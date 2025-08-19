@@ -49,3 +49,7 @@ build/
 /.vscode/
 .DS_Store
 Thumbs.db
+# Плагины: игнорируем всё, кроме своих
+wp-content/plugins/*
+!wp-content/plugins/paint-shop-ux/
+!wp-content/plugins/paint-core/   # (если ты его тоже будешь использовать)
