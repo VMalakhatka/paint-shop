@@ -52,7 +52,12 @@ Thumbs.db
 # === Плагины: игнорируем всё, кроме своих ===
 wp-content/plugins/*
 !wp-content/plugins/                # разрешить саму папку
+
 !wp-content/plugins/paint-core/
-!wp-content/plugins/paint-core/**   # и всё внутри
+!wp-content/plugins/paint-core/**
+
 !wp-content/plugins/paint-shop-ux/
 !wp-content/plugins/paint-shop-ux/**
+
+!wp-content/plugins/Rolle_Price/
+!wp-content/plugins/Rolle_Price/**
