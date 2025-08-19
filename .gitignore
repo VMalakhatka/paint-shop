@@ -1,0 +1,41 @@
+# === WordPress core (не храним) ===
+/wp-admin/
+/wp-includes/
+/index.php
+/wp-*.php
+/readme.html
+/license.txt
+
+# === Конфиги с паролями (оставляем только sample) ===
+wp-config.php
+
+# === Медиа ===
+wp-content/uploads/
+
+# === Плагины и темы: исключаем всё, кроме своих ===
+wp-content/plugins/*
+!wp-content/plugins/my-custom-plugin/
+
+wp-content/themes/*
+!wp-content/themes/my-theme/
+
+# === MU plugins (если используешь — раскомментируй) ===
+# wp-content/mu-plugins/*
+# !wp-content/mu-plugins/my-mu-plugin.php
+
+# === Node / Composer ===
+node_modules/
+vendor/
+dist/
+build/
+
+# === IDE / System ===
+*.log
+*.cache
+*.tmp
+*.sql
+*.tar.gz
+/.idea/
+/.vscode/
+.DS_Store
+Thumbs.db
