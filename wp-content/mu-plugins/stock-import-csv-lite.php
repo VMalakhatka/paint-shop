@@ -217,7 +217,7 @@ class Stock_Import_CSV_Lite {
                 if ($sku===''){ $errors++; continue; }
                 foreach ($wideCols as [$i,$locSlug]) {
                     $rawv = isset($r[$i]) ? trim((string)$r[$i]) : '';
-                    if ($rawv==='' || $rawv==='0') continue;
+                    if ($rawv==='') continue;
                     $val = str_replace(',','.',$rawv);
                     if (!is_numeric($val)){ $errors++; continue; }
                     $push($sku,$locSlug,$val);
