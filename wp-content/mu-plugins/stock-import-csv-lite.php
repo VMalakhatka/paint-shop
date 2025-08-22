@@ -1,8 +1,8 @@
 <?php
 /*
-Plugin Name: Stock Import CSV — Lite (stable)
-Description: Боевой импорт остатков в wp_stock_import. Поддерживает длинный (sku,location_slug,qty) и широкий (sku,<склады>...) форматы. Есть SMOKE‑TEST.
-Version: 1.1.1
+Plugin Name: Stock Import CSV — Lite (stable + docs)
+Description: Боевой импорт остатков в wp_stock_import. Поддерживает длинный (sku,location_slug,qty) и широкий (sku,<склады>...) форматы. Есть SMOKE‑TEST. На странице — встроенная документация и примеры CSV.
+Version: 1.2.0
 Author: PaintCore
 */
 if (!defined('ABSPATH')) exit;
@@ -53,12 +53,10 @@ class Stock_Import_CSV_Lite {
         ?>
         <div class="wrap">
             <h1>Импорт остатков (CSV → wp_stock_import) — LITE</h1>
-            <p>
-                Форматы:<br>
-                1) длинный: <code>sku,location_slug,qty</code><br>
-                2) широкий: <code>sku,kiev1,odesa,...</code>
+            <p class="description">
+                Форматы: <strong>длинный</strong> (<code>sku,location_slug,qty</code>) и <strong>широкий</strong> (<code>sku,kiev1,odesa,...</code>).<br>
+                Кодировка: UTF‑8/CP1251 (авто). Разделитель: <code>,</code> / <code>;</code> / <code>TAB</code> (авто).
             </p>
-            <p>Кодировка: UTF‑8/CP1251 (авто). Разделитель: запятая / точка с запятой / TAB (авто).</p>
 
             <form method="post" enctype="multipart/form-data">
                 <?php wp_nonce_field('stock_import_lite'); ?>
@@ -77,6 +75,11 @@ class Stock_Import_CSV_Lite {
                     <button class="button" name="smoke" value="1">SMOKE‑TEST (вставить CR‑TEST‑SMOKE)</button>
                 </p>
             </form>
+
+            <?php
+            // Встроенная документация
+            $this->render_docs_block();
+            ?>
 
             <?php if ($rep !== null): ?>
                 <hr>
@@ -260,5 +263,114 @@ class Stock_Import_CSV_Lite {
         $q   = $wpdb->prepare($sql, $values);
         $wpdb->query($q);
     }
+
+    /** ВСТРОЕННАЯ ДОКУМЕНТАЦИЯ */
+    private function render_docs_block() { ?>
+        <hr>
+        <style>
+            .stock-docs{background:#fff;border:1px solid #ccd0d4;border-radius:6px;padding:16px;margin-top:12px}
+            .stock-docs h2{margin:.2em 0 .6em}
+            .stock-docs h3{margin:1.2em 0 .4em}
+            .stock-docs code{background:#f6f7f7;padding:2px 4px;border-radius:4px}
+            .stock-docs pre{background:#f6f7f7;border:1px solid #e2e4e7;border-radius:6px;padding:10px;overflow:auto}
+            .stock-docs .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+            @media (max-width: 1024px){ .stock-docs .grid{grid-template-columns:1fr} }
+            .copy-btn{margin-top:6px}
+            .muted{color:#666}
+        </style>
+
+        <div class="stock-docs">
+          <h2>Документация по импорту</h2>
+          <p class="muted">Страница загружает CSV в таблицу <code>wp_stock_import</code>.</p>
+
+          <h3>Таблица назначения</h3>
+          <pre>CREATE TABLE wp_stock_import (
+  sku           VARCHAR(191) NOT NULL,
+  location_slug VARCHAR(191) NOT NULL,
+  qty           DECIMAL(18,3) NOT NULL,
+  PRIMARY KEY (sku, location_slug)
+);</pre>
+          <ul>
+            <li><code>sku</code> — артикул.</li>
+            <li><code>location_slug</code> — склад (слаг).</li>
+            <li><code>qty</code> — остаток (до 3 знаков после запятой).</li>
+          </ul>
+
+          <h3>Поддерживаемые форматы CSV</h3>
+          <div class="grid">
+            <div>
+              <strong>1) Длинный</strong> — <code>sku,location_slug,qty</code>
+              <pre id="ex-long">sku;location_slug;qty
+CR-TEST-001;kiev1;10
+CR-TEST-001;odesa;3.5
+CR-TEST-002;kiev1;0
+CR-TEST-003;odesa;7</pre>
+              <button type="button" class="button copy-btn" data-copy="#ex-long">Скопировать пример</button>
+            </div>
+            <div>
+              <strong>2) Широкий</strong> — <code>sku,&lt;склады&gt;…</code>
+              <pre id="ex-wide">sku,kiev1,odesa
+A-AZ РАЗНОЕ,"68583,91",0
+AB-111-10X15,0,0
+AB-111-20X20,0,0
+AB-111-20X30,0,0</pre>
+              <button type="button" class="button copy-btn" data-copy="#ex-wide">Скопировать пример</button>
+              <p class="muted">Пустые/нулевые ячейки по складам пропускаются.</p>
+            </div>
+          </div>
+
+          <h3>Разделители и кодировка</h3>
+          <ul>
+            <li>Разделитель: авто — <code>;</code> / <code>,</code> / <code>TAB</code>.</li>
+            <li>Кодировка: авто — UTF‑8 / Windows‑1251 / ISO‑8859‑1 / Windows‑1252.</li>
+            <li>Дробная часть: и <code>.</code>, и <code>,</code> распознаются.</li>
+          </ul>
+
+          <h3>Алиасы складов</h3>
+          <p>Следующие варианты нормализуются в слаги:</p>
+          <table class="widefat striped">
+            <thead><tr><th>Вход</th><th>Станет</th></tr></thead>
+            <tbody>
+              <tr><td>киев / київ / kiev / к</td><td><code>kiev1</code></td></tr>
+              <tr><td>одесса / одеса / odessa / odesa / о</td><td><code>odesa</code></td></tr>
+            </tbody>
+          </table>
+          <p class="muted">Незнакомые названия превращаются в slug через <code>sanitize_title()</code>.</p>
+
+          <h3>Правила импорта</h3>
+          <ul>
+            <li>Ключ: <code>(sku, location_slug)</code>. При совпадении — обновление (<em>upsert</em>).</li>
+            <li><strong>TRUNCATE</strong> — удаляет все старые строки перед вставкой.</li>
+            <li>Широкий формат: пустые/нулевые ячейки не создают записей.</li>
+          </ul>
+
+          <h3>Как подготовить CSV</h3>
+          <ol>
+            <li>Экспорт из Excel/Sheets как <em>CSV</em> (желательно UTF‑8).</li>
+            <li>В «широком» формате — первая колонка <code>sku</code>, дальше названия складов (<code>kiev1</code>, <code>odesa</code>, …).</li>
+          </ol>
+
+          <h3>Диагностика</h3>
+          <ul>
+            <li>Кнопка <strong>SMOKE‑TEST</strong> вставит тестовую строку <code>(CR-TEST-SMOKE, kiev1, 7)</code>.</li>
+            <li>При необходимости подробного лога можно временно включить версию «Verbose» и смотреть <code>wp-content/debug.log</code>.</li>
+          </ul>
+        </div>
+
+        <script>
+        document.addEventListener('click', function(e){
+          if(!e.target.matches('.copy-btn')) return;
+          const sel = e.target.getAttribute('data-copy');
+          const el = document.querySelector(sel);
+          if(!el) return;
+          navigator.clipboard.writeText(el.textContent).then(()=>{
+            e.target.textContent = 'Скопировано ✓';
+            setTimeout(()=>{ e.target.textContent = 'Скопировать пример'; }, 1500);
+          });
+        });
+        </script>
+        <?php
+    }
 }
+
 new Stock_Import_CSV_Lite();
