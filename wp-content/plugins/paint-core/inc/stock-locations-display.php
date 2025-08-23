@@ -4,13 +4,20 @@ namespace PaintCore\Stock;
 defined('ABSPATH') || exit;
 
 /**
- * Stock Locations: показать «Другие склады» и «Заказ со склада» в корзине/чекауте,
- * а также сохранить/показать склад в заказах и письмах.
- * Требования: таксономия `location` (плагин Stock Locations),
- * мета остатка `_stock_at_{term_id}`, primary-локация в `_yoast_wpseo_primary_location`.
+ * UI для складов:
+ *  - корзина/чекаут: показываем Primary + «Другие склады» (информативно до оформления);
+ *  - заказ/письма: показываем ФАКТИЧЕСКИЙ склад списания.
+ *
+ * Фактический склад берём в приоритете из мет строки заказа плагина
+ * Stock Locations for WooCommerce: `_stock_locations` (массив term_id) / `_stock_location` (term_id).
+ * Если их нет — используем нашу мету/подпись, которую пишет inc/order-stock-locations.php после редукции.
+ * Если и её нет — уже в самый последний момент падаем на Primary у товара.
+ *
+ * Требования: таксономия `location`, меты остатков `_stock_at_{TERM_ID}`,
+ * primary в `_yoast_wpseo_primary_location`.
  */
 
-/* ========== ХЕЛПЕРЫ ========== */
+/* ====================== ХЕЛПЕРЫ (товар) ====================== */
 
 function primary_location_term_id( $product_id ) {
     $pid = (int) $product_id;
@@ -81,7 +88,7 @@ function other_locations_stock_for_product( \WC_Product $product ) {
     return $stocks;
 }
 
-/* ========== КОРЗИНА / ЧЕКАУТ: 2 строки под названием позиции ========== */
+/* ====================== КОРЗИНА / ЧЕКАУТ ====================== */
 
 add_filter('woocommerce_get_item_data', function( $item_data, $cart_item ){
     $product = $cart_item['data'] ?? null;
@@ -117,67 +124,91 @@ add_filter('woocommerce_get_item_data', function( $item_data, $cart_item ){
     return $item_data;
 }, 20, 2);
 
-/* ========== СОХРАНЕНИЕ В ЗАКАЗ ========== */
+/* ====================== РЕНДЕР ДЛЯ ЗАКАЗОВ/ПИСЕМ ====================== */
 
-add_action( 'woocommerce_checkout_create_order_line_item', function( $item, $cart_item_key, $values, $order ){
-    $product = $item->get_product();
-    if ( ! ( $product instanceof \WC_Product ) ) return;
+/**
+ * Получить подпись склада(ов) для строки заказа с приоритетом:
+ *  1) SLW: _stock_locations[] / _stock_location (id → имена)
+ *  2) Наша видимая мета «Склад» (если инжектнули количественную подпись «Киев × 2, Одеса × 10»)
+ *  3) Наши машинные меты _stock_location_id / _stock_location_slug
+ *  4) Фолбэк: Primary у товара
+ */
+function pc_render_item_location_label( $item ) {
+    // 1) Если уже есть наша оформленная подпись — отдаём её как есть
+    $pretty = $item->get_meta( __('Склад','woocommerce') );
+    if ( $pretty ) return $pretty;
 
-    $term_id = primary_location_term_id( $product->get_id() );
-    if ( $term_id ) {
-        $term = get_term( $term_id, 'location' );
-        if ( $term && ! is_wp_error( $term ) ) {
-            // машинные меты
-            $item->add_meta_data( '_stock_location_id',   (int)$term_id, true );
-            $item->add_meta_data( '_stock_location_slug', $term->slug,   true );
-            // видимая мета
-            $item->add_meta_data( __( 'Склад', 'woocommerce' ), $term->name, true );
+    // 2) SLW меты
+    $loc_ids = $item->get_meta('_stock_locations', true);
+    $loc_id  = (int) $item->get_meta('_stock_location');
+
+    $names = [];
+    if ( is_array($loc_ids) && !empty($loc_ids) ) {
+        foreach ($loc_ids as $tid) {
+            $t = get_term( (int)$tid, 'location' );
+            if ( $t && ! is_wp_error($t) ) $names[] = $t->name;
         }
+    } elseif ( $loc_id ) {
+        $t = get_term( $loc_id, 'location' );
+        if ( $t && ! is_wp_error($t) ) $names[] = $t->name;
     }
-}, 10, 4 );
+    if ( !empty($names) ) {
+        return implode(', ', array_unique($names));
+    }
 
-/* ========== ВЫВОД В ЗАКАЗЕ И ПИСЬМАХ (если видимая мета отсутствует) ========== */
+    // 3) Наши машинные меты (резерв)
+    $rid  = (int) $item->get_meta('_stock_location_id');
+    $slug = (string) $item->get_meta('_stock_location_slug');
+    if ( $rid ) {
+        $t = get_term( $rid, 'location' );
+        if ( $t && !is_wp_error($t) ) return $t->name;
+    }
+    if ( $slug !== '' ) {
+        $t = get_term_by('slug', $slug, 'location');
+        if ( $t && !is_wp_error($t) ) return $t->name;
+    }
 
+    // 4) Фолбэк — primary у товара
+    $product = $item->get_product();
+    if ( $product instanceof \WC_Product ) {
+        $name = primary_location_name_for_product( $product );
+        if ( $name ) return $name;
+    }
+
+    return '';
+}
+
+/* ====================== ВЫВОД В ЗАКАЗЕ / ПИСЬМАХ ====================== */
+
+// Админ/клиентские страницы заказа
 add_action( 'woocommerce_order_item_meta_end', function( $item_id, $item, $order, $plain ){
+    // если видимая мета уже есть — не дублируем (её мог положить наш перехват дельт)
     if ( $item->get_meta( __( 'Склад', 'woocommerce' ) ) ) return;
 
-    $product = $item->get_product();
-    if ( ! ( $product instanceof \WC_Product ) ) return;
-
-    $term_id = (int) $item->get_meta('_stock_location_id');
-    if ( ! $term_id ) $term_id = primary_location_term_id( $product->get_id() );
-    if ( ! $term_id ) return;
-
-    $term = get_term( $term_id, 'location' );
-    if ( ! $term || is_wp_error( $term ) ) return;
+    $label = pc_render_item_location_label( $item );
+    if ( ! $label ) return;
 
     if ( $plain ) {
-        echo "\n".__('Склад','woocommerce').': '.$term->name."\n";
+        echo "\n".__('Склад','woocommerce').': '.$label."\n";
     } else {
         echo '<div class="wc-item-loc" style="font-size:12px;color:#555;margin-top:2px">'
-           . esc_html__('Склад','woocommerce') . ': ' . esc_html($term->name)
+           . esc_html__('Склад','woocommerce') . ': ' . esc_html($label)
            . '</div>';
     }
 }, 10, 4 );
 
+// Письма
 add_action( 'woocommerce_email_order_item_meta', function( $item, $sent_to_admin, $plain, $email ){
     if ( $item->get_meta( __( 'Склад', 'woocommerce' ) ) ) return;
 
-    $product = $item->get_product();
-    if ( ! ( $product instanceof \WC_Product ) ) return;
-
-    $term_id = (int) $item->get_meta('_stock_location_id');
-    if ( ! $term_id ) $term_id = primary_location_term_id( $product->get_id() );
-    if ( ! $term_id ) return;
-
-    $term = get_term( $term_id, 'location' );
-    if ( ! $term || is_wp_error( $term ) ) return;
+    $label = pc_render_item_location_label( $item );
+    if ( ! $label ) return;
 
     if ( $plain ) {
-        echo "\n".__('Склад','woocommerce').': '.$term->name."\n";
+        echo "\n".__('Склад','woocommerce').': '.$label."\n";
     } else {
         echo '<br><small class="wc-item-loc" style="color:#555">'
-           . esc_html__('Склад','woocommerce') . ': ' . esc_html($term->name)
+           . esc_html__('Склад','woocommerce') . ': ' . esc_html($label)
            . '</small>';
     }
 }, 10, 4 );
