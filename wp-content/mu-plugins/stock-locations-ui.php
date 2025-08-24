@@ -2,7 +2,7 @@
 /*
 Plugin Name: Stock Locations UI (archive + single)
 Description: Показывает остатки по складам и основной (Primary) склад в каталоге и на странице товара. Читает меты _stock_at_{TERM_ID} и primary из _yoast_wpseo_primary_location.
-Version: 1.0.0
+Version: 1.1.0
 Author: PaintCore
 */
 if (!defined('ABSPATH')) exit;
@@ -22,6 +22,42 @@ function slu_get_primary_location_term_id( $product_id ) {
         }
     }
     return $term_id ?: 0;
+}
+
+/** сумма остатков по всем складам (учитывает вариации, умеет падать на родителя) */
+function slu_total_available_qty( WC_Product $product ) {
+    $pid = (int) $product->get_id();
+
+    // быстрый путь: если поддерживаем кэш суммы в _stock
+    $sum = get_post_meta($pid, '_stock', true);
+    if ($sum !== '' && $sum !== null) {
+        return max(0, (int) round((float)$sum));
+    }
+
+    // иначе — суммируем все _stock_at_%
+    global $wpdb;
+    $rows = $wpdb->get_col( $wpdb->prepare(
+        "SELECT meta_value FROM {$wpdb->postmeta}
+         WHERE post_id=%d AND meta_key LIKE %s",
+        $pid, $wpdb->esc_like('_stock_at_') . '%'
+    ));
+    $total = 0.0;
+    foreach ( (array)$rows as $v ) $total += (float)$v;
+
+    // фолбэк: для вариации попробуем родителя
+    if ($total <= 0 && $product->is_type('variation')) {
+        $parent_id = (int) $product->get_parent_id();
+        if ($parent_id) {
+            $rows = $wpdb->get_col( $wpdb->prepare(
+                "SELECT meta_value FROM {$wpdb->postmeta}
+                 WHERE post_id=%d AND meta_key LIKE %s",
+                $parent_id, $wpdb->esc_like('_stock_at_') . '%'
+            ));
+            foreach ( (array)$rows as $v ) $total += (float)$v;
+        }
+    }
+
+    return max(0, (int) round($total));
 }
 
 /** получить массив [ term_id => ['name'=>'...', 'qty'=>int] ] по всем привязанным к товару складам */
@@ -106,6 +142,10 @@ add_action('woocommerce_single_product_summary', function(){
     global $product;
     if ( ! ($product instanceof WC_Product) ) return;
 
+    // NEW: если суммарно 0 — ничего не показываем
+    $total = slu_total_available_qty($product);
+    if ($total <= 0) return;
+
     $primary_line = slu_render_primary_location_line( $product );
     $others_line  = slu_render_other_locations_line( $product );
     if ( ! $primary_line && ! $others_line ) return;
@@ -117,13 +157,19 @@ add_action('woocommerce_single_product_summary', function(){
     if ( $others_line ) {
         echo '<div><strong>' . esc_html__('Другие склады', 'woocommerce') . ':</strong> ' . $others_line . '</div>';
     }
+    echo '<div style="margin-top:4px;color:#2e7d32"><strong>'
+       . esc_html__('Всего', 'woocommerce') . ':</strong> ' . (int)$total . '</div>';
     echo '</div>';
-}, 25); // после цены (обычно 10) и краткого описания (20)
+}, 25); // после цены и короткого описания
 
 /** ===== product archive (loop) ===== */
 add_action('woocommerce_after_shop_loop_item_title', function(){
     global $product;
     if ( ! ($product instanceof WC_Product) ) return;
+
+    // NEW: если суммарно 0 — ничего не показываем
+    $total = slu_total_available_qty($product);
+    if ($total <= 0) return;
 
     $primary_line = slu_render_primary_location_line( $product );
     $others_line  = slu_render_other_locations_line( $product );
@@ -136,6 +182,8 @@ add_action('woocommerce_after_shop_loop_item_title', function(){
     if ( $others_line ) {
         echo '<div style="color:#555;">' . esc_html__('Другие склады', 'woocommerce') . ': ' . $others_line . '</div>';
     }
+    echo '<div style="margin-top:2px;color:#2e7d32">'
+       . esc_html__('Всего', 'woocommerce') . ': ' . (int)$total . '</div>';
     echo '</div>';
 }, 11); // сразу под заголовком/ценой
 
