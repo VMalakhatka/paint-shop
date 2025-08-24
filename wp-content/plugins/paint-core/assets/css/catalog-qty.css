@@ -143,3 +143,25 @@
     width:1em;height:1em
   }
 }
+/* --- выравниваем qty + кнопку в один ряд в каталоге --- */
+
+/* когда JS-обёртка есть */
+.loop-buy-row{display:flex;align-items:center;gap:.5rem;margin-top:.35rem}
+.loop-buy-row .add_to_cart_button{display:inline-flex !important; width:auto !important;}
+.loop-buy-row .button{display:inline-flex !important; width:auto !important;}
+
+/* страховка: если обёртки нет, держим рядом по "соседству" */
+.products .product .loop-qty-wrap,
+.products li.product .loop-qty-wrap{display:inline-flex; vertical-align:middle; margin-right:.5rem;}
+.products .product .loop-qty-wrap + .add_to_cart_button,
+.products li.product .loop-qty-wrap + .add_to_cart_button,
+.products .product .loop-qty-wrap + .button,
+.products li.product .loop-qty-wrap + .button{
+  display:inline-flex !important;
+  width:auto !important;
+  vertical-align:middle;
+}
+
+/* чтобы тема не растягивала кнопку на всю ширину */
+.products .add_to_cart_button,
+.products .button{width:auto !important;}

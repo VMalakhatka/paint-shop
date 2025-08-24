@@ -124,3 +124,26 @@
   $(document.body).on('wc_fragments_loaded wc_fragments_refreshed', boot);
 
 })(jQuery);
+/* === Склейка qty и кнопки в один ряд (wrap) === */
+(function($){
+  function wrapBuyRows(){
+    $('.products .product, li.product').each(function(){
+      var $p   = $(this);
+      if ($p.find('.loop-buy-row').length) return;
+
+      var $qty = $p.find('.loop-qty-wrap').first();
+      var $btn = $p.find(
+        // разные варианты кнопок у тем/плагинов
+        '.add_to_cart_button, [data-product_id].ajax_add_to_cart, [data-product_id].button, a.button, button.button'
+      ).first();
+
+      if ($qty.length && $btn.length){
+        $qty.add($btn).wrapAll('<div class="loop-buy-row"></div>');
+      }
+    });
+  }
+
+  // первичный запуск и после всех Woo событиях с фрагментами
+  $(document).ready(wrapBuyRows);
+  $(document.body).on('wc_fragments_loaded wc_fragments_refreshed added_to_cart updated_wc_div', wrapBuyRows);
+})(jQuery);
