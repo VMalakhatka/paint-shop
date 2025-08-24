@@ -82,7 +82,7 @@ function pc_recalc_total_stock(int $product_id) : void {
  */
 function pc_build_allocation_plan( $order_or_id ) : void {
     $order = ($order_or_id instanceof \WC_Order) ? $order_or_id : wc_get_order($order_or_id);
-    if ( ! $order ) { error_log('[PC PLAN] no order'); return; }
+    if ( ! $order ) { pc_log('[PC PLAN] no order'); return; }
 
     foreach ( $order->get_items('line_item') as $item_id => $item ) {
         $product = $item->get_product();
@@ -155,9 +155,9 @@ function pc_build_allocation_plan( $order_or_id ) : void {
             $item->update_meta_data( __('Склад','woocommerce'), implode(', ', $parts) );
             $item->save();
 
-            error_log('[PC PLAN] order '.$order->get_id().' item '.$item_id.' plan='.print_r($allocated,true));
+            pc_log('[PC PLAN] order '.$order->get_id().' item '.$item_id.' plan='.print_r($allocated,true));
         } else {
-            error_log('[PC PLAN] order '.$order->get_id().' item '.$item_id.' no allocation (stock=0?)');
+            pc_log('[PC PLAN] order '.$order->get_id().' item '.$item_id.' no allocation (stock=0?)');
         }
     }
 }
@@ -191,15 +191,15 @@ add_action('woocommerce_order_action_pc_build_alloc_plan', function($order){
 function pc_reduce_stock_from_breakdown( $order_or_id ) : void {
     $order = ($order_or_id instanceof \WC_Order) ? $order_or_id : wc_get_order($order_or_id);
     if ( ! $order ) {
-        error_log('[PC REDUCE] no WC_Order, abort (arg='. (is_object($order_or_id)? get_class($order_or_id) : (string)$order_or_id) .')');
+        pc_log('[PC REDUCE] no WC_Order, abort (arg='. (is_object($order_or_id)? get_class($order_or_id) : (string)$order_or_id) .')');
         return;
     }
     $oid = (int) $order->get_id();
-    error_log("[PC REDUCE] start for order {$oid}");
+    pc_log("[PC REDUCE] start for order {$oid}");
 
     // анти‑повтор
     if ( $order->get_meta(PC_STOCK_REDUCED_META) ) {
-        error_log("[PC REDUCE] already reduced, skip (order {$oid})");
+        pc_log("[PC REDUCE] already reduced, skip (order {$oid})");
         return;
     }
 
@@ -208,13 +208,13 @@ function pc_reduce_stock_from_breakdown( $order_or_id ) : void {
 
     foreach ( $order->get_items('line_item') as $item_id => $item ) {
         $product = $item->get_product();
-        if ( ! $product ) { error_log("[PC REDUCE] item {$item_id}: no product, skip"); continue; }
+        if ( ! $product ) { pc_log("[PC REDUCE] item {$item_id}: no product, skip"); continue; }
         $pid  = (int) $product->get_id();
 
         // План может быть массивом или JSON; если его нет — построим на лету
         $plan = $item->get_meta('_pc_stock_breakdown', true);
         if ( !is_array($plan) || empty($plan) ) {
-            error_log("[PC REDUCE] item {$item_id}: plan empty → build now");
+            pc_log("[PC REDUCE] item {$item_id}: plan empty → build now");
             pc_build_allocation_plan($order);
             $plan = $item->get_meta('_pc_stock_breakdown', true);
         }
@@ -222,7 +222,7 @@ function pc_reduce_stock_from_breakdown( $order_or_id ) : void {
             $plan = json_decode((string)$plan, true);
         }
         if ( !is_array($plan) || empty($plan) ) {
-            error_log("[PC REDUCE] item {$item_id}: plan still empty, skip");
+            pc_log("[PC REDUCE] item {$item_id}: plan still empty, skip");
             continue;
         }
 
@@ -234,7 +234,7 @@ function pc_reduce_stock_from_breakdown( $order_or_id ) : void {
             if ( $tid > 0 && $q > 0 ) $norm[$tid] = $q;
         }
         if ( empty($norm) ) {
-            error_log("[PC REDUCE] item {$item_id}: plan normalized empty, skip");
+            pc_log("[PC REDUCE] item {$item_id}: plan normalized empty, skip");
             continue;
         }
 
@@ -246,7 +246,7 @@ function pc_reduce_stock_from_breakdown( $order_or_id ) : void {
             $curf = ($cur === '' || $cur === null) ? 0.0 : (float)$cur;
             $newf = max(0.0, $curf - (float)$qty);
 
-            error_log("[PC REDUCE] order {$oid} item {$item_id} pid {$pid} {$mkey}: {$curf} -> {$newf} (reduce {$qty})");
+            pc_log("[PC REDUCE] order {$oid} item {$item_id} pid {$pid} {$mkey}: {$curf} -> {$newf} (reduce {$qty})");
             update_post_meta($pid, $mkey, wc_format_decimal($newf, 3));
 
             $changed_any = true;
@@ -270,15 +270,15 @@ function pc_reduce_stock_from_breakdown( $order_or_id ) : void {
             update_post_meta($pid, '_stock_status', ($sum > 0 ? 'instock' : 'outofstock'));
             if ( function_exists('wc_delete_product_transients') ) wc_delete_product_transients($pid);
 
-            error_log("[PC REDUCE] pid {$pid}: total _stock = {$sum}");
+            pc_log("[PC REDUCE] pid {$pid}: total _stock = {$sum}");
         }
 
         // Пометка — редукция выполнена
         $order->update_meta_data(PC_STOCK_REDUCED_META, 'yes');
         $order->save();
-        error_log("[PC REDUCE] done for order {$oid}");
+        pc_log("[PC REDUCE] done for order {$oid}");
     } else {
-        error_log("[PC REDUCE] nothing changed, not marking reduced (order {$oid})");
+        pc_log("[PC REDUCE] nothing changed, not marking reduced (order {$oid})");
     }
 }
 
