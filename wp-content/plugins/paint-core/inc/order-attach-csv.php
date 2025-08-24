@@ -81,47 +81,75 @@ add_filter('woocommerce_email_attachments', function ($attachments, $email_id, $
 
     if (!($order instanceof \WC_Order)) return $attachments;
 
-    // заголовок CSV
+    // Заголовки CSV
     $rows   = [];
     $rows[] = ['SKU','GTIN','Quantity','Price','Location'];
 
-    foreach ($order->get_items() as $item) {
+    // Локации: словарик term_id => name
+    $locById = [];
+    $terms = get_terms(['taxonomy'=>'location','hide_empty'=>false]);
+    if (!is_wp_error($terms)) {
+        foreach ($terms as $t) $locById[(int)$t->term_id] = $t->name;
+    }
+
+    foreach ($order->get_items('line_item') as $item) {
         if (!($item instanceof \WC_Order_Item_Product)) continue;
         $product = $item->get_product();
         if (!$product) continue;
 
-        // SKU (учитываем вариации)
+        // SKU (вариации — фолбэк на родителя)
         $sku = $product->get_sku();
         if (!$sku && $product->is_type('variation')) {
             $parent = wc_get_product($product->get_parent_id());
             if ($parent) $sku = $parent->get_sku();
         }
 
-        // GTIN (учитываем вариации)
+        // GTIN (фолбэк на родителя)
         $gtin = get_post_meta($product->get_id(), '_global_unique_id', true);
         if (!$gtin && $product->is_type('variation')) {
             $parent = wc_get_product($product->get_parent_id());
             if ($parent) $gtin = get_post_meta($parent->get_id(), '_global_unique_id', true);
         }
 
-        // Реальный склад списания (или фолбэк)
-        $location_name = pc_order_item_location_label($item);
+        $qty_total  = max(0, (int)$item->get_quantity());
+        $line_total = (float)$item->get_total();
+        $unit_price = $qty_total > 0 ? $line_total / $qty_total : $line_total;
 
-        // Кол-во / цена за единицу
-        $qty        = (int) $item->get_quantity();
-        $line_total = (float) $item->get_total();
-        $unit_price = $qty > 0 ? $line_total / $qty : $line_total;
+        // План распределения по складам
+        $plan = $item->get_meta('_pc_stock_breakdown', true);
+        if (!is_array($plan)) $plan = json_decode((string)$plan, true);
 
-        $rows[] = [
-            $sku ?: '',
-            $gtin ?: '',
-            $qty,
-            wc_format_decimal($unit_price, wc_get_price_decimals()),
-            $location_name,
-        ];
+        if (is_array($plan) && !empty($plan)) {
+            foreach ($plan as $term_id => $q) {
+                $term_id = (int)$term_id;
+                $q = (int)$q;
+                if ($term_id <= 0 || $q <= 0) continue;
+                $rows[] = [
+                    $sku ?: '',
+                    $gtin ?: '',
+                    $q,
+                    wc_format_decimal($unit_price, wc_get_price_decimals()),
+                    $locById[$term_id] ?? ('#'.$term_id),
+                ];
+            }
+        } else {
+            // Фолбэк: если плана нет — одной строкой с primary
+            $primary_id = (int) get_post_meta($product->get_id(), '_yoast_wpseo_primary_location', true);
+            if (!$primary_id && $product->is_type('variation')) {
+                $parent_id = $product->get_parent_id();
+                if ($parent_id) $primary_id = (int) get_post_meta($parent_id, '_yoast_wpseo_primary_location', true);
+            }
+            $rows[] = [
+                $sku ?: '',
+                $gtin ?: '',
+                $qty_total,
+                wc_format_decimal($unit_price, wc_get_price_decimals()),
+                $locById[$primary_id] ?? '',
+            ];
+        }
     }
 
-    // создаём временный CSV
+    // Создаём CSV
     $uploads  = function_exists('wp_upload_dir') ? wp_upload_dir() : null;
     $tmp_base = ($uploads && is_dir($uploads['basedir']) && is_writable($uploads['basedir']))
         ? $uploads['basedir'] : sys_get_temp_dir();
@@ -130,18 +158,17 @@ add_filter('woocommerce_email_attachments', function ($attachments, $email_id, $
     $path     = trailingslashit($tmp_base) . $filename;
 
     if ($fh = fopen($path, 'w')) {
-        fwrite($fh, "\xEF\xBB\xBF"); // BOM для Excel
+        fwrite($fh, "\xEF\xBB\xBF"); // UTF‑8 BOM
         foreach ($rows as $r) fputcsv($fh, $r, ';');
         fclose($fh);
 
         $attachments[] = $path;
         set_transient('wc_csv_is_mine_' . md5($path), 1, HOUR_IN_SECONDS);
     }
-
     return $attachments;
 }, 99, 4);
 
-// удаление временных файлов после отправки/ошибки
+// Очистка временных файлов (без изменений)
 add_action('wp_mail_succeeded', function($data){
     foreach ((array)($data['attachments'] ?? []) as $file) {
         if ($file && get_transient('wc_csv_is_mine_' . md5($file))) {

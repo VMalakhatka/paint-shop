@@ -169,6 +169,8 @@ function pc_build_allocation_plan( $order_or_id ) : void {
 add_action('woocommerce_checkout_order_processed', __NAMESPACE__.'\\pc_build_allocation_plan', 40);
 add_action('woocommerce_order_status_processing',  __NAMESPACE__.'\\pc_build_allocation_plan', 30);
 add_action('woocommerce_order_status_completed',   __NAMESPACE__.'\\pc_build_allocation_plan', 30);
+// план должен быть готов ДО отправки письма New Order
+add_action('woocommerce_new_order', __NAMESPACE__.'\\pc_build_allocation_plan', 1);
 
 // Кнопка «Build stock allocation plan (PaintCore)» в админке заказа
 add_action('woocommerce_order_actions', function($actions){
