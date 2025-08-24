@@ -1,7 +1,7 @@
 <?php
 defined('ABSPATH') || exit;
 
-const PC_DEBUG = false; // включай true для отладки
+const PC_DEBUG = true; // включай true для отладки
 
 if (!function_exists('pc_log')) {
     function pc_log($msg) {

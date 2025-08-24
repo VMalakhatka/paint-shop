@@ -6,8 +6,17 @@
   background:#fff !important;color:#000 !important;-webkit-text-fill-color:#000 !important;
   caret-color:#000;
 }
-.loop-qty-btn{border:none;background:transparent;color:#000;font-size:17px;padding:0 .3rem;cursor:pointer;height:28px;display:flex;align-items:center;justify-content:center}
+.loop-qty-btn{
+  border:none;background:transparent;color:#000;font-size:17px;
+  padding:0 .3rem;cursor:pointer;height:28px;display:flex;align-items:center;justify-content:center
+}
 .loop-qty-view{display:none}
+
+/* Когда товара нет (или лимит = 0): блокируем ТОЛЬКО qty и +/- */
+.loop-qty-wrap.is-disabled .loop-qty,
+.loop-qty-wrap.is-disabled .loop-qty-btn{
+  opacity:.45; pointer-events:none;
+}
 
 /* Кнопка (рамка/фон темы оставляем, но центруем содержимое) */
 .products .add_to_cart_button,
@@ -20,9 +29,15 @@
 .products .price,.products .woocommerce-Price-amount{color:#000!important}
 
 /* Остаток рядом с ценой */
-.loop-stock-top{display:inline-block;margin-left:8px;font-size:12px;vertical-align:baseline;white-space:nowrap}
-.loop-stock-top.in{color:#2e7d32}.loop-stock-top.pre{color:#8B4513}.loop-stock-top.out{color:#c62828}
-@media (max-width:430px){.loop-stock-top{display:block;margin-left:0;margin-top:2px}}
+.loop-stock-top{
+  display:inline-block;margin-left:8px;font-size:12px;vertical-align:baseline;white-space:nowrap
+}
+.loop-stock-top.in{color:#2e7d32}
+.loop-stock-top.pre{color:#8B4513}
+.loop-stock-top.out{color:#c62828}
+@media (max-width:430px){
+  .loop-stock-top{display:block;margin-left:0;margin-top:2px}
+}
 
 /* Планшеты */
 @media (max-width:768px){
@@ -35,7 +50,11 @@
 @media (max-width:430px){
   .loop-qty-wrap{gap:.10rem;align-items:center}
   .loop-qty{display:none !important}
-  .loop-qty-view{display:inline-block;width:auto;min-width:14px;text-align:center;font-size:12px;line-height:20px;color:#000;border:1px solid #000;background:#fff;height:20px;margin:0;padding:0 1px}
+  .loop-qty-view{
+    display:inline-block;width:auto;min-width:14px;text-align:center;
+    font-size:12px;line-height:20px;color:#000;border:1px solid #000;background:#fff;
+    height:20px;margin:0;padding:0 1px
+  }
   .loop-qty-btn{font-size:12px;height:20px;padding:0 .1rem}
 }
 @media (max-width:360px){
@@ -51,7 +70,7 @@
 .loop-buy-row{display:flex;align-items:center;gap:.5rem;margin-top:.35rem}
 .loop-buy-row .loop-qty-wrap{margin-bottom:0}
 
-/* Кнопка в ряду: жёсткая центровка + зазор под знак (N) */
+/* Кнопка в ряду: центровка + зазор под знак (N) */
 .loop-buy-row .add_to_cart_button,
 .loop-qty-wrap + .add_to_cart_button,
 .loop-buy-row [data-product_id].button,
