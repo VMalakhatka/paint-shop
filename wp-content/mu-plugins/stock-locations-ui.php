@@ -299,3 +299,35 @@ add_action('wp_head', function(){
     @media (max-width:480px){.products .slu-stock-mini{font-size:11px;margin-top:4px}}
     </style>';
 });
+
+// Cart: показываем распределение "Списание", убираем старые строки
+add_filter('woocommerce_get_item_data', function( $item_data, $cart_item ){
+    $product = $cart_item['data'] ?? null;
+    if ( ! ($product instanceof WC_Product) ) return $item_data;
+/*
+    // 1) Уберём старые строки из другого модуля (если они есть)
+    // Ключи могут быть переведены, поэтому чистим текст
+    $item_data = array_values(array_filter($item_data, function($row){
+        $key = isset($row['key']) ? wc_clean( wp_strip_all_tags($row['key']) ) : '';
+        $remove_keys = [
+            __( 'Другие склады', 'woocommerce' ),
+            __( 'Заказ со склада', 'woocommerce' ),
+        ];
+        return !in_array( $key, $remove_keys, true );
+    }));
+*/
+    // 2) Добавим нашу строку "Списание: Киев — 2, Одеса — 1"
+    $qty = max(0, (int)($cart_item['quantity'] ?? 0));
+    if ( $qty > 0 ) {
+        $line = slu_render_allocation_line( $product, $qty ); // уже есть в этом же файле
+        if ( $line ) {
+            $item_data[] = [
+                'key'     => __( 'Списание', 'woocommerce' ),
+                'value'   => $line,
+                'display' => $line, // чтобы корректно работало и в Woo Blocks
+            ];
+        }
+    }
+
+    return $item_data;
+}, 30, 2);
