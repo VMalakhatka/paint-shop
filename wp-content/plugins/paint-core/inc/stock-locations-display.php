@@ -90,7 +90,17 @@ function other_locations_stock_for_product( \WC_Product $product ) {
 
 /* ====================== КОРЗИНА / ЧЕКАУТ ====================== */
 
-add_filter('woocommerce_get_item_data', function( $item_data, $cart_item ){
+add_filter(
+  'woocommerce_get_item_data',
+  __NAMESPACE__ . '\\pc_cart_item_locations_meta',
+  20,
+  2
+);
+function pc_cart_item_locations_meta( $item_data, $cart_item ){
+    // если включено «новое списание» — не добавляем старые строки в корзину
+    if ( apply_filters('pc_disable_legacy_cart_locations', false) ) {
+        return $item_data;
+    }
     $product = $cart_item['data'] ?? null;
     if ( ! ($product instanceof \WC_Product) ) return $item_data;
 
@@ -122,7 +132,7 @@ add_filter('woocommerce_get_item_data', function( $item_data, $cart_item ){
     }
 
     return $item_data;
-}, 20, 2);
+}
 
 /* ====================== РЕНДЕР ДЛЯ ЗАКАЗОВ/ПИСЕМ ====================== */
 
