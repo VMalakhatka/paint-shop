@@ -102,6 +102,22 @@ function slu_collect_location_stocks_for_product( WC_Product $product ) {
     return $result;
 }
 
+/** Сколько этого товара/вариации уже в корзине */
+function slu_cart_qty_for_product( WC_Product $product ): int {
+    $pid = (int) $product->get_id();
+    $vid = $product->is_type('variation') ? $pid : 0;
+
+    $sum = 0;
+    if ( WC()->cart ) {
+        foreach ( WC()->cart->get_cart() as $item ) {
+            $p = (int) ($item['product_id'] ?? 0);
+            $v = (int) ($item['variation_id'] ?? 0);
+            if ( $p === $pid && $v === $vid ) $sum += (int) ($item['quantity'] ?? 0);
+        }
+    }
+    return $sum;
+}
+
 /** собрать HTML‑строчку вида “Киев — 5, Одеса — 17” (не включая primary) */
 function slu_render_other_locations_line( WC_Product $product ) {
     $primary = slu_get_primary_location_term_id( $product->get_id() );
@@ -137,55 +153,38 @@ function slu_render_primary_location_line( WC_Product $product ) {
     return esc_html($term->name) . ( $qty !== null ? ' — ' . (int)$qty : '' );
 }
 
-/** ===== single product ===== */
+/* ===== single product ===== */
+remove_all_actions('woocommerce_single_product_summary'); // на всякий случай, если уже есть старый хук
 add_action('woocommerce_single_product_summary', function(){
     global $product;
     if ( ! ($product instanceof WC_Product) ) return;
 
-    // NEW: если суммарно 0 — ничего не показываем
-    $total = slu_total_available_qty($product);
-    if ($total <= 0) return;
+    // На PDP показываем всё, включая "В корзине"
+    echo slu_render_stock_panel( $product, [
+        'show_primary' => true,
+        'show_others'  => true,
+        'show_total'   => true,
+        'show_incart'  => true,
+        'wrap_class'   => '',
+    ] );
+}, 25);
 
-    $primary_line = slu_render_primary_location_line( $product );
-    $others_line  = slu_render_other_locations_line( $product );
-    if ( ! $primary_line && ! $others_line ) return;
-
-    echo '<div class="slu-stock-box" style="margin:10px 0 6px; font-size:14px; color:#333;">';
-    if ( $primary_line ) {
-        echo '<div><strong>' . esc_html__('Заказ со склада', 'woocommerce') . ':</strong> ' . $primary_line . '</div>';
-    }
-    if ( $others_line ) {
-        echo '<div><strong>' . esc_html__('Другие склады', 'woocommerce') . ':</strong> ' . $others_line . '</div>';
-    }
-    echo '<div style="margin-top:4px;color:#2e7d32"><strong>'
-       . esc_html__('Всего', 'woocommerce') . ':</strong> ' . (int)$total . '</div>';
-    echo '</div>';
-}, 25); // после цены и короткого описания
-
-/** ===== product archive (loop) ===== */
+/* ===== product archive (loop) ===== */
+remove_all_actions('woocommerce_after_shop_loop_item_title');
 add_action('woocommerce_after_shop_loop_item_title', function(){
     global $product;
     if ( ! ($product instanceof WC_Product) ) return;
 
-    // NEW: если суммарно 0 — ничего не показываем
-    $total = slu_total_available_qty($product);
-    if ($total <= 0) return;
+    // В каталоге — как раньше: primary + others + total (без "В корзине")
+    echo slu_render_stock_panel( $product, [
+        'show_primary' => true,
+        'show_others'  => true,
+        'show_total'   => true,
+        'show_incart'  => false,
+        'wrap_class'   => 'slu-stock-mini',
+    ] );
+}, 11);
 
-    $primary_line = slu_render_primary_location_line( $product );
-    $others_line  = slu_render_other_locations_line( $product );
-    if ( ! $primary_line && ! $others_line ) return;
-
-    echo '<div class="slu-stock-mini" style="margin-top:4px; font-size:12px; color:#2e7d32;">';
-    if ( $primary_line ) {
-        echo '<div>' . esc_html__('Заказ со склада', 'woocommerce') . ': ' . $primary_line . '</div>';
-    }
-    if ( $others_line ) {
-        echo '<div style="color:#555;">' . esc_html__('Другие склады', 'woocommerce') . ': ' . $others_line . '</div>';
-    }
-    echo '<div style="margin-top:2px;color:#2e7d32">'
-       . esc_html__('Всего', 'woocommerce') . ': ' . (int)$total . '</div>';
-    echo '</div>';
-}, 11); // сразу под заголовком/ценой
 
 /* ===== (опционально) немного CSS для витрин, можно убрать ===== */
 add_action('wp_head', function(){
@@ -194,3 +193,55 @@ add_action('wp_head', function(){
     .single-product .slu-stock-box{border:1px dashed #e0e0e0; padding:8px 10px; border-radius:6px; background:#fafafa}
     </style>';
 });
+
+/**
+ * Универсальный блок складов/остатков.
+ * $opts:
+ *  - show_primary (bool)  — строка "Заказ со склада: ..."
+ *  - show_others  (bool)  — "Другие склады: ..."
+ *  - show_total   (bool)  — "Всего: N"
+ *  - show_incart  (bool)  — "В корзине: N"
+ *  - wrap_class   (string) дополнительный CSS‑класс
+ */
+function slu_render_stock_panel( WC_Product $product, array $opts = [] ): string {
+    $o = array_merge([
+        'show_primary' => true,
+        'show_others'  => true,
+        'show_total'   => true,
+        'show_incart'  => true,
+        'wrap_class'   => '',
+    ], $opts);
+
+    $primary_line = $o['show_primary'] ? slu_render_primary_location_line( $product ) : '';
+    $others_line  = $o['show_others']  ? slu_render_other_locations_line( $product ) : '';
+    $total        = $o['show_total']   ? slu_total_available_qty( $product ) : null;
+    $in_cart      = $o['show_incart']  ? slu_cart_qty_for_product( $product ) : null;
+
+    // Если вообще нечего показывать — возвращаем пусто
+    if ( ! $primary_line && ! $others_line && $total === null && $in_cart === null ) {
+        return '';
+    }
+
+    ob_start();
+    ?>
+    <div class="slu-stock-box <?= esc_attr( $o['wrap_class'] ) ?>"
+         style="margin:10px 0 6px; font-size:14px; color:#333; border:1px dashed #e0e0e0; padding:8px 10px; border-radius:6px; background:#fafafa">
+        <?php if ( $primary_line ): ?>
+            <div><strong><?= esc_html__( 'Заказ со склада', 'woocommerce' ) ?>:</strong> <?= $primary_line ?></div>
+        <?php endif; ?>
+
+        <?php if ( $others_line ): ?>
+            <div><strong><?= esc_html__( 'Другие склады', 'woocommerce' ) ?>:</strong> <?= $others_line ?></div>
+        <?php endif; ?>
+
+        <?php if ( $total !== null ): ?>
+            <div><strong><?= esc_html__( 'Всего', 'woocommerce' ) ?>:</strong> <?= (int) $total ?></div>
+        <?php endif; ?>
+
+        <?php if ( $in_cart !== null ): ?>
+            <div><strong><?= esc_html__( 'В корзине', 'woocommerce' ) ?>:</strong> <?= (int) $in_cart ?></div>
+        <?php endif; ?>
+    </div>
+    <?php
+    return (string) ob_get_clean();
+}
