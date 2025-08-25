@@ -76,7 +76,7 @@ function slu_cart_qty_for_product( WC_Product $product ): int {
     return $sum;
 }
 
-/** собрать “имя — qty” по другим складам (без primary) */
+/** собрать “имя — qty” по другим складам */
 function slu_collect_location_stocks_for_product( WC_Product $product ) {
     $result = [];
     $term_ids = wp_get_object_terms( $product->get_id(), 'location', ['fields' => 'ids', 'hide_empty' => false] );
@@ -109,6 +109,66 @@ function slu_collect_location_stocks_for_product( WC_Product $product ) {
         $result[$tid] = ['name' => $term->name, 'qty' => $qty];
     }
     return $result;
+}
+
+/** ===== План списания (алгоритм) =====
+ * Вернёт массив [ term_id => qty_to_deduct ] для нужного количества $need.
+ * Приоритет по умолчанию: primary -> остальные (убывание остатка).
+ * Можно переопределить через фильтр 'slu_allocation_plan'.
+ */
+function slu_get_allocation_plan( WC_Product $product, int $need, string $strategy = 'primary_first' ): array {
+    $need = max(0, (int)$need);
+    if ($need === 0) return [];
+
+    // даём шанс внешнему коду полностью заменить расчёт
+    $custom = apply_filters('slu_allocation_plan', null, $product, $need, $strategy);
+    if (is_array($custom)) {
+        return $custom;
+    }
+
+    // Собираем остатки по складам: [term_id => ['name'=>..., 'qty'=>int]]
+    $all = slu_collect_location_stocks_for_product($product);
+    if (empty($all)) return [];
+
+    $primary_id = (int) slu_get_primary_location_term_id( $product->get_id() );
+
+    // Упорядочим: сначала primary, потом по убыванию qty
+    $ordered = [];
+    if ($primary_id && isset($all[$primary_id])) {
+        $ordered[$primary_id] = $all[$primary_id];
+        unset($all[$primary_id]);
+    }
+    // остальные по убыванию остатков
+    uasort($all, function($a,$b){ return (int)$b['qty'] <=> (int)$a['qty']; });
+    $ordered += $all;
+
+    // Непосредственно распределение
+    $plan = [];
+    $left = $need;
+    foreach ($ordered as $tid => $row) {
+        if ($left <= 0) break;
+        $take = min($left, max(0,(int)$row['qty']));
+        if ($take > 0) {
+            $plan[(int)$tid] = $take;
+            $left -= $take;
+        }
+    }
+    return $plan;
+}
+
+/** Рендер “Київ — 2, Одеса — 1” по плану списания */
+function slu_render_allocation_line( WC_Product $product, int $need ): string {
+    $plan = slu_get_allocation_plan($product, $need);
+    if (empty($plan)) return '';
+
+    $parts = [];
+    foreach ($plan as $tid => $qty) {
+        $t = get_term((int)$tid, 'location');
+        if ($t && !is_wp_error($t)) {
+            $parts[] = esc_html($t->name) . ' — ' . (int)$qty;
+        }
+    }
+    return implode(', ', $parts);
 }
 
 function slu_render_other_locations_line( WC_Product $product ) {
@@ -156,6 +216,7 @@ function slu_render_stock_panel( WC_Product $product, array $opts = [] ): string
         'show_others'    => true,
         'show_total'     => true,
         'show_incart'    => true,
+        'show_incart_plan' => true,   // <--- НОВОЕ
         'hide_when_zero' => false,
         'wrap_class'     => '',
     ], $opts);
@@ -185,6 +246,12 @@ function slu_render_stock_panel( WC_Product $product, array $opts = [] ): string
         <?php endif; ?>
         <?php if ( $in_cart !== null ): ?>
             <div><strong><?= esc_html__('В корзине', 'woocommerce') ?>:</strong> <?= (int)$in_cart ?></div>
+            <?php if ( $o['show_incart_plan'] && (int)$in_cart > 0 ):
+                $alloc = slu_render_allocation_line($product, (int)$in_cart);
+                if ($alloc): ?>
+                    <div style="color:#555"><strong><?= esc_html__('Списание', 'woocommerce') ?>:</strong> <?= $alloc ?></div>
+                <?php endif;
+            endif; ?>
         <?php endif; ?>
     </div>
     <?php
@@ -197,12 +264,13 @@ add_action('woocommerce_single_product_summary', function(){
     if ( ! ($product instanceof WC_Product) ) return;
 
     echo slu_render_stock_panel( $product, [
-        'show_primary'   => true,
-        'show_others'    => true,
-        'show_total'     => true,
-        'show_incart'    => true,
+        'show_primary'     => true,
+        'show_others'      => true,
+        'show_total'       => true,
+        'show_incart'      => true,
         'hide_when_zero' => false,
-        'wrap_class'     => '',
+        'show_incart_plan' => true,   // <— включаем
+        'wrap_class'       => '',
     ] );
 }, 25);
 
