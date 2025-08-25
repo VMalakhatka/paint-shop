@@ -165,3 +165,32 @@
 /* чтобы тема не растягивала кнопку на всю ширину */
 .products .add_to_cart_button,
 .products .button{width:auto !important;}
+
+/* PDP — как сейчас: аккуратный блок */
+.single-product .slu-stock-box{
+  border:1px dashed #e0e0e0;
+  padding:8px 10px;
+  border-radius:6px;
+  background:#fafafa;
+  font-size:14px;
+  color:#333;
+  margin:10px 0 6px;
+}
+
+/* Каталог — компактно и без рамок */
+.products .slu-stock-mini{
+  border:0;
+  padding:0;
+  margin-top:6px;
+  background:transparent;
+  font-size:12px;
+  line-height:1.25;
+  color:#2e7d32;              /* зелёная строка */
+}
+.products .slu-stock-mini div{margin:0 0 2px}
+.products .slu-stock-mini strong{color:#333; font-weight:600}
+
+/* На маленьких экранах ещё компактнее */
+@media (max-width:480px){
+  .products .slu-stock-mini{font-size:11px;margin-top:4px}
+}
