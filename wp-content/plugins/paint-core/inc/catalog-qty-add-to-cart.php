@@ -52,6 +52,19 @@ function pcux_available_qty(\WC_Product $product): int {
     return (int) max(0, round($sum));
 }
 
+/* ===== Доступно к добавлению (остаток минус уже в корзине) ===== */
+function pcux_available_for_add(\WC_Product $product): int {
+    // если есть mu-функция — используем её (она уже учитывает корзину)
+    if (function_exists('\\slu_available_for_add')) {
+        return (int) max(0, \slu_available_for_add($product));
+    }
+
+    // иначе: наш общий остаток минус то, что уже в корзине
+    $total   = (int) pcux_available_qty($product);
+    $in_cart = (int) wc_loop_get_in_cart_count($product); // для simple товаров ок
+    return max(0, $total - $in_cart);
+}
+
 /* ===== Конфиг виджета в каталоге ===== */
 add_action('init', function () {
     $GLOBALS['wc_loop_cfg'] = [
@@ -100,7 +113,7 @@ add_action('woocommerce_after_shop_loop_item', function () {
     if ($product->is_sold_individually()) return;
     if ($product->is_type('variable')) return; // упрощаем
 
-    $available   = pcux_available_qty($product);
+    $available   = pcux_available_for_add($product);
     $cfg         = $GLOBALS['wc_loop_cfg'] ?? [];
     $min         = max(1, (int)($cfg['min'] ?? 1));
     $pid         = $product->get_id();
@@ -195,65 +208,93 @@ add_action('wp_enqueue_scripts', function () {
  * Проверка при добавлении в корзину (AJAX/не AJAX).
  * Принудительно используем глобальные функции WP/WC через \, чтобы избежать фаталов в неймспейсе.
  */
-/* ===== Серверные проверки кол-ва (не больше "Всего") — версия с try/catch ===== */
+/* ===== Серверные проверки кол-ва (не больше доступного) ===== */
 
+// Вспомогалка: доступно к добавлению прямо сейчас
+function _pcux_available_now(\WC_Product $prod, int $product_id, int $variation_id = 0): int {
+    // 1) если есть наша функция — используем её
+    if (\function_exists('\\PaintUX\\Catalog\\pcux_available_for_add')) {
+        return (int) \PaintUX\Catalog\pcux_available_for_add($prod);
+    }
+
+    // 2) фолбэк: общий остаток минус уже в корзине
+    $total = 0;
+    if (\function_exists(__NAMESPACE__ . '\\pcux_available_qty')) {
+        // т.к. мы уже в том же namespace, можно вызвать коротко:
+        $total = (int) pcux_available_qty($prod);
+        // или полностью: $total = (int) \PaintUX\Catalog\pcux_available_qty($prod);
+    }
+
+    $in_cart = 0;
+    $cart = (\function_exists('\\WC') && \WC()) ? \WC()->cart : null;
+    if ($cart && \is_object($cart)) {
+        foreach ($cart->get_cart() as $item) {
+            $pid = (int)($item['product_id'] ?? 0);
+            $vid = (int)($item['variation_id'] ?? 0);
+            if ($pid === $product_id && $vid === ($variation_id ?: 0)) {
+                $in_cart += (int)($item['quantity'] ?? 0);
+            }
+        }
+    }
+
+    return max(0, $total - $in_cart);
+}
+
+/** Добавление в корзину (AJAX/не AJAX) */
 \add_filter('woocommerce_add_to_cart_validation',
 function ($passed, $product_id, $qty, $variation_id = 0) {
     try {
         $prod = \wc_get_product($variation_id ?: $product_id);
         if (!($prod instanceof \WC_Product)) return $passed;
 
-        $available = \PaintUX\Catalog\pcux_available_qty($prod);
-
-        // сколько уже в корзине
-        $in_cart = 0;
-        $cart = (\function_exists('\\WC') && \WC()) ? \WC()->cart : null;
-        if ($cart && \is_object($cart)) {
-            foreach ($cart->get_cart() as $item) {
-                $pid = (int)($item['product_id'] ?? 0);
-                $vid = (int)($item['variation_id'] ?? 0);
-                if ($pid === (int)$product_id && $vid === (int)($variation_id ?: 0)) {
-                    $in_cart += (int)($item['quantity'] ?? 0);
-                }
-            }
-        }
+        $available = _pcux_available_now($prod, (int)$product_id, (int)$variation_id);
 
         if ($available <= 0) {
             \wc_add_notice(\__('Товар сейчас недоступен на складе.', 'woocommerce'), 'error');
             return false;
         }
-
-        if (($qty + $in_cart) > $available) {
+        if ((int)$qty > (int)$available) {
             \wc_add_notice(
                 \sprintf(\__('Доступно только %d шт. на складе.', 'woocommerce'), (int)$available),
                 'error'
             );
             return false;
         }
-
         return $passed;
     } catch (\Throwable $e) {
         if (\function_exists('\\PaintCore\\pc_log')) {
             \PaintCore\pc_log('add_to_cart_validation ERROR: ' . $e->getMessage());
         }
-        return $passed; // не валим AJAX
+        return $passed; // не роняем процесс
     }
 }, 10, 4);
 
-\add_filter('woocommerce_update_cart_validation', function ($passed, $cart_item_key, $values, $quantity) {
+
+/** Обновление количества существующей строки корзины */
+\add_filter('woocommerce_update_cart_validation',
+function ($passed, $cart_item_key, $values, $new_qty) {
     try {
+        /** @var \WC_Product|null $product */
         $product = $values['data'] ?? null;
         if (!($product instanceof \WC_Product)) return $passed;
 
-        $available = \PaintUX\Catalog\pcux_available_qty($product);
+        $pid = (int)($values['product_id'] ?? $product->get_id());
+        $vid = (int)($values['variation_id'] ?? 0);
+        $current_line_qty = (int)($values['quantity'] ?? 0); // сколько было ДО обновления
 
-        if ($available <= 0) {
+        // Сколько ещё можно добавить сверх уже лежащего (по всем строкам)
+        $available_for_add = _pcux_available_now($product, $pid, $vid);
+
+        // При апдейте текущей строки мы «возвращаем» её старое кол-во во доступ
+        $available_for_update = max(0, $available_for_add + $current_line_qty);
+
+        if ($available_for_update <= 0) {
             \wc_add_notice(\__('Товар сейчас недоступен на складе.', 'woocommerce'), 'error');
             return false;
         }
-        if ($quantity > $available) {
+        if ((int)$new_qty > (int)$available_for_update) {
             \wc_add_notice(
-                \sprintf(\__('Доступно только %d шт. на складе.', 'woocommerce'), (int)$available),
+                \sprintf(\__('Доступно только %d шт. на складе.', 'woocommerce'), (int)$available_for_update),
                 'error'
             );
             return false;

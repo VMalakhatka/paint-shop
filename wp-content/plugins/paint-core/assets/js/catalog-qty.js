@@ -3,6 +3,36 @@
 
   /* ===== (N) на кнопках — простая карта ===== */
   var cartMap = {};
+  function getMax($wrap){
+  return parseInt($wrap.attr('data-max') || $wrap.data('max') || '0', 10) || 0;
+}
+function setMax($wrap, newMax){
+  newMax = Math.max(0, parseInt(newMax,10) || 0);
+  $wrap.attr('data-max', newMax).data('max', newMax);
+  var $inp  = $wrap.find('.loop-qty');
+  var $view = $wrap.find('.loop-qty-view');
+  var min   = parseInt($inp.attr('min')||'1',10)||1;
+
+  if(newMax <= 0){
+    // выключаем qty и прячем возможность добавлять
+    $wrap.addClass('is-disabled');
+    $inp.prop('disabled', true).val('0');
+    if($view.length) $view.text('0');
+    // по желанию: заблокировать кнопку
+    var $btn = $wrap.closest('.product,li.product').find('.add_to_cart_button').first();
+    $btn.prop('disabled', true).addClass('disabled');
+    return;
+  }
+
+  // активный режим
+  $wrap.removeClass('is-disabled');
+  $inp.prop('disabled', false).attr('max', String(newMax));
+
+  // если текущее значение > max — подрежем
+  var cur = parseInt(String($inp.val()||'').replace(/\D+/g,''),10) || min;
+  if(cur > newMax){ cur = newMax; $inp.val(String(cur)); }
+  if($view.length) $view.text(String(cur));
+}
   function readQtyFromButton($btn){
     var m = ($btn.text()||'').match(/\((\d+)\)/);
     return m ? parseInt(m[1],10)||0 : 0;
@@ -98,11 +128,23 @@
     }
     cartMap[pid] = (current||0)+add;
 
-    $('.products .add_to_cart_button').each(function(){
-      var $b=$(this);
-      if(parseInt($b.data('product_id'),10)===pid){
-        $b.text(cartMap[pid]>0?'('+cartMap[pid]+')':'');
+    // ... уже есть: cartMap[pid] = (current||0)+add;
+
+    $('.products .product, li.product').each(function(){
+      var $p = $(this);
+      var $b = $p.find('.add_to_cart_button').first();
+      if(parseInt($b.data('product_id'),10) !== pid) return;
+
+      // уменьшить per-card лимит
+      var $wrap = $p.find('.loop-qty-wrap').first();
+      if($wrap.length){
+        var oldMax = getMax($wrap);
+        var newMax = oldMax - add;
+        setMax($wrap, newMax);
       }
+
+      // обновить текст на всех кнопках этого товара
+      $b.text(cartMap[pid] > 0 ? '('+cartMap[pid]+')' : '');
     });
   });
 
@@ -117,6 +159,10 @@
       $inp.val(String(val));
       syncView($w);
       setBtnQty($w, val);
+      var maxNow = getMax($w);
+      if(maxNow <= 0){
+        setMax($w, 0);
+      }
     });
     initButtons();
   }

@@ -55,6 +55,15 @@ if (!function_exists('slu_total_available_qty')) {
     }
 }
 
+// доступное к добавлению = общий остаток минус то, что уже в корзине
+if (!function_exists('slu_available_for_add')) {
+    function slu_available_for_add(WC_Product $product): int {
+        $total   = slu_total_available_qty($product);
+        $in_cart = slu_cart_qty_for_product($product);
+        return max(0, (int)$total - (int)$in_cart);
+    }
+}
+
 if (!function_exists('slu_cart_qty_for_product')) {
     /** сколько этого товара/вариации уже в корзине */
     function slu_cart_qty_for_product(WC_Product $product): int{
