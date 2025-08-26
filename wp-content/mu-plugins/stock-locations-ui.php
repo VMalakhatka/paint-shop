@@ -277,8 +277,9 @@ add_action('woocommerce_after_shop_loop_item_title', function(){
 
 /** =================== КОРЗИНА / ЧЕКАУТ =================== */
 
-/* отключаем «старые» строки в paint-core (если он таковые добавляет) */
+/* отключаем «старые» строки в paint-core (если он таковые добавляет) 
  add_filter('pc_disable_legacy_cart_locations', '__return_true');
+*/
 
 /* добавляем нашу строку "Списание" — только на страницах корзины/чекаута */
 if (!function_exists('slu_cart_allocation_row')) {

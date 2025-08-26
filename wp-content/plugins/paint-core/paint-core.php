@@ -8,27 +8,34 @@ Version: 1.0.0
 defined('ABSPATH') || exit;
 
 define('PAINT_CORE_PATH', plugin_dir_path(__FILE__));
-define('PAINT_CORE_URL',  plugin_dir_url(__FILE__)); // ДЛЯ assets
-define('PAINT_CORE_INC', plugin_dir_path(__FILE__) . 'inc/');
+define('PAINT_CORE_URL',  plugin_dir_url(__FILE__));
+define('PAINT_CORE_INC',  PAINT_CORE_PATH . 'inc/');
 
-// 1) приоритетные файлы
-$priority = [
-  'utils.php',            // здесь pc_log и константы
-  'stock-public.php',     // здесь pc_available_qty_for_product()
-  // добавь сюда, если нужно: 'stock-locations-display.php', ...
-];
-
-// сначала грузим по приоритету, если существуют
-foreach ($priority as $fname) {
-    $full = PAINT_CORE_INC . $fname;
-    if (file_exists($full)) require_once $full;
+/* 0) Конфиг (должен грузиться ПЕРВЫМ) */
+$pc_config = PAINT_CORE_PATH . 'config.php';
+if (file_exists($pc_config)) {
+    require_once $pc_config;
 }
 
-// 2) потом — все остальные inc/*.php, кроме уже загруженных
+/* 1) Файлы с приоритетом (если нужны ранние функции) */
+$priority = [
+    'stock-public.php',
+];
+
+foreach ($priority as $fname) {
+    $full = PAINT_CORE_INC . $fname;
+    if (file_exists($full)) {
+        require_once $full;
+    }
+}
+
+/* 2) Все остальные inc/*.php (кроме уже загруженных) */
 $loaded = array_flip($priority);
 $all = glob(PAINT_CORE_INC . '*.php') ?: [];
 sort($all);
 foreach ($all as $f) {
     $base = basename($f);
-    if (!isset($loaded[$base])) require_once $f;
+    if (!isset($loaded[$base])) {
+        require_once $f;
+    }
 }
