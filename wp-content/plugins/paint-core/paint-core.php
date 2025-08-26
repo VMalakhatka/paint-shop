@@ -39,3 +39,18 @@ foreach ($all as $f) {
         require_once $f;
     }
 }
+
+// 
+add_action('wp_enqueue_scripts', function () {
+    if (function_exists('is_product') && is_product()) {
+        $js_rel = 'assets/js/single-ajax-add-to-cart.js';
+        $js_abs = PAINT_CORE_PATH . $js_rel;
+        wp_enqueue_script(
+            'paint-core-single-ajax-atc',
+            PAINT_CORE_URL . $js_rel,
+            ['jquery', 'wc-add-to-cart'],
+            file_exists($js_abs) ? filemtime($js_abs) : '1.0.0',
+            true
+        );
+    }
+}, 30);

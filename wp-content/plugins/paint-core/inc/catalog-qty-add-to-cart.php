@@ -307,3 +307,73 @@ function ($passed, $cart_item_key, $values, $new_qty) {
         return $passed;
     }
 }, 10, 4);
+
+// ===== PDP: ограничиваем qty по "доступно к добавлению" =====
+
+/** Доступно к добавлению для текущего товара (с учётом корзины) */
+function pcux_single_available_for_add( \WC_Product $product ): int {
+    // 1) если есть функция из MU — используем её
+    if ( function_exists('\\slu_available_for_add') ) {
+        return max(0, (int) \slu_available_for_add($product));
+    }
+
+    // 2) фолбэк: общее - уже в корзине (для simple достаточно)
+    $total = function_exists('\\PaintUX\\Catalog\\pcux_available_qty')
+        ? (int) \PaintUX\Catalog\pcux_available_qty($product)
+        : 0;
+
+    $in_cart = 0;
+    if ( function_exists('WC') && WC() && WC()->cart ) {
+        foreach ( WC()->cart->get_cart() as $item ) {
+            $pid = (int) ($item['product_id'] ?? 0);
+            $vid = (int) ($item['variation_id'] ?? 0);
+            if ( $product->is_type('variation') ) {
+                if ( $vid === (int) $product->get_id() ) $in_cart += (int) ($item['quantity'] ?? 0);
+            } else {
+                if ( $pid === (int) $product->get_id() ) $in_cart += (int) ($item['quantity'] ?? 0);
+            }
+        }
+    }
+    return max(0, $total - $in_cart);
+}
+
+/**
+ * Подставляем min/max/value в поле количества на PDP
+ */
+// PDP: жёстко ограничиваем qty доступным к добавлению (учитывает уже лежащее в корзине)
+add_filter('woocommerce_quantity_input_args', function(array $args, $product){
+    // только страница товара и только реальный продукт
+    if ( ! function_exists('is_product') || ! is_product() ) return $args;
+    if ( ! ($product instanceof \WC_Product) ) return $args;
+
+    // (упрощение) вариативные пропустим — для них нужен отдельный хук на выбор вариации
+    if ( $product->is_type('variable') ) return $args;
+
+    // сколько ещё можно добавить прямо сейчас
+    if (function_exists('\\slu_available_for_add')) {
+        $avail = (int) \slu_available_for_add($product);
+    } elseif (function_exists(__NAMESPACE__.'\\pcux_available_for_add')) {
+        $avail = (int) \PaintUX\Catalog\pcux_available_for_add($product);
+    } else {
+        // самый грубый фолбэк
+        $avail = max(0, (int) $product->get_stock_quantity());
+    }
+
+    if ($avail <= 0) {
+        // ничего нельзя — показываем 0 и блокируем
+        $args['min_value']   = 0;
+        $args['max_value']   = 0;
+        $args['input_value'] = 0;
+        $args['classes'][]   = 'qty--disabled';
+        return $args;
+    }
+
+    $min = 1;
+    $cur = isset($args['input_value']) ? (int)$args['input_value'] : $min;
+
+    $args['min_value']   = $min;
+    $args['max_value']   = $avail;
+    $args['input_value'] = min(max($min, $cur), $avail);
+
+    return $args;
+}, 999, 2);
