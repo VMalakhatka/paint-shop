@@ -195,3 +195,10 @@ function setMax($wrap, newMax){
   $(document).ready(wrapBuyRows);
   $(document.body).on('wc_fragments_loaded wc_fragments_refreshed added_to_cart updated_wc_div', wrapBuyRows);
 })(jQuery);
+// --- Борьба с bfcache: при возврате "назад" перезагружаем страницу
+window.addEventListener('pageshow', function (e) {
+  // если страница пришла из back/forward cache — делаем hard reload
+  if (e.persisted) {
+    window.location.reload();
+  }
+});
