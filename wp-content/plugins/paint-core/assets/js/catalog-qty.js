@@ -4,8 +4,10 @@
   /* ===== (N) на кнопках — простая карта ===== */
   var cartMap = {};
   function getMax($wrap){
-  return parseInt($wrap.attr('data-max') || $wrap.data('max') || '0', 10) || 0;
-}
+    var v = $wrap.data('max');
+    if (typeof v === 'undefined') v = $wrap.attr('data-max');
+    return parseInt(v || '0', 10) || 0;
+  } 
 function setMax($wrap, newMax){
   newMax = Math.max(0, parseInt(newMax,10) || 0);
   $wrap.attr('data-max', newMax).data('max', newMax);
@@ -20,7 +22,7 @@ function setMax($wrap, newMax){
     if($view.length) $view.text('0');
     // по желанию: заблокировать кнопку
     var $btn = $wrap.closest('.product,li.product').find('.add_to_cart_button').first();
-    $btn.prop('disabled', true).addClass('disabled');
+    $btn.addClass('disabled').attr('aria-disabled', 'true');
     return;
   }
 
