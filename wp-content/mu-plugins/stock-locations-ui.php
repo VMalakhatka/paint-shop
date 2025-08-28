@@ -154,7 +154,13 @@ function pc_build_stock_view(WC_Product $product): array {
         return ['mode'=>'auto','preferred'=>null,'primary'=>null,'ordered'=>[], 'sum'=>0];
     }
     $all = (array) slu_collect_location_stocks_for_product($product);
+    
+    // ← ДОБАВЬ: убираем нулевые склады из показа
+    $all = array_filter($all, static function($row){
+        return (int)($row['qty'] ?? 0) > 0;
+    });
 
+    // суммарный остаток (можно считать по отфильтрованным — нули не влияют)
     $sum = 0; foreach ($all as $row) $sum += (int)($row['qty'] ?? 0);
 
     $pref = function_exists('pc_get_alloc_pref') ? pc_get_alloc_pref() : ['mode'=>'auto','term_id'=>0];
@@ -166,8 +172,16 @@ function pc_build_stock_view(WC_Product $product): array {
     // Только выбранный склад
     if ($mode === 'single') {
         $only = [];
-        if ($sel && isset($all[$sel])) $only[$sel] = $all[$sel];
-        return ['mode'=>'single','preferred'=>$sel?:null,'primary'=>$primary?:null,'ordered'=>$only,'sum'=>isset($only[$sel]['qty'])?(int)$only[$sel]['qty']:0];
+        if ($sel && isset($all[$sel])) {           // ← только если qty > 0 (после фильтра он есть)
+            $only[$sel] = $all[$sel];
+        }
+        return [
+            'mode'      => 'single',
+            'preferred' => $sel ?: null,
+            'primary'   => $primary ?: null,
+            'ordered'   => $only,                  // ← может быть пусто, если qty=0
+            'sum'       => isset($only[$sel]['qty']) ? (int)$only[$sel]['qty'] : 0
+        ];
     }
 
     // Auto / Manual: выбранный (в manual) -> primary -> остальные по убыванию
@@ -266,19 +280,20 @@ if (!function_exists('slu_render_stock_panel')) {
         $v = pc_build_stock_view($product);
 
         // === Режим "Только выбранный склад" ===
-        if ($v['mode'] === 'single') {
-            $onlyLine = '';
-            if (!empty($v['ordered'])) {
-                $row = reset($v['ordered']);
-                $onlyLine = pc_fmt_loc_line($row);
+       if ($v['mode'] === 'single') {
+            // если выбранный склад пуст — панель не рисуем вообще
+            if (empty($v['ordered'])) {
+                return '';
             }
-            if ($o['hide_when_zero'] && $onlyLine === '') return '';
+
+            $row = reset($v['ordered']);            // тут гарантированно qty>0
+            $onlyLine = pc_fmt_loc_line($row);
 
             ob_start(); ?>
             <div class="slu-stock-box <?= esc_attr($o['wrap_class']) ?>">
                 <div>
                     <strong><?= esc_html__('Заказ со склада','woocommerce') ?>:</strong>
-                    <?= $onlyLine !== '' ? $onlyLine : '— 0' ?>
+                    <?= $onlyLine ?>
                 </div>
             </div>
             <?php
@@ -289,16 +304,17 @@ if (!function_exists('slu_render_stock_panel')) {
         // Первый элемент — приоритетный; подсвечиваем его .is-preferred
         $firstHtml = '';
         $others    = [];
-        $isFirst   = true;
-
         foreach ($v['ordered'] as $tid => $row) {
+            $q = (int)($row['qty'] ?? 0);
+            if ($q <= 0) continue;                 // страховка
             $line = pc_fmt_loc_line($row);
-            if ($isFirst) {
-                $firstHtml = '<span class="is-preferred">'.$line.'</span>';
-                $isFirst   = false;
-            } else {
-                $others[] = $line;
-            }
+            if ($firstHtml === '') $firstHtml = '<span class="is-preferred">'.$line.'</span>';
+            else $others[] = $line;
+        }
+
+        // если вообще нечего показать — прячем блок при hide_when_zero
+        if ($o['hide_when_zero'] && $firstHtml === '' && empty($others)) {
+            return '';
         }
 
         if ($o['hide_when_zero'] && (int) $v['sum'] <= 0) return '';
