@@ -250,11 +250,12 @@ if (!function_exists('slu_render_stock_panel')) {
      *  - wrap_class (string)
      */
     // Универсальный рендер панели под выбранный режим (catalog + PDP)
-    function slu_render_stock_panel(WC_Product $product, array $opts=[]): string{
+    // Универсальный рендер панели под выбранный режим (catalog + PDP)
+// Подсвечивает приоритетный склад (первый в порядке $v['ordered'])
+    function slu_render_stock_panel( WC_Product $product, array $opts = [] ): string {
         $o = array_merge([
-            'wrap_class'       => '',      // доп. класс для контейнера
-            // Параметры ниже теперь игнорируются для 'single', но оставлены ради совместимости:
-            'show_primary'     => true,
+            'wrap_class'       => '',
+            'show_primary'     => true,   // оставлены для совместимости
             'show_others'      => true,
             'show_total'       => true,
             'show_incart'      => false,
@@ -264,7 +265,7 @@ if (!function_exists('slu_render_stock_panel')) {
 
         $v = pc_build_stock_view($product);
 
-        // SINGLE: только выбранный склад, без "других" и "всего"
+        // === Режим "Только выбранный склад" ===
         if ($v['mode'] === 'single') {
             $onlyLine = '';
             if (!empty($v['ordered'])) {
@@ -272,35 +273,50 @@ if (!function_exists('slu_render_stock_panel')) {
                 $onlyLine = pc_fmt_loc_line($row);
             }
             if ($o['hide_when_zero'] && $onlyLine === '') return '';
+
             ob_start(); ?>
             <div class="slu-stock-box <?= esc_attr($o['wrap_class']) ?>">
-                <div><strong><?= esc_html__('Заказ со склада','woocommerce') ?>:</strong>
+                <div>
+                    <strong><?= esc_html__('Заказ со склада','woocommerce') ?>:</strong>
                     <?= $onlyLine !== '' ? $onlyLine : '— 0' ?>
                 </div>
             </div>
-            <?php return (string)ob_get_clean();
+            <?php
+            return (string) ob_get_clean();
         }
 
-        // AUTO / MANUAL: первый — приоритетный, далее остальные, в конце "Всего"
-        $first = ''; $others = [];
-        foreach ($v['ordered'] as $tid=>$row) {
-            if ($first === '') $first = pc_fmt_loc_line($row);
-            else $others[] = pc_fmt_loc_line($row);
+        // === AUTO / MANUAL ===
+        // Первый элемент — приоритетный; подсвечиваем его .is-preferred
+        $firstHtml = '';
+        $others    = [];
+        $isFirst   = true;
+
+        foreach ($v['ordered'] as $tid => $row) {
+            $line = pc_fmt_loc_line($row);
+            if ($isFirst) {
+                $firstHtml = '<span class="is-preferred">'.$line.'</span>';
+                $isFirst   = false;
+            } else {
+                $others[] = $line;
+            }
         }
-        if ($o['hide_when_zero'] && (int)$v['sum'] <= 0) return '';
+
+        if ($o['hide_when_zero'] && (int) $v['sum'] <= 0) return '';
 
         ob_start(); ?>
         <div class="slu-stock-box <?= esc_attr($o['wrap_class']) ?>">
-            <?php if ($first !== ''): ?>
-                <div><strong><?= esc_html__('Заказ со склада','woocommerce') ?>:</strong> <?= $first ?></div>
+            <?php if ($firstHtml !== ''): ?>
+                <div><strong><?= esc_html__('Заказ со склада','woocommerce') ?>:</strong> <?= $firstHtml ?></div>
             <?php endif; ?>
+
             <?php if (!empty($others)): ?>
-                <div><strong><?= esc_html__('Другие склады','woocommerce') ?>:</strong> <?= implode(', ', $others) ?></div>
+                <div><strong><?= esc_html__('Другие склады','woocommerce') ?>:</strong> <?= esc_html(implode(', ', $others)) ?></div>
             <?php endif; ?>
-            <div><strong><?= esc_html__('Всего','woocommerce') ?>:</strong> <?= (int)$v['sum'] ?></div>
+
+            <div><strong><?= esc_html__('Всего','woocommerce') ?>:</strong> <?= (int) $v['sum'] ?></div>
         </div>
         <?php
-        return (string)ob_get_clean();
+        return (string) ob_get_clean();
     }
 }
 
@@ -382,6 +398,17 @@ add_shortcode('pc_stock_allocation', function($atts){
     return '<div class="slu-stock-box slu-stock-mini"><strong>'.esc_html__('Списание','woocommerce').':</strong> '.esc_html($line).'</div>';
 });
 
+// Показываем стоковый HTML Woo только когда товара нет
+add_filter('woocommerce_get_stock_html', function($html, $product){
+    if (!($product instanceof WC_Product)) return $html;
+
+    // если товар в наличии — ничего не выводим
+    if ($product->is_in_stock()) {
+        return '';
+    }
+    // иначе (нет в наличии) оставляем стандартный красный текст
+    return $html;
+}, 99, 2);
 /** =================== Немного CSS (можно перенести в общие стили) =================== */
 add_action('wp_head', function(){
     echo '<style>

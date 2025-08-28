@@ -143,24 +143,37 @@ add_action('woocommerce_after_shop_loop_item', function () {
     echo '</div>';
 }, 9);
 
-/* ===== Маркер «В наличии/Нет в наличии» под ценой (как было) ===== */
-add_action( 'woocommerce_after_shop_loop_item_title', function () {
+/* ===== Маркер под ценой: показываем ТОЛЬКО "Нет в наличии" ===== */
+add_action('woocommerce_after_shop_loop_item_title', function () {
     global $product;
-    if ( ! $product instanceof \WC_Product ) return;
+    if (!($product instanceof \WC_Product)) return;
 
-    if ( $product->is_in_stock() ) {
-        if ( $product->managing_stock() ) {
-            $qty = (int) $product->get_stock_quantity();
-            if ( $qty > 0 ) {
-                echo '<span class="loop-stock-top in" data-stock="'.esc_attr($qty).'">'.esc_html__('На складе: ', 'woocommerce') . esc_html( $qty ) . '</span>';
-            } else {
-                echo '<span class="loop-stock-top pre" data-stock="0">'.esc_html__('Под заказ', 'woocommerce').'</span>';
+    $is_out = false;
+
+    if (function_exists('pc_build_stock_view')) {
+        $v = pc_build_stock_view($product);
+
+        if (($v['mode'] ?? 'auto') === 'single') {
+            // режим "Только выбранный склад": смотрим остаток только по выбранному
+            $qty = 0;
+            if (!empty($v['ordered'])) {
+                $row = reset($v['ordered']);
+                $qty = (int)($row['qty'] ?? 0);
             }
+            $is_out = ($qty <= 0);
         } else {
-            echo '<span class="loop-stock-top in" data-stock="">'.esc_html__('В наличии', 'woocommerce').'</span>';
+            // авто/приоритет: нет суммарного остатка
+            $is_out = ((int)($v['sum'] ?? 0) <= 0);
         }
     } else {
-        echo '<span class="loop-stock-top out" data-stock="0">'.esc_html__('Нет в наличии', 'woocommerce').'</span>';
+        // фолбэк на стандартный Woo
+        $is_out = !$product->is_in_stock();
+    }
+
+    if ($is_out) {
+        echo '<span class="loop-stock-top out" data-stock="0">' .
+             esc_html__('Нет в наличии', 'woocommerce') .
+             '</span>';
     }
 }, 11);
 
