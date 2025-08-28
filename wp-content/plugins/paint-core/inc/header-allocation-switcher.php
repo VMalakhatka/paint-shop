@@ -187,49 +187,80 @@ add_action('woocommerce_checkout_create_order_line_item', function($item, $cart_
     }
 }, 10, 3);
 
-/* ============================ Применение предпочтения к плану ============================ */
-
+// ===== Переопределяем план списания с учётом выбранного режима/склада (safe) =====
 add_filter('slu_allocation_plan', function($plan, $product, $need, $strategy){
-    $pref = pc_get_alloc_pref();
-    $need = max(0, (int)$need);
-    if ($need === 0 || !($product instanceof \WC_Product)) return [];
-
-    if (!function_exists('slu_collect_location_stocks_for_product')) return $plan;
-
-    $all = slu_collect_location_stocks_for_product($product); // [term_id => ['name'=>..., 'qty'=>...]]
-    if (empty($all) || !is_array($all)) return [];
-
-    // SINGLE: только выбранный склад
-    if ($pref['mode'] === 'single' && $pref['term_id'] > 0) {
-        $tid  = (int) $pref['term_id'];
-        $qty  = isset($all[$tid]['qty']) ? max(0, (int)$all[$tid]['qty']) : 0;
-        $take = min($need, $qty);
-        return $take > 0 ? [$tid => $take] : [];
-    }
-
-    // MANUAL: приоритет выбранного
-    $ordered = [];
-    if ($pref['mode'] === 'manual' && $pref['term_id'] > 0 && isset($all[(int)$pref['term_id']])) {
-        $ordered[(int)$pref['term_id']] = $all[(int)$pref['term_id']];
-        unset($all[(int)$pref['term_id']]);
-    }
-
-    // Далее — primary, потом по убыванию
-    if (function_exists('slu_get_primary_location_term_id')) {
-        $primary_id = (int) slu_get_primary_location_term_id($product->get_id());
-        if ($primary_id && isset($all[$primary_id])) {
-            $ordered[$primary_id] = $all[$primary_id];
-            unset($all[$primary_id]);
+    try {
+        if ( ! ($product instanceof \WC_Product) ) {
+            return is_array($plan) ? $plan : [];
         }
-    }
-    uasort($all, function($a,$b){ return (int)($b['qty'] ?? 0) <=> (int)($a['qty'] ?? 0); });
-    $ordered += array_reverse($all, true); // чтобы шёл по убыванию
 
-    $res  = []; $left = $need;
-    foreach ($ordered as $tid => $row) {
-        if ($left <= 0) break;
-        $take = min($left, max(0, (int)($row['qty'] ?? 0)));
-        if ($take > 0) { $res[(int)$tid] = $take; $left -= $take; }
+        $need = max(0, (int)$need);
+        if ($need === 0) return [];
+
+        // Защитные проверки на наличие функций
+        if ( !function_exists('slu_collect_location_stocks_for_product') ) {
+            return is_array($plan) ? $plan : [];
+        }
+
+        $pref = function_exists('pc_get_alloc_pref')
+            ? pc_get_alloc_pref()
+            : ['mode' => 'auto', 'term_id' => 0];
+
+        $mode = $pref['mode'] ?? 'auto';
+        $sel  = (int)($pref['term_id'] ?? 0);
+
+        // Собираем остатки по локациям
+        $all = (array) slu_collect_location_stocks_for_product($product);
+
+        // Режим 3: "только выбранный склад"
+        if ($mode === 'single') {
+            if ($sel && isset($all[$sel])) {
+                $available = max(0, (int)($all[$sel]['qty'] ?? 0));
+                $take = min($need, $available);
+                return $take > 0 ? [ $sel => $take ] : [];
+            }
+            // выбранного склада нет — ничего не списываем
+            return [];
+        }
+
+        // Режим 2: "с приоритетом выбранного"
+        if ($mode === 'manual' && $sel) {
+            // Заказ с выбранного, остаток — как в базовом алгоритме
+            $ordered = [];
+
+            if (isset($all[$sel])) {
+                $ordered[$sel] = $all[$sel];
+                unset($all[$sel]);
+            }
+
+            if (function_exists('slu_get_primary_location_term_id')) {
+                $primary = (int) slu_get_primary_location_term_id($product->get_id());
+                if ($primary && isset($all[$primary])) {
+                    $ordered[$primary] = $all[$primary];
+                    unset($all[$primary]);
+                }
+            }
+
+            uasort($all, function($a,$b){ return (int)($b['qty'] ?? 0) <=> (int)($a['qty'] ?? 0); });
+            $ordered += $all;
+
+            $res = []; $left = $need;
+            foreach ($ordered as $tid => $row) {
+                if ($left <= 0) break;
+                $take = min($left, max(0, (int)($row['qty'] ?? 0)));
+                if ($take > 0) { $res[(int)$tid] = $take; $left -= $take; }
+            }
+            return $res;
+        }
+
+        // Режим 1: "авто" — отдадим базовый алгоритм (или то, что уже притащил другой фильтр)
+        return is_array($plan) ? $plan : null;
+
+    } catch (\Throwable $e) {
+        // Никаких фаталов на чекауте
+        if (function_exists('error_log')) {
+            error_log('[alloc_plan] '.$e->getMessage());
+        }
+        return is_array($plan) ? $plan : [];
     }
-    return $res;
 }, 10, 4);

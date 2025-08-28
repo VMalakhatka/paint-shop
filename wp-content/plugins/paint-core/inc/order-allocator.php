@@ -1,5 +1,6 @@
 <?php
 namespace PaintCore\Stock;
+use function PaintCore\pc_log; 
 
 defined('ABSPATH') || exit;
 

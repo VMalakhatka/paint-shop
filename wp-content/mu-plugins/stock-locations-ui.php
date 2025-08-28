@@ -312,8 +312,12 @@ if (!function_exists('slu_render_stock_panel')) {
             <?php if (!empty($others)): ?>
                 <div><strong><?= esc_html__('Другие склады','woocommerce') ?>:</strong> <?= esc_html(implode(', ', $others)) ?></div>
             <?php endif; ?>
-
-            <div><strong><?= esc_html__('Всего','woocommerce') ?>:</strong> <?= (int) $v['sum'] ?></div>
+                <div>
+                    <span class="slu-nb">
+                        <strong><?= esc_html__('Всего','woocommerce') ?>:</strong>
+                        <span class="slu-stock-total"><?= (int)$v['sum'] ?></span>
+                    </span>
+                </div>
         </div>
         <?php
         return (string) ob_get_clean();
@@ -417,5 +421,15 @@ add_action('wp_head', function(){
     .products .slu-stock-mini div{margin:0 0 2px}
     .products .slu-stock-mini strong{color:#333;font-weight:600}
     @media (max-width:480px){.products .slu-stock-mini{font-size:11px;margin-top:4px}}
+
+       /* "Всего: N" — держим в одной строке независимо от темы */
+        .slu-nb{
+            display:inline-flex;           /* children в одну линию */
+            align-items:baseline;          /* красиво выравниваем */
+            gap:.25em;
+            white-space:nowrap;
+        }
+        .slu-nb strong{display:inline;}
+        .slu-nb .slu-stock-total{display:inline !important;}  /* на случай, если тема делает block */
     </style>';
 });
