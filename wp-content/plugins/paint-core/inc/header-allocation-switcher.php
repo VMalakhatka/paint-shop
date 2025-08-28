@@ -93,36 +93,54 @@ function pc_render_alloc_control() {
 
     <script>
     (function($){
-      var nonce = <?php echo wp_json_encode($nonce); ?>;
-      var ajaxu = <?php echo wp_json_encode($ajax_u); ?>;
+        var nonce = <?php echo wp_json_encode($nonce); ?>;
+        var ajaxu = <?php echo wp_json_encode($ajax_u); ?>; 
 
-      function savePref(mode, term_id){
-        return $.post(ajaxu, { action:'pc_set_alloc_pref', nonce:nonce, mode:mode, term_id:term_id });
-      }
-      function refreshUI(){
-        $(document.body).trigger('wc_fragment_refresh');
-      }
+        function savePref(mode, term_id){
+            return $.post(ajaxu, { action:'pc_set_alloc_pref', nonce:nonce, mode:mode, term_id:term_id });
+        }
 
-      $(document).on('change', '.pc-alloc-mode', function(){
-        var mode  = this.value;
-        var $term = $('.pc-alloc-term');
-        // склад нужен только в manual/single
-        $term.prop('disabled', (mode === 'auto'));
-        var tid = (mode === 'auto') ? 0 : (parseInt($term.val(),10) || 0);
-        savePref(mode, tid).done(function(){
-          $.post(ajaxu, {action:'pc_recalc_alloc_plans'}).always(refreshUI);
+        // Мягкое обновление UI после сохранения
+        function refreshUI(){
+            var $b = $('body');
+
+            // корзина / чекаут — обновим расчет и фрагменты без reload
+            if ($b.hasClass('woocommerce-cart') || $b.hasClass('woocommerce-checkout')) {
+            $(document.body).trigger('wc_fragment_refresh');
+            $b.trigger('update_checkout');
+            return;
+            }
+
+            // на каталоге/карточке — просто перезагрузим страницу,
+            // чтобы блоки остатков и кнопки подтянулись под новый режим
+            window.location.reload();
+        }
+
+        // смена режима
+        $(document).on('change', '.pc-alloc-mode', function(){
+            var mode  = this.value;
+            var $term = $('.pc-alloc-term');
+
+            // склад доступен в manual и single
+            $term.prop('disabled', (mode === 'auto'));
+
+            var tid = (mode === 'auto') ? 0 : (parseInt($term.val(), 10) || 0);
+            savePref(mode, tid).always(refreshUI);
         });
-      });
 
-      $(document).on('change', '.pc-alloc-term', function(){
-        var tid  = parseInt(this.value, 10) || 0;
-        var mode = $('.pc-alloc-mode').val();
-        if (mode === 'auto') { mode = 'manual'; $('.pc-alloc-mode').val('manual'); }
-        savePref(mode, tid).done(function(){
-          $.post(ajaxu, {action:'pc_recalc_alloc_plans'}).always(refreshUI);
+        // смена склада
+        $(document).on('change', '.pc-alloc-term', function(){
+            var tid  = parseInt(this.value, 10) || 0;
+            var mode = $('.pc-alloc-mode').val() || 'auto';
+
+            // если был auto и пользователь выбрал склад — переводим в manual
+            if (mode === 'auto') {
+            mode = 'manual';
+            $('.pc-alloc-mode').val('manual');
+            }
+            savePref(mode, tid).always(refreshUI);
         });
-      });
-    })(jQuery);
+        })(jQuery);
     </script>
     <?php
 }
