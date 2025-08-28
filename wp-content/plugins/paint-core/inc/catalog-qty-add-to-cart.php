@@ -12,31 +12,50 @@ defined('ABSPATH') || exit;
  * - Передаёт реальное количество при добавлении в корзину (через событие adding_to_cart).
  */
 
+/** === SINGLE mode helpers === */
+function pc_pref_single_mode_term(): array {
+    if (function_exists('\\pc_get_alloc_pref')) {
+        $p = \pc_get_alloc_pref();
+        return [$p['mode'] ?? 'auto', (int)($p['term_id'] ?? 0)];
+    }
+    return ['auto', 0];
+}
+function pc_qty_on_term(\WC_Product $product, int $term_id): int {
+    $pid = (int)$product->get_id();
+    $key = '_stock_at_'.(int)$term_id;
+    $v   = get_post_meta($pid, $key, true);
+    if (($v === '' || $v === null) && $product->is_type('variation')) {
+        $parent = (int)$product->get_parent_id();
+        if ($parent) $v = get_post_meta($parent, $key, true);
+    }
+    return max(0, (int)round((float)($v === '' || $v === null ? 0 : $v)));
+}
+
 /* ===== Доступное количество (Всего) ===== */
 function pcux_available_qty(\WC_Product $product): int {
-    // если есть функция из mu-плагина — используем её
+    // SINGLE: только выбранный склад
+    [$mode, $tid] = pc_pref_single_mode_term();
+    if ($mode === 'single' && $tid > 0) {
+        return pc_qty_on_term($product, $tid);
+    }
+
+    // иначе — общий остаток (как было)
     if (function_exists('\\slu_total_available_qty')) {
         return (int) max(0, (int) \slu_total_available_qty($product));
     }
-
     global $wpdb;
     $pid = (int) $product->get_id();
     $sum = 0.0;
-
-    // быстрый путь — кэш в _stock
     $stock = get_post_meta($pid, '_stock', true);
     if ($stock !== '' && $stock !== null) {
         $sum = (float) $stock;
     } else {
-        // суммируем все _stock_at_%
         $rows = $wpdb->get_col($wpdb->prepare(
             "SELECT meta_value FROM {$wpdb->postmeta}
              WHERE post_id=%d AND meta_key LIKE %s",
             $pid, $wpdb->esc_like('_stock_at_') . '%'
         ));
         foreach ((array)$rows as $v) $sum += (float)$v;
-
-        // фолбэк для вариаций — попробуем родителя
         if ($sum <= 0 && $product->is_type('variation')) {
             $parent_id = (int) $product->get_parent_id();
             if ($parent_id) {
@@ -54,16 +73,32 @@ function pcux_available_qty(\WC_Product $product): int {
 
 /* ===== Доступно к добавлению (остаток минус уже в корзине) ===== */
 function pcux_available_for_add(\WC_Product $product): int {
-    // если есть mu-функция — используем её (она уже учитывает корзину)
-    if (function_exists('\\slu_available_for_add')) {
-        return (int) max(0, \slu_available_for_add($product));
-    }
+    // базовый доступный остаток (уже учитывает SINGLE через п.2)
+    $total = (int) pcux_available_qty($product);
 
-    // иначе: наш общий остаток минус то, что уже в корзине
-    $total   = (int) pcux_available_qty($product);
-    $in_cart = (int) wc_loop_get_in_cart_count($product); // для simple товаров ок
+    // уже в корзине — считаем по конкретному продукту/вариации
+    $in_cart = 0;
+    if (function_exists('WC') && WC() && WC()->cart) {
+        foreach (WC()->cart->get_cart() as $item) {
+            $pid = (int)($item['product_id'] ?? 0);
+            $vid = (int)($item['variation_id'] ?? 0);
+            if ($product->is_type('variation')) {
+                if ($vid === (int)$product->get_id()) $in_cart += (int)($item['quantity'] ?? 0);
+            } else {
+                if ($pid === (int)$product->get_id()) $in_cart += (int)($item['quantity'] ?? 0);
+            }
+        }
+    }
     return max(0, $total - $in_cart);
 }
+
+// SINGLE: если на выбранном складе 0 — товар нельзя купить
+add_filter('woocommerce_is_purchasable', function($ok, $product){
+    if (!($product instanceof \WC_Product)) return $ok;
+    [$mode, $tid] = pc_pref_single_mode_term();
+    if ($mode !== 'single' || $tid <= 0) return $ok;
+    return pc_qty_on_term($product, $tid) > 0;
+}, 10, 2);
 
 /* ===== Конфиг виджета в каталоге ===== */
 add_action('init', function () {

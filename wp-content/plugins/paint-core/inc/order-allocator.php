@@ -92,74 +92,90 @@ function pc_build_allocation_plan( $order_or_id ) : void {
         $need = (int) $item->get_quantity();
         if ( $need <= 0 ) continue;
 
-        // Primary из Yoast-меты (с фоллбеком на родителя для вариаций)
-        $primary = (int) get_post_meta($pid, '_yoast_wpseo_primary_location', true);
-        if ( ! $primary ) {
-            $parent = (int) wp_get_post_parent_id($pid);
-            if ($parent) $primary = (int) get_post_meta($parent, '_yoast_wpseo_primary_location', true);
+        /* ---------- 1) ПРОБУЕМ ЕДИНЫЙ ПЛАН (учитывает auto/manual/single) ---------- */
+        $plan = [];
+        if ( function_exists('\\slu_get_allocation_plan') ) {
+            // третий аргумент — просто ярлык стратегии для хука; можешь оставить 'checkout'
+            $plan = \slu_get_allocation_plan( $product, $need, 'checkout' );
         }
 
-        // Снимок остатков по всем локациям
-        $terms = get_terms(['taxonomy'=>'location','hide_empty'=>false]);
-        if ( is_wp_error($terms) || empty($terms) ) continue;
-
-        $rows = [];
-        foreach ($terms as $t) {
-            $stock = pc_read_stock_for_term($pid, (int)$t->term_id);
-            $rows[] = [
-                'term_id'    => (int)$t->term_id,
-                'name'       => $t->name,
-                'slug'       => $t->slug,
-                'stock'      => (int)$stock,
-                'is_primary' => ($primary && (int)$t->term_id === $primary) ? 1 : 0,
-            ];
-        }
-
-        // Primary вперёд, затем по имени (детерминированный порядок)
-        usort($rows, function($a,$b){
-            if ($a['is_primary'] !== $b['is_primary']) return $a['is_primary'] ? -1 : 1;
-            return strnatcasecmp($a['name'], $b['name']);
-        });
-
-        // Аллокация
-        $allocated = []; // term_id => qty
-        $rem = $need;
-        foreach ($rows as $r) {
-            if ($rem <= 0) break;
-            $avail = (int)$r['stock'];
-            if ($avail <= 0) continue;
-            $take = min($avail, $rem);
-            $allocated[$r['term_id']] = ($allocated[$r['term_id']] ?? 0) + $take;
-            $rem -= $take;
-        }
-
-        // Запишем план + «Склад: Київ × N, Одеса × M»
-        if ( ! empty($allocated) ) {
-            arsort($allocated, SORT_NUMERIC);
-
-            $dict = [];
-            foreach ($terms as $t) $dict[(int)$t->term_id] = $t;
-
-            $parts = [];
-            $first_id = null; $first_slug = null;
-            foreach ($allocated as $tid => $q) {
-                $t    = $dict[$tid] ?? null;
-                $name = $t ? $t->name : '#'.$tid;
-                $slug = $t ? $t->slug : (string)$tid;
-                $parts[] = sprintf('%s × %d', $name, (int)$q);
-                if ($first_id === null) { $first_id = (int)$tid; $first_slug = $slug; }
+        /* ---------- 2) НОРМАЛИЗУЕМ/ФОЛБЭК, если общий план ничего не вернул ---------- */
+        $norm = [];
+        if ( is_array($plan) ) {
+            foreach ( $plan as $k => $v ) {
+                $tid = (int) $k;
+                $q   = (int) $v;
+                if ( $tid > 0 && $q > 0 ) $norm[$tid] = $q;
             }
-
-            $item->update_meta_data('_pc_stock_breakdown', $allocated);
-            $item->update_meta_data('_stock_location_id',   $first_id);
-            $item->update_meta_data('_stock_location_slug', $first_slug);
-            $item->update_meta_data( __('Склад','woocommerce'), implode(', ', $parts) );
-            $item->save();
-
-            pc_log('[PC PLAN] order '.$order->get_id().' item '.$item_id.' plan='.print_r($allocated,true));
-        } else {
-            pc_log('[PC PLAN] order '.$order->get_id().' item '.$item_id.' no allocation (stock=0?)');
         }
+
+        if ( empty($norm) ) {
+            // ЛЕГАСИ: снимок остатков и simple priority (primary → по имени)
+            $terms = get_terms(['taxonomy'=>'location','hide_empty'=>false]);
+            if ( is_wp_error($terms) || empty($terms) ) { pc_log('[PC PLAN] no terms'); continue; }
+
+            $primary = pc_primary_location_id($pid);
+
+            $rows = [];
+            foreach ($terms as $t) {
+                $rows[] = [
+                    'term_id'    => (int)$t->term_id,
+                    'name'       => $t->name,
+                    'stock'      => (int) pc_read_stock_for_term($pid, (int)$t->term_id),
+                    'is_primary' => ($primary && (int)$t->term_id === $primary) ? 1 : 0,
+                ];
+            }
+            usort($rows, function($a,$b){
+                if ($a['is_primary'] !== $b['is_primary']) return $a['is_primary'] ? -1 : 1;
+                return strnatcasecmp($a['name'], $b['name']);
+            });
+
+            $rem = $need;
+            foreach ($rows as $r) {
+                if ($rem <= 0) break;
+                $avail = (int)$r['stock'];
+                if ($avail <= 0) continue;
+                $take = min($avail, $rem);
+                $norm[(int)$r['term_id']] = ($norm[(int)$r['term_id']] ?? 0) + $take;
+                $rem -= $take;
+            }
+        }
+
+        if ( empty($norm) ) {
+            pc_log('[PC PLAN] order '.$order->get_id().' item '.$item_id.' no allocation (stock=0?)');
+            continue;
+        }
+
+        /* ---------- 3) СОХРАНЯЕМ ПЛАН + ЧЕЛОВЕЧЕСКУЮ СТРОКУ ---------- */
+        // соберём термы, чтобы красиво подписать
+        $dict = [];
+        $terms = get_terms(['taxonomy'=>'location','hide_empty'=>false]);
+        if ( ! is_wp_error($terms) ) {
+            foreach ($terms as $t) { $dict[(int)$t->term_id] = $t; }
+        }
+
+        // порядок «крупные вперёд», чтобы «первый склад» был реально самым весомым
+        arsort($norm, SORT_NUMERIC);
+
+        $parts = [];
+        $first_id  = null;
+        $first_slug= null;
+
+        foreach ($norm as $tid => $qty) {
+            $t    = $dict[(int)$tid] ?? null;
+            $name = $t ? $t->name : '#'.$tid;
+            $slug = $t ? $t->slug : (string)$tid;
+            $parts[] = sprintf('%s × %d', $name, (int)$qty);
+            if ($first_id === null) { $first_id = (int)$tid; $first_slug = $slug; }
+        }
+
+        $item->update_meta_data('_pc_stock_breakdown', $norm);
+        $item->update_meta_data('_stock_location_id',   $first_id);
+        $item->update_meta_data('_stock_location_slug', $first_slug);
+        $item->update_meta_data( __('Склад','woocommerce'), implode(', ', $parts) );
+        $item->save();
+
+        pc_log('[PC PLAN] order '.$order->get_id().' item '.$item_id.' plan='.print_r($norm,true));
     }
 }
 
