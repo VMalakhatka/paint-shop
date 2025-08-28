@@ -317,8 +317,6 @@ if (!function_exists('slu_render_stock_panel')) {
             return '';
         }
 
-        if ($o['hide_when_zero'] && (int) $v['sum'] <= 0) return '';
-
         ob_start(); ?>
         <div class="slu-stock-box <?= esc_attr($o['wrap_class']) ?>">
             <?php if ($firstHtml !== ''): ?>
@@ -326,7 +324,7 @@ if (!function_exists('slu_render_stock_panel')) {
             <?php endif; ?>
 
             <?php if (!empty($others)): ?>
-                <div><strong><?= esc_html__('Другие склады','woocommerce') ?>:</strong> <?= esc_html(implode(', ', $others)) ?></div>
+                <div><strong><?= esc_html__('Другие склады','woocommerce') ?>:</strong> <?= implode(', ', $others) ?></div>
             <?php endif; ?>
                 <div>
                     <span class="slu-nb">
