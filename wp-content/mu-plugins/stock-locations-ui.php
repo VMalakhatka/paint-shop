@@ -148,6 +148,48 @@ if (!function_exists('slu_render_primary_location_line')) {
     }
 }
 
+// Собираем и упорядочиваем локации под выбранный режим
+function pc_build_stock_view(WC_Product $product): array {
+    if (!function_exists('slu_collect_location_stocks_for_product')) {
+        return ['mode'=>'auto','preferred'=>null,'primary'=>null,'ordered'=>[], 'sum'=>0];
+    }
+    $all = (array) slu_collect_location_stocks_for_product($product);
+
+    $sum = 0; foreach ($all as $row) $sum += (int)($row['qty'] ?? 0);
+
+    $pref = function_exists('pc_get_alloc_pref') ? pc_get_alloc_pref() : ['mode'=>'auto','term_id'=>0];
+    $mode = $pref['mode'];
+    $sel  = (int)($pref['term_id'] ?? 0);
+
+    $primary = function_exists('slu_get_primary_location_term_id') ? (int) slu_get_primary_location_term_id($product->get_id()) : 0;
+
+    // Только выбранный склад
+    if ($mode === 'single') {
+        $only = [];
+        if ($sel && isset($all[$sel])) $only[$sel] = $all[$sel];
+        return ['mode'=>'single','preferred'=>$sel?:null,'primary'=>$primary?:null,'ordered'=>$only,'sum'=>isset($only[$sel]['qty'])?(int)$only[$sel]['qty']:0];
+    }
+
+    // Auto / Manual: выбранный (в manual) -> primary -> остальные по убыванию
+    $ordered = [];
+    if ($mode === 'manual' && $sel && isset($all[$sel])) {
+        $ordered[$sel] = $all[$sel]; unset($all[$sel]);
+    }
+    if ($primary && isset($all[$primary])) {
+        $ordered[$primary] = $all[$primary]; unset($all[$primary]);
+    }
+    uasort($all, function($a,$b){ return (int)($b['qty'] ?? 0) <=> (int)($a['qty'] ?? 0); });
+    $ordered += $all;
+
+    return ['mode'=>$mode,'preferred'=>$sel?:null,'primary'=>$primary?:null,'ordered'=>$ordered,'sum'=>(int)$sum];
+}
+
+function pc_fmt_loc_line(array $row): string {
+    $name = isset($row['name']) ? (string)$row['name'] : '';
+    $qty  = isset($row['qty'])  ? (int)$row['qty']     : 0;
+    return esc_html($name).' — '.esc_html($qty);
+}
+
 /** =================== ПЛАН СПИСАНИЯ (АЛГОРИТМ) =================== */
 
 if (!function_exists('slu_get_allocation_plan')) {
@@ -207,45 +249,55 @@ if (!function_exists('slu_render_stock_panel')) {
      *  - hide_when_zero (bool) — спрятать блок, если total <= 0
      *  - wrap_class (string)
      */
+    // Универсальный рендер панели под выбранный режим (catalog + PDP)
     function slu_render_stock_panel(WC_Product $product, array $opts=[]): string{
         $o = array_merge([
+            'wrap_class'       => '',      // доп. класс для контейнера
+            // Параметры ниже теперь игнорируются для 'single', но оставлены ради совместимости:
             'show_primary'     => true,
             'show_others'      => true,
             'show_total'       => true,
-            'show_incart'      => true,
-            'show_incart_plan' => true,
+            'show_incart'      => false,
+            'show_incart_plan' => false,
             'hide_when_zero'   => false,
-            'wrap_class'       => '',
         ], $opts);
 
-        $primary_line = $o['show_primary'] ? slu_render_primary_location_line($product) : '';
-        $others_line  = $o['show_others']  ? slu_render_other_locations_line($product) : '';
-        $total        = $o['show_total']   ? slu_total_available_qty($product) : null;
-        $in_cart      = $o['show_incart']  ? slu_cart_qty_for_product($product) : null;
+        $v = pc_build_stock_view($product);
 
-        if ($o['hide_when_zero'] && $total !== null && (int)$total <= 0) return '';
-        if (!$primary_line && !$others_line && $total === null && $in_cart === null) return '';
+        // SINGLE: только выбранный склад, без "других" и "всего"
+        if ($v['mode'] === 'single') {
+            $onlyLine = '';
+            if (!empty($v['ordered'])) {
+                $row = reset($v['ordered']);
+                $onlyLine = pc_fmt_loc_line($row);
+            }
+            if ($o['hide_when_zero'] && $onlyLine === '') return '';
+            ob_start(); ?>
+            <div class="slu-stock-box <?= esc_attr($o['wrap_class']) ?>">
+                <div><strong><?= esc_html__('Заказ со склада','woocommerce') ?>:</strong>
+                    <?= $onlyLine !== '' ? $onlyLine : '— 0' ?>
+                </div>
+            </div>
+            <?php return (string)ob_get_clean();
+        }
+
+        // AUTO / MANUAL: первый — приоритетный, далее остальные, в конце "Всего"
+        $first = ''; $others = [];
+        foreach ($v['ordered'] as $tid=>$row) {
+            if ($first === '') $first = pc_fmt_loc_line($row);
+            else $others[] = pc_fmt_loc_line($row);
+        }
+        if ($o['hide_when_zero'] && (int)$v['sum'] <= 0) return '';
 
         ob_start(); ?>
         <div class="slu-stock-box <?= esc_attr($o['wrap_class']) ?>">
-            <?php if ($primary_line): ?>
-                <div><strong><?= esc_html__('Заказ со склада','woocommerce') ?>:</strong> <?= $primary_line ?></div>
+            <?php if ($first !== ''): ?>
+                <div><strong><?= esc_html__('Заказ со склада','woocommerce') ?>:</strong> <?= $first ?></div>
             <?php endif; ?>
-            <?php if ($others_line): ?>
-                <div><strong><?= esc_html__('Другие склады','woocommerce') ?>:</strong> <?= $others_line ?></div>
+            <?php if (!empty($others)): ?>
+                <div><strong><?= esc_html__('Другие склады','woocommerce') ?>:</strong> <?= implode(', ', $others) ?></div>
             <?php endif; ?>
-            <?php if ($total !== null): ?>
-                <div><strong><?= esc_html__('Всего','woocommerce') ?>:</strong> <?= (int)$total ?></div>
-            <?php endif; ?>
-            <?php if ($in_cart !== null): ?>
-                <div><strong><?= esc_html__('В корзине','woocommerce') ?>:</strong> <?= (int)$in_cart ?></div>
-                <?php if ($o['show_incart_plan'] && (int)$in_cart > 0):
-                    $alloc = slu_render_allocation_line($product, (int)$in_cart);
-                    if ($alloc): ?>
-                        <div style="color:#555"><strong><?= esc_html__('Списание','woocommerce') ?>:</strong> <?= $alloc ?></div>
-                    <?php endif;
-                endif; ?>
-            <?php endif; ?>
+            <div><strong><?= esc_html__('Всего','woocommerce') ?>:</strong> <?= (int)$v['sum'] ?></div>
         </div>
         <?php
         return (string)ob_get_clean();
