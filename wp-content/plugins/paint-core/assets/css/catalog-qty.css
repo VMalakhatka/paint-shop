@@ -194,3 +194,58 @@
 @media (max-width:480px){
   .products .slu-stock-mini{font-size:11px;margin-top:4px}
 }
+
+/* ===== Переключатель списания рядом с логотипом ===== */
+.site-branding{
+  display:flex;
+  align-items:center;        /* логотип/название и переключатель в одну линию */
+  gap:12px;                  /* расстояние между "paint" и селектами */
+}
+
+.pc-alloc{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font:14px/1.2 system-ui;
+}
+
+.pc-alloc small{ color:#666; }
+
+.pc-alloc select{
+  max-height:34px;
+  padding:4px 8px;
+  line-height:1.2;
+}
+
+/* === Брендинг: заголовок + наш переключатель в одну линию === */
+.site-title-with-alloc{
+  display:flex;
+  align-items:center;
+  gap:12px;         /* расстояние между "Paint" и селектами */
+}
+
+/* сам блок переключателя */
+.pc-alloc{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font:14px/1.2 system-ui;
+}
+.pc-alloc select{ max-height:34px; padding:4px 8px; }
+.pc-alloc small{ color:#666; }
+
+/* === Заголовок + наш переключатель в одну линию === */
+.site-branding{
+  display:flex;
+  align-items:center;
+  gap:12px;                 /* расстояние между "paint" и селектами */
+}
+
+.pc-alloc{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font:14px/1.2 system-ui;
+}
+.pc-alloc select{ max-height:34px; padding:4px 8px; }
+.pc-alloc small{ color:#666; }

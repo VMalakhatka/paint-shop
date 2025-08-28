@@ -19,7 +19,8 @@ if (file_exists($pc_config)) {
 
 /* 1) Файлы с приоритетом (если нужны ранние функции) */
 $priority = [
-    'stock-public.php',
+    'stock-public.php',            // сначала регистрируем таксономии / функции
+    'header-allocation-switcher.php', // затем UI переключателя
 ];
 
 foreach ($priority as $fname) {
