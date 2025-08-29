@@ -195,30 +195,81 @@
   .products .slu-stock-mini{font-size:11px;margin-top:4px}
 }
 
-/* ===== Переключатель списания рядом с логотипом ===== */
+/* ===== Шапка: селекторы списания/склада рядом с логотипом ===== */
 .site-branding{
   display:flex;
   align-items:center;
-  gap:12px;                 /* расстояние между "paint" и селектами */
+  gap:12px;
 }
 
+/* Контейнер с подписью "Списание:" и двумя select */
 .pc-alloc{
   display:flex;
   align-items:center;
   gap:8px;
   font:14px/1.2 system-ui;
 }
-.pc-alloc select{ max-height:34px; padding:4px 8px; line-height:1.2; }
 .pc-alloc small{ color:#666; }
 
-/* если блок оборачивается темой в .site-title-with-alloc */
-.site-title-with-alloc{
-  display:flex;
-  align-items:center;
-  gap:12px;
+.pc-alloc select{
+  max-height:34px;
+  padding:4px 8px;
+  line-height:1.2;
+  min-width:0;            /* не распираем контейнер */
 }
 
-.slu-stock-box .is-preferred{
-  font-weight: 600;
-  color: #8B4513; /* акцент для приоритетного склада */
+/* телефоны */
+@media (max-width:480px){
+  .site-branding{ gap:8px; }
+
+  .pc-alloc{ gap:6px; }
+  .pc-alloc small{ font-size:12px; }
+
+  .pc-alloc select{
+    font-size:12px;
+    height:32px;
+    padding:0 22px 0 8px; /* ужимаем внутренние отступы */
+  }
+
+  /* чуть уменьшим сам заголовок/логотип "paint" */
+  .site-header .site-title a,
+  .site-header .main-title a,
+  .site-header .site-branding .site-title{
+    font-size:16px !important;
+    line-height:1.2;
+  }
+}
+
+/* очень узкие экраны — селекты друг под другом */
+@media (max-width:360px){
+  .pc-alloc{
+    flex-direction:column;
+    align-items:stretch;
+    gap:6px;
+  }
+  .pc-alloc > *{ width:100%; }
+  .pc-alloc small{ display:none; } /* по желанию: скрыть слово "Списание:" */
+}
+
+/* экстремально узкие (если нужно ещё меньше шрифт названия) */
+@media (max-width:320px){
+  .site-header .site-title a,
+  .site-header .main-title a,
+  .site-header .site-branding .site-title{
+    font-size:14px !important;
+  }
+}
+
+/* страховка: позволяем перенос в очень тесных шапках */
+@media (max-width:400px){
+  .site-branding{ flex-wrap: wrap; }
+  .pc-alloc{ flex-wrap: wrap; }
+  .pc-alloc select{ max-width: 100%; }
+}
+
+/* косметика для мобильных Safari/Chrome */
+.pc-alloc select{
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: #fff; /* избегаем серого iOS */
 }
