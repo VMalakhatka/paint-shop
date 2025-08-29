@@ -186,3 +186,178 @@ UNION ALL
 SELECT 'price_schule_rows',  COUNT(*) FROM wp_postmeta WHERE meta_key = '_wpc_price_role_schule';
 
 COMMIT;
+
+
+Каркас и где крутить ручки
+
+1) MU-плагин: per-page = колонки × ряды
+
+Файл: wp-content/mu-plugins/psu-force-per-page.php (или твой PSU Smart/Force Per Page)
+Задача: подгоняет количество товаров на странице под фактическую сетку (колонки меряются JS, ряды — по константам/брейкпоинтам).
+Главные настройки (константы):
+	•	PSUFP_COOKIE_COLS — имя cookie с числом колонок (по умолчанию psu_cols).
+	•	PSUFP_COOKIE_ROWS — имя cookie с числом рядов (если используешь адаптивные ряды).
+	•	PSUFP_ROWS_DESKTOP / PSUFP_ROWS_MOBILE / PSUFP_ROWS_XSMALL — сколько рядов показывать для разных ширин.
+	•	PSUFP_FALLBACK_COLS — сколько колонок считать, пока cookie ещё нет (например, при первом заходе).
+	•	PSUFP_DEBUG — true включит отладочный блок в футере и логи в консоль.
+
+Что важно знать:
+	•	Колонки определяет CSS грид (см. п.2), JS просто “считывает” их и кладёт в cookie.
+	•	Сервер берёт per_page из cookie → выдаёт колонки × ряды.
+	•	Если “не добивало” страницу — почти всегда колонок считалось меньше или рядов было больше, чем нужно.
+
+⸻
+
+2) Сетка каталога (CSS)
+
+Файл: wp-content/themes/generatepress-child/style.css
+Задача: визуальная сетка карточек Woo.
+Критичные места:
+
+.woocommerce ul.products{
+  display:grid !important;
+  gap:20px;
+  grid-auto-flow:row;
+  grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); /* DESKTOP min */
+}
+@media (max-width:1024px){
+  .woocommerce ul.products{
+    grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); /* TABLET min */
+  }
+}
+@media (max-width:768px){
+  .woocommerce ul.products{
+    grid-template-columns:repeat(auto-fit, minmax(100px, 1fr)); /* MOBILE min */
+  }
+}
+
+/* Сброс ширин от темы: обязательно! */
+.woocommerce ul.products li.product{
+  float:none !important;
+  width:auto !important;
+  margin:0 !important;
+  clear:none !important;
+}
+.woocommerce ul.products[class*="columns-"] li.product{
+  width:auto !important;
+  clear:none !important;
+  margin-right:0 !important;
+}
+
+
+Ручки: числа minmax(…px, 1fr) — чем меньше минимальная ширина, тем больше колонок поместится.
+
+⸻
+
+3) Каталожная “qty + в корзину” (контроль доступного количества)
+
+Файл: wp-content/plugins/paint-core/inc/scatalog-qty-add-to-cart.php (у тебя может называться чуть иначе, но это UI-плагин каталога)
+Задача:
+	•	показывает плюс/минус и поле qty в листинге;
+	•	ограничивает ввод по доступному количеству;
+	•	валидирует на сервере при добавлении/обновлении корзины.
+
+Ключевые функции/фильтры:
+	•	pcux_available_qty($product) — общий остаток (сумма _stock_at_% либо _stock).
+	•	pcux_available_for_add($product) — доступно к добавлению = общий остаток − уже в корзине.
+	•	woocommerce_add_to_cart_validation и woocommerce_update_cart_validation — серверная проверка.
+	•	Если установлен MU-хелпер, используются \slu_total_available_qty() и \slu_available_for_add().
+
+Где править поведение: внутри функций pcux_available_qty/pcux_available_for_add или прокинуть свою MU-функцию slu_*.
+
+⸻
+
+4) UI складов (PDP/каталог/корзина) + план списания в корзине
+
+Файл-плагин: wp-content/plugins/stock-locations-ui/stock-locations-ui.php (по твоему коду)
+Задача:
+	•	показывает “Заказ со склада … / Другие склады … / Всего: N”;
+	•	режимы: auto / manual / single;
+	•	не показывает нулевые склады;
+	•	выводит строку “Списание” в корзине/чекауте по плану.
+
+Ключевое:
+	•	pc_build_stock_view($product) — собирает локации и фильтрует нули.
+	•	slu_render_stock_panel($product, $opts) — рендер панели; в режиме single скрывает блок, если склад = 0.
+	•	slu_render_allocation_line() — “Київ — 2, Одеса — 1” по плану.
+	•	add_filter('woocommerce_get_item_data', 'slu_cart_allocation_row', 30, 2) — добавляет “Списание” в карточку корзины.
+
+Где править:
+	•	чтобы точно скрывать нулевые — см. фильтрацию в pc_build_stock_view();
+	•	чтобы поменять текст/порядок — в slu_render_stock_panel().
+
+⸻
+
+5) Распределение и реальное списание остатков
+
+Файл: wp-content/plugins/paint-core/inc/order-allocator.php
+Задача:
+	•	На этапе оформления/статуса строит план списания по складам для каждой строки заказа
+→ мета _pc_stock_breakdown = [ term_id => qty, ... ], видимая мета “Склад: Київ × N, Одеса × M”, _stock_location_id/_slug.
+	•	Потом списывает реальные остатки из мет _stock_at_{term_id}, пересчитывает _stock/_stock_status.
+	•	Антидубль: флажок _pc_stock_reduced = yes.
+
+Хуки:
+	•	План: woocommerce_new_order (раньше), woocommerce_checkout_order_processed (40), woocommerce_order_status_processing/completed (30).
+	•	Редукция: те же статусы, но (60) — после построения плана.
+
+Переопределение алгоритма:
+	•	фильтр slu_allocation_plan — можешь вернуть свой [term_id => qty], чтобы изменить стратегию.
+
+Где править приоритеты:
+	•	в pc_build_allocation_plan() порядок — сначала primary, потом по имени (или меняй на “по убыванию остатков”).
+
+⸻
+
+6) Базовый конфиг ядра
+
+Файл: wp-content/plugins/paint-core/inc/Config.php (или рядом)
+Задача/настройки:
+	•	Config::DEBUG — включает pc_log() (лог в error_log).
+	•	Config::DISABLE_LEGACY_CART_LOCATIONS — отключает “старые” строки складов в корзине из старого Paint Core.
+	•	Config::ENABLE_STOCK_ALLOCATION — включает новый алгоритм распределения.
+	•	Хелпер pc_log($msg) (в неймспейсе PaintCore) — не забывай use function PaintCore\pc_log; в файлах, где зовёшь.
+
+⸻
+
+7) Переключатель режима складов (если есть)
+
+Файл: inc/header-allocation-switcher.php (или похожее место в теме/плагине)
+Задача: UI для auto/manual/single + выбранный term_id.
+Важно: после смены режима перерисовывать PDP/каталог. Если не обновляется — проверь, что:
+	•	состояние хранится (cookie/option/session?),
+	•	расчёт в pc_build_stock_view() читает именно это состояние,
+	•	есть хук/JS, который дёргает перерисовку (или обычный reload).
+
+⸻
+
+8) Тема: functions.php (дочерняя)
+
+Файл: wp-content/themes/generatepress-child/functions.php
+Что тут теперь стоит оставлять:
+	•	Подключение стилей дочерней темы;
+	•	Мелкие правки (хлебные крошки, заголовки, и т.п.).
+Не держим тут: логику per-page (вынесено в MU-плагин), сетку можно держать в style.css.
+
+⸻
+
+Частые задачи и где править
+	•	“Не добивается последний ряд”: см. MU-плагин (ряды/колонки), CSS minmax, cookie psu_cols/psu_rows.
+	•	“Показывает нулевой склад”: stock-locations-ui.php → pc_build_stock_view() — фильтруем нули.
+	•	“В корзине/чекауте план пересчитался не так”: см. order-allocator.php (план/редукция), фильтр slu_allocation_plan.
+	•	“Хочу первично списывать из Одессы”: либо сделай её primary в метах Yoast, либо перепиши порядок в slu_allocation_plan.
+	•	“Каталог даёт добавить больше, чем на выбранном складе”: сейчас лимит идёт от общего остатка. Если надо “по выбранному складу” в режиме single, скорректируй pcux_available_qty()/pcux_available_for_add() (или дай MU-функции slu_* учитывать текущий режим).
+
+⸻
+
+Быстрый чек-лист (диагностика)
+	1.	Внизу страницы (если PSUFP_DEBUG = true) — строка вида:
+cols=5, rows=3, per_page=15 (помогает понять, что именно считает клиент/сервер).
+	2.	В консоли браузера — сообщения [PSUFP] … (колонки/ряды/перезагрузка).
+	3.	В PHP-логах — [PSU] … о перехвате posts_per_page.
+	4.	Проверить cookie psu_cols/psu_rows.
+	5.	Открыть devtools → Elements: убедиться, что .woocommerce ul.products имеет наш grid-template-columns и что .columns-* не ломают.
+
+⸻
+
+Если хочешь, упакую всё это в один “живой” README.md (с кодовыми сниппетами), либо добавлю в админке страницу “Настройки каталога”, где можно менять PSUFP_ROWS_* и minmax без лезания в файлы.
