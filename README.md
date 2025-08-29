@@ -3,18 +3,47 @@
 E-commerce проект на базе **WordPress + WooCommerce**, кастомизированный под задачи магазина красок.
 
 ## 📂 Структура проекта
-app/public/           # корень WordPress
-├─ wp-content/
-│   ├─ themes/
-│   │   └─ my-theme/           # кастомная тема (с оверрайдами WooCommerce)
-│   ├─ plugins/
-│   │   └─ my-custom-plugin/   # кастомные плагины
-│   ├─ uploads/                # медиафайлы (не в Git)
-│   └─ mu-plugins/             # must-use плагины (если есть)
-├─ .gitignore
-├─ wp-cli.yml
-└─ README.md
-
+wp-content/
+├─ mu-plugins/
+│  ├─ psu-force-per-page.php            # per_page = колонки × ряды (cookie psu_cols/psu_rows)
+│  ├─ stock-import-csv-lite.php         # лёгкий CSV-импорт (склады/остатки — lite)
+│  └─ stock-locations-ui.php            # UI-патчи для отображения остатков по складам
+│
+├─ plugins/
+│  ├─ paint-core/
+│  │  ├─ assets/
+│  │  │  └─ css/
+│  │  │     └─ catalog-qty.css          # стили qty/кнопок в каталоге
+│  │  ├─ inc/
+│  │  │  ├─ catalog-qty-add-to-cart.php # qty + «в корзину» в один ряд, состояния и лимиты
+│  │  │  ├─ header-allocation-switcher.php # селекторы «Списание/Склад» в шапке + AJAX
+│  │  │  ├─ order-allocator.php         # расчёт плана списания по складам (slu_allocation_plan)
+│  │  │  ├─ order-attach-csv.php        # вспом. функционал с CSV для заказов (см. файл)
+│  │  │  ├─ role-price-importer.php     # импорт цен по ролям (страница в админке)
+│  │  │  ├─ sku-gtin-admin-columns.php  # колонки SKU/GTIN в админке
+│  │  │  ├─ sku-gtin-front-emails.php   # вывод SKU/GTIN во фронте/письмах
+│  │  │  ├─ stock-import-table.php      # таблица импорта остатков
+│  │  │  ├─ stock-locations-display.php # виджеты/шаблоны отображения остатков
+│  │  │  ├─ config.php                  # базовые константы/переключатели
+│  │  │  └─ paint-core.php              # загрузчик инклюдов
+│  │  └─ paint-core.php                 # главный файл плагина
+│  │
+│  ├─ paint-shop-ux/
+│  │  └─ paint-shop-ux.php              # мелкие UX-правки магазина
+│  │
+│  ├─ role-price/
+│  │  └─ role-price.php                 # цены по ролям: выбор мета-ключа _wpc_price_role_*
+│  │
+│  ├─ stock-sync-to-woo/
+│  │  └─ stock-sync-to-woo.php          # синк остатков в Woo (интеграция)
+│  │
+│  └─ … (сторонние плагины)
+│
+├─ themes/
+│  └─ generatepress-child/
+│     ├─ style.css                      # сетка каталога (CSS Grid), мелкие стили
+│     └─ functions.php                  # хлебные крошки и подключение стилей темы
+└─ uploads/ …                           # медиа (в Git не храним)
 ## 🚀 Как развернуть проект
 
 1. Установить WordPress и WooCommerce (через WP-CLI):
