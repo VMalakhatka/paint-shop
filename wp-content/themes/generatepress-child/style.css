@@ -15,14 +15,10 @@ Version: 1.0
 .woocommerce ul.products::after{ content:none !important; }
 
 .woocommerce ul.products{
-  list-style:none;
-  margin:0;
-  padding:0;
+  list-style:none; margin:0; padding:0;
   display:grid !important;
   gap:20px;
-  grid-auto-flow:row; /* без dense, чтобы ряды не «скакали» */
-
-  /* === Авто-подгон колонок: ровные ряды без «жирной» последней === */
+  grid-auto-flow:row;
   grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));
 }
 @media (max-width:1024px){
@@ -36,7 +32,25 @@ Version: 1.0
   }
 }
 
-/* Убираем ширины/clear от темы */
+/* сброс «столбцов темы», чтобы ничто не ломало CSS-grid */
+.woocommerce ul.products li.product{
+  float:none !important; width:auto !important; margin:0 !important; clear:none !important;
+}
+.woocommerce ul.products[class*="columns-"] li.product{
+  width:auto !important; clear:none !important; margin-right:0 !important;
+}
+
+/* mobile ≤768px — ещё крупнее карточка => ещё меньше колонок */
+@media (max-width:768px){
+  .woocommerce ul.products{
+    grid-template-columns:repeat(auto-fit, minmax(100px, 1fr));
+  }
+  .woocommerce ul.products[class*="columns-"]{
+    grid-template-columns:repeat(auto-fit, minmax(100px, 1fr)) !important;
+  }
+}
+
+/* Сброс ширин, которые задаёт тема/Woo по .columns-* */
 .woocommerce ul.products li.product{
   float:none !important;
   width:auto !important;
@@ -47,6 +61,23 @@ Version: 1.0
   width:auto !important;
   clear:none !important;
   margin-right:0 !important;
+}
+
+/* Сброс ширин, которые задаёт тема/Woo по .columns-* */
+.woocommerce ul.products li.product{
+  float:none !important;
+  width:auto !important;
+  margin:0 !important;
+  clear:none !important;
+}
+.woocommerce ul.products[class*="columns-"] li.product{
+  width:auto !important;
+  clear:none !important;
+  margin-right:0 !important;
+}
+/* Даже если Woo навесил columns-1 — всё равно держим грид */
+.woocommerce ul.products.columns-1{
+  display:grid !important;
 }
 
 /* ── Категории: центрирование содержимого ───────────────────────────────── */
@@ -74,10 +105,10 @@ Version: 1.0
 .woocommerce ul.products li.product-category .woocommerce-loop-category__title {
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;   /* максимум 3 строки */
+  -webkit-line-clamp: 3;
   overflow: hidden;
   line-height: 1.25;
-  min-height: calc(1.25em * 3); /* фикс под 3 строки */
+  min-height: calc(1.25em * 3);
   margin: 0;
   text-align: center;
   font-size: 14px;
