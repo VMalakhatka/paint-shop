@@ -6,7 +6,7 @@ E-commerce проект на базе **WordPress + WooCommerce**, кастом�
 <details>
 <summary><strong>Структура проекта</strong></summary>
 
-<!-- 
+```text
 wp-content/
 ├─ mu-plugins/
 │  ├─ psu-force-per-page.php        # per_page = колонки × ряды (cookie psu_cols/psu_rows)
@@ -45,11 +45,7 @@ wp-content/
 │  └─ generatepress-child/
 │     └─ style.css                 # сетка каталога (CSS Grid), мелкие стили
 │
-└─ uploads/                        # медиа (в Git не храним) 
--->
-
-</details>
-
+└─ uploads/                        # медиа (в Git не храним)
 
 
 ## 🚀 Как развернуть проект
