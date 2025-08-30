@@ -350,7 +350,66 @@ AB-111-20X20,3,1.5
 	•	Опция TRUNCATE — предварительно очищает таблицу.
 	•	Кнопка SMOKE-TEST создаёт строку (CR-TEST-SMOKE, kiev1, 7).
 
-⸻
+Схема хранения остатков в базе
+
+👉 После импорта данные распределяются по мета-ключам товара и связям:
+	•	Наличие на складах:
+_stock_at_{term_id} = количество (например, _stock_at_3942 = 12)
+	•	Общий остаток:
+_stock = 44
+	•	Primary (основной склад):
+_yoast_wpseo_primary_location = term_id
+	•	Привязка к складам:
+wp_term_relationships (taxonomy = location → wp_term_taxonomy → wp_terms)
+
+Где что хранится (итог):
+
+Что                      Где хранится
+Общий остаток            wp_postmeta._stock
+Остаток по складу        wp_postmeta._stock_at_{term_id}
+Primary-склад            wp_postmeta._yoast_wpseo_primary_location (значение = term_id)
+Список локаций у товара  wp_term_relationships (таксономия location → wp_term_taxonomy → wp_terms)
+
+SQL-пример (выгрузить остатки по складам для товаров)
+```
+SELECT
+  p.ID,
+  p.post_title,
+  sku.meta_value                                AS sku,
+  t.term_id,
+  t.name                                        AS location_name,
+  t.slug                                        AS location_slug,
+  CAST(pm_qty.meta_value AS SIGNED)             AS qty,
+  CAST(pm_total.meta_value AS SIGNED)           AS total_stock,
+  pm_primary.meta_value                         AS primary_location_term_id,
+  CASE WHEN pm_primary.meta_value = t.term_id THEN 1 ELSE 0 END AS is_primary
+FROM wp_posts p
+JOIN wp_postmeta sku
+  ON sku.post_id = p.ID
+ AND sku.meta_key = '_sku'
+ AND sku.meta_value <> ''
+/* строки вида _stock_at_{term_id} */
+JOIN wp_postmeta pm_qty
+  ON pm_qty.post_id = p.ID
+ AND pm_qty.meta_key REGEXP '^_stock_at_[0-9]+$'
+/* вынимаем term_id из ключа */
+JOIN wp_terms t
+  ON t.term_id = CONVERT(SUBSTRING_INDEX(pm_qty.meta_key, '_stock_at_', -1), UNSIGNED)
+JOIN wp_term_taxonomy tt
+  ON tt.term_id = t.term_id
+ AND tt.taxonomy = 'location'
+/* общий остаток и primary location */
+LEFT JOIN wp_postmeta pm_total
+  ON pm_total.post_id = p.ID
+ AND pm_total.meta_key = '_stock'
+LEFT JOIN wp_postmeta pm_primary
+  ON pm_primary.post_id = p.ID
+ AND pm_primary.meta_key = '_yoast_wpseo_primary_location'
+WHERE p.post_type = 'product'
+  AND p.post_status IN ('publish','private')
+-- AND sku.meta_value = 'CR-CE0900056730'   -- (опционально) отфильтровать по SKU
+ORDER BY sku, location_name;
+```
 
 Структура таблицы (DDL)
 
