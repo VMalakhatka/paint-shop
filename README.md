@@ -155,6 +155,9 @@ CR-001;10.50;11.00;9.90;10.00📌 Итого:
    MASTER (fixed collations + InnoDB temp)
    =========================== */
 
+## SQL - внесения цен - проверить 
+<details>
+<summary><strong>SQL </strong></summary>
 START TRANSACTION;
 
 /* Бэкап текущих цен по ролям */
@@ -275,7 +278,7 @@ UNION ALL
 SELECT 'price_schule_rows',  COUNT(*) FROM wp_postmeta WHERE meta_key = '_wpc_price_role_schule';
 
 COMMIT;
-
+<details>
 
 ⚙️ Кастомные модули и настройки
 
