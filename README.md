@@ -192,6 +192,7 @@ wp-content/
 .woocommerce ul.products.columns-1{ display:grid !important; }
 
 Ручки: меняй «минимум» в minmax(…px, 1fr) — так управляется число колонок на брейкпоинте.
+```
 
 </details>
 
