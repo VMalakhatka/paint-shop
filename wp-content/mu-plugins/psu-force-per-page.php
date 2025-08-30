@@ -9,6 +9,23 @@
 if (!defined('ABSPATH')) exit;
 
 /* ================== НАСТРОЙКИ ================== */
+/**
+ * Кол-во товаров на странице = колонки × ряды.
+ * - Колонки меряются на клиенте (JS) и пишутся в cookie `PSUFP_COOKIE_COLS`.
+ * - Ряды выбираются по брейкпоинтам (PSUFP_ROWS_*), кладутся в `PSUFP_COOKIE_ROWS`.
+ * - Сервер берёт оба значения и подставляет `posts_per_page`.
+ *
+ * Особенности:
+ * - Явный оверрайд: добавь ?per_page=N (1..200) к URL — вернём это значение.
+ * - Хук расширения: `psufp_rows_for_width` позволяет переопределить ряды.
+ * - Фактическое число колонок диктует CSS Grid темы (JS только «считывает»).
+ *
+ * Перехваты:
+ * - loop_shop_per_page, pre_get_posts (main query), woocommerce_product_query (архивы товаров)
+ *
+ * Отладка:
+ * - PSUFP_DEBUG=true — зелёная плашка + console.log в браузере.
+ */
 define('PSUFP_COOKIE_COLS',   'psu_cols');  // имя cookie с количеством колонок
 define('PSUFP_COOKIE_ROWS',   'psu_rows');  // имя cookie с количеством рядов
 
@@ -29,6 +46,10 @@ function psufp_is_product_archive_context(): bool {
 
 /** Считать per_page из cookie (или из fallback). */
 function psufp_calc_per_page(): int {
+    // приоритет — явному параметру в URL -- ?per_page= в URL
+    $override = isset($_GET['per_page']) ? (int) $_GET['per_page'] : 0;
+    if ($override > 0 && $override <= 200) return $override;
+
     $cols = isset($_COOKIE[PSUFP_COOKIE_COLS]) ? (int) $_COOKIE[PSUFP_COOKIE_COLS] : 0;
     if ($cols < 1 || $cols > 12) $cols = (int) PSUFP_FALLBACK_COLS;
 
@@ -51,6 +72,7 @@ add_action('pre_get_posts', function($q){
 
 add_action('woocommerce_product_query', function($q){
     if (is_admin()) return;
+    if (!psufp_is_product_archive_context()) return; // <— добавили
     $q->set('posts_per_page', psufp_calc_per_page());
 }, 9999);
 
@@ -130,3 +152,12 @@ add_action('wp_footer', function () {
       <div id="psufp-debug" style="margin:20px 0;padding:10px;background:#111;color:#0f0;border:2px solid #0f0; font-family:monospace">PSUFP …</div>
     <?php endif;
 }, 999);
+
+function psufp_decide_rows_for_width(int $w): int {
+    $rows =
+        ($w <= 320) ? (int) PSUFP_ROWS_XSMALL :
+        (($w <= 480) ? (int) PSUFP_ROWS_MOBILE : (int) PSUFP_ROWS_DESKTOP);
+
+    // даём шанс переопределить
+    return (int) apply_filters('psufp_rows_for_width', $rows, $w);
+}
