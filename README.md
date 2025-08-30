@@ -363,6 +363,7 @@ CREATE TABLE wp_stock_import (
   PRIMARY KEY (sku, location_slug)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ```
+```
 Поля отчёта (что вернёт страница после импорта)
 	•	ok (bool), format (long|wide), encoding, delimiter
 	•	rows_read (сколько строк прочитали из CSV)
@@ -385,7 +386,7 @@ CREATE TABLE wp_stock_import (
 	1.	Загрузили CSV сюда →
 	2.	wp_stock_import заполнилась →
 	3.	модуль синхронизации переносит данные из wp_stock_import в меты товара (или в вашу систему остатков).
-
+```
 </details>
 
 
