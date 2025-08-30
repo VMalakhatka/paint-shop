@@ -281,45 +281,46 @@ COMMIT;
 </details>
 
 ⚙️ Кастомные модули и настройки
+    <details>
+    <summary><strong>1) mu-plugins/psu-force-per-page.php — авто-пересчёт per_page </strong></summary>
 
-1) mu-plugins/psu-force-per-page.php — авто-пересчёт per_page
+      Идея: количество товаров на странице = колонки × ряды.
+      Колонки вычисляются на клиенте (по CSS Grid), пишутся в cookie, сервер подстраивает posts_per_page.
+        •	Константы:
+      ```
+      // имя cookie с колонками
+      define('PSUFP_COOKIE_COLS', 'psu_cols');
+      // имя cookie с рядами (для мобилок ниже брейкпоинта можно ставить 2)
+      define('PSUFP_COOKIE_ROWS', 'psu_rows');
 
-Идея: количество товаров на странице = колонки × ряды.
-Колонки вычисляются на клиенте (по CSS Grid), пишутся в cookie, сервер подстраивает posts_per_page.
-	•	Константы:
-```
-// имя cookie с колонками
-define('PSUFP_COOKIE_COLS', 'psu_cols');
-// имя cookie с рядами (для мобилок ниже брейкпоинта можно ставить 2)
-define('PSUFP_COOKIE_ROWS', 'psu_rows');
+      // дефолтные значения на сервере
+      define('PSUFP_ROWS', 3);            // ряды по умолчанию (десктоп)
+      define('PSUFP_FALLBACK_COLS', 5);   // если cookie ещё нет
 
-// дефолтные значения на сервере
-define('PSUFP_ROWS', 3);            // ряды по умолчанию (десктоп)
-define('PSUFP_FALLBACK_COLS', 5);   // если cookie ещё нет
+      // отладка (true — виден зелёный блок внизу и логи в console)
+      define('PSUFP_DEBUG', false);
 
-// отладка (true — виден зелёный блок внизу и логи в console)
-define('PSUFP_DEBUG', false);
+      // брейкпоинт, ниже которого JS пишет в cookie PSUFP_COOKIE_ROWS = 2
+      define('PSUFP_BREAKPOINT_MOBILE', 320);
+      ```
 
-// брейкпоинт, ниже которого JS пишет в cookie PSUFP_COOKIE_ROWS = 2
-define('PSUFP_BREAKPOINT_MOBILE', 320);
-```
+      Задача: подгоняет количество товаров на странице под фактическую сетку (колонки меряются JS, ряды — по константам/брейкпоинтам).
 
-Задача: подгоняет количество товаров на странице под фактическую сетку (колонки меряются JS, ряды — по константам/брейкпоинтам).
+      Что важно знать:
+        •	Колонки определяет CSS грид (см. п.2), JS просто “считывает” их и кладёт в cookie.
+        •	Сервер берёт per_page из cookie → выдаёт колонки × ряды.
+        •	Если “не добивало” страницу — почти всегда колонок считалось меньше или рядов было больше, чем нужно.
 
-Что важно знать:
-	•	Колонки определяет CSS грид (см. п.2), JS просто “считывает” их и кладёт в cookie.
-	•	Сервер берёт per_page из cookie → выдаёт колонки × ряды.
-	•	Если “не добивало” страницу — почти всегда колонок считалось меньше или рядов было больше, чем нужно.
+        •	Cookie: psu_cols (число колонок), psu_rows (ряды с учётом брейкпоинта).
+        •	Где меняем количество рядов для маленьких экранов: константы выше.
+        •	Хуки: request, loop_shop_per_page, pre_get_posts, woocommerce_product_query.
+        •	Отладка: временно define('PSUFP_DEBUG', true); — внизу страницы появится блок вида
+      PSUFP cols=5 (cookie 5), rows=3 (cookie 3), w=1280.
 
-	•	Cookie: psu_cols (число колонок), psu_rows (ряды с учётом брейкпоинта).
-	•	Где меняем количество рядов для маленьких экранов: константы выше.
-	•	Хуки: request, loop_shop_per_page, pre_get_posts, woocommerce_product_query.
-	•	Отладка: временно define('PSUFP_DEBUG', true); — внизу страницы появится блок вида
-PSUFP cols=5 (cookie 5), rows=3 (cookie 3), w=1280.
+      Колонки определяет CSS (см. style.css темы): grid-template-columns: repeat(auto-fit, minmax(...)). Плагин лишь подгоняет per_page.
 
-Колонки определяет CSS (см. style.css темы): grid-template-columns: repeat(auto-fit, minmax(...)). Плагин лишь подгоняет per_page.
-
-⸻
+      ⸻
+    </details>
 
 2) Сетка каталога (CSS)
 
