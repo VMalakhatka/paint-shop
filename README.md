@@ -339,7 +339,7 @@ AB-111-20X20,3,1.5
 Пустые/нулевые ячейки в «широком» формате пропускаются (строки не создаются).
 
 ⸻
-
+```
 Алгоритм и поведение
 	•	Кодировка: авто (UTF-8 / CP1251 / ISO-8859-1 / Windows-1252). Убирается BOM.
 	•	Разделитель: авто (; / , / TAB). Десятичные: , и . поддерживаются.
@@ -369,7 +369,7 @@ wp_term_relationships (taxonomy = location → wp_term_taxonomy → wp_terms)
 Остаток по складу        wp_postmeta._stock_at_{term_id}
 Primary-склад            wp_postmeta._yoast_wpseo_primary_location (значение = term_id)
 Список локаций у товара  wp_term_relationships (таксономия location → wp_term_taxonomy → wp_terms)
-
+```
 SQL-пример (выгрузить остатки по складам для товаров)
 ```
 SELECT
