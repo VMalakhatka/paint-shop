@@ -124,6 +124,120 @@ wp-content/
 | **(SQL) «Импорт цен по ролям»** | Массовая запись `_wpc_price_role_*` по SKU. | Метаключи: `_wpc_price_role_partner`, `_wpc_price_role_opt`, `_wpc_price_role_opt_osn`, `_wpc_price_role_schule`. | Woo → Инструменты импорта + запуск SQL |
 </details>
 
+## 🎭 Тема (GeneratePress Child)
+
+<details>
+<summary><strong>Общее</strong></summary>
+
+**Идея.** Тема остаётся максимально «тонкой»: сетка/стили/косметика. Бизнес-логика — в плагинах.
+
+**Важно:**
+- Количество **колонок** определяет **только CSS Grid**.
+- Число товаров на страницу (`per_page`) настраивает MU-плагин, а не тема.
+
+</details>
+
+<details>
+<summary><strong>Файлы темы</strong></summary>
+
+| Путь | Назначение |
+|---|---|
+| `wp-content/themes/generatepress-child/style.css` | CSS-сетка каталога (Grid), стили qty/кнопок, мини-стили шапки («Списание/Склад»). |
+| `wp-content/themes/generatepress-child/functions.php` | Подключение стилей темы, лёгкие правки (напр., разделитель хлебных крошек). |
+| `wp-content/themes/generatepress-child/header.php` | Шаблон шапки GeneratePress (обычно без бизнес-логики; UI складов монтируем из плагина). |
+
+</details>
+
+<details>
+<summary><strong>style.css — ключ к сетке каталога</strong></summary>
+
+Минимальный набор правил (без дублей):
+
+```css
+/* Woo Grid base */
+.woocommerce ul.products::before,
+.woocommerce ul.products::after { content: none !important; }
+
+.woocommerce ul.products{
+  list-style:none; margin:0; padding:0;
+  display:grid !important;
+  gap:20px;
+  grid-auto-flow:row;
+  grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));
+}
+
+/* Tablet */
+@media (max-width:1024px){
+  .woocommerce ul.products{
+    grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));
+  }
+}
+
+/* Mobile */
+@media (max-width:768px){
+  .woocommerce ul.products{
+    grid-template-columns:repeat(auto-fit, minmax(100px, 1fr));
+  }
+}
+
+/* Reset widths that fight the grid */
+.woocommerce ul.products li.product{
+  float:none !important; width:auto !important; margin:0 !important; clear:none !important;
+}
+.woocommerce ul.products[class*="columns-"] li.product{
+  width:auto !important; clear:none !important; margin-right:0 !important;
+}
+
+/* Even if Woo forces columns-1 — keep grid */
+.woocommerce ul.products.columns-1{ display:grid !important; }
+
+Ручки: меняй «минимум» в minmax(…px, 1fr) — так управляется число колонок на брейкпоинте.
+
+</details>
+
+<details>
+<summary><strong>functions.php — только лёгкие хуки</strong></summary>
+<?php
+// Подключение стилей дочерней темы
+add_action('wp_enqueue_scripts', function () {
+    wp_enqueue_style('generatepress-child-style', get_stylesheet_uri());
+});
+
+// Хлебные крошки: разделитель
+add_filter('woocommerce_breadcrumb_defaults', function ($defaults) {
+    $defaults['delimiter'] = ' <span class="breadcrumb-delimiter">→</span> ';
+    return $defaults;
+});
+
+</details>
+<details>
+<summary><strong>Мини-стили шапки (селекторы «Списание/Склад»)</strong></summary>
+/* Рядом с логотипом */
+.site-branding{ display:flex; align-items:center; gap:12px; }
+
+/* Контрол списания/склада */
+.pc-alloc{ display:flex; align-items:center; gap:8px; font:14px/1.2 system-ui; }
+.pc-alloc small{ color:#666; }
+.pc-alloc select{ max-height:34px; padding:4px 8px; line-height:1.2; min-width:0; }
+
+/* Телефоны */
+@media (max-width:480px){
+  .site-branding{ gap:8px; }
+  .pc-alloc{ gap:6px; }
+  .pc-alloc small{ font-size:12px; }
+  .pc-alloc select{ font-size:12px; height:32px; padding:0 22px 0 8px; }
+}
+
+/* Очень узкие — в столбик */
+@media (max-width:360px){
+  .pc-alloc{ flex-direction:column; align-items:stretch; gap:6px; }
+  .pc-alloc > *{ width:100%; }
+  .pc-alloc small{ display:none; }
+}
+
+</details>
+
+
 <details>
     <summary><strong> Как устроено хранение price_role </strong></summary>
 
