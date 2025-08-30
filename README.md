@@ -448,6 +448,112 @@ CREATE TABLE wp_stock_import (
 ```
 </details>
 
+<details>
+<summary><strong>3) mu-plugins/stock-locations-ui.php — UI складов (каталог / PDP / корзина)</strong></summary>
+
+```
+
+Назначение. Единый блок остатков по складам и строка «Списание» в корзине/чекауте.
+Показывает:
+	•	Заказ со склада: приоритетный (выбранный/primary)
+	•	Другие склады: список «Имя — qty» (только с qty > 0)
+	•	Всего: суммарный остаток
+	•	В корзине/чекауте строку «Списание: Київ — 2, Одеса — 1» по плану распределения.
+
+Режимы работы: auto / manual / single (берутся из селектора в шапке: cookie/сессия).
+Контекст показа: PDP, луп каталога, корзина/чекаут.
+
+```
+Где берутся данные
+```
+
+Что                                   Источник
+
+Список локаций товара           таксономия location (wp_term_relationships → wp_terms)
+Остаток по локации              wp_postmeta._stock_at_{term_id} (для вариаций — фолбэк к родителю)
+Общий остаток                   wp_postmeta._stock (если нет — суммируем _stock_at_%)
+Primary-локация                 wp_postmeta._yoast_wpseo_primary_location (значение = term_id)
+Уже в корзине                   объём из WC()->cart по продукту/вариации
+
+```
+Ключевые функции
+```
+
+pc_build_stock_view( WC_Product $product ): array
+// Собирает и сортирует локации под режим (убирает нулевые), возвращает:
+// ['mode','preferred','primary','ordered' => [term_id => ['name','qty']], 'sum']
+
+slu_render_stock_panel( WC_Product $product, array $opts = [] ): string
+// Рендер блока (каталог + PDP), учитывает режим и опции (см. таблицу ниже)
+
+slu_get_allocation_plan( WC_Product $product, int $need, string $strategy='primary_first' ): array
+// Строит план списания [ term_id => qty ] с приоритетом primary → остальные (qty по убыванию)
+
+slu_render_allocation_line( WC_Product $product, int $need ): string
+// Возвращает строку "Київ — 2, Одеса — 1" по плану списания
+
+```
+Опции рендера панели (slu_render_stock_panel)
+```
+
+Опция         Тип       Дефолт        Что делает
+wrap_class    string      ''        Доп. класс контейнера
+show_primary  bool      true        Оставлено для совместимости (показываем первую строку)
+show_others   bool      true        Показ остальных локаций
+show_total    bool      true        Показ строки «Всего: N»
+show_incart   bool      false       (зарез. на будущее)
+show_incart_plan bool   false       (зарез. на будущее)
+hide_when_zero   bool   false       Если нечего показывать (после фильтрации нулей) — скрыть блок
+
+Важно: перед рендером нулевые склады зеркально фильтруются (qty <= 0 → не показываем).
+В режиме single блок вообще не рисуется, если выбранный склад пуст.
+
+⸻
+
+Встраивание в шаблоны (есть в плагине)
+	•	PDP: woocommerce_single_product_summary (приоритет 25)
+	•	Каталог: woocommerce_after_shop_loop_item_title (приоритет 11, класс slu-stock-mini, hide_when_zero=true)
+	•	Корзина/чекаут (строка «Списание»):
+```
+```
+add_filter('woocommerce_get_item_data', 'slu_cart_allocation_row', 30, 2);
+```
+```
+Хуки/расширение
+	•	Переопределение плана списания:
+```
+```
+add_filter('slu_allocation_plan', function($plan, $product, $need, $strategy){
+    // верни массив [ term_id => qty ], чтобы полностью заменить логику
+    return null; // вернуть массив, чтобы применился он; null — оставить дефолт
+}, 10, 4);
+```
+```
+	•	Отключение «старых» строк складов в корзине (если их добавляет другой модуль):
+// add_filter('pc_disable_legacy_cart_locations', '__return_true');
+
+Шорткод
+
+Показать план списания в любом месте:
+
+[pc_stock_allocation product_id="43189" qty="3"]
+
+Классы и стили (вшитые; можно вынести в тему)
+	•	slu-stock-box — базовый контейнер (PDP)
+	•	slu-stock-mini — компактный вид (каталог)
+	•	.is-preferred — подсветка приоритетного склада
+	•	.slu-nb .slu-stock-total — «Всего: N» фиксируем в одну строку
+
+⸻
+
+Диагностика
+	1.	На PDP/каталоге нет блока — проверьте, что остатков > 0 (нули скрываются), и что товар привязан к таксономии location.
+	2.	Корзина не показывает «Списание» — убедитесь, что находит план (slu_get_allocation_plan) и хук woocommerce_get_item_data активен.
+	3.	Нужен другой порядок приоритета — используйте фильтр slu_allocation_plan (например, «всегда сначала Одесса»).
+	4.	В режиме single пустой склад → блок скрывается по дизайну.
+```
+
+</details>
 
 <details>
     <summary><strong> Как устроено хранение price_role </strong></summary>
