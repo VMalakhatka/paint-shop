@@ -277,23 +277,44 @@ SELECT 'price_schule_rows',  COUNT(*) FROM wp_postmeta WHERE meta_key = '_wpc_pr
 COMMIT;
 
 
-Каркас и где крутить ручки
+⚙️ Кастомные модули и настройки
 
-1) MU-плагин: per-page = колонки × ряды
+1) mu-plugins/psu-force-per-page.php — авто-пересчёт per_page
 
-Файл: wp-content/mu-plugins/psu-force-per-page.php (или твой PSU Smart/Force Per Page)
+Идея: количество товаров на странице = колонки × ряды.
+Колонки вычисляются на клиенте (по CSS Grid), пишутся в cookie, сервер подстраивает posts_per_page.
+	•	Константы:
+```
+// имя cookie с колонками
+define('PSUFP_COOKIE_COLS', 'psu_cols');
+// имя cookie с рядами (для мобилок ниже брейкпоинта можно ставить 2)
+define('PSUFP_COOKIE_ROWS', 'psu_rows');
+
+// дефолтные значения на сервере
+define('PSUFP_ROWS', 3);            // ряды по умолчанию (десктоп)
+define('PSUFP_FALLBACK_COLS', 5);   // если cookie ещё нет
+
+// отладка (true — виден зелёный блок внизу и логи в console)
+define('PSUFP_DEBUG', false);
+
+// брейкпоинт, ниже которого JS пишет в cookie PSUFP_COOKIE_ROWS = 2
+define('PSUFP_BREAKPOINT_MOBILE', 320);
+```
+
 Задача: подгоняет количество товаров на странице под фактическую сетку (колонки меряются JS, ряды — по константам/брейкпоинтам).
-Главные настройки (константы):
-	•	PSUFP_COOKIE_COLS — имя cookie с числом колонок (по умолчанию psu_cols).
-	•	PSUFP_COOKIE_ROWS — имя cookie с числом рядов (если используешь адаптивные ряды).
-	•	PSUFP_ROWS_DESKTOP / PSUFP_ROWS_MOBILE / PSUFP_ROWS_XSMALL — сколько рядов показывать для разных ширин.
-	•	PSUFP_FALLBACK_COLS — сколько колонок считать, пока cookie ещё нет (например, при первом заходе).
-	•	PSUFP_DEBUG — true включит отладочный блок в футере и логи в консоль.
 
 Что важно знать:
 	•	Колонки определяет CSS грид (см. п.2), JS просто “считывает” их и кладёт в cookie.
 	•	Сервер берёт per_page из cookie → выдаёт колонки × ряды.
 	•	Если “не добивало” страницу — почти всегда колонок считалось меньше или рядов было больше, чем нужно.
+
+	•	Cookie: psu_cols (число колонок), psu_rows (ряды с учётом брейкпоинта).
+	•	Где меняем количество рядов для маленьких экранов: константы выше.
+	•	Хуки: request, loop_shop_per_page, pre_get_posts, woocommerce_product_query.
+	•	Отладка: временно define('PSUFP_DEBUG', true); — внизу страницы появится блок вида
+PSUFP cols=5 (cookie 5), rows=3 (cookie 3), w=1280.
+
+Колонки определяет CSS (см. style.css темы): grid-template-columns: repeat(auto-fit, minmax(...)). Плагин лишь подгоняет per_page.
 
 ⸻
 
