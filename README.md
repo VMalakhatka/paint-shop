@@ -278,7 +278,7 @@ UNION ALL
 SELECT 'price_schule_rows',  COUNT(*) FROM wp_postmeta WHERE meta_key = '_wpc_price_role_schule';
 
 COMMIT;
-<details>
+</details>
 
 ⚙️ Кастомные модули и настройки
 
