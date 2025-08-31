@@ -686,6 +686,80 @@ wp-content/plugins/role-price/role-price.php
 ```
 </details>
 
+<details>
+<summary><strong>stock-sync-to-woo.php — синхронизация остатков в WooCommerce</strong></summary>
+
+```txt
+Назначение.
+Берёт данные из таблицы wp_stock_import (sku, location_slug, qty) и переносит их в WooCommerce:
+	•	пишет остатки в мета-ключи _stock_at_{TERM_ID} (и при опции — _stock_at_{slug}),
+	•	суммирует и обновляет _stock,
+	•	обновляет статус in stock / out of stock,
+	•	привязывает товар к термам таксономии location,
+	•	может выставить Primary location.
+
+⸻
+
+Как работает
+	1.	Берём партии строк из wp_stock_import (batch size — по умолчанию 500).
+	2.	Для каждого SKU:
+	•	ищем товар по SKU (product или variation),
+	•	ищем склад по location_slug в таксономии location,
+	•	пишем количество в _stock_at_{TERM_ID},
+	•	при включённой опции — дублируем в _stock_at_{slug}.
+	3.	Обновляем суммарный остаток _stock.
+	4.	По опциям:
+	•	upd_status — обновить _stock_status (instock / outofstock),
+	•	set_manage — включить manage_stock=yes,
+	•	attach_terms — привязать товар к таксономии location,
+	•	set_primary — если нет primary, поставить первый из складов,
+	•	delete_rows — удалять обработанные строки,
+	•	loop_until_empty — повторять цикл до пустой таблицы.
+
+⸻
+
+Опции (админка → Инструменты → «Синхр. остатков → Woo»)
+	•	Batch size — сколько строк обрабатывать за проход.
+	•	Dry-Run — только показать, без записи.
+	•	Фильтр по SKU (префикс) — обрабатывать только товары с заданным префиксом SKU.
+	•	Обновлять статус наличия (_stock_status).
+	•	Включать manage_stock.
+	•	Удалять строки из wp_stock_import после записи.
+	•	Крутиться до пустой таблицы (если включено удаление строк).
+	•	Привязывать location к товарам.
+	•	Ставить Primary location.
+	•	Дублировать меты по slug — писать _stock_at_{slug} для совместимости.
+
+⸻
+
+Пример хранения после синка
+	•	_stock_at_3942 = 12
+	•	_stock_at_3943 = 32
+	•	_stock = 44
+	•	_yoast_wpseo_primary_location = 3942
+	•	Привязка к taxonomy = location (через wp_term_relationships).
+
+⸻
+
+Отчёт
+
+После выполнения отображает:
+	•	сколько строк обработано,
+	•	сколько товаров обновлено,
+	•	какие SKU не найдены,
+	•	какие location_slug не распознаны,
+	•	какие мета-ключи использовались,
+	•	сколько записей добавлено/обновлено в wp_postmeta.
+
+⸻
+
+Диагностика
+	•	Dry-Run → можно посмотреть отчёт без записи в мету.
+	•	Если SKU не найден — будет в not_found_skus.
+	•	Если склад не найден — будет в not_found_locations.
+	•	Состояние таблицы: SELECT COUNT(*) FROM wp_stock_import;.
+```
+</details>
 
 ⚙️ Кастомные модули и настройки
 
