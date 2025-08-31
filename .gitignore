@@ -61,3 +61,5 @@ wp-content/plugins/*
 
 !wp-content/plugins/role-price/
 !wp-content/plugins/role-price/**
+# WP Migration backups
+/wp-content/ai1wm-backups/
