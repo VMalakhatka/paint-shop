@@ -15,6 +15,7 @@ const PSU_COLS_DESKTOP = 0; // 0 = не трогаем сетку (сетка у
 const PSU_IMG_H_DESKTOP = 210; // px
 const PSU_IMG_H_TABLET  = 190; // px
 const PSU_IMG_H_MOBILE  = 180; // px
+const PSU_TITLE_RESERVE    = 30;  // сколько символов показывать, если нет "|"
 
 /** =======================
  *  1) Компактные названия
@@ -27,7 +28,7 @@ add_action('init', function () {
 function psu_loop_title() {
     if (is_product()) return; // на странице товара — полное
     $raw = get_the_title();
-    $display = psu_compact_title_after_pipe($raw, 25);
+    $display = psu_compact_title_after_pipe($raw, PSU_TITLE_RESERVE);
     echo '<h2 class="woocommerce-loop-product__title compact-title" title="' . esc_attr($raw) . '">' . esc_html($display) . '</h2>';
 }
 function psu_compact_title_after_pipe($title, $reserve = 25) {
