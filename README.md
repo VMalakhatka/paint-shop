@@ -556,6 +556,90 @@ add_filter('slu_allocation_plan', function($plan, $product, $need, $strategy){
 </details>
 
 <details>
+<summary><strong>5) role-price/role-price.php — цены по ролям (runtime)</strong></summary>
+
+**Идея.** Для каждого товара можно задать **свою цену под роль пользователя**.  
+Плагин в рантайме подменяет цену, если для текущей роли найдена мета.
+
+### Как формируется мета-ключ
+
+wpc_price_role
+```
+Примеры:
+- `_wpc_price_role_partner`
+- `_wpc_price_role_opt`
+- `_wpc_price_role_opt_osn`
+- `_wpc_price_role_schule`
+
+> Суффикс берётся из **первой роли** пользователя: `$user->roles[0]`.
+
+### Где хранится
+- Таблица: `wp_postmeta`  
+- Ключ: `_wpc_price_role_<role>`  
+- Значение: цена как строка/decimal (потом приводится к `wc_get_price_decimals()`)
+
+Быстрая проверка в БД:
+```sql
+SELECT post_id, meta_key, meta_value
+FROM wp_postmeta
+WHERE meta_key LIKE '_wpc_price_role_%'
+LIMIT 20;
+```
+Как рассчитывается цена (хуки и приоритеты)
+
+```
+Этап                        Хук/механизм                                   Что делает
+
+Подмена цены товара     woocommerce_product_get_price (prio 5)           Если найдена цена под роль — вернуть её; 
+                                                                            иначе не трогать ($price как был)
+                                                                            
+Подмена цены вариации   woocommerce_product_variation_get_price (prio 5)  То же, для вариаций
+
+Разные цены в кэше вариаций   woocommerce_get_variation_prices_hash      Добавляет роль в хеш: один и тот же 
+                                                                        товар может иметь разные цены для разных ролей
+
+Пересчёт в корзине        woocommerce_before_calculate_totals            Обновляет цену, если товар добавили «до» 
+                                                                          смены роли/правил
+
+Приоритет 5 выбран специально: если своей цены нет, мы не мешаем сторонним скидкам/плагинам 
+(которые обычно висят на ~10 и ниже).
+
+```
+CSV / импорт
+
+Обычно роли-цены завозятся пакетом вместе со SKU (см. раздел «SQL — внесение цен»).
+Минимальный CSV:
+```
+sku;partner;opt;opt_osn;schule
+CR-001;10.50;11.00;9.90;10.00
+```
+```
+	•	После импорта ты получишь меты:
+_wpc_price_role_partner, _wpc_price_role_opt, _wpc_price_role_opt_osn, _wpc_price_role_schule на постах-товарах.
+	•	Сам role-price только читает эти меты и подставляет цену в рантайме. Импорт делает отдельный модуль/SQL.
+
+Алгоритм плагина (в 3 шагах)
+	1.	Получить текущего пользователя и его первую роль.
+	2.	Сформировать мета-ключ _wpc_price_role_<role> и прочитать мету для текущего товара/вариации.
+	3.	Если мета не пустая — вернуть эту цену; иначе оставить то, что вернуло ядро/другие плагины.
+
+Частые вопросы и диагностика
+	•	«Цена не меняется» — проверь, что у пользователя реально есть роль (а не guest) и что у товара есть соответствующая мета.
+	•	«Скидки не применяются» — это норма, если есть кастомная роль-цена: она главнее. Если роли-цены нет — скидки сторонних плагинов остаются.
+	•	«Вариации показывают одну цену для всех» — нужен хук woocommerce_get_variation_prices_hash (он добавлен).
+	•	«После смены роли в корзине старая цена» — пересчёт делает хук woocommerce_before_calculate_totals (он добавлен).
+
+Куда смотреть в коде
+
+wp-content/plugins/role-price/role-price.php
+Ключевые точки:
+	•	vp_role_price_override() — подмена цены товара/вариации;
+	•	фильтр хеша вариаций;
+	•	пересчёт цены в корзине.
+```
+</details>
+
+<details>
     <summary><strong> Как устроено хранение price_role </strong></summary>
 
       •	Мета-ключ для каждой роли формируется так:_wpc_price_role_<role>	•	Примеры:
@@ -776,27 +860,6 @@ add_filter('slu_allocation_plan', function($plan, $product, $need, $strategy){
 	•	Если установлен MU-хелпер, используются \slu_total_available_qty() и \slu_available_for_add().
 
 Где править поведение: внутри функций pcux_available_qty/pcux_available_for_add или прокинуть свою MU-функцию slu_*.
-
-⸻
-
-4) UI складов (PDP/каталог/корзина) + план списания в корзине
-
-Файл-плагин: wp-content/plugins/stock-locations-ui/stock-locations-ui.php (по твоему коду)
-Задача:
-	•	показывает “Заказ со склада … / Другие склады … / Всего: N”;
-	•	режимы: auto / manual / single;
-	•	не показывает нулевые склады;
-	•	выводит строку “Списание” в корзине/чекауте по плану.
-
-Ключевое:
-	•	pc_build_stock_view($product) — собирает локации и фильтрует нули.
-	•	slu_render_stock_panel($product, $opts) — рендер панели; в режиме single скрывает блок, если склад = 0.
-	•	slu_render_allocation_line() — “Київ — 2, Одеса — 1” по плану.
-	•	add_filter('woocommerce_get_item_data', 'slu_cart_allocation_row', 30, 2) — добавляет “Списание” в карточку корзины.
-
-Где править:
-	•	чтобы точно скрывать нулевые — см. фильтрацию в pc_build_stock_view();
-	•	чтобы поменять текст/порядок — в slu_render_stock_panel().
 
 ⸻
 
