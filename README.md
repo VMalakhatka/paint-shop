@@ -686,6 +686,7 @@ add_filter('slu_allocation_plan', function($plan, $product, $need, $strategy){
 
 </details>
 
+## 🔌 Плагины
 <details>
 <summary><strong>5) role-price/role-price.php — цены по ролям (runtime)</strong></summary>
 
