@@ -32,25 +32,7 @@ Version: 1.0
   }
 }
 
-/* сброс «столбцов темы», чтобы ничто не ломало CSS-grid */
-.woocommerce ul.products li.product{
-  float:none !important; width:auto !important; margin:0 !important; clear:none !important;
-}
-.woocommerce ul.products[class*="columns-"] li.product{
-  width:auto !important; clear:none !important; margin-right:0 !important;
-}
-
-/* mobile ≤768px — ещё крупнее карточка => ещё меньше колонок */
-@media (max-width:768px){
-  .woocommerce ul.products{
-    grid-template-columns:repeat(auto-fit, minmax(100px, 1fr));
-  }
-  .woocommerce ul.products[class*="columns-"]{
-    grid-template-columns:repeat(auto-fit, minmax(100px, 1fr)) !important;
-  }
-}
-
-/* Сброс ширин, которые задаёт тема/Woo по .columns-* */
+/* Сброс ширин, которые могут ломать CSS Grid */
 .woocommerce ul.products li.product{
   float:none !important;
   width:auto !important;
@@ -62,23 +44,8 @@ Version: 1.0
   clear:none !important;
   margin-right:0 !important;
 }
-
-/* Сброс ширин, которые задаёт тема/Woo по .columns-* */
-.woocommerce ul.products li.product{
-  float:none !important;
-  width:auto !important;
-  margin:0 !important;
-  clear:none !important;
-}
-.woocommerce ul.products[class*="columns-"] li.product{
-  width:auto !important;
-  clear:none !important;
-  margin-right:0 !important;
-}
-/* Даже если Woo навесил columns-1 — всё равно держим грид */
-.woocommerce ul.products.columns-1{
-  display:grid !important;
-}
+/* Даже если Woo навесил columns-1 — всё равно держим grid */
+.woocommerce ul.products.columns-1{ display:grid !important; }
 
 /* ── Категории: центрирование содержимого ───────────────────────────────── */
 .woocommerce ul.products li.product-category a{
@@ -87,8 +54,6 @@ Version: 1.0
   align-items:center;
   text-align:center;
 }
-
-/* Иконка категории (квадрат, адаптивная, но не больше 120px) */
 .woocommerce ul.products li.product-category a img{
   width: clamp(72px, 16vw, 120px) !important;
   height: clamp(72px, 16vw, 120px);
@@ -100,32 +65,44 @@ Version: 1.0
   padding:6px;
   box-sizing:border-box;
 }
-
-/* Заголовок категории: до 3 строк одинаковой высоты */
 .woocommerce ul.products li.product-category .woocommerce-loop-category__title {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  overflow: hidden;
-  line-height: 1.25;
-  min-height: calc(1.25em * 3);
-  margin: 0;
-  text-align: center;
-  font-size: 14px;
-  word-break: break-word;
-  hyphens: auto;
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:3;
+  overflow:hidden;
+  line-height:1.25;
+  min-height:calc(1.25em * 3);
+  margin:0;
+  text-align:center;
+  font-size:14px;
+  word-break:break-word;
+  hyphens:auto;
 }
 
 /* ── Страница товара: меньший H1 на мобильных ───────────────────────────── */
 @media (max-width:480px){
-  .single-product .product_title{
-    font-size:18px;
-    line-height:1.3;
-  }
+  .single-product .product_title{ font-size:18px; line-height:1.3; }
 }
 @media (min-width:481px) and (max-width:767px){
-  .single-product .product_title{
-    font-size:20px;
-    line-height:1.3;
-  }
+  .single-product .product_title{ font-size:20px; line-height:1.3; }
 }
+
+/* ── Сайдбары GeneratePress ─────────────────────────────────────────────── */
+/* Узкий ТОЛЬКО левый сайдбар на десктопе (правый оставляем как в теме) */
+@media (min-width:1025px){
+  body.left-sidebar .content-area{ width:78%; }
+  body.left-sidebar .widget-area{ width:22%; }
+}
+/* Планшеты: чуть шире контент, тот же баланс для обоих вариантов сайдбара */
+@media (min-width:769px) and (max-width:1024px){
+  .site-content .content-area{ width:70%; }
+  .site-content .widget-area{ width:30%; }
+}
+
+/* === Search / Relevanssi highlights ===================================== */
+/* Подсветка совпадений Relevanssi */
+.relevanssi-query-term{
+  font-weight:700;           /* жирный */
+  background:#fff3a6;        /* мягкая жёлтая подложка */
+}
+/* === End Search ========================================================== */

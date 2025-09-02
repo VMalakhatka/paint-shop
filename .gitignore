@@ -1,4 +1,4 @@
-# === WordPress core ===
+# === WordPress core (мы его не храним) ===
 /wp-admin/
 /wp-includes/
 /index.php
@@ -6,34 +6,58 @@
 /readme.html
 /license.txt
 
-# === Конфиг ===
+# === Конфиг и чувствительное ===
 wp-config.php
+.env
+.env.* 
+local-xdebuginfo.php
 
-# === Медиа ===
+# === Медиа и временные каталоги ===
 wp-content/uploads/
-
-# === Плагины: исключаем все, кроме кастомных (если появятся) ===
-wp-content/plugins/*
-# !wp-content/plugins/my-custom-plugin/
-
-# === Темы: исключаем все, кроме своей ===
-wp-content/themes/*
-!wp-content/themes/generatepress-child/
-
-# === MU plugins (если появятся) ===
-# wp-content/mu-plugins/*
-# !wp-content/mu-plugins/my-mu-plugin.php
-
-# === Временные папки и логи ===
+wp-content/upgrade/
+wp-content/cache/
+wp-content/debug.log
+wp-content/wflogs/
+wp-content/ai1wm-backups/
+wp-content/jetpack-waf/
+wp-content/fonts/
 wp-content/webtoffee_import/
 wp-content/webtoffee_export/
 wp-content/webtoffee_iew_log/
-wp-content/jetpack-waf/
-wp-content/fonts/
 
-local-xdebuginfo.php
+# Drop-ins, которые не надо версионировать
+wp-content/object-cache.php
+wp-content/advanced-cache.php
 
-# === Node / Composer ===
+# === Темы: игнорируем всё, кроме нашей child-темы ===
+wp-content/themes/*
+!wp-content/themes/generatepress-child/
+!wp-content/themes/generatepress-child/**
+
+# === Плагины: игнорируем всё, кроме наших ===
+wp-content/plugins/*
+!wp-content/plugins/
+!wp-content/plugins/paint-core/
+!wp-content/plugins/paint-core/**
+!wp-content/plugins/paint-shop-ux/
+!wp-content/plugins/paint-shop-ux/**
+!wp-content/plugins/role-price/
+!wp-content/plugins/role-price/**
+
+# === MU-plugins: либо отслеживаем все, либо только свои ===
+# Вариант 1 (отслеживать все mu-plugins):
+# !wp-content/mu-plugins/
+# !wp-content/mu-plugins/**
+
+# Вариант 2 (жёстко зафиксировать только наши текущие файлы):
+wp-content/mu-plugins/*
+!wp-content/mu-plugins/psu-force-per-page.php
+!wp-content/mu-plugins/role-price-import-lite.php
+!wp-content/mu-plugins/stock-import-csv-lite.php
+!wp-content/mu-plugins/stock-locations-ui.php
+!wp-content/mu-plugins/stock-sync-to-woo.php
+
+# === Node / Composer / сборки ===
 node_modules/
 vendor/
 dist/
@@ -45,21 +69,9 @@ build/
 *.tmp
 *.sql
 *.tar.gz
+*.bak
+*.orig
 /.idea/
 /.vscode/
 .DS_Store
 Thumbs.db
-# === Плагины: игнорируем всё, кроме своих ===
-wp-content/plugins/*
-!wp-content/plugins/                # разрешить саму папку
-
-!wp-content/plugins/paint-core/
-!wp-content/plugins/paint-core/**
-
-!wp-content/plugins/paint-shop-ux/
-!wp-content/plugins/paint-shop-ux/**
-
-!wp-content/plugins/role-price/
-!wp-content/plugins/role-price/**
-# WP Migration backups
-/wp-content/ai1wm-backups/
