@@ -1,5 +1,65 @@
 # 🛒 Paint Shop (WooCommerce)
 
+## 📂 Рабочий сценарий переноса базы WordPress целиком
+<details>
+1. Экспорт из локальной (через сокет Local)
+```text
+SOCK='/Users/admin/Library/Application Support/Local/run/OtIxFLAFM/mysql/mysqld.sock'
+
+mysqldump -u root -proot -S "$SOCK" local \
+  --add-drop-table \
+  --default-character-set=utf8mb4 \
+  > /tmp/site.sql
+
+gzip -9 /tmp/site.sql
+ls -lh /tmp/site.sql.gz
+```
+2. Загрузка на сервер
+```text
+scp -P 2022 /tmp/site.sql.gz kreul:/var/www/virtuals/kreul.com.ua/
+```
+3. Восстановление на сервере
+```text
+ssh kreul '
+  cd /var/www/virtuals/kreul.com.ua &&
+  gunzip -f site.sql.gz &&
+  mysql -u aphp -p"passwordDB" kreul < site.sql
+
+```
+
+4. Правка домена и сброс кэша
+
+(на всякий случай отключаем проблемные плагины, если мешают)
+```text
+ssh kreul '
+  WP=/var/www/virtuals/kreul.com.ua
+  PHPRUN="/opt/remi/php83/root/bin/php /bin/wp-cli.phar --path=$WP --skip-plugins --skip-themes"
+
+  # Чиним URL
+  $PHPRUN search-replace "http://paint.local" "https://kreul.com.ua" \
+    --all-tables --precise --recurse-objects --skip-columns=guid
+
+  # Дополнительно руками правим home/siteurl
+  mysql -u aphp -p"y8AwfN6PSfn(" kreul \
+    -e "UPDATE wp_options
+        SET option_value='\''https://kreul.com.ua'\''
+        WHERE option_name IN ('\''home'\'','\''siteurl'\'');"
+
+  # Сброс правил и кэша
+  $PHPRUN rewrite flush --hard || true
+  $PHPRUN cache flush || true
+
+  echo "home: $($PHPRUN option get home)"
+  echo "siteurl: $($PHPRUN option get siteurl)"
+'
+```
+⚡ После этих шагов у тебя:
+	•	Вся база один-в-один как локальная, включая виджеты и настройки плагинов.
+	•	Домен заменён на https://kreul.com.ua.
+	•	Кэш и пермалинки обновлены.
+
+</details>
+
 E-commerce проект на базе **WordPress + WooCommerce**, кастомизированный под задачи магазина красок.
 
 ## 📂 Структура проекта
