@@ -3,6 +3,7 @@
 ## 📂 Рабочий сценарий переноса базы WordPress целиком
 <details>
 1. Экспорт из локальной (через сокет Local)
+
 ```text
 SOCK='/Users/admin/Library/Application Support/Local/run/OtIxFLAFM/mysql/mysqld.sock'
 
@@ -14,6 +15,7 @@ mysqldump -u root -proot -S "$SOCK" local \
 gzip -9 /tmp/site.sql
 ls -lh /tmp/site.sql.gz
 ```
+
 2. Загрузка на сервер
 ```text
 scp -P 2022 /tmp/site.sql.gz kreul:/var/www/virtuals/kreul.com.ua/
@@ -53,11 +55,12 @@ ssh kreul '
   echo "siteurl: $($PHPRUN option get siteurl)"
 '
 ```
+```text
 ⚡ После этих шагов у тебя:
 	•	Вся база один-в-один как локальная, включая виджеты и настройки плагинов.
 	•	Домен заменён на https://kreul.com.ua.
 	•	Кэш и пермалинки обновлены.
-
+```
 </details>
 
 E-commerce проект на базе **WordPress + WooCommerce**, кастомизированный под задачи магазина красок.
