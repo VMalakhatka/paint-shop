@@ -749,6 +749,58 @@ add_filter('slu_allocation_plan', function($plan, $product, $need, $strategy){
 
 </details>
 
+🔎 Поиск и подсветка (Relevanssi + MU)
+<details>
+<summary><strong>6) psu-search-filters.php — Поиск и подсветка </strong></summary>
+
+```text
+Что даёт:
+	•	Релевантный поиск (через плагин Relevanssi).
+	•	Подсветка найденных слов в заголовках карточек на странице поиска.
+	•	(Опц.) Базовые фильтры ?location= и ?in_stock=1 для витрин Woo.
+
+```
+1) MU-плагин: wp-content/mu-plugins/psu-search-filters.php
+2) Тема (child): wp-content/themes/generatepress-child/functions.php
+
+```php
+
+// Сниппет Relevanssi под заголовком карточки в выдаче поиска
+add_action('woocommerce_after_shop_loop_item_title', function(){
+    if (!is_search()) return;
+    if (!function_exists('relevanssi_the_excerpt')) return;
+    echo '<div class="relevanssi-snippet" style="margin:.35rem 0 .5rem; font-size:.9em; color:#555;">';
+    relevanssi_the_excerpt();
+    echo '</div>';
+}, 8);
+
+```
+
+3) Тема (child): style.css — подсветка найденных слов
+
+```css
+/* === Search / Relevanssi highlights === */
+.relevanssi-query-term{
+  font-weight: 700;        /* жирный */
+  background: #fff3a6;     /* мягкая жёлтая подложка */
+}
+/* === End Search === */
+
+```
+
+4) Рекомендации по настройке Relevanssi
+
+```text
+	1.	Indexing → Post types: включить product.
+	2.	Indexing → Custom fields: добавить _sku (если хотите искать по артикулу).
+	3.	Searching → Default operator: обычно AND (точнее по фразам).
+	4.	Excerpts and highlights:
+	•	включить Custom excerpts и Highlighting search terms;
+	•	можно оставить тип <strong> или стиль/класс не трогать (мы подсвечиваем своим классом).
+	5.	Build the index (первый раз — вручную, потом индекс обновляется автоматически).
+```
+
+</details>
 ## 🔌 Плагины
 <details>
 <summary><strong>5) role-price/role-price.php — цены по ролям (runtime)</strong></summary>
