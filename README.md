@@ -284,6 +284,15 @@ E-commerce проект на базе **WordPress + WooCommerce**, кастом�
 <summary><strong>Структура проекта</strong></summary>
 
 ```text
+
+📂 Теперь схема:
+	•	wp-config.php (общий загрузчик, в репо)
+	•	wp-config.common.php (в репо, всё общее)
+	•	wp-config.local.php (в .gitignore, локальные креды и WP_DEBUG)
+	•	wp-config.production.php (в .gitignore, продакшен креды и оптимизации)
+
+⸻
+
 wp-content/
 ├─ mu-plugins/
 │  ├─ psu-force-per-page.php        # per_page = колонки × ряды (cookie psu_cols/psu_rows)
