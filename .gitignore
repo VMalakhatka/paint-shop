@@ -7,10 +7,12 @@
 /license.txt
 
 # === Конфиг и чувствительное ===
-wp-config.php
+wp-config.local.php   # только локально
+wp-config.production.php
 .env
-.env.* 
+.env.*
 local-xdebuginfo.php
+
 
 # === Медиа и временные каталоги ===
 wp-content/uploads/
