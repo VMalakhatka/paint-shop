@@ -179,6 +179,26 @@ alias ddb="~/deploy_db.sh site.sql.gz"
 <details>
 <summary><strong> 🔒 ~/full_backup.sh — полный бэкап + ротация </strong></summary>
 
+pull_latest_backup.sh
+
+лежит в wp-content 
+ запустить с этой директории
+
+ ```bash
+./pull_latest_backup.sh
+ ```
+ 	3.	При необходимости переопределить параметры на лету:
+
+```bash
+PORT=2022 USER=vmalakhatka HOST=51.83.33.95 DEST_DIR=~/Downloads ~/pull_latest_backup.sh
+```
+
+или, если бэкапы лежат не в ~/backups:
+
+```bash
+REMOTE_DIR=/var/backups PATTERN="kreul-full-*.tar.gz" ~/pull_latest_backup.sh
+```
+
 ```text
 	•	Делает дамп БД
 	•	Архивирует весь каталог WP
@@ -210,6 +230,17 @@ crontab -e
 scp -P 2022 \
 "vmalakhatka@51.83.33.95:$(ssh -p 2022 vmalakhatka@51.83.33.95 'ls -1t ~/backups/full-backup-*.tar.gz | head -1')" \
 ~/Downloads/
+```
+
+или с докачкой через rsync
+
+```bash
+LATEST=$(ssh -p 2022 vmalakhatka@51.83.33.95 \
+  'ls -1t ~/backups/full-backup-*.tar.gz | head -1')
+
+rsync -avzP -e "ssh -p 2022" \
+  "vmalakhatka@51.83.33.95:$LATEST" \
+  ~/Downloads/
 ```
 
 После этого архив будет в ~/Downloads/.
