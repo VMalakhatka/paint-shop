@@ -68,6 +68,7 @@ wp-content/mu-plugins/*
 !wp-content/mu-plugins/stock-locations-ui.php
 !wp-content/mu-plugins/stock-sync-to-woo.php
 !wp-content/mu-plugins/psu-search-filters.php
+!wp-content/mu-plugins/pc-wholesale-quick-order.php
 
 # === Node / Composer / сборки ===
 node_modules/
