@@ -18,3 +18,25 @@ add_action('woocommerce_after_shop_loop_item_title', function(){
     relevanssi_the_excerpt();
     echo '</div>';
 }, 8);
+
+// 1) Укажи слаг страницы быстрого заказа
+const PCQO_PAGE_SLUG = 'shvydke-zamovlennia'; // ПРИМЕР: поставь свой слаг страницы
+
+/**
+ * На странице «Швидке замовлення» переписываем ссылки категорий
+ * на ту же страницу с параметром ?cat=<slug>.
+ */
+add_filter('term_link', function ($url, $term, $taxonomy) {
+    if ($taxonomy !== 'product_cat') {
+        return $url;
+    }
+    // мы только на нашей quick-order странице переписываем ссылки
+    if (!is_page() || !is_page(PCQO_PAGE_SLUG)) {
+        return $url;
+    }
+    $page_url = get_permalink(get_page_by_path(PCQO_PAGE_SLUG));
+    if (!$page_url) {
+        return $url;
+    }
+    return add_query_arg('cat', $term->slug, $page_url);
+}, 10, 3);
