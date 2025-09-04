@@ -10,11 +10,16 @@
 !wp-config.php
 !wp-config.common.php
 
-# === Конфиг и чувствительное ===
-wp-config.local.php   # только локально
+# env-специфичные конфиги
+wp-config.local.php
 wp-config.production.php
+wp-config.staging.php
+
+# .env и подобное
 .env
 .env.*
+
+# локальные вспомогательные файлы
 local-xdebuginfo.php
 
 

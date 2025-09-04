@@ -1,28 +1,46 @@
 <?php
 /**
- * Common config
+ * Общие настройки для всех окружений.
+ * ВАЖНО: здесь НЕ подключаем wp-settings.php и НЕ задаём DB_*.
  */
 
-// Секретные ключи (одни для всех окружений)
-define( 'AUTH_KEY',          '<SQzsc,LJV~gH/AhJNZP-*8OM(!tFYu:1y&={H .*a1?2x0B}(,HN ^M%JG?{LH6' );
-define( 'SECURE_AUTH_KEY',   'TMzaoPV#AIf*IyI!C@10EO,_]R*o 3tn-90=6BsguicF6Ipnt!_P?l;AoRb,n aB' );
-define( 'LOGGED_IN_KEY',     'T/#XE7+{EsL1cB:NPo&uM==PqzI)aNQG^.%)0!l^^lDH2E5[|G{e:W6dS=CjOZT7' );
-define( 'NONCE_KEY',         'T72@1Qwrap;)Ztb%fGY(gq9gL8cO2Mw@h[(#1r@v/ug;VTF#oliIlUkyt8+_~HQ=' );
-define( 'AUTH_SALT',         'Wh9@hm>%D?nLwPAI6]ERp*;GA-;0^UDij^.O*y?&8=&.11b%`4J}SoT?nd7PQdQx' );
-define( 'SECURE_AUTH_SALT',  'Q,I7.]VJvjTIS/h&Ci4U[=&v&|= d3YN) ,xnFJ1ns5i I:SOBvJqAqwFp<%Z}>f' );
-define( 'LOGGED_IN_SALT',    'Wy(d7AV?+EF#QEg:Ga@U@-WAT?(@-N]ck9tc(&*+h5%a_^ydda>KoMI[#RAP.,/-' );
-define( 'NONCE_SALT',        '/6V`FBh{M}e*r8w,{bWc>j;=s [;,Jvi@#IY>MkgE`MGESd<I%bDPw7F(VVcw:gg' );
-define( 'WP_CACHE_KEY_SALT', 'b[0jiym L>}8b=rt^#FXul;C5?CM0#[.YnS*SoP42N-R6^`7Lv]dprj6,Y]-Cp(Y' );
+/* Кодировка таблиц по умолчанию */
+if (!defined('DB_CHARSET')) define('DB_CHARSET', 'utf8');
+if (!defined('DB_COLLATE')) define('DB_COLLATE', '');
 
-// Табличный префикс
-$table_prefix = 'wp_';
+/* Префикс таблиц */
+if (!isset($table_prefix)) $table_prefix = 'wp_';
 
-// Debug по умолчанию выключен, окружение само включит
-if (!defined('WP_DEBUG')) define('WP_DEBUG', false);
+/* Логи/отладка: значения по дефолту — «разумные», но переопределяются в env-файлах */
+if (!defined('WP_DEBUG'))         define('WP_DEBUG', false);
+if (!defined('WP_DEBUG_LOG'))     define('WP_DEBUG_LOG', true);   // писать в wp-content/debug.log
+if (!defined('WP_DEBUG_DISPLAY')) define('WP_DEBUG_DISPLAY', false);
+@ini_set('display_errors', 0);
 
-// Абсолютный путь
+/* Тип окружения по умолчанию (может быть переопределён env-файлами/переменной окружения) */
+if (!defined('WP_ENVIRONMENT_TYPE')) define('WP_ENVIRONMENT_TYPE', 'production');
+
+/* Ключи и соли.
+   — Безопасней держать их НЕ в репозитории:
+     либо через переменные окружения, либо в отдельном некоммитимом файле.
+   — На худой конец можно положить сюда «на все окружения», но реальные значения не коммитить.
+*/
+if (!defined('AUTH_KEY')) {
+    // Пример: подтягиваем из getenv(), если заданы; иначе — заглушки (замените своими на сервере/локали).
+    define('AUTH_KEY',         getenv('AUTH_KEY')         ?: 'change-me');
+    define('SECURE_AUTH_KEY',  getenv('SECURE_AUTH_KEY')  ?: 'change-me');
+    define('LOGGED_IN_KEY',    getenv('LOGGED_IN_KEY')    ?: 'change-me');
+    define('NONCE_KEY',        getenv('NONCE_KEY')        ?: 'change-me');
+    define('AUTH_SALT',        getenv('AUTH_SALT')        ?: 'change-me');
+    define('SECURE_AUTH_SALT', getenv('SECURE_AUTH_SALT') ?: 'change-me');
+    define('LOGGED_IN_SALT',   getenv('LOGGED_IN_SALT')   ?: 'change-me');
+    define('NONCE_SALT',       getenv('NONCE_SALT')       ?: 'change-me');
+    if (!defined('WP_CACHE_KEY_SALT')) {
+        define('WP_CACHE_KEY_SALT', getenv('WP_CACHE_KEY_SALT') ?: 'change-me');
+    }
+}
+
+/* Абсолютный путь (подстраховка) */
 if (!defined('ABSPATH')) {
     define('ABSPATH', __DIR__ . '/');
 }
-
-require_once ABSPATH . 'wp-settings.php';
