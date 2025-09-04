@@ -6,6 +6,10 @@
 /readme.html
 /license.txt
 
+# но эти два файла мы всё-таки храним в репозитории:
+!wp-config.php
+!wp-config.common.php
+
 # === Конфиг и чувствительное ===
 wp-config.local.php   # только локально
 wp-config.production.php
