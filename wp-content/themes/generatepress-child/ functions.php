@@ -40,3 +40,11 @@ add_filter('term_link', function ($url, $term, $taxonomy) {
     }
     return add_query_arg('cat', $term->slug, $page_url);
 }, 10, 3);
+
+add_filter('slu_ui_labels', function($L){
+    $L['from']       = 'Зі складу';
+    $L['others']     = 'Інші скл.';
+    $L['total']      = 'Загал.';
+    $L['allocation'] = 'Списання';
+    return $L;
+});

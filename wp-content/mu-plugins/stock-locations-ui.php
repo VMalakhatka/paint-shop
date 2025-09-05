@@ -2,10 +2,32 @@
 /*
 Plugin Name: Stock Locations UI (archive + single + cart)
 Description: Универсальный блок складов/остатков + план списания. Работает в карточке, каталоге и корзине/чекауте.
-Version: 1.1.2
+Version: 1.2.0
 Author: PaintCore
 */
 if (!defined('ABSPATH')) exit;
+
+/** ========================= UI LABELS =========================
+ *  Можна перевизначити у wp-config.php константами:
+ *    SLU_LBL_FROM, SLU_LBL_OTHERS, SLU_LBL_TOTAL, SLU_LBL_ALLOCATION
+ *  або фільтром: add_filter('slu_ui_labels', fn($L)=>...)
+ */
+if (!defined('SLU_LBL_FROM'))       define('SLU_LBL_FROM', 'Зі складу');
+if (!defined('SLU_LBL_OTHERS'))     define('SLU_LBL_OTHERS', 'Інші скл.');
+if (!defined('SLU_LBL_TOTAL'))      define('SLU_LBL_TOTAL', 'Загал.');
+if (!defined('SLU_LBL_ALLOCATION')) define('SLU_LBL_ALLOCATION', 'Списання');
+
+if (!function_exists('slu_labels')) {
+    function slu_labels(): array {
+        $labels = [
+            'from'       => SLU_LBL_FROM,
+            'others'     => SLU_LBL_OTHERS,
+            'total'      => SLU_LBL_TOTAL,
+            'allocation' => SLU_LBL_ALLOCATION,
+        ];
+        return apply_filters('slu_ui_labels', $labels);
+    }
+}
 
 /** ========================= HELPERS ========================= */
 
@@ -82,7 +104,7 @@ if (!function_exists('slu_cart_qty_for_product')) {
 }
 
 if (!function_exists('slu_collect_location_stocks_for_product')) {
-    /** собрать “имя — qty” по всем складам, привязанным к товару */
+    /** собрать “імʼя — qty” по всіх складах, привʼязаних до товару */
     function slu_collect_location_stocks_for_product(WC_Product $product): array{
         $result   = [];
         $term_ids = wp_get_object_terms($product->get_id(), 'location', ['fields'=>'ids','hide_empty'=>false]);
@@ -148,19 +170,18 @@ if (!function_exists('slu_render_primary_location_line')) {
     }
 }
 
-// Собираем и упорядочиваем локации под выбранный режим
+// Збираємо й впорядковуємо локації під обраний режим
 function pc_build_stock_view(WC_Product $product): array {
     if (!function_exists('slu_collect_location_stocks_for_product')) {
         return ['mode'=>'auto','preferred'=>null,'primary'=>null,'ordered'=>[], 'sum'=>0];
     }
     $all = (array) slu_collect_location_stocks_for_product($product);
-    
-    // ← ДОБАВЬ: убираем нулевые склады из показа
+
+    // ховаємо нульові склади
     $all = array_filter($all, static function($row){
         return (int)($row['qty'] ?? 0) > 0;
     });
 
-    // суммарный остаток (можно считать по отфильтрованным — нули не влияют)
     $sum = 0; foreach ($all as $row) $sum += (int)($row['qty'] ?? 0);
 
     $pref = function_exists('pc_get_alloc_pref') ? pc_get_alloc_pref() : ['mode'=>'auto','term_id'=>0];
@@ -169,22 +190,22 @@ function pc_build_stock_view(WC_Product $product): array {
 
     $primary = function_exists('slu_get_primary_location_term_id') ? (int) slu_get_primary_location_term_id($product->get_id()) : 0;
 
-    // Только выбранный склад
+    // single: тільки вибраний склад
     if ($mode === 'single') {
         $only = [];
-        if ($sel && isset($all[$sel])) {           // ← только если qty > 0 (после фильтра он есть)
+        if ($sel && isset($all[$sel])) {
             $only[$sel] = $all[$sel];
         }
         return [
             'mode'      => 'single',
             'preferred' => $sel ?: null,
             'primary'   => $primary ?: null,
-            'ordered'   => $only,                  // ← может быть пусто, если qty=0
+            'ordered'   => $only,
             'sum'       => isset($only[$sel]['qty']) ? (int)$only[$sel]['qty'] : 0
         ];
     }
 
-    // Auto / Manual: выбранный (в manual) -> primary -> остальные по убыванию
+    // auto/manual
     $ordered = [];
     if ($mode === 'manual' && $sel && isset($all[$sel])) {
         $ordered[$sel] = $all[$sel]; unset($all[$sel]);
@@ -204,13 +225,9 @@ function pc_fmt_loc_line(array $row): string {
     return esc_html($name).' — '.esc_html($qty);
 }
 
-/** =================== ПЛАН СПИСАНИЯ (АЛГОРИТМ) =================== */
+/** =================== ПЛАН СПИСАНИЯ =================== */
 
 if (!function_exists('slu_get_allocation_plan')) {
-    /**
-     * Вернёт массив [ term_id => qty_to_deduct ] для нужного количества $need.
-     * Приоритет: primary -> остальные (по убыванию остатка). Переопределяемо фильтром 'slu_allocation_plan'.
-     */
     function slu_get_allocation_plan(WC_Product $product, int $need, string $strategy='primary_first'): array{
         $need = max(0,(int)$need);
         if ($need === 0) return [];
@@ -241,7 +258,6 @@ if (!function_exists('slu_get_allocation_plan')) {
 }
 
 if (!function_exists('slu_render_allocation_line')) {
-    /** "Київ — 2, Одеса — 1" по плану списания */
     function slu_render_allocation_line(WC_Product $product, int $need): string{
         $plan = slu_get_allocation_plan($product, $need);
         if (empty($plan)) return '';
@@ -254,22 +270,13 @@ if (!function_exists('slu_render_allocation_line')) {
     }
 }
 
-/** =================== УНИВЕРСАЛЬНЫЙ ПАНЕЛЬ-БЛОК =================== */
+/** =================== ПАНЕЛЬ СКЛАДІВ (UI) =================== */
 
 if (!function_exists('slu_render_stock_panel')) {
-    /**
-     * $opts:
-     *  - show_primary, show_others, show_total, show_incart, show_incart_plan
-     *  - hide_when_zero (bool) — спрятать блок, если total <= 0
-     *  - wrap_class (string)
-     */
-    // Универсальный рендер панели под выбранный режим (catalog + PDP)
-    // Универсальный рендер панели под выбранный режим (catalog + PDP)
-// Подсвечивает приоритетный склад (первый в порядке $v['ordered'])
     function slu_render_stock_panel( WC_Product $product, array $opts = [] ): string {
         $o = array_merge([
             'wrap_class'       => '',
-            'show_primary'     => true,   // оставлены для совместимости
+            'show_primary'     => true,
             'show_others'      => true,
             'show_total'       => true,
             'show_incart'      => false,
@@ -278,21 +285,18 @@ if (!function_exists('slu_render_stock_panel')) {
         ], $opts);
 
         $v = pc_build_stock_view($product);
+        $L = slu_labels();
 
-        // === Режим "Только выбранный склад" ===
-       if ($v['mode'] === 'single') {
-            // если выбранный склад пуст — панель не рисуем вообще
-            if (empty($v['ordered'])) {
-                return '';
-            }
-
-            $row = reset($v['ordered']);            // тут гарантированно qty>0
+        // режим "тільки обраний склад"
+        if ($v['mode'] === 'single') {
+            if (empty($v['ordered'])) return '';
+            $row = reset($v['ordered']);
             $onlyLine = pc_fmt_loc_line($row);
 
             ob_start(); ?>
             <div class="slu-stock-box <?= esc_attr($o['wrap_class']) ?>">
                 <div>
-                    <strong><?= esc_html__('Заказ со склада','woocommerce') ?>:</strong>
+                    <strong><?= esc_html($L['from']) ?>:</strong>
                     <?= $onlyLine ?>
                 </div>
             </div>
@@ -300,19 +304,17 @@ if (!function_exists('slu_render_stock_panel')) {
             return (string) ob_get_clean();
         }
 
-        // === AUTO / MANUAL ===
-        // Первый элемент — приоритетный; подсвечиваем его .is-preferred
+        // auto/manual
         $firstHtml = '';
         $others    = [];
         foreach ($v['ordered'] as $tid => $row) {
             $q = (int)($row['qty'] ?? 0);
-            if ($q <= 0) continue;                 // страховка
+            if ($q <= 0) continue;
             $line = pc_fmt_loc_line($row);
             if ($firstHtml === '') $firstHtml = '<span class="is-preferred">'.$line.'</span>';
             else $others[] = $line;
         }
 
-        // если вообще нечего показать — прячем блок при hide_when_zero
         if ($o['hide_when_zero'] && $firstHtml === '' && empty($others)) {
             return '';
         }
@@ -320,25 +322,26 @@ if (!function_exists('slu_render_stock_panel')) {
         ob_start(); ?>
         <div class="slu-stock-box <?= esc_attr($o['wrap_class']) ?>">
             <?php if ($firstHtml !== ''): ?>
-                <div><strong><?= esc_html__('Заказ со склада','woocommerce') ?>:</strong> <?= $firstHtml ?></div>
+                <div><strong><?= esc_html($L['from']) ?>:</strong> <?= $firstHtml ?></div>
             <?php endif; ?>
 
             <?php if (!empty($others)): ?>
-                <div><strong><?= esc_html__('Другие склады','woocommerce') ?>:</strong> <?= implode(', ', $others) ?></div>
+                <div><strong><?= esc_html($L['others']) ?>:</strong> <?= implode(', ', $others) ?></div>
             <?php endif; ?>
-                <div>
-                    <span class="slu-nb">
-                        <strong><?= esc_html__('Всего','woocommerce') ?>:</strong>
-                        <span class="slu-stock-total"><?= (int)$v['sum'] ?></span>
-                    </span>
-                </div>
+
+            <div>
+                <span class="slu-nb">
+                    <strong><?= esc_html($L['total']) ?>:</strong>
+                    <span class="slu-stock-total"><?= (int)$v['sum'] ?></span>
+                </span>
+            </div>
         </div>
         <?php
         return (string) ob_get_clean();
     }
 }
 
-/** =================== ВСТАВКИ В ШАБЛОНЫ =================== */
+/** =================== ВСТАВКИ В ШАБЛОНИ =================== */
 
 /* PDP */
 add_action('woocommerce_single_product_summary', function(){
@@ -372,16 +375,9 @@ add_action('woocommerce_after_shop_loop_item_title', function(){
 
 /** =================== КОРЗИНА / ЧЕКАУТ =================== */
 
-/* отключаем «старые» строки в paint-core (если он таковые добавляет) 
- add_filter('pc_disable_legacy_cart_locations', '__return_true');
-*/
-
-/* добавляем нашу строку "Списание" — только на страницах корзины/чекаута */
 if (!function_exists('slu_cart_allocation_row')) {
     function slu_cart_allocation_row($item_data, $cart_item){
         if (!is_array($item_data)) $item_data = [];
-
-        // работаем только в корзине/чекауте
         $is_ctx = (function_exists('is_cart') && is_cart()) || (function_exists('is_checkout') && is_checkout());
         if (!$is_ctx) return $item_data;
 
@@ -393,8 +389,9 @@ if (!function_exists('slu_cart_allocation_row')) {
 
         $line = slu_render_allocation_line($product, $qty);
         if ($line !== '') {
+            $L = slu_labels();
             $item_data[] = [
-                'key'     => __('Списание','woocommerce'),
+                'key'     => esc_html($L['allocation']),
                 'value'   => $line,
                 'display' => $line,
             ];
@@ -404,7 +401,7 @@ if (!function_exists('slu_cart_allocation_row')) {
 }
 add_filter('woocommerce_get_item_data', 'slu_cart_allocation_row', 30, 2);
 
-/** =================== (опц.) Шорткод для любых мест =================== */
+/** =================== (опц.) Шорткод для будь-яких місць =================== */
 // [pc_stock_allocation product_id="43189" qty="3"]
 add_shortcode('pc_stock_allocation', function($atts){
     $a = shortcode_atts(['product_id'=>0,'qty'=>0], $atts, 'pc_stock_allocation');
@@ -413,21 +410,18 @@ add_shortcode('pc_stock_allocation', function($atts){
     $qty  = max(0,(int)$a['qty']);
     $line = slu_render_allocation_line($prod, $qty);
     if (!$line) return '';
-    return '<div class="slu-stock-box slu-stock-mini"><strong>'.esc_html__('Списание','woocommerce').':</strong> '.esc_html($line).'</div>';
+    $L = slu_labels();
+    return '<div class="slu-stock-box slu-stock-mini"><strong>'.esc_html($L['allocation']).':</strong> '.esc_html($line).'</div>';
 });
 
-// Показываем стоковый HTML Woo только когда товара нет
+/* Woo stock HTML: показуємо стандартний лише коли товару немає */
 add_filter('woocommerce_get_stock_html', function($html, $product){
     if (!($product instanceof WC_Product)) return $html;
-
-    // если товар в наличии — ничего не выводим
-    if ($product->is_in_stock()) {
-        return '';
-    }
-    // иначе (нет в наличии) оставляем стандартный красный текст
+    if ($product->is_in_stock()) return '';
     return $html;
 }, 99, 2);
-/** =================== Немного CSS (можно перенести в общие стили) =================== */
+
+/** =================== CSS =================== */
 add_action('wp_head', function(){
     echo '<style>
     .single-product .slu-stock-box{border:1px dashed #e0e0e0;padding:8px 10px;border-radius:6px;background:#fafafa;font-size:14px;color:#333;margin:10px 0 6px}
@@ -435,37 +429,31 @@ add_action('wp_head', function(){
     .products .slu-stock-mini div{margin:0 0 2px}
     .products .slu-stock-mini strong{color:#333;font-weight:600}
     @media (max-width:480px){.products .slu-stock-mini{font-size:11px;margin-top:4px}}
-
-       /* "Всего: N" — держим в одной строке независимо от темы */
-        .slu-nb{
-            display:inline-flex;           /* children в одну линию */
-            align-items:baseline;          /* красиво выравниваем */
-            gap:.25em;
-            white-space:nowrap;
-        }
-        .slu-nb strong{display:inline;}
-        .slu-nb .slu-stock-total{display:inline !important;}  /* на случай, если тема делает block */
+    .slu-nb{display:inline-flex;align-items:baseline;gap:.25em;white-space:nowrap}
+    .slu-nb strong{display:inline;}
+    .slu-nb .slu-stock-total{display:inline !important;}
     </style>';
 });
 
+/** =================== Компактор рядка «Інші скл.» =================== */
 add_filter('slu_stock_panel_html', function($html, $product, $view, $opts){
     if (!isset($opts['wrap_class']) || strpos($opts['wrap_class'],'slu-stock-mini') === false) return $html;
 
-    // Скомпактим «Другие склады» в одну строку с title
+    $L = function_exists('slu_labels') ? slu_labels() : ['others'=>'Інші скл.'];
+    $needle = $L['others'];
+
     $doc = new DOMDocument();
     libxml_use_internal_errors(true);
     $doc->loadHTML('<?xml encoding="utf-8" ?>'.$html);
     libxml_clear_errors();
 
     $xpath = new DOMXPath($doc);
-    // ищем div с текстом "Другие склады:"
-    foreach ($xpath->query('//div[strong[contains(text(),"Другие склады")]]') as $div) {
+    foreach ($xpath->query('//div[strong[contains(text(), "'.$needle.'")]]') as $div) {
         $text = trim($div->textContent);
         $parts = explode(':', $text, 2);
         $label = $parts[0].':';
         $list  = isset($parts[1]) ? trim($parts[1]) : '';
 
-        // делаем короткий текст (до 40 символов) и полный в title
         $short = mb_strlen($list) > 40 ? mb_substr($list,0,40).'…' : $list;
 
         while ($div->firstChild) $div->removeChild($div->firstChild);
