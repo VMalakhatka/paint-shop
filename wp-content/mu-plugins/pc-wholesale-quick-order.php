@@ -221,19 +221,38 @@ add_shortcode('pc_quick_order', function($atts){
               if (!$product) continue;
 
               $pid        = $product->get_id();
-              $price_html = $product->get_price_html();
-              $sku        = $product->get_sku();
+            $price_html = $product->get_price_html();
+            $sku        = $product->get_sku();
 
-              // у кошику
-              $in_cart_qty = function_exists('slu_cart_qty_for_product')
-                    ? (int) slu_cart_qty_for_product($product)
-                    : ((WC()->cart && isset($cart_qty_map[$pid])) ? (int)$cart_qty_map[$pid] : 0);
+            /* у кошику (з модулю складів) */
+            $in_cart_qty = function_exists('slu_cart_qty_for_product')
+                ? (int) slu_cart_qty_for_product($product)
+                : ((WC()->cart && isset($cart_qty_map[$pid])) ? (int)$cart_qty_map[$pid] : 0);
 
-              // доступно ещё
-              $available_for_add = pcqo_available_qty_for_mode($pid);
+            /* доступно до додавання з урахуванням обраного режиму (single/manual/auto) */
+            if (function_exists('pc_build_stock_view')) {
+                $view = pc_build_stock_view($product);             // ['sum' => ...] вже враховує режим
+                $base = (int)($view['sum'] ?? 0);
+                $available_for_add = max(0, $base - $in_cart_qty);
+            } elseif (function_exists('slu_available_for_add')) {
+                $available_for_add = (int) slu_available_for_add($product);
+            } else {
+                $available_for_add = max(0, (int)$product->get_stock_quantity() - (int)$in_cart_qty);
+            }
 
-              // блок складів
-              $stock_html = pcqo_render_stock_html($pid);
+            /* HTML блоку складів (як у каталозі/картці) — БЕЗ фолбека */
+            $stock_html = '';
+            if (function_exists('slu_render_stock_panel')) {
+                $stock_html = slu_render_stock_panel($product, [
+                    'wrap_class'       => 'slu-stock-mini',
+                    'show_primary'     => true,
+                    'show_others'      => true,
+                    'show_total'       => true,
+                    'hide_when_zero'   => true,    // якщо на обраному складі 0 — блок порожній
+                    'show_incart'      => false,
+                    'show_incart_plan' => false,
+                ]);
+            }
 
               $step = max(1, (int) $product->get_min_purchase_quantity());
           ?>
@@ -292,9 +311,18 @@ function pc_qo_bulk_add(){
 
         $product = wc_get_product($pid); if (!$product) continue;
 
-        $available = function_exists('slu_available_for_add')
-            ? (int) slu_available_for_add($product)
-            : max(0, (int) get_post_meta($pid,'_stock',true));
+        if (function_exists('pc_build_stock_view')) {
+            $view = pc_build_stock_view($product);           // учитывает режим single/manual/auto
+            $in_cart = function_exists('slu_cart_qty_for_product')
+                ? (int) slu_cart_qty_for_product($product)
+                : 0;
+            $available = max(0, (int)($view['sum'] ?? 0) - $in_cart);
+        } elseif (function_exists('slu_available_for_add')) {
+            $available = (int) slu_available_for_add($product);
+        } else {
+            $available = max(0, (int) get_post_meta($pid,'_stock',true));
+        }
+        
         if ($qty > $available) $qty = $available;
         if ($qty <= 0) continue;
 
