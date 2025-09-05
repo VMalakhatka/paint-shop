@@ -447,3 +447,34 @@ add_action('wp_head', function(){
         .slu-nb .slu-stock-total{display:inline !important;}  /* на случай, если тема делает block */
     </style>';
 });
+
+add_filter('slu_stock_panel_html', function($html, $product, $view, $opts){
+    if (!isset($opts['wrap_class']) || strpos($opts['wrap_class'],'slu-stock-mini') === false) return $html;
+
+    // Скомпактим «Другие склады» в одну строку с title
+    $doc = new DOMDocument();
+    libxml_use_internal_errors(true);
+    $doc->loadHTML('<?xml encoding="utf-8" ?>'.$html);
+    libxml_clear_errors();
+
+    $xpath = new DOMXPath($doc);
+    // ищем div с текстом "Другие склады:"
+    foreach ($xpath->query('//div[strong[contains(text(),"Другие склады")]]') as $div) {
+        $text = trim($div->textContent);
+        $parts = explode(':', $text, 2);
+        $label = $parts[0].':';
+        $list  = isset($parts[1]) ? trim($parts[1]) : '';
+
+        // делаем короткий текст (до 40 символов) и полный в title
+        $short = mb_strlen($list) > 40 ? mb_substr($list,0,40).'…' : $list;
+
+        while ($div->firstChild) $div->removeChild($div->firstChild);
+        $strong = $doc->createElement('strong', $label.' ');
+        $div->appendChild($strong);
+        $span = $doc->createElement('span', $short);
+        $span->setAttribute('title', $list);
+        $div->appendChild($span);
+    }
+    $body = $doc->getElementsByTagName('body')->item(0);
+    return $doc->saveHTML($body->firstChild);
+}, 10, 4);
