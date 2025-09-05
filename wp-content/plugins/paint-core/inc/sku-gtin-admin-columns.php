@@ -51,30 +51,50 @@ add_action('manage_woocommerce_page_wc-orders_custom_column', function($column, 
 
 /* ------------ Хелперы ------------ */
 
-/** Универсально вытащить GTIN у продукта/вариации, пробуя популярные ключи меты */
-function pc_get_product_gtin(\WC_Product $product): string {
-    $keys = [
-        '_global_unique_id', // как было у тебя
-        '_wpm_gtin_code',    // WebToffee/Woo product GTIN
-        '_alg_ean',          // EAN/UPC/GTIN by Alg
-        '_ean',              // встречается у ряда плагинов
-        '_sku_gtin',         // на всякий случай
-    ];
+/**
+ * Отримати GTIN із продукту/варіації.
+ * - Пріоритет: константа PC_GTIN_META_KEY, далі — список кандидатів
+ * - Нормалізуємо: лишаємо тільки цифри
+ * - Фільтр: приймаємо тільки довжини 8/12/13/14 (GTIN-8/UPC-A/EAN-13/GTIN-14)
+ * - Для підозрілих (коротких) повертаємо ''.
+ */
+function pc_get_product_gtin(WC_Product $product): string {
+    $candidates = array_filter(array_unique(array_merge(
+        [ defined('PC_GTIN_META_KEY') ? PC_GTIN_META_KEY : '' ],
+        apply_filters('pc_gtin_meta_keys', [
+            '_global_unique_id',   // твій на сайті
+            '_wpm_gtin_code',
+            '_alg_ean',
+            '_ean',
+            '_sku_gtin',
+        ])
+    )));
 
-    // сперва у самой записи товара/вариации
-    foreach ($keys as $k) {
-        $v = get_post_meta($product->get_id(), $k, true);
-        if ($v !== '' && $v !== null) return (string) $v;
-    }
-
-    // если вариация — пробуем родителя
-    if ($product->is_type('variation')) {
-        $parent_id = $product->get_parent_id();
-        if ($parent_id) {
-            foreach ($keys as $k) {
-                $v = get_post_meta($parent_id, $k, true);
-                if ($v !== '' && $v !== null) return (string) $v;
+    $fetch = function(int $post_id) use ($candidates): string {
+        foreach ($candidates as $key) {
+            if ($key === '') continue;
+            $raw = get_post_meta($post_id, $key, true);
+            if ($raw === '' || $raw === null) continue;
+            // нормалізація: тільки цифри
+            $digits = preg_replace('/\D+/', '', (string)$raw);
+            $len = strlen($digits);
+            if (in_array($len, [8,12,13,14], true)) {
+                return $digits;
             }
+        }
+        return '';
+    };
+
+    // спершу сам товар/варіація
+    $v = $fetch($product->get_id());
+    if ($v !== '') return $v;
+
+    // якщо варіація — спробувати батька
+    if ($product->is_type('variation')) {
+        $pid = (int)$product->get_parent_id();
+        if ($pid) {
+            $v = $fetch($pid);
+            if ($v !== '') return $v;
         }
     }
     return '';

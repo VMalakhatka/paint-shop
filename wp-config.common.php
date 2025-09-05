@@ -15,6 +15,7 @@ define( 'LOGGED_IN_SALT',    'Wy(d7AV?+EF#QEg:Ga@U@-WAT?(@-N]ck9tc(&*+h5%a_^ydda
 define( 'NONCE_SALT',        '/6V`FBh{M}e*r8w,{bWc>j;=s [;,Jvi@#IY>MkgE`MGESd<I%bDPw7F(VVcw:gg' );
 define( 'WP_CACHE_KEY_SALT', 'b[0jiym L>}8b=rt^#FXul;C5?CM0#[.YnS*SoP42N-R6^`7Lv]dprj6,Y]-Cp(Y' );
 
+define('PC_GTIN_META_KEY', '_global_unique_id');
 
 $table_prefix = 'wp_';
 
