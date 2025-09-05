@@ -2,10 +2,52 @@
 /*
 Plugin Name: PC Wholesale Quick Order
 Description: Табличний «швидкий заказ» для оптовиків + масове додавання в кошик.
-Version: 1.3.0
+Version: 1.3.2
 Author: PaintCore
 */
 if (!defined('ABSPATH')) exit;
+
+/** ================= UI LABELS =================
+ * Можно переопределить в wp-config.php:
+ *   PCQO_LBL_ADD_ALL, PCQO_LBL_SORT, PCQO_LBL_BY_TITLE, PCQO_LBL_BY_SKU, PCQO_LBL_BY_PRICE,
+ *   PCQO_LBL_TOGGLE_ASC, PCQO_LBL_TOGGLE_DESC,
+ *   PCQO_LBL_HIDE0, PCQO_LBL_SHOW0,
+ *   PCQO_LBL_SELECTED_SUMMARY, PCQO_LBL_NO_ITEMS,
+ *   PCQO_LBL_NOT_ENOUGH_RIGHTS, PCQO_LBL_NOT_FOUND
+ * Или фильтром: add_filter('pcqo_labels', fn($L)=>{ ...; return $L; });
+ */
+if (!defined('PCQO_LBL_ADD_ALL'))          define('PCQO_LBL_ADD_ALL', 'Додати все в кошик');
+if (!defined('PCQO_LBL_SORT'))             define('PCQO_LBL_SORT', 'Сортувати:');
+if (!defined('PCQO_LBL_BY_TITLE'))         define('PCQO_LBL_BY_TITLE', 'по назві');
+if (!defined('PCQO_LBL_BY_SKU'))           define('PCQO_LBL_BY_SKU', 'по артиклю');
+if (!defined('PCQO_LBL_BY_PRICE'))         define('PCQO_LBL_BY_PRICE', 'по ціні');
+if (!defined('PCQO_LBL_TOGGLE_ASC'))       define('PCQO_LBL_TOGGLE_ASC', '⇅ ЗБІЛ');
+if (!defined('PCQO_LBL_TOGGLE_DESC'))      define('PCQO_LBL_TOGGLE_DESC', '⇅ ЗМЕН');
+if (!defined('PCQO_LBL_HIDE0'))            define('PCQO_LBL_HIDE0', 'Сховати 0');
+if (!defined('PCQO_LBL_SHOW0'))            define('PCQO_LBL_SHOW0', 'Показати 0');
+if (!defined('PCQO_LBL_SELECTED_SUMMARY')) define('PCQO_LBL_SELECTED_SUMMARY', 'Обрано позицій: %d, шт: %s');
+if (!defined('PCQO_LBL_NO_ITEMS'))         define('PCQO_LBL_NO_ITEMS', 'Немає вибраних кількостей.');
+if (!defined('PCQO_LBL_NOT_ENOUGH_RIGHTS'))define('PCQO_LBL_NOT_ENOUGH_RIGHTS', 'Недостатньо прав для швидкого замовлення.');
+if (!defined('PCQO_LBL_NOT_FOUND'))        define('PCQO_LBL_NOT_FOUND', 'Товари не знайдені.');
+
+function pcqo_labels(): array {
+    $L = [
+        'add_all'   => PCQO_LBL_ADD_ALL,
+        'sort'      => PCQO_LBL_SORT,
+        'by_title'  => PCQO_LBL_BY_TITLE,
+        'by_sku'    => PCQO_LBL_BY_SKU,
+        'by_price'  => PCQO_LBL_BY_PRICE,
+        'asc'       => PCQO_LBL_TOGGLE_ASC,
+        'desc'      => PCQO_LBL_TOGGLE_DESC,
+        'hide0'     => PCQO_LBL_HIDE0,
+        'show0'     => PCQO_LBL_SHOW0,
+        'summary'   => PCQO_LBL_SELECTED_SUMMARY,
+        'noitems'   => PCQO_LBL_NO_ITEMS,
+        'norights'  => PCQO_LBL_NOT_ENOUGH_RIGHTS,
+        'notfound'  => PCQO_LBL_NOT_FOUND,
+    ];
+    return apply_filters('pcqo_labels', $L);
+}
 
 /** ===== Helpers ===== */
 function pcqo_current_location_slug(): string {
@@ -31,7 +73,6 @@ function pcqo_available_qty_for_mode(int $product_id): int {
     if ($product && function_exists('slu_available_for_add')) {
         return max(0, (int) slu_available_for_add($product));
     }
-    // Фолбэк
     $stock  = (int) wc_stock_amount(get_post_meta($product_id, '_stock', true));
     $inCart = (WC()->cart) ? (int) (WC()->cart->get_cart_item_quantities()[$product_id] ?? 0) : 0;
     return max(0, $stock - $inCart);
@@ -58,6 +99,7 @@ function pcqo_render_stock_html(int $product_id): string {
 /** ===== Шорткод [pc_quick_order] ===== */
 add_shortcode('pc_quick_order', function($atts){
     if (!function_exists('wc_get_product')) return '';
+    $L = pcqo_labels();
 
     $a = shortcode_atts([
         'cat'        => '',
@@ -69,7 +111,6 @@ add_shortcode('pc_quick_order', function($atts){
     ], $atts, 'pc_quick_order');
     $a['show_stock'] = (int) $a['show_stock'];
 
-    // allow GET override for sort
     if (isset($_GET['orderby'])) {
         $g = strtolower(sanitize_text_field($_GET['orderby']));
         if (in_array($g, ['title','sku','date','price'], true)) $a['orderby'] = $g;
@@ -79,16 +120,14 @@ add_shortcode('pc_quick_order', function($atts){
         $a['order'] = $ord;
     }
 
-    // role gate (optional)
     if (!empty($a['role_only'])) {
         $need = array_map('trim', explode(',', $a['role_only']));
         $u = wp_get_current_user();
         if (!$u || empty($u->roles) || count(array_intersect($need, $u->roles)) === 0) {
-            return '<p>Недостатньо прав для швидкого замовлення.</p>';
+            return '<p>'.esc_html($L['norights']).'</p>';
         }
     }
 
-    // category source
     $cat_slugs = [];
     if (!empty($_GET['cat']))            $cat_slugs = array_filter(array_map('sanitize_title', preg_split('/[,\s]+/', (string)$_GET['cat'])));
     if (!$cat_slugs && !empty($a['cat']))$cat_slugs = array_filter(array_map('sanitize_title', preg_split('/[,\s]+/', (string)$a['cat'])));
@@ -96,7 +135,6 @@ add_shortcode('pc_quick_order', function($atts){
         $term = get_queried_object(); if ($term && !is_wp_error($term)) $cat_slugs = [$term->slug];
     }
 
-    // query
     $paged = isset($_GET['qo_page']) ? max(1, (int)$_GET['qo_page']) : 1;
     $order = (strtoupper($a['order']) === 'DESC') ? 'DESC' : 'ASC';
 
@@ -112,20 +150,10 @@ add_shortcode('pc_quick_order', function($atts){
         'tax_query'      => [],
         'meta_query'     => [],
     ];
-
-    // only simple
     $args['tax_query'][] = [
-        'taxonomy' => 'product_type',
-        'field'    => 'slug',
-        'terms'    => ['simple'],
-        'operator' => 'IN',
+        'taxonomy' => 'product_type','field'=>'slug','terms'=>['simple'],'operator'=>'IN',
     ];
-    // only with price
-    $args['meta_query'][] = [
-        'key'     => '_price',
-        'value'   => '',
-        'compare' => '!=',
-    ];
+    $args['meta_query'][] = ['key'=>'_price','value'=>'','compare'=>'!='];
     switch (strtolower($a['orderby'])) {
         case 'sku':   $args['meta_key'] = '_sku';   $args['orderby'] = 'meta_value';     $args['meta_type'] = 'CHAR'; break;
         case 'price': $args['meta_key'] = '_price'; $args['orderby'] = 'meta_value_num'; $args['ignore_sticky_posts'] = true; break;
@@ -134,17 +162,13 @@ add_shortcode('pc_quick_order', function($atts){
     }
     if ($cat_slugs) {
         $args['tax_query'][] = [
-            'taxonomy'         => 'product_cat',
-            'field'            => 'slug',
-            'terms'            => $cat_slugs,
-            'operator'         => 'IN',
-            'include_children' => true,
+            'taxonomy'=>'product_cat','field'=>'slug','terms'=>$cat_slugs,
+            'operator'=>'IN','include_children'=>true,
         ];
     }
 
     $q = new WP_Query($args);
 
-    // pager
     $build_pager = function(WP_Query $q, int $paged): string {
         if ((int)$q->max_num_pages <= 1) return '';
         $base = remove_query_arg('qo_page');
@@ -159,27 +183,22 @@ add_shortcode('pc_quick_order', function($atts){
     };
     $pager_html = $build_pager($q, $paged);
 
-    if (!$q->have_posts()) return '<p>Товари не знайдені.</p>';
+    if (!$q->have_posts()) return '<p>'.esc_html($L['notfound']).'</p>';
 
-    // === server toggle: hide zero ===
+    // server toggle: hide zero
     $hz_on = (isset($_GET['hide_zero']) && $_GET['hide_zero'] === '1');
 
-    // render
     $nonce = wp_create_nonce('pc_bulk_add');
     ob_start(); ?>
     <div class="pc-qo-wrap">
       <div class="pc-qo-toolbar" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
         <button type="button" class="button button-primary pc-qo-addall" data-nonce="<?php echo esc_attr($nonce); ?>">
-          Добавить всё в корзину
+          <?php echo esc_html($L['add_all']); ?>
         </button>
         <?php
             $base = remove_query_arg(['qo_page']);
             $mk = function($key, $order = null) use ($base, $a) {
-                return esc_url(add_query_arg([
-                    'orderby' => $key,
-                    'order'   => $order ?: $a['order'],
-                    'qo_page' => 1,
-                ], $base));
+                return esc_url(add_query_arg(['orderby'=>$key,'order'=>$order?:$a['order'],'qo_page'=>1], $base));
             };
             $bold = function($key, $label) use ($a, $mk) {
                 $url   = $mk($key);
@@ -188,18 +207,17 @@ add_shortcode('pc_quick_order', function($atts){
                 return '<a href="'.$url.'"'.$style.'>'.$label.'</a>';
             };
             $nextOrder = ($a['order'] === 'ASC') ? 'DESC' : 'ASC';
-            $label     = ($nextOrder === 'DESC') ? 'ЗБІЛ' : 'ЗМЕН';
             $toggleUrl = $mk($a['orderby'], $nextOrder);
+            $toggleLbl = ($nextOrder === 'DESC') ? $L['asc'] : $L['desc'];
 
-            // toggle hide_zero link
-            $hz_url  = esc_url(add_query_arg('hide_zero', $hz_on ? '0' : '1', $base));
-            $hz_text = $hz_on ? 'Показати 0' : 'Сховати 0';
+            $hz_url  = esc_url(add_query_arg(['hide_zero' => $hz_on ? '0' : '1', 'qo_page' => 1], $base));
+            $hz_text = $hz_on ? $L['show0'] : $L['hide0'];
         ?>
-        <span style="opacity:.7">Сортувати:</span>
-        <?= $bold('title','по назві'); ?> ·
-        <?= $bold('sku','по артиклю'); ?> ·
-        <?= $bold('price','по ціні'); ?>
-        <a href="<?= $toggleUrl; ?>" style="margin-left:8px">⇅ <?= esc_html($label); ?></a>
+        <span style="opacity:.7"><?php echo esc_html($L['sort']); ?></span>
+        <?= $bold('title',  esc_html($L['by_title'])); ?> ·
+        <?= $bold('sku',    esc_html($L['by_sku']));   ?> ·
+        <?= $bold('price',  esc_html($L['by_price'])); ?>
+        <a href="<?= $toggleUrl; ?>" style="margin-left:8px"><?= esc_html($toggleLbl); ?></a>
 
         <a href="<?= $hz_url; ?>" class="pc-qo-hz-link" style="margin-left:14px"><?= esc_html($hz_text); ?></a>
 
@@ -233,12 +251,10 @@ add_shortcode('pc_quick_order', function($atts){
               $price_html = $product->get_price_html();
               $sku        = $product->get_sku();
 
-              // у кошику
               $in_cart_qty = function_exists('slu_cart_qty_for_product')
                   ? (int) slu_cart_qty_for_product($product)
                   : ((WC()->cart && isset($cart_qty_map[$pid])) ? (int)$cart_qty_map[$pid] : 0);
 
-              // доступно під режим (single/manual/auto)
               if (function_exists('pc_build_stock_view')) {
                   $view = pc_build_stock_view($product);
                   $base = (int)($view['sum'] ?? 0);
@@ -249,12 +265,8 @@ add_shortcode('pc_quick_order', function($atts){
                   $available_for_add = max(0, (int)$product->get_stock_quantity() - (int)$in_cart_qty);
               }
 
-              // если включён флаг "Сховати 0" — пропускаем нулевые строки
-              if ($hz_on && $available_for_add <= 0) {
-                  continue;
-              }
+              if ($hz_on && $available_for_add <= 0) continue;
 
-              // HTML складів
               $stock_html = '';
               if (function_exists('slu_render_stock_panel')) {
                   $stock_html = slu_render_stock_panel($product, [
@@ -269,7 +281,6 @@ add_shortcode('pc_quick_order', function($atts){
               }
 
               $step = max(1, (int) $product->get_min_purchase_quantity());
-
               $row_classes = ['pc-qo-row'];
               if ((int)$available_for_add <= 0) $row_classes[] = 'is-zero';
               if ((int)$in_cart_qty > 0)        $row_classes[] = 'has-incart';
@@ -308,7 +319,7 @@ add_shortcode('pc_quick_order', function($atts){
     return ob_get_clean();
 });
 
-/** SQL tweaks for our query */
+/** SQL tweaks */
 add_filter('posts_groupby', function($groupby, WP_Query $q){
     if ($q->get('pc_qo')) { global $wpdb; return "{$wpdb->posts}.ID"; }
     return $groupby;
@@ -334,9 +345,7 @@ function pc_qo_bulk_add(){
 
         if (function_exists('pc_build_stock_view')) {
             $view = pc_build_stock_view($product);
-            $in_cart = function_exists('slu_cart_qty_for_product')
-                ? (int) slu_cart_qty_for_product($product)
-                : 0;
+            $in_cart = function_exists('slu_cart_qty_for_product') ? (int) slu_cart_qty_for_product($product) : 0;
             $available = max(0, (int)($view['sum'] ?? 0) - $in_cart);
         } elseif (function_exists('slu_available_for_add')) {
             $available = (int) slu_available_for_add($product);
@@ -370,7 +379,7 @@ add_action('wp', function () {
     }, 10, 3);
 });
 
-/** Стили и JS (только то, что нужно для UI/подсветки/суммы) */
+/** Стили и JS */
 add_action('wp_enqueue_scripts', function(){
     wp_enqueue_script('jquery');
 
@@ -392,46 +401,94 @@ add_action('wp_enqueue_scripts', function(){
         .pc-qo-qty .pc-qo-input{width:100%; box-sizing:border-box; text-align:right;
             font-size:11px; padding:2px 6px; height:24px; border:1px solid #ddd; border-radius:6px}
         .pc-qo-qty .pc-qo-input:disabled{opacity:.35; background:#f7f7f7}
-
         .pc-qo-toolbar{margin:6px 0 10px; font-size:12px}
         .pc-qo-pager{margin:10px 0; display:flex; gap:6px; flex-wrap:wrap}
         .pc-qo-table-wrap{max-height:70vh; overflow:auto; border:1px solid #eee; border-radius:8px}
-
         .pc-qo-stockhint{width:260px; font-size:12px; line-height:1.25}
         .slu-stock-mini{color:#2e7d32; font-size:12px; line-height:1.25; margin:0}
         .slu-stock-mini div{margin:0 0 2px}
         .slu-stock-mini strong{font-weight:600; color:#333}
         .slu-stock-mini .is-preferred{font-weight:600}
         .slu-stock-mini .slu-nb{display:inline-flex; gap:.25em; white-space:nowrap}
-
-        /* Подсветка «у кошику» */
         .pc-qo-table .pc-qo-row.has-incart{ background:#f6f8fb; }
     ';
     wp_register_style('pc-qo-inline', false);
     wp_enqueue_style('pc-qo-inline');
     wp_add_inline_style('pc-qo-inline', $css);
 
-    // небольшой скрипт для счётчика «Обрано позицій…»
+    $ajax_url = admin_url('admin-ajax.php');
+    $L = pcqo_labels();
+    $summaryTpl = esc_js($L['summary']); // "Обрано позицій: %d, шт: %s"
+
     wp_add_inline_script('jquery', "jQuery(function($){
-        function recalcSummary(){
-          var sum = 0, items = 0;
-          $('.pc-qo-row').each(function(){
-            var qty = parseFloat($(this).find('.pc-qo-input').val()||0);
-            if(qty>0){ items++; sum += qty; }
-          });
-          $('.pc-qo-message').text( items ? ('Обрано позицій: '+items+', шт: '+sum) : '' );
+        function clampQty(\$input){
+            var \$row = \$input.closest('.pc-qo-row');
+            var available = parseFloat(\$row.data('available')) || 0;
+            var step = parseFloat(\$input.attr('step')) || 1;
+            var v = parseFloat(\$input.val() || 0);
+            if (v < 0) v = 0;
+            if (available >= 0 && v > available) v = available;
+            if (step > 0) v = Math.floor(v/step)*step;
+            \$input.val(v || '');
+            return v || 0;
         }
-        $(document).on('input change', '.pc-qo-input', function(){
-          var $row = $(this).closest('.pc-qo-row');
-          var available = parseFloat($row.data('available')) || 0;
-          var step = parseFloat($(this).attr('step')) || 1;
-          var v = parseFloat($(this).val() || 0);
-          if (v < 0) v = 0;
-          if (available >= 0 && v > available) v = available;
-          if (step > 0) v = Math.floor(v/step)*step;
-          $(this).val(v || '');
-          recalcSummary();
+        function recalcSummary(){
+            var sum = 0, items = 0;
+            $('.pc-qo-row').each(function(){
+                var v = clampQty($(this).find('.pc-qo-input'));
+                if(v>0){ items++; sum += v; }
+            });
+            if(items>0){
+                $('.pc-qo-message').text(sprintf('{$summaryTpl}', items, sum));
+            }else{
+                $('.pc-qo-message').text('');
+            }
+        }
+        function sprintf(fmt){ // очень простой %d %s
+            var args = Array.prototype.slice.call(arguments,1);
+            var i=0;
+            return fmt.replace(/%[ds]/g,function(){return args[i++];});
+        }
+
+        $(document).on('input keyup blur change', '.pc-qo-input', function(){
+            clampQty($(this));
+            recalcSummary();
         });
+
+        $(document).on('click','.pc-qo-addall',function(){
+            var \$btn = $(this), nonce = \$btn.data('nonce');
+            var items = [];
+            $('.pc-qo-row').each(function(){
+                var id = parseInt($(this).data('id'),10);
+                var avail = parseFloat($(this).data('available')) || 0;
+                var \$inp = $(this).find('.pc-qo-input');
+                var qty = clampQty(\$inp);
+                if(id>0 && qty>0){
+                    if (avail >= 0 && qty > avail) qty = avail;
+                    if (qty>0) items.push({id:id, qty:qty});
+                }
+            });
+            if(!items.length){ $('.pc-qo-message').text('".esc_js($L['noitems'])."'); return; }
+
+            \$btn.prop('disabled', true).text('…');
+            $.post('".$ajax_url."', {
+                action: 'pc_bulk_add_to_cart',
+                _ajax_nonce: nonce,
+                items: items
+            }, function(resp){
+                if(resp && resp.success){
+                    $('.pc-qo-message').text('Додано позицій: '+resp.data.added);
+                    location.reload();
+                }else{
+                    $('.pc-qo-message').text('Помилка додавання.');
+                    \$btn.prop('disabled', false).text('".esc_js($L['add_all'])."');
+                }
+            }).fail(function(){
+                $('.pc-qo-message').text('Помилка зв\\'язку.');
+                \$btn.prop('disabled', false).text('".esc_js($L['add_all'])."');
+            });
+        });
+
         recalcSummary();
     });");
 });
