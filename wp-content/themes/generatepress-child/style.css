@@ -4,6 +4,77 @@ Template: generatepress
 Version: 1.0
 */
 
+/* === 1) Общая ширина сайта на больших экранах === */
+/* поменяй значение под себя: 1280px / 1400px / 1600px */
+@media (min-width: 1200px){
+  :root{ --container-max: 2100px; }
+
+  /* Классические темы */
+  .container,
+  .site .container,
+  .content-area,
+  .site-main,
+  .site-content,
+  .wrap,
+  .page-wrap,
+  .content-wrap,
+  /* Storefront */
+  .col-full,
+  /* Astra */
+  .ast-container,
+  /* OceanWP / GeneratePress */
+  .container.grid-container,
+  .container .grid-container{
+    max-width: var(--container-max) !important;
+    width: 95%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Блочные темы (Twenty Twenty-Four и т.п.) */
+  .wp-site-blocks,
+  .is-layout-constrained{
+    max-width: var(--container-max) !important;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* === 2) Чуть уменьшаем боковые внутренние отступы контента === */
+@media (min-width: 1200px){
+  .site-content,
+  .site-main,
+  .content-area{
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+/* === 3) Таблица списка товаров/товары Woo === */
+.woocommerce .shop_table{
+  width: 100%;
+}
+
+/* Если у таблицы внутри стоят фиксированные max-width у колонок — снимем ограничения */
+.woocommerce table.shop_table th,
+.woocommerce table.shop_table td{
+  max-width: none;
+  white-space: normal;         /* перенос длинных значений */
+  word-break: break-word;
+}
+
+/* === 4) (Опционально) Только для страницы «Список товара» — ещё шире === */
+/* Узнай ID страницы (в админке в адресной строке page_id=XXXX) и подставь его ниже */
+@media (min-width: 1200px){
+  body.page-id-XXXX .container,
+  body.page-id-XXXX .col-full,
+  body.page-id-XXXX .ast-container,
+  body.page-id-XXXX .wp-site-blocks{
+    max-width: 1600px !important;
+    width: 96%;
+  }
+}
+
 /* ── Хлебные крошки (Yoast) ─────────────────────────────────────────────── */
 .woocommerce-breadcrumb .breadcrumb-delimiter{
   margin:0 .4em;
