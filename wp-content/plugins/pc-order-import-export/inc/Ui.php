@@ -110,36 +110,60 @@ class Ui
     /* ===================== PUBLIC RENDERERS ===================== */
 
 
-    /** Блок імпорту в чернетку на сторінці "Мої замовлення" */
-    public static function render_account_import_block(): void
-    {
-        // проста форма — той самий AJAX, що й на кошику
-        $nonce_draft = wp_create_nonce('pcoe_import_draft');
-        ?>
-        <div class="pcoe-import" style="margin:16px 0; padding:12px; border:1px solid #eee; border-radius:8px">
-        <details open>
-            <summary><strong>Імпорт у чернетку замовлення</strong> (CSV / XLSX)</summary>
-            <form id="pcoe-import-draft-form" enctype="multipart/form-data" method="post" onsubmit="return false;"
-                style="margin-top:12px; display:flex; gap:12px; align-items:center; flex-wrap:wrap">
-                <input type="hidden" name="_wpnonce" value="<?php echo esc_attr($nonce_draft); ?>">
-                <input type="file" name="file" accept=".csv,.xlsx,.xls" required>
-                <input type="text" name="title" placeholder="Назва чернетки (необов’язково)" style="min-width:260px">
-                <button type="submit" class="button">Імпортувати у чернетку</button>
-                <span class="pcoe-import-draft-msg" style="margin-left:8px; opacity:.8"></span>
-            </form>
+/** Блок імпорту + кнопка «В чернетку» на сторінці "Мої замовлення" */
+public static function render_account_import_block(): void
+{
+    $nonce_draft      = wp_create_nonce('pcoe_import_draft');      // для імпорту файлу у чернетку
+    $nonce_cart_draft = wp_create_nonce('pcoe_cart_to_draft');      // для збереження кошика у чернетку
+    $ajax             = admin_url('admin-ajax.php');
+    ?>
+    <div class="pcoe-import" style="margin:16px 0; padding:12px; border:1px solid #eee; border-radius:8px">
 
-            <div class="pcoe-import-draft-result" style="margin-top:10px; display:none">
-            <div class="pcoe-import-draft-links" style="margin:6px 0"></div>
-            <div class="pcoe-import-draft-report"></div>
-            </div>
+      <!-- Імпорт у чернетку замовлення -->
+      <details open>
+        <summary><strong>Імпорт у чернетку замовлення</strong> (CSV / XLSX)</summary>
 
-            <div style="font-size:12px; opacity:.8; margin-top:10px">
-            Формат: <code>sku;qty</code> або <code>gtin;qty</code>. Допускаються локальні назви колонок (Артикул, К-сть…).
-            </div>
-        </details>
+        <form id="pcoe-import-draft-form" enctype="multipart/form-data" method="post" onsubmit="return false;"
+              style="margin-top:12px; display:flex; gap:12px; align-items:center; flex-wrap:wrap">
+          <input type="hidden" name="_wpnonce" value="<?php echo esc_attr($nonce_draft); ?>">
+          <input type="file" name="file" accept=".csv,.xlsx,.xls" required>
+          <input type="text" name="title" placeholder="Назва чернетки (необов’язково)" style="min-width:260px">
+          <button type="submit" class="button">Імпортувати у чернетку</button>
+          <span class="pcoe-import-draft-msg" style="margin-left:8px; opacity:.8"></span>
+        </form>
+
+        <div class="pcoe-import-draft-result" style="margin-top:10px; display:none">
+          <div class="pcoe-import-draft-links" style="margin:6px 0"></div>
+          <div class="pcoe-import-draft-report"></div>
         </div>
-        <?php
-    }
+
+        <div style="font-size:12px; opacity:.8; margin-top:10px">
+          Формат: <code>sku;qty</code> або <code>gtin;qty</code>. Допускаються локальні назви колонок (Артикул, К-сть…).
+        </div>
+      </details>
+
+      <!-- Зберегти поточний кошик у чернетку -->
+      <details style="margin-top:14px">
+        <summary><strong>Зберегти поточний кошик у чернетку</strong></summary>
+
+        <form action="<?php echo esc_url($ajax); ?>" method="post"
+              style="margin-top:12px; display:flex; gap:8px; align-items:center; flex-wrap:wrap">
+          <input type="hidden" name="action" value="pcoe_cart_to_draft">
+          <input type="hidden" name="_wpnonce" value="<?php echo esc_attr($nonce_cart_draft); ?>">
+          <input type="hidden" name="clear" value="1">
+          <input type="hidden" name="dest" value="orders"><!-- після збереження → My account / Orders -->
+          <input type="text" name="title" placeholder="Назва чернетки (необов’язково)" style="min-width:260px">
+          <button class="button" type="submit">В чернетку</button>
+        </form>
+
+        <div style="font-size:12px; opacity:.8; margin-top:8px">
+          Порада: додайте зрозумілу назву (наприклад, «Шаблон Чернівці»), щоб легко знаходити цю чернетку в списку.
+        </div>
+      </details>
+
+    </div>
+    <?php
+}
 
     /** Блок на странице заказа */
     public static function render_order_block($order): void
