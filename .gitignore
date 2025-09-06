@@ -22,6 +22,8 @@ wp-config.staging.php
 # локальные вспомогательные файлы
 local-xdebuginfo.php
 
+wp-content/phpinfo.php
+
 
 # === Медиа и временные каталоги ===
 wp-content/uploads/

@@ -12,33 +12,32 @@ if (!defined('ABSPATH')) exit;
 define('PCOE_DIR', __DIR__);
 define('PCOE_URL', plugin_dir_url(__FILE__));
 
-// (опційно для XLSX) – якщо є vendor/
-$vendor = PCOE_DIR.'/vendor/autoload.php';
-if (is_readable($vendor)) require_once $vendor;
+/**
+ * ВАЖНО: НЕ подключаем здесь никакие vendor/autoload.php.
+ * MU-плагин 00-composer-autoload.php уже подхватывает wp-content/vendor/autoload.php
+ * для всего сайта.
+ */
 
+// автозагрузка только наших классов из inc/
 spl_autoload_register(function($class){
     $pfx = 'PaintCore\\PCOE\\';
     if (strpos($class, $pfx) !== 0) return;
     $rel = str_replace('\\','/', substr($class, strlen($pfx)));
-    $file = PCOE_DIR.'/inc/'.$rel.'.php';
+    $file = PCOE_DIR . '/inc/' . $rel . '.php';
     if (is_file($file)) require $file;
 });
 
-add_action('plugins_loaded', function(){
-    // М’яка залежність від WooCommerce
+add_action('plugins_loaded', function () {
+    // Мягкая зависимость от WooCommerce
     if (!class_exists('WooCommerce')) return;
+
+    // Если PhpSpreadsheet отсутствует — просто отключим XLSX (экспорт/импорт CSV останутся)
+    if (!class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class)) {
+        // Поведением управляет Ui::disableXlsx()
+        if (class_exists(\PaintCore\PCOE\Ui::class)) {
+            \PaintCore\PCOE\Ui::disableXlsx();
+        }
+    }
+
     (new PaintCore\PCOE\Plugin())->init();
 });
-
-add_action('plugins_loaded', function () {
-    if (!class_exists('WooCommerce') || !function_exists('WC')) return;
-    (new \PaintCore\PCOE\Plugin())->init();
-});
-
-add_action('init', function () {
-    load_plugin_textdomain('pc-oi-export', false, dirname(plugin_basename(__FILE__)).'/languages');
-});
-
-if (version_compare(PHP_VERSION, '8.1', '<')) {
-    // можна показати адмін-нотіс, а XLSX — тихо падати в CSV
-}

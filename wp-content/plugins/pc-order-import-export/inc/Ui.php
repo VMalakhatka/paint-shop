@@ -5,53 +5,57 @@ defined('ABSPATH') || exit;
 
 class Ui
 {
-    /** Підключення всіх хуків UI */
+    /** Если нет PhpSpreadsheet — отключаем XLSX-кнопку */
+    protected static bool $xlsx_enabled = true;
+    public static function disableXlsx(): void { self::$xlsx_enabled = false; }
+
+    /** Подключение всех UI-хуков */
     public static function init(): void
     {
-        // CART: виводимо блок у кількох «низах», щоб підхопити різні теми
-        add_action('woocommerce_after_cart_totals',              [self::class, 'render_cart_block']);
-        add_action('woocommerce_cart_totals_after_shipping',     [self::class, 'render_cart_block']);
-        add_action('woocommerce_proceed_to_checkout',            [self::class, 'render_cart_block']);
+        // CART: рендерим блок в нескольких «низах», чтобы поймать разные темы
+        add_action('woocommerce_after_cart_totals',          [self::class, 'render_cart_block']);
+        add_action('woocommerce_cart_totals_after_shipping', [self::class, 'render_cart_block']);
+        add_action('woocommerce_proceed_to_checkout',        [self::class, 'render_cart_block']);
 
-        // CART (блоковий редактор): як fallback дописуємо у контент сторінки
-        add_filter('the_content', [self::class, 'maybe_append_to_cart_block'], 20, 1);
+        // CART (блочный редактор): fallback — дописываем в конец контента
+        add_filter('the_content', [self::class, 'maybe_append_to_cart_block'], 20);
 
-        // ORDER: кнопки експорту під таблицею замовлення
+        // ORDER: кнопки экспорта под таблицей заказа
         add_action('woocommerce_order_details_after_order_table', [self::class, 'render_order_block']);
 
-        // Скрипти для всього фронту
+        // Скрипты
         add_action('wp_enqueue_scripts', [self::class, 'enqueue_js']);
     }
 
+    /** Алиас на случай, если где-то вызывается Ui::hooks() */
+    public static function hooks(): void { self::init(); }
+
     /* ===================== PUBLIC RENDERERS ===================== */
 
-    /** Блок керування на сторінці кошика */
+    /** Блок на странице корзины */
     public static function render_cart_block(): void
     {
-        if ( ! function_exists('WC') || ! WC()->cart ) return;
-
+        if (!function_exists('WC') || !WC()->cart) return;
         echo self::render_controls_html('cart', 0);
         echo self::render_import_html('cart');
     }
 
-    /** Блок керування на сторінці замовлення */
+    /** Блок на странице заказа */
     public static function render_order_block($order): void
     {
-        if ( ! $order instanceof \WC_Order ) return;
-
+        if (!$order instanceof \WC_Order) return;
         echo self::render_controls_html('order', (int)$order->get_id());
-        // На сторінці замовлення імпорт у чернетку не показуємо,
-        // але за потреби можна увімкнути: echo self::render_import_html('order');
+        echo self::render_import_html('order');
+        // Импорт в черновик на странице заказа не показываем (можно включить при желании)
     }
 
-    /** Fallback: якщо кошик — блоковий (Gutenberg), вписуємо в кінець контенту */
+    /** Fallback для блочного корзинного шаблона */
     public static function maybe_append_to_cart_block(string $content): string
     {
-        if ( ! is_cart() ) return $content;
+        if (!is_cart()) return $content;
 
         global $post;
         if ($post && function_exists('has_block') && has_block('woocommerce/cart', $post)) {
-            // Уникаємо дубляжу: якщо наш блок вже десь нижче — не додаємо вдруге.
             if (strpos($content, 'class="pcoe-export"') === false) {
                 $content .= self::render_controls_html('cart', 0);
             }
@@ -64,13 +68,13 @@ class Ui
 
     /* ===================== INTERNAL HTML BUILDERS ===================== */
 
-    /** HTML: панель експорту (кнопки, split, колонки) */
+    /** Панель экспорта (кнопки, split, колонки) */
     protected static function render_controls_html(string $scope, int $order_id = 0): string
     {
-        if ($scope === 'cart' && (! function_exists('WC') || ! WC()->cart)) return '';
+        if ($scope === 'cart' && (!function_exists('WC') || !WC()->cart)) return '';
 
         $L    = Helpers::labels();
-        $cols = Helpers::available_columns();
+        $cols = Helpers::columns();
 
         $nonce = wp_create_nonce('pcoe_export');
         $base  = admin_url('admin-ajax.php?action=pcoe_export&_wpnonce='.$nonce.'&type='.$scope);
@@ -81,8 +85,20 @@ class Ui
         ob_start(); ?>
         <div class="pcoe-export" style="margin-top:16px">
           <div style="display:flex;gap:10px;flex-wrap:wrap;margin:8px 0;align-items:center">
-            <a class="button" href="<?php echo esc_url($base.'&fmt=csv'); ?>"><?php echo esc_html($L['btn_csv']); ?></a>
-            <a class="button" href="<?php echo esc_url($base.'&fmt=xlsx'); ?>"><?php echo esc_html($L['btn_xlsx']); ?></a>
+            <a class="button" href="<?php echo esc_url($base.'&fmt=csv'); ?>">
+                <?php echo esc_html($L['btn_csv']); ?>
+            </a>
+
+            <?php if (self::$xlsx_enabled): ?>
+              <a class="button" href="<?php echo esc_url($base.'&fmt=xlsx'); ?>">
+                  <?php echo esc_html($L['btn_xlsx']); ?>
+              </a>
+            <?php else: ?>
+              <a class="button disabled" onclick="return false"
+                 title="XLSX недоступний на цьому сервері">
+                 <?php echo esc_html($L['btn_xlsx']); ?>
+              </a>
+            <?php endif; ?>
 
             <label style="display:flex;align-items:center;gap:6px;margin-left:auto">
               <span><?php echo esc_html($L['split_label']); ?></span>
@@ -95,7 +111,8 @@ class Ui
 
           <details style="margin:8px 0">
             <summary><?php echo esc_html($L['conf_toggle']); ?></summary>
-            <div class="pcoe-cols" data-scope="<?php echo esc_attr($scope); ?>" style="display:flex;gap:14px;flex-wrap:wrap;margin:10px 0">
+            <div class="pcoe-cols" data-scope="<?php echo esc_attr($scope); ?>"
+                 style="display:flex;gap:14px;flex-wrap:wrap;margin:10px 0">
               <?php foreach ($cols as $key => $label): ?>
                 <label style="display:flex;gap:6px;align-items:center">
                   <input type="checkbox" class="pcoe-col" value="<?php echo esc_attr($key); ?>">
@@ -109,21 +126,21 @@ class Ui
         return ob_get_clean();
     }
 
-    /** HTML: імпорт у кошик + у чернетку (для cart scope) */
+    /** Импорт (в корзину + в черновик) — отображается только на странице корзины */
     protected static function render_import_html(string $scope): string
     {
         if ($scope !== 'cart') return '';
-        if (! function_exists('WC') || ! WC()->cart) return '';
+        if (!function_exists('WC') || !WC()->cart) return '';
 
-        $nonce_cart   = wp_create_nonce('pcoe_import_cart');
-        $nonce_draft  = wp_create_nonce('pcoe_import_draft');
+        $nonce_cart  = wp_create_nonce('pcoe_import_cart');
+        $nonce_draft = wp_create_nonce('pcoe_import_draft');
 
         ob_start(); ?>
         <div class="pcoe-import" style="margin-top:18px; padding-top:10px; border-top:1px dashed #e5e5e5">
             <details>
                 <summary><strong>Імпорт</strong> (CSV / XLSX)</summary>
 
-                <!-- Імпорт у КОШИК -->
+                <!-- У кошик -->
                 <div style="margin-top:12px">
                   <form id="pcoe-import-form" enctype="multipart/form-data" method="post" onsubmit="return false;"
                         style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
@@ -134,7 +151,7 @@ class Ui
                   </form>
                 </div>
 
-                <!-- Імпорт у ЧЕРНЕТКУ ЗАМОВЛЕННЯ -->
+                <!-- У чернетку замовлення -->
                 <div style="margin-top:14px">
                   <form id="pcoe-import-draft-form" enctype="multipart/form-data" method="post" onsubmit="return false;"
                         style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
@@ -144,7 +161,6 @@ class Ui
                       <span class="pcoe-import-draft-msg" style="margin-left:8px; opacity:.8"></span>
                   </form>
 
-                  <!-- Результати імпорту в чернетку -->
                   <div class="pcoe-import-draft-result" style="margin-top:10px; display:none">
                       <div class="pcoe-import-draft-links" style="margin:6px 0"></div>
                       <div class="pcoe-import-draft-report"></div>
@@ -153,7 +169,7 @@ class Ui
 
                 <div style="font-size:12px; opacity:.8; margin-top:12px">
                     Формат CSV: <code>sku;qty</code> або <code>gtin;qty</code>. Розділювач <code>;</code> або <code>,</code>.
-                    Для кількості допускаються і крапка, і кома в дробових; тисячні пробіли і не&nbsp;знак — ігноруються.
+                    Дробові кількості: крапка або кома; тисячні пробіли і не-знак ігноруються.
                 </div>
             </details>
         </div>
@@ -166,33 +182,21 @@ class Ui
     public static function enqueue_js(): void
     {
         wp_enqueue_script('jquery');
-
-        // один інлайн-скрипт на все (експорт + імпорти)
         wp_add_inline_script('jquery', self::js_code());
     }
 
     protected static function js_code(): string
     {
-        $ajax = esc_js( admin_url('admin-ajax.php') );
-
+        $ajax = esc_js(admin_url('admin-ajax.php'));
         return <<<JS
 jQuery(function($){
     var KEY_COLS='pcoeCols', KEY_SPLIT='pcoeSplit';
 
-    function readCols(scope){
-        try{ var all=JSON.parse(localStorage.getItem(KEY_COLS)||'{}'); return all[scope]||[]; }catch(e){ return []; }
-    }
-    function writeCols(scope, arr){
-        try{ var all=JSON.parse(localStorage.getItem(KEY_COLS)||'{}'); all[scope]=arr; localStorage.setItem(KEY_COLS, JSON.stringify(all)); }catch(e){}
-    }
-    function readSplit(scope){
-        try{ var all=JSON.parse(localStorage.getItem(KEY_SPLIT)||'{}'); return all[scope]||'agg'; }catch(e){ return 'agg'; }
-    }
-    function writeSplit(scope, val){
-        try{ var all=JSON.parse(localStorage.getItem(KEY_SPLIT)||'{}'); all[scope]=val; localStorage.setItem(KEY_SPLIT, JSON.stringify(all)); }catch(e){}
-    }
+    function readCols(scope){ try{ var all=JSON.parse(localStorage.getItem(KEY_COLS)||'{}'); return all[scope]||[]; }catch(e){ return []; } }
+    function writeCols(scope, arr){ try{ var all=JSON.parse(localStorage.getItem(KEY_COLS)||'{}'); all[scope]=arr; localStorage.setItem(KEY_COLS, JSON.stringify(all)); }catch(e){} }
+    function readSplit(scope){ try{ var all=JSON.parse(localStorage.getItem(KEY_SPLIT)||'{}'); return all[scope]||'agg'; }catch(e){ return 'agg'; } }
+    function writeSplit(scope, val){ try{ var all=JSON.parse(localStorage.getItem(KEY_SPLIT)||'{}'); all[scope]=val; localStorage.setItem(KEY_SPLIT, JSON.stringify(all)); }catch(e){} }
 
-    // Відновити чекбокси колонок
     $('.pcoe-cols').each(function(){
         var scope = $(this).data('scope');
         var sel = readCols(scope);
@@ -205,13 +209,11 @@ jQuery(function($){
         }
     });
 
-    // Відновити split
     $('.pcoe-split').each(function(){
         var scope = $(this).data('scope');
         $(this).val(readSplit(scope));
     });
 
-    // Зберегти вибір користувача
     $(document).on('change','.pcoe-col',function(){
         var wrap = $(this).closest('.pcoe-cols');
         var scope = wrap.data('scope');
@@ -224,7 +226,6 @@ jQuery(function($){
         writeSplit(scope, $(this).val());
     });
 
-    // Проклейка параметрів у посилання експорту
     $(document).on('click','.pcoe-export a.button',function(){
         var box = $(this).closest('.pcoe-export');
         var colsWrap = box.find('.pcoe-cols'); var scope = colsWrap.data('scope');
@@ -237,86 +238,63 @@ jQuery(function($){
         this.href = href.toString();
     });
 
-    // Авто-вмикати примітку (note) при split=per_loc (корисно для складів)
     function ensureNoteChecked(scope){
         var wrap = $('.pcoe-cols[data-scope="'+scope+'"]');
         var note = wrap.find('input.pcoe-col[value="note"]');
-        if (!note.prop('checked')) {
-            note.prop('checked', true).trigger('change');
-        }
+        if (!note.prop('checked')) { note.prop('checked', true).trigger('change'); }
     }
-    $('.pcoe-split').each(function(){
-        var scope = $(this).data('scope');
-        if ($(this).val()==='per_loc') ensureNoteChecked(scope);
-    });
-    $(document).on('change','.pcoe-split',function(){
-        var scope = $(this).data('scope');
-        if ($(this).val()==='per_loc') ensureNoteChecked(scope);
-    });
+    $('.pcoe-split').each(function(){ var scope=$(this).data('scope'); if($(this).val()==='per_loc') ensureNoteChecked(scope); });
+    $(document).on('change','.pcoe-split',function(){ var scope=$(this).data('scope'); if($(this).val()==='per_loc') ensureNoteChecked(scope); });
 
-    /* =============== ІМПОРТ У КОШИК =============== */
+    // === Імпорт у кошик
     $(document).on('submit','#pcoe-import-form',function(){
-        var \$f = $(this), \$msg = \$f.find('.pcoe-import-msg');
-        var fd = new FormData(this);
-        fd.append('action','pcoe_import_cart');
+        var \$f=$(this), \$msg=\$f.find('.pcoe-import-msg');
+        var fd=new FormData(this); fd.append('action','pcoe_import_cart');
         \$msg.text('Імпортуємо…');
         $.ajax({
-          url: '{$ajax}',
-          method:'POST',
-          data: fd, contentType:false, processData:false,
-          success: function(resp){
+          url:'{$ajax}', method:'POST', data:fd, contentType:false, processData:false,
+          success:function(resp){
             if(resp && resp.success){
               \$msg.text('Додано позицій: '+resp.data.added+', пропущено: '+resp.data.skipped);
-              // Перечитати сторінку, щоб побачити нові кількості в кошику:
               window.location.reload();
             }else{
               \$msg.text((resp && resp.data && resp.data.msg) ? resp.data.msg : 'Помилка імпорту.');
             }
           },
-          error: function(){ \$msg.text('Помилка з\'єднання.'); }
+          error:function(){ \$msg.text('Помилка з\\'єднання.'); }
         });
         return false;
     });
 
-    /* =============== ІМПОРТ У ЧЕРНЕТКУ ЗАМОВЛЕННЯ =============== */
+    // === Імпорт у чернетку
     $(document).on('submit','#pcoe-import-draft-form',function(){
-        var \$f = $(this), \$msg = \$f.find('.pcoe-import-draft-msg');
-        var \$box = $('.pcoe-import-draft-result');
+        var \$f=$(this), \$msg=\$f.find('.pcoe-import-draft-msg');
+        var \$box=$('.pcoe-import-draft-result');
         \$msg.text('Імпортуємо…'); \$box.hide();
 
-        var fd = new FormData(this);
-        fd.append('action','pcoe_import_order_draft');
+        var fd=new FormData(this); fd.append('action','pcoe_import_order_draft');
 
         $.ajax({
-          url: '{$ajax}',
-          method:'POST',
-          data: fd, contentType:false, processData:false,
-          success: function(resp){
+          url:'{$ajax}', method:'POST', data:fd, contentType:false, processData:false,
+          success:function(resp){
             if(resp && resp.success){
                 \$msg.text('Імпортовано: '+resp.data.imported+', пропущено: '+resp.data.skipped);
-                // Посилання
-                var linksHtml = '';
-                if (resp.data.links){
-                    if (resp.data.links.edit){
-                        linksHtml += '<a class="button" href="'+resp.data.links.edit+'" target="_blank" rel="noopener">Відкрити в адмінці</a> ';
-                    }
-                    if (resp.data.links.view){
-                        linksHtml += '<a class="button" href="'+resp.data.links.view+'" target="_blank" rel="noopener">Переглянути замовлення</a>';
-                    }
+                var linksHtml='';
+                if(resp.data.links){
+                    if(resp.data.links.edit){ linksHtml += '<a class="button" href="'+resp.data.links.edit+'" target="_blank" rel="noopener">Відкрити в адмінці</a> '; }
+                    if(resp.data.links.view){ linksHtml += '<a class="button" href="'+resp.data.links.view+'" target="_blank" rel="noopener">Переглянути замовлення</a>'; }
                 }
-                $('.pcoe-import-draft-links').html(linksHtml || '');
-                // Звіт
-                $('.pcoe-import-draft-report').html(resp.data.report_html || '');
+                $('.pcoe-import-draft-links').html(linksHtml||'');
+                $('.pcoe-import-draft-report').html(resp.data.report_html||'');
                 \$box.show();
             }else{
                 \$msg.text((resp && resp.data && resp.data.msg) ? resp.data.msg : 'Помилка імпорту.');
             }
           },
-          error: function(){ \$msg.text('Помилка з\'єднання.'); }
+          error:function(){ \$msg.text('Помилка з\\'єднання.'); }
         });
         return false;
     });
-
 });
 JS;
     }

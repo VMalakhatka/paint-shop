@@ -82,12 +82,26 @@ class ImporterDraft
         // Мапінг колонок
         $start = 0;
         $map   = ['sku'=>0,'qty'=>1,'gtin'=>null,'price'=>null];
-        $h     = array_map('strval', (array)$rows[0]);
-        $normH = array_map([Helpers::class, 'norm'], $h);
-        if (in_array('sku', $normH, true) || in_array('gtin', $normH, true)) {
-            $cm   = Helpers::build_colmap($h);
-            $map  = array_merge($map, $cm);
+
+        $h     = array_map('strval', (array)$rows[0]);                // сирі заголовки
+        $cm    = Helpers::build_colmap($h);                           // шукаємо "Артикул/К-сть/..." тощо
+        $has_header = isset($cm['sku']) || isset($cm['gtin']) || isset($cm['qty']) || isset($cm['price']);
+
+        if ($has_header) {
+            $map   = array_merge($map, $cm);
             $start = 1;
+        } else {
+            // Додатковий «рятувальний» детект: якщо у першому рядку багато нетеоретичних чисел — це теж шапка
+            $nonNumeric = 0;
+            foreach ($h as $cell) {
+                $cell = trim((string)$cell);
+                $cell2 = str_replace([","," ","\xC2\xA0"], ['.','',''], $cell);
+                if ($cell === '' || !is_numeric($cell2)) $nonNumeric++;
+            }
+            if ($nonNumeric >= 2) { // виглядає як шапка
+                $map   = array_merge($map, $cm);
+                $start = 1;
+            }
         }
 
         // Створити порожню чернетку (без емейлів і без списань складу)
@@ -111,10 +125,6 @@ class ImporterDraft
             $qty   = Helpers::parse_qty(self::safe_val($r, $map['qty']));
             $price = self::parse_price(self::safe_val($r, $map['price']));
 
-            if ($qty <= 0) {
-                $skipped++; $report[] = self::logRow($i+1,'skip','Кількість ≤ 0'); continue;
-            }
-
             $pid = 0;
             if ($sku !== '')  $pid = wc_get_product_id_by_sku($sku);
             if (!$pid && $gtin !== '') $pid = Helpers::find_product_by_gtin($gtin);
@@ -132,11 +142,14 @@ class ImporterDraft
                 continue;
             }
 
-            // Мін/макс
-            $minq = max(1, (int)$product->get_min_purchase_quantity());
-            if ($qty < $minq) $qty = (float)$minq;
-            $maxq = (int)$product->get_max_purchase_quantity();
-            if ($maxq > 0 && $qty > $maxq) $qty = (float)$maxq;
+            // Чернетка: не обмежуємо мін/макс/залишок.
+            // Лише нормалізуємо кількість під крок WooCommerce і відсікаємо нуль/від’ємні.
+            $qty = wc_stock_amount($qty);
+            if ($qty <= 0) {
+                $skipped++;
+                $report[] = self::logRow($i+1,'skip','Кількість ≤ 0');
+                continue;
+            }
 
             // Додати позицію (subtotal/total — якщо є ціна у файлі; інакше Woo візьме з продукту)
             $item_data = [];
@@ -184,9 +197,6 @@ class ImporterDraft
     {
         $rows = [];
         if (preg_match('~\.(xlsx|xls)$~i', $name)) {
-            foreach ([WP_CONTENT_DIR.'/vendor/autoload.php', ABSPATH.'vendor/autoload.php'] as $autoload) {
-                if (is_readable($autoload)) { require_once $autoload; break; }
-            }
             if (class_exists('\\PhpOffice\\PhpSpreadsheet\\IOFactory')) {
                 try{
                     $xls = \PhpOffice\PhpSpreadsheet\IOFactory::load($tmp);

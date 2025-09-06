@@ -114,10 +114,6 @@ class ImporterCart
         $rows = [];
 
         if (preg_match('~\.(xlsx|xls)$~i', $name)) {
-            // Спробувати PhpSpreadsheet через vendor/autoload.php
-            foreach ([WP_CONTENT_DIR.'/vendor/autoload.php', ABSPATH.'vendor/autoload.php'] as $autoload) {
-                if (is_readable($autoload)) { require_once $autoload; break; }
-            }
             if (class_exists('\\PhpOffice\\PhpSpreadsheet\\IOFactory')) {
                 try {
                     $xls = \PhpOffice\PhpSpreadsheet\IOFactory::load($tmp);

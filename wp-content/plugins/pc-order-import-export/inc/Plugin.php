@@ -7,7 +7,7 @@ class Plugin {
         ImporterDraft::register_status();
 
         // UI (кнопки експорту, імпорту в кошик і в чернетку)
-        Ui::hooks();
+        Ui::init();
 
         // Експорт
         add_action('wp_ajax_pcoe_export', [Exporter::class,'handle']);
