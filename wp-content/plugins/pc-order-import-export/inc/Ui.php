@@ -16,6 +16,7 @@ class Ui
         add_action('woocommerce_after_cart_totals',          [self::class, 'render_cart_block']);
         add_action('woocommerce_cart_totals_after_shipping', [self::class, 'render_cart_block']);
         add_action('woocommerce_proceed_to_checkout',        [self::class, 'render_cart_block']);
+        add_action('woocommerce_before_account_orders', [self::class, 'render_account_import_block'], 5);
 
         // CART (блочный редактор): fallback — дописываем в конец контента
         add_filter('the_content', [self::class, 'maybe_append_to_cart_block'], 20);
@@ -25,6 +26,28 @@ class Ui
 
         // Скрипты
         add_action('wp_enqueue_scripts', [self::class, 'enqueue_js']);
+
+        add_filter('woocommerce_my_account_my_orders_columns', function($cols){
+            // вставимо після колонки "Order"
+            $new = [];
+            foreach ($cols as $key=>$label){
+                $new[$key] = $label;
+                if ($key === 'order-number') {
+                    $new['pc_draft_title'] = 'Назва';
+                }
+            }
+            return $new;
+        }, 10, 1);
+
+        add_action('woocommerce_my_account_my_orders_column_pc_draft_title', function($order){
+            if (!$order instanceof \WC_Order) return;
+            $title = (string)$order->get_meta('_pc_draft_title');
+            if ($title !== '') {
+                echo esc_html($title);
+            } else {
+                if ($order->has_status('pc-draft')) echo '<em style="opacity:.7">(без назви)</em>';
+            }
+        });
     }
 
     /** Алиас на случай, если где-то вызывается Ui::hooks() */
@@ -32,11 +55,60 @@ class Ui
 
     /* ===================== PUBLIC RENDERERS ===================== */
 
-    /** Блок на странице корзины */
+
+    /** Блок імпорту в чернетку на сторінці "Мої замовлення" */
+    public static function render_account_import_block(): void
+    {
+        // проста форма — той самий AJAX, що й на кошику
+        $nonce_draft = wp_create_nonce('pcoe_import_draft');
+        ?>
+        <div class="pcoe-import" style="margin:16px 0; padding:12px; border:1px solid #eee; border-radius:8px">
+        <details open>
+            <summary><strong>Імпорт у чернетку замовлення</strong> (CSV / XLSX)</summary>
+            <form id="pcoe-import-draft-form" enctype="multipart/form-data" method="post" onsubmit="return false;"
+                style="margin-top:12px; display:flex; gap:12px; align-items:center; flex-wrap:wrap">
+                <input type="hidden" name="_wpnonce" value="<?php echo esc_attr($nonce_draft); ?>">
+                <input type="file" name="file" accept=".csv,.xlsx,.xls" required>
+                <input type="text" name="title" placeholder="Назва чернетки (необов’язково)" style="min-width:260px">
+                <button type="submit" class="button">Імпортувати у чернетку</button>
+                <span class="pcoe-import-draft-msg" style="margin-left:8px; opacity:.8"></span>
+            </form>
+
+            <div class="pcoe-import-draft-result" style="margin-top:10px; display:none">
+            <div class="pcoe-import-draft-links" style="margin:6px 0"></div>
+            <div class="pcoe-import-draft-report"></div>
+            </div>
+
+            <div style="font-size:12px; opacity:.8; margin-top:10px">
+            Формат: <code>sku;qty</code> або <code>gtin;qty</code>. Допускаються локальні назви колонок (Артикул, К-сть…).
+            </div>
+        </details>
+        </div>
+        <?php
+    }
+
     public static function render_cart_block(): void
     {
         if (!function_exists('WC') || !WC()->cart) return;
+
+        // 1) панель експорту
         echo self::render_controls_html('cart', 0);
+
+        // 2) кнопка "Зберегти кошик у чернетку" (Cart → Draft)
+        ?>
+        <div style="margin:8px 0 4px; display:flex; gap:8px; align-items:center; flex-wrap:wrap">
+            <form action="<?php echo esc_url(admin_url('admin-ajax.php')); ?>" method="get"
+                style="display:flex; gap:8px; align-items:center">
+                <input type="hidden" name="action" value="pcoe_cart_to_draft">
+                <input type="hidden" name="_wpnonce" value="<?php echo esc_attr(wp_create_nonce('pcoe_cart_to_draft')); ?>">
+                <input type="hidden" name="clear" value="1">
+                <input type="text" name="title" placeholder="Назва чернетки (необов’язково)" style="min-width:260px">
+                <button class="button" type="submit">Зберегти кошик у чернетку</button>
+            </form>
+        </div>
+        <?php
+
+        // 3) блок імпорту в кошик/чернетку
         echo self::render_import_html('cart');
     }
 

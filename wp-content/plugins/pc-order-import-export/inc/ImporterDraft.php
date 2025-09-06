@@ -183,6 +183,15 @@ class ImporterDraft
             'view' => self::customer_view_link($order),
         ];
 
+        $title = isset($_POST['title']) ? sanitize_text_field((string)$_POST['title']) : '';
+        if ($title === '' && $name !== '') {
+            $title = preg_replace('~\.(csv|xlsx?|xls)$~i', '', basename($name));
+        }
+        if ($title !== '') {
+            $order->update_meta_data('_pc_draft_title', $title);
+            $order->save();
+        }
+
         wp_send_json_success([
             'order_id'    => $order_id,
             'imported'    => $imported,

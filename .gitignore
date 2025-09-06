@@ -56,8 +56,6 @@ wp-content/plugins/*
 !wp-content/plugins/paint-shop-ux/**
 !wp-content/plugins/role-price/
 !wp-content/plugins/role-price/**
-!wp-content/plugins/pc-order-exporter/
-!wp-content/plugins/pc-order-exporter/**
 !wp-content/plugins/pc-order-import-export
 !wp-content/plugins/pc-order-import-export/**
 
