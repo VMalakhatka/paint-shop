@@ -31,6 +31,21 @@ class CartToDraft
         return add_query_arg($q, admin_url('admin-ajax.php'));
     }
 
+    protected static function redirect_now(string $url): void {
+        if (!$url) $url = wc_get_account_endpoint_url('orders');
+
+        if (!headers_sent()) {
+            wp_safe_redirect($url);
+            exit;
+        }
+
+        // Фолбек, якщо заголовки вже відправлені або ajax-браузер не слідує 302
+        $url_js = esc_url_raw($url);
+        echo '<meta http-equiv="refresh" content="0;url='.esc_attr($url_js).'">';
+        echo '<script>location.href='.json_encode($url_js).';</script>';
+        exit;
+    }
+
     /**
      * Обробник: зберегти поточний кошик як чернетку (і опціонально очистити кошик)
      *
@@ -47,6 +62,30 @@ class CartToDraft
             wp_die('Bad nonce', '', ['response' => 403]);
         }
 
+        $cart  = WC()->cart;
+        $items = $cart->get_cart();
+        if (empty($items)) { self::redirect_now(wc_get_cart_url()); }
+
+        $snapshot = [];
+        foreach ($items as $ci) {
+            $snapshot[] = [
+                (int)($ci['product_id'] ?? 0),
+                (int)($ci['variation_id'] ?? 0),
+                (float)($ci['quantity'] ?? 0),
+            ];
+        }
+        $hash = md5(wp_json_encode($snapshot));
+        // окремі ключі для залогінених і гостей
+        $uid  = get_current_user_id() ?: 0;
+        $lock_key = 'pcoe_cart2draft_' . $uid . '_' . $hash;
+
+        // якщо вже створювали хвилину тому — ведемо туди ж
+        if ($existing = (int) get_transient($lock_key)) {
+            self::redirect_now( current_user_can('edit_shop_orders')
+                ? admin_url('post.php?post='.$existing.'&action=edit')
+                : wc_get_account_endpoint_url('orders')
+            );
+        }
         if (!function_exists('WC') || !WC()->cart) {
             wp_die('Cart not available', '', ['response' => 400]);
         }
@@ -97,29 +136,22 @@ class CartToDraft
         try { $order->calculate_totals(false); } catch (\Throwable $e) {}
         $order->save();
 
-        // очистить корзину?
-        $clear = isset($_REQUEST['clear']) ? (string) $_REQUEST['clear'] : '';
-        if ($clear === '1') {
-            $cart->empty_cart();
+        set_transient($lock_key, (int)$order->get_id(), 30); // 30 сек достатньо
+        
+        if ( function_exists('WC') && WC()->cart ) {
+            WC()->cart->empty_cart(true);   // чистить і persistent cart
+            if ( WC()->session ) {
+                WC()->session->set('cart', array());
+            }
+            if ( function_exists('wc_setcookie') ) {
+                wc_setcookie('woocommerce_items_in_cart', 0);
+                wc_setcookie('woocommerce_cart_hash', '');
+            }
         }
 
         // редирект
-        $order_id = (int) $order->get_id();
-        $dest = isset($_REQUEST['dest']) ? sanitize_key((string) $_REQUEST['dest']) : '';
-
-        // приоритет: что попросили в форме
-        if ($dest === 'orders') {
-            $redirect = wc_get_account_endpoint_url('orders');
-        } elseif ($dest === 'view') {
-            $redirect = self::customer_view_link($order) ?: wc_get_account_endpoint_url('orders');
-        } elseif ($dest === 'admin') {
-            $redirect = admin_url('post.php?post='.$order_id.'&action=edit');
-        } else {
-            // дефолт: тоже в Orders (и для админов, и для клиентов)
-            $redirect = wc_get_account_endpoint_url('orders');
-        }
         wc_add_notice( sprintf(__('Чернетку #%d створено.', 'your-textdomain'), $order_id), 'success' );
-        wp_safe_redirect($redirect);
+        self::redirect_now($redirect);
         exit;
     }
 
