@@ -809,7 +809,6 @@ CREATE TABLE wp_stock_import (
 <details>
 <summary><strong>PC Order Import/Export</strong></summary>
 ```
-
 # PC Order Import/Export
 
 Плагін для WooCommerce: експорт кошика/замовлень у CSV/XLSX + імпорт у кошик/чернетку.
