@@ -173,10 +173,6 @@ class CartToDraft
             $redirect = wc_get_account_endpoint_url('orders');
         }
 
-        // опціонально: флеш-повідомлення
-        wc_add_notice(sprintf('Чернетку #%d створено.', $order_id), 'success');
-
-        // надійний редирект (ваш helper)
         self::redirect_now($redirect);
     }
 
