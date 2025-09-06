@@ -56,6 +56,22 @@ else
 fi
 
 
+# == Composer install (если есть composer.json) ==
+if [ -f "$REPO/composer.json" ]; then
+  echo "== Composer install =="
+  if [ ! -f "$REPO/vendor/autoload.php" ] || [ "$REPO/composer.lock" -nt "$REPO/vendor/autoload.php" ]; then
+    /home/vmalakhatka/bin/composer -d "$REPO" install --no-dev -o
+  else
+    echo "✓ vendor/ актуален — пропускаем composer install"
+  fi
+fi
+
+# копируем vendor
+if [ -d "$REPO/vendor" ]; then
+  mkdir -p "$WP/wp-content/vendor"
+  rsync "${RSYNC[@]}" "$REPO/vendor/" "$WP/wp-content/vendor/"
+fi
+
 # == Ops-скрипты из репозитория -> в $HOME ==
 # Скрипты лежат в репозитории в wp-content; на сервере должны жить в $HOME и быть исполняемыми.
 # ВАЖНО: сюда НЕ включаем сам deploy_safe.sh, чтобы не перезаписывать работающий скрипт.
@@ -102,6 +118,11 @@ if [ -d "$THEMES_PLUG" ]; then
   rm -rf "$THEMES_PLUG"
 fi
 
+mkdir -p "$WP/wp-content/mu-plugins" \
+         "$WP/wp-content/themes/generatepress-child" \
+         "$PLUG/paint-core" "$PLUG/paint-shop-ux" "$PLUG/role-price" \
+         "$PLUG/pc-order-exporter" "$PLUG/pc-order-import-export"
+
 # 2) Синхроним ТОЛЬКО наши каталоги
 rsync "${RSYNC[@]}" wp-content/mu-plugins/                 "$WP/wp-content/mu-plugins/"
 rsync "${RSYNC[@]}" wp-content/themes/generatepress-child/  "$WP/wp-content/themes/generatepress-child/"
@@ -116,8 +137,9 @@ for p in \
   "$WP/wp-content/mu-plugins" \
   "$WP/wp-content/themes/generatepress-child" \
   "$PLUG/paint-core" \
+  "$PLUG/paint-shop-ux" \
   "$PLUG/role-price" \
-  "$PLUG/pc-order-exporter"\
+  "$PLUG/pc-order-exporter" \
   "$PLUG/pc-order-import-export"
 do
   find "$p" -type d -exec chmod 755 {} \; 2>/dev/null || true
@@ -136,6 +158,23 @@ if /opt/remi/php83/root/bin/php /bin/wp-cli.phar --path="$WP" eval \
   fi
 else
   echo "❌ Ошибка: WP-CLI не смог записать в $PLUG"
+fi
+
+# перед блоком "Очистка кэша", один раз создадим мост
+MU_LOADER="$WP/wp-content/mu-plugins/00-composer-autoload.php"
+if [ ! -f "$MU_LOADER" ]; then
+  mkdir -p "$WP/wp-content/mu-plugins"
+  cat > "$MU_LOADER" <<'PHP'
+<?php
+/**
+ * Autoload Composer vendor placed in wp-content/vendor
+ */
+$autoload = WP_CONTENT_DIR . '/vendor/autoload.php';
+if ( file_exists( $autoload ) ) {
+    require_once $autoload;
+}
+PHP
+  echo "✓ Создан MU-plugin для автозагрузчика: $MU_LOADER"
 fi
 
 # 5) Очистка кэша WP

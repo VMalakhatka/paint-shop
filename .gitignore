@@ -79,6 +79,9 @@ node_modules/
 vendor/
 dist/
 build/
+/vendor/
+composer.phar
+composer-setup.php
 
 # === IDE / System ===
 *.log
