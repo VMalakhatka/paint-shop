@@ -56,6 +56,8 @@ wp-content/plugins/*
 !wp-content/plugins/role-price/**
 !wp-content/plugins/pc-order-exporter/
 !wp-content/plugins/pc-order-exporter/**
+!wp-content/plugins/pc-order-import-export
+!wp-content/plugins/pc-order-import-export/**
 
 # === MU-plugins: либо отслеживаем все, либо только свои ===
 # Вариант 1 (отслеживать все mu-plugins):
