@@ -43,12 +43,21 @@ class Ui
     /** Блок на странице заказа */
     public static function render_order_block($order): void
     {
-        if (!$order instanceof \WC_Order) return;
-        echo self::render_controls_html('order', (int)$order->get_id());
-        echo self::render_import_html('order');
-        // Импорт в черновик на странице заказа не показываем (можно включить при желании)
-    }
+        if ( ! $order instanceof \WC_Order ) return;
 
+        echo self::render_controls_html('order', (int)$order->get_id());
+
+        // Кнопка «В кошик!» — доступна власнику замовлення або менеджеру
+        $can_manage = current_user_can('manage_woocommerce');
+        $is_owner   = (int)$order->get_user_id() === (int)get_current_user_id();
+
+        if ( $can_manage || $is_owner ) {
+            $url = \PaintCore\PCOE\DraftToCart::action_url((int)$order->get_id(), ['clear' => '1']);
+            echo '<p style="margin-top:10px">
+                    <a class="button" href="'.esc_url($url).'">В кошик!</a>
+                </p>';
+        }
+}
     /** Fallback для блочного корзинного шаблона */
     public static function maybe_append_to_cart_block(string $content): string
     {
@@ -125,6 +134,7 @@ class Ui
         <?php
         return ob_get_clean();
     }
+    
 
     /** Импорт (в корзину + в черновик) — отображается только на странице корзины */
     protected static function render_import_html(string $scope): string

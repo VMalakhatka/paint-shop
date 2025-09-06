@@ -808,12 +808,13 @@ CREATE TABLE wp_stock_import (
 
 <details>
 <summary><strong>PC Order Import/Export</strong></summary>
-```
+
+```markdown
 # PC Order Import/Export
 
 Плагін для WooCommerce: експорт кошика/замовлень у CSV/XLSX + імпорт у кошик/чернетку.
 
-## 📦 Встановлення
+## 📦 Востановлення
 1. Скопіювати каталог `pc-order-import-export` у `wp-content/plugins/`.
 2. Активувати плагін у WordPress → Плагіни.
 3. Для XLSX потрібен пакет [`phpoffice/phpspreadsheet`](https://phpspreadsheet.readthedocs.io).
