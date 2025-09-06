@@ -105,10 +105,18 @@ gunzip -c ~/backup-db-YYYYMMDD-HHMM.sql.gz | mysql -u aphp -p kreul
 Скрипт
 	•	deploy_safe.sh — лежит на сервере в ~/deploy_safe.sh.
 	•	Исходник хранится в репозитории: wp-content/deploy_safe.sh.
+	•	если отредактировал deploy_safe.sh и он уже попал на сервер в wp-content/
+	•	то его надо переместить в HOME и открыть права 
+```
+
+```bash
+cp -f /var/www/virtuals/kreul.com.ua/wp-content/deploy_safe.sh ~/
+chmod 755 ~/deploy_safe.sh
+```
 
 Алгоритм
 	1.	Код репозитория на сервере хранится в:
-```
+
 ```bash
 ~/deploy/paint-shop
 ```
@@ -116,6 +124,7 @@ gunzip -c ~/backup-db-YYYYMMDD-HHMM.sql.gz | mysql -u aphp -p kreul
 ```bash
 ~/deploy_safe.sh
 ```
+
 ```text
 Скрипт:
 	•	делает git pull,
@@ -139,6 +148,7 @@ DRY_RUN=1 ~/deploy_safe.sh
 ```bash
 tail -n 200 ~/deploy.log
 ```
+
 ```text
 	•	Автоматическая ротация лога (хранится ≤1MB).
 

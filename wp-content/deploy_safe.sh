@@ -115,8 +115,8 @@ for p in \
   "$WP/wp-content/mu-plugins" \
   "$WP/wp-content/themes/generatepress-child" \
   "$PLUG/paint-core" \
-  "$PLUG/paint-shop-ux" \
-  "$PLUG/role-price"
+  "$PLUG/role-price" \
+  "$PLUG/pc-order-exporter"
 do
   find "$p" -type d -exec chmod 755 {} \; 2>/dev/null || true
   find "$p" -type f -exec chmod 644 {} \; 2>/dev/null || true
