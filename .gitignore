@@ -54,6 +54,8 @@ wp-content/plugins/*
 !wp-content/plugins/paint-shop-ux/**
 !wp-content/plugins/role-price/
 !wp-content/plugins/role-price/**
+!wp-content/plugins/pc-order-exporter/
+!wp-content/plugins/pc-order-exporter/**
 
 # === MU-plugins: либо отслеживаем все, либо только свои ===
 # Вариант 1 (отслеживать все mu-plugins):
