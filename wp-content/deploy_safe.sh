@@ -109,6 +109,7 @@ rsync "${RSYNC[@]}" wp-content/plugins/paint-core/          "$PLUG/paint-core/"
 rsync "${RSYNC[@]}" wp-content/plugins/paint-shop-ux/       "$PLUG/paint-shop-ux/"
 rsync "${RSYNC[@]}" wp-content/plugins/role-price/          "$PLUG/role-price/"
 rsync "${RSYNC[@]}" wp-content/plugins/pc-order-exporter/   "$PLUG/pc-order-exporter/"
+rsync "${RSYNC[@]}" wp-content/plugins/pc-order-import-export/   "$PLUG/pc-order-import-export/"
 
 # 3) Права (мягко; ошибки игнорируем)
 for p in \
@@ -116,7 +117,8 @@ for p in \
   "$WP/wp-content/themes/generatepress-child" \
   "$PLUG/paint-core" \
   "$PLUG/role-price" \
-  "$PLUG/pc-order-exporter"
+  "$PLUG/pc-order-exporter"\
+  "$PLUG/pc-order-import-export"
 do
   find "$p" -type d -exec chmod 755 {} \; 2>/dev/null || true
   find "$p" -type f -exec chmod 644 {} \; 2>/dev/null || true
