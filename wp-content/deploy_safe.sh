@@ -108,6 +108,7 @@ rsync "${RSYNC[@]}" wp-content/themes/generatepress-child/  "$WP/wp-content/them
 rsync "${RSYNC[@]}" wp-content/plugins/paint-core/          "$PLUG/paint-core/"
 rsync "${RSYNC[@]}" wp-content/plugins/paint-shop-ux/       "$PLUG/paint-shop-ux/"
 rsync "${RSYNC[@]}" wp-content/plugins/role-price/          "$PLUG/role-price/"
+rsync "${RSYNC[@]}" wp-content/plugins/pc-order-exporter/   "$PLUG/pc-order-exporter/"
 
 # 3) Права (мягко; ошибки игнорируем)
 for p in \
