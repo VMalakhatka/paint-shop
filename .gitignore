@@ -66,6 +66,7 @@ wp-content/plugins/*
 
 # Вариант 2 (жёстко зафиксировать только наши текущие файлы):
 wp-content/mu-plugins/*
+!wp-content/mu-plugins/00-composer-autoload.php
 !wp-content/mu-plugins/psu-force-per-page.php
 !wp-content/mu-plugins/role-price-import-lite.php
 !wp-content/mu-plugins/stock-import-csv-lite.php

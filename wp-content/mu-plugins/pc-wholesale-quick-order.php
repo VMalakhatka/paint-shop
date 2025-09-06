@@ -183,48 +183,79 @@ add_shortcode('pc_quick_order', function($atts){
     };
     $pager_html = $build_pager($q, $paged);
 
+    /* ==== Breadcrumbs for Quick Order ==== */
+    $pcqo_render_breadcrumbs = function(array $cat_slugs){
+        $post = get_post();
+        $base = $post ? get_permalink($post) : home_url('/');
+
+        echo '<nav class="woocommerce-breadcrumb" style="margin:6px 0 12px">';
+        echo '<a href="'.esc_url(home_url('/')).'">Головна</a>';
+        echo ' <span class="breadcrumb-delimiter">→</span> ';
+        echo '<a href="'.esc_url($base).'">Список товару</a>';
+
+        if (count($cat_slugs) === 1) {
+            $slug = $cat_slugs[0];
+            $term = get_term_by('slug', $slug, 'product_cat');
+            if ($term && !is_wp_error($term)) {
+                $anc = array_reverse(get_ancestors($term->term_id, 'product_cat'));
+                foreach ($anc as $aid) {
+                    $t = get_term($aid, 'product_cat');
+                    if ($t && !is_wp_error($t)) {
+                        echo ' <span class="breadcrumb-delimiter">→</span> ';
+                        echo '<a href="'.esc_url(add_query_arg('cat', $t->slug, $base)).'">'.esc_html($t->name).'</a>';
+                    }
+                }
+                echo ' <span class="breadcrumb-delimiter">→</span> ';
+                echo '<a href="'.esc_url(add_query_arg('cat', $term->slug, $base)).'">'.esc_html($term->name).'</a>';
+            }
+        }
+        echo '</nav>';
+    };
+    /* ==== /Breadcrumbs ==== */
+
     if (!$q->have_posts()) return '<p>'.esc_html($L['notfound']).'</p>';
 
-    // server toggle: hide zero
     $hz_on = (isset($_GET['hide_zero']) && $_GET['hide_zero'] === '1');
 
     $nonce = wp_create_nonce('pc_bulk_add');
+
     ob_start(); ?>
     <div class="pc-qo-wrap">
-      <div class="pc-qo-toolbar" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <?php $pcqo_render_breadcrumbs($cat_slugs); ?>
+
+    <div class="pc-qo-toolbar" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
         <button type="button" class="button button-primary pc-qo-addall" data-nonce="<?php echo esc_attr($nonce); ?>">
-          <?php echo esc_html($L['add_all']); ?>
+        <?php echo esc_html($L['add_all']); ?>
         </button>
         <?php
-            $base = remove_query_arg(['qo_page']);
-            $mk = function($key, $order = null) use ($base, $a) {
-                return esc_url(add_query_arg(['orderby'=>$key,'order'=>$order?:$a['order'],'qo_page'=>1], $base));
-            };
-            $bold = function($key, $label) use ($a, $mk) {
-                $url   = $mk($key);
-                $isCur = ($a['orderby'] === $key);
-                $style = $isCur ? ' style="font-weight:700;text-decoration:underline"' : '';
-                return '<a href="'.$url.'"'.$style.'>'.$label.'</a>';
-            };
-            $nextOrder = ($a['order'] === 'ASC') ? 'DESC' : 'ASC';
-            $toggleUrl = $mk($a['orderby'], $nextOrder);
-            $toggleLbl = ($nextOrder === 'DESC') ? $L['asc'] : $L['desc'];
+        $base = remove_query_arg(['qo_page']);
+        $mk = function($key, $order = null) use ($base, $a) {
+            return esc_url(add_query_arg(['orderby'=>$key,'order'=>$order?:$a['order'],'qo_page'=>1], $base));
+        };
+        $bold = function($key, $label) use ($a, $mk) {
+            $url   = $mk($key);
+            $isCur = ($a['orderby'] === $key);
+            $style = $isCur ? ' style="font-weight:700;text-decoration:underline"' : '';
+            return '<a href="'.$url.'"'.$style.'>'.$label.'</a>';
+        };
+        $nextOrder = ($a['order'] === 'ASC') ? 'DESC' : 'ASC';
+        $toggleUrl = $mk($a['orderby'], $nextOrder);
+        $toggleLbl = ($nextOrder === 'DESC') ? $L['asc'] : $L['desc'];
 
-            $hz_url  = esc_url(add_query_arg(['hide_zero' => $hz_on ? '0' : '1', 'qo_page' => 1], $base));
-            $hz_text = $hz_on ? $L['show0'] : $L['hide0'];
+        $hz_url  = esc_url(add_query_arg(['hide_zero' => $hz_on ? '0' : '1', 'qo_page' => 1], $base));
+        $hz_text = $hz_on ? $L['show0'] : $L['hide0'];
         ?>
         <span style="opacity:.7"><?php echo esc_html($L['sort']); ?></span>
         <?= $bold('title',  esc_html($L['by_title'])); ?> ·
         <?= $bold('sku',    esc_html($L['by_sku']));   ?> ·
         <?= $bold('price',  esc_html($L['by_price'])); ?>
         <a href="<?= $toggleUrl; ?>" style="margin-left:8px"><?= esc_html($toggleLbl); ?></a>
-
         <a href="<?= $hz_url; ?>" class="pc-qo-hz-link" style="margin-left:14px"><?= esc_html($hz_text); ?></a>
-
         <span class="pc-qo-message" style="margin-left:auto;"></span>
-      </div>
+    </div>
 
-      <?php echo $pager_html; ?>
+    <?php echo $pager_html; ?>
+    <!-- ... дальше как было ... -->
 
       <div class="pc-qo-table-wrap">
         <table class="pc-qo-table">
