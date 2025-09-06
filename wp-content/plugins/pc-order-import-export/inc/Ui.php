@@ -272,14 +272,17 @@ public static function render_account_import_block(): void
 
                  <!-- Зберегти поточний кошик у чернетку -->
                 <div style="margin-top:14px">
-                  <form action="<?php echo esc_url(admin_url('admin-ajax.php')); ?>" method="get"
+                <form action="<?php echo esc_url(admin_url('admin-ajax.php')); ?>" method="post"
                         style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
                     <input type="hidden" name="action" value="pcoe_cart_to_draft">
                     <input type="hidden" name="_wpnonce" value="<?php echo esc_attr(wp_create_nonce('pcoe_cart_to_draft')); ?>">
-                    <input type="hidden" name="clear" value="1">
+                    <input type="hidden" name="dest" value="orders"><!-- редирект одразу в 'Мої замовлення' -->
                     <input type="text" name="title" placeholder="Назва чернетки (необов’язково)" style="min-width:260px">
-                    <button class="button" type="submit">В чернетку</button>
-                  </form>
+                    <button class="button" type="submit"
+                            onclick="this.disabled=true;this.innerText='Зберігаю…';this.form.submit();">
+                        В чернетку
+                    </button>
+                </form>
                 </div>
 
                 <div style="font-size:12px; opacity:.8; margin-top:12px">

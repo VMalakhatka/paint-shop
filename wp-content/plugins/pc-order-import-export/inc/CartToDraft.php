@@ -56,16 +56,23 @@ class CartToDraft
      */
     public static function handle(): void
     {
-        // nonce: принимаем и GET, и POST
+        // 1) Nonce (GET/POST)
         $nonce = isset($_REQUEST['_wpnonce']) ? (string) $_REQUEST['_wpnonce'] : '';
         if (!$nonce || !wp_verify_nonce($nonce, 'pcoe_cart_to_draft')) {
             wp_die('Bad nonce', '', ['response' => 403]);
         }
 
+        if (!function_exists('WC') || !WC()->cart) {
+            wp_die('Cart not available', '', ['response' => 400]);
+        }
+
         $cart  = WC()->cart;
         $items = $cart->get_cart();
-        if (empty($items)) { self::redirect_now(wc_get_cart_url()); }
+        if (empty($items)) {
+            self::redirect_now(wc_get_cart_url());
+        }
 
+        // 2) Анти-даблклік: ХЕШ кошика + ранній "LOCK"
         $snapshot = [];
         foreach ($items as $ci) {
             $snapshot[] = [
@@ -75,45 +82,43 @@ class CartToDraft
             ];
         }
         $hash = md5(wp_json_encode($snapshot));
-        // окремі ключі для залогінених і гостей
         $uid  = get_current_user_id() ?: 0;
         $lock_key = 'pcoe_cart2draft_' . $uid . '_' . $hash;
 
-        // якщо вже створювали хвилину тому — ведемо туди ж
-        if ($existing = (int) get_transient($lock_key)) {
-            self::redirect_now( current_user_can('edit_shop_orders')
-                ? admin_url('post.php?post='.$existing.'&action=edit')
-                : wc_get_account_endpoint_url('orders')
-            );
+        $lock_val = get_transient($lock_key);
+        if ($lock_val && $lock_val !== 'LOCK') {
+            // вже є ID створеного чернетка — ведемо туди (або в Список)
+            $existing_id = (int) $lock_val;
+            $url = current_user_can('edit_shop_orders')
+                ? admin_url('post.php?post='.$existing_id.'&action=edit')
+                : wc_get_account_endpoint_url('orders');
+            self::redirect_now($url);
         }
-        if (!function_exists('WC') || !WC()->cart) {
-            wp_die('Cart not available', '', ['response' => 400]);
+        if ($lock_val === 'LOCK') {
+            // хтось вже відправив форму — просто на «Замовлення»
+            self::redirect_now(wc_get_account_endpoint_url('orders'));
         }
+        // Ставимо LOCK одразу, щоб не було гонки
+        set_transient($lock_key, 'LOCK', 30); // 30 сек більше ніж досить
 
-        $cart  = WC()->cart;
-        $items = $cart->get_cart();
-        if (empty($items)) {
-            wp_safe_redirect(wc_get_cart_url());
-            exit;
-        }
-
-        // создаём черновик
+        // 3) Створюємо чернетку
         $order = wc_create_order([
             'status'      => 'wc-pc-draft',
             'customer_id' => get_current_user_id() ?: 0,
         ]);
         if (!$order instanceof \WC_Order) {
+            // знімаємо lock у разі фейлу
+            delete_transient($lock_key);
             wp_die('Cannot create draft order', '', ['response' => 500]);
         }
 
-        // название (опц.)
+        // 4) Назва (опц.)
         $title = isset($_REQUEST['title']) ? sanitize_text_field((string) $_REQUEST['title']) : '';
         if ($title !== '') {
             $order->update_meta_data('_pc_draft_title', $title);
         }
 
-        // переносим позиции из корзины
-        $imported = 0;
+        // 5) Переносимо позиції
         foreach ($items as $ci) {
             $product = $ci['data'] ?? null;
             if (!$product instanceof \WC_Product) continue;
@@ -130,18 +135,25 @@ class CartToDraft
                 }
             }
 
-            try { $order->add_product($product, $qty, $item_args); $imported++; } catch (\Throwable $e) {}
+            try { $order->add_product($product, $qty, $item_args); } catch (\Throwable $e) {}
         }
 
         try { $order->calculate_totals(false); } catch (\Throwable $e) {}
         $order->save();
 
-        set_transient($lock_key, (int)$order->get_id(), 30); // 30 сек достатньо
-        
-        if ( function_exists('WC') && WC()->cart ) {
-            WC()->cart->empty_cart(true);   // чистить і persistent cart
+        $order_id = (int) $order->get_id();
+
+        // Міняємо LOCK на створений ID (другий клік піде сюди вище)
+        set_transient($lock_key, $order_id, 30);
+
+        // 6) ЧИСТИМО КОШИК (жорстко, включно з persistent)
+        if ( WC()->cart ) {
+            WC()->cart->empty_cart(true);
             if ( WC()->session ) {
                 WC()->session->set('cart', array());
+                WC()->session->set('applied_coupons', array());
+                WC()->session->set('cart_totals', null);
+                WC()->session->set('cart_hash', '');
             }
             if ( function_exists('wc_setcookie') ) {
                 wc_setcookie('woocommerce_items_in_cart', 0);
@@ -149,10 +161,23 @@ class CartToDraft
             }
         }
 
-        // редирект
-        wc_add_notice( sprintf(__('Чернетку #%d створено.', 'your-textdomain'), $order_id), 'success' );
+        // --- Куди редиректити
+        $order_id = (int) $order->get_id();
+        $dest = isset($_REQUEST['dest']) ? sanitize_key((string) $_REQUEST['dest']) : 'orders';
+
+        if ($dest === 'admin') {
+            $redirect = admin_url('post.php?post='.$order_id.'&action=edit');
+        } elseif ($dest === 'view') {
+            $redirect = self::customer_view_link($order) ?: wc_get_account_endpoint_url('orders');
+        } else { // 'orders' за замовчуванням
+            $redirect = wc_get_account_endpoint_url('orders');
+        }
+
+        // опціонально: флеш-повідомлення
+        wc_add_notice(sprintf('Чернетку #%d створено.', $order_id), 'success');
+
+        // надійний редирект (ваш helper)
         self::redirect_now($redirect);
-        exit;
     }
 
     /** Посилання «Переглянути замовлення» для власника */
