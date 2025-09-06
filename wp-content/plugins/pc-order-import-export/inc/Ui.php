@@ -9,6 +9,60 @@ class Ui
     protected static bool $xlsx_enabled = true;
     public static function disableXlsx(): void { self::$xlsx_enabled = false; }
 
+    public static function render_cart_block(): void
+    {
+        if (!function_exists('WC') || !WC()->cart) return;
+
+        echo self::render_controls_html('cart', 0);
+        echo self::render_import_html('cart');
+
+        // ← наша кнопка/форма «В чернетку»
+        echo self::render_cart_to_draft_html();
+    }
+
+    /** Fallback для блочного кошика (Gutenberg) */
+    public static function maybe_append_to_cart_block(string $content): string
+    {
+        if (!is_cart()) return $content;
+
+        global $post;
+        if ($post && function_exists('has_block') && has_block('woocommerce/cart', $post)) {
+            if (strpos($content, 'class="pcoe-export"') === false) {
+                $content .= self::render_controls_html('cart', 0);
+            }
+            if (strpos($content, 'id="pcoe-import-form"') === false) {
+                $content .= self::render_import_html('cart');
+            }
+            // додати форму «В чернетку», якщо її ще немає
+            if (strpos($content, 'class="pcoe-cart-to-draft"') === false) {
+                $content .= self::render_cart_to_draft_html();
+            }
+        }
+        return $content;
+    }
+
+    /** HTML: форма «Зберегти кошик у чернетку» */
+    protected static function render_cart_to_draft_html(): string
+    {
+        if (!function_exists('WC') || !WC()->cart) return '';
+        $nonce  = wp_create_nonce('pcoe_cart_to_draft');
+        $action = admin_url('admin-ajax.php');
+
+        ob_start(); ?>
+        <div class="pcoe-cart-to-draft" style="margin:14px 0 6px">
+            <form action="<?php echo esc_url($action); ?>" method="post"
+                  style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                <input type="hidden" name="action" value="pcoe_cart_to_draft">
+                <input type="hidden" name="_wpnonce" value="<?php echo esc_attr($nonce); ?>">
+                <input type="text" name="title" placeholder="Назва чернетки (необов’язково)"
+                       style="min-width:260px">
+                <button class="button" type="submit">В чернетку</button>
+            </form>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+    
     /** Подключение всех UI-хуков */
     public static function init(): void
     {
@@ -87,31 +141,6 @@ class Ui
         <?php
     }
 
-    public static function render_cart_block(): void
-    {
-        if (!function_exists('WC') || !WC()->cart) return;
-
-        // 1) панель експорту
-        echo self::render_controls_html('cart', 0);
-
-        // 2) кнопка "Зберегти кошик у чернетку" (Cart → Draft)
-        ?>
-        <div style="margin:8px 0 4px; display:flex; gap:8px; align-items:center; flex-wrap:wrap">
-            <form action="<?php echo esc_url(admin_url('admin-ajax.php')); ?>" method="get"
-                style="display:flex; gap:8px; align-items:center">
-                <input type="hidden" name="action" value="pcoe_cart_to_draft">
-                <input type="hidden" name="_wpnonce" value="<?php echo esc_attr(wp_create_nonce('pcoe_cart_to_draft')); ?>">
-                <input type="hidden" name="clear" value="1">
-                <input type="text" name="title" placeholder="Назва чернетки (необов’язково)" style="min-width:260px">
-                <button class="button" type="submit">Зберегти кошик у чернетку</button>
-            </form>
-        </div>
-        <?php
-
-        // 3) блок імпорту в кошик/чернетку
-        echo self::render_import_html('cart');
-    }
-
     /** Блок на странице заказа */
     public static function render_order_block($order): void
     {
@@ -130,22 +159,6 @@ class Ui
                 </p>';
         }
 }
-    /** Fallback для блочного корзинного шаблона */
-    public static function maybe_append_to_cart_block(string $content): string
-    {
-        if (!is_cart()) return $content;
-
-        global $post;
-        if ($post && function_exists('has_block') && has_block('woocommerce/cart', $post)) {
-            if (strpos($content, 'class="pcoe-export"') === false) {
-                $content .= self::render_controls_html('cart', 0);
-            }
-            if (strpos($content, 'id="pcoe-import-form"') === false) {
-                $content .= self::render_import_html('cart');
-            }
-        }
-        return $content;
-    }
 
     /* ===================== INTERNAL HTML BUILDERS ===================== */
 
@@ -233,20 +246,16 @@ class Ui
                   </form>
                 </div>
 
-                <!-- У чернетку замовлення -->
+                 <!-- Зберегти поточний кошик у чернетку -->
                 <div style="margin-top:14px">
-                  <form id="pcoe-import-draft-form" enctype="multipart/form-data" method="post" onsubmit="return false;"
-                        style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-                      <input type="hidden" name="_wpnonce" value="<?php echo esc_attr($nonce_draft); ?>">
-                      <input type="file" name="file" accept=".csv,.xlsx,.xls" required>
-                      <button type="submit" class="button">Імпортувати у чернетку замовлення</button>
-                      <span class="pcoe-import-draft-msg" style="margin-left:8px; opacity:.8"></span>
+                  <form action="<?php echo esc_url(admin_url('admin-ajax.php')); ?>" method="get"
+                        style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                    <input type="hidden" name="action" value="pcoe_cart_to_draft">
+                    <input type="hidden" name="_wpnonce" value="<?php echo esc_attr(wp_create_nonce('pcoe_cart_to_draft')); ?>">
+                    <input type="hidden" name="clear" value="1">
+                    <input type="text" name="title" placeholder="Назва чернетки (необов’язково)" style="min-width:260px">
+                    <button class="button" type="submit">В чернетку</button>
                   </form>
-
-                  <div class="pcoe-import-draft-result" style="margin-top:10px; display:none">
-                      <div class="pcoe-import-draft-links" style="margin:6px 0"></div>
-                      <div class="pcoe-import-draft-report"></div>
-                  </div>
                 </div>
 
                 <div style="font-size:12px; opacity:.8; margin-top:12px">
@@ -360,19 +369,25 @@ jQuery(function($){
           url:'{$ajax}', method:'POST', data:fd, contentType:false, processData:false,
           success:function(resp){
             if(resp && resp.success){
+                // показати короткий підсумок
                 \$msg.text('Імпортовано: '+resp.data.imported+', пропущено: '+resp.data.skipped);
+
+                // (опційно) миттєво показати кнопки
                 var linksHtml='';
                 if(resp.data.links){
                     if(resp.data.links.edit){ linksHtml += '<a class="button" href="'+resp.data.links.edit+'" target="_blank" rel="noopener">Відкрити в адмінці</a> '; }
                     if(resp.data.links.view){ linksHtml += '<a class="button" href="'+resp.data.links.view+'" target="_blank" rel="noopener">Переглянути замовлення</a>'; }
                 }
-                $('.pcoe-import-draft-links').html(linksHtml||'');
-                $('.pcoe-import-draft-report').html(resp.data.report_html||'');
+                \$('.pcoe-import-draft-links').html(linksHtml||'');
+                \$('.pcoe-import-draft-report').html(resp.data.report_html||'');
                 \$box.show();
-            }else{
+
+                // ↓ головне: перезавантажити список замовлень, щоб з'явився новий чернетка
+                setTimeout(function(){ window.location.reload(); }, 800);
+            } else {
                 \$msg.text((resp && resp.data && resp.data.msg) ? resp.data.msg : 'Помилка імпорту.');
             }
-          },
+         },
           error:function(){ \$msg.text('Помилка з\\'єднання.'); }
         });
         return false;

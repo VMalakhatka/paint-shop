@@ -21,6 +21,14 @@ class Plugin {
         add_action('wp_ajax_pcoe_import_order_draft', [ImporterDraft::class,'handle']);
         add_action('wp_ajax_nopriv_pcoe_import_order_draft', [ImporterDraft::class,'handle']);
 
+        // З кошика → у чернетку
+        add_action('wp_ajax_pcoe_cart_to_draft',        [CartToDraft::class, 'handle']);
+        add_action('wp_ajax_nopriv_pcoe_cart_to_draft', [CartToDraft::class, 'handle']);
+
+        // З чернетки → у кошик
+        add_action('wp_ajax_pcoe_draft_to_cart',        [DraftToCart::class, 'handle']);
+        add_action('wp_ajax_nopriv_pcoe_draft_to_cart', [DraftToCart::class, 'handle']);
+
           DraftToCart::hooks();
           CartToDraft::hooks(); 
 
