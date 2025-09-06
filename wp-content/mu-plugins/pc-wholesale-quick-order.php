@@ -185,32 +185,32 @@ add_shortcode('pc_quick_order', function($atts){
 
     /* ==== Breadcrumbs for Quick Order ==== */
     $pcqo_render_breadcrumbs = function(array $cat_slugs){
-        $post = get_post();
-        $base = $post ? get_permalink($post) : home_url('/');
+    $post = get_post();
+    $base = $post ? get_permalink($post) : home_url('/');
 
-        echo '<nav class="woocommerce-breadcrumb" style="margin:6px 0 12px">';
-        echo '<a href="'.esc_url(home_url('/')).'">Головна</a>';
-        echo ' <span class="breadcrumb-delimiter">→</span> ';
-        echo '<a href="'.esc_url($base).'">Список товару</a>';
+    echo '<nav class="woocommerce-breadcrumb" style="margin:6px 0 12px">';
+    // Прибрали «Головна»
+    echo '<a href="'.esc_url($base).'">Список товару</a>';
 
-        if (count($cat_slugs) === 1) {
-            $slug = $cat_slugs[0];
-            $term = get_term_by('slug', $slug, 'product_cat');
-            if ($term && !is_wp_error($term)) {
-                $anc = array_reverse(get_ancestors($term->term_id, 'product_cat'));
-                foreach ($anc as $aid) {
-                    $t = get_term($aid, 'product_cat');
-                    if ($t && !is_wp_error($t)) {
-                        echo ' <span class="breadcrumb-delimiter">→</span> ';
-                        echo '<a href="'.esc_url(add_query_arg('cat', $t->slug, $base)).'">'.esc_html($t->name).'</a>';
-                    }
+    // Якщо вибрана рівно одна категорія — показуємо її предків + її саму
+    if (count($cat_slugs) === 1) {
+        $slug = $cat_slugs[0];
+        $term = get_term_by('slug', $slug, 'product_cat');
+        if ($term && !is_wp_error($term)) {
+            $anc = array_reverse(get_ancestors($term->term_id, 'product_cat'));
+            foreach ($anc as $aid) {
+                $t = get_term($aid, 'product_cat');
+                if ($t && !is_wp_error($t)) {
+                    echo ' <span class="breadcrumb-delimiter">→</span> ';
+                    echo '<a href="'.esc_url(add_query_arg('cat', $t->slug, $base)).'">'.esc_html($t->name).'</a>';
                 }
-                echo ' <span class="breadcrumb-delimiter">→</span> ';
-                echo '<a href="'.esc_url(add_query_arg('cat', $term->slug, $base)).'">'.esc_html($term->name).'</a>';
             }
+            echo ' <span class="breadcrumb-delimiter">→</span> ';
+            echo '<a href="'.esc_url(add_query_arg('cat', $term->slug, $base)).'">'.esc_html($term->name).'</a>';
         }
-        echo '</nav>';
-    };
+    }
+    echo '</nav>';
+};
     /* ==== /Breadcrumbs ==== */
 
     if (!$q->have_posts()) return '<p>'.esc_html($L['notfound']).'</p>';
