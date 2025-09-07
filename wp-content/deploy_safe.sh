@@ -72,6 +72,16 @@ if [ -d "$REPO/vendor" ]; then
   rsync "${RSYNC[@]}" "$REPO/vendor/" "$WP/wp-content/vendor/"
 fi
 
+# копируем свои переводы Loco
+if [ -d "$REPO/wp-content/languages/loco" ]; then
+  mkdir -p "$WP/wp-content/languages/loco"
+  # не тащим резервные файлы вида *.po~
+  rsync "${RSYNC[@]}" \
+    --exclude '*~' \
+    "$REPO/wp-content/languages/loco/" \
+    "$WP/wp-content/languages/loco/"
+fi
+
 # == Ops-скрипты из репозитория -> в $HOME ==
 # Скрипты лежат в репозитории в wp-content; на сервере должны жить в $HOME и быть исполняемыми.
 # ВАЖНО: сюда НЕ включаем сам deploy_safe.sh, чтобы не перезаписывать работающий скрипт.

@@ -97,3 +97,14 @@ composer-setup.php
 /.vscode/
 .DS_Store
 Thumbs.db
+
+# WP language packs (скачиваются WP автоматически)
+wp-content/languages/*
+!wp-content/languages/loco/**
+
+# Не коммитим бэкапы Loco и времянки
+wp-content/languages/loco/**/*~
+wp-content/languages/loco/**/backup-*.po~
+
+# оставить пустую директорию languages/ (не обязательно, если деплоем на готовый WP)
+!wp-content/languages/.gitkeep

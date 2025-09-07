@@ -26,19 +26,41 @@ const PCQO_PAGE_SLUG = 'shvydke-zamovlennia'; // ПРИМЕР: поставь с
  * На странице «Швидке замовлення» переписываем ссылки категорий
  * на ту же страницу с параметром ?cat=<slug>.
  */
+// 1) Слаг сторінки «Швидке замовлення» (не дублюємо, якщо уже є)
+if ( ! defined('PCQO_PAGE_SLUG') ) {
+    define('PCQO_PAGE_SLUG', 'shvydke-zamovlennia');
+}
+
+/**
+ * 2) На сторінці зі шорткодом [pc_quick_order] переписуємо посилання
+ *    категорій на ту ж сторінку з ?cat=<slug>.
+ */
 add_filter('term_link', function ($url, $term, $taxonomy) {
-    if ($taxonomy !== 'product_cat') {
+    if ($taxonomy !== 'product_cat' || is_admin()) {
         return $url;
     }
-    // мы только на нашей quick-order странице переписываем ссылки
-    if (!is_page() || !is_page(PCQO_PAGE_SLUG)) {
+
+    // Працюємо тільки коли реально відображається сторінка Quick Order
+    global $post;
+    if ( ! $post ) {
         return $url;
     }
-    $page_url = get_permalink(get_page_by_path(PCQO_PAGE_SLUG));
-    if (!$page_url) {
+
+    // Дозволяє або за слагом сторінки, або за наявністю шорткоду
+    $is_quick_order_page =
+        is_page( PCQO_PAGE_SLUG ) ||
+        ( has_shortcode( (string) $post->post_content, 'pc_quick_order' ) );
+
+    if ( ! $is_quick_order_page ) {
         return $url;
     }
-    return add_query_arg('cat', $term->slug, $page_url);
+
+    $page_url = get_permalink( $post->ID ?: get_page_by_path( PCQO_PAGE_SLUG ) );
+    if ( ! $page_url ) {
+        return $url;
+    }
+
+    return add_query_arg( 'cat', $term->slug, $page_url );
 }, 10, 3);
 
 add_filter('slu_ui_labels', function($L){
