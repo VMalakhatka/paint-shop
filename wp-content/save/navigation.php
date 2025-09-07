@@ -7,18 +7,10 @@ defined('ABSPATH') || exit;
  */
 $items = wc_get_account_menu_items();
 
-// Мапа наших назв
-$ua = [
-    'dashboard'        => 'Панель',
-    'orders'           => 'Замовлення',
-    'downloads'        => 'Завантаження',
-    'edit-address'     => 'Адреси',
-    'payment-methods'  => 'Платіжні методи',
-    'edit-account'     => 'Профіль',
-    'customer-logout'  => 'Вийти',
-];
 unset($items['dashboard']);     // прибрати «Панель»
 unset($items['downloads']);     // прибрати «Завантаження»
+
+
 ?>
 <nav class="woocommerce-MyAccount-navigation">
     <ul>
