@@ -10,7 +10,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "POT-Creation-Date: 2025-08-27T10:15:17+00:00\n"
-"PO-Revision-Date: 2025-09-07 12:14+0000\n"
+"PO-Revision-Date: 2025-09-07 19:59+0000\n"
 "X-Generator: Loco https://localise.biz/\n"
 "X-Domain: woocommerce\n"
 "Language: uk\n"
@@ -12230,7 +12230,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-setup-wizard.php:873
 #: includes/shipping/legacy-free-shipping/class-wc-shipping-legacy-free-shipping.php:108
 msgid "Free Shipping"
-msgstr ""
+msgstr "безкоштовна доставка"
 
 #: includes/admin/class-wc-admin-setup-wizard.php:874
 msgid "Don't charge for shipping."
@@ -15119,7 +15119,7 @@ msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:105
 msgid "Allow free shipping"
-msgstr ""
+msgstr "Дозволити безкоштовну доставку"
 
 #. translators: %s: URL to free shipping document.
 #: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:107
@@ -23914,11 +23914,11 @@ msgstr ""
 
 #: includes/class-wc-post-types.php:530
 msgid "Add coupon"
-msgstr ""
+msgstr "Додати купон"
 
 #: includes/class-wc-post-types.php:531
 msgid "Add new coupon"
-msgstr ""
+msgstr "Додати новий купон"
 
 #: includes/class-wc-post-types.php:533
 msgid "Edit coupon"
@@ -32199,7 +32199,7 @@ msgstr ""
 #: assets/client/blocks/wc-blocks-data.js:3
 #: assets/client/blocks/wc-cart-checkout-base-frontend.js:40
 msgid "Free shipping"
-msgstr ""
+msgstr "безкоштовна доставка"
 
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:57
 msgid ""
@@ -32209,7 +32209,7 @@ msgstr ""
 
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:108
 msgid "e.g. Free shipping"
-msgstr ""
+msgstr "наприклад. Безкоштовна доставка"
 
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:112
 msgid "Free shipping requires"
@@ -32363,7 +32363,7 @@ msgstr ""
 
 #: includes/shipping/legacy-free-shipping/class-wc-shipping-legacy-free-shipping.php:44
 msgid "Free shipping (legacy)"
-msgstr ""
+msgstr "Безкоштовна доставка (стара версія)"
 
 #: includes/shipping/legacy-free-shipping/class-wc-shipping-legacy-free-shipping.php:112
 #: includes/shipping/legacy-local-delivery/class-wc-shipping-legacy-local-delivery.php:174
@@ -32373,7 +32373,7 @@ msgstr ""
 
 #: includes/shipping/legacy-free-shipping/class-wc-shipping-legacy-free-shipping.php:133
 msgid "Free shipping requires..."
-msgstr ""
+msgstr "Безкоштовна доставка вимагає..."
 
 #: includes/shipping/legacy-free-shipping/class-wc-shipping-legacy-free-shipping.php:141
 msgid "A minimum order amount OR a coupon"
@@ -32731,7 +32731,7 @@ msgstr ""
 
 #: includes/wc-cart-functions.php:317
 msgid "Free shipping coupon"
-msgstr ""
+msgstr "Купон на безкоштовну доставку"
 
 #. translators: %s: coupon code.
 #: includes/wc-cart-functions.php:322
@@ -38933,7 +38933,7 @@ msgstr ""
 
 #: src/Admin/Features/ShippingPartnerSuggestions/DefaultShippingPartners.php:249
 msgid "Free shipping platform"
-msgstr ""
+msgstr "Платформа безкоштовної доставки"
 
 #: src/Admin/Features/ShippingPartnerSuggestions/DefaultShippingPartners.php:263
 msgid ""
@@ -62438,7 +62438,7 @@ msgstr ""
 #: assets/client/blocks/cart.js:23 assets/client/blocks/checkout.js:19
 #: assets/client/blocks/wc-cart-checkout-base-frontend.js:31
 msgid "Add coupons"
-msgstr ""
+msgstr "Додати купони"
 
 #: assets/client/blocks/cart.js:23 assets/client/blocks/checkout.js:19
 #: assets/client/blocks/wc-cart-checkout-base-frontend.js:31
@@ -62470,7 +62470,7 @@ msgstr ""
 #: assets/client/blocks/cart.js:25 assets/client/blocks/checkout.js:23
 #: assets/client/blocks/wc-cart-checkout-base-frontend.js:33
 msgid "Estimated total"
-msgstr ""
+msgstr "Загалом"
 
 #. translators: %s is a list of tax rates
 #: assets/client/blocks/cart.js:26 assets/client/blocks/checkout.js:24
