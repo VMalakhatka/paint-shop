@@ -211,26 +211,42 @@ add_shortcode('pc_quick_order', function($atts){
     }
     echo '</nav>';
 };
-    /* ==== /Breadcrumbs ==== */
+/* ==== /Breadcrumbs ==== */
 
-    if (!$q->have_posts()) return '<p>'.esc_html($L['notfound']).'</p>';
+$hz_on = ( isset($_GET['hide_zero']) && $_GET['hide_zero'] === '1' );
+$nonce = wp_create_nonce('pc_bulk_add');
 
-    $hz_on = (isset($_GET['hide_zero']) && $_GET['hide_zero'] === '1');
+ob_start(); ?>
+<div class="pc-qo-wrap">
 
-    $nonce = wp_create_nonce('pc_bulk_add');
+    <?php
+    // WooCommerce notices завжди зверху
+    if ( function_exists('woocommerce_output_all_notices') ) {
+        woocommerce_output_all_notices();
+    } elseif ( function_exists('wc_print_notices') ) {
+        wc_print_notices();
+    }
 
-    ob_start(); ?>
-    <div class="pc-qo-wrap">
-    <?php $pcqo_render_breadcrumbs($cat_slugs); ?>
+    // Крихти (Breadcrumbs)
+    $pcqo_render_breadcrumbs($cat_slugs);
+
+    // Якщо немає товарів — показуємо повідомлення та завершуємо
+    if ( ! $q->have_posts() ) : ?>
+        <p><?php echo esc_html( $L['notfound'] ); ?></p>
+</div>
+<?php
+        return ob_get_clean();
+    endif;
+    ?>
 
     <div class="pc-qo-toolbar" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
         <button type="button" class="button button-primary pc-qo-addall" data-nonce="<?php echo esc_attr($nonce); ?>">
-        <?php echo esc_html($L['add_all']); ?>
+            <?php echo esc_html($L['add_all']); ?>
         </button>
         <?php
         $base = remove_query_arg(['qo_page']);
         $mk = function($key, $order = null) use ($base, $a) {
-            return esc_url(add_query_arg(['orderby'=>$key,'order'=>$order?:$a['order'],'qo_page'=>1], $base));
+            return esc_url( add_query_arg( ['orderby'=>$key, 'order'=>$order?:$a['order'], 'qo_page'=>1], $base ) );
         };
         $bold = function($key, $label) use ($a, $mk) {
             $url   = $mk($key);
@@ -242,112 +258,114 @@ add_shortcode('pc_quick_order', function($atts){
         $toggleUrl = $mk($a['orderby'], $nextOrder);
         $toggleLbl = ($nextOrder === 'DESC') ? $L['asc'] : $L['desc'];
 
-        $hz_url  = esc_url(add_query_arg(['hide_zero' => $hz_on ? '0' : '1', 'qo_page' => 1], $base));
+        $hz_url  = esc_url( add_query_arg(['hide_zero'=>$hz_on ? '0':'1', 'qo_page'=>1], $base) );
         $hz_text = $hz_on ? $L['show0'] : $L['hide0'];
         ?>
         <span style="opacity:.7"><?php echo esc_html($L['sort']); ?></span>
-        <?= $bold('title',  esc_html($L['by_title'])); ?> ·
-        <?= $bold('sku',    esc_html($L['by_sku']));   ?> ·
-        <?= $bold('price',  esc_html($L['by_price'])); ?>
+        <?= $bold('title', esc_html($L['by_title'])); ?> ·
+        <?= $bold('sku',   esc_html($L['by_sku']));   ?> ·
+        <?= $bold('price', esc_html($L['by_price'])); ?>
         <a href="<?= $toggleUrl; ?>" style="margin-left:8px"><?= esc_html($toggleLbl); ?></a>
         <a href="<?= $hz_url; ?>" class="pc-qo-hz-link" style="margin-left:14px"><?= esc_html($hz_text); ?></a>
         <span class="pc-qo-message" style="margin-left:auto;"></span>
     </div>
 
     <?php echo $pager_html; ?>
-    <!-- ... дальше как было ... -->
 
-      <div class="pc-qo-table-wrap">
+    <div class="pc-qo-table-wrap">
         <table class="pc-qo-table">
-          <thead>
-            <tr>
-              <th style="width:44%;">Товар</th>
-              <th>Артикль</th>
-              <th>Ціна</th>
-              <th class="pc-qo-incart">У кошику</th>
-              <?php if ( ! empty( $a['show_stock'] ) ): ?>
-                <th title="Остатки по режиму">Наявність</th>
-              <?php endif; ?>
-              <th class="pc-qo-qty">К-сть</th>
-            </tr>
-          </thead>
-          <tbody>
-          <?php
-          $cart_qty_map = ( WC()->cart ) ? WC()->cart->get_cart_item_quantities() : [];
-          while ($q->have_posts()): $q->the_post();
-              $product = wc_get_product(get_the_ID());
-              if (!$product) continue;
+            <thead>
+                <tr>
+                    <th style="width:44%;">Товар</th>
+                    <th>Артикль</th>
+                    <th>Ціна</th>
+                    <th class="pc-qo-incart">У кошику</th>
+                    <?php if ( ! empty( $a['show_stock'] ) ): ?>
+                        <th title="Остатки по режиму">Наявність</th>
+                    <?php endif; ?>
+                    <th class="pc-qo-qty">К-сть</th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php
+            // про всяк випадок — повертаємо покажчик на початок
+            $q->rewind_posts();
 
-              $pid        = $product->get_id();
-              $price_html = $product->get_price_html();
-              $sku        = $product->get_sku();
+            $cart_qty_map = ( WC()->cart ) ? WC()->cart->get_cart_item_quantities() : [];
+            while ( $q->have_posts() ) : $q->the_post();
+                $product = wc_get_product( get_the_ID() );
+                if ( ! $product ) continue;
 
-              $in_cart_qty = function_exists('slu_cart_qty_for_product')
-                  ? (int) slu_cart_qty_for_product($product)
-                  : ((WC()->cart && isset($cart_qty_map[$pid])) ? (int)$cart_qty_map[$pid] : 0);
+                $pid        = $product->get_id();
+                $price_html = $product->get_price_html();
+                $sku        = $product->get_sku();
 
-              if (function_exists('pc_build_stock_view')) {
-                  $view = pc_build_stock_view($product);
-                  $base = (int)($view['sum'] ?? 0);
-                  $available_for_add = max(0, $base - $in_cart_qty);
-              } elseif (function_exists('slu_available_for_add')) {
-                  $available_for_add = (int) slu_available_for_add($product);
-              } else {
-                  $available_for_add = max(0, (int)$product->get_stock_quantity() - (int)$in_cart_qty);
-              }
+                $in_cart_qty = function_exists('slu_cart_qty_for_product')
+                    ? (int) slu_cart_qty_for_product($product)
+                    : ( (WC()->cart && isset($cart_qty_map[$pid])) ? (int) $cart_qty_map[$pid] : 0 );
 
-              if ($hz_on && $available_for_add <= 0) continue;
+                if ( function_exists('pc_build_stock_view') ) {
+                    $view = pc_build_stock_view($product);
+                    $base = (int) ($view['sum'] ?? 0);
+                    $available_for_add = max(0, $base - $in_cart_qty);
+                } elseif ( function_exists('slu_available_for_add') ) {
+                    $available_for_add = (int) slu_available_for_add($product);
+                } else {
+                    $available_for_add = max(0, (int) $product->get_stock_quantity() - (int) $in_cart_qty);
+                }
 
-              $stock_html = '';
-              if (function_exists('slu_render_stock_panel')) {
-                  $stock_html = slu_render_stock_panel($product, [
-                      'wrap_class'       => 'slu-stock-mini',
-                      'show_primary'     => true,
-                      'show_others'      => true,
-                      'show_total'       => true,
-                      'hide_when_zero'   => true,
-                      'show_incart'      => false,
-                      'show_incart_plan' => false,
-                  ]);
-              }
+                if ( $hz_on && $available_for_add <= 0 ) continue;
 
-              $step = max(1, (int) $product->get_min_purchase_quantity());
-              $row_classes = ['pc-qo-row'];
-              if ((int)$available_for_add <= 0) $row_classes[] = 'is-zero';
-              if ((int)$in_cart_qty > 0)        $row_classes[] = 'has-incart';
-              ?>
-              <tr class="<?php echo esc_attr(implode(' ', $row_classes)); ?>"
-                  data-id="<?php echo esc_attr($pid); ?>"
-                  data-available="<?php echo esc_attr($available_for_add); ?>"
-                  data-incart="<?php echo esc_attr($in_cart_qty); ?>">
-                <td class="pc-qo-title"><a href="<?php the_permalink(); ?>" target="_blank" rel="noopener"><?php the_title(); ?></a></td>
-                <td class="pc-qo-sku"><?php echo esc_html($sku ?: '—'); ?></td>
-                <td class="pc-qo-price"><?php echo $price_html ?: '—'; ?></td>
-                <td class="pc-qo-incart"><?php echo (int)$in_cart_qty; ?></td>
-                <?php if ( ! empty( $a['show_stock'] ) ): ?>
-                  <td class="pc-qo-stockhint">
-                    <?php echo $stock_html !== '' ? $stock_html : '<span class="muted">Загал.: '.esc_html($available_for_add).'</span>'; ?>
-                  </td>
-                <?php endif; ?>
-                <td class="pc-qo-qty">
-                  <input type="number"
-                         min="0"
-                         step="<?php echo esc_attr($step); ?>"
-                         max="<?php echo esc_attr($available_for_add); ?>"
-                         class="pc-qo-input"
-                         <?php echo $available_for_add<=0?'disabled':''; ?>
-                         placeholder="0">
-                </td>
-              </tr>
-          <?php endwhile; wp_reset_postdata(); ?>
-          </tbody>
+                $stock_html = '';
+                if ( function_exists('slu_render_stock_panel') ) {
+                    $stock_html = slu_render_stock_panel($product, [
+                        'wrap_class'       => 'slu-stock-mini',
+                        'show_primary'     => true,
+                        'show_others'      => true,
+                        'show_total'       => true,
+                        'hide_when_zero'   => true,
+                        'show_incart'      => false,
+                        'show_incart_plan' => false,
+                    ]);
+                }
+
+                $step = max(1, (int) $product->get_min_purchase_quantity());
+                $row_classes = ['pc-qo-row'];
+                if ( (int) $available_for_add <= 0 ) $row_classes[] = 'is-zero';
+                if ( (int) $in_cart_qty > 0 )        $row_classes[] = 'has-incart';
+                ?>
+                <tr class="<?php echo esc_attr( implode(' ', $row_classes) ); ?>"
+                    data-id="<?php echo esc_attr($pid); ?>"
+                    data-available="<?php echo esc_attr($available_for_add); ?>"
+                    data-incart="<?php echo esc_attr($in_cart_qty); ?>">
+                    <td class="pc-qo-title"><a href="<?php the_permalink(); ?>" target="_blank" rel="noopener"><?php the_title(); ?></a></td>
+                    <td class="pc-qo-sku"><?php echo esc_html($sku ?: '—'); ?></td>
+                    <td class="pc-qo-price"><?php echo $price_html ?: '—'; ?></td>
+                    <td class="pc-qo-incart"><?php echo (int) $in_cart_qty; ?></td>
+                    <?php if ( ! empty( $a['show_stock'] ) ): ?>
+                        <td class="pc-qo-stockhint">
+                            <?php echo $stock_html !== '' ? $stock_html : '<span class="muted">Загал.: '.esc_html($available_for_add).'</span>'; ?>
+                        </td>
+                    <?php endif; ?>
+                    <td class="pc-qo-qty">
+                        <input type="number"
+                               min="0"
+                               step="<?php echo esc_attr($step); ?>"
+                               max="<?php echo esc_attr($available_for_add); ?>"
+                               class="pc-qo-input"
+                               <?php echo $available_for_add<=0 ? 'disabled' : ''; ?>
+                               placeholder="0">
+                    </td>
+                </tr>
+            <?php endwhile; wp_reset_postdata(); ?>
+            </tbody>
         </table>
-      </div>
-
-      <?php echo $pager_html; ?>
     </div>
-    <?php
-    return ob_get_clean();
+
+    <?php echo $pager_html; ?>
+</div>
+<?php
+return ob_get_clean();
 });
 
 /** SQL tweaks */
@@ -394,7 +412,6 @@ function pc_qo_bulk_add(){
         $res = WC()->cart->add_to_cart($pid, $qty);
         if ($res) $added++;
     }
-    wc_clear_notices();
     wp_send_json_success(['added'=>$added]);
 }
 

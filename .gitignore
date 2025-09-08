@@ -75,6 +75,7 @@ wp-content/mu-plugins/*
 !wp-content/mu-plugins/psu-search-filters.php
 !wp-content/mu-plugins/pc-wholesale-quick-order.php
 !wp-content/mu-plugins/pc-account-tweaks.php
+!wp-content/mu-plugins/pc-cart-guard.php
 
 # === Node / Composer / сборки ===
 node_modules/
