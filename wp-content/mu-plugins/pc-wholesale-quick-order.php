@@ -314,7 +314,8 @@ ob_start(); ?>
                     $available_for_add = max(0, (int) $product->get_stock_quantity() - (int) $in_cart_qty);
                 }
 
-                if ( $hz_on && $available_for_add <= 0 ) continue;
+                // ховаємо лише якщо немає що додавати І в кошику теж 0
+                if ( $hz_on && $available_for_add <= 0 && $in_cart_qty <= 0 ) continue;
 
                 $stock_html = '';
                 if ( function_exists('slu_render_stock_panel') ) {
@@ -353,7 +354,7 @@ ob_start(); ?>
                             step="<?php echo esc_attr($step); ?>"
                             max="<?php echo esc_attr($available_for_add); ?>"
                             class="pc-qo-input"
-                            <?php echo $available_for_add<=0 ? 'disabled' : ''; ?>
+                            <?php echo ($available_for_add<=0 && $in_cart_qty<=0) ? 'disabled' : ''; ?>
                             placeholder="0">
                     </td>
                 </tr>
