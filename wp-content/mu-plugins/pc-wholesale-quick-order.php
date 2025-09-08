@@ -349,12 +349,12 @@ ob_start(); ?>
                     <?php endif; ?>
                     <td class="pc-qo-qty">
                         <input type="number"
-                               min="0"
-                               step="<?php echo esc_attr($step); ?>"
-                               max="<?php echo esc_attr($available_for_add); ?>"
-                               class="pc-qo-input"
-                               <?php echo $available_for_add<=0 ? 'disabled' : ''; ?>
-                               placeholder="0">
+                            min="<?php echo - (int) $in_cart_qty; ?>"
+                            step="<?php echo esc_attr($step); ?>"
+                            max="<?php echo esc_attr($available_for_add); ?>"
+                            class="pc-qo-input"
+                            <?php echo $available_for_add<=0 ? 'disabled' : ''; ?>
+                            placeholder="0">
                     </td>
                 </tr>
             <?php endwhile; wp_reset_postdata(); ?>
@@ -466,77 +466,164 @@ add_action('wp_enqueue_scripts', function(){
 
     $ajax_url = admin_url('admin-ajax.php');
     $L = pcqo_labels();
-    $summaryTpl = esc_js($L['summary']); // "Обрано позицій: %d, шт: %s"
 
-    wp_add_inline_script('jquery', "jQuery(function($){
-        function clampQty(\$input){
-            var \$row = \$input.closest('.pc-qo-row');
-            var available = parseFloat(\$row.data('available')) || 0;
-            var step = parseFloat(\$input.attr('step')) || 1;
-            var v = parseFloat(\$input.val() || 0);
-            if (v < 0) v = 0;
+// Готуємо JS окремим nowdoc — $ у ньому не інтерполюється PHP-ом
+$js = <<<'JS'
+jQuery(function($){
+    function clampQty($input){
+        var $row      = $input.closest('.pc-qo-row');
+        var available = parseFloat($row.data('available')) || 0; // скільки ще можна додати (+)
+        var inCart    = parseFloat($row.data('incart'))    || 0; // скільки вже у кошику (для -)
+        var step      = parseFloat($input.attr('step')) || 1;
+
+        var raw = String($input.val() || '').trim().replace(',', '.');
+
+        // дозволяємо тимчасове '-' під час набору (щоб можна було ввести -5)
+        if (raw === '-') return 0;
+
+        if (raw === '') { $input.val(''); return 0; }
+
+        var v = parseFloat(raw);
+        if (!isFinite(v)) v = 0;
+
+        // запам’ятовуємо знак і квантуємо по кроку
+        var sign = v < 0 ? -1 : (v > 0 ? 1 : 0);
+        v = Math.abs(v);
+        if (step > 0) v = Math.floor(v/step) * step;
+
+        // обмеження: + не більше доступного, - модулем не більше ніж у кошику
+        if (sign > 0) {
             if (available >= 0 && v > available) v = available;
-            if (step > 0) v = Math.floor(v/step)*step;
-            \$input.val(v || '');
-            return v || 0;
-        }
-        function recalcSummary(){
-            var sum = 0, items = 0;
-            $('.pc-qo-row').each(function(){
-                var v = clampQty($(this).find('.pc-qo-input'));
-                if(v>0){ items++; sum += v; }
-            });
-            if(items>0){
-                $('.pc-qo-message').text(sprintf('{$summaryTpl}', items, sum));
-            }else{
-                $('.pc-qo-message').text('');
-            }
-        }
-        function sprintf(fmt){ // очень простой %d %s
-            var args = Array.prototype.slice.call(arguments,1);
-            var i=0;
-            return fmt.replace(/%[ds]/g,function(){return args[i++];});
+        } else if (sign < 0) {
+            if (inCart >= 0 && v > inCart) v = inCart;
         }
 
-        $(document).on('input keyup blur change', '.pc-qo-input', function(){
-            clampQty($(this));
-            recalcSummary();
+        v = sign * v;
+
+        // якщо 0 — очищаємо (як і раніше)
+        if (v === 0) { $input.val(''); return 0; }
+
+        $input.val(v);
+        return v;
+    }
+
+    function sprintf(fmt){
+        var args = Array.prototype.slice.call(arguments,1), i=0;
+        return fmt.replace(/%[ds]/g, function(){ return args[i++]; });
+    }
+
+    // Підставимо далі з PHP через json_encode
+    var summaryTpl = __SUMMARY__;
+
+    function recalcSummary(){
+        var sum = 0, items = 0;
+        $('.pc-qo-row').each(function(){
+            var v = clampQty($(this).find('.pc-qo-input'));
+            if (v > 0){ items++; sum += v; }
+        });
+        $('.pc-qo-message').text(items ? sprintf(summaryTpl, items, sum) : '');
+    }
+
+    // Всі типи ручного вводу
+    $(document).on('input keyup blur change paste', '.pc-qo-input', function(){
+        clampQty($(this));
+        recalcSummary();
+    });
+
+    // КНОПКА: логіка як у стабільному — відправляємо тільки додатні
+    // ... залишаємо все як є ДО обробника кліку .pc-qo-addall
+
+    // КНОПКА: і мінуси, і плюси
+    $(document).on('click', '.pc-qo-addall', function(){
+        var $btn = $(this), nonce = $btn.data('nonce');
+        var adds = [], subs = [];
+
+        $('.pc-qo-row').each(function(){
+            var id    = parseInt($(this).data('id'),10);
+            var avail = parseFloat($(this).data('available')) || 0;
+            var inCart= parseFloat($(this).data('incart'))    || 0;
+            var $inp  = $(this).find('.pc-qo-input');
+            var qty   = clampQty($inp); // може бути < 0
+
+            if (!id || !qty) return;
+
+            if (qty > 0){
+                if (avail >= 0 && qty > avail) qty = avail;
+                if (qty > 0) adds.push({id:id, qty:qty});
+            } else if (qty < 0){
+                // мінус обмежено clampQty по inCart, тож уже ОК
+                subs.push({id:id, qty:qty}); // qty від’ємна!
+            }
         });
 
-        $(document).on('click','.pc-qo-addall',function(){
-            var \$btn = $(this), nonce = \$btn.data('nonce');
-            var items = [];
-            $('.pc-qo-row').each(function(){
-                var id = parseInt($(this).data('id'),10);
-                var avail = parseFloat($(this).data('available')) || 0;
-                var \$inp = $(this).find('.pc-qo-input');
-                var qty = clampQty(\$inp);
-                if(id>0 && qty>0){
-                    if (avail >= 0 && qty > avail) qty = avail;
-                    if (qty>0) items.push({id:id, qty:qty});
-                }
-            });
-            if(!items.length){ $('.pc-qo-message').text('".esc_js($L['noitems'])."'); return; }
+        if (!adds.length && !subs.length){
+            $('.pc-qo-message').text(__NOITEMS__);
+            return;
+        }
 
-            \$btn.prop('disabled', true).text('…');
-            $.post('".$ajax_url."', {
+        $btn.prop('disabled', true).text('…');
+
+        // 1) спочатку мінуси (pc_cart_adjust по одному)
+        function runSubs(list){
+            if (!list.length) return $.Deferred().resolve().promise();
+            var dfd = $.Deferred();
+            var i = 0;
+            function next(){
+                if (i >= list.length) { dfd.resolve(); return; }
+                var it = list[i++];
+                $.post(__AJAX_URL__, {
+                    action: 'pc_cart_adjust',
+                    nonce: __ADJ_NONCE__,
+                    product_id: it.id,
+                    qty: it.qty // від’ємна дельта
+                }).always(next); // не зупиняємось на помилці; можна .fail() показати msg, якщо треба
+            }
+            next();
+            return dfd.promise();
+        }
+
+        // 2) далі плюси — одним батчем
+        function runAdds(list){
+            if (!list.length) return $.Deferred().resolve().promise();
+            var dfd = $.Deferred();
+            $.post(__AJAX_URL__, {
                 action: 'pc_bulk_add_to_cart',
                 _ajax_nonce: nonce,
-                items: items
+                items: list
             }, function(resp){
                 if(resp && resp.success){
-                    $('.pc-qo-message').text('Додано позицій: '+resp.data.added);
-                    location.reload();
+                    $('.pc-qo-message').text('Додано позицій: ' + resp.data.added);
                 }else{
                     $('.pc-qo-message').text('Помилка додавання.');
-                    \$btn.prop('disabled', false).text('".esc_js($L['add_all'])."');
                 }
+                dfd.resolve();
             }).fail(function(){
-                $('.pc-qo-message').text('Помилка зв\\'язку.');
-                \$btn.prop('disabled', false).text('".esc_js($L['add_all'])."');
+                $btn.prop('disabled', false).text(__ADDALL__);
+                $('.pc-qo-message').text('Помилка зв\'язку (додавання).');
+                dfd.resolve();
             });
-        });
+            return dfd.promise();
+        }
 
-        recalcSummary();
-    });");
+        // 3) ланцюжок: спершу subs, потім adds, потім reload
+        runSubs(subs).then(function(){
+            return runAdds(adds);
+        }).then(function(){
+            location.reload();
+        });
+    });
+
+    recalcSummary();
+});
+JS;
+
+    $adj_nonce = wp_create_nonce('pc_cart_adj');
+
+    $js = str_replace(
+        ['__SUMMARY__',              '__NOITEMS__',               '__AJAX_URL__',                        '__ADDALL__',            '__ADJ_NONCE__'],
+        [json_encode($L['summary']), json_encode($L['noitems']),  json_encode(admin_url('admin-ajax.php')), json_encode($L['add_all']), json_encode($adj_nonce)],
+        $js
+    );
+
+wp_add_inline_script('jquery', $js);
 });

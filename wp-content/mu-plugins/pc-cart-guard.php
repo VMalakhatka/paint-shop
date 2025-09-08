@@ -118,3 +118,65 @@ add_action('woocommerce_before_calculate_totals', 'pc_cartguard_enforce_limits',
 //         }
 //     }
 // }, 20);
+
+/**
+ * AJAX: скоригувати кількість товару у кошику на delta (може бути від'ємним).
+ * Виклик: action=pc_cart_adjust, nonce=pc_cart_adj, product_id, qty (signed int)
+ */
+add_action('wp_ajax_pc_cart_adjust',    'pc_cart_adjust_qty');
+add_action('wp_ajax_nopriv_pc_cart_adjust', 'pc_cart_adjust_qty');
+
+function pc_cart_adjust_qty() {
+    check_ajax_referer('pc_cart_adj', 'nonce');
+
+    $pid   = isset($_POST['product_id']) ? (int) $_POST['product_id'] : 0;
+    $delta = isset($_POST['qty'])        ? (int) $_POST['qty']        : 0;
+
+    if (!$pid || $delta === 0 || !function_exists('WC')) {
+        wp_send_json_error(['msg' => 'bad params']);
+    }
+
+    $cart = WC()->cart;
+    if (!$cart) {
+        wp_send_json_error(['msg' => 'no cart']);
+    }
+
+    $product = wc_get_product($pid);
+    if (!$product || !$product->is_purchasable()) {
+        wp_send_json_error(['msg' => 'no product']);
+    }
+
+    // шукаємо позицію у кошику
+    $current_qty = 0;
+    $item_key    = null;
+    foreach ($cart->get_cart() as $key => $item) {
+        if ((int) $item['product_id'] === $pid) {
+            $current_qty = (int) $item['quantity'];
+            $item_key    = $key;
+            break;
+        }
+    }
+
+    // максимум, дозволений на поточному складі/режимі
+    $allowed_max = pc_cartguard_get_allowed_qty_for_cart($product, $current_qty);
+
+    // нова цільова кількість (додаємо/віднімаємо дельту)
+    $target = $current_qty + $delta;
+    if ($target < 0)              $target = 0;
+    if ($target > $allowed_max)   $target = $allowed_max;
+
+    if ($target <= 0) {
+        // видалити
+        if ($item_key) $cart->remove_cart_item($item_key);
+    } else {
+        if ($item_key) $cart->set_quantity($item_key, $target, true);
+        else           $cart->add_to_cart($pid, $target);
+    }
+
+    $cart->calculate_totals();
+
+    wp_send_json_success([
+        'new_qty'     => $target,
+        'allowed_max' => $allowed_max,
+    ]);
+}
