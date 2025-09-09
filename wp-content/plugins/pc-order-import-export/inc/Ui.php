@@ -70,10 +70,9 @@ class Ui
     /** Подключение всех UI-хуков */
     public static function init(): void
     {
-        // CART: рендерим блок в нескольких «низах», чтобы поймать разные темы
-        add_action('woocommerce_after_cart_totals',          [self::class, 'render_cart_block']);
-        add_action('woocommerce_cart_totals_after_shipping', [self::class, 'render_cart_block']);
-        add_action('woocommerce_proceed_to_checkout',        [self::class, 'render_cart_block']);
+       
+        add_action('woocommerce_after_cart_totals', [self::class, 'render_cart_block'], 99);
+   
         add_action('woocommerce_before_account_orders', [self::class, 'render_account_import_block'], 5);
 
         // CART (блочный редактор): fallback — дописываем в конец контента

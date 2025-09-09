@@ -68,21 +68,28 @@ function pc_render_alloc_control() {
     $pref   = pc_get_alloc_pref();
     $mode   = $pref['mode'];
     $curId  = (int) $pref['term_id'];
+    $firstId = (int) ($terms[0]->term_id ?? 0); // первый доступный склад
+
+    // если не auto и склада нет — показываем первый как выбранный (UI)
+    if ($mode !== 'auto' && $curId <= 0) {
+        $curId = $firstId;
+    }
+
+
     $nonce  = wp_create_nonce('pc_alloc_nonce');
     $ajax_u = admin_url('admin-ajax.php');
     ?>
     <div class="pc-alloc" role="group" aria-label="<?php echo esc_attr__('Списание', 'woocommerce'); ?>">
       <small><?php echo esc_html__('Списание:', 'woocommerce'); ?></small>
 
-      <select class="pc-alloc-mode" aria-label="<?php echo esc_attr__('Режим списания', 'woocommerce'); ?>">
+      <select id="pc-slu-mode" class="pc-alloc-mode" aria-label="<?php echo esc_attr__('Режим списания', 'woocommerce'); ?>">
         <option value="auto"   <?php selected($mode, 'auto');   ?>><?php echo esc_html__('Авто', 'woocommerce'); ?></option>
         <option value="manual" <?php selected($mode, 'manual'); ?>><?php echo esc_html__('С приоритетом выбранного', 'woocommerce'); ?></option>
         <option value="single" <?php selected($mode, 'single'); ?>><?php echo esc_html__('Только выбранный склад', 'woocommerce'); ?></option>
       </select>
 
-      <select class="pc-alloc-term" aria-label="<?php echo esc_attr__('Склад', 'woocommerce'); ?>"
+      <select id="pc-slu-location" class="pc-alloc-term" aria-label="<?php echo esc_attr__('Склад', 'woocommerce'); ?>"
               <?php disabled($mode === 'auto'); ?>>
-        <option value="0"><?php echo esc_html__('— склад —', 'woocommerce'); ?></option>
         <?php foreach ($terms as $t): ?>
           <option value="<?php echo (int) $t->term_id; ?>" <?php selected($curId, (int) $t->term_id); ?>>
             <?php echo esc_html($t->name); ?>
@@ -91,56 +98,102 @@ function pc_render_alloc_control() {
       </select>
     </div>
 
-    <script>
+        <script>
     (function($){
         var nonce = <?php echo wp_json_encode($nonce); ?>;
-        var ajaxu = <?php echo wp_json_encode($ajax_u); ?>; 
+        var ajaxu = <?php echo wp_json_encode($ajax_u); ?>;
 
         function savePref(mode, term_id){
             return $.post(ajaxu, { action:'pc_set_alloc_pref', nonce:nonce, mode:mode, term_id:term_id });
         }
 
-        // Мягкое обновление UI после сохранения
-        function refreshUI(){
-            var $b = $('body');
+        // Сильный пересчёт корзины/чекаута без reload
+        function strongCartRefresh(){
+            var $b     = $('body');
+            var isCart = $b.hasClass('woocommerce-cart');
+            var isCO   = $b.hasClass('woocommerce-checkout');
 
-            // корзина / чекаут — обновим расчет и фрагменты без reload
-            if ($b.hasClass('woocommerce-cart') || $b.hasClass('woocommerce-checkout')) {
-            $(document.body).trigger('wc_fragment_refresh');
-            $b.trigger('update_checkout');
-            return;
-            }
+            // сервером пересчитываем "планы"
+            var recalc = $.post(ajaxu, {action:'pc_recalc_alloc_plans'});
 
-            // на каталоге/карточке — просто перезагрузим страницу,
-            // чтобы блоки остатков и кнопки подтянулись под новый режим
-            window.location.reload();
+            recalc.always(function(){
+                if (isCart || isCO) {
+                // без reload — обновляем фрагменты
+                $(document.body).trigger('wc_fragment_refresh');
+                if (isCO) $b.trigger('update_checkout');
+
+                if (isCart) {
+                    var $form = $('form.woocommerce-cart-form');
+                    var $btn  = $form.find('button[name="update_cart"]');
+                    if ($btn.length) { $btn.prop('disabled', false).trigger('click'); }
+                    else if ($form.length) {
+                    if (!$form.find('input[name="update_cart"]').length){
+                        $('<input type="hidden" name="update_cart" value="1">').appendTo($form);
+                    }
+                    $form.trigger('submit');
+                    }
+                }
+                } else {
+                // каталог / карточка — простая перезагрузка
+                window.location.reload();
+                }
+            });
         }
 
-        // смена режима
-        $(document).on('change', '.pc-alloc-mode', function(){
-            var mode  = this.value;
-            var $term = $('.pc-alloc-term');
+        function current(){
+            var mode = $('#pc-slu-mode').val() || 'auto';
+            var tid  = parseInt($('#pc-slu-location').val(), 10) || 0;
+            return {mode: mode, tid: tid};
+        }
 
-            // склад доступен в manual и single
-            $term.prop('disabled', (mode === 'auto'));
-
-            var tid = (mode === 'auto') ? 0 : (parseInt($term.val(), 10) || 0);
-            savePref(mode, tid).always(refreshUI);
-        });
-
-        // смена склада
-        $(document).on('change', '.pc-alloc-term', function(){
-            var tid  = parseInt(this.value, 10) || 0;
-            var mode = $('.pc-alloc-mode').val() || 'auto';
-
-            // если был auto и пользователь выбрал склад — переводим в manual
+        // Если пользователь щёлкнул режим, а склад не выбран — выбираем первый
+        function ensureTermForMode(mode){
+            $(function(){
+            // первичная синхронизация UI
+                var mode = $('#pc-slu-mode').val() || 'auto';
+                ensureTermForMode(mode);
+            });
+            var $term = $('#pc-slu-location');
             if (mode === 'auto') {
-            mode = 'manual';
-            $('.pc-alloc-mode').val('manual');
+                $term.prop('disabled', true);
+                return 0;
             }
-            savePref(mode, tid).always(refreshUI);
+            $term.prop('disabled', false);
+            var val = parseInt($term.val(), 10) || 0;
+            if (!val) {
+                var first = parseInt($term.find('option:first').val(), 10) || 0;
+                if (first){ $term.val(first).trigger('change'); return first; }
+            }
+            return val;
+        }
+
+        // Смена режима
+        $(document).on('change', '#pc-slu-mode', function(){
+            var mode = this.value;
+            var tid  = ensureTermForMode(mode);
+            savePref(mode, tid).always(strongCartRefresh);
         });
-        })(jQuery);
+
+        // Смена склада
+        $(document).on('change', '#pc-slu-location', function(){
+            var st   = current();
+            var mode = st.mode;
+            var tid  = parseInt(this.value, 10) || 0;
+
+            // если был auto и выбрали склад — уводим в manual (логично для UX)
+            if (mode === 'auto') {
+                mode = 'manual';
+                $('#pc-slu-mode').val('manual');
+            }
+            savePref(mode, tid).always(strongCartRefresh);
+        });
+
+        // На всякий случай: при ajax-перерисовках ещё раз блокируем/выбираем
+        $(document.body).on('wc_fragments_refreshed updated_wc_div cart-items-rendered', function(){
+            var st = current();
+            ensureTermForMode(st.mode);
+        });
+    })(jQuery);
     </script>
     <?php
 }
