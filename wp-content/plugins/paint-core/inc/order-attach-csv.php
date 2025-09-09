@@ -16,6 +16,26 @@ defined('ABSPATH') || exit;
  * - інакше шукаємо у PC_GTIN_META_KEY або в списку pc_gtin_meta_keys().
  */
 
+// Унифицированное чтение плана из строки заказа (supports _pc_alloc_plan и старый _pc_stock_breakdown)
+if (!function_exists(__NAMESPACE__.'\\pc_get_order_item_plan')) {
+    function pc_get_order_item_plan(\WC_Order_Item_Product $item): array {
+        $plan = $item->get_meta('_pc_alloc_plan', true);
+        if (!is_array($plan) || !$plan) {
+            $plan = $item->get_meta('_pc_stock_breakdown', true);
+            if (!is_array($plan)) {
+                $try  = json_decode((string)$plan, true);
+                $plan = is_array($try) ? $try : [];
+            }
+        }
+        $out = [];
+        foreach ((array)$plan as $tid => $q) {
+            $tid = (int)$tid; $q = (int)$q;
+            if ($tid > 0 && $q > 0) $out[$tid] = $q;
+        }
+        return $out;
+    }
+}
+
 /** ------------------------- GTIN (без нормалізації) ------------------------- */
 
 /** Повертає список ключів мета, де може жити GTIN (можна розширити фільтром). */
@@ -94,29 +114,24 @@ function pc_location_name_by($term_id = 0, string $slug = ''): string {
 function pc_order_item_location_label(\WC_Order_Item_Product $item): string {
     // 1) вже записана видима мета "Склад"
     $human = (string) $item->get_meta(__('Склад','woocommerce'));
-    if ($human !== '') return $human;
+if ($human !== '') return $human;
 
-    // 2) план списання (надійніше за все)
-    $plan = $item->get_meta('_pc_stock_breakdown', true);
-    if (!is_array($plan)) {
-        $try = json_decode((string)$plan, true);
-        if (is_array($try)) $plan = $try; else $plan = [];
+// 2) план списання
+$plan = pc_get_order_item_plan($item);
+if (!empty($plan)) {
+    $terms = get_terms(['taxonomy'=>'location','hide_empty'=>false]);
+    $dict  = [];
+    if (!is_wp_error($terms)) {
+        foreach ($terms as $t) $dict[(int)$t->term_id] = $t->name;
     }
-    if (!empty($plan)) {
-        // підготуємо назви термінів
-        $terms = get_terms(['taxonomy'=>'location','hide_empty'=>false]);
-        $dict  = [];
-        if (!is_wp_error($terms)) {
-            foreach ($terms as $t) $dict[(int)$t->term_id] = $t->name;
-        }
-        arsort($plan, SORT_NUMERIC);
-        $parts = [];
-        foreach ($plan as $tid=>$q) {
-            $name = $dict[(int)$tid] ?? ('#'.(int)$tid);
-            $parts[] = $name . ' — ' . (int)$q;
-        }
-        if ($parts) return implode(', ', $parts);
+    arsort($plan, SORT_NUMERIC);
+    $parts = [];
+    foreach ($plan as $tid=>$q) {
+        $name = $dict[(int)$tid] ?? ('#'.(int)$tid);
+        $parts[] = $name . ' — ' . (int)$q;
     }
+    if ($parts) return implode(', ', $parts);
+}
 
     // 3) машинні одиночні
     $id   = (int) $item->get_meta('_stock_location_id');
@@ -209,9 +224,7 @@ add_filter('woocommerce_email_attachments', function ($attachments, $email_id, $
         $unit_price = $qty_total > 0 ? $line_total / $qty_total : $line_total;
 
         // План (для by_plan або для нотатки в summary)
-        $plan = $item->get_meta('_pc_stock_breakdown', true);
-        if (!is_array($plan)) $plan = json_decode((string)$plan, true);
-        if (!is_array($plan)) $plan = [];
+        $plan = pc_get_order_item_plan($item);
 
         if ($mode === 'by_plan') {
             if (!empty($plan)) {

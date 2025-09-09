@@ -71,7 +71,7 @@ class Ui
     public static function init(): void
     {
        
-        add_action('woocommerce_after_cart_totals', [self::class, 'render_cart_block'], 99);
+        add_action('woocommerce_after_cart', [self::class, 'render_cart_block'], 5);
    
         add_action('woocommerce_before_account_orders', [self::class, 'render_account_import_block'], 5);
 
@@ -80,6 +80,8 @@ class Ui
 
         // ORDER: кнопки экспорта под таблицей заказа
         add_action('woocommerce_order_details_after_order_table', [self::class, 'render_order_block']);
+
+        add_action('woocommerce_cart_is_empty', [self::class, 'render_cart_empty_block'], 20);
 
         // Скрипты
         add_action('wp_enqueue_scripts', [self::class, 'enqueue_js']);
@@ -110,6 +112,11 @@ class Ui
     /** Алиас на случай, если где-то вызывается Ui::hooks() */
     public static function hooks(): void { self::init(); }
 
+    public static function render_cart_empty_block(): void {
+        // показываем только импорт и «в чернетку»
+        echo self::render_import_html('cart');
+        echo self::render_cart_to_draft_html();
+    }
     /* ===================== PUBLIC RENDERERS ===================== */
 
 
@@ -186,7 +193,6 @@ public static function render_account_import_block(): void
                 </p>';
         }
 }
-
     /* ===================== INTERNAL HTML BUILDERS ===================== */
 
     /** Панель экспорта (кнопки, split, колонки) */

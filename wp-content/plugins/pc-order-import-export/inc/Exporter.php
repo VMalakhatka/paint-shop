@@ -62,13 +62,22 @@ class Exporter {
             $qty   = (float)($it['quantity'] ?? 0);
             $price = (float) wc_get_price_excluding_tax($p);
 
-            // план списання — через фільтр (core може підкласти), або primary
-            $plan = apply_filters('pcoe_cart_allocation_plan', [], $p, (int)$qty);
-            if (!$plan && $qty > 0) {
-                $tid = Helpers::primary_location_id($p);
-                if ($tid) $plan = [$tid => (int)$qty];
+            // план списання: 1) збережений у корзині; 2) фільтр/перерахунок; 3) fallback → primary
+            $plan = [];
+            if (!empty($it['pc_alloc_plan']) && is_array($it['pc_alloc_plan'])) {
+                $plan = $it['pc_alloc_plan'];                           // [term_id => qty]
+            } else {
+                // якщо є фільтр — нехай підкладе; або порахуємо безпосередньо
+                $plan = apply_filters('pcoe_cart_allocation_plan', [], $p, (int)$qty);
+                if (!$plan && function_exists('pc_calc_plan_for')) {
+                    $plan = (array) pc_calc_plan_for($p, (int)$qty);
+                }
+                if (!$plan && $qty > 0) {
+                    $tid = Helpers::primary_location_id($p);
+                    if ($tid) $plan = [$tid => (int)$qty];
+                }
             }
-
+                error_log('EXPORT CART plan: ' . print_r($plan, true));
             if ($split === 'per_loc' && $plan) {
                 foreach ($plan as $tid => $q) {
                     $q = (int)$q; if ($q <= 0) continue;
@@ -119,11 +128,14 @@ class Exporter {
             $qty  = (float)$item->get_quantity();
             $unit = (float)$order->get_item_subtotal($item, false, false);
 
-            // план списання з мети або fallback
-            $plan = $item->get_meta('_pc_stock_breakdown', true);
-            if (!is_array($plan)) {
-                $try  = json_decode((string)$plan, true);
-                $plan = is_array($try) ? $try : [];
+           // план списання з мети (наш ключ), або старий ключ, або fallback
+            $plan = $item->get_meta('_pc_alloc_plan', true);
+            if (!is_array($plan) || !$plan) {
+                $plan = $item->get_meta('_pc_stock_breakdown', true);   // сумісність зі старою схемою
+                if (!is_array($plan)) {
+                    $try  = json_decode((string)$plan, true);
+                    $plan = is_array($try) ? $try : [];
+                }
             }
             if (!$plan) {
                 $tid = (int)$item->get_meta('_stock_location_id');
@@ -133,7 +145,7 @@ class Exporter {
                 $tid = Helpers::primary_location_id($p);
                 if ($tid) $plan = [$tid => (int)$qty];
             }
-
+error_log('EXPORT ORDER plan: ' . print_r($plan, true));
             if ($split === 'per_loc' && $plan) {
                 foreach ($plan as $tid => $q) {
                     $q = (int)$q; if ($q <= 0) continue;

@@ -45,7 +45,7 @@ class Helpers {
         return apply_filters('pcoe_gtin_meta_keys', $keys);
     }
 
-    public static function product_gtin(WC_PRODUCT $product): string {
+    public static function product_gtin(WC_Product $product): string {
         // якщо є глобальний хелпер core — віддай йому
         if (function_exists('pc_get_product_gtin')) {
             $v = (string) pc_get_product_gtin($product);
@@ -135,6 +135,7 @@ class Helpers {
         return ($t && !is_wp_error($t)) ? $t->name : '';
     }
     public static function note_from_plan(array $plan): string {
+        error_log('NOTE_FROM_PLAN input: ' . print_r($plan, true));
         if (!$plan) return '';
         arsort($plan, SORT_NUMERIC);
         $parts = [];

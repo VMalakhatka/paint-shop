@@ -1,175 +1,119 @@
 <?php
-namespace PaintCore\Stock;
+namespace PaintCore\Orders;
 
 defined('ABSPATH') || exit;
 
 /**
- * Email: SKU, GTIN і коректний «Склад: …» під назвою товару.
- * Джерело складу:
- *  1) видима мета рядка "Склад" (від аллокатора, якщо вже записана);
- *  2) _pc_stock_breakdown (term_id => qty), з іменами термінів;
- *  3) _stock_location_id / _stock_location_slug;
- *  4) інакше — пусто.
+ * Лейбл склада для строк заказа в письмах.
+ * Здесь НЕТ CSV/GTIN — только определение подписи склада.
+ * CSV-вложение и GTIN-хелперы живут в order-attach-csv.php.
  */
 
-/** ========================= Лейбли (можна перевизначити фільтром) ========================= */
-function pc_email_labels(): array {
-    $L = [
-        'sku'      => 'Артикул',
-        'gtin'     => 'GTIN',
-        'location' => __('Склад','woocommerce'),
-    ];
-    return apply_filters('pc_email_meta_labels', $L);
+/** ------------------------- Локації / склад ------------------------- */
+
+/** Primary term_id локації для продукту/варіації. */
+if (!function_exists(__NAMESPACE__.'\\pc_primary_location_term_id_for_product')) {
+    function pc_primary_location_term_id_for_product(\WC_Product $product): int {
+        $pid = $product->get_id();
+        $tid = (int) get_post_meta($pid, '_yoast_wpseo_primary_location', true);
+        if (!$tid && $product->is_type('variation')) {
+            $parent = $product->get_parent_id();
+            if ($parent) $tid = (int) get_post_meta($parent, '_yoast_wpseo_primary_location', true);
+        }
+        return $tid ?: 0;
+    }
 }
 
-/** ========================= GTIN (без нормалізації) ========================= */
+/** Назва локації по term_id/slug (без фатальних). */
+if (!function_exists(__NAMESPACE__.'\\pc_location_name_by')) {
+    function pc_location_name_by($term_id = 0, string $slug = ''): string {
+        if ($term_id) {
+            $t = get_term((int)$term_id, 'location');
+            if ($t && !is_wp_error($t)) return $t->name;
+        }
+        if ($slug !== '') {
+            $t = get_term_by('slug', $slug, 'location');
+            if ($t && !is_wp_error($t)) return $t->name;
+        }
+        return '';
+    }
+}
 
 /**
- * Отримати GTIN із продукту/варіації:
- * - якщо існує глобальний хелпер \pc_get_product_gtin() — використовуємо його;
- * - інакше шукаємо “як є” в PC_GTIN_META_KEY або у списку кандидатів;
- * - для варіацій: якщо порожньо — дивимось у батька.
+ * Унифицированное чтение плана из строки заказа.
+ * Поддерживает новый ключ _pc_alloc_plan и старый _pc_stock_breakdown.
+ * Guard на случай, если order-attach-csv.php ещё не подключён.
  */
-function pc_email_get_product_gtin(\WC_Product $product): string {
-    // 1) Глобальний хелпер (якщо підключений десь у твоєму коді)
-    if (function_exists('\\pc_get_product_gtin')) {
-        $v = \pc_get_product_gtin($product);
-        if ($v !== '' && $v !== null) return (string) $v;
+if (!function_exists(__NAMESPACE__.'\\pc_get_order_item_plan')) {
+    function pc_get_order_item_plan(\WC_Order_Item_Product $item): array {
+        $plan = $item->get_meta('_pc_alloc_plan', true);
+        if (!is_array($plan) || !$plan) {
+            $plan = $item->get_meta('_pc_stock_breakdown', true);
+            if (!is_array($plan)) {
+                $try  = json_decode((string)$plan, true);
+                $plan = is_array($try) ? $try : [];
+            }
+        }
+        $out = [];
+        foreach ((array)$plan as $tid => $q) {
+            $tid = (int)$tid; $q = (int)$q;
+            if ($tid > 0 && $q > 0) $out[$tid] = $q;
+        }
+        return $out;
     }
+}
 
-    // 2) Локальний пошук без нормалізації (як є)
-    $candidates = array_filter(array_unique(array_merge(
-        [ defined('PC_GTIN_META_KEY') ? PC_GTIN_META_KEY : '' ],
-        apply_filters('pc_gtin_meta_keys', [
-            '_global_unique_id',   // ваш ключ
-            '_wpm_gtin_code',      // WebToffee/Woo product GTIN
-            '_alg_ean',            // EAN/UPC/GTIN by Alg
-            '_ean',
-            '_sku_gtin',
-        ])
-    )));
+/** Повернути людську розбивку складів для item: "Київ — 2, Одеса — 1". */
+if (!function_exists(__NAMESPACE__.'\\pc_order_item_location_label')) {
+    function pc_order_item_location_label(\WC_Order_Item_Product $item): string {
+        // 1) Уже записана видима мета «Склад»
+        $human = (string) $item->get_meta(__('Склад','woocommerce'));
+        if ($human !== '') return $human;
 
-    $fetch_raw = function(int $post_id) use ($candidates): string {
-        foreach ($candidates as $key) {
-            if ($key === '') continue;
-            $raw = get_post_meta($post_id, $key, true);
-            if ($raw !== '' && $raw !== null) {
-                return (string) $raw; // повертаємо як є (можуть бути букви)
+        // 2) План списання (основной источник)
+        $plan = pc_get_order_item_plan($item);
+        if (!empty($plan)) {
+            $terms = get_terms(['taxonomy'=>'location','hide_empty'=>false]);
+            $dict  = [];
+            if (!is_wp_error($terms)) {
+                foreach ($terms as $t) $dict[(int)$t->term_id] = $t->name;
+            }
+            arsort($plan, SORT_NUMERIC);
+            $parts = [];
+            foreach ($plan as $tid => $q) {
+                $name = $dict[(int)$tid] ?? ('#'.(int)$tid);
+                $parts[] = $name . ' — ' . (int)$q;
+            }
+            if ($parts) return implode(', ', $parts);
+        }
+
+        // 3) Машинні одиночні
+        $id   = (int) $item->get_meta('_stock_location_id');
+        $slug = (string) $item->get_meta('_stock_location_slug');
+        $name = pc_location_name_by($id, $slug);
+        if ($name !== '') return $name;
+
+        // 4) Фолбеки SLW
+        $loc_ids = $item->get_meta('_stock_locations', true);
+        if (is_array($loc_ids) && $loc_ids) {
+            $names = [];
+            foreach ($loc_ids as $tid) {
+                $n = pc_location_name_by((int)$tid, '');
+                if ($n !== '') $names[] = $n;
+            }
+            $names = array_values(array_unique(array_filter($names)));
+            if ($names) return implode(', ', $names);
+        }
+
+        // 5) Останній фолбек — primary
+        $product = $item->get_product();
+        if ($product instanceof \WC_Product) {
+            $tid = pc_primary_location_term_id_for_product($product);
+            if ($tid) {
+                $n = pc_location_name_by($tid, '');
+                if ($n !== '') return $n;
             }
         }
         return '';
-    };
-
-    // Спочатку сама варіація/товар
-    $v = $fetch_raw($product->get_id());
-    if ($v !== '') return $v;
-
-    // Якщо варіація — пробуємо батька
-    if ($product->is_type('variation')) {
-        $pid = (int)$product->get_parent_id();
-        if ($pid) {
-            $v = $fetch_raw($pid);
-            if ($v !== '') return $v;
-        }
     }
-    return '';
 }
-
-/** ========================= Локації (із рядка замовлення) ========================= */
-
-/**
- * Побудувати підпис «Київ × 3, Одеса × 2» по даним рядка замовлення.
- */
-function pc_build_location_label_from_item(\WC_Order_Item_Product $item): string {
-    $visible = (string) $item->get_meta(__('Склад','woocommerce'));
-    if ($visible !== '') {
-        return $visible;
-    }
-
-    $plan = $item->get_meta('_pc_stock_breakdown', true);
-    if (!is_array($plan)) {
-        $try = json_decode((string)$plan, true);
-        if (is_array($try)) $plan = $try; else $plan = [];
-    }
-
-    if (!empty($plan)) {
-        $terms = get_terms(['taxonomy'=>'location','hide_empty'=>false]);
-        $dict  = [];
-        if (!is_wp_error($terms)) {
-            foreach ($terms as $t) $dict[(int)$t->term_id] = $t;
-        }
-
-        arsort($plan, SORT_NUMERIC);
-
-        $parts = [];
-        foreach ($plan as $tid => $qty) {
-            $t    = $dict[(int)$tid] ?? null;
-            $name = $t ? $t->name : '#'.(int)$tid;
-            $parts[] = sprintf('%s × %d', $name, (int)$qty);
-        }
-        if ($parts) {
-            return implode(', ', $parts);
-        }
-    }
-
-    $term_id = (int) $item->get_meta('_stock_location_id');
-    $slug    = (string) $item->get_meta('_stock_location_slug');
-    if ($term_id) {
-        $term = get_term($term_id, 'location');
-        if ($term && !is_wp_error($term)) return $term->name;
-    }
-    if ($slug !== '') {
-        $term = get_term_by('slug', $slug, 'location');
-        if ($term && !is_wp_error($term)) return $term->name;
-    }
-
-    return '';
-}
-
-/** ========================= Вивід під назвою товару ========================= */
-
-add_action('woocommerce_email_order_item_meta', function($item, $sent_to_admin, $plain, $email){
-    if (!($item instanceof \WC_Order_Item_Product)) return;
-
-    $L = pc_email_labels();
-
-    $product = $item->get_product();
-
-    // SKU (для варіацій: якщо пусто у варіації — беремо у батька)
-    $sku = '';
-    if ($product instanceof \WC_Product) {
-        $sku = (string) $product->get_sku();
-        if (!$sku && $product->is_type('variation')) {
-            $parent = wc_get_product($product->get_parent_id());
-            if ($parent) $sku = (string) $parent->get_sku();
-        }
-    }
-
-    // GTIN — як є (без нормалізації)
-    $gtin = '';
-    if ($product instanceof \WC_Product) {
-        $gtin = pc_email_get_product_gtin($product);
-    }
-
-    // Склад(и)
-    $loc_label = pc_build_location_label_from_item($item);
-
-    // Збірка рядка
-    $parts = [];
-    if ($sku !== '')  $parts[] = $L['sku'].': '.$sku;
-    if ($gtin !== '') $parts[] = $L['gtin'].': '.$gtin;
-
-    if ($plain) {
-        if ($parts) echo "\n" . implode(' | ', $parts) . "\n";
-        if ($loc_label !== '') echo $L['location'] . ': ' . $loc_label . "\n";
-    } else {
-        if ($parts) {
-            echo '<br><small style="color:#555">' . esc_html(implode(' | ', $parts)) . '</small>';
-        }
-        if ($loc_label !== '') {
-            echo '<br><small style="color:#555">'
-               . esc_html($L['location']) . ': ' . esc_html($loc_label)
-               . '</small>';
-        }
-    }
-}, 10, 4);
