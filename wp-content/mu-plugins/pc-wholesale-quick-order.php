@@ -459,7 +459,19 @@ add_action('wp_enqueue_scripts', function(){
         .slu-stock-mini strong{font-weight:600; color:#333}
         .slu-stock-mini .is-preferred{font-weight:600}
         .slu-stock-mini .slu-nb{display:inline-flex; gap:.25em; white-space:nowrap}
-        .pc-qo-table .pc-qo-row.has-incart{ background:#f6f8fb; }
+
+        /* БЫЛО: .pc-qo-table .pc-qo-row.has-incart{ background:#f6f8fb; } */
+        .pc-qo-table .pc-qo-row.has-incart{
+            background:#eaf2ff;                 /* чуть ярче */
+            box-shadow: inset 0 0 0 2px rgba(56,132,255,.18);
+            transition: background .15s ease, box-shadow .15s ease;
+        }
+        .pc-qo-table .pc-qo-row.has-incart .pc-qo-incart{
+            font-weight:700;
+        }
+        .pc-qo-table .pc-qo-row.has-incart .pc-qo-title a{
+            color:#0b5ed7;                       /* легкий акцент на названии */
+        }
     ';
     wp_register_style('pc-qo-inline', false);
     wp_enqueue_style('pc-qo-inline');

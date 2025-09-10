@@ -15,7 +15,7 @@ const PSU_COLS_DESKTOP = 0; // 0 = не трогаем сетку (сетка у
 const PSU_IMG_H_DESKTOP = 210; // px
 const PSU_IMG_H_TABLET  = 190; // px
 const PSU_IMG_H_MOBILE  = 180; // px
-const PSU_TITLE_RESERVE    = 30;  // сколько символов показывать, если нет "|"
+const PSU_TITLE_RESERVE    = 35;  // сколько символов показывать, если нет "|"
 
 /** =======================
  *  1) Компактные названия

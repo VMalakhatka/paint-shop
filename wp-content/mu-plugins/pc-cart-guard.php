@@ -431,3 +431,58 @@ add_filter('woocommerce_cart_item_quantity', function ($product_quantity, $cart_
          . 'data-allowed="'.esc_attr($max).'" />'
          . '</div>';
 }, 20, 3);
+
+add_action('woocommerce_check_cart_items', function () {
+    foreach (WC()->cart->get_cart() as $ci) {
+        if (empty($ci['data']) || ! $ci['data'] instanceof WC_Product) continue;
+        $p     = $ci['data'];
+        $want  = (int)$ci['quantity'];
+        $stock = $p->get_stock_quantity();
+        $ms    = $p->get_manage_stock() ? 'on' : 'off';
+        $avail = function_exists('slu_available_for_add') ? (int)slu_available_for_add($p) : (int)$stock;
+
+        error_log(sprintf('[CHK] %s | want=%d | woo_stock=%s | manage=%s | our_avail=%d',
+            $p->get_sku() ?: $p->get_id(), $want, var_export($stock,true), $ms, $avail
+        ));
+    }
+}, 1);
+
+// ==== Guard: виправляємо фальшиве "нема на складі" ====
+add_action('woocommerce_check_cart_items', function () {
+    foreach (WC()->cart->get_cart() as $key => $ci) {
+        if (empty($ci['data']) || ! $ci['data'] instanceof WC_Product) continue;
+        $product = $ci['data'];
+        $want    = (int) $ci['quantity'];
+
+        // Woo бачить так:
+        $woo_stock = $product->get_stock_quantity();
+        $manage    = $product->get_manage_stock();
+
+        // А наша логіка складів:
+        $avail = function_exists('slu_available_for_add')
+            ? (int) slu_available_for_add($product)
+            : (int) $woo_stock;
+
+        // Якщо Woo каже "0", але реально є:
+        if ($avail >= $want) {
+            // знімаємо блокуючу помилку й залишаємо notice
+            wc_clear_notices();
+            wc_add_notice(sprintf(
+                'Кількість для "%s" скоригована під доступний залишок (%d шт.).',
+                $product->get_name(),
+                $avail
+            ), 'notice');
+
+            // підрізаємо кошик до реальної кількості
+            WC()->cart->set_quantity($key, $avail, false);
+        }
+    }
+}, 20);
+
+// Вимкнути hold stock навіть якщо в адмінці хтось знову увімкне
+add_filter('pre_option_woocommerce_hold_stock_minutes', function(){ return ''; });
+
+// И не уменьшаем запасы при создании Pending-заказа на checkout
+add_action('init', function () {
+    remove_action('woocommerce_checkout_order_processed', 'wc_maybe_reduce_stock_levels', 10);
+});

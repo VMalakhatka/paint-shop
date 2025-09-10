@@ -70,3 +70,9 @@ add_filter('slu_ui_labels', function($L){
     $L['allocation'] = 'Списання';
     return $L;
 });
+
+// Дата ордеру по нажатию кнопки чекаут
+add_action('woocommerce_checkout_create_order', function(\WC_Order $order, $data){
+    // фіксуємо дату створення рівно зараз (з урахуванням таймзони WP)
+    $order->set_date_created( current_time('timestamp') );
+}, 10, 2);
