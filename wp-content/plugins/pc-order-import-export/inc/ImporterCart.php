@@ -28,32 +28,25 @@ class ImporterCart
         $tmp  = (string) $_FILES['file']['tmp_name'];
         $name = strtolower((string)($_FILES['file']['name'] ?? ''));
 
-        // Прочитати файл у масив рядків
-        [$rows, $err] = self::read_rows($tmp, $name);
-        if ($err) wp_send_json_error(['msg' => $err], 400);
+        // 1) читаем файл общей функцией
+        [$rows, $err] = \PaintCore\PCOE\Helpers::read_rows($tmp, $name);
+        if ($err)  wp_send_json_error(['msg' => $err], 400);
         if (!$rows) wp_send_json_error(['msg' => 'Порожній файл або невірний формат'], 400);
 
-        // Мапінг колонок за заголовком
-        $start = 0;
-        $map   = ['sku'=>0,'qty'=>1,'gtin'=>null,'price'=>null];
-        $h     = array_map('strval', (array)$rows[0]);
-        $normH = array_map([Helpers::class, 'norm'], $h);
-        if (in_array('sku', $normH, true) || in_array('gtin', $normH, true)) {
-            $cm   = Helpers::build_colmap($h); // повертає sku|gtin|qty|price
-            $map  = array_merge($map, $cm);
-            $start = 1;
-        }
+        // 2) детект шапки + маппинг колонок (локализованные заголовки поддерживаются)
+        [$map, $start] = \PaintCore\PCOE\Helpers::detect_colmap_and_start($rows);
 
-        $report = []; // масив рядків-логів
+        $report = [];
         $added = 0; $skipped = 0;
 
+        // 3) построчно добавляем
         for ($i = $start; $i < count($rows); $i++) {
             $r = (array) $rows[$i];
 
-            $sku  = self::safe_val($r, $map['sku']);
-            $gtin = self::safe_val($r, $map['gtin']);
-            $qty  = Helpers::parse_qty(self::safe_val($r, $map['qty']));
-            $priceRaw = self::safe_val($r, $map['price']);
+            $sku   = self::safe_val($r, $map['sku']);
+            $gtin  = self::safe_val($r, $map['gtin']);
+            $qty   = \PaintCore\PCOE\Helpers::parse_qty(self::safe_val($r, $map['qty']));
+            $qty   = wc_stock_amount($qty); // нормализуем к шагу Woo
 
             if ($qty <= 0) {
                 $skipped++;
@@ -61,10 +54,8 @@ class ImporterCart
                 continue;
             }
 
-            $pid = 0;
-            if ($sku !== '')  $pid = wc_get_product_id_by_sku($sku);
-            if (!$pid && $gtin !== '') $pid = Helpers::find_product_by_gtin($gtin);
-
+            // SKU/GTIN → product_id (общий helper)
+            $pid = \PaintCore\PCOE\Helpers::resolve_product_id($sku, $gtin);
             if (!$pid) {
                 $skipped++;
                 $report[] = self::logRow($i+1, 'error', 'Не знайдено товар за SKU/GTIN', compact('sku','gtin'));
@@ -72,20 +63,19 @@ class ImporterCart
             }
 
             $product = wc_get_product($pid);
-            if (!$product instanceof WC_Product) {
+            if (!$product instanceof \WC_Product) {
                 $skipped++;
                 $report[] = self::logRow($i+1, 'error', 'Товар недоступний', compact('pid'));
                 continue;
             }
 
-            // Мін/макс з продукту
+            // Минимум/максимум из продукта
             $minq = max(1, (int)$product->get_min_purchase_quantity());
             if ($qty < $minq) $qty = (float)$minq;
             $maxq = (int)$product->get_max_purchase_quantity();
             if ($maxq > 0 && $qty > $maxq) $qty = (float)$maxq;
 
-            // Додаємо
-            $ok = WC()->cart->add_to_cart($pid, $qty);
+            $ok = WC()->cart->add_to_cart((int)$pid, $qty);
             if ($ok) {
                 $added++;
                 $report[] = self::logRow($i+1, 'ok', 'Додано', [
@@ -108,43 +98,6 @@ class ImporterCart
         ]);
     }
 
-    /** Прочитати CSV або XLS/XLSX у масив рядків */
-    protected static function read_rows(string $tmp, string $name): array
-    {
-        $rows = [];
-
-        if (preg_match('~\.(xlsx|xls)$~i', $name)) {
-            if (class_exists('\\PhpOffice\\PhpSpreadsheet\\IOFactory')) {
-                try {
-                    $xls = \PhpOffice\PhpSpreadsheet\IOFactory::load($tmp);
-                    $sheet = $xls->getActiveSheet();
-                    foreach ($sheet->toArray(null, true, true, false) as $r) {
-                        // toArray вже повертає плоскі значення
-                        $rows[] = $r;
-                    }
-                    return [$rows, null];
-                } catch (\Throwable $e) {
-                    return [[], 'Не вдалося прочитати XLS(X): '.$e->getMessage()];
-                }
-            } else {
-                return [[], 'Підтримка XLSX недоступна на цьому сервері. Використайте CSV.'];
-            }
-        }
-
-        // CSV: спроба вгадати роздільник
-        $sep = ';';
-        $peek = @file_get_contents($tmp, false, null, 0, 2048);
-        if ($peek && substr_count($peek, ',') > substr_count($peek, ';')) $sep = ',';
-        if (($fh = @fopen($tmp, 'r')) !== false) {
-            while (($r = fgetcsv($fh, 0, $sep)) !== false) {
-                if ($r === [null] || $r === false) continue;
-                $rows[] = $r;
-            }
-            fclose($fh);
-            return [$rows, null];
-        }
-        return [[], 'Не вдалося прочитати файл'];
-    }
 
     /** Безпечне отримання колонки з рядка */
     protected static function safe_val(array $row, $idx): string

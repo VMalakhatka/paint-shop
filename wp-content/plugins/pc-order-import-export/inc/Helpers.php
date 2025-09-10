@@ -145,4 +145,86 @@ class Helpers {
         }
         return $parts ? ('Списання: '.implode(', ', $parts)) : '';
     }
+
+     /** Прочитати CSV/XLS(X) у масив рядків */
+    public static function read_rows(string $tmp, string $name): array {
+        $rows = [];
+        if (preg_match('~\.(xlsx|xls)$~i', $name)) {
+            if (class_exists('\\PhpOffice\\PhpSpreadsheet\\IOFactory')) {
+                try{
+                    $xls = \PhpOffice\PhpSpreadsheet\IOFactory::load($tmp);
+                    $sheet = $xls->getActiveSheet();
+                    foreach ($sheet->toArray(null, true, true, false) as $r) {
+                        $rows[] = $r;
+                    }
+                    return [$rows, null];
+                } catch (\Throwable $e){
+                    return [[], 'Не вдалося прочитати XLS(X): '.$e->getMessage()];
+                }
+            } else {
+                return [[], 'Підтримка XLSX недоступна на цьому сервері. Використайте CSV.'];
+            }
+        }
+        // CSV
+        $sep = ';';
+        $peek = @file_get_contents($tmp, false, null, 0, 2048);
+        if ($peek && substr_count($peek, ',') > substr_count($peek, ';')) $sep = ',';
+        if (($fh = @fopen($tmp, 'r')) !== false) {
+            while (($r = fgetcsv($fh, 0, $sep)) !== false) {
+                if ($r === [null] || $r === false) continue;
+                $rows[] = $r;
+            }
+            fclose($fh);
+            return [$rows, null];
+        }
+        return [[], 'Не вдалося прочитати файл'];
+    }
+
+    /** Детект шапки + мапінг колонок (як у Draft) */
+    public static function detect_colmap_and_start(array $rows): array {
+        $map   = ['sku'=>0,'qty'=>1,'gtin'=>null,'price'=>null];
+        $start = 0;
+
+        if (empty($rows)) return [$map, $start];
+
+        $h  = array_map('strval', (array)$rows[0]);  // сирі заголовки
+        $cm = self::build_colmap($h);               // шукаємо локалізовані назви
+
+        $has_header = isset($cm['sku']) || isset($cm['gtin']) || isset($cm['qty']) || isset($cm['price']);
+        if ($has_header) {
+            $map   = array_merge($map, $cm);
+            $start = 1;
+        } else {
+            // fallback-евристика: якщо 1-й рядок виглядає як шапка
+            $nonNumeric = 0;
+            foreach ($h as $cell) {
+                $cell  = trim((string)$cell);
+                $cell2 = str_replace([","," ","\xC2\xA0"], ['.','',''], $cell);
+                if ($cell === '' || !is_numeric($cell2)) $nonNumeric++;
+            }
+            if ($nonNumeric >= 2) {
+                $map   = array_merge($map, $cm);
+                $start = 1;
+            }
+        }
+        return [$map, $start];
+    }
+
+    /** Пошук товару за SKU/GTIN */
+    public static function resolve_product_id(string $sku, string $gtin): int {
+        $pid = 0;
+        if ($sku !== '')  $pid = wc_get_product_id_by_sku($sku);
+        if (!$pid && $gtin !== '') $pid = self::find_product_by_gtin($gtin);
+        return (int)$pid;
+    }
+
+    /** Парсер ціни (уніфікований з Draft) */
+    public static function parse_price(string $raw): ?float {
+        $raw = trim($raw);
+        if ($raw === '' || $raw === '-') return null;
+        $s = str_replace(["\xC2\xA0",' '], '', $raw);
+        if (strpos($s, ',') !== false && strpos($s, '.') === false) $s = str_replace(',', '.', $s);
+        if (!is_numeric($s)) return null;
+        return (float)$s;
+    }
 }
