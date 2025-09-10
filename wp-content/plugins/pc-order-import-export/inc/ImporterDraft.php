@@ -75,77 +75,47 @@ class ImporterDraft
         $tmp  = (string) $_FILES['file']['tmp_name'];
         $name = strtolower((string)($_FILES['file']['name'] ?? ''));
 
-        // 1) читаємо файл (загальний хелпер)
         [$rows, $err] = Helpers::read_rows($tmp, $name);
         if ($err)  wp_send_json_error(['msg' => $err], 400);
         if (!$rows) wp_send_json_error(['msg' => 'Порожній файл або невірний формат'], 400);
 
-        // 2) детект шапки + маппінг колонок
         [$map, $start] = Helpers::detect_colmap_and_start($rows);
 
-        // 3) створюємо чернетку (без емейлів)
+        // создаём чернетку
         $order = wc_create_order([
             'status'      => 'wc-pc-draft',
             'customer_id' => get_current_user_id() ?: 0,
         ]);
-        if (!($order instanceof WC_Order)) {
+        if (!($order instanceof \WC_Order)) {
             wp_send_json_error(['msg' => 'Не вдалося створити чернетку замовлення'], 500);
         }
 
-        $report = [];
-        $imported = 0; $skipped = 0;
-
-        for ($i = $start; $i < count($rows); $i++) {
-            $r = (array) $rows[$i];
-
-            $sku   = self::safe_val($r, $map['sku']);
-            $gtin  = self::safe_val($r, $map['gtin']);
-            $qty   = wc_stock_amount( Helpers::parse_qty(self::safe_val($r, $map['qty'])) );
-            $price = Helpers::parse_price( self::safe_val($r, $map['price']) );
-
-            $pid = Helpers::resolve_product_id($sku, $gtin);
-            if (!$pid) {
-                $skipped++;
-                $report[] = self::logRow($i+1,'error','Не знайдено товар за SKU/GTIN', compact('sku','gtin'));
-                continue;
-            }
-
-            $product = wc_get_product($pid);
-            if (!$product instanceof WC_Product) {
-                $skipped++;
-                $report[] = self::logRow($i+1,'error','Товар недоступний', compact('pid'));
-                continue;
-            }
-
-            if ($qty <= 0) {
-                $skipped++;
-                $report[] = self::logRow($i+1,'skip','Кількість ≤ 0');
-                continue;
-            }
-
+        // adder для чернетки: додаємо позиції в order; якщо є ціна у файлі — виставляємо subtotal/total
+        $adder = function(\WC_Product $product, float $qty, ?float $price, array &$errExtra) use ($order): bool {
             $item_data = [];
             if ($price !== null) {
                 $item_data['subtotal'] = (float)$price * (float)$qty;
                 $item_data['total']    = (float)$price * (float)$qty;
             }
-
             try {
                 $order->add_product($product, $qty, $item_data);
-                $imported++;
-                $report[] = self::logRow($i+1,'ok','Додано у чернетку', [
-                    'name' => $product->get_name(),
-                    'sku'  => $product->get_sku() ?: $sku,
-                    'qty'  => $qty,
-                    'price'=> ($price !== null ? $price : '—'),
-                ]);
+                return true;
             } catch (\Throwable $e) {
-                $skipped++;
-                $report[] = self::logRow($i+1,'error','Помилка додавання: '.$e->getMessage());
+                $errExtra['ex']  = $e->getMessage();
+                $errExtra['pid'] = (int)$product->get_id();
+                return false;
             }
-        }
+        };
+
+        $res = Helpers::process_rows_with_adder($rows, $map, $start, [
+            'allow_price' => true,                 // чернетка може приймати ціну з файлу
+            'ok_label'    => 'Додано у чернетку',  // текст у звіті
+            'adder'       => $adder,
+        ]);
 
         try { $order->calculate_totals(false); } catch (\Throwable $e) {}
 
+        // лінки + заголовок, як у тебе було
         $order_id = $order->get_id();
         $links = [
             'edit' => (current_user_can('edit_shop_orders') ? admin_url('post.php?post='.$order_id.'&action=edit') : ''),
@@ -163,22 +133,13 @@ class ImporterDraft
 
         wp_send_json_success([
             'order_id'    => $order_id,
-            'imported'    => $imported,
-            'skipped'     => $skipped,
-            'report_html' => Helpers::render_report($report), // ← загальний рендер
+            'imported'    => $res['ok'],
+            'skipped'     => $res['skipped'],
+            'report_html' => Helpers::render_report($res['report']),
             'links'       => $links,
         ]);
     }
-
-    protected static function safe_val(array $row, $idx): string
-    {
-        if ($idx === null || $idx === false) return '';
-        return isset($row[$idx]) ? trim((string)$row[$idx]) : '';
-    }
-    protected static function logRow(int $line, string $type, string $msg, array $extra = []): array
-    {
-        return ['line'=>$line,'type'=>$type,'msg'=>$msg,'extra'=>$extra];
-    }
+    
     protected static function customer_view_link(WC_Order $order): string
     {
         $uid = get_current_user_id();

@@ -262,4 +262,95 @@ class Helpers {
         <?php
         return ob_get_clean();
     }
+
+    /**
+     * Универсальная обработка строк импорта.
+     * Мы сами лишь парсим sku/gtin/qty/price и находим продукт,
+     * а реальное «добавление» делаем через переданный колбек $adder.
+     *
+     * @param array $rows
+     * @param array $map     ['sku'=>..,'gtin'=>..,'qty'=>..,'price'=>..]
+     * @param int   $start   индекс первой строки данных (после шапки)
+     * @param array $opts    [
+     *   'allow_price' => bool, // true для чернетки, false для кошика
+     *   'ok_label'    => string, // текст для success (напр. "Додано" / "Додано у чернетку")
+     *   'adder'       => callable(WC_Product $product, float $qty, ?float $price, array &$errExtra): bool
+     * ]
+     * @return array ['ok'=>int,'skipped'=>int,'report'=>array]
+     */
+    public static function process_rows_with_adder(array $rows, array $map, int $start, array $opts): array {
+        $allowPrice = (bool)($opts['allow_price'] ?? false);
+        $okLabel    = (string)($opts['ok_label'] ?? 'Додано');
+        $adder      = $opts['adder'] ?? null;
+        if (!is_callable($adder)) {
+            return ['ok'=>0,'skipped'=>0,'report'=>[ self::logRow(0,'error','Внутрішня помилка: adder не заданий') ]];
+        }
+
+        $ok = 0; $skipped = 0; $report = [];
+
+        for ($i = $start; $i < count($rows); $i++) {
+            $r    = (array)$rows[$i];
+            $sku  = self::safe_val($r, $map['sku']  ?? null);
+            $gtin = self::safe_val($r, $map['gtin'] ?? null);
+            $qty  = wc_stock_amount( self::parse_qty(self::safe_val($r, $map['qty'] ?? null)) );
+            $price= $allowPrice ? self::parse_price(self::safe_val($r, $map['price'] ?? null)) : null;
+
+            if ($qty <= 0) {
+                $skipped++;
+                $report[] = self::logRow($i+1, 'skip', 'Кількість ≤ 0');
+                continue;
+            }
+
+            $pid = self::resolve_product_id($sku, $gtin);
+            if (!$pid) {
+                $skipped++;
+                $report[] = self::logRow($i+1, 'error', 'Не знайдено товар за SKU/GTIN', compact('sku','gtin'));
+                continue;
+            }
+
+            $product = wc_get_product($pid);
+            if (!($product instanceof \WC_Product)) {
+                $skipped++;
+                $report[] = self::logRow($i+1, 'error', 'Товар недоступний', compact('pid'));
+                continue;
+            }
+
+            $errExtra = [];
+            $okAdd = false;
+            try {
+                $okAdd = (bool) call_user_func($adder, $product, (float)$qty, $price, $errExtra);
+            } catch (\Throwable $e) {
+                $okAdd = false;
+                $errExtra['ex'] = $e->getMessage();
+            }
+
+            if ($okAdd) {
+                $ok++;
+                $rowExtra = [
+                    'name' => $product->get_name(),
+                    'sku'  => $product->get_sku() ?: $sku,
+                    'qty'  => $qty,
+                ];
+                if ($allowPrice) { $rowExtra['price'] = ($price !== null ? $price : '—'); }
+                $report[] = self::logRow($i+1, 'ok', $okLabel, $rowExtra);
+            } else {
+                $skipped++;
+                if (!$errExtra) { $errExtra = ['sku' => $product->get_sku() ?: $sku]; }
+                $report[] = self::logRow($i+1, 'error', 'Не вдалося додати', $errExtra);
+            }
+        }
+
+        return ['ok'=>$ok,'skipped'=>$skipped,'report'=>$report];
+    }
+
+    // Безпечне читання клітинки рядка за індексом
+    public static function safe_val(array $row, $idx): string {
+        if ($idx === null || $idx === false) return '';
+        return isset($row[$idx]) ? trim((string)$row[$idx]) : '';
+    }
+
+    // Рядок звіту (для Cart/Draft)
+    public static function logRow(int $line, string $type, string $msg, array $extra = []): array {
+        return ['line' => $line, 'type' => $type, 'msg' => $msg, 'extra' => $extra];
+    }
 }
