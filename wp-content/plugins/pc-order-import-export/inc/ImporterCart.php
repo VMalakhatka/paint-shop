@@ -1,7 +1,6 @@
 <?php
 namespace PaintCore\PCOE;
 
-use WC_Product;
 use WC;
 
 defined('ABSPATH') || exit;
@@ -9,16 +8,16 @@ defined('ABSPATH') || exit;
 class ImporterCart
 {
     /**
-     * AJAX handler: імпорт у кошик з CSV/XLS(X)
+     * AJAX: імпорт у кошик з CSV/XLS(X)
      * action: pcoe_import_cart
      * nonce:  pcoe_import_cart
      */
     public static function handle()
     {
-        if ( ! isset($_POST['_wpnonce']) || ! wp_verify_nonce($_POST['_wpnonce'], 'pcoe_import_cart') ) {
+        if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'pcoe_import_cart')) {
             wp_send_json_error(['msg' => 'Bad nonce'], 403);
         }
-        if ( ! WC()->cart ) {
+        if (!function_exists('WC') || !WC()->cart) {
             wp_send_json_error(['msg' => 'Cart not available'], 400);
         }
         if (empty($_FILES['file']['tmp_name'])) {
@@ -28,25 +27,24 @@ class ImporterCart
         $tmp  = (string) $_FILES['file']['tmp_name'];
         $name = strtolower((string)($_FILES['file']['name'] ?? ''));
 
-        // 1) читаем файл общей функцией
-        [$rows, $err] = \PaintCore\PCOE\Helpers::read_rows($tmp, $name);
+        // 1) читаємо файл (загальний хелпер)
+        [$rows, $err] = Helpers::read_rows($tmp, $name);
         if ($err)  wp_send_json_error(['msg' => $err], 400);
         if (!$rows) wp_send_json_error(['msg' => 'Порожній файл або невірний формат'], 400);
 
-        // 2) детект шапки + маппинг колонок (локализованные заголовки поддерживаются)
-        [$map, $start] = \PaintCore\PCOE\Helpers::detect_colmap_and_start($rows);
+        // 2) детект шапки + маппінг колонок
+        [$map, $start] = Helpers::detect_colmap_and_start($rows);
 
         $report = [];
         $added = 0; $skipped = 0;
 
-        // 3) построчно добавляем
+        // 3) построчно додаємо до кошика
         for ($i = $start; $i < count($rows); $i++) {
             $r = (array) $rows[$i];
 
-            $sku   = self::safe_val($r, $map['sku']);
-            $gtin  = self::safe_val($r, $map['gtin']);
-            $qty   = \PaintCore\PCOE\Helpers::parse_qty(self::safe_val($r, $map['qty']));
-            $qty   = wc_stock_amount($qty); // нормализуем к шагу Woo
+            $sku = self::safe_val($r, $map['sku']);
+            $gtin = self::safe_val($r, $map['gtin']);
+            $qty  = wc_stock_amount( Helpers::parse_qty(self::safe_val($r, $map['qty'])) );
 
             if ($qty <= 0) {
                 $skipped++;
@@ -54,8 +52,8 @@ class ImporterCart
                 continue;
             }
 
-            // SKU/GTIN → product_id (общий helper)
-            $pid = \PaintCore\PCOE\Helpers::resolve_product_id($sku, $gtin);
+            // SKU/GTIN → product_id
+            $pid = Helpers::resolve_product_id($sku, $gtin);
             if (!$pid) {
                 $skipped++;
                 $report[] = self::logRow($i+1, 'error', 'Не знайдено товар за SKU/GTIN', compact('sku','gtin'));
@@ -63,17 +61,17 @@ class ImporterCart
             }
 
             $product = wc_get_product($pid);
-            if (!$product instanceof \WC_Product) {
+            if (!($product instanceof \WC_Product)) {
                 $skipped++;
                 $report[] = self::logRow($i+1, 'error', 'Товар недоступний', compact('pid'));
                 continue;
             }
 
-            // Минимум/максимум из продукта
-            $minq = max(1, (int)$product->get_min_purchase_quantity());
-            if ($qty < $minq) $qty = (float)$minq;
-            $maxq = (int)$product->get_max_purchase_quantity();
-            if ($maxq > 0 && $qty > $maxq) $qty = (float)$maxq;
+            // Мін/макс з продукту
+            $minq = max(1, (int) $product->get_min_purchase_quantity());
+            if ($qty < $minq) $qty = (float) $minq;
+            $maxq = (int) $product->get_max_purchase_quantity();
+            if ($maxq > 0 && $qty > $maxq) $qty = (float) $maxq;
 
             $ok = WC()->cart->add_to_cart((int)$pid, $qty);
             if ($ok) {
@@ -94,10 +92,9 @@ class ImporterCart
         wp_send_json_success([
             'added'       => $added,
             'skipped'     => $skipped,
-            'report_html' => self::render_report($report),
+            'report_html' => Helpers::render_report($report), // ← спільний рендер
         ]);
     }
-
 
     /** Безпечне отримання колонки з рядка */
     protected static function safe_val(array $row, $idx): string
@@ -110,41 +107,5 @@ class ImporterCart
     protected static function logRow(int $line, string $type, string $msg, array $extra = []): array
     {
         return ['line'=>$line,'type'=>$type,'msg'=>$msg,'extra'=>$extra];
-    }
-
-    /** HTML звіту по рядках */
-    protected static function render_report(array $rows): string
-    {
-        if (!$rows) return '';
-        ob_start(); ?>
-        <div class="pcoe-report" style="margin-top:8px">
-          <table style="width:100%;max-width:800px;border-collapse:collapse;font-size:12px">
-            <thead>
-              <tr>
-                <th style="text-align:left;border-bottom:1px solid #eee;padding:4px 6px">Рядок</th>
-                <th style="text-align:left;border-bottom:1px solid #eee;padding:4px 6px">Статус</th>
-                <th style="text-align:left;border-bottom:1px solid #eee;padding:4px 6px">Повідомлення</th>
-              </tr>
-            </thead>
-            <tbody>
-              <?php foreach ($rows as $r): ?>
-              <tr>
-                <td style="padding:4px 6px;border-bottom:1px solid #f5f5f5"><?php echo (int)$r['line']; ?></td>
-                <td style="padding:4px 6px;border-bottom:1px solid #f5f5f5">
-                    <?php echo esc_html($r['type']); ?>
-                </td>
-                <td style="padding:4px 6px;border-bottom:1px solid #f5f5f5">
-                    <?php echo esc_html($r['msg']); ?>
-                    <?php if (!empty($r['extra'])): ?>
-                        <small style="opacity:.75"> — <?php echo esc_html(json_encode($r['extra'], JSON_UNESCAPED_UNICODE)); ?></small>
-                    <?php endif; ?>
-                </td>
-              </tr>
-              <?php endforeach; ?>
-            </tbody>
-          </table>
-        </div>
-        <?php
-        return ob_get_clean();
     }
 }

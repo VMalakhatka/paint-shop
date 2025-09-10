@@ -279,21 +279,6 @@ public static function render_account_import_block(): void
                   </form>
                 </div>
 
-                 <!-- Зберегти поточний кошик у чернетку -->
-                <div style="margin-top:14px">
-                  <form action="<?php echo esc_url(admin_url('admin-ajax.php')); ?>" method="get"
-                        style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                    <input type="hidden" name="action" value="pcoe_cart_to_draft">
-                    <input type="hidden" name="_wpnonce" value="<?php echo esc_attr(wp_create_nonce('pcoe_cart_to_draft')); ?>">
-                    <input type="hidden" name="dest" value="orders">
-                    <input type="text" name="title" placeholder="Назва чернетки (необов’язково)" style="min-width:260px">
-                    <button class="button" type="submit"
-                            onclick="this.disabled=true;this.innerText='Зберігаю…';this.form.submit();">
-                        В чернетку
-                    </button>
-                  </form>
-                </div>
-
                 <div style="font-size:12px; opacity:.8; margin-top:12px">
                     Формат CSV: <code>sku;qty</code> або <code>gtin;qty</code>. Розділювач <code>;</code> або <code>,</code>.
                     Дробові кількості: крапка або кома; тисячні пробіли і не-знак ігноруються.
@@ -373,25 +358,32 @@ jQuery(function($){
     $('.pcoe-split').each(function(){ var scope=$(this).data('scope'); if($(this).val()==='per_loc') ensureNoteChecked(scope); });
     $(document).on('change','.pcoe-split',function(){ var scope=$(this).data('scope'); if($(this).val()==='per_loc') ensureNoteChecked(scope); });
 
-    // === Імпорт у кошик
-    $(document).on('submit','#pcoe-import-form',function(){
+    // === Імпорт у кошик (safe)
+        $(document).on('submit','#pcoe-import-form',function(e){
+        e.preventDefault();
         var \$f=$(this), \$msg=\$f.find('.pcoe-import-msg');
         var fd=new FormData(this); fd.append('action','pcoe_import_cart');
         \$msg.text('Імпортуємо…');
         $.ajax({
-          url:'{$ajax}', method:'POST', data:fd, contentType:false, processData:false,
-          success:function(resp){
+            url:'{$ajax}', method:'POST', data:fd, contentType:false, processData:false
+        }).done(function(resp){
             if(resp && resp.success){
-              \$msg.text('Додано позицій: '+resp.data.added+', пропущено: '+resp.data.skipped);
-              window.location.reload();
-            }else{
-              \$msg.text((resp && resp.data && resp.data.msg) ? resp.data.msg : 'Помилка імпорту.');
+            \$msg.text('Додано: '+resp.data.added+', пропущено: '+resp.data.skipped);
+            if(resp.data.report_html){
+                if(!$('.pcoe-import-report').length){
+                $('<div class="pcoe-import-report" style="margin-top:10px"></div>').insertAfter(\$f.closest('div'));
+                }
+                $('.pcoe-import-report').html(resp.data.report_html);
             }
-          },
-          error:function(){ \$msg.text('Помилка з\\'єднання.'); }
+            setTimeout(function(){ window.location.reload(); }, 1200);
+            }else{
+            \$msg.text((resp && resp.data && resp.data.msg) ? resp.data.msg : 'Помилка імпорту.');
+            }
+        }).fail(function(){
+            \$msg.text('Помилка з\'єднання.');
         });
         return false;
-    });
+        });
 
     // === Імпорт у чернетку
     $(document).on('submit','#pcoe-import-draft-form',function(){

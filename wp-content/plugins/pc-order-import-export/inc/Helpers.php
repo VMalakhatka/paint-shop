@@ -227,4 +227,39 @@ class Helpers {
         if (!is_numeric($s)) return null;
         return (float)$s;
     }
+
+        /** HTML звіту по рядках (спільний для Cart/Draft) */
+    public static function render_report(array $rows): string {
+        if (!$rows) return '';
+        ob_start(); ?>
+        <div class="pcoe-report" style="margin-top:8px">
+          <table style="width:100%;max-width:900px;border-collapse:collapse;font-size:12px">
+            <thead>
+              <tr>
+                <th style="text-align:left;border-bottom:1px solid #eee;padding:4px 6px">Рядок</th>
+                <th style="text-align:left;border-bottom:1px solid #eee;padding:4px 6px">Статус</th>
+                <th style="text-align:left;border-bottom:1px solid #eee;padding:4px 6px">Повідомлення</th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php foreach ($rows as $r): ?>
+              <tr>
+                <td style="padding:4px 6px;border-bottom:1px solid #f5f5f5"><?php echo (int)$r['line']; ?></td>
+                <td style="padding:4px 6px;border-bottom:1px solid #f5f5f5">
+                    <?php echo esc_html($r['type']); ?>
+                </td>
+                <td style="padding:4px 6px;border-bottom:1px solid #f5f5f5">
+                    <?php echo esc_html($r['msg']); ?>
+                    <?php if (!empty($r['extra'])): ?>
+                        <small style="opacity:.75"> — <?php echo esc_html(json_encode($r['extra'], JSON_UNESCAPED_UNICODE)); ?></small>
+                    <?php endif; ?>
+                </td>
+              </tr>
+              <?php endforeach; ?>
+            </tbody>
+          </table>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
 }
