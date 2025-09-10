@@ -1333,10 +1333,64 @@ const PSU_IMG_H_MOBILE  = 160;
 Где править поведение: внутри функций pcux_available_qty/pcux_available_for_add или прокинуть свою MU-функцию slu_*.
 
 ⸻
+5) новоописание Розподіл і фактичне списання залишків (уніфіковано)
+Файл: wp-content/plugins/paint-core/inc/order-allocator.php
 
-5) Распределение и реальное списание остатков
+Що робить
+	•	План у рядках замовлення: на етапі створення замовлення записує:
+	•	_pc_alloc_plan (джерело з хедера/свічера),
+	•	дубль у _pc_stock_breakdown (сумісність),
+	•	видиму мету “Склад: Київ × N, Одеса × M”,
+	•	_stock_location_id/_slug (перший реально використаний склад).
+	•	Реальне списання: читає план і зменшує _stock_at_{term_id} для всіх позицій, потім перераховує _stock та _stock_status.
+Антидубль: _pc_stock_reduced = yes.
+
+Хуки
+	•	Побудова плану: woocommerce_new_order (priority 5).
+	•	Редукція (ОДИН раз):
+woocommerce_order_status_processing (60),
+woocommerce_order_status_completed (60).
+
+На checkout_order_processed списань більше немає.
+
+Переозначення алгоритму
+	•	Фільтр slu_allocation_plan — якщо повернути масив [term_id => qty], буде використано ваш розподіл.
+	•	Якщо фільтр нічого не дав — використовується централізований калькулятор з header-allocation-switcher.php (функція pc_calc_plan_for()).
+
+Ручні дії в адмінці
+	•	Build stock allocation plan (PaintCore) — перебудувати план і мети рядків.
+	•	Reduce stock from plan (PaintCore) — примусово списати.
+	•	RESTORE stock from plan (PaintCore) — відкотити списання (повернути залишки) і прибрати мету _pc_stock_reduced.
+
+Залежності/сумісність
+	•	Поля залишків по складах: _stock_at_{TERM_ID}.
+	•	Загальний _stock рахується як сума по _stock_at_*.
+	•	Стандартне Woo-списання вимкнено (ти вже видалив wc_maybe_reduce_stock_levels) + hold_stock_minutes = порожньо.новоописание 
+
+
+
+5) старое описание Распределение и реальное списание остатков
+
+Файл: wp-content/5) Распределение и реальное списание остатков
 
 Файл: wp-content/plugins/paint-core/inc/order-allocator.php
+Задача:
+	•	На этапе оформления/статуса строит план списания по складам для каждой строки заказа
+→ мета _pc_stock_breakdown = [ term_id => qty, ... ], видимая мета “Склад: Київ × N, Одеса × M”, _stock_location_id/_slug.
+	•	Потом списывает реальные остатки из мет _stock_at_{term_id}, пересчитывает _stock/_stock_status.
+	•	Антидубль: флажок _pc_stock_reduced = yes.
+
+Хуки:
+	•	План: woocommerce_new_order (раньше), woocommerce_checkout_order_processed (40), woocommerce_order_status_processing/completed (30).
+	•	Редукция: те же статусы, но (60) — после построения плана.
+
+Переопределение алгоритма:
+	•	фильтр slu_allocation_plan — можешь вернуть свой [term_id => qty], чтобы изменить стратегию.
+
+Где править приоритеты:
+	•	в pc_build_allocation_plan() порядок — сначала primary, потом по имени (или меняй на “по убыванию остатков”).
+
+⸻
 Задача:
 	•	На этапе оформления/статуса строит план списания по складам для каждой строки заказа
 → мета _pc_stock_breakdown = [ term_id => qty, ... ], видимая мета “Склад: Київ × N, Одеса × M”, _stock_location_id/_slug.

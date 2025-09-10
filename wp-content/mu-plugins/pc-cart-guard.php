@@ -486,3 +486,21 @@ add_filter('pre_option_woocommerce_hold_stock_minutes', function(){ return ''; }
 add_action('init', function () {
     remove_action('woocommerce_checkout_order_processed', 'wc_maybe_reduce_stock_levels', 10);
 });
+
+// Полностью гасим любые автосписания до выяснения
+add_filter('pre_option_woocommerce_hold_stock_minutes', '__return_empty_string', 9999);
+add_filter('woocommerce_can_reduce_order_stock', '__return_false', 9999);
+remove_action('woocommerce_checkout_order_processed', 'wc_maybe_reduce_stock_levels', 10);
+remove_action('woocommerce_payment_complete',          'wc_maybe_reduce_stock_levels', 10);
+remove_action('woocommerce_order_status_processing',   'wc_maybe_reduce_stock_levels', 10);
+remove_action('woocommerce_order_status_completed',    'wc_maybe_reduce_stock_levels', 10);
+
+// Барьер: на фронте запретить записи _stock / _stock_status / _stock_at_* (кроме наших редукций на processing/completed и админки)
+add_filter('update_post_metadata', function($check,$post_id,$key,$val){
+    if ($key!=='_stock' && $key!=='_stock_status' && strpos($key,'_stock_at_')!==0) return $check;
+    if (is_admin() || (defined('DOING_CRON') && DOING_CRON)) return $check;
+    if (did_action('woocommerce_order_status_processing') || did_action('woocommerce_order_status_completed')) return $check;
+    error_log(sprintf('[STOCK-BARRIER] blocked write: post=%d key=%s new=%s url=%s',
+        (int)$post_id,$key,is_scalar($val)?$val:json_encode($val),$_SERVER['REQUEST_URI']??''));
+    return false;
+}, 9999, 4);

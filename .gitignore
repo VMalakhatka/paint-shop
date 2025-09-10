@@ -76,6 +76,7 @@ wp-content/mu-plugins/*
 !wp-content/mu-plugins/pc-wholesale-quick-order.php
 !wp-content/mu-plugins/pc-account-tweaks.php
 !wp-content/mu-plugins/pc-cart-guard.php
+!wp-content/mu-plugins/pc_slw.php
 
 # === Node / Composer / сборки ===
 node_modules/
