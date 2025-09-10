@@ -117,7 +117,10 @@ add_action('woocommerce_new_order', __NAMESPACE__.'\\build_allocation_plan_for_o
 function reduce_stock_from_plan($order_or_id): void {
     $order = ($order_or_id instanceof \WC_Order) ? $order_or_id : wc_get_order($order_or_id);
     if (!$order) return;
-    if ($order->get_meta(PC_STOCK_REDUCED_META)) return; // антидубль
+    if ($order->get_meta(PC_STOCK_REDUCED_META)) return;
+
+    // >>> разрешаем записи на время нашей процедуры
+    $GLOBALS['PC_ALLOW_STOCK_WRITE'] = true;
 
     $touched = [];
     foreach ($order->get_items('line_item') as $item) {
@@ -139,6 +142,9 @@ function reduce_stock_from_plan($order_or_id): void {
         $order->update_meta_data(PC_STOCK_REDUCED_META, 'yes');
         $order->save();
     }
+
+    // <<< закрываем коридор
+    unset($GLOBALS['PC_ALLOW_STOCK_WRITE']);
 }
 
 add_action('woocommerce_order_status_processing', __NAMESPACE__.'\\reduce_stock_from_plan', 60);
