@@ -53,17 +53,14 @@ add_action('manage_woocommerce_page_wc-orders_custom_column', function($column, 
 /* ------------ Хелперы ------------ */
 
 /**
- * Отримати GTIN із продукту/варіації.
- * - Пріоритет: константа PC_GTIN_META_KEY, далі — список кандидатів
- * - Нормалізуємо: лишаємо тільки цифри
- * - Фільтр: приймаємо тільки довжини 8/12/13/14 (GTIN-8/UPC-A/EAN-13/GTIN-14)
- * - Для підозрілих (коротких) повертаємо ''.
+ * GTIN из продукта/вариации «как есть».
+ * Берём первый непустой из списка ключей, без нормализации.
  */
 function pc_get_product_gtin(\WC_Product $product): string {
     $candidates = array_filter(array_unique(array_merge(
         [ defined('PC_GTIN_META_KEY') ? PC_GTIN_META_KEY : '' ],
         apply_filters('pc_gtin_meta_keys', [
-            '_global_unique_id',   // ваш ключ
+            '_global_unique_id',
             '_wpm_gtin_code',
             '_alg_ean',
             '_ean',
@@ -71,33 +68,30 @@ function pc_get_product_gtin(\WC_Product $product): string {
         ])
     )));
 
-    $fetch = function(int $post_id) use ($candidates): string {
+    $fetch_raw = function (int $post_id) use ($candidates): string {
         foreach ($candidates as $key) {
             if ($key === '') continue;
             $raw = get_post_meta($post_id, $key, true);
-            if ($raw === '' || $raw === null) continue;
-            // нормалізація: тільки цифри
-            $digits = preg_replace('/\D+/', '', (string)$raw);
-            $len = strlen($digits);
-            if (in_array($len, [8,12,13,14], true)) {
-                return $digits;
+            if ($raw !== '' && $raw !== null) {
+                return (string) $raw; // ← без изменений
             }
         }
         return '';
     };
 
-    // спершу сам товар/варіація
-    $v = $fetch($product->get_id());
+    // 1) у самого товара/вариации
+    $v = $fetch_raw($product->get_id());
     if ($v !== '') return $v;
 
-    // якщо варіація — спробувати батька
+    // 2) если это вариация — пробуем родителя
     if ($product->is_type('variation')) {
-        $pid = (int)$product->get_parent_id();
+        $pid = (int) $product->get_parent_id();
         if ($pid) {
-            $v = $fetch($pid);
+            $v = $fetch_raw($pid);
             if ($v !== '') return $v;
         }
     }
+
     return '';
 }
 
@@ -149,6 +143,30 @@ function implode_list_unique(array $list, int $max = 5): string {
     }
     return implode(', ', $list);
 }
+
+// Показать GTIN под "Артикул" в карточке заказа (classic + HPOS)
+add_action('woocommerce_after_order_itemmeta', function ($item_id, $item, $product) {
+    if (!$product && $item instanceof \WC_Order_Item_Product) {
+        $product = $item->get_product();
+    }
+    if (!($product instanceof \WC_Product)) return;
+
+    // берём «как есть»
+    $gtin = pc_get_product_gtin($product);
+    if ($gtin === '') return;
+
+    echo '<div class="pc-order-item-gtin"><small>'
+        . esc_html__('GTIN', 'paint-core') . ': '
+        . esc_html($gtin)
+        . '</small></div>';
+}, 10, 3);
+
+// Спрятать служебные меты строки заказа из админки (classic + HPOS)
+add_filter('woocommerce_hidden_order_itemmeta', function ($hidden) {
+    $hidden[] = '_stock_location_id';
+    $hidden[] = '_stock_location_slug';
+    return $hidden;
+}, 10, 1);
 
 /* ------------ Немного стилей для ширины/обрезки ------------ */
 add_action('admin_head', function () { ?>
