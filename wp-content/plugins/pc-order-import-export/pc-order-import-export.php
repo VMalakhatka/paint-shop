@@ -1,13 +1,27 @@
 <?php
 /**
  * Plugin Name: PC Order Import/Export
- * Description: Експорт кошика/замовлень у CSV/XLSX + імпорт у кошик/чернетку. Інтегровано з WooCommerce.
- * Version: 1.0.0
- * Author: PaintCore
- * Text Domain: pc-oi-export
+ * Description: Export cart/orders to CSV/XLSX + import to cart/draft. WooCommerce integration.
+ * Text Domain: pc-order-import-export
+ * Domain Path: /languages
  */
 
 if (!defined('ABSPATH')) exit;
+
+add_action('plugins_loaded', function () {
+    // обычная загрузка
+    load_plugin_textdomain('pc-order-import-export', false, dirname(plugin_basename(__FILE__)).'/languages');
+
+    // подстраховка (иногда WP не подхватывает uk без суффикса)
+    if (!is_textdomain_loaded('pc-order-import-export')) {
+        $locale = function_exists('determine_locale') ? determine_locale() : get_locale();
+        $candidates = ["pc-order-import-export-$locale.mo"];
+        foreach ($candidates as $name) {
+            $p = plugin_dir_path(__FILE__) . "languages/$name";
+            if (file_exists($p) && load_textdomain('pc-order-import-export', $p)) break;
+        }
+    }
+});
 
 define('PCOE_DIR', __DIR__);
 define('PCOE_URL', plugin_dir_url(__FILE__));

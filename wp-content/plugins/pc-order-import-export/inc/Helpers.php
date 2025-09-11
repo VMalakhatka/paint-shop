@@ -7,22 +7,22 @@ class Helpers {
     // Текстові мітки (1 місце для перекладів)
     public static function labels(): array {
         return [
-            'btn_csv'       => 'Завантажити CSV',
-            'btn_xlsx'      => 'Завантажити XLSX',
-            'conf_toggle'   => 'Налаштувати експорт',
-            'split_label'   => 'Формат позицій:',
-            'split_agg'     => 'Загальна (у примітках «Списання: …»)',
-            'split_per_loc' => 'Окремо по кожному складу',
-            'col_sku'       => 'Артикул',
-            'col_gtin'      => 'GTIN',
-            'col_name'      => 'Назва',
-            'col_qty'       => 'К-сть',
-            'col_price'     => 'Ціна',
-            'col_total'     => 'Сума',
-            'col_note'      => 'Примітка',
-            'filename_cart'  => 'cart',
-            'filename_order' => 'order',
-            'xls_missing'    => 'XLSX недоступний (PhpSpreadsheet не знайдено) — збережено як CSV.',
+            'btn_csv'       => __('Download CSV', 'pc-order-import-export'),
+            'btn_xlsx'      => __('Download XLSX', 'pc-order-import-export'),
+            'conf_toggle'   => __('Configure export', 'pc-order-import-export'),
+            'split_label'   => __('Row format:', 'pc-order-import-export'),
+            'split_agg'     => __('Aggregate (write "Allocation: ..." in Notes)', 'pc-order-import-export'),
+            'split_per_loc' => __('Separate per location', 'pc-order-import-export'),
+            'col_sku'       => __('SKU', 'pc-order-import-export'),
+            'col_gtin'      => __('GTIN', 'pc-order-import-export'),
+            'col_name'      => __('Name', 'pc-order-import-export'),
+            'col_qty'       => __('Qty', 'pc-order-import-export'),
+            'col_price'     => __('Price', 'pc-order-import-export'),
+            'col_total'     => __('Total', 'pc-order-import-export'),
+            'col_note'      => __('Notes', 'pc-order-import-export'),
+            'filename_cart'  => __('cart', 'pc-order-import-export'),
+            'filename_order' => __('order', 'pc-order-import-export'),
+            'xls_missing'   => __('XLSX is unavailable (PhpSpreadsheet not found) - saved as CSV.', 'pc-order-import-export'),
         ];
     }
 
@@ -83,29 +83,53 @@ class Helpers {
 
     // нормалізатор колонки + мапінг заголовку
     public static function norm(string $s): string {
-        $s = trim(mb_strtolower($s, 'UTF-8'));
-        $s = str_replace(['ё','й'], ['е','и'], $s);
-        return preg_replace('~\s+~u',' ', $s);
-    }
-    public static function build_colmap(array $header): array {
-        $syn = [
-            'sku'   => ['sku','артикул'],
-            'gtin'  => ['gtin','штрих код','штрих-код','штрихкод','ean','upc'],
-            'qty'   => ['qty','к-сть','кількість','количество','quantity'],
-            'price' => ['price','ціна','цена'],
-        ];
-        $map = ['sku'=>null,'gtin'=>null,'qty'=>null,'price'=>null];
-        $h = array_map([__CLASS__,'norm'], $header);
-        foreach ($map as $k => $_) {
-            foreach ($syn[$k] as $want) {
-                $pos = array_search($want, $h, true);
-                if ($pos !== false) { $map[$k] = $pos; break; }
-            }
+    $s = trim(mb_strtolower($s, 'UTF-8'));
+    // унифицируем популярные варианты
+    $s = str_replace(
+        ['ё','й','–','—','-'],
+        ['е','и','-','-','-'],
+        $s
+    );
+    $s = preg_replace('~\s+~u',' ', $s);
+    return $s;
+}
+
+public static function build_colmap(array $header): array {
+    $syn = [
+        'sku' => [
+            'sku','артикул','артикль','код','код товара','код продукту'
+        ],
+        'gtin' => [
+            'gtin','ean','upc',
+            'штрих код','штрих-код','штрихкод',
+            'штрихкод товара','штрихкод продукту'
+        ],
+        'qty' => [
+            'qty','quantity','количество','к-во','к-сть','кількість'
+        ],
+        'price' => [
+            'price','цена','вартість','цiна'
+        ],
+        // при необходимости можно добавить name/total/note,
+        // но они сейчас не обязательны для матчинга
+    ];
+
+    $map = ['sku'=>null,'gtin'=>null,'qty'=>null,'price'=>null];
+    $h = array_map([__CLASS__,'norm'], $header);
+
+    foreach ($map as $k => $_) {
+        foreach ($syn[$k] as $want) {
+            $pos = array_search($want, $h, true);
+            if ($pos !== false) { $map[$k] = $pos; break; }
         }
-        if ($map['qty'] === null) $map['qty'] = 1;
-        if ($map['sku'] === null && $map['gtin'] === null) $map['sku'] = 0;
-        return apply_filters('pcoe_colmap', $map, $header);
     }
+
+    // разумные дефолты (как у тебя)
+    if ($map['qty'] === null) $map['qty'] = 1;
+    if ($map['sku'] === null && $map['gtin'] === null) $map['sku'] = 0;
+
+    return apply_filters('pcoe_colmap', $map, $header);
+}
 
     // парсер кількості (., ,; пробіли-тисячні)
     public static function parse_qty($raw): float {

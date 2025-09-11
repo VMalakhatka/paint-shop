@@ -1,0 +1,75 @@
+#. Plugin Name of the plugin
+#: pc-order-import-export.php
+msgid "PC Order Import/Export"
+msgstr "PC Імпорт/Експорт замовлень"
+
+#. Description of the plugin
+#: pc-order-import-export.php
+msgid ""
+"Export cart/orders to CSV/XLSX + import to cart/draft. WooCommerce "
+"integration."
+msgstr "Експорт кошика/замовлень у CSV/XLSX + імпорт у кошик/чернетку. Інтеграція з WooCommerce."
+
+#: inc/Helpers.php:10
+msgid "Download CSV"
+msgstr "Завантажити CSV"
+
+#: inc/Helpers.php:11
+msgid "Download XLSX"
+msgstr "Завантажити XLSX"
+
+#: inc/Helpers.php:12
+msgid "Configure export"
+msgstr "Налаштувати експорт"
+
+#: inc/Helpers.php:13
+msgid "Row format:"
+msgstr "Формат рядків:"
+
+#: inc/Helpers.php:14
+msgid "Aggregate (write \"Allocation: ...\" in Notes)"
+msgstr "Загальний (у примітках «Списання: …»)"
+
+#: inc/Helpers.php:15
+msgid "Separate per location"
+msgstr "Окремо по складах"
+
+#: inc/Helpers.php:16
+msgid "SKU"
+msgstr "Артикул"
+
+#: inc/Helpers.php:17
+msgid "GTIN"
+msgstr "Штрихкод"
+
+#: inc/Helpers.php:18
+msgid "Name"
+msgstr "Назва"
+
+#: inc/Helpers.php:19
+msgid "Qty"
+msgstr "К-сть"
+
+#: inc/Helpers.php:20
+msgid "Price"
+msgstr "Ціна"
+
+#: inc/Helpers.php:21
+msgid "Total"
+msgstr "Сума"
+
+#: inc/Helpers.php:22
+msgid "Notes"
+msgstr "Примітки"
+
+#: inc/Helpers.php:23
+msgid "cart"
+msgstr "кошик"
+
+#: inc/Helpers.php:24
+msgid "order"
+msgstr "замовлення"
+
+#: inc/Helpers.php:25
+msgid "XLSX is unavailable (PhpSpreadsheet not found) - saved as CSV."
+msgstr "XLSX недоступний (PhpSpreadsheet не знайдено) — збережено як CSV."
