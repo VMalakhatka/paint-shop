@@ -95,7 +95,9 @@ function stamp_item_plan(\WC_Order_Item_Product $item, array $plan): void {
         $item->update_meta_data('_stock_location_id',   $first_id);
         $item->update_meta_data('_stock_location_slug', $first_slug);
     }
-    $item->update_meta_data( __('Склад','woocommerce'), implode(', ', $parts) );
+
+    // ⬇️ было: __('Склад','woocommerce')
+    $item->update_meta_data( __('Warehouse', 'paint-core'), implode(', ', $parts) );
     $item->save();
 }
 
@@ -153,9 +155,9 @@ add_action('woocommerce_order_status_completed',  __NAMESPACE__.'\\reduce_stock_
 /* ---------- admin actions ---------- */
 
 add_filter('woocommerce_order_actions', function($actions){
-    $actions['pc_build_alloc_plan']  = 'Build stock allocation plan (PaintCore)';
-    $actions['pc_reduce_from_plan']  = 'Reduce stock from plan (PaintCore)';
-    $actions['pc_restore_from_plan'] = 'RESTORE stock from plan (PaintCore)';
+    $actions['pc_build_alloc_plan']  = __('Build stock allocation plan', 'paint-core') . ' (PaintCore)';
+    $actions['pc_reduce_from_plan']  = __('Reduce stock from plan',    'paint-core') . ' (PaintCore)';
+    $actions['pc_restore_from_plan'] = __('Restore stock from plan',   'paint-core') . ' (PaintCore)';
     return $actions;
 }, 10, 1);
 

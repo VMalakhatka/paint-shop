@@ -108,6 +108,7 @@ wp-content/languages/*
 !wp-content/languages/loco/**
 
 # Не коммитим бэкапы Loco и времянки
+*.po~
 wp-content/languages/loco/**/*~
 wp-content/languages/loco/**/backup-*.po~
 

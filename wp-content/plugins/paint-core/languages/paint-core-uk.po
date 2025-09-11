@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Paint Core 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/paint-core\n"
-"POT-Creation-Date: 2025-09-11T18:35:34+00:00\n"
+"POT-Creation-Date: 2025-09-11T19:03:26+00:00\n"
 "Language: uk\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -50,7 +50,7 @@ msgstr "Списання:"
 msgid "Allocation mode"
 msgstr "Режим списання"
 
-#: inc/header-allocation-switcher.php:158 paint-core.php:57
+#: inc/header-allocation-switcher.php:158
 msgid "Auto"
 msgstr "Вирішує система з якого складу"
 
@@ -65,6 +65,22 @@ msgstr "Лише обраний склад"
 #: inc/header-allocation-switcher.php:163
 msgid "Location"
 msgstr "Склад"
+
+#: inc/order-allocator.php:100
+msgid "Warehouse"
+msgstr "Склад"
+
+#: inc/order-allocator.php:158
+msgid "Build stock allocation plan"
+msgstr "Створити план списання"
+
+#: inc/order-allocator.php:159
+msgid "Reduce stock from plan"
+msgstr "Списати за планом"
+
+#: inc/order-allocator.php:160
+msgid "Restore stock from plan"
+msgstr "Повернути за планом"
 
 #~ msgid "In cart"
 #~ msgstr "У кошику"
