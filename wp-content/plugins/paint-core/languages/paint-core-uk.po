@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Paint Core 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/paint-core\n"
-"POT-Creation-Date: 2025-09-11T19:03:26+00:00\n"
+"POT-Creation-Date: 2025-09-11T19:15:38+00:00\n"
 "Language: uk\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -62,7 +62,8 @@ msgstr "З пріоритетом обраного"
 msgid "Only selected location"
 msgstr "Лише обраний склад"
 
-#: inc/header-allocation-switcher.php:163
+#: inc/header-allocation-switcher.php:163 inc/order-attach-csv.php:186
+#: inc/order-attach-csv.php:194
 msgid "Location"
 msgstr "Склад"
 
@@ -81,6 +82,32 @@ msgstr "Списати за планом"
 #: inc/order-allocator.php:160
 msgid "Restore stock from plan"
 msgstr "Повернути за планом"
+
+#: inc/order-attach-csv.php:182 inc/order-attach-csv.php:190
+msgid "SKU"
+msgstr "Артикль"
+
+#: inc/order-attach-csv.php:183 inc/order-attach-csv.php:191
+msgid "GTIN"
+msgstr "Шрих код"
+
+#: inc/order-attach-csv.php:184 inc/order-attach-csv.php:192
+msgid "Quantity"
+msgstr "Кількість"
+
+#: inc/order-attach-csv.php:185 inc/order-attach-csv.php:193
+msgid "Price"
+msgstr "Ціна"
+
+#: inc/order-attach-csv.php:187
+msgid "Notes"
+msgstr "Примітки"
+
+# translators: %s is a human-readable stock allocation like "Одеса — 3, Київ — 1"
+#: inc/order-attach-csv.php:270
+#, php-format
+msgid "Write-off: %s"
+msgstr "Списання: %s"
 
 #~ msgid "In cart"
 #~ msgstr "У кошику"

@@ -176,9 +176,23 @@ function pc_orders_csv_mode(): string {
 
 /** Заголовки колонок (можна перевизначити фільтром). */
 function pc_orders_csv_headers(string $mode): array {
+    // Локализуем базовые названия колонок
     $headers = ($mode === 'summary')
-        ? ['SKU','GTIN','Quantity','Price','Location','Notes']
-        : ['SKU','GTIN','Quantity','Price','Location'];
+        ? [
+            __('SKU', 'paint-core'),
+            __('GTIN', 'paint-core'),
+            __('Quantity', 'paint-core'),
+            __('Price', 'paint-core'),
+            __('Location', 'paint-core'),
+            __('Notes', 'paint-core'),
+        ]
+        : [
+            __('SKU', 'paint-core'),
+            __('GTIN', 'paint-core'),
+            __('Quantity', 'paint-core'),
+            __('Price', 'paint-core'),
+            __('Location', 'paint-core'),
+        ];
     return apply_filters('pc_orders_csv_headers', $headers, $mode);
 }
 
@@ -226,7 +240,7 @@ add_filter('woocommerce_email_attachments', function ($attachments, $email_id, $
         // План (для by_plan або для нотатки в summary)
         $plan = pc_get_order_item_plan($item);
 
-        if ($mode === 'by_plan') {
+         if ($mode === 'by_plan') {
             if (!empty($plan)) {
                 foreach ($plan as $term_id => $q) {
                     $term_id = (int)$term_id;
@@ -241,7 +255,7 @@ add_filter('woocommerce_email_attachments', function ($attachments, $email_id, $
                     ];
                 }
             } else {
-                // фолбек: якщо плана нема — однією строкою з primary
+                // фолбек: если плана нет — одной строкой с primary
                 $primary_id = pc_primary_location_term_id_for_product($product);
                 $rows[] = [
                     $sku ?: '',
@@ -252,8 +266,8 @@ add_filter('woocommerce_email_attachments', function ($attachments, $email_id, $
                 ];
             }
         } else { // summary
-            $loc_label = pc_order_item_location_label($item); // "Одеса — 3, Київ — 1" або щось одне
-            $notes     = $loc_label !== '' ? ('Списання: '.$loc_label) : '';
+            $loc_label = pc_order_item_location_label($item); // "Одеса — 3, Київ — 1" либо одно значение
+            $notes     = $loc_label !== '' ? sprintf(__('Write-off: %s', 'paint-core'), $loc_label) : '';
             $rows[] = [
                 $sku ?: '',
                 $gtin ?: '',
@@ -263,6 +277,7 @@ add_filter('woocommerce_email_attachments', function ($attachments, $email_id, $
                 $notes,
             ];
         }
+
     }
 
     // Створюємо CSV у тимчасовому місці
