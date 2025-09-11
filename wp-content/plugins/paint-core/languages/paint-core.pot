@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-09-11T15:50:38+00:00\n"
+"POT-Creation-Date: 2025-09-11T18:43:49+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: paint-core\n"
@@ -46,4 +46,33 @@ msgstr ""
 #: inc/catalog-qty-add-to-cart.php:347
 #, php-format
 msgid "Only %d units are available in stock."
+msgstr ""
+
+#: inc/header-allocation-switcher.php:154
+msgid "Allocation"
+msgstr ""
+
+#: inc/header-allocation-switcher.php:155
+msgid "Allocation:"
+msgstr ""
+
+#: inc/header-allocation-switcher.php:157
+msgid "Allocation mode"
+msgstr ""
+
+#: inc/header-allocation-switcher.php:158
+#: paint-core.php:57
+msgid "Auto"
+msgstr ""
+
+#: inc/header-allocation-switcher.php:159
+msgid "Preferred location first"
+msgstr ""
+
+#: inc/header-allocation-switcher.php:160
+msgid "Only selected location"
+msgstr ""
+
+#: inc/header-allocation-switcher.php:163
+msgid "Location"
 msgstr ""

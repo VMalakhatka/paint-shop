@@ -1,24 +1,70 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Paint Core 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/paint-core\n"
+"POT-Creation-Date: 2025-09-11T17:55:47+00:00\n"
 "Language: uk\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
-#: paint-core.php:XX
-msgid "In cart"
-msgstr "У кошику"
+#. Plugin Name of the plugin
+#: paint-core.php
+msgid "Paint Core"
+msgstr ""
 
+#. Description of the plugin
+#: paint-core.php
+msgid "Core helpers for Paint Shop."
+msgstr ""
+
+#: inc/catalog-qty-add-to-cart.php:164
 msgid "Minus"
 msgstr "Мінус"
 
+#: inc/catalog-qty-add-to-cart.php:175
 msgid "Plus"
 msgstr "Плюс"
 
+#: inc/catalog-qty-add-to-cart.php:210
 msgid "Out of stock"
 msgstr "Немає в наявності"
 
+#: inc/catalog-qty-add-to-cart.php:301 inc/catalog-qty-add-to-cart.php:341
 msgid "This product is currently unavailable in stock."
 msgstr "Цей товар зараз недоступний на складі."
 
+#. translators: %d: number of units available in stock
+#: inc/catalog-qty-add-to-cart.php:307 inc/catalog-qty-add-to-cart.php:347
+#, php-format
 msgid "Only %d units are available in stock."
 msgstr "Доступно лише %d шт. на складі."
+
+#: inc/header-allocation-switcher.php:154
+msgid "Allocation"
+msgstr "Списання"
+
+#: inc/header-allocation-switcher.php:155
+msgid "Allocation:"
+msgstr "Списання:"
+
+#: inc/header-allocation-switcher.php:157
+msgid "Allocation mode"
+msgstr "Режим списання"
+
+#: inc/header-allocation-switcher.php:158
+msgid "Auto"
+msgstr "Авто"
+
+#: inc/header-allocation-switcher.php:159
+msgid "Preferred location first"
+msgstr "З пріоритетом обраного"
+
+#: inc/header-allocation-switcher.php:160
+msgid "Only selected location"
+msgstr "Лише обраний склад"
+
+#: inc/header-allocation-switcher.php:163
+msgid "Location"
+msgstr "Склад"
+
+#~ msgid "In cart"
+#~ msgstr "У кошику"

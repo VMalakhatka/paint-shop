@@ -14,12 +14,18 @@
 defined('ABSPATH') || exit;
 
 add_action('plugins_loaded', function () {
-    load_plugin_textdomain(
-        'paint-core',
-        false,
-        dirname(plugin_basename(__FILE__)) . '/languages'
-    );
+    load_plugin_textdomain('paint-core', false, dirname(plugin_basename(__FILE__)) . '/languages');
+
+    if (!is_textdomain_loaded('paint-core')) {
+        $locale = function_exists('determine_locale') ? determine_locale() : get_locale();
+        $candidates = ["paint-core-$locale.mo"];
+        foreach ($candidates as $name) {
+            $p = plugin_dir_path(__FILE__) . "languages/$name";
+            if (file_exists($p) && load_textdomain('paint-core', $p)) break;
+        }
+    }
 });
+
 
 define('PAINT_CORE_PATH', plugin_dir_path(__FILE__));
 define('PAINT_CORE_URL',  plugin_dir_url(__FILE__));

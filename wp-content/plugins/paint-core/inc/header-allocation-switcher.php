@@ -133,15 +133,15 @@ function pc_calc_plan_for(\WC_Product $product, int $qty): array {
 
 function pc_render_alloc_control() {
     static $printed = false;
-    if ($printed) return; // рисуем один раз
+    if ($printed) return;
     $printed = true;
 
     $terms = get_terms(['taxonomy' => 'location', 'hide_empty' => false]);
     if (is_wp_error($terms) || empty($terms)) return;
 
-    $pref   = pc_get_alloc_pref();
-    $mode   = $pref['mode'];
-    $curId  = (int) $pref['term_id'];
+    $pref    = pc_get_alloc_pref();
+    $mode    = $pref['mode'];
+    $curId   = (int) $pref['term_id'];
     $firstId = (int) ($terms[0]->term_id ?? 0);
 
     if ($mode !== 'auto' && $curId <= 0) {
@@ -151,16 +151,16 @@ function pc_render_alloc_control() {
     $nonce  = wp_create_nonce('pc_alloc_nonce');
     $ajax_u = admin_url('admin-ajax.php');
     ?>
-    <div class="pc-alloc" role="group" aria-label="<?php echo esc_attr__('Списание', 'woocommerce'); ?>">
-      <small><?php echo esc_html__('Списание:', 'woocommerce'); ?></small>
+    <div class="pc-alloc" role="group" aria-label="<?php echo esc_attr__( 'Allocation', 'paint-core' ); ?>">
+      <small><?php echo esc_html__( 'Allocation:', 'paint-core' ); ?></small>
 
-      <select id="pc-slu-mode" class="pc-alloc-mode" aria-label="<?php echo esc_attr__('Режим списания', 'woocommerce'); ?>">
-        <option value="auto"   <?php selected($mode, 'auto');   ?>><?php echo esc_html__('Авто', 'woocommerce'); ?></option>
-        <option value="manual" <?php selected($mode, 'manual'); ?>><?php echo esc_html__('С приоритетом выбранного', 'woocommerce'); ?></option>
-        <option value="single" <?php selected($mode, 'single'); ?>><?php echo esc_html__('Только выбранный склад', 'woocommerce'); ?></option>
+      <select id="pc-slu-mode" class="pc-alloc-mode" aria-label="<?php echo esc_attr__( 'Allocation mode', 'paint-core' ); ?>">
+        <option value="auto"   <?php selected($mode, 'auto');   ?>><?php echo esc_html__( 'Auto', 'paint-core' ); ?></option>
+        <option value="manual" <?php selected($mode, 'manual'); ?>><?php echo esc_html__( 'Preferred location first', 'paint-core' ); ?></option>
+        <option value="single" <?php selected($mode, 'single'); ?>><?php echo esc_html__( 'Only selected location', 'paint-core' ); ?></option>
       </select>
 
-      <select id="pc-slu-location" class="pc-alloc-term" aria-label="<?php echo esc_attr__('Склад', 'woocommerce'); ?>"
+      <select id="pc-slu-location" class="pc-alloc-term" aria-label="<?php echo esc_attr__( 'Location', 'paint-core' ); ?>"
               <?php disabled($mode === 'auto'); ?>>
         <?php foreach ($terms as $t): ?>
           <option value="<?php echo (int) $t->term_id; ?>" <?php selected($curId, (int) $t->term_id); ?>>
