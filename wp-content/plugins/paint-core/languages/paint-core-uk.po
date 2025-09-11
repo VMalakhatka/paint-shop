@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Paint Core 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/paint-core\n"
-"POT-Creation-Date: 2025-09-11T20:24:10+00:00\n"
+"POT-Creation-Date: 2025-09-11T20:58:11+00:00\n"
 "Language: uk\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -67,7 +67,7 @@ msgstr "Лише обраний склад"
 msgid "Location"
 msgstr "Склад"
 
-#: inc/order-allocator.php:100
+#: inc/order-allocator.php:100 inc/sku-gtin-front-emails.php:75
 msgid "Warehouse"
 msgstr "Склад"
 
@@ -90,6 +90,7 @@ msgstr "Артикль"
 
 #: inc/order-attach-csv.php:183 inc/order-attach-csv.php:191
 #: inc/sku-gtin-admin-columns.php:30 inc/sku-gtin-admin-columns.php:35
+#: inc/sku-gtin-admin-columns.php:159
 msgid "GTIN"
 msgstr "Штрих код"
 
