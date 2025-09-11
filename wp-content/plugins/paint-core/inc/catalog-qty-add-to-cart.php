@@ -161,7 +161,7 @@ add_action('woocommerce_after_shop_loop_item', function () {
     echo '<div class="loop-qty-wrap'.($is_disabled?' is-disabled':'').'" data-product-id="'.esc_attr($pid).'" data-max="'.esc_attr($max).'">';
 
     if (!empty($cfg['show_plus_minus'])) {
-        echo '<button type="button" class="loop-qty-btn loop-qty-minus" aria-label="Minus" '.($is_disabled?'disabled':'').'>−</button>';
+        echo '<button type="button" class="loop-qty-btn loop-qty-minus" aria-label="' . esc_attr__( 'Minus', 'paint-core' ) . '" '.($is_disabled?'disabled':'').'>−</button>';
     }
 
     echo '<input type="text" inputmode="numeric" pattern="[0-9]*" class="input-text qty text loop-qty" '
@@ -172,7 +172,7 @@ add_action('woocommerce_after_shop_loop_item', function () {
     echo '<span class="loop-qty-view" aria-hidden="true">'.esc_html($val).'</span>';
 
     if (!empty($cfg['show_plus_minus'])) {
-        echo '<button type="button" class="loop-qty-btn loop-qty-plus" aria-label="Plus" '.($is_disabled?'disabled':'').'>+</button>';
+        echo '<button type="button" class="loop-qty-btn loop-qty-plus" aria-label="' . esc_attr__( 'Plus', 'paint-core' ) . '" '.($is_disabled?'disabled':'').'>+</button>';
     }
 
     echo '</div>';
@@ -207,8 +207,8 @@ add_action('woocommerce_after_shop_loop_item_title', function () {
 
     if ($is_out) {
         echo '<span class="loop-stock-top out" data-stock="0">' .
-             esc_html__('Нет в наличии', 'woocommerce') .
-             '</span>';
+            esc_html__( 'Out of stock', 'paint-core' ) .
+            '</span>';
     }
 }, 11);
 
@@ -298,12 +298,13 @@ function ($passed, $product_id, $qty, $variation_id = 0) {
         $available = _pcux_available_now($prod, (int)$product_id, (int)$variation_id);
 
         if ($available <= 0) {
-            \wc_add_notice(\__('Товар сейчас недоступен на складе.', 'woocommerce'), 'error');
+            \wc_add_notice( \__( 'This product is currently unavailable in stock.', 'paint-core' ), 'error' );
             return false;
         }
         if ((int)$qty > (int)$available) {
             \wc_add_notice(
-                \sprintf(\__('Доступно только %d шт. на складе.', 'woocommerce'), (int)$available),
+                 /* translators: %d: number of units available in stock */
+                \sprintf( \__( 'Only %d units are available in stock.', 'paint-core' ), (int) $available ),
                 'error'
             );
             return false;
@@ -337,12 +338,13 @@ function ($passed, $cart_item_key, $values, $new_qty) {
         $available_for_update = max(0, $available_for_add + $current_line_qty);
 
         if ($available_for_update <= 0) {
-            \wc_add_notice(\__('Товар сейчас недоступен на складе.', 'woocommerce'), 'error');
+            \wc_add_notice( \__( 'This product is currently unavailable in stock.', 'paint-core' ), 'error' );
             return false;
         }
         if ((int)$new_qty > (int)$available_for_update) {
             \wc_add_notice(
-                \sprintf(\__('Доступно только %d шт. на складе.', 'woocommerce'), (int)$available_for_update),
+                 /* translators: %d: number of units available in stock */
+                \sprintf( \__( 'Only %d units are available in stock.', 'paint-core' ), (int) $available_for_update ),
                 'error'
             );
             return false;

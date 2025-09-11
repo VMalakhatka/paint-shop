@@ -1,0 +1,24 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Paint Core 1.0.0\n"
+"Language: ru_RU\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+#: paint-core.php:XX
+msgid "In cart"
+msgstr "В корзине"
+
+msgid "Minus"
+msgstr "Минус"
+
+msgid "Plus"
+msgstr "Плюс"
+
+msgid "Out of stock"
+msgstr "Нет в наличии"
+
+msgid "This product is currently unavailable in stock."
+msgstr "Этот товар сейчас недоступен на складе."
+
+msgid "Only %d units are available in stock."
+msgstr "Доступно только %d шт. на складе."

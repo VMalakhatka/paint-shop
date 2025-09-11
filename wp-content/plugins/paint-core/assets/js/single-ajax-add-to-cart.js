@@ -1,4 +1,6 @@
 (function($){
+// Достаём __ из wp.i18n, с запасным вариантом (на случай, если скрипт подключили без i18n)
+var __ = (window.wp && wp.i18n && wp.i18n.__) ? wp.i18n.__ : function(s){ return s; };
   function clamp(n, min, max){
     n = parseInt(n,10); if (isNaN(n)) n = min;
     if (n < min) n = min;
@@ -41,22 +43,17 @@
     });
   }
 
-    // ✅ сохраняем <strong> и устойчиво обновляем число
-    function bumpInCartOnPage(added){
-        var $strong = $('.slu-stock-box').find('strong:contains("В корзине")').first();
-        if (!$strong.length) return;
+  // ✅ сохраняем <strong> и устойчиво обновляем число
+  // ✅ обновляем <span class="slu-in-cart-qty"> без завязки на текст
+  function bumpInCartOnPage(added){
+    var $row = $('.slu-stock-box .slu-in-cart-row').first();
+    if (!$row.length) return;
 
-        var $row = $strong.closest('div');
-        // текущее число берём из конца текста/HTML
-        var current = 0;
-        var t = $row.text();
-        var m = t.match(/(\d+)\s*$/);
-        if (m) current = parseInt(m[1],10) || 0;
-
-        var next = current + (parseInt(added,10) || 0);
-        // ВОЗВРАЩАЕМ разметку со <strong>
-        $row.html('<strong>В корзине</strong>: ' + next);
-    }
+    var $qty = $row.find('.slu-in-cart-qty');
+    var current = parseInt(($qty.text() || '0').replace(/\D+/g,''), 10) || 0;
+    var next = current + (parseInt(added,10) || 0);
+    $qty.text(String(next));
+  }
 
   // Перехват submit на PDP
   $(document).on('submit', 'form.cart', function(e){

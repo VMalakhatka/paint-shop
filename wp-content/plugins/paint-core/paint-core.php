@@ -1,11 +1,25 @@
 <?php
-/*
-Plugin Name: Paint Core
-Description: Бизнес-логика магазина (CSV к письмам, цены, склады и т.п.).
-Author: Volodymyr
-Version: 1.0.0
-*/
+/**
+ * Plugin Name: Paint Core
+ * Description: Core helpers for Paint Shop.
+ * Version: 1.0.0
+ * Text Domain: paint-core
+ * Domain Path: /languages
+ * 
+ * (опционально добавишь позже)
+ * Requires at least: 6.0
+ * Requires PHP: 8.0
+ */
+
 defined('ABSPATH') || exit;
+
+add_action('plugins_loaded', function () {
+    load_plugin_textdomain(
+        'paint-core',
+        false,
+        dirname(plugin_basename(__FILE__)) . '/languages'
+    );
+});
 
 define('PAINT_CORE_PATH', plugin_dir_path(__FILE__));
 define('PAINT_CORE_URL',  plugin_dir_url(__FILE__));

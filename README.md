@@ -1808,6 +1808,8 @@ const PSU_IMG_H_MOBILE  = 160;
 
 </details>
 
+
+```text
 ⚙️ Кастомные модули и настройки
 
 
@@ -1956,3 +1958,89 @@ cols=5, rows=3, per_page=15 (помогает понять, что именно 
 ⸻
 
 Если хочешь, упакую всё это в один “живой” README.md (с кодовыми сниппетами), либо добавлю в админке страницу “Настройки каталога”, где можно менять PSUFP_ROWS_* и minmax без лезания в файлы.
+```
+
+## 1) Удаляем дубли _stock_at_*, оставляя последнюю запись
+
+```sql
+
+-- A. Посмотреть, что именно удалим (превью TOP 20)
+SELECT pm.post_id, pm.meta_key, pm.meta_id, pm.meta_value
+FROM wp_postmeta pm
+JOIN (
+  SELECT post_id, meta_key, MAX(meta_id) AS keep_id
+  FROM wp_postmeta
+  WHERE meta_key REGEXP '^_stock_at_[0-9]+$'
+  GROUP BY post_id, meta_key
+  HAVING COUNT(*) > 1
+) d ON d.post_id = pm.post_id AND d.meta_key = pm.meta_key
+WHERE pm.meta_id <> d.keep_id
+ORDER BY pm.post_id, pm.meta_key
+LIMIT 20;
+
+-- B. Удаление дублей (оставляем запись с максимальным meta_id)
+DELETE pm
+FROM wp_postmeta pm
+JOIN (
+  SELECT post_id, meta_key, MAX(meta_id) AS keep_id
+  FROM wp_postmeta
+  WHERE meta_key REGEXP '^_stock_at_[0-9]+$'
+  GROUP BY post_id, meta_key
+  HAVING COUNT(*) > 1
+) d ON d.post_id = pm.post_id AND d.meta_key = pm.meta_key
+WHERE pm.meta_id <> d.keep_id;
+
+```
+
+## 2) Синхронизируем _stock с суммой по складам
+
+Оставляем _stock (вы сами писали, что на него кое-что ссылается), но приводим его к сумме _stock_at_%.
+
+```sql
+
+-- Обновить _stock там, где он уже есть
+UPDATE wp_postmeta s
+JOIN (
+  SELECT post_id, SUM(CAST(meta_value AS DECIMAL(10,3))) AS sum_qty
+  FROM wp_postmeta
+  WHERE meta_key LIKE '_stock_at\_%'
+  GROUP BY post_id
+) t ON t.post_id = s.post_id
+SET s.meta_value = t.sum_qty
+WHERE s.meta_key = '_stock';
+
+-- Создать _stock там, где его нет, но есть _stock_at_*
+INSERT INTO wp_postmeta (post_id, meta_key, meta_value)
+SELECT t.post_id, '_stock', t.sum_qty
+FROM (
+  SELECT post_id, SUM(CAST(meta_value AS DECIMAL(10,3))) AS sum_qty
+  FROM wp_postmeta
+  WHERE meta_key LIKE '_stock_at\_%'
+  GROUP BY post_id
+) t
+LEFT JOIN wp_postmeta s
+  ON s.post_id = t.post_id AND s.meta_key = '_stock'
+WHERE s.post_id IS NULL;
+
+```
+
+## 3) Быстрая проверка
+
+```sql
+
+-- Должно вернуть 0 строк (нет дублей)
+SELECT post_id, meta_key, COUNT(*) c
+FROM wp_postmeta
+WHERE meta_key REGEXP '^_stock_at_[0-9]+$'
+GROUP BY post_id, meta_key
+HAVING c > 1
+ORDER BY post_id, meta_key;
+
+-- Проверить конкретный проблемный товар (пример: 17410)
+SELECT meta_key, meta_value
+FROM wp_postmeta
+WHERE post_id=17410
+  AND (meta_key='_stock' OR meta_key LIKE '_stock_at\_%')
+ORDER BY meta_key;
+
+```

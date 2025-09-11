@@ -16,6 +16,7 @@ if (!defined('SLU_LBL_FROM'))       define('SLU_LBL_FROM', 'Зі складу');
 if (!defined('SLU_LBL_OTHERS'))     define('SLU_LBL_OTHERS', 'Інші скл.');
 if (!defined('SLU_LBL_TOTAL'))      define('SLU_LBL_TOTAL', 'Загал.');
 if (!defined('SLU_LBL_ALLOCATION')) define('SLU_LBL_ALLOCATION', 'Списання');
+if (!defined('SLU_LBL_IN_CART'))    define('SLU_LBL_IN_CART', 'В корзине');
 
 if (!function_exists('slu_labels')) {
     function slu_labels(): array {
@@ -24,6 +25,7 @@ if (!function_exists('slu_labels')) {
             'others'     => SLU_LBL_OTHERS,
             'total'      => SLU_LBL_TOTAL,
             'allocation' => SLU_LBL_ALLOCATION,
+            'in_cart'    => SLU_LBL_IN_CART,
         ];
         return apply_filters('slu_ui_labels', $labels);
     }
@@ -329,6 +331,12 @@ if (!function_exists('slu_render_stock_panel')) {
                 <div><strong><?= esc_html($L['others']) ?>:</strong> <?= implode(', ', $others) ?></div>
             <?php endif; ?>
 
+            <?php if ( !empty($o['show_incart']) ) : ?>
+                <div class="slu-in-cart-row">
+                    <strong><?= esc_html($L['in_cart']) ?></strong>:
+                    <span class="slu-in-cart-qty"><?= (int) slu_cart_qty_for_product($product) ?></span>
+                </div>
+            <?php endif; ?>
             <div>
                 <span class="slu-nb">
                     <strong><?= esc_html($L['total']) ?>:</strong>
