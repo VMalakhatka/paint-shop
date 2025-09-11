@@ -2,7 +2,14 @@
 
 ## 🚀 Перенос базы WordPress из локальной среды (Local) на сервер
 <details>
-<summary><strong>Структура </strong></summary>
+<summary><strong>deploy db to kreul.com.ua </strong></summary>
+
+Для деплоя запусти 
+
+```bash
+./export_and_push.sh
+```
+### Описание нюансов
 - `wp-content/deploy_db.sh` — скрипт для сервера.  
   Должен лежать в домашней папке пользователя **vmalakhatka** на сервере: 
 
@@ -22,12 +29,14 @@
 
 ---
 
-## 🔧 Подготовка
+###  🔧 Подготовка
 
 1. Убедись, что SSH-ключ добавлен для пользователя `vmalakhatka` на сервере.  
  Проверка:
- ```bash
+
+```bash
  ssh -p 2022 vmalakhatka@51.83.33.95(и быть исполняемым: `chmod +x ~/deploy_db.sh`).
+```
 
 - `wp-content/export_and_push.sh` — скрипт для локального запуска на Mac.  
 Он:
@@ -38,10 +47,9 @@
 
 Оба скрипта хранятся в репозитории в `wp-content/`, чтобы всегда были под рукой.
 
----
-``` 
+--- 
 
-## 🔧 Подготовка
+### 🔧 Подготовка
 
 1. Убедись, что SSH-ключ добавлен для пользователя `vmalakhatka` на сервере.  
  Проверка:
@@ -55,6 +63,130 @@
 
 ```bash
 chmod +x ~/deploy_db.sh
+```
+
+
+🚀 Setup Environment (Local → Server deploy)
+
+Чтобы скрипты deploy_safe.sh и export_and_push.sh работали без ошибок и лишних паролей, нужно настроить локальное окружение:
+
+1. MySQL client
+
+На macOS (Apple Silicon) ставим клиент:
+
+```bash
+brew install mysql-client
+```
+Добавляем в PATH (~/.zshrc и ~/.zprofile):
+
+```bash
+
+if [ -d /opt/homebrew/opt/mysql-client/bin ]; then
+  export PATH="/opt/homebrew/opt/mysql-client/bin:$PATH"
+fi
+
+```
+
+Перезагрузить оболочку:
+
+```bash
+
+source ~/.zshrc
+
+```
+
+Проверка:
+
+```bash
+
+mysql --version
+mysqldump --version
+
+
+```
+
+
+2. MySQL credentials (~/.my.cnf)
+
+Создаём файл:
+
+```bash
+
+cat > ~/.my.cnf <<'EOF'
+[client]
+user=root
+password=root
+socket=/Users/admin/.local-mysql/mysqld.sock
+EOF
+chmod 600 ~/.my.cnf
+
+```
+
+⚠️ socket каждый раз может меняться при перезапуске Local. Чтобы не обновлять руками:
+
+и в ~/.my.cnf прописываем socket=/Users/admin/.local-mysql/mysqld.sock.
+
+Теперь mysql и mysqldump работают без передачи -u/-p и без предупреждения про пароль.
+
+⸻
+3. SSH config (~/.ssh/config)
+
+Создаём/дополняем файл ~/.ssh/config:
+
+```bash
+
+Host kreul
+  HostName 51.83.33.95
+  Port 2022
+  User vmalakhatka
+  ServerAliveInterval 15
+  ServerAliveCountMax 4
+  ConnectTimeout 10
+  IdentityFile ~/.ssh/id_rsa
+
+```
+
+Теперь можно подключаться коротко:
+
+```bash
+
+ssh kreul
+scp file.sql.gz kreul:/var/www/virtuals/kreul.com.ua/
+
+```
+
+4. Проверка подключения
+
+```bash 
+
+ssh kreul "echo connected ok"
+scp /etc/hosts kreul:/tmp/
+
+```
+
+5. Запуск деплоя
+
+Код → сервер:
+
+```bash
+dcode
+```
+
+База → сервер:
+
+```bash
+./export_and_push.sh
+```
+
+```text
+
+👉 Таким образом:
+	•	MySQL доступен через mysqldump без паролей;
+	•	SSH идёт по алиасу kreul;
+	•	Все скрипты (deploy_safe.sh, export_and_push.sh) работают без лишних флагов.
+
+⸻
+
 ```
 
 ▶️ Экспорт и перенос
@@ -781,7 +913,7 @@ recalc_total_stock($product_id);
 
 Возврат:
 	•	Админ выбирает «RESTORE» → add_term_stock(+qty) → recalc_total_stock() → _pc_stock_reduced удаляется.
-	
+
 ```
 
 </details>
