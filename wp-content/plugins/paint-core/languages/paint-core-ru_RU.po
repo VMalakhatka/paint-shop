@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Paint Core 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/paint-core\n"
-"POT-Creation-Date: 2025-09-11T19:15:38+00:00\n"
+"POT-Creation-Date: 2025-09-11T20:24:10+00:00\n"
 "Language: ru_RU\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -84,10 +84,12 @@ msgid "Restore stock from plan"
 msgstr "Восстановить по плану"
 
 #: inc/order-attach-csv.php:182 inc/order-attach-csv.php:190
+#: inc/sku-gtin-admin-columns.php:29 inc/sku-gtin-admin-columns.php:34
 msgid "SKU"
 msgstr "Артикль"
 
 #: inc/order-attach-csv.php:183 inc/order-attach-csv.php:191
+#: inc/sku-gtin-admin-columns.php:30 inc/sku-gtin-admin-columns.php:35
 msgid "GTIN"
 msgstr "Штрих код"
 

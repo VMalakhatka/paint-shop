@@ -25,13 +25,14 @@ function add_my_order_columns(array $columns): array {
     foreach ($columns as $key => $label) {
         $new[$key] = $label;
         if ($key === 'order_total') {
-            $new['order_skus']  = 'Артикул';
-            $new['order_gtins'] = 'GTIN';
+            // заголовки через i18n
+            $new['order_skus']  = esc_html__( 'SKU',  'paint-core' );
+            $new['order_gtins'] = esc_html__( 'GTIN', 'paint-core' );
         }
     }
-    // если не нашли order_total
-    $new['order_skus']  = $new['order_skus']  ?? 'Артикул';
-    $new['order_gtins'] = $new['order_gtins'] ?? 'GTIN';
+    // если не нашли order_total — добавим в конец
+    $new['order_skus']  = $new['order_skus']  ?? esc_html__( 'SKU',  'paint-core' );
+    $new['order_gtins'] = $new['order_gtins'] ?? esc_html__( 'GTIN', 'paint-core' );
     return $new;
 }
 
@@ -58,11 +59,11 @@ add_action('manage_woocommerce_page_wc-orders_custom_column', function($column, 
  * - Фільтр: приймаємо тільки довжини 8/12/13/14 (GTIN-8/UPC-A/EAN-13/GTIN-14)
  * - Для підозрілих (коротких) повертаємо ''.
  */
-function pc_get_product_gtin(WC_Product $product): string {
+function pc_get_product_gtin(\WC_Product $product): string {
     $candidates = array_filter(array_unique(array_merge(
         [ defined('PC_GTIN_META_KEY') ? PC_GTIN_META_KEY : '' ],
         apply_filters('pc_gtin_meta_keys', [
-            '_global_unique_id',   // твій на сайті
+            '_global_unique_id',   // ваш ключ
             '_wpm_gtin_code',
             '_alg_ean',
             '_ean',
@@ -118,10 +119,10 @@ function get_order_skus($order_id): array {
         }
         if ($sku) $set[$sku] = true;
     }
-    return array_keys($set);
+    return array_values(array_keys($set));
 }
 
-/** Список уникальных GTIN из заказа (с поддержкой разных мета-ключей) */
+/** Список уникальных GTIN из заказа */
 function get_order_gtins($order_id): array {
     $order = wc_get_order($order_id);
     if (!$order) return [];
@@ -135,7 +136,7 @@ function get_order_gtins($order_id): array {
         $gtin = pc_get_product_gtin($product);
         if ($gtin !== '') $set[$gtin] = true;
     }
-    return array_keys($set);
+    return array_values(array_keys($set));
 }
 
 /** Склейка списка, максимум 5 элементов + “+N”, либо тире */

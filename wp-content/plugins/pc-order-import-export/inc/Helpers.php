@@ -83,50 +83,57 @@ class Helpers {
 
     // нормалізатор колонки + мапінг заголовку
     public static function norm(string $s): string {
-    $s = trim(mb_strtolower($s, 'UTF-8'));
-    // унифицируем популярные варианты
-    $s = str_replace(
-        ['ё','й','–','—','-'],
-        ['е','и','-','-','-'],
-        $s
-    );
-    $s = preg_replace('~\s+~u',' ', $s);
-    return $s;
-}
+        $s = trim(mb_strtolower($s, 'UTF-8'));
+        $s = str_replace(['ё','й','–','—','-','.’','’','“','”'], ['е','и','-','-','-','','','',''], $s);
+        // унифицируем многоточия, точки, двойные пробелы
+        $s = str_replace(['…','.’','.'], ['','',''], $s);
+        $s = preg_replace('~\s+~u',' ', $s);
+        return $s;
+    }
 
 public static function build_colmap(array $header): array {
     $syn = [
-        'sku' => [
-            'sku','артикул','артикль','код','код товара','код продукту'
-        ],
-        'gtin' => [
+        'sku' => ['sku','артикул','артикль','код','код товара','код продукту'],
+        'gtin'=> [
             'gtin','ean','upc',
             'штрих код','штрих-код','штрихкод',
-            'штрихкод товара','штрихкод продукту'
+            'шрих код','шрих-код','шрихкод', // <- опечатки
         ],
-        'qty' => [
-            'qty','quantity','количество','к-во','к-сть','кількість'
-        ],
-        'price' => [
-            'price','цена','вартість','цiна'
-        ],
-        // при необходимости можно добавить name/total/note,
-        // но они сейчас не обязательны для матчинга
+        'qty' => ['qty','quantity','количество','к-во','к-сть','кількість'],
+        'price'=> ['price','цена','вартість','цiна','ціна'],
     ];
 
     $map = ['sku'=>null,'gtin'=>null,'qty'=>null,'price'=>null];
-    $h = array_map([__CLASS__,'norm'], $header);
+    $h   = array_map([__CLASS__,'norm'], $header);
 
-    foreach ($map as $k => $_) {
+    // точные совпадения
+    foreach (['sku','gtin','qty','price'] as $k) {
         foreach ($syn[$k] as $want) {
             $pos = array_search($want, $h, true);
             if ($pos !== false) { $map[$k] = $pos; break; }
         }
     }
 
-    // разумные дефолты (как у тебя)
+    // если GTIN не найден — мягкое правило: любая колонка, где встречается слово "штрих"
+    if ($map['gtin'] === null) {
+        foreach ($h as $i => $cell) {
+            if (strpos($cell, 'штрих') !== false) { $map['gtin'] = $i; break; }
+        }
+    }
+
+    // дефолты как раньше
     if ($map['qty'] === null) $map['qty'] = 1;
     if ($map['sku'] === null && $map['gtin'] === null) $map['sku'] = 0;
+
+    // эвристика: если нет sku, а в первой колонке длинные цифры — считать её GTIN
+    if ($map['gtin'] === null && $map['sku'] !== null) {
+        $firstTitle = $h[$map['sku']] ?? '';
+        $looksNumericId = preg_match('~^\d{8,16}$~', preg_replace('~\D+~','', (string)($header[($map['sku']??0)] ?? '')));
+        if ($looksNumericId) {
+            $map['gtin'] = $map['sku'];
+            $map['sku']  = null;
+        }
+    }
 
     return apply_filters('pcoe_colmap', $map, $header);
 }

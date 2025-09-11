@@ -1,3 +1,18 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: PC Order Import/Export 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/pc-order-import-export\n"
+"POT-Creation-Date: 2025-09-11 00:00+0000\n"
+"PO-Revision-Date: 2025-09-11 00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: uk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: make\n"
+"X-Domain: pc-order-import-export\n"
+
 #. Plugin Name of the plugin
 #: pc-order-import-export.php
 msgid "PC Order Import/Export"
