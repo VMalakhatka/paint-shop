@@ -3,11 +3,14 @@ namespace PaintCore\Orders;
 
 defined('ABSPATH') || exit;
 
+// единый набор складских хелперов
+require_once __DIR__ . '/warehouse-helpers.php';
+
 /**
  * CSV-вложение к письмам WooCommerce.
  *
  * Режими:
- *  - by_plan (дефолт): окремі рядки по кожному складу (з _pc_stock_breakdown);
+ *  - by_plan (дефолт): окремі рядки по кожному складу
  *  - summary: один рядок на позицію, а розбивку по складах пишемо в колонку Notes
  *             як "Списання: Одеса — 3, Київ — 1".
  *
@@ -15,26 +18,6 @@ defined('ABSPATH') || exit;
  * - якщо існує глобальний хелпер \pc_get_product_gtin() — використовуємо його;
  * - інакше шукаємо у PC_GTIN_META_KEY або в списку pc_gtin_meta_keys().
  */
-
-// Унифицированное чтение плана из строки заказа (supports _pc_alloc_plan и старый _pc_stock_breakdown)
-if (!function_exists(__NAMESPACE__.'\\pc_get_order_item_plan')) {
-    function pc_get_order_item_plan(\WC_Order_Item_Product $item): array {
-        $plan = $item->get_meta('_pc_alloc_plan', true);
-        if (!is_array($plan) || !$plan) {
-            $plan = $item->get_meta('_pc_stock_breakdown', true);
-            if (!is_array($plan)) {
-                $try  = json_decode((string)$plan, true);
-                $plan = is_array($try) ? $try : [];
-            }
-        }
-        $out = [];
-        foreach ((array)$plan as $tid => $q) {
-            $tid = (int)$tid; $q = (int)$q;
-            if ($tid > 0 && $q > 0) $out[$tid] = $q;
-        }
-        return $out;
-    }
-}
 
 /** ------------------------- GTIN (без нормалізації) ------------------------- */
 
@@ -110,62 +93,6 @@ function pc_location_name_by($term_id = 0, string $slug = ''): string {
     return '';
 }
 
-/** Повернути людську розбивку складів для item: "Київ — 2, Одеса — 1". */
-function pc_order_item_location_label(\WC_Order_Item_Product $item): string {
-    // 1) вже записана видима мета "Склад"
-    $human = (string) $item->get_meta(__('Склад','woocommerce'));
-if ($human !== '') return $human;
-
-// 2) план списання
-$plan = pc_get_order_item_plan($item);
-if (!empty($plan)) {
-    $terms = get_terms(['taxonomy'=>'location','hide_empty'=>false]);
-    $dict  = [];
-    if (!is_wp_error($terms)) {
-        foreach ($terms as $t) $dict[(int)$t->term_id] = $t->name;
-    }
-    arsort($plan, SORT_NUMERIC);
-    $parts = [];
-    foreach ($plan as $tid=>$q) {
-        $name = $dict[(int)$tid] ?? ('#'.(int)$tid);
-        $parts[] = $name . ' — ' . (int)$q;
-    }
-    if ($parts) return implode(', ', $parts);
-}
-
-    // 3) машинні одиночні
-    $id   = (int) $item->get_meta('_stock_location_id');
-    $slug = (string) $item->get_meta('_stock_location_slug');
-    $name = pc_location_name_by($id, $slug);
-    if ($name !== '') return $name;
-
-    // 4) фолбеки SLW
-    $loc_ids = $item->get_meta('_stock_locations', true);
-    if (is_array($loc_ids) && $loc_ids) {
-        $names = [];
-        foreach ($loc_ids as $tid) {
-            $n = pc_location_name_by((int)$tid, '');
-            if ($n !== '') $names[] = $n;
-        }
-        $names = array_values(array_unique(array_filter($names)));
-        if ($names) return implode(', ', $names);
-    }
-    $loc_id = (int) $item->get_meta('_stock_location');
-    $name   = pc_location_name_by($loc_id, '');
-    if ($name !== '') return $name;
-
-    // 5) останній фолбек — primary
-    $product = $item->get_product();
-    if ($product instanceof \WC_Product) {
-        $tid = pc_primary_location_term_id_for_product($product);
-        if ($tid) {
-            $n = pc_location_name_by($tid, '');
-            if ($n !== '') return $n;
-        }
-    }
-    return '';
-}
-
 /** ------------------------- Хедери/настройки CSV ------------------------- */
 
 /** Режим експорту: 'by_plan' (дефолт) або 'summary'. */
@@ -237,8 +164,8 @@ add_filter('woocommerce_email_attachments', function ($attachments, $email_id, $
         $line_total = (float)$item->get_total();
         $unit_price = $qty_total > 0 ? $line_total / $qty_total : $line_total;
 
-        // План (для by_plan або для нотатки в summary)
-        $plan = pc_get_order_item_plan($item);
+        // лан (для by_plan або для нотатки в summary)
+        $plan = \pc_get_order_item_plan($item);
 
          if ($mode === 'by_plan') {
             if (!empty($plan)) {

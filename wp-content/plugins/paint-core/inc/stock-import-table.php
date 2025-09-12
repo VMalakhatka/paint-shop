@@ -1,6 +1,6 @@
 <?php
 /**
- * Создаёт (если нет) таблицу wp_stock_import для загрузки остатков по складам.
+ * Create (if not exists) table wp_stock_import for stock uploads per location.
  */
 namespace PaintCore\StockImport;
 defined('ABSPATH') || exit;
@@ -10,7 +10,7 @@ function maybe_create_table() {
     global $wpdb;
     $table = $wpdb->prefix . 'stock_import';
 
-    // Есть ли таблица?
+    // Check if table exists
     $exists = $wpdb->get_var( $wpdb->prepare(
         "SELECT COUNT(*) FROM information_schema.tables
          WHERE table_schema=%s AND table_name=%s",
@@ -19,7 +19,7 @@ function maybe_create_table() {
 
     if ( ! $exists ) {
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-        $charset_collate = $wpdb->get_charset_collate(); // обычно utf8mb4_unicode_520_ci у тебя
+        $charset_collate = $wpdb->get_charset_collate();
 
         $sql = "CREATE TABLE {$table} (
             sku           VARCHAR(191) NOT NULL,

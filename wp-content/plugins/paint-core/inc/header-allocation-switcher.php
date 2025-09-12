@@ -305,7 +305,7 @@ add_action('woocommerce_after_cart_item_quantity_update',  'pc_recalc_alloc_plan
 add_action('wp_ajax_pc_recalc_alloc_plans',      function(){ pc_recalc_alloc_plans_for_cart(); wp_send_json_success(); });
 add_action('wp_ajax_nopriv_pc_recalc_alloc_plans', function(){ pc_recalc_alloc_plans_for_cart(); wp_send_json_success(); });
 
-// При создании заказа переносим план в мету строки (оба ключа для совместимости)
+// При создании заказа переносим план в мету строки
 add_action('woocommerce_checkout_create_order_line_item', function($item, $cart_item_key, $values){
     if (!empty($values['pc_alloc_plan']) && is_array($values['pc_alloc_plan'])) {
         $plan = [];
@@ -314,8 +314,7 @@ add_action('woocommerce_checkout_create_order_line_item', function($item, $cart_
             if ($tid > 0 && $q > 0) $plan[$tid] = $q;
         }
         if ($plan) {
-            $item->add_meta_data('_pc_alloc_plan', $plan, true);      // наш новый ключ
-            $item->add_meta_data('_pc_stock_breakdown', $plan, true); // совместимость
+            $item->add_meta_data('_pc_alloc_plan', $plan, true); // <-- оставляем
         }
     }
 }, 10, 3);

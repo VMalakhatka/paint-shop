@@ -9,6 +9,14 @@ if (!defined('ABSPATH')) exit;
 
 /* ================== DEBUG ================== */
 
+// нужен калькулятор / планировщик
+if (!function_exists('pc_calc_plan_for')) {
+    // тот файл, где у тебя калькулятор текущего плана (как мы подключали ранее)
+    require_once WP_PLUGIN_DIR . '/paint-core/inc/header-allocation-switcher.php';
+}
+// на всякий случай — отключаем легаси-вывод мест списания
+add_filter('pc_disable_legacy_cart_locations', '__return_true');
+
 if (!defined('PC_CART_GUARD_DEBUG')) {
     // Увімк./вимк. детальне логування тут:
     define('PC_CART_GUARD_DEBUG', true);
@@ -21,26 +29,99 @@ function pc_cg_log($msg){
     error_log('pc(cart): ' . $msg . ' | url=' . $uri);
 }
 
+function pc_cartguard_render_plan_html(WC_Product $product, int $qty): string {
+    // пробуем реальный план
+    if (function_exists('pc_calc_plan_for')) {
+        // ожидается массив вида [term_id => qty] под текущие настройки списания
+        $plan = pc_calc_plan_for($product, $qty, 'cart');
+        if (is_array($plan) && $plan) {
+            $parts = [];
+
+            foreach ($plan as $term_id => $q) {
+                $q = (int) $q;
+                if ($q <= 0) continue;
+
+                // название склада
+                $name = '';
+                if (function_exists('pc_term_name')) {
+                    $name = (string) pc_term_name((int) $term_id);
+                } else {
+                    // фолбек: берём имя терма напрямую
+                    $t = get_term((int) $term_id);
+                    $name = ($t && !is_wp_error($t)) ? $t->name : ('#'.$term_id);
+                }
+
+                $parts[] = esc_html($name) . ' — ' . $q;
+            }
+
+            if (!empty($parts)) {
+                return '<div class="pc-cart-plan" style="margin:.25rem 0 .15rem;color:#333">'
+                     . esc_html__('Списання:', 'woocommerce') . ' '
+                     . '<strong>' . implode(', ', $parts) . '</strong>'
+                     . '</div>';
+            }
+        }
+    }
+
+    // === ФОЛБЕК: если калькулятора нет/вернул пусто — оставляем прежнее поведение ===
+    $loc_title = '';
+    if (function_exists('pc_build_stock_view')) {
+        $view = pc_build_stock_view($product);
+        if (!empty($view['preferred_name'])) {
+            $loc_title = (string) $view['preferred_name'];
+        }
+    } elseif (function_exists('slu_current_location_title')) {
+        $loc_title = (string) slu_current_location_title();
+    }
+
+    return '<div class="pc-cart-plan" style="margin:.25rem 0 .15rem;color:#333">'
+         . esc_html__('Списання:', 'woocommerce') . ' '
+         . '<strong>' . esc_html($loc_title ?: '—') . ' — ' . intval($qty) . '</strong>'
+         . '</div>';
+}
+
 /* ================== CORE LIMITS ================== */
 
 function pc_cartguard_get_allowed_qty_for_cart(WC_Product $product, int $current_cart_qty): int {
-    $maxQty = 0; $src = 'none';
+    $maxQty = 0; 
+    $src    = 'none';
 
-    if (function_exists('pc_build_stock_view')) {
-        $view   = pc_build_stock_view($product);            // ['sum'=>..., 'preferred_name'=>...]
-        $sum    = isset($view['sum']) ? (int) $view['sum'] : 0;
-        $maxQty = max(0, $sum);
-        $src    = 'pc_build_stock_view(sum='.$sum.')';
-    } elseif (function_exists('slu_available_for_add')) {
+    // 1) Пытаемся взять лимит через калькулятор плана (учтёт режим single/auto)
+    if (function_exists('pc_calc_plan_for')) {
+        // Просим «как максимум можно списать сейчас» — даём большой запрос
+        $plan = pc_calc_plan_for($product, 999999, 'cart-cap'); // вернёт [term_id => qty]
+        if (is_array($plan)) {
+            $maxQty = array_sum(array_map('intval', $plan));
+            $src    = 'pc_calc_plan_for(sum_plan='. $maxQty .')';
+        }
+    }
+
+    // 2) Если калькулятора нет/вернул 0 — пробуем preferred из stock_view
+    if ($maxQty <= 0 && function_exists('pc_build_stock_view')) {
+        $view = pc_build_stock_view($product); // ожидаем preferred_qty, sum и т.д.
+        if (isset($view['preferred_qty'])) {
+            $maxQty = max(0, (int)$view['preferred_qty']);
+            $src    = 'pc_build_stock_view(preferred_qty='.$maxQty.')';
+        } else {
+            $sum    = isset($view['sum']) ? (int)$view['sum'] : 0;
+            $maxQty = max(0, $sum);
+            $src    = 'pc_build_stock_view(sum='.$sum.')';
+        }
+    }
+
+    // 3) Легаси-резервные способы
+    if ($maxQty <= 0 && function_exists('slu_available_for_add')) {
         $addable = (int) slu_available_for_add($product);
         $maxQty  = max(0, $current_cart_qty + $addable);
         $src     = 'slu_available_for_add(addable='.$addable.'; cur='.$current_cart_qty.')';
-    } else {
+    }
+    if ($maxQty <= 0) {
         $stock  = (int) wc_stock_amount(get_post_meta($product->get_id(), '_stock', true));
         $maxQty = max(0, $stock);
         $src    = 'fallback_stock('.$stock.')';
     }
 
+    // 4) Персональные лимиты товара
     $product_max = (int) $product->get_max_purchase_quantity();
     if ($product_max > 0) {
         $maxQty = min($maxQty, $product_max);
@@ -127,7 +208,7 @@ function pc_cart_item_extras(){
 
         $pid = $product->get_id();
         $qty = (int) ($item['quantity'] ?? 0);
-
+/*
         // План списання
         $loc_title = '';
         if (function_exists('pc_build_stock_view')) {
@@ -136,11 +217,7 @@ function pc_cart_item_extras(){
         } elseif (function_exists('slu_current_location_title')) {
             $loc_title = (string) slu_current_location_title();
         }
-        $plan_html = '<div class="pc-cart-plan" style="margin:.25rem 0 .15rem;color:#333">'
-                   . esc_html__('Списання:', 'woocommerce') . ' '
-                   . '<strong>'.esc_html($loc_title ?: '—').' — '.intval($qty).'</strong>'
-                   . '</div>';
-
+       $plan_html = pc_cartguard_render_plan_html($product, $qty);*/
 
 
         $stocks_html = '';
@@ -300,7 +377,7 @@ function requestClassicUpdate(){
 }
 
   // qty клампим и обновляем форму
-  $(document).on('input change', QTY_SEL, function(){ clamp($(this)); });
+  $(document).on('input', QTY_SEL, function(){ clamp($(this)); });
   var t=null;
   $(document).on('blur', QTY_SEL, function(){
     if ($('form.woocommerce-cart-form').length){
@@ -365,31 +442,17 @@ add_filter('woocommerce_cart_item_name', function ($name, $cart_item, $cart_item
     $product = isset($cart_item['data']) ? $cart_item['data'] : null;
     if (!$product instanceof WC_Product) return $name;
 
-    $pid = $product->get_id();
     $qty = (int) ($cart_item['quantity'] ?? 0);
 
-    $has_slu_panel = function_exists('slu_render_stock_panel') ? '1' : '0';
-    $has_view      = function_exists('pc_build_stock_view')     ? '1' : '0';
-    pc_cg_log("filter cart_item_name: pid=$pid qty=$qty has_slu_panel=$has_slu_panel has_view=$has_view");
+    // 1) Сносим любые уже вставленные «мини-ярлыки» (кем бы они ни были добавлены)
+    //    Ищем <div class="pc-cart-plan">...</div> и вырезаем.
+    $clean_name = preg_replace('~<div\s+class=["\']pc-cart-plan["\'][\s\S]*?</div>~i', '', (string)$name);
 
-    // План списання
-    $loc_title = '';
-    if (function_exists('pc_build_stock_view')) {
-        $view = pc_build_stock_view($product);
-        if (!empty($view['preferred_name'])) $loc_title = (string) $view['preferred_name'];
-        pc_cg_log('plan: preferred_name='.($view['preferred_name'] ?? ''));
-    }
-    if ($loc_title === '' && function_exists('slu_current_location_title')) {
-        $loc_title = (string) slu_current_location_title();
-        pc_cg_log('plan: fallback current_location='.$loc_title);
-    }
+    // 2) НЕ добавляем наш мини-ярлык
+    // $plan_html = pc_cartguard_render_plan_html($product, $qty);
+    $plan_html = '';
 
-    $plan_html = '<div class="pc-cart-plan" style="margin:.25rem 0 .15rem;color:#333">'
-               . esc_html__('Списання:', 'woocommerce') . ' '
-               . '<strong>' . esc_html($loc_title ?: '—') . ' — ' . intval($qty) . '</strong>'
-               . '</div>';
-
-    // Міні-склади
+    // 3) Панель складов (информативная, как на «фото 3»)
     $stocks_html = '';
     if (function_exists('slu_render_stock_panel')) {
         $panel = (string) slu_render_stock_panel($product, [
@@ -399,15 +462,21 @@ add_filter('woocommerce_cart_item_name', function ($name, $cart_item, $cart_item
             'show_total'       => true,
             'hide_when_zero'   => false,
             'show_incart'      => true,
-            'show_incart_plan' => true,
+            'show_incart_plan' => false,   // <<< включаем строку «Списання» ВНУТРИ панели
+            // иногда помогает явно проставить контекст:
+            'context'          => 'cart',
         ]);
-        $stocks_html = '<div class="pc-cart-stocks" style="margin:.15rem 0 0">'.$panel.'</div>';
-        pc_cg_log('stocks: html_len='.strlen($panel));
+        if ($panel !== '') {
+            $stocks_html = '<div class="pc-cart-stocks" style="margin:.15rem 0 0">'.$panel.'</div>';
+            pc_cg_log('stocks: html_len='.strlen($panel));
+        } else {
+            pc_cg_log('stocks: panel empty');
+        }
     } else {
-        pc_cg_log('stocks: slu_render_stock_panel not exists at this point');
+        pc_cg_log('stocks: slu_render_stock_panel not exists');
     }
 
-    return $name . $plan_html . $stocks_html;
+    return $clean_name . $plan_html . $stocks_html;
 }, 20, 3);
 
 /**
@@ -447,6 +516,7 @@ add_action('woocommerce_check_cart_items', function () {
     }
 }, 1);
 
+/*
 // ==== Guard: виправляємо фальшиве "нема на складі" ====
 add_action('woocommerce_check_cart_items', function () {
     foreach (WC()->cart->get_cart() as $key => $ci) {
@@ -477,7 +547,7 @@ add_action('woocommerce_check_cart_items', function () {
             WC()->cart->set_quantity($key, $avail, false);
         }
     }
-}, 20);
+}, 20);*/
 
 // Вимкнути hold stock навіть якщо в адмінці хтось знову увімкне
 add_filter('pre_option_woocommerce_hold_stock_minutes', function(){ return ''; });

@@ -129,14 +129,7 @@ class Exporter {
             $unit = (float)$order->get_item_subtotal($item, false, false);
 
            // план списання з мети (наш ключ), або старий ключ, або fallback
-            $plan = $item->get_meta('_pc_alloc_plan', true);
-            if (!is_array($plan) || !$plan) {
-                $plan = $item->get_meta('_pc_stock_breakdown', true);   // сумісність зі старою схемою
-                if (!is_array($plan)) {
-                    $try  = json_decode((string)$plan, true);
-                    $plan = is_array($try) ? $try : [];
-                }
-            }
+            $plan = \pc_get_order_item_plan($item);
             if (!$plan) {
                 $tid = (int)$item->get_meta('_stock_location_id');
                 if ($tid) $plan = [$tid => (int)$qty];

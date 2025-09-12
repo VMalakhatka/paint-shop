@@ -3,7 +3,6 @@
  * PaintCore – Unified Stock Allocation & Reduction
  *
  * План списання береться з `_pc_alloc_plan` (новий свічер у шапці) і
- * дублюється у `_pc_stock_breakdown` для сумісності.
  * Реальне списання робимо ОДИН раз на статусах processing/completed.
  */
 
@@ -13,6 +12,27 @@ defined('ABSPATH') || exit;
 const PC_STOCK_REDUCED_META = '_pc_stock_reduced';
 
 /* ---------- per-term stock helpers ---------- */
+
+// paint-core/inc/order-allocator.php (глобальный ns)
+if (!function_exists(__NAMESPACE__ . '\\pc_compute_and_stamp_item_plan')) {
+        function pc_compute_and_stamp_item_plan(\WC_Order_Item_Product $item, \WC_Product $product, int $need, string $ctx = 'auto'): void {
+        $need = max(0, $need);
+        if ($need === 0) return;
+
+        // 1) внешний фильтр — даём шанс переопределить
+        $plan = (array) apply_filters('slu_allocation_plan', [], $product, $need, $ctx);
+
+        // 2) наш калькулятор
+        if (empty($plan) && function_exists('pc_calc_plan_for')) {
+            $plan = (array) \pc_calc_plan_for($product, $need);
+        }
+        error_log(sprintf('pc(plan): ctx=%s pid=%d need=%d plan=%s',
+            $ctx, $product->get_id(), $need, json_encode($plan, JSON_UNESCAPED_UNICODE)));
+        if (!empty($plan) && function_exists(__NAMESPACE__ . '\\stamp_item_plan')) {
+            stamp_item_plan($item, $plan);
+        }
+    }
+}
 
 function read_term_stock(int $product_id, int $term_id): float {
     $key = '_stock_at_' . (int)$term_id;
@@ -45,28 +65,33 @@ function recalc_total_stock(int $product_id): void {
 /* ---------- plan read/build ---------- */
 
 function ensure_item_plan(\WC_Order_Item_Product $item): array {
-    $plan = $item->get_meta('_pc_alloc_plan', true);
-    if (!is_array($plan) || empty($plan)) {
-        $plan = $item->get_meta('_pc_stock_breakdown', true);
-        if (!is_array($plan)) $plan = json_decode((string)$plan, true);
+    // 1) читаем только новый ключ
+    $plan = \pc_get_order_item_plan($item);
+    if (!empty($plan)) return $plan;
+
+    // 2) если плана нет — считаем (фильтр -> наш калькулятор)
+    $product = $item->get_product();
+    $need    = (int) $item->get_quantity();
+    if (!($product instanceof \WC_Product) || $need <= 0) return [];
+
+    // сначала внешний фильтр — даём шанс переопределить всё
+    $plan = (array) apply_filters('slu_allocation_plan', [], $product, $need, 'order-fallback');
+
+    // затем наш централизованный калькулятор (из header-allocation-switcher.php)
+    if (empty($plan) && function_exists('pc_calc_plan_for')) {
+        $plan = (array) \pc_calc_plan_for($product, $need);
     }
-    if ((!is_array($plan) || empty($plan)) && ($p = $item->get_product())) {
-        $need = (int) $item->get_quantity();
-        if ($need > 0) {
-            // спочатку — зовнішні фільтри
-            $from_filter = (array) apply_filters('slu_allocation_plan', [], $p, $need, 'order-fallback');
-            $plan = !empty($from_filter) ? $from_filter : [];
-            // потім — наш централізований калькулятор (з хедера)
-            if (empty($plan) && function_exists('pc_calc_plan_for')) {
-                $plan = (array) \pc_calc_plan_for($p, $need);
-            }
-        }
-    }
+
+    // нормализация
     $norm = [];
-    foreach ((array)$plan as $k => $v) {
-        $tid = (int)$k; $q = (int)$v;
+    foreach ((array)$plan as $tid => $q) {
+        $tid = (int)$tid; $q = (int)$q;
         if ($tid > 0 && $q > 0) $norm[$tid] = $q;
     }
+    if (!empty($norm) && function_exists(__NAMESPACE__ . '\\stamp_item_plan')) {
+        stamp_item_plan($item, $norm);
+    }
+
     return $norm;
 }
 
@@ -90,14 +115,10 @@ function stamp_item_plan(\WC_Order_Item_Product $item, array $plan): void {
     }
 
     $item->update_meta_data('_pc_alloc_plan',       $plan);
-    $item->update_meta_data('_pc_stock_breakdown',  $plan);
     if ($first_id) {
         $item->update_meta_data('_stock_location_id',   $first_id);
         $item->update_meta_data('_stock_location_slug', $first_slug);
     }
-
-    // ⬇️ было: __('Склад','woocommerce')
-    $item->update_meta_data( __('Warehouse', 'paint-core'), implode(', ', $parts) );
     $item->save();
 }
 
@@ -184,3 +205,31 @@ add_action('woocommerce_order_action_pc_restore_from_plan', function($order_or_i
     $order->delete_meta_data(PC_STOCK_REDUCED_META);
     $order->save();
 });
+
+add_action('woocommerce_checkout_create_order_line_item', function($item, $cart_item_key, $values){
+    if (!($item instanceof \WC_Order_Item_Product)) return;
+
+    $product = $item->get_product();
+    if (!($product instanceof \WC_Product)) return;
+
+    // 1) если корзина уже посчитала план — ставим как есть
+    $plan = [];
+    if (!empty($values['pc_alloc_plan']) && is_array($values['pc_alloc_plan'])) {
+        foreach ($values['pc_alloc_plan'] as $tid => $q) {
+            $tid = (int)$tid; $q = (int)$q;
+            if ($tid > 0 && $q > 0) $plan[$tid] = $q;
+        }
+    }
+    if (!empty($plan)) {
+        stamp_item_plan($item, $plan); // тот же namespace
+        return;
+    }
+
+    // 2) иначе — считаем и штампуем здесь
+    pc_compute_and_stamp_item_plan(
+        $item,
+        $product,
+        (int) max(0, $item->get_quantity()),
+        'checkout'
+    );
+}, 10, 3);

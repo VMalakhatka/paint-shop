@@ -1,11 +1,65 @@
 <?php
 /*
-Plugin Name: Stock Locations UI (archive + single + cart)
-Description: Универсальный блок складов/остатков + план списания. Работает в карточке, каталоге и корзине/чекауте.
-Version: 1.2.0
+Plugin Name: PC Allocation Helpers
+Description: Глобальные хелперы для плана списания: чтение (_pc_alloc_plan) и humanize ("Київ — 2, Одеса — 1").
+Version: 1.0.0
 Author: PaintCore
 */
 if (!defined('ABSPATH')) exit;
+
+/**
+ * Прочитать план списания из строки заказа.
+ * Возвращает массив вида [term_id => qty] с положительными числами.
+ */
+if (!function_exists('pc_get_order_item_plan')) {
+    function pc_get_order_item_plan(\WC_Order_Item_Product $item): array {
+        $plan = $item->get_meta('_pc_alloc_plan', true);
+
+        $out = [];
+        foreach ((array) $plan as $tid => $q) {
+            $tid = (int)$tid;
+            $q   = (int)$q;
+            if ($tid > 0 && $q > 0) {
+                $out[$tid] = $q;
+            }
+        }
+        return $out;
+    }
+}
+
+/**
+ * Превратить план вида [term_id => qty] в строку "Київ — 2, Одеса — 1".
+ * Берёт имена терминов таксономии `location`. Сортирует по количеству (desc).
+ */
+if (!function_exists('pc_humanize_alloc_plan')) {
+    function pc_humanize_alloc_plan(array $plan): string {
+        if (empty($plan)) return '';
+
+        // Справочник term_id => name
+        $dict = [];
+        $terms = get_terms([
+            'taxonomy'   => 'location',
+            'hide_empty' => false,
+        ]);
+        if (!is_wp_error($terms) && $terms) {
+            foreach ($terms as $t) {
+                $dict[(int)$t->term_id] = (string)$t->name;
+            }
+        }
+
+        // Сортировка по количеству (убывание)
+        arsort($plan, SORT_NUMERIC);
+
+        // Сборка "Имя — Кол-во"
+        $parts = [];
+        foreach ($plan as $tid => $q) {
+            $name = $dict[(int)$tid] ?? ('#' . (int)$tid);
+            $parts[] = $name . ' — ' . (int)$q;
+        }
+
+        return implode(', ', $parts);
+    }
+}
 
 /** ========================= UI LABELS =========================
  *  Можна перевизначити у wp-config.php константами:

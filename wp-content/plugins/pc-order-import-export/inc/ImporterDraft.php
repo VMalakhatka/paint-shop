@@ -5,6 +5,17 @@ use WC_Order;
 use WC_Product;
 
 defined('ABSPATH') || exit;
+// гарантируем наличие нужных хелперов
+if (!function_exists('\\PaintCore\\Stock\\pc_compute_and_stamp_item_plan')
+    || !function_exists('\\PaintCore\\Stock\\stamp_item_plan')) {
+    require_once WP_PLUGIN_DIR . '/paint-core/inc/order-allocator.php';
+}
+
+// >>> ДОБАВЬ ЭТО: калькулятор плана
+// Калькулятор плана (верная проверка с неймспейсом)
+if (!function_exists('\\PaintCore\\Stock\\pc_calc_plan_for')) {
+    require_once WP_PLUGIN_DIR . '/paint-core/inc/header-allocation-switcher.php';
+}
 
 class ImporterDraft
 {
@@ -90,7 +101,7 @@ class ImporterDraft
             wp_send_json_error(['msg' => 'Не вдалося створити чернетку замовлення'], 500);
         }
 
-        // adder для чернетки: додаємо позиції в order; якщо є ціна у файлі — виставляємо subtotal/total
+        // adder для чернетки: додаємо позиції і одразу штампуємо план списання
         $adder = function(\WC_Product $product, float $qty, ?float $price, array &$errExtra) use ($order): bool {
             $item_data = [];
             if ($price !== null) {
@@ -98,8 +109,29 @@ class ImporterDraft
                 $item_data['total']    = (float)$price * (float)$qty;
             }
             try {
-                $order->add_product($product, $qty, $item_data);
+                $item_id = $order->add_product($product, $qty, $item_data);
+                if (!$item_id) return true;
+
+                $item = $order->get_item($item_id);
+                if ($item instanceof \WC_Order_Item_Product) {
+                    // Единая точка: посчитать и проштамповать (правильная сигнатура)
+                    \PaintCore\Stock\pc_compute_and_stamp_item_plan(
+                        $item,
+                        'import-draft',
+                        [
+                            // на время дебага можно зафиксировать предпочтительный склад:
+                            // 'preferred_location' => 3942,
+                        ]
+                    );
+                    // Сохранить меты позиции+                    
+                    $item->save();
+                    // Лог для проверки, что мета реально записалась
+                    $plan_meta = $item->get_meta('_pc_alloc_plan', true);
+                    error_log('pc(plan): ctx=import-draft pid=' . $product->get_id() .
+                        ' qty=' . (int)$qty . ' plan=' . json_encode($plan_meta, JSON_UNESCAPED_UNICODE));
+                }
                 return true;
+
             } catch (\Throwable $e) {
                 $errExtra['ex']  = $e->getMessage();
                 $errExtra['pid'] = (int)$product->get_id();

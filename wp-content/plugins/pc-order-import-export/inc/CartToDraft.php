@@ -6,6 +6,12 @@ use WC_Product;
 
 defined('ABSPATH') || exit;
 
+// гарантируем наличие функций штамповки
+if (!function_exists('\\PaintCore\\Stock\\pc_compute_and_stamp_item_plan')
+    || !function_exists('\\PaintCore\\Stock\\stamp_item_plan')) {
+    require_once WP_PLUGIN_DIR . '/paint-core/inc/order-allocator.php';
+}
+
 /**
  * Кошик → Чернетка замовлення (wc-pc-draft)
  */
@@ -56,6 +62,10 @@ class CartToDraft
      */
     public static function handle(): void
     {
+        if (!function_exists('\\PaintCore\\Stock\\pc_compute_and_stamp_item_plan')
+            || !function_exists('\\PaintCore\\Stock\\stamp_item_plan')) {
+            require_once WP_PLUGIN_DIR . '/paint-core/inc/order-allocator.php';
+        }
         // 1) Nonce (GET/POST)
         $nonce = isset($_REQUEST['_wpnonce']) ? (string) $_REQUEST['_wpnonce'] : '';
         if (!$nonce || !wp_verify_nonce($nonce, 'pcoe_cart_to_draft')) {
@@ -117,8 +127,9 @@ class CartToDraft
         if ($title !== '') {
             $order->update_meta_data('_pc_draft_title', $title);
         }
-
         // 5) Переносимо позиції
+        error_log('pc(check): has allocator='.(int)function_exists('\\PaintCore\\Stock\\pc_compute_and_stamp_item_plan'));
+
         foreach ($items as $ci) {
             $product = $ci['data'] ?? null;
             if (!$product instanceof \WC_Product) continue;
@@ -135,7 +146,27 @@ class CartToDraft
                 }
             }
 
-            try { $order->add_product($product, $qty, $item_args); } catch (\Throwable $e) {}
+            try {
+                $item_id = $order->add_product($product, $qty, $item_args);
+                if ($item_id) {
+                    $item = $order->get_item($item_id);
+                    if ($item instanceof \WC_Order_Item_Product) {
+                        // ← СТАВИМ ШТАМП ТУТ ЖЕ
+                        \PaintCore\Stock\pc_compute_and_stamp_item_plan(
+                            $item,
+                            $product,
+                            (int)$qty,
+                            'cart-to-draft'
+                        );
+                        $item->save();
+                        error_log('pc(plan): cart2draft order='.$order->get_id()
+                            .' pid='.$product->get_id()
+                            .' qty='.(int)$qty);
+                    }
+                }
+            } catch (\Throwable $e) {
+                error_log('pc(plan-err): '.$e->getMessage());
+            }
         }
 
         try { $order->calculate_totals(false); } catch (\Throwable $e) {}
