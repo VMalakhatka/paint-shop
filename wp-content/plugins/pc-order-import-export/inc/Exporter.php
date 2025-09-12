@@ -7,7 +7,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 class Exporter {
     public static function handle(){
         if (!isset($_GET['_wpnonce']) || !wp_verify_nonce($_GET['_wpnonce'], 'pcoe_export')) {
-            wp_die('Bad nonce', '', ['response'=>403]);
+            wp_die( esc_html__( 'Security check failed (bad nonce).', 'pc-order-import-export' ), '', ['response'=>403] );
         }
 
         $type  = sanitize_key($_GET['type'] ?? 'cart');        // cart|order
@@ -25,15 +25,15 @@ class Exporter {
 
         if ($type === 'order') {
             $order_id = isset($_GET['order_id']) ? (int)$_GET['order_id'] : 0;
-            if (!$order_id) wp_die('No order', '', ['response'=>400]);
+            if (!$order_id) wp_die( esc_html__( 'Order ID is missing.', 'pc-order-import-export' ), '', ['response'=>400] );
 
             $order = wc_get_order($order_id);
-            if (!$order) wp_die('Order not found', '', ['response'=>404]);
+            if (!$order) wp_die( esc_html__( 'Order not found.', 'pc-order-import-export' ), '', ['response'=>404] );
 
             // доступ: владелец заказа или manage_woocommerce
             if (!current_user_can('manage_woocommerce')) {
                 if ((int)$order->get_user_id() !== (int)get_current_user_id()) {
-                    wp_die('Forbidden', '', ['response'=>403]);
+                    wp_die( esc_html__( 'You do not have permission to perform this action.', 'pc-order-import-export' ), '', ['response'=>403] );
                 }
             }
             $rows     = self::extract_from_order($order_id, $cols, $split);
@@ -77,7 +77,8 @@ class Exporter {
                     if ($tid) $plan = [$tid => (int)$qty];
                 }
             }
-                error_log('EXPORT CART plan: ' . print_r($plan, true));
+            error_log('EXPORT CART plan: ' . print_r($plan, true));
+
             if ($split === 'per_loc' && $plan) {
                 foreach ($plan as $tid => $q) {
                     $q = (int)$q; if ($q <= 0) continue;
@@ -88,7 +89,11 @@ class Exporter {
                         'qty'   => $q,
                         'price' => wc_format_decimal($price, 2),
                         'total' => wc_format_decimal($price * $q, 2),
-                        'note'  => 'Склад: ' . Helpers::loc_name_by_id((int)$tid),
+                        'note'  => sprintf(
+                            /* translators: %s: location name */
+                            esc_html__( 'Warehouse: %s', 'pc-order-import-export' ),
+                            Helpers::loc_name_by_id((int)$tid)
+                        ),
                     ], array_flip($want));
                 }
             } else {
@@ -128,7 +133,7 @@ class Exporter {
             $qty  = (float)$item->get_quantity();
             $unit = (float)$order->get_item_subtotal($item, false, false);
 
-           // план списання з мети (наш ключ), або старий ключ, або fallback
+            // план списання з мети (наш ключ), або старий ключ, або fallback
             $plan = \pc_get_order_item_plan($item);
             if (!$plan) {
                 $tid = (int)$item->get_meta('_stock_location_id');
@@ -138,6 +143,7 @@ class Exporter {
                 $tid = Helpers::primary_location_id($p);
                 if ($tid) $plan = [$tid => (int)$qty];
             }
+
             if ($split === 'per_loc' && $plan) {
                 foreach ($plan as $tid => $q) {
                     $q = (int)$q; if ($q <= 0) continue;
@@ -148,7 +154,11 @@ class Exporter {
                         'qty'   => $q,
                         'price' => wc_format_decimal($unit, 2),
                         'total' => wc_format_decimal($unit * $q, 2),
-                        'note'  => 'Склад: ' . Helpers::loc_name_by_id((int)$tid),
+                        'note'  => sprintf(
+                            /* translators: %s: location name */
+                            esc_html__( 'Warehouse: %s', 'pc-order-import-export' ),
+                            Helpers::loc_name_by_id((int)$tid)
+                        ),
                     ], array_flip($want));
                 }
             } else {
