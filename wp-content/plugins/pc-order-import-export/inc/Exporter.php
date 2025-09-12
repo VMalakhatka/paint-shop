@@ -138,7 +138,6 @@ class Exporter {
                 $tid = Helpers::primary_location_id($p);
                 if ($tid) $plan = [$tid => (int)$qty];
             }
-error_log('EXPORT ORDER plan: ' . print_r($plan, true));
             if ($split === 'per_loc' && $plan) {
                 foreach ($plan as $tid => $q) {
                     $q = (int)$q; if ($q <= 0) continue;
