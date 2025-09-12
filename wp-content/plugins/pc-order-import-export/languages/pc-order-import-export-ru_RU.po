@@ -1,8 +1,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PC Order Import/Export 1.0.0\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/pc-order-import-export\n"
-"POT-Creation-Date: 2025-09-11 00:00+0000\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/pc-order-import-"
+"export\n"
+"POT-Creation-Date: 2025-09-12T20:15:44+00:00\n"
 "PO-Revision-Date: 2025-09-11 00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -12,7 +13,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: make\n"
 "X-Domain: pc-order-import-export\n"
-
 
 #. Plugin Name of the plugin
 #: pc-order-import-export.php
@@ -24,7 +24,21 @@ msgstr "PC Импорт/Экспорт заказов"
 msgid ""
 "Export cart/orders to CSV/XLSX + import to cart/draft. WooCommerce "
 "integration."
-msgstr "Экспорт корзины/заказов в CSV/XLSX + импорт в корзину/черновик. Интеграция с WooCommerce."
+msgstr ""
+"Экспорт корзины/заказов в CSV/XLSX + импорт в корзину/черновик. Интеграция с "
+"WooCommerce."
+
+#: inc/CartToDraft.php:82
+msgid "Security check failed (bad nonce)."
+msgstr "Ошибка проверки безопасности (неверный ключ)."
+
+#: inc/CartToDraft.php:90
+msgid "Cart is not available."
+msgstr "Корзина недоступна."
+
+#: inc/CartToDraft.php:139
+msgid "Cannot create draft order."
+msgstr "Не удалось создать черновик заказа."
 
 #: inc/Helpers.php:10
 msgid "Download CSV"

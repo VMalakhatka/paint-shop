@@ -6,18 +6,22 @@ use WC_Product;
 
 defined('ABSPATH') || exit;
 
-// гарантируем наличие функций штамповки
+// Ensure allocator functions are available
 if (!function_exists('\\PaintCore\\Stock\\pc_compute_and_stamp_item_plan')
     || !function_exists('\\PaintCore\\Stock\\stamp_item_plan')) {
     require_once WP_PLUGIN_DIR . '/paint-core/inc/order-allocator.php';
 }
 
 /**
- * Кошик → Чернетка замовлення (wc-pc-draft)
+ * Cart → Draft Order (wc-pc-draft)
+ *
+ * - Creates a draft order from the current cart via AJAX.
+ * - Optionally clears the cart after creation.
+ * - Stamps the allocation plan for each line item right away.
  */
 class CartToDraft
 {
-    /** Повісити AJAX-обробники */
+    /** Register AJAX handlers */
     public static function hooks(): void
     {
         add_action('wp_ajax_pcoe_cart_to_draft',        [self::class, 'handle']);
@@ -25,7 +29,7 @@ class CartToDraft
     }
 
     /**
-     * Допоміжне: побудувати URL (GET) для кнопки/посилання
+     * Helper: build action URL (GET) for button/link
      */
     public static function action_url(array $args = []): string
     {
@@ -37,15 +41,18 @@ class CartToDraft
         return add_query_arg($q, admin_url('admin-ajax.php'));
     }
 
+    /** Safe redirect (works even if headers already sent) */
     protected static function redirect_now(string $url): void {
-        if (!$url) $url = wc_get_account_endpoint_url('orders');
+        if (!$url) {
+            $url = wc_get_account_endpoint_url('orders');
+        }
 
         if (!headers_sent()) {
             wp_safe_redirect($url);
             exit;
         }
 
-        // Фолбек, якщо заголовки вже відправлені або ajax-браузер не слідує 302
+        // Fallback for cases when headers are already sent
         $url_js = esc_url_raw($url);
         echo '<meta http-equiv="refresh" content="0;url='.esc_attr($url_js).'">';
         echo '<script>location.href='.json_encode($url_js).';</script>';
@@ -53,12 +60,13 @@ class CartToDraft
     }
 
     /**
-     * Обробник: зберегти поточний кошик як чернетку (і опціонально очистити кошик)
+     * Handler: save current cart as a draft order (optionally clear the cart)
      *
-     * GET params:
+     * GET/POST params:
      *   _wpnonce : nonce('pcoe_cart_to_draft')
-     *   clear    : '1' → очистити кошик після створення (опційно)
-     *   title    : назва чернетки (опційно)
+     *   clear    : '1' → clear cart after creation (optional)  [kept for compatibility, not used here]
+     *   title    : draft title (optional)
+     *   dest     : 'admin' | 'view' | 'orders' (default: 'orders')
      */
     public static function handle(): void
     {
@@ -66,14 +74,23 @@ class CartToDraft
             || !function_exists('\\PaintCore\\Stock\\stamp_item_plan')) {
             require_once WP_PLUGIN_DIR . '/paint-core/inc/order-allocator.php';
         }
+
         // 1) Nonce (GET/POST)
         $nonce = isset($_REQUEST['_wpnonce']) ? (string) $_REQUEST['_wpnonce'] : '';
         if (!$nonce || !wp_verify_nonce($nonce, 'pcoe_cart_to_draft')) {
-            wp_die('Bad nonce', '', ['response' => 403]);
+            wp_die(
+                esc_html__('Security check failed (bad nonce).', 'pc-order-import-export'),
+                '',
+                ['response' => 403]
+            );
         }
 
         if (!function_exists('WC') || !WC()->cart) {
-            wp_die('Cart not available', '', ['response' => 400]);
+            wp_die(
+                esc_html__('Cart is not available.', 'pc-order-import-export'),
+                '',
+                ['response' => 400]
+            );
         }
 
         $cart  = WC()->cart;
@@ -82,7 +99,7 @@ class CartToDraft
             self::redirect_now(wc_get_cart_url());
         }
 
-        // 2) Анти-даблклік: ХЕШ кошика + ранній "LOCK"
+        // 2) Anti double-click: snapshot hash + early LOCK
         $snapshot = [];
         foreach ($items as $ci) {
             $snapshot[] = [
@@ -97,7 +114,7 @@ class CartToDraft
 
         $lock_val = get_transient($lock_key);
         if ($lock_val && $lock_val !== 'LOCK') {
-            // вже є ID створеного чернетка — ведемо туди (або в Список)
+            // Draft already created — redirect there (or to Orders)
             $existing_id = (int) $lock_val;
             $url = current_user_can('edit_shop_orders')
                 ? admin_url('post.php?post='.$existing_id.'&action=edit')
@@ -105,30 +122,36 @@ class CartToDraft
             self::redirect_now($url);
         }
         if ($lock_val === 'LOCK') {
-            // хтось вже відправив форму — просто на «Замовлення»
+            // Request is already in-flight — go to Orders
             self::redirect_now(wc_get_account_endpoint_url('orders'));
         }
-        // Ставимо LOCK одразу, щоб не було гонки
-        set_transient($lock_key, 'LOCK', 30); // 30 сек більше ніж досить
+        // Place LOCK immediately to avoid race
+        set_transient($lock_key, 'LOCK', 30); // 30s is more than enough
 
-        // 3) Створюємо чернетку
+        // 3) Create draft order
         $order = wc_create_order([
             'status'      => 'wc-pc-draft',
             'customer_id' => get_current_user_id() ?: 0,
         ]);
         if (!$order instanceof \WC_Order) {
-            // знімаємо lock у разі фейлу
             delete_transient($lock_key);
-            wp_die('Cannot create draft order', '', ['response' => 500]);
+            wp_die(
+                esc_html__('Cannot create draft order.', 'pc-order-import-export'),
+                '',
+                ['response' => 500]
+            );
         }
 
-        // 4) Назва (опц.)
+        // 4) Optional title
         $title = isset($_REQUEST['title']) ? sanitize_text_field((string) $_REQUEST['title']) : '';
         if ($title !== '') {
             $order->update_meta_data('_pc_draft_title', $title);
         }
-        // 5) Переносимо позиції
-        error_log('pc(check): has allocator='.(int)function_exists('\\PaintCore\\Stock\\pc_compute_and_stamp_item_plan'));
+
+        // 5) Move items from cart and stamp allocation plan
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('pc(check): has allocator='.(int)function_exists('\\PaintCore\\Stock\\pc_compute_and_stamp_item_plan'));
+        }
 
         foreach ($items as $ci) {
             $product = $ci['data'] ?? null;
@@ -138,6 +161,7 @@ class CartToDraft
             if ($qty <= 0) continue;
 
             $item_args = [];
+            // Preserve totals where possible (unit price * qty)
             if (isset($ci['line_total'], $ci['line_subtotal']) && $qty > 0) {
                 $unit = (float)$ci['line_total'] / (float)$qty;
                 if ($unit > 0) {
@@ -151,7 +175,7 @@ class CartToDraft
                 if ($item_id) {
                     $item = $order->get_item($item_id);
                     if ($item instanceof \WC_Order_Item_Product) {
-                        // ← СТАВИМ ШТАМП ТУТ ЖЕ
+                        // Stamp allocation plan right away
                         \PaintCore\Stock\pc_compute_and_stamp_item_plan(
                             $item,
                             $product,
@@ -159,13 +183,20 @@ class CartToDraft
                             'cart-to-draft'
                         );
                         $item->save();
-                        error_log('pc(plan): cart2draft order='.$order->get_id()
-                            .' pid='.$product->get_id()
-                            .' qty='.(int)$qty);
+
+                        if (defined('WP_DEBUG') && WP_DEBUG) {
+                            error_log(
+                                'pc(plan): cart2draft order='.$order->get_id()
+                                .' pid='.$product->get_id()
+                                .' qty='.(int)$qty
+                            );
+                        }
                     }
                 }
             } catch (\Throwable $e) {
-                error_log('pc(plan-err): '.$e->getMessage());
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('pc(plan-err): '.$e->getMessage());
+                }
             }
         }
 
@@ -174,10 +205,10 @@ class CartToDraft
 
         $order_id = (int) $order->get_id();
 
-        // Міняємо LOCK на створений ID (другий клік піде сюди вище)
+        // Switch LOCK to created ID (subsequent click will reuse it)
         set_transient($lock_key, $order_id, 30);
 
-        // 6) ЧИСТИМО КОШИК (жорстко, включно з persistent)
+        // 6) Clear the cart (hard, including persistent)
         if ( WC()->cart ) {
             WC()->cart->empty_cart(true);
             if ( WC()->session ) {
@@ -192,22 +223,21 @@ class CartToDraft
             }
         }
 
-        // --- Куди редиректити
-        $order_id = (int) $order->get_id();
+        // --- Where to redirect
         $dest = isset($_REQUEST['dest']) ? sanitize_key((string) $_REQUEST['dest']) : 'orders';
 
         if ($dest === 'admin') {
             $redirect = admin_url('post.php?post='.$order_id.'&action=edit');
         } elseif ($dest === 'view') {
             $redirect = self::customer_view_link($order) ?: wc_get_account_endpoint_url('orders');
-        } else { // 'orders' за замовчуванням
+        } else { // default: 'orders'
             $redirect = wc_get_account_endpoint_url('orders');
         }
 
         self::redirect_now($redirect);
     }
 
-    /** Посилання «Переглянути замовлення» для власника */
+    /** "View order" link for the owner */
     protected static function customer_view_link(WC_Order $order): string
     {
         $uid = get_current_user_id();
