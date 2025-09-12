@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Paint Core 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/paint-core\n"
-"POT-Creation-Date: 2025-09-11T20:58:11+00:00\n"
+"POT-Creation-Date: 2025-09-12T20:00:35+00:00\n"
 "Language: uk\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -62,55 +62,55 @@ msgstr "З пріоритетом обраного"
 msgid "Only selected location"
 msgstr "Лише обраний склад"
 
-#: inc/header-allocation-switcher.php:163 inc/order-attach-csv.php:186
-#: inc/order-attach-csv.php:194
+#: inc/header-allocation-switcher.php:163 inc/order-attach-csv.php:113
+#: inc/order-attach-csv.php:121
 msgid "Location"
 msgstr "Склад"
 
-#: inc/order-allocator.php:100 inc/sku-gtin-front-emails.php:75
-msgid "Warehouse"
-msgstr "Склад"
-
-#: inc/order-allocator.php:158
+#: inc/order-allocator.php:179
 msgid "Build stock allocation plan"
 msgstr "Створити план списання"
 
-#: inc/order-allocator.php:159
+#: inc/order-allocator.php:180
 msgid "Reduce stock from plan"
 msgstr "Списати за планом"
 
-#: inc/order-allocator.php:160
+#: inc/order-allocator.php:181
 msgid "Restore stock from plan"
 msgstr "Повернути за планом"
 
-#: inc/order-attach-csv.php:182 inc/order-attach-csv.php:190
+#: inc/order-attach-csv.php:109 inc/order-attach-csv.php:117
 #: inc/sku-gtin-admin-columns.php:29 inc/sku-gtin-admin-columns.php:34
 msgid "SKU"
 msgstr "Артикль"
 
-#: inc/order-attach-csv.php:183 inc/order-attach-csv.php:191
+#: inc/order-attach-csv.php:110 inc/order-attach-csv.php:118
 #: inc/sku-gtin-admin-columns.php:30 inc/sku-gtin-admin-columns.php:35
 #: inc/sku-gtin-admin-columns.php:159
 msgid "GTIN"
 msgstr "Штрих код"
 
-#: inc/order-attach-csv.php:184 inc/order-attach-csv.php:192
+#: inc/order-attach-csv.php:111 inc/order-attach-csv.php:119
 msgid "Quantity"
 msgstr "Кількість"
 
-#: inc/order-attach-csv.php:185 inc/order-attach-csv.php:193
+#: inc/order-attach-csv.php:112 inc/order-attach-csv.php:120
 msgid "Price"
 msgstr "Ціна"
 
-#: inc/order-attach-csv.php:187
+#: inc/order-attach-csv.php:114
 msgid "Notes"
 msgstr "Примітки"
 
 # translators: %s is a human-readable stock allocation like "Одеса — 3, Київ — 1"
-#: inc/order-attach-csv.php:270
+#: inc/order-attach-csv.php:197
 #, php-format
 msgid "Write-off: %s"
 msgstr "Списання: %s"
+
+#: inc/stock-locations-display.php:213 inc/stock-locations-display.php:216
+msgid "Warehouse"
+msgstr "Склад"
 
 #~ msgid "In cart"
 #~ msgstr "У кошику"

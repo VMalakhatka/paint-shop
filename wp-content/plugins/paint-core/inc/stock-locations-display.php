@@ -206,17 +206,14 @@ function pc_render_item_location_label( $item ) {
 add_action('woocommerce_order_item_meta_end', function($item_id, $item, $order, $plain){
     $label = pc_render_item_location_label($item);
 
-    // >>> DEBUG
-    if ($label === '') { $label = '[NO PLAN]'; }
-    // <<< DEBUG
-
     if (!$label) return;
 
     if ($plain) {
-        echo "\n".__('Warehouse','paint-core').': '.$label."\n";
+        // plain-text (например, письма без HTML)
+        echo "\n".esc_html__('Warehouse','paint-core').': '.$label."\n";
     } else {
         echo '<div class="wc-item-loc" style="font-size:12px;color:#555;margin-top:2px">'
-           . esc_html__('Склад','woocommerce') . ': ' . esc_html($label)
+           . esc_html__('Warehouse','paint-core') . ': ' . esc_html($label)
            . '</div>';
     }
 }, 10, 4);
