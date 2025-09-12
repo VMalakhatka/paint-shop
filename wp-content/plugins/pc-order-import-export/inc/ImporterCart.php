@@ -15,13 +15,13 @@ class ImporterCart
     public static function handle()
     {
         if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'pcoe_import_cart')) {
-            wp_send_json_error(['msg' => 'Bad nonce'], 403);
+            wp_send_json_error(['msg' => esc_html__( 'Security check failed (bad nonce).', 'pc-order-import-export' )], 403);
         }
         if (!function_exists('WC') || !WC()->cart) {
-            wp_send_json_error(['msg' => 'Cart not available'], 400);
+            wp_send_json_error(['msg' => esc_html__( 'Cart is not available.', 'pc-order-import-export' )], 400);
         }
         if (empty($_FILES['file']['tmp_name'])) {
-            wp_send_json_error(['msg' => 'Файл не передано'], 400);
+            wp_send_json_error(['msg' => esc_html__( 'No file was uploaded.', 'pc-order-import-export' )], 400);
         }
 
         // Прогреваем сессию/корзину, чтобы первый AJAX не терял позиции
@@ -39,7 +39,7 @@ class ImporterCart
 
         [$rows, $err] = Helpers::read_rows($tmp, $name);
         if ($err)  wp_send_json_error(['msg' => $err], 400);
-        if (!$rows) wp_send_json_error(['msg' => 'Порожній файл або невірний формат'], 400);
+        if (!$rows) wp_send_json_error(['msg' => esc_html__( 'Empty file or invalid format.', 'pc-order-import-export' )], 400);
 
         [$map, $start] = Helpers::detect_colmap_and_start($rows);
 
@@ -52,8 +52,8 @@ class ImporterCart
         };
 
         $res = Helpers::process_rows_with_adder($rows, $map, $start, [
-            'allow_price' => false,            // ціну з файлу НЕ враховуємо в кошику
-            'ok_label'    => 'Додано',         // текст у звіті
+            'allow_price' => false,                                    // ціну з файлу НЕ враховуємо в кошику
+            'ok_label'    => esc_html__( 'Added', 'pc-order-import-export' ), // текст у звіті
             'adder'       => $adder,
         ]);
 

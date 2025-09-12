@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: PC Order Import/Export 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/pc-order-import-"
 "export\n"
-"POT-Creation-Date: 2025-09-12T21:05:57+00:00\n"
+"POT-Creation-Date: 2025-09-12T21:12:01+00:00\n"
 "PO-Revision-Date: 2025-09-11 00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -29,10 +29,11 @@ msgstr ""
 "WooCommerce."
 
 #: inc/CartToDraft.php:82 inc/DraftToCart.php:32 inc/Exporter.php:10
+#: inc/ImporterCart.php:18
 msgid "Security check failed (bad nonce)."
 msgstr "Помилка перевірки безпеки (невірний ключ)."
 
-#: inc/CartToDraft.php:90
+#: inc/CartToDraft.php:90 inc/ImporterCart.php:21
 msgid "Cart is not available."
 msgstr "Кошик недоступний."
 
@@ -121,3 +122,15 @@ msgstr "замовлення"
 #: inc/Helpers.php:25
 msgid "XLSX is unavailable (PhpSpreadsheet not found) - saved as CSV."
 msgstr "XLSX недоступний (PhpSpreadsheet не знайдено) — збережено як CSV."
+
+#: inc/ImporterCart.php:24
+msgid "No file was uploaded."
+msgstr "Файл не було завантажено."
+
+#: inc/ImporterCart.php:42
+msgid "Empty file or invalid format."
+msgstr "Порожній файл або невірний формат."
+
+#: inc/ImporterCart.php:56
+msgid "Added"
+msgstr "Додано"
