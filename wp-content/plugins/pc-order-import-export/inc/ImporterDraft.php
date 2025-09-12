@@ -5,13 +5,13 @@ use WC_Order;
 use WC_Product;
 
 defined('ABSPATH') || exit;
+
 // гарантируем наличие нужных хелперов
 if (!function_exists('\\PaintCore\\Stock\\pc_compute_and_stamp_item_plan')
     || !function_exists('\\PaintCore\\Stock\\stamp_item_plan')) {
     require_once WP_PLUGIN_DIR . '/paint-core/inc/order-allocator.php';
 }
 
-// >>> ДОБАВЬ ЭТО: калькулятор плана
 // Калькулятор плана (верная проверка с неймспейсом)
 if (!function_exists('\\PaintCore\\Stock\\pc_calc_plan_for')) {
     require_once WP_PLUGIN_DIR . '/paint-core/inc/header-allocation-switcher.php';
@@ -19,17 +19,21 @@ if (!function_exists('\\PaintCore\\Stock\\pc_calc_plan_for')) {
 
 class ImporterDraft
 {
-   /** Зареєструвати статус замовлення "Чернетка (імпорт)" */
+    /** Зарегистрировать статус заказа «Черновик (импорт)» */
     public static function register_status()
     {
         add_action('init', function () {
             register_post_status('wc-pc-draft', [
-                'label'                     => 'Чернетка (імпорт)',
+                'label'                     => __('Draft (import)', 'pc-order-import-export'),
                 'public'                    => false,
                 'exclude_from_search'       => true,
                 'show_in_admin_all_list'    => true,
                 'show_in_admin_status_list' => true,
-                'label_count'               => _n_noop('Чернетка (імпорт) <span class="count">(%s)</span>', 'Чернетка (імпорт) <span class="count">(%s)</span>'),
+                'label_count'               => _n_noop(
+                    'Draft (import) <span class="count">(%s)</span>',
+                    'Draft (import) <span class="count">(%s)</span>',
+                    'pc-order-import-export'
+                ),
             ]);
         });
 
@@ -38,17 +42,17 @@ class ImporterDraft
             foreach ($st as $k => $label) {
                 $new[$k] = $label;
                 if ($k === 'wc-pending') {
-                    $new['wc-pc-draft'] = 'Чернетка (імпорт)';
+                    $new['wc-pc-draft'] = __('Draft (import)', 'pc-order-import-export');
                 }
             }
             if (!isset($new['wc-pc-draft'])) {
-                $new['wc-pc-draft'] = 'Чернетка (імпорт)';
+                $new['wc-pc-draft'] = __('Draft (import)', 'pc-order-import-export');
             }
             return $new;
         });
     }
 
-    /** Відрубити усі емейли для статусу pc-draft */
+    /** Отключить все письма для статуса pc-draft */
     public static function mute_emails_for_drafts()
     {
         $ids = [
@@ -60,6 +64,7 @@ class ImporterDraft
         foreach ($ids as $eid) {
             add_filter("woocommerce_email_enabled_{$eid}", function ($enabled, $order) {
                 if ($order instanceof WC_Order) {
+                    // WooCommerce хранит статус как 'pc-draft' без префикса 'wc-'
                     if ($order->has_status('pc-draft') || $order->get_status() === 'pc-draft') {
                         return false;
                     }
@@ -70,17 +75,17 @@ class ImporterDraft
     }
 
     /**
-     * AJAX: імпорт у ЧЕРНЕТКУ замовлення
+     * AJAX: импорт в ЧЕРНОВИК заказа
      * action: pcoe_import_order_draft
      * nonce:  pcoe_import_draft
      */
     public static function handle()
     {
         if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'pcoe_import_draft')) {
-            wp_send_json_error(['msg' => 'Bad nonce'], 403);
+            wp_send_json_error(['msg' => esc_html__('Security check failed (bad nonce).', 'pc-order-import-export')], 403);
         }
         if (empty($_FILES['file']['tmp_name'])) {
-            wp_send_json_error(['msg' => 'Файл не передано'], 400);
+            wp_send_json_error(['msg' => esc_html__('No file was uploaded.', 'pc-order-import-export')], 400);
         }
 
         $tmp  = (string) $_FILES['file']['tmp_name'];
@@ -88,20 +93,20 @@ class ImporterDraft
 
         [$rows, $err] = Helpers::read_rows($tmp, $name);
         if ($err)  wp_send_json_error(['msg' => $err], 400);
-        if (!$rows) wp_send_json_error(['msg' => 'Порожній файл або невірний формат'], 400);
+        if (!$rows) wp_send_json_error(['msg' => esc_html__('Empty file or invalid format.', 'pc-order-import-export')], 400);
 
         [$map, $start] = Helpers::detect_colmap_and_start($rows);
 
-        // создаём чернетку
+        // создаём черновик
         $order = wc_create_order([
             'status'      => 'wc-pc-draft',
             'customer_id' => get_current_user_id() ?: 0,
         ]);
         if (!($order instanceof \WC_Order)) {
-            wp_send_json_error(['msg' => 'Не вдалося створити чернетку замовлення'], 500);
+            wp_send_json_error(['msg' => esc_html__('Failed to create draft order.', 'pc-order-import-export')], 500);
         }
 
-        // adder для чернетки: додаємо позиції і одразу штампуємо план списання
+        // adder для черновика: добавляем позиции и сразу штампуем план списания
         $adder = function(\WC_Product $product, float $qty, ?float $price, array &$errExtra) use ($order): bool {
             $item_data = [];
             if ($price !== null) {
@@ -114,18 +119,17 @@ class ImporterDraft
 
                 $item = $order->get_item($item_id);
                 if ($item instanceof \WC_Order_Item_Product) {
-                    // Единая точка: посчитать и проштамповать (правильная сигнатура)
+                    // Единая точка: посчитать и проштамповать
                     \PaintCore\Stock\pc_compute_and_stamp_item_plan(
                         $item,
                         'import-draft',
                         [
-                            // на время дебага можно зафиксировать предпочтительный склад:
-                            // 'preferred_location' => 3942,
+                            // 'preferred_location' => 3942, // пример: фиксировать приоритетный склад
                         ]
                     );
-                    // Сохранить меты позиции+                    
                     $item->save();
-                    // Лог для проверки, что мета реально записалась
+
+                    // DEBUG-лог для проверки меты (при необходимости можно удалить)
                     $plan_meta = $item->get_meta('_pc_alloc_plan', true);
                     error_log('pc(plan): ctx=import-draft pid=' . $product->get_id() .
                         ' qty=' . (int)$qty . ' plan=' . json_encode($plan_meta, JSON_UNESCAPED_UNICODE));
@@ -140,14 +144,14 @@ class ImporterDraft
         };
 
         $res = Helpers::process_rows_with_adder($rows, $map, $start, [
-            'allow_price' => true,                 // чернетка може приймати ціну з файлу
-            'ok_label'    => 'Додано у чернетку',  // текст у звіті
+            'allow_price' => true,                                                // черновик может принимать цену из файла
+            'ok_label'    => esc_html__('Added to draft', 'pc-order-import-export'),
             'adder'       => $adder,
         ]);
 
         try { $order->calculate_totals(false); } catch (\Throwable $e) {}
 
-        // лінки + заголовок, як у тебе було
+        // ссылки + заголовок
         $order_id = $order->get_id();
         $links = [
             'edit' => (current_user_can('edit_shop_orders') ? admin_url('post.php?post='.$order_id.'&action=edit') : ''),
@@ -171,7 +175,7 @@ class ImporterDraft
             'links'       => $links,
         ]);
     }
-    
+
     protected static function customer_view_link(WC_Order $order): string
     {
         $uid = get_current_user_id();

@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: PC Order Import/Export 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/pc-order-import-"
 "export\n"
-"POT-Creation-Date: 2025-09-12T21:12:01+00:00\n"
+"POT-Creation-Date: 2025-09-12T21:21:08+00:00\n"
 "PO-Revision-Date: 2025-09-11 00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -29,7 +29,7 @@ msgstr ""
 "WooCommerce."
 
 #: inc/CartToDraft.php:82 inc/DraftToCart.php:32 inc/Exporter.php:10
-#: inc/ImporterCart.php:18
+#: inc/ImporterCart.php:18 inc/ImporterDraft.php:85
 msgid "Security check failed (bad nonce)."
 msgstr "Ошибка проверки безопасности (неверный ключ)."
 
@@ -123,14 +123,34 @@ msgstr "заказ"
 msgid "XLSX is unavailable (PhpSpreadsheet not found) - saved as CSV."
 msgstr "XLSX недоступен (PhpSpreadsheet не найден) — сохранено как CSV."
 
-#: inc/ImporterCart.php:24
+#: inc/ImporterCart.php:24 inc/ImporterDraft.php:88
 msgid "No file was uploaded."
 msgstr "Файл не был загружен."
 
-#: inc/ImporterCart.php:42
+#: inc/ImporterCart.php:42 inc/ImporterDraft.php:96
 msgid "Empty file or invalid format."
 msgstr "Файл пустой или неверный формат."
 
 #: inc/ImporterCart.php:56
 msgid "Added"
 msgstr "Добавлено"
+
+#: inc/ImporterDraft.php:27 inc/ImporterDraft.php:45 inc/ImporterDraft.php:49
+msgid "Draft (import)"
+msgstr "Черновик (импорт)"
+
+#: inc/ImporterDraft.php:32
+#, php-format
+msgid "Draft (import) <span class=\"count\">(%s)</span>"
+msgid_plural "Draft (import) <span class=\"count\">(%s)</span>"
+msgstr[0] "Черновик (импорт) <span class=\"count\">(%s)</span>"
+msgstr[1] "Черновики (импорт) <span class=\"count\">(%s)</span>"
+
+#: inc/ImporterDraft.php:106
+#, fuzzy
+msgid "Failed to create draft order."
+msgstr "Не удалось создать черновик заказа."
+
+#: inc/ImporterDraft.php:148
+msgid "Added to draft"
+msgstr "Добавлено в черновик"
