@@ -19,8 +19,18 @@ add_filter('pc_disable_legacy_cart_locations', '__return_true');
 
 if (!defined('PC_CART_GUARD_DEBUG')) {
     // Увімк./вимк. детальне логування тут:
-    define('PC_CART_GUARD_DEBUG', true);
+    define('PC_CART_GUARD_DEBUG', false);
 }
+
+// Тумблеры отображения (можно переопределить фильтрами из темы/плагина)
+//if (!has_filter('pc_cart_show_plan'))        add_filter('pc_cart_show_plan',        '__return_true');  // "Списання: Одеса — 3, ..."
+if (!has_filter('pc_cart_show_stock_panel')) add_filter('pc_cart_show_stock_panel', '__return_true');  // зелёная мини-панель
+add_filter('pc_cart_show_plan',        '__return_false'); // скрыть строку плана над зеленой    
+
+/*
+add_filter('pc_cart_show_plan',        '__return_false'); // скрыть строку плана над зеленой 
+add_filter('pc_cart_show_stock_panel', '__return_false'); // скрыть зелёную панель
+*/
 
 function pc_cg_log($msg){
     if (!PC_CART_GUARD_DEBUG) return;
@@ -197,32 +207,17 @@ add_action('wp_ajax_nopriv_pc_cart_item_extras', 'pc_cart_item_extras');
 
 function pc_cart_item_extras(){
     if (!function_exists('WC')) wp_send_json_error(['msg'=>'no wc']);
-
-    $cart = WC()->cart;
-    if (!$cart) wp_send_json_error(['msg'=>'no cart']);
+    $cart = WC()->cart; if (!$cart) wp_send_json_error(['msg'=>'no cart']);
 
     $out = [];
     foreach ($cart->get_cart() as $item_key => $item){
-        $product = isset($item['data']) ? $item['data'] : null;
-        if (!$product instanceof WC_Product) continue;
+        $product = $item['data'] ?? null; if (!$product instanceof WC_Product) continue;
+        $qty     = (int) ($item['quantity'] ?? 0);
 
-        $pid = $product->get_id();
-        $qty = (int) ($item['quantity'] ?? 0);
-/*
-        // План списання
-        $loc_title = '';
-        if (function_exists('pc_build_stock_view')) {
-            $view = pc_build_stock_view($product);
-            if (!empty($view['preferred_name'])) $loc_title = (string) $view['preferred_name'];
-        } elseif (function_exists('slu_current_location_title')) {
-            $loc_title = (string) slu_current_location_title();
-        }
-       $plan_html = pc_cartguard_render_plan_html($product, $qty);*/
-
-
+        $plan_html   = apply_filters('pc_cart_show_plan', true)        ? pc_cartguard_render_plan_html($product, $qty) : '';
         $stocks_html = '';
 
-        if (function_exists('slu_render_stock_panel')) {
+        if (apply_filters('pc_cart_show_stock_panel', true) && function_exists('slu_render_stock_panel')) {
             $panel = (string) slu_render_stock_panel($product, [
                 'wrap_class'       => 'slu-stock-mini',
                 'show_primary'     => true,
@@ -230,25 +225,23 @@ function pc_cart_item_extras(){
                 'show_total'       => true,
                 'hide_when_zero'   => false,
                 'show_incart'      => true,
-                'show_incart_plan' => true,
+                'show_incart_plan' => false,
             ]);
             $stocks_html = '<div class="pc-cart-stocks" style="margin:.15rem 0 0">'.$panel.'</div>';
         }
 
-        // ВОТ ЭТОГО НЕ ХВАТАЛО:
         $allowed = pc_cartguard_get_allowed_qty_for_cart($product, $qty);
 
-            $out[] = [
-                'product_id'   => $pid,
-                'name'         => $product->get_name(),
-                'permalink'    => $product->get_permalink(),
-                'sku'       => $product->get_sku(),       // (опционально, если полезно)
-                'plan_html'    => $plan_html,
-                'stocks_html'  => $stocks_html,
-                'allowed_max'  => (int) $allowed,
-            ]; 
+        $out[] = [
+            'product_id'   => $product->get_id(),
+            'name'         => $product->get_name(),
+            'permalink'    => $product->get_permalink(),
+            'sku'          => $product->get_sku(),
+            'plan_html'    => $plan_html,
+            'stocks_html'  => $stocks_html,
+            'allowed_max'  => (int) $allowed,
+        ];
     }
-
     wp_send_json_success(['items'=>$out]);
 }
 
@@ -438,23 +431,30 @@ add_action('wp_print_scripts', function(){
  * Вивід під назвою позиції: «Списання…» + міні-склади.
  * Робимо через ФІЛЬТР — він гарантовано в cart/cart.php
  */
+// Рисуем ПЛАН и мини-панель ОДИН раз, в самом конце цепочки фильтров.
 add_filter('woocommerce_cart_item_name', function ($name, $cart_item, $cart_item_key) {
-    $product = isset($cart_item['data']) ? $cart_item['data'] : null;
+    $product = $cart_item['data'] ?? null;
     if (!$product instanceof WC_Product) return $name;
 
     $qty = (int) ($cart_item['quantity'] ?? 0);
 
-    // 1) Сносим любые уже вставленные «мини-ярлыки» (кем бы они ни были добавлены)
-    //    Ищем <div class="pc-cart-plan">...</div> и вырезаем.
-    $clean_name = preg_replace('~<div\s+class=["\']pc-cart-plan["\'][\s\S]*?</div>~i', '', (string)$name);
+    // 1) СНОСИМ любые уже добавленные планы чужими хуками (и нашими прежними)
+    $clean = (string) $name;
+    // наши/чужие блоки с классом pc-cart-plan
+    $clean = preg_replace('~<div\s+class=(["\']).*?\bpc-cart-plan\b.*?\1[\s\S]*?</div>~iu', '', $clean);
+    // подстраховка: “Списан(ня|ие): …” без класса (если кто-то выводит голым HTML)
+    $clean = preg_replace('~\s*(Списан(?:ня|ие)\s*:\s*.*?)(<br\s*/?>|</p>|</div>|$)~iu', '$2', $clean);
 
-    // 2) НЕ добавляем наш мини-ярлык
-    // $plan_html = pc_cartguard_render_plan_html($product, $qty);
-    $plan_html = '';
+    // 2) Собираем наш вывод
+    $html = '';
 
-    // 3) Панель складов (информативная, как на «фото 3»)
-    $stocks_html = '';
-    if (function_exists('slu_render_stock_panel')) {
+    // — строка ПЛАНА
+    if (apply_filters('pc_cart_show_plan', true)) {
+        $html .= pc_cartguard_render_plan_html($product, $qty);
+    }
+
+    // — зелёная мини-панель складов
+    if (apply_filters('pc_cart_show_stock_panel', true) && function_exists('slu_render_stock_panel')) {
         $panel = (string) slu_render_stock_panel($product, [
             'wrap_class'       => 'slu-stock-mini',
             'show_primary'     => true,
@@ -462,22 +462,13 @@ add_filter('woocommerce_cart_item_name', function ($name, $cart_item, $cart_item
             'show_total'       => true,
             'hide_when_zero'   => false,
             'show_incart'      => true,
-            'show_incart_plan' => false,   // <<< включаем строку «Списання» ВНУТРИ панели
-            // иногда помогает явно проставить контекст:
-            'context'          => 'cart',
+            'show_incart_plan' => false, // это только внутренний флаг панели, строку плана рисуем сами
         ]);
-        if ($panel !== '') {
-            $stocks_html = '<div class="pc-cart-stocks" style="margin:.15rem 0 0">'.$panel.'</div>';
-            pc_cg_log('stocks: html_len='.strlen($panel));
-        } else {
-            pc_cg_log('stocks: panel empty');
-        }
-    } else {
-        pc_cg_log('stocks: slu_render_stock_panel not exists');
+        $html .= '<div class="pc-cart-stocks" style="margin:.15rem 0 0">'.$panel.'</div>';
     }
 
-    return $clean_name . $plan_html . $stocks_html;
-}, 20, 3);
+    return $clean . $html;
+}, 9999, 3);
 
 /**
  * Малюємо qty-інпут із правильними max/step + data-allowed (для JS).
