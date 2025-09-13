@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: PC Order Import/Export 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/pc-order-import-"
 "export\n"
-"POT-Creation-Date: 2025-09-13T14:01:39+00:00\n"
+"POT-Creation-Date: 2025-09-13T14:20:37+00:00\n"
 "PO-Revision-Date: 2025-09-11 00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -123,154 +123,178 @@ msgstr "заказ"
 msgid "XLSX is unavailable (PhpSpreadsheet not found) - saved as CSV."
 msgstr "XLSX недоступен (PhpSpreadsheet не найден) — сохранено как CSV."
 
-#: inc/Helpers.php:101
+#: inc/Helpers.php:109
 msgctxt "CSV header: SKU"
 msgid "SKU"
 msgstr "SKU"
 
-#: inc/Helpers.php:102
+#: inc/Helpers.php:110
 msgctxt "CSV header: SKU"
 msgid "Article"
 msgstr "Артикул"
 
-#: inc/Helpers.php:103
+#: inc/Helpers.php:111
 msgctxt "CSV header: SKU"
 msgid "Артикул"
 msgstr "Артикул"
 
-#: inc/Helpers.php:104
+#: inc/Helpers.php:112
 msgctxt "CSV header: SKU"
 msgid "Артикль"
 msgstr "Артикль"
 
-#: inc/Helpers.php:105
+#: inc/Helpers.php:113
 msgctxt "CSV header: SKU"
 msgid "Код"
 msgstr "Код"
 
-#: inc/Helpers.php:106
+#: inc/Helpers.php:114
 msgctxt "CSV header: SKU"
 msgid "Код товара"
 msgstr "Код товара"
 
-#: inc/Helpers.php:107
+#: inc/Helpers.php:115
 msgctxt "CSV header: SKU"
 msgid "Код продукту"
 msgstr "Код продукта"
 
-#: inc/Helpers.php:111
+#: inc/Helpers.php:119
 msgctxt "CSV header: GTIN"
 msgid "Barcode"
 msgstr "Штрих-код"
 
-#: inc/Helpers.php:112
+#: inc/Helpers.php:120
 msgctxt "CSV header: GTIN"
 msgid "Штрих код"
 msgstr "Штрих код"
 
-#: inc/Helpers.php:113
+#: inc/Helpers.php:121
 msgctxt "CSV header: GTIN"
 msgid "Штрих-код"
 msgstr "Штрих-код"
 
-#: inc/Helpers.php:114
+#: inc/Helpers.php:122
 msgctxt "CSV header: GTIN"
 msgid "Штрихкод"
 msgstr "Штрихкод"
 
-#: inc/Helpers.php:116
+#: inc/Helpers.php:124
 msgctxt "CSV header: GTIN"
 msgid "Шрих код"
 msgstr "Шрих код"
 
-#: inc/Helpers.php:117
+#: inc/Helpers.php:125
 msgctxt "CSV header: GTIN"
 msgid "Шрих-код"
 msgstr "Шрих-код"
 
-#: inc/Helpers.php:118
+#: inc/Helpers.php:126
 msgctxt "CSV header: GTIN"
 msgid "Шрихкод"
 msgstr "Шрихкод"
 
-#: inc/Helpers.php:122
+#: inc/Helpers.php:130
 msgctxt "CSV header: QTY"
 msgid "Количество"
 msgstr "Количество"
 
-#: inc/Helpers.php:123
+#: inc/Helpers.php:131
 msgctxt "CSV header: QTY"
 msgid "К-во"
 msgstr "К-во"
 
-#: inc/Helpers.php:124
+#: inc/Helpers.php:132
 msgctxt "CSV header: QTY"
 msgid "К-сть"
 msgstr "К-во"
 
-#: inc/Helpers.php:125
+#: inc/Helpers.php:133
 msgctxt "CSV header: QTY"
 msgid "Кількість"
 msgstr "Количество"
 
-#: inc/Helpers.php:129
+#: inc/Helpers.php:134
+msgctxt "CSV header: QTY"
+msgid "шт"
+msgstr "шт"
+
+#: inc/Helpers.php:135
+msgctxt "CSV header: QTY"
+msgid "pcs"
+msgstr "шт."
+
+#: inc/Helpers.php:136
+msgctxt "CSV header: QTY"
+msgid "pieces"
+msgstr "штуки"
+
+#: inc/Helpers.php:140
 msgctxt "CSV header: PRICE"
 msgid "Цена"
 msgstr "Цена"
 
-#: inc/Helpers.php:130
+#: inc/Helpers.php:141
 msgctxt "CSV header: PRICE"
 msgid "Вартість"
 msgstr "Стоимость"
 
-#: inc/Helpers.php:131
+#: inc/Helpers.php:142
 msgctxt "CSV header: PRICE"
 msgid "Цiна"
 msgstr "Цена"
 
-#: inc/Helpers.php:132
+#: inc/Helpers.php:143
 msgctxt "CSV header: PRICE"
 msgid "Ціна"
 msgstr "Цена"
 
-#: inc/Helpers.php:263
+#: inc/Helpers.php:144
+msgctxt "CSV header: PRICE"
+msgid "Ціна за одиницю"
+msgstr "Цена за единицу"
+
+#: inc/Helpers.php:287
 #, php-format
 msgid "Failed to read XLS(X): %s"
 msgstr "Не удалось прочитать XLS(X): %s"
 
-#: inc/Helpers.php:268
+#: inc/Helpers.php:292
 msgid "XLSX support is unavailable on this server. Please use CSV."
 msgstr "Поддержка XLSX недоступна на этом сервере. Используйте CSV."
 
-#: inc/Helpers.php:354
+#: inc/Helpers.php:378
 msgid "Failed to read the file."
 msgstr "Не удалось прочитать файл."
 
-#: inc/Helpers.php:436
+#: inc/Helpers.php:460
 msgid "Row"
 msgstr "Строка"
 
-#: inc/Helpers.php:437
+#: inc/Helpers.php:461
 msgid "Status"
 msgstr "Статус"
 
-#: inc/Helpers.php:438
+#: inc/Helpers.php:462
 msgid "Message"
 msgstr "Сообщение"
 
-#: inc/Helpers.php:497
+#: inc/Helpers.php:508
+msgid "Internal error: adder is not set"
+msgstr "Внутренняя ошибка: adder не задан"
+
+#: inc/Helpers.php:523
 msgid "Quantity ≤ 0"
 msgstr "Количество ≤ 0"
 
-#: inc/Helpers.php:504
+#: inc/Helpers.php:530
 msgid "Product not found by SKU/GTIN"
 msgstr "Товар не найден по Артиклю/Штрих-коду"
 
-#: inc/Helpers.php:511
+#: inc/Helpers.php:537
 msgid "Product is unavailable"
 msgstr "Товар недоступен"
 
-#: inc/Helpers.php:536
+#: inc/Helpers.php:562
 msgid "Failed to add"
 msgstr "Не удалось добавить"
 

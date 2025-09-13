@@ -93,57 +93,72 @@ class Helpers {
         return $s;
     }
 
-/** Транслируемые синонимы заголовков CSV (локализуемые) */
-public static function header_synonyms(): array {
-    // ВАЖНО: каждый вариант прогоним через self::norm ниже, поэтому пишем «нормальные» формы
-    $sku  = [
-        'sku',
-        _x('SKU',        'CSV header: SKU',   'pc-order-import-export'),
-        _x('Article',    'CSV header: SKU',   'pc-order-import-export'),
-        _x('Артикул',    'CSV header: SKU',   'pc-order-import-export'),
-        _x('Артикль',    'CSV header: SKU',   'pc-order-import-export'),
-        _x('Код',        'CSV header: SKU',   'pc-order-import-export'),
-        _x('Код товара', 'CSV header: SKU',   'pc-order-import-export'),
-        _x('Код продукту','CSV header: SKU',  'pc-order-import-export'),
-    ];
-    $gtin = [
-        'gtin','ean','upc',
-        _x('Barcode',    'CSV header: GTIN',  'pc-order-import-export'),
-        _x('Штрих код',  'CSV header: GTIN',  'pc-order-import-export'),
-        _x('Штрих-код',  'CSV header: GTIN',  'pc-order-import-export'),
-        _x('Штрихкод',   'CSV header: GTIN',  'pc-order-import-export'),
-        // опечатки пусть живут тоже:
-        _x('Шрих код',   'CSV header: GTIN',  'pc-order-import-export'),
-        _x('Шрих-код',   'CSV header: GTIN',  'pc-order-import-export'),
-        _x('Шрихкод',    'CSV header: GTIN',  'pc-order-import-export'),
-    ];
-    $qty  = [
-        'qty','quantity',
-        _x('Количество', 'CSV header: QTY',   'pc-order-import-export'),
-        _x('К-во',       'CSV header: QTY',   'pc-order-import-export'),
-        _x('К-сть',      'CSV header: QTY',   'pc-order-import-export'),
-        _x('Кількість',  'CSV header: QTY',   'pc-order-import-export'),
-    ];
-    $price= [
-        'price',
-        _x('Цена',       'CSV header: PRICE', 'pc-order-import-export'),
-        _x('Вартість',   'CSV header: PRICE', 'pc-order-import-export'),
-        _x('Цiна',       'CSV header: PRICE', 'pc-order-import-export'),
-        _x('Ціна',       'CSV header: PRICE', 'pc-order-import-export'),
-    ];
+    /** Транслируемые синонимы заголовков CSV (локализуемые + железное ядро EN) */
+    public static function header_synonyms(): array {
+        // 0) ЖЁСТКОЕ ЯДРО (EN/INTL) — работает всегда, без i18n
+        $hard = [
+            'sku'   => ['sku','article','part number','part #','part#','mpn','model','model sku'],
+            'gtin'  => ['gtin','ean','ean13','ean-13','ean8','ean-8','upc','barcode','bar code','qr','isbn','jan'],
+            'qty'   => ['qty','qnt','quantity','q-ty','count','pcs','pieces'],
+            // важно: не добавляем сюда "amount/subtotal/total", чтобы не путать с общей суммой
+            'price' => ['price','unit price','unitprice','cost'],
+        ];
 
-    // нормализуем так же, как и заголовок файла
-    $norm = function(array $arr){ return array_values(array_unique(array_map([__CLASS__,'norm'], $arr))); };
+        // 1) Локализуемые дополнения (через _x) — можно расширять в .po
+        $sku  = array_merge($hard['sku'], [
+            _x('SKU',         'CSV header: SKU',   'pc-order-import-export'),
+            _x('Article',     'CSV header: SKU',   'pc-order-import-export'),
+            _x('Артикул',     'CSV header: SKU',   'pc-order-import-export'),
+            _x('Артикль',     'CSV header: SKU',   'pc-order-import-export'),
+            _x('Код',         'CSV header: SKU',   'pc-order-import-export'),
+            _x('Код товара',  'CSV header: SKU',   'pc-order-import-export'),
+            _x('Код продукту','CSV header: SKU',   'pc-order-import-export'),
+        ]);
 
-    $map = [
-        'sku'   => $norm($sku),
-        'gtin'  => $norm($gtin),
-        'qty'   => $norm($qty),
-        'price' => $norm($price),
-    ];
+        $gtin = array_merge($hard['gtin'], [
+            _x('Barcode',     'CSV header: GTIN',  'pc-order-import-export'),
+            _x('Штрих код',   'CSV header: GTIN',  'pc-order-import-export'),
+            _x('Штрих-код',   'CSV header: GTIN',  'pc-order-import-export'),
+            _x('Штрихкод',    'CSV header: GTIN',  'pc-order-import-export'),
+            // опечатки:
+            _x('Шрих код',    'CSV header: GTIN',  'pc-order-import-export'),
+            _x('Шрих-код',    'CSV header: GTIN',  'pc-order-import-export'),
+            _x('Шрихкод',     'CSV header: GTIN',  'pc-order-import-export'),
+        ]);
 
-    return apply_filters('pcoe_header_synonyms', $map);
-}
+        $qty  = array_merge($hard['qty'], [
+            _x('Количество',  'CSV header: QTY',   'pc-order-import-export'),
+            _x('К-во',        'CSV header: QTY',   'pc-order-import-export'),
+            _x('К-сть',       'CSV header: QTY',   'pc-order-import-export'),
+            _x('Кількість',   'CSV header: QTY',   'pc-order-import-export'),
+            _x('шт',          'CSV header: QTY',   'pc-order-import-export'),
+            _x('pcs',         'CSV header: QTY',   'pc-order-import-export'),
+            _x('pieces',      'CSV header: QTY',   'pc-order-import-export'),
+        ]);
+
+        $price= array_merge($hard['price'], [
+            _x('Цена',        'CSV header: PRICE', 'pc-order-import-export'),
+            _x('Вартість',    'CSV header: PRICE', 'pc-order-import-export'),
+            _x('Цiна',        'CSV header: PRICE', 'pc-order-import-export'),
+            _x('Ціна',        'CSV header: PRICE', 'pc-order-import-export'),
+            _x('Ціна за одиницю','CSV header: PRICE', 'pc-order-import-export'),
+        ]);
+
+        // 2) Нормализуем как и заголовок файла
+        $norm = function(array $arr){
+            return array_values(array_unique(array_map([__CLASS__,'norm'], $arr)));
+        };
+
+        $map = [
+            'sku'   => $norm($sku),
+            'gtin'  => $norm($gtin),
+            'qty'   => $norm($qty),
+            'price' => $norm($price),
+        ];
+
+        // 3) Даём возможность проекту/темам расширять список
+        return apply_filters('pcoe_header_synonyms', $map);
+    }
 
 public static function build_colmap(array $header): array {
     // Брали «жёсткие» синонимы — теперь берём i18n-версию
