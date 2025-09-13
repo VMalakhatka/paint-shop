@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: PC Order Import/Export 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/pc-order-import-"
 "export\n"
-"POT-Creation-Date: 2025-09-13T05:41:18+00:00\n"
+"POT-Creation-Date: 2025-09-13T06:06:33+00:00\n"
 "PO-Revision-Date: 2025-09-11 00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -254,3 +254,7 @@ msgstr "Открыть в админке"
 #: inc/Ui.php:316
 msgid "View order"
 msgstr "Просмотр заказа"
+
+#: inc/Ui.php:317
+msgid "Imported"
+msgstr "Импортировано"
