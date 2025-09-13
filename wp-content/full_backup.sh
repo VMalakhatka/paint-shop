@@ -2,9 +2,9 @@
 set -euo pipefail
 
 WP=/var/www/virtuals/kreul.com.ua
-BACKUP_DIR=~/backups
+BACKUP_DIR=/mnt/backup/backups_kreul
 TS=$(date +%Y%m%d-%H%M%S)
-RETAIN=3   # сколько последних полных архивов хранить
+RETAIN=1   # сколько последних полных архивов хранить
 
 mkdir -p "$BACKUP_DIR"
 
