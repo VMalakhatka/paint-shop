@@ -87,28 +87,71 @@ class Helpers {
         $s = preg_replace('/^\xEF\xBB\xBF/u', '', $s);
 
         $s = trim(mb_strtolower($s, 'UTF-8'));
-        $s = str_replace(['ё','й','–','—','-','.’','’','“','”'], ['е','и','-','-','-','','','',''], $s);
+        $s = str_replace(['ё','–','—','-','.’','’','“','”'], ['е','-','-','-','','','',''], $s);
         $s = str_replace(['…','.’','.'], ['','',''], $s);
         $s = preg_replace('~\s+~u',' ', $s);
         return $s;
     }
 
-public static function build_colmap(array $header): array {
-    $syn = [
-        'sku' => ['sku','артикул','артикль','код','код товара','код продукту'],
-        'gtin'=> [
-            'gtin','ean','upc',
-            'штрих код','штрих-код','штрихкод',
-            'шрих код','шрих-код','шрихкод', // <- опечатки
-        ],
-        'qty' => ['qty','quantity','количество','к-во','к-сть','кількість'],
-        'price'=> ['price','цена','вартість','цiна','ціна'],
+/** Транслируемые синонимы заголовков CSV (локализуемые) */
+public static function header_synonyms(): array {
+    // ВАЖНО: каждый вариант прогоним через self::norm ниже, поэтому пишем «нормальные» формы
+    $sku  = [
+        'sku',
+        _x('SKU',        'CSV header: SKU',   'pc-order-import-export'),
+        _x('Article',    'CSV header: SKU',   'pc-order-import-export'),
+        _x('Артикул',    'CSV header: SKU',   'pc-order-import-export'),
+        _x('Артикль',    'CSV header: SKU',   'pc-order-import-export'),
+        _x('Код',        'CSV header: SKU',   'pc-order-import-export'),
+        _x('Код товара', 'CSV header: SKU',   'pc-order-import-export'),
+        _x('Код продукту','CSV header: SKU',  'pc-order-import-export'),
     ];
+    $gtin = [
+        'gtin','ean','upc',
+        _x('Barcode',    'CSV header: GTIN',  'pc-order-import-export'),
+        _x('Штрих код',  'CSV header: GTIN',  'pc-order-import-export'),
+        _x('Штрих-код',  'CSV header: GTIN',  'pc-order-import-export'),
+        _x('Штрихкод',   'CSV header: GTIN',  'pc-order-import-export'),
+        // опечатки пусть живут тоже:
+        _x('Шрих код',   'CSV header: GTIN',  'pc-order-import-export'),
+        _x('Шрих-код',   'CSV header: GTIN',  'pc-order-import-export'),
+        _x('Шрихкод',    'CSV header: GTIN',  'pc-order-import-export'),
+    ];
+    $qty  = [
+        'qty','quantity',
+        _x('Количество', 'CSV header: QTY',   'pc-order-import-export'),
+        _x('К-во',       'CSV header: QTY',   'pc-order-import-export'),
+        _x('К-сть',      'CSV header: QTY',   'pc-order-import-export'),
+        _x('Кількість',  'CSV header: QTY',   'pc-order-import-export'),
+    ];
+    $price= [
+        'price',
+        _x('Цена',       'CSV header: PRICE', 'pc-order-import-export'),
+        _x('Вартість',   'CSV header: PRICE', 'pc-order-import-export'),
+        _x('Цiна',       'CSV header: PRICE', 'pc-order-import-export'),
+        _x('Ціна',       'CSV header: PRICE', 'pc-order-import-export'),
+    ];
+
+    // нормализуем так же, как и заголовок файла
+    $norm = function(array $arr){ return array_values(array_unique(array_map([__CLASS__,'norm'], $arr))); };
+
+    $map = [
+        'sku'   => $norm($sku),
+        'gtin'  => $norm($gtin),
+        'qty'   => $norm($qty),
+        'price' => $norm($price),
+    ];
+
+    return apply_filters('pcoe_header_synonyms', $map);
+}
+
+public static function build_colmap(array $header): array {
+    // Брали «жёсткие» синонимы — теперь берём i18n-версию
+    $syn = self::header_synonyms();
 
     $map = ['sku'=>null,'gtin'=>null,'qty'=>null,'price'=>null];
     $h   = array_map([__CLASS__,'norm'], $header);
 
-    // точные совпадения
     foreach (['sku','gtin','qty','price'] as $k) {
         foreach ($syn[$k] as $want) {
             $pos = array_search($want, $h, true);
@@ -118,8 +161,17 @@ public static function build_colmap(array $header): array {
 
     // если GTIN не найден — мягкое правило: любая колонка, где встречается слово "штрих"
     if ($map['gtin'] === null) {
+        $needles = array_unique(array_merge(
+            ['штрих','barcode'],
+            array_filter(self::header_synonyms()['gtin'], fn($s) => mb_strlen($s, 'UTF-8') >= 5)
+        ));
         foreach ($h as $i => $cell) {
-            if (strpos($cell, 'штрих') !== false) { $map['gtin'] = $i; break; }
+            foreach ($needles as $needle) {
+                if (mb_strpos($cell, $needle, 0, 'UTF-8') !== false) {
+                    $map['gtin'] = $i; 
+                    break 2;
+                }
+            }
         }
     }
 
@@ -183,6 +235,28 @@ public static function build_colmap(array $header): array {
     public static function read_rows(string $tmp, string $name): array {
         $rows = [];
 
+        // --- NEW: автодетект кодировки для CSV и возможная перекодировка во временный файл
+        $prepare_csv_path = function(string $path): string {
+            $sample = @file_get_contents($path, false, null, 0, 65536);
+            if ($sample === false) return $path;
+
+            // частые кодировки: UTF-8, Windows-1251/1252, ISO-8859-1
+            $enc = mb_detect_encoding($sample, ['UTF-8','Windows-1251','Windows-1252','ISO-8859-1'], true);
+            if (!$enc) return $path;
+
+            if ($enc !== 'UTF-8') {
+                // перекодируем целиком в UTF-8 во временный файл
+                $utf = @iconv($enc, 'UTF-8//IGNORE', file_get_contents($path));
+                if ($utf !== false) {
+                    $tmp_utf = wp_tempnam( 'pcoe-csv-utf8-' );
+                    if ($tmp_utf && @file_put_contents($tmp_utf, $utf) !== false) {
+                        return $tmp_utf;
+                    }
+                }
+            }
+            return $path;
+        };
+
         // 1) XLSX/XLS — как и было
         if (preg_match('~\.(xlsx|xls)$~i', $name)) {
             if (class_exists('\\PhpOffice\\PhpSpreadsheet\\IOFactory')) {
@@ -194,17 +268,20 @@ public static function build_colmap(array $header): array {
                     }
                     return [$rows, null];
                 } catch (\Throwable $e) {
-                    return [[], 'Не вдалося прочитати XLS(X): '.$e->getMessage()];
+                    return [[], sprintf(
+                        __('Failed to read XLS(X): %s', 'pc-order-import-export'),
+                        $e->getMessage()
+                    )];
                 }
             }
-            return [[], 'Підтримка XLSX недоступна на цьому сервері. Використайте CSV.'];
+            return [[], __('XLSX support is unavailable on this server. Please use CSV.', 'pc-order-import-export')];
         }
 
         // 2) CSV — читаем через PhpSpreadsheet CSV reader (если доступен)
         if (class_exists('\\PhpOffice\\PhpSpreadsheet\\Reader\\Csv')) {
             try {
-                // авто-детект разделителя по первой «насыщенной» строке
-                $sample = @file_get_contents($tmp, false, null, 0, 8192) ?: '';
+                $tmpCsv = $prepare_csv_path($tmp);  // <-- NEW
+                $sample = @file_get_contents($tmpCsv, false, null, 0, 8192) ?: '';
                 $delims = [',',';',"\t",'|'];
                 $best = ';';
                 $bestCnt = -1;
@@ -226,7 +303,7 @@ public static function build_colmap(array $header): array {
                     // $reader->setInputEncoding($enc);
                 }
 
-                $spreadsheet = $reader->load($tmp);
+                $spreadsheet = $reader->load($tmpCsv);
                 $sheet = $spreadsheet->getActiveSheet();
                 foreach ($sheet->toArray(null, true, true, false) as $r) {
                     // фильтр «пустых» строк: всё пусто или массив из одного null
@@ -252,8 +329,9 @@ public static function build_colmap(array $header): array {
         }
 
         // 3) Fallback: нативный fgetcsv (как было, но с авто-разделителем и BOM-фикс)
+        $tmpCsv = $prepare_csv_path($tmp); // <-- NEW
         $sep = ';';
-        $peek = @file_get_contents($tmp, false, null, 0, 2048);
+        $peek = @file_get_contents($tmpCsv, false, null, 0, 2048);
         if ($peek) {
             $candidates = [',',';',"\t",'|'];
             $best = ';'; $bestCnt = -1;
@@ -263,7 +341,7 @@ public static function build_colmap(array $header): array {
             }
             $sep = $best;
         }
-        if (($fh = @fopen($tmp, 'r')) !== false) {
+        if (($fh = @fopen($tmpCsv, 'r')) !== false) {
             $rowIndex = 0;
             while (($r = fgetcsv($fh, 0, $sep)) !== false) {
                 if ($r === [null] || $r === false) continue;
@@ -282,7 +360,7 @@ public static function build_colmap(array $header): array {
             return [$rows, null];
         }
 
-        return [[], 'Не вдалося прочитати файл'];
+        return [[], __('Failed to read the file.', 'pc-order-import-export')];
     }
 
     /** Детект шапки + мапінг колонок (як у Draft) */
@@ -364,9 +442,9 @@ public static function build_colmap(array $header): array {
           <table style="width:100%;max-width:900px;border-collapse:collapse;font-size:12px">
             <thead>
               <tr>
-                <th style="text-align:left;border-bottom:1px solid #eee;padding:4px 6px">Рядок</th>
-                <th style="text-align:left;border-bottom:1px solid #eee;padding:4px 6px">Статус</th>
-                <th style="text-align:left;border-bottom:1px solid #eee;padding:4px 6px">Повідомлення</th>
+                <th style="text-align:left;border-bottom:1px solid #eee;padding:4px 6px"><?php echo esc_html__('Row', 'pc-order-import-export'); ?></th>
+                <th style="text-align:left;border-bottom:1px solid #eee;padding:4px 6px"><?php echo esc_html__('Status', 'pc-order-import-export'); ?></th>
+                <th style="text-align:left;border-bottom:1px solid #eee;padding:4px 6px"><?php echo esc_html__('Message', 'pc-order-import-export'); ?></th>
               </tr>
             </thead>
             <tbody>
@@ -411,7 +489,9 @@ public static function build_colmap(array $header): array {
         $okLabel    = (string)($opts['ok_label'] ?? 'Додано');
         $adder      = $opts['adder'] ?? null;
         if (!is_callable($adder)) {
-            return ['ok'=>0,'skipped'=>0,'report'=>[ self::logRow(0,'error','Внутрішня помилка: adder не заданий') ]];
+            return ['ok'=>0,'skipped'=>0,'report'=>[
+                self::logRow(0,'error', __('Internal error: adder is not set', 'pc-order-import-export'))
+            ]];
         }
 
         $ok = 0; $skipped = 0; $report = [];
@@ -425,21 +505,21 @@ public static function build_colmap(array $header): array {
 
             if ($qty <= 0) {
                 $skipped++;
-                $report[] = self::logRow($i+1, 'skip', 'Кількість ≤ 0');
+                $report[] = self::logRow($i+1, 'skip', __('Quantity ≤ 0', 'pc-order-import-export'));
                 continue;
             }
 
             $pid = self::resolve_product_id($sku, $gtin);
             if (!$pid) {
                 $skipped++;
-                $report[] = self::logRow($i+1, 'error', 'Не знайдено товар за SKU/GTIN', compact('sku','gtin'));
+                $report[] = self::logRow($i+1, 'error', __('Product not found by SKU/GTIN', 'pc-order-import-export'), compact('sku','gtin'));
                 continue;
             }
 
             $product = wc_get_product($pid);
             if (!($product instanceof \WC_Product)) {
                 $skipped++;
-                $report[] = self::logRow($i+1, 'error', 'Товар недоступний', compact('pid'));
+                $report[] = self::logRow($i+1, 'error', __('Product is unavailable', 'pc-order-import-export'), compact('pid'));
                 continue;
             }
 
@@ -464,7 +544,7 @@ public static function build_colmap(array $header): array {
             } else {
                 $skipped++;
                 if (!$errExtra) { $errExtra = ['sku' => $product->get_sku() ?: $sku]; }
-                $report[] = self::logRow($i+1, 'error', 'Не вдалося додати', $errExtra);
+                $report[] = self::logRow($i+1, 'error', __('Failed to add', 'pc-order-import-export'), $errExtra);
             }
         }
 
