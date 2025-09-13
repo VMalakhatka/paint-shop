@@ -55,11 +55,11 @@ class Ui
                 <input type="hidden" name="action" value="pcoe_cart_to_draft">
                 <input type="hidden" name="_wpnonce" value="<?php echo esc_attr($nonce); ?>">
                 <input type="hidden" name="dest" value="orders">
-                <input type="text" name="title" placeholder="Назва чернетки (необов’язково)"
+                <input type="text" name="title" placeholder="<?php echo esc_attr__('Draft title (optional)', 'pc-order-import-export'); ?>"
                     style="min-width:260px">
                 <button class="button" type="submit"
-                        onclick="this.disabled=true;this.innerText='Зберігаю…';this.form.submit();">
-                    В чернетку
+                        onclick="this.disabled=true;this.innerText='<?php echo esc_js(__('Saving…', 'pc-order-import-export')); ?>';this.form.submit();">
+                    <?php echo esc_html__('Save to draft', 'pc-order-import-export'); ?>
                 </button>
             </form>
         </div>
@@ -92,7 +92,7 @@ class Ui
             foreach ($cols as $key=>$label){
                 $new[$key] = $label;
                 if ($key === 'order-number') {
-                    $new['pc_draft_title'] = 'Назва';
+                    $new['pc_draft_title'] = esc_html__('Title', 'pc-order-import-export');
                 }
             }
             return $new;
@@ -104,7 +104,7 @@ class Ui
             if ($title !== '') {
                 echo esc_html($title);
             } else {
-                if ($order->has_status('pc-draft')) echo '<em style="opacity:.7">(без назви)</em>';
+                if ($order->has_status('pc-draft')) echo '<em style="opacity:.7">' . esc_html__('(untitled)', 'pc-order-import-export') . '</em>';
             }
         });
     }
@@ -131,14 +131,14 @@ public static function render_account_import_block(): void
 
       <!-- Імпорт у чернетку замовлення -->
       <details open>
-        <summary><strong>Імпорт у чернетку замовлення</strong> (CSV / XLSX)</summary>
+        <summary><strong><?php echo esc_html__('Import into draft order', 'pc-order-import-export'); ?></strong> <?php echo esc_html__('(CSV / XLSX)', 'pc-order-import-export'); ?> </summary>
 
         <form id="pcoe-import-draft-form" enctype="multipart/form-data" method="post" onsubmit="return false;"
               style="margin-top:12px; display:flex; gap:12px; align-items:center; flex-wrap:wrap">
           <input type="hidden" name="_wpnonce" value="<?php echo esc_attr($nonce_draft); ?>">
           <input type="file" name="file" accept=".csv,.xlsx,.xls" required>
-          <input type="text" name="title" placeholder="Назва чернетки (необов’язково)" style="min-width:260px">
-          <button type="submit" class="button">Імпортувати у чернетку</button>
+          <input type="text" name="title" placeholder="<?php echo esc_attr__('Draft title (optional)', 'pc-order-import-export'); ?>"  style="min-width:260px">
+          <button type="submit" class="button"><?php echo esc_html__('Import to draft', 'pc-order-import-export'); ?> </button>
           <span class="pcoe-import-draft-msg" style="margin-left:8px; opacity:.8"></span>
         </form>
 
@@ -148,13 +148,19 @@ public static function render_account_import_block(): void
         </div>
 
         <div style="font-size:12px; opacity:.8; margin-top:10px">
-          Формат: <code>sku;qty</code> або <code>gtin;qty</code>. Допускаються локальні назви колонок (Артикул, К-сть…).
+          <?php
+                printf(
+                esc_html__('Format: %1$s or %2$s. Localized column names are supported (SKU, Qty…).', 'pc-order-import-export'),
+                '<code>sku;qty</code>',
+                '<code>gtin;qty</code>'
+                );
+          ?>
         </div>
       </details>
 
       <!-- Зберегти поточний кошик у чернетку -->
       <details style="margin-top:14px">
-        <summary><strong>Зберегти поточний кошик у чернетку</strong></summary>
+        <summary><strong><?php echo esc_html__('Save current cart to draft', 'pc-order-import-export'); ?></strong> </summary>
 
         <form action="<?php echo esc_url($ajax); ?>" method="post"
               style="margin-top:12px; display:flex; gap:8px; align-items:center; flex-wrap:wrap">
@@ -162,12 +168,12 @@ public static function render_account_import_block(): void
           <input type="hidden" name="_wpnonce" value="<?php echo esc_attr($nonce_cart_draft); ?>">
           <input type="hidden" name="clear" value="1">
           <input type="hidden" name="dest" value="orders"><!-- після збереження → My account / Orders -->
-          <input type="text" name="title" placeholder="Назва чернетки (необов’язково)" style="min-width:260px">
-          <button class="button" type="submit">В чернетку</button>
+          <input type="text" name="title" placeholder="<?php echo esc_attr__('Draft title (optional)', 'pc-order-import-export'); ?>" style="min-width:260px">
+          <button class="button" type="submit"> <?php echo esc_html__('Save to draft', 'pc-order-import-export'); ?> </button>
         </form>
 
         <div style="font-size:12px; opacity:.8; margin-top:8px">
-          Порада: додайте зрозумілу назву (наприклад, «Шаблон Чернівці»), щоб легко знаходити цю чернетку в списку.
+          <?php echo esc_html__('Tip: add a meaningful name (e.g., "Template Chernivtsi") to easily find this draft later.', 'pc-order-import-export'); ?>
         </div>
       </details>
 
@@ -189,7 +195,7 @@ public static function render_account_import_block(): void
         if ( $can_manage || $is_owner ) {
             $url = \PaintCore\PCOE\DraftToCart::action_url((int)$order->get_id(), ['clear' => '1']);
             echo '<p style="margin-top:10px">
-                    <a class="button" href="'.esc_url($url).'">В кошик!</a>
+                    <a class="button" href="'.esc_url($url).'">'.esc_html__('Add to cart', 'pc-order-import-export').'</a>
                 </p>';
         }
 }
@@ -222,7 +228,7 @@ public static function render_account_import_block(): void
               </a>
             <?php else: ?>
               <a class="button disabled" onclick="return false"
-                 title="XLSX недоступний на цьому сервері">
+                 title="<?php echo esc_attr__('XLSX is unavailable on this server', 'pc-order-import-export'); ?>">
                  <?php echo esc_html($L['btn_xlsx']); ?>
               </a>
             <?php endif; ?>
@@ -266,22 +272,28 @@ public static function render_account_import_block(): void
         ob_start(); ?>
         <div class="pcoe-import" style="margin-top:18px; padding-top:10px; border-top:1px dashed #e5e5e5">
             <details>
-                <summary><strong>Імпорт</strong> (CSV / XLSX)</summary>
+                <summary> <strong><?php echo esc_html__('Import', 'pc-order-import-export'); ?></strong> <?php echo esc_html__('(CSV / XLSX)', 'pc-order-import-export'); ?></summary>
 
-                <!-- У кошик -->
+                <!-- У кошик -->Формат CSV: <code>sku;qty</code> або <code>gtin;qty</code>
                 <div style="margin-top:12px">
                   <form id="pcoe-import-form" enctype="multipart/form-data" method="post" onsubmit="return false;"
                         style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
                       <input type="hidden" name="_wpnonce" value="<?php echo esc_attr($nonce_cart); ?>">
                       <input type="file" name="file" accept=".csv,.xlsx,.xls" required>
-                      <button type="submit" class="button">Імпортувати у кошик</button>
+                      <button type="submit" class="button"><?php echo esc_html__('Import to cart', 'pc-order-import-export'); ?></button>
                       <span class="pcoe-import-msg" style="margin-left:8px; opacity:.8"></span>
                   </form>
                 </div>
 
                 <div style="font-size:12px; opacity:.8; margin-top:12px">
-                    Формат CSV: <code>sku;qty</code> або <code>gtin;qty</code>. Розділювач <code>;</code> або <code>,</code>.
-                    Дробові кількості: крапка або кома; тисячні пробіли і не-знак ігноруються.
+                    <?php
+                        echo wp_kses_post( sprintf(
+                        /* translators: %1$s and %2$s are code examples like sku;qty, gtin;qty */
+                        esc_html__('CSV format: %1$s or %2$s. Delimiter ";" or ",". Decimals: dot or comma; thousand separators are ignored.', 'pc-order-import-export'),
+                        '<code>sku;qty</code>',
+                        '<code>gtin;qty</code>'
+                        ) );
+                    ?>
                 </div>
             </details>
         </div>
@@ -294,133 +306,144 @@ public static function render_account_import_block(): void
     public static function enqueue_js(): void
     {
         wp_enqueue_script('jquery');
-        wp_add_inline_script('jquery', self::js_code());
+       $i18n = [
+        'importing'     => __('Importing…', 'pc-order-import-export'),
+        'added'         => __('Added', 'pc-order-import-export'),
+        'skipped'       => __('Skipped', 'pc-order-import-export'),
+        'import_error'  => __('Import error.', 'pc-order-import-export'),
+        'conn_error'    => __('Connection error.', 'pc-order-import-export'),
+        'open_in_admin' => __('Open in admin', 'pc-order-import-export'),
+        'view_order'    => __('View order', 'pc-order-import-export'),
+        ];
+        wp_add_inline_script('jquery', self::js_code($i18n));
     }
 
-    protected static function js_code(): string
+    protected static function js_code(array $i18n): string
     {
         $ajax = esc_js(admin_url('admin-ajax.php'));
+        $i = array_map('esc_js', $i18n);
         return <<<JS
-jQuery(function($){
-    var KEY_COLS='pcoeCols', KEY_SPLIT='pcoeSplit';
+            jQuery(function($){
+            var I18N = <?php echo wp_json_encode($i, JSON_UNESCAPED_UNICODE); ?>;
+            var KEY_COLS='pcoeCols', KEY_SPLIT='pcoeSplit';
 
-    function readCols(scope){ try{ var all=JSON.parse(localStorage.getItem(KEY_COLS)||'{}'); return all[scope]||[]; }catch(e){ return []; } }
-    function writeCols(scope, arr){ try{ var all=JSON.parse(localStorage.getItem(KEY_COLS)||'{}'); all[scope]=arr; localStorage.setItem(KEY_COLS, JSON.stringify(all)); }catch(e){} }
-    function readSplit(scope){ try{ var all=JSON.parse(localStorage.getItem(KEY_SPLIT)||'{}'); return all[scope]||'agg'; }catch(e){ return 'agg'; } }
-    function writeSplit(scope, val){ try{ var all=JSON.parse(localStorage.getItem(KEY_SPLIT)||'{}'); all[scope]=val; localStorage.setItem(KEY_SPLIT, JSON.stringify(all)); }catch(e){} }
+            function readCols(scope){ try{ var all=JSON.parse(localStorage.getItem(KEY_COLS)||'{}'); return all[scope]||[]; }catch(e){ return []; } }
+            function writeCols(scope, arr){ try{ var all=JSON.parse(localStorage.getItem(KEY_COLS)||'{}'); all[scope]=arr; localStorage.setItem(KEY_COLS, JSON.stringify(all)); }catch(e){} }
+            function readSplit(scope){ try{ var all=JSON.parse(localStorage.getItem(KEY_SPLIT)||'{}'); return all[scope]||'agg'; }catch(e){ return 'agg'; } }
+            function writeSplit(scope, val){ try{ var all=JSON.parse(localStorage.getItem(KEY_SPLIT)||'{}'); all[scope]=val; localStorage.setItem(KEY_SPLIT, JSON.stringify(all)); }catch(e){} }
 
-    $('.pcoe-cols').each(function(){
-        var scope = $(this).data('scope');
-        var sel = readCols(scope);
-        if (sel.length){
-            $(this).find('input.pcoe-col').each(function(){
-                if (sel.indexOf($(this).val())!==-1) $(this).prop('checked', true);
+            $('.pcoe-cols').each(function(){
+                var scope = $(this).data('scope');
+                var sel = readCols(scope);
+                if (sel.length){
+                    $(this).find('input.pcoe-col').each(function(){
+                        if (sel.indexOf($(this).val())!==-1) $(this).prop('checked', true);
+                    });
+                } else {
+                    $(this).find('input.pcoe-col[value="sku"],input.pcoe-col[value="name"],input.pcoe-col[value="qty"],input.pcoe-col[value="price"],input.pcoe-col[value="total"]').prop('checked', true);
+                }
             });
-        } else {
-            $(this).find('input.pcoe-col[value="sku"],input.pcoe-col[value="name"],input.pcoe-col[value="qty"],input.pcoe-col[value="price"],input.pcoe-col[value="total"]').prop('checked', true);
-        }
-    });
 
-    $('.pcoe-split').each(function(){
-        var scope = $(this).data('scope');
-        $(this).val(readSplit(scope));
-    });
+            $('.pcoe-split').each(function(){
+                var scope = $(this).data('scope');
+                $(this).val(readSplit(scope));
+            });
 
-    $(document).on('change','.pcoe-col',function(){
-        var wrap = $(this).closest('.pcoe-cols');
-        var scope = wrap.data('scope');
-        var arr = [];
-        wrap.find('input.pcoe-col:checked').each(function(){ arr.push($(this).val()); });
-        writeCols(scope, arr);
-    });
-    $(document).on('change','.pcoe-split',function(){
-        var scope = $(this).data('scope');
-        writeSplit(scope, $(this).val());
-    });
+            $(document).on('change','.pcoe-col',function(){
+                var wrap = $(this).closest('.pcoe-cols');
+                var scope = wrap.data('scope');
+                var arr = [];
+                wrap.find('input.pcoe-col:checked').each(function(){ arr.push($(this).val()); });
+                writeCols(scope, arr);
+            });
+            $(document).on('change','.pcoe-split',function(){
+                var scope = $(this).data('scope');
+                writeSplit(scope, $(this).val());
+            });
 
-    $(document).on('click','.pcoe-export a.button',function(){
-        var box = $(this).closest('.pcoe-export');
-        var colsWrap = box.find('.pcoe-cols'); var scope = colsWrap.data('scope');
-        var cols=[]; colsWrap.find('input.pcoe-col:checked').each(function(){ cols.push($(this).val()); });
-        if(!cols.length){ cols=['sku','name','qty','price','total']; }
-        var splitSel = box.find('.pcoe-split'); var split = splitSel.val() || 'agg';
-        var href = new URL(this.href);
-        href.searchParams.set('cols', cols.join(','));
-        href.searchParams.set('split', split);
-        this.href = href.toString();
-    });
+            $(document).on('click','.pcoe-export a.button',function(){
+                var box = $(this).closest('.pcoe-export');
+                var colsWrap = box.find('.pcoe-cols'); var scope = colsWrap.data('scope');
+                var cols=[]; colsWrap.find('input.pcoe-col:checked').each(function(){ cols.push($(this).val()); });
+                if(!cols.length){ cols=['sku','name','qty','price','total']; }
+                var splitSel = box.find('.pcoe-split'); var split = splitSel.val() || 'agg';
+                var href = new URL(this.href);
+                href.searchParams.set('cols', cols.join(','));
+                href.searchParams.set('split', split);
+                this.href = href.toString();
+            });
 
-    function ensureNoteChecked(scope){
-        var wrap = $('.pcoe-cols[data-scope="'+scope+'"]');
-        var note = wrap.find('input.pcoe-col[value="note"]');
-        if (!note.prop('checked')) { note.prop('checked', true).trigger('change'); }
-    }
-    $('.pcoe-split').each(function(){ var scope=$(this).data('scope'); if($(this).val()==='per_loc') ensureNoteChecked(scope); });
-    $(document).on('change','.pcoe-split',function(){ var scope=$(this).data('scope'); if($(this).val()==='per_loc') ensureNoteChecked(scope); });
-
-    // === Імпорт у кошик (safe)
-        $(document).on('submit','#pcoe-import-form',function(e){
-        e.preventDefault();
-        var \$f=$(this), \$msg=\$f.find('.pcoe-import-msg');
-        var fd=new FormData(this); fd.append('action','pcoe_import_cart');
-        \$msg.text('Імпортуємо…');
-        $.ajax({
-            url:'{$ajax}', method:'POST', data:fd, contentType:false, processData:false
-        }).done(function(resp){
-            if(resp && resp.success){
-            \$msg.text('Додано: '+resp.data.added+', пропущено: '+resp.data.skipped);
-            if(resp.data.report_html){
-                if(!$('.pcoe-import-report').length){
-                $('<div class="pcoe-import-report" style="margin-top:10px"></div>').insertAfter(\$f.closest('div'));
-                }
-                $('.pcoe-import-report').html(resp.data.report_html);
+            function ensureNoteChecked(scope){
+                var wrap = $('.pcoe-cols[data-scope="'+scope+'"]');
+                var note = wrap.find('input.pcoe-col[value="note"]');
+                if (!note.prop('checked')) { note.prop('checked', true).trigger('change'); }
             }
-            setTimeout(function(){ window.location.reload(); }, 1200);
-            }else{
-            \$msg.text((resp && resp.data && resp.data.msg) ? resp.data.msg : 'Помилка імпорту.');
-            }
-        }).fail(function(){
-            \$msg.text('Помилка з\'єднання.');
+            $('.pcoe-split').each(function(){ var scope=$(this).data('scope'); if($(this).val()==='per_loc') ensureNoteChecked(scope); });
+            $(document).on('change','.pcoe-split',function(){ var scope=$(this).data('scope'); if($(this).val()==='per_loc') ensureNoteChecked(scope); });
+
+            // === Імпорт у кошик (safe)
+                $(document).on('submit','#pcoe-import-form',function(e){
+                e.preventDefault();
+                var \$f=$(this), \$msg=\$f.find('.pcoe-import-msg');
+                var fd=new FormData(this); fd.append('action','pcoe_import_cart');
+                \$msg.text(I18N.importing);
+                $.ajax({
+                    url:'{$ajax}', method:'POST', data:fd, contentType:false, processData:false
+                }).done(function(resp){
+                    if(resp && resp.success){
+                    \$msg.text(I18N.added+': '+resp.data.added+', '+I18N.skipped+': '+resp.data.skipped);
+                    if(resp.data.report_html){
+                        if(!$('.pcoe-import-report').length){
+                        $('<div class="pcoe-import-report" style="margin-top:10px"></div>').insertAfter(\$f.closest('div'));
+                        }
+                        $('.pcoe-import-report').html(resp.data.report_html);
+                    }
+                    setTimeout(function(){ window.location.reload(); }, 1200);
+                    }else{
+                    \$msg.text((resp && resp.data && resp.data.msg) ? resp.data.msg : I18N.import_error);
+                    }
+                }).fail(function(){
+                    \$msg.text(I18N.conn_error);
+                });
+                return false;
+                });
+
+            // === Імпорт у чернетку
+            $(document).on('submit','#pcoe-import-draft-form',function(){
+                var \$f=$(this), \$msg=\$f.find('.pcoe-import-draft-msg');
+                var \$box=$('.pcoe-import-draft-result');
+                \$msg.text(I18N.importing); \$box.hide();
+
+                var fd=new FormData(this); fd.append('action','pcoe_import_order_draft');
+
+                $.ajax({
+                url:'{$ajax}', method:'POST', data:fd, contentType:false, processData:false,
+                success:function(resp){
+                    if(resp && resp.success){
+                        // показати короткий підсумок
+                        \$msg.text(I18N.imported+': '+resp.data.imported+', '+I18N.skipped+': '+resp.data.skipped);
+
+                        // (опційно) миттєво показати кнопки
+                        var linksHtml='';
+                        if(resp.data.links){
+                            if(resp.data.links.edit){ linksHtml += '<a class="button" href="'+resp.data.links.edit+'" target="_blank" rel="noopener">'+I18N.open_in_admin+'</a> '; }
+                            if(resp.data.links.view){ linksHtml += '<a class="button" href="'+resp.data.links.view+'" target="_blank" rel="noopener">'+I18N.view_order+'</a>'; }
+                        }
+                        \$('.pcoe-import-draft-links').html(linksHtml||'');
+                        \$('.pcoe-import-draft-report').html(resp.data.report_html||'');
+                        \$box.show();
+
+                        // ↓ головне: перезавантажити список замовлень, щоб з'явився новий чернетка
+                        setTimeout(function(){ window.location.reload(); }, 800);
+                    } else {
+                        \$msg.text((resp && resp.data && resp.data.msg) ? resp.data.msg : I18N.import_error);
+                    }
+                },
+                error:function(){ $msg.text(I18N.conn_error);
+                });
+                return false;
+            });
         });
-        return false;
-        });
-
-    // === Імпорт у чернетку
-    $(document).on('submit','#pcoe-import-draft-form',function(){
-        var \$f=$(this), \$msg=\$f.find('.pcoe-import-draft-msg');
-        var \$box=$('.pcoe-import-draft-result');
-        \$msg.text('Імпортуємо…'); \$box.hide();
-
-        var fd=new FormData(this); fd.append('action','pcoe_import_order_draft');
-
-        $.ajax({
-          url:'{$ajax}', method:'POST', data:fd, contentType:false, processData:false,
-          success:function(resp){
-            if(resp && resp.success){
-                // показати короткий підсумок
-                \$msg.text('Імпортовано: '+resp.data.imported+', пропущено: '+resp.data.skipped);
-
-                // (опційно) миттєво показати кнопки
-                var linksHtml='';
-                if(resp.data.links){
-                    if(resp.data.links.edit){ linksHtml += '<a class="button" href="'+resp.data.links.edit+'" target="_blank" rel="noopener">Відкрити в адмінці</a> '; }
-                    if(resp.data.links.view){ linksHtml += '<a class="button" href="'+resp.data.links.view+'" target="_blank" rel="noopener">Переглянути замовлення</a>'; }
-                }
-                \$('.pcoe-import-draft-links').html(linksHtml||'');
-                \$('.pcoe-import-draft-report').html(resp.data.report_html||'');
-                \$box.show();
-
-                // ↓ головне: перезавантажити список замовлень, щоб з'явився новий чернетка
-                setTimeout(function(){ window.location.reload(); }, 800);
-            } else {
-                \$msg.text((resp && resp.data && resp.data.msg) ? resp.data.msg : 'Помилка імпорту.');
-            }
-         },
-          error:function(){ \$msg.text('Помилка з\\'єднання.'); }
-        });
-        return false;
-    });
-});
-JS;
+        JS;
     }
 }

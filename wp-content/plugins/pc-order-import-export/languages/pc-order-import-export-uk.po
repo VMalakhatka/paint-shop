@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: PC Order Import/Export 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/pc-order-import-"
 "export\n"
-"POT-Creation-Date: 2025-09-12T21:21:08+00:00\n"
+"POT-Creation-Date: 2025-09-13T05:41:18+00:00\n"
 "PO-Revision-Date: 2025-09-11 00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -131,7 +131,7 @@ msgstr "Файл не було завантажено."
 msgid "Empty file or invalid format."
 msgstr "Порожній файл або невірний формат."
 
-#: inc/ImporterCart.php:56
+#: inc/ImporterCart.php:56 inc/Ui.php:311
 msgid "Added"
 msgstr "Додано"
 
@@ -146,12 +146,111 @@ msgid_plural "Draft (import) <span class=\"count\">(%s)</span>"
 msgstr[0] "Чернетка (імпорт) <span class=\"count\">(%s)</span>"
 msgstr[1] "Чернетки (імпорт) <span class=\"count\">(%s)</span>"
 
-
 #: inc/ImporterDraft.php:106
-#, fuzzy
 msgid "Failed to create draft order."
 msgstr "Не вдалося створити чернетку замовлення."
 
 #: inc/ImporterDraft.php:148
 msgid "Added to draft"
 msgstr "Додано у чернетку"
+
+#: inc/Ui.php:58 inc/Ui.php:140 inc/Ui.php:171
+msgid "Draft title (optional)"
+msgstr "Назва чернетки (необов’язково)"
+
+#: inc/Ui.php:61
+msgid "Saving…"
+msgstr "Зберігаю…"
+
+#: inc/Ui.php:62 inc/Ui.php:172
+msgid "Save to draft"
+msgstr "Зберегти у чернетку"
+
+#: inc/Ui.php:95
+msgid "Title"
+msgstr "Назва"
+
+#: inc/Ui.php:107
+msgid "(untitled)"
+msgstr "(без назви)"
+
+#: inc/Ui.php:134
+msgid "Import into draft order"
+msgstr "Імпортувати у чернетку замовлення"
+
+#: inc/Ui.php:134 inc/Ui.php:275
+msgid "(CSV / XLSX)"
+msgstr "(CSV / XLSX)"
+
+#: inc/Ui.php:141
+msgid "Import to draft"
+msgstr "Імпортувати у чернетку"
+
+#: inc/Ui.php:153
+#, php-format
+msgid "Format: %1$s or %2$s. Localized column names are supported (SKU, Qty…)."
+msgstr ""
+"Формат: %1$s або %2$s. Підтримуються локалізовані назви колонок (Артикул, К-"
+"сть…)."
+
+#: inc/Ui.php:163
+msgid "Save current cart to draft"
+msgstr "Зберегти поточний кошик у чернетку"
+
+#: inc/Ui.php:176
+msgid ""
+"Tip: add a meaningful name (e.g., \"Template Chernivtsi\") to easily find "
+"this draft later."
+msgstr ""
+"Порада: додайте зрозумілу назву (наприклад, «Шаблон Чернівці»), щоб легко "
+"знайти цей чернетку пізніше."
+
+#: inc/Ui.php:198
+msgid "Add to cart"
+msgstr "Додано у кошик"
+
+#: inc/Ui.php:231
+msgid "XLSX is unavailable on this server"
+msgstr "XLSX недоступний на цьому сервері"
+
+#: inc/Ui.php:275
+msgid "Import"
+msgstr "Імпорт"
+
+#: inc/Ui.php:283
+msgid "Import to cart"
+msgstr "Імпортувати у кошик"
+
+#. translators: %1$s and %2$s are code examples like sku;qty, gtin;qty
+#: inc/Ui.php:292
+#, php-format
+msgid ""
+"CSV format: %1$s or %2$s. Delimiter \";\" or \",\". Decimals: dot or comma; "
+"thousand separators are ignored."
+msgstr ""
+"Формат CSV: %1$s або %2$s. Розділювач «;» або «,». Дробові: крапка або кома; "
+"роздільники тисяч ігноруються."
+
+#: inc/Ui.php:310
+msgid "Importing…"
+msgstr "Імпортую…"
+
+#: inc/Ui.php:312
+msgid "Skipped"
+msgstr "Пропущено"
+
+#: inc/Ui.php:313
+msgid "Import error."
+msgstr "Помилка імпорту."
+
+#: inc/Ui.php:314
+msgid "Connection error."
+msgstr "Помилка з’єднання."
+
+#: inc/Ui.php:315
+msgid "Open in admin"
+msgstr "Відкрити в адмінці"
+
+#: inc/Ui.php:316
+msgid "View order"
+msgstr "Переглянути замовлення"

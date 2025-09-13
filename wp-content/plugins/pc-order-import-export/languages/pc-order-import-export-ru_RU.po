@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: PC Order Import/Export 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/pc-order-import-"
 "export\n"
-"POT-Creation-Date: 2025-09-12T21:21:08+00:00\n"
+"POT-Creation-Date: 2025-09-13T05:41:18+00:00\n"
 "PO-Revision-Date: 2025-09-11 00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -131,7 +131,7 @@ msgstr "Файл не был загружен."
 msgid "Empty file or invalid format."
 msgstr "Файл пустой или неверный формат."
 
-#: inc/ImporterCart.php:56
+#: inc/ImporterCart.php:56 inc/Ui.php:311
 msgid "Added"
 msgstr "Добавлено"
 
@@ -147,10 +147,110 @@ msgstr[0] "Черновик (импорт) <span class=\"count\">(%s)</span>"
 msgstr[1] "Черновики (импорт) <span class=\"count\">(%s)</span>"
 
 #: inc/ImporterDraft.php:106
-#, fuzzy
 msgid "Failed to create draft order."
 msgstr "Не удалось создать черновик заказа."
 
 #: inc/ImporterDraft.php:148
 msgid "Added to draft"
 msgstr "Добавлено в черновик"
+
+#: inc/Ui.php:58 inc/Ui.php:140 inc/Ui.php:171
+msgid "Draft title (optional)"
+msgstr "Название черновика (необязательно)"
+
+#: inc/Ui.php:61
+msgid "Saving…"
+msgstr "Сохраняю…"
+
+#: inc/Ui.php:62 inc/Ui.php:172
+msgid "Save to draft"
+msgstr "Сохранить в черновик"
+
+#: inc/Ui.php:95
+msgid "Title"
+msgstr "Название"
+
+#: inc/Ui.php:107
+msgid "(untitled)"
+msgstr "(без названия)"
+
+#: inc/Ui.php:134
+msgid "Import into draft order"
+msgstr "Импортировать в черновик заказа"
+
+#: inc/Ui.php:134 inc/Ui.php:275
+msgid "(CSV / XLSX)"
+msgstr "(CSV / XLSX)"
+
+#: inc/Ui.php:141
+msgid "Import to draft"
+msgstr "Импортировать в черновик"
+
+#: inc/Ui.php:153
+#, php-format
+msgid "Format: %1$s or %2$s. Localized column names are supported (SKU, Qty…)."
+msgstr ""
+"Формат: %1$s или %2$s. Поддерживаются локализованные названия колонок "
+"(Артикул, Кол-во…)."
+
+#: inc/Ui.php:163
+msgid "Save current cart to draft"
+msgstr "Сохранить текущую корзину в черновик"
+
+#: inc/Ui.php:176
+msgid ""
+"Tip: add a meaningful name (e.g., \"Template Chernivtsi\") to easily find "
+"this draft later."
+msgstr ""
+"Совет: добавьте понятное название (например, «Шаблон Черновцы»), чтобы легко "
+"найти этот черновик позже."
+
+#: inc/Ui.php:198
+msgid "Add to cart"
+msgstr "Добавлено в корзину"
+
+#: inc/Ui.php:231
+msgid "XLSX is unavailable on this server"
+msgstr "XLSX недоступен на этом сервере"
+
+#: inc/Ui.php:275
+msgid "Import"
+msgstr "Импорт"
+
+#: inc/Ui.php:283
+msgid "Import to cart"
+msgstr "Импортировать в корзину"
+
+#. translators: %1$s and %2$s are code examples like sku;qty, gtin;qty
+#: inc/Ui.php:292
+#, php-format
+msgid ""
+"CSV format: %1$s or %2$s. Delimiter \";\" or \",\". Decimals: dot or comma; "
+"thousand separators are ignored."
+msgstr ""
+"Формат CSV: %1$s или %2$s. Разделитель «;» или «,». Десятичные: точка или "
+"запятая; разделители тысяч игнорируются."
+
+#: inc/Ui.php:310
+msgid "Importing…"
+msgstr "Импортирую…"
+
+#: inc/Ui.php:312
+msgid "Skipped"
+msgstr "Пропущено"
+
+#: inc/Ui.php:313
+msgid "Import error."
+msgstr "Ошибка импорта."
+
+#: inc/Ui.php:314
+msgid "Connection error."
+msgstr "Ошибка соединения."
+
+#: inc/Ui.php:315
+msgid "Open in admin"
+msgstr "Открыть в админке"
+
+#: inc/Ui.php:316
+msgid "View order"
+msgstr "Просмотр заказа"

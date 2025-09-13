@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-09-12T21:24:56+00:00\n"
+"POT-Creation-Date: 2025-09-13T05:49:00+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: pc-order-import-export\n"
@@ -138,6 +138,7 @@ msgid "Empty file or invalid format."
 msgstr ""
 
 #: inc/ImporterCart.php:56
+#: inc/Ui.php:311
 msgid "Added"
 msgstr ""
 
@@ -160,4 +161,99 @@ msgstr ""
 
 #: inc/ImporterDraft.php:148
 msgid "Added to draft"
+msgstr ""
+
+#: inc/Ui.php:58
+#: inc/Ui.php:140
+#: inc/Ui.php:171
+msgid "Draft title (optional)"
+msgstr ""
+
+#: inc/Ui.php:61
+msgid "Saving…"
+msgstr ""
+
+#: inc/Ui.php:62
+#: inc/Ui.php:172
+msgid "Save to draft"
+msgstr ""
+
+#: inc/Ui.php:95
+msgid "Title"
+msgstr ""
+
+#: inc/Ui.php:107
+msgid "(untitled)"
+msgstr ""
+
+#: inc/Ui.php:134
+msgid "Import into draft order"
+msgstr ""
+
+#: inc/Ui.php:134
+#: inc/Ui.php:275
+msgid "(CSV / XLSX)"
+msgstr ""
+
+#: inc/Ui.php:141
+msgid "Import to draft"
+msgstr ""
+
+#: inc/Ui.php:153
+#, php-format
+msgid "Format: %1$s or %2$s. Localized column names are supported (SKU, Qty…)."
+msgstr ""
+
+#: inc/Ui.php:163
+msgid "Save current cart to draft"
+msgstr ""
+
+#: inc/Ui.php:176
+msgid "Tip: add a meaningful name (e.g., \"Template Chernivtsi\") to easily find this draft later."
+msgstr ""
+
+#: inc/Ui.php:198
+msgid "Add to cart"
+msgstr ""
+
+#: inc/Ui.php:231
+msgid "XLSX is unavailable on this server"
+msgstr ""
+
+#: inc/Ui.php:275
+msgid "Import"
+msgstr ""
+
+#: inc/Ui.php:283
+msgid "Import to cart"
+msgstr ""
+
+#. translators: %1$s and %2$s are code examples like sku;qty, gtin;qty
+#: inc/Ui.php:292
+#, php-format
+msgid "CSV format: %1$s or %2$s. Delimiter \";\" or \",\". Decimals: dot or comma; thousand separators are ignored."
+msgstr ""
+
+#: inc/Ui.php:310
+msgid "Importing…"
+msgstr ""
+
+#: inc/Ui.php:312
+msgid "Skipped"
+msgstr ""
+
+#: inc/Ui.php:313
+msgid "Import error."
+msgstr ""
+
+#: inc/Ui.php:314
+msgid "Connection error."
+msgstr ""
+
+#: inc/Ui.php:315
+msgid "Open in admin"
+msgstr ""
+
+#: inc/Ui.php:316
+msgid "View order"
 msgstr ""
