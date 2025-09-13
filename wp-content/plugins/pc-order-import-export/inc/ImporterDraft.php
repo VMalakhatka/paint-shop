@@ -113,33 +113,53 @@ class ImporterDraft
                 $item_data['subtotal'] = (float)$price * (float)$qty;
                 $item_data['total']    = (float)$price * (float)$qty;
             }
-            try {
-                $item_id = $order->add_product($product, $qty, $item_data);
-                if (!$item_id) return true;
 
+            try {
+                // 1) Добавляем позицию
+                $item_id = $order->add_product($product, $qty, $item_data);
+
+                if (!$item_id) {
+                    // явный провал add_product -> это НЕ успех
+                    $errExtra['reason'] = 'add_product_failed';
+                    $errExtra['pid']    = (int)$product->get_id();
+                    return false;
+                }
+
+                // 2) Пытаемся проштамповать план (если получится)
                 $item = $order->get_item($item_id);
                 if ($item instanceof \WC_Order_Item_Product) {
-                    // Единая точка: посчитать и проштамповать
-                    \PaintCore\Stock\pc_compute_and_stamp_item_plan(
-                        $item,
-                        'import-draft',
-                        [
-                            // 'preferred_location' => 3942, // пример: фиксировать приоритетный склад
-                        ]
-                    );
-                    $item->save();
+                    try {
+                        \PaintCore\Stock\pc_compute_and_stamp_item_plan(
+                            $item,
+                            'import-draft',
+                            [
+                                // 'preferred_location' => 3942,
+                            ]
+                        );
+                        $item->save();
 
-                    // DEBUG-лог для проверки меты (при необходимости можно удалить)
-                    $plan_meta = $item->get_meta('_pc_alloc_plan', true);
-                    error_log('pc(plan): ctx=import-draft pid=' . $product->get_id() .
-                        ' qty=' . (int)$qty . ' plan=' . json_encode($plan_meta, JSON_UNESCAPED_UNICODE));
+                        // (опционально) debug
+                        $plan_meta = $item->get_meta('_pc_alloc_plan', true);
+                        error_log(
+                            'pc(plan): ctx=import-draft pid=' . $product->get_id() .
+                            ' qty=' . (int)$qty . ' plan=' . json_encode($plan_meta, JSON_UNESCAPED_UNICODE)
+                        );
+                    } catch (\Throwable $e) {
+                        // само добавление в заказ уже состоялось — это успех.
+                        // План не обязателен для черновика. Логируем, но успех не сбиваем.
+                        $errExtra['plan_warn'] = $e->getMessage();
+                    }
+                } else {
+                    // Позиция добавлена, но получить item не удалось — считаем успехом, просто логируем
+                    $errExtra['warn'] = 'item_object_missing';
                 }
-                return true;
+
+                return true; // ✅ чёткий флаг успеха
 
             } catch (\Throwable $e) {
                 $errExtra['ex']  = $e->getMessage();
                 $errExtra['pid'] = (int)$product->get_id();
-                return false;
+                return false;     // ❌ чёткий флаг ошибки
             }
         };
 

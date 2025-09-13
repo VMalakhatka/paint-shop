@@ -306,148 +306,29 @@ public static function render_account_import_block(): void
     public static function enqueue_js(): void
     {
         wp_enqueue_script('jquery');
-       $i18n = [
-        'importing'     => __('Importing…', 'pc-order-import-export'),
-        'added'         => __('Added', 'pc-order-import-export'),
-        'skipped'       => __('Skipped', 'pc-order-import-export'),
-        'import_error'  => __('Import error.', 'pc-order-import-export'),
-        'conn_error'    => __('Connection error.', 'pc-order-import-export'),
-        'open_in_admin' => __('Open in admin', 'pc-order-import-export'),
-        'view_order'    => __('View order', 'pc-order-import-export'),
-        'imported'      => __('Imported', 'pc-order-import-export'),
-        ];
-        wp_add_inline_script('jquery', self::js_code($i18n));
-    }
 
-    protected static function js_code(array $i18n): string
-    {
-        $ajax  = admin_url('admin-ajax.php');
-        $json  = wp_json_encode($i18n, JSON_UNESCAPED_UNICODE);
-        $ajax  = esc_js($ajax);
+        //  наш файл
+        wp_enqueue_script(
+            'pcoe-js',
+            plugins_url('../assets/pcoe.js', __FILE__), // путь скорректируй при необходимости
+            ['jquery'],
+            '1.0.0',
+            true
+        );
 
-        return <<<JS
-    jQuery(function($){
-    var I18N = {$json};
-    var KEY_COLS='pcoeCols', KEY_SPLIT='pcoeSplit';
-
-    function readCols(scope){ try{ var all=JSON.parse(localStorage.getItem(KEY_COLS)||'{}'); return all[scope]||[]; }catch(e){ return []; } }
-    function writeCols(scope, arr){ try{ var all=JSON.parse(localStorage.getItem(KEY_COLS)||'{}'); all[scope]=arr; localStorage.setItem(KEY_COLS, JSON.stringify(all)); }catch(e){} }
-    function readSplit(scope){ try{ var all=JSON.parse(localStorage.getItem(KEY_SPLIT)||'{}'); return all[scope]||'agg'; }catch(e){ return 'agg'; } }
-    function writeSplit(scope, val){ try{ var all=JSON.parse(localStorage.getItem(KEY_SPLIT)||'{}'); all[scope]=val; localStorage.setItem(KEY_SPLIT, JSON.stringify(all)); }catch(e){} }
-
-    $('.pcoe-cols').each(function(){
-        var scope = $(this).data('scope');
-        var sel = readCols(scope);
-        if (sel.length){
-        $(this).find('input.pcoe-col').each(function(){
-            if (sel.indexOf($(this).val())!==-1) $(this).prop('checked', true);
-        });
-        } else {
-        $(this).find('input.pcoe-col[value="sku"],input.pcoe-col[value="name"],input.pcoe-col[value="qty"],input.pcoe-col[value="price"],input.pcoe-col[value="total"]').prop('checked', true);
-        }
-    });
-
-    $('.pcoe-split').each(function(){
-        var scope = $(this).data('scope');
-        $(this).val(readSplit(scope));
-    });
-
-    $(document).on('change','.pcoe-col',function(){
-        var wrap = $(this).closest('.pcoe-cols');
-        var scope = wrap.data('scope');
-        var arr = [];
-        wrap.find('input.pcoe-col:checked').each(function(){ arr.push($(this).val()); });
-        writeCols(scope, arr);
-    });
-    $(document).on('change','.pcoe-split',function(){
-        var scope = $(this).data('scope');
-        writeSplit(scope, $(this).val());
-    });
-
-    $(document).on('click','.pcoe-export a.button',function(){
-        var box = $(this).closest('.pcoe-export');
-        var colsWrap = box.find('.pcoe-cols'); var scope = colsWrap.data('scope');
-        var cols=[]; colsWrap.find('input.pcoe-col:checked').each(function(){ cols.push($(this).val()); });
-        if(!cols.length){ cols=['sku','name','qty','price','total']; }
-        var splitSel = box.find('.pcoe-split'); var split = splitSel.val() || 'agg';
-        var href = new URL(this.href);
-        href.searchParams.set('cols', cols.join(','));
-        href.searchParams.set('split', split);
-        this.href = href.toString();
-    });
-
-    function ensureNoteChecked(scope){
-        var wrap = $('.pcoe-cols[data-scope="'+scope+'"]');
-        var note = wrap.find('input.pcoe-col[value="note"]');
-        if (!note.prop('checked')) { note.prop('checked', true).trigger('change'); }
-    }
-    $('.pcoe-split').each(function(){ var scope=$(this).data('scope'); if($(this).val()==='per_loc') ensureNoteChecked(scope); });
-    $(document).on('change','.pcoe-split',function(){ var scope=$(this).data('scope'); if($(this).val()==='per_loc') ensureNoteChecked(scope); });
-
-    // === Імпорт у кошик
-    $(document).on('submit','#pcoe-import-form',function(e){
-        e.preventDefault();
-        var \$f=$(this), \$msg=\$f.find('.pcoe-import-msg');
-        var fd=new FormData(this); fd.append('action','pcoe_import_cart');
-        \$msg.text(I18N.importing);
-        $.ajax({
-        url:'{$ajax}', method:'POST', data:fd, contentType:false, processData:false
-        }).done(function(resp){
-        if(resp && resp.success){
-            \$msg.text(I18N.added+': '+resp.data.added+', '+I18N.skipped+': '+resp.data.skipped);
-            if(resp.data.report_html){
-            if(!$('.pcoe-import-report').length){
-                $('<div class="pcoe-import-report" style="margin-top:10px"></div>').insertAfter(\$f.closest('div'));
-            }
-            $('.pcoe-import-report').html(resp.data.report_html);
-            }
-            setTimeout(function(){ window.location.reload(); }, 1200);
-        } else {
-            \$msg.text((resp && resp.data && resp.data.msg) ? resp.data.msg : I18N.import_error);
-        }
-        }).fail(function(){
-        \$msg.text(I18N.conn_error);
-        });
-        return false;
-    });
-
-    // === Імпорт у чернетку
-    $(document).on('submit','#pcoe-import-draft-form',function(){
-        var \$f=$(this), \$msg=\$f.find('.pcoe-import-draft-msg');
-        var \$box=$('.pcoe-import-draft-result');
-        \$msg.text(I18N.importing); \$box.hide();
-
-        var fd=new FormData(this); fd.append('action','pcoe_import_order_draft');
-
-        $.ajax({
-        url:'{$ajax}', method:'POST', data:fd, contentType:false, processData:false
-        }).done(function(resp){
-        if(resp && resp.success){
-            // короткий підсумок
-            var importedTxt = I18N.imported ? I18N.imported : 'Imported';
-            \$msg.text(importedTxt+': '+resp.data.imported+', '+I18N.skipped+': '+resp.data.skipped);
-
-            // швидкі кнопки
-            var linksHtml='';
-            if(resp.data.links){
-            if(resp.data.links.edit){ linksHtml += '<a class="button" href="'+resp.data.links.edit+'" target="_blank" rel="noopener">'+I18N.open_in_admin+'</a> '; }
-            if(resp.data.links.view){ linksHtml += '<a class="button" href="'+resp.data.links.view+'" target="_blank" rel="noopener">'+I18N.view_order+'</a>'; }
-            }
-            $('.pcoe-import-draft-links').html(linksHtml||'');
-            $('.pcoe-import-draft-report').html(resp.data.report_html||'');
-            \$box.show();
-
-            setTimeout(function(){ window.location.reload(); }, 800);
-        } else {
-            \$msg.text((resp && resp.data && resp.data.msg) ? resp.data.msg : I18N.import_error);
-        }
-        }).fail(function(){
-        \$msg.text(I18N.conn_error);
-        });
-
-        return false;
-    });
-    });
-    JS;
+        // Передаём ajaxUrl и i18n в pcoeVars
+        wp_localize_script('pcoe-js', 'pcoeVars', [
+            'ajaxUrl' => admin_url('admin-ajax.php'),
+            'i18n' => [
+                'importing'      => __('Importing…', 'pc-order-import-export'),
+                'added'          => __('Added', 'pc-order-import-export'),
+                'skipped'        => __('Skipped', 'pc-order-import-export'),
+                'import_error'   => __('Import error.', 'pc-order-import-export'),
+                'conn_error'     => __('Connection error.', 'pc-order-import-export'),
+                'open_in_admin'  => __('Open in admin', 'pc-order-import-export'),
+                'view_order'     => __('View order', 'pc-order-import-export'),
+                'imported'       => __('Imported', 'pc-order-import-export'),
+            ],
+        ]);
     }
 }

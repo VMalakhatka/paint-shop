@@ -83,9 +83,11 @@ class Helpers {
 
     // нормалізатор колонки + мапінг заголовку
     public static function norm(string $s): string {
+        // убираем BOM, если он есть
+        $s = preg_replace('/^\xEF\xBB\xBF/u', '', $s);
+
         $s = trim(mb_strtolower($s, 'UTF-8'));
         $s = str_replace(['ё','й','–','—','-','.’','’','“','”'], ['е','и','-','-','-','','','',''], $s);
-        // унифицируем многоточия, точки, двойные пробелы
         $s = str_replace(['…','.’','.'], ['','',''], $s);
         $s = preg_replace('~\s+~u',' ', $s);
         return $s;
@@ -180,34 +182,106 @@ public static function build_colmap(array $header): array {
      /** Прочитати CSV/XLS(X) у масив рядків */
     public static function read_rows(string $tmp, string $name): array {
         $rows = [];
+
+        // 1) XLSX/XLS — как и было
         if (preg_match('~\.(xlsx|xls)$~i', $name)) {
             if (class_exists('\\PhpOffice\\PhpSpreadsheet\\IOFactory')) {
-                try{
-                    $xls = \PhpOffice\PhpSpreadsheet\IOFactory::load($tmp);
+                try {
+                    $xls   = \PhpOffice\PhpSpreadsheet\IOFactory::load($tmp);
                     $sheet = $xls->getActiveSheet();
                     foreach ($sheet->toArray(null, true, true, false) as $r) {
                         $rows[] = $r;
                     }
                     return [$rows, null];
-                } catch (\Throwable $e){
+                } catch (\Throwable $e) {
                     return [[], 'Не вдалося прочитати XLS(X): '.$e->getMessage()];
                 }
-            } else {
-                return [[], 'Підтримка XLSX недоступна на цьому сервері. Використайте CSV.'];
+            }
+            return [[], 'Підтримка XLSX недоступна на цьому сервері. Використайте CSV.'];
+        }
+
+        // 2) CSV — читаем через PhpSpreadsheet CSV reader (если доступен)
+        if (class_exists('\\PhpOffice\\PhpSpreadsheet\\Reader\\Csv')) {
+            try {
+                // авто-детект разделителя по первой «насыщенной» строке
+                $sample = @file_get_contents($tmp, false, null, 0, 8192) ?: '';
+                $delims = [',',';',"\t",'|'];
+                $best = ';';
+                $bestCnt = -1;
+                foreach ($delims as $d) {
+                    $c = substr_count($sample, $d);
+                    if ($c > $bestCnt) { $bestCnt = $c; $best = $d; }
+                }
+
+                $reader = new \PhpOffice\PhpSpreadsheet\Reader\Csv();
+                $reader->setDelimiter($best);
+                $reader->setEnclosure('"');
+                $reader->setEscapeCharacter('\\');
+
+                // кодировка: пусть попробует понять сам, а мы подстрахуем UTF-8
+                if (method_exists($reader, 'setInputEncoding')) {
+                    // PhpSpreadsheet CSV читает как UTF-8 по умолчанию.
+                    // Если нужен Windows-1251 — можно раскомментировать автодетект:
+                    // $enc = mb_detect_encoding($sample, ['UTF-8','Windows-1251','Windows-1252','ISO-8859-1'], true) ?: 'UTF-8';
+                    // $reader->setInputEncoding($enc);
+                }
+
+                $spreadsheet = $reader->load($tmp);
+                $sheet = $spreadsheet->getActiveSheet();
+                foreach ($sheet->toArray(null, true, true, false) as $r) {
+                    // фильтр «пустых» строк: всё пусто или массив из одного null
+                    if ($r === [null] || $r === false) { continue; }
+                    // нормализация NBSP тонких пробелов по всем ячейкам
+                    foreach ($r as $i => $v) {
+                        if ($v === null) continue;
+                        $v = (string)$v;
+                        // снять BOM, если прилип к первой ячейке
+                        if ($i === 0 && isset($v[0]) && substr($v,0,3) === "\xEF\xBB\xBF") {
+                            $v = substr($v,3);
+                        }
+                        $v = preg_replace('/\x{00A0}|\x{2007}|\x{202F}/u', ' ', $v);
+                        $r[$i] = trim($v);
+                    }
+                    $rows[] = $r;
+                }
+                return [$rows, null];
+
+            } catch (\Throwable $e) {
+                // упали — мягко откатываемся на fgetcsv
             }
         }
-        // CSV
+
+        // 3) Fallback: нативный fgetcsv (как было, но с авто-разделителем и BOM-фикс)
         $sep = ';';
         $peek = @file_get_contents($tmp, false, null, 0, 2048);
-        if ($peek && substr_count($peek, ',') > substr_count($peek, ';')) $sep = ',';
+        if ($peek) {
+            $candidates = [',',';',"\t",'|'];
+            $best = ';'; $bestCnt = -1;
+            foreach ($candidates as $d) {
+                $c = substr_count($peek, $d);
+                if ($c > $bestCnt) { $bestCnt = $c; $best = $d; }
+            }
+            $sep = $best;
+        }
         if (($fh = @fopen($tmp, 'r')) !== false) {
+            $rowIndex = 0;
             while (($r = fgetcsv($fh, 0, $sep)) !== false) {
                 if ($r === [null] || $r === false) continue;
+                if ($rowIndex === 0 && isset($r[0])) {
+                    $r[0] = preg_replace('/^\xEF\xBB\xBF/u', '', (string)$r[0]);
+                }
+                foreach ($r as $i => $v) {
+                    $v = (string)$v;
+                    $v = preg_replace('/\x{00A0}|\x{2007}|\x{202F}/u', ' ', $v);
+                    $r[$i] = trim($v);
+                }
                 $rows[] = $r;
+                $rowIndex++;
             }
             fclose($fh);
             return [$rows, null];
         }
+
         return [[], 'Не вдалося прочитати файл'];
     }
 
@@ -241,12 +315,35 @@ public static function build_colmap(array $header): array {
         return [$map, $start];
     }
 
+    private static function strip_quotes(string $s): string {
+        // срезаем только обрамляющие (“умные” тоже)
+        return preg_replace('~^[\'"“”‚‛‘’]+|[\'"“”‚‛‘’]+$~u', '', $s);
+    }
+
+    private static function strip_weird_spaces(string $s): string {
+        // NBSP / узкие пробелы → обычный пробел
+        return preg_replace('/\x{00A0}|\x{2007}|\x{202F}/u', ' ', $s);
+    }
+
     /** Пошук товару за SKU/GTIN */
     public static function resolve_product_id(string $sku, string $gtin): int {
-        $pid = 0;
-        if ($sku !== '')  $pid = wc_get_product_id_by_sku($sku);
-        if (!$pid && $gtin !== '') $pid = self::find_product_by_gtin($gtin);
-        return (int)$pid;
+        $sku  = trim($sku);
+        // GTIN оставляем как есть, но очищаем от пробелов/разделителей
+        $gtin = preg_replace('~\s+~u', '', (string)$gtin);
+
+        // если GTIN есть — пробуем первым
+        if ($gtin !== '') {
+            $pid = self::find_product_by_gtin($gtin);
+            if ($pid) return (int)$pid;
+            // если по GTIN не нашли — пробуем SKU
+        }
+
+        if ($sku !== '') {
+            $pid = wc_get_product_id_by_sku($sku);
+            if ($pid) return (int)$pid;
+        }
+
+        return 0;
     }
 
     /** Парсер ціни (уніфікований з Draft) */
@@ -377,7 +474,20 @@ public static function build_colmap(array $header): array {
     // Безпечне читання клітинки рядка за індексом
     public static function safe_val(array $row, $idx): string {
         if ($idx === null || $idx === false) return '';
-        return isset($row[$idx]) ? trim((string)$row[$idx]) : '';
+        if (!array_key_exists($idx, $row)) return '';
+
+        $v = (string)$row[$idx];
+
+        // снять BOM (если внезапно попал в першу клітинку)
+        if (isset($v[0]) && substr($v, 0, 3) === "\xEF\xBB\xBF") {
+            $v = substr($v, 3);
+        }
+
+        // унификация пробелов + срез обрамляющих кавычек
+        $v = self::strip_weird_spaces(self::strip_quotes($v));
+
+        // финальный trim
+        return trim($v);
     }
 
     // Рядок звіту (для Cart/Draft)
