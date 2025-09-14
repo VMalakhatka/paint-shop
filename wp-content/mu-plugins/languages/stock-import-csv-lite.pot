@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-09-14T12:57:18+00:00\n"
+"POT-Creation-Date: 2025-09-14T13:07:19+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: stock-import-csv-lite\n"
@@ -21,10 +21,178 @@ msgstr ""
 
 #. Description of the plugin
 #: stock-import-csv-lite.php
-msgid "Боевой импорт остатков в wp_stock_import. Поддерживает длинный (sku,location_slug,qty) и широкий (sku,<склады>...) форматы. Есть SMOKE‑TEST. На странице — встроенная документация и примеры CSV."
+msgid "Production stock import into wp_stock_import. Supports long (sku,location_slug,qty) and wide (sku,<warehouses>...) CSV formats. Includes a SMOKE TEST. The page contains built-in docs and CSV examples."
 msgstr ""
 
 #. Author of the plugin
 #: stock-import-csv-lite.php
 msgid "PaintCore"
+msgstr ""
+
+#: stock-import-csv-lite.php:26
+#: stock-import-csv-lite.php:27
+msgid "Stock Import (Lite)"
+msgstr ""
+
+#: stock-import-csv-lite.php:52
+msgid "Insufficient permissions."
+msgstr ""
+
+#: stock-import-csv-lite.php:57
+msgid "Stock Import (CSV → wp_stock_import) — LITE"
+msgstr ""
+
+#: stock-import-csv-lite.php:61
+msgid "Formats: <strong>long</strong> (<code>sku,location_slug,qty</code>) and <strong>wide</strong> (<code>sku,kiev1,odesa,...</code>).<br>Encoding: UTF-8/CP1251 (auto). Delimiter: <code>,</code> / <code>;</code> / <code>TAB</code> (auto)."
+msgstr ""
+
+#: stock-import-csv-lite.php:70
+msgid "CSV file"
+msgstr ""
+
+#: stock-import-csv-lite.php:74
+msgid "TRUNCATE"
+msgstr ""
+
+#: stock-import-csv-lite.php:78
+msgid "Clear <code>wp_stock_import</code> before import"
+msgstr ""
+
+#: stock-import-csv-lite.php:84
+msgid "Import CSV"
+msgstr ""
+
+#: stock-import-csv-lite.php:85
+msgid "SMOKE-TEST (insert CR-TEST-SMOKE)"
+msgstr ""
+
+#: stock-import-csv-lite.php:96
+msgid "Report"
+msgstr ""
+
+#: stock-import-csv-lite.php:294
+#: stock-import-csv-lite.php:297
+msgid "Documentation"
+msgstr ""
+
+#: stock-import-csv-lite.php:295
+msgid "Copied ✓"
+msgstr ""
+
+#: stock-import-csv-lite.php:296
+#: stock-import-csv-lite.php:322
+#: stock-import-csv-lite.php:331
+msgid "Copy example"
+msgstr ""
+
+#: stock-import-csv-lite.php:298
+msgid "This page imports CSV into the <code>wp_stock_import</code> table."
+msgstr ""
+
+#: stock-import-csv-lite.php:300
+msgid "Table structure"
+msgstr ""
+
+#: stock-import-csv-lite.php:308
+msgid "SKU (product code)."
+msgstr ""
+
+#: stock-import-csv-lite.php:309
+msgid "Warehouse (slug)."
+msgstr ""
+
+#: stock-import-csv-lite.php:310
+msgid "Quantity (up to 3 decimals)."
+msgstr ""
+
+#: stock-import-csv-lite.php:313
+msgid "Supported CSV formats"
+msgstr ""
+
+#: stock-import-csv-lite.php:316
+msgid "1) Long format"
+msgstr ""
+
+#: stock-import-csv-lite.php:325
+msgid "2) Wide format"
+msgstr ""
+
+#: stock-import-csv-lite.php:332
+msgid "Empty/zero warehouse cells are skipped."
+msgstr ""
+
+#: stock-import-csv-lite.php:336
+msgid "Delimiters and encoding"
+msgstr ""
+
+#: stock-import-csv-lite.php:338
+msgid "Delimiter: auto — <code>;</code> / <code>,</code> / <code>TAB</code>."
+msgstr ""
+
+#: stock-import-csv-lite.php:339
+msgid "Encoding: auto — UTF-8 / Windows-1251 / ISO-8859-1 / Windows-1252."
+msgstr ""
+
+#: stock-import-csv-lite.php:340
+msgid "Decimals: both <code>.</code> and <code>,</code> are recognized."
+msgstr ""
+
+#: stock-import-csv-lite.php:343
+msgid "Warehouse aliases"
+msgstr ""
+
+#: stock-import-csv-lite.php:344
+msgid "The following variants normalize to slugs:"
+msgstr ""
+
+#: stock-import-csv-lite.php:346
+msgid "Input"
+msgstr ""
+
+#: stock-import-csv-lite.php:346
+msgid "Becomes"
+msgstr ""
+
+#: stock-import-csv-lite.php:352
+msgid "Unknown names are converted to a slug via <code>sanitize_title()</code>."
+msgstr ""
+
+#: stock-import-csv-lite.php:354
+msgid "Import rules"
+msgstr ""
+
+#: stock-import-csv-lite.php:356
+msgid "Key: <code>(sku, location_slug)</code>. On conflict — update (<em>upsert</em>)."
+msgstr ""
+
+#: stock-import-csv-lite.php:357
+msgid "<strong>TRUNCATE</strong> — removes all old rows before inserting."
+msgstr ""
+
+#: stock-import-csv-lite.php:358
+msgid "Wide format: empty/zero cells do not create rows."
+msgstr ""
+
+#: stock-import-csv-lite.php:361
+msgid "How to prepare CSV"
+msgstr ""
+
+#: stock-import-csv-lite.php:363
+msgid "Export from Excel/Sheets as <em>CSV</em> (preferably UTF-8)."
+msgstr ""
+
+#: stock-import-csv-lite.php:364
+msgid "For the wide format — first column is <code>sku</code>, then warehouse names (<code>kiev1</code>, <code>odesa</code>, …)."
+msgstr ""
+
+#: stock-import-csv-lite.php:367
+msgid "Diagnostics"
+msgstr ""
+
+#: stock-import-csv-lite.php:369
+msgid "The <strong>SMOKE-TEST</strong> button inserts a test row <code>(CR-TEST-SMOKE, kiev1, 7)</code>."
+msgstr ""
+
+#: stock-import-csv-lite.php:370
+msgid "For verbose logs you can temporarily enable a verbose build and check <code>wp-content/debug.log</code>."
 msgstr ""

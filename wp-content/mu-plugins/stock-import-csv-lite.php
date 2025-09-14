@@ -1,9 +1,11 @@
 <?php
 /*
 Plugin Name: Stock Import CSV — Lite (stable + docs)
-Description: Боевой импорт остатков в wp_stock_import. Поддерживает длинный (sku,location_slug,qty) и широкий (sku,<склады>...) форматы. Есть SMOKE‑TEST. На странице — встроенная документация и примеры CSV.
+Description: Production stock import into wp_stock_import. Supports long (sku,location_slug,qty) and wide (sku,<warehouses>...) CSV formats. Includes a SMOKE TEST. The page contains built-in docs and CSV examples.
 Version: 1.2.0
 Author: PaintCore
+Text Domain: stock-import-csv-lite
+Domain Path: /languages
 */
 if (!defined('ABSPATH')) exit;
 
@@ -21,8 +23,8 @@ class Stock_Import_CSV_Lite {
     public function menu() {
         add_submenu_page(
             'tools.php',
-            'Импорт остатков (Lite)',
-            'Импорт остатков (Lite)',
+            __( 'Stock Import (Lite)', 'stock-import-csv-lite' ),
+            __( 'Stock Import (Lite)', 'stock-import-csv-lite' ),
             self::CAP,
             self::SLUG,
             [$this,'page']
@@ -47,43 +49,51 @@ class Stock_Import_CSV_Lite {
     }
 
     public function page() {
-        if (!current_user_can(self::CAP)) wp_die('Недостаточно прав.');
+        if (!current_user_can(self::CAP)) wp_die( __( 'Insufficient permissions.', 'stock-import-csv-lite' ) );
         $rep = $this->last_report;
 
         ?>
         <div class="wrap">
-            <h1>Импорт остатков (CSV → wp_stock_import) — LITE</h1>
+            <h1><?php echo esc_html__( 'Stock Import (CSV → wp_stock_import) — LITE', 'stock-import-csv-lite' ); ?></h1>
             <p class="description">
-                Форматы: <strong>длинный</strong> (<code>sku,location_slug,qty</code>) и <strong>широкий</strong> (<code>sku,kiev1,odesa,...</code>).<br>
-                Кодировка: UTF‑8/CP1251 (авто). Разделитель: <code>,</code> / <code>;</code> / <code>TAB</code> (авто).
+                <?php
+                echo wp_kses_post(
+                    __( 'Formats: <strong>long</strong> (<code>sku,location_slug,qty</code>) and <strong>wide</strong> (<code>sku,kiev1,odesa,...</code>).<br>Encoding: UTF-8/CP1251 (auto). Delimiter: <code>,</code> / <code>;</code> / <code>TAB</code> (auto).', 'stock-import-csv-lite' )
+                );
+                ?>
             </p>
 
             <form method="post" enctype="multipart/form-data">
                 <?php wp_nonce_field('stock_import_lite'); ?>
                 <table class="form-table" role="presentation">
                     <tr>
-                        <th scope="row">CSV‑файл</th>
+                        <th scope="row"><?php echo esc_html__( 'CSV file', 'stock-import-csv-lite' ); ?></th>
                         <td><input type="file" name="csv" accept=".csv,text/csv" required></td>
                     </tr>
                     <tr>
-                        <th scope="row">TRUNCATE</th>
-                        <td><label><input type="checkbox" name="truncate" value="1"> Очистить <code>wp_stock_import</code> перед импортом</label></td>
+                        <th scope="row"><?php echo esc_html__( 'TRUNCATE', 'stock-import-csv-lite' ); ?></th>
+                        <td>
+                            <label>
+                                <input type="checkbox" name="truncate" value="1">
+                                <?php echo wp_kses_post( __( 'Clear <code>wp_stock_import</code> before import', 'stock-import-csv-lite' ) ); ?>
+                            </label>
+                        </td>
                     </tr>
                 </table>
                 <p class="submit">
-                    <button class="button button-primary" name="do_import" value="1">Импортировать CSV</button>
-                    <button class="button" name="smoke" value="1">SMOKE‑TEST (вставить CR‑TEST‑SMOKE)</button>
+                    <button class="button button-primary" name="do_import" value="1"><?php echo esc_html__( 'Import CSV', 'stock-import-csv-lite' ); ?></button>
+                    <button class="button" name="smoke" value="1"><?php echo esc_html__( 'SMOKE-TEST (insert CR-TEST-SMOKE)', 'stock-import-csv-lite' ); ?></button>
                 </p>
             </form>
 
             <?php
-            // Встроенная документация
+            // Built-in documentation
             $this->render_docs_block();
             ?>
 
             <?php if ($rep !== null): ?>
                 <hr>
-                <h2>Отчёт</h2>
+                <h2><?php echo esc_html__( 'Report', 'stock-import-csv-lite' ); ?></h2>
                 <pre style="background:#fff;border:1px solid #ccd0d4;padding:8px;max-height:420px;overflow:auto"><?php
                     echo esc_html(print_r($rep, true));
                 ?></pre>
@@ -151,6 +161,7 @@ class Stock_Import_CSV_Lite {
         if (!$headers) { fclose($fh); @unlink($tmp); @unlink($path); return ['ok'=>false,'stage'=>'header','error'=>'no header']; }
 
         $aliasMap = [
+            // aliases -> normalized slugs
             'киев'=>'kiev1','київ'=>'kiev1','kiev'=>'kiev1','к'=>'kiev1',
             'одесса'=>'odesa','одеса'=>'odesa','odessa'=>'odesa','odesa'=>'odesa','о'=>'odesa',
         ];
@@ -184,7 +195,7 @@ class Stock_Import_CSV_Lite {
         if (!$isLong && !$isWide) {
             fclose($fh); @unlink($tmp); @unlink($path);
             return [
-                'ok'=>false,'stage'=>'format','error'=>'Не распознан формат',
+                'ok'=>false,'stage'=>'format','error'=>'format not recognized',
                 'headers'=>$headers,'headers_norm'=>$headers_norm,'encoding'=>$enc,'delimiter'=>($delim === "\t" ? 'TAB' : $delim)
             ];
         }
@@ -264,7 +275,7 @@ class Stock_Import_CSV_Lite {
         $wpdb->query($q);
     }
 
-    /** ВСТРОЕННАЯ ДОКУМЕНТАЦИЯ */
+    /** Built-in documentation */
     private function render_docs_block() { ?>
         <hr>
         <style>
@@ -279,11 +290,14 @@ class Stock_Import_CSV_Lite {
             .muted{color:#666}
         </style>
 
-        <div class="stock-docs">
-          <h2>Документация по импорту</h2>
-          <p class="muted">Страница загружает CSV в таблицу <code>wp_stock_import</code>.</p>
+        <div class="stock-docs"
+             data-lbl-docs="<?php echo esc_attr__( 'Documentation', 'stock-import-csv-lite' ); ?>"
+             data-lbl-copied="<?php echo esc_attr__( 'Copied ✓', 'stock-import-csv-lite' ); ?>"
+             data-lbl-copy="<?php echo esc_attr__( 'Copy example', 'stock-import-csv-lite' ); ?>">
+          <h2><?php echo esc_html__( 'Documentation', 'stock-import-csv-lite' ); ?></h2>
+          <p class="muted"><?php echo wp_kses_post( __( 'This page imports CSV into the <code>wp_stock_import</code> table.', 'stock-import-csv-lite' ) ); ?></p>
 
-          <h3>Таблица назначения</h3>
+          <h3><?php echo esc_html__( 'Table structure', 'stock-import-csv-lite' ); ?></h3>
           <pre>CREATE TABLE wp_stock_import (
   sku           VARCHAR(191) NOT NULL,
   location_slug VARCHAR(191) NOT NULL,
@@ -291,83 +305,88 @@ class Stock_Import_CSV_Lite {
   PRIMARY KEY (sku, location_slug)
 );</pre>
           <ul>
-            <li><code>sku</code> — артикул.</li>
-            <li><code>location_slug</code> — склад (слаг).</li>
-            <li><code>qty</code> — остаток (до 3 знаков после запятой).</li>
+            <li><code>sku</code> — <?php echo esc_html__( 'SKU (product code).', 'stock-import-csv-lite' ); ?></li>
+            <li><code>location_slug</code> — <?php echo esc_html__( 'Warehouse (slug).', 'stock-import-csv-lite' ); ?></li>
+            <li><code>qty</code> — <?php echo esc_html__( 'Quantity (up to 3 decimals).', 'stock-import-csv-lite' ); ?></li>
           </ul>
 
-          <h3>Поддерживаемые форматы CSV</h3>
+          <h3><?php echo esc_html__( 'Supported CSV formats', 'stock-import-csv-lite' ); ?></h3>
           <div class="grid">
             <div>
-              <strong>1) Длинный</strong> — <code>sku,location_slug,qty</code>
+              <strong><?php echo esc_html__( '1) Long format', 'stock-import-csv-lite' ); ?></strong> — <code>sku,location_slug,qty</code>
               <pre id="ex-long">sku;location_slug;qty
 CR-TEST-001;kiev1;10
 CR-TEST-001;odesa;3.5
 CR-TEST-002;kiev1;0
 CR-TEST-003;odesa;7</pre>
-              <button type="button" class="button copy-btn" data-copy="#ex-long">Скопировать пример</button>
+              <button type="button" class="button copy-btn" data-copy="#ex-long"><?php echo esc_html__( 'Copy example', 'stock-import-csv-lite' ); ?></button>
             </div>
             <div>
-              <strong>2) Широкий</strong> — <code>sku,&lt;склады&gt;…</code>
+              <strong><?php echo esc_html__( '2) Wide format', 'stock-import-csv-lite' ); ?></strong> — <code>sku,&lt;warehouses&gt;…</code>
               <pre id="ex-wide">sku,kiev1,odesa
-A-AZ РАЗНОЕ,"68583,91",0
+A-AZ MISC,"68583,91",0
 AB-111-10X15,0,0
 AB-111-20X20,0,0
 AB-111-20X30,0,0</pre>
-              <button type="button" class="button copy-btn" data-copy="#ex-wide">Скопировать пример</button>
-              <p class="muted">Пустые/нулевые ячейки по складам пропускаются.</p>
+              <button type="button" class="button copy-btn" data-copy="#ex-wide"><?php echo esc_html__( 'Copy example', 'stock-import-csv-lite' ); ?></button>
+              <p class="muted"><?php echo esc_html__( 'Empty/zero warehouse cells are skipped.', 'stock-import-csv-lite' ); ?></p>
             </div>
           </div>
 
-          <h3>Разделители и кодировка</h3>
+          <h3><?php echo esc_html__( 'Delimiters and encoding', 'stock-import-csv-lite' ); ?></h3>
           <ul>
-            <li>Разделитель: авто — <code>;</code> / <code>,</code> / <code>TAB</code>.</li>
-            <li>Кодировка: авто — UTF‑8 / Windows‑1251 / ISO‑8859‑1 / Windows‑1252.</li>
-            <li>Дробная часть: и <code>.</code>, и <code>,</code> распознаются.</li>
+            <li><?php echo wp_kses_post( __( 'Delimiter: auto — <code>;</code> / <code>,</code> / <code>TAB</code>.', 'stock-import-csv-lite' ) ); ?></li>
+            <li><?php echo esc_html__( 'Encoding: auto — UTF-8 / Windows-1251 / ISO-8859-1 / Windows-1252.', 'stock-import-csv-lite' ); ?></li>
+            <li><?php echo wp_kses_post( __( 'Decimals: both <code>.</code> and <code>,</code> are recognized.', 'stock-import-csv-lite' ) ); ?></li>
           </ul>
 
-          <h3>Алиасы складов</h3>
-          <p>Следующие варианты нормализуются в слаги:</p>
+          <h3><?php echo esc_html__( 'Warehouse aliases', 'stock-import-csv-lite' ); ?></h3>
+          <p><?php echo esc_html__( 'The following variants normalize to slugs:', 'stock-import-csv-lite' ); ?></p>
           <table class="widefat striped">
-            <thead><tr><th>Вход</th><th>Станет</th></tr></thead>
+            <thead><tr><th><?php echo esc_html__( 'Input', 'stock-import-csv-lite' ); ?></th><th><?php echo esc_html__( 'Becomes', 'stock-import-csv-lite' ); ?></th></tr></thead>
             <tbody>
               <tr><td>киев / київ / kiev / к</td><td><code>kiev1</code></td></tr>
               <tr><td>одесса / одеса / odessa / odesa / о</td><td><code>odesa</code></td></tr>
             </tbody>
           </table>
-          <p class="muted">Незнакомые названия превращаются в slug через <code>sanitize_title()</code>.</p>
+          <p class="muted"><?php echo wp_kses_post( __( 'Unknown names are converted to a slug via <code>sanitize_title()</code>.', 'stock-import-csv-lite' ) ); ?></p>
 
-          <h3>Правила импорта</h3>
+          <h3><?php echo esc_html__( 'Import rules', 'stock-import-csv-lite' ); ?></h3>
           <ul>
-            <li>Ключ: <code>(sku, location_slug)</code>. При совпадении — обновление (<em>upsert</em>).</li>
-            <li><strong>TRUNCATE</strong> — удаляет все старые строки перед вставкой.</li>
-            <li>Широкий формат: пустые/нулевые ячейки не создают записей.</li>
+            <li><?php echo wp_kses_post( __( 'Key: <code>(sku, location_slug)</code>. On conflict — update (<em>upsert</em>).', 'stock-import-csv-lite' ) ); ?></li>
+            <li><?php echo wp_kses_post( __( '<strong>TRUNCATE</strong> — removes all old rows before inserting.', 'stock-import-csv-lite' ) ); ?></li>
+            <li><?php echo esc_html__( 'Wide format: empty/zero cells do not create rows.', 'stock-import-csv-lite' ); ?></li>
           </ul>
 
-          <h3>Как подготовить CSV</h3>
+          <h3><?php echo esc_html__( 'How to prepare CSV', 'stock-import-csv-lite' ); ?></h3>
           <ol>
-            <li>Экспорт из Excel/Sheets как <em>CSV</em> (желательно UTF‑8).</li>
-            <li>В «широком» формате — первая колонка <code>sku</code>, дальше названия складов (<code>kiev1</code>, <code>odesa</code>, …).</li>
+            <li><?php echo wp_kses_post( __( 'Export from Excel/Sheets as <em>CSV</em> (preferably UTF-8).', 'stock-import-csv-lite' ) ); ?></li>
+            <li><?php echo wp_kses_post( __( 'For the wide format — first column is <code>sku</code>, then warehouse names (<code>kiev1</code>, <code>odesa</code>, …).', 'stock-import-csv-lite' ) ); ?></li>
           </ol>
 
-          <h3>Диагностика</h3>
+          <h3><?php echo esc_html__( 'Diagnostics', 'stock-import-csv-lite' ); ?></h3>
           <ul>
-            <li>Кнопка <strong>SMOKE‑TEST</strong> вставит тестовую строку <code>(CR-TEST-SMOKE, kiev1, 7)</code>.</li>
-            <li>При необходимости подробного лога можно временно включить версию «Verbose» и смотреть <code>wp-content/debug.log</code>.</li>
+            <li><?php echo wp_kses_post( __( 'The <strong>SMOKE-TEST</strong> button inserts a test row <code>(CR-TEST-SMOKE, kiev1, 7)</code>.', 'stock-import-csv-lite' ) ); ?></li>
+            <li><?php echo wp_kses_post( __( 'For verbose logs you can temporarily enable a verbose build and check <code>wp-content/debug.log</code>.', 'stock-import-csv-lite' ) ); ?></li>
           </ul>
         </div>
 
         <script>
-        document.addEventListener('click', function(e){
-          if(!e.target.matches('.copy-btn')) return;
-          const sel = e.target.getAttribute('data-copy');
-          const el = document.querySelector(sel);
-          if(!el) return;
-          navigator.clipboard.writeText(el.textContent).then(()=>{
-            e.target.textContent = 'Скопировано ✓';
-            setTimeout(()=>{ e.target.textContent = 'Скопировать пример'; }, 1500);
+        (function(){
+          document.addEventListener('click', function(e){
+            if(!e.target.matches('.copy-btn')) return;
+            const root = document.querySelector('.stock-docs');
+            const lblCopied = root ? root.getAttribute('data-lbl-copied') : 'Copied ✓';
+            const lblCopy   = root ? root.getAttribute('data-lbl-copy')   : 'Copy example';
+            const sel = e.target.getAttribute('data-copy');
+            const el = document.querySelector(sel);
+            if(!el) return;
+            navigator.clipboard.writeText(el.textContent).then(()=>{
+              e.target.textContent = lblCopied;
+              setTimeout(()=>{ e.target.textContent = lblCopy; }, 1500);
+            });
           });
-        });
+        })();
         </script>
         <?php
     }

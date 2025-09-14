@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: stock-import-csv-lite 1.2.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/stock-import-csv-"
 "lite\n"
-"POT-Creation-Date: 2025-09-14T09:46:18+00:00\n"
+"POT-Creation-Date: 2025-09-14T13:04:41+00:00\n"
 "PO-Revision-Date: 2025-09-14T09:46:18+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -26,12 +26,192 @@ msgstr ""
 #. Description of the plugin
 #: stock-import-csv-lite.php
 msgid ""
-"Боевой импорт остатков в wp_stock_import. Поддерживает длинный (sku,"
-"location_slug,qty) и широкий (sku,<склады>...) форматы. Есть SMOKE‑TEST. На "
-"странице — встроенная документация и примеры CSV."
+"Production stock import into wp_stock_import. Supports long (sku,"
+"location_slug,qty) and wide (sku,<warehouses>...) CSV formats. Includes a "
+"SMOKE TEST. The page contains built-in docs and CSV examples."
 msgstr ""
 
 #. Author of the plugin
 #: stock-import-csv-lite.php
 msgid "PaintCore"
+msgstr "PaintCore"
+
+#: stock-import-csv-lite.php:26 stock-import-csv-lite.php:27
+msgid "Stock Import (Lite)"
+msgstr "Імпорт залишків (Lite)"
+
+#: stock-import-csv-lite.php:52
+msgid "Insufficient permissions."
+msgstr "Недостатньо прав."
+
+#: stock-import-csv-lite.php:57
+msgid "Stock Import (CSV → wp_stock_import) — LITE"
+msgstr "Імпорт залишків (CSV → wp_stock_import) — LITE"
+
+#: stock-import-csv-lite.php:61
+msgid ""
+"Formats: <strong>long</strong> (<code>sku,location_slug,qty</code>) and "
+"<strong>wide</strong> (<code>sku,kiev1,odesa,...</code>).<br>Encoding: UTF-8/"
+"CP1251 (auto). Delimiter: <code>,</code> / <code>;</code> / <code>TAB</code> "
+"(auto)."
 msgstr ""
+"Формати: <strong>довгий</strong> (<code>sku,location_slug,qty</code>) і "
+"<strong>широкий</strong> (<code>sku,kiev1,odesa,...</code>).<br>Кодування: UTF-8/CP1251 (авто). Роздільник: <code>,</code> / <code>;</code> / <code>TAB</code> (авто)."
+
+#: stock-import-csv-lite.php:70
+msgid "CSV file"
+msgstr "CSV-файл"
+
+#: stock-import-csv-lite.php:74
+msgid "TRUNCATE"
+msgstr "TRUNCATE"
+
+#: stock-import-csv-lite.php:78
+msgid "Clear <code>wp_stock_import</code> before import"
+msgstr "Очистити <code>wp_stock_import</code> перед імпортом"
+
+#: stock-import-csv-lite.php:84
+msgid "Import CSV"
+msgstr "Імпортувати CSV"
+
+#: stock-import-csv-lite.php:85
+msgid "SMOKE-TEST (insert CR-TEST-SMOKE)"
+msgstr "SMOKE-ТЕСТ (вставити CR-TEST-SMOKE)"
+
+#: stock-import-csv-lite.php:96
+msgid "Report"
+msgstr "Звіт"
+
+#: stock-import-csv-lite.php:294 stock-import-csv-lite.php:297
+msgid "Documentation"
+msgstr "Документація"
+
+#: stock-import-csv-lite.php:295
+msgid "Copied ✓"
+msgstr "Скопійовано ✓"
+
+#: stock-import-csv-lite.php:296 stock-import-csv-lite.php:322
+#: stock-import-csv-lite.php:331
+msgid "Copy example"
+msgstr "Скопіювати приклад"
+
+#: stock-import-csv-lite.php:298
+msgid "This page imports CSV into the <code>wp_stock_import</code> table."
+msgstr "Ця сторінка імпортує CSV у таблицю <code>wp_stock_import</code>."
+
+#: stock-import-csv-lite.php:300
+msgid "Table structure"
+msgstr "Структура таблиці"
+
+#: stock-import-csv-lite.php:308
+msgid "SKU (product code)."
+msgstr "SKU (артикул)."
+
+#: stock-import-csv-lite.php:309
+msgid "Warehouse (slug)."
+msgstr "Склад (slug)."
+
+#: stock-import-csv-lite.php:310
+msgid "Quantity (up to 3 decimals)."
+msgstr "Кількість (до 3 знаків після коми)."
+
+#: stock-import-csv-lite.php:313
+msgid "Supported CSV formats"
+msgstr "Підтримувані формати CSV"
+
+#: stock-import-csv-lite.php:316
+msgid "1) Long format"
+msgstr "1) Довгий формат"
+
+#: stock-import-csv-lite.php:325
+msgid "2) Wide format"
+msgstr "2) Широкий формат"
+
+#: stock-import-csv-lite.php:332
+msgid "Empty/zero warehouse cells are skipped."
+msgstr "Порожні/нульові клітинки складів пропускаються."
+
+#: stock-import-csv-lite.php:336
+msgid "Delimiters and encoding"
+msgstr "Роздільники та кодування"
+
+#: stock-import-csv-lite.php:338
+msgid "Delimiter: auto — <code>;</code> / <code>,</code> / <code>TAB</code>."
+msgstr "Роздільник: авто — <code>;</code> / <code>,</code> / <code>TAB</code>."
+
+#: stock-import-csv-lite.php:339
+msgid "Encoding: auto — UTF-8 / Windows-1251 / ISO-8859-1 / Windows-1252."
+msgstr "Кодування: авто — UTF-8 / Windows-1251 / ISO-8859-1 / Windows-1252."
+
+#: stock-import-csv-lite.php:340
+msgid "Decimals: both <code>.</code> and <code>,</code> are recognized."
+msgstr "Дробова частина: розпізнаються як <code>.</code>, так і <code>,</code>."
+
+#: stock-import-csv-lite.php:343
+msgid "Warehouse aliases"
+msgstr "Аліаси складів"
+
+#: stock-import-csv-lite.php:344
+msgid "The following variants normalize to slugs:"
+msgstr "Наступні варіанти нормалізуються до slug-ів:"
+
+#: stock-import-csv-lite.php:346
+msgid "Input"
+msgstr "Вхід"
+
+#: stock-import-csv-lite.php:346
+msgid "Becomes"
+msgstr "Стає"
+
+#: stock-import-csv-lite.php:352
+msgid ""
+"Unknown names are converted to a slug via <code>sanitize_title()</code>."
+msgstr "Невідомі назви перетворюються на slug через <code>sanitize_title()</code>."
+
+#: stock-import-csv-lite.php:354
+msgid "Import rules"
+msgstr "Правила імпорту"
+
+#: stock-import-csv-lite.php:356
+msgid ""
+"Key: <code>(sku, location_slug)</code>. On conflict — update (<em>upsert</"
+"em>)."
+msgstr "Ключ: <code>(sku, location_slug)</code>. При конфлікті — оновлення (<em>upsert</em>)."
+
+#: stock-import-csv-lite.php:357
+msgid "<strong>TRUNCATE</strong> — removes all old rows before inserting."
+msgstr "<strong>TRUNCATE</strong> — видаляє всі старі рядки перед вставкою."
+
+#: stock-import-csv-lite.php:358
+msgid "Wide format: empty/zero cells do not create rows."
+msgstr "Широкий формат: порожні/нульові клітинки не створюють рядків."
+
+#: stock-import-csv-lite.php:361
+msgid "How to prepare CSV"
+msgstr "Як підготувати CSV"
+
+#: stock-import-csv-lite.php:363
+msgid "Export from Excel/Sheets as <em>CSV</em> (preferably UTF-8)."
+msgstr "Експортуйте з Excel/Sheets як <em>CSV</em> (бажано UTF-8)."
+
+#: stock-import-csv-lite.php:364
+msgid ""
+"For the wide format — first column is <code>sku</code>, then warehouse names "
+"(<code>kiev1</code>, <code>odesa</code>, …)."
+msgstr "Для широкого формату — перша колонка <code>sku</code>, далі назви складів (<code>kiev1</code>, <code>odesa</code>, …)."
+
+#: stock-import-csv-lite.php:367
+msgid "Diagnostics"
+msgstr "Діагностика"
+
+#: stock-import-csv-lite.php:369
+msgid ""
+"The <strong>SMOKE-TEST</strong> button inserts a test row <code>(CR-TEST-"
+"SMOKE, kiev1, 7)</code>."
+msgstr "Кнопка <strong>SMOKE-ТЕСТ</strong> вставляє тестовий рядок <code>(CR-TEST-SMOKE, kiev1, 7)</code>."
+
+#: stock-import-csv-lite.php:370
+msgid ""
+"For verbose logs you can temporarily enable a verbose build and check "
+"<code>wp-content/debug.log</code>."
+msgstr "Для детальних логів можна тимчасово увімкнути розширений режим і перевірити <code>wp-content/debug.log</code>."
