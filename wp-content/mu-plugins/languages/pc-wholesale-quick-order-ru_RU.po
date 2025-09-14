@@ -5,8 +5,8 @@ msgstr ""
 "Project-Id-Version: pc-wholesale-quick-order 1.3.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/pc-wholesale-"
 "quick-order\n"
-"POT-Creation-Date: 2025-09-14T09:46:18+00:00\n"
-"PO-Revision-Date: 2025-09-14T09:46:18+00:00\n"
+"POT-Creation-Date: 2025-09-14T11:33:24+00:00\n"
+"PO-Revision-Date: 2025-09-14T11:16:32+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: ru\n"
@@ -21,14 +21,126 @@ msgstr ""
 #. Plugin Name of the plugin
 #: pc-wholesale-quick-order.php
 msgid "PC Wholesale Quick Order"
-msgstr ""
+msgstr "Оптовый быстрый заказ"
 
 #. Description of the plugin
 #: pc-wholesale-quick-order.php
 msgid "Табличний «швидкий заказ» для оптовиків + масове додавання в кошик."
 msgstr ""
+"Табличный «быстрый заказ» для оптовиков + массовое добавление в корзину."
 
 #. Author of the plugin
 #: pc-wholesale-quick-order.php
 msgid "PaintCore"
-msgstr ""
+msgstr "PaintCore"
+
+#: pc-wholesale-quick-order.php:18
+msgid "Add all to cart"
+msgstr "Добавить всё в корзину"
+
+#: pc-wholesale-quick-order.php:19
+msgid "Sort:"
+msgstr "Сортировать:"
+
+#: pc-wholesale-quick-order.php:20
+msgid "by title"
+msgstr "по названию"
+
+#: pc-wholesale-quick-order.php:21
+msgid "by SKU"
+msgstr "по артикулу"
+
+#: pc-wholesale-quick-order.php:22
+msgid "by price"
+msgstr "по цене"
+
+#: pc-wholesale-quick-order.php:23
+msgid "⇅ ASC"
+msgstr "⇅ по возрастанию"
+
+#: pc-wholesale-quick-order.php:24
+msgid "⇅ DESC"
+msgstr "⇅ по убыванию"
+
+#: pc-wholesale-quick-order.php:25
+msgid "Hide 0"
+msgstr "Скрыть 0"
+
+#: pc-wholesale-quick-order.php:26
+msgid "Show 0"
+msgstr "Показать 0"
+
+#: pc-wholesale-quick-order.php:27
+#, php-format
+msgid "Selected items: %d, qty: %s"
+msgstr "Выбрано позиций: %d, шт: %s"
+
+#: pc-wholesale-quick-order.php:28
+msgid "No quantities selected."
+msgstr "Не выбрано количество."
+
+#: pc-wholesale-quick-order.php:29
+msgid "Not enough permissions for quick order."
+msgstr "Недостаточно прав для быстрого заказа."
+
+#: pc-wholesale-quick-order.php:30
+msgid "Products not found."
+msgstr "Товары не найдены."
+
+#: pc-wholesale-quick-order.php:32
+#, php-format
+msgid "Added items: %d"
+msgstr "Добавлено позиций: %d"
+
+#: pc-wholesale-quick-order.php:33
+msgid "Add error."
+msgstr "Ошибка добавления."
+
+#: pc-wholesale-quick-order.php:34
+msgid "Connection error (adding)."
+msgstr "Ошибка соединения (добавление)."
+
+#: pc-wholesale-quick-order.php:84 pc-wholesale-quick-order.php:341
+#, php-format
+msgid "%s: %s"
+msgstr "%s: %s"
+
+#: pc-wholesale-quick-order.php:85 pc-wholesale-quick-order.php:342
+msgid "Total"
+msgstr "Всего"
+
+#: pc-wholesale-quick-order.php:183
+msgid "Product list"
+msgstr "Список товаров"
+
+#: pc-wholesale-quick-order.php:269
+msgid "Product"
+msgstr "Товар"
+
+#: pc-wholesale-quick-order.php:270
+msgid "SKU"
+msgstr "Артикул"
+
+#: pc-wholesale-quick-order.php:271
+msgid "Price"
+msgstr "Цена"
+
+#: pc-wholesale-quick-order.php:272
+msgid "In cart"
+msgstr "В корзине"
+
+#: pc-wholesale-quick-order.php:274
+msgid "Stock by mode"
+msgstr "Остатки по режиму"
+
+#: pc-wholesale-quick-order.php:274
+msgid "Availability"
+msgstr "Наличие"
+
+#: pc-wholesale-quick-order.php:276
+msgid "Qty"
+msgstr "Кол-во"
+
+#: pc-wholesale-quick-order.php:381
+msgid "Empty request"
+msgstr "Пустой запрос"

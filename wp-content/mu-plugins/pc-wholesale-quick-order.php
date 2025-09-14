@@ -4,47 +4,34 @@ Plugin Name: PC Wholesale Quick Order
 Description: Табличний «швидкий заказ» для оптовиків + масове додавання в кошик.
 Version: 1.3.2
 Author: PaintCore
+Text Domain: pc-wholesale-quick-order
+Domain Path: /languages
 */
 if (!defined('ABSPATH')) exit;
 
 /** ================= UI LABELS =================
- * Можно переопределить в wp-config.php:
- *   PCQO_LBL_ADD_ALL, PCQO_LBL_SORT, PCQO_LBL_BY_TITLE, PCQO_LBL_BY_SKU, PCQO_LBL_BY_PRICE,
- *   PCQO_LBL_TOGGLE_ASC, PCQO_LBL_TOGGLE_DESC,
- *   PCQO_LBL_HIDE0, PCQO_LBL_SHOW0,
- *   PCQO_LBL_SELECTED_SUMMARY, PCQO_LBL_NO_ITEMS,
- *   PCQO_LBL_NOT_ENOUGH_RIGHTS, PCQO_LBL_NOT_FOUND
- * Или фильтром: add_filter('pcqo_labels', fn($L)=>{ ...; return $L; });
+ * Переопределяй константами в wp-config.php ИЛИ фильтром 'pcqo_labels'.
+ * Важно: перевод берём на этапе рендера, чтобы домен уже был загружен.
  */
-if (!defined('PCQO_LBL_ADD_ALL'))          define('PCQO_LBL_ADD_ALL', 'Додати все в кошик');
-if (!defined('PCQO_LBL_SORT'))             define('PCQO_LBL_SORT', 'Сортувати:');
-if (!defined('PCQO_LBL_BY_TITLE'))         define('PCQO_LBL_BY_TITLE', 'по назві');
-if (!defined('PCQO_LBL_BY_SKU'))           define('PCQO_LBL_BY_SKU', 'по артиклю');
-if (!defined('PCQO_LBL_BY_PRICE'))         define('PCQO_LBL_BY_PRICE', 'по ціні');
-if (!defined('PCQO_LBL_TOGGLE_ASC'))       define('PCQO_LBL_TOGGLE_ASC', '⇅ ЗБІЛ');
-if (!defined('PCQO_LBL_TOGGLE_DESC'))      define('PCQO_LBL_TOGGLE_DESC', '⇅ ЗМЕН');
-if (!defined('PCQO_LBL_HIDE0'))            define('PCQO_LBL_HIDE0', 'Сховати 0');
-if (!defined('PCQO_LBL_SHOW0'))            define('PCQO_LBL_SHOW0', 'Показати 0');
-if (!defined('PCQO_LBL_SELECTED_SUMMARY')) define('PCQO_LBL_SELECTED_SUMMARY', 'Обрано позицій: %d, шт: %s');
-if (!defined('PCQO_LBL_NO_ITEMS'))         define('PCQO_LBL_NO_ITEMS', 'Немає вибраних кількостей.');
-if (!defined('PCQO_LBL_NOT_ENOUGH_RIGHTS'))define('PCQO_LBL_NOT_ENOUGH_RIGHTS', 'Недостатньо прав для швидкого замовлення.');
-if (!defined('PCQO_LBL_NOT_FOUND'))        define('PCQO_LBL_NOT_FOUND', 'Товари не знайдені.');
-
 function pcqo_labels(): array {
     $L = [
-        'add_all'   => PCQO_LBL_ADD_ALL,
-        'sort'      => PCQO_LBL_SORT,
-        'by_title'  => PCQO_LBL_BY_TITLE,
-        'by_sku'    => PCQO_LBL_BY_SKU,
-        'by_price'  => PCQO_LBL_BY_PRICE,
-        'asc'       => PCQO_LBL_TOGGLE_ASC,
-        'desc'      => PCQO_LBL_TOGGLE_DESC,
-        'hide0'     => PCQO_LBL_HIDE0,
-        'show0'     => PCQO_LBL_SHOW0,
-        'summary'   => PCQO_LBL_SELECTED_SUMMARY,
-        'noitems'   => PCQO_LBL_NO_ITEMS,
-        'norights'  => PCQO_LBL_NOT_ENOUGH_RIGHTS,
-        'notfound'  => PCQO_LBL_NOT_FOUND,
+        'add_all'   => defined('PCQO_LBL_ADD_ALL')          ? PCQO_LBL_ADD_ALL          : __('Add all to cart', 'pc-wholesale-quick-order'),
+        'sort'      => defined('PCQO_LBL_SORT')             ? PCQO_LBL_SORT             : __('Sort:', 'pc-wholesale-quick-order'),
+        'by_title'  => defined('PCQO_LBL_BY_TITLE')         ? PCQO_LBL_BY_TITLE         : __('by title', 'pc-wholesale-quick-order'),
+        'by_sku'    => defined('PCQO_LBL_BY_SKU')           ? PCQO_LBL_BY_SKU           : __('by SKU', 'pc-wholesale-quick-order'),
+        'by_price'  => defined('PCQO_LBL_BY_PRICE')         ? PCQO_LBL_BY_PRICE         : __('by price', 'pc-wholesale-quick-order'),
+        'asc'       => defined('PCQO_LBL_TOGGLE_ASC')       ? PCQO_LBL_TOGGLE_ASC       : __('⇅ ASC', 'pc-wholesale-quick-order'),
+        'desc'      => defined('PCQO_LBL_TOGGLE_DESC')      ? PCQO_LBL_TOGGLE_DESC      : __('⇅ DESC', 'pc-wholesale-quick-order'),
+        'hide0'     => defined('PCQO_LBL_HIDE0')            ? PCQO_LBL_HIDE0            : __('Hide 0', 'pc-wholesale-quick-order'),
+        'show0'     => defined('PCQO_LBL_SHOW0')            ? PCQO_LBL_SHOW0            : __('Show 0', 'pc-wholesale-quick-order'),
+        'summary'   => defined('PCQO_LBL_SELECTED_SUMMARY') ? PCQO_LBL_SELECTED_SUMMARY : __('Selected items: %d, qty: %s', 'pc-wholesale-quick-order'),
+        'noitems'   => defined('PCQO_LBL_NO_ITEMS')         ? PCQO_LBL_NO_ITEMS         : __('No quantities selected.', 'pc-wholesale-quick-order'),
+        'norights'  => defined('PCQO_LBL_NOT_ENOUGH_RIGHTS')? PCQO_LBL_NOT_ENOUGH_RIGHTS: __('Not enough permissions for quick order.', 'pc-wholesale-quick-order'),
+        'notfound'  => defined('PCQO_LBL_NOT_FOUND')        ? PCQO_LBL_NOT_FOUND        : __('Products not found.', 'pc-wholesale-quick-order'),
+        // Доп. ярлыки для JS:
+        'added_n'   => defined('PCQO_LBL_ADDED_N')          ? PCQO_LBL_ADDED_N          : __('Added items: %d', 'pc-wholesale-quick-order'),
+        'add_err'   => defined('PCQO_LBL_ADD_ERR')          ? PCQO_LBL_ADD_ERR          : __('Add error.', 'pc-wholesale-quick-order'),
+        'conn_err'  => defined('PCQO_LBL_CONN_ERR')         ? PCQO_LBL_CONN_ERR         : __('Connection error (adding).', 'pc-wholesale-quick-order'),
     ];
     return apply_filters('pcqo_labels', $L);
 }
@@ -93,7 +80,10 @@ function pcqo_render_stock_html(int $product_id): string {
         ]);
     }
     $total = (int) wc_stock_amount(get_post_meta($product_id, '_stock', true));
-    return '<span class="muted">Загал.: '.esc_html($total).'</span>';
+    return '<span class="muted">'
+        . sprintf( esc_html__('%s: %s', 'pc-wholesale-quick-order'),
+                   esc_html__('Total', 'pc-wholesale-quick-order'), esc_html($total) )
+        . '</span>';
 }
 
 /** ===== Шорткод [pc_quick_order] ===== */
@@ -189,8 +179,8 @@ add_shortcode('pc_quick_order', function($atts){
     $base = $post ? get_permalink($post) : home_url('/');
 
     echo '<nav class="woocommerce-breadcrumb" style="margin:6px 0 12px">';
-    // Прибрали «Головна»
-    echo '<a href="'.esc_url($base).'">Список товару</a>';
+    // Прибрали «Home»
+    echo '<a href="'.esc_url($base).'">'.esc_html__('Product list', 'pc-wholesale-quick-order').'</a>';
 
     // Якщо вибрана рівно одна категорія — показуємо її предків + її саму
     if (count($cat_slugs) === 1) {
@@ -276,14 +266,14 @@ ob_start(); ?>
         <table class="pc-qo-table">
             <thead>
                 <tr>
-                    <th style="width:44%;">Товар</th>
-                    <th>Артикль</th>
-                    <th>Ціна</th>
-                    <th class="pc-qo-incart">У кошику</th>
+                    <th style="width:44%;"><?php echo esc_html__('Product', 'pc-wholesale-quick-order'); ?></th>
+                    <th><?php echo esc_html__('SKU', 'pc-wholesale-quick-order'); ?></th>
+                    <th><?php echo esc_html__('Price', 'pc-wholesale-quick-order'); ?></th>
+                    <th class="pc-qo-incart"><?php echo esc_html__('In cart', 'pc-wholesale-quick-order'); ?></th>
                     <?php if ( ! empty( $a['show_stock'] ) ): ?>
-                        <th title="Остатки по режиму">Наявність</th>
+                         <th title="<?php echo esc_attr__('Stock by mode', 'pc-wholesale-quick-order'); ?>"><?php echo esc_html__('Availability', 'pc-wholesale-quick-order'); ?></th>
                     <?php endif; ?>
-                    <th class="pc-qo-qty">К-сть</th>
+                    <th class="pc-qo-qty"><?php echo esc_html__('Qty', 'pc-wholesale-quick-order'); ?></th>
                 </tr>
             </thead>
             <tbody>
@@ -345,7 +335,12 @@ ob_start(); ?>
                     <td class="pc-qo-incart"><?php echo (int) $in_cart_qty; ?></td>
                     <?php if ( ! empty( $a['show_stock'] ) ): ?>
                         <td class="pc-qo-stockhint">
-                            <?php echo $stock_html !== '' ? $stock_html : '<span class="muted">Загал.: '.esc_html($available_for_add).'</span>'; ?>
+                            <?php
+                                echo $stock_html !== ''
+                                    ? $stock_html
+                                    : '<span class="muted">'.sprintf(esc_html__('%s: %s', 'pc-wholesale-quick-order'), 
+                                    esc_html__('Total', 'pc-wholesale-quick-order'), esc_html($available_for_add)).'</span>';
+                            ?>
                         </td>
                     <?php endif; ?>
                     <td class="pc-qo-qty">
@@ -383,7 +378,7 @@ add_action('wp_ajax_pc_bulk_add_to_cart',        'pc_qo_bulk_add');
 add_action('wp_ajax_nopriv_pc_bulk_add_to_cart', 'pc_qo_bulk_add');
 function pc_qo_bulk_add(){
     check_ajax_referer('pc_bulk_add');
-    if (empty($_POST['items']) || !is_array($_POST['items'])) wp_send_json_error(['msg'=>'Порожній запит']);
+    if (empty($_POST['items']) || !is_array($_POST['items'])) wp_send_json_error(['msg'=>__('Empty request','pc-wholesale-quick-order')]);
 
     $added = 0;
     foreach ($_POST['items'] as $row) {
@@ -479,6 +474,9 @@ add_action('wp_enqueue_scripts', function(){
 
     $ajax_url = admin_url('admin-ajax.php');
     $L = pcqo_labels();
+    $added_n = $L['added_n'];
+    $add_err = $L['add_err'];
+    $conn_err= $L['conn_err'];
 
 // Готуємо JS окремим nowdoc — $ у ньому не інтерполюється PHP-ом
 $js = <<<'JS'
@@ -605,14 +603,14 @@ jQuery(function($){
                 items: list
             }, function(resp){
                 if(resp && resp.success){
-                    $('.pc-qo-message').text('Додано позицій: ' + resp.data.added);
+                    $('.pc-qo-message').text(sprintf(__ADDED_N__, resp.data.added));
                 }else{
-                    $('.pc-qo-message').text('Помилка додавання.');
+                    $('.pc-qo-message').text(__ADD_ERR__);
                 }
                 dfd.resolve();
             }).fail(function(){
                 $btn.prop('disabled', false).text(__ADDALL__);
-                $('.pc-qo-message').text('Помилка зв\'язку (додавання).');
+                $('.pc-qo-message').text(__CONN_ERR__);
                 dfd.resolve();
             });
             return dfd.promise();
@@ -633,8 +631,8 @@ JS;
     $adj_nonce = wp_create_nonce('pc_cart_adj');
 
     $js = str_replace(
-        ['__SUMMARY__',              '__NOITEMS__',               '__AJAX_URL__',                        '__ADDALL__',            '__ADJ_NONCE__'],
-        [json_encode($L['summary']), json_encode($L['noitems']),  json_encode(admin_url('admin-ajax.php')), json_encode($L['add_all']), json_encode($adj_nonce)],
+        ['__SUMMARY__',              '__NOITEMS__',               '__AJAX_URL__',                         '__ADDALL__',             '__ADJ_NONCE__',         '__ADDED_N__',           '__ADD_ERR__',            '__CONN_ERR__'],
+        [json_encode($L['summary']), json_encode($L['noitems']),  json_encode(admin_url('admin-ajax.php')), json_encode($L['add_all']), json_encode($adj_nonce), json_encode($added_n),    json_encode($add_err),    json_encode($conn_err)],
         $js
     );
 
