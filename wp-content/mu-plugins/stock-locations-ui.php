@@ -349,7 +349,8 @@ if (!function_exists('slu_render_stock_panel')) {
                 </div>
             </div>
             <?php
-            return (string) ob_get_clean();
+            $html = (string) ob_get_clean();
+            return apply_filters('slu_stock_panel_html', $html, $product, $v, $o);
         }
 
         // auto/manual
@@ -391,7 +392,8 @@ if (!function_exists('slu_render_stock_panel')) {
             </div>
         </div>
         <?php
-        return (string) ob_get_clean();
+        $html = (string) ob_get_clean();
+        return apply_filters('slu_stock_panel_html', $html, $product, $v, $o);
     }
 }
 

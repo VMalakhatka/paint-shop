@@ -1,118 +1,150 @@
 <?php
 /*
 Plugin Name: Stock Sync → WooCommerce
-Description: Синхронизирует wp_stock_import → меты товара (_stock_at_{TERM_ID}), суммирует в _stock, проставляет таксономию location и, при желании, дублирует меты по slug. Умеет удалять обработанные строки и крутиться до опустошения таблицы.
-Version: 1.3.0
+Description: Syncs wp_stock_import → product metas (_stock_at_{TERM_ID}), sums into _stock, assigns the 'location' taxonomy and optionally duplicates metas by slug. Can delete processed rows and loop until the table is empty.
+Version: 1.4.0
 Author: PaintCore
+Text Domain: stock-sync-to-woo
+Domain Path: /languages
 */
 if (!defined('ABSPATH')) exit;
 
 class PC_Stock_Sync_Woo {
     const SLUG = 'pc-stock-sync-woo';
-    const CAP  = 'manage_woocommerce'; // можно заменить на manage_options
+    const CAP  = 'manage_woocommerce'; // or 'manage_options'
+
+    private $report = null;
 
     public function __construct() {
-        add_action('admin_menu', [$this,'menu']);
-        add_action('admin_init', [$this,'maybe_handle']);
+        add_action('admin_menu',  [$this,'menu']);
+        add_action('admin_init',  [$this,'maybe_handle']);
     }
 
     public function menu() {
         add_submenu_page(
             'tools.php',
-            'Синхронизация остатков → WooCommerce',
-            'Синхр. остатков → Woo',
+            esc_html__('Stock sync → WooCommerce', 'stock-sync-to-woo'),
+            esc_html__('Stock sync → Woo', 'stock-sync-to-woo'),
             self::CAP,
             self::SLUG,
             [$this,'page']
         );
     }
 
-    private $report = null;
-
     public function page() {
-        if (!current_user_can(self::CAP)) wp_die('Недостаточно прав.');
+        if (!current_user_can(self::CAP)) wp_die( esc_html__('Insufficient permissions.', 'stock-sync-to-woo') );
         $r = $this->report;
         ?>
         <div class="wrap">
-            <h1>Синхронизация остатков → WooCommerce</h1>
+            <h1><?php echo esc_html__('Stock sync → WooCommerce', 'stock-sync-to-woo'); ?></h1>
 
             <p style="max-width:960px">
-                Берём строки из <code>wp_stock_import (sku, location_slug, qty)</code>, ищем товар по SKU, находим склад по
-                <code>location_slug</code> в таксономии <code>location</code> и пишем остаток в мету
-                <code>_stock_at_{TERM_ID}</code>. Затем суммируем по SKU и обновляем <code>_stock</code>.
-                Можно автоматически привязать товар к терминам <code>location</code> и выставить Primary.
+                <?php
+                echo wp_kses_post(
+                    sprintf(
+                        /* translators: keep code tags as-is */
+                        __('We read rows from %1$s (sku, location_slug, qty), find a product by SKU, resolve a warehouse by %2$s in the %3$s taxonomy and write quantity into %4$s. Then we sum per SKU and update %5$s. Optionally we can auto-attach %3$s terms to products and set Primary.', 'stock-sync-to-woo'),
+                        '<code>wp_stock_import</code>',
+                        '<code>location_slug</code>',
+                        '<code>location</code>',
+                        '<code>_stock_at_{TERM_ID}</code>',
+                        '<code>_stock</code>'
+                    )
+                );
+                ?>
             </p>
 
             <form method="post">
                 <?php wp_nonce_field('pc_stock_sync'); ?>
                 <table class="form-table" role="presentation">
                     <tr>
-                        <th scope="row">Batch size</th>
+                        <th scope="row"><?php echo esc_html__('Batch size', 'stock-sync-to-woo'); ?></th>
                         <td>
                             <input type="number" name="batch" value="<?php echo isset($_POST['batch']) ? intval($_POST['batch']) : 500; ?>" min="1" max="5000" step="1" style="width:120px">
-                            <p class="description">Сколько строк из <code>wp_stock_import</code> обработать за один проход.</p>
+                            <p class="description">
+                                <?php
+                                echo wp_kses_post(
+                                    sprintf(
+                                        /* translators: keep code tag */
+                                        __('How many rows from %s to process per pass.', 'stock-sync-to-woo'),
+                                        '<code>wp_stock_import</code>'
+                                    )
+                                );
+                                ?>
+                            </p>
                         </td>
                     </tr>
                     <tr>
-                        <th scope="row">Dry‑Run</th>
+                        <th scope="row">Dry-Run</th>
                         <td>
-                            <label><input type="checkbox" name="dry" value="1" <?php checked(!empty($_POST['dry'])); ?>> Только показать, без записи</label>
+                            <label><input type="checkbox" name="dry" value="1" <?php checked(!empty($_POST['dry'])); ?>> <?php echo esc_html__('Show only, no writes', 'stock-sync-to-woo'); ?></label>
                         </td>
                     </tr>
                     <tr>
-                        <th scope="row">Фильтр по SKU (префикс)</th>
+                        <th scope="row"><?php echo esc_html__('SKU filter (prefix)', 'stock-sync-to-woo'); ?></th>
                         <td>
-                            <input type="text" name="sku_prefix" value="<?php echo isset($_POST['sku_prefix']) ? esc_attr($_POST['sku_prefix']) : ''; ?>" placeholder="например, CR- или AB-" style="width:240px">
-                            <p class="description">Если указать префикс, обработаем только строки, где SKU начинается с него.</p>
+                            <input type="text" name="sku_prefix" value="<?php echo isset($_POST['sku_prefix']) ? esc_attr($_POST['sku_prefix']) : ''; ?>" placeholder="<?php echo esc_attr__('e.g. CR- or AB-', 'stock-sync-to-woo'); ?>" style="width:240px">
+                            <p class="description"><?php echo esc_html__('If set, only rows whose SKU starts with this prefix will be processed.', 'stock-sync-to-woo'); ?></p>
                         </td>
                     </tr>
                     <tr>
-                        <th scope="row">Обновлять статус наличия?</th>
-                        <td><label><input type="checkbox" name="upd_status" value="1" <?php checked(!empty($_POST['upd_status']), true); ?>> Да</label></td>
+                        <th scope="row"><?php echo esc_html__('Update stock status?', 'stock-sync-to-woo'); ?></th>
+                        <td><label><input type="checkbox" name="upd_status" value="1" <?php checked(!empty($_POST['upd_status']), true); ?>> <?php echo esc_html__('Yes', 'stock-sync-to-woo'); ?></label></td>
                     </tr>
                     <tr>
-                        <th scope="row">Включать manage_stock?</th>
-                        <td><label><input type="checkbox" name="set_manage" value="1" <?php checked(!empty($_POST['set_manage']), true); ?>> Да</label></td>
+                        <th scope="row"><?php echo esc_html__('Enable manage_stock?', 'stock-sync-to-woo'); ?></th>
+                        <td><label><input type="checkbox" name="set_manage" value="1" <?php checked(!empty($_POST['set_manage']), true); ?>> <?php echo esc_html__('Yes', 'stock-sync-to-woo'); ?></label></td>
                     </tr>
                     <tr>
-                        <th scope="row">Удалять обработанные строки из wp_stock_import?</th>
-                        <td><label><input type="checkbox" name="delete_rows" value="1" <?php checked(!empty($_POST['delete_rows'])); ?>> Да, после успешной записи</label></td>
+                        <th scope="row"><?php echo wp_kses_post( sprintf( __('Delete processed rows from %s?', 'stock-sync-to-woo'), '<code>wp_stock_import</code>' ) ); ?></th>
+                        <td><label><input type="checkbox" name="delete_rows" value="1" <?php checked(!empty($_POST['delete_rows'])); ?>> <?php echo esc_html__('Yes, after successful writes', 'stock-sync-to-woo'); ?></label></td>
                     </tr>
                     <tr>
-                        <th scope="row">Крутиться до пустой таблицы?</th>
+                        <th scope="row"><?php echo esc_html__('Loop until table is empty?', 'stock-sync-to-woo'); ?></th>
                         <td>
-                            <label><input type="checkbox" name="loop_until_empty" value="1" <?php checked(!empty($_POST['loop_until_empty'])); ?>> Да</label>
-                            <span style="margin-left:12px">Max loops: <input type="number" name="max_loops" value="<?php echo isset($_POST['max_loops']) ? intval($_POST['max_loops']) : 50; ?>" min="1" max="1000" style="width:90px"></span>
+                            <label><input type="checkbox" name="loop_until_empty" value="1" <?php checked(!empty($_POST['loop_until_empty'])); ?>> <?php echo esc_html__('Yes', 'stock-sync-to-woo'); ?></label>
+                            <span style="margin-left:12px"><?php echo esc_html__('Max loops', 'stock-sync-to-woo'); ?>: <input type="number" name="max_loops" value="<?php echo isset($_POST['max_loops']) ? intval($_POST['max_loops']) : 50; ?>" min="1" max="1000" style="width:90px"></span>
+                            <p class="description"><?php echo esc_html__('Safety: looping requires deletion to be enabled.', 'stock-sync-to-woo'); ?></p>
                         </td>
                     </tr>
                     <tr>
-                        <th scope="row">Привязывать tax. <code>location</code> к товарам?</th>
-                        <td><label><input type="checkbox" name="attach_terms" value="1" <?php checked(!empty($_POST['attach_terms']), true); ?>> Да</label></td>
+                        <th scope="row"><?php echo wp_kses_post( sprintf( __('Attach %s terms to products?', 'stock-sync-to-woo'), '<code>location</code>' ) ); ?></th>
+                        <td><label><input type="checkbox" name="attach_terms" value="1" <?php checked(!empty($_POST['attach_terms']), true); ?>> <?php echo esc_html__('Yes', 'stock-sync-to-woo'); ?></label></td>
                     </tr>
                     <tr>
-                        <th scope="row">Ставить Primary location, если отсутствует?</th>
-                        <td><label><input type="checkbox" name="set_primary" value="1" <?php checked(!empty($_POST['set_primary']), true); ?>> Да</label></td>
+                        <th scope="row"><?php echo esc_html__('Set Primary location if missing?', 'stock-sync-to-woo'); ?></th>
+                        <td><label><input type="checkbox" name="set_primary" value="1" <?php checked(!empty($_POST['set_primary']), true); ?>> <?php echo esc_html__('Yes', 'stock-sync-to-woo'); ?></label></td>
                     </tr>
                     <tr>
-                        <th scope="row">Дублировать меты по slug (для совместимости)?</th>
-                        <td><label><input type="checkbox" name="duplicate_slug_meta" value="1" <?php checked(!empty($_POST['duplicate_slug_meta'])); ?>> Да, писать ещё <code>_stock_at_{slug}</code></label></td>
+                        <th scope="row"><?php echo esc_html__('Duplicate metas by slug (compat)?', 'stock-sync-to-woo'); ?></th>
+                        <td><label><input type="checkbox" name="duplicate_slug_meta" value="1" <?php checked(!empty($_POST['duplicate_slug_meta'])); ?>> <?php echo wp_kses_post( __('Yes, also write <code>_stock_at_{slug}</code>', 'stock-sync-to-woo') ); ?></label></td>
                     </tr>
                 </table>
 
                 <p class="submit">
-                    <button class="button button-primary">Синхронизировать</button>
+                    <button class="button button-primary"><?php echo esc_html__('Synchronize', 'stock-sync-to-woo'); ?></button>
                 </p>
             </form>
 
             <?php if ($r): ?>
                 <hr>
-                <h2>Отчёт</h2>
+                <h2><?php echo esc_html__('Report', 'stock-sync-to-woo'); ?></h2>
                 <pre style="background:#fff;border:1px solid #ccd0d4;padding:10px;max-height:500px;overflow:auto"><?php
                     echo esc_html(print_r($r, true));
                 ?></pre>
             <?php endif; ?>
 
-            <p style="margin-top:10px;color:#666">Подсказка: текущий размер таблицы можно посмотреть запросом <code>SELECT COUNT(*) FROM wp_stock_import;</code></p>
+            <p style="margin-top:10px;color:#666">
+                <?php
+                echo wp_kses_post(
+                    sprintf(
+                        /* translators: keep code tag */
+                        __('Tip: check current table size with %s', 'stock-sync-to-woo'),
+                        '<code>SELECT COUNT(*) FROM wp_stock_import;</code>'
+                    )
+                );
+                ?>
+            </p>
         </div>
         <?php
     }
@@ -122,32 +154,32 @@ class PC_Stock_Sync_Woo {
         if (!current_user_can(self::CAP)) return;
         if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'pc_stock_sync')) return;
 
-        // блокировка от повторного запуска
+        // lock against double-run
         $lock_key = 'pc_stock_sync_lock';
         if (get_transient($lock_key)) {
-            $this->report = ['ok'=>0,'error'=>'Sync is already running. Try again in ~30s.'];
+            $this->report = ['ok'=>0,'error'=>esc_html__('Sync is already running. Try again in ~30s.', 'stock-sync-to-woo')];
             return;
         }
-        set_transient($lock_key, 1, 30); // 30 сек
+        set_transient($lock_key, 1, 30); // 30 sec
 
         $opts = [
-            'batch'              => max(1, min(2000, intval($_POST['batch'] ?? 500))),
-            'dry'                => !empty($_POST['dry']),
-            'sku_prefix'         => trim((string)($_POST['sku_prefix'] ?? '')),
-            'upd_status'         => !empty($_POST['upd_status']),
-            'set_manage'         => !empty($_POST['set_manage']),
-            'delete_rows'        => !empty($_POST['delete_rows']),
-            'loop_until_empty'   => !empty($_POST['loop_until_empty']),
-            'max_loops'          => max(1, min(200, intval($_POST['max_loops'] ?? 50))),
-            'attach_terms'       => !empty($_POST['attach_terms']),
-            'set_primary'        => !empty($_POST['set_primary']),
-            'duplicate_slug_meta'=> !empty($_POST['duplicate_slug_meta']),
-            // лимиты по времени (сек)
-            'hard_request_sec'   => 22,
-            'hard_loop_sec'      => 4.5,
+            'batch'               => max(1, min(2000, intval($_POST['batch'] ?? 500))),
+            'dry'                 => !empty($_POST['dry']),
+            'sku_prefix'          => trim((string)($_POST['sku_prefix'] ?? '')),
+            'upd_status'          => !empty($_POST['upd_status']),
+            'set_manage'          => !empty($_POST['set_manage']),
+            'delete_rows'         => !empty($_POST['delete_rows']),
+            'loop_until_empty'    => !empty($_POST['loop_until_empty']),
+            'max_loops'           => max(1, min(200, intval($_POST['max_loops'] ?? 50))),
+            'attach_terms'        => !empty($_POST['attach_terms']),
+            'set_primary'         => !empty($_POST['set_primary']),
+            'duplicate_slug_meta' => !empty($_POST['duplicate_slug_meta']),
+            // time limits (sec)
+            'hard_request_sec'    => 22,
+            'hard_loop_sec'       => 4.5,
         ];
 
-        // безопасность: крутиться до пустой таблицы только при удалении строк
+        // safety: loop-until-empty only allowed when deletion is enabled
         if ($opts['loop_until_empty'] && !$opts['delete_rows']) {
             $opts['loop_until_empty'] = false;
         }
@@ -157,7 +189,7 @@ class PC_Stock_Sync_Woo {
         delete_transient($lock_key);
     }
 
-    /** получить term по slug в таксономии location (кэшируем на время запроса) */
+    /** get 'location' term by slug (per-request cache) */
     private static $loc_cache = [];
     private function get_location_term_by_slug( string $slug ) {
         $slug = sanitize_title($slug);
@@ -173,16 +205,17 @@ class PC_Stock_Sync_Woo {
         return null;
     }
 
-    /** привязать товар к термину location, если ещё не привязан */
+    /** attach 'location' term to product if not yet attached */
     private function ensure_product_has_location_term( int $product_id, int $term_id ): void {
         $terms = wp_get_object_terms($product_id, 'location', ['fields'=>'ids']);
         if (is_wp_error($terms)) return;
-        if (!in_array($term_id, array_map('intval',$terms), true)) {
-            wp_set_object_terms($product_id, array_merge($terms ?: [], [$term_id]), 'location', false);
+        $ints = array_map('intval', (array)$terms);
+        if (!in_array($term_id, $ints, true)) {
+            wp_set_object_terms($product_id, array_merge($ints ?: [], [$term_id]), 'location', false);
         }
     }
 
-    /** выставить primary, если не стоит */
+    /** set Primary location if missing */
     private function ensure_primary_location( int $product_id, int $term_id ): void {
         $cur = (int) get_post_meta($product_id, '_yoast_wpseo_primary_location', true);
         if (!$cur) {
@@ -201,7 +234,7 @@ class PC_Stock_Sync_Woo {
         $affected_products = 0;
         $meta_records = 0;
         $not_found_skus = [];
-        $not_found_locations = []; // <— копим неизвестные склады
+        $not_found_locations = [];
         $sum_by_sku = [];
         $product_ids = [];
         $meta_keys_used = [];
@@ -210,7 +243,7 @@ class PC_Stock_Sync_Woo {
             $loops++;
             $t_loop0 = microtime(true);
 
-            // 1) взять порцию
+            // 1) fetch a batch
             $where = '1=1';
             $args  = [];
             if ($o['sku_prefix'] !== '') { $where .= ' AND sku LIKE %s'; $args[] = $o['sku_prefix'] . '%'; }
@@ -224,7 +257,7 @@ class PC_Stock_Sync_Woo {
             $rows = $wpdb->get_results($wpdb->prepare($sql, $args), ARRAY_A);
             if (!$rows) break;
 
-            // 2) сгруппировать по SKU
+            // 2) group by SKU
             $perSku = [];
             foreach ($rows as $r) {
                 $sku = (string)$r['sku'];
@@ -235,16 +268,16 @@ class PC_Stock_Sync_Woo {
                 $perSku[$sku]['sum'] += $qty;
             }
 
-            // 3) обработка SKU
+            // 3) process each SKU
             foreach ($perSku as $sku => $data) {
                 $pid = function_exists('wc_get_product_id_by_sku') ? wc_get_product_id_by_sku($sku) : 0;
                 if (!$pid) {
                     $pid = (int)$wpdb->get_var($wpdb->prepare(
                         "SELECT p.ID
-                        FROM {$wpdb->posts} p
-                        JOIN {$wpdb->postmeta} m ON m.post_id=p.ID AND m.meta_key='_sku'
-                        WHERE m.meta_value=%s AND p.post_type IN ('product','product_variation')
-                        LIMIT 1", $sku
+                         FROM {$wpdb->posts} p
+                         JOIN {$wpdb->postmeta} m ON m.post_id=p.ID AND m.meta_key='_sku'
+                         WHERE m.meta_value=%s AND p.post_type IN ('product','product_variation')
+                         LIMIT 1", $sku
                     ));
                 }
                 if (!$pid) { $not_found_skus[$sku]=true; continue; }
@@ -256,16 +289,16 @@ class PC_Stock_Sync_Woo {
                     $term = $this->get_location_term_by_slug($locSlug);
                     if (!$term) {
                         $not_found_locations[$sku][] = (string)$locSlug;
-                        continue; // неизвестный склад не пишем
+                        continue; // unknown location -> skip
                     }
 
-                    // пишем строго по TERM_ID
+                    // write strictly by TERM_ID
                     $meta_key_id = '_stock_at_' . (int)$term->term_id;
                     $meta_keys_used[$meta_key_id] = true;
                     if (!$o['dry']) update_post_meta($pid, $meta_key_id, wc_format_decimal($qty, 3));
                     $meta_records++;
 
-                    // опция: дублировать по slug
+                    // optional: duplicate by slug
                     if (!empty($o['duplicate_slug_meta'])) {
                         $meta_key_slug = '_stock_at_' . $term->slug;
                         $meta_keys_used[$meta_key_slug] = true;
@@ -273,13 +306,13 @@ class PC_Stock_Sync_Woo {
                         $meta_records++;
                     }
 
-                    // опция: привязать термины
+                    // optional: attach terms
                     if (!empty($o['attach_terms']) && !$o['dry']) {
                         $this->ensure_product_has_location_term($pid, (int)$term->term_id);
                     }
                 }
 
-                // итоговый stock
+                // final total stock
                 $total = (float)$data['sum'];
                 $sum_by_sku[$sku] = $total;
 
@@ -297,18 +330,18 @@ class PC_Stock_Sync_Woo {
                     }
                 }
 
-                // лимит времени на один цикл (чтобы UI не «замирал»)
+                // per-loop time limit (keep UI reactive)
                 if (microtime(true) - $t_loop0 > $o['hard_loop_sec']) break;
             }
 
-            // 4) удаление обработанных строк (если включено)
+            // 4) delete processed rows (if enabled)
             if ($o['delete_rows'] && !$o['dry'] && !empty($rows)) {
-                // убираем дубли пар на всякий случай
+                // de-dup pairs just in case
                 $pairs = [];
                 foreach ($rows as $r) { $pairs[$r['sku'].'|'.$r['location_slug']] = [$r['sku'],$r['location_slug']]; }
                 $pairs = array_values($pairs);
 
-                // ограничим удаление 200–400 парами за раз (безопасно для prepare)
+                // limit delete to ~400 pairs per query (safer for prepare)
                 $chunk = array_slice($pairs, 0, 400);
                 $place = []; $vals = [];
                 foreach ($chunk as [$s,$l]) { $place[]='(%s,%s)'; $vals[]=$s; $vals[]=$l; }
@@ -320,10 +353,10 @@ class PC_Stock_Sync_Woo {
 
             $total_rows += count($rows);
 
-            // если строк было меньше батча — вероятно, дошли до хвоста
+            // tail reached
             if (count($rows) < $o['batch']) break;
 
-            // общий жёсткий лимит по времени
+            // hard request-time limit
             if (microtime(true) - $t_request0 > $o['hard_request_sec']) break;
 
         } while (!empty($o['loop_until_empty']) && $loops < $o['max_loops']);
@@ -342,7 +375,7 @@ class PC_Stock_Sync_Woo {
             'deleted_from_table'   => (!empty($o['delete_rows']) && !$o['dry']) ? 'YES' : 'NO',
             'loop_until_empty'     => !empty($o['loop_until_empty']) ? 'YES' : 'NO',
             'not_found_skus'       => array_keys($not_found_skus),
-            'not_found_locations'  => $not_found_locations, // <— теперь видно проблемные склады
+            'not_found_locations'  => $not_found_locations,
             'sum_by_sku'           => $sum_by_sku,
             'product_ids'          => $product_ids,
             'meta_keys_used'       => array_keys($meta_keys_used),
@@ -353,4 +386,5 @@ class PC_Stock_Sync_Woo {
         ];
     }
 }
+
 new PC_Stock_Sync_Woo();
