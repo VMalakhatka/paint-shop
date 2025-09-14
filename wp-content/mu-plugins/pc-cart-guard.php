@@ -498,7 +498,7 @@ add_action('woocommerce_check_cart_items', function () {
         $ms    = $p->get_manage_stock() ? 'on' : 'off';
         $avail = function_exists('slu_available_for_add') ? (int)slu_available_for_add($p) : (int)$stock;
 
-        error_log(sprintf('[CHK] %s | want=%d | woo_stock=%s | manage=%s | our_avail=%d',
+        pc_cg_log(sprintf('[CHK] %s | want=%d | woo_stock=%s | manage=%s | our_avail=%d',
             $p->get_sku() ?: $p->get_id(), $want, var_export($stock,true), $ms, $avail
         ));
     }
@@ -521,7 +521,7 @@ add_filter('update_post_metadata', function($check,$post_id,$key,$val){
     if ($key!=='_stock' && $key!=='_stock_status' && strpos($key,'_stock_at_')!==0) return $check;
     if (is_admin() || (defined('DOING_CRON') && DOING_CRON)) return $check;
     if (did_action('woocommerce_order_status_processing') || did_action('woocommerce_order_status_completed')) return $check;
-    error_log(sprintf('[STOCK-BARRIER] blocked write: post=%d key=%s new=%s url=%s',
+    pc_cg_log(sprintf('[STOCK-BARRIER] blocked write: post=%d key=%s new=%s url=%s',
         (int)$post_id,$key,is_scalar($val)?$val:json_encode($val),$_SERVER['REQUEST_URI']??''));
     return false;
 }, 9999, 4);
