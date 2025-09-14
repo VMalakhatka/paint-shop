@@ -47,20 +47,37 @@ SRC_URL="$($PHPRUN option get siteurl || true)"
 echo "SRC_URL: ${SRC_URL:-<empty>}"
 echo "TARGET_URL: $TARGET_URL"
 
-# 4) Мгновенно правим home/siteurl в БД
-mysql -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" -e "
-  UPDATE wp_options
-    SET option_value='$TARGET_URL'
-  WHERE option_name IN ('home','siteurl');"
+# 4) Мгновенно правим home/siteurl через WP-CLI (надёжнее, чем прямой SQL)
+$PHPRUN option update home "$TARGET_URL"   --quiet || true
+$PHPRUN option update siteurl "$TARGET_URL" --quiet || true
 
 # 5) Глобальная замена домена (если исходный отличен)
 if [ -n "${SRC_URL:-}" ] && [ "$SRC_URL" != "$TARGET_URL" ]; then
   echo "== search-replace $SRC_URL -> $TARGET_URL =="
+  # --all-tables-with-prefix безопаснее, чем --all-tables, если в БД много лишних схем
   $PHPRUN search-replace "$SRC_URL" "$TARGET_URL" \
-    --all-tables --precise --recurse-objects --skip-columns=guid
+    --all-tables-with-prefix --precise --recurse-objects --skip-columns=guid
 else
   echo "== search-replace пропущен (SRC_URL пустой или равен TARGET_URL) =="
 fi
+
+# РОТАЦИЯ БЭКАПОВ В $HOME
+rotate_keep_latest() {
+  local pattern="$1"
+  local keep="${2:-2}"   # по умолчанию оставлять 2
+  ls -1t $pattern 2>/dev/null | tail -n +$((keep+1)) | xargs -r rm -f
+}
+
+(
+  # чтобы шаблоны без совпадений не мешали
+  shopt -s nullglob
+  cd "$HOME" || exit 0
+  KEEP=2
+  rotate_keep_latest "backup-db-*.sql.gz" "$KEEP"
+  rotate_keep_latest "backup-plugins-*.tgz" "$KEEP"
+  rotate_keep_latest "backup-themes-plugins-*.tgz" "$KEEP"
+)
+
 
 # 6) Сброс пермалинков и кэша
 $PHPRUN rewrite flush --hard || true

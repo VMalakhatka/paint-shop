@@ -77,6 +77,12 @@ wp-content/mu-plugins/*
 !wp-content/mu-plugins/pc-account-tweaks.php
 !wp-content/mu-plugins/pc-cart-guard.php
 !wp-content/mu-plugins/pc-stock-tap.php
+!wp-content/mu-plugins/00-mu-i18n-loader.php
+!wp-content/mu-plugins/Makefile
+# Но НЕ игнорируем сам каталог languages и его содержимое
+!wp-content/mu-plugins/languages/
+!wp-content/mu-plugins/languages/**
+
 
 # === Node / Composer / сборки ===
 node_modules/

@@ -185,6 +185,19 @@ PHP
   echo "✓ Создан MU-plugin для автозагрузчика: $MU_LOADER"
 fi
 
+rotate_keep_latest() {
+  local pattern="$1"
+  local keep="${2:-2}"   # по умолчанию оставлять 2
+  ls -1t $pattern 2>/dev/null | tail -n +$((keep+1)) | xargs -r rm -f
+}
+
+(
+  cd "$HOME" || exit 0
+  rotate_keep_latest "backup-db-*.sql.gz" 2
+  rotate_keep_latest "backup-plugins-*.tgz" 2
+  rotate_keep_latest "backup-themes-plugins-*.tgz" 2
+)
+
 # 5) Очистка кэша WP
 /opt/remi/php83/root/bin/php /bin/wp-cli.phar --path="$WP" cache flush || true
 
