@@ -65,13 +65,47 @@ Version: 1.0
 
 /* === 4) (Опционально) Только для страницы «Список товара» — ещё шире === */
 /* Узнай ID страницы (в админке в адресной строке page_id=XXXX) и подставь его ниже */
+/* Убираем боковые паддинги только на странице "Список товара" */
 @media (min-width: 1200px){
-  body.page-id-XXXX .container,
-  body.page-id-XXXX .col-full,
-  body.page-id-XXXX .ast-container,
-  body.page-id-XXXX .wp-site-blocks{
-    max-width: 1600px !important;
-    width: 96%;
+  body.page-id-102209 .site-content,
+  body.page-id-102209 .content-area,
+  body.page-id-102209 .container,
+  body.page-id-102209 .col-full,
+  body.page-id-102209 .ast-container,
+  body.page-id-102209 .wp-site-blocks {
+    max-width: 2800px !important;
+    width: 99%;
+    padding-left: 0px !important;   /* уменьшаем поля */
+    padding-right: 0px !important;  /* уменьшаем поля */
+  }
+}
+
+/* Список товару: сжимаем зазор контент ↔ сайдбар */
+@media (min-width: 1200px){
+  /* убираем остаточные внешние отступы колонок */
+  body.page-id-102209 .content-area,
+  body.page-id-102209 .widget-area{
+    margin: 0 !important;
+  }
+
+  /* делим ширину плотнее: больше контент, чуть меньше сайдбар */
+  body.page-id-102209 .site-content .content-area{ width: 78% !important; }
+  body.page-id-102209 .site-content .widget-area{ width: 22% !important; }
+
+  /* уменьшаем внутренние отступы у колонок */
+  body.page-id-102209 .site-content .content-area{ padding-right: 0px !important; }
+  body.page-id-102209 .site-content .widget-area{ padding-left: 0px !important; }
+
+  /* если тема в режиме separate containers — ужмём и «карточку» */
+  body.page-id-102209.separate-containers .inside-article{
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+  }
+
+  /* и у самой грид-обёртки GP, чтобы не добавляла общий gutter */
+  body.page-id-102209 .grid-container{
+    padding-left: 0px !important;
+    padding-right: 0px !important;
   }
 }
 
@@ -260,6 +294,10 @@ body.admin-bar .woocommerce .woocommerce-products-header{ top: 46px; }
   margin: 0;
 }
 /* Лёгкая тень при залипании, чтобы отделял */
+
+.woocommerce .woocommerce-products-header{
+  box-shadow: 0 2px 6px rgba(0,0,0,.06);
+}
 
 /* === Hide "Товар списком" on mobile === */
 @media (max-width: 768px){
