@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-09-14T12:00:24+00:00\n"
+"POT-Creation-Date: 2025-09-14T12:57:18+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: role-price-import-lite\n"
@@ -21,10 +21,62 @@ msgstr ""
 
 #. Description of the plugin
 #: role-price-import-lite.php
-msgid "Импорт цен по ролям из CSV для менеджеров. Обновляет _wpc_price_role_* по SKU. Есть опция бэкапа."
+msgid "Import role-based prices from CSV for managers. Updates _wpc_price_role_* by SKU. Optional backup."
 msgstr ""
 
 #. Author of the plugin
 #: role-price-import-lite.php
 msgid "PaintCore"
+msgstr ""
+
+#: role-price-import-lite.php:26
+#: role-price-import-lite.php:27
+#: role-price-import-lite.php:50
+msgid "Role Price Import (CSV)"
+msgstr ""
+
+#: role-price-import-lite.php:47
+msgid "Insufficient permissions."
+msgstr ""
+
+#. translators: keep code columns as-is
+#: role-price-import-lite.php:57
+#, php-format
+msgid "Upload a CSV with columns: %s."
+msgstr ""
+
+#: role-price-import-lite.php:68
+msgid "CSV file"
+msgstr ""
+
+#: role-price-import-lite.php:72
+msgid "Backup"
+msgstr ""
+
+#: role-price-import-lite.php:76
+msgid "Create a backup of current <code>_wpc_price_role_*</code>"
+msgstr ""
+
+#: role-price-import-lite.php:83
+msgid "Import"
+msgstr ""
+
+#: role-price-import-lite.php:90
+msgid "Report"
+msgstr ""
+
+#: role-price-import-lite.php:97
+msgid "CSV format"
+msgstr ""
+
+#: role-price-import-lite.php:101
+msgid "Delimiter: auto (<code>;</code>/<code>,</code>/<code>TAB</code>)"
+msgstr ""
+
+#: role-price-import-lite.php:102
+msgid "Encoding: auto (UTF-8 / CP1251, etc.)"
+msgstr ""
+
+#: role-price-import-lite.php:103
+msgid "Empty role cells are skipped (role price unchanged)"
 msgstr ""

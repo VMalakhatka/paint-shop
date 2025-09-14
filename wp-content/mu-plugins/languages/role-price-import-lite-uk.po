@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: role-price-import-lite 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/role-price-import-"
 "lite\n"
-"POT-Creation-Date: 2025-09-14T09:46:18+00:00\n"
+"POT-Creation-Date: 2025-09-14T12:55:04+00:00\n"
 "PO-Revision-Date: 2025-09-14T09:46:18+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -21,16 +21,66 @@ msgstr ""
 #. Plugin Name of the plugin
 #: role-price-import-lite.php
 msgid "Role Price Import — Lite"
-msgstr ""
+msgstr "Імпорт цін за ролями — Лайт"
 
 #. Description of the plugin
 #: role-price-import-lite.php
 msgid ""
-"Импорт цен по ролям из CSV для менеджеров. Обновляет _wpc_price_role_* по "
-"SKU. Есть опция бэкапа."
-msgstr ""
+"Import role-based prices from CSV for managers. Updates _wpc_price_role_* by "
+"SKU. Optional backup."
+msgstr "Імпорт цін за ролями з CSV для менеджерів. Оновлює _wpc_price_role_* за SKU. Додатково можна зробити резервну копію."
 
 #. Author of the plugin
 #: role-price-import-lite.php
 msgid "PaintCore"
-msgstr ""
+msgstr "PaintCore"
+
+#: role-price-import-lite.php:26 role-price-import-lite.php:27 role-price-import-lite.php:50
+msgid "Role Price Import (CSV)"
+msgstr "Імпорт цін за ролями (CSV)"
+
+#: role-price-import-lite.php:47
+msgid "Insufficient permissions."
+msgstr "Недостатньо прав."
+
+#. translators: keep code columns as-is
+#: role-price-import-lite.php:57
+#, php-format
+msgid "Upload a CSV with columns: %s."
+msgstr "Завантажте CSV з колонками: %s."
+
+#: role-price-import-lite.php:68
+msgid "CSV file"
+msgstr "CSV-файл"
+
+#: role-price-import-lite.php:72
+msgid "Backup"
+msgstr "Резервна копія"
+
+#: role-price-import-lite.php:76
+msgid "Create a backup of current <code>_wpc_price_role_*</code>"
+msgstr "Зробити резервну копію поточних <code>_wpc_price_role_*</code>"
+
+#: role-price-import-lite.php:83
+msgid "Import"
+msgstr "Імпортувати"
+
+#: role-price-import-lite.php:90
+msgid "Report"
+msgstr "Звіт"
+
+#: role-price-import-lite.php:97
+msgid "CSV format"
+msgstr "Формат CSV"
+
+#: role-price-import-lite.php:101
+msgid "Delimiter: auto (<code>;</code>/<code>,</code>/<code>TAB</code>)"
+msgstr "Роздільник: авто (<code>;</code>/<code>,</code>/<code>TAB</code>)"
+
+#: role-price-import-lite.php:102
+msgid "Encoding: auto (UTF-8 / CP1251, etc.)"
+msgstr "Кодування: авто (UTF-8 / CP1251 тощо)"
+
+#: role-price-import-lite.php:103
+msgid "Empty role cells are skipped (role price unchanged)"
+msgstr "Порожні клітинки ролей пропускаються (ціна ролі не змінюється)"
