@@ -1,29 +1,20 @@
-# Copyright (C) 2025 PSU
+# Copyright (C) 2025 PaintCore
 # This file is distributed under the same license as the PSU Force Per Page (cols × rows) plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: psu-force-per-page 1.1.0\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/psu-force-per-"
-"page\n"
-"POT-Creation-Date: 2025-09-14T11:49:40+00:00\n"
-"PO-Revision-Date: 2025-09-14T09:46:18+00:00\n"
-"Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
-"Language: ru\n"
+"Project-Id-Version: psu-force-per-page\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/psu-force-per-page\n"
+"POT-Creation-Date: 2025-09-14 00:00+0000\n"
+"PO-Revision-Date: 2025-09-14 00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ru_RU\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: WP-CLI 2.12.0\n"
+"X-Generator: msginit\n"
 "X-Domain: psu-force-per-page\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-
-msgid ""
-msgstr ""
-"Project-Id-Version: psu-force-per-page\n"
-"Language: ru_RU\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 #. Plugin Name of the plugin
 #: psu-force-per-page.php
@@ -33,7 +24,7 @@ msgstr "PSU Force Per Page (колонки × ряды)"
 #. Description of the plugin
 #: psu-force-per-page.php
 msgid "Кол-во товаров на странице = колонки × ряды. Колонки меряются JS-ом, ряды задаются константами."
-msgstr "Количество товаров на странице = колонки × ряды. Колонки измеряются JS-ом, ряды задаются константами."
+msgstr "Количество товаров на странице = колонки × ряды. Колонки измеряются JS, ряды задаются константами."
 
 #. Author of the plugin
 #: psu-force-per-page.php

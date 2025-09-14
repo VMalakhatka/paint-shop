@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: psu-search-filters 1.1.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/psu-search-"
 "filters\n"
-"POT-Creation-Date: 2025-09-14T09:46:18+00:00\n"
+"POT-Creation-Date: 2025-09-14T11:56:15+00:00\n"
 "PO-Revision-Date: 2025-09-14T09:46:18+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -21,15 +21,15 @@ msgstr ""
 #. Plugin Name of the plugin
 #: psu-search-filters.php
 msgid "PSU Search & Filters"
-msgstr ""
+msgstr "PSU Search & Filters"
 
 #. Description of the plugin
 #: psu-search-filters.php
 msgid ""
 "Базовые фильтры для витрин Woo (location / in_stock). Поиск — Relevanssi."
-msgstr ""
+msgstr "Базовые фильтры для витрин Woo (location / in_stock). Поиск — Relevanssi."
 
 #. Author of the plugin
 #: psu-search-filters.php
-msgid "PSU"
-msgstr ""
+msgid "PaintCore"
+msgstr "PaintCore"

@@ -3,7 +3,9 @@
 Plugin Name: PSU Search & Filters
 Description: Базовые фильтры для витрин Woo (location / in_stock). Поиск — Relevanssi.
 Version: 1.1.0
-Author: PSU
+Author: PaintCore
+Text Domain: psu-search-filters
+Domain Path: /languages
 */
 if (!defined('ABSPATH')) exit;
 
