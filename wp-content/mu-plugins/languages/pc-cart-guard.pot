@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-09-14T09:46:18+00:00\n"
+"POT-Creation-Date: 2025-09-14T10:13:27+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: pc-cart-guard\n"
@@ -21,10 +21,25 @@ msgstr ""
 
 #. Description of the plugin
 #: pc-cart-guard.php
-msgid "Обрізає/видаляє позиції кошика за доступністю складу. Показує «Списання…» + міні-склади у кошику. Клампить qty у реальному часі. З розширеним логуванням."
+msgid "Trim/remove cart items based on stock availability. Shows \"Write-off…\" + mini stock panel in cart. Clamps qty in real time. Extended logging."
 msgstr ""
 
 #. Author of the plugin
 #: pc-cart-guard.php
 msgid "Volodymyr Malakhatka"
+msgstr ""
+
+#: pc-cart-guard.php:69
+#: pc-cart-guard.php:88
+msgid "Write-off:"
+msgstr ""
+
+#: pc-cart-guard.php:176
+#, php-format
+msgid "“%s” is temporarily unavailable at the selected write-off location."
+msgstr ""
+
+#: pc-cart-guard.php:186
+#, php-format
+msgid "Quantity for “%1$s” adjusted to %2$d per stock availability."
 msgstr ""

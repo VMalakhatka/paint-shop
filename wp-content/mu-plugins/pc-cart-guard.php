@@ -1,11 +1,11 @@
 <?php
 /*
   Plugin Name: PC Cart Guard (debug)
-  Description: Обрізає/видаляє позиції кошика за доступністю складу. Показує «Списання…» + міні-склади у кошику. Клампить qty у реальному часі. З розширеним логуванням.
+  Description: Trim/remove cart items based on stock availability. Shows "Write-off…" + mini stock panel in cart. Clamps qty in real time. Extended logging.
   Author: Volodymyr Malakhatka
   Text Domain: pc-cart-guard
   Domain Path: /languages
- */
+*/
 
 if (!defined('ABSPATH')) exit;
 
@@ -13,26 +13,21 @@ if (!defined('ABSPATH')) exit;
 
 // нужен калькулятор / планировщик
 if (!function_exists('pc_calc_plan_for')) {
-    // тот файл, где у тебя калькулятор текущего плана (как мы подключали ранее)
+    // файл, где у тебя калькулятор текущего плана
     require_once WP_PLUGIN_DIR . '/paint-core/inc/header-allocation-switcher.php';
 }
 // на всякий случай — отключаем легаси-вывод мест списания
 add_filter('pc_disable_legacy_cart_locations', '__return_true');
 
 if (!defined('PC_CART_GUARD_DEBUG')) {
-    // Увімк./вимк. детальне логування тут:
+    // Вкл/выкл детальное логирование
     define('PC_CART_GUARD_DEBUG', false);
 }
 
-// Тумблеры отображения (можно переопределить фильтрами из темы/плагина)
-//if (!has_filter('pc_cart_show_plan'))        add_filter('pc_cart_show_plan',        '__return_true');  // "Списання: Одеса — 3, ..."
+// Тумблеры отображения (можно переопределить фильтрами)
+// if (!has_filter('pc_cart_show_plan'))        add_filter('pc_cart_show_plan',        '__return_true');  // "Write-off: Odesa — 3, ..."
 if (!has_filter('pc_cart_show_stock_panel')) add_filter('pc_cart_show_stock_panel', '__return_true');  // зелёная мини-панель
-add_filter('pc_cart_show_plan',        '__return_false'); // скрыть строку плана над зеленой    
-
-/*
-add_filter('pc_cart_show_plan',        '__return_false'); // скрыть строку плана над зеленой 
-add_filter('pc_cart_show_stock_panel', '__return_false'); // скрыть зелёную панель
-*/
+add_filter('pc_cart_show_plan', '__return_false'); // скрыть строку плана над зелёной
 
 function pc_cg_log($msg){
     if (!PC_CART_GUARD_DEBUG) return;
@@ -41,6 +36,9 @@ function pc_cg_log($msg){
     error_log('pc(cart): ' . $msg . ' | url=' . $uri);
 }
 
+/**
+ * Рендер строки «Write-off: …»
+ */
 function pc_cartguard_render_plan_html(WC_Product $product, int $qty): string {
     // пробуем реальный план
     if (function_exists('pc_calc_plan_for')) {
@@ -68,7 +66,7 @@ function pc_cartguard_render_plan_html(WC_Product $product, int $qty): string {
 
             if (!empty($parts)) {
                 return '<div class="pc-cart-plan" style="margin:.25rem 0 .15rem;color:#333">'
-                     . esc_html__('Списання:', 'woocommerce') . ' '
+                     . esc_html__('Write-off:', 'pc-cart-guard') . ' '
                      . '<strong>' . implode(', ', $parts) . '</strong>'
                      . '</div>';
             }
@@ -87,7 +85,7 @@ function pc_cartguard_render_plan_html(WC_Product $product, int $qty): string {
     }
 
     return '<div class="pc-cart-plan" style="margin:.25rem 0 .15rem;color:#333">'
-         . esc_html__('Списання:', 'woocommerce') . ' '
+         . esc_html__('Write-off:', 'pc-cart-guard') . ' '
          . '<strong>' . esc_html($loc_title ?: '—') . ' — ' . intval($qty) . '</strong>'
          . '</div>';
 }
@@ -151,7 +149,7 @@ function pc_cartguard_enforce_limits() {
     $cart = WC()->cart;
     if (!$cart || empty($cart->get_cart())) { pc_cg_log('enforce: no cart or empty'); return; }
 
-     // ⚠️ FAILSAFE: режим "только выбранный склад", но склад ещё не выбран — не трогаем корзину
+    // FAILSAFE: режим "только выбранный склад", но склад ещё не выбран — не трогаем корзину
     if (function_exists('pc_get_alloc_pref')) {
         $pref = pc_get_alloc_pref();
         if (($pref['mode'] ?? 'auto') === 'single' && (int)($pref['term_id'] ?? 0) <= 0) {
@@ -172,11 +170,11 @@ function pc_cartguard_enforce_limits() {
         $allowed_max = pc_cartguard_get_allowed_qty_for_cart($product, $current_qty);
 
         if ($allowed_max <= 0) {
-            // удаляем позицию ТИХО, а сообщение - как notice (не error)
+            // удаляем позицию ТИХО, а сообщение — как notice (не error)
             $cart->remove_cart_item($key);
             wc_add_notice(
-            sprintf(__('«%s» тимчасово недоступний на обраній локації списання.', 'woocommerce'), $product->get_name()),
-            'notice'
+                sprintf(__('“%s” is temporarily unavailable at the selected write-off location.', 'pc-cart-guard'), $product->get_name()),
+                'notice'
             );
             $changed_any = true;
             continue;
@@ -185,8 +183,8 @@ function pc_cartguard_enforce_limits() {
         if ($current_qty > $allowed_max) {
             $cart->set_quantity($key, $allowed_max, true);
             wc_add_notice(
-            sprintf(__('Кількість для «%1$s» скориговано до %2$d згідно доступності на складі.', 'woocommerce'), $product->get_name(), $allowed_max),
-            'notice'
+                sprintf(__('Quantity for “%1$s” adjusted to %2$d per stock availability.', 'pc-cart-guard'), $product->get_name(), $allowed_max),
+                'notice'
             );
             $changed_any = true;
         }
@@ -340,7 +338,7 @@ add_action('wp_enqueue_scripts', function () {
     wp_enqueue_script('jquery');
 
     // (1) Кламп qty — Classic + Blocks
-wp_add_inline_script('jquery', <<<'JS'
+    wp_add_inline_script('jquery', <<<'JS'
 jQuery(function($){
   var QTY_SEL = '.pc-cart-qty, .quantity .qty';
 
@@ -357,19 +355,19 @@ jQuery(function($){
     return n;
   }
 
-function requestClassicUpdate(){
-  var $form = $('form.woocommerce-cart-form');
-  var $btn  = $form.find('button[name="update_cart"]');
-  if ($btn.length){
-    $btn.prop('disabled', false).trigger('click');
-  } else if ($form.length) {
-    // фоллбек: принудительно добавим флажок и отправим форму
-    if (!$form.find('input[name="update_cart"]').length){
-      $('<input type="hidden" name="update_cart" value="1">').appendTo($form);
+  function requestClassicUpdate(){
+    var $form = $('form.woocommerce-cart-form');
+    var $btn  = $form.find('button[name="update_cart"]');
+    if ($btn.length){
+      $btn.prop('disabled', false).trigger('click');
+    } else if ($form.length) {
+      // фоллбек: принудительно добавим флажок и отправим форму
+      if (!$form.find('input[name="update_cart"]').length){
+        $('<input type="hidden" name="update_cart" value="1">').appendTo($form);
+      }
+      $form.trigger('submit');
     }
-    $form.trigger('submit');
   }
-}
 
   // qty клампим и обновляем форму
   $(document).on('input', QTY_SEL, function(){ clamp($(this)); });
@@ -388,9 +386,8 @@ function requestClassicUpdate(){
   });
   $(QTY_SEL).each(function(){ clamp($(this)); });
 
-    // === Принудительный апдейт корзины при смене ЛОКАЦИИ/РЕЖИМА списания
-    // Покрываем <select>, <input>, <a> — и на change, и на click.
-    var LOC_SEL = [
+  // === Принудительный апдейт корзины при смене ЛОКАЦИИ/РЕЖИМА списания
+  var LOC_SEL = [
     '[name="slu_location"]',
     '[name="slu_mode"]',
     '.pc-location-switcher select',
@@ -401,17 +398,16 @@ function requestClassicUpdate(){
     '#pc-slu-switch input',
     '.pc-slu-select',
     '.slu-location-switch a'
-    ].join(',');
+  ].join(',');
 
-    function pcDebounce(fn, ms){ var t; return function(){ clearTimeout(t); t=setTimeout(fn, ms||120); }; }
-    var triggerUpdate = pcDebounce(requestClassicUpdate, 120);
+  function pcDebounce(fn, ms){ var t; return function(){ clearTimeout(t); t=setTimeout(fn, ms||120); }; }
+  var triggerUpdate = pcDebounce(requestClassicUpdate, 120);
 
-    $(document).on('change click', LOC_SEL, function(){
+  $(document).on('change click', LOC_SEL, function(){
     // чуть подождём, чтобы плагин успел записать куку/сессию локации
-     console.log('location/mode change -> update');
+    console.log('location/mode change -> update');
     triggerUpdate();
-    });
-
+  });
 });
 JS
 );
@@ -430,24 +426,22 @@ add_action('wp_print_scripts', function(){
 /* ================== CART UI HOOKS ================== */
 
 /**
- * Вивід під назвою позиції: «Списання…» + міні-склади.
- * Робимо через ФІЛЬТР — він гарантовано в cart/cart.php
+ * Вывод под названием позиции: «Write-off…» + мини-склады (один раз, в конце цепочки).
  */
-// Рисуем ПЛАН и мини-панель ОДИН раз, в самом конце цепочки фильтров.
 add_filter('woocommerce_cart_item_name', function ($name, $cart_item, $cart_item_key) {
     $product = $cart_item['data'] ?? null;
     if (!$product instanceof WC_Product) return $name;
 
     $qty = (int) ($cart_item['quantity'] ?? 0);
 
-    // 1) СНОСИМ любые уже добавленные планы чужими хуками (и нашими прежними)
+    // 1) Сносим любые уже добавленные планы (и наши прежние)
     $clean = (string) $name;
-    // наши/чужие блоки с классом pc-cart-plan
+    // блоки с классом pc-cart-plan
     $clean = preg_replace('~<div\s+class=(["\']).*?\bpc-cart-plan\b.*?\1[\s\S]*?</div>~iu', '', $clean);
-    // подстраховка: “Списан(ня|ие): …” без класса (если кто-то выводит голым HTML)
+    // подстраховка: “Списан(ня|ие): …” без класса
     $clean = preg_replace('~\s*(Списан(?:ня|ие)\s*:\s*.*?)(<br\s*/?>|</p>|</div>|$)~iu', '$2', $clean);
 
-    // 2) Собираем наш вывод
+    // 2) Наш вывод
     $html = '';
 
     // — строка ПЛАНА
@@ -464,7 +458,7 @@ add_filter('woocommerce_cart_item_name', function ($name, $cart_item, $cart_item
             'show_total'       => true,
             'hide_when_zero'   => false,
             'show_incart'      => true,
-            'show_incart_plan' => false, // это только внутренний флаг панели, строку плана рисуем сами
+            'show_incart_plan' => false, // строку плана рисуем сами
         ]);
         $html .= '<div class="pc-cart-stocks" style="margin:.15rem 0 0">'.$panel.'</div>';
     }
@@ -473,7 +467,7 @@ add_filter('woocommerce_cart_item_name', function ($name, $cart_item, $cart_item
 }, 9999, 3);
 
 /**
- * Малюємо qty-інпут із правильними max/step + data-allowed (для JS).
+ * Рендер qty-инпута с корректными max/step + data-allowed.
  */
 add_filter('woocommerce_cart_item_quantity', function ($product_quantity, $cart_item_key, $cart_item) {
     $product = isset($cart_item['data']) ? $cart_item['data'] : null;
@@ -494,6 +488,7 @@ add_filter('woocommerce_cart_item_quantity', function ($product_quantity, $cart_
          . '</div>';
 }, 20, 3);
 
+/* Диагностика наличия/управления остатками (оставим как есть) */
 add_action('woocommerce_check_cart_items', function () {
     foreach (WC()->cart->get_cart() as $ci) {
         if (empty($ci['data']) || ! $ci['data'] instanceof WC_Product) continue;
@@ -509,48 +504,11 @@ add_action('woocommerce_check_cart_items', function () {
     }
 }, 1);
 
-/*
-// ==== Guard: виправляємо фальшиве "нема на складі" ====
-add_action('woocommerce_check_cart_items', function () {
-    foreach (WC()->cart->get_cart() as $key => $ci) {
-        if (empty($ci['data']) || ! $ci['data'] instanceof WC_Product) continue;
-        $product = $ci['data'];
-        $want    = (int) $ci['quantity'];
-
-        // Woo бачить так:
-        $woo_stock = $product->get_stock_quantity();
-        $manage    = $product->get_manage_stock();
-
-        // А наша логіка складів:
-        $avail = function_exists('slu_available_for_add')
-            ? (int) slu_available_for_add($product)
-            : (int) $woo_stock;
-
-        // Якщо Woo каже "0", але реально є:
-        if ($avail >= $want) {
-            // знімаємо блокуючу помилку й залишаємо notice
-            wc_clear_notices();
-            wc_add_notice(sprintf(
-                'Кількість для "%s" скоригована під доступний залишок (%d шт.).',
-                $product->get_name(),
-                $avail
-            ), 'notice');
-
-            // підрізаємо кошик до реальної кількості
-            WC()->cart->set_quantity($key, $avail, false);
-        }
-    }
-}, 20);*/
-
-// Вимкнути hold stock навіть якщо в адмінці хтось знову увімкне
+/* ==== Жёсткие запреты автосписаний (как было) ==== */
 add_filter('pre_option_woocommerce_hold_stock_minutes', function(){ return ''; });
-
-// И не уменьшаем запасы при создании Pending-заказа на checkout
 add_action('init', function () {
     remove_action('woocommerce_checkout_order_processed', 'wc_maybe_reduce_stock_levels', 10);
 });
-
-// Полностью гасим любые автосписания до выяснения
 add_filter('pre_option_woocommerce_hold_stock_minutes', '__return_empty_string', 9999);
 add_filter('woocommerce_can_reduce_order_stock', '__return_false', 9999);
 remove_action('woocommerce_checkout_order_processed', 'wc_maybe_reduce_stock_levels', 10);
@@ -558,7 +516,7 @@ remove_action('woocommerce_payment_complete',          'wc_maybe_reduce_stock_le
 remove_action('woocommerce_order_status_processing',   'wc_maybe_reduce_stock_levels', 10);
 remove_action('woocommerce_order_status_completed',    'wc_maybe_reduce_stock_levels', 10);
 
-// Барьер: на фронте запретить записи _stock / _stock_status / _stock_at_* (кроме наших редукций на processing/completed и админки)
+/* Барьер: на фронте запретить записи _stock/_stock_status/_stock_at_* (кроме «наших окон») */
 add_filter('update_post_metadata', function($check,$post_id,$key,$val){
     if ($key!=='_stock' && $key!=='_stock_status' && strpos($key,'_stock_at_')!==0) return $check;
     if (is_admin() || (defined('DOING_CRON') && DOING_CRON)) return $check;

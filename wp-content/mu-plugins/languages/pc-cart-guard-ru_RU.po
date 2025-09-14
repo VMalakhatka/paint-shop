@@ -4,8 +4,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pc-cart-guard\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/pc-cart-guard\n"
-"POT-Creation-Date: 2025-09-14T09:46:18+00:00\n"
-"PO-Revision-Date: 2025-09-14T09:46:18+00:00\n"
+"POT-Creation-Date: 2025-09-14T10:07:15+00:00\n"
+"PO-Revision-Date: 2025-09-14T10:07:15+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: ru\n"
@@ -20,16 +20,32 @@ msgstr ""
 #. Plugin Name of the plugin
 #: pc-cart-guard.php
 msgid "PC Cart Guard (debug)"
-msgstr ""
+msgstr "PC Защита корзины (отладка)"
 
 #. Description of the plugin
 #: pc-cart-guard.php
 msgid ""
-"Обрізає/видаляє позиції кошика за доступністю складу. Показує «Списання…» + "
-"міні-склади у кошику. Клампить qty у реальному часі. З розширеним логуванням."
-msgstr ""
+"Trim/remove cart items based on stock availability. Shows \"Write-off…\" + "
+"mini stock panel in cart. Clamps qty in real time. Extended logging."
+msgstr "Обрезает/удаляет позиции корзины в зависимости от доступности склада. "
+"Показывает «Списание…» + мини-панель складов в корзине. "
+"Ограничивает количество в реальном времени. Расширенное логирование."
 
 #. Author of the plugin
 #: pc-cart-guard.php
 msgid "Volodymyr Malakhatka"
-msgstr ""
+msgstr "Volodymyr Malakhatka"
+
+#: pc-cart-guard.php:69 pc-cart-guard.php:88
+msgid "Write-off:"
+msgstr "Списание:"
+
+#: pc-cart-guard.php:176
+#, php-format
+msgid "“%s” is temporarily unavailable at the selected write-off location."
+msgstr "«%s» временно недоступен на выбранном складе списания."
+
+#: pc-cart-guard.php:186
+#, php-format
+msgid "Quantity for “%1$s” adjusted to %2$d per stock availability."
+msgstr "Количество для «%1$s» скорректировано до %2$d в соответствии с доступностью на складе."
