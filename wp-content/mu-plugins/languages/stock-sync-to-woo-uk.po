@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: stock-sync-to-woo 1.3.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/stock-sync-to-"
 "woo\n"
-"POT-Creation-Date: 2025-09-14T09:46:19+00:00\n"
+"POT-Creation-Date: 2025-09-14T16:30:03+00:00\n"
 "PO-Revision-Date: 2025-09-14T09:46:19+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -26,13 +26,135 @@ msgstr ""
 #. Description of the plugin
 #: stock-sync-to-woo.php
 msgid ""
-"Синхронизирует wp_stock_import → меты товара (_stock_at_{TERM_ID}), "
-"суммирует в _stock, проставляет таксономию location и, при желании, "
-"дублирует меты по slug. Умеет удалять обработанные строки и крутиться до "
-"опустошения таблицы."
+"Syncs wp_stock_import → product metas (_stock_at_{TERM_ID}), sums into "
+"_stock, assigns the 'location' taxonomy and optionally duplicates metas by "
+"slug. Can delete processed rows and loop until the table is empty."
 msgstr ""
 
 #. Author of the plugin
 #: stock-sync-to-woo.php
 msgid "PaintCore"
+msgstr "PaintCore"
+
+#: stock-sync-to-woo.php:26 stock-sync-to-woo.php:39
+msgid "Stock sync → WooCommerce"
+msgstr "Синхронізація залишків → WooCommerce"
+
+#: stock-sync-to-woo.php:27
+msgid "Stock sync → Woo"
+msgstr "Синхронізація → Woo"
+
+#: stock-sync-to-woo.php:35
+msgid "Insufficient permissions."
+msgstr "Недостатньо прав."
+
+#. translators: keep code tags as-is
+#: stock-sync-to-woo.php:46
+#, php-format
+msgid ""
+"We read rows from %1$s (sku, location_slug, qty), find a product by SKU, "
+"resolve a warehouse by %2$s in the %3$s taxonomy and write quantity into "
+"%4$s. Then we sum per SKU and update %5$s. Optionally we can auto-attach "
+"%3$s terms to products and set Primary."
 msgstr ""
+"Беремо рядки з %1$s (sku, location_slug, qty), шукаємо товар за SKU, "
+"знаходимо склад за %2$s у таксономії %3$s і записуємо залишок у %4$s. Потім "
+"підсумовуємо по SKU і оновлюємо %5$s. За потреби можна автоматично "
+"прив’язати терміни %3$s до товарів і виставити Primary."
+
+#: stock-sync-to-woo.php:61
+msgid "Batch size"
+msgstr "Розмір пакета"
+
+#. translators: keep code tag
+#: stock-sync-to-woo.php:69
+#, php-format
+msgid "How many rows from %s to process per pass."
+msgstr "Скільки рядків із %s обробити за один прохід."
+
+#: stock-sync-to-woo.php:80
+msgid "Show only, no writes"
+msgstr "Лише показати, без запису"
+
+#: stock-sync-to-woo.php:84
+msgid "SKU filter (prefix)"
+msgstr "Фільтр за SKU (префікс)"
+
+#: stock-sync-to-woo.php:86
+msgid "e.g. CR- or AB-"
+msgstr "наприклад, CR- або AB-"
+
+#: stock-sync-to-woo.php:87
+msgid "If set, only rows whose SKU starts with this prefix will be processed."
+msgstr ""
+"Якщо вказано, будуть оброблені лише рядки, де SKU починається з цього "
+"префікса."
+
+#: stock-sync-to-woo.php:91
+msgid "Update stock status?"
+msgstr "Оновлювати статус наявності?"
+
+#: stock-sync-to-woo.php:92 stock-sync-to-woo.php:96 stock-sync-to-woo.php:105
+#: stock-sync-to-woo.php:112 stock-sync-to-woo.php:116
+msgid "Yes"
+msgstr "Так"
+
+#: stock-sync-to-woo.php:95
+msgid "Enable manage_stock?"
+msgstr "Увімкнути manage_stock?"
+
+#: stock-sync-to-woo.php:99
+#, php-format
+msgid "Delete processed rows from %s?"
+msgstr "Видаляти оброблені рядки з %s?"
+
+#: stock-sync-to-woo.php:100
+msgid "Yes, after successful writes"
+msgstr "Так, після успішного запису"
+
+#: stock-sync-to-woo.php:103
+msgid "Loop until table is empty?"
+msgstr "Крутитися, доки таблиця не спорожніє?"
+
+#: stock-sync-to-woo.php:106
+msgid "Max loops"
+msgstr "Максимум циклів"
+
+#: stock-sync-to-woo.php:107
+msgid "Safety: looping requires deletion to be enabled."
+msgstr "Безпека: для циклічної роботи потрібно ввімкнути видалення."
+
+#: stock-sync-to-woo.php:111
+#, php-format
+msgid "Attach %s terms to products?"
+msgstr "Прив’язувати терміни %s до товарів?"
+
+#: stock-sync-to-woo.php:115
+msgid "Set Primary location if missing?"
+msgstr "Виставляти Primary location, якщо відсутній?"
+
+#: stock-sync-to-woo.php:119
+msgid "Duplicate metas by slug (compat)?"
+msgstr "Дублювати мета-поля за slug (сумісність)?"
+
+#: stock-sync-to-woo.php:120
+msgid "Yes, also write <code>_stock_at_{slug}</code>"
+msgstr "Так, також записувати <code>_stock_at_{slug}</code>"
+
+#: stock-sync-to-woo.php:125
+msgid "Synchronize"
+msgstr "Синхронізувати"
+
+#: stock-sync-to-woo.php:131
+msgid "Report"
+msgstr "Звіт"
+
+#. translators: keep code tag
+#: stock-sync-to-woo.php:142
+#, php-format
+msgid "Tip: check current table size with %s"
+msgstr "Підказка: перевірити розмір таблиці можна запитом %s"
+
+#: stock-sync-to-woo.php:160
+msgid "Sync is already running. Try again in ~30s."
+msgstr "Синхронізація вже виконується. Спробуйте ще раз через ~30 с."
