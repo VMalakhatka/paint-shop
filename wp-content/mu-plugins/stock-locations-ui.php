@@ -1,15 +1,17 @@
 <?php
 /*
-Plugin Name: PC Allocation Helpers
-Description: Глобальные хелперы для плана списания: чтение (_pc_alloc_plan) и humanize ("Київ — 2, Одеса — 1").
-Version: 1.0.0
+Plugin Name: Stock Locations UI
+Description: Helpers and UI for per-location stock display/allocation. Reads _pc_alloc_plan and renders compact stock panels.
+Version: 1.1.0
 Author: PaintCore
+Text Domain: stock-locations-ui
+Domain Path: /languages
 */
 if (!defined('ABSPATH')) exit;
 
 /**
- * Прочитать план списания из строки заказа.
- * Возвращает массив вида [term_id => qty] с положительными числами.
+ * Read allocation plan from order item meta.
+ * Returns array like [term_id => qty] with positive integers.
  */
 if (!function_exists('pc_get_order_item_plan')) {
     function pc_get_order_item_plan(\WC_Order_Item_Product $item): array {
@@ -28,14 +30,14 @@ if (!function_exists('pc_get_order_item_plan')) {
 }
 
 /**
- * Превратить план вида [term_id => qty] в строку "Київ — 2, Одеса — 1".
- * Берёт имена терминов таксономии `location`. Сортирует по количеству (desc).
+ * Turn plan [term_id => qty] into "Kyiv — 2, Odesa — 1".
+ * Uses taxonomy `location` term names. Sorts by qty desc.
  */
 if (!function_exists('pc_humanize_alloc_plan')) {
     function pc_humanize_alloc_plan(array $plan): string {
         if (empty($plan)) return '';
 
-        // Справочник term_id => name
+        // term_id => name dictionary
         $dict = [];
         $terms = get_terms([
             'taxonomy'   => 'location',
@@ -47,10 +49,8 @@ if (!function_exists('pc_humanize_alloc_plan')) {
             }
         }
 
-        // Сортировка по количеству (убывание)
         arsort($plan, SORT_NUMERIC);
 
-        // Сборка "Имя — Кол-во"
         $parts = [];
         foreach ($plan as $tid => $q) {
             $name = $dict[(int)$tid] ?? ('#' . (int)$tid);
@@ -62,15 +62,15 @@ if (!function_exists('pc_humanize_alloc_plan')) {
 }
 
 /** ========================= UI LABELS =========================
- *  Можна перевизначити у wp-config.php константами:
- *    SLU_LBL_FROM, SLU_LBL_OTHERS, SLU_LBL_TOTAL, SLU_LBL_ALLOCATION
- *  або фільтром: add_filter('slu_ui_labels', fn($L)=>...)
+ *  Can be overridden in wp-config.php via constants:
+ *    SLU_LBL_FROM, SLU_LBL_OTHERS, SLU_LBL_TOTAL, SLU_LBL_ALLOCATION, SLU_LBL_IN_CART
+ *  or via filter: add_filter('slu_ui_labels', fn($L)=>...)
  */
-if (!defined('SLU_LBL_FROM'))       define('SLU_LBL_FROM', 'Зі складу');
-if (!defined('SLU_LBL_OTHERS'))     define('SLU_LBL_OTHERS', 'Інші скл.');
-if (!defined('SLU_LBL_TOTAL'))      define('SLU_LBL_TOTAL', 'Загал.');
-if (!defined('SLU_LBL_ALLOCATION')) define('SLU_LBL_ALLOCATION', 'Списання');
-if (!defined('SLU_LBL_IN_CART'))    define('SLU_LBL_IN_CART', 'В корзине');
+if (!defined('SLU_LBL_FROM'))       define('SLU_LBL_FROM',       __('From stock', 'stock-locations-ui'));
+if (!defined('SLU_LBL_OTHERS'))     define('SLU_LBL_OTHERS',     __('Other loc.', 'stock-locations-ui'));
+if (!defined('SLU_LBL_TOTAL'))      define('SLU_LBL_TOTAL',      __('Total', 'stock-locations-ui'));
+if (!defined('SLU_LBL_ALLOCATION')) define('SLU_LBL_ALLOCATION', __('Allocation', 'stock-locations-ui'));
+if (!defined('SLU_LBL_IN_CART'))    define('SLU_LBL_IN_CART',    __('In cart', 'stock-locations-ui'));
 
 if (!function_exists('slu_labels')) {
     function slu_labels(): array {
@@ -102,7 +102,7 @@ if (!function_exists('slu_get_primary_location_term_id')) {
 }
 
 if (!function_exists('slu_total_available_qty')) {
-    /** сумма остатков по всем складам (с кешем в _stock, фолбэк — суммирование _stock_at_%) */
+    /** sum of all location stocks (cached in _stock; fallback — sum of _stock_at_%) */
     function slu_total_available_qty(WC_Product $product){
         $pid = (int)$product->get_id();
         $sum = get_post_meta($pid, '_stock', true);
@@ -133,7 +133,7 @@ if (!function_exists('slu_total_available_qty')) {
     }
 }
 
-// доступное к добавлению = общий остаток минус то, что уже в корзине
+// available to add = total stock minus quantity already in cart
 if (!function_exists('slu_available_for_add')) {
     function slu_available_for_add(WC_Product $product): int {
         $total   = slu_total_available_qty($product);
@@ -143,7 +143,7 @@ if (!function_exists('slu_available_for_add')) {
 }
 
 if (!function_exists('slu_cart_qty_for_product')) {
-    /** сколько этого товара/вариации уже в корзине */
+    /** how many of this product/variation are already in the cart */
     function slu_cart_qty_for_product(WC_Product $product): int{
         $pid = (int)$product->get_id();
         $vid = $product->is_type('variation') ? $pid : 0;
@@ -160,7 +160,7 @@ if (!function_exists('slu_cart_qty_for_product')) {
 }
 
 if (!function_exists('slu_collect_location_stocks_for_product')) {
-    /** собрать “імʼя — qty” по всіх складах, привʼязаних до товару */
+    /** collect “name — qty” across all locations attached to the product */
     function slu_collect_location_stocks_for_product(WC_Product $product): array{
         $result   = [];
         $term_ids = wp_get_object_terms($product->get_id(), 'location', ['fields'=>'ids','hide_empty'=>false]);
@@ -226,14 +226,14 @@ if (!function_exists('slu_render_primary_location_line')) {
     }
 }
 
-// Збираємо й впорядковуємо локації під обраний режим
+// Build and order locations for preferred mode
 function pc_build_stock_view(WC_Product $product): array {
     if (!function_exists('slu_collect_location_stocks_for_product')) {
         return ['mode'=>'auto','preferred'=>null,'primary'=>null,'ordered'=>[], 'sum'=>0];
     }
     $all = (array) slu_collect_location_stocks_for_product($product);
 
-    // ховаємо нульові склади
+    // hide zero-qty locations
     $all = array_filter($all, static function($row){
         return (int)($row['qty'] ?? 0) > 0;
     });
@@ -246,7 +246,7 @@ function pc_build_stock_view(WC_Product $product): array {
 
     $primary = function_exists('slu_get_primary_location_term_id') ? (int) slu_get_primary_location_term_id($product->get_id()) : 0;
 
-    // single: тільки вибраний склад
+    // single: only the chosen location
     if ($mode === 'single') {
         $only = [];
         if ($sel && isset($all[$sel])) {
@@ -281,7 +281,7 @@ function pc_fmt_loc_line(array $row): string {
     return esc_html($name).' — '.esc_html($qty);
 }
 
-/** =================== ПЛАН СПИСАНИЯ =================== */
+/** =================== ALLOCATION PLAN =================== */
 
 if (!function_exists('slu_get_allocation_plan')) {
     function slu_get_allocation_plan(WC_Product $product, int $need, string $strategy='primary_first'): array{
@@ -326,7 +326,7 @@ if (!function_exists('slu_render_allocation_line')) {
     }
 }
 
-/** =================== ПАНЕЛЬ СКЛАДІВ (UI) =================== */
+/** =================== STOCK PANEL (UI) =================== */
 
 if (!function_exists('slu_render_stock_panel')) {
     function slu_render_stock_panel( WC_Product $product, array $opts = [] ): string {
@@ -343,7 +343,7 @@ if (!function_exists('slu_render_stock_panel')) {
         $v = pc_build_stock_view($product);
         $L = slu_labels();
 
-        // режим "тільки обраний склад"
+        // "single" mode: only chosen location
         if ($v['mode'] === 'single') {
             if (empty($v['ordered'])) return '';
             $row = reset($v['ordered']);
@@ -403,7 +403,7 @@ if (!function_exists('slu_render_stock_panel')) {
     }
 }
 
-/** =================== ВСТАВКИ В ШАБЛОНИ =================== */
+/** =================== THEME INSERTS =================== */
 
 /* PDP */
 add_action('woocommerce_single_product_summary', function(){
@@ -420,7 +420,7 @@ add_action('woocommerce_single_product_summary', function(){
     ]);
 }, 25);
 
-/* Каталог */
+/* Catalog loop */
 add_action('woocommerce_after_shop_loop_item_title', function(){
     global $product;
     if (!($product instanceof WC_Product)) return;
@@ -435,7 +435,7 @@ add_action('woocommerce_after_shop_loop_item_title', function(){
     ]);
 }, 11);
 
-/** =================== КОРЗИНА / ЧЕКАУТ =================== */
+/** =================== CART / CHECKOUT =================== */
 
 if (!function_exists('slu_cart_allocation_row')) {
     function slu_cart_allocation_row($item_data, $cart_item){
@@ -463,7 +463,7 @@ if (!function_exists('slu_cart_allocation_row')) {
 }
 add_filter('woocommerce_get_item_data', 'slu_cart_allocation_row', 30, 2);
 
-/** =================== (опц.) Шорткод для будь-яких місць =================== */
+/** =================== SHORTCODE =================== */
 // [pc_stock_allocation product_id="43189" qty="3"]
 add_shortcode('pc_stock_allocation', function($atts){
     $a = shortcode_atts(['product_id'=>0,'qty'=>0], $atts, 'pc_stock_allocation');
@@ -476,7 +476,7 @@ add_shortcode('pc_stock_allocation', function($atts){
     return '<div class="slu-stock-box slu-stock-mini"><strong>'.esc_html($L['allocation']).':</strong> '.esc_html($line).'</div>';
 });
 
-/* Woo stock HTML: показуємо стандартний лише коли товару немає */
+/* Woo stock HTML: show default only when out of stock */
 add_filter('woocommerce_get_stock_html', function($html, $product){
     if (!($product instanceof WC_Product)) return $html;
     if ($product->is_in_stock()) return '';
@@ -497,11 +497,11 @@ add_action('wp_head', function(){
     </style>';
 });
 
-/** =================== Компактор рядка «Інші скл.» =================== */
+/** =================== MINI PANEL COMPACTOR =================== */
 add_filter('slu_stock_panel_html', function($html, $product, $view, $opts){
     if (!isset($opts['wrap_class']) || strpos($opts['wrap_class'],'slu-stock-mini') === false) return $html;
 
-    $L = function_exists('slu_labels') ? slu_labels() : ['others'=>'Інші скл.'];
+    $L = function_exists('slu_labels') ? slu_labels() : ['others'=>__('Other loc.', 'stock-locations-ui')];
     $needle = $L['others'];
 
     $doc = new DOMDocument();
