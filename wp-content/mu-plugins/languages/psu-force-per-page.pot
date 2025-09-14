@@ -1,4 +1,4 @@
-# Copyright (C) 2025 PSU
+# Copyright (C) 2025 PaintCore
 # This file is distributed under the same license as the PSU Force Per Page (cols × rows) plugin.
 msgid ""
 msgstr ""
@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-09-14T11:33:24+00:00\n"
+"POT-Creation-Date: 2025-09-14T11:49:40+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: psu-force-per-page\n"
@@ -26,5 +26,13 @@ msgstr ""
 
 #. Author of the plugin
 #: psu-force-per-page.php
-msgid "PSU"
+msgid "PaintCore"
+msgstr ""
+
+#: psu-force-per-page.php:89
+msgid "PSUFP"
+msgstr ""
+
+#: psu-force-per-page.php:156
+msgid "PSUFP …"
 msgstr ""

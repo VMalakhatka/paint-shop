@@ -2,8 +2,10 @@
 /**
  * Plugin Name: PSU Force Per Page (cols × rows)
  * Description: Кол-во товаров на странице = колонки × ряды. Колонки меряются JS-ом, ряды задаются константами.
- * Author: PSU
+ * Author: PaintCore
  * Version: 1.1.0
+ * Text Domain: psu-force-per-page
+ * Domain Path: /languages
  */
 
 if (!defined('ABSPATH')) exit;
@@ -84,10 +86,12 @@ add_action('wp_footer', function () {
     $cookieCols = esc_js(PSUFP_COOKIE_COLS);
     $cookieRows = esc_js(PSUFP_COOKIE_ROWS);
     $debug      = PSUFP_DEBUG ? 'true' : 'false';
+    $dbg_label  = esc_js( __( 'PSUFP', 'psu-force-per-page' ) );
     ?>
     <script>
     (function(){
       var DEBUG = <?php echo $debug; ?>;
+      var DBG_LABEL = <?php echo '"'.$dbg_label.'"'; ?>;
 
       function setCookie(name, value, days){
         var d = new Date(); d.setTime(d.getTime() + days*864e5);
@@ -124,7 +128,7 @@ add_action('wp_footer', function () {
         var prevRows = parseInt(getCookie('<?php echo $cookieRows; ?>') || '0', 10);
 
         if (DEBUG) {
-          var msg = "[PSUFP] cols=" + cols + " (cookie " + prevCols + "), rows=" + rows + " (cookie " + prevRows + "), w=" + window.innerWidth;
+          var msg = "[" + DBG_LABEL + "] cols=" + cols + " (cookie " + prevCols + "), rows=" + rows + " (cookie " + prevRows + "), w=" + window.innerWidth;
           console.log(msg);
           var box = document.getElementById('psufp-debug'); if (box) box.textContent = msg;
         }
@@ -149,7 +153,7 @@ add_action('wp_footer', function () {
     })();
     </script>
     <?php if (PSUFP_DEBUG): ?>
-      <div id="psufp-debug" style="margin:20px 0;padding:10px;background:#111;color:#0f0;border:2px solid #0f0; font-family:monospace">PSUFP …</div>
+      <div id="psufp-debug" style="margin:20px 0;padding:10px;background:#111;color:#0f0;border:2px solid #0f0; font-family:monospace"><?php echo esc_html__( 'PSUFP …', 'psu-force-per-page' ); ?></div>
     <?php endif;
 }, 999);
 
