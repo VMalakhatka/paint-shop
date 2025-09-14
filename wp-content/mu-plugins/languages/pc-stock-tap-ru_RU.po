@@ -4,8 +4,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pc-stock-tap\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/pc-stock-tap\n"
-"POT-Creation-Date: 2025-09-14T09:46:18+00:00\n"
-"PO-Revision-Date: 2025-09-14T09:46:18+00:00\n"
+"POT-Creation-Date: 2025-09-14T10:28:43+00:00\n"
+"PO-Revision-Date: 2025-09-14T10:28:43+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: ru\n"
@@ -20,14 +20,14 @@ msgstr ""
 #. Plugin Name of the plugin
 #: pc-stock-tap.php
 msgid "PC Stock Tap"
-msgstr ""
+msgstr "PC Барьер стока"
 
 #. Description of the plugin
 #: pc-stock-tap.php
 msgid "Selective stock writes barrier + trace log."
-msgstr ""
+msgstr "Выборочный барьер записей стока + трейс-лог."
 
 #. Author of the plugin
 #: pc-stock-tap.php
 msgid "Volodymyr Malakhatka"
-msgstr ""
+msgstr "Volodymyr Malakhatka"

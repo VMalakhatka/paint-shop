@@ -3,9 +3,10 @@
 Plugin Name: PC Stock Tap
 Description: Selective stock writes barrier + trace log.
 Author: Volodymyr Malakhatka
-Text Domain: pc-stock-tap.php
+Text Domain: pc-stock-tap
 Domain Path: /languages
 */
+
 if (!defined('ABSPATH')) exit;
 
 function pcstk_trace_paths($limit = 20){
@@ -31,9 +32,9 @@ function pcstk_trace_str(){
 }
 
 /**
- * Селективный барьер записей _stock/_stock_status/_stock_at_* на фронте.
- * Блокируем ТОЛЬКО, если вызов пришёл из SLW-хелперов/классов (frontend/order-item),
- * и это не наше целевое списание.
+ * Selective barrier for writes of _stock/_stock_status/_stock_at_* on frontend.
+ * Block ONLY if call came from SLW helpers/classes (frontend/order-item),
+ * and it's not our intentional write-off.
  */
 add_filter('update_post_metadata', function($check,$post_id,$key,$val){
   // интересуют только ключи стока
@@ -54,23 +55,13 @@ add_filter('update_post_metadata', function($check,$post_id,$key,$val){
   $paths = pcstk_trace_paths();
   $is_slw_writer = false;
   foreach ($paths as $p){
-    // названия взяты из твоих логов:
-    if (strpos($p, 'helper-slw-frontend.php')!==false)   { $is_slw_writer = true; break; }
+    if (strpos($p, 'helper-slw-frontend.php')!==false)    { $is_slw_writer = true; break; }
     if (strpos($p, 'class-slw-frontend-cart.php')!==false){ $is_slw_writer = true; break; }
-    if (strpos($p, 'helper-slw-order-item.php')!==false) { $is_slw_writer = true; break; }
-    if (strpos($p, 'class-slw-order-item.php')!==false)  { $is_slw_writer = true; break; }
+    if (strpos($p, 'helper-slw-order-item.php')!==false)  { $is_slw_writer = true; break; }
+    if (strpos($p, 'class-slw-order-item.php')!==false)   { $is_slw_writer = true; break; }
   }
 
   if ($is_slw_writer){
-    $old = get_post_meta($post_id,$key,true);
-    if (defined('WP_DEBUG') && WP_DEBUG) {
-        error_log(sprintf(
-            '[STOCK-BARRIER] blocked (SLW): post=%d key=%s old=%s new=%s url=%s trace=%s',
-            (int)$post_id,$key,is_scalar($old)?$old:json_encode($old),
-            is_scalar($val)?$val:json_encode($val),
-            $_SERVER['REQUEST_URI']??'', pcstk_trace_str()
-        ));
-    }
     return false; // ← блок
   }
 
