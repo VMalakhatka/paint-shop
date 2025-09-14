@@ -1,11 +1,12 @@
-# Copyright (C) 2025 
-# This file is distributed under the same license as the PC Stock Tap plugin.
+# Copyright (C) 2025 PaintCore
+# This file is distributed under the same license as the Stock Import CSV — Lite (stable + docs) plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: PC Stock Tap\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mu-plugins\n"
-"POT-Creation-Date: 2025-09-14T08:43:36+00:00\n"
-"PO-Revision-Date: 2025-09-14T08:43:36+00:00\n"
+"Project-Id-Version: stock-import-csv-lite 1.2.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/stock-import-csv-"
+"lite\n"
+"POT-Creation-Date: 2025-09-14T09:46:18+00:00\n"
+"PO-Revision-Date: 2025-09-14T09:46:18+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: uk\n"
@@ -18,11 +19,19 @@ msgstr ""
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 #. Plugin Name of the plugin
-#: pc-stock-tap.php
-msgid "PC Stock Tap"
+#: stock-import-csv-lite.php
+msgid "Stock Import CSV — Lite (stable + docs)"
 msgstr ""
 
 #. Description of the plugin
-#: pc-stock-tap.php
-msgid "Точечный барьер записей стока + трейс лог."
+#: stock-import-csv-lite.php
+msgid ""
+"Боевой импорт остатков в wp_stock_import. Поддерживает длинный (sku,"
+"location_slug,qty) и широкий (sku,<склады>...) форматы. Есть SMOKE‑TEST. На "
+"странице — встроенная документация и примеры CSV."
+msgstr ""
+
+#. Author of the plugin
+#: stock-import-csv-lite.php
+msgid "PaintCore"
 msgstr ""

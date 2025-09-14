@@ -1,7 +1,10 @@
 <?php
 /*
 Plugin Name: PC Stock Tap
-Description: Точечный барьер записей стока + трейс лог.
+Description: Selective stock writes barrier + trace log.
+Author: Volodymyr Malakhatka
+Text Domain: pc-stock-tap.php
+Domain Path: /languages
 */
 if (!defined('ABSPATH')) exit;
 

@@ -1,11 +1,12 @@
-# Copyright (C) 2025 
-# This file is distributed under the same license as the PC Stock Tap plugin.
+# Copyright (C) 2025 PaintCore
+# This file is distributed under the same license as the Stock Sync → WooCommerce plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: PC Stock Tap\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mu-plugins\n"
-"POT-Creation-Date: 2025-09-14T08:43:36+00:00\n"
-"PO-Revision-Date: 2025-09-14T08:43:36+00:00\n"
+"Project-Id-Version: stock-sync-to-woo 1.3.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/stock-sync-to-"
+"woo\n"
+"POT-Creation-Date: 2025-09-14T09:46:19+00:00\n"
+"PO-Revision-Date: 2025-09-14T09:46:19+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: uk\n"
@@ -18,11 +19,20 @@ msgstr ""
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 #. Plugin Name of the plugin
-#: pc-stock-tap.php
-msgid "PC Stock Tap"
+#: stock-sync-to-woo.php
+msgid "Stock Sync → WooCommerce"
 msgstr ""
 
 #. Description of the plugin
-#: pc-stock-tap.php
-msgid "Точечный барьер записей стока + трейс лог."
+#: stock-sync-to-woo.php
+msgid ""
+"Синхронизирует wp_stock_import → меты товара (_stock_at_{TERM_ID}), "
+"суммирует в _stock, проставляет таксономию location и, при желании, "
+"дублирует меты по slug. Умеет удалять обработанные строки и крутиться до "
+"опустошения таблицы."
+msgstr ""
+
+#. Author of the plugin
+#: stock-sync-to-woo.php
+msgid "PaintCore"
 msgstr ""

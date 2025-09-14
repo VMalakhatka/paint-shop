@@ -1,8 +1,10 @@
 <?php
-/**
- * Plugin Name: PC Cart Guard (debug)
- * Description: Обрізає/видаляє позиції кошика за доступністю складу. Показує «Списання…» + міні-склади у кошику. Клампить qty у реальному часі. З розширеним логуванням.
- * Author: PaintCore
+/*
+  Plugin Name: PC Cart Guard (debug)
+  Description: Обрізає/видаляє позиції кошика за доступністю складу. Показує «Списання…» + міні-склади у кошику. Клампить qty у реальному часі. З розширеним логуванням.
+  Author: Volodymyr Malakhatka
+  Text Domain: pc-cart-guard
+  Domain Path: /languages
  */
 
 if (!defined('ABSPATH')) exit;

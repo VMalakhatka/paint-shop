@@ -1,11 +1,11 @@
-# Copyright (C) 2025 
+# Copyright (C) 2025 Volodymyr Malakhatka
 # This file is distributed under the same license as the PC Stock Tap plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: PC Stock Tap\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mu-plugins\n"
-"POT-Creation-Date: 2025-09-14T08:43:35+00:00\n"
-"PO-Revision-Date: 2025-09-14T08:43:35+00:00\n"
+"Project-Id-Version: pc-stock-tap\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/pc-stock-tap\n"
+"POT-Creation-Date: 2025-09-14T09:46:18+00:00\n"
+"PO-Revision-Date: 2025-09-14T09:46:18+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: ru\n"
@@ -24,5 +24,10 @@ msgstr ""
 
 #. Description of the plugin
 #: pc-stock-tap.php
-msgid "Точечный барьер записей стока + трейс лог."
+msgid "Selective stock writes barrier + trace log."
+msgstr ""
+
+#. Author of the plugin
+#: pc-stock-tap.php
+msgid "Volodymyr Malakhatka"
 msgstr ""

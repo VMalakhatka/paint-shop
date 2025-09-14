@@ -1,25 +1,30 @@
-# Copyright (C) 2025 
-# This file is distributed under the same license as the PC Stock Tap plugin.
+# Copyright (C) 2025 PaintCore
+# This file is distributed under the same license as the PC Allocation Helpers plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: PC Stock Tap\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mu-plugins\n"
+"Project-Id-Version: stock-locations-ui 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/stock-locations-ui\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-09-14T08:43:36+00:00\n"
+"POT-Creation-Date: 2025-09-14T09:46:19+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: stock-locations-ui\n"
 
 #. Plugin Name of the plugin
-#: pc-stock-tap.php
-msgid "PC Stock Tap"
+#: stock-locations-ui.php
+msgid "PC Allocation Helpers"
 msgstr ""
 
 #. Description of the plugin
-#: pc-stock-tap.php
-msgid "Точечный барьер записей стока + трейс лог."
+#: stock-locations-ui.php
+msgid "Глобальные хелперы для плана списания: чтение (_pc_alloc_plan) и humanize (\"Київ — 2, Одеса — 1\")."
+msgstr ""
+
+#. Author of the plugin
+#: stock-locations-ui.php
+msgid "PaintCore"
 msgstr ""
