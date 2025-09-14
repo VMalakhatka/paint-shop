@@ -111,6 +111,3 @@ msgstr "Списание: %s"
 #: inc/stock-locations-display.php:213 inc/stock-locations-display.php:216
 msgid "Warehouse"
 msgstr "Склад"
-
-#~ msgid "In cart"
-#~ msgstr "В корзине"

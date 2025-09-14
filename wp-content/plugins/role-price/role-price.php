@@ -14,6 +14,7 @@ add_action('init', function () {
     load_plugin_textdomain('role-price', false, dirname(plugin_basename(__FILE__)) . '/languages');
 });
 
+
 // === Кастомные цены по ролям: override только если найдена своя цена ===
 // Приоритет 5: если своей цены нет, WPC (priority ~10) применит глобальные скидки.
 add_filter('woocommerce_product_get_price',          'vp_role_price_override', 5, 2);

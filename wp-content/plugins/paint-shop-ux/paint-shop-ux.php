@@ -54,6 +54,7 @@ function psu_loop_title() {
 function psu_get_compact_title(string $title, int $product_id = 0): string {
     $clean = trim(wp_strip_all_tags($title));
 
+    
     // 1) спец-поле
     $meta_key = apply_filters('psu_compact_title_meta_key', '_psu_compact_title');
     if ($product_id) {

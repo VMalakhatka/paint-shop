@@ -37,6 +37,7 @@ if (file_exists($pc_config)) {
     require_once $pc_config;
 }
 
+
 /* 1) Файлы с приоритетом (если нужны ранние функции) */
 $priority = [
     'stock-public.php',            // сначала регистрируем таксономии / функции

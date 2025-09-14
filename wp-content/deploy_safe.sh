@@ -25,7 +25,7 @@ echo "==== $(date +'%F %T') deploy_safe.sh start ===="
 command -v git >/dev/null || { echo "❌ git не найден"; exit 1; }
 
 # Базовый rsync: без прав/владельцев/времён (для учётки без sudo)
-RSYNC_BASE=( -rtv --delete --exclude .DS_Store --no-perms --no-owner --no-group --omit-dir-times )
+RSYNC_BASE=( -rtiv --delete --exclude .DS_Store --no-perms --no-owner --no-group --omit-dir-times --no-times --checksum )
 if [ "${DRY_RUN:-0}" = "1" ]; then
   echo ">> DRY_RUN=1: rsync будет с -n (без изменений)"
   RSYNC=( "${RSYNC_BASE[@]}" -n )
@@ -175,6 +175,12 @@ rsync "${RSYNC[@]}" wp-content/plugins/paint-core/          "$PLUG/paint-core/"
 rsync "${RSYNC[@]}" wp-content/plugins/paint-shop-ux/       "$PLUG/paint-shop-ux/"
 rsync "${RSYNC[@]}" wp-content/plugins/role-price/          "$PLUG/role-price/"
 rsync "${RSYNC[@]}" wp-content/plugins/pc-order-import-export/   "$PLUG/pc-order-import-export/"
+
+# Сброс OPcache (если включён)
+( /opt/remi/php83/root/bin/php -r 'if(function_exists("opcache_reset")){opcache_reset();echo "✓ OPcache reset\n";}else{echo "ℹ OPcache not available\n";}' ) || true
+
+# На всякий случай активируем наш UX плагин
+/opt/remi/php83/root/bin/php /bin/wp-cli.phar --path="$WP" plugin activate paint-shop-ux || true
 
 # 3) Права (мягко; ошибки игнорируем)
 for p in \

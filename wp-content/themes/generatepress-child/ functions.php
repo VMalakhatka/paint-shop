@@ -18,6 +18,7 @@ add_action('woocommerce_after_shop_loop_item_title', function(){
     echo '</div>';
 }, 8);
 
+
 /** ================= Quick Order: переписываем ссылки категорий ================= */
 
 // Слаг страницы «Швидке замовлення» (однократно)

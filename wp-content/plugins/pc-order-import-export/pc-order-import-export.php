@@ -23,6 +23,7 @@ add_action('plugins_loaded', function () {
     }
 });
 
+
 define('PCOE_DIR', __DIR__);
 define('PCOE_URL', plugin_dir_url(__FILE__));
 
