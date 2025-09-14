@@ -66,23 +66,15 @@ if (!function_exists('pc_humanize_alloc_plan')) {
  *    SLU_LBL_FROM, SLU_LBL_OTHERS, SLU_LBL_TOTAL, SLU_LBL_ALLOCATION, SLU_LBL_IN_CART
  *  or via filter: add_filter('slu_ui_labels', fn($L)=>...)
  */
-if (!defined('SLU_LBL_FROM'))       define('SLU_LBL_FROM',       __('From stock', 'stock-locations-ui'));
-if (!defined('SLU_LBL_OTHERS'))     define('SLU_LBL_OTHERS',     __('Other loc.', 'stock-locations-ui'));
-if (!defined('SLU_LBL_TOTAL'))      define('SLU_LBL_TOTAL',      __('Total', 'stock-locations-ui'));
-if (!defined('SLU_LBL_ALLOCATION')) define('SLU_LBL_ALLOCATION', __('Allocation', 'stock-locations-ui'));
-if (!defined('SLU_LBL_IN_CART'))    define('SLU_LBL_IN_CART',    __('In cart', 'stock-locations-ui'));
-
-if (!function_exists('slu_labels')) {
-    function slu_labels(): array {
-        $labels = [
-            'from'       => SLU_LBL_FROM,
-            'others'     => SLU_LBL_OTHERS,
-            'total'      => SLU_LBL_TOTAL,
-            'allocation' => SLU_LBL_ALLOCATION,
-            'in_cart'    => SLU_LBL_IN_CART,
-        ];
-        return apply_filters('slu_ui_labels', $labels);
-    }
+function slu_labels(): array {
+    $L = [
+        'from'       => defined('SLU_LBL_FROM')       ? SLU_LBL_FROM       : __('From stock', 'stock-locations-ui'),
+        'others'     => defined('SLU_LBL_OTHERS')     ? SLU_LBL_OTHERS     : __('Other loc.', 'stock-locations-ui'),
+        'total'      => defined('SLU_LBL_TOTAL')      ? SLU_LBL_TOTAL      : __('Total', 'stock-locations-ui'),
+        'allocation' => defined('SLU_LBL_ALLOCATION') ? SLU_LBL_ALLOCATION : __('Allocation', 'stock-locations-ui'),
+        'in_cart'    => defined('SLU_LBL_IN_CART')    ? SLU_LBL_IN_CART    : __('In cart', 'stock-locations-ui'),
+    ];
+    return apply_filters('slu_ui_labels', $L);
 }
 
 /** ========================= HELPERS ========================= */

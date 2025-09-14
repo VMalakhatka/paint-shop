@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: stock-locations-ui 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/stock-locations-"
 "ui\n"
-"POT-Creation-Date: 2025-09-14T09:46:19+00:00\n"
+"POT-Creation-Date: 2025-09-14T15:45:56+00:00\n"
 "PO-Revision-Date: 2025-09-14T09:46:19+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -20,17 +20,35 @@ msgstr ""
 
 #. Plugin Name of the plugin
 #: stock-locations-ui.php
-msgid "PC Allocation Helpers"
-msgstr ""
+msgid "Stock Locations UI"
+msgstr "Интерфейс локаций складов"
 
 #. Description of the plugin
 #: stock-locations-ui.php
-msgid ""
-"Глобальные хелперы для плана списания: чтение (_pc_alloc_plan) и humanize "
-"(\"Київ — 2, Одеса — 1\")."
-msgstr ""
+msgid "Helpers and UI for per-location stock display/allocation. Reads _pc_alloc_plan and renders compact stock panels."
+msgstr "Хелперы и интерфейс для отображения/распределения остатков по складам. Читает _pc_alloc_plan и выводит компактные панели остатков."
 
 #. Author of the plugin
 #: stock-locations-ui.php
 msgid "PaintCore"
-msgstr ""
+msgstr "PaintCore"
+
+#: stock-locations-ui.php:69
+msgid "From stock"
+msgstr "Со склада"
+
+#: stock-locations-ui.php:70 stock-locations-ui.php:504
+msgid "Other loc."
+msgstr "Прочие скл."
+
+#: stock-locations-ui.php:71
+msgid "Total"
+msgstr "Итого"
+
+#: stock-locations-ui.php:72
+msgid "Allocation"
+msgstr "Списание"
+
+#: stock-locations-ui.php:73
+msgid "In cart"
+msgstr "В корзине"
