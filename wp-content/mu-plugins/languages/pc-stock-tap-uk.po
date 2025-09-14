@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pc-stock-tap\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/pc-stock-tap\n"
-"POT-Creation-Date: 2025-09-14T10:28:43+00:00\n"
+"POT-Creation-Date: 2025-09-14T10:55:17+00:00\n"
 "PO-Revision-Date: 2025-09-14T10:28:43+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -31,3 +31,9 @@ msgstr "Вибірковий бар’єр записів стоку + трей�
 #: pc-stock-tap.php
 msgid "Volodymyr Malakhatka"
 msgstr "Volodymyr Malakhatka"
+
+#: pc-stock-tap.php:70
+#, php-format
+msgid ""
+"[STOCK-BARRIER] blocked (SLW): post=%d key=%s old=%s new=%s url=%s trace=%s"
+msgstr "[STOCK-BARRIER] blocked (SLW): post=%d key=%s old=%s new=%s url=%s trace=%s"

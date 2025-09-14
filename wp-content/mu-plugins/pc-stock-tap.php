@@ -55,6 +55,7 @@ add_filter('update_post_metadata', function($check,$post_id,$key,$val){
   $paths = pcstk_trace_paths();
   $is_slw_writer = false;
   foreach ($paths as $p){
+    // названия взяты из твоих логов:
     if (strpos($p, 'helper-slw-frontend.php')!==false)    { $is_slw_writer = true; break; }
     if (strpos($p, 'class-slw-frontend-cart.php')!==false){ $is_slw_writer = true; break; }
     if (strpos($p, 'helper-slw-order-item.php')!==false)  { $is_slw_writer = true; break; }
@@ -62,9 +63,22 @@ add_filter('update_post_metadata', function($check,$post_id,$key,$val){
   }
 
   if ($is_slw_writer){
+    $old = get_post_meta($post_id,$key,true);
+    if (defined('WP_DEBUG') && WP_DEBUG) {
+        error_log(sprintf(
+            // через __() для возможности перевода сообщений логов
+            __('[STOCK-BARRIER] blocked (SLW): post=%d key=%s old=%s new=%s url=%s trace=%s', 'pc-stock-tap'),
+            (int)$post_id,
+            $key,
+            is_scalar($old)?$old:json_encode($old),
+            is_scalar($val)?$val:json_encode($val),
+            $_SERVER['REQUEST_URI']??'',
+            pcstk_trace_str()
+        ));
+    }
     return false; // ← блок
   }
 
   // по умолчанию пропускаем (другие плагины/наши вещи)
   return $check;
-}, 9999, 4);
+}, 9999, 4);  
