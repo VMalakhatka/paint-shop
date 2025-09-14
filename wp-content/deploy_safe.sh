@@ -8,6 +8,9 @@ PLUG="$WP/wp-content/plugins"
 THEMES="$WP/wp-content/themes"
 THEMES_PLUG="$THEMES/plugins"
 LOG=~/deploy.log
+BACKUP_DIR=/mnt/backup/backups_kreul
+
+mkdir -p "$BACKUP_DIR"
 
 # Ротация лога (если > 1 МБ — сдвигаем)
 if [ -f "$LOG" ] && [ "$(wc -c <"$LOG")" -gt 1048576 ]; then
@@ -119,7 +122,7 @@ mkdir -p "$PLUG"
 TS=$(date +%Y%m%d-%H%M%S)
 tar -C "$WP/wp-content" -czf "$HOME/backup-plugins-$TS.tgz" plugins 2>/dev/null || true
 tar -C "$THEMES"      -czf "$HOME/backup-themes-plugins-$TS.tgz" plugins 2>/dev/null || true
-echo "Backups: ~/backup-plugins-$TS.tgz, ~/backup-themes-plugins-$TS.tgz"
+echo "Backups: $BACKUP_DIR/backup-plugins-$TS.tgz, ~/backup-themes-plugins-$TS.tgz"
 
 # 1) Если по ошибке существует themes/plugins — вернём в plugins
 if [ -d "$THEMES_PLUG" ]; then
