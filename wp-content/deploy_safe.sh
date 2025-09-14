@@ -120,9 +120,41 @@ mkdir -p "$PLUG"
 
 # 0) Быстрые бэкапы (не блокируют работу)
 TS=$(date +%Y%m%d-%H%M%S)
-tar -C "$WP/wp-content" -czf "$HOME/backup-plugins-$TS.tgz" plugins 2>/dev/null || true
-tar -C "$THEMES"      -czf "$HOME/backup-themes-plugins-$TS.tgz" plugins 2>/dev/null || true
-echo "Backups: $BACKUP_DIR/backup-plugins-$TS.tgz, ~/backup-themes-plugins-$TS.tgz"
+
+# Проверка, что можем писать в BACKUP_DIR
+if ! ( : > "$BACKUP_DIR/.write_test" ) 2>/dev/null; then
+  echo "⚠ $BACKUP_DIR недоступен для записи — переключаюсь на \$HOME"
+  BACKUP_DIR="$HOME"
+  mkdir -p "$BACKUP_DIR"
+else
+  rm -f "$BACKUP_DIR/.write_test" 2>/dev/null || true
+fi
+
+# Бэкап плагинов
+tar -C "$WP/wp-content" -czf "$BACKUP_DIR/backup-plugins-$TS.tgz" plugins 2>/dev/null || true
+
+# Бэкап темы (вариант 1: только child-тему)
+tar -C "$WP/wp-content/themes" -czf "$BACKUP_DIR/backup-theme-generatepress-child-$TS.tgz" generatepress-child 2>/dev/null || true
+
+# (или вариант 2: весь каталог themes)
+# tar -C "$WP/wp-content" -czf "$BACKUP_DIR/backup-themes-$TS.tgz" themes 2>/dev/null || true
+
+echo "Backups: $BACKUP_DIR/backup-plugins-$TS.tgz, $BACKUP_DIR/backup-theme-generatepress-child-$TS.tgz"
+
+# Функция ротации
+rotate_keep_latest() {
+  local pattern="$1"
+  local keep="${2:-2}"   # по умолчанию оставляем 2
+  ls -1t $pattern 2>/dev/null | tail -n +$((keep+1)) | xargs -r rm -f
+}
+
+# Ротация именно в каталоге BACKUP_DIR
+(
+  cd "$BACKUP_DIR" 2>/dev/null || exit 0
+  rotate_keep_latest "backup-plugins-*.tgz" 2
+  rotate_keep_latest "backup-themes-plugins-*.tgz" 2
+  ls -lh backup-plugins-*.tgz backup-themes-plugins-*.tgz 2>/dev/null | sed 's/^/  /'
+)
 
 # 1) Если по ошибке существует themes/plugins — вернём в plugins
 if [ -d "$THEMES_PLUG" ]; then
@@ -134,7 +166,7 @@ fi
 mkdir -p "$WP/wp-content/mu-plugins" \
          "$WP/wp-content/themes/generatepress-child" \
          "$PLUG/paint-core" "$PLUG/paint-shop-ux" "$PLUG/role-price" \
-         "$PLUG/pc-order-import-export" "$PLUG/pc-order-import-export"
+         "$PLUG/pc-order-import-export"
 
 # 2) Синхроним ТОЛЬКО наши каталоги
 rsync "${RSYNC[@]}" wp-content/mu-plugins/                 "$WP/wp-content/mu-plugins/"
