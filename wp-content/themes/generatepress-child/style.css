@@ -171,17 +171,31 @@ Version: 1.0
   box-sizing:border-box;
 }
 .woocommerce ul.products li.product-category .woocommerce-loop-category__title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3; /* старый префикс для Safari/Chrome */
+  line-clamp: 3;         /* стандартное свойство для новых браузеров */
+  overflow: hidden;
+  line-height: 1.25;
+  min-height: calc(1.25em * 3);
+  margin: 0;
+  text-align: center;
+  font-size: 14px;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+.woocommerce ul.products li.product .woocommerce-loop-product__title.compact-title{
+  --lines:2;
   display:-webkit-box;
   -webkit-box-orient:vertical;
-  -webkit-line-clamp:3;
+  -webkit-line-clamp:var(--lines);
+  line-clamp:var(--lines); /* стандарт */
   overflow:hidden;
-  line-height:1.25;
-  min-height:calc(1.25em * 3);
-  margin:0;
-  text-align:center;
-  font-size:14px;
-  word-break:break-word;
-  hyphens:auto;
+  line-height:1.2;
+  min-height:calc(1.2em * var(--lines));
+  margin:0.4rem 0 0.6rem !important;
+  font-size: clamp(0.85rem, 2.5vw, 1rem);
 }
 
 /* ── Страница товара: меньший H1 на мобильных ───────────────────────────── */

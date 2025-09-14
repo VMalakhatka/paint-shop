@@ -31,25 +31,73 @@ add_action('init', function () {
     remove_action('woocommerce_shop_loop_item_title', 'woocommerce_template_loop_product_title', 10);
     add_action('woocommerce_shop_loop_item_title', 'psu_loop_title', 10);
 });
+
 function psu_loop_title() {
     if (is_product()) return;
-    $raw = get_the_title();
-    $reserve = (int) apply_filters('psu_title_reserve', PSU_TITLE_RESERVE);
-    $display = psu_compact_title_after_pipe($raw, $reserve);
+
+    $raw     = get_the_title();
+    $product = wc_get_product(get_the_ID());
+
+    $display = psu_get_compact_title($raw, $product ? $product->get_id() : 0);
+    // даём перехватить на всякий случай
+    $display = apply_filters('psu_compact_title_display', $display, $raw, $product);
+
     echo '<h2 class="woocommerce-loop-product__title compact-title" title="' . esc_attr($raw) . '">' . esc_html($display) . '</h2>';
 }
-function psu_compact_title_after_pipe($title, $reserve = 25) {
-    $t = trim(wp_strip_all_tags((string)$title));
-    $pos = strpos($t, '|');
-    if ($pos !== false) {
-        $after = ltrim(substr($t, $pos + 1));
-        if ($after !== '') return $after;
+
+/**
+ * Правило выбора компактного названия:
+ * 1) кастомное поле _psu_compact_title (если непустое)
+ * 2) если в title есть две | — берём между ними; если одна | — берём после неё
+ * 3) иначе — полный title
+ */
+function psu_get_compact_title(string $title, int $product_id = 0): string {
+    $clean = trim(wp_strip_all_tags($title));
+
+    // 1) спец-поле
+    $meta_key = apply_filters('psu_compact_title_meta_key', '_psu_compact_title');
+    if ($product_id) {
+        $custom = get_post_meta($product_id, $meta_key, true);
+        $custom = is_string($custom) ? trim(wp_strip_all_tags($custom)) : '';
+        if ($custom !== '') {
+            return $custom;
+        }
     }
-    $chars = preg_split('//u', $t, -1, PREG_SPLIT_NO_EMPTY);
-    if (!$chars) return $t;
-    $len = count($chars);
-    return ($len <= $reserve) ? $t : implode('', array_slice($chars, $len - $reserve));
+
+    // 2) маркеры |…| либо |…конец
+    $first = strpos($clean, '|');
+    if ($first !== false) {
+        $second = strpos($clean, '|', $first + 1);
+        if ($second !== false) {
+            $mid = trim(substr($clean, $first + 1, $second - $first - 1));
+            if ($mid !== '') return $mid;
+        } else {
+            $after = ltrim(substr($clean, $first + 1));
+            if ($after !== '') return $after;
+        }
+    }
+
+    // 3) полный
+    return $clean;
 }
+
+
+// UI: вкладка «Общие» → текстовое поле «Compact catalog title»
+add_action('woocommerce_product_options_general_product_data', function () {
+    woocommerce_wp_text_input([
+        'id'          => '_psu_compact_title',
+        'label'       => __('Compact catalog title', 'paint-shop-ux'),
+        'desc_tip'    => true,
+        'description' => __('Shown in product grid. If empty, the plugin will use |…| or text after |, otherwise full title.', 'paint-shop-ux'),
+    ]);
+});
+
+// Save
+add_action('woocommerce_admin_process_product_object', function (WC_Product $product) {
+    if (isset($_POST['_psu_compact_title'])) {
+        $product->update_meta_data('_psu_compact_title', sanitize_text_field(wp_unslash($_POST['_psu_compact_title'])));
+    }
+});
 
 /** =======================
  *  2) CSS
