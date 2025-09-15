@@ -1,0 +1,4 @@
+.wrap h1 { margin-bottom: 12px; }
+#filters label { display:inline-block; margin-right:12px; }
+#reportTable td, #reportTable th { vertical-align: middle; }
+#reportTable td:nth-child(3), #reportTable td:nth-child(4) { text-align: right; }

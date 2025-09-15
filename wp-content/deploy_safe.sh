@@ -152,8 +152,10 @@ rotate_keep_latest() {
 (
   cd "$BACKUP_DIR" 2>/dev/null || exit 0
   rotate_keep_latest "backup-plugins-*.tgz" 2
-  rotate_keep_latest "backup-themes-plugins-*.tgz" 2
-  ls -lh backup-plugins-*.tgz backup-themes-plugins-*.tgz 2>/dev/null | sed 's/^/  /'
+  rotate_keep_latest "backup-theme-generatepress-child-*.tgz" 2
+
+  # безопасный вывод списка (не роняет скрипт, если какого-то паттерна нет)
+  ls -lh backup-plugins-*.tgz backup-theme-generatepress-child-*.tgz 2>/dev/null | sed 's/^/  /' || true
 )
 
 # 1) Если по ошибке существует themes/plugins — вернём в plugins
@@ -241,6 +243,23 @@ rotate_keep_latest() {
 
 # 5) Очистка кэша WP
 /opt/remi/php83/root/bin/php /bin/wp-cli.phar --path="$WP" cache flush || true
+
+# == Self-update deploy_safe.sh (обновится для следующего запуска) ==
+SELF_SRC="$REPO/wp-content/deploy_safe.sh"
+SELF_DST="$HOME/deploy_safe.sh"
+
+if [ -f "$SELF_SRC" ]; then
+  if ! cmp -s "$SELF_SRC" "$SELF_DST"; then
+    cp -f "$SELF_SRC" "$SELF_DST.next"
+    chmod 755 "$SELF_DST.next" || true
+    mv -f "$SELF_DST.next" "$SELF_DST"
+    echo "✓ Обновлён $SELF_DST (вступит в силу со следующего запуска)"
+  else
+    echo "✓ $SELF_DST уже актуален"
+  fi
+else
+  echo "ℹ В репозитории нет $SELF_SRC — пропускаю self-update"
+fi
 
 echo "Done."
 echo "==== $(date +'%F %T') deploy_safe.sh end ===="
