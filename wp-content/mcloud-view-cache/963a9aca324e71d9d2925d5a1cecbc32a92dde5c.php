@@ -1,1 +1,0 @@
-Google Cloud Storage is another top choice, particularly if you are already hosting or using services in the Google Cloud ecosphere.<?php /**PATH /Users/admin/Local Sites/paint/app/public/wp-content/plugins/ilab-media-tools/views/wizard/cloud-storage/providers/google/description.blade.php ENDPATH**/ ?>

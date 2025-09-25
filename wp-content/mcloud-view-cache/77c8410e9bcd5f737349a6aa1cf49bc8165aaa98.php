@@ -1,1 +1,0 @@
-Cloudflare R2 is an economical choice if cloud storage is all you need.<?php /**PATH /Users/admin/Local Sites/paint/app/public/wp-content/plugins/ilab-media-tools/views/wizard/cloud-storage/providers/cloudflare/description.blade.php ENDPATH**/ ?>

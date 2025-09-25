@@ -1,1 +1,0 @@
-<p>Provide the credentials your service provider has given you.  Clicking on <strong>Next</strong> will verify your settings.</p><?php /**PATH /Users/admin/Local Sites/paint/app/public/wp-content/plugins/ilab-media-tools/views/wizard/cloud-storage/providers/other-s3/form.blade.php ENDPATH**/ ?>

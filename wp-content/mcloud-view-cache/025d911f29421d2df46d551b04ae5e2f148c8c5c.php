@@ -1,1 +1,0 @@
-<p>Add in the settings from the tutorial here.  Clicking on <strong>Next</strong> will verify your settings.</p><?php /**PATH /Users/admin/Local Sites/paint/app/public/wp-content/plugins/ilab-media-tools/views/wizard/cloud-storage/providers/cloudflare/form.blade.php ENDPATH**/ ?>

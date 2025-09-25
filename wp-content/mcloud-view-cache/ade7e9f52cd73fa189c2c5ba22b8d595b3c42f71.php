@@ -1,1 +1,0 @@
-<p>Provide your Minio credentials.  Clicking on <strong>Next</strong> will verify your settings.</p><?php /**PATH /Users/admin/Local Sites/paint/app/public/wp-content/plugins/ilab-media-tools/views/wizard/cloud-storage/providers/minio/form.blade.php ENDPATH**/ ?>
