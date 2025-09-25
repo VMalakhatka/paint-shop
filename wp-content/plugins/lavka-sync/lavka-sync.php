@@ -12,7 +12,7 @@ define('LAVKA_SYNC_DIR', plugin_dir_path(__FILE__));
 define('LAVKA_SYNC_URL', plugin_dir_url(__FILE__));
 define('LAVKA_SYNC_INC', LAVKA_SYNC_DIR . 'inc');
 
-foreach (['core.php', 'admin-ui.php', 'rest-api.php'] as $f) {
+foreach (['core.php', 'admin-ui.php', 'rest-api.php', 'warehouse-map.php'] as $f) {
     $p = LAVKA_SYNC_INC . '/' . $f;
     if (file_exists($p)) {
         require_once $p;

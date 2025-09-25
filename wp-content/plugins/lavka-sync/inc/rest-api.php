@@ -197,3 +197,81 @@ add_action('rest_api_init', function () {
         },
     ]);
 });
+
+/** ====== МЭППИНГ СКЛАДОВ: GET/PUT /locations/map ====== */
+
+/** нормализация кода внешнего склада */
+function lavka_map_norm_code($s){
+    $s = trim((string)$s);
+    if ($s === '') return '';
+    // приводим к верхнему регистру и убираем лишние пробелы
+    return strtoupper(preg_replace('~\s+~',' ',$s));
+}
+
+/** собрать мэппинг из таксономии: [{term_id, slug, name, codes:[]}, …] */
+function lavka_map_collect(): array {
+    $terms = get_terms([
+        'taxonomy'   => 'location',
+        'hide_empty' => false,
+        'number'     => 0,
+    ]);
+    if (is_wp_error($terms) || empty($terms)) return [];
+
+    $out = [];
+    foreach ($terms as $t) {
+        $codes = get_term_meta($t->term_id, 'lavka_ext_codes', true);
+        $codes = is_array($codes) ? array_values(array_unique(array_filter(array_map('lavka_map_norm_code',$codes)))) : [];
+        $out[] = [
+            'term_id' => (int)$t->term_id,
+            'slug'    => (string)$t->slug,
+            'name'    => (string)$t->name,
+            'codes'   => $codes,
+        ];
+    }
+    return $out;
+}
+
+/** записать мэппинг: payload {"mapping":[{"term_id":3943,"codes":["ODESA","WH-7"]}, ...]} */
+function lavka_map_write(array $mapping): array {
+    $written = 0; $errors = [];
+    foreach ($mapping as $row) {
+        $tid   = (int)($row['term_id'] ?? 0);
+        $codes = $row['codes'] ?? [];
+        if ($tid <= 0 || !is_array($codes)) { $errors[] = ['term_id'=>$tid,'error'=>'bad_row']; continue; }
+
+        $codes = array_values(array_unique(array_filter(array_map('lavka_map_norm_code',$codes))));
+        update_term_meta($tid, 'lavka_ext_codes', $codes);
+        $written++;
+    }
+    return ['written'=>$written, 'errors'=>$errors];
+}
+
+add_action('rest_api_init', function(){
+    $ns = 'lavka/v1';
+
+    // GET /locations/map — прочитать текущий мэппинг
+    register_rest_route($ns, '/locations/map', [
+        'methods'  => 'GET',
+        'permission_callback' => 'lavka_rest_auth', // cookie+nonce (админ) ИЛИ Basic/X-Auth-Token (Java)
+        'callback' => function( WP_REST_Request $req ){
+            return new WP_REST_Response([
+                'items' => lavka_map_collect()
+            ], 200);
+        },
+    ]);
+
+    // PUT /locations/map — сохранить мэппинг
+    register_rest_route($ns, '/locations/map', [
+        'methods'  => 'PUT',
+        'permission_callback' => 'lavka_rest_auth',
+        'callback' => function( WP_REST_Request $req ){
+            $json = $req->get_json_params() ?: [];
+            $mapping = $json['mapping'] ?? null;
+            if (!is_array($mapping)) {
+                return new WP_REST_Response(['ok'=>false,'error'=>"Body must contain 'mapping' array"], 422);
+            }
+            $res = lavka_map_write($mapping);
+            return new WP_REST_Response(['ok'=>true] + $res, 200);
+        },
+    ]);
+});

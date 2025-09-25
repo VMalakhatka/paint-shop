@@ -15,6 +15,7 @@ if (!function_exists('lavka_sync_get_options')) {
             'supplier'      => 'KREUL',
             'stock_id'      => '7',
             'schedule'      => 'off', // off|hourly|twicedaily|daily
+            'java_wh_path'    => '/warehouses', // <— НОВОЕ: эндпоинт Java со справочником складов
 
             // Флаги поведения при записи остатков
             'set_manage'          => true,

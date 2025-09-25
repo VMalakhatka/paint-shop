@@ -9,8 +9,209 @@ if (!defined('ABSPATH')) exit;
 
 /** Меню + страница настроек */
 add_action('admin_menu', function () {
-    add_menu_page('Lavka Sync','Lavka Sync','manage_options','lavka-sync','lavka_sync_render_page','dashicons-update',58);
+    add_submenu_page(
+        'lavka-sync',                 // родитель — ваша главная страница
+        'Lavka Mapping',              // Title
+        'Mapping',                    // Label
+        'manage_lavka_sync',          // capability
+        'lavka-mapping',              // slug
+        'lavka_render_mapping_page'   // callback
+    );
 });
+
+function lavka_render_mapping_page(){
+    if (!current_user_can('manage_lavka_sync')) wp_die('Недостаточно прав');
+
+    // дадим nonce для REST cookie-авторизации
+    $rest_nonce = wp_create_nonce('wp_rest');
+
+    ?>
+    <div class="wrap">
+      <h1>Lavka Mapping</h1>
+      <p>Сопоставьте Woo-склады (таксономия <code>location</code>) с внешними MS-складами. Один Woo-склад может агрегировать несколько MS-складов.</p>
+
+      <div id="lavka-mapping-app">Загрузка…</div>
+    </div>
+
+    <script>
+    (function(){
+      const REST_ROOT = "<?php echo esc_js( rest_url('lavka/v1/') ); ?>";
+      const REST_NONCE = "<?php echo esc_js( $rest_nonce ); ?>";
+      const AJAX_URL = "<?php echo esc_js( admin_url('admin-ajax.php') ); ?>";
+      const AJAX_NONCE = "<?php echo esc_js( wp_create_nonce('lavka_mapping_nonce') ); ?>";
+
+      function restGet(path){
+        return fetch(REST_ROOT + path, {
+          headers: {'X-WP-Nonce': REST_NONCE}
+        }).then(r => r.json());
+      }
+      function restPut(path, body){
+        return fetch(REST_ROOT + path, {
+          method: 'PUT',
+          headers: {'X-WP-Nonce': REST_NONCE, 'Content-Type':'application/json'},
+          body: JSON.stringify(body||{})
+        }).then(r => r.json());
+      }
+      function ajax(action, data){
+        const f = new FormData();
+        f.append('action', action);
+        f.append('_wpnonce', AJAX_NONCE);
+        if (data) for (const k in data) f.append(k, data[k]);
+        return fetch(AJAX_URL, { method:'POST', credentials:'same-origin', body:f }).then(r=>r.json());
+      }
+
+      const el = document.getElementById('lavka-mapping-app');
+
+      async function load(){
+        el.textContent = 'Загрузка списков…';
+        const [woo, map, ms] = await Promise.all([
+          restGet('locations?hide_empty=0&per_page=1000'),
+          restGet('locations/map'),
+          ajax('lavka_ms_wh_list', {})
+        ]);
+
+        if (!woo || !woo.items || !map || !map.items || !ms || !ms.ok) {
+          el.textContent = 'Ошибка загрузки данных.';
+          console.log({woo,map,ms});
+          return;
+        }
+
+        // нормализуем выбранные коды по term_id
+        const selectedByTid = {};
+        map.items.forEach(row => { selectedByTid[row.term_id] = new Set(row.codes||[]); });
+
+        // рисуем таблицу
+        const msList = ms.items || [];
+        const wrap = document.createElement('div');
+        wrap.innerHTML = `
+          <style>
+            .lm-table{border-collapse:collapse;width:100%;max-width:1100px}
+            .lm-table th,.lm-table td{border:1px solid #e5e5e5;padding:8px;vertical-align:top}
+            .lm-multi{min-width:340px;min-height:92px}
+            .lm-actions{margin:10px 0}
+          </style>
+          <table class="lm-table">
+            <thead><tr><th>Woo склад</th><th>MS склады (множественный выбор)</th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <div class="lm-actions">
+            <button class="button button-primary" id="lm-save">Сохранить мэппинг</button>
+            <span id="lm-status" style="margin-left:10px;"></span>
+          </div>
+        `;
+        const tbody = wrap.querySelector('tbody');
+
+        (woo.items||[]).forEach(loc=>{
+          const tr = document.createElement('tr');
+          const td1 = document.createElement('td');
+          td1.innerHTML = `<strong>${loc.name}</strong><br><code>${loc.slug}</code> (id=${loc.id})`;
+          const td2 = document.createElement('td');
+
+          const sel = document.createElement('select');
+          sel.className = 'lm-multi';
+          sel.multiple = true;
+
+          const selected = selectedByTid[loc.id] || new Set();
+
+          msList.forEach(x=>{
+            const code = (x.code||'').toString();
+            const name = (x.name||x.title||code);
+            if (!code) return;
+            const opt = document.createElement('option');
+            opt.value = code;
+            opt.textContent = `${code} — ${name}`;
+            if (selected.has(code)) opt.selected = true;
+            sel.appendChild(opt);
+          });
+
+          td2.appendChild(sel);
+          tr.appendChild(td1); tr.appendChild(td2);
+          tr.dataset.tid = String(loc.id);
+          tbody.appendChild(tr);
+        });
+
+        el.innerHTML = '';
+        el.appendChild(wrap);
+
+        // Сохранение
+        document.getElementById('lm-save').addEventListener('click', async ()=>{
+          const rows = el.querySelectorAll('tbody tr');
+          const mapping = [];
+          rows.forEach(tr=>{
+            const tid = parseInt(tr.dataset.tid, 10);
+            const sel = tr.querySelector('select');
+            const codes = Array.from(sel.selectedOptions).map(o=>o.value);
+            mapping.push({ term_id: tid, codes });
+          });
+
+          const status = document.getElementById('lm-status');
+          status.textContent = 'Сохраняю…';
+          try{
+            const res = await restPut('locations/map', { mapping });
+            if (res && res.ok) {
+              status.textContent = `OK: записано ${res.written}`;
+            } else {
+              status.textContent = 'Ошибка сохранения';
+              console.log(res);
+            }
+          }catch(e){
+            status.textContent = 'Сеть/ошибка';
+            console.error(e);
+          }
+        });
+      }
+
+      load();
+    })();
+    </script>
+    <?php
+}
+
+// AJAX: тянем список MS-складов из Java (сервер-сайд, чтобы избежать CORS)
+add_action('wp_ajax_lavka_ms_wh_list', function(){
+    if (!current_user_can('manage_lavka_sync')) wp_send_json_error(['error'=>'forbidden'], 403);
+    check_ajax_referer('lavka_mapping_nonce');
+
+    $o   = lavka_sync_get_options();
+    $url = rtrim($o['java_base_url'] ?? '', '/');
+    $pth = ltrim($o['java_wh_path'] ?? '/warehouses', '/');
+    $full = $url . '/' . $pth;
+
+    $resp = wp_remote_get($full, [
+        'timeout' => 20,
+        'headers' => [
+            'X-Auth-Token' => $o['api_token'] ?? '',
+            'Accept'       => 'application/json',
+        ],
+    ]);
+
+    if (is_wp_error($resp)) wp_send_json_error(['error'=>$resp->get_error_message()]);
+    $code = wp_remote_retrieve_response_code($resp);
+    $body = json_decode(wp_remote_retrieve_body($resp), true);
+
+    if ($code < 200 || $code >= 300) {
+        wp_send_json_error(['error'=>'Java status '.$code, 'body'=>$body]);
+    }
+
+    // Нормализуем ответ к виду: { ok:true, items:[{code, name}] }
+    $items = [];
+    if (isset($body['items']) && is_array($body['items'])) {
+        $src = $body['items'];
+    } elseif (is_array($body)) {
+        $src = $body;
+    } else {
+        $src = [];
+    }
+    foreach ($src as $x){
+        $code = $x['code'] ?? ($x['id'] ?? ($x['slug'] ?? ($x['extCode'] ?? '')));
+        $name = $x['name'] ?? ($x['title'] ?? $code);
+        $code = is_string($code) ? $code : (string)$code;
+        if ($code !== '') $items[] = ['code'=>$code, 'name'=>(string)$name];
+    }
+
+    wp_send_json_success(['items'=>$items]);
+});
+
 add_action('admin_init', function () {
     register_setting('lavka_sync', LAVKA_SYNC_OPTION);
 });
