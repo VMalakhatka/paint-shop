@@ -38,6 +38,10 @@ wp-content/webtoffee_import/
 wp-content/webtoffee_export/
 wp-content/webtoffee_iew_log/
 
+# Media Cloud cache
+wp-content/mcloud-reports/
+wp-content/mcloud-view-cache/
+
 # Drop-ins, которые не надо версионировать
 wp-content/object-cache.php
 wp-content/advanced-cache.php
@@ -84,7 +88,6 @@ wp-content/mu-plugins/*
 # Но НЕ игнорируем сам каталог languages и его содержимое
 !wp-content/mu-plugins/languages/
 !wp-content/mu-plugins/languages/**
-
 
 # === Node / Composer / сборки ===
 node_modules/
