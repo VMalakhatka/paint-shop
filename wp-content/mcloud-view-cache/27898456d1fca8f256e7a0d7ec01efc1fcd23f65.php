@@ -1,0 +1,1 @@
+<p>To finish up, we'll run a quick test to make sure everything is working correctly.</p><?php /**PATH /Users/admin/Local Sites/paint/app/public/wp-content/plugins/ilab-media-tools/views/wizard/imgix/test.blade.php ENDPATH**/ ?>

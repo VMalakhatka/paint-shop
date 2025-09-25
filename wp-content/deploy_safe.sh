@@ -167,12 +167,13 @@ fi
 
 mkdir -p "$WP/wp-content/mu-plugins" \
          "$WP/wp-content/themes/generatepress-child" \
-         "$PLUG/paint-core" "$PLUG/paint-shop-ux" "$PLUG/role-price" \
+         "$PLUG/lavka-sync" "$PLUG/paint-core" "$PLUG/paint-shop-ux" "$PLUG/role-price" \
          "$PLUG/pc-order-import-export"
 
 # 2) Синхроним ТОЛЬКО наши каталоги
 rsync "${RSYNC[@]}" wp-content/mu-plugins/                 "$WP/wp-content/mu-plugins/"
 rsync "${RSYNC[@]}" wp-content/themes/generatepress-child/  "$WP/wp-content/themes/generatepress-child/"
+rsync "${RSYNC[@]}" wp-content/plugins/lavka-sync/          "$PLUG/lavka-sync/"
 rsync "${RSYNC[@]}" wp-content/plugins/paint-core/          "$PLUG/paint-core/"
 rsync "${RSYNC[@]}" wp-content/plugins/paint-shop-ux/       "$PLUG/paint-shop-ux/"
 rsync "${RSYNC[@]}" wp-content/plugins/role-price/          "$PLUG/role-price/"
@@ -188,6 +189,7 @@ rsync "${RSYNC[@]}" wp-content/plugins/pc-order-import-export/   "$PLUG/pc-order
 for p in \
   "$WP/wp-content/mu-plugins" \
   "$WP/wp-content/themes/generatepress-child" \
+  "$PLUG/lavka-sync" \
   "$PLUG/paint-core" \
   "$PLUG/paint-shop-ux" \
   "$PLUG/role-price" \

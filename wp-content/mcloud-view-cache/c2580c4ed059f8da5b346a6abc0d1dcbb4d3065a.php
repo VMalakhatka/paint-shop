@@ -1,0 +1,1 @@
+<p>Media Cloud will now run a series of tests to verify that Media Cloud can access your cloud storage provider and that everything is setup correctly.</p><?php /**PATH /Users/admin/Local Sites/paint/app/public/wp-content/plugins/ilab-media-tools/views/wizard/cloud-storage/providers/do/test.blade.php ENDPATH**/ ?>
