@@ -10,7 +10,7 @@ if (!function_exists('lavka_sync_get_options')) {
     function lavka_sync_get_options(): array {
         $defaults = [
             // UI / интеграционные настройки
-            'java_base_url' => 'http://127.0.0.1:8083',
+            'java_base_url' => 'http://127.0.0.1:8080',
             'api_token'     => '',
             'supplier'      => 'KREUL',
             'stock_id'      => '7',

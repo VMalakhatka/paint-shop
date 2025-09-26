@@ -476,7 +476,7 @@ add_action('wp_ajax_lavka_reports_data', function () {
 
     // Пример: тянем из Java API /sync/stock?dry=true, но можно сделать отдельный метод /reports/stock
     $opts = get_option('lavka_sync_options', []);
-    $java = rtrim($opts['java_base_url'] ?? 'http://127.0.0.1:8083', '/');
+    $java = rtrim($opts['java_base_url'] ?? 'http://127.0.0.1:8080', '/');
 
     $url  = add_query_arg([
         'supplier' => $supplier,
