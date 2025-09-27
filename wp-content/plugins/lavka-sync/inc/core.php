@@ -16,6 +16,7 @@ if (!function_exists('lavka_sync_get_options')) {
             'stock_id'      => '7',
             'schedule'      => 'off', // off|hourly|twicedaily|daily
             'java_wh_path'    => '/warehouses', // <— НОВОЕ: эндпоинт Java со справочником складов
+            'java_stock_query_path' => '/admin/stock/stock/query',
 
             // Флаги поведения при записи остатков
             'set_manage'          => true,
@@ -146,52 +147,110 @@ function lavka_set_primary_location_if_missing(int $product_id, int $term_id): v
  */
 function lavka_write_stock_for_sku(string $sku, array $lines, array $opts): array {
     $pid = lavka_find_product_id_by_sku($sku);
-    if (!$pid) return ['sku'=>$sku, 'found'=>false];
+    if (!$pid) {
+        return ['sku' => $sku, 'found' => false];
+    }
 
-    $rows = [];
-    $sum  = 0.0;
+    $rows         = [];
+    $sum          = 0.0;
+    $meta_records = 0;
+    $first_ok_tid = 0;
 
-    foreach ($lines as $r) {
-        $slug = sanitize_title($r['location_slug'] ?? '');
-        $qty  = (float) ($r['qty'] ?? 0);
-        if ($slug === '') continue;
+    foreach ($lines as $row) {
+        if (!is_array($row)) continue;
 
-        $term = lavka_get_location_term_by_slug($slug);
-        if (!$term) {
-            $rows[] = ['slug'=>$slug, 'term_id'=>0, 'qty'=>$qty, 'ok'=>false, 'reason'=>'unknown_location'];
+        // qty обязателен и числовой
+        if (!array_key_exists('qty', $row) || !is_numeric($row['qty'])) {
+            $rows[] = ['ok' => false, 'error' => 'qty_invalid'];
+            continue;
+        }
+        $qty = (float) $row['qty'];
+
+        $term = null;
+        $tid  = 0;
+        $slug = null;
+
+        if (isset($row['term_id']) || isset($row['id'])) {
+            $tid  = (int) ($row['term_id'] ?? $row['id']);
+            $term = get_term($tid, 'location');
+            if ($term && !is_wp_error($term)) {
+                $tid  = (int) $term->term_id;
+                $slug = (string) $term->slug;
+            } else {
+                $rows[] = ['ok' => false, 'term_id' => (int)$tid, 'qty' => $qty, 'error' => 'term_not_found'];
+                continue;
+            }
+        } elseif (isset($row['location_slug'])) {
+            $slugIn = sanitize_title((string)$row['location_slug']);
+            if ($slugIn === '') {
+                $rows[] = ['ok' => false, 'location_slug' => '', 'qty' => $qty, 'error' => 'slug_empty'];
+                continue;
+            }
+            $term = get_term_by('slug', $slugIn, 'location');
+            if ($term && !is_wp_error($term)) {
+                $tid  = (int) $term->term_id;
+                $slug = (string) $term->slug;
+            } else {
+                $rows[] = ['ok' => false, 'location_slug' => $slugIn, 'qty' => $qty, 'error' => 'term_not_found'];
+                continue;
+            }
+        } else {
+            $rows[] = ['ok' => false, 'qty' => $qty, 'error' => 'no_term_id_or_slug'];
             continue;
         }
 
-        $meta_key_id = '_stock_at_' . (int)$term->term_id;
-        $meta_key_sl = '_stock_at_' . $term->slug;
-
+        // запись по TERM_ID (+ опциональный дубль по slug)
+        $meta_key_id = '_stock_at_' . $tid;
         if (empty($opts['dry'])) {
             update_post_meta($pid, $meta_key_id, wc_format_decimal($qty, 3));
-            if (!empty($opts['duplicate_slug_meta'])) {
-                update_post_meta($pid, $meta_key_sl, wc_format_decimal($qty, 3));
+        }
+        $meta_records++;
+
+        if (!empty($opts['duplicate_slug_meta']) && $slug) {
+            $meta_key_slug = '_stock_at_' . $slug;
+            if (empty($opts['dry'])) {
+                update_post_meta($pid, $meta_key_slug, wc_format_decimal($qty, 3));
             }
-            if (!empty($opts['attach_terms'])) {
-                lavka_attach_location_term($pid, (int)$term->term_id);
-            }
+            $meta_records++;
         }
 
-        $rows[] = ['slug'=>$slug, 'term_id'=>(int)$term->term_id, 'qty'=>$qty, 'ok'=>true];
+        // привязать term к товару (не добавляет дубликаты)
+        if (!empty($opts['attach_terms']) && empty($opts['dry'])) {
+            wp_set_object_terms($pid, [$tid], 'location', true);
+        }
+
+        // аккумулируем
         $sum += $qty;
+        if ($first_ok_tid === 0) $first_ok_tid = $tid;
+
+        $rows[] = [
+            'ok'      => true,
+            'term_id' => $tid,
+            'slug'    => $slug,
+            'qty'     => $qty,
+        ];
     }
 
+    // итоговые поля товара
     if (empty($opts['dry'])) {
         update_post_meta($pid, '_stock', wc_format_decimal($sum, 3));
-        if (!empty($opts['set_manage'])) update_post_meta($pid, '_manage_stock', 'yes');
+
+        if (!empty($opts['set_manage'])) {
+            update_post_meta($pid, '_manage_stock', 'yes');
+        }
         if (!empty($opts['upd_status'])) {
             update_post_meta($pid, '_stock_status', $sum > 0 ? 'instock' : 'outofstock');
-            if (function_exists('wc_delete_product_transients')) wc_delete_product_transients($pid);
+            if (function_exists('wc_delete_product_transients')) {
+                wc_delete_product_transients($pid);
+            }
         }
-        if (!empty($opts['set_primary']) && !empty($rows)) {
-            foreach ($rows as $r) {
-                if (!empty($r['ok']) && !empty($r['term_id'])) {
-                    lavka_set_primary_location_if_missing($pid, (int)$r['term_id']);
-                    break;
-                }
+        if (!empty($opts['set_primary']) && $first_ok_tid > 0) {
+            if (function_exists('lavka_set_primary_location_if_missing')) {
+                lavka_set_primary_location_if_missing($pid, $first_ok_tid);
+            } else {
+                // запасной вариант: Yoast Primary term
+                $cur = (int) get_post_meta($pid, '_yoast_wpseo_primary_location', true);
+                if (!$cur) update_post_meta($pid, '_yoast_wpseo_primary_location', $first_ok_tid);
             }
         }
     }
@@ -199,9 +258,18 @@ function lavka_write_stock_for_sku(string $sku, array $lines, array $opts): arra
     return [
         'sku'        => $sku,
         'found'      => true,
-        'product_id' => $pid,
+        'product_id' => (int) $pid,
         'total'      => (float) $sum,
         'lines'      => $rows,
         'dry'        => !empty($opts['dry']),
     ];
 }
+
+add_action('init', function () {
+    foreach (['administrator','shop_manager','lavka_manager'] as $role_name) {
+        if ($r = get_role($role_name)) {
+            $r->add_cap('manage_lavka_sync');
+            $r->add_cap('view_lavka_reports');
+        }
+    }
+});

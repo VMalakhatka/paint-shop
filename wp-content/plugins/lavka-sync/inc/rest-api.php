@@ -246,6 +246,25 @@ function lavka_map_write(array $mapping): array {
     return ['written'=>$written, 'errors'=>$errors];
 }
 
+add_action('rest_api_init', function () {
+    $ns = 'lavka/v1';
+
+    register_rest_route($ns, '/stock/query-apply', [
+        'methods'  => WP_REST_Server::CREATABLE, // POST
+        'permission_callback' => 'lavka_rest_auth', // App Password или X-Auth-Token
+        'callback' => function( WP_REST_Request $req ) {
+            $json = (array)$req->get_json_params();
+            $skus = (array)($json['skus'] ?? []);
+            $dry  = filter_var($req->get_param('dry') ?? $json['dry'] ?? false, FILTER_VALIDATE_BOOL);
+            $res  = lavka_sync_java_query_and_apply($skus, ['dry'=>$dry]);
+            return new WP_REST_Response($res, !empty($res['ok']) ? 200 : 400);
+        },
+        'args' => [
+            'dry' => [ 'required'=>false ],
+        ],
+    ]);
+});
+
 add_action('rest_api_init', function(){
     $ns = 'lavka/v1';
 
