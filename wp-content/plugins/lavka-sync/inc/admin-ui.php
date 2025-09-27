@@ -289,6 +289,15 @@ KR-1254"></textarea>
   </label>
   <span id="lavka-pull-status" style="margin-left:10px;"></span>
 </p>
+
+<div style="margin-top:12px">
+  <label>Пакет, шт:
+    <input type="number" id="lavka-batch" value="200" min="10" max="1000" step="10" style="width:7rem">
+  </label>
+  <button id="lavka-pull-all" class="button button-primary" style="margin-left:8px">Pull ALL (paged)</button>
+  <span id="lavka-pull-all-status" style="margin-left:10px;"></span>
+</div>
+
 <script>
 (function(){
   const ajaxUrl = "<?php echo esc_js(admin_url('admin-ajax.php')); ?>";
@@ -384,6 +393,54 @@ KR-1254"></textarea>
         document.getElementById('lavka-sync-dry').addEventListener('click', () => call('lavka_sync_run', true));
         document.getElementById('lavka-sync-run').addEventListener('click', () => call('lavka_sync_run', false));
       })();
+
+      (function(){
+  const ajaxUrl     = "<?php echo esc_js(admin_url('admin-ajax.php')); ?>";
+  const nonceAll    = "<?php echo esc_js(wp_create_nonce('lavka_pull_java_all')); ?>";
+  const btnAll      = document.getElementById('lavka-pull-all');
+  const batchEl     = document.getElementById('lavka-batch');
+  const dryEl       = document.getElementById('lavka-pull-dry');
+  const allStatus   = document.getElementById('lavka-pull-all-status');
+
+  btnAll?.addEventListener('click', async ()=>{
+    const batch = Math.max(10, Math.min(1000, parseInt(batchEl.value,10) || 200));
+    const dry   = dryEl.checked ? '1' : '0';
+
+    btnAll.disabled = true;
+    let page = 0, pages = null, total = 0, done = 0, nf = 0;
+
+    try{
+      while (pages === null || page < pages) {
+        allStatus.textContent = `Страница ${page+1}${pages ? ' из '+pages : ''}…`;
+
+        const f = new FormData();
+        f.append('action','lavka_pull_java_all_page');
+        f.append('_wpnonce', nonceAll);
+        f.append('page', String(page));
+        f.append('batch', String(batch));
+        f.append('dry', dry);
+
+        const r = await fetch(ajaxUrl, { method:'POST', credentials:'same-origin', body:f });
+        const j = await r.json();
+        if (!j?.success) { allStatus.textContent = 'Ошибка: ' + (j?.data?.error || 'unknown'); break; }
+
+        const d = j.data;
+        pages = d.pages; total = d.total;
+        done  += (d.processed || 0);
+        nf    += (d.not_found || 0);
+
+        allStatus.textContent = `Готово: ${Math.min((page+1)*batch, total)}/${total}. Обновлено ${done}, не найдены ${nf}.`;
+        page++;
+      }
+    } catch(e){
+      console.error(e);
+      allStatus.textContent = 'Сеть/ошибка';
+    } finally {
+      btnAll.disabled = false;
+    }
+  });
+})();
+
     </script>
     <?php
 }
@@ -543,7 +600,7 @@ add_action('wp_ajax_lavka_reports_data', function () {
     $stockId  = (int)($_POST['stockId'] ?? 7);
 
     // Пример: тянем из Java API /sync/stock?dry=true, но можно сделать отдельный метод /reports/stock
-    $opts = get_option('lavka_sync_options', []);
+    $opts = lavka_sync_get_options();
     $java = rtrim($opts['java_base_url'] ?? 'http://127.0.0.1:8080', '/');
 
     $url  = add_query_arg([
@@ -551,7 +608,6 @@ add_action('wp_ajax_lavka_reports_data', function () {
         'stockId'  => $stockId,
         'dry'      => 'true'
     ], $java . '/sync/stock');
-    if (defined('WP_DEBUG') && WP_DEBUG) error_log('[lavka] stock query payload: '.wp_json_encode($payload));
     $resp = wp_remote_post($url, [
         'timeout' => 20,
         'headers' => [
@@ -587,28 +643,121 @@ register_activation_hook(__FILE__, function () {
 
 register_activation_hook(__FILE__, function () {
     global $wpdb;
-    $table = $wpdb->prefix . 'lavka_sync_logs';
+    $table   = $wpdb->prefix . 'lavka_sync_logs';
     $charset = $wpdb->get_charset_collate();
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
     dbDelta("
         CREATE TABLE {$table} (
           id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
           ts DATETIME NOT NULL,
-          action VARCHAR(50) NOT NULL,          -- dry-run | sync
+          action VARCHAR(50) NOT NULL,
           supplier VARCHAR(100) NOT NULL,
           stock_id INT NOT NULL,
-          since_hours INT NULL,                 -- null или число
-          updated_count INT DEFAULT 0,          -- сколько реально обновили
-          preview_count INT DEFAULT 0,          -- сколько было в превью
-          errors LONGTEXT NULL,                 -- json
-          user_id BIGINT UNSIGNED NULL,         -- кто запустил
+          dry TINYINT(1) NOT NULL DEFAULT 0,
+          changed_since_hours INT NULL,
+          updated INT NOT NULL DEFAULT 0,
+          not_found INT NOT NULL DEFAULT 0,
+          duration_ms INT NOT NULL DEFAULT 0,
+          status VARCHAR(20) NOT NULL,
+          message TEXT NULL,
           PRIMARY KEY (id),
           KEY ts (ts),
-          KEY action (action)
+          KEY action (action),
+          KEY supplier (supplier)
         ) {$charset};
     ");
 });
 
+// Сколько уникальных SKU в базе
+function lavka_count_all_skus(): int {
+    global $wpdb;
+    return (int) $wpdb->get_var("
+        SELECT COUNT(DISTINCT m.meta_value)
+        FROM {$wpdb->postmeta} m
+        JOIN {$wpdb->posts} p ON p.ID = m.post_id
+        WHERE m.meta_key = '_sku' AND m.meta_value <> ''
+          AND p.post_type IN ('product','product_variation')
+          AND p.post_status IN ('publish','private','draft','pending')
+    ");
+}
+
+// Отдать порцию SKU
+function lavka_get_skus_slice(int $offset, int $limit): array {
+    global $wpdb;
+    $sql = $wpdb->prepare("
+        SELECT DISTINCT m.meta_value
+        FROM {$wpdb->postmeta} m
+        JOIN {$wpdb->posts} p ON p.ID = m.post_id
+        WHERE m.meta_key = '_sku' AND m.meta_value <> ''
+          AND p.post_type IN ('product','product_variation')
+          AND p.post_status IN ('publish','private','draft','pending')
+        ORDER BY m.meta_value ASC
+        LIMIT %d OFFSET %d
+    ", $limit, $offset);
+    $rows = $wpdb->get_col($sql) ?: [];
+    return array_values(array_filter(array_map('strval', $rows)));
+}
+
+
+add_action('wp_ajax_lavka_pull_java_all_page', function () {
+    if (!current_user_can('manage_lavka_sync')) wp_send_json_error(['error'=>'forbidden'], 403);
+    check_ajax_referer('lavka_pull_java_all');
+
+    $batch = max(10, min(1000, (int)($_POST['batch'] ?? 200)));
+    $page  = max(0, (int)($_POST['page'] ?? 0));
+    $dry = filter_var($_POST['dry'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
+    $total = lavka_count_all_skus();
+    $pages = (int) ceil($total / $batch);
+
+    if ($total <= 0) wp_send_json_error(['error'=>'no_skus']);
+    if ($page >= $pages) {
+        wp_send_json_success([
+            'page'      => $page,
+            'pages'     => $pages,
+            'total'     => $total,
+            'processed' => 0,
+            'not_found' => 0,
+            'dry'       => (bool)$dry,
+            'sample'    => [],
+        ]);
+    }
+
+    $offset = $page * $batch;
+    $skus   = lavka_get_skus_slice($offset, $batch);
+
+    if (!$skus) {
+        wp_send_json_success([
+            'page'      => $page,
+            'pages'     => $pages,
+            'total'     => $total,
+            'processed' => 0,
+            'not_found' => 0,
+            'dry'       => (bool)$dry,
+            'sample'    => [],
+        ]);
+    }
+
+    $res = lavka_sync_java_query_and_apply($skus, ['dry'=>$dry]);
+
+    if (empty($res['ok'])) {
+        wp_send_json_error(['error'=>$res['error'] ?? 'unknown','body'=>$res['body'] ?? null]);
+    }
+
+    // Чтобы ответ не раздувался, даём только сэмпл
+    $sample = $res['results'] ?? [];
+    if (count($sample) > 20) $sample = array_slice($sample, 0, 20);
+
+    wp_send_json_success([
+        'page'      => $page,
+        'pages'     => $pages,
+        'total'     => $total,
+        'processed' => (int)$res['processed'],
+        'not_found' => (int)$res['not_found'],
+        'dry'       => (bool)$res['dry'],
+        'sample'    => $sample,
+    ]);
+});
 function lavka_sync_log(array $row) {
     global $wpdb;
     $table = $wpdb->prefix . 'lavka_sync_logs';
@@ -674,7 +823,6 @@ add_action('wp_ajax_lavka_sync_run', function () {
     ];
 
     $t0   = microtime(true);
-    if (defined('WP_DEBUG') && WP_DEBUG) error_log('[lavka] stock query payload: '.wp_json_encode($payload));
     $resp = wp_remote_post($url, $args);
     $ms   = (int) round((microtime(true) - $t0) * 1000);
 
