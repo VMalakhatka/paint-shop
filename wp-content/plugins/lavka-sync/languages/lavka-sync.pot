@@ -1,0 +1,104 @@
+# Copyright (C) 2025 
+# This file is distributed under the same license as the Lavka Sync plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: Lavka Sync 0.2.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lavka-sync\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2025-09-28T07:25:19+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: lavka-sync\n"
+
+#. Plugin Name of the plugin
+#: lavka-sync.php
+msgid "Lavka Sync"
+msgstr ""
+
+#. Description of the plugin
+#: lavka-sync.php
+msgid "Provides buttons and settings to synchronize with the Java service and exposes a REST API."
+msgstr ""
+
+#: inc/warehouse-map.php:28
+#: inc/warehouse-map.php:103
+msgid "Warehouses mapping"
+msgstr ""
+
+#: inc/warehouse-map.php:29
+msgid "Warehouses"
+msgstr ""
+
+#: inc/warehouse-map.php:71
+msgid "You do not have sufficient permissions to access this page."
+msgstr ""
+
+#: inc/warehouse-map.php:89
+msgid "Saved."
+msgstr ""
+
+#: inc/warehouse-map.php:106
+msgid "Match: <strong>Woo → MSSQL</strong>. One Woo location aggregates sums from selected MSSQL warehouses."
+msgstr ""
+
+#: inc/warehouse-map.php:116
+msgid "ID"
+msgstr ""
+
+#: inc/warehouse-map.php:117
+msgid "Woo location"
+msgstr ""
+
+#: inc/warehouse-map.php:118
+#: inc/warehouse-map.php:139
+msgid "Linked MSSQL warehouses (codes)"
+msgstr ""
+
+#: inc/warehouse-map.php:119
+msgid "Pick from directory"
+msgstr ""
+
+#: inc/warehouse-map.php:147
+msgid "e.g. D01, D02, D05"
+msgstr ""
+
+#: inc/warehouse-map.php:151
+msgid "CSV list of codes (spaces optional)."
+msgstr ""
+
+#. translators: 1: external warehouse code, 2: name
+#: inc/warehouse-map.php:163
+#, php-format
+msgid "%1$s — %2$s"
+msgstr ""
+
+#: inc/warehouse-map.php:170
+msgid "Apply codes"
+msgstr ""
+
+#: inc/warehouse-map.php:173
+msgid "Clear"
+msgstr ""
+
+#: inc/warehouse-map.php:179
+msgid "MSSQL directory is not available. Enter codes manually or check Java endpoint <code>/ref/warehouses</code>."
+msgstr ""
+
+#. translators: %s: taxonomy name
+#: inc/warehouse-map.php:190
+#, php-format
+msgid "No Woo locations found (taxonomy “%s”)."
+msgstr ""
+
+#: inc/warehouse-map.php:199
+msgid "Save mappings"
+msgstr ""
+
+#: lavka-sync.php:41
+#, php-format
+msgid "Lavka Sync: file %s is missing."
+msgstr ""

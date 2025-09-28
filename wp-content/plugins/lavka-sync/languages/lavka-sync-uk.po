@@ -1,0 +1,117 @@
+# Copyright (C) 2025 
+# This file is distributed under the same license as the Lavka Sync plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: Lavka Sync 0.2.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lavka-sync\n"
+"POT-Creation-Date: 2025-09-28T07:25:19+00:00\n"
+"PO-Revision-Date: 2025-09-28T07:10:54+00:00\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: uk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: lavka-sync\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#. Plugin Name of the plugin
+#: lavka-sync.php
+msgid "Lavka Sync"
+msgstr "Lavka Sync"
+
+#. Description of the plugin
+#: lavka-sync.php
+msgid ""
+"Provides buttons and settings to synchronize with the Java service and "
+"exposes a REST API."
+msgstr ""
+"Надає кнопки та налаштування для синхронізації з Java-сервісом і відкриває "
+"REST API."
+
+#: inc/warehouse-map.php:28 inc/warehouse-map.php:103
+msgid "Warehouses mapping"
+msgstr "Відповідність складів"
+
+#: inc/warehouse-map.php:29
+msgid "Warehouses"
+msgstr "Склади"
+
+#: inc/warehouse-map.php:71
+msgid "You do not have sufficient permissions to access this page."
+msgstr "У вас недостатньо прав для доступу до цієї сторінки."
+
+#: inc/warehouse-map.php:89
+msgid "Saved."
+msgstr "Збережено."
+
+#: inc/warehouse-map.php:106
+msgid ""
+"Match: <strong>Woo → MSSQL</strong>. One Woo location aggregates sums from "
+"selected MSSQL warehouses."
+msgstr ""
+"Відповідність: <strong>Woo → MSSQL</strong>. Один склад Woo агрегує залишки "
+"з вибраних MSSQL-складів."
+
+#: inc/warehouse-map.php:116
+msgid "ID"
+msgstr "ID"
+
+#: inc/warehouse-map.php:117
+msgid "Woo location"
+msgstr "Склад Woo"
+
+#: inc/warehouse-map.php:118 inc/warehouse-map.php:139
+msgid "Linked MSSQL warehouses (codes)"
+msgstr "Прив’язані MSSQL-склади (коди)"
+
+#: inc/warehouse-map.php:119
+msgid "Pick from directory"
+msgstr "Вибрати з довідника"
+
+#: inc/warehouse-map.php:147
+msgid "e.g. D01, D02, D05"
+msgstr "напр. D01, D02, D05"
+
+#: inc/warehouse-map.php:151
+msgid "CSV list of codes (spaces optional)."
+msgstr "CSV-список кодів (пробіли необов’язкові)."
+
+#. translators: 1: external warehouse code, 2: name
+#: inc/warehouse-map.php:163
+#, php-format
+msgid "%1$s — %2$s"
+msgstr "%1$s — %2$s"
+
+#: inc/warehouse-map.php:170
+msgid "Apply codes"
+msgstr "Застосувати коди"
+
+#: inc/warehouse-map.php:173
+msgid "Clear"
+msgstr "Очистити"
+
+#: inc/warehouse-map.php:179
+msgid ""
+"MSSQL directory is not available. Enter codes manually or check Java "
+"endpoint <code>/ref/warehouses</code>."
+msgstr ""
+"Довідник MSSQL недоступний. Введіть коди вручну або перевірте Java endpoint "
+"<code>/ref/warehouses</code>."
+
+#. translators: %s: taxonomy name
+#: inc/warehouse-map.php:190
+#, php-format
+msgid "No Woo locations found (taxonomy “%s”)."
+msgstr "Не знайдено складів Woo (таксономія “%s”)."
+
+#: inc/warehouse-map.php:199
+msgid "Save mappings"
+msgstr "Зберегти відповідності"
+
+#: lavka-sync.php:41
+#, php-format
+msgid "Lavka Sync: file %s is missing."
+msgstr "Lavka Sync: файл %s відсутній."
