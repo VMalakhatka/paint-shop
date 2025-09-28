@@ -833,7 +833,7 @@ add_action('wp_ajax_lavka_pull_java_all_page', function () {
     if (!current_user_can('manage_lavka_sync')) wp_send_json_error(['error'=>'forbidden'], 403);
     check_ajax_referer('lavka_pull_java_all');
 
-    $batch = max(10, min(1000, (int)($_POST['batch'] ?? 200)));
+    $batch = max(LAVKA_BATCH_MIN, min(LAVKA_BATCH_MAX, (int)($_POST['batch'] ?? 200)));
     $page  = max(0, (int)($_POST['page'] ?? 0));
     $dry = filter_var($_POST['dry'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
