@@ -13,6 +13,10 @@ define('LAVKA_SYNC_VER', '0.2.0');
 define('LAVKA_SYNC_DIR', plugin_dir_path(__FILE__));
 define('LAVKA_SYNC_URL', plugin_dir_url(__FILE__));
 define('LAVKA_SYNC_INC', LAVKA_SYNC_DIR . 'inc');
+if (!defined('LAVKA_LAST_TO_OPTION'))  define('LAVKA_LAST_TO_OPTION', 'lavka_sync_last_to'); // хранит последний serverTo (ISO)
+if (!defined('LAVKA_MOV_DEF_PAGESIZE')) define('LAVKA_MOV_DEF_PAGESIZE', 500);
+if (!defined('LAVKA_MOV_MAX_PAGESIZE')) define('LAVKA_MOV_MAX_PAGESIZE', 2000);
+if (!defined('LAVKA_MOV_OVERLAP_PCT'))  define('LAVKA_MOV_OVERLAP_PCT', 20); // overlap +20%
 
 /** i18n: грузим переводы */
 add_action('plugins_loaded', function () {
