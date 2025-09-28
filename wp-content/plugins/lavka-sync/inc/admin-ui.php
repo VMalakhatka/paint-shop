@@ -1,8 +1,10 @@
 <?php
 /**
  * Plugin Name: Lavka Sync
- * Description: Кнопки и настройки синхронизации с Java-сервисом.
+ * Description: Provides buttons and settings to synchronize with the Java service.
  * Version: 0.1.0
+ * Text Domain: lavka-sync
+ * Domain Path: /languages
  */
 
 if (!defined('ABSPATH')) exit;
@@ -10,9 +12,9 @@ if (!defined('ABSPATH')) exit;
 /** Меню + страница настроек */
 add_action('admin_menu', function () {
     add_menu_page(
-        'Lavka Sync',
-        'Lavka Sync',
-        'manage_lavka_sync',      // было manage_options
+        __('Lavka Sync', 'lavka-sync'),
+        __('Lavka Sync', 'lavka-sync'),
+        'manage_lavka_sync',
         'lavka-sync',
         'lavka_sync_render_page',
         'dashicons-update',
@@ -20,36 +22,87 @@ add_action('admin_menu', function () {
     );
 
     add_submenu_page(
-        'lavka-sync',
-        'Lavka Mapping',
-        'Mapping',
-        'manage_lavka_sync',      // оставляем manage_lavka_sync
-        'lavka-mapping',
-        'lavka_render_mapping_page'
+      'lavka-sync',
+      __('Lavka Mapping', 'lavka-sync'),
+      __('Mapping', 'lavka-sync'),
+      'manage_lavka_sync',
+      'lavka-mapping',
+      'lavka_render_mapping_page'
     );
 
     // (если есть) Logs/Reports тоже лучше на manage_lavka_sync
 });
 
-function lavka_render_mapping_page(){
-    if (!current_user_can('manage_lavka_sync')) wp_die('Недостаточно прав');
+function lavka_render_mapping_page() {
+    // словарь для фронта
+    $i18n = [
+        // общие
+        'page_title'        => esc_html__('Lavka Mapping', 'lavka-sync'),
+        'page_intro'        => __(
+            'Match Woo locations (taxonomy <code>location</code>) with external MS warehouses. One Woo location may aggregate several MS warehouses.',
+            'lavka-sync'
+        ),
+        'loading'           => esc_html__('Loading…', 'lavka-sync'),
+        'saving'            => esc_html__('Saving…', 'lavka-sync'),
+        'saved_ok'          => esc_html__('OK: saved', 'lavka-sync'),
+        'save_error'        => esc_html__('Save error', 'lavka-sync'),
+        'network_error'     => esc_html__('Network error', 'lavka-sync'),
+        'data_load_error'   => esc_html__('Failed to load data.', 'lavka-sync'),
 
-    // дадим nonce для REST cookie-авторизации
+        // таблица
+        'th_woo_location'   => esc_html__('Woo location', 'lavka-sync'),
+        'th_ms_multi'       => esc_html__('MS warehouses (multi-select)', 'lavka-sync'),
+        'btn_save_mapping'  => esc_html__('Save mapping', 'lavka-sync'),
+
+        // строки с параметрами
+        'ok_written'        => esc_html__('OK: written %s', 'lavka-sync'),
+
+        'th_sku'        => esc_html__('SKU', 'lavka-sync'),
+        'th_total'      => esc_html__('Total', 'lavka-sync'),
+        'th_by_location'=> esc_html__('By warehouses', 'lavka-sync'),
+        'th_found'      => esc_html__('Found', 'lavka-sync'),
+        'no_data'       => esc_html__('No data', 'lavka-sync'),
+
+      'i18n_enter_skus'    => esc_html__('Enter one or more SKUs', 'lavka-sync'),
+      'i18n_running'       => esc_html__('Running…', 'lavka-sync'),
+      'i18n_error_prefix'  => esc_html__('Error:', 'lavka-sync'),
+      'i18n_network_error' => esc_html__('Network error', 'lavka-sync'),
+      'i18n_page'          => esc_html__('Page', 'lavka-sync'),
+      'i18n_of'            => esc_html__('of', 'lavka-sync'),
+      'i18n_done'          => esc_html__('Done', 'lavka-sync'),
+      'i18n_updated'       => esc_html__('Updated', 'lavka-sync'),
+      'i18n_not_found'     => esc_html__('Not found', 'lavka-sync'),
+
+      'i18n_ok_processed' => esc_html__('OK: processed %1$s, not found %2$s', 'lavka-sync'),
+
+      'i18n_working' => esc_html__('Working…', 'lavka-sync'),
+      'i18n_error'   => esc_html__('Error:', 'lavka-sync'),
+      'i18n_neterr'  => esc_html__('Network error', 'lavka-sync'),
+      'i18n_ok'      => esc_html__('OK', 'lavka-sync'),
+    ];
+
+    if (!current_user_can('manage_lavka_sync')) {
+        wp_die( esc_html__('You do not have sufficient permissions to access this page.', 'lavka-sync') );
+    }
+
+    // nonce для REST cookie-авторизации
     $rest_nonce = wp_create_nonce('wp_rest');
-
     ?>
     <div class="wrap">
-      <h1>Lavka Mapping</h1>
-      <p>Сопоставьте Woo-склады (таксономия <code>location</code>) с внешними MS-складами. Один Woo-склад может агрегировать несколько MS-складов.</p>
+      <h1><?php echo esc_html( $i18n['page_title'] ); ?></h1>
+      <p><?php echo wp_kses_post( $i18n['page_intro'] ); ?></p>
 
-      <div id="lavka-mapping-app">Загрузка…</div>
+      <div id="lavka-mapping-app"><?php echo esc_html( $i18n['loading'] ); ?></div>
     </div>
 
     <script>
+    // i18n в JS
+    const LAVKA_I18N = <?php echo wp_json_encode($i18n, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP); ?>;
+
     (function(){
-      const REST_ROOT = "<?php echo esc_js( rest_url('lavka/v1/') ); ?>";
+      const REST_ROOT  = "<?php echo esc_js( rest_url('lavka/v1/') ); ?>";
       const REST_NONCE = "<?php echo esc_js( $rest_nonce ); ?>";
-      const AJAX_URL = "<?php echo esc_js( admin_url('admin-ajax.php') ); ?>";
+      const AJAX_URL   = "<?php echo esc_js( admin_url('admin-ajax.php') ); ?>";
       const AJAX_NONCE = "<?php echo esc_js( wp_create_nonce('lavka_mapping_nonce') ); ?>";
 
       function restGet(path){
@@ -61,7 +114,7 @@ function lavka_render_mapping_page(){
         return fetch(REST_ROOT + path, {
           method: 'PUT',
           headers: {'X-WP-Nonce': REST_NONCE, 'Content-Type':'application/json'},
-          body: JSON.stringify(body||{})
+          body: JSON.stringify(body || {})
         }).then(r => r.json());
       }
       function ajax(action, data){
@@ -69,31 +122,38 @@ function lavka_render_mapping_page(){
         f.append('action', action);
         f.append('_wpnonce', AJAX_NONCE);
         if (data) for (const k in data) f.append(k, data[k]);
-        return fetch(AJAX_URL, { method:'POST', credentials:'same-origin', body:f }).then(r=>r.json());
+        return fetch(AJAX_URL, {
+          method:'POST',
+          credentials:'same-origin',
+          body:f
+        }).then(r => r.json());
       }
 
       const el = document.getElementById('lavka-mapping-app');
 
       async function load(){
-        el.textContent = 'Загрузка списков…';
+        el.textContent = LAVKA_I18N.loading;
+
         const [woo, map, ms] = await Promise.all([
           restGet('locations?hide_empty=0&per_page=1000'),
           restGet('locations/map'),
           ajax('lavka_ms_wh_list', {})
         ]);
 
-        if (!woo || !woo.items || !map || !map.items || !ms || !ms.ok) {
-          el.textContent = 'Ошибка загрузки данных.';
-          console.log({woo,map,ms});
+        if (!woo || !woo.items || !map || !map.items || !ms || !ms.success) {
+          el.textContent = LAVKA_I18N.data_load_error;
+          console.log({woo, map, ms});
           return;
         }
 
-        // нормализуем выбранные коды по term_id
+        // выбранные коды по term_id
         const selectedByTid = {};
-        map.items.forEach(row => { selectedByTid[row.term_id] = new Set(row.codes||[]); });
+        (map.items || []).forEach(row => {
+          selectedByTid[row.id || row.term_id] = new Set(row.codes || []);
+        });
 
-        // рисуем таблицу
-        const msList = ms.items || [];
+        const msList = (ms.data && ms.data.items) ? ms.data.items : (ms.items || []);
+
         const wrap = document.createElement('div');
         wrap.innerHTML = `
           <style>
@@ -103,31 +163,37 @@ function lavka_render_mapping_page(){
             .lm-actions{margin:10px 0}
           </style>
           <table class="lm-table">
-            <thead><tr><th>Woo склад</th><th>MS склады (множественный выбор)</th></tr></thead>
+            <thead>
+              <tr>
+                <th>${LAVKA_I18N.th_woo_location}</th>
+                <th>${LAVKA_I18N.th_ms_multi}</th>
+              </tr>
+            </thead>
             <tbody></tbody>
           </table>
           <div class="lm-actions">
-            <button class="button button-primary" id="lm-save">Сохранить мэппинг</button>
+            <button class="button button-primary" id="lm-save">${LAVKA_I18N.btn_save_mapping}</button>
             <span id="lm-status" style="margin-left:10px;"></span>
           </div>
         `;
         const tbody = wrap.querySelector('tbody');
 
-        (woo.items||[]).forEach(loc=>{
-          const tr = document.createElement('tr');
+        (woo.items || []).forEach(loc => {
+          const tr  = document.createElement('tr');
           const td1 = document.createElement('td');
-          td1.innerHTML = `<strong>${loc.name}</strong><br><code>${loc.slug}</code> (id=${loc.id})`;
           const td2 = document.createElement('td');
+
+          td1.innerHTML = `<strong>${loc.name}</strong><br><code>${loc.slug}</code> (id=${loc.id})`;
 
           const sel = document.createElement('select');
           sel.className = 'lm-multi';
-          sel.multiple = true;
+          sel.multiple  = true;
 
           const selected = selectedByTid[loc.id] || new Set();
 
-          msList.forEach(x=>{
-            const code = (x.code||'').toString();
-            const name = (x.name||x.title||code);
+          msList.forEach(x => {
+            const code = (x.code || '').toString();
+            const name = (x.name || x.title || code);
             if (!code) return;
             const opt = document.createElement('option');
             opt.value = code;
@@ -137,7 +203,8 @@ function lavka_render_mapping_page(){
           });
 
           td2.appendChild(sel);
-          tr.appendChild(td1); tr.appendChild(td2);
+          tr.appendChild(td1);
+          tr.appendChild(td2);
           tr.dataset.tid = String(loc.id);
           tbody.appendChild(tr);
         });
@@ -145,36 +212,38 @@ function lavka_render_mapping_page(){
         el.innerHTML = '';
         el.appendChild(wrap);
 
-        // Сохранение
-        document.getElementById('lm-save').addEventListener('click', async ()=>{
+        // сохранение
+        document.getElementById('lm-save').addEventListener('click', async () => {
           const rows = el.querySelectorAll('tbody tr');
           const mapping = [];
-          rows.forEach(tr=>{
+          rows.forEach(tr => {
             const tid = parseInt(tr.dataset.tid, 10);
             const sel = tr.querySelector('select');
-            const codes = Array.from(sel.selectedOptions).map(o=>o.value);
+            const codes = Array.from(sel.selectedOptions).map(o => o.value);
             mapping.push({ term_id: tid, codes });
           });
 
           const status = document.getElementById('lm-status');
-          status.textContent = 'Сохраняю…';
-          try{
+          status.textContent = LAVKA_I18N.saving;
+
+          try {
             const res = await restPut('locations/map', { mapping });
-            if (res && res.ok) {
-              status.textContent = `OK: записано ${res.written}`;
+            if (res && (res.ok || typeof res.written !== 'undefined')) {
+              const n = (res.written != null) ? res.written : '';
+              status.textContent = n ? LAVKA_I18N.ok_written.replace('%s', n) : LAVKA_I18N.saved_ok;
             } else {
-              status.textContent = 'Ошибка сохранения';
+              status.textContent = LAVKA_I18N.save_error;
               console.log(res);
             }
-          }catch(e){
-            status.textContent = 'Сеть/ошибка';
+          } catch (e) {
+            status.textContent = LAVKA_I18N.network_error;
             console.error(e);
           }
         });
       }
 
       load();
-    })();
+    }());
     </script>
     <?php
 }
@@ -235,69 +304,107 @@ function lavka_sync_render_page() {
     $nonce = wp_create_nonce('lavka_sync_nonce');
     ?>
     <div class="wrap">
-      <h1>Lavka Sync</h1>
+      <h1><?php echo esc_html__('Lavka Sync', 'lavka-sync'); ?></h1>
 
       <form method="post" action="options.php">
-        <?php settings_fields('lavka_sync'); ?>
-        <?php $o = lavka_sync_get_options(); ?>
+        <?php settings_fields('lavka_sync'); $o = lavka_sync_get_options(); ?>
         <table class="form-table" role="presentation">
           <tr>
-            <th scope="row"><label for="java_base_url">Java Base URL</label></th>
-            <td><input name="<?php echo LAVKA_SYNC_OPTION; ?>[java_base_url]" id="java_base_url" type="url" value="<?php echo esc_attr($o['java_base_url']); ?>" class="regular-text" /></td>
+            <th scope="row"><label for="java_base_url"><?php echo esc_html__('Java Base URL', 'lavka-sync'); ?></label></th>
+            <td><input name="<?php echo LAVKA_SYNC_OPTION; ?>[java_base_url]" id="java_base_url" type="url" value="<?php echo esc_attr($o['java_base_url'] ?? ''); ?>" class="regular-text" /></td>
           </tr>
           <tr>
-            <th scope="row"><label for="api_token">API Token (для Java)</label></th>
-            <td><input name="<?php echo LAVKA_SYNC_OPTION; ?>[api_token]" id="api_token" type="text" value="<?php echo esc_attr($o['api_token']); ?>" class="regular-text" /></td>
+            <th scope="row"><label for="api_token"><?php echo esc_html__('API Token (for Java)', 'lavka-sync'); ?></label></th>
+            <td><input name="<?php echo LAVKA_SYNC_OPTION; ?>[api_token]" id="api_token" type="text" value="<?php echo esc_attr($o['api_token'] ?? ''); ?>" class="regular-text" /></td>
           </tr>
           <tr>
-            <th scope="row"><label for="supplier">Supplier</label></th>
-            <td><input name="<?php echo LAVKA_SYNC_OPTION; ?>[supplier]" id="supplier" type="text" value="<?php echo esc_attr($o['supplier']); ?>" /></td>
+            <th scope="row"><label for="supplier"><?php echo esc_html__('Supplier', 'lavka-sync'); ?></label></th>
+            <td><input name="<?php echo LAVKA_SYNC_OPTION; ?>[supplier]" id="supplier" type="text" value="<?php echo esc_attr($o['supplier'] ?? ''); ?>" /></td>
           </tr>
           <tr>
-            <th scope="row"><label for="stock_id">Stock ID</label></th>
-            <td><input name="<?php echo LAVKA_SYNC_OPTION; ?>[stock_id]" id="stock_id" type="number" value="<?php echo esc_attr($o['stock_id']); ?>" /></td>
+            <th scope="row"><label for="stock_id"><?php echo esc_html__('Stock ID', 'lavka-sync'); ?></label></th>
+            <td><input name="<?php echo LAVKA_SYNC_OPTION; ?>[stock_id]" id="stock_id" type="number" value="<?php echo esc_attr($o['stock_id'] ?? 0); ?>" /></td>
           </tr>
           <tr>
-            <th scope="row"><label for="schedule">Автосинк (WP-Cron)</label></th>
+            <th scope="row"><label for="schedule"><?php echo esc_html__('Auto sync (WP-Cron)', 'lavka-sync'); ?></label></th>
             <td>
               <select name="<?php echo LAVKA_SYNC_OPTION; ?>[schedule]" id="schedule">
-                <option value="off"        <?php selected($o['schedule'], 'off'); ?>>Выключен</option>
-                <option value="hourly"     <?php selected($o['schedule'], 'hourly'); ?>>Каждый час</option>
-                <option value="twicedaily" <?php selected($o['schedule'], 'twicedaily'); ?>>Дважды в день</option>
-                <option value="daily"      <?php selected($o['schedule'], 'daily'); ?>>Раз в день</option>
+                <option value="off"        <?php selected($o['schedule'] ?? 'off', 'off'); ?>><?php echo esc_html__('Disabled', 'lavka-sync'); ?></option>
+                <option value="hourly"     <?php selected($o['schedule'] ?? 'off', 'hourly'); ?>><?php echo esc_html__('Hourly', 'lavka-sync'); ?></option>
+                <option value="twicedaily" <?php selected($o['schedule'] ?? 'off', 'twicedaily'); ?>><?php echo esc_html__('Twice daily', 'lavka-sync'); ?></option>
+                <option value="daily"      <?php selected($o['schedule'] ?? 'off', 'daily'); ?>><?php echo esc_html__('Daily', 'lavka-sync'); ?></option>
               </select>
             </td>
           </tr>
         </table>
-        <?php submit_button('Сохранить настройки'); ?>
+        <?php submit_button( __('Save settings', 'lavka-sync') ); ?>
       </form>
 
       <hr />
 
-      <h2>Ручной запуск</h2>
-<h2>Pull from Java (mapped)</h2>
-<p>
-  <label for="lavka-skus"><strong>SKUs</strong> (через запятую или с новой строки):</label><br>
-  <textarea id="lavka-skus" rows="4" style="width: 100%; max-width: 720px;"
-    placeholder="KR-99461
-KR-1254"></textarea>
-</p>
-<p style="margin-top:8px">
-  <button id="lavka-pull-java" class="button">Pull from Java (mapped)</button>
-  <label style="margin-left:8px;">
-    <input type="checkbox" id="lavka-pull-dry" checked> dry-run
-  </label>
-  <span id="lavka-pull-status" style="margin-left:10px;"></span>
-</p>
+      <h2><?php echo esc_html__('Manual run', 'lavka-sync'); ?></h2>
+      <h2><?php echo esc_html__('Pull from Java (mapped)', 'lavka-sync'); ?></h2>
 
-<div style="margin-top:12px">
-  <label>Пакет, шт:
-    <input type="number" id="lavka-batch" value="200" min="10" max="1000" step="10" style="width:7rem">
-  </label>
-  <button id="lavka-pull-all" class="button button-primary" style="margin-left:8px">Pull ALL (paged)</button>
-  <span id="lavka-pull-all-status" style="margin-left:10px;"></span>
-</div>
+      <p>
+        <label for="lavka-skus">
+          <strong><?php echo esc_html__('SKUs', 'lavka-sync'); ?></strong>
+          (<?php echo esc_html__('comma or newline separated', 'lavka-sync'); ?>):
+        </label><br>
+        <textarea id="lavka-skus" rows="4" style="width:100%;max-width:720px"></textarea>
+      </p>
 
+      <p style="margin-top:8px">
+        <button id="lavka-pull-java" class="button"><?php echo esc_html__('Pull from Java (mapped)', 'lavka-sync'); ?></button>
+        <label style="margin-left:8px;">
+          <input type="checkbox" id="lavka-pull-dry" checked> <?php echo esc_html__('dry-run', 'lavka-sync'); ?>
+        </label>
+        <span id="lavka-pull-status" style="margin-left:10px;"></span>
+      </p>
+
+      <div style="margin-top:12px">
+        <label><?php echo esc_html__('Batch size', 'lavka-sync'); ?>, <?php echo esc_html__('items', 'lavka-sync'); ?>:
+          <input type="number" id="lavka-batch" value="200" min="10" max="1000" step="10" style="width:7rem">
+        </label>
+        <button id="lavka-pull-all" class="button button-primary" style="margin-left:8px"><?php echo esc_html__('Pull ALL (paged)', 'lavka-sync'); ?></button>
+        <span id="lavka-pull-all-status" style="margin-left:10px;"></span>
+      </div>
+      
+      <p>
+        <button id="lavka-sync-dry" class="button"><?php echo esc_html__('Dry-run', 'lavka-sync'); ?></button>
+        <button id="lavka-sync-run" class="button button-primary"><?php echo esc_html__('Synchronize', 'lavka-sync'); ?></button>
+        <span id="lavka-sync-result" style="margin-left:10px;"></span>
+      </p>
+
+    </div>
+  <?php
+    $i18n_settings = [
+      'th_sku'            => esc_html__('SKU', 'lavka-sync'),
+      'th_total'          => esc_html__('Total', 'lavka-sync'),
+      'th_by_location'    => esc_html__('By warehouses', 'lavka-sync'),
+      'th_found'          => esc_html__('Found', 'lavka-sync'),
+      'no_data'           => esc_html__('No data', 'lavka-sync'),
+
+      'i18n_enter_skus'   => esc_html__('Enter one or more SKUs', 'lavka-sync'),
+      'i18n_running'      => esc_html__('Running…', 'lavka-sync'),
+      'i18n_ok_processed' => esc_html__('OK: processed %1$s, not found %2$s', 'lavka-sync'),
+      'i18n_error_prefix' => esc_html__('Error:', 'lavka-sync'),
+      'i18n_network_error'=> esc_html__('Network error', 'lavka-sync'),
+
+      'i18n_working'      => esc_html__('Working…', 'lavka-sync'),
+      'i18n_error'        => esc_html__('Error:', 'lavka-sync'),
+      'i18n_neterr'       => esc_html__('Network error', 'lavka-sync'),
+      'i18n_ok'           => esc_html__('OK', 'lavka-sync'),
+
+      'i18n_page'         => esc_html__('Page', 'lavka-sync'),
+      'i18n_of'           => esc_html__('of', 'lavka-sync'),
+      'i18n_done'         => esc_html__('Done', 'lavka-sync'),
+      'i18n_updated'      => esc_html__('Updated', 'lavka-sync'),
+      'i18n_not_found'    => esc_html__('Not found', 'lavka-sync'),
+    ];
+  ?>
+  <script>
+    const LAVKA_I18N = <?php echo wp_json_encode($i18n_settings, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP); ?>;
+  </script>
 <script>
 (function(){
   const ajaxUrl = "<?php echo esc_js(admin_url('admin-ajax.php')); ?>";
@@ -311,11 +418,11 @@ KR-1254"></textarea>
     const raw = (skusEl.value || '').trim();
     const list = raw.split(/[\s,;]+/).filter(Boolean);
     if (!list.length) {
-      status.textContent = 'Введите один или несколько SKU';
+      status.textContent = LAVKA_I18N.i18n_enter_skus;
       return;
     }
 
-    status.textContent = 'Выполняю...';
+    status.textContent = LAVKA_I18N.i18n_running;
 
     const f = new FormData();
     f.append('action','lavka_pull_java');
@@ -328,7 +435,9 @@ KR-1254"></textarea>
       const r = await fetch(ajaxUrl, {method:'POST', credentials:'same-origin', body:f});
       const j = await r.json();
       if (j?.success) {
-        status.textContent = `OK: processed ${j.data.processed}, not_found ${j.data.not_found}`;
+        status.textContent = LAVKA_I18N.i18n_ok_processed
+          .replace('%1$s', j.data.processed)
+          .replace('%2$s', j.data.not_found);
         const boxId = 'lavka-pull-details';
         let box = document.getElementById(boxId);
         if (!box) {
@@ -339,42 +448,50 @@ KR-1254"></textarea>
         }
         const rows = (j.data.results || []).map(r => {
           const lines = (r.lines || []).map(l => `${l.term_id}: ${l.qty}`).join(', ');
-          return `<tr><td>${r.sku}</td><td>${r.total ?? ''}</td><td>${lines}</td><td>${r.found ? '✓' : '—'}</td></tr>`;
+          return `<tr>
+                    <td>${r.sku}</td>
+                    <td>${r.total ?? ''}</td>
+                    <td>${lines}</td>
+                    <td>${r.found ? '✓' : '—'}</td>
+                  </tr>`;
         }).join('');
+
         box.innerHTML = `
           <table class="widefat striped" style="max-width:720px">
-            <thead><tr><th>SKU</th><th>Total</th><th>По складам</th><th>Найден</th></tr></thead>
-            <tbody>${rows || '<tr><td colspan="4">Нет данных</td></tr>'}</tbody>
+            <thead>
+              <tr>
+                <th>${LAVKA_I18N.th_sku}</th>
+                <th>${LAVKA_I18N.th_total}</th>
+                <th>${LAVKA_I18N.th_by_location}</th>
+                <th>${LAVKA_I18N.th_found}</th>
+              </tr>
+            </thead>
+            <tbody>${rows || `<tr><td colspan="4">${LAVKA_I18N.no_data}</td></tr>`}</tbody>
           </table>
         `;
-        status.textContent = `OK: processed ${j.data.processed}, not_found ${j.data.not_found}`;
+        status.textContent = LAVKA_I18N.i18n_ok_processed
+          .replace('%1$s', j.data.processed)
+          .replace('%2$s', j.data.not_found);
         console.log(j.data);
       } else {
-        status.textContent = 'Ошибка: ' + (j?.data?.error || 'unknown');
+        status.textContent = `${LAVKA_I18N.i18n_error_prefix} ${j?.data?.error || 'unknown'}`;
         console.log(j);
       }
     }catch(e){
-      status.textContent = 'Сеть/ошибка';
+      status.textContent = LAVKA_I18N.i18n_network_error;
       console.error(e);
     }
   });
 })();
 </script>
-      <p>
-        <button id="lavka-sync-dry" class="button">Dry-run</button>
-        <button id="lavka-sync-run" class="button button-primary">Синхронизировать</button>
-        <span id="lavka-sync-result" style="margin-left:10px;"></span>
-      </p>
-    </div>
-
     <script>
       (function() {
-        const ajaxUrl = "<?php echo admin_url('admin-ajax.php'); ?>";
+        const ajaxUrl = "<?php echo esc_js( admin_url('admin-ajax.php') ); ?>";
         const nonce   = "<?php echo esc_js($nonce); ?>";
 
         async function call(action, dry) {
           const resEl = document.getElementById('lavka-sync-result');
-          resEl.textContent = 'Выполняю...';
+          resEl.textContent = LAVKA_I18N.i18n_working;
           try {
             const form = new FormData();
             form.append('action', action);
@@ -382,10 +499,11 @@ KR-1254"></textarea>
             form.append('dry', dry ? '1' : '0');
             const resp = await fetch(ajaxUrl, { method: 'POST', credentials: 'same-origin', body: form });
             const json = await resp.json();
-            resEl.textContent = (json && json.ok) ? 'OK' : ('Ошибка: ' + (json && json.error ? json.error : 'unknown'));
+            resEl.textContent = (json && json.success) ? LAVKA_I18N.i18n_ok
+              : `${LAVKA_I18N.i18n_error} ${(json && json.data && json.data.error) ? json.data.error : 'unknown'}`;
             console.log(json);
           } catch(e) {
-            resEl.textContent = 'Ошибка сети';
+            resEl.textContent = LAVKA_I18N.i18n_neterr;
             console.error(e);
           }
         }
@@ -395,51 +513,56 @@ KR-1254"></textarea>
       })();
 
       (function(){
-  const ajaxUrl     = "<?php echo esc_js(admin_url('admin-ajax.php')); ?>";
-  const nonceAll    = "<?php echo esc_js(wp_create_nonce('lavka_pull_java_all')); ?>";
-  const btnAll      = document.getElementById('lavka-pull-all');
-  const batchEl     = document.getElementById('lavka-batch');
-  const dryEl       = document.getElementById('lavka-pull-dry');
-  const allStatus   = document.getElementById('lavka-pull-all-status');
+        const ajaxUrl     = "<?php echo esc_js(admin_url('admin-ajax.php')); ?>";
+        const nonceAll    = "<?php echo esc_js(wp_create_nonce('lavka_pull_java_all')); ?>";
+        const btnAll      = document.getElementById('lavka-pull-all');
+        const batchEl     = document.getElementById('lavka-batch');
+        const dryEl       = document.getElementById('lavka-pull-dry');
+        const allStatus   = document.getElementById('lavka-pull-all-status');
 
-  btnAll?.addEventListener('click', async ()=>{
-    const batch = Math.max(10, Math.min(1000, parseInt(batchEl.value,10) || 200));
-    const dry   = dryEl.checked ? '1' : '0';
+        btnAll?.addEventListener('click', async ()=>{
+          const batch = Math.max(10, Math.min(1000, parseInt(batchEl.value,10) || 200));
+          const dry   = dryEl.checked ? '1' : '0';
 
-    btnAll.disabled = true;
-    let page = 0, pages = null, total = 0, done = 0, nf = 0;
+          btnAll.disabled = true;
+          let page = 0, pages = null, total = 0, done = 0, nf = 0;
 
-    try{
-      while (pages === null || page < pages) {
-        allStatus.textContent = `Страница ${page+1}${pages ? ' из '+pages : ''}…`;
+          try{
+            while (pages === null || page < pages) {
+              allStatus.textContent = `${LAVKA_I18N.i18n_page} ${page+1}${pages ? ' ' + LAVKA_I18N.i18n_of + ' ' + pages : ''}…`;
 
-        const f = new FormData();
-        f.append('action','lavka_pull_java_all_page');
-        f.append('_wpnonce', nonceAll);
-        f.append('page', String(page));
-        f.append('batch', String(batch));
-        f.append('dry', dry);
+              const f = new FormData();
+              f.append('action','lavka_pull_java_all_page');
+              f.append('_wpnonce', nonceAll);
+              f.append('page', String(page));
+              f.append('batch', String(batch));
+              f.append('dry', dry);
 
-        const r = await fetch(ajaxUrl, { method:'POST', credentials:'same-origin', body:f });
-        const j = await r.json();
-        if (!j?.success) { allStatus.textContent = 'Ошибка: ' + (j?.data?.error || 'unknown'); break; }
+              const r = await fetch(ajaxUrl, { method:'POST', credentials:'same-origin', body:f });
+              const j = await r.json();
+              if (!j?.success) {
+                allStatus.textContent = `${LAVKA_I18N.i18n_error_prefix} ${j?.data?.error || 'unknown'}`;
+                break;
+              }
 
-        const d = j.data;
-        pages = d.pages; total = d.total;
-        done  += (d.processed || 0);
-        nf    += (d.not_found || 0);
+              const d = j.data;
+              pages = d.pages; total = d.total;
+              done  += (d.processed || 0);
+              nf    += (d.not_found || 0);
 
-        allStatus.textContent = `Готово: ${Math.min((page+1)*batch, total)}/${total}. Обновлено ${done}, не найдены ${nf}.`;
-        page++;
-      }
-    } catch(e){
-      console.error(e);
-      allStatus.textContent = 'Сеть/ошибка';
-    } finally {
-      btnAll.disabled = false;
-    }
-  });
-})();
+              allStatus.textContent =
+                `${LAVKA_I18N.i18n_done}: ${Math.min((page+1)*batch, total)}/${total}. ` +
+                `${LAVKA_I18N.i18n_updated} ${done}, ${LAVKA_I18N.i18n_not_found} ${nf}.`;
+              page++;
+            }
+          } catch(e){
+            console.error(e);
+            allStatus.textContent =  LAVKA_I18N.i18n_network_error;
+          } finally {
+            btnAll.disabled = false;
+          }
+        });
+      })();
 
     </script>
     <?php
@@ -525,6 +648,7 @@ add_action('lavka_sync_cron', function () {
 );
 
 // Создаём собственное право и роль на активации плагина
+//1й
 register_activation_hook(__FILE__, function () {
     // Базируемся на shop_manager
     $base = get_role('shop_manager');
@@ -541,9 +665,9 @@ register_activation_hook(__FILE__, function () {
 
 add_action('admin_menu', function () {
     add_menu_page(
-        'Lavka Reports',
-        'Lavka Reports',
-        'view_lavka_reports',        // доступ только с этим правом
+        __('Lavka Reports', 'lavka-sync'),
+        __('Lavka Reports', 'lavka-sync'),
+        'view_lavka_reports',
         'lavka-reports',
         'lavka_reports_render_page',
         'dashicons-chart-line',
@@ -569,23 +693,44 @@ add_action('admin_enqueue_scripts', function ($hook) {
 
 // Рендер страницы
 function lavka_reports_render_page() {
-    if (!current_user_can('view_lavka_reports')) wp_die('Недостаточно прав');
+    if (!current_user_can('view_lavka_reports')) {
+        wp_die( esc_html__('You do not have sufficient permissions to access this page.', 'lavka-sync') );
+    }
     ?>
     <div class="wrap">
-      <h1>Lavka Reports</h1>
+      <h1><?php echo esc_html__('Lavka Reports', 'lavka-sync'); ?></h1>
 
       <form id="filters" style="margin: 12px 0">
-        <label>Поставщик: <input type="text" name="supplier" value="KREUL"></label>
-        <label style="margin-left:10px;">Склад: <input type="number" name="stockId" value="7"></label>
-        <button class="button">Обновить</button>
+        <label>
+          <?php echo esc_html__('Supplier', 'lavka-sync'); ?>:
+          <input type="text" name="supplier" value="KREUL">
+        </label>
+        <label style="margin-left:10px;">
+          <?php echo esc_html__('Warehouse', 'lavka-sync'); ?>:
+          <input type="number" name="stockId" value="7">
+        </label>
+        <button class="button" type="submit">
+          <?php echo esc_html__('Refresh', 'lavka-sync'); ?>
+        </button>
       </form>
 
       <canvas id="salesChart" height="100"></canvas>
 
-      <h2 style="margin-top:16px;">Данные</h2>
+      <h2 style="margin-top:16px;"><?php echo esc_html__('Data', 'lavka-sync'); ?></h2>
       <table class="widefat fixed striped" id="reportTable">
-        <thead><tr><th>SKU</th><th>Название</th><th>Остаток</th><th>Цена</th></tr></thead>
-        <tbody><tr><td colspan="4">Загрузка...</td></tr></tbody>
+        <thead>
+          <tr>
+            <th><?php echo esc_html__('SKU', 'lavka-sync'); ?></th>
+            <th><?php echo esc_html__('Title', 'lavka-sync'); ?></th>
+            <th><?php echo esc_html__('Stock', 'lavka-sync'); ?></th>
+            <th><?php echo esc_html__('Price', 'lavka-sync'); ?></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="4"><?php echo esc_html__('Loading…', 'lavka-sync'); ?></td>
+          </tr>
+        </tbody>
       </table>
     </div>
     <?php
@@ -624,21 +769,6 @@ add_action('wp_ajax_lavka_reports_data', function () {
         wp_send_json_success($body);
     }
     wp_send_json_error(['error'=>'Java status '.$code, 'body'=>$body]);
-});
-
-register_activation_hook(__FILE__, function () {
-    // создать роль на базе shop_manager (если нужна отдельная)
-    $base = get_role('shop_manager');
-    if ($base && !get_role('lavka_manager')) {
-        add_role('lavka_manager', 'Lavka Manager', $base->capabilities);
-    }
-    // кастомные capability
-    $caps = ['manage_lavka_sync', 'view_lavka_reports'];
-    foreach (['shop_manager','lavka_manager','administrator'] as $role) {
-        if ($r = get_role($role)) {
-            foreach ($caps as $c) { $r->add_cap($c); }
-        }
-    }
 });
 
 register_activation_hook(__FILE__, function () {
@@ -758,24 +888,6 @@ add_action('wp_ajax_lavka_pull_java_all_page', function () {
         'sample'    => $sample,
     ]);
 });
-function lavka_sync_log(array $row) {
-    global $wpdb;
-    $table = $wpdb->prefix . 'lavka_sync_logs';
-    $wpdb->insert($table, [
-        'ts'            => current_time('mysql'),
-        'action'        => $row['action'] ?? '',
-        'supplier'      => $row['supplier'] ?? '',
-        'stock_id'      => (int)($row['stock_id'] ?? 0),
-        'since_hours'   => isset($row['since_hours']) ? (int)$row['since_hours'] : null,
-        'updated_count' => (int)($row['updated_count'] ?? 0),
-        'preview_count' => (int)($row['preview_count'] ?? 0),
-        'errors'        => !empty($row['errors']) ? wp_json_encode($row['errors'], JSON_UNESCAPED_UNICODE) : null,
-        'user_id'       => get_current_user_id() ?: null,
-    ], [
-        '%s','%s','%s','%d','%d','%d','%d','%s','%d'
-    ]);
-    return $wpdb->insert_id ?: 0;
-}
 
 function lavka_log_write(array $data) {
     global $wpdb;
@@ -868,8 +980,8 @@ add_action('wp_ajax_lavka_sync_run', function () {
 add_action('admin_menu', function () {
     add_submenu_page(
         'lavka-sync',                // slug родительской страницы (вашей)
-        'Lavka Logs',                // Title
-        'Logs',                      // Label в меню
+        __('Lavka Logs', 'lavka-sync'),  // Title
+        __('Logs', 'lavka-sync'),    // Label в меню
         'manage_lavka_sync',         // capability
         'lavka-logs',                // slug страницы логов
         'lavka_logs_render_page'     // callback рендера
@@ -879,7 +991,8 @@ add_action('admin_menu', function () {
 
 // 2) Рендер страницы логов с пагинацией
 function lavka_logs_render_page() {
-    if (!current_user_can('manage_lavka_sync')) wp_die('Недостаточно прав');
+    if (!current_user_can('manage_lavka_sync')) 
+      wp_die( esc_html__('You do not have sufficient permissions to access this page.', 'lavka-sync') );
     global $wpdb;
     $t = $wpdb->prefix . 'lavka_sync_logs';
 
@@ -899,19 +1012,30 @@ function lavka_logs_render_page() {
     );
     ?>
     <div class="wrap">
-      <h1>Lavka Logs</h1>
+      <h1><?php echo esc_html__('Lavka Logs', 'lavka-sync'); ?></h1>
 
-      <p>
-        <a class="button" href="<?php echo esc_url($csv_url); ?>">Экспорт CSV</a>
-      </p>
+        <p>
+          <a class="button" href="<?php echo esc_url($csv_url); ?>">
+            <?php echo esc_html__('Export CSV', 'lavka-sync'); ?>
+          </a>
+        </p>
 
       <table class="widefat fixed striped">
         <thead>
-          <tr>
-            <th>ID</th><th>Время (UTC)</th><th>Action</th><th>Supplier</th><th>Stock</th>
-            <th>Dry</th><th>Changed, ч</th><th>Updated</th><th>Not found</th>
-            <th>ms</th><th>Status</th><th>Message</th>
-          </tr>
+            <tr>
+              <th><?php echo esc_html__('ID', 'lavka-sync'); ?></th>
+              <th><?php echo esc_html__('Time (UTC)', 'lavka-sync'); ?></th>
+              <th><?php echo esc_html__('Action', 'lavka-sync'); ?></th>
+              <th><?php echo esc_html__('Supplier', 'lavka-sync'); ?></th>
+              <th><?php echo esc_html__('Stock', 'lavka-sync'); ?></th>
+              <th><?php echo esc_html__('Dry', 'lavka-sync'); ?></th>
+              <th><?php echo esc_html__('Changed, h', 'lavka-sync'); ?></th>
+              <th><?php echo esc_html__('Updated', 'lavka-sync'); ?></th>
+              <th><?php echo esc_html__('Not found', 'lavka-sync'); ?></th>
+              <th><?php echo esc_html__('ms', 'lavka-sync'); ?></th>
+              <th><?php echo esc_html__('Status', 'lavka-sync'); ?></th>
+              <th><?php echo esc_html__('Message', 'lavka-sync'); ?></th>
+            </tr>
         </thead>
         <tbody>
         <?php if ($rows): foreach ($rows as $r): ?>
@@ -921,7 +1045,7 @@ function lavka_logs_render_page() {
             <td><?php echo esc_html($r['action']); ?></td>
             <td><?php echo esc_html($r['supplier']); ?></td>
             <td><?php echo (int)$r['stock_id']; ?></td>
-            <td><?php echo $r['dry'] ? 'yes' : 'no'; ?></td>
+            <td><?php echo $r['dry'] ? esc_html__('yes', 'lavka-sync') : esc_html__('no', 'lavka-sync'); ?></td>
             <td><?php echo $r['changed_since_hours'] !== null ? (int)$r['changed_since_hours'] : ''; ?></td>
             <td><?php echo (int)$r['updated']; ?></td>
             <td><?php echo (int)$r['not_found']; ?></td>
@@ -930,7 +1054,7 @@ function lavka_logs_render_page() {
             <td><?php echo esc_html($r['message']); ?></td>
           </tr>
         <?php endforeach; else: ?>
-          <tr><td colspan="12">Логов пока нет.</td></tr>
+          <tr><td colspan="12"><?php echo esc_html__('No logs yet.', 'lavka-sync'); ?></td></tr>
         <?php endif; ?>
         </tbody>
       </table>
@@ -954,7 +1078,8 @@ function lavka_logs_render_page() {
 }
 // 3) Экспорт CSV (admin-post)
 add_action('admin_post_lavka_logs_csv', function () {
-    if (!current_user_can('manage_lavka_sync')) wp_die('Недостаточно прав');
+    if (!current_user_can('manage_lavka_sync')) 
+        wp_die( esc_html__('You do not have sufficient permissions to access this page.', 'lavka-sync') );
     check_admin_referer('lavka_logs_csv');
 
     global $wpdb;

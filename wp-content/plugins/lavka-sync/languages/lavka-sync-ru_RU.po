@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Lavka Sync 0.2.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lavka-sync\n"
-"POT-Creation-Date: 2025-09-28T07:25:19+00:00\n"
+"POT-Creation-Date: 2025-09-28T08:58:12+00:00\n"
 "PO-Revision-Date: 2025-09-28T07:10:54+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -18,7 +18,7 @@ msgstr ""
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 #. Plugin Name of the plugin
-#: lavka-sync.php
+#: lavka-sync.php inc/admin-ui.php:15 inc/admin-ui.php:16 inc/admin-ui.php:307
 msgid "Lavka Sync"
 msgstr "Lavka Sync"
 
@@ -31,6 +31,297 @@ msgstr ""
 "Предоставляет кнопки и настройки для синхронизации с Java-сервисом и "
 "открывает REST API."
 
+#: inc/admin-ui.php:26 inc/admin-ui.php:40
+msgid "Lavka Mapping"
+msgstr "Сопоставление Lavka"
+
+#: inc/admin-ui.php:27
+msgid "Mapping"
+msgstr "Сопоставление"
+
+#: inc/admin-ui.php:41
+msgid ""
+"Match Woo locations (taxonomy <code>location</code>) with external MS "
+"warehouses. One Woo location may aggregate several MS warehouses."
+msgstr "Сопоставьте локации Woo (таксономия <code>location</code>) со внешними складами MS. Одна локация Woo может объединять несколько складов MS."
+
+#: inc/admin-ui.php:45 inc/admin-ui.php:731
+msgid "Loading…"
+msgstr "Загрузка…"
+
+#: inc/admin-ui.php:46
+msgid "Saving…"
+msgstr "Сохранение…"
+
+#: inc/admin-ui.php:47
+msgid "OK: saved"
+msgstr "ОК: сохранено"
+
+#: inc/admin-ui.php:48
+msgid "Save error"
+msgstr "Ошибка сохранения"
+
+#: inc/admin-ui.php:49 inc/admin-ui.php:69 inc/admin-ui.php:80
+#: inc/admin-ui.php:391 inc/admin-ui.php:395
+msgid "Network error"
+msgstr "Сетевая ошибка"
+
+#: inc/admin-ui.php:50
+msgid "Failed to load data."
+msgstr "Не удалось загрузить данные."
+
+#: inc/admin-ui.php:53 inc/warehouse-map.php:117
+msgid "Woo location"
+msgstr "Склад Woo"
+
+#: inc/admin-ui.php:54
+msgid "MS warehouses (multi-select)"
+msgstr "Склады MS (множественный выбор)"
+
+#: inc/admin-ui.php:55
+msgid "Save mapping"
+msgstr "Сохранить сопоставления"
+
+#: inc/admin-ui.php:58
+#, php-format
+msgid "OK: written %s"
+msgstr "ОК: записано %s"
+
+#: inc/admin-ui.php:60 inc/admin-ui.php:381 inc/admin-ui.php:723
+msgid "SKU"
+msgstr "Артикул"
+
+#: inc/admin-ui.php:61 inc/admin-ui.php:382
+msgid "Total"
+msgstr "Всего"
+
+#: inc/admin-ui.php:62 inc/admin-ui.php:383
+msgid "By warehouses"
+msgstr "По складам"
+
+#: inc/admin-ui.php:63 inc/admin-ui.php:384
+msgid "Found"
+msgstr "Найдено"
+
+#: inc/admin-ui.php:64 inc/admin-ui.php:385
+msgid "No data"
+msgstr "Нет данных"
+
+#: inc/admin-ui.php:66 inc/admin-ui.php:387
+msgid "Enter one or more SKUs"
+msgstr "Введите один или несколько артикулов"
+
+#: inc/admin-ui.php:67 inc/admin-ui.php:388
+msgid "Running…"
+msgstr "Выполняется…"
+
+#: inc/admin-ui.php:68 inc/admin-ui.php:79 inc/admin-ui.php:390
+#: inc/admin-ui.php:394
+msgid "Error:"
+msgstr "Ошибка:"
+
+#: inc/admin-ui.php:70 inc/admin-ui.php:398
+msgid "Page"
+msgstr "Страница"
+
+#: inc/admin-ui.php:71 inc/admin-ui.php:399
+msgid "of"
+msgstr "из"
+
+#: inc/admin-ui.php:72 inc/admin-ui.php:400
+msgid "Done"
+msgstr "Готово"
+
+#: inc/admin-ui.php:73 inc/admin-ui.php:401 inc/admin-ui.php:1033
+msgid "Updated"
+msgstr "Обновлено"
+
+#: inc/admin-ui.php:74 inc/admin-ui.php:402 inc/admin-ui.php:1034
+msgid "Not found"
+msgstr "Не найдено"
+
+#: inc/admin-ui.php:76 inc/admin-ui.php:389
+#, php-format
+msgid "OK: processed %1$s, not found %2$s"
+msgstr "ОК: обработано %1$s, не найдено %2$s"
+
+#: inc/admin-ui.php:78 inc/admin-ui.php:393
+msgid "Working…"
+msgstr "Выполнение…"
+
+#: inc/admin-ui.php:81 inc/admin-ui.php:396
+msgid "OK"
+msgstr "ОК"
+
+#: inc/admin-ui.php:85 inc/admin-ui.php:697 inc/admin-ui.php:995
+#: inc/admin-ui.php:1082 inc/warehouse-map.php:71
+msgid "You do not have sufficient permissions to access this page."
+msgstr "У вас недостаточно прав для доступа к этой странице."
+
+#: inc/admin-ui.php:313
+msgid "Java Base URL"
+msgstr "Базовый URL Java"
+
+#: inc/admin-ui.php:317
+msgid "API Token (for Java)"
+msgstr "API-токен (для Java)"
+
+#: inc/admin-ui.php:321 inc/admin-ui.php:705 inc/admin-ui.php:1029
+msgid "Supplier"
+msgstr "Поставщик"
+
+#: inc/admin-ui.php:325
+msgid "Stock ID"
+msgstr "ID склада"
+
+#: inc/admin-ui.php:329
+msgid "Auto sync (WP-Cron)"
+msgstr "Автосинхронизация (WP-Cron)"
+
+#: inc/admin-ui.php:332
+msgid "Disabled"
+msgstr "Отключено"
+
+#: inc/admin-ui.php:333
+msgid "Hourly"
+msgstr "Ежечасно"
+
+#: inc/admin-ui.php:334
+msgid "Twice daily"
+msgstr "Два раза в день"
+
+#: inc/admin-ui.php:335
+msgid "Daily"
+msgstr "Ежедневно"
+
+#: inc/admin-ui.php:340
+msgid "Save settings"
+msgstr "Сохранить настройки"
+
+#: inc/admin-ui.php:345
+msgid "Manual run"
+msgstr "Ручной запуск"
+
+#: inc/admin-ui.php:346 inc/admin-ui.php:357
+msgid "Pull from Java (mapped)"
+msgstr "Забрать из Java (по мэппингу)"
+
+#: inc/admin-ui.php:350
+msgid "SKUs"
+msgstr "Артикулы"
+
+#: inc/admin-ui.php:351
+msgid "comma or newline separated"
+msgstr "через запятую или перенос строки"
+
+#: inc/admin-ui.php:359
+msgid "dry-run"
+msgstr "пробный запуск"
+
+#: inc/admin-ui.php:365
+msgid "Batch size"
+msgstr "Размер пакета"
+
+#: inc/admin-ui.php:365
+msgid "items"
+msgstr "шт."
+
+#: inc/admin-ui.php:368
+msgid "Pull ALL (paged)"
+msgstr "Забрать ВСЕ (постранично)"
+
+#: inc/admin-ui.php:373
+msgid "Dry-run"
+msgstr "Пробный запуск"
+
+#: inc/admin-ui.php:374
+msgid "Synchronize"
+msgstr "Синхронизировать"
+
+#: inc/admin-ui.php:668 inc/admin-ui.php:669 inc/admin-ui.php:701
+msgid "Lavka Reports"
+msgstr "Отчёты Lavka"
+
+#: inc/admin-ui.php:709
+msgid "Warehouse"
+msgstr "Склад"
+
+#: inc/admin-ui.php:713
+msgid "Refresh"
+msgstr "Обновить"
+
+#: inc/admin-ui.php:719
+msgid "Data"
+msgstr "Данные"
+
+#: inc/admin-ui.php:724
+msgid "Title"
+msgstr "Название"
+
+#: inc/admin-ui.php:725 inc/admin-ui.php:1030
+msgid "Stock"
+msgstr "Остаток"
+
+#: inc/admin-ui.php:726
+msgid "Price"
+msgstr "Цена"
+
+#: inc/admin-ui.php:983 inc/admin-ui.php:1015
+msgid "Lavka Logs"
+msgstr "Журнал Lavka"
+
+#: inc/admin-ui.php:984
+msgid "Logs"
+msgstr "Логи"
+
+#: inc/admin-ui.php:1019
+msgid "Export CSV"
+msgstr "Экспорт CSV"
+
+#: inc/admin-ui.php:1026 inc/warehouse-map.php:116
+msgid "ID"
+msgstr "ID"
+
+#: inc/admin-ui.php:1027
+msgid "Time (UTC)"
+msgstr "Время (UTC)"
+
+#: inc/admin-ui.php:1028
+msgid "Action"
+msgstr "Действие"
+
+#: inc/admin-ui.php:1031
+msgid "Dry"
+msgstr "Пробный"
+
+#: inc/admin-ui.php:1032
+msgid "Changed, h"
+msgstr "Изменения, ч"
+
+#: inc/admin-ui.php:1035
+msgid "ms"
+msgstr "мс"
+
+#: inc/admin-ui.php:1036
+msgid "Status"
+msgstr "Статус"
+
+#: inc/admin-ui.php:1037
+msgid "Message"
+msgstr "Сообщение"
+
+#: inc/admin-ui.php:1048
+msgid "yes"
+msgstr "да"
+
+#: inc/admin-ui.php:1048
+msgid "no"
+msgstr "нет"
+
+#: inc/admin-ui.php:1057
+msgid "No logs yet."
+msgstr "Логов пока нет."
+
 #: inc/warehouse-map.php:28 inc/warehouse-map.php:103
 msgid "Warehouses mapping"
 msgstr "Соответствие складов"
@@ -38,10 +329,6 @@ msgstr "Соответствие складов"
 #: inc/warehouse-map.php:29
 msgid "Warehouses"
 msgstr "Склады"
-
-#: inc/warehouse-map.php:71
-msgid "You do not have sufficient permissions to access this page."
-msgstr "У вас недостаточно прав для доступа к этой странице."
 
 #: inc/warehouse-map.php:89
 msgid "Saved."
@@ -54,14 +341,6 @@ msgid ""
 msgstr ""
 "Соответствие: <strong>Woo → MSSQL</strong>. Один склад Woo агрегирует "
 "остатки из выбранных MSSQL-складов."
-
-#: inc/warehouse-map.php:116
-msgid "ID"
-msgstr "ID"
-
-#: inc/warehouse-map.php:117
-msgid "Woo location"
-msgstr "Склад Woo"
 
 #: inc/warehouse-map.php:118 inc/warehouse-map.php:139
 msgid "Linked MSSQL warehouses (codes)"
