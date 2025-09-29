@@ -294,3 +294,106 @@ add_action('rest_api_init', function(){
         },
     ]);
 });
+
+/**
+ * Один запрос страницы движения.
+ */
+function lavka_java_movement_page(string $fromIso, int $page, int $pageSize): array {
+    $opts = lavka_sync_get_options();
+    $base = rtrim($opts['java_base_url'] ?? '', '/');
+    if (!$base) return ['ok'=>false, 'error'=>'no_java_base'];
+
+    $url = $base . '/admin/stock/stock/movements';
+    $locations = lavka_get_locations_mapping_for_java();
+
+    $body = [
+        'from'      => $fromIso,
+        'locations' => $locations,
+        'page'      => max(0, $page),
+        'pageSize'  => max(1, min(LAVKA_MOV_MAX_PAGESIZE, $pageSize ?: LAVKA_MOV_DEF_PAGESIZE)),
+    ];
+
+    $resp = wp_remote_post($url, [
+        'timeout' => 30,
+        'headers' => [
+            'Content-Type' => 'application/json',
+            'Accept'       => 'application/json',
+            'X-Auth-Token' => $opts['api_token'] ?? '',
+        ],
+        'body' => wp_json_encode($body),
+    ]);
+
+    if (is_wp_error($resp)) return ['ok'=>false, 'error'=>$resp->get_error_message()];
+    $code = wp_remote_retrieve_response_code($resp);
+    $json = json_decode(wp_remote_retrieve_body($resp), true);
+    if ($code < 200 || $code >= 300) return ['ok'=>false, 'error'=>'java_'.$code, 'body'=>$json];
+
+    return ['ok'=>true, 'data'=>$json];
+}
+
+/**
+ * Полный цикл: бежим по страницам movement, собираем изменённые SKU
+ * и применяем апдейт через lavka_sync_java_query_and_apply().
+ */
+function lavka_sync_java_movement_apply_loop(array $args = []): array {
+    $dry      = !empty($args['dry']);
+    $pageSize = (int)($args['pageSize'] ?? LAVKA_MOV_DEF_PAGESIZE);
+    $fromIso  = (string)($args['from'] ?? '');
+
+    $auto   = lavka_get_auto_cfg();
+    $lastTo = get_option(LAVKA_LAST_TO_OPTION, '');
+    if (!$fromIso) $fromIso = lavka_calc_movement_from($auto, $lastTo);
+
+    $updated = 0; $notFound = 0; $pages = 0;
+    $serverFrom = null; $serverTo = null;
+
+    $emptyStreak = 0;          // ← счётчик пустых страниц
+    $EMPTY_LIMIT = 3;          // ← можно 2 или 3 по вкусу
+    $earlyStop   = false;
+
+    for ($p = 0; $p < 100000; $p++) {
+        $call = lavka_java_movement_page($fromIso, $p, $pageSize);
+        if (empty($call['ok'])) {
+            return ['ok'=>false, 'error'=>$call['error'] ?? 'movement_error', 'page'=>$p];
+        }
+        $d = $call['data'] ?: [];
+        $serverFrom = $d['serverFrom'] ?? $serverFrom;
+        $serverTo   = $d['serverTo']   ?? $serverTo;
+
+        $skus = array_values(array_filter(array_map(
+            fn($x)=> (string)($x['sku'] ?? ''), (array)($d['items'] ?? [])
+        )));
+
+        if ($skus) {
+            $emptyStreak = 0; // сбросили
+            $res = lavka_sync_java_query_and_apply($skus, ['dry'=>$dry]);
+            if (!empty($res['ok'])) {
+                $updated  += (int)($res['processed'] ?? 0);
+                $notFound += (int)($res['not_found'] ?? 0);
+            }
+        } else {
+            $emptyStreak++;
+            if ($emptyStreak >= $EMPTY_LIMIT) {
+                $earlyStop = true;
+                $pages++; // текущую страницу тоже засчитаем
+                break;
+            }
+        }
+
+        $pages++;
+        if (!empty($d['last'])) break;
+    }
+
+    if ($serverTo) update_option(LAVKA_LAST_TO_OPTION, (string)$serverTo, false);
+
+    return [
+        'ok'         => true,
+        'updated'    => $updated,
+        'not_found'  => $notFound,
+        'pages'      => $pages,
+        'serverFrom' => $serverFrom,
+        'serverTo'   => $serverTo,
+        'dry'        => $dry,
+        'earlyStop'  => $earlyStop,   // ← чтобы видеть в ответе/логах
+    ];
+}

@@ -64,19 +64,21 @@ register_activation_hook(dirname(__DIR__) . '/lavka-sync.php', function () {
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
     dbDelta("
         CREATE TABLE {$table} (
-          id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-          ts DATETIME NOT NULL,
-          action VARCHAR(50) NOT NULL,
-          supplier VARCHAR(100) NOT NULL,
-          stock_id INT NOT NULL,
-          since_hours INT NULL,
-          updated_count INT DEFAULT 0,
-          preview_count INT DEFAULT 0,
-          errors LONGTEXT NULL,
-          user_id BIGINT UNSIGNED NULL,
-          PRIMARY KEY (id),
-          KEY ts (ts),
-          KEY action (action)
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        ts DATETIME NOT NULL,
+        action VARCHAR(50) NOT NULL,
+        supplier VARCHAR(100) NOT NULL,
+        stock_id INT NOT NULL,
+        dry TINYINT(1) NOT NULL DEFAULT 0,
+        changed_since_hours INT NULL,
+        updated INT NOT NULL DEFAULT 0,
+        not_found INT NOT NULL DEFAULT 0,
+        duration_ms INT NOT NULL DEFAULT 0,
+        status VARCHAR(20) NOT NULL DEFAULT 'OK',
+        message TEXT NULL,
+        PRIMARY KEY (id),
+        KEY ts (ts),
+        KEY action (action)
         ) {$charset};
     ");
 });

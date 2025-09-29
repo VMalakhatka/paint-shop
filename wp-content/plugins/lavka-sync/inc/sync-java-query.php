@@ -19,20 +19,22 @@ function lavka_sync_java_query_and_apply(array $skus, array $opts = []): array {
         return ['ok'=>false, 'error'=>'Empty SKUs list'];
     }
 
-// 2) Берём мэппинг локаций из term meta (через наш сборщик)
-$mapItems = lavka_map_collect(); // [{term_id, codes:[...]}]
-$locations = [];
-foreach ($mapItems as $row) {
-    $tid = (int)($row['term_id'] ?? 0);
-    // Java ждёт числовые коды → приводим к int и откидываем нули
-    $codes = array_values(array_filter(array_map('intval', (array)($row['codes'] ?? [])), fn($v)=>$v>0));
-    if ($tid && $codes) {
-        $locations[] = ['id'=>$tid, 'codes'=>$codes];
+// берём мэппинг и ГОТОВИМ locations
+    $mapItems  = lavka_map_collect();
+    $locations = [];
+    foreach ($mapItems as $row) {
+        $tid   = (int)($row['term_id'] ?? 0);
+        $codes = array_values(array_filter(
+            array_map('strval', (array)($row['codes'] ?? [])),
+            fn($s)=> $s !== ''
+        ));
+        if ($tid && $codes) {
+            $locations[] = ['id' => $tid, 'codes' => $codes]; // ВАЖНО
+        }
     }
-}
-if (!$locations) {
-    return ['ok'=>false, 'error'=>'No locations mapping available'];
-}
+    if (!$locations) {
+        return ['ok'=>false, 'error'=>'No locations mapping available'];
+    }
 
     // 3) Флаги записи
     $flags = [
