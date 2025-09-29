@@ -17,6 +17,7 @@ if (!function_exists('lavka_sync_get_options')) {
             'schedule'      => 'off', // off|hourly|twicedaily|daily
             'java_wh_path'    => '/warehouses', // <— НОВОЕ: эндпоинт Java со справочником складов
             'java_stock_query_path' => '/admin/stock/stock/query',
+            'java_stock_query_path'    => '/admin/stock/stock/query',
 
             // Флаги поведения при записи остатков
             'set_manage'          => true,

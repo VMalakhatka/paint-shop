@@ -303,7 +303,9 @@ function lavka_java_movement_page(string $fromIso, int $page, int $pageSize): ar
     $base = rtrim($opts['java_base_url'] ?? '', '/');
     if (!$base) return ['ok'=>false, 'error'=>'no_java_base'];
 
-    $url = $base . '/admin/stock/stock/movements';
+    // inc/rest-api.php — внутри lavka_java_movement_page()
+    $path = '/' . ltrim($opts['java_stock_movement_path'] ?? '/admin/stock/stock/movements', '/');
+    $url  = $base . $path;
     $locations = lavka_get_locations_mapping_for_java();
 
     $body = [
@@ -384,8 +386,11 @@ function lavka_sync_java_movement_apply_loop(array $args = []): array {
         if (!empty($d['last'])) break;
     }
 
-    if ($serverTo) update_option(LAVKA_LAST_TO_OPTION, (string)$serverTo, false);
-
+    // сохраняем last_to только в бою (dry=false) и в ISO8601
+    if ($serverTo && !$dry) {
+        $save = is_numeric($serverTo) ? gmdate('c', (int)$serverTo) : (string)$serverTo;
+        update_option(LAVKA_LAST_TO_OPTION, $save, false);
+    }
     return [
         'ok'         => true,
         'updated'    => $updated,
