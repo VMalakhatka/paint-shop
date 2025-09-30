@@ -837,7 +837,7 @@ function lavka_sync_render_page() {
 // Ручной запуск инкрементальной синхронизации (movement)
 add_action('wp_ajax_lavka_pull_movement', function () {
     if (!current_user_can('manage_lavka_sync')) wp_send_json_error(['error'=>'forbidden'], 403);
-    check_ajax_referer('lavka_pull_movement'); // можно завести отдельный, но используем имеющийся
+    check_ajax_referer('lavka_pull_movement');
 
     $pageSize = max(10, min(LAVKA_MOV_MAX_PAGESIZE, (int)($_POST['pageSize'] ?? LAVKA_MOV_DEF_PAGESIZE)));
     $dry      = filter_var($_POST['dry'] ?? false, FILTER_VALIDATE_BOOLEAN);
@@ -845,7 +845,10 @@ add_action('wp_ajax_lavka_pull_movement', function () {
 
     $t0  = microtime(true);
     $res = lavka_sync_java_movement_apply_loop(['pageSize'=>$pageSize, 'dry'=>$dry, 'from'=>$fromIso]);
-    if (empty($res['ok'])) wp_send_json_error(['error'=>$res['error'] ?? 'unknown']);
+    if (empty($res['ok'])) {
+        error_log('[lavka] movement ajax fail: '.print_r($res,true));
+        wp_send_json_error(['error'=>$res['error'] ?? 'movement_error']);
+    }
 
     lavka_log_write([
         'action'      => 'movement_pull',
@@ -856,7 +859,7 @@ add_action('wp_ajax_lavka_pull_movement', function () {
         'not_found'   => (int)$res['not_found'],
         'duration_ms' => (int)round((microtime(true)-$t0)*1000),
         'status'      => 'OK',
-        'message' => sprintf(
+        'message'     => sprintf(
             'Movement window [%s..%s], pages=%d%s',
             $res['serverFrom'] ?? '-', $res['serverTo'] ?? '-', (int)$res['pages'],
             !empty($res['earlyStop']) ? ', earlyStop=1' : ''
@@ -1065,7 +1068,7 @@ function lavka_get_skus_slice(int $offset, int $limit): array {
 
 add_action('wp_ajax_lavka_pull_java_all_page', function () {
     if (!current_user_can('manage_lavka_sync')) wp_send_json_error(['error'=>'forbidden'], 403);
-    check_ajax_referer('lavka_pull_movement');
+    check_ajax_referer('lavka_pull_java_all');
 
     $batch = max(LAVKA_BATCH_MIN, min(LAVKA_BATCH_MAX, (int)($_POST['batch'] ?? 200)));
     $page  = max(0, (int)($_POST['page'] ?? 0));
@@ -1404,6 +1407,10 @@ function lavka_log_write(array $data) {
     global $wpdb;
     $t = $wpdb->prefix . 'lavka_sync_logs';
 
+    // кто инициировал
+    $uid = array_key_exists('user_id', $data) ? (int)$data['user_id'] : (int)get_current_user_id();
+    if ($uid <= 0) $uid = null; // для WP-Cron / системных задач
+
     $wpdb->insert($t, [
         'ts'                  => gmdate('Y-m-d H:i:s'),
         'action'              => $data['action'] ?? 'sync_stock',
@@ -1416,6 +1423,7 @@ function lavka_log_write(array $data) {
         'duration_ms'         => (int)($data['duration_ms'] ?? 0),
         'status'              => $data['status'] ?? 'OK',
         'message'             => $data['message'] ?? null,
+        'user_id'             => $uid, // ← теперь пишем
     ]);
 
     if ($wpdb->last_error && defined('WP_DEBUG') && WP_DEBUG) {

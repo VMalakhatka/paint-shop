@@ -17,7 +17,7 @@ if (!function_exists('lavka_sync_get_options')) {
             'schedule'      => 'off', // off|hourly|twicedaily|daily
             'java_wh_path'    => '/warehouses', // <— НОВОЕ: эндпоинт Java со справочником складов
             'java_stock_query_path' => '/admin/stock/stock/query',
-            'java_stock_query_path'    => '/admin/stock/stock/query',
+            'java_stock_movement_path'    => '/admin/stock/stock/movements',
 
             // Флаги поведения при записи остатков
             'set_manage'          => true,
@@ -28,6 +28,43 @@ if (!function_exists('lavka_sync_get_options')) {
         ];
         return wp_parse_args(get_option(LAVKA_SYNC_OPTION, []), $defaults);
     }
+}
+
+register_activation_hook(__FILE__, 'lavka_sync_install');
+add_action('admin_init', 'lavka_sync_maybe_upgrade');
+
+function lavka_sync_install(){ lavka_sync_run_dbdelta(); update_option('lavka_sync_db_ver','1.1'); }
+function lavka_sync_maybe_upgrade(){
+  $v = get_option('lavka_sync_db_ver','1.0');
+  if (version_compare($v,'1.1','<')) {
+    lavka_sync_run_dbdelta();
+    update_option('lavka_sync_db_ver','1.1');
+  }
+}
+function lavka_sync_run_dbdelta(){
+  global $wpdb;
+  $t = $wpdb->prefix.'lavka_sync_logs';
+  $charset = $wpdb->get_charset_collate();
+  $sql = "CREATE TABLE $t (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    ts DATETIME NOT NULL,
+    action VARCHAR(64) NOT NULL,
+    supplier VARCHAR(191) NOT NULL DEFAULT '',
+    stock_id INT NOT NULL DEFAULT 0,
+    dry TINYINT(1) NOT NULL DEFAULT 0,
+    changed_since_hours INT NULL,
+    updated INT NOT NULL DEFAULT 0,
+    not_found INT NOT NULL DEFAULT 0,
+    duration_ms INT NOT NULL DEFAULT 0,
+    status VARCHAR(32) NOT NULL DEFAULT 'OK',
+    message TEXT NULL,
+    PRIMARY KEY (id),
+    KEY action (action),
+    KEY ts (ts),
+    KEY status (status)
+  ) $charset;";
+  require_once ABSPATH.'wp-admin/includes/upgrade.php';
+  dbDelta($sql);
 }
 
 /** Разрешаем Application Passwords в локалке/HTTP (если нужно) */

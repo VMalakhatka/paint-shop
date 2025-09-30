@@ -303,19 +303,18 @@ function lavka_java_movement_page(string $fromIso, int $page, int $pageSize): ar
     $base = rtrim($opts['java_base_url'] ?? '', '/');
     if (!$base) return ['ok'=>false, 'error'=>'no_java_base'];
 
-    // inc/rest-api.php — внутри lavka_java_movement_page()
+    // ДЕФОЛТ — SINGULAR
     $path = '/' . ltrim($opts['java_stock_movement_path'] ?? '/admin/stock/stock/movements', '/');
     $url  = $base . $path;
-    $locations = lavka_get_locations_mapping_for_java();
 
+    $locations = lavka_get_locations_mapping_for_java();
     $body = [
         'from'      => $fromIso,
         'locations' => $locations,
         'page'      => max(0, $page),
         'pageSize'  => max(1, min(LAVKA_MOV_MAX_PAGESIZE, $pageSize ?: LAVKA_MOV_DEF_PAGESIZE)),
     ];
-
-    $resp = wp_remote_post($url, [
+    $args = [
         'timeout' => 30,
         'headers' => [
             'Content-Type' => 'application/json',
@@ -323,12 +322,36 @@ function lavka_java_movement_page(string $fromIso, int $page, int $pageSize): ar
             'X-Auth-Token' => $opts['api_token'] ?? '',
         ],
         'body' => wp_json_encode($body),
-    ]);
+    ];
 
-    if (is_wp_error($resp)) return ['ok'=>false, 'error'=>$resp->get_error_message()];
+    // ЛОГ: куда стучимся
+    error_log('[lavka] movement URL try: ' . $url);
+
+    $resp = wp_remote_post($url, $args);
+
+    // Фолбэк: если 404 и в пути было /movements — попробуем /movement
+    if (!is_wp_error($resp)) {
+        $code = wp_remote_retrieve_response_code($resp);
+        if ($code === 404 && preg_match('#/movements/?$#', $path)) {
+            $alt = $base . preg_replace('#/movements/?$#', '/movement', $path);
+            error_log('[lavka] movement URL fallback: ' . $alt);
+            $resp = wp_remote_post($alt, $args);
+        }
+    }
+
+    if (is_wp_error($resp)) {
+        error_log('[lavka] movement error: ' . $resp->get_error_message());
+        return ['ok'=>false, 'error'=>$resp->get_error_message()];
+    }
+
     $code = wp_remote_retrieve_response_code($resp);
-    $json = json_decode(wp_remote_retrieve_body($resp), true);
-    if ($code < 200 || $code >= 300) return ['ok'=>false, 'error'=>'java_'.$code, 'body'=>$json];
+    $bodyRaw = wp_remote_retrieve_body($resp);
+    $json = json_decode($bodyRaw, true);
+
+    if ($code < 200 || $code >= 300) {
+        error_log('[lavka] movement http='.$code.' body='.substr($bodyRaw,0,400));
+        return ['ok'=>false, 'error'=>'java_'.$code, 'body'=>$json];
+    }
 
     return ['ok'=>true, 'data'=>$json];
 }
