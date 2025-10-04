@@ -365,6 +365,11 @@ function lavka_sync_java_movement_apply_loop(array $args = []): array {
     $pageSize = (int)($args['pageSize'] ?? LAVKA_MOV_DEF_PAGESIZE);
     $fromIso  = (string)($args['from'] ?? '');
 
+    $updatedRows = [];    // [["sku","total","lines_json"], ...]
+    $notFoundRows = [];   // [["sku"], ...]
+    $TRUNCATE_LIMIT = 10000;
+    $truncated = false;
+
     $auto   = lavka_get_auto_cfg();
     $lastTo = get_option(LAVKA_LAST_TO_OPTION, '');
     if (!$fromIso) $fromIso = lavka_calc_movement_from($auto, $lastTo);

@@ -31,7 +31,8 @@
     });
 
     /** загрузка модулей */
-    foreach (['core.php', 'admin-ui.php', 'rest-api.php', 'warehouse-map.php', 'sync-java-query.php', 'sync.php'] as $f) {
+    foreach (['core.php', 'admin-ui.php', 'lavka-logs-csv.php' ,'rest-api.php'
+        , 'warehouse-map.php', 'sync-java-query.php', 'sync.php'] as $f) {
         $p = LAVKA_SYNC_INC . '/' . $f;
         if (file_exists($p)) {
             require_once $p;

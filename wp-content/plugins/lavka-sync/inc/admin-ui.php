@@ -850,6 +850,39 @@ add_action('wp_ajax_lavka_pull_movement', function () {
         wp_send_json_error(['error'=>$res['error'] ?? 'movement_error']);
     }
 
+        $log_id = lavka_log_write([
+        'action'      => 'movement_pull',
+        'supplier'    => '',
+        'stock_id'    => 0,
+        'dry'         => $dry ? 1 : 0,
+        'updated'     => (int)$res['updated'],
+        'not_found'   => (int)$res['not_found'],
+        'duration_ms' => (int)round((microtime(true)-$t0)*1000),
+        'status'      => 'OK',
+        'message'     => sprintf(
+            'Movement window [%s..%s], pages=%d%s',
+            $res['serverFrom'] ?? '-', $res['serverTo'] ?? '-', (int)$res['pages'],
+            !empty($res['earlyStop']) ? ', earlyStop=1' : ''
+        ),
+    ]);
+
+    if ($log_id && !empty($res['details'])) {
+        $det = $res['details'];
+
+        $csvUpdated = array_merge([['sku','total','lines_json']], $det['updated'] ?? []);
+        $csvNF      = array_merge([['sku']], $det['not_found'] ?? []);
+
+        $ts = gmdate('Ymd-His');
+        $f1 = lavka_save_csv("movement-$ts-$log_id-updated.csv",   $csvUpdated);
+        $f2 = lavka_save_csv("movement-$ts-$log_id-not-found.csv", $csvNF);
+
+        $parts = [];
+        if ($f1) $parts[] = 'updated_csv=' . $f1['url'];
+        if ($f2) $parts[] = 'not_found_csv=' . $f2['url'];
+        if (!empty($det['truncated'])) $parts[] = 'truncated=1 (limited to 10000 rows per list)';
+        if ($parts) lavka_log_append_message($log_id, '['.implode(' | ', $parts).']');
+    }
+
     lavka_log_write([
         'action'      => 'movement_pull',
         'supplier'    => '',
@@ -1407,10 +1440,6 @@ function lavka_log_write(array $data) {
     global $wpdb;
     $t = $wpdb->prefix . 'lavka_sync_logs';
 
-    // кто инициировал
-    $uid = array_key_exists('user_id', $data) ? (int)$data['user_id'] : (int)get_current_user_id();
-    if ($uid <= 0) $uid = null; // для WP-Cron / системных задач
-
     $wpdb->insert($t, [
         'ts'                  => gmdate('Y-m-d H:i:s'),
         'action'              => $data['action'] ?? 'sync_stock',
@@ -1423,12 +1452,14 @@ function lavka_log_write(array $data) {
         'duration_ms'         => (int)($data['duration_ms'] ?? 0),
         'status'              => $data['status'] ?? 'OK',
         'message'             => $data['message'] ?? null,
-        'user_id'             => $uid, // ← теперь пишем
+        'user_id'             => get_current_user_id() ?: null, // ← теперь пишем user_id
     ]);
 
     if ($wpdb->last_error && defined('WP_DEBUG') && WP_DEBUG) {
         error_log('[lavka] log insert failed: ' . $wpdb->last_error);
     }
+
+    return (int)$wpdb->insert_id; // ← важно: вернуть ID
 }
 
 // 1) Пункт меню "Logs" под вашим родительским "lavka-sync"
