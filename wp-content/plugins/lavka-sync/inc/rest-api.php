@@ -365,10 +365,11 @@ function lavka_sync_java_movement_apply_loop(array $args = []): array {
     $pageSize = (int)($args['pageSize'] ?? LAVKA_MOV_DEF_PAGESIZE);
     $fromIso  = (string)($args['from'] ?? '');
 
-    $updatedRows = [];    // [["sku","total","lines_json"], ...]
-    $notFoundRows = [];   // [["sku"], ...]
-    $TRUNCATE_LIMIT = 10000;
-    $truncated = false;
+    // Детали для логов (ограниченно)
+    $updatedRows   = [];   // [["sku","total","lines_json"], ...]
+    $notFoundRows  = [];   // [["sku"], ...]
+    $TRUNCATE_LIMIT = 300; // хватит для логов
+    $truncated     = false;
 
     $auto   = lavka_get_auto_cfg();
     $lastTo = get_option(LAVKA_LAST_TO_OPTION, '');
@@ -377,9 +378,7 @@ function lavka_sync_java_movement_apply_loop(array $args = []): array {
     $updated = 0; $notFound = 0; $pages = 0;
     $serverFrom = null; $serverTo = null;
 
-    $emptyStreak = 0;          // ← счётчик пустых страниц
-    $EMPTY_LIMIT = 3;          // ← можно 2 или 3 по вкусу
-    $earlyStop   = false;
+    $emptyStreak = 0; $EMPTY_LIMIT = 3; $earlyStop = false;
 
     for ($p = 0; $p < 100000; $p++) {
         $call = lavka_java_movement_page($fromIso, $p, $pageSize);
@@ -395,30 +394,45 @@ function lavka_sync_java_movement_apply_loop(array $args = []): array {
         )));
 
         if ($skus) {
-            $emptyStreak = 0; // сбросили
+            $emptyStreak = 0;
             $res = lavka_sync_java_query_and_apply($skus, ['dry'=>$dry]);
+
             if (!empty($res['ok'])) {
                 $updated  += (int)($res['processed'] ?? 0);
                 $notFound += (int)($res['not_found'] ?? 0);
+
+                // Сбор деталей
+                foreach (($res['results'] ?? []) as $row) {
+                    $sku = (string)($row['sku'] ?? '');
+                    if ($sku === '') continue;
+
+                    if (!empty($row['found'])) {
+                        if (count($updatedRows) < $TRUNCATE_LIMIT) {
+                            $total = $row['total'] ?? null;
+                            $lines = isset($row['lines']) ? wp_json_encode($row['lines']) : '';
+                            $updatedRows[] = [$sku, $total, $lines];
+                        } else { $truncated = true; }
+                    } else {
+                        if (count($notFoundRows) < $TRUNCATE_LIMIT) {
+                            $notFoundRows[] = [$sku];
+                        } else { $truncated = true; }
+                    }
+                }
             }
         } else {
             $emptyStreak++;
-            if ($emptyStreak >= $EMPTY_LIMIT) {
-                $earlyStop = true;
-                $pages++; // текущую страницу тоже засчитаем
-                break;
-            }
+            if ($emptyStreak >= $EMPTY_LIMIT) { $earlyStop = true; $pages++; break; }
         }
 
         $pages++;
         if (!empty($d['last'])) break;
     }
 
-    // сохраняем last_to только в бою (dry=false) и в ISO8601
     if ($serverTo && !$dry) {
         $save = is_numeric($serverTo) ? gmdate('c', (int)$serverTo) : (string)$serverTo;
         update_option(LAVKA_LAST_TO_OPTION, $save, false);
     }
+
     return [
         'ok'         => true,
         'updated'    => $updated,
@@ -427,6 +441,11 @@ function lavka_sync_java_movement_apply_loop(array $args = []): array {
         'serverFrom' => $serverFrom,
         'serverTo'   => $serverTo,
         'dry'        => $dry,
-        'earlyStop'  => $earlyStop,   // ← чтобы видеть в ответе/логах
+        'earlyStop'  => $earlyStop,
+        'details'    => [
+            'updated'   => $updatedRows,
+            'not_found' => $notFoundRows,
+            'truncated' => $truncated ? 1 : 0,
+        ],
     ];
 }

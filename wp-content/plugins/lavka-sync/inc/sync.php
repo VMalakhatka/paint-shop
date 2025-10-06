@@ -70,6 +70,12 @@
             'duration_ms' => 0, // можно обернуть в таймер, если нужно
             'status'      => 'OK',
             'message'     => 'pull from '.$url,
+               'message'     => sprintf('page %d/%d: %s', $page+1, max(1,$pages), (string)($res['error'] ?? 'unknown')),
+                'errors' => wp_json_encode([
+                    'updated'   => $updatedRows,
+                    'not_found' => $notFoundRows,
+                    'truncated' => (count($updatedRows) >= $TRUNCATE_LIMIT || count($notFoundRows) >= $TRUNCATE_LIMIT) ? 1 : 0,
+                ], JSON_UNESCAPED_UNICODE),
         ]);
 
         return [

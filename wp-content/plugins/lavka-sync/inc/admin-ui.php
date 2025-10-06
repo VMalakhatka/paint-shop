@@ -864,6 +864,7 @@ add_action('wp_ajax_lavka_pull_movement', function () {
             $res['serverFrom'] ?? '-', $res['serverTo'] ?? '-', (int)$res['pages'],
             !empty($res['earlyStop']) ? ', earlyStop=1' : ''
         ),
+        'errors'      => wp_json_encode($res['details'] ?? [], JSON_UNESCAPED_UNICODE),
     ]);
 
     if ($log_id && !empty($res['details'])) {
@@ -897,6 +898,8 @@ add_action('wp_ajax_lavka_pull_movement', function () {
             $res['serverFrom'] ?? '-', $res['serverTo'] ?? '-', (int)$res['pages'],
             !empty($res['earlyStop']) ? ', earlyStop=1' : ''
         ),
+        'errors'  => wp_json_encode($res['details'] ?? [], JSON_UNESCAPED_UNICODE),
+        'user_id' => get_current_user_id(),
     ]);
 
     wp_send_json_success($res);
@@ -937,6 +940,33 @@ add_action('wp_ajax_lavka_pull_java', function(){
     // ВАЖНО: дергаем именно lavka_sync_java_query_and_apply (POST /admin/stock/stock/query)
     $res = lavka_sync_java_query_and_apply($skus, ['dry'=>$dry]);
 
+    $updatedRows   = [];
+    $notFoundRows  = [];
+    $TRUNCATE_LIMIT = 300;
+    $truncated     = false;
+
+    $det = $res['results'] ?? [];
+    foreach ($det as $row) {
+        $sku = (string)($row['sku'] ?? '');
+        if ($sku === '') continue;
+
+        if (!empty($row['found'])) {
+            if (count($updatedRows) < $TRUNCATE_LIMIT) {
+                $total = $row['total'] ?? null;
+                $lines = isset($row['lines']) ? wp_json_encode($row['lines']) : '';
+                $updatedRows[] = [$sku, $total, $lines];
+            } else {
+                $truncated = true;
+            }
+        } else {
+            if (count($notFoundRows) < $TRUNCATE_LIMIT) {
+                $notFoundRows[] = [$sku];
+            } else {
+                $truncated = true;
+            }
+        }
+    }
+
         // === WRITE LOG (успех/ошибка) ===
     if (function_exists('lavka_log_write')) {
         lavka_log_write([
@@ -949,6 +979,11 @@ add_action('wp_ajax_lavka_pull_java', function(){
             'duration_ms' => (int)round((microtime(true)-$t0)*1000),
             'status'      => !empty($res['ok']) ? 'OK' : 'ERR',
             'message'     => sprintf('SKUs=%d', is_countable($skus)?count($skus):0),
+            'errors' => wp_json_encode([
+                'updated'   => $updatedRows,
+                'not_found' => $notFoundRows,
+                'truncated' => $truncated ? 1 : 0,
+            ], JSON_UNESCAPED_UNICODE),
         ]);
     }
     // === /WRITE LOG ===
@@ -1142,6 +1177,33 @@ add_action('wp_ajax_lavka_pull_java_all_page', function () {
 
     $res = lavka_sync_java_query_and_apply($skus, ['dry'=>$dry]);
 
+    $updatedRows   = [];
+    $notFoundRows  = [];
+    $TRUNCATE_LIMIT = 300;
+    $truncated     = false;
+
+    $det = $res['results'] ?? [];
+    foreach ($det as $row) {
+        $sku = (string)($row['sku'] ?? '');
+        if ($sku === '') continue;
+
+        if (!empty($row['found'])) {
+            if (count($updatedRows) < $TRUNCATE_LIMIT) {
+                $total = $row['total'] ?? null;
+                $lines = isset($row['lines']) ? wp_json_encode($row['lines']) : '';
+                $updatedRows[] = [$sku, $total, $lines];
+            } else {
+                $truncated = true;
+            }
+        } else {
+            if (count($notFoundRows) < $TRUNCATE_LIMIT) {
+                $notFoundRows[] = [$sku];
+            } else {
+                $truncated = true;
+            }
+        }
+    }
+
     if (empty($res['ok'])) {
         if (function_exists('lavka_log_write')) {
             lavka_log_write([
@@ -1154,6 +1216,12 @@ add_action('wp_ajax_lavka_pull_java_all_page', function () {
                 'duration_ms' => (int)round((microtime(true)-$t0)*1000),
                 'status'      => 'ERR',
                 'message'     => sprintf('page %d/%d: %s', $page+1, max(1,$pages), (string)($res['error'] ?? 'unknown')),
+                'errors' => wp_json_encode([
+                    'updated'   => $updatedRows,
+                    'not_found' => $notFoundRows,
+                    'truncated' => (count($updatedRows) >= $TRUNCATE_LIMIT || count($notFoundRows) >= $TRUNCATE_LIMIT) ? 1 : 0,
+                ], JSON_UNESCAPED_UNICODE),
+                'user_id' => get_current_user_id(),
             ]);
         }
         wp_send_json_error(['error'=>$res['error'] ?? 'unknown','body'=>$res['body'] ?? null]);
@@ -1175,6 +1243,12 @@ add_action('wp_ajax_lavka_pull_java_all_page', function () {
             'duration_ms' => (int)round((microtime(true)-$t0)*1000),
             'status'      => 'OK',
             'message'     => sprintf('completed: pages=%d, batch=%d, total=%d', max(1,$pages), $batch, $total),
+               'message'     => sprintf('page %d/%d: %s', $page+1, max(1,$pages), (string)($res['error'] ?? 'unknown')),
+                'errors' => wp_json_encode([
+                    'updated'   => $updatedRows,
+                    'not_found' => $notFoundRows,
+                    'truncated' => (count($updatedRows) >= $TRUNCATE_LIMIT || count($notFoundRows) >= $TRUNCATE_LIMIT) ? 1 : 0,
+                ], JSON_UNESCAPED_UNICODE),
         ]);
     }
 
@@ -1277,6 +1351,11 @@ add_action('lavka_auto_pull_all', function () {
     $updated = 0;
     $notFound = 0;
 
+    $detUpdated   = [];
+    $detNotFound  = [];
+    $TRUNCATE_LIMIT = 300;
+    $truncated    = false;
+
     for ($page = 0; $page < $pages; $page++) {
         $skus = lavka_get_skus_slice($page * $batch, $batch);
         if (!$skus) continue;
@@ -1285,6 +1364,46 @@ add_action('lavka_auto_pull_all', function () {
         if (!empty($res['ok'])) {
             $updated  += (int)($res['processed'] ?? 0);
             $notFound += (int)($res['not_found'] ?? 0);
+            $updatedRows   = [];
+            $notFoundRows  = [];
+            $TRUNCATE_LIMIT = 300;
+            $truncated     = false;
+
+            $det = $res['results'] ?? [];
+            foreach ($det as $row) {
+                $sku = (string)($row['sku'] ?? '');
+                if ($sku === '') continue;
+
+                if (!empty($row['found'])) {
+                    if (count($updatedRows) < $TRUNCATE_LIMIT) {
+                        $total = $row['total'] ?? null;
+                        $lines = isset($row['lines']) ? wp_json_encode($row['lines']) : '';
+                        $updatedRows[] = [$sku, $total, $lines];
+                    } else {
+                        $truncated = true;
+                    }
+                } else {
+                    if (count($notFoundRows) < $TRUNCATE_LIMIT) {
+                        $notFoundRows[] = [$sku];
+                    } else {
+                        $truncated = true;
+                    }
+                }
+                if (!$truncated && $updatedRows) {
+                    foreach ($updatedRows as $r) {
+                        if (count($detUpdated) < $TRUNCATE_LIMIT) {
+                            $detUpdated[] = $r;
+                        } else { $truncated = true; break; }
+                    }
+                }
+                if (!$truncated && $notFoundRows) {
+                    foreach ($notFoundRows as $r) {
+                        if (count($detNotFound) < $TRUNCATE_LIMIT) {
+                            $detNotFound[] = $r;
+                        } else { $truncated = true; break; }
+                    }
+                }
+            }
         } else {
             // Можно логировать ошибку и продолжать
         }
@@ -1300,6 +1419,12 @@ add_action('lavka_auto_pull_all', function () {
         'duration_ms' => (int)round((microtime(true) - $t0) * 1000),
         'status'      => 'OK',
         'message'     => sprintf('Auto paged pull completed (batch=%d, pages=%d)', $batch, $pages),
+        'errors' => wp_json_encode([
+            'updated'   => $detUpdated,
+            'not_found' => $detNotFound,
+            'truncated' => $truncated ? 1 : 0,
+        ], JSON_UNESCAPED_UNICODE),
+        'user_id' => 0,
     ]);
 
     // Планируем следующий запуск
@@ -1340,6 +1465,8 @@ add_action('lavka_auto_pull_movement', function () {
             $res['serverFrom'] ?? '-', $res['serverTo'] ?? '-', (int)($res['pages'] ?? 0),
             !empty($res['earlyStop']) ? ' (early-stop)' : ''
         ),
+        'errors'  => wp_json_encode($res['details'] ?? [], JSON_UNESCAPED_UNICODE),
+        'user_id' => 0,
     ]);
 
     $next = lavka_calc_next_ts($cfg, time());
@@ -1452,7 +1579,10 @@ function lavka_log_write(array $data) {
         'duration_ms'         => (int)($data['duration_ms'] ?? 0),
         'status'              => $data['status'] ?? 'OK',
         'message'             => $data['message'] ?? null,
-        'user_id'             => get_current_user_id() ?: null, // ← теперь пишем user_id
+
+        // НОВОЕ:
+        'errors'              => isset($data['errors']) ? (string)$data['errors'] : null,
+        'user_id'             => (int)($data['user_id'] ?? get_current_user_id()),
     ]);
 
     if ($wpdb->last_error && defined('WP_DEBUG') && WP_DEBUG) {
