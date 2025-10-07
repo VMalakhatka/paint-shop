@@ -416,7 +416,7 @@ function lavka_sync_render_page() {
       </div>
 
       <div class="lavka-movement" style="margin-top:18px">
-        <h3><?php echo esc_html_x('Incremental (movement', 'heading: manual movement section', 'lavka-sync'); ?></h3>
+        <h3><?php echo esc_html_x('Incremental (movement)', 'heading: manual movement section', 'lavka-sync'); ?></h3>
         <p>
           <label>
             <?php echo esc_html__('Page size', 'lavka-sync'); ?>:
@@ -851,21 +851,22 @@ add_action('wp_ajax_lavka_pull_movement', function () {
     }
 
         $log_id = lavka_log_write([
-        'action'      => 'movement_pull',
-        'supplier'    => '',
-        'stock_id'    => 0,
-        'dry'         => $dry ? 1 : 0,
-        'updated'     => (int)$res['updated'],
-        'not_found'   => (int)$res['not_found'],
-        'duration_ms' => (int)round((microtime(true)-$t0)*1000),
-        'status'      => 'OK',
-        'message'     => sprintf(
-            'Movement window [%s..%s], pages=%d%s',
-            $res['serverFrom'] ?? '-', $res['serverTo'] ?? '-', (int)$res['pages'],
-            !empty($res['earlyStop']) ? ', earlyStop=1' : ''
-        ),
-        'errors'      => wp_json_encode($res['details'] ?? [], JSON_UNESCAPED_UNICODE),
-    ]);
+            'action'      => 'movement_pull',
+            'supplier'    => '',
+            'stock_id'    => 0,
+            'dry'         => $dry ? 1 : 0,
+            'updated'     => (int)$res['updated'],
+            'not_found'   => (int)$res['not_found'],
+            'duration_ms' => (int)round((microtime(true)-$t0)*1000),
+            'status'      => 'OK',
+            'message'     => sprintf(
+                'Movement window [%s..%s], pages=%d%s',
+                $res['serverFrom'] ?? '-', $res['serverTo'] ?? '-', (int)$res['pages'],
+                !empty($res['earlyStop']) ? ', earlyStop=1' : ''
+            ),
+            'errors'      => wp_json_encode($res['details'] ?? [], JSON_UNESCAPED_UNICODE),
+            'user_id'     => get_current_user_id(), // <-- добавить сюда
+        ]);
 
     if ($log_id && !empty($res['details'])) {
         $det = $res['details'];
@@ -880,27 +881,9 @@ add_action('wp_ajax_lavka_pull_movement', function () {
         $parts = [];
         if ($f1) $parts[] = 'updated_csv=' . $f1['url'];
         if ($f2) $parts[] = 'not_found_csv=' . $f2['url'];
-        if (!empty($det['truncated'])) $parts[] = 'truncated=1 (limited to 10000 rows per list)';
+        if (!empty($det['truncated'])) $parts[] = 'truncated=1 (limited to 300 rows per list)';
         if ($parts) lavka_log_append_message($log_id, '['.implode(' | ', $parts).']');
     }
-
-    lavka_log_write([
-        'action'      => 'movement_pull',
-        'supplier'    => '',
-        'stock_id'    => 0,
-        'dry'         => $dry ? 1 : 0,
-        'updated'     => (int)$res['updated'],
-        'not_found'   => (int)$res['not_found'],
-        'duration_ms' => (int)round((microtime(true)-$t0)*1000),
-        'status'      => 'OK',
-        'message'     => sprintf(
-            'Movement window [%s..%s], pages=%d%s',
-            $res['serverFrom'] ?? '-', $res['serverTo'] ?? '-', (int)$res['pages'],
-            !empty($res['earlyStop']) ? ', earlyStop=1' : ''
-        ),
-        'errors'  => wp_json_encode($res['details'] ?? [], JSON_UNESCAPED_UNICODE),
-        'user_id' => get_current_user_id(),
-    ]);
 
     wp_send_json_success($res);
 });
@@ -1243,12 +1226,12 @@ add_action('wp_ajax_lavka_pull_java_all_page', function () {
             'duration_ms' => (int)round((microtime(true)-$t0)*1000),
             'status'      => 'OK',
             'message'     => sprintf('completed: pages=%d, batch=%d, total=%d', max(1,$pages), $batch, $total),
-               'message'     => sprintf('page %d/%d: %s', $page+1, max(1,$pages), (string)($res['error'] ?? 'unknown')),
                 'errors' => wp_json_encode([
                     'updated'   => $updatedRows,
                     'not_found' => $notFoundRows,
                     'truncated' => (count($updatedRows) >= $TRUNCATE_LIMIT || count($notFoundRows) >= $TRUNCATE_LIMIT) ? 1 : 0,
                 ], JSON_UNESCAPED_UNICODE),
+                'user_id' => get_current_user_id(),
         ]);
     }
 
@@ -1366,8 +1349,6 @@ add_action('lavka_auto_pull_all', function () {
             $notFound += (int)($res['not_found'] ?? 0);
             $updatedRows   = [];
             $notFoundRows  = [];
-            $TRUNCATE_LIMIT = 300;
-            $truncated     = false;
 
             $det = $res['results'] ?? [];
             foreach ($det as $row) {
@@ -1389,7 +1370,8 @@ add_action('lavka_auto_pull_all', function () {
                         $truncated = true;
                     }
                 }
-                if (!$truncated && $updatedRows) {
+            }
+            if (!$truncated && $updatedRows) {
                     foreach ($updatedRows as $r) {
                         if (count($detUpdated) < $TRUNCATE_LIMIT) {
                             $detUpdated[] = $r;
@@ -1403,7 +1385,6 @@ add_action('lavka_auto_pull_all', function () {
                         } else { $truncated = true; break; }
                     }
                 }
-            }
         } else {
             // Можно логировать ошибку и продолжать
         }
@@ -1411,20 +1392,20 @@ add_action('lavka_auto_pull_all', function () {
 
     lavka_log_write([
         'action'      => 'auto_pull_all',
-        'supplier'    => '',      // не используется сейчас
-        'stock_id'    => 0,       // не используется сейчас
+        'supplier'    => '',
+        'stock_id'    => 0,
         'dry'         => 0,
         'updated'     => $updated,
         'not_found'   => $notFound,
         'duration_ms' => (int)round((microtime(true) - $t0) * 1000),
         'status'      => 'OK',
         'message'     => sprintf('Auto paged pull completed (batch=%d, pages=%d)', $batch, $pages),
-        'errors' => wp_json_encode([
+        'errors'      => wp_json_encode([
             'updated'   => $detUpdated,
             'not_found' => $detNotFound,
             'truncated' => $truncated ? 1 : 0,
         ], JSON_UNESCAPED_UNICODE),
-        'user_id' => 0,
+        'user_id'     => 0, // крон — системный
     ]);
 
     // Планируем следующий запуск
