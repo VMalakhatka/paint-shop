@@ -1,0 +1,11 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: lavka-reports\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Domain: lavka-reports\n"
+
+#: inc/class-admin.php:20
+msgid "Lavka report"
+msgstr ""

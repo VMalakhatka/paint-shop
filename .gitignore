@@ -64,6 +64,8 @@ wp-content/plugins/*
 !wp-content/plugins/pc-order-import-export/**
 !wp-content/plugins/lavka-sync
 !wp-content/plugins/lavka-sync/**
+!wp-content/plugins/lavka-reports
+!wp-content/plugins/lavka-reports/**
 
 # === MU-plugins: либо отслеживаем все, либо только свои ===
 # Вариант 1 (отслеживать все mu-plugins):

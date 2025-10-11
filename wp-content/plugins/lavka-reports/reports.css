@@ -1,0 +1,5 @@
+.lavr-form .lr-grid{display:grid;grid-template-columns:repeat(2,minmax(220px,320px));gap:12px}
+.lavr-form .lr-multicol{display:flex;gap:16px;align-items:flex-start}
+.lavr-form .lr-chip{display:inline-block;margin:4px;padding:4px 8px;border:1px solid #ccd0d4;border-radius:12px;background:#fff}
+.lavr-form .lr-ref{margin:6px 0}
+.link-delete{color:#b32d2e}
