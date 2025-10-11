@@ -416,27 +416,41 @@ function lavka_sync_render_page() {
       </div>
 
       <div class="lavka-movement" style="margin-top:18px">
-        <h3><?php echo esc_html_x('Incremental (movement)', 'heading: manual movement section', 'lavka-sync'); ?></h3>
-        <p>
-          <label>
-            <?php echo esc_html__('Page size', 'lavka-sync'); ?>:
-            <input type="number" id="lavka-mov-pagesize" min="10" max="2000" value="500" style="width:7rem">
-          </label>
-          <label style="margin-left:10px;">
-            <?php echo esc_html__('From (ISO 8601, optional)', 'lavka-sync'); ?>:
-            <input type="text"
-                id="lavka-mov-from"
-                placeholder="<?php echo esc_attr__( 'leave empty to auto', 'lavka-sync' ); ?>"
-                style="width:16rem">
-          </label>
-          <label style="margin-left:10px;">
-            <input type="checkbox" id="lavka-mov-dry" checked> <?php echo esc_html__('dry-run', 'lavka-sync'); ?>
-          </label>
-          <button id="lavka-mov-run" class="button button-primary" style="margin-left:10px">
-            <?php echo esc_html__('Run movement', 'lavka-sync'); ?>
-          </button>
-          <span id="lavka-mov-status" style="margin-left:10px;"></span>
-        </p>
+          <h3><?php echo esc_html_x('Incremental (movement)', 'heading: manual movement section', 'lavka-sync'); ?></h3>
+          <p>
+              <label>
+                  <?php echo esc_html__('Page size', 'lavka-sync'); ?>:
+                  <input type="number"
+                        id="lavka-mov-pagesize"
+                        min="10" max="2000"
+                        value="500"
+                        style="width:7rem">
+              </label>
+
+              <label style="margin-left:10px;">
+                  <?php echo esc_html__('From (ISO 8601, optional)', 'lavka-sync'); ?>:
+                  <input type="text"
+                        id="lavka-mov-from"
+                        placeholder="<?php echo esc_attr__('e.g. 2025-09-30T00:00:00Z', 'lavka-sync'); ?>"
+                        style="width:16rem">
+                  <small class="description" style="display:block;margin-left:4px;color:#666;">
+                      <?php echo esc_html__('Example: 2025-09-30T00:00:00Z (leave empty for auto)', 'lavka-sync'); ?>
+                  </small>
+              </label>
+
+              <label style="margin-left:10px;">
+                  <input type="checkbox" id="lavka-mov-dry" checked>
+                  <?php echo esc_html__('Dry run', 'lavka-sync'); ?>
+              </label>
+
+              <button id="lavka-mov-run"
+                      class="button button-primary"
+                      style="margin-left:10px">
+                  <?php echo esc_html__('Run movement', 'lavka-sync'); ?>
+              </button>
+
+              <span id="lavka-mov-status" style="margin-left:10px;"></span>
+          </p>
       </div>
       
             <div class="lavka-auto" style="margin-top:18px">
