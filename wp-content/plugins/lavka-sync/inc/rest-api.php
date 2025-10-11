@@ -361,6 +361,8 @@ function lavka_java_movement_page(string $fromIso, int $page, int $pageSize): ar
  * и применяем апдейт через lavka_sync_java_query_and_apply().
  */
 function lavka_sync_java_movement_apply_loop(array $args = []): array {
+        ignore_user_abort(true);
+    if (function_exists('set_time_limit')) @set_time_limit(600);
     $dry      = !empty($args['dry']);
     $pageSize = (int)($args['pageSize'] ?? LAVKA_MOV_DEF_PAGESIZE);
     $fromIso  = (string)($args['from'] ?? '');

@@ -42,7 +42,7 @@ function lavka_fetch_ext_warehouses(): array {
     $endpoint = apply_filters('lavka_ext_wh_endpoint', $base . '/ref/warehouses');
 
     $resp = wp_remote_get($endpoint, [
-        'timeout' => 15,
+        'timeout' => 60,
         'headers' => array_filter([
             'Accept'       => 'application/json',
             // если на Java включён токен:

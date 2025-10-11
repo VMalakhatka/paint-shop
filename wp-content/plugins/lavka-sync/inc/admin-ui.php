@@ -271,7 +271,7 @@ add_action('wp_ajax_lavka_ms_wh_list', function(){
     $full = $url . '/' . $pth;
 
     $resp = wp_remote_get($full, [
-        'timeout' => 20,
+        'timeout' => 60,
         'headers' => [
             'X-Auth-Token' => $o['api_token'] ?? '',
             'Accept'       => 'application/json',
@@ -858,7 +858,14 @@ add_action('wp_ajax_lavka_pull_movement', function () {
     $fromIso  = (string)($_POST['from'] ?? '');
 
     $t0  = microtime(true);
-    $res = lavka_sync_java_movement_apply_loop(['pageSize'=>$pageSize, 'dry'=>$dry, 'from'=>$fromIso]);
+    ignore_user_abort(true);
+    if (function_exists('set_time_limit')) @set_time_limit(600); // до 10 минут
+
+    $res = lavka_sync_java_movement_apply_loop([
+        'pageSize' => $pageSize,
+        'dry'      => $dry,
+        'from'     => $fromIso,
+    ]);
     if (empty($res['ok'])) {
         error_log('[lavka] movement ajax fail: '.print_r($res,true));
         wp_send_json_error(['error'=>$res['error'] ?? 'movement_error']);

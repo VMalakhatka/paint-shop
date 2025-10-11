@@ -33,7 +33,7 @@ class Lavka_Reports_Ajax {
 
         $endpoint = $base . '/ref/warehouses';
         $resp = wp_remote_get($endpoint, [
-            'timeout' => 20,
+            'timeout' => 60,
             'headers' => array_filter([
                 'Accept'       => 'application/json',
                 'X-Auth-Token' => $token ?: null,
@@ -75,7 +75,7 @@ class Lavka_Reports_Ajax {
     $endpoint = $base . '/ref/op-types';
 
     $resp = wp_remote_get($endpoint, [
-        'timeout' => 20,
+        'timeout' => 60,
         'headers' => array_filter([
             'Accept'       => 'application/json',
             'X-Auth-Token' => $token ?: null,

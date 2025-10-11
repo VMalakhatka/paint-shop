@@ -25,7 +25,7 @@
 
         // тянем из Java
         $resp = wp_remote_get($url, [
-            'timeout' => 30,
+            'timeout' => 60,
             'headers' => [
                 'X-Auth-Token' => $o['api_token'] ?? '',
                 'Accept'       => 'application/json',
