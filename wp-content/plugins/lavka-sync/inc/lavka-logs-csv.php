@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) exit;
 
 function lavka__logs_base(): array {
     // 1) Если задан свой каталог — используем его, без URL
-    if (defined('LAVKA_LOGS_DIR') && LAVKA_LOGS_DIR) {
+   /* if (defined('LAVKA_LOGS_DIR') && LAVKA_LOGS_DIR) {
         return ['dir' => rtrim((string)LAVKA_LOGS_DIR, '/'), 'url' => null];
     }
 
@@ -23,14 +23,14 @@ function lavka__logs_base(): array {
     $base = apply_filters('lavka_logs_base', ['dir'=>$dir, 'url'=>$url]);
     $base['dir'] = rtrim($base['dir'] ?? $dir, '/');
     $base['url'] = $base['url'] ?? null;
-    return $base;
+    return $base;*/
 }
 
 /**
  * Сохранить CSV и вернуть ['path'=>..., 'url'=>null|url]
  */
 function lavka_save_csv(string $name, array $rows): ?array {
-    $base = lavka__logs_base();
+   /* $base = lavka__logs_base();
     $dir  = $base['dir'];
     $urlb = $base['url'];
 
@@ -44,7 +44,7 @@ function lavka_save_csv(string $name, array $rows): ?array {
     fclose($fh);
 
     // если URL не задан — просто вернём путь
-    return ['path' => $path, 'url' => $urlb ? $urlb . '/' . rawurlencode($name) : null];
+    return ['path' => $path, 'url' => $urlb ? $urlb . '/' . rawurlencode($name) : null];*/
 }
 
 /**
@@ -63,13 +63,13 @@ function lavka_log_append_message(int $log_id, string $suffix) {
  * Плановая чистка старых CSV (по умолчанию 14 дней)
  */
 function lavka_cleanup_old_csv($days = 14) {
-    $base = lavka__logs_base();
+   /* $base = lavka__logs_base();
     $dir  = $base['dir'];
     if (!is_dir($dir)) return;
     $cut = time() - $days*86400;
     foreach (glob($dir.'/*.csv') as $f) {
         if (@filemtime($f) < $cut) @unlink($f);
-    }
+    }*/
 }
 
 add_action('lavka_cleanup_logs', function(){ lavka_cleanup_old_csv(14); });
