@@ -271,7 +271,7 @@ add_action('wp_ajax_lavka_ms_wh_list', function(){
     $full = $url . '/' . $pth;
 
     $resp = wp_remote_get($full, [
-        'timeout' => 60,
+        'timeout' => 160,
         'headers' => [
             'X-Auth-Token' => $o['api_token'] ?? '',
             'Accept'       => 'application/json',
@@ -1090,7 +1090,7 @@ add_action('wp_ajax_lavka_reports_data', function () {
         'dry'      => 'true'
     ], $java . '/sync/stock');
     $resp = wp_remote_post($url, [
-        'timeout' => 20,
+        'timeout' => 160,
         'headers' => [
             'X-Auth-Token' => $opts['api_token'] ?? '',
             'Accept'       => 'application/json',

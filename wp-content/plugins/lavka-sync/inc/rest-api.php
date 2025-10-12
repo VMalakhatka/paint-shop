@@ -315,7 +315,7 @@ function lavka_java_movement_page(string $fromIso, int $page, int $pageSize): ar
         'pageSize'  => max(1, min(LAVKA_MOV_MAX_PAGESIZE, $pageSize ?: LAVKA_MOV_DEF_PAGESIZE)),
     ];
     $args = [
-        'timeout' => 30,
+        'timeout' => 160,
         'headers' => [
             'Content-Type' => 'application/json',
             'Accept'       => 'application/json',

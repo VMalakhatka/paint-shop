@@ -33,7 +33,7 @@ class Lavka_Reports_Ajax {
 
         $endpoint = $base . '/ref/warehouses';
         $resp = wp_remote_get($endpoint, [
-            'timeout' => 60,
+            'timeout' => 160,
             'headers' => array_filter([
                 'Accept'       => 'application/json',
                 'X-Auth-Token' => $token ?: null,
@@ -75,7 +75,7 @@ class Lavka_Reports_Ajax {
     $endpoint = $base . '/ref/op-types';
 
     $resp = wp_remote_get($endpoint, [
-        'timeout' => 60,
+        'timeout' => 160,
         'headers' => array_filter([
             'Accept'       => 'application/json',
             'X-Auth-Token' => $token ?: null,
@@ -177,7 +177,7 @@ class Lavka_Reports_Ajax {
                 'payload' => $payload,
             ]);
             $resp = wp_remote_post($base.'/admin/stock/stock/no-movement', [
-                'timeout' => 45,
+                'timeout' => 160,
                 'headers' => array_filter([
                     'Accept'       => 'application/json',
                     'Content-Type' => 'application/json',
