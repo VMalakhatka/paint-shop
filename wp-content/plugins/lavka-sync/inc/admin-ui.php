@@ -875,22 +875,38 @@ function lavka_sync_render_page() {
     f.append('dry', dry);
     if (from) f.append('from', from);
 
-    try{
-      const r = await fetch(ajaxUrl, { method:'POST', credentials:'same-origin', body:f });
-      const j = await r.json();
-      if (j?.success) {
-        const d = j.data || {};
-        st.textContent =
-          `${LAVKA_I18N.i18n_done}: ${d.updated||0}, ` +
-          `${LAVKA_I18N.i18n_not_found} ${d.not_found||0}, ` +
-          `pages ${d.pages||0}` + (d.earlyStop ? ' (early stop)' : '');
-      } else {
-        st.textContent = `${LAVKA_I18N.i18n_error} ${j?.data?.error || 'unknown'}`;
-      }
-    } catch(e){
-      console.error(e);
-      st.textContent = LAVKA_I18N.i18n_neterr;
-    }
+    try {
+  console.time('lavka-movement-ajax'); // замер длительности
+
+  const r = await fetch(ajaxUrl, { method:'POST', credentials:'same-origin', body:f });
+
+  const ct = (r.headers.get('content-type') || '').toLowerCase();
+  let j = null, raw = '';
+
+  if (ct.includes('application/json')) {
+    j = await r.json();
+  } else {
+    raw = await r.text(); // HTML/текст ошибки от сервера (503/504/…)
+    throw new Error(`HTTP ${r.status} ${r.statusText}. Body: ${raw.slice(0,300)}`);
+  }
+
+  if (j?.success) {
+    const d = j.data || {};
+    st.textContent =
+      `${LAVKA_I18N.i18n_done}: ${d.updated||0}, ` +
+      `${LAVKA_I18N.i18n_not_found} ${d.not_found||0}, ` +
+      `pages ${d.pages||0}` + (d.earlyStop ? ' (early stop)' : '');
+    console.log('OK (movement):', d);
+  } else {
+    st.textContent = `${LAVKA_I18N.i18n_error} ${j?.data?.error || 'unknown'}`;
+    console.warn('AJAX fail (movement):', j);
+  }
+} catch (e) {
+  console.error('AJAX network error (movement):', e);
+  st.textContent = `${LAVKA_I18N.i18n_neterr}${e?.message ? ' — ' + e.message : ''}`;
+} finally {
+  console.timeEnd('lavka-movement-ajax');
+}
   });
 })();
 </script>
