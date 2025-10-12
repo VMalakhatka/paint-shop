@@ -858,8 +858,12 @@ add_action('wp_ajax_lavka_pull_movement', function () {
     $fromIso  = (string)($_POST['from'] ?? '');
 
     $t0  = microtime(true);
-    ignore_user_abort(true);
-    if (function_exists('set_time_limit')) @set_time_limit(600); // до 10 минут
+    // повышаем выживаемость long-poll запроса
+ignore_user_abort(true);
+if (function_exists('set_time_limit')) @set_time_limit(600);
+@ini_set('max_execution_time', '600');
+@ini_set('default_socket_timeout', '600'); // чтобы сокет HTTP не отвалился раньше
+
 
     $res = lavka_sync_java_movement_apply_loop([
         'pageSize' => $pageSize,
@@ -1448,6 +1452,13 @@ add_action('lavka_auto_pull_movement', function () {
         // если файл с функцией не подключён — не падаем, просто выходим
         return;
     }
+
+        // повышаем выживаемость long-poll запроса
+ignore_user_abort(true);
+if (function_exists('set_time_limit')) @set_time_limit(600);
+@ini_set('max_execution_time', '600');
+@ini_set('default_socket_timeout', '600'); // чтобы сокет HTTP не отвалился раньше
+
     $res = lavka_sync_java_movement_apply_loop([
         'pageSize' => (int)$cfg['batch'],
         'dry'      => false,
