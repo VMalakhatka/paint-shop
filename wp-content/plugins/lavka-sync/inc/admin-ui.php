@@ -657,56 +657,93 @@ function lavka_sync_render_page() {
 </script>
     <script>
       (function(){
-        const ajaxUrl     = "<?php echo esc_js(admin_url('admin-ajax.php')); ?>";
-        const nonceAll    = "<?php echo esc_js(wp_create_nonce('lavka_pull_java_all')); ?>";
-        const btnAll      = document.getElementById('lavka-pull-all');
-        const batchEl     = document.getElementById('lavka-batch');
-        const dryEl       = document.getElementById('lavka-pull-dry');
-        const allStatus   = document.getElementById('lavka-pull-all-status');
+  const ajaxUrl = "<?php echo esc_js(admin_url('admin-ajax.php')); ?>";
+  const nonce   = "<?php echo esc_js(wp_create_nonce('lavka_pull_java')); ?>";
+  const btn     = document.getElementById('lavka-pull-java');
+  const dryEl   = document.getElementById('lavka-pull-dry');
+  const status  = document.getElementById('lavka-pull-status');
+  const skusEl  = document.getElementById('lavka-skus');
 
-        btnAll?.addEventListener('click', async ()=>{
-          const batch = Math.max(10, Math.min(1000, parseInt(batchEl.value,10) || 200));
-          const dry   = dryEl.checked ? '1' : '0';
+  btn?.addEventListener('click', async ()=>{
+    const raw = (skusEl.value || '').trim();
+    const list = raw.split(/[\s,;]+/).filter(Boolean);
+    if (!list.length) {
+      status.textContent = LAVKA_I18N.i18n_enter_skus;
+      return;
+    }
 
-          btnAll.disabled = true;
-          let page = 0, pages = null, total = 0, done = 0, nf = 0;
+    status.textContent = LAVKA_I18N.i18n_running;
 
-          try{
-            while (pages === null || page < pages) {
-              allStatus.textContent = `${LAVKA_I18N.i18n_page} ${page+1}${pages ? ' ' + LAVKA_I18N.i18n_of + ' ' + pages : ''}…`;
+    const f = new FormData();
+    f.append('action','lavka_pull_java');
+    f.append('_wpnonce', nonce);
+    f.append('dry', dryEl.checked ? '1':'0');
+    list.forEach(s => f.append('skus[]', s));
 
-              const f = new FormData();
-              f.append('action','lavka_pull_java_all_page');
-              f.append('_wpnonce', nonceAll);
-              f.append('page', String(page));
-              f.append('batch', String(batch));
-              f.append('dry', dry);
+    try {
+      const r = await fetch(ajaxUrl, { method:'POST', credentials:'same-origin', body:f });
 
-              const r = await fetch(ajaxUrl, { method:'POST', credentials:'same-origin', body:f });
-              const j = await r.json();
-              if (!j?.success) {
-                allStatus.textContent = `${LAVKA_I18N.i18n_error_prefix} ${j?.data?.error || 'unknown'}`;
-                break;
-              }
+      const ct = (r.headers.get('content-type') || '').toLowerCase();
+      let j = null, rawBody = '';
 
-              const d = j.data;
-              pages = d.pages; total = d.total;
-              done  += (d.processed || 0);
-              nf    += (d.not_found || 0);
+      if (ct.includes('application/json')) {
+        j = await r.json();
+      } else {
+        rawBody = await r.text(); // сервер вернул HTML/текст (например, 504/524)
+        throw new Error(`HTTP ${r.status} ${r.statusText}. Body: ${rawBody.slice(0,300)}`);
+      }
 
-              allStatus.textContent =
-                `${LAVKA_I18N.i18n_done}: ${Math.min((page+1)*batch, total)}/${total}. ` +
-                `${LAVKA_I18N.i18n_updated} ${done}, ${LAVKA_I18N.i18n_not_found} ${nf}.`;
-              page++;
-            }
-          } catch(e){
-            console.error(e);
-            allStatus.textContent =  LAVKA_I18N.i18n_network_error;
-          } finally {
-            btnAll.disabled = false;
-          }
-        });
-      })();
+      if (j?.success) {
+        const d = j.data || {};
+        status.textContent =
+          `${LAVKA_I18N.i18n_done}: ${d.processed||0}, ` +
+          `${LAVKA_I18N.i18n_not_found} ${d.not_found||0}`;
+
+        const boxId = 'lavka-pull-details';
+        let box = document.getElementById(boxId);
+        if (!box) {
+          box = document.createElement('div');
+          box.id = boxId;
+          box.style.marginTop = '8px';
+          status.parentNode.appendChild(box);
+        }
+
+        const rows = (d.results || []).map(r => {
+          const lines = (r.lines || []).map(l => `${l.term_id}: ${l.qty}`).join(', ');
+          return `<tr>
+                    <td>${r.sku}</td>
+                    <td>${r.total ?? ''}</td>
+                    <td>${lines}</td>
+                    <td>${r.found ? '✓' : '—'}</td>
+                  </tr>`;
+        }).join('');
+
+        box.innerHTML = `
+          <table class="widefat striped" style="max-width:720px">
+            <thead>
+              <tr>
+                <th>${LAVKA_I18N.th_sku}</th>
+                <th>${LAVKA_I18N.th_total}</th>
+                <th>${LAVKA_I18N.th_by_location}</th>
+                <th>${LAVKA_I18N.th_found}</th>
+              </tr>
+            </thead>
+            <tbody>${rows || `<tr><td colspan="4">${LAVKA_I18N.no_data}</td></tr>`}</tbody>
+          </table>
+        `;
+
+        console.log('OK:', d);
+      } else {
+        status.textContent = `${LAVKA_I18N.i18n_error_prefix} ${j?.data?.error || 'unknown'}`;
+        console.warn('AJAX fail:', j);
+      }
+
+    } catch (e) {
+      console.error('AJAX network error:', e);
+      status.textContent = `${LAVKA_I18N.i18n_network_error}${e?.message ? ' — ' + e.message : ''}`;
+    }
+  });
+}());
 
     </script>
 
