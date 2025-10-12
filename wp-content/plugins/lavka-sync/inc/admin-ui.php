@@ -589,56 +589,69 @@ function lavka_sync_render_page() {
     // отправляем как массив skus[]
     list.forEach(s => f.append('skus[]', s));
 
-    try{
-      const r = await fetch(ajaxUrl, {method:'POST', credentials:'same-origin', body:f});
-      const j = await r.json();
-      if (j?.success) {
-        status.textContent = LAVKA_I18N.i18n_ok_processed
-          .replace('%1$s', j.data.processed)
-          .replace('%2$s', j.data.not_found);
-        const boxId = 'lavka-pull-details';
-        let box = document.getElementById(boxId);
-        if (!box) {
-          box = document.createElement('div');
-          box.id = boxId;
-          box.style.marginTop = '8px';
-          status.parentNode.appendChild(box);
-        }
-        const rows = (j.data.results || []).map(r => {
-          const lines = (r.lines || []).map(l => `${l.term_id}: ${l.qty}`).join(', ');
-          return `<tr>
-                    <td>${r.sku}</td>
-                    <td>${r.total ?? ''}</td>
-                    <td>${lines}</td>
-                    <td>${r.found ? '✓' : '—'}</td>
-                  </tr>`;
-        }).join('');
+    try {
+  const r = await fetch(ajaxUrl, { method:'POST', credentials:'same-origin', body:f });
 
-        box.innerHTML = `
-          <table class="widefat striped" style="max-width:720px">
-            <thead>
-              <tr>
-                <th>${LAVKA_I18N.th_sku}</th>
-                <th>${LAVKA_I18N.th_total}</th>
-                <th>${LAVKA_I18N.th_by_location}</th>
-                <th>${LAVKA_I18N.th_found}</th>
-              </tr>
-            </thead>
-            <tbody>${rows || `<tr><td colspan="4">${LAVKA_I18N.no_data}</td></tr>`}</tbody>
-          </table>
-        `;
-        status.textContent = LAVKA_I18N.i18n_ok_processed
-          .replace('%1$s', j.data.processed)
-          .replace('%2$s', j.data.not_found);
-        console.log(j.data);
-      } else {
-        status.textContent = `${LAVKA_I18N.i18n_error_prefix} ${j?.data?.error || 'unknown'}`;
-        console.log(j);
-      }
-    }catch(e){
-      status.textContent = LAVKA_I18N.i18n_network_error;
-      console.error(e);
+  const ct = (r.headers.get('content-type') || '').toLowerCase();
+  let j = null, raw = '';
+
+  if (ct.includes('application/json')) {
+    j = await r.json();
+  } else {
+    raw = await r.text(); // сервер вернул HTML/текст (например, 504/524)
+    throw new Error(`HTTP ${r.status} ${r.statusText}. Body: ${raw.slice(0,300)}`);
+  }
+
+  if (j?.success) {
+    const d = j.data || {};
+    status.textContent =
+      `${LAVKA_I18N.i18n_done}: ${d.processed||0}, ` +
+      `${LAVKA_I18N.i18n_not_found} ${d.not_found||0}`;
+
+    // рисуем таблицу, как раньше
+    const boxId = 'lavka-pull-details';
+    let box = document.getElementById(boxId);
+    if (!box) {
+      box = document.createElement('div');
+      box.id = boxId;
+      box.style.marginTop = '8px';
+      status.parentNode.appendChild(box);
     }
+
+    const rows = (d.results || []).map(r => {
+      const lines = (r.lines || []).map(l => `${l.term_id}: ${l.qty}`).join(', ');
+      return `<tr>
+                <td>${r.sku}</td>
+                <td>${r.total ?? ''}</td>
+                <td>${lines}</td>
+                <td>${r.found ? '✓' : '—'}</td>
+              </tr>`;
+    }).join('');
+
+    box.innerHTML = `
+      <table class="widefat striped" style="max-width:720px">
+        <thead>
+          <tr>
+            <th>${LAVKA_I18N.th_sku}</th>
+            <th>${LAVKA_I18N.th_total}</th>
+            <th>${LAVKA_I18N.th_by_location}</th>
+            <th>${LAVKA_I18N.th_found}</th>
+          </tr>
+        </thead>
+        <tbody>${rows || `<tr><td colspan="4">${LAVKA_I18N.no_data}</td></tr>`}</tbody>
+      </table>
+    `;
+
+    console.log('OK:', d);
+  } else {
+    status.textContent = `${LAVKA_I18N.i18n_error_prefix} ${j?.data?.error || 'unknown'}`;
+    console.warn('AJAX fail:', j);
+  }
+
+} catch (e) {
+  console.error('AJAX network error:', e);
+  status.textContent = `${LAVKA_I18N.i18n_network_error}${e?.message ? ' — ' + e.message : ''}`;
+}
   });
 })();
 </script>
