@@ -20,6 +20,18 @@ define('LPS_DEF_BATCH',   500);
 define('LPS_MIN_BATCH',   50);
 define('LPS_MAX_BATCH',   2000);
 
+// ---- CRON (price sync) ----
+if (!defined('LPS_OPT_CRON')) define('LPS_OPT_CRON', 'lps_cron_price'); // опция расписания
+
+require_once __DIR__ . '/inc/cron.php';
+
+register_activation_hook(__FILE__, function () {
+    if (function_exists('lps_cron_reschedule_price')) lps_cron_reschedule_price();
+});
+register_deactivation_hook(__FILE__, function () {
+    if (function_exists('lps_cron_clear_all')) lps_cron_clear_all();
+});
+
 require_once __DIR__.'/inc/helpers.php';
 require_once __DIR__.'/inc/admin-ui.php';
 require_once __DIR__.'/inc/mapping.php';

@@ -164,3 +164,22 @@ if (!function_exists('lps_find_product_id_by_sku')) {
         return $pid ?: 0;
     }
 }
+
+// Разобрать список артикулов: разделители только ",", ";" и переводы строк.
+// Пробелы внутри артикула не считаем разделителем.
+if (!function_exists('lps_parse_sku_list')) {
+    function lps_parse_sku_list(string $raw): array {
+        // унифицируем разделители в запятые
+        $raw = str_replace(["\r\n", "\n", "\r", ";", "|"], ',', $raw);
+        // разбиваем ТОЛЬКО по запятым
+        $parts = explode(',', $raw);
+
+        $out = [];
+        foreach ($parts as $p) {
+            $s = trim($p);                 // обрезаем пробелы по краям
+            if ($s === '') continue;
+            if (!in_array($s, $out, true)) $out[] = $s; // дедупликация
+        }
+        return $out;
+    }
+}

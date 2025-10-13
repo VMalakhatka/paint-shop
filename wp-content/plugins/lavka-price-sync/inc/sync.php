@@ -108,17 +108,31 @@ function lps_apply_prices_multi(array $items, bool $dry = false): array {
             $change['retail'] = $ret;
         }
 
-        // Ролевые
+       // Ролевые
         $roles = is_array($row['roles'] ?? null) ? $row['roles'] : [];
         foreach ($roles as $role => $price) {
             $meta_key = lps_role_meta_key($role);
             if (!$dry) {
+                // ===== transient-замок на post_id+meta_key (защита от параллельной записи) =====
+                $lock_key = 'lps_lock_' . md5($pid . '|' . $meta_key);
+                // если уже кто-то пишет — пропустим/подождём кратко (здесь просто пропуск)
+                if (get_transient($lock_key)) {
+                    // Можно: sleep(1) и попробовать ещё раз, но обычно хватит пропуска.
+                    continue;
+                }
+                set_transient($lock_key, 1, 10); // TTL 10 сек достаточно для одной записи
+
+                // гарантированно одинарная запись:
+                // 1) если запись есть — обновит; 2) если нет — создаст ровно одну
                 update_post_meta($pid, $meta_key, (float)$price);
+
+                // снимаем замок
+                delete_transient($lock_key);
+                // ===== конец замка =====
             }
             $updatedRoles++;
             $change['roles'][] = ['role'=>$role, 'price'=>(float)$price];
         }
-
         $details[] = ['sku'=>$sku, 'found'=>true] + $change;
     }
 
@@ -135,17 +149,22 @@ function lps_apply_prices_multi(array $items, bool $dry = false): array {
  */
 add_action('wp_ajax_lps_run_prices', function () {
     if (!current_user_can(LPS_CAP)) wp_send_json_error(['error'=>'forbidden'], 403);
-    check_ajax_referer('lps_admin_nonce');
+    check_ajax_referer('lps_sync_skus');
 
     // читаем SKUs
     $skus = [];
     if (isset($_POST['skus']) && is_array($_POST['skus'])) {
         $skus = array_map('strval', wp_unslash($_POST['skus']));
     } elseif (isset($_POST['skus'])) {
-        $raw = (string)wp_unslash($_POST['skus']);
-        $skus = preg_split('/[\s,;]+/u', $raw, -1, PREG_SPLIT_NO_EMPTY);
+        $raw  = (string)wp_unslash($_POST['skus']);
+        if (function_exists('lps_parse_sku_list')) {
+            $skus = lps_parse_sku_list($raw);
+        } else {
+            // fallback: только , ; переводы строк и | — пробелы внутри SKU сохраняем
+            $raw  = str_replace(["\r\n","\n","\r",";","|"], ',', $raw);
+            $skus = array_values(array_filter(array_map('trim', explode(',', $raw))));
+        }
     }
-    $skus = array_values(array_unique(array_filter(array_map('trim', $skus))));
     if (!$skus) wp_send_json_error(['error'=>'empty_skus']);
 
     $dry = !empty($_POST['dry']);
@@ -171,7 +190,7 @@ add_action('wp_ajax_lps_run_prices', function () {
  */
 add_action('wp_ajax_lps_run_prices_all_page', function () {
     if (!current_user_can(LPS_CAP)) wp_send_json_error(['error'=>'forbidden'], 403);
-    check_ajax_referer('lps_admin_nonce');
+    check_ajax_referer('lps_sync_all');
 
     $page  = max(0, (int)($_POST['page'] ?? 0));
     $batch = max(LPS_MIN_BATCH, min(LPS_MAX_BATCH, (int)($_POST['batch'] ?? LPS_DEF_BATCH)));
@@ -200,5 +219,36 @@ add_action('wp_ajax_lps_run_prices_all_page', function () {
         'not_found'     =>$applied['not_found'],
         'dry'=>$dry,
         'sample'=>array_slice($applied['items'], 0, 20),
+    ]);
+});
+
+add_action('wp_ajax_lps_run_prices_listed', function () {
+    if (!current_user_can(LPS_CAP)) wp_send_json_error(['error'=>'forbidden'], 403);
+    check_ajax_referer('lps_sync_skus'); // тот же nonce, что в кнопке
+
+    // принимаем массив skus[] или строку skus
+    $skus = [];
+    if (isset($_POST['skus']) && is_array($_POST['skus'])) {
+        $skus = array_values(array_filter(array_map('trim', array_map('strval', wp_unslash($_POST['skus'])))));
+    } else {
+        $raw  = (string)($_POST['skus'] ?? '');
+        $skus = lps_parse_sku_list($raw);
+    }
+
+    if (!$skus) {
+        wp_send_json_success(['items'=>[], 'updated_retail'=>0, 'updated_roles'=>0, 'not_found'=>0]);
+    }
+
+    $j = lps_java_fetch_prices_multi($skus);
+    if (empty($j['ok'])) {
+        wp_send_json_error(['error'=>$j['error'] ?? 'java_error', 'body'=>$j['body'] ?? null]);
+    }
+
+    $applied = lps_apply_prices_multi($j['items'], /*dry*/ false);
+    wp_send_json_success([
+        'updated_retail'=>$applied['updated_retail'],
+        'updated_roles' =>$applied['updated_roles'],
+        'not_found'     =>$applied['not_found'],
+        'items'         =>$applied['items'],
     ]);
 });

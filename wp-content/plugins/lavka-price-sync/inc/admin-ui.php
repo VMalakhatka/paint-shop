@@ -78,6 +78,65 @@ add_action('admin_enqueue_scripts', function($hook){
 function lps_render_settings_page() {
     if (!current_user_can(LPS_CAP)) return;
     if (isset($_POST['lps_save']) && check_admin_referer('lps_save_options')) {
+      // Save cron settings (schedule)
+    if (
+        $_SERVER['REQUEST_METHOD'] === 'POST'
+        && isset($_POST['_wpnonce_lps_cron'])
+        && wp_verify_nonce($_POST['_wpnonce_lps_cron'], 'lps_save_cron')
+    ) {
+        if (!current_user_can(LPS_CAP)) wp_die('forbidden');
+
+        $in = $_POST['lps_cron'] ?? [];
+
+        // нормализуем вход
+        $out = [
+            'enabled' => !empty($in['enabled']),
+            'mode'    => in_array(($in['mode'] ?? 'daily'), ['daily','weekly','dates'], true) ? $in['mode'] : 'daily',
+            'time'    => (string)($in['time'] ?? '03:30'),
+            'batch'   => max(50, min(2000, (int)($in['batch'] ?? 500))),
+        ];
+
+        if ($out['mode'] === 'weekly') {
+            $allow = ['mon','tue','wed','thu','fri','sat','sun'];
+            $out['days'] = array_values(array_intersect($allow, (array)($in['days'] ?? [])));
+        } else {
+            $out['days'] = [];
+        }
+
+        if ($out['mode'] === 'dates') {
+            $raw   = (string)($in['dates'] ?? '');
+            $dates = array_filter(array_map('trim', preg_split('/\R+/', $raw)));
+            $out['dates'] = array_values($dates);
+        } else {
+            $out['dates'] = [];
+        }
+
+        update_option(LPS_OPT_CRON, $out, false);
+
+        // пересоздаём расписание
+        if (function_exists('lps_cron_reschedule_price')) {
+            lps_cron_reschedule_price();
+        }
+
+        // "Запустити зараз"
+        if (isset($_POST['lps_cron_run_now'])) {
+            $res = function_exists('lps_run_price_sync_now') ? lps_run_price_sync_now() : ['ok'=>false,'error'=>'missing'];
+            printf(
+                '<div class="notice notice-success"><p>%s</p></div>',
+                esc_html(
+                    sprintf(
+                        __('Запуск виконано: ok=%s, updated_retail=%d, updated_roles=%d, not_found=%d', 'lavka-price-sync'),
+                        !empty($res['ok']) ? 'true' : 'false',
+                        (int)($res['updated_retail'] ?? 0),
+                        (int)($res['updated_roles']  ?? 0),
+                        (int)($res['not_found']      ?? 0)
+                    )
+                )
+            );
+        } else {
+            echo '<div class="notice notice-success"><p>'.esc_html__('Розклад збережено', 'lavka-price-sync').'</p></div>';
+        }
+    }
         $o = lps_get_options();
         $o['java_base_url']  = esc_url_raw($_POST['java_base_url'] ?? '');
         $o['api_token']      = sanitize_text_field($_POST['api_token'] ?? '');
@@ -255,6 +314,7 @@ function lps_render_run_page() {
           <?php _e('Sync listed SKUs','lavka-price-sync'); ?>
         </button>
         <span id="lps-listed-status" style="margin-left:10px;"></span>
+          <div id="lps-listed-box" style="margin-top:10px;"></div> <!-- ← контейнер для таблицы -->
       </p>
 
       <hr>
@@ -271,6 +331,135 @@ function lps_render_run_page() {
         </button>
         <span id="lps-all-status" style="margin-left:10px;"></span>
       </p>
+    <?php
+    // --- Schedule (price sync) ---
+    $cron = get_option(LPS_OPT_CRON, [
+        'enabled' => false,
+        'mode'    => 'daily',
+        'time'    => '03:30',
+        'days'    => ['mon'],
+        'dates'   => [],
+        'batch'   => 500,
+    ]);
+    ?>
+    <div class="postbox">
+      <h2 class="hndle"><span><?php _e('Price sync schedule', 'lavka-price-sync'); ?></span></h2>
+      <div class="inside">
+        <form method="post">
+          <?php wp_nonce_field('lps_save_cron','_wpnonce_lps_cron'); ?>
+          <table class="form-table">
+            <tr>
+              <th><label for="lps-cron-enabled"><?php _e('Enable', 'lavka-price-sync'); ?></label></th>
+              <td>
+                <label>
+                  <input type="checkbox" id="lps-cron-enabled" name="lps_cron[enabled]" value="1" <?php checked(!empty($cron['enabled'])); ?>>
+                  <?php _e('Yes', 'lavka-price-sync'); ?>
+                </label>
+              </td>
+            </tr>
+
+            <tr>
+              <th><?php _e('Mode', 'lavka-price-sync'); ?></th>
+              <td>
+                <select name="lps_cron[mode]" id="lps-cron-mode">
+                  <option value="daily"  <?php selected(($cron['mode']??'')==='daily');  ?>>
+                    <?php _e('Daily at specified time', 'lavka-price-sync'); ?>
+                  </option>
+                  <option value="weekly" <?php selected(($cron['mode']??'')==='weekly'); ?>>
+                    <?php _e('Weekly by days', 'lavka-price-sync'); ?>
+                  </option>
+                  <option value="dates"  <?php selected(($cron['mode']??'')==='dates');  ?>>
+                    <?php _e('On specific dates', 'lavka-price-sync'); ?>
+                  </option>
+                </select>
+              </td>
+            </tr>
+
+            <tr class="lps-field lps-field-time">
+              <th><label for="lps-cron-time"><?php _e('Time (HH:MM)', 'lavka-price-sync'); ?></label></th>
+              <td>
+                <input type="text" id="lps-cron-time" name="lps_cron[time]"
+                      value="<?php echo esc_attr($cron['time'] ?? '03:30'); ?>"
+                      class="regular-text" placeholder="03:30">
+              </td>
+            </tr>
+
+            <tr class="lps-field lps-field-weekly">
+              <th><?php _e('Week days', 'lavka-price-sync'); ?></th>
+              <td>
+                <?php
+                // English labels as source; translators will localize them.
+                $days = [
+                  'mon' => __('Mon', 'lavka-price-sync'),
+                  'tue' => __('Tue', 'lavka-price-sync'),
+                  'wed' => __('Wed', 'lavka-price-sync'),
+                  'thu' => __('Thu', 'lavka-price-sync'),
+                  'fri' => __('Fri', 'lavka-price-sync'),
+                  'sat' => __('Sat', 'lavka-price-sync'),
+                  'sun' => __('Sun', 'lavka-price-sync'),
+                ];
+                foreach ($days as $k=>$label) {
+                  $checked = in_array($k, (array)($cron['days'] ?? []), true);
+                  echo '<label style="margin-right:12px;">'
+                    . '<input type="checkbox" name="lps_cron[days][]" value="'.esc_attr($k).'" '.checked($checked,true,false).'> '
+                    . esc_html($label)
+                    . '</label>';
+                }
+                ?>
+              </td>
+            </tr>
+
+            <tr class="lps-field lps-field-dates">
+              <th><label for="lps-cron-dates"><?php _e('Dates (one per line)', 'lavka-price-sync'); ?></label></th>
+              <td>
+                <textarea id="lps-cron-dates" name="lps_cron[dates]" rows="4" class="large-text"
+                          placeholder="2025-10-15 14:00&#10;2025-11-01 09:30"><?php
+                  echo esc_textarea( implode("\n", (array)($cron['dates'] ?? [])) );
+                ?></textarea>
+                <p class="description">
+                  <?php printf(__('Site timezone: %s', 'lavka-price-sync'), wp_timezone_string()); ?>
+                </p>
+              </td>
+            </tr>
+
+            <tr>
+              <th><label for="lps-cron-batch"><?php _e('Batch size per run', 'lavka-price-sync'); ?></label></th>
+              <td>
+                <input type="number" id="lps-cron-batch" name="lps_cron[batch]"
+                      value="<?php echo (int)($cron['batch'] ?? 500); ?>" min="50" max="2000">
+              </td>
+            </tr>
+          </table>
+
+          <p>
+            <button class="button button-primary">
+              <?php _e('Save schedule', 'lavka-price-sync'); ?>
+            </button>
+            <button name="lps_cron_run_now" value="1" class="button">
+              <?php _e('Run now', 'lavka-price-sync'); ?>
+            </button>
+          </p>
+        </form>
+      </div>
+    </div>
+
+    <script>
+    (function(){
+      const modeEl = document.getElementById('lps-cron-mode');
+      const rows = {
+        weekly: document.querySelector('.lps-field-weekly'),
+        dates:  document.querySelector('.lps-field-dates'),
+        time:   document.querySelector('.lps-field-time'),
+      };
+      function apply(){
+        const m = modeEl.value;
+        if (rows.weekly) rows.weekly.style.display = (m === 'weekly') ? '' : 'none';
+        if (rows.dates)  rows.dates.style.display  = (m === 'dates')  ? '' : 'none';
+        if (rows.time)   rows.time.style.display   = (m !== 'dates')  ? '' : '';
+      }
+      if (modeEl){ modeEl.addEventListener('change', apply); apply(); }
+    })();
+    </script>
     </div>
     <?php
 }
