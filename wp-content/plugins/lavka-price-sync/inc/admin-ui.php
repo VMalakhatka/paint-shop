@@ -38,20 +38,29 @@ add_action('admin_menu', function () {
 /** Assets */
 add_action('admin_enqueue_scripts', function($hook){
     if (strpos($hook, 'lps-') === false) return;
+
     wp_enqueue_style('lps-admin', plugins_url('../assets/admin.css', __FILE__), [], '1.0');
     wp_enqueue_script('lps-admin', plugins_url('../assets/admin.js', __FILE__), [], '1.0', true);
+
+    // Локализация текстов
     wp_localize_script('lps-admin', 'LPS_I18N', [
-        'loading'        => esc_html__('Loading…','lavka-price-sync'),
-        'saving'         => esc_html__('Saving…','lavka-price-sync'),
-        'saved'          => esc_html__('Saved','lavka-price-sync'),
-        'neterr'         => esc_html__('Network error','lavka-price-sync'),
-        'error'          => esc_html__('Error:','lavka-price-sync'),
-        'done'           => esc_html__('Done','lavka-price-sync'),
-        'page'           => esc_html__('Page','lavka-price-sync'),
-        'of'             => esc_html__('of','lavka-price-sync'),
-        'not_found'      => esc_html__('Not found','lavka-price-sync'),
-        'updated'        => esc_html__('Updated','lavka-price-sync'),
-        'enter_skus'     => esc_html__('Enter one or more SKUs','lavka-price-sync'),
+        'loading'    => esc_html__('Loading…','lavka-price-sync'),
+        'saving'     => esc_html__('Saving…','lavka-price-sync'),
+        'saved'      => esc_html__('Saved','lavka-price-sync'),
+        'neterr'     => esc_html__('Network error','lavka-price-sync'),
+        'error'      => esc_html__('Error:','lavka-price-sync'),
+        'done'       => esc_html__('Done','lavka-price-sync'),
+        'page'       => esc_html__('Page','lavka-price-sync'),
+        'of'         => esc_html__('of','lavka-price-sync'),
+        'not_found'  => esc_html__('Not found','lavka-price-sync'),
+        'updated'    => esc_html__('Updated','lavka-price-sync'),
+        'enter_skus' => esc_html__('Enter one or more SKUs','lavka-price-sync'),
+    ]);
+
+    // Здесь теперь безопасно создавать nonce и admin_url
+    wp_localize_script('lps-admin', 'LPS_ADMIN', [
+        'ajaxUrl' => admin_url('admin-ajax.php'),
+        'nonce'   => wp_create_nonce('lps_admin_nonce'),
     ]);
 });
 
@@ -143,6 +152,73 @@ function lps_render_settings_page() {
     </div>
     <?php
 }
+
+
+/** Mapping page */
+function lps_render_mapping_page() {
+    if (!current_user_can(LPS_CAP)) return;
+
+    // Надёжно получаем роли
+    if (function_exists('lps_get_roles')) {
+        $roles = lps_get_roles();
+    } else {
+        // Фоллбек: читаем напрямую из WP
+        if (!function_exists('wp_roles')) {
+            require_once ABSPATH . 'wp-includes/pluggable.php';
+        }
+        $wp_roles = wp_roles();
+        $roles = [];
+        foreach ($wp_roles->roles as $slug => $data) {
+            $roles[$slug] = isset($data['name']) ? $data['name'] : $slug;
+        }
+        ksort($roles);
+    }
+    
+    ?>
+    <div class="wrap">
+      <h1><?php echo esc_html__('Mapping', 'lavka-price-sync'); ?></h1>
+
+      <p class="description">
+        <?php echo esc_html__('Link WooCommerce roles to external contract codes. Prices for a role will be taken using its mapped contract.', 'lavka-price-sync'); ?>
+      </p>
+
+      <div id="lps-mapping-wrap"
+           data-ajax="<?php echo esc_attr( admin_url('admin-ajax.php') ); ?>"
+           data-nonce="<?php echo esc_attr( wp_create_nonce('lps_admin_nonce') ); ?>">
+
+        <table class="widefat striped" style="max-width:900px">
+          <thead>
+            <tr>
+              <th><?php echo esc_html__('Role', 'lavka-price-sync'); ?></th>
+              <th><?php echo esc_html__('Contract', 'lavka-price-sync'); ?></th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php foreach ($roles as $slug => $label): ?>
+              <tr>
+                <td><strong><?php echo esc_html($label); ?></strong><br><code><?php echo esc_html($slug); ?></code></td>
+                <td>
+                  <!-- Опции контрактов подставит JS; держим data-атрибут с ролью -->
+                  <select class="lps-contract" data-lps-role="<?php echo esc_attr($slug); ?>" style="min-width:320px">
+                    <option value=""><?php echo esc_html__('— Select contract —', 'lavka-price-sync'); ?></option>
+                  </select>
+                </td>
+              </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+
+        <p style="margin-top:10px">
+          <button class="button button-primary" id="lps-mapping-save">
+            <?php echo esc_html__('Save mapping', 'lavka-price-sync'); ?>
+          </button>
+          <span id="lps-mapping-status" style="margin-left:10px;"></span>
+        </p>
+      </div>
+    </div>
+    <?php
+}
+
 
 /** Run page (manual) */
 function lps_render_run_page() {

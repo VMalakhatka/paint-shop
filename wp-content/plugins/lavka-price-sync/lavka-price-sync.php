@@ -8,8 +8,8 @@
  */
 if (!defined('ABSPATH')) exit;
 
-add_action('plugins_loaded', function () {
-  load_plugin_textdomain('lavka-price-sync', false, dirname(plugin_basename(__FILE__)) . '/languages');
+add_action('init', function () {
+    load_plugin_textdomain('lavka-price-sync', false, dirname(plugin_basename(__FILE__)) . '/languages');
 });
 
 define('LPS_OPT_MAIN',    'lps_options');
