@@ -4,20 +4,17 @@ if (!defined('ABSPATH')) exit;
 /** Get & normalize plugin options */
 function lps_get_options(): array {
     $o = get_option(LPS_OPT_MAIN, []);
-    $o = is_array($o) ? $o : [];
-    return wp_parse_args($o, [
+    return wp_parse_args(is_array($o)?$o:[], [
         'java_base_url'  => '',
         'api_token'      => '',
-        'path_contracts' => '/contracts',
-        'path_prices'    => '/prices/query', // POST
+        'path_contracts' => '/ref/ref/contracts',
+        'path_prices'    => '/prices/query',
         'batch'          => LPS_DEF_BATCH,
-        'cron_enabled'   => true,
         'timeout'        => 160,
+        'cron_enabled'   => false,
     ]);
 }
-
-/** Save options (internal) */
-function lps_update_options(array $o) {
+function lps_update_options(array $o): void {
     update_option(LPS_OPT_MAIN, $o, false);
 }
 
@@ -44,6 +41,47 @@ function lps_java_url(string $path): string {
     $path = '/'.ltrim($path, '/');
     return $base.$path;
 }
+
+// ==== HTTP ====
+function lps_java_get(string $path, array $args = []) {
+    $o = lps_get_options();
+    $url = rtrim($o['java_base_url'], '/') . '/' . ltrim($path, '/');
+    $args = wp_parse_args($args, [
+        'timeout' => (int)($o['timeout'] ?? 160),
+        'headers' => [
+            'X-Auth-Token' => $o['api_token'] ?? '',
+            'Accept'       => 'application/json',
+        ],
+    ]);
+    return wp_remote_get($url, $args);
+}
+
+function lps_java_post(string $path, $body, array $args = []) {
+    $o = lps_get_options();
+    $url = rtrim($o['java_base_url'], '/') . '/' . ltrim($path, '/');
+    $args = wp_parse_args($args, [
+        'timeout' => (int)($o['timeout'] ?? 160),
+        'headers' => [
+            'X-Auth-Token'   => $o['api_token'] ?? '',
+            'Accept'         => 'application/json',
+            'Content-Type'   => 'application/json',
+        ],
+        'body' => is_string($body) ? $body : wp_json_encode($body),
+    ]);
+    return wp_remote_post($url, $args);
+}
+
+
+// ==== роли ====
+function lps_get_roles(): array {
+    $out = [];
+    foreach (wp_roles()->roles as $slug => $def) {
+        $out[$slug] = $def['name'] ?? $slug;
+    }
+    ksort($out, SORT_NATURAL|SORT_FLAG_CASE);
+    return $out;
+}
+
 
 /** HTTP GET/POST to Java */
 function lps_http_json(string $method, string $url, array $args = []) {

@@ -1,22 +1,31 @@
 /* assets/admin.js */
+/* assets/admin.js */
 (function(){
-  // Общий nonce и ajax url — положи их в data-атрибуты контейнеров или выдавай через wp_localize_script,
-  // здесь читаем из глобальных переменных, если они есть.
-  const AJAX_URL = window.ajaxurl || (window.LPS && LPS.ajaxUrl) || (window.wp && wp.ajax && wp.ajax.settings && wp.ajax.settings.url);
-  const NONCE = window.LPS_ADMIN_NONCE || (window.LPS && LPS.nonce) || '';
+   const mapWrap = document.getElementById('lps-mapping-wrap');
+   
+  console.log('[LPS] admin.js loaded');
+ 
+  if (!mapWrap) {
+    console.log('[LPS] #lps-mapping-wrap not found on this page');
+    return;
+  }
+  console.log('[LPS] mapping wrap found');
+  const GLB = (window.LPS_ADMIN || {});
+  const GLOBAL_AJAX_URL = GLB.ajaxUrl || window.ajaxurl;
+  const GLOBAL_NONCE = GLB.nonce || '';
 
-  // Универсальный fetch с диагностикой
-  async function post(action, payload){
+  async function postAjax(url, nonce, action, payload){
     const f = new FormData();
     f.append('action', action);
-    f.append('_wpnonce', NONCE);
+    f.append('_wpnonce', nonce);
     Object.entries(payload||{}).forEach(([k,v])=>{
       if (Array.isArray(v)) v.forEach(x=>f.append(k+'[]', x));
       else f.append(k, v);
     });
 
-    const r = await fetch(AJAX_URL, { method:'POST', credentials:'same-origin', body:f });
-    const ct = (r.headers.get('content-type')||'').toLowerCase();
+    const r = await fetch(url, { method:'POST', credentials:'same-origin', body:f });
+    const ct = (r.headers.get('content-type') || '').toLowerCase();
+
     if (ct.includes('application/json')) {
       return r.json();
     } else {
@@ -25,103 +34,77 @@
     }
   }
 
-  // --- Mapping page wiring (если элементы есть) ---
-  const mapWrap = document.getElementById('lps-mapping-wrap');
+  // ===== Mapping =====
   if (mapWrap) {
-    const rolesSel = document.getElementById('lps-roles');
-    const contractsSel = document.getElementById('lps-contracts');
-    const btnSave = document.getElementById('lps-mapping-save');
-    const status = document.getElementById('lps-mapping-status');
+    // Берём url/nonce c data-* (если есть), иначе из глобалей
+    const AJAX_URL = mapWrap.dataset.ajax || GLOBAL_AJAX_URL;
+    const NONCE    = mapWrap.dataset.nonce || GLOBAL_NONCE;
 
+    const status = document.getElementById('lps-mapping-status');
+    const saveBtn = document.getElementById('lps-mapping-save');
+
+    // Инициализация: тянем контракты и текущий маппинг
     (async function init(){
       status.textContent = (window.LPS_I18N && LPS_I18N.loading) || 'Loading…';
       try{
-        const [{data:mapRes}, {data:ctr}] = await Promise.all([
-          post('lps_get_mapping', {}),
-          post('lps_get_contracts', {})
+        const [contractsRes, mappingRes] = await Promise.all([
+          postAjax(AJAX_URL, NONCE, 'lps_get_contracts', {}),
+          postAjax(AJAX_URL, NONCE, 'lps_get_mapping',  {})
         ]);
-      }catch(e){
-        // WP JSON success оболочка
-      }
-    })().catch(e=>{
-      console.error(e);
-      status.textContent = (window.LPS_I18N && LPS_I18N.neterr) || 'Network error';
-    });
 
-    btnSave && btnSave.addEventListener('click', async ()=>{
-      try{
-        status.textContent = (window.LPS_I18N && LPS_I18N.saving) || 'Saving…';
-        const map = {};
-        // собираем все <select data-role="slug">
-        document.querySelectorAll('[data-lps-role]').forEach(sel=>{
-          map[sel.dataset.lpsRole] = sel.value || '';
-        });
-        const j = await post('lps_save_mapping', {map});
-                status.textContent = j?.success
-          ? ((window.LPS_I18N && LPS_I18N.saved) || 'Saved')
-          : (((window.LPS_I18N && LPS_I18N.error) || 'Error:') + ' ' + (j?.data?.error || 'unknown'));
-      } catch (e) {
-        console.error(e);
-        status.textContent = (window.LPS_I18N && LPS_I18N.neterr) || 'Network error';
-      }
-    });
+        if (!contractsRes?.success) throw new Error('contracts: ' + (contractsRes?.data?.error || 'unknown'));
+        if (!mappingRes?.success)  throw new Error('mapping: '   + (mappingRes?.data?.error  || 'unknown'));
 
-    // Инициализация таблицы маппинга
-    (async function initFill(){
-      status.textContent = (window.LPS_I18N && LPS_I18N.loading) || 'Loading…';
-      try{
-        const resMap = await post('lps_get_mapping', {});
-        const resCtr = await post('lps_get_contracts', {});
-        if (!resMap?.success || !resCtr?.success) {
-          status.textContent = ((window.LPS_I18N && LPS_I18N.error) || 'Error:') + ' API';
-          return;
-        }
+        const items = (contractsRes.data.items || []);
+        const map   = (mappingRes.data.map || {});
 
-        const map = (resMap.data && resMap.data.map) || {};
-        const roles = (resMap.data && resMap.data.roles) || [];
-        const contracts = (resCtr.data && resCtr.data.items) || [];
+        // Заполняем все <select class="lps-contract" data-lps-role="slug">
+        document.querySelectorAll('select.lps-contract[data-lps-role]').forEach(sel=>{
+          const role = sel.dataset.lpsRole;
+          // очистка
+          sel.innerHTML = '';
+          const opt0 = document.createElement('option');
+          opt0.value = '';
+          opt0.textContent = '— Select contract —';
+          sel.appendChild(opt0);
 
-        const tbody = document.getElementById('lps-mapping-body');
-        if (!tbody) { status.textContent = 'No tbody'; return; }
-        tbody.innerHTML = '';
-
-        roles.forEach(r => {
-          const tr  = document.createElement('tr');
-          const td1 = document.createElement('td');
-          const td2 = document.createElement('td');
-
-          td1.innerHTML = `<strong>${r.name || r.slug}</strong><br><code>${r.slug}</code>`;
-
-          const sel = document.createElement('select');
-          sel.setAttribute('data-lps-role', r.slug);
-          sel.className = 'lps-contract-select';
-
-          const empty = document.createElement('option');
-          empty.value = '';
-          empty.textContent = '—';
-          sel.appendChild(empty);
-
-          (contracts || []).forEach(c => {
+          items.forEach(c=>{
             const opt = document.createElement('option');
-            opt.value = String(c.code || '');
-            opt.textContent = `${c.code || ''} — ${c.name || ''}`.trim();
-            if ((map[r.slug] || '') === opt.value) opt.selected = true;
+            opt.value = c.code || '';
+            const label = c.code + (c.name && c.name !== c.code ? ` — ${c.name}` : '');
+            opt.textContent = label;
+            if ((map[role] || '') === opt.value) opt.selected = true;
             sel.appendChild(opt);
           });
-
-          td2.appendChild(sel);
-          tr.appendChild(td1);
-          tr.appendChild(td2);
-          tbody.appendChild(tr);
         });
 
         status.textContent = '';
       } catch(e){
-        console.error(e);
+        console.error('Mapping init error:', e);
         status.textContent = (window.LPS_I18N && LPS_I18N.neterr) || 'Network error';
+        status.title = e.message || String(e);
       }
     })();
-  }
 
-  // --- Run page wiring ниже уже есть ---
+    // Сохранение маппинга
+    saveBtn && saveBtn.addEventListener('click', async ()=>{
+      try{
+        status.textContent = (window.LPS_I18N && LPS_I18N.saving) || 'Saving…';
+        const map = {};
+        document.querySelectorAll('select.lps-contract[data-lps-role]').forEach(sel=>{
+          map[sel.dataset.lpsRole] = sel.value || '';
+        });
+        const res = await postAjax(AJAX_URL, NONCE, 'lps_save_mapping', { map });
+        if (res?.success) {
+          status.textContent = (window.LPS_I18N && LPS_I18N.saved) || 'Saved';
+        } else {
+          status.textContent = ((window.LPS_I18N && LPS_I18N.error) || 'Error:') + ' ' + (res?.data?.error || 'unknown');
+        }
+      } catch(e){
+        console.error('Mapping save error:', e);
+        status.textContent = (window.LPS_I18N && LPS_I18N.neterr) || 'Network error';
+        status.title = e.message || String(e);
+      }
+    });
+  }
 })();

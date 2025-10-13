@@ -39,10 +39,21 @@ add_action('admin_menu', function () {
 add_action('admin_enqueue_scripts', function($hook){
     if (strpos($hook, 'lps-') === false) return;
 
-    wp_enqueue_style('lps-admin', plugins_url('../assets/admin.css', __FILE__), [], '1.0');
-    wp_enqueue_script('lps-admin', plugins_url('../assets/admin.js', __FILE__), [], '1.0', true);
+    $css = __DIR__ . '/../assets/admin.css';
+    $js  = __DIR__ . '/../assets/admin.js';
 
-    // Локализация текстов
+    wp_enqueue_style('lps-admin',
+        plugins_url('../assets/admin.css', __FILE__),
+        [],
+        @filemtime($css) ?: '1.0'
+    );
+    wp_enqueue_script('lps-admin',
+        plugins_url('../assets/admin.js', __FILE__),
+        [],
+        @filemtime($js) ?: '1.0',
+        true
+    );
+
     wp_localize_script('lps-admin', 'LPS_I18N', [
         'loading'    => esc_html__('Loading…','lavka-price-sync'),
         'saving'     => esc_html__('Saving…','lavka-price-sync'),
@@ -56,13 +67,12 @@ add_action('admin_enqueue_scripts', function($hook){
         'updated'    => esc_html__('Updated','lavka-price-sync'),
         'enter_skus' => esc_html__('Enter one or more SKUs','lavka-price-sync'),
     ]);
-
-    // Здесь теперь безопасно создавать nonce и admin_url
     wp_localize_script('lps-admin', 'LPS_ADMIN', [
         'ajaxUrl' => admin_url('admin-ajax.php'),
         'nonce'   => wp_create_nonce('lps_admin_nonce'),
     ]);
 });
+
 
 /** Settings page */
 function lps_render_settings_page() {
@@ -71,7 +81,7 @@ function lps_render_settings_page() {
         $o = lps_get_options();
         $o['java_base_url']  = esc_url_raw($_POST['java_base_url'] ?? '');
         $o['api_token']      = sanitize_text_field($_POST['api_token'] ?? '');
-        $o['path_contracts'] = '/'.ltrim(sanitize_text_field($_POST['path_contracts'] ?? '/contracts'), '/');
+        $o['path_contracts'] = '/'.ltrim(sanitize_text_field($_POST['path_contracts'] ?? '/ref/ref/contracts'), '/');
         $o['path_prices']    = '/'.ltrim(sanitize_text_field($_POST['path_prices'] ?? '/prices/query'), '/');
         $o['batch']          = max(LPS_MIN_BATCH, min(LPS_MAX_BATCH, (int)($_POST['batch'] ?? LPS_DEF_BATCH)));
         $o['timeout']        = max(30, min(600, (int)($_POST['timeout'] ?? 160)));
@@ -173,7 +183,7 @@ function lps_render_mapping_page() {
         }
         ksort($roles);
     }
-    
+
     ?>
     <div class="wrap">
       <h1><?php echo esc_html__('Mapping', 'lavka-price-sync'); ?></h1>
