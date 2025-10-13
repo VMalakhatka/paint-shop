@@ -142,3 +142,25 @@ function lps_get_skus_slice(int $offset, int $limit): array {
     $rows = $wpdb->get_col($sql) ?: [];
     return array_values(array_filter(array_map('strval',$rows)));
 }
+
+
+if (!function_exists('lps_role_meta_key')) {
+    function lps_role_meta_key(string $role): string {
+        return '_wpc_price_role_' . sanitize_key($role);
+    }
+}
+
+if (!function_exists('lps_find_product_id_by_sku')) {
+    function lps_find_product_id_by_sku(string $sku): int {
+        global $wpdb;
+        $pid = (int) $wpdb->get_var($wpdb->prepare("
+            SELECT p.ID
+            FROM {$wpdb->postmeta} m
+            JOIN {$wpdb->posts} p ON p.ID = m.post_id
+            WHERE m.meta_key = '_sku' AND m.meta_value = %s
+              AND p.post_type IN ('product','product_variation')
+            LIMIT 1
+        ", $sku));
+        return $pid ?: 0;
+    }
+}

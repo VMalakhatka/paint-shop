@@ -238,6 +238,9 @@ function lps_render_run_page() {
     $o = lps_get_options();
     ?>
     <div class="wrap">
+      <p class="description">
+  <?php _e('Uses mapping from the Mapping page. For each SKU the endpoint returns retail price and all role prices. The plugin updates _regular_price/_price and _wpc_price_role_<role>.','lavka-price-sync'); ?>
+</p>
       <h1><?php echo esc_html__('Run price sync', 'lavka-price-sync'); ?></h1>
 
       <h2><?php _e('Sync listed SKUs','lavka-price-sync'); ?></h2>
