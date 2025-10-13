@@ -125,7 +125,7 @@ function lps_render_settings_page() {
                 '<div class="notice notice-success"><p>%s</p></div>',
                 esc_html(
                     sprintf(
-                        __('Запуск виконано: ok=%s, updated_retail=%d, updated_roles=%d, not_found=%d', 'lavka-price-sync'),
+                        __('Launch completed: ok=%s, updated_retail=%d, updated_roles=%d, not_found=%d', 'lavka-price-sync'),
                         !empty($res['ok']) ? 'true' : 'false',
                         (int)($res['updated_retail'] ?? 0),
                         (int)($res['updated_roles']  ?? 0),
@@ -134,7 +134,7 @@ function lps_render_settings_page() {
                 )
             );
         } else {
-            echo '<div class="notice notice-success"><p>'.esc_html__('Розклад збережено', 'lavka-price-sync').'</p></div>';
+            echo '<div class="notice notice-success"><p>'.esc_html__('Schedule saved', 'lavka-price-sync').'</p></div>';
         }
     }
         $o = lps_get_options();

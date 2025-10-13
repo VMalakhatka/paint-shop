@@ -1,48 +1,269 @@
+# Copyright (C) 2025 
+# This file is distributed under the same license as the Lavka Price Sync plugin.
 msgid ""
 msgstr ""
 "Project-Id-Version: Lavka Price Sync 0.1.0\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-12 00:00+0000\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: \n"
-"Language-Team: \n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lavka-price-sync\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"POT-Creation-Date: 2025-10-13T20:11:03+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: lavka-price-sync\n"
 
+#. Plugin Name of the plugin
 #: lavka-price-sync.php
+#: inc/admin-ui.php:7
+#: inc/admin-ui.php:154
 msgid "Lavka Price Sync"
 msgstr ""
 
-#: inc/admin-ui.php
+#. Description of the plugin
+#: lavka-price-sync.php
+msgid "Sync role-based prices from Java service to WooCommerce (meta: _wpc_price_role_<role>)."
+msgstr ""
+
+#: inc/admin-ui.php:8
+msgid "Price Sync"
+msgstr ""
+
+#: inc/admin-ui.php:16
+#: inc/admin-ui.php:17
 msgid "Settings"
 msgstr ""
 
-#: inc/admin-ui.php
+#: inc/admin-ui.php:23
+#: inc/admin-ui.php:24
+#: inc/admin-ui.php:248
 msgid "Mapping"
 msgstr ""
 
-#: inc/admin-ui.php
+#: inc/admin-ui.php:30
+#: inc/admin-ui.php:31
+msgid "Run"
+msgstr ""
+
+#: inc/admin-ui.php:58
 msgid "Loading…"
 msgstr ""
 
-#: inc/admin-ui.php
+#: inc/admin-ui.php:59
 msgid "Saving…"
 msgstr ""
 
-#: inc/admin-ui.php
+#: inc/admin-ui.php:60
+#: inc/admin-ui.php:149
 msgid "Saved"
 msgstr ""
 
-#: inc/admin-ui.php
+#: inc/admin-ui.php:61
 msgid "Network error"
 msgstr ""
 
-#: inc/admin-ui.php
+#: inc/admin-ui.php:62
+msgid "Error:"
+msgstr ""
+
+#: inc/admin-ui.php:63
+msgid "Done"
+msgstr ""
+
+#: inc/admin-ui.php:64
+msgid "Page"
+msgstr ""
+
+#: inc/admin-ui.php:65
+msgid "of"
+msgstr ""
+
+#: inc/admin-ui.php:66
+msgid "Not found"
+msgstr ""
+
+#: inc/admin-ui.php:67
+msgid "Updated"
+msgstr ""
+
+#: inc/admin-ui.php:68
+msgid "Enter one or more SKUs"
+msgstr ""
+
+#: inc/admin-ui.php:128
+#, php-format
+msgid "Launch completed: ok=%s, updated_retail=%d, updated_roles=%d, not_found=%d"
+msgstr ""
+
+#: inc/admin-ui.php:137
+msgid "Schedule saved"
+msgstr ""
+
+#: inc/admin-ui.php:159
+msgid "Java Base URL"
+msgstr ""
+
+#: inc/admin-ui.php:167
+msgid "API Token"
+msgstr ""
+
+#: inc/admin-ui.php:175
+msgid "Contracts endpoint"
+msgstr ""
+
+#: inc/admin-ui.php:184
+msgid "Prices endpoint"
+msgstr ""
+
+#: inc/admin-ui.php:193
+#: inc/admin-ui.php:324
+msgid "Batch size"
+msgstr ""
+
+#: inc/admin-ui.php:201
+msgid "HTTP timeout, sec"
+msgstr ""
+
+#: inc/admin-ui.php:209
+msgid "Cron"
+msgstr ""
+
+#: inc/admin-ui.php:213
+msgid "Run hourly"
+msgstr ""
+
+#: inc/admin-ui.php:219
+msgid "Save"
+msgstr ""
+
+#: inc/admin-ui.php:251
+msgid "Link WooCommerce roles to external contract codes. Prices for a role will be taken using its mapped contract."
+msgstr ""
+
+#: inc/admin-ui.php:261
+msgid "Role"
+msgstr ""
+
+#: inc/admin-ui.php:262
+msgid "Contract"
+msgstr ""
+
+#: inc/admin-ui.php:272
+msgid "— Select contract —"
+msgstr ""
+
+#: inc/admin-ui.php:282
+msgid "Save mapping"
+msgstr ""
+
+#: inc/admin-ui.php:301
+msgid "Uses mapping from the Mapping page. For each SKU the endpoint returns retail price and all role prices. The plugin updates _regular_price/_price and _wpc_price_role_<role>."
+msgstr ""
+
+#: inc/admin-ui.php:303
+msgid "Run price sync"
+msgstr ""
+
+#: inc/admin-ui.php:305
+#: inc/admin-ui.php:314
 msgid "Sync listed SKUs"
 msgstr ""
 
-#: inc/admin-ui.php
+#: inc/admin-ui.php:322
+#: inc/admin-ui.php:330
 msgid "Sync ALL (paged)"
+msgstr ""
+
+#: inc/admin-ui.php:346
+msgid "Price sync schedule"
+msgstr ""
+
+#: inc/admin-ui.php:352
+msgid "Enable"
+msgstr ""
+
+#: inc/admin-ui.php:356
+msgid "Yes"
+msgstr ""
+
+#: inc/admin-ui.php:362
+msgid "Mode"
+msgstr ""
+
+#: inc/admin-ui.php:366
+msgid "Daily at specified time"
+msgstr ""
+
+#: inc/admin-ui.php:369
+msgid "Weekly by days"
+msgstr ""
+
+#: inc/admin-ui.php:372
+msgid "On specific dates"
+msgstr ""
+
+#: inc/admin-ui.php:379
+msgid "Time (HH:MM)"
+msgstr ""
+
+#: inc/admin-ui.php:388
+msgid "Week days"
+msgstr ""
+
+#: inc/admin-ui.php:393
+msgid "Mon"
+msgstr ""
+
+#: inc/admin-ui.php:394
+msgid "Tue"
+msgstr ""
+
+#: inc/admin-ui.php:395
+msgid "Wed"
+msgstr ""
+
+#: inc/admin-ui.php:396
+msgid "Thu"
+msgstr ""
+
+#: inc/admin-ui.php:397
+msgid "Fri"
+msgstr ""
+
+#: inc/admin-ui.php:398
+msgid "Sat"
+msgstr ""
+
+#: inc/admin-ui.php:399
+msgid "Sun"
+msgstr ""
+
+#: inc/admin-ui.php:413
+msgid "Dates (one per line)"
+msgstr ""
+
+#: inc/admin-ui.php:420
+#, php-format
+msgid "Site timezone: %s"
+msgstr ""
+
+#: inc/admin-ui.php:426
+msgid "Batch size per run"
+msgstr ""
+
+#: inc/admin-ui.php:436
+msgid "Save schedule"
+msgstr ""
+
+#: inc/admin-ui.php:439
+msgid "Run now"
+msgstr ""
+
+#: inc/cron.php:23
+msgid "Once Weekly"
+msgstr ""
+
+#: lavka-price-sync.php:47
+msgid "Lavka Price hourly"
 msgstr ""
