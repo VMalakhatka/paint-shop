@@ -1,0 +1,41 @@
+/* Общие */
+.lps-muted { opacity: .75; }
+.lps-inline { display: inline-block; vertical-align: middle; }
+
+/* Таблица маппинга */
+#lps-mapping-wrap .lps-table {
+  border-collapse: collapse;
+  width: 100%;
+  max-width: 1100px;
+}
+#lps-mapping-wrap .lps-table th,
+#lps-mapping-wrap .lps-table td {
+  border: 1px solid #e5e5e5;
+  padding: 8px;
+  vertical-align: top;
+  background: #fff;
+}
+#lps-mapping-wrap .lps-table th {
+  background: #f6f7f7;
+  font-weight: 600;
+}
+#lps-mapping-wrap .lps-contract-select {
+  min-width: 360px;
+}
+
+/* Панель действий/статуса */
+#lps-mapping-actions { margin: 10px 0; }
+#lps-mapping-status { margin-left: 10px; }
+
+/* Run page */
+#lps-run-wrap .lps-textarea {
+  width: 100%;
+  max-width: 720px;
+  min-height: 120px;
+}
+#lps-run-controls { margin: 8px 0; }
+#lps-run-status { margin-left: 10px; }
+
+/* Небольшие утилиты */
+.lps-w7rem { width: 7rem; }
+.lps-w10rem { width: 10rem; }

@@ -24,8 +24,8 @@ if (!defined('LAVKA_MOV_EMPTY_BREAK')) define('LAVKA_MOV_EMPTY_BREAK', 2); // п
 /** Меню + страница настроек */
 add_action('admin_menu', function () {
     add_menu_page(
-        __('Lavka Sync', 'lavka-sync'),
-        __('Lavka Sync', 'lavka-sync'),
+        __('Lavka Synck', 'lavka-sync'),
+        __('Lavka Synck', 'lavka-sync'),
         'manage_lavka_sync',
         'lavka-sync',
         'lavka_sync_render_page',
