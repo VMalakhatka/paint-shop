@@ -295,6 +295,68 @@ function lps_render_run_page() {
     $nonce_listed = wp_create_nonce('lps_sync_skus');
     $nonce_all    = wp_create_nonce('lps_sync_all');
     $o = lps_get_options();
+        // --- Handle Cron form submit (schedule) ---
+    if (
+        $_SERVER['REQUEST_METHOD'] === 'POST'
+        && isset($_POST['_wpnonce_lps_cron'])
+        && wp_verify_nonce($_POST['_wpnonce_lps_cron'], 'lps_save_cron')
+    ) {
+        $in = $_POST['lps_cron'] ?? [];
+
+        // строгая нормализация
+        $out = [
+            'enabled' => (isset($in['enabled']) && (string)$in['enabled'] === '1'),
+            'mode'    => in_array(($in['mode'] ?? 'daily'), ['daily','weekly','dates'], true) ? $in['mode'] : 'daily',
+            'time'    => (string)($in['time'] ?? '03:30'),
+            'batch'   => max(50, min(2000, (int)($in['batch'] ?? 500))),
+        ];
+
+        if ($out['mode'] === 'weekly') {
+            $allow = ['mon','tue','wed','thu','fri','sat','sun'];
+            $out['days'] = array_values(array_intersect($allow, (array)($in['days'] ?? [])));
+        } else {
+            $out['days'] = [];
+        }
+
+        if ($out['mode'] === 'dates') {
+            $raw = (string)($in['dates'] ?? '');
+            $dates = array_filter(array_map('trim', preg_split('/\R+/', $raw)));
+            $out['dates'] = array_values($dates);
+        } else {
+            $out['dates'] = [];
+        }
+
+        update_option(LPS_OPT_CRON, $out, false);
+
+        if (function_exists('lps_cron_reschedule_price')) {
+            lps_cron_reschedule_price();
+        }
+
+        if (isset($_POST['lps_cron_run_now'])) {
+            $res = function_exists('lps_run_price_sync_now') ? lps_run_price_sync_now() : ['ok'=>false,'error'=>'missing'];
+            printf('<div class="notice notice-success"><p>%s</p></div>',
+                esc_html(sprintf(
+                    __('Launch completed: ok=%s, updated_retail=%d, updated_roles=%d, not_found=%d', 'lavka-price-sync'),
+                    !empty($res['ok']) ? 'true' : 'false',
+                    (int)($res['updated_retail'] ?? 0),
+                    (int)($res['updated_roles']  ?? 0),
+                    (int)($res['not_found']      ?? 0)
+                ))
+            );
+        } else {
+            echo '<div class="notice notice-success"><p>'.esc_html__('Schedule saved', 'lavka-price-sync').'</p></div>';
+        }
+    }
+
+    // всегда берём актуальное состояние после обработки POST
+    $cron = get_option(LPS_OPT_CRON, [
+        'enabled' => false,
+        'mode'    => 'daily',
+        'time'    => '03:30',
+        'days'    => ['mon'],
+        'dates'   => [],
+        'batch'   => 500,
+    ]);
     ?>
     <div class="wrap">
       <p class="description">
@@ -343,7 +405,14 @@ function lps_render_run_page() {
     ]);
     ?>
     <div class="postbox">
-      <h2 class="hndle"><span><?php _e('Price sync schedule', 'lavka-price-sync'); ?></span></h2>
+      <label>
+          <input type="checkbox"
+                id="lps-cron-enabled"
+                name="lps_cron[enabled]"
+                value="1"
+                <?php checked( isset($cron['enabled']) && (bool)$cron['enabled'], true ); ?>>
+          <?php _e('Yes', 'lavka-price-sync'); ?>
+        </label>
       <div class="inside">
         <form method="post">
           <?php wp_nonce_field('lps_save_cron','_wpnonce_lps_cron'); ?>
@@ -352,7 +421,11 @@ function lps_render_run_page() {
               <th><label for="lps-cron-enabled"><?php _e('Enable', 'lavka-price-sync'); ?></label></th>
               <td>
                 <label>
-                  <input type="checkbox" id="lps-cron-enabled" name="lps_cron[enabled]" value="1" <?php checked(!empty($cron['enabled'])); ?>>
+                  <input type="checkbox"
+                      id="lps-cron-enabled"
+                      name="lps_cron[enabled]"
+                      value="1"
+                      <?php checked( isset($cron['enabled']) && (bool)$cron['enabled'], true ); ?>>
                   <?php _e('Yes', 'lavka-price-sync'); ?>
                 </label>
               </td>
@@ -432,12 +505,12 @@ function lps_render_run_page() {
           </table>
 
           <p>
-            <button class="button button-primary">
-              <?php _e('Save schedule', 'lavka-price-sync'); ?>
-            </button>
-            <button name="lps_cron_run_now" value="1" class="button">
-              <?php _e('Run now', 'lavka-price-sync'); ?>
-            </button>
+              <button type="submit" class="button button-primary">
+                  <?php _e('Save schedule', 'lavka-price-sync'); ?>
+              </button>
+              <button type="submit" name="lps_cron_run_now" value="1" class="button">
+                  <?php _e('Run now', 'lavka-price-sync'); ?>
+              </button>
           </p>
         </form>
       </div>
