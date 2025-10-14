@@ -48,6 +48,9 @@ function lps_run_price_sync_now(): array {
     $notFound      = 0;
     $sample        = [];
 
+        // anchor: LOGS-NF-ACCUM
+    $notFoundSkus = [];
+
     for ($page=0; $page<$pages; $page++) {
         $skus = lps_get_skus_slice($page*$batch, $batch);
         if (!$skus) break;
@@ -59,6 +62,12 @@ function lps_run_price_sync_now(): array {
         }
 
         $applied = lps_apply_prices_multi($j['items'], /*dry*/ false);
+            // anchor: LOGS-COLLECT-NF
+            foreach ($applied['items'] as $it) {
+                if (empty($it['found']) && !empty($it['sku'])) {
+                    $notFoundSkus[] = (string)$it['sku'];
+                }
+            }
         $updatedRetail += (int)$applied['updated_retail'];
         $updatedRoles  += (int)$applied['updated_roles'];
         $notFound      += (int)$applied['not_found'];
@@ -67,15 +76,27 @@ function lps_run_price_sync_now(): array {
             $sample = array_merge($sample, array_slice($applied['items'], 0, 10 - count($sample)));
         }
     }
+        // anchor: LOGS-FINISH
+    $csvPath = null;
+    if (!empty($notFoundSkus) && function_exists('lps_save_not_found_csv')) {
+        $notFoundSkus = array_values(array_unique($notFoundSkus));
+        $csvPath = lps_save_not_found_csv($notFoundSkus);
+    }
 
-    return [
+    $result = [
         'ok' => true,
         'total' => $total,
         'updated_retail' => $updatedRetail,
         'updated_roles'  => $updatedRoles,
         'not_found'      => $notFound,
         'sample'         => $sample,
+        'csv_path'       => $csvPath,
     ];
+
+    if (!empty($log_id) && function_exists('lps_log_finish')) {
+        lps_log_finish($log_id, $result);
+    }
+    return $result;
 }
 
 /** Очистить все события нашего хука */

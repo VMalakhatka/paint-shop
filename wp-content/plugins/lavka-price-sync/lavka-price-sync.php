@@ -53,3 +53,29 @@ register_activation_hook(__FILE__, function () {
 register_deactivation_hook(__FILE__, function () {
   wp_clear_scheduled_hook(LPS_CRON_HOOK);
 });
+
+// anchor: ACTIVATION-LOGS
+register_activation_hook(__FILE__, function(){
+    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+    global $wpdb;
+    $table = $wpdb->prefix . 'lps_price_logs';
+    $charset = $wpdb->get_charset_collate();
+    $sql = "CREATE TABLE {$table} (
+      id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+      started_at DATETIME NOT NULL,
+      finished_at DATETIME NULL,
+      mode VARCHAR(20) NOT NULL DEFAULT 'manual',   -- manual|cron
+      triggered_by BIGINT UNSIGNED NULL,            -- user id, если есть
+      ok TINYINT(1) NOT NULL DEFAULT 0,
+      total INT UNSIGNED NOT NULL DEFAULT 0,
+      updated_retail INT UNSIGNED NOT NULL DEFAULT 0,
+      updated_roles INT UNSIGNED NOT NULL DEFAULT 0,
+      not_found INT UNSIGNED NOT NULL DEFAULT 0,
+      csv_path TEXT NULL,                           -- путь к CSV (uploads)
+      sample_json LONGTEXT NULL,                    -- маленький sample
+      PRIMARY KEY (id),
+      KEY started_at (started_at),
+      KEY mode (mode)
+    ) {$charset};";
+    dbDelta($sql);
+});
