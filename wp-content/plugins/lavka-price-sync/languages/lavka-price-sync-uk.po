@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Lavka Price Sync 0.1.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lavka-price-sync\n"
-"POT-Creation-Date: 2025-10-13T20:06:37+00:00\n"
+"POT-Creation-Date: 2025-10-14T13:39:13+00:00\n"
 "PO-Revision-Date: 2025-10-13T20:03:35+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -18,7 +18,7 @@ msgstr ""
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 #. Plugin Name of the plugin
-#: lavka-price-sync.php inc/admin-ui.php:7 inc/admin-ui.php:154
+#: lavka-price-sync.php inc/admin-ui.php:7 inc/admin-ui.php:95
 msgid "Lavka Price Sync"
 msgstr "Синхронізація цін Lavka"
 
@@ -27,7 +27,9 @@ msgstr "Синхронізація цін Lavka"
 msgid ""
 "Sync role-based prices from Java service to WooCommerce (meta: "
 "_wpc_price_role_<role>)."
-msgstr "Синхронізація цін за ролями з Java-сервісу до WooCommerce (мета: _wpc_price_role_<роль>)."
+msgstr ""
+"Синхронізація цін за ролями з Java-сервісу до WooCommerce (мета: "
+"_wpc_price_role_<роль>)."
 
 #: inc/admin-ui.php:8
 msgid "Price Sync"
@@ -37,7 +39,7 @@ msgstr "Синхронізація цін"
 msgid "Settings"
 msgstr "Налаштування"
 
-#: inc/admin-ui.php:23 inc/admin-ui.php:24 inc/admin-ui.php:248
+#: inc/admin-ui.php:23 inc/admin-ui.php:24 inc/admin-ui.php:189
 msgid "Mapping"
 msgstr "Відповідності"
 
@@ -53,7 +55,7 @@ msgstr "Завантаження…"
 msgid "Saving…"
 msgstr "Збереження…"
 
-#: inc/admin-ui.php:60 inc/admin-ui.php:149
+#: inc/admin-ui.php:60 inc/admin-ui.php:90
 msgid "Saved"
 msgstr "Збережено"
 
@@ -89,98 +91,104 @@ msgstr "Оновлено"
 msgid "Enter one or more SKUs"
 msgstr "Введіть один або кілька артикулів (SKU)"
 
-#: inc/admin-ui.php:128
-#, php-format
-msgid ""
-"Launch completed: ok=%s, updated_retail=%d, updated_roles=%d, not_found=%d"
-msgstr "Запуск завершено: ok=%s, оновлено роздрібних=%d, ролевих=%d, не знайдено=%d"
-
-#: inc/admin-ui.php:137
-msgid "Schedule saved"
-msgstr "Розклад збережено"
-
-#: inc/admin-ui.php:159
+#: inc/admin-ui.php:100
 msgid "Java Base URL"
 msgstr "Базова адреса Java-сервісу"
 
-#: inc/admin-ui.php:167
+#: inc/admin-ui.php:108
 msgid "API Token"
 msgstr "API-токен"
 
-#: inc/admin-ui.php:175
+#: inc/admin-ui.php:116
 msgid "Contracts endpoint"
 msgstr "Ендпоінт контрактів"
 
-#: inc/admin-ui.php:184
+#: inc/admin-ui.php:125
 msgid "Prices endpoint"
 msgstr "Ендпоінт цін"
 
-#: inc/admin-ui.php:193 inc/admin-ui.php:324
+#: inc/admin-ui.php:134 inc/admin-ui.php:327
 msgid "Batch size"
 msgstr "Розмір пакета"
 
-#: inc/admin-ui.php:201
+#: inc/admin-ui.php:142
 msgid "HTTP timeout, sec"
 msgstr "Тайм-аут HTTP, сек"
 
-#: inc/admin-ui.php:209
+#: inc/admin-ui.php:150
 msgid "Cron"
 msgstr "Планувальник (Cron)"
 
-#: inc/admin-ui.php:213
+#: inc/admin-ui.php:154
 msgid "Run hourly"
 msgstr "Запускати щогодини"
 
-#: inc/admin-ui.php:219
+#: inc/admin-ui.php:160
 msgid "Save"
 msgstr "Зберегти"
 
-#: inc/admin-ui.php:251
+#: inc/admin-ui.php:192
 msgid ""
 "Link WooCommerce roles to external contract codes. Prices for a role will be "
 "taken using its mapped contract."
-msgstr "Зв’яжіть ролі WooCommerce із зовнішніми кодами контрактів. Ціни для ролі братимуться за відповідним контрактом."
+msgstr ""
+"Зв’яжіть ролі WooCommerce із зовнішніми кодами контрактів. Ціни для ролі "
+"братимуться за відповідним контрактом."
 
-#: inc/admin-ui.php:261
+#: inc/admin-ui.php:202
 msgid "Role"
 msgstr "Роль"
 
-#: inc/admin-ui.php:262
+#: inc/admin-ui.php:203
 msgid "Contract"
 msgstr "Контракт"
 
-#: inc/admin-ui.php:272
+#: inc/admin-ui.php:213
 msgid "— Select contract —"
 msgstr "— Оберіть контракт —"
 
-#: inc/admin-ui.php:282
+#: inc/admin-ui.php:223
 msgid "Save mapping"
 msgstr "Зберегти відповідності"
 
-#: inc/admin-ui.php:301
+#: inc/admin-ui.php:280
+#, php-format
+msgid ""
+"Launch completed: ok=%s, updated_retail=%d, updated_roles=%d, not_found=%d"
+msgstr ""
+"Запуск завершено: ok=%s, оновлено роздрібних=%d, ролевих=%d, не знайдено=%d"
+
+#: inc/admin-ui.php:288
+msgid "Schedule saved"
+msgstr "Розклад збережено"
+
+#: inc/admin-ui.php:304
 msgid ""
 "Uses mapping from the Mapping page. For each SKU the endpoint returns retail "
 "price and all role prices. The plugin updates _regular_price/_price and "
 "_wpc_price_role_<role>."
-msgstr "Використовує відповідності зі сторінки Mapping. Для кожного SKU ендпоінт повертає роздрібну та ролеві ціни. Плагін оновлює _regular_price/_price і _wpc_price_role_<роль>."
+msgstr ""
+"Використовує відповідності зі сторінки Mapping. Для кожного SKU ендпоінт "
+"повертає роздрібну та ролеві ціни. Плагін оновлює _regular_price/_price і "
+"_wpc_price_role_<роль>."
 
-#: inc/admin-ui.php:303
+#: inc/admin-ui.php:306
 msgid "Run price sync"
 msgstr "Запустити синхронізацію цін"
 
-#: inc/admin-ui.php:305 inc/admin-ui.php:314
+#: inc/admin-ui.php:308 inc/admin-ui.php:317
 msgid "Sync listed SKUs"
 msgstr "Синхронізувати зазначені SKU"
 
-#: inc/admin-ui.php:322 inc/admin-ui.php:330
+#: inc/admin-ui.php:325 inc/admin-ui.php:333
 msgid "Sync ALL (paged)"
 msgstr "Синхронізувати всі (посторінково)"
 
-#: inc/admin-ui.php:346
+#: inc/admin-ui.php:342
 msgid "Price sync schedule"
 msgstr "Розклад синхронізації цін"
 
-#: inc/admin-ui.php:352
+#: inc/admin-ui.php:348
 msgid "Enable"
 msgstr "Увімкнути"
 
@@ -208,56 +216,74 @@ msgstr "У визначені дати"
 msgid "Time (HH:MM)"
 msgstr "Час (HH:MM)"
 
-#: inc/admin-ui.php:388
+#: inc/admin-ui.php:401
+msgid "Next run"
+msgstr "Наступний пуск"
+
+#: inc/admin-ui.php:405
+#, fuzzy
+msgid "scheduled"
+msgstr "Зберегти розклад"
+
+#: inc/admin-ui.php:408
+msgid "planned"
+msgstr "заплановано"
+
+#: inc/admin-ui.php:410
+#, fuzzy
+msgid "Not scheduled"
+msgstr "Зберегти розклад"
+
+#: inc/admin-ui.php:416
 msgid "Week days"
 msgstr "Дні тижня"
 
-#: inc/admin-ui.php:393
+#: inc/admin-ui.php:420
 msgid "Mon"
 msgstr "Пн"
 
-#: inc/admin-ui.php:394
+#: inc/admin-ui.php:421
 msgid "Tue"
 msgstr "Вт"
 
-#: inc/admin-ui.php:395
+#: inc/admin-ui.php:422
 msgid "Wed"
 msgstr "Ср"
 
-#: inc/admin-ui.php:396
+#: inc/admin-ui.php:423
 msgid "Thu"
 msgstr "Чт"
 
-#: inc/admin-ui.php:397
+#: inc/admin-ui.php:424
 msgid "Fri"
 msgstr "Пт"
 
-#: inc/admin-ui.php:398
+#: inc/admin-ui.php:425
 msgid "Sat"
 msgstr "Сб"
 
-#: inc/admin-ui.php:399
+#: inc/admin-ui.php:426
 msgid "Sun"
 msgstr "Нд"
 
-#: inc/admin-ui.php:413
+#: inc/admin-ui.php:440
 msgid "Dates (one per line)"
 msgstr "Дати (по одній у рядку)"
 
-#: inc/admin-ui.php:420
+#: inc/admin-ui.php:447
 #, php-format
 msgid "Site timezone: %s"
 msgstr "Часовий пояс сайту: %s"
 
-#: inc/admin-ui.php:426
+#: inc/admin-ui.php:453
 msgid "Batch size per run"
 msgstr "Розмір пакета за один запуск"
 
-#: inc/admin-ui.php:436
+#: inc/admin-ui.php:463
 msgid "Save schedule"
 msgstr "Зберегти розклад"
 
-#: inc/admin-ui.php:439
+#: inc/admin-ui.php:466
 msgid "Run now"
 msgstr "Запустити зараз"
 
