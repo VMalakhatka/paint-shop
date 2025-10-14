@@ -1665,7 +1665,7 @@ function lavka_log_write(array $data) {
     ]);
 
     if ($wpdb->last_error && defined('WP_DEBUG') && WP_DEBUG) {
-        error_log('[lavka] log insert failed: ' . $wpdb->last_error);
+        lps_log('[lavka] log insert failed: ' . $wpdb->last_error);
     }
 
     return (int)$wpdb->insert_id; // ← важно: вернуть ID

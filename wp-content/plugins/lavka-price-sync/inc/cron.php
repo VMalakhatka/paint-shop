@@ -133,4 +133,104 @@ function lps_cron_reschedule_price(): void {
             } catch (\Throwable $e) {}
         }
     }
+    error_log('[LPS] reschedule: mode='.($mode).' enabled=1; next='. lps_cron_next_ts());
 }
+
+/**
+ * Вычислить плановый next-run из опции (локальная TZ сайта), не заглядывая в WP-Cron.
+ * Возвращает Unix timestamp или null.
+ */
+function lps_cron_calc_next_from_option(?array $opt): ?int {
+    if (!$opt || empty($opt['enabled'])) return null;
+
+    $mode = $opt['mode'] ?? 'daily';
+    $tz   = wp_timezone();
+    $now  = new DateTime('now', $tz);
+
+    // HH:MM
+    $hhmm = (string)($opt['time'] ?? '03:30');
+    if (!preg_match('/^(\d{1,2}):(\d{2})$/', $hhmm, $m)) $m = [0,3,30];
+    $H = (int)$m[1]; $i = (int)$m[2];
+
+    if ($mode === 'daily') {
+        $run = (clone $now)->setTime($H, $i, 0);
+        if ($run <= $now) $run->modify('+1 day');
+        return $run->getTimestamp();
+    }
+
+    if ($mode === 'weekly') {
+        $days = is_array($opt['days'] ?? null) ? $opt['days'] : [];
+        if (!$days) return null;
+        $map  = ['sun'=>0,'mon'=>1,'tue'=>2,'wed'=>3,'thu'=>4,'fri'=>5,'sat'=>6];
+        $best = null;
+        foreach ($days as $code) {
+            if (!isset($map[$code])) continue;
+            $run = (clone $now)->setTime($H,$i,0);
+            $target = $map[$code];
+            while ((int)$run->format('w') !== $target || $run <= $now) {
+                $run->modify('+1 day');
+            }
+            if (!$best || $run < $best) $best = $run;
+        }
+        return $best ? $best->getTimestamp() : null;
+    }
+
+    if ($mode === 'dates') {
+        $dates = is_array($opt['dates'] ?? null) ? $opt['dates'] : [];
+        $best = null;
+        foreach ($dates as $ds) {
+            try {
+                $dt = new DateTime((string)$ds, $tz);
+                if ($dt > $now && (!$best || $dt < $best)) $best = $dt;
+            } catch (\Throwable $e) {}
+        }
+        return $best ? $best->getTimestamp() : null;
+    }
+
+    return null;
+}
+
+
+
+/**
+ * Вернёт timestamp ближайшего события по нашему хуку.
+ */
+function lps_cron_next_ts(): ?int {
+    $hook = 'lps_cron_sync_prices'; // <- убедись, что именно таким хуком планируешь событие
+    $ts = wp_next_scheduled($hook);
+    if ($ts) return (int)$ts;
+
+    // fallback: ищем в сыром массиве кронов (на случай schedule c аргами)
+    $crons = _get_cron_array();
+    if (!is_array($crons)) return null;
+    foreach ($crons as $time => $hooks) {
+        if (isset($hooks[$hook])) {
+            return (int)$time;
+        }
+    }
+    return null;
+}
+
+/**
+ * Отформатировать дату в часовом поясе сайта.
+ */
+function lps_fmt_site_dt(int $ts): string {
+    // WP хранит cron в Unix TS (локальное время интерпретируется как GMT),
+    // поэтому приводим через date_i18n / wp_date.
+    if (function_exists('wp_date')) {
+        return wp_date('Y-m-d H:i:s', $ts, wp_timezone());
+    }
+    return date_i18n('Y-m-d H:i:s', $ts);
+}
+
+// Если включено, но события нет — перепланировать молча.
+add_action('admin_init', function(){
+    $opt = get_option(LPS_OPT_CRON, []);
+    if (empty($opt['enabled'])) return;
+
+    // событие уже есть?
+    if (wp_get_scheduled_event(LPS_CRON_HOOK)) return;
+
+    // self-heal
+    lps_cron_reschedule_price();
+});

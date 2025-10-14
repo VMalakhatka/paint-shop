@@ -78,65 +78,6 @@ add_action('admin_enqueue_scripts', function($hook){
 function lps_render_settings_page() {
     if (!current_user_can(LPS_CAP)) return;
     if (isset($_POST['lps_save']) && check_admin_referer('lps_save_options')) {
-      // Save cron settings (schedule)
-    if (
-        $_SERVER['REQUEST_METHOD'] === 'POST'
-        && isset($_POST['_wpnonce_lps_cron'])
-        && wp_verify_nonce($_POST['_wpnonce_lps_cron'], 'lps_save_cron')
-    ) {
-        if (!current_user_can(LPS_CAP)) wp_die('forbidden');
-
-        $in = $_POST['lps_cron'] ?? [];
-
-        // нормализуем вход
-        $out = [
-            'enabled' => !empty($in['enabled']),
-            'mode'    => in_array(($in['mode'] ?? 'daily'), ['daily','weekly','dates'], true) ? $in['mode'] : 'daily',
-            'time'    => (string)($in['time'] ?? '03:30'),
-            'batch'   => max(50, min(2000, (int)($in['batch'] ?? 500))),
-        ];
-
-        if ($out['mode'] === 'weekly') {
-            $allow = ['mon','tue','wed','thu','fri','sat','sun'];
-            $out['days'] = array_values(array_intersect($allow, (array)($in['days'] ?? [])));
-        } else {
-            $out['days'] = [];
-        }
-
-        if ($out['mode'] === 'dates') {
-            $raw   = (string)($in['dates'] ?? '');
-            $dates = array_filter(array_map('trim', preg_split('/\R+/', $raw)));
-            $out['dates'] = array_values($dates);
-        } else {
-            $out['dates'] = [];
-        }
-
-        update_option(LPS_OPT_CRON, $out, false);
-
-        // пересоздаём расписание
-        if (function_exists('lps_cron_reschedule_price')) {
-            lps_cron_reschedule_price();
-        }
-
-        // "Запустити зараз"
-        if (isset($_POST['lps_cron_run_now'])) {
-            $res = function_exists('lps_run_price_sync_now') ? lps_run_price_sync_now() : ['ok'=>false,'error'=>'missing'];
-            printf(
-                '<div class="notice notice-success"><p>%s</p></div>',
-                esc_html(
-                    sprintf(
-                        __('Launch completed: ok=%s, updated_retail=%d, updated_roles=%d, not_found=%d', 'lavka-price-sync'),
-                        !empty($res['ok']) ? 'true' : 'false',
-                        (int)($res['updated_retail'] ?? 0),
-                        (int)($res['updated_roles']  ?? 0),
-                        (int)($res['not_found']      ?? 0)
-                    )
-                )
-            );
-        } else {
-            echo '<div class="notice notice-success"><p>'.esc_html__('Schedule saved', 'lavka-price-sync').'</p></div>';
-        }
-    }
         $o = lps_get_options();
         $o['java_base_url']  = esc_url_raw($_POST['java_base_url'] ?? '');
         $o['api_token']      = sanitize_text_field($_POST['api_token'] ?? '');
@@ -331,7 +272,7 @@ function lps_render_run_page() {
         if (function_exists('lps_cron_reschedule_price')) {
             lps_cron_reschedule_price();
         }
-
+        
         if (isset($_POST['lps_cron_run_now'])) {
             $res = function_exists('lps_run_price_sync_now') ? lps_run_price_sync_now() : ['ok'=>false,'error'=>'missing'];
             printf('<div class="notice notice-success"><p>%s</p></div>',
@@ -395,24 +336,10 @@ function lps_render_run_page() {
       </p>
     <?php
     // --- Schedule (price sync) ---
-    $cron = get_option(LPS_OPT_CRON, [
-        'enabled' => false,
-        'mode'    => 'daily',
-        'time'    => '03:30',
-        'days'    => ['mon'],
-        'dates'   => [],
-        'batch'   => 500,
-    ]);
     ?>
+
     <div class="postbox">
-      <label>
-          <input type="checkbox"
-                id="lps-cron-enabled"
-                name="lps_cron[enabled]"
-                value="1"
-                <?php checked( isset($cron['enabled']) && (bool)$cron['enabled'], true ); ?>>
-          <?php _e('Yes', 'lavka-price-sync'); ?>
-        </label>
+      <h2 class="hndle"><span><?php _e('Price sync schedule', 'lavka-price-sync'); ?></span></h2>
       <div class="inside">
         <form method="post">
           <?php wp_nonce_field('lps_save_cron','_wpnonce_lps_cron'); ?>
@@ -422,10 +349,10 @@ function lps_render_run_page() {
               <td>
                 <label>
                   <input type="checkbox"
-                      id="lps-cron-enabled"
-                      name="lps_cron[enabled]"
-                      value="1"
-                      <?php checked( isset($cron['enabled']) && (bool)$cron['enabled'], true ); ?>>
+                        id="lps-cron-enabled"
+                        name="lps_cron[enabled]"
+                        value="1"
+                        <?php checked( isset($cron['enabled']) && (bool)$cron['enabled'], true ); ?>>
                   <?php _e('Yes', 'lavka-price-sync'); ?>
                 </label>
               </td>
@@ -457,11 +384,38 @@ function lps_render_run_page() {
               </td>
             </tr>
 
+           // anchor: NEXT-RUN-ROW (новый блок)
+            <?php
+            $planned_ts   = function_exists('lps_cron_calc_next_from_option') ? lps_cron_calc_next_from_option($cron) : null;
+            $event        = function_exists('wp_get_scheduled_event') ? wp_get_scheduled_event(LPS_CRON_HOOK) : null;
+            $scheduled_ts = $event ? (int)$event->timestamp : (function_exists('lps_cron_next_ts') ? lps_cron_next_ts() : null);
+
+            // небольшой auto-heal прямо в UI: включено, план есть, а факта нет
+            if (!empty($cron['enabled']) && $planned_ts && !$scheduled_ts && function_exists('lps_cron_reschedule_price')) {
+                lps_cron_reschedule_price();
+                // после перепланирования попробуем ещё раз прочитать
+                $event        = function_exists('wp_get_scheduled_event') ? wp_get_scheduled_event(LPS_CRON_HOOK) : null;
+                $scheduled_ts = $event ? (int)$event->timestamp : (function_exists('lps_cron_next_ts') ? lps_cron_next_ts() : null);
+            }
+
+            echo '<tr><th>'.esc_html__('Next run', 'lavka-price-sync').'</th><td>';
+
+            if ($scheduled_ts) {
+                echo '<em>'.esc_html( lps_fmt_site_dt($scheduled_ts) ).'</em> ';
+                echo '<span style="opacity:.7">('.esc_html__('scheduled', 'lavka-price-sync').')</span>';
+            } elseif ($planned_ts) {
+                echo '<em>'.esc_html( lps_fmt_site_dt($planned_ts) ).'</em> ';
+                echo '<span style="opacity:.7">('.esc_html__('planned', 'lavka-price-sync').')</span>';
+            } else {
+                echo '<em>'.esc_html__('Not scheduled', 'lavka-price-sync').'</em>';
+            }
+            echo '</td></tr>';
+            ?>
+
             <tr class="lps-field lps-field-weekly">
               <th><?php _e('Week days', 'lavka-price-sync'); ?></th>
               <td>
                 <?php
-                // English labels as source; translators will localize them.
                 $days = [
                   'mon' => __('Mon', 'lavka-price-sync'),
                   'tue' => __('Tue', 'lavka-price-sync'),
@@ -505,12 +459,12 @@ function lps_render_run_page() {
           </table>
 
           <p>
-              <button type="submit" class="button button-primary">
-                  <?php _e('Save schedule', 'lavka-price-sync'); ?>
-              </button>
-              <button type="submit" name="lps_cron_run_now" value="1" class="button">
-                  <?php _e('Run now', 'lavka-price-sync'); ?>
-              </button>
+            <button type="submit" class="button button-primary">
+              <?php _e('Save schedule', 'lavka-price-sync'); ?>
+            </button>
+            <button type="submit" name="lps_cron_run_now" value="1" class="button">
+              <?php _e('Run now', 'lavka-price-sync'); ?>
+            </button>
           </p>
         </form>
       </div>

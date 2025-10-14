@@ -44,3 +44,19 @@
             });
         }
     }
+
+    if (!function_exists('lps_log')) {
+    function lps_log(string $msg, string $level = 'info'): void {
+        if (!defined('WP_DEBUG_LOG') || !WP_DEBUG_LOG) {
+            return; // глобальное выключение логов
+        }
+
+        $prefix = sprintf('[LPS][%s] ', strtoupper($level));
+        $line = $prefix . $msg;
+
+        // стандартный путь WordPress: wp-content/debug.log
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log($line);
+        }
+    }
+}
