@@ -176,6 +176,34 @@ function psu_subcategory_thumbnail( $category ) {
 }
 
 /** =======================
+ *  Product thumbnails fallback
+ *  ======================= */
+add_action('init', function () {
+    remove_action('woocommerce_before_shop_loop_item_title', 'woocommerce_template_loop_product_thumbnail', 10);
+    add_action('woocommerce_before_shop_loop_item_title', 'psu_loop_product_thumbnail', 10);
+});
+
+function psu_loop_product_thumbnail() {
+    global $product;
+    if ( ! $product ) {
+        $product = wc_get_product(get_the_ID());
+    }
+    $product_id = $product ? $product->get_id() : 0;
+
+    if ( has_post_thumbnail( $product_id ) ) {
+        echo woocommerce_get_product_thumbnail(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+        return;
+    }
+
+    $full_title = get_the_title();
+    $compact_title = psu_get_compact_title($full_title, $product_id);
+
+    echo '<div class="psu-prod-faux-thumb" role="img" aria-label="' . esc_attr($full_title) . '">'
+        . '<span class="psu-prod-faux-title">' . esc_html($compact_title) . '</span>'
+        . '</div>';
+}
+
+/** =======================
  *  2) CSS
  *  ======================= */
 add_action('wp_enqueue_scripts', function () {
@@ -260,6 +288,57 @@ add_action('wp_enqueue_scripts', function () {
 .woocommerce ul.products li.product .loop-buy-row{margin-top:auto}
 .woocommerce-products-header__title.page-title{font-size:1.8rem}
 @media (max-width:768px){ .woocommerce-products-header__title.page-title{font-size:1.4rem} }
+
+/* Product thumbnail fallback */
+/* Product thumbnail fallback */
+.woocommerce ul.products li.product .psu-prod-faux-thumb{
+  width:100%;
+  height: '.$img_h_desktop.'px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  box-sizing:border-box;
+  border:1px solid #eee;
+  border-radius:6px;
+  padding:10px; /* немного больше отступы от краёв */
+  color:#8a4b2a;
+  font-weight:600;
+  line-height:1.2;
+  /* Чуть заметный фон, ещё прозрачнее чем у категорий */
+  --psu-pg1: rgba(138,75,42,.035);
+  --psu-pg2: rgba(0,0,0,.02);
+  background-image:
+    linear-gradient(135deg, var(--psu-pg1), rgba(255,255,255,.0)),
+    repeating-linear-gradient(45deg, rgba(0,0,0,.012) 0 8px, rgba(0,0,0,.008) 8px 16px);
+  background-blend-mode:multiply;
+  font-size: clamp(0.75rem, 2vw, 0.95rem); /* заметно меньше, ~в 2 раза */
+}
+
+/* Текст внутри заглушки: обрезка по строкам и отступы */
+.woocommerce ul.products li.product .psu-prod-faux-title{
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:9; /* влезает лучше, максимум 3 строки */
+  overflow:hidden;
+  word-break:break-word;
+  hyphens:auto;
+  padding:0 .5rem;
+  transition: transform .25s ease;
+  will-change: transform;
+}
+
+.woocommerce ul.products li.product a:hover .psu-prod-faux-title,
+.woocommerce ul.products li.product .psu-prod-faux-thumb:hover .psu-prod-faux-title{
+  transform: scale(1.06);
+}
+
+@media (max-width:1024px){
+  .woocommerce ul.products li.product .psu-prod-faux-thumb{height: '.$img_h_tablet.'px;}
+}
+@media (max-width:600px){
+  .woocommerce ul.products li.product .psu-prod-faux-thumb{height: '.$img_h_mobile.'px;}
+}
 ';
     wp_register_style('psu-inline', false);
     wp_enqueue_style('psu-inline');
