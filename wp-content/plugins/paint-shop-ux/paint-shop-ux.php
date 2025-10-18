@@ -204,6 +204,31 @@ function psu_loop_product_thumbnail() {
 }
 
 /** =======================
+ *  Repeat sticky header (title + description) on paginated archives
+ *  ======================= */
+add_action('woocommerce_archive_description', function(){
+    // Only on WooCommerce product taxonomy archives (product_cat, product_tag, etc.)
+    if ( ! function_exists('is_product_taxonomy') || ! is_product_taxonomy() ) return;
+
+    // Only when it is a paginated page (page 2, 3, ...). Page 1 already has description via core.
+    if ( ! is_paged() ) return;
+
+    $term = get_queried_object();
+    if ( ! $term ) return;
+
+    $desc = term_description( $term );
+    if ( empty( $desc ) ) return;
+
+    // Keep Woo formatting for consistency
+    if ( function_exists('wc_format_content') ) {
+        $desc = wc_format_content( $desc );
+    }
+
+    // Inject only the description into the existing header so there is no duplicate title.
+    echo '<div class="term-description">' . $desc . '</div>';
+}, 5);
+
+/** =======================
  *  2) CSS
  *  ======================= */
 add_action('wp_enqueue_scripts', function () {
