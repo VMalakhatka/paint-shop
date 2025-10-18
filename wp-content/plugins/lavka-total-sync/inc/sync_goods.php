@@ -19,54 +19,46 @@ if (!defined('LTS_OPT'))        define('LTS_OPT',        'lts_options');
 if (!defined('LTS_CAP'))        define('LTS_CAP',        'manage_lavka_sync'); // доступ
 if (!defined('LTS_USER_AGENT')) define('LTS_USER_AGENT', 'LavkaTotalSync/1.0');
 
-// [LTS] ANCHOR: options accessor
-function lts_get_options(): array {
-    $o = get_option(LTS_OPT, []);
-    return [
-        'java_base_url' => isset($o['java_base_url']) ? rtrim((string)$o['java_base_url'], '/') : '',
-        'api_token'     => isset($o['api_token']) ? (string)$o['api_token'] : '',
-        'timeout'       => isset($o['timeout']) ? max(10, (int)$o['timeout']) : 160,
-        'page_limit'    => isset($o['page_limit']) ? max(50, min(1000, (int)$o['page_limit'])) : 500,
-        // ↓ если изображения недоступны или не нужны, выключи
-        'import_images' => !empty($o['import_images']),
-    ];
-}
 
 // [LTS] ANCHOR: http GET helper
-function lts_http_get_json(string $url, array $headers = [], int $timeout = 120) {
-    $args = [
-        'timeout' => $timeout,
-        'headers' => array_merge([
-            'Accept'     => 'application/json',
-            'User-Agent' => LTS_USER_AGENT,
-        ], $headers),
-    ];
-    $resp = wp_remote_get($url, $args);
-    if (is_wp_error($resp)) {
-        return ['ok'=>false, 'error'=>$resp->get_error_message()];
+if (!function_exists('lts_http_get_json')) {
+    function lts_http_get_json(string $url, array $headers = [], int $timeout = 120) {
+        $args = [
+            'timeout' => $timeout,
+            'headers' => array_merge([
+                'Accept'     => 'application/json',
+                'User-Agent' => LTS_USER_AGENT,
+            ], $headers),
+        ];
+        $resp = wp_remote_get($url, $args);
+        if (is_wp_error($resp)) {
+            return ['ok'=>false, 'error'=>$resp->get_error_message()];
+        }
+        $code = wp_remote_retrieve_response_code($resp);
+        $ct   = (string)wp_remote_retrieve_header($resp, 'content-type');
+        $body = (string)wp_remote_retrieve_body($resp);
+        if ($code < 200 || $code >= 300) {
+            return ['ok'=>false, 'error'=>"HTTP $code", 'body'=>substr($body, 0, 600)];
+        }
+        $json = (stripos($ct, 'json') !== false) ? json_decode($body, true) : null;
+        if (!is_array($json)) {
+            return ['ok'=>false, 'error'=>'bad_json'];
+        }
+        return ['ok'=>true, 'data'=>$json];
     }
-    $code = wp_remote_retrieve_response_code($resp);
-    $ct   = (string)wp_remote_retrieve_header($resp, 'content-type');
-    $body = (string)wp_remote_retrieve_body($resp);
-    if ($code < 200 || $code >= 300) {
-        return ['ok'=>false, 'error'=>"HTTP $code", 'body'=>substr($body, 0, 600)];
-    }
-    $json = (stripos($ct, 'json') !== false) ? json_decode($body, true) : null;
-    if (!is_array($json)) {
-        return ['ok'=>false, 'error'=>'bad_json'];
-    }
-    return ['ok'=>true, 'data'=>$json];
 }
 
 // [LTS] ANCHOR: find product by SKU
-function lts_find_product_id_by_sku(string $sku): ?int {
-    global $wpdb;
-    $pid = $wpdb->get_var($wpdb->prepare(
-        "SELECT post_id FROM {$wpdb->postmeta}
-         WHERE meta_key = '_sku' AND meta_value = %s
-         ORDER BY post_id ASC LIMIT 1", $sku
-    ));
-    return $pid ? (int)$pid : null;
+if (!function_exists('lts_find_product_id_by_sku')) {
+    function lts_find_product_id_by_sku(string $sku): ?int {
+        global $wpdb;
+        $pid = $wpdb->get_var($wpdb->prepare(
+            "SELECT post_id FROM {$wpdb->postmeta}
+            WHERE meta_key = '_sku' AND meta_value = %s
+            ORDER BY post_id ASC LIMIT 1", $sku
+        ));
+        return $pid ? (int)$pid : null;
+    }
 }
 
 // [LTS] ANCHOR: ensure product post exists

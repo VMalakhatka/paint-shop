@@ -26,7 +26,10 @@ add_filter('cron_schedules', function ($s) {
     return $s;
 });
 
-const LPS_CRON_HOOK = 'lps_cron_sync_prices';
+// use define+guard to avoid "already defined" when file loads twice
+if (!defined('LPS_CRON_HOOK')) {
+    define('LPS_CRON_HOOK', 'lps_cron_sync_prices');
+}
 
 // Основной хук
 add_action(LPS_CRON_HOOK, function () {

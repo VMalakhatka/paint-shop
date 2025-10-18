@@ -59,13 +59,13 @@ register_activation_hook(__FILE__, function () {
     // Set default options if not present.
     if (false === get_option(LTS_OPT)) {
         $defaults = [
-            'base_url'    => '',
-            'api_token'   => '',
-            'path_sync'   => '/sync/goods',
-            'path_status' => '/sync/goods/{id}',
-            'path_cancel' => '/sync/goods/{id}/cancel',
-            'batch'       => 500,
-            'timeout'     => 160,
+        'base_url'    => 'http://127.0.0.1:8080',
+        'api_token'   => 'x3hXx0p3x9p7lC9cR7fU1wE6o9c2dYb4qB2cVwzQb9hM=',
+        'path_sync'   => '/admin/export/card-tov',
+        'path_status' => '', // не используется для fetch-only сценария
+        'path_cancel' => '', // не используется
+        'batch'       => 500,
+        'timeout'     => 160,
         ];
         add_option(LTS_OPT, $defaults);
     }
