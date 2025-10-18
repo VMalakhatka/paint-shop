@@ -101,7 +101,7 @@ function lts_render_settings_page() {
     // Save options
     if (isset($_POST['lts_save']) && check_admin_referer('lts_save_options')) {
         $opts = lts_get_options();
-        $opts['base_url']   = esc_url_raw($_POST['base_url'] ?? '');
+        $opts['java_base_url'] = esc_url_raw($_POST['java_base_url'] ?? '');
         $opts['api_token'] = sanitize_text_field($_POST['api_token'] ?? '');
         $opts['path_sync']  = '/' . ltrim(sanitize_text_field($_POST['path_sync'] ?? '/sync/goods'), '/');
         $opts['path_status'] = '/' . ltrim(sanitize_text_field($_POST['path_status'] ?? '/sync/status'), '/');
@@ -122,12 +122,12 @@ function lts_render_settings_page() {
             <table class="form-table">
                 <tr>
                     <th scope="row">
-                        <label for="base_url">
+                        <label for="java_base_url">
                             <?php _e('Java Base URL', 'lavka-total-sync'); ?>
                         </label>
                     </th>
                     <td>
-                        <input name="base_url" id="base_url" type="url" class="regular-text" value="<?php echo esc_attr($opts['base_url']); ?>" />
+                        <input name="java_base_url" id="java_base_url" type="url" class="regular-text" value="<?php echo esc_attr($opts['java_base_url']); ?>" />
                     </td>
                 </tr>
                 <tr>
@@ -201,15 +201,88 @@ function lts_render_settings_page() {
  */
 function lts_render_run_page() {
     if (!current_user_can(LTS_CAP)) return;
+
+    $result = null;
+    $error  = null;
+
+    // Handle submit (no JS needed)
+    if (!empty($_POST['lts_run_submit']) && check_admin_referer('lts_total_sync')) {
+        $args = [
+            'limit'   => isset($_POST['limit']) ? (int)$_POST['limit'] : 500,
+            'after'   => isset($_POST['after']) ? trim((string)$_POST['after']) : null,
+            'max'     => (isset($_POST['max_items']) && $_POST['max_items'] !== '') ? max(1, (int)$_POST['max_items']) : null,
+            'dry_run' => !empty($_POST['dry_run']),
+        ];
+        if (isset($_POST['draft_stale_seconds']) && $_POST['draft_stale_seconds'] !== '') {
+            $args['draft_stale_seconds'] = max(60, (int)$_POST['draft_stale_seconds']);
+        }
+        if (isset($_POST['max_seconds']) && $_POST['max_seconds'] !== '') {
+            $args['max_seconds'] = max(1, (int)$_POST['max_seconds']);
+        }
+        $res = lts_sync_goods_run($args);
+        if (!empty($res['ok'])) {
+            $result = $res;
+        } else {
+            $error = $res;
+        }
+    }
     ?>
     <div class="wrap">
         <h1><?php echo esc_html__('Run Total Sync', 'lavka-total-sync'); ?></h1>
         <p class="description">
-            <?php _e('This page will allow you to start a full synchronization of WooCommerce products (except price and quantity) using data from an external MSSQL source.', 'lavka-total-sync'); ?>
+            <?php _e('Run a full synchronization of WooCommerce products (except price and stock) from the external MSSQL source. Uses keyset pagination (limit/after).', 'lavka-total-sync'); ?>
         </p>
-        <p>
-            <?php _e('The full run page is under development.', 'lavka-total-sync'); ?>
-        </p>
+
+        <?php if ($error): ?>
+            <div class="notice notice-error"><p><strong><?php _e('Error', 'lavka-total-sync'); ?>:</strong> <?php echo esc_html(print_r($error, true)); ?></p></div>
+        <?php elseif ($result): ?>
+            <div class="notice notice-success"><p><?php _e('Sync completed.', 'lavka-total-sync'); ?></p></div>
+        <?php endif; ?>
+
+        <form method="post" class="lts-run-form" style="max-width:820px">
+            <?php wp_nonce_field('lts_total_sync'); ?>
+            <table class="form-table">
+                <tr>
+                    <th scope="row"><label for="limit"><?php _e('Page size (limit)', 'lavka-total-sync'); ?></label></th>
+                    <td><input id="limit" name="limit" type="number" min="50" max="1000" value="<?php echo isset($_POST['limit']) ? (int)$_POST['limit'] : 500; ?>" style="width:7rem"></td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="after"><?php _e('Cursor (after)', 'lavka-total-sync'); ?></label></th>
+                    <td><input id="after" name="after" type="text" class="regular-text" placeholder="SKU cursor e.g. DR-DA000123" value="<?php echo isset($_POST['after']) ? esc_attr((string)$_POST['after']) : ''; ?>"></td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="max_items"><?php _e('Max items to modify', 'lavka-total-sync'); ?></label></th>
+                    <td>
+                        <input id="max_items" name="max_items" type="number" min="1" step="1" placeholder="20" value="<?php echo isset($_POST['max_items']) ? (int)$_POST['max_items'] : ''; ?>" style="width:7rem">
+                        <p class="description"><?php _e('If set, process only this many SKUs starting from the cursor (after) and stop.', 'lavka-total-sync'); ?></p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="max_seconds"><?php _e('Max run time (seconds)', 'lavka-total-sync'); ?></label></th>
+                    <td>
+                        <input id="max_seconds" name="max_seconds" type="number" min="1" step="1" placeholder="60" value="<?php echo isset($_POST['max_seconds']) ? (int)$_POST['max_seconds'] : ''; ?>" style="width:7rem">
+                        <p class="description"><?php _e('Optional safety limit: stop the sync when this many seconds have elapsed.', 'lavka-total-sync'); ?></p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><?php _e('Dry run', 'lavka-total-sync'); ?></th>
+                    <td><label><input type="checkbox" name="dry_run" <?php checked(!empty($_POST['dry_run'])); ?>> <?php _e('Do not modify Woo, only fetch pages', 'lavka-total-sync'); ?></label></td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="draft_stale_seconds"><?php _e('Draft items not updated for (seconds)', 'lavka-total-sync'); ?></label></th>
+                    <td>
+                        <input id="draft_stale_seconds" name="draft_stale_seconds" type="number" min="60" step="60" placeholder="7200" value="<?php echo isset($_POST['draft_stale_seconds']) ? (int)$_POST['draft_stale_seconds'] : 7200; ?>" style="width:9rem">
+                        <p class="description"><?php _e('After the run, products with _sync_updated_at older than this threshold will be moved to draft.', 'lavka-total-sync'); ?></p>
+                    </td>
+                </tr>
+            </table>
+            <?php submit_button(__('Run', 'lavka-total-sync'), 'primary', 'lts_run_submit', false); ?>
+        </form>
+
+        <?php if ($result): ?>
+            <h2><?php _e('Result', 'lavka-total-sync'); ?></h2>
+            <textarea readonly rows="10" style="width:100%;max-width:820px;font-family:monospace"><?php echo esc_textarea(wp_json_encode($result, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE)); ?></textarea>
+        <?php endif; ?>
     </div>
     <?php
 }

@@ -299,7 +299,8 @@ function lts_log(string $msg, array $ctx = []): void {
  *   'after'   => string|null (начальный курсор),
  *   'max'     => int|null (макс. кол-во элементов за прогон; null = не ограничивать),
  *   'dry_run' => bool (только проверить источник, без записи в Woo),
- *   'draft_stale_seconds' => int|null (если задан — по завершении задрафтить те, кто старее)
+ *   'draft_stale_seconds' => int|null (если задан — по завершении задрафтить те, кто старее),
+ *   'max_seconds' => int|null (макс. время выполнения в секундах; null = не ограничивать),
  * ]
  */
 function lts_sync_goods_run(array $args = []): array {
@@ -317,6 +318,7 @@ function lts_sync_goods_run(array $args = []): array {
     $max     = isset($args['max']) ? max(1, (int)$args['max']) : null;
     $dry     = !empty($args['dry_run']);
     $draftStale = isset($args['draft_stale_seconds']) ? max(60, (int)$args['draft_stale_seconds']) : null;
+    $maxSeconds = isset($args['max_seconds']) ? max(1, (int)$args['max_seconds']) : null;
 
 
         // [LTS] ANCHOR: logs - start
@@ -350,6 +352,10 @@ function lts_sync_goods_run(array $args = []): array {
         }
 
         foreach ($items as $it) {
+            if ($maxSeconds && (time() - $started_at) >= $maxSeconds) {
+                $last_flag = true;
+                break 2;
+            }
             // сухой прогон — ничего не пишем
             if ($dry) {
                 $done++;
