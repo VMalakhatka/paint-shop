@@ -167,8 +167,8 @@ fi
 
 mkdir -p "$WP/wp-content/mu-plugins" \
          "$WP/wp-content/themes/generatepress-child" \
-         "$PLUG/lavka-sync" "$PLUG/lavka-sync/lavka-price-sync" "$PLUG/lavka-sync/lavka-reports" "$PLUG/paint-core" "$PLUG/paint-shop-ux" "$PLUG/role-price" \
-         "$PLUG/pc-order-import-export"
+         "$PLUG/lavka-sync" "$PLUG/lavka-sync/lavka-price-sync" \
+         "$PLUG/lavka-sync/lavka-reports" "$PLUG/paint-core" "$PLUG/paint-shop-ux" "$PLUG/role-price" "$PLUG/lavka-total-sync" "$PLUG/pc-order-import-export"
 
 # 2) Синхроним ТОЛЬКО наши каталоги
 rsync "${RSYNC[@]}" wp-content/mu-plugins/                 "$WP/wp-content/mu-plugins/"
@@ -179,6 +179,7 @@ rsync "${RSYNC[@]}" wp-content/plugins/lavka-sync/          "$PLUG/lavka-sync/"
 rsync "${RSYNC[@]}" wp-content/plugins/paint-core/          "$PLUG/paint-core/"
 rsync "${RSYNC[@]}" wp-content/plugins/paint-shop-ux/       "$PLUG/paint-shop-ux/"
 rsync "${RSYNC[@]}" wp-content/plugins/role-price/          "$PLUG/role-price/"
+rsync "${RSYNC[@]}" wp-content/plugins/lavka-total-sync/          "$PLUG/lavka-total-sync/"
 rsync "${RSYNC[@]}" wp-content/plugins/pc-order-import-export/   "$PLUG/pc-order-import-export/"
 
 # Сброс OPcache (если включён)
@@ -197,6 +198,7 @@ for p in \
   "$PLUG/paint-core" \
   "$PLUG/paint-shop-ux" \
   "$PLUG/role-price" \
+  "$PLUG/rlavka-total-sync" \
   "$PLUG/pc-order-import-export"
 do
   find "$p" -type d -exec chmod 755 {} \; 2>/dev/null || true

@@ -68,6 +68,9 @@ wp-content/plugins/*
 !wp-content/plugins/lavka-reports/**
 !wp-content/plugins/lavka-price-sync
 !wp-content/plugins/lavka-price-sync/**
+!wp-content/plugins/lavka-total-sync
+!wp-content/plugins/lavka-total-sync/**
+
 
 # === MU-plugins: либо отслеживаем все, либо только свои ===
 # Вариант 1 (отслеживать все mu-plugins):

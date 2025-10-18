@@ -294,7 +294,7 @@ Version: 1.0
   top: 0;                /* при необходимости поднимите до высоты фикс. шапки */
   z-index: 60;           /* поверх сортировки/списка */
   background: #fff;      /* фон, чтобы не просвечивало */
-  margin: 0 0 14px;      /* стандартный отступ снизу */
+  margin: -22px 0 8px;      /* отступ снизу */
   padding: 10px 0;       /* немного воздуха */
 }
 /* Если включена админ-панель WP — компенсируем её высоту */
@@ -311,6 +311,12 @@ body.admin-bar .woocommerce .woocommerce-products-header{ top: 46px; }
 
 .woocommerce .woocommerce-products-header{
   box-shadow: 0 2px 6px rgba(0,0,0,.06);
+}
+
+/* === Smaller Woo Category Header Title === */
+.woocommerce .woocommerce-products-header .page-title,
+.woocommerce .woocommerce-products-header h1{
+  font-size: clamp(18px, 2.2vw, 12px) !important; /* just smaller, same style */
 }
 
 /* === Hide "Товар списком" on mobile === */
