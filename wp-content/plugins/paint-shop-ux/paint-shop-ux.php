@@ -101,6 +101,43 @@ add_action('woocommerce_admin_process_product_object', function (WC_Product $pro
 });
 
 /** =======================
+ *  3) Category thumbnails fallback
+ *  ======================= */
+// Replace WooCommerce default category thumbnail output to show a text box when no image.
+add_action('init', function () {
+    // Remove default renderer.
+    remove_action('woocommerce_before_subcategory_title', 'woocommerce_subcategory_thumbnail', 10);
+    // Add our custom renderer.
+    add_action('woocommerce_before_subcategory_title', 'psu_subcategory_thumbnail', 10, 1);
+});
+
+/**
+ * Output category thumbnail or a text fallback that fills the image area.
+ *
+ * @param WP_Term $category
+ */
+function psu_subcategory_thumbnail( $category ) {
+    $thumb_id = get_term_meta( $category->term_id, 'thumbnail_id', true );
+    $size     = apply_filters( 'subcategory_archive_thumbnail_size', 'woocommerce_thumbnail' );
+
+    if ( $thumb_id ) {
+        // Normal image when available.
+        $image = wp_get_attachment_image( $thumb_id, $size, false, array( 'loading' => 'lazy' ) );
+        if ( ! $image && function_exists( 'wc_placeholder_img' ) ) {
+            $image = wc_placeholder_img( $size );
+        }
+        echo $image; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+        return;
+    }
+
+    // Text fallback — full clickable area is preserved because this runs inside the link.
+    $name = isset( $category->name ) ? $category->name : '';
+    echo '<div class="psu-cat-faux-thumb" role="img" aria-label="' . esc_attr( $name ) . '">'
+       . esc_html( $name )
+       . '</div>';
+}
+
+/** =======================
  *  2) CSS
  *  ======================= */
 add_action('wp_enqueue_scripts', function () {
@@ -116,11 +153,40 @@ add_action('wp_enqueue_scripts', function () {
   object-fit:contain;object-position:center;display:block;
   background:#fff;padding:6px;box-sizing:border-box;
 }
+.woocommerce ul.products li.product-category a img{
+  width:100%;
+  height: '.$img_h_desktop.'px;
+  object-fit:contain;object-position:center;display:block;
+  background:#fff;padding:6px;box-sizing:border-box;
+}
 @media (max-width:1024px){
   .woocommerce ul.products li.product a img{height: '.$img_h_tablet.'px;}
+  .woocommerce ul.products li.product-category a img{height: '.$img_h_tablet.'px;}
 }
 @media (max-width:600px){
   .woocommerce ul.products li.product a img{height: '.$img_h_mobile.'px;}
+  .woocommerce ul.products li.product-category a img{height: '.$img_h_mobile.'px;}
+}
+.woocommerce ul.products li.product-category .psu-cat-faux-thumb{
+  width:100%;
+  height: '.$img_h_desktop.'px;
+  background:#fff;
+  padding:6px;
+  box-sizing:border-box;
+  display:flex;align-items:center;justify-content:center;
+  text-align:center;
+  color:#8a4b2a;
+  font-weight:600;
+  line-height:1.2;
+  border:1px solid #eee;
+  word-break:break-word;
+  font-size: clamp(0.95rem, 2.2vw, 1.25rem);
+}
+@media (max-width:1024px){
+  .woocommerce ul.products li.product-category .psu-cat-faux-thumb{height: '.$img_h_tablet.'px;}
+}
+@media (max-width:600px){
+  .woocommerce ul.products li.product-category .psu-cat-faux-thumb{height: '.$img_h_mobile.'px;}
 }
 .woocommerce ul.products li.product .woocommerce-loop-product__title.compact-title{
   --lines:2;
