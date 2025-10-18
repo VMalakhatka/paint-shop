@@ -14,10 +14,15 @@ if (!defined('ABSPATH')) exit;
  * - По окончании можно «задрафтить» всё, что не обновлялось дольше порога.
  */
 
+
 // [LTS] ANCHOR: constants
 if (!defined('LTS_OPT'))        define('LTS_OPT',        'lts_options');
 if (!defined('LTS_CAP'))        define('LTS_CAP',        'manage_lavka_sync'); // доступ
 if (!defined('LTS_USER_AGENT')) define('LTS_USER_AGENT', 'LavkaTotalSync/1.0');
+
+// [LTS] ANCHOR: logs include (single source of truth)
+require_once __DIR__ . '/logs.php';
+
 
 
 // [LTS] ANCHOR: http GET helper
@@ -118,55 +123,117 @@ function lts_norm_text(?string $s): string {
     return trim($s);
 }
 
+// [LTS] ANCHOR: set category + description (with prefix/suffix + tiny cache)
 function lts_assign_category_and_description(int $post_id, ?int $groupId, ?string $grDescr): void {
-    if (!$groupId || $groupId <= 0) {
-        return;
-    }
+    if (!$groupId || $groupId <= 0) return;
 
-    // Привяжем товар к категории (term уже создан на бэке)
+    // привяжем товар к категории
     wp_set_post_terms($post_id, [$groupId], 'product_cat', false);
 
-    // Кеш на время выполнения, чтобы не читать/писать один и тот же term много раз
-    static $termWriteCache = [];   // term_id => normalized incoming description
-    static $termReadCache  = [];   // term_id => normalized current description
+    // ---- read prefix/suffix HTML directly from plugin options (LTS_OPT)
+    $opt    = get_option(LTS_OPT, []);
+    $prefix = isset($opt['cat_desc_prefix_html']) ? trim((string)$opt['cat_desc_prefix_html']) : '';
+    $suffix = isset($opt['cat_desc_suffix_html']) ? trim((string)$opt['cat_desc_suffix_html']) : '';
 
-    // Опциональное описание категории — обновляем только при наличии и отличии
-    $grDescr = is_null($grDescr) ? '' : trim((string)$grDescr);
-    if ($grDescr === '') {
-        return;
+    // исходный текст (может быть пустым — тогда выходим)
+    $core = trim((string)$grDescr);
+    if ($core === '') return;
+
+    // если уже пришёл с приклеенными краями — не дублируем
+    $finalHtml = $core;
+    $coreTrim  = trim($core);
+
+    // debug: log options read
+    lts_log_db('info', 'catdesc', [
+        'result'  => 'opts',
+        'message' => 'cat-desc options read',
+        'ctx'     => [
+            'prefix_len' => strlen($prefix),
+            'suffix_len' => strlen($suffix),
+            'term_id'    => $groupId,
+        ],
+    ]);
+
+    $hasPrefix = $prefix !== '' && str_starts_with($coreTrim, trim($prefix));
+    $hasSuffix = $suffix !== '' && str_ends_with($coreTrim, trim($suffix));
+
+    if (!$hasPrefix || !$hasSuffix) {
+        $finalHtml = ($hasPrefix ? '' : $prefix) . $coreTrim . ($hasSuffix ? '' : $suffix);
     }
 
-    $incomingNorm = lts_norm_text($grDescr);
+    lts_log_db('info', 'catdesc', [
+        'result'  => 'build',
+        'message' => 'cat-desc built',
+        'ctx'     => [
+            'core_len'  => strlen($coreTrim),
+            'final_len' => strlen($finalHtml),
+            'term_id'   => $groupId,
+        ],
+    ]);
+    // --- лёгкий кэш, чтобы не дёргать БД по одному и тому же терму
+    static $termWriteCache = []; // term_id => finalHtml (точное сравнение)
+    static $termReadCache  = []; // term_id => currentHtml (точное сравнение)
 
-    // Если в этом же прогоне уже пытались писать точно такой же текст — выходим
-    if (isset($termWriteCache[$groupId]) && $termWriteCache[$groupId] === $incomingNorm) {
-        return;
-    }
-
-    // Берём текущий терм (будет закеширован объектным кэшем WP) и нормализуем
-    if (!isset($termReadCache[$groupId])) {
-        $term = get_term($groupId, 'product_cat');
-        if ($term && !is_wp_error($term)) {
-            $termReadCache[$groupId] = lts_norm_text((string)$term->description);
-        } else {
-            // Если по какой-то причине терм не получился — не пытаемся обновлять
-            $termReadCache[$groupId] = '';
-        }
-    }
-
-    if ($termReadCache[$groupId] !== $incomingNorm) {
-        // Пишем только при реальном изменении
-        $res = wp_update_term($groupId, 'product_cat', [
-            'description' => $grDescr,
+    if (isset($termWriteCache[$groupId]) && $termWriteCache[$groupId] === $finalHtml) {
+        lts_log_db('info', 'catdesc', [
+            'result'  => 'skip',
+            'message' => 'cat-desc unchanged',
+            'ctx'     => ['term_id' => $groupId, 'changed' => 0],
         ]);
+        return;
+    }
+
+    if (!isset($termReadCache[$groupId])) {
+        $t = get_term($groupId, 'product_cat');
+        $termReadCache[$groupId] = ($t && !is_wp_error($t)) ? (string)$t->description : '';
+    }
+
+    // обновляем только если реально отличается HTML (точное сравнение)
+        // обновляем только если реально отличается HTML (точное сравнение)
+    if ($termReadCache[$groupId] !== $finalHtml) {
+
+        // --- ВАЖНО: временно снимаем KSES-фильтры, чтобы сохранить inline-стили и теги
+        $removed = [];
+
+        // Эти фильтры часто режут описание термов
+        if (has_filter('pre_term_description', 'wp_filter_kses')) {
+            remove_filter('pre_term_description', 'wp_filter_kses');
+            $removed[] = ['pre_term_description','wp_filter_kses'];
+        }
+        if (has_filter('term_description', 'wp_kses_data')) {
+            remove_filter('term_description', 'wp_kses_data');
+            $removed[] = ['term_description','wp_kses_data'];
+        }
+        // На некоторых инсталляциях встречается ещё wp_kses_post
+        if (has_filter('pre_term_description', 'wp_kses_post')) {
+            remove_filter('pre_term_description', 'wp_kses_post');
+            $removed[] = ['pre_term_description','wp_kses_post'];
+        }
+
+        // Обновляем описание с HTML/inline-стилями
+        $res = wp_update_term($groupId, 'product_cat', ['description' => $finalHtml]);
+
+        // Возвращаем фильтры назад, чтобы не влиять на чужой код
+        foreach ($removed as [$hook,$cb]) {
+            add_filter($hook, $cb);
+        }
+
         if (!is_wp_error($res)) {
-            // Обновим локальный read‑кеш, чтобы следующие товары той же категории не дергали БД
-            $termReadCache[$groupId]  = $incomingNorm;
-            $termWriteCache[$groupId] = $incomingNorm;
+            $termReadCache[$groupId]  = $finalHtml;
+            $termWriteCache[$groupId] = $finalHtml;
+            lts_log_db('info', 'catdesc', [
+                'result'  => 'update',
+                'message' => 'cat-desc updated',
+                'ctx'     => ['term_id' => $groupId, 'changed' => 1],
+            ]);
         }
     } else {
-        // Зафиксируем, что уже «писали» такой же текст — последующие вызовы сразу выйдут
-        $termWriteCache[$groupId] = $incomingNorm;
+        $termWriteCache[$groupId] = $finalHtml;
+        lts_log_db('info', 'catdesc', [
+            'result'  => 'skip',
+            'message' => 'cat-desc unchanged',
+            'ctx'     => ['term_id' => $groupId, 'changed' => 0],
+        ]);
     }
 }
 

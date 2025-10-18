@@ -108,6 +108,9 @@ function lts_render_settings_page() {
         $opts['path_cancel'] = '/' . ltrim(sanitize_text_field($_POST['path_cancel'] ?? '/sync/cancel'), '/');
         $opts['batch']     = max(LTS_MIN_BATCH, min(LTS_MAX_BATCH, (int)($_POST['batch'] ?? LTS_DEF_BATCH)));
         $opts['timeout']   = max(30, min(600, (int)($_POST['timeout'] ?? 160)));
+        // [LTS] ANCHOR: save-cat-desc-glue
+        $opts['cat_desc_prefix_html'] = wp_kses_post($_POST['cat_desc_prefix_html'] ?? '');
+        $opts['cat_desc_suffix_html'] = wp_kses_post($_POST['cat_desc_suffix_html'] ?? '');
         lts_update_options($opts);
         echo '<div class="updated"><p>' . esc_html__('Saved', 'lavka-total-sync') . '</p></div>';
     }
@@ -187,6 +190,29 @@ function lts_render_settings_page() {
                     </th>
                     <td>
                         <input name="timeout" type="number" min="30" max="600" value="<?php echo (int)$opts['timeout']; ?>" />
+                    </td>
+                </tr>
+                <!-- [LTS] ANCHOR: form-cat-desc-glue -->
+                <tr>
+                    <th scope="row">
+                        <label for="cat_desc_prefix_html">
+                            <?php _e('Category description — prefix (HTML)', 'lavka-total-sync'); ?>
+                        </label>
+                    </th>
+                    <td>
+                        <textarea name="cat_desc_prefix_html" id="cat_desc_prefix_html" rows="3" class="large-text" placeholder='<p style="margin: .75rem 0 0; font-size: clamp(1rem,2.5vw,3rem); line-height:1.2; display:-webkit-box; overflow:hidden; font-weight:500; color:#8a4b2a">'><?php echo esc_textarea($opts['cat_desc_prefix_html'] ?? ''); ?></textarea>
+                        <p class="description"><?php _e('HTML to prepend before category description. Leave empty to disable.', 'lavka-total-sync'); ?></p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">
+                        <label for="cat_desc_suffix_html">
+                            <?php _e('Category description — suffix (HTML)', 'lavka-total-sync'); ?>
+                        </label>
+                    </th>
+                    <td>
+                        <textarea name="cat_desc_suffix_html" id="cat_desc_suffix_html" rows="2" class="large-text" placeholder='</p>'><?php echo esc_textarea($opts['cat_desc_suffix_html'] ?? ''); ?></textarea>
+                        <p class="description"><?php _e('HTML to append after category description. Example: closing &lt;/p&gt; tag.', 'lavka-total-sync'); ?></p>
                     </td>
                 </tr>
             </table>
