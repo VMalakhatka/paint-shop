@@ -103,6 +103,42 @@ add_action('woocommerce_admin_process_product_object', function (WC_Product $pro
 /** =======================
  *  3) Category thumbnails fallback
  *  ======================= */
+
+/**
+ * Build up-to-2-letter initials from a term name (multibyte safe).
+ */
+function psu_term_initials( $name ) {
+    $name = trim( wp_strip_all_tags( (string) $name ) );
+    if ( $name === '' ) return '';
+
+    // Split by whitespace and punctuation commonly used in names.
+    $parts = preg_split( '/[\s\-\._]+/u', $name, -1, PREG_SPLIT_NO_EMPTY );
+    $letters = [];
+
+    foreach ( $parts as $part ) {
+        // take first character (multibyte safe)
+        if ( function_exists( 'mb_substr' ) ) {
+            $first = mb_substr( $part, 0, 1, 'UTF-8' );
+        } else {
+            $first = substr( $part, 0, 1 );
+        }
+        if ( $first !== '' ) {
+            $letters[] = $first;
+        }
+        if ( count( $letters ) >= 2 ) break;
+    }
+
+    $initials = implode( '', $letters );
+
+    // Uppercase (multibyte safe)
+    if ( function_exists( 'mb_strtoupper' ) ) {
+        $initials = mb_strtoupper( $initials, 'UTF-8' );
+    } else {
+        $initials = strtoupper( $initials );
+    }
+    return $initials;
+}
+
 // Replace WooCommerce default category thumbnail output to show a text box when no image.
 add_action('init', function () {
     // Remove default renderer.
@@ -132,9 +168,11 @@ function psu_subcategory_thumbnail( $category ) {
 
     // Text fallback — full clickable area is preserved because this runs inside the link.
     $name = isset( $category->name ) ? $category->name : '';
+    $initials = psu_term_initials( $name );
+
     echo '<div class="psu-cat-faux-thumb" role="img" aria-label="' . esc_attr( $name ) . '">'
-       . esc_html( $name )
-       . '</div>';
+        . '<span class="psu-cat-faux-title">' . esc_html( $name ) . '</span>'
+        . '</div>';
 }
 
 /** =======================
@@ -168,9 +206,16 @@ add_action('wp_enqueue_scripts', function () {
   .woocommerce ul.products li.product-category a img{height: '.$img_h_mobile.'px;}
 }
 .woocommerce ul.products li.product-category .psu-cat-faux-thumb{
+  position:relative;
   width:100%;
   height: '.$img_h_desktop.'px;
-  background:#fff;
+  /* gradient + subtle paper-like texture overlay */
+  --psu-grad-1:#eae4dd;
+  --psu-grad-2:#e8e5e2;
+  background-image:
+    linear-gradient(135deg,var(--psu-grad-1),var(--psu-grad-2)),
+    repeating-linear-gradient(45deg,rgba(0,0,0,.007) 0 10px, rgba(0,0,0,.005) 10px 20px);
+  background-blend-mode: multiply;
   padding:6px;
   box-sizing:border-box;
   display:flex;align-items:center;justify-content:center;
@@ -181,6 +226,19 @@ add_action('wp_enqueue_scripts', function () {
   border:1px solid #eee;
   word-break:break-word;
   font-size: clamp(0.95rem, 2.2vw, 1.25rem);
+  border-radius:6px;
+  overflow:hidden;
+}
+
+.woocommerce ul.products li.product-category .psu-cat-faux-title{
+  transition:transform .25s ease;
+  will-change:transform;
+  padding:0 .25rem;
+}
+
+.woocommerce ul.products li.product-category a:hover .psu-cat-faux-title,
+.woocommerce ul.products li.product-category .psu-cat-faux-thumb:hover .psu-cat-faux-title{
+  transform:scale(1.08);
 }
 @media (max-width:1024px){
   .woocommerce ul.products li.product-category .psu-cat-faux-thumb{height: '.$img_h_tablet.'px;}
