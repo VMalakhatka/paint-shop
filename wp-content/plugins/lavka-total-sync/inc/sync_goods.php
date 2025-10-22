@@ -497,6 +497,9 @@ function lts_sync_goods_run(array $args = []): array {
     $dry     = !empty($args['dry_run']);
     $draftStale = isset($args['draft_stale_seconds']) ? max(60, (int)$args['draft_stale_seconds']) : null;
     $maxSeconds = isset($args['max_seconds']) ? max(1, (int)$args['max_seconds']) : null;
+ 
+    // курсор к бэкенду отправляем ровно таким, как ввёл оператор
+    $afterRaw = array_key_exists('after', $args) ? (string)$args['after'] : '';
 
 
         // [LTS] ANCHOR: logs - start
@@ -525,8 +528,8 @@ function lts_sync_goods_run(array $args = []): array {
         // Бэкенд ожидает ROOT = JSON-МАССИВ (List<ItemHash>),
         // а параметры afterSku/limit — через query string.
         $qs = ['limit' => $limit];
-        if ($last_cursor !== null && $last_cursor !== '') {
-            $qs['afterSku'] = (string)$last_cursor; // строго тот курсор, что задал оператор
+        if ($afterRaw !== '') {
+            $qs['after'] = $afterRaw; // строго то, что ввёл оператор (имя параметра на бэке — "after")
         }
         $reqUrl = $url . '?' . http_build_query($qs);
 
@@ -535,7 +538,7 @@ function lts_sync_goods_run(array $args = []): array {
             'result'  => 'request',
             'message' => 'diff request prepared',
             'ctx'     => [
-                'afterSku' => ($last_cursor !== null ? (string)$last_cursor : '(omitted)'),
+                'after' => $afterRaw,
                 'limit'    => $limit,
                 'seen_cnt' => count($seen),
                 'target'   => $reqUrl,
