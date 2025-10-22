@@ -53,6 +53,112 @@ if (!function_exists('lts_http_get_json')) {
     }
 }
 
+// [LTS] ANCHOR: http POST helper (JSON)
+if (!function_exists('lts_http_post_json')) {
+    function lts_http_post_json(string $url, array $payload, array $headers = [], int $timeout = 120) {
+        $args = [
+            'timeout' => $timeout,
+            'headers' => array_merge([
+                'Accept'       => 'application/json',
+                'Content-Type' => 'application/json; charset=utf-8',
+                'User-Agent'   => LTS_USER_AGENT,
+            ], $headers),
+            'body'    => wp_json_encode($payload),
+            'method'  => 'POST',
+        ];
+        $resp = wp_remote_post($url, $args);
+        if (is_wp_error($resp)) {
+            return ['ok'=>false, 'error'=>$resp->get_error_message()];
+        }
+        $code = wp_remote_retrieve_response_code($resp);
+        $ct   = (string)wp_remote_retrieve_header($resp, 'content-type');
+        $body = (string)wp_remote_retrieve_body($resp);
+        if ($code < 200 || $code >= 300) {
+            return ['ok'=>false, 'error'=>"HTTP $code", 'body'=>substr($body, 0, 600)];
+        }
+        $json = (stripos($ct, 'json') !== false) ? json_decode($body, true) : null;
+        if (!is_array($json)) {
+            return ['ok'=>false, 'error'=>'bad_json'];
+        }
+        return ['ok'=>true, 'data'=>$json];
+    }
+}
+
+// [LTS] ANCHOR: collect seen window (sku asc with stored hash)
+if (!function_exists('lts_collect_seen_window')) {
+    /**
+     * Возвращает окно {sku, hash} из Woo, отсортированное по SKU (ASC), начиная с $after (исключительно).
+     * @param int $limit
+     * @param string|null $after
+     * @return array<int,array{sku:string,hash:string}>
+     */
+    function lts_collect_seen_window(int $limit, ?string $after = null): array {
+        global $wpdb;
+        $limit = max(1, min(1000, $limit));
+        // Лексикографическое сравнение по мета _sku.
+        $afterCond = '';
+        $params = [];
+        if ($after !== null && $after !== '') {
+            $afterCond = 'AND sku.meta_value > %s';
+            $params[] = $after;
+        }
+        $sql = "
+            SELECT sku.post_id, sku.meta_value AS sku,
+                   COALESCE(h.meta_value, '') AS hash
+            FROM {$wpdb->postmeta} sku
+            JOIN {$wpdb->posts} p ON p.ID = sku.post_id AND p.post_type = 'product'
+            LEFT JOIN {$wpdb->postmeta} h ON h.post_id = sku.post_id AND h.meta_key = '_ms_hash'
+            WHERE sku.meta_key = '_sku'
+              $afterCond
+            ORDER BY sku.meta_value ASC
+            LIMIT {$limit}
+        ";
+        $rows = $params ? $wpdb->get_results($wpdb->prepare($sql, ...$params), ARRAY_A)
+                        : $wpdb->get_results($sql, ARRAY_A);
+        $out = [];
+        if ($rows) {
+            foreach ($rows as $r) {
+                $s = (string)$r['sku'];
+                $h = isset($r['hash']) ? (string)$r['hash'] : '';
+                if ($s !== '') $out[] = ['sku'=>$s, 'hash'=>$h];
+            }
+        }
+        return $out;
+    }
+}
+
+// [LTS] ANCHOR: draft by SKUs helper
+if (!function_exists('lts_draft_products_by_skus')) {
+    /**
+     * Переводит найденные по SKU товары в статус draft.
+     * Возвращает кол-во обновлённых постов.
+     */
+    function lts_draft_products_by_skus(array $skus): int {
+        $skus = array_values(array_filter(array_map('strval', $skus)));
+        if (!$skus) return 0;
+        global $wpdb;
+        // Найдём post_id по _sku
+        $in = implode(',', array_fill(0, count($skus), '%s'));
+        $sql = "
+            SELECT DISTINCT pm.post_id
+            FROM {$wpdb->postmeta} pm
+            JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+            WHERE pm.meta_key = '_sku' AND pm.meta_value IN ($in)
+              AND p.post_type = 'product'
+        ";
+        $ids = $wpdb->get_col($wpdb->prepare($sql, ...$skus));
+        $cnt = 0;
+        if ($ids) {
+            foreach ($ids as $pid) {
+                $pid = (int)$pid;
+                $res = wp_update_post(['ID'=>$pid, 'post_status'=>'draft'], true);
+                if (!is_wp_error($res)) $cnt++;
+            }
+        }
+        return $cnt;
+    }
+}
+
 // [LTS] ANCHOR: find product by SKU
 if (!function_exists('lts_find_product_id_by_sku')) {
     function lts_find_product_id_by_sku(string $sku): ?int {
@@ -293,6 +399,11 @@ function lts_upsert_product_from_item(array $it, array $opts): array {
     // Пометка времени успешного апдейта
     update_post_meta($pid, '_sync_updated_at', current_time('mysql')); // локальное WP-время
 
+    // Сохраняем контрольную сумму карточки (если пришла из diff)
+    if (isset($it['hash'])) {
+        update_post_meta($pid, '_ms_hash', (string)$it['hash']);
+    }
+
     return ['ok'=>true, 'post_id'=>$pid];
 }
 
@@ -402,77 +513,120 @@ function lts_sync_goods_run(array $args = []): array {
     $last_flag = false;
     $started_at = time();
 
+    // DIFF режим: используем сохранённый путь `path_sync` и дефолт /admin/export/card-tov/diff
+    $endpointRaw = !empty($o['path_sync']) ? $o['path_sync'] : '/admin/export/card-tov/diff';
+    $endpoint    = '/' . ltrim($endpointRaw, '/');
+    $url         = rtrim($o['java_base_url'], '/') . $endpoint;
+
     do {
-        $j = lts_fetch_page($o['java_base_url'], $o['api_token'], $limit, $last_cursor, (int)$o['timeout']);
+        // Собираем seen window (массив объектов {sku,hash})
+        $seen = lts_collect_seen_window($limit, $last_cursor);
+
+        // Бэкенд ожидает ROOT = JSON-МАССИВ (List<ItemHash>),
+        // а параметры afterSku/limit — через query string.
+        $qs = ['limit' => $limit];
+        if ($last_cursor !== null && $last_cursor !== '') {
+            $qs['afterSku'] = (string)$last_cursor; // строго тот курсор, что задал оператор
+        }
+        $reqUrl = $url . '?' . http_build_query($qs);
+
+        // Логируем факт подготовки запроса
+        lts_log_db('info', 'diff', [
+            'result'  => 'request',
+            'message' => 'diff request prepared',
+            'ctx'     => [
+                'afterSku' => ($last_cursor !== null ? (string)$last_cursor : '(omitted)'),
+                'limit'    => $limit,
+                'seen_cnt' => count($seen),
+                'target'   => $reqUrl,
+            ],
+        ]);
+
+        // Тело = только массив $seen, без обёртки объекта
+        $headers = [];
+        if (!empty($o['api_token'])) {
+            $headers['Authorization'] = 'Bearer ' . $o['api_token'];
+        }
+        $j = lts_http_post_json($reqUrl, $seen, $headers, (int)$o['timeout']);
         if (empty($j['ok'])) {
             lts_log('fetch_page_error', ['error'=>$j['error'] ?? 'unknown', 'after'=>$last_cursor]);
             return ['ok'=>false, 'error'=>$j['error'] ?? 'fetch_failed', 'after'=>$last_cursor];
         }
         $data = $j['data'];
-        $items = is_array($data['items'] ?? null) ? $data['items'] : [];
-        $next = isset($data['nextAfter']) ? (string)$data['nextAfter'] : null;
+        $toDelete = is_array($data['toDelete'] ?? null) ? $data['toDelete'] : [];
+        $toUpdateFull = is_array($data['toUpdateFull'] ?? null) ? $data['toUpdateFull'] : [];
+        $toCreateFull = is_array($data['toCreateFull'] ?? null) ? $data['toCreateFull'] : [];
         $last_flag = !empty($data['last']);
 
-        if (!$items) {
-            // пустая страница — считаем завершением
+        // Если всё пусто — завершить
+        if (empty($toDelete) && empty($toUpdateFull) && empty($toCreateFull)) {
             break;
         }
 
-        foreach ($items as $it) {
-            if ($maxSeconds && (time() - $started_at) >= $maxSeconds) {
-                $last_flag = true;
-                break 2;
-            }
-            // сухой прогон — ничего не пишем
-            if ($dry) {
-                $done++;
-                $last_cursor = (string)($it['sku'] ?? $last_cursor);
-                continue;
-            }
-
-            $sku = (string)($it['sku'] ?? '');
-            if ($sku === '') continue;
-
-            $pid_before = lts_find_product_id_by_sku($sku);
-            try {
-                $res = lts_upsert_product_from_item($it, $o);
-                if (!empty($res['ok'])) {
-                    // [LTS] ANCHOR: logs - per item ok
-                    lts_log_db('info', 'upsert', [
-                        'sku'     => $sku,
-                        'post_id' => $res['post_id'] ?? null,
-                        'result'  => $pid_before ? 'updated' : 'created'
-                    ]);
-                    if ($pid_before) $updated++; else $created++;
-                    $done++;
-                } else {
-                    // was: lts_log('upsert_failed', [...]);
-                    lts_log_db('error', 'upsert', [
-                        'sku'     => $sku,
-                        'post_id' => $pid_before ?: null,
-                        'result'  => 'failed',
-                        'message' => $res['error'] ?? 'unknown'
-                    ]);
-                }
-            } catch (Throwable $e) {
-                // was: lts_log('exception_upsert', [...]);
-                lts_log_db('error', 'upsert', [
-                    'sku'     => $sku,
-                    'post_id' => $pid_before ?: null,
-                    'result'  => 'exception',
-                    'message' => $e->getMessage()
+        // Удаляем (draft) по toDelete
+        if (!$dry && !empty($toDelete)) {
+            $drafted_now = lts_draft_products_by_skus($toDelete);
+            if ($drafted_now > 0) {
+                lts_log_db('info', 'draft', [
+                    'result'  => 'drafted_diff',
+                    'message' => 'marked products as draft by diff',
+                    'ctx'     => ['count'=>$drafted_now, 'skus'=>$toDelete]
                 ]);
-            }
-
-            $last_cursor = $sku;
-            if ($max && $done >= $max) {
-                $last_flag = true; // условно завершаем досрочно
-                break 2;
             }
         }
 
-        // движемся дальше
-        $last_cursor = $next ?: $last_cursor;
+        // Обновляем/создаём по toUpdateFull и toCreateFull
+        foreach ([['arr'=>$toUpdateFull,'type'=>'update'], ['arr'=>$toCreateFull,'type'=>'create']] as $batch) {
+            foreach ($batch['arr'] as $it) {
+                if ($maxSeconds && (time() - $started_at) >= $maxSeconds) {
+                    $last_flag = true;
+                    break 2;
+                }
+                // сухой прогон — ничего не пишем
+                if ($dry) {
+                    $done++;
+                    $last_cursor = (string)($it['sku'] ?? $last_cursor);
+                    continue;
+                }
+                $sku = (string)($it['sku'] ?? '');
+                if ($sku === '') continue;
+                $pid_before = lts_find_product_id_by_sku($sku);
+                try {
+                    $res = lts_upsert_product_from_item($it, $o);
+                    if (!empty($res['ok'])) {
+                        lts_log_db('info', 'upsert', [
+                            'sku'     => $sku,
+                            'post_id' => $res['post_id'] ?? null,
+                            'result'  => $pid_before ? 'updated' : 'created'
+                        ]);
+                        if ($pid_before) $updated++; else $created++;
+                        $done++;
+                    } else {
+                        lts_log_db('error', 'upsert', [
+                            'sku'     => $sku,
+                            'post_id' => $pid_before ?: null,
+                            'result'  => 'failed',
+                            'message' => $res['error'] ?? 'unknown'
+                        ]);
+                    }
+                } catch (Throwable $e) {
+                    lts_log_db('error', 'upsert', [
+                        'sku'     => $sku,
+                        'post_id' => $pid_before ?: null,
+                        'result'  => 'exception',
+                        'message' => $e->getMessage()
+                    ]);
+                }
+                $last_cursor = $sku;
+                if ($max && $done >= $max) {
+                    $last_flag = true;
+                    break 2;
+                }
+            }
+        }
+
+        // nextAfter для курсора
+        $last_cursor = isset($data['nextAfter']) ? (string)$data['nextAfter'] : $last_cursor;
 
         // небольшая щадящая пауза для уменьшения нагрузки
         usleep(100 * 1000); // 100ms
