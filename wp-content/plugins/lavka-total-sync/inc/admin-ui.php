@@ -50,8 +50,11 @@ add_action('admin_menu', function() {
  * Enqueue admin assets for our plugin pages.
  */
 add_action('admin_enqueue_scripts', function($hook) {
-    // Only load assets on our plugin pages
-    if (strpos($hook, 'lts-') === false) {
+    // Load assets on any of our plugin screens. Hook names vary across setups
+    // (e.g. 'toplevel_page_lts-main', 'lavka-total-sync_page_lts-run', etc.).
+    $is_ours = (strpos($hook, 'lavka-total-sync') !== false)
+            || (strpos($hook, 'lts-') !== false);
+    if (!$is_ours) {
         return;
     }
 
@@ -73,6 +76,149 @@ add_action('admin_enqueue_scripts', function($hook) {
     wp_localize_script('lts-admin', 'LTS_ADMIN', [
         'ajaxUrl' => admin_url('admin-ajax.php'),
         'nonce'   => wp_create_nonce('lts_admin_nonce'),
+    ]);
+});
+
+/**
+ * Background sync: start, worker, status
+ */
+add_action('wp_ajax_lts_bg_start', function () {
+    if (!current_user_can(LTS_CAP)) wp_send_json_error(['error'=>'forbidden'], 403);
+    check_ajax_referer('lts_admin_nonce','_ajax_nonce');
+
+    // Collect args from POST
+    $args = [
+        'limit'   => isset($_POST['limit']) ? (int)$_POST['limit'] : 500,
+        'after'   => isset($_POST['after']) ? trim((string)$_POST['after']) : null,
+        'max'     => (isset($_POST['max_items']) && $_POST['max_items'] !== '') ? max(1,(int)$_POST['max_items']) : null,
+        'dry_run' => !empty($_POST['dry_run']),
+    ];
+    if (isset($_POST['draft_stale_seconds']) && $_POST['draft_stale_seconds'] !== '') {
+        $args['draft_stale_seconds'] = max(60, (int)$_POST['draft_stale_seconds']);
+    }
+    if (isset($_POST['max_seconds']) && $_POST['max_seconds'] !== '') {
+        $args['max_seconds'] = max(1, (int)$_POST['max_seconds']);
+    }
+
+    $run_id = uniqid('lts_', true);
+
+    // Persist run meta
+    $runs = get_option('lts_bg_runs', []);
+    $runs[$run_id] = [
+        'status'     => 'running',
+        'started_at' => time(),
+        'args'       => $args,
+    ];
+    update_option('lts_bg_runs', $runs, false);
+
+    // Fallback: schedule WP-Cron worker in case loopback requests are blocked
+    if ( ! wp_next_scheduled('lts_bg_worker_event', [ 'run_id' => $run_id ]) ) {
+        wp_schedule_single_event( time() + 2, 'lts_bg_worker_event', [ 'run_id' => $run_id ] );
+    }
+
+    // Fire background worker (non-blocking)
+    $url = admin_url('admin-ajax.php');
+    $payload = [
+        'action'     => 'lts_bg_worker',
+        'run_id'     => $run_id,
+        '_ajax_nonce'=> wp_create_nonce('lts_admin_nonce'),
+    ];
+    // Send as non-blocking request
+    wp_remote_post($url, [
+        'timeout'   => 0.01,
+        'blocking'  => false,
+        'sslverify' => apply_filters('https_local_ssl_verify', false),
+        'body'      => $payload,
+    ]);
+
+    wp_send_json_success(['run_id'=>$run_id]);
+});
+
+// Reusable background worker function for both AJAX and WP-Cron
+if ( ! function_exists('lts_run_bg_worker') ) {
+    function lts_run_bg_worker( $run_id ) {
+        $runs = get_option('lts_bg_runs', []);
+        if ( ! $run_id || empty( $runs[ $run_id ] ) ) {
+            return ['ok'=>false,'error'=>'unknown_run'];
+        }
+        $args = $runs[ $run_id ]['args'];
+
+        // helper to log with run id
+        if ( ! function_exists('lts_log_db_with_run') ) {
+            function lts_log_db_with_run( $level, $tag, $ctx, $run_id ) {
+                if ( ! is_array( $ctx ) ) $ctx = [];
+                $ctx['run'] = $run_id;
+                lts_log_db( $level, $tag, $ctx );
+            }
+        }
+        lts_log_db_with_run('info','bg','start', $run_id);
+
+        $res = lts_sync_goods_run( $args );
+
+        $runs[ $run_id ]['status']      = 'finished';
+        $runs[ $run_id ]['finished_at'] = time();
+        $runs[ $run_id ]['result']      = $res;
+        update_option('lts_bg_runs', $runs, false);
+
+        lts_log_db_with_run('info','bg','finish', $run_id);
+        return $res;
+    }
+}
+
+add_action('wp_ajax_lts_bg_worker', function () {
+    if (!current_user_can(LTS_CAP)) wp_send_json_error(['error'=>'forbidden'], 403);
+    check_ajax_referer('lts_admin_nonce','_ajax_nonce');
+
+    $run_id = isset($_POST['run_id']) ? (string)$_POST['run_id'] : '';
+    $res = lts_run_bg_worker( $run_id );
+    // terminate fast for loopback call
+    wp_die();
+});
+
+add_action('lts_bg_worker_event', function( $run_id ) {
+    // Run without capability/nonces – it is internal cron
+    lts_run_bg_worker( (string) $run_id );
+});
+
+add_action('wp_ajax_lts_bg_status', function () {
+    if (!current_user_can(LTS_CAP)) wp_send_json_error(['error'=>'forbidden'], 403);
+    check_ajax_referer('lts_admin_nonce','_ajax_nonce');
+
+    global $wpdb;
+    $run_id = isset($_GET['run_id']) ? (string)$_GET['run_id'] : '';
+    $after_id = isset($_GET['after_id']) ? (int)$_GET['after_id'] : 0;
+
+    $status = null;
+    $runs = get_option('lts_bg_runs', []);
+    if ($run_id && isset($runs[$run_id])) {
+        $status = $runs[$run_id]['status'];
+    }
+
+    // Tail last 200 log rows for this run (search in ctx JSON)
+    $table = $wpdb->prefix . 'lts_sync_logs';
+    $rows = [];
+    if ($run_id && $wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table))) {
+        $like = '%"run":"' . $wpdb->esc_like($run_id) . '"%';
+        $sql  = $wpdb->prepare("
+            SELECT id, ts, level, tag, message, ctx
+            FROM {$table}
+            WHERE id > %d AND ctx LIKE %s
+            ORDER BY id ASC
+            LIMIT 200
+        ", $after_id, $like);
+        $rows = $wpdb->get_results($sql, ARRAY_A);
+    }
+
+    // If finished and we have result
+    $result = null;
+    if ($run_id && isset($runs[$run_id]['result'])) {
+        $result = $runs[$run_id]['result'];
+    }
+
+    wp_send_json_success([
+        'status' => $status,
+        'rows'   => $rows ?: [],
+        'result' => $result,
     ]);
 });
 
@@ -309,6 +455,107 @@ function lts_render_run_page() {
             <h2><?php _e('Result', 'lavka-total-sync'); ?></h2>
             <textarea readonly rows="10" style="width:100%;max-width:820px;font-family:monospace"><?php echo esc_textarea(wp_json_encode($result, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE)); ?></textarea>
         <?php endif; ?>
+
+        <hr class="wp-header-end">
+        <h2><?php _e('Background total sync', 'lavka-total-sync'); ?></h2>
+        <p class="description"><?php _e('Run sync in background and watch live log. This will not block the page.', 'lavka-total-sync'); ?></p>
+        <div id="lts-bg-sync">
+            <p>
+                <button id="lts-bg-start" class="button button-primary"><?php _e('Start', 'lavka-total-sync'); ?></button>
+                <button id="lts-bg-cancel" class="button" disabled><?php _e('Cancel', 'lavka-total-sync'); ?></button>
+                <span id="lts-bg-status">[status: ]</span>
+            </p>
+            <textarea id="lts-bg-log" class="large-text code" rows="12" readonly> </textarea>
+        </div>
+        <script>
+        (function($){
+            var runId = null;
+            var lastId = 0;
+            var pollTimer = null;
+
+            function formArgs(){
+                return {
+                    limit: $('#limit').val(),
+                    after: $('#after').val(),
+                    max_items: $('#max_items').val(),
+                    max_seconds: $('#max_seconds').val(),
+                    dry_run: $('#lts-run-form-dry').is(':checked') ? 1 : 0,
+                    draft_stale_seconds: $('#draft_stale_seconds').val()
+                };
+            }
+
+            function appendLog(line){
+                var ta = $('#lts-bg-log');
+                ta.val( ta.val() + line + "\n" );
+                ta.scrollTop(ta[0].scrollHeight);
+            }
+
+            function poll(){
+                if(!runId) return;
+                $.get(LTS_ADMIN.ajaxUrl, {
+                    action: 'lts_bg_status',
+                    _ajax_nonce: LTS_ADMIN.nonce,
+                    run_id: runId,
+                    after_id: lastId
+                }).done(function(resp){
+                    if(!resp || !resp.success) return;
+                    $('#lts-bg-status').text('[status: '+(resp.data.status||'')+']');
+                    if(resp.data.rows && resp.data.rows.length){
+                        resp.data.rows.forEach(function(r){
+                            lastId = Math.max(lastId, parseInt(r.id,10)||0);
+                            var ctx = '';
+                            try { ctx = JSON.parse(r.ctx || '{}'); } catch(e){}
+                            var sku = ctx && ctx.sku ? ctx.sku : '';
+                            if(r.tag === 'upsert'){
+                                appendLog((sku?sku+' ':'') + (ctx.result || r.level));
+                            } else if (r.tag === 'draft' && ctx.count){
+                                appendLog('Drafted: '+ctx.count);
+                            } else if (r.tag === 'diff' && r.message){
+                                appendLog('[diff] '+r.message);
+                            }
+                        });
+                    }
+                    if(resp.data.result && resp.data.status === 'finished'){
+                        appendLog('=== FINISHED ===');
+                        appendLog(JSON.stringify(resp.data.result));
+                        clearInterval(pollTimer); pollTimer=null;
+                        $('#lts-bg-start').prop('disabled', false);
+                        $('#lts-bg-cancel').prop('disabled', true);
+                    }
+                });
+            }
+
+            $('#lts-bg-start').on('click', function(e){
+                e.preventDefault();
+                $('#lts-bg-log').val('Started background sync.\n[status: ]\n');
+                $('#lts-bg-status').text('[status: ]');
+                lastId = 0;
+                $.post(LTS_ADMIN.ajaxUrl, $.extend({
+                    action: 'lts_bg_start',
+                    _ajax_nonce: LTS_ADMIN.nonce
+                }, formArgs())).done(function(resp){
+                    if(!resp || !resp.success){ appendLog('Failed to start'); return; }
+                    runId = resp.data.run_id;
+                    $('#lts-bg-start').prop('disabled', true);
+                    $('#lts-bg-cancel').prop('disabled', false);
+                    if(pollTimer) clearInterval(pollTimer);
+                    pollTimer = setInterval(poll, 2000);
+                }).fail(function(){ appendLog('Start error'); });
+            });
+
+            $('#lts-bg-cancel').on('click', function(e){
+                e.preventDefault();
+                // simple cancel: just stop polling UI; actual job will finish server-side
+                if(pollTimer) clearInterval(pollTimer);
+                $('#lts-bg-start').prop('disabled', false);
+                $('#lts-bg-cancel').prop('disabled', true);
+                appendLog('Stopped watching (job continues on server).');
+            });
+
+            // minor: mark dry checkbox with id for script
+            $('input[name="dry_run"]').attr('id','lts-run-form-dry');
+        })(jQuery);
+        </script>
     </div>
     <?php
 }
