@@ -101,6 +101,7 @@ add_action('wp_ajax_lts_bg_start', function () {
     }
 
     $run_id = uniqid('lts_', true);
+    $args['run_id'] = $run_id;
 
     // Persist run meta
     $runs = get_option('lts_bg_runs', []);
@@ -142,6 +143,7 @@ if ( ! function_exists('lts_run_bg_worker') ) {
             return ['ok'=>false,'error'=>'unknown_run'];
         }
         $args = $runs[ $run_id ]['args'];
+        $args['run_id'] = (string) $run_id;
 
         // helper to log with run id
         if ( ! function_exists('lts_log_db_with_run') ) {
@@ -469,58 +471,92 @@ function lts_render_run_page() {
         </div>
         <script>
         (function($){
-            var runId = null;
-            var lastId = 0;
             var pollTimer = null;
+            var runId = '';
+            var lastRowId = 0;
 
             function formArgs(){
                 return {
-                    limit: $('#limit').val(),
-                    after: $('#after').val(),
-                    max_items: $('#max_items').val(),
-                    max_seconds: $('#max_seconds').val(),
-                    dry_run: $('#lts-run-form-dry').is(':checked') ? 1 : 0,
-                    draft_stale_seconds: $('#draft_stale_seconds').val()
+                    limit: parseInt($('#limit').val(), 10) || 500,
+                    after: ($('#after').val() || '').trim() || null,
+                    max_items: parseInt($('#max_items').val(), 10) || 200,
+                    max_seconds: parseInt($('#max_seconds').val(), 10) || 10,
+                    draft_stale_seconds: parseInt($('#draft_stale_seconds').val(), 10) || 0
                 };
             }
 
             function appendLog(line){
-                var ta = $('#lts-bg-log');
-                ta.val( ta.val() + line + "\n" );
-                ta.scrollTop(ta[0].scrollHeight);
+                var $ta = $('#lts-bg-log');
+                var ta = $ta.get(0);
+                var atEnd = (ta.scrollTop + ta.clientHeight + 8) >= ta.scrollHeight;
+                $ta.val($ta.val() + line + "\n");
+                if (atEnd) ta.scrollTop = ta.scrollHeight;
+            }
+
+            function setUiRunning(running){
+                $('#lts-bg-start').prop('disabled', running);
+                $('#lts-bg-cancel').prop('disabled', !running);
+                $('#lts-bg-status').text('[status: ' + (running ? 'running' : '') + ']');
             }
 
             function poll(){
-                if(!runId) return;
                 $.get(LTS_ADMIN.ajaxUrl, {
                     action: 'lts_bg_status',
                     _ajax_nonce: LTS_ADMIN.nonce,
                     run_id: runId,
-                    after_id: lastId
+                    after_id: lastRowId
                 }).done(function(resp){
-                    if(!resp || !resp.success) return;
-                    $('#lts-bg-status').text('[status: '+(resp.data.status||'')+']');
-                    if(resp.data.rows && resp.data.rows.length){
+                    if (!resp || !resp.success) return;
+
+                    // status
+                    var status = resp.data.status || '';
+                    $('#lts-bg-status').text('[status: ' + status + ']');
+
+                    // stream log rows (if any)
+                    if (resp.data.rows && resp.data.rows.length) {
                         resp.data.rows.forEach(function(r){
-                            lastId = Math.max(lastId, parseInt(r.id,10)||0);
-                            var ctx = '';
-                            try { ctx = JSON.parse(r.ctx || '{}'); } catch(e){}
-                            var sku = ctx && ctx.sku ? ctx.sku : '';
-                            if(r.tag === 'upsert'){
-                                appendLog((sku?sku+' ':'') + (ctx.result || r.level));
-                            } else if (r.tag === 'draft' && ctx.count){
-                                appendLog('Drafted: '+ctx.count);
-                            } else if (r.tag === 'diff' && r.message){
-                                appendLog('[diff] '+r.message);
+                            var tag = r.tag ? (' [' + r.tag + ']') : '';
+                            var msg = '';
+                            // Try to use explicit message first
+                            if (r.message && String(r.message).trim() !== '') {
+                                msg = r.message;
+                            } else {
+                                // Parse ctx JSON to extract useful info
+                                var ctx = {};
+                                try { ctx = r.ctx ? JSON.parse(r.ctx) : {}; } catch(e) { ctx = {}; }
+                                if (ctx.line) {
+                                    // progress lines come here
+                                    msg = ctx.line;
+                                } else if (r.tag === 'upsert' && ctx.sku) {
+                                    // human-friendly upsert line
+                                    var res = (ctx.result || 'upsert');
+                                    msg = res + ': ' + ctx.sku + (ctx.post_id ? (' -> post_id=' + ctx.post_id) : '');
+                                } else if (r.tag === 'draft' && ctx.count !== undefined) {
+                                    msg = 'drafted: ' + ctx.count;
+                                } else if (r.tag === 'diff' && ctx.seen_cnt !== undefined) {
+                                    msg = 'diff request: after="' + (ctx.after || '') + '", limit=' + (ctx.limit || '') + ', seen=' + ctx.seen_cnt;
+                                } else if (ctx.sku) {
+                                    msg = (r.tag || 'log') + ': ' + ctx.sku;
+                                } else {
+                                    // as a last resort, show compact ctx JSON
+                                    try { msg = JSON.stringify(ctx); } catch(e) { msg = ''; }
+                                }
                             }
+                            appendLog('#' + r.id + tag + ': ' + (msg || ''));
+                            lastRowId = r.id;
                         });
                     }
-                    if(resp.data.result && resp.data.status === 'finished'){
+
+                    // If finished and we have a result — print and stop
+                    if (status === 'finished' || status === 'done' || status === 'error' || status === 'canceled') {
+                        clearInterval(pollTimer); pollTimer = null;
+                        setUiRunning(false);
                         appendLog('=== FINISHED ===');
-                        appendLog(JSON.stringify(resp.data.result));
-                        clearInterval(pollTimer); pollTimer=null;
-                        $('#lts-bg-start').prop('disabled', false);
-                        $('#lts-bg-cancel').prop('disabled', true);
+                        if (resp.data.result) {
+                            try {
+                                appendLog(JSON.stringify(resp.data.result));
+                            } catch(e){}
+                        }
                     }
                 });
             }
@@ -528,31 +564,37 @@ function lts_render_run_page() {
             $('#lts-bg-start').on('click', function(e){
                 e.preventDefault();
                 $('#lts-bg-log').val('Started background sync.\n[status: ]\n');
-                $('#lts-bg-status').text('[status: ]');
-                lastId = 0;
+
+                var args = formArgs();
                 $.post(LTS_ADMIN.ajaxUrl, $.extend({
                     action: 'lts_bg_start',
                     _ajax_nonce: LTS_ADMIN.nonce
-                }, formArgs())).done(function(resp){
-                    if(!resp || !resp.success){ appendLog('Failed to start'); return; }
-                    runId = resp.data.run_id;
-                    $('#lts-bg-start').prop('disabled', true);
-                    $('#lts-bg-cancel').prop('disabled', false);
-                    if(pollTimer) clearInterval(pollTimer);
-                    pollTimer = setInterval(poll, 2000);
-                }).fail(function(){ appendLog('Start error'); });
+                }, args)).done(function(resp){
+                    if (!resp || !resp.success) { appendLog('Failed to start'); return; }
+                    setUiRunning(true);
+                    runId = (resp.data && resp.data.run_id) ? resp.data.run_id : '';
+                    lastRowId = 0;
+                    if (pollTimer) clearInterval(pollTimer);
+                    pollTimer = setInterval(poll, 1500);
+                    poll(); // first immediate poll
+                }).fail(function(){
+                    appendLog('Start error');
+                });
             });
 
             $('#lts-bg-cancel').on('click', function(e){
                 e.preventDefault();
-                // simple cancel: just stop polling UI; actual job will finish server-side
-                if(pollTimer) clearInterval(pollTimer);
-                $('#lts-bg-start').prop('disabled', false);
-                $('#lts-bg-cancel').prop('disabled', true);
-                appendLog('Stopped watching (job continues on server).');
+                $.post(LTS_ADMIN.ajaxUrl, {
+                    action: 'lts_job_cancel',
+                    nonce:  LTS_ADMIN.nonce
+                }).always(function(){
+                    if (pollTimer) clearInterval(pollTimer);
+                    setUiRunning(false);
+                    appendLog('Canceled by user.');
+                });
             });
 
-            // minor: mark dry checkbox with id for script
+            // ensure the "dry run" checkbox has an id if present (not used by worker)
             $('input[name="dry_run"]').attr('id','lts-run-form-dry');
         })(jQuery);
         </script>

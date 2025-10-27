@@ -108,8 +108,34 @@ add_action('wp_ajax_lts_job_status', function(){
     if (!current_user_can('manage_lavka_sync')) wp_send_json_error(['error'=>'cap']);
     check_ajax_referer('lts_admin_nonce','nonce');
 
+    global $wpdb;
     $job = get_option(LTS_JOB_OPT, null);
-    wp_send_json_success(['job'=>$job]);
+    $run_id = isset($_GET['run_id']) ? (string)$_GET['run_id'] : '';
+    $after_id = isset($_GET['after_id']) ? (int)$_GET['after_id'] : 0;
+
+    if (!$run_id && !empty($job['run_id'])) {
+        $run_id = $job['run_id'];
+    }
+
+    $rows = [];
+    $table = $wpdb->prefix . 'lts_sync_logs';
+    if ($run_id && $wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table))) {
+        $like = '%"run":"' . $wpdb->esc_like($run_id) . '"%';
+        $sql = $wpdb->prepare("
+            SELECT id, ts, level, tag, message, ctx
+            FROM {$table}
+            WHERE id > %d AND ctx LIKE %s
+            ORDER BY id ASC
+            LIMIT 200
+        ", $after_id, $like);
+        $rows = $wpdb->get_results($sql, ARRAY_A);
+    }
+
+    wp_send_json_success([
+        'job'    => $job,
+        'run_id' => $run_id,
+        'rows'   => $rows ?: [],
+    ]);
 });
 
 add_action('wp_ajax_lts_job_cancel', function(){
@@ -118,4 +144,53 @@ add_action('wp_ajax_lts_job_cancel', function(){
 
     lts_job_stop('canceled');
     wp_send_json_success(['ok'=>true]);
+});
+
+// Тикер
+add_action(LTS_JOB_HOOK, function () {
+    $job = get_option(LTS_JOB_OPT, null);
+    if (!$job || $job['status'] !== 'running') return;
+
+    $args = [
+        'limit'               => max(50, min(1000, (int)$job['limit'])),
+        'after'               => $job['after'] ?: null,
+        'max_seconds'         => max(5, min(30, (int)$job['max_sec'])),
+        'max'                 => max(1, (int)($job['max_items'] ?? 200)),
+        'draft_stale_seconds' => $job['draft_sec'] ?: null,
+    ];
+
+    // 👇 теперь добавляем run_id, чтобы записи логов можно было привязать
+    if (!empty($job['run_id'])) {
+        $args['run_id'] = (string)$job['run_id'];
+    }
+
+    try {
+        $res = lts_sync_goods_run($args);
+
+        if (empty($res['ok'])) {
+            lts_job_stop('error', $res['error'] ?? 'unknown');
+            return;
+        }
+
+        $job['after']   = $res['after'] ?? $job['after'];
+        $job['done']   += (int)($res['done'] ?? 0);
+        $job['created']+= (int)($res['created'] ?? 0);
+        $job['updated']+= (int)($res['updated'] ?? 0);
+        $job['drafted']+= (int)($res['drafted'] ?? 0);
+        $job['last']    = !empty($res['last']);
+        $job['reason']  = $res['reason'] ?? null;
+        $job['updated_ts'] = time();
+
+        if ($job['last']) {
+            $job['status'] = 'done';
+            update_option(LTS_JOB_OPT, $job, false);
+            return;
+        }
+
+        update_option(LTS_JOB_OPT, $job, false);
+        wp_schedule_single_event(time()+3, LTS_JOB_HOOK);
+
+    } catch (\Throwable $e) {
+        lts_job_stop('error', $e->getMessage());
+    }
 });

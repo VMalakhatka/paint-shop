@@ -49,6 +49,8 @@ require_once __DIR__ . '/inc/sync_goods.php';
 // [LTS] ANCHOR: include logs
 require_once __DIR__ . '/inc/logs.php';
 
+require_once __DIR__ . '/inc/worker.php';
+
 // [LTS] ANCHOR: include admin logs
 if (is_admin()) {
     require_once __DIR__ . '/inc/admin-logs.php';

@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) exit;
  * - Создаём новые товары, обновляем существующие.
  * - Пишем term->description для категории из grDescr (чтобы «прилипало» сверху).
  * - Помечаем каждый обработанный товар метой _sync_updated_at (локальное время WP).
- * - По окончании можно «задрафтить» всё, что не обновлялось дольше порога.
+ * - В конце прогона больше НЕ драфтим «устаревшие» товары (логика отключена).
  */
 
 
@@ -343,6 +343,95 @@ function lts_assign_category_and_description(int $post_id, ?int $groupId, ?strin
     }
 }
 
+/**
+ * Создаёт (если нужно) атрибут Woo и термин, и привязывает его к продукту.
+ * $taxonomy_name — без префикса 'pa_' (например, 'edin_izmer').
+ * Если уже существует — просто обновляем термы и делаем атрибут видимым.
+ */
+function lts_set_product_attribute_text(int $product_id, string $taxonomy_with_pa, string $term_value, bool $visible = true): void {
+    if ($term_value === '') return;
+
+    // Убедимся, что таксономия зарегистрирована (обычно Woo делает это на init).
+    $tax = $taxonomy_with_pa; // ожидается с префиксом 'pa_'
+    if (!taxonomy_exists($tax)) {
+        // Если можем — создадим атрибут через API Woo.
+        if (function_exists('wc_create_attribute')) {
+            $base = preg_replace('/^pa_/', '', $tax);
+            $attr_id = wc_attribute_taxonomy_id_by_name($base);
+            if (!$attr_id) {
+                $res = wc_create_attribute([
+                    'name'         => $base,
+                    'slug'         => $base,
+                    'type'         => 'select',
+                    'order_by'     => 'menu_order',
+                    'has_archives' => false,
+                ]);
+                // wc_create_attribute вернёт wp_error либо id
+                if (!is_wp_error($res)) {
+                    $attr_id = (int)$res;
+                }
+            }
+            // Попробуем принудительно зарегистрировать таксономию для немедленного использования
+            if (!taxonomy_exists($tax)) {
+                register_taxonomy($tax, 'product', [
+                    'hierarchical' => false,
+                    'label'        => ucfirst(str_replace(['pa_','_'],' ', $tax)),
+                    'query_var'    => true,
+                    'rewrite'      => false,
+                    'show_ui'      => false,
+                    'show_in_nav_menus' => false,
+                    'show_admin_column' => false,
+                ]);
+            }
+        } else {
+            // Fallback: мягкая регистрация таксономии
+            register_taxonomy($tax, 'product', [
+                'hierarchical' => false,
+                'label'        => ucfirst(str_replace(['pa_','_'],' ', $tax)),
+                'query_var'    => true,
+                'rewrite'      => false,
+                'show_ui'      => false,
+                'show_in_nav_menus' => false,
+                'show_admin_column' => false,
+            ]);
+        }
+    }
+
+    // Создадим термин при необходимости
+    $term = term_exists($term_value, $tax);
+    if (!$term || is_wp_error($term)) {
+        $term = wp_insert_term($term_value, $tax);
+    }
+    if (is_wp_error($term)) {
+        return;
+    }
+
+    // Привяжем термин к товару
+    wp_set_object_terms($product_id, [(int)$term['term_id']], $tax, false);
+
+    // Обновим карточные атрибуты (_product_attributes), чтобы было видно на витрине
+    $attrs = get_post_meta($product_id, '_product_attributes', true);
+    if (!is_array($attrs)) $attrs = [];
+
+    if (!isset($attrs[$tax]) || !is_array($attrs[$tax])) {
+        $position = count($attrs);
+        $attrs[$tax] = [
+            'name'         => $tax,
+            'value'        => '',
+            'position'     => $position,
+            'is_visible'   => $visible ? 1 : 0,
+            'is_variation' => 0,
+            'is_taxonomy'  => 1,
+        ];
+    } else {
+        // гарантируем видимость
+        $attrs[$tax]['is_visible'] = $visible ? 1 : 0;
+        $attrs[$tax]['is_taxonomy'] = 1;
+    }
+
+    update_post_meta($product_id, '_product_attributes', $attrs);
+}
+
 // [LTS] ANCHOR: upsert one item (без цены/остатков)
 function lts_upsert_product_from_item(array $it, array $opts): array {
     $sku   = (string)($it['sku'] ?? '');
@@ -370,18 +459,47 @@ function lts_upsert_product_from_item(array $it, array $opts): array {
     if ($width  !== null) update_post_meta($pid, '_width',  (string)$width);
     if ($height !== null) update_post_meta($pid, '_height', (string)$height);
 
-    // Прочие поля в мету (если пришли)
-    $map = [
-        'globalUniqueId' => '_global_uid',
-        'razmIzmer'      => '_razm_izmer',
-        'edinIzmer'      => '_edin_izmer',
-        'vesEdinic'      => '_ves_edinic',
-        'status'         => '_ms_status',
-    ];
-    foreach ($map as $src => $meta_key) {
-        if (array_key_exists($src, $it)) {
-            $val = $it[$src];
-            update_post_meta($pid, $meta_key, is_scalar($val) ? (string)$val : wp_json_encode($val));
+    // Стандартные поля и согласованные мета:
+    if (array_key_exists('globalUniqueId', $it)) {
+        update_post_meta($pid, '_global_unique_id', (string)$it['globalUniqueId']);
+    }
+
+    // Единица измерения → атрибут pa_edin_izmer (видимый)
+    if (array_key_exists('edinIzmer', $it)) {
+        $edin = trim((string)$it['edinIzmer']);
+        if ($edin !== '') {
+            lts_set_product_attribute_text($pid, 'pa_edin_izmer', $edin, true);
+        }
+    }
+
+    // ВЛИЯНИЕ СТАТУСА НА ПУБЛИКАЦИЮ/ВИДИМОСТЬ
+    // status=1  → публикуем и делаем видимым (убрать exclude термы)
+    // status=0  → публикуем, но скрываем из каталога и поиска (оставляем опубликованным)
+    if (array_key_exists('status', $it)) {
+        $statusInt = (int)$it['status'];
+        // Термы видимости WooCommerce
+        if (function_exists('wc_get_product_visibility_term_ids')) {
+            $vis = wc_get_product_visibility_term_ids(); // ['exclude-from-catalog'=>id, 'exclude-from-search'=>id, ...]
+            $excludeTerms = [];
+            if (!empty($vis['exclude-from-catalog'])) $excludeTerms[] = (int)$vis['exclude-from-catalog'];
+            if (!empty($vis['exclude-from-search']))  $excludeTerms[] = (int)$vis['exclude-from-search'];
+            if ($statusInt === 1) {
+                // Публикуем и делаем видимым
+                wp_update_post(['ID' => $pid, 'post_status' => 'publish']);
+                if ($excludeTerms) {
+                    wp_remove_object_terms($pid, $excludeTerms, 'product_visibility');
+                }
+            } else {
+                // Оставляем publish, но скрываем с витрины и из поиска
+                wp_update_post(['ID' => $pid, 'post_status' => 'publish']);
+                if ($excludeTerms) {
+                    // Добавляем exclude-термы (не трогаем остальные)
+                    wp_set_post_terms($pid, $excludeTerms, 'product_visibility', true);
+                }
+            }
+        } else {
+            // Fallback: только статус поста
+            wp_update_post(['ID' => $pid, 'post_status' => ($statusInt === 1 ? 'publish' : 'publish')]);
         }
     }
 
@@ -495,15 +613,34 @@ function lts_sync_goods_run(array $args = []): array {
     $after   = isset($args['after']) ? (string)$args['after'] : null;
     $max     = isset($args['max']) ? max(1, (int)$args['max']) : null;
     $dry     = !empty($args['dry_run']);
-    $draftStale = isset($args['draft_stale_seconds']) ? max(60, (int)$args['draft_stale_seconds']) : null;
+    $draftStale = null; // логика «устаревших» отключена
     $maxSeconds = isset($args['max_seconds']) ? max(1, (int)$args['max_seconds']) : null;
- 
+
+    // Run-scoped logger: attach current run id (if provided) to every DB log entry.
+    $runId = isset($args['run_id']) ? (string)$args['run_id'] : '';
+    $log = function (string $level, string $tag, array $ctx = []) use ($runId) {
+        if (!is_array($ctx)) {
+            $ctx = [];
+        }
+        if ($runId !== '') {
+            $ctx['run'] = $runId;
+        }
+        lts_log_db($level, $tag, $ctx);
+    };
+
+    // progress lines for live UI (worker polls level=progress, tag=progress)
+    $progress = function (string $line) use ($runId) {
+        lts_log_db('progress', 'progress', ['run' => $runId, 'line' => $line]);
+    };
+
     // курсор к бэкенду отправляем ровно таким, как ввёл оператор
     $afterRaw = array_key_exists('after', $args) ? (string)$args['after'] : '';
 
+    $progress(sprintf('Start: limit=%d, after="%s", dry=%s', $limit, $afterRaw, $dry ? 'true' : 'false'));
 
-        // [LTS] ANCHOR: logs - start
-    lts_log_db('info', 'sync', [
+
+    // [LTS] ANCHOR: logs - start
+    $log('info', 'sync', [
         'result'  => 'start',
         'message' => 'sync goods start',
         'ctx'     => ['limit'=>$limit, 'after'=>$after, 'max'=>$max, 'dry'=>$dry]
@@ -512,6 +649,7 @@ function lts_sync_goods_run(array $args = []): array {
     $done = 0;
     $created = 0;
     $updated = 0;
+    $drafted_diff = 0;   // drafted by toDelete
     $last_cursor = $after;
     $last_flag = false;
     $started_at = time();
@@ -533,8 +671,10 @@ function lts_sync_goods_run(array $args = []): array {
         }
         $reqUrl = $url . '?' . http_build_query($qs);
 
+        $progress(sprintf('Request: after="%s", limit=%d, seen=%d', $afterRaw, $limit, count($seen)));
+
         // Логируем факт подготовки запроса
-        lts_log_db('info', 'diff', [
+        $log('info', 'diff', [
             'result'  => 'request',
             'message' => 'diff request prepared',
             'ctx'     => [
@@ -552,6 +692,7 @@ function lts_sync_goods_run(array $args = []): array {
         }
         $j = lts_http_post_json($reqUrl, $seen, $headers, (int)$o['timeout']);
         if (empty($j['ok'])) {
+            $log('error', 'fetch', ['error'=>$j['error'] ?? 'unknown', 'after'=>$last_cursor]);
             lts_log('fetch_page_error', ['error'=>$j['error'] ?? 'unknown', 'after'=>$last_cursor]);
             return ['ok'=>false, 'error'=>$j['error'] ?? 'fetch_failed', 'after'=>$last_cursor];
         }
@@ -569,8 +710,10 @@ function lts_sync_goods_run(array $args = []): array {
         // Удаляем (draft) по toDelete
         if (!$dry && !empty($toDelete)) {
             $drafted_now = lts_draft_products_by_skus($toDelete);
+            $drafted_diff += (int)$drafted_now;
+            $progress(sprintf('Draft-by-diff: %d (skus: %s)', (int)$drafted_now, implode(',', array_slice($toDelete, 0, 5))));
             if ($drafted_now > 0) {
-                lts_log_db('info', 'draft', [
+                $log('info', 'draft', [
                     'result'  => 'drafted_diff',
                     'message' => 'marked products as draft by diff',
                     'ctx'     => ['count'=>$drafted_now, 'skus'=>$toDelete]
@@ -594,10 +737,12 @@ function lts_sync_goods_run(array $args = []): array {
                 $sku = (string)($it['sku'] ?? '');
                 if ($sku === '') continue;
                 $pid_before = lts_find_product_id_by_sku($sku);
+                $progress('Upsert begin: '.$sku);
                 try {
                     $res = lts_upsert_product_from_item($it, $o);
                     if (!empty($res['ok'])) {
-                        lts_log_db('info', 'upsert', [
+                        $progress('Upsert ok: '.$sku.' -> post_id='.$res['post_id']);
+                        $log('info', 'upsert', [
                             'sku'     => $sku,
                             'post_id' => $res['post_id'] ?? null,
                             'result'  => $pid_before ? 'updated' : 'created'
@@ -605,7 +750,8 @@ function lts_sync_goods_run(array $args = []): array {
                         if ($pid_before) $updated++; else $created++;
                         $done++;
                     } else {
-                        lts_log_db('error', 'upsert', [
+                        $progress('Upsert fail: '.$sku.' -> '.($res['error'] ?? 'unknown'));
+                        $log('error', 'upsert', [
                             'sku'     => $sku,
                             'post_id' => $pid_before ?: null,
                             'result'  => 'failed',
@@ -613,7 +759,8 @@ function lts_sync_goods_run(array $args = []): array {
                         ]);
                     }
                 } catch (Throwable $e) {
-                    lts_log_db('error', 'upsert', [
+                    $progress('Upsert exception: '.$sku.' -> '.$e->getMessage());
+                    $log('error', 'upsert', [
                         'sku'     => $sku,
                         'post_id' => $pid_before ?: null,
                         'result'  => 'exception',
@@ -631,45 +778,40 @@ function lts_sync_goods_run(array $args = []): array {
         // nextAfter для курсора
         $last_cursor = isset($data['nextAfter']) ? (string)$data['nextAfter'] : $last_cursor;
 
+        $progress(sprintf('Page end: nextAfter="%s", done=%d, created=%d, updated=%d', $last_cursor, $done, $created, $updated));
+
         // небольшая щадящая пауза для уменьшения нагрузки
         usleep(100 * 1000); // 100ms
 
     } while (!$last_flag);
 
-    $drafted = 0;
-    if (!$dry && $draftStale) {
-        $drafted = lts_mark_stale_products_as_draft($draftStale);
-        // [LTS] ANCHOR: logs - drafted summary
-
-                lts_log_db('info', 'draft', [
-                    'result'  => 'drafted',
-                    'message' => 'marked stale products as draft',
-                    'ctx'     => ['count'=>$drafted, 'older_than_sec'=>$draftStale]
-                ]);
-    }
 
     $elapsed = time() - $started_at;
     lts_log('sync_done', [
         'done'=>$done, 'created'=>$created, 'updated'=>$updated,
-        'drafted'=>$drafted, 'elapsed_sec'=>$elapsed, 'last_after'=>$last_cursor
+        'drafted'=>$drafted_diff, 'elapsed_sec'=>$elapsed, 'last_after'=>$last_cursor
     ]);
+    $progress(sprintf('Finish: done=%d, created=%d, updated=%d, drafted_diff=%d, after="%s"', $done, $created, $updated, $drafted_diff, $last_cursor));
     // [LTS] ANCHOR: logs - finish
-        lts_log_db('info', 'sync', [
-            'result'  => 'finish',
-            'message' => 'sync goods finish',
-            'ctx'     => [
-                'done'=>$done, 'created'=>$created, 'updated'=>$updated,
-                'drafted'=>$drafted, 'elapsed_sec'=>$elapsed, 'last_after'=>$last_cursor
-            ]
-        ]);
+    $log('info', 'sync', [
+        'result'  => 'finish',
+        'message' => 'sync goods finish',
+        'ctx'     => [
+            'done'=>$done, 'created'=>$created, 'updated'=>$updated,
+            'drafted'=>$drafted_diff, 'elapsed_sec'=>$elapsed, 'last_after'=>$last_cursor
+        ]
+    ]);
     return [
-        'ok'       => true,
-        'done'     => $done,
-        'created'  => $created,
-        'updated'  => $updated,
-        'drafted'  => $drafted,
-        'after'    => $last_cursor,
-        'elapsed'  => $elapsed,
-        'last'     => $last_flag,
+        'ok'             => true,
+        'done'           => $done,
+        'created'        => $created,
+        'updated'        => $updated,
+        // По ожиданию пользователя "drafted" = сколько задрафтили по списку toDelete
+        'drafted'        => $drafted_diff,
+        // Дополнительно возвращаем раздельно
+        'drafted_diff'   => $drafted_diff,
+        'after'          => $last_cursor,
+        'elapsed'        => $elapsed,
+        'last'           => $last_flag,
     ];
 }

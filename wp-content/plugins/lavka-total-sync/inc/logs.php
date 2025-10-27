@@ -38,6 +38,53 @@ function lts_log_db(string $level, string $action, array $data = []): void {
     }
 }
 
+// === Live progress polling ===============================================
+
+add_action('wp_ajax_lts_logs_progress', 'lts_ajax_logs_progress');
+
+function lts_ajax_logs_progress() {
+    if ( ! current_user_can( defined('LTS_CAP') ? LTS_CAP : 'manage_options') ) {
+        wp_send_json_error(['error' => 'forbidden'], 403);
+    }
+
+    global $wpdb;
+    $table   = $wpdb->prefix . 'lts_logs';
+    $run     = isset($_GET['run']) ? (string) $_GET['run'] : '';
+    $sinceId = isset($_GET['since_id']) ? (int) $_GET['since_id'] : 0;
+
+    if ($run === '') {
+        wp_send_json_success(['rows' => [], 'last_id' => $sinceId]);
+    }
+
+    // Тянем только наши "прогресс"-строки текущего прогона
+    // level='progress', tag='progress', ctx->>'$.run' = $run
+    $sql = "
+        SELECT id, created_at, ctx
+        FROM {$table}
+        WHERE level = 'progress'
+          AND tag   = 'progress'
+          AND id    > %d
+          AND JSON_EXTRACT(ctx, '$.run') = %s
+        ORDER BY id ASC
+        LIMIT 500
+    ";
+
+    $rows = $wpdb->get_results( $wpdb->prepare($sql, $sinceId, wp_json_encode($run)), ARRAY_A );
+    $out  = [];
+    $last = $sinceId;
+
+    foreach ($rows as $r) {
+        $ctx = json_decode($r['ctx'] ?? '{}', true) ?: [];
+        $line = isset($ctx['line']) ? (string)$ctx['line'] : '';
+        if ($line !== '') {
+            $out[] = $line;
+        }
+        $last = (int)$r['id'];
+    }
+
+    wp_send_json_success(['rows' => $out, 'last_id' => $last]);
+}
+
 /** Утилита для ротации (например, хранить 30 дней) */
 function lts_logs_prune(int $days = 30): int {
     global $wpdb;
