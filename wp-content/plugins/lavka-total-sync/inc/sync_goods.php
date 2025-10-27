@@ -780,6 +780,12 @@ function lts_sync_goods_run(array $args = []): array {
 
         $progress(sprintf('Page end: nextAfter="%s", done=%d, created=%d, updated=%d', $last_cursor, $done, $created, $updated));
 
+        // Keep product_cat counters consistent after each processed portion
+        if (function_exists('lts_recount_all_product_cat_counts')) {
+            lts_recount_all_product_cat_counts();
+            $progress('Recount categories: done');
+        }
+
         // небольшая щадящая пауза для уменьшения нагрузки
         usleep(100 * 1000); // 100ms
 
@@ -801,6 +807,11 @@ function lts_sync_goods_run(array $args = []): array {
             'drafted'=>$drafted_diff, 'elapsed_sec'=>$elapsed, 'last_after'=>$last_cursor
         ]
     ]);
+    // Final safety recount to ensure consistency even if the session was interrupted earlier
+    if (function_exists('lts_recount_all_product_cat_counts')) {
+        lts_recount_all_product_cat_counts();
+        $progress('Recount categories: final done');
+    }
     return [
         'ok'             => true,
         'done'           => $done,

@@ -104,3 +104,38 @@ function lts_java_post(string $path, $body, array $args = []) {
     ]);
     return wp_remote_post($url, $args);
 }
+
+function lts_recount_all_product_cat_counts(): void {
+    global $wpdb;
+
+    // 1) пересчёт всех product_cat одним SQL
+    $wpdb->query("
+        UPDATE {$wpdb->term_taxonomy} tt
+        LEFT JOIN (
+          SELECT tr.term_taxonomy_id, COUNT(*) AS real_cnt
+          FROM {$wpdb->term_relationships} tr
+          JOIN {$wpdb->posts} p
+            ON p.ID = tr.object_id
+           AND p.post_type = 'product'
+           AND p.post_status = 'publish'
+          GROUP BY tr.term_taxonomy_id
+        ) x ON x.term_taxonomy_id = tt.term_taxonomy_id
+        SET tt.count = COALESCE(x.real_cnt, 0)
+        WHERE tt.taxonomy = 'product_cat'
+    ");
+
+    // 2) сбросим кэши термов, чтобы админ/виджеты увидели новые значения
+    // Получим все term_id для product_cat и почистим кэш
+    $term_ids = $wpdb->get_col("
+        SELECT term_id FROM {$wpdb->term_taxonomy}
+        WHERE taxonomy = 'product_cat'
+    ");
+    if ($term_ids) {
+        clean_term_cache(array_map('intval', $term_ids), 'product_cat');
+    }
+
+    // 3) сброс product transients (на всякий случай)
+    if (function_exists('wc_delete_product_transients')) {
+        wc_delete_product_transients();
+    }
+}

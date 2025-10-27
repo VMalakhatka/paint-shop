@@ -240,6 +240,22 @@ add_action('wp_ajax_lts_run_total_sync', function(){
     wp_send_json_success($res);
 });
 
+add_action('wp_ajax_lts_recount_cats', function () {
+    if (!current_user_can(LTS_CAP)) wp_send_json_error(['error'=>'forbidden'], 403);
+    check_ajax_referer('lts_admin_nonce','_ajax_nonce');
+
+    if (function_exists('lts_recount_all_product_cat_counts')) {
+        try {
+            lts_recount_all_product_cat_counts();
+            wp_send_json_success(['ok' => true]);
+        } catch (\Throwable $e) {
+            wp_send_json_error(['error' => $e->getMessage()]);
+        }
+    } else {
+        wp_send_json_error(['error' => 'missing_helper']);
+    }
+});
+
 /**
  * Render the settings page.
  */
@@ -596,6 +612,39 @@ function lts_render_run_page() {
 
             // ensure the "dry run" checkbox has an id if present (not used by worker)
             $('input[name="dry_run"]').attr('id','lts-run-form-dry');
+        })(jQuery);
+        </script>
+
+        <hr>
+        <h2><?php _e('Force recount product categories', 'lavka-total-sync'); ?></h2>
+        <p class="description"><?php _e('Manually recalculate product_cat counters (stored term counts) for all categories. Useful if catalog shows wrong counts.', 'lavka-total-sync'); ?></p>
+        <p>
+            <button id="lts-recount-cats" class="button"><?php _e('Force recount now', 'lavka-total-sync'); ?></button>
+            <span id="lts-recount-status"></span>
+        </p>
+        <script>
+        (function($){
+            $('#lts-recount-cats').on('click', function(e){
+                e.preventDefault();
+                var $btn = $(this);
+                var $st = $('#lts-recount-status');
+                $btn.prop('disabled', true);
+                $st.text('<?php echo esc_js(__('Working…', 'lavka-total-sync')); ?>');
+                $.post(LTS_ADMIN.ajaxUrl, {
+                    action: 'lts_recount_cats',
+                    _ajax_nonce: LTS_ADMIN.nonce
+                }).done(function(resp){
+                    if (resp && resp.success) {
+                        $st.text('<?php echo esc_js(__('Done.', 'lavka-total-sync')); ?>');
+                    } else {
+                        $st.text('<?php echo esc_js(__('Error', 'lavka-total-sync')); ?>');
+                    }
+                }).fail(function(){
+                    $st.text('<?php echo esc_js(__('Error', 'lavka-total-sync')); ?>');
+                }).always(function(){
+                    $btn.prop('disabled', false);
+                });
+            });
         })(jQuery);
         </script>
     </div>
