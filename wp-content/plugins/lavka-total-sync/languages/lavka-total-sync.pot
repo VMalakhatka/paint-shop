@@ -1,0 +1,280 @@
+# Copyright (C) 2025 Your Name
+# This file is distributed under the same license as the Lavka Total Sync plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: Lavka Total Sync 0.1.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lavka-total-sync\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2025-10-27T20:38:27+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: lavka-total-sync\n"
+
+#. Plugin Name of the plugin
+#: lavka-total-sync.php
+#: inc/admin-ui.php:19
+#: inc/admin-ui.php:286
+msgid "Lavka Total Sync"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: lavka-total-sync.php
+msgid "https://example.com/"
+msgstr ""
+
+#. Description of the plugin
+#: lavka-total-sync.php
+msgid "Total synchronisation of products from external MSSQL or file sources into WooCommerce, excluding price and stock. Provides an admin interface to configure endpoints and launch synchronisation tasks."
+msgstr ""
+
+#. Author of the plugin
+#: lavka-total-sync.php
+msgid "Your Name"
+msgstr ""
+
+#: inc/admin-logs.php:11
+msgid "Total Sync Logs"
+msgstr ""
+
+#: inc/admin-logs.php:12
+msgid "Logs"
+msgstr ""
+
+#: inc/admin-logs.php:30
+msgid "Total Sync — Logs"
+msgstr ""
+
+#: inc/admin-logs.php:34
+#: inc/admin-logs.php:86
+msgid "Level"
+msgstr ""
+
+#: inc/admin-logs.php:36
+#: inc/admin-logs.php:44
+msgid "Any"
+msgstr ""
+
+#: inc/admin-logs.php:42
+#: inc/admin-logs.php:87
+msgid "Action"
+msgstr ""
+
+#: inc/admin-logs.php:52
+#: inc/admin-logs.php:88
+msgid "SKU"
+msgstr ""
+
+#: inc/admin-logs.php:55
+msgid "Days"
+msgstr ""
+
+#: inc/admin-logs.php:58
+msgid "Filter"
+msgstr ""
+
+#: inc/admin-logs.php:63
+msgid "Export CSV"
+msgstr ""
+
+#: inc/admin-logs.php:85
+msgid "Time"
+msgstr ""
+
+#: inc/admin-logs.php:89
+msgid "Post"
+msgstr ""
+
+#: inc/admin-logs.php:90
+#: inc/admin-ui.php:473
+msgid "Result"
+msgstr ""
+
+#: inc/admin-logs.php:91
+msgid "Message"
+msgstr ""
+
+#: inc/admin-logs.php:111
+msgid "No logs"
+msgstr ""
+
+#: inc/admin-ui.php:20
+msgid "Total Sync"
+msgstr ""
+
+#: inc/admin-ui.php:31
+#: inc/admin-ui.php:32
+msgid "Settings"
+msgstr ""
+
+#: inc/admin-ui.php:41
+#: inc/admin-ui.php:42
+#: inc/admin-ui.php:469
+msgid "Run"
+msgstr ""
+
+#: inc/admin-ui.php:70
+msgid "Loading…"
+msgstr ""
+
+#: inc/admin-ui.php:71
+msgid "Saving…"
+msgstr ""
+
+#: inc/admin-ui.php:72
+#: inc/admin-ui.php:279
+msgid "Saved"
+msgstr ""
+
+#: inc/admin-ui.php:73
+msgid "Error:"
+msgstr ""
+
+#: inc/admin-ui.php:74
+msgid "Updated"
+msgstr ""
+
+#: inc/admin-ui.php:293
+msgid "Java Base URL"
+msgstr ""
+
+#: inc/admin-ui.php:303
+msgid "API Token"
+msgstr ""
+
+#: inc/admin-ui.php:313
+msgid "Sync endpoint"
+msgstr ""
+
+#: inc/admin-ui.php:324
+msgid "Status endpoint"
+msgstr ""
+
+#: inc/admin-ui.php:335
+msgid "Cancel endpoint"
+msgstr ""
+
+#: inc/admin-ui.php:345
+msgid "Batch size"
+msgstr ""
+
+#: inc/admin-ui.php:353
+msgid "HTTP timeout, sec"
+msgstr ""
+
+#: inc/admin-ui.php:363
+msgid "Category description — prefix (HTML)"
+msgstr ""
+
+#: inc/admin-ui.php:368
+msgid "HTML to prepend before category description. Leave empty to disable."
+msgstr ""
+
+#: inc/admin-ui.php:374
+msgid "Category description — suffix (HTML)"
+msgstr ""
+
+#: inc/admin-ui.php:379
+msgid "HTML to append after category description. Example: closing &lt;/p&gt; tag."
+msgstr ""
+
+#: inc/admin-ui.php:383
+msgid "Save"
+msgstr ""
+
+#: inc/admin-ui.php:421
+msgid "Run Total Sync"
+msgstr ""
+
+#: inc/admin-ui.php:423
+msgid "Run a full synchronization of WooCommerce products (except price and stock) from the external MSSQL source. Uses keyset pagination (limit/after)."
+msgstr ""
+
+#: inc/admin-ui.php:427
+#: inc/admin-ui.php:640
+#: inc/admin-ui.php:643
+msgid "Error"
+msgstr ""
+
+#: inc/admin-ui.php:429
+msgid "Sync completed."
+msgstr ""
+
+#: inc/admin-ui.php:436
+msgid "Page size (limit)"
+msgstr ""
+
+#: inc/admin-ui.php:440
+msgid "Cursor (after)"
+msgstr ""
+
+#: inc/admin-ui.php:444
+msgid "Max items to modify"
+msgstr ""
+
+#: inc/admin-ui.php:447
+msgid "If set, process only this many SKUs starting from the cursor (after) and stop."
+msgstr ""
+
+#: inc/admin-ui.php:451
+msgid "Max run time (seconds)"
+msgstr ""
+
+#: inc/admin-ui.php:454
+msgid "Optional safety limit: stop the sync when this many seconds have elapsed."
+msgstr ""
+
+#: inc/admin-ui.php:458
+msgid "Dry run"
+msgstr ""
+
+#: inc/admin-ui.php:459
+msgid "Do not modify Woo, only fetch pages"
+msgstr ""
+
+#: inc/admin-ui.php:462
+msgid "Draft items not updated for (seconds)"
+msgstr ""
+
+#: inc/admin-ui.php:465
+msgid "After the run, products with _sync_updated_at older than this threshold will be moved to draft."
+msgstr ""
+
+#: inc/admin-ui.php:478
+msgid "Background total sync"
+msgstr ""
+
+#: inc/admin-ui.php:479
+msgid "Run sync in background and watch live log. This will not block the page."
+msgstr ""
+
+#: inc/admin-ui.php:482
+msgid "Start"
+msgstr ""
+
+#: inc/admin-ui.php:483
+msgid "Cancel"
+msgstr ""
+
+#: inc/admin-ui.php:619
+msgid "Force recount product categories"
+msgstr ""
+
+#: inc/admin-ui.php:620
+msgid "Manually recalculate product_cat counters (stored term counts) for all categories. Useful if catalog shows wrong counts."
+msgstr ""
+
+#: inc/admin-ui.php:622
+msgid "Force recount now"
+msgstr ""
+
+#: inc/admin-ui.php:632
+msgid "Working…"
+msgstr ""
+
+#: inc/admin-ui.php:638
+msgid "Done."
+msgstr ""
