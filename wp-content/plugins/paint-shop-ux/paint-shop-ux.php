@@ -300,9 +300,9 @@ add_action('wp_enqueue_scripts', function () {
   .woocommerce ul.products li.product-category .psu-cat-faux-thumb{height: '.$img_h_mobile.'px;}
 }
 .woocommerce ul.products li.product .woocommerce-loop-product__title.compact-title{
-  --lines:2;
+  --lines:3;
   display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:var(--lines);
-  overflow:hidden;line-height:1.2;min-height:calc(1.2em * var(--lines));
+  overflow:hidden;line-height:1.2;min-height:calc(1.3em * var(--lines));
   margin:0.4rem 0 0.6rem !important;
   font-size: clamp(0.85rem, 2.5vw, 1rem);
 }
