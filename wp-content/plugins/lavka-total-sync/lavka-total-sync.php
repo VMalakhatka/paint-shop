@@ -51,6 +51,9 @@ require_once __DIR__ . '/inc/logs.php';
 
 require_once __DIR__ . '/inc/worker.php';
 
+require_once __DIR__ . '/inc/rest-catdesc-batch.php';
+
+
 // [LTS] ANCHOR: include admin logs
 if (is_admin()) {
     require_once __DIR__ . '/inc/admin-logs.php';

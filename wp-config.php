@@ -10,6 +10,8 @@ if (!defined('ABSPATH')) {
     define('ABSPATH', __DIR__ . '/');
 }
 
+define('WP_APPLICATION_PASSWORDS_ALLOW_HTTP', true);
+
 // Если нужно только проверить конфиги без загрузки ядра
 if (defined('WP_SKIP_BOOTSTRAP') && WP_SKIP_BOOTSTRAP) {
     require __DIR__ . '/wp-config.common.php';
