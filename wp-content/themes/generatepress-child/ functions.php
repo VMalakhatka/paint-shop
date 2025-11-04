@@ -51,6 +51,8 @@ add_filter('term_link', function ($url, $term, $taxonomy) {
     return add_query_arg('cat', $term->slug, $page_url);
 }, 10, 3);
 
+add_filter('psu_products_per_page', fn()=>24);
+
 /** ================= Stock Locations UI: опциональный кастом лейблов ============== */
 /*
 // Включай ТОЛЬКО если нужны свои аббревиатуры, отличные от перевода плагина

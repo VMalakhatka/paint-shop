@@ -18,11 +18,96 @@ add_action('init', function () {
  *  Настройки по умолчанию
  *  ======================= */
 // через фильтры — так локали/темы смогут подменять
+// Быстро: для изменения числа колонок на десктопе — установите PSU_COLS_DESKTOP (2..6); для товаров на страницу — используйте ?pp=24 в URL.
 const PSU_COLS_DESKTOP = 0;
 const PSU_IMG_H_DESKTOP = 210;
 const PSU_IMG_H_TABLET  = 190;
 const PSU_IMG_H_MOBILE  = 180;
 const PSU_TITLE_RESERVE = 35;
+
+/** =======================
+ *  Catalog grid controls: per-page + columns
+ *  ======================= */
+
+/**
+ * Products per page.
+ * Priority: URL ?pp= (6..120) → otherwise keep theme/Woo default.
+ * Example usage: /shop/?pp=24
+ */
+add_filter('loop_shop_per_page', function ($per_page) {
+    $pp = isset($_GET['pp']) ? (int) $_GET['pp'] : 0;
+    if ($pp >= 6 && $pp <= 120) {
+        return $pp;
+    }
+    // Optional: allow theme/site-wide override via filter 'psu_products_per_page'.
+    $pp_filter = (int) apply_filters('psu_products_per_page', 0);
+    if ($pp_filter >= 6 && $pp_filter <= 120) {
+        return $pp_filter;
+    }
+    return $per_page;
+}, 20);
+
+/**
+ * Force desktop columns count if PSU_COLS_DESKTOP is set (2..6).
+ * Works with both common filter names for broader theme compatibility.
+ */
+function psu_loop_shop_columns($cols) {
+    $cfg = defined('PSU_COLS_DESKTOP') ? (int) PSU_COLS_DESKTOP : 0;
+    $cfg = (int) apply_filters('psu_cols_desktop', $cfg);
+    if ($cfg >= 2 && $cfg <= 6) {
+        return $cfg;
+    }
+    return $cols;
+}
+
+add_filter('loop_shop_columns', 'psu_loop_shop_columns', 20);
+add_filter('woocommerce_loop_shop_columns', 'psu_loop_shop_columns', 20);
+
+/** =======================
+ *  Small UI control: per-page switcher (12 / 24 / 48)
+ *  ======================= */
+add_action('woocommerce_before_shop_loop', function(){
+    if (!function_exists('is_shop') || (!is_shop() && !is_product_taxonomy())) return;
+
+    // Current value
+    $cur = isset($_GET['pp']) ? (int)$_GET['pp'] : 0;
+    if ($cur < 6 || $cur > 120) { $cur = 0; }
+
+    // Build links preserving current query (except "pp")
+    $base_url = remove_query_arg('pp');
+    $mk = function($val) use ($base_url){
+        return esc_url(add_query_arg('pp', (int)$val, $base_url));
+    };
+
+    echo '<div class="psu-per-page" role="group" aria-label="Products per page">'
+       . '<span class="psu-per-page__label">' . esc_html__('Show:', 'paint-shop-ux') . '</span>'
+       . '<a class="psu-per-page__btn' . ($cur===12 ? ' is-active' : '') . '" href="' . $mk(12) . '">12</a>'
+       . '<a class="psu-per-page__btn' . ($cur===24 ? ' is-active' : '') . '" href="' . $mk(24) . '">24</a>'
+       . '<a class="psu-per-page__btn' . ($cur===48 ? ' is-active' : '') . '" href="' . $mk(48) . '">48</a>'
+       . '</div>';
+}, 15);
+
+/**
+ * Hard‑set posts_per_page on the main product archive query (themes sometimes bypass loop_shop_per_page).
+ */
+add_action('pre_get_posts', function($q){
+    if (is_admin() || ! $q->is_main_query()) return;
+
+    // Only affect shop and product taxonomy archives
+    if (function_exists('is_shop') && (is_shop() || is_product_taxonomy())) {
+        $pp = isset($_GET['pp']) ? (int) $_GET['pp'] : 0;
+        if ($pp < 6 || $pp > 120) {
+            // allow site-wide override via filter if present
+            $pp_filter = (int) apply_filters('psu_products_per_page', 0);
+            $pp = ($pp_filter >= 6 && $pp_filter <= 120) ? $pp_filter : 0;
+        }
+        if ($pp >= 6 && $pp <= 120) {
+            $q->set('posts_per_page', $pp);
+            // Some themes also read 'posts_per_archive_page'
+            $q->set('posts_per_archive_page', $pp);
+        }
+    }
+}, 20);
 
 /** =======================
  *  1) Компактные названия
@@ -364,8 +449,21 @@ add_action('wp_enqueue_scripts', function () {
 @media (max-width:600px){
   .woocommerce ul.products li.product .psu-prod-faux-thumb{height: '.$img_h_mobile.'px;}
 }
+/* Per-page switcher */
+.psu-per-page{display:flex;align-items:center;gap:.35rem;margin:.5rem 0 1rem}
+.psu-per-page__label{opacity:.8;margin-right:.25rem}
+.psu-per-page__btn{display:inline-block;padding:.25rem .5rem;border:1px solid #ddd;border-radius:4px;text-decoration:none}
+.psu-per-page__btn:hover{border-color:#bbb}
+.psu-per-page__btn.is-active{background:#f2f2f2;border-color:#bbb}
 ';
     wp_register_style('psu-inline', false);
     wp_enqueue_style('psu-inline');
     wp_add_inline_style('psu-inline', $css);
+
+    // Small JS nudge: trigger a few resize events to help themes recalc the product grid
+    // when images/inline CSS change dimensions (fixes "single-row" first render on some setups).
+    wp_register_script('psu-grid-nudge', '', [], false, true);
+    wp_enqueue_script('psu-grid-nudge');
+    $js = "(function(){function kick(){try{window.dispatchEvent(new Event('resize'));}catch(e){var ev=document.createEvent('UIEvents');ev.initUIEvent('resize',true,false,window,0);window.dispatchEvent(ev);} } if(document.readyState==='complete'){setTimeout(kick,120);} else {window.addEventListener('load',function(){setTimeout(kick,60); setTimeout(kick,250); setTimeout(kick,800);});} document.addEventListener('DOMContentLoaded',function(){setTimeout(kick,60);});})();";
+    wp_add_inline_script('psu-grid-nudge', $js);
 }, 20);
