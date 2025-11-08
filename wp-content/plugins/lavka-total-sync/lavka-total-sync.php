@@ -53,6 +53,8 @@ require_once __DIR__ . '/inc/worker.php';
 
 require_once __DIR__ . '/inc/rest-catdesc-batch.php';
 
+require_once __DIR__ . '/inc/sync-img.php';
+
 
 // [LTS] ANCHOR: include admin logs
 if (is_admin()) {

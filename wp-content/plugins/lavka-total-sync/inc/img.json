@@ -1,0 +1,80 @@
+{
+  "results": [
+    {
+      "sku": "CR-CE0900056027",
+      "productId": 55302,
+      "applied": [
+        {
+          "applied": true,
+          "file": "cr-ce0900056027.jpg",
+          "featured": true
+        },
+        {
+          "applied": true,
+          "file": "cr-ce0900056027_1.jpg",
+          "position": 1
+        },
+        {
+          "applied": true,
+          "file": "cr-ce0900056027_2.jpg",
+          "position": 2
+        },
+        {
+          "applied": true,
+          "file": "cr-ce0900056027_3.jpg",
+          "position": 3
+        },
+        {
+          "applied": true,
+          "file": "cr-ce0900056027_4.jpg",
+          "position": 4
+        }
+      ],
+      "warnings": [
+        "gallery_error:pic/cr-ce0900056027_5.jpg:Not found in s3_media_index: cr-ce0900056027_5.jpg",
+        "gallery_error:pic/cr-ce0900056027_6.jpg:Not found in s3_media_index: cr-ce0900056027_6.jpg"
+      ]
+    },
+    {
+      "sku": "CR-CE0900056045",
+      "productId": 50803,
+      "applied": [
+        {
+          "applied": true,
+          "file": "cr-ce0900056045.jpg",
+          "featured": true
+        },
+        {
+          "applied": true,
+          "file": "cr-ce0900056800_1.jpg",
+          "position": 1
+        },
+        {
+          "applied": true,
+          "file": "cr-ce0900056800_2.jpg",
+          "position": 2
+        },
+        {
+          "applied": true,
+          "file": "cr-ce0900056800_3.jpg",
+          "position": 3
+        },
+        {
+          "applied": true,
+          "file": "cr-ce0900056800_4.jpg",
+          "position": 4
+        }
+      ],
+      "warnings": [
+        "gallery_error:pic/ce0900056045_champagne_72dpi_rvb.jpg:Not found in s3_media_index: ce0900056045_champagne_72dpi_rvb.jpg",
+        "gallery_error:pic/cr-ce0900056800_10.jpg:Not found in s3_media_index: cr-ce0900056800_10.jpg",
+        "gallery_error:pic/cr-ce0900056800_6.jpg:Not found in s3_media_index: cr-ce0900056800_6.jpg",
+        "gallery_error:pic/cr-ce0900056800_7.jpg:Not found in s3_media_index: cr-ce0900056800_7.jpg",
+        "gallery_error:pic/cr-ce0900056800_8.jpg:Not found in s3_media_index: cr-ce0900056800_8.jpg",
+        "gallery_error:pic/cr-ce0900056800_9.jpg:Not found in s3_media_index: cr-ce0900056800_9.jpg"
+      ]
+    }
+  ],
+  "ok": true,
+  "processed": 2
+}
