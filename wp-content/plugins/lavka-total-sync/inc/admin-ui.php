@@ -275,11 +275,21 @@ function lts_render_settings_page() {
         // [LTS] ANCHOR: save-cat-desc-glue
         $opts['cat_desc_prefix_html'] = wp_kses_post($_POST['cat_desc_prefix_html'] ?? '');
         $opts['cat_desc_suffix_html'] = wp_kses_post($_POST['cat_desc_suffix_html'] ?? '');
+        // Save defaults for new API (/sync/run) and the "first" SKU
+        $opts['new_api_defaults'] = [
+            'limit'       => isset($_POST['lts_def_limit']) ? (int)$_POST['lts_def_limit'] : 40000,
+            'pageSizeWoo' => isset($_POST['lts_def_page'])  ? (int)$_POST['lts_def_page']  : 200,
+            'cursorAfter' => isset($_POST['lts_def_after']) ? sanitize_text_field((string)$_POST['lts_def_after']) : '',
+            'dryRun'      => !empty($_POST['lts_def_dry']),
+        ];
+        $opts['first_sku'] = isset($_POST['lts_first_sku']) ? sanitize_text_field((string)$_POST['lts_first_sku']) : '___';
         lts_update_options($opts);
         echo '<div class="updated"><p>' . esc_html__('Saved', 'lavka-total-sync') . '</p></div>';
     }
 
     $opts = lts_get_options();
+    $def = isset($opts['new_api_defaults']) && is_array($opts['new_api_defaults']) ? $opts['new_api_defaults'] : [];
+    $firstSku = isset($opts['first_sku']) ? (string)$opts['first_sku'] : '___';
 
     ?>
     <div class="wrap">
@@ -377,6 +387,32 @@ function lts_render_settings_page() {
                     <td>
                         <textarea name="cat_desc_suffix_html" id="cat_desc_suffix_html" rows="2" class="large-text" placeholder='</p>'><?php echo esc_textarea($opts['cat_desc_suffix_html'] ?? ''); ?></textarea>
                         <p class="description"><?php _e('HTML to append after category description. Example: closing &lt;/p&gt; tag.', 'lavka-total-sync'); ?></p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row" colspan="2"><h2 style="margin:1.5rem 0 .25rem;"><?php _e('New API defaults (/sync/run)', 'lavka-total-sync'); ?></h2></th>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="lts_def_limit"><?php _e('Default limit', 'lavka-total-sync'); ?></label></th>
+                    <td><input type="number" id="lts_def_limit" name="lts_def_limit" class="regular-text" value="<?php echo isset($def['limit']) ? (int)$def['limit'] : 40000; ?>"></td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="lts_def_page"><?php _e('Default Woo batch size', 'lavka-total-sync'); ?></label></th>
+                    <td><input type="number" id="lts_def_page" name="lts_def_page" class="regular-text" value="<?php echo isset($def['pageSizeWoo']) ? (int)$def['pageSizeWoo'] : 200; ?>"></td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="lts_def_after"><?php _e('Default cursorAfter', 'lavka-total-sync'); ?></label></th>
+                    <td><input type="text" id="lts_def_after" name="lts_def_after" class="regular-text" value="<?php echo esc_attr(isset($def['cursorAfter']) ? $def['cursorAfter'] : ''); ?>"></td>
+                </tr>
+                <tr>
+                    <th scope="row"><?php _e('Default dry run', 'lavka-total-sync'); ?></th>
+                    <td><label><input type="checkbox" id="lts_def_dry" name="lts_def_dry" <?php checked(!empty($def['dryRun'])); ?>> <?php _e('Calculate only, no writes', 'lavka-total-sync'); ?></label></td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="lts_first_sku"><?php _e('First SKU (lexicographically first)', 'lavka-total-sync'); ?></label></th>
+                    <td>
+                        <input type="text" id="lts_first_sku" name="lts_first_sku" class="regular-text" value="<?php echo esc_attr($firstSku ?: '___'); ?>">
+                        <p class="description"><?php _e('Used by cron full sync as cursorAfter. Should be lower than any real SKU.', 'lavka-total-sync'); ?></p>
                     </td>
                 </tr>
             </table>
