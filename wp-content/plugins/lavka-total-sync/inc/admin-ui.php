@@ -257,6 +257,191 @@ add_action('wp_ajax_lts_recount_cats', function () {
 });
 
 /**
+ * Internal: call Java /sync/run once with given payload.
+ */
+if (!function_exists('lts_call_java_sync_run')) {
+    function lts_call_java_sync_run(array $payload, array $opts) {
+        $base = rtrim((string)($opts['java_base_url'] ?? ''), '/');
+        if ($base === '') return ['ok'=>false,'error'=>'java_base_url_missing'];
+
+        $url = $base . '/sync/run';
+
+        $headers = [
+            'Accept'       => 'application/json',
+            'Content-Type' => 'application/json; charset=utf-8',
+            'User-Agent'   => defined('LTS_USER_AGENT') ? LTS_USER_AGENT : 'Lavka-Total-Sync',
+        ];
+        if (!empty($opts['api_token'])) {
+            $headers['Authorization'] = 'Bearer ' . $opts['api_token'];
+        }
+
+        $resp = wp_remote_post($url, [
+            'timeout' => max(60, (int)($opts['timeout'] ?? 160)),
+            'headers' => $headers,
+            'body'    => wp_json_encode($payload),
+        ]);
+
+        if (is_wp_error($resp)) {
+            return ['ok'=>false,'error'=>$resp->get_error_message()];
+        }
+        $code = wp_remote_retrieve_response_code($resp);
+        $ct   = (string)wp_remote_retrieve_header($resp, 'content-type');
+        $body = (string)wp_remote_retrieve_body($resp);
+
+        if ($code < 200 || $code >= 300) {
+            return ['ok'=>false,'http'=>$code,'raw'=>mb_substr($body,0,2000)];
+        }
+        if (stripos($ct, 'json') !== false) {
+            $json = json_decode($body, true);
+            return ['ok'=>true,'json'=>$json];
+        }
+        return ['ok'=>true,'raw'=>mb_substr($body,0,2000)];
+    }
+}
+
+/**
+ * Add custom cron schedules (e.g., every 15 minutes, weekly).
+ */
+add_filter('cron_schedules', function($schedules){
+    if (!isset($schedules['every_15_minutes'])) {
+        $schedules['every_15_minutes'] = [
+            'interval' => 15 * 60,
+            'display'  => __('Every 15 Minutes', 'lavka-total-sync'),
+        ];
+    }
+    if (!isset($schedules['weekly'])) {
+        $schedules['weekly'] = [
+            'interval' => 7 * DAY_IN_SECONDS,
+            'display'  => __('Weekly', 'lavka-total-sync'),
+        ];
+    }
+    return $schedules;
+});
+
+// Helper: Calculate next run timestamp in blog timezone for daily/weekly
+if (!function_exists('lts_next_run_ts')) {
+    /**
+     * Calculate next run timestamp (unix) in blog timezone.
+     * $mode: 'daily_at' or 'weekly_at'.
+     * $hour: 0..23, $min: 0..59, $dow: 0..6 (Mon=1..Sun=0 like PHP w). We use 1..7 with 1=Mon,7=Sun.
+     */
+    function lts_next_run_ts(string $mode, int $hour, int $min, int $dow = 1): int {
+        $tz_string = get_option('timezone_string');
+        if (!$tz_string || !@in_array($tz_string, timezone_identifiers_list(), true)) {
+            $offset = (float) get_option('gmt_offset');
+            $tz_string = $offset ? sprintf('Etc/GMT%+d', - $offset) : 'UTC';
+        }
+        $tz = new DateTimeZone($tz_string);
+        $now = new DateTime('now', $tz);
+
+        // Start from today at requested time
+        $target = new DateTime('now', $tz);
+        $target->setTime(max(0,min(23,$hour)), max(0,min(59,$min)), 0);
+
+        if ($mode === 'daily_at') {
+            if ($target <= $now) {
+                $target->modify('+1 day');
+            }
+            return $target->getTimestamp();
+        }
+
+        // weekly_at: $dow: 1..7 (Mon..Sun). PHP N: 1..7 Mon..Sun
+        $wantN = ($dow >= 1 && $dow <= 7) ? $dow : 1;
+        $curN  = (int) $now->format('N');
+        $daysAdd = ($wantN - $curN);
+        if ($daysAdd < 0) $daysAdd += 7;
+        if ($daysAdd === 0 && $target <= $now) {
+            $daysAdd = 7;
+        }
+        if ($daysAdd) $target->modify('+' . $daysAdd . ' days');
+        return $target->getTimestamp();
+    }
+}
+
+/**
+ * Cron hook: full sync via /sync/run with configured defaults.
+ */
+add_action('lts_cron_full_sync_event', function () {
+    $opts = lts_get_options();
+    $firstSku = isset($opts['first_sku']) ? (string)$opts['first_sku'] : '___';
+
+    $limit       = isset($opts['cron_limit']) ? (int)$opts['cron_limit'] : 900000;
+    $pageSizeWoo = isset($opts['cron_page'])  ? (int)$opts['cron_page']  : 200;
+    $cursorAfter = $firstSku;
+    $dryRun      = false;
+
+    $payload = [
+        'limit'       => $limit,
+        'pageSizeWoo' => $pageSizeWoo,
+        'cursorAfter' => $cursorAfter,
+        'dryRun'      => $dryRun,
+    ];
+
+    $res = lts_call_java_sync_run($payload, $opts);
+
+    // Log a short line into DB logs (if table exists)
+    if (function_exists('lts_log_db')) {
+        $ctx = ['cron'=>'full','payload'=>$payload];
+        if (!empty($res['json'])) $ctx['result'] = $res['json'];
+        lts_log_db('info','cron_full_sync',$ctx);
+    }
+});
+
+/**
+ * Ensure cron is (re)scheduled according to options.
+ */
+if (!function_exists('lts_refresh_cron_schedule')) {
+function lts_refresh_cron_schedule() {
+    $opts = lts_get_options();
+    $enabled    = !empty($opts['cron_enabled']);
+    $mode       = isset($opts['cron_mode']) ? (string)$opts['cron_mode'] : 'daily_at';
+    $recurrence = 'daily';
+
+    // Clear any scheduled instance
+    $next = wp_next_scheduled('lts_cron_full_sync_event');
+    if ($next) {
+        wp_unschedule_event($next, 'lts_cron_full_sync_event');
+    }
+
+    if (!$enabled) return;
+
+    $hour = isset($opts['cron_hour']) ? (int)$opts['cron_hour'] : 3;
+    $min  = isset($opts['cron_min'])  ? (int)$opts['cron_min']  : 0;
+    $dow  = isset($opts['cron_dow'])  ? (int)$opts['cron_dow']  : 1; // 1=Mon..7=Sun
+
+    if ($mode === 'weekly_at') {
+        $recurrence = 'weekly';
+        $ts = lts_next_run_ts('weekly_at', $hour, $min, $dow);
+    } else { // daily_at default
+        $recurrence = 'daily';
+        $ts = lts_next_run_ts('daily_at', $hour, $min);
+    }
+
+    if ($ts <= time()) $ts = time() + 60; // fallback
+    wp_schedule_event($ts, $recurrence, 'lts_cron_full_sync_event');
+}
+}
+// Also refresh on plugin/theme loaded (safe enough)
+add_action('init', function(){
+    // Only in admin or when cron runner loads
+    if (is_admin() || defined('DOING_CRON')) {
+        lts_refresh_cron_schedule();
+    }
+});
+
+/**
+ * AJAX: Run cron task immediately (manual trigger)
+ */
+add_action('wp_ajax_lts_cron_run_now', function(){
+    if (!current_user_can(LTS_CAP)) wp_send_json_error(['error'=>'forbidden'], 403);
+    check_ajax_referer('lts_admin_nonce','nonce');
+
+    do_action('lts_cron_full_sync_event');
+
+    wp_send_json_success(['ok'=>true]);
+});
+
+/**
  * Render the settings page.
  */
 function lts_render_settings_page() {
@@ -283,7 +468,21 @@ function lts_render_settings_page() {
             'dryRun'      => !empty($_POST['lts_def_dry']),
         ];
         $opts['first_sku'] = isset($_POST['lts_first_sku']) ? sanitize_text_field((string)$_POST['lts_first_sku']) : '___';
+        // Cron full sync options
+        $opts['cron_enabled']   = !empty($_POST['lts_cron_enabled']) ? 1 : 0;
+        // New cron schedule options
+        $opts['cron_mode'] = in_array(($_POST['lts_cron_mode'] ?? 'daily_at'), ['daily_at','weekly_at'], true)
+            ? (string)$_POST['lts_cron_mode'] : 'daily_at';
+        $opts['cron_hour'] = max(0, min(23, (int)($_POST['lts_cron_hour'] ?? 3)));
+        $opts['cron_min']  = max(0, min(59, (int)($_POST['lts_cron_min']  ?? 0)));
+        $opts['cron_dow']  = max(1, min(7,  (int)($_POST['lts_cron_dow']  ?? 1))); // 1=Mon..7=Sun
+        $opts['cron_limit']     = isset($_POST['lts_cron_limit']) ? (int)$_POST['lts_cron_limit'] : 900000;
+        $opts['cron_page']      = isset($_POST['lts_cron_page'])  ? (int)$_POST['lts_cron_page']  : 200;
         lts_update_options($opts);
+        // (Re)schedule cron according to updated options
+        if (function_exists('lts_refresh_cron_schedule')) {
+            lts_refresh_cron_schedule();
+        }
         echo '<div class="updated"><p>' . esc_html__('Saved', 'lavka-total-sync') . '</p></div>';
     }
 
@@ -413,6 +612,68 @@ function lts_render_settings_page() {
                     <td>
                         <input type="text" id="lts_first_sku" name="lts_first_sku" class="regular-text" value="<?php echo esc_attr($firstSku ?: '___'); ?>">
                         <p class="description"><?php _e('Used by cron full sync as cursorAfter. Should be lower than any real SKU.', 'lavka-total-sync'); ?></p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row" colspan="2"><h2 style="margin:1.5rem 0 .25rem;"><?php _e('Cron full sync (/sync/run)', 'lavka-total-sync'); ?></h2></th>
+                </tr>
+                <tr>
+                    <th scope="row"><?php _e('Enable cron', 'lavka-total-sync'); ?></th>
+                    <td>
+                        <label><input type="checkbox" name="lts_cron_enabled" <?php checked(!empty($opts['cron_enabled'])); ?>> <?php _e('Run full fields sync on schedule', 'lavka-total-sync'); ?></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="lts_cron_mode"><?php _e('Schedule type', 'lavka-total-sync'); ?></label></th>
+                    <td>
+                        <?php $mode = isset($opts['cron_mode']) ? (string)$opts['cron_mode'] : 'daily_at'; ?>
+                        <select id="lts_cron_mode" name="lts_cron_mode">
+                            <option value="daily_at" <?php selected($mode,'daily_at'); ?>><?php _e('Daily at time', 'lavka-total-sync'); ?></option>
+                            <option value="weekly_at" <?php selected($mode,'weekly_at'); ?>><?php _e('Weekly on day at time', 'lavka-total-sync'); ?></option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><?php _e('Run time', 'lavka-total-sync'); ?></th>
+                    <td>
+                        <?php $h = isset($opts['cron_hour']) ? (int)$opts['cron_hour'] : 3; $m = isset($opts['cron_min']) ? (int)$opts['cron_min'] : 0; ?>
+                        <input type="number" name="lts_cron_hour" id="lts_cron_hour" min="0" max="23" value="<?php echo (int)$h; ?>" style="width:5rem"> :
+                        <input type="number" name="lts_cron_min" id="lts_cron_min" min="0" max="59" value="<?php echo (int)$m; ?>" style="width:5rem">
+                        <span class="description">(<?php echo esc_html( get_option('timezone_string') ?: 'site time' ); ?>)</span>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="lts_cron_dow"><?php _e('Day of week (for weekly)', 'lavka-total-sync'); ?></label></th>
+                    <td>
+                        <?php $dow = isset($opts['cron_dow']) ? (int)$opts['cron_dow'] : 1; ?>
+                        <select id="lts_cron_dow" name="lts_cron_dow">
+                            <option value="1" <?php selected($dow,1); ?>><?php _e('Monday', 'lavka-total-sync'); ?></option>
+                            <option value="2" <?php selected($dow,2); ?>><?php _e('Tuesday', 'lavka-total-sync'); ?></option>
+                            <option value="3" <?php selected($dow,3); ?>><?php _e('Wednesday', 'lavka-total-sync'); ?></option>
+                            <option value="4" <?php selected($dow,4); ?>><?php _e('Thursday', 'lavka-total-sync'); ?></option>
+                            <option value="5" <?php selected($dow,5); ?>><?php _e('Friday', 'lavka-total-sync'); ?></option>
+                            <option value="6" <?php selected($dow,6); ?>><?php _e('Saturday', 'lavka-total-sync'); ?></option>
+                            <option value="7" <?php selected($dow,7); ?>><?php _e('Sunday', 'lavka-total-sync'); ?></option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="lts_cron_limit"><?php _e('Cron limit', 'lavka-total-sync'); ?></label></th>
+                    <td><input type="number" id="lts_cron_limit" name="lts_cron_limit" class="regular-text" value="<?php echo isset($opts['cron_limit']) ? (int)$opts['cron_limit'] : 900000; ?>"></td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="lts_cron_page"><?php _e('Cron Woo batch size (1..200)', 'lavka-total-sync'); ?></label></th>
+                    <td><input type="number" id="lts_cron_page" name="lts_cron_page" class="regular-text" value="<?php echo isset($opts['cron_page']) ? (int)$opts['cron_page'] : 200; ?>"></td>
+                </tr>
+                <tr>
+                    <th scope="row"><?php _e('First SKU used as cursorAfter', 'lavka-total-sync'); ?></th>
+                    <td><code><?php echo esc_html($firstSku ?: '___'); ?></code></td>
+                </tr>
+                <tr>
+                    <th scope="row"><?php _e('Manual trigger', 'lavka-total-sync'); ?></th>
+                    <td>
+                        <button type="button" class="button" id="lts_cron_run_now"><?php _e('Run cron task now', 'lavka-total-sync'); ?></button>
+                        <span id="lts_cron_now_status" style="margin-left:.5rem;color:#555;"></span>
                     </td>
                 </tr>
             </table>
@@ -759,5 +1020,26 @@ function lts_render_run_page() {
             })(jQuery);
             </script>
     </div>
-    <?php
+    <script>
+        (function($){
+            $('#lts_cron_run_now').on('click', function(e){
+                e.preventDefault();
+                var $st = $('#lts_cron_now_status');
+                $st.text('<?php echo esc_js(__('Working…','lavka-total-sync')); ?>');
+                $.post(ajaxurl, {
+                    action: 'lts_cron_run_now',
+                    nonce:  '<?php echo esc_js( wp_create_nonce('lts_admin_nonce') ); ?>'
+                }).done(function(resp){
+                    if (resp && resp.success) {
+                        $st.text('<?php echo esc_js(__('Done.','lavka-total-sync')); ?>');
+                    } else {
+                        $st.text('<?php echo esc_js(__('Error','lavka-total-sync')); ?>');
+                    }
+                }).fail(function(){
+                    $st.text('<?php echo esc_js(__('Error','lavka-total-sync')); ?>');
+                });
+            });
+        })(jQuery);
+    </script>
+<?php
 }
