@@ -474,6 +474,37 @@ function lts_render_run_page() {
             <textarea readonly rows="10" style="width:100%;max-width:820px;font-family:monospace"><?php echo esc_textarea(wp_json_encode($result, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE)); ?></textarea>
         <?php endif; ?>
 
+        <h2 style="margin-top:2rem;"><?php _e('Run (new API /sync/run)', 'lavka-total-sync'); ?></h2>
+            <p><?php _e('Start Java sync via /sync/run (fields only).', 'lavka-total-sync'); ?></p>
+
+            <table class="form-table" role="presentation">
+            <tr>
+                <th scope="row"><label for="lts_new_limit"><?php _e('Limit (max items)', 'lavka-total-sync'); ?></label></th>
+                <td><input type="number" id="lts_new_limit" class="regular-text" placeholder="40000"></td>
+            </tr>
+            <tr>
+                <th scope="row"><label for="lts_new_page"><?php _e('Woo batch size (1..200)', 'lavka-total-sync'); ?></label></th>
+                <td><input type="number" id="lts_new_page" class="regular-text" placeholder="200"></td>
+            </tr>
+            <tr>
+                <th scope="row"><label for="lts_new_after"><?php _e('Cursor (after SKU)', 'lavka-total-sync'); ?></label></th>
+                <td><input type="text" id="lts_new_after" class="regular-text" placeholder="A-P1431Å-GOLD 90"></td>
+            </tr>
+            <tr>
+                <th scope="row"><?php _e('Dry run', 'lavka-total-sync'); ?></th>
+                <td><label><input type="checkbox" id="lts_new_dry"> <?php _e('Calculate only, no writes', 'lavka-total-sync'); ?></label></td>
+            </tr>
+            </table>
+
+            <p>
+            <button type="button" class="button button-primary" id="lts_btn_new_run">
+                <?php _e('Run (new API)', 'lavka-total-sync'); ?>
+            </button>
+            <span id="lts_new_run_status" style="margin-left:.6rem;color:#555;"></span>
+            </p>
+
+            <pre id="lts_new_run_output" style="max-height:260px;overflow:auto;background:#111;color:#9fe;padding:10px;border-radius:6px;"></pre>
+
         <hr class="wp-header-end">
         <h2><?php _e('Background total sync', 'lavka-total-sync'); ?></h2>
         <p class="description"><?php _e('Run sync in background and watch live log. This will not block the page.', 'lavka-total-sync'); ?></p>
@@ -647,6 +678,50 @@ function lts_render_run_page() {
             });
         })(jQuery);
         </script>
+        <script>
+            (function($){
+            const ajaxUrl = ajaxurl;
+            const nonce   = '<?php echo esc_js( wp_create_nonce('lts_admin_nonce') ); ?>';
+
+            function print(obj){
+                try { return JSON.stringify(obj, null, 2); } catch(e){ return String(obj); }
+            }
+
+            $('#lts_btn_new_run').on('click', async function(){
+                $('#lts_new_run_status').text('<?php echo esc_js(__('Working…','lavka-total-sync')); ?>');
+                $('#lts_new_run_output').text('');
+
+                const data = {
+                action: 'lts_sync_run',
+                nonce:  nonce,
+                limit:       $('#lts_new_limit').val(),
+                pageSizeWoo: $('#lts_new_page').val(),
+                cursorAfter: $('#lts_new_after').val(),
+                dryRun:      $('#lts_new_dry').is(':checked') ? 1 : 0
+                };
+
+                try {
+                const res = await $.post(ajaxUrl, data);
+                if (!res || !res.success) {
+                    $('#lts_new_run_status').text('<?php echo esc_js(__('Error','lavka-total-sync')); ?>');
+                    $('#lts_new_run_output').text(print(res && res.data ? res.data : res));
+                    return;
+                }
+                $('#lts_new_run_status').text('<?php echo esc_js(__('Done.','lavka-total-sync')); ?>');
+
+                const d = res.data;
+                if (d.json) {
+                    $('#lts_new_run_output').text(print(d.json));
+                } else {
+                    $('#lts_new_run_output').text(d.raw || '(no body)');
+                }
+                } catch(e){
+                $('#lts_new_run_status').text('<?php echo esc_js(__('Error','lavka-total-sync')); ?>');
+                $('#lts_new_run_output').text(String(e));
+                }
+            });
+            })(jQuery);
+            </script>
     </div>
     <?php
 }
