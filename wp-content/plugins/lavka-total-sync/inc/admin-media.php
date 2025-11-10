@@ -501,6 +501,8 @@ CR-CE0900056100"></textarea>
             <span id="lts_mc_site"></span>
             <br>
             <em>UTC/server:</em> <span id="lts_mc_utc"></span>
+            <br>
+            <em><?php _e('Your local (browser) time','lavka-total-sync'); ?>:</em> <span id="lts_mc_local"></span>
         </p>
 
         <script>
@@ -513,6 +515,12 @@ CR-CE0900056100"></textarea>
                     if (res && res.success) {
                         $('#lts_mc_site').text(res.data.site_time);
                         $('#lts_mc_utc').text(res.data.utc_time);
+                        if (res.data.next_ts) {
+                            const d = new Date(res.data.next_ts * 1000);
+                            $('#lts_mc_local').text(d.toLocaleString());
+                        } else {
+                            $('#lts_mc_local').text('—');
+                        }
                     }
                 });
             }
@@ -539,6 +547,12 @@ CR-CE0900056100"></textarea>
                         $('#lts_mc_info').text('<?php echo esc_js(__('Saved','lavka-total-sync')); ?>');
                         $('#lts_mc_site').text(res.data.site_time);
                         $('#lts_mc_utc').text(res.data.utc_time);
+                        if (res.data.next_ts) {
+                            const d = new Date(res.data.next_ts * 1000);
+                            $('#lts_mc_local').text(d.toLocaleString());
+                        } else {
+                            $('#lts_mc_local').text('—');
+                        }
                     } else {
                         $('#lts_mc_info').text('<?php echo esc_js(__('Error','lavka-total-sync')); ?>');
                     }
