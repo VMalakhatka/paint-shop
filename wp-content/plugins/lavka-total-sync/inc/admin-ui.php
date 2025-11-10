@@ -257,6 +257,52 @@ add_action('wp_ajax_lts_recount_cats', function () {
 });
 
 /**
+ * AJAX: call new Java /sync/run with UI parameters
+ */
+add_action('wp_ajax_lts_sync_run', function(){
+    if (!current_user_can(LTS_CAP)) wp_send_json_error(['error'=>'forbidden'], 403);
+    check_ajax_referer('lts_admin_nonce','nonce');
+
+    $opts = lts_get_options();
+    $def  = isset($opts['new_api_defaults']) && is_array($opts['new_api_defaults']) ? $opts['new_api_defaults'] : [];
+
+    // Read payload from POST with fallbacks to saved defaults
+    $limit       = isset($_POST['limit']) && $_POST['limit'] !== ''
+        ? (int)$_POST['limit']
+        : (int)($def['limit'] ?? 40000);
+
+    $pageSizeWoo = isset($_POST['pageSizeWoo']) && $_POST['pageSizeWoo'] !== ''
+        ? (int)$_POST['pageSizeWoo']
+        : (int)($def['pageSizeWoo'] ?? 200);
+
+    // Cursor: allow empty → use saved default (may be "___")
+    $cursorAfter = isset($_POST['cursorAfter']) && $_POST['cursorAfter'] !== ''
+        ? sanitize_text_field((string)$_POST['cursorAfter'])
+        : (string)($def['cursorAfter'] ?? '');
+
+    $dryRun = isset($_POST['dryRun'])
+        ? ((int)$_POST['dryRun'] ? true : false)
+        : (bool)($def['dryRun'] ?? false);
+
+    // Build payload as required by Java API
+    $payload = [
+        'limit'       => $limit,
+        'pageSizeWoo' => max(1, min(200, $pageSizeWoo)),
+        'cursorAfter' => $cursorAfter,
+        'dryRun'      => $dryRun,
+    ];
+
+    // Call Java
+    $res = lts_call_java_sync_run($payload, $opts);
+
+    // Return whatever we got (either json or raw)
+    if (!empty($res['ok'])) {
+        wp_send_json_success($res);
+    }
+    wp_send_json_error($res);
+});
+
+/**
  * Internal: call Java /sync/run once with given payload.
  */
 if (!function_exists('lts_call_java_sync_run')) {
@@ -419,12 +465,21 @@ function lts_refresh_cron_schedule() {
 
     if ($ts <= time()) $ts = time() + 60; // fallback
     wp_schedule_event($ts, $recurrence, 'lts_cron_full_sync_event');
+    // Try to spawn wp-cron so the task can run even without site traffic
+    if (!defined('DOING_CRON') && !wp_doing_cron() && !defined('REST_REQUEST')) {
+        $cron_url = site_url('wp-cron.php?doing_wp_cron=1');
+        wp_remote_post($cron_url, [
+            'timeout'   => 0.01,
+            'blocking'  => false,
+            'sslverify' => apply_filters('https_local_ssl_verify', false),
+        ]);
+    }
 }
 }
 // Also refresh on plugin/theme loaded (safe enough)
 add_action('init', function(){
-    // Only in admin or when cron runner loads
-    if (is_admin() || defined('DOING_CRON')) {
+    if (!is_admin()) return;
+    if (!wp_next_scheduled('lts_cron_full_sync_event')) {
         lts_refresh_cron_schedule();
     }
 });
@@ -438,6 +493,23 @@ add_action('wp_ajax_lts_cron_run_now', function(){
 
     do_action('lts_cron_full_sync_event');
 
+    wp_send_json_success(['ok'=>true]);
+});
+
+/**
+ * AJAX: ping wp-cron.php to process due events
+ */
+add_action('wp_ajax_lts_ping_wp_cron', function(){
+    if (!current_user_can(LTS_CAP)) wp_send_json_error(['error'=>'forbidden'], 403);
+    check_ajax_referer('lts_admin_nonce','nonce');
+    if (!defined('DOING_CRON') && !wp_doing_cron()) {
+        $url = site_url('wp-cron.php?doing_wp_cron=1');
+        wp_remote_post($url, [
+            'timeout'   => 0.01,
+            'blocking'  => false,
+            'sslverify' => apply_filters('https_local_ssl_verify', false),
+        ]);
+    }
     wp_send_json_success(['ok'=>true]);
 });
 
@@ -489,6 +561,35 @@ function lts_render_settings_page() {
     $opts = lts_get_options();
     $def = isset($opts['new_api_defaults']) && is_array($opts['new_api_defaults']) ? $opts['new_api_defaults'] : [];
     $firstSku = isset($opts['first_sku']) ? (string)$opts['first_sku'] : '___';
+
+    // Compute next scheduled run timestamps for display
+    $next_gmt = wp_next_scheduled('lts_cron_full_sync_event');
+    $next_site = '';
+    $next_utc  = '';
+    if ($next_gmt) {
+        // Site timezone
+        $tz_string = get_option('timezone_string');
+        if (!$tz_string || !@in_array($tz_string, timezone_identifiers_list(), true)) {
+            $offset = (float) get_option('gmt_offset');
+            $tz_string = $offset ? sprintf('Etc/GMT%+d', - $offset) : 'UTC';
+        }
+        try {
+            $tz_site = new DateTimeZone($tz_string);
+        } catch (\Throwable $e) {
+            $tz_site = new DateTimeZone('UTC');
+        }
+        $dt_site = new DateTime('@' . $next_gmt);
+        $dt_site->setTimezone($tz_site);
+        $next_site = $dt_site->format('Y-m-d H:i:s') . ' (' . $tz_string . ')';
+
+        // UTC/server reference
+        $dt_utc = new DateTime('@' . $next_gmt);
+        $dt_utc->setTimezone(new DateTimeZone('UTC'));
+        $next_utc = $dt_utc->format('Y-m-d H:i:s') . ' (UTC)';
+    } else {
+        $next_site = __('— not scheduled —', 'lavka-total-sync');
+        $next_utc  = '';
+    }
 
     ?>
     <div class="wrap">
@@ -670,6 +771,22 @@ function lts_render_settings_page() {
                     <td><code><?php echo esc_html($firstSku ?: '___'); ?></code></td>
                 </tr>
                 <tr>
+                    <th scope="row"><?php _e('Next run', 'lavka-total-sync'); ?></th>
+                    <td>
+                        <?php if ($next_gmt): ?>
+                            <div><strong><?php _e('Site time', 'lavka-total-sync'); ?>:</strong> <?php echo esc_html($next_site); ?></div>
+                            <div><strong><?php _e('UTC/server', 'lavka-total-sync'); ?>:</strong> <?php echo esc_html($next_utc); ?></div>
+                            <div id="lts-next-local" data-nextts="<?php echo (int)$next_gmt; ?>"></div>
+                        <?php else: ?>
+                            <em><?php _e('Not scheduled', 'lavka-total-sync'); ?></em>
+                        <?php endif; ?>
+                        <p style="margin-top:.5rem">
+                            <button type="button" class="button" id="lts_ping_wp_cron"><?php _e('Ping WP‑Cron now', 'lavka-total-sync'); ?></button>
+                            <span id="lts_ping_status" style="margin-left:.5rem;color:#555"></span>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
                     <th scope="row"><?php _e('Manual trigger', 'lavka-total-sync'); ?></th>
                     <td>
                         <button type="button" class="button" id="lts_cron_run_now"><?php _e('Run cron task now', 'lavka-total-sync'); ?></button>
@@ -679,6 +796,53 @@ function lts_render_settings_page() {
             </table>
             <?php submit_button(__('Save', 'lavka-total-sync'), 'primary', 'lts_save', false); ?>
         </form>
+        <script>
+        (function($){
+            $('#lts_cron_run_now').on('click', function(e){
+                e.preventDefault();
+                var $st = $('#lts_cron_now_status');
+                $st.text('<?php echo esc_js(__('Working…','lavka-total-sync')); ?>');
+                $.post(ajaxurl, {
+                    action: 'lts_cron_run_now',
+                    nonce:  '<?php echo esc_js( wp_create_nonce('lts_admin_nonce') ); ?>'
+                }).done(function(resp){
+                    if (resp && resp.success) {
+                        $st.text('<?php echo esc_js(__('Done.','lavka-total-sync')); ?>');
+                    } else {
+                        $st.text('<?php echo esc_js(__('Error','lavka-total-sync')); ?>');
+                    }
+                }).fail(function(){
+                    $st.text('<?php echo esc_js(__('Error','lavka-total-sync')); ?>');
+                });
+            });
+        })(jQuery);
+            // Show browser local time for next run
+            (function(){
+                var el = document.getElementById('lts-next-local');
+                if (!el) return;
+                var ts = parseInt(el.getAttribute('data-nextts'), 10);
+                if (!ts) return;
+                var d  = new Date(ts * 1000);
+                el.textContent = '<?php echo esc_js(__('Your local (browser) time:', 'lavka-total-sync')); ?> ' + d.toLocaleString();
+            })();
+
+            // Ping WP‑Cron
+            (function($){
+                $('#lts_ping_wp_cron').on('click', function(e){
+                    e.preventDefault();
+                    var $st = $('#lts_ping_status');
+                    $st.text('<?php echo esc_js(__('Working…','lavka-total-sync')); ?>');
+                    $.post(ajaxurl, {
+                        action: 'lts_ping_wp_cron',
+                        nonce:  '<?php echo esc_js( wp_create_nonce('lts_admin_nonce') ); ?>'
+                    }).done(function(){
+                        $st.text('<?php echo esc_js(__('Done.','lavka-total-sync')); ?>');
+                    }).fail(function(){
+                        $st.text('<?php echo esc_js(__('Error','lavka-total-sync')); ?>');
+                    });
+                });
+            })(jQuery);
+        </script>
     </div>
     <?php
 }
@@ -1020,26 +1184,5 @@ function lts_render_run_page() {
             })(jQuery);
             </script>
     </div>
-    <script>
-        (function($){
-            $('#lts_cron_run_now').on('click', function(e){
-                e.preventDefault();
-                var $st = $('#lts_cron_now_status');
-                $st.text('<?php echo esc_js(__('Working…','lavka-total-sync')); ?>');
-                $.post(ajaxurl, {
-                    action: 'lts_cron_run_now',
-                    nonce:  '<?php echo esc_js( wp_create_nonce('lts_admin_nonce') ); ?>'
-                }).done(function(resp){
-                    if (resp && resp.success) {
-                        $st.text('<?php echo esc_js(__('Done.','lavka-total-sync')); ?>');
-                    } else {
-                        $st.text('<?php echo esc_js(__('Error','lavka-total-sync')); ?>');
-                    }
-                }).fail(function(){
-                    $st.text('<?php echo esc_js(__('Error','lavka-total-sync')); ?>');
-                });
-            });
-        })(jQuery);
-    </script>
 <?php
 }
