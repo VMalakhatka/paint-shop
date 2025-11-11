@@ -301,6 +301,11 @@ function lts_render_media_sync_page() {
     $cap = defined('LTS_CAP') ? LTS_CAP : 'manage_options';
     if (!current_user_can($cap)) return;
 
+    // Гарантируем, что jQuery загружен для админ-страницы с инлайновыми обработчиками
+    if (function_exists('wp_enqueue_script')) {
+        wp_enqueue_script('jquery');
+    }
+
     ?>
     <div class="wrap">
         <h1><?php echo esc_html__('Media Sync (images)', 'lavka-total-sync'); ?></h1>
