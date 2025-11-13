@@ -59,6 +59,8 @@ require_once __DIR__ . '/inc/admin-sync-run.php';
 
 require_once __DIR__ . '/inc/admin-media.php';
 
+require_once __DIR__ . '/inc/admin-cron-summary.php';
+
 
 // [LTS] ANCHOR: include admin logs
 if (is_admin()) {
