@@ -81,17 +81,11 @@ function lavka_topbar() {
             <div class="lavka-topbar__logo">
                 <?php lavka_inline_svg_logo(); ?>
             </div>
-            <div class="lavka-topbar__info">
-                <div class="lavka-topbar__line">
-                    м. Київ, ТЦ "Art Mall", 2-й поверх, +38050 348-01-38
-                </div>
-                <div class="lavka-topbar__line">
-                    Оптові продажі:
-                    <strong>+38050&nbsp;348-01-38</strong>
-                    &nbsp;•&nbsp;
-                    <a href="mailto:shop@paint.dn.ua">shop@paint.dn.ua</a>
-                </div>
-            </div>
+    <div class="lavka-topbar__info">
+        <div>м. Київ, ТЦ «Олімпійський», +38044&nbsp;593-26-05</div>
+        <div>м. Одеса, Ланжеронівська, 17, +38063&nbsp;857-17-68</div>
+        <div>Оптові продажі, +38050&nbsp;348-01-38</div>
+    </div>
         </div>
     </div>
     <?php

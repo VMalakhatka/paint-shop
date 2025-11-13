@@ -354,3 +354,26 @@ body.admin-bar .woocommerce .woocommerce-products-header{ top: 46px; }
 .lavka-topbar {
     background: #f7cfa1 !important;
 }
+
+/* Логотип и адрес в одну строку */
+.lavka-topbar__inner {
+    display: flex;
+    align-items: flex-end;
+    gap: 36px;
+    margin-left: 10px; /* небольшой отступ слева */
+}
+
+.lavka-topbar__logo {
+    flex: 0 0 auto;
+    margin-top: 2px;
+}
+
+.lavka-topbar__info {
+    flex: 1 1 auto;
+    white-space: nowrap;
+} 
+
+/* Тонкая подстройка: чуть опускаем сам SVG-логотип внутри бара */
+.lavka-topbar__logo svg {
+    transform: translateY(6px);
+}
