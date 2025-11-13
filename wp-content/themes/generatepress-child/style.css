@@ -323,3 +323,34 @@ body.admin-bar .woocommerce .woocommerce-products-header{ top: 46px; }
 @media (max-width: 768px){
   #menu-item-102214 { display: none !important; }
 }
+
+.site-logo--svg svg {
+    display: block;
+    width: 180px;      /* подгони под себя */
+    height: auto;
+}
+
+/* Крась все заливки в один цвет */
+.site-logo--svg svg path,
+.site-logo--svg svg rect,
+.site-logo--svg svg circle {
+    fill: #4b2b1b;     /* основной цвет логотипа */
+}
+
+/* Ховер-эффект */
+.site-logo--svg:hover svg path,
+.site-logo--svg:hover svg rect,
+.site-logo--svg:hover svg circle {
+    fill: #8c4a24;     /* цвет при наведении */
+}
+
+/* Прячем букву P стандартного логотипа GeneratePress */
+.site-logo .main-title,
+.site-logo .main-title a {
+    display: none;
+}
+
+/* Цвет верхнего бара как в тестовом футере */
+.lavka-topbar {
+    background: #f7cfa1 !important;
+}
