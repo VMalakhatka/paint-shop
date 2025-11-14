@@ -377,3 +377,28 @@ body.admin-bar .woocommerce .woocommerce-products-header{ top: 46px; }
 .lavka-topbar__logo svg {
     transform: translateY(6px);
 }
+
+/* ===== Мобильная версия верхнего бара ===== */
+@media (max-width: 768px) {
+
+    /* Контейнер: делаем вертикально — логотип сверху, текст снизу */
+    .lavka-topbar__inner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    /* Логотип — уменьшаем */
+    .lavka-topbar__logo svg {
+        width: 160px !important;   /* можно 140–180 подбирать */
+        height: auto;
+        transform: none !important; /* убираем сдвиг вниз */
+    }
+
+    /* Текст под логотипом — делаем меньше */
+    .lavka-topbar__info {
+        font-size: 14px;
+        line-height: 1.3;
+        white-space: normal; /* разрешаем перенос строк */
+    }
+}
