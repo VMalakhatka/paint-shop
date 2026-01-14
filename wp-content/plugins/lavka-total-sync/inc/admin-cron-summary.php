@@ -13,15 +13,16 @@ if (!defined('ABSPATH')) exit;
 
 /**
  * Какие крон-хуки считаем «нашими».
- * При необходимости можно добавить ещё.
  *
- * ВАЖНО: значения должны совпадать с тем, что передаётся в wp_schedule_*_event().
+ * 1) Явно добавляем известные константы плагина (LTS_CRON_HOOK, LTS_MEDIA_CRON_HOOK, LTS_JOB_HOOK).
+ * 2) Плюс автоматически подхватываем все хуки, чьё имя начинается с префикса "lts_" из текущего cron-массива.
+ *    Это защищает от будущих переименований/добавлений без правки этой страницы.
  */
-function lts_cron_get_plugin_hooks(): array {
+function lts_cron_get_plugin_hooks(array $cron = null): array {
     $hooks = [];
 
-    // Тотал-синк товаров (см. admin-ui.php — там мы определяли константу)
-    if (defined('LTS_CRON_HOOK')) {
+    // Тотал-синк товаров
+    if (defined('LTS_CRON_HOOK') && LTS_CRON_HOOK) {
         $hooks[] = LTS_CRON_HOOK;
     } else {
         // fallback, если константа не определена, но хуки названы строкой
@@ -29,10 +30,29 @@ function lts_cron_get_plugin_hooks(): array {
     }
 
     // Синхронизация медиа (images)
-    if (defined('LTS_MEDIA_CRON_HOOK')) {
+    if (defined('LTS_MEDIA_CRON_HOOK') && LTS_MEDIA_CRON_HOOK) {
         $hooks[] = LTS_MEDIA_CRON_HOOK;
     } else {
         $hooks[] = 'lts_media_cron_event';
+    }
+
+    // Фоновый worker (тикер), если используется в плагине
+    if (defined('LTS_JOB_HOOK') && LTS_JOB_HOOK) {
+        $hooks[] = LTS_JOB_HOOK;
+    } else {
+        // известное имя из worker.php
+        $hooks[] = 'lts_job_tick';
+    }
+
+    // Авто-поиск всех cron-хуков с префиксом lts_
+    if (is_array($cron)) {
+        foreach ($cron as $ts => $hookGroup) {
+            foreach ($hookGroup as $hookName => $instances) {
+                if (strpos($hookName, 'lts_') === 0) {
+                    $hooks[] = $hookName;
+                }
+            }
+        }
     }
 
     // Убираем дубли и пустые
@@ -72,7 +92,7 @@ function lts_render_cron_summary_page() {
 
     // Получаем весь крон-массив
     $cron = _get_cron_array();
-    $pluginHooks = lts_cron_get_plugin_hooks();
+    $pluginHooks = lts_cron_get_plugin_hooks($cron);
     $schedules = wp_get_schedules();
 
     ?>
