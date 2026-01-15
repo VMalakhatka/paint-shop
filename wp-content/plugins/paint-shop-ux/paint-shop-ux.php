@@ -125,15 +125,60 @@ add_action('init', function () {
     add_action('woocommerce_before_subcategory_title', 'psu_subcategory_thumbnail', 10);
 });
 
-function psu_subcategory_thumbnail($category) {
-    $thumb_id = get_term_meta($category->term_id, 'thumbnail_id', true);
-    if ($thumb_id) {
-        echo wp_get_attachment_image($thumb_id, 'woocommerce_thumbnail', false, ['loading' => 'lazy']);
+function psu_subcategory_thumbnail( $category ) {
+    $size = apply_filters('subcategory_archive_thumbnail_size', 'woocommerce_thumbnail');
+
+    /** =========================
+     *  1) Если у категории есть своя картинка — показываем её
+     *  ========================= */
+    $thumb_id = get_term_meta( $category->term_id, 'thumbnail_id', true );
+    if ( $thumb_id ) {
+        echo wp_get_attachment_image( $thumb_id, $size, false, ['loading' => 'lazy'] );
         return;
     }
 
-    echo '<div class="psu-cat-faux-thumb" role="img" aria-label="' . esc_attr($category->name) . '">';
-    echo '<span class="psu-cat-faux-title">' . esc_html($category->name) . '</span>';
+    /** =========================
+ *  2) Подкатегория:
+ *     пробуем взять картинку любого товара ВНУТРИ ветки
+ *  ========================= */
+if ( ! empty( $category->parent ) ) {
+
+    $q = new WC_Product_Query([
+        'status'    => 'publish',
+        'limit'     => 1,
+        'orderby'   => 'date',
+        'order'     => 'DESC',
+        'tax_query' => [[
+            'taxonomy' => 'product_cat',
+            'field'    => 'term_id',
+            'terms'    => [$category->term_id],
+            'include_children' => true, // 🔴 ВАЖНО
+        ]],
+    ]);
+
+    $products = $q->get_products();
+
+    if ( ! empty( $products ) ) {
+        foreach ( $products as $product ) {
+            if ( $product && $product->get_image_id() ) {
+                echo wp_get_attachment_image(
+                    $product->get_image_id(),
+                    $size,
+                    false,
+                    ['loading' => 'lazy']
+                );
+                return;
+            }
+        }
+    }
+}
+
+    /** =========================
+     *  3) Fallback — текстовый бокс
+     *  ========================= */
+    $name = $category->name ?? '';
+    echo '<div class="psu-cat-faux-thumb" role="img" aria-label="' . esc_attr( $name ) . '">';
+    echo '<span class="psu-cat-faux-title">' . esc_html( $name ) . '</span>';
     echo '</div>';
 }
 
