@@ -138,29 +138,27 @@ function psu_subcategory_thumbnail( $category ) {
     }
 
     /** =========================
- *  2) Подкатегория:
- *     пробуем взять картинку любого товара ВНУТРИ ветки
- *  ========================= */
-if ( ! empty( $category->parent ) ) {
-
+     *  2) Пробуем взять картинку любого товара
+     *     в этой категории ИЛИ в дочерних
+     *  ========================= */
     $q = new WC_Product_Query([
         'status'    => 'publish',
-        'limit'     => 1,
+        'limit'     => 20,              // ⬅ важно: больше 1
         'orderby'   => 'date',
         'order'     => 'DESC',
         'tax_query' => [[
-            'taxonomy' => 'product_cat',
-            'field'    => 'term_id',
-            'terms'    => [$category->term_id],
-            'include_children' => true, // 🔴 ВАЖНО
+            'taxonomy'         => 'product_cat',
+            'field'            => 'term_id',
+            'terms'            => [$category->term_id],
+            'include_children' => true,
         ]],
     ]);
 
     $products = $q->get_products();
 
-    if ( ! empty( $products ) ) {
-        foreach ( $products as $product ) {
-            if ( $product && $product->get_image_id() ) {
+    if (!empty($products)) {
+        foreach ($products as $product) {
+            if ($product instanceof WC_Product && $product->get_image_id()) {
                 echo wp_get_attachment_image(
                     $product->get_image_id(),
                     $size,
@@ -171,8 +169,9 @@ if ( ! empty( $category->parent ) ) {
             }
         }
     }
-}
 
+
+    
     /** =========================
      *  3) Fallback — текстовый бокс
      *  ========================= */
@@ -181,6 +180,12 @@ if ( ! empty( $category->parent ) ) {
     echo '<span class="psu-cat-faux-title">' . esc_html( $name ) . '</span>';
     echo '</div>';
 }
+
+add_filter('woocommerce_product_subcategories_args', function ($args) {
+    $args['orderby'] = 'name';
+    $args['order']   = 'ASC';
+    return $args;
+}, 20);
 
 /** =======================
  *  Product thumbnail fallback
@@ -202,7 +207,6 @@ function psu_loop_product_thumbnail() {
     $title = psu_get_compact_title(get_the_title(), $product ? $product->get_id() : 0);
     echo '<div class="psu-prod-faux-thumb" role="img"><span class="psu-prod-faux-title">' . esc_html($title) . '</span></div>';
 }
-
 /** =======================
  *  CSS + JS
  *  ======================= */
@@ -284,6 +288,18 @@ $css = <<<CSS
 .psu-per-page{display:flex;gap:.35rem;margin:.5rem 0 1rem}
 .psu-per-page__btn{padding:.25rem .5rem;border:1px solid #ddd;border-radius:4px;text-decoration:none}
 .psu-per-page__btn.is-active{background:#f2f2f2}
+
+/* Category & subcategory title color */
+.woocommerce ul.products li.product-category h2,
+.woocommerce ul.products li.product-category h2 a {
+  color: #8a4b2a;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.woocommerce ul.products li.product-category h2 a:hover {
+  color: #6f3c22;
+}
 CSS;
 
     wp_register_style('psu-inline', false);
