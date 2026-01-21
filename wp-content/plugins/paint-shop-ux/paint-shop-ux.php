@@ -181,12 +181,18 @@ function psu_subcategory_thumbnail( $category ) {
     echo '</div>';
 }
 
+/**
+ * Force alphabetical order for product categories
+ */
 add_filter('woocommerce_product_subcategories_args', function ($args) {
     $args['orderby'] = 'name';
     $args['order']   = 'ASC';
+
+    // ❗ КЛЮЧЕВО: отключаем menu_order
     $args['menu_order'] = false;
+
     return $args;
-}, 20);
+}, 99);
 
 /** =======================
  *  Product thumbnail fallback
