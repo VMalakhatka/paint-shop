@@ -182,8 +182,9 @@ function psu_subcategory_thumbnail( $category ) {
 }
 
 add_filter('woocommerce_product_subcategories_args', function ($args) {
-    unset($args['menu_order']);   
+    $args['orderby'] = 'name';
     $args['order']   = 'ASC';
+    $args['menu_order'] = false;
     return $args;
 }, 20);
 
@@ -313,3 +314,19 @@ CSS;
         "window.addEventListener('load',()=>{setTimeout(()=>window.dispatchEvent(new Event('resize')),120);});"
     );
 });
+
+/**
+ * FORCE alphabetical order for product categories everywhere
+ * (fix GeneratePress / server cache behaviour)
+ */
+add_action('pre_get_posts', function ($q) {
+    if (is_admin() || !$q->is_main_query()) return;
+
+    // shop + category pages
+    if (is_shop() || is_product_category()) {
+
+        // ❗ важно: именно tax_query
+        $q->set('orderby', 'name');
+        $q->set('order', 'ASC');
+    }
+}, 30);
