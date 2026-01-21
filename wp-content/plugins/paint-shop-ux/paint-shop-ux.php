@@ -184,6 +184,7 @@ function psu_subcategory_thumbnail( $category ) {
 add_filter('woocommerce_product_subcategories_args', function ($args) {
     $args['orderby'] = 'name';
     $args['order']   = 'ASC';
+    $args['menu_order'] = false;
     return $args;
 }, 20);
 
