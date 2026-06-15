@@ -1414,70 +1414,130 @@ function lavka_calc_next_ts(array $cfg, ?int $from_ts = null): int {
 
 // Schedule runner: processes ALL SKUs by pages with mapping
 add_action('lavka_auto_pull_all', function () {
+
     $cfg = lavka_get_auto_cfg();
-    if (empty($cfg['enabled'])) return;
+
+    if (empty($cfg['enabled'])) {
+
+        return;
+
+    }
+
+    // Сразу ставим следующий запуск
+
+    $next = lavka_calc_next_ts($cfg, time());
+
+    if ($next > 0) {
+
+        wp_clear_scheduled_hook('lavka_auto_pull_all');
+
+        wp_schedule_single_event($next, 'lavka_auto_pull_all');
+
+    }
 
     $t0 = microtime(true);
-    $batch = max(LAVKA_BATCH_MIN, min(LAVKA_BATCH_MAX, (int)$cfg['batch']));
+
+    $batch = max(
+        LAVKA_BATCH_MIN,
+        min(LAVKA_BATCH_MAX, (int)$cfg['batch'])
+    );
+
     $total = lavka_count_all_skus();
     $pages = (int) ceil($total / $batch);
 
-    $updated = 0;
+    $updated  = 0;
     $notFound = 0;
 
-    $detUpdated   = [];
-    $detNotFound  = [];
+    $detUpdated  = [];
+    $detNotFound = [];
+
     $TRUNCATE_LIMIT = 300;
-    $truncated    = false;
+    $truncated = false;
 
     for ($page = 0; $page < $pages; $page++) {
+
         $skus = lavka_get_skus_slice($page * $batch, $batch);
-        if (!$skus) continue;
 
-        $res = lavka_sync_java_query_and_apply($skus, ['dry' => false]);
-        if (!empty($res['ok'])) {
-            $updated  += (int)($res['processed'] ?? 0);
-            $notFound += (int)($res['not_found'] ?? 0);
-            $updatedRows   = [];
-            $notFoundRows  = [];
+        if (!$skus) {
+            continue;
+        }
 
-            $det = $res['results'] ?? [];
-            foreach ($det as $row) {
-                $sku = (string)($row['sku'] ?? '');
-                if ($sku === '') continue;
+        $res = lavka_sync_java_query_and_apply(
+            $skus,
+            ['dry' => false]
+        );
 
-                if (!empty($row['found'])) {
-                    if (count($updatedRows) < $TRUNCATE_LIMIT) {
-                        $total = $row['total'] ?? null;
-                        $lines = isset($row['lines']) ? wp_json_encode($row['lines']) : '';
-                        $updatedRows[] = [$sku, $total, $lines];
-                    } else {
-                        $truncated = true;
-                    }
+        if (empty($res['ok'])) {
+            continue;
+        }
+
+        $updated  += (int)($res['processed'] ?? 0);
+        $notFound += (int)($res['not_found'] ?? 0);
+
+        $updatedRows  = [];
+        $notFoundRows = [];
+
+        $det = $res['results'] ?? [];
+
+        foreach ($det as $row) {
+
+            $sku = (string)($row['sku'] ?? '');
+
+            if ($sku === '') {
+                continue;
+            }
+
+            if (!empty($row['found'])) {
+
+                if (count($updatedRows) < $TRUNCATE_LIMIT) {
+
+                    $totalQty = $row['total'] ?? null;
+                    $lines    = isset($row['lines'])
+                        ? wp_json_encode($row['lines'])
+                        : '';
+
+                    $updatedRows[] = [
+                        $sku,
+                        $totalQty,
+                        $lines
+                    ];
+
                 } else {
-                    if (count($notFoundRows) < $TRUNCATE_LIMIT) {
-                        $notFoundRows[] = [$sku];
-                    } else {
-                        $truncated = true;
-                    }
+                    $truncated = true;
+                }
+
+            } else {
+
+                if (count($notFoundRows) < $TRUNCATE_LIMIT) {
+                    $notFoundRows[] = [$sku];
+                } else {
+                    $truncated = true;
                 }
             }
-            if (!$truncated && $updatedRows) {
-                    foreach ($updatedRows as $r) {
-                        if (count($detUpdated) < $TRUNCATE_LIMIT) {
-                            $detUpdated[] = $r;
-                        } else { $truncated = true; break; }
-                    }
+        }
+
+        if (!$truncated && $updatedRows) {
+            foreach ($updatedRows as $r) {
+
+                if (count($detUpdated) < $TRUNCATE_LIMIT) {
+                    $detUpdated[] = $r;
+                } else {
+                    $truncated = true;
+                    break;
                 }
-                if (!$truncated && $notFoundRows) {
-                    foreach ($notFoundRows as $r) {
-                        if (count($detNotFound) < $TRUNCATE_LIMIT) {
-                            $detNotFound[] = $r;
-                        } else { $truncated = true; break; }
-                    }
+            }
+        }
+
+        if (!$truncated && $notFoundRows) {
+            foreach ($notFoundRows as $r) {
+
+                if (count($detNotFound) < $TRUNCATE_LIMIT) {
+                    $detNotFound[] = $r;
+                } else {
+                    $truncated = true;
+                    break;
                 }
-        } else {
-            // Можно логировать ошибку и продолжать
+            }
         }
     }
 
@@ -1490,40 +1550,57 @@ add_action('lavka_auto_pull_all', function () {
         'not_found'   => $notFound,
         'duration_ms' => (int)round((microtime(true) - $t0) * 1000),
         'status'      => 'OK',
-        'message'     => sprintf('Auto paged pull completed (batch=%d, pages=%d)', $batch, $pages),
+        'message'     => sprintf(
+            'Auto paged pull completed (batch=%d, pages=%d)',
+            $batch,
+            $pages
+        ),
         'errors'      => wp_json_encode([
             'updated'   => $detUpdated,
             'not_found' => $detNotFound,
             'truncated' => $truncated ? 1 : 0,
         ], JSON_UNESCAPED_UNICODE),
-        'user_id'     => 0, // крон — системный
+        'user_id'     => 0,
     ]);
-
-    // Планируем следующий запуск
-    $next = lavka_calc_next_ts($cfg, time());
-    if ($next > 0) {
-        wp_schedule_single_event($next, 'lavka_auto_pull_all');
-    }
 });
 
 // Auto-runner: incremental movement
 add_action('lavka_auto_pull_movement', function () {
+
     $cfg = lavka_get_auto_cfg();
-    if (empty($cfg['enabled']) || ($cfg['strategy'] ?? 'full') !== 'movement') return;
 
-    $t0  = microtime(true);
+    if (empty($cfg['enabled'])) {
 
-    // pageSize берём из batch, dry=false (боевой режим)
+        return;
+
+    }
+
+    // Сразу ставим следующий запуск
+
+    $next = lavka_calc_next_ts($cfg, time());
+
+    if ($next > 0) {
+
+        wp_clear_scheduled_hook('lavka_auto_pull_movement');
+
+        wp_schedule_single_event($next, 'lavka_auto_pull_movement');
+
+    }
+
+    $t0 = microtime(true);
+
     if (!function_exists('lavka_sync_java_movement_apply_loop')) {
-        // если файл с функцией не подключён — не падаем, просто выходим
         return;
     }
 
-        // повышаем выживаемость long-poll запроса
-ignore_user_abort(true);
-if (function_exists('set_time_limit')) @set_time_limit(600);
-@ini_set('max_execution_time', '600');
-@ini_set('default_socket_timeout', '600'); // чтобы сокет HTTP не отвалился раньше
+    ignore_user_abort(true);
+
+    if (function_exists('set_time_limit')) {
+        @set_time_limit(600);
+    }
+
+    @ini_set('max_execution_time', '600');
+    @ini_set('default_socket_timeout', '600');
 
     $res = lavka_sync_java_movement_apply_loop([
         'pageSize' => (int)$cfg['batch'],
@@ -1537,19 +1614,21 @@ if (function_exists('set_time_limit')) @set_time_limit(600);
         'dry'         => 0,
         'updated'     => (int)($res['updated'] ?? 0),
         'not_found'   => (int)($res['not_found'] ?? 0),
-        'duration_ms' => (int)round((microtime(true)-$t0)*1000),
+        'duration_ms' => (int)round((microtime(true) - $t0) * 1000),
         'status'      => !empty($res['ok']) ? 'OK' : 'ERR',
         'message'     => sprintf(
             'Movement window [%s..%s], pages=%d%s',
-            $res['serverFrom'] ?? '-', $res['serverTo'] ?? '-', (int)($res['pages'] ?? 0),
+            $res['serverFrom'] ?? '-',
+            $res['serverTo'] ?? '-',
+            (int)($res['pages'] ?? 0),
             !empty($res['earlyStop']) ? ' (early-stop)' : ''
         ),
-        'errors'  => wp_json_encode($res['details'] ?? [], JSON_UNESCAPED_UNICODE),
+        'errors'  => wp_json_encode(
+            $res['details'] ?? [],
+            JSON_UNESCAPED_UNICODE
+        ),
         'user_id' => 0,
     ]);
-
-    $next = lavka_calc_next_ts($cfg, time());
-    if ($next > 0) wp_schedule_single_event($next, 'lavka_auto_pull_movement');
 });
 
 // AJAX: загрузить текущие настройки автосинка
