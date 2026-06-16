@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-06-16T11:31:00+00:00\n"
+"POT-Creation-Date: 2026-06-16T12:09:10+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: lavka-sync\n"
@@ -44,12 +44,12 @@ msgid "Match Woo locations (taxonomy <code>location</code>) with external MS war
 msgstr ""
 
 #: inc/admin-ui.php:57
-#: inc/admin-ui.php:1164
+#: inc/admin-ui.php:1163
 msgid "Loading…"
 msgstr ""
 
 #: inc/admin-ui.php:58
-#: inc/admin-ui.php:858
+#: inc/admin-ui.php:857
 msgid "Saving…"
 msgstr ""
 
@@ -66,7 +66,7 @@ msgstr ""
 #: inc/admin-ui.php:92
 #: inc/admin-ui.php:550
 #: inc/admin-ui.php:554
-#: inc/admin-ui.php:879
+#: inc/admin-ui.php:878
 msgid "Network error"
 msgstr ""
 
@@ -94,7 +94,7 @@ msgstr ""
 
 #: inc/admin-ui.php:72
 #: inc/admin-ui.php:540
-#: inc/admin-ui.php:1156
+#: inc/admin-ui.php:1155
 msgid "SKU"
 msgstr ""
 
@@ -132,7 +132,7 @@ msgstr ""
 #: inc/admin-ui.php:91
 #: inc/admin-ui.php:549
 #: inc/admin-ui.php:553
-#: inc/admin-ui.php:875
+#: inc/admin-ui.php:874
 msgid "Error:"
 msgstr ""
 
@@ -153,13 +153,13 @@ msgstr ""
 
 #: inc/admin-ui.php:85
 #: inc/admin-ui.php:560
-#: inc/admin-ui.php:1847
+#: inc/admin-ui.php:1846
 msgid "Updated"
 msgstr ""
 
 #: inc/admin-ui.php:86
 #: inc/admin-ui.php:561
-#: inc/admin-ui.php:1848
+#: inc/admin-ui.php:1847
 msgid "Not found"
 msgstr ""
 
@@ -180,9 +180,9 @@ msgid "OK"
 msgstr ""
 
 #: inc/admin-ui.php:97
-#: inc/admin-ui.php:1130
-#: inc/admin-ui.php:1809
-#: inc/admin-ui.php:1896
+#: inc/admin-ui.php:1129
+#: inc/admin-ui.php:1808
+#: inc/admin-ui.php:1895
 #: inc/warehouse-map.php:71
 msgid "You do not have sufficient permissions to access this page."
 msgstr ""
@@ -360,105 +360,125 @@ msgstr ""
 msgid "Next run:"
 msgstr ""
 
-#: inc/admin-ui.php:846
+#: inc/admin-ui.php:816
+msgid "FULL"
+msgstr ""
+
+#: inc/admin-ui.php:818
+msgid "MOVEMENT"
+msgstr ""
+
+#: inc/admin-ui.php:822
+msgid "Last run:"
+msgstr ""
+
+#: inc/admin-ui.php:825
+msgid "updated"
+msgstr ""
+
+#: inc/admin-ui.php:827
+msgid "not found"
+msgstr ""
+
+#: inc/admin-ui.php:845
 msgid "Last serverTo:"
 msgstr ""
 
-#: inc/admin-ui.php:872
+#: inc/admin-ui.php:871
 msgid "Saved"
 msgstr ""
 
+#: inc/admin-ui.php:1100
 #: inc/admin-ui.php:1101
-#: inc/admin-ui.php:1102
-#: inc/admin-ui.php:1134
+#: inc/admin-ui.php:1133
 msgid "Lavka Reports"
 msgstr ""
 
-#: inc/admin-ui.php:1138
-#: inc/admin-ui.php:1843
+#: inc/admin-ui.php:1137
+#: inc/admin-ui.php:1842
 msgid "Supplier"
 msgstr ""
 
-#: inc/admin-ui.php:1142
+#: inc/admin-ui.php:1141
 msgid "Warehouse"
 msgstr ""
 
-#: inc/admin-ui.php:1146
+#: inc/admin-ui.php:1145
 msgid "Refresh"
 msgstr ""
 
-#: inc/admin-ui.php:1152
+#: inc/admin-ui.php:1151
 msgid "Data"
 msgstr ""
 
-#: inc/admin-ui.php:1157
+#: inc/admin-ui.php:1156
 msgid "Title"
 msgstr ""
 
-#: inc/admin-ui.php:1158
-#: inc/admin-ui.php:1844
+#: inc/admin-ui.php:1157
+#: inc/admin-ui.php:1843
 msgid "Stock"
 msgstr ""
 
-#: inc/admin-ui.php:1159
+#: inc/admin-ui.php:1158
 msgid "Price"
 msgstr ""
 
-#: inc/admin-ui.php:1798
-#: inc/admin-ui.php:1829
+#: inc/admin-ui.php:1797
+#: inc/admin-ui.php:1828
 msgid "Lavka Logs"
 msgstr ""
 
-#: inc/admin-ui.php:1799
+#: inc/admin-ui.php:1798
 msgid "Logs"
 msgstr ""
 
-#: inc/admin-ui.php:1833
+#: inc/admin-ui.php:1832
 msgid "Export CSV"
 msgstr ""
 
-#: inc/admin-ui.php:1840
+#: inc/admin-ui.php:1839
 #: inc/warehouse-map.php:116
 msgid "ID"
 msgstr ""
 
-#: inc/admin-ui.php:1841
+#: inc/admin-ui.php:1840
 msgid "Time (UTC)"
 msgstr ""
 
-#: inc/admin-ui.php:1842
+#: inc/admin-ui.php:1841
 msgid "Action"
 msgstr ""
 
-#: inc/admin-ui.php:1845
+#: inc/admin-ui.php:1844
 msgid "Dry"
 msgstr ""
 
-#: inc/admin-ui.php:1846
+#: inc/admin-ui.php:1845
 msgid "Changed, h"
 msgstr ""
 
-#: inc/admin-ui.php:1849
+#: inc/admin-ui.php:1848
 msgid "ms"
 msgstr ""
 
-#: inc/admin-ui.php:1850
+#: inc/admin-ui.php:1849
 msgid "Status"
 msgstr ""
 
-#: inc/admin-ui.php:1851
+#: inc/admin-ui.php:1850
 msgid "Message"
 msgstr ""
 
-#: inc/admin-ui.php:1862
+#: inc/admin-ui.php:1861
 msgid "yes"
 msgstr ""
 
-#: inc/admin-ui.php:1862
+#: inc/admin-ui.php:1861
 msgid "no"
 msgstr ""
 
-#: inc/admin-ui.php:1871
+#: inc/admin-ui.php:1870
 msgid "No logs yet."
 msgstr ""
 

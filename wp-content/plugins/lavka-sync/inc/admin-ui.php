@@ -813,19 +813,18 @@ function lavka_sync_render_page() {
       let actionName = o.last_run.action;
 
       if (actionName === 'auto_pull_all') {
-        actionName = 'FULL';
+        actionName = "<?php echo esc_js(__('FULL', 'lavka-sync')); ?>";
       } else if (actionName === 'auto_movement') {
-        actionName = 'MOVEMENT';
+        actionName = "<?php echo esc_js(__('MOVEMENT', 'lavka-sync')); ?>";
       }
 
       elLastRun.textContent =
-        "Останній запуск: " +
+        "<?php echo esc_js(__('Last run:', 'lavka-sync')); ?> " +
         o.last_run.ts +
-        " (" +
-        actionName +
-        "), updated=" +
+        " (" + actionName + ")" +
+        ", <?php echo esc_js(__('updated', 'lavka-sync')); ?>=" +
         (o.last_run.updated || 0) +
-        ", not_found=" +
+        ", <?php echo esc_js(__('not found', 'lavka-sync')); ?>=" +
         (o.last_run.not_found || 0);
 
     } else {
