@@ -529,8 +529,9 @@ function lavka_sync_render_page() {
           <button class="button button-primary" id="lavka-auto-save"><?php echo esc_html__('Save auto sync', 'lavka-sync'); ?></button>
           <span id="lavka-auto-status" style="margin-left:10px;"></span>
         </p>
-        <p id="lavka-auto-next" style="opacity:.8"></p>
-        <p id="lavka-auto-lastto" style="opacity:.8"></p>
+      <p id="lavka-auto-next" style="opacity:.8"></p>
+      <p id="lavka-auto-lastrun" style="opacity:.8"></p>
+      <p id="lavka-auto-lastto" style="opacity:.8"></p>
       </div>
 
     </div>
@@ -768,6 +769,7 @@ function lavka_sync_render_page() {
   const elNext    = document.getElementById('lavka-auto-next');
   const elStrategy = document.getElementById('lavka-auto-strategy');
   const elLastTo   = document.getElementById('lavka-auto-lastto');
+  const elLastRun  = document.getElementById('lavka-auto-lastrun');
 
   function toggleByMode(){
     const m = elMode.value;
@@ -806,6 +808,31 @@ function lavka_sync_render_page() {
       elNext.textContent = '';
     }
     elStrategy.value = (o.strategy || 'full');
+    if (o.last_run && o.last_run.ts) {
+
+      let actionName = o.last_run.action;
+
+      if (actionName === 'auto_pull_all') {
+        actionName = 'FULL';
+      } else if (actionName === 'auto_movement') {
+        actionName = 'MOVEMENT';
+      }
+
+      elLastRun.textContent =
+        "Останній запуск: " +
+        o.last_run.ts +
+        " (" +
+        actionName +
+        "), updated=" +
+        (o.last_run.updated || 0) +
+        ", not_found=" +
+        (o.last_run.not_found || 0);
+
+    } else {
+
+      elLastRun.textContent = "";
+
+    }
     if (o.last_to) {
       const raw = o.last_to;
       let txt = '';
@@ -1638,6 +1665,19 @@ add_action('wp_ajax_lavka_auto_get', function () {
 
     $cfg = lavka_get_auto_cfg();
     $next = lavka_calc_next_ts($cfg, time());
+    global $wpdb;
+
+    $last_run = $wpdb->get_row(
+        "
+        SELECT ts, action, updated, not_found
+        FROM {$wpdb->prefix}lavka_sync_logs
+        WHERE action IN ('auto_pull_all','auto_movement')
+        ORDER BY id DESC
+        LIMIT 1
+        ",
+        ARRAY_A
+    );
+
     wp_send_json_success([
         'enabled'  => (bool)$cfg['enabled'],
         'mode'     => (string)$cfg['mode'],
@@ -1649,7 +1689,8 @@ add_action('wp_ajax_lavka_auto_get', function () {
         'next_ts'  => $next ?: null,
         'strategy' => (string)($cfg['strategy'] ?? 'full'),
         'last_to'  => get_option(LAVKA_LAST_TO_OPTION, '') ?: null,
-    ]);
+        'last_run' => $last_run ?: null,
+    ]); 
 });
 
 // AJAX: сохранить настройки и перепланировать

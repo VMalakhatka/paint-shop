@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Lavka Sync 0.2.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lavka-sync\n"
-"POT-Creation-Date: 2025-10-11T08:44:38+00:00\n"
+"POT-Creation-Date: 2026-06-16T11:31:00+00:00\n"
 "PO-Revision-Date: 2025-09-28T07:10:54+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -18,7 +18,7 @@ msgstr ""
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 #. Plugin Name of the plugin
-#: lavka-sync.php inc/admin-ui.php:27 inc/admin-ui.php:28 inc/admin-ui.php:372
+#: lavka-sync.php inc/admin-ui.php:372
 msgid "Lavka Sync"
 msgstr "Lavka Sync"
 
@@ -30,6 +30,11 @@ msgid ""
 msgstr ""
 "Надає кнопки та налаштування для синхронізації з Java-сервісом і відкриває "
 "REST API."
+
+#: inc/admin-ui.php:27 inc/admin-ui.php:28
+#, fuzzy
+msgid "Lavka Synck"
+msgstr "Lavka Sync"
 
 #: inc/admin-ui.php:38 inc/admin-ui.php:52
 msgid "Lavka Mapping"
@@ -47,11 +52,11 @@ msgstr ""
 "Зіставте локації Woo (таксономія <code>location</code>) із зовнішніми "
 "складами MS. Одна локація Woo може об’єднувати кілька складів MS."
 
-#: inc/admin-ui.php:57 inc/admin-ui.php:1060
+#: inc/admin-ui.php:57 inc/admin-ui.php:1164
 msgid "Loading…"
 msgstr "Завантаження…"
 
-#: inc/admin-ui.php:58 inc/admin-ui.php:781
+#: inc/admin-ui.php:58 inc/admin-ui.php:858
 msgid "Saving…"
 msgstr "Збереження…"
 
@@ -64,7 +69,7 @@ msgid "Save error"
 msgstr "Помилка збереження"
 
 #: inc/admin-ui.php:61 inc/admin-ui.php:81 inc/admin-ui.php:92
-#: inc/admin-ui.php:549 inc/admin-ui.php:553 inc/admin-ui.php:802
+#: inc/admin-ui.php:550 inc/admin-ui.php:554 inc/admin-ui.php:879
 msgid "Network error"
 msgstr "Мережева помилка"
 
@@ -89,74 +94,74 @@ msgstr "Зберегти зіставлення"
 msgid "OK: written %s"
 msgstr "ОК: записано %s"
 
-#: inc/admin-ui.php:72 inc/admin-ui.php:539 inc/admin-ui.php:1052
+#: inc/admin-ui.php:72 inc/admin-ui.php:540 inc/admin-ui.php:1156
 msgid "SKU"
 msgstr "Артикул"
 
-#: inc/admin-ui.php:73 inc/admin-ui.php:540
+#: inc/admin-ui.php:73 inc/admin-ui.php:541
 msgid "Total"
 msgstr "Всього"
 
-#: inc/admin-ui.php:74 inc/admin-ui.php:541
+#: inc/admin-ui.php:74 inc/admin-ui.php:542
 msgid "By warehouses"
 msgstr "За складами"
 
-#: inc/admin-ui.php:75 inc/admin-ui.php:542
+#: inc/admin-ui.php:75 inc/admin-ui.php:543
 msgid "Found"
 msgstr "Знайдено"
 
-#: inc/admin-ui.php:76 inc/admin-ui.php:543
+#: inc/admin-ui.php:76 inc/admin-ui.php:544
 msgid "No data"
 msgstr "Немає даних"
 
-#: inc/admin-ui.php:78 inc/admin-ui.php:545
+#: inc/admin-ui.php:78 inc/admin-ui.php:546
 msgid "Enter one or more SKUs"
 msgstr "Введіть один або кілька артикулів"
 
-#: inc/admin-ui.php:79 inc/admin-ui.php:546
+#: inc/admin-ui.php:79 inc/admin-ui.php:547
 msgid "Running…"
 msgstr "Виконується…"
 
-#: inc/admin-ui.php:80 inc/admin-ui.php:91 inc/admin-ui.php:548
-#: inc/admin-ui.php:552 inc/admin-ui.php:798
+#: inc/admin-ui.php:80 inc/admin-ui.php:91 inc/admin-ui.php:549
+#: inc/admin-ui.php:553 inc/admin-ui.php:875
 msgid "Error:"
 msgstr "Помилка:"
 
-#: inc/admin-ui.php:82 inc/admin-ui.php:556
+#: inc/admin-ui.php:82 inc/admin-ui.php:557
 msgid "Page"
 msgstr "Сторінка"
 
-#: inc/admin-ui.php:83 inc/admin-ui.php:557
+#: inc/admin-ui.php:83 inc/admin-ui.php:558
 msgid "of"
 msgstr "з"
 
-#: inc/admin-ui.php:84 inc/admin-ui.php:558
+#: inc/admin-ui.php:84 inc/admin-ui.php:559
 msgid "Done"
 msgstr "Готово"
 
-#: inc/admin-ui.php:85 inc/admin-ui.php:559 inc/admin-ui.php:1643
+#: inc/admin-ui.php:85 inc/admin-ui.php:560 inc/admin-ui.php:1847
 msgid "Updated"
 msgstr "Оновлено"
 
-#: inc/admin-ui.php:86 inc/admin-ui.php:560 inc/admin-ui.php:1644
+#: inc/admin-ui.php:86 inc/admin-ui.php:561 inc/admin-ui.php:1848
 msgid "Not found"
 msgstr "Не знайдено"
 
-#: inc/admin-ui.php:88 inc/admin-ui.php:547
+#: inc/admin-ui.php:88 inc/admin-ui.php:548
 #, php-format
 msgid "OK: processed %1$s, not found %2$s"
 msgstr "ОК: опрацьовано %1$s, не знайдено %2$s"
 
-#: inc/admin-ui.php:90 inc/admin-ui.php:551
+#: inc/admin-ui.php:90 inc/admin-ui.php:552
 msgid "Working…"
 msgstr "Виконується…"
 
-#: inc/admin-ui.php:93 inc/admin-ui.php:554
+#: inc/admin-ui.php:93 inc/admin-ui.php:555
 msgid "OK"
 msgstr "ОК"
 
-#: inc/admin-ui.php:97 inc/admin-ui.php:1026 inc/admin-ui.php:1605
-#: inc/admin-ui.php:1692 inc/warehouse-map.php:71
+#: inc/admin-ui.php:97 inc/admin-ui.php:1130 inc/admin-ui.php:1809
+#: inc/admin-ui.php:1896 inc/warehouse-map.php:71
 msgid "You do not have sufficient permissions to access this page."
 msgstr "У вас недостатньо прав для доступу до цієї сторінки."
 
@@ -328,103 +333,103 @@ msgstr "Інкрементально (за рухом)"
 msgid "Save auto sync"
 msgstr "Зберегти автосинхронізацію"
 
-#: inc/admin-ui.php:754
+#: inc/admin-ui.php:806
 msgid "Next run:"
 msgstr "Наступний запуск:"
 
-#: inc/admin-ui.php:769
+#: inc/admin-ui.php:846
 msgid "Last serverTo:"
-msgstr "Останній У:"
+msgstr "Остання межа movement:"
 
-#: inc/admin-ui.php:795
+#: inc/admin-ui.php:872
 msgid "Saved"
 msgstr "Збережено"
 
-#: inc/admin-ui.php:997 inc/admin-ui.php:998 inc/admin-ui.php:1030
+#: inc/admin-ui.php:1101 inc/admin-ui.php:1102 inc/admin-ui.php:1134
 msgid "Lavka Reports"
 msgstr "Звіти Lavka"
 
-#: inc/admin-ui.php:1034 inc/admin-ui.php:1639
+#: inc/admin-ui.php:1138 inc/admin-ui.php:1843
 msgid "Supplier"
 msgstr "Постачальник"
 
-#: inc/admin-ui.php:1038
+#: inc/admin-ui.php:1142
 msgid "Warehouse"
 msgstr "Склад"
 
-#: inc/admin-ui.php:1042
+#: inc/admin-ui.php:1146
 msgid "Refresh"
 msgstr "Оновити"
 
-#: inc/admin-ui.php:1048
+#: inc/admin-ui.php:1152
 msgid "Data"
 msgstr "Дані"
 
-#: inc/admin-ui.php:1053
+#: inc/admin-ui.php:1157
 msgid "Title"
 msgstr "Назва"
 
-#: inc/admin-ui.php:1054 inc/admin-ui.php:1640
+#: inc/admin-ui.php:1158 inc/admin-ui.php:1844
 msgid "Stock"
 msgstr "Залишок"
 
-#: inc/admin-ui.php:1055
+#: inc/admin-ui.php:1159
 msgid "Price"
 msgstr "Ціна"
 
-#: inc/admin-ui.php:1594 inc/admin-ui.php:1625
+#: inc/admin-ui.php:1798 inc/admin-ui.php:1829
 msgid "Lavka Logs"
 msgstr "Журнал Lavka"
 
-#: inc/admin-ui.php:1595
+#: inc/admin-ui.php:1799
 msgid "Logs"
 msgstr "Логи"
 
-#: inc/admin-ui.php:1629
+#: inc/admin-ui.php:1833
 msgid "Export CSV"
 msgstr "Експорт CSV"
 
-#: inc/admin-ui.php:1636 inc/warehouse-map.php:116
+#: inc/admin-ui.php:1840 inc/warehouse-map.php:116
 msgid "ID"
 msgstr "ID"
 
-#: inc/admin-ui.php:1637
+#: inc/admin-ui.php:1841
 msgid "Time (UTC)"
 msgstr "Час (UTC)"
 
-#: inc/admin-ui.php:1638
+#: inc/admin-ui.php:1842
 msgid "Action"
 msgstr "Дія"
 
-#: inc/admin-ui.php:1641
+#: inc/admin-ui.php:1845
 msgid "Dry"
 msgstr "Пробний"
 
-#: inc/admin-ui.php:1642
+#: inc/admin-ui.php:1846
 msgid "Changed, h"
 msgstr "Змінено, год"
 
-#: inc/admin-ui.php:1645
+#: inc/admin-ui.php:1849
 msgid "ms"
 msgstr "мс"
 
-#: inc/admin-ui.php:1646
+#: inc/admin-ui.php:1850
 msgid "Status"
 msgstr "Статус"
 
-#: inc/admin-ui.php:1647
+#: inc/admin-ui.php:1851
 msgid "Message"
 msgstr "Повідомлення"
 
-#: inc/admin-ui.php:1658
+#: inc/admin-ui.php:1862
 msgid "yes"
 msgstr "так"
 
-#: inc/admin-ui.php:1658
+#: inc/admin-ui.php:1862
 msgid "no"
 msgstr "ні"
 
-#: inc/admin-ui.php:1667
+#: inc/admin-ui.php:1871
 msgid "No logs yet."
 msgstr "Ще немає логів."
 
