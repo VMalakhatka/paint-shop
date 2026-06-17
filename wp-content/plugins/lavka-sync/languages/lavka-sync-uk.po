@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Lavka Sync 0.2.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lavka-sync\n"
-"POT-Creation-Date: 2026-06-16T11:58:17+00:00\n"
+"POT-Creation-Date: 2026-06-17T13:17:21+00:00\n"
 "PO-Revision-Date: 2025-09-28T07:10:54+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -138,11 +138,11 @@ msgstr "з"
 msgid "Done"
 msgstr "Готово"
 
-#: inc/admin-ui.php:85 inc/admin-ui.php:560 inc/admin-ui.php:1846
+#: inc/admin-ui.php:85 inc/admin-ui.php:560 inc/admin-ui.php:1881
 msgid "Updated"
 msgstr "Оновлено"
 
-#: inc/admin-ui.php:86 inc/admin-ui.php:561 inc/admin-ui.php:1847
+#: inc/admin-ui.php:86 inc/admin-ui.php:561 inc/admin-ui.php:1882
 msgid "Not found"
 msgstr "Не знайдено"
 
@@ -159,8 +159,8 @@ msgstr "Виконується…"
 msgid "OK"
 msgstr "ОК"
 
-#: inc/admin-ui.php:97 inc/admin-ui.php:1129 inc/admin-ui.php:1808
-#: inc/admin-ui.php:1895 inc/warehouse-map.php:71
+#: inc/admin-ui.php:97 inc/admin-ui.php:1129 inc/admin-ui.php:1843
+#: inc/admin-ui.php:1930 inc/warehouse-map.php:71
 msgid "You do not have sufficient permissions to access this page."
 msgstr "У вас недостатньо прав для доступу до цієї сторінки."
 
@@ -346,7 +346,7 @@ msgstr "за рухом"
 
 #: inc/admin-ui.php:822
 msgid "Last run:"
-msgstr "Наступний запуск:"
+msgstr "Останній запуск:"
 
 #: inc/admin-ui.php:825
 msgid "updated"
@@ -368,7 +368,7 @@ msgstr "Збережено"
 msgid "Lavka Reports"
 msgstr "Звіти Lavka"
 
-#: inc/admin-ui.php:1137 inc/admin-ui.php:1842
+#: inc/admin-ui.php:1137 inc/admin-ui.php:1877
 msgid "Supplier"
 msgstr "Постачальник"
 
@@ -388,7 +388,7 @@ msgstr "Дані"
 msgid "Title"
 msgstr "Назва"
 
-#: inc/admin-ui.php:1157 inc/admin-ui.php:1843
+#: inc/admin-ui.php:1157 inc/admin-ui.php:1878
 msgid "Stock"
 msgstr "Залишок"
 
@@ -396,59 +396,59 @@ msgstr "Залишок"
 msgid "Price"
 msgstr "Ціна"
 
-#: inc/admin-ui.php:1797 inc/admin-ui.php:1828
+#: inc/admin-ui.php:1832 inc/admin-ui.php:1863
 msgid "Lavka Logs"
 msgstr "Журнал Lavka"
 
-#: inc/admin-ui.php:1798
+#: inc/admin-ui.php:1833
 msgid "Logs"
 msgstr "Логи"
 
-#: inc/admin-ui.php:1832
+#: inc/admin-ui.php:1867
 msgid "Export CSV"
 msgstr "Експорт CSV"
 
-#: inc/admin-ui.php:1839 inc/warehouse-map.php:116
+#: inc/admin-ui.php:1874 inc/warehouse-map.php:116
 msgid "ID"
 msgstr "ID"
 
-#: inc/admin-ui.php:1840
+#: inc/admin-ui.php:1875
 msgid "Time (UTC)"
 msgstr "Час (UTC)"
 
-#: inc/admin-ui.php:1841
+#: inc/admin-ui.php:1876
 msgid "Action"
 msgstr "Дія"
 
-#: inc/admin-ui.php:1844
+#: inc/admin-ui.php:1879
 msgid "Dry"
 msgstr "Пробний"
 
-#: inc/admin-ui.php:1845
+#: inc/admin-ui.php:1880
 msgid "Changed, h"
 msgstr "Змінено, год"
 
-#: inc/admin-ui.php:1848
+#: inc/admin-ui.php:1883
 msgid "ms"
 msgstr "мс"
 
-#: inc/admin-ui.php:1849
+#: inc/admin-ui.php:1884
 msgid "Status"
 msgstr "Статус"
 
-#: inc/admin-ui.php:1850
+#: inc/admin-ui.php:1885
 msgid "Message"
 msgstr "Повідомлення"
 
-#: inc/admin-ui.php:1861
+#: inc/admin-ui.php:1896
 msgid "yes"
 msgstr "так"
 
-#: inc/admin-ui.php:1861
+#: inc/admin-ui.php:1896
 msgid "no"
 msgstr "ні"
 
-#: inc/admin-ui.php:1870
+#: inc/admin-ui.php:1905
 msgid "No logs yet."
 msgstr "Ще немає логів."
 

@@ -1440,7 +1440,7 @@ function lavka_calc_next_ts(array $cfg, ?int $from_ts = null): int {
 
 // Schedule runner: processes ALL SKUs by pages with mapping
 add_action('lavka_auto_pull_all', function () {
-
+    error_log('[LAVKA] AUTO FULL START');
     $cfg = lavka_get_auto_cfg();
 
     if (empty($cfg['enabled'])) {
@@ -1488,11 +1488,32 @@ add_action('lavka_auto_pull_all', function () {
             continue;
         }
 
+        error_log(
+            sprintf(
+                '[LAVKA] page=%d/%d skus=%d',
+                $page + 1,
+                $pages,
+                count($skus)
+            )
+        );
+
         $res = lavka_sync_java_query_and_apply(
             $skus,
             ['dry' => false]
         );
 
+        error_log(
+            sprintf(
+                '[LAVKA] page=%d/%d ok=%s processed=%d not_found=%d',
+                $page + 1,
+                $pages,
+                !empty($res['ok']) ? 'yes' : 'no',
+                (int)($res['processed'] ?? 0),
+                (int)($res['not_found'] ?? 0)
+            )
+        );
+
+        
         if (empty($res['ok'])) {
             continue;
         }
@@ -1542,6 +1563,7 @@ add_action('lavka_auto_pull_all', function () {
             }
         }
 
+
         if (!$truncated && $updatedRows) {
             foreach ($updatedRows as $r) {
 
@@ -1566,8 +1588,21 @@ add_action('lavka_auto_pull_all', function () {
             }
         }
     }
-
-    lavka_log_write([
+    error_log('[LAVKA] AUTO FULL END');
+    error_log(
+        sprintf(
+            '[LAVKA] WRITE LOG updated=%d not_found=%d',
+            $updated,
+            $notFound
+        )
+    );
+    error_log(
+        sprintf(
+            '[LAVKA] BEFORE WRITE duration=%d ms',
+            (int)round((microtime(true) - $t0) * 1000)
+        )
+    );
+    $logId = lavka_log_write([
         'action'      => 'auto_pull_all',
         'supplier'    => '',
         'stock_id'    => 0,
@@ -1588,6 +1623,11 @@ add_action('lavka_auto_pull_all', function () {
         ], JSON_UNESCAPED_UNICODE),
         'user_id'     => 0,
     ]);
+    global $wpdb;
+
+    error_log('[LAVKA] LOG ID=' . $logId);
+
+    error_log('[LAVKA] DB ERROR=' . $wpdb->last_error);
 });
 
 // Auto-runner: incremental movement
