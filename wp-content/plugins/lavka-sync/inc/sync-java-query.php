@@ -80,16 +80,45 @@ function lavka_sync_java_query_and_apply(array $skus, array $opts = []): array {
     $items = (array)($body['items'] ?? []);
     $results = [];
     $notFound = 0;
-    foreach ($items as $it) {
+   foreach ($items as $it) {
+
         $sku   = (string)($it['sku'] ?? '');
         $lines = [];
+
         foreach ((array)($it['lines'] ?? []) as $ln) {
-            $lines[] = ['term_id'=>(int)($ln['id'] ?? 0), 'qty'=>(float)($ln['qty'] ?? 0)];
+            $lines[] = [
+                'term_id' => (int)($ln['id'] ?? 0),
+                'qty'     => (float)($ln['qty'] ?? 0)
+            ];
         }
+
         if ($sku && $lines) {
-            $res = lavka_write_stock_for_sku($sku, $lines, $flags);
+
+            file_put_contents(
+                WP_CONTENT_DIR . '/lavka-debug.log',
+                date('Y-m-d H:i:s')
+                . " WRITE SKU={$sku} LINES=" . count($lines) . "\n",
+                FILE_APPEND
+            );
+
+            $res = lavka_write_stock_for_sku(
+                $sku,
+                $lines,
+                $flags
+            );
+
+            file_put_contents(
+                WP_CONTENT_DIR . '/lavka-debug.log',
+                date('Y-m-d H:i:s')
+                . " WRITE DONE {$sku}\n",
+                FILE_APPEND
+            );
+
             $results[] = $res;
-            if (empty($res['found'])) $notFound++;
+
+            if (empty($res['found'])) {
+                $notFound++;
+            }
         }
     }
 

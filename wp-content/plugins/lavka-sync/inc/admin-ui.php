@@ -1542,9 +1542,21 @@ add_action('lavka_auto_pull_all', function () {
             FILE_APPEND
         );
 
+        file_put_contents(
+            WP_CONTENT_DIR.'/lavka-debug.log',
+            date('Y-m-d H:i:s')." BEFORE QUERY PAGE ".($page+1)."\n",
+            FILE_APPEND
+        );
+
         $res = lavka_sync_java_query_and_apply(
             $skus,
             ['dry' => false]
+        );
+
+        file_put_contents(
+            WP_CONTENT_DIR.'/lavka-debug.log',
+            date('Y-m-d H:i:s')." AFTER QUERY PAGE ".($page+1)."\n",
+            FILE_APPEND
         );
 
         file_put_contents(
