@@ -186,8 +186,29 @@ function lavka_set_primary_location_if_missing(int $product_id, int $term_id): v
  * $opts:  ['set_manage'=>bool,'upd_status'=>bool,'attach_terms'=>bool,'set_primary'=>bool,'duplicate_slug_meta'=>bool,'dry'=>bool]
  */
 function lavka_write_stock_for_sku(string $sku, array $lines, array $opts): array {
+
+    file_put_contents(
+        WP_CONTENT_DIR.'/lavka-debug.log',
+        date('Y-m-d H:i:s')." ENTER lavka_write_stock_for_sku SKU=".$sku."\n",
+        FILE_APPEND
+    );
+
     $pid = lavka_find_product_id_by_sku($sku);
+
+    file_put_contents(
+        WP_CONTENT_DIR.'/lavka-debug.log',
+        date('Y-m-d H:i:s')." PRODUCT_ID=".$pid." SKU=".$sku."\n",
+        FILE_APPEND
+    );
+
     if (!$pid) {
+
+        file_put_contents(
+            WP_CONTENT_DIR.'/lavka-debug.log',
+            date('Y-m-d H:i:s')." PRODUCT NOT FOUND SKU=".$sku."\n",
+            FILE_APPEND
+        );
+
         return ['sku' => $sku, 'found' => false];
     }
 
@@ -197,109 +218,182 @@ function lavka_write_stock_for_sku(string $sku, array $lines, array $opts): arra
     $first_ok_tid = 0;
 
     foreach ($lines as $row) {
+
+        file_put_contents(
+            WP_CONTENT_DIR.'/lavka-debug.log',
+            date('Y-m-d H:i:s')." LINE START SKU=".$sku."\n",
+            FILE_APPEND
+        );
+
         if (!is_array($row)) continue;
 
-        // qty обязателен и числовой
         if (!array_key_exists('qty', $row) || !is_numeric($row['qty'])) {
             $rows[] = ['ok' => false, 'error' => 'qty_invalid'];
             continue;
         }
-        $qty = (float) $row['qty'];
+
+        $qty = (float)$row['qty'];
 
         $term = null;
         $tid  = 0;
         $slug = null;
 
         if (isset($row['term_id']) || isset($row['id'])) {
-            $tid  = (int) ($row['term_id'] ?? $row['id']);
+
+            $tid  = (int)($row['term_id'] ?? $row['id']);
+
+            file_put_contents(
+                WP_CONTENT_DIR.'/lavka-debug.log',
+                date('Y-m-d H:i:s')." GET TERM ".$tid." SKU=".$sku."\n",
+                FILE_APPEND
+            );
+
             $term = get_term($tid, 'location');
+
             if ($term && !is_wp_error($term)) {
-                $tid  = (int) $term->term_id;
-                $slug = (string) $term->slug;
+                $tid  = (int)$term->term_id;
+                $slug = (string)$term->slug;
             } else {
-                $rows[] = ['ok' => false, 'term_id' => (int)$tid, 'qty' => $qty, 'error' => 'term_not_found'];
+
+                file_put_contents(
+                    WP_CONTENT_DIR.'/lavka-debug.log',
+                    date('Y-m-d H:i:s')." TERM NOT FOUND ".$tid." SKU=".$sku."\n",
+                    FILE_APPEND
+                );
+
+                $rows[] = [
+                    'ok' => false,
+                    'term_id' => (int)$tid,
+                    'qty' => $qty,
+                    'error' => 'term_not_found'
+                ];
+
                 continue;
             }
-        } elseif (isset($row['location_slug'])) {
-            $slugIn = sanitize_title((string)$row['location_slug']);
-            if ($slugIn === '') {
-                $rows[] = ['ok' => false, 'location_slug' => '', 'qty' => $qty, 'error' => 'slug_empty'];
-                continue;
-            }
-            $term = get_term_by('slug', $slugIn, 'location');
-            if ($term && !is_wp_error($term)) {
-                $tid  = (int) $term->term_id;
-                $slug = (string) $term->slug;
-            } else {
-                $rows[] = ['ok' => false, 'location_slug' => $slugIn, 'qty' => $qty, 'error' => 'term_not_found'];
-                continue;
-            }
-        } else {
-            $rows[] = ['ok' => false, 'qty' => $qty, 'error' => 'no_term_id_or_slug'];
-            continue;
         }
 
-        // запись по TERM_ID (+ опциональный дубль по slug)
         $meta_key_id = '_stock_at_' . $tid;
+
         if (empty($opts['dry'])) {
-            update_post_meta($pid, $meta_key_id, wc_format_decimal($qty, 3));
-        }
-        $meta_records++;
 
-        if (!empty($opts['duplicate_slug_meta']) && $slug) {
-            $meta_key_slug = '_stock_at_' . $slug;
-            if (empty($opts['dry'])) {
-                update_post_meta($pid, $meta_key_slug, wc_format_decimal($qty, 3));
-            }
-            $meta_records++;
+            file_put_contents(
+                WP_CONTENT_DIR.'/lavka-debug.log',
+                date('Y-m-d H:i:s')." META START ".$meta_key_id." SKU=".$sku."\n",
+                FILE_APPEND
+            );
+
+            update_post_meta(
+                $pid,
+                $meta_key_id,
+                wc_format_decimal($qty, 3)
+            );
+
+            file_put_contents(
+                WP_CONTENT_DIR.'/lavka-debug.log',
+                date('Y-m-d H:i:s')." META DONE ".$meta_key_id." SKU=".$sku."\n",
+                FILE_APPEND
+            );
         }
 
-        // привязать term к товару (не добавляет дубликаты)
         if (!empty($opts['attach_terms']) && empty($opts['dry'])) {
-            wp_set_object_terms($pid, [$tid], 'location', true);
+
+            file_put_contents(
+                WP_CONTENT_DIR.'/lavka-debug.log',
+                date('Y-m-d H:i:s')." TERMS START ".$tid." SKU=".$sku."\n",
+                FILE_APPEND
+            );
+
+            wp_set_object_terms(
+                $pid,
+                [$tid],
+                'location',
+                true
+            );
+
+            file_put_contents(
+                WP_CONTENT_DIR.'/lavka-debug.log',
+                date('Y-m-d H:i:s')." TERMS DONE ".$tid." SKU=".$sku."\n",
+                FILE_APPEND
+            );
         }
 
-        // аккумулируем
         $sum += $qty;
-        if ($first_ok_tid === 0) $first_ok_tid = $tid;
 
-        $rows[] = [
-            'ok'      => true,
-            'term_id' => $tid,
-            'slug'    => $slug,
-            'qty'     => $qty,
-        ];
+        if ($first_ok_tid === 0) {
+            $first_ok_tid = $tid;
+        }
+
+        file_put_contents(
+            WP_CONTENT_DIR.'/lavka-debug.log',
+            date('Y-m-d H:i:s')." LINE DONE SKU=".$sku."\n",
+            FILE_APPEND
+        );
     }
 
-    // итоговые поля товара
+    file_put_contents(
+        WP_CONTENT_DIR.'/lavka-debug.log',
+        date('Y-m-d H:i:s')." TOTAL STOCK START SKU=".$sku."\n",
+        FILE_APPEND
+    );
+
     if (empty($opts['dry'])) {
-        update_post_meta($pid, '_stock', wc_format_decimal($sum, 3));
 
-        if (!empty($opts['set_manage'])) {
-            update_post_meta($pid, '_manage_stock', 'yes');
-        }
+        update_post_meta(
+            $pid,
+            '_stock',
+            wc_format_decimal($sum, 3)
+        );
+
+        file_put_contents(
+            WP_CONTENT_DIR.'/lavka-debug.log',
+            date('Y-m-d H:i:s')." TOTAL STOCK DONE SKU=".$sku."\n",
+            FILE_APPEND
+        );
+
         if (!empty($opts['upd_status'])) {
-            update_post_meta($pid, '_stock_status', $sum > 0 ? 'instock' : 'outofstock');
+
+            file_put_contents(
+                WP_CONTENT_DIR.'/lavka-debug.log',
+                date('Y-m-d H:i:s')." STATUS START SKU=".$sku."\n",
+                FILE_APPEND
+            );
+
+            update_post_meta(
+                $pid,
+                '_stock_status',
+                $sum > 0 ? 'instock' : 'outofstock'
+            );
+
             if (function_exists('wc_delete_product_transients')) {
+
+                file_put_contents(
+                    WP_CONTENT_DIR.'/lavka-debug.log',
+                    date('Y-m-d H:i:s')." TRANSIENT START SKU=".$sku."\n",
+                    FILE_APPEND
+                );
+
                 wc_delete_product_transients($pid);
-            }
-        }
-        if (!empty($opts['set_primary']) && $first_ok_tid > 0) {
-            if (function_exists('lavka_set_primary_location_if_missing')) {
-                lavka_set_primary_location_if_missing($pid, $first_ok_tid);
-            } else {
-                // запасной вариант: Yoast Primary term
-                $cur = (int) get_post_meta($pid, '_yoast_wpseo_primary_location', true);
-                if (!$cur) update_post_meta($pid, '_yoast_wpseo_primary_location', $first_ok_tid);
+
+                file_put_contents(
+                    WP_CONTENT_DIR.'/lavka-debug.log',
+                    date('Y-m-d H:i:s')." TRANSIENT DONE SKU=".$sku."\n",
+                    FILE_APPEND
+                );
             }
         }
     }
+
+    file_put_contents(
+        WP_CONTENT_DIR.'/lavka-debug.log',
+        date('Y-m-d H:i:s')." EXIT lavka_write_stock_for_sku SKU=".$sku."\n",
+        FILE_APPEND
+    );
 
     return [
         'sku'        => $sku,
         'found'      => true,
-        'product_id' => (int) $pid,
-        'total'      => (float) $sum,
+        'product_id' => (int)$pid,
+        'total'      => (float)$sum,
         'lines'      => $rows,
         'dry'        => !empty($opts['dry']),
     ];

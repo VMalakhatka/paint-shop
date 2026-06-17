@@ -1516,58 +1516,22 @@ add_action('lavka_auto_pull_all', function () {
         );
 
         if (!$skus) {
-
-            file_put_contents(
-                WP_CONTENT_DIR . '/lavka-debug.log',
-                date('Y-m-d H:i:s')
-                . " PAGE "
-                . ($page + 1)
-                . " EMPTY\n",
-                FILE_APPEND
-            );
-
             continue;
         }
-
-        file_put_contents(
-            WP_CONTENT_DIR . '/lavka-debug.log',
-            date('Y-m-d H:i:s')
-            . " PAGE START "
-            . ($page + 1)
-            . "/"
-            . $pages
-            . " SKUS="
-            . count($skus)
-            . "\n",
-            FILE_APPEND
-        );
-
-        file_put_contents(
-            WP_CONTENT_DIR.'/lavka-debug.log',
-            date('Y-m-d H:i:s')." BEFORE QUERY PAGE ".($page+1)."\n",
-            FILE_APPEND
-        );
 
         $res = lavka_sync_java_query_and_apply(
             $skus,
             ['dry' => false]
         );
 
-        file_put_contents(
-            WP_CONTENT_DIR.'/lavka-debug.log',
-            date('Y-m-d H:i:s')." AFTER QUERY PAGE ".($page+1)."\n",
-            FILE_APPEND
-        );
-
+        // Log after successful call and before error check
         file_put_contents(
             WP_CONTENT_DIR . '/lavka-debug.log',
             date('Y-m-d H:i:s')
-            . " PAGE END "
+            . " PAGE "
             . ($page + 1)
             . "/"
             . $pages
-            . " OK="
-            . (!empty($res['ok']) ? 'YES' : 'NO')
             . " PROCESSED="
             . (int)($res['processed'] ?? 0)
             . " NOT_FOUND="
@@ -1577,18 +1541,6 @@ add_action('lavka_auto_pull_all', function () {
         );
 
         if (empty($res['ok'])) {
-
-            file_put_contents(
-                WP_CONTENT_DIR . '/lavka-debug.log',
-                date('Y-m-d H:i:s')
-                . " PAGE FAILED "
-                . ($page + 1)
-                . " ERROR="
-                . ($res['error'] ?? 'unknown')
-                . "\n",
-                FILE_APPEND
-            );
-
             continue;
         }
 
@@ -1660,17 +1612,6 @@ add_action('lavka_auto_pull_all', function () {
         }
     }
 
-    file_put_contents(
-        WP_CONTENT_DIR . '/lavka-debug.log',
-        date('Y-m-d H:i:s')
-        . " AUTO FULL END UPDATED="
-        . $updated
-        . " NOT_FOUND="
-        . $notFound
-        . "\n",
-        FILE_APPEND
-    );
-
     $durationMs = (int)round(
         (microtime(true) - $t0) * 1000
     );
@@ -1678,7 +1619,11 @@ add_action('lavka_auto_pull_all', function () {
     file_put_contents(
         WP_CONTENT_DIR . '/lavka-debug.log',
         date('Y-m-d H:i:s')
-        . " BEFORE WRITE duration="
+        . " AUTO FULL END UPDATED="
+        . $updated
+        . " NOT_FOUND="
+        . $notFound
+        . " DURATION="
         . $durationMs
         . "ms\n",
         FILE_APPEND
@@ -1705,26 +1650,6 @@ add_action('lavka_auto_pull_all', function () {
         ], JSON_UNESCAPED_UNICODE),
         'user_id'     => 0,
     ]);
-
-    global $wpdb;
-
-    file_put_contents(
-        WP_CONTENT_DIR . '/lavka-debug.log',
-        date('Y-m-d H:i:s')
-        . " LOG_ID="
-        . (int)$logId
-        . "\n",
-        FILE_APPEND
-    );
-
-    file_put_contents(
-        WP_CONTENT_DIR . '/lavka-debug.log',
-        date('Y-m-d H:i:s')
-        . " DB_ERROR="
-        . ($wpdb->last_error ?: 'NONE')
-        . "\n",
-        FILE_APPEND
-    );
 });
 
 // Auto-runner: incremental movement

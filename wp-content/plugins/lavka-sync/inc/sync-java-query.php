@@ -85,6 +85,14 @@ function lavka_sync_java_query_and_apply(array $skus, array $opts = []): array {
 
     );
     if (is_wp_error($resp)) {
+
+        file_put_contents(
+            WP_CONTENT_DIR.'/lavka-debug.log',
+            date('Y-m-d H:i:s')
+            ." HTTP ERROR=".$resp->get_error_message()."\n",
+            FILE_APPEND
+        );
+        
         return ['ok'=>false, 'error'=>$resp->get_error_message()];
     }
     $code = wp_remote_retrieve_response_code($resp);
@@ -99,51 +107,14 @@ function lavka_sync_java_query_and_apply(array $skus, array $opts = []): array {
     );
     $rawBody = wp_remote_retrieve_body($resp);
 
-    file_put_contents(
-        WP_CONTENT_DIR.'/lavka-debug.log',
-        date('Y-m-d H:i:s')
-        ." BODY LEN=".strlen($rawBody)."\n",
-        FILE_APPEND
-    );
-
-    file_put_contents(
-        WP_CONTENT_DIR.'/lavka-debug.log',
-        date('Y-m-d H:i:s')." BEFORE JSON\n",
-        FILE_APPEND
-    );
-
     $body = json_decode($rawBody, true);
 
-    file_put_contents(
-        WP_CONTENT_DIR.'/lavka-debug.log',
-        date('Y-m-d H:i:s')." AFTER JSON\n",
-        FILE_APPEND
-    );
-    
-    file_put_contents(
-        WP_CONTENT_DIR.'/lavka-debug.log',
-        date('Y-m-d H:i:s')
-        ." JSON OK=".(json_last_error() === JSON_ERROR_NONE ? 'YES' : 'NO')
-        ."\n",
-        FILE_APPEND
-    );
-
-    file_put_contents(
-        WP_CONTENT_DIR.'/lavka-debug.log',
-        date('Y-m-d H:i:s')
-        ." JSON ERROR=".json_last_error_msg()
-        ."\n",
-        FILE_APPEND
-    );
-
-    file_put_contents(
-        WP_CONTENT_DIR.'/lavka-debug.log',
-        date('Y-m-d H:i:s')
-        ." ITEMS=".count($body['items'] ?? [])
-        ."\n",
-        FILE_APPEND
-    );
-
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        return [
+            'ok'    => false,
+            'error' => 'JSON decode error: '.json_last_error_msg()
+        ];
+    }
     if ($code < 200 || $code >= 300) {
         return ['ok'=>false, 'error'=>"Java status $code", 'body'=>$body];
     }
@@ -166,24 +137,10 @@ function lavka_sync_java_query_and_apply(array $skus, array $opts = []): array {
 
         if ($sku && $lines) {
 
-            file_put_contents(
-                WP_CONTENT_DIR . '/lavka-debug.log',
-                date('Y-m-d H:i:s')
-                . " WRITE SKU={$sku} LINES=" . count($lines) . "\n",
-                FILE_APPEND
-            );
-
             $res = lavka_write_stock_for_sku(
                 $sku,
                 $lines,
                 $flags
-            );
-
-            file_put_contents(
-                WP_CONTENT_DIR . '/lavka-debug.log',
-                date('Y-m-d H:i:s')
-                . " WRITE DONE {$sku}\n",
-                FILE_APPEND
             );
 
             $results[] = $res;
