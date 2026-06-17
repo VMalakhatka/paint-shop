@@ -57,6 +57,15 @@ function lavka_sync_java_query_and_apply(array $skus, array $opts = []): array {
         'locations' => $locations,
     ];
     if (defined('WP_DEBUG') && WP_DEBUG) error_log('[lavka] stock query payload: '.wp_json_encode($payload));
+    file_put_contents(
+
+        WP_CONTENT_DIR.'/lavka-debug.log',
+
+        date('Y-m-d H:i:s')." HTTP START\n",
+
+        FILE_APPEND
+
+    );
     $resp = wp_remote_post($url, [
         'timeout' => 160,
         'headers' => [
@@ -66,11 +75,74 @@ function lavka_sync_java_query_and_apply(array $skus, array $opts = []): array {
         ],
         'body' => wp_json_encode($payload),
     ]);
+    file_put_contents(
+
+        WP_CONTENT_DIR.'/lavka-debug.log',
+
+        date('Y-m-d H:i:s')." HTTP FINISH\n",
+
+        FILE_APPEND
+
+    );
     if (is_wp_error($resp)) {
         return ['ok'=>false, 'error'=>$resp->get_error_message()];
     }
     $code = wp_remote_retrieve_response_code($resp);
-    $body = json_decode(wp_remote_retrieve_body($resp), true);
+    file_put_contents(
+
+        WP_CONTENT_DIR.'/lavka-debug.log',
+
+        date('Y-m-d H:i:s')." HTTP CODE=".$code."\n",
+
+        FILE_APPEND
+
+    );
+    $rawBody = wp_remote_retrieve_body($resp);
+
+    file_put_contents(
+        WP_CONTENT_DIR.'/lavka-debug.log',
+        date('Y-m-d H:i:s')
+        ." BODY LEN=".strlen($rawBody)."\n",
+        FILE_APPEND
+    );
+
+    file_put_contents(
+        WP_CONTENT_DIR.'/lavka-debug.log',
+        date('Y-m-d H:i:s')." BEFORE JSON\n",
+        FILE_APPEND
+    );
+
+    $body = json_decode($rawBody, true);
+
+    file_put_contents(
+        WP_CONTENT_DIR.'/lavka-debug.log',
+        date('Y-m-d H:i:s')." AFTER JSON\n",
+        FILE_APPEND
+    );
+    
+    file_put_contents(
+        WP_CONTENT_DIR.'/lavka-debug.log',
+        date('Y-m-d H:i:s')
+        ." JSON OK=".(json_last_error() === JSON_ERROR_NONE ? 'YES' : 'NO')
+        ."\n",
+        FILE_APPEND
+    );
+
+    file_put_contents(
+        WP_CONTENT_DIR.'/lavka-debug.log',
+        date('Y-m-d H:i:s')
+        ." JSON ERROR=".json_last_error_msg()
+        ."\n",
+        FILE_APPEND
+    );
+
+    file_put_contents(
+        WP_CONTENT_DIR.'/lavka-debug.log',
+        date('Y-m-d H:i:s')
+        ." ITEMS=".count($body['items'] ?? [])
+        ."\n",
+        FILE_APPEND
+    );
 
     if ($code < 200 || $code >= 300) {
         return ['ok'=>false, 'error'=>"Java status $code", 'body'=>$body];
