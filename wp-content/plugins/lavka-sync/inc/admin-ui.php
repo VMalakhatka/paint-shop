@@ -1619,7 +1619,7 @@ add_action('lavka_auto_pull_all', function () {
                 gc_collect_cycles();
             }
 
-            wp_cache_flush();
+            // wp_cache_flush();
 
             continue;
         }
@@ -1699,7 +1699,7 @@ add_action('lavka_auto_pull_all', function () {
             gc_collect_cycles();
         }
 
-        wp_cache_flush();
+       // wp_cache_flush();
 
         file_put_contents(
             WP_CONTENT_DIR.'/lavka-debug.log',
