@@ -278,11 +278,24 @@ function lavka_write_stock_for_sku(string $sku, array $lines, array $opts): arra
 
             file_put_contents(
                 WP_CONTENT_DIR.'/lavka-debug.log',
-                date('Y-m-d H:i:s')." META START ".$meta_key_id." SKU=".$sku."\n",
+                date('Y-m-d H:i:s')
+                ." META START ".$meta_key_id
+                ." SKU=".$sku
+                ." PID=".$pid."\n",
                 FILE_APPEND
             );
 
-            update_post_meta(
+            file_put_contents(
+                WP_CONTENT_DIR.'/lavka-debug.log',
+                date('Y-m-d H:i:s')
+                ." MEM BEFORE META="
+                .round(memory_get_usage(true)/1024/1024)
+                ."MB SKU=".$sku
+                ." PID=".$pid."\n",
+                FILE_APPEND
+            );
+
+            $r = update_post_meta(
                 $pid,
                 $meta_key_id,
                 wc_format_decimal($qty, 3)
@@ -290,7 +303,29 @@ function lavka_write_stock_for_sku(string $sku, array $lines, array $opts): arra
 
             file_put_contents(
                 WP_CONTENT_DIR.'/lavka-debug.log',
-                date('Y-m-d H:i:s')." META DONE ".$meta_key_id." SKU=".$sku."\n",
+                date('Y-m-d H:i:s')
+                ." META RESULT="
+                .var_export($r, true)
+                ." SKU=".$sku
+                ." PID=".$pid."\n",
+                FILE_APPEND
+            );
+
+            file_put_contents(
+                WP_CONTENT_DIR.'/lavka-debug.log',
+                date('Y-m-d H:i:s')
+                ." MEM AFTER META="
+                .round(memory_get_usage(true)/1024/1024)
+                ."MB SKU=".$sku
+                ." PID=".$pid."\n",
+                FILE_APPEND
+            );
+
+            file_put_contents(
+                WP_CONTENT_DIR.'/lavka-debug.log',
+                date('Y-m-d H:i:s')
+                ." META DONE ".$meta_key_id
+                ." SKU=".$sku."\n",
                 FILE_APPEND
             );
         }
