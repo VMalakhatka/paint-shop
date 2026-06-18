@@ -371,8 +371,19 @@ function lavka_write_stock_for_sku(string $sku, array $lines, array $opts): arra
                     date('Y-m-d H:i:s')." TRANSIENT START SKU=".$sku."\n",
                     FILE_APPEND
                 );
+                $hooks = has_action('woocommerce_delete_product_transients');
 
-                wc_delete_product_transients($pid);
+                file_put_contents(
+                    WP_CONTENT_DIR.'/lavka-debug.log',
+                    date('Y-m-d H:i:s')." TRANSIENT HOOKS=".$hooks." SKU=".$sku."\n",
+                    FILE_APPEND
+                );
+                file_put_contents(
+                    WP_CONTENT_DIR.'/lavka-debug.log',
+                    date('Y-m-d H:i:s')." TRANSIENT SKIPPED SKU=".$sku."\n",
+                    FILE_APPEND
+                );
+                //wc_delete_product_transients($pid);
 
                 file_put_contents(
                     WP_CONTENT_DIR.'/lavka-debug.log',
