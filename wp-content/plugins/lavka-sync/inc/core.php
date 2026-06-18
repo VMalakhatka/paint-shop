@@ -187,27 +187,36 @@ function lavka_set_primary_location_if_missing(int $product_id, int $term_id): v
  */
 function lavka_write_stock_for_sku(string $sku, array $lines, array $opts): array {
 
-    file_put_contents(
-        WP_CONTENT_DIR.'/lavka-debug.log',
-        date('Y-m-d H:i:s')." ENTER lavka_write_stock_for_sku SKU=".$sku."\n",
-        FILE_APPEND
-    );
+    // file_put_contents(
+    //     WP_CONTENT_DIR.'/lavka-debug.log',
+    //     date('Y-m-d H:i:s')." ENTER lavka_write_stock_for_sku SKU=".$sku."\n",
+    //     FILE_APPEND
+    // );
+
+    // file_put_contents(
+    //     WP_CONTENT_DIR.'/lavka-debug.log',
+    //     date('Y-m-d H:i:s')
+    //     ." ENTER MEM="
+    //     .round(memory_get_usage(true)/1024/1024)
+    //     ."MB SKU=".$sku."\n",
+    //     FILE_APPEND
+    // );
 
     $pid = lavka_find_product_id_by_sku($sku);
 
-    file_put_contents(
-        WP_CONTENT_DIR.'/lavka-debug.log',
-        date('Y-m-d H:i:s')." PRODUCT_ID=".$pid." SKU=".$sku."\n",
-        FILE_APPEND
-    );
+    // file_put_contents(
+    //     WP_CONTENT_DIR.'/lavka-debug.log',
+    //     date('Y-m-d H:i:s')." PRODUCT_ID=".$pid." SKU=".$sku."\n",
+    //     FILE_APPEND
+    // );
 
     if (!$pid) {
 
-        file_put_contents(
-            WP_CONTENT_DIR.'/lavka-debug.log',
-            date('Y-m-d H:i:s')." PRODUCT NOT FOUND SKU=".$sku."\n",
-            FILE_APPEND
-        );
+        // file_put_contents(
+        //     WP_CONTENT_DIR.'/lavka-debug.log',
+        //     date('Y-m-d H:i:s')." PRODUCT NOT FOUND SKU=".$sku."\n",
+        //     FILE_APPEND
+        // );
 
         return ['sku' => $sku, 'found' => false];
     }
@@ -219,11 +228,11 @@ function lavka_write_stock_for_sku(string $sku, array $lines, array $opts): arra
 
     foreach ($lines as $row) {
 
-        file_put_contents(
-            WP_CONTENT_DIR.'/lavka-debug.log',
-            date('Y-m-d H:i:s')." LINE START SKU=".$sku."\n",
-            FILE_APPEND
-        );
+        //  file_put_contents(
+        //     WP_CONTENT_DIR.'/lavka-debug.log',
+        //     date('Y-m-d H:i:s')." LINE START SKU=".$sku."\n",
+        //     FILE_APPEND
+        // );
 
         if (!is_array($row)) continue;
 
@@ -242,11 +251,11 @@ function lavka_write_stock_for_sku(string $sku, array $lines, array $opts): arra
 
             $tid  = (int)($row['term_id'] ?? $row['id']);
 
-            file_put_contents(
-                WP_CONTENT_DIR.'/lavka-debug.log',
-                date('Y-m-d H:i:s')." GET TERM ".$tid." SKU=".$sku."\n",
-                FILE_APPEND
-            );
+            // file_put_contents(
+            //     WP_CONTENT_DIR.'/lavka-debug.log',
+            //     date('Y-m-d H:i:s')." GET TERM ".$tid." SKU=".$sku."\n",
+            //     FILE_APPEND
+            // );
 
             $term = get_term($tid, 'location');
 
@@ -255,11 +264,11 @@ function lavka_write_stock_for_sku(string $sku, array $lines, array $opts): arra
                 $slug = (string)$term->slug;
             } else {
 
-                file_put_contents(
-                    WP_CONTENT_DIR.'/lavka-debug.log',
-                    date('Y-m-d H:i:s')." TERM NOT FOUND ".$tid." SKU=".$sku."\n",
-                    FILE_APPEND
-                );
+                // file_put_contents(
+                //     WP_CONTENT_DIR.'/lavka-debug.log',
+                //     date('Y-m-d H:i:s')." TERM NOT FOUND ".$tid." SKU=".$sku."\n",
+                //     FILE_APPEND
+                // );
 
                 $rows[] = [
                     'ok' => false,
@@ -276,24 +285,24 @@ function lavka_write_stock_for_sku(string $sku, array $lines, array $opts): arra
 
         if (empty($opts['dry'])) {
 
-            file_put_contents(
-                WP_CONTENT_DIR.'/lavka-debug.log',
-                date('Y-m-d H:i:s')
-                ." META START ".$meta_key_id
-                ." SKU=".$sku
-                ." PID=".$pid."\n",
-                FILE_APPEND
-            );
+            // file_put_contents(
+            //     WP_CONTENT_DIR.'/lavka-debug.log',
+            //     date('Y-m-d H:i:s')
+            //     ." META START ".$meta_key_id
+            //     ." SKU=".$sku
+            //     ." PID=".$pid."\n",
+            //     FILE_APPEND
+            // );
 
-            file_put_contents(
-                WP_CONTENT_DIR.'/lavka-debug.log',
-                date('Y-m-d H:i:s')
-                ." MEM BEFORE META="
-                .round(memory_get_usage(true)/1024/1024)
-                ."MB SKU=".$sku
-                ." PID=".$pid."\n",
-                FILE_APPEND
-            );
+            // file_put_contents(
+            //     WP_CONTENT_DIR.'/lavka-debug.log',
+            //     date('Y-m-d H:i:s')
+            //     ." MEM BEFORE META="
+            //     .round(memory_get_usage(true)/1024/1024)
+            //     ."MB SKU=".$sku
+            //     ." PID=".$pid."\n",
+            //     FILE_APPEND
+            // );
 
             $r = update_post_meta(
                 $pid,
@@ -301,42 +310,42 @@ function lavka_write_stock_for_sku(string $sku, array $lines, array $opts): arra
                 wc_format_decimal($qty, 3)
             );
 
-            file_put_contents(
-                WP_CONTENT_DIR.'/lavka-debug.log',
-                date('Y-m-d H:i:s')
-                ." META RESULT="
-                .var_export($r, true)
-                ." SKU=".$sku
-                ." PID=".$pid."\n",
-                FILE_APPEND
-            );
+            // file_put_contents(
+            //     WP_CONTENT_DIR.'/lavka-debug.log',
+            //     date('Y-m-d H:i:s')
+            //     ." META RESULT="
+            //     .var_export($r, true)
+            //     ." SKU=".$sku
+            //     ." PID=".$pid."\n",
+            //     FILE_APPEND
+            // );
 
-            file_put_contents(
-                WP_CONTENT_DIR.'/lavka-debug.log',
-                date('Y-m-d H:i:s')
-                ." MEM AFTER META="
-                .round(memory_get_usage(true)/1024/1024)
-                ."MB SKU=".$sku
-                ." PID=".$pid."\n",
-                FILE_APPEND
-            );
+            // file_put_contents(
+            //     WP_CONTENT_DIR.'/lavka-debug.log',
+            //     date('Y-m-d H:i:s')
+            //     ." MEM AFTER META="
+            //     .round(memory_get_usage(true)/1024/1024)
+            //     ."MB SKU=".$sku
+            //     ." PID=".$pid."\n",
+            //     FILE_APPEND
+            // );
 
-            file_put_contents(
-                WP_CONTENT_DIR.'/lavka-debug.log',
-                date('Y-m-d H:i:s')
-                ." META DONE ".$meta_key_id
-                ." SKU=".$sku."\n",
-                FILE_APPEND
-            );
+            // file_put_contents(
+            //     WP_CONTENT_DIR.'/lavka-debug.log',
+            //     date('Y-m-d H:i:s')
+            //     ." META DONE ".$meta_key_id
+            //     ." SKU=".$sku."\n",
+            //     FILE_APPEND
+            // );
         }
 
         if (!empty($opts['attach_terms']) && empty($opts['dry'])) {
 
-            file_put_contents(
-                WP_CONTENT_DIR.'/lavka-debug.log',
-                date('Y-m-d H:i:s')." TERMS START ".$tid." SKU=".$sku."\n",
-                FILE_APPEND
-            );
+            // file_put_contents(
+            //     WP_CONTENT_DIR.'/lavka-debug.log',
+            //     date('Y-m-d H:i:s')." TERMS START ".$tid." SKU=".$sku."\n",
+            //     FILE_APPEND
+            // );
 
             wp_set_object_terms(
                 $pid,
@@ -345,11 +354,11 @@ function lavka_write_stock_for_sku(string $sku, array $lines, array $opts): arra
                 true
             );
 
-            file_put_contents(
-                WP_CONTENT_DIR.'/lavka-debug.log',
-                date('Y-m-d H:i:s')." TERMS DONE ".$tid." SKU=".$sku."\n",
-                FILE_APPEND
-            );
+            // file_put_contents(
+            //     WP_CONTENT_DIR.'/lavka-debug.log',
+            //     date('Y-m-d H:i:s')." TERMS DONE ".$tid." SKU=".$sku."\n",
+            //     FILE_APPEND
+            // );
         }
 
         $sum += $qty;
@@ -358,18 +367,18 @@ function lavka_write_stock_for_sku(string $sku, array $lines, array $opts): arra
             $first_ok_tid = $tid;
         }
 
-        file_put_contents(
-            WP_CONTENT_DIR.'/lavka-debug.log',
-            date('Y-m-d H:i:s')." LINE DONE SKU=".$sku."\n",
-            FILE_APPEND
-        );
+        // file_put_contents(
+        //     WP_CONTENT_DIR.'/lavka-debug.log',
+        //     date('Y-m-d H:i:s')." LINE DONE SKU=".$sku."\n",
+        //     FILE_APPEND
+        // );
     }
 
-    file_put_contents(
-        WP_CONTENT_DIR.'/lavka-debug.log',
-        date('Y-m-d H:i:s')." TOTAL STOCK START SKU=".$sku."\n",
-        FILE_APPEND
-    );
+    // file_put_contents(
+    //     WP_CONTENT_DIR.'/lavka-debug.log',
+    //     date('Y-m-d H:i:s')." TOTAL STOCK START SKU=".$sku."\n",
+    //     FILE_APPEND
+    // );
 
     if (empty($opts['dry'])) {
 
@@ -379,19 +388,19 @@ function lavka_write_stock_for_sku(string $sku, array $lines, array $opts): arra
             wc_format_decimal($sum, 3)
         );
 
-        file_put_contents(
-            WP_CONTENT_DIR.'/lavka-debug.log',
-            date('Y-m-d H:i:s')." TOTAL STOCK DONE SKU=".$sku."\n",
-            FILE_APPEND
-        );
+        // file_put_contents(
+        //     WP_CONTENT_DIR.'/lavka-debug.log',
+        //     date('Y-m-d H:i:s')." TOTAL STOCK DONE SKU=".$sku."\n",
+        //     FILE_APPEND
+        // );
 
         if (!empty($opts['upd_status'])) {
 
-            file_put_contents(
-                WP_CONTENT_DIR.'/lavka-debug.log',
-                date('Y-m-d H:i:s')." STATUS START SKU=".$sku."\n",
-                FILE_APPEND
-            );
+            // file_put_contents(
+            //     WP_CONTENT_DIR.'/lavka-debug.log',
+            //     date('Y-m-d H:i:s')." STATUS START SKU=".$sku."\n",
+            //     FILE_APPEND
+            // );
 
             update_post_meta(
                 $pid,
@@ -401,40 +410,47 @@ function lavka_write_stock_for_sku(string $sku, array $lines, array $opts): arra
 
             if (function_exists('wc_delete_product_transients')) {
 
-                file_put_contents(
-                    WP_CONTENT_DIR.'/lavka-debug.log',
-                    date('Y-m-d H:i:s')." TRANSIENT START SKU=".$sku."\n",
-                    FILE_APPEND
-                );
-                $hooks = has_action('woocommerce_delete_product_transients');
+                // file_put_contents(
+                //     WP_CONTENT_DIR.'/lavka-debug.log',
+                //     date('Y-m-d H:i:s')." TRANSIENT START SKU=".$sku."\n",
+                //     FILE_APPEND
+                // );
+                has_action('woocommerce_delete_product_transients');
 
-                file_put_contents(
-                    WP_CONTENT_DIR.'/lavka-debug.log',
-                    date('Y-m-d H:i:s')." TRANSIENT HOOKS=".$hooks." SKU=".$sku."\n",
-                    FILE_APPEND
-                );
-                file_put_contents(
-                    WP_CONTENT_DIR.'/lavka-debug.log',
-                    date('Y-m-d H:i:s')." TRANSIENT SKIPPED SKU=".$sku."\n",
-                    FILE_APPEND
-                );
-                //wc_delete_product_transients($pid);
+                // file_put_contents(
+                //     WP_CONTENT_DIR.'/lavka-debug.log',
+                //     date('Y-m-d H:i:s')." TRANSIENT HOOKS=".$hooks." SKU=".$sku."\n",
+                //     FILE_APPEND
+                // );
+                // file_put_contents(
+                //     WP_CONTENT_DIR.'/lavka-debug.log',
+                //     date('Y-m-d H:i:s')." TRANSIENT SKIPPED SKU=".$sku."\n",
+                //     FILE_APPEND
+                // );
+                wc_delete_product_transients($pid);
 
-                file_put_contents(
-                    WP_CONTENT_DIR.'/lavka-debug.log',
-                    date('Y-m-d H:i:s')." TRANSIENT DONE SKU=".$sku."\n",
-                    FILE_APPEND
-                );
+                // file_put_contents(
+                //     WP_CONTENT_DIR.'/lavka-debug.log',
+                //     date('Y-m-d H:i:s')." TRANSIENT DONE SKU=".$sku."\n",
+                //     FILE_APPEND
+                // );
             }
         }
     }
 
-    file_put_contents(
-        WP_CONTENT_DIR.'/lavka-debug.log',
-        date('Y-m-d H:i:s')." EXIT lavka_write_stock_for_sku SKU=".$sku."\n",
-        FILE_APPEND
-    );
-
+    // file_put_contents(
+    //     WP_CONTENT_DIR.'/lavka-debug.log',
+    //     date('Y-m-d H:i:s')." EXIT lavka_write_stock_for_sku SKU=".$sku."\n",
+    //     FILE_APPEND
+    // );
+    // file_put_contents(
+    //     WP_CONTENT_DIR.'/lavka-debug.log',
+    //     date('Y-m-d H:i:s')
+    //     ." EXIT MEM="
+    //     .round(memory_get_usage(true)/1024/1024)
+    //     ."MB SKU=".$sku."\n",
+    //     FILE_APPEND
+    // );
     return [
         'sku'        => $sku,
         'found'      => true,

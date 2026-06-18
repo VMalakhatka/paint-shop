@@ -1502,11 +1502,11 @@ add_action('lavka_auto_pull_all', function () {
     $updated = 0;
     $notFound = 0;
 
-    // $detUpdated = [];
-    // $detNotFound = [];
+    $detUpdated = [];
+    $detNotFound = [];
 
-    // $TRUNCATE_LIMIT = 300;
-    // $truncated = false;
+    $TRUNCATE_LIMIT = 300;
+    $truncated = false;
 
     for ($page = 0; $page < $pages; $page++) {
 
@@ -1627,72 +1627,72 @@ add_action('lavka_auto_pull_all', function () {
         $updated += (int)($res['processed'] ?? 0);
         $notFound += (int)($res['not_found'] ?? 0);
 
-        // $updatedRows = [];
-        // $notFoundRows = [];
+        $updatedRows = [];
+        $notFoundRows = [];
 
-        // foreach (($res['results'] ?? []) as $row) {
+        foreach (($res['results'] ?? []) as $row) {
 
-        //     $sku = (string)($row['sku'] ?? '');
+            $sku = (string)($row['sku'] ?? '');
 
-        //     if ($sku === '') {
-        //         continue;
-        //     }
+            if ($sku === '') {
+                continue;
+            }
 
-        //     if (!empty($row['found'])) {
+            if (!empty($row['found'])) {
 
-        //         if (count($updatedRows) < $TRUNCATE_LIMIT) {
+                if (count($updatedRows) < $TRUNCATE_LIMIT) {
 
-        //             $updatedRows[] = [
-        //                 $sku,
-        //                 $row['total'] ?? null,
-        //                 isset($row['lines'])
-        //                     ? wp_json_encode($row['lines'])
-        //                     : ''
-        //             ];
+                    $updatedRows[] = [
+                        $sku,
+                        $row['total'] ?? null,
+                        isset($row['lines'])
+                            ? wp_json_encode($row['lines'])
+                            : ''
+                    ];
 
-        //         } else {
+                } else {
 
-        //             $truncated = true;
-        //         }
+                    $truncated = true;
+                }
 
-        //     } else {
+            } else {
 
-        //         if (count($notFoundRows) < $TRUNCATE_LIMIT) {
+                if (count($notFoundRows) < $TRUNCATE_LIMIT) {
 
-        //             $notFoundRows[] = [$sku];
+                    $notFoundRows[] = [$sku];
 
-        //         } else {
+                } else {
 
-        //             $truncated = true;
-        //         }
-        //     }
-        // }
+                    $truncated = true;
+                }
+            }
+        }
 
-        // if (!$truncated) {
+        if (!$truncated) {
 
-        //     foreach ($updatedRows as $r) {
+            foreach ($updatedRows as $r) {
 
-        //         if (count($detUpdated) < $TRUNCATE_LIMIT) {
-        //             $detUpdated[] = $r;
-        //         } else {
-        //             $truncated = true;
-        //             break;
-        //         }
-        //     }
+                if (count($detUpdated) < $TRUNCATE_LIMIT) {
+                    $detUpdated[] = $r;
+                } else {
+                    $truncated = true;
+                    break;
+                }
+            }
 
-        //     foreach ($notFoundRows as $r) {
+            foreach ($notFoundRows as $r) {
 
-        //         if (count($detNotFound) < $TRUNCATE_LIMIT) {
-        //             $detNotFound[] = $r;
-        //         } else {
-        //             $truncated = true;
-        //             break;
-        //         }
-            // }
-        // }
+                if (count($detNotFound) < $TRUNCATE_LIMIT) {
+                    $detNotFound[] = $r;
+                } else {
+                    $truncated = true;
+                    break;
+                }
+            }
+        }
         unset($skus);
-        // unset($updatedRows);
-        // unset($notFoundRows);
+        unset($updatedRows);
+        unset($notFoundRows);
         unset($res);
 
         if (function_exists('gc_collect_cycles')) {
@@ -1751,8 +1751,8 @@ add_action('lavka_auto_pull_all', function () {
             $pages
         ),
         'errors'      => wp_json_encode([
-            // 'updated'   => $detUpdated,
-            // 'not_found' => $detNotFound,
+            'updated'   => $detUpdated,
+            'not_found' => $detNotFound,
             'truncated' => $truncated ? 1 : 0,
         ], JSON_UNESCAPED_UNICODE),
         'user_id'     => 0,
