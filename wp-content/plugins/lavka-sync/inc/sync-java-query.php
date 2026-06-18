@@ -9,6 +9,30 @@ if (!defined('ABSPATH')) exit;
 function lavka_sync_java_query_and_apply(array $skus, array $opts = []): array {
     $o = lavka_sync_get_options();
 
+     static $cache_logged = false;
+
+    if (!$cache_logged) {
+
+        $cache_logged = true;
+
+        file_put_contents(
+
+            WP_CONTENT_DIR.'/lavka-debug.log',
+
+            date('Y-m-d H:i:s')
+
+            ." CACHE CLASS="
+
+            .get_class($GLOBALS['wp_object_cache'])
+
+            ."\n",
+
+            FILE_APPEND
+
+        );
+
+    }
+
     // 1) Нормализуем SKU
     $skus = array_values(array_filter(array_unique(array_map(function($s){
         $s = trim((string)$s);

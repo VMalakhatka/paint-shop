@@ -1709,6 +1709,18 @@ add_action('lavka_auto_pull_all', function () {
             ."MB PAGE=".($page + 1)."\n",
             FILE_APPEND
         );
+        if (isset($GLOBALS['wp_object_cache']->cache)) {
+
+            file_put_contents(
+                WP_CONTENT_DIR.'/lavka-debug.log',
+                date('Y-m-d H:i:s')
+                ." OBJECT CACHE GROUPS="
+                .count($GLOBALS['wp_object_cache']->cache)
+                ."\n",
+                FILE_APPEND
+            );
+        }
+
         file_put_contents(
             WP_CONTENT_DIR.'/lavka-debug.log',
             date('Y-m-d H:i:s')
