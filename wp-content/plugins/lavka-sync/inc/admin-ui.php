@@ -1567,7 +1567,14 @@ add_action('lavka_auto_pull_all', function () {
             $skus,
             ['dry' => false]
         );
-
+        file_put_contents(
+            WP_CONTENT_DIR.'/lavka-debug.log',
+            date('Y-m-d H:i:s')
+            ." PAGE MEMORY AFTER JAVA="
+            .round(memory_get_usage(true)/1024/1024)
+            ."MB PAGE=".($page + 1)."\n",
+            FILE_APPEND
+        );
         file_put_contents(
             WP_CONTENT_DIR . '/lavka-debug.log',
             date('Y-m-d H:i:s')
@@ -1579,6 +1586,14 @@ add_action('lavka_auto_pull_all', function () {
             FILE_APPEND
         );
 
+        file_put_contents(
+            WP_CONTENT_DIR.'/lavka-debug.log',
+            date('Y-m-d H:i:s')
+            ." PAGE MEMORY="
+            .round(memory_get_usage(true)/1024/1024)
+            ."MB PAGE=".($page + 1)."\n",
+            FILE_APPEND
+        );
         // Log after successful call and before error check
         file_put_contents(
             WP_CONTENT_DIR . '/lavka-debug.log',
@@ -1596,6 +1611,16 @@ add_action('lavka_auto_pull_all', function () {
         );
 
         if (empty($res['ok'])) {
+
+            unset($skus);
+            unset($res);
+
+            if (function_exists('gc_collect_cycles')) {
+                gc_collect_cycles();
+            }
+
+            wp_cache_flush();
+
             continue;
         }
 
@@ -1665,6 +1690,33 @@ add_action('lavka_auto_pull_all', function () {
                 }
             }
         }
+        unset($skus);
+        unset($updatedRows);
+        unset($notFoundRows);
+        unset($res);
+
+        if (function_exists('gc_collect_cycles')) {
+            gc_collect_cycles();
+        }
+
+        wp_cache_flush();
+
+        file_put_contents(
+            WP_CONTENT_DIR.'/lavka-debug.log',
+            date('Y-m-d H:i:s')
+            ." PAGE MEMORY AFTER GC="
+            .round(memory_get_usage(true)/1024/1024)
+            ."MB PAGE=".($page + 1)."\n",
+            FILE_APPEND
+        );
+        file_put_contents(
+            WP_CONTENT_DIR.'/lavka-debug.log',
+            date('Y-m-d H:i:s')
+            ." PEAK MEMORY="
+            .round(memory_get_peak_usage(true)/1024/1024)
+            ."MB PAGE=".($page + 1)."\n",
+            FILE_APPEND
+        );
     }
 
     $durationMs = (int)round(
