@@ -1510,18 +1510,73 @@ add_action('lavka_auto_pull_all', function () {
 
     for ($page = 0; $page < $pages; $page++) {
 
+        file_put_contents(
+
+            WP_CONTENT_DIR . '/lavka-debug.log',
+
+            date('Y-m-d H:i:s')
+
+            . " PAGE LOOP START "
+
+            . ($page + 1)
+
+            . "/"
+
+            . $pages
+
+            . "\n",
+
+            FILE_APPEND
+
+        );
+
         $skus = lavka_get_skus_slice(
             $page * $batch,
             $batch
+        );
+
+        file_put_contents(
+            WP_CONTENT_DIR . '/lavka-debug.log',
+            date('Y-m-d H:i:s')
+            . " PAGE GOT SKUS "
+            . ($page + 1)
+            . "/"
+            . $pages
+            . " COUNT="
+            . count($skus)
+            . "\n",
+            FILE_APPEND
         );
 
         if (!$skus) {
             continue;
         }
 
+        file_put_contents(
+            WP_CONTENT_DIR . '/lavka-debug.log',
+            date('Y-m-d H:i:s')
+            . " PAGE JAVA START "
+            . ($page + 1)
+            . "/"
+            . $pages
+            . "\n",
+            FILE_APPEND
+        );
+
         $res = lavka_sync_java_query_and_apply(
             $skus,
             ['dry' => false]
+        );
+
+        file_put_contents(
+            WP_CONTENT_DIR . '/lavka-debug.log',
+            date('Y-m-d H:i:s')
+            . " PAGE JAVA END "
+            . ($page + 1)
+            . "/"
+            . $pages
+            . "\n",
+            FILE_APPEND
         );
 
         // Log after successful call and before error check
