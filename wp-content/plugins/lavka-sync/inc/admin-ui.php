@@ -1703,6 +1703,12 @@ add_action('wp_ajax_lavka_auto_get', function () {
         ARRAY_A
     );
 
+    if (!empty($last_run['ts'])) {
+        $dt = new DateTime($last_run['ts'], new DateTimeZone('UTC'));
+        $dt->setTimezone(wp_timezone());
+        $last_run['ts'] = $dt->format('Y-m-d H:i:s');
+    }
+
     wp_send_json_success([
         'enabled'  => (bool)$cfg['enabled'],
         'mode'     => (string)$cfg['mode'],
@@ -1880,7 +1886,11 @@ function lavka_logs_render_page() {
         <?php if ($rows): foreach ($rows as $r): ?>
           <tr>
             <td><?php echo (int)$r['id']; ?></td>
-            <td><?php echo esc_html($r['ts']); ?></td>
+            <td><?php
+$dt = new DateTime($r['ts'], new DateTimeZone('UTC'));
+$dt->setTimezone(wp_timezone());
+echo esc_html($dt->format('Y-m-d H:i:s'));
+?></td>
             <td><?php echo esc_html($r['action']); ?></td>
             <td><?php echo esc_html($r['supplier']); ?></td>
             <td><?php echo (int)$r['stock_id']; ?></td>
