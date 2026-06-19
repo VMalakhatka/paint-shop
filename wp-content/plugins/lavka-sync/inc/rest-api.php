@@ -385,7 +385,24 @@ function lavka_sync_java_movement_apply_loop(array $args = []): array {
     for ($p = 0; $p < 100000; $p++) {
         $call = lavka_java_movement_page($fromIso, $p, $pageSize);
         if (empty($call['ok'])) {
-            return ['ok'=>false, 'error'=>$call['error'] ?? 'movement_error', 'page'=>$p];
+
+            $err = $call['error'] ?? 'movement_error';
+
+            unset($call);
+
+            if (isset($GLOBALS['wp_object_cache']->cache)) {
+                $GLOBALS['wp_object_cache']->cache = [];
+            }
+
+            if (function_exists('gc_collect_cycles')) {
+                gc_collect_cycles();
+            }
+
+            return [
+                'ok'    => false,
+                'error' => $err,
+                'page'  => $p
+            ];
         }
         $d = $call['data'] ?: [];
         $serverFrom = $d['serverFrom'] ?? $serverFrom;
@@ -427,7 +444,25 @@ function lavka_sync_java_movement_apply_loop(array $args = []): array {
         }
 
         $pages++;
-        if (!empty($d['last'])) break;
+
+        $isLast = !empty($d['last']);
+
+        unset($skus);
+        unset($res);
+        unset($call);
+        unset($d);
+
+        if (isset($GLOBALS['wp_object_cache']->cache)) {
+            $GLOBALS['wp_object_cache']->cache = [];
+        }
+
+        if (function_exists('gc_collect_cycles')) {
+            gc_collect_cycles();
+        }
+
+        if ($isLast) {
+            break;
+        }
     }
 
     if ($serverTo && !$dry) {

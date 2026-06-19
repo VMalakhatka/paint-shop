@@ -1040,6 +1040,14 @@ add_action('wp_ajax_lavka_pull_java', function(){
     // ВАЖНО: дергаем именно lavka_sync_java_query_and_apply (POST /admin/stock/stock/query)
     $res = lavka_sync_java_query_and_apply($skus, ['dry'=>$dry]);
 
+    if (empty($res['ok'])) {
+        return [
+            'ok'    => false,
+            'error' => $res['error'] ?? 'apply_failed',
+            'page'  => $p ?? 0,
+        ];
+    }
+    
     $updatedRows   = [];
     $notFoundRows  = [];
     $TRUNCATE_LIMIT = 300;
