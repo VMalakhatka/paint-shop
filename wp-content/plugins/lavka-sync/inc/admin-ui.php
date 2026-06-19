@@ -329,37 +329,134 @@ function lavka_get_locations_mapping_for_java(): array {
 
 /**
  * Рассчитать значение from (ISO8601) для /stock/movement.
+ *
+ * Логика:
+ * 1. Есть last_server_to -> берём его минус overlap.
+ * 2. Нет last_server_to -> пытаемся взять время последнего FULL.
+ * 3. Никогда не уходим глубже чем на 3 суток назад.
+ */
+
+function lavka_calc_movement_from(array $auto_cfg, ?string $last_server_to_iso): string {
+
+    global $wpdb;
+    $now = time();
+
+    // Жёсткий лимит окна
+    $maxWindow = 3 * DAY_IN_SECONDS;
+
+    // Базовый интервал по расписанию
+    switch ($auto_cfg['mode'] ?? 'interval') {
+        case 'interval':
+            $base = max(300, (int)$auto_cfg['interval'] * 60);
+            break;
+        case 'daily':
+            $base = DAY_IN_SECONDS;
+            break;
+        case 'weekly':
+            $base = WEEK_IN_SECONDS;
+            break;
+        case 'dates':
+            $base = 30 * DAY_IN_SECONDS;
+            break;
+        default:
+            $base = HOUR_IN_SECONDS;
+    }
+
+    // overlap минимум 5 минут
+    $overlap = max(
+        300,
+        (int)round($base * (LAVKA_MOV_OVERLAP_PCT / 100))
+    );
+
+    // никогда не больше 3 суток
+    $overlap = min($overlap, $maxWindow);
+
+    /*
+     * Вариант №1:
+     * есть сохранённый serverTo
+     */
+    if (!empty($last_server_to_iso)) {
+        $toTs = strtotime($last_server_to_iso);
+        if ($toTs) {
+            $fromTs = $toTs - $overlap;
+
+            // защита от слишком старого окна
+            $fromTs = max(
+                $fromTs,
+                $now - $maxWindow
+            );
+            return gmdate('c', $fromTs);
+        }
+    }
+
+    /*
+     * Вариант №2:
+     * нет serverTo -> ищем последний FULL
+     */
+    $fullTs = $wpdb->get_var(
+        "
+        SELECT ts
+        FROM {$wpdb->prefix}lavka_sync_logs
+        WHERE action = 'auto_pull_all'
+          AND status = 'OK'
+        ORDER BY id DESC
+        LIMIT 1
+        "
+    );
+    if (!empty($fullTs)) {
+        $fullUnix = strtotime($fullTs);
+        if ($fullUnix) {
+            $fromTs = max(
+                $fullUnix,
+                $now - $maxWindow
+            );
+            return gmdate('c', $fromTs);
+        }
+    }
+    /*
+     * Вариант №3:
+     * совсем первый запуск
+     */
+    return gmdate(
+        'c', $now - 3 * DAY_IN_SECONDS
+    );
+
+}
+
+
+/**
+ * Рассчитать значение from (ISO8601) для /stock/movement.
  * Если есть сохранённый last serverTo — берём его и даём overlap (>=5 мин).
  * Иначе — берём длину окна по режиму авто и добавляем +20%.
  */
-function lavka_calc_movement_from(array $auto_cfg, ?string $last_server_to_iso): string {
-    $now = time();
+// function lavka_calc_movement_from(array $auto_cfg, ?string $last_server_to_iso): string {
+//     $now = time();
 
-    if ($last_server_to_iso) {
-        $to = strtotime($last_server_to_iso) ?: $now;
-        $base = 0;
-        switch ($auto_cfg['mode'] ?? 'interval') {
-            case 'interval': $base = max(300, (int)$auto_cfg['interval'] * 60); break;
-            case 'daily':    $base = 24*3600; break;
-            case 'weekly':   $base = 7*24*3600; break;
-            case 'dates':    $base = 30*24*3600; break;
-            default:         $base = 3600;
-        }
-        $overlap = max(300, (int)round($base * (LAVKA_MOV_OVERLAP_PCT/100)));
-        return gmdate('c', $to - $overlap);
-    }
+//     if ($last_server_to_iso) {
+//         $to = strtotime($last_server_to_iso) ?: $now;
+//         $base = 0;
+//         switch ($auto_cfg['mode'] ?? 'interval') {
+//             case 'interval': $base = max(300, (int)$auto_cfg['interval'] * 60); break;
+//             case 'daily':    $base = 24*3600; break;
+//             case 'weekly':   $base = 7*24*3600; break;
+//             case 'dates':    $base = 30*24*3600; break;
+//             default:         $base = 3600;
+//         }
+//         $overlap = max(300, (int)round($base * (LAVKA_MOV_OVERLAP_PCT/100)));
+//         return gmdate('c', $to - $overlap);
+//     }
 
-    // fallback: окно расписания +20%
-    switch ($auto_cfg['mode'] ?? 'interval') {
-        case 'interval': $win = max(300, (int)$auto_cfg['interval']*60); break;
-        case 'daily':    $win = 24*3600; break;
-        case 'weekly':   $win = 7*24*3600; break;
-        case 'dates':    $win = 30*24*3600; break;
-        default:         $win = 3600;
-    }
-    $fromTs = $now - (int)round($win * (1 + LAVKA_MOV_OVERLAP_PCT/100));
-    return gmdate('c', $fromTs);
-}
+//     // fallback: окно расписания +20%
+//     switch ($auto_cfg['mode'] ?? 'interval') {
+//         case 'interval': $win = max(300, (int)$auto_cfg['interval']*60); break;
+//         case 'daily':    $win = 24*3600; break;
+//         case 'weekly':   $win = 7*24*3600; break;
+//         case 'dates':    $win = 30*24*3600; break;
+//         default:         $win = 3600;
+//     }
+//     $fromTs = $now - (int)round($win * (1 + LAVKA_MOV_OVERLAP_PCT/100));
+//     return gmdate('c', $fromTs);
+// }
 
 function lavka_sync_render_page() {
     if (!current_user_can('manage_lavka_sync')) return;
