@@ -1614,11 +1614,20 @@ add_action('lavka_auto_pull_all', function () {
 
             unset($skus);
             unset($res);
+            if (isset($GLOBALS['wp_object_cache']->cache)) {
 
+                $GLOBALS['wp_object_cache']->cache = [];
+
+            }
             if (function_exists('gc_collect_cycles')) {
                 gc_collect_cycles();
             }
-
+            file_put_contents(
+                WP_CONTENT_DIR.'/lavka-debug.log',
+                date('Y-m-d H:i:s')
+                ." OBJECT CACHE CLEARED\n",
+                FILE_APPEND
+            );
             // wp_cache_flush();
 
             continue;
@@ -1695,9 +1704,23 @@ add_action('lavka_auto_pull_all', function () {
         unset($notFoundRows);
         unset($res);
 
+     
+
+         if (isset($GLOBALS['wp_object_cache']->cache)) {
+
+                $GLOBALS['wp_object_cache']->cache = [];
+
+        }
+        
         if (function_exists('gc_collect_cycles')) {
             gc_collect_cycles();
         }
+            file_put_contents(
+                WP_CONTENT_DIR.'/lavka-debug.log',
+                date('Y-m-d H:i:s')
+                ." OBJECT CACHE CLEARED\n",
+                FILE_APPEND
+            );
 
        // wp_cache_flush();
 
