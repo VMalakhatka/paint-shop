@@ -1850,11 +1850,13 @@ add_action('wp_ajax_lavka_auto_get_full', function () {
         $last_run['ts'] = $dt->format('Y-m-d H:i:s');
     }
 
-    wp_send_json_success([
-        'cfg'      => $cfg,
-        'next_ts'  => $next ?: null,
-        'last_run' => $last_run ?: null,
-    ]);
+    wp_send_json_success(array_merge(
+        $cfg,
+        [
+            'next_ts'  => $next ?: null,
+            'last_run' => $last_run ?: null,
+        ]
+    ));
 });
 
 add_action('wp_ajax_lavka_auto_get_movement', function () {
@@ -1888,12 +1890,14 @@ add_action('wp_ajax_lavka_auto_get_movement', function () {
         $last_run['ts'] = $dt->format('Y-m-d H:i:s');
     }
 
-    wp_send_json_success([
-        'cfg'       => $cfg,
-        'next_ts'   => $next ?: null,
-        'last_run'  => $last_run ?: null,
-        'last_to'   => get_option(LAVKA_LAST_TO_OPTION, '') ?: null,
-    ]);
+    wp_send_json_success(array_merge(
+        $cfg,
+        [
+            'next_ts'  => $next ?: null,
+            'last_run' => $last_run ?: null,
+            'last_to'  => get_option(LAVKA_LAST_TO_OPTION, '') ?: null,
+        ]
+    ));
 });
 
 /*
