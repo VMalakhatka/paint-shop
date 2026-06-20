@@ -12,7 +12,8 @@ if (!defined('ABSPATH')) exit;
 if (!defined('LAVKA_SYNC_OPTION')) define('LAVKA_SYNC_OPTION', 'lavka_sync_options');
 if (!defined('LAVKA_BATCH_MIN')) define('LAVKA_BATCH_MIN', 10);
 if (!defined('LAVKA_BATCH_MAX')) define('LAVKA_BATCH_MAX', 1000);
-if (!defined('LAVKA_AUTO_OPTION')) define('LAVKA_AUTO_OPTION', 'lavka_sync_auto');
+define('LAVKA_AUTO_FULL_OPTION', 'lavka_sync_auto_full');
+define('LAVKA_AUTO_MOV_OPTION',  'lavka_sync_auto_movement');
 // Movement / incremental sync
 if (!defined('LAVKA_LAST_TO_OPTION'))  define('LAVKA_LAST_TO_OPTION', 'lavka_sync_last_to'); // хранит последний serverTo
 if (!defined('LAVKA_MOV_DEF_PAGESIZE')) define('LAVKA_MOV_DEF_PAGESIZE', 500);
@@ -20,6 +21,43 @@ if (!defined('LAVKA_MOV_MAX_PAGESIZE')) define('LAVKA_MOV_MAX_PAGESIZE', 2000);
 if (!defined('LAVKA_MOV_OVERLAP_PCT'))  define('LAVKA_MOV_OVERLAP_PCT', 20); // overlap +20%
 if (!defined('LAVKA_MOV_EMPTY_BREAK')) define('LAVKA_MOV_EMPTY_BREAK', 2); // после 2 пустых подряд — стоп
 
+function lavka_get_auto_full_cfg(): array {
+
+    $cfg = get_option(LAVKA_AUTO_FULL_OPTION, []);
+
+    return wp_parse_args(is_array($cfg) ? $cfg : [], [
+
+        'enabled'  => false,
+
+        'mode'     => 'off',
+
+        'interval' => 60,
+
+        'time'     => '03:00',
+
+        'days'     => [1],
+
+        'dates'    => [],
+
+        'batch'    => 200,
+
+    ]);
+
+}
+
+function lavka_get_auto_mov_cfg(): array {
+    $cfg = get_option(LAVKA_AUTO_MOV_OPTION, []);
+
+    return wp_parse_args(is_array($cfg) ? $cfg : [], [
+        'enabled'  => false,
+        'mode'     => 'off',
+        'interval' => 60,
+        'time'     => '03:00',
+        'days'     => [1],
+        'dates'    => [],
+        'batch'    => 500,
+    ]);
+}
 
 /** Меню + страница настроек */
 add_action('admin_menu', function () {
@@ -1469,20 +1507,6 @@ add_action('wp_ajax_lavka_pull_java_all_page', function () {
     ]);
 });
 
-// === Auto-sync config helpers ===
-function lavka_get_auto_cfg(): array {
-    $cfg = get_option(LAVKA_AUTO_OPTION, []);
-    return wp_parse_args(is_array($cfg) ? $cfg : [], [
-        'enabled'  => false,
-        'mode'     => 'off',     // off|interval|daily|weekly|dates
-        'interval' => 60,        // minutes
-        'time'     => '03:00',   // HH:MM
-        'days'     => [1],       // 0..6 (Sun..Sat)
-        'dates'    => [],        // [1..28]
-        'batch'    => 200,
-        'strategy' => 'full', // full | movement
-    ]);
-}
 
 function lavka_calc_next_ts(array $cfg, ?int $from_ts = null): int {
     $from = $from_ts ?: time();
@@ -1545,7 +1569,7 @@ function lavka_calc_next_ts(array $cfg, ?int $from_ts = null): int {
 
 // Schedule runner: processes ALL SKUs by pages with mapping
 add_action('lavka_auto_pull_all', function () {
-    $cfg = lavka_get_auto_cfg();
+    $cfg = lavka_get_auto_full_cfg();
 
     if (empty($cfg['enabled'])) {
         return;
@@ -1724,7 +1748,7 @@ add_action('lavka_auto_pull_all', function () {
 // Auto-runner: incremental movement
 add_action('lavka_auto_pull_movement', function () {
 
-    $cfg = lavka_get_auto_cfg();
+    $cfg = lavka_get_auto_mov_cfg();
 
     if (empty($cfg['enabled'])) {
 
@@ -1788,20 +1812,32 @@ add_action('lavka_auto_pull_movement', function () {
     ]);
 });
 
+/*
+ * TODO: split into:
+ * - wp_ajax_lavka_auto_get_full
+ * - wp_ajax_lavka_auto_get_movement
+ * after UI migration.
+ */
 // AJAX: загрузить текущие настройки автосинка
-add_action('wp_ajax_lavka_auto_get', function () {
-    if (!current_user_can('manage_lavka_sync')) wp_send_json_error(['error'=>'forbidden'], 403);
+add_action('wp_ajax_lavka_auto_get_full', function () {
+
+    if (!current_user_can('manage_lavka_sync')) {
+        wp_send_json_error(['error'=>'forbidden'], 403);
+    }
+
     check_ajax_referer('lavka_auto_nonce');
 
-    $cfg = lavka_get_auto_cfg();
+    $cfg = lavka_get_auto_full_cfg();
+
     $next = lavka_calc_next_ts($cfg, time());
+
     global $wpdb;
 
     $last_run = $wpdb->get_row(
         "
         SELECT ts, action, updated, not_found
         FROM {$wpdb->prefix}lavka_sync_logs
-        WHERE action IN ('auto_pull_all','auto_movement')
+        WHERE action='auto_pull_all'
         ORDER BY id DESC
         LIMIT 1
         ",
@@ -1815,20 +1851,57 @@ add_action('wp_ajax_lavka_auto_get', function () {
     }
 
     wp_send_json_success([
-        'enabled'  => (bool)$cfg['enabled'],
-        'mode'     => (string)$cfg['mode'],
-        'interval' => (int)$cfg['interval'],
-        'time'     => (string)$cfg['time'],
-        'days'     => array_values(array_map('intval', (array)$cfg['days'])),
-        'dates'    => array_values(array_map('intval', (array)$cfg['dates'])),
-        'batch'    => (int)$cfg['batch'],
+        'cfg'      => $cfg,
         'next_ts'  => $next ?: null,
-        'strategy' => (string)($cfg['strategy'] ?? 'full'),
-        'last_to'  => get_option(LAVKA_LAST_TO_OPTION, '') ?: null,
         'last_run' => $last_run ?: null,
-    ]); 
+    ]);
 });
 
+add_action('wp_ajax_lavka_auto_get_movement', function () {
+
+    if (!current_user_can('manage_lavka_sync')) {
+        wp_send_json_error(['error'=>'forbidden'], 403);
+    }
+
+    check_ajax_referer('lavka_auto_nonce');
+
+    $cfg = lavka_get_auto_mov_cfg();
+
+    $next = lavka_calc_next_ts($cfg, time());
+
+    global $wpdb;
+
+    $last_run = $wpdb->get_row(
+        "
+        SELECT ts, action, updated, not_found
+        FROM {$wpdb->prefix}lavka_sync_logs
+        WHERE action='auto_movement'
+        ORDER BY id DESC
+        LIMIT 1
+        ",
+        ARRAY_A
+    );
+
+    if (!empty($last_run['ts'])) {
+        $dt = new DateTime($last_run['ts'], new DateTimeZone('UTC'));
+        $dt->setTimezone(wp_timezone());
+        $last_run['ts'] = $dt->format('Y-m-d H:i:s');
+    }
+
+    wp_send_json_success([
+        'cfg'       => $cfg,
+        'next_ts'   => $next ?: null,
+        'last_run'  => $last_run ?: null,
+        'last_to'   => get_option(LAVKA_LAST_TO_OPTION, '') ?: null,
+    ]);
+});
+
+/*
+ * TODO: split into:
+ * - wp_ajax_lavka_auto_save_full
+ * - wp_ajax_lavka_auto_save_movement
+ * after UI migration.
+ */
 // AJAX: сохранить настройки и перепланировать
 add_action('wp_ajax_lavka_auto_save', function () {
     if (!current_user_can('manage_lavka_sync')) wp_send_json_error(['error'=>'forbidden'], 403);
@@ -1873,7 +1946,7 @@ add_action('wp_ajax_lavka_auto_save', function () {
         'batch'    => $batch,
         'strategy' => $strategy, // <<< НОВОЕ
     ];
-    update_option(LAVKA_AUTO_OPTION, $cfg, false);
+    update_option(LAVKA_AUTO_FULL_OPTION, $cfg, false);
 
     // Снимаем предыдущие хуки и планируем НУЖНЫЙ
     wp_clear_scheduled_hook('lavka_auto_pull_all');
@@ -1896,6 +1969,146 @@ add_action('wp_ajax_lavka_auto_save', function () {
 register_deactivation_hook(__FILE__, function () {
     wp_clear_scheduled_hook('lavka_auto_pull_all');
     wp_clear_scheduled_hook('lavka_auto_pull_movement'); // <<< НОВОЕ
+});
+
+add_action('wp_ajax_lavka_auto_save_full', function () {
+    if (!current_user_can('manage_lavka_sync')) {
+        wp_send_json_error(['error'=>'forbidden'], 403);
+    }
+
+    check_ajax_referer('lavka_auto_nonce');
+
+    $enabled  = !empty($_POST['enabled']);
+    $mode     = sanitize_text_field($_POST['mode'] ?? 'off');
+    $interval = max(5, min(1440, (int)($_POST['interval'] ?? 60)));
+
+    $time = preg_replace('/[^0-9:]/', '', (string)($_POST['time'] ?? '03:00'));
+    if (preg_match('/^(\d{1,2}):(\d{1,2})$/', $time, $m)) {
+        $h   = str_pad((string)min(23, (int)$m[1]), 2, '0', STR_PAD_LEFT);
+        $min = str_pad((string)min(59, (int)$m[2]), 2, '0', STR_PAD_LEFT);
+        $time = "$h:$min";
+    } else {
+        $time = '03:00';
+    }
+
+    $batch = max(LAVKA_BATCH_MIN, min(LAVKA_BATCH_MAX, (int)($_POST['batch'] ?? 200)));
+
+    $days = array_map('intval', (array)($_POST['days'] ?? []));
+    $days = array_values(array_filter($days, fn($d) => $d >= 0 && $d <= 6));
+
+    $dates_raw = $_POST['dates'] ?? '';
+    if (is_array($dates_raw)) {
+        $dates = array_map('intval', $dates_raw);
+    } else {
+        $dates = array_map('intval', preg_split('/[^\d]+/', (string)$dates_raw, -1, PREG_SPLIT_NO_EMPTY));
+    }
+    $dates = array_values(array_filter($dates, fn($d) => $d >= 1 && $d <= 28));
+
+    $cfg = [
+        'enabled'  => $enabled,
+        'mode'     => in_array($mode, ['off','interval','daily','weekly','dates'], true) ? $mode : 'off',
+        'interval' => $interval,
+        'time'     => $time,
+        'days'     => $days,
+        'dates'    => $dates,
+        'batch'    => $batch,
+    ];
+
+    update_option(LAVKA_AUTO_FULL_OPTION, $cfg, false);
+
+    wp_clear_scheduled_hook('lavka_auto_pull_all');
+
+    $next = lavka_calc_next_ts($cfg, time());
+
+    if ($cfg['enabled'] && $next > 0) {
+        wp_schedule_single_event($next, 'lavka_auto_pull_all');
+    }
+
+    wp_send_json_success([
+        'cfg'     => $cfg,
+        'next_ts' => $next ?: null,
+    ]);
+});
+
+add_action('wp_ajax_lavka_auto_save_movement', function () {
+
+  if (!current_user_can('manage_lavka_sync')) {
+      wp_send_json_error(['error'=>'forbidden'], 403);
+  }
+
+  check_ajax_referer('lavka_auto_nonce');
+  
+  update_option(LAVKA_AUTO_MOV_OPTION, $cfg, false);
+
+  wp_clear_scheduled_hook('lavka_auto_pull_movement');
+
+  $next = lavka_calc_next_ts($cfg, time());
+
+  if ($cfg['enabled'] && $next > 0) {
+      wp_schedule_single_event(
+          $next,
+          'lavka_auto_pull_movement'
+      );
+  }
+
+  $enabled  = !empty($_POST['enabled']);
+    $mode     = sanitize_text_field($_POST['mode'] ?? 'off');
+    $interval = max(5, min(1440, (int)($_POST['interval'] ?? 60)));
+    $time = preg_replace('/[^0-9:]/', '', (string)($_POST['time'] ?? '03:00'));
+    if (preg_match('/^(\d{1,2}):(\d{1,2})$/', $time, $m)) {
+        $h   = str_pad((string)min(23, (int)$m[1]), 2, '0', STR_PAD_LEFT);
+        $min = str_pad((string)min(59, (int)$m[2]), 2, '0', STR_PAD_LEFT);
+        $time = "$h:$min";
+    } else {
+        $time = '03:00';
+    }
+    $batch    = max(LAVKA_BATCH_MIN, min(LAVKA_BATCH_MAX, (int)($_POST['batch'] ?? 200)));
+
+    $days = array_map('intval', (array)($_POST['days'] ?? []));
+    $days = array_values(array_filter($days, fn($d)=> $d>=0 && $d<=6));
+
+    // dates строкой "1,10,28" или массивом
+    $dates_raw = $_POST['dates'] ?? '';
+    if (is_array($dates_raw)) {
+        $dates = array_map('intval', $dates_raw);
+    } else {
+        $dates = array_map('intval', preg_split('/[^\d]+/', (string)$dates_raw, -1, PREG_SPLIT_NO_EMPTY));
+    }
+    $dates = array_values(array_filter($dates, fn($d)=> $d>=1 && $d<=28));
+
+    // <<< НОВОЕ: разбор стратегии >>>
+    $strategy = sanitize_text_field($_POST['strategy'] ?? 'full');
+    $strategy = in_array($strategy, ['full','movement'], true) ? $strategy : 'full';
+
+    $cfg = [
+        'enabled'  => $enabled,
+        'mode'     => in_array($mode, ['off','interval','daily','weekly','dates'], true) ? $mode : 'off',
+        'interval' => $interval,
+        'time'     => $time ?: '03:00',
+        'days'     => $days,
+        'dates'    => $dates,
+        'batch'    => $batch,
+        'strategy' => $strategy, // <<< НОВОЕ
+    ];
+    update_option(LAVKA_AUTO_FULL_OPTION, $cfg, false);
+
+    // Снимаем предыдущие хуки и планируем НУЖНЫЙ
+    wp_clear_scheduled_hook('lavka_auto_pull_all');
+    wp_clear_scheduled_hook('lavka_auto_pull_movement'); // <<< НОВОЕ
+    $next = lavka_calc_next_ts($cfg, time());
+    if ($enabled && $next > 0) {
+        if ($strategy === 'movement') {
+            wp_schedule_single_event($next, 'lavka_auto_pull_movement'); // <<< НОВОЕ
+        } else {
+            wp_schedule_single_event($next, 'lavka_auto_pull_all');
+        }
+    }
+
+    wp_send_json_success(array_merge($cfg, [
+        'next_ts' => $next ?: null,
+        'last_to' => get_option(LAVKA_LAST_TO_OPTION, '') ?: null, // <<< удобно отдать в UI
+    ]));
+  
 });
 
 function lavka_log_write(array $data) {
