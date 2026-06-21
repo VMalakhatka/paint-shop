@@ -667,6 +667,35 @@ function lavka_sync_render_page() {
       <p id="lavka-auto-next" style="opacity:.8"></p>
       <p id="lavka-auto-lastrun" style="opacity:.8"></p>
       <p id="lavka-auto-lastto" style="opacity:.8"></p>
+
+      <hr style="margin:10px 0">
+
+      <div id="lavka-full-info" style="opacity:.8"></div>
+      <div id="lavka-mov-info" style="opacity:.8;margin-top:4px"></div>
+
+      <hr style="margin:20px 0">
+
+      <h3>FULL sync</h3>
+      <p>
+        <button class="button button-secondary" id="lavka-auto-save-full">
+          Save FULL
+        </button>
+        <span id="lavka-auto-full-status" style="margin-left:10px;"></span>
+      </p>
+
+      <div id="lavka-full-extra" style="opacity:.8;margin-bottom:20px"></div>
+
+      <hr style="margin:20px 0">
+
+      <h3>MOVEMENT sync</h3>
+      <p>
+        <button class="button button-secondary" id="lavka-auto-save-movement">
+          Save MOVEMENT
+        </button>
+        <span id="lavka-auto-movement-status" style="margin-left:10px;"></span>
+      </p>
+
+      <div id="lavka-movement-extra" style="opacity:.8"></div>
       </div>
 
     </div>
@@ -984,8 +1013,178 @@ function lavka_sync_render_page() {
   }
 
   // load current
-  autoAjax('lavka_auto_get', {}).then(j=>{
-    if (j?.success) fill(j.data || {});
+async function loadFullSettings() {
+
+  const j = await autoAjax(
+    'lavka_auto_get_full',
+    {}
+  );
+
+  if (j?.success) {
+
+    console.log(
+      'FULL settings',
+      j.data
+    );
+
+    const d = j.data || {};
+
+    // пока используем существующий UI
+    fill(d);
+
+    const fullInfo = document.getElementById('lavka-full-extra');
+
+    if (fullInfo) {
+
+      let html = '';
+
+      if (d.next_ts) {
+        html += 'Наступний запуск FULL: ' + new Date(d.next_ts * 1000).toLocaleString();
+      }
+
+      if (d.last_run && d.last_run.ts) {
+        html += (html ? '<br>' : '')
+          + 'Останній запуск FULL: '
+          + d.last_run.ts
+          + ' (Оновлено=' + (d.last_run.updated || 0)
+          + ', Не знайдено=' + (d.last_run.not_found || 0) + ')';
+      }
+
+      fullInfo.innerHTML = html;
+    }
+  }
+}
+
+async function loadMovementSettings() {
+
+  const j = await autoAjax(
+    'lavka_auto_get_movement',
+    {}
+  );
+
+  if (j?.success) {
+
+    console.log(
+      'MOVEMENT settings',
+      j.data
+    );
+
+    const d = j.data || {};
+
+    const movInfo = document.getElementById('lavka-movement-extra');
+
+    if (movInfo) {
+
+      let html = '';
+
+      if (d.next_ts) {
+        html += 'Наступний запуск MOVEMENT: ' + new Date(d.next_ts * 1000).toLocaleString();
+      }
+
+      if (d.last_run && d.last_run.ts) {
+        html += (html ? '<br>' : '')
+          + 'Останній запуск MOVEMENT: '
+          + d.last_run.ts
+          + ' (Оновлено=' + (d.last_run.updated || 0)
+          + ', Не знайдено=' + (d.last_run.not_found || 0) + ')';
+      }
+
+      if (d.last_to) {
+
+          let txt = '';
+
+          if (/^\d+(\.\d+)?$/.test(String(d.last_to))) {
+              txt = new Date(Math.floor(Number(d.last_to)) * 1000).toLocaleString();
+          } else {
+              const dt = new Date(d.last_to);
+              txt = isNaN(dt.getTime()) ? d.last_to : dt.toLocaleString();
+          }
+
+          html += (html ? '<br>' : '')
+              + 'Остання межа movement: '
+              + txt;
+      }
+
+      movInfo.innerHTML = html;
+    }
+  }
+}
+
+loadFullSettings();
+loadMovementSettings();
+
+  const btnSaveFull = document.getElementById('lavka-auto-save-full');
+  const btnSaveMovement = document.getElementById('lavka-auto-save-movement');
+  const fullStatus = document.getElementById('lavka-auto-full-status');
+  const movementStatus = document.getElementById('lavka-auto-movement-status');
+  const fullExtra = document.getElementById('lavka-full-extra');
+  const movementExtra = document.getElementById('lavka-movement-extra');
+
+  btnSaveFull?.addEventListener('click', async () => {
+    fullStatus.textContent = 'Saving...';
+
+    const payload = {
+      enabled: elEnabled.checked ? '1' : '0',
+      mode: elMode.value,
+      interval: elInterval.value,
+      time: elTime.value,
+      batch: elBatch.value,
+      dates: elDates.value,
+      days: elDows.filter(x => x.checked).map(x => x.value)
+    };
+
+    const j = await autoAjax('lavka_auto_save_full', payload);
+
+    if (j?.success) {
+      fullStatus.textContent = 'Saved';
+
+      if (fullExtra) {
+
+          let html = 'FULL configuration saved';
+
+          if (j.data?.next_ts) {
+              html += '<br>Наступний запуск: '
+                  + new Date(j.data.next_ts * 1000).toLocaleString();
+          }
+
+          fullExtra.innerHTML = html;
+      }
+
+      await loadFullSettings();
+    } else {
+      fullStatus.textContent = 'Error';
+    }
+  });
+
+  btnSaveMovement?.addEventListener('click', async () => {
+    movementStatus.textContent = 'Saving...';
+
+    const payload = {
+      enabled: elEnabled.checked ? '1' : '0',
+      mode: elMode.value,
+      interval: elInterval.value,
+      time: elTime.value,
+      batch: elBatch.value,
+      dates: elDates.value,
+      days: elDows.filter(x => x.checked).map(x => x.value)
+    };
+
+    const j = await autoAjax('lavka_auto_save_movement', payload);
+
+    if (j?.success) {
+      movementStatus.textContent = 'Saved';
+      await loadMovementSettings();
+
+      if (movementExtra) {
+        movementExtra.innerHTML =
+          'MOVEMENT configuration saved' +
+          (j.data?.next_ts
+            ? '<br>Next run: ' + new Date(j.data.next_ts * 1000).toLocaleString()
+            : '');
+      }
+    } else {
+      movementStatus.textContent = 'Error';
+    }
   });
 
   elSave?.addEventListener('click', async ()=>{
