@@ -1276,6 +1276,27 @@ loadMovementSettings();
 
 // Ручной запуск инкрементальной синхронизации (movement)
 add_action('wp_ajax_lavka_pull_movement', function () {
+
+    register_shutdown_function(function () {
+
+        $e = error_get_last();
+
+        if ($e) {
+
+            file_put_contents(
+                WP_CONTENT_DIR . '/lavka-debug.log',
+                print_r($e, true) . PHP_EOL,
+                FILE_APPEND
+            );
+        }
+    });
+
+    file_put_contents(
+        WP_CONTENT_DIR . '/lavka-debug.log',
+        "ENTER movement ajax\n",
+        FILE_APPEND
+    );
+
     if (!current_user_can('manage_lavka_sync')) wp_send_json_error(['error'=>'forbidden'], 403);
     check_ajax_referer('lavka_pull_movement');
 
@@ -1285,17 +1306,35 @@ add_action('wp_ajax_lavka_pull_movement', function () {
 
     $t0  = microtime(true);
     // повышаем выживаемость long-poll запроса
-ignore_user_abort(true);
-if (function_exists('set_time_limit')) @set_time_limit(600);
-@ini_set('max_execution_time', '600');
-@ini_set('default_socket_timeout', '600'); // чтобы сокет HTTP не отвалился раньше
+    ignore_user_abort(true);
+    if (function_exists('set_time_limit')) @set_time_limit(600);
+    @ini_set('max_execution_time', '600');
+    @ini_set('default_socket_timeout', '600'); // чтобы сокет HTTP не отвалился раньше
 
+    file_put_contents(
+        WP_CONTENT_DIR . '/lavka-debug.log',
+        "BEFORE movement_apply_loop\n",
+        FILE_APPEND
+    );  
 
     $res = lavka_sync_java_movement_apply_loop([
         'pageSize' => $pageSize,
         'dry'      => $dry,
         'from'     => $fromIso,
     ]);
+
+    file_put_contents(
+        WP_CONTENT_DIR . '/lavka-debug.log',
+        "AFTER movement_apply_loop\n",
+        FILE_APPEND
+    );
+
+    file_put_contents(
+        WP_CONTENT_DIR . '/lavka-debug.log',
+        print_r($res, true) . PHP_EOL,
+        FILE_APPEND
+    );
+    
     if (empty($res['ok'])) {
         error_log('[lavka] movement ajax fail: '.print_r($res,true));
         wp_send_json_error(['error'=>$res['error'] ?? 'movement_error']);
