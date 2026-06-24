@@ -373,7 +373,7 @@ function lavka_sync_java_movement_apply_loop(array $args = []): array {
     $TRUNCATE_LIMIT = 300; // хватит для логов
     $truncated     = false;
 
-    $auto   = lavka_get_auto_cfg();
+    $auto   = lavka_get_auto_mov_cfg();
     $lastTo = get_option(LAVKA_LAST_TO_OPTION, '');
     if (!$fromIso) $fromIso = lavka_calc_movement_from($auto, $lastTo);
 
