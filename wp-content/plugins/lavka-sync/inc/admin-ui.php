@@ -1326,7 +1326,7 @@ add_action('wp_ajax_lavka_pull_movement', function () {
     file_put_contents(WP_CONTENT_DIR.'/lavka-debug.log',"STEP-1\n",FILE_APPEND);
 
     if (!current_user_can('manage_lavka_sync')) wp_send_json_error(['error'=>'forbidden'], 403);
-     // check_ajax_referer('lavka_pull_movement');
+     check_ajax_referer('lavka_pull_movement');
 
     file_put_contents(
     WP_CONTENT_DIR.'/lavka-debug.log',
@@ -1340,16 +1340,6 @@ file_put_contents(
     WP_CONTENT_DIR.'/lavka-debug.log',
     "AFTER NONCE\n",
     FILE_APPEND
-);
-
-file_put_contents(
-
-    WP_CONTENT_DIR.'/lavka-debug.log',
-
-    "STEP-2 nonce\n",
-
-    FILE_APPEND
-
 );
 
     file_put_contents(WP_CONTENT_DIR.'/lavka-debug.log',"STEP-2 nonce\n",FILE_APPEND);
