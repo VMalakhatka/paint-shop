@@ -1277,18 +1277,30 @@ loadMovementSettings();
 // Ручной запуск инкрементальной синхронизации (movement)
 add_action('wp_ajax_lavka_pull_movement', function () {
 
+    // register_shutdown_function(function () {
+
+    //     $e = error_get_last();
+
+    //     if ($e) {
+
+    //         file_put_contents(
+    //             WP_CONTENT_DIR . '/lavka-debug.log',
+    //             print_r($e, true) . PHP_EOL,
+    //             FILE_APPEND
+    //         );
+    //     }
+    // });
+
+
     register_shutdown_function(function () {
 
         $e = error_get_last();
 
-        if ($e) {
-
-            file_put_contents(
-                WP_CONTENT_DIR . '/lavka-debug.log',
-                print_r($e, true) . PHP_EOL,
-                FILE_APPEND
-            );
-        }
+        file_put_contents(
+            WP_CONTENT_DIR.'/lavka-debug.log',
+            "SHUTDOWN:\n".print_r($e,true)."\n",
+            FILE_APPEND
+        );
     });
 
     file_put_contents(
@@ -1297,12 +1309,17 @@ add_action('wp_ajax_lavka_pull_movement', function () {
         FILE_APPEND
     );
 
+    file_put_contents(WP_CONTENT_DIR.'/lavka-debug.log',"STEP-1\n",FILE_APPEND);
+
     if (!current_user_can('manage_lavka_sync')) wp_send_json_error(['error'=>'forbidden'], 403);
     check_ajax_referer('lavka_pull_movement');
+    file_put_contents(WP_CONTENT_DIR.'/lavka-debug.log',"STEP-2 nonce\n",FILE_APPEND);
 
     $pageSize = max(10, min(LAVKA_MOV_MAX_PAGESIZE, (int)($_POST['pageSize'] ?? LAVKA_MOV_DEF_PAGESIZE)));
     $dry      = filter_var($_POST['dry'] ?? false, FILTER_VALIDATE_BOOLEAN);
     $fromIso  = (string)($_POST['from'] ?? '');
+
+    file_put_contents(WP_CONTENT_DIR.'/lavka-debug.log',"STEP-3 params\n",FILE_APPEND);
 
     $t0  = microtime(true);
     // повышаем выживаемость long-poll запроса
@@ -1334,7 +1351,7 @@ add_action('wp_ajax_lavka_pull_movement', function () {
         print_r($res, true) . PHP_EOL,
         FILE_APPEND
     );
-    
+
     if (empty($res['ok'])) {
         error_log('[lavka] movement ajax fail: '.print_r($res,true));
         wp_send_json_error(['error'=>$res['error'] ?? 'movement_error']);
@@ -1408,6 +1425,9 @@ add_action('wp_ajax_lavka_pull_java', function(){
 
     // === LOG START ===
     $t0 = microtime(true);
+
+          file_put_contents(WP_CONTENT_DIR.'/lavka-debug.log',"STEP-4 timer\n",FILE_APPEND);
+
     // === /LOG START ===
 
     // ВАЖНО: дергаем именно lavka_sync_java_query_and_apply (POST /admin/stock/stock/query)
@@ -2020,6 +2040,8 @@ add_action('lavka_auto_pull_movement', function () {
 
     @ini_set('max_execution_time', '600');
     @ini_set('default_socket_timeout', '600');
+
+    file_put_contents(WP_CONTENT_DIR.'/lavka-debug.log',"STEP-5 before movement\n",FILE_APPEND);
 
     $res = lavka_sync_java_movement_apply_loop([
         'pageSize' => (int)$cfg['batch'],
