@@ -1296,9 +1296,23 @@ add_action('wp_ajax_lavka_pull_movement', function () {
 
         $e = error_get_last();
 
+        if (!$e) {
+            return;
+        }
+
+        if (!in_array($e['type'], [
+            E_ERROR,
+            E_PARSE,
+            E_CORE_ERROR,
+            E_COMPILE_ERROR,
+            E_USER_ERROR
+        ])) {
+            return;
+        }
+
         file_put_contents(
             WP_CONTENT_DIR.'/lavka-debug.log',
-            "SHUTDOWN:\n".print_r($e,true)."\n",
+            "FATAL:\n" . print_r($e, true) . "\n",
             FILE_APPEND
         );
     });
@@ -1312,7 +1326,22 @@ add_action('wp_ajax_lavka_pull_movement', function () {
     file_put_contents(WP_CONTENT_DIR.'/lavka-debug.log',"STEP-1\n",FILE_APPEND);
 
     if (!current_user_can('manage_lavka_sync')) wp_send_json_error(['error'=>'forbidden'], 403);
-    check_ajax_referer('lavka_pull_movement');
+    // check_ajax_referer('lavka_pull_movement');
+
+    file_put_contents(
+    WP_CONTENT_DIR.'/lavka-debug.log',
+    "BEFORE NONCE\n",
+    FILE_APPEND
+);
+
+check_ajax_referer('lavka_pull_movement');
+
+file_put_contents(
+    WP_CONTENT_DIR.'/lavka-debug.log',
+    "AFTER NONCE\n",
+    FILE_APPEND
+);
+
     file_put_contents(WP_CONTENT_DIR.'/lavka-debug.log',"STEP-2 nonce\n",FILE_APPEND);
 
     $pageSize = max(10, min(LAVKA_MOV_MAX_PAGESIZE, (int)($_POST['pageSize'] ?? LAVKA_MOV_DEF_PAGESIZE)));
