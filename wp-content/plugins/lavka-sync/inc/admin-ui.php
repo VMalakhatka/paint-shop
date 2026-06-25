@@ -633,7 +633,7 @@ function lavka_sync_render_page() {
       </div>
       
             <div class="lavka-auto" style="margin-top:18px">
-        <h3><?php echo esc_html__('Auto sync (paged)', 'lavka-sync'); ?></h3>
+        <h3><?php echo esc_html__('Automatic synchronization settings', 'lavka-sync'); ?></h3>
 
         <p>
           <label>
@@ -706,10 +706,10 @@ function lavka_sync_render_page() {
 
       <hr style="margin:20px 0">
 
-      <h3><?php echo esc_html__('FULL sync', 'lavka-sync'); ?></h3>
+      <h3><?php echo esc_html__('FULL synchronization', 'lavka-sync'); ?></h3>
       <p>
         <button class="button button-secondary" id="lavka-auto-save-full">
-          <?php echo esc_html__('Save FULL', 'lavka-sync'); ?>
+          <?php echo esc_html__('Save FULL settings', 'lavka-sync'); ?>
         </button>
         <span id="lavka-auto-full-status" style="margin-left:10px;"></span>
       </p>
@@ -718,10 +718,10 @@ function lavka_sync_render_page() {
 
       <hr style="margin:20px 0">
 
-      <h3><?php echo esc_html__('MOVEMENT sync', 'lavka-sync'); ?></h3>
+      <h3><?php echo esc_html__('Movement synchronization', 'lavka-sync'); ?></h3>
       <p>
         <button class="button button-secondary" id="lavka-auto-save-movement">
-          <?php echo esc_html__('Save MOVEMENT', 'lavka-sync'); ?>
+          <?php echo esc_html__('Save Movement settings', 'lavka-sync'); ?>
         </button>
         <span id="lavka-auto-movement-status" style="margin-left:10px;"></span>
       </p>
