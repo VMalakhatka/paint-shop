@@ -327,6 +327,14 @@ function lavka_java_movement_page(string $fromIso, int $page, int $pageSize): ar
     // ЛОГ: куда стучимся
     error_log('[lavka] movement URL try: ' . $url);
 
+    file_put_contents(
+        WP_CONTENT_DIR . '/lavka-debug.log',
+        "\nREQUEST JSON:\n" .
+        wp_json_encode($body, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) .
+        "\n",
+        FILE_APPEND
+    );
+
     $resp = wp_remote_post($url, $args);
 
     // Фолбэк: если 404 и в пути было /movements — попробуем /movement
