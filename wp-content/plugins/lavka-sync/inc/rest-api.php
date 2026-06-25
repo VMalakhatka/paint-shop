@@ -377,6 +377,17 @@ function lavka_sync_java_movement_apply_loop(array $args = []): array {
     $lastTo = get_option(LAVKA_LAST_TO_OPTION, '');
     if (!$fromIso) $fromIso = lavka_calc_movement_from($auto, $lastTo);
 
+
+    file_put_contents(
+        WP_CONTENT_DIR . '/lavka-debug.log',
+        "\n================ MOVEMENT START ================\n" .
+        date('c') . "\n" .
+        "auto=" . print_r($auto, true) .
+        "lastTo=" . var_export($lastTo, true) . "\n" .
+        "fromIso=" . var_export($fromIso, true) . "\n",
+        FILE_APPEND
+    );
+
     $updated = 0; $notFound = 0; $pages = 0;
     $serverFrom = null; $serverTo = null;
 
@@ -384,6 +395,11 @@ function lavka_sync_java_movement_apply_loop(array $args = []): array {
 
     for ($p = 0; $p < 100000; $p++) {
         $call = lavka_java_movement_page($fromIso, $p, $pageSize);
+        file_put_contents(
+            WP_CONTENT_DIR . '/lavka-debug.log',
+            date('c') . " movement page={$p} from={$fromIso}\n",
+            FILE_APPEND
+        );
         if (empty($call['ok'])) {
 
             $err = $call['error'] ?? 'movement_error';
@@ -405,6 +421,15 @@ function lavka_sync_java_movement_apply_loop(array $args = []): array {
             ];
         }
         $d = $call['data'] ?: [];
+
+        file_put_contents(
+            WP_CONTENT_DIR . '/lavka-debug.log',
+            date('c') .
+            " items=" . count($d['items'] ?? []) .
+            " last=" . (!empty($d['last']) ? '1' : '0') .
+            "\n",
+            FILE_APPEND
+        );
         $serverFrom = $d['serverFrom'] ?? $serverFrom;
         $serverTo   = $d['serverTo']   ?? $serverTo;
 
@@ -415,6 +440,16 @@ function lavka_sync_java_movement_apply_loop(array $args = []): array {
         if ($skus) {
             $emptyStreak = 0;
             $res = lavka_sync_java_query_and_apply($skus, ['dry'=>$dry]);
+
+            file_put_contents(
+                WP_CONTENT_DIR . '/lavka-debug.log',
+                date('c') .
+                " apply ok=" . (!empty($res['ok']) ? '1' : '0') .
+                " processed=" . ($res['processed'] ?? 0) .
+                " not_found=" . ($res['not_found'] ?? 0) .
+                "\n",
+                FILE_APPEND
+            );
 
             if (!empty($res['ok'])) {
                 $updated  += (int)($res['processed'] ?? 0);
@@ -469,6 +504,16 @@ function lavka_sync_java_movement_apply_loop(array $args = []): array {
         $save = is_numeric($serverTo) ? gmdate('c', (int)$serverTo) : (string)$serverTo;
         update_option(LAVKA_LAST_TO_OPTION, $save, false);
     }
+
+
+    file_put_contents(
+        WP_CONTENT_DIR . '/lavka-debug.log',
+        "serverTo=" . var_export($serverTo, true) . "\n" .
+        "savedLastTo=" . var_export($save, true) . "\n" .
+        "updated={$updated}, notFound={$notFound}, pages={$pages}\n" .
+        "================ END ==========================\n\n",
+        FILE_APPEND
+    );
 
     return [
         'ok'         => true,

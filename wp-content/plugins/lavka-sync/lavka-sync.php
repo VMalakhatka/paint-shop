@@ -30,6 +30,16 @@
         }
     });
 
+    function lavka_debug($msg) {
+        file_put_contents(
+            WP_CONTENT_DIR . '/lavka-debug.log',
+            '[' . gmdate('Y-m-d H:i:s') . '] ' .
+            (is_string($msg) ? $msg : print_r($msg, true))
+            . PHP_EOL,
+            FILE_APPEND
+        );
+    }
+
     /** загрузка модулей */
     foreach (['core.php', 'admin-ui.php', 'lavka-logs-csv.php' ,'rest-api.php'
         , 'warehouse-map.php', 'sync-java-query.php', 'sync.php'] as $f) {
