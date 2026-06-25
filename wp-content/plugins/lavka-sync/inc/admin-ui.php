@@ -352,40 +352,34 @@ add_action('admin_init', function () {
  * Возвращает массив вида: [{id, codes:[...]}]
  */
 function lavka_get_locations_mapping_for_java(): array {
-    if (!function_exists('rest_do_request')) return [];
 
-    $req  = new WP_REST_Request('GET', '/lavka/v1/locations/map');
-    $resp = rest_do_request($req);
+    $tax = apply_filters('lavka_location_taxonomy', 'location');
 
-   
+    $terms = get_terms([
+        'taxonomy'   => $tax,
+        'hide_empty' => false,
+    ]);
 
-    file_put_contents(
-
-        WP_CONTENT_DIR . '/lavka-debug.log',
-
-        "\n================ REST RESPONSE ================\n" .
-
-        print_r($resp, true) . "\n",
-
-        FILE_APPEND
-
-    );
-
-    $data = is_wp_error($resp) ? [] : $resp->get_data();
-
-    file_put_contents(
-        WP_CONTENT_DIR . '/lavka-debug.log',
-        "REST DATA:\n" .
-        print_r($data, true) . "\n",
-        FILE_APPEND
-    );
+    if (is_wp_error($terms)) {
+        return [];
+    }
 
     $items = [];
-    foreach (($data['items'] ?? []) as $row) {
-        $tid   = (int)($row['id'] ?? $row['term_id'] ?? 0);
-        $codes = array_values(array_filter(array_map('strval', (array)($row['codes'] ?? []))));
-        if ($tid && $codes) $items[] = ['id'=>$tid, 'codes'=>$codes];
+
+    foreach ($terms as $t) {
+
+        $codes = array_values(array_filter(
+            array_map('strval', lavka_get_location_ext_codes((int)$t->term_id))
+        ));
+
+        if ($codes) {
+            $items[] = [
+                'id'    => (int)$t->term_id,
+                'codes' => $codes,
+            ];
+        }
     }
+
     return $items;
 }
 
