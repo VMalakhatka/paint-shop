@@ -366,64 +366,36 @@ function lavka_get_locations_mapping_for_java(): array {
 }
 
 /**
- * Рассчитать значение from (ISO8601) для /stock/movement.
+ * Calculates the starting point for movement synchronization.
  *
- * Логика:
- * 1. Есть last_server_to -> берём его минус overlap.
- * 2. Нет last_server_to -> пытаемся взять время последнего FULL.
- * 3. Никогда не уходим глубже чем на 3 суток назад.
+ * IMPORTANT:
+ * Folio stores only the calendar date in SCL_MOVE.DATE_PREDM.
+ * The time component is always 00:00:00, therefore true
+ * minute-level incremental synchronization is impossible.
+ *
+ * Current implementation synchronizes the whole calendar day:
+ *  - if previous movement exists -> start from 00:00 of that day;
+ *  - otherwise -> start from the day of the last successful FULL sync;
+ *  - on the first run -> synchronize the previous three days.
+ *
+ * TODO:
+ * Replace this logic after implementing a Java endpoint that uses
+ * real document timestamps (or another source containing operation time).
  */
 
 function lavka_calc_movement_from(array $auto_cfg, ?string $last_server_to_iso): string {
 
     global $wpdb;
-    $now = time();
-
-    // Жёсткий лимит окна
-    $maxWindow = 3 * DAY_IN_SECONDS;
-
-    // Базовый интервал по расписанию
-    switch ($auto_cfg['mode'] ?? 'interval') {
-        case 'interval':
-            $base = max(300, (int)$auto_cfg['interval'] * 60);
-            break;
-        case 'daily':
-            $base = DAY_IN_SECONDS;
-            break;
-        case 'weekly':
-            $base = WEEK_IN_SECONDS;
-            break;
-        case 'dates':
-            $base = 30 * DAY_IN_SECONDS;
-            break;
-        default:
-            $base = HOUR_IN_SECONDS;
-    }
-
-    // overlap минимум 5 минут
-    $overlap = max(
-        300,
-        (int)round($base * (LAVKA_MOV_OVERLAP_PCT / 100))
-    );
-
-    // никогда не больше 3 суток
-    $overlap = min($overlap, $maxWindow);
 
     /*
      * Вариант №1:
      * есть сохранённый serverTo
+     * -> берем начало этого дня (UTC)
      */
     if (!empty($last_server_to_iso)) {
-        $toTs = strtotime($last_server_to_iso);
-        if ($toTs) {
-            $fromTs = $toTs - $overlap;
-
-            // защита от слишком старого окна
-            $fromTs = max(
-                $fromTs,
-                $now - $maxWindow
-            );
-            return gmdate('c', $fromTs);
+        $ts = strtotime($last_server_to_iso);
+        if ($ts) {
+            return gmdate('Y-m-d\T00:00:00\Z', $ts);
         }
     }
 
@@ -431,70 +403,34 @@ function lavka_calc_movement_from(array $auto_cfg, ?string $last_server_to_iso):
      * Вариант №2:
      * нет serverTo -> ищем последний FULL
      */
-    $fullTs = $wpdb->get_var(
-        "
+    $fullTs = $wpdb->get_var("
         SELECT ts
         FROM {$wpdb->prefix}lavka_sync_logs
-        WHERE action = 'auto_pull_all'
-          AND status = 'OK'
+        WHERE action='auto_pull_all'
+          AND status='OK'
         ORDER BY id DESC
         LIMIT 1
-        "
-    );
+    ");
+
     if (!empty($fullTs)) {
-        $fullUnix = strtotime($fullTs);
-        if ($fullUnix) {
-            $fromTs = max(
-                $fullUnix,
-                $now - $maxWindow
-            );
-            return gmdate('c', $fromTs);
+        $ts = strtotime($fullTs);
+        if ($ts) {
+
+            return gmdate('Y-m-d\T00:00:00\Z', $ts);
+
         }
     }
+
     /*
      * Вариант №3:
-     * совсем первый запуск
+     * первый запуск — последние 3 дня
      */
     return gmdate(
-        'c', $now - 3 * DAY_IN_SECONDS
+        'Y-m-d\T00:00:00\Z',
+        strtotime('-3 days')
     );
-
 }
 
-
-/**
- * Рассчитать значение from (ISO8601) для /stock/movement.
- * Если есть сохранённый last serverTo — берём его и даём overlap (>=5 мин).
- * Иначе — берём длину окна по режиму авто и добавляем +20%.
- */
-// function lavka_calc_movement_from(array $auto_cfg, ?string $last_server_to_iso): string {
-//     $now = time();
-
-//     if ($last_server_to_iso) {
-//         $to = strtotime($last_server_to_iso) ?: $now;
-//         $base = 0;
-//         switch ($auto_cfg['mode'] ?? 'interval') {
-//             case 'interval': $base = max(300, (int)$auto_cfg['interval'] * 60); break;
-//             case 'daily':    $base = 24*3600; break;
-//             case 'weekly':   $base = 7*24*3600; break;
-//             case 'dates':    $base = 30*24*3600; break;
-//             default:         $base = 3600;
-//         }
-//         $overlap = max(300, (int)round($base * (LAVKA_MOV_OVERLAP_PCT/100)));
-//         return gmdate('c', $to - $overlap);
-//     }
-
-//     // fallback: окно расписания +20%
-//     switch ($auto_cfg['mode'] ?? 'interval') {
-//         case 'interval': $win = max(300, (int)$auto_cfg['interval']*60); break;
-//         case 'daily':    $win = 24*3600; break;
-//         case 'weekly':   $win = 7*24*3600; break;
-//         case 'dates':    $win = 30*24*3600; break;
-//         default:         $win = 3600;
-//     }
-//     $fromTs = $now - (int)round($win * (1 + LAVKA_MOV_OVERLAP_PCT/100));
-//     return gmdate('c', $fromTs);
-// }
 
 function lavka_sync_render_page() {
     if (!current_user_can('manage_lavka_sync')) return;
