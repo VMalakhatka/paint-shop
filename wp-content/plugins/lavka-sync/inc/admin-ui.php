@@ -740,19 +740,14 @@ function lavka_sync_render_page() {
 
       'i18n_enter_skus'   => esc_html__('Enter one or more SKUs', 'lavka-sync'),
       'i18n_running'      => esc_html__('Running…', 'lavka-sync'),
-      'i18n_ok_processed' => esc_html__('OK: processed %1$s, not found %2$s', 'lavka-sync'),
       'i18n_error_prefix' => esc_html__('Error:', 'lavka-sync'),
       'i18n_network_error'=> esc_html__('Network error', 'lavka-sync'),
 
       'i18n_working'      => esc_html__('Working…', 'lavka-sync'),
       'i18n_error'        => esc_html__('Error:', 'lavka-sync'),
       'i18n_neterr'       => esc_html__('Network error', 'lavka-sync'),
-      'i18n_ok'           => esc_html__('OK', 'lavka-sync'),
 
-      'i18n_page'         => esc_html__('Page', 'lavka-sync'),
-      'i18n_of'           => esc_html__('of', 'lavka-sync'),
       'i18n_done'         => esc_html__('Done', 'lavka-sync'),
-      'i18n_updated'      => esc_html__('Updated', 'lavka-sync'),
       'i18n_not_found'    => esc_html__('Not found', 'lavka-sync'),
       'i18n_pages'        => esc_html__('pages', 'lavka-sync'),
       'i18n_early_stop'   => esc_html__('early stop', 'lavka-sync'),
@@ -769,8 +764,8 @@ function lavka_sync_render_page() {
       'i18n_saving_dots'  => esc_html__('Saving...', 'lavka-sync'),
       'i18n_saved'        => esc_html__('Saved', 'lavka-sync'),
       'i18n_error_plain'  => esc_html__('Error', 'lavka-sync'),
-      'i18n_full_saved'   => esc_html__('FULL configuration saved', 'lavka-sync'),
-      'i18n_movement_saved'=> esc_html__('MOVEMENT configuration saved', 'lavka-sync'),
+      'i18n_full_saved'   => esc_html__('FULL settings saved', 'lavka-sync'),
+      'i18n_movement_saved'=> esc_html__('Movement settings saved', 'lavka-sync'),
       'i18n_next_run'     => esc_html__('Next run', 'lavka-sync'),
     ];
   ?>

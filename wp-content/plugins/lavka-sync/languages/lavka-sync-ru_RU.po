@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Lavka Sync 0.2.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lavka-sync\n"
-"POT-Creation-Date: 2026-06-25T19:54:27+00:00\n"
+"POT-Creation-Date: 2026-06-25T20:43:19+00:00\n"
 "PO-Revision-Date: 2025-09-28T07:10:54+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -51,11 +51,11 @@ msgstr ""
 "Сопоставьте локации Woo (таксономия <code>location</code>) со внешними "
 "складами MS. Одна локация Woo может объединять несколько складов MS."
 
-#: inc/admin-ui.php:95 inc/admin-ui.php:1583
+#: inc/admin-ui.php:95 inc/admin-ui.php:1489
 msgid "Loading…"
 msgstr "Загрузка…"
 
-#: inc/admin-ui.php:96 inc/admin-ui.php:1267
+#: inc/admin-ui.php:96
 msgid "Saving…"
 msgstr "Сохранение…"
 
@@ -68,7 +68,7 @@ msgid "Save error"
 msgstr "Ошибка сохранения"
 
 #: inc/admin-ui.php:99 inc/admin-ui.php:119 inc/admin-ui.php:130
-#: inc/admin-ui.php:758 inc/admin-ui.php:762 inc/admin-ui.php:1288
+#: inc/admin-ui.php:744 inc/admin-ui.php:748
 msgid "Network error"
 msgstr "Сетевая ошибка"
 
@@ -93,76 +93,75 @@ msgstr "Сохранить сопоставления"
 msgid "OK: written %s"
 msgstr "ОК: записано %s"
 
-#: inc/admin-ui.php:110 inc/admin-ui.php:748 inc/admin-ui.php:1575
+#: inc/admin-ui.php:110 inc/admin-ui.php:735 inc/admin-ui.php:1481
 msgid "SKU"
 msgstr "Артикул"
 
-#: inc/admin-ui.php:111 inc/admin-ui.php:749
+#: inc/admin-ui.php:111 inc/admin-ui.php:736
 msgid "Total"
 msgstr "Всего"
 
-#: inc/admin-ui.php:112 inc/admin-ui.php:750
+#: inc/admin-ui.php:112 inc/admin-ui.php:737
 msgid "By warehouses"
 msgstr "По складам"
 
-#: inc/admin-ui.php:113 inc/admin-ui.php:751
+#: inc/admin-ui.php:113 inc/admin-ui.php:738
 msgid "Found"
 msgstr "Найдено"
 
-#: inc/admin-ui.php:114 inc/admin-ui.php:752
+#: inc/admin-ui.php:114 inc/admin-ui.php:739
 msgid "No data"
 msgstr "Нет данных"
 
-#: inc/admin-ui.php:116 inc/admin-ui.php:754
+#: inc/admin-ui.php:116 inc/admin-ui.php:741
 msgid "Enter one or more SKUs"
 msgstr "Введите один или несколько артикулов"
 
-#: inc/admin-ui.php:117 inc/admin-ui.php:755
+#: inc/admin-ui.php:117 inc/admin-ui.php:742
 msgid "Running…"
 msgstr "Выполняется…"
 
-#: inc/admin-ui.php:118 inc/admin-ui.php:129 inc/admin-ui.php:757
-#: inc/admin-ui.php:761 inc/admin-ui.php:1284
+#: inc/admin-ui.php:118 inc/admin-ui.php:129 inc/admin-ui.php:743
+#: inc/admin-ui.php:747
 msgid "Error:"
 msgstr "Ошибка:"
 
-#: inc/admin-ui.php:120 inc/admin-ui.php:765
+#: inc/admin-ui.php:120
 msgid "Page"
 msgstr "Страница"
 
-#: inc/admin-ui.php:121 inc/admin-ui.php:766
+#: inc/admin-ui.php:121
 msgid "of"
 msgstr "из"
 
-#: inc/admin-ui.php:122 inc/admin-ui.php:767
+#: inc/admin-ui.php:122 inc/admin-ui.php:750
 msgid "Done"
 msgstr "Готово"
 
-#: inc/admin-ui.php:123 inc/admin-ui.php:768 inc/admin-ui.php:779
-#: inc/admin-ui.php:2449
+#: inc/admin-ui.php:123 inc/admin-ui.php:761 inc/admin-ui.php:2355
 msgid "Updated"
 msgstr "Обновлено"
 
-#: inc/admin-ui.php:124 inc/admin-ui.php:769 inc/admin-ui.php:780
-#: inc/admin-ui.php:2450
+#: inc/admin-ui.php:124 inc/admin-ui.php:751 inc/admin-ui.php:762
+#: inc/admin-ui.php:2356
 msgid "Not found"
 msgstr "Не найдено"
 
-#: inc/admin-ui.php:126 inc/admin-ui.php:756
+#: inc/admin-ui.php:126
 #, php-format
 msgid "OK: processed %1$s, not found %2$s"
 msgstr "ОК: обработано %1$s, не найдено %2$s"
 
-#: inc/admin-ui.php:128 inc/admin-ui.php:760
+#: inc/admin-ui.php:128 inc/admin-ui.php:746
 msgid "Working…"
 msgstr "Выполнение…"
 
-#: inc/admin-ui.php:131 inc/admin-ui.php:763
+#: inc/admin-ui.php:131
 msgid "OK"
 msgstr "ОК"
 
-#: inc/admin-ui.php:135 inc/admin-ui.php:1549 inc/admin-ui.php:2411
-#: inc/admin-ui.php:2502 inc/warehouse-map.php:71
+#: inc/admin-ui.php:135 inc/admin-ui.php:1455 inc/admin-ui.php:2317
+#: inc/admin-ui.php:2408 inc/warehouse-map.php:71
 msgid "You do not have sufficient permissions to access this page."
 msgstr "У вас недостаточно прав для доступа к этой странице."
 
@@ -302,14 +301,14 @@ msgid "Run movement"
 msgstr "Запустить по движению"
 
 #: inc/admin-ui.php:636
-msgid "Auto sync (paged)"
-msgstr "Автосинхронизация (постранично)"
+msgid "Automatic synchronization settings"
+msgstr "Настройки автоматической синхронизации"
 
 #: inc/admin-ui.php:641
 msgid "Enabled"
 msgstr "Включено"
 
-#: inc/admin-ui.php:647 inc/admin-ui.php:773
+#: inc/admin-ui.php:647 inc/admin-ui.php:755
 msgid "Mode"
 msgstr "Режим"
 
@@ -367,199 +366,167 @@ msgctxt "select: auto-sync strategy"
 msgid "Incremental (movement)"
 msgstr "Инкрементально (по движению)"
 
-#: inc/admin-ui.php:708
-msgid "Save auto sync"
-msgstr "Сохранить автосинхронизацию"
-
-#: inc/admin-ui.php:722
-msgid "FULL sync"
+#: inc/admin-ui.php:709
+msgid "FULL synchronization"
 msgstr "Полная синхронизация"
 
-#: inc/admin-ui.php:725
-msgid "Save FULL"
-msgstr "Сохранить полную синхронизацию"
+#: inc/admin-ui.php:712
+msgid "Save FULL settings"
+msgstr "Сохранить настройки полной синхронизации"
 
-#: inc/admin-ui.php:734
-msgid "MOVEMENT sync"
+#: inc/admin-ui.php:721
+msgid "Movement synchronization"
 msgstr "Синхронизация по движению"
 
-#: inc/admin-ui.php:737
-msgid "Save MOVEMENT"
-msgstr "Сохранить синхронизацию по движению"
+#: inc/admin-ui.php:724
+msgid "Save Movement settings"
+msgstr "Сохранить настройки синхронизации по движению"
 
-#: inc/admin-ui.php:770
+#: inc/admin-ui.php:752
 msgid "pages"
 msgstr "страниц"
 
-#: inc/admin-ui.php:771
+#: inc/admin-ui.php:753
 msgid "early stop"
 msgstr "досрочная остановка"
 
-#: inc/admin-ui.php:772
+#: inc/admin-ui.php:754
 msgid "unknown"
 msgstr "неизвестно"
 
-#: inc/admin-ui.php:774
+#: inc/admin-ui.php:756
 msgid "Batch"
 msgstr "Пакет"
 
-#: inc/admin-ui.php:775
+#: inc/admin-ui.php:757
 msgid "Next FULL run"
 msgstr "Следующий полный запуск"
 
-#: inc/admin-ui.php:776
+#: inc/admin-ui.php:758
 msgid "Last FULL run"
 msgstr "Последний полный запуск"
 
-#: inc/admin-ui.php:777
+#: inc/admin-ui.php:759
 msgid "Next MOVEMENT run"
 msgstr "Следующий запуск по движению"
 
-#: inc/admin-ui.php:778
+#: inc/admin-ui.php:760
 msgid "Last MOVEMENT run"
 msgstr "Последний запуск по движению"
 
-#: inc/admin-ui.php:781
+#: inc/admin-ui.php:763
 msgid "Last movement boundary"
 msgstr "Последняя граница движения"
 
-#: inc/admin-ui.php:782
+#: inc/admin-ui.php:764
 msgid "Saving..."
 msgstr "Сохранение…"
 
-#: inc/admin-ui.php:783 inc/admin-ui.php:1281
+#: inc/admin-ui.php:765
 msgid "Saved"
 msgstr "Сохранено"
 
-#: inc/admin-ui.php:784
+#: inc/admin-ui.php:766
 msgid "Error"
 msgstr "Ошибка"
 
-#: inc/admin-ui.php:785
-msgid "FULL configuration saved"
+#: inc/admin-ui.php:767
+msgid "FULL settings saved"
 msgstr "Настройки полной синхронизации сохранены"
 
-#: inc/admin-ui.php:786
-msgid "MOVEMENT configuration saved"
+#: inc/admin-ui.php:768
+msgid "Movement settings saved"
 msgstr "Настройки синхронизации по движению сохранены"
 
-#: inc/admin-ui.php:787
+#: inc/admin-ui.php:769
 msgid "Next run"
 msgstr "Следующий запуск"
 
-#: inc/admin-ui.php:1032
-msgid "Next run:"
-msgstr "Следующий запуск:"
-
-#: inc/admin-ui.php:1042
-msgid "FULL"
-msgstr "полный"
-
-#: inc/admin-ui.php:1044
-msgid "MOVEMENT"
-msgstr "по движению"
-
-#: inc/admin-ui.php:1050
-msgid "Last run:"
-msgstr "Последний запуск:"
-
-#: inc/admin-ui.php:1053
-msgid "updated"
-msgstr "Обновлено"
-
-#: inc/admin-ui.php:1055
-msgid "not found"
-msgstr "Не найдено"
-
-#: inc/admin-ui.php:1073
-msgid "Last serverTo:"
-msgstr "Последний синхр в:"
-
-#: inc/admin-ui.php:1520 inc/admin-ui.php:1521 inc/admin-ui.php:1553
+#: inc/admin-ui.php:1426 inc/admin-ui.php:1427 inc/admin-ui.php:1459
 msgid "Lavka Reports"
 msgstr "Отчёты Lavka"
 
-#: inc/admin-ui.php:1557 inc/admin-ui.php:2445
+#: inc/admin-ui.php:1463 inc/admin-ui.php:2351
 msgid "Supplier"
 msgstr "Поставщик"
 
-#: inc/admin-ui.php:1561
+#: inc/admin-ui.php:1467
 msgid "Warehouse"
 msgstr "Склад"
 
-#: inc/admin-ui.php:1565
+#: inc/admin-ui.php:1471
 msgid "Refresh"
 msgstr "Обновить"
 
-#: inc/admin-ui.php:1571
+#: inc/admin-ui.php:1477
 msgid "Data"
 msgstr "Данные"
 
-#: inc/admin-ui.php:1576
+#: inc/admin-ui.php:1482
 msgid "Title"
 msgstr "Название"
 
-#: inc/admin-ui.php:1577 inc/admin-ui.php:2446
+#: inc/admin-ui.php:1483 inc/admin-ui.php:2352
 msgid "Stock"
 msgstr "Остаток"
 
-#: inc/admin-ui.php:1578
+#: inc/admin-ui.php:1484
 msgid "Price"
 msgstr "Цена"
 
-#: inc/admin-ui.php:2400 inc/admin-ui.php:2431
+#: inc/admin-ui.php:2306 inc/admin-ui.php:2337
 msgid "Lavka Logs"
 msgstr "Журнал Lavka"
 
-#: inc/admin-ui.php:2401
+#: inc/admin-ui.php:2307
 msgid "Logs"
 msgstr "Логи"
 
-#: inc/admin-ui.php:2435
+#: inc/admin-ui.php:2341
 msgid "Export CSV"
 msgstr "Экспорт CSV"
 
-#: inc/admin-ui.php:2442 inc/warehouse-map.php:116
+#: inc/admin-ui.php:2348 inc/warehouse-map.php:116
 msgid "ID"
 msgstr "ID"
 
-#: inc/admin-ui.php:2443
+#: inc/admin-ui.php:2349
 msgid "Time (UTC)"
 msgstr "Время (UTC)"
 
-#: inc/admin-ui.php:2444
+#: inc/admin-ui.php:2350
 msgid "Action"
 msgstr "Действие"
 
-#: inc/admin-ui.php:2447
+#: inc/admin-ui.php:2353
 msgid "Dry"
 msgstr "Пробный"
 
-#: inc/admin-ui.php:2448
+#: inc/admin-ui.php:2354
 msgid "Changed, h"
 msgstr "Изменения, ч"
 
-#: inc/admin-ui.php:2451
+#: inc/admin-ui.php:2357
 msgid "ms"
 msgstr "мс"
 
-#: inc/admin-ui.php:2452
+#: inc/admin-ui.php:2358
 msgid "Status"
 msgstr "Статус"
 
-#: inc/admin-ui.php:2453
+#: inc/admin-ui.php:2359
 msgid "Message"
 msgstr "Сообщение"
 
-#: inc/admin-ui.php:2468
+#: inc/admin-ui.php:2374
 msgid "yes"
 msgstr "да"
 
-#: inc/admin-ui.php:2468
+#: inc/admin-ui.php:2374
 msgid "no"
 msgstr "нет"
 
-#: inc/admin-ui.php:2477
+#: inc/admin-ui.php:2383
 msgid "No logs yet."
 msgstr "Логов пока нет."
 
@@ -635,6 +602,48 @@ msgstr "Сохранить соответствия"
 #, php-format
 msgid "Lavka Sync: file %s is missing."
 msgstr "Lavka Sync: файл %s отсутствует."
+
+#~ msgid "Auto sync (paged)"
+#~ msgstr "Автосинхронизация (постранично)"
+
+#~ msgid "Save auto sync"
+#~ msgstr "Сохранить автосинхронизацию"
+
+#~ msgid "FULL sync"
+#~ msgstr "Полная синхронизация"
+
+#~ msgid "Save FULL"
+#~ msgstr "Сохранить полную синхронизацию"
+
+#~ msgid "MOVEMENT sync"
+#~ msgstr "Синхронизация по движению"
+
+#~ msgid "Save MOVEMENT"
+#~ msgstr "Сохранить синхронизацию по движению"
+
+#~ msgid "MOVEMENT configuration saved"
+#~ msgstr "Настройки синхронизации по движению сохранены"
+
+#~ msgid "Next run:"
+#~ msgstr "Следующий запуск:"
+
+#~ msgid "FULL"
+#~ msgstr "полный"
+
+#~ msgid "MOVEMENT"
+#~ msgstr "по движению"
+
+#~ msgid "Last run:"
+#~ msgstr "Последний запуск:"
+
+#~ msgid "updated"
+#~ msgstr "Обновлено"
+
+#~ msgid "not found"
+#~ msgstr "Не найдено"
+
+#~ msgid "Last serverTo:"
+#~ msgstr "Последний синхр в:"
 
 #~ msgctxt "heading: manual movement section"
 #~ msgid "Incremental (movement"
