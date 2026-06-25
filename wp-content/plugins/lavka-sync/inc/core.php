@@ -67,6 +67,19 @@ function lavka_sync_run_dbdelta(){
   dbDelta($sql);
 }
 
+function lavka_sync_grant_capabilities(): void {
+    foreach (['administrator','shop_manager','lavka_manager'] as $role_name) {
+        if ($role = get_role($role_name)) {
+            if (!$role->has_cap('manage_lavka_sync')) {
+                $role->add_cap('manage_lavka_sync');
+            }
+            if (!$role->has_cap('view_lavka_reports')) {
+                $role->add_cap('view_lavka_reports');
+            }
+        }
+    }
+}
+
 /** Разрешаем Application Passwords в локалке/HTTP (если нужно) */
 add_filter('wp_is_application_passwords_available', function ($available) {
     if ($available) return true;
@@ -87,13 +100,7 @@ register_activation_hook(dirname(__DIR__) . '/lavka-sync.php', function () {
     if ($base && !get_role('lavka_manager')) {
         add_role('lavka_manager', 'Lavka Manager', $base->capabilities);
     }
-    // Права
-    foreach (['shop_manager','lavka_manager','administrator'] as $role) {
-        if ($r = get_role($role)) {
-            $r->add_cap('manage_lavka_sync');
-            $r->add_cap('view_lavka_reports');
-        }
-    }
+    lavka_sync_grant_capabilities();
 
     // Таблица логов
     global $wpdb;
@@ -122,14 +129,7 @@ register_activation_hook(dirname(__DIR__) . '/lavka-sync.php', function () {
 });
 
 /** На всякий случай — дожимаем капы на init */
-add_action('init', function () {
-    foreach (['administrator','shop_manager','lavka_manager'] as $role_name) {
-        if ($role = get_role($role_name)) {
-            if (!$role->has_cap('manage_lavka_sync'))   $role->add_cap('manage_lavka_sync');
-            if (!$role->has_cap('view_lavka_reports'))  $role->add_cap('view_lavka_reports');
-        }
-    }
-});
+add_action('init', 'lavka_sync_grant_capabilities');
 
 /* =========================
  * ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
@@ -298,12 +298,3 @@ function lavka_write_stock_for_sku(string $sku, array $lines, array $opts): arra
         'dry'        => !empty($opts['dry']),
     ];
 }
-
-add_action('init', function () {
-    foreach (['administrator','shop_manager','lavka_manager'] as $role_name) {
-        if ($r = get_role($role_name)) {
-            $r->add_cap('manage_lavka_sync');
-            $r->add_cap('view_lavka_reports');
-        }
-    }
-});
