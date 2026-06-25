@@ -353,9 +353,33 @@ add_action('admin_init', function () {
  */
 function lavka_get_locations_mapping_for_java(): array {
     if (!function_exists('rest_do_request')) return [];
+
     $req  = new WP_REST_Request('GET', '/lavka/v1/locations/map');
     $resp = rest_do_request($req);
+
+   
+
+    file_put_contents(
+
+        WP_CONTENT_DIR . '/lavka-debug.log',
+
+        "\n================ REST RESPONSE ================\n" .
+
+        print_r($resp, true) . "\n",
+
+        FILE_APPEND
+
+    );
+
     $data = is_wp_error($resp) ? [] : $resp->get_data();
+
+    file_put_contents(
+        WP_CONTENT_DIR . '/lavka-debug.log',
+        "REST DATA:\n" .
+        print_r($data, true) . "\n",
+        FILE_APPEND
+    );
+
     $items = [];
     foreach (($data['items'] ?? []) as $row) {
         $tid   = (int)($row['id'] ?? $row['term_id'] ?? 0);
