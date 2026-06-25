@@ -348,6 +348,18 @@ add_action('admin_init', function () {
 });
 
 /**
+ * Builds the warehouse mapping for Java synchronization.
+ *
+ * IMPORTANT:
+ * This function intentionally reads data directly from the local
+ * WordPress database instead of calling the internal REST endpoint.
+ *
+ * The REST endpoint is intended for external clients (Java service).
+ * During WP-Cron execution there is no authenticated user, therefore
+ * calling the internal REST route would fail with HTTP 401.
+ */
+
+/**
  * Забрать маппинг локаций -> коды MS для запроса в Java.
  * Возвращает массив вида: [{id, codes:[...]}]
  */
@@ -449,6 +461,84 @@ function lavka_calc_movement_from(array $auto_cfg, ?string $last_server_to_iso):
     );
 }
 
+/**
+ * Human-readable schedule description.
+ *
+ * Examples:
+ *  - Every 5 minutes
+ *  - Every 2 hours
+ *  - Daily at 13:20
+ *  - Mon, Wed, Fri at 13:20
+ *  - Dates: 1,10,20 at 13:20
+ */
+function lavka_schedule_to_text(array $cfg): string
+{
+    $mode = $cfg['mode'] ?? 'interval';
+
+    switch ($mode) {
+
+        case 'interval':
+            $min = max(1, (int)($cfg['interval'] ?? 60));
+
+            if ($min < 60) {
+                return sprintf(__('Every %d minute(s)', 'lavka-sync'), $min);
+            }
+
+            if ($min % 60 === 0) {
+                return sprintf(__('Every %d hour(s)', 'lavka-sync'), $min / 60);
+            }
+
+            $h = intdiv($min, 60);
+            $m = $min % 60;
+
+            return sprintf(
+                __('Every %dh %02dm', 'lavka-sync'),
+                $h,
+                $m
+            );
+
+        case 'daily':
+            return sprintf(
+                __('Daily at %s', 'lavka-sync'),
+                $cfg['time'] ?? '--:--'
+            );
+
+        case 'weekly':
+
+            $daysMap = [
+                1 => __('Mon', 'lavka-sync'),
+                2 => __('Tue', 'lavka-sync'),
+                3 => __('Wed', 'lavka-sync'),
+                4 => __('Thu', 'lavka-sync'),
+                5 => __('Fri', 'lavka-sync'),
+                6 => __('Sat', 'lavka-sync'),
+                7 => __('Sun', 'lavka-sync'),
+            ];
+
+            $days = [];
+            foreach ((array)($cfg['days'] ?? []) as $d) {
+                if (isset($daysMap[$d])) {
+                    $days[] = $daysMap[$d];
+                }
+            }
+
+            return sprintf(
+                __('%s at %s', 'lavka-sync'),
+                implode(', ', $days),
+                $cfg['time'] ?? '--:--'
+            );
+
+        case 'dates':
+
+            return sprintf(
+                __('Dates: %s at %s', 'lavka-sync'),
+                implode(', ', (array)($cfg['dates'] ?? [])),
+                $cfg['time'] ?? '--:--'
+            );
+    }
+
+    return __('Unknown', 'lavka-sync');
+}
 
 function lavka_sync_render_page() {
     if (!current_user_can('manage_lavka_sync')) return;
@@ -994,6 +1084,12 @@ async function loadFullSettings() {
 
       let html = '';
 
+      if (d.schedule_text) {
+          html += 'Режим: ' + d.schedule_text;
+          html += '<br>Batch: ' + (d.batch || 0);
+          html += '<br><br>';
+      }
+
       if (d.next_ts) {
         html += 'Наступний запуск FULL: ' + new Date(d.next_ts * 1000).toLocaleString();
       }
@@ -1032,6 +1128,12 @@ async function loadMovementSettings() {
     if (movInfo) {
 
       let html = '';
+
+      if (d.schedule_text) {
+          html += 'Режим: ' + d.schedule_text;
+          html += '<br>Batch: ' + (d.batch || 0);
+          html += '<br><br>';
+      }
 
       if (d.next_ts) {
         html += 'Наступний запуск MOVEMENT: ' + new Date(d.next_ts * 1000).toLocaleString();
@@ -2007,6 +2109,7 @@ add_action('wp_ajax_lavka_auto_get_full', function () {
         [
             'next_ts'  => $next ?: null,
             'last_run' => $last_run ?: null,
+            'schedule_text' => lavka_schedule_to_text($cfg),
         ]
     ));
 });
@@ -2042,6 +2145,7 @@ add_action('wp_ajax_lavka_auto_get_movement', function () {
             'next_ts'  => $next ?: null,
             'last_run' => $last_run ?: null,
             'last_to'  => get_option(LAVKA_LAST_TO_OPTION, '') ?: null,
+            'schedule_text' => lavka_schedule_to_text($cfg),
         ]
     ));
 });
