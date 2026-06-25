@@ -684,7 +684,7 @@ function lavka_sync_render_page() {
 
           <span id="lavka-auto-dates-wrap" style="display:none;margin-right:10px;">
             <?php echo esc_html__('Dates (comma-separated DD)', 'lavka-sync'); ?>:
-            <input type="text" id="lavka-auto-dates" placeholder="1, 10, 28" style="width:10rem">
+            <input type="text" id="lavka-auto-dates" placeholder="<?php echo esc_attr__('1, 10, 28', 'lavka-sync'); ?>" style="width:10rem">
           </span>
 
           <label>
@@ -719,10 +719,10 @@ function lavka_sync_render_page() {
 
       <hr style="margin:20px 0">
 
-      <h3>FULL sync</h3>
+      <h3><?php echo esc_html__('FULL sync', 'lavka-sync'); ?></h3>
       <p>
         <button class="button button-secondary" id="lavka-auto-save-full">
-          Save FULL
+          <?php echo esc_html__('Save FULL', 'lavka-sync'); ?>
         </button>
         <span id="lavka-auto-full-status" style="margin-left:10px;"></span>
       </p>
@@ -731,10 +731,10 @@ function lavka_sync_render_page() {
 
       <hr style="margin:20px 0">
 
-      <h3>MOVEMENT sync</h3>
+      <h3><?php echo esc_html__('MOVEMENT sync', 'lavka-sync'); ?></h3>
       <p>
         <button class="button button-secondary" id="lavka-auto-save-movement">
-          Save MOVEMENT
+          <?php echo esc_html__('Save MOVEMENT', 'lavka-sync'); ?>
         </button>
         <span id="lavka-auto-movement-status" style="margin-left:10px;"></span>
       </p>
@@ -767,6 +767,24 @@ function lavka_sync_render_page() {
       'i18n_done'         => esc_html__('Done', 'lavka-sync'),
       'i18n_updated'      => esc_html__('Updated', 'lavka-sync'),
       'i18n_not_found'    => esc_html__('Not found', 'lavka-sync'),
+      'i18n_pages'        => esc_html__('pages', 'lavka-sync'),
+      'i18n_early_stop'   => esc_html__('early stop', 'lavka-sync'),
+      'i18n_unknown'      => esc_html__('unknown', 'lavka-sync'),
+      'i18n_mode'         => esc_html__('Mode', 'lavka-sync'),
+      'i18n_batch'        => esc_html__('Batch', 'lavka-sync'),
+      'i18n_next_full'    => esc_html__('Next FULL run', 'lavka-sync'),
+      'i18n_last_full'    => esc_html__('Last FULL run', 'lavka-sync'),
+      'i18n_next_movement'=> esc_html__('Next MOVEMENT run', 'lavka-sync'),
+      'i18n_last_movement'=> esc_html__('Last MOVEMENT run', 'lavka-sync'),
+      'i18n_updated_label'=> esc_html__('Updated', 'lavka-sync'),
+      'i18n_not_found_label'=> esc_html__('Not found', 'lavka-sync'),
+      'i18n_last_movement_boundary'=> esc_html__('Last movement boundary', 'lavka-sync'),
+      'i18n_saving_dots'  => esc_html__('Saving...', 'lavka-sync'),
+      'i18n_saved'        => esc_html__('Saved', 'lavka-sync'),
+      'i18n_error_plain'  => esc_html__('Error', 'lavka-sync'),
+      'i18n_full_saved'   => esc_html__('FULL configuration saved', 'lavka-sync'),
+      'i18n_movement_saved'=> esc_html__('MOVEMENT configuration saved', 'lavka-sync'),
+      'i18n_next_run'     => esc_html__('Next run', 'lavka-sync'),
     ];
   ?>
   <script>
@@ -853,7 +871,7 @@ function lavka_sync_render_page() {
 
     console.log('OK:', d);
   } else {
-    status.textContent = `${LAVKA_I18N.i18n_error_prefix} ${j?.data?.error || 'unknown'}`;
+    status.textContent = `${LAVKA_I18N.i18n_error_prefix} ${j?.data?.error || LAVKA_I18N.i18n_unknown}`;
     console.warn('AJAX fail:', j);
   }
 
@@ -943,7 +961,7 @@ function lavka_sync_render_page() {
 
         console.log('OK:', d);
       } else {
-        status.textContent = `${LAVKA_I18N.i18n_error_prefix} ${j?.data?.error || 'unknown'}`;
+        status.textContent = `${LAVKA_I18N.i18n_error_prefix} ${j?.data?.error || LAVKA_I18N.i18n_unknown}`;
         console.warn('AJAX fail:', j);
       }
 
@@ -1085,21 +1103,21 @@ async function loadFullSettings() {
       let html = '';
 
       if (d.schedule_text) {
-          html += 'Режим: ' + d.schedule_text;
-          html += '<br>Batch: ' + (d.batch || 0);
+          html += LAVKA_I18N.i18n_mode + ': ' + d.schedule_text;
+          html += '<br>' + LAVKA_I18N.i18n_batch + ': ' + (d.batch || 0);
           html += '<br><br>';
       }
 
       if (d.next_ts) {
-        html += 'Наступний запуск FULL: ' + new Date(d.next_ts * 1000).toLocaleString();
+        html += LAVKA_I18N.i18n_next_full + ': ' + new Date(d.next_ts * 1000).toLocaleString();
       }
 
       if (d.last_run && d.last_run.ts) {
         html += (html ? '<br>' : '')
-          + 'Останній запуск FULL: '
+          + LAVKA_I18N.i18n_last_full + ': '
           + new Date(d.last_run.ts.replace(' ', 'T') + 'Z').toLocaleString()
-          + ' (Оновлено=' + (d.last_run.updated || 0)
-          + ', Не знайдено=' + (d.last_run.not_found || 0) + ')';
+          + ' (' + LAVKA_I18N.i18n_updated_label + '=' + (d.last_run.updated || 0)
+          + ', ' + LAVKA_I18N.i18n_not_found_label + '=' + (d.last_run.not_found || 0) + ')';
       }
 
       fullInfo.innerHTML = html;
@@ -1130,21 +1148,21 @@ async function loadMovementSettings() {
       let html = '';
 
       if (d.schedule_text) {
-          html += 'Режим: ' + d.schedule_text;
-          html += '<br>Batch: ' + (d.batch || 0);
+          html += LAVKA_I18N.i18n_mode + ': ' + d.schedule_text;
+          html += '<br>' + LAVKA_I18N.i18n_batch + ': ' + (d.batch || 0);
           html += '<br><br>';
       }
 
       if (d.next_ts) {
-        html += 'Наступний запуск MOVEMENT: ' + new Date(d.next_ts * 1000).toLocaleString();
+        html += LAVKA_I18N.i18n_next_movement + ': ' + new Date(d.next_ts * 1000).toLocaleString();
       }
 
       if (d.last_run && d.last_run.ts) {
         html += (html ? '<br>' : '')
-          + 'Останній запуск MOVEMENT: '
+          + LAVKA_I18N.i18n_last_movement + ': '
           + new Date(d.last_run.ts.replace(' ', 'T') + 'Z').toLocaleString()
-          + ' (Оновлено=' + (d.last_run.updated || 0)
-          + ', Не знайдено=' + (d.last_run.not_found || 0) + ')';
+          + ' (' + LAVKA_I18N.i18n_updated_label + '=' + (d.last_run.updated || 0)
+          + ', ' + LAVKA_I18N.i18n_not_found_label + '=' + (d.last_run.not_found || 0) + ')';
       }
 
       if (d.last_to) {
@@ -1159,7 +1177,7 @@ async function loadMovementSettings() {
           }
 
           html += (html ? '<br>' : '')
-              + 'Остання межа movement: '
+              + LAVKA_I18N.i18n_last_movement_boundary + ': '
               + txt;
       }
 
@@ -1179,7 +1197,7 @@ loadMovementSettings();
   const movementExtra = document.getElementById('lavka-movement-extra');
 
   btnSaveFull?.addEventListener('click', async () => {
-    fullStatus.textContent = 'Saving...';
+    fullStatus.textContent = LAVKA_I18N.i18n_saving_dots;
 
     const payload = {
       enabled: elEnabled.checked ? '1' : '0',
@@ -1194,14 +1212,14 @@ loadMovementSettings();
     const j = await autoAjax('lavka_auto_save_full', payload);
 
     if (j?.success) {
-      fullStatus.textContent = 'Saved';
+      fullStatus.textContent = LAVKA_I18N.i18n_saved;
 
       if (fullExtra) {
 
-          let html = 'FULL configuration saved';
+          let html = LAVKA_I18N.i18n_full_saved;
 
           if (j.data?.next_ts) {
-              html += '<br>Наступний запуск: '
+              html += '<br>' + LAVKA_I18N.i18n_next_run + ': '
                   + new Date(j.data.next_ts * 1000).toLocaleString();
           }
 
@@ -1210,12 +1228,12 @@ loadMovementSettings();
 
       await loadFullSettings();
     } else {
-      fullStatus.textContent = 'Error';
+      fullStatus.textContent = LAVKA_I18N.i18n_error_plain;
     }
   });
 
   btnSaveMovement?.addEventListener('click', async () => {
-    movementStatus.textContent = 'Saving...';
+    movementStatus.textContent = LAVKA_I18N.i18n_saving_dots;
 
     const payload = {
       enabled: elEnabled.checked ? '1' : '0',
@@ -1230,18 +1248,18 @@ loadMovementSettings();
     const j = await autoAjax('lavka_auto_save_movement', payload);
 
     if (j?.success) {
-      movementStatus.textContent = 'Saved';
+      movementStatus.textContent = LAVKA_I18N.i18n_saved;
       await loadMovementSettings();
 
       if (movementExtra) {
         movementExtra.innerHTML =
-          'MOVEMENT configuration saved' +
+          LAVKA_I18N.i18n_movement_saved +
           (j.data?.next_ts
-            ? '<br>Next run: ' + new Date(j.data.next_ts * 1000).toLocaleString()
+            ? '<br>' + LAVKA_I18N.i18n_next_run + ': ' + new Date(j.data.next_ts * 1000).toLocaleString()
             : '');
       }
     } else {
-      movementStatus.textContent = 'Error';
+      movementStatus.textContent = LAVKA_I18N.i18n_error_plain;
     }
   });
 
@@ -1263,7 +1281,7 @@ loadMovementSettings();
         elStatus.textContent = "<?php echo esc_js(__('Saved', 'lavka-sync')); ?>";
         fill(j.data || {});
       } else {
-        elStatus.textContent = "<?php echo esc_js(__('Error:', 'lavka-sync')); ?> " + (j?.data?.error || 'unknown');
+        elStatus.textContent = "<?php echo esc_js(__('Error:', 'lavka-sync')); ?> " + (j?.data?.error || LAVKA_I18N.i18n_unknown);
       }
     } catch(e){
       console.error(e);
@@ -1313,10 +1331,10 @@ loadMovementSettings();
     st.textContent =
       `${LAVKA_I18N.i18n_done}: ${d.updated||0}, ` +
       `${LAVKA_I18N.i18n_not_found} ${d.not_found||0}, ` +
-      `pages ${d.pages||0}` + (d.earlyStop ? ' (early stop)' : '');
+      `${LAVKA_I18N.i18n_pages} ${d.pages||0}` + (d.earlyStop ? ` (${LAVKA_I18N.i18n_early_stop})` : '');
     console.log('OK (movement):', d);
   } else {
-    st.textContent = `${LAVKA_I18N.i18n_error} ${j?.data?.error || 'unknown'}`;
+    st.textContent = `${LAVKA_I18N.i18n_error} ${j?.data?.error || LAVKA_I18N.i18n_unknown}`;
     console.warn('AJAX fail (movement):', j);
   }
 } catch (e) {
