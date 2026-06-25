@@ -982,14 +982,16 @@ function lavka_sync_render_page() {
         actionName = "<?php echo esc_js(__('MOVEMENT', 'lavka-sync')); ?>";
       }
 
+      const dt = new Date(o.last_run.ts.replace(' ', 'T') + 'Z');
+
       elLastRun.textContent =
-        "<?php echo esc_js(__('Last run:', 'lavka-sync')); ?> " +
-        o.last_run.ts +
-        " (" + actionName + ")" +
-        ", <?php echo esc_js(__('updated', 'lavka-sync')); ?>=" +
-        (o.last_run.updated || 0) +
-        ", <?php echo esc_js(__('not found', 'lavka-sync')); ?>=" +
-        (o.last_run.not_found || 0);
+          "<?php echo esc_js(__('Last run:', 'lavka-sync')); ?> " +
+          dt.toLocaleString() +
+          " (" + actionName + ")" +
+          ", <?php echo esc_js(__('updated', 'lavka-sync')); ?>=" +
+          (o.last_run.updated || 0) +
+          ", <?php echo esc_js(__('not found', 'lavka-sync')); ?>=" +
+          (o.last_run.not_found || 0);
 
     } else {
 
@@ -1045,7 +1047,7 @@ async function loadFullSettings() {
       if (d.last_run && d.last_run.ts) {
         html += (html ? '<br>' : '')
           + 'Останній запуск FULL: '
-          + d.last_run.ts
+          + new Date(d.last_run.ts.replace(' ', 'T') + 'Z').toLocaleString()
           + ' (Оновлено=' + (d.last_run.updated || 0)
           + ', Не знайдено=' + (d.last_run.not_found || 0) + ')';
       }
@@ -1084,7 +1086,7 @@ async function loadMovementSettings() {
       if (d.last_run && d.last_run.ts) {
         html += (html ? '<br>' : '')
           + 'Останній запуск MOVEMENT: '
-          + d.last_run.ts
+          + new Date(d.last_run.ts.replace(' ', 'T') + 'Z').toLocaleString()
           + ' (Оновлено=' + (d.last_run.updated || 0)
           + ', Не знайдено=' + (d.last_run.not_found || 0) + ')';
       }
@@ -2045,12 +2047,7 @@ add_action('wp_ajax_lavka_auto_get_full', function () {
         ARRAY_A
     );
 
-    if (!empty($last_run['ts'])) {
-        $dt = new DateTime($last_run['ts'], new DateTimeZone('UTC'));
-        $dt->setTimezone(wp_timezone());
-        $last_run['ts'] = $dt->format('Y-m-d H:i:s');
-    }
-
+// Отдаём как есть (UTC из БД). Локализацию выполняет JavaScript.
     wp_send_json_success(array_merge(
         $cfg,
         [
@@ -2084,12 +2081,6 @@ add_action('wp_ajax_lavka_auto_get_movement', function () {
         ",
         ARRAY_A
     );
-
-    if (!empty($last_run['ts'])) {
-        $dt = new DateTime($last_run['ts'], new DateTimeZone('UTC'));
-        $dt->setTimezone(wp_timezone());
-        $last_run['ts'] = $dt->format('Y-m-d H:i:s');
-    }
 
     wp_send_json_success(array_merge(
         $cfg,
