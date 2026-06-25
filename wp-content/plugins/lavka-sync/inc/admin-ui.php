@@ -704,19 +704,6 @@ function lavka_sync_render_page() {
           </label>
         </p>
 
-        <p>
-          <button class="button button-primary" id="lavka-auto-save"><?php echo esc_html__('Save auto sync', 'lavka-sync'); ?></button>
-          <span id="lavka-auto-status" style="margin-left:10px;"></span>
-        </p>
-      <p id="lavka-auto-next" style="opacity:.8"></p>
-      <p id="lavka-auto-lastrun" style="opacity:.8"></p>
-      <p id="lavka-auto-lastto" style="opacity:.8"></p>
-
-      <hr style="margin:10px 0">
-
-      <div id="lavka-full-info" style="opacity:.8"></div>
-      <div id="lavka-mov-info" style="opacity:.8;margin-top:4px"></div>
-
       <hr style="margin:20px 0">
 
       <h3><?php echo esc_html__('FULL sync', 'lavka-sync'); ?></h3>
@@ -990,12 +977,7 @@ function lavka_sync_render_page() {
   const wTime     = document.getElementById('lavka-auto-time-wrap');
   const wDow      = document.getElementById('lavka-auto-dow-wrap');
   const wDates    = document.getElementById('lavka-auto-dates-wrap');
-  const elSave    = document.getElementById('lavka-auto-save');
-  const elStatus  = document.getElementById('lavka-auto-status');
-  const elNext    = document.getElementById('lavka-auto-next');
   const elStrategy = document.getElementById('lavka-auto-strategy');
-  const elLastTo   = document.getElementById('lavka-auto-lastto');
-  const elLastRun  = document.getElementById('lavka-auto-lastrun');
 
   function toggleByMode(){
     const m = elMode.value;
@@ -1027,53 +1009,7 @@ function lavka_sync_render_page() {
     elDates.value     = (o.dates || []).join(', ');
     elDows.forEach(ch => ch.checked = (o.days || []).includes(parseInt(ch.value,10)));
     toggleByMode();
-    if (o.next_ts) {
-      const d = new Date(o.next_ts * 1000);
-      elNext.textContent = "<?php echo esc_js(__('Next run:', 'lavka-sync')); ?> " + d.toLocaleString();
-    } else {
-      elNext.textContent = '';
-    }
     elStrategy.value = (o.strategy || 'full');
-    if (o.last_run && o.last_run.ts) {
-
-      let actionName = o.last_run.action;
-
-      if (actionName === 'auto_pull_all') {
-        actionName = "<?php echo esc_js(__('FULL', 'lavka-sync')); ?>";
-      } else if (actionName === 'auto_movement') {
-        actionName = "<?php echo esc_js(__('MOVEMENT', 'lavka-sync')); ?>";
-      }
-
-      const dt = new Date(o.last_run.ts.replace(' ', 'T') + 'Z');
-
-      elLastRun.textContent =
-          "<?php echo esc_js(__('Last run:', 'lavka-sync')); ?> " +
-          dt.toLocaleString() +
-          " (" + actionName + ")" +
-          ", <?php echo esc_js(__('updated', 'lavka-sync')); ?>=" +
-          (o.last_run.updated || 0) +
-          ", <?php echo esc_js(__('not found', 'lavka-sync')); ?>=" +
-          (o.last_run.not_found || 0);
-
-    } else {
-
-      elLastRun.textContent = "";
-
-    }
-    if (o.last_to) {
-      const raw = o.last_to;
-      let txt = '';
-      if (typeof raw === 'number' || /^\d+(\.\d+)?$/.test(String(raw))) {
-        const d = new Date(Math.floor(Number(raw)) * 1000);
-        txt = d.toLocaleString();
-      } else {
-        const d = new Date(String(raw));
-        txt = isNaN(d.getTime()) ? String(raw) : d.toLocaleString();
-      }
-      elLastTo.textContent = "<?php echo esc_js(__('Last serverTo:', 'lavka-sync')); ?> " + txt;
-    } else {
-      elLastTo.textContent = "";
-    }
   }
 
   // load current
@@ -1263,31 +1199,6 @@ loadMovementSettings();
     }
   });
 
-  elSave?.addEventListener('click', async ()=>{
-    elStatus.textContent = "<?php echo esc_js(__('Saving…', 'lavka-sync')); ?>";
-    try{
-      const payload = {
-        enabled: elEnabled.checked ? '1':'0',
-        mode: elMode.value,
-        interval: elInterval.value,
-        time: elTime.value,
-        batch: elBatch.value,
-        dates: elDates.value,
-        days: elDows.filter(x=>x.checked).map(x=>x.value),
-        strategy: elStrategy.value,
-      };
-      const j = await autoAjax('lavka_auto_save', payload);
-      if (j?.success) {
-        elStatus.textContent = "<?php echo esc_js(__('Saved', 'lavka-sync')); ?>";
-        fill(j.data || {});
-      } else {
-        elStatus.textContent = "<?php echo esc_js(__('Error:', 'lavka-sync')); ?> " + (j?.data?.error || LAVKA_I18N.i18n_unknown);
-      }
-    } catch(e){
-      console.error(e);
-      elStatus.textContent = "<?php echo esc_js(__('Network error', 'lavka-sync')); ?>";
-    }
-  });
 })();
 </script>
 <script>
