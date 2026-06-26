@@ -64,7 +64,7 @@ function lavka_sync_java_query_and_apply(array $skus, array $opts = []): array {
         'skus'      => $skus,
         'locations' => $locations,
     ];
-    if (defined('WP_DEBUG') && WP_DEBUG) error_log('[lavka] stock query payload: '.wp_json_encode($payload));
+    lavka_sync_debug_log('[lavka] stock query payload: '.wp_json_encode($payload));
 
     $resp = wp_remote_post($url, [
         'timeout' => 160,

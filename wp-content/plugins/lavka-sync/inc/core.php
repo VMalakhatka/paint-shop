@@ -5,6 +5,22 @@ if (!defined('LAVKA_SYNC_OPTION')) {
     define('LAVKA_SYNC_OPTION', 'lavka_sync_options');
 }
 
+function lavka_sync_debug_enabled(): bool {
+    if (defined('LAVKA_SYNC_DEBUG_LOG')) {
+        return (bool) LAVKA_SYNC_DEBUG_LOG;
+    }
+
+    return defined('WP_DEBUG') && WP_DEBUG;
+}
+
+function lavka_sync_debug_log(string $message): void {
+    if (!lavka_sync_debug_enabled()) {
+        return;
+    }
+
+    error_log($message);
+}
+
 /** Опции плагина (единая точка правды) */
 if (!function_exists('lavka_sync_get_options')) {
     function lavka_sync_get_options(): array {

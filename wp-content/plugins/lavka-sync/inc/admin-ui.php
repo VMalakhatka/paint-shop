@@ -1353,7 +1353,7 @@ add_action('wp_ajax_lavka_pull_movement', function () {
     ]);
 
     if (empty($res['ok'])) {
-        error_log('[lavka] movement ajax fail: '.print_r($res,true));
+        lavka_sync_debug_log('[lavka] movement ajax fail: '.print_r($res,true));
         lavka_sync_lock_release_and_send_error($lock_token, ['error'=>$res['error'] ?? 'movement_error']);
     }
 

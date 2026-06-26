@@ -325,7 +325,7 @@ function lavka_java_movement_page(string $fromIso, int $page, int $pageSize): ar
     ];
 
     // ЛОГ: куда стучимся
-    error_log('[lavka] movement URL try: ' . $url);
+    lavka_sync_debug_log('[lavka] movement URL try: ' . $url);
 
     $resp = wp_remote_post($url, $args);
 
@@ -334,13 +334,13 @@ function lavka_java_movement_page(string $fromIso, int $page, int $pageSize): ar
         $code = wp_remote_retrieve_response_code($resp);
         if ($code === 404 && preg_match('#/movements/?$#', $path)) {
             $alt = $base . preg_replace('#/movements/?$#', '/movement', $path);
-            error_log('[lavka] movement URL fallback: ' . $alt);
+            lavka_sync_debug_log('[lavka] movement URL fallback: ' . $alt);
             $resp = wp_remote_post($alt, $args);
         }
     }
 
     if (is_wp_error($resp)) {
-        error_log('[lavka] movement error: ' . $resp->get_error_message());
+        lavka_sync_debug_log('[lavka] movement error: ' . $resp->get_error_message());
         return ['ok'=>false, 'error'=>$resp->get_error_message()];
     }
 
@@ -349,7 +349,7 @@ function lavka_java_movement_page(string $fromIso, int $page, int $pageSize): ar
     $json = json_decode($bodyRaw, true);
 
     if ($code < 200 || $code >= 300) {
-        error_log('[lavka] movement http='.$code.' body='.substr($bodyRaw,0,400));
+        lavka_sync_debug_log('[lavka] movement http='.$code.' body='.substr($bodyRaw,0,400));
         return ['ok'=>false, 'error'=>'java_'.$code, 'body'=>$json];
     }
 
