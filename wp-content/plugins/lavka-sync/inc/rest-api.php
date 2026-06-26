@@ -391,13 +391,7 @@ function lavka_sync_java_movement_apply_loop(array $args = []): array {
 
             unset($call);
 
-            if (isset($GLOBALS['wp_object_cache']->cache)) {
-                $GLOBALS['wp_object_cache']->cache = [];
-            }
-
-            if (function_exists('gc_collect_cycles')) {
-                gc_collect_cycles();
-            }
+            lavka_sync_release_memory();
 
             return [
                 'ok'    => false,
@@ -454,13 +448,7 @@ function lavka_sync_java_movement_apply_loop(array $args = []): array {
         unset($call);
         unset($d);
 
-        if (isset($GLOBALS['wp_object_cache']->cache)) {
-            $GLOBALS['wp_object_cache']->cache = [];
-        }
-
-        if (function_exists('gc_collect_cycles')) {
-            gc_collect_cycles();
-        }
+        lavka_sync_release_memory();
 
         if ($isLast) {
             break;

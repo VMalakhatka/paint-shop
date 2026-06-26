@@ -1990,14 +1990,7 @@ add_action('lavka_auto_pull_all', function () {
 
             unset($skus);
             unset($res);
-            if (isset($GLOBALS['wp_object_cache']->cache)) {
-
-                $GLOBALS['wp_object_cache']->cache = [];
-
-            }
-            if (function_exists('gc_collect_cycles')) {
-                gc_collect_cycles();
-            }
+            lavka_sync_release_memory();
             continue;
         }
 
@@ -2072,12 +2065,7 @@ add_action('lavka_auto_pull_all', function () {
         unset($notFoundRows);
         unset($res);
 
-        if (isset($GLOBALS['wp_object_cache']->cache)) {
-                $GLOBALS['wp_object_cache']->cache = [];
-        }
-        if (function_exists('gc_collect_cycles')) {
-            gc_collect_cycles();
-        }
+        lavka_sync_release_memory();
     }
 
     $durationMs = (int)round(

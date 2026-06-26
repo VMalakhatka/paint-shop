@@ -21,6 +21,16 @@ function lavka_sync_debug_log(string $message): void {
     error_log($message);
 }
 
+function lavka_sync_release_memory(): void {
+    if (isset($GLOBALS['wp_object_cache']->cache)) {
+        $GLOBALS['wp_object_cache']->cache = [];
+    }
+
+    if (function_exists('gc_collect_cycles')) {
+        gc_collect_cycles();
+    }
+}
+
 /** Опции плагина (единая точка правды) */
 if (!function_exists('lavka_sync_get_options')) {
     function lavka_sync_get_options(): array {
