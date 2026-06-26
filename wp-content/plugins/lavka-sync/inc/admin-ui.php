@@ -21,6 +21,78 @@ if (!defined('LAVKA_MOV_MAX_PAGESIZE')) define('LAVKA_MOV_MAX_PAGESIZE', 2000);
 if (!defined('LAVKA_MOV_OVERLAP_PCT'))  define('LAVKA_MOV_OVERLAP_PCT', 20); // overlap +20%
 if (!defined('LAVKA_MOV_EMPTY_BREAK')) define('LAVKA_MOV_EMPTY_BREAK', 2); // после 2 пустых подряд — стоп
 
+if (!defined('LAVKA_SYNC_LOCK_TTL_MANUAL')) define('LAVKA_SYNC_LOCK_TTL_MANUAL', 15 * MINUTE_IN_SECONDS);
+if (!defined('LAVKA_SYNC_LOCK_TTL_MOVEMENT')) define('LAVKA_SYNC_LOCK_TTL_MOVEMENT', 30 * MINUTE_IN_SECONDS);
+if (!defined('LAVKA_SYNC_LOCK_TTL_FULL')) define('LAVKA_SYNC_LOCK_TTL_FULL', 2 * HOUR_IN_SECONDS);
+
+function lavka_sync_lock_acquire(string $process, string $source, string $label, int $ttl): array {
+    if (!function_exists('lavka_ecosystem_lock_acquire')) {
+        return [
+            'ok'    => true,
+            'token' => null,
+            'lock'  => null,
+        ];
+    }
+
+    return lavka_ecosystem_lock_acquire(
+        'lavka-sync',
+        $process,
+        $source,
+        $label,
+        $ttl
+    );
+}
+
+function lavka_sync_lock_release(?string $token): void {
+    if ($token && function_exists('lavka_ecosystem_lock_release')) {
+        lavka_ecosystem_lock_release($token);
+    }
+}
+
+function lavka_sync_lock_send_json_error(array $lock_result): void {
+    if (function_exists('lavka_ecosystem_lock_send_json_error')) {
+        lavka_ecosystem_lock_send_json_error($lock_result['lock'] ?? null);
+    }
+
+    wp_send_json_error([
+        'error'   => 'lavka_sync_locked',
+        'message' => $lock_result['message'] ?? 'Synchronization is already running. Please try again later.',
+        'lock'    => $lock_result['lock'] ?? null,
+    ], 409);
+}
+
+function lavka_sync_lock_release_and_send_success(?string $token, array $data): void {
+    lavka_sync_lock_release($token);
+    wp_send_json_success($data);
+}
+
+function lavka_sync_lock_release_and_send_error(?string $token, array $data, int $status_code = 200): void {
+    lavka_sync_lock_release($token);
+    wp_send_json_error($data, $status_code);
+}
+
+function lavka_sync_lock_continue_current(string $process, string $token = ''): ?string {
+    if (!function_exists('lavka_ecosystem_lock_get')) {
+        return null;
+    }
+
+    $lock = lavka_ecosystem_lock_get();
+
+    if (
+        is_array($lock)
+        && ($lock['owner'] ?? '') === 'lavka-sync'
+        && ($lock['process'] ?? '') === $process
+        && (int)($lock['user_id'] ?? 0) === get_current_user_id()
+        && (!function_exists('lavka_ecosystem_lock_is_stale') || !lavka_ecosystem_lock_is_stale($lock))
+        && !empty($lock['token'])
+        && ($token === '' || hash_equals((string)$lock['token'], $token))
+    ) {
+        return (string)$lock['token'];
+    }
+
+    return null;
+}
+
 function lavka_get_auto_full_cfg(): array {
 
     $cfg = get_option(LAVKA_AUTO_FULL_OPTION, []);
@@ -1254,6 +1326,19 @@ add_action('wp_ajax_lavka_pull_movement', function () {
     $dry      = filter_var($_POST['dry'] ?? false, FILTER_VALIDATE_BOOLEAN);
     $fromIso  = (string)($_POST['from'] ?? '');
 
+    $lock = lavka_sync_lock_acquire(
+        'stock_movement_manual',
+        'manual',
+        'Manual Movement stock synchronization',
+        LAVKA_SYNC_LOCK_TTL_MOVEMENT
+    );
+
+    if (empty($lock['ok'])) {
+        lavka_sync_lock_send_json_error($lock);
+    }
+
+    $lock_token = $lock['token'] ?? null;
+
     $t0  = microtime(true);
     // повышаем выживаемость long-poll запроса
     ignore_user_abort(true);
@@ -1269,7 +1354,7 @@ add_action('wp_ajax_lavka_pull_movement', function () {
 
     if (empty($res['ok'])) {
         error_log('[lavka] movement ajax fail: '.print_r($res,true));
-        wp_send_json_error(['error'=>$res['error'] ?? 'movement_error']);
+        lavka_sync_lock_release_and_send_error($lock_token, ['error'=>$res['error'] ?? 'movement_error']);
     }
 
         $log_id = lavka_log_write([
@@ -1307,7 +1392,7 @@ add_action('wp_ajax_lavka_pull_movement', function () {
         if ($parts) lavka_log_append_message($log_id, '['.implode(' | ', $parts).']');
     }
 
-    wp_send_json_success($res);
+    lavka_sync_lock_release_and_send_success($lock_token, $res);
 });
 
 // AJAX: Pull from Java with SKUs list (string or array)
@@ -1338,6 +1423,19 @@ add_action('wp_ajax_lavka_pull_java', function(){
 
     $dry = filter_var($_POST['dry'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
+    $lock = lavka_sync_lock_acquire(
+        'stock_manual_skus',
+        'manual',
+        'Manual SKU stock synchronization',
+        LAVKA_SYNC_LOCK_TTL_MANUAL
+    );
+
+    if (empty($lock['ok'])) {
+        lavka_sync_lock_send_json_error($lock);
+    }
+
+    $lock_token = $lock['token'] ?? null;
+
     // === LOG START ===
     $t0 = microtime(true);
     // === /LOG START ===
@@ -1346,11 +1444,9 @@ add_action('wp_ajax_lavka_pull_java', function(){
     $res = lavka_sync_java_query_and_apply($skus, ['dry'=>$dry]);
 
     if (empty($res['ok'])) {
-        return [
-            'ok'    => false,
+        lavka_sync_lock_release_and_send_error($lock_token, [
             'error' => $res['error'] ?? 'apply_failed',
-            'page'  => $p ?? 0,
-        ];
+        ]);
     }
     
     $updatedRows   = [];
@@ -1402,9 +1498,9 @@ add_action('wp_ajax_lavka_pull_java', function(){
     // === /WRITE LOG ===
 
     if (!empty($res['ok'])) {
-        wp_send_json_success($res);
+        lavka_sync_lock_release_and_send_success($lock_token, $res);
     }
-    wp_send_json_error(['error'=>$res['error'] ?? 'unknown','body'=>$res['body'] ?? null]);
+    lavka_sync_lock_release_and_send_error($lock_token, ['error'=>$res['error'] ?? 'unknown','body'=>$res['body'] ?? null]);
 });
 
 
@@ -1555,14 +1651,42 @@ add_action('wp_ajax_lavka_pull_java_all_page', function () {
     $page  = max(0, (int)($_POST['page'] ?? 0));
     $dry = filter_var($_POST['dry'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
+    $lock_token = null;
+    if ($page === 0) {
+        $lock = lavka_sync_lock_acquire(
+            'stock_manual_all',
+            'manual',
+            'Manual paged stock synchronization',
+            LAVKA_SYNC_LOCK_TTL_FULL
+        );
+
+        if (empty($lock['ok'])) {
+            lavka_sync_lock_send_json_error($lock);
+        }
+
+        $lock_token = $lock['token'] ?? null;
+    } else {
+        $posted_token = isset($_POST['lock_token'])
+            ? sanitize_text_field((string)$_POST['lock_token'])
+            : '';
+        $lock_token = lavka_sync_lock_continue_current('stock_manual_all', $posted_token);
+
+        if (function_exists('lavka_ecosystem_lock_get') && !$lock_token) {
+            lavka_sync_lock_send_json_error([
+                'lock'    => lavka_ecosystem_lock_get(),
+                'message' => 'Manual paged stock synchronization lock is missing. Please restart the process.',
+            ]);
+        }
+    }
+
     $t0 = microtime(true); // замер
 
     $total = lavka_count_all_skus();
     $pages = (int) ceil($total / $batch);
 
-    if ($total <= 0) wp_send_json_error(['error'=>'no_skus']);
+    if ($total <= 0) lavka_sync_lock_release_and_send_error($lock_token, ['error'=>'no_skus']);
     if ($page >= $pages) {
-        wp_send_json_success([
+        lavka_sync_lock_release_and_send_success($lock_token, [
             'page'      => $page,
             'pages'     => $pages,
             'total'     => $total,
@@ -1570,6 +1694,7 @@ add_action('wp_ajax_lavka_pull_java_all_page', function () {
             'not_found' => 0,
             'dry'       => (bool)$dry,
             'sample'    => [],
+            'lock_token' => $lock_token,
         ]);
     }
 
@@ -1577,7 +1702,7 @@ add_action('wp_ajax_lavka_pull_java_all_page', function () {
     $skus   = lavka_get_skus_slice($offset, $batch);
 
     if (!$skus) {
-        wp_send_json_success([
+        lavka_sync_lock_release_and_send_success($lock_token, [
             'page'      => $page,
             'pages'     => $pages,
             'total'     => $total,
@@ -1585,6 +1710,7 @@ add_action('wp_ajax_lavka_pull_java_all_page', function () {
             'not_found' => 0,
             'dry'       => (bool)$dry,
             'sample'    => [],
+            'lock_token' => $lock_token,
         ]);
     }
 
@@ -1637,7 +1763,7 @@ add_action('wp_ajax_lavka_pull_java_all_page', function () {
                 'user_id' => get_current_user_id(),
             ]);
         }
-        wp_send_json_error(['error'=>$res['error'] ?? 'unknown','body'=>$res['body'] ?? null]);
+        lavka_sync_lock_release_and_send_error($lock_token, ['error'=>$res['error'] ?? 'unknown','body'=>$res['body'] ?? null]);
     }
 
     // Чтобы ответ не раздувался, даём только сэмпл
@@ -1666,6 +1792,13 @@ add_action('wp_ajax_lavka_pull_java_all_page', function () {
     }
 
 
+    $is_last_page = ($page + 1) >= $pages;
+
+    if ($is_last_page) {
+        lavka_sync_lock_release($lock_token);
+        $lock_token = null;
+    }
+
     wp_send_json_success([
         'page'      => $page,
         'pages'     => $pages,
@@ -1674,6 +1807,7 @@ add_action('wp_ajax_lavka_pull_java_all_page', function () {
         'not_found' => (int)$res['not_found'],
         'dry'       => (bool)$res['dry'],
         'sample'    => $sample,
+        'lock_token'=> $lock_token,
     ]);
 });
 
@@ -1758,6 +1892,45 @@ add_action('lavka_auto_pull_all', function () {
         );
     }
 
+    $lock = lavka_sync_lock_acquire(
+        'stock_full_auto',
+        'cron',
+        'Automatic FULL stock synchronization',
+        LAVKA_SYNC_LOCK_TTL_FULL
+    );
+
+    if (empty($lock['ok'])) {
+        $retry = time() + 10 * MINUTE_IN_SECONDS;
+        if (function_exists('lavka_ecosystem_lock_reschedule_single_event')) {
+            $retry = lavka_ecosystem_lock_reschedule_single_event('lavka_auto_pull_all');
+        } else {
+            wp_schedule_single_event($retry, 'lavka_auto_pull_all');
+        }
+
+        if (function_exists('lavka_log_write')) {
+            lavka_log_write([
+                'action'      => 'auto_pull_all',
+                'supplier'    => '',
+                'stock_id'    => 0,
+                'dry'         => 0,
+                'updated'     => 0,
+                'not_found'   => 0,
+                'duration_ms' => 0,
+                'status'      => 'SKIP',
+                'message'     => sprintf(
+                    'Skipped: another synchronization is running; retry scheduled at %s',
+                    gmdate('c', (int)$retry)
+                ),
+                'user_id'     => 0,
+            ]);
+        }
+
+        return;
+    }
+
+    $lock_token = $lock['token'] ?? null;
+
+    try {
     $t0 = microtime(true);
 
     $batch = max(
@@ -1913,6 +2086,9 @@ add_action('lavka_auto_pull_all', function () {
         ], JSON_UNESCAPED_UNICODE),
         'user_id'     => 0,
     ]);
+    } finally {
+        lavka_sync_lock_release($lock_token);
+    }
 });
 
 // Auto-runner: incremental movement
@@ -1944,6 +2120,45 @@ add_action('lavka_auto_pull_movement', function () {
         return;
     }
 
+    $lock = lavka_sync_lock_acquire(
+        'stock_movement_auto',
+        'cron',
+        'Automatic Movement stock synchronization',
+        LAVKA_SYNC_LOCK_TTL_MOVEMENT
+    );
+
+    if (empty($lock['ok'])) {
+        $retry = time() + 10 * MINUTE_IN_SECONDS;
+        if (function_exists('lavka_ecosystem_lock_reschedule_single_event')) {
+            $retry = lavka_ecosystem_lock_reschedule_single_event('lavka_auto_pull_movement');
+        } else {
+            wp_schedule_single_event($retry, 'lavka_auto_pull_movement');
+        }
+
+        if (function_exists('lavka_log_write')) {
+            lavka_log_write([
+                'action'      => 'auto_movement',
+                'supplier'    => '',
+                'stock_id'    => 0,
+                'dry'         => 0,
+                'updated'     => 0,
+                'not_found'   => 0,
+                'duration_ms' => 0,
+                'status'      => 'SKIP',
+                'message'     => sprintf(
+                    'Skipped: another synchronization is running; retry scheduled at %s',
+                    gmdate('c', (int)$retry)
+                ),
+                'user_id'     => 0,
+            ]);
+        }
+
+        return;
+    }
+
+    $lock_token = $lock['token'] ?? null;
+
+    try {
     ignore_user_abort(true);
 
     if (function_exists('set_time_limit')) {
@@ -1980,6 +2195,9 @@ add_action('lavka_auto_pull_movement', function () {
         ),
         'user_id' => 0,
     ]);
+    } finally {
+        lavka_sync_lock_release($lock_token);
+    }
 });
 
 /*
