@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-06-26T14:13:35+00:00\n"
+"POT-Creation-Date: 2026-06-26T17:11:37+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: lavka-price-sync\n"
@@ -215,73 +215,81 @@ msgstr ""
 msgid "Time (HH:MM)"
 msgstr ""
 
-#: inc/admin-ui.php:409
+#: inc/admin-ui.php:420
 msgid "Next run"
 msgstr ""
 
-#: inc/admin-ui.php:413
+#: inc/admin-ui.php:424
 msgid "scheduled"
 msgstr ""
 
-#: inc/admin-ui.php:416
+#: inc/admin-ui.php:427
 msgid "planned"
 msgstr ""
 
-#: inc/admin-ui.php:418
+#: inc/admin-ui.php:429
 msgid "Not scheduled"
 msgstr ""
 
-#: inc/admin-ui.php:424
+#: inc/admin-ui.php:434
+msgid "Retry run"
+msgstr ""
+
+#: inc/admin-ui.php:436
+msgid "retry"
+msgstr ""
+
+#: inc/admin-ui.php:442
 msgid "Week days"
 msgstr ""
 
-#: inc/admin-ui.php:428
+#: inc/admin-ui.php:446
 msgid "Mon"
 msgstr ""
 
-#: inc/admin-ui.php:429
+#: inc/admin-ui.php:447
 msgid "Tue"
 msgstr ""
 
-#: inc/admin-ui.php:430
+#: inc/admin-ui.php:448
 msgid "Wed"
 msgstr ""
 
-#: inc/admin-ui.php:431
+#: inc/admin-ui.php:449
 msgid "Thu"
 msgstr ""
 
-#: inc/admin-ui.php:432
+#: inc/admin-ui.php:450
 msgid "Fri"
 msgstr ""
 
-#: inc/admin-ui.php:433
+#: inc/admin-ui.php:451
 msgid "Sat"
 msgstr ""
 
-#: inc/admin-ui.php:434
+#: inc/admin-ui.php:452
 msgid "Sun"
 msgstr ""
 
-#: inc/admin-ui.php:448
+#: inc/admin-ui.php:466
 msgid "Dates (one per line)"
 msgstr ""
 
 #. translators: %s: site timezone name.
-#: inc/admin-ui.php:457
+#: inc/admin-ui.php:475
 #, php-format
 msgid "Site timezone: %s"
 msgstr ""
 
-#: inc/admin-ui.php:464
+#: inc/admin-ui.php:482
 msgid "Batch size per run"
 msgstr ""
 
-#: inc/admin-ui.php:474
+#: inc/admin-ui.php:492
 msgid "Save schedule"
 msgstr ""
 
-#: inc/admin-ui.php:477
+#: inc/admin-ui.php:495
 msgid "Run now"
 msgstr ""
 

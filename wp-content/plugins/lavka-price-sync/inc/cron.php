@@ -332,22 +332,44 @@ function lps_cron_calc_next_from_option(?array $opt): ?int {
 
 
 
+function lps_cron_next_event(?bool $recurring_only = null): ?array {
+    $crons = _get_cron_array();
+    if (!is_array($crons)) return null;
+
+    foreach ($crons as $time => $hooks) {
+        if (empty($hooks[LPS_CRON_HOOK]) || !is_array($hooks[LPS_CRON_HOOK])) {
+            continue;
+        }
+
+        foreach ($hooks[LPS_CRON_HOOK] as $event) {
+            $schedule = isset($event['schedule']) ? (string)$event['schedule'] : '';
+            $is_recurring = $schedule !== '';
+
+            if ($recurring_only === true && !$is_recurring) {
+                continue;
+            }
+
+            if ($recurring_only === false && $is_recurring) {
+                continue;
+            }
+
+            return [
+                'timestamp' => (int)$time,
+                'schedule'  => $schedule,
+            ];
+        }
+    }
+
+    return null;
+}
+
 /**
  * Вернёт timestamp ближайшего события по нашему хуку.
  */
-function lps_cron_next_ts(): ?int {
-    $ts = wp_next_scheduled(LPS_CRON_HOOK);
-    if ($ts) return (int)$ts;
+function lps_cron_next_ts(?bool $recurring_only = null): ?int {
+    $event = lps_cron_next_event($recurring_only);
 
-    // fallback: ищем в сыром массиве кронов (на случай schedule c аргами)
-    $crons = _get_cron_array();
-    if (!is_array($crons)) return null;
-    foreach ($crons as $time => $hooks) {
-        if (isset($hooks[LPS_CRON_HOOK])) {
-            return (int)$time;
-        }
-    }
-    return null;
+    return $event ? (int)$event['timestamp'] : null;
 }
 
 /**

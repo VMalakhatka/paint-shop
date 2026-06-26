@@ -394,30 +394,48 @@ function lps_render_run_page() {
 
             <?php
             $planned_ts   = function_exists('lps_cron_calc_next_from_option') ? lps_cron_calc_next_from_option($cron) : null;
-            $event        = function_exists('wp_get_scheduled_event') ? wp_get_scheduled_event(LPS_CRON_HOOK) : null;
-            $scheduled_ts = $event ? (int)$event->timestamp : (function_exists('lps_cron_next_ts') ? lps_cron_next_ts() : null);
+            $mode         = (string)($cron['mode'] ?? 'daily');
+            $scheduled_ts = null;
+            $retry_ts     = function_exists('lps_cron_next_ts') ? lps_cron_next_ts(false) : null;
+
+            if (function_exists('lps_cron_next_ts')) {
+                $scheduled_ts = $mode === 'dates'
+                    ? lps_cron_next_ts(null)
+                    : lps_cron_next_ts(true);
+            }
+
+            $event = function_exists('wp_get_scheduled_event') ? wp_get_scheduled_event(LPS_CRON_HOOK) : null;
             $legacy_hourly_event = $event && !empty($event->schedule) && $event->schedule === 'lps_hourly';
 
             // небольшой auto-heal прямо в UI: включено, план есть, а факта нет
             if (!empty($cron['enabled']) && $planned_ts && (!$scheduled_ts || $legacy_hourly_event) && function_exists('lps_cron_reschedule_price')) {
                 lps_cron_reschedule_price();
                 // после перепланирования попробуем ещё раз прочитать
-                $event        = function_exists('wp_get_scheduled_event') ? wp_get_scheduled_event(LPS_CRON_HOOK) : null;
-                $scheduled_ts = $event ? (int)$event->timestamp : (function_exists('lps_cron_next_ts') ? lps_cron_next_ts() : null);
+                $scheduled_ts = function_exists('lps_cron_next_ts')
+                    ? ($mode === 'dates' ? lps_cron_next_ts(null) : lps_cron_next_ts(true))
+                    : null;
+                $retry_ts = function_exists('lps_cron_next_ts') ? lps_cron_next_ts(false) : null;
             }
 
             echo '<tr><th>'.esc_html__('Next run', 'lavka-price-sync').'</th><td>';
 
             if ($scheduled_ts) {
-                echo '<em>'.esc_html( lps_fmt_site_dt($scheduled_ts) ).'</em> ';
+                echo '<em class="lps-dt-local" data-ts="'.esc_attr((string)$scheduled_ts).'">'.esc_html( lps_fmt_site_dt($scheduled_ts) ).'</em> ';
                 echo '<span style="opacity:.7">('.esc_html__('scheduled', 'lavka-price-sync').')</span>';
             } elseif ($planned_ts) {
-                echo '<em>'.esc_html( lps_fmt_site_dt($planned_ts) ).'</em> ';
+                echo '<em class="lps-dt-local" data-ts="'.esc_attr((string)$planned_ts).'">'.esc_html( lps_fmt_site_dt($planned_ts) ).'</em> ';
                 echo '<span style="opacity:.7">('.esc_html__('planned', 'lavka-price-sync').')</span>';
             } else {
                 echo '<em>'.esc_html__('Not scheduled', 'lavka-price-sync').'</em>';
             }
             echo '</td></tr>';
+
+            if ($retry_ts && $mode !== 'dates') {
+                echo '<tr><th>'.esc_html__('Retry run', 'lavka-price-sync').'</th><td>';
+                echo '<em class="lps-dt-local" data-ts="'.esc_attr((string)$retry_ts).'">'.esc_html( lps_fmt_site_dt($retry_ts) ).'</em> ';
+                echo '<span style="opacity:.7">('.esc_html__('retry', 'lavka-price-sync').')</span>';
+                echo '</td></tr>';
+            }
             ?>
 
             <tr class="lps-field lps-field-weekly">
@@ -496,6 +514,11 @@ function lps_render_run_page() {
         if (rows.time)   rows.time.style.display   = (m !== 'dates')  ? '' : '';
       }
       if (modeEl){ modeEl.addEventListener('change', apply); apply(); }
+      document.querySelectorAll('.lps-dt-local[data-ts]').forEach((el)=>{
+        const ts = parseInt(el.dataset.ts || '0', 10);
+        if (!ts) return;
+        el.textContent = new Date(ts * 1000).toLocaleString();
+      });
     })();
     </script>
     </div>

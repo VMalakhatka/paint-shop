@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Lavka Price Sync 0.1.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lavka-price-sync\n"
-"POT-Creation-Date: 2026-06-26T14:13:35+00:00\n"
+"POT-Creation-Date: 2026-06-26T17:11:37+00:00\n"
 "PO-Revision-Date: 2025-10-13T20:03:35+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -223,73 +223,81 @@ msgstr "У визначені дати"
 msgid "Time (HH:MM)"
 msgstr "Час (HH:MM)"
 
-#: inc/admin-ui.php:409
+#: inc/admin-ui.php:420
 msgid "Next run"
 msgstr "Наступний пуск"
 
-#: inc/admin-ui.php:413
+#: inc/admin-ui.php:424
 msgid "scheduled"
 msgstr "заплановано"
 
-#: inc/admin-ui.php:416
+#: inc/admin-ui.php:427
 msgid "planned"
 msgstr "заплановано"
 
-#: inc/admin-ui.php:418
+#: inc/admin-ui.php:429
 msgid "Not scheduled"
 msgstr "Не заплановано"
 
-#: inc/admin-ui.php:424
+#: inc/admin-ui.php:434
+msgid "Retry run"
+msgstr "Повторний запуск"
+
+#: inc/admin-ui.php:436
+msgid "retry"
+msgstr "повтор"
+
+#: inc/admin-ui.php:442
 msgid "Week days"
 msgstr "Дні тижня"
 
-#: inc/admin-ui.php:428
+#: inc/admin-ui.php:446
 msgid "Mon"
 msgstr "Пн"
 
-#: inc/admin-ui.php:429
+#: inc/admin-ui.php:447
 msgid "Tue"
 msgstr "Вт"
 
-#: inc/admin-ui.php:430
+#: inc/admin-ui.php:448
 msgid "Wed"
 msgstr "Ср"
 
-#: inc/admin-ui.php:431
+#: inc/admin-ui.php:449
 msgid "Thu"
 msgstr "Чт"
 
-#: inc/admin-ui.php:432
+#: inc/admin-ui.php:450
 msgid "Fri"
 msgstr "Пт"
 
-#: inc/admin-ui.php:433
+#: inc/admin-ui.php:451
 msgid "Sat"
 msgstr "Сб"
 
-#: inc/admin-ui.php:434
+#: inc/admin-ui.php:452
 msgid "Sun"
 msgstr "Нд"
 
-#: inc/admin-ui.php:448
+#: inc/admin-ui.php:466
 msgid "Dates (one per line)"
 msgstr "Дати (по одній у рядку)"
 
 #. translators: %s: site timezone name.
-#: inc/admin-ui.php:457
+#: inc/admin-ui.php:475
 #, php-format
 msgid "Site timezone: %s"
 msgstr "Часовий пояс сайту: %s"
 
-#: inc/admin-ui.php:464
+#: inc/admin-ui.php:482
 msgid "Batch size per run"
 msgstr "Розмір пакета за один запуск"
 
-#: inc/admin-ui.php:474
+#: inc/admin-ui.php:492
 msgid "Save schedule"
 msgstr "Зберегти розклад"
 
-#: inc/admin-ui.php:477
+#: inc/admin-ui.php:495
 msgid "Run now"
 msgstr "Запустити зараз"
 
