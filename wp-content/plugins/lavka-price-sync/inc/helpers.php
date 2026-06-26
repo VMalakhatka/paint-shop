@@ -18,6 +18,16 @@ function lps_update_options(array $o): void {
     update_option(LPS_OPT_MAIN, $o, false);
 }
 
+function lps_release_memory(): void {
+    if (isset($GLOBALS['wp_object_cache']->cache)) {
+        $GLOBALS['wp_object_cache']->cache = [];
+    }
+
+    if (function_exists('gc_collect_cycles')) {
+        gc_collect_cycles();
+    }
+}
+
 /** Mapping role → contractCode */
 function lps_get_mapping(): array {
     $m = get_option(LPS_OPT_MAPPING, []);

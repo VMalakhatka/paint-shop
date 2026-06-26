@@ -36,6 +36,39 @@ add_action(LPS_CRON_HOOK, function () {
     lps_run_price_sync_now('cron');
 });
 
+function lps_recover_stale_price_sync(): void {
+    if (!function_exists('lavka_ecosystem_lock_get') || !function_exists('lavka_ecosystem_lock_is_stale')) {
+        return;
+    }
+
+    $lock = lavka_ecosystem_lock_get();
+    if (!$lock || ($lock['owner'] ?? '') !== 'lavka-price-sync' || ($lock['process'] ?? '') !== 'price_sync_all') {
+        return;
+    }
+
+    if (!lavka_ecosystem_lock_is_stale($lock)) {
+        return;
+    }
+
+    if (function_exists('lps_logs_table') && function_exists('lps_log_mark_stale')) {
+        global $wpdb;
+        $log_id = (int)$wpdb->get_var(
+            "SELECT id FROM " . lps_logs_table() . " WHERE finished_at IS NULL AND mode IN ('cron','manual') ORDER BY id DESC LIMIT 1"
+        );
+
+        if ($log_id > 0) {
+            lps_log_mark_stale($log_id, $lock);
+        }
+    }
+
+    if (function_exists('lavka_ecosystem_lock_clear_stale')) {
+        lavka_ecosystem_lock_clear_stale();
+    }
+}
+
+add_action('admin_init', 'lps_recover_stale_price_sync');
+add_action(LPS_CRON_HOOK, 'lps_recover_stale_price_sync', 1);
+
 /** Запустить полный синк цен (постранично, без AJAX) */
 function lps_run_price_sync_now(string $mode = 'cron'): array {
     if (!function_exists('lps_count_all_skus')) return ['ok'=>false,'error'=>'helpers_missing'];
@@ -239,6 +272,10 @@ function lps_run_price_sync_now(string $mode = 'cron'): array {
                     'not_found' => $notFound,
                 ],
             ]);
+        }
+
+        if (function_exists('lps_release_memory')) {
+            lps_release_memory();
         }
     }
         // anchor: LOGS-FINISH

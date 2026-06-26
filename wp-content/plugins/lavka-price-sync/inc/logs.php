@@ -33,6 +33,17 @@ function lps_log_finish(int $log_id, array $data): void {
         ['%s','%d','%d','%d','%d','%d','%s','%s'], ['%d']);
 }
 
+function lps_log_mark_stale(int $log_id, array $lock = []): void {
+    lps_log_finish($log_id, [
+        'ok' => false,
+        'sample' => [[
+            'error' => 'stale_lock',
+            'message' => 'Price synchronization lock expired before the process closed its log.',
+            'lock' => $lock,
+        ]],
+    ]);
+}
+
 function lps_log_progress(int $log_id, array $data): void {
     global $wpdb;
     $row = [
@@ -103,7 +114,15 @@ function lps_render_logs_page(): void {
                             <td><?php echo esc_html((string) $row['started_at']); ?></td>
                             <td><?php echo esc_html((string) $row['finished_at']); ?></td>
                             <td><?php echo esc_html((string) $row['mode']); ?></td>
-                            <td><?php echo !empty($row['ok']) ? esc_html__('OK', 'lavka-price-sync') : esc_html__('Error', 'lavka-price-sync'); ?></td>
+                            <td>
+                                <?php
+                                if (empty($row['finished_at'])) {
+                                    echo esc_html__('Running', 'lavka-price-sync');
+                                } else {
+                                    echo !empty($row['ok']) ? esc_html__('OK', 'lavka-price-sync') : esc_html__('Error', 'lavka-price-sync');
+                                }
+                                ?>
+                            </td>
                             <td><?php echo (int) $row['total']; ?></td>
                             <td><?php echo (int) $row['updated_retail']; ?></td>
                             <td><?php echo (int) $row['updated_roles']; ?></td>
