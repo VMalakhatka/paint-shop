@@ -232,29 +232,3 @@ function lavka_render_warehouses_page() {
 
     <?php
 }
-
-/** ===== REST: GET /lavka/v1/locations/map ===== */
-add_action('rest_api_init', function(){
-    $ns = 'lavka/v1';
-    register_rest_route($ns, '/locations/map', [
-        'methods'  => 'GET',
-        'permission_callback' => 'lavka_rest_auth',
-        'callback' => function(){
-            $tax   = apply_filters('lavka_location_taxonomy', 'location');
-            $terms = get_terms(['taxonomy'=>$tax,'hide_empty'=>false]);
-            if (is_wp_error($terms)) {
-                return new WP_REST_Response(['ok'=>false,'error'=>$terms->get_error_message()], 500);
-            }
-            $items = [];
-            foreach ($terms as $t) {
-                $items[] = [
-                    'id'    => (int)$t->term_id,
-                    'slug'  => (string)$t->slug,
-                    'name'  => (string)$t->name,
-                    'codes' => lavka_get_location_ext_codes((int)$t->term_id),
-                ];
-            }
-            return new WP_REST_Response(['ok'=>true,'items'=>$items], 200);
-        },
-    ]);
-});

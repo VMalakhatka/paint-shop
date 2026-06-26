@@ -222,6 +222,7 @@ function lavka_map_collect(): array {
         $codes = get_term_meta($t->term_id, 'lavka_ext_codes', true);
         $codes = is_array($codes) ? array_values(array_unique(array_filter(array_map('lavka_map_norm_code',$codes)))) : [];
         $out[] = [
+            'id'      => (int)$t->term_id,
             'term_id' => (int)$t->term_id,
             'slug'    => (string)$t->slug,
             'name'    => (string)$t->name,
