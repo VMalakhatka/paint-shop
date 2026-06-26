@@ -43,6 +43,31 @@ function lps_run_price_sync_now(): array {
     $o     = get_option(LPS_OPT_CRON, []);
     $batch = max(50, min(2000, (int)($o['batch'] ?? 500)));
     $log_id = function_exists('lps_log_start') ? lps_log_start('cron') : 0;
+    $log_closed = false;
+
+    if ($log_id && function_exists('lps_log_finish')) {
+        register_shutdown_function(function () use ($log_id, &$log_closed) {
+            if ($log_closed) {
+                return;
+            }
+
+            $error = error_get_last();
+            if (!$error) {
+                return;
+            }
+
+            lps_log_finish($log_id, [
+                'ok' => false,
+                'sample' => [[
+                    'error' => 'fatal',
+                    'message' => $error['message'] ?? '',
+                    'file' => $error['file'] ?? '',
+                    'line' => $error['line'] ?? '',
+                ]],
+            ]);
+            $log_closed = true;
+        });
+    }
 
     $total = (int) lps_count_all_skus();
     $pages = (int) ceil(max(1,$total) / $batch);
@@ -73,6 +98,7 @@ function lps_run_price_sync_now(): array {
             ];
             if ($log_id && function_exists('lps_log_finish')) {
                 lps_log_finish($log_id, $result);
+                $log_closed = true;
             }
             return $result;
         }
@@ -111,6 +137,7 @@ function lps_run_price_sync_now(): array {
 
     if (!empty($log_id) && function_exists('lps_log_finish')) {
         lps_log_finish($log_id, $result);
+        $log_closed = true;
     }
     return $result;
 }
