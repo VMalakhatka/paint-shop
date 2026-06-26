@@ -1548,6 +1548,11 @@ add_action('admin_enqueue_scripts', function ($hook) {
     wp_localize_script('lavka-reports-js', 'LavkaReports', [
         'ajaxUrl' => admin_url('admin-ajax.php'),
         'nonce'   => wp_create_nonce('lavka_reports_nonce'),
+        'i18n'    => [
+            'noData'     => __('No data', 'lavka-sync'),
+            'loading'    => __('Loading...', 'lavka-sync'),
+            'stockLabel' => __('Stock', 'lavka-sync'),
+        ],
     ]);
 });
 

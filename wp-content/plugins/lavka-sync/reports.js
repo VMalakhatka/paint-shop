@@ -1,4 +1,10 @@
 (function(){
+  const i18n = (window.LavkaReports && window.LavkaReports.i18n) || {};
+
+  function text(key, fallback) {
+    return i18n[key] || fallback;
+  }
+
   async function loadData(params) {
     const form = new FormData();
     form.append('action','lavka_reports_data');
@@ -11,14 +17,38 @@
 
   function renderTable(rows) {
     const tb = document.querySelector('#reportTable tbody');
-    tb.innerHTML = rows.map(r => (
-      `<tr>
-        <td>${(r.sku ?? '').toString().replace(/</g,'&lt;')}</td>
-        <td>${(r.name ?? '').toString().replace(/</g,'&lt;')}</td>
-        <td style="text-align:right;">${(r.qty ?? '').toString()}</td>
-        <td style="text-align:right;">${(r.price ?? '').toString()}</td>
-      </tr>`
-    )).join('') || '<tr><td colspan="4">Нет данных</td></tr>';
+    if (!tb) return;
+
+    tb.textContent = '';
+
+    if (!rows.length) {
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 4;
+      td.textContent = text('noData', 'No data');
+      tr.appendChild(td);
+      tb.appendChild(tr);
+      return;
+    }
+
+    rows.forEach(r => {
+      const tr = document.createElement('tr');
+      const values = [
+        r.sku ?? '',
+        r.name ?? '',
+        r.qty ?? '',
+        r.price ?? ''
+      ];
+
+      values.forEach((value, index) => {
+        const td = document.createElement('td');
+        td.textContent = value.toString();
+        if (index >= 2) td.style.textAlign = 'right';
+        tr.appendChild(td);
+      });
+
+      tb.appendChild(tr);
+    });
   }
 
   function renderChart(labels, data) {
@@ -28,7 +58,7 @@
       type: 'bar',
       data: {
         labels,
-        datasets: [{ label: 'Остаток', data }]
+        datasets: [{ label: text('stockLabel', 'Stock'), data }]
       },
       options: {
         responsive: true,
@@ -47,7 +77,15 @@
       const supplier = form.supplier.value.trim();
       const stockId  = form.stockId.value.trim();
       const tbody = document.querySelector('#reportTable tbody');
-      if (tbody) tbody.innerHTML = '<tr><td colspan="4">Загрузка...</td></tr>';
+      if (tbody) {
+        tbody.textContent = '';
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 4;
+        td.textContent = text('loading', 'Loading...');
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+      }
 
       try {
         const json = await loadData({supplier, stockId});
