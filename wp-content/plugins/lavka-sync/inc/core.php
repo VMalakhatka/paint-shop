@@ -46,7 +46,6 @@ if (!function_exists('lavka_sync_get_options')) {
     }
 }
 
-register_activation_hook(__FILE__, 'lavka_sync_install');
 add_action('admin_init', 'lavka_sync_maybe_upgrade');
 
 function lavka_sync_install(){ lavka_sync_run_dbdelta(); update_option('lavka_sync_db_ver','1.1'); }
