@@ -244,6 +244,7 @@ function lavka_ecosystem_lock_reschedule_single_event(
     array $args = []
 ): int {
     $timestamp = time() + max(MINUTE_IN_SECONDS, $delay);
+    wp_clear_scheduled_hook($hook, $args);
     wp_schedule_single_event($timestamp, $hook, $args);
 
     return $timestamp;

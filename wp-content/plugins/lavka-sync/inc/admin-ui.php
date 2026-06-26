@@ -1879,19 +1879,6 @@ add_action('lavka_auto_pull_all', function () {
         return;
     }
 
-    // сразу планируем следующий запуск
-    $next = lavka_calc_next_ts($cfg, time());
-
-    if ($next > 0) {
-
-        wp_clear_scheduled_hook('lavka_auto_pull_all');
-
-        wp_schedule_single_event(
-            $next,
-            'lavka_auto_pull_all'
-        );
-    }
-
     $lock = lavka_sync_lock_acquire(
         'stock_full_auto',
         'cron',
@@ -1904,6 +1891,7 @@ add_action('lavka_auto_pull_all', function () {
         if (function_exists('lavka_ecosystem_lock_reschedule_single_event')) {
             $retry = lavka_ecosystem_lock_reschedule_single_event('lavka_auto_pull_all');
         } else {
+            wp_clear_scheduled_hook('lavka_auto_pull_all');
             wp_schedule_single_event($retry, 'lavka_auto_pull_all');
         }
 
@@ -1929,6 +1917,13 @@ add_action('lavka_auto_pull_all', function () {
     }
 
     $lock_token = $lock['token'] ?? null;
+
+    $next = lavka_calc_next_ts($cfg, time());
+
+    if ($next > 0) {
+        wp_clear_scheduled_hook('lavka_auto_pull_all');
+        wp_schedule_single_event($next, 'lavka_auto_pull_all');
+    }
 
     try {
     $t0 = microtime(true);
@@ -2102,18 +2097,6 @@ add_action('lavka_auto_pull_movement', function () {
 
     }
 
-    // Сразу ставим следующий запуск
-
-    $next = lavka_calc_next_ts($cfg, time());
-
-    if ($next > 0) {
-
-        wp_clear_scheduled_hook('lavka_auto_pull_movement');
-
-        wp_schedule_single_event($next, 'lavka_auto_pull_movement');
-
-    }
-
     $t0 = microtime(true);
 
     if (!function_exists('lavka_sync_java_movement_apply_loop')) {
@@ -2132,6 +2115,7 @@ add_action('lavka_auto_pull_movement', function () {
         if (function_exists('lavka_ecosystem_lock_reschedule_single_event')) {
             $retry = lavka_ecosystem_lock_reschedule_single_event('lavka_auto_pull_movement');
         } else {
+            wp_clear_scheduled_hook('lavka_auto_pull_movement');
             wp_schedule_single_event($retry, 'lavka_auto_pull_movement');
         }
 
@@ -2157,6 +2141,13 @@ add_action('lavka_auto_pull_movement', function () {
     }
 
     $lock_token = $lock['token'] ?? null;
+
+    $next = lavka_calc_next_ts($cfg, time());
+
+    if ($next > 0) {
+        wp_clear_scheduled_hook('lavka_auto_pull_movement');
+        wp_schedule_single_event($next, 'lavka_auto_pull_movement');
+    }
 
     try {
     ignore_user_abort(true);
@@ -2217,7 +2208,7 @@ add_action('wp_ajax_lavka_auto_get_full', function () {
 
     $cfg = lavka_get_auto_full_cfg();
 
-    $next = lavka_calc_next_ts($cfg, time());
+    $next = wp_next_scheduled('lavka_auto_pull_all') ?: lavka_calc_next_ts($cfg, time());
 
     global $wpdb;
 
@@ -2253,7 +2244,7 @@ add_action('wp_ajax_lavka_auto_get_movement', function () {
 
     $cfg = lavka_get_auto_mov_cfg();
 
-    $next = lavka_calc_next_ts($cfg, time());
+    $next = wp_next_scheduled('lavka_auto_pull_movement') ?: lavka_calc_next_ts($cfg, time());
 
     global $wpdb;
 
