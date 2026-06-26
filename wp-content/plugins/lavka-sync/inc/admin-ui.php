@@ -262,7 +262,7 @@ function lavka_render_mapping_page() {
           ajax('lavka_ms_wh_list', {})
         ]);
 
-        if (!woo || !woo.items || !map || !map.items || !ms || !ms.success) {
+        if (!woo || !woo.items || !map || !map.items) {
           el.textContent = LAVKA_I18N.data_load_error;
           console.log({woo, map, ms});
           return;
@@ -274,7 +274,25 @@ function lavka_render_mapping_page() {
           selectedByTid[row.id || row.term_id] = new Set(row.codes || []);
         });
 
-        const msList = (ms.data && ms.data.items) ? ms.data.items : (ms.items || []);
+        const msSource = (ms && ms.success && ms.data && ms.data.items)
+          ? ms.data.items
+          : ((ms && ms.items) ? ms.items : []);
+        const msByCode = new Map();
+
+        msSource.forEach(x => {
+          const code = (x.code || '').toString();
+          if (code) msByCode.set(code, { code, name: (x.name || x.title || code) });
+        });
+
+        Object.values(selectedByTid).forEach(set => {
+          set.forEach(code => {
+            if (code && !msByCode.has(code)) {
+              msByCode.set(code, { code, name: code });
+            }
+          });
+        });
+
+        const msList = Array.from(msByCode.values());
 
         const wrap = document.createElement('div');
         wrap.innerHTML = `
@@ -380,13 +398,20 @@ add_action('wp_ajax_lavka_ms_wh_list', function(){
     $pth = ltrim($o['java_wh_path'] ?? '/warehouses', '/');
     $full = $url . '/' . $pth;
 
-    $resp = wp_remote_get($full, [
+    $request_args = [
         'timeout' => 160,
         'headers' => [
             'X-Auth-Token' => $o['api_token'] ?? '',
             'Accept'       => 'application/json',
         ],
-    ]);
+    ];
+
+    $resp = wp_remote_get($full, $request_args);
+
+    if (!is_wp_error($resp) && (int)wp_remote_retrieve_response_code($resp) === 404 && $pth !== 'ref/warehouses') {
+        $full = $url . '/ref/warehouses';
+        $resp = wp_remote_get($full, $request_args);
+    }
 
     if (is_wp_error($resp)) wp_send_json_error(['error'=>$resp->get_error_message()]);
     $code = wp_remote_retrieve_response_code($resp);
