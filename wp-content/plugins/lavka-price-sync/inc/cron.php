@@ -33,44 +33,128 @@ if (!defined('LPS_CRON_HOOK')) {
 
 // Основной хук
 add_action(LPS_CRON_HOOK, function () {
-    lps_run_price_sync_now();
+    lps_run_price_sync_now('cron');
 });
 
 /** Запустить полный синк цен (постранично, без AJAX) */
-function lps_run_price_sync_now(): array {
+function lps_run_price_sync_now(string $mode = 'cron'): array {
     if (!function_exists('lps_count_all_skus')) return ['ok'=>false,'error'=>'helpers_missing'];
+
+    $mode = $mode === 'manual' ? 'manual' : 'cron';
+    $lock_token = null;
+
+    if (function_exists('lavka_ecosystem_lock_acquire')) {
+        $lock = lavka_ecosystem_lock_acquire(
+            'lavka-price-sync',
+            'price_sync_all',
+            $mode,
+            __('Price synchronization', 'lavka-price-sync'),
+            2 * HOUR_IN_SECONDS
+        );
+
+        if (empty($lock['ok'])) {
+            if ($mode === 'cron' && function_exists('wp_schedule_single_event')) {
+                wp_schedule_single_event(time() + LAVKA_ECOSYSTEM_LOCK_CRON_DELAY, LPS_CRON_HOOK);
+            }
+
+            return [
+                'ok' => false,
+                'error' => 'lavka_sync_locked',
+                'message' => $lock['message'] ?? __('Synchronization is already running. Please try again later.', 'lavka-price-sync'),
+                'lock' => $lock['lock'] ?? null,
+            ];
+        }
+
+        $lock_token = $lock['token'] ?? null;
+    }
 
     $o     = get_option(LPS_OPT_CRON, []);
     $batch = max(50, min(2000, (int)($o['batch'] ?? 500)));
-    $log_id = function_exists('lps_log_start') ? lps_log_start('cron') : 0;
+    $log_id = function_exists('lps_log_start') ? lps_log_start($mode) : 0;
     $log_closed = false;
 
     if ($log_id && function_exists('lps_log_finish')) {
-        register_shutdown_function(function () use ($log_id, &$log_closed) {
-            if ($log_closed) {
-                return;
+        register_shutdown_function(function () use ($log_id, &$log_closed, $lock_token) {
+            if (!$log_closed) {
+                $error = error_get_last();
+                if ($error) {
+                    lps_log_finish($log_id, [
+                        'ok' => false,
+                        'sample' => [[
+                            'error' => 'fatal',
+                            'message' => $error['message'] ?? '',
+                            'file' => $error['file'] ?? '',
+                            'line' => $error['line'] ?? '',
+                        ]],
+                    ]);
+                    $log_closed = true;
+                }
             }
 
-            $error = error_get_last();
-            if (!$error) {
-                return;
+            if ($lock_token && function_exists('lavka_ecosystem_lock_release')) {
+                lavka_ecosystem_lock_release($lock_token);
             }
-
-            lps_log_finish($log_id, [
-                'ok' => false,
-                'sample' => [[
-                    'error' => 'fatal',
-                    'message' => $error['message'] ?? '',
-                    'file' => $error['file'] ?? '',
-                    'line' => $error['line'] ?? '',
-                ]],
-            ]);
-            $log_closed = true;
+        });
+    } elseif ($lock_token) {
+        register_shutdown_function(function () use ($lock_token) {
+            if (function_exists('lavka_ecosystem_lock_release')) {
+                lavka_ecosystem_lock_release($lock_token);
+            }
         });
     }
 
-    $total = (int) lps_count_all_skus();
-    $pages = (int) ceil(max(1,$total) / $batch);
+    $finish = function (array $result) use ($log_id, &$log_closed, $lock_token): array {
+        if ($log_id && function_exists('lps_log_finish')) {
+            lps_log_finish($log_id, $result);
+            $log_closed = true;
+        }
+
+        if ($lock_token && function_exists('lavka_ecosystem_lock_release')) {
+            lavka_ecosystem_lock_release($lock_token);
+        }
+
+        return $result;
+    };
+
+    if ($mode === 'cron' && $lock_token === null && function_exists('lavka_ecosystem_lock_acquire')) {
+        return $finish([
+            'ok' => false,
+            'error' => 'lavka_sync_locked',
+        ]);
+    }
+
+    if ($mode === 'cron' && function_exists('lavka_ecosystem_lock_get')) {
+        $active_lock = lavka_ecosystem_lock_get();
+        if ($active_lock && ($active_lock['token'] ?? null) !== $lock_token) {
+            if (function_exists('wp_schedule_single_event')) {
+                wp_schedule_single_event(time() + LAVKA_ECOSYSTEM_LOCK_CRON_DELAY, LPS_CRON_HOOK);
+            }
+
+            return $finish([
+                'ok' => false,
+                'error' => 'lavka_sync_locked',
+                'sample' => [[
+                    'message' => 'Price synchronization skipped because another Lavka synchronization is running.',
+                    'lock' => $active_lock,
+                ]],
+            ]);
+        }
+    }
+
+    try {
+        $total = (int) lps_count_all_skus();
+        $pages = (int) ceil(max(1,$total) / $batch);
+    } catch (\Throwable $e) {
+        return $finish([
+            'ok' => false,
+            'error' => $e->getMessage(),
+            'sample' => [[
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]],
+        ]);
+    }
 
     $updatedRetail = 0;
     $updatedRoles  = 0;
@@ -86,7 +170,7 @@ function lps_run_price_sync_now(): array {
 
         $j = lps_java_fetch_prices_multi($skus);
         if (empty($j['ok'])) {
-            error_log('[LPS] cron java_error: ' . ($j['error'] ?? 'unknown'));
+            error_log('[LPS] price sync java_error: ' . ($j['error'] ?? 'unknown'));
             $result = [
                 'ok' => false,
                 'error' => $j['error'] ?? 'java_error',
@@ -96,11 +180,7 @@ function lps_run_price_sync_now(): array {
                 'not_found' => $notFound,
                 'sample' => $sample,
             ];
-            if ($log_id && function_exists('lps_log_finish')) {
-                lps_log_finish($log_id, $result);
-                $log_closed = true;
-            }
-            return $result;
+            return $finish($result);
         }
 
         $applied = lps_apply_prices_multi($j['items'], /*dry*/ false);
@@ -135,11 +215,7 @@ function lps_run_price_sync_now(): array {
         'csv_path'       => $csvPath,
     ];
 
-    if (!empty($log_id) && function_exists('lps_log_finish')) {
-        lps_log_finish($log_id, $result);
-        $log_closed = true;
-    }
-    return $result;
+    return $finish($result);
 }
 
 /** Очистить все события нашего хука */

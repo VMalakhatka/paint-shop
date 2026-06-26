@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Lavka Price Sync 0.1.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lavka-price-sync\n"
-"POT-Creation-Date: 2026-06-26T12:39:00+00:00\n"
+"POT-Creation-Date: 2026-06-26T14:03:11+00:00\n"
 "PO-Revision-Date: 2025-10-13T20:03:35+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -162,8 +162,8 @@ msgid ""
 "Launch completed: ok=%1$s, updated_retail=%2$d, updated_roles=%3$d, "
 "not_found=%4$d"
 msgstr ""
-"Запуск завершён: ok=%1$s, обновлено розничных=%2$d, ролевых=%3$d, не "
-"найдено=%4$d"
+"Запуск завершён: ok=%1$s, обновлено розничных=%2$d, ролевых=%3$d, не найдено="
+"%4$d"
 
 #: inc/admin-ui.php:296
 msgid "Schedule saved"
@@ -223,79 +223,87 @@ msgstr "В указанные даты"
 msgid "Time (HH:MM)"
 msgstr "Время (HH:MM)"
 
-#: inc/admin-ui.php:408
+#: inc/admin-ui.php:409
 msgid "Next run"
 msgstr "Следующий запуск"
 
-#: inc/admin-ui.php:412
+#: inc/admin-ui.php:413
 msgid "scheduled"
 msgstr "запланировано"
 
-#: inc/admin-ui.php:415
+#: inc/admin-ui.php:416
 msgid "planned"
 msgstr "запланировано"
 
-#: inc/admin-ui.php:417
+#: inc/admin-ui.php:418
 msgid "Not scheduled"
 msgstr "Не запланировано"
 
-#: inc/admin-ui.php:423
+#: inc/admin-ui.php:424
 msgid "Week days"
 msgstr "Дни недели"
 
-#: inc/admin-ui.php:427
+#: inc/admin-ui.php:428
 msgid "Mon"
 msgstr "Пн"
 
-#: inc/admin-ui.php:428
+#: inc/admin-ui.php:429
 msgid "Tue"
 msgstr "Вт"
 
-#: inc/admin-ui.php:429
+#: inc/admin-ui.php:430
 msgid "Wed"
 msgstr "Ср"
 
-#: inc/admin-ui.php:430
+#: inc/admin-ui.php:431
 msgid "Thu"
 msgstr "Чт"
 
-#: inc/admin-ui.php:431
+#: inc/admin-ui.php:432
 msgid "Fri"
 msgstr "Пт"
 
-#: inc/admin-ui.php:432
+#: inc/admin-ui.php:433
 msgid "Sat"
 msgstr "Сб"
 
-#: inc/admin-ui.php:433
+#: inc/admin-ui.php:434
 msgid "Sun"
 msgstr "Вс"
 
-#: inc/admin-ui.php:447
+#: inc/admin-ui.php:448
 msgid "Dates (one per line)"
 msgstr "Даты (по одной в строке)"
 
 #. translators: %s: site timezone name.
-#: inc/admin-ui.php:456
+#: inc/admin-ui.php:457
 #, php-format
 msgid "Site timezone: %s"
 msgstr "Часовой пояс сайта: %s"
 
-#: inc/admin-ui.php:463
+#: inc/admin-ui.php:464
 msgid "Batch size per run"
 msgstr "Размер пакета за один запуск"
 
-#: inc/admin-ui.php:473
+#: inc/admin-ui.php:474
 msgid "Save schedule"
 msgstr "Сохранить расписание"
 
-#: inc/admin-ui.php:476
+#: inc/admin-ui.php:477
 msgid "Run now"
 msgstr "Запустить сейчас"
 
 #: inc/cron.php:23
 msgid "Once Weekly"
 msgstr "Раз в неделю"
+
+#: inc/cron.php:51
+msgid "Price synchronization"
+msgstr "Синхронизация цен"
+
+#: inc/cron.php:63
+msgid "Synchronization is already running. Please try again later."
+msgstr "Синхронизация уже выполняется. Попробуйте позже."
 
 #: inc/logs.php:66
 msgid "Price sync logs"

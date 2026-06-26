@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-06-26T12:39:00+00:00\n"
+"POT-Creation-Date: 2026-06-26T14:03:11+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: lavka-price-sync\n"
@@ -215,78 +215,86 @@ msgstr ""
 msgid "Time (HH:MM)"
 msgstr ""
 
-#: inc/admin-ui.php:408
+#: inc/admin-ui.php:409
 msgid "Next run"
 msgstr ""
 
-#: inc/admin-ui.php:412
+#: inc/admin-ui.php:413
 msgid "scheduled"
 msgstr ""
 
-#: inc/admin-ui.php:415
+#: inc/admin-ui.php:416
 msgid "planned"
 msgstr ""
 
-#: inc/admin-ui.php:417
+#: inc/admin-ui.php:418
 msgid "Not scheduled"
 msgstr ""
 
-#: inc/admin-ui.php:423
+#: inc/admin-ui.php:424
 msgid "Week days"
 msgstr ""
 
-#: inc/admin-ui.php:427
+#: inc/admin-ui.php:428
 msgid "Mon"
 msgstr ""
 
-#: inc/admin-ui.php:428
+#: inc/admin-ui.php:429
 msgid "Tue"
 msgstr ""
 
-#: inc/admin-ui.php:429
+#: inc/admin-ui.php:430
 msgid "Wed"
 msgstr ""
 
-#: inc/admin-ui.php:430
+#: inc/admin-ui.php:431
 msgid "Thu"
 msgstr ""
 
-#: inc/admin-ui.php:431
+#: inc/admin-ui.php:432
 msgid "Fri"
 msgstr ""
 
-#: inc/admin-ui.php:432
+#: inc/admin-ui.php:433
 msgid "Sat"
 msgstr ""
 
-#: inc/admin-ui.php:433
+#: inc/admin-ui.php:434
 msgid "Sun"
 msgstr ""
 
-#: inc/admin-ui.php:447
+#: inc/admin-ui.php:448
 msgid "Dates (one per line)"
 msgstr ""
 
 #. translators: %s: site timezone name.
-#: inc/admin-ui.php:456
+#: inc/admin-ui.php:457
 #, php-format
 msgid "Site timezone: %s"
 msgstr ""
 
-#: inc/admin-ui.php:463
+#: inc/admin-ui.php:464
 msgid "Batch size per run"
 msgstr ""
 
-#: inc/admin-ui.php:473
+#: inc/admin-ui.php:474
 msgid "Save schedule"
 msgstr ""
 
-#: inc/admin-ui.php:476
+#: inc/admin-ui.php:477
 msgid "Run now"
 msgstr ""
 
 #: inc/cron.php:23
 msgid "Once Weekly"
+msgstr ""
+
+#: inc/cron.php:51
+msgid "Price synchronization"
+msgstr ""
+
+#: inc/cron.php:63
+msgid "Synchronization is already running. Please try again later."
 msgstr ""
 
 #: inc/logs.php:66

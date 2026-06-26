@@ -214,6 +214,7 @@
     const box    = document.getElementById('lps-listed-box');
 
     btnListed.addEventListener('click', async ()=>{
+      if (btnListed.disabled) return;
       try{
         const raw = (ta?.value || '').trim();
         if (!raw) { status.textContent = I18N.enter_skus || 'Enter one or more SKUs'; return; }
@@ -230,6 +231,7 @@
 
         status.textContent = I18N.loading || 'Loading…';
         if (box) box.innerHTML = '';
+        btnListed.disabled = true;
 
         // ВАЖНО: у listed — свой nonce из data-nonce
         const data = await postAjax('lps_run_prices_listed', { skus }, btnListed.dataset.nonce);
@@ -242,6 +244,8 @@
       } catch(e){
         console.error('[LPS] listed error:', e);
         status.textContent = `${I18N.error||'Error'}: ${e.message||e}`;
+      } finally {
+        btnListed.disabled = false;
       }
     });
   }
@@ -252,12 +256,14 @@
     const batchEl = document.getElementById('lps-batch');
 
     btnAll.addEventListener('click', async ()=>{
+      if (btnAll.disabled) return;
       let page = 0, pages = 0;
       let totals = { retail:0, roles:0, nf:0 };
       const batch = Math.max(50, Math.min(2000, parseInt(batchEl?.value,10) || 500));
       const t0 = performance.now();
 
       try{
+        btnAll.disabled = true;
         status.textContent = (I18N.loading || 'Loading…') + ` (page 1)`;
 
         while (true) {
@@ -285,6 +291,8 @@
       } catch(e){
         console.error('[LPS] ALL error:', e);
         status.textContent = `${I18N.error||'Error'}: ${e.message||e}`;
+      } finally {
+        btnAll.disabled = false;
       }
     });
   }

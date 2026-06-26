@@ -281,7 +281,7 @@ function lps_render_run_page() {
         }
         
         if (isset($_POST['lps_cron_run_now'])) {
-            $res = function_exists('lps_run_price_sync_now') ? lps_run_price_sync_now() : ['ok'=>false,'error'=>'missing'];
+            $res = function_exists('lps_run_price_sync_now') ? lps_run_price_sync_now('manual') : ['ok'=>false,'error'=>'missing'];
             printf('<div class="notice notice-success"><p>%s</p></div>',
                 esc_html(sprintf(
                     /* translators: 1: whether the sync succeeded, 2: updated retail prices, 3: updated role prices, 4: missing SKUs. */
