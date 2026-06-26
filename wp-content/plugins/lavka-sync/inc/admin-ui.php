@@ -2217,6 +2217,7 @@ add_action('wp_ajax_lavka_auto_get_full', function () {
         SELECT ts, action, updated, not_found
         FROM {$wpdb->prefix}lavka_sync_logs
         WHERE action='auto_pull_all'
+          AND status <> 'SKIP'
         ORDER BY id DESC
         LIMIT 1
         ",
@@ -2253,6 +2254,7 @@ add_action('wp_ajax_lavka_auto_get_movement', function () {
         SELECT ts, action, updated, not_found
         FROM {$wpdb->prefix}lavka_sync_logs
         WHERE action='auto_movement'
+          AND status <> 'SKIP'
         ORDER BY id DESC
         LIMIT 1
         ",
