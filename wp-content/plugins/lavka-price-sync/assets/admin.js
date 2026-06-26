@@ -265,10 +265,12 @@
       try{
         btnAll.disabled = true;
         status.textContent = (I18N.loading || 'Loading…') + ` (page 1)`;
+        let lockToken = '';
 
         while (true) {
           // У ALL — свой nonce
-          const data = await postAjax('lps_run_prices_all_page', { page, batch }, btnAll.dataset.nonce);
+          const data = await postAjax('lps_run_prices_all_page', { page, batch, lock_token: lockToken }, btnAll.dataset.nonce);
+          lockToken = data.lock_token || '';
 
           pages = data.pages || pages;
           totals.retail += data.updated_retail || 0;

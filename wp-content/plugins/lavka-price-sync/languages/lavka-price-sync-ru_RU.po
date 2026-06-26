@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Lavka Price Sync 0.1.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lavka-price-sync\n"
-"POT-Creation-Date: 2026-06-26T14:03:11+00:00\n"
+"POT-Creation-Date: 2026-06-26T14:13:35+00:00\n"
 "PO-Revision-Date: 2025-10-13T20:03:35+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -301,7 +301,7 @@ msgstr "Раз в неделю"
 msgid "Price synchronization"
 msgstr "Синхронизация цен"
 
-#: inc/cron.php:63
+#: inc/cron.php:63 inc/sync.php:7
 msgid "Synchronization is already running. Please try again later."
 msgstr "Синхронизация уже выполняется. Попробуйте позже."
 
@@ -352,6 +352,22 @@ msgstr "Ошибка"
 #: inc/logs.php:107
 msgid "No logs yet."
 msgstr "Логов пока нет."
+
+#: inc/sync.php:215
+msgid "Manual paged price synchronization"
+msgstr "Ручная постраничная синхронизация цен"
+
+#: inc/sync.php:232
+msgid ""
+"Manual paged price synchronization lock is missing. Please restart the "
+"process."
+msgstr ""
+"Блокировка ручной постраничной синхронизации цен отсутствует. Перезапустите "
+"процесс."
+
+#: inc/sync.php:302
+msgid "Manual listed price synchronization"
+msgstr "Ручная синхронизация цен для указанных SKU"
 
 #~ msgid "Lavka Price hourly"
 #~ msgstr "Lavka Price — ежечасно"

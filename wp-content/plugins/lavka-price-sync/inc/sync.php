@@ -1,6 +1,14 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
+function lps_lock_error_response(array $lock): void {
+    wp_send_json_error([
+        'error'   => 'lavka_sync_locked',
+        'message' => $lock['message'] ?? __('Synchronization is already running. Please try again later.', 'lavka-price-sync'),
+        'lock'    => $lock['lock'] ?? null,
+    ], 409);
+}
+
 /**
  * Построить priceMap из сохранённого маппинга ролей.
  * Возвращает массив вида [ roleSlug => contractName ]
@@ -195,22 +203,67 @@ add_action('wp_ajax_lps_run_prices_all_page', function () {
     $page  = max(0, (int)($_POST['page'] ?? 0));
     $batch = max(LPS_MIN_BATCH, min(LPS_MAX_BATCH, (int)($_POST['batch'] ?? LPS_DEF_BATCH)));
     $dry   = !empty($_POST['dry']);
+    $lock_token = isset($_POST['lock_token']) ? sanitize_text_field(wp_unslash($_POST['lock_token'])) : '';
+    $owns_lock = false;
+
+    if (function_exists('lavka_ecosystem_lock_acquire') && function_exists('lavka_ecosystem_lock_get')) {
+        if ($page === 0 || $lock_token === '') {
+            $lock = lavka_ecosystem_lock_acquire(
+                'lavka-price-sync',
+                'price_sync_all_ajax',
+                'manual',
+                __('Manual paged price synchronization', 'lavka-price-sync'),
+                2 * HOUR_IN_SECONDS
+            );
+            if (empty($lock['ok'])) {
+                lps_lock_error_response($lock);
+            }
+            $lock_token = (string)($lock['token'] ?? '');
+            $owns_lock = true;
+        } else {
+            $current_lock = lavka_ecosystem_lock_get();
+            $owns_lock = $current_lock
+                && isset($current_lock['token'])
+                && hash_equals((string)$current_lock['token'], $lock_token);
+
+            if (!$owns_lock) {
+                lps_lock_error_response([
+                    'lock' => $current_lock,
+                    'message' => __('Manual paged price synchronization lock is missing. Please restart the process.', 'lavka-price-sync'),
+                ]);
+            }
+        }
+    }
 
     $total = lps_count_all_skus();
     $pages = (int) ceil(max(1,$total) / $batch);
     if ($total<=0 || $page >= $pages) {
+        if ($owns_lock && function_exists('lavka_ecosystem_lock_release')) {
+            lavka_ecosystem_lock_release($lock_token);
+        }
         wp_send_json_success([
             'page'=>$page, 'pages'=>$pages, 'total'=>$total,
             'updated_retail'=>0, 'updated_roles'=>0, 'not_found'=>0,
-            'dry'=>$dry, 'sample'=>[]
+            'dry'=>$dry, 'sample'=>[], 'lock_token'=>null
         ]);
     }
 
     $skus = lps_get_skus_slice($page*$batch, $batch);
     $j = lps_java_fetch_prices_multi($skus);
-    if (empty($j['ok'])) wp_send_json_error(['error'=>$j['error'] ?? 'java_error', 'body'=>$j['body'] ?? null]);
+    if (empty($j['ok'])) {
+        if ($owns_lock && function_exists('lavka_ecosystem_lock_release')) {
+            lavka_ecosystem_lock_release($lock_token);
+        }
+        wp_send_json_error(['error'=>$j['error'] ?? 'java_error', 'body'=>$j['body'] ?? null]);
+    }
 
     $applied = lps_apply_prices_multi($j['items'], $dry);
+    $next_page = $page + 1;
+    $done = $next_page >= $pages;
+
+    if ($done && $owns_lock && function_exists('lavka_ecosystem_lock_release')) {
+        lavka_ecosystem_lock_release($lock_token);
+    }
 
     wp_send_json_success([
         'page'=>$page, 'pages'=>$pages, 'total'=>$total,
@@ -219,6 +272,7 @@ add_action('wp_ajax_lps_run_prices_all_page', function () {
         'not_found'     =>$applied['not_found'],
         'dry'=>$dry,
         'sample'=>array_slice($applied['items'], 0, 20),
+        'lock_token'=>$done ? null : $lock_token,
     ]);
 });
 
@@ -239,12 +293,34 @@ add_action('wp_ajax_lps_run_prices_listed', function () {
         wp_send_json_success(['items'=>[], 'updated_retail'=>0, 'updated_roles'=>0, 'not_found'=>0]);
     }
 
+    $lock_token = null;
+    if (function_exists('lavka_ecosystem_lock_acquire')) {
+        $lock = lavka_ecosystem_lock_acquire(
+            'lavka-price-sync',
+            'price_sync_listed_ajax',
+            'manual',
+            __('Manual listed price synchronization', 'lavka-price-sync'),
+            30 * MINUTE_IN_SECONDS
+        );
+        if (empty($lock['ok'])) {
+            lps_lock_error_response($lock);
+        }
+        $lock_token = $lock['token'] ?? null;
+    }
+
     $j = lps_java_fetch_prices_multi($skus);
     if (empty($j['ok'])) {
+        if ($lock_token && function_exists('lavka_ecosystem_lock_release')) {
+            lavka_ecosystem_lock_release($lock_token);
+        }
         wp_send_json_error(['error'=>$j['error'] ?? 'java_error', 'body'=>$j['body'] ?? null]);
     }
 
     $applied = lps_apply_prices_multi($j['items'], /*dry*/ false);
+    if ($lock_token && function_exists('lavka_ecosystem_lock_release')) {
+        lavka_ecosystem_lock_release($lock_token);
+    }
+
     wp_send_json_success([
         'updated_retail'=>$applied['updated_retail'],
         'updated_roles' =>$applied['updated_roles'],
