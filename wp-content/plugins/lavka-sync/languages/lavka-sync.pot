@@ -9,20 +9,24 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-06-26T10:08:45+00:00\n"
+"POT-Creation-Date: 2026-06-26T12:24:44+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: lavka-sync\n"
 
 #. Plugin Name of the plugin
 #: lavka-sync.php
-#: inc/admin-ui.php:642
+#: inc/admin-ui.php:650
 msgid "Lavka Sync"
 msgstr ""
 
 #. Description of the plugin
 #: lavka-sync.php
 msgid "Provides buttons and settings to synchronize with the Java service and exposes a REST API."
+msgstr ""
+
+#: inc/admin-ui.php:59
+msgid "Synchronization is already running. Please try again later."
 msgstr ""
 
 #: inc/admin-ui.php:137
@@ -39,7 +43,7 @@ msgid "Match Woo locations (taxonomy <code>location</code>) with external MS war
 msgstr ""
 
 #: inc/admin-ui.php:158
-#: inc/admin-ui.php:1596
+#: inc/admin-ui.php:1604
 msgid "Loading…"
 msgstr ""
 
@@ -56,10 +60,10 @@ msgid "Save error"
 msgstr ""
 
 #: inc/admin-ui.php:162
-#: inc/admin-ui.php:182
-#: inc/admin-ui.php:193
-#: inc/admin-ui.php:824
-#: inc/admin-ui.php:828
+#: inc/admin-ui.php:183
+#: inc/admin-ui.php:195
+#: inc/admin-ui.php:832
+#: inc/admin-ui.php:836
 msgid "Network error"
 msgstr ""
 
@@ -80,472 +84,504 @@ msgstr ""
 msgid "Save mapping"
 msgstr ""
 
-#: inc/admin-ui.php:171
+#. translators: %s: number of saved mapping rows.
+#: inc/admin-ui.php:172
 #, php-format
 msgid "OK: written %s"
 msgstr ""
 
-#: inc/admin-ui.php:173
-#: inc/admin-ui.php:815
-#: inc/admin-ui.php:1588
+#: inc/admin-ui.php:174
+#: inc/admin-ui.php:823
+#: inc/admin-ui.php:1596
 msgid "SKU"
 msgstr ""
 
-#: inc/admin-ui.php:174
-#: inc/admin-ui.php:816
+#: inc/admin-ui.php:175
+#: inc/admin-ui.php:824
 msgid "Total"
 msgstr ""
 
-#: inc/admin-ui.php:175
-#: inc/admin-ui.php:817
+#: inc/admin-ui.php:176
+#: inc/admin-ui.php:825
 msgid "By warehouses"
 msgstr ""
 
-#: inc/admin-ui.php:176
-#: inc/admin-ui.php:818
+#: inc/admin-ui.php:177
+#: inc/admin-ui.php:826
 msgid "Found"
 msgstr ""
 
-#: inc/admin-ui.php:177
-#: inc/admin-ui.php:819
-#: inc/admin-ui.php:1552
+#: inc/admin-ui.php:178
+#: inc/admin-ui.php:827
+#: inc/admin-ui.php:1560
 msgid "No data"
 msgstr ""
 
-#: inc/admin-ui.php:179
-#: inc/admin-ui.php:821
+#: inc/admin-ui.php:180
+#: inc/admin-ui.php:829
 msgid "Enter one or more SKUs"
 msgstr ""
 
-#: inc/admin-ui.php:180
-#: inc/admin-ui.php:822
+#: inc/admin-ui.php:181
+#: inc/admin-ui.php:830
 msgid "Running…"
 msgstr ""
 
-#: inc/admin-ui.php:181
-#: inc/admin-ui.php:192
-#: inc/admin-ui.php:823
-#: inc/admin-ui.php:827
+#: inc/admin-ui.php:182
+#: inc/admin-ui.php:194
+#: inc/admin-ui.php:831
+#: inc/admin-ui.php:835
 msgid "Error:"
 msgstr ""
 
-#: inc/admin-ui.php:183
+#: inc/admin-ui.php:184
 msgid "Page"
 msgstr ""
 
-#: inc/admin-ui.php:184
+#: inc/admin-ui.php:185
 msgid "of"
 msgstr ""
 
-#: inc/admin-ui.php:185
-#: inc/admin-ui.php:830
+#: inc/admin-ui.php:186
+#: inc/admin-ui.php:838
 msgid "Done"
 msgstr ""
 
-#: inc/admin-ui.php:186
-#: inc/admin-ui.php:841
-#: inc/admin-ui.php:2507
+#: inc/admin-ui.php:187
+#: inc/admin-ui.php:849
+#: inc/admin-ui.php:2503
 msgid "Updated"
 msgstr ""
 
-#: inc/admin-ui.php:187
-#: inc/admin-ui.php:831
-#: inc/admin-ui.php:842
-#: inc/admin-ui.php:2508
+#: inc/admin-ui.php:188
+#: inc/admin-ui.php:839
+#: inc/admin-ui.php:850
+#: inc/admin-ui.php:2504
 msgid "Not found"
 msgstr ""
 
-#: inc/admin-ui.php:189
+#. translators: 1: number of processed items, 2: number of missing items.
+#: inc/admin-ui.php:191
 #, php-format
 msgid "OK: processed %1$s, not found %2$s"
 msgstr ""
 
-#: inc/admin-ui.php:191
-#: inc/admin-ui.php:826
+#: inc/admin-ui.php:193
+#: inc/admin-ui.php:834
 msgid "Working…"
 msgstr ""
 
-#: inc/admin-ui.php:194
+#: inc/admin-ui.php:196
 msgid "OK"
 msgstr ""
 
-#: inc/admin-ui.php:198
-#: inc/admin-ui.php:1562
-#: inc/admin-ui.php:2469
-#: inc/admin-ui.php:2560
+#: inc/admin-ui.php:200
+#: inc/admin-ui.php:1570
+#: inc/admin-ui.php:2465
+#: inc/admin-ui.php:2556
 #: inc/warehouse-map.php:71
 msgid "You do not have sufficient permissions to access this page."
 msgstr ""
 
-#: inc/admin-ui.php:575
+#. translators: %d: interval in minutes.
+#: inc/admin-ui.php:578
 #, php-format
 msgid "Every %d minute(s)"
 msgstr ""
 
-#: inc/admin-ui.php:579
+#. translators: %d: interval in hours.
+#: inc/admin-ui.php:583
 #, php-format
 msgid "Every %d hour(s)"
 msgstr ""
 
-#: inc/admin-ui.php:586
+#. translators: 1: interval hours, 2: interval minutes.
+#: inc/admin-ui.php:591
 #, php-format
-msgid "Every %dh %02dm"
+msgid "Every %1$dh %2$02dm"
 msgstr ""
 
-#: inc/admin-ui.php:593
+#. translators: %s: time in HH:MM format.
+#: inc/admin-ui.php:599
 #, php-format
 msgid "Daily at %s"
 msgstr ""
 
-#: inc/admin-ui.php:600
-#: inc/admin-ui.php:763
+#: inc/admin-ui.php:606
+#: inc/admin-ui.php:771
 msgid "Mon"
 msgstr ""
 
-#: inc/admin-ui.php:601
-#: inc/admin-ui.php:764
+#: inc/admin-ui.php:607
+#: inc/admin-ui.php:772
 msgid "Tue"
 msgstr ""
 
-#: inc/admin-ui.php:602
-#: inc/admin-ui.php:765
+#: inc/admin-ui.php:608
+#: inc/admin-ui.php:773
 msgid "Wed"
 msgstr ""
 
-#: inc/admin-ui.php:603
-#: inc/admin-ui.php:766
+#: inc/admin-ui.php:609
+#: inc/admin-ui.php:774
 msgid "Thu"
 msgstr ""
 
-#: inc/admin-ui.php:604
-#: inc/admin-ui.php:767
+#: inc/admin-ui.php:610
+#: inc/admin-ui.php:775
 msgid "Fri"
 msgstr ""
 
-#: inc/admin-ui.php:605
-#: inc/admin-ui.php:768
+#: inc/admin-ui.php:611
+#: inc/admin-ui.php:776
 msgid "Sat"
 msgstr ""
 
-#: inc/admin-ui.php:606
-#: inc/admin-ui.php:762
+#: inc/admin-ui.php:612
+#: inc/admin-ui.php:770
 msgid "Sun"
 msgstr ""
 
-#: inc/admin-ui.php:617
+#. translators: 1: comma-separated weekday names, 2: time in HH:MM format.
+#: inc/admin-ui.php:624
 #, php-format
-msgid "%s at %s"
+msgid "%1$s at %2$s"
 msgstr ""
 
-#: inc/admin-ui.php:625
+#. translators: 1: comma-separated month dates, 2: time in HH:MM format.
+#: inc/admin-ui.php:633
 #, php-format
-msgid "Dates: %s at %s"
+msgid "Dates: %1$s at %2$s"
 msgstr ""
 
-#: inc/admin-ui.php:631
+#: inc/admin-ui.php:639
 msgid "Unknown"
 msgstr ""
 
-#: inc/admin-ui.php:648
+#: inc/admin-ui.php:656
 msgid "Java Base URL"
 msgstr ""
 
-#: inc/admin-ui.php:652
+#: inc/admin-ui.php:660
 msgid "API Token (for Java)"
 msgstr ""
 
-#: inc/admin-ui.php:656
+#: inc/admin-ui.php:664
 msgid "Save settings"
 msgstr ""
 
-#: inc/admin-ui.php:661
+#: inc/admin-ui.php:669
 msgid "Manual run"
 msgstr ""
 
-#: inc/admin-ui.php:662
-#: inc/admin-ui.php:673
+#: inc/admin-ui.php:670
+#: inc/admin-ui.php:681
 msgid "Pull from Java (mapped)"
 msgstr ""
 
-#: inc/admin-ui.php:666
+#: inc/admin-ui.php:674
 msgid "SKUs"
 msgstr ""
 
-#: inc/admin-ui.php:667
+#: inc/admin-ui.php:675
 msgid "comma or newline separated"
 msgstr ""
 
-#: inc/admin-ui.php:675
+#: inc/admin-ui.php:683
 msgid "dry-run"
 msgstr ""
 
-#: inc/admin-ui.php:681
-#: inc/admin-ui.php:782
+#: inc/admin-ui.php:689
+#: inc/admin-ui.php:790
 msgid "Batch size"
 msgstr ""
 
-#: inc/admin-ui.php:681
+#: inc/admin-ui.php:689
 msgid "items"
 msgstr ""
 
-#: inc/admin-ui.php:684
+#: inc/admin-ui.php:692
 msgid "Pull ALL (paged)"
 msgstr ""
 
-#: inc/admin-ui.php:689
+#: inc/admin-ui.php:697
 msgctxt "heading: manual movement section"
 msgid "Incremental (movement)"
 msgstr ""
 
-#: inc/admin-ui.php:692
+#: inc/admin-ui.php:700
 msgid "Page size"
 msgstr ""
 
-#: inc/admin-ui.php:701
+#: inc/admin-ui.php:709
 msgid "From (ISO 8601, optional)"
 msgstr ""
 
-#: inc/admin-ui.php:704
+#: inc/admin-ui.php:712
 msgid "e.g. 2025-09-30T00:00:00Z"
 msgstr ""
 
-#: inc/admin-ui.php:707
+#: inc/admin-ui.php:715
 msgid "Example: 2025-09-30T00:00:00Z (leave empty for auto)"
 msgstr ""
 
-#: inc/admin-ui.php:713
+#: inc/admin-ui.php:721
 msgid "Dry run"
 msgstr ""
 
-#: inc/admin-ui.php:719
+#: inc/admin-ui.php:727
 msgid "Run movement"
 msgstr ""
 
-#: inc/admin-ui.php:727
+#: inc/admin-ui.php:735
 msgid "Automatic synchronization settings"
 msgstr ""
 
-#: inc/admin-ui.php:732
+#: inc/admin-ui.php:740
 msgid "Enabled"
 msgstr ""
 
-#: inc/admin-ui.php:738
-#: inc/admin-ui.php:835
+#: inc/admin-ui.php:746
+#: inc/admin-ui.php:843
 msgid "Mode"
 msgstr ""
 
-#: inc/admin-ui.php:740
+#: inc/admin-ui.php:748
 msgid "Disabled"
 msgstr ""
 
-#: inc/admin-ui.php:741
+#: inc/admin-ui.php:749
 msgid "Every N minutes"
 msgstr ""
 
-#: inc/admin-ui.php:742
+#: inc/admin-ui.php:750
 msgid "Daily at time"
 msgstr ""
 
-#: inc/admin-ui.php:743
+#: inc/admin-ui.php:751
 msgid "Weekly on days"
 msgstr ""
 
-#: inc/admin-ui.php:744
+#: inc/admin-ui.php:752
 msgid "Specific dates"
 msgstr ""
 
-#: inc/admin-ui.php:749
+#: inc/admin-ui.php:757
 msgid "Every (minutes)"
 msgstr ""
 
-#: inc/admin-ui.php:754
+#: inc/admin-ui.php:762
 msgid "Time (HH:MM)"
 msgstr ""
 
-#: inc/admin-ui.php:759
+#: inc/admin-ui.php:767
 msgid "Days"
 msgstr ""
 
-#: inc/admin-ui.php:777
+#: inc/admin-ui.php:785
 msgid "Dates (comma-separated DD)"
 msgstr ""
 
-#: inc/admin-ui.php:778
+#: inc/admin-ui.php:786
 msgid "1, 10, 28"
 msgstr ""
 
-#: inc/admin-ui.php:789
+#: inc/admin-ui.php:797
 msgid "FULL synchronization"
 msgstr ""
 
-#: inc/admin-ui.php:792
+#: inc/admin-ui.php:800
 msgid "Save FULL settings"
 msgstr ""
 
-#: inc/admin-ui.php:801
+#: inc/admin-ui.php:809
 msgid "Movement synchronization"
 msgstr ""
 
-#: inc/admin-ui.php:804
+#: inc/admin-ui.php:812
 msgid "Save Movement settings"
 msgstr ""
 
-#: inc/admin-ui.php:832
+#: inc/admin-ui.php:840
 msgid "pages"
 msgstr ""
 
-#: inc/admin-ui.php:833
+#: inc/admin-ui.php:841
 msgid "early stop"
 msgstr ""
 
-#: inc/admin-ui.php:834
+#: inc/admin-ui.php:842
 msgid "unknown"
 msgstr ""
 
-#: inc/admin-ui.php:836
+#: inc/admin-ui.php:844
 msgid "Batch"
 msgstr ""
 
-#: inc/admin-ui.php:837
+#: inc/admin-ui.php:845
 msgid "Next FULL run"
 msgstr ""
 
-#: inc/admin-ui.php:838
+#: inc/admin-ui.php:846
 msgid "Last FULL run"
 msgstr ""
 
-#: inc/admin-ui.php:839
+#: inc/admin-ui.php:847
 msgid "Next MOVEMENT run"
 msgstr ""
 
-#: inc/admin-ui.php:840
+#: inc/admin-ui.php:848
 msgid "Last MOVEMENT run"
 msgstr ""
 
-#: inc/admin-ui.php:843
+#: inc/admin-ui.php:851
 msgid "Last movement boundary"
 msgstr ""
 
-#: inc/admin-ui.php:844
+#: inc/admin-ui.php:852
 msgid "Saving..."
 msgstr ""
 
-#: inc/admin-ui.php:845
+#: inc/admin-ui.php:853
 msgid "Saved"
 msgstr ""
 
-#: inc/admin-ui.php:846
+#: inc/admin-ui.php:854
 msgid "Error"
 msgstr ""
 
-#: inc/admin-ui.php:847
+#: inc/admin-ui.php:855
 msgid "FULL settings saved"
 msgstr ""
 
-#: inc/admin-ui.php:848
+#: inc/admin-ui.php:856
 msgid "Movement settings saved"
 msgstr ""
 
-#: inc/admin-ui.php:849
+#: inc/admin-ui.php:857
 msgid "Next run"
 msgstr ""
 
-#: inc/admin-ui.php:1528
-#: inc/admin-ui.php:1529
-#: inc/admin-ui.php:1566
+#: inc/admin-ui.php:1359
+msgid "Manual Movement stock synchronization"
+msgstr ""
+
+#: inc/admin-ui.php:1456
+msgid "Manual SKU stock synchronization"
+msgstr ""
+
+#: inc/admin-ui.php:1536
+#: inc/admin-ui.php:1537
+#: inc/admin-ui.php:1574
 msgid "Lavka Reports"
 msgstr ""
 
-#: inc/admin-ui.php:1553
+#: inc/admin-ui.php:1561
 msgid "Loading..."
 msgstr ""
 
-#: inc/admin-ui.php:1554
-#: inc/admin-ui.php:1590
-#: inc/admin-ui.php:2504
+#: inc/admin-ui.php:1562
+#: inc/admin-ui.php:1598
+#: inc/admin-ui.php:2500
 msgid "Stock"
 msgstr ""
 
-#: inc/admin-ui.php:1570
-#: inc/admin-ui.php:2503
+#: inc/admin-ui.php:1578
+#: inc/admin-ui.php:2499
 msgid "Supplier"
 msgstr ""
 
-#: inc/admin-ui.php:1574
+#: inc/admin-ui.php:1582
 msgid "Warehouse"
 msgstr ""
 
-#: inc/admin-ui.php:1578
+#: inc/admin-ui.php:1586
 msgid "Refresh"
 msgstr ""
 
-#: inc/admin-ui.php:1584
+#: inc/admin-ui.php:1592
 msgid "Data"
 msgstr ""
 
-#: inc/admin-ui.php:1589
+#: inc/admin-ui.php:1597
 msgid "Title"
 msgstr ""
 
-#: inc/admin-ui.php:1591
+#: inc/admin-ui.php:1599
 msgid "Price"
 msgstr ""
 
-#: inc/admin-ui.php:2458
-#: inc/admin-ui.php:2489
+#: inc/admin-ui.php:1691
+msgid "Manual paged stock synchronization"
+msgstr ""
+
+#: inc/admin-ui.php:1709
+msgid "Manual paged stock synchronization lock is missing. Please restart the process."
+msgstr ""
+
+#: inc/admin-ui.php:1917
+msgid "Automatic FULL stock synchronization"
+msgstr ""
+
+#: inc/admin-ui.php:2129
+msgid "Automatic Movement stock synchronization"
+msgstr ""
+
+#: inc/admin-ui.php:2454
+#: inc/admin-ui.php:2485
 msgid "Lavka Logs"
 msgstr ""
 
-#: inc/admin-ui.php:2459
+#: inc/admin-ui.php:2455
 msgid "Logs"
 msgstr ""
 
-#: inc/admin-ui.php:2493
+#: inc/admin-ui.php:2489
 msgid "Export CSV"
 msgstr ""
 
-#: inc/admin-ui.php:2500
+#: inc/admin-ui.php:2496
 #: inc/warehouse-map.php:116
 msgid "ID"
 msgstr ""
 
-#: inc/admin-ui.php:2501
+#: inc/admin-ui.php:2497
 msgid "Time (UTC)"
 msgstr ""
 
-#: inc/admin-ui.php:2502
+#: inc/admin-ui.php:2498
 msgid "Action"
 msgstr ""
 
-#: inc/admin-ui.php:2505
+#: inc/admin-ui.php:2501
 msgid "Dry"
 msgstr ""
 
-#: inc/admin-ui.php:2506
+#: inc/admin-ui.php:2502
 msgid "Changed, h"
 msgstr ""
 
-#: inc/admin-ui.php:2509
+#: inc/admin-ui.php:2505
 msgid "ms"
 msgstr ""
 
-#: inc/admin-ui.php:2510
+#: inc/admin-ui.php:2506
 msgid "Status"
 msgstr ""
 
-#: inc/admin-ui.php:2511
+#: inc/admin-ui.php:2507
 msgid "Message"
 msgstr ""
 
-#: inc/admin-ui.php:2526
+#: inc/admin-ui.php:2522
 msgid "yes"
 msgstr ""
 
-#: inc/admin-ui.php:2526
+#: inc/admin-ui.php:2522
 msgid "no"
 msgstr ""
 
-#: inc/admin-ui.php:2535
+#: inc/admin-ui.php:2531
 msgid "No logs yet."
 msgstr ""
 
@@ -611,7 +647,8 @@ msgstr ""
 msgid "Save mappings"
 msgstr ""
 
-#: lavka-sync.php:42
+#. translators: %s: missing plugin include file path.
+#: lavka-sync.php:43
 #, php-format
 msgid "Lavka Sync: file %s is missing."
 msgstr ""

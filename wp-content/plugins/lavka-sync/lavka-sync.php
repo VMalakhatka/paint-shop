@@ -39,6 +39,7 @@
         } else {
             add_action('admin_notices', function() use ($f){
                 echo '<div class="notice notice-error"><p>' .
+                    /* translators: %s: missing plugin include file path. */
                     esc_html(sprintf(__('Lavka Sync: file %s is missing.', 'lavka-sync'), "inc/$f")) .
                     '</p></div>';
             });

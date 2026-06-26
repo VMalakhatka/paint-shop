@@ -56,7 +56,7 @@ function lavka_sync_lock_send_json_error(array $lock_result): void {
 
     wp_send_json_error([
         'error'   => 'lavka_sync_locked',
-        'message' => $lock_result['message'] ?? 'Synchronization is already running. Please try again later.',
+        'message' => $lock_result['message'] ?? __('Synchronization is already running. Please try again later.', 'lavka-sync'),
         'lock'    => $lock_result['lock'] ?? null,
     ], 409);
 }
@@ -168,6 +168,7 @@ function lavka_render_mapping_page() {
         'btn_save_mapping'  => esc_html__('Save mapping', 'lavka-sync'),
 
         // строки с параметрами
+        /* translators: %s: number of saved mapping rows. */
         'ok_written'        => esc_html__('OK: written %s', 'lavka-sync'),
 
         'th_sku'        => esc_html__('SKU', 'lavka-sync'),
@@ -186,6 +187,7 @@ function lavka_render_mapping_page() {
       'i18n_updated'       => esc_html__('Updated', 'lavka-sync'),
       'i18n_not_found'     => esc_html__('Not found', 'lavka-sync'),
 
+      /* translators: 1: number of processed items, 2: number of missing items. */
       'i18n_ok_processed' => esc_html__('OK: processed %1$s, not found %2$s', 'lavka-sync'),
 
       'i18n_working' => esc_html__('Working…', 'lavka-sync'),
@@ -572,10 +574,12 @@ function lavka_schedule_to_text(array $cfg): string
             $min = max(1, (int)($cfg['interval'] ?? 60));
 
             if ($min < 60) {
+                /* translators: %d: interval in minutes. */
                 return sprintf(__('Every %d minute(s)', 'lavka-sync'), $min);
             }
 
             if ($min % 60 === 0) {
+                /* translators: %d: interval in hours. */
                 return sprintf(__('Every %d hour(s)', 'lavka-sync'), $min / 60);
             }
 
@@ -583,13 +587,15 @@ function lavka_schedule_to_text(array $cfg): string
             $m = $min % 60;
 
             return sprintf(
-                __('Every %dh %02dm', 'lavka-sync'),
+                /* translators: 1: interval hours, 2: interval minutes. */
+                __('Every %1$dh %2$02dm', 'lavka-sync'),
                 $h,
                 $m
             );
 
         case 'daily':
             return sprintf(
+                /* translators: %s: time in HH:MM format. */
                 __('Daily at %s', 'lavka-sync'),
                 $cfg['time'] ?? '--:--'
             );
@@ -614,7 +620,8 @@ function lavka_schedule_to_text(array $cfg): string
             }
 
             return sprintf(
-                __('%s at %s', 'lavka-sync'),
+                /* translators: 1: comma-separated weekday names, 2: time in HH:MM format. */
+                __('%1$s at %2$s', 'lavka-sync'),
                 implode(', ', $days),
                 $cfg['time'] ?? '--:--'
             );
@@ -622,7 +629,8 @@ function lavka_schedule_to_text(array $cfg): string
         case 'dates':
 
             return sprintf(
-                __('Dates: %s at %s', 'lavka-sync'),
+                /* translators: 1: comma-separated month dates, 2: time in HH:MM format. */
+                __('Dates: %1$s at %2$s', 'lavka-sync'),
                 implode(', ', (array)($cfg['dates'] ?? [])),
                 $cfg['time'] ?? '--:--'
             );
@@ -1348,7 +1356,7 @@ add_action('wp_ajax_lavka_pull_movement', function () {
     $lock = lavka_sync_lock_acquire(
         'stock_movement_manual',
         'manual',
-        'Manual Movement stock synchronization',
+        __('Manual Movement stock synchronization', 'lavka-sync'),
         LAVKA_SYNC_LOCK_TTL_MOVEMENT
     );
 
@@ -1445,7 +1453,7 @@ add_action('wp_ajax_lavka_pull_java', function(){
     $lock = lavka_sync_lock_acquire(
         'stock_manual_skus',
         'manual',
-        'Manual SKU stock synchronization',
+        __('Manual SKU stock synchronization', 'lavka-sync'),
         LAVKA_SYNC_LOCK_TTL_MANUAL
     );
 
@@ -1680,7 +1688,7 @@ add_action('wp_ajax_lavka_pull_java_all_page', function () {
         $lock = lavka_sync_lock_acquire(
             'stock_manual_all',
             'manual',
-            'Manual paged stock synchronization',
+            __('Manual paged stock synchronization', 'lavka-sync'),
             LAVKA_SYNC_LOCK_TTL_FULL
         );
 
@@ -1698,7 +1706,7 @@ add_action('wp_ajax_lavka_pull_java_all_page', function () {
         if (function_exists('lavka_ecosystem_lock_get') && !$lock_token) {
             lavka_sync_lock_send_json_error([
                 'lock'    => lavka_ecosystem_lock_get(),
-                'message' => 'Manual paged stock synchronization lock is missing. Please restart the process.',
+                'message' => __('Manual paged stock synchronization lock is missing. Please restart the process.', 'lavka-sync'),
             ]);
         }
     }
@@ -1906,7 +1914,7 @@ add_action('lavka_auto_pull_all', function () {
     $lock = lavka_sync_lock_acquire(
         'stock_full_auto',
         'cron',
-        'Automatic FULL stock synchronization',
+        __('Automatic FULL stock synchronization', 'lavka-sync'),
         LAVKA_SYNC_LOCK_TTL_FULL
     );
 
@@ -2118,7 +2126,7 @@ add_action('lavka_auto_pull_movement', function () {
     $lock = lavka_sync_lock_acquire(
         'stock_movement_auto',
         'cron',
-        'Automatic Movement stock synchronization',
+        __('Automatic Movement stock synchronization', 'lavka-sync'),
         LAVKA_SYNC_LOCK_TTL_MOVEMENT
     );
 
