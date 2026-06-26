@@ -192,6 +192,29 @@ function lavka_ecosystem_lock_release(?string $token): bool {
 }
 
 /**
+ * Extends the current lock lifetime when it is still owned by the given token.
+ */
+function lavka_ecosystem_lock_touch(?string $token, ?int $ttl = null, array $extra = []): bool {
+    if (!$token) {
+        return false;
+    }
+
+    $lock = lavka_ecosystem_lock_get();
+
+    if (!$lock || !isset($lock['token']) || !hash_equals((string) $lock['token'], $token)) {
+        return false;
+    }
+
+    $ttl = lavka_ecosystem_lock_normalize_ttl($ttl);
+    $lock = array_merge($lock, $extra, [
+        'expires_at' => time() + $ttl,
+        'ttl'        => $ttl,
+    ]);
+
+    return update_option(LAVKA_ECOSYSTEM_LOCK_OPTION, $lock, false);
+}
+
+/**
  * Builds a human-readable message for manual/AJAX responses.
  */
 function lavka_ecosystem_lock_format_message(?array $lock = null): string {

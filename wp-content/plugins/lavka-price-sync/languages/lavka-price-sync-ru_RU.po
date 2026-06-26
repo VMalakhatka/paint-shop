@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Lavka Price Sync 0.1.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lavka-price-sync\n"
-"POT-Creation-Date: 2026-06-26T17:11:37+00:00\n"
+"POT-Creation-Date: 2026-06-26T18:11:01+00:00\n"
 "PO-Revision-Date: 2025-10-13T20:03:35+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -83,7 +83,7 @@ msgstr "Страница"
 msgid "of"
 msgstr "из"
 
-#: inc/admin-ui.php:73 inc/logs.php:79
+#: inc/admin-ui.php:73 inc/logs.php:93
 msgid "Not found"
 msgstr "Не найдено"
 
@@ -203,7 +203,7 @@ msgstr "Включить"
 msgid "Yes"
 msgstr "Да"
 
-#: inc/admin-ui.php:370 inc/logs.php:74
+#: inc/admin-ui.php:370 inc/logs.php:88
 msgid "Mode"
 msgstr "Режим"
 
@@ -313,53 +313,63 @@ msgstr "Синхронизация цен"
 msgid "Synchronization is already running. Please try again later."
 msgstr "Синхронизация уже выполняется. Попробуйте позже."
 
-#: inc/logs.php:66
+#: inc/logs.php:80
 msgid "Price sync logs"
 msgstr "Логи синхронизации цен"
 
-#: inc/logs.php:71
+#: inc/logs.php:85
 msgid "ID"
 msgstr "ID"
 
-#: inc/logs.php:72
+#: inc/logs.php:86 inc/logs.php:139 inc/logs.php:144 inc/logs.php:159
 msgid "Started"
 msgstr "Начато"
 
-#: inc/logs.php:73
+#: inc/logs.php:87 inc/logs.php:134
 msgid "Finished"
 msgstr "Завершено"
 
-#: inc/logs.php:75
+#: inc/logs.php:89
 msgid "Status"
 msgstr "Статус"
 
-#: inc/logs.php:76
+#: inc/logs.php:90
 msgid "Total"
 msgstr "Всего"
 
-#: inc/logs.php:77
+#: inc/logs.php:91
 msgid "Retail"
 msgstr "Розничные"
 
-#: inc/logs.php:78
+#: inc/logs.php:92
 msgid "Roles"
 msgstr "Роли"
 
-#: inc/logs.php:80
+#: inc/logs.php:94
+msgid "Progress"
+msgstr "Прогресс"
+
+#: inc/logs.php:95
 msgid "CSV"
 msgstr "CSV"
 
-#: inc/logs.php:91
+#: inc/logs.php:106
 msgid "OK"
 msgstr "OK"
 
-#: inc/logs.php:91
+#: inc/logs.php:106
 msgid "Error"
 msgstr "Ошибка"
 
-#: inc/logs.php:107
+#: inc/logs.php:123
 msgid "No logs yet."
 msgstr "Логов пока нет."
+
+#. translators: 1: processed page number, 2: total pages.
+#: inc/logs.php:153
+#, php-format
+msgid "Page %1$d of %2$d"
+msgstr "Страница %1$d из %2$d"
 
 #: inc/sync.php:215
 msgid "Manual paged price synchronization"

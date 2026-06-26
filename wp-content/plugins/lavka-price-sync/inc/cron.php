@@ -144,6 +144,19 @@ function lps_run_price_sync_now(string $mode = 'cron'): array {
     try {
         $total = (int) lps_count_all_skus();
         $pages = (int) ceil(max(1,$total) / $batch);
+        if ($log_id && function_exists('lps_log_progress')) {
+            lps_log_progress($log_id, [
+                'total' => $total,
+                'sample' => [
+                    'progress' => [
+                        'page' => 0,
+                        'pages' => $pages,
+                        'batch' => $batch,
+                        'last_page_at' => current_time('mysql'),
+                    ],
+                ],
+            ]);
+        }
     } catch (\Throwable $e) {
         return $finish([
             'ok' => false,
@@ -196,6 +209,36 @@ function lps_run_price_sync_now(string $mode = 'cron'): array {
 
         if (count($sample) < 10) {
             $sample = array_merge($sample, array_slice($applied['items'], 0, 10 - count($sample)));
+        }
+
+        if ($log_id && function_exists('lps_log_progress')) {
+            lps_log_progress($log_id, [
+                'total' => $total,
+                'updated_retail' => $updatedRetail,
+                'updated_roles' => $updatedRoles,
+                'not_found' => $notFound,
+                'sample' => [
+                    'progress' => [
+                        'page' => $page + 1,
+                        'pages' => $pages,
+                        'batch' => $batch,
+                        'last_page_at' => current_time('mysql'),
+                    ],
+                    'sample' => array_slice($sample, 0, 3),
+                ],
+            ]);
+        }
+
+        if ($lock_token && function_exists('lavka_ecosystem_lock_touch')) {
+            lavka_ecosystem_lock_touch($lock_token, 2 * HOUR_IN_SECONDS, [
+                'progress' => [
+                    'page' => $page + 1,
+                    'pages' => $pages,
+                    'updated_retail' => $updatedRetail,
+                    'updated_roles' => $updatedRoles,
+                    'not_found' => $notFound,
+                ],
+            ]);
         }
     }
         // anchor: LOGS-FINISH

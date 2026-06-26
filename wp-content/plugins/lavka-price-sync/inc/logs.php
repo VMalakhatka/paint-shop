@@ -33,6 +33,20 @@ function lps_log_finish(int $log_id, array $data): void {
         ['%s','%d','%d','%d','%d','%d','%s','%s'], ['%d']);
 }
 
+function lps_log_progress(int $log_id, array $data): void {
+    global $wpdb;
+    $row = [
+        'total'         => (int)($data['total'] ?? 0),
+        'updated_retail'=> (int)($data['updated_retail'] ?? 0),
+        'updated_roles' => (int)($data['updated_roles'] ?? 0),
+        'not_found'     => (int)($data['not_found'] ?? 0),
+        'sample_json'   => !empty($data['sample']) ? wp_json_encode($data['sample']) : null,
+    ];
+
+    $wpdb->update(lps_logs_table(), $row, ['id'=>$log_id],
+        ['%d','%d','%d','%d','%s'], ['%d']);
+}
+
 /** Сохранить CSV с не найденными SKU в uploads и вернуть путь */
 function lps_save_not_found_csv(array $skus): ?string {
     if (!$skus) return null;
@@ -77,6 +91,7 @@ function lps_render_logs_page(): void {
                     <th><?php echo esc_html__('Retail', 'lavka-price-sync'); ?></th>
                     <th><?php echo esc_html__('Roles', 'lavka-price-sync'); ?></th>
                     <th><?php echo esc_html__('Not found', 'lavka-price-sync'); ?></th>
+                    <th><?php echo esc_html__('Progress', 'lavka-price-sync'); ?></th>
                     <th><?php echo esc_html__('CSV', 'lavka-price-sync'); ?></th>
                 </tr>
             </thead>
@@ -93,6 +108,7 @@ function lps_render_logs_page(): void {
                             <td><?php echo (int) $row['updated_retail']; ?></td>
                             <td><?php echo (int) $row['updated_roles']; ?></td>
                             <td><?php echo (int) $row['not_found']; ?></td>
+                            <td><?php echo esc_html(lps_log_progress_label($row)); ?></td>
                             <td>
                                 <?php if (!empty($row['csv_path'])): ?>
                                     <code><?php echo esc_html(basename((string) $row['csv_path'])); ?></code>
@@ -104,11 +120,41 @@ function lps_render_logs_page(): void {
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="10"><?php echo esc_html__('No logs yet.', 'lavka-price-sync'); ?></td>
+                        <td colspan="11"><?php echo esc_html__('No logs yet.', 'lavka-price-sync'); ?></td>
                     </tr>
                 <?php endif; ?>
             </tbody>
         </table>
     </div>
     <?php
+}
+
+function lps_log_progress_label(array $row): string {
+    if (!empty($row['finished_at'])) {
+        return __('Finished', 'lavka-price-sync');
+    }
+
+    $sample = json_decode((string)($row['sample_json'] ?? ''), true);
+    if (!is_array($sample)) {
+        return __('Started', 'lavka-price-sync');
+    }
+
+    $progress = $sample['progress'] ?? null;
+    if (!is_array($progress)) {
+        return __('Started', 'lavka-price-sync');
+    }
+
+    $page = (int)($progress['page'] ?? 0);
+    $pages = (int)($progress['pages'] ?? 0);
+
+    if ($page > 0 && $pages > 0) {
+        return sprintf(
+            /* translators: 1: processed page number, 2: total pages. */
+            __('Page %1$d of %2$d', 'lavka-price-sync'),
+            $page,
+            $pages
+        );
+    }
+
+    return __('Started', 'lavka-price-sync');
 }
