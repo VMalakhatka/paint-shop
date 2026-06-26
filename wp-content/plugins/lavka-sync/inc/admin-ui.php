@@ -143,15 +143,6 @@ add_action('admin_menu', function () {
         58
     );
 
-    add_submenu_page(
-      'lavka-sync',
-      __('Lavka Mapping', 'lavka-sync'),
-      __('Mapping', 'lavka-sync'),
-      'manage_lavka_sync',
-      'lavka-mapping',
-      'lavka_render_mapping_page'
-    );
-
     // (если есть) Logs/Reports тоже лучше на manage_lavka_sync
 });
 
@@ -408,9 +399,12 @@ add_action('wp_ajax_lavka_ms_wh_list', function(){
 
     $resp = wp_remote_get($full, $request_args);
 
-    if (!is_wp_error($resp) && (int)wp_remote_retrieve_response_code($resp) === 404 && $pth !== 'ref/warehouses') {
-        $full = $url . '/ref/warehouses';
-        $resp = wp_remote_get($full, $request_args);
+    if (!is_wp_error($resp) && $pth !== 'ref/warehouses') {
+        $code = (int)wp_remote_retrieve_response_code($resp);
+        if ($code < 200 || $code >= 300) {
+            $full = $url . '/ref/warehouses';
+            $resp = wp_remote_get($full, $request_args);
+        }
     }
 
     if (is_wp_error($resp)) wp_send_json_error(['error'=>$resp->get_error_message()]);
