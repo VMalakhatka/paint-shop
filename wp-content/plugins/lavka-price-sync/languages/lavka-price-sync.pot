@@ -1,4 +1,4 @@
-# Copyright (C) 2025 
+# Copyright (C) 2026
 # This file is distributed under the same license as the Lavka Price Sync plugin.
 msgid ""
 msgstr ""
@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-10-14T13:43:46+00:00\n"
+"POT-Creation-Date: 2026-06-26T12:39:00+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: lavka-price-sync\n"
@@ -17,7 +17,7 @@ msgstr ""
 #. Plugin Name of the plugin
 #: lavka-price-sync.php
 #: inc/admin-ui.php:7
-#: inc/admin-ui.php:95
+#: inc/admin-ui.php:102
 msgid "Lavka Price Sync"
 msgstr ""
 
@@ -37,7 +37,7 @@ msgstr ""
 
 #: inc/admin-ui.php:23
 #: inc/admin-ui.php:24
-#: inc/admin-ui.php:189
+#: inc/admin-ui.php:196
 msgid "Mapping"
 msgstr ""
 
@@ -46,233 +46,242 @@ msgstr ""
 msgid "Run"
 msgstr ""
 
-#: inc/admin-ui.php:58
-msgid "Loading…"
-msgstr ""
-
-#: inc/admin-ui.php:59
-msgid "Saving…"
-msgstr ""
-
-#: inc/admin-ui.php:60
-#: inc/admin-ui.php:90
-msgid "Saved"
-msgstr ""
-
-#: inc/admin-ui.php:61
-msgid "Network error"
-msgstr ""
-
-#: inc/admin-ui.php:62
-msgid "Error:"
-msgstr ""
-
-#: inc/admin-ui.php:63
-msgid "Done"
-msgstr ""
-
-#: inc/admin-ui.php:64
-msgid "Page"
+#: inc/admin-ui.php:37
+#: inc/admin-ui.php:38
+msgid "Logs"
 msgstr ""
 
 #: inc/admin-ui.php:65
-msgid "of"
+msgid "Loading…"
 msgstr ""
 
 #: inc/admin-ui.php:66
-msgid "Not found"
+msgid "Saving…"
 msgstr ""
 
 #: inc/admin-ui.php:67
-msgid "Updated"
+#: inc/admin-ui.php:97
+msgid "Saved"
 msgstr ""
 
 #: inc/admin-ui.php:68
+msgid "Network error"
+msgstr ""
+
+#: inc/admin-ui.php:69
+msgid "Error:"
+msgstr ""
+
+#: inc/admin-ui.php:70
+msgid "Done"
+msgstr ""
+
+#: inc/admin-ui.php:71
+msgid "Page"
+msgstr ""
+
+#: inc/admin-ui.php:72
+msgid "of"
+msgstr ""
+
+#: inc/admin-ui.php:73
+#: inc/logs.php:79
+msgid "Not found"
+msgstr ""
+
+#: inc/admin-ui.php:74
+msgid "Updated"
+msgstr ""
+
+#: inc/admin-ui.php:75
 msgid "Enter one or more SKUs"
 msgstr ""
 
-#: inc/admin-ui.php:100
+#: inc/admin-ui.php:107
 msgid "Java Base URL"
 msgstr ""
 
-#: inc/admin-ui.php:108
+#: inc/admin-ui.php:115
 msgid "API Token"
 msgstr ""
 
-#: inc/admin-ui.php:116
+#: inc/admin-ui.php:123
 msgid "Contracts endpoint"
 msgstr ""
 
-#: inc/admin-ui.php:125
+#: inc/admin-ui.php:132
 msgid "Prices endpoint"
 msgstr ""
 
-#: inc/admin-ui.php:134
-#: inc/admin-ui.php:327
+#: inc/admin-ui.php:141
+#: inc/admin-ui.php:335
 msgid "Batch size"
 msgstr ""
 
-#: inc/admin-ui.php:142
+#: inc/admin-ui.php:149
 msgid "HTTP timeout, sec"
 msgstr ""
 
-#: inc/admin-ui.php:150
+#: inc/admin-ui.php:157
 msgid "Cron"
 msgstr ""
 
-#: inc/admin-ui.php:154
+#: inc/admin-ui.php:161
 msgid "Run hourly"
 msgstr ""
 
-#: inc/admin-ui.php:160
+#: inc/admin-ui.php:167
 msgid "Save"
 msgstr ""
 
-#: inc/admin-ui.php:192
+#: inc/admin-ui.php:199
 msgid "Link WooCommerce roles to external contract codes. Prices for a role will be taken using its mapped contract."
 msgstr ""
 
-#: inc/admin-ui.php:202
+#: inc/admin-ui.php:209
 msgid "Role"
 msgstr ""
 
-#: inc/admin-ui.php:203
+#: inc/admin-ui.php:210
 msgid "Contract"
 msgstr ""
 
-#: inc/admin-ui.php:213
+#: inc/admin-ui.php:220
 msgid "— Select contract —"
 msgstr ""
 
-#: inc/admin-ui.php:223
+#: inc/admin-ui.php:230
 msgid "Save mapping"
 msgstr ""
 
-#: inc/admin-ui.php:280
+#. translators: 1: whether the sync succeeded, 2: updated retail prices, 3: updated role prices, 4: missing SKUs.
+#: inc/admin-ui.php:288
 #, php-format
-msgid "Launch completed: ok=%s, updated_retail=%d, updated_roles=%d, not_found=%d"
+msgid "Launch completed: ok=%1$s, updated_retail=%2$d, updated_roles=%3$d, not_found=%4$d"
 msgstr ""
 
-#: inc/admin-ui.php:288
+#: inc/admin-ui.php:296
 msgid "Schedule saved"
 msgstr ""
 
-#: inc/admin-ui.php:304
+#: inc/admin-ui.php:312
 msgid "Uses mapping from the Mapping page. For each SKU the endpoint returns retail price and all role prices. The plugin updates _regular_price/_price and _wpc_price_role_<role>."
 msgstr ""
 
-#: inc/admin-ui.php:306
+#: inc/admin-ui.php:314
 msgid "Run price sync"
 msgstr ""
 
-#: inc/admin-ui.php:308
-#: inc/admin-ui.php:317
+#: inc/admin-ui.php:316
+#: inc/admin-ui.php:325
 msgid "Sync listed SKUs"
 msgstr ""
 
-#: inc/admin-ui.php:325
 #: inc/admin-ui.php:333
+#: inc/admin-ui.php:341
 msgid "Sync ALL (paged)"
 msgstr ""
 
-#: inc/admin-ui.php:342
+#: inc/admin-ui.php:350
 msgid "Price sync schedule"
 msgstr ""
 
-#: inc/admin-ui.php:348
+#: inc/admin-ui.php:356
 msgid "Enable"
 msgstr ""
 
-#: inc/admin-ui.php:356
+#: inc/admin-ui.php:364
 msgid "Yes"
 msgstr ""
 
-#: inc/admin-ui.php:362
+#: inc/admin-ui.php:370
+#: inc/logs.php:74
 msgid "Mode"
 msgstr ""
 
-#: inc/admin-ui.php:366
+#: inc/admin-ui.php:374
 msgid "Daily at specified time"
 msgstr ""
 
-#: inc/admin-ui.php:369
+#: inc/admin-ui.php:377
 msgid "Weekly by days"
 msgstr ""
 
-#: inc/admin-ui.php:372
+#: inc/admin-ui.php:380
 msgid "On specific dates"
 msgstr ""
 
-#: inc/admin-ui.php:379
+#: inc/admin-ui.php:387
 msgid "Time (HH:MM)"
 msgstr ""
 
-#: inc/admin-ui.php:401
+#: inc/admin-ui.php:408
 msgid "Next run"
 msgstr ""
 
-#: inc/admin-ui.php:405
+#: inc/admin-ui.php:412
 msgid "scheduled"
 msgstr ""
 
-#: inc/admin-ui.php:408
+#: inc/admin-ui.php:415
 msgid "planned"
 msgstr ""
 
-#: inc/admin-ui.php:410
+#: inc/admin-ui.php:417
 msgid "Not scheduled"
 msgstr ""
 
-#: inc/admin-ui.php:416
+#: inc/admin-ui.php:423
 msgid "Week days"
 msgstr ""
 
-#: inc/admin-ui.php:420
+#: inc/admin-ui.php:427
 msgid "Mon"
 msgstr ""
 
-#: inc/admin-ui.php:421
+#: inc/admin-ui.php:428
 msgid "Tue"
 msgstr ""
 
-#: inc/admin-ui.php:422
+#: inc/admin-ui.php:429
 msgid "Wed"
 msgstr ""
 
-#: inc/admin-ui.php:423
+#: inc/admin-ui.php:430
 msgid "Thu"
 msgstr ""
 
-#: inc/admin-ui.php:424
+#: inc/admin-ui.php:431
 msgid "Fri"
 msgstr ""
 
-#: inc/admin-ui.php:425
+#: inc/admin-ui.php:432
 msgid "Sat"
 msgstr ""
 
-#: inc/admin-ui.php:426
+#: inc/admin-ui.php:433
 msgid "Sun"
 msgstr ""
 
-#: inc/admin-ui.php:440
+#: inc/admin-ui.php:447
 msgid "Dates (one per line)"
 msgstr ""
 
-#: inc/admin-ui.php:447
+#. translators: %s: site timezone name.
+#: inc/admin-ui.php:456
 #, php-format
 msgid "Site timezone: %s"
 msgstr ""
 
-#: inc/admin-ui.php:453
+#: inc/admin-ui.php:463
 msgid "Batch size per run"
 msgstr ""
 
-#: inc/admin-ui.php:463
+#: inc/admin-ui.php:473
 msgid "Save schedule"
 msgstr ""
 
-#: inc/admin-ui.php:466
+#: inc/admin-ui.php:476
 msgid "Run now"
 msgstr ""
 
@@ -280,6 +289,50 @@ msgstr ""
 msgid "Once Weekly"
 msgstr ""
 
-#: lavka-price-sync.php:47
-msgid "Lavka Price hourly"
+#: inc/logs.php:66
+msgid "Price sync logs"
+msgstr ""
+
+#: inc/logs.php:71
+msgid "ID"
+msgstr ""
+
+#: inc/logs.php:72
+msgid "Started"
+msgstr ""
+
+#: inc/logs.php:73
+msgid "Finished"
+msgstr ""
+
+#: inc/logs.php:75
+msgid "Status"
+msgstr ""
+
+#: inc/logs.php:76
+msgid "Total"
+msgstr ""
+
+#: inc/logs.php:77
+msgid "Retail"
+msgstr ""
+
+#: inc/logs.php:78
+msgid "Roles"
+msgstr ""
+
+#: inc/logs.php:80
+msgid "CSV"
+msgstr ""
+
+#: inc/logs.php:91
+msgid "OK"
+msgstr ""
+
+#: inc/logs.php:91
+msgid "Error"
+msgstr ""
+
+#: inc/logs.php:107
+msgid "No logs yet."
 msgstr ""

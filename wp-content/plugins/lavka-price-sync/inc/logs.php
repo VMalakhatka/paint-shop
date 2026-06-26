@@ -30,7 +30,7 @@ function lps_log_finish(int $log_id, array $data): void {
         'sample_json'   => !empty($data['sample']) ? wp_json_encode($data['sample']) : null,
     ];
     $wpdb->update(lps_logs_table(), $row, ['id'=>$log_id],
-        ['%s','%d','%d','%d','%d','%s','%s'], ['%d']);
+        ['%s','%d','%d','%d','%d','%d','%s','%s'], ['%d']);
 }
 
 /** Сохранить CSV с не найденными SKU в uploads и вернуть путь */
@@ -51,4 +51,64 @@ function lps_save_not_found_csv(array $skus): ?string {
     fclose($fh);
 
     return $file;
+}
+
+function lps_render_logs_page(): void {
+    if (!current_user_can(LPS_CAP)) {
+        return;
+    }
+
+    global $wpdb;
+    $table = lps_logs_table();
+    $rows = $wpdb->get_results("SELECT * FROM {$table} ORDER BY id DESC LIMIT 100", ARRAY_A);
+    ?>
+    <div class="wrap">
+        <h1><?php echo esc_html__('Price sync logs', 'lavka-price-sync'); ?></h1>
+
+        <table class="widefat striped">
+            <thead>
+                <tr>
+                    <th><?php echo esc_html__('ID', 'lavka-price-sync'); ?></th>
+                    <th><?php echo esc_html__('Started', 'lavka-price-sync'); ?></th>
+                    <th><?php echo esc_html__('Finished', 'lavka-price-sync'); ?></th>
+                    <th><?php echo esc_html__('Mode', 'lavka-price-sync'); ?></th>
+                    <th><?php echo esc_html__('Status', 'lavka-price-sync'); ?></th>
+                    <th><?php echo esc_html__('Total', 'lavka-price-sync'); ?></th>
+                    <th><?php echo esc_html__('Retail', 'lavka-price-sync'); ?></th>
+                    <th><?php echo esc_html__('Roles', 'lavka-price-sync'); ?></th>
+                    <th><?php echo esc_html__('Not found', 'lavka-price-sync'); ?></th>
+                    <th><?php echo esc_html__('CSV', 'lavka-price-sync'); ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if ($rows): ?>
+                    <?php foreach ($rows as $row): ?>
+                        <tr>
+                            <td><?php echo (int) $row['id']; ?></td>
+                            <td><?php echo esc_html((string) $row['started_at']); ?></td>
+                            <td><?php echo esc_html((string) $row['finished_at']); ?></td>
+                            <td><?php echo esc_html((string) $row['mode']); ?></td>
+                            <td><?php echo !empty($row['ok']) ? esc_html__('OK', 'lavka-price-sync') : esc_html__('Error', 'lavka-price-sync'); ?></td>
+                            <td><?php echo (int) $row['total']; ?></td>
+                            <td><?php echo (int) $row['updated_retail']; ?></td>
+                            <td><?php echo (int) $row['updated_roles']; ?></td>
+                            <td><?php echo (int) $row['not_found']; ?></td>
+                            <td>
+                                <?php if (!empty($row['csv_path'])): ?>
+                                    <code><?php echo esc_html(basename((string) $row['csv_path'])); ?></code>
+                                <?php else: ?>
+                                    &mdash;
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <tr>
+                        <td colspan="10"><?php echo esc_html__('No logs yet.', 'lavka-price-sync'); ?></td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+    <?php
 }

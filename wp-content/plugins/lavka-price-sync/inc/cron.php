@@ -28,7 +28,7 @@ add_filter('cron_schedules', function ($s) {
 
 // use define+guard to avoid "already defined" when file loads twice
 if (!defined('LPS_CRON_HOOK')) {
-    define('LPS_CRON_HOOK', 'lps_cron_sync_prices');
+    define('LPS_CRON_HOOK', 'lps_cron_price_sync');
 }
 
 // Основной хук
@@ -42,6 +42,7 @@ function lps_run_price_sync_now(): array {
 
     $o     = get_option(LPS_OPT_CRON, []);
     $batch = max(50, min(2000, (int)($o['batch'] ?? 500)));
+    $log_id = function_exists('lps_log_start') ? lps_log_start('cron') : 0;
 
     $total = (int) lps_count_all_skus();
     $pages = (int) ceil(max(1,$total) / $batch);
@@ -61,7 +62,19 @@ function lps_run_price_sync_now(): array {
         $j = lps_java_fetch_prices_multi($skus);
         if (empty($j['ok'])) {
             error_log('[LPS] cron java_error: ' . ($j['error'] ?? 'unknown'));
-            return ['ok'=>false, 'error'=>$j['error'] ?? 'java_error'];
+            $result = [
+                'ok' => false,
+                'error' => $j['error'] ?? 'java_error',
+                'total' => $total,
+                'updated_retail' => $updatedRetail,
+                'updated_roles' => $updatedRoles,
+                'not_found' => $notFound,
+                'sample' => $sample,
+            ];
+            if ($log_id && function_exists('lps_log_finish')) {
+                lps_log_finish($log_id, $result);
+            }
+            return $result;
         }
 
         $applied = lps_apply_prices_multi($j['items'], /*dry*/ false);
@@ -220,15 +233,14 @@ function lps_cron_calc_next_from_option(?array $opt): ?int {
  * Вернёт timestamp ближайшего события по нашему хуку.
  */
 function lps_cron_next_ts(): ?int {
-    $hook = 'lps_cron_sync_prices'; // <- убедись, что именно таким хуком планируешь событие
-    $ts = wp_next_scheduled($hook);
+    $ts = wp_next_scheduled(LPS_CRON_HOOK);
     if ($ts) return (int)$ts;
 
     // fallback: ищем в сыром массиве кронов (на случай schedule c аргами)
     $crons = _get_cron_array();
     if (!is_array($crons)) return null;
     foreach ($crons as $time => $hooks) {
-        if (isset($hooks[$hook])) {
+        if (isset($hooks[LPS_CRON_HOOK])) {
             return (int)$time;
         }
     }
@@ -253,7 +265,8 @@ add_action('admin_init', function(){
     if (empty($opt['enabled'])) return;
 
     // событие уже есть?
-    if (wp_get_scheduled_event(LPS_CRON_HOOK)) return;
+    $event = wp_get_scheduled_event(LPS_CRON_HOOK);
+    if ($event && (empty($event->schedule) || $event->schedule !== 'lps_hourly')) return;
 
     // self-heal
     lps_cron_reschedule_price();

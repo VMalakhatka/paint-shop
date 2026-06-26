@@ -23,6 +23,8 @@ define('LPS_MAX_BATCH',   2000);
 // ---- CRON (price sync) ----
 if (!defined('LPS_OPT_CRON')) define('LPS_OPT_CRON', 'lps_cron_price'); // опция расписания
 
+require_once __DIR__.'/inc/helpers.php';
+require_once __DIR__.'/inc/logs.php';
 require_once __DIR__ . '/inc/cron.php';
 
 register_activation_hook(__FILE__, function () {
@@ -32,7 +34,6 @@ register_deactivation_hook(__FILE__, function () {
     if (function_exists('lps_cron_clear_all')) lps_cron_clear_all();
 });
 
-require_once __DIR__.'/inc/helpers.php';
 require_once __DIR__.'/inc/admin-ui.php';
 require_once __DIR__.'/inc/mapping.php';
 require_once __DIR__.'/inc/sync.php';
@@ -41,17 +42,6 @@ add_action('init', function () {
   foreach (['administrator','shop_manager'] as $r) {
     if ($role = get_role($r)) $role->add_cap(LPS_CAP);
   }
-});
-
-add_filter('cron_schedules', function ($s) {
-  $s['lps_hourly'] = ['interval'=>3600, 'display'=>__('Lavka Price hourly','lavka-price-sync')];
-  return $s;
-});
-register_activation_hook(__FILE__, function () {
-  if (!wp_next_scheduled(LPS_CRON_HOOK)) wp_schedule_event(time()+300, 'lps_hourly', LPS_CRON_HOOK);
-});
-register_deactivation_hook(__FILE__, function () {
-  wp_clear_scheduled_hook(LPS_CRON_HOOK);
 });
 
 // anchor: ACTIVATION-LOGS

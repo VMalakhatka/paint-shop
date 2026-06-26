@@ -33,6 +33,13 @@ add_action('admin_menu', function () {
         'lps-run',
         'lps_render_run_page'
     );
+    add_submenu_page('lps-main',
+        __('Logs', 'lavka-price-sync'),
+        __('Logs', 'lavka-price-sync'),
+        LPS_CAP,
+        'lps-logs',
+        'lps_render_logs_page'
+    );
 });
 
 /** Assets */
@@ -277,7 +284,8 @@ function lps_render_run_page() {
             $res = function_exists('lps_run_price_sync_now') ? lps_run_price_sync_now() : ['ok'=>false,'error'=>'missing'];
             printf('<div class="notice notice-success"><p>%s</p></div>',
                 esc_html(sprintf(
-                    __('Launch completed: ok=%s, updated_retail=%d, updated_roles=%d, not_found=%d', 'lavka-price-sync'),
+                    /* translators: 1: whether the sync succeeded, 2: updated retail prices, 3: updated role prices, 4: missing SKUs. */
+                    __('Launch completed: ok=%1$s, updated_retail=%2$d, updated_roles=%3$d, not_found=%4$d', 'lavka-price-sync'),
                     !empty($res['ok']) ? 'true' : 'false',
                     (int)($res['updated_retail'] ?? 0),
                     (int)($res['updated_roles']  ?? 0),
@@ -384,14 +392,14 @@ function lps_render_run_page() {
               </td>
             </tr>
 
-           // anchor: NEXT-RUN-ROW (новый блок)
             <?php
             $planned_ts   = function_exists('lps_cron_calc_next_from_option') ? lps_cron_calc_next_from_option($cron) : null;
             $event        = function_exists('wp_get_scheduled_event') ? wp_get_scheduled_event(LPS_CRON_HOOK) : null;
             $scheduled_ts = $event ? (int)$event->timestamp : (function_exists('lps_cron_next_ts') ? lps_cron_next_ts() : null);
+            $legacy_hourly_event = $event && !empty($event->schedule) && $event->schedule === 'lps_hourly';
 
             // небольшой auto-heal прямо в UI: включено, план есть, а факта нет
-            if (!empty($cron['enabled']) && $planned_ts && !$scheduled_ts && function_exists('lps_cron_reschedule_price')) {
+            if (!empty($cron['enabled']) && $planned_ts && (!$scheduled_ts || $legacy_hourly_event) && function_exists('lps_cron_reschedule_price')) {
                 lps_cron_reschedule_price();
                 // после перепланирования попробуем ещё раз прочитать
                 $event        = function_exists('wp_get_scheduled_event') ? wp_get_scheduled_event(LPS_CRON_HOOK) : null;
@@ -444,7 +452,10 @@ function lps_render_run_page() {
                   echo esc_textarea( implode("\n", (array)($cron['dates'] ?? [])) );
                 ?></textarea>
                 <p class="description">
-                  <?php printf(__('Site timezone: %s', 'lavka-price-sync'), wp_timezone_string()); ?>
+                  <?php
+                  /* translators: %s: site timezone name. */
+                  printf(__('Site timezone: %s', 'lavka-price-sync'), wp_timezone_string());
+                  ?>
                 </p>
               </td>
             </tr>
