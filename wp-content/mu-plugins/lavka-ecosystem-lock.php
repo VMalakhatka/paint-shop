@@ -138,7 +138,7 @@ function lavka_ecosystem_log_event(string $event, array $data = []): int {
             'context_json'     => $context_json,
             'user_id'          => isset($data['user_id']) ? (int) $data['user_id'] : get_current_user_id(),
         ],
-        ['%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d']
+        ['%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d']
     );
 
     return $inserted ? (int) $wpdb->insert_id : 0;
