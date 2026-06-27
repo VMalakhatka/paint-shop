@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) exit;
  * 2) Плюс автоматически подхватываем все хуки, чьё имя начинается с префикса "lts_" из текущего cron-массива.
  *    Это защищает от будущих переименований/добавлений без правки этой страницы.
  */
-function lts_cron_get_plugin_hooks(array $cron = null): array {
+function lts_cron_get_plugin_hooks(?array $cron = null): array {
     $hooks = [];
 
     // Тотал-синк товаров

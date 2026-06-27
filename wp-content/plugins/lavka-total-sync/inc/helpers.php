@@ -1,6 +1,77 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
+if (!defined('LTS_ECOSYSTEM_LOCK_TTL')) {
+    define('LTS_ECOSYSTEM_LOCK_TTL', 2 * HOUR_IN_SECONDS);
+}
+
+function lts_ecosystem_lock_acquire(string $process, string $source, string $label): array {
+    if (!function_exists('lavka_ecosystem_lock_acquire')) {
+        return ['ok' => true, 'token' => null, 'lock' => null];
+    }
+
+    return lavka_ecosystem_lock_acquire(
+        'lavka-total-sync',
+        $process,
+        $source,
+        $label,
+        LTS_ECOSYSTEM_LOCK_TTL
+    );
+}
+
+function lts_ecosystem_lock_release(?string $token): void {
+    if ($token && function_exists('lavka_ecosystem_lock_release')) {
+        lavka_ecosystem_lock_release($token);
+    }
+}
+
+function lts_ecosystem_lock_is_owned(?string $token): bool {
+    if (!$token || !function_exists('lavka_ecosystem_lock_get')) {
+        return false;
+    }
+
+    $lock = lavka_ecosystem_lock_get();
+
+    return !empty($lock['token']) && hash_equals((string) $lock['token'], $token);
+}
+
+function lts_ecosystem_lock_error(array $result): array {
+    return [
+        'ok'      => false,
+        'error'   => 'lavka_sync_locked',
+        'message' => $result['message'] ?? __('Synchronization is already running. Please try again later.', 'lavka-total-sync'),
+        'lock'    => $result['lock'] ?? null,
+    ];
+}
+
+function lts_ecosystem_schedule_retry(string $hook, string $process, ?array $blocking_lock = null): int {
+    $delay = defined('LAVKA_ECOSYSTEM_LOCK_CRON_DELAY')
+        ? LAVKA_ECOSYSTEM_LOCK_CRON_DELAY
+        : 10 * MINUTE_IN_SECONDS;
+    $timestamp = time() + $delay;
+    $scheduled = wp_schedule_single_event($timestamp, $hook);
+
+    if (function_exists('lavka_ecosystem_log_event')) {
+        lavka_ecosystem_log_event($scheduled ? 'cron_rescheduled' : 'cron_reschedule_failed', [
+            'level'        => $scheduled ? 'warning' : 'error',
+            'owner'        => 'lavka-total-sync',
+            'process'      => $process,
+            'source'       => 'cron',
+            'message'      => $scheduled
+                ? 'Total synchronization cron was postponed because another synchronization is running.'
+                : 'Total synchronization cron retry could not be scheduled.',
+            'scheduled_at' => $timestamp,
+            'context'      => [
+                'hook'          => $hook,
+                'blocking_lock' => $blocking_lock,
+            ],
+            'user_id' => 0,
+        ]);
+    }
+
+    return $timestamp;
+}
+
 /**
  * Retrieve and normalize plugin options for Lavka Total Sync.
  *

@@ -55,8 +55,6 @@ require_once __DIR__ . '/inc/rest-catdesc-batch.php';
 
 require_once __DIR__ . '/inc/sync-img.php';
 
-require_once __DIR__ . '/inc/admin-sync-run.php';
-
 require_once __DIR__ . '/inc/admin-media.php';
 
 require_once __DIR__ . '/inc/admin-cron-summary.php';
@@ -73,7 +71,7 @@ register_activation_hook(__FILE__, function () {
     if (false === get_option(LTS_OPT)) {
         $defaults = [
         'base_url'    => 'http://127.0.0.1:8080',
-        'api_token'   => 'x3hXx0p3x9p7lC9cR7fU1wE6o9c2dYb4qB2cVwzQb9hM=',
+        'api_token'   => '',
         'path_sync'   => '/admin/export/card-tov',
         'path_status' => '', // не используется для fetch-only сценария
         'path_cancel' => '', // не используется

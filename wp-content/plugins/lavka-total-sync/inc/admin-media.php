@@ -95,8 +95,14 @@ add_action(LTS_MEDIA_CRON_HOOK, function(){
         'dry'             => !empty($o['media_dry']) ? true : false,
     ];
     // Выполняем запрос
+    $res = ['ok'=>false, 'error'=>'media_sync_failed'];
     try {
-        $res = lts_call_java_media('/admin/media/sync/range', $payload);
+        $res = lts_call_java_media_locked(
+            '/admin/media/sync/range',
+            $payload,
+            'cron',
+            'media_range_sync'
+        );
         if (function_exists('lts_log_db')) {
             lts_log_db(!empty($res['ok']) ? 'info' : 'error', 'media_cron', [
                 'result' => !empty($res['ok']) ? 'ok' : 'fail',
@@ -104,10 +110,20 @@ add_action(LTS_MEDIA_CRON_HOOK, function(){
             ]);
         }
     } catch (Throwable $e) {
+        $res = ['ok'=>false, 'error'=>$e->getMessage()];
         error_log('[LTS][media_cron] exception: '.$e->getMessage());
     }
-    // Перепланируем следующий одиночный запуск
-    lts_media_cron_schedule_next();
+
+    if (($res['error'] ?? '') === 'lavka_sync_locked') {
+        lts_ecosystem_schedule_retry(
+            LTS_MEDIA_CRON_HOOK,
+            'media_range_sync',
+            $res['lock'] ?? null
+        );
+    } else {
+        // Перепланируем следующий одиночный запуск
+        lts_media_cron_schedule_next();
+    }
 });
 
 /** AJAX: сохранить настройки крона для Media Sync (range only) и перепланировать */
@@ -235,6 +251,31 @@ if (!function_exists('lts_call_java_media')) {
     }
 }
 
+if (!function_exists('lts_call_java_media_locked')) {
+    function lts_call_java_media_locked(
+        string $path,
+        array $payload,
+        string $source,
+        string $process
+    ): array {
+        $lock = lts_ecosystem_lock_acquire(
+            $process,
+            $source,
+            __('Product media synchronization', 'lavka-total-sync')
+        );
+        if (empty($lock['ok'])) {
+            return lts_ecosystem_lock_error($lock);
+        }
+
+        $lock_token = $lock['token'] ?? null;
+        try {
+            return lts_call_java_media($path, $payload);
+        } finally {
+            lts_ecosystem_lock_release($lock_token);
+        }
+    }
+}
+
 /** AJAX: по диапазону (курсор) */
 add_action('wp_ajax_lts_media_sync_range', function () {
     $cap = defined('LTS_CAP') ? LTS_CAP : 'manage_options';
@@ -260,7 +301,12 @@ add_action('wp_ajax_lts_media_sync_range', function () {
         'dry'             => $dry,
     ];
 
-    $res = lts_call_java_media('/admin/media/sync/range', $payload);
+    $res = lts_call_java_media_locked(
+        '/admin/media/sync/range',
+        $payload,
+        'manual',
+        'media_range_sync'
+    );
     if (!empty($res['ok'])) wp_send_json_success($res);
     wp_send_json_error($res);
 });
@@ -291,7 +337,12 @@ add_action('wp_ajax_lts_media_sync_list', function () {
         'dry'             => $dry,
     ];
 
-    $res = lts_call_java_media('/admin/media/sync', $payload);
+    $res = lts_call_java_media_locked(
+        '/admin/media/sync',
+        $payload,
+        'manual',
+        'media_list_sync'
+    );
     if (!empty($res['ok'])) wp_send_json_success($res);
     wp_send_json_error($res);
 });

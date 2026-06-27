@@ -600,6 +600,51 @@ function lts_log(string $msg, array $ctx = []): void {
  * ]
  */
 function lts_sync_goods_run(array $args = []): array {
+    $inherited_token = isset($args['_lock_token']) ? (string) $args['_lock_token'] : '';
+    $owns_lock = false;
+    $lock_token = $inherited_token ?: null;
+
+    if ($inherited_token !== '') {
+        if (!lts_ecosystem_lock_is_owned($inherited_token)) {
+            return [
+                'ok'    => false,
+                'error' => 'lavka_sync_lock_lost',
+            ];
+        }
+
+        if (function_exists('lavka_ecosystem_lock_touch')) {
+            lavka_ecosystem_lock_touch($inherited_token, LTS_ECOSYSTEM_LOCK_TTL);
+        }
+    } else {
+        $source = isset($args['_lock_source']) ? sanitize_key((string) $args['_lock_source']) : 'manual';
+        $lock = lts_ecosystem_lock_acquire(
+            'product_fields_sync',
+            $source,
+            __('Product data synchronization', 'lavka-total-sync')
+        );
+
+        if (empty($lock['ok'])) {
+            return lts_ecosystem_lock_error($lock);
+        }
+
+        $lock_token = $lock['token'] ?? null;
+        $owns_lock = (bool) $lock_token;
+    }
+
+    if ($lock_token) {
+        $args['_lock_token'] = $lock_token;
+    }
+
+    try {
+        return lts_sync_goods_run_unlocked($args);
+    } finally {
+        if ($owns_lock) {
+            lts_ecosystem_lock_release($lock_token);
+        }
+    }
+}
+
+function lts_sync_goods_run_unlocked(array $args = []): array {
     if (!class_exists('WC_Product')) {
         return ['ok'=>false, 'error'=>'woocommerce_missing'];
     }
@@ -619,18 +664,19 @@ function lts_sync_goods_run(array $args = []): array {
     // Run-scoped logger: attach current run id (if provided) to every DB log entry.
     $runId = isset($args['run_id']) ? (string)$args['run_id'] : '';
     $log = function (string $level, string $tag, array $ctx = []) use ($runId) {
-        if (!is_array($ctx)) {
-            $ctx = [];
-        }
+        $context = isset($ctx['ctx']) && is_array($ctx['ctx']) ? $ctx['ctx'] : [];
         if ($runId !== '') {
-            $ctx['run'] = $runId;
+            $context['run'] = $runId;
         }
+        $ctx['ctx'] = $context;
         lts_log_db($level, $tag, $ctx);
     };
 
     // progress lines for live UI (worker polls level=progress, tag=progress)
     $progress = function (string $line) use ($runId) {
-        lts_log_db('progress', 'progress', ['run' => $runId, 'line' => $line]);
+        lts_log_db('progress', 'progress', [
+            'ctx' => ['run' => $runId, 'line' => $line],
+        ]);
     };
 
     // курсор к бэкенду отправляем ровно таким, как ввёл оператор
@@ -784,6 +830,22 @@ function lts_sync_goods_run(array $args = []): array {
         if (function_exists('lts_recount_all_product_cat_counts')) {
             lts_recount_all_product_cat_counts();
             $progress('Recount categories: done');
+        }
+
+        if (!empty($args['_lock_token']) && function_exists('lavka_ecosystem_lock_touch')) {
+            lavka_ecosystem_lock_touch(
+                (string) $args['_lock_token'],
+                LTS_ECOSYSTEM_LOCK_TTL,
+                [
+                    'progress' => [
+                        'after'   => $last_cursor,
+                        'done'    => $done,
+                        'created' => $created,
+                        'updated' => $updated,
+                        'drafted' => $drafted_diff,
+                    ],
+                ]
+            );
         }
 
         // небольшая щадящая пауза для уменьшения нагрузки

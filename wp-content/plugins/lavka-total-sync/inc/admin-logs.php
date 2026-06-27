@@ -7,7 +7,7 @@ if (!defined('LTS_CAP')) define('LTS_CAP', 'manage_lavka_sync');
 // [LTS] ANCHOR: submenu - Logs
 add_action('admin_menu', function(){
     add_submenu_page(
-        'lavka-total-sync', // замените на slug вашего основного меню плагина
+        'lts-main',
         __('Total Sync Logs','lavka-total-sync'),
         __('Logs','lavka-total-sync'),
         LTS_CAP,

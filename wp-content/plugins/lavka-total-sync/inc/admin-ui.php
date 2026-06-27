@@ -103,12 +103,22 @@ add_action('wp_ajax_lts_bg_start', function () {
     $run_id = uniqid('lts_', true);
     $args['run_id'] = $run_id;
 
+    $lock = lts_ecosystem_lock_acquire(
+        'product_fields_background',
+        'manual',
+        __('Background product data synchronization', 'lavka-total-sync')
+    );
+    if (empty($lock['ok'])) {
+        wp_send_json_error(lts_ecosystem_lock_error($lock), 409);
+    }
+
     // Persist run meta
     $runs = get_option('lts_bg_runs', []);
     $runs[$run_id] = [
         'status'     => 'running',
         'started_at' => time(),
         'args'       => $args,
+        'lock_token' => $lock['token'] ?? null,
     ];
     update_option('lts_bg_runs', $runs, false);
 
@@ -142,28 +152,100 @@ if ( ! function_exists('lts_run_bg_worker') ) {
         if ( ! $run_id || empty( $runs[ $run_id ] ) ) {
             return ['ok'=>false,'error'=>'unknown_run'];
         }
+
+        if (($runs[$run_id]['status'] ?? '') !== 'running') {
+            return ['ok'=>false,'error'=>'run_not_active'];
+        }
+
+        $claim_option = 'lts_bg_worker_claim_' . md5((string) $run_id);
+        if (!add_option($claim_option, time(), '', 'no')) {
+            return ['ok'=>false,'error'=>'worker_already_running'];
+        }
+
+        $lock_token = isset($runs[$run_id]['lock_token']) ? (string) $runs[$run_id]['lock_token'] : '';
+        if (function_exists('lavka_ecosystem_lock_get') && !lts_ecosystem_lock_is_owned($lock_token)) {
+            $runs[$run_id]['status'] = 'error';
+            $runs[$run_id]['finished_at'] = time();
+            $runs[$run_id]['result'] = ['ok'=>false,'error'=>'lavka_sync_lock_lost'];
+            update_option('lts_bg_runs', $runs, false);
+            delete_option($claim_option);
+
+            return $runs[$run_id]['result'];
+        }
+
+        wp_clear_scheduled_hook('lts_bg_worker_event', ['run_id' => $run_id]);
+
         $args = $runs[ $run_id ]['args'];
         $args['run_id'] = (string) $run_id;
+        $args['_lock_token'] = $lock_token;
+
+        register_shutdown_function(function () use ($run_id, $lock_token, $claim_option) {
+            $error = error_get_last();
+            $fatal_types = [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR];
+            if (!$error || !in_array((int) $error['type'], $fatal_types, true)) {
+                return;
+            }
+
+            $runs = get_option('lts_bg_runs', []);
+            if (isset($runs[$run_id])) {
+                $runs[$run_id]['status'] = 'error';
+                $runs[$run_id]['finished_at'] = time();
+                $runs[$run_id]['result'] = [
+                    'ok'      => false,
+                    'error'   => 'fatal',
+                    'message' => $error['message'] ?? '',
+                ];
+                update_option('lts_bg_runs', $runs, false);
+            }
+
+            lts_ecosystem_lock_release($lock_token);
+            delete_option($claim_option);
+        });
 
         // helper to log with run id
         if ( ! function_exists('lts_log_db_with_run') ) {
             function lts_log_db_with_run( $level, $tag, $ctx, $run_id ) {
-                if ( ! is_array( $ctx ) ) $ctx = [];
-                $ctx['run'] = $run_id;
-                lts_log_db( $level, $tag, $ctx );
+                $data = is_array($ctx) ? $ctx : ['message' => (string) $ctx];
+                $context = isset($data['ctx']) && is_array($data['ctx']) ? $data['ctx'] : [];
+                $context['run'] = $run_id;
+                $data['ctx'] = $context;
+                lts_log_db( $level, $tag, $data );
             }
         }
-        lts_log_db_with_run('info','bg','start', $run_id);
 
-        $res = lts_sync_goods_run( $args );
+        try {
+            lts_log_db_with_run('info','bg','start', $run_id);
+            $res = lts_sync_goods_run( $args );
 
-        $runs[ $run_id ]['status']      = 'finished';
-        $runs[ $run_id ]['finished_at'] = time();
-        $runs[ $run_id ]['result']      = $res;
-        update_option('lts_bg_runs', $runs, false);
+            $runs = get_option('lts_bg_runs', []);
+            if (isset($runs[$run_id])) {
+                $cancel_requested = ($runs[$run_id]['status'] ?? '') === 'cancel_requested';
+                $runs[$run_id]['status'] = $cancel_requested
+                    ? 'canceled'
+                    : (!empty($res['ok']) ? 'finished' : 'error');
+                $runs[$run_id]['finished_at'] = time();
+                $runs[$run_id]['result'] = $res;
+                update_option('lts_bg_runs', $runs, false);
+            }
 
-        lts_log_db_with_run('info','bg','finish', $run_id);
-        return $res;
+            lts_log_db_with_run(!empty($res['ok']) ? 'info' : 'error', 'bg', 'finish', $run_id);
+
+            return $res;
+        } catch (Throwable $e) {
+            $res = ['ok'=>false,'error'=>$e->getMessage()];
+            $runs = get_option('lts_bg_runs', []);
+            if (isset($runs[$run_id])) {
+                $runs[$run_id]['status'] = 'error';
+                $runs[$run_id]['finished_at'] = time();
+                $runs[$run_id]['result'] = $res;
+                update_option('lts_bg_runs', $runs, false);
+            }
+
+            return $res;
+        } finally {
+            lts_ecosystem_lock_release($lock_token);
+            delete_option($claim_option);
+        }
     }
 }
 
@@ -202,7 +284,7 @@ add_action('wp_ajax_lts_bg_status', function () {
     if ($run_id && $wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table))) {
         $like = '%"run":"' . $wpdb->esc_like($run_id) . '"%';
         $sql  = $wpdb->prepare("
-            SELECT id, ts, level, tag, message, ctx
+            SELECT id, ts, level, action AS tag, message, ctx
             FROM {$table}
             WHERE id > %d AND ctx LIKE %s
             ORDER BY id ASC
@@ -222,6 +304,32 @@ add_action('wp_ajax_lts_bg_status', function () {
         'rows'   => $rows ?: [],
         'result' => $result,
     ]);
+});
+
+add_action('wp_ajax_lts_bg_cancel', function () {
+    if (!current_user_can(LTS_CAP)) wp_send_json_error(['error'=>'forbidden'], 403);
+    check_ajax_referer('lts_admin_nonce','_ajax_nonce');
+
+    $run_id = isset($_POST['run_id']) ? (string) $_POST['run_id'] : '';
+    $runs = get_option('lts_bg_runs', []);
+    if ($run_id === '' || empty($runs[$run_id])) {
+        wp_send_json_error(['error'=>'unknown_run'], 404);
+    }
+
+    $claim_option = 'lts_bg_worker_claim_' . md5($run_id);
+    if (get_option($claim_option, false) !== false) {
+        $runs[$run_id]['status'] = 'cancel_requested';
+        update_option('lts_bg_runs', $runs, false);
+        wp_send_json_success(['status'=>'cancel_requested']);
+    }
+
+    $runs[$run_id]['status'] = 'canceled';
+    $runs[$run_id]['finished_at'] = time();
+    update_option('lts_bg_runs', $runs, false);
+    wp_clear_scheduled_hook('lts_bg_worker_event', ['run_id' => $run_id]);
+    lts_ecosystem_lock_release(isset($runs[$run_id]['lock_token']) ? (string) $runs[$run_id]['lock_token'] : null);
+
+    wp_send_json_success(['status'=>'canceled']);
 });
 
 add_action('wp_ajax_lts_run_total_sync', function(){
@@ -293,7 +401,7 @@ add_action('wp_ajax_lts_sync_run', function(){
     ];
 
     // Call Java
-    $res = lts_call_java_sync_run($payload, $opts);
+    $res = lts_call_java_sync_run_locked($payload, $opts, 'manual');
 
     // Return whatever we got (either json or raw)
     if (!empty($res['ok'])) {
@@ -342,6 +450,26 @@ if (!function_exists('lts_call_java_sync_run')) {
             return ['ok'=>true,'json'=>$json];
         }
         return ['ok'=>true,'raw'=>mb_substr($body,0,2000)];
+    }
+}
+
+if (!function_exists('lts_call_java_sync_run_locked')) {
+    function lts_call_java_sync_run_locked(array $payload, array $opts, string $source): array {
+        $lock = lts_ecosystem_lock_acquire(
+            'product_fields_java',
+            $source,
+            __('Java product data synchronization', 'lavka-total-sync')
+        );
+        if (empty($lock['ok'])) {
+            return lts_ecosystem_lock_error($lock);
+        }
+
+        $lock_token = $lock['token'] ?? null;
+        try {
+            return lts_call_java_sync_run($payload, $opts);
+        } finally {
+            lts_ecosystem_lock_release($lock_token);
+        }
     }
 }
 
@@ -423,13 +551,25 @@ add_action('lts_cron_full_sync_event', function () {
         'dryRun'      => $dryRun,
     ];
 
-    $res = lts_call_java_sync_run($payload, $opts);
+    $res = lts_call_java_sync_run_locked($payload, $opts, 'cron');
+
+    if (($res['error'] ?? '') === 'lavka_sync_locked') {
+        lts_ecosystem_schedule_retry(
+            'lts_cron_full_sync_event',
+            'product_fields_java',
+            $res['lock'] ?? null
+        );
+    }
 
     // Log a short line into DB logs (if table exists)
     if (function_exists('lts_log_db')) {
         $ctx = ['cron'=>'full','payload'=>$payload];
         if (!empty($res['json'])) $ctx['result'] = $res['json'];
-        lts_log_db('info','cron_full_sync',$ctx);
+        lts_log_db(!empty($res['ok']) ? 'info' : 'error', 'cron_full_sync', [
+            'result'  => !empty($res['ok']) ? 'ok' : 'failed',
+            'message' => $res['message'] ?? $res['error'] ?? '',
+            'ctx'     => $ctx,
+        ]);
     }
 });
 
@@ -491,9 +631,20 @@ add_action('wp_ajax_lts_cron_run_now', function(){
     if (!current_user_can(LTS_CAP)) wp_send_json_error(['error'=>'forbidden'], 403);
     check_ajax_referer('lts_admin_nonce','nonce');
 
-    do_action('lts_cron_full_sync_event');
+    $opts = lts_get_options();
+    $payload = [
+        'limit'       => isset($opts['cron_limit']) ? (int)$opts['cron_limit'] : 900000,
+        'pageSizeWoo' => isset($opts['cron_page']) ? (int)$opts['cron_page'] : 200,
+        'cursorAfter' => isset($opts['first_sku']) ? (string)$opts['first_sku'] : '___',
+        'dryRun'      => false,
+    ];
+    $res = lts_call_java_sync_run_locked($payload, $opts, 'manual');
 
-    wp_send_json_success(['ok'=>true]);
+    if (empty($res['ok'])) {
+        wp_send_json_error($res, ($res['error'] ?? '') === 'lavka_sync_locked' ? 409 : 500);
+    }
+
+    wp_send_json_success($res);
 });
 
 /**
@@ -1093,12 +1244,18 @@ function lts_render_run_page() {
             $('#lts-bg-cancel').on('click', function(e){
                 e.preventDefault();
                 $.post(LTS_ADMIN.ajaxUrl, {
-                    action: 'lts_job_cancel',
-                    nonce:  LTS_ADMIN.nonce
-                }).always(function(){
-                    if (pollTimer) clearInterval(pollTimer);
-                    setUiRunning(false);
-                    appendLog('Canceled by user.');
+                    action: 'lts_bg_cancel',
+                    _ajax_nonce: LTS_ADMIN.nonce,
+                    run_id: runId
+                }).done(function(resp){
+                    var status = resp && resp.success && resp.data ? resp.data.status : '';
+                    if (status === 'canceled') {
+                        if (pollTimer) clearInterval(pollTimer);
+                        setUiRunning(false);
+                        appendLog('Canceled by user.');
+                    } else if (status === 'cancel_requested') {
+                        appendLog('Cancellation requested. Waiting for the current operation to finish.');
+                    }
                 });
             });
 

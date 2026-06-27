@@ -6,6 +6,15 @@ const LTS_JOB_HOOK = 'lts_job_tick';
 
 // Запуск задачи
 function lts_job_start(array $args = []) {
+    $lock = lts_ecosystem_lock_acquire(
+        'product_fields_worker',
+        isset($args['_lock_source']) ? sanitize_key((string) $args['_lock_source']) : 'manual',
+        __('Background product data worker', 'lavka-total-sync')
+    );
+    if (empty($lock['ok'])) {
+        return lts_ecosystem_lock_error($lock);
+    }
+
     // Сохраняем состояние
     $job = [
         'status'   => 'running',
@@ -20,11 +29,18 @@ function lts_job_start(array $args = []) {
         'done'     => 0, 'created'=>0, 'updated'=>0, 'drafted'=>0,
         'last'     => false,
         'error'    => null,
+        'lock_token' => $lock['token'] ?? null,
+        'run_id'     => uniqid('lts_job_', true),
     ];
     update_option(LTS_JOB_OPT, $job, false);
     // Запланировать первый тик сразу
     if (!wp_next_scheduled(LTS_JOB_HOOK)) {
-        wp_schedule_single_event(time(), LTS_JOB_HOOK);
+        if (!wp_schedule_single_event(time(), LTS_JOB_HOOK)) {
+            $job['status'] = 'error';
+            $job['error'] = 'worker_schedule_failed';
+            update_option(LTS_JOB_OPT, $job, false);
+            lts_ecosystem_lock_release(isset($job['lock_token']) ? (string) $job['lock_token'] : null);
+        }
     }
     return $job;
 }
@@ -36,6 +52,7 @@ function lts_job_stop($status = 'stopped', $error = null) {
     $job['updated'] = time();
     if ($error) $job['error'] = (string)$error;
     update_option(LTS_JOB_OPT, $job, false);
+    lts_ecosystem_lock_release(isset($job['lock_token']) ? (string) $job['lock_token'] : null);
 }
 
 add_action('wp_ajax_lts_job_start', function(){
@@ -55,6 +72,9 @@ add_action('wp_ajax_lts_job_start', function(){
         'max_items' => $maxIt,
         'draft_stale_seconds' => $draft ?: null,
     ]);
+    if (empty($job['status']) || $job['status'] !== 'running') {
+        wp_send_json_error($job, 409);
+    }
     wp_send_json_success(['job'=>$job]);
 });
 
@@ -76,7 +96,7 @@ add_action('wp_ajax_lts_job_status', function(){
     if ($run_id && $wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table))) {
         $like = '%"run":"' . $wpdb->esc_like($run_id) . '"%';
         $sql = $wpdb->prepare("
-            SELECT id, ts, level, tag, message, ctx
+            SELECT id, ts, level, action AS tag, message, ctx
             FROM {$table}
             WHERE id > %d AND ctx LIKE %s
             ORDER BY id ASC
@@ -111,6 +131,7 @@ add_action(LTS_JOB_HOOK, function () {
         'max_seconds'         => max(5, min(30, (int)$job['max_sec'])),
         'max'                 => max(1, (int)($job['max_items'] ?? 200)),
         'draft_stale_seconds' => $job['draft_sec'] ?: null,
+        '_lock_token'         => $job['lock_token'] ?? null,
     ];
 
     // 👇 теперь добавляем run_id, чтобы записи логов можно было привязать
@@ -138,6 +159,7 @@ add_action(LTS_JOB_HOOK, function () {
         if ($job['last']) {
             $job['status'] = 'done';
             update_option(LTS_JOB_OPT, $job, false);
+            lts_ecosystem_lock_release(isset($job['lock_token']) ? (string) $job['lock_token'] : null);
             return;
         }
 
