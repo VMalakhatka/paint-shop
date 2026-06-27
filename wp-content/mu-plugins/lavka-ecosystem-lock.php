@@ -28,6 +28,150 @@ if (!defined('LAVKA_ECOSYSTEM_LOCK_CRON_DELAY')) {
     define('LAVKA_ECOSYSTEM_LOCK_CRON_DELAY', 10 * MINUTE_IN_SECONDS);
 }
 
+// Database schema version for the shared Lavka event journal.
+if (!defined('LAVKA_ECOSYSTEM_EVENTS_DB_VERSION')) {
+    define('LAVKA_ECOSYSTEM_EVENTS_DB_VERSION', '1');
+}
+
+// Number of days retained in the shared event journal.
+if (!defined('LAVKA_ECOSYSTEM_EVENTS_RETENTION_DAYS')) {
+    define('LAVKA_ECOSYSTEM_EVENTS_RETENTION_DAYS', 30);
+}
+
+/**
+ * Returns the database table used by the shared Lavka event journal.
+ */
+function lavka_ecosystem_events_table(): string {
+    global $wpdb;
+
+    return $wpdb->prefix . 'lavka_ecosystem_events';
+}
+
+/**
+ * Creates or upgrades the shared event journal table.
+ *
+ * MU plugins do not have an activation hook, so the schema version is checked
+ * after all MU plugins have loaded.
+ */
+function lavka_ecosystem_events_install(): void {
+    $installed_version = (string) get_option('lavka_ecosystem_events_db_version', '');
+
+    if ($installed_version === LAVKA_ECOSYSTEM_EVENTS_DB_VERSION) {
+        return;
+    }
+
+    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+    global $wpdb;
+    $table   = lavka_ecosystem_events_table();
+    $charset = $wpdb->get_charset_collate();
+
+    dbDelta("CREATE TABLE {$table} (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        created_at DATETIME NOT NULL,
+        created_at_gmt DATETIME NOT NULL,
+        event VARCHAR(40) NOT NULL,
+        level VARCHAR(20) NOT NULL DEFAULT 'info',
+        owner VARCHAR(100) NOT NULL DEFAULT '',
+        process VARCHAR(100) NOT NULL DEFAULT '',
+        source VARCHAR(30) NOT NULL DEFAULT '',
+        token VARCHAR(36) NOT NULL DEFAULT '',
+        message TEXT NULL,
+        scheduled_at DATETIME NULL,
+        scheduled_at_gmt DATETIME NULL,
+        context_json LONGTEXT NULL,
+        user_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+        PRIMARY KEY  (id),
+        KEY created_at_gmt (created_at_gmt),
+        KEY event (event),
+        KEY owner (owner),
+        KEY process (process),
+        KEY level (level)
+    ) {$charset};");
+
+    update_option('lavka_ecosystem_events_db_version', LAVKA_ECOSYSTEM_EVENTS_DB_VERSION, false);
+}
+add_action('muplugins_loaded', 'lavka_ecosystem_events_install', 1);
+
+/**
+ * Writes one event to the shared Lavka journal.
+ *
+ * Supported data fields: level, owner, process, source, token, message,
+ * scheduled_at (Unix timestamp), context and user_id.
+ */
+function lavka_ecosystem_log_event(string $event, array $data = []): int {
+    global $wpdb;
+
+    $level = sanitize_key((string) ($data['level'] ?? 'info'));
+    if (!in_array($level, ['info', 'warning', 'error'], true)) {
+        $level = 'info';
+    }
+
+    $scheduled_timestamp = isset($data['scheduled_at']) ? (int) $data['scheduled_at'] : 0;
+    $scheduled_at = null;
+    $scheduled_at_gmt = null;
+
+    if ($scheduled_timestamp > 0) {
+        $scheduled_at = wp_date('Y-m-d H:i:s', $scheduled_timestamp, wp_timezone());
+        $scheduled_at_gmt = gmdate('Y-m-d H:i:s', $scheduled_timestamp);
+    }
+
+    $context = $data['context'] ?? null;
+    $context_json = $context !== null
+        ? wp_json_encode($context, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
+        : null;
+
+    $inserted = $wpdb->insert(
+        lavka_ecosystem_events_table(),
+        [
+            'created_at'       => current_time('mysql'),
+            'created_at_gmt'   => current_time('mysql', true),
+            'event'            => sanitize_key($event),
+            'level'            => $level,
+            'owner'            => sanitize_key((string) ($data['owner'] ?? '')),
+            'process'          => sanitize_key((string) ($data['process'] ?? '')),
+            'source'           => sanitize_key((string) ($data['source'] ?? '')),
+            'token'            => sanitize_text_field((string) ($data['token'] ?? '')),
+            'message'          => isset($data['message']) ? (string) $data['message'] : null,
+            'scheduled_at'     => $scheduled_at,
+            'scheduled_at_gmt' => $scheduled_at_gmt,
+            'context_json'     => $context_json,
+            'user_id'          => isset($data['user_id']) ? (int) $data['user_id'] : get_current_user_id(),
+        ],
+        ['%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d']
+    );
+
+    return $inserted ? (int) $wpdb->insert_id : 0;
+}
+
+/**
+ * Removes old shared journal entries at most once per day.
+ */
+function lavka_ecosystem_events_maybe_cleanup(): void {
+    $last_cleanup = (int) get_option('lavka_ecosystem_events_last_cleanup', 0);
+
+    if ($last_cleanup > time() - DAY_IN_SECONDS) {
+        return;
+    }
+
+    global $wpdb;
+    $retention_days = max(
+        1,
+        (int) apply_filters('lavka_ecosystem_events_retention_days', LAVKA_ECOSYSTEM_EVENTS_RETENTION_DAYS)
+    );
+    $threshold = gmdate('Y-m-d H:i:s', time() - ($retention_days * DAY_IN_SECONDS));
+
+    $wpdb->query(
+        $wpdb->prepare(
+            'DELETE FROM ' . lavka_ecosystem_events_table() . ' WHERE created_at_gmt < %s',
+            $threshold
+        )
+    );
+
+    update_option('lavka_ecosystem_events_last_cleanup', time(), false);
+}
+add_action('init', 'lavka_ecosystem_events_maybe_cleanup');
+
 /**
  * Returns the default lock lifetime.
  *
@@ -271,4 +415,92 @@ function lavka_ecosystem_lock_reschedule_single_event(
     wp_schedule_single_event($timestamp, $hook, $args);
 
     return $timestamp;
+}
+
+/**
+ * Registers the shared Lavka event journal under the WordPress Tools menu.
+ */
+function lavka_ecosystem_events_register_admin_page(): void {
+    add_management_page(
+        __('Lavka events', 'lavka-ecosystem'),
+        __('Lavka events', 'lavka-ecosystem'),
+        'manage_options',
+        'lavka-ecosystem-events',
+        'lavka_ecosystem_events_render_admin_page'
+    );
+}
+add_action('admin_menu', 'lavka_ecosystem_events_register_admin_page');
+
+/**
+ * Renders the shared Lavka event journal.
+ */
+function lavka_ecosystem_events_render_admin_page(): void {
+    if (!current_user_can('manage_options')) {
+        return;
+    }
+
+    global $wpdb;
+    $rows = $wpdb->get_results(
+        'SELECT * FROM ' . lavka_ecosystem_events_table() . ' ORDER BY id DESC LIMIT 200',
+        ARRAY_A
+    );
+    ?>
+    <div class="wrap">
+        <h1><?php echo esc_html__('Lavka ecosystem events', 'lavka-ecosystem'); ?></h1>
+        <p>
+            <?php
+            echo esc_html__(
+                'Shared synchronization events, lock conflicts and scheduled retries from Lavka plugins.',
+                'lavka-ecosystem'
+            );
+            ?>
+        </p>
+
+        <table class="widefat striped">
+            <thead>
+                <tr>
+                    <th><?php echo esc_html__('Time', 'lavka-ecosystem'); ?></th>
+                    <th><?php echo esc_html__('Level', 'lavka-ecosystem'); ?></th>
+                    <th><?php echo esc_html__('Event', 'lavka-ecosystem'); ?></th>
+                    <th><?php echo esc_html__('Owner', 'lavka-ecosystem'); ?></th>
+                    <th><?php echo esc_html__('Process', 'lavka-ecosystem'); ?></th>
+                    <th><?php echo esc_html__('Source', 'lavka-ecosystem'); ?></th>
+                    <th><?php echo esc_html__('Message', 'lavka-ecosystem'); ?></th>
+                    <th><?php echo esc_html__('Scheduled for', 'lavka-ecosystem'); ?></th>
+                    <th><?php echo esc_html__('Details', 'lavka-ecosystem'); ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if ($rows): ?>
+                    <?php foreach ($rows as $row): ?>
+                        <tr>
+                            <td><?php echo esc_html((string) $row['created_at']); ?></td>
+                            <td><?php echo esc_html((string) $row['level']); ?></td>
+                            <td><code><?php echo esc_html((string) $row['event']); ?></code></td>
+                            <td><?php echo esc_html((string) $row['owner']); ?></td>
+                            <td><?php echo esc_html((string) $row['process']); ?></td>
+                            <td><?php echo esc_html((string) $row['source']); ?></td>
+                            <td><?php echo esc_html((string) $row['message']); ?></td>
+                            <td><?php echo esc_html((string) $row['scheduled_at']); ?></td>
+                            <td>
+                                <?php if (!empty($row['context_json'])): ?>
+                                    <details>
+                                        <summary><?php echo esc_html__('View', 'lavka-ecosystem'); ?></summary>
+                                        <pre style="max-width:520px;white-space:pre-wrap;word-break:break-word;"><?php echo esc_html((string) $row['context_json']); ?></pre>
+                                    </details>
+                                <?php else: ?>
+                                    &mdash;
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <tr>
+                        <td colspan="9"><?php echo esc_html__('No events yet.', 'lavka-ecosystem'); ?></td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+    <?php
 }
