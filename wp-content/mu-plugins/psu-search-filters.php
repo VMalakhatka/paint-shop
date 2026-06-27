@@ -54,6 +54,45 @@ add_action('pre_get_posts', function(WP_Query $q){
     $q->set('post_type', ['product']);
 }, 30);
 
+/**
+ * Reindex products after searchable identifiers are written after post save.
+ *
+ * External imports often create the post first and add `_sku` afterwards,
+ * which is too late for Relevanssi's wp_after_insert_post index update.
+ */
+function psu_queue_relevanssi_product_reindex($meta_id, int $object_id, string $meta_key, $meta_value): void {
+    if (!in_array($meta_key, ['_sku', '_gtin'], true)) {
+        return;
+    }
+
+    if (!in_array(get_post_type($object_id), ['product', 'product_variation'], true)) {
+        return;
+    }
+
+    static $post_ids = [];
+    static $shutdown_registered = false;
+
+    $post_ids[$object_id] = true;
+
+    if ($shutdown_registered) {
+        return;
+    }
+
+    $shutdown_registered = true;
+    add_action('shutdown', function () use (&$post_ids): void {
+        if (!function_exists('relevanssi_insert_edit')) {
+            return;
+        }
+
+        foreach (array_keys($post_ids) as $post_id) {
+            relevanssi_insert_edit((int) $post_id);
+        }
+    }, 20);
+}
+add_action('added_post_meta', 'psu_queue_relevanssi_product_reindex', 10, 4);
+add_action('updated_post_meta', 'psu_queue_relevanssi_product_reindex', 10, 4);
+add_action('deleted_post_meta', 'psu_queue_relevanssi_product_reindex', 10, 4);
+
 // Подсветка поисковых слов в заголовках (клиент-сайд, только на страницах поиска)
 add_action('wp_footer', function () {
     if (!is_search()) return;
