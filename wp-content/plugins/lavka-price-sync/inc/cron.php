@@ -69,6 +69,34 @@ function lps_recover_stale_price_sync(): void {
 add_action('admin_init', 'lps_recover_stale_price_sync');
 add_action(LPS_CRON_HOOK, 'lps_recover_stale_price_sync', 1);
 
+function lps_schedule_locked_cron_retry(?array $blocking_lock = null): int {
+    $delay = defined('LAVKA_ECOSYSTEM_LOCK_CRON_DELAY')
+        ? LAVKA_ECOSYSTEM_LOCK_CRON_DELAY
+        : 10 * MINUTE_IN_SECONDS;
+    $timestamp = time() + $delay;
+    $scheduled = wp_schedule_single_event($timestamp, LPS_CRON_HOOK);
+
+    if (function_exists('lavka_ecosystem_log_event')) {
+        lavka_ecosystem_log_event($scheduled ? 'cron_rescheduled' : 'cron_reschedule_failed', [
+            'level'        => $scheduled ? 'warning' : 'error',
+            'owner'        => 'lavka-price-sync',
+            'process'      => 'price_sync_all',
+            'source'       => 'cron',
+            'message'      => $scheduled
+                ? 'Price synchronization cron was postponed because another synchronization is running.'
+                : 'Price synchronization cron retry could not be scheduled.',
+            'scheduled_at' => $timestamp,
+            'context'      => [
+                'hook'          => LPS_CRON_HOOK,
+                'blocking_lock' => $blocking_lock,
+            ],
+            'user_id' => 0,
+        ]);
+    }
+
+    return $timestamp;
+}
+
 /** Запустить полный синк цен (постранично, без AJAX) */
 function lps_run_price_sync_now(string $mode = 'cron'): array {
     if (!function_exists('lps_count_all_skus')) return ['ok'=>false,'error'=>'helpers_missing'];
@@ -86,8 +114,8 @@ function lps_run_price_sync_now(string $mode = 'cron'): array {
         );
 
         if (empty($lock['ok'])) {
-            if ($mode === 'cron' && function_exists('wp_schedule_single_event')) {
-                wp_schedule_single_event(time() + LAVKA_ECOSYSTEM_LOCK_CRON_DELAY, LPS_CRON_HOOK);
+            if ($mode === 'cron') {
+                lps_schedule_locked_cron_retry($lock['lock'] ?? null);
             }
 
             return [
@@ -159,9 +187,7 @@ function lps_run_price_sync_now(string $mode = 'cron'): array {
     if ($mode === 'cron' && function_exists('lavka_ecosystem_lock_get')) {
         $active_lock = lavka_ecosystem_lock_get();
         if ($active_lock && ($active_lock['token'] ?? null) !== $lock_token) {
-            if (function_exists('wp_schedule_single_event')) {
-                wp_schedule_single_event(time() + LAVKA_ECOSYSTEM_LOCK_CRON_DELAY, LPS_CRON_HOOK);
-            }
+            lps_schedule_locked_cron_retry($active_lock);
 
             return $finish([
                 'ok' => false,

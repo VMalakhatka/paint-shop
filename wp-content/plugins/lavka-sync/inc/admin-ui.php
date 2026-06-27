@@ -1921,7 +1921,16 @@ add_action('lavka_auto_pull_all', function () {
     if (empty($lock['ok'])) {
         $retry = time() + 10 * MINUTE_IN_SECONDS;
         if (function_exists('lavka_ecosystem_lock_reschedule_single_event')) {
-            $retry = lavka_ecosystem_lock_reschedule_single_event('lavka_auto_pull_all');
+            $retry = lavka_ecosystem_lock_reschedule_single_event(
+                'lavka_auto_pull_all',
+                LAVKA_ECOSYSTEM_LOCK_CRON_DELAY,
+                [],
+                [
+                    'owner'         => 'lavka-sync',
+                    'process'       => 'stock_full_auto',
+                    'blocking_lock' => $lock['lock'] ?? null,
+                ]
+            );
         } else {
             wp_clear_scheduled_hook('lavka_auto_pull_all');
             wp_schedule_single_event($retry, 'lavka_auto_pull_all');
@@ -2133,7 +2142,16 @@ add_action('lavka_auto_pull_movement', function () {
     if (empty($lock['ok'])) {
         $retry = time() + 10 * MINUTE_IN_SECONDS;
         if (function_exists('lavka_ecosystem_lock_reschedule_single_event')) {
-            $retry = lavka_ecosystem_lock_reschedule_single_event('lavka_auto_pull_movement');
+            $retry = lavka_ecosystem_lock_reschedule_single_event(
+                'lavka_auto_pull_movement',
+                LAVKA_ECOSYSTEM_LOCK_CRON_DELAY,
+                [],
+                [
+                    'owner'         => 'lavka-sync',
+                    'process'       => 'stock_movement_auto',
+                    'blocking_lock' => $lock['lock'] ?? null,
+                ]
+            );
         } else {
             wp_clear_scheduled_hook('lavka_auto_pull_movement');
             wp_schedule_single_event($retry, 'lavka_auto_pull_movement');

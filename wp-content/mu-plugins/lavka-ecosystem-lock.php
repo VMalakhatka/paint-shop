@@ -237,7 +237,26 @@ function lavka_ecosystem_lock_clear_stale(): bool {
         return false;
     }
 
-    return delete_option(LAVKA_ECOSYSTEM_LOCK_OPTION);
+    $deleted = delete_option(LAVKA_ECOSYSTEM_LOCK_OPTION);
+
+    if ($deleted) {
+        lavka_ecosystem_log_event('stale_lock_cleared', [
+            'level'   => 'warning',
+            'owner'   => $lock['owner'] ?? '',
+            'process' => $lock['process'] ?? '',
+            'source'  => $lock['source'] ?? '',
+            'token'   => $lock['token'] ?? '',
+            'message' => 'Expired synchronization lock was removed.',
+            'context' => [
+                'label'      => $lock['label'] ?? '',
+                'started_at' => $lock['started_at'] ?? null,
+                'expires_at' => $lock['expires_at'] ?? null,
+            ],
+            'user_id' => $lock['user_id'] ?? 0,
+        ]);
+    }
+
+    return $deleted;
 }
 
 /**
@@ -285,6 +304,20 @@ function lavka_ecosystem_lock_acquire(
 
     // Atomic first attempt: only one request can create this option.
     if (add_option(LAVKA_ECOSYSTEM_LOCK_OPTION, $lock, '', 'no')) {
+        lavka_ecosystem_log_event('lock_acquired', [
+            'owner'   => $lock['owner'],
+            'process' => $lock['process'],
+            'source'  => $lock['source'],
+            'token'   => $lock['token'],
+            'message' => 'Synchronization lock acquired.',
+            'context' => [
+                'label'      => $lock['label'],
+                'ttl'        => $lock['ttl'],
+                'expires_at' => $lock['expires_at'],
+            ],
+            'user_id' => $lock['user_id'],
+        ]);
+
         return [
             'ok'    => true,
             'token' => $token,
@@ -296,9 +329,23 @@ function lavka_ecosystem_lock_acquire(
 
     // If another request left an expired lock between checks, clear and retry.
     if ($current && lavka_ecosystem_lock_is_stale($current)) {
-        delete_option(LAVKA_ECOSYSTEM_LOCK_OPTION);
+        lavka_ecosystem_lock_clear_stale();
 
         if (add_option(LAVKA_ECOSYSTEM_LOCK_OPTION, $lock, '', 'no')) {
+            lavka_ecosystem_log_event('lock_acquired', [
+                'owner'   => $lock['owner'],
+                'process' => $lock['process'],
+                'source'  => $lock['source'],
+                'token'   => $lock['token'],
+                'message' => 'Synchronization lock acquired after an expired lock was removed.',
+                'context' => [
+                    'label'      => $lock['label'],
+                    'ttl'        => $lock['ttl'],
+                    'expires_at' => $lock['expires_at'],
+                ],
+                'user_id' => $lock['user_id'],
+            ]);
+
             return [
                 'ok'    => true,
                 'token' => $token,
@@ -307,10 +354,24 @@ function lavka_ecosystem_lock_acquire(
         }
     }
 
+    $current = $current ?: lavka_ecosystem_lock_get();
+    lavka_ecosystem_log_event('lock_blocked', [
+        'level'   => 'warning',
+        'owner'   => $lock['owner'],
+        'process' => $lock['process'],
+        'source'  => $lock['source'],
+        'message' => lavka_ecosystem_lock_format_message($current),
+        'context' => [
+            'requested_label' => $lock['label'],
+            'blocking_lock'   => $current,
+        ],
+        'user_id' => $lock['user_id'],
+    ]);
+
     return [
         'ok'      => false,
         'token'   => null,
-        'lock'    => $current ?: lavka_ecosystem_lock_get(),
+        'lock'    => $current,
         'message' => lavka_ecosystem_lock_format_message($current),
     ];
 }
@@ -332,7 +393,25 @@ function lavka_ecosystem_lock_release(?string $token): bool {
         return false;
     }
 
-    return delete_option(LAVKA_ECOSYSTEM_LOCK_OPTION);
+    $deleted = delete_option(LAVKA_ECOSYSTEM_LOCK_OPTION);
+
+    if ($deleted) {
+        lavka_ecosystem_log_event('lock_released', [
+            'owner'   => $lock['owner'] ?? '',
+            'process' => $lock['process'] ?? '',
+            'source'  => $lock['source'] ?? '',
+            'token'   => $lock['token'] ?? '',
+            'message' => 'Synchronization lock released.',
+            'context' => [
+                'label'            => $lock['label'] ?? '',
+                'duration_seconds' => max(0, time() - (int) ($lock['started_at'] ?? time())),
+                'progress'         => $lock['progress'] ?? null,
+            ],
+            'user_id' => $lock['user_id'] ?? 0,
+        ]);
+    }
+
+    return $deleted;
 }
 
 /**
@@ -408,11 +487,29 @@ function lavka_ecosystem_lock_send_json_error(?array $lock = null, int $status_c
 function lavka_ecosystem_lock_reschedule_single_event(
     string $hook,
     int $delay = LAVKA_ECOSYSTEM_LOCK_CRON_DELAY,
-    array $args = []
+    array $args = [],
+    array $event_data = []
 ): int {
     $timestamp = time() + max(MINUTE_IN_SECONDS, $delay);
     wp_clear_scheduled_hook($hook, $args);
-    wp_schedule_single_event($timestamp, $hook, $args);
+    $scheduled = wp_schedule_single_event($timestamp, $hook, $args);
+
+    lavka_ecosystem_log_event($scheduled ? 'cron_rescheduled' : 'cron_reschedule_failed', [
+        'level'        => $scheduled ? 'warning' : 'error',
+        'owner'        => $event_data['owner'] ?? '',
+        'process'      => $event_data['process'] ?? '',
+        'source'       => 'cron',
+        'message'      => $event_data['message'] ?? ($scheduled
+            ? 'Cron event was postponed because another synchronization is running.'
+            : 'Cron retry could not be scheduled.'),
+        'scheduled_at' => $timestamp,
+        'context'      => [
+            'hook'          => $hook,
+            'args'          => $args,
+            'blocking_lock' => $event_data['blocking_lock'] ?? lavka_ecosystem_lock_get(),
+        ],
+        'user_id' => 0,
+    ]);
 
     return $timestamp;
 }
