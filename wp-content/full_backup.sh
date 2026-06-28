@@ -14,10 +14,10 @@ command -v mysqldump >/dev/null || { echo "❌ mysqldump не найден"; exi
 command -v tar >/dev/null || { echo "❌ tar не найден"; exit 1; }
 
 # --- Данные БД из wp-config.php ---
-DB_NAME=$(/opt/remi/php83/root/bin/php -r "include \"$WP/wp-config.php\"; echo DB_NAME;")
-DB_USER=$(/opt/remi/php83/root/bin/php -r "include \"$WP/wp-config.php\"; echo DB_USER;")
-DB_PASS=$(/opt/remi/php83/root/bin/php -r "include \"$WP/wp-config.php\"; echo DB_PASSWORD;")
-DB_HOST=$(/opt/remi/php83/root/bin/php -r "include \"$WP/wp-config.php\"; echo DB_HOST;")
+DB_NAME=$(/opt/remi/php83/root/bin/php -r "include \"$WP/wp-config.php\"; echo trim(DB_NAME);")
+DB_USER=$(/opt/remi/php83/root/bin/php -r "include \"$WP/wp-config.php\"; echo trim(DB_USER);")
+DB_PASS=$(/opt/remi/php83/root/bin/php -r "include \"$WP/wp-config.php\"; echo trim(DB_PASSWORD);")
+DB_HOST=$(/opt/remi/php83/root/bin/php -r "include \"$WP/wp-config.php\"; echo trim(DB_HOST);")
 
 echo "== Дамп базы =="
 mysqldump -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" \
