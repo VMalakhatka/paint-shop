@@ -4,7 +4,7 @@ set -euo pipefail
 # Пути
 SRC_DIR="/var/www/virtuals/kreul.com.ua/wp-content"
 DST_DIR="$HOME"
-SCRIPTS=( deploy_safe.sh deploy_db.sh export_and_push.sh )
+SCRIPTS=( deploy_safe.sh deploy_db.sh export_and_push.sh full_backup.sh )
 
 echo "== Обновляем ops-скрипты =="
 
