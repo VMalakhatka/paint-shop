@@ -285,3 +285,55 @@ msgstr "Працюємо…"
 #: inc/admin-ui.php:638
 msgid "Done."
 msgstr "Готово."
+
+#: inc/admin-logs.php
+msgid "Processed"
+msgstr "Оброблено"
+
+#: inc/admin-logs.php
+msgid "Created"
+msgstr "Створено"
+
+#: inc/admin-logs.php
+msgid "Drafted"
+msgstr "Переведено в чернетки"
+
+#: inc/admin-logs.php
+msgid "Next cursor"
+msgstr "Наступний курсор"
+
+#: inc/admin-logs.php
+msgid "Last flag"
+msgstr "Ознака завершення"
+
+#: inc/admin-logs.php
+msgid "Errors"
+msgstr "Помилки"
+
+#: inc/admin-logs.php
+msgid "Limit"
+msgstr "Ліміт"
+
+#: inc/admin-logs.php
+msgid "Woo batch"
+msgstr "Пакет Woo"
+
+#: inc/admin-logs.php
+msgid "Cursor"
+msgstr "Курсор"
+
+#: inc/admin-logs.php
+msgid "Yes"
+msgstr "Так"
+
+#: inc/admin-logs.php
+msgid "No"
+msgstr "Ні"
+
+#: inc/admin-logs.php
+msgid "View details"
+msgstr "Переглянути деталі"
+
+#: inc/admin-logs.php
+msgid "Details"
+msgstr "Деталі"

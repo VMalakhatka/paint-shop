@@ -278,3 +278,55 @@ msgstr ""
 #: inc/admin-ui.php:638
 msgid "Done."
 msgstr ""
+
+#: inc/admin-logs.php
+msgid "Processed"
+msgstr ""
+
+#: inc/admin-logs.php
+msgid "Created"
+msgstr ""
+
+#: inc/admin-logs.php
+msgid "Drafted"
+msgstr ""
+
+#: inc/admin-logs.php
+msgid "Next cursor"
+msgstr ""
+
+#: inc/admin-logs.php
+msgid "Last flag"
+msgstr ""
+
+#: inc/admin-logs.php
+msgid "Errors"
+msgstr ""
+
+#: inc/admin-logs.php
+msgid "Limit"
+msgstr ""
+
+#: inc/admin-logs.php
+msgid "Woo batch"
+msgstr ""
+
+#: inc/admin-logs.php
+msgid "Cursor"
+msgstr ""
+
+#: inc/admin-logs.php
+msgid "Yes"
+msgstr ""
+
+#: inc/admin-logs.php
+msgid "No"
+msgstr ""
+
+#: inc/admin-logs.php
+msgid "View details"
+msgstr ""
+
+#: inc/admin-logs.php
+msgid "Details"
+msgstr ""
