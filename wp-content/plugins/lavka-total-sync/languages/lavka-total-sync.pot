@@ -330,3 +330,7 @@ msgstr ""
 #: inc/admin-logs.php
 msgid "Details"
 msgstr ""
+
+#: inc/admin-ui.php
+msgid "Used by cron full sync as cursorAfter. Leave empty to start from the beginning."
+msgstr ""

@@ -343,3 +343,7 @@ msgstr "Посмотреть детали"
 #: inc/admin-logs.php
 msgid "Details"
 msgstr "Детали"
+
+#: inc/admin-ui.php
+msgid "Used by cron full sync as cursorAfter. Leave empty to start from the beginning."
+msgstr "Используется полной синхронизацией cron как cursorAfter. Оставьте пустым, чтобы начать с начала."

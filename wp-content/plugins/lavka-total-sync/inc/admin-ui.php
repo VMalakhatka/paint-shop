@@ -364,6 +364,13 @@ add_action('wp_ajax_lts_recount_cats', function () {
     }
 });
 
+if (!function_exists('lts_normalize_cursor_after')) {
+    function lts_normalize_cursor_after($value) {
+        $cursor = trim((string)$value);
+        return $cursor === '' || $cursor === '___' ? null : $cursor;
+    }
+}
+
 /**
  * AJAX: call new Java /sync/run with UI parameters
  */
@@ -383,10 +390,11 @@ add_action('wp_ajax_lts_sync_run', function(){
         ? (int)$_POST['pageSizeWoo']
         : (int)($def['pageSizeWoo'] ?? 200);
 
-    // Cursor: allow empty → use saved default (may be "___")
-    $cursorAfter = isset($_POST['cursorAfter']) && $_POST['cursorAfter'] !== ''
+    // An explicitly cleared field means "start from the beginning".
+    $cursorAfter = array_key_exists('cursorAfter', $_POST)
         ? sanitize_text_field((string)$_POST['cursorAfter'])
         : (string)($def['cursorAfter'] ?? '');
+    $cursorAfter = lts_normalize_cursor_after($cursorAfter);
 
     $dryRun = isset($_POST['dryRun'])
         ? ((int)$_POST['dryRun'] ? true : false)
@@ -537,7 +545,7 @@ if (!function_exists('lts_next_run_ts')) {
  */
 add_action('lts_cron_full_sync_event', function () {
     $opts = lts_get_options();
-    $firstSku = isset($opts['first_sku']) ? (string)$opts['first_sku'] : '___';
+    $firstSku = lts_normalize_cursor_after($opts['first_sku'] ?? null);
 
     $limit       = isset($opts['cron_limit']) ? (int)$opts['cron_limit'] : 900000;
     $pageSizeWoo = isset($opts['cron_page'])  ? (int)$opts['cron_page']  : 200;
@@ -635,7 +643,7 @@ add_action('wp_ajax_lts_cron_run_now', function(){
     $payload = [
         'limit'       => isset($opts['cron_limit']) ? (int)$opts['cron_limit'] : 900000,
         'pageSizeWoo' => isset($opts['cron_page']) ? (int)$opts['cron_page'] : 200,
-        'cursorAfter' => isset($opts['first_sku']) ? (string)$opts['first_sku'] : '___',
+        'cursorAfter' => lts_normalize_cursor_after($opts['first_sku'] ?? null),
         'dryRun'      => false,
     ];
     $res = lts_call_java_sync_run_locked($payload, $opts, 'manual');
@@ -687,10 +695,10 @@ function lts_render_settings_page() {
         $opts['new_api_defaults'] = [
             'limit'       => isset($_POST['lts_def_limit']) ? (int)$_POST['lts_def_limit'] : 40000,
             'pageSizeWoo' => isset($_POST['lts_def_page'])  ? (int)$_POST['lts_def_page']  : 200,
-            'cursorAfter' => isset($_POST['lts_def_after']) ? sanitize_text_field((string)$_POST['lts_def_after']) : '',
+            'cursorAfter' => lts_normalize_cursor_after(isset($_POST['lts_def_after']) ? sanitize_text_field((string)$_POST['lts_def_after']) : null),
             'dryRun'      => !empty($_POST['lts_def_dry']),
         ];
-        $opts['first_sku'] = isset($_POST['lts_first_sku']) ? sanitize_text_field((string)$_POST['lts_first_sku']) : '___';
+        $opts['first_sku'] = lts_normalize_cursor_after(isset($_POST['lts_first_sku']) ? sanitize_text_field((string)$_POST['lts_first_sku']) : null);
         // Cron full sync options
         $opts['cron_enabled']   = !empty($_POST['lts_cron_enabled']) ? 1 : 0;
         // New cron schedule options
@@ -711,7 +719,7 @@ function lts_render_settings_page() {
 
     $opts = lts_get_options();
     $def = isset($opts['new_api_defaults']) && is_array($opts['new_api_defaults']) ? $opts['new_api_defaults'] : [];
-    $firstSku = isset($opts['first_sku']) ? (string)$opts['first_sku'] : '___';
+    $firstSku = lts_normalize_cursor_after($opts['first_sku'] ?? null);
 
     // Compute next scheduled run timestamps for display
     $next_gmt = wp_next_scheduled('lts_cron_full_sync_event');
@@ -862,8 +870,8 @@ function lts_render_settings_page() {
                 <tr>
                     <th scope="row"><label for="lts_first_sku"><?php _e('First SKU (lexicographically first)', 'lavka-total-sync'); ?></label></th>
                     <td>
-                        <input type="text" id="lts_first_sku" name="lts_first_sku" class="regular-text" value="<?php echo esc_attr($firstSku ?: '___'); ?>">
-                        <p class="description"><?php _e('Used by cron full sync as cursorAfter. Should be lower than any real SKU.', 'lavka-total-sync'); ?></p>
+                        <input type="text" id="lts_first_sku" name="lts_first_sku" class="regular-text" value="<?php echo esc_attr($firstSku ?? ''); ?>">
+                        <p class="description"><?php _e('Used by cron full sync as cursorAfter. Leave empty to start from the beginning.', 'lavka-total-sync'); ?></p>
                     </td>
                 </tr>
                 <tr>
@@ -919,7 +927,7 @@ function lts_render_settings_page() {
                 </tr>
                 <tr>
                     <th scope="row"><?php _e('First SKU used as cursorAfter', 'lavka-total-sync'); ?></th>
-                    <td><code><?php echo esc_html($firstSku ?: '___'); ?></code></td>
+                    <td><code><?php echo esc_html($firstSku ?? 'NULL'); ?></code></td>
                 </tr>
                 <tr>
                     <th scope="row"><?php _e('Next run', 'lavka-total-sync'); ?></th>
@@ -1309,12 +1317,14 @@ function lts_render_run_page() {
                 $('#lts_new_run_status').text('<?php echo esc_js(__('Working…','lavka-total-sync')); ?>');
                 $('#lts_new_run_output').text('');
 
+                const cursorAfter = $.trim($('#lts_new_after').val());
+
                 const data = {
                 action: 'lts_sync_run',
                 nonce:  nonce,
                 limit:       $('#lts_new_limit').val(),
                 pageSizeWoo: $('#lts_new_page').val(),
-                cursorAfter: $('#lts_new_after').val(),
+                cursorAfter: cursorAfter === '' ? null : cursorAfter,
                 dryRun:      $('#lts_new_dry').is(':checked') ? 1 : 0
                 };
 
