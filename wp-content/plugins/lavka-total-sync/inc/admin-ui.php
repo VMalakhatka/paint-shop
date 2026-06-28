@@ -367,7 +367,7 @@ add_action('wp_ajax_lts_recount_cats', function () {
 if (!function_exists('lts_normalize_cursor_after')) {
     function lts_normalize_cursor_after($value) {
         $cursor = trim((string)$value);
-        return $cursor === '' || $cursor === '___' ? null : $cursor;
+        return $cursor === '' || $cursor === '___' ? '!' : $cursor;
     }
 }
 
@@ -390,7 +390,7 @@ add_action('wp_ajax_lts_sync_run', function(){
         ? (int)$_POST['pageSizeWoo']
         : (int)($def['pageSizeWoo'] ?? 200);
 
-    // An explicitly cleared field means "start from the beginning".
+    // Use a binary-safe sentinel until Java supports an unbounded first page consistently.
     $cursorAfter = array_key_exists('cursorAfter', $_POST)
         ? sanitize_text_field((string)$_POST['cursorAfter'])
         : (string)($def['cursorAfter'] ?? '');
@@ -1108,7 +1108,7 @@ function lts_render_run_page() {
             </tr>
             <tr>
                 <th scope="row"><label for="lts_new_after"><?php _e('Cursor (after SKU)', 'lavka-total-sync'); ?></label></th>
-                <td><input type="text" id="lts_new_after" class="regular-text" placeholder="A-P1431Å-GOLD 90"></td>
+                <td><input type="text" id="lts_new_after" class="regular-text"></td>
             </tr>
             <tr>
                 <th scope="row"><?php _e('Dry run', 'lavka-total-sync'); ?></th>
@@ -1324,7 +1324,7 @@ function lts_render_run_page() {
                 nonce:  nonce,
                 limit:       $('#lts_new_limit').val(),
                 pageSizeWoo: $('#lts_new_page').val(),
-                cursorAfter: cursorAfter === '' ? null : cursorAfter,
+                cursorAfter: cursorAfter === '' ? '!' : cursorAfter,
                 dryRun:      $('#lts_new_dry').is(':checked') ? 1 : 0
                 };
 
