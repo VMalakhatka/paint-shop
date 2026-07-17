@@ -17,6 +17,7 @@ if (!defined('ABSPATH')) exit;
 
 /** Крон: хук для задачи синхронизации изображений по диапазону */
 if (!defined('LTS_MEDIA_CRON_HOOK')) define('LTS_MEDIA_CRON_HOOK', 'lts_media_cron_event');
+if (!defined('LTS_MEDIA_REINDEX_CRON_HOOK')) define('LTS_MEDIA_REINDEX_CRON_HOOK', 'lts_media_reindex_cron_event');
 
 /**
  * Вычислить следующий запуск по настройкам (daily/weekly) в ЧАСОВОМ ПОЯСЕ САЙТА.
@@ -76,6 +77,74 @@ function lts_media_cron_schedule_next(): ?int {
     return $ts;
 }
 
+function lts_media_reindex_cron_next_ts(array $o): ?int {
+    if (empty($o['media_reindex_enabled'])) return null;
+
+    $freq = in_array($o['media_reindex_freq'] ?? 'monthly', ['daily', 'weekly', 'monthly'], true)
+        ? $o['media_reindex_freq']
+        : 'monthly';
+    $hh  = max(0, min(23, (int)($o['media_reindex_h'] ?? 3)));
+    $mm  = max(0, min(59, (int)($o['media_reindex_m'] ?? 0)));
+    $dow = max(1, min(7, (int)($o['media_reindex_dow'] ?? 1)));
+    $dom = max(1, min(28, (int)($o['media_reindex_dom'] ?? 1)));
+
+    $tz = function_exists('wp_timezone') ? wp_timezone() : new DateTimeZone(get_option('timezone_string') ?: 'UTC');
+    $now = new DateTime('now', $tz);
+    $next = clone $now;
+
+    if ($freq === 'daily') {
+        $next->setTime($hh, $mm, 0);
+        if ($next <= $now) $next->modify('+1 day');
+    } elseif ($freq === 'weekly') {
+        $next->setTime($hh, $mm, 0);
+        $cur = (int)$now->format('N');
+        if ($cur > $dow || ($cur === $dow && $next <= $now)) {
+            $next->modify('+' . (7 - $cur + $dow) . ' days');
+        } elseif ($cur < $dow) {
+            $next->modify('+' . ($dow - $cur) . ' days');
+        }
+    } else {
+        $next->setDate((int)$now->format('Y'), (int)$now->format('n'), $dom);
+        $next->setTime($hh, $mm, 0);
+        if ($next <= $now) {
+            $next->modify('first day of next month');
+            $next->setDate((int)$next->format('Y'), (int)$next->format('n'), $dom);
+            $next->setTime($hh, $mm, 0);
+        }
+    }
+
+    $nextUtc = clone $next; $nextUtc->setTimezone(new DateTimeZone('UTC'));
+    return $nextUtc->getTimestamp();
+}
+
+function lts_media_reindex_cron_unschedule_all(): void {
+    while ($ts = wp_next_scheduled(LTS_MEDIA_REINDEX_CRON_HOOK)) {
+        wp_unschedule_event($ts, LTS_MEDIA_REINDEX_CRON_HOOK);
+    }
+}
+
+function lts_media_reindex_cron_schedule_next(): ?int {
+    if (!function_exists('lts_get_options')) return null;
+    $o = lts_get_options();
+    if (empty($o['media_reindex_enabled'])) return null;
+    $ts = lts_media_reindex_cron_next_ts($o);
+    if ($ts) {
+        wp_schedule_single_event($ts, LTS_MEDIA_REINDEX_CRON_HOOK);
+        $o['media_reindex_next_ts'] = $ts;
+        update_option(defined('LTS_OPT') ? LTS_OPT : 'lts_options', $o, false);
+    }
+    return $ts;
+}
+
+function lts_media_reindex_run(string $source): array {
+    return lts_call_java_media_locked(
+        '/admin/media/reindex',
+        [],
+        $source,
+        'media_reindex'
+    );
+}
+
 /**
  * Исполнитель крона: дергает Java /admin/media/sync/range c сохранёнными параметрами.
  * После выполнения сам перепланирует следующий запуск (если включено).
@@ -123,6 +192,37 @@ add_action(LTS_MEDIA_CRON_HOOK, function(){
     } else {
         // Перепланируем следующий одиночный запуск
         lts_media_cron_schedule_next();
+    }
+});
+
+add_action(LTS_MEDIA_REINDEX_CRON_HOOK, function(){
+    if (!function_exists('lts_get_options')) return;
+    $o = lts_get_options();
+    if (empty($o['media_reindex_enabled'])) return;
+
+    $res = ['ok'=>false, 'error'=>'media_reindex_failed'];
+    try {
+        $res = lts_media_reindex_run('cron');
+        if (function_exists('lts_log_db')) {
+            lts_log_db(!empty($res['ok']) ? 'info' : 'error', 'media_reindex_cron', [
+                'result' => !empty($res['ok']) ? 'ok' : 'fail',
+                'http'   => $res['http'] ?? 200,
+                'json'   => $res['json'] ?? null,
+            ]);
+        }
+    } catch (Throwable $e) {
+        $res = ['ok'=>false, 'error'=>$e->getMessage()];
+        error_log('[LTS][media_reindex_cron] exception: '.$e->getMessage());
+    }
+
+    if (($res['error'] ?? '') === 'lavka_sync_locked') {
+        lts_ecosystem_schedule_retry(
+            LTS_MEDIA_REINDEX_CRON_HOOK,
+            'media_reindex',
+            $res['lock'] ?? null
+        );
+    } else {
+        lts_media_reindex_cron_schedule_next();
     }
 });
 
@@ -184,6 +284,68 @@ add_action('wp_ajax_lts_media_cron_run_now', function(){
 
     wp_schedule_single_event(time()+1, LTS_MEDIA_CRON_HOOK);
     wp_send_json_success(['ok'=>true]);
+});
+
+add_action('wp_ajax_lts_media_reindex_run', function(){
+    $cap = defined('LTS_CAP') ? LTS_CAP : 'manage_options';
+    if (!current_user_can($cap)) wp_send_json_error(['error'=>'forbidden'], 403);
+    check_ajax_referer('lts_admin_nonce','nonce');
+
+    $res = lts_media_reindex_run('manual');
+    if (function_exists('lts_log_db')) {
+        lts_log_db(!empty($res['ok']) ? 'info' : 'error', 'media_reindex_manual', [
+            'result' => !empty($res['ok']) ? 'ok' : 'fail',
+            'message' => $res['error'] ?? null,
+            'ctx'    => [
+                'http' => $res['http'] ?? 200,
+                'json' => $res['json'] ?? null,
+                'raw'  => $res['raw'] ?? null,
+                'lock' => $res['lock'] ?? null,
+            ],
+        ]);
+    }
+    if (!empty($res['ok'])) wp_send_json_success($res);
+    wp_send_json_error($res);
+});
+
+add_action('wp_ajax_lts_media_reindex_cron_save', function(){
+    $cap = defined('LTS_CAP') ? LTS_CAP : 'manage_options';
+    if (!current_user_can($cap)) wp_send_json_error(['error'=>'forbidden'], 403);
+    check_ajax_referer('lts_admin_nonce','nonce');
+    if (!function_exists('lts_get_options')) wp_send_json_error(['error'=>'missing_options']);
+
+    $o = lts_get_options();
+    $freq = $_POST['freq'] ?? 'monthly';
+    $o['media_reindex_enabled'] = !empty($_POST['enabled']) ? 1 : 0;
+    $o['media_reindex_freq'] = in_array($freq, ['daily', 'weekly', 'monthly'], true) ? $freq : 'monthly';
+    $o['media_reindex_h'] = max(0, min(23, (int)($_POST['hh'] ?? 3)));
+    $o['media_reindex_m'] = max(0, min(59, (int)($_POST['mm'] ?? 0)));
+    $o['media_reindex_dow'] = max(1, min(7, (int)($_POST['dow'] ?? 1)));
+    $o['media_reindex_dom'] = max(1, min(28, (int)($_POST['dom'] ?? 1)));
+
+    update_option(defined('LTS_OPT') ? LTS_OPT : 'lts_options', $o, false);
+
+    lts_media_reindex_cron_unschedule_all();
+    $ts = lts_media_reindex_cron_schedule_next();
+
+    $tz = function_exists('wp_timezone') ? wp_timezone() : new DateTimeZone('UTC');
+    $siteStr = $ts ? (new DateTime('@'.$ts))->setTimezone($tz)->format('Y-m-d H:i:s') : '—';
+    $utcStr  = $ts ? gmdate('Y-m-d H:i:s', $ts) : '—';
+
+    wp_send_json_success(['ok'=>true,'next_ts'=>$ts,'site_time'=>$siteStr,'utc_time'=>$utcStr]);
+});
+
+add_action('wp_ajax_lts_media_reindex_cron_status', function(){
+    $cap = defined('LTS_CAP') ? LTS_CAP : 'manage_options';
+    if (!current_user_can($cap)) wp_send_json_error(['error'=>'forbidden'], 403);
+    check_ajax_referer('lts_admin_nonce','nonce');
+
+    $ts = wp_next_scheduled(LTS_MEDIA_REINDEX_CRON_HOOK);
+    $tz = function_exists('wp_timezone') ? wp_timezone() : new DateTimeZone('UTC');
+    $siteStr = $ts ? (new DateTime('@'.$ts))->setTimezone($tz)->format('Y-m-d H:i:s') : __('Not scheduled','lavka-total-sync');
+    $utcStr  = $ts ? gmdate('Y-m-d H:i:s', $ts) : __('Not scheduled','lavka-total-sync');
+
+    wp_send_json_success(['next_ts'=>$ts,'site_time'=>$siteStr,'utc_time'=>$utcStr]);
 });
 
 /** Добавляем подпункт меню под "Total Sync" */
@@ -468,8 +630,80 @@ CR-CE0900056100"></textarea>
         <pre id="lts_ms_list_out" style="max-height:280px;overflow:auto;background:#111;color:#9fe;padding:10px;border-radius:6px;"></pre>
 
         <hr style="margin:1.25rem 0;">
-        <h2><?php _e('Media Sync Cron (range only)', 'lavka-total-sync'); ?></h2>
+        <h2><?php _e('OVH media index', 'lavka-total-sync'); ?></h2>
         <?php $o = function_exists('lts_get_options') ? lts_get_options() : []; ?>
+        <p class="description">
+            <?php _e('Refresh the S3 media index after uploading new images, or run it by a separate schedule.', 'lavka-total-sync'); ?>
+        </p>
+        <p>
+            <button id="lts_btn_media_reindex" class="button button-primary"><?php _e('Update OVH media index now', 'lavka-total-sync'); ?></button>
+            <span id="lts_mr_status" style="margin-left:.6rem;color:#555;"></span>
+        </p>
+        <pre id="lts_mr_out" style="max-height:220px;overflow:auto;background:#111;color:#9fe;padding:10px;border-radius:6px;"></pre>
+        <table class="form-table" role="presentation">
+            <tr>
+                <th scope="row"><?php _e('Enable index cron', 'lavka-total-sync'); ?></th>
+                <td><label><input type="checkbox" id="lts_mr_enabled" <?php echo !empty($o['media_reindex_enabled']) ? 'checked' : '';?> > <?php _e('Run by schedule', 'lavka-total-sync'); ?></label></td>
+            </tr>
+            <tr>
+                <th scope="row"><?php _e('Frequency', 'lavka-total-sync'); ?></th>
+                <td>
+                    <?php $rfreq = $o['media_reindex_freq'] ?? 'monthly'; ?>
+                    <select id="lts_mr_freq">
+                        <option value="daily" <?php selected($rfreq,'daily'); ?>><?php _e('Daily','lavka-total-sync'); ?></option>
+                        <option value="weekly" <?php selected($rfreq,'weekly'); ?>><?php _e('Weekly','lavka-total-sync'); ?></option>
+                        <option value="monthly" <?php selected($rfreq,'monthly'); ?>><?php _e('Monthly','lavka-total-sync'); ?></option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row"><?php _e('Time (site local)', 'lavka-total-sync'); ?></th>
+                <td>
+                    <?php $rhh = (int)($o['media_reindex_h'] ?? 3); $rmm = (int)($o['media_reindex_m'] ?? 0); ?>
+                    <input id="lts_mr_hh" type="number" min="0" max="23" step="1" class="small-text" value="<?php echo esc_attr($rhh);?>"> :
+                    <input id="lts_mr_mm" type="number" min="0" max="59" step="1" class="small-text" value="<?php echo esc_attr($rmm);?>">
+                    <p class="description"><?php _e('Uses the site timezone from Settings → General.', 'lavka-total-sync'); ?></p>
+                </td>
+            </tr>
+            <tr id="lts_mr_row_dow" style="<?php echo (($o['media_reindex_freq'] ?? 'monthly')==='weekly')?'':'display:none';?>">
+                <th scope="row"><?php _e('Day of week', 'lavka-total-sync'); ?></th>
+                <td>
+                    <?php $rdow = (int)($o['media_reindex_dow'] ?? 1); ?>
+                    <select id="lts_mr_dow">
+                        <option value="1" <?php selected($rdow,1); ?>><?php _e('Monday','lavka-total-sync'); ?></option>
+                        <option value="2" <?php selected($rdow,2); ?>><?php _e('Tuesday','lavka-total-sync'); ?></option>
+                        <option value="3" <?php selected($rdow,3); ?>><?php _e('Wednesday','lavka-total-sync'); ?></option>
+                        <option value="4" <?php selected($rdow,4); ?>><?php _e('Thursday','lavka-total-sync'); ?></option>
+                        <option value="5" <?php selected($rdow,5); ?>><?php _e('Friday','lavka-total-sync'); ?></option>
+                        <option value="6" <?php selected($rdow,6); ?>><?php _e('Saturday','lavka-total-sync'); ?></option>
+                        <option value="7" <?php selected($rdow,7); ?>><?php _e('Sunday','lavka-total-sync'); ?></option>
+                    </select>
+                </td>
+            </tr>
+            <tr id="lts_mr_row_dom" style="<?php echo (($o['media_reindex_freq'] ?? 'monthly')==='monthly')?'':'display:none';?>">
+                <th scope="row"><?php _e('Day of month', 'lavka-total-sync'); ?></th>
+                <td>
+                    <input id="lts_mr_dom" type="number" min="1" max="28" step="1" class="small-text" value="<?php echo esc_attr((int)($o['media_reindex_dom'] ?? 1));?>">
+                    <p class="description"><?php _e('Use days 1–28 so every month is valid.', 'lavka-total-sync'); ?></p>
+                </td>
+            </tr>
+        </table>
+        <p>
+            <button id="lts_mr_save" class="button"><?php _e('Save index schedule','lavka-total-sync'); ?></button>
+            <button id="lts_mr_stat" class="button"><?php _e('Refresh status','lavka-total-sync'); ?></button>
+            <span id="lts_mr_info" style="margin-left:.6rem;color:#555;"></span>
+        </p>
+        <p id="lts_mr_next">
+            <strong><?php _e('Next index run', 'lavka-total-sync'); ?>:</strong>
+            <span id="lts_mr_site"></span>
+            <br>
+            <em>UTC/server:</em> <span id="lts_mr_utc"></span>
+            <br>
+            <em><?php _e('Your local (browser) time','lavka-total-sync'); ?>:</em> <span id="lts_mr_local"></span>
+        </p>
+
+        <hr style="margin:1.25rem 0;">
+        <h2><?php _e('Media Sync Cron (range only)', 'lavka-total-sync'); ?></h2>
         <table class="form-table" role="presentation">
             <tr>
                 <th scope="row"><?php _e('Enable cron', 'lavka-total-sync'); ?></th>
@@ -580,6 +814,20 @@ CR-CE0900056100"></textarea>
                     }
                 });
             }
+            function updReindexNext() {
+                $.post(ajaxUrl, {action:'lts_media_reindex_cron_status', nonce:nonce}).done(function(res){
+                    if (res && res.success) {
+                        $('#lts_mr_site').text(res.data.site_time);
+                        $('#lts_mr_utc').text(res.data.utc_time);
+                        if (res.data.next_ts) {
+                            const d = new Date(res.data.next_ts * 1000);
+                            $('#lts_mr_local').text(d.toLocaleString());
+                        } else {
+                            $('#lts_mr_local').text('—');
+                        }
+                    }
+                });
+            }
             function saveCron() {
                 const freq = $('#lts_mc_freq').val();
                 const payload = {
@@ -616,9 +864,46 @@ CR-CE0900056100"></textarea>
                     $('#lts_mc_info').text('<?php echo esc_js(__('Error','lavka-total-sync')); ?>');
                 });
             }
+            function syncReindexScheduleRows() {
+                const freq = $('#lts_mr_freq').val();
+                $('#lts_mr_row_dow').toggle(freq === 'weekly');
+                $('#lts_mr_row_dom').toggle(freq === 'monthly');
+            }
+            function saveReindexCron() {
+                const payload = {
+                    action:'lts_media_reindex_cron_save', nonce:nonce,
+                    enabled: $('#lts_mr_enabled').is(':checked') ? 1 : 0,
+                    freq: $('#lts_mr_freq').val(),
+                    hh: parseInt($('#lts_mr_hh').val(),10)||0,
+                    mm: parseInt($('#lts_mr_mm').val(),10)||0,
+                    dow: parseInt($('#lts_mr_dow').val(),10)||1,
+                    dom: parseInt($('#lts_mr_dom').val(),10)||1
+                };
+                $('#lts_mr_info').text('<?php echo esc_js(__('Saving…','lavka-total-sync')); ?>');
+                $.post(ajaxUrl, payload).done(function(res){
+                    if (res && res.success) {
+                        $('#lts_mr_info').text('<?php echo esc_js(__('Saved','lavka-total-sync')); ?>');
+                        $('#lts_mr_site').text(res.data.site_time);
+                        $('#lts_mr_utc').text(res.data.utc_time);
+                        if (res.data.next_ts) {
+                            const d = new Date(res.data.next_ts * 1000);
+                            $('#lts_mr_local').text(d.toLocaleString());
+                        } else {
+                            $('#lts_mr_local').text('—');
+                        }
+                    } else {
+                        $('#lts_mr_info').text('<?php echo esc_js(__('Error','lavka-total-sync')); ?>');
+                    }
+                }).fail(function(){
+                    $('#lts_mr_info').text('<?php echo esc_js(__('Error','lavka-total-sync')); ?>');
+                });
+            }
             $('#lts_mc_freq').on('change', function(){
                 if ($(this).val()==='weekly') $('#lts_mc_row_dow').show(); else $('#lts_mc_row_dow').hide();
             });
+            $('#lts_mr_freq').on('change', syncReindexScheduleRows);
+            $('#lts_mr_save').on('click', function(e){ e.preventDefault(); saveReindexCron(); });
+            $('#lts_mr_stat').on('click', function(e){ e.preventDefault(); updReindexNext(); });
             $('#lts_mc_save').on('click', function(e){ e.preventDefault(); saveCron(); });
             $('#lts_mc_stat').on('click', function(e){ e.preventDefault(); updNext(); });
             $('#lts_mc_run').on('click', function(e){ e.preventDefault();
@@ -631,6 +916,8 @@ CR-CE0900056100"></textarea>
                 });
             });
             // init
+            syncReindexScheduleRows();
+            updReindexNext();
             updNext();
         })(jQuery);
         </script>
@@ -641,6 +928,28 @@ CR-CE0900056100"></textarea>
             const nonce   = '<?php echo esc_js( wp_create_nonce('lts_admin_nonce') ); ?>';
 
             function print(obj){ try{return JSON.stringify(obj,null,2);}catch(e){return String(obj);} }
+
+            $('#lts_btn_media_reindex').on('click', async function(){
+                $('#lts_mr_status').text('<?php echo esc_js(__('Working…','lavka-total-sync')); ?>');
+                $('#lts_mr_out').text('');
+                try{
+                    const res = await $.post(ajaxUrl, {
+                        action: 'lts_media_reindex_run',
+                        nonce: nonce
+                    });
+                    if (!res || !res.success) {
+                        $('#lts_mr_status').text('<?php echo esc_js(__('Error','lavka-total-sync')); ?>');
+                        $('#lts_mr_out').text(print(res && res.data ? res.data : res));
+                        return;
+                    }
+                    $('#lts_mr_status').text('<?php echo esc_js(__('Done.','lavka-total-sync')); ?>');
+                    const d = res.data;
+                    $('#lts_mr_out').text(d.json ? print(d.json) : (d.raw || '(no body)'));
+                } catch(e){
+                    $('#lts_mr_status').text('<?php echo esc_js(__('Error','lavka-total-sync')); ?>');
+                    $('#lts_mr_out').text(String(e));
+                }
+            });
 
             // По диапазону
             $('#lts_btn_media_range').on('click', async function(){
