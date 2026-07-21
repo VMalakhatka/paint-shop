@@ -361,12 +361,77 @@ msgstr "(CSV / XLSX)"
 msgid "Import to draft"
 msgstr "Імпортувати у чернетку"
 
-#: inc/Ui.php:153
+#: inc/Ui.php:78
 #, php-format
-msgid "Format: %1$s or %2$s. Localized column names are supported (SKU, Qty…)."
+msgid ""
+"Upload a CSV / XLSX file with order lines. The first row must contain column "
+"names. Minimum format: %1$s or %2$s. Column names may be in Ukrainian, "
+"Russian, or English."
 msgstr ""
-"Формат: %1$s або %2$s. Підтримуються локалізовані назви колонок (Артикул, К-"
-"сть…)."
+"Завантажте CSV / XLSX файл з позиціями замовлення. Перший рядок має містити "
+"назви колонок. Мінімальний формат: %1$s або %2$s. Назви колонок можуть бути "
+"українською, російською або англійською."
+
+#: inc/Ui.php:88
+msgid "Detailed file import instructions"
+msgstr "Детальна інструкція з імпорту файлу"
+
+#: inc/Ui.php:95
+#, php-format
+msgid ""
+"%1$s is the product SKU, %2$s is the barcode, and %3$s is the quantity."
+msgstr "%1$s — артикул товару, %2$s — штрихкод, %3$s — кількість."
+
+#: inc/Ui.php:105
+msgid ""
+"Use either SKU or GTIN to identify the product. If both columns are present, "
+"GTIN is checked first, then SKU."
+msgstr ""
+"Для визначення товару використовуйте SKU або GTIN. Якщо є обидві колонки, "
+"спочатку перевіряється GTIN, потім SKU."
+
+#: inc/Ui.php:106
+msgid ""
+"Quantity must be greater than 0. Empty, zero, or negative quantities are "
+"skipped."
+msgstr ""
+"Кількість має бути більшою за 0. Порожні, нульові або від’ємні кількості "
+"пропускаються."
+
+#: inc/Ui.php:107
+msgid ""
+"CSV delimiters are detected automatically: semicolon, comma, tab, or "
+"vertical bar. Semicolon is recommended."
+msgstr ""
+"Роздільники CSV визначаються автоматично: крапка з комою, кома, табуляція "
+"або вертикальна риска. Рекомендовано використовувати крапку з комою."
+
+#: inc/Ui.php:108
+msgid "The optional price column can be used when importing into a draft order."
+msgstr ""
+"Необов’язкову колонку ціни можна використовувати під час імпорту у чернетку "
+"замовлення."
+
+#: inc/Ui.php:109
+msgid ""
+"After import, a draft order is created. It is not a completed order yet; "
+"review it before adding it to the cart."
+msgstr ""
+"Після імпорту створюється чернетка замовлення. Це ще не завершене "
+"замовлення; перевірте його перед додаванням у кошик."
+
+#: inc/Ui.php:110
+msgid "The import report shows which rows were added, skipped, or not found."
+msgstr ""
+"Звіт імпорту показує, які рядки було додано, пропущено або не знайдено."
+
+#: inc/Ui.php:114
+msgid "Supported column names include:"
+msgstr "Підтримувані назви колонок:"
+
+#: inc/Ui.php:123
+msgid "Examples:"
+msgstr "Приклади:"
 
 #: inc/Ui.php:163
 msgid "Save current cart to draft"

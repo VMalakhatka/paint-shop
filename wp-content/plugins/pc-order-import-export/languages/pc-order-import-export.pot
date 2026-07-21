@@ -374,9 +374,62 @@ msgstr ""
 msgid "Import to draft"
 msgstr ""
 
-#: inc/Ui.php:153
+#: inc/Ui.php:78
 #, php-format
-msgid "Format: %1$s or %2$s. Localized column names are supported (SKU, Qty…)."
+msgid ""
+"Upload a CSV / XLSX file with order lines. The first row must contain column "
+"names. Minimum format: %1$s or %2$s. Column names may be in Ukrainian, "
+"Russian, or English."
+msgstr ""
+
+#: inc/Ui.php:88
+msgid "Detailed file import instructions"
+msgstr ""
+
+#: inc/Ui.php:95
+#, php-format
+msgid ""
+"%1$s is the product SKU, %2$s is the barcode, and %3$s is the quantity."
+msgstr ""
+
+#: inc/Ui.php:105
+msgid ""
+"Use either SKU or GTIN to identify the product. If both columns are present, "
+"GTIN is checked first, then SKU."
+msgstr ""
+
+#: inc/Ui.php:106
+msgid ""
+"Quantity must be greater than 0. Empty, zero, or negative quantities are "
+"skipped."
+msgstr ""
+
+#: inc/Ui.php:107
+msgid ""
+"CSV delimiters are detected automatically: semicolon, comma, tab, or "
+"vertical bar. Semicolon is recommended."
+msgstr ""
+
+#: inc/Ui.php:108
+msgid "The optional price column can be used when importing into a draft order."
+msgstr ""
+
+#: inc/Ui.php:109
+msgid ""
+"After import, a draft order is created. It is not a completed order yet; "
+"review it before adding it to the cart."
+msgstr ""
+
+#: inc/Ui.php:110
+msgid "The import report shows which rows were added, skipped, or not found."
+msgstr ""
+
+#: inc/Ui.php:114
+msgid "Supported column names include:"
+msgstr ""
+
+#: inc/Ui.php:123
+msgid "Examples:"
 msgstr ""
 
 #: inc/Ui.php:163

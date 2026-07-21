@@ -66,6 +66,73 @@ class Ui
         <?php
         return ob_get_clean();
     }
+
+    /** HTML: короткая подсказка + подробная инструкция по импорту файла заказа */
+    protected static function render_import_file_help_html(): string
+    {
+        ob_start(); ?>
+        <div class="pcoe-import-help" style="font-size:12px; opacity:.88; margin-top:10px; line-height:1.45">
+          <p style="margin:0 0 8px">
+            <?php
+            printf(
+                esc_html__('Upload a CSV / XLSX file with order lines. The first row must contain column names. Minimum format: %1$s or %2$s. Column names may be in Ukrainian, Russian, or English.', 'pc-order-import-export'),
+                '<code>sku;qty</code>',
+                '<code>gtin;qty</code>'
+            );
+            ?>
+          </p>
+
+          <details class="pcoe-import-help-details">
+            <summary style="cursor:pointer">
+              <?php echo esc_html__('Detailed file import instructions', 'pc-order-import-export'); ?>
+            </summary>
+
+            <div style="margin-top:8px">
+              <p style="margin:0 0 6px">
+                <?php
+                printf(
+                    esc_html__('%1$s is the product SKU, %2$s is the barcode, and %3$s is the quantity.', 'pc-order-import-export'),
+                    '<code>sku</code>',
+                    '<code>gtin</code>',
+                    '<code>qty</code>'
+                );
+                ?>
+              </p>
+
+              <ul style="margin:0 0 8px 18px">
+                <li><?php echo esc_html__('Use either SKU or GTIN to identify the product. If both columns are present, GTIN is checked first, then SKU.', 'pc-order-import-export'); ?></li>
+                <li><?php echo esc_html__('Quantity must be greater than 0. Empty, zero, or negative quantities are skipped.', 'pc-order-import-export'); ?></li>
+                <li><?php echo esc_html__('CSV delimiters are detected automatically: semicolon, comma, tab, or vertical bar. Semicolon is recommended.', 'pc-order-import-export'); ?></li>
+                <li><?php echo esc_html__('The optional price column can be used when importing into a draft order.', 'pc-order-import-export'); ?></li>
+                <li><?php echo esc_html__('After import, a draft order is created. It is not a completed order yet; review it before adding it to the cart.', 'pc-order-import-export'); ?></li>
+                <li><?php echo esc_html__('The import report shows which rows were added, skipped, or not found.', 'pc-order-import-export'); ?></li>
+              </ul>
+
+              <p style="margin:0 0 6px">
+                <?php echo esc_html__('Supported column names include:', 'pc-order-import-export'); ?>
+              </p>
+              <ul style="margin:0 0 8px 18px">
+                <li><?php printf('%s: <code>sku</code>, <code>SKU</code>, <code>Артикул</code>, <code>Код товара</code>, <code>Код продукту</code>', esc_html__('SKU', 'pc-order-import-export')); ?></li>
+                <li><?php printf('%s: <code>gtin</code>, <code>GTIN</code>, <code>ean</code>, <code>barcode</code>, <code>Штрих-код</code>, <code>Штрихкод</code>', esc_html__('GTIN', 'pc-order-import-export')); ?></li>
+                <li><?php printf('%s: <code>qty</code>, <code>Qty</code>, <code>Количество</code>, <code>К-во</code>, <code>К-сть</code>, <code>Кількість</code>, <code>шт</code>', esc_html__('Qty', 'pc-order-import-export')); ?></li>
+                <li><?php printf('%s: <code>price</code>, <code>Price</code>, <code>Цена</code>, <code>Ціна</code>, <code>Вартість</code>', esc_html__('Price', 'pc-order-import-export')); ?></li>
+              </ul>
+
+              <p style="margin:0 0 4px">
+                <?php echo esc_html__('Examples:', 'pc-order-import-export'); ?>
+              </p>
+              <pre style="white-space:pre-wrap; margin:0 0 6px; padding:8px; background:#f7f7f7; border-radius:4px"><code>sku;qty
+ABC-123;10
+DEF-456;3</code></pre>
+              <pre style="white-space:pre-wrap; margin:0; padding:8px; background:#f7f7f7; border-radius:4px"><code>Штрих-код;К-сть
+4820000000001;10
+4820000000002;3</code></pre>
+            </div>
+          </details>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
     
     /** Подключение всех UI-хуков */
     public static function init(): void
@@ -147,15 +214,7 @@ public static function render_account_import_block(): void
           <div class="pcoe-import-draft-report"></div>
         </div>
 
-        <div style="font-size:12px; opacity:.8; margin-top:10px">
-          <?php
-                printf(
-                esc_html__('Format: %1$s or %2$s. Localized column names are supported (SKU, Qty…).', 'pc-order-import-export'),
-                '<code>sku;qty</code>',
-                '<code>gtin;qty</code>'
-                );
-          ?>
-        </div>
+        <?php echo self::render_import_file_help_html(); ?>
       </details>
 
       <!-- Зберегти поточний кошик у чернетку -->
