@@ -66,6 +66,7 @@ add_action('woocommerce_before_shop_loop', function () {
 add_action('init', function () {
     remove_action('woocommerce_shop_loop_item_title', 'woocommerce_template_loop_product_title', 10);
     add_action('woocommerce_shop_loop_item_title', 'psu_loop_title', 10);
+    add_action('woocommerce_shop_loop_item_title', 'psu_loop_sku', 11);
 });
 
 function psu_loop_title() {
@@ -76,6 +77,18 @@ function psu_loop_title() {
     $display = psu_get_compact_title($raw, $product ? $product->get_id() : 0);
 
     echo '<h2 class="woocommerce-loop-product__title compact-title" title="' . esc_attr($raw) . '">' . esc_html($display) . '</h2>';
+}
+
+function psu_loop_sku() {
+    if (is_product()) return;
+
+    $product = wc_get_product(get_the_ID());
+    if (!($product instanceof WC_Product)) return;
+
+    $sku = (string) $product->get_sku();
+    if ($sku === '') return;
+
+    echo '<div class="psu-loop-sku">' . esc_html($sku) . '</div>';
 }
 
 function psu_get_compact_title(string $title, int $product_id = 0): string {
@@ -289,6 +302,19 @@ $css = <<<CSS
   -webkit-box-orient:vertical;
   overflow:hidden;
   min-height:calc(1.3em * var(--lines));
+}
+
+.psu-loop-sku{
+  display:none;
+  margin:-.15rem 0 .25rem;
+  font-size:11px;
+  line-height:1.15;
+  color:#333;
+  white-space:nowrap;
+}
+
+@media (min-width:769px){
+  .psu-loop-sku{display:block}
 }
 
 /* Per-page UI */
