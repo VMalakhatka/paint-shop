@@ -79,15 +79,16 @@ function pc_folio_customer_map_admin_footer(): void {
 
         function labelFor(item) {
             var parts = [];
-            if (item.shortName) parts.push(item.shortName);
-            if (item.name && item.name !== item.shortName) parts.push(item.name);
+            var shortName = item.shortName || item.id || '';
+            if (shortName) parts.push(shortName);
+            if (item.name && item.name !== shortName) parts.push(item.name);
             if (item.typeLabel || item.type) parts.push('[' + (item.typeLabel || item.type) + ']');
             return parts.join(' - ');
         }
 
         function setPartner(item) {
             document.getElementById('pc_folio_partner_id').value = item.id || '';
-            document.getElementById('pc_folio_partner_short_name').value = item.shortName || '';
+            document.getElementById('pc_folio_partner_short_name').value = item.id || '';
             document.getElementById('pc_folio_partner_name').value = item.name || '';
             document.getElementById('pc_folio_partner_type').value = item.type || '';
             document.getElementById('pc-folio-partner-current').innerHTML = item.id
@@ -237,6 +238,8 @@ function pc_folio_customer_map_save(int $user_id): void {
         delete_user_meta($user_id, PC_FOLIO_PARTNER_META_TYPE);
         return;
     }
+
+    $short_name = $id;
 
     update_user_meta($user_id, PC_FOLIO_PARTNER_META_ID, $id);
     update_user_meta($user_id, PC_FOLIO_PARTNER_META_SHORT_NAME, $short_name);
