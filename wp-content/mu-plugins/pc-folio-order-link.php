@@ -653,6 +653,106 @@ if (!function_exists('pc_folio_render_order_preview_metabox')) {
             '<textarea class="widefat code" rows="18" readonly>%s</textarea>',
             esc_textarea(wp_json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))
         );
+        ?>
+        <hr>
+        <h3><?php echo esc_html__('Java response simulator', 'pc-folio-order-link'); ?></h3>
+        <p class="description"><?php echo esc_html__('Paste a Java response to preview what Woo would do. This does not save data, create orders, or change statuses.', 'pc-folio-order-link'); ?></p>
+        <textarea class="widefat code" rows="10" id="pc-folio-response-preview" placeholder="<?php echo esc_attr__('Paste Java response JSON here...', 'pc-folio-order-link'); ?>"></textarea>
+        <p>
+            <button type="button" class="button" id="pc-folio-response-simulate">
+                <?php echo esc_html__('Preview response actions', 'pc-folio-order-link'); ?>
+            </button>
+        </p>
+        <pre id="pc-folio-response-simulation-result" style="display:none;background:#f6f7f7;border:1px solid #dcdcde;padding:10px;white-space:pre-wrap"></pre>
+        <script>
+        (function(){
+            var button = document.getElementById('pc-folio-response-simulate');
+            var input = document.getElementById('pc-folio-response-preview');
+            var output = document.getElementById('pc-folio-response-simulation-result');
+            if (!button || !input || !output) {
+                return;
+            }
+
+            function asText(value) {
+                return String(value == null ? '' : value);
+            }
+
+            function docLabel(doc) {
+                var number = asText(doc.document_number || doc.documentNumber || doc.document_id || doc.documentId || '');
+                var warehouse = asText(doc.folio_warehouse_id || doc.warehouseId || '');
+                var parts = [];
+                if (number) parts.push('#' + number);
+                if (warehouse) parts.push('<?php echo esc_js(__('warehouse', 'pc-folio-order-link')); ?> ' + warehouse);
+                return parts.length ? parts.join(', ') : '<?php echo esc_js(__('without number', 'pc-folio-order-link')); ?>';
+            }
+
+            function isMissingDoc(doc) {
+                return asText(doc.document_type || doc.documentType) === 'missing_stock_account'
+                    || doc.accounting_enabled === false
+                    || doc.accountingEnabled === false;
+            }
+
+            function simulate(data) {
+                var docs = Array.isArray(data.documents) ? data.documents : [];
+                var realDocs = docs.filter(function(doc){ return doc && !isMissingDoc(doc); });
+                var missingDocs = docs.filter(function(doc){ return doc && isMissingDoc(doc); });
+                var lines = [];
+
+                lines.push('<?php echo esc_js(__('No changes would be applied. This is a simulation only.', 'pc-folio-order-link')); ?>');
+                lines.push('');
+
+                if (!data || data.ok === false) {
+                    lines.push('<?php echo esc_js(__('Result: Java response is not OK. Woo would stop and show an error.', 'pc-folio-order-link')); ?>');
+                    return lines;
+                }
+
+                if (!docs.length) {
+                    lines.push('<?php echo esc_js(__('Result: no Folio documents found in response.', 'pc-folio-order-link')); ?>');
+                    return lines;
+                }
+
+                if (realDocs.length === 1 && missingDocs.length === 0) {
+                    lines.push('<?php echo esc_js(__('Plan: reuse the original Woo order.', 'pc-folio-order-link')); ?>');
+                    lines.push('- <?php echo esc_js(__('Save Folio document link on the original order:', 'pc-folio-order-link')); ?> ' + docLabel(realDocs[0]));
+                    lines.push('- <?php echo esc_js(__('Set original Woo order status to processing.', 'pc-folio-order-link')); ?>');
+                    return lines;
+                }
+
+                lines.push('<?php echo esc_js(__('Plan: keep the original Woo order as parent/draft.', 'pc-folio-order-link')); ?>');
+
+                realDocs.forEach(function(doc, index) {
+                    lines.push('- <?php echo esc_js(__('Create child Woo order for real Folio account:', 'pc-folio-order-link')); ?> ' + docLabel(doc));
+                    lines.push('  <?php echo esc_js(__('Child status:', 'pc-folio-order-link')); ?> processing');
+                });
+
+                missingDocs.forEach(function(doc) {
+                    lines.push('- <?php echo esc_js(__('Create missing-stock draft/on-hold Woo order:', 'pc-folio-order-link')); ?> ' + docLabel(doc));
+                    lines.push('  <?php echo esc_js(__('Reason:', 'pc-folio-order-link')); ?> missing_stock_account');
+                });
+
+                if (data.warnings && data.warnings.length) {
+                    lines.push('');
+                    lines.push('<?php echo esc_js(__('Warnings:', 'pc-folio-order-link')); ?> ' + data.warnings.join(', '));
+                }
+
+                return lines;
+            }
+
+            button.addEventListener('click', function(){
+                var parsed;
+                output.style.display = 'block';
+                try {
+                    parsed = JSON.parse(input.value || '{}');
+                } catch (err) {
+                    output.textContent = '<?php echo esc_js(__('Invalid JSON:', 'pc-folio-order-link')); ?> ' + err.message;
+                    return;
+                }
+
+                output.textContent = simulate(parsed).join("\n");
+            });
+        })();
+        </script>
+        <?php
     }
 }
 

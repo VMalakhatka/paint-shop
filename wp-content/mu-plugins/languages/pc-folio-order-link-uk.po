@@ -67,3 +67,62 @@ msgstr "Попередній перегляд JSON ФОЛІО"
 #: pc-folio-order-link.php:291
 msgid "Preview only. This JSON is not sent to Folio yet."
 msgstr "Лише попередній перегляд. Цей JSON ще не надсилається у ФОЛІО."
+
+msgid "Java response simulator"
+msgstr "Симулятор відповіді Java"
+
+msgid "Paste a Java response to preview what Woo would do. This does not save data, create orders, or change statuses."
+msgstr ""
+"Вставте відповідь Java, щоб переглянути, що зробив би Woo. Це не зберігає "
+"дані, не створює замовлення і не змінює статуси."
+
+msgid "Paste Java response JSON here..."
+msgstr "Вставте JSON відповіді Java тут..."
+
+msgid "Preview response actions"
+msgstr "Переглянути дії за відповіддю"
+
+msgid "warehouse"
+msgstr "склад"
+
+msgid "without number"
+msgstr "без номера"
+
+msgid "No changes would be applied. This is a simulation only."
+msgstr "Зміни не будуть застосовані. Це лише симуляція."
+
+msgid "Result: Java response is not OK. Woo would stop and show an error."
+msgstr "Результат: відповідь Java не OK. Woo зупиниться і покаже помилку."
+
+msgid "Result: no Folio documents found in response."
+msgstr "Результат: у відповіді не знайдено документів ФОЛІО."
+
+msgid "Plan: reuse the original Woo order."
+msgstr "План: використати початкове замовлення Woo."
+
+msgid "Save Folio document link on the original order:"
+msgstr "Зберегти зв'язок із документом ФОЛІО в початковому замовленні:"
+
+msgid "Set original Woo order status to processing."
+msgstr "Встановити для початкового замовлення Woo статус processing."
+
+msgid "Plan: keep the original Woo order as parent/draft."
+msgstr "План: залишити початкове замовлення Woo як батьківське/чернетку."
+
+msgid "Create child Woo order for real Folio account:"
+msgstr "Створити дочірнє замовлення Woo для реального рахунку ФОЛІО:"
+
+msgid "Child status:"
+msgstr "Статус дочірнього замовлення:"
+
+msgid "Create missing-stock draft/on-hold Woo order:"
+msgstr "Створити чернетку/on-hold замовлення Woo для нестачі товару:"
+
+msgid "Reason:"
+msgstr "Причина:"
+
+msgid "Warnings:"
+msgstr "Попередження:"
+
+msgid "Invalid JSON:"
+msgstr "Некоректний JSON:"

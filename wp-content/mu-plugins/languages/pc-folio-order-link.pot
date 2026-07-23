@@ -59,3 +59,60 @@ msgstr ""
 #: pc-folio-order-link.php:291
 msgid "Preview only. This JSON is not sent to Folio yet."
 msgstr ""
+
+msgid "Java response simulator"
+msgstr ""
+
+msgid "Paste a Java response to preview what Woo would do. This does not save data, create orders, or change statuses."
+msgstr ""
+
+msgid "Paste Java response JSON here..."
+msgstr ""
+
+msgid "Preview response actions"
+msgstr ""
+
+msgid "warehouse"
+msgstr ""
+
+msgid "without number"
+msgstr ""
+
+msgid "No changes would be applied. This is a simulation only."
+msgstr ""
+
+msgid "Result: Java response is not OK. Woo would stop and show an error."
+msgstr ""
+
+msgid "Result: no Folio documents found in response."
+msgstr ""
+
+msgid "Plan: reuse the original Woo order."
+msgstr ""
+
+msgid "Save Folio document link on the original order:"
+msgstr ""
+
+msgid "Set original Woo order status to processing."
+msgstr ""
+
+msgid "Plan: keep the original Woo order as parent/draft."
+msgstr ""
+
+msgid "Create child Woo order for real Folio account:"
+msgstr ""
+
+msgid "Child status:"
+msgstr ""
+
+msgid "Create missing-stock draft/on-hold Woo order:"
+msgstr ""
+
+msgid "Reason:"
+msgstr ""
+
+msgid "Warnings:"
+msgstr ""
+
+msgid "Invalid JSON:"
+msgstr ""

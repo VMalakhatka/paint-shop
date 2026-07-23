@@ -67,3 +67,62 @@ msgstr "Предпросмотр JSON ФОЛИО"
 #: pc-folio-order-link.php:291
 msgid "Preview only. This JSON is not sent to Folio yet."
 msgstr "Только предпросмотр. Этот JSON пока не отправляется в ФОЛИО."
+
+msgid "Java response simulator"
+msgstr "Симулятор ответа Java"
+
+msgid "Paste a Java response to preview what Woo would do. This does not save data, create orders, or change statuses."
+msgstr ""
+"Вставьте ответ Java, чтобы посмотреть, что сделал бы Woo. Это не сохраняет "
+"данные, не создаёт заказы и не меняет статусы."
+
+msgid "Paste Java response JSON here..."
+msgstr "Вставьте JSON ответа Java здесь..."
+
+msgid "Preview response actions"
+msgstr "Предпросмотр действий по ответу"
+
+msgid "warehouse"
+msgstr "склад"
+
+msgid "without number"
+msgstr "без номера"
+
+msgid "No changes would be applied. This is a simulation only."
+msgstr "Изменения не будут применены. Это только симуляция."
+
+msgid "Result: Java response is not OK. Woo would stop and show an error."
+msgstr "Результат: ответ Java не OK. Woo остановится и покажет ошибку."
+
+msgid "Result: no Folio documents found in response."
+msgstr "Результат: в ответе не найдены документы ФОЛИО."
+
+msgid "Plan: reuse the original Woo order."
+msgstr "План: использовать исходный заказ Woo."
+
+msgid "Save Folio document link on the original order:"
+msgstr "Сохранить связь с документом ФОЛИО в исходном заказе:"
+
+msgid "Set original Woo order status to processing."
+msgstr "Установить исходному заказу Woo статус processing."
+
+msgid "Plan: keep the original Woo order as parent/draft."
+msgstr "План: оставить исходный заказ Woo как родительский/черновик."
+
+msgid "Create child Woo order for real Folio account:"
+msgstr "Создать дочерний заказ Woo для реального счёта ФОЛИО:"
+
+msgid "Child status:"
+msgstr "Статус дочернего заказа:"
+
+msgid "Create missing-stock draft/on-hold Woo order:"
+msgstr "Создать черновик/on-hold заказ Woo для недостающего товара:"
+
+msgid "Reason:"
+msgstr "Причина:"
+
+msgid "Warnings:"
+msgstr "Предупреждения:"
+
+msgid "Invalid JSON:"
+msgstr "Некорректный JSON:"
