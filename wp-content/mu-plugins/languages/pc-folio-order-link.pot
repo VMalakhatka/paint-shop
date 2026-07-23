@@ -1,0 +1,52 @@
+# Copyright (C) 2026 PaintCore
+# This file is distributed under the same license as the PC Folio Order Link plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: pc-folio-order-link 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-23T00:00:00+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Domain: pc-folio-order-link\n"
+
+#: pc-folio-order-link.php:111
+#: pc-folio-order-link.php:121
+msgid "Folio document link"
+msgstr ""
+
+#: pc-folio-order-link.php:141
+msgid "Order not found."
+msgstr ""
+
+#: pc-folio-order-link.php:150
+msgid "Document ID"
+msgstr ""
+
+#: pc-folio-order-link.php:151
+msgid "Document number"
+msgstr ""
+
+#: pc-folio-order-link.php:152
+msgid "Document type"
+msgstr ""
+
+#: pc-folio-order-link.php:153
+msgid "Document status"
+msgstr ""
+
+#: pc-folio-order-link.php:154
+msgid "Created at"
+msgstr ""
+
+#: pc-folio-order-link.php:155
+msgid "Payload hash"
+msgstr ""
+
+#: pc-folio-order-link.php:171
+msgid "Last error"
+msgstr ""
+
+#: pc-folio-order-link.php:174
+msgid "These fields only store the Woo order to Folio document connection. They do not send anything to Folio."
+msgstr ""

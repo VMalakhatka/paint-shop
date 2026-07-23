@@ -13,6 +13,7 @@ add_action('muplugins_loaded', function () {
         'pc-account-tweaks',
         'pc-cart-guard',
         'pc-folio-customer-map',
+        'pc-folio-order-link',
         'pc-stock-tap',
         'pc-wholesale-quick-order',
         'psu-force-per-page',

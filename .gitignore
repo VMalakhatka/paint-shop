@@ -91,6 +91,7 @@ wp-content/mu-plugins/*
 !wp-content/mu-plugins/pc-cart-guard.php
 !wp-content/mu-plugins/pc-stock-tap.php
 !wp-content/mu-plugins/pc-folio-customer-map.php
+!wp-content/mu-plugins/pc-folio-order-link.php
 !wp-content/mu-plugins/00-mu-i18n-loader.php
 !wp-content/mu-plugins/lavka-ecosystem-lock.php
 !wp-content/mu-plugins/Makefile
