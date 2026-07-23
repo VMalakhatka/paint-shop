@@ -29,6 +29,163 @@ if (!function_exists('pc_folio_order_link_meta_keys')) {
     }
 }
 
+if (!function_exists('pc_folio_order_documents_meta_keys')) {
+    /**
+     * Meta keys used for one Woo order mapped to multiple Folio documents.
+     */
+    function pc_folio_order_documents_meta_keys(): array
+    {
+        return [
+            'documents_result' => '_folio_documents_result',
+            'child_order_ids'  => '_folio_child_order_ids',
+            'parent_order_id'  => '_folio_parent_order_id',
+            'split_status'     => '_folio_split_status',
+            'split_created_at' => '_folio_split_created_at',
+        ];
+    }
+}
+
+if (!function_exists('pc_folio_clean_meta_value')) {
+    /**
+     * Clean nested Folio response data before storing it in order meta.
+     */
+    function pc_folio_clean_meta_value($value)
+    {
+        if (is_array($value)) {
+            $clean = [];
+            foreach ($value as $key => $item) {
+                $clean_key = is_int($key) ? $key : (string) $key;
+                if ($clean_key === '' && !is_int($key)) {
+                    continue;
+                }
+                $clean[$clean_key] = pc_folio_clean_meta_value($item);
+            }
+            return $clean;
+        }
+
+        if (is_bool($value) || is_int($value) || is_float($value) || $value === null) {
+            return $value;
+        }
+
+        return pc_folio_preview_text(sanitize_text_field((string) $value));
+    }
+}
+
+if (!function_exists('pc_folio_get_order_documents_result')) {
+    /**
+     * Read the full Java/Folio split response stored on a Woo order.
+     *
+     * @param int|\WC_Order $order_or_id Order object or order ID.
+     */
+    function pc_folio_get_order_documents_result($order_or_id): array
+    {
+        $order = ($order_or_id instanceof \WC_Order) ? $order_or_id : wc_get_order($order_or_id);
+        if (!$order) {
+            return [];
+        }
+
+        $keys = pc_folio_order_documents_meta_keys();
+        $value = $order->get_meta($keys['documents_result'], true);
+
+        return is_array($value) ? $value : [];
+    }
+}
+
+if (!function_exists('pc_folio_guess_split_status')) {
+    /**
+     * Derive a small status label from the Java/Folio response.
+     */
+    function pc_folio_guess_split_status(array $result): string
+    {
+        if (isset($result['ok']) && !$result['ok']) {
+            return 'error';
+        }
+
+        if (!empty($result['errors'])) {
+            return 'error';
+        }
+
+        $documents = isset($result['documents']) && is_array($result['documents'])
+            ? $result['documents']
+            : [];
+
+        foreach ($documents as $document) {
+            if (is_array($document) && (($document['document_type'] ?? '') === 'missing_stock_account')) {
+                return 'partial';
+            }
+        }
+
+        return $documents ? 'ready' : 'empty';
+    }
+}
+
+if (!function_exists('pc_folio_set_order_documents_result')) {
+    /**
+     * Store the full Java/Folio split response on a Woo order.
+     *
+     * This does not create child orders and does not change order status.
+     *
+     * @param int|\WC_Order $order_or_id Order object or order ID.
+     */
+    function pc_folio_set_order_documents_result($order_or_id, array $result): bool
+    {
+        $order = ($order_or_id instanceof \WC_Order) ? $order_or_id : wc_get_order($order_or_id);
+        if (!$order) {
+            return false;
+        }
+
+        $keys = pc_folio_order_documents_meta_keys();
+        $clean = pc_folio_clean_meta_value($result);
+
+        $order->update_meta_data($keys['documents_result'], $clean);
+        $order->update_meta_data($keys['split_status'], pc_folio_guess_split_status($clean));
+        $order->update_meta_data($keys['split_created_at'], current_time('mysql'));
+        $order->save();
+
+        return true;
+    }
+}
+
+if (!function_exists('pc_folio_set_parent_child_links')) {
+    /**
+     * Link an existing parent order with existing child orders.
+     *
+     * This only writes meta. It does not create orders and does not change statuses.
+     *
+     * @param int|\WC_Order $parent_order_or_id Parent order object or ID.
+     * @param int[]         $child_order_ids    Existing child Woo order IDs.
+     */
+    function pc_folio_set_parent_child_links($parent_order_or_id, array $child_order_ids): bool
+    {
+        $parent_order = ($parent_order_or_id instanceof \WC_Order) ? $parent_order_or_id : wc_get_order($parent_order_or_id);
+        if (!$parent_order) {
+            return false;
+        }
+
+        $parent_id = (int) $parent_order->get_id();
+        $child_order_ids = array_values(array_unique(array_filter(array_map('absint', $child_order_ids))));
+        $keys = pc_folio_order_documents_meta_keys();
+
+        $parent_order->update_meta_data($keys['child_order_ids'], $child_order_ids);
+        if ($child_order_ids) {
+            $parent_order->update_meta_data($keys['split_status'], 'split');
+        }
+        $parent_order->save();
+
+        foreach ($child_order_ids as $child_order_id) {
+            $child_order = wc_get_order($child_order_id);
+            if (!$child_order) {
+                continue;
+            }
+
+            $child_order->update_meta_data($keys['parent_order_id'], $parent_id);
+            $child_order->save();
+        }
+
+        return true;
+    }
+}
+
 if (!function_exists('pc_folio_get_order_document_link')) {
     /**
      * Read the Folio document link from an order.
@@ -366,6 +523,7 @@ if (!function_exists('pc_folio_build_order_preview_payload')) {
             ],
             'folio_client'   => $folio_client,
             'folio_document_link' => pc_folio_get_order_document_link($order),
+            'folio_documents_result' => pc_folio_get_order_documents_result($order),
             'billing'       => [
                 'first_name' => pc_folio_preview_text($order->get_billing_first_name()),
                 'last_name'  => pc_folio_preview_text($order->get_billing_last_name()),

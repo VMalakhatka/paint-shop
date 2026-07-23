@@ -2,7 +2,7 @@
 
 This document describes the draft WooCommerce to Folio order payload.
 
-Status: draft, preview-only on the WooCommerce side.
+Status: draft, preview-only on the WooCommerce side. - в Фолио это неучитываемый счет , который не меняет остатки товара 
 
 WooCommerce must not split one order into multiple Folio documents. WooCommerce sends the structured order, customer mapping, item allocation plan, and available Folio warehouses with priorities. Java/Folio owns the final document split and warehouse selection logic.
 
@@ -39,10 +39,10 @@ The preview is read-only and does not send anything to Folio.
   "split_strategy": "java_by_allocations_and_folio_warehouse_priority",
   "folio_account_header": {
     "externalRequestId": "7ec24df3-b03d-4a3d-a104-d459658451b7",
-    "documentNumber": "",
+    "documentNumber": "", - если пусто создать номер самому - последний счет +1
     "documentDate": "2026-07-23T00:00:00",
     "controlDate": "2026-07-26",
-    "warehouseId": null,
+    "warehouseId": null, - логика складов в товаре 
     "operationType": "СЧЕТ",
     "folioOperationKind": "*ПРЕДОПЛАТ",
     "payerName": "Full Folio partner name",
@@ -65,7 +65,9 @@ The preview is read-only and does not send anything to Folio.
   "woo_order": {
     "id": 116873,
     "number": "116873",
-    "status": "completed",
+    "status": "completed",- это уже расходник не счет , 
+     может быть processing - это обычный счет 
+     pc-draft - это неучитываемыйсчет 
     "currency": "UAH",
     "total": 3132.6
   },
@@ -74,12 +76,12 @@ The preview is read-only and does not send anything to Folio.
     "id": "FOLIO_SHORT_NAME",
     "short_name": "FOLIO_SHORT_NAME",
     "name": "Full Folio partner name",
-    "type": "D"
+    "type": "D" - это Дилер 
   },
   "folio_document_link": {
-    "document_id": "",
-    "document_number": "",
-    "document_type": "",
+    "document_id": "", уникальный номер 
+    "document_number": "", обычный номер 
+    "document_type": "", 
     "document_status": "",
     "document_created_at": "",
     "document_payload_hash": "",
@@ -106,7 +108,10 @@ The preview is read-only and does not send anything to Folio.
       "total": 295.2,
       "unit_price": 147.6,
       "allocations": [
-        {
+        { - для неучитываемых счетов - создаем счет без распределения на одном складе - самом приоритетном
+        
+        у каждого товара есть план размещения по складам 
+        в Woo храниться что он должен быть помещен на группу складо в Одесса (группа состоит из 5 и 15го склада у 5го приоритет выше - пытаемся 2 сколько можем зарезервировать на 5 если нет достаточного кол-ва то на 15 ! Если не хватило всравно количествва - то создаем счет неучитываемый на складе с высоким приеритетом - в информации счета пишем - нет на складе )
           "woo_location_id": 3943,
           "woo_location_slug": "odesa",
           "woo_location_name": "Odesa",
@@ -191,7 +196,9 @@ Currently fixed to `CLASSIC`.
 
 `folio_account_header.payerShortName`
 
-Mapped Folio partner short name. In the current Woo user mapping, `id` and `short_name` are intentionally the same value.
+Mapped Folio partner short name. This must be `_PARTNER.N_USER`.
+
+Important: `_PARTNER.N_USER` is the unique short organization name used by Folio for `SCL_NAKL.BRIEFORG` / `SCL_MOVE.ORG_PREDM`. In the current Woo user mapping, `folio_client.id`, `folio_client.short_name`, and `folio_account_header.payerShortName` are intentionally the same value. `_PARTNER.NAMEP_USER` is a payment-document name and must not be used as the short name.
 
 `folio_account_header.folioUser`
 
@@ -247,7 +254,9 @@ Currently contains the Woo order number and order creation time.
 
 `folio_client.id`
 
-The Folio client identifier selected in the WordPress user profile. In the current Woo mapping, `id` and `short_name` are intentionally the same value.
+The Folio client identifier selected in the WordPress user profile. This must be `_PARTNER.N_USER`.
+
+In the current Woo mapping, `id` and `short_name` are intentionally the same value. The full client name is `_PARTNER.NAME_USER`.
 
 `folio_document_link`
 
@@ -322,7 +331,27 @@ Woo will use this response to save:
 - `_folio_document_payload_hash`
 - `_folio_document_last_error`
 
-If Java creates multiple Folio documents for one Woo order, the current single-link meta model must be extended before enabling sending.
+## Woo Meta/API Layer
+
+Implemented helper functions:
+
+```php
+pc_folio_set_order_documents_result($order_or_id, array $result): bool
+pc_folio_get_order_documents_result($order_or_id): array
+pc_folio_set_parent_child_links($parent_order_or_id, array $child_order_ids): bool
+```
+
+Multiple-document meta keys:
+
+- `_folio_documents_result` stores the full Java/Folio response.
+- `_folio_child_order_ids` stores child Woo order IDs on the parent order.
+- `_folio_parent_order_id` stores parent Woo order ID on a child order.
+- `_folio_split_status` stores a compact state: `ready`, `partial`, `error`, `empty`, or `split`.
+- `_folio_split_created_at` stores when the Java/Folio split response was saved.
+
+This layer only stores metadata. It does not create child orders, send anything to Folio, or change Woo order statuses.
+
+The old single-document meta keys remain available for the simple case where Java returns exactly one real account document.
 
 ## Open Questions For Java
 
