@@ -184,7 +184,7 @@ if (!function_exists('pc_folio_preview_text')) {
      */
     function pc_folio_preview_text($value): string
     {
-        return trim(wp_specialchars_decode((string) $value, ENT_QUOTES));
+        return trim(html_entity_decode((string) $value, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
     }
 }
 
@@ -217,6 +217,7 @@ if (!function_exists('pc_folio_build_order_preview_payload')) {
                     'woo_location_slug'    => ($term && !is_wp_error($term)) ? pc_folio_preview_text($term->slug) : '',
                     'woo_location_name'    => ($term && !is_wp_error($term)) ? pc_folio_preview_text($term->name) : '',
                     'quantity'             => (float) $qty,
+                    'allocation_source'    => '_pc_alloc_plan',
                     'folio_warehouses'     => pc_folio_get_location_warehouses_for_preview($term_id),
                 ];
             }
@@ -229,23 +230,27 @@ if (!function_exists('pc_folio_build_order_preview_payload')) {
                 'quantity'      => (float) $item->get_quantity(),
                 'subtotal'      => (float) $item->get_subtotal(),
                 'total'         => (float) $item->get_total(),
+                'unit_price'    => (float) ((float) $item->get_quantity() > 0 ? ((float) $item->get_total() / (float) $item->get_quantity()) : 0),
                 'allocations'   => $allocations,
             ];
         }
 
         return [
-            'preview_only'  => true,
-            'source'        => 'woo_order',
-            'woo_order'     => [
+            'preview_only'   => true,
+            'schema_version' => 'folio-order-preview/v1',
+            'source'         => 'woo_order',
+            'intent'         => 'create_or_update_folio_documents',
+            'split_strategy' => 'java_by_allocations_and_folio_warehouse_priority',
+            'woo_order'      => [
                 'id'       => (int) $order->get_id(),
                 'number'   => (string) $order->get_order_number(),
                 'status'   => (string) $order->get_status(),
                 'currency' => (string) $order->get_currency(),
                 'total'    => (float) $order->get_total(),
             ],
-            'folio_client'  => pc_folio_get_order_customer_link($order),
+            'folio_client'   => pc_folio_get_order_customer_link($order),
             'folio_document_link' => pc_folio_get_order_document_link($order),
-            'billing'      => [
+            'billing'       => [
                 'first_name' => pc_folio_preview_text($order->get_billing_first_name()),
                 'last_name'  => pc_folio_preview_text($order->get_billing_last_name()),
                 'company'    => pc_folio_preview_text($order->get_billing_company()),
@@ -255,7 +260,7 @@ if (!function_exists('pc_folio_build_order_preview_payload')) {
                 'address_1'  => pc_folio_preview_text($order->get_billing_address_1()),
                 'address_2'  => pc_folio_preview_text($order->get_billing_address_2()),
             ],
-            'items'        => $items,
+            'items'         => $items,
         ];
     }
 }
