@@ -68,6 +68,12 @@ msgstr "Попередній перегляд JSON ФОЛІО"
 msgid "Preview only. This JSON is not sent to Folio yet."
 msgstr "Лише попередній перегляд. Цей JSON ще не надсилається у ФОЛІО."
 
+msgid "Send preview to Java"
+msgstr "Надіслати preview в Java"
+
+msgid "Java Base URL is not configured."
+msgstr "Java Base URL не налаштовано."
+
 msgid "Java response simulator"
 msgstr "Симулятор відповіді Java"
 
@@ -126,3 +132,21 @@ msgstr "Попередження:"
 
 msgid "Invalid JSON:"
 msgstr "Некоректний JSON:"
+
+msgid "Sending preview to Java..."
+msgstr "Надсилання preview в Java..."
+
+msgid "Invalid preview JSON:"
+msgstr "Некоректний preview JSON:"
+
+msgid "Java preview request failed."
+msgstr "Запит preview до Java не вдався."
+
+msgid "Forbidden."
+msgstr "Заборонено."
+
+msgid "Invalid preview JSON."
+msgstr "Некоректний preview JSON."
+
+msgid "Invalid Java preview response."
+msgstr "Некоректна preview-відповідь Java."

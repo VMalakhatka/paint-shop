@@ -60,6 +60,12 @@ msgstr ""
 msgid "Preview only. This JSON is not sent to Folio yet."
 msgstr ""
 
+msgid "Send preview to Java"
+msgstr ""
+
+msgid "Java Base URL is not configured."
+msgstr ""
+
 msgid "Java response simulator"
 msgstr ""
 
@@ -115,4 +121,22 @@ msgid "Warnings:"
 msgstr ""
 
 msgid "Invalid JSON:"
+msgstr ""
+
+msgid "Sending preview to Java..."
+msgstr ""
+
+msgid "Invalid preview JSON:"
+msgstr ""
+
+msgid "Java preview request failed."
+msgstr ""
+
+msgid "Forbidden."
+msgstr ""
+
+msgid "Invalid preview JSON."
+msgstr ""
+
+msgid "Invalid Java preview response."
 msgstr ""
