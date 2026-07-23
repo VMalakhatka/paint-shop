@@ -114,6 +114,11 @@ function pc_folio_customer_map_admin_footer(): void {
             });
         }
 
+        function selectedTypes() {
+            var select = document.getElementById('pc-folio-partner-types');
+            return select ? select.value : 'П,Д,К';
+        }
+
         function searchPartners(query) {
             var box = document.getElementById('pc-folio-partner-results');
             if (!query || query.length < 2) {
@@ -126,7 +131,7 @@ function pc_folio_customer_map_admin_footer(): void {
             body.set('action', 'pc_folio_partner_search');
             body.set('_ajax_nonce', nonce);
             body.set('q', query);
-            body.set('types', 'П,Д,К');
+            body.set('types', selectedTypes());
             body.set('limit', '20');
 
             fetch(ajaxurl, {
@@ -167,6 +172,13 @@ function pc_folio_customer_map_admin_footer(): void {
                     '<input type="hidden" id="pc_folio_partner_type" name="pc_folio_partner_type">' +
                     '<p id="pc-folio-partner-current" style="margin:0 0 8px"></p>' +
                     '<input type="search" id="pc-folio-partner-search" class="regular-text" autocomplete="off" placeholder="<?php echo esc_attr__('Search Folio client...', 'pc-folio-customer-map'); ?>">' +
+                    ' <select id="pc-folio-partner-types">' +
+                        '<option value="П,Д,К"><?php echo esc_js(__('Clients (partners, dealers, customers)', 'pc-folio-customer-map')); ?></option>' +
+                        '<option value="all"><?php echo esc_js(__('All', 'pc-folio-customer-map')); ?></option>' +
+                        '<option value="П"><?php echo esc_js(__('Partners', 'pc-folio-customer-map')); ?></option>' +
+                        '<option value="Д"><?php echo esc_js(__('Dealers', 'pc-folio-customer-map')); ?></option>' +
+                        '<option value="К"><?php echo esc_js(__('Customers', 'pc-folio-customer-map')); ?></option>' +
+                    '</select>' +
                     ' <button type="button" class="button" id="pc-folio-partner-clear"><?php echo esc_js(__('Clear', 'pc-folio-customer-map')); ?></button>' +
                     '<div id="pc-folio-partner-results" style="margin-top:8px"></div>' +
                     '<p class="description"><?php echo esc_js(__('Searches Folio partners, dealers, and customers. The selected client will be used for Folio account preview.', 'pc-folio-customer-map')); ?></p>' +
@@ -179,6 +191,9 @@ function pc_folio_customer_map_admin_footer(): void {
                 var query = this.value.trim();
                 clearTimeout(timer);
                 timer = setTimeout(function(){ searchPartners(query); }, 300);
+            });
+            document.getElementById('pc-folio-partner-types').addEventListener('change', function(){
+                searchPartners(document.getElementById('pc-folio-partner-search').value.trim());
             });
             document.getElementById('pc-folio-partner-clear').addEventListener('click', function(){
                 setPartner({});
