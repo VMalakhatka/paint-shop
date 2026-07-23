@@ -178,6 +178,16 @@ if (!function_exists('pc_folio_get_location_warehouses_for_preview')) {
     }
 }
 
+if (!function_exists('pc_folio_preview_text')) {
+    /**
+     * Normalize Woo strings for JSON preview: decode HTML entities and trim whitespace.
+     */
+    function pc_folio_preview_text($value): string
+    {
+        return trim(wp_specialchars_decode((string) $value, ENT_QUOTES));
+    }
+}
+
 if (!function_exists('pc_folio_build_order_preview_payload')) {
     /**
      * Build a draft Folio payload from Woo order data without sending it anywhere.
@@ -204,8 +214,8 @@ if (!function_exists('pc_folio_build_order_preview_payload')) {
                 $term = $term_id > 0 ? get_term($term_id, 'location') : null;
                 $allocations[] = [
                     'woo_location_id'      => $term_id,
-                    'woo_location_slug'    => ($term && !is_wp_error($term)) ? (string) $term->slug : '',
-                    'woo_location_name'    => ($term && !is_wp_error($term)) ? (string) $term->name : '',
+                    'woo_location_slug'    => ($term && !is_wp_error($term)) ? pc_folio_preview_text($term->slug) : '',
+                    'woo_location_name'    => ($term && !is_wp_error($term)) ? pc_folio_preview_text($term->name) : '',
                     'quantity'             => (float) $qty,
                     'folio_warehouses'     => pc_folio_get_location_warehouses_for_preview($term_id),
                 ];
@@ -214,8 +224,8 @@ if (!function_exists('pc_folio_build_order_preview_payload')) {
             $items[] = [
                 'order_item_id' => (int) $item_id,
                 'product_id'    => $product ? (int) $product->get_id() : 0,
-                'sku'           => $product ? (string) $product->get_sku() : '',
-                'name'          => (string) $item->get_name(),
+                'sku'           => $product ? pc_folio_preview_text($product->get_sku()) : '',
+                'name'          => pc_folio_preview_text($item->get_name()),
                 'quantity'      => (float) $item->get_quantity(),
                 'subtotal'      => (float) $item->get_subtotal(),
                 'total'         => (float) $item->get_total(),
@@ -236,14 +246,14 @@ if (!function_exists('pc_folio_build_order_preview_payload')) {
             'folio_client'  => pc_folio_get_order_customer_link($order),
             'folio_document_link' => pc_folio_get_order_document_link($order),
             'billing'      => [
-                'first_name' => (string) $order->get_billing_first_name(),
-                'last_name'  => (string) $order->get_billing_last_name(),
-                'company'    => (string) $order->get_billing_company(),
-                'phone'      => (string) $order->get_billing_phone(),
-                'email'      => (string) $order->get_billing_email(),
-                'city'       => (string) $order->get_billing_city(),
-                'address_1'  => (string) $order->get_billing_address_1(),
-                'address_2'  => (string) $order->get_billing_address_2(),
+                'first_name' => pc_folio_preview_text($order->get_billing_first_name()),
+                'last_name'  => pc_folio_preview_text($order->get_billing_last_name()),
+                'company'    => pc_folio_preview_text($order->get_billing_company()),
+                'phone'      => pc_folio_preview_text($order->get_billing_phone()),
+                'email'      => pc_folio_preview_text($order->get_billing_email()),
+                'city'       => pc_folio_preview_text($order->get_billing_city()),
+                'address_1'  => pc_folio_preview_text($order->get_billing_address_1()),
+                'address_2'  => pc_folio_preview_text($order->get_billing_address_2()),
             ],
             'items'        => $items,
         ];
