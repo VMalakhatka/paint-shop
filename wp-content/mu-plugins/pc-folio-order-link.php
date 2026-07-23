@@ -188,6 +188,119 @@ if (!function_exists('pc_folio_preview_text')) {
     }
 }
 
+if (!function_exists('pc_folio_get_order_price_contract_type')) {
+    /**
+     * Resolve the Folio price contract from the customer's Woo role mapping.
+     */
+    function pc_folio_get_order_price_contract_type(\WC_Order $order): string
+    {
+        $user_id = (int) $order->get_user_id();
+        if ($user_id <= 0 || !function_exists('get_userdata')) {
+            return '';
+        }
+
+        $user = get_userdata($user_id);
+        if (!$user || empty($user->roles) || !is_array($user->roles)) {
+            return '';
+        }
+
+        $map = function_exists('lps_get_role_contract_map') ? (array) lps_get_role_contract_map() : [];
+        foreach ($user->roles as $role) {
+            $role = sanitize_key((string) $role);
+            if ($role !== '' && isset($map[$role]) && $map[$role] !== '') {
+                return pc_folio_preview_text($map[$role]);
+            }
+        }
+
+        return pc_folio_preview_text((string) reset($user->roles));
+    }
+}
+
+if (!function_exists('pc_folio_build_delivery_info')) {
+    /**
+     * Build a human delivery/contact summary for the Folio account header preview.
+     */
+    function pc_folio_build_delivery_info(\WC_Order $order): string
+    {
+        $parts = [];
+
+        $shipping_method = pc_folio_preview_text($order->get_shipping_method());
+        if ($shipping_method !== '') {
+            $parts[] = $shipping_method;
+        }
+
+        $city = pc_folio_preview_text($order->get_shipping_city() ?: $order->get_billing_city());
+        if ($city !== '') {
+            $parts[] = $city;
+        }
+
+        $address = trim(implode(' ', array_filter([
+            pc_folio_preview_text($order->get_shipping_address_1() ?: $order->get_billing_address_1()),
+            pc_folio_preview_text($order->get_shipping_address_2() ?: $order->get_billing_address_2()),
+        ])));
+        if ($address !== '') {
+            $parts[] = $address;
+        }
+
+        $payment_method = pc_folio_preview_text($order->get_payment_method_title());
+        if ($payment_method !== '') {
+            $parts[] = $payment_method;
+        }
+
+        $phone = pc_folio_preview_text($order->get_billing_phone());
+        if ($phone !== '') {
+            $parts[] = sprintf('tel. %s', $phone);
+        }
+
+        return implode(', ', $parts);
+    }
+}
+
+if (!function_exists('pc_folio_build_account_header_preview')) {
+    /**
+     * Build the extended Folio account header fields from Woo order data.
+     */
+    function pc_folio_build_account_header_preview(\WC_Order $order, array $folio_client): array
+    {
+        $now = (int) current_time('timestamp');
+        $created = $order->get_date_created();
+        $ordered_at = $created ? $created->date_i18n('Y-m-d H:i:s') : wp_date('Y-m-d H:i:s', $now);
+        $payer_name = pc_folio_preview_text($folio_client['name'] ?? '');
+        if ($payer_name === '') {
+            $payer_name = trim(implode(' ', array_filter([
+                pc_folio_preview_text($order->get_billing_first_name()),
+                pc_folio_preview_text($order->get_billing_last_name()),
+            ])));
+        }
+
+        return [
+            'externalRequestId'   => function_exists('wp_generate_uuid4') ? wp_generate_uuid4() : md5(uniqid('', true)),
+            'documentNumber'      => '',
+            'documentDate'        => wp_date('Y-m-d\T00:00:00', $now),
+            'controlDate'         => wp_date('Y-m-d', $now + (3 * DAY_IN_SECONDS)),
+            'warehouseId'         => null,
+            'operationType'       => 'СЧЕТ',
+            'folioOperationKind'  => '*ПРЕДОПЛАТ',
+            'payerName'           => $payer_name,
+            'receiverName'        => 'CLASSIC',
+            'payerShortName'      => pc_folio_preview_text($folio_client['short_name'] ?? ($folio_client['id'] ?? '')),
+            'folioUser'           => 'buh',
+            'sourceInfo'          => 'Интернет заказ сайт',
+            'additionalInfo'      => pc_folio_preview_text($order->get_customer_note()),
+            'priceContractType'   => pc_folio_get_order_price_contract_type($order),
+            'notCash'             => true,
+            'accountingEnabled'   => true,
+            'returnFlag'          => false,
+            'payerCity'           => pc_folio_preview_text($order->get_billing_city()),
+            'directorName'        => '',
+            'accountantName'      => '',
+            'payerPhone'          => pc_folio_preview_text($order->get_billing_phone()),
+            'deliveryInfo'        => pc_folio_build_delivery_info($order),
+            'comment'             => sprintf('Woo order #%s, ordered at %s', $order->get_order_number(), $ordered_at),
+        ];
+    }
+}
+
 if (!function_exists('pc_folio_build_order_preview_payload')) {
     /**
      * Build a draft Folio payload from Woo order data without sending it anywhere.
@@ -235,12 +348,15 @@ if (!function_exists('pc_folio_build_order_preview_payload')) {
             ];
         }
 
+        $folio_client = pc_folio_get_order_customer_link($order);
+
         return [
             'preview_only'   => true,
             'schema_version' => 'folio-order-preview/v1',
             'source'         => 'woo_order',
             'intent'         => 'create_or_update_folio_documents',
             'split_strategy' => 'java_by_allocations_and_folio_warehouse_priority',
+            'folio_account_header' => pc_folio_build_account_header_preview($order, $folio_client),
             'woo_order'      => [
                 'id'       => (int) $order->get_id(),
                 'number'   => (string) $order->get_order_number(),
@@ -248,7 +364,7 @@ if (!function_exists('pc_folio_build_order_preview_payload')) {
                 'currency' => (string) $order->get_currency(),
                 'total'    => (float) $order->get_total(),
             ],
-            'folio_client'   => pc_folio_get_order_customer_link($order),
+            'folio_client'   => $folio_client,
             'folio_document_link' => pc_folio_get_order_document_link($order),
             'billing'       => [
                 'first_name' => pc_folio_preview_text($order->get_billing_first_name()),
