@@ -140,7 +140,7 @@ Java should:
 2. Decide how many Folio documents must be created.
 3. Split lines by available Folio warehouses and priorities.
 4. Select the final Folio warehouse per line or per document.
-5. Create non-stock-impacting draft documents for cart/import draft flows when requested later.
+5. Create non-stock-impacting draft documents for cart/import draft flows when requested later. - в фолио это неучитываемй счет 
 6. Create real documents for order execution flows when requested later.
 7. Return enough data for Woo to persist the Folio link in order meta.
 
@@ -159,7 +159,7 @@ Woo should not:
   "woo_order_id": 116873,
   "documents": [
     {
-      "document_id": "FOLIO_INTERNAL_ID",
+      "document_id": "FOLIO_INTERNAL_ID", - уникальный номер 
       "document_number": "FOLIO_VISIBLE_NUMBER",
       "document_type": "account",
       "document_status": "draft",
