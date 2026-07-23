@@ -1,0 +1,79 @@
+# Copyright (C) 2026 PaintCore
+# This file is distributed under the same license as the PC Folio Customer Map plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: pc-folio-customer-map 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-23T00:00:00+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Domain: pc-folio-customer-map\n"
+
+#: pc-folio-customer-map.php:96
+msgid "Not selected"
+msgstr ""
+
+#: pc-folio-customer-map.php:103
+msgid "No Folio clients found."
+msgstr ""
+
+#: pc-folio-customer-map.php:129
+msgid "Searching..."
+msgstr ""
+
+#: pc-folio-customer-map.php:147
+msgid "Folio client search failed."
+msgstr ""
+
+#: pc-folio-customer-map.php:154
+msgid "Connection error."
+msgstr ""
+
+#: pc-folio-customer-map.php:167
+msgid "Folio client"
+msgstr ""
+
+#: pc-folio-customer-map.php:175
+msgid "Search Folio client..."
+msgstr ""
+
+#: pc-folio-customer-map.php:177
+msgid "Clients (partners, dealers, customers)"
+msgstr ""
+
+#: pc-folio-customer-map.php:178
+msgid "All"
+msgstr ""
+
+#: pc-folio-customer-map.php:179
+msgid "Partners"
+msgstr ""
+
+#: pc-folio-customer-map.php:180
+msgid "Dealers"
+msgstr ""
+
+#: pc-folio-customer-map.php:181
+msgid "Customers"
+msgstr ""
+
+#: pc-folio-customer-map.php:183
+msgid "Clear"
+msgstr ""
+
+#: pc-folio-customer-map.php:185
+msgid "Searches Folio partners, dealers, and customers. The selected client will be used for Folio account preview."
+msgstr ""
+
+#: pc-folio-customer-map.php:254
+msgid "Forbidden."
+msgstr ""
+
+#: pc-folio-customer-map.php:260
+msgid "Java connection helper is unavailable."
+msgstr ""
+
+#: pc-folio-customer-map.php:288
+msgid "Invalid Folio partners response."
+msgstr ""

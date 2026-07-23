@@ -580,6 +580,11 @@ msgstr ""
 msgid "Linked MSSQL warehouses (codes)"
 msgstr "Прив’язані MSSQL-склади (коди)"
 
+#: inc/warehouse-map.php:120
+#: inc/warehouse-map.php:263
+msgid "Folio warehouses (id:priority)"
+msgstr "Склади ФОЛІО (id:пріоритет)"
+
 #: inc/warehouse-map.php:119
 msgid "Pick from directory"
 msgstr "Вибрати з довідника"
@@ -588,9 +593,19 @@ msgstr "Вибрати з довідника"
 msgid "e.g. D01, D02, D05"
 msgstr "напр. D01, D02, D05"
 
+#: inc/warehouse-map.php:271
+msgid "e.g. 7:10, 8:20"
+msgstr "наприклад, 7:10, 8:20"
+
 #: inc/warehouse-map.php:151
 msgid "CSV list of codes (spaces optional)."
 msgstr "CSV-список кодів (пробіли необов’язкові)."
+
+#: inc/warehouse-map.php:275
+msgid "Lower priority number is used first. Used for Folio account split."
+msgstr ""
+"Менше число пріоритету використовується першим. Використовується для "
+"розподілу рахунку ФОЛІО."
 
 #. translators: 1: external warehouse code, 2: name
 #: inc/warehouse-map.php:163
@@ -601,6 +616,10 @@ msgstr "%1$s — %2$s"
 #: inc/warehouse-map.php:170
 msgid "Apply codes"
 msgstr "Застосувати коди"
+
+#: inc/warehouse-map.php:297
+msgid "Apply Folio"
+msgstr "Застосувати ФОЛІО"
 
 #: inc/warehouse-map.php:173
 msgid "Clear"

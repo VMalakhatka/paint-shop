@@ -607,6 +607,11 @@ msgstr ""
 msgid "Linked MSSQL warehouses (codes)"
 msgstr ""
 
+#: inc/warehouse-map.php:120
+#: inc/warehouse-map.php:263
+msgid "Folio warehouses (id:priority)"
+msgstr ""
+
 #: inc/warehouse-map.php:119
 msgid "Pick from directory"
 msgstr ""
@@ -615,8 +620,16 @@ msgstr ""
 msgid "e.g. D01, D02, D05"
 msgstr ""
 
+#: inc/warehouse-map.php:271
+msgid "e.g. 7:10, 8:20"
+msgstr ""
+
 #: inc/warehouse-map.php:151
 msgid "CSV list of codes (spaces optional)."
+msgstr ""
+
+#: inc/warehouse-map.php:275
+msgid "Lower priority number is used first. Used for Folio account split."
 msgstr ""
 
 #. translators: 1: external warehouse code, 2: name
@@ -627,6 +640,10 @@ msgstr ""
 
 #: inc/warehouse-map.php:170
 msgid "Apply codes"
+msgstr ""
+
+#: inc/warehouse-map.php:297
+msgid "Apply Folio"
 msgstr ""
 
 #: inc/warehouse-map.php:173

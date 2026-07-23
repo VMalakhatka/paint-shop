@@ -12,6 +12,7 @@ add_action('muplugins_loaded', function () {
     $domains = [
         'pc-account-tweaks',
         'pc-cart-guard',
+        'pc-folio-customer-map',
         'pc-stock-tap',
         'pc-wholesale-quick-order',
         'psu-force-per-page',
