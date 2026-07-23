@@ -523,7 +523,6 @@ if (!function_exists('pc_folio_build_order_preview_payload')) {
             ],
             'folio_client'   => $folio_client,
             'folio_document_link' => pc_folio_get_order_document_link($order),
-            'folio_documents_result' => pc_folio_get_order_documents_result($order),
             'billing'       => [
                 'first_name' => pc_folio_preview_text($order->get_billing_first_name()),
                 'last_name'  => pc_folio_preview_text($order->get_billing_last_name()),
