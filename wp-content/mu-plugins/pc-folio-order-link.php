@@ -106,6 +106,150 @@ if (!function_exists('pc_folio_clear_order_document_link')) {
     }
 }
 
+if (!function_exists('pc_folio_get_order_customer_link')) {
+    /**
+     * Read the Folio customer mapping for the order customer.
+     */
+    function pc_folio_get_order_customer_link(\WC_Order $order): array
+    {
+        $user_id = (int) $order->get_user_id();
+        if ($user_id <= 0) {
+            return [
+                'user_id'    => 0,
+                'id'         => '',
+                'short_name' => '',
+                'name'       => '',
+                'type'       => '',
+            ];
+        }
+
+        return [
+            'user_id'    => $user_id,
+            'id'         => (string) get_user_meta($user_id, '_folio_partner_id', true),
+            'short_name' => (string) get_user_meta($user_id, '_folio_partner_short_name', true),
+            'name'       => (string) get_user_meta($user_id, '_folio_partner_name', true),
+            'type'       => (string) get_user_meta($user_id, '_folio_partner_type', true),
+        ];
+    }
+}
+
+if (!function_exists('pc_folio_get_location_warehouses_for_preview')) {
+    /**
+     * Read Folio warehouse priorities for a Woo location term.
+     */
+    function pc_folio_get_location_warehouses_for_preview(int $term_id): array
+    {
+        if ($term_id <= 0) {
+            return [];
+        }
+
+        if (function_exists('lavka_get_location_folio_warehouses')) {
+            return array_values((array) lavka_get_location_folio_warehouses($term_id));
+        }
+
+        $raw = get_term_meta($term_id, 'lavka_folio_warehouses', true);
+        if (!is_array($raw)) {
+            return [];
+        }
+
+        $items = [];
+        foreach ($raw as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+
+            $id = isset($row['id']) ? trim((string) $row['id']) : '';
+            $priority = isset($row['priority']) ? (int) $row['priority'] : 0;
+            if ($id === '') {
+                continue;
+            }
+
+            $items[] = [
+                'id'       => $id,
+                'priority' => $priority > 0 ? $priority : 100,
+            ];
+        }
+
+        usort($items, static function ($a, $b) {
+            return ((int) $a['priority']) <=> ((int) $b['priority']);
+        });
+
+        return $items;
+    }
+}
+
+if (!function_exists('pc_folio_build_order_preview_payload')) {
+    /**
+     * Build a draft Folio payload from Woo order data without sending it anywhere.
+     */
+    function pc_folio_build_order_preview_payload($order_or_id): array
+    {
+        $order = ($order_or_id instanceof \WC_Order) ? $order_or_id : wc_get_order($order_or_id);
+        if (!$order) {
+            return [];
+        }
+
+        $items = [];
+        foreach ($order->get_items('line_item') as $item_id => $item) {
+            if (!($item instanceof \WC_Order_Item_Product)) {
+                continue;
+            }
+
+            $product = $item->get_product();
+            $plan = function_exists('pc_get_order_item_plan') ? (array) pc_get_order_item_plan($item) : [];
+            $allocations = [];
+
+            foreach ($plan as $term_id => $qty) {
+                $term_id = (int) $term_id;
+                $term = $term_id > 0 ? get_term($term_id, 'location') : null;
+                $allocations[] = [
+                    'woo_location_id'      => $term_id,
+                    'woo_location_slug'    => ($term && !is_wp_error($term)) ? (string) $term->slug : '',
+                    'woo_location_name'    => ($term && !is_wp_error($term)) ? (string) $term->name : '',
+                    'quantity'             => (float) $qty,
+                    'folio_warehouses'     => pc_folio_get_location_warehouses_for_preview($term_id),
+                ];
+            }
+
+            $items[] = [
+                'order_item_id' => (int) $item_id,
+                'product_id'    => $product ? (int) $product->get_id() : 0,
+                'sku'           => $product ? (string) $product->get_sku() : '',
+                'name'          => (string) $item->get_name(),
+                'quantity'      => (float) $item->get_quantity(),
+                'subtotal'      => (float) $item->get_subtotal(),
+                'total'         => (float) $item->get_total(),
+                'allocations'   => $allocations,
+            ];
+        }
+
+        return [
+            'preview_only'  => true,
+            'source'        => 'woo_order',
+            'woo_order'     => [
+                'id'       => (int) $order->get_id(),
+                'number'   => (string) $order->get_order_number(),
+                'status'   => (string) $order->get_status(),
+                'currency' => (string) $order->get_currency(),
+                'total'    => (float) $order->get_total(),
+            ],
+            'folio_client'  => pc_folio_get_order_customer_link($order),
+            'folio_document_link' => pc_folio_get_order_document_link($order),
+            'billing'      => [
+                'first_name' => (string) $order->get_billing_first_name(),
+                'last_name'  => (string) $order->get_billing_last_name(),
+                'company'    => (string) $order->get_billing_company(),
+                'phone'      => (string) $order->get_billing_phone(),
+                'email'      => (string) $order->get_billing_email(),
+                'city'       => (string) $order->get_billing_city(),
+                'address_1'  => (string) $order->get_billing_address_1(),
+                'address_2'  => (string) $order->get_billing_address_2(),
+            ],
+            'items'        => $items,
+        ];
+    }
+}
+
 add_action('add_meta_boxes', function () {
     if (!function_exists('wc_get_order')) {
         return;
@@ -126,6 +270,24 @@ add_action('add_meta_boxes', function () {
         'pc_folio_render_order_link_metabox',
         'woocommerce_page_wc-orders',
         'side',
+        'default'
+    );
+
+    add_meta_box(
+        'pc-folio-order-preview',
+        __('Folio JSON preview', 'pc-folio-order-link'),
+        'pc_folio_render_order_preview_metabox',
+        'shop_order',
+        'normal',
+        'default'
+    );
+
+    add_meta_box(
+        'pc-folio-order-preview',
+        __('Folio JSON preview', 'pc-folio-order-link'),
+        'pc_folio_render_order_preview_metabox',
+        'woocommerce_page_wc-orders',
+        'normal',
         'default'
     );
 });
@@ -176,6 +338,32 @@ if (!function_exists('pc_folio_render_order_link_metabox')) {
         );
         echo '<p class="description">' . esc_html__('These fields only store the Woo order to Folio document connection. They do not send anything to Folio.', 'pc-folio-order-link') . '</p>';
         echo '</div>';
+    }
+}
+
+if (!function_exists('pc_folio_render_order_preview_metabox')) {
+    /**
+     * Render the draft Folio JSON payload preview.
+     *
+     * @param \WP_Post|\WC_Order $post_or_order_object Current order screen object.
+     */
+    function pc_folio_render_order_preview_metabox($post_or_order_object): void
+    {
+        $order = ($post_or_order_object instanceof \WC_Order)
+            ? $post_or_order_object
+            : wc_get_order($post_or_order_object->ID ?? 0);
+
+        if (!$order) {
+            echo '<p>' . esc_html__('Order not found.', 'pc-folio-order-link') . '</p>';
+            return;
+        }
+
+        $payload = pc_folio_build_order_preview_payload($order);
+        echo '<p class="description">' . esc_html__('Preview only. This JSON is not sent to Folio yet.', 'pc-folio-order-link') . '</p>';
+        printf(
+            '<textarea class="widefat code" rows="18" readonly>%s</textarea>',
+            esc_textarea(wp_json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))
+        );
     }
 }
 

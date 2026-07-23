@@ -58,3 +58,12 @@ msgid "These fields only store the Woo order to Folio document connection. They 
 msgstr ""
 "Ці поля лише зберігають зв'язок замовлення Woo з документом ФОЛІО. Вони "
 "нічого не надсилають у ФОЛІО."
+
+#: pc-folio-order-link.php:236
+#: pc-folio-order-link.php:246
+msgid "Folio JSON preview"
+msgstr "Попередній перегляд JSON ФОЛІО"
+
+#: pc-folio-order-link.php:291
+msgid "Preview only. This JSON is not sent to Folio yet."
+msgstr "Лише попередній перегляд. Цей JSON ще не надсилається у ФОЛІО."
