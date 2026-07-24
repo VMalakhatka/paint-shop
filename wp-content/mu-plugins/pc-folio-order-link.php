@@ -469,6 +469,15 @@ if (!function_exists('pc_folio_build_account_header_preview')) {
                 pc_folio_preview_text($order->get_billing_last_name()),
             ])));
         }
+        $site_customer_name = trim(implode(' ', array_filter([
+            pc_folio_preview_text($order->get_billing_first_name()),
+            pc_folio_preview_text($order->get_billing_last_name()),
+        ])));
+        if ($site_customer_name === '') {
+            $site_customer_name = pc_folio_preview_text($order->get_billing_email());
+        }
+        $site_name = pc_folio_preview_text(get_bloginfo('name'));
+        $source_info = trim($site_name . ($site_customer_name !== '' ? ' + ' . $site_customer_name : ''));
 
         return [
             'externalRequestId'   => function_exists('wp_generate_uuid4') ? wp_generate_uuid4() : md5(uniqid('', true)),
@@ -482,8 +491,8 @@ if (!function_exists('pc_folio_build_account_header_preview')) {
             'receiverName'        => 'CLASSIC',
             'payerShortName'      => pc_folio_preview_text($folio_client['short_name'] ?? ($folio_client['id'] ?? '')),
             'folioUser'           => 'buh',
-            'sourceInfo'          => 'Интернет заказ сайт',
-            'additionalInfo'      => pc_folio_preview_text($order->get_customer_note()),
+            'sourceInfo'          => $source_info !== '' ? $source_info : 'Интернет заказ сайт',
+            'additionalInfo'      => sprintf('Woo order #%s, ordered at %s', $order->get_order_number(), $ordered_at),
             'priceContractType'   => pc_folio_get_order_price_contract_type($order),
             'notCash'             => true,
             'accountingEnabled'   => true,

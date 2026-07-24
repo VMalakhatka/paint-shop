@@ -89,6 +89,7 @@ wp-content/mu-plugins/*
 !wp-content/mu-plugins/pc-wholesale-quick-order.php
 !wp-content/mu-plugins/pc-account-tweaks.php
 !wp-content/mu-plugins/pc-cart-guard.php
+!wp-content/mu-plugins/pc-guest-customer-register.php
 !wp-content/mu-plugins/pc-stock-tap.php
 !wp-content/mu-plugins/pc-folio-customer-map.php
 !wp-content/mu-plugins/pc-folio-order-link.php
