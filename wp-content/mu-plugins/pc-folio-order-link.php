@@ -459,8 +459,9 @@ if (!function_exists('pc_folio_build_account_header_preview')) {
      */
     function pc_folio_build_account_header_preview(\WC_Order $order, array $folio_client): array
     {
-        $now = (int) current_time('timestamp');
+        $now = time();
         $created = $order->get_date_created();
+        $document_ts = $created ? (int) $created->getTimestamp() : $now;
         $ordered_at = $created ? $created->date_i18n('Y-m-d H:i:s') : wp_date('Y-m-d H:i:s', $now);
         $payer_name = pc_folio_preview_text($folio_client['name'] ?? '');
         if ($payer_name === '') {
@@ -482,8 +483,8 @@ if (!function_exists('pc_folio_build_account_header_preview')) {
         return [
             'externalRequestId'   => function_exists('wp_generate_uuid4') ? wp_generate_uuid4() : md5(uniqid('', true)),
             'documentNumber'      => '',
-            'documentDate'        => wp_date('Y-m-d\T00:00:00', $now),
-            'controlDate'         => wp_date('Y-m-d', $now + (3 * DAY_IN_SECONDS)),
+            'documentDate'        => wp_date('Y-m-d\T00:00:00', $document_ts),
+            'controlDate'         => wp_date('Y-m-d', $document_ts + (3 * DAY_IN_SECONDS)),
             'warehouseId'         => null,
             'operationType'       => 'СЧЕТ',
             'folioOperationKind'  => '*ПРЕДОПЛАТ',
