@@ -153,6 +153,33 @@ if (!function_exists('pc_guest_customer_create_from_order')) {
     }
 }
 
+if (!function_exists('pc_guest_customer_send_new_account_email')) {
+    /**
+     * Send WooCommerce's standard new account email with a set-password link.
+     */
+    function pc_guest_customer_send_new_account_email(int $user_id): bool
+    {
+        if ($user_id <= 0 || !function_exists('WC')) {
+            return false;
+        }
+
+        $mailer = WC()->mailer();
+        $emails = $mailer ? $mailer->get_emails() : [];
+        if (empty($emails['WC_Email_Customer_New_Account'])) {
+            return false;
+        }
+
+        $email = $emails['WC_Email_Customer_New_Account'];
+        if (!is_object($email) || !method_exists($email, 'trigger')) {
+            return false;
+        }
+
+        $email->trigger($user_id, '', true);
+
+        return true;
+    }
+}
+
 if (!function_exists('pc_guest_customer_sync_user_meta_from_order')) {
     /**
      * Copy billing and shipping fields from the order to the user profile.
@@ -218,8 +245,10 @@ if (!function_exists('pc_guest_customer_attach_order')) {
             $user_id = pc_guest_customer_find_user_by_phone((string) $order->get_billing_phone());
         }
 
+        $created_user = false;
         if (!$user_id) {
             $user_id = pc_guest_customer_create_from_order($order);
+            $created_user = $user_id > 0;
         }
 
         if (!$user_id) {
@@ -240,6 +269,10 @@ if (!function_exists('pc_guest_customer_attach_order')) {
         $order->set_customer_id($user_id);
         $order->update_meta_data('_pc_guest_customer_register_status', 'attached');
         $order->update_meta_data('_pc_guest_customer_user_id', $user_id);
+        if ($created_user && pc_guest_customer_send_new_account_email($user_id)) {
+            $order->update_meta_data('_pc_guest_customer_account_email_sent', 'yes');
+            $order->add_order_note('Customer account was created automatically. A password setup email was sent to the customer.');
+        }
         $order->save();
     }
 }
