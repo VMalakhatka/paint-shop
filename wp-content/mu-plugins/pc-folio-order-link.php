@@ -409,7 +409,7 @@ if (!function_exists('pc_folio_get_order_price_contract_type')) {
             }
         }
 
-        return pc_folio_preview_text((string) reset($user->roles));
+        return '';
     }
 }
 

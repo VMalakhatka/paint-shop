@@ -197,14 +197,16 @@ if (!function_exists('pc_guest_customer_sync_user_meta_from_order')) {
 if (!function_exists('pc_guest_customer_attach_order')) {
     /**
      * Attach a guest checkout order to an existing or newly created Internet client.
+     *
+     * @param int|\WC_Order $order_or_id Woo order object or ID.
      */
-    function pc_guest_customer_attach_order(int $order_id): void
+    function pc_guest_customer_attach_order($order_or_id): void
     {
         if (!function_exists('wc_get_order')) {
             return;
         }
 
-        $order = wc_get_order($order_id);
+        $order = ($order_or_id instanceof \WC_Order) ? $order_or_id : wc_get_order((int) $order_or_id);
         if (!$order || (int) $order->get_customer_id() > 0) {
             return;
         }
@@ -242,3 +244,40 @@ if (!function_exists('pc_guest_customer_attach_order')) {
     }
 }
 add_action('woocommerce_checkout_order_processed', 'pc_guest_customer_attach_order', 20, 1);
+add_action('woocommerce_store_api_checkout_order_processed', 'pc_guest_customer_attach_order', 20, 1);
+
+if (defined('WP_CLI') && WP_CLI && !class_exists('PC_Guest_Customer_Register_CLI')) {
+    /**
+     * WP-CLI helper for manually attaching an existing guest order.
+     */
+    class PC_Guest_Customer_Register_CLI {
+        /**
+         * Attach/create a customer for an existing guest order.
+         *
+         * ## OPTIONS
+         *
+         * <order_id>
+         * : Woo order ID.
+         */
+        public function attach($args): void
+        {
+            $order_id = isset($args[0]) ? absint($args[0]) : 0;
+            if (!$order_id) {
+                WP_CLI::error('Order ID is required.');
+            }
+
+            pc_guest_customer_attach_order($order_id);
+            $order = wc_get_order($order_id);
+            $user_id = $order ? (int) $order->get_customer_id() : 0;
+
+            if ($user_id > 0) {
+                WP_CLI::success(sprintf('Order %d attached to user %d.', $order_id, $user_id));
+                return;
+            }
+
+            WP_CLI::warning(sprintf('Order %d was not attached.', $order_id));
+        }
+    }
+
+    WP_CLI::add_command('pc guest-customer', 'PC_Guest_Customer_Register_CLI');
+}
