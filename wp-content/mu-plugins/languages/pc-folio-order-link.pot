@@ -63,6 +63,9 @@ msgstr ""
 msgid "Send preview to Java"
 msgstr ""
 
+msgid "Create Folio account(s)"
+msgstr ""
+
 msgid "Java Base URL is not configured."
 msgstr ""
 
@@ -82,6 +85,9 @@ msgid "warehouse"
 msgstr ""
 
 msgid "without number"
+msgstr ""
+
+msgid "missing quantity"
 msgstr ""
 
 msgid "No changes would be applied. This is a simulation only."
@@ -120,6 +126,15 @@ msgstr ""
 msgid "Warnings:"
 msgstr ""
 
+msgid "Creating Folio account(s)..."
+msgstr ""
+
+msgid "Create real Folio account documents now? Woo will only save the Java response; child orders will not be created yet."
+msgstr ""
+
+msgid "Creation cancelled."
+msgstr ""
+
 msgid "Invalid JSON:"
 msgstr ""
 
@@ -132,6 +147,15 @@ msgstr ""
 msgid "Java preview request failed."
 msgstr ""
 
+msgid "Java create request failed."
+msgstr ""
+
+msgid "Java response saved to Woo order meta."
+msgstr ""
+
+msgid "Folio account response was saved. Child Woo orders were not created yet."
+msgstr ""
+
 msgid "Forbidden."
 msgstr ""
 
@@ -139,4 +163,16 @@ msgid "Invalid preview JSON."
 msgstr ""
 
 msgid "Invalid Java preview response."
+msgstr ""
+
+msgid "Folio documents are already saved for this order."
+msgstr ""
+
+msgid "Invalid Java create response."
+msgstr ""
+
+msgid "Folio account creation failed. Java response was saved for review."
+msgstr ""
+
+msgid "Java response is not OK."
 msgstr ""

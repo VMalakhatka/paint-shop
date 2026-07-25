@@ -159,6 +159,103 @@ if (!function_exists('pc_folio_guess_split_status')) {
     }
 }
 
+if (!function_exists('pc_folio_is_missing_document')) {
+    /**
+     * Detect Java's non-accounting missing-stock document.
+     */
+    function pc_folio_is_missing_document(array $document): bool
+    {
+        return ($document['document_type'] ?? '') === 'missing_stock_account'
+            || ($document['documentType'] ?? '') === 'missing_stock_account'
+            || (array_key_exists('accounting_enabled', $document) && !$document['accounting_enabled'])
+            || (array_key_exists('accountingEnabled', $document) && !$document['accountingEnabled']);
+    }
+}
+
+if (!function_exists('pc_folio_document_created_at_text')) {
+    /**
+     * Convert Java document_created_at variants to a compact string for order meta.
+     */
+    function pc_folio_document_created_at_text($value): string
+    {
+        if (is_array($value)) {
+            return implode('-', array_map('strval', $value));
+        }
+
+        return pc_folio_preview_text($value);
+    }
+}
+
+if (!function_exists('pc_folio_get_single_real_document_link')) {
+    /**
+     * Return legacy single-document link fields when Java created exactly one real account.
+     */
+    function pc_folio_get_single_real_document_link(array $response, string $payload_hash = ''): array
+    {
+        $documents = isset($response['documents']) && is_array($response['documents'])
+            ? $response['documents']
+            : [];
+        $real_documents = [];
+
+        foreach ($documents as $document) {
+            if (!is_array($document) || pc_folio_is_missing_document($document)) {
+                continue;
+            }
+            $real_documents[] = $document;
+        }
+
+        if (count($documents) !== 1 || count($real_documents) !== 1) {
+            return [];
+        }
+
+        $document = $real_documents[0];
+
+        return [
+            'document_id'           => (string) ($document['document_id'] ?? ($document['documentId'] ?? '')),
+            'document_number'       => (string) ($document['document_number'] ?? ($document['documentNumber'] ?? '')),
+            'document_type'         => (string) ($document['document_type'] ?? ($document['documentType'] ?? '')),
+            'document_status'       => (string) ($document['document_status'] ?? ($document['documentStatus'] ?? '')),
+            'document_created_at'   => pc_folio_document_created_at_text($document['document_created_at'] ?? ($document['documentCreatedAt'] ?? '')),
+            'document_payload_hash' => $payload_hash,
+            'document_last_error'   => '',
+        ];
+    }
+}
+
+if (!function_exists('pc_folio_order_has_saved_documents')) {
+    /**
+     * Check whether an order already has a Folio document result saved.
+     */
+    function pc_folio_order_has_saved_documents(\WC_Order $order): bool
+    {
+        $result = pc_folio_get_order_documents_result($order);
+        $link = pc_folio_get_order_document_link($order);
+
+        return !empty($result['documents'])
+            || !empty($link['document_id'])
+            || !empty($link['document_number']);
+    }
+}
+
+if (!function_exists('pc_folio_save_order_java_response')) {
+    /**
+     * Save Java's real create response to Woo order meta without creating child orders.
+     */
+    function pc_folio_save_order_java_response(\WC_Order $order, array $response, array $payload): void
+    {
+        $payload_hash = hash('sha256', (string) wp_json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+
+        pc_folio_set_order_documents_result($order, $response);
+
+        $single_link = pc_folio_get_single_real_document_link($response, $payload_hash);
+        if ($single_link) {
+            pc_folio_set_order_document_link($order, $single_link);
+        }
+
+        $order->add_order_note(__('Folio account response was saved. Child Woo orders were not created yet.', 'pc-folio-order-link'));
+    }
+}
+
 if (!function_exists('pc_folio_set_order_documents_result')) {
     /**
      * Store the full Java/Folio split response on a Woo order.
@@ -707,6 +804,9 @@ if (!function_exists('pc_folio_render_order_preview_metabox')) {
             <button type="button" class="button button-secondary" id="pc-folio-send-preview-java">
                 <?php echo esc_html__('Send preview to Java', 'pc-folio-order-link'); ?>
             </button>
+            <button type="button" class="button button-primary" id="pc-folio-create-java">
+                <?php echo esc_html__('Create Folio account(s)', 'pc-folio-order-link'); ?>
+            </button>
             <span class="spinner" id="pc-folio-send-preview-spinner" style="float:none"></span>
         </p>
         <pre id="pc-folio-java-preview-response" style="display:none;background:#1d2327;color:#f0f0f1;border:1px solid #3c434a;padding:10px;white-space:pre-wrap"></pre>
@@ -724,6 +824,7 @@ if (!function_exists('pc_folio_render_order_preview_metabox')) {
         (function(){
             var previewJson = document.getElementById('pc-folio-order-preview-json');
             var sendButton = document.getElementById('pc-folio-send-preview-java');
+            var createButton = document.getElementById('pc-folio-create-java');
             var sendSpinner = document.getElementById('pc-folio-send-preview-spinner');
             var rawResponse = document.getElementById('pc-folio-java-preview-response');
             var button = document.getElementById('pc-folio-response-simulate');
@@ -750,6 +851,23 @@ if (!function_exists('pc_folio_render_order_preview_metabox')) {
                 return asText(doc.document_type || doc.documentType) === 'missing_stock_account'
                     || doc.accounting_enabled === false
                     || doc.accountingEnabled === false;
+            }
+
+            function warningLabel(warning) {
+                if (typeof warning === 'string') {
+                    return warning;
+                }
+                if (!warning || typeof warning !== 'object') {
+                    return asText(warning);
+                }
+
+                var parts = [];
+                if (warning.code) parts.push(asText(warning.code));
+                if (warning.message) parts.push(asText(warning.message));
+                if (warning.details && warning.details.sku) parts.push('SKU ' + asText(warning.details.sku));
+                if (warning.details && warning.details.missingQuantity) parts.push('<?php echo esc_js(__('missing quantity', 'pc-folio-order-link')); ?> ' + asText(warning.details.missingQuantity));
+
+                return parts.length ? parts.join(' - ') : JSON.stringify(warning);
             }
 
             function simulate(data) {
@@ -792,10 +910,80 @@ if (!function_exists('pc_folio_render_order_preview_metabox')) {
 
                 if (data.warnings && data.warnings.length) {
                     lines.push('');
-                    lines.push('<?php echo esc_js(__('Warnings:', 'pc-folio-order-link')); ?> ' + data.warnings.join(', '));
+                    lines.push('<?php echo esc_js(__('Warnings:', 'pc-folio-order-link')); ?>');
+                    data.warnings.forEach(function(warning) {
+                        lines.push('- ' + warningLabel(warning));
+                    });
                 }
 
                 return lines;
+            }
+
+            function sendPayloadToJava(previewOnly) {
+                var parsed;
+                rawResponse.style.display = 'block';
+                rawResponse.textContent = previewOnly
+                    ? '<?php echo esc_js(__('Sending preview to Java...', 'pc-folio-order-link')); ?>'
+                    : '<?php echo esc_js(__('Creating Folio account(s)...', 'pc-folio-order-link')); ?>';
+                output.style.display = 'block';
+                output.textContent = '';
+
+                try {
+                    parsed = JSON.parse(previewJson.value || '{}');
+                } catch (err) {
+                    rawResponse.textContent = '<?php echo esc_js(__('Invalid preview JSON:', 'pc-folio-order-link')); ?> ' + err.message;
+                    return;
+                }
+
+                parsed.preview_only = !!previewOnly;
+
+                if (!previewOnly && !window.confirm('<?php echo esc_js(__('Create real Folio account documents now? Woo will only save the Java response; child orders will not be created yet.', 'pc-folio-order-link')); ?>')) {
+                    rawResponse.textContent = '<?php echo esc_js(__('Creation cancelled.', 'pc-folio-order-link')); ?>';
+                    return;
+                }
+
+                if (sendButton) sendButton.disabled = true;
+                if (createButton) createButton.disabled = true;
+                if (sendSpinner) {
+                    sendSpinner.classList.add('is-active');
+                }
+
+                var body = new URLSearchParams();
+                body.set('action', previewOnly ? 'pc_folio_order_preview_java' : 'pc_folio_order_create_java');
+                body.set('_ajax_nonce', previewOnly ? '<?php echo esc_js(wp_create_nonce('pc_folio_order_preview_java')); ?>' : '<?php echo esc_js(wp_create_nonce('pc_folio_order_create_java')); ?>');
+                body.set('payload', JSON.stringify(parsed));
+
+                fetch(ajaxurl, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+                    body: body.toString()
+                })
+                .then(function(resp){ return resp.json(); })
+                .then(function(resp){
+                    var data = resp && resp.success ? resp.data : (resp ? resp.data : null);
+                    if (!resp || !resp.success) {
+                        throw new Error(data && data.message ? data.message : (previewOnly ? '<?php echo esc_js(__('Java preview request failed.', 'pc-folio-order-link')); ?>' : '<?php echo esc_js(__('Java create request failed.', 'pc-folio-order-link')); ?>'));
+                    }
+
+                    rawResponse.textContent = data.raw || JSON.stringify(data.response, null, 2);
+                    input.value = JSON.stringify(data.response || {}, null, 2);
+                    output.textContent = simulate(data.response || {}).join("\n");
+
+                    if (!previewOnly && data.saved) {
+                        output.textContent += "\n\n" + '<?php echo esc_js(__('Java response saved to Woo order meta.', 'pc-folio-order-link')); ?>';
+                    }
+                })
+                .catch(function(err){
+                    rawResponse.textContent = err.message || String(err);
+                })
+                .finally(function(){
+                    if (sendButton) sendButton.disabled = false;
+                    if (createButton) createButton.disabled = false;
+                    if (sendSpinner) {
+                        sendSpinner.classList.remove('is-active');
+                    }
+                });
             }
 
             button.addEventListener('click', function(){
@@ -813,57 +1001,13 @@ if (!function_exists('pc_folio_render_order_preview_metabox')) {
 
             if (sendButton && previewJson && rawResponse) {
                 sendButton.addEventListener('click', function(){
-                    var parsed;
-                    rawResponse.style.display = 'block';
-                    rawResponse.textContent = '<?php echo esc_js(__('Sending preview to Java...', 'pc-folio-order-link')); ?>';
-                    output.style.display = 'block';
-                    output.textContent = '';
+                    sendPayloadToJava(true);
+                });
+            }
 
-                    try {
-                        parsed = JSON.parse(previewJson.value || '{}');
-                    } catch (err) {
-                        rawResponse.textContent = '<?php echo esc_js(__('Invalid preview JSON:', 'pc-folio-order-link')); ?> ' + err.message;
-                        return;
-                    }
-
-                    parsed.preview_only = true;
-
-                    sendButton.disabled = true;
-                    if (sendSpinner) {
-                        sendSpinner.classList.add('is-active');
-                    }
-
-                    var body = new URLSearchParams();
-                    body.set('action', 'pc_folio_order_preview_java');
-                    body.set('_ajax_nonce', '<?php echo esc_js(wp_create_nonce('pc_folio_order_preview_java')); ?>');
-                    body.set('payload', JSON.stringify(parsed));
-
-                    fetch(ajaxurl, {
-                        method: 'POST',
-                        credentials: 'same-origin',
-                        headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
-                        body: body.toString()
-                    })
-                    .then(function(resp){ return resp.json(); })
-                    .then(function(resp){
-                        var data = resp && resp.success ? resp.data : (resp ? resp.data : null);
-                        if (!resp || !resp.success) {
-                            throw new Error(data && data.message ? data.message : '<?php echo esc_js(__('Java preview request failed.', 'pc-folio-order-link')); ?>');
-                        }
-
-                        rawResponse.textContent = data.raw || JSON.stringify(data.response, null, 2);
-                        input.value = JSON.stringify(data.response || {}, null, 2);
-                        output.textContent = simulate(data.response || {}).join("\n");
-                    })
-                    .catch(function(err){
-                        rawResponse.textContent = err.message || String(err);
-                    })
-                    .finally(function(){
-                        sendButton.disabled = false;
-                        if (sendSpinner) {
-                            sendSpinner.classList.remove('is-active');
-                        }
-                    });
+            if (createButton && previewJson && rawResponse) {
+                createButton.addEventListener('click', function(){
+                    sendPayloadToJava(false);
                 });
             }
         })();
@@ -891,6 +1035,10 @@ if (!function_exists('pc_folio_order_preview_java_ajax')) {
         }
 
         $payload['preview_only'] = true;
+        $order_id = (int) ($payload['woo_order']['id'] ?? 0);
+        if ($order_id > 0 && !current_user_can('edit_shop_order', $order_id)) {
+            wp_send_json_error(['message' => __('Forbidden.', 'pc-folio-order-link')], 403);
+        }
 
         $resp = pc_folio_order_link_java_post('/admin/folio/order-accounts', $payload, [
             'timeout' => 120,
@@ -924,6 +1072,86 @@ if (!function_exists('pc_folio_order_preview_java_ajax')) {
     }
 }
 add_action('wp_ajax_pc_folio_order_preview_java', 'pc_folio_order_preview_java_ajax');
+
+if (!function_exists('pc_folio_order_create_java_ajax')) {
+    /**
+     * Create Folio account documents in Java and save the response on the Woo order.
+     */
+    function pc_folio_order_create_java_ajax(): void
+    {
+        if (!pc_folio_order_link_can_manage()) {
+            wp_send_json_error(['message' => __('Forbidden.', 'pc-folio-order-link')], 403);
+        }
+
+        check_ajax_referer('pc_folio_order_create_java');
+
+        $raw_payload = isset($_POST['payload']) ? (string) wp_unslash($_POST['payload']) : '';
+        $payload = json_decode($raw_payload, true);
+        if (!is_array($payload)) {
+            wp_send_json_error(['message' => __('Invalid preview JSON.', 'pc-folio-order-link')], 400);
+        }
+
+        $order_id = (int) ($payload['woo_order']['id'] ?? 0);
+        $order = $order_id > 0 ? wc_get_order($order_id) : false;
+        if (!$order) {
+            wp_send_json_error(['message' => __('Order not found.', 'pc-folio-order-link')], 404);
+        }
+
+        if (!current_user_can('edit_shop_order', $order_id)) {
+            wp_send_json_error(['message' => __('Forbidden.', 'pc-folio-order-link')], 403);
+        }
+
+        if (pc_folio_order_has_saved_documents($order)) {
+            wp_send_json_error(['message' => __('Folio documents are already saved for this order.', 'pc-folio-order-link')], 409);
+        }
+
+        $payload['preview_only'] = false;
+
+        $resp = pc_folio_order_link_java_post('/admin/folio/order-accounts', $payload, [
+            'timeout' => 180,
+        ]);
+        if (is_wp_error($resp)) {
+            wp_send_json_error(['message' => $resp->get_error_message()], 500);
+        }
+
+        $code = (int) wp_remote_retrieve_response_code($resp);
+        $raw = (string) wp_remote_retrieve_body($resp);
+        $data = json_decode($raw, true);
+
+        if ($code < 200 || $code >= 300) {
+            wp_send_json_error([
+                'message' => sprintf('Java create HTTP %d', $code),
+                'raw'     => $raw,
+            ], $code);
+        }
+
+        if (!is_array($data)) {
+            wp_send_json_error([
+                'message' => __('Invalid Java create response.', 'pc-folio-order-link'),
+                'raw'     => $raw,
+            ], 500);
+        }
+
+        if (empty($data['ok'])) {
+            pc_folio_set_order_documents_result($order, $data);
+            $order->add_order_note(__('Folio account creation failed. Java response was saved for review.', 'pc-folio-order-link'));
+            wp_send_json_error([
+                'message'  => __('Java response is not OK.', 'pc-folio-order-link'),
+                'response' => $data,
+                'raw'      => wp_json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            ], 500);
+        }
+
+        pc_folio_save_order_java_response($order, $data, $payload);
+
+        wp_send_json_success([
+            'response' => $data,
+            'raw'      => wp_json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'saved'    => true,
+        ]);
+    }
+}
+add_action('wp_ajax_pc_folio_order_create_java', 'pc_folio_order_create_java_ajax');
 
 add_action('woocommerce_process_shop_order_meta', function ($order_id) {
     if (!isset($_POST['pc_folio_order_link_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['pc_folio_order_link_nonce'])), 'pc_folio_order_link_save')) {

@@ -71,6 +71,9 @@ msgstr "Лише попередній перегляд. Цей JSON ще не н
 msgid "Send preview to Java"
 msgstr "Надіслати preview в Java"
 
+msgid "Create Folio account(s)"
+msgstr "Створити рахунок(и) ФОЛІО"
+
 msgid "Java Base URL is not configured."
 msgstr "Java Base URL не налаштовано."
 
@@ -93,6 +96,9 @@ msgstr "склад"
 
 msgid "without number"
 msgstr "без номера"
+
+msgid "missing quantity"
+msgstr "нестача"
 
 msgid "No changes would be applied. This is a simulation only."
 msgstr "Зміни не будуть застосовані. Це лише симуляція."
@@ -130,6 +136,17 @@ msgstr "Причина:"
 msgid "Warnings:"
 msgstr "Попередження:"
 
+msgid "Creating Folio account(s)..."
+msgstr "Створення рахунку(ів) ФОЛІО..."
+
+msgid "Create real Folio account documents now? Woo will only save the Java response; child orders will not be created yet."
+msgstr ""
+"Створити реальні рахунки ФОЛІО зараз? Woo лише збереже відповідь Java; "
+"дочірні замовлення ще не створюватимуться."
+
+msgid "Creation cancelled."
+msgstr "Створення скасовано."
+
 msgid "Invalid JSON:"
 msgstr "Некоректний JSON:"
 
@@ -142,6 +159,17 @@ msgstr "Некоректний preview JSON:"
 msgid "Java preview request failed."
 msgstr "Запит preview до Java не вдався."
 
+msgid "Java create request failed."
+msgstr "Запит створення до Java не вдався."
+
+msgid "Java response saved to Woo order meta."
+msgstr "Відповідь Java збережено в meta замовлення Woo."
+
+msgid "Folio account response was saved. Child Woo orders were not created yet."
+msgstr ""
+"Відповідь про рахунки ФОЛІО збережено. Дочірні замовлення Woo ще не "
+"створювалися."
+
 msgid "Forbidden."
 msgstr "Заборонено."
 
@@ -150,3 +178,16 @@ msgstr "Некоректний preview JSON."
 
 msgid "Invalid Java preview response."
 msgstr "Некоректна preview-відповідь Java."
+
+msgid "Folio documents are already saved for this order."
+msgstr "Документи ФОЛІО вже збережені для цього замовлення."
+
+msgid "Invalid Java create response."
+msgstr "Некоректна відповідь Java на створення."
+
+msgid "Folio account creation failed. Java response was saved for review."
+msgstr ""
+"Створення рахунку ФОЛІО не вдалося. Відповідь Java збережено для перевірки."
+
+msgid "Java response is not OK."
+msgstr "Відповідь Java не OK."
