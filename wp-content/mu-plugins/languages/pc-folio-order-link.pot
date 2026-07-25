@@ -51,6 +51,38 @@ msgstr ""
 msgid "These fields only store the Woo order to Folio document connection. They do not send anything to Folio."
 msgstr ""
 
+msgid "Split status"
+msgstr ""
+
+msgid "not set"
+msgstr ""
+
+msgid "Saved Folio documents"
+msgstr ""
+
+msgid "missing stock"
+msgstr ""
+
+msgid "account"
+msgstr ""
+
+msgid "%d item"
+msgid_plural "%d items"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Kind: %s"
+msgstr ""
+
+msgid "No saved Folio documents yet."
+msgstr ""
+
+msgid "Linked Woo child orders"
+msgstr ""
+
+msgid "No linked Woo child orders yet."
+msgstr ""
+
 #: pc-folio-order-link.php:236
 #: pc-folio-order-link.php:246
 msgid "Folio JSON preview"

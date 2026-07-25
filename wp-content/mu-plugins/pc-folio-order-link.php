@@ -899,6 +899,73 @@ if (!function_exists('pc_folio_render_order_link_metabox')) {
             esc_textarea($values['document_last_error'] ?? '')
         );
         echo '<p class="description">' . esc_html__('These fields only store the Woo order to Folio document connection. They do not send anything to Folio.', 'pc-folio-order-link') . '</p>';
+
+        $document_keys = pc_folio_order_documents_meta_keys();
+        $split_status = (string) $order->get_meta($document_keys['split_status'], true);
+        $documents_result = pc_folio_get_order_documents_result($order);
+        $documents = isset($documents_result['documents']) && is_array($documents_result['documents'])
+            ? $documents_result['documents']
+            : [];
+        $child_order_ids = $order->get_meta($document_keys['child_order_ids'], true);
+        $child_order_ids = is_array($child_order_ids) ? array_values(array_filter(array_map('absint', $child_order_ids))) : [];
+
+        echo '<hr>';
+        echo '<p><strong>' . esc_html__('Split status', 'pc-folio-order-link') . '</strong><br>';
+        echo '<code>' . esc_html($split_status !== '' ? $split_status : __('not set', 'pc-folio-order-link')) . '</code></p>';
+
+        echo '<p><strong>' . esc_html__('Saved Folio documents', 'pc-folio-order-link') . '</strong></p>';
+        if ($documents) {
+            echo '<ul style="margin-left:0;list-style:none">';
+            foreach ($documents as $document) {
+                if (!is_array($document)) {
+                    continue;
+                }
+
+                $document_type = (string) ($document['document_type'] ?? ($document['documentType'] ?? ''));
+                $document_status = (string) ($document['document_status'] ?? ($document['documentStatus'] ?? ''));
+                $items = isset($document['items']) && is_array($document['items']) ? $document['items'] : [];
+                $label = pc_folio_document_label($document);
+                $kind = pc_folio_is_missing_document($document)
+                    ? __('missing stock', 'pc-folio-order-link')
+                    : __('account', 'pc-folio-order-link');
+
+                printf(
+                    '<li style="margin-bottom:8px"><strong>%1$s</strong><br><code>%2$s</code> · <code>%3$s</code> · %4$s<br><span class="description">%5$s</span></li>',
+                    esc_html($label),
+                    esc_html($document_type !== '' ? $document_type : $kind),
+                    esc_html($document_status !== '' ? $document_status : '-'),
+                    esc_html(sprintf(_n('%d item', '%d items', count($items), 'pc-folio-order-link'), count($items))),
+                    esc_html(sprintf(__('Kind: %s', 'pc-folio-order-link'), $kind))
+                );
+            }
+            echo '</ul>';
+        } else {
+            echo '<p class="description">' . esc_html__('No saved Folio documents yet.', 'pc-folio-order-link') . '</p>';
+        }
+
+        echo '<p><strong>' . esc_html__('Linked Woo child orders', 'pc-folio-order-link') . '</strong></p>';
+        if ($child_order_ids) {
+            echo '<ul style="margin-left:0;list-style:none">';
+            foreach ($child_order_ids as $child_order_id) {
+                $child_order = wc_get_order($child_order_id);
+                $label = $child_order
+                    ? sprintf('#%1$s (%2$s)', $child_order->get_order_number(), wc_get_order_status_name($child_order->get_status()))
+                    : sprintf('#%d', $child_order_id);
+                $url = $child_order ? $child_order->get_edit_order_url() : '';
+
+                echo '<li>';
+                if ($url !== '') {
+                    printf('<a href="%1$s">%2$s</a>', esc_url($url), esc_html($label));
+                } else {
+                    echo esc_html($label);
+                }
+                echo '</li>';
+            }
+            echo '</ul>';
+        } else {
+            echo '<p class="description">' . esc_html__('No linked Woo child orders yet.', 'pc-folio-order-link') . '</p>';
+        }
+
         echo '</div>';
     }
 }

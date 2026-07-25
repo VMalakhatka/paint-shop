@@ -59,6 +59,39 @@ msgstr ""
 "Ці поля лише зберігають зв'язок замовлення Woo з документом ФОЛІО. Вони "
 "нічого не надсилають у ФОЛІО."
 
+msgid "Split status"
+msgstr "Статус розділення"
+
+msgid "not set"
+msgstr "не встановлено"
+
+msgid "Saved Folio documents"
+msgstr "Збережені документи ФОЛІО"
+
+msgid "missing stock"
+msgstr "нестача товару"
+
+msgid "account"
+msgstr "рахунок"
+
+msgid "%d item"
+msgid_plural "%d items"
+msgstr[0] "%d позиція"
+msgstr[1] "%d позиції"
+msgstr[2] "%d позицій"
+
+msgid "Kind: %s"
+msgstr "Тип: %s"
+
+msgid "No saved Folio documents yet."
+msgstr "Збережених документів ФОЛІО ще немає."
+
+msgid "Linked Woo child orders"
+msgstr "Пов'язані дочірні замовлення Woo"
+
+msgid "No linked Woo child orders yet."
+msgstr "Пов'язаних дочірніх замовлень Woo ще немає."
+
 #: pc-folio-order-link.php:236
 #: pc-folio-order-link.php:246
 msgid "Folio JSON preview"
