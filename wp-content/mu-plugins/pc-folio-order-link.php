@@ -256,6 +256,133 @@ if (!function_exists('pc_folio_save_order_java_response')) {
     }
 }
 
+if (!function_exists('pc_folio_document_label')) {
+    /**
+     * Build a short human-readable Folio document label for order notes.
+     */
+    function pc_folio_document_label(array $document): string
+    {
+        $number = (string) ($document['document_number'] ?? ($document['documentNumber'] ?? ($document['document_id'] ?? ($document['documentId'] ?? ''))));
+        $warehouse = (string) ($document['folio_warehouse_id'] ?? ($document['warehouseId'] ?? ''));
+        $parts = [];
+
+        if ($number !== '') {
+            $parts[] = '#' . $number;
+        }
+
+        if ($warehouse !== '') {
+            $parts[] = sprintf(__('warehouse %s', 'pc-folio-order-link'), $warehouse);
+        }
+
+        return $parts ? implode(', ', $parts) : __('without number', 'pc-folio-order-link');
+    }
+}
+
+if (!function_exists('pc_folio_apply_saved_response_to_order')) {
+    /**
+     * Apply the saved Java response only as Woo meta/status preparation.
+     *
+     * This intentionally does not create child orders yet.
+     */
+    function pc_folio_apply_saved_response_to_order(\WC_Order $order): array
+    {
+        $result = pc_folio_get_order_documents_result($order);
+        if (empty($result)) {
+            return [
+                'ok'      => false,
+                'message' => __('No saved Folio response found for this order.', 'pc-folio-order-link'),
+            ];
+        }
+
+        if (isset($result['ok']) && !$result['ok']) {
+            return [
+                'ok'      => false,
+                'message' => __('Saved Folio response is not OK.', 'pc-folio-order-link'),
+            ];
+        }
+
+        $documents = isset($result['documents']) && is_array($result['documents'])
+            ? $result['documents']
+            : [];
+        if (!$documents) {
+            return [
+                'ok'      => false,
+                'message' => __('Result: no Folio documents found in response.', 'pc-folio-order-link'),
+            ];
+        }
+
+        $real_documents = [];
+        $missing_documents = [];
+        foreach ($documents as $document) {
+            if (!is_array($document)) {
+                continue;
+            }
+
+            if (pc_folio_is_missing_document($document)) {
+                $missing_documents[] = $document;
+            } else {
+                $real_documents[] = $document;
+            }
+        }
+
+        $keys = pc_folio_order_documents_meta_keys();
+        if ((string) $order->get_meta($keys['split_status'], true) === 'ready_to_split') {
+            return [
+                'ok'      => true,
+                'status'  => 'ready_to_split',
+                'message' => __('Saved Folio response is already marked ready for split.', 'pc-folio-order-link'),
+            ];
+        }
+
+        if (count($documents) === 1 && count($real_documents) === 1 && count($missing_documents) === 0) {
+            $single_link = pc_folio_get_single_real_document_link($result);
+            if (!$single_link) {
+                return [
+                    'ok'      => false,
+                    'message' => __('Could not build Folio document link from saved response.', 'pc-folio-order-link'),
+                ];
+            }
+
+            pc_folio_set_order_document_link($order, $single_link);
+            if ($order->get_status() !== 'processing') {
+                $order->update_status('processing', __('Saved Folio response applied: linked one Folio account.', 'pc-folio-order-link'));
+            } else {
+                $order->add_order_note(__('Saved Folio response applied: linked one Folio account.', 'pc-folio-order-link'));
+            }
+
+            return [
+                'ok'      => true,
+                'status'  => 'linked',
+                'message' => sprintf(__('Saved Folio response applied. Linked document %s.', 'pc-folio-order-link'), pc_folio_document_label($real_documents[0])),
+            ];
+        }
+
+        $order->update_meta_data($keys['split_status'], 'ready_to_split');
+        $order->update_meta_data($keys['split_created_at'], current_time('mysql'));
+        $order->save();
+
+        $note_lines = [
+            __('Saved Folio response marked ready for Woo split. Child orders were not created yet.', 'pc-folio-order-link'),
+        ];
+
+        foreach ($real_documents as $document) {
+            $note_lines[] = sprintf(__('Real Folio account: %s', 'pc-folio-order-link'), pc_folio_document_label($document));
+        }
+
+        foreach ($missing_documents as $document) {
+            $note_lines[] = sprintf(__('Missing-stock Folio account: %s', 'pc-folio-order-link'), pc_folio_document_label($document));
+        }
+
+        $order->add_order_note(implode("\n", $note_lines));
+
+        return [
+            'ok'      => true,
+            'status'  => 'ready_to_split',
+            'message' => __('Saved Folio response marked ready for split. No child orders were created yet.', 'pc-folio-order-link'),
+        ];
+    }
+}
+
 if (!function_exists('pc_folio_set_order_documents_result')) {
     /**
      * Store the full Java/Folio split response on a Woo order.
@@ -825,6 +952,9 @@ if (!function_exists('pc_folio_render_order_preview_metabox')) {
             <button type="button" class="button" id="pc-folio-preview-saved-response" <?php disabled(empty($saved_result)); ?>>
                 <?php echo esc_html__('Preview saved response actions', 'pc-folio-order-link'); ?>
             </button>
+            <button type="button" class="button button-primary" id="pc-folio-apply-saved-response" <?php disabled(empty($saved_result)); ?>>
+                <?php echo esc_html__('Apply saved Folio response', 'pc-folio-order-link'); ?>
+            </button>
         </p>
         <hr>
         <h3><?php echo esc_html__('Java response simulator', 'pc-folio-order-link'); ?></h3>
@@ -842,6 +972,7 @@ if (!function_exists('pc_folio_render_order_preview_metabox')) {
             var sendButton = document.getElementById('pc-folio-send-preview-java');
             var createButton = document.getElementById('pc-folio-create-java');
             var savedButton = document.getElementById('pc-folio-preview-saved-response');
+            var applySavedButton = document.getElementById('pc-folio-apply-saved-response');
             var sendSpinner = document.getElementById('pc-folio-send-preview-spinner');
             var rawResponse = document.getElementById('pc-folio-java-preview-response');
             var button = document.getElementById('pc-folio-response-simulate');
@@ -1062,6 +1193,50 @@ if (!function_exists('pc_folio_render_order_preview_metabox')) {
                 });
             }
 
+            if (applySavedButton && rawResponse) {
+                applySavedButton.addEventListener('click', function(){
+                    if (!window.confirm('<?php echo esc_js(__('Apply the saved Folio response to Woo now? This will only save links/status markers; child orders will not be created yet.', 'pc-folio-order-link')); ?>')) {
+                        return;
+                    }
+
+                    rawResponse.style.display = 'block';
+                    rawResponse.textContent = '<?php echo esc_js(__('Applying saved Folio response...', 'pc-folio-order-link')); ?>';
+                    output.style.display = 'block';
+                    output.textContent = '';
+                    applySavedButton.disabled = true;
+                    if (savedButton) savedButton.disabled = true;
+
+                    var body = new URLSearchParams();
+                    body.set('action', 'pc_folio_order_apply_saved_response');
+                    body.set('_ajax_nonce', '<?php echo esc_js(wp_create_nonce('pc_folio_order_apply_saved_response')); ?>');
+                    body.set('order_id', String(orderId));
+
+                    fetch(ajaxurl, {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+                        body: body.toString()
+                    })
+                    .then(function(resp){ return resp.json(); })
+                    .then(function(resp){
+                        var data = resp && resp.success ? resp.data : (resp ? resp.data : null);
+                        if (!resp || !resp.success) {
+                            throw new Error(data && data.message ? data.message : '<?php echo esc_js(__('Saved Folio response could not be applied.', 'pc-folio-order-link')); ?>');
+                        }
+
+                        rawResponse.textContent = data.raw || JSON.stringify(data.result, null, 2);
+                        output.textContent = data.message || '<?php echo esc_js(__('Saved Folio response applied.', 'pc-folio-order-link')); ?>';
+                    })
+                    .catch(function(err){
+                        rawResponse.textContent = err.message || String(err);
+                    })
+                    .finally(function(){
+                        applySavedButton.disabled = false;
+                        if (savedButton) savedButton.disabled = false;
+                    });
+                });
+            }
+
             if (createButton && previewJson && rawResponse) {
                 createButton.addEventListener('click', function(){
                     sendPayloadToJava(false);
@@ -1244,6 +1419,42 @@ if (!function_exists('pc_folio_order_saved_response_plan_ajax')) {
     }
 }
 add_action('wp_ajax_pc_folio_order_saved_response_plan', 'pc_folio_order_saved_response_plan_ajax');
+
+if (!function_exists('pc_folio_order_apply_saved_response_ajax')) {
+    /**
+     * Apply the saved Java/Folio response without creating child Woo orders yet.
+     */
+    function pc_folio_order_apply_saved_response_ajax(): void
+    {
+        if (!pc_folio_order_link_can_manage()) {
+            wp_send_json_error(['message' => __('Forbidden.', 'pc-folio-order-link')], 403);
+        }
+
+        check_ajax_referer('pc_folio_order_apply_saved_response');
+
+        $order_id = isset($_POST['order_id']) ? absint(wp_unslash($_POST['order_id'])) : 0;
+        $order = $order_id > 0 ? wc_get_order($order_id) : false;
+        if (!$order) {
+            wp_send_json_error(['message' => __('Order not found.', 'pc-folio-order-link')], 404);
+        }
+
+        if (!current_user_can('edit_shop_order', $order_id)) {
+            wp_send_json_error(['message' => __('Forbidden.', 'pc-folio-order-link')], 403);
+        }
+
+        $result = pc_folio_apply_saved_response_to_order($order);
+        if (empty($result['ok'])) {
+            wp_send_json_error(['message' => $result['message'] ?? __('Saved Folio response could not be applied.', 'pc-folio-order-link')], 400);
+        }
+
+        wp_send_json_success([
+            'result'  => $result,
+            'message' => $result['message'] ?? __('Saved Folio response applied.', 'pc-folio-order-link'),
+            'raw'     => wp_json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+        ]);
+    }
+}
+add_action('wp_ajax_pc_folio_order_apply_saved_response', 'pc_folio_order_apply_saved_response_ajax');
 
 add_action('woocommerce_process_shop_order_meta', function ($order_id) {
     if (!isset($_POST['pc_folio_order_link_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['pc_folio_order_link_nonce'])), 'pc_folio_order_link_save')) {

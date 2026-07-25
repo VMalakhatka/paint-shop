@@ -94,6 +94,9 @@ msgstr "Для цього замовлення ще немає збережен�
 msgid "Preview saved response actions"
 msgstr "Переглянути дії за збереженою відповіддю"
 
+msgid "Apply saved Folio response"
+msgstr "Застосувати збережену відповідь ФОЛІО"
+
 msgid "Paste a Java response to preview what Woo would do. This does not save data, create orders, or change statuses."
 msgstr ""
 "Вставте відповідь Java, щоб переглянути, що зробив би Woo. Це не зберігає "
@@ -185,6 +188,20 @@ msgstr "Завантаження збереженої відповіді ФОЛ�
 msgid "Saved Folio response could not be loaded."
 msgstr "Не вдалося завантажити збережену відповідь ФОЛІО."
 
+msgid "Apply the saved Folio response to Woo now? This will only save links/status markers; child orders will not be created yet."
+msgstr ""
+"Застосувати збережену відповідь ФОЛІО до Woo зараз? Будуть збережені лише "
+"зв'язки/статусні маркери; дочірні замовлення ще не створюватимуться."
+
+msgid "Applying saved Folio response..."
+msgstr "Застосування збереженої відповіді ФОЛІО..."
+
+msgid "Saved Folio response could not be applied."
+msgstr "Не вдалося застосувати збережену відповідь ФОЛІО."
+
+msgid "Saved Folio response applied."
+msgstr "Збережену відповідь ФОЛІО застосовано."
+
 msgid "Folio account response was saved. Child Woo orders were not created yet."
 msgstr ""
 "Відповідь про рахунки ФОЛІО збережено. Дочірні замовлення Woo ще не "
@@ -214,3 +231,37 @@ msgstr "Відповідь Java не OK."
 
 msgid "No saved Folio response found for this order."
 msgstr "Для цього замовлення не знайдено збереженої відповіді ФОЛІО."
+
+msgid "Saved Folio response is not OK."
+msgstr "Збережена відповідь ФОЛІО не OK."
+
+msgid "Could not build Folio document link from saved response."
+msgstr "Не вдалося побудувати зв'язок із документом ФОЛІО зі збереженої відповіді."
+
+msgid "Saved Folio response applied: linked one Folio account."
+msgstr "Збережену відповідь ФОЛІО застосовано: прив'язано один рахунок ФОЛІО."
+
+msgid "Saved Folio response applied. Linked document %s."
+msgstr "Збережену відповідь ФОЛІО застосовано. Прив'язаний документ %s."
+
+msgid "Saved Folio response is already marked ready for split."
+msgstr "Збережена відповідь ФОЛІО вже позначена як готова до розділення."
+
+msgid "Saved Folio response marked ready for Woo split. Child orders were not created yet."
+msgstr ""
+"Збережену відповідь ФОЛІО позначено як готову до розділення Woo. Дочірні "
+"замовлення ще не створювалися."
+
+msgid "Real Folio account: %s"
+msgstr "Реальний рахунок ФОЛІО: %s"
+
+msgid "Missing-stock Folio account: %s"
+msgstr "Рахунок ФОЛІО для нестачі товару: %s"
+
+msgid "Saved Folio response marked ready for split. No child orders were created yet."
+msgstr ""
+"Збережену відповідь ФОЛІО позначено як готову до розділення. Дочірні "
+"замовлення ще не створювалися."
+
+msgid "warehouse %s"
+msgstr "склад %s"

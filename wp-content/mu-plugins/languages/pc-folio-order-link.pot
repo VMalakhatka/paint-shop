@@ -84,6 +84,9 @@ msgstr ""
 msgid "Preview saved response actions"
 msgstr ""
 
+msgid "Apply saved Folio response"
+msgstr ""
+
 msgid "Paste a Java response to preview what Woo would do. This does not save data, create orders, or change statuses."
 msgstr ""
 
@@ -171,6 +174,18 @@ msgstr ""
 msgid "Saved Folio response could not be loaded."
 msgstr ""
 
+msgid "Apply the saved Folio response to Woo now? This will only save links/status markers; child orders will not be created yet."
+msgstr ""
+
+msgid "Applying saved Folio response..."
+msgstr ""
+
+msgid "Saved Folio response could not be applied."
+msgstr ""
+
+msgid "Saved Folio response applied."
+msgstr ""
+
 msgid "Folio account response was saved. Child Woo orders were not created yet."
 msgstr ""
 
@@ -196,4 +211,34 @@ msgid "Java response is not OK."
 msgstr ""
 
 msgid "No saved Folio response found for this order."
+msgstr ""
+
+msgid "Saved Folio response is not OK."
+msgstr ""
+
+msgid "Could not build Folio document link from saved response."
+msgstr ""
+
+msgid "Saved Folio response applied: linked one Folio account."
+msgstr ""
+
+msgid "Saved Folio response applied. Linked document %s."
+msgstr ""
+
+msgid "Saved Folio response is already marked ready for split."
+msgstr ""
+
+msgid "Saved Folio response marked ready for Woo split. Child orders were not created yet."
+msgstr ""
+
+msgid "Real Folio account: %s"
+msgstr ""
+
+msgid "Missing-stock Folio account: %s"
+msgstr ""
+
+msgid "Saved Folio response marked ready for split. No child orders were created yet."
+msgstr ""
+
+msgid "warehouse %s"
 msgstr ""
