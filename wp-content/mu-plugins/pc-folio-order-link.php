@@ -563,8 +563,11 @@ if (!function_exists('pc_folio_create_child_orders_from_saved_response')) {
         $parent_order->update_meta_data($keys['split_status'], 'split_created');
         $parent_order->update_meta_data($keys['split_created_at'], current_time('mysql'));
         $parent_order->save();
+        if ($parent_order->get_status() !== 'draft') {
+            $parent_order->update_status('draft', __('Parent order moved to draft after Folio split. Child order statuses were preserved.', 'pc-folio-order-link'));
+        }
         $parent_order->add_order_note(sprintf(
-            __('Created %d Woo child orders from saved Folio response. Parent order status was not changed.', 'pc-folio-order-link'),
+            __('Created %d Woo child orders from saved Folio response. Parent order was moved to draft.', 'pc-folio-order-link'),
             count($child_order_ids)
         ));
 
@@ -1545,7 +1548,7 @@ if (!function_exists('pc_folio_render_order_preview_metabox')) {
 
             if (createChildrenButton && rawResponse) {
                 createChildrenButton.addEventListener('click', function(){
-                    if (!window.confirm('<?php echo esc_js(__('Create Woo child orders from the saved Folio response now? The parent order status will not be changed.', 'pc-folio-order-link')); ?>')) {
+                    if (!window.confirm('<?php echo esc_js(__('Create Woo child orders from the saved Folio response now? The parent order will be moved to draft.', 'pc-folio-order-link')); ?>')) {
                         return;
                     }
 

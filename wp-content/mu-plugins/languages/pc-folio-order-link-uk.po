@@ -253,10 +253,10 @@ msgstr "Не вдалося застосувати збережену відпо
 msgid "Saved Folio response applied."
 msgstr "Збережену відповідь ФОЛІО застосовано."
 
-msgid "Create Woo child orders from the saved Folio response now? The parent order status will not be changed."
+msgid "Create Woo child orders from the saved Folio response now? The parent order will be moved to draft."
 msgstr ""
-"Створити дочірні замовлення Woo зі збереженої відповіді ФОЛІО зараз? Статус "
-"батьківського замовлення не буде змінено."
+"Створити дочірні замовлення Woo зі збереженої відповіді ФОЛІО зараз? "
+"Батьківське замовлення буде переведено в чернетку."
 
 msgid "Creating Woo child orders..."
 msgstr "Створення дочірніх замовлень Woo..."
@@ -352,10 +352,15 @@ msgstr "Замовлення не позначене як готове до ро
 msgid "Woo child orders are already linked to this parent order."
 msgstr "Дочірні замовлення Woo вже пов'язані з цим батьківським замовленням."
 
-msgid "Created %d Woo child orders from saved Folio response. Parent order status was not changed."
+msgid "Parent order moved to draft after Folio split. Child order statuses were preserved."
 msgstr ""
-"Створено %d дочірніх замовлень Woo зі збереженої відповіді ФОЛІО. Статус "
-"батьківського замовлення не змінювався."
+"Батьківське замовлення переведено в чернетку після розділення ФОЛІО. "
+"Статуси дочірніх замовлень збережено."
+
+msgid "Created %d Woo child orders from saved Folio response. Parent order was moved to draft."
+msgstr ""
+"Створено %d дочірніх замовлень Woo зі збереженої відповіді ФОЛІО. "
+"Батьківське замовлення переведено в чернетку."
 
 msgid "Created %d Woo child orders."
 msgstr "Створено %d дочірніх замовлень Woo."

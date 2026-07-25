@@ -236,7 +236,7 @@ msgstr ""
 msgid "Saved Folio response applied."
 msgstr ""
 
-msgid "Create Woo child orders from the saved Folio response now? The parent order status will not be changed."
+msgid "Create Woo child orders from the saved Folio response now? The parent order will be moved to draft."
 msgstr ""
 
 msgid "Creating Woo child orders..."
@@ -326,7 +326,10 @@ msgstr ""
 msgid "Woo child orders are already linked to this parent order."
 msgstr ""
 
-msgid "Created %d Woo child orders from saved Folio response. Parent order status was not changed."
+msgid "Parent order moved to draft after Folio split. Child order statuses were preserved."
+msgstr ""
+
+msgid "Created %d Woo child orders from saved Folio response. Parent order was moved to draft."
 msgstr ""
 
 msgid "Created %d Woo child orders."
