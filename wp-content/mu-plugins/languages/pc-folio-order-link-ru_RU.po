@@ -80,6 +80,20 @@ msgstr "Java Base URL не настроен."
 msgid "Java response simulator"
 msgstr "Симулятор ответа Java"
 
+msgid "Saved Folio response"
+msgstr "Сохранённый ответ ФОЛИО"
+
+msgid "A saved Java response exists for this order. Preview what Woo would do before applying it."
+msgstr ""
+"Для этого заказа есть сохранённый ответ Java. Посмотрите, что сделал бы Woo, "
+"перед применением."
+
+msgid "No saved Java response exists for this order yet."
+msgstr "Для этого заказа пока нет сохранённого ответа Java."
+
+msgid "Preview saved response actions"
+msgstr "Предпросмотр действий по сохранённому ответу"
+
 msgid "Paste a Java response to preview what Woo would do. This does not save data, create orders, or change statuses."
 msgstr ""
 "Вставьте ответ Java, чтобы посмотреть, что сделал бы Woo. Это не сохраняет "
@@ -165,6 +179,12 @@ msgstr "Запрос создания к Java не удался."
 msgid "Java response saved to Woo order meta."
 msgstr "Ответ Java сохранён в meta заказа Woo."
 
+msgid "Loading saved Folio response..."
+msgstr "Загрузка сохранённого ответа ФОЛИО..."
+
+msgid "Saved Folio response could not be loaded."
+msgstr "Не удалось загрузить сохранённый ответ ФОЛИО."
+
 msgid "Folio account response was saved. Child Woo orders were not created yet."
 msgstr ""
 "Ответ по счетам ФОЛИО сохранён. Дочерние заказы Woo пока не создавались."
@@ -189,3 +209,6 @@ msgstr "Создание счёта ФОЛИО не удалось. Ответ J
 
 msgid "Java response is not OK."
 msgstr "Ответ Java не OK."
+
+msgid "No saved Folio response found for this order."
+msgstr "Для этого заказа не найден сохранённый ответ ФОЛИО."

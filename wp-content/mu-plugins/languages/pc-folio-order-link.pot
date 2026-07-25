@@ -72,6 +72,18 @@ msgstr ""
 msgid "Java response simulator"
 msgstr ""
 
+msgid "Saved Folio response"
+msgstr ""
+
+msgid "A saved Java response exists for this order. Preview what Woo would do before applying it."
+msgstr ""
+
+msgid "No saved Java response exists for this order yet."
+msgstr ""
+
+msgid "Preview saved response actions"
+msgstr ""
+
 msgid "Paste a Java response to preview what Woo would do. This does not save data, create orders, or change statuses."
 msgstr ""
 
@@ -153,6 +165,12 @@ msgstr ""
 msgid "Java response saved to Woo order meta."
 msgstr ""
 
+msgid "Loading saved Folio response..."
+msgstr ""
+
+msgid "Saved Folio response could not be loaded."
+msgstr ""
+
 msgid "Folio account response was saved. Child Woo orders were not created yet."
 msgstr ""
 
@@ -175,4 +193,7 @@ msgid "Folio account creation failed. Java response was saved for review."
 msgstr ""
 
 msgid "Java response is not OK."
+msgstr ""
+
+msgid "No saved Folio response found for this order."
 msgstr ""
