@@ -561,6 +561,7 @@ if (!function_exists('pc_folio_create_child_orders_from_saved_response')) {
 
         pc_folio_set_parent_child_links($parent_order, $child_order_ids);
         $parent_order->update_meta_data($keys['split_status'], 'split_created');
+        $parent_order->update_meta_data($keys['split_created_at'], current_time('mysql'));
         $parent_order->save();
         $parent_order->add_order_note(sprintf(
             __('Created %d Woo child orders from saved Folio response. Parent order status was not changed.', 'pc-folio-order-link'),
@@ -1574,6 +1575,10 @@ if (!function_exists('pc_folio_render_order_preview_metabox')) {
 
                         rawResponse.textContent = data.raw || JSON.stringify(data.result, null, 2);
                         output.textContent = data.message || '<?php echo esc_js(__('Woo child orders created.', 'pc-folio-order-link')); ?>';
+                        output.textContent += "\n" + '<?php echo esc_js(__('Reloading order page to show linked child orders...', 'pc-folio-order-link')); ?>';
+                        window.setTimeout(function(){
+                            window.location.reload();
+                        }, 900);
                     })
                     .catch(function(err){
                         rawResponse.textContent = err.message || String(err);

@@ -248,6 +248,9 @@ msgstr ""
 msgid "Woo child orders created."
 msgstr ""
 
+msgid "Reloading order page to show linked child orders..."
+msgstr ""
+
 msgid "Folio account response was saved. Child Woo orders were not created yet."
 msgstr ""
 

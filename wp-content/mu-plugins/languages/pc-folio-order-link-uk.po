@@ -267,6 +267,9 @@ msgstr "Не вдалося створити дочірні замовлення
 msgid "Woo child orders created."
 msgstr "Дочірні замовлення Woo створено."
 
+msgid "Reloading order page to show linked child orders..."
+msgstr "Оновлення сторінки замовлення, щоб показати пов'язані дочірні замовлення..."
+
 msgid "Folio account response was saved. Child Woo orders were not created yet."
 msgstr ""
 "Відповідь про рахунки ФОЛІО збережено. Дочірні замовлення Woo ще не "
