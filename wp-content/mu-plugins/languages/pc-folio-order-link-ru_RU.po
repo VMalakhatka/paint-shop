@@ -145,6 +145,9 @@ msgstr "Предпросмотр действий по сохранённому 
 msgid "Apply saved Folio response"
 msgstr "Применить сохранённый ответ ФОЛИО"
 
+msgid "Create Woo child orders"
+msgstr "Создать дочерние заказы Woo"
+
 msgid "Paste a Java response to preview what Woo would do. This does not save data, create orders, or change statuses."
 msgstr ""
 "Вставьте ответ Java, чтобы посмотреть, что сделал бы Woo. Это не сохраняет "
@@ -250,6 +253,20 @@ msgstr "Не удалось применить сохранённый ответ
 msgid "Saved Folio response applied."
 msgstr "Сохранённый ответ ФОЛИО применён."
 
+msgid "Create Woo child orders from the saved Folio response now? The parent order status will not be changed."
+msgstr ""
+"Создать дочерние заказы Woo из сохранённого ответа ФОЛИО сейчас? Статус "
+"родительского заказа не будет изменён."
+
+msgid "Creating Woo child orders..."
+msgstr "Создание дочерних заказов Woo..."
+
+msgid "Woo child orders could not be created."
+msgstr "Не удалось создать дочерние заказы Woo."
+
+msgid "Woo child orders created."
+msgstr "Дочерние заказы Woo созданы."
+
 msgid "Folio account response was saved. Child Woo orders were not created yet."
 msgstr ""
 "Ответ по счетам ФОЛИО сохранён. Дочерние заказы Woo пока не создавались."
@@ -311,3 +328,29 @@ msgstr ""
 
 msgid "warehouse %s"
 msgstr "склад %s"
+
+msgid "Folio item"
+msgstr "Позиция ФОЛИО"
+
+msgid "Could not create Woo child order."
+msgstr "Не удалось создать дочерний заказ Woo."
+
+msgid "Created from parent order as missing-stock Folio child order."
+msgstr "Создан из родительского заказа как дочерний заказ ФОЛИО для нехватки товара."
+
+msgid "Created from parent order as Folio child order."
+msgstr "Создан из родительского заказа как дочерний заказ ФОЛИО."
+
+msgid "Order is not marked ready for split."
+msgstr "Заказ не помечен как готовый к разделению."
+
+msgid "Woo child orders are already linked to this parent order."
+msgstr "Дочерние заказы Woo уже связаны с этим родительским заказом."
+
+msgid "Created %d Woo child orders from saved Folio response. Parent order status was not changed."
+msgstr ""
+"Создано %d дочерних заказов Woo из сохранённого ответа ФОЛИО. Статус "
+"родительского заказа не изменялся."
+
+msgid "Created %d Woo child orders."
+msgstr "Создано %d дочерних заказов Woo."

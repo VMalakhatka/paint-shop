@@ -134,6 +134,9 @@ msgstr ""
 msgid "Apply saved Folio response"
 msgstr ""
 
+msgid "Create Woo child orders"
+msgstr ""
+
 msgid "Paste a Java response to preview what Woo would do. This does not save data, create orders, or change statuses."
 msgstr ""
 
@@ -233,6 +236,18 @@ msgstr ""
 msgid "Saved Folio response applied."
 msgstr ""
 
+msgid "Create Woo child orders from the saved Folio response now? The parent order status will not be changed."
+msgstr ""
+
+msgid "Creating Woo child orders..."
+msgstr ""
+
+msgid "Woo child orders could not be created."
+msgstr ""
+
+msgid "Woo child orders created."
+msgstr ""
+
 msgid "Folio account response was saved. Child Woo orders were not created yet."
 msgstr ""
 
@@ -288,4 +303,28 @@ msgid "Saved Folio response marked ready for split. No child orders were created
 msgstr ""
 
 msgid "warehouse %s"
+msgstr ""
+
+msgid "Folio item"
+msgstr ""
+
+msgid "Could not create Woo child order."
+msgstr ""
+
+msgid "Created from parent order as missing-stock Folio child order."
+msgstr ""
+
+msgid "Created from parent order as Folio child order."
+msgstr ""
+
+msgid "Order is not marked ready for split."
+msgstr ""
+
+msgid "Woo child orders are already linked to this parent order."
+msgstr ""
+
+msgid "Created %d Woo child orders from saved Folio response. Parent order status was not changed."
+msgstr ""
+
+msgid "Created %d Woo child orders."
 msgstr ""

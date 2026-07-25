@@ -145,6 +145,9 @@ msgstr "Переглянути дії за збереженою відповід
 msgid "Apply saved Folio response"
 msgstr "Застосувати збережену відповідь ФОЛІО"
 
+msgid "Create Woo child orders"
+msgstr "Створити дочірні замовлення Woo"
+
 msgid "Paste a Java response to preview what Woo would do. This does not save data, create orders, or change statuses."
 msgstr ""
 "Вставте відповідь Java, щоб переглянути, що зробив би Woo. Це не зберігає "
@@ -250,6 +253,20 @@ msgstr "Не вдалося застосувати збережену відпо
 msgid "Saved Folio response applied."
 msgstr "Збережену відповідь ФОЛІО застосовано."
 
+msgid "Create Woo child orders from the saved Folio response now? The parent order status will not be changed."
+msgstr ""
+"Створити дочірні замовлення Woo зі збереженої відповіді ФОЛІО зараз? Статус "
+"батьківського замовлення не буде змінено."
+
+msgid "Creating Woo child orders..."
+msgstr "Створення дочірніх замовлень Woo..."
+
+msgid "Woo child orders could not be created."
+msgstr "Не вдалося створити дочірні замовлення Woo."
+
+msgid "Woo child orders created."
+msgstr "Дочірні замовлення Woo створено."
+
 msgid "Folio account response was saved. Child Woo orders were not created yet."
 msgstr ""
 "Відповідь про рахунки ФОЛІО збережено. Дочірні замовлення Woo ще не "
@@ -313,3 +330,29 @@ msgstr ""
 
 msgid "warehouse %s"
 msgstr "склад %s"
+
+msgid "Folio item"
+msgstr "Позиція ФОЛІО"
+
+msgid "Could not create Woo child order."
+msgstr "Не вдалося створити дочірнє замовлення Woo."
+
+msgid "Created from parent order as missing-stock Folio child order."
+msgstr "Створено з батьківського замовлення як дочірнє замовлення ФОЛІО для нестачі товару."
+
+msgid "Created from parent order as Folio child order."
+msgstr "Створено з батьківського замовлення як дочірнє замовлення ФОЛІО."
+
+msgid "Order is not marked ready for split."
+msgstr "Замовлення не позначене як готове до розділення."
+
+msgid "Woo child orders are already linked to this parent order."
+msgstr "Дочірні замовлення Woo вже пов'язані з цим батьківським замовленням."
+
+msgid "Created %d Woo child orders from saved Folio response. Parent order status was not changed."
+msgstr ""
+"Створено %d дочірніх замовлень Woo зі збереженої відповіді ФОЛІО. Статус "
+"батьківського замовлення не змінювався."
+
+msgid "Created %d Woo child orders."
+msgstr "Створено %d дочірніх замовлень Woo."

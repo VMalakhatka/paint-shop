@@ -222,6 +222,24 @@ if (!function_exists('pc_folio_get_single_real_document_link')) {
     }
 }
 
+if (!function_exists('pc_folio_get_single_document_link')) {
+    /**
+     * Return legacy link fields for any single Folio document, including missing-stock.
+     */
+    function pc_folio_get_single_document_link(array $document, string $payload_hash = ''): array
+    {
+        return [
+            'document_id'           => (string) ($document['document_id'] ?? ($document['documentId'] ?? '')),
+            'document_number'       => (string) ($document['document_number'] ?? ($document['documentNumber'] ?? '')),
+            'document_type'         => (string) ($document['document_type'] ?? ($document['documentType'] ?? '')),
+            'document_status'       => (string) ($document['document_status'] ?? ($document['documentStatus'] ?? '')),
+            'document_created_at'   => pc_folio_document_created_at_text($document['document_created_at'] ?? ($document['documentCreatedAt'] ?? '')),
+            'document_payload_hash' => $payload_hash,
+            'document_last_error'   => '',
+        ];
+    }
+}
+
 if (!function_exists('pc_folio_order_has_saved_documents')) {
     /**
      * Check whether an order already has a Folio document result saved.
@@ -379,6 +397,181 @@ if (!function_exists('pc_folio_apply_saved_response_to_order')) {
             'ok'      => true,
             'status'  => 'ready_to_split',
             'message' => __('Saved Folio response marked ready for split. No child orders were created yet.', 'pc-folio-order-link'),
+        ];
+    }
+}
+
+if (!function_exists('pc_folio_get_order_item_by_id')) {
+    /**
+     * Find a parent order line item by Woo order item ID.
+     */
+    function pc_folio_get_order_item_by_id(\WC_Order $order, int $item_id): ?\WC_Order_Item_Product
+    {
+        $item = $item_id > 0 ? $order->get_item($item_id) : false;
+
+        return ($item instanceof \WC_Order_Item_Product) ? $item : null;
+    }
+}
+
+if (!function_exists('pc_folio_copy_order_customer_data')) {
+    /**
+     * Copy customer, billing, shipping and payment identity to a child order.
+     */
+    function pc_folio_copy_order_customer_data(\WC_Order $source, \WC_Order $target): void
+    {
+        $target->set_customer_id((int) $source->get_customer_id());
+        $target->set_currency($source->get_currency());
+        $target->set_prices_include_tax($source->get_prices_include_tax());
+        $target->set_payment_method($source->get_payment_method());
+        $target->set_payment_method_title($source->get_payment_method_title());
+        $target->set_customer_note($source->get_customer_note());
+        $target->set_address($source->get_address('billing'), 'billing');
+        $target->set_address($source->get_address('shipping'), 'shipping');
+    }
+}
+
+if (!function_exists('pc_folio_create_child_order_item')) {
+    /**
+     * Add a Folio document item to a child Woo order.
+     */
+    function pc_folio_create_child_order_item(\WC_Order $parent_order, \WC_Order $child_order, array $folio_item): void
+    {
+        $source_item_id = (int) ($folio_item['order_item_id'] ?? ($folio_item['orderItemId'] ?? 0));
+        $source_item = pc_folio_get_order_item_by_id($parent_order, $source_item_id);
+        $sku = (string) ($folio_item['sku'] ?? '');
+        $quantity = max(0, (float) ($folio_item['quantity'] ?? 0));
+        $amount = (float) ($folio_item['amount'] ?? 0);
+        $price = (float) ($folio_item['price'] ?? 0);
+        $product = $source_item ? $source_item->get_product() : false;
+
+        if (!$product && $sku !== '') {
+            $product_id = wc_get_product_id_by_sku($sku);
+            $product = $product_id ? wc_get_product($product_id) : false;
+        }
+
+        $order_item = new \WC_Order_Item_Product();
+        if ($product) {
+            $order_item->set_product($product);
+        }
+        if ($source_item) {
+            $order_item->set_name($source_item->get_name());
+            $order_item->set_tax_class($source_item->get_tax_class());
+        } else {
+            $order_item->set_name($sku !== '' ? $sku : __('Folio item', 'pc-folio-order-link'));
+        }
+
+        $order_item->set_quantity($quantity);
+        $order_item->set_subtotal($amount);
+        $order_item->set_total($amount);
+        $order_item->set_subtotal_tax(0);
+        $order_item->set_total_tax(0);
+        $order_item->add_meta_data('_folio_source_order_item_id', $source_item_id, true);
+        $order_item->add_meta_data('_folio_sku', $sku, true);
+        $order_item->add_meta_data('_folio_price', $price, true);
+        $order_item->add_meta_data('_folio_warehouse_id', (string) ($folio_item['folio_warehouse_id'] ?? ($folio_item['warehouseId'] ?? '')), true);
+        $order_item->add_meta_data('_folio_allocation_status', (string) ($folio_item['allocation_status'] ?? ($folio_item['allocationStatus'] ?? '')), true);
+
+        $child_order->add_item($order_item);
+    }
+}
+
+if (!function_exists('pc_folio_create_child_order_from_document')) {
+    /**
+     * Create one Woo child order from one Folio document response.
+     */
+    function pc_folio_create_child_order_from_document(\WC_Order $parent_order, array $document): \WC_Order
+    {
+        $child_order = wc_create_order([
+            'customer_id' => (int) $parent_order->get_customer_id(),
+            'created_via' => 'pc-folio-split',
+        ]);
+        if (!$child_order instanceof \WC_Order) {
+            throw new \RuntimeException(__('Could not create Woo child order.', 'pc-folio-order-link'));
+        }
+
+        if (method_exists($child_order, 'set_parent_id')) {
+            $child_order->set_parent_id((int) $parent_order->get_id());
+        }
+
+        pc_folio_copy_order_customer_data($parent_order, $child_order);
+
+        $items = isset($document['items']) && is_array($document['items']) ? $document['items'] : [];
+        foreach ($items as $folio_item) {
+            if (is_array($folio_item)) {
+                pc_folio_create_child_order_item($parent_order, $child_order, $folio_item);
+            }
+        }
+
+        $child_order->calculate_totals(false);
+        $child_order->update_meta_data('_folio_split_from_order_id', (int) $parent_order->get_id());
+        $child_order->update_meta_data('_folio_split_document_kind', pc_folio_is_missing_document($document) ? 'missing_stock' : 'account');
+        pc_folio_set_order_document_link($child_order, pc_folio_get_single_document_link($document));
+
+        $status = pc_folio_is_missing_document($document) ? 'on-hold' : 'processing';
+        $note = pc_folio_is_missing_document($document)
+            ? __('Created from parent order as missing-stock Folio child order.', 'pc-folio-order-link')
+            : __('Created from parent order as Folio child order.', 'pc-folio-order-link');
+        $child_order->update_status($status, $note);
+        $child_order->save();
+
+        return $child_order;
+    }
+}
+
+if (!function_exists('pc_folio_create_child_orders_from_saved_response')) {
+    /**
+     * Create Woo child orders from a saved Java/Folio split response.
+     */
+    function pc_folio_create_child_orders_from_saved_response(\WC_Order $parent_order): array
+    {
+        $keys = pc_folio_order_documents_meta_keys();
+        if ((string) $parent_order->get_meta($keys['split_status'], true) !== 'ready_to_split') {
+            return [
+                'ok'      => false,
+                'message' => __('Order is not marked ready for split.', 'pc-folio-order-link'),
+            ];
+        }
+
+        $existing_child_ids = $parent_order->get_meta($keys['child_order_ids'], true);
+        if (is_array($existing_child_ids) && array_filter($existing_child_ids)) {
+            return [
+                'ok'      => false,
+                'message' => __('Woo child orders are already linked to this parent order.', 'pc-folio-order-link'),
+            ];
+        }
+
+        $result = pc_folio_get_order_documents_result($parent_order);
+        $documents = isset($result['documents']) && is_array($result['documents']) ? $result['documents'] : [];
+        if (!$documents) {
+            return [
+                'ok'      => false,
+                'message' => __('Result: no Folio documents found in response.', 'pc-folio-order-link'),
+            ];
+        }
+
+        $child_order_ids = [];
+        foreach ($documents as $document) {
+            if (!is_array($document)) {
+                continue;
+            }
+
+            $child_order = pc_folio_create_child_order_from_document($parent_order, $document);
+            $child_order_ids[] = (int) $child_order->get_id();
+        }
+
+        pc_folio_set_parent_child_links($parent_order, $child_order_ids);
+        $parent_order->update_meta_data($keys['split_status'], 'split_created');
+        $parent_order->save();
+        $parent_order->add_order_note(sprintf(
+            __('Created %d Woo child orders from saved Folio response. Parent order status was not changed.', 'pc-folio-order-link'),
+            count($child_order_ids)
+        ));
+
+        return [
+            'ok'              => true,
+            'status'          => 'split_created',
+            'child_order_ids' => $child_order_ids,
+            'message'         => sprintf(__('Created %d Woo child orders.', 'pc-folio-order-link'), count($child_order_ids)),
         ];
     }
 }
@@ -1026,6 +1219,11 @@ if (!function_exists('pc_folio_render_order_preview_metabox')) {
         $payload = pc_folio_build_order_preview_payload($order);
         $order_id = (int) $order->get_id();
         $saved_result = pc_folio_get_order_documents_result($order);
+        $document_keys = pc_folio_order_documents_meta_keys();
+        $split_status = (string) $order->get_meta($document_keys['split_status'], true);
+        $child_order_ids = $order->get_meta($document_keys['child_order_ids'], true);
+        $child_order_ids = is_array($child_order_ids) ? array_values(array_filter(array_map('absint', $child_order_ids))) : [];
+        $can_create_children = $split_status === 'ready_to_split' && empty($child_order_ids);
         echo '<p class="description">' . esc_html__('Preview only. This JSON is not sent to Folio yet.', 'pc-folio-order-link') . '</p>';
         printf(
             '<textarea class="widefat code" rows="18" readonly id="pc-folio-order-preview-json">%s</textarea>',
@@ -1058,6 +1256,9 @@ if (!function_exists('pc_folio_render_order_preview_metabox')) {
             <button type="button" class="button button-primary" id="pc-folio-apply-saved-response" <?php disabled(empty($saved_result)); ?>>
                 <?php echo esc_html__('Apply saved Folio response', 'pc-folio-order-link'); ?>
             </button>
+            <button type="button" class="button button-primary" id="pc-folio-create-child-orders" <?php disabled(!$can_create_children); ?>>
+                <?php echo esc_html__('Create Woo child orders', 'pc-folio-order-link'); ?>
+            </button>
         </p>
         <hr>
         <h3><?php echo esc_html__('Java response simulator', 'pc-folio-order-link'); ?></h3>
@@ -1076,6 +1277,7 @@ if (!function_exists('pc_folio_render_order_preview_metabox')) {
             var createButton = document.getElementById('pc-folio-create-java');
             var savedButton = document.getElementById('pc-folio-preview-saved-response');
             var applySavedButton = document.getElementById('pc-folio-apply-saved-response');
+            var createChildrenButton = document.getElementById('pc-folio-create-child-orders');
             var sendSpinner = document.getElementById('pc-folio-send-preview-spinner');
             var rawResponse = document.getElementById('pc-folio-java-preview-response');
             var button = document.getElementById('pc-folio-response-simulate');
@@ -1340,6 +1542,45 @@ if (!function_exists('pc_folio_render_order_preview_metabox')) {
                 });
             }
 
+            if (createChildrenButton && rawResponse) {
+                createChildrenButton.addEventListener('click', function(){
+                    if (!window.confirm('<?php echo esc_js(__('Create Woo child orders from the saved Folio response now? The parent order status will not be changed.', 'pc-folio-order-link')); ?>')) {
+                        return;
+                    }
+
+                    rawResponse.style.display = 'block';
+                    rawResponse.textContent = '<?php echo esc_js(__('Creating Woo child orders...', 'pc-folio-order-link')); ?>';
+                    output.style.display = 'block';
+                    output.textContent = '';
+                    createChildrenButton.disabled = true;
+
+                    var body = new URLSearchParams();
+                    body.set('action', 'pc_folio_order_create_child_orders');
+                    body.set('_ajax_nonce', '<?php echo esc_js(wp_create_nonce('pc_folio_order_create_child_orders')); ?>');
+                    body.set('order_id', String(orderId));
+
+                    fetch(ajaxurl, {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+                        body: body.toString()
+                    })
+                    .then(function(resp){ return resp.json(); })
+                    .then(function(resp){
+                        var data = resp && resp.success ? resp.data : (resp ? resp.data : null);
+                        if (!resp || !resp.success) {
+                            throw new Error(data && data.message ? data.message : '<?php echo esc_js(__('Woo child orders could not be created.', 'pc-folio-order-link')); ?>');
+                        }
+
+                        rawResponse.textContent = data.raw || JSON.stringify(data.result, null, 2);
+                        output.textContent = data.message || '<?php echo esc_js(__('Woo child orders created.', 'pc-folio-order-link')); ?>';
+                    })
+                    .catch(function(err){
+                        rawResponse.textContent = err.message || String(err);
+                    });
+                });
+            }
+
             if (createButton && previewJson && rawResponse) {
                 createButton.addEventListener('click', function(){
                     sendPayloadToJava(false);
@@ -1558,6 +1799,47 @@ if (!function_exists('pc_folio_order_apply_saved_response_ajax')) {
     }
 }
 add_action('wp_ajax_pc_folio_order_apply_saved_response', 'pc_folio_order_apply_saved_response_ajax');
+
+if (!function_exists('pc_folio_order_create_child_orders_ajax')) {
+    /**
+     * Create Woo child orders from the saved Folio response.
+     */
+    function pc_folio_order_create_child_orders_ajax(): void
+    {
+        if (!pc_folio_order_link_can_manage()) {
+            wp_send_json_error(['message' => __('Forbidden.', 'pc-folio-order-link')], 403);
+        }
+
+        check_ajax_referer('pc_folio_order_create_child_orders');
+
+        $order_id = isset($_POST['order_id']) ? absint(wp_unslash($_POST['order_id'])) : 0;
+        $order = $order_id > 0 ? wc_get_order($order_id) : false;
+        if (!$order) {
+            wp_send_json_error(['message' => __('Order not found.', 'pc-folio-order-link')], 404);
+        }
+
+        if (!current_user_can('edit_shop_order', $order_id)) {
+            wp_send_json_error(['message' => __('Forbidden.', 'pc-folio-order-link')], 403);
+        }
+
+        try {
+            $result = pc_folio_create_child_orders_from_saved_response($order);
+        } catch (\Throwable $e) {
+            wp_send_json_error(['message' => $e->getMessage()], 500);
+        }
+
+        if (empty($result['ok'])) {
+            wp_send_json_error(['message' => $result['message'] ?? __('Woo child orders could not be created.', 'pc-folio-order-link')], 400);
+        }
+
+        wp_send_json_success([
+            'result'  => $result,
+            'message' => $result['message'] ?? __('Woo child orders created.', 'pc-folio-order-link'),
+            'raw'     => wp_json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+        ]);
+    }
+}
+add_action('wp_ajax_pc_folio_order_create_child_orders', 'pc_folio_order_create_child_orders_ajax');
 
 add_action('woocommerce_process_shop_order_meta', function ($order_id) {
     if (!isset($_POST['pc_folio_order_link_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['pc_folio_order_link_nonce'])), 'pc_folio_order_link_save')) {
