@@ -83,6 +83,21 @@ msgstr[2] "%d позиций"
 msgid "Kind: %s"
 msgstr "Тип: %s"
 
+msgid "Future Woo child order items"
+msgstr "Позиции будущего дочернего заказа Woo"
+
+msgid "without SKU"
+msgstr "без SKU"
+
+msgid "price"
+msgstr "цена"
+
+msgid "amount"
+msgstr "сумма"
+
+msgid "No items in this Folio document."
+msgstr "В этом документе ФОЛИО нет позиций."
+
 msgid "No saved Folio documents yet."
 msgstr "Сохранённых документов ФОЛИО пока нет."
 

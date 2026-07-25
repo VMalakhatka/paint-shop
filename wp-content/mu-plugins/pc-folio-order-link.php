@@ -937,6 +937,42 @@ if (!function_exists('pc_folio_render_order_link_metabox')) {
                     esc_html(sprintf(_n('%d item', '%d items', count($items), 'pc-folio-order-link'), count($items))),
                     esc_html(sprintf(__('Kind: %s', 'pc-folio-order-link'), $kind))
                 );
+
+                echo '<li style="margin:-4px 0 12px 12px">';
+                echo '<strong>' . esc_html__('Future Woo child order items', 'pc-folio-order-link') . '</strong>';
+                if ($items) {
+                    echo '<ul style="margin:4px 0 0 0;list-style:none">';
+                    foreach ($items as $item) {
+                        if (!is_array($item)) {
+                            continue;
+                        }
+
+                        $sku = (string) ($item['sku'] ?? '');
+                        $quantity = (float) ($item['quantity'] ?? 0);
+                        $price = (float) ($item['price'] ?? 0);
+                        $amount = (float) ($item['amount'] ?? 0);
+                        $allocation_status = (string) ($item['allocation_status'] ?? ($item['allocationStatus'] ?? ''));
+                        $line = sprintf(
+                            '%1$s × %2$s · %3$s %4$s · %5$s %6$s',
+                            $sku !== '' ? $sku : __('without SKU', 'pc-folio-order-link'),
+                            wc_format_decimal($quantity, 2),
+                            __('price', 'pc-folio-order-link'),
+                            wc_price($price, ['currency' => $order->get_currency()]),
+                            __('amount', 'pc-folio-order-link'),
+                            wc_price($amount, ['currency' => $order->get_currency()])
+                        );
+
+                        if ($allocation_status !== '') {
+                            $line .= ' · ' . $allocation_status;
+                        }
+
+                        echo '<li><span class="description">' . wp_kses_post($line) . '</span></li>';
+                    }
+                    echo '</ul>';
+                } else {
+                    echo '<p class="description" style="margin:4px 0 0">' . esc_html__('No items in this Folio document.', 'pc-folio-order-link') . '</p>';
+                }
+                echo '</li>';
             }
             echo '</ul>';
         } else {

@@ -74,6 +74,21 @@ msgstr[1] ""
 msgid "Kind: %s"
 msgstr ""
 
+msgid "Future Woo child order items"
+msgstr ""
+
+msgid "without SKU"
+msgstr ""
+
+msgid "price"
+msgstr ""
+
+msgid "amount"
+msgstr ""
+
+msgid "No items in this Folio document."
+msgstr ""
+
 msgid "No saved Folio documents yet."
 msgstr ""
 
