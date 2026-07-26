@@ -863,6 +863,29 @@ if (!function_exists('pc_folio_preview_text')) {
     }
 }
 
+if (!function_exists('pc_folio_header_short_text')) {
+    /**
+     * Keep Folio header fields inside legacy varchar limits without breaking UTF-8 text.
+     */
+    function pc_folio_header_short_text($value, int $max_length = 30): string
+    {
+        $text = preg_replace('/\s+/', ' ', pc_folio_preview_text($value));
+        $text = trim((string) $text);
+
+        if ($max_length <= 0 || $text === '') {
+            return '';
+        }
+
+        if (function_exists('mb_strlen') && function_exists('mb_substr')) {
+            return mb_strlen($text, 'UTF-8') > $max_length
+                ? mb_substr($text, 0, $max_length, 'UTF-8')
+                : $text;
+        }
+
+        return strlen($text) > $max_length ? substr($text, 0, $max_length) : $text;
+    }
+}
+
 if (!function_exists('pc_folio_get_order_price_contract_type')) {
     /**
      * Resolve the Folio price contract from the customer's Woo role mapping.
@@ -941,6 +964,7 @@ if (!function_exists('pc_folio_build_account_header_preview')) {
         $created = $order->get_date_created();
         $document_ts = $created ? (int) $created->getTimestamp() : $now;
         $ordered_at = $created ? $created->date_i18n('Y-m-d H:i:s') : wp_date('Y-m-d H:i:s', $now);
+        $ordered_at_short = $created ? $created->date_i18n('Y-m-d H:i') : wp_date('Y-m-d H:i', $now);
         $payer_name = pc_folio_preview_text($folio_client['name'] ?? '');
         if ($payer_name === '') {
             $payer_name = trim(implode(' ', array_filter([
@@ -957,6 +981,12 @@ if (!function_exists('pc_folio_build_account_header_preview')) {
         }
         $site_name = pc_folio_preview_text(get_bloginfo('name'));
         $source_info = trim($site_name . ($site_customer_name !== '' ? ' + ' . $site_customer_name : ''));
+        $source_info = pc_folio_header_short_text($source_info !== '' ? $source_info : 'Internet order');
+        $additional_info = pc_folio_header_short_text(sprintf(
+            'Int %s %s',
+            $order->get_order_number(),
+            $ordered_at_short
+        ));
 
         return [
             'externalRequestId'   => function_exists('wp_generate_uuid4') ? wp_generate_uuid4() : md5(uniqid('', true)),
@@ -970,8 +1000,8 @@ if (!function_exists('pc_folio_build_account_header_preview')) {
             'receiverName'        => 'CLASSIC',
             'payerShortName'      => pc_folio_preview_text($folio_client['short_name'] ?? ($folio_client['id'] ?? '')),
             'folioUser'           => 'buh',
-            'sourceInfo'          => $source_info !== '' ? $source_info : 'Интернет заказ сайт',
-            'additionalInfo'      => sprintf('Woo order #%s, ordered at %s', $order->get_order_number(), $ordered_at),
+            'sourceInfo'          => $source_info,
+            'additionalInfo'      => $additional_info,
             'priceContractType'   => pc_folio_get_order_price_contract_type($order),
             'notCash'             => true,
             'accountingEnabled'   => true,
