@@ -391,3 +391,42 @@ msgstr ""
 
 msgid "Created %d Woo child orders."
 msgstr ""
+
+msgid "Order was saved, but Folio processing needs a manager check."
+msgstr ""
+
+msgid "Automatic Folio processing did not finish: %s"
+msgstr ""
+
+msgid "Automatic Folio processing did not finish. A manager will check the order."
+msgstr ""
+
+msgid "Order was split into Folio warehouse accounts."
+msgstr ""
+
+msgid "Folio order status"
+msgstr ""
+
+msgid "Order was sent to Folio."
+msgstr ""
+
+msgid "Folio account #%s was created for this order."
+msgstr ""
+
+msgid "Folio warehouse: %s"
+msgstr ""
+
+msgid "Order #%1$s, %2$s"
+msgstr ""
+
+msgid "Folio"
+msgstr ""
+
+msgid "%d Folio orders"
+msgstr ""
+
+msgid "manager check"
+msgstr ""
+
+msgid "The order is being processed. Please wait: we are creating Folio account documents and checking warehouses."
+msgstr ""

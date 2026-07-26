@@ -501,6 +501,300 @@ if (!function_exists('pc_folio_build_parent_split_notice')) {
     }
 }
 
+if (!function_exists('pc_folio_get_order_warehouse_id_for_customer')) {
+    /**
+     * Find the Folio warehouse ID for customer-facing order notices.
+     */
+    function pc_folio_get_order_warehouse_id_for_customer(\WC_Order $order): string
+    {
+        foreach ($order->get_items('line_item') as $item) {
+            $warehouse_id = (string) $item->get_meta('_folio_warehouse_id', true);
+            if ($warehouse_id !== '') {
+                return $warehouse_id;
+            }
+        }
+
+        $result = pc_folio_get_order_documents_result($order);
+        $documents = isset($result['documents']) && is_array($result['documents']) ? $result['documents'] : [];
+        foreach ($documents as $document) {
+            if (!is_array($document)) {
+                continue;
+            }
+
+            $warehouse_id = pc_folio_get_document_warehouse_id($document);
+            if ($warehouse_id !== '') {
+                return $warehouse_id;
+            }
+        }
+
+        return '';
+    }
+}
+
+if (!function_exists('pc_folio_get_order_customer_message')) {
+    /**
+     * Build a compact customer-facing status message for Folio order processing.
+     */
+    function pc_folio_get_order_customer_message(\WC_Order $order): array
+    {
+        $auto_status = (string) $order->get_meta('_folio_auto_status', true);
+        $auto_error = (string) $order->get_meta('_folio_auto_error', true);
+        if ($auto_status === 'error') {
+            return [
+                'type'    => 'error',
+                'title'   => __('Order was saved, but Folio processing needs a manager check.', 'pc-folio-order-link'),
+                'message' => $auto_error !== ''
+                    ? sprintf(__('Automatic Folio processing did not finish: %s', 'pc-folio-order-link'), $auto_error)
+                    : __('Automatic Folio processing did not finish. A manager will check the order.', 'pc-folio-order-link'),
+            ];
+        }
+
+        $notice = trim((string) $order->get_meta('_folio_customer_notice', true));
+        $keys = pc_folio_order_documents_meta_keys();
+        $child_order_ids = $order->get_meta($keys['child_order_ids'], true);
+        $child_order_ids = is_array($child_order_ids) ? array_values(array_filter(array_map('absint', $child_order_ids))) : [];
+        if ($child_order_ids) {
+            return [
+                'type'            => 'success',
+                'title'           => __('Order was split into Folio warehouse accounts.', 'pc-folio-order-link'),
+                'message'         => $notice !== '' ? $notice : pc_folio_build_parent_split_notice(),
+                'child_order_ids' => $child_order_ids,
+            ];
+        }
+
+        if ($notice !== '') {
+            return [
+                'type'    => pc_folio_is_missing_document(['document_type' => (string) $order->get_meta('_folio_document_type', true)]) ? 'notice' : 'success',
+                'title'   => __('Folio order status', 'pc-folio-order-link'),
+                'message' => $notice,
+            ];
+        }
+
+        $link = pc_folio_get_order_document_link($order);
+        if (($link['document_number'] ?? '') !== '') {
+            return [
+                'type'    => 'success',
+                'title'   => __('Order was sent to Folio.', 'pc-folio-order-link'),
+                'message' => sprintf(__('Folio account #%s was created for this order.', 'pc-folio-order-link'), $link['document_number']),
+            ];
+        }
+
+        return [];
+    }
+}
+
+if (!function_exists('pc_folio_render_customer_order_message')) {
+    /**
+     * Show Folio status on thank-you and my-account order detail pages.
+     */
+    function pc_folio_render_customer_order_message($order): void
+    {
+        if (!$order instanceof \WC_Order) {
+            $order = wc_get_order($order);
+        }
+        if (!$order instanceof \WC_Order) {
+            return;
+        }
+
+        static $rendered = [];
+        $order_id = (int) $order->get_id();
+        if (isset($rendered[$order_id])) {
+            return;
+        }
+        $rendered[$order_id] = true;
+
+        $message = pc_folio_get_order_customer_message($order);
+        if (!$message) {
+            return;
+        }
+
+        $classes = 'pc-folio-customer-notice pc-folio-customer-notice--' . sanitize_html_class($message['type'] ?? 'notice');
+        echo '<section class="' . esc_attr($classes) . '">';
+        echo '<h2>' . esc_html($message['title']) . '</h2>';
+        echo '<p>' . esc_html($message['message']) . '</p>';
+
+        $warehouse_id = pc_folio_get_order_warehouse_id_for_customer($order);
+        if ($warehouse_id !== '') {
+            echo '<p class="pc-folio-customer-notice__warehouse">' . esc_html(sprintf(__('Folio warehouse: %s', 'pc-folio-order-link'), $warehouse_id)) . '</p>';
+        }
+
+        $child_order_ids = isset($message['child_order_ids']) && is_array($message['child_order_ids'])
+            ? array_values(array_filter(array_map('absint', $message['child_order_ids'])))
+            : [];
+        if ($child_order_ids) {
+            echo '<ul class="pc-folio-customer-notice__orders">';
+            foreach ($child_order_ids as $child_order_id) {
+                $child_order = wc_get_order($child_order_id);
+                if (!$child_order instanceof \WC_Order) {
+                    continue;
+                }
+
+                $child_label = sprintf(
+                    __('Order #%1$s, %2$s', 'pc-folio-order-link'),
+                    $child_order->get_order_number(),
+                    wc_get_order_status_name($child_order->get_status())
+                );
+                echo '<li><a href="' . esc_url($child_order->get_view_order_url()) . '">' . esc_html($child_label) . '</a></li>';
+            }
+            echo '</ul>';
+        }
+
+        echo '</section>';
+    }
+}
+
+if (!function_exists('pc_folio_add_my_account_orders_column')) {
+    /**
+     * Add a compact Folio/warehouse column to the customer orders table.
+     */
+    function pc_folio_add_my_account_orders_column(array $columns): array
+    {
+        $new_columns = [];
+        foreach ($columns as $key => $label) {
+            $new_columns[$key] = $label;
+            if ($key === 'order-status') {
+                $new_columns['pc-folio'] = __('Folio', 'pc-folio-order-link');
+            }
+        }
+
+        if (!isset($new_columns['pc-folio'])) {
+            $new_columns['pc-folio'] = __('Folio', 'pc-folio-order-link');
+        }
+
+        return $new_columns;
+    }
+}
+
+if (!function_exists('pc_folio_render_my_account_orders_column')) {
+    /**
+     * Render the compact Folio/warehouse status in the customer orders list.
+     */
+    function pc_folio_render_my_account_orders_column(\WC_Order $order): void
+    {
+        $message = pc_folio_get_order_customer_message($order);
+        $warehouse_id = pc_folio_get_order_warehouse_id_for_customer($order);
+        $link = pc_folio_get_order_document_link($order);
+        $parts = [];
+
+        if (($link['document_number'] ?? '') !== '') {
+            $parts[] = '#' . $link['document_number'];
+        }
+        if ($warehouse_id !== '') {
+            $parts[] = sprintf(__('warehouse %s', 'pc-folio-order-link'), $warehouse_id);
+        }
+        if (!$parts && !empty($message['child_order_ids'])) {
+            $parts[] = sprintf(__('%d Folio orders', 'pc-folio-order-link'), count($message['child_order_ids']));
+        }
+        if (!$parts && (($message['type'] ?? '') === 'error')) {
+            $parts[] = __('manager check', 'pc-folio-order-link');
+        }
+
+        echo $parts ? esc_html(implode(' · ', $parts)) : '&mdash;';
+    }
+}
+
+if (!function_exists('pc_folio_render_checkout_processing_message')) {
+    /**
+     * Show a clear waiting message after the customer submits checkout.
+     */
+    function pc_folio_render_checkout_processing_message(): void
+    {
+        if (!function_exists('is_checkout') || !is_checkout() || (function_exists('is_order_received_page') && is_order_received_page())) {
+            return;
+        }
+        ?>
+        <script>
+        (function(){
+            var shown = false;
+            function showProcessingMessage() {
+                if (shown) {
+                    return;
+                }
+                shown = true;
+                var target = document.querySelector('form.checkout, .wc-block-checkout, .wp-block-woocommerce-checkout');
+                if (!target) {
+                    return;
+                }
+                var box = document.createElement('div');
+                box.className = 'pc-folio-checkout-processing';
+                box.textContent = '<?php echo esc_js(__('The order is being processed. Please wait: we are creating Folio account documents and checking warehouses.', 'pc-folio-order-link')); ?>';
+                target.parentNode.insertBefore(box, target);
+            }
+
+            document.addEventListener('submit', function(event) {
+                if (event.target && event.target.matches && event.target.matches('form.checkout')) {
+                    showProcessingMessage();
+                }
+            }, true);
+
+            document.addEventListener('click', function(event) {
+                var button = event.target && event.target.closest
+                    ? event.target.closest('button[name="woocommerce_checkout_place_order"], .wc-block-components-checkout-place-order-button')
+                    : null;
+                if (button) {
+                    showProcessingMessage();
+                }
+            }, true);
+        }());
+        </script>
+        <?php
+    }
+}
+
+if (!function_exists('pc_folio_render_frontend_styles')) {
+    /**
+     * Print small frontend styles for Folio checkout and order notices.
+     */
+    function pc_folio_render_frontend_styles(): void
+    {
+        if (is_admin()) {
+            return;
+        }
+        ?>
+        <style>
+            .pc-folio-checkout-processing {
+                border-left: 4px solid #7f54b3;
+                margin: 0 0 18px;
+                padding: 12px 14px;
+                background: #f6f1fb;
+                color: #242228;
+                font-size: 16px;
+                line-height: 1.4;
+            }
+            .pc-folio-customer-notice {
+                border: 1px solid #d7d7d7;
+                border-left: 5px solid #7f54b3;
+                margin: 0 0 24px;
+                padding: 16px 18px;
+                background: #fff;
+            }
+            .pc-folio-customer-notice--success { border-left-color: #2271b1; }
+            .pc-folio-customer-notice--error { border-left-color: #b32d2e; }
+            .pc-folio-customer-notice h2 {
+                font-size: 22px;
+                margin: 0 0 8px;
+            }
+            .pc-folio-customer-notice p {
+                margin: 0 0 8px;
+            }
+            .pc-folio-customer-notice__warehouse {
+                font-weight: 700;
+                font-size: 18px;
+            }
+            .pc-folio-customer-notice__orders {
+                margin: 8px 0 0 18px;
+            }
+        </style>
+        <?php
+    }
+}
+
+add_action('woocommerce_order_details_before_order_table', 'pc_folio_render_customer_order_message', 5);
+add_filter('woocommerce_my_account_my_orders_columns', 'pc_folio_add_my_account_orders_column', 20);
+add_action('woocommerce_my_account_my_orders_column_pc-folio', 'pc_folio_render_my_account_orders_column', 10);
+add_action('wp_head', 'pc_folio_render_frontend_styles', 20);
+add_action('wp_footer', 'pc_folio_render_checkout_processing_message', 20);
+
 if (!function_exists('pc_folio_get_parent_split_order_status')) {
     /**
      * Use the visible local import draft status for split parent orders.

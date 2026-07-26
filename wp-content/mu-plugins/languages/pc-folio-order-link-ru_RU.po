@@ -422,3 +422,42 @@ msgstr ""
 
 msgid "Created %d Woo child orders."
 msgstr "Создано %d дочерних заказов Woo."
+
+msgid "Order was saved, but Folio processing needs a manager check."
+msgstr "Заказ сохранён, но обработка ФОЛИО требует проверки менеджером."
+
+msgid "Automatic Folio processing did not finish: %s"
+msgstr "Автоматическая обработка ФОЛИО не завершилась: %s"
+
+msgid "Automatic Folio processing did not finish. A manager will check the order."
+msgstr "Автоматическая обработка ФОЛИО не завершилась. Менеджер проверит заказ."
+
+msgid "Order was split into Folio warehouse accounts."
+msgstr "Заказ разделён на счета ФОЛИО по складам."
+
+msgid "Folio order status"
+msgstr "Статус заказа ФОЛИО"
+
+msgid "Order was sent to Folio."
+msgstr "Заказ передан в ФОЛИО."
+
+msgid "Folio account #%s was created for this order."
+msgstr "Для этого заказа создан счёт ФОЛИО #%s."
+
+msgid "Folio warehouse: %s"
+msgstr "Склад ФОЛИО: %s"
+
+msgid "Order #%1$s, %2$s"
+msgstr "Заказ #%1$s, %2$s"
+
+msgid "Folio"
+msgstr "ФОЛИО"
+
+msgid "%d Folio orders"
+msgstr "%d заказов ФОЛИО"
+
+msgid "manager check"
+msgstr "проверка менеджером"
+
+msgid "The order is being processed. Please wait: we are creating Folio account documents and checking warehouses."
+msgstr "Заказ обрабатывается системой. Пожалуйста, подождите: мы создаём счета ФОЛИО и проверяем склады."
