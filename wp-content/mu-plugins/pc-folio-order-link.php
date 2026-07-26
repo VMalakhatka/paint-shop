@@ -384,9 +384,18 @@ if (!function_exists('pc_folio_create_documents_for_order')) {
         $data = json_decode($raw, true);
 
         if ($code < 200 || $code >= 300) {
+            $details = '';
+            if (is_array($data)) {
+                $details = (string) ($data['details'] ?? ($data['message'] ?? ($data['title'] ?? ($data['error'] ?? ''))));
+            }
+            $message = sprintf('Java create HTTP %d', $code);
+            if ($details !== '') {
+                $message .= ': ' . pc_folio_header_short_text($details, 220);
+            }
+
             return [
                 'ok'      => false,
-                'message' => sprintf('Java create HTTP %d', $code),
+                'message' => $message,
                 'raw'     => $raw,
                 'payload' => $payload,
             ];
@@ -538,14 +547,11 @@ if (!function_exists('pc_folio_get_order_customer_message')) {
     function pc_folio_get_order_customer_message(\WC_Order $order): array
     {
         $auto_status = (string) $order->get_meta('_folio_auto_status', true);
-        $auto_error = (string) $order->get_meta('_folio_auto_error', true);
         if ($auto_status === 'error') {
             return [
                 'type'    => 'error',
                 'title'   => __('Order was saved, but Folio processing needs a manager check.', 'pc-folio-order-link'),
-                'message' => $auto_error !== ''
-                    ? sprintf(__('Automatic Folio processing did not finish: %s', 'pc-folio-order-link'), $auto_error)
-                    : __('Automatic Folio processing did not finish. A manager will check the order.', 'pc-folio-order-link'),
+                'message' => __('Automatic Folio processing did not finish. A manager will check the order.', 'pc-folio-order-link'),
             ];
         }
 
@@ -1136,11 +1142,16 @@ if (!function_exists('pc_folio_auto_process_checkout_order')) {
         $order->update_meta_data('_folio_auto_status', 'running');
         $order->update_meta_data('_folio_auto_started_at', current_time('mysql'));
         $order->delete_meta_data('_folio_auto_error');
+        $order->delete_meta_data('_folio_auto_error_raw');
         $order->save();
 
         try {
             $create = pc_folio_create_documents_for_order($order, 'checkout');
             if (empty($create['ok'])) {
+                if (!empty($create['raw'])) {
+                    $order->update_meta_data('_folio_auto_error_raw', substr((string) $create['raw'], 0, 5000));
+                    $order->save();
+                }
                 throw new \RuntimeException($create['message'] ?? __('Folio automatic creation failed.', 'pc-folio-order-link'));
             }
 
@@ -1162,6 +1173,7 @@ if (!function_exists('pc_folio_auto_process_checkout_order')) {
                 $order->update_meta_data('_folio_auto_status', 'success');
                 $order->update_meta_data('_folio_auto_finished_at', current_time('mysql'));
                 $order->delete_meta_data('_folio_auto_error');
+                $order->delete_meta_data('_folio_auto_error_raw');
                 $order->add_order_note(__('Automatic Folio checkout processing completed.', 'pc-folio-order-link'));
                 if (is_array($child_result) && !empty($child_result['child_order_ids'])) {
                     $order->add_order_note(sprintf(
