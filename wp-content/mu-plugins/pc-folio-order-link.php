@@ -613,14 +613,16 @@ if (!function_exists('pc_folio_render_customer_order_message')) {
         echo '<h2>' . esc_html($message['title']) . '</h2>';
         echo '<p>' . esc_html($message['message']) . '</p>';
 
-        $warehouse_id = pc_folio_get_order_warehouse_id_for_customer($order);
-        if ($warehouse_id !== '') {
-            echo '<p class="pc-folio-customer-notice__warehouse">' . esc_html(sprintf(__('Folio warehouse: %s', 'pc-folio-order-link'), $warehouse_id)) . '</p>';
-        }
-
         $child_order_ids = isset($message['child_order_ids']) && is_array($message['child_order_ids'])
             ? array_values(array_filter(array_map('absint', $message['child_order_ids'])))
             : [];
+        if (!$child_order_ids) {
+            $warehouse_id = pc_folio_get_order_warehouse_id_for_customer($order);
+            if ($warehouse_id !== '') {
+                echo '<p class="pc-folio-customer-notice__warehouse">' . esc_html(sprintf(__('Folio warehouse: %s', 'pc-folio-order-link'), $warehouse_id)) . '</p>';
+            }
+        }
+
         if ($child_order_ids) {
             echo '<ul class="pc-folio-customer-notice__orders">';
             foreach ($child_order_ids as $child_order_id) {
@@ -634,6 +636,10 @@ if (!function_exists('pc_folio_render_customer_order_message')) {
                     $child_order->get_order_number(),
                     wc_get_order_status_name($child_order->get_status())
                 );
+                $child_warehouse_id = pc_folio_get_order_warehouse_id_for_customer($child_order);
+                if ($child_warehouse_id !== '') {
+                    $child_label .= ' · ' . sprintf(__('warehouse %s', 'pc-folio-order-link'), $child_warehouse_id);
+                }
                 echo '<li><a href="' . esc_url($child_order->get_view_order_url()) . '">' . esc_html($child_label) . '</a></li>';
             }
             echo '</ul>';
