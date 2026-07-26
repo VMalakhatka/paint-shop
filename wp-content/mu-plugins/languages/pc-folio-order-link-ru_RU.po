@@ -107,6 +107,15 @@ msgstr "Сохранённых документов ФОЛИО пока нет."
 msgid "Linked Woo child orders"
 msgstr "Связанные дочерние заказы Woo"
 
+msgid "Parent Woo order"
+msgstr "Родительский заказ Woo"
+
+msgid "This order was created from the parent order during Folio split."
+msgstr "Этот заказ создан из родительского заказа во время разделения ФОЛИО."
+
+msgid "Folio split document kind"
+msgstr "Тип документа разделения ФОЛИО"
+
 msgid "No linked Woo child orders yet."
 msgstr "Связанных дочерних заказов Woo пока нет."
 

@@ -351,6 +351,21 @@ if (!function_exists('pc_folio_build_parent_split_notice')) {
     }
 }
 
+if (!function_exists('pc_folio_get_parent_split_order_status')) {
+    /**
+     * WooCommerce uses checkout-draft as the native order draft status.
+     */
+    function pc_folio_get_parent_split_order_status(): string
+    {
+        if (class_exists('\Automattic\WooCommerce\Enums\OrderStatus')
+            && defined('\Automattic\WooCommerce\Enums\OrderStatus::CHECKOUT_DRAFT')) {
+            return \Automattic\WooCommerce\Enums\OrderStatus::CHECKOUT_DRAFT;
+        }
+
+        return 'checkout-draft';
+    }
+}
+
 if (!function_exists('pc_folio_apply_saved_response_to_order')) {
     /**
      * Apply the saved Java response only as Woo meta/status preparation.
@@ -620,8 +635,9 @@ if (!function_exists('pc_folio_create_child_orders_from_saved_response')) {
         $parent_order->update_meta_data($keys['split_created_at'], current_time('mysql'));
         pc_folio_set_order_customer_notice($parent_order, pc_folio_build_parent_split_notice());
         $parent_order->save();
-        if ($parent_order->get_status() !== 'draft') {
-            $parent_order->update_status('draft', __('Parent order moved to draft after Folio split. Child order statuses were preserved.', 'pc-folio-order-link'));
+        $parent_split_status = pc_folio_get_parent_split_order_status();
+        if ($parent_order->get_status() !== $parent_split_status) {
+            $parent_order->update_status($parent_split_status, __('Parent order moved to draft after Folio split. Child order statuses were preserved.', 'pc-folio-order-link'));
         }
         $parent_order->add_order_note(sprintf(
             __('Created %d Woo child orders from saved Folio response. Parent order was moved to draft.', 'pc-folio-order-link'),
@@ -1192,10 +1208,35 @@ if (!function_exists('pc_folio_render_order_link_metabox')) {
             : [];
         $child_order_ids = $order->get_meta($document_keys['child_order_ids'], true);
         $child_order_ids = is_array($child_order_ids) ? array_values(array_filter(array_map('absint', $child_order_ids))) : [];
+        $parent_order_id = (int) $order->get_meta($document_keys['parent_order_id'], true);
+        $split_from_order_id = (int) $order->get_meta('_folio_split_from_order_id', true);
+        $source_parent_order_id = $parent_order_id > 0 ? $parent_order_id : $split_from_order_id;
+        $split_document_kind = (string) $order->get_meta('_folio_split_document_kind', true);
 
         echo '<hr>';
         echo '<p><strong>' . esc_html__('Split status', 'pc-folio-order-link') . '</strong><br>';
         echo '<code>' . esc_html($split_status !== '' ? $split_status : __('not set', 'pc-folio-order-link')) . '</code></p>';
+
+        if ($source_parent_order_id > 0) {
+            $source_parent_order = wc_get_order($source_parent_order_id);
+            $source_parent_label = $source_parent_order
+                ? sprintf('#%1$s (%2$s)', $source_parent_order->get_order_number(), wc_get_order_status_name($source_parent_order->get_status()))
+                : sprintf('#%d', $source_parent_order_id);
+            $source_parent_url = $source_parent_order ? $source_parent_order->get_edit_order_url() : '';
+
+            echo '<p><strong>' . esc_html__('Parent Woo order', 'pc-folio-order-link') . '</strong><br>';
+            if ($source_parent_url !== '') {
+                printf('<a href="%1$s">%2$s</a>', esc_url($source_parent_url), esc_html($source_parent_label));
+            } else {
+                echo esc_html($source_parent_label);
+            }
+            echo '<br><span class="description">' . esc_html__('This order was created from the parent order during Folio split.', 'pc-folio-order-link') . '</span></p>';
+        }
+
+        if ($split_document_kind !== '') {
+            echo '<p><strong>' . esc_html__('Folio split document kind', 'pc-folio-order-link') . '</strong><br>';
+            echo '<code>' . esc_html($split_document_kind) . '</code></p>';
+        }
 
         $customer_notice = (string) $order->get_meta('_folio_customer_notice', true);
         if ($customer_notice !== '') {

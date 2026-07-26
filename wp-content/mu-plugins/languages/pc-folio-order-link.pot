@@ -98,6 +98,15 @@ msgstr ""
 msgid "Linked Woo child orders"
 msgstr ""
 
+msgid "Parent Woo order"
+msgstr ""
+
+msgid "This order was created from the parent order during Folio split."
+msgstr ""
+
+msgid "Folio split document kind"
+msgstr ""
+
 msgid "No linked Woo child orders yet."
 msgstr ""
 
