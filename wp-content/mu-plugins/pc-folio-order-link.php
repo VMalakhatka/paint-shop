@@ -270,7 +270,157 @@ if (!function_exists('pc_folio_save_order_java_response')) {
             pc_folio_set_order_document_link($order, $single_link);
         }
 
-        $order->add_order_note(__('Folio account response was saved. Child Woo orders were not created yet.', 'pc-folio-order-link'));
+        $order->add_order_note(__('Folio account response was saved on the Woo order.', 'pc-folio-order-link'));
+    }
+}
+
+if (!function_exists('pc_folio_auto_checkout_enabled')) {
+    /**
+     * Allow production to disable automatic Folio creation with a constant or filter.
+     */
+    function pc_folio_auto_checkout_enabled(): bool
+    {
+        $enabled = !defined('PC_FOLIO_AUTO_CHECKOUT') || (bool) PC_FOLIO_AUTO_CHECKOUT;
+
+        return (bool) apply_filters('pc_folio_auto_checkout_enabled', $enabled);
+    }
+}
+
+if (!function_exists('pc_folio_validate_order_payload_for_create')) {
+    /**
+     * Validate only the fields that would make Java reject an automatic checkout run.
+     */
+    function pc_folio_validate_order_payload_for_create(array $payload): array
+    {
+        $errors = [];
+        $folio_client = isset($payload['folio_client']) && is_array($payload['folio_client'])
+            ? $payload['folio_client']
+            : [];
+        if (trim((string) ($folio_client['id'] ?? ($folio_client['short_name'] ?? ''))) === '') {
+            $errors[] = __('Folio client is not mapped for this Woo customer.', 'pc-folio-order-link');
+        }
+
+        $items = isset($payload['items']) && is_array($payload['items']) ? $payload['items'] : [];
+        if (!$items) {
+            $errors[] = __('Order has no line items for Folio.', 'pc-folio-order-link');
+        }
+
+        foreach ($items as $index => $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+
+            $sku = trim((string) ($item['sku'] ?? ''));
+            $label = $sku !== '' ? $sku : sprintf(__('item #%d', 'pc-folio-order-link'), $index + 1);
+            $allocations = isset($item['allocations']) && is_array($item['allocations']) ? $item['allocations'] : [];
+            if (!$allocations) {
+                $errors[] = sprintf(__('No stock allocation found for %s.', 'pc-folio-order-link'), $label);
+                continue;
+            }
+
+            foreach ($allocations as $allocation) {
+                if (!is_array($allocation)) {
+                    continue;
+                }
+
+                $warehouses = isset($allocation['folio_warehouses']) && is_array($allocation['folio_warehouses'])
+                    ? $allocation['folio_warehouses']
+                    : [];
+                if (!$warehouses) {
+                    $errors[] = sprintf(__('No Folio warehouse mapping found for %s.', 'pc-folio-order-link'), $label);
+                    break;
+                }
+            }
+        }
+
+        return array_values(array_unique($errors));
+    }
+}
+
+if (!function_exists('pc_folio_create_documents_for_order')) {
+    /**
+     * Create real Folio documents through Java and save the response on the Woo order.
+     */
+    function pc_folio_create_documents_for_order(\WC_Order $order, string $source = 'manual'): array
+    {
+        if (pc_folio_order_has_saved_documents($order)) {
+            return [
+                'ok'      => false,
+                'message' => __('Folio documents are already saved for this order.', 'pc-folio-order-link'),
+            ];
+        }
+
+        $payload = pc_folio_build_order_preview_payload($order);
+        if (!$payload) {
+            return [
+                'ok'      => false,
+                'message' => __('Could not build Folio order payload.', 'pc-folio-order-link'),
+            ];
+        }
+
+        $payload['preview_only'] = false;
+        $errors = pc_folio_validate_order_payload_for_create($payload);
+        if ($errors) {
+            return [
+                'ok'      => false,
+                'message' => implode(' ', $errors),
+                'payload' => $payload,
+            ];
+        }
+
+        $resp = pc_folio_order_link_java_post('/admin/folio/order-accounts', $payload, [
+            'timeout' => 180,
+        ]);
+        if (is_wp_error($resp)) {
+            return [
+                'ok'      => false,
+                'message' => $resp->get_error_message(),
+                'payload' => $payload,
+            ];
+        }
+
+        $code = (int) wp_remote_retrieve_response_code($resp);
+        $raw = (string) wp_remote_retrieve_body($resp);
+        $data = json_decode($raw, true);
+
+        if ($code < 200 || $code >= 300) {
+            return [
+                'ok'      => false,
+                'message' => sprintf('Java create HTTP %d', $code),
+                'raw'     => $raw,
+                'payload' => $payload,
+            ];
+        }
+
+        if (!is_array($data)) {
+            return [
+                'ok'      => false,
+                'message' => __('Invalid Java create response.', 'pc-folio-order-link'),
+                'raw'     => $raw,
+                'payload' => $payload,
+            ];
+        }
+
+        if (empty($data['ok'])) {
+            pc_folio_set_order_documents_result($order, $data);
+            return [
+                'ok'       => false,
+                'message'  => __('Java response is not OK.', 'pc-folio-order-link'),
+                'response' => $data,
+                'raw'      => $raw,
+                'payload'  => $payload,
+            ];
+        }
+
+        pc_folio_save_order_java_response($order, $data, $payload);
+        $order->add_order_note(sprintf(__('Folio account response was created automatically from %s.', 'pc-folio-order-link'), $source));
+
+        return [
+            'ok'       => true,
+            'response' => $data,
+            'raw'      => $raw,
+            'payload'  => $payload,
+        ];
     }
 }
 
@@ -647,6 +797,93 @@ if (!function_exists('pc_folio_create_child_orders_from_saved_response')) {
         ];
     }
 }
+
+if (!function_exists('pc_folio_auto_process_checkout_order')) {
+    /**
+     * Automatically run the verified manual Folio pipeline for a fresh checkout order.
+     */
+    function pc_folio_auto_process_checkout_order($order_id): void
+    {
+        if (!pc_folio_auto_checkout_enabled()) {
+            return;
+        }
+
+        $order_id = absint($order_id);
+        $order = $order_id > 0 ? wc_get_order($order_id) : false;
+        if (!$order instanceof \WC_Order) {
+            return;
+        }
+
+        if ((int) $order->get_parent_id() > 0 || $order->get_meta('_folio_split_from_order_id', true)) {
+            return;
+        }
+
+        if (in_array($order->get_status(), ['trash', 'cancelled', 'refunded', 'failed', 'pc-draft'], true)) {
+            return;
+        }
+
+        if (pc_folio_order_has_saved_documents($order)) {
+            return;
+        }
+
+        $auto_status = (string) $order->get_meta('_folio_auto_status', true);
+        if (in_array($auto_status, ['running', 'success'], true)) {
+            return;
+        }
+
+        $order->update_meta_data('_folio_auto_status', 'running');
+        $order->update_meta_data('_folio_auto_started_at', current_time('mysql'));
+        $order->delete_meta_data('_folio_auto_error');
+        $order->save();
+
+        try {
+            $create = pc_folio_create_documents_for_order($order, 'checkout');
+            if (empty($create['ok'])) {
+                throw new \RuntimeException($create['message'] ?? __('Folio automatic creation failed.', 'pc-folio-order-link'));
+            }
+
+            $apply = pc_folio_apply_saved_response_to_order($order);
+            if (empty($apply['ok'])) {
+                throw new \RuntimeException($apply['message'] ?? __('Saved Folio response could not be applied.', 'pc-folio-order-link'));
+            }
+
+            $child_result = null;
+            if (($apply['status'] ?? '') === 'ready_to_split') {
+                $child_result = pc_folio_create_child_orders_from_saved_response($order);
+                if (empty($child_result['ok'])) {
+                    throw new \RuntimeException($child_result['message'] ?? __('Woo child orders could not be created.', 'pc-folio-order-link'));
+                }
+            }
+
+            $order = wc_get_order($order_id);
+            if ($order instanceof \WC_Order) {
+                $order->update_meta_data('_folio_auto_status', 'success');
+                $order->update_meta_data('_folio_auto_finished_at', current_time('mysql'));
+                $order->delete_meta_data('_folio_auto_error');
+                $order->add_order_note(__('Automatic Folio checkout processing completed.', 'pc-folio-order-link'));
+                if (is_array($child_result) && !empty($child_result['child_order_ids'])) {
+                    $order->add_order_note(sprintf(
+                        __('Automatic Folio split created child Woo orders: %s.', 'pc-folio-order-link'),
+                        implode(', ', array_map('strval', (array) $child_result['child_order_ids']))
+                    ));
+                }
+                $order->save();
+            }
+        } catch (\Throwable $e) {
+            $order = wc_get_order($order_id);
+            if ($order instanceof \WC_Order) {
+                $order->update_meta_data('_folio_auto_status', 'error');
+                $order->update_meta_data('_folio_auto_finished_at', current_time('mysql'));
+                $order->update_meta_data('_folio_auto_error', $e->getMessage());
+                $order->add_order_note(sprintf(__('Automatic Folio checkout processing failed: %s', 'pc-folio-order-link'), $e->getMessage()));
+                $order->save();
+            }
+        }
+    }
+}
+
+add_action('woocommerce_checkout_order_processed', 'pc_folio_auto_process_checkout_order', 90, 1);
+add_action('woocommerce_store_api_checkout_order_processed', 'pc_folio_auto_process_checkout_order', 90, 1);
 
 if (!function_exists('pc_folio_set_order_documents_result')) {
     /**
@@ -1841,48 +2078,20 @@ if (!function_exists('pc_folio_order_create_java_ajax')) {
             wp_send_json_error(['message' => __('Folio documents are already saved for this order.', 'pc-folio-order-link')], 409);
         }
 
-        $payload['preview_only'] = false;
-
-        $resp = pc_folio_order_link_java_post('/admin/folio/order-accounts', $payload, [
-            'timeout' => 180,
-        ]);
-        if (is_wp_error($resp)) {
-            wp_send_json_error(['message' => $resp->get_error_message()], 500);
-        }
-
-        $code = (int) wp_remote_retrieve_response_code($resp);
-        $raw = (string) wp_remote_retrieve_body($resp);
-        $data = json_decode($raw, true);
-
-        if ($code < 200 || $code >= 300) {
+        $result = pc_folio_create_documents_for_order($order, 'admin');
+        if (empty($result['ok'])) {
             wp_send_json_error([
-                'message' => sprintf('Java create HTTP %d', $code),
-                'raw'     => $raw,
-            ], $code);
-        }
-
-        if (!is_array($data)) {
-            wp_send_json_error([
-                'message' => __('Invalid Java create response.', 'pc-folio-order-link'),
-                'raw'     => $raw,
+                'message'  => $result['message'] ?? __('Java response is not OK.', 'pc-folio-order-link'),
+                'response' => $result['response'] ?? null,
+                'raw'      => $result['raw'] ?? '',
             ], 500);
         }
 
-        if (empty($data['ok'])) {
-            pc_folio_set_order_documents_result($order, $data);
-            $order->add_order_note(__('Folio account creation failed. Java response was saved for review.', 'pc-folio-order-link'));
-            wp_send_json_error([
-                'message'  => __('Java response is not OK.', 'pc-folio-order-link'),
-                'response' => $data,
-                'raw'      => wp_json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-            ], 500);
-        }
-
-        pc_folio_save_order_java_response($order, $data, $payload);
+        $data = is_array($result['response'] ?? null) ? $result['response'] : [];
 
         wp_send_json_success([
             'response' => $data,
-            'raw'      => wp_json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'raw'      => (string) ($result['raw'] ?? wp_json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)),
             'saved'    => true,
         ]);
     }

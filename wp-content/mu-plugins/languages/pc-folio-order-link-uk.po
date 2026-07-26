@@ -282,10 +282,41 @@ msgstr "Дочірні замовлення Woo створено."
 msgid "Reloading order page to show linked child orders..."
 msgstr "Оновлення сторінки замовлення, щоб показати пов'язані дочірні замовлення..."
 
-msgid "Folio account response was saved. Child Woo orders were not created yet."
-msgstr ""
-"Відповідь про рахунки ФОЛІО збережено. Дочірні замовлення Woo ще не "
-"створювалися."
+msgid "Folio account response was saved on the Woo order."
+msgstr "Відповідь про рахунки ФОЛІО збережено в замовленні Woo."
+
+msgid "Folio client is not mapped for this Woo customer."
+msgstr "Для цього клієнта Woo не задано відповідність клієнту ФОЛІО."
+
+msgid "Order has no line items for Folio."
+msgstr "У замовленні немає товарних позицій для ФОЛІО."
+
+msgid "item #%d"
+msgstr "позиція #%d"
+
+msgid "No stock allocation found for %s."
+msgstr "Для %s не знайдено план розподілу залишків."
+
+msgid "No Folio warehouse mapping found for %s."
+msgstr "Для %s не знайдено відповідність складу ФОЛІО."
+
+msgid "Could not build Folio order payload."
+msgstr "Не вдалося сформувати payload замовлення ФОЛІО."
+
+msgid "Folio account response was created automatically from %s."
+msgstr "Відповідь про рахунки ФОЛІО створено автоматично з %s."
+
+msgid "Folio automatic creation failed."
+msgstr "Автоматичне створення ФОЛІО не вдалося."
+
+msgid "Automatic Folio checkout processing completed."
+msgstr "Автоматичну обробку checkout у ФОЛІО завершено."
+
+msgid "Automatic Folio split created child Woo orders: %s."
+msgstr "Автоматичне розділення ФОЛІО створило дочірні замовлення Woo: %s."
+
+msgid "Automatic Folio checkout processing failed: %s"
+msgstr "Автоматична обробка checkout у ФОЛІО не вдалася: %s"
 
 msgid "Forbidden."
 msgstr "Заборонено."
