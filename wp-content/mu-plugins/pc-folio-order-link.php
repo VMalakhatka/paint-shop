@@ -353,16 +353,11 @@ if (!function_exists('pc_folio_build_parent_split_notice')) {
 
 if (!function_exists('pc_folio_get_parent_split_order_status')) {
     /**
-     * WooCommerce uses checkout-draft as the native order draft status.
+     * Use the visible local import draft status for split parent orders.
      */
     function pc_folio_get_parent_split_order_status(): string
     {
-        if (class_exists('\Automattic\WooCommerce\Enums\OrderStatus')
-            && defined('\Automattic\WooCommerce\Enums\OrderStatus::CHECKOUT_DRAFT')) {
-            return \Automattic\WooCommerce\Enums\OrderStatus::CHECKOUT_DRAFT;
-        }
-
-        return 'checkout-draft';
+        return 'pc-draft';
     }
 }
 
