@@ -2,6 +2,28 @@
 чтобы достучаться до базы на серверер надо поднять тунель 
 ssh -p 2022 -N -L 3307:127.0.0.1:3306 vmalakhatka@51.83.33.95
 
+## Folio / Woo Orders
+
+Основная документация по созданию счетов ФОЛІО из Woo-заказов:
+
+`docs/FOLIO_ORDER_JSON_CONTRACT.md`
+
+Там описаны:
+
+- JSON contract Woo -> Java/Folio;
+- ручная цепочка preview/create/apply/split;
+- автоматическая обработка checkout-заказов;
+- meta-поля связи Woo order <-> Folio document;
+- статусы parent/child orders после split;
+- SQL-проверки и recovery notes.
+
+Автоматическое создание документов ФОЛІО при checkout включено по умолчанию.
+Отключить можно в `wp-config.php` или environment-specific config:
+
+```php
+define('PC_FOLIO_AUTO_CHECKOUT', false);
+```
+
 ## 🚀 Перенос базы WordPress из локальной среды (Local) на сервер
 <details>
 <summary><strong>deploy db to kreul.com.ua </strong></summary>

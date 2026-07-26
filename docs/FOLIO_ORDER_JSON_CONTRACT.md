@@ -2,7 +2,11 @@
 
 This document describes the draft WooCommerce to Folio order payload.
 
-Status: draft, preview-only on the WooCommerce side. - в Фолио это неучитываемый счет , который не меняет остатки товара 
+Status: implemented in Woo preview, manual real create, and automatic checkout processing.
+
+`preview_only=true` is used only for preview/simulation. Real checkout creation sends
+`preview_only=false` to Java. In Folio, a missing-stock or draft document is a
+non-accounting account that does not change stock.
 
 WooCommerce must not split one order into multiple Folio documents. WooCommerce sends the structured order, customer mapping, item allocation plan, and available Folio warehouses with priorities. Java/Folio owns the final document split and warehouse selection logic.
 
@@ -26,7 +30,10 @@ Admin UI:
 
 WooCommerce order edit screen -> `Folio JSON preview`.
 
-The preview is read-only and does not send anything to Folio.
+The preview textarea is read-only and does not send anything to Folio by itself.
+The same metabox also has actions for sending a preview to Java, creating real
+Folio account documents, applying a saved Java response, and creating Woo child
+orders from that response.
 
 ## Payload Shape
 
@@ -206,11 +213,19 @@ Currently fixed to `buh` on the Woo side because the authoritative Folio login/u
 
 `folio_account_header.sourceInfo`
 
-Currently fixed to `Интернет заказ сайт`.
+Built from site/customer information and trimmed to 30 UTF-8 characters because
+Folio stores it in `L_CP1_PLAT varchar(30)`.
 
 `folio_account_header.additionalInfo`
 
-Woo customer checkout note.
+Compact Woo order reference, also trimmed to 30 UTF-8 characters because Folio
+stores it in `L_CP2_PLAT varchar(30)`.
+
+Current format:
+
+```text
+Int 116906 2026-07-25 16:20
+```
 
 `folio_account_header.priceContractType`
 
@@ -352,6 +367,126 @@ Multiple-document meta keys:
 This layer only stores metadata. It does not create child orders, send anything to Folio, or change Woo order statuses.
 
 The old single-document meta keys remain available for the simple case where Java returns exactly one real account document.
+
+## Woo Checkout Automation
+
+Automatic Folio processing runs from:
+
+```php
+woocommerce_checkout_order_processed
+woocommerce_store_api_checkout_order_processed
+```
+
+File:
+
+`wp-content/mu-plugins/pc-folio-order-link.php`
+
+Main functions:
+
+```php
+pc_folio_auto_process_checkout_order($order_id): void
+pc_folio_create_documents_for_order(\WC_Order $order, string $source = 'manual'): array
+pc_folio_apply_saved_response_to_order(\WC_Order $order): array
+pc_folio_create_child_orders_from_saved_response(\WC_Order $parent_order): array
+```
+
+The automatic pipeline intentionally reuses the same helpers as the manual admin
+buttons:
+
+1. Build the Woo -> Folio payload.
+2. Validate critical fields before Java:
+   - Folio client mapping exists.
+   - Order has line items.
+   - Each line item has `_pc_alloc_plan` allocations.
+   - Each allocation has Folio warehouse mappings.
+3. Send `preview_only=false` to Java endpoint:
+   - `POST /admin/folio/order-accounts`
+4. Save the Java response to Woo meta.
+5. Apply the saved response.
+6. If Java returned one real document:
+   - keep the original Woo order;
+   - save the single Folio document link on that order;
+   - keep/set Woo status `processing`.
+7. If Java returned multiple documents or a `missing_stock_account`:
+   - create child Woo orders;
+   - real account children get status `processing`;
+   - missing-stock children get status `on-hold`;
+   - parent gets status `pc-draft` (`wc-pc-draft`, visible as `Draft (import)`);
+   - parent stores `_folio_child_order_ids`;
+   - children store `_folio_parent_order_id` and `_folio_split_from_order_id`.
+
+Checkout must not fail if Folio/Java fails. On error, Woo stores:
+
+- `_folio_auto_status = error`
+- `_folio_auto_error`
+- `_folio_auto_started_at`
+- `_folio_auto_finished_at`
+
+and adds a private order note. The manual buttons remain available for retry or
+diagnostics.
+
+Successful automatic processing stores:
+
+- `_folio_auto_status = success`
+- `_folio_auto_started_at`
+- `_folio_auto_finished_at`
+
+## Runtime Flag
+
+Automatic checkout processing can be disabled in `wp-config.php` or environment
+specific config:
+
+```php
+define('PC_FOLIO_AUTO_CHECKOUT', false);
+```
+
+Default behavior when the constant is not defined:
+
+```php
+PC_FOLIO_AUTO_CHECKOUT = true
+```
+
+Use this flag before risky deploys, Java maintenance, Folio maintenance, or any
+period where Woo orders should be accepted but Folio documents should not be
+created automatically.
+
+## Current Manual Recovery / Debug Checks
+
+Check Folio automation meta on an HPOS order:
+
+```sql
+SELECT order_id, meta_key, meta_value
+FROM wp_wc_orders_meta
+WHERE order_id = 116906
+  AND meta_key LIKE '_folio_%'
+ORDER BY meta_key;
+```
+
+Check a split parent and children:
+
+```sql
+SELECT id, parent_order_id, status, total_amount, date_created_gmt
+FROM wp_wc_orders
+WHERE id IN (116906, 116907, 116908)
+ORDER BY id;
+```
+
+Expected statuses after split:
+
+```text
+parent        wc-pc-draft
+real child    wc-processing
+missing child wc-on-hold
+```
+
+## Future: Existing Folio Documents / History Import
+
+Planned safe sequence:
+
+1. Manual link existing Folio document to a Woo order.
+2. Folio history preview by mapped customer without creating Woo orders.
+3. Import selected Folio document as Woo draft.
+4. Bulk import/sync Folio history only after duplicate rules are proven.
 
 ## Open Questions For Java
 
