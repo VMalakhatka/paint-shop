@@ -801,18 +801,20 @@ if (!function_exists('pc_folio_create_child_orders_from_saved_response')) {
 if (!function_exists('pc_folio_auto_process_checkout_order')) {
     /**
      * Automatically run the verified manual Folio pipeline for a fresh checkout order.
+     *
+     * Classic checkout passes an order ID, while Store API checkout passes a WC_Order object.
      */
-    function pc_folio_auto_process_checkout_order($order_id): void
+    function pc_folio_auto_process_checkout_order($order_or_id): void
     {
         if (!pc_folio_auto_checkout_enabled()) {
             return;
         }
 
-        $order_id = absint($order_id);
-        $order = $order_id > 0 ? wc_get_order($order_id) : false;
+        $order = ($order_or_id instanceof \WC_Order) ? $order_or_id : wc_get_order(absint($order_or_id));
         if (!$order instanceof \WC_Order) {
             return;
         }
+        $order_id = (int) $order->get_id();
 
         if ((int) $order->get_parent_id() > 0 || $order->get_meta('_folio_split_from_order_id', true)) {
             return;
