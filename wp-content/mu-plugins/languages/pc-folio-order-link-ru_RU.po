@@ -62,6 +62,9 @@ msgstr ""
 msgid "Split status"
 msgstr "Статус разделения"
 
+msgid "Folio customer notice"
+msgstr "Сообщение ФОЛИО для клиента"
+
 msgid "not set"
 msgstr "не задан"
 
@@ -331,6 +334,22 @@ msgstr ""
 
 msgid "warehouse %s"
 msgstr "склад %s"
+
+msgid "Product is currently unavailable. This part of the order was moved to waiting/preorder mode. A manager will contact the customer to confirm details."
+msgstr ""
+"Товар сейчас отсутствует. Эта часть заказа переведена в режим ожидания/"
+"предзаказа. Менеджер свяжется с клиентом для согласования деталей."
+
+msgid "Shipment will be prepared from the assigned Folio warehouse."
+msgstr "Отправление будет подготовлено с назначенного склада ФОЛИО."
+
+msgid "Shipment will be prepared from Folio warehouse %s."
+msgstr "Отправление будет подготовлено со склада ФОЛИО %s."
+
+msgid "Order was split into multiple Folio accounts. Each account corresponds to a separate warehouse."
+msgstr ""
+"Заказ разделён на несколько счетов ФОЛИО. Каждый счёт соответствует "
+"отдельному складу."
 
 msgid "Folio item"
 msgstr "Позиция ФОЛИО"

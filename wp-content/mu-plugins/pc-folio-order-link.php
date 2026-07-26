@@ -296,6 +296,61 @@ if (!function_exists('pc_folio_document_label')) {
     }
 }
 
+if (!function_exists('pc_folio_get_document_warehouse_id')) {
+    /**
+     * Read the Folio warehouse ID from a document response.
+     */
+    function pc_folio_get_document_warehouse_id(array $document): string
+    {
+        return (string) ($document['folio_warehouse_id'] ?? ($document['warehouseId'] ?? ''));
+    }
+}
+
+if (!function_exists('pc_folio_set_order_customer_notice')) {
+    /**
+     * Store a future customer-facing Folio notice and mirror it as a private admin note.
+     */
+    function pc_folio_set_order_customer_notice(\WC_Order $order, string $notice): void
+    {
+        $notice = trim($notice);
+        if ($notice === '') {
+            return;
+        }
+
+        $order->update_meta_data('_folio_customer_notice', $notice);
+        $order->add_order_note($notice, false);
+    }
+}
+
+if (!function_exists('pc_folio_build_child_order_notice')) {
+    /**
+     * Build the future customer-facing notice for a Folio child order.
+     */
+    function pc_folio_build_child_order_notice(array $document): string
+    {
+        if (pc_folio_is_missing_document($document)) {
+            return __('Product is currently unavailable. This part of the order was moved to waiting/preorder mode. A manager will contact the customer to confirm details.', 'pc-folio-order-link');
+        }
+
+        $warehouse_id = pc_folio_get_document_warehouse_id($document);
+        if ($warehouse_id === '') {
+            return __('Shipment will be prepared from the assigned Folio warehouse.', 'pc-folio-order-link');
+        }
+
+        return sprintf(__('Shipment will be prepared from Folio warehouse %s.', 'pc-folio-order-link'), $warehouse_id);
+    }
+}
+
+if (!function_exists('pc_folio_build_parent_split_notice')) {
+    /**
+     * Build the future customer-facing notice for a split parent order.
+     */
+    function pc_folio_build_parent_split_notice(): string
+    {
+        return __('Order was split into multiple Folio accounts. Each account corresponds to a separate warehouse.', 'pc-folio-order-link');
+    }
+}
+
 if (!function_exists('pc_folio_apply_saved_response_to_order')) {
     /**
      * Apply the saved Java response only as Woo meta/status preparation.
@@ -506,6 +561,7 @@ if (!function_exists('pc_folio_create_child_order_from_document')) {
         $child_order->update_meta_data('_folio_split_from_order_id', (int) $parent_order->get_id());
         $child_order->update_meta_data('_folio_split_document_kind', pc_folio_is_missing_document($document) ? 'missing_stock' : 'account');
         pc_folio_set_order_document_link($child_order, pc_folio_get_single_document_link($document));
+        pc_folio_set_order_customer_notice($child_order, pc_folio_build_child_order_notice($document));
 
         $status = pc_folio_is_missing_document($document) ? 'on-hold' : 'processing';
         $note = pc_folio_is_missing_document($document)
@@ -562,6 +618,7 @@ if (!function_exists('pc_folio_create_child_orders_from_saved_response')) {
         pc_folio_set_parent_child_links($parent_order, $child_order_ids);
         $parent_order->update_meta_data($keys['split_status'], 'split_created');
         $parent_order->update_meta_data($keys['split_created_at'], current_time('mysql'));
+        pc_folio_set_order_customer_notice($parent_order, pc_folio_build_parent_split_notice());
         $parent_order->save();
         if ($parent_order->get_status() !== 'draft') {
             $parent_order->update_status('draft', __('Parent order moved to draft after Folio split. Child order statuses were preserved.', 'pc-folio-order-link'));
@@ -1109,6 +1166,12 @@ if (!function_exists('pc_folio_render_order_link_metabox')) {
         echo '<hr>';
         echo '<p><strong>' . esc_html__('Split status', 'pc-folio-order-link') . '</strong><br>';
         echo '<code>' . esc_html($split_status !== '' ? $split_status : __('not set', 'pc-folio-order-link')) . '</code></p>';
+
+        $customer_notice = (string) $order->get_meta('_folio_customer_notice', true);
+        if ($customer_notice !== '') {
+            echo '<p><strong>' . esc_html__('Folio customer notice', 'pc-folio-order-link') . '</strong><br>';
+            echo '<span class="description">' . esc_html($customer_notice) . '</span></p>';
+        }
 
         echo '<p><strong>' . esc_html__('Saved Folio documents', 'pc-folio-order-link') . '</strong></p>';
         if ($documents) {

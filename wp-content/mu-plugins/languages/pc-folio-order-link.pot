@@ -54,6 +54,9 @@ msgstr ""
 msgid "Split status"
 msgstr ""
 
+msgid "Folio customer notice"
+msgstr ""
+
 msgid "not set"
 msgstr ""
 
@@ -306,6 +309,18 @@ msgid "Saved Folio response marked ready for split. No child orders were created
 msgstr ""
 
 msgid "warehouse %s"
+msgstr ""
+
+msgid "Product is currently unavailable. This part of the order was moved to waiting/preorder mode. A manager will contact the customer to confirm details."
+msgstr ""
+
+msgid "Shipment will be prepared from the assigned Folio warehouse."
+msgstr ""
+
+msgid "Shipment will be prepared from Folio warehouse %s."
+msgstr ""
+
+msgid "Order was split into multiple Folio accounts. Each account corresponds to a separate warehouse."
 msgstr ""
 
 msgid "Folio item"
