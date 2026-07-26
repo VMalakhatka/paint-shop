@@ -1391,6 +1391,29 @@ if (!function_exists('pc_folio_render_order_preview_metabox')) {
                 return parts.length ? parts.join(' - ') : JSON.stringify(warning);
             }
 
+            function ajaxErrorText(data, fallback) {
+                var lines = [];
+                if (data && data.message) {
+                    lines.push(asText(data.message));
+                } else {
+                    lines.push(fallback);
+                }
+
+                if (data && data.raw) {
+                    lines.push('');
+                    lines.push('Raw response:');
+                    lines.push(asText(data.raw));
+                }
+
+                if (data && data.response) {
+                    lines.push('');
+                    lines.push('Parsed response:');
+                    lines.push(JSON.stringify(data.response, null, 2));
+                }
+
+                return lines.join("\n");
+            }
+
             function simulate(data) {
                 var docs = Array.isArray(data.documents) ? data.documents : [];
                 var realDocs = docs.filter(function(doc){ return doc && !isMissingDoc(doc); });
@@ -1484,7 +1507,7 @@ if (!function_exists('pc_folio_render_order_preview_metabox')) {
                 .then(function(resp){
                     var data = resp && resp.success ? resp.data : (resp ? resp.data : null);
                     if (!resp || !resp.success) {
-                        throw new Error(data && data.message ? data.message : (previewOnly ? '<?php echo esc_js(__('Java preview request failed.', 'pc-folio-order-link')); ?>' : '<?php echo esc_js(__('Java create request failed.', 'pc-folio-order-link')); ?>'));
+                        throw new Error(ajaxErrorText(data, previewOnly ? '<?php echo esc_js(__('Java preview request failed.', 'pc-folio-order-link')); ?>' : '<?php echo esc_js(__('Java create request failed.', 'pc-folio-order-link')); ?>'));
                     }
 
                     rawResponse.textContent = data.raw || JSON.stringify(data.response, null, 2);
@@ -1549,7 +1572,7 @@ if (!function_exists('pc_folio_render_order_preview_metabox')) {
                     .then(function(resp){
                         var data = resp && resp.success ? resp.data : (resp ? resp.data : null);
                         if (!resp || !resp.success) {
-                            throw new Error(data && data.message ? data.message : '<?php echo esc_js(__('Saved Folio response could not be loaded.', 'pc-folio-order-link')); ?>');
+                            throw new Error(ajaxErrorText(data, '<?php echo esc_js(__('Saved Folio response could not be loaded.', 'pc-folio-order-link')); ?>'));
                         }
 
                         rawResponse.textContent = data.raw || JSON.stringify(data.response, null, 2);
@@ -1593,7 +1616,7 @@ if (!function_exists('pc_folio_render_order_preview_metabox')) {
                     .then(function(resp){
                         var data = resp && resp.success ? resp.data : (resp ? resp.data : null);
                         if (!resp || !resp.success) {
-                            throw new Error(data && data.message ? data.message : '<?php echo esc_js(__('Saved Folio response could not be applied.', 'pc-folio-order-link')); ?>');
+                            throw new Error(ajaxErrorText(data, '<?php echo esc_js(__('Saved Folio response could not be applied.', 'pc-folio-order-link')); ?>'));
                         }
 
                         rawResponse.textContent = data.raw || JSON.stringify(data.result, null, 2);
@@ -1636,7 +1659,7 @@ if (!function_exists('pc_folio_render_order_preview_metabox')) {
                     .then(function(resp){
                         var data = resp && resp.success ? resp.data : (resp ? resp.data : null);
                         if (!resp || !resp.success) {
-                            throw new Error(data && data.message ? data.message : '<?php echo esc_js(__('Woo child orders could not be created.', 'pc-folio-order-link')); ?>');
+                            throw new Error(ajaxErrorText(data, '<?php echo esc_js(__('Woo child orders could not be created.', 'pc-folio-order-link')); ?>'));
                         }
 
                         rawResponse.textContent = data.raw || JSON.stringify(data.result, null, 2);
