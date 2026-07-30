@@ -817,6 +817,25 @@ if (!function_exists('pc_folio_get_parent_split_order_status')) {
     }
 }
 
+if (!function_exists('pc_folio_order_should_wait_for_online_payment')) {
+    /**
+     * Online gateways create the order before payment, so Folio must wait until Woo marks it paid.
+     */
+    function pc_folio_order_should_wait_for_online_payment(\WC_Order $order): bool
+    {
+        $payment_method = strtolower((string) $order->get_payment_method());
+        $online_methods = (array) apply_filters('pc_folio_online_payment_methods', [
+            'wayforpay',
+        ]);
+
+        if (!in_array($payment_method, array_map('strtolower', $online_methods), true)) {
+            return false;
+        }
+
+        return !$order->is_paid();
+    }
+}
+
 if (!function_exists('pc_folio_apply_saved_response_to_order')) {
     /**
      * Apply the saved Java response only as Woo meta/status preparation.
@@ -1134,6 +1153,16 @@ if (!function_exists('pc_folio_auto_process_checkout_order')) {
             return;
         }
 
+        if (pc_folio_order_should_wait_for_online_payment($order)) {
+            $order->update_meta_data('_folio_auto_status', 'waiting_payment');
+            $order->update_meta_data('_folio_auto_started_at', current_time('mysql'));
+            $order->delete_meta_data('_folio_auto_error');
+            $order->delete_meta_data('_folio_auto_error_raw');
+            $order->add_order_note(__('Automatic Folio checkout processing is waiting for online payment confirmation.', 'pc-folio-order-link'));
+            $order->save();
+            return;
+        }
+
         $auto_status = (string) $order->get_meta('_folio_auto_status', true);
         if (in_array($auto_status, ['running', 'success'], true)) {
             return;
@@ -1198,6 +1227,8 @@ if (!function_exists('pc_folio_auto_process_checkout_order')) {
 
 add_action('woocommerce_checkout_order_processed', 'pc_folio_auto_process_checkout_order', 90, 1);
 add_action('woocommerce_store_api_checkout_order_processed', 'pc_folio_auto_process_checkout_order', 90, 1);
+add_action('woocommerce_payment_complete', 'pc_folio_auto_process_checkout_order', 90, 1);
+add_action('woocommerce_order_status_processing', 'pc_folio_auto_process_checkout_order', 90, 1);
 
 if (!function_exists('pc_folio_set_order_documents_result')) {
     /**
