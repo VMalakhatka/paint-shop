@@ -61,7 +61,7 @@ add_action('pre_get_posts', function(WP_Query $q){
  * which is too late for Relevanssi's wp_after_insert_post index update.
  */
 function psu_queue_relevanssi_product_reindex($meta_id, int $object_id, string $meta_key, $meta_value): void {
-    if (!in_array($meta_key, ['_sku', '_gtin'], true)) {
+    if (!in_array($meta_key, ['_sku', '_gtin', '_ms_hash'], true)) {
         return;
     }
 
