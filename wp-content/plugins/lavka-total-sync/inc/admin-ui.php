@@ -454,6 +454,12 @@ add_action('wp_ajax_lts_sync_force_refresh', function(){
 
     $res = lts_call_java_sync_force_refresh_locked($payload, $opts, 'manual');
 
+    if (!empty($res['ok']) && !$dryRun) {
+        $json = isset($res['json']) && is_array($res['json']) ? $res['json'] : [];
+        $nextAfter = isset($json['nextAfter']) ? (string)$json['nextAfter'] : '';
+        $res['relevanssi_reindexed'] = lts_reindex_products_in_sync_window($cursorAfter, $nextAfter, $limit);
+    }
+
     if (!empty($res['ok'])) {
         wp_send_json_success($res);
     }
@@ -555,6 +561,59 @@ if (!function_exists('lts_call_java_sync_force_refresh_locked')) {
         } finally {
             lts_ecosystem_lock_release($lock_token);
         }
+    }
+}
+
+if (!function_exists('lts_reindex_products_in_sync_window')) {
+    function lts_reindex_products_in_sync_window(string $cursor_after, string $next_after, int $limit): array {
+        if (!function_exists('relevanssi_insert_edit')) {
+            return [
+                'ok' => false,
+                'reason' => 'relevanssi_unavailable',
+                'count' => 0,
+            ];
+        }
+
+        global $wpdb;
+
+        $cursor_after = lts_normalize_cursor_after($cursor_after);
+        $next_after = trim($next_after);
+        $limit = max(1, min(2000, $limit));
+
+        $where = "sku.meta_key = '_sku' AND p.post_type = 'product'";
+        $params = [];
+
+        if ($cursor_after !== '') {
+            $where .= ' AND sku.meta_value > %s';
+            $params[] = $cursor_after;
+        }
+
+        if ($next_after !== '') {
+            $where .= ' AND sku.meta_value <= %s';
+            $params[] = $next_after;
+        }
+
+        $sql = "
+            SELECT DISTINCT p.ID
+            FROM {$wpdb->posts} AS p
+            JOIN {$wpdb->postmeta} AS sku
+                ON sku.post_id = p.ID
+            WHERE {$where}
+            ORDER BY sku.meta_value ASC
+            LIMIT {$limit}
+        ";
+
+        $prepared = $params ? $wpdb->prepare($sql, ...$params) : $sql;
+        $product_ids = array_map('intval', (array)$wpdb->get_col($prepared));
+
+        foreach ($product_ids as $product_id) {
+            relevanssi_insert_edit($product_id);
+        }
+
+        return [
+            'ok' => true,
+            'count' => count($product_ids),
+        ];
     }
 }
 
