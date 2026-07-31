@@ -419,14 +419,71 @@ add_action('wp_ajax_lts_sync_run', function(){
 });
 
 /**
+ * AJAX: force Java product refresh with UI parameters.
+ */
+add_action('wp_ajax_lts_sync_force_refresh', function(){
+    if (!current_user_can(LTS_CAP)) wp_send_json_error(['error'=>'forbidden'], 403);
+    check_ajax_referer('lts_admin_nonce','nonce');
+
+    $opts = lts_get_options();
+    $def  = isset($opts['new_api_defaults']) && is_array($opts['new_api_defaults']) ? $opts['new_api_defaults'] : [];
+
+    $limit = isset($_POST['limit']) && $_POST['limit'] !== ''
+        ? (int)$_POST['limit']
+        : (int)($def['limit'] ?? 40000);
+
+    $pageSizeWoo = isset($_POST['pageSizeWoo']) && $_POST['pageSizeWoo'] !== ''
+        ? (int)$_POST['pageSizeWoo']
+        : (int)($def['pageSizeWoo'] ?? 200);
+
+    $cursorAfter = array_key_exists('cursorAfter', $_POST)
+        ? sanitize_text_field((string)$_POST['cursorAfter'])
+        : (string)($def['cursorAfter'] ?? '');
+    $cursorAfter = lts_normalize_cursor_after($cursorAfter);
+
+    $dryRun = isset($_POST['dryRun'])
+        ? ((int)$_POST['dryRun'] ? true : false)
+        : (bool)($def['dryRun'] ?? false);
+
+    $payload = [
+        'limit'       => $limit,
+        'pageSizeWoo' => max(1, min(200, $pageSizeWoo)),
+        'cursorAfter' => $cursorAfter,
+        'dryRun'      => $dryRun,
+    ];
+
+    $res = lts_call_java_sync_force_refresh_locked($payload, $opts, 'manual');
+
+    if (!empty($res['ok'])) {
+        wp_send_json_success($res);
+    }
+    wp_send_json_error($res);
+});
+
+/**
  * Internal: call Java /sync/run once with given payload.
  */
 if (!function_exists('lts_call_java_sync_run')) {
     function lts_call_java_sync_run(array $payload, array $opts) {
+        return lts_call_java_sync_endpoint('/sync/run', $payload, $opts);
+    }
+}
+
+/**
+ * Internal: call Java product force-refresh once with given payload.
+ */
+if (!function_exists('lts_call_java_sync_force_refresh')) {
+    function lts_call_java_sync_force_refresh(array $payload, array $opts) {
+        return lts_call_java_sync_endpoint('/admin/sync/products/force-refresh', $payload, $opts);
+    }
+}
+
+if (!function_exists('lts_call_java_sync_endpoint')) {
+    function lts_call_java_sync_endpoint(string $path, array $payload, array $opts) {
         $base = rtrim((string)($opts['java_base_url'] ?? ''), '/');
         if ($base === '') return ['ok'=>false,'error'=>'java_base_url_missing'];
 
-        $url = $base . '/sync/run';
+        $url = $base . '/' . ltrim($path, '/');
 
         $headers = [
             'Accept'       => 'application/json',
@@ -475,6 +532,26 @@ if (!function_exists('lts_call_java_sync_run_locked')) {
         $lock_token = $lock['token'] ?? null;
         try {
             return lts_call_java_sync_run($payload, $opts);
+        } finally {
+            lts_ecosystem_lock_release($lock_token);
+        }
+    }
+}
+
+if (!function_exists('lts_call_java_sync_force_refresh_locked')) {
+    function lts_call_java_sync_force_refresh_locked(array $payload, array $opts, string $source): array {
+        $lock = lts_ecosystem_lock_acquire(
+            'product_fields_java',
+            $source,
+            __('Java product force refresh', 'lavka-total-sync')
+        );
+        if (empty($lock['ok'])) {
+            return lts_ecosystem_lock_error($lock);
+        }
+
+        $lock_token = $lock['token'] ?? null;
+        try {
+            return lts_call_java_sync_force_refresh($payload, $opts);
         } finally {
             lts_ecosystem_lock_release($lock_token);
         }
@@ -1125,6 +1202,41 @@ function lts_render_run_page() {
 
             <pre id="lts_new_run_output" style="max-height:260px;overflow:auto;background:#111;color:#9fe;padding:10px;border-radius:6px;"></pre>
 
+        <div style="margin-top:1.5rem;padding:16px 18px;border-left:5px solid #d63638;background:#fff4f4;max-width:920px;">
+            <h2 style="margin-top:0;"><?php _e('Force refresh products (/admin/sync/products/force-refresh)', 'lavka-total-sync'); ?></h2>
+            <p>
+                <?php _e('Repair mode: Java will update matching Woo products even when _ms_hash is already equal. Use it to refresh catalog visibility and other synced fields.', 'lavka-total-sync'); ?>
+            </p>
+
+            <table class="form-table" role="presentation">
+            <tr>
+                <th scope="row"><label for="lts_force_limit"><?php _e('Limit (max items)', 'lavka-total-sync'); ?></label></th>
+                <td><input type="number" id="lts_force_limit" class="regular-text" placeholder="5"></td>
+            </tr>
+            <tr>
+                <th scope="row"><label for="lts_force_page"><?php _e('Woo batch size (1..200)', 'lavka-total-sync'); ?></label></th>
+                <td><input type="number" id="lts_force_page" class="regular-text" placeholder="5"></td>
+            </tr>
+            <tr>
+                <th scope="row"><label for="lts_force_after"><?php _e('Cursor (after SKU)', 'lavka-total-sync'); ?></label></th>
+                <td><input type="text" id="lts_force_after" class="regular-text" placeholder="KR-16233"></td>
+            </tr>
+            <tr>
+                <th scope="row"><?php _e('Dry run', 'lavka-total-sync'); ?></th>
+                <td><label><input type="checkbox" id="lts_force_dry"> <?php _e('Calculate only, no writes', 'lavka-total-sync'); ?></label></td>
+            </tr>
+            </table>
+
+            <p>
+                <button type="button" class="button button-primary" id="lts_btn_force_refresh" style="background:#b32d2e;border-color:#8a2424;">
+                    <?php _e('Force refresh products', 'lavka-total-sync'); ?>
+                </button>
+                <span id="lts_force_status" style="margin-left:.6rem;color:#555;"></span>
+            </p>
+
+            <pre id="lts_force_output" style="max-height:260px;overflow:auto;background:#111;color:#ffd6d6;padding:10px;border-radius:6px;"></pre>
+        </div>
+
         <hr class="wp-header-end">
         <h2><?php _e('Background total sync', 'lavka-total-sync'); ?></h2>
         <p class="description"><?php _e('Run sync in background and watch live log. This will not block the page.', 'lavka-total-sync'); ?></p>
@@ -1346,6 +1458,42 @@ function lts_render_run_page() {
                 } catch(e){
                 $('#lts_new_run_status').text('<?php echo esc_js(__('Error','lavka-total-sync')); ?>');
                 $('#lts_new_run_output').text(String(e));
+                }
+            });
+
+            $('#lts_btn_force_refresh').on('click', async function(){
+                $('#lts_force_status').text('<?php echo esc_js(__('Working…','lavka-total-sync')); ?>');
+                $('#lts_force_output').text('');
+
+                const cursorAfter = $.trim($('#lts_force_after').val());
+
+                const data = {
+                action: 'lts_sync_force_refresh',
+                nonce:  nonce,
+                limit:       $('#lts_force_limit').val(),
+                pageSizeWoo: $('#lts_force_page').val(),
+                cursorAfter: cursorAfter === '' ? '!' : cursorAfter,
+                dryRun:      $('#lts_force_dry').is(':checked') ? 1 : 0
+                };
+
+                try {
+                const res = await $.post(ajaxUrl, data);
+                if (!res || !res.success) {
+                    $('#lts_force_status').text('<?php echo esc_js(__('Error','lavka-total-sync')); ?>');
+                    $('#lts_force_output').text(print(res && res.data ? res.data : res));
+                    return;
+                }
+                $('#lts_force_status').text('<?php echo esc_js(__('Done.','lavka-total-sync')); ?>');
+
+                const d = res.data;
+                if (d.json) {
+                    $('#lts_force_output').text(print(d.json));
+                } else {
+                    $('#lts_force_output').text(d.raw || '(no body)');
+                }
+                } catch(e){
+                $('#lts_force_status').text('<?php echo esc_js(__('Error','lavka-total-sync')); ?>');
+                $('#lts_force_output').text(String(e));
                 }
             });
             })(jQuery);

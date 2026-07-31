@@ -341,3 +341,19 @@ msgstr "Деталі"
 #: inc/admin-ui.php
 msgid "Used by cron full sync as cursorAfter. Leave empty to start from the beginning."
 msgstr "Використовується повною синхронізацією cron як cursorAfter. Залиште порожнім, щоб почати з початку."
+
+#: inc/admin-ui.php
+msgid "Java product force refresh"
+msgstr "Примусове оновлення товарів Java"
+
+#: inc/admin-ui.php
+msgid "Force refresh products (/admin/sync/products/force-refresh)"
+msgstr "Примусово оновити товари (/admin/sync/products/force-refresh)"
+
+#: inc/admin-ui.php
+msgid "Repair mode: Java will update matching Woo products even when _ms_hash is already equal. Use it to refresh catalog visibility and other synced fields."
+msgstr "Режим ремонту: Java оновить відповідні товари Woo навіть коли _ms_hash уже збігається. Використовуйте для оновлення видимості в каталозі та інших синхронізованих полів."
+
+#: inc/admin-ui.php
+msgid "Force refresh products"
+msgstr "Примусово оновити товари"
