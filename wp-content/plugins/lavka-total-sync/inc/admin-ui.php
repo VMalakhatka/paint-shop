@@ -578,7 +578,7 @@ if (!function_exists('lts_reindex_products_in_sync_window')) {
 
         $cursor_after = lts_normalize_cursor_after($cursor_after);
         $next_after = trim($next_after);
-        $limit = max(1, min(2000, $limit));
+        $limit = max(1, min(3000, $limit));
 
         $where = "sku.meta_key = '_sku' AND p.post_type = 'product'";
         $params = [];
