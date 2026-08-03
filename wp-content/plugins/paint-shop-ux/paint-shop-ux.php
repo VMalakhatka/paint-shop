@@ -227,6 +227,24 @@ function psu_loop_product_thumbnail() {
     $title = psu_get_compact_title(get_the_title(), $product ? $product->get_id() : 0);
     echo '<div class="psu-prod-faux-thumb" role="img"><span class="psu-prod-faux-title">' . esc_html($title) . '</span></div>';
 }
+
+/** =======================
+ *  Desktop search on single product
+ *  ======================= */
+add_action('woocommerce_single_product_summary', 'psu_single_product_search', 41);
+
+function psu_single_product_search() {
+    if (!function_exists('is_product') || !is_product()) return;
+
+    $query = get_search_query();
+
+    echo '<form role="search" method="get" class="psu-single-product-search" action="' . esc_url(home_url('/')) . '">';
+    echo '<label class="screen-reader-text" for="psu-single-product-search-field">' . esc_html__('Search products', 'woocommerce') . '</label>';
+    echo '<input type="search" id="psu-single-product-search-field" class="psu-single-product-search__field" name="s" value="' . esc_attr($query) . '" placeholder="' . esc_attr__('Search products&hellip;', 'woocommerce') . '">';
+    echo '<input type="hidden" name="post_type" value="product">';
+    echo '<button type="submit" class="psu-single-product-search__button" aria-label="' . esc_attr__('Search', 'woocommerce') . '"><svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M10.5 5a5.5 5.5 0 1 0 3.47 9.77l3.13 3.13a1 1 0 0 0 1.41-1.41l-3.13-3.13A5.5 5.5 0 0 0 10.5 5Zm0 2a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7Z"/></svg></button>';
+    echo '</form>';
+}
 /** =======================
  *  CSS + JS
  *  ======================= */
@@ -315,6 +333,61 @@ $css = <<<CSS
 
 @media (min-width:769px){
   .psu-loop-sku{display:block}
+}
+
+/* Single product desktop search */
+.psu-single-product-search{
+  display:none;
+}
+
+@media (min-width:769px){
+  .psu-single-product-search{
+    display:flex;
+    width:min(420px, 100%);
+    margin:1rem 0 0;
+    border:1px solid #d9d9d9;
+    background:#fff;
+  }
+
+  .psu-single-product-search__field{
+    flex:1 1 auto;
+    min-width:0;
+    height:42px;
+    border:0;
+    padding:0 12px;
+    background:#f7f7f7;
+    font-size:14px;
+  }
+
+  .psu-single-product-search__field:focus{
+    outline:1px solid #777;
+    outline-offset:-1px;
+  }
+
+  .psu-single-product-search__button{
+    flex:0 0 46px;
+    width:46px;
+    height:42px;
+    border:0;
+    border-left:1px solid #d9d9d9;
+    background:#2f3439;
+    color:#fff;
+    cursor:pointer;
+    line-height:1;
+  }
+
+  .psu-single-product-search__button svg{
+    display:block;
+    width:18px;
+    height:18px;
+    margin:auto;
+    fill:currentColor;
+  }
+
+  .psu-single-product-search__button:hover,
+  .psu-single-product-search__button:focus{
+    background:#1f2327;
+  }
 }
 
 /* Per-page UI */
