@@ -7,10 +7,10 @@ class Helpers {
     // Текстові мітки (1 місце для перекладів)
     public static function labels(): array {
         return [
-            'btn_csv'       => __('Download CSV', 'pc-order-import-export'),
-            'btn_xlsx'      => __('Download XLSX', 'pc-order-import-export'),
-            'conf_toggle'   => __('Configure export', 'pc-order-import-export'),
-            'split_label'   => __('Row format:', 'pc-order-import-export'),
+            'btn_csv'       => __('Download to CSV', 'pc-order-import-export'),
+            'btn_xlsx'      => __('Download to XLSX', 'pc-order-import-export'),
+            'conf_toggle'   => __('Configure export columns', 'pc-order-import-export'),
+            'split_label'   => __('Choose how to split warehouses in export:', 'pc-order-import-export'),
             'split_agg'     => __('Aggregate (write "Allocation: ..." in Notes)', 'pc-order-import-export'),
             'split_per_loc' => __('Separate per location', 'pc-order-import-export'),
             'col_sku'       => __('SKU', 'pc-order-import-export'),

@@ -447,7 +447,7 @@ msgstr ""
 
 #: inc/Ui.php:198
 msgid "Add to cart"
-msgstr "Додано у кошик"
+msgstr "Додати у кошик"
 
 #: inc/Ui.php:231
 msgid "XLSX is unavailable on this server"
@@ -498,3 +498,48 @@ msgstr "Переглянути замовлення"
 #: inc/Ui.php:330
 msgid "Imported"
 msgstr "Імпортований"
+
+#: inc/Helpers.php:10
+msgid "Download to CSV"
+msgstr "Завантажити у CSV"
+
+#: inc/Helpers.php:11
+msgid "Download to XLSX"
+msgstr "Завантажити у XLSX"
+
+#: inc/Helpers.php:12
+msgid "Configure export columns"
+msgstr "Налаштувати колонки експорту"
+
+#: inc/Helpers.php:13
+msgid "Choose how to split warehouses in export:"
+msgstr "Вибрати, як розділяти склади в експорті:"
+
+#: inc/Ui.php
+msgid "To cart"
+msgstr "У кошик"
+
+#: inc/Ui.php
+msgid "Load draft into cart"
+msgstr "Завантажити чернетку у кошик"
+
+#: inc/Ui.php
+#, php-format
+msgid "CSV format: %1$s or %2$s."
+msgstr "Формат CSV: %1$s або %2$s."
+
+#: inc/Ui.php
+msgid "Draft order created"
+msgstr "Чернетку замовлення створено"
+
+#: inc/Ui.php
+msgid "Open new draft"
+msgstr "Відкрити нову чернетку"
+
+#: inc/Ui.php
+msgid "Refresh list"
+msgstr "Оновити список"
+
+#: inc/Ui.php
+msgid "The orders list below has not been refreshed yet."
+msgstr "Список замовлень нижче ще не оновлено."

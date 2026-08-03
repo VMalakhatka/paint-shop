@@ -25,21 +25,21 @@ jQuery(function ($) {
     var $notice = $('<div class="woocommerce-info pcoe-orders-stale-notice" style="margin:12px 0"></div>');
     $notice.append(
       $('<strong></strong>').text(
-        (I18N.draft_created || 'Чернетку замовлення створено') + (orderId ? (' #' + orderId) : '') + '. '
+        (I18N.draft_created || 'Draft order created') + (orderId ? (' #' + orderId) : '') + '. '
       )
     );
-    $notice.append(document.createTextNode(I18N.orders_list_stale || 'Список замовлень нижче ще не оновлено.'));
+    $notice.append(document.createTextNode(I18N.orders_list_stale || 'The orders list below has not been refreshed yet.'));
 
     if (viewUrl) {
       $notice.append(' ').append(
-        pcoeButton(I18N.open_new_draft || 'Відкрити нову чернетку', viewUrl, 'button-primary')
+        pcoeButton(I18N.open_new_draft || 'Open new draft', viewUrl, 'button-primary')
           .css({ marginLeft: '8px' })
       );
     }
 
     $notice.append(' ').append(
       $('<button type="button" class="button"></button>')
-        .text(I18N.refresh_list || 'Оновити список')
+        .text(I18N.refresh_list || 'Refresh list')
         .css({ marginLeft: '8px' })
         .on('click', function(){ window.location.reload(); })
     );

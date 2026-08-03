@@ -174,6 +174,25 @@ DEF-456;3</code></pre>
                 if ($order->has_status('pc-draft')) echo '<em style="opacity:.7">' . esc_html__('(untitled)', 'pc-order-import-export') . '</em>';
             }
         });
+
+        add_filter('woocommerce_my_account_my_orders_actions', function(array $actions, $order): array {
+            if (!$order instanceof \WC_Order || !$order->has_status('pc-draft')) {
+                return $actions;
+            }
+
+            $can_manage = current_user_can('manage_woocommerce');
+            $is_owner   = (int)$order->get_user_id() === (int)get_current_user_id();
+            if (!$can_manage && !$is_owner) {
+                return $actions;
+            }
+
+            $actions['pcoe-draft-to-cart'] = [
+                'url'  => \PaintCore\PCOE\DraftToCart::action_url((int)$order->get_id(), ['clear' => '1']),
+                'name' => __('To cart', 'pc-order-import-export'),
+            ];
+
+            return $actions;
+        }, 20, 2);
     }
 
     /** Алиас на случай, если где-то вызывается Ui::hooks() */
@@ -254,7 +273,7 @@ public static function render_account_import_block(): void
         if ( $can_manage || $is_owner ) {
             $url = \PaintCore\PCOE\DraftToCart::action_url((int)$order->get_id(), ['clear' => '1']);
             echo '<p style="margin-top:10px">
-                    <a class="button" href="'.esc_url($url).'">'.esc_html__('Add to cart', 'pc-order-import-export').'</a>
+                    <a class="button" href="'.esc_url($url).'">'.esc_html__('Load draft into cart', 'pc-order-import-export').'</a>
                 </p>';
         }
 }
@@ -333,7 +352,15 @@ public static function render_account_import_block(): void
             <details>
                 <summary> <strong><?php echo esc_html__('Import', 'pc-order-import-export'); ?></strong> <?php echo esc_html__('(CSV / XLSX)', 'pc-order-import-export'); ?></summary>
 
-                <!-- У кошик -->Формат CSV: <code>sku;qty</code> або <code>gtin;qty</code>
+                <p style="margin:10px 0 0">
+                    <?php
+                    printf(
+                        wp_kses_post(__('CSV format: %1$s or %2$s.', 'pc-order-import-export')),
+                        '<code>sku;qty</code>',
+                        '<code>gtin;qty</code>'
+                    );
+                    ?>
+                </p>
                 <div style="margin-top:12px">
                   <form id="pcoe-import-form" enctype="multipart/form-data" method="post" onsubmit="return false;"
                         style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
@@ -390,10 +417,10 @@ public static function render_account_import_block(): void
                 'open_in_admin'  => __('Open in admin', 'pc-order-import-export'),
                 'view_order'     => __('View order', 'pc-order-import-export'),
                 'imported'       => __('Imported', 'pc-order-import-export'),
-                'draft_created'  => __('Чернетку замовлення створено', 'pc-order-import-export'),
-                'open_new_draft' => __('Відкрити нову чернетку', 'pc-order-import-export'),
-                'refresh_list'   => __('Оновити список', 'pc-order-import-export'),
-                'orders_list_stale' => __('Список замовлень нижче ще не оновлено.', 'pc-order-import-export'),
+                'draft_created'  => __('Draft order created', 'pc-order-import-export'),
+                'open_new_draft' => __('Open new draft', 'pc-order-import-export'),
+                'refresh_list'   => __('Refresh list', 'pc-order-import-export'),
+                'orders_list_stale' => __('The orders list below has not been refreshed yet.', 'pc-order-import-export'),
             ],
         ]);
     }
