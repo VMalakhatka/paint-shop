@@ -9,6 +9,44 @@ jQuery(function ($) {
   function readSplit(scope){ try{ var all=JSON.parse(localStorage.getItem(KEY_SPLIT)||'{}'); return all[scope]||'agg'; }catch(e){ return 'agg'; } }
   function writeSplit(scope, val){ try{ var all=JSON.parse(localStorage.getItem(KEY_SPLIT)||'{}'); all[scope]=val; localStorage.setItem(KEY_SPLIT, JSON.stringify(all)); }catch(e){} }
 
+  function pcoeButton(label, href, extraClass) {
+    var $btn = $('<a class="button"></a>').text(label || '');
+    if (extraClass) $btn.addClass(extraClass);
+    if (href) $btn.attr('href', href);
+    return $btn;
+  }
+
+  function markOrdersListStale(orderId, viewUrl) {
+    var $table = $('.woocommerce-orders-table').first();
+    if (!$table.length) return;
+
+    $('.pcoe-orders-stale-notice').remove();
+
+    var $notice = $('<div class="woocommerce-info pcoe-orders-stale-notice" style="margin:12px 0"></div>');
+    $notice.append(
+      $('<strong></strong>').text(
+        (I18N.draft_created || 'Чернетку замовлення створено') + (orderId ? (' #' + orderId) : '') + '. '
+      )
+    );
+    $notice.append(document.createTextNode(I18N.orders_list_stale || 'Список замовлень нижче ще не оновлено.'));
+
+    if (viewUrl) {
+      $notice.append(' ').append(
+        pcoeButton(I18N.open_new_draft || 'Відкрити нову чернетку', viewUrl, 'button-primary')
+          .css({ marginLeft: '8px' })
+      );
+    }
+
+    $notice.append(' ').append(
+      $('<button type="button" class="button"></button>')
+        .text(I18N.refresh_list || 'Оновити список')
+        .css({ marginLeft: '8px' })
+        .on('click', function(){ window.location.reload(); })
+    );
+
+    $table.before($notice);
+  }
+
   // Инициализация чекбоксов/сплита
   $('.pcoe-cols').each(function(){
     var scope = $(this).data('scope');
@@ -105,13 +143,16 @@ jQuery(function ($) {
           $msg.text((I18N.imported || 'Imported')+': '+resp.data.imported+', '+(I18N.skipped || 'Skipped')+': '+resp.data.skipped);
 
           var linksHtml='';
+          var orderId = resp.data.order_id || '';
+          var viewUrl = resp.data.links && resp.data.links.view ? resp.data.links.view : '';
           if(resp.data.links){
             if(resp.data.links.edit){ linksHtml += '<a class="button" href="'+resp.data.links.edit+'" target="_blank" rel="noopener">'+(I18N.open_in_admin || 'Open in admin')+'</a> '; }
-            if(resp.data.links.view){ linksHtml += '<a class="button" href="'+resp.data.links.view+'" target="_blank" rel="noopener">'+(I18N.view_order || 'View order')+'</a>'; }
+            if(resp.data.links.view){ linksHtml += '<a class="button button-primary" href="'+resp.data.links.view+'">'+(I18N.open_new_draft || I18N.view_order || 'View order')+'</a>'; }
           }
           $('.pcoe-import-draft-links').html(linksHtml||'');
           $('.pcoe-import-draft-report').html(resp.data.report_html||'');
           $box.show();
+          markOrdersListStale(orderId, viewUrl);
 
           var refreshLabel = (I18N.refresh_list || 'Оновити список');
           if (!$('.pcoe-refresh-list').length) {

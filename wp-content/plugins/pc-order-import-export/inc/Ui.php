@@ -366,12 +366,15 @@ public static function render_account_import_block(): void
     {
         wp_enqueue_script('jquery');
 
+        $js_rel = '../assets/pcoe.js';
+        $js_abs = plugin_dir_path(__FILE__) . $js_rel;
+
         //  наш файл
         wp_enqueue_script(
             'pcoe-js',
-            plugins_url('../assets/pcoe.js', __FILE__), // путь скорректируй при необходимости
+            plugins_url($js_rel, __FILE__),
             ['jquery'],
-            '1.0.0',
+            file_exists($js_abs) ? (string) filemtime($js_abs) : '1.0.0',
             true
         );
 
@@ -387,6 +390,10 @@ public static function render_account_import_block(): void
                 'open_in_admin'  => __('Open in admin', 'pc-order-import-export'),
                 'view_order'     => __('View order', 'pc-order-import-export'),
                 'imported'       => __('Imported', 'pc-order-import-export'),
+                'draft_created'  => __('Чернетку замовлення створено', 'pc-order-import-export'),
+                'open_new_draft' => __('Відкрити нову чернетку', 'pc-order-import-export'),
+                'refresh_list'   => __('Оновити список', 'pc-order-import-export'),
+                'orders_list_stale' => __('Список замовлень нижче ще не оновлено.', 'pc-order-import-export'),
             ],
         ]);
     }
