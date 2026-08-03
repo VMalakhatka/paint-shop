@@ -91,15 +91,6 @@ function pc_build_alloc_plan(\WC_Product $product, int $need): array {
         unset($all[$sel]);
     }
 
-    // затем — primary
-    if (function_exists('slu_get_primary_location_term_id')) {
-        $primary = (int) slu_get_primary_location_term_id($product->get_id());
-        if ($primary && isset($all[$primary])) {
-            $ordered[$primary] = $all[$primary];
-            unset($all[$primary]);
-        }
-    }
-
     // остальные — по убыванию остатков
     uasort($all, function($a,$b){ return (int)($b['qty'] ?? 0) <=> (int)($a['qty'] ?? 0); });
     $ordered += $all;

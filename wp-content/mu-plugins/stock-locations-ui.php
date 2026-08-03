@@ -236,8 +236,6 @@ function pc_build_stock_view(WC_Product $product): array {
     $mode = $pref['mode'];
     $sel  = (int)($pref['term_id'] ?? 0);
 
-    $primary = function_exists('slu_get_primary_location_term_id') ? (int) slu_get_primary_location_term_id($product->get_id()) : 0;
-
     // single: only the chosen location
     if ($mode === 'single') {
         $only = [];
@@ -247,7 +245,7 @@ function pc_build_stock_view(WC_Product $product): array {
         return [
             'mode'      => 'single',
             'preferred' => $sel ?: null,
-            'primary'   => $primary ?: null,
+            'primary'   => null,
             'ordered'   => $only,
             'sum'       => isset($only[$sel]['qty']) ? (int)$only[$sel]['qty'] : 0
         ];
@@ -258,13 +256,10 @@ function pc_build_stock_view(WC_Product $product): array {
     if ($mode === 'manual' && $sel && isset($all[$sel])) {
         $ordered[$sel] = $all[$sel]; unset($all[$sel]);
     }
-    if ($primary && isset($all[$primary])) {
-        $ordered[$primary] = $all[$primary]; unset($all[$primary]);
-    }
     uasort($all, function($a,$b){ return (int)($b['qty'] ?? 0) <=> (int)($a['qty'] ?? 0); });
     $ordered += $all;
 
-    return ['mode'=>$mode,'preferred'=>$sel?:null,'primary'=>$primary?:null,'ordered'=>$ordered,'sum'=>(int)$sum];
+    return ['mode'=>$mode,'preferred'=>$sel?:null,'primary'=>null,'ordered'=>$ordered,'sum'=>(int)$sum];
 }
 
 function pc_fmt_loc_line(array $row): string {
@@ -285,13 +280,7 @@ if (!function_exists('slu_get_allocation_plan')) {
         $all = slu_collect_location_stocks_for_product($product);
         if (empty($all)) return [];
 
-        $primary_id = (int)slu_get_primary_location_term_id($product->get_id());
-
         $ordered = [];
-        if ($primary_id && isset($all[$primary_id])) {
-            $ordered[$primary_id] = $all[$primary_id];
-            unset($all[$primary_id]);
-        }
         uasort($all, function($a,$b){ return (int)$b['qty'] <=> (int)$a['qty']; });
         $ordered += $all;
 
