@@ -166,6 +166,7 @@ add_action('rest_api_init', function () {
 
             // что пришло в JSON по флагам (мы их уже собрали в $opt выше)
             $opts = array_merge($defaults, $opt);
+            $opts['set_primary'] = false;
 
             // ограничение на размер пачки
             $max = 500;

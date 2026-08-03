@@ -49,10 +49,16 @@ if (!function_exists('lavka_sync_get_options')) {
             'set_manage'          => true,
             'upd_status'          => true,
             'attach_terms'        => true,
-            'set_primary'         => true,
+            'set_primary'         => false,
             'duplicate_slug_meta' => false,
         ];
-        return wp_parse_args(get_option(LAVKA_SYNC_OPTION, []), $defaults);
+        $options = wp_parse_args(get_option(LAVKA_SYNC_OPTION, []), $defaults);
+
+        // Legacy primary location was used as a display/allocation hint and can
+        // make individual products prefer the wrong warehouse. Keep it off.
+        $options['set_primary'] = false;
+
+        return $options;
     }
 }
 

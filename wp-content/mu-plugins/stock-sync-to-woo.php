@@ -113,7 +113,10 @@ class PC_Stock_Sync_Woo {
                     </tr>
                     <tr>
                         <th scope="row"><?php echo esc_html__('Set Primary location if missing?', 'stock-sync-to-woo'); ?></th>
-                        <td><label><input type="checkbox" name="set_primary" value="1" <?php checked(!empty($_POST['set_primary']), true); ?>> <?php echo esc_html__('Yes', 'stock-sync-to-woo'); ?></label></td>
+                        <td>
+                            <label><input type="checkbox" value="1" disabled> <?php echo esc_html__('Disabled', 'stock-sync-to-woo'); ?></label>
+                            <p class="description"><?php echo esc_html__('Legacy primary location is no longer written automatically; warehouse order is calculated from actual stock and the selected allocation mode.', 'stock-sync-to-woo'); ?></p>
+                        </td>
                     </tr>
                     <tr>
                         <th scope="row"><?php echo esc_html__('Duplicate metas by slug (compat)?', 'stock-sync-to-woo'); ?></th>
@@ -172,7 +175,7 @@ class PC_Stock_Sync_Woo {
             'loop_until_empty'    => !empty($_POST['loop_until_empty']),
             'max_loops'           => max(1, min(200, intval($_POST['max_loops'] ?? 50))),
             'attach_terms'        => !empty($_POST['attach_terms']),
-            'set_primary'         => !empty($_POST['set_primary']),
+            'set_primary'         => false,
             'duplicate_slug_meta' => !empty($_POST['duplicate_slug_meta']),
             // time limits (sec)
             'hard_request_sec'    => 22,

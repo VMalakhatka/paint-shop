@@ -50,7 +50,7 @@ function lavka_sync_java_query_and_apply(array $skus, array $opts = []): array {
         'set_manage'          => true,
         'upd_status'          => true,
         'attach_terms'        => true,
-        'set_primary'         => true,
+        'set_primary'         => false,
         'duplicate_slug_meta' => false,
     ];
     $flags = array_merge($flags, array_intersect_key($opts, $flags));
