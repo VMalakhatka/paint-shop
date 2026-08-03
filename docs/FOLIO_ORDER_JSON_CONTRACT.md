@@ -431,6 +431,18 @@ Successful automatic processing stores:
 - `_folio_auto_started_at`
 - `_folio_auto_finished_at`
 
+After a successful automatic checkout run Woo also:
+
+- clears the customer's active cart so processed items do not remain in the
+  basket after Folio documents are created;
+- redirects the order-received URL to **My Account -> Orders** for the current
+  logged-in customer, so the customer immediately sees the real child orders or
+  the linked original order.
+
+This redirect is only used for completed Folio automation. Orders waiting for an
+online payment confirmation or orders with `_folio_auto_status = error` keep the
+standard WooCommerce checkout/order-received flow.
+
 ## Runtime Flag
 
 Automatic checkout processing can be disabled in `wp-config.php` or environment

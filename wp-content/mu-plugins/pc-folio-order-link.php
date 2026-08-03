@@ -286,6 +286,71 @@ if (!function_exists('pc_folio_auto_checkout_enabled')) {
     }
 }
 
+if (!function_exists('pc_folio_clear_current_checkout_cart')) {
+    /**
+     * Clear the customer's active cart after Folio has accepted the checkout.
+     */
+    function pc_folio_clear_current_checkout_cart(): void
+    {
+        if (is_admin() && !wp_doing_ajax()) {
+            return;
+        }
+
+        if (!function_exists('WC')) {
+            return;
+        }
+
+        $woocommerce = WC();
+        if (!is_object($woocommerce) || empty($woocommerce->cart) || !method_exists($woocommerce->cart, 'empty_cart')) {
+            return;
+        }
+
+        if (method_exists($woocommerce->cart, 'is_empty') && $woocommerce->cart->is_empty()) {
+            return;
+        }
+
+        $woocommerce->cart->empty_cart(true);
+    }
+}
+
+if (!function_exists('pc_folio_order_should_go_to_account_orders')) {
+    /**
+     * Route completed Folio checkout flows to the account order list.
+     */
+    function pc_folio_order_should_go_to_account_orders(\WC_Order $order): bool
+    {
+        if (!pc_folio_auto_checkout_enabled()) {
+            return false;
+        }
+
+        if (!is_user_logged_in()) {
+            return false;
+        }
+
+        $current_user_id = get_current_user_id();
+        if ((int) $order->get_user_id() !== $current_user_id && !current_user_can('manage_woocommerce')) {
+            return false;
+        }
+
+        if ((string) $order->get_meta('_folio_auto_status', true) === 'success') {
+            return true;
+        }
+
+        $keys = pc_folio_order_documents_meta_keys();
+        $split_status = (string) $order->get_meta($keys['split_status'], true);
+        if (in_array($split_status, ['ready', 'ready_to_split', 'split_created'], true)) {
+            return true;
+        }
+
+        $child_order_ids = $order->get_meta($keys['child_order_ids'], true);
+        if (is_array($child_order_ids) && array_filter(array_map('absint', $child_order_ids))) {
+            return true;
+        }
+
+        return false;
+    }
+}
+
 if (!function_exists('pc_folio_validate_order_payload_for_create')) {
     /**
      * Validate only the fields that would make Java reject an automatic checkout run.
@@ -1211,6 +1276,7 @@ if (!function_exists('pc_folio_auto_process_checkout_order')) {
                     ));
                 }
                 $order->save();
+                pc_folio_clear_current_checkout_cart();
             }
         } catch (\Throwable $e) {
             $order = wc_get_order($order_id);
@@ -1229,6 +1295,23 @@ add_action('woocommerce_checkout_order_processed', 'pc_folio_auto_process_checko
 add_action('woocommerce_store_api_checkout_order_processed', 'pc_folio_auto_process_checkout_order', 90, 1);
 add_action('woocommerce_payment_complete', 'pc_folio_auto_process_checkout_order', 90, 1);
 add_action('woocommerce_order_status_processing', 'pc_folio_auto_process_checkout_order', 90, 1);
+
+add_filter('woocommerce_get_checkout_order_received_url', function ($url, $order) {
+    if (!$order instanceof \WC_Order || !function_exists('wc_get_account_endpoint_url')) {
+        return $url;
+    }
+
+    if (!pc_folio_order_should_go_to_account_orders($order)) {
+        return $url;
+    }
+
+    return add_query_arg(
+        [
+            'folio_checkout_order' => (int) $order->get_id(),
+        ],
+        wc_get_account_endpoint_url('orders')
+    );
+}, 20, 2);
 
 if (!function_exists('pc_folio_set_order_documents_result')) {
     /**
