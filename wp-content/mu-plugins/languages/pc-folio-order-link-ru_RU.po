@@ -376,6 +376,36 @@ msgstr ""
 msgid "warehouse %s"
 msgstr "склад %s"
 
+msgid "Kyiv"
+msgstr "Киев"
+
+msgid "Kyiv workshop"
+msgstr "Мастер-класс Киев"
+
+msgid "Odesa"
+msgstr "Одесса"
+
+msgid "Odesa workshop"
+msgstr "Мастер-класс Одесса"
+
+msgid "Kyiv wholesale"
+msgstr "Киев ОПТ"
+
+msgid "Kyiv wholesale workshop"
+msgstr "Мастер-класс КиевОпт"
+
+msgid "Transport"
+msgstr "Транспорт"
+
+msgid "Odesa 15"
+msgstr "Одесса 15"
+
+msgid "Odesa 20"
+msgstr "Одесса 20"
+
+msgid "Cart order split by warehouses"
+msgstr "Заказ из корзины, разделённый по складам"
+
 msgid "Product is currently unavailable. This part of the order was moved to waiting/preorder mode. A manager will contact the customer to confirm details."
 msgstr ""
 "Товар сейчас отсутствует. Эта часть заказа переведена в режим ожидания/"

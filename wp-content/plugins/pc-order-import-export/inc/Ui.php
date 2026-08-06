@@ -189,6 +189,7 @@ DEF-456;3</code></pre>
             $actions['pcoe-draft-to-cart'] = [
                 'url'  => \PaintCore\PCOE\DraftToCart::action_url((int)$order->get_id(), ['clear' => '1']),
                 'name' => __('To cart', 'pc-order-import-export'),
+                'class' => 'pcoe-draft-to-cart',
             ];
 
             return $actions;
@@ -405,6 +406,10 @@ public static function render_account_import_block(): void
             true
         );
 
+        wp_register_style('pcoe-inline', false, [], null);
+        wp_enqueue_style('pcoe-inline');
+        wp_add_inline_style('pcoe-inline', self::inline_css());
+
         // Передаём ajaxUrl и i18n в pcoeVars
         wp_localize_script('pcoe-js', 'pcoeVars', [
             'ajaxUrl' => admin_url('admin-ajax.php'),
@@ -423,5 +428,49 @@ public static function render_account_import_block(): void
                 'orders_list_stale' => __('The orders list below has not been refreshed yet.', 'pc-order-import-export'),
             ],
         ]);
+    }
+
+    protected static function inline_css(): string
+    {
+        return '
+        .woocommerce-account table.woocommerce-orders-table td.woocommerce-orders-table__cell-order-actions,
+        .woocommerce-account table.woocommerce-orders-table td.order-actions {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 10px !important;
+            align-items: stretch !important;
+        }
+        .woocommerce-account table.woocommerce-orders-table td.woocommerce-orders-table__cell-order-actions .woocommerce-button,
+        .woocommerce-account table.woocommerce-orders-table td.order-actions .woocommerce-button {
+            display: block !important;
+            width: 100% !important;
+            box-sizing: border-box;
+            margin: 0 !important;
+            padding: .7em 1em !important;
+            text-align: center !important;
+            border: 1px solid #d5d0df !important;
+            border-radius: 7px !important;
+            line-height: 1.2 !important;
+            box-shadow: 0 1px 0 rgba(0,0,0,.04);
+            text-decoration: none !important;
+        }
+        .woocommerce-account table.woocommerce-orders-table td.woocommerce-orders-table__cell-order-actions .woocommerce-button:last-child,
+        .woocommerce-account table.woocommerce-orders-table td.order-actions .woocommerce-button:last-child {
+            margin-bottom: 0;
+        }
+        .woocommerce-account table.woocommerce-orders-table td.woocommerce-orders-table__cell-order-actions .pcoe-draft-to-cart,
+        .woocommerce-account table.woocommerce-orders-table td.order-actions .pcoe-draft-to-cart {
+            border-color: #7a5bb3 !important;
+            background: #f3eefb !important;
+            color: #3f2d63 !important;
+        }
+        .woocommerce-account table.woocommerce-orders-table td.woocommerce-orders-table__cell-order-actions .pcoe-draft-to-cart:hover,
+        .woocommerce-account table.woocommerce-orders-table td.woocommerce-orders-table__cell-order-actions .pcoe-draft-to-cart:focus,
+        .woocommerce-account table.woocommerce-orders-table td.order-actions .pcoe-draft-to-cart:hover,
+        .woocommerce-account table.woocommerce-orders-table td.order-actions .pcoe-draft-to-cart:focus {
+            background: #e8def7 !important;
+            color: #2f214c !important;
+        }
+        ';
     }
 }

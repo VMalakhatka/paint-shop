@@ -353,6 +353,36 @@ msgstr ""
 msgid "warehouse %s"
 msgstr ""
 
+msgid "Kyiv"
+msgstr ""
+
+msgid "Kyiv workshop"
+msgstr ""
+
+msgid "Odesa"
+msgstr ""
+
+msgid "Odesa workshop"
+msgstr ""
+
+msgid "Kyiv wholesale"
+msgstr ""
+
+msgid "Kyiv wholesale workshop"
+msgstr ""
+
+msgid "Transport"
+msgstr ""
+
+msgid "Odesa 15"
+msgstr ""
+
+msgid "Odesa 20"
+msgstr ""
+
+msgid "Cart order split by warehouses"
+msgstr ""
+
 msgid "Product is currently unavailable. This part of the order was moved to waiting/preorder mode. A manager will contact the customer to confirm details."
 msgstr ""
 

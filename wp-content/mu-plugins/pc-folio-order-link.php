@@ -513,10 +513,44 @@ if (!function_exists('pc_folio_document_label')) {
         }
 
         if ($warehouse !== '') {
-            $parts[] = sprintf(__('warehouse %s', 'pc-folio-order-link'), $warehouse);
+            $parts[] = pc_folio_warehouse_label($warehouse);
         }
 
         return $parts ? implode(', ', $parts) : __('without number', 'pc-folio-order-link');
+    }
+}
+
+if (!function_exists('pc_folio_warehouse_label')) {
+    /**
+     * Human-readable Folio warehouse label for customer/admin UI.
+     */
+    function pc_folio_warehouse_label($warehouse_id): string
+    {
+        $warehouse_id = trim((string) $warehouse_id);
+        if ($warehouse_id === '') {
+            return '';
+        }
+
+        $labels = [
+            '1'  => __('Kyiv', 'pc-folio-order-link'),
+            '2'  => __('Kyiv workshop', 'pc-folio-order-link'),
+            '5'  => __('Odesa', 'pc-folio-order-link'),
+            '6'  => __('Odesa workshop', 'pc-folio-order-link'),
+            '7'  => __('Kyiv wholesale', 'pc-folio-order-link'),
+            '8'  => __('Kyiv wholesale workshop', 'pc-folio-order-link'),
+            '9'  => __('Transport', 'pc-folio-order-link'),
+            '15' => __('Odesa 15', 'pc-folio-order-link'),
+            '20' => __('Odesa 20', 'pc-folio-order-link'),
+        ];
+
+        /**
+         * Allows replacing warehouse labels with names from a live Folio directory later.
+         *
+         * @param array<string,string> $labels
+         */
+        $labels = apply_filters('pc_folio_warehouse_labels', $labels);
+
+        return (string) ($labels[$warehouse_id] ?? sprintf(__('warehouse %s', 'pc-folio-order-link'), $warehouse_id));
     }
 }
 
@@ -561,7 +595,7 @@ if (!function_exists('pc_folio_build_child_order_notice')) {
             return __('Shipment will be prepared from the assigned Folio warehouse.', 'pc-folio-order-link');
         }
 
-        return sprintf(__('Shipment will be prepared from Folio warehouse %s.', 'pc-folio-order-link'), $warehouse_id);
+        return sprintf(__('Shipment will be prepared from Folio warehouse %s.', 'pc-folio-order-link'), pc_folio_warehouse_label($warehouse_id));
     }
 }
 
@@ -690,7 +724,7 @@ if (!function_exists('pc_folio_render_customer_order_message')) {
         if (!$child_order_ids) {
             $warehouse_id = pc_folio_get_order_warehouse_id_for_customer($order);
             if ($warehouse_id !== '') {
-                echo '<p class="pc-folio-customer-notice__warehouse">' . esc_html(sprintf(__('Folio warehouse: %s', 'pc-folio-order-link'), $warehouse_id)) . '</p>';
+                echo '<p class="pc-folio-customer-notice__warehouse">' . esc_html(sprintf(__('Folio warehouse: %s', 'pc-folio-order-link'), pc_folio_warehouse_label($warehouse_id))) . '</p>';
             }
         }
 
@@ -709,7 +743,7 @@ if (!function_exists('pc_folio_render_customer_order_message')) {
                 );
                 $child_warehouse_id = pc_folio_get_order_warehouse_id_for_customer($child_order);
                 if ($child_warehouse_id !== '') {
-                    $child_label .= ' · ' . sprintf(__('warehouse %s', 'pc-folio-order-link'), $child_warehouse_id);
+                    $child_label .= ' · ' . pc_folio_warehouse_label($child_warehouse_id);
                 }
                 echo '<li><a href="' . esc_url($child_order->get_view_order_url()) . '">' . esc_html($child_label) . '</a></li>';
             }
@@ -757,7 +791,7 @@ if (!function_exists('pc_folio_render_my_account_orders_column')) {
             $parts[] = '#' . $link['document_number'];
         }
         if ($warehouse_id !== '') {
-            $parts[] = sprintf(__('warehouse %s', 'pc-folio-order-link'), $warehouse_id);
+            $parts[] = pc_folio_warehouse_label($warehouse_id);
         }
         if (!$parts && !empty($message['child_order_ids'])) {
             $parts[] = sprintf(__('%d Folio orders', 'pc-folio-order-link'), count($message['child_order_ids']));
@@ -1168,6 +1202,7 @@ if (!function_exists('pc_folio_create_child_orders_from_saved_response')) {
         pc_folio_set_parent_child_links($parent_order, $child_order_ids);
         $parent_order->update_meta_data($keys['split_status'], 'split_created');
         $parent_order->update_meta_data($keys['split_created_at'], current_time('mysql'));
+        $parent_order->update_meta_data('_pc_draft_title', __('Cart order split by warehouses', 'pc-folio-order-link'));
         pc_folio_set_order_customer_notice($parent_order, pc_folio_build_parent_split_notice());
         $parent_order->save();
         $parent_split_status = pc_folio_get_parent_split_order_status();
@@ -2090,12 +2125,29 @@ if (!function_exists('pc_folio_render_order_preview_metabox')) {
                 return String(value == null ? '' : value);
             }
 
+            var warehouseLabels = <?php echo wp_json_encode(apply_filters('pc_folio_warehouse_labels', [
+                '1'  => __('Kyiv', 'pc-folio-order-link'),
+                '2'  => __('Kyiv workshop', 'pc-folio-order-link'),
+                '5'  => __('Odesa', 'pc-folio-order-link'),
+                '6'  => __('Odesa workshop', 'pc-folio-order-link'),
+                '7'  => __('Kyiv wholesale', 'pc-folio-order-link'),
+                '8'  => __('Kyiv wholesale workshop', 'pc-folio-order-link'),
+                '9'  => __('Transport', 'pc-folio-order-link'),
+                '15' => __('Odesa 15', 'pc-folio-order-link'),
+                '20' => __('Odesa 20', 'pc-folio-order-link'),
+            ]), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?> || {};
+
+            function warehouseLabel(id) {
+                id = asText(id);
+                return warehouseLabels[id] || ('<?php echo esc_js(__('warehouse', 'pc-folio-order-link')); ?> ' + id);
+            }
+
             function docLabel(doc) {
                 var number = asText(doc.document_number || doc.documentNumber || doc.document_id || doc.documentId || '');
                 var warehouse = asText(doc.folio_warehouse_id || doc.warehouseId || '');
                 var parts = [];
                 if (number) parts.push('#' + number);
-                if (warehouse) parts.push('<?php echo esc_js(__('warehouse', 'pc-folio-order-link')); ?> ' + warehouse);
+                if (warehouse) parts.push(warehouseLabel(warehouse));
                 return parts.length ? parts.join(', ') : '<?php echo esc_js(__('without number', 'pc-folio-order-link')); ?>';
             }
 
