@@ -70,6 +70,8 @@ wp-content/plugins/*
 !wp-content/plugins/lavka-price-sync/**
 !wp-content/plugins/lavka-total-sync
 !wp-content/plugins/lavka-total-sync/**
+!wp-content/plugins/lavka-product-media-upload/
+!wp-content/plugins/lavka-product-media-upload/**
 
 
 # === MU-plugins: либо отслеживаем все, либо только свои ===
