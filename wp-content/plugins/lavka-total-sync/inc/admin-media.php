@@ -509,6 +509,137 @@ add_action('wp_ajax_lts_media_sync_list', function () {
     wp_send_json_error($res);
 });
 
+/** AJAX: read-only report of products without linked WooCommerce images. */
+add_action('wp_ajax_lts_media_missing_images_report', function () {
+    $cap = defined('LTS_CAP') ? LTS_CAP : 'manage_options';
+    if (!current_user_can($cap)) wp_send_json_error(['error' => 'forbidden'], 403);
+    check_ajax_referer('lts_admin_nonce', 'nonce');
+
+    global $wpdb;
+
+    $report_type = isset($_POST['report_type']) && $_POST['report_type'] === 'featured'
+        ? 'featured'
+        : 'all';
+    $scope = isset($_POST['scope']) && $_POST['scope'] === 'active'
+        ? 'active'
+        : 'published';
+    $page = max(1, (int)($_POST['page'] ?? 1));
+    $per_page = max(10, min(200, (int)($_POST['per_page'] ?? 50)));
+    $offset = ($page - 1) * $per_page;
+
+    $statuses = $scope === 'active'
+        ? ['publish', 'draft', 'pending', 'private']
+        : ['publish'];
+    $status_placeholders = implode(',', array_fill(0, count($statuses), '%s'));
+
+    // A product has a main image only when _thumbnail_id points to a live attachment.
+    $missing_condition = "NOT EXISTS (
+        SELECT 1
+        FROM {$wpdb->postmeta} AS thumb
+        INNER JOIN {$wpdb->posts} AS attachment
+            ON attachment.ID = CAST(thumb.meta_value AS UNSIGNED)
+           AND attachment.post_type = 'attachment'
+           AND attachment.post_status <> 'trash'
+        WHERE thumb.post_id = product.ID
+          AND thumb.meta_key = '_thumbnail_id'
+          AND CAST(thumb.meta_value AS UNSIGNED) > 0
+    )";
+
+    if ($report_type === 'all') {
+        $missing_condition .= " AND NOT EXISTS (
+            SELECT 1
+            FROM {$wpdb->postmeta} AS gallery
+            WHERE gallery.post_id = product.ID
+              AND gallery.meta_key = '_product_image_gallery'
+              AND TRIM(BOTH ',' FROM TRIM(gallery.meta_value)) <> ''
+        )";
+    }
+
+    $base_where = "product.post_type = 'product'
+        AND product.post_status IN ({$status_placeholders})
+        AND {$missing_condition}";
+
+    $count_sql = "SELECT COUNT(*) FROM {$wpdb->posts} AS product WHERE {$base_where}";
+    $total = (int)$wpdb->get_var($wpdb->prepare($count_sql, ...$statuses));
+    $pages = max(1, (int)ceil($total / $per_page));
+
+    if ($page > $pages) {
+        $page = $pages;
+        $offset = ($page - 1) * $per_page;
+    }
+
+    $rows_sql = "
+        SELECT
+            product.ID,
+            product.post_title,
+            product.post_status,
+            (
+                SELECT sku.meta_value
+                FROM {$wpdb->postmeta} AS sku
+                WHERE sku.post_id = product.ID AND sku.meta_key = '_sku'
+                ORDER BY sku.meta_id DESC
+                LIMIT 1
+            ) AS sku,
+            (
+                SELECT thumb.meta_value
+                FROM {$wpdb->postmeta} AS thumb
+                WHERE thumb.post_id = product.ID AND thumb.meta_key = '_thumbnail_id'
+                ORDER BY thumb.meta_id DESC
+                LIMIT 1
+            ) AS thumbnail_id,
+            (
+                SELECT gallery.meta_value
+                FROM {$wpdb->postmeta} AS gallery
+                WHERE gallery.post_id = product.ID AND gallery.meta_key = '_product_image_gallery'
+                ORDER BY gallery.meta_id DESC
+                LIMIT 1
+            ) AS gallery_ids
+        FROM {$wpdb->posts} AS product
+        WHERE {$base_where}
+        ORDER BY product.ID DESC
+        LIMIT %d OFFSET %d
+    ";
+    $query_params = array_merge($statuses, [$per_page, $offset]);
+    $db_rows = $wpdb->get_results($wpdb->prepare($rows_sql, ...$query_params), ARRAY_A);
+
+    $rows = [];
+    foreach ($db_rows as $row) {
+        $thumbnail_id = absint($row['thumbnail_id'] ?? 0);
+        $gallery_ids = array_values(array_unique(array_filter(array_map(
+            'absint',
+            explode(',', (string)($row['gallery_ids'] ?? ''))
+        ))));
+        $status_object = get_post_status_object((string)$row['post_status']);
+
+        $rows[] = [
+            'id'            => (int)$row['ID'],
+            'sku'           => (string)($row['sku'] ?? ''),
+            'title'         => (string)$row['post_title'],
+            'status'        => (string)$row['post_status'],
+            'status_label'  => $status_object ? $status_object->label : (string)$row['post_status'],
+            'gallery_count' => count($gallery_ids),
+            'reason'        => $thumbnail_id > 0 ? 'broken_attachment' : 'missing_featured',
+            'reason_label'  => $thumbnail_id > 0
+                ? __('The featured attachment no longer exists', 'lavka-total-sync')
+                : __('Featured image is not assigned', 'lavka-total-sync'),
+            'edit_url'      => get_edit_post_link((int)$row['ID'], 'raw'),
+            'view_url'      => $row['post_status'] === 'publish'
+                ? get_permalink((int)$row['ID'])
+                : null,
+        ];
+    }
+
+    wp_send_json_success([
+        'rows'       => $rows,
+        'total'      => $total,
+        'page'       => $page,
+        'pages'      => $pages,
+        'per_page'   => $per_page,
+        'report_type'=> $report_type,
+        'scope'      => $scope,
+    ]);
+});
+
 /** Рендер страницы UI */
 function lts_render_media_sync_page() {
     $cap = defined('LTS_CAP') ? LTS_CAP : 'manage_options';
@@ -628,6 +759,109 @@ CR-CE0900056100"></textarea>
         </p>
 
         <pre id="lts_ms_list_out" style="max-height:280px;overflow:auto;background:#111;color:#9fe;padding:10px;border-radius:6px;"></pre>
+
+        <hr style="margin:1.25rem 0;">
+
+        <section id="lts_media_missing_report">
+            <h2><?php _e('Products without images', 'lavka-total-sync'); ?></h2>
+            <p class="description">
+                <?php _e('The report checks WooCommerce product image links. Attachment parent fields in the Media Library do not affect this report.', 'lavka-total-sync'); ?>
+            </p>
+            <div class="lts-media-report-controls">
+                <label for="lts_media_report_type">
+                    <span><?php _e('Report type', 'lavka-total-sync'); ?></span>
+                    <select id="lts_media_report_type">
+                        <option value="all"><?php _e('No images at all', 'lavka-total-sync'); ?></option>
+                        <option value="featured"><?php _e('No featured image', 'lavka-total-sync'); ?></option>
+                    </select>
+                </label>
+                <label for="lts_media_report_scope">
+                    <span><?php _e('Product scope', 'lavka-total-sync'); ?></span>
+                    <select id="lts_media_report_scope">
+                        <option value="published"><?php _e('Published products only', 'lavka-total-sync'); ?></option>
+                        <option value="active"><?php _e('All active products', 'lavka-total-sync'); ?></option>
+                    </select>
+                </label>
+                <label for="lts_media_report_per_page">
+                    <span><?php _e('Rows per page', 'lavka-total-sync'); ?></span>
+                    <select id="lts_media_report_per_page">
+                        <option value="25">25</option>
+                        <option value="50" selected>50</option>
+                        <option value="100">100</option>
+                        <option value="200">200</option>
+                    </select>
+                </label>
+                <button id="lts_btn_media_report" class="button button-primary">
+                    <?php _e('Build report', 'lavka-total-sync'); ?>
+                </button>
+                <span id="lts_media_report_status" aria-live="polite"></span>
+            </div>
+
+            <div id="lts_media_report_result" hidden>
+                <p id="lts_media_report_summary"></p>
+                <div class="lts-media-report-table-wrap">
+                    <table class="widefat striped" id="lts_media_report_table">
+                        <thead>
+                            <tr>
+                                <th><?php _e('ID', 'lavka-total-sync'); ?></th>
+                                <th><?php _e('SKU', 'lavka-total-sync'); ?></th>
+                                <th><?php _e('Product', 'lavka-total-sync'); ?></th>
+                                <th><?php _e('Status', 'lavka-total-sync'); ?></th>
+                                <th><?php _e('Gallery', 'lavka-total-sync'); ?></th>
+                                <th><?php _e('Reason', 'lavka-total-sync'); ?></th>
+                                <th><?php _e('Actions', 'lavka-total-sync'); ?></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="lts-media-report-pagination">
+                    <button type="button" id="lts_media_report_prev" class="button">
+                        <?php _e('Previous'); ?>
+                    </button>
+                    <span id="lts_media_report_page"></span>
+                    <button type="button" id="lts_media_report_next" class="button">
+                        <?php _e('Next'); ?>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <style>
+            .lts-media-report-controls {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: end;
+                gap: 12px;
+                margin: 16px 0;
+            }
+            .lts-media-report-controls label {
+                display: grid;
+                gap: 5px;
+            }
+            .lts-media-report-controls label > span {
+                font-weight: 600;
+            }
+            #lts_media_report_status {
+                min-height: 30px;
+                display: inline-flex;
+                align-items: center;
+            }
+            .lts-media-report-table-wrap {
+                overflow-x: auto;
+            }
+            #lts_media_report_table .column-actions {
+                display: flex;
+                gap: 6px;
+                white-space: nowrap;
+            }
+            .lts-media-report-pagination {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-top: 12px;
+            }
+        </style>
 
         <hr style="margin:1.25rem 0;">
         <h2><?php _e('OVH media index', 'lavka-total-sync'); ?></h2>
@@ -928,6 +1162,88 @@ CR-CE0900056100"></textarea>
             const nonce   = '<?php echo esc_js( wp_create_nonce('lts_admin_nonce') ); ?>';
 
             function print(obj){ try{return JSON.stringify(obj,null,2);}catch(e){return String(obj);} }
+
+            let mediaReportPage = 1;
+            let mediaReportPages = 1;
+
+            function renderMediaReport(data) {
+                const $result = $('#lts_media_report_result');
+                const $body = $('#lts_media_report_table tbody').empty();
+
+                if (!data.rows.length) {
+                    $('<tr>').append(
+                        $('<td>', {colspan: 7}).text('<?php echo esc_js(__('No products found', 'lavka-total-sync')); ?>')
+                    ).appendTo($body);
+                } else {
+                    data.rows.forEach(function(row) {
+                        const $actions = $('<div>', {class: 'column-actions'});
+                        if (row.edit_url) {
+                            $('<a>', {class: 'button button-small', href: row.edit_url})
+                                .text('<?php echo esc_js(__('Edit')); ?>')
+                                .appendTo($actions);
+                        }
+                        if (row.view_url) {
+                            $('<a>', {class: 'button button-small', href: row.view_url, target: '_blank', rel: 'noopener'})
+                                .text('<?php echo esc_js(__('View')); ?>')
+                                .appendTo($actions);
+                        }
+
+                        $('<tr>')
+                            .append($('<td>').text(row.id))
+                            .append($('<td>').append($('<code>').text(row.sku || '—')))
+                            .append($('<td>').append($('<a>', {href: row.edit_url || '#'}).text(row.title || '—')))
+                            .append($('<td>').text(row.status_label))
+                            .append($('<td>').text(row.gallery_count))
+                            .append($('<td>').text(row.reason_label))
+                            .append($('<td>').append($actions))
+                            .appendTo($body);
+                    });
+                }
+
+                mediaReportPage = data.page;
+                mediaReportPages = data.pages;
+                $('#lts_media_report_summary').text(
+                    '<?php echo esc_js(__('Found:', 'lavka-total-sync')); ?>' + ' ' + data.total
+                );
+                $('#lts_media_report_page').text(
+                    '<?php echo esc_js(__('Page', 'lavka-total-sync')); ?>' + ' ' + data.page + ' / ' + data.pages
+                );
+                $('#lts_media_report_prev').prop('disabled', data.page <= 1);
+                $('#lts_media_report_next').prop('disabled', data.page >= data.pages);
+                $result.prop('hidden', false);
+            }
+
+            function loadMediaReport(page) {
+                $('#lts_media_report_status').text('<?php echo esc_js(__('Working…','lavka-total-sync')); ?>');
+                $.post(ajaxUrl, {
+                    action: 'lts_media_missing_images_report',
+                    nonce: nonce,
+                    report_type: $('#lts_media_report_type').val(),
+                    scope: $('#lts_media_report_scope').val(),
+                    per_page: $('#lts_media_report_per_page').val(),
+                    page: page
+                }).done(function(res) {
+                    if (!res || !res.success) {
+                        $('#lts_media_report_status').text('<?php echo esc_js(__('Error','lavka-total-sync')); ?>');
+                        return;
+                    }
+                    renderMediaReport(res.data);
+                    $('#lts_media_report_status').text('<?php echo esc_js(__('Done.','lavka-total-sync')); ?>');
+                }).fail(function() {
+                    $('#lts_media_report_status').text('<?php echo esc_js(__('Error','lavka-total-sync')); ?>');
+                });
+            }
+
+            $('#lts_btn_media_report').on('click', function(e) {
+                e.preventDefault();
+                loadMediaReport(1);
+            });
+            $('#lts_media_report_prev').on('click', function() {
+                if (mediaReportPage > 1) loadMediaReport(mediaReportPage - 1);
+            });
+            $('#lts_media_report_next').on('click', function() {
+                if (mediaReportPage < mediaReportPages) loadMediaReport(mediaReportPage + 1);
+            });
 
             $('#lts_btn_media_reindex').on('click', async function(){
                 $('#lts_mr_status').text('<?php echo esc_js(__('Working…','lavka-total-sync')); ?>');

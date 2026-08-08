@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Lavka Total Sync 0.1.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lavka-total-sync\n"
-"POT-Creation-Date: 2025-10-27T20:35:13+00:00\n"
+"POT-Creation-Date: 2026-08-08T20:45:39+00:00\n"
 "PO-Revision-Date: 2025-10-27T20:35:13+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -14,11 +14,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: lavka-total-sync\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 #. Plugin Name of the plugin
-#: lavka-total-sync.php inc/admin-ui.php:19 inc/admin-ui.php:286
+#: lavka-total-sync.php inc/admin-ui.php:19 inc/admin-ui.php:891
 msgid "Lavka Total Sync"
 msgstr "Полная синхронизация Lavka"
 
@@ -43,65 +43,535 @@ msgstr ""
 msgid "Your Name"
 msgstr "Ваше имя"
 
-#: inc/admin-logs.php:11
+#: inc/admin-cron-summary.php:71 inc/admin-cron-summary.php:72
+#: inc/admin-cron-summary.php:100
+msgid "Cron summary"
+msgstr ""
+
+#: inc/admin-cron-summary.php:104
+msgid ""
+"На этой странице показаны только задачи WP-Cron, которые относятся к плагину "
+"Lavka Total Sync (товары и медиа)."
+msgstr ""
+
+#: inc/admin-cron-summary.php:114
+msgid "Site time now"
+msgstr ""
+
+#: inc/admin-cron-summary.php:120
+msgid "UTC/server time now"
+msgstr ""
+
+#: inc/admin-cron-summary.php:124
+msgid "Plugin hooks"
+msgstr ""
+
+#: inc/admin-cron-summary.php:130
+msgid "Scheduled events"
+msgstr ""
+
+#: inc/admin-cron-summary.php:134
+msgid "No cron events found."
+msgstr ""
+
+#: inc/admin-cron-summary.php:159
+msgid "Single (one-off)"
+msgstr ""
+
+#: inc/admin-cron-summary.php:186
+msgid "No cron events for this plugin found."
+msgstr ""
+
+#: inc/admin-cron-summary.php:200
+msgid "Hook"
+msgstr ""
+
+#: inc/admin-cron-summary.php:201
+msgid "Next run (site time)"
+msgstr ""
+
+#: inc/admin-cron-summary.php:202
+msgid "Next run (UTC)"
+msgstr ""
+
+#: inc/admin-cron-summary.php:203
+msgid "Schedule"
+msgstr ""
+
+#: inc/admin-cron-summary.php:204
+msgid "Args"
+msgstr ""
+
+#: inc/admin-logs.php:27
+msgid "Processed"
+msgstr "Обработано"
+
+#: inc/admin-logs.php:28
+msgid "Created"
+msgstr "Создано"
+
+#: inc/admin-logs.php:29 inc/admin-ui.php:74
+msgid "Updated"
+msgstr "Обновлено"
+
+#: inc/admin-logs.php:30
+msgid "Drafted"
+msgstr "Переведено в черновики"
+
+#: inc/admin-logs.php:35 inc/admin-logs.php:59
+msgid "Yes"
+msgstr "Да"
+
+#: inc/admin-logs.php:35 inc/admin-logs.php:59
+msgid "No"
+msgstr "Нет"
+
+#: inc/admin-logs.php:39
+msgid "Next cursor"
+msgstr "Следующий курсор"
+
+#: inc/admin-logs.php:41
+msgid "Last flag"
+msgstr "Признак завершения"
+
+#: inc/admin-logs.php:43
+msgid "Errors"
+msgstr "Ошибки"
+
+#: inc/admin-logs.php:52
+msgid "Limit"
+msgstr "Лимит"
+
+#: inc/admin-logs.php:54
+msgid "Woo batch"
+msgstr "Пакет Woo"
+
+#: inc/admin-logs.php:56
+msgid "Cursor"
+msgstr "Курсор"
+
+#: inc/admin-logs.php:58 inc/admin-media.php:703 inc/admin-media.php:750
+#: inc/admin-media.php:1011 inc/admin-ui.php:1214 inc/admin-ui.php:1250
+#: inc/admin-ui.php:1284
+msgid "Dry run"
+msgstr "Тестовый запуск"
+
+#: inc/admin-logs.php:71
+msgid "View details"
+msgstr "Посмотреть детали"
+
+#: inc/admin-logs.php:80
 msgid "Total Sync Logs"
 msgstr "Логи полной синхронизации"
 
-#: inc/admin-logs.php:12
+#: inc/admin-logs.php:81
 msgid "Logs"
 msgstr "Логи"
 
-#: inc/admin-logs.php:30
+#: inc/admin-logs.php:99
 msgid "Total Sync — Logs"
 msgstr "Полная синхронизация — Логи"
 
-#: inc/admin-logs.php:34 inc/admin-logs.php:86
+#: inc/admin-logs.php:103 inc/admin-logs.php:155
 msgid "Level"
 msgstr "Уровень"
 
-#: inc/admin-logs.php:36 inc/admin-logs.php:44
+#: inc/admin-logs.php:105 inc/admin-logs.php:113
 msgid "Any"
 msgstr "Любой"
 
-#: inc/admin-logs.php:42 inc/admin-logs.php:87
+#: inc/admin-logs.php:111 inc/admin-logs.php:156
 msgid "Action"
 msgstr "Действие"
 
-#: inc/admin-logs.php:52 inc/admin-logs.php:88
+#: inc/admin-logs.php:121 inc/admin-logs.php:157 inc/admin-media.php:805
 msgid "SKU"
 msgstr "Артикул"
 
-#: inc/admin-logs.php:55
+#: inc/admin-logs.php:124
 msgid "Days"
 msgstr "Дней"
 
-#: inc/admin-logs.php:58
+#: inc/admin-logs.php:127
 msgid "Filter"
 msgstr "Фильтр"
 
-#: inc/admin-logs.php:63
+#: inc/admin-logs.php:132
 msgid "Export CSV"
 msgstr "Экспорт CSV"
 
-#: inc/admin-logs.php:85
+#: inc/admin-logs.php:154
 msgid "Time"
 msgstr "Время"
 
-#: inc/admin-logs.php:89
+#: inc/admin-logs.php:158
 msgid "Post"
 msgstr "Публикация"
 
-#: inc/admin-logs.php:90 inc/admin-ui.php:473
+#: inc/admin-logs.php:159 inc/admin-ui.php:1229
 msgid "Result"
 msgstr "Результат"
 
-#: inc/admin-logs.php:91
+#: inc/admin-logs.php:160
 msgid "Message"
 msgstr "Сообщение"
 
-#: inc/admin-logs.php:111
+#: inc/admin-logs.php:161
+msgid "Details"
+msgstr "Детали"
+
+#: inc/admin-logs.php:182
 msgid "No logs"
 msgstr "Логов нет"
+
+#: inc/admin-media.php:273 inc/admin-media.php:274 inc/admin-media.php:345
+#: inc/admin-media.php:346 inc/admin-ui.php:1076
+msgid "Not scheduled"
+msgstr ""
+
+#: inc/admin-media.php:355 inc/admin-media.php:356 inc/admin-media.php:653
+msgid "Media Sync (images)"
+msgstr ""
+
+#: inc/admin-media.php:426
+msgid "Product media synchronization"
+msgstr ""
+
+#: inc/admin-media.php:623
+msgid "The featured attachment no longer exists"
+msgstr "Основное вложение больше не существует"
+
+#: inc/admin-media.php:624
+msgid "Featured image is not assigned"
+msgstr "Основное изображение не назначено"
+
+#: inc/admin-media.php:657
+msgid ""
+"Синхронизация изображений по диапазону SKU (курсор) или по списку SKU. "
+"Отправляет запросы в Java API /admin/media/sync/range и /admin/media/sync."
+msgstr ""
+
+#: inc/admin-media.php:667
+msgid "By range (cursor) → /admin/media/sync/range"
+msgstr ""
+
+#: inc/admin-media.php:670 inc/admin-media.php:980
+msgid "From SKU (inclusive)"
+msgstr ""
+
+#: inc/admin-media.php:674 inc/admin-media.php:984
+msgid "To SKU (inclusive)"
+msgstr ""
+
+#: inc/admin-media.php:678 inc/admin-media.php:988
+#, fuzzy
+msgid "Chunk size"
+msgstr "Размер пакета"
+
+#: inc/admin-media.php:682 inc/admin-media.php:728 inc/admin-media.php:992
+msgid "Mode"
+msgstr ""
+
+#: inc/admin-media.php:685 inc/admin-media.php:731 inc/admin-media.php:996
+msgid "both (featured + gallery)"
+msgstr ""
+
+#: inc/admin-media.php:686 inc/admin-media.php:732 inc/admin-media.php:997
+msgid "featured only"
+msgstr ""
+
+#: inc/admin-media.php:687 inc/admin-media.php:733 inc/admin-media.php:998
+msgid "gallery only"
+msgstr ""
+
+#: inc/admin-media.php:690
+msgid ""
+"featured → только обложка; gallery → только галерея; both/пусто → и то, и "
+"другое."
+msgstr ""
+
+#: inc/admin-media.php:695 inc/admin-media.php:742 inc/admin-media.php:1003
+msgid "Gallery start position"
+msgstr ""
+
+#: inc/admin-media.php:699 inc/admin-media.php:746 inc/admin-media.php:1007
+msgid "Limit per SKU (gallery)"
+msgstr ""
+
+#: inc/admin-media.php:704 inc/admin-media.php:751 inc/admin-media.php:1012
+msgid "Не писать в Woo, только расчёт/логика"
+msgstr ""
+
+#: inc/admin-media.php:708
+#, fuzzy
+msgid "Run range sync"
+msgstr "Запустить полную синхронизацию"
+
+#: inc/admin-media.php:717
+msgid "By list of SKUs → /admin/media/sync"
+msgstr ""
+
+#: inc/admin-media.php:720
+msgid "SKUs (one per line or ';')"
+msgstr ""
+
+#: inc/admin-media.php:738
+msgid "Touch on update"
+msgstr ""
+
+#: inc/admin-media.php:739
+msgid "Обновлять метки времени при изменении"
+msgstr ""
+
+#: inc/admin-media.php:755
+#, fuzzy
+msgid "Run list sync"
+msgstr "Запустить полную синхронизацию"
+
+#: inc/admin-media.php:764
+msgid "Products without images"
+msgstr "Товары без изображений"
+
+#: inc/admin-media.php:766
+msgid ""
+"The report checks WooCommerce product image links. Attachment parent fields "
+"in the Media Library do not affect this report."
+msgstr ""
+"Отчёт проверяет связи изображений товаров WooCommerce. Поля родительского "
+"объекта вложения в медиатеке не влияют на этот отчёт."
+
+#: inc/admin-media.php:770
+msgid "Report type"
+msgstr "Тип отчёта"
+
+#: inc/admin-media.php:772
+msgid "No images at all"
+msgstr "Нет ни одного изображения"
+
+#: inc/admin-media.php:773
+msgid "No featured image"
+msgstr "Нет основного изображения"
+
+#: inc/admin-media.php:777
+msgid "Product scope"
+msgstr "Какие товары проверять"
+
+#: inc/admin-media.php:779
+msgid "Published products only"
+msgstr "Только опубликованные товары"
+
+#: inc/admin-media.php:780
+msgid "All active products"
+msgstr "Все активные товары"
+
+#: inc/admin-media.php:784
+msgid "Rows per page"
+msgstr "Строк на странице"
+
+#: inc/admin-media.php:793
+msgid "Build report"
+msgstr "Сформировать отчёт"
+
+#: inc/admin-media.php:804
+msgid "ID"
+msgstr "ID"
+
+#: inc/admin-media.php:806
+msgid "Product"
+msgstr "Товар"
+
+#: inc/admin-media.php:807
+msgid "Status"
+msgstr "Статус"
+
+#: inc/admin-media.php:808
+msgid "Gallery"
+msgstr "Галерея"
+
+#: inc/admin-media.php:809
+msgid "Reason"
+msgstr "Причина"
+
+#: inc/admin-media.php:810
+#, fuzzy
+msgid "Actions"
+msgstr "Действия"
+
+#: inc/admin-media.php:865
+msgid "OVH media index"
+msgstr ""
+
+#: inc/admin-media.php:868
+msgid ""
+"Refresh the S3 media index after uploading new images, or run it by a "
+"separate schedule."
+msgstr ""
+
+#: inc/admin-media.php:871
+msgid "Update OVH media index now"
+msgstr ""
+
+#: inc/admin-media.php:877
+msgid "Enable index cron"
+msgstr ""
+
+#: inc/admin-media.php:878 inc/admin-media.php:942
+msgid "Run by schedule"
+msgstr ""
+
+#: inc/admin-media.php:881 inc/admin-media.php:945
+msgid "Frequency"
+msgstr ""
+
+#: inc/admin-media.php:885 inc/admin-media.php:949
+msgid "Daily"
+msgstr ""
+
+#: inc/admin-media.php:886 inc/admin-media.php:950 inc/admin-ui.php:633
+msgid "Weekly"
+msgstr ""
+
+#: inc/admin-media.php:887
+msgid "Monthly"
+msgstr ""
+
+#: inc/admin-media.php:892 inc/admin-media.php:955
+msgid "Time (site local)"
+msgstr ""
+
+#: inc/admin-media.php:897 inc/admin-media.php:960
+msgid "Uses the site timezone from Settings → General."
+msgstr ""
+
+#: inc/admin-media.php:901 inc/admin-media.php:964
+msgid "Day of week"
+msgstr ""
+
+#: inc/admin-media.php:905 inc/admin-media.php:968 inc/admin-ui.php:1046
+msgid "Monday"
+msgstr ""
+
+#: inc/admin-media.php:906 inc/admin-media.php:969 inc/admin-ui.php:1047
+msgid "Tuesday"
+msgstr ""
+
+#: inc/admin-media.php:907 inc/admin-media.php:970 inc/admin-ui.php:1048
+msgid "Wednesday"
+msgstr ""
+
+#: inc/admin-media.php:908 inc/admin-media.php:971 inc/admin-ui.php:1049
+msgid "Thursday"
+msgstr ""
+
+#: inc/admin-media.php:909 inc/admin-media.php:972 inc/admin-ui.php:1050
+msgid "Friday"
+msgstr ""
+
+#: inc/admin-media.php:910 inc/admin-media.php:973 inc/admin-ui.php:1051
+msgid "Saturday"
+msgstr ""
+
+#: inc/admin-media.php:911 inc/admin-media.php:974 inc/admin-ui.php:1052
+msgid "Sunday"
+msgstr ""
+
+#: inc/admin-media.php:916
+msgid "Day of month"
+msgstr ""
+
+#: inc/admin-media.php:919
+msgid "Use days 1–28 so every month is valid."
+msgstr ""
+
+#: inc/admin-media.php:924
+msgid "Save index schedule"
+msgstr ""
+
+#: inc/admin-media.php:925 inc/admin-media.php:1018
+msgid "Refresh status"
+msgstr ""
+
+#: inc/admin-media.php:929
+msgid "Next index run"
+msgstr ""
+
+#: inc/admin-media.php:934 inc/admin-media.php:1027
+msgid "Your local (browser) time"
+msgstr ""
+
+#: inc/admin-media.php:938
+msgid "Media Sync Cron (range only)"
+msgstr ""
+
+#: inc/admin-media.php:941 inc/admin-ui.php:1017
+msgid "Enable cron"
+msgstr ""
+
+#: inc/admin-media.php:978
+msgid "Range payload"
+msgstr ""
+
+#: inc/admin-media.php:1016
+msgid "Save & schedule"
+msgstr ""
+
+#: inc/admin-media.php:1017 inc/admin-ui.php:1087
+msgid "Run cron task now"
+msgstr ""
+
+#: inc/admin-media.php:1022 inc/admin-ui.php:1069
+#, fuzzy
+msgid "Next run"
+msgstr "Следующий курсор"
+
+#: inc/admin-media.php:1080 inc/admin-media.php:1114 inc/admin-ui.php:71
+msgid "Saving…"
+msgstr "Сохранение…"
+
+#: inc/admin-media.php:1083 inc/admin-media.php:1117 inc/admin-ui.php:72
+#: inc/admin-ui.php:853
+msgid "Saved"
+msgstr "Сохранено"
+
+#: inc/admin-media.php:1093 inc/admin-media.php:1096 inc/admin-media.php:1127
+#: inc/admin-media.php:1130 inc/admin-media.php:1147 inc/admin-media.php:1225
+#: inc/admin-media.php:1231 inc/admin-media.php:1255 inc/admin-media.php:1263
+#: inc/admin-media.php:1286 inc/admin-media.php:1294 inc/admin-media.php:1316
+#: inc/admin-media.php:1324 inc/admin-ui.php:1107 inc/admin-ui.php:1110
+#: inc/admin-ui.php:1136 inc/admin-ui.php:1183 inc/admin-ui.php:1468
+#: inc/admin-ui.php:1471 inc/admin-ui.php:1505 inc/admin-ui.php:1518
+#: inc/admin-ui.php:1541 inc/admin-ui.php:1554
+msgid "Error"
+msgstr "Ошибка"
+
+#: inc/admin-media.php:1142 inc/admin-media.php:1215 inc/admin-media.php:1247
+#: inc/admin-media.php:1270 inc/admin-media.php:1301 inc/admin-ui.php:1099
+#: inc/admin-ui.php:1129 inc/admin-ui.php:1460 inc/admin-ui.php:1488
+#: inc/admin-ui.php:1524
+msgid "Working…"
+msgstr "Работаю…"
+
+#: inc/admin-media.php:1144
+msgid "Scheduled"
+msgstr ""
+
+#: inc/admin-media.php:1173
+msgid "No products found"
+msgstr "Товары не найдены"
+
+#: inc/admin-media.php:1204
+msgid "Found:"
+msgstr "Найдено:"
+
+#: inc/admin-media.php:1207
+msgid "Page"
+msgstr "Страница"
+
+#: inc/admin-media.php:1229 inc/admin-media.php:1259 inc/admin-media.php:1290
+#: inc/admin-media.php:1320 inc/admin-ui.php:1105 inc/admin-ui.php:1134
+#: inc/admin-ui.php:1466 inc/admin-ui.php:1509 inc/admin-ui.php:1545
+msgid "Done."
+msgstr "Готово."
 
 #: inc/admin-ui.php:20
 msgid "Total Sync"
@@ -111,7 +581,7 @@ msgstr "Полная синхронизация"
 msgid "Settings"
 msgstr "Настройки"
 
-#: inc/admin-ui.php:41 inc/admin-ui.php:42 inc/admin-ui.php:469
+#: inc/admin-ui.php:41 inc/admin-ui.php:42 inc/admin-ui.php:1225
 msgid "Run"
 msgstr "Запустить"
 
@@ -119,76 +589,187 @@ msgstr "Запустить"
 msgid "Loading…"
 msgstr "Загрузка…"
 
-#: inc/admin-ui.php:71
-msgid "Saving…"
-msgstr "Сохранение…"
-
-#: inc/admin-ui.php:72 inc/admin-ui.php:279
-msgid "Saved"
-msgstr "Сохранено"
-
 #: inc/admin-ui.php:73
 msgid "Error:"
 msgstr "Ошибка:"
 
-#: inc/admin-ui.php:74
-msgid "Updated"
-msgstr "Обновлено"
+#: inc/admin-ui.php:109
+#, fuzzy
+msgid "Background product data synchronization"
+msgstr "Фоновая полная синхронизация"
 
-#: inc/admin-ui.php:293
+#: inc/admin-ui.php:532
+msgid "Java product data synchronization"
+msgstr ""
+
+#: inc/admin-ui.php:552
+msgid "Java product force refresh"
+msgstr "Принудительное обновление товаров Java"
+
+#: inc/admin-ui.php:627
+msgid "Every 15 Minutes"
+msgstr ""
+
+#: inc/admin-ui.php:885
+msgid "— not scheduled —"
+msgstr ""
+
+#: inc/admin-ui.php:898
 msgid "Java Base URL"
 msgstr "Базовый URL Java"
 
-#: inc/admin-ui.php:303
+#: inc/admin-ui.php:908
 msgid "API Token"
 msgstr "Токен API"
 
-#: inc/admin-ui.php:313
+#: inc/admin-ui.php:918
 msgid "Sync endpoint"
 msgstr "Конечная точка синхронизации"
 
-#: inc/admin-ui.php:324
+#: inc/admin-ui.php:929
 msgid "Status endpoint"
 msgstr "Конечная точка статуса"
 
-#: inc/admin-ui.php:335
+#: inc/admin-ui.php:940
 msgid "Cancel endpoint"
 msgstr "Конечная точка отмены"
 
-#: inc/admin-ui.php:345
+#: inc/admin-ui.php:950
 msgid "Batch size"
 msgstr "Размер пакета"
 
-#: inc/admin-ui.php:353
+#: inc/admin-ui.php:958
 msgid "HTTP timeout, sec"
 msgstr "Таймаут HTTP, сек"
 
-#: inc/admin-ui.php:363
+#: inc/admin-ui.php:968
 msgid "Category description — prefix (HTML)"
 msgstr "Описание категории — префикс (HTML)"
 
-#: inc/admin-ui.php:368
+#: inc/admin-ui.php:973
 msgid "HTML to prepend before category description. Leave empty to disable."
-msgstr "HTML для добавления перед описанием категории. Оставьте пустым для отключения."
+msgstr ""
+"HTML для добавления перед описанием категории. Оставьте пустым для "
+"отключения."
 
-#: inc/admin-ui.php:374
+#: inc/admin-ui.php:979
 msgid "Category description — suffix (HTML)"
 msgstr "Описание категории — суффикс (HTML)"
 
-#: inc/admin-ui.php:379
+#: inc/admin-ui.php:984
 msgid ""
 "HTML to append after category description. Example: closing &lt;/p&gt; tag."
-msgstr "HTML для добавления после описания категории. Пример: закрывающий тег &lt;/p&gt;."
+msgstr ""
+"HTML для добавления после описания категории. Пример: закрывающий тег &lt;/"
+"p&gt;."
 
-#: inc/admin-ui.php:383
+#: inc/admin-ui.php:988
+msgid "New API defaults (/sync/run)"
+msgstr ""
+
+#: inc/admin-ui.php:991
+msgid "Default limit"
+msgstr ""
+
+#: inc/admin-ui.php:995
+msgid "Default Woo batch size"
+msgstr ""
+
+#: inc/admin-ui.php:999
+#, fuzzy
+msgid "Default cursorAfter"
+msgstr "Следующий курсор"
+
+#: inc/admin-ui.php:1003
+#, fuzzy
+msgid "Default dry run"
+msgstr "Тестовый запуск"
+
+#: inc/admin-ui.php:1004 inc/admin-ui.php:1251 inc/admin-ui.php:1285
+msgid "Calculate only, no writes"
+msgstr ""
+
+#: inc/admin-ui.php:1007
+msgid "First SKU (lexicographically first)"
+msgstr ""
+
+#: inc/admin-ui.php:1010
+msgid ""
+"Used by cron full sync as cursorAfter. Leave empty to start from the "
+"beginning."
+msgstr ""
+"Используется полной синхронизацией cron как cursorAfter. Оставьте пустым, "
+"чтобы начать с начала."
+
+#: inc/admin-ui.php:1014
+msgid "Cron full sync (/sync/run)"
+msgstr ""
+
+#: inc/admin-ui.php:1019
+msgid "Run full fields sync on schedule"
+msgstr ""
+
+#: inc/admin-ui.php:1023
+msgid "Schedule type"
+msgstr ""
+
+#: inc/admin-ui.php:1027
+msgid "Daily at time"
+msgstr ""
+
+#: inc/admin-ui.php:1028
+msgid "Weekly on day at time"
+msgstr ""
+
+#: inc/admin-ui.php:1033
+msgid "Run time"
+msgstr ""
+
+#: inc/admin-ui.php:1042
+msgid "Day of week (for weekly)"
+msgstr ""
+
+#: inc/admin-ui.php:1057
+msgid "Cron limit"
+msgstr ""
+
+#: inc/admin-ui.php:1061
+msgid "Cron Woo batch size (1..200)"
+msgstr ""
+
+#: inc/admin-ui.php:1065
+msgid "First SKU used as cursorAfter"
+msgstr ""
+
+#: inc/admin-ui.php:1072
+msgid "Site time"
+msgstr ""
+
+#: inc/admin-ui.php:1073
+msgid "UTC/server"
+msgstr ""
+
+#: inc/admin-ui.php:1079
+msgid "Ping WP‑Cron now"
+msgstr ""
+
+#: inc/admin-ui.php:1085
+msgid "Manual trigger"
+msgstr ""
+
+#: inc/admin-ui.php:1092
 msgid "Save"
 msgstr "Сохранить"
 
-#: inc/admin-ui.php:421
+#: inc/admin-ui.php:1121
+msgid "Your local (browser) time:"
+msgstr ""
+
+#: inc/admin-ui.php:1177
 msgid "Run Total Sync"
 msgstr "Запустить полную синхронизацию"
 
-#: inc/admin-ui.php:423
+#: inc/admin-ui.php:1179
 msgid ""
 "Run a full synchronization of WooCommerce products (except price and stock) "
 "from the external MSSQL source. Uses keyset pagination (limit/after)."
@@ -196,170 +777,143 @@ msgstr ""
 "Запустить полную синхронизацию продуктов WooCommerce (кроме цены и наличия) "
 "из внешнего MSSQL источника. Использует пагинацию по ключу (limit/after)."
 
-#: inc/admin-ui.php:427 inc/admin-ui.php:640 inc/admin-ui.php:643
-msgid "Error"
-msgstr "Ошибка"
-
-#: inc/admin-ui.php:429
+#: inc/admin-ui.php:1185
 msgid "Sync completed."
 msgstr "Синхронизация завершена."
 
-#: inc/admin-ui.php:436
+#: inc/admin-ui.php:1192
 msgid "Page size (limit)"
 msgstr "Размер страницы (limit)"
 
-#: inc/admin-ui.php:440
+#: inc/admin-ui.php:1196
 msgid "Cursor (after)"
 msgstr "Курсор (after)"
 
-#: inc/admin-ui.php:444
+#: inc/admin-ui.php:1200
 msgid "Max items to modify"
 msgstr "Максимум элементов для изменения"
 
-#: inc/admin-ui.php:447
+#: inc/admin-ui.php:1203
 msgid ""
 "If set, process only this many SKUs starting from the cursor (after) and "
 "stop."
 msgstr ""
-"Если установлено, обработать только это количество артикулов, начиная с курсора (after), и остановиться."
+"Если установлено, обработать только это количество артикулов, начиная с "
+"курсора (after), и остановиться."
 
-#: inc/admin-ui.php:451
+#: inc/admin-ui.php:1207
 msgid "Max run time (seconds)"
 msgstr "Максимальное время выполнения (секунды)"
 
-#: inc/admin-ui.php:454
+#: inc/admin-ui.php:1210
 msgid ""
 "Optional safety limit: stop the sync when this many seconds have elapsed."
-msgstr "Опциональное ограничение безопасности: остановить синхронизацию, когда пройдет столько секунд."
+msgstr ""
+"Опциональное ограничение безопасности: остановить синхронизацию, когда "
+"пройдет столько секунд."
 
-#: inc/admin-ui.php:458
-msgid "Dry run"
-msgstr "Тестовый запуск"
-
-#: inc/admin-ui.php:459
+#: inc/admin-ui.php:1215
 msgid "Do not modify Woo, only fetch pages"
 msgstr "Не изменять Woo, только получать страницы"
 
-#: inc/admin-ui.php:462
+#: inc/admin-ui.php:1218
 msgid "Draft items not updated for (seconds)"
 msgstr "Черновики не обновлялись в течение (секунд)"
 
-#: inc/admin-ui.php:465
+#: inc/admin-ui.php:1221
 msgid ""
 "After the run, products with _sync_updated_at older than this threshold will "
 "be moved to draft."
 msgstr ""
-"После запуска, продукты с _sync_updated_at старше этого порога будут переведены в черновики."
+"После запуска, продукты с _sync_updated_at старше этого порога будут "
+"переведены в черновики."
 
-#: inc/admin-ui.php:478
+#: inc/admin-ui.php:1233
+msgid "Run (new API /sync/run)"
+msgstr ""
+
+#: inc/admin-ui.php:1234
+msgid "Start Java sync via /sync/run (fields only)."
+msgstr ""
+
+#: inc/admin-ui.php:1238 inc/admin-ui.php:1272
+msgid "Limit (max items)"
+msgstr ""
+
+#: inc/admin-ui.php:1242 inc/admin-ui.php:1276
+msgid "Woo batch size (1..200)"
+msgstr ""
+
+#: inc/admin-ui.php:1246 inc/admin-ui.php:1280
+#, fuzzy
+msgid "Cursor (after SKU)"
+msgstr "Курсор (after)"
+
+#: inc/admin-ui.php:1257
+msgid "Run (new API)"
+msgstr ""
+
+#: inc/admin-ui.php:1265
+msgid "Force refresh products (/admin/sync/products/force-refresh)"
+msgstr "Принудительно обновить товары (/admin/sync/products/force-refresh)"
+
+#: inc/admin-ui.php:1267
+msgid ""
+"Repair mode: Java will update matching Woo products even when _ms_hash is "
+"already equal. Use it to refresh catalog visibility and other synced fields."
+msgstr ""
+"Режим ремонта: Java обновит соответствующие товары Woo даже когда _ms_hash "
+"уже совпадает. Используйте для обновления видимости в каталоге и других "
+"синхронизированных полей."
+
+#: inc/admin-ui.php:1291
+msgid "Force refresh products"
+msgstr "Принудительно обновить товары"
+
+#: inc/admin-ui.php:1300
 msgid "Background total sync"
 msgstr "Фоновая полная синхронизация"
 
-#: inc/admin-ui.php:479
+#: inc/admin-ui.php:1301
 msgid ""
 "Run sync in background and watch live log. This will not block the page."
-msgstr "Запустить синхронизацию в фоновом режиме и просматривать живой лог. Это не заблокирует страницу."
+msgstr ""
+"Запустить синхронизацию в фоновом режиме и просматривать живой лог. Это не "
+"заблокирует страницу."
 
-#: inc/admin-ui.php:482
+#: inc/admin-ui.php:1304
 msgid "Start"
 msgstr "Старт"
 
-#: inc/admin-ui.php:483
+#: inc/admin-ui.php:1305
 msgid "Cancel"
 msgstr "Отмена"
 
-#: inc/admin-ui.php:619
+#: inc/admin-ui.php:1447
 msgid "Force recount product categories"
 msgstr "Принудительный пересчет категорий продуктов"
 
-#: inc/admin-ui.php:620
+#: inc/admin-ui.php:1448
 msgid ""
 "Manually recalculate product_cat counters (stored term counts) for all "
 "categories. Useful if catalog shows wrong counts."
 msgstr ""
-"Вручную пересчитать счетчики product_cat (хранимые количества терминов) для всех "
-"категорий. Полезно, если каталог показывает неверные количества."
+"Вручную пересчитать счетчики product_cat (хранимые количества терминов) для "
+"всех категорий. Полезно, если каталог показывает неверные количества."
 
-#: inc/admin-ui.php:622
+#: inc/admin-ui.php:1450
 msgid "Force recount now"
 msgstr "Пересчитать сейчас"
 
-#: inc/admin-ui.php:632
-msgid "Working…"
-msgstr "Работаю…"
+#: inc/helpers.php:42
+msgid "Synchronization is already running. Please try again later."
+msgstr ""
 
-#: inc/admin-ui.php:638
-msgid "Done."
-msgstr "Готово."
+#: inc/sync_goods.php:623
+msgid "Product data synchronization"
+msgstr ""
 
-#: inc/admin-logs.php
-msgid "Processed"
-msgstr "Обработано"
-
-#: inc/admin-logs.php
-msgid "Created"
-msgstr "Создано"
-
-#: inc/admin-logs.php
-msgid "Drafted"
-msgstr "Переведено в черновики"
-
-#: inc/admin-logs.php
-msgid "Next cursor"
-msgstr "Следующий курсор"
-
-#: inc/admin-logs.php
-msgid "Last flag"
-msgstr "Признак завершения"
-
-#: inc/admin-logs.php
-msgid "Errors"
-msgstr "Ошибки"
-
-#: inc/admin-logs.php
-msgid "Limit"
-msgstr "Лимит"
-
-#: inc/admin-logs.php
-msgid "Woo batch"
-msgstr "Пакет Woo"
-
-#: inc/admin-logs.php
-msgid "Cursor"
-msgstr "Курсор"
-
-#: inc/admin-logs.php
-msgid "Yes"
-msgstr "Да"
-
-#: inc/admin-logs.php
-msgid "No"
-msgstr "Нет"
-
-#: inc/admin-logs.php
-msgid "View details"
-msgstr "Посмотреть детали"
-
-#: inc/admin-logs.php
-msgid "Details"
-msgstr "Детали"
-
-#: inc/admin-ui.php
-msgid "Used by cron full sync as cursorAfter. Leave empty to start from the beginning."
-msgstr "Используется полной синхронизацией cron как cursorAfter. Оставьте пустым, чтобы начать с начала."
-
-#: inc/admin-ui.php
-msgid "Java product force refresh"
-msgstr "Принудительное обновление товаров Java"
-
-#: inc/admin-ui.php
-msgid "Force refresh products (/admin/sync/products/force-refresh)"
-msgstr "Принудительно обновить товары (/admin/sync/products/force-refresh)"
-
-#: inc/admin-ui.php
-msgid "Repair mode: Java will update matching Woo products even when _ms_hash is already equal. Use it to refresh catalog visibility and other synced fields."
-msgstr "Режим ремонта: Java обновит соответствующие товары Woo даже когда _ms_hash уже совпадает. Используйте для обновления видимости в каталоге и других синхронизированных полей."
-
-#: inc/admin-ui.php
-msgid "Force refresh products"
-msgstr "Принудительно обновить товары"
+#: inc/worker.php:12
+#, fuzzy
+msgid "Background product data worker"
+msgstr "Принудительный пересчет категорий продуктов"
