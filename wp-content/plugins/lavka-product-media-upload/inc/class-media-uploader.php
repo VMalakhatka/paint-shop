@@ -191,6 +191,11 @@ final class MediaUploader
             );
         }
 
+        $parent_warnings = $this->sync_attachment_parent(
+            $attachment_id,
+            (int) ($row['product_id'] ?? 0)
+        );
+
         update_post_meta($attachment_id, '_lpmu_verified_at', current_time('mysql'));
 
         $attached_file = (string) get_post_meta($attachment_id, '_wp_attached_file', true);
@@ -228,10 +233,39 @@ final class MediaUploader
             'warnings' => array_values(array_unique(array_merge(
                 (array) ($row['warnings'] ?? []),
                 (array) ($post_check['warnings'] ?? []),
-                (array) ($remote['warnings'] ?? [])
+                (array) ($remote['warnings'] ?? []),
+                $parent_warnings
             ))),
             'technical' => '',
         ]);
+    }
+
+    private function sync_attachment_parent(int $attachment_id, int $product_id): array
+    {
+        $attachment = get_post($attachment_id);
+        if (!$attachment || $attachment->post_type !== 'attachment' || $product_id < 1) {
+            return [__('The attachment parent could not be synchronized with the product.', 'lavka-product-media-upload')];
+        }
+
+        $current_parent = (int) $attachment->post_parent;
+        if ($current_parent === $product_id) {
+            return [];
+        }
+        if ($current_parent > 0) {
+            return [__('The attachment already belongs to another WordPress post, so its media parent was not changed.', 'lavka-product-media-upload')];
+        }
+
+        $updated = wp_update_post([
+            'ID' => $attachment_id,
+            'post_parent' => $product_id,
+        ], true);
+
+        if (is_wp_error($updated) || (int) $updated !== $attachment_id) {
+            return [__('The attachment parent could not be synchronized with the product.', 'lavka-product-media-upload')];
+        }
+
+        clean_post_cache($attachment_id);
+        return [];
     }
 
     private function verify_attachment(int $attachment_id, array $row): array

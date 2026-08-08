@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the Lavka Product Media Upload plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Lavka Product Media Upload 0.1.3\n"
+"Project-Id-Version: Lavka Product Media Upload 0.1.4\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lavka-product-media-upload\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-08T15:41:32+00:00\n"
+"POT-Creation-Date: 2026-08-08T20:30:44+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: lavka-product-media-upload\n"
@@ -100,7 +100,7 @@ msgid "More than one selected file matches the registry source filename."
 msgstr ""
 
 #: inc/class-image-validator.php:147
-#: inc/class-media-uploader.php:309
+#: inc/class-media-uploader.php:343
 msgid "WooCommerce variations do not have a standard separate gallery."
 msgstr ""
 
@@ -395,50 +395,59 @@ msgid "The canonical server copy could not be created."
 msgstr ""
 
 #: inc/class-media-uploader.php:247
+#: inc/class-media-uploader.php:264
+msgid "The attachment parent could not be synchronized with the product."
+msgstr ""
+
+#: inc/class-media-uploader.php:255
+msgid "The attachment already belongs to another WordPress post, so its media parent was not changed."
+msgstr ""
+
+#: inc/class-media-uploader.php:281
 msgid "WordPress did not create a valid attachment post."
 msgstr ""
 
-#: inc/class-media-uploader.php:253
+#: inc/class-media-uploader.php:287
 msgid "The attachment MIME differs from the validated image MIME."
 msgstr ""
 
-#: inc/class-media-uploader.php:262
+#: inc/class-media-uploader.php:296
 msgid "The attachment file key does not contain the expected canonical filename."
 msgstr ""
 
-#: inc/class-media-uploader.php:268
+#: inc/class-media-uploader.php:302
 msgid "WordPress attachment metadata was not generated."
 msgstr ""
 
-#: inc/class-media-uploader.php:274
+#: inc/class-media-uploader.php:308
 msgid "Attachment metadata dimensions differ from the validated source dimensions."
 msgstr ""
 
-#: inc/class-media-uploader.php:284
+#: inc/class-media-uploader.php:318
 msgid "The attachment URL is missing or invalid."
 msgstr ""
 
-#: inc/class-media-uploader.php:289
+#: inc/class-media-uploader.php:323
 msgid "WordPress generated no derivative image sizes for this attachment."
 msgstr ""
 
-#: inc/class-media-uploader.php:299
+#: inc/class-media-uploader.php:333
 msgid "The WooCommerce product disappeared before image assignment."
 msgstr ""
 
-#: inc/class-media-uploader.php:322
+#: inc/class-media-uploader.php:356
 msgid "The image role is unsupported."
 msgstr ""
 
-#: inc/class-media-uploader.php:340
+#: inc/class-media-uploader.php:374
 msgid "Remote-object verification was not required for the resolved attachment URL."
 msgstr ""
 
-#: inc/class-media-uploader.php:389
+#: inc/class-media-uploader.php:423
 msgid "Remote HEAD metadata was incomplete, but the public object signature was verified."
 msgstr ""
 
-#: inc/class-media-uploader.php:399
+#: inc/class-media-uploader.php:433
 msgid "The Media Cloud or OVH object could not be verified after bounded retries."
 msgstr ""
 
