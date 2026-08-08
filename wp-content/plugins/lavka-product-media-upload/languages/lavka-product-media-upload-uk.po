@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Lavka Product Media Upload 0.1.0\n"
+"Project-Id-Version: Lavka Product Media Upload 0.1.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lavka-product-"
 "media-upload\n"
-"POT-Creation-Date: 2026-08-07T13:57:39+00:00\n"
+"POT-Creation-Date: 2026-08-08T15:04:02+00:00\n"
 "PO-Revision-Date: 2026-08-07 10:33+0200\n"
 "Last-Translator: Volodymyr\n"
 "Language-Team: Ukrainian\n"
@@ -33,7 +33,7 @@ msgstr ""
 msgid "Volodymyr"
 msgstr "Volodymyr"
 
-#: inc/class-batch-service.php:97 inc/class-plugin.php:340
+#: inc/class-batch-service.php:97 inc/class-plugin.php:343
 msgid "File writing is disabled for this verification stage."
 msgstr "Запис файлів вимкнено на цьому етапі перевірки."
 
@@ -511,28 +511,28 @@ msgstr ""
 msgid "Product image batches"
 msgstr "Пакети зображень товарів"
 
-#: inc/class-plugin.php:88
+#: inc/class-plugin.php:89
 msgid "Checking the batch…"
 msgstr "Перевіряємо пакет…"
 
-#: inc/class-plugin.php:89
+#: inc/class-plugin.php:90
 msgid "Uploading approved files…"
 msgstr "Завантажуємо схвалені файли…"
 
-#: inc/class-plugin.php:90
+#: inc/class-plugin.php:91
 msgid "The server request failed."
 msgstr "Запит до сервера не виконано."
 
-#: inc/class-plugin.php:91
+#: inc/class-plugin.php:92
 msgid "Select an XLS or XLSX registry."
 msgstr "Виберіть реєстр XLS або XLSX."
 
-#: inc/class-plugin.php:92
+#: inc/class-plugin.php:93
 msgid "Select at least one image."
 msgstr "Виберіть щонайменше одне зображення."
 
 #. translators: %d: server-side maximum number of uploaded files
-#: inc/class-plugin.php:94
+#: inc/class-plugin.php:95
 #, php-format
 msgid ""
 "The server accepts at most %d image files per check. Split this set into "
@@ -541,49 +541,59 @@ msgstr ""
 "Сервер приймає не більше %d файлів зображень за одну перевірку. Розділіть "
 "цей набір на менші пакети."
 
-#: inc/class-plugin.php:95
+#. translators: 1: total selected file size, 2: safe server request size limit
+#: inc/class-plugin.php:97
+#, php-format
+msgid ""
+"The selected registry and images total %1$s, but the safe server request "
+"limit is %2$s. Split the images into smaller batches."
+msgstr ""
+"Загальний розмір вибраного реєстру та зображень становить %1$s, але "
+"безпечний ліміт запиту сервера — %2$s. Розділіть зображення на менші пакети."
+
+#: inc/class-plugin.php:98
 msgid "Run the mandatory check before uploading."
 msgstr "Перед завантаженням виконайте обов'язкову перевірку."
 
 #. translators: %d: number of selected image files
-#: inc/class-plugin.php:97
+#: inc/class-plugin.php:100
 #, php-format
 msgid "%d image files selected"
 msgstr "Вибрано файлів зображень: %d"
 
-#: inc/class-plugin.php:98 inc/class-plugin.php:215
+#: inc/class-plugin.php:101 inc/class-plugin.php:218
 msgid "Drop JPEG, PNG or WebP files here"
 msgstr "Перетягніть сюди файли JPEG, PNG або WebP"
 
-#: inc/class-plugin.php:99
+#: inc/class-plugin.php:102
 msgid "Ready"
 msgstr "Готово"
 
-#: inc/class-plugin.php:100 inc/class-report-store.php:68
+#: inc/class-plugin.php:103 inc/class-report-store.php:68
 msgid "Errors"
 msgstr "Помилки"
 
-#: inc/class-plugin.php:101 inc/class-report-store.php:69
+#: inc/class-plugin.php:104 inc/class-report-store.php:69
 msgid "Warnings"
 msgstr "Попередження"
 
-#: inc/class-plugin.php:102 inc/class-report-store.php:70
+#: inc/class-plugin.php:105 inc/class-report-store.php:70
 msgid "Technical details"
 msgstr "Технічні подробиці"
 
-#: inc/class-plugin.php:103
+#: inc/class-plugin.php:106
 msgid "No warnings"
 msgstr "Немає попереджень"
 
-#: inc/class-plugin.php:104
+#: inc/class-plugin.php:107
 msgid "The check is complete. Download the report for the full audit trail."
 msgstr "Перевірку завершено. Завантажте звіт для повного журналу перевірки."
 
-#: inc/class-plugin.php:105
+#: inc/class-plugin.php:108
 msgid "Upload only the rows that passed all checks?"
 msgstr "Завантажити лише рядки, що пройшли всі перевірки?"
 
-#: inc/class-plugin.php:106
+#: inc/class-plugin.php:109
 msgid ""
 "The S3 media index is unavailable, so remote filename conflicts were not "
 "checked."
@@ -591,175 +601,175 @@ msgstr ""
 "Індекс медіа S3 недоступний, тому конфлікти віддалених імен файлів не "
 "перевірено."
 
-#: inc/class-plugin.php:107
+#: inc/class-plugin.php:110
 msgid "Not referenced by the registry"
 msgstr "Не вказано в реєстрі"
 
-#: inc/class-plugin.php:108 inc/class-report-store.php:48
+#: inc/class-plugin.php:111 inc/class-report-store.php:48
 msgid "Row"
 msgstr "Рядок"
 
-#: inc/class-plugin.php:109
+#: inc/class-plugin.php:112
 msgid "Identifiers"
 msgstr "Ідентифікатори"
 
-#: inc/class-plugin.php:110 inc/class-report-store.php:50
+#: inc/class-plugin.php:113 inc/class-report-store.php:50
 msgid "SKU"
 msgstr "Артикул"
 
-#: inc/class-plugin.php:111
+#: inc/class-plugin.php:114
 msgid "GTIN"
 msgstr "GTIN"
 
-#: inc/class-plugin.php:112 inc/class-report-store.php:52
+#: inc/class-plugin.php:115 inc/class-report-store.php:52
 msgid "Source file"
 msgstr "Вихідний файл"
 
-#: inc/class-plugin.php:113 inc/class-report-store.php:53
+#: inc/class-plugin.php:116 inc/class-report-store.php:53
 msgid "Canonical file"
 msgstr "Канонічний файл"
 
-#: inc/class-plugin.php:114
+#: inc/class-plugin.php:117
 msgid "Image"
 msgstr "Зображення"
 
-#: inc/class-plugin.php:115
+#: inc/class-plugin.php:118
 msgid "Assignment"
 msgstr "Призначення"
 
-#: inc/class-plugin.php:116
+#: inc/class-plugin.php:119
 msgid "Result"
 msgstr "Результат"
 
-#: inc/class-plugin.php:117
+#: inc/class-plugin.php:120
 msgid "Product"
 msgstr "Товар"
 
-#: inc/class-plugin.php:118 inc/class-report-store.php:61
+#: inc/class-plugin.php:121 inc/class-report-store.php:61
 msgid "Role"
 msgstr "Роль"
 
-#: inc/class-plugin.php:119 inc/class-report-store.php:62
+#: inc/class-plugin.php:122 inc/class-report-store.php:62
 msgid "Position"
 msgstr "Позиція"
 
-#: inc/class-plugin.php:120
+#: inc/class-plugin.php:123
 msgid "Size"
 msgstr "Розмір"
 
-#: inc/class-plugin.php:121
+#: inc/class-plugin.php:124
 msgid "Dimensions"
 msgstr "Розміри"
 
-#: inc/class-plugin.php:122 inc/class-report-store.php:56
+#: inc/class-plugin.php:125 inc/class-report-store.php:56
 msgid "Color space"
 msgstr "Колірний простір"
 
-#: inc/class-plugin.php:123 inc/class-report-store.php:60
+#: inc/class-plugin.php:126 inc/class-report-store.php:60
 msgid "SHA-256"
 msgstr "SHA-256"
 
-#: inc/class-plugin.php:124
+#: inc/class-plugin.php:127
 msgid "Attachment"
 msgstr "Вкладення"
 
-#: inc/class-plugin.php:125
+#: inc/class-plugin.php:128
 msgid "Total"
 msgstr "Усього"
 
-#: inc/class-plugin.php:126
+#: inc/class-plugin.php:129
 msgid "Approved"
 msgstr "Схвалено"
 
-#: inc/class-plugin.php:127
+#: inc/class-plugin.php:130
 msgid "Successful"
 msgstr "Успішно"
 
-#: inc/class-plugin.php:129
+#: inc/class-plugin.php:132
 msgid "Verification passed"
 msgstr "Перевірку пройдено"
 
-#: inc/class-plugin.php:130
+#: inc/class-plugin.php:133
 msgid "Uploaded successfully"
 msgstr "Успішно завантажено"
 
-#: inc/class-plugin.php:131
+#: inc/class-plugin.php:134
 msgid "Registry error"
 msgstr "Помилка реєстру"
 
-#: inc/class-plugin.php:132
+#: inc/class-plugin.php:135
 msgid "Unsafe filename"
 msgstr "Небезпечне ім'я файлу"
 
-#: inc/class-plugin.php:133
+#: inc/class-plugin.php:136
 msgid "File not found"
 msgstr "Файл не знайдено"
 
-#: inc/class-plugin.php:134
+#: inc/class-plugin.php:137
 msgid "Extra file"
 msgstr "Зайвий файл"
 
-#: inc/class-plugin.php:135
+#: inc/class-plugin.php:138
 msgid "Invalid image format"
 msgstr "Некоректний формат зображення"
 
-#: inc/class-plugin.php:136
+#: inc/class-plugin.php:139
 msgid "Image decode failed"
 msgstr "Не вдалося декодувати зображення"
 
-#: inc/class-plugin.php:137
+#: inc/class-plugin.php:140
 msgid "Invalid image dimensions"
 msgstr "Некоректні розміри зображення"
 
-#: inc/class-plugin.php:138
+#: inc/class-plugin.php:141
 msgid "File is too large"
 msgstr "Файл завеликий"
 
-#: inc/class-plugin.php:139
+#: inc/class-plugin.php:142
 msgid "Duplicate in batch"
 msgstr "Дублікат у пакеті"
 
-#: inc/class-plugin.php:140
+#: inc/class-plugin.php:143
 msgid "Possible visual duplicate"
 msgstr "Можливий візуальний дублікат"
 
-#: inc/class-plugin.php:141
+#: inc/class-plugin.php:144
 msgid "Product not found"
 msgstr "Товар не знайдено"
 
-#: inc/class-plugin.php:142
+#: inc/class-plugin.php:145
 msgid "Identifier mismatch"
 msgstr "Ідентифікатори не збігаються"
 
-#: inc/class-plugin.php:143
+#: inc/class-plugin.php:146
 msgid "WordPress filename conflict"
 msgstr "Конфлікт імені файлу у WordPress"
 
-#: inc/class-plugin.php:144
+#: inc/class-plugin.php:147
 msgid "S3 filename conflict"
 msgstr "Конфлікт імені файлу в S3"
 
-#: inc/class-plugin.php:145
+#: inc/class-plugin.php:148
 msgid "Upload failed"
 msgstr "Завантаження не виконано"
 
-#: inc/class-plugin.php:146
+#: inc/class-plugin.php:149
 msgid "Attachment metadata failed"
 msgstr "Помилка метаданих вкладення"
 
-#: inc/class-plugin.php:147
+#: inc/class-plugin.php:150
 msgid "OVH verification failed"
 msgstr "Перевірка OVH не пройдена"
 
-#: inc/class-plugin.php:156 inc/class-plugin.php:480
+#: inc/class-plugin.php:159 inc/class-plugin.php:483
 msgid "You do not have permission to check product images."
 msgstr "У вас немає дозволу перевіряти зображення товарів."
 
-#: inc/class-plugin.php:166
+#: inc/class-plugin.php:169
 msgid "Product image batch verification"
 msgstr "Перевірка пакетів зображень товарів"
 
-#: inc/class-plugin.php:168
+#: inc/class-plugin.php:171
 msgid ""
 "Check an XLS/XLSX registry and all source images before anything is written "
 "to the Media Library."
@@ -767,17 +777,17 @@ msgstr ""
 "Перевірте реєстр XLS/XLSX і всі вихідні зображення до будь-якого запису в "
 "медіатеку."
 
-#: inc/class-plugin.php:174
+#: inc/class-plugin.php:177
 msgid "Verification-only mode is active."
 msgstr "Увімкнено режим лише перевірки."
 
-#: inc/class-plugin.php:175
+#: inc/class-plugin.php:178
 msgid ""
 "This stage does not write files to WordPress, OVH/S3 or product records."
 msgstr ""
 "На цьому етапі файли не записуються у WordPress, OVH/S3 або записи товарів."
 
-#: inc/class-plugin.php:181
+#: inc/class-plugin.php:184
 msgid ""
 "Before checking a batch, run a fresh Total Sync and refresh the S3 media "
 "index so product and conflict data are current."
@@ -785,48 +795,48 @@ msgstr ""
 "Перед перевіркою пакета запустіть актуальну повну синхронізацію та оновіть "
 "індекс медіа S3, щоб дані товарів і конфліктів були свіжими."
 
-#: inc/class-plugin.php:186
+#: inc/class-plugin.php:189
 msgid "Validation settings were saved."
 msgstr "Налаштування перевірки збережено."
 
-#: inc/class-plugin.php:192
+#: inc/class-plugin.php:195
 msgid ""
 "WooCommerce or PhpSpreadsheet is unavailable. Batch processing is disabled."
 msgstr "WooCommerce або PhpSpreadsheet недоступний. Пакетну обробку вимкнено."
 
-#: inc/class-plugin.php:197
+#: inc/class-plugin.php:200
 msgid "1. Select the registry and images"
 msgstr "1. Виберіть реєстр і зображення"
 
-#: inc/class-plugin.php:201
+#: inc/class-plugin.php:204
 msgid "Registry file"
 msgstr "Файл реєстру"
 
-#: inc/class-plugin.php:205
+#: inc/class-plugin.php:208
 msgid ""
 "The current four-column XLS and the new header-based template are supported."
 msgstr ""
 "Підтримуються поточний чотириколонковий XLS і новий шаблон із заголовками."
 
-#: inc/class-plugin.php:206
+#: inc/class-plugin.php:209
 msgid "Download the new XLSX template"
 msgstr "Завантажити новий шаблон XLSX"
 
-#: inc/class-plugin.php:211
+#: inc/class-plugin.php:214
 msgid "Source images"
 msgstr "Вихідні зображення"
 
-#: inc/class-plugin.php:216
+#: inc/class-plugin.php:219
 msgid "or choose multiple files"
 msgstr "або виберіть кілька файлів"
 
 #. translators: %d: server-side maximum number of uploaded files
-#: inc/class-plugin.php:224
+#: inc/class-plugin.php:227
 #, php-format
 msgid "Server limit: up to %d image files per check."
 msgstr "Обмеження сервера: до %d файлів зображень за одну перевірку."
 
-#: inc/class-plugin.php:234
+#: inc/class-plugin.php:237
 msgid ""
 "For a four-column registry without roles, explicitly treat every row as a "
 "main product image."
@@ -834,7 +844,7 @@ msgstr ""
 "Для чотириколонкового реєстру без ролей явно вважати кожен рядок головним "
 "зображенням товару."
 
-#: inc/class-plugin.php:238
+#: inc/class-plugin.php:241
 msgid ""
 "For header-based registries, generate canonical filenames from SKU or "
 "barcode. Legacy four-column registries always use column 2 as the "
@@ -844,63 +854,63 @@ msgstr ""
 "штрихкоду. У старих чотириколонкових реєстрах авторитетним ім'ям завжди є "
 "значення колонки 2."
 
-#: inc/class-plugin.php:244
+#: inc/class-plugin.php:247
 msgid "Validation thresholds and capabilities"
 msgstr "Пороги та можливості перевірки"
 
-#: inc/class-plugin.php:252
+#: inc/class-plugin.php:255
 msgid "Maximum file size (MiB)"
 msgstr "Максимальний розмір файлу (МіБ)"
 
-#: inc/class-plugin.php:260
+#: inc/class-plugin.php:263
 msgid "File size warning (MiB)"
 msgstr "Попередження про розмір файлу (МіБ)"
 
-#: inc/class-plugin.php:266
+#: inc/class-plugin.php:269
 msgid "Minimum side warning (px)"
 msgstr "Попередження про мінімальну сторону (пкс)"
 
-#: inc/class-plugin.php:267
+#: inc/class-plugin.php:270
 msgid "Recommended minimum side (px)"
 msgstr "Рекомендована мінімальна сторона (пкс)"
 
-#: inc/class-plugin.php:268
+#: inc/class-plugin.php:271
 msgid "Recommended maximum side (px)"
 msgstr "Рекомендована максимальна сторона (пкс)"
 
-#: inc/class-plugin.php:269
+#: inc/class-plugin.php:272
 msgid "Large side warning (px)"
 msgstr "Попередження про велику сторону (пкс)"
 
-#: inc/class-plugin.php:270
+#: inc/class-plugin.php:273
 msgid "Hard maximum side (px)"
 msgstr "Жорстка максимальна сторона (пкс)"
 
-#: inc/class-plugin.php:271
+#: inc/class-plugin.php:274
 msgid "Hard maximum total pixels"
 msgstr "Жорсткий максимум загальної кількості пікселів"
 
-#: inc/class-plugin.php:272
+#: inc/class-plugin.php:275
 msgid "Aspect-ratio warning threshold"
 msgstr "Поріг попередження про співвідношення сторін"
 
-#: inc/class-plugin.php:273
+#: inc/class-plugin.php:276
 msgid "Filename warning length"
 msgstr "Довжина імені для попередження"
 
-#: inc/class-plugin.php:274
+#: inc/class-plugin.php:277
 msgid "Filename hard length limit"
 msgstr "Жорстке обмеження довжини імені"
 
-#: inc/class-plugin.php:279
+#: inc/class-plugin.php:282
 msgid "Treat image decoder warnings as blocking errors."
 msgstr "Вважати попередження декодера зображень блокувальними помилками."
 
-#: inc/class-plugin.php:282
+#: inc/class-plugin.php:285
 msgid "Save validation settings"
 msgstr "Зберегти налаштування перевірки"
 
-#: inc/class-plugin.php:286
+#: inc/class-plugin.php:289
 msgid ""
 "The server verifies signatures, MIME, a full image decode, dimensions, "
 "metadata and WordPress name conflicts. ClamAV, perceptual hashing and "
@@ -912,7 +922,7 @@ msgstr ""
 "розмиття чи вмісту є точками розширення й не вважаються активними без "
 "відповідної інтеграції."
 
-#: inc/class-plugin.php:289
+#: inc/class-plugin.php:292
 msgid ""
 "These values apply only to this batch uploader. The global WordPress upload "
 "limit is not changed."
@@ -920,55 +930,55 @@ msgstr ""
 "Ці значення діють лише для цього пакетного завантажувача. Глобальний ліміт "
 "WordPress не змінюється."
 
-#: inc/class-plugin.php:296
+#: inc/class-plugin.php:299
 msgid "Check without writing"
 msgstr "Перевірити без запису"
 
-#: inc/class-plugin.php:300
+#: inc/class-plugin.php:303
 msgid "Upload only approved rows"
 msgstr "Завантажити лише схвалені рядки"
 
-#: inc/class-plugin.php:304
+#: inc/class-plugin.php:307
 msgid "Download CSV report"
 msgstr "Завантажити звіт CSV"
 
-#: inc/class-plugin.php:330
+#: inc/class-plugin.php:333
 msgid "The batch could not be checked."
 msgstr "Не вдалося перевірити пакет."
 
-#: inc/class-plugin.php:348
+#: inc/class-plugin.php:351
 msgid "The dry-run token is missing."
 msgstr "Відсутній токен попередньої перевірки."
 
-#: inc/class-plugin.php:363
+#: inc/class-plugin.php:366
 msgid "The approved batch could not be uploaded."
 msgstr "Не вдалося завантажити схвалений пакет."
 
-#: inc/class-plugin.php:372
+#: inc/class-plugin.php:375
 msgid "You do not have permission to download this report."
 msgstr "У вас немає дозволу завантажити цей звіт."
 
-#: inc/class-plugin.php:380
+#: inc/class-plugin.php:383
 msgid "The report has expired or does not exist."
 msgstr "Термін дії звіту минув або звіт не існує."
 
-#: inc/class-plugin.php:393
+#: inc/class-plugin.php:396
 msgid "You do not have permission to download this template."
 msgstr "У вас немає дозволу завантажити цей шаблон."
 
-#: inc/class-plugin.php:398
+#: inc/class-plugin.php:401
 msgid "PhpSpreadsheet is unavailable."
 msgstr "PhpSpreadsheet недоступний."
 
-#: inc/class-plugin.php:426
+#: inc/class-plugin.php:429
 msgid "You do not have permission to change validation settings."
 msgstr "У вас немає дозволу змінювати налаштування перевірки."
 
-#: inc/class-plugin.php:483
+#: inc/class-plugin.php:486
 msgid "WooCommerce or PhpSpreadsheet is unavailable."
 msgstr "WooCommerce або PhpSpreadsheet недоступний."
 
-#: inc/class-plugin.php:491
+#: inc/class-plugin.php:494
 msgid "The registry file is missing."
 msgstr "Файл реєстру відсутній."
 
@@ -986,11 +996,10 @@ msgstr "За штрихкодом не знайдено товар WooCommerce."
 
 #: inc/class-product-resolver.php:44
 msgid ""
-"The barcode was not found in WooCommerce. The SKU match is used for this "
-"legacy registry row."
+"The barcode was not found in WooCommerce. The SKU match is used for this row."
 msgstr ""
-"Штрихкод не знайдено у WooCommerce. Для цього рядка застарілого реєстру "
-"використано збіг за артикулом."
+"Штрихкод не знайдено у WooCommerce. Для цього рядка використано збіг за "
+"артикулом."
 
 #: inc/class-product-resolver.php:50
 msgid "The SKU and barcode point to different WooCommerce products."

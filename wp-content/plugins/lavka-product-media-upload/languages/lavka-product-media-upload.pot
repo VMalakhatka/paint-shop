@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the Lavka Product Media Upload plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Lavka Product Media Upload 0.1.0\n"
+"Project-Id-Version: Lavka Product Media Upload 0.1.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lavka-product-media-upload\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-07T13:57:39+00:00\n"
+"POT-Creation-Date: 2026-08-08T15:04:02+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: lavka-product-media-upload\n"
@@ -30,7 +30,7 @@ msgid "Volodymyr"
 msgstr ""
 
 #: inc/class-batch-service.php:97
-#: inc/class-plugin.php:340
+#: inc/class-plugin.php:343
 msgid "File writing is disabled for this verification stage."
 msgstr ""
 
@@ -451,434 +451,440 @@ msgstr ""
 msgid "Product image batches"
 msgstr ""
 
-#: inc/class-plugin.php:88
+#: inc/class-plugin.php:89
 msgid "Checking the batch…"
 msgstr ""
 
-#: inc/class-plugin.php:89
+#: inc/class-plugin.php:90
 msgid "Uploading approved files…"
 msgstr ""
 
-#: inc/class-plugin.php:90
+#: inc/class-plugin.php:91
 msgid "The server request failed."
 msgstr ""
 
-#: inc/class-plugin.php:91
+#: inc/class-plugin.php:92
 msgid "Select an XLS or XLSX registry."
 msgstr ""
 
-#: inc/class-plugin.php:92
+#: inc/class-plugin.php:93
 msgid "Select at least one image."
 msgstr ""
 
 #. translators: %d: server-side maximum number of uploaded files
-#: inc/class-plugin.php:94
+#: inc/class-plugin.php:95
 #, php-format
 msgid "The server accepts at most %d image files per check. Split this set into smaller batches."
 msgstr ""
 
-#: inc/class-plugin.php:95
+#. translators: 1: total selected file size, 2: safe server request size limit
+#: inc/class-plugin.php:97
+#, php-format
+msgid "The selected registry and images total %1$s, but the safe server request limit is %2$s. Split the images into smaller batches."
+msgstr ""
+
+#: inc/class-plugin.php:98
 msgid "Run the mandatory check before uploading."
 msgstr ""
 
 #. translators: %d: number of selected image files
-#: inc/class-plugin.php:97
+#: inc/class-plugin.php:100
 #, php-format
 msgid "%d image files selected"
 msgstr ""
 
-#: inc/class-plugin.php:98
-#: inc/class-plugin.php:215
+#: inc/class-plugin.php:101
+#: inc/class-plugin.php:218
 msgid "Drop JPEG, PNG or WebP files here"
 msgstr ""
 
-#: inc/class-plugin.php:99
+#: inc/class-plugin.php:102
 msgid "Ready"
 msgstr ""
 
-#: inc/class-plugin.php:100
+#: inc/class-plugin.php:103
 #: inc/class-report-store.php:68
 msgid "Errors"
 msgstr ""
 
-#: inc/class-plugin.php:101
+#: inc/class-plugin.php:104
 #: inc/class-report-store.php:69
 msgid "Warnings"
 msgstr ""
 
-#: inc/class-plugin.php:102
+#: inc/class-plugin.php:105
 #: inc/class-report-store.php:70
 msgid "Technical details"
 msgstr ""
 
-#: inc/class-plugin.php:103
+#: inc/class-plugin.php:106
 msgid "No warnings"
 msgstr ""
 
-#: inc/class-plugin.php:104
+#: inc/class-plugin.php:107
 msgid "The check is complete. Download the report for the full audit trail."
 msgstr ""
 
-#: inc/class-plugin.php:105
+#: inc/class-plugin.php:108
 msgid "Upload only the rows that passed all checks?"
 msgstr ""
 
-#: inc/class-plugin.php:106
+#: inc/class-plugin.php:109
 msgid "The S3 media index is unavailable, so remote filename conflicts were not checked."
 msgstr ""
 
-#: inc/class-plugin.php:107
+#: inc/class-plugin.php:110
 msgid "Not referenced by the registry"
 msgstr ""
 
-#: inc/class-plugin.php:108
+#: inc/class-plugin.php:111
 #: inc/class-report-store.php:48
 msgid "Row"
 msgstr ""
 
-#: inc/class-plugin.php:109
+#: inc/class-plugin.php:112
 msgid "Identifiers"
 msgstr ""
 
-#: inc/class-plugin.php:110
+#: inc/class-plugin.php:113
 #: inc/class-report-store.php:50
 msgid "SKU"
 msgstr ""
 
-#: inc/class-plugin.php:111
+#: inc/class-plugin.php:114
 msgid "GTIN"
 msgstr ""
 
-#: inc/class-plugin.php:112
+#: inc/class-plugin.php:115
 #: inc/class-report-store.php:52
 msgid "Source file"
 msgstr ""
 
-#: inc/class-plugin.php:113
+#: inc/class-plugin.php:116
 #: inc/class-report-store.php:53
 msgid "Canonical file"
 msgstr ""
 
-#: inc/class-plugin.php:114
+#: inc/class-plugin.php:117
 msgid "Image"
 msgstr ""
 
-#: inc/class-plugin.php:115
+#: inc/class-plugin.php:118
 msgid "Assignment"
 msgstr ""
 
-#: inc/class-plugin.php:116
+#: inc/class-plugin.php:119
 msgid "Result"
 msgstr ""
 
-#: inc/class-plugin.php:117
+#: inc/class-plugin.php:120
 msgid "Product"
 msgstr ""
 
-#: inc/class-plugin.php:118
+#: inc/class-plugin.php:121
 #: inc/class-report-store.php:61
 msgid "Role"
 msgstr ""
 
-#: inc/class-plugin.php:119
+#: inc/class-plugin.php:122
 #: inc/class-report-store.php:62
 msgid "Position"
 msgstr ""
 
-#: inc/class-plugin.php:120
+#: inc/class-plugin.php:123
 msgid "Size"
 msgstr ""
 
-#: inc/class-plugin.php:121
+#: inc/class-plugin.php:124
 msgid "Dimensions"
 msgstr ""
 
-#: inc/class-plugin.php:122
+#: inc/class-plugin.php:125
 #: inc/class-report-store.php:56
 msgid "Color space"
 msgstr ""
 
-#: inc/class-plugin.php:123
+#: inc/class-plugin.php:126
 #: inc/class-report-store.php:60
 msgid "SHA-256"
 msgstr ""
 
-#: inc/class-plugin.php:124
+#: inc/class-plugin.php:127
 msgid "Attachment"
 msgstr ""
 
-#: inc/class-plugin.php:125
+#: inc/class-plugin.php:128
 msgid "Total"
 msgstr ""
 
-#: inc/class-plugin.php:126
+#: inc/class-plugin.php:129
 msgid "Approved"
 msgstr ""
 
-#: inc/class-plugin.php:127
+#: inc/class-plugin.php:130
 msgid "Successful"
 msgstr ""
 
-#: inc/class-plugin.php:129
+#: inc/class-plugin.php:132
 msgid "Verification passed"
 msgstr ""
 
-#: inc/class-plugin.php:130
+#: inc/class-plugin.php:133
 msgid "Uploaded successfully"
 msgstr ""
 
-#: inc/class-plugin.php:131
+#: inc/class-plugin.php:134
 msgid "Registry error"
 msgstr ""
 
-#: inc/class-plugin.php:132
+#: inc/class-plugin.php:135
 msgid "Unsafe filename"
 msgstr ""
 
-#: inc/class-plugin.php:133
+#: inc/class-plugin.php:136
 msgid "File not found"
 msgstr ""
 
-#: inc/class-plugin.php:134
+#: inc/class-plugin.php:137
 msgid "Extra file"
 msgstr ""
 
-#: inc/class-plugin.php:135
+#: inc/class-plugin.php:138
 msgid "Invalid image format"
 msgstr ""
 
-#: inc/class-plugin.php:136
+#: inc/class-plugin.php:139
 msgid "Image decode failed"
 msgstr ""
 
-#: inc/class-plugin.php:137
+#: inc/class-plugin.php:140
 msgid "Invalid image dimensions"
 msgstr ""
 
-#: inc/class-plugin.php:138
+#: inc/class-plugin.php:141
 msgid "File is too large"
 msgstr ""
 
-#: inc/class-plugin.php:139
+#: inc/class-plugin.php:142
 msgid "Duplicate in batch"
 msgstr ""
 
-#: inc/class-plugin.php:140
+#: inc/class-plugin.php:143
 msgid "Possible visual duplicate"
 msgstr ""
 
-#: inc/class-plugin.php:141
+#: inc/class-plugin.php:144
 msgid "Product not found"
 msgstr ""
 
-#: inc/class-plugin.php:142
+#: inc/class-plugin.php:145
 msgid "Identifier mismatch"
 msgstr ""
 
-#: inc/class-plugin.php:143
+#: inc/class-plugin.php:146
 msgid "WordPress filename conflict"
 msgstr ""
 
-#: inc/class-plugin.php:144
+#: inc/class-plugin.php:147
 msgid "S3 filename conflict"
 msgstr ""
 
-#: inc/class-plugin.php:145
+#: inc/class-plugin.php:148
 msgid "Upload failed"
 msgstr ""
 
-#: inc/class-plugin.php:146
+#: inc/class-plugin.php:149
 msgid "Attachment metadata failed"
 msgstr ""
 
-#: inc/class-plugin.php:147
+#: inc/class-plugin.php:150
 msgid "OVH verification failed"
 msgstr ""
 
-#: inc/class-plugin.php:156
-#: inc/class-plugin.php:480
+#: inc/class-plugin.php:159
+#: inc/class-plugin.php:483
 msgid "You do not have permission to check product images."
 msgstr ""
 
-#: inc/class-plugin.php:166
+#: inc/class-plugin.php:169
 msgid "Product image batch verification"
 msgstr ""
 
-#: inc/class-plugin.php:168
+#: inc/class-plugin.php:171
 msgid "Check an XLS/XLSX registry and all source images before anything is written to the Media Library."
 msgstr ""
 
-#: inc/class-plugin.php:174
+#: inc/class-plugin.php:177
 msgid "Verification-only mode is active."
 msgstr ""
 
-#: inc/class-plugin.php:175
+#: inc/class-plugin.php:178
 msgid "This stage does not write files to WordPress, OVH/S3 or product records."
 msgstr ""
 
-#: inc/class-plugin.php:181
+#: inc/class-plugin.php:184
 msgid "Before checking a batch, run a fresh Total Sync and refresh the S3 media index so product and conflict data are current."
 msgstr ""
 
-#: inc/class-plugin.php:186
+#: inc/class-plugin.php:189
 msgid "Validation settings were saved."
 msgstr ""
 
-#: inc/class-plugin.php:192
+#: inc/class-plugin.php:195
 msgid "WooCommerce or PhpSpreadsheet is unavailable. Batch processing is disabled."
 msgstr ""
 
-#: inc/class-plugin.php:197
+#: inc/class-plugin.php:200
 msgid "1. Select the registry and images"
 msgstr ""
 
-#: inc/class-plugin.php:201
+#: inc/class-plugin.php:204
 msgid "Registry file"
 msgstr ""
 
-#: inc/class-plugin.php:205
+#: inc/class-plugin.php:208
 msgid "The current four-column XLS and the new header-based template are supported."
 msgstr ""
 
-#: inc/class-plugin.php:206
+#: inc/class-plugin.php:209
 msgid "Download the new XLSX template"
 msgstr ""
 
-#: inc/class-plugin.php:211
+#: inc/class-plugin.php:214
 msgid "Source images"
 msgstr ""
 
-#: inc/class-plugin.php:216
+#: inc/class-plugin.php:219
 msgid "or choose multiple files"
 msgstr ""
 
 #. translators: %d: server-side maximum number of uploaded files
-#: inc/class-plugin.php:224
+#: inc/class-plugin.php:227
 #, php-format
 msgid "Server limit: up to %d image files per check."
 msgstr ""
 
-#: inc/class-plugin.php:234
+#: inc/class-plugin.php:237
 msgid "For a four-column registry without roles, explicitly treat every row as a main product image."
 msgstr ""
 
-#: inc/class-plugin.php:238
+#: inc/class-plugin.php:241
 msgid "For header-based registries, generate canonical filenames from SKU or barcode. Legacy four-column registries always use column 2 as the authoritative filename."
 msgstr ""
 
-#: inc/class-plugin.php:244
+#: inc/class-plugin.php:247
 msgid "Validation thresholds and capabilities"
 msgstr ""
 
-#: inc/class-plugin.php:252
+#: inc/class-plugin.php:255
 msgid "Maximum file size (MiB)"
 msgstr ""
 
-#: inc/class-plugin.php:260
+#: inc/class-plugin.php:263
 msgid "File size warning (MiB)"
 msgstr ""
 
-#: inc/class-plugin.php:266
+#: inc/class-plugin.php:269
 msgid "Minimum side warning (px)"
 msgstr ""
 
-#: inc/class-plugin.php:267
+#: inc/class-plugin.php:270
 msgid "Recommended minimum side (px)"
 msgstr ""
 
-#: inc/class-plugin.php:268
+#: inc/class-plugin.php:271
 msgid "Recommended maximum side (px)"
 msgstr ""
 
-#: inc/class-plugin.php:269
+#: inc/class-plugin.php:272
 msgid "Large side warning (px)"
 msgstr ""
 
-#: inc/class-plugin.php:270
+#: inc/class-plugin.php:273
 msgid "Hard maximum side (px)"
 msgstr ""
 
-#: inc/class-plugin.php:271
+#: inc/class-plugin.php:274
 msgid "Hard maximum total pixels"
 msgstr ""
 
-#: inc/class-plugin.php:272
+#: inc/class-plugin.php:275
 msgid "Aspect-ratio warning threshold"
 msgstr ""
 
-#: inc/class-plugin.php:273
+#: inc/class-plugin.php:276
 msgid "Filename warning length"
 msgstr ""
 
-#: inc/class-plugin.php:274
+#: inc/class-plugin.php:277
 msgid "Filename hard length limit"
 msgstr ""
 
-#: inc/class-plugin.php:279
+#: inc/class-plugin.php:282
 msgid "Treat image decoder warnings as blocking errors."
 msgstr ""
 
-#: inc/class-plugin.php:282
+#: inc/class-plugin.php:285
 msgid "Save validation settings"
 msgstr ""
 
-#: inc/class-plugin.php:286
+#: inc/class-plugin.php:289
 msgid "The server verifies signatures, MIME, a full image decode, dimensions, metadata and WordPress name conflicts. ClamAV, perceptual hashing and expensive blur/content analysis are extension points and are not claimed as active unless an integration provides them."
 msgstr ""
 
-#: inc/class-plugin.php:289
+#: inc/class-plugin.php:292
 msgid "These values apply only to this batch uploader. The global WordPress upload limit is not changed."
 msgstr ""
 
-#: inc/class-plugin.php:296
+#: inc/class-plugin.php:299
 msgid "Check without writing"
 msgstr ""
 
-#: inc/class-plugin.php:300
+#: inc/class-plugin.php:303
 msgid "Upload only approved rows"
 msgstr ""
 
-#: inc/class-plugin.php:304
+#: inc/class-plugin.php:307
 msgid "Download CSV report"
 msgstr ""
 
-#: inc/class-plugin.php:330
+#: inc/class-plugin.php:333
 msgid "The batch could not be checked."
 msgstr ""
 
-#: inc/class-plugin.php:348
+#: inc/class-plugin.php:351
 msgid "The dry-run token is missing."
 msgstr ""
 
-#: inc/class-plugin.php:363
+#: inc/class-plugin.php:366
 msgid "The approved batch could not be uploaded."
 msgstr ""
 
-#: inc/class-plugin.php:372
+#: inc/class-plugin.php:375
 msgid "You do not have permission to download this report."
 msgstr ""
 
-#: inc/class-plugin.php:380
+#: inc/class-plugin.php:383
 msgid "The report has expired or does not exist."
 msgstr ""
 
-#: inc/class-plugin.php:393
+#: inc/class-plugin.php:396
 msgid "You do not have permission to download this template."
 msgstr ""
 
-#: inc/class-plugin.php:398
+#: inc/class-plugin.php:401
 msgid "PhpSpreadsheet is unavailable."
 msgstr ""
 
-#: inc/class-plugin.php:426
+#: inc/class-plugin.php:429
 msgid "You do not have permission to change validation settings."
 msgstr ""
 
-#: inc/class-plugin.php:483
+#: inc/class-plugin.php:486
 msgid "WooCommerce or PhpSpreadsheet is unavailable."
 msgstr ""
 
-#: inc/class-plugin.php:491
+#: inc/class-plugin.php:494
 msgid "The registry file is missing."
 msgstr ""
 
@@ -895,7 +901,7 @@ msgid "No WooCommerce product was found for the barcode."
 msgstr ""
 
 #: inc/class-product-resolver.php:44
-msgid "The barcode was not found in WooCommerce. The SKU match is used for this legacy registry row."
+msgid "The barcode was not found in WooCommerce. The SKU match is used for this row."
 msgstr ""
 
 #: inc/class-product-resolver.php:50

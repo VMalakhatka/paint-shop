@@ -41,7 +41,7 @@ final class ProductResolver
             ];
         }
         if ($barcode !== '' && $barcode_id < 1 && $allow_missing_barcode && $sku_id > 0) {
-            $warnings[] = __('The barcode was not found in WooCommerce. The SKU match is used for this legacy registry row.', 'lavka-product-media-upload');
+            $warnings[] = __('The barcode was not found in WooCommerce. The SKU match is used for this row.', 'lavka-product-media-upload');
         }
         if ($sku_id > 0 && $barcode_id > 0 && $sku_id !== $barcode_id) {
             return [

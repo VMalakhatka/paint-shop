@@ -35,6 +35,17 @@
         return String(template || '').replace('%d', String(number));
     }
 
+    function formatBytes(bytes) {
+        var units = ['B', 'KiB', 'MiB', 'GiB'];
+        var value = Math.max(0, Number(bytes) || 0);
+        var unit = 0;
+        while (value >= 1024 && unit < units.length - 1) {
+            value /= 1024;
+            unit += 1;
+        }
+        return value.toFixed(unit === 0 ? 0 : 1) + ' ' + units[unit];
+    }
+
     function setFiles(files) {
         selectedImages = Array.prototype.slice.call(files || []);
         fileCount.textContent = selectedImages.length
@@ -92,7 +103,23 @@
             window.alert(format(strings.tooManyImages, data.maxFiles));
             return false;
         }
+        var requestBytes = Number(registryInput.files[0].size || 0);
+        selectedImages.forEach(function (file) {
+            requestBytes += Number(file.size || 0);
+        });
+        if (data.maxRequestBytes && requestBytes > data.maxRequestBytes) {
+            window.alert(String(strings.requestTooLarge || '')
+                .replace('%1$s', formatBytes(requestBytes))
+                .replace('%2$s', formatBytes(data.maxRequestBytes)));
+            return false;
+        }
         return true;
+    }
+
+    function requestError(message, technical) {
+        var error = new Error(message || strings.requestFailed);
+        error.technical = technical || '';
+        return error;
     }
 
     function request(action, busyMessage) {
@@ -102,8 +129,18 @@
             credentials: 'same-origin',
             body: buildForm(action)
         }).then(function (response) {
-            return response.json().catch(function () {
-                throw new Error(strings.requestFailed);
+            return response.text().then(function (rawBody) {
+                var payload;
+                try {
+                    payload = JSON.parse(rawBody);
+                } catch (ignore) {
+                    throw requestError(
+                        strings.requestFailed + ' HTTP ' + response.status,
+                        rawBody.slice(0, 3000)
+                    );
+                }
+                payload._httpStatus = response.status;
+                return payload;
             });
         }).then(function (payload) {
             if (!payload || !payload.success) {
@@ -113,7 +150,10 @@
                 var technical = payload && payload.data && payload.data.technical
                     ? payload.data.technical
                     : '';
-                throw new Error(message + (technical ? ' (' + technical + ')' : ''));
+                throw requestError(
+                    message + (payload && payload._httpStatus ? ' (HTTP ' + payload._httpStatus + ')' : ''),
+                    technical
+                );
             }
             return payload.data;
         }).finally(function () {
@@ -230,7 +270,12 @@
     }
 
     function showError(error) {
-        summary.innerHTML = '<div class="notice notice-error inline"><p>' + escapeHtml(error.message || strings.requestFailed) + '</p></div>';
+        var technical = error && error.technical
+            ? '<details><summary>' + escapeHtml(strings.details) + '</summary><pre>' + escapeHtml(error.technical) + '</pre></details>'
+            : '';
+        summary.innerHTML = '<div class="notice notice-error inline"><p>'
+            + escapeHtml(error.message || strings.requestFailed)
+            + '</p>' + technical + '</div>';
     }
 
     registryInput.addEventListener('change', resetApproval);

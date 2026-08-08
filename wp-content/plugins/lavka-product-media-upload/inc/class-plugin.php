@@ -83,6 +83,7 @@ final class Plugin
             'nonce' => wp_create_nonce(self::NONCE_ACTION),
             'maxFileBytes' => ImageValidator::thresholds()['max_file_bytes'],
             'maxFiles' => max(1, (int) ini_get('max_file_uploads') - 1),
+            'maxRequestBytes' => (int) floor(wp_max_upload_size() * 0.95),
             'writesEnabled' => \lpmu_writes_enabled(),
             'strings' => [
                 'checking' => __('Checking the batch…', 'lavka-product-media-upload'),
@@ -92,6 +93,8 @@ final class Plugin
                 'selectImages' => __('Select at least one image.', 'lavka-product-media-upload'),
                 /* translators: %d: server-side maximum number of uploaded files */
                 'tooManyImages' => __('The server accepts at most %d image files per check. Split this set into smaller batches.', 'lavka-product-media-upload'),
+                /* translators: 1: total selected file size, 2: safe server request size limit */
+                'requestTooLarge' => __('The selected registry and images total %1$s, but the safe server request limit is %2$s. Split the images into smaller batches.', 'lavka-product-media-upload'),
                 'dryRunRequired' => __('Run the mandatory check before uploading.', 'lavka-product-media-upload'),
                 /* translators: %d: number of selected image files */
                 'filesSelected' => __('%d image files selected', 'lavka-product-media-upload'),

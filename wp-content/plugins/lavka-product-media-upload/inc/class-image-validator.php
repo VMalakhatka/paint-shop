@@ -129,7 +129,7 @@ final class ImageValidator
                 $product_result = $this->products->resolve(
                     $sku,
                     $barcode,
-                    !empty($manifest_row['legacy']) && $sku !== ''
+                    $sku !== ''
                 );
                 if (empty($product_result['ok'])) {
                     $errors[] = (string) $product_result['message'];
