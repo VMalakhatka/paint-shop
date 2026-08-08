@@ -3,7 +3,7 @@
  * Plugin Name: Lavka — Media Link Only (MU)
  * Description: Эндпоинт, который создаёт/находит attachment БЕЗ загрузки файла и привязывает к товару. Путь/URL не переписываются.
  * Author: Lavka
- * Version: 1.1
+ * Version: 1.2
  */
 if (!defined('ABSPATH')) { exit; }
 
@@ -82,6 +82,11 @@ function lavka_media_link_only(\WP_REST_Request $r) {
 
     global $wpdb;
     $att_id = 0;
+    $attachment_created = false;
+    $attachment_parent_before = null;
+    $attachment_parent_after = null;
+    $attachment_parent_changed = false;
+    $attachment_parent_conflict = false;
 
     // 1) по короткому _wp_attached_file
     $att_id = (int)$wpdb->get_var($wpdb->prepare(
@@ -106,15 +111,37 @@ function lavka_media_link_only(\WP_REST_Request $r) {
     if ($att_id) {
       update_post_meta($att_id, '_wp_attached_file', $s3key);
       if ($mime) wp_update_post(['ID'=>$att_id,'post_mime_type'=>$mime]);
+
+      $attachment_parent_before = (int)get_post_field('post_parent', $att_id);
+      $attachment_parent_after = $attachment_parent_before;
+
+      // Fill an empty Media Library relation, but never steal an attachment
+      // that is already owned by another post.
+      if ($attachment_parent_before === 0) {
+        $parent_result = wp_update_post([
+          'ID'          => $att_id,
+          'post_parent' => $pid,
+        ], true);
+        if (is_wp_error($parent_result)) return $parent_result;
+
+        $attachment_parent_after = $pid;
+        $attachment_parent_changed = true;
+      } elseif ($attachment_parent_before !== $pid) {
+        $attachment_parent_conflict = true;
+      }
     } else {
       $att_id = wp_insert_post([
         'post_status'    => 'inherit',
         'post_type'      => 'attachment',
         'post_mime_type' => $mime,
+        'post_parent'    => $pid,
         'guid'           => $url,
         'post_title'     => basename($s3key),
       ], true);
       if (is_wp_error($att_id)) return $att_id;
+      $attachment_created = true;
+      $attachment_parent_after = $pid;
+      $attachment_parent_changed = true;
       update_post_meta($att_id, '_wp_attached_file', $s3key);
     }
 
@@ -145,6 +172,11 @@ function lavka_media_link_only(\WP_REST_Request $r) {
       'gallery_added' => $add_to_gallery,
       's3_key'        => $s3key,
       'url'           => $url,
+      'attachment_created'         => $attachment_created,
+      'attachment_parent_before'   => $attachment_parent_before,
+      'attachment_parent_after'    => $attachment_parent_after,
+      'attachment_parent_changed'  => $attachment_parent_changed,
+      'attachment_parent_conflict' => $attachment_parent_conflict,
     ], 200);
 
   } catch (\Throwable $e) {
