@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-07T08:40:34+00:00\n"
+"POT-Creation-Date: 2026-08-07T13:57:39+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: lavka-product-media-upload\n"
@@ -83,7 +83,7 @@ msgid "The source filename mixes visually similar Latin and Cyrillic letters. Co
 msgstr ""
 
 #: inc/class-image-validator.php:95
-#: inc/class-image-validator.php:140
+#: inc/class-image-validator.php:145
 msgid "The same product, role and position occur more than once in the registry."
 msgstr ""
 
@@ -103,274 +103,274 @@ msgstr ""
 msgid "More than one selected file matches the registry source filename."
 msgstr ""
 
-#: inc/class-image-validator.php:145
+#: inc/class-image-validator.php:150
 #: inc/class-media-uploader.php:309
 msgid "WooCommerce variations do not have a standard separate gallery."
 msgstr ""
 
-#: inc/class-image-validator.php:190
+#: inc/class-image-validator.php:195
 msgid "The canonical filename is duplicated inside this batch."
 msgstr ""
 
-#: inc/class-image-validator.php:196
+#: inc/class-image-validator.php:201
 msgid "The same image content occurs more than once in this batch."
 msgstr ""
 
-#: inc/class-image-validator.php:210
+#: inc/class-image-validator.php:215
 msgid "This exact image was already uploaded and verified. It will be skipped."
 msgstr ""
 
-#: inc/class-image-validator.php:218
+#: inc/class-image-validator.php:223
 msgid "A matching attachment from an incomplete earlier attempt will be verified and resumed without creating a duplicate."
 msgstr ""
 
-#: inc/class-image-validator.php:220
+#: inc/class-image-validator.php:225
 msgid "The canonical filename already exists in the WordPress Media Library."
 msgstr ""
 
-#: inc/class-image-validator.php:241
+#: inc/class-image-validator.php:246
 msgid "The S3 media index could not be checked."
 msgstr ""
 
-#: inc/class-image-validator.php:245
+#: inc/class-image-validator.php:250
 msgid "The canonical filename already exists in the S3 media index."
 msgstr ""
 
-#: inc/class-image-validator.php:298
+#: inc/class-image-validator.php:303
 msgid "The selected file is not referenced by any registry row."
 msgstr ""
 
 #. translators: %d: PHP upload error code
-#: inc/class-image-validator.php:452
+#: inc/class-image-validator.php:457
 #, php-format
 msgid "PHP rejected the image upload with error %d."
 msgstr ""
 
-#: inc/class-image-validator.php:460
+#: inc/class-image-validator.php:465
 msgid "The image temporary file is missing or is not a valid HTTP upload."
 msgstr ""
 
-#: inc/class-image-validator.php:464
+#: inc/class-image-validator.php:469
 msgid "The image file is empty."
 msgstr ""
 
-#: inc/class-image-validator.php:469
+#: inc/class-image-validator.php:474
 msgid "The uploaded byte count does not match the size declared by the request."
 msgstr ""
 
-#: inc/class-image-validator.php:474
+#: inc/class-image-validator.php:479
 msgid "The image exceeds the configured hard file-size limit."
 msgstr ""
 
-#: inc/class-image-validator.php:477
+#: inc/class-image-validator.php:482
 msgid "The image is larger than the configured warning threshold."
 msgstr ""
 
-#: inc/class-image-validator.php:487
+#: inc/class-image-validator.php:492
 msgid "Only JPEG, PNG and WebP images are allowed."
 msgstr ""
 
-#: inc/class-image-validator.php:493
+#: inc/class-image-validator.php:498
 msgid "The file magic signature is not JPEG, PNG or WebP."
 msgstr ""
 
-#: inc/class-image-validator.php:499
+#: inc/class-image-validator.php:504
 msgid "The PHP Fileinfo extension is required for MIME verification."
 msgstr ""
 
-#: inc/class-image-validator.php:524
+#: inc/class-image-validator.php:529
 msgid "The extension, magic signature, server MIME and WordPress file check do not agree."
 msgstr ""
 
-#: inc/class-image-validator.php:537
+#: inc/class-image-validator.php:542
 msgid "The image dimensions could not be read."
 msgstr ""
 
-#: inc/class-image-validator.php:543
+#: inc/class-image-validator.php:548
 msgid "The image has invalid dimensions."
 msgstr ""
 
-#: inc/class-image-validator.php:546
+#: inc/class-image-validator.php:551
 msgid "The image exceeds the configured geometry or total-pixel limit."
 msgstr ""
 
-#: inc/class-image-validator.php:552
+#: inc/class-image-validator.php:557
 msgid "The image is within the configured pixel limit but cannot be decoded safely with the currently available PHP memory."
 msgstr ""
 
-#: inc/class-image-validator.php:557
+#: inc/class-image-validator.php:562
 msgid "At least one image side is below the configured minimum-side warning."
 msgstr ""
 
-#: inc/class-image-validator.php:560
+#: inc/class-image-validator.php:565
 msgid "At least one image side is above the configured large-side warning."
 msgstr ""
 
-#: inc/class-image-validator.php:566
+#: inc/class-image-validator.php:571
 msgid "The image is outside the recommended side range."
 msgstr ""
 
-#: inc/class-image-validator.php:570
+#: inc/class-image-validator.php:575
 msgid "The image has an unusually wide or tall aspect ratio."
 msgstr ""
 
-#: inc/class-image-validator.php:576
+#: inc/class-image-validator.php:581
 msgid "The JPEG bit depth is not supported by the current pipeline."
 msgstr ""
 
-#: inc/class-image-validator.php:579
+#: inc/class-image-validator.php:584
 msgid "The JPEG appears to use CMYK. RGB or sRGB is preferred for the storefront."
 msgstr ""
 
-#: inc/class-image-validator.php:593
+#: inc/class-image-validator.php:598
 msgid "The WordPress Image Editor could not open the image."
 msgstr ""
 
-#: inc/class-image-validator.php:605
+#: inc/class-image-validator.php:610
 msgid "The WordPress Image Editor reported unexpected image dimensions."
 msgstr ""
 
-#: inc/class-image-validator.php:620
+#: inc/class-image-validator.php:625
 msgid "The external malware scanner rejected the image."
 msgstr ""
 
-#: inc/class-image-validator.php:675
+#: inc/class-image-validator.php:680
 msgid "The canonical filename exceeds the configured hard length limit."
 msgstr ""
 
-#: inc/class-image-validator.php:678
+#: inc/class-image-validator.php:683
 msgid "The canonical filename exceeds the configured warning length."
 msgstr ""
 
-#: inc/class-image-validator.php:681
+#: inc/class-image-validator.php:686
 msgid "The canonical filename contains unsupported characters."
 msgstr ""
 
-#: inc/class-image-validator.php:684
+#: inc/class-image-validator.php:689
 msgid "The canonical filename is hidden, reserved or has multiple extensions."
 msgstr ""
 
-#: inc/class-image-validator.php:694
+#: inc/class-image-validator.php:699
 msgid "A canonical filename cannot be generated without an identifier."
 msgstr ""
 
-#: inc/class-image-validator.php:713
+#: inc/class-image-validator.php:718
 msgid "The SKU uses a non-ASCII prefix without an explicit business mapping."
 msgstr ""
 
-#: inc/class-image-validator.php:720
+#: inc/class-image-validator.php:725
 msgid "The identifier cannot be converted to a safe canonical filename without guessing."
 msgstr ""
 
-#: inc/class-image-validator.php:732
+#: inc/class-image-validator.php:737
 msgid "The filename contains NUL or control characters."
 msgstr ""
 
-#: inc/class-image-validator.php:741
+#: inc/class-image-validator.php:746
 msgid "The filename contains a path or path-traversal sequence."
 msgstr ""
 
-#: inc/class-image-validator.php:744
+#: inc/class-image-validator.php:749
 msgid "Hidden files and multiple extensions are not allowed."
 msgstr ""
 
-#: inc/class-image-validator.php:749
+#: inc/class-image-validator.php:754
 msgid "The filename has an empty or reserved basename."
 msgstr ""
 
-#: inc/class-image-validator.php:827
+#: inc/class-image-validator.php:832
 msgid "The file contains a suspicious executable or script signature."
 msgstr ""
 
-#: inc/class-image-validator.php:835
+#: inc/class-image-validator.php:840
 msgid "The JPEG SOI/EOI structure is incomplete."
 msgstr ""
 
-#: inc/class-image-validator.php:846
+#: inc/class-image-validator.php:851
 msgid "The image container is unsupported."
 msgstr ""
 
-#: inc/class-image-validator.php:860
+#: inc/class-image-validator.php:865
 msgid "The PNG chunk structure is invalid."
 msgstr ""
 
-#: inc/class-image-validator.php:866
+#: inc/class-image-validator.php:871
 msgid "A PNG chunk CRC check failed."
 msgstr ""
 
-#: inc/class-image-validator.php:879
+#: inc/class-image-validator.php:884
 msgid "The PNG does not end cleanly at the IEND chunk."
 msgstr ""
 
-#: inc/class-image-validator.php:882
+#: inc/class-image-validator.php:887
 msgid "Animated PNG files are not allowed for product images."
 msgstr ""
 
-#: inc/class-image-validator.php:892
+#: inc/class-image-validator.php:897
 msgid "The WebP container is too short."
 msgstr ""
 
-#: inc/class-image-validator.php:896
+#: inc/class-image-validator.php:901
 msgid "The WebP RIFF size does not match the file size."
 msgstr ""
 
-#: inc/class-image-validator.php:905
+#: inc/class-image-validator.php:910
 msgid "The WebP chunk structure is invalid."
 msgstr ""
 
-#: inc/class-image-validator.php:919
+#: inc/class-image-validator.php:924
 msgid "The WebP container has trailing or incomplete data."
 msgstr ""
 
-#: inc/class-image-validator.php:922
+#: inc/class-image-validator.php:927
 msgid "Animated WebP files are not allowed for product images."
 msgstr ""
 
-#: inc/class-image-validator.php:947
+#: inc/class-image-validator.php:952
 msgid "The server image decoder could not fully decode the file."
 msgstr ""
 
-#: inc/class-image-validator.php:955
+#: inc/class-image-validator.php:960
 msgid "Decoded image dimensions differ from the header dimensions."
 msgstr ""
 
-#: inc/class-image-validator.php:964
+#: inc/class-image-validator.php:969
 msgid "The image decoder reported a warning in strict mode."
 msgstr ""
 
-#: inc/class-image-validator.php:968
+#: inc/class-image-validator.php:973
 msgid "The image decoder reported a non-blocking warning."
 msgstr ""
 
-#: inc/class-image-validator.php:1014
+#: inc/class-image-validator.php:1019
 msgid "The image appears almost uniform or has very low contrast."
 msgstr ""
 
-#: inc/class-image-validator.php:1016
+#: inc/class-image-validator.php:1021
 msgid "The image appears to have low contrast."
 msgstr ""
 
-#: inc/class-image-validator.php:1019
+#: inc/class-image-validator.php:1024
 msgid "The image appears to be almost completely transparent."
 msgstr ""
 
-#: inc/class-image-validator.php:1034
+#: inc/class-image-validator.php:1039
 msgid "The image contains an ICC profile. Verify storefront color rendering."
 msgstr ""
 
-#: inc/class-image-validator.php:1042
+#: inc/class-image-validator.php:1047
 msgid "The JPEG uses EXIF orientation and may require explicit autorotation."
 msgstr ""
 
-#: inc/class-image-validator.php:1045
+#: inc/class-image-validator.php:1050
 msgid "The JPEG contains GPS metadata."
 msgstr ""
 
-#: inc/class-image-validator.php:1048
+#: inc/class-image-validator.php:1053
 msgid "The JPEG contains EXIF metadata. Metadata is not stripped in version 1."
 msgstr ""
 
-#: inc/class-image-validator.php:1158
+#: inc/class-image-validator.php:1163
 msgid "Gallery positions contain gaps. Version 1 will not renumber them automatically."
 msgstr ""
 
@@ -882,23 +882,27 @@ msgstr ""
 msgid "The registry file is missing."
 msgstr ""
 
-#: inc/class-product-resolver.php:20
+#: inc/class-product-resolver.php:21
 msgid "The barcode belongs to more than one WooCommerce product."
 msgstr ""
 
-#: inc/class-product-resolver.php:30
+#: inc/class-product-resolver.php:31
 msgid "No WooCommerce product was found for the SKU."
 msgstr ""
 
-#: inc/class-product-resolver.php:38
+#: inc/class-product-resolver.php:39
 msgid "No WooCommerce product was found for the barcode."
 msgstr ""
 
-#: inc/class-product-resolver.php:46
+#: inc/class-product-resolver.php:44
+msgid "The barcode was not found in WooCommerce. The SKU match is used for this legacy registry row."
+msgstr ""
+
+#: inc/class-product-resolver.php:50
 msgid "The SKU and barcode point to different WooCommerce products."
 msgstr ""
 
-#: inc/class-product-resolver.php:57
+#: inc/class-product-resolver.php:61
 msgid "The matched object is not a supported WooCommerce product or variation."
 msgstr ""
 

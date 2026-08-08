@@ -8,10 +8,11 @@ if (!defined('ABSPATH')) {
 
 final class ProductResolver
 {
-    public function resolve(string $sku, string $barcode): array
+    public function resolve(string $sku, string $barcode, bool $allow_missing_barcode = false): array
     {
         $sku_id = $sku !== '' ? (int) wc_get_product_id_by_sku($sku) : 0;
         $barcode_ids = $barcode !== '' ? $this->find_by_barcode($barcode) : [];
+        $warnings = [];
 
         if (count($barcode_ids) > 1) {
             return [
@@ -31,13 +32,16 @@ final class ProductResolver
                 'technical' => $sku,
             ];
         }
-        if ($barcode !== '' && $barcode_id < 1) {
+        if ($barcode !== '' && $barcode_id < 1 && !($allow_missing_barcode && $sku_id > 0)) {
             return [
                 'ok' => false,
                 'status' => 'PRODUCT_NOT_FOUND',
                 'message' => __('No WooCommerce product was found for the barcode.', 'lavka-product-media-upload'),
                 'technical' => $barcode,
             ];
+        }
+        if ($barcode !== '' && $barcode_id < 1 && $allow_missing_barcode && $sku_id > 0) {
+            $warnings[] = __('The barcode was not found in WooCommerce. The SKU match is used for this legacy registry row.', 'lavka-product-media-upload');
         }
         if ($sku_id > 0 && $barcode_id > 0 && $sku_id !== $barcode_id) {
             return [
@@ -65,6 +69,7 @@ final class ProductResolver
             'product' => $product,
             'product_type' => $product->get_type(),
             'product_name' => $product->get_name(),
+            'warnings' => $warnings,
         ];
     }
 

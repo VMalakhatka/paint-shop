@@ -126,12 +126,17 @@ final class ImageValidator
 
             $product_result = null;
             if (!$errors) {
-                $product_result = $this->products->resolve($sku, $barcode);
+                $product_result = $this->products->resolve(
+                    $sku,
+                    $barcode,
+                    !empty($manifest_row['legacy']) && $sku !== ''
+                );
                 if (empty($product_result['ok'])) {
                     $errors[] = (string) $product_result['message'];
                     $row['status'] = (string) $product_result['status'];
                     $row['technical'] = (string) ($product_result['technical'] ?? '');
                 } else {
+                    $warnings = array_merge($warnings, (array) ($product_result['warnings'] ?? []));
                     $row['product_id'] = (int) $product_result['product_id'];
                     $row['product_type'] = (string) $product_result['product_type'];
                     $row['product_name'] = (string) $product_result['product_name'];
