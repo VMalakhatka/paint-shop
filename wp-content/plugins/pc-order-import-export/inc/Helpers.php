@@ -41,7 +41,7 @@ class Helpers {
     }
 
     public static function gtin_meta_keys(): array {
-        $keys = ['_global_unique_id','_wpm_gtin_code','_alg_ean','_ean','_sku_gtin'];
+        $keys = ['_wc_gtin_code','_global_unique_id','_wpm_gtin_code','_alg_ean','_ean','_sku_gtin'];
         return apply_filters('pcoe_gtin_meta_keys', $keys);
     }
 

@@ -82,6 +82,10 @@ verification-only mode.
 
 ## Extension points
 
+Barcode lookup supports the Java full-sync `_wc_gtin_code` field, the WooCommerce
+`_global_unique_id` field and the legacy/plugin GTIN fields exposed through
+`lavka_product_media_upload_barcode_meta_keys`.
+
 - `lavka_product_media_upload_thresholds`
 - `lavka_product_media_upload_capability`
 - `lavka_product_media_upload_barcode_meta_keys`

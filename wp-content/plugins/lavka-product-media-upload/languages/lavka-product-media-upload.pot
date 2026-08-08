@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the Lavka Product Media Upload plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Lavka Product Media Upload 0.1.1\n"
+"Project-Id-Version: Lavka Product Media Upload 0.1.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lavka-product-media-upload\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-08T15:04:02+00:00\n"
+"POT-Creation-Date: 2026-08-08T15:19:57+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: lavka-product-media-upload\n"
@@ -936,54 +936,54 @@ msgstr ""
 msgid "The registry row is empty."
 msgstr ""
 
-#: inc/class-registry-reader.php:132
+#: inc/class-registry-reader.php:131
 msgid "The registry contains no data rows."
 msgstr ""
 
 #. translators: 1: spreadsheet cell, 2: reason
-#: inc/class-registry-reader.php:190
+#: inc/class-registry-reader.php:189
 #, php-format
 msgid "Cell %1$s: %2$s"
 msgstr ""
 
-#: inc/class-registry-reader.php:210
+#: inc/class-registry-reader.php:209
 msgid "Formulas are not allowed in registry identifiers."
 msgstr ""
 
 #: inc/class-registry-reader.php:214
-msgid "A numeric value may have lost precision. Store identifiers as text."
-msgstr ""
-
-#: inc/class-registry-reader.php:219
 msgid "Scientific notation is not allowed. Store identifiers as text."
 msgstr ""
 
-#: inc/class-registry-reader.php:238
+#: inc/class-registry-reader.php:233
 msgid "The registry contains duplicate column headers."
 msgstr ""
 
 #. translators: %s: required column
-#: inc/class-registry-reader.php:253
+#: inc/class-registry-reader.php:248
 #, php-format
 msgid "The registry is missing the required “%s” column."
 msgstr ""
 
-#: inc/class-registry-reader.php:260
+#: inc/class-registry-reader.php:255
 msgid "The registry must contain an SKU or barcode column."
 msgstr ""
 
 #. translators: %d: PHP upload error code
-#: inc/class-registry-reader.php:273
+#: inc/class-registry-reader.php:268
 #, php-format
 msgid "The registry upload failed with PHP error %d."
 msgstr ""
 
-#: inc/class-registry-reader.php:281
+#: inc/class-registry-reader.php:276
 msgid "The registry temporary file is invalid."
 msgstr ""
 
-#: inc/class-registry-reader.php:294
-msgid "A numeric value may have lost precision or leading zeroes. Store identifiers as text."
+#: inc/class-registry-reader.php:290
+msgid "The SKU is stored in Excel as a number and may have lost precision or leading zeroes. Format the cell as Text and re-enter the SKU."
+msgstr ""
+
+#: inc/class-registry-reader.php:293
+msgid "The barcode is stored in Excel as a number and may have lost precision or leading zeroes. Format the cell as Text and re-enter the barcode."
 msgstr ""
 
 #: inc/class-report-store.php:46

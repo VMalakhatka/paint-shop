@@ -91,10 +91,8 @@ final class RegistryReader
             if ($header_mode) {
                 $identifier_errors = $this->numeric_identifier_errors(
                     $raw['numeric_indexes'],
-                    [
-                        $header_map['sku'] ?? null,
-                        $header_map['barcode'] ?? null,
-                    ]
+                    $header_map['sku'] ?? null,
+                    $header_map['barcode'] ?? null
                 );
                 $row = [
                     'row_number' => $row_number,
@@ -110,7 +108,8 @@ final class RegistryReader
             } else {
                 $identifier_errors = $this->numeric_identifier_errors(
                     $raw['numeric_indexes'],
-                    [0, 3]
+                    0,
+                    3
                 );
                 $row = [
                     'row_number' => $row_number,
@@ -210,10 +209,6 @@ final class RegistryReader
             return ['', __('Formulas are not allowed in registry identifiers.', 'lavka-product-media-upload')];
         }
 
-        if (is_float($raw)) {
-            return ['', __('A numeric value may have lost precision. Store identifiers as text.', 'lavka-product-media-upload')];
-        }
-
         $formatted = $cell->getFormattedValue();
         if (is_string($formatted) && preg_match('/^[+-]?\d+(?:[.,]\d+)?E[+-]?\d+$/i', trim($formatted))) {
             return ['', __('Scientific notation is not allowed. Store identifiers as text.', 'lavka-product-media-upload')];
@@ -287,15 +282,18 @@ final class RegistryReader
         return $index === null ? '' : self::normalize_text($values[$index] ?? '');
     }
 
-    private function numeric_identifier_errors(array $numeric_indexes, array $identifier_indexes): array
+    private function numeric_identifier_errors(array $numeric_indexes, ?int $sku_index, ?int $barcode_index): array
     {
-        foreach ($identifier_indexes as $index) {
-            if ($index !== null && in_array($index, $numeric_indexes, true)) {
-                return [__('A numeric value may have lost precision or leading zeroes. Store identifiers as text.', 'lavka-product-media-upload')];
-            }
+        $errors = [];
+
+        if ($sku_index !== null && in_array($sku_index, $numeric_indexes, true)) {
+            $errors[] = __('The SKU is stored in Excel as a number and may have lost precision or leading zeroes. Format the cell as Text and re-enter the SKU.', 'lavka-product-media-upload');
+        }
+        if ($barcode_index !== null && in_array($barcode_index, $numeric_indexes, true)) {
+            $errors[] = __('The barcode is stored in Excel as a number and may have lost precision or leading zeroes. Format the cell as Text and re-enter the barcode.', 'lavka-product-media-upload');
         }
 
-        return [];
+        return $errors;
     }
 
     private function is_empty(array $values): bool

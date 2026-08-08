@@ -60,6 +60,7 @@ function pc_get_product_gtin(\WC_Product $product): string {
     $candidates = array_filter(array_unique(array_merge(
         [ defined('PC_GTIN_META_KEY') ? PC_GTIN_META_KEY : '' ],
         apply_filters('pc_gtin_meta_keys', [
+            '_wc_gtin_code',
             '_global_unique_id',
             '_wpm_gtin_code',
             '_alg_ean',

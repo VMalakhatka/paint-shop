@@ -78,6 +78,7 @@ final class ProductResolver
         global $wpdb;
 
         $keys = (array) apply_filters('lavka_product_media_upload_barcode_meta_keys', [
+            '_wc_gtin_code',
             '_global_unique_id',
             '_wpm_gtin_code',
             '_alg_ean',

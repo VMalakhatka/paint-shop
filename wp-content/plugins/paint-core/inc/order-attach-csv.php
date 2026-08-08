@@ -26,6 +26,7 @@ function pc_gtin_meta_keys(): array {
     $keys = array_filter(array_unique(array_merge(
         [ defined('PC_GTIN_META_KEY') ? PC_GTIN_META_KEY : '' ],
         [
+            '_wc_gtin_code',       // Java full sync
             '_global_unique_id',  // ваш ключ
             '_wpm_gtin_code',     // WebToffee/Woo product GTIN
             '_alg_ean',           // EAN/UPC/GTIN by Alg

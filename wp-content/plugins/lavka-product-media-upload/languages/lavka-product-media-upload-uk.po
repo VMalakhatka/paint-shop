@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Lavka Product Media Upload 0.1.1\n"
+"Project-Id-Version: Lavka Product Media Upload 0.1.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lavka-product-"
 "media-upload\n"
-"POT-Creation-Date: 2026-08-08T15:04:02+00:00\n"
+"POT-Creation-Date: 2026-08-08T15:19:57+00:00\n"
 "PO-Revision-Date: 2026-08-07 10:33+0200\n"
 "Last-Translator: Volodymyr\n"
 "Language-Team: Ukrainian\n"
@@ -1037,60 +1037,63 @@ msgstr ""
 msgid "The registry row is empty."
 msgstr "Рядок реєстру порожній."
 
-#: inc/class-registry-reader.php:132
+#: inc/class-registry-reader.php:131
 msgid "The registry contains no data rows."
 msgstr "Реєстр не містить рядків із даними."
 
 #. translators: 1: spreadsheet cell, 2: reason
-#: inc/class-registry-reader.php:190
+#: inc/class-registry-reader.php:189
 #, php-format
 msgid "Cell %1$s: %2$s"
 msgstr "Комірка %1$s: %2$s"
 
-#: inc/class-registry-reader.php:210
+#: inc/class-registry-reader.php:209
 msgid "Formulas are not allowed in registry identifiers."
 msgstr "Формули не дозволені в ідентифікаторах реєстру."
 
 #: inc/class-registry-reader.php:214
-msgid "A numeric value may have lost precision. Store identifiers as text."
-msgstr ""
-"Числове значення могло втратити точність. Зберігайте ідентифікатори як текст."
-
-#: inc/class-registry-reader.php:219
 msgid "Scientific notation is not allowed. Store identifiers as text."
 msgstr "Науковий запис не дозволений. Зберігайте ідентифікатори як текст."
 
-#: inc/class-registry-reader.php:238
+#: inc/class-registry-reader.php:233
 msgid "The registry contains duplicate column headers."
 msgstr "Реєстр містить дубльовані заголовки колонок."
 
 #. translators: %s: required column
-#: inc/class-registry-reader.php:253
+#: inc/class-registry-reader.php:248
 #, php-format
 msgid "The registry is missing the required “%s” column."
 msgstr "У реєстрі відсутня обов'язкова колонка «%s»."
 
-#: inc/class-registry-reader.php:260
+#: inc/class-registry-reader.php:255
 msgid "The registry must contain an SKU or barcode column."
 msgstr "Реєстр має містити колонку артикула або штрихкоду."
 
 #. translators: %d: PHP upload error code
-#: inc/class-registry-reader.php:273
+#: inc/class-registry-reader.php:268
 #, php-format
 msgid "The registry upload failed with PHP error %d."
 msgstr "Завантаження реєстру завершилося помилкою PHP %d."
 
-#: inc/class-registry-reader.php:281
+#: inc/class-registry-reader.php:276
 msgid "The registry temporary file is invalid."
 msgstr "Тимчасовий файл реєстру некоректний."
 
-#: inc/class-registry-reader.php:294
+#: inc/class-registry-reader.php:290
 msgid ""
-"A numeric value may have lost precision or leading zeroes. Store identifiers "
-"as text."
+"The SKU is stored in Excel as a number and may have lost precision or "
+"leading zeroes. Format the cell as Text and re-enter the SKU."
 msgstr ""
-"Числове значення могло втратити точність або початкові нулі. Зберігайте "
-"ідентифікатори як текст."
+"Артикул збережено в Excel як число, тому він міг втратити точність або "
+"початкові нулі. Задайте для комірки формат «Текст» і введіть артикул повторно."
+
+#: inc/class-registry-reader.php:293
+msgid ""
+"The barcode is stored in Excel as a number and may have lost precision or "
+"leading zeroes. Format the cell as Text and re-enter the barcode."
+msgstr ""
+"Штрихкод збережено в Excel як число, тому він міг втратити точність або "
+"початкові нулі. Задайте для комірки формат «Текст» і введіть штрихкод повторно."
 
 #: inc/class-report-store.php:46
 msgid "Batch ID"
@@ -1147,6 +1150,11 @@ msgstr "ID вкладення"
 #: inc/class-report-store.php:67
 msgid "URL"
 msgstr "URL"
+
+#~ msgid "A numeric value may have lost precision. Store identifiers as text."
+#~ msgstr ""
+#~ "Числове значення могло втратити точність. Зберігайте ідентифікатори як "
+#~ "текст."
 
 #~ msgid "Ready to upload"
 #~ msgstr "Готово до завантаження"
