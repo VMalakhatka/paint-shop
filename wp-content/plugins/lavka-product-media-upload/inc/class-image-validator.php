@@ -83,9 +83,6 @@ final class ImageValidator
                 $errors[] = __('A gallery image requires a unique positive position.', 'lavka-product-media-upload');
             }
 
-            if ($sku !== '' && $this->has_mixed_lookalike_scripts($sku)) {
-                $errors[] = __('The SKU mixes visually similar Latin and Cyrillic letters. Correct it explicitly in the registry.', 'lavka-product-media-upload');
-            }
             if ($source_file !== '' && $this->has_mixed_lookalike_scripts($source_file)) {
                 $errors[] = __('The source filename mixes visually similar Latin and Cyrillic letters. Correct it explicitly in the registry.', 'lavka-product-media-upload');
             }

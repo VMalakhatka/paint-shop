@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Lavka Product Media Upload 0.1.2\n"
+"Project-Id-Version: Lavka Product Media Upload 0.1.3\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lavka-product-"
 "media-upload\n"
-"POT-Creation-Date: 2026-08-08T15:19:57+00:00\n"
+"POT-Creation-Date: 2026-08-08T15:41:32+00:00\n"
 "Language: ru_RU\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -81,60 +81,52 @@ msgstr "Для изображения галереи необходима уни
 
 #: inc/class-image-validator.php:87
 msgid ""
-"The SKU mixes visually similar Latin and Cyrillic letters. Correct it "
-"explicitly in the registry."
-msgstr ""
-"Артикул содержит визуально похожие латинские и кириллические буквы. "
-"Исправьте его явно в реестре."
-
-#: inc/class-image-validator.php:90
-msgid ""
 "The source filename mixes visually similar Latin and Cyrillic letters. "
 "Correct it explicitly in the registry."
 msgstr ""
 "Имя исходного файла содержит визуально похожие латинские и кириллические "
 "буквы. Исправьте его явно в реестре."
 
-#: inc/class-image-validator.php:95 inc/class-image-validator.php:145
+#: inc/class-image-validator.php:92 inc/class-image-validator.php:142
 msgid ""
 "The same product, role and position occur more than once in the registry."
 msgstr "Одинаковое сочетание товара, роли и позиции повторяется в реестре."
 
-#: inc/class-image-validator.php:101
+#: inc/class-image-validator.php:98
 msgid "The same source file is referenced by more than one registry row."
 msgstr "На один исходный файл ссылается больше одной строки реестра."
 
-#: inc/class-image-validator.php:107
+#: inc/class-image-validator.php:104
 msgid "A product can have only one main image in a batch."
 msgstr "Товар может иметь только одно главное изображение в пакете."
 
-#: inc/class-image-validator.php:120
+#: inc/class-image-validator.php:117
 msgid "No selected image matches the registry source filename."
 msgstr "Среди выбранных изображений нет файла с именем из реестра."
 
-#: inc/class-image-validator.php:123
+#: inc/class-image-validator.php:120
 msgid "More than one selected file matches the registry source filename."
 msgstr "Имени файла из реестра соответствует более одного выбранного файла."
 
-#: inc/class-image-validator.php:150 inc/class-media-uploader.php:309
+#: inc/class-image-validator.php:147 inc/class-media-uploader.php:309
 msgid "WooCommerce variations do not have a standard separate gallery."
 msgstr "Вариации WooCommerce не имеют стандартной отдельной галереи."
 
-#: inc/class-image-validator.php:195
+#: inc/class-image-validator.php:192
 msgid "The canonical filename is duplicated inside this batch."
 msgstr "Каноническое имя файла дублируется в этом пакете."
 
-#: inc/class-image-validator.php:201
+#: inc/class-image-validator.php:198
 msgid "The same image content occurs more than once in this batch."
 msgstr ""
 "Одинаковое содержимое изображения встречается в этом пакете более одного "
 "раза."
 
-#: inc/class-image-validator.php:215
+#: inc/class-image-validator.php:212
 msgid "This exact image was already uploaded and verified. It will be skipped."
 msgstr "Это же изображение уже загружено и проверено. Оно будет пропущено."
 
-#: inc/class-image-validator.php:223
+#: inc/class-image-validator.php:220
 msgid ""
 "A matching attachment from an incomplete earlier attempt will be verified "
 "and resumed without creating a duplicate."
@@ -142,65 +134,65 @@ msgstr ""
 "Подходящее вложение из незавершённой предыдущей попытки будет проверено и "
 "возобновлено без создания дубликата."
 
-#: inc/class-image-validator.php:225
+#: inc/class-image-validator.php:222
 msgid "The canonical filename already exists in the WordPress Media Library."
 msgstr "Каноническое имя файла уже существует в медиатеке WordPress."
 
-#: inc/class-image-validator.php:246
+#: inc/class-image-validator.php:243
 msgid "The S3 media index could not be checked."
 msgstr "Не удалось проверить индекс медиа S3."
 
-#: inc/class-image-validator.php:250
+#: inc/class-image-validator.php:247
 msgid "The canonical filename already exists in the S3 media index."
 msgstr "Каноническое имя файла уже существует в индексе медиа S3."
 
-#: inc/class-image-validator.php:303
+#: inc/class-image-validator.php:300
 msgid "The selected file is not referenced by any registry row."
 msgstr "Выбранный файл не указан ни в одной строке реестра."
 
 #. translators: %d: PHP upload error code
-#: inc/class-image-validator.php:457
+#: inc/class-image-validator.php:454
 #, php-format
 msgid "PHP rejected the image upload with error %d."
 msgstr "PHP отклонил загрузку изображения с ошибкой %d."
 
-#: inc/class-image-validator.php:465
+#: inc/class-image-validator.php:462
 msgid "The image temporary file is missing or is not a valid HTTP upload."
 msgstr ""
 "Временный файл изображения отсутствует или не является корректной HTTP-"
 "загрузкой."
 
-#: inc/class-image-validator.php:469
+#: inc/class-image-validator.php:466
 msgid "The image file is empty."
 msgstr "Файл изображения пуст."
 
-#: inc/class-image-validator.php:474
+#: inc/class-image-validator.php:471
 msgid ""
 "The uploaded byte count does not match the size declared by the request."
 msgstr ""
 "Число загруженных байтов не соответствует размеру, указанному в запросе."
 
-#: inc/class-image-validator.php:479
+#: inc/class-image-validator.php:476
 msgid "The image exceeds the configured hard file-size limit."
 msgstr "Изображение превышает установленное жёсткое ограничение размера файла."
 
-#: inc/class-image-validator.php:482
+#: inc/class-image-validator.php:479
 msgid "The image is larger than the configured warning threshold."
 msgstr "Изображение больше установленного порога предупреждения."
 
-#: inc/class-image-validator.php:492
+#: inc/class-image-validator.php:489
 msgid "Only JPEG, PNG and WebP images are allowed."
 msgstr "Разрешены только изображения JPEG, PNG и WebP."
 
-#: inc/class-image-validator.php:498
+#: inc/class-image-validator.php:495
 msgid "The file magic signature is not JPEG, PNG or WebP."
 msgstr "Магическая сигнатура файла не соответствует JPEG, PNG или WebP."
 
-#: inc/class-image-validator.php:504
+#: inc/class-image-validator.php:501
 msgid "The PHP Fileinfo extension is required for MIME verification."
 msgstr "Для проверки MIME требуется расширение PHP Fileinfo."
 
-#: inc/class-image-validator.php:529
+#: inc/class-image-validator.php:526
 msgid ""
 "The extension, magic signature, server MIME and WordPress file check do not "
 "agree."
@@ -208,21 +200,21 @@ msgstr ""
 "Расширение, магическая сигнатура, серверный MIME и проверка WordPress не "
 "совпадают."
 
-#: inc/class-image-validator.php:542
+#: inc/class-image-validator.php:539
 msgid "The image dimensions could not be read."
 msgstr "Не удалось прочитать размеры изображения."
 
-#: inc/class-image-validator.php:548
+#: inc/class-image-validator.php:545
 msgid "The image has invalid dimensions."
 msgstr "Изображение имеет некорректные размеры."
 
-#: inc/class-image-validator.php:551
+#: inc/class-image-validator.php:548
 msgid "The image exceeds the configured geometry or total-pixel limit."
 msgstr ""
 "Изображение превышает установленное ограничение стороны или общего числа "
 "пикселей."
 
-#: inc/class-image-validator.php:557
+#: inc/class-image-validator.php:554
 msgid ""
 "The image is within the configured pixel limit but cannot be decoded safely "
 "with the currently available PHP memory."
@@ -230,76 +222,76 @@ msgstr ""
 "Изображение не превышает установленный лимит пикселей, но его нельзя "
 "безопасно декодировать при текущем доступном объёме памяти PHP."
 
-#: inc/class-image-validator.php:562
+#: inc/class-image-validator.php:559
 msgid "At least one image side is below the configured minimum-side warning."
 msgstr ""
 "Как минимум одна сторона изображения меньше установленного порога "
 "предупреждения."
 
-#: inc/class-image-validator.php:565
+#: inc/class-image-validator.php:562
 msgid "At least one image side is above the configured large-side warning."
 msgstr ""
 "Как минимум одна сторона изображения больше установленного порога "
 "предупреждения."
 
-#: inc/class-image-validator.php:571
+#: inc/class-image-validator.php:568
 msgid "The image is outside the recommended side range."
 msgstr "Размер изображения выходит за рекомендуемый диапазон."
 
-#: inc/class-image-validator.php:575
+#: inc/class-image-validator.php:572
 msgid "The image has an unusually wide or tall aspect ratio."
 msgstr "Изображение имеет необычно широкое или высокое соотношение сторон."
 
-#: inc/class-image-validator.php:581
+#: inc/class-image-validator.php:578
 msgid "The JPEG bit depth is not supported by the current pipeline."
 msgstr "Текущий процесс не поддерживает эту глубину цвета JPEG."
 
-#: inc/class-image-validator.php:584
+#: inc/class-image-validator.php:581
 msgid ""
 "The JPEG appears to use CMYK. RGB or sRGB is preferred for the storefront."
 msgstr ""
 "Похоже, JPEG использует CMYK. Для витрины предпочтительны RGB или sRGB."
 
-#: inc/class-image-validator.php:598
+#: inc/class-image-validator.php:595
 msgid "The WordPress Image Editor could not open the image."
 msgstr "Редактор изображений WordPress не смог открыть изображение."
 
-#: inc/class-image-validator.php:610
+#: inc/class-image-validator.php:607
 msgid "The WordPress Image Editor reported unexpected image dimensions."
 msgstr "Редактор изображений WordPress вернул неожиданные размеры."
 
-#: inc/class-image-validator.php:625
+#: inc/class-image-validator.php:622
 msgid "The external malware scanner rejected the image."
 msgstr "Внешний сканер вредоносного ПО отклонил изображение."
 
-#: inc/class-image-validator.php:680
+#: inc/class-image-validator.php:677
 msgid "The canonical filename exceeds the configured hard length limit."
 msgstr ""
 "Каноническое имя файла превышает установленное жёсткое ограничение длины."
 
-#: inc/class-image-validator.php:683
+#: inc/class-image-validator.php:680
 msgid "The canonical filename exceeds the configured warning length."
 msgstr "Каноническое имя файла превышает установленный порог предупреждения."
 
-#: inc/class-image-validator.php:686
+#: inc/class-image-validator.php:683
 msgid "The canonical filename contains unsupported characters."
 msgstr "Каноническое имя файла содержит неподдерживаемые символы."
 
-#: inc/class-image-validator.php:689
+#: inc/class-image-validator.php:686
 msgid "The canonical filename is hidden, reserved or has multiple extensions."
 msgstr ""
 "Каноническое имя является скрытым, зарезервированным или содержит несколько "
 "расширений."
 
-#: inc/class-image-validator.php:699
+#: inc/class-image-validator.php:696
 msgid "A canonical filename cannot be generated without an identifier."
 msgstr "Невозможно создать каноническое имя файла без идентификатора."
 
-#: inc/class-image-validator.php:718
+#: inc/class-image-validator.php:715
 msgid "The SKU uses a non-ASCII prefix without an explicit business mapping."
 msgstr "Артикул содержит не-ASCII префикс без явного бизнес-соответствия."
 
-#: inc/class-image-validator.php:725
+#: inc/class-image-validator.php:722
 msgid ""
 "The identifier cannot be converted to a safe canonical filename without "
 "guessing."
@@ -307,118 +299,118 @@ msgstr ""
 "Идентификатор нельзя преобразовать в безопасное каноническое имя без "
 "предположений."
 
-#: inc/class-image-validator.php:737
+#: inc/class-image-validator.php:734
 msgid "The filename contains NUL or control characters."
 msgstr "Имя файла содержит NUL или управляющие символы."
 
-#: inc/class-image-validator.php:746
+#: inc/class-image-validator.php:743
 msgid "The filename contains a path or path-traversal sequence."
 msgstr "Имя файла содержит путь или последовательность обхода пути."
 
-#: inc/class-image-validator.php:749
+#: inc/class-image-validator.php:746
 msgid "Hidden files and multiple extensions are not allowed."
 msgstr "Скрытые файлы и несколько расширений не допускаются."
 
-#: inc/class-image-validator.php:754
+#: inc/class-image-validator.php:751
 msgid "The filename has an empty or reserved basename."
 msgstr "Имя файла имеет пустую или зарезервированную основу."
 
-#: inc/class-image-validator.php:832
+#: inc/class-image-validator.php:829
 msgid "The file contains a suspicious executable or script signature."
 msgstr "Файл содержит подозрительную сигнатуру исполняемого кода или скрипта."
 
-#: inc/class-image-validator.php:840
+#: inc/class-image-validator.php:837
 msgid "The JPEG SOI/EOI structure is incomplete."
 msgstr "Структура SOI/EOI файла JPEG неполна."
 
-#: inc/class-image-validator.php:851
+#: inc/class-image-validator.php:848
 msgid "The image container is unsupported."
 msgstr "Контейнер изображения не поддерживается."
 
-#: inc/class-image-validator.php:865
+#: inc/class-image-validator.php:862
 msgid "The PNG chunk structure is invalid."
 msgstr "Структура блоков PNG некорректна."
 
-#: inc/class-image-validator.php:871
+#: inc/class-image-validator.php:868
 msgid "A PNG chunk CRC check failed."
 msgstr "Проверка CRC блока PNG не пройдена."
 
-#: inc/class-image-validator.php:884
+#: inc/class-image-validator.php:881
 msgid "The PNG does not end cleanly at the IEND chunk."
 msgstr "PNG не завершается корректно на блоке IEND."
 
-#: inc/class-image-validator.php:887
+#: inc/class-image-validator.php:884
 msgid "Animated PNG files are not allowed for product images."
 msgstr "Анимированные PNG не допускаются для изображений товаров."
 
-#: inc/class-image-validator.php:897
+#: inc/class-image-validator.php:894
 msgid "The WebP container is too short."
 msgstr "Контейнер WebP слишком короткий."
 
-#: inc/class-image-validator.php:901
+#: inc/class-image-validator.php:898
 msgid "The WebP RIFF size does not match the file size."
 msgstr "Размер RIFF в WebP не соответствует размеру файла."
 
-#: inc/class-image-validator.php:910
+#: inc/class-image-validator.php:907
 msgid "The WebP chunk structure is invalid."
 msgstr "Структура блоков WebP некорректна."
 
-#: inc/class-image-validator.php:924
+#: inc/class-image-validator.php:921
 msgid "The WebP container has trailing or incomplete data."
 msgstr "Контейнер WebP содержит лишние или неполные данные."
 
-#: inc/class-image-validator.php:927
+#: inc/class-image-validator.php:924
 msgid "Animated WebP files are not allowed for product images."
 msgstr "Анимированные WebP не допускаются для изображений товаров."
 
-#: inc/class-image-validator.php:952
+#: inc/class-image-validator.php:949
 msgid "The server image decoder could not fully decode the file."
 msgstr "Серверный декодер не смог полностью декодировать файл."
 
-#: inc/class-image-validator.php:960
+#: inc/class-image-validator.php:957
 msgid "Decoded image dimensions differ from the header dimensions."
 msgstr ""
 "Размеры декодированного изображения отличаются от размеров в заголовке."
 
-#: inc/class-image-validator.php:969
+#: inc/class-image-validator.php:966
 msgid "The image decoder reported a warning in strict mode."
 msgstr "Декодер изображения вернул предупреждение в строгом режиме."
 
-#: inc/class-image-validator.php:973
+#: inc/class-image-validator.php:970
 msgid "The image decoder reported a non-blocking warning."
 msgstr "Декодер изображения вернул неблокирующее предупреждение."
 
-#: inc/class-image-validator.php:1019
+#: inc/class-image-validator.php:1016
 msgid "The image appears almost uniform or has very low contrast."
 msgstr ""
 "Изображение выглядит почти одноцветным или имеет очень низкий контраст."
 
-#: inc/class-image-validator.php:1021
+#: inc/class-image-validator.php:1018
 msgid "The image appears to have low contrast."
 msgstr "Похоже, изображение имеет низкий контраст."
 
-#: inc/class-image-validator.php:1024
+#: inc/class-image-validator.php:1021
 msgid "The image appears to be almost completely transparent."
 msgstr "Похоже, изображение почти полностью прозрачное."
 
-#: inc/class-image-validator.php:1039
+#: inc/class-image-validator.php:1036
 msgid "The image contains an ICC profile. Verify storefront color rendering."
 msgstr ""
 "Изображение содержит профиль ICC. Проверьте отображение цветов на витрине."
 
-#: inc/class-image-validator.php:1047
+#: inc/class-image-validator.php:1044
 msgid "The JPEG uses EXIF orientation and may require explicit autorotation."
 msgstr "JPEG использует ориентацию EXIF и может требовать явного автоповорота."
 
-#: inc/class-image-validator.php:1050
+#: inc/class-image-validator.php:1047
 msgid "The JPEG contains GPS metadata."
 msgstr "JPEG содержит метаданные GPS."
 
-#: inc/class-image-validator.php:1053
+#: inc/class-image-validator.php:1050
 msgid "The JPEG contains EXIF metadata. Metadata is not stripped in version 1."
 msgstr "JPEG содержит метаданные EXIF. В версии 1 метаданные не удаляются."
 
-#: inc/class-image-validator.php:1163
+#: inc/class-image-validator.php:1160
 msgid ""
 "Gallery positions contain gaps. Version 1 will not renumber them "
 "automatically."
@@ -1153,6 +1145,13 @@ msgstr "ID вложения"
 #: inc/class-report-store.php:67
 msgid "URL"
 msgstr "URL"
+
+#~ msgid ""
+#~ "The SKU mixes visually similar Latin and Cyrillic letters. Correct it "
+#~ "explicitly in the registry."
+#~ msgstr ""
+#~ "Артикул содержит визуально похожие латинские и кириллические буквы. "
+#~ "Исправьте его явно в реестре."
 
 #~ msgid "A numeric value may have lost precision. Store identifiers as text."
 #~ msgstr ""
