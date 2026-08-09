@@ -415,6 +415,9 @@ final class Plugin
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
         nocache_headers();
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="product-image-registry-template.xlsx"');

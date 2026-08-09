@@ -1,4 +1,4 @@
-    <?php
+<?php
     /**
      * Plugin Name: Lavka Sync
      * Description:Provides buttons and settings to synchronize with the Java service and exposes a REST API.

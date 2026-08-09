@@ -837,7 +837,7 @@ add_action('admin_post_lts_media_missing_images_export', function () {
         $sheet->getColumnDimension($column)->setWidth($width);
     }
 
-    if (ob_get_length()) {
+    while (ob_get_level() > 0) {
         ob_end_clean();
     }
     nocache_headers();
