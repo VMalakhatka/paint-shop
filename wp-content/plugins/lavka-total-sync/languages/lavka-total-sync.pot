@@ -1020,3 +1020,131 @@ msgstr ""
 #: inc/worker.php:12
 msgid "Background product data worker"
 msgstr ""
+
+#: inc/admin-media.php
+msgid "The filename has no extension. Check the image name stored in Folio."
+msgstr ""
+
+#: inc/admin-media.php
+msgid "The .ipg extension looks like a .jpg typo. Correct the image name in Folio or in storage."
+msgstr ""
+
+#: inc/admin-media.php
+msgid "There is a space before the file extension. The name must match OVH/S3 exactly."
+msgstr ""
+
+#: inc/admin-media.php
+msgid "File is missing from the OVH/S3 media index"
+msgstr ""
+
+#: inc/admin-media.php
+msgid "Folio references this image, but Java could not find the exact filename in the current OVH/S3 media index."
+msgstr ""
+
+#: inc/admin-media.php
+msgid "Upload the file with exactly this name or correct the name in Folio, update the OVH media index, and rerun media synchronization."
+msgstr ""
+
+#: inc/admin-media.php
+msgid "Java media synchronization error"
+msgstr ""
+
+#: inc/admin-media.php
+msgid "Check the technical message and rerun media synchronization after correcting its cause."
+msgstr ""
+
+#: inc/admin-media.php
+msgid "The mismatch log exists but the web server cannot read it."
+msgstr ""
+
+#: inc/admin-media.php
+msgid "The mismatch log was not found at the configured path."
+msgstr ""
+
+#: inc/admin-media.php
+msgid "Featured image"
+msgstr ""
+
+#: inc/admin-media.php
+msgid "Gallery image"
+msgstr ""
+
+#: inc/admin-media.php
+msgid "Recent failed media links from Java"
+msgstr ""
+
+#: inc/admin-media.php
+msgid "This is a historical read-only view of sync-mismatch.log. An entry can remain after the image has been fixed; rerun media synchronization to get current results."
+msgstr ""
+
+#: inc/admin-media.php
+msgid "Image type"
+msgstr ""
+
+#: inc/admin-media.php
+msgid "All failures"
+msgstr ""
+
+#: inc/admin-media.php
+msgid "Featured images"
+msgstr ""
+
+#: inc/admin-media.php
+msgid "Gallery images"
+msgstr ""
+
+#: inc/admin-media.php
+msgid "Search"
+msgstr ""
+
+#: inc/admin-media.php
+msgid "SKU, product ID or filename"
+msgstr ""
+
+#: inc/admin-media.php
+msgid "Read mismatch log"
+msgstr ""
+
+#: inc/admin-media.php
+msgid "Type"
+msgstr ""
+
+#: inc/admin-media.php
+msgid "Expected file"
+msgstr ""
+
+#: inc/admin-media.php
+msgid "What went wrong"
+msgstr ""
+
+#: inc/admin-media.php
+msgid "What to do"
+msgstr ""
+
+#: inc/admin-media.php
+msgid "Mismatch log is unavailable."
+msgstr ""
+
+#: inc/admin-media.php
+msgid "Unavailable"
+msgstr ""
+
+#: inc/admin-media.php
+msgid "Updated:"
+msgstr ""
+
+#: inc/admin-media.php
+msgid "File:"
+msgstr ""
+
+#: inc/admin-media.php
+msgid "Only the newest part of the large log was read."
+msgstr ""
+
+#: inc/admin-media.php
+msgid "No failed media links found"
+msgstr ""
+
+#: inc/admin-media.php
+msgid "Technical message"
+msgstr ""

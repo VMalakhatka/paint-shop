@@ -700,6 +700,206 @@ function lts_media_missing_images_report_data(array $args, bool $paginate = true
     ];
 }
 
+/** Resolve the Java media mismatch log without accepting a path from the request. */
+function lts_media_mismatch_log_path(): string {
+    $path = defined('LTS_MEDIA_MISMATCH_LOG_PATH')
+        ? (string)LTS_MEDIA_MISMATCH_LOG_PATH
+        : '/mnt/backup/backups_kreul/synck_logs/sync-mismatch.log';
+
+    return (string)apply_filters('lts_media_mismatch_log_path', $path);
+}
+
+/** Normalize filters for the Java mismatch log report. */
+function lts_media_mismatch_report_args(array $source): array {
+    $type = sanitize_key((string)($source['type'] ?? 'all'));
+    if (!in_array($type, ['all', 'featured', 'gallery'], true)) {
+        $type = 'all';
+    }
+
+    return [
+        'type'     => $type,
+        'query'    => sanitize_text_field((string)($source['query'] ?? '')),
+        'page'     => max(1, (int)($source['page'] ?? 1)),
+        'per_page' => max(10, min(200, (int)($source['per_page'] ?? 50))),
+    ];
+}
+
+/** Read only the newest part of a potentially large Java log file. */
+function lts_media_mismatch_log_tail(string $path, int $max_bytes = 8388608): array {
+    $size = (int)@filesize($path);
+    $offset = max(0, $size - $max_bytes);
+    $handle = @fopen($path, 'rb');
+    if (!$handle) {
+        return ['content' => '', 'size' => $size, 'truncated' => false];
+    }
+
+    if ($offset > 0) {
+        fseek($handle, $offset);
+    }
+    $content = (string)stream_get_contents($handle);
+    fclose($handle);
+
+    if ($offset > 0) {
+        $first_newline = strpos($content, "\n");
+        $content = $first_newline === false ? '' : substr($content, $first_newline + 1);
+    }
+
+    return [
+        'content'   => $content,
+        'size'      => $size,
+        'truncated' => $offset > 0,
+    ];
+}
+
+/** Turn a Java mismatch message into an operator-facing explanation. */
+function lts_media_mismatch_explanation(string $message, string $file): array {
+    if (stripos($message, 'Not found in s3_media_index:') !== false) {
+        $hint = '';
+        $basename = wp_basename($file);
+        $extension = strtolower((string)pathinfo($basename, PATHINFO_EXTENSION));
+
+        if ($extension === '') {
+            $hint = __('The filename has no extension. Check the image name stored in Folio.', 'lavka-total-sync');
+        } elseif ($extension === 'ipg') {
+            $hint = __('The .ipg extension looks like a .jpg typo. Correct the image name in Folio or in storage.', 'lavka-total-sync');
+        } elseif (preg_match('/\s+\.[^.]+$/u', $basename)) {
+            $hint = __('There is a space before the file extension. The name must match OVH/S3 exactly.', 'lavka-total-sync');
+        }
+
+        return [
+            'code'        => 'not_in_s3_index',
+            'label'       => __('File is missing from the OVH/S3 media index', 'lavka-total-sync'),
+            'explanation' => __('Folio references this image, but Java could not find the exact filename in the current OVH/S3 media index.', 'lavka-total-sync'),
+            'action'      => __('Upload the file with exactly this name or correct the name in Folio, update the OVH media index, and rerun media synchronization.', 'lavka-total-sync'),
+            'hint'        => $hint,
+        ];
+    }
+
+    return [
+        'code'        => 'sync_error',
+        'label'       => __('Java media synchronization error', 'lavka-total-sync'),
+        'explanation' => $message,
+        'action'      => __('Check the technical message and rerun media synchronization after correcting its cause.', 'lavka-total-sync'),
+        'hint'        => '',
+    ];
+}
+
+/** Parse recent standalone mismatch events; Java summary blocks are intentionally ignored. */
+function lts_media_mismatch_report_data(array $args): array {
+    $path = lts_media_mismatch_log_path();
+    if (!is_file($path) || !is_readable($path)) {
+        return [
+            'available' => false,
+            'path'      => $path,
+            'error'     => is_file($path)
+                ? __('The mismatch log exists but the web server cannot read it.', 'lavka-total-sync')
+                : __('The mismatch log was not found at the configured path.', 'lavka-total-sync'),
+            'rows'      => [],
+            'total'     => 0,
+            'page'      => 1,
+            'pages'     => 1,
+        ];
+    }
+
+    $tail = lts_media_mismatch_log_tail($path);
+    $events = [];
+    $lines = explode("\n", str_replace("\r\n", "\n", $tail['content']));
+    foreach ($lines as $line) {
+        if (strpos($line, '[sync.mismatch]') === false) {
+            continue;
+        }
+
+        $matched = preg_match(
+            '/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(?:\.\d+)?)'
+            . '.*?\[sync\.mismatch\]\s+(featured_failed|gallery_failed)'
+            . '\s+sku=(.*?)\s+pid=(\d+)'
+            . '(?:\s+file=(.*?))?\s+msg=(.+)$/u',
+            trim($line),
+            $match
+        );
+        if (!$matched) {
+            continue;
+        }
+
+        $event_type = $match[2] === 'featured_failed' ? 'featured' : 'gallery';
+        if ($args['type'] !== 'all' && $args['type'] !== $event_type) {
+            continue;
+        }
+
+        $message = trim((string)$match[6]);
+        $file = trim((string)($match[5] ?? ''));
+        if ($file === '' && preg_match('/Not found in s3_media_index:\s*(.+)$/iu', $message, $file_match)) {
+            $file = trim((string)$file_match[1]);
+        }
+
+        $sku = trim((string)$match[3]);
+        $product_id = (int)$match[4];
+        if ($args['query'] !== '') {
+            $haystack = $sku . ' ' . $product_id . ' ' . $file . ' ' . $message;
+            $position = function_exists('mb_stripos')
+                ? mb_stripos($haystack, $args['query'])
+                : stripos($haystack, $args['query']);
+            if ($position === false) {
+                continue;
+            }
+        }
+
+        $events[] = [
+            'time'       => (string)$match[1],
+            'type'       => $event_type,
+            'sku'        => $sku,
+            'product_id' => $product_id,
+            'file'       => $file,
+            'message'    => $message,
+        ];
+    }
+
+    $events = array_reverse($events);
+    $total = count($events);
+    $pages = max(1, (int)ceil($total / $args['per_page']));
+    $page = min($args['page'], $pages);
+    $offset = ($page - 1) * $args['per_page'];
+    $rows = array_slice($events, $offset, $args['per_page']);
+
+    foreach ($rows as &$row) {
+        $explanation = lts_media_mismatch_explanation($row['message'], $row['file']);
+        $row['type_label'] = $row['type'] === 'featured'
+            ? __('Featured image', 'lavka-total-sync')
+            : __('Gallery image', 'lavka-total-sync');
+        $row['product_title'] = get_the_title($row['product_id']);
+        $row['edit_url'] = get_edit_post_link($row['product_id'], 'raw');
+        $row['cause_label'] = $explanation['label'];
+        $row['explanation'] = $explanation['explanation'];
+        $row['recommended_action'] = $explanation['action'];
+        $row['hint'] = $explanation['hint'];
+    }
+    unset($row);
+
+    return [
+        'available'   => true,
+        'path'        => $path,
+        'modified_at' => wp_date('Y-m-d H:i:s', (int)filemtime($path)),
+        'file_size'   => size_format((int)$tail['size'], 1),
+        'truncated'   => !empty($tail['truncated']),
+        'rows'        => $rows,
+        'total'       => $total,
+        'page'        => $page,
+        'pages'       => $pages,
+        'per_page'    => $args['per_page'],
+    ];
+}
+
+/** AJAX: read-only report of recent Java media mismatch events. */
+add_action('wp_ajax_lts_media_mismatch_report', function () {
+    $cap = defined('LTS_CAP') ? LTS_CAP : 'manage_options';
+    if (!current_user_can($cap)) wp_send_json_error(['error' => 'forbidden'], 403);
+    check_ajax_referer('lts_admin_nonce', 'nonce');
+
+    wp_send_json_success(lts_media_mismatch_report_data(
+        lts_media_mismatch_report_args(wp_unslash($_POST))
+    ));
+});
+
 /** AJAX: read-only report of products without linked WooCommerce images. */
 add_action('wp_ajax_lts_media_missing_images_report', function () {
     $cap = defined('LTS_CAP') ? LTS_CAP : 'manage_options';
@@ -1059,6 +1259,70 @@ CR-CE0900056100"></textarea>
             </div>
         </section>
 
+        <hr style="margin:1.25rem 0;">
+
+        <section id="lts_media_mismatch_report">
+            <h2><?php _e('Recent failed media links from Java', 'lavka-total-sync'); ?></h2>
+            <p class="description">
+                <?php _e('This is a historical read-only view of sync-mismatch.log. An entry can remain after the image has been fixed; rerun media synchronization to get current results.', 'lavka-total-sync'); ?>
+            </p>
+            <div class="lts-media-report-controls">
+                <label for="lts_media_mismatch_type">
+                    <span><?php _e('Image type', 'lavka-total-sync'); ?></span>
+                    <select id="lts_media_mismatch_type">
+                        <option value="all"><?php _e('All failures', 'lavka-total-sync'); ?></option>
+                        <option value="featured"><?php _e('Featured images', 'lavka-total-sync'); ?></option>
+                        <option value="gallery"><?php _e('Gallery images', 'lavka-total-sync'); ?></option>
+                    </select>
+                </label>
+                <label for="lts_media_mismatch_query">
+                    <span><?php _e('Search', 'lavka-total-sync'); ?></span>
+                    <input id="lts_media_mismatch_query" type="search" placeholder="<?php echo esc_attr__('SKU, product ID or filename', 'lavka-total-sync'); ?>">
+                </label>
+                <label for="lts_media_mismatch_per_page">
+                    <span><?php _e('Rows per page', 'lavka-total-sync'); ?></span>
+                    <select id="lts_media_mismatch_per_page">
+                        <option value="25">25</option>
+                        <option value="50" selected>50</option>
+                        <option value="100">100</option>
+                        <option value="200">200</option>
+                    </select>
+                </label>
+                <button id="lts_btn_media_mismatch" class="button button-primary">
+                    <?php _e('Read mismatch log', 'lavka-total-sync'); ?>
+                </button>
+                <span id="lts_media_mismatch_status" aria-live="polite"></span>
+            </div>
+
+            <div id="lts_media_mismatch_result" hidden>
+                <p id="lts_media_mismatch_summary"></p>
+                <div class="lts-media-report-table-wrap">
+                    <table class="widefat striped" id="lts_media_mismatch_table">
+                        <thead>
+                            <tr>
+                                <th><?php _e('Time', 'lavka-total-sync'); ?></th>
+                                <th><?php _e('Type', 'lavka-total-sync'); ?></th>
+                                <th><?php _e('Product', 'lavka-total-sync'); ?></th>
+                                <th><?php _e('Expected file', 'lavka-total-sync'); ?></th>
+                                <th><?php _e('What went wrong', 'lavka-total-sync'); ?></th>
+                                <th><?php _e('What to do', 'lavka-total-sync'); ?></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="lts-media-report-pagination">
+                    <button type="button" id="lts_media_mismatch_prev" class="button">
+                        <?php _e('Previous'); ?>
+                    </button>
+                    <span id="lts_media_mismatch_page"></span>
+                    <button type="button" id="lts_media_mismatch_next" class="button">
+                        <?php _e('Next'); ?>
+                    </button>
+                </div>
+            </div>
+        </section>
+
         <style>
             .lts-media-report-controls {
                 display: flex;
@@ -1079,6 +1343,11 @@ CR-CE0900056100"></textarea>
                 display: inline-flex;
                 align-items: center;
             }
+            #lts_media_mismatch_status {
+                min-height: 30px;
+                display: inline-flex;
+                align-items: center;
+            }
             .lts-media-report-table-wrap {
                 overflow-x: auto;
             }
@@ -1092,6 +1361,18 @@ CR-CE0900056100"></textarea>
                 align-items: center;
                 gap: 10px;
                 margin-top: 12px;
+            }
+            #lts_media_mismatch_table td {
+                vertical-align: top;
+            }
+            #lts_media_mismatch_table .lts-mismatch-product,
+            #lts_media_mismatch_table .lts-mismatch-details {
+                display: grid;
+                gap: 4px;
+            }
+            #lts_media_mismatch_table .lts-mismatch-hint {
+                color: #8a4b08;
+                font-weight: 600;
             }
         </style>
 
@@ -1398,6 +1679,8 @@ CR-CE0900056100"></textarea>
 
             let mediaReportPage = 1;
             let mediaReportPages = 1;
+            let mediaMismatchPage = 1;
+            let mediaMismatchPages = 1;
 
             function updateMediaReportExportUrl() {
                 const url = new URL(mediaReportExportBaseUrl, window.location.origin);
@@ -1489,6 +1772,120 @@ CR-CE0900056100"></textarea>
                 if (mediaReportPage < mediaReportPages) loadMediaReport(mediaReportPage + 1);
             });
             updateMediaReportExportUrl();
+
+            function renderMediaMismatchReport(data) {
+                const $result = $('#lts_media_mismatch_result').prop('hidden', false);
+                const $body = $('#lts_media_mismatch_table tbody').empty();
+                const $summary = $('#lts_media_mismatch_summary').empty();
+
+                if (!data.available) {
+                    $('<strong>').text(data.error || '<?php echo esc_js(__('Mismatch log is unavailable.', 'lavka-total-sync')); ?>').appendTo($summary);
+                    $summary.append(document.createTextNode(' '));
+                    $('<code>').text(data.path || '').appendTo($summary);
+                    $('<tr>').append(
+                        $('<td>', {colspan: 6}).text(data.error || '<?php echo esc_js(__('Mismatch log is unavailable.', 'lavka-total-sync')); ?>')
+                    ).appendTo($body);
+                    $('#lts_media_mismatch_status').text('<?php echo esc_js(__('Unavailable', 'lavka-total-sync')); ?>');
+                    return;
+                }
+
+                $summary
+                    .append(document.createTextNode('<?php echo esc_js(__('Found:', 'lavka-total-sync')); ?>' + ' ' + data.total + '. '))
+                    .append(document.createTextNode('<?php echo esc_js(__('Updated:', 'lavka-total-sync')); ?>' + ' ' + data.modified_at + '. '))
+                    .append(document.createTextNode('<?php echo esc_js(__('File:', 'lavka-total-sync')); ?>' + ' ' + data.file_size + ' '))
+                    .append($('<code>').text(data.path));
+                if (data.truncated) {
+                    $summary.append($('<span>', {class: 'description'}).text(
+                        ' <?php echo esc_js(__('Only the newest part of the large log was read.', 'lavka-total-sync')); ?>'
+                    ));
+                }
+
+                if (!data.rows.length) {
+                    $('<tr>').append(
+                        $('<td>', {colspan: 6}).text('<?php echo esc_js(__('No failed media links found', 'lavka-total-sync')); ?>')
+                    ).appendTo($body);
+                } else {
+                    data.rows.forEach(function(row) {
+                        const $product = $('<div>', {class: 'lts-mismatch-product'});
+                        $('<code>').text(row.sku || '—').appendTo($product);
+                        const productLabel = '#' + row.product_id + (row.product_title ? ' · ' + row.product_title : '');
+                        if (row.edit_url) {
+                            $('<a>', {href: row.edit_url}).text(productLabel).appendTo($product);
+                        } else {
+                            $('<span>').text(productLabel).appendTo($product);
+                        }
+
+                        const $details = $('<div>', {class: 'lts-mismatch-details'});
+                        $('<strong>').text(row.cause_label).appendTo($details);
+                        $('<span>').text(row.explanation).appendTo($details);
+                        const $technical = $('<details>');
+                        $('<summary>').text('<?php echo esc_js(__('Technical message', 'lavka-total-sync')); ?>').appendTo($technical);
+                        $('<code>').text(row.message).appendTo($technical);
+                        $technical.appendTo($details);
+
+                        const $action = $('<div>', {class: 'lts-mismatch-details'});
+                        $('<span>').text(row.recommended_action).appendTo($action);
+                        if (row.hint) {
+                            $('<span>', {class: 'lts-mismatch-hint'}).text(row.hint).appendTo($action);
+                        }
+
+                        $('<tr>')
+                            .append($('<td>').text(row.time))
+                            .append($('<td>').text(row.type_label))
+                            .append($('<td>').append($product))
+                            .append($('<td>').append($('<code>').text(row.file || '—')))
+                            .append($('<td>').append($details))
+                            .append($('<td>').append($action))
+                            .appendTo($body);
+                    });
+                }
+
+                mediaMismatchPage = data.page;
+                mediaMismatchPages = data.pages;
+                $('#lts_media_mismatch_page').text(
+                    '<?php echo esc_js(__('Page', 'lavka-total-sync')); ?>' + ' ' + data.page + ' / ' + data.pages
+                );
+                $('#lts_media_mismatch_prev').prop('disabled', data.page <= 1);
+                $('#lts_media_mismatch_next').prop('disabled', data.page >= data.pages);
+                $('#lts_media_mismatch_status').text('<?php echo esc_js(__('Done.','lavka-total-sync')); ?>');
+            }
+
+            function loadMediaMismatchReport(page) {
+                $('#lts_media_mismatch_status').text('<?php echo esc_js(__('Working…','lavka-total-sync')); ?>');
+                $.post(ajaxUrl, {
+                    action: 'lts_media_mismatch_report',
+                    nonce: nonce,
+                    type: $('#lts_media_mismatch_type').val(),
+                    query: $('#lts_media_mismatch_query').val(),
+                    per_page: $('#lts_media_mismatch_per_page').val(),
+                    page: page
+                }).done(function(res) {
+                    if (!res || !res.success) {
+                        $('#lts_media_mismatch_status').text('<?php echo esc_js(__('Error','lavka-total-sync')); ?>');
+                        return;
+                    }
+                    renderMediaMismatchReport(res.data);
+                }).fail(function() {
+                    $('#lts_media_mismatch_status').text('<?php echo esc_js(__('Error','lavka-total-sync')); ?>');
+                });
+            }
+
+            $('#lts_btn_media_mismatch').on('click', function(e) {
+                e.preventDefault();
+                loadMediaMismatchReport(1);
+            });
+            $('#lts_media_mismatch_query').on('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    loadMediaMismatchReport(1);
+                }
+            });
+            $('#lts_media_mismatch_prev').on('click', function() {
+                if (mediaMismatchPage > 1) loadMediaMismatchReport(mediaMismatchPage - 1);
+            });
+            $('#lts_media_mismatch_next').on('click', function() {
+                if (mediaMismatchPage < mediaMismatchPages) loadMediaMismatchReport(mediaMismatchPage + 1);
+            });
 
             $('#lts_btn_media_reindex').on('click', async function(){
                 $('#lts_mr_status').text('<?php echo esc_js(__('Working…','lavka-total-sync')); ?>');
