@@ -523,6 +523,10 @@ add_action('wp_ajax_lts_media_missing_images_report', function () {
     $scope = isset($_POST['scope']) && $_POST['scope'] === 'active'
         ? 'active'
         : 'published';
+    $visibility = sanitize_key((string)($_POST['visibility'] ?? 'exclude_hidden'));
+    if (!in_array($visibility, ['exclude_hidden', 'all', 'hidden_only'], true)) {
+        $visibility = 'exclude_hidden';
+    }
     $page = max(1, (int)($_POST['page'] ?? 1));
     $per_page = max(10, min(200, (int)($_POST['per_page'] ?? 50)));
     $offset = ($page - 1) * $per_page;
@@ -555,9 +559,40 @@ add_action('wp_ajax_lts_media_missing_images_report', function () {
         )";
     }
 
+    // WooCommerce "Hidden" means excluded from both the catalog and search.
+    $hidden_condition = "EXISTS (
+        SELECT 1
+        FROM {$wpdb->term_relationships} AS hidden_catalog_rel
+        INNER JOIN {$wpdb->term_taxonomy} AS hidden_catalog_tax
+            ON hidden_catalog_tax.term_taxonomy_id = hidden_catalog_rel.term_taxonomy_id
+           AND hidden_catalog_tax.taxonomy = 'product_visibility'
+        INNER JOIN {$wpdb->terms} AS hidden_catalog_term
+            ON hidden_catalog_term.term_id = hidden_catalog_tax.term_id
+           AND hidden_catalog_term.slug = 'exclude-from-catalog'
+        WHERE hidden_catalog_rel.object_id = product.ID
+    ) AND EXISTS (
+        SELECT 1
+        FROM {$wpdb->term_relationships} AS hidden_search_rel
+        INNER JOIN {$wpdb->term_taxonomy} AS hidden_search_tax
+            ON hidden_search_tax.term_taxonomy_id = hidden_search_rel.term_taxonomy_id
+           AND hidden_search_tax.taxonomy = 'product_visibility'
+        INNER JOIN {$wpdb->terms} AS hidden_search_term
+            ON hidden_search_term.term_id = hidden_search_tax.term_id
+           AND hidden_search_term.slug = 'exclude-from-search'
+        WHERE hidden_search_rel.object_id = product.ID
+    )";
+
+    $visibility_condition = '';
+    if ($visibility === 'exclude_hidden') {
+        $visibility_condition = "AND NOT ({$hidden_condition})";
+    } elseif ($visibility === 'hidden_only') {
+        $visibility_condition = "AND ({$hidden_condition})";
+    }
+
     $base_where = "product.post_type = 'product'
         AND product.post_status IN ({$status_placeholders})
-        AND {$missing_condition}";
+        AND {$missing_condition}
+        {$visibility_condition}";
 
     $count_sql = "SELECT COUNT(*) FROM {$wpdb->posts} AS product WHERE {$base_where}";
     $total = (int)$wpdb->get_var($wpdb->prepare($count_sql, ...$statuses));
@@ -637,6 +672,7 @@ add_action('wp_ajax_lts_media_missing_images_report', function () {
         'per_page'   => $per_page,
         'report_type'=> $report_type,
         'scope'      => $scope,
+        'visibility' => $visibility,
     ]);
 });
 
@@ -780,6 +816,14 @@ CR-CE0900056100"></textarea>
                     <select id="lts_media_report_scope">
                         <option value="published"><?php _e('Published products only', 'lavka-total-sync'); ?></option>
                         <option value="active"><?php _e('All active products', 'lavka-total-sync'); ?></option>
+                    </select>
+                </label>
+                <label for="lts_media_report_visibility">
+                    <span><?php _e('Catalog visibility', 'lavka-total-sync'); ?></span>
+                    <select id="lts_media_report_visibility">
+                        <option value="exclude_hidden"><?php _e('Exclude hidden products', 'lavka-total-sync'); ?></option>
+                        <option value="all"><?php _e('Include hidden products', 'lavka-total-sync'); ?></option>
+                        <option value="hidden_only"><?php _e('Hidden products only', 'lavka-total-sync'); ?></option>
                     </select>
                 </label>
                 <label for="lts_media_report_per_page">
@@ -1220,6 +1264,7 @@ CR-CE0900056100"></textarea>
                     nonce: nonce,
                     report_type: $('#lts_media_report_type').val(),
                     scope: $('#lts_media_report_scope').val(),
+                    visibility: $('#lts_media_report_visibility').val(),
                     per_page: $('#lts_media_report_per_page').val(),
                     page: page
                 }).done(function(res) {
