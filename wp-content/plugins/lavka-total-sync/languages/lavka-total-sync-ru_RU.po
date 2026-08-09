@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Lavka Total Sync 0.1.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lavka-total-sync\n"
-"POT-Creation-Date: 2026-08-09T08:37:00+00:00\n"
+"POT-Creation-Date: 2026-08-09T12:08:28+00:00\n"
 "PO-Revision-Date: 2025-10-27T20:35:13+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -150,8 +150,8 @@ msgstr "Пакет Woo"
 msgid "Cursor"
 msgstr "Курсор"
 
-#: inc/admin-logs.php:58 inc/admin-media.php:924 inc/admin-media.php:971
-#: inc/admin-media.php:1245 inc/admin-ui.php:1214 inc/admin-ui.php:1250
+#: inc/admin-logs.php:58 inc/admin-media.php:1228 inc/admin-media.php:1275
+#: inc/admin-media.php:1642 inc/admin-ui.php:1214 inc/admin-ui.php:1250
 #: inc/admin-ui.php:1284
 msgid "Dry run"
 msgstr "Тестовый запуск"
@@ -184,8 +184,8 @@ msgstr "Любой"
 msgid "Action"
 msgstr "Действие"
 
-#: inc/admin-logs.php:121 inc/admin-logs.php:157 inc/admin-media.php:772
-#: inc/admin-media.php:1039
+#: inc/admin-logs.php:121 inc/admin-logs.php:157 inc/admin-media.php:1076
+#: inc/admin-media.php:1343
 msgid "SKU"
 msgstr "Артикул"
 
@@ -201,7 +201,7 @@ msgstr "Фильтр"
 msgid "Export CSV"
 msgstr "Экспорт CSV"
 
-#: inc/admin-logs.php:154
+#: inc/admin-logs.php:154 inc/admin-media.php:1407
 msgid "Time"
 msgstr "Время"
 
@@ -230,7 +230,7 @@ msgstr "Логов нет"
 msgid "Not scheduled"
 msgstr ""
 
-#: inc/admin-media.php:355 inc/admin-media.php:356 inc/admin-media.php:874
+#: inc/admin-media.php:355 inc/admin-media.php:356 inc/admin-media.php:1178
 msgid "Media Sync (images)"
 msgstr ""
 
@@ -254,174 +254,234 @@ msgstr "Основное вложение больше не существует
 msgid "Featured image is not assigned"
 msgstr "Основное изображение не назначено"
 
-#: inc/admin-media.php:719
+#: inc/admin-media.php:762
+msgid "The filename has no extension. Check the image name stored in Folio."
+msgstr ""
+
+#: inc/admin-media.php:764
+msgid ""
+"The .ipg extension looks like a .jpg typo. Correct the image name in Folio "
+"or in storage."
+msgstr ""
+
+#: inc/admin-media.php:766
+msgid ""
+"There is a space before the file extension. The name must match OVH/S3 "
+"exactly."
+msgstr ""
+
+#: inc/admin-media.php:771
+msgid "File is missing from the OVH/S3 media index"
+msgstr ""
+
+#: inc/admin-media.php:772
+msgid ""
+"Folio references this image, but Java could not find the exact filename in "
+"the current OVH/S3 media index."
+msgstr ""
+
+#: inc/admin-media.php:773
+msgid ""
+"Upload the file with exactly this name or correct the name in Folio, update "
+"the OVH media index, and rerun media synchronization."
+msgstr ""
+
+#: inc/admin-media.php:780
+msgid "Java media synchronization error"
+msgstr ""
+
+#: inc/admin-media.php:782
+msgid ""
+"Check the technical message and rerun media synchronization after correcting "
+"its cause."
+msgstr ""
+
+#: inc/admin-media.php:897
+msgid "The mismatch log exists but the web server cannot read it."
+msgstr ""
+
+#: inc/admin-media.php:898
+msgid "The mismatch log was not found at the configured path."
+msgstr ""
+
+#: inc/admin-media.php:970
+#, fuzzy
+msgid "Featured image"
+msgstr "Нет основного изображения"
+
+#: inc/admin-media.php:971
+#, fuzzy
+msgid "Gallery image"
+msgstr "Галерея"
+
+#: inc/admin-media.php:1023
 msgid "You do not have permission to export this report."
 msgstr "У вас нет разрешения экспортировать этот отчёт."
 
-#: inc/admin-media.php:733
+#: inc/admin-media.php:1037
 msgid "PhpSpreadsheet is unavailable."
 msgstr "PhpSpreadsheet недоступен."
 
-#: inc/admin-media.php:740 inc/admin-media.php:993
+#: inc/admin-media.php:1044 inc/admin-media.php:1297
 msgid "No images at all"
 msgstr "Нет ни одного изображения"
 
-#: inc/admin-media.php:741 inc/admin-media.php:994
+#: inc/admin-media.php:1045 inc/admin-media.php:1298
 msgid "No featured image"
 msgstr "Нет основного изображения"
 
-#: inc/admin-media.php:744 inc/admin-media.php:1000
+#: inc/admin-media.php:1048 inc/admin-media.php:1304
 msgid "Published products only"
 msgstr "Только опубликованные товары"
 
-#: inc/admin-media.php:745 inc/admin-media.php:1001
+#: inc/admin-media.php:1049 inc/admin-media.php:1305
 msgid "All active products"
 msgstr "Все активные товары"
 
-#: inc/admin-media.php:748 inc/admin-media.php:1007
+#: inc/admin-media.php:1052 inc/admin-media.php:1311
 msgid "Exclude hidden products"
 msgstr "Не показывать скрытые товары"
 
-#: inc/admin-media.php:749 inc/admin-media.php:1008
+#: inc/admin-media.php:1053 inc/admin-media.php:1312
 msgid "Include hidden products"
 msgstr "Показывать скрытые вместе с остальными"
 
-#: inc/admin-media.php:750 inc/admin-media.php:1009
+#: inc/admin-media.php:1054 inc/admin-media.php:1313
 msgid "Hidden products only"
 msgstr "Только скрытые товары"
 
-#: inc/admin-media.php:757 inc/admin-media.php:985
+#: inc/admin-media.php:1061 inc/admin-media.php:1289
 msgid "Products without images"
 msgstr "Товары без изображений"
 
-#: inc/admin-media.php:760 inc/admin-media.php:991
+#: inc/admin-media.php:1064 inc/admin-media.php:1295
 msgid "Report type"
 msgstr "Тип отчёта"
 
-#: inc/admin-media.php:762 inc/admin-media.php:998
+#: inc/admin-media.php:1066 inc/admin-media.php:1302
 msgid "Product scope"
 msgstr "Какие товары проверять"
 
-#: inc/admin-media.php:764 inc/admin-media.php:775 inc/admin-media.php:1005
+#: inc/admin-media.php:1068 inc/admin-media.php:1079 inc/admin-media.php:1309
 msgid "Catalog visibility"
 msgstr "Видимость в каталоге"
 
-#: inc/admin-media.php:766
+#: inc/admin-media.php:1070
 msgid "Generated at"
 msgstr "Сформировано"
 
-#: inc/admin-media.php:771 inc/admin-media.php:1038
+#: inc/admin-media.php:1075 inc/admin-media.php:1342
 msgid "ID"
 msgstr "ID"
 
-#: inc/admin-media.php:773 inc/admin-media.php:1040
+#: inc/admin-media.php:1077 inc/admin-media.php:1344 inc/admin-media.php:1409
 msgid "Product"
 msgstr "Товар"
 
-#: inc/admin-media.php:774 inc/admin-media.php:1041
+#: inc/admin-media.php:1078 inc/admin-media.php:1345
 msgid "Status"
 msgstr "Статус"
 
-#: inc/admin-media.php:776 inc/admin-media.php:1042
+#: inc/admin-media.php:1080 inc/admin-media.php:1346
 msgid "Gallery"
 msgstr "Галерея"
 
-#: inc/admin-media.php:777 inc/admin-media.php:1043
+#: inc/admin-media.php:1081 inc/admin-media.php:1347
 msgid "Reason"
 msgstr "Причина"
 
-#: inc/admin-media.php:778
+#: inc/admin-media.php:1082
 msgid "Edit URL"
 msgstr "URL редактирования"
 
-#: inc/admin-media.php:779
+#: inc/admin-media.php:1083
 msgid "Product URL"
 msgstr "URL товара"
 
-#: inc/admin-media.php:878
+#: inc/admin-media.php:1182
 msgid ""
 "Синхронизация изображений по диапазону SKU (курсор) или по списку SKU. "
 "Отправляет запросы в Java API /admin/media/sync/range и /admin/media/sync."
 msgstr ""
 
-#: inc/admin-media.php:888
+#: inc/admin-media.php:1192
 msgid "By range (cursor) → /admin/media/sync/range"
 msgstr ""
 
-#: inc/admin-media.php:891 inc/admin-media.php:1214
+#: inc/admin-media.php:1195 inc/admin-media.php:1611
 msgid "From SKU (inclusive)"
 msgstr ""
 
-#: inc/admin-media.php:895 inc/admin-media.php:1218
+#: inc/admin-media.php:1199 inc/admin-media.php:1615
 msgid "To SKU (inclusive)"
 msgstr ""
 
-#: inc/admin-media.php:899 inc/admin-media.php:1222
+#: inc/admin-media.php:1203 inc/admin-media.php:1619
 #, fuzzy
 msgid "Chunk size"
 msgstr "Размер пакета"
 
-#: inc/admin-media.php:903 inc/admin-media.php:949 inc/admin-media.php:1226
+#: inc/admin-media.php:1207 inc/admin-media.php:1253 inc/admin-media.php:1623
 msgid "Mode"
 msgstr ""
 
-#: inc/admin-media.php:906 inc/admin-media.php:952 inc/admin-media.php:1230
+#: inc/admin-media.php:1210 inc/admin-media.php:1256 inc/admin-media.php:1627
 msgid "both (featured + gallery)"
 msgstr ""
 
-#: inc/admin-media.php:907 inc/admin-media.php:953 inc/admin-media.php:1231
+#: inc/admin-media.php:1211 inc/admin-media.php:1257 inc/admin-media.php:1628
 msgid "featured only"
 msgstr ""
 
-#: inc/admin-media.php:908 inc/admin-media.php:954 inc/admin-media.php:1232
+#: inc/admin-media.php:1212 inc/admin-media.php:1258 inc/admin-media.php:1629
 msgid "gallery only"
 msgstr ""
 
-#: inc/admin-media.php:911
+#: inc/admin-media.php:1215
 msgid ""
 "featured → только обложка; gallery → только галерея; both/пусто → и то, и "
 "другое."
 msgstr ""
 
-#: inc/admin-media.php:916 inc/admin-media.php:963 inc/admin-media.php:1237
+#: inc/admin-media.php:1220 inc/admin-media.php:1267 inc/admin-media.php:1634
 msgid "Gallery start position"
 msgstr ""
 
-#: inc/admin-media.php:920 inc/admin-media.php:967 inc/admin-media.php:1241
+#: inc/admin-media.php:1224 inc/admin-media.php:1271 inc/admin-media.php:1638
 msgid "Limit per SKU (gallery)"
 msgstr ""
 
-#: inc/admin-media.php:925 inc/admin-media.php:972 inc/admin-media.php:1246
+#: inc/admin-media.php:1229 inc/admin-media.php:1276 inc/admin-media.php:1643
 msgid "Не писать в Woo, только расчёт/логика"
 msgstr ""
 
-#: inc/admin-media.php:929
+#: inc/admin-media.php:1233
 #, fuzzy
 msgid "Run range sync"
 msgstr "Запустить полную синхронизацию"
 
-#: inc/admin-media.php:938
+#: inc/admin-media.php:1242
 msgid "By list of SKUs → /admin/media/sync"
 msgstr ""
 
-#: inc/admin-media.php:941
+#: inc/admin-media.php:1245
 msgid "SKUs (one per line or ';')"
 msgstr ""
 
-#: inc/admin-media.php:959
+#: inc/admin-media.php:1263
 msgid "Touch on update"
 msgstr ""
 
-#: inc/admin-media.php:960
+#: inc/admin-media.php:1264
 msgid "Обновлять метки времени при изменении"
 msgstr ""
 
-#: inc/admin-media.php:976
+#: inc/admin-media.php:1280
 #, fuzzy
 msgid "Run list sync"
 msgstr "Запустить полную синхронизацию"
 
-#: inc/admin-media.php:987
+#: inc/admin-media.php:1291
 msgid ""
 "The report checks WooCommerce product image links. Attachment parent fields "
 "in the Media Library do not affect this report."
@@ -429,198 +489,301 @@ msgstr ""
 "Отчёт проверяет связи изображений товаров WooCommerce. Поля родительского "
 "объекта вложения в медиатеке не влияют на этот отчёт."
 
-#: inc/admin-media.php:1013
+#: inc/admin-media.php:1317 inc/admin-media.php:1387
 msgid "Rows per page"
 msgstr "Строк на странице"
 
-#: inc/admin-media.php:1022
+#: inc/admin-media.php:1326
 msgid "Build report"
 msgstr "Сформировать отчёт"
 
-#: inc/admin-media.php:1028
+#: inc/admin-media.php:1332
 msgid "Export XLSX"
 msgstr "Экспортировать XLSX"
 
-#: inc/admin-media.php:1044
+#: inc/admin-media.php:1348
 #, fuzzy
 msgid "Actions"
 msgstr "Действия"
 
-#: inc/admin-media.php:1099
+#: inc/admin-media.php:1369
+msgid "Recent failed media links from Java"
+msgstr ""
+
+#: inc/admin-media.php:1371
+msgid ""
+"This is a historical read-only view of sync-mismatch.log. An entry can "
+"remain after the image has been fixed; rerun media synchronization to get "
+"current results."
+msgstr ""
+
+#: inc/admin-media.php:1375
+msgid "Image type"
+msgstr ""
+
+#: inc/admin-media.php:1377
+msgid "All failures"
+msgstr ""
+
+#: inc/admin-media.php:1378
+#, fuzzy
+msgid "Featured images"
+msgstr "Нет основного изображения"
+
+#: inc/admin-media.php:1379
+#, fuzzy
+msgid "Gallery images"
+msgstr "Галерея"
+
+#: inc/admin-media.php:1383
+msgid "Search"
+msgstr ""
+
+#: inc/admin-media.php:1384
+msgid "SKU, product ID or filename"
+msgstr ""
+
+#: inc/admin-media.php:1396
+msgid "Read mismatch log"
+msgstr ""
+
+#: inc/admin-media.php:1408
+msgid "Type"
+msgstr ""
+
+#: inc/admin-media.php:1410
+msgid "Expected file"
+msgstr ""
+
+#: inc/admin-media.php:1411
+msgid "What went wrong"
+msgstr ""
+
+#: inc/admin-media.php:1412
+msgid "What to do"
+msgstr ""
+
+#: inc/admin-media.php:1496
 msgid "OVH media index"
 msgstr ""
 
-#: inc/admin-media.php:1102
+#: inc/admin-media.php:1499
 msgid ""
 "Refresh the S3 media index after uploading new images, or run it by a "
 "separate schedule."
 msgstr ""
 
-#: inc/admin-media.php:1105
+#: inc/admin-media.php:1502
 msgid "Update OVH media index now"
 msgstr ""
 
-#: inc/admin-media.php:1111
+#: inc/admin-media.php:1508
 msgid "Enable index cron"
 msgstr ""
 
-#: inc/admin-media.php:1112 inc/admin-media.php:1176
+#: inc/admin-media.php:1509 inc/admin-media.php:1573
 msgid "Run by schedule"
 msgstr ""
 
-#: inc/admin-media.php:1115 inc/admin-media.php:1179
+#: inc/admin-media.php:1512 inc/admin-media.php:1576
 msgid "Frequency"
 msgstr ""
 
-#: inc/admin-media.php:1119 inc/admin-media.php:1183
+#: inc/admin-media.php:1516 inc/admin-media.php:1580
 msgid "Daily"
 msgstr ""
 
-#: inc/admin-media.php:1120 inc/admin-media.php:1184 inc/admin-ui.php:633
+#: inc/admin-media.php:1517 inc/admin-media.php:1581 inc/admin-ui.php:633
 msgid "Weekly"
 msgstr ""
 
-#: inc/admin-media.php:1121
+#: inc/admin-media.php:1518
 msgid "Monthly"
 msgstr ""
 
-#: inc/admin-media.php:1126 inc/admin-media.php:1189
+#: inc/admin-media.php:1523 inc/admin-media.php:1586
 msgid "Time (site local)"
 msgstr ""
 
-#: inc/admin-media.php:1131 inc/admin-media.php:1194
+#: inc/admin-media.php:1528 inc/admin-media.php:1591
 msgid "Uses the site timezone from Settings → General."
 msgstr ""
 
-#: inc/admin-media.php:1135 inc/admin-media.php:1198
+#: inc/admin-media.php:1532 inc/admin-media.php:1595
 msgid "Day of week"
 msgstr ""
 
-#: inc/admin-media.php:1139 inc/admin-media.php:1202 inc/admin-ui.php:1046
+#: inc/admin-media.php:1536 inc/admin-media.php:1599 inc/admin-ui.php:1046
 msgid "Monday"
 msgstr ""
 
-#: inc/admin-media.php:1140 inc/admin-media.php:1203 inc/admin-ui.php:1047
+#: inc/admin-media.php:1537 inc/admin-media.php:1600 inc/admin-ui.php:1047
 msgid "Tuesday"
 msgstr ""
 
-#: inc/admin-media.php:1141 inc/admin-media.php:1204 inc/admin-ui.php:1048
+#: inc/admin-media.php:1538 inc/admin-media.php:1601 inc/admin-ui.php:1048
 msgid "Wednesday"
 msgstr ""
 
-#: inc/admin-media.php:1142 inc/admin-media.php:1205 inc/admin-ui.php:1049
+#: inc/admin-media.php:1539 inc/admin-media.php:1602 inc/admin-ui.php:1049
 msgid "Thursday"
 msgstr ""
 
-#: inc/admin-media.php:1143 inc/admin-media.php:1206 inc/admin-ui.php:1050
+#: inc/admin-media.php:1540 inc/admin-media.php:1603 inc/admin-ui.php:1050
 msgid "Friday"
 msgstr ""
 
-#: inc/admin-media.php:1144 inc/admin-media.php:1207 inc/admin-ui.php:1051
+#: inc/admin-media.php:1541 inc/admin-media.php:1604 inc/admin-ui.php:1051
 msgid "Saturday"
 msgstr ""
 
-#: inc/admin-media.php:1145 inc/admin-media.php:1208 inc/admin-ui.php:1052
+#: inc/admin-media.php:1542 inc/admin-media.php:1605 inc/admin-ui.php:1052
 msgid "Sunday"
 msgstr ""
 
-#: inc/admin-media.php:1150
+#: inc/admin-media.php:1547
 msgid "Day of month"
 msgstr ""
 
-#: inc/admin-media.php:1153
+#: inc/admin-media.php:1550
 msgid "Use days 1–28 so every month is valid."
 msgstr ""
 
-#: inc/admin-media.php:1158
+#: inc/admin-media.php:1555
 msgid "Save index schedule"
 msgstr ""
 
-#: inc/admin-media.php:1159 inc/admin-media.php:1252
+#: inc/admin-media.php:1556 inc/admin-media.php:1649
 msgid "Refresh status"
 msgstr ""
 
-#: inc/admin-media.php:1163
+#: inc/admin-media.php:1560
 msgid "Next index run"
 msgstr ""
 
-#: inc/admin-media.php:1168 inc/admin-media.php:1261
+#: inc/admin-media.php:1565 inc/admin-media.php:1658
 msgid "Your local (browser) time"
 msgstr ""
 
-#: inc/admin-media.php:1172
+#: inc/admin-media.php:1569
 msgid "Media Sync Cron (range only)"
 msgstr ""
 
-#: inc/admin-media.php:1175 inc/admin-ui.php:1017
+#: inc/admin-media.php:1572 inc/admin-ui.php:1017
 msgid "Enable cron"
 msgstr ""
 
-#: inc/admin-media.php:1212
+#: inc/admin-media.php:1609
 msgid "Range payload"
 msgstr ""
 
-#: inc/admin-media.php:1250
+#: inc/admin-media.php:1647
 msgid "Save & schedule"
 msgstr ""
 
-#: inc/admin-media.php:1251 inc/admin-ui.php:1087
+#: inc/admin-media.php:1648 inc/admin-ui.php:1087
 msgid "Run cron task now"
 msgstr ""
 
-#: inc/admin-media.php:1256 inc/admin-ui.php:1069
+#: inc/admin-media.php:1653 inc/admin-ui.php:1069
 #, fuzzy
 msgid "Next run"
 msgstr "Следующий курсор"
 
-#: inc/admin-media.php:1314 inc/admin-media.php:1348 inc/admin-ui.php:71
+#: inc/admin-media.php:1711 inc/admin-media.php:1745 inc/admin-ui.php:71
 msgid "Saving…"
 msgstr "Сохранение…"
 
-#: inc/admin-media.php:1317 inc/admin-media.php:1351 inc/admin-ui.php:72
+#: inc/admin-media.php:1714 inc/admin-media.php:1748 inc/admin-ui.php:72
 #: inc/admin-ui.php:853
 msgid "Saved"
 msgstr "Сохранено"
 
-#: inc/admin-media.php:1327 inc/admin-media.php:1330 inc/admin-media.php:1361
-#: inc/admin-media.php:1364 inc/admin-media.php:1381 inc/admin-media.php:1469
-#: inc/admin-media.php:1475 inc/admin-media.php:1502 inc/admin-media.php:1510
-#: inc/admin-media.php:1533 inc/admin-media.php:1541 inc/admin-media.php:1563
-#: inc/admin-media.php:1571 inc/admin-ui.php:1107 inc/admin-ui.php:1110
-#: inc/admin-ui.php:1136 inc/admin-ui.php:1183 inc/admin-ui.php:1468
-#: inc/admin-ui.php:1471 inc/admin-ui.php:1505 inc/admin-ui.php:1518
-#: inc/admin-ui.php:1541 inc/admin-ui.php:1554
+#: inc/admin-media.php:1724 inc/admin-media.php:1727 inc/admin-media.php:1758
+#: inc/admin-media.php:1761 inc/admin-media.php:1778 inc/admin-media.php:1868
+#: inc/admin-media.php:1874 inc/admin-media.php:1993 inc/admin-media.php:1998
+#: inc/admin-media.php:2028 inc/admin-media.php:2036 inc/admin-media.php:2059
+#: inc/admin-media.php:2067 inc/admin-media.php:2089 inc/admin-media.php:2097
+#: inc/admin-ui.php:1107 inc/admin-ui.php:1110 inc/admin-ui.php:1136
+#: inc/admin-ui.php:1183 inc/admin-ui.php:1468 inc/admin-ui.php:1471
+#: inc/admin-ui.php:1505 inc/admin-ui.php:1518 inc/admin-ui.php:1541
+#: inc/admin-ui.php:1554
 msgid "Error"
 msgstr "Ошибка"
 
-#: inc/admin-media.php:1376 inc/admin-media.php:1458 inc/admin-media.php:1494
-#: inc/admin-media.php:1517 inc/admin-media.php:1548 inc/admin-ui.php:1099
-#: inc/admin-ui.php:1129 inc/admin-ui.php:1460 inc/admin-ui.php:1488
-#: inc/admin-ui.php:1524
+#: inc/admin-media.php:1773 inc/admin-media.php:1857 inc/admin-media.php:1983
+#: inc/admin-media.php:2020 inc/admin-media.php:2043 inc/admin-media.php:2074
+#: inc/admin-ui.php:1099 inc/admin-ui.php:1129 inc/admin-ui.php:1460
+#: inc/admin-ui.php:1488 inc/admin-ui.php:1524
 msgid "Working…"
 msgstr "Работаю…"
 
-#: inc/admin-media.php:1378
+#: inc/admin-media.php:1775
 msgid "Scheduled"
 msgstr ""
 
-#: inc/admin-media.php:1416
+#: inc/admin-media.php:1815
 msgid "No products found"
 msgstr "Товары не найдены"
 
-#: inc/admin-media.php:1447
+#: inc/admin-media.php:1846 inc/admin-media.php:1909
 msgid "Found:"
 msgstr "Найдено:"
 
-#: inc/admin-media.php:1450
+#: inc/admin-media.php:1849 inc/admin-media.php:1975
 msgid "Page"
 msgstr "Страница"
 
-#: inc/admin-media.php:1473 inc/admin-media.php:1506 inc/admin-media.php:1537
-#: inc/admin-media.php:1567 inc/admin-ui.php:1105 inc/admin-ui.php:1134
-#: inc/admin-ui.php:1466 inc/admin-ui.php:1509 inc/admin-ui.php:1545
+#: inc/admin-media.php:1872 inc/admin-media.php:1979 inc/admin-media.php:2032
+#: inc/admin-media.php:2063 inc/admin-media.php:2093 inc/admin-ui.php:1105
+#: inc/admin-ui.php:1134 inc/admin-ui.php:1466 inc/admin-ui.php:1509
+#: inc/admin-ui.php:1545
 msgid "Done."
 msgstr "Готово."
+
+#: inc/admin-media.php:1898 inc/admin-media.php:1902
+#, fuzzy
+msgid "Mismatch log is unavailable."
+msgstr "PhpSpreadsheet недоступен."
+
+#: inc/admin-media.php:1904
+msgid "Unavailable"
+msgstr ""
+
+#: inc/admin-media.php:1910
+#, fuzzy
+msgid "Updated:"
+msgstr "Обновлено"
+
+#: inc/admin-media.php:1911
+msgid "File:"
+msgstr ""
+
+#: inc/admin-media.php:1915
+msgid "Only the newest part of the large log was read."
+msgstr ""
+
+#: inc/admin-media.php:1921
+msgid "No failed media links found"
+msgstr ""
+
+#: inc/admin-media.php:1938
+msgid "Technical message"
+msgstr ""
+
+#: inc/admin-media.php:1950
+msgid "Possible matching files in the current OVH/S3 index:"
+msgstr "Возможные соответствующие файлы в актуальном индексе OVH/S3:"
+
+#: inc/admin-media.php:1956
+msgid ""
+"The filename in Folio may be non-canonical. If one of these files is "
+"correct, set its exact filename in Folio and rerun media synchronization; do "
+"not upload another duplicate."
+msgstr ""
+"Имя файла в ФОЛИО может быть неканоническим. Если один из этих файлов "
+"правильный, укажите в ФОЛИО его точное имя и повторите синхронизацию "
+"медиа; не загружайте ещё один дубликат."
 
 #: inc/admin-ui.php:20
 msgid "Total Sync"

@@ -784,6 +784,108 @@ function lts_media_mismatch_explanation(string $message, string $file): array {
     ];
 }
 
+/** Resolve the media index table used by Java. */
+function lts_media_mismatch_s3_index_table(): string {
+    static $resolved = null;
+    if ($resolved !== null) {
+        return $resolved;
+    }
+
+    global $wpdb;
+    foreach (array_unique([$wpdb->prefix . 's3_media_index', 's3_media_index']) as $candidate) {
+        $found = $wpdb->get_var($wpdb->prepare(
+            'SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s',
+            $candidate
+        ));
+        if ((string)$found === $candidate) {
+            $resolved = $candidate;
+            return $resolved;
+        }
+    }
+
+    $resolved = '';
+    return $resolved;
+}
+
+/** Build deterministic filename variants that WordPress commonly creates. */
+function lts_media_mismatch_filename_candidates(string $file): array {
+    $basename = wp_basename(str_replace('\\', '/', trim($file)));
+    if ($basename === '') {
+        return [];
+    }
+
+    $lower = function_exists('mb_strtolower')
+        ? mb_strtolower($basename, 'UTF-8')
+        : strtolower($basename);
+    $normalized = sanitize_file_name($lower);
+    $space_normalized = preg_replace('/\s+/u', '-', $lower) ?: $lower;
+    $space_normalized = preg_replace('/-+/', '-', $space_normalized) ?: $space_normalized;
+    $base_names = array_values(array_unique(array_filter([$lower, $normalized, $space_normalized])));
+    $candidates = $base_names;
+
+    foreach ($base_names as $base_name) {
+        $extension = (string)pathinfo($base_name, PATHINFO_EXTENSION);
+        $stem = (string)pathinfo($base_name, PATHINFO_FILENAME);
+        if ($stem === '' || $extension === '') {
+            continue;
+        }
+        for ($suffix = 1; $suffix <= 20; $suffix++) {
+            $candidates[] = $stem . '-' . $suffix . '.' . $extension;
+        }
+    }
+
+    return array_values(array_unique($candidates));
+}
+
+/** Find current exact/normalized candidates in the OVH/S3 media index in one query. */
+function lts_media_mismatch_s3_suggestions(array $rows): array {
+    global $wpdb;
+
+    $table = lts_media_mismatch_s3_index_table();
+    if ($table === '' || !$rows) {
+        return [];
+    }
+
+    $candidate_rows = [];
+    foreach ($rows as $index => $row) {
+        foreach (lts_media_mismatch_filename_candidates((string)($row['file'] ?? '')) as $candidate) {
+            $candidate_rows[$candidate][] = (int)$index;
+        }
+    }
+    if (!$candidate_rows) {
+        return [];
+    }
+
+    $filenames = array_keys($candidate_rows);
+    $placeholders = implode(', ', array_fill(0, count($filenames), '%s'));
+    $sql = "
+        SELECT filename_lower, full_key
+        FROM `{$table}`
+        WHERE filename_lower IN ({$placeholders})
+        ORDER BY filename_lower, last_modified DESC, size_bytes DESC
+    ";
+    $matches = $wpdb->get_results($wpdb->prepare($sql, ...$filenames), ARRAY_A);
+    if (!is_array($matches)) {
+        return [];
+    }
+
+    $suggestions = [];
+    foreach ($matches as $match) {
+        $filename = strtolower((string)($match['filename_lower'] ?? ''));
+        foreach ($candidate_rows[$filename] ?? [] as $index) {
+            $suggestions[$index][$filename] = [
+                'filename' => (string)($match['filename_lower'] ?? ''),
+                'full_key' => (string)($match['full_key'] ?? ''),
+            ];
+        }
+    }
+
+    foreach ($suggestions as $index => $items) {
+        $suggestions[$index] = array_values($items);
+    }
+    return $suggestions;
+}
+
 /** Parse recent standalone mismatch events; Java summary blocks are intentionally ignored. */
 function lts_media_mismatch_report_data(array $args): array {
     $path = lts_media_mismatch_log_path();
@@ -860,8 +962,9 @@ function lts_media_mismatch_report_data(array $args): array {
     $page = min($args['page'], $pages);
     $offset = ($page - 1) * $args['per_page'];
     $rows = array_slice($events, $offset, $args['per_page']);
+    $s3_suggestions = lts_media_mismatch_s3_suggestions($rows);
 
-    foreach ($rows as &$row) {
+    foreach ($rows as $row_index => &$row) {
         $explanation = lts_media_mismatch_explanation($row['message'], $row['file']);
         $row['type_label'] = $row['type'] === 'featured'
             ? __('Featured image', 'lavka-total-sync')
@@ -872,6 +975,7 @@ function lts_media_mismatch_report_data(array $args): array {
         $row['explanation'] = $explanation['explanation'];
         $row['recommended_action'] = $explanation['action'];
         $row['hint'] = $explanation['hint'];
+        $row['suggested_files'] = $s3_suggestions[$row_index] ?? [];
     }
     unset($row);
 
@@ -1374,6 +1478,18 @@ CR-CE0900056100"></textarea>
                 color: #8a4b08;
                 font-weight: 600;
             }
+            #lts_media_mismatch_table .lts-mismatch-suggestions {
+                display: grid;
+                gap: 5px;
+                margin-top: 8px;
+                padding: 8px 10px;
+                border-left: 3px solid #dba617;
+                background: #fff8e5;
+            }
+            #lts_media_mismatch_table .lts-mismatch-suggestions code {
+                display: block;
+                overflow-wrap: anywhere;
+            }
         </style>
 
         <hr style="margin:1.25rem 0;">
@@ -1827,6 +1943,19 @@ CR-CE0900056100"></textarea>
                         $('<span>').text(row.recommended_action).appendTo($action);
                         if (row.hint) {
                             $('<span>', {class: 'lts-mismatch-hint'}).text(row.hint).appendTo($action);
+                        }
+                        if (Array.isArray(row.suggested_files) && row.suggested_files.length) {
+                            const $suggestions = $('<div>', {class: 'lts-mismatch-suggestions'});
+                            $('<strong>').text(
+                                '<?php echo esc_js(__('Possible matching files in the current OVH/S3 index:', 'lavka-total-sync')); ?>'
+                            ).appendTo($suggestions);
+                            row.suggested_files.forEach(function(item) {
+                                $('<code>', {title: item.full_key || ''}).text(item.filename).appendTo($suggestions);
+                            });
+                            $('<span>').text(
+                                '<?php echo esc_js(__("The filename in Folio may be non-canonical. If one of these files is correct, set its exact filename in Folio and rerun media synchronization; do not upload another duplicate.", 'lavka-total-sync')); ?>'
+                            ).appendTo($suggestions);
+                            $suggestions.appendTo($action);
                         }
 
                         $('<tr>')
