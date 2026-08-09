@@ -58,6 +58,21 @@ Do not identify a gallery row only by filename. The search response must return 
 
 Also confirm the real length and nullability of `ALL_ARTC.S50` before enabling writes.
 
+### 3.1 Confirmed schema findings (2026-08-09)
+
+The production Folio schema was inspected before enabling writes:
+
+- `dbo.img_prod.id` is an `int IDENTITY`, non-null primary key;
+- `dbo.img_prod.PLUS_ARTIC` is nullable `bigint`;
+- `dbo.img_prod.image` is nullable `varchar(100)`;
+- `dbo.img_prod.sort_order` is nullable `int`;
+- `img_prod` has no additional unique constraints and has real duplicate combinations of `PLUS_ARTIC + image + sort_order`;
+- there are no additional required `img_prod` columns without defaults;
+- `dbo.ALL_ARTC.S50` is nullable `varchar(50)`;
+- `dbo.ALL_ARTC.COD_ARTIC` is the primary key and `PLUS_ARTIC` currently resolves to one SKU.
+
+Therefore gallery responses use `img_prod.id` as `recordId`. Updates use that ID plus optimistic checks for the old filename and sort order. Inserts explicitly provide only `PLUS_ARTIC`, `image` and `sort_order`; SQL Server generates `id`.
+
 ## 4. Search endpoint
 
 ```http
