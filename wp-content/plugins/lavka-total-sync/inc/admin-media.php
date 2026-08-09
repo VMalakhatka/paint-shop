@@ -1392,7 +1392,7 @@ CR-CE0900056100"></textarea>
         (function($){
             const ajaxUrl = '<?php echo esc_js(admin_url('admin-ajax.php')); ?>';
             const nonce   = '<?php echo esc_js( wp_create_nonce('lts_admin_nonce') ); ?>';
-            const mediaReportExportBaseUrl = '<?php echo esc_js($media_report_export_url); ?>';
+            const mediaReportExportBaseUrl = <?php echo wp_json_encode($media_report_export_url); ?>;
 
             function print(obj){ try{return JSON.stringify(obj,null,2);}catch(e){return String(obj);} }
 
