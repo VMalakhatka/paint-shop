@@ -353,3 +353,23 @@ The first release should keep apply manual. Automatic apply after package upload
 8. Adding a gallery image assigns the requested position or `max + 1` exactly once.
 9. Gallery update cannot affect more than one row.
 10. Dry preview produces no MSSQL, MariaDB, WooCommerce or S3 changes.
+
+## 11. WordPress frontend integration rules
+
+The WordPress admin must call Java through a server-side authenticated proxy. The browser must never receive the Java API token and must not construct a trusted `s3Proof` itself.
+
+For the mismatch repair report, WordPress follows these rules:
+
+1. One report row and one selected S3 object produce one Java change. Repairs are not combined across SKU values.
+2. WordPress re-reads the exact `filename_lower + full_key` row from `s3_media_index` and builds `s3Proof` from its current `full_key`, `size_bytes` and `etag`.
+3. WordPress searches the current Folio row before preview. `match=normalized` is used only to locate the historical reference; the target `filename` is the exact basename from `s3_media_index`.
+4. A main-image repair uses `set_main` and the current search result as `expectedOldFilename`.
+5. A gallery repair uses `update_gallery`, `recordId.key`, `expectedOldFilename`, `expectedOldSortOrder` and the unchanged current `sortOrder` from the search result.
+6. Zero or multiple matching Folio rows block the repair. WordPress never guesses a gallery row.
+7. Preview and apply are separate admin actions. Apply is offered only after a one-change preview returns top-level `ok=true` and item status `ready`.
+8. WordPress stores the exact apply payload server-side for 30 minutes and gives the browser only an opaque token. Apply reads that stored payload, so browser data cannot change after preview.
+9. The same stored `externalRequestId` and request content are reused when an apply is retried.
+10. Apply runs under the Lavka ecosystem global lock and writes a compact `folio_media_repair` entry to the Total Sync log.
+11. HTTP 200 is not treated as success by itself. WordPress checks top-level `ok` and the item status. `blocked` is shown as a refusal, `noop` as already correct, and only `applied` or `noop` complete an apply successfully.
+
+The package uploader will use the same proxy and preview/apply helpers later. Automatic apply after upload remains disabled in the first release.

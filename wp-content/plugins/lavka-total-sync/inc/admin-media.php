@@ -360,15 +360,9 @@ add_action('admin_menu', function () {
     );
 });
 
-/**
- * Вспомогательный вызов Java media endpoint.
- *
- * @param string $path  относительный путь (напр. '/admin/media/sync' или '/admin/media/sync/range')
- * @param array  $payload тело запроса (ассоц. массив)
- * @return array         ['ok'=>true,'json'=>..] | ['ok'=>false,'error'=>..] | ['ok'=>false,'http'=>code,'raw'=>..]
- */
-if (!function_exists('lts_call_java_media')) {
-    function lts_call_java_media(string $path, array $payload): array {
+/** Send an authenticated JSON request to the configured Java API. */
+if (!function_exists('lts_call_java_media_request')) {
+    function lts_call_java_media_request(string $method, string $path, array $data = []): array {
         if (!function_exists('lts_get_options')) {
             return ['ok'=>false,'error'=>'missing_options'];
         }
@@ -380,36 +374,49 @@ if (!function_exists('lts_call_java_media')) {
         $path = '/' . ltrim($path, '/');
         $url  = $base . $path;
 
+        $method = strtoupper($method);
         $headers = [
-            'Accept'       => 'application/json',
-            'Content-Type' => 'application/json; charset=utf-8',
-            'User-Agent'   => defined('LTS_USER_AGENT') ? LTS_USER_AGENT : 'Lavka-Total-Sync',
+            'Accept'     => 'application/json',
+            'User-Agent' => defined('LTS_USER_AGENT') ? LTS_USER_AGENT : 'Lavka-Total-Sync',
         ];
         if (!empty($opts['api_token'])) {
             $headers['Authorization'] = 'Bearer ' . $opts['api_token'];
         }
 
-        $resp = wp_remote_post($url, [
+        $request_args = [
+            'method'  => $method,
             'timeout' => max(60, (int)($opts['timeout'] ?? 160)),
             'headers' => $headers,
-            'body'    => wp_json_encode($payload),
-        ]);
+        ];
+        if ($method === 'GET') {
+            $url = add_query_arg($data, $url);
+        } else {
+            $request_args['headers']['Content-Type'] = 'application/json; charset=utf-8';
+            $request_args['body'] = wp_json_encode($data, JSON_UNESCAPED_UNICODE);
+        }
+
+        $resp = wp_remote_request($url, $request_args);
 
         if (is_wp_error($resp)) {
             return ['ok'=>false,'error'=>$resp->get_error_message()];
         }
         $code = wp_remote_retrieve_response_code($resp);
-        $ct   = (string)wp_remote_retrieve_header($resp, 'content-type');
         $body = (string)wp_remote_retrieve_body($resp);
 
         if ($code < 200 || $code >= 300) {
             return ['ok'=>false,'http'=>$code,'raw'=>mb_substr($body, 0, 4000)];
         }
-        if (stripos($ct, 'json') !== false) {
-            $json = json_decode($body, true);
-            return ['ok'=>true,'json'=>$json];
+        $json = json_decode($body, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($json)) {
+            return ['ok'=>true,'http'=>$code,'json'=>$json];
         }
-        return ['ok'=>true,'raw'=>mb_substr($body, 0, 4000)];
+        return ['ok'=>false,'http'=>$code,'error'=>'invalid_json','raw'=>mb_substr($body, 0, 4000)];
+    }
+}
+
+if (!function_exists('lts_call_java_media')) {
+    function lts_call_java_media(string $path, array $payload): array {
+        return lts_call_java_media_request('POST', $path, $payload);
     }
 }
 
@@ -859,7 +866,7 @@ function lts_media_mismatch_s3_suggestions(array $rows): array {
     $filenames = array_keys($candidate_rows);
     $placeholders = implode(', ', array_fill(0, count($filenames), '%s'));
     $sql = "
-        SELECT filename_lower, full_key
+        SELECT filename_lower, full_key, size_bytes, etag, last_modified
         FROM `{$table}`
         WHERE filename_lower IN ({$placeholders})
         ORDER BY filename_lower, last_modified DESC, size_bytes DESC
@@ -871,11 +878,17 @@ function lts_media_mismatch_s3_suggestions(array $rows): array {
 
     $suggestions = [];
     foreach ($matches as $match) {
-        $filename = strtolower((string)($match['filename_lower'] ?? ''));
+        $filename = function_exists('mb_strtolower')
+            ? mb_strtolower((string)($match['filename_lower'] ?? ''), 'UTF-8')
+            : strtolower((string)($match['filename_lower'] ?? ''));
         foreach ($candidate_rows[$filename] ?? [] as $index) {
-            $suggestions[$index][$filename] = [
-                'filename' => (string)($match['filename_lower'] ?? ''),
-                'full_key' => (string)($match['full_key'] ?? ''),
+            $full_key = (string)($match['full_key'] ?? '');
+            $suggestions[$index][$filename . '|' . $full_key] = [
+                'filename'      => (string)($match['filename_lower'] ?? ''),
+                'full_key'      => $full_key,
+                'size_bytes'    => isset($match['size_bytes']) ? (int)$match['size_bytes'] : null,
+                'etag'          => (string)($match['etag'] ?? ''),
+                'last_modified' => (string)($match['last_modified'] ?? ''),
             ];
         }
     }
@@ -885,6 +898,239 @@ function lts_media_mismatch_s3_suggestions(array $rows): array {
     }
     return $suggestions;
 }
+
+/** Return one exact S3 index row as trusted proof for a Folio media change. */
+function lts_media_folio_s3_proof(string $filename, string $full_key): ?array {
+    global $wpdb;
+
+    $table = lts_media_mismatch_s3_index_table();
+    if ($table === '' || $filename === '' || $full_key === '') {
+        return null;
+    }
+
+    $row = $wpdb->get_row($wpdb->prepare(
+        "SELECT filename_lower, full_key, size_bytes, etag
+         FROM `{$table}`
+         WHERE filename_lower = %s AND full_key = %s
+         LIMIT 1",
+        $filename,
+        $full_key
+    ), ARRAY_A);
+    if (!is_array($row) || empty($row['filename_lower']) || empty($row['full_key'])) {
+        return null;
+    }
+
+    return [
+        'filename'  => (string)$row['filename_lower'],
+        'fullKey'   => (string)$row['full_key'],
+        'sizeBytes' => (int)($row['size_bytes'] ?? 0),
+        'etag'      => (string)($row['etag'] ?? ''),
+    ];
+}
+
+/** Validate that a Folio write target is an exact basename, without normalizing it. */
+function lts_media_folio_is_basename(string $filename): bool {
+    if ($filename === '' || preg_match('~[\\\\/]~', $filename)) {
+        return false;
+    }
+    if (filter_var($filename, FILTER_VALIDATE_URL)) {
+        return false;
+    }
+    return wp_basename($filename) === $filename;
+}
+
+/** Extract one result status from a one-change Java response. */
+function lts_media_folio_change_status(array $response): string {
+    $results = isset($response['results']) && is_array($response['results'])
+        ? $response['results']
+        : [];
+    return isset($results[0]['status']) ? sanitize_key((string)$results[0]['status']) : '';
+}
+
+function lts_media_folio_preview_transient_key(string $token): string {
+    return 'lts_folio_media_' . md5($token);
+}
+
+/** Build a single safe repair operation from the mismatch report and current Java search data. */
+function lts_media_folio_build_repair(array $input): array {
+    $sku = trim(sanitize_text_field((string)($input['sku'] ?? '')));
+    $report_type = sanitize_key((string)($input['report_type'] ?? ''));
+    $expected_filename = trim(sanitize_text_field((string)($input['expected_filename'] ?? '')));
+    $candidate_filename = trim(sanitize_text_field((string)($input['candidate_filename'] ?? '')));
+    $candidate_full_key = trim(sanitize_text_field((string)($input['candidate_full_key'] ?? '')));
+
+    if ($sku === '' || $expected_filename === '' || !in_array($report_type, ['featured', 'gallery'], true)) {
+        return ['ok' => false, 'error' => 'invalid_repair_context'];
+    }
+    if (!lts_media_folio_is_basename($candidate_filename)) {
+        return ['ok' => false, 'error' => 'invalid_target_filename'];
+    }
+
+    $proof = lts_media_folio_s3_proof($candidate_filename, $candidate_full_key);
+    if (!$proof || $proof['etag'] === '') {
+        return ['ok' => false, 'error' => 's3_proof_unavailable'];
+    }
+
+    // Use the exact filename from MariaDB, never a browser-normalized value.
+    $candidate_filename = $proof['filename'];
+    $role = $report_type === 'featured' ? 'main' : 'gallery';
+    $search = lts_call_java_media_request('GET', '/admin/folio/product-media', [
+        'sku'      => $sku,
+        'filename' => $expected_filename,
+        'role'     => $role,
+        'match'    => 'normalized',
+        'limit'    => 50,
+        'offset'   => 0,
+    ]);
+    if (empty($search['ok']) || empty($search['json']) || empty($search['json']['ok'])) {
+        return ['ok' => false, 'error' => 'folio_search_failed', 'java' => $search];
+    }
+
+    $items = isset($search['json']['items']) && is_array($search['json']['items'])
+        ? array_values(array_filter($search['json']['items'], static function ($item) use ($sku, $role) {
+            return is_array($item)
+                && (string)($item['sku'] ?? '') === $sku
+                && (string)($item['role'] ?? '') === $role;
+        }))
+        : [];
+    if (count($items) !== 1) {
+        return [
+            'ok'    => false,
+            'error' => count($items) ? 'folio_record_ambiguous' : 'folio_record_not_found',
+            'search'=> $search['json'],
+        ];
+    }
+
+    $item = $items[0];
+    $operation = $role === 'main' ? 'set_main' : 'update_gallery';
+    $record_id = null;
+    if ($operation === 'update_gallery') {
+        $record_id = (string)($item['recordId']['key'] ?? '');
+        if ($record_id === '') {
+            return ['ok' => false, 'error' => 'folio_gallery_record_id_missing', 'search' => $search['json']];
+        }
+    }
+
+    $change = [
+        'operation'            => $operation,
+        'sku'                  => $sku,
+        'recordId'             => $record_id,
+        'expectedOldFilename'  => array_key_exists('filename', $item) ? $item['filename'] : null,
+        'expectedOldSortOrder' => array_key_exists('sortOrder', $item) ? $item['sortOrder'] : null,
+        'filename'             => $candidate_filename,
+        'sortOrder'            => $operation === 'update_gallery' ? ($item['sortOrder'] ?? null) : null,
+        's3Proof'              => [
+            'fullKey'   => $proof['fullKey'],
+            'sizeBytes' => $proof['sizeBytes'],
+            'etag'      => $proof['etag'],
+        ],
+    ];
+
+    return [
+        'ok'        => true,
+        'search'    => $search['json'],
+        'item'      => $item,
+        'change'    => $change,
+        's3_proof'  => $proof,
+    ];
+}
+
+/** AJAX: search current Folio row and send one read-only repair preview to Java. */
+add_action('wp_ajax_lts_folio_media_repair_preview', function () {
+    $cap = defined('LTS_CAP') ? LTS_CAP : 'manage_options';
+    if (!current_user_can($cap)) wp_send_json_error(['error' => 'forbidden'], 403);
+    check_ajax_referer('lts_admin_nonce', 'nonce');
+
+    $built = lts_media_folio_build_repair(wp_unslash($_POST));
+    if (empty($built['ok'])) {
+        wp_send_json_error($built, 422);
+    }
+
+    $token = wp_generate_uuid4();
+    $payload = [
+        'externalRequestId' => 'woo-media-repair:' . $token,
+        'previewOnly'       => true,
+        'source'            => 'woo_media_repair',
+        'changes'           => [$built['change']],
+    ];
+    $preview = lts_call_java_media('/admin/folio/product-media/changes', $payload);
+    if (empty($preview['ok']) || empty($preview['json'])) {
+        wp_send_json_error(['error' => 'folio_preview_failed', 'java' => $preview], 502);
+    }
+
+    $status = lts_media_folio_change_status($preview['json']);
+    $can_apply = !empty($preview['json']['ok']) && $status === 'ready';
+    if ($can_apply) {
+        $apply_payload = $payload;
+        $apply_payload['previewOnly'] = false;
+        set_transient(lts_media_folio_preview_transient_key($token), [
+            'user_id'    => get_current_user_id(),
+            'created_at' => time(),
+            'payload'    => $apply_payload,
+            'preview'    => $preview['json'],
+            'context'    => [
+                'sku'        => (string)$built['change']['sku'],
+                'product_id' => absint($_POST['product_id'] ?? 0),
+            ],
+        ], 30 * MINUTE_IN_SECONDS);
+    }
+
+    wp_send_json_success([
+        'token'     => $can_apply ? $token : '',
+        'can_apply' => $can_apply,
+        'status'    => $status,
+        'search'    => $built['search'],
+        'change'    => $built['change'],
+        'preview'   => $preview['json'],
+    ]);
+});
+
+/** AJAX: apply the exact server-side request that previously returned ready. */
+add_action('wp_ajax_lts_folio_media_repair_apply', function () {
+    $cap = defined('LTS_CAP') ? LTS_CAP : 'manage_options';
+    if (!current_user_can($cap)) wp_send_json_error(['error' => 'forbidden'], 403);
+    check_ajax_referer('lts_admin_nonce', 'nonce');
+
+    $token = sanitize_text_field((string)($_POST['token'] ?? ''));
+    $stored = $token !== '' ? get_transient(lts_media_folio_preview_transient_key($token)) : false;
+    if (!is_array($stored) || (int)($stored['user_id'] ?? 0) !== get_current_user_id()) {
+        wp_send_json_error(['error' => 'preview_expired'], 410);
+    }
+    if (empty($stored['payload']) || !is_array($stored['payload'])) {
+        wp_send_json_error(['error' => 'preview_payload_missing'], 422);
+    }
+
+    $result = lts_call_java_media_locked(
+        '/admin/folio/product-media/changes',
+        $stored['payload'],
+        'manual',
+        'folio_media_repair'
+    );
+    if (empty($result['ok']) || empty($result['json'])) {
+        wp_send_json_error(['error' => 'folio_apply_failed', 'java' => $result], 502);
+    }
+
+    $status = lts_media_folio_change_status($result['json']);
+    $applied = !empty($result['json']['ok']) && in_array($status, ['applied', 'noop'], true);
+    if (function_exists('lts_log_db')) {
+        lts_log_db($applied ? 'info' : 'error', 'folio_media_repair', [
+            'sku'     => (string)($stored['context']['sku'] ?? ''),
+            'post_id' => (int)($stored['context']['product_id'] ?? 0),
+            'result'  => $status ?: 'unknown',
+            'message' => $applied ? 'Folio product media reference updated.' : 'Folio product media update was blocked.',
+            'ctx'     => [
+                'external_request_id' => (string)($stored['payload']['externalRequestId'] ?? ''),
+                'java_ok'             => !empty($result['json']['ok']),
+            ],
+        ]);
+    }
+
+    wp_send_json_success([
+        'applied' => $applied,
+        'status'  => $status,
+        'result'  => $result['json'],
+    ]);
+});
 
 /** Parse recent standalone mismatch events; Java summary blocks are intentionally ignored. */
 function lts_media_mismatch_report_data(array $args): array {
@@ -1368,7 +1614,8 @@ CR-CE0900056100"></textarea>
         <section id="lts_media_mismatch_report">
             <h2><?php _e('Recent failed media links from Java', 'lavka-total-sync'); ?></h2>
             <p class="description">
-                <?php _e('This is a historical read-only view of sync-mismatch.log. An entry can remain after the image has been fixed; rerun media synchronization to get current results.', 'lavka-total-sync'); ?>
+                <?php _e('This is a historical view of sync-mismatch.log. An entry can remain after the image has been fixed; rerun media synchronization to get current results.', 'lavka-total-sync'); ?>
+                <?php _e('A suggested Folio correction is always previewed first and is written only after separate confirmation.', 'lavka-total-sync'); ?>
             </p>
             <div class="lts-media-report-controls">
                 <label for="lts_media_mismatch_type">
@@ -1493,6 +1740,32 @@ CR-CE0900056100"></textarea>
             #lts_media_mismatch_table .lts-mismatch-suggestion {
                 display: grid;
                 gap: 2px;
+            }
+            #lts_media_mismatch_table .lts-folio-repair-actions {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 8px;
+                margin-top: 4px;
+            }
+            #lts_media_mismatch_table .lts-folio-repair-result {
+                display: grid;
+                gap: 5px;
+                margin-top: 6px;
+                padding: 8px 10px;
+                border-left: 3px solid #2271b1;
+                background: #f0f6fc;
+            }
+            #lts_media_mismatch_table .lts-folio-repair-result.is-error {
+                border-left-color: #d63638;
+                background: #fcf0f1;
+            }
+            #lts_media_mismatch_table .lts-folio-repair-result.is-success {
+                border-left-color: #00a32a;
+                background: #edfaef;
+            }
+            #lts_media_mismatch_table .lts-folio-repair-messages {
+                margin: 0 0 0 18px;
             }
         </style>
 
@@ -1893,6 +2166,92 @@ CR-CE0900056100"></textarea>
             });
             updateMediaReportExportUrl();
 
+            function folioRepairStatusLabel(status) {
+                const labels = {
+                    ready: '<?php echo esc_js(__('Ready to apply', 'lavka-total-sync')); ?>',
+                    applied: '<?php echo esc_js(__('Applied', 'lavka-total-sync')); ?>',
+                    noop: '<?php echo esc_js(__('No change required', 'lavka-total-sync')); ?>',
+                    blocked: '<?php echo esc_js(__('Blocked', 'lavka-total-sync')); ?>'
+                };
+                return labels[status] || status || '<?php echo esc_js(__('Unknown', 'lavka-total-sync')); ?>';
+            }
+
+            function folioRepairErrorLabel(code) {
+                const labels = {
+                    invalid_repair_context: '<?php echo esc_js(__('The report row does not contain enough data for a Folio correction.', 'lavka-total-sync')); ?>',
+                    invalid_target_filename: '<?php echo esc_js(__('The target must be an exact filename without a path or URL.', 'lavka-total-sync')); ?>',
+                    s3_proof_unavailable: '<?php echo esc_js(__('The exact S3 object, size or ETag could not be confirmed in the current media index.', 'lavka-total-sync')); ?>',
+                    folio_search_failed: '<?php echo esc_js(__('Java could not search the current Folio media record.', 'lavka-total-sync')); ?>',
+                    folio_record_ambiguous: '<?php echo esc_js(__('Several Folio records match this image. Automatic selection is unsafe.', 'lavka-total-sync')); ?>',
+                    folio_record_not_found: '<?php echo esc_js(__('The current Folio media record was not found. The historical log may be outdated.', 'lavka-total-sync')); ?>',
+                    folio_gallery_record_id_missing: '<?php echo esc_js(__('The Folio gallery row has no stable record ID.', 'lavka-total-sync')); ?>',
+                    folio_preview_failed: '<?php echo esc_js(__('Java did not return a valid correction preview.', 'lavka-total-sync')); ?>',
+                    preview_expired: '<?php echo esc_js(__('The preview expired. Run the preview again before applying.', 'lavka-total-sync')); ?>',
+                    preview_payload_missing: '<?php echo esc_js(__('The preview expired. Run the preview again before applying.', 'lavka-total-sync')); ?>',
+                    folio_apply_failed: '<?php echo esc_js(__('Java did not return a valid apply response.', 'lavka-total-sync')); ?>'
+                };
+                return labels[code] || code || '<?php echo esc_js(__('Request failed.', 'lavka-total-sync')); ?>';
+            }
+
+            function appendFolioMessages($target, title, messages) {
+                if (!Array.isArray(messages) || !messages.length) return;
+                $('<strong>').text(title).appendTo($target);
+                const $list = $('<ul>', {class: 'lts-folio-repair-messages'}).appendTo($target);
+                messages.forEach(function(message) {
+                    const code = message && message.code ? message.code + ': ' : '';
+                    $('<li>').text(code + (message && message.message ? message.message : '')).appendTo($list);
+                });
+            }
+
+            function renderFolioRepairPreview($target, data) {
+                $target.empty().removeClass('is-error is-success');
+                const preview = data && data.preview ? data.preview : {};
+                const result = Array.isArray(preview.results) && preview.results.length ? preview.results[0] : {};
+                const before = result.before || {};
+                const after = result.after || {};
+                const status = data.status || result.status || '';
+
+                $target.addClass(data.can_apply || status === 'noop' ? 'is-success' : 'is-error');
+                $('<strong>').text('<?php echo esc_js(__('Folio correction preview', 'lavka-total-sync')); ?>').appendTo($target);
+                $('<span>').text(
+                    '<?php echo esc_js(__('Current filename:', 'lavka-total-sync')); ?>' + ' ' + (before.filename || '—')
+                ).appendTo($target);
+                $('<span>').text(
+                    '<?php echo esc_js(__('New filename:', 'lavka-total-sync')); ?>' + ' ' + (after.filename || '—')
+                ).appendTo($target);
+                $('<span>').text(
+                    '<?php echo esc_js(__('Java status:', 'lavka-total-sync')); ?>' + ' ' + folioRepairStatusLabel(status)
+                ).appendTo($target);
+                appendFolioMessages($target, '<?php echo esc_js(__('Warnings', 'lavka-total-sync')); ?>', result.warnings);
+                appendFolioMessages($target, '<?php echo esc_js(__('Errors', 'lavka-total-sync')); ?>', result.errors);
+                appendFolioMessages($target, '<?php echo esc_js(__('Warnings', 'lavka-total-sync')); ?>', preview.warnings);
+                appendFolioMessages($target, '<?php echo esc_js(__('Errors', 'lavka-total-sync')); ?>', preview.errors);
+
+                if (data.can_apply && data.token) {
+                    $('<button>', {
+                        type: 'button',
+                        class: 'button button-primary lts-folio-repair-apply',
+                        text: '<?php echo esc_js(__('Apply correction in Folio', 'lavka-total-sync')); ?>'
+                    }).data('token', data.token).appendTo($target);
+                }
+            }
+
+            function renderFolioRepairFailure($target, payload) {
+                const data = payload && payload.data ? payload.data : payload;
+                const code = data && data.error ? data.error : '';
+                $target.empty().removeClass('is-success').addClass('is-error');
+                $('<strong>').text('<?php echo esc_js(__('Folio correction was not prepared', 'lavka-total-sync')); ?>').appendTo($target);
+                $('<span>').text(folioRepairErrorLabel(code)).appendTo($target);
+                const java = data && data.java ? data.java : {};
+                const technical = java.message || java.error || java.raw || '';
+                if (technical) {
+                    $('<details>')
+                        .append($('<summary>').text('<?php echo esc_js(__('Technical message', 'lavka-total-sync')); ?>'))
+                        .append($('<pre>').text(technical))
+                        .appendTo($target);
+                }
+            }
+
             function renderMediaMismatchReport(data) {
                 const $result = $('#lts_media_mismatch_result').prop('hidden', false);
                 const $body = $('#lts_media_mismatch_table tbody').empty();
@@ -1961,6 +2320,38 @@ CR-CE0900056100"></textarea>
                                         '<?php echo esc_js(__('OVH/S3 index path:', 'lavka-total-sync')); ?>' + ' ' + item.full_key
                                     ).appendTo($candidate);
                                 }
+                                if (item.size_bytes !== null || item.etag) {
+                                    const proof = [];
+                                    if (item.size_bytes !== null) {
+                                        proof.push(item.size_bytes + ' <?php echo esc_js(__('bytes', 'lavka-total-sync')); ?>');
+                                    }
+                                    if (item.etag) proof.push('ETag ' + item.etag);
+                                    $('<span>', {class: 'description'}).text(
+                                        '<?php echo esc_js(__('S3 proof:', 'lavka-total-sync')); ?>' + ' ' + proof.join(' · ')
+                                    ).appendTo($candidate);
+                                }
+                                const $repairActions = $('<div>', {class: 'lts-folio-repair-actions'}).appendTo($candidate);
+                                const $repairResult = $('<div>', {
+                                    class: 'lts-folio-repair-result',
+                                    hidden: true,
+                                    'aria-live': 'polite'
+                                }).appendTo($candidate);
+                                const $previewButton = $('<button>', {
+                                    type: 'button',
+                                    class: 'button lts-folio-repair-preview',
+                                    text: '<?php echo esc_js(__('Preview Folio correction', 'lavka-total-sync')); ?>',
+                                    disabled: !item.full_key || !item.etag
+                                }).data('repair', {
+                                    sku: row.sku,
+                                    product_id: row.product_id,
+                                    report_type: row.type,
+                                    expected_filename: row.file,
+                                    candidate_filename: item.filename,
+                                    candidate_full_key: item.full_key
+                                }).appendTo($repairActions);
+                                if (!item.etag) {
+                                    $previewButton.attr('title', '<?php echo esc_js(__('This S3 index row has no ETag, so it cannot be used as write proof.', 'lavka-total-sync')); ?>');
+                                }
                                 $candidate.appendTo($suggestions);
                             });
                             $('<span>').text(
@@ -2025,6 +2416,69 @@ CR-CE0900056100"></textarea>
             });
             $('#lts_media_mismatch_next').on('click', function() {
                 if (mediaMismatchPage < mediaMismatchPages) loadMediaMismatchReport(mediaMismatchPage + 1);
+            });
+
+            $('#lts_media_mismatch_table').on('click', '.lts-folio-repair-preview', function() {
+                const $button = $(this);
+                const $candidate = $button.closest('.lts-mismatch-suggestion');
+                const $result = $candidate.find('.lts-folio-repair-result').first().prop('hidden', false);
+                const repair = $button.data('repair') || {};
+
+                $button.prop('disabled', true).text('<?php echo esc_js(__('Preparing preview…', 'lavka-total-sync')); ?>');
+                $result.empty().removeClass('is-error is-success');
+                $('<span>').text('<?php echo esc_js(__('Searching the current Folio record and validating S3 proof…', 'lavka-total-sync')); ?>').appendTo($result);
+
+                $.post(ajaxUrl, $.extend({
+                    action: 'lts_folio_media_repair_preview',
+                    nonce: nonce
+                }, repair)).done(function(response) {
+                    if (!response || !response.success) {
+                        renderFolioRepairFailure($result, response || {});
+                        return;
+                    }
+                    renderFolioRepairPreview($result, response.data);
+                }).fail(function(xhr) {
+                    renderFolioRepairFailure($result, xhr.responseJSON || {});
+                }).always(function() {
+                    $button.prop('disabled', false).text('<?php echo esc_js(__('Preview Folio correction', 'lavka-total-sync')); ?>');
+                });
+            });
+
+            $('#lts_media_mismatch_table').on('click', '.lts-folio-repair-apply', function() {
+                const $button = $(this);
+                const $result = $button.closest('.lts-folio-repair-result');
+                const token = $button.data('token') || '';
+
+                $button.prop('disabled', true).text('<?php echo esc_js(__('Applying…', 'lavka-total-sync')); ?>');
+                $.post(ajaxUrl, {
+                    action: 'lts_folio_media_repair_apply',
+                    nonce: nonce,
+                    token: token
+                }).done(function(response) {
+                    if (!response || !response.success) {
+                        renderFolioRepairFailure($result, response || {});
+                        return;
+                    }
+                    const data = response.data || {};
+                    const javaResponse = data.result || {};
+                    const javaResult = Array.isArray(javaResponse.results) && javaResponse.results.length
+                        ? javaResponse.results[0]
+                        : {};
+                    $result.empty().removeClass('is-error is-success').addClass(data.applied ? 'is-success' : 'is-error');
+                    $('<strong>').text(data.applied
+                        ? '<?php echo esc_js(__('Folio correction applied', 'lavka-total-sync')); ?>'
+                        : '<?php echo esc_js(__('Folio correction was blocked', 'lavka-total-sync')); ?>'
+                    ).appendTo($result);
+                    $('<span>').text(
+                        '<?php echo esc_js(__('Java status:', 'lavka-total-sync')); ?>' + ' ' + folioRepairStatusLabel(data.status || javaResult.status)
+                    ).appendTo($result);
+                    appendFolioMessages($result, '<?php echo esc_js(__('Warnings', 'lavka-total-sync')); ?>', javaResult.warnings);
+                    appendFolioMessages($result, '<?php echo esc_js(__('Errors', 'lavka-total-sync')); ?>', javaResult.errors);
+                    appendFolioMessages($result, '<?php echo esc_js(__('Warnings', 'lavka-total-sync')); ?>', javaResponse.warnings);
+                    appendFolioMessages($result, '<?php echo esc_js(__('Errors', 'lavka-total-sync')); ?>', javaResponse.errors);
+                }).fail(function(xhr) {
+                    renderFolioRepairFailure($result, xhr.responseJSON || {});
+                });
             });
 
             $('#lts_btn_media_reindex').on('click', async function(){
