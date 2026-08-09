@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Lavka Product Media Upload 0.1.4\n"
+"Project-Id-Version: Lavka Product Media Upload 0.1.5\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lavka-product-"
 "media-upload\n"
-"POT-Creation-Date: 2026-08-08T20:30:44+00:00\n"
+"POT-Creation-Date: 2026-08-09T09:45:46+00:00\n"
 "PO-Revision-Date: 2026-08-07 10:33+0200\n"
 "Last-Translator: Volodymyr\n"
 "Language-Team: Ukrainian\n"
@@ -148,53 +148,65 @@ msgstr "Не вдалося перевірити індекс медіа S3."
 msgid "The canonical filename already exists in the S3 media index."
 msgstr "Канонічне ім'я файлу вже існує в індексі медіа S3."
 
-#: inc/class-image-validator.php:300
+#. translators: %s: comma-separated filenames
+#: inc/class-image-validator.php:259
+#, php-format
+msgid ""
+"Automatically renamed legacy variants already exist: %s. The approved "
+"canonical filename will be uploaded separately; existing variants will not "
+"be changed."
+msgstr ""
+"Вже існують старі автоматично перейменовані варіанти: %s. Файл із "
+"затвердженим канонічним ім'ям буде завантажено окремо; наявні варіанти не "
+"змінюватимуться."
+
+#: inc/class-image-validator.php:311
 msgid "The selected file is not referenced by any registry row."
 msgstr "Вибраний файл не вказано в жодному рядку реєстру."
 
 #. translators: %d: PHP upload error code
-#: inc/class-image-validator.php:454
+#: inc/class-image-validator.php:528
 #, php-format
 msgid "PHP rejected the image upload with error %d."
 msgstr "PHP відхилив завантаження зображення з помилкою %d."
 
-#: inc/class-image-validator.php:462
+#: inc/class-image-validator.php:536
 msgid "The image temporary file is missing or is not a valid HTTP upload."
 msgstr ""
 "Тимчасовий файл зображення відсутній або не є коректним HTTP-завантаженням."
 
-#: inc/class-image-validator.php:466
+#: inc/class-image-validator.php:540
 msgid "The image file is empty."
 msgstr "Файл зображення порожній."
 
-#: inc/class-image-validator.php:471
+#: inc/class-image-validator.php:545
 msgid ""
 "The uploaded byte count does not match the size declared by the request."
 msgstr ""
 "Фактична кількість завантажених байтів не відповідає розміру, оголошеному в "
 "запиті."
 
-#: inc/class-image-validator.php:476
+#: inc/class-image-validator.php:550
 msgid "The image exceeds the configured hard file-size limit."
 msgstr "Зображення перевищує встановлене жорстке обмеження розміру файлу."
 
-#: inc/class-image-validator.php:479
+#: inc/class-image-validator.php:553
 msgid "The image is larger than the configured warning threshold."
 msgstr "Зображення більше за встановлений поріг попередження."
 
-#: inc/class-image-validator.php:489
+#: inc/class-image-validator.php:563
 msgid "Only JPEG, PNG and WebP images are allowed."
 msgstr "Дозволено лише зображення JPEG, PNG і WebP."
 
-#: inc/class-image-validator.php:495
+#: inc/class-image-validator.php:569
 msgid "The file magic signature is not JPEG, PNG or WebP."
 msgstr "Магічна сигнатура файлу не відповідає JPEG, PNG або WebP."
 
-#: inc/class-image-validator.php:501
+#: inc/class-image-validator.php:575
 msgid "The PHP Fileinfo extension is required for MIME verification."
 msgstr "Для перевірки MIME потрібне розширення PHP Fileinfo."
 
-#: inc/class-image-validator.php:526
+#: inc/class-image-validator.php:600
 msgid ""
 "The extension, magic signature, server MIME and WordPress file check do not "
 "agree."
@@ -202,21 +214,21 @@ msgstr ""
 "Розширення, магічна сигнатура, серверний MIME та перевірка WordPress не "
 "збігаються."
 
-#: inc/class-image-validator.php:539
+#: inc/class-image-validator.php:613
 msgid "The image dimensions could not be read."
 msgstr "Не вдалося прочитати розміри зображення."
 
-#: inc/class-image-validator.php:545
+#: inc/class-image-validator.php:619
 msgid "The image has invalid dimensions."
 msgstr "Зображення має некоректні розміри."
 
-#: inc/class-image-validator.php:548
+#: inc/class-image-validator.php:622
 msgid "The image exceeds the configured geometry or total-pixel limit."
 msgstr ""
 "Зображення перевищує встановлене обмеження сторони або загальної кількості "
 "пікселів."
 
-#: inc/class-image-validator.php:554
+#: inc/class-image-validator.php:628
 msgid ""
 "The image is within the configured pixel limit but cannot be decoded safely "
 "with the currently available PHP memory."
@@ -226,188 +238,188 @@ msgstr ""
 "встановлений ліміт пікселів, але його неможливо безпечно декодувати з "
 "доступним обсягом пам’яті PHP."
 
-#: inc/class-image-validator.php:559
+#: inc/class-image-validator.php:633
 msgid "At least one image side is below the configured minimum-side warning."
 msgstr ""
 "Щонайменше одна сторона зображення менша за встановлений поріг попередження."
 
-#: inc/class-image-validator.php:562
+#: inc/class-image-validator.php:636
 msgid "At least one image side is above the configured large-side warning."
 msgstr ""
 "Щонайменше одна сторона зображення більша за встановлений поріг попередження."
 
-#: inc/class-image-validator.php:568
+#: inc/class-image-validator.php:642
 msgid "The image is outside the recommended side range."
 msgstr "Розміри зображення виходять за рекомендований діапазон."
 
-#: inc/class-image-validator.php:572
+#: inc/class-image-validator.php:646
 msgid "The image has an unusually wide or tall aspect ratio."
 msgstr "Зображення має незвично широке або високе співвідношення сторін."
 
-#: inc/class-image-validator.php:578
+#: inc/class-image-validator.php:652
 msgid "The JPEG bit depth is not supported by the current pipeline."
 msgstr "Поточний процес не підтримує цю глибину кольору JPEG."
 
-#: inc/class-image-validator.php:581
+#: inc/class-image-validator.php:655
 msgid ""
 "The JPEG appears to use CMYK. RGB or sRGB is preferred for the storefront."
 msgstr "Схоже, JPEG використовує CMYK. Для вітрини бажано RGB або sRGB."
 
-#: inc/class-image-validator.php:595
+#: inc/class-image-validator.php:669
 msgid "The WordPress Image Editor could not open the image."
 msgstr "Редактор зображень WordPress не зміг відкрити зображення."
 
-#: inc/class-image-validator.php:607
+#: inc/class-image-validator.php:681
 msgid "The WordPress Image Editor reported unexpected image dimensions."
 msgstr "Редактор зображень WordPress повернув неочікувані розміри."
 
-#: inc/class-image-validator.php:622
+#: inc/class-image-validator.php:696
 msgid "The external malware scanner rejected the image."
 msgstr "Зовнішній сканер шкідливого ПЗ відхилив зображення."
 
-#: inc/class-image-validator.php:677
+#: inc/class-image-validator.php:751
 msgid "The canonical filename exceeds the configured hard length limit."
 msgstr "Канонічне ім'я файлу перевищує встановлене жорстке обмеження довжини."
 
-#: inc/class-image-validator.php:680
+#: inc/class-image-validator.php:754
 msgid "The canonical filename exceeds the configured warning length."
 msgstr "Канонічне ім'я файлу перевищує встановлений поріг попередження."
 
-#: inc/class-image-validator.php:683
+#: inc/class-image-validator.php:757
 msgid "The canonical filename contains unsupported characters."
 msgstr "Канонічне ім'я файлу містить непідтримувані символи."
 
-#: inc/class-image-validator.php:686
+#: inc/class-image-validator.php:760
 msgid "The canonical filename is hidden, reserved or has multiple extensions."
 msgstr "Канонічне ім'я приховане, зарезервоване або має кілька розширень."
 
-#: inc/class-image-validator.php:696
+#: inc/class-image-validator.php:770
 msgid "A canonical filename cannot be generated without an identifier."
 msgstr "Неможливо створити канонічне ім'я файлу без ідентифікатора."
 
-#: inc/class-image-validator.php:715
+#: inc/class-image-validator.php:789
 msgid "The SKU uses a non-ASCII prefix without an explicit business mapping."
 msgstr "Артикул має не-ASCII префікс без явного бізнес-відповідника."
 
-#: inc/class-image-validator.php:722
+#: inc/class-image-validator.php:796
 msgid ""
 "The identifier cannot be converted to a safe canonical filename without "
 "guessing."
 msgstr ""
 "Ідентифікатор неможливо перетворити на безпечне канонічне ім'я без припущень."
 
-#: inc/class-image-validator.php:734
+#: inc/class-image-validator.php:808
 msgid "The filename contains NUL or control characters."
 msgstr "Ім'я файлу містить NUL або керівні символи."
 
-#: inc/class-image-validator.php:743
+#: inc/class-image-validator.php:817
 msgid "The filename contains a path or path-traversal sequence."
 msgstr "Ім'я файлу містить шлях або послідовність обходу шляху."
 
-#: inc/class-image-validator.php:746
+#: inc/class-image-validator.php:820
 msgid "Hidden files and multiple extensions are not allowed."
 msgstr "Приховані файли та кілька розширень не дозволені."
 
-#: inc/class-image-validator.php:751
+#: inc/class-image-validator.php:825
 msgid "The filename has an empty or reserved basename."
 msgstr "Ім'я файлу має порожню або зарезервовану основу."
 
-#: inc/class-image-validator.php:829
+#: inc/class-image-validator.php:903
 msgid "The file contains a suspicious executable or script signature."
 msgstr "Файл містить підозрілу сигнатуру виконуваного коду або скрипту."
 
-#: inc/class-image-validator.php:837
+#: inc/class-image-validator.php:911
 msgid "The JPEG SOI/EOI structure is incomplete."
 msgstr "Структура SOI/EOI файлу JPEG неповна."
 
-#: inc/class-image-validator.php:848
+#: inc/class-image-validator.php:922
 msgid "The image container is unsupported."
 msgstr "Контейнер зображення не підтримується."
 
-#: inc/class-image-validator.php:862
+#: inc/class-image-validator.php:936
 msgid "The PNG chunk structure is invalid."
 msgstr "Структура блоків PNG некоректна."
 
-#: inc/class-image-validator.php:868
+#: inc/class-image-validator.php:942
 msgid "A PNG chunk CRC check failed."
 msgstr "Перевірка CRC блоку PNG не пройдена."
 
-#: inc/class-image-validator.php:881
+#: inc/class-image-validator.php:955
 msgid "The PNG does not end cleanly at the IEND chunk."
 msgstr "PNG не завершується коректно на блоці IEND."
 
-#: inc/class-image-validator.php:884
+#: inc/class-image-validator.php:958
 msgid "Animated PNG files are not allowed for product images."
 msgstr "Анімовані PNG не дозволені для зображень товарів."
 
-#: inc/class-image-validator.php:894
+#: inc/class-image-validator.php:968
 msgid "The WebP container is too short."
 msgstr "Контейнер WebP занадто короткий."
 
-#: inc/class-image-validator.php:898
+#: inc/class-image-validator.php:972
 msgid "The WebP RIFF size does not match the file size."
 msgstr "Розмір RIFF у WebP не відповідає розміру файлу."
 
-#: inc/class-image-validator.php:907
+#: inc/class-image-validator.php:981
 msgid "The WebP chunk structure is invalid."
 msgstr "Структура блоків WebP некоректна."
 
-#: inc/class-image-validator.php:921
+#: inc/class-image-validator.php:995
 msgid "The WebP container has trailing or incomplete data."
 msgstr "Контейнер WebP містить зайві або неповні дані."
 
-#: inc/class-image-validator.php:924
+#: inc/class-image-validator.php:998
 msgid "Animated WebP files are not allowed for product images."
 msgstr "Анімовані WebP не дозволені для зображень товарів."
 
-#: inc/class-image-validator.php:949
+#: inc/class-image-validator.php:1023
 msgid "The server image decoder could not fully decode the file."
 msgstr "Серверний декодер не зміг повністю декодувати файл."
 
-#: inc/class-image-validator.php:957
+#: inc/class-image-validator.php:1031
 msgid "Decoded image dimensions differ from the header dimensions."
 msgstr ""
 "Розміри декодованого зображення відрізняються від розмірів у заголовку."
 
-#: inc/class-image-validator.php:966
+#: inc/class-image-validator.php:1040
 msgid "The image decoder reported a warning in strict mode."
 msgstr "Декодер зображення повернув попередження в суворому режимі."
 
-#: inc/class-image-validator.php:970
+#: inc/class-image-validator.php:1044
 msgid "The image decoder reported a non-blocking warning."
 msgstr "Декодер зображення повернув неблокувальне попередження."
 
-#: inc/class-image-validator.php:1016
+#: inc/class-image-validator.php:1090
 msgid "The image appears almost uniform or has very low contrast."
 msgstr "Зображення виглядає майже одноколірним або має дуже низький контраст."
 
-#: inc/class-image-validator.php:1018
+#: inc/class-image-validator.php:1092
 msgid "The image appears to have low contrast."
 msgstr "Схоже, зображення має низький контраст."
 
-#: inc/class-image-validator.php:1021
+#: inc/class-image-validator.php:1095
 msgid "The image appears to be almost completely transparent."
 msgstr "Схоже, зображення майже повністю прозоре."
 
-#: inc/class-image-validator.php:1036
+#: inc/class-image-validator.php:1110
 msgid "The image contains an ICC profile. Verify storefront color rendering."
 msgstr ""
 "Зображення містить профіль ICC. Перевірте відтворення кольорів на вітрині."
 
-#: inc/class-image-validator.php:1044
+#: inc/class-image-validator.php:1118
 msgid "The JPEG uses EXIF orientation and may require explicit autorotation."
 msgstr ""
 "JPEG використовує орієнтацію EXIF і може потребувати явного автоповороту."
 
-#: inc/class-image-validator.php:1047
+#: inc/class-image-validator.php:1121
 msgid "The JPEG contains GPS metadata."
 msgstr "JPEG містить метадані GPS."
 
-#: inc/class-image-validator.php:1050
+#: inc/class-image-validator.php:1124
 msgid "The JPEG contains EXIF metadata. Metadata is not stripped in version 1."
 msgstr "JPEG містить метадані EXIF. У версії 1 метадані не видаляються."
 
-#: inc/class-image-validator.php:1160
+#: inc/class-image-validator.php:1234
 msgid ""
 "Gallery positions contain gaps. Version 1 will not renumber them "
 "automatically."
@@ -765,7 +777,7 @@ msgstr "Помилка метаданих вкладення"
 msgid "OVH verification failed"
 msgstr "Перевірка OVH не пройдена"
 
-#: inc/class-plugin.php:159 inc/class-plugin.php:483
+#: inc/class-plugin.php:159 inc/class-plugin.php:486
 msgid "You do not have permission to check product images."
 msgstr "У вас немає дозволу перевіряти зображення товарів."
 
@@ -974,15 +986,15 @@ msgstr "У вас немає дозволу завантажити цей шаб
 msgid "PhpSpreadsheet is unavailable."
 msgstr "PhpSpreadsheet недоступний."
 
-#: inc/class-plugin.php:429
+#: inc/class-plugin.php:432
 msgid "You do not have permission to change validation settings."
 msgstr "У вас немає дозволу змінювати налаштування перевірки."
 
-#: inc/class-plugin.php:486
+#: inc/class-plugin.php:489
 msgid "WooCommerce or PhpSpreadsheet is unavailable."
 msgstr "WooCommerce або PhpSpreadsheet недоступний."
 
-#: inc/class-plugin.php:494
+#: inc/class-plugin.php:497
 msgid "The registry file is missing."
 msgstr "Файл реєстру відсутній."
 

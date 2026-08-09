@@ -251,6 +251,17 @@ final class ImageValidator
                 }
             }
 
+            if (!$errors && $row['canonical_file'] !== '') {
+                $legacy_variants = $this->legacy_auto_renamed_variants($row['canonical_file']);
+                if ($legacy_variants) {
+                    $warnings[] = sprintf(
+                        /* translators: %s: comma-separated filenames */
+                        __('Automatically renamed legacy variants already exist: %s. The approved canonical filename will be uploaded separately; existing variants will not be changed.', 'lavka-product-media-upload'),
+                        implode(', ', $legacy_variants)
+                    );
+                }
+            }
+
             if (!$errors && !empty($already_uploaded[$row['row_number']])) {
                 $row['valid'] = false;
             } elseif (!$errors) {
@@ -341,6 +352,69 @@ final class ImageValidator
         ";
 
         return (int) $wpdb->get_var($wpdb->prepare($sql, $filename, $like_path, $like_url));
+    }
+
+    private function legacy_auto_renamed_variants(string $filename): array
+    {
+        $extension = strtolower((string) pathinfo($filename, PATHINFO_EXTENSION));
+        $stem = (string) pathinfo($filename, PATHINFO_FILENAME);
+        if ($stem === '' || $extension === '') {
+            return [];
+        }
+
+        global $wpdb;
+
+        $pattern = '/^' . preg_quote($stem, '/') . '-[1-9][0-9]*\\.' . preg_quote($extension, '/') . '$/i';
+        $like_tail = '%' . $wpdb->esc_like($stem . '-') . '%' . $wpdb->esc_like('.' . $extension);
+        $variants = [];
+
+        $wordpress_paths = $wpdb->get_col($wpdb->prepare(
+            "
+                SELECT pm.meta_value
+                FROM {$wpdb->posts} p
+                INNER JOIN {$wpdb->postmeta} pm
+                  ON pm.post_id = p.ID AND pm.meta_key = '_wp_attached_file'
+                WHERE p.post_type = 'attachment'
+                  AND LOWER(pm.meta_value) LIKE LOWER(%s)
+                LIMIT 50
+            ",
+            $like_tail
+        ));
+        foreach ($wordpress_paths as $path) {
+            $candidate = wp_basename((string) $path);
+            if (preg_match($pattern, $candidate)) {
+                $variants[] = $candidate;
+            }
+        }
+
+        $table = $this->s3_index_table();
+        if ($table !== '') {
+            $s3_pattern = $wpdb->esc_like(strtolower($stem) . '-') . '%' . $wpdb->esc_like('.' . $extension);
+            $s3_rows = $wpdb->get_results(
+                $wpdb->prepare(
+                    "
+                        SELECT filename_lower, full_key
+                        FROM `{$table}`
+                        WHERE LOWER(filename_lower) LIKE %s
+                           OR LOWER(full_key) LIKE %s
+                        LIMIT 50
+                    ",
+                    $s3_pattern,
+                    '%' . $s3_pattern
+                ),
+                ARRAY_A
+            );
+            foreach ($s3_rows as $s3_row) {
+                $candidate = wp_basename((string) ($s3_row['filename_lower'] ?: $s3_row['full_key']));
+                if (preg_match($pattern, $candidate)) {
+                    $variants[] = $candidate;
+                }
+            }
+        }
+
+        $variants = array_values(array_unique($variants));
+        natcasesort($variants);
+        return array_values($variants);
     }
 
     private function built_in_s3_name_check(string $filename): array

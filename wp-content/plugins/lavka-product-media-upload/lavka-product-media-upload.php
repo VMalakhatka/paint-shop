@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Lavka Product Media Upload
  * Description: Validates product image batches from XLS/XLSX manifests and reports naming, product, WordPress and S3 conflicts.
- * Version: 0.1.4
+ * Version: 0.1.5
  * Author: Volodymyr
  * Text Domain: lavka-product-media-upload
  * Domain Path: /languages
@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('LPMU_VERSION', '0.1.4');
+define('LPMU_VERSION', '0.1.5');
 define('LPMU_FILE', __FILE__);
 define('LPMU_DIR', plugin_dir_path(__FILE__));
 define('LPMU_URL', plugin_dir_url(__FILE__));

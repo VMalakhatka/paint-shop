@@ -68,6 +68,11 @@ not checked.
 
 Before checking a production batch, refresh Total Sync and the S3 media index.
 
+Legacy WordPress filenames with an automatically added numeric suffix, such as
+`product-1.jpg`, are reported as warnings when the approved canonical name is
+`product.jpg`. They do not block the canonical upload and are never removed or
+overwritten automatically.
+
 ## Upload phase
 
 The uploader creates a server-side copy with the approved canonical filename and calls
