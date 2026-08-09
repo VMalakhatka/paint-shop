@@ -509,26 +509,40 @@ add_action('wp_ajax_lts_media_sync_list', function () {
     wp_send_json_error($res);
 });
 
-/** AJAX: read-only report of products without linked WooCommerce images. */
-add_action('wp_ajax_lts_media_missing_images_report', function () {
-    $cap = defined('LTS_CAP') ? LTS_CAP : 'manage_options';
-    if (!current_user_can($cap)) wp_send_json_error(['error' => 'forbidden'], 403);
-    check_ajax_referer('lts_admin_nonce', 'nonce');
+/** Normalize filters shared by the on-screen report and XLSX export. */
+function lts_media_missing_images_report_args(array $source): array {
+    $report_type = sanitize_key((string)($source['report_type'] ?? 'all'));
+    $scope = sanitize_key((string)($source['scope'] ?? 'published'));
+    $visibility = sanitize_key((string)($source['visibility'] ?? 'exclude_hidden'));
 
-    global $wpdb;
-
-    $report_type = isset($_POST['report_type']) && $_POST['report_type'] === 'featured'
-        ? 'featured'
-        : 'all';
-    $scope = isset($_POST['scope']) && $_POST['scope'] === 'active'
-        ? 'active'
-        : 'published';
-    $visibility = sanitize_key((string)($_POST['visibility'] ?? 'exclude_hidden'));
+    if ($report_type !== 'featured') {
+        $report_type = 'all';
+    }
+    if ($scope !== 'active') {
+        $scope = 'published';
+    }
     if (!in_array($visibility, ['exclude_hidden', 'all', 'hidden_only'], true)) {
         $visibility = 'exclude_hidden';
     }
-    $page = max(1, (int)($_POST['page'] ?? 1));
-    $per_page = max(10, min(200, (int)($_POST['per_page'] ?? 50)));
+
+    return [
+        'report_type' => $report_type,
+        'scope'       => $scope,
+        'visibility'  => $visibility,
+        'page'        => max(1, (int)($source['page'] ?? 1)),
+        'per_page'    => max(10, min(200, (int)($source['per_page'] ?? 50))),
+    ];
+}
+
+/** Run the read-only missing-image query. */
+function lts_media_missing_images_report_data(array $args, bool $paginate = true): array {
+    global $wpdb;
+
+    $report_type = $args['report_type'];
+    $scope = $args['scope'];
+    $visibility = $args['visibility'];
+    $page = $paginate ? $args['page'] : 1;
+    $per_page = $args['per_page'];
     $offset = ($page - 1) * $per_page;
 
     $statuses = $scope === 'active'
@@ -628,13 +642,19 @@ add_action('wp_ajax_lts_media_missing_images_report', function () {
                 WHERE gallery.post_id = product.ID AND gallery.meta_key = '_product_image_gallery'
                 ORDER BY gallery.meta_id DESC
                 LIMIT 1
-            ) AS gallery_ids
+            ) AS gallery_ids,
+            CASE WHEN {$hidden_condition} THEN 1 ELSE 0 END AS is_hidden
         FROM {$wpdb->posts} AS product
         WHERE {$base_where}
         ORDER BY product.ID DESC
-        LIMIT %d OFFSET %d
     ";
-    $query_params = array_merge($statuses, [$per_page, $offset]);
+
+    $query_params = $statuses;
+    if ($paginate) {
+        $rows_sql .= ' LIMIT %d OFFSET %d';
+        $query_params[] = $per_page;
+        $query_params[] = $offset;
+    }
     $db_rows = $wpdb->get_results($wpdb->prepare($rows_sql, ...$query_params), ARRAY_A);
 
     $rows = [];
@@ -652,6 +672,10 @@ add_action('wp_ajax_lts_media_missing_images_report', function () {
             'title'         => (string)$row['post_title'],
             'status'        => (string)$row['post_status'],
             'status_label'  => $status_object ? $status_object->label : (string)$row['post_status'],
+            'is_hidden'     => !empty($row['is_hidden']),
+            'visibility_label' => !empty($row['is_hidden'])
+                ? __('Hidden', 'lavka-total-sync')
+                : __('Visible', 'lavka-total-sync'),
             'gallery_count' => count($gallery_ids),
             'reason'        => $thumbnail_id > 0 ? 'broken_attachment' : 'missing_featured',
             'reason_label'  => $thumbnail_id > 0
@@ -664,7 +688,7 @@ add_action('wp_ajax_lts_media_missing_images_report', function () {
         ];
     }
 
-    wp_send_json_success([
+    return [
         'rows'       => $rows,
         'total'      => $total,
         'page'       => $page,
@@ -673,13 +697,172 @@ add_action('wp_ajax_lts_media_missing_images_report', function () {
         'report_type'=> $report_type,
         'scope'      => $scope,
         'visibility' => $visibility,
-    ]);
+    ];
+}
+
+/** AJAX: read-only report of products without linked WooCommerce images. */
+add_action('wp_ajax_lts_media_missing_images_report', function () {
+    $cap = defined('LTS_CAP') ? LTS_CAP : 'manage_options';
+    if (!current_user_can($cap)) wp_send_json_error(['error' => 'forbidden'], 403);
+    check_ajax_referer('lts_admin_nonce', 'nonce');
+
+    wp_send_json_success(lts_media_missing_images_report_data(
+        lts_media_missing_images_report_args(wp_unslash($_POST))
+    ));
+});
+
+/** Download the complete filtered report as an XLSX workbook. */
+add_action('admin_post_lts_media_missing_images_export', function () {
+    $cap = defined('LTS_CAP') ? LTS_CAP : 'manage_options';
+    if (!current_user_can($cap)) {
+        wp_die(
+            esc_html__('You do not have permission to export this report.', 'lavka-total-sync'),
+            '',
+            ['response' => 403]
+        );
+    }
+    check_admin_referer('lts_media_missing_images_export');
+
+    if (!class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class)) {
+        $composer_autoload = WP_CONTENT_DIR . '/vendor/autoload.php';
+        if (is_file($composer_autoload)) {
+            require_once $composer_autoload;
+        }
+    }
+    if (!class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class)) {
+        wp_die(esc_html__('PhpSpreadsheet is unavailable.', 'lavka-total-sync'));
+    }
+
+    $args = lts_media_missing_images_report_args(wp_unslash($_GET));
+    $data = lts_media_missing_images_report_data($args, false);
+
+    $report_labels = [
+        'all'      => __('No images at all', 'lavka-total-sync'),
+        'featured' => __('No featured image', 'lavka-total-sync'),
+    ];
+    $scope_labels = [
+        'published' => __('Published products only', 'lavka-total-sync'),
+        'active'    => __('All active products', 'lavka-total-sync'),
+    ];
+    $visibility_labels = [
+        'exclude_hidden' => __('Exclude hidden products', 'lavka-total-sync'),
+        'all'            => __('Include hidden products', 'lavka-total-sync'),
+        'hidden_only'    => __('Hidden products only', 'lavka-total-sync'),
+    ];
+
+    $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+    $sheet->setTitle('Missing images');
+    $sheet->mergeCells('A1:I1');
+    $sheet->setCellValue('A1', __('Products without images', 'lavka-total-sync'));
+    $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+
+    $sheet->setCellValue('A2', __('Report type', 'lavka-total-sync'));
+    $sheet->setCellValue('B2', $report_labels[$args['report_type']]);
+    $sheet->setCellValue('A3', __('Product scope', 'lavka-total-sync'));
+    $sheet->setCellValue('B3', $scope_labels[$args['scope']]);
+    $sheet->setCellValue('A4', __('Catalog visibility', 'lavka-total-sync'));
+    $sheet->setCellValue('B4', $visibility_labels[$args['visibility']]);
+    $sheet->setCellValue('A5', __('Generated at', 'lavka-total-sync'));
+    $sheet->setCellValue('B5', current_time('Y-m-d H:i:s'));
+
+    $header_row = 7;
+    $headers = [
+        __('ID', 'lavka-total-sync'),
+        __('SKU', 'lavka-total-sync'),
+        __('Product', 'lavka-total-sync'),
+        __('Status', 'lavka-total-sync'),
+        __('Catalog visibility', 'lavka-total-sync'),
+        __('Gallery', 'lavka-total-sync'),
+        __('Reason', 'lavka-total-sync'),
+        __('Edit URL', 'lavka-total-sync'),
+        __('Product URL', 'lavka-total-sync'),
+    ];
+    $sheet->fromArray($headers, null, 'A' . $header_row);
+    $sheet->getStyle('A' . $header_row . ':I' . $header_row)->getFont()->setBold(true);
+    $sheet->freezePane('A' . ($header_row + 1));
+
+    $row_number = $header_row + 1;
+    foreach ($data['rows'] as $row) {
+        $sheet->setCellValue('A' . $row_number, $row['id']);
+        $sheet->setCellValueExplicit(
+            'B' . $row_number,
+            $row['sku'],
+            \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+        );
+        $sheet->setCellValueExplicit(
+            'C' . $row_number,
+            $row['title'],
+            \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+        );
+        $sheet->setCellValue('D' . $row_number, $row['status_label']);
+        $sheet->setCellValue('E' . $row_number, $row['visibility_label']);
+        $sheet->setCellValue('F' . $row_number, $row['gallery_count']);
+        $sheet->setCellValue('G' . $row_number, $row['reason_label']);
+        $sheet->setCellValueExplicit(
+            'H' . $row_number,
+            (string)$row['edit_url'],
+            \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+        );
+        $sheet->setCellValueExplicit(
+            'I' . $row_number,
+            (string)$row['view_url'],
+            \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+        );
+        $row_number++;
+    }
+
+    $last_row = max($header_row, $row_number - 1);
+    $sheet->setAutoFilter('A' . $header_row . ':I' . $last_row);
+    if ($last_row > $header_row) {
+        $sheet->getStyle('A' . ($header_row + 1) . ':I' . $last_row)
+            ->getAlignment()
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_TOP);
+        $sheet->getStyle('C' . ($header_row + 1) . ':G' . $last_row)
+            ->getAlignment()
+            ->setWrapText(true);
+    }
+
+    foreach ([
+        'A' => 10,
+        'B' => 24,
+        'C' => 60,
+        'D' => 20,
+        'E' => 24,
+        'F' => 10,
+        'G' => 38,
+        'H' => 52,
+        'I' => 52,
+    ] as $column => $width) {
+        $sheet->getColumnDimension($column)->setWidth($width);
+    }
+
+    if (ob_get_length()) {
+        ob_end_clean();
+    }
+    nocache_headers();
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header('Content-Disposition: attachment; filename="products-without-images-' . gmdate('Ymd-His') . '.xlsx"');
+    (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save('php://output');
+    $spreadsheet->disconnectWorksheets();
+    exit;
 });
 
 /** Рендер страницы UI */
 function lts_render_media_sync_page() {
     $cap = defined('LTS_CAP') ? LTS_CAP : 'manage_options';
     if (!current_user_can($cap)) return;
+
+    $media_report_export_url = add_query_arg(
+        [
+            'action'      => 'lts_media_missing_images_export',
+            'report_type' => 'all',
+            'scope'       => 'published',
+            'visibility'  => 'exclude_hidden',
+            '_wpnonce'    => wp_create_nonce('lts_media_missing_images_export'),
+        ],
+        admin_url('admin-post.php')
+    );
 
     // Гарантируем, что jQuery загружен для админ-страницы с инлайновыми обработчиками
     if (function_exists('wp_enqueue_script')) {
@@ -838,6 +1021,11 @@ CR-CE0900056100"></textarea>
                 <button id="lts_btn_media_report" class="button button-primary">
                     <?php _e('Build report', 'lavka-total-sync'); ?>
                 </button>
+                <a
+                    id="lts_btn_media_report_export"
+                    class="button"
+                    href="<?php echo esc_url($media_report_export_url); ?>"
+                ><?php _e('Export XLSX', 'lavka-total-sync'); ?></a>
                 <span id="lts_media_report_status" aria-live="polite"></span>
             </div>
 
@@ -1204,11 +1392,20 @@ CR-CE0900056100"></textarea>
         (function($){
             const ajaxUrl = '<?php echo esc_js(admin_url('admin-ajax.php')); ?>';
             const nonce   = '<?php echo esc_js( wp_create_nonce('lts_admin_nonce') ); ?>';
+            const mediaReportExportBaseUrl = '<?php echo esc_js($media_report_export_url); ?>';
 
             function print(obj){ try{return JSON.stringify(obj,null,2);}catch(e){return String(obj);} }
 
             let mediaReportPage = 1;
             let mediaReportPages = 1;
+
+            function updateMediaReportExportUrl() {
+                const url = new URL(mediaReportExportBaseUrl, window.location.origin);
+                url.searchParams.set('report_type', $('#lts_media_report_type').val());
+                url.searchParams.set('scope', $('#lts_media_report_scope').val());
+                url.searchParams.set('visibility', $('#lts_media_report_visibility').val());
+                $('#lts_btn_media_report_export').attr('href', url.toString());
+            }
 
             function renderMediaReport(data) {
                 const $result = $('#lts_media_report_result');
@@ -1283,12 +1480,15 @@ CR-CE0900056100"></textarea>
                 e.preventDefault();
                 loadMediaReport(1);
             });
+            $('#lts_media_report_type, #lts_media_report_scope, #lts_media_report_visibility')
+                .on('change', updateMediaReportExportUrl);
             $('#lts_media_report_prev').on('click', function() {
                 if (mediaReportPage > 1) loadMediaReport(mediaReportPage - 1);
             });
             $('#lts_media_report_next').on('click', function() {
                 if (mediaReportPage < mediaReportPages) loadMediaReport(mediaReportPage + 1);
             });
+            updateMediaReportExportUrl();
 
             $('#lts_btn_media_reindex').on('click', async function(){
                 $('#lts_mr_status').text('<?php echo esc_js(__('Working…','lavka-total-sync')); ?>');
