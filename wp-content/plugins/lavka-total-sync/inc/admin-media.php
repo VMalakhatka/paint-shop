@@ -1490,6 +1490,10 @@ CR-CE0900056100"></textarea>
                 display: block;
                 overflow-wrap: anywhere;
             }
+            #lts_media_mismatch_table .lts-mismatch-suggestion {
+                display: grid;
+                gap: 2px;
+            }
         </style>
 
         <hr style="margin:1.25rem 0;">
@@ -1947,13 +1951,20 @@ CR-CE0900056100"></textarea>
                         if (Array.isArray(row.suggested_files) && row.suggested_files.length) {
                             const $suggestions = $('<div>', {class: 'lts-mismatch-suggestions'});
                             $('<strong>').text(
-                                '<?php echo esc_js(__('Possible matching files in the current OVH/S3 index:', 'lavka-total-sync')); ?>'
+                                '<?php echo esc_js(__('Possible matching files found in the current OVH/S3 media index table:', 'lavka-total-sync')); ?>'
                             ).appendTo($suggestions);
                             row.suggested_files.forEach(function(item) {
-                                $('<code>', {title: item.full_key || ''}).text(item.filename).appendTo($suggestions);
+                                const $candidate = $('<div>', {class: 'lts-mismatch-suggestion'});
+                                $('<code>').text(item.filename).appendTo($candidate);
+                                if (item.full_key) {
+                                    $('<span>', {class: 'description'}).text(
+                                        '<?php echo esc_js(__('OVH/S3 index path:', 'lavka-total-sync')); ?>' + ' ' + item.full_key
+                                    ).appendTo($candidate);
+                                }
+                                $candidate.appendTo($suggestions);
                             });
                             $('<span>').text(
-                                '<?php echo esc_js(__("The filename in Folio may be non-canonical. If one of these files is correct, set its exact filename in Folio and rerun media synchronization; do not upload another duplicate.", 'lavka-total-sync')); ?>'
+                                '<?php echo esc_js(__("These filenames are actual records from s3_media_index found after normalizing the filename from Folio. If one of these files is correct, set its exact filename in Folio and rerun media synchronization; do not upload another duplicate.", 'lavka-total-sync')); ?>'
                             ).appendTo($suggestions);
                             $suggestions.appendTo($action);
                         }
