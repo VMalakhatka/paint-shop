@@ -719,16 +719,56 @@ function lts_media_mismatch_log_path(): string {
 /** Normalize filters for the Java mismatch log report. */
 function lts_media_mismatch_report_args(array $source): array {
     $type = sanitize_key((string)($source['type'] ?? 'all'));
+    $visibility = sanitize_key((string)($source['visibility'] ?? 'exclude_hidden'));
     if (!in_array($type, ['all', 'featured', 'gallery'], true)) {
         $type = 'all';
     }
+    if (!in_array($visibility, ['exclude_hidden', 'all', 'hidden_only'], true)) {
+        $visibility = 'exclude_hidden';
+    }
 
     return [
-        'type'     => $type,
-        'query'    => sanitize_text_field((string)($source['query'] ?? '')),
-        'page'     => max(1, (int)($source['page'] ?? 1)),
-        'per_page' => max(10, min(200, (int)($source['per_page'] ?? 50))),
+        'type'       => $type,
+        'visibility' => $visibility,
+        'query'      => sanitize_text_field((string)($source['query'] ?? '')),
+        'page'       => max(1, (int)($source['page'] ?? 1)),
+        'per_page'   => max(10, min(200, (int)($source['per_page'] ?? 50))),
     ];
+}
+
+/** Return product IDs whose Woo catalog visibility is explicitly hidden. */
+function lts_media_hidden_product_ids(array $product_ids): array {
+    $product_ids = array_values(array_unique(array_filter(array_map('absint', $product_ids))));
+    if (!$product_ids) {
+        return [];
+    }
+
+    $visibility_terms = [];
+    foreach (array_chunk($product_ids, 500) as $product_ids_chunk) {
+        $terms = wp_get_object_terms($product_ids_chunk, 'product_visibility', [
+            'fields' => 'all_with_object_id',
+        ]);
+        if (is_wp_error($terms)) {
+            continue;
+        }
+
+        foreach ($terms as $term) {
+            $object_id = absint($term->object_id ?? 0);
+            $slug = (string)($term->slug ?? '');
+            if ($object_id > 0 && in_array($slug, ['exclude-from-catalog', 'exclude-from-search'], true)) {
+                $visibility_terms[$object_id][$slug] = true;
+            }
+        }
+    }
+
+    $hidden_ids = [];
+    foreach ($visibility_terms as $product_id => $slugs) {
+        if (!empty($slugs['exclude-from-catalog']) && !empty($slugs['exclude-from-search'])) {
+            $hidden_ids[(int)$product_id] = true;
+        }
+    }
+
+    return $hidden_ids;
 }
 
 /** Read only the newest part of a potentially large Java log file. */
@@ -1203,6 +1243,22 @@ function lts_media_mismatch_report_data(array $args): array {
     }
 
     $events = array_reverse($events);
+    $hidden_product_ids = lts_media_hidden_product_ids(array_column($events, 'product_id'));
+    foreach ($events as &$event) {
+        $event['is_hidden'] = isset($hidden_product_ids[(int)$event['product_id']]);
+    }
+    unset($event);
+
+    if ($args['visibility'] === 'exclude_hidden') {
+        $events = array_values(array_filter($events, static function (array $event): bool {
+            return empty($event['is_hidden']);
+        }));
+    } elseif ($args['visibility'] === 'hidden_only') {
+        $events = array_values(array_filter($events, static function (array $event): bool {
+            return !empty($event['is_hidden']);
+        }));
+    }
+
     $total = count($events);
     $pages = max(1, (int)ceil($total / $args['per_page']));
     $page = min($args['page'], $pages);
@@ -1236,6 +1292,7 @@ function lts_media_mismatch_report_data(array $args): array {
         'page'        => $page,
         'pages'       => $pages,
         'per_page'    => $args['per_page'],
+        'visibility'  => $args['visibility'],
     ];
 }
 
@@ -1629,6 +1686,14 @@ CR-CE0900056100"></textarea>
                 <label for="lts_media_mismatch_query">
                     <span><?php _e('Search', 'lavka-total-sync'); ?></span>
                     <input id="lts_media_mismatch_query" type="search" placeholder="<?php echo esc_attr__('SKU, product ID or filename', 'lavka-total-sync'); ?>">
+                </label>
+                <label for="lts_media_mismatch_visibility">
+                    <span><?php _e('Catalog visibility', 'lavka-total-sync'); ?></span>
+                    <select id="lts_media_mismatch_visibility">
+                        <option value="exclude_hidden"><?php _e('Exclude hidden products', 'lavka-total-sync'); ?></option>
+                        <option value="all"><?php _e('Include hidden products', 'lavka-total-sync'); ?></option>
+                        <option value="hidden_only"><?php _e('Hidden products only', 'lavka-total-sync'); ?></option>
+                    </select>
                 </label>
                 <label for="lts_media_mismatch_per_page">
                     <span><?php _e('Rows per page', 'lavka-total-sync'); ?></span>
@@ -2387,6 +2452,7 @@ CR-CE0900056100"></textarea>
                     action: 'lts_media_mismatch_report',
                     nonce: nonce,
                     type: $('#lts_media_mismatch_type').val(),
+                    visibility: $('#lts_media_mismatch_visibility').val(),
                     query: $('#lts_media_mismatch_query').val(),
                     per_page: $('#lts_media_mismatch_per_page').val(),
                     page: page
