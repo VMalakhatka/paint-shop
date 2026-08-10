@@ -884,7 +884,7 @@ function lts_media_mismatch_filename_candidates(string $file): array {
     return array_values(array_unique($candidates));
 }
 
-/** Find current exact/normalized candidates in the OVH/S3 media index in one query. */
+/** Find current exact/normalized candidates in the OVH/S3 media index. */
 function lts_media_mismatch_s3_suggestions(array $rows): array {
     global $wpdb;
 
@@ -903,17 +903,19 @@ function lts_media_mismatch_s3_suggestions(array $rows): array {
         return [];
     }
 
-    $filenames = array_keys($candidate_rows);
-    $placeholders = implode(', ', array_fill(0, count($filenames), '%s'));
-    $sql = "
-        SELECT filename_lower, full_key, size_bytes, etag, last_modified
-        FROM `{$table}`
-        WHERE filename_lower IN ({$placeholders})
-        ORDER BY filename_lower, last_modified DESC, size_bytes DESC
-    ";
-    $matches = $wpdb->get_results($wpdb->prepare($sql, ...$filenames), ARRAY_A);
-    if (!is_array($matches)) {
-        return [];
+    $matches = [];
+    foreach (array_chunk(array_keys($candidate_rows), 500) as $filenames) {
+        $placeholders = implode(', ', array_fill(0, count($filenames), '%s'));
+        $sql = "
+            SELECT filename_lower, full_key, size_bytes, etag, last_modified
+            FROM `{$table}`
+            WHERE filename_lower IN ({$placeholders})
+            ORDER BY filename_lower, last_modified DESC, size_bytes DESC
+        ";
+        $chunk_matches = $wpdb->get_results($wpdb->prepare($sql, ...$filenames), ARRAY_A);
+        if (is_array($chunk_matches)) {
+            $matches = array_merge($matches, $chunk_matches);
+        }
     }
 
     $suggestions = [];
@@ -1173,7 +1175,7 @@ add_action('wp_ajax_lts_folio_media_repair_apply', function () {
 });
 
 /** Parse recent standalone mismatch events; Java summary blocks are intentionally ignored. */
-function lts_media_mismatch_report_data(array $args): array {
+function lts_media_mismatch_report_data(array $args, bool $paginate = true): array {
     $path = lts_media_mismatch_log_path();
     if (!is_file($path) || !is_readable($path)) {
         return [
@@ -1260,10 +1262,10 @@ function lts_media_mismatch_report_data(array $args): array {
     }
 
     $total = count($events);
-    $pages = max(1, (int)ceil($total / $args['per_page']));
-    $page = min($args['page'], $pages);
+    $pages = $paginate ? max(1, (int)ceil($total / $args['per_page'])) : 1;
+    $page = $paginate ? min($args['page'], $pages) : 1;
     $offset = ($page - 1) * $args['per_page'];
-    $rows = array_slice($events, $offset, $args['per_page']);
+    $rows = $paginate ? array_slice($events, $offset, $args['per_page']) : $events;
     $s3_suggestions = lts_media_mismatch_s3_suggestions($rows);
 
     foreach ($rows as $row_index => &$row) {
@@ -1273,6 +1275,9 @@ function lts_media_mismatch_report_data(array $args): array {
             : __('Gallery image', 'lavka-total-sync');
         $row['product_title'] = get_the_title($row['product_id']);
         $row['edit_url'] = get_edit_post_link($row['product_id'], 'raw');
+        $row['visibility_label'] = !empty($row['is_hidden'])
+            ? __('Hidden', 'lavka-total-sync')
+            : __('Visible', 'lavka-total-sync');
         $row['cause_label'] = $explanation['label'];
         $row['explanation'] = $explanation['explanation'];
         $row['recommended_action'] = $explanation['action'];
@@ -1455,6 +1460,170 @@ add_action('admin_post_lts_media_missing_images_export', function () {
     exit;
 });
 
+/** Download all filtered Java media mismatch events as an XLSX workbook. */
+add_action('admin_post_lts_media_mismatch_export', function () {
+    $cap = defined('LTS_CAP') ? LTS_CAP : 'manage_options';
+    if (!current_user_can($cap)) {
+        wp_die(
+            esc_html__('You do not have permission to export this report.', 'lavka-total-sync'),
+            '',
+            ['response' => 403]
+        );
+    }
+    check_admin_referer('lts_media_mismatch_export');
+
+    if (!class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class)) {
+        $composer_autoload = WP_CONTENT_DIR . '/vendor/autoload.php';
+        if (is_file($composer_autoload)) {
+            require_once $composer_autoload;
+        }
+    }
+    if (!class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class)) {
+        wp_die(esc_html__('PhpSpreadsheet is unavailable.', 'lavka-total-sync'));
+    }
+
+    $args = lts_media_mismatch_report_args(wp_unslash($_GET));
+    $data = lts_media_mismatch_report_data($args, false);
+    if (empty($data['available'])) {
+        wp_die(esc_html((string)($data['error'] ?? __('Mismatch log is unavailable.', 'lavka-total-sync'))));
+    }
+
+    $type_labels = [
+        'all'      => __('All failures', 'lavka-total-sync'),
+        'featured' => __('Featured images', 'lavka-total-sync'),
+        'gallery'  => __('Gallery images', 'lavka-total-sync'),
+    ];
+    $visibility_labels = [
+        'exclude_hidden' => __('Exclude hidden products', 'lavka-total-sync'),
+        'all'            => __('Include hidden products', 'lavka-total-sync'),
+        'hidden_only'    => __('Hidden products only', 'lavka-total-sync'),
+    ];
+
+    $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+    $sheet->setTitle('Media mismatch');
+    $sheet->mergeCells('A1:L1');
+    $sheet->setCellValue('A1', __('Recent failed media links from Java', 'lavka-total-sync'));
+    $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+
+    $sheet->setCellValue('A2', __('Image type', 'lavka-total-sync'));
+    $sheet->setCellValue('B2', $type_labels[$args['type']]);
+    $sheet->setCellValue('A3', __('Search', 'lavka-total-sync'));
+    $sheet->setCellValueExplicit(
+        'B3',
+        $args['query'] !== '' ? $args['query'] : '—',
+        \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+    );
+    $sheet->setCellValue('A4', __('Catalog visibility', 'lavka-total-sync'));
+    $sheet->setCellValue('B4', $visibility_labels[$args['visibility']]);
+    $sheet->setCellValue('A5', __('Generated at', 'lavka-total-sync'));
+    $sheet->setCellValue('B5', current_time('Y-m-d H:i:s'));
+
+    $header_row = 7;
+    $headers = [
+        __('Time', 'lavka-total-sync'),
+        __('Type', 'lavka-total-sync'),
+        __('SKU', 'lavka-total-sync'),
+        __('ID', 'lavka-total-sync'),
+        __('Product', 'lavka-total-sync'),
+        __('Catalog visibility', 'lavka-total-sync'),
+        __('Expected file', 'lavka-total-sync'),
+        __('What went wrong', 'lavka-total-sync'),
+        __('Technical message', 'lavka-total-sync'),
+        __('What to do', 'lavka-total-sync'),
+        __('Possible matching files found in the current OVH/S3 media index table:', 'lavka-total-sync'),
+        __('Edit URL', 'lavka-total-sync'),
+    ];
+    $sheet->fromArray($headers, null, 'A' . $header_row);
+    $sheet->getStyle('A' . $header_row . ':L' . $header_row)->getFont()->setBold(true);
+    $sheet->freezePane('A' . ($header_row + 1));
+
+    $set_text = static function ($sheet, string $cell, $value): void {
+        $sheet->setCellValueExplicit(
+            $cell,
+            (string)$value,
+            \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+        );
+    };
+
+    $row_number = $header_row + 1;
+    foreach ($data['rows'] as $row) {
+        $suggested_files = [];
+        foreach ($row['suggested_files'] ?? [] as $suggestion) {
+            $parts = array_filter([
+                (string)($suggestion['filename'] ?? ''),
+                (string)($suggestion['full_key'] ?? ''),
+                isset($suggestion['size_bytes'])
+                    ? (int)$suggestion['size_bytes'] . ' ' . __('bytes', 'lavka-total-sync')
+                    : '',
+                !empty($suggestion['etag']) ? 'ETag ' . (string)$suggestion['etag'] : '',
+            ], static function ($value): bool {
+                return $value !== '';
+            });
+            if ($parts) {
+                $suggested_files[] = implode(' | ', $parts);
+            }
+        }
+
+        $recommended_action = (string)($row['recommended_action'] ?? '');
+        if (!empty($row['hint'])) {
+            $recommended_action .= ($recommended_action !== '' ? "\n" : '') . (string)$row['hint'];
+        }
+
+        $set_text($sheet, 'A' . $row_number, $row['time'] ?? '');
+        $set_text($sheet, 'B' . $row_number, $row['type_label'] ?? '');
+        $set_text($sheet, 'C' . $row_number, $row['sku'] ?? '');
+        $sheet->setCellValue('D' . $row_number, (int)($row['product_id'] ?? 0));
+        $set_text($sheet, 'E' . $row_number, $row['product_title'] ?? '');
+        $set_text($sheet, 'F' . $row_number, $row['visibility_label'] ?? '');
+        $set_text($sheet, 'G' . $row_number, $row['file'] ?? '');
+        $set_text($sheet, 'H' . $row_number, $row['cause_label'] ?? '');
+        $set_text($sheet, 'I' . $row_number, $row['message'] ?? '');
+        $set_text($sheet, 'J' . $row_number, $recommended_action);
+        $set_text($sheet, 'K' . $row_number, implode("\n", $suggested_files));
+        $set_text($sheet, 'L' . $row_number, $row['edit_url'] ?? '');
+        $row_number++;
+    }
+
+    $last_row = max($header_row, $row_number - 1);
+    $sheet->setAutoFilter('A' . $header_row . ':L' . $last_row);
+    if ($last_row > $header_row) {
+        $sheet->getStyle('A' . ($header_row + 1) . ':L' . $last_row)
+            ->getAlignment()
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_TOP);
+        $sheet->getStyle('E' . ($header_row + 1) . ':L' . $last_row)
+            ->getAlignment()
+            ->setWrapText(true);
+    }
+
+    foreach ([
+        'A' => 23,
+        'B' => 20,
+        'C' => 24,
+        'D' => 12,
+        'E' => 54,
+        'F' => 22,
+        'G' => 36,
+        'H' => 34,
+        'I' => 56,
+        'J' => 56,
+        'K' => 70,
+        'L' => 52,
+    ] as $column => $width) {
+        $sheet->getColumnDimension($column)->setWidth($width);
+    }
+
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+    nocache_headers();
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header('Content-Disposition: attachment; filename="media-link-failures-' . gmdate('Ymd-His') . '.xlsx"');
+    (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save('php://output');
+    $spreadsheet->disconnectWorksheets();
+    exit;
+});
+
 /** Рендер страницы UI */
 function lts_render_media_sync_page() {
     $cap = defined('LTS_CAP') ? LTS_CAP : 'manage_options';
@@ -1467,6 +1636,16 @@ function lts_render_media_sync_page() {
             'scope'       => 'published',
             'visibility'  => 'exclude_hidden',
             '_wpnonce'    => wp_create_nonce('lts_media_missing_images_export'),
+        ],
+        admin_url('admin-post.php')
+    );
+    $media_mismatch_export_url = add_query_arg(
+        [
+            'action'     => 'lts_media_mismatch_export',
+            'type'       => 'all',
+            'visibility' => 'exclude_hidden',
+            'query'      => '',
+            '_wpnonce'   => wp_create_nonce('lts_media_mismatch_export'),
         ],
         admin_url('admin-post.php')
     );
@@ -1707,6 +1886,11 @@ CR-CE0900056100"></textarea>
                 <button id="lts_btn_media_mismatch" class="button button-primary">
                     <?php _e('Read mismatch log', 'lavka-total-sync'); ?>
                 </button>
+                <a
+                    id="lts_btn_media_mismatch_export"
+                    class="button"
+                    href="<?php echo esc_url($media_mismatch_export_url); ?>"
+                ><?php _e('Export XLSX', 'lavka-total-sync'); ?></a>
                 <span id="lts_media_mismatch_status" aria-live="polite"></span>
             </div>
 
@@ -2132,6 +2316,7 @@ CR-CE0900056100"></textarea>
             const ajaxUrl = '<?php echo esc_js(admin_url('admin-ajax.php')); ?>';
             const nonce   = '<?php echo esc_js( wp_create_nonce('lts_admin_nonce') ); ?>';
             const mediaReportExportBaseUrl = <?php echo wp_json_encode($media_report_export_url); ?>;
+            const mediaMismatchExportBaseUrl = <?php echo wp_json_encode($media_mismatch_export_url); ?>;
 
             function print(obj){ try{return JSON.stringify(obj,null,2);}catch(e){return String(obj);} }
 
@@ -2146,6 +2331,14 @@ CR-CE0900056100"></textarea>
                 url.searchParams.set('scope', $('#lts_media_report_scope').val());
                 url.searchParams.set('visibility', $('#lts_media_report_visibility').val());
                 $('#lts_btn_media_report_export').attr('href', url.toString());
+            }
+
+            function updateMediaMismatchExportUrl() {
+                const url = new URL(mediaMismatchExportBaseUrl, window.location.origin);
+                url.searchParams.set('type', $('#lts_media_mismatch_type').val());
+                url.searchParams.set('visibility', $('#lts_media_mismatch_visibility').val());
+                url.searchParams.set('query', $('#lts_media_mismatch_query').val());
+                $('#lts_btn_media_mismatch_export').attr('href', url.toString());
             }
 
             function renderMediaReport(data) {
@@ -2477,6 +2670,10 @@ CR-CE0900056100"></textarea>
                     loadMediaMismatchReport(1);
                 }
             });
+            $('#lts_media_mismatch_type, #lts_media_mismatch_visibility')
+                .on('change', updateMediaMismatchExportUrl);
+            $('#lts_media_mismatch_query').on('input', updateMediaMismatchExportUrl);
+            updateMediaMismatchExportUrl();
             $('#lts_media_mismatch_prev').on('click', function() {
                 if (mediaMismatchPage > 1) loadMediaMismatchReport(mediaMismatchPage - 1);
             });
