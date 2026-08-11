@@ -335,8 +335,12 @@ Do not delete duplicate WordPress attachments or S3 objects as part of this work
 1. WordPress validates the register and image files.
 2. WordPress creates an unattached Media Library record through `media_handle_upload()`;
    Media Cloud uploads the original and generated sizes through its standard hooks.
+   Large-image scaling is disabled for this call so the approved original basename is
+   preserved; registered WordPress thumbnail sizes are still generated.
 3. WordPress verifies the attachment metadata and public remote object.
-4. Java refreshes the OVH/S3 index once for the approved batch.
+4. Java refreshes the OVH/S3 index once for the approved batch. If an uploaded object is
+   not visible yet, WordPress waits briefly and requests one bounded second refresh only
+   for the rows still awaiting exact proof.
 5. WordPress reads the exact basename, full key, size and ETag from the refreshed index.
 6. WordPress searches the current Folio main/gallery references for the exact SKU.
 7. WordPress sends `set_main`, `update_gallery` or `add_gallery` with
@@ -350,6 +354,8 @@ Do not delete duplicate WordPress attachments or S3 objects as part of this work
 This automatic path is enabled only by the uploader's explicit second confirmation
 after its mandatory dry run. It runs under the Lavka ecosystem global lock. Failures
 remain resumable and never permit WordPress to invent a suffixed filename.
+If the shared lock API is unavailable, WordPress keeps verification available but
+blocks the upload before creating an attachment.
 
 ## 10. Acceptance tests
 

@@ -198,8 +198,8 @@ final class BatchService
                 'process' => 'product_media_batch',
                 'source' => 'manual',
                 'message' => $has_failures
-                    ? 'Product image batch completed with rows requiring attention.'
-                    : 'Product image batch completed successfully.',
+                    ? __('Product image batch completed with rows requiring attention.', 'lavka-product-media-upload')
+                    : __('Product image batch completed successfully.', 'lavka-product-media-upload'),
                 'context' => [
                     'batch_id' => (string) $stored['batch_id'],
                     'manifest_hash' => (string) $stored['manifest_hash'],

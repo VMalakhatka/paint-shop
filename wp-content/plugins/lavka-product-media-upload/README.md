@@ -79,12 +79,15 @@ The uploader creates a server-side copy with the approved canonical filename and
 WordPress `media_handle_upload()`. The original file on the operator's computer is not
 renamed or modified. Active Media Cloud handling therefore receives the original and
 generated sizes through the same path as a normal Media Library upload. The plugin does
-not write directly to S3.
+not write directly to S3. WordPress large-image scaling is disabled only for this upload
+call so the original keeps the approved basename; normal registered thumbnail sizes are
+still generated.
 
 After all approved files have passed WordPress metadata and remote-object verification,
 the plugin performs this sequence under the shared Lavka ecosystem lock:
 
-1. Refresh the Java OVH/S3 media index once for the batch.
+1. Refresh the Java OVH/S3 media index once for the batch. If an uploaded object has not
+   appeared yet, wait briefly and perform one bounded second refresh for the pending rows.
 2. Read the exact `filename_lower + full_key` object proof from `s3_media_index`.
 3. Read the current main and gallery references for each exact Folio SKU.
 4. Build `set_main`, `update_gallery` or `add_gallery` changes.
@@ -103,6 +106,8 @@ exact search resolves the operation as already correct before Woo assignment.
 
 Folder selection is a browser convenience and remains subject to PHP's
 `max_file_uploads` and request-size limits. Split a large folder into smaller batches.
+If the shared Lavka lock API is unavailable, verification remains available but the
+upload cycle is blocked before any file is written.
 
 Uploading is available only after a successful dry run tied to the current operator,
 registry hash and source file hashes. Define `LPMU_ENABLE_WRITES` as `false`, or return

@@ -1,10 +1,10 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Lavka Product Media Upload 0.1.5\n"
+"Project-Id-Version: Lavka Product Media Upload 0.2.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lavka-product-"
 "media-upload\n"
-"POT-Creation-Date: 2026-08-09T09:45:46+00:00\n"
-"PO-Revision-Date: 2026-08-07 10:33+0200\n"
+"POT-Creation-Date: 2026-08-11T15:48:25+00:00\n"
+"PO-Revision-Date: 2026-08-11 17:20+0200\n"
 "Last-Translator: Volodymyr\n"
 "Language-Team: Ukrainian\n"
 "Language: uk\n"
@@ -22,18 +22,18 @@ msgstr "Пакетне завантаження зображень Lavka"
 #. Description of the plugin
 #: lavka-product-media-upload.php
 msgid ""
-"Validates product image batches from XLS/XLSX manifests and reports naming, "
-"product, WordPress and S3 conflicts."
+"Validates and uploads product image batches, then synchronizes OVH/S3, Folio "
+"and WooCommerce."
 msgstr ""
-"Перевіряє пакети зображень товарів за реєстрами XLS/XLSX і повідомляє про "
-"конфлікти імен, товарів, WordPress та S3."
+"Перевіряє та завантажує пакети зображень товарів, а потім синхронізує OVH/"
+"S3, ФОЛІО та WooCommerce."
 
 #. Author of the plugin
 #: lavka-product-media-upload.php
 msgid "Volodymyr"
 msgstr "Volodymyr"
 
-#: inc/class-batch-service.php:97 inc/class-plugin.php:343
+#: inc/class-batch-service.php:97 inc/class-plugin.php:390
 msgid "File writing is disabled for this verification stage."
 msgstr "Запис файлів вимкнено на цьому етапі перевірки."
 
@@ -66,6 +66,20 @@ msgstr "Хеш реєстру змінився після перевірки."
 msgid "A row differs from the approved dry-run result."
 msgstr "Рядок відрізняється від схваленого результату перевірки."
 
+#: inc/class-batch-service.php:144
+msgid "Another Lavka synchronization is running. Try this batch again later."
+msgstr ""
+"Виконується інша синхронізація Lavka. Повторіть запуск цього пакета пізніше."
+
+#: inc/class-batch-service.php:201
+msgid "Product image batch completed with rows requiring attention."
+msgstr ""
+"Обробку пакета зображень товарів завершено; деякі рядки потребують уваги."
+
+#: inc/class-batch-service.php:202
+msgid "Product image batch completed successfully."
+msgstr "Пакет зображень товарів успішно оброблено."
+
 #: inc/class-image-validator.php:74
 msgid "An SKU or barcode is required."
 msgstr "Потрібно вказати артикул або штрихкод."
@@ -90,7 +104,7 @@ msgstr ""
 "Ім'я вихідного файлу містить візуально схожі латинські та кириличні літери. "
 "Виправте його явно в реєстрі."
 
-#: inc/class-image-validator.php:92 inc/class-image-validator.php:142
+#: inc/class-image-validator.php:92 inc/class-image-validator.php:145
 msgid ""
 "The same product, role and position occur more than once in the registry."
 msgstr "Однакове поєднання товару, ролі та позиції повторюється в реєстрі."
@@ -111,24 +125,24 @@ msgstr "Серед вибраних зображень немає файлу з 
 msgid "More than one selected file matches the registry source filename."
 msgstr "Імені файлу з реєстру відповідає більше одного вибраного файлу."
 
-#: inc/class-image-validator.php:147 inc/class-media-uploader.php:343
+#: inc/class-image-validator.php:150 inc/class-media-uploader.php:423
 msgid "WooCommerce variations do not have a standard separate gallery."
 msgstr "Варіації WooCommerce не мають стандартної окремої галереї."
 
-#: inc/class-image-validator.php:192
+#: inc/class-image-validator.php:195
 msgid "The canonical filename is duplicated inside this batch."
 msgstr "Канонічне ім'я файлу дублюється в цьому пакеті."
 
-#: inc/class-image-validator.php:198
+#: inc/class-image-validator.php:201
 msgid "The same image content occurs more than once in this batch."
 msgstr ""
 "Однаковий вміст зображення трапляється в цьому пакеті більше одного разу."
 
-#: inc/class-image-validator.php:212
+#: inc/class-image-validator.php:215
 msgid "This exact image was already uploaded and verified. It will be skipped."
 msgstr "Це саме зображення вже завантажено й перевірено. Його буде пропущено."
 
-#: inc/class-image-validator.php:220
+#: inc/class-image-validator.php:223
 msgid ""
 "A matching attachment from an incomplete earlier attempt will be verified "
 "and resumed without creating a duplicate."
@@ -136,20 +150,20 @@ msgstr ""
 "Відповідне вкладення з незавершеної попередньої спроби буде перевірено та "
 "продовжено без створення дубліката."
 
-#: inc/class-image-validator.php:222
+#: inc/class-image-validator.php:225
 msgid "The canonical filename already exists in the WordPress Media Library."
 msgstr "Канонічне ім'я файлу вже існує в медіатеці WordPress."
 
-#: inc/class-image-validator.php:243
+#: inc/class-image-validator.php:246
 msgid "The S3 media index could not be checked."
 msgstr "Не вдалося перевірити індекс медіа S3."
 
-#: inc/class-image-validator.php:247
+#: inc/class-image-validator.php:250
 msgid "The canonical filename already exists in the S3 media index."
 msgstr "Канонічне ім'я файлу вже існує в індексі медіа S3."
 
 #. translators: %s: comma-separated filenames
-#: inc/class-image-validator.php:259
+#: inc/class-image-validator.php:262
 #, php-format
 msgid ""
 "Automatically renamed legacy variants already exist: %s. The approved "
@@ -160,53 +174,53 @@ msgstr ""
 "затвердженим канонічним ім'ям буде завантажено окремо; наявні варіанти не "
 "змінюватимуться."
 
-#: inc/class-image-validator.php:311
+#: inc/class-image-validator.php:314
 msgid "The selected file is not referenced by any registry row."
 msgstr "Вибраний файл не вказано в жодному рядку реєстру."
 
 #. translators: %d: PHP upload error code
-#: inc/class-image-validator.php:528
+#: inc/class-image-validator.php:531
 #, php-format
 msgid "PHP rejected the image upload with error %d."
 msgstr "PHP відхилив завантаження зображення з помилкою %d."
 
-#: inc/class-image-validator.php:536
+#: inc/class-image-validator.php:539
 msgid "The image temporary file is missing or is not a valid HTTP upload."
 msgstr ""
 "Тимчасовий файл зображення відсутній або не є коректним HTTP-завантаженням."
 
-#: inc/class-image-validator.php:540
+#: inc/class-image-validator.php:543
 msgid "The image file is empty."
 msgstr "Файл зображення порожній."
 
-#: inc/class-image-validator.php:545
+#: inc/class-image-validator.php:548
 msgid ""
 "The uploaded byte count does not match the size declared by the request."
 msgstr ""
 "Фактична кількість завантажених байтів не відповідає розміру, оголошеному в "
 "запиті."
 
-#: inc/class-image-validator.php:550
+#: inc/class-image-validator.php:553
 msgid "The image exceeds the configured hard file-size limit."
 msgstr "Зображення перевищує встановлене жорстке обмеження розміру файлу."
 
-#: inc/class-image-validator.php:553
+#: inc/class-image-validator.php:556
 msgid "The image is larger than the configured warning threshold."
 msgstr "Зображення більше за встановлений поріг попередження."
 
-#: inc/class-image-validator.php:563
+#: inc/class-image-validator.php:566
 msgid "Only JPEG, PNG and WebP images are allowed."
 msgstr "Дозволено лише зображення JPEG, PNG і WebP."
 
-#: inc/class-image-validator.php:569
+#: inc/class-image-validator.php:572
 msgid "The file magic signature is not JPEG, PNG or WebP."
 msgstr "Магічна сигнатура файлу не відповідає JPEG, PNG або WebP."
 
-#: inc/class-image-validator.php:575
+#: inc/class-image-validator.php:578
 msgid "The PHP Fileinfo extension is required for MIME verification."
 msgstr "Для перевірки MIME потрібне розширення PHP Fileinfo."
 
-#: inc/class-image-validator.php:600
+#: inc/class-image-validator.php:603
 msgid ""
 "The extension, magic signature, server MIME and WordPress file check do not "
 "agree."
@@ -214,21 +228,21 @@ msgstr ""
 "Розширення, магічна сигнатура, серверний MIME та перевірка WordPress не "
 "збігаються."
 
-#: inc/class-image-validator.php:613
+#: inc/class-image-validator.php:616
 msgid "The image dimensions could not be read."
 msgstr "Не вдалося прочитати розміри зображення."
 
-#: inc/class-image-validator.php:619
+#: inc/class-image-validator.php:622
 msgid "The image has invalid dimensions."
 msgstr "Зображення має некоректні розміри."
 
-#: inc/class-image-validator.php:622
+#: inc/class-image-validator.php:625
 msgid "The image exceeds the configured geometry or total-pixel limit."
 msgstr ""
 "Зображення перевищує встановлене обмеження сторони або загальної кількості "
 "пікселів."
 
-#: inc/class-image-validator.php:628
+#: inc/class-image-validator.php:631
 msgid ""
 "The image is within the configured pixel limit but cannot be decoded safely "
 "with the currently available PHP memory."
@@ -238,224 +252,228 @@ msgstr ""
 "встановлений ліміт пікселів, але його неможливо безпечно декодувати з "
 "доступним обсягом пам’яті PHP."
 
-#: inc/class-image-validator.php:633
+#: inc/class-image-validator.php:636
 msgid "At least one image side is below the configured minimum-side warning."
 msgstr ""
 "Щонайменше одна сторона зображення менша за встановлений поріг попередження."
 
-#: inc/class-image-validator.php:636
+#: inc/class-image-validator.php:639
 msgid "At least one image side is above the configured large-side warning."
 msgstr ""
 "Щонайменше одна сторона зображення більша за встановлений поріг попередження."
 
-#: inc/class-image-validator.php:642
+#: inc/class-image-validator.php:645
 msgid "The image is outside the recommended side range."
 msgstr "Розміри зображення виходять за рекомендований діапазон."
 
-#: inc/class-image-validator.php:646
+#: inc/class-image-validator.php:649
 msgid "The image has an unusually wide or tall aspect ratio."
 msgstr "Зображення має незвично широке або високе співвідношення сторін."
 
-#: inc/class-image-validator.php:652
+#: inc/class-image-validator.php:655
 msgid "The JPEG bit depth is not supported by the current pipeline."
 msgstr "Поточний процес не підтримує цю глибину кольору JPEG."
 
-#: inc/class-image-validator.php:655
+#: inc/class-image-validator.php:658
 msgid ""
 "The JPEG appears to use CMYK. RGB or sRGB is preferred for the storefront."
 msgstr "Схоже, JPEG використовує CMYK. Для вітрини бажано RGB або sRGB."
 
-#: inc/class-image-validator.php:669
+#: inc/class-image-validator.php:672
 msgid "The WordPress Image Editor could not open the image."
 msgstr "Редактор зображень WordPress не зміг відкрити зображення."
 
-#: inc/class-image-validator.php:681
+#: inc/class-image-validator.php:684
 msgid "The WordPress Image Editor reported unexpected image dimensions."
 msgstr "Редактор зображень WordPress повернув неочікувані розміри."
 
-#: inc/class-image-validator.php:696
+#: inc/class-image-validator.php:699
 msgid "The external malware scanner rejected the image."
 msgstr "Зовнішній сканер шкідливого ПЗ відхилив зображення."
 
-#: inc/class-image-validator.php:751
+#: inc/class-image-validator.php:754
 msgid "The canonical filename exceeds the configured hard length limit."
 msgstr "Канонічне ім'я файлу перевищує встановлене жорстке обмеження довжини."
 
-#: inc/class-image-validator.php:754
+#: inc/class-image-validator.php:757
 msgid "The canonical filename exceeds the configured warning length."
 msgstr "Канонічне ім'я файлу перевищує встановлений поріг попередження."
 
-#: inc/class-image-validator.php:757
+#: inc/class-image-validator.php:760
 msgid "The canonical filename contains unsupported characters."
 msgstr "Канонічне ім'я файлу містить непідтримувані символи."
 
-#: inc/class-image-validator.php:760
+#: inc/class-image-validator.php:763
 msgid "The canonical filename is hidden, reserved or has multiple extensions."
 msgstr "Канонічне ім'я приховане, зарезервоване або має кілька розширень."
 
-#: inc/class-image-validator.php:770
+#: inc/class-image-validator.php:773
 msgid "A canonical filename cannot be generated without an identifier."
 msgstr "Неможливо створити канонічне ім'я файлу без ідентифікатора."
 
-#: inc/class-image-validator.php:789
+#: inc/class-image-validator.php:792
 msgid "The SKU uses a non-ASCII prefix without an explicit business mapping."
 msgstr "Артикул має не-ASCII префікс без явного бізнес-відповідника."
 
-#: inc/class-image-validator.php:796
+#: inc/class-image-validator.php:799
 msgid ""
 "The identifier cannot be converted to a safe canonical filename without "
 "guessing."
 msgstr ""
 "Ідентифікатор неможливо перетворити на безпечне канонічне ім'я без припущень."
 
-#: inc/class-image-validator.php:808
+#: inc/class-image-validator.php:811
 msgid "The filename contains NUL or control characters."
 msgstr "Ім'я файлу містить NUL або керівні символи."
 
-#: inc/class-image-validator.php:817
+#: inc/class-image-validator.php:820
 msgid "The filename contains a path or path-traversal sequence."
 msgstr "Ім'я файлу містить шлях або послідовність обходу шляху."
 
-#: inc/class-image-validator.php:820
+#: inc/class-image-validator.php:823
 msgid "Hidden files and multiple extensions are not allowed."
 msgstr "Приховані файли та кілька розширень не дозволені."
 
-#: inc/class-image-validator.php:825
+#: inc/class-image-validator.php:828
 msgid "The filename has an empty or reserved basename."
 msgstr "Ім'я файлу має порожню або зарезервовану основу."
 
-#: inc/class-image-validator.php:903
+#: inc/class-image-validator.php:906
 msgid "The file contains a suspicious executable or script signature."
 msgstr "Файл містить підозрілу сигнатуру виконуваного коду або скрипту."
 
-#: inc/class-image-validator.php:911
+#: inc/class-image-validator.php:914
 msgid "The JPEG SOI/EOI structure is incomplete."
 msgstr "Структура SOI/EOI файлу JPEG неповна."
 
-#: inc/class-image-validator.php:922
+#: inc/class-image-validator.php:925
 msgid "The image container is unsupported."
 msgstr "Контейнер зображення не підтримується."
 
-#: inc/class-image-validator.php:936
+#: inc/class-image-validator.php:939
 msgid "The PNG chunk structure is invalid."
 msgstr "Структура блоків PNG некоректна."
 
-#: inc/class-image-validator.php:942
+#: inc/class-image-validator.php:945
 msgid "A PNG chunk CRC check failed."
 msgstr "Перевірка CRC блоку PNG не пройдена."
 
-#: inc/class-image-validator.php:955
+#: inc/class-image-validator.php:958
 msgid "The PNG does not end cleanly at the IEND chunk."
 msgstr "PNG не завершується коректно на блоці IEND."
 
-#: inc/class-image-validator.php:958
+#: inc/class-image-validator.php:961
 msgid "Animated PNG files are not allowed for product images."
 msgstr "Анімовані PNG не дозволені для зображень товарів."
 
-#: inc/class-image-validator.php:968
+#: inc/class-image-validator.php:971
 msgid "The WebP container is too short."
 msgstr "Контейнер WebP занадто короткий."
 
-#: inc/class-image-validator.php:972
+#: inc/class-image-validator.php:975
 msgid "The WebP RIFF size does not match the file size."
 msgstr "Розмір RIFF у WebP не відповідає розміру файлу."
 
-#: inc/class-image-validator.php:981
+#: inc/class-image-validator.php:984
 msgid "The WebP chunk structure is invalid."
 msgstr "Структура блоків WebP некоректна."
 
-#: inc/class-image-validator.php:995
+#: inc/class-image-validator.php:998
 msgid "The WebP container has trailing or incomplete data."
 msgstr "Контейнер WebP містить зайві або неповні дані."
 
-#: inc/class-image-validator.php:998
+#: inc/class-image-validator.php:1001
 msgid "Animated WebP files are not allowed for product images."
 msgstr "Анімовані WebP не дозволені для зображень товарів."
 
-#: inc/class-image-validator.php:1023
+#: inc/class-image-validator.php:1026
 msgid "The server image decoder could not fully decode the file."
 msgstr "Серверний декодер не зміг повністю декодувати файл."
 
-#: inc/class-image-validator.php:1031
+#: inc/class-image-validator.php:1034
 msgid "Decoded image dimensions differ from the header dimensions."
 msgstr ""
 "Розміри декодованого зображення відрізняються від розмірів у заголовку."
 
-#: inc/class-image-validator.php:1040
+#: inc/class-image-validator.php:1043
 msgid "The image decoder reported a warning in strict mode."
 msgstr "Декодер зображення повернув попередження в суворому режимі."
 
-#: inc/class-image-validator.php:1044
+#: inc/class-image-validator.php:1047
 msgid "The image decoder reported a non-blocking warning."
 msgstr "Декодер зображення повернув неблокувальне попередження."
 
-#: inc/class-image-validator.php:1090
+#: inc/class-image-validator.php:1093
 msgid "The image appears almost uniform or has very low contrast."
 msgstr "Зображення виглядає майже одноколірним або має дуже низький контраст."
 
-#: inc/class-image-validator.php:1092
+#: inc/class-image-validator.php:1095
 msgid "The image appears to have low contrast."
 msgstr "Схоже, зображення має низький контраст."
 
-#: inc/class-image-validator.php:1095
+#: inc/class-image-validator.php:1098
 msgid "The image appears to be almost completely transparent."
 msgstr "Схоже, зображення майже повністю прозоре."
 
-#: inc/class-image-validator.php:1110
+#: inc/class-image-validator.php:1113
 msgid "The image contains an ICC profile. Verify storefront color rendering."
 msgstr ""
 "Зображення містить профіль ICC. Перевірте відтворення кольорів на вітрині."
 
-#: inc/class-image-validator.php:1118
+#: inc/class-image-validator.php:1121
 msgid "The JPEG uses EXIF orientation and may require explicit autorotation."
 msgstr ""
 "JPEG використовує орієнтацію EXIF і може потребувати явного автоповороту."
 
-#: inc/class-image-validator.php:1121
+#: inc/class-image-validator.php:1124
 msgid "The JPEG contains GPS metadata."
 msgstr "JPEG містить метадані GPS."
 
-#: inc/class-image-validator.php:1124
+#: inc/class-image-validator.php:1127
 msgid "The JPEG contains EXIF metadata. Metadata is not stripped in version 1."
 msgstr "JPEG містить метадані EXIF. У версії 1 метадані не видаляються."
 
-#: inc/class-image-validator.php:1234
+#: inc/class-image-validator.php:1237
 msgid ""
 "Gallery positions contain gaps. Version 1 will not renumber them "
 "automatically."
 msgstr ""
 "Позиції галереї мають пропуски. Версія 1 не перенумеровує їх автоматично."
 
-#: inc/class-media-uploader.php:29
+#: inc/class-media-uploader.php:31
 msgid "The approved row is missing internal upload data."
 msgstr "У схваленому рядку відсутні внутрішні дані завантаження."
 
-#: inc/class-media-uploader.php:33
+#: inc/class-media-uploader.php:35
 msgid "The resumable attachment no longer matches the canonical filename."
 msgstr ""
 "Вкладення для відновлення більше не відповідає канонічному імені файлу."
 
-#: inc/class-media-uploader.php:36
+#: inc/class-media-uploader.php:38
 msgid "The canonical filename appeared in WordPress after the dry run."
 msgstr "Канонічне ім'я файлу з'явилося у WordPress після перевірки."
 
-#: inc/class-media-uploader.php:42
+#: inc/class-media-uploader.php:44
 msgid "Another upload is currently using the same canonical filename."
 msgstr "Інше завантаження зараз використовує таке саме канонічне ім'я."
 
-#: inc/class-media-uploader.php:68
+#: inc/class-media-uploader.php:70
 msgid "A physical upload file already uses the canonical filename."
 msgstr "Фізичний файл у каталозі завантажень уже має це канонічне ім'я."
 
-#: inc/class-media-uploader.php:73
+#: inc/class-media-uploader.php:75
 msgid "The canonical server copy could not be created."
 msgstr "Не вдалося створити серверну копію з канонічним ім'ям."
 
-#: inc/class-media-uploader.php:247 inc/class-media-uploader.php:264
+#: inc/class-media-uploader.php:255
+msgid "The verified attachment is missing before WooCommerce assignment."
+msgstr "Перед призначенням у WooCommerce не знайдено перевіреного вкладення."
+
+#: inc/class-media-uploader.php:327 inc/class-media-uploader.php:344
 msgid "The attachment parent could not be synchronized with the product."
 msgstr "Не вдалося синхронізувати батьківський запис медіафайлу з товаром."
 
-#: inc/class-media-uploader.php:255
+#: inc/class-media-uploader.php:335
 msgid ""
 "The attachment already belongs to another WordPress post, so its media "
 "parent was not changed."
@@ -463,52 +481,52 @@ msgstr ""
 "Медіафайл уже належить іншому запису WordPress, тому його батьківський запис "
 "не змінено."
 
-#: inc/class-media-uploader.php:281
+#: inc/class-media-uploader.php:361
 msgid "WordPress did not create a valid attachment post."
 msgstr "WordPress не створив коректний запис вкладення."
 
-#: inc/class-media-uploader.php:287
+#: inc/class-media-uploader.php:367
 msgid "The attachment MIME differs from the validated image MIME."
 msgstr "MIME вкладення відрізняється від перевіреного MIME зображення."
 
-#: inc/class-media-uploader.php:296
+#: inc/class-media-uploader.php:376
 msgid ""
 "The attachment file key does not contain the expected canonical filename."
 msgstr "Ключ файлу вкладення не містить очікуваного канонічного імені."
 
-#: inc/class-media-uploader.php:302
+#: inc/class-media-uploader.php:382
 msgid "WordPress attachment metadata was not generated."
 msgstr "Метадані вкладення WordPress не були створені."
 
-#: inc/class-media-uploader.php:308
+#: inc/class-media-uploader.php:388
 msgid ""
 "Attachment metadata dimensions differ from the validated source dimensions."
 msgstr ""
 "Розміри в метаданих вкладення відрізняються від перевірених розмірів джерела."
 
-#: inc/class-media-uploader.php:318
+#: inc/class-media-uploader.php:398
 msgid "The attachment URL is missing or invalid."
 msgstr "URL вкладення відсутній або некоректний."
 
-#: inc/class-media-uploader.php:323
+#: inc/class-media-uploader.php:403
 msgid "WordPress generated no derivative image sizes for this attachment."
 msgstr "WordPress не створив похідних розмірів зображення для цього вкладення."
 
-#: inc/class-media-uploader.php:333
+#: inc/class-media-uploader.php:413
 msgid "The WooCommerce product disappeared before image assignment."
 msgstr "Товар WooCommerce зник до призначення зображення."
 
-#: inc/class-media-uploader.php:356
+#: inc/class-media-uploader.php:438
 msgid "The image role is unsupported."
 msgstr "Роль зображення не підтримується."
 
-#: inc/class-media-uploader.php:374
+#: inc/class-media-uploader.php:456
 msgid ""
 "Remote-object verification was not required for the resolved attachment URL."
 msgstr ""
 "Для отриманого URL вкладення перевірка віддаленого об'єкта не була потрібна."
 
-#: inc/class-media-uploader.php:423
+#: inc/class-media-uploader.php:505
 msgid ""
 "Remote HEAD metadata was incomplete, but the public object signature was "
 "verified."
@@ -516,7 +534,7 @@ msgstr ""
 "Віддалені метадані HEAD були неповними, але сигнатуру публічного об'єкта "
 "перевірено."
 
-#: inc/class-media-uploader.php:433
+#: inc/class-media-uploader.php:515
 msgid ""
 "The Media Cloud or OVH object could not be verified after bounded retries."
 msgstr ""
@@ -532,8 +550,11 @@ msgid "Checking the batch…"
 msgstr "Перевіряємо пакет…"
 
 #: inc/class-plugin.php:90
-msgid "Uploading approved files…"
-msgstr "Завантажуємо схвалені файли…"
+msgid ""
+"Uploading to OVH/S3, synchronizing Folio and assigning WooCommerce images…"
+msgstr ""
+"Завантажуємо в OVH/S3, синхронізуємо ФОЛІО та призначаємо зображення у "
+"WooCommerce…"
 
 #: inc/class-plugin.php:91
 msgid "The server request failed."
@@ -577,39 +598,56 @@ msgstr "Перед завантаженням виконайте обов'язк
 msgid "%d image files selected"
 msgstr "Вибрано файлів зображень: %d"
 
-#: inc/class-plugin.php:101 inc/class-plugin.php:218
+#: inc/class-plugin.php:101 inc/class-plugin.php:255
 msgid "Drop JPEG, PNG or WebP files here"
 msgstr "Перетягніть сюди файли JPEG, PNG або WebP"
 
-#: inc/class-plugin.php:102
+#: inc/class-plugin.php:102 inc/class-plugin.php:263
+msgid "Choose an image folder"
+msgstr "Вибрати папку із зображеннями"
+
+#: inc/class-plugin.php:103 inc/class-plugin.php:156
 msgid "Ready"
 msgstr "Готово"
 
-#: inc/class-plugin.php:103 inc/class-report-store.php:68
+#: inc/class-plugin.php:104 inc/class-report-store.php:73
 msgid "Errors"
 msgstr "Помилки"
 
-#: inc/class-plugin.php:104 inc/class-report-store.php:69
+#: inc/class-plugin.php:105 inc/class-report-store.php:74
 msgid "Warnings"
 msgstr "Попередження"
 
-#: inc/class-plugin.php:105 inc/class-report-store.php:70
+#: inc/class-plugin.php:106 inc/class-report-store.php:75
 msgid "Technical details"
 msgstr "Технічні подробиці"
 
-#: inc/class-plugin.php:106
+#: inc/class-plugin.php:107
 msgid "No warnings"
 msgstr "Немає попереджень"
 
-#: inc/class-plugin.php:107
-msgid "The check is complete. Download the report for the full audit trail."
-msgstr "Перевірку завершено. Завантажте звіт для повного журналу перевірки."
-
 #: inc/class-plugin.php:108
-msgid "Upload only the rows that passed all checks?"
-msgstr "Завантажити лише рядки, що пройшли всі перевірки?"
+msgid ""
+"The operation is complete. Download the report for the full audit trail."
+msgstr "Операцію завершено. Завантажте звіт із повним журналом перевірки."
 
 #: inc/class-plugin.php:109
+msgid ""
+"The operation finished, but some rows require a safe retry. Review the "
+"errors and download the report."
+msgstr ""
+"Операцію завершено, але деякі рядки потрібно безпечно повторити. Перегляньте "
+"помилки та завантажте звіт."
+
+#: inc/class-plugin.php:110
+msgid ""
+"Upload all approved images, refresh the S3 index, update Folio and assign "
+"the images in WooCommerce?"
+msgstr ""
+"Завантажити всі схвалені зображення, оновити індекс S3 і ФОЛІО та призначити "
+"зображення у WooCommerce?"
+
+#: inc/class-plugin.php:111
 msgid ""
 "The S3 media index is unavailable, so remote filename conflicts were not "
 "checked."
@@ -617,193 +655,305 @@ msgstr ""
 "Індекс медіа S3 недоступний, тому конфлікти віддалених імен файлів не "
 "перевірено."
 
-#: inc/class-plugin.php:110
+#: inc/class-plugin.php:112
 msgid "Not referenced by the registry"
 msgstr "Не вказано в реєстрі"
 
-#: inc/class-plugin.php:111 inc/class-report-store.php:48
+#: inc/class-plugin.php:113 inc/class-report-store.php:48
 msgid "Row"
 msgstr "Рядок"
 
-#: inc/class-plugin.php:112
+#: inc/class-plugin.php:114
 msgid "Identifiers"
 msgstr "Ідентифікатори"
 
-#: inc/class-plugin.php:113 inc/class-report-store.php:50
+#: inc/class-plugin.php:115 inc/class-report-store.php:50
 msgid "SKU"
 msgstr "Артикул"
 
-#: inc/class-plugin.php:114
+#: inc/class-plugin.php:116
 msgid "GTIN"
 msgstr "GTIN"
 
-#: inc/class-plugin.php:115 inc/class-report-store.php:52
+#: inc/class-plugin.php:117 inc/class-report-store.php:52
 msgid "Source file"
 msgstr "Вихідний файл"
 
-#: inc/class-plugin.php:116 inc/class-report-store.php:53
+#: inc/class-plugin.php:118 inc/class-report-store.php:53
 msgid "Canonical file"
 msgstr "Канонічний файл"
 
-#: inc/class-plugin.php:117
+#: inc/class-plugin.php:119
 msgid "Image"
 msgstr "Зображення"
 
-#: inc/class-plugin.php:118
+#: inc/class-plugin.php:120
 msgid "Assignment"
 msgstr "Призначення"
 
-#: inc/class-plugin.php:119
+#: inc/class-plugin.php:121
 msgid "Result"
 msgstr "Результат"
 
-#: inc/class-plugin.php:120
+#: inc/class-plugin.php:122
 msgid "Product"
 msgstr "Товар"
 
-#: inc/class-plugin.php:121 inc/class-report-store.php:61
+#: inc/class-plugin.php:123 inc/class-report-store.php:61
 msgid "Role"
 msgstr "Роль"
 
-#: inc/class-plugin.php:122 inc/class-report-store.php:62
+#: inc/class-plugin.php:124 inc/class-report-store.php:62
 msgid "Position"
 msgstr "Позиція"
 
-#: inc/class-plugin.php:123
+#: inc/class-plugin.php:125
 msgid "Size"
 msgstr "Розмір"
 
-#: inc/class-plugin.php:124
+#: inc/class-plugin.php:126
 msgid "Dimensions"
 msgstr "Розміри"
 
-#: inc/class-plugin.php:125 inc/class-report-store.php:56
+#: inc/class-plugin.php:127 inc/class-report-store.php:56
 msgid "Color space"
 msgstr "Колірний простір"
 
-#: inc/class-plugin.php:126 inc/class-report-store.php:60
+#: inc/class-plugin.php:128 inc/class-report-store.php:60
 msgid "SHA-256"
 msgstr "SHA-256"
 
-#: inc/class-plugin.php:127
+#: inc/class-plugin.php:129
 msgid "Attachment"
 msgstr "Вкладення"
 
-#: inc/class-plugin.php:128
+#: inc/class-plugin.php:130
 msgid "Total"
 msgstr "Усього"
 
-#: inc/class-plugin.php:129
+#: inc/class-plugin.php:131
 msgid "Approved"
 msgstr "Схвалено"
 
-#: inc/class-plugin.php:130
+#: inc/class-plugin.php:132
 msgid "Successful"
 msgstr "Успішно"
 
-#: inc/class-plugin.php:132
+#: inc/class-plugin.php:133
+msgid "Requires retry"
+msgstr "Потрібен повтор"
+
+#: inc/class-plugin.php:134 inc/class-report-store.php:69
+msgid "Workflow stage"
+msgstr "Етап обробки"
+
+#: inc/class-plugin.php:135 inc/class-report-store.php:70
+msgid "Folio operation"
+msgstr "Операція ФОЛІО"
+
+#: inc/class-plugin.php:136 inc/class-report-store.php:71
+msgid "Folio status"
+msgstr "Статус ФОЛІО"
+
+#: inc/class-plugin.php:137 inc/class-report-store.php:68
+msgid "S3 key"
+msgstr "Ключ S3"
+
+#: inc/class-plugin.php:139
+msgid "Refreshing the S3 index"
+msgstr "Оновлення індексу S3"
+
+#: inc/class-plugin.php:140
+msgid "Repeating the S3 index refresh"
+msgstr "Повторне оновлення індексу S3"
+
+#: inc/class-plugin.php:141
+msgid "Checking the S3 object proof"
+msgstr "Перевірка підтвердження об'єкта S3"
+
+#: inc/class-plugin.php:142
+msgid "S3 object verified"
+msgstr "Об'єкт S3 перевірено"
+
+#: inc/class-plugin.php:143
+msgid "Reading Folio references"
+msgstr "Читання посилань ФОЛІО"
+
+#: inc/class-plugin.php:144
+msgid "Preparing the Folio change"
+msgstr "Підготовка зміни у ФОЛІО"
+
+#: inc/class-plugin.php:145
+msgid "Checking the Folio preview"
+msgstr "Перевірка попереднього перегляду ФОЛІО"
+
+#: inc/class-plugin.php:146
+msgid "Applying the Folio change"
+msgstr "Застосування зміни у ФОЛІО"
+
+#: inc/class-plugin.php:147
+msgid "Assigning the image in WooCommerce"
+msgstr "Призначення зображення у WooCommerce"
+
+#: inc/class-plugin.php:148
+msgid "Completed"
+msgstr "Завершено"
+
+#: inc/class-plugin.php:151
+msgid "Set main image"
+msgstr "Установити головне зображення"
+
+#: inc/class-plugin.php:152
+msgid "Update gallery image"
+msgstr "Оновити зображення галереї"
+
+#: inc/class-plugin.php:153
+msgid "Add gallery image"
+msgstr "Додати зображення галереї"
+
+#: inc/class-plugin.php:157
+msgid "Applied"
+msgstr "Застосовано"
+
+#: inc/class-plugin.php:158
+msgid "Already correct"
+msgstr "Уже правильно"
+
+#: inc/class-plugin.php:159
+msgid "Blocked"
+msgstr "Заблоковано"
+
+#: inc/class-plugin.php:162
 msgid "Verification passed"
 msgstr "Перевірку пройдено"
 
-#: inc/class-plugin.php:133
-msgid "Uploaded successfully"
-msgstr "Успішно завантажено"
+#: inc/class-plugin.php:163
+msgid "Uploaded; synchronization is pending"
+msgstr "Завантажено; очікується синхронізація"
 
-#: inc/class-plugin.php:134
+#: inc/class-plugin.php:164
+msgid "Full workflow completed"
+msgstr "Повний цикл завершено"
+
+#: inc/class-plugin.php:165
 msgid "Registry error"
 msgstr "Помилка реєстру"
 
-#: inc/class-plugin.php:135
+#: inc/class-plugin.php:166
 msgid "Unsafe filename"
 msgstr "Небезпечне ім'я файлу"
 
-#: inc/class-plugin.php:136
+#: inc/class-plugin.php:167
 msgid "File not found"
 msgstr "Файл не знайдено"
 
-#: inc/class-plugin.php:137
+#: inc/class-plugin.php:168
 msgid "Extra file"
 msgstr "Зайвий файл"
 
-#: inc/class-plugin.php:138
+#: inc/class-plugin.php:169
 msgid "Invalid image format"
 msgstr "Некоректний формат зображення"
 
-#: inc/class-plugin.php:139
+#: inc/class-plugin.php:170
 msgid "Image decode failed"
 msgstr "Не вдалося декодувати зображення"
 
-#: inc/class-plugin.php:140
+#: inc/class-plugin.php:171
 msgid "Invalid image dimensions"
 msgstr "Некоректні розміри зображення"
 
-#: inc/class-plugin.php:141
+#: inc/class-plugin.php:172
 msgid "File is too large"
 msgstr "Файл завеликий"
 
-#: inc/class-plugin.php:142
+#: inc/class-plugin.php:173
 msgid "Duplicate in batch"
 msgstr "Дублікат у пакеті"
 
-#: inc/class-plugin.php:143
+#: inc/class-plugin.php:174
 msgid "Possible visual duplicate"
 msgstr "Можливий візуальний дублікат"
 
-#: inc/class-plugin.php:144
+#: inc/class-plugin.php:175
 msgid "Product not found"
 msgstr "Товар не знайдено"
 
-#: inc/class-plugin.php:145
+#: inc/class-plugin.php:176
 msgid "Identifier mismatch"
 msgstr "Ідентифікатори не збігаються"
 
-#: inc/class-plugin.php:146
+#: inc/class-plugin.php:177
 msgid "WordPress filename conflict"
 msgstr "Конфлікт імені файлу у WordPress"
 
-#: inc/class-plugin.php:147
+#: inc/class-plugin.php:178
 msgid "S3 filename conflict"
 msgstr "Конфлікт імені файлу в S3"
 
-#: inc/class-plugin.php:148
+#: inc/class-plugin.php:179
 msgid "Upload failed"
 msgstr "Завантаження не виконано"
 
-#: inc/class-plugin.php:149
+#: inc/class-plugin.php:180
 msgid "Attachment metadata failed"
 msgstr "Помилка метаданих вкладення"
 
-#: inc/class-plugin.php:150
+#: inc/class-plugin.php:181
 msgid "OVH verification failed"
 msgstr "Перевірка OVH не пройдена"
 
-#: inc/class-plugin.php:159 inc/class-plugin.php:486
+#: inc/class-plugin.php:182
+msgid "S3 index refresh failed"
+msgstr "Не вдалося оновити індекс S3"
+
+#: inc/class-plugin.php:183
+msgid "S3 object proof failed"
+msgstr "Не вдалося підтвердити об'єкт S3"
+
+#: inc/class-plugin.php:184
+msgid "Folio lookup failed"
+msgstr "Не вдалося виконати пошук у ФОЛІО"
+
+#: inc/class-plugin.php:185
+msgid "Folio preview blocked"
+msgstr "Попередній перегляд ФОЛІО заблоковано"
+
+#: inc/class-plugin.php:186
+msgid "Folio update failed"
+msgstr "Не вдалося оновити ФОЛІО"
+
+#: inc/class-plugin.php:187
+msgid "WooCommerce image assignment failed"
+msgstr "Не вдалося призначити зображення у WooCommerce"
+
+#: inc/class-plugin.php:196 inc/class-plugin.php:540
 msgid "You do not have permission to check product images."
 msgstr "У вас немає дозволу перевіряти зображення товарів."
 
-#: inc/class-plugin.php:169
-msgid "Product image batch verification"
-msgstr "Перевірка пакетів зображень товарів"
+#: inc/class-plugin.php:206
+msgid "Product image batch workflow"
+msgstr "Повний цикл пакетного завантаження зображень"
 
-#: inc/class-plugin.php:171
+#: inc/class-plugin.php:208
 msgid ""
-"Check an XLS/XLSX registry and all source images before anything is written "
-"to the Media Library."
+"Check the XLS/XLSX registry, then upload approved images and synchronize OVH/"
+"S3, Folio and WooCommerce in one controlled operation."
 msgstr ""
-"Перевірте реєстр XLS/XLSX і всі вихідні зображення до будь-якого запису в "
-"медіатеку."
+"Перевірте реєстр XLS/XLSX, а потім однією контрольованою операцією "
+"завантажте схвалені зображення та синхронізуйте OVH/S3, ФОЛІО і WooCommerce."
 
-#: inc/class-plugin.php:177
+#: inc/class-plugin.php:214
 msgid "Verification-only mode is active."
 msgstr "Увімкнено режим лише перевірки."
 
-#: inc/class-plugin.php:178
+#: inc/class-plugin.php:215
 msgid ""
 "This stage does not write files to WordPress, OVH/S3 or product records."
 msgstr ""
 "На цьому етапі файли не записуються у WordPress, OVH/S3 або записи товарів."
 
-#: inc/class-plugin.php:184
+#: inc/class-plugin.php:221
 msgid ""
 "Before checking a batch, run a fresh Total Sync and refresh the S3 media "
 "index so product and conflict data are current."
@@ -811,48 +961,56 @@ msgstr ""
 "Перед перевіркою пакета запустіть актуальну повну синхронізацію та оновіть "
 "індекс медіа S3, щоб дані товарів і конфліктів були свіжими."
 
-#: inc/class-plugin.php:189
+#: inc/class-plugin.php:226
 msgid "Validation settings were saved."
 msgstr "Налаштування перевірки збережено."
 
-#: inc/class-plugin.php:195
+#: inc/class-plugin.php:232
 msgid ""
 "WooCommerce or PhpSpreadsheet is unavailable. Batch processing is disabled."
 msgstr "WooCommerce або PhpSpreadsheet недоступний. Пакетну обробку вимкнено."
 
-#: inc/class-plugin.php:200
+#: inc/class-plugin.php:237
 msgid "1. Select the registry and images"
 msgstr "1. Виберіть реєстр і зображення"
 
-#: inc/class-plugin.php:204
+#: inc/class-plugin.php:241
 msgid "Registry file"
 msgstr "Файл реєстру"
 
-#: inc/class-plugin.php:208
+#: inc/class-plugin.php:245
 msgid ""
 "The current four-column XLS and the new header-based template are supported."
 msgstr ""
 "Підтримуються поточний чотириколонковий XLS і новий шаблон із заголовками."
 
-#: inc/class-plugin.php:209
+#: inc/class-plugin.php:246
 msgid "Download the new XLSX template"
 msgstr "Завантажити новий шаблон XLSX"
 
-#: inc/class-plugin.php:214
+#: inc/class-plugin.php:251
 msgid "Source images"
 msgstr "Вихідні зображення"
 
-#: inc/class-plugin.php:219
+#: inc/class-plugin.php:256
 msgid "or choose multiple files"
 msgstr "або виберіть кілька файлів"
 
+#: inc/class-plugin.php:268
+msgid ""
+"Folder selection reads image files from the chosen folder. Original files "
+"and names on your computer are never changed."
+msgstr ""
+"Вибір папки зчитує з неї файли зображень. Початкові файли та їхні імена на "
+"вашому комп'ютері ніколи не змінюються."
+
 #. translators: %d: server-side maximum number of uploaded files
-#: inc/class-plugin.php:227
+#: inc/class-plugin.php:274
 #, php-format
 msgid "Server limit: up to %d image files per check."
 msgstr "Обмеження сервера: до %d файлів зображень за одну перевірку."
 
-#: inc/class-plugin.php:237
+#: inc/class-plugin.php:284
 msgid ""
 "For a four-column registry without roles, explicitly treat every row as a "
 "main product image."
@@ -860,7 +1018,7 @@ msgstr ""
 "Для чотириколонкового реєстру без ролей явно вважати кожен рядок головним "
 "зображенням товару."
 
-#: inc/class-plugin.php:241
+#: inc/class-plugin.php:288
 msgid ""
 "For header-based registries, generate canonical filenames from SKU or "
 "barcode. Legacy four-column registries always use column 2 as the "
@@ -870,63 +1028,63 @@ msgstr ""
 "штрихкоду. У старих чотириколонкових реєстрах авторитетним ім'ям завжди є "
 "значення колонки 2."
 
-#: inc/class-plugin.php:247
+#: inc/class-plugin.php:294
 msgid "Validation thresholds and capabilities"
 msgstr "Пороги та можливості перевірки"
 
-#: inc/class-plugin.php:255
+#: inc/class-plugin.php:302
 msgid "Maximum file size (MiB)"
 msgstr "Максимальний розмір файлу (МіБ)"
 
-#: inc/class-plugin.php:263
+#: inc/class-plugin.php:310
 msgid "File size warning (MiB)"
 msgstr "Попередження про розмір файлу (МіБ)"
 
-#: inc/class-plugin.php:269
+#: inc/class-plugin.php:316
 msgid "Minimum side warning (px)"
 msgstr "Попередження про мінімальну сторону (пкс)"
 
-#: inc/class-plugin.php:270
+#: inc/class-plugin.php:317
 msgid "Recommended minimum side (px)"
 msgstr "Рекомендована мінімальна сторона (пкс)"
 
-#: inc/class-plugin.php:271
+#: inc/class-plugin.php:318
 msgid "Recommended maximum side (px)"
 msgstr "Рекомендована максимальна сторона (пкс)"
 
-#: inc/class-plugin.php:272
+#: inc/class-plugin.php:319
 msgid "Large side warning (px)"
 msgstr "Попередження про велику сторону (пкс)"
 
-#: inc/class-plugin.php:273
+#: inc/class-plugin.php:320
 msgid "Hard maximum side (px)"
 msgstr "Жорстка максимальна сторона (пкс)"
 
-#: inc/class-plugin.php:274
+#: inc/class-plugin.php:321
 msgid "Hard maximum total pixels"
 msgstr "Жорсткий максимум загальної кількості пікселів"
 
-#: inc/class-plugin.php:275
+#: inc/class-plugin.php:322
 msgid "Aspect-ratio warning threshold"
 msgstr "Поріг попередження про співвідношення сторін"
 
-#: inc/class-plugin.php:276
+#: inc/class-plugin.php:323
 msgid "Filename warning length"
 msgstr "Довжина імені для попередження"
 
-#: inc/class-plugin.php:277
+#: inc/class-plugin.php:324
 msgid "Filename hard length limit"
 msgstr "Жорстке обмеження довжини імені"
 
-#: inc/class-plugin.php:282
+#: inc/class-plugin.php:329
 msgid "Treat image decoder warnings as blocking errors."
 msgstr "Вважати попередження декодера зображень блокувальними помилками."
 
-#: inc/class-plugin.php:285
+#: inc/class-plugin.php:332
 msgid "Save validation settings"
 msgstr "Зберегти налаштування перевірки"
 
-#: inc/class-plugin.php:289
+#: inc/class-plugin.php:336
 msgid ""
 "The server verifies signatures, MIME, a full image decode, dimensions, "
 "metadata and WordPress name conflicts. ClamAV, perceptual hashing and "
@@ -938,7 +1096,7 @@ msgstr ""
 "розмиття чи вмісту є точками розширення й не вважаються активними без "
 "відповідної інтеграції."
 
-#: inc/class-plugin.php:292
+#: inc/class-plugin.php:339
 msgid ""
 "These values apply only to this batch uploader. The global WordPress upload "
 "limit is not changed."
@@ -946,55 +1104,55 @@ msgstr ""
 "Ці значення діють лише для цього пакетного завантажувача. Глобальний ліміт "
 "WordPress не змінюється."
 
-#: inc/class-plugin.php:299
+#: inc/class-plugin.php:346
 msgid "Check without writing"
 msgstr "Перевірити без запису"
 
-#: inc/class-plugin.php:303
-msgid "Upload only approved rows"
-msgstr "Завантажити лише схвалені рядки"
+#: inc/class-plugin.php:350
+msgid "Upload and synchronize approved rows"
+msgstr "Завантажити й синхронізувати схвалені рядки"
 
-#: inc/class-plugin.php:307
+#: inc/class-plugin.php:354
 msgid "Download CSV report"
 msgstr "Завантажити звіт CSV"
 
-#: inc/class-plugin.php:333
+#: inc/class-plugin.php:380
 msgid "The batch could not be checked."
 msgstr "Не вдалося перевірити пакет."
 
-#: inc/class-plugin.php:351
+#: inc/class-plugin.php:404
 msgid "The dry-run token is missing."
 msgstr "Відсутній токен попередньої перевірки."
 
-#: inc/class-plugin.php:366
+#: inc/class-plugin.php:420
 msgid "The approved batch could not be uploaded."
 msgstr "Не вдалося завантажити схвалений пакет."
 
-#: inc/class-plugin.php:375
+#: inc/class-plugin.php:429
 msgid "You do not have permission to download this report."
 msgstr "У вас немає дозволу завантажити цей звіт."
 
-#: inc/class-plugin.php:383
+#: inc/class-plugin.php:437
 msgid "The report has expired or does not exist."
 msgstr "Термін дії звіту минув або звіт не існує."
 
-#: inc/class-plugin.php:396
+#: inc/class-plugin.php:450
 msgid "You do not have permission to download this template."
 msgstr "У вас немає дозволу завантажити цей шаблон."
 
-#: inc/class-plugin.php:401
+#: inc/class-plugin.php:455
 msgid "PhpSpreadsheet is unavailable."
 msgstr "PhpSpreadsheet недоступний."
 
-#: inc/class-plugin.php:432
+#: inc/class-plugin.php:486
 msgid "You do not have permission to change validation settings."
 msgstr "У вас немає дозволу змінювати налаштування перевірки."
 
-#: inc/class-plugin.php:489
+#: inc/class-plugin.php:543
 msgid "WooCommerce or PhpSpreadsheet is unavailable."
 msgstr "WooCommerce або PhpSpreadsheet недоступний."
 
-#: inc/class-plugin.php:497
+#: inc/class-plugin.php:551
 msgid "The registry file is missing."
 msgstr "Файл реєстру відсутній."
 
@@ -1169,6 +1327,156 @@ msgstr "ID вкладення"
 msgid "URL"
 msgstr "URL"
 
+#: inc/class-report-store.php:72
+msgid "Folio request ID"
+msgstr "ID запиту ФОЛІО"
+
+#: inc/class-workflow-service.php:37
+msgid ""
+"The shared Lavka synchronization lock is unavailable. The upload was not "
+"started."
+msgstr ""
+"Спільний сервіс блокування синхронізацій Lavka недоступний. Завантаження не "
+"розпочато."
+
+#: inc/class-workflow-service.php:45
+msgid "Product image batch upload"
+msgstr "Пакетне завантаження зображень товарів"
+
+#: inc/class-workflow-service.php:94
+msgid ""
+"The OVH/S3 media index could not be refreshed after upload. The files remain "
+"available for a safe retry."
+msgstr ""
+"Після завантаження не вдалося оновити індекс медіа OVH/S3. Файли збережено "
+"для безпечного повтору."
+
+#: inc/class-workflow-service.php:136
+msgid ""
+"The OVH/S3 media index could not be refreshed during the verification retry."
+msgstr "Під час повторної перевірки не вдалося оновити індекс медіа OVH/S3."
+
+#: inc/class-workflow-service.php:147
+msgid ""
+"The uploaded object could not be confirmed in the refreshed OVH/S3 index."
+msgstr ""
+"Не вдалося підтвердити завантажений об'єкт в оновленому індексі OVH/S3."
+
+#: inc/class-workflow-service.php:193
+msgid "Folio synchronization requires an exact SKU."
+msgstr "Для синхронізації з ФОЛІО потрібен точний артикул."
+
+#: inc/class-workflow-service.php:211
+msgid ""
+"The current Folio image references could not be read. WooCommerce assignment "
+"was not changed."
+msgstr ""
+"Не вдалося прочитати поточні посилання на зображення у ФОЛІО. Призначення у "
+"WooCommerce не змінено."
+
+#: inc/class-workflow-service.php:226
+msgid ""
+"Folio returned more image rows than can be checked safely in one exact "
+"search."
+msgstr ""
+"ФОЛІО повернуло більше рядків зображень, ніж можна безпечно перевірити одним "
+"точним пошуком."
+
+#: inc/class-workflow-service.php:262
+msgid "Folio refused the preview. No WooCommerce image assignment was changed."
+msgstr ""
+"ФОЛІО відхилило попередній перегляд. Призначення зображень у WooCommerce не "
+"змінено."
+
+#: inc/class-workflow-service.php:277
+msgid ""
+"Folio did not apply the approved image references. The uploaded files remain "
+"available for retry."
+msgstr ""
+"ФОЛІО не застосувало схвалені посилання на зображення. Завантажені файли "
+"збережено для повтору."
+
+#: inc/class-workflow-service.php:318
+msgid "Folio returned more than one main-image record for the SKU."
+msgstr ""
+"ФОЛІО повернуло більше одного запису головного зображення для артикула."
+
+#: inc/class-workflow-service.php:331
+msgid "The Folio change is missing an exact filename or S3 proof."
+msgstr "Для зміни у ФОЛІО бракує точного імені файлу або підтвердження S3."
+
+#: inc/class-workflow-service.php:356
+msgid "The Folio image role is unsupported."
+msgstr "Роль зображення у ФОЛІО не підтримується."
+
+#: inc/class-workflow-service.php:365
+msgid "Folio contains duplicate gallery rows for the target filename."
+msgstr "У ФОЛІО є дубльовані рядки галереї для цільового імені файлу."
+
+#: inc/class-workflow-service.php:379
+msgid "Folio contains more than one gallery row at the requested position."
+msgstr "У ФОЛІО є більше одного рядка галереї на запитаній позиції."
+
+#: inc/class-workflow-service.php:390
+msgid "The Folio gallery row has no stable record ID."
+msgstr "Рядок галереї ФОЛІО не має стабільного ID запису."
+
+#: inc/class-workflow-service.php:395
+msgid ""
+"More than one uploaded image would update the same Folio gallery row. Adjust "
+"the gallery positions and check the batch again."
+msgstr ""
+"Кілька завантажених зображень намагаються оновити один рядок галереї ФОЛІО. "
+"Виправте позиції галереї та повторно перевірте пакет."
+
+#: inc/class-workflow-service.php:443
+msgid "The uploaded object is missing from the current S3 proof context."
+msgstr "У поточних даних для підтвердження S3 бракує завантаженого об'єкта."
+
+#: inc/class-workflow-service.php:458
+msgid ""
+"The uploaded filename was not found in the refreshed OVH/S3 media index."
+msgstr ""
+"Ім'я завантаженого файлу не знайдено в оновленому індексі медіа OVH/S3."
+
+#: inc/class-workflow-service.php:475
+msgid ""
+"The refreshed S3 index does not identify exactly one object for the uploaded "
+"attachment."
+msgstr ""
+"Оновлений індекс S3 не визначає рівно один об'єкт для завантаженого "
+"вкладення."
+
+#: inc/class-workflow-service.php:484
+msgid ""
+"The S3 index row has no valid size or ETag and cannot be used as Folio proof."
+msgstr ""
+"Рядок індексу S3 не має коректного розміру або ETag, тому його не можна "
+"використати як підтвердження для ФОЛІО."
+
+#~ msgid ""
+#~ "Validates product image batches from XLS/XLSX manifests and reports "
+#~ "naming, product, WordPress and S3 conflicts."
+#~ msgstr ""
+#~ "Перевіряє пакети зображень товарів за реєстрами XLS/XLSX і повідомляє про "
+#~ "конфлікти імен, товарів, WordPress та S3."
+
+#~ msgid "Uploading approved files…"
+#~ msgstr "Завантажуємо схвалені файли…"
+
+#~ msgid "Upload only the rows that passed all checks?"
+#~ msgstr "Завантажити лише рядки, що пройшли всі перевірки?"
+
+#~ msgid "Uploaded successfully"
+#~ msgstr "Успішно завантажено"
+
+#~ msgid ""
+#~ "Check an XLS/XLSX registry and all source images before anything is "
+#~ "written to the Media Library."
+#~ msgstr ""
+#~ "Перевірте реєстр XLS/XLSX і всі вихідні зображення до будь-якого запису в "
+#~ "медіатеку."
+
 #~ msgid ""
 #~ "The SKU mixes visually similar Latin and Cyrillic letters. Correct it "
 #~ "explicitly in the registry."
@@ -1190,6 +1498,3 @@ msgstr "URL"
 #~ msgstr ""
 #~ "Створювати канонічні імена файлів з артикула або штрихкоду та додавати "
 #~ "запропоноване ім'я до звіту."
-
-#~ msgid "Product image batch upload"
-#~ msgstr "Пакетне завантаження зображень товарів"

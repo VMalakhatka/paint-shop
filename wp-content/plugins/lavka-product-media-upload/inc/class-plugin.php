@@ -106,6 +106,7 @@ final class Plugin
                 'details' => __('Technical details', 'lavka-product-media-upload'),
                 'noWarnings' => __('No warnings', 'lavka-product-media-upload'),
                 'reportReady' => __('The operation is complete. Download the report for the full audit trail.', 'lavka-product-media-upload'),
+                'reportPartial' => __('The operation finished, but some rows require a safe retry. Review the errors and download the report.', 'lavka-product-media-upload'),
                 'confirmUpload' => __('Upload all approved images, refresh the S3 index, update Folio and assign the images in WooCommerce?', 'lavka-product-media-upload'),
                 's3Unavailable' => __('The S3 media index is unavailable, so remote filename conflicts were not checked.', 'lavka-product-media-upload'),
                 'extraFile' => __('Not referenced by the registry', 'lavka-product-media-upload'),
@@ -136,6 +137,7 @@ final class Plugin
                 's3Key' => __('S3 key', 'lavka-product-media-upload'),
                 'workflowStageLabels' => [
                     's3_reindex' => __('Refreshing the S3 index', 'lavka-product-media-upload'),
+                    's3_reindex_retry' => __('Repeating the S3 index refresh', 'lavka-product-media-upload'),
                     's3_proof' => __('Checking the S3 object proof', 'lavka-product-media-upload'),
                     's3_verified' => __('S3 object verified', 'lavka-product-media-upload'),
                     'folio_search' => __('Reading Folio references', 'lavka-product-media-upload'),
@@ -390,6 +392,12 @@ final class Plugin
         }
 
         $this->guard_ajax();
+
+        ignore_user_abort(true);
+        if (function_exists('set_time_limit')) {
+            @set_time_limit(900);
+        }
+        @ini_set('max_execution_time', '900');
 
         $token = sanitize_text_field(wp_unslash($_POST['batch_token'] ?? ''));
         if ($token === '') {

@@ -12,6 +12,7 @@ if (!defined('ABSPATH')) {
 final class WorkflowService
 {
     private const LOCK_TTL = 2 * HOUR_IN_SECONDS;
+    private const S3_PROOF_ATTEMPTS = 2;
 
     private MediaUploader $uploader;
     private bool $s3_table_checked = false;
@@ -24,8 +25,17 @@ final class WorkflowService
 
     public function acquire_lock(string $batch_id): array
     {
-        if (!function_exists('lavka_ecosystem_lock_acquire')) {
-            return ['ok' => true, 'token' => null, 'lock' => null];
+        if (
+            !function_exists('lavka_ecosystem_lock_acquire')
+            || !function_exists('lavka_ecosystem_lock_touch')
+            || !function_exists('lavka_ecosystem_lock_release')
+        ) {
+            return [
+                'ok' => false,
+                'token' => null,
+                'lock' => null,
+                'message' => __('The shared Lavka synchronization lock is unavailable. The upload was not started.', 'lavka-product-media-upload'),
+            ];
         }
 
         return lavka_ecosystem_lock_acquire(
@@ -87,20 +97,57 @@ final class WorkflowService
             );
         }
 
-        foreach ($uploaded_indexes as $index) {
-            $proof = $this->s3_proof($rows[$index]);
-            if (!$proof['ok']) {
+        $pending_proofs = array_fill_keys($uploaded_indexes, true);
+        $proof_failures = [];
+        $retry_reindex_failure = null;
+        for ($attempt = 1; $attempt <= self::S3_PROOF_ATTEMPTS && $pending_proofs; $attempt++) {
+            foreach (array_keys($pending_proofs) as $index) {
+                $proof = $this->s3_proof($rows[$index]);
+                if (!$proof['ok']) {
+                    $proof_failures[$index] = $proof;
+                    continue;
+                }
+                $rows[$index]['_s3_proof'] = $proof['proof'];
+                $rows[$index]['workflow_stage'] = 's3_verified';
+                unset($pending_proofs[$index], $proof_failures[$index]);
+            }
+
+            if (!$pending_proofs || $attempt === self::S3_PROOF_ATTEMPTS) {
+                break;
+            }
+
+            $this->touch_lock($lock_token, [
+                'stage' => 's3_reindex_retry',
+                'pending' => count($pending_proofs),
+            ]);
+            sleep(2);
+            $retry_reindex = $this->java_request_with_retry('POST', '/admin/media/reindex', []);
+            if (!$this->java_success($retry_reindex)) {
+                $retry_reindex_failure = $retry_reindex;
+                break;
+            }
+        }
+
+        foreach (array_keys($pending_proofs) as $index) {
+            if ($retry_reindex_failure !== null) {
                 $rows[$index] = $this->fail_row(
                     $rows[$index],
-                    'S3_PROOF_FAILED',
-                    $proof['message'],
-                    $proof['technical'] ?? '',
-                    's3_proof'
+                    'S3_INDEX_FAILED',
+                    __('The OVH/S3 media index could not be refreshed during the verification retry.', 'lavka-product-media-upload'),
+                    $this->java_technical($retry_reindex_failure),
+                    's3_reindex_retry'
                 );
                 continue;
             }
-            $rows[$index]['_s3_proof'] = $proof['proof'];
-            $rows[$index]['workflow_stage'] = 's3_verified';
+
+            $failure = $proof_failures[$index] ?? [];
+            $rows[$index] = $this->fail_row(
+                $rows[$index],
+                'S3_PROOF_FAILED',
+                (string) ($failure['message'] ?? __('The uploaded object could not be confirmed in the refreshed OVH/S3 index.', 'lavka-product-media-upload')),
+                (string) ($failure['technical'] ?? ''),
+                's3_proof'
+            );
         }
 
         $groups = [];
@@ -170,6 +217,17 @@ final class WorkflowService
         $items = isset($search['json']['items']) && is_array($search['json']['items'])
             ? array_values(array_filter($search['json']['items'], 'is_array'))
             : [];
+        $total_items = isset($search['json']['total']) ? (int) $search['json']['total'] : count($items);
+        if ($total_items > count($items)) {
+            return $this->fail_indexes(
+                $rows,
+                $indexes,
+                'FOLIO_SEARCH_FAILED',
+                __('Folio returned more image rows than can be checked safely in one exact search.', 'lavka-product-media-upload'),
+                'total=' . $total_items . '; returned=' . count($items),
+                'folio_search'
+            );
+        }
         $built = $this->build_changes($rows, $indexes, $items);
         if (!$built['ok']) {
             return $this->fail_indexes(
@@ -420,10 +478,10 @@ final class WorkflowService
         }
 
         $match = $matches[0];
-        if ((string) ($match['etag'] ?? '') === '') {
+        if ((int) ($match['size_bytes'] ?? 0) < 1 || (string) ($match['etag'] ?? '') === '') {
             return [
                 'ok' => false,
-                'message' => __('The S3 index row has no ETag and cannot be used as Folio proof.', 'lavka-product-media-upload'),
+                'message' => __('The S3 index row has no valid size or ETag and cannot be used as Folio proof.', 'lavka-product-media-upload'),
                 'technical' => (string) ($match['full_key'] ?? ''),
             ];
         }
@@ -471,10 +529,25 @@ final class WorkflowService
                 'technical' => 'expected_results=' . $expected . '; actual_results=' . count($results),
             ];
         }
-        $statuses = [];
-        foreach ($results as $result) {
+        $statuses = array_fill(0, $expected, null);
+        foreach ($results as $fallback_index => $result) {
+            if (!is_array($result)) {
+                return [
+                    'ok' => false,
+                    'statuses' => [],
+                    'technical' => 'invalid_result_at=' . $fallback_index,
+                ];
+            }
+            $index = array_key_exists('index', $result) ? (int) $result['index'] : $fallback_index;
+            if ($index < 0 || $index >= $expected || $statuses[$index] !== null) {
+                return [
+                    'ok' => false,
+                    'statuses' => [],
+                    'technical' => 'invalid_or_duplicate_result_index=' . $index,
+                ];
+            }
             $status = sanitize_key((string) ($result['status'] ?? ''));
-            $statuses[] = $status;
+            $statuses[$index] = $status;
             if (!in_array($status, $allowed, true)) {
                 return [
                     'ok' => false,
@@ -482,6 +555,9 @@ final class WorkflowService
                     'technical' => wp_json_encode($response['json'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
                 ];
             }
+        }
+        if (in_array(null, $statuses, true)) {
+            return ['ok' => false, 'statuses' => [], 'technical' => 'missing_result_index'];
         }
         return ['ok' => true, 'statuses' => $statuses, 'technical' => ''];
     }

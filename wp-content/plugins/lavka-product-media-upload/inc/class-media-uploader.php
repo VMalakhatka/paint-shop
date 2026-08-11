@@ -8,6 +8,8 @@ if (!defined('ABSPATH')) {
 
 final class MediaUploader
 {
+    private const NAME_LOCK_TTL = 30 * MINUTE_IN_SECONDS;
+
     private ImageValidator $validator;
     private array $thresholds;
 
@@ -38,7 +40,7 @@ final class MediaUploader
 
         $lock_name = 'lpmu_name_lock_' . md5($filename);
         $lock_token = wp_generate_uuid4();
-        if (!add_option($lock_name, $lock_token, '', false)) {
+        if (!$this->acquire_name_lock($lock_name, $lock_token)) {
             return $this->failure($row, 'NAME_CONFLICT_WP', __('Another upload is currently using the same canonical filename.', 'lavka-product-media-upload'));
         }
 
@@ -90,8 +92,12 @@ final class MediaUploader
             $exact_name_callback = static function (string $dir, string $name, string $ext) use ($filename): string {
                 return $filename;
             };
+            $disable_big_image_scaling = static function () {
+                return false;
+            };
 
             try {
+                add_filter('big_image_size_threshold', $disable_big_image_scaling, 10, 1);
                 $attachment_id = media_handle_upload(
                     $field,
                     0,
@@ -112,6 +118,7 @@ final class MediaUploader
                     ]
                 );
             } finally {
+                remove_filter('big_image_size_threshold', $disable_big_image_scaling, 10);
                 if ($previous_file === null) {
                     unset($_FILES[$field]);
                 } else {
@@ -135,9 +142,39 @@ final class MediaUploader
             if ($server_copy !== '' && file_exists($server_copy)) {
                 wp_delete_file($server_copy);
             }
-            if (get_option($lock_name) === $lock_token) {
-                delete_option($lock_name);
-            }
+            $this->release_name_lock($lock_name, $lock_token);
+        }
+    }
+
+    private function acquire_name_lock(string $lock_name, string $lock_token): bool
+    {
+        $value = [
+            'token' => $lock_token,
+            'expires_at' => time() + self::NAME_LOCK_TTL,
+        ];
+        if (add_option($lock_name, $value, '', false)) {
+            return true;
+        }
+
+        $current = get_option($lock_name);
+        $expires_at = is_array($current) ? (int) ($current['expires_at'] ?? 0) : 0;
+        if ($expires_at >= time()) {
+            return false;
+        }
+
+        delete_option($lock_name);
+        return add_option($lock_name, $value, '', false);
+    }
+
+    private function release_name_lock(string $lock_name, string $lock_token): void
+    {
+        $current = get_option($lock_name);
+        if (
+            is_array($current)
+            && isset($current['token'])
+            && hash_equals((string) $current['token'], $lock_token)
+        ) {
+            delete_option($lock_name);
         }
     }
 
@@ -387,10 +424,12 @@ final class MediaUploader
         }
         if ($role === 'gallery') {
             $gallery = array_values(array_filter(array_map('intval', $product->get_gallery_image_ids())));
-            if (!in_array($attachment_id, $gallery, true)) {
-                $position = max(1, (int) ($row['position'] ?? 1));
-                array_splice($gallery, min(count($gallery), $position - 1), 0, [$attachment_id]);
-            }
+            $gallery = array_values(array_filter(
+                $gallery,
+                static fn(int $current_id): bool => $current_id !== $attachment_id
+            ));
+            $position = max(1, (int) ($row['position'] ?? 1));
+            array_splice($gallery, min(count($gallery), $position - 1), 0, [$attachment_id]);
             $product->set_gallery_image_ids($gallery);
             $product->save();
             return ['ok' => true];

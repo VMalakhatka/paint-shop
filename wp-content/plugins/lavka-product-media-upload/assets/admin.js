@@ -273,6 +273,7 @@
 
     function renderSummary(result, completed) {
         var counts = result.summary || {};
+        var requiresRetry = completed && ((counts.partial || 0) > 0 || (counts.errors || 0) > 0);
         var cards = [
             [strings.total, counts.total || 0],
             [completed ? strings.successful : strings.approved, completed ? (counts.success || 0) : (counts.ready || 0)],
@@ -283,7 +284,8 @@
         summary.innerHTML = '<div class="lpmu-summary-grid">' + cards.map(function (card) {
             return '<div><strong>' + escapeHtml(card[1]) + '</strong><span>' + escapeHtml(card[0]) + '</span></div>';
         }).join('') + '</div>'
-            + '<div class="notice notice-success inline"><p>' + escapeHtml(strings.reportReady) + '</p></div>'
+            + '<div class="notice ' + (requiresRetry ? 'notice-warning' : 'notice-success') + ' inline"><p>'
+            + escapeHtml(requiresRetry ? strings.reportPartial : strings.reportReady) + '</p></div>'
             + (result.capabilities && !result.capabilities.s3_index_check
                 ? '<div class="notice notice-warning inline"><p>' + escapeHtml(strings.s3Unavailable) + '</p></div>'
                 : '');
