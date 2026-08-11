@@ -54,6 +54,20 @@
     color: #2271b1;
 }
 
+.lpmu-source-actions {
+    margin: 10px 0 4px;
+}
+
+.lpmu-source-actions .button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.lpmu-source-actions .dashicons {
+    margin-top: 2px;
+}
+
 .lpmu-confirm {
     display: block;
     margin-top: 20px;
@@ -129,7 +143,7 @@
 
 .lpmu-summary-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(120px, 190px));
+    grid-template-columns: repeat(auto-fit, minmax(120px, 190px));
     gap: 12px;
     margin: 16px 0;
 }

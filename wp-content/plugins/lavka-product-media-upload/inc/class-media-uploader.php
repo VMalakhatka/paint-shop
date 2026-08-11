@@ -94,7 +94,7 @@ final class MediaUploader
             try {
                 $attachment_id = media_handle_upload(
                     $field,
-                    $product_id,
+                    0,
                     [
                         'post_title' => (string) ($row['product_name'] ?: pathinfo($filename, PATHINFO_FILENAME)),
                         'post_excerpt' => '',
@@ -181,11 +181,49 @@ final class MediaUploader
             );
         }
 
+        update_post_meta($attachment_id, '_lpmu_verified_at', current_time('mysql'));
+
+        $attached_file = (string) get_post_meta($attachment_id, '_wp_attached_file', true);
+        return array_merge($this->public_row($row), [
+            'valid' => true,
+            'status' => 'UPLOADED',
+            'attachment_id' => $attachment_id,
+            'url' => $post_check['url'],
+            's3_key' => $attached_file,
+            'errors' => [],
+            'warnings' => array_values(array_unique(array_merge(
+                (array) ($row['warnings'] ?? []),
+                (array) ($post_check['warnings'] ?? []),
+                (array) ($remote['warnings'] ?? [])
+            ))),
+            'technical' => '',
+        ]);
+    }
+
+    /**
+     * Assigns a remotely verified attachment to Woo only after Folio accepted it.
+     */
+    public function finalize(
+        array $row,
+        string $batch_id,
+        string $manifest_hash,
+        string $folio_status,
+        string $external_request_id
+    ): array {
+        $attachment_id = (int) ($row['attachment_id'] ?? 0);
+        if ($attachment_id < 1) {
+            return $this->failure(
+                $row,
+                'WOO_ASSIGN_FAILED',
+                __('The verified attachment is missing before WooCommerce assignment.', 'lavka-product-media-upload')
+            );
+        }
+
         $role_result = $this->assign_role($attachment_id, $row);
         if (!$role_result['ok']) {
             return $this->failure(
-                array_merge($row, ['attachment_id' => $attachment_id, 'url' => $post_check['url']]),
-                'UPLOAD_FAILED',
+                $row,
+                'WOO_ASSIGN_FAILED',
                 $role_result['message'],
                 $role_result['technical'] ?? ''
             );
@@ -196,9 +234,13 @@ final class MediaUploader
             (int) ($row['product_id'] ?? 0)
         );
 
-        update_post_meta($attachment_id, '_lpmu_verified_at', current_time('mysql'));
+        $completed_at = current_time('mysql');
+        update_post_meta($attachment_id, '_lpmu_folio_status', $folio_status);
+        update_post_meta($attachment_id, '_lpmu_folio_external_request_id', $external_request_id);
+        update_post_meta($attachment_id, '_lpmu_workflow_completed_at', $completed_at);
 
         $attached_file = (string) get_post_meta($attachment_id, '_wp_attached_file', true);
+        $url = (string) wp_get_attachment_url($attachment_id);
         $payload = [
             'batch_id' => $batch_id,
             'manifest_hash' => $manifest_hash,
@@ -207,7 +249,7 @@ final class MediaUploader
             'filename' => (string) ($row['canonical_file'] ?? ''),
             'source_sha256' => (string) ($row['sha256'] ?? ''),
             's3_key' => $attached_file,
-            's3_url' => $post_check['url'],
+            's3_url' => $url,
             'role' => (string) ($row['role'] ?? ''),
             'position' => (int) ($row['position'] ?? 0),
             'attachment_id' => $attachment_id,
@@ -218,9 +260,8 @@ final class MediaUploader
         ];
 
         /**
-         * Fires only after WordPress metadata, product assignment and remote-object verification succeed.
-         *
-         * Java/Folio integration may subscribe without changing this uploader.
+         * Fires only after WordPress metadata, S3 proof, Folio synchronization,
+         * product assignment and remote-object verification succeed.
          */
         do_action('lavka_product_media_upload_after_upload', $payload);
 
@@ -228,12 +269,14 @@ final class MediaUploader
             'valid' => true,
             'status' => 'SUCCESS',
             'attachment_id' => $attachment_id,
-            'url' => $post_check['url'],
+            'url' => $url,
+            's3_key' => $attached_file,
+            'workflow_stage' => 'completed',
+            'folio_status' => $folio_status,
+            'folio_external_request_id' => $external_request_id,
             'errors' => [],
             'warnings' => array_values(array_unique(array_merge(
                 (array) ($row['warnings'] ?? []),
-                (array) ($post_check['warnings'] ?? []),
-                (array) ($remote['warnings'] ?? []),
                 $parent_warnings
             ))),
             'technical' => '',

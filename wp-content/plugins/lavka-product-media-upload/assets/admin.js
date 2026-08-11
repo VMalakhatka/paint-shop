@@ -5,6 +5,8 @@
     var strings = data.strings || {};
     var registryInput = document.getElementById('lpmu-registry');
     var imagesInput = document.getElementById('lpmu-images');
+    var folderInput = document.getElementById('lpmu-folder');
+    var folderButton = document.getElementById('lpmu-folder-button');
     var dropZone = document.getElementById('lpmu-drop-zone');
     var fileCount = document.getElementById('lpmu-file-count');
     var legacyMain = document.getElementById('lpmu-legacy-main');
@@ -165,6 +167,11 @@
         return (strings.statusLabels && strings.statusLabels[status]) || status || '';
     }
 
+    function mappedLabel(mapName, value) {
+        var labels = strings[mapName] || {};
+        return labels[value] || value || '';
+    }
+
     function listBlock(title, entries, type) {
         if (!entries || !entries.length) {
             return '';
@@ -225,6 +232,18 @@
             if (row.attachment_id) {
                 assignment.push('<strong>' + escapeHtml(strings.attachment) + ':</strong> #' + escapeHtml(row.attachment_id));
             }
+            if (row.workflow_stage) {
+                assignment.push('<strong>' + escapeHtml(strings.workflow) + ':</strong> ' + escapeHtml(mappedLabel('workflowStageLabels', row.workflow_stage)));
+            }
+            if (row.folio_operation) {
+                assignment.push('<strong>' + escapeHtml(strings.folioOperation) + ':</strong> ' + escapeHtml(mappedLabel('folioOperationLabels', row.folio_operation)));
+            }
+            if (row.folio_status) {
+                assignment.push('<strong>' + escapeHtml(strings.folioStatus) + ':</strong> ' + escapeHtml(mappedLabel('folioStatusLabels', row.folio_status)));
+            }
+            if (row.s3_key) {
+                assignment.push('<strong>' + escapeHtml(strings.s3Key) + ':</strong> <code>' + escapeHtml(row.s3_key) + '</code>');
+            }
 
             return '<tr class="' + stateClass + '">'
                 + '<td>' + escapeHtml(row.row_number || '—') + '</td>'
@@ -257,6 +276,7 @@
         var cards = [
             [strings.total, counts.total || 0],
             [completed ? strings.successful : strings.approved, completed ? (counts.success || 0) : (counts.ready || 0)],
+            [strings.partial, completed ? (counts.partial || 0) : 0],
             [strings.errors, counts.errors || 0],
             [strings.warnings, counts.warnings || 0]
         ];
@@ -280,8 +300,22 @@
 
     registryInput.addEventListener('change', resetApproval);
     imagesInput.addEventListener('change', function () {
+        if (folderInput) {
+            folderInput.value = '';
+        }
         setFiles(imagesInput.files);
     });
+    if (folderInput) {
+        folderInput.addEventListener('change', function () {
+            imagesInput.value = '';
+            setFiles(folderInput.files);
+        });
+    }
+    if (folderButton && folderInput) {
+        folderButton.addEventListener('click', function () {
+            folderInput.click();
+        });
+    }
     legacyMain.addEventListener('change', resetApproval);
     if (generateNames) {
         generateNames.addEventListener('change', resetApproval);

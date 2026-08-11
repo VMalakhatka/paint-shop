@@ -137,20 +137,48 @@ final class BatchService
             }
         }
 
-        $uploader = new MediaUploader();
-        $completed = [];
-        foreach ($validation['rows'] as $row) {
-            if (empty($row['valid'])) {
-                $completed[] = $row;
-                continue;
-            }
-            $completed[] = $uploader->upload(
-                $row,
-                (string) $stored['batch_id'],
-                (string) $stored['manifest_hash']
+        $workflow = new WorkflowService();
+        $lock = $workflow->acquire_lock((string) $stored['batch_id']);
+        if (empty($lock['ok'])) {
+            throw new \RuntimeException(
+                (string) ($lock['message'] ?? __('Another Lavka synchronization is running. Try this batch again later.', 'lavka-product-media-upload')),
+                409
             );
         }
-        $completed = array_merge($completed, $validation['extra_files']);
+
+        $lock_token = isset($lock['token']) ? (string) $lock['token'] : null;
+        try {
+            $uploader = new MediaUploader();
+            $completed = [];
+            $ready_total = count(array_filter($validation['rows'], static fn(array $row): bool => !empty($row['valid'])));
+            $ready_done = 0;
+            foreach ($validation['rows'] as $row) {
+                if (empty($row['valid'])) {
+                    $completed[] = $row;
+                    continue;
+                }
+                $ready_done++;
+                $workflow->touch_lock($lock_token, [
+                    'stage' => 'upload',
+                    'uploaded' => $ready_done,
+                    'total' => $ready_total,
+                ]);
+                $completed[] = $uploader->upload(
+                    $row,
+                    (string) $stored['batch_id'],
+                    (string) $stored['manifest_hash']
+                );
+            }
+            $completed = $workflow->complete(
+                $completed,
+                (string) $stored['batch_id'],
+                (string) $stored['manifest_hash'],
+                $lock_token
+            );
+            $completed = array_merge($completed, $validation['extra_files']);
+        } finally {
+            $workflow->release_lock($lock_token);
+        }
 
         $summary = $this->summarize($completed);
         $report = [
@@ -161,6 +189,24 @@ final class BatchService
             'summary' => $summary,
         ];
         $report_link = ReportStore::store($report);
+
+        if (function_exists('lavka_ecosystem_log_event')) {
+            $has_failures = (int) ($summary['errors'] ?? 0) > 0 || (int) ($summary['partial'] ?? 0) > 0;
+            lavka_ecosystem_log_event($has_failures ? 'media_batch_partial' : 'media_batch_completed', [
+                'level' => $has_failures ? 'warning' : 'info',
+                'owner' => 'lavka-product-media-upload',
+                'process' => 'product_media_batch',
+                'source' => 'manual',
+                'message' => $has_failures
+                    ? 'Product image batch completed with rows requiring attention.'
+                    : 'Product image batch completed successfully.',
+                'context' => [
+                    'batch_id' => (string) $stored['batch_id'],
+                    'manifest_hash' => (string) $stored['manifest_hash'],
+                    'summary' => $summary,
+                ],
+            ]);
+        }
 
         delete_transient($this->batch_key($batch_token));
 
@@ -228,6 +274,7 @@ final class BatchService
             'total' => count($rows),
             'ready' => 0,
             'success' => 0,
+            'partial' => 0,
             'errors' => 0,
             'warnings' => 0,
         ];
@@ -237,6 +284,13 @@ final class BatchService
             }
             if (($row['status'] ?? '') === 'SUCCESS') {
                 $summary['success']++;
+            }
+            if (
+                !empty($row['attachment_id'])
+                && ($row['status'] ?? '') !== 'SUCCESS'
+                && !in_array(($row['status'] ?? ''), ['READY', 'EXTRA_FILE'], true)
+            ) {
+                $summary['partial']++;
             }
             if (!empty($row['errors'])) {
                 $summary['errors']++;

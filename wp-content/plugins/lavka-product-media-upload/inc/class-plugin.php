@@ -87,7 +87,7 @@ final class Plugin
             'writesEnabled' => \lpmu_writes_enabled(),
             'strings' => [
                 'checking' => __('Checking the batch…', 'lavka-product-media-upload'),
-                'uploading' => __('Uploading approved files…', 'lavka-product-media-upload'),
+                'uploading' => __('Uploading to OVH/S3, synchronizing Folio and assigning WooCommerce images…', 'lavka-product-media-upload'),
                 'requestFailed' => __('The server request failed.', 'lavka-product-media-upload'),
                 'selectRegistry' => __('Select an XLS or XLSX registry.', 'lavka-product-media-upload'),
                 'selectImages' => __('Select at least one image.', 'lavka-product-media-upload'),
@@ -99,13 +99,14 @@ final class Plugin
                 /* translators: %d: number of selected image files */
                 'filesSelected' => __('%d image files selected', 'lavka-product-media-upload'),
                 'dropHint' => __('Drop JPEG, PNG or WebP files here', 'lavka-product-media-upload'),
+                'chooseFolder' => __('Choose an image folder', 'lavka-product-media-upload'),
                 'ready' => __('Ready', 'lavka-product-media-upload'),
                 'errors' => __('Errors', 'lavka-product-media-upload'),
                 'warnings' => __('Warnings', 'lavka-product-media-upload'),
                 'details' => __('Technical details', 'lavka-product-media-upload'),
                 'noWarnings' => __('No warnings', 'lavka-product-media-upload'),
-                'reportReady' => __('The check is complete. Download the report for the full audit trail.', 'lavka-product-media-upload'),
-                'confirmUpload' => __('Upload only the rows that passed all checks?', 'lavka-product-media-upload'),
+                'reportReady' => __('The operation is complete. Download the report for the full audit trail.', 'lavka-product-media-upload'),
+                'confirmUpload' => __('Upload all approved images, refresh the S3 index, update Folio and assign the images in WooCommerce?', 'lavka-product-media-upload'),
                 's3Unavailable' => __('The S3 media index is unavailable, so remote filename conflicts were not checked.', 'lavka-product-media-upload'),
                 'extraFile' => __('Not referenced by the registry', 'lavka-product-media-upload'),
                 'row' => __('Row', 'lavka-product-media-upload'),
@@ -128,9 +129,37 @@ final class Plugin
                 'total' => __('Total', 'lavka-product-media-upload'),
                 'approved' => __('Approved', 'lavka-product-media-upload'),
                 'successful' => __('Successful', 'lavka-product-media-upload'),
+                'partial' => __('Requires retry', 'lavka-product-media-upload'),
+                'workflow' => __('Workflow stage', 'lavka-product-media-upload'),
+                'folioOperation' => __('Folio operation', 'lavka-product-media-upload'),
+                'folioStatus' => __('Folio status', 'lavka-product-media-upload'),
+                's3Key' => __('S3 key', 'lavka-product-media-upload'),
+                'workflowStageLabels' => [
+                    's3_reindex' => __('Refreshing the S3 index', 'lavka-product-media-upload'),
+                    's3_proof' => __('Checking the S3 object proof', 'lavka-product-media-upload'),
+                    's3_verified' => __('S3 object verified', 'lavka-product-media-upload'),
+                    'folio_search' => __('Reading Folio references', 'lavka-product-media-upload'),
+                    'folio_prepare' => __('Preparing the Folio change', 'lavka-product-media-upload'),
+                    'folio_preview' => __('Checking the Folio preview', 'lavka-product-media-upload'),
+                    'folio_apply' => __('Applying the Folio change', 'lavka-product-media-upload'),
+                    'woo_assignment' => __('Assigning the image in WooCommerce', 'lavka-product-media-upload'),
+                    'completed' => __('Completed', 'lavka-product-media-upload'),
+                ],
+                'folioOperationLabels' => [
+                    'set_main' => __('Set main image', 'lavka-product-media-upload'),
+                    'update_gallery' => __('Update gallery image', 'lavka-product-media-upload'),
+                    'add_gallery' => __('Add gallery image', 'lavka-product-media-upload'),
+                ],
+                'folioStatusLabels' => [
+                    'ready' => __('Ready', 'lavka-product-media-upload'),
+                    'applied' => __('Applied', 'lavka-product-media-upload'),
+                    'noop' => __('Already correct', 'lavka-product-media-upload'),
+                    'blocked' => __('Blocked', 'lavka-product-media-upload'),
+                ],
                 'statusLabels' => [
                     'READY' => __('Verification passed', 'lavka-product-media-upload'),
-                    'SUCCESS' => __('Uploaded successfully', 'lavka-product-media-upload'),
+                    'UPLOADED' => __('Uploaded; synchronization is pending', 'lavka-product-media-upload'),
+                    'SUCCESS' => __('Full workflow completed', 'lavka-product-media-upload'),
                     'MANIFEST_ERROR' => __('Registry error', 'lavka-product-media-upload'),
                     'UNSAFE_FILENAME' => __('Unsafe filename', 'lavka-product-media-upload'),
                     'FILE_NOT_FOUND' => __('File not found', 'lavka-product-media-upload'),
@@ -148,6 +177,12 @@ final class Plugin
                     'UPLOAD_FAILED' => __('Upload failed', 'lavka-product-media-upload'),
                     'METADATA_FAILED' => __('Attachment metadata failed', 'lavka-product-media-upload'),
                     'OVH_VERIFY_FAILED' => __('OVH verification failed', 'lavka-product-media-upload'),
+                    'S3_INDEX_FAILED' => __('S3 index refresh failed', 'lavka-product-media-upload'),
+                    'S3_PROOF_FAILED' => __('S3 object proof failed', 'lavka-product-media-upload'),
+                    'FOLIO_SEARCH_FAILED' => __('Folio lookup failed', 'lavka-product-media-upload'),
+                    'FOLIO_PREVIEW_BLOCKED' => __('Folio preview blocked', 'lavka-product-media-upload'),
+                    'FOLIO_APPLY_FAILED' => __('Folio update failed', 'lavka-product-media-upload'),
+                    'WOO_ASSIGN_FAILED' => __('WooCommerce image assignment failed', 'lavka-product-media-upload'),
                 ],
             ],
         ]);
@@ -166,9 +201,9 @@ final class Plugin
         );
         ?>
         <div class="wrap lpmu-wrap">
-            <h1><?php echo esc_html__('Product image batch verification', 'lavka-product-media-upload'); ?></h1>
+            <h1><?php echo esc_html__('Product image batch workflow', 'lavka-product-media-upload'); ?></h1>
             <p class="description">
-                <?php echo esc_html__('Check an XLS/XLSX registry and all source images before anything is written to the Media Library.', 'lavka-product-media-upload'); ?>
+                <?php echo esc_html__('Check the XLS/XLSX registry, then upload approved images and synchronize OVH/S3, Folio and WooCommerce in one controlled operation.', 'lavka-product-media-upload'); ?>
             </p>
 
             <?php if (!\lpmu_writes_enabled()) : ?>
@@ -219,7 +254,17 @@ final class Plugin
                             <span><?php echo esc_html__('or choose multiple files', 'lavka-product-media-upload'); ?></span>
                         </div>
                         <input id="lpmu-images" class="screen-reader-text" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" multiple>
+                        <input id="lpmu-folder" class="screen-reader-text" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" multiple webkitdirectory directory>
+                        <p class="lpmu-source-actions">
+                            <button id="lpmu-folder-button" class="button" type="button">
+                                <span class="dashicons dashicons-open-folder" aria-hidden="true"></span>
+                                <?php echo esc_html__('Choose an image folder', 'lavka-product-media-upload'); ?>
+                            </button>
+                        </p>
                         <p id="lpmu-file-count" class="description"></p>
+                        <p class="description">
+                            <?php echo esc_html__('Folder selection reads image files from the chosen folder. Original files and names on your computer are never changed.', 'lavka-product-media-upload'); ?>
+                        </p>
                         <p class="description">
                             <?php
                             printf(
@@ -300,7 +345,7 @@ final class Plugin
                 </button>
                 <?php if (\lpmu_writes_enabled()) : ?>
                     <button id="lpmu-upload" class="button button-primary lpmu-hidden" type="button">
-                        <?php echo esc_html__('Upload only approved rows', 'lavka-product-media-upload'); ?>
+                        <?php echo esc_html__('Upload and synchronize approved rows', 'lavka-product-media-upload'); ?>
                     </button>
                 <?php endif; ?>
                 <a id="lpmu-report-link" class="button lpmu-hidden" href="#">
@@ -362,10 +407,11 @@ final class Plugin
             );
             wp_send_json_success($result);
         } catch (\Throwable $e) {
+            $status = (int) $e->getCode() === 409 ? 409 : 400;
             wp_send_json_error([
                 'message' => __('The approved batch could not be uploaded.', 'lavka-product-media-upload'),
                 'technical' => $e->getMessage(),
-            ], 400);
+            ], $status);
         }
     }
 

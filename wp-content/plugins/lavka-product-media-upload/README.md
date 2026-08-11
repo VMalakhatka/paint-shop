@@ -1,7 +1,7 @@
 # Lavka Product Media Upload
 
-Operator-facing WordPress plugin for validating and uploading product image batches
-through the standard WordPress Media Library pipeline.
+Operator-facing WordPress plugin for validating product image batches and completing
+the controlled Media Library, OVH/S3, Folio and WooCommerce workflow.
 
 ## Location
 
@@ -9,12 +9,12 @@ After activation, open **Media > Product image batches**.
 
 The operator must:
 
-1. Select an XLS/XLSX registry and all referenced image files.
+1. Select an XLS/XLSX registry and all referenced image files, or choose their folder.
 2. Confirm the legacy four-column mode when the registry has no role column.
 3. Choose whether canonical filenames should be generated from SKU/barcode.
 4. Run the mandatory check.
 5. Review every error and warning.
-6. Upload only the rows that passed the check.
+6. Confirm the full upload and synchronization operation for rows that passed.
 7. Download the CSV audit report.
 
 ## Registry formats
@@ -76,9 +76,33 @@ overwritten automatically.
 ## Upload phase
 
 The uploader creates a server-side copy with the approved canonical filename and calls
-WordPress `media_handle_upload()`. Active Media Cloud handling therefore receives the
-original and generated sizes through the same path as a normal Media Library upload.
-The plugin does not write directly to S3.
+WordPress `media_handle_upload()`. The original file on the operator's computer is not
+renamed or modified. Active Media Cloud handling therefore receives the original and
+generated sizes through the same path as a normal Media Library upload. The plugin does
+not write directly to S3.
+
+After all approved files have passed WordPress metadata and remote-object verification,
+the plugin performs this sequence under the shared Lavka ecosystem lock:
+
+1. Refresh the Java OVH/S3 media index once for the batch.
+2. Read the exact `filename_lower + full_key` object proof from `s3_media_index`.
+3. Read the current main and gallery references for each exact Folio SKU.
+4. Build `set_main`, `update_gallery` or `add_gallery` changes.
+5. Send a mandatory `previewOnly=true` request.
+6. Apply the identical request with `previewOnly=false` and the same deterministic
+   `externalRequestId`.
+7. Assign the accepted attachment as the WooCommerce main/gallery image and synchronize
+   its Media Library parent.
+8. Save a CSV audit report and a compact shared Lavka event.
+
+The Folio step is atomic per SKU. A failure for one SKU does not guess or overwrite a
+different row. An attachment from an interrupted operation remains marked as partial;
+running the same files through the mandatory check again resumes that attachment instead
+of creating a `-1` duplicate. If Folio was applied but the response was lost, the next
+exact search resolves the operation as already correct before Woo assignment.
+
+Folder selection is a browser convenience and remains subject to PHP's
+`max_file_uploads` and request-size limits. Split a large folder into smaller batches.
 
 Uploading is available only after a successful dry run tied to the current operator,
 registry hash and source file hashes. Define `LPMU_ENABLE_WRITES` as `false`, or return
@@ -106,7 +130,8 @@ Barcode lookup supports the Java full-sync `_wc_gtin_code` field, the WooCommerc
 - `lavka_product_media_upload_enable_writes`
 
 The post-upload hook runs only after the attachment and remote object have passed
-verification.
+verification, Folio has accepted the exact reference, and WooCommerce assignment has
+succeeded.
 
 ## Version 1 limits
 

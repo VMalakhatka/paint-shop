@@ -135,6 +135,9 @@ final class ImageValidator
                 } else {
                     $warnings = array_merge($warnings, (array) ($product_result['warnings'] ?? []));
                     $row['product_id'] = (int) $product_result['product_id'];
+                    if ($row['sku'] === '') {
+                        $row['sku'] = (string) ($product_result['product_sku'] ?? '');
+                    }
                     $row['product_type'] = (string) $product_result['product_type'];
                     $row['product_name'] = (string) $product_result['product_name'];
                     $assignment_key = $row['product_id'] . '|' . $role . '|' . $position;
@@ -1196,7 +1199,7 @@ final class ImageValidator
     private function is_verified_existing_upload(int $attachment_id, array $row): bool
     {
         return $this->is_matching_partial_upload($attachment_id, $row)
-            && (string) get_post_meta($attachment_id, '_lpmu_verified_at', true) !== '';
+            && (string) get_post_meta($attachment_id, '_lpmu_workflow_completed_at', true) !== '';
     }
 
     private function is_matching_partial_upload(int $attachment_id, array $row): bool

@@ -333,13 +333,23 @@ Do not delete duplicate WordPress attachments or S3 objects as part of this work
 ## 9. New upload workflow
 
 1. WordPress validates the register and image files.
-2. WordPress uploads and attaches images using the existing media uploader.
-3. The OVH/S3 index is updated and confirms the exact basename, full key, size and ETag.
-4. WordPress sends `set_main`, `update_gallery` or `add_gallery` with `previewOnly=true`.
-5. The operator or a later explicitly enabled automation applies the validated changes.
-6. Existing media synchronization may be rerun to confirm Folio and Woo now agree.
+2. WordPress creates an unattached Media Library record through `media_handle_upload()`;
+   Media Cloud uploads the original and generated sizes through its standard hooks.
+3. WordPress verifies the attachment metadata and public remote object.
+4. Java refreshes the OVH/S3 index once for the approved batch.
+5. WordPress reads the exact basename, full key, size and ETag from the refreshed index.
+6. WordPress searches the current Folio main/gallery references for the exact SKU.
+7. WordPress sends `set_main`, `update_gallery` or `add_gallery` with
+   `previewOnly=true`.
+8. If every result is `ready` or `noop`, WordPress sends the identical changes with
+   `previewOnly=false` and the same `externalRequestId`.
+9. Only after apply returns `applied` or `noop` does WordPress assign the attachment to
+   the WooCommerce product and set the attachment parent.
+10. Existing media synchronization may be rerun as a separate reconciliation check.
 
-The first release should keep apply manual. Automatic apply after package upload can be enabled only after preview/apply has been tested on both main and gallery records.
+This automatic path is enabled only by the uploader's explicit second confirmation
+after its mandatory dry run. It runs under the Lavka ecosystem global lock. Failures
+remain resumable and never permit WordPress to invent a suffixed filename.
 
 ## 10. Acceptance tests
 
@@ -372,4 +382,6 @@ For the mismatch repair report, WordPress follows these rules:
 10. Apply runs under the Lavka ecosystem global lock and writes a compact `folio_media_repair` entry to the Total Sync log.
 11. HTTP 200 is not treated as success by itself. WordPress checks top-level `ok` and the item status. `blocked` is shown as a refusal, `noop` as already correct, and only `applied` or `noop` complete an apply successfully.
 
-The package uploader will use the same proxy and preview/apply helpers later. Automatic apply after upload remains disabled in the first release.
+The package uploader uses the same authenticated server-side proxy and response rules.
+For each exact SKU it always performs preview before apply, reuses one deterministic
+request ID, and treats `blocked` or top-level `ok=false` as a failed partial workflow.

@@ -67,6 +67,7 @@ final class ProductResolver
             'ok' => true,
             'product_id' => $product_id,
             'product' => $product,
+            'product_sku' => (string) $product->get_sku(),
             'product_type' => $product->get_type(),
             'product_name' => $product->get_name(),
             'warnings' => $warnings,
