@@ -966,6 +966,115 @@ function lts_media_mismatch_wordpress_suggestions(array $rows): array {
     return $suggestions;
 }
 
+/**
+ * Find files already assigned to the affected Woo product and confirm their exact
+ * current object in the OVH/S3 index. These are safer Folio repair candidates
+ * than an unrelated normalized filename match from the global media index.
+ */
+function lts_media_mismatch_assigned_s3_suggestions(array $rows): array {
+    global $wpdb;
+
+    $table = lts_media_mismatch_s3_index_table();
+    if ($table === '' || !$rows) {
+        return [];
+    }
+
+    $assigned_by_filename = [];
+    foreach ($rows as $index => $row) {
+        $product_id = (int)($row['product_id'] ?? 0);
+        $role = (string)($row['type'] ?? '');
+        if ($product_id < 1 || !in_array($role, ['featured', 'gallery'], true)) {
+            continue;
+        }
+
+        $attachment_ids = [];
+        if ($role === 'featured') {
+            $attachment_ids[] = (int)get_post_meta($product_id, '_thumbnail_id', true);
+        } else {
+            $attachment_ids = array_map(
+                'intval',
+                explode(',', (string)get_post_meta($product_id, '_product_image_gallery', true))
+            );
+        }
+        $attachment_ids = array_values(array_unique(array_filter($attachment_ids)));
+        if (!$attachment_ids) {
+            continue;
+        }
+
+        $expected_names = array_fill_keys(
+            lts_media_mismatch_filename_candidates((string)($row['file'] ?? '')),
+            true
+        );
+        foreach ($attachment_ids as $attachment_id) {
+            if (get_post_type($attachment_id) !== 'attachment') {
+                continue;
+            }
+            $attached_file = (string)get_post_meta($attachment_id, '_wp_attached_file', true);
+            $filename = wp_basename($attached_file !== '' ? $attached_file : (string)wp_get_attachment_url($attachment_id));
+            $filename_lower = function_exists('mb_strtolower')
+                ? mb_strtolower($filename, 'UTF-8')
+                : strtolower($filename);
+            if ($filename_lower === '' || !isset($expected_names[$filename_lower])) {
+                continue;
+            }
+
+            $assigned_by_filename[$filename_lower][] = [
+                'row_index'     => (int)$index,
+                'attachment_id' => $attachment_id,
+                'attached_file' => $attached_file,
+                'edit_url'      => get_edit_post_link($attachment_id, 'raw'),
+            ];
+        }
+    }
+
+    if (!$assigned_by_filename) {
+        return [];
+    }
+
+    $matches = [];
+    foreach (array_chunk(array_keys($assigned_by_filename), 500) as $filenames) {
+        $placeholders = implode(', ', array_fill(0, count($filenames), '%s'));
+        $sql = "
+            SELECT filename_lower, full_key, size_bytes, etag, last_modified
+            FROM `{$table}`
+            WHERE filename_lower IN ({$placeholders})
+            ORDER BY filename_lower, last_modified DESC, size_bytes DESC
+        ";
+        $chunk_matches = $wpdb->get_results($wpdb->prepare($sql, ...$filenames), ARRAY_A);
+        if (is_array($chunk_matches)) {
+            $matches = array_merge($matches, $chunk_matches);
+        }
+    }
+
+    $suggestions = [];
+    foreach ($matches as $match) {
+        $filename = function_exists('mb_strtolower')
+            ? mb_strtolower((string)($match['filename_lower'] ?? ''), 'UTF-8')
+            : strtolower((string)($match['filename_lower'] ?? ''));
+        foreach ($assigned_by_filename[$filename] ?? [] as $assigned) {
+            $index = (int)$assigned['row_index'];
+            $full_key = (string)($match['full_key'] ?? '');
+            $suggestions[$index][$filename . '|' . $full_key] = [
+                'filename'        => (string)($match['filename_lower'] ?? ''),
+                'full_key'        => $full_key,
+                'public_url'      => lts_media_mismatch_public_url($full_key),
+                'size_bytes'      => isset($match['size_bytes']) ? (int)$match['size_bytes'] : null,
+                'etag'            => (string)($match['etag'] ?? ''),
+                'last_modified'   => (string)($match['last_modified'] ?? ''),
+                'woo_assigned'    => true,
+                'attachment_id'   => (int)$assigned['attachment_id'],
+                'attached_file'   => (string)$assigned['attached_file'],
+                'attachment_url'  => (string)$assigned['edit_url'],
+            ];
+        }
+    }
+
+    foreach ($suggestions as $index => $items) {
+        $suggestions[$index] = array_values($items);
+    }
+    return $suggestions;
+}
+
 /** Find current exact/normalized candidates in the OVH/S3 media index. */
 function lts_media_mismatch_s3_suggestions(array $rows): array {
     global $wpdb;
@@ -1349,6 +1458,7 @@ function lts_media_mismatch_report_data(array $args, bool $paginate = true): arr
     $page = $paginate ? min($args['page'], $pages) : 1;
     $offset = ($page - 1) * $args['per_page'];
     $rows = $paginate ? array_slice($events, $offset, $args['per_page']) : $events;
+    $assigned_s3_suggestions = lts_media_mismatch_assigned_s3_suggestions($rows);
     $s3_suggestions = lts_media_mismatch_s3_suggestions($rows);
     $wordpress_suggestions = lts_media_mismatch_wordpress_suggestions($rows);
 
@@ -1366,8 +1476,23 @@ function lts_media_mismatch_report_data(array $args, bool $paginate = true): arr
         $row['explanation'] = $explanation['explanation'];
         $row['recommended_action'] = $explanation['action'];
         $row['hint'] = $explanation['hint'];
-        $row['suggested_files'] = $s3_suggestions[$row_index] ?? [];
-        $row['wordpress_suggested_files'] = $wordpress_suggestions[$row_index] ?? [];
+        $preferred = $assigned_s3_suggestions[$row_index] ?? [];
+        $combined = [];
+        foreach (array_merge($preferred, $s3_suggestions[$row_index] ?? []) as $suggestion) {
+            $key = (string)($suggestion['filename'] ?? '') . '|' . (string)($suggestion['full_key'] ?? '');
+            if ($key !== '|' && !isset($combined[$key])) {
+                $combined[$key] = $suggestion;
+            }
+        }
+        $assigned_attachment_ids = array_fill_keys(array_map(
+            static fn(array $item): int => (int)($item['attachment_id'] ?? 0),
+            $preferred
+        ), true);
+        $row['suggested_files'] = array_values($combined);
+        $row['wordpress_suggested_files'] = array_values(array_filter(
+            $wordpress_suggestions[$row_index] ?? [],
+            static fn(array $item): bool => !isset($assigned_attachment_ids[(int)($item['attachment_id'] ?? 0)])
+        ));
     }
     unset($row);
 
@@ -1637,8 +1762,12 @@ add_action('admin_post_lts_media_mismatch_export', function () {
         $suggested_files = [];
         foreach ($row['suggested_files'] ?? [] as $suggestion) {
             $parts = array_filter([
+                !empty($suggestion['woo_assigned'])
+                    ? __('Assigned to this WooCommerce product and confirmed in the OVH/S3 index', 'lavka-total-sync')
+                    : '',
                 (string)($suggestion['filename'] ?? ''),
                 (string)($suggestion['public_url'] ?? ''),
+                (string)($suggestion['attachment_url'] ?? ''),
                 isset($suggestion['size_bytes'])
                     ? (int)$suggestion['size_bytes'] . ' ' . __('bytes', 'lavka-total-sync')
                     : '',
@@ -2092,6 +2221,9 @@ CR-CE0900056100"></textarea>
             #lts_media_mismatch_table .lts-mismatch-suggestion {
                 display: grid;
                 gap: 2px;
+            }
+            #lts_media_mismatch_table .lts-mismatch-preferred {
+                color: #007017;
             }
             #lts_media_mismatch_table .lts-folio-repair-actions {
                 display: flex;
@@ -2675,7 +2807,22 @@ CR-CE0900056100"></textarea>
                             ).appendTo($suggestions);
                             row.suggested_files.forEach(function(item) {
                                 const $candidate = $('<div>', {class: 'lts-mismatch-suggestion'});
+                                if (item.woo_assigned) {
+                                    $('<strong>', {class: 'lts-mismatch-preferred'}).text(
+                                        '<?php echo esc_js(__('Preferred candidate: already assigned to this WooCommerce product and confirmed in the current OVH/S3 index.', 'lavka-total-sync')); ?>'
+                                    ).appendTo($candidate);
+                                }
                                 $('<code>').text(item.filename).appendTo($candidate);
+                                if (item.attachment_url) {
+                                    const attachmentLabel = '<?php echo esc_js(__('Open the assigned WordPress image', 'lavka-total-sync')); ?>'
+                                        + (item.attachment_id ? ' · ID ' + item.attachment_id : '');
+                                    $('<a>', {
+                                        href: item.attachment_url,
+                                        target: '_blank',
+                                        rel: 'noopener',
+                                        text: attachmentLabel
+                                    }).appendTo($candidate);
+                                }
                                 if (item.public_url) {
                                     const $urlLine = $('<span>', {class: 'description'}).appendTo($candidate);
                                     $('<span>').text(
@@ -2723,7 +2870,7 @@ CR-CE0900056100"></textarea>
                                 $candidate.appendTo($suggestions);
                             });
                             $('<span>').text(
-                                '<?php echo esc_js(__("These filenames are actual records from s3_media_index found after normalizing the filename from Folio. If one of these files is correct, set its exact filename in Folio and rerun media synchronization; do not upload another duplicate.", 'lavka-total-sync')); ?>'
+                                '<?php echo esc_js(__("Preferred candidates are images already assigned to the affected WooCommerce product and confirmed in s3_media_index. Remaining filenames are actual index records found after normalizing the filename from Folio. If one of these files is correct, set its exact filename in Folio and rerun media synchronization; do not upload another duplicate.", 'lavka-total-sync')); ?>'
                             ).appendTo($suggestions);
                             $suggestions.appendTo($action);
                         }

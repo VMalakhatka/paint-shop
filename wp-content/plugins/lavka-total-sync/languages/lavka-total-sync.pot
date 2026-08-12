@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-10T18:18:08+00:00\n"
+"POT-Creation-Date: 2026-08-12T18:22:43+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: lavka-total-sync\n"
@@ -130,10 +130,10 @@ msgid "Last flag"
 msgstr ""
 
 #: inc/admin-logs.php:43
-#: inc/admin-media.php:2484
-#: inc/admin-media.php:2486
-#: inc/admin-media.php:2739
-#: inc/admin-media.php:2741
+#: inc/admin-media.php:2719
+#: inc/admin-media.php:2721
+#: inc/admin-media.php:3021
+#: inc/admin-media.php:3023
 msgid "Errors"
 msgstr ""
 
@@ -150,9 +150,9 @@ msgid "Cursor"
 msgstr ""
 
 #: inc/admin-logs.php:58
-#: inc/admin-media.php:1710
-#: inc/admin-media.php:1757
-#: inc/admin-media.php:2168
+#: inc/admin-media.php:1942
+#: inc/admin-media.php:1989
+#: inc/admin-media.php:2403
 #: inc/admin-ui.php:1214
 #: inc/admin-ui.php:1250
 #: inc/admin-ui.php:1284
@@ -192,9 +192,9 @@ msgstr ""
 
 #: inc/admin-logs.php:121
 #: inc/admin-logs.php:157
-#: inc/admin-media.php:1384
-#: inc/admin-media.php:1526
-#: inc/admin-media.php:1825
+#: inc/admin-media.php:1594
+#: inc/admin-media.php:1736
+#: inc/admin-media.php:2057
 msgid "SKU"
 msgstr ""
 
@@ -211,8 +211,8 @@ msgid "Export CSV"
 msgstr ""
 
 #: inc/admin-logs.php:154
-#: inc/admin-media.php:1524
-#: inc/admin-media.php:1903
+#: inc/admin-media.php:1734
+#: inc/admin-media.php:2135
 msgid "Time"
 msgstr ""
 
@@ -247,7 +247,7 @@ msgstr ""
 
 #: inc/admin-media.php:355
 #: inc/admin-media.php:356
-#: inc/admin-media.php:1660
+#: inc/admin-media.php:1892
 msgid "Media Sync (images)"
 msgstr ""
 
@@ -256,12 +256,12 @@ msgid "Product media synchronization"
 msgstr ""
 
 #: inc/admin-media.php:684
-#: inc/admin-media.php:1279
+#: inc/admin-media.php:1473
 msgid "Hidden"
 msgstr ""
 
 #: inc/admin-media.php:685
-#: inc/admin-media.php:1280
+#: inc/admin-media.php:1474
 msgid "Visible"
 msgstr ""
 
@@ -305,533 +305,530 @@ msgstr ""
 msgid "Check the technical message and rerun media synchronization after correcting its cause."
 msgstr ""
 
-#: inc/admin-media.php:1185
+#: inc/admin-media.php:1377
 msgid "The mismatch log exists but the web server cannot read it."
 msgstr ""
 
-#: inc/admin-media.php:1186
+#: inc/admin-media.php:1378
 msgid "The mismatch log was not found at the configured path."
 msgstr ""
 
-#: inc/admin-media.php:1274
+#: inc/admin-media.php:1468
 msgid "Featured image"
 msgstr ""
 
-#: inc/admin-media.php:1275
+#: inc/admin-media.php:1469
 msgid "Gallery image"
 msgstr ""
 
-#: inc/admin-media.php:1331
-#: inc/admin-media.php:1468
+#: inc/admin-media.php:1541
+#: inc/admin-media.php:1678
 msgid "You do not have permission to export this report."
 msgstr ""
 
-#: inc/admin-media.php:1345
-#: inc/admin-media.php:1482
+#: inc/admin-media.php:1555
+#: inc/admin-media.php:1692
 msgid "PhpSpreadsheet is unavailable."
 msgstr ""
 
-#: inc/admin-media.php:1352
-#: inc/admin-media.php:1779
+#: inc/admin-media.php:1562
+#: inc/admin-media.php:2011
 msgid "No images at all"
 msgstr ""
 
-#: inc/admin-media.php:1353
-#: inc/admin-media.php:1780
+#: inc/admin-media.php:1563
+#: inc/admin-media.php:2012
 msgid "No featured image"
 msgstr ""
 
-#: inc/admin-media.php:1356
-#: inc/admin-media.php:1786
+#: inc/admin-media.php:1566
+#: inc/admin-media.php:2018
 msgid "Published products only"
 msgstr ""
 
-#: inc/admin-media.php:1357
-#: inc/admin-media.php:1787
+#: inc/admin-media.php:1567
+#: inc/admin-media.php:2019
 msgid "All active products"
 msgstr ""
 
-#: inc/admin-media.php:1360
-#: inc/admin-media.php:1497
-#: inc/admin-media.php:1793
-#: inc/admin-media.php:1872
+#: inc/admin-media.php:1570
+#: inc/admin-media.php:1707
+#: inc/admin-media.php:2025
+#: inc/admin-media.php:2104
 msgid "Exclude hidden products"
 msgstr ""
 
-#: inc/admin-media.php:1361
-#: inc/admin-media.php:1498
-#: inc/admin-media.php:1794
-#: inc/admin-media.php:1873
+#: inc/admin-media.php:1571
+#: inc/admin-media.php:1708
+#: inc/admin-media.php:2026
+#: inc/admin-media.php:2105
 msgid "Include hidden products"
 msgstr ""
 
-#: inc/admin-media.php:1362
-#: inc/admin-media.php:1499
-#: inc/admin-media.php:1795
-#: inc/admin-media.php:1874
+#: inc/admin-media.php:1572
+#: inc/admin-media.php:1709
+#: inc/admin-media.php:2027
+#: inc/admin-media.php:2106
 msgid "Hidden products only"
 msgstr ""
 
-#: inc/admin-media.php:1369
-#: inc/admin-media.php:1771
+#: inc/admin-media.php:1579
+#: inc/admin-media.php:2003
 msgid "Products without images"
 msgstr ""
 
-#: inc/admin-media.php:1372
-#: inc/admin-media.php:1777
+#: inc/admin-media.php:1582
+#: inc/admin-media.php:2009
 msgid "Report type"
 msgstr ""
 
-#: inc/admin-media.php:1374
-#: inc/admin-media.php:1784
+#: inc/admin-media.php:1584
+#: inc/admin-media.php:2016
 msgid "Product scope"
 msgstr ""
 
-#: inc/admin-media.php:1376
-#: inc/admin-media.php:1387
-#: inc/admin-media.php:1517
-#: inc/admin-media.php:1529
-#: inc/admin-media.php:1791
-#: inc/admin-media.php:1870
+#: inc/admin-media.php:1586
+#: inc/admin-media.php:1597
+#: inc/admin-media.php:1727
+#: inc/admin-media.php:1739
+#: inc/admin-media.php:2023
+#: inc/admin-media.php:2102
 msgid "Catalog visibility"
 msgstr ""
 
-#: inc/admin-media.php:1378
-#: inc/admin-media.php:1519
+#: inc/admin-media.php:1588
+#: inc/admin-media.php:1729
 msgid "Generated at"
 msgstr ""
 
-#: inc/admin-media.php:1383
-#: inc/admin-media.php:1527
-#: inc/admin-media.php:1824
+#: inc/admin-media.php:1593
+#: inc/admin-media.php:1737
+#: inc/admin-media.php:2056
 msgid "ID"
 msgstr ""
 
-#: inc/admin-media.php:1385
-#: inc/admin-media.php:1528
-#: inc/admin-media.php:1826
-#: inc/admin-media.php:1905
+#: inc/admin-media.php:1595
+#: inc/admin-media.php:1738
+#: inc/admin-media.php:2058
+#: inc/admin-media.php:2137
 msgid "Product"
 msgstr ""
 
-#: inc/admin-media.php:1386
-#: inc/admin-media.php:1827
+#: inc/admin-media.php:1596
+#: inc/admin-media.php:2059
 msgid "Status"
 msgstr ""
 
-#: inc/admin-media.php:1388
-#: inc/admin-media.php:1828
+#: inc/admin-media.php:1598
+#: inc/admin-media.php:2060
 msgid "Gallery"
 msgstr ""
 
-#: inc/admin-media.php:1389
-#: inc/admin-media.php:1829
+#: inc/admin-media.php:1599
+#: inc/admin-media.php:2061
 msgid "Reason"
 msgstr ""
 
-#: inc/admin-media.php:1390
-#: inc/admin-media.php:1535
+#: inc/admin-media.php:1600
+#: inc/admin-media.php:1746
 msgid "Edit URL"
 msgstr ""
 
-#: inc/admin-media.php:1391
+#: inc/admin-media.php:1601
 msgid "Product URL"
 msgstr ""
 
-#: inc/admin-media.php:1488
-#: inc/admin-media.php:2519
-#: inc/admin-media.php:2523
+#: inc/admin-media.php:1698
+#: inc/admin-media.php:2754
+#: inc/admin-media.php:2758
 msgid "Mismatch log is unavailable."
 msgstr ""
 
-#: inc/admin-media.php:1492
-#: inc/admin-media.php:1860
+#: inc/admin-media.php:1702
+#: inc/admin-media.php:2092
 msgid "All failures"
 msgstr ""
 
-#: inc/admin-media.php:1493
-#: inc/admin-media.php:1861
+#: inc/admin-media.php:1703
+#: inc/admin-media.php:2093
 msgid "Featured images"
 msgstr ""
 
-#: inc/admin-media.php:1494
-#: inc/admin-media.php:1862
+#: inc/admin-media.php:1704
+#: inc/admin-media.php:2094
 msgid "Gallery images"
 msgstr ""
 
-#: inc/admin-media.php:1506
-#: inc/admin-media.php:1851
+#: inc/admin-media.php:1716
+#: inc/admin-media.php:2083
 msgid "Recent failed media links from Java"
 msgstr ""
 
-#: inc/admin-media.php:1509
-#: inc/admin-media.php:1858
+#: inc/admin-media.php:1719
+#: inc/admin-media.php:2090
 msgid "Image type"
 msgstr ""
 
-#: inc/admin-media.php:1511
-#: inc/admin-media.php:1866
+#: inc/admin-media.php:1721
+#: inc/admin-media.php:2098
 msgid "Search"
 msgstr ""
 
-#: inc/admin-media.php:1525
-#: inc/admin-media.php:1904
+#: inc/admin-media.php:1735
+#: inc/admin-media.php:2136
 msgid "Type"
 msgstr ""
 
-#: inc/admin-media.php:1530
-#: inc/admin-media.php:1906
+#: inc/admin-media.php:1740
+#: inc/admin-media.php:2138
 msgid "Expected file"
 msgstr ""
 
-#: inc/admin-media.php:1531
-#: inc/admin-media.php:1907
+#: inc/admin-media.php:1741
+#: inc/admin-media.php:2139
 msgid "What went wrong"
 msgstr ""
 
-#: inc/admin-media.php:1532
-#: inc/admin-media.php:2507
-#: inc/admin-media.php:2559
+#: inc/admin-media.php:1742
+#: inc/admin-media.php:2742
+#: inc/admin-media.php:2794
 msgid "Technical message"
 msgstr ""
 
-#: inc/admin-media.php:1533
-#: inc/admin-media.php:1908
+#: inc/admin-media.php:1743
+#: inc/admin-media.php:2140
 msgid "What to do"
 msgstr ""
 
-#: inc/admin-media.php:1534
-#: inc/admin-media.php:2571
+#: inc/admin-media.php:1744
+#: inc/admin-media.php:2806
 msgid "Possible matching files found in the current OVH/S3 media index table:"
 msgstr ""
 
+#: inc/admin-media.php:1745
+#: inc/admin-media.php:2880
 msgid "Possible matching files found in the WordPress Media Library:"
 msgstr ""
 
-msgid "WordPress attached file:"
+#: inc/admin-media.php:1766
+msgid "Assigned to this WooCommerce product and confirmed in the OVH/S3 index"
 msgstr ""
 
-msgid "OVH/S3 image:"
-msgstr ""
-
-msgid "These files exist in WordPress, but were not confirmed in the current OVH/S3 index result. Refresh the media index first. Only an exact S3 index row with proof can be applied to Folio."
-msgstr ""
-
-#: inc/admin-media.php:1557
-#: inc/admin-media.php:2584
+#: inc/admin-media.php:1772
+#: inc/admin-media.php:2841
 msgid "bytes"
 msgstr ""
 
-#: inc/admin-media.php:1664
+#: inc/admin-media.php:1896
 msgid "Синхронизация изображений по диапазону SKU (курсор) или по списку SKU. Отправляет запросы в Java API /admin/media/sync/range и /admin/media/sync."
 msgstr ""
 
-#: inc/admin-media.php:1674
+#: inc/admin-media.php:1906
 msgid "By range (cursor) → /admin/media/sync/range"
 msgstr ""
 
-#: inc/admin-media.php:1677
-#: inc/admin-media.php:2137
+#: inc/admin-media.php:1909
+#: inc/admin-media.php:2372
 msgid "From SKU (inclusive)"
 msgstr ""
 
-#: inc/admin-media.php:1681
-#: inc/admin-media.php:2141
+#: inc/admin-media.php:1913
+#: inc/admin-media.php:2376
 msgid "To SKU (inclusive)"
 msgstr ""
 
-#: inc/admin-media.php:1685
-#: inc/admin-media.php:2145
+#: inc/admin-media.php:1917
+#: inc/admin-media.php:2380
 msgid "Chunk size"
 msgstr ""
 
-#: inc/admin-media.php:1689
-#: inc/admin-media.php:1735
-#: inc/admin-media.php:2149
+#: inc/admin-media.php:1921
+#: inc/admin-media.php:1967
+#: inc/admin-media.php:2384
 msgid "Mode"
 msgstr ""
 
-#: inc/admin-media.php:1692
-#: inc/admin-media.php:1738
-#: inc/admin-media.php:2153
+#: inc/admin-media.php:1924
+#: inc/admin-media.php:1970
+#: inc/admin-media.php:2388
 msgid "both (featured + gallery)"
 msgstr ""
 
-#: inc/admin-media.php:1693
-#: inc/admin-media.php:1739
-#: inc/admin-media.php:2154
+#: inc/admin-media.php:1925
+#: inc/admin-media.php:1971
+#: inc/admin-media.php:2389
 msgid "featured only"
 msgstr ""
 
-#: inc/admin-media.php:1694
-#: inc/admin-media.php:1740
-#: inc/admin-media.php:2155
+#: inc/admin-media.php:1926
+#: inc/admin-media.php:1972
+#: inc/admin-media.php:2390
 msgid "gallery only"
 msgstr ""
 
-#: inc/admin-media.php:1697
+#: inc/admin-media.php:1929
 msgid "featured → только обложка; gallery → только галерея; both/пусто → и то, и другое."
 msgstr ""
 
-#: inc/admin-media.php:1702
-#: inc/admin-media.php:1749
-#: inc/admin-media.php:2160
+#: inc/admin-media.php:1934
+#: inc/admin-media.php:1981
+#: inc/admin-media.php:2395
 msgid "Gallery start position"
 msgstr ""
 
-#: inc/admin-media.php:1706
-#: inc/admin-media.php:1753
-#: inc/admin-media.php:2164
+#: inc/admin-media.php:1938
+#: inc/admin-media.php:1985
+#: inc/admin-media.php:2399
 msgid "Limit per SKU (gallery)"
 msgstr ""
 
-#: inc/admin-media.php:1711
-#: inc/admin-media.php:1758
-#: inc/admin-media.php:2169
+#: inc/admin-media.php:1943
+#: inc/admin-media.php:1990
+#: inc/admin-media.php:2404
 msgid "Не писать в Woo, только расчёт/логика"
 msgstr ""
 
-#: inc/admin-media.php:1715
+#: inc/admin-media.php:1947
 msgid "Run range sync"
 msgstr ""
 
-#: inc/admin-media.php:1724
+#: inc/admin-media.php:1956
 msgid "By list of SKUs → /admin/media/sync"
 msgstr ""
 
-#: inc/admin-media.php:1727
+#: inc/admin-media.php:1959
 msgid "SKUs (one per line or ';')"
 msgstr ""
 
-#: inc/admin-media.php:1745
+#: inc/admin-media.php:1977
 msgid "Touch on update"
 msgstr ""
 
-#: inc/admin-media.php:1746
+#: inc/admin-media.php:1978
 msgid "Обновлять метки времени при изменении"
 msgstr ""
 
-#: inc/admin-media.php:1762
+#: inc/admin-media.php:1994
 msgid "Run list sync"
 msgstr ""
 
-#: inc/admin-media.php:1773
+#: inc/admin-media.php:2005
 msgid "The report checks WooCommerce product image links. Attachment parent fields in the Media Library do not affect this report."
 msgstr ""
 
-#: inc/admin-media.php:1799
-#: inc/admin-media.php:1878
+#: inc/admin-media.php:2031
+#: inc/admin-media.php:2110
 msgid "Rows per page"
 msgstr ""
 
-#: inc/admin-media.php:1808
+#: inc/admin-media.php:2040
 msgid "Build report"
 msgstr ""
 
-#: inc/admin-media.php:1814
-#: inc/admin-media.php:1893
+#: inc/admin-media.php:2046
+#: inc/admin-media.php:2125
 msgid "Export XLSX"
 msgstr ""
 
-#: inc/admin-media.php:1830
+#: inc/admin-media.php:2062
 msgid "Actions"
 msgstr ""
 
-#: inc/admin-media.php:1853
+#: inc/admin-media.php:2085
 msgid "This is a historical view of sync-mismatch.log. An entry can remain after the image has been fixed; rerun media synchronization to get current results."
 msgstr ""
 
-#: inc/admin-media.php:1854
+#: inc/admin-media.php:2086
 msgid "A suggested Folio correction is always previewed first and is written only after separate confirmation."
 msgstr ""
 
-#: inc/admin-media.php:1867
+#: inc/admin-media.php:2099
 msgid "SKU, product ID or filename"
 msgstr ""
 
-#: inc/admin-media.php:1887
+#: inc/admin-media.php:2119
 msgid "Read mismatch log"
 msgstr ""
 
-#: inc/admin-media.php:2022
+#: inc/admin-media.php:2257
 msgid "OVH media index"
 msgstr ""
 
-#: inc/admin-media.php:2025
+#: inc/admin-media.php:2260
 msgid "Refresh the S3 media index after uploading new images, or run it by a separate schedule."
 msgstr ""
 
-#: inc/admin-media.php:2028
+#: inc/admin-media.php:2263
 msgid "Update OVH media index now"
 msgstr ""
 
-#: inc/admin-media.php:2034
+#: inc/admin-media.php:2269
 msgid "Enable index cron"
 msgstr ""
 
-#: inc/admin-media.php:2035
-#: inc/admin-media.php:2099
+#: inc/admin-media.php:2270
+#: inc/admin-media.php:2334
 msgid "Run by schedule"
 msgstr ""
 
-#: inc/admin-media.php:2038
-#: inc/admin-media.php:2102
+#: inc/admin-media.php:2273
+#: inc/admin-media.php:2337
 msgid "Frequency"
 msgstr ""
 
-#: inc/admin-media.php:2042
-#: inc/admin-media.php:2106
+#: inc/admin-media.php:2277
+#: inc/admin-media.php:2341
 msgid "Daily"
 msgstr ""
 
-#: inc/admin-media.php:2043
-#: inc/admin-media.php:2107
+#: inc/admin-media.php:2278
+#: inc/admin-media.php:2342
 #: inc/admin-ui.php:633
 msgid "Weekly"
 msgstr ""
 
-#: inc/admin-media.php:2044
+#: inc/admin-media.php:2279
 msgid "Monthly"
 msgstr ""
 
-#: inc/admin-media.php:2049
-#: inc/admin-media.php:2112
+#: inc/admin-media.php:2284
+#: inc/admin-media.php:2347
 msgid "Time (site local)"
 msgstr ""
 
-#: inc/admin-media.php:2054
-#: inc/admin-media.php:2117
+#: inc/admin-media.php:2289
+#: inc/admin-media.php:2352
 msgid "Uses the site timezone from Settings → General."
 msgstr ""
 
-#: inc/admin-media.php:2058
-#: inc/admin-media.php:2121
+#: inc/admin-media.php:2293
+#: inc/admin-media.php:2356
 msgid "Day of week"
 msgstr ""
 
-#: inc/admin-media.php:2062
-#: inc/admin-media.php:2125
+#: inc/admin-media.php:2297
+#: inc/admin-media.php:2360
 #: inc/admin-ui.php:1046
 msgid "Monday"
 msgstr ""
 
-#: inc/admin-media.php:2063
-#: inc/admin-media.php:2126
+#: inc/admin-media.php:2298
+#: inc/admin-media.php:2361
 #: inc/admin-ui.php:1047
 msgid "Tuesday"
 msgstr ""
 
-#: inc/admin-media.php:2064
-#: inc/admin-media.php:2127
+#: inc/admin-media.php:2299
+#: inc/admin-media.php:2362
 #: inc/admin-ui.php:1048
 msgid "Wednesday"
 msgstr ""
 
-#: inc/admin-media.php:2065
-#: inc/admin-media.php:2128
+#: inc/admin-media.php:2300
+#: inc/admin-media.php:2363
 #: inc/admin-ui.php:1049
 msgid "Thursday"
 msgstr ""
 
-#: inc/admin-media.php:2066
-#: inc/admin-media.php:2129
+#: inc/admin-media.php:2301
+#: inc/admin-media.php:2364
 #: inc/admin-ui.php:1050
 msgid "Friday"
 msgstr ""
 
-#: inc/admin-media.php:2067
-#: inc/admin-media.php:2130
+#: inc/admin-media.php:2302
+#: inc/admin-media.php:2365
 #: inc/admin-ui.php:1051
 msgid "Saturday"
 msgstr ""
 
-#: inc/admin-media.php:2068
-#: inc/admin-media.php:2131
+#: inc/admin-media.php:2303
+#: inc/admin-media.php:2366
 #: inc/admin-ui.php:1052
 msgid "Sunday"
 msgstr ""
 
-#: inc/admin-media.php:2073
+#: inc/admin-media.php:2308
 msgid "Day of month"
 msgstr ""
 
-#: inc/admin-media.php:2076
+#: inc/admin-media.php:2311
 msgid "Use days 1–28 so every month is valid."
 msgstr ""
 
-#: inc/admin-media.php:2081
+#: inc/admin-media.php:2316
 msgid "Save index schedule"
 msgstr ""
 
-#: inc/admin-media.php:2082
-#: inc/admin-media.php:2175
+#: inc/admin-media.php:2317
+#: inc/admin-media.php:2410
 msgid "Refresh status"
 msgstr ""
 
-#: inc/admin-media.php:2086
+#: inc/admin-media.php:2321
 msgid "Next index run"
 msgstr ""
 
-#: inc/admin-media.php:2091
-#: inc/admin-media.php:2184
+#: inc/admin-media.php:2326
+#: inc/admin-media.php:2419
 msgid "Your local (browser) time"
 msgstr ""
 
-#: inc/admin-media.php:2095
+#: inc/admin-media.php:2330
 msgid "Media Sync Cron (range only)"
 msgstr ""
 
-#: inc/admin-media.php:2098
+#: inc/admin-media.php:2333
 #: inc/admin-ui.php:1017
 msgid "Enable cron"
 msgstr ""
 
-#: inc/admin-media.php:2135
+#: inc/admin-media.php:2370
 msgid "Range payload"
 msgstr ""
 
-#: inc/admin-media.php:2173
+#: inc/admin-media.php:2408
 msgid "Save & schedule"
 msgstr ""
 
-#: inc/admin-media.php:2174
+#: inc/admin-media.php:2409
 #: inc/admin-ui.php:1087
 msgid "Run cron task now"
 msgstr ""
 
-#: inc/admin-media.php:2179
+#: inc/admin-media.php:2414
 #: inc/admin-ui.php:1069
 msgid "Next run"
 msgstr ""
 
-#: inc/admin-media.php:2237
-#: inc/admin-media.php:2271
+#: inc/admin-media.php:2472
+#: inc/admin-media.php:2506
 #: inc/admin-ui.php:71
 msgid "Saving…"
 msgstr ""
 
-#: inc/admin-media.php:2240
-#: inc/admin-media.php:2274
+#: inc/admin-media.php:2475
+#: inc/admin-media.php:2509
 #: inc/admin-ui.php:72
 #: inc/admin-ui.php:853
 msgid "Saved"
 msgstr ""
 
-#: inc/admin-media.php:2250
-#: inc/admin-media.php:2253
-#: inc/admin-media.php:2284
-#: inc/admin-media.php:2287
-#: inc/admin-media.php:2304
-#: inc/admin-media.php:2403
-#: inc/admin-media.php:2409
-#: inc/admin-media.php:2654
-#: inc/admin-media.php:2659
-#: inc/admin-media.php:2756
-#: inc/admin-media.php:2764
-#: inc/admin-media.php:2787
-#: inc/admin-media.php:2795
-#: inc/admin-media.php:2817
-#: inc/admin-media.php:2825
+#: inc/admin-media.php:2485
+#: inc/admin-media.php:2488
+#: inc/admin-media.php:2519
+#: inc/admin-media.php:2522
+#: inc/admin-media.php:2539
+#: inc/admin-media.php:2638
+#: inc/admin-media.php:2644
+#: inc/admin-media.php:2936
+#: inc/admin-media.php:2941
+#: inc/admin-media.php:3038
+#: inc/admin-media.php:3046
+#: inc/admin-media.php:3069
+#: inc/admin-media.php:3077
+#: inc/admin-media.php:3099
+#: inc/admin-media.php:3107
 #: inc/admin-ui.php:1107
 #: inc/admin-ui.php:1110
 #: inc/admin-ui.php:1136
@@ -845,12 +842,12 @@ msgstr ""
 msgid "Error"
 msgstr ""
 
-#: inc/admin-media.php:2299
-#: inc/admin-media.php:2392
-#: inc/admin-media.php:2643
-#: inc/admin-media.php:2748
-#: inc/admin-media.php:2771
-#: inc/admin-media.php:2802
+#: inc/admin-media.php:2534
+#: inc/admin-media.php:2627
+#: inc/admin-media.php:2925
+#: inc/admin-media.php:3030
+#: inc/admin-media.php:3053
+#: inc/admin-media.php:3084
 #: inc/admin-ui.php:1099
 #: inc/admin-ui.php:1129
 #: inc/admin-ui.php:1460
@@ -859,29 +856,29 @@ msgstr ""
 msgid "Working…"
 msgstr ""
 
-#: inc/admin-media.php:2301
+#: inc/admin-media.php:2536
 msgid "Scheduled"
 msgstr ""
 
-#: inc/admin-media.php:2350
+#: inc/admin-media.php:2585
 msgid "No products found"
 msgstr ""
 
-#: inc/admin-media.php:2381
-#: inc/admin-media.php:2530
+#: inc/admin-media.php:2616
+#: inc/admin-media.php:2765
 msgid "Found:"
 msgstr ""
 
-#: inc/admin-media.php:2384
-#: inc/admin-media.php:2635
+#: inc/admin-media.php:2619
+#: inc/admin-media.php:2917
 msgid "Page"
 msgstr ""
 
-#: inc/admin-media.php:2407
-#: inc/admin-media.php:2639
-#: inc/admin-media.php:2760
-#: inc/admin-media.php:2791
-#: inc/admin-media.php:2821
+#: inc/admin-media.php:2642
+#: inc/admin-media.php:2921
+#: inc/admin-media.php:3042
+#: inc/admin-media.php:3073
+#: inc/admin-media.php:3103
 #: inc/admin-ui.php:1105
 #: inc/admin-ui.php:1134
 #: inc/admin-ui.php:1466
@@ -890,161 +887,177 @@ msgstr ""
 msgid "Done."
 msgstr ""
 
-#: inc/admin-media.php:2429
+#: inc/admin-media.php:2664
 msgid "Ready to apply"
 msgstr ""
 
-#: inc/admin-media.php:2430
+#: inc/admin-media.php:2665
 msgid "Applied"
 msgstr ""
 
-#: inc/admin-media.php:2431
+#: inc/admin-media.php:2666
 msgid "No change required"
 msgstr ""
 
-#: inc/admin-media.php:2432
+#: inc/admin-media.php:2667
 msgid "Blocked"
 msgstr ""
 
-#: inc/admin-media.php:2434
+#: inc/admin-media.php:2669
 msgid "Unknown"
 msgstr ""
 
-#: inc/admin-media.php:2439
+#: inc/admin-media.php:2674
 msgid "The report row does not contain enough data for a Folio correction."
 msgstr ""
 
-#: inc/admin-media.php:2440
+#: inc/admin-media.php:2675
 msgid "The target must be an exact filename without a path or URL."
 msgstr ""
 
-#: inc/admin-media.php:2441
+#: inc/admin-media.php:2676
 msgid "The exact S3 object, size or ETag could not be confirmed in the current media index."
 msgstr ""
 
-#: inc/admin-media.php:2442
+#: inc/admin-media.php:2677
 msgid "Java could not search the current Folio media record."
 msgstr ""
 
-#: inc/admin-media.php:2443
+#: inc/admin-media.php:2678
 msgid "Several Folio records match this image. Automatic selection is unsafe."
 msgstr ""
 
-#: inc/admin-media.php:2444
+#: inc/admin-media.php:2679
 msgid "The current Folio media record was not found. The historical log may be outdated."
 msgstr ""
 
-#: inc/admin-media.php:2445
+#: inc/admin-media.php:2680
 msgid "The Folio gallery row has no stable record ID."
 msgstr ""
 
-#: inc/admin-media.php:2446
+#: inc/admin-media.php:2681
 msgid "Java did not return a valid correction preview."
 msgstr ""
 
-#: inc/admin-media.php:2447
-#: inc/admin-media.php:2448
+#: inc/admin-media.php:2682
+#: inc/admin-media.php:2683
 msgid "The preview expired. Run the preview again before applying."
 msgstr ""
 
-#: inc/admin-media.php:2449
+#: inc/admin-media.php:2684
 msgid "Java did not return a valid apply response."
 msgstr ""
 
-#: inc/admin-media.php:2451
+#: inc/admin-media.php:2686
 msgid "Request failed."
 msgstr ""
 
-#: inc/admin-media.php:2473
+#: inc/admin-media.php:2708
 msgid "Folio correction preview"
 msgstr ""
 
-#: inc/admin-media.php:2475
+#: inc/admin-media.php:2710
 msgid "Current filename:"
 msgstr ""
 
-#: inc/admin-media.php:2478
+#: inc/admin-media.php:2713
 msgid "New filename:"
 msgstr ""
 
-#: inc/admin-media.php:2481
-#: inc/admin-media.php:2736
+#: inc/admin-media.php:2716
+#: inc/admin-media.php:3018
 msgid "Java status:"
 msgstr ""
 
-#: inc/admin-media.php:2483
-#: inc/admin-media.php:2485
-#: inc/admin-media.php:2738
-#: inc/admin-media.php:2740
+#: inc/admin-media.php:2718
+#: inc/admin-media.php:2720
+#: inc/admin-media.php:3020
+#: inc/admin-media.php:3022
 msgid "Warnings"
 msgstr ""
 
-#: inc/admin-media.php:2492
+#: inc/admin-media.php:2727
 msgid "Apply correction in Folio"
 msgstr ""
 
-#: inc/admin-media.php:2501
+#: inc/admin-media.php:2736
 msgid "Folio correction was not prepared"
 msgstr ""
 
-#: inc/admin-media.php:2525
+#: inc/admin-media.php:2760
 msgid "Unavailable"
 msgstr ""
 
-#: inc/admin-media.php:2531
+#: inc/admin-media.php:2766
 msgid "Updated:"
 msgstr ""
 
-#: inc/admin-media.php:2532
+#: inc/admin-media.php:2767
 msgid "File:"
 msgstr ""
 
-#: inc/admin-media.php:2536
+#: inc/admin-media.php:2771
 msgid "Only the newest part of the large log was read."
 msgstr ""
 
-#: inc/admin-media.php:2542
+#: inc/admin-media.php:2777
 msgid "No failed media links found"
 msgstr ""
 
-#: inc/admin-media.php:2578
-msgid "OVH/S3 index path:"
+#: inc/admin-media.php:2812
+msgid "Preferred candidate: already assigned to this WooCommerce product and confirmed in the current OVH/S3 index."
 msgstr ""
 
-#: inc/admin-media.php:2588
+#: inc/admin-media.php:2817
+msgid "Open the assigned WordPress image"
+msgstr ""
+
+#: inc/admin-media.php:2829
+msgid "OVH/S3 image:"
+msgstr ""
+
+#: inc/admin-media.php:2845
 msgid "S3 proof:"
 msgstr ""
 
-#: inc/admin-media.php:2600
-#: inc/admin-media.php:2706
+#: inc/admin-media.php:2857
+#: inc/admin-media.php:2988
 msgid "Preview Folio correction"
 msgstr ""
 
-#: inc/admin-media.php:2611
+#: inc/admin-media.php:2868
 msgid "This S3 index row has no ETag, so it cannot be used as write proof."
 msgstr ""
 
-#: inc/admin-media.php:2616
-msgid "These filenames are actual records from s3_media_index found after normalizing the filename from Folio. If one of these files is correct, set its exact filename in Folio and rerun media synchronization; do not upload another duplicate."
+#: inc/admin-media.php:2873
+msgid "Preferred candidates are images already assigned to the affected WooCommerce product and confirmed in s3_media_index. Remaining filenames are actual index records found after normalizing the filename from Folio. If one of these files is correct, set its exact filename in Folio and rerun media synchronization; do not upload another duplicate."
 msgstr ""
 
-#: inc/admin-media.php:2690
+#: inc/admin-media.php:2892
+msgid "WordPress attached file:"
+msgstr ""
+
+#: inc/admin-media.php:2898
+msgid "These files exist in WordPress, but were not confirmed in the current OVH/S3 index result. Refresh the media index first. Only an exact S3 index row with proof can be applied to Folio."
+msgstr ""
+
+#: inc/admin-media.php:2972
 msgid "Preparing preview…"
 msgstr ""
 
-#: inc/admin-media.php:2692
+#: inc/admin-media.php:2974
 msgid "Searching the current Folio record and validating S3 proof…"
 msgstr ""
 
-#: inc/admin-media.php:2715
+#: inc/admin-media.php:2997
 msgid "Applying…"
 msgstr ""
 
-#: inc/admin-media.php:2732
+#: inc/admin-media.php:3014
 msgid "Folio correction applied"
 msgstr ""
 
-#: inc/admin-media.php:2733
+#: inc/admin-media.php:3015
 msgid "Folio correction was blocked"
 msgstr ""
 
