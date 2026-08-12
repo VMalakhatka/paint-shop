@@ -76,7 +76,7 @@ overwritten automatically.
 ## Upload phase
 
 The uploader creates a server-side copy with the approved canonical filename and calls
-WordPress `media_handle_upload()`. The original file on the operator's computer is not
+WordPress `media_handle_sideload()`. The original file on the operator's computer is not
 renamed or modified. Active Media Cloud handling therefore receives the original and
 generated sizes through the same path as a normal Media Library upload. The plugin does
 not write directly to S3. WordPress large-image scaling is disabled only for this upload
