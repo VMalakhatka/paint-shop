@@ -13,12 +13,14 @@
     var generateNames = document.getElementById('lpmu-generate-names');
     var checkButton = document.getElementById('lpmu-check');
     var uploadButton = document.getElementById('lpmu-upload');
+    var uploadState = document.getElementById('lpmu-upload-state');
     var reportLink = document.getElementById('lpmu-report-link');
     var spinner = document.getElementById('lpmu-spinner');
     var summary = document.getElementById('lpmu-summary');
     var results = document.getElementById('lpmu-results');
     var selectedImages = [];
     var batchToken = '';
+    var uploadAllowed = false;
 
     if (!registryInput || !imagesInput || !dropZone || !checkButton) {
         return;
@@ -58,8 +60,13 @@
 
     function resetApproval() {
         batchToken = '';
+        uploadAllowed = false;
         if (uploadButton) {
-            uploadButton.classList.add('lpmu-hidden');
+            uploadButton.disabled = true;
+        }
+        if (uploadState) {
+            uploadState.textContent = strings.uploadLocked || strings.dryRunRequired;
+            uploadState.classList.remove('is-ready', 'is-blocked', 'is-complete');
         }
         reportLink.classList.add('lpmu-hidden');
         reportLink.removeAttribute('href');
@@ -68,7 +75,7 @@
     function setBusy(active, message) {
         checkButton.disabled = active;
         if (uploadButton) {
-            uploadButton.disabled = active;
+            uploadButton.disabled = active || !uploadAllowed;
         }
         spinner.classList.toggle('is-active', active);
         if (active && message) {
@@ -361,8 +368,17 @@
                 reportLink.href = result.report_url;
                 reportLink.classList.remove('lpmu-hidden');
             }
-            if (uploadButton && result.can_upload && batchToken) {
-                uploadButton.classList.remove('lpmu-hidden');
+            uploadAllowed = Boolean(result.can_upload && batchToken);
+            if (uploadButton) {
+                uploadButton.disabled = !uploadAllowed;
+            }
+            if (uploadState) {
+                var ready = Number(result.summary && result.summary.ready || 0);
+                uploadState.textContent = uploadAllowed
+                    ? format(strings.uploadReady, ready)
+                    : strings.uploadBlocked;
+                uploadState.classList.toggle('is-ready', uploadAllowed);
+                uploadState.classList.toggle('is-blocked', !uploadAllowed);
             }
         }).catch(showError);
     });
@@ -379,8 +395,14 @@
             request('lpmu_upload_batch', strings.uploading).then(function (result) {
                 renderSummary(result, true);
                 renderRows(result.rows || []);
-                uploadButton.classList.add('lpmu-hidden');
+                uploadAllowed = false;
+                uploadButton.disabled = true;
                 batchToken = '';
+                if (uploadState) {
+                    uploadState.textContent = strings.uploadCompleted;
+                    uploadState.classList.remove('is-ready', 'is-blocked');
+                    uploadState.classList.add('is-complete');
+                }
                 if (result.report_url) {
                     reportLink.href = result.report_url;
                     reportLink.classList.remove('lpmu-hidden');

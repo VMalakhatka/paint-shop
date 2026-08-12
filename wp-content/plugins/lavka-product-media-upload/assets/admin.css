@@ -137,6 +137,43 @@
     margin: 0;
 }
 
+.lpmu-full-cycle {
+    border-left: 4px solid #2271b1;
+}
+
+.lpmu-full-cycle-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.lpmu-full-cycle-actions .button {
+    min-height: 40px;
+    padding: 4px 18px;
+}
+
+.lpmu-full-cycle-actions .description {
+    flex: 1 1 420px;
+    margin: 0;
+}
+
+.lpmu-full-cycle-actions .description.is-ready {
+    color: #007017;
+    font-weight: 600;
+}
+
+.lpmu-full-cycle-actions .description.is-blocked {
+    color: #b32d2e;
+    font-weight: 600;
+}
+
+.lpmu-full-cycle-actions .description.is-complete {
+    color: #1d2327;
+    font-weight: 600;
+}
+
 .lpmu-hidden {
     display: none !important;
 }

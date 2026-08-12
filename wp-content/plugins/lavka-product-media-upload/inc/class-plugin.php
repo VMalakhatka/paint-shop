@@ -96,6 +96,11 @@ final class Plugin
                 /* translators: 1: total selected file size, 2: safe server request size limit */
                 'requestTooLarge' => __('The selected registry and images total %1$s, but the safe server request limit is %2$s. Split the images into smaller batches.', 'lavka-product-media-upload'),
                 'dryRunRequired' => __('Run the mandatory check before uploading.', 'lavka-product-media-upload'),
+                'uploadLocked' => __('Run the mandatory check first. The full cycle becomes available only for rows that pass without blocking errors.', 'lavka-product-media-upload'),
+                /* translators: %d: number of approved rows */
+                'uploadReady' => __('The full cycle is ready for %d approved rows. Rows with errors will not be uploaded.', 'lavka-product-media-upload'),
+                'uploadBlocked' => __('The full cycle is unavailable because no rows passed verification. Correct the blocking errors and run the check again.', 'lavka-product-media-upload'),
+                'uploadCompleted' => __('The full cycle has finished. Review the result table and download the audit report.', 'lavka-product-media-upload'),
                 /* translators: %d: number of selected image files */
                 'filesSelected' => __('%d image files selected', 'lavka-product-media-upload'),
                 'dropHint' => __('Drop JPEG, PNG or WebP files here', 'lavka-product-media-upload'),
@@ -345,16 +350,28 @@ final class Plugin
                 <button id="lpmu-check" class="button button-primary" type="button" <?php disabled(!$this->dependencies_ready()); ?>>
                     <?php echo esc_html__('Check without writing', 'lavka-product-media-upload'); ?>
                 </button>
-                <?php if (\lpmu_writes_enabled()) : ?>
-                    <button id="lpmu-upload" class="button button-primary lpmu-hidden" type="button">
-                        <?php echo esc_html__('Upload and synchronize approved rows', 'lavka-product-media-upload'); ?>
-                    </button>
-                <?php endif; ?>
                 <a id="lpmu-report-link" class="button lpmu-hidden" href="#">
                     <?php echo esc_html__('Download CSV report', 'lavka-product-media-upload'); ?>
                 </a>
                 <span id="lpmu-spinner" class="spinner"></span>
             </div>
+
+            <?php if (\lpmu_writes_enabled()) : ?>
+                <section class="lpmu-panel lpmu-full-cycle">
+                    <h2><?php echo esc_html__('2. Full batch image upload cycle', 'lavka-product-media-upload'); ?></h2>
+                    <p>
+                        <?php echo esc_html__('Uploads approved images through the WordPress Media Library, refreshes the OVH/S3 index, updates Folio through preview and apply, and then assigns the images to WooCommerce products.', 'lavka-product-media-upload'); ?>
+                    </p>
+                    <div class="lpmu-full-cycle-actions">
+                        <button id="lpmu-upload" class="button button-primary" type="button" disabled>
+                            <?php echo esc_html__('Upload and synchronize approved rows', 'lavka-product-media-upload'); ?>
+                        </button>
+                        <p id="lpmu-upload-state" class="description">
+                            <?php echo esc_html__('Run the mandatory check first. The full cycle becomes available only for rows that pass without blocking errors.', 'lavka-product-media-upload'); ?>
+                        </p>
+                    </div>
+                </section>
+            <?php endif; ?>
 
             <div id="lpmu-summary" class="lpmu-summary" aria-live="polite"></div>
             <div id="lpmu-results" class="lpmu-results"></div>
