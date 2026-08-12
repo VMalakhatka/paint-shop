@@ -107,6 +107,7 @@ node_modules/
 vendor/
 dist/
 build/
+/outputs/
 /vendor/
 composer.phar
 composer-setup.php

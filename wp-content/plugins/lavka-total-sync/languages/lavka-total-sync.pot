@@ -505,6 +505,15 @@ msgstr ""
 msgid "Possible matching files found in the current OVH/S3 media index table:"
 msgstr ""
 
+msgid "Possible matching files found in the WordPress Media Library:"
+msgstr ""
+
+msgid "WordPress attached file:"
+msgstr ""
+
+msgid "These files exist in WordPress, but were not confirmed in the current OVH/S3 index result. Refresh the media index first. Only an exact S3 index row with proof can be applied to Folio."
+msgstr ""
+
 #: inc/admin-media.php:1557
 #: inc/admin-media.php:2584
 msgid "bytes"

@@ -876,12 +876,78 @@ function lts_media_mismatch_filename_candidates(string $file): array {
         if ($stem === '' || $extension === '') {
             continue;
         }
+        $candidates[] = $stem . '-scaled.' . $extension;
         for ($suffix = 1; $suffix <= 20; $suffix++) {
             $candidates[] = $stem . '-' . $suffix . '.' . $extension;
+            $candidates[] = $stem . '-scaled-' . $suffix . '.' . $extension;
         }
     }
 
     return array_values(array_unique($candidates));
+}
+
+/** Find normalized candidates that exist in the WordPress Media Library. */
+function lts_media_mismatch_wordpress_suggestions(array $rows): array {
+    global $wpdb;
+
+    if (!$rows) {
+        return [];
+    }
+
+    $candidate_rows = [];
+    foreach ($rows as $index => $row) {
+        foreach (lts_media_mismatch_filename_candidates((string)($row['file'] ?? '')) as $candidate) {
+            $candidate_rows[$candidate][] = (int)$index;
+        }
+    }
+    if (!$candidate_rows) {
+        return [];
+    }
+
+    $matches = [];
+    foreach (array_chunk(array_keys($candidate_rows), 250) as $filenames) {
+        $placeholders = implode(', ', array_fill(0, count($filenames), '%s'));
+        $sql = "
+            SELECT DISTINCT p.ID AS attachment_id, pm.meta_value AS attached_file, p.guid
+            FROM {$wpdb->posts} p
+            LEFT JOIN {$wpdb->postmeta} pm
+              ON pm.post_id = p.ID AND pm.meta_key = '_wp_attached_file'
+            WHERE p.post_type = 'attachment'
+              AND (
+                    LOWER(SUBSTRING_INDEX(pm.meta_value, '/', -1)) IN ({$placeholders})
+                 OR LOWER(SUBSTRING_INDEX(p.guid, '/', -1)) IN ({$placeholders})
+              )
+            ORDER BY p.ID DESC
+        ";
+        $params = array_merge($filenames, $filenames);
+        $chunk_matches = $wpdb->get_results($wpdb->prepare($sql, ...$params), ARRAY_A);
+        if (is_array($chunk_matches)) {
+            $matches = array_merge($matches, $chunk_matches);
+        }
+    }
+
+    $suggestions = [];
+    foreach ($matches as $match) {
+        $attached_file = (string)($match['attached_file'] ?? '');
+        $filename = wp_basename($attached_file !== '' ? $attached_file : (string)($match['guid'] ?? ''));
+        $filename_lower = function_exists('mb_strtolower')
+            ? mb_strtolower($filename, 'UTF-8')
+            : strtolower($filename);
+        foreach ($candidate_rows[$filename_lower] ?? [] as $index) {
+            $attachment_id = (int)($match['attachment_id'] ?? 0);
+            $suggestions[$index][$attachment_id . '|' . $filename_lower] = [
+                'attachment_id' => $attachment_id,
+                'filename'      => $filename,
+                'attached_file' => $attached_file,
+                'edit_url'      => $attachment_id > 0 ? get_edit_post_link($attachment_id, 'raw') : '',
+            ];
+        }
+    }
+
+    foreach ($suggestions as $index => $items) {
+        $suggestions[$index] = array_values($items);
+    }
+    return $suggestions;
 }
 
 /** Find current exact/normalized candidates in the OVH/S3 media index. */
@@ -1267,6 +1333,7 @@ function lts_media_mismatch_report_data(array $args, bool $paginate = true): arr
     $offset = ($page - 1) * $args['per_page'];
     $rows = $paginate ? array_slice($events, $offset, $args['per_page']) : $events;
     $s3_suggestions = lts_media_mismatch_s3_suggestions($rows);
+    $wordpress_suggestions = lts_media_mismatch_wordpress_suggestions($rows);
 
     foreach ($rows as $row_index => &$row) {
         $explanation = lts_media_mismatch_explanation($row['message'], $row['file']);
@@ -1283,6 +1350,7 @@ function lts_media_mismatch_report_data(array $args, bool $paginate = true): arr
         $row['recommended_action'] = $explanation['action'];
         $row['hint'] = $explanation['hint'];
         $row['suggested_files'] = $s3_suggestions[$row_index] ?? [];
+        $row['wordpress_suggested_files'] = $wordpress_suggestions[$row_index] ?? [];
     }
     unset($row);
 
@@ -1502,7 +1570,7 @@ add_action('admin_post_lts_media_mismatch_export', function () {
     $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
     $sheet->setTitle('Media mismatch');
-    $sheet->mergeCells('A1:L1');
+    $sheet->mergeCells('A1:M1');
     $sheet->setCellValue('A1', __('Recent failed media links from Java', 'lavka-total-sync'));
     $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
 
@@ -1532,10 +1600,11 @@ add_action('admin_post_lts_media_mismatch_export', function () {
         __('Technical message', 'lavka-total-sync'),
         __('What to do', 'lavka-total-sync'),
         __('Possible matching files found in the current OVH/S3 media index table:', 'lavka-total-sync'),
+        __('Possible matching files found in the WordPress Media Library:', 'lavka-total-sync'),
         __('Edit URL', 'lavka-total-sync'),
     ];
     $sheet->fromArray($headers, null, 'A' . $header_row);
-    $sheet->getStyle('A' . $header_row . ':L' . $header_row)->getFont()->setBold(true);
+    $sheet->getStyle('A' . $header_row . ':M' . $header_row)->getFont()->setBold(true);
     $sheet->freezePane('A' . ($header_row + 1));
 
     $set_text = static function ($sheet, string $cell, $value): void {
@@ -1565,6 +1634,21 @@ add_action('admin_post_lts_media_mismatch_export', function () {
             }
         }
 
+        $wordpress_suggested_files = [];
+        foreach ($row['wordpress_suggested_files'] ?? [] as $suggestion) {
+            $parts = array_filter([
+                (string)($suggestion['filename'] ?? ''),
+                !empty($suggestion['attachment_id']) ? 'ID ' . (int)$suggestion['attachment_id'] : '',
+                (string)($suggestion['attached_file'] ?? ''),
+                (string)($suggestion['edit_url'] ?? ''),
+            ], static function ($value): bool {
+                return $value !== '';
+            });
+            if ($parts) {
+                $wordpress_suggested_files[] = implode(' | ', $parts);
+            }
+        }
+
         $recommended_action = (string)($row['recommended_action'] ?? '');
         if (!empty($row['hint'])) {
             $recommended_action .= ($recommended_action !== '' ? "\n" : '') . (string)$row['hint'];
@@ -1581,17 +1665,18 @@ add_action('admin_post_lts_media_mismatch_export', function () {
         $set_text($sheet, 'I' . $row_number, $row['message'] ?? '');
         $set_text($sheet, 'J' . $row_number, $recommended_action);
         $set_text($sheet, 'K' . $row_number, implode("\n", $suggested_files));
-        $set_text($sheet, 'L' . $row_number, $row['edit_url'] ?? '');
+        $set_text($sheet, 'L' . $row_number, implode("\n", $wordpress_suggested_files));
+        $set_text($sheet, 'M' . $row_number, $row['edit_url'] ?? '');
         $row_number++;
     }
 
     $last_row = max($header_row, $row_number - 1);
-    $sheet->setAutoFilter('A' . $header_row . ':L' . $last_row);
+    $sheet->setAutoFilter('A' . $header_row . ':M' . $last_row);
     if ($last_row > $header_row) {
-        $sheet->getStyle('A' . ($header_row + 1) . ':L' . $last_row)
+        $sheet->getStyle('A' . ($header_row + 1) . ':M' . $last_row)
             ->getAlignment()
             ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_TOP);
-        $sheet->getStyle('E' . ($header_row + 1) . ':L' . $last_row)
+        $sheet->getStyle('E' . ($header_row + 1) . ':M' . $last_row)
             ->getAlignment()
             ->setWrapText(true);
     }
@@ -1608,7 +1693,8 @@ add_action('admin_post_lts_media_mismatch_export', function () {
         'I' => 56,
         'J' => 56,
         'K' => 70,
-        'L' => 52,
+        'L' => 70,
+        'M' => 52,
     ] as $column => $width) {
         $sheet->getColumnDimension($column)->setWidth($width);
     }
@@ -2616,6 +2702,31 @@ CR-CE0900056100"></textarea>
                                 '<?php echo esc_js(__("These filenames are actual records from s3_media_index found after normalizing the filename from Folio. If one of these files is correct, set its exact filename in Folio and rerun media synchronization; do not upload another duplicate.", 'lavka-total-sync')); ?>'
                             ).appendTo($suggestions);
                             $suggestions.appendTo($action);
+                        }
+                        if (Array.isArray(row.wordpress_suggested_files) && row.wordpress_suggested_files.length) {
+                            const $wordpressSuggestions = $('<div>', {class: 'lts-mismatch-suggestions'});
+                            $('<strong>').text(
+                                '<?php echo esc_js(__('Possible matching files found in the WordPress Media Library:', 'lavka-total-sync')); ?>'
+                            ).appendTo($wordpressSuggestions);
+                            row.wordpress_suggested_files.forEach(function(item) {
+                                const $candidate = $('<div>', {class: 'lts-mismatch-suggestion'});
+                                const label = item.filename + (item.attachment_id ? ' · ID ' + item.attachment_id : '');
+                                if (item.edit_url) {
+                                    $('<a>', {href: item.edit_url, target: '_blank', rel: 'noopener'}).text(label).appendTo($candidate);
+                                } else {
+                                    $('<code>').text(label).appendTo($candidate);
+                                }
+                                if (item.attached_file) {
+                                    $('<span>', {class: 'description'}).text(
+                                        '<?php echo esc_js(__('WordPress attached file:', 'lavka-total-sync')); ?>' + ' ' + item.attached_file
+                                    ).appendTo($candidate);
+                                }
+                                $candidate.appendTo($wordpressSuggestions);
+                            });
+                            $('<span>').text(
+                                '<?php echo esc_js(__('These files exist in WordPress, but were not confirmed in the current OVH/S3 index result. Refresh the media index first. Only an exact S3 index row with proof can be applied to Folio.', 'lavka-total-sync')); ?>'
+                            ).appendTo($wordpressSuggestions);
+                            $wordpressSuggestions.appendTo($action);
                         }
 
                         $('<tr>')
