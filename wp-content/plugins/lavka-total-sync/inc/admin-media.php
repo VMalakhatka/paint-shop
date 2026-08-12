@@ -886,6 +886,22 @@ function lts_media_mismatch_filename_candidates(string $file): array {
     return array_values(array_unique($candidates));
 }
 
+/** Build a public OVH/S3 URL from the exact object key stored in the index. */
+function lts_media_mismatch_public_url(string $full_key): string {
+    $full_key = ltrim(str_replace('\\', '/', trim($full_key)), '/');
+    if ($full_key === '') {
+        return '';
+    }
+
+    $base_url = defined('LTS_MEDIA_PUBLIC_BASE_URL')
+        ? (string)LTS_MEDIA_PUBLIC_BASE_URL
+        : 'https://kreul-media.s3.gra.io.cloud.ovh.net/';
+    $base_url = (string)apply_filters('lts_media_public_base_url', $base_url);
+    $encoded_key = implode('/', array_map('rawurlencode', explode('/', $full_key)));
+
+    return esc_url_raw(trailingslashit($base_url) . $encoded_key);
+}
+
 /** Find normalized candidates that exist in the WordPress Media Library. */
 function lts_media_mismatch_wordpress_suggestions(array $rows): array {
     global $wpdb;
@@ -994,6 +1010,7 @@ function lts_media_mismatch_s3_suggestions(array $rows): array {
             $suggestions[$index][$filename . '|' . $full_key] = [
                 'filename'      => (string)($match['filename_lower'] ?? ''),
                 'full_key'      => $full_key,
+                'public_url'    => lts_media_mismatch_public_url($full_key),
                 'size_bytes'    => isset($match['size_bytes']) ? (int)$match['size_bytes'] : null,
                 'etag'          => (string)($match['etag'] ?? ''),
                 'last_modified' => (string)($match['last_modified'] ?? ''),
@@ -1621,7 +1638,7 @@ add_action('admin_post_lts_media_mismatch_export', function () {
         foreach ($row['suggested_files'] ?? [] as $suggestion) {
             $parts = array_filter([
                 (string)($suggestion['filename'] ?? ''),
-                (string)($suggestion['full_key'] ?? ''),
+                (string)($suggestion['public_url'] ?? ''),
                 isset($suggestion['size_bytes'])
                     ? (int)$suggestion['size_bytes'] . ' ' . __('bytes', 'lavka-total-sync')
                     : '',
@@ -2659,10 +2676,17 @@ CR-CE0900056100"></textarea>
                             row.suggested_files.forEach(function(item) {
                                 const $candidate = $('<div>', {class: 'lts-mismatch-suggestion'});
                                 $('<code>').text(item.filename).appendTo($candidate);
-                                if (item.full_key) {
-                                    $('<span>', {class: 'description'}).text(
-                                        '<?php echo esc_js(__('OVH/S3 index path:', 'lavka-total-sync')); ?>' + ' ' + item.full_key
-                                    ).appendTo($candidate);
+                                if (item.public_url) {
+                                    const $urlLine = $('<span>', {class: 'description'}).appendTo($candidate);
+                                    $('<span>').text(
+                                        '<?php echo esc_js(__('OVH/S3 image:', 'lavka-total-sync')); ?>' + ' '
+                                    ).appendTo($urlLine);
+                                    $('<a>', {
+                                        href: item.public_url,
+                                        target: '_blank',
+                                        rel: 'noopener',
+                                        text: item.public_url
+                                    }).appendTo($urlLine);
                                 }
                                 if (item.size_bytes !== null || item.etag) {
                                     const proof = [];

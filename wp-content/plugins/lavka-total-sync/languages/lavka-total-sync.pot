@@ -511,6 +511,9 @@ msgstr ""
 msgid "WordPress attached file:"
 msgstr ""
 
+msgid "OVH/S3 image:"
+msgstr ""
+
 msgid "These files exist in WordPress, but were not confirmed in the current OVH/S3 index result. Refresh the media index first. Only an exact S3 index row with proof can be applied to Folio."
 msgstr ""
 

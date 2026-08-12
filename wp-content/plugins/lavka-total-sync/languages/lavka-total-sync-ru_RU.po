@@ -467,6 +467,9 @@ msgstr "В медиатеке WordPress найдены возможные соо
 msgid "WordPress attached file:"
 msgstr "Файл вложения WordPress:"
 
+msgid "OVH/S3 image:"
+msgstr "Изображение OVH/S3:"
+
 msgid "These files exist in WordPress, but were not confirmed in the current OVH/S3 index result. Refresh the media index first. Only an exact S3 index row with proof can be applied to Folio."
 msgstr "Эти файлы существуют в WordPress, но не подтверждены текущим результатом индекса OVH/S3. Сначала обновите индекс медиа. В ФОЛИО можно применить только точную строку индекса S3 с подтверждением."
 
