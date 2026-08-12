@@ -21,10 +21,14 @@ final class ReportStore
 
         return [
             'token' => $token,
-            'url' => wp_nonce_url(
-                admin_url('admin-post.php?action=lpmu_download_report&token=' . rawurlencode($token)),
-                'lpmu_report_' . $token
-            ),
+            // This URL is returned as JSON and assigned directly by JavaScript.
+            // Building query arguments explicitly avoids wp_nonce_url() encoding
+            // separators as "&amp;", which would turn token into "amp;token".
+            'url' => add_query_arg([
+                'action' => 'lpmu_download_report',
+                'token' => $token,
+                '_wpnonce' => wp_create_nonce('lpmu_report_' . $token),
+            ], admin_url('admin-post.php')),
         ];
     }
 

@@ -79,9 +79,7 @@ final class MediaUploader
             require_once ABSPATH . 'wp-admin/includes/image.php';
             require_once ABSPATH . 'wp-admin/includes/media.php';
 
-            $field = 'lpmu_canonical_image';
-            $previous_file = $_FILES[$field] ?? null;
-            $_FILES[$field] = [
+            $sideload = [
                 'name' => $filename,
                 'type' => (string) ($row['mime'] ?? ''),
                 'tmp_name' => $server_copy,
@@ -89,41 +87,27 @@ final class MediaUploader
                 'size' => (int) ($row['file_size'] ?? filesize($server_copy)),
             ];
 
-            $exact_name_callback = static function (string $dir, string $name, string $ext) use ($filename): string {
-                return $filename;
-            };
             $disable_big_image_scaling = static function () {
                 return false;
             };
 
             try {
                 add_filter('big_image_size_threshold', $disable_big_image_scaling, 10, 1);
-                $attachment_id = media_handle_upload(
-                    $field,
+                // The canonical file is a server-side copy, not the original PHP
+                // upload temporary file. The sideload API is the matching core API
+                // and still creates the attachment, image metadata and thumbnails.
+                $attachment_id = media_handle_sideload(
+                    $sideload,
                     0,
+                    (string) ($row['product_name'] ?: pathinfo($filename, PATHINFO_FILENAME)),
                     [
                         'post_title' => (string) ($row['product_name'] ?: pathinfo($filename, PATHINFO_FILENAME)),
                         'post_excerpt' => '',
                         'post_content' => '',
-                    ],
-                    [
-                        'test_form' => false,
-                        'test_upload' => false,
-                        'mimes' => [
-                            'jpg|jpeg' => 'image/jpeg',
-                            'png' => 'image/png',
-                            'webp' => 'image/webp',
-                        ],
-                        'unique_filename_callback' => $exact_name_callback,
                     ]
                 );
             } finally {
                 remove_filter('big_image_size_threshold', $disable_big_image_scaling, 10);
-                if ($previous_file === null) {
-                    unset($_FILES[$field]);
-                } else {
-                    $_FILES[$field] = $previous_file;
-                }
             }
 
             if (is_wp_error($attachment_id)) {
