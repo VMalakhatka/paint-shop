@@ -3,7 +3,7 @@
  * Plugin Name: Lavka — Media Link Only (MU)
  * Description: Эндпоинт, который создаёт/находит attachment БЕЗ загрузки файла и привязывает к товару. Путь/URL не переписываются.
  * Author: Lavka
- * Version: 1.2
+ * Version: 1.3
  */
 if (!defined('ABSPATH')) { exit; }
 
@@ -199,6 +199,7 @@ function lavka_media_link_only(\WP_REST_Request $r) {
 /** Полностью согласует главное изображение и упорядоченную галерею одного товара. */
 function lavka_media_reconcile(\WP_REST_Request $r) {
   $created_ids = [];
+  $product_applied = false;
   try {
     if (!function_exists('wc_get_product')) {
       return new \WP_Error('woocommerce_unavailable', 'WooCommerce is not available', ['status'=>503]);
@@ -291,12 +292,19 @@ function lavka_media_reconcile(\WP_REST_Request $r) {
 
       if ($featured_prepared !== null) $product->set_image_id($featured_after);
       if ($gallery_changed) $product->set_gallery_image_ids($after_gallery);
-      if ($featured_changed || $gallery_changed) $product->save();
+      if ($featured_changed || $gallery_changed) {
+        $product->save();
+        $product_applied = true;
+      }
     }
 
+    $would_create = (bool)($featured_prepared['would_create'] ?? false);
+    foreach ($gallery_prepared as $prepared) {
+      if (!empty($prepared['would_create'])) $would_create = true;
+    }
     $status = 'noop';
     if ($dry_run) {
-      $status = ($featured_changed || $gallery_changed || !empty($created_ids)) ? 'preview' : 'noop';
+      $status = ($featured_changed || $gallery_changed || $would_create) ? 'preview' : 'noop';
     } elseif ($featured_changed || $gallery_changed) {
       $status = $replace_gallery ? 'applied' : 'partial';
     }
@@ -324,7 +332,7 @@ function lavka_media_reconcile(\WP_REST_Request $r) {
       'status' => $status,
     ], 200);
   } catch (\Throwable $e) {
-    lavka_media_cleanup_created($created_ids);
+    if (!$product_applied) lavka_media_cleanup_created($created_ids);
     error_log('[lavka] media reconcile fatal: '.$e->getMessage()."\n".$e->getTraceAsString());
     return new \WP_Error('media_reconcile_failed', $e->getMessage(), ['status'=>500]);
   }
