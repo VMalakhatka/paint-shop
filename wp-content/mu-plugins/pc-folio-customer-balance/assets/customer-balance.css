@@ -1,0 +1,192 @@
+.pc-folio-balance {
+    color: #24272b;
+    width: 100%;
+}
+
+.pc-folio-balance__header,
+.pc-folio-balance__filters,
+.pc-folio-balance__partner,
+.pc-folio-balance__filter-actions {
+    align-items: center;
+    display: flex;
+}
+
+.pc-folio-balance__header {
+    gap: 20px;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.pc-folio-balance__header h2 {
+    font-size: 28px;
+    margin: 0 0 5px;
+}
+
+.pc-folio-balance__partner {
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    margin: 0;
+}
+
+.pc-folio-balance__partner span {
+    color: #646a73;
+    font-family: monospace;
+}
+
+.pc-folio-balance__filters {
+    background: #f5f6f7;
+    border: 1px solid #d8dadd;
+    gap: 16px;
+    justify-content: space-between;
+    padding: 14px;
+}
+
+.pc-folio-balance__filters label span {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.pc-folio-balance__filters input[type="date"] {
+    min-height: 40px;
+}
+
+.pc-folio-balance__filter-actions {
+    gap: 8px;
+}
+
+.pc-folio-balance__status,
+.pc-folio-balance__notice {
+    margin-top: 14px;
+    padding: 10px 12px;
+}
+
+.pc-folio-balance__status:empty {
+    display: none;
+}
+
+.pc-folio-balance__status.is-loading,
+.pc-folio-balance__status.is-info,
+.pc-folio-balance__notice {
+    background: #eef6fb;
+    border-left: 4px solid #2271b1;
+}
+
+.pc-folio-balance__status.is-error {
+    background: #fcf0f1;
+    border-left: 4px solid #d63638;
+}
+
+.pc-folio-balance__summary {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(5, minmax(130px, 1fr));
+    margin-top: 18px;
+}
+
+.pc-folio-balance__metric {
+    background: #ccffff;
+    border: 1px solid #aebfc3;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    min-height: 78px;
+    padding: 10px;
+}
+
+.pc-folio-balance__metric span {
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.pc-folio-balance__metric strong {
+    font-size: 17px;
+    margin-top: auto;
+}
+
+.pc-folio-balance__metric--deferredAmount { background: #ffff99; }
+.pc-folio-balance__metric--overdueDeferredAmount { background: #ffc7ce; }
+.pc-folio-balance__metric--prepaymentAmount { background: #339966; color: #fff; }
+.pc-folio-balance__metric--payableNow { background: #fff200; border-color: #a99800; }
+.pc-folio-balance__metric--payableNow strong { font-size: 21px; }
+
+.pc-folio-balance__table-wrap {
+    border: 1px solid #c9cdd2;
+    margin-top: 18px;
+    max-width: 100%;
+    overflow: auto;
+}
+
+.pc-folio-balance__table {
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13px;
+    margin: 0;
+    min-width: 1480px;
+    width: 100%;
+}
+
+.pc-folio-balance__table th,
+.pc-folio-balance__table td {
+    border-bottom: 1px solid #d9dcdf;
+    border-right: 1px solid #e1e3e5;
+    padding: 7px 8px;
+    vertical-align: top;
+}
+
+.pc-folio-balance__table th {
+    background: #eef0f2;
+    font-size: 12px;
+    position: sticky;
+    text-align: left;
+    top: 0;
+    white-space: normal;
+    z-index: 1;
+}
+
+.pc-folio-balance__table td:nth-child(7),
+.pc-folio-balance__table td:nth-child(8),
+.pc-folio-balance__table td:nth-child(9),
+.pc-folio-balance__table td:nth-child(10),
+.pc-folio-balance__table td:nth-child(11),
+.pc-folio-balance__table td:nth-child(12) {
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.pc-folio-balance__table tr.is-opening td { background: #e7e7e7; font-weight: 700; }
+.pc-folio-balance__table tr.is-prepayment td { background: #d7f0e4; }
+.pc-folio-balance__table tr.is-deferred td { background: #ffffcc; }
+.pc-folio-balance__table tr.is-overdue td { background: #ffc7ce; color: #8b0000; font-weight: 600; }
+
+@media (max-width: 782px) {
+    .pc-folio-balance__header,
+    .pc-folio-balance__filters {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .pc-folio-balance__header h2 { font-size: 24px; }
+    .pc-folio-balance__filter-actions { display: grid; grid-template-columns: 1fr 1fr; }
+    .pc-folio-balance__filter-actions .button { margin: 0; min-height: 42px; white-space: normal; }
+    .pc-folio-balance__summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media print {
+    @page { size: A4 landscape; margin: 8mm; }
+    body * { visibility: hidden; }
+    .pc-folio-balance,
+    .pc-folio-balance * { visibility: visible; }
+    .pc-folio-balance { left: 0; position: absolute; top: 0; }
+    .pc-folio-balance__filters,
+    .pc-folio-balance__print,
+    .pc-folio-balance__status { display: none !important; }
+    .pc-folio-balance__summary { grid-template-columns: repeat(5, 1fr); }
+    .pc-folio-balance__table-wrap { border: 0; overflow: visible; }
+    .pc-folio-balance__table { font-size: 8px; min-width: 0; }
+    .pc-folio-balance__table th { position: static; }
+    .pc-folio-balance__table th,
+    .pc-folio-balance__table td { padding: 3px; }
+}

@@ -94,6 +94,9 @@ wp-content/mu-plugins/*
 !wp-content/mu-plugins/pc-guest-customer-register.php
 !wp-content/mu-plugins/pc-stock-tap.php
 !wp-content/mu-plugins/pc-folio-customer-map.php
+!wp-content/mu-plugins/pc-folio-customer-balance.php
+!wp-content/mu-plugins/pc-folio-customer-balance/
+!wp-content/mu-plugins/pc-folio-customer-balance/**
 !wp-content/mu-plugins/pc-folio-order-link.php
 !wp-content/mu-plugins/00-mu-i18n-loader.php
 !wp-content/mu-plugins/lavka-ecosystem-lock.php
