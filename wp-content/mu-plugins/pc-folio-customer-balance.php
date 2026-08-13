@@ -112,6 +112,12 @@ function pc_folio_balance_enqueue_assets(): void {
             'warehouse'     => __('Warehouse', 'pc-folio-customer-balance'),
             'documentId'    => __('Folio document ID', 'pc-folio-customer-balance'),
             'requestId'     => __('Request ID: %s', 'pc-folio-customer-balance'),
+            'invalidRules'  => __('The Folio report contains an invalid deferred-payment classification and cannot be shown as financially correct. Please contact the manager.', 'pc-folio-customer-balance'),
+            'period'        => __('Period: %1$s - %2$s', 'pc-folio-customer-balance'),
+            'allTimePeriod' => __('Period: all time', 'pc-folio-customer-balance'),
+            'warehouses'    => __('Warehouses: %s', 'pc-folio-customer-balance'),
+            'allWarehouses' => __('All warehouses', 'pc-folio-customer-balance'),
+            'asOfShort'     => __('As of: %s', 'pc-folio-customer-balance'),
             'summary'       => [
                 'openingBalance'        => __('Opening balance', 'pc-folio-customer-balance'),
                 'expenseTotal'          => __('Expense invoice total', 'pc-folio-customer-balance'),
@@ -163,6 +169,7 @@ function pc_folio_balance_endpoint_content(): void {
         </form>
 
         <div class="pc-folio-balance__status" data-pc-folio-status role="status" aria-live="polite"></div>
+        <div class="pc-folio-balance__report-meta" data-pc-folio-report-meta hidden></div>
         <div class="pc-folio-balance__summary" data-pc-folio-summary hidden></div>
         <div class="pc-folio-balance__notice" data-pc-folio-notice hidden></div>
 

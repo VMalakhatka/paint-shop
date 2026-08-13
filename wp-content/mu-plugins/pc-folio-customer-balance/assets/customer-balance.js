@@ -9,6 +9,7 @@
     var allButton = root.querySelector('[data-pc-folio-all]');
     var printButton = root.querySelector('[data-pc-folio-print]');
     var statusBox = root.querySelector('[data-pc-folio-status]');
+    var reportMetaBox = root.querySelector('[data-pc-folio-report-meta]');
     var summaryBox = root.querySelector('[data-pc-folio-summary]');
     var noticeBox = root.querySelector('[data-pc-folio-notice]');
     var tableWrap = root.querySelector('[data-pc-folio-table-wrap]');
@@ -47,7 +48,12 @@
 
     function dateText(value) {
         if (!value) return '';
-        var parts = String(value).substring(0, 10).split('-');
+        var parts;
+        if (Array.isArray(value) && value.length >= 3) {
+            parts = [value[0], value[1], value[2]];
+        } else {
+            parts = String(value).substring(0, 10).split('-');
+        }
         if (parts.length !== 3) return text(value);
         var parsed = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
         return Number.isNaN(parsed.getTime()) ? text(value) : dateFormatter.format(parsed);
@@ -117,16 +123,63 @@
         tableWrap.hidden = rows.length === 0;
     }
 
+    function hasInvalidDeferredClassification(rows) {
+        return rows.some(function (row) {
+            if (!row || (!row.deferred && !row.overdueDeferred)) return false;
+            return !/^111/.test(text(row.basis).trim());
+        });
+    }
+
+    function renderReportMeta(filters) {
+        filters = filters || {};
+        reportMetaBox.replaceChildren();
+
+        var dateFrom = dateText(filters.dateFrom);
+        var dateTo = dateText(filters.dateTo);
+        var isAllTime = !filters.dateFrom || (Array.isArray(filters.dateFrom)
+            ? Number(filters.dateFrom[0]) === 1753
+            : String(filters.dateFrom).indexOf('1753-01-01') === 0);
+
+        var warehouseNames = Array.isArray(filters.warehouseNames) ? filters.warehouseNames.filter(Boolean) : [];
+        var warehouseIds = Array.isArray(filters.warehouseIds) ? filters.warehouseIds.filter(function (id) { return id != null; }) : [];
+        var warehouseValue = warehouseNames.length
+            ? warehouseNames.join(', ')
+            : (warehouseIds.length ? warehouseIds.join(', ') : pcFolioBalance.labels.allWarehouses);
+
+        [
+            isAllTime ? pcFolioBalance.labels.allTimePeriod : pcFolioBalance.labels.period.replace('%1$s', dateFrom).replace('%2$s', dateTo),
+            pcFolioBalance.labels.warehouses.replace('%s', warehouseValue),
+            pcFolioBalance.labels.asOfShort.replace('%s', dateText(filters.asOfDate || filters.dateTo))
+        ].forEach(function (line) {
+            var item = document.createElement('span');
+            item.textContent = line;
+            reportMetaBox.appendChild(item);
+        });
+        reportMetaBox.hidden = false;
+    }
+
     function render(report) {
+        var rows = Array.isArray(report.rows) ? report.rows : [];
+        if (hasInvalidDeferredClassification(rows)) {
+            summaryBox.hidden = true;
+            tableWrap.hidden = true;
+            noticeBox.hidden = true;
+            reportMetaBox.hidden = true;
+            printButton.disabled = true;
+            setStatus(pcFolioBalance.labels.invalidRules, 'error');
+            return;
+        }
+
+        renderReportMeta(report.filters || {});
         renderSummary(report.summary || {});
-        renderRows(Array.isArray(report.rows) ? report.rows : []);
+        renderRows(rows);
         var asOfDate = report.filters && (report.filters.asOfDate || report.filters.dateTo);
         noticeBox.textContent = asOfDate
             ? pcFolioBalance.labels.asOf.replace('%s', dateText(asOfDate))
             : '';
         noticeBox.hidden = !noticeBox.textContent;
         printButton.disabled = false;
-        setStatus((report.rows || []).length ? '' : pcFolioBalance.labels.empty, 'info');
+        setStatus(rows.length ? '' : pcFolioBalance.labels.empty, 'info');
     }
 
     function loadReport() {

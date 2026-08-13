@@ -37,6 +37,24 @@ msgstr "ID документа ФОЛІО"
 msgid "Request ID: %s"
 msgstr "ID запиту: %s"
 
+msgid "The Folio report contains an invalid deferred-payment classification and cannot be shown as financially correct. Please contact the manager."
+msgstr "Звіт ФОЛІО містить некоректну класифікацію відстрочки, тому його не можна показати як фінансово правильний. Зверніться до менеджера."
+
+msgid "Period: %1$s - %2$s"
+msgstr "Період: %1$s - %2$s"
+
+msgid "Period: all time"
+msgstr "Період: за весь період"
+
+msgid "Warehouses: %s"
+msgstr "Склади: %s"
+
+msgid "All warehouses"
+msgstr "Усі склади"
+
+msgid "As of: %s"
+msgstr "Станом на: %s"
+
 msgid "Opening balance"
 msgstr "Залишок на початок"
 
