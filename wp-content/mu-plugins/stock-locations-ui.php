@@ -81,15 +81,9 @@ function slu_labels(): array {
 
 if (!function_exists('slu_get_primary_location_term_id')) {
     function slu_get_primary_location_term_id($product_id){
-        $pid = (int)$product_id; if(!$pid) return 0;
-        $term_id = (int)get_post_meta($pid, '_yoast_wpseo_primary_location', true);
-        if(!$term_id){
-            $parent_id = (int)wp_get_post_parent_id($pid);
-            if($parent_id){
-                $term_id = (int)get_post_meta($parent_id, '_yoast_wpseo_primary_location', true);
-            }
-        }
-        return $term_id ?: 0;
+        // Product-specific warehouse priority is intentionally disabled.
+        // Every product follows the shared `slw_location_priority` order.
+        return 0;
     }
 }
 
@@ -186,6 +180,35 @@ if (!function_exists('slu_collect_location_stocks_for_product')) {
     }
 }
 
+if (!function_exists('slu_order_location_stocks_by_global_priority')) {
+    /**
+     * Apply the one global warehouse order shared by every product.
+     * Lower `slw_location_priority` values are processed first.
+     */
+    function slu_order_location_stocks_by_global_priority(array $stocks): array {
+        static $priorities = [];
+
+        uksort($stocks, static function($left_id, $right_id) use (&$priorities): int {
+            $left_id  = (int) $left_id;
+            $right_id = (int) $right_id;
+
+            foreach ([$left_id, $right_id] as $term_id) {
+                if (!array_key_exists($term_id, $priorities)) {
+                    $raw = get_term_meta($term_id, 'slw_location_priority', true);
+                    $priorities[$term_id] = ($raw !== '' && is_numeric($raw))
+                        ? (int) $raw
+                        : PHP_INT_MAX;
+                }
+            }
+
+            $by_priority = $priorities[$left_id] <=> $priorities[$right_id];
+            return $by_priority !== 0 ? $by_priority : ($left_id <=> $right_id);
+        });
+
+        return $stocks;
+    }
+}
+
 if (!function_exists('slu_render_other_locations_line')) {
     function slu_render_other_locations_line(WC_Product $product): string{
         $primary = slu_get_primary_location_term_id($product->get_id());
@@ -256,7 +279,7 @@ function pc_build_stock_view(WC_Product $product): array {
     if ($mode === 'manual' && $sel && isset($all[$sel])) {
         $ordered[$sel] = $all[$sel]; unset($all[$sel]);
     }
-    uasort($all, function($a,$b){ return (int)($b['qty'] ?? 0) <=> (int)($a['qty'] ?? 0); });
+    $all = slu_order_location_stocks_by_global_priority($all);
     $ordered += $all;
 
     return ['mode'=>$mode,'preferred'=>$sel?:null,'primary'=>null,'ordered'=>$ordered,'sum'=>(int)$sum];
@@ -280,9 +303,7 @@ if (!function_exists('slu_get_allocation_plan')) {
         $all = slu_collect_location_stocks_for_product($product);
         if (empty($all)) return [];
 
-        $ordered = [];
-        uasort($all, function($a,$b){ return (int)$b['qty'] <=> (int)$a['qty']; });
-        $ordered += $all;
+        $ordered = slu_order_location_stocks_by_global_priority($all);
 
         $plan = []; $left = $need;
         foreach ($ordered as $tid=>$row) {

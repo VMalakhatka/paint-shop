@@ -91,8 +91,12 @@ function pc_build_alloc_plan(\WC_Product $product, int $need): array {
         unset($all[$sel]);
     }
 
-    // остальные — по убыванию остатков
-    uasort($all, function($a,$b){ return (int)($b['qty'] ?? 0) <=> (int)($a['qty'] ?? 0); });
+    // Остальные склады используют единый глобальный порядок для всех товаров.
+    if (function_exists('slu_order_location_stocks_by_global_priority')) {
+        $all = slu_order_location_stocks_by_global_priority($all);
+    } else {
+        ksort($all, SORT_NUMERIC);
+    }
     $ordered += $all;
 
     // Жадно набираем до need
