@@ -123,13 +123,6 @@
         tableWrap.hidden = rows.length === 0;
     }
 
-    function hasInvalidDeferredClassification(rows) {
-        return rows.some(function (row) {
-            if (!row || (!row.deferred && !row.overdueDeferred)) return false;
-            return !/^111/.test(text(row.basis).trim());
-        });
-    }
-
     function renderReportMeta(filters) {
         filters = filters || {};
         reportMetaBox.replaceChildren();
@@ -160,16 +153,6 @@
 
     function render(report) {
         var rows = Array.isArray(report.rows) ? report.rows : [];
-        if (hasInvalidDeferredClassification(rows)) {
-            summaryBox.hidden = true;
-            tableWrap.hidden = true;
-            noticeBox.hidden = true;
-            reportMetaBox.hidden = true;
-            printButton.disabled = true;
-            setStatus(pcFolioBalance.labels.invalidRules, 'error');
-            return;
-        }
-
         renderReportMeta(report.filters || {});
         renderSummary(report.summary || {});
         renderRows(rows);

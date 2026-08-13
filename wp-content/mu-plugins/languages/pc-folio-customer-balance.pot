@@ -58,12 +58,6 @@ msgstr ""
 msgid "Request ID: %s"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:115
-msgid ""
-"The Folio report contains an invalid deferred-payment classification and "
-"cannot be shown as financially correct. Please contact the manager."
-msgstr ""
-
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:116
 #, php-format
 msgid "Period: %1$s - %2$s"

@@ -112,7 +112,6 @@ function pc_folio_balance_enqueue_assets(): void {
             'warehouse'     => __('Warehouse', 'pc-folio-customer-balance'),
             'documentId'    => __('Folio document ID', 'pc-folio-customer-balance'),
             'requestId'     => __('Request ID: %s', 'pc-folio-customer-balance'),
-            'invalidRules'  => __('The Folio report contains an invalid deferred-payment classification and cannot be shown as financially correct. Please contact the manager.', 'pc-folio-customer-balance'),
             'period'        => __('Period: %1$s - %2$s', 'pc-folio-customer-balance'),
             'allTimePeriod' => __('Period: all time', 'pc-folio-customer-balance'),
             'warehouses'    => __('Warehouses: %s', 'pc-folio-customer-balance'),
