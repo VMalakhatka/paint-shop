@@ -576,6 +576,33 @@ msgstr "Сформировать отчёт"
 msgid "Export XLSX"
 msgstr "Экспортировать XLSX"
 
+msgid "Before applying corrections, set the required report filters and export the complete XLSX report. Keep it as the before-corrections record."
+msgstr "Перед применением исправлений установите нужные фильтры отчёта и экспортируйте полный отчёт XLSX. Сохраните его как контрольное состояние до исправлений."
+
+msgid "Confirmed repairs awaiting Woo synchronization"
+msgstr "Подтверждённые исправления, ожидающие синхронизации с Woo"
+
+msgid "Only SKUs whose Folio correction was confirmed from this report are added here. Synchronization processes this list only, not the complete catalog."
+msgstr "Сюда добавляются только артикулы, исправление которых в ФОЛІО подтверждено из этого отчёта. Синхронизация обрабатывает только этот список, а не весь каталог."
+
+msgid "Synchronize corrected products with Woo"
+msgstr "Синхронизировать исправленные товары с Woo"
+
+msgid "Clear repair queue"
+msgstr "Очистить очередь исправлений"
+
+msgid "Products in queue:"
+msgstr "Товаров в очереди:"
+
+msgid "Synchronizing corrected products…"
+msgstr "Синхронизация исправленных товаров…"
+
+msgid "Point synchronization failed. The SKUs remain in the queue."
+msgstr "Точечная синхронизация не завершилась. Артикулы остались в очереди."
+
+msgid "Clear all SKUs from the repair queue?"
+msgstr "Очистить все артикулы из очереди исправлений?"
+
 #: inc/admin-media.php:2062
 #, fuzzy
 msgid "Actions"

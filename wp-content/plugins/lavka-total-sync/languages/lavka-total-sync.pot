@@ -630,6 +630,33 @@ msgstr ""
 msgid "Export XLSX"
 msgstr ""
 
+msgid "Before applying corrections, set the required report filters and export the complete XLSX report. Keep it as the before-corrections record."
+msgstr ""
+
+msgid "Confirmed repairs awaiting Woo synchronization"
+msgstr ""
+
+msgid "Only SKUs whose Folio correction was confirmed from this report are added here. Synchronization processes this list only, not the complete catalog."
+msgstr ""
+
+msgid "Synchronize corrected products with Woo"
+msgstr ""
+
+msgid "Clear repair queue"
+msgstr ""
+
+msgid "Products in queue:"
+msgstr ""
+
+msgid "Synchronizing corrected products…"
+msgstr ""
+
+msgid "Point synchronization failed. The SKUs remain in the queue."
+msgstr ""
+
+msgid "Clear all SKUs from the repair queue?"
+msgstr ""
+
 #: inc/admin-media.php:2062
 msgid "Actions"
 msgstr ""

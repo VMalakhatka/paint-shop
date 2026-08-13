@@ -445,6 +445,126 @@ if (!function_exists('lts_call_java_media_locked')) {
     }
 }
 
+/** Return the deduplicated list of SKUs whose Folio media references were repaired. */
+function lts_media_repair_queue_get(): array {
+    $stored = get_option('lts_media_repair_sync_queue', []);
+    if (!is_array($stored)) {
+        return [];
+    }
+
+    $skus = array_map(static fn($sku): string => trim(sanitize_text_field((string)$sku)), $stored);
+    return array_slice(array_values(array_unique(array_filter($skus))), 0, 3000);
+}
+
+/** Add one confirmed Folio repair to the point-sync queue. */
+function lts_media_repair_queue_add(string $sku): array {
+    $sku = trim(sanitize_text_field($sku));
+    $queue = lts_media_repair_queue_get();
+    if ($sku !== '' && !in_array($sku, $queue, true)) {
+        $queue[] = $sku;
+        update_option('lts_media_repair_sync_queue', $queue, false);
+    }
+    return $queue;
+}
+
+/** Persist the remaining queue after a point synchronization. */
+function lts_media_repair_queue_set(array $skus): array {
+    $clean = array_map(static fn($sku): string => trim(sanitize_text_field((string)$sku)), $skus);
+    $clean = array_slice(array_values(array_unique(array_filter($clean))), 0, 3000);
+    update_option('lts_media_repair_sync_queue', $clean, false);
+    return $clean;
+}
+
+add_action('wp_ajax_lts_media_repair_queue_status', function () {
+    $cap = defined('LTS_CAP') ? LTS_CAP : 'manage_options';
+    if (!current_user_can($cap)) wp_send_json_error(['error' => 'forbidden'], 403);
+    check_ajax_referer('lts_admin_nonce', 'nonce');
+
+    $queue = lts_media_repair_queue_get();
+    wp_send_json_success(['skus' => $queue, 'count' => count($queue)]);
+});
+
+add_action('wp_ajax_lts_media_repair_queue_clear', function () {
+    $cap = defined('LTS_CAP') ? LTS_CAP : 'manage_options';
+    if (!current_user_can($cap)) wp_send_json_error(['error' => 'forbidden'], 403);
+    check_ajax_referer('lts_admin_nonce', 'nonce');
+
+    $queue = lts_media_repair_queue_set([]);
+    wp_send_json_success(['skus' => $queue, 'count' => 0]);
+});
+
+/** Synchronize only SKUs accumulated by confirmed repairs in this report. */
+add_action('wp_ajax_lts_media_repair_queue_sync', function () {
+    $cap = defined('LTS_CAP') ? LTS_CAP : 'manage_options';
+    if (!current_user_can($cap)) wp_send_json_error(['error' => 'forbidden'], 403);
+    check_ajax_referer('lts_admin_nonce', 'nonce');
+
+    $queue = lts_media_repair_queue_get();
+    if (!$queue) {
+        wp_send_json_error(['error' => 'repair_queue_empty'], 422);
+    }
+
+    $res = lts_call_java_media_locked(
+        '/admin/media/sync',
+        [
+            'skus'            => $queue,
+            'mode'            => 'both',
+            'touchOnUpdate'   => false,
+            'galleryStartPos' => 1,
+            'limitPerSku'     => 100,
+            'dry'             => false,
+        ],
+        'manual',
+        'media_repair_queue_sync'
+    );
+
+    if (empty($res['ok']) || empty($res['json']) || empty($res['json']['ok'])) {
+        wp_send_json_error(['error' => 'repair_queue_sync_failed', 'java' => $res], 502);
+    }
+
+    $completed = [];
+    $results = isset($res['json']['results']) && is_array($res['json']['results'])
+        ? $res['json']['results']
+        : [];
+    foreach ($results as $result) {
+        if (
+            !is_array($result)
+            || empty($result['sku'])
+            || empty($result['productId'])
+            || empty($result['applied'])
+            || !is_array($result['applied'])
+        ) {
+            continue;
+        }
+        if (!empty($result['warnings'])) {
+            continue;
+        }
+        $completed[] = (string)$result['sku'];
+    }
+
+    $remaining = array_values(array_diff($queue, $completed));
+    lts_media_repair_queue_set($remaining);
+
+    if (function_exists('lts_log_db')) {
+        lts_log_db($remaining ? 'warning' : 'info', 'media_repair_queue_sync', [
+            'result'  => $remaining ? 'partial' : 'ok',
+            'message' => 'Confirmed Folio media repairs synchronized with WooCommerce.',
+            'ctx'     => [
+                'requested_skus' => $queue,
+                'completed_skus' => $completed,
+                'remaining_skus' => $remaining,
+            ],
+        ]);
+    }
+
+    wp_send_json_success([
+        'completed' => $completed,
+        'remaining' => $remaining,
+        'count'     => count($remaining),
+        'java'      => $res['json'],
+    ]);
+});
+
 /** AJAX: по диапазону (курсор) */
 add_action('wp_ajax_lts_media_sync_range', function () {
     $cap = defined('LTS_CAP') ? LTS_CAP : 'manage_options';
@@ -1346,6 +1466,9 @@ add_action('wp_ajax_lts_folio_media_repair_apply', function () {
 
     $status = lts_media_folio_change_status($result['json']);
     $applied = !empty($result['json']['ok']) && in_array($status, ['applied', 'noop'], true);
+    $queue = $applied
+        ? lts_media_repair_queue_add((string)($stored['context']['sku'] ?? ''))
+        : lts_media_repair_queue_get();
     if (function_exists('lts_log_db')) {
         lts_log_db($applied ? 'info' : 'error', 'folio_media_repair', [
             'sku'     => (string)($stored['context']['sku'] ?? ''),
@@ -1363,6 +1486,8 @@ add_action('wp_ajax_lts_folio_media_repair_apply', function () {
         'applied' => $applied,
         'status'  => $status,
         'result'  => $result['json'],
+        'queue'   => $queue,
+        'queue_count' => count($queue),
     ]);
 });
 
@@ -2085,6 +2210,11 @@ CR-CE0900056100"></textarea>
                 <?php _e('This is a historical view of sync-mismatch.log. An entry can remain after the image has been fixed; rerun media synchronization to get current results.', 'lavka-total-sync'); ?>
                 <?php _e('A suggested Folio correction is always previewed first and is written only after separate confirmation.', 'lavka-total-sync'); ?>
             </p>
+            <div class="notice notice-warning inline">
+                <p>
+                    <?php _e('Before applying corrections, set the required report filters and export the complete XLSX report. Keep it as the before-corrections record.', 'lavka-total-sync'); ?>
+                </p>
+            </div>
             <div class="lts-media-report-controls">
                 <label for="lts_media_mismatch_type">
                     <span><?php _e('Image type', 'lavka-total-sync'); ?></span>
@@ -2152,6 +2282,23 @@ CR-CE0900056100"></textarea>
                         <?php _e('Next'); ?>
                     </button>
                 </div>
+            </div>
+
+            <div id="lts_media_repair_queue" class="lts-media-repair-queue">
+                <h3><?php _e('Confirmed repairs awaiting Woo synchronization', 'lavka-total-sync'); ?></h3>
+                <p class="description">
+                    <?php _e('Only SKUs whose Folio correction was confirmed from this report are added here. Synchronization processes this list only, not the complete catalog.', 'lavka-total-sync'); ?>
+                </p>
+                <textarea id="lts_media_repair_queue_skus" class="large-text code" rows="5" readonly></textarea>
+                <p>
+                    <button type="button" id="lts_btn_media_repair_queue_sync" class="button button-primary">
+                        <?php _e('Synchronize corrected products with Woo', 'lavka-total-sync'); ?>
+                    </button>
+                    <button type="button" id="lts_btn_media_repair_queue_clear" class="button">
+                        <?php _e('Clear repair queue', 'lavka-total-sync'); ?>
+                    </button>
+                    <span id="lts_media_repair_queue_status" aria-live="polite"></span>
+                </p>
             </div>
         </section>
 
@@ -2250,6 +2397,19 @@ CR-CE0900056100"></textarea>
             }
             #lts_media_mismatch_table .lts-folio-repair-messages {
                 margin: 0 0 0 18px;
+            }
+            .lts-media-repair-queue {
+                margin-top: 18px;
+                padding: 16px;
+                border: 1px solid #c3c4c7;
+                border-left: 4px solid #2271b1;
+                background: #fff;
+            }
+            .lts-media-repair-queue h3 {
+                margin-top: 0;
+            }
+            #lts_media_repair_queue_status {
+                margin-left: 8px;
             }
         </style>
 
@@ -2669,6 +2829,58 @@ CR-CE0900056100"></textarea>
                 return labels[status] || status || '<?php echo esc_js(__('Unknown', 'lavka-total-sync')); ?>';
             }
 
+            function renderMediaRepairQueue(data) {
+                const skus = data && Array.isArray(data.skus)
+                    ? data.skus
+                    : (data && Array.isArray(data.remaining) ? data.remaining : []);
+                $('#lts_media_repair_queue_skus').val(skus.join('\n'));
+                $('#lts_btn_media_repair_queue_sync, #lts_btn_media_repair_queue_clear').prop('disabled', !skus.length);
+                $('#lts_media_repair_queue_status').text(
+                    '<?php echo esc_js(__('Products in queue:', 'lavka-total-sync')); ?>' + ' ' + skus.length
+                );
+            }
+
+            function loadMediaRepairQueue() {
+                $.post(ajaxUrl, {
+                    action: 'lts_media_repair_queue_status',
+                    nonce: nonce
+                }).done(function(response) {
+                    if (response && response.success) renderMediaRepairQueue(response.data || {});
+                });
+            }
+
+            $('#lts_btn_media_repair_queue_sync').on('click', function() {
+                const $button = $(this);
+                $button.prop('disabled', true);
+                $('#lts_media_repair_queue_status').text('<?php echo esc_js(__('Synchronizing corrected products…', 'lavka-total-sync')); ?>');
+                $.post(ajaxUrl, {
+                    action: 'lts_media_repair_queue_sync',
+                    nonce: nonce
+                }).done(function(response) {
+                    if (!response || !response.success) {
+                        $('#lts_media_repair_queue_status').text('<?php echo esc_js(__('Point synchronization failed. The SKUs remain in the queue.', 'lavka-total-sync')); ?>');
+                        return;
+                    }
+                    renderMediaRepairQueue(response.data || {});
+                }).fail(function() {
+                    $('#lts_media_repair_queue_status').text('<?php echo esc_js(__('Point synchronization failed. The SKUs remain in the queue.', 'lavka-total-sync')); ?>');
+                }).always(function() {
+                    loadMediaRepairQueue();
+                });
+            });
+
+            $('#lts_btn_media_repair_queue_clear').on('click', function() {
+                if (!window.confirm('<?php echo esc_js(__('Clear all SKUs from the repair queue?', 'lavka-total-sync')); ?>')) return;
+                $.post(ajaxUrl, {
+                    action: 'lts_media_repair_queue_clear',
+                    nonce: nonce
+                }).done(function(response) {
+                    if (response && response.success) renderMediaRepairQueue(response.data || {});
+                });
+            });
+
+            loadMediaRepairQueue();
+
             function folioRepairErrorLabel(code) {
                 const labels = {
                     invalid_repair_context: '<?php echo esc_js(__('The report row does not contain enough data for a Folio correction.', 'lavka-total-sync')); ?>',
@@ -3021,6 +3233,9 @@ CR-CE0900056100"></textarea>
                     appendFolioMessages($result, '<?php echo esc_js(__('Errors', 'lavka-total-sync')); ?>', javaResult.errors);
                     appendFolioMessages($result, '<?php echo esc_js(__('Warnings', 'lavka-total-sync')); ?>', javaResponse.warnings);
                     appendFolioMessages($result, '<?php echo esc_js(__('Errors', 'lavka-total-sync')); ?>', javaResponse.errors);
+                    if (data.applied) {
+                        renderMediaRepairQueue({skus: data.queue || []});
+                    }
                 }).fail(function(xhr) {
                     renderFolioRepairFailure($result, xhr.responseJSON || {});
                 });
