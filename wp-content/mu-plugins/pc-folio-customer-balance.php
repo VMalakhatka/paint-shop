@@ -25,13 +25,15 @@ function pc_folio_balance_user_context(int $user_id = 0): array {
         return [];
     }
 
+    $partner_id = trim((string) get_user_meta($user_id, '_folio_partner_id', true));
     $short_name = trim((string) get_user_meta($user_id, '_folio_partner_short_name', true));
-    if ($short_name === '') {
+    if ($partner_id === '' || $short_name === '' || $partner_id !== $short_name) {
         return [];
     }
 
     return [
         'user_id'    => $user_id,
+        'partner_id' => $partner_id,
         'short_name' => $short_name,
         'name'       => trim((string) get_user_meta($user_id, '_folio_partner_name', true)),
         'type'       => trim((string) get_user_meta($user_id, '_folio_partner_type', true)),
