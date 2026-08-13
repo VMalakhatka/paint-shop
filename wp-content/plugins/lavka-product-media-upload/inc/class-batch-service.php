@@ -150,6 +150,7 @@ final class BatchService
         try {
             $uploader = new MediaUploader();
             $completed = [];
+            $completed_assets = [];
             $ready_total = count(array_filter($validation['rows'], static fn(array $row): bool => !empty($row['valid'])));
             $ready_done = 0;
             foreach ($validation['rows'] as $row) {
@@ -163,11 +164,20 @@ final class BatchService
                     'uploaded' => $ready_done,
                     'total' => $ready_total,
                 ]);
-                $completed[] = $uploader->upload(
-                    $row,
-                    (string) $stored['batch_id'],
-                    (string) $stored['manifest_hash']
-                );
+                $asset_key = (string) ($row['_asset_key'] ?? $row['sha256'] ?? '');
+                if ($asset_key !== '' && isset($completed_assets[$asset_key])) {
+                    $result = $uploader->reuse_batch_asset($row, $completed_assets[$asset_key]);
+                } else {
+                    $result = $uploader->upload(
+                        $row,
+                        (string) $stored['batch_id'],
+                        (string) $stored['manifest_hash']
+                    );
+                    if ($asset_key !== '') {
+                        $completed_assets[$asset_key] = $result;
+                    }
+                }
+                $completed[] = $result;
             }
             $completed = $workflow->complete(
                 $completed,
@@ -262,7 +272,15 @@ final class BatchService
     private function public_rows(array $rows): array
     {
         foreach ($rows as &$row) {
-            unset($row['_upload'], $row['_product'], $row['_resume_attachment_id']);
+            unset(
+                $row['_upload'],
+                $row['_product'],
+                $row['_resume_attachment_id'],
+                $row['_reuse_attachment_id'],
+                $row['_asset_key'],
+                $row['_asset_owner_row'],
+                $row['_asset_owner_product_id']
+            );
         }
         unset($row);
         return array_values($rows);

@@ -26,15 +26,19 @@ final class MediaUploader
         $source = (array) ($row['_upload'] ?? []);
         $source_tmp = (string) ($source['tmp_name'] ?? '');
         $resume_attachment_id = (int) ($row['_resume_attachment_id'] ?? 0);
+        $reuse_attachment_id = (int) ($row['_reuse_attachment_id'] ?? 0);
 
         if ($filename === '' || $product_id < 1 || $source_tmp === '') {
             return $this->failure($row, 'UPLOAD_FAILED', __('The approved row is missing internal upload data.', 'lavka-product-media-upload'));
         }
         $existing_attachment_id = $this->validator->wordpress_name_conflict($filename);
+        if ($reuse_attachment_id > 0 && $existing_attachment_id !== $reuse_attachment_id) {
+            return $this->failure($row, 'NAME_CONFLICT_WP', __('The reusable attachment no longer matches the canonical filename.', 'lavka-product-media-upload'));
+        }
         if ($resume_attachment_id > 0 && $existing_attachment_id !== $resume_attachment_id) {
             return $this->failure($row, 'NAME_CONFLICT_WP', __('The resumable attachment no longer matches the canonical filename.', 'lavka-product-media-upload'));
         }
-        if ($resume_attachment_id < 1 && $existing_attachment_id > 0) {
+        if ($reuse_attachment_id < 1 && $resume_attachment_id < 1 && $existing_attachment_id > 0) {
             return $this->failure($row, 'NAME_CONFLICT_WP', __('The canonical filename appeared in WordPress after the dry run.', 'lavka-product-media-upload'));
         }
 
@@ -46,6 +50,15 @@ final class MediaUploader
 
         $server_copy = '';
         try {
+            if ($reuse_attachment_id > 0) {
+                $this->write_asset_tracking_meta($reuse_attachment_id, $row, $batch_id, $manifest_hash);
+                return $this->complete_attachment(
+                    $reuse_attachment_id,
+                    $row,
+                    $batch_id,
+                    $manifest_hash
+                );
+            }
             if ($resume_attachment_id > 0) {
                 $this->write_tracking_meta(
                     $resume_attachment_id,
@@ -130,6 +143,48 @@ final class MediaUploader
         }
     }
 
+    public function reuse_batch_asset(array $row, array $uploaded_asset): array
+    {
+        if (($uploaded_asset['status'] ?? '') !== 'UPLOADED') {
+            $failed = $this->failure(
+                $row,
+                (string) ($uploaded_asset['status'] ?? 'UPLOAD_FAILED'),
+                __('The shared image could not be reused because its completed upload proof is missing.', 'lavka-product-media-upload'),
+                (string) ($uploaded_asset['technical'] ?? '')
+            );
+            $failed['errors'] = array_values(array_unique(array_merge(
+                (array) ($uploaded_asset['errors'] ?? []),
+                (array) ($failed['errors'] ?? [])
+            )));
+            return $failed;
+        }
+
+        if (
+            (int) ($uploaded_asset['attachment_id'] ?? 0) < 1
+            || !hash_equals((string) ($uploaded_asset['sha256'] ?? ''), (string) ($row['sha256'] ?? ''))
+        ) {
+            return $this->failure(
+                $row,
+                'UPLOAD_FAILED',
+                __('The shared image could not be reused because its completed upload proof is missing.', 'lavka-product-media-upload')
+            );
+        }
+
+        return array_merge($row, [
+            'valid' => true,
+            'status' => 'UPLOADED',
+            'attachment_id' => (int) $uploaded_asset['attachment_id'],
+            'url' => (string) ($uploaded_asset['url'] ?? ''),
+            's3_key' => (string) ($uploaded_asset['s3_key'] ?? ''),
+            'errors' => [],
+            'warnings' => array_values(array_unique(array_merge(
+                (array) ($row['warnings'] ?? []),
+                [__('The physical image was uploaded once and reused for this registry row.', 'lavka-product-media-upload')]
+            ))),
+            'technical' => '',
+        ]);
+    }
+
     private function acquire_name_lock(string $lock_name, string $lock_token): bool
     {
         $value = [
@@ -176,6 +231,19 @@ final class MediaUploader
         update_post_meta($attachment_id, '_lpmu_position', (int) ($row['position'] ?? 0));
     }
 
+    private function write_asset_tracking_meta(
+        int $attachment_id,
+        array $row,
+        string $batch_id,
+        string $manifest_hash
+    ): void {
+        update_post_meta($attachment_id, '_lpmu_batch_id', $batch_id);
+        update_post_meta($attachment_id, '_lpmu_manifest_hash', $manifest_hash);
+        if ((string) get_post_meta($attachment_id, '_lpmu_source_sha256', true) === '') {
+            update_post_meta($attachment_id, '_lpmu_source_sha256', (string) ($row['sha256'] ?? ''));
+        }
+    }
+
     private function complete_attachment(
         int $attachment_id,
         array $row,
@@ -205,7 +273,9 @@ final class MediaUploader
         update_post_meta($attachment_id, '_lpmu_verified_at', current_time('mysql'));
 
         $attached_file = (string) get_post_meta($attachment_id, '_wp_attached_file', true);
-        return array_merge($this->public_row($row), [
+        // Keep the internal asset owner until Folio accepted every assignment.
+        // BatchService removes these fields before persisting the public report.
+        return array_merge($row, [
             'valid' => true,
             'status' => 'UPLOADED',
             'attachment_id' => $attachment_id,
@@ -252,10 +322,11 @@ final class MediaUploader
 
         $parent_warnings = $this->sync_attachment_parent(
             $attachment_id,
-            (int) ($row['product_id'] ?? 0)
+            $row
         );
 
         $completed_at = current_time('mysql');
+        $this->record_assignment($attachment_id, $row, $completed_at);
         update_post_meta($attachment_id, '_lpmu_folio_status', $folio_status);
         update_post_meta($attachment_id, '_lpmu_folio_external_request_id', $external_request_id);
         update_post_meta($attachment_id, '_lpmu_workflow_completed_at', $completed_at);
@@ -286,7 +357,9 @@ final class MediaUploader
          */
         do_action('lavka_product_media_upload_after_upload', $payload);
 
-        return array_merge($this->public_row($row), [
+        // Keep internal batch ownership data until Folio and Woo assignment finish.
+        // BatchService strips it before saving the public report.
+        return array_merge($row, [
             'valid' => true,
             'status' => 'SUCCESS',
             'attachment_id' => $attachment_id,
@@ -304,24 +377,46 @@ final class MediaUploader
         ]);
     }
 
-    private function sync_attachment_parent(int $attachment_id, int $product_id): array
+    private function sync_attachment_parent(int $attachment_id, array $row): array
     {
+        $product_id = (int) ($row['product_id'] ?? 0);
         $attachment = get_post($attachment_id);
         if (!$attachment || $attachment->post_type !== 'attachment' || $product_id < 1) {
             return [__('The attachment parent could not be synchronized with the product.', 'lavka-product-media-upload')];
         }
 
+        $manifest_owner = (int) ($row['_asset_owner_product_id'] ?? $product_id);
+        $owner_product = function_exists('wc_get_product') ? wc_get_product($manifest_owner) : false;
+        if ($owner_product && $owner_product->is_type('variation') && $owner_product->get_parent_id() > 0) {
+            $manifest_owner = (int) $owner_product->get_parent_id();
+        }
+
+        // TODO: For simple products that belong to a future Folio variation group,
+        // replace the first manifest owner with the Folio group parent when that
+        // relationship becomes available through the product media API.
+        $preferred_parent = (int) apply_filters(
+            'lavka_product_media_upload_primary_product_id',
+            $manifest_owner,
+            $row,
+            $attachment_id
+        );
+        if ($preferred_parent < 1) {
+            $preferred_parent = $product_id;
+        }
+
         $current_parent = (int) $attachment->post_parent;
-        if ($current_parent === $product_id) {
+        if ($current_parent === $preferred_parent) {
+            update_post_meta($attachment_id, '_lpmu_primary_product_id', $preferred_parent);
             return [];
         }
         if ($current_parent > 0) {
+            update_post_meta($attachment_id, '_lpmu_primary_product_id', $current_parent);
             return [__('The attachment already belongs to another WordPress post, so its media parent was not changed.', 'lavka-product-media-upload')];
         }
 
         $updated = wp_update_post([
             'ID' => $attachment_id,
-            'post_parent' => $product_id,
+            'post_parent' => $preferred_parent,
         ], true);
 
         if (is_wp_error($updated) || (int) $updated !== $attachment_id) {
@@ -329,7 +424,29 @@ final class MediaUploader
         }
 
         clean_post_cache($attachment_id);
+        update_post_meta($attachment_id, '_lpmu_primary_product_id', $preferred_parent);
         return [];
+    }
+
+    private function record_assignment(int $attachment_id, array $row, string $completed_at): void
+    {
+        $assignments = get_post_meta($attachment_id, '_lpmu_assignments', true);
+        $assignments = is_array($assignments) ? $assignments : [];
+        $key = (int) ($row['product_id'] ?? 0)
+            . '|' . (string) ($row['role'] ?? '')
+            . '|' . (int) ($row['position'] ?? 0);
+        $assignments[$key] = [
+            'product_id' => (int) ($row['product_id'] ?? 0),
+            'sku' => (string) ($row['sku'] ?? ''),
+            'role' => (string) ($row['role'] ?? ''),
+            'position' => (int) ($row['position'] ?? 0),
+            'last_used_at' => $completed_at,
+        ];
+        update_post_meta($attachment_id, '_lpmu_assignments', $assignments);
+        if ((string) get_post_meta($attachment_id, '_lpmu_first_used_at', true) === '') {
+            update_post_meta($attachment_id, '_lpmu_first_used_at', $completed_at);
+        }
+        update_post_meta($attachment_id, '_lpmu_last_used_at', $completed_at);
     }
 
     private function verify_attachment(int $attachment_id, array $row): array
@@ -528,7 +645,15 @@ final class MediaUploader
 
     private function public_row(array $row): array
     {
-        unset($row['_upload'], $row['_product'], $row['_resume_attachment_id']);
+        unset(
+            $row['_upload'],
+            $row['_product'],
+            $row['_resume_attachment_id'],
+            $row['_reuse_attachment_id'],
+            $row['_asset_key'],
+            $row['_asset_owner_row'],
+            $row['_asset_owner_product_id']
+        );
         return $row;
     }
 }

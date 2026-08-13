@@ -56,11 +56,20 @@ Unknown non-ASCII SKU prefixes are rejected instead of guessed.
 
 ## Conflict sources
 
-The check looks for canonical filename conflicts in:
+The check looks for canonical filenames in:
 
 - the WordPress Media Library via `_wp_attached_file` and attachment `guid`;
 - `s3_media_index.filename_lower`;
 - `s3_media_index.full_key`.
+
+An existing exact image is reused only when WordPress has a valid attachment and
+the selected source content is proven identical. A shared source image referenced by
+several registry rows is validated and uploaded once, then the same attachment is
+assigned to each listed product and synchronized to every exact Folio SKU.
+
+An S3 object without a matching WordPress attachment is blocked. WooCommerce stores an
+attachment ID rather than an arbitrary image URL, so reconstructing missing attachment
+metadata is intentionally outside the automatic reuse path.
 
 Both `s3_media_index` and a prefixed `${wpdb->prefix}s3_media_index` table are
 supported. If neither table exists, the UI explicitly reports that S3 conflicts were
@@ -103,6 +112,19 @@ different row. An attachment from an interrupted operation remains marked as par
 running the same files through the mandatory check again resumes that attachment instead
 of creating a `-1` duplicate. If Folio was applied but the response was lost, the next
 exact search resolves the operation as already correct before Woo assignment.
+
+For a shared attachment, the first registry row determines both the canonical filename
+and the deterministic Media Library parent. The attachment records that parent in
+`_lpmu_primary_product_id`, all Woo assignments in `_lpmu_assignments`, and the
+`_lpmu_first_used_at` / `_lpmu_last_used_at` timestamps for a future orphan/retention
+report. A future full-media audit should refresh `_lpmu_last_used_at` for every observed
+relationship and treat only old, unobserved attachments as cleanup candidates. TODO:
+replace the first-row fallback parent with the Folio variable-product parent when that
+relationship is exposed by the product media API.
+
+Replacing different image content under an existing canonical filename is never done
+silently. A future explicit replacement mode must create a controlled versioned name,
+preview the Folio change and retain the old object until the new assignment is verified.
 
 Folder selection is a browser convenience and remains subject to PHP's
 `max_file_uploads` and request-size limits. Split a large folder into smaller batches.

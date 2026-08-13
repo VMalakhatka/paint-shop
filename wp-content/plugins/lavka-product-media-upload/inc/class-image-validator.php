@@ -8,6 +8,8 @@ if (!defined('ABSPATH')) {
 
 final class ImageValidator
 {
+    private ?array $s3_index_columns = null;
+
     public const SETTINGS_OPTION = 'lpmu_validation_thresholds';
 
     private ProductResolver $products;
@@ -52,10 +54,9 @@ final class ImageValidator
         $seen_row_keys = [];
         $seen_sources = [];
         $seen_canonical = [];
-        $seen_sha = [];
+        $assets = [];
         $seen_main = [];
         $seen_product_assignments = [];
-        $already_uploaded = [];
         $resumable_uploads = [];
 
         foreach ($registry['rows'] as $manifest_row) {
@@ -94,9 +95,6 @@ final class ImageValidator
             $seen_row_keys[$row_key] = true;
 
             $source_key = mb_strtolower($source_file, 'UTF-8');
-            if ($source_key !== '' && isset($seen_sources[$source_key])) {
-                $errors[] = __('The same source file is referenced by more than one registry row.', 'lavka-product-media-upload');
-            }
             $seen_sources[$source_key] = true;
 
             $main_key = mb_strtolower($sku !== '' ? 'sku:' . $sku : 'barcode:' . $barcode, 'UTF-8');
@@ -171,6 +169,7 @@ final class ImageValidator
                         'sha256' => $file_result['sha256'],
                         'color_space' => $file_result['color_space'],
                     ]);
+                    $row['_upload'] = $file_candidates[0];
                 }
             }
 
@@ -190,29 +189,43 @@ final class ImageValidator
             }
 
             if (!$errors && $row['canonical_file'] !== '') {
-                $canonical_key = $row['canonical_file'];
-                if (isset($seen_canonical[$canonical_key])) {
+                // Deduplicate repeated registry references to the same selected
+                // source file. Equal bytes under intentionally different source
+                // names remain separate assets with separate canonical names.
+                $asset_key = hash('sha256', $source_key . '|' . (string) $row['sha256']);
+                if (isset($assets[$asset_key])) {
+                    $asset = $assets[$asset_key];
+                    $row['canonical_file'] = (string) $asset['canonical_file'];
+                    $row['_asset_owner_row'] = (int) $asset['row_number'];
+                    $row['_asset_owner_product_id'] = (int) $asset['product_id'];
+                    $warnings[] = __('This image is shared by multiple registry rows. It will be uploaded once and assigned to every listed product.', 'lavka-product-media-upload');
+                } else {
+                    $assets[$asset_key] = [
+                        'canonical_file' => (string) $row['canonical_file'],
+                        'row_number' => (int) $row['row_number'],
+                        'product_id' => (int) $row['product_id'],
+                    ];
+                    $row['_asset_owner_row'] = (int) $row['row_number'];
+                    $row['_asset_owner_product_id'] = (int) $row['product_id'];
+                }
+                $row['_asset_key'] = $asset_key;
+
+                $canonical_key = mb_strtolower((string) $row['canonical_file'], 'UTF-8');
+                if (isset($seen_canonical[$canonical_key]) && $seen_canonical[$canonical_key] !== $asset_key) {
                     $errors[] = __('The canonical filename is duplicated inside this batch.', 'lavka-product-media-upload');
                     $row['status'] = 'DUPLICATE_IN_BATCH';
                 }
-                $seen_canonical[$canonical_key] = true;
-
-                if (isset($seen_sha[$row['sha256']])) {
-                    $errors[] = __('The same image content occurs more than once in this batch.', 'lavka-product-media-upload');
-                    $row['status'] = 'DUPLICATE_IN_BATCH';
-                }
-                $seen_sha[$row['sha256']] = true;
+                $seen_canonical[$canonical_key] = $asset_key;
             }
 
             if (!$errors && $row['canonical_file'] !== '') {
                 $wp_conflict = $this->wordpress_name_conflict($row['canonical_file']);
                 if ($wp_conflict > 0) {
-                    if ($this->is_verified_existing_upload($wp_conflict, $row)) {
-                        $already_uploaded[$row['row_number']] = true;
-                        $row['status'] = 'SUCCESS';
+                    if ($this->existing_attachment_matches_source($wp_conflict, $row)) {
+                        $row['_reuse_attachment_id'] = $wp_conflict;
                         $row['attachment_id'] = $wp_conflict;
                         $row['url'] = (string) wp_get_attachment_url($wp_conflict);
-                        $warnings[] = __('This exact image was already uploaded and verified. It will be skipped.', 'lavka-product-media-upload');
+                        $warnings[] = __('An identical image already exists in WordPress and OVH/S3. The existing file will be reused without uploading another copy.', 'lavka-product-media-upload');
                     } elseif (
                         \lpmu_writes_enabled()
                         && $this->is_matching_partial_upload($wp_conflict, $row)
@@ -232,7 +245,7 @@ final class ImageValidator
             if (
                 !$errors
                 && $row['canonical_file'] !== ''
-                && empty($already_uploaded[$row['row_number']])
+                && empty($row['_reuse_attachment_id'])
                 && empty($resumable_uploads[$row['row_number']])
             ) {
                 $remote = apply_filters(
@@ -247,7 +260,7 @@ final class ImageValidator
                         $row['status'] = 'NAME_CONFLICT_S3';
                         $row['technical'] = (string) ($remote['technical'] ?? '');
                     } elseif (!empty($remote['conflict'])) {
-                        $errors[] = __('The canonical filename already exists in the S3 media index.', 'lavka-product-media-upload');
+                        $errors[] = __('The file already exists in OVH/S3, but no matching WordPress attachment with proven identical content was found. WooCommerce requires an attachment ID, so this row cannot be linked safely.', 'lavka-product-media-upload');
                         $row['status'] = 'NAME_CONFLICT_S3';
                         $row['technical'] = (string) ($remote['technical'] ?? '');
                     }
@@ -265,9 +278,7 @@ final class ImageValidator
                 }
             }
 
-            if (!$errors && !empty($already_uploaded[$row['row_number']])) {
-                $row['valid'] = false;
-            } elseif (!$errors) {
+            if (!$errors) {
                 $row['valid'] = true;
                 $row['status'] = 'READY';
                 $row['_upload'] = $file_candidates[0];
@@ -1196,10 +1207,59 @@ final class ImageValidator
         ];
     }
 
-    private function is_verified_existing_upload(int $attachment_id, array $row): bool
+    private function existing_attachment_matches_source(int $attachment_id, array $row): bool
     {
-        return $this->is_matching_partial_upload($attachment_id, $row)
-            && (string) get_post_meta($attachment_id, '_lpmu_workflow_completed_at', true) !== '';
+        if (get_post_type($attachment_id) !== 'attachment' || (string) ($row['sha256'] ?? '') === '') {
+            return false;
+        }
+
+        $known_hash = (string) get_post_meta($attachment_id, '_lpmu_source_sha256', true);
+        if ($known_hash !== '') {
+            return hash_equals($known_hash, (string) $row['sha256']);
+        }
+
+        $path = get_attached_file($attachment_id, true);
+        if (is_string($path) && $path !== '' && is_file($path) && is_readable($path)) {
+            $actual_hash = hash_file('sha256', $path);
+            return is_string($actual_hash) && hash_equals($actual_hash, (string) $row['sha256']);
+        }
+
+        return $this->s3_object_matches_source((string) ($row['canonical_file'] ?? ''), $row);
+    }
+
+    private function s3_object_matches_source(string $filename, array $row): bool
+    {
+        global $wpdb;
+
+        $table = $this->s3_index_table();
+        if ($table === '' || $filename === '') {
+            return false;
+        }
+
+        if ($this->s3_index_columns === null) {
+            $this->s3_index_columns = $wpdb->get_col("SHOW COLUMNS FROM `{$table}`", 0);
+        }
+        $columns = $this->s3_index_columns;
+        if (!in_array('size_bytes', $columns, true) || !in_array('etag', $columns, true)) {
+            return false;
+        }
+
+        $match = $wpdb->get_row($wpdb->prepare(
+            "SELECT size_bytes, etag FROM `{$table}` WHERE BINARY filename_lower = BINARY %s LIMIT 1",
+            mb_strtolower($filename, 'UTF-8')
+        ), ARRAY_A);
+        if (!is_array($match) || (int) ($match['size_bytes'] ?? 0) !== (int) ($row['file_size'] ?? 0)) {
+            return false;
+        }
+
+        $etag = strtolower(trim((string) ($match['etag'] ?? ''), "\"' "));
+        $source_tmp = (string) (($row['_upload']['tmp_name'] ?? ''));
+        if (!preg_match('/^[a-f0-9]{32}$/', $etag) || $source_tmp === '' || !is_file($source_tmp)) {
+            return false;
+        }
+
+        $source_md5 = md5_file($source_tmp);
+        return is_string($source_md5) && hash_equals($etag, strtolower($source_md5));
     }
 
     private function is_matching_partial_upload(int $attachment_id, array $row): bool
