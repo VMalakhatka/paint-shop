@@ -134,6 +134,15 @@ msgstr ""
 msgid "Print"
 msgstr ""
 
+msgid "Export XLSX"
+msgstr ""
+
+msgid "Balance"
+msgstr ""
+
+msgid "XLSX export is temporarily unavailable."
+msgstr ""
+
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:162
 msgid "Period start"
 msgstr ""

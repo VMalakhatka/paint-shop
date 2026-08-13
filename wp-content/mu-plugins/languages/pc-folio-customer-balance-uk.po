@@ -91,6 +91,15 @@ msgstr "Цей звіт недоступний для вашого обліко�
 msgid "Print"
 msgstr "Друкувати"
 
+msgid "Export XLSX"
+msgstr "Експортувати XLSX"
+
+msgid "Balance"
+msgstr "Баланс"
+
+msgid "XLSX export is temporarily unavailable."
+msgstr "Експорт XLSX тимчасово недоступний."
+
 msgid "Period start"
 msgstr "Початок періоду"
 

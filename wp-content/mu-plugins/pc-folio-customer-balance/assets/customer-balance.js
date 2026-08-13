@@ -7,6 +7,7 @@
     var form = root.querySelector('[data-pc-folio-form]');
     var dateInput = form.querySelector('[name="date_from"]');
     var allButton = root.querySelector('[data-pc-folio-all]');
+    var exportButton = root.querySelector('[data-pc-folio-export]');
     var printButton = root.querySelector('[data-pc-folio-print]');
     var statusBox = root.querySelector('[data-pc-folio-status]');
     var reportMetaBox = root.querySelector('[data-pc-folio-report-meta]');
@@ -161,6 +162,7 @@
             ? pcFolioBalance.labels.asOf.replace('%s', dateText(asOfDate))
             : '';
         noticeBox.hidden = !noticeBox.textContent;
+        exportButton.disabled = false;
         printButton.disabled = false;
         setStatus(rows.length ? '' : pcFolioBalance.labels.empty, 'info');
     }
@@ -170,6 +172,7 @@
         controller = new AbortController();
         submitButton.disabled = true;
         allButton.disabled = true;
+        exportButton.disabled = true;
         printButton.disabled = true;
         setStatus(pcFolioBalance.labels.loading, 'loading');
 
@@ -210,9 +213,20 @@
         event.preventDefault();
         loadReport();
     });
+    dateInput.addEventListener('change', function () {
+        exportButton.disabled = true;
+        printButton.disabled = true;
+    });
     allButton.addEventListener('click', function () {
         dateInput.value = '';
         loadReport();
+    });
+    exportButton.addEventListener('click', function () {
+        var url = new URL(pcFolioBalance.exportUrl, window.location.href);
+        url.searchParams.set('action', 'pc_folio_customer_balance_export');
+        url.searchParams.set('_wpnonce', pcFolioBalance.exportNonce);
+        if (dateInput.value) url.searchParams.set('date_from', dateInput.value);
+        window.location.assign(url.toString());
     });
     printButton.addEventListener('click', function () { window.print(); });
 

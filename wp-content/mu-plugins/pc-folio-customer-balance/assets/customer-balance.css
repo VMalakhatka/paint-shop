@@ -10,9 +10,15 @@
 .pc-folio-balance__header,
 .pc-folio-balance__filters,
 .pc-folio-balance__partner,
+.pc-folio-balance__header-actions,
 .pc-folio-balance__filter-actions {
     align-items: center;
     display: flex;
+}
+
+.pc-folio-balance__header-actions {
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .pc-folio-balance__header {
@@ -198,6 +204,7 @@
     .pc-folio-balance * { visibility: visible; }
     .pc-folio-balance { position: static; }
     .pc-folio-balance__filters,
+    .pc-folio-balance__header-actions,
     .pc-folio-balance__print,
     .pc-folio-balance__status { display: none !important; }
     .pc-folio-balance__summary { grid-template-columns: repeat(5, 1fr); }

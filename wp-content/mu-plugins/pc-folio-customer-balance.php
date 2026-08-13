@@ -10,7 +10,7 @@
 defined('ABSPATH') || exit;
 
 const PC_FOLIO_BALANCE_ENDPOINT = 'folio-balance';
-const PC_FOLIO_BALANCE_VERSION  = '0.1.0';
+const PC_FOLIO_BALANCE_VERSION  = '0.2.0';
 
 function pc_folio_balance_user_context(int $user_id = 0): array {
     $user_id = $user_id > 0 ? $user_id : get_current_user_id();
@@ -101,8 +101,10 @@ function pc_folio_balance_enqueue_assets(): void {
         true
     );
     wp_localize_script('pc-folio-customer-balance', 'pcFolioBalance', [
-        'ajaxUrl' => admin_url('admin-ajax.php'),
-        'nonce'   => wp_create_nonce('pc_folio_customer_balance'),
+        'ajaxUrl'     => admin_url('admin-ajax.php'),
+        'nonce'       => wp_create_nonce('pc_folio_customer_balance'),
+        'exportUrl'   => admin_url('admin-post.php'),
+        'exportNonce' => wp_create_nonce('pc_folio_customer_balance_export'),
         'labels'  => [
             'loading'       => __('The report is being generated...', 'pc-folio-customer-balance'),
             'ready'         => __('Select a period start date or generate the report for all time.', 'pc-folio-customer-balance'),
@@ -151,9 +153,14 @@ function pc_folio_balance_endpoint_content(): void {
                     <span><?php echo esc_html($context['short_name']); ?></span>
                 </p>
             </div>
-            <button type="button" class="button pc-folio-balance__print" data-pc-folio-print disabled>
-                <?php esc_html_e('Print', 'pc-folio-customer-balance'); ?>
-            </button>
+            <div class="pc-folio-balance__header-actions">
+                <button type="button" class="button" data-pc-folio-export disabled>
+                    <?php esc_html_e('Export XLSX', 'pc-folio-customer-balance'); ?>
+                </button>
+                <button type="button" class="button pc-folio-balance__print" data-pc-folio-print disabled>
+                    <?php esc_html_e('Print', 'pc-folio-customer-balance'); ?>
+                </button>
+            </div>
         </div>
 
         <form class="pc-folio-balance__filters" data-pc-folio-form>
@@ -208,6 +215,53 @@ function pc_folio_balance_valid_date(string $value): bool {
     return $date instanceof DateTimeImmutable && $date->format('Y-m-d') === $value;
 }
 
+function pc_folio_balance_fetch_report(array $context, string $date_from = '') {
+    if (!function_exists('lps_java_get')) {
+        return new WP_Error('folio_connection_unavailable', __('The Folio service connection is unavailable.', 'pc-folio-customer-balance'), ['status' => 503]);
+    }
+
+    $query = [
+        'partnerShortName'       => $context['short_name'],
+        'includeServicePayments' => 'true',
+    ];
+    if ($date_from !== '') {
+        $query['dateFrom'] = $date_from;
+    }
+
+    $response = lps_java_get(add_query_arg($query, '/admin/folio/customer-balance'), ['timeout' => 160]);
+    if (is_wp_error($response)) {
+        return new WP_Error('folio_unavailable', __('The Folio service is temporarily unavailable.', 'pc-folio-customer-balance'), ['status' => 503]);
+    }
+
+    $code = (int) wp_remote_retrieve_response_code($response);
+    $data = json_decode((string) wp_remote_retrieve_body($response), true);
+    if ($code < 200 || $code >= 300) {
+        $messages = [
+            400 => __('The report parameters were rejected by Folio.', 'pc-folio-customer-balance'),
+            404 => __('The linked customer was not found in Folio.', 'pc-folio-customer-balance'),
+            503 => __('The Folio service is temporarily unavailable.', 'pc-folio-customer-balance'),
+        ];
+        $request_id = is_array($data) ? sanitize_text_field((string) ($data['reqId'] ?? $data['requestId'] ?? '')) : '';
+        return new WP_Error('folio_http_error', $messages[$code] ?? __('The report could not be generated. Please try again later.', 'pc-folio-customer-balance'), [
+            'status' => $code >= 400 && $code < 600 ? $code : 502,
+            'reqId'  => $request_id,
+        ]);
+    }
+
+    if (!is_array($data) || !isset($data['summary'], $data['rows']) || !is_array($data['summary']) || !is_array($data['rows'])) {
+        return new WP_Error('invalid_folio_report', __('Folio returned an invalid report response.', 'pc-folio-customer-balance'), ['status' => 502]);
+    }
+    if (isset($data['ok']) && $data['ok'] !== true) {
+        return new WP_Error('folio_report_failed', __('The report could not be generated. Please try again later.', 'pc-folio-customer-balance'), ['status' => 502]);
+    }
+    $response_short_name = trim((string) ($data['partner']['shortName'] ?? ''));
+    if ($response_short_name === '' || $response_short_name !== $context['short_name']) {
+        return new WP_Error('folio_customer_mismatch', __('Folio returned a report for a different customer.', 'pc-folio-customer-balance'), ['status' => 502]);
+    }
+
+    return $data;
+}
+
 function pc_folio_balance_ajax(): void {
     check_ajax_referer('pc_folio_customer_balance');
 
@@ -228,54 +282,204 @@ function pc_folio_balance_ajax(): void {
         wp_send_json_error(['message' => __('Enter a valid period start date.', 'pc-folio-customer-balance')], 400);
     }
 
-    if (!function_exists('lps_java_get')) {
-        wp_send_json_error(['message' => __('The Folio service connection is unavailable.', 'pc-folio-customer-balance')], 503);
-    }
-
-    $query = [
-        'partnerShortName'      => $context['short_name'],
-        'includeServicePayments' => 'true',
-    ];
-    if ($date_from !== '') {
-        $query['dateFrom'] = $date_from;
-    }
-
-    $response = lps_java_get(add_query_arg($query, '/admin/folio/customer-balance'), ['timeout' => 160]);
-    if (is_wp_error($response)) {
-        wp_send_json_error(['message' => __('The Folio service is temporarily unavailable.', 'pc-folio-customer-balance')], 503);
-    }
-
-    $code = (int) wp_remote_retrieve_response_code($response);
-    $body = (string) wp_remote_retrieve_body($response);
-    $data = json_decode($body, true);
-
-    if ($code < 200 || $code >= 300) {
-        $request_id = '';
-        if (is_array($data)) {
-            $request_id = sanitize_text_field((string) ($data['reqId'] ?? $data['requestId'] ?? ''));
-        }
-        $messages = [
-            400 => __('The report parameters were rejected by Folio.', 'pc-folio-customer-balance'),
-            404 => __('The linked customer was not found in Folio.', 'pc-folio-customer-balance'),
-            503 => __('The Folio service is temporarily unavailable.', 'pc-folio-customer-balance'),
-        ];
+    $data = pc_folio_balance_fetch_report($context, $date_from);
+    if (is_wp_error($data)) {
+        $error_data = $data->get_error_data();
         wp_send_json_error([
-            'message' => $messages[$code] ?? __('The report could not be generated. Please try again later.', 'pc-folio-customer-balance'),
-            'reqId'   => $request_id,
-        ], $code >= 400 && $code < 600 ? $code : 502);
-    }
-
-    if (!is_array($data) || !isset($data['summary'], $data['rows']) || !is_array($data['summary']) || !is_array($data['rows'])) {
-        wp_send_json_error(['message' => __('Folio returned an invalid report response.', 'pc-folio-customer-balance')], 502);
-    }
-    if (isset($data['ok']) && $data['ok'] !== true) {
-        wp_send_json_error(['message' => __('The report could not be generated. Please try again later.', 'pc-folio-customer-balance')], 502);
-    }
-    $response_short_name = trim((string) ($data['partner']['shortName'] ?? ''));
-    if ($response_short_name === '' || $response_short_name !== $context['short_name']) {
-        wp_send_json_error(['message' => __('Folio returned a report for a different customer.', 'pc-folio-customer-balance')], 502);
+            'message' => $data->get_error_message(),
+            'reqId'   => is_array($error_data) ? (string) ($error_data['reqId'] ?? '') : '',
+        ], is_array($error_data) ? (int) ($error_data['status'] ?? 502) : 502);
     }
 
     wp_send_json_success(['report' => $data]);
 }
 add_action('wp_ajax_pc_folio_customer_balance', 'pc_folio_balance_ajax');
+
+function pc_folio_balance_export_date($value): string {
+    if (is_array($value) && count($value) >= 3) {
+        return sprintf('%04d-%02d-%02d', (int) $value[0], (int) $value[1], (int) $value[2]);
+    }
+    return is_scalar($value) ? substr((string) $value, 0, 10) : '';
+}
+
+function pc_folio_balance_export_xlsx(): void {
+    if (!is_user_logged_in()) {
+        auth_redirect();
+    }
+    check_admin_referer('pc_folio_customer_balance_export');
+
+    $context = pc_folio_balance_user_context();
+    if (!$context) {
+        wp_die(esc_html__('This report is not available for your account.', 'pc-folio-customer-balance'), '', ['response' => 403]);
+    }
+
+    $date_from = isset($_GET['date_from']) ? sanitize_text_field(wp_unslash($_GET['date_from'])) : '';
+    if ($date_from !== '' && (!pc_folio_balance_valid_date($date_from) || $date_from > wp_date('Y-m-d'))) {
+        wp_die(esc_html__('Enter a valid period start date.', 'pc-folio-customer-balance'), '', ['response' => 400]);
+    }
+
+    if (!class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class)) {
+        wp_die(esc_html__('XLSX export is temporarily unavailable.', 'pc-folio-customer-balance'), '', ['response' => 503]);
+    }
+
+    $report = pc_folio_balance_fetch_report($context, $date_from);
+    if (is_wp_error($report)) {
+        wp_die(esc_html($report->get_error_message()), '', ['response' => 502]);
+    }
+
+    $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+    $sheet->setTitle(__('Balance', 'pc-folio-customer-balance'));
+
+    $partner_name = trim((string) ($report['partner']['name'] ?? $context['name']));
+    $partner_short_name = trim((string) ($report['partner']['shortName'] ?? $context['short_name']));
+    $filters = is_array($report['filters'] ?? null) ? $report['filters'] : [];
+    $date_to = pc_folio_balance_export_date($filters['dateTo'] ?? $filters['asOfDate'] ?? '');
+    $filter_from = pc_folio_balance_export_date($filters['dateFrom'] ?? '');
+    $all_time = $filter_from === '' || $filter_from === '1753-01-01';
+
+    $sheet->setCellValue('A1', __('Balance with customer', 'pc-folio-customer-balance'));
+    $sheet->setCellValueExplicit('A2', $partner_name, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+    $sheet->setCellValueExplicit('A3', $partner_short_name, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+    $sheet->setCellValue('A4', $all_time
+        ? __('Period: all time', 'pc-folio-customer-balance')
+        : sprintf(__('Period: %1$s - %2$s', 'pc-folio-customer-balance'), $filter_from, $date_to));
+
+    $summary_labels = [
+        'openingBalance'        => __('Opening balance', 'pc-folio-customer-balance'),
+        'expenseTotal'          => __('Expense invoice total', 'pc-folio-customer-balance'),
+        'receiptTotal'          => __('Receipt invoice total', 'pc-folio-customer-balance'),
+        'bankPaymentTotal'      => __('Bank payments', 'pc-folio-customer-balance'),
+        'cashPaymentTotal'      => __('Cash payments', 'pc-folio-customer-balance'),
+        'commonDebt'            => __('Total debt', 'pc-folio-customer-balance'),
+        'deferredAmount'        => __('Deferred / on sale', 'pc-folio-customer-balance'),
+        'overdueDeferredAmount' => __('Overdue deferred / on sale', 'pc-folio-customer-balance'),
+        'prepaymentAmount'      => __('Prepayment', 'pc-folio-customer-balance'),
+        'payableNow'            => __('Payable now', 'pc-folio-customer-balance'),
+    ];
+    $summary = is_array($report['summary'] ?? null) ? $report['summary'] : [];
+    $column = 1;
+    foreach ($summary_labels as $key => $label) {
+        $column_letter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($column);
+        $sheet->setCellValue($column_letter . '6', $label);
+        $sheet->setCellValueExplicit(
+            $column_letter . '7',
+            (float) ($summary[$key] ?? 0),
+            \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC
+        );
+        $column++;
+    }
+
+    $headers = [
+        __('Due date', 'pc-folio-customer-balance'),
+        __('No.', 'pc-folio-customer-balance'),
+        __('D', 'pc-folio-customer-balance'),
+        __('Document No.', 'pc-folio-customer-balance'),
+        __('Date', 'pc-folio-customer-balance'),
+        __('Basis', 'pc-folio-customer-balance'),
+        __('Opening debt', 'pc-folio-customer-balance'),
+        __('Expense invoices', 'pc-folio-customer-balance'),
+        __('Receipt invoices', 'pc-folio-customer-balance'),
+        __('Bank payment', 'pc-folio-customer-balance'),
+        __('Cash payment', 'pc-folio-customer-balance'),
+        __('Closing debt', 'pc-folio-customer-balance'),
+        __('Note', 'pc-folio-customer-balance'),
+        __('Invoice date', 'pc-folio-customer-balance'),
+    ];
+    foreach ($headers as $index => $header) {
+        $column_letter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($index + 1);
+        $sheet->setCellValue($column_letter . '9', $header);
+    }
+
+    $row_number = 10;
+    foreach ($report['rows'] as $row) {
+        if (!is_array($row)) {
+            continue;
+        }
+        $values = [
+            pc_folio_balance_export_date($row['controlDate'] ?? ''),
+            (int) ($row['sequence'] ?? 0),
+            $row['documentType'] ?? '',
+            $row['documentNumber'] ?? '',
+            pc_folio_balance_export_date($row['documentDate'] ?? ''),
+            $row['basis'] ?? '',
+            (float) ($row['balanceBefore'] ?? 0),
+            (float) ($row['expenseAmount'] ?? 0),
+            (float) ($row['receiptAmount'] ?? 0),
+            (float) ($row['bankPayment'] ?? 0),
+            (float) ($row['cashPayment'] ?? 0),
+            (float) ($row['balanceAfter'] ?? 0),
+            $row['note'] ?? '',
+            pc_folio_balance_export_date($row['invoiceDate'] ?? ''),
+        ];
+        foreach ($values as $index => $value) {
+            $cell = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($index + 1) . $row_number;
+            if (in_array($index, [6, 7, 8, 9, 10, 11], true)) {
+                $sheet->setCellValueExplicit($cell, $value, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+            } else {
+                $sheet->setCellValueExplicit($cell, (string) $value, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            }
+        }
+
+        $fill = null;
+        if (!empty($row['openingBalanceRow'])) {
+            $fill = 'E7E7E7';
+        } elseif (!empty($row['overdueDeferred'])) {
+            $fill = 'FFC7CE';
+        } elseif (!empty($row['deferred'])) {
+            $fill = 'FFFFCC';
+        } elseif (!empty($row['prepayment'])) {
+            $fill = 'D7F0E4';
+        }
+        if ($fill !== null) {
+            $sheet->getStyle('A' . $row_number . ':N' . $row_number)->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()->setRGB($fill);
+        }
+        $row_number++;
+    }
+
+    $last_row = max(10, $row_number - 1);
+    $sheet->mergeCells('A1:N1');
+    $sheet->mergeCells('A2:N2');
+    $sheet->mergeCells('A3:N3');
+    $sheet->mergeCells('A4:N4');
+    $sheet->getStyle('A1:N1')->getFont()->setBold(true)->setSize(16);
+    $sheet->getStyle('A6:J6')->getFont()->setBold(true);
+    $summary_colors = ['CCFFFF', 'CCFFFF', 'CCFFFF', 'CCFFFF', 'CCFFFF', 'CCFFFF', 'FFFF99', 'FFC7CE', '339966', 'FFF200'];
+    foreach ($summary_colors as $index => $color) {
+        $column_letter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($index + 1);
+        $sheet->getStyle($column_letter . '6:' . $column_letter . '7')->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setRGB($color);
+    }
+    $sheet->getStyle('I6:I7')->getFont()->getColor()->setRGB('FFFFFF');
+    $sheet->getStyle('J7')->getFont()->setBold(true)->setSize(14);
+    $sheet->getStyle('A9:N9')->getFont()->setBold(true)->getColor()->setRGB('FFFFFF');
+    $sheet->getStyle('A9:N9')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('4472C4');
+    $sheet->getStyle('A7:J7')->getNumberFormat()->setFormatCode('#,##0.00');
+    $sheet->getStyle('G10:L' . $last_row)->getNumberFormat()->setFormatCode('#,##0.00');
+    $sheet->getStyle('A6:J7')->getAlignment()->setWrapText(true);
+    $sheet->getStyle('A9:N' . $last_row)->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_TOP);
+    $sheet->getStyle('A9:N' . $last_row)->getAlignment()->setWrapText(true);
+    $sheet->setAutoFilter('A9:N' . $last_row);
+    $sheet->freezePane('A10');
+
+    $widths = [13, 7, 8, 16, 13, 28, 15, 16, 16, 15, 15, 15, 32, 13];
+    foreach ($widths as $index => $width) {
+        $sheet->getColumnDimensionByColumn($index + 1)->setWidth($width);
+    }
+
+    $filename = 'folio-balance-' . (int) $context['user_id'] . '-' . wp_date('Ymd-His') . '.xlsx';
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+    nocache_headers();
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    header('X-Content-Type-Options: nosniff');
+    (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save('php://output');
+    $spreadsheet->disconnectWorksheets();
+    exit;
+}
+add_action('admin_post_pc_folio_customer_balance_export', 'pc_folio_balance_export_xlsx');
