@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: Lavka Total Sync 0.1.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lavka-total-sync\n"
 "POT-Creation-Date: 2026-08-12T18:22:43+00:00\n"
-"PO-Revision-Date: 2025-10-27T20:35:13+00:00\n"
+"PO-Revision-Date: 2026-08-13T00:00:00+02:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: uk\n"
@@ -229,15 +229,15 @@ msgstr "Журналів немає"
 #: inc/admin-media.php:273 inc/admin-media.php:274 inc/admin-media.php:345
 #: inc/admin-media.php:346 inc/admin-ui.php:1076
 msgid "Not scheduled"
-msgstr ""
+msgstr "Не заплановано"
 
 #: inc/admin-media.php:355 inc/admin-media.php:356 inc/admin-media.php:1892
 msgid "Media Sync (images)"
-msgstr ""
+msgstr "Синхронізація зображень"
 
 #: inc/admin-media.php:433
 msgid "Product media synchronization"
-msgstr ""
+msgstr "Синхронізація зображень товарів"
 
 #: inc/admin-media.php:684 inc/admin-media.php:1473
 msgid "Hidden"
@@ -283,7 +283,7 @@ msgid ""
 "Folio references this image, but Java could not find the exact filename in "
 "the current OVH/S3 media index."
 msgstr ""
-"ФОЛІО посилається на це зображення, але Java не знайшла точне ім'я файлу в "
+"ФОЛІО посилається на це зображення, але система не знайшла точне ім'я файлу в "
 "актуальному індексі OVH/S3."
 
 #: inc/admin-media.php:820
@@ -296,7 +296,7 @@ msgstr ""
 
 #: inc/admin-media.php:827
 msgid "Java media synchronization error"
-msgstr "Помилка синхронізації медіа Java"
+msgstr "Помилка синхронізації зображень із ФОЛІО"
 
 #: inc/admin-media.php:829
 msgid ""
@@ -429,7 +429,7 @@ msgstr "Зображення галереї"
 
 #: inc/admin-media.php:1716 inc/admin-media.php:2083
 msgid "Recent failed media links from Java"
-msgstr "Останні невдалі прив'язки медіа з Java"
+msgstr "Останні невдалі прив'язки зображень із ФОЛІО"
 
 #: inc/admin-media.php:1719 inc/admin-media.php:2090
 msgid "Image type"
@@ -470,7 +470,7 @@ msgstr "У медіатеці WordPress знайдено можливі відп
 
 #: inc/admin-media.php:1766
 msgid "Assigned to this WooCommerce product and confirmed in the OVH/S3 index"
-msgstr "Призначено цьому товару WooCommerce і підтверджено в індексі OVH/S3"
+msgstr "Прив'язано до цього товару на сайті та підтверджено в індексі OVH/S3"
 
 #: inc/admin-media.php:1772 inc/admin-media.php:2841
 msgid "bytes"
@@ -480,84 +480,81 @@ msgstr "байтів"
 msgid ""
 "Синхронизация изображений по диапазону SKU (курсор) или по списку SKU. "
 "Отправляет запросы в Java API /admin/media/sync/range и /admin/media/sync."
-msgstr ""
+msgstr "Синхронізація зображень для діапазону товарів або вибраного списку артикулів."
 
 #: inc/admin-media.php:1906
 msgid "By range (cursor) → /admin/media/sync/range"
-msgstr ""
+msgstr "Синхронізація товарів за діапазоном артикулів"
 
 #: inc/admin-media.php:1909 inc/admin-media.php:2372
 msgid "From SKU (inclusive)"
-msgstr ""
+msgstr "Від артикулу (включно)"
 
 #: inc/admin-media.php:1913 inc/admin-media.php:2376
 msgid "To SKU (inclusive)"
-msgstr ""
+msgstr "До артикулу (включно)"
 
 #: inc/admin-media.php:1917 inc/admin-media.php:2380
-#, fuzzy
 msgid "Chunk size"
 msgstr "Розмір пакету"
 
 #: inc/admin-media.php:1921 inc/admin-media.php:1967 inc/admin-media.php:2384
 msgid "Mode"
-msgstr ""
+msgstr "Що синхронізувати"
 
 #: inc/admin-media.php:1924 inc/admin-media.php:1970 inc/admin-media.php:2388
 msgid "both (featured + gallery)"
-msgstr ""
+msgstr "Головне зображення та галерею"
 
 #: inc/admin-media.php:1925 inc/admin-media.php:1971 inc/admin-media.php:2389
 msgid "featured only"
-msgstr ""
+msgstr "Лише головне зображення"
 
 #: inc/admin-media.php:1926 inc/admin-media.php:1972 inc/admin-media.php:2390
 msgid "gallery only"
-msgstr ""
+msgstr "Лише галерею"
 
 #: inc/admin-media.php:1929
 msgid ""
 "featured → только обложка; gallery → только галерея; both/пусто → и то, и "
 "другое."
-msgstr ""
+msgstr "Виберіть синхронізацію головного зображення, галереї або обох типів зображень."
 
 #: inc/admin-media.php:1934 inc/admin-media.php:1981 inc/admin-media.php:2395
 msgid "Gallery start position"
-msgstr ""
+msgstr "Початкова позиція галереї"
 
 #: inc/admin-media.php:1938 inc/admin-media.php:1985 inc/admin-media.php:2399
 msgid "Limit per SKU (gallery)"
-msgstr ""
+msgstr "Максимум зображень галереї для одного товару"
 
 #: inc/admin-media.php:1943 inc/admin-media.php:1990 inc/admin-media.php:2404
 msgid "Не писать в Woo, только расчёт/логика"
-msgstr ""
+msgstr "Не вносити зміни на сайт, лише перевірити та розрахувати"
 
 #: inc/admin-media.php:1947
-#, fuzzy
 msgid "Run range sync"
-msgstr "Запустити повну синхронізацію"
+msgstr "Синхронізувати вказаний діапазон"
 
 #: inc/admin-media.php:1956
 msgid "By list of SKUs → /admin/media/sync"
-msgstr ""
+msgstr "Синхронізація вибраних товарів за артикулами"
 
 #: inc/admin-media.php:1959
 msgid "SKUs (one per line or ';')"
-msgstr ""
+msgstr "Артикули (кожен з нового рядка або через «;»)"
 
 #: inc/admin-media.php:1977
 msgid "Touch on update"
-msgstr ""
+msgstr "Оновлювати дату зміни"
 
 #: inc/admin-media.php:1978
 msgid "Обновлять метки времени при изменении"
-msgstr ""
+msgstr "Оновлювати дату й час товару після зміни"
 
 #: inc/admin-media.php:1994
-#, fuzzy
 msgid "Run list sync"
-msgstr "Запустити повну синхронізацію"
+msgstr "Синхронізувати вибрані товари"
 
 #: inc/admin-media.php:2005
 msgid ""
@@ -583,28 +580,28 @@ msgid "Before applying corrections, set the required report filters and export t
 msgstr "Перед застосуванням виправлень установіть потрібні фільтри звіту та експортуйте повний звіт XLSX. Збережіть його як контрольний стан до виправлень."
 
 msgid "Confirmed repairs awaiting Woo synchronization"
-msgstr "Підтверджені виправлення, що очікують синхронізації з Woo"
+msgstr "Підтверджені виправлення у ФОЛІО, що очікують оновлення на сайті"
 
 msgid "Only SKUs whose Folio correction was confirmed from this report are added here. Synchronization processes this list only, not the complete catalog."
 msgstr "Сюди додаються лише артикули, виправлення яких у ФОЛІО підтверджено з цього звіту. Синхронізація обробляє тільки цей список, а не весь каталог."
 
 msgid "Synchronize corrected products with Woo"
-msgstr "Синхронізувати виправлені товари з Woo"
+msgstr "Оновити виправлені товари на сайті"
 
 msgid "Clear repair queue"
-msgstr "Очистити чергу виправлень"
+msgstr "Очистити список виправлень"
 
 msgid "Products in queue:"
 msgstr "Товарів у черзі:"
 
 msgid "Synchronizing corrected products…"
-msgstr "Синхронізація виправлених товарів…"
+msgstr "Оновлення виправлених товарів на сайті…"
 
 msgid "Point synchronization failed. The SKUs remain in the queue."
-msgstr "Точкова синхронізація не завершилася. Артикули залишилися в черзі."
+msgstr "Оновлення не завершилося. Артикули залишилися у списку для повторного запуску."
 
 msgid "Clear all SKUs from the repair queue?"
-msgstr "Очистити всі артикули з черги виправлень?"
+msgstr "Очистити весь список артикулів, що очікують оновлення?"
 
 #: inc/admin-media.php:2062
 #, fuzzy
@@ -638,130 +635,129 @@ msgstr "Переглянути журнал помилок"
 
 #: inc/admin-media.php:2257
 msgid "OVH media index"
-msgstr ""
+msgstr "Індекс зображень OVH/S3"
 
 #: inc/admin-media.php:2260
 msgid ""
 "Refresh the S3 media index after uploading new images, or run it by a "
 "separate schedule."
-msgstr ""
+msgstr "Оновіть індекс OVH/S3 після завантаження нових зображень або налаштуйте окремий розклад."
 
 #: inc/admin-media.php:2263
 msgid "Update OVH media index now"
-msgstr ""
+msgstr "Оновити індекс OVH/S3 зараз"
 
 #: inc/admin-media.php:2269
 msgid "Enable index cron"
-msgstr ""
+msgstr "Автоматичне оновлення індексу"
 
 #: inc/admin-media.php:2270 inc/admin-media.php:2334
 msgid "Run by schedule"
-msgstr ""
+msgstr "Запускати за розкладом"
 
 #: inc/admin-media.php:2273 inc/admin-media.php:2337
 msgid "Frequency"
-msgstr ""
+msgstr "Періодичність"
 
 #: inc/admin-media.php:2277 inc/admin-media.php:2341
 msgid "Daily"
-msgstr ""
+msgstr "Щодня"
 
 #: inc/admin-media.php:2278 inc/admin-media.php:2342 inc/admin-ui.php:633
 msgid "Weekly"
-msgstr ""
+msgstr "Щотижня"
 
 #: inc/admin-media.php:2279
 msgid "Monthly"
-msgstr ""
+msgstr "Щомісяця"
 
 #: inc/admin-media.php:2284 inc/admin-media.php:2347
 msgid "Time (site local)"
-msgstr ""
+msgstr "Час сайту"
 
 #: inc/admin-media.php:2289 inc/admin-media.php:2352
 msgid "Uses the site timezone from Settings → General."
-msgstr ""
+msgstr "Використовується часовий пояс із розділу «Налаштування → Загальні»."
 
 #: inc/admin-media.php:2293 inc/admin-media.php:2356
 msgid "Day of week"
-msgstr ""
+msgstr "День тижня"
 
 #: inc/admin-media.php:2297 inc/admin-media.php:2360 inc/admin-ui.php:1046
 msgid "Monday"
-msgstr ""
+msgstr "Понеділок"
 
 #: inc/admin-media.php:2298 inc/admin-media.php:2361 inc/admin-ui.php:1047
 msgid "Tuesday"
-msgstr ""
+msgstr "Вівторок"
 
 #: inc/admin-media.php:2299 inc/admin-media.php:2362 inc/admin-ui.php:1048
 msgid "Wednesday"
-msgstr ""
+msgstr "Середа"
 
 #: inc/admin-media.php:2300 inc/admin-media.php:2363 inc/admin-ui.php:1049
 msgid "Thursday"
-msgstr ""
+msgstr "Четвер"
 
 #: inc/admin-media.php:2301 inc/admin-media.php:2364 inc/admin-ui.php:1050
 msgid "Friday"
-msgstr ""
+msgstr "П'ятниця"
 
 #: inc/admin-media.php:2302 inc/admin-media.php:2365 inc/admin-ui.php:1051
 msgid "Saturday"
-msgstr ""
+msgstr "Субота"
 
 #: inc/admin-media.php:2303 inc/admin-media.php:2366 inc/admin-ui.php:1052
 msgid "Sunday"
-msgstr ""
+msgstr "Неділя"
 
 #: inc/admin-media.php:2308
 msgid "Day of month"
-msgstr ""
+msgstr "День місяця"
 
 #: inc/admin-media.php:2311
 msgid "Use days 1–28 so every month is valid."
-msgstr ""
+msgstr "Використовуйте числа 1–28, щоб розклад працював щомісяця."
 
 #: inc/admin-media.php:2316
 msgid "Save index schedule"
-msgstr ""
+msgstr "Зберегти розклад оновлення індексу"
 
 #: inc/admin-media.php:2317 inc/admin-media.php:2410
 msgid "Refresh status"
-msgstr ""
+msgstr "Оновити стан"
 
 #: inc/admin-media.php:2321
 msgid "Next index run"
-msgstr ""
+msgstr "Наступне оновлення індексу"
 
 #: inc/admin-media.php:2326 inc/admin-media.php:2419
 msgid "Your local (browser) time"
-msgstr ""
+msgstr "Ваш місцевий час"
 
 #: inc/admin-media.php:2330
 msgid "Media Sync Cron (range only)"
-msgstr ""
+msgstr "Автоматична синхронізація зображень за діапазоном"
 
 #: inc/admin-media.php:2333 inc/admin-ui.php:1017
 msgid "Enable cron"
-msgstr ""
+msgstr "Увімкнути автоматичний запуск"
 
 #: inc/admin-media.php:2370
 msgid "Range payload"
-msgstr ""
+msgstr "Параметри діапазону"
 
 #: inc/admin-media.php:2408
 msgid "Save & schedule"
-msgstr ""
+msgstr "Зберегти та запланувати"
 
 #: inc/admin-media.php:2409 inc/admin-ui.php:1087
 msgid "Run cron task now"
-msgstr ""
+msgstr "Запустити завдання зараз"
 
 #: inc/admin-media.php:2414 inc/admin-ui.php:1069
-#, fuzzy
 msgid "Next run"
-msgstr "Наступний курсор"
+msgstr "Наступний запуск"
 
 #: inc/admin-media.php:2472 inc/admin-media.php:2506 inc/admin-ui.php:71
 msgid "Saving…"
@@ -793,7 +789,7 @@ msgstr "Працюємо…"
 
 #: inc/admin-media.php:2536
 msgid "Scheduled"
-msgstr ""
+msgstr "Заплановано"
 
 #: inc/admin-media.php:2585
 msgid "No products found"
@@ -852,7 +848,7 @@ msgstr ""
 
 #: inc/admin-media.php:2677
 msgid "Java could not search the current Folio media record."
-msgstr "Java не змогла знайти актуальний запис медіа у ФОЛІО."
+msgstr "Не вдалося знайти актуальний запис зображення у ФОЛІО."
 
 #: inc/admin-media.php:2678
 msgid "Several Folio records match this image. Automatic selection is unsafe."
@@ -874,7 +870,7 @@ msgstr "Рядок галереї ФОЛІО не має стабільного 
 
 #: inc/admin-media.php:2681
 msgid "Java did not return a valid correction preview."
-msgstr "Java не повернула коректний попередній перегляд виправлення."
+msgstr "Не вдалося отримати коректний попередній перегляд виправлення у ФОЛІО."
 
 #: inc/admin-media.php:2682 inc/admin-media.php:2683
 msgid "The preview expired. Run the preview again before applying."
@@ -884,7 +880,7 @@ msgstr ""
 
 #: inc/admin-media.php:2684
 msgid "Java did not return a valid apply response."
-msgstr "Java не повернула коректну відповідь на застосування."
+msgstr "Не вдалося отримати підтвердження застосування виправлення у ФОЛІО."
 
 #: inc/admin-media.php:2686
 msgid "Request failed."
@@ -904,7 +900,7 @@ msgstr "Нове ім'я файлу:"
 
 #: inc/admin-media.php:2716 inc/admin-media.php:3018
 msgid "Java status:"
-msgstr "Статус Java:"
+msgstr "Статус обробки:"
 
 #: inc/admin-media.php:2718 inc/admin-media.php:2720 inc/admin-media.php:3020
 #: inc/admin-media.php:3022
