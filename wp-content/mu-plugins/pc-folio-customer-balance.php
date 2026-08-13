@@ -43,6 +43,12 @@ function pc_folio_balance_register_endpoint(): void {
 }
 add_action('init', 'pc_folio_balance_register_endpoint');
 
+function pc_folio_balance_query_vars(array $query_vars): array {
+    $query_vars[PC_FOLIO_BALANCE_ENDPOINT] = PC_FOLIO_BALANCE_ENDPOINT;
+    return $query_vars;
+}
+add_filter('woocommerce_get_query_vars', 'pc_folio_balance_query_vars');
+
 function pc_folio_balance_flush_rewrite_once(): void {
     if ((string) get_option('pc_folio_balance_rewrite_version', '') === PC_FOLIO_BALANCE_VERSION) {
         return;
