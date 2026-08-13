@@ -16,6 +16,9 @@ msgstr "Баланс із клієнтом"
 msgid "The report is being generated..."
 msgstr "Звіт формується..."
 
+msgid "Select a period start date or generate the report for all time."
+msgstr "Виберіть дату початку періоду або сформуйте звіт за весь період."
+
 msgid "The report could not be generated. Please try again later."
 msgstr "Не вдалося сформувати звіт. Спробуйте пізніше."
 

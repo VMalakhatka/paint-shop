@@ -180,5 +180,5 @@
     });
     printButton.addEventListener('click', function () { window.print(); });
 
-    loadReport();
+    setStatus(pcFolioBalance.labels.ready, 'info');
 }());

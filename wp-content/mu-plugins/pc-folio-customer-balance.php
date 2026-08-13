@@ -25,15 +25,13 @@ function pc_folio_balance_user_context(int $user_id = 0): array {
         return [];
     }
 
-    $partner_id = trim((string) get_user_meta($user_id, '_folio_partner_id', true));
     $short_name = trim((string) get_user_meta($user_id, '_folio_partner_short_name', true));
-    if ($partner_id === '' || $short_name === '' || $partner_id !== $short_name) {
+    if ($short_name === '') {
         return [];
     }
 
     return [
         'user_id'    => $user_id,
-        'partner_id' => $partner_id,
         'short_name' => $short_name,
         'name'       => trim((string) get_user_meta($user_id, '_folio_partner_name', true)),
         'type'       => trim((string) get_user_meta($user_id, '_folio_partner_type', true)),
@@ -101,6 +99,7 @@ function pc_folio_balance_enqueue_assets(): void {
         'nonce'   => wp_create_nonce('pc_folio_customer_balance'),
         'labels'  => [
             'loading'       => __('The report is being generated...', 'pc-folio-customer-balance'),
+            'ready'         => __('Select a period start date or generate the report for all time.', 'pc-folio-customer-balance'),
             'requestFailed' => __('The report could not be generated. Please try again later.', 'pc-folio-customer-balance'),
             'empty'         => __('No operations were found for the selected period.', 'pc-folio-customer-balance'),
             'asOf'          => __('The report was generated from active Folio documents as of %s.', 'pc-folio-customer-balance'),
