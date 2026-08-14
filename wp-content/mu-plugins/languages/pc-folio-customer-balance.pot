@@ -22,6 +22,18 @@ msgstr ""
 msgid "Balance with customer"
 msgstr ""
 
+msgid "Customer balance"
+msgstr ""
+
+msgid "Folio balance"
+msgstr ""
+
+msgid "Back to user profile"
+msgstr ""
+
+msgid "This report is not available for the selected user."
+msgstr ""
+
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:107
 msgid "The report is being generated..."
 msgstr ""

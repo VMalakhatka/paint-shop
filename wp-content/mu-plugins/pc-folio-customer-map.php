@@ -64,6 +64,14 @@ function pc_folio_customer_map_admin_footer(): void {
 
     $value = pc_folio_customer_map_get_value($user_id);
     $nonce = wp_create_nonce('pc_folio_partner_search');
+    $balance_button = '';
+    if ($value['shortName'] !== '' && function_exists('pc_folio_balance_admin_url')) {
+        $balance_button = sprintf(
+            ' <a class="button" href="%1$s" target="_blank" rel="noopener">%2$s</a>',
+            esc_url(pc_folio_balance_admin_url($user_id)),
+            esc_html__('Folio balance', 'pc-folio-customer-balance')
+        );
+    }
     ?>
     <script>
     (function(){
@@ -181,6 +189,7 @@ function pc_folio_customer_map_admin_footer(): void {
                         '<option value="К"><?php echo esc_js(__('Customers', 'pc-folio-customer-map')); ?></option>' +
                     '</select>' +
                     ' <button type="button" class="button" id="pc-folio-partner-clear"><?php echo esc_js(__('Clear', 'pc-folio-customer-map')); ?></button>' +
+                    <?php echo wp_json_encode($balance_button); ?> +
                     '<div id="pc-folio-partner-results" style="margin-top:8px"></div>' +
                     '<p class="description"><?php echo esc_js(__('Searches Folio partners, dealers, and customers. The selected client will be used for Folio account preview.', 'pc-folio-customer-map')); ?></p>' +
                 '</td>';

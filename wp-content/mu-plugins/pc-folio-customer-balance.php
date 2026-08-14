@@ -3,16 +3,17 @@
  * Plugin Name: PC Folio Customer Balance
  * Description: Shows the signed-in wholesale customer's Folio balance report in My Account.
  * Author: Volodymyr
- * Version: 0.1.0
+ * Version: 0.3.0
  * Text Domain: pc-folio-customer-balance
  */
 
 defined('ABSPATH') || exit;
 
 const PC_FOLIO_BALANCE_ENDPOINT = 'folio-balance';
-const PC_FOLIO_BALANCE_VERSION  = '0.2.0';
+const PC_FOLIO_BALANCE_VERSION  = '0.3.0';
+const PC_FOLIO_BALANCE_ADMIN_PAGE = 'pc-folio-customer-balance';
 
-function pc_folio_balance_user_context(int $user_id = 0): array {
+function pc_folio_balance_user_context(int $user_id = 0, bool $require_customer_role = true): array {
     $user_id = $user_id > 0 ? $user_id : get_current_user_id();
     $user = $user_id > 0 ? get_userdata($user_id) : false;
 
@@ -21,7 +22,7 @@ function pc_folio_balance_user_context(int $user_id = 0): array {
     }
 
     $allowed_roles = ['opt', 'partner'];
-    if (!array_intersect($allowed_roles, (array) $user->roles)) {
+    if ($require_customer_role && !array_intersect($allowed_roles, (array) $user->roles)) {
         return [];
     }
 
@@ -36,6 +37,32 @@ function pc_folio_balance_user_context(int $user_id = 0): array {
         'name'       => trim((string) get_user_meta($user_id, '_folio_partner_name', true)),
         'type'       => trim((string) get_user_meta($user_id, '_folio_partner_type', true)),
     ];
+}
+
+function pc_folio_balance_can_manage(): bool {
+    return current_user_can('edit_users') || current_user_can('manage_woocommerce');
+}
+
+function pc_folio_balance_admin_url(int $user_id): string {
+    return add_query_arg([
+        'page'    => PC_FOLIO_BALANCE_ADMIN_PAGE,
+        'user_id' => $user_id,
+    ], admin_url('admin.php'));
+}
+
+function pc_folio_balance_admin_context(int $user_id): array {
+    if ($user_id <= 0 || !pc_folio_balance_can_manage() || !current_user_can('edit_user', $user_id)) {
+        return [];
+    }
+    return pc_folio_balance_user_context($user_id, false);
+}
+
+function pc_folio_balance_request_context(): array {
+    $raw_user_id = $_POST['user_id'] ?? $_GET['user_id'] ?? 0;
+    $target_user_id = max(0, (int) $raw_user_id);
+    return $target_user_id > 0
+        ? pc_folio_balance_admin_context($target_user_id)
+        : pc_folio_balance_user_context();
 }
 
 function pc_folio_balance_register_endpoint(): void {
@@ -81,11 +108,7 @@ function pc_folio_balance_is_endpoint(): bool {
     return function_exists('is_wc_endpoint_url') && is_wc_endpoint_url(PC_FOLIO_BALANCE_ENDPOINT);
 }
 
-function pc_folio_balance_enqueue_assets(): void {
-    if (!pc_folio_balance_is_endpoint() || !pc_folio_balance_user_context()) {
-        return;
-    }
-
+function pc_folio_balance_enqueue_assets_for_context(array $context, int $target_user_id = 0): void {
     $base_url = plugin_dir_url(__FILE__) . 'pc-folio-customer-balance/assets/';
     wp_enqueue_style(
         'pc-folio-customer-balance',
@@ -105,6 +128,7 @@ function pc_folio_balance_enqueue_assets(): void {
         'nonce'       => wp_create_nonce('pc_folio_customer_balance'),
         'exportUrl'   => admin_url('admin-post.php'),
         'exportNonce' => wp_create_nonce('pc_folio_customer_balance_export'),
+        'userId'      => $target_user_id,
         'labels'  => [
             'loading'       => __('The report is being generated...', 'pc-folio-customer-balance'),
             'ready'         => __('Select a period start date or generate the report for all time.', 'pc-folio-customer-balance'),
@@ -135,16 +159,19 @@ function pc_folio_balance_enqueue_assets(): void {
         ],
     ]);
 }
-add_action('wp_enqueue_scripts', 'pc_folio_balance_enqueue_assets');
 
-function pc_folio_balance_endpoint_content(): void {
+function pc_folio_balance_enqueue_assets(): void {
     $context = pc_folio_balance_user_context();
-    if (!$context) {
-        echo '<p class="woocommerce-error">' . esc_html__('This report is not available for your account.', 'pc-folio-customer-balance') . '</p>';
+    if (!pc_folio_balance_is_endpoint() || !$context) {
         return;
     }
+    pc_folio_balance_enqueue_assets_for_context($context);
+}
+add_action('wp_enqueue_scripts', 'pc_folio_balance_enqueue_assets');
+
+function pc_folio_balance_render_report(array $context, bool $admin = false): void {
     ?>
-    <section class="pc-folio-balance" aria-labelledby="pc-folio-balance-title">
+    <section class="pc-folio-balance<?php echo $admin ? ' pc-folio-balance--admin' : ''; ?>" aria-labelledby="pc-folio-balance-title">
         <div class="pc-folio-balance__header">
             <div>
                 <h2 id="pc-folio-balance-title"><?php esc_html_e('Balance with customer', 'pc-folio-customer-balance'); ?></h2>
@@ -205,7 +232,76 @@ function pc_folio_balance_endpoint_content(): void {
     </section>
     <?php
 }
+
+function pc_folio_balance_endpoint_content(): void {
+    $context = pc_folio_balance_user_context();
+    if (!$context) {
+        echo '<p class="woocommerce-error">' . esc_html__('This report is not available for your account.', 'pc-folio-customer-balance') . '</p>';
+        return;
+    }
+    pc_folio_balance_render_report($context);
+}
 add_action('woocommerce_account_' . PC_FOLIO_BALANCE_ENDPOINT . '_endpoint', 'pc_folio_balance_endpoint_content');
+
+function pc_folio_balance_register_admin_page(): void {
+    add_submenu_page(
+        null,
+        __('Customer balance', 'pc-folio-customer-balance'),
+        __('Customer balance', 'pc-folio-customer-balance'),
+        'read',
+        PC_FOLIO_BALANCE_ADMIN_PAGE,
+        'pc_folio_balance_admin_page'
+    );
+}
+add_action('admin_menu', 'pc_folio_balance_register_admin_page');
+
+function pc_folio_balance_admin_page(): void {
+    $user_id = isset($_GET['user_id']) ? max(0, (int) $_GET['user_id']) : 0;
+    $context = pc_folio_balance_admin_context($user_id);
+    if (!$context) {
+        wp_die(esc_html__('This report is not available for the selected user.', 'pc-folio-customer-balance'), '', ['response' => 403]);
+    }
+    ?>
+    <div class="wrap">
+        <p>
+            <a href="<?php echo esc_url(get_edit_user_link($user_id)); ?>">&larr; <?php esc_html_e('Back to user profile', 'pc-folio-customer-balance'); ?></a>
+        </p>
+        <?php pc_folio_balance_render_report($context, true); ?>
+    </div>
+    <?php
+}
+
+function pc_folio_balance_admin_assets(string $hook_suffix): void {
+    unset($hook_suffix);
+    $page = isset($_GET['page']) ? sanitize_key(wp_unslash($_GET['page'])) : '';
+    if ($page !== PC_FOLIO_BALANCE_ADMIN_PAGE) {
+        return;
+    }
+    $user_id = isset($_GET['user_id']) ? max(0, (int) $_GET['user_id']) : 0;
+    $context = pc_folio_balance_admin_context($user_id);
+    if ($context) {
+        pc_folio_balance_enqueue_assets_for_context($context, $user_id);
+    }
+}
+add_action('admin_enqueue_scripts', 'pc_folio_balance_admin_assets');
+
+function pc_folio_balance_user_row_action(array $actions, WP_User $user): array {
+    if (!pc_folio_balance_can_manage() || !current_user_can('edit_user', $user->ID)) {
+        return $actions;
+    }
+    if (!pc_folio_balance_user_context($user->ID, false)) {
+        return $actions;
+    }
+
+    $actions['pc_folio_balance'] = sprintf(
+        '<a href="%1$s" target="_blank" rel="noopener">%2$s</a>',
+        esc_url(pc_folio_balance_admin_url($user->ID)),
+        esc_html__('Folio balance', 'pc-folio-customer-balance')
+    );
+    return $actions;
+}
+add_filter('user_row_actions', 'pc_folio_balance_user_row_action', 20, 2);
+add_filter('ms_user_row_actions', 'pc_folio_balance_user_row_action', 20, 2);
 
 function pc_folio_balance_valid_date(string $value): bool {
     if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
@@ -265,7 +361,7 @@ function pc_folio_balance_fetch_report(array $context, string $date_from = '') {
 function pc_folio_balance_ajax(): void {
     check_ajax_referer('pc_folio_customer_balance');
 
-    $context = pc_folio_balance_user_context();
+    $context = pc_folio_balance_request_context();
     if (!$context) {
         wp_send_json_error(['message' => __('This report is not available for your account.', 'pc-folio-customer-balance')], 403);
     }
@@ -308,7 +404,7 @@ function pc_folio_balance_export_xlsx(): void {
     }
     check_admin_referer('pc_folio_customer_balance_export');
 
-    $context = pc_folio_balance_user_context();
+    $context = pc_folio_balance_request_context();
     if (!$context) {
         wp_die(esc_html__('This report is not available for your account.', 'pc-folio-customer-balance'), '', ['response' => 403]);
     }

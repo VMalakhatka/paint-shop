@@ -3,6 +3,14 @@
     width: 100%;
 }
 
+.pc-folio-balance--admin {
+    background: #fff;
+    border: 1px solid #c9cdd2;
+    border-radius: 6px;
+    box-sizing: border-box;
+    padding: 20px;
+}
+
 .pc-folio-balance [hidden] {
     display: none !important;
 }

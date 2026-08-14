@@ -13,6 +13,18 @@ msgstr ""
 msgid "Balance with customer"
 msgstr "Баланс із клієнтом"
 
+msgid "Customer balance"
+msgstr "Баланс клієнта"
+
+msgid "Folio balance"
+msgstr "Баланс ФОЛІО"
+
+msgid "Back to user profile"
+msgstr "Повернутися до профілю користувача"
+
+msgid "This report is not available for the selected user."
+msgstr "Цей звіт недоступний для вибраного користувача."
+
 msgid "The report is being generated..."
 msgstr "Звіт формується..."
 

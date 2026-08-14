@@ -179,6 +179,7 @@
         var body = new URLSearchParams();
         body.set('action', 'pc_folio_customer_balance');
         body.set('_ajax_nonce', pcFolioBalance.nonce);
+        if (pcFolioBalance.userId) body.set('user_id', String(pcFolioBalance.userId));
         if (dateInput.value) body.set('date_from', dateInput.value);
 
         fetch(pcFolioBalance.ajaxUrl, {
@@ -225,6 +226,7 @@
         var url = new URL(pcFolioBalance.exportUrl, window.location.href);
         url.searchParams.set('action', 'pc_folio_customer_balance_export');
         url.searchParams.set('_wpnonce', pcFolioBalance.exportNonce);
+        if (pcFolioBalance.userId) url.searchParams.set('user_id', String(pcFolioBalance.userId));
         if (dateInput.value) url.searchParams.set('date_from', dateInput.value);
         window.location.assign(url.toString());
     });
