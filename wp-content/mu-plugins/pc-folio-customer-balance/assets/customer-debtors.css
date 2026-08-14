@@ -97,13 +97,32 @@
 }
 
 .pc-folio-debtors__table {
-    min-width: 1180px;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 1500px;
+    table-layout: fixed;
+    width: 100%;
+}
+
+.pc-folio-debtors__col-customer { width: 280px; }
+.pc-folio-debtors__col-type { width: 90px; }
+.pc-folio-debtors__col-money { width: 145px; }
+.pc-folio-debtors__col-site-user { width: 360px; }
+
+.pc-folio-debtors__table th,
+.pc-folio-debtors__table td {
+    box-sizing: border-box;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+    padding: 10px;
 }
 
 .pc-folio-debtors__table th {
+    background: #fff;
     position: sticky;
     top: 32px;
-    z-index: 1;
+    vertical-align: bottom;
+    z-index: 2;
 }
 
 .pc-folio-debtors__table td {
@@ -142,10 +161,16 @@
 
 .pc-folio-debtors__site-user {
     align-items: center;
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
     gap: 5px;
+    grid-template-columns: minmax(110px, 1fr) auto auto;
     margin-bottom: 5px;
+}
+
+.pc-folio-debtors__site-user .button {
+    margin: 0;
+    min-height: 28px;
+    white-space: nowrap;
 }
 
 .pc-folio-debtors__mapping-warning {

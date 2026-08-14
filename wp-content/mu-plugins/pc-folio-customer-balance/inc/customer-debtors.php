@@ -71,6 +71,16 @@ function pc_folio_debtors_render_page(): void {
 
         <div class="pc-folio-debtors__table-wrap" data-pc-debtors-table-wrap hidden>
             <table class="widefat striped pc-folio-debtors__table">
+                <colgroup>
+                    <col class="pc-folio-debtors__col-customer">
+                    <col class="pc-folio-debtors__col-type">
+                    <col class="pc-folio-debtors__col-money">
+                    <col class="pc-folio-debtors__col-money">
+                    <col class="pc-folio-debtors__col-money">
+                    <col class="pc-folio-debtors__col-money">
+                    <col class="pc-folio-debtors__col-money">
+                    <col class="pc-folio-debtors__col-site-user">
+                </colgroup>
                 <thead>
                     <tr>
                         <th><?php esc_html_e('Folio customer', 'pc-folio-customer-balance'); ?></th>
