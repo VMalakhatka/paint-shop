@@ -3,14 +3,14 @@
  * Plugin Name: PC Folio Customer Balance
  * Description: Shows the signed-in wholesale customer's Folio balance report in My Account.
  * Author: Volodymyr
- * Version: 0.3.1
+ * Version: 0.4.0
  * Text Domain: pc-folio-customer-balance
  */
 
 defined('ABSPATH') || exit;
 
 const PC_FOLIO_BALANCE_ENDPOINT = 'folio-balance';
-const PC_FOLIO_BALANCE_VERSION  = '0.3.1';
+const PC_FOLIO_BALANCE_VERSION  = '0.4.0';
 const PC_FOLIO_BALANCE_ADMIN_PAGE = 'pc-folio-customer-balance';
 
 function pc_folio_balance_user_context(int $user_id = 0, bool $require_customer_role = true): array {
@@ -51,7 +51,7 @@ function pc_folio_balance_admin_url(int $user_id): string {
 }
 
 function pc_folio_balance_admin_context(int $user_id): array {
-    if ($user_id <= 0 || !pc_folio_balance_can_manage() || !current_user_can('edit_user', $user_id)) {
+    if ($user_id <= 0 || !pc_folio_balance_can_manage()) {
         return [];
     }
     return pc_folio_balance_user_context($user_id, false);
@@ -614,3 +614,5 @@ function pc_folio_balance_export_xlsx(): void {
     exit;
 }
 add_action('admin_post_pc_folio_customer_balance_export', 'pc_folio_balance_export_xlsx');
+
+require_once __DIR__ . '/pc-folio-customer-balance/inc/customer-debtors.php';

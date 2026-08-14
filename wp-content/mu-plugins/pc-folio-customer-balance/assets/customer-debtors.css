@@ -1,0 +1,184 @@
+.pc-folio-debtors {
+    max-width: 1680px;
+}
+
+.pc-folio-debtors__filters {
+    align-items: end;
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    display: grid;
+    gap: 12px;
+    grid-template-columns: 180px minmax(240px, 1fr) 260px 130px auto;
+    margin-top: 18px;
+    padding: 14px;
+}
+
+.pc-folio-debtors__filters label span {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.pc-folio-debtors__filters input,
+.pc-folio-debtors__filters select,
+.pc-folio-debtors__filters .button {
+    margin: 0;
+    min-height: 40px;
+    width: 100%;
+}
+
+.pc-folio-debtors__hint {
+    color: #646970;
+    margin: 10px 0 0;
+}
+
+.pc-folio-debtors__status {
+    margin-top: 14px;
+    padding: 10px 12px;
+}
+
+.pc-folio-debtors__status:empty {
+    display: none;
+}
+
+.pc-folio-debtors__status.is-loading,
+.pc-folio-debtors__status.is-info {
+    background: #eef6fb;
+    border-left: 4px solid #2271b1;
+}
+
+.pc-folio-debtors__status.is-error {
+    background: #fcf0f1;
+    border-left: 4px solid #d63638;
+}
+
+.pc-folio-debtors__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 24px;
+    margin-top: 16px;
+}
+
+.pc-folio-debtors__summary {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(6, minmax(140px, 1fr));
+    margin-top: 14px;
+}
+
+.pc-folio-debtors__metric {
+    background: #ccffff;
+    border: 1px solid #aebfc3;
+    display: flex;
+    flex-direction: column;
+    min-height: 64px;
+    padding: 9px;
+}
+
+.pc-folio-debtors__metric span {
+    font-size: 12px;
+}
+
+.pc-folio-debtors__metric strong {
+    font-size: 17px;
+    margin-top: auto;
+}
+
+.pc-folio-debtors__metric--matchedClients { background: #f0f0f1; }
+.pc-folio-debtors__metric--deferredAmountTotal { background: #ffff99; }
+.pc-folio-debtors__metric--overdueDeferredAmountTotal { background: #ffc7ce; }
+.pc-folio-debtors__metric--prepaymentAmountTotal { background: #339966; color: #fff; }
+.pc-folio-debtors__metric--payableNowTotal { background: #fff200; border-color: #a99800; }
+
+.pc-folio-debtors__table-wrap {
+    margin-top: 16px;
+    overflow: auto;
+}
+
+.pc-folio-debtors__table {
+    min-width: 1180px;
+}
+
+.pc-folio-debtors__table th {
+    position: sticky;
+    top: 32px;
+    z-index: 1;
+}
+
+.pc-folio-debtors__table td {
+    vertical-align: top;
+}
+
+.pc-folio-debtors__table td:first-child strong,
+.pc-folio-debtors__table td:first-child code {
+    display: block;
+}
+
+.pc-folio-debtors__table td:first-child code {
+    margin-top: 4px;
+    width: fit-content;
+}
+
+.pc-folio-debtors__table .is-money {
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.pc-folio-debtors__table .is-overdue {
+    color: #b32d2e;
+    font-weight: 600;
+}
+
+.pc-folio-debtors__table .is-payable {
+    background: #fff9b8;
+    font-weight: 700;
+}
+
+.pc-folio-debtors__table .is-unlinked {
+    color: #8a2424;
+}
+
+.pc-folio-debtors__site-user {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 5px;
+}
+
+.pc-folio-debtors__mapping-warning {
+    color: #b32d2e;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.pc-folio-debtors__pagination {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 14px;
+}
+
+@media (max-width: 1100px) {
+    .pc-folio-debtors__filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .pc-folio-debtors__summary {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 782px) {
+    .pc-folio-debtors__filters,
+    .pc-folio-debtors__summary {
+        grid-template-columns: 1fr;
+    }
+
+    .pc-folio-debtors__table th {
+        top: 46px;
+    }
+}
