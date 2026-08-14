@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: PC Folio Customer Balance 0.4.0\n"
+"Project-Id-Version: PC Folio Customer Balance 0.5.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-14 13:35+0200\n"
+"POT-Creation-Date: 2026-08-14 19:56+0200\n"
 "PO-Revision-Date: 2026-08-13 00:00+0200\n"
 "Last-Translator: Volodymyr\n"
 "Language-Team: Ukrainian\n"
@@ -13,11 +13,15 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:194
+msgid "A debt snapshot refresh is already running."
+msgstr "Оновлення знімка заборгованості вже виконується."
+
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:208
 msgid "All time"
 msgstr "За весь період"
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:50
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:65
 msgid "All types"
 msgstr "Усі типи"
 
@@ -26,7 +30,7 @@ msgid "All warehouses"
 msgstr "Усі склади"
 
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:145
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:126
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:154
 #, php-format
 msgid "As of: %s"
 msgstr "Станом на: %s"
@@ -70,13 +74,17 @@ msgstr "Оплата через банк"
 msgid "Basis"
 msgstr "Підстава"
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:137
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:165
 msgid "Buyer"
 msgstr "Покупець"
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:49
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:64
 msgid "Buyers"
 msgstr "Покупці"
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:41
+msgid "Calculated as of"
+msgstr "Розраховано станом на"
 
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:232
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:515
@@ -93,37 +101,49 @@ msgstr "Опл. каса"
 msgid "Cash payments"
 msgstr "Оплата через касу"
 
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:177
+msgid "Checking the Folio debt snapshot..."
+msgstr "Перевіряємо стан знімка заборгованості ФОЛІО..."
+
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:233
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:516
 msgid "Closing debt"
 msgstr "Борг, кінець"
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:42
+msgid "Completed"
+msgstr "Завершено"
 
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:258
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:259
 msgid "Customer balance"
 msgstr "Баланс клієнта"
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:83
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:108
 msgid "Customer on site"
 msgstr "Клієнт на сайті"
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:40
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:55
 msgid "Customer search"
 msgstr "Пошук клієнта"
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:162
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:210
 msgid "Customer search must not exceed 100 characters."
 msgstr "Пошуковий запит не повинен перевищувати 100 символів."
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:44
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:59
 msgid "Customer type"
 msgstr "Тип клієнта"
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:46
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:61
 msgid "Customers (partners, dealers, buyers)"
 msgstr "Клієнти (партнери, дилери, покупці)"
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:128
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:43
+msgid "Customers calculated"
+msgstr "Розраховано клієнтів"
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:156
 #, php-format
 msgid "Customers found: %s"
 msgstr "Знайдено клієнтів: %s"
@@ -133,26 +153,41 @@ msgstr "Знайдено клієнтів: %s"
 msgid "Date"
 msgstr "Дата"
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:136
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:164
 msgid "Dealer"
 msgstr "Дилер"
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:48
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:63
 msgid "Dealers"
 msgstr "Дилери"
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:140
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:178
+msgid "Debt data is being refreshed..."
+msgstr "Дані заборгованості оновлюються..."
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:188
+msgid ""
+"Debt data is being updated. The report will become available after "
+"completion."
+msgstr ""
+"Дані заборгованості оновлюються. Звіт стане доступним після завершення."
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:36
+msgid "Debt snapshot"
+msgstr "Знімок заборгованості"
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:168
 msgid "Debtors found"
 msgstr "Знайдено боржників"
 
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:162
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:486
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:79
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:142
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:104
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:170
 msgid "Deferred / on sale"
 msgstr "На відстрочці / реалізації"
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:131
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:159
 msgid "Detailed balance"
 msgstr "Детальний баланс"
 
@@ -166,7 +201,7 @@ msgstr "№ документа"
 msgid "Due date"
 msgstr "Контр. строк"
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:156
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:204
 msgid "Enter a non-negative threshold with no more than two decimal places."
 msgstr "Вкажіть невід'ємний поріг не більше ніж із двома знаками після коми."
 
@@ -198,20 +233,12 @@ msgstr "Експортувати XLSX"
 msgid "Folio balance"
 msgstr "Баланс ФОЛІО"
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:66
-msgid ""
-"Folio calculates every customer using the canonical balance procedure, so a "
-"large report may take some time."
-msgstr ""
-"ФОЛІО розраховує кожного клієнта за канонічною процедурою балансу, тому "
-"великий звіт може формуватися певний час."
-
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:153
 #, php-format
 msgid "Folio code: %s"
 msgstr "Код ФОЛІО: %s"
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:76
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:101
 msgid "Folio customer"
 msgstr "Клієнт ФОЛІО"
 
@@ -229,7 +256,11 @@ msgstr "ID документа ФОЛІО"
 msgid "Folio returned a report for a different customer."
 msgstr "ФОЛІО повернуло звіт для іншого клієнта."
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:251
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:347
+msgid "Folio returned an invalid debt snapshot response."
+msgstr "ФОЛІО повернуло некоректну відповідь знімка заборгованості."
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:299
 msgid "Folio returned an invalid debtors report."
 msgstr "ФОЛІО повернуло некоректний звіт боржників."
 
@@ -237,8 +268,12 @@ msgstr "ФОЛІО повернуло некоректний звіт боржн
 msgid "Folio returned an invalid report response."
 msgstr "ФОЛІО повернуло некоректну відповідь звіту."
 
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:351
+msgid "Folio returned an unknown debt snapshot status."
+msgstr "ФОЛІО повернуло невідомий статус знімка заборгованості."
+
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:209
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:62
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:77
 msgid "Generate report"
 msgstr "Сформувати звіт"
 
@@ -247,19 +282,19 @@ msgstr "Сформувати звіт"
 msgid "Invoice date"
 msgstr "Дата рахунку"
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:36
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:51
 msgid "Minimum payable amount"
 msgstr "Мінімальна сума до сплати"
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:133
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:161
 msgid "Multiple site customers are linked"
 msgstr "Прив'язано кількох клієнтів сайту"
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:93
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:118
 msgid "Next page"
 msgstr "Наступна сторінка"
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:125
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:153
 msgid "No customers exceed the selected payable threshold."
 msgstr "Немає клієнтів, сума до сплати яких перевищує вибраний поріг."
 
@@ -272,7 +307,11 @@ msgstr "За вибраний період операцій не знайден�
 msgid "No."
 msgstr "№"
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:132
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:183
+msgid "Not created"
+msgstr "Ще не створено"
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:160
 msgid "Not linked to a site customer"
 msgstr "Не прив'язано до клієнта сайту"
 
@@ -303,28 +342,28 @@ msgstr "Операція"
 
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:163
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:487
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:80
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:143
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:105
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:171
 msgid "Overdue deferred / on sale"
 msgstr "Прострочена відстрочка / реалізація"
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:129
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:157
 #, php-format
 msgid "Page %1$s of %2$s"
 msgstr "Сторінка %1$s із %2$s"
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:135
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:163
 msgid "Partner"
 msgstr "Партнер"
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:47
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:62
 msgid "Partners"
 msgstr "Партнери"
 
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:165
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:489
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:82
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:145
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:107
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:173
 msgid "Payable now"
 msgstr "До сплати"
 
@@ -345,12 +384,12 @@ msgstr "Період: за весь період"
 
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:164
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:488
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:81
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:144
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:106
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:172
 msgid "Prepayment"
 msgstr "Передоплата"
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:91
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:116
 msgid "Previous page"
 msgstr "Попередня сторінка"
 
@@ -358,9 +397,13 @@ msgstr "Попередня сторінка"
 msgid "Print"
 msgstr "Друкувати"
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:130
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:158
 msgid "Profile"
 msgstr "Профіль"
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:181
+msgid "Ready"
+msgstr "Готово"
 
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:149
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:430
@@ -377,12 +420,21 @@ msgstr "Прибуткові накладні"
 msgid "Receipt invoices"
 msgstr "Сума прибуткових накладних"
 
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:45
+msgid "Refresh debt data"
+msgstr "Оновити дані заборгованості"
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:185
+msgid "Replaced by a newer snapshot"
+msgstr "Замінено новішим знімком"
+
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:140
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:152
 #, php-format
 msgid "Request ID: %s"
 msgstr "ID запиту: %s"
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:54
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:69
 msgid "Rows per page"
 msgstr "Рядків на сторінці"
 
@@ -390,41 +442,77 @@ msgstr "Рядків на сторінці"
 msgid "Select a period start date or generate the report for all time."
 msgstr "Виберіть дату початку періоду або сформуйте звіт за весь період."
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:167
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:215
 msgid "Select a valid Folio customer type."
 msgstr "Виберіть коректний тип клієнта ФОЛІО."
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:172
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:220
 msgid "Select a valid number of rows per page."
 msgstr "Виберіть коректну кількість рядків на сторінці."
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:41
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:56
 msgid "Short or full Folio name"
 msgstr "Коротке або повне ім'я у ФОЛІО"
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:40
+msgid "Status"
+msgstr "Статус"
 
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:382
 msgid "The Folio customer mapping is invalid. Please contact the manager."
 msgstr "Прив'язка клієнта ФОЛІО некоректна. Зверніться до менеджера."
 
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:340
+msgid "The Folio debt snapshot request failed."
+msgstr "Не вдалося виконати запит знімка заборгованості ФОЛІО."
+
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:325
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:227
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:275
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:323
 msgid "The Folio service connection is unavailable."
 msgstr "Підключення до сервісу ФОЛІО недоступне."
 
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:338
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:347
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:232
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:280
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:334
 msgid "The Folio service is temporarily unavailable."
 msgstr "Сервіс ФОЛІО тимчасово недоступний."
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:124
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:240
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:189
+msgid ""
+"The debt snapshot has not been created yet. Start an administrative refresh."
+msgstr ""
+"Знімок заборгованості ще не створено. Запустіть адміністративне оновлення."
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:179
+msgid "The debt snapshot refresh could not be started."
+msgstr "Не вдалося запустити оновлення знімка заборгованості."
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:193
+msgid "The debt snapshot refresh has started."
+msgstr "Оновлення знімка заборгованості запущено."
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:180
+msgid "The debt snapshot status could not be checked."
+msgstr "Не вдалося перевірити стан знімка заборгованості."
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:151
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:288
 msgid "The debtors report could not be generated. Please try again later."
 msgstr "Не вдалося сформувати звіт боржників. Спробуйте пізніше."
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:123
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:150
 msgid "The debtors report is being generated. This may take some time..."
 msgstr "Формується звіт боржників. Це може зайняти певний час..."
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:37
+msgid "The debtors report uses a previously calculated Folio snapshot."
+msgstr "Звіт боржників використовує заздалегідь розрахований знімок ФОЛІО."
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:190
+msgid "The latest debt snapshot refresh failed."
+msgstr "Останнє оновлення знімка заборгованості завершилося помилкою."
 
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:346
 msgid "The linked customer was not found in Folio."
@@ -440,8 +528,16 @@ msgstr "Не вдалося сформувати звіт. Спробуйте п
 msgid "The report is being generated..."
 msgstr "Звіт формується..."
 
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:81
+msgid ""
+"The report is loaded from the prepared Folio snapshot and does not "
+"recalculate every customer during viewing."
+msgstr ""
+"Звіт завантажується з підготовленого знімка ФОЛІО і не перераховує кожного "
+"клієнта під час перегляду."
+
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:345
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:239
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:287
 msgid "The report parameters were rejected by Folio."
 msgstr "ФОЛІО відхилило параметри звіту."
 
@@ -458,9 +554,21 @@ msgstr ""
 msgid "The report was generated from active Folio documents as of %s."
 msgstr "Звіт сформовано за активними документами ФОЛІО станом на %s."
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:177
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:225
 msgid "The requested report page is invalid."
 msgstr "Запитана сторінка звіту некоректна."
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:191
+msgid ""
+"The snapshot contains no customers. Refresh the debt data before generating "
+"the report."
+msgstr ""
+"Знімок не містить клієнтів. Оновіть дані заборгованості перед формуванням "
+"звіту."
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:187
+msgid "The snapshot is ready. You can generate the debtors report."
+msgstr "Знімок готовий. Можна формувати звіт боржників."
 
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:271
 msgid "This report is not available for the selected user."
@@ -472,26 +580,38 @@ msgstr "Цей звіт недоступний для вибраного кор�
 msgid "This report is not available for your account."
 msgstr "Цей звіт недоступний для вашого облікового запису."
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:127
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:155
 #, php-format
 msgid "Threshold: more than %s UAH"
 msgstr "Поріг: більше ніж %s грн"
 
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:161
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:485
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:78
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:141
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:103
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:169
 msgid "Total debt"
 msgstr "Загальний борг"
 
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:77
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:102
 msgid "Type"
 msgstr "Тип"
 
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:167
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:147
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:175
 msgid "UAH"
 msgstr "грн"
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:186
+msgid "Unknown status"
+msgstr "Невідомий статус"
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:184
+msgid "Update failed"
+msgstr "Помилка оновлення"
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:182
+msgid "Updating"
+msgstr "Оновлюється"
 
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:138
 msgid "Warehouse"
@@ -502,14 +622,31 @@ msgstr "Склад"
 msgid "Warehouses: %s"
 msgstr "Склади: %s"
 
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:192
+#, php-format
+msgid "Warning: debt data was calculated as of %s."
+msgstr "Увага: дані заборгованості розраховано станом на %s."
+
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:453
 msgid "XLSX export is temporarily unavailable."
 msgstr "Експорт XLSX тимчасово недоступний."
 
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:382
+msgid "You do not have permission to refresh this report."
+msgstr "У вас немає дозволу на оновлення цього звіту."
+
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:25
-#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:274
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:368
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:396
 msgid "You do not have permission to view this report."
 msgstr "У вас немає дозволу на перегляд цього звіту."
 
 #~ msgid "D"
 #~ msgstr "Д"
+
+#~ msgid ""
+#~ "Folio calculates every customer using the canonical balance procedure, so "
+#~ "a large report may take some time."
+#~ msgstr ""
+#~ "ФОЛІО розраховує кожного клієнта за канонічною процедурою балансу, тому "
+#~ "великий звіт може формуватися певний час."

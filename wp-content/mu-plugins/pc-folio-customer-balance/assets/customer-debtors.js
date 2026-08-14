@@ -15,8 +15,19 @@
     var prevButton = root.querySelector('[data-pc-debtors-prev]');
     var nextButton = root.querySelector('[data-pc-debtors-next]');
     var submitButton = form.querySelector('[type="submit"]');
+    var snapshotRoot = root.querySelector('[data-pc-debtors-snapshot]');
+    var snapshotState = root.querySelector('[data-pc-snapshot-state]');
+    var snapshotDate = root.querySelector('[data-pc-snapshot-date]');
+    var snapshotCompleted = root.querySelector('[data-pc-snapshot-completed]');
+    var snapshotTotal = root.querySelector('[data-pc-snapshot-total]');
+    var snapshotMessage = root.querySelector('[data-pc-snapshot-message]');
+    var refreshButton = root.querySelector('[data-pc-snapshot-refresh]');
     var offset = 0;
-    var controller = null;
+    var reportController = null;
+    var snapshotController = null;
+    var snapshotPollTimer = null;
+    var currentSnapshot = null;
+    var loadAfterReady = false;
     var money = new Intl.NumberFormat('uk-UA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     var dateFormatter = new Intl.DateTimeFormat('uk-UA');
 
@@ -37,9 +48,176 @@
         return Number.isNaN(parsed.getTime()) ? String(value) : dateFormatter.format(parsed);
     }
 
+    function dateTimeText(value) {
+        if (!value) return '';
+        var parsed = new Date(String(value));
+        return Number.isNaN(parsed.getTime()) ? String(value) : parsed.toLocaleString('uk-UA');
+    }
+
     function setStatus(message, kind) {
         statusBox.textContent = message || '';
         statusBox.className = 'pc-folio-debtors__status' + (kind ? ' is-' + kind : '');
+    }
+
+    function setSnapshotMessage(message, kind) {
+        snapshotMessage.textContent = message || '';
+        snapshotMessage.className = 'pc-folio-debtors__snapshot-message' + (kind ? ' is-' + kind : '');
+    }
+
+    function snapshotLabel(status) {
+        var labels = pcFolioDebtors.labels.snapshot;
+        return {
+            ACTIVE: labels.active,
+            BUILDING: labels.building,
+            NOT_READY: labels.notReady,
+            FAILED: labels.failed,
+            SUPERSEDED: labels.superseded
+        }[status] || labels.unknown;
+    }
+
+    function snapshotIsReady(snapshot) {
+        return snapshot
+            && snapshot.status === 'ACTIVE'
+            && snapshot.running !== true
+            && number(snapshot.totalClients) > 0;
+    }
+
+    function setReportAvailability(enabled) {
+        submitButton.disabled = !enabled;
+        if (!enabled) {
+            prevButton.disabled = true;
+            nextButton.disabled = true;
+        }
+    }
+
+    function stopSnapshotPolling() {
+        if (snapshotPollTimer) window.clearTimeout(snapshotPollTimer);
+        snapshotPollTimer = null;
+    }
+
+    function scheduleSnapshotCheck() {
+        stopSnapshotPolling();
+        snapshotPollTimer = window.setTimeout(function () {
+            checkSnapshot(true);
+        }, number(pcFolioDebtors.pollInterval) || 5000);
+    }
+
+    function renderSnapshot(snapshot) {
+        var labels = pcFolioDebtors.labels.snapshot;
+        var status = String(snapshot.status || '');
+        var building = status === 'BUILDING' || snapshot.running === true;
+        var ready = snapshotIsReady(snapshot);
+        currentSnapshot = snapshot;
+
+        snapshotRoot.dataset.status = building ? 'building' : status.toLowerCase();
+        snapshotState.textContent = building ? labels.building : snapshotLabel(status);
+        snapshotDate.textContent = dateText(snapshot.asOfDate) || '\u2014';
+        snapshotCompleted.textContent = dateTimeText(snapshot.completedAt) || '\u2014';
+        snapshotTotal.textContent = String(number(snapshot.totalClients));
+        refreshButton.disabled = building;
+        setReportAvailability(ready);
+
+        if (ready) {
+            stopSnapshotPolling();
+            if (snapshot.asOfDate && String(snapshot.asOfDate).substring(0, 10) < pcFolioDebtors.today) {
+                setSnapshotMessage(labels.staleMessage.replace('%s', dateText(snapshot.asOfDate)), 'warning');
+            } else {
+                setSnapshotMessage(labels.readyMessage, 'success');
+            }
+            if (loadAfterReady) {
+                loadAfterReady = false;
+                loadReport();
+            }
+            return;
+        }
+
+        if (building) {
+            setSnapshotMessage(labels.buildingMessage, 'loading');
+            scheduleSnapshotCheck();
+        } else if (status === 'NOT_READY') {
+            setSnapshotMessage(labels.notReadyMessage, 'warning');
+        } else if (status === 'FAILED') {
+            var failure = labels.failedMessage;
+            if (snapshot.error) failure += ' ' + String(snapshot.error);
+            setSnapshotMessage(failure, 'error');
+        } else if (status === 'ACTIVE') {
+            setSnapshotMessage(labels.emptyMessage, 'warning');
+        } else {
+            setSnapshotMessage(snapshotLabel(status), 'warning');
+            if (status === 'SUPERSEDED') scheduleSnapshotCheck();
+        }
+    }
+
+    function ajaxRequest(action, signal) {
+        var body = new URLSearchParams();
+        body.set('action', action);
+        body.set('_ajax_nonce', pcFolioDebtors.nonce);
+        return fetch(pcFolioDebtors.ajaxUrl, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+            body: body.toString(),
+            signal: signal
+        }).then(function (response) {
+            return response.json().catch(function () { return {}; }).then(function (payload) {
+                if (!response.ok || !payload.success) {
+                    var message = payload.data && payload.data.message ? payload.data.message : pcFolioDebtors.labels.snapshot.statusFailed;
+                    if (payload.data && payload.data.reqId) {
+                        message += ' ' + pcFolioDebtors.labels.requestId.replace('%s', payload.data.reqId);
+                    }
+                    throw new Error(message);
+                }
+                return payload.data.snapshot;
+            });
+        });
+    }
+
+    function checkSnapshot(silent) {
+        if (snapshotController) snapshotController.abort();
+        snapshotController = new AbortController();
+        setReportAvailability(false);
+        if (!silent) setSnapshotMessage(pcFolioDebtors.labels.snapshot.checking, 'loading');
+
+        return ajaxRequest('pc_folio_customer_debtors_snapshot_status', snapshotController.signal)
+            .then(renderSnapshot)
+            .catch(function (error) {
+                if (error.name === 'AbortError') return;
+                stopSnapshotPolling();
+                currentSnapshot = null;
+                refreshButton.disabled = false;
+                setReportAvailability(false);
+                setSnapshotMessage(error.message || pcFolioDebtors.labels.snapshot.statusFailed, 'error');
+            });
+    }
+
+    function refreshSnapshot() {
+        if (snapshotController) snapshotController.abort();
+        snapshotController = new AbortController();
+        stopSnapshotPolling();
+        currentSnapshot = null;
+        if (reportController) reportController.abort();
+        metaBox.hidden = true;
+        summaryBox.hidden = true;
+        tableWrap.hidden = true;
+        pagination.hidden = true;
+        setStatus('', '');
+        refreshButton.disabled = true;
+        setReportAvailability(false);
+        setSnapshotMessage(pcFolioDebtors.labels.snapshot.refreshing, 'loading');
+
+        ajaxRequest('pc_folio_customer_debtors_snapshot_refresh', snapshotController.signal)
+            .then(function (result) {
+                var message = result && result.refreshAccepted === false
+                    ? pcFolioDebtors.labels.snapshot.running
+                    : pcFolioDebtors.labels.snapshot.accepted;
+                setSnapshotMessage(message, 'loading');
+                scheduleSnapshotCheck();
+            })
+            .catch(function (error) {
+                if (error.name === 'AbortError') return;
+                refreshButton.disabled = false;
+                setSnapshotMessage(error.message || pcFolioDebtors.labels.snapshot.refreshFailed, 'error');
+            });
     }
 
     function appendTextCell(row, value, className) {
@@ -176,8 +354,13 @@
     }
 
     function loadReport() {
-        if (controller) controller.abort();
-        controller = new AbortController();
+        if (!snapshotIsReady(currentSnapshot)) {
+            loadAfterReady = true;
+            checkSnapshot(false);
+            return;
+        }
+        if (reportController) reportController.abort();
+        reportController = new AbortController();
         submitButton.disabled = true;
         prevButton.disabled = true;
         nextButton.disabled = true;
@@ -197,7 +380,7 @@
             credentials: 'same-origin',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
             body: body.toString(),
-            signal: controller.signal
+            signal: reportController.signal
         })
             .then(function (response) {
                 return response.json().catch(function () { return {}; }).then(function (payload) {
@@ -216,14 +399,15 @@
                 if (error.name !== 'AbortError') setStatus(error.message || pcFolioDebtors.labels.requestFailed, 'error');
             })
             .finally(function () {
-                submitButton.disabled = false;
+                setReportAvailability(snapshotIsReady(currentSnapshot));
             });
     }
 
     form.addEventListener('submit', function (event) {
         event.preventDefault();
         offset = 0;
-        loadReport();
+        loadAfterReady = true;
+        checkSnapshot(false);
     });
     prevButton.addEventListener('click', function () {
         offset = Math.max(0, offset - number(form.elements.limit.value));
@@ -233,4 +417,8 @@
         offset += number(form.elements.limit.value);
         loadReport();
     });
+    refreshButton.addEventListener('click', refreshSnapshot);
+
+    setReportAvailability(false);
+    checkSnapshot(false);
 }());
