@@ -72,6 +72,26 @@
         return td;
     }
 
+    function operationCell(row) {
+        var td = document.createElement('td');
+        var operation = pcFolioBalance.labels.operation;
+        var bank = number(row.bankPayment);
+        var cash = number(row.cashPayment);
+
+        if (row.openingBalanceRow) td.textContent = operation.opening;
+        else if (bank !== 0 && cash !== 0) td.textContent = operation.bankCash;
+        else if (bank !== 0) td.textContent = operation.bankPayment;
+        else if (cash !== 0) td.textContent = operation.cashPayment;
+        else if (number(row.expenseAmount) !== 0) td.textContent = operation.expense;
+        else if (number(row.receiptAmount) !== 0) td.textContent = operation.receipt;
+        else td.textContent = text(row.documentType);
+
+        if (row.documentType) {
+            td.title = operation.folioCode.replace('%s', text(row.documentType));
+        }
+        return td;
+    }
+
     function renderSummary(summary) {
         summaryBox.replaceChildren();
         summaryFields.forEach(function (key) {
@@ -106,7 +126,7 @@
             tr.append(
                 cell(row, 'controlDate', 'date'),
                 cell(row, 'sequence'),
-                cell(row, 'documentType'),
+                operationCell(row),
                 cell(row, 'documentNumber'),
                 cell(row, 'documentDate', 'date'),
                 cell(row, 'basis'),

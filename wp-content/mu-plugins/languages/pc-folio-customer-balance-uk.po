@@ -186,3 +186,28 @@ msgstr "ФОЛІО повернуло некоректну відповідь з
 
 msgid "Folio returned a report for a different customer."
 msgstr "ФОЛІО повернуло звіт для іншого клієнта."
+
+msgid "Operation"
+msgstr "Операція"
+
+msgid "Opening"
+msgstr "Початок"
+
+msgid "Expense"
+msgstr "Видаток"
+
+msgid "Receipt"
+msgstr "Прихід"
+
+msgid "Bank payment short"
+msgstr "Опл. банк"
+
+msgid "Cash payment short"
+msgstr "Опл. каса"
+
+msgid "Bank and cash payment"
+msgstr "Опл. банк/каса"
+
+#, php-format
+msgid "Folio code: %s"
+msgstr "Код ФОЛІО: %s"

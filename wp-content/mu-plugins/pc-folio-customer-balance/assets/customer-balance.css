@@ -171,6 +171,12 @@
     z-index: 1;
 }
 
+.pc-folio-balance__table th:nth-child(3),
+.pc-folio-balance__table td:nth-child(3) {
+    min-width: 76px;
+    white-space: nowrap;
+}
+
 .pc-folio-balance__table td:nth-child(7),
 .pc-folio-balance__table td:nth-child(8),
 .pc-folio-balance__table td:nth-child(9),

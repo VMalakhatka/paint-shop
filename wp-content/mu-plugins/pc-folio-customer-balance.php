@@ -3,14 +3,14 @@
  * Plugin Name: PC Folio Customer Balance
  * Description: Shows the signed-in wholesale customer's Folio balance report in My Account.
  * Author: Volodymyr
- * Version: 0.3.0
+ * Version: 0.3.1
  * Text Domain: pc-folio-customer-balance
  */
 
 defined('ABSPATH') || exit;
 
 const PC_FOLIO_BALANCE_ENDPOINT = 'folio-balance';
-const PC_FOLIO_BALANCE_VERSION  = '0.3.0';
+const PC_FOLIO_BALANCE_VERSION  = '0.3.1';
 const PC_FOLIO_BALANCE_ADMIN_PAGE = 'pc-folio-customer-balance';
 
 function pc_folio_balance_user_context(int $user_id = 0, bool $require_customer_role = true): array {
@@ -143,6 +143,15 @@ function pc_folio_balance_enqueue_assets_for_context(array $context, int $target
             'warehouses'    => __('Warehouses: %s', 'pc-folio-customer-balance'),
             'allWarehouses' => __('All warehouses', 'pc-folio-customer-balance'),
             'asOfShort'     => __('As of: %s', 'pc-folio-customer-balance'),
+            'operation'     => [
+                'opening'     => __('Opening', 'pc-folio-customer-balance'),
+                'expense'     => __('Expense', 'pc-folio-customer-balance'),
+                'receipt'     => __('Receipt', 'pc-folio-customer-balance'),
+                'bankPayment' => __('Bank payment short', 'pc-folio-customer-balance'),
+                'cashPayment' => __('Cash payment short', 'pc-folio-customer-balance'),
+                'bankCash'    => __('Bank and cash payment', 'pc-folio-customer-balance'),
+                'folioCode'   => __('Folio code: %s', 'pc-folio-customer-balance'),
+            ],
             'summary'       => [
                 'openingBalance'        => __('Opening balance', 'pc-folio-customer-balance'),
                 'expenseTotal'          => __('Expense invoice total', 'pc-folio-customer-balance'),
@@ -212,7 +221,7 @@ function pc_folio_balance_render_report(array $context, bool $admin = false): vo
                     <tr>
                         <th><?php esc_html_e('Due date', 'pc-folio-customer-balance'); ?></th>
                         <th><?php esc_html_e('No.', 'pc-folio-customer-balance'); ?></th>
-                        <th><?php esc_html_e('D', 'pc-folio-customer-balance'); ?></th>
+                        <th><?php esc_html_e('Operation', 'pc-folio-customer-balance'); ?></th>
                         <th><?php esc_html_e('Document No.', 'pc-folio-customer-balance'); ?></th>
                         <th><?php esc_html_e('Date', 'pc-folio-customer-balance'); ?></th>
                         <th><?php esc_html_e('Basis', 'pc-folio-customer-balance'); ?></th>
@@ -398,6 +407,32 @@ function pc_folio_balance_export_date($value): string {
     return is_scalar($value) ? substr((string) $value, 0, 10) : '';
 }
 
+function pc_folio_balance_operation_label(array $row): string {
+    if (!empty($row['openingBalanceRow'])) {
+        return __('Opening', 'pc-folio-customer-balance');
+    }
+
+    $bank = (float) ($row['bankPayment'] ?? 0);
+    $cash = (float) ($row['cashPayment'] ?? 0);
+    if ($bank != 0.0 && $cash != 0.0) {
+        return __('Bank and cash payment', 'pc-folio-customer-balance');
+    }
+    if ($bank != 0.0) {
+        return __('Bank payment short', 'pc-folio-customer-balance');
+    }
+    if ($cash != 0.0) {
+        return __('Cash payment short', 'pc-folio-customer-balance');
+    }
+    if ((float) ($row['expenseAmount'] ?? 0) != 0.0) {
+        return __('Expense', 'pc-folio-customer-balance');
+    }
+    if ((float) ($row['receiptAmount'] ?? 0) != 0.0) {
+        return __('Receipt', 'pc-folio-customer-balance');
+    }
+
+    return trim((string) ($row['documentType'] ?? ''));
+}
+
 function pc_folio_balance_export_xlsx(): void {
     if (!is_user_logged_in()) {
         auth_redirect();
@@ -469,7 +504,7 @@ function pc_folio_balance_export_xlsx(): void {
     $headers = [
         __('Due date', 'pc-folio-customer-balance'),
         __('No.', 'pc-folio-customer-balance'),
-        __('D', 'pc-folio-customer-balance'),
+        __('Operation', 'pc-folio-customer-balance'),
         __('Document No.', 'pc-folio-customer-balance'),
         __('Date', 'pc-folio-customer-balance'),
         __('Basis', 'pc-folio-customer-balance'),
@@ -495,7 +530,7 @@ function pc_folio_balance_export_xlsx(): void {
         $values = [
             pc_folio_balance_export_date($row['controlDate'] ?? ''),
             (int) ($row['sequence'] ?? 0),
-            $row['documentType'] ?? '',
+            pc_folio_balance_operation_label($row),
             $row['documentNumber'] ?? '',
             pc_folio_balance_export_date($row['documentDate'] ?? ''),
             $row['basis'] ?? '',

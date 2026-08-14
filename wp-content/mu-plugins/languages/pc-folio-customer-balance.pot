@@ -255,3 +255,28 @@ msgstr ""
 #: wp-content/mu-plugins/pc-folio-customer-balance.php:277
 msgid "Folio returned a report for a different customer."
 msgstr ""
+
+msgid "Operation"
+msgstr ""
+
+msgid "Opening"
+msgstr ""
+
+msgid "Expense"
+msgstr ""
+
+msgid "Receipt"
+msgstr ""
+
+msgid "Bank payment short"
+msgstr ""
+
+msgid "Cash payment short"
+msgstr ""
+
+msgid "Bank and cash payment"
+msgstr ""
+
+#, php-format
+msgid "Folio code: %s"
+msgstr ""
