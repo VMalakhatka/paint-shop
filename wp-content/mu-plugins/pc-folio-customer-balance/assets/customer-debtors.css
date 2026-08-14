@@ -119,10 +119,7 @@
 
 .pc-folio-debtors__table th {
     background: #fff;
-    position: sticky;
-    top: 32px;
     vertical-align: bottom;
-    z-index: 2;
 }
 
 .pc-folio-debtors__table td {
@@ -203,7 +200,4 @@
         grid-template-columns: 1fr;
     }
 
-    .pc-folio-debtors__table th {
-        top: 46px;
-    }
 }
