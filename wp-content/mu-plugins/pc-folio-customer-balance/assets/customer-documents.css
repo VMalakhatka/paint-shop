@@ -1,0 +1,224 @@
+.pc-folio-documents {
+    color: #24272b;
+    width: 100%;
+}
+
+.pc-folio-documents [hidden] {
+    display: none !important;
+}
+
+.pc-folio-documents__header {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.pc-folio-documents__header h2 {
+    font-size: 28px;
+    margin: 0 0 5px;
+}
+
+.pc-folio-documents__header p {
+    margin: 0;
+}
+
+.pc-folio-documents__header code {
+    margin-left: 8px;
+}
+
+.pc-folio-documents__filters {
+    align-items: end;
+    background: #f5f6f7;
+    border: 1px solid #d8dadd;
+    display: grid;
+    gap: 14px;
+    grid-template-columns: 150px 150px minmax(310px, 1fr) 120px auto;
+    padding: 14px;
+}
+
+.pc-folio-documents__filters > label > span,
+.pc-folio-documents__filters legend {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.pc-folio-documents__filters input[type="date"],
+.pc-folio-documents__filters select,
+.pc-folio-documents__filters > .button {
+    margin: 0;
+    min-height: 40px;
+    width: 100%;
+}
+
+.pc-folio-documents__filters fieldset {
+    border: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin: 0;
+    padding: 0 0 8px;
+}
+
+.pc-folio-documents__filters fieldset label {
+    white-space: nowrap;
+}
+
+.pc-folio-documents__status,
+.pc-folio-documents__warning {
+    margin-top: 14px;
+    padding: 10px 12px;
+}
+
+.pc-folio-documents__status:empty {
+    display: none;
+}
+
+.pc-folio-documents__status.is-loading,
+.pc-folio-documents__status.is-info,
+.pc-folio-documents__warning {
+    background: #eef6fb;
+    border-left: 4px solid #2271b1;
+}
+
+.pc-folio-documents__status.is-error {
+    background: #fcf0f1;
+    border-left: 4px solid #d63638;
+}
+
+.pc-folio-documents__table-wrap,
+.pc-folio-documents__detail-table-wrap {
+    border: 1px solid #c9cdd2;
+    margin-top: 16px;
+    max-width: 100%;
+    overflow: auto;
+}
+
+.pc-folio-documents__table,
+.pc-folio-documents__detail-table {
+    border-collapse: collapse;
+    font-size: 14px;
+    margin: 0;
+    min-width: 860px;
+    width: 100%;
+}
+
+.pc-folio-documents__table th,
+.pc-folio-documents__table td,
+.pc-folio-documents__detail-table th,
+.pc-folio-documents__detail-table td {
+    border-bottom: 1px solid #d9dcdf;
+    padding: 9px;
+    text-align: left;
+    vertical-align: top;
+}
+
+.pc-folio-documents__table th,
+.pc-folio-documents__detail-table th {
+    background: #eef0f2;
+    font-size: 12px;
+}
+
+.pc-folio-documents .is-money {
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.pc-folio-documents__pagination {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 14px;
+}
+
+.pc-folio-documents__detail {
+    border-top: 3px solid #2271b1;
+    margin-top: 28px;
+    padding-top: 18px;
+    scroll-margin-top: 40px;
+}
+
+.pc-folio-documents__detail-header {
+    align-items: center;
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+}
+
+.pc-folio-documents__detail-header h3 {
+    font-size: 22px;
+    margin: 0;
+}
+
+.pc-folio-documents__detail-section {
+    margin-top: 20px;
+}
+
+.pc-folio-documents__detail-section h4 {
+    font-size: 17px;
+    margin: 0 0 9px;
+}
+
+.pc-folio-documents__requisites {
+    display: grid;
+    gap: 1px;
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+    margin: 0;
+}
+
+.pc-folio-documents__requisites div {
+    background: #f5f6f7;
+    min-width: 0;
+    padding: 10px;
+}
+
+.pc-folio-documents__requisites dt {
+    color: #646970;
+    font-size: 12px;
+}
+
+.pc-folio-documents__requisites dd {
+    font-weight: 600;
+    margin: 4px 0 0;
+    overflow-wrap: anywhere;
+}
+
+.pc-folio-documents__repeat {
+    background: #f5f6f7;
+    border-left: 4px solid #646970;
+    padding: 14px;
+}
+
+.pc-folio-documents__repeat .pc-folio-documents__detail-section {
+    margin-top: 12px;
+}
+
+@media (max-width: 1100px) {
+    .pc-folio-documents__filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .pc-folio-documents__requisites {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 782px) {
+    .pc-folio-documents__filters,
+    .pc-folio-documents__requisites {
+        grid-template-columns: 1fr;
+    }
+
+    .pc-folio-documents__header h2 {
+        font-size: 24px;
+    }
+
+    .pc-folio-documents__filters fieldset {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}

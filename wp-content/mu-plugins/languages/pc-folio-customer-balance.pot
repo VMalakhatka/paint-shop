@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PC Folio Customer Balance 0.5.0\n"
+"Project-Id-Version: PC Folio Customer Balance 0.6.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-14 19:56+0200\n"
+"POT-Creation-Date: 2026-08-14 23:58+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,7 +21,31 @@ msgstr ""
 msgid "A debt snapshot refresh is already running."
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:208
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:91
+msgid "A payment cannot be repeated as an order."
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:92
+msgid "A return document cannot be repeated as a regular order."
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:66
+msgid "Account"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:148
+msgid "Accounts"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:167
+msgid "Actions"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:116
+msgid "Additional requisites"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:211
 msgid "All time"
 msgstr ""
 
@@ -29,52 +53,65 @@ msgstr ""
 msgid "All types"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:144
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:147
 msgid "All warehouses"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:145
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:85
+msgid "Allocated amount"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:125
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:164
+msgid "Amount"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:148
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:154
 #, php-format
 msgid "As of: %s"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:276
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:123
+msgid "Available for repeat order"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:279
 msgid "Back to user profile"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:463
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:466
 msgid "Balance"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:97
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:186
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:472
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:100
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:189
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:475
 msgid "Balance with customer"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:152
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:418
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:155
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:421
 msgid "Bank and cash payment"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:231
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:514
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:234
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:517
 msgid "Bank payment"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:150
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:421
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:153
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:424
 msgid "Bank payment short"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:159
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:483
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:162
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:486
 msgid "Bank payments"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:227
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:510
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:230
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:513
 msgid "Basis"
 msgstr ""
 
@@ -90,18 +127,22 @@ msgstr ""
 msgid "Calculated as of"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:232
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:515
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:87
+msgid "Can be repeated as an order"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:235
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:518
 msgid "Cash payment"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:151
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:424
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:154
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:427
 msgid "Cash payment short"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:160
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:484
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:163
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:487
 msgid "Cash payments"
 msgstr ""
 
@@ -109,8 +150,12 @@ msgstr ""
 msgid "Checking the Folio debt snapshot..."
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:233
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:516
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:181
+msgid "Close details"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:236
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:519
 msgid "Closing debt"
 msgstr ""
 
@@ -118,8 +163,16 @@ msgstr ""
 msgid "Completed"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:258
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:259
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:78
+msgid "Currency"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:77
+msgid "Currency amount"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:261
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:262
 msgid "Customer balance"
 msgstr ""
 
@@ -152,8 +205,13 @@ msgstr ""
 msgid "Customers found: %s"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:226
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:509
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:88
+msgid "Data source"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:229
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:512
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:163
 msgid "Date"
 msgstr ""
 
@@ -183,8 +241,8 @@ msgstr ""
 msgid "Debtors found"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:162
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:486
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:165
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:489
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:104
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:170
 msgid "Deferred / on sale"
@@ -194,13 +252,50 @@ msgstr ""
 msgid "Detailed balance"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:225
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:508
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:228
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:511
 msgid "Document No."
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:222
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:505
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:75
+msgid "Document date"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:56
+msgid "Document details are being loaded..."
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:117
+msgid "Document items"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:73
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:162
+msgid "Document number"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:74
+msgid "Document number suffix"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:172
+msgid "Document pages"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:115
+msgid "Document requisites"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:71
+msgid "Document type"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:147
+msgid "Document types"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:225
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:508
 msgid "Due date"
 msgstr ""
 
@@ -208,35 +303,44 @@ msgstr ""
 msgid "Enter a non-negative threshold with no more than two decimal places."
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:387
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:449
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:257
+msgid "Enter a valid document period."
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:390
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:452
 msgid "Enter a valid period start date."
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:148
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:427
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:151
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:430
 msgid "Expense"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:157
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:481
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:67
+msgid "Expense invoice"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:160
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:484
 msgid "Expense invoice total"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:229
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:512
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:232
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:515
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:149
 msgid "Expense invoices"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:194
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:197
 msgid "Export XLSX"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:308
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:311
 msgid "Folio balance"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:153
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:156
 #, php-format
 msgid "Folio code: %s"
 msgstr ""
@@ -251,11 +355,26 @@ msgstr ""
 msgid "Folio debtors"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:139
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:142
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:72
 msgid "Folio document ID"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:364
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:26
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:138
+msgid "Folio documents"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:55
+msgid "Folio documents are being loaded..."
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:57
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:217
+msgid "Folio documents could not be loaded. Please try again later."
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:367
 msgid "Folio returned a report for a different customer."
 msgstr ""
 
@@ -267,7 +386,15 @@ msgstr ""
 msgid "Folio returned an invalid debtors report."
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:357
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:298
+msgid "Folio returned an invalid document list."
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:223
+msgid "Folio returned an invalid document response."
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:360
 msgid "Folio returned an invalid report response."
 msgstr ""
 
@@ -275,14 +402,58 @@ msgstr ""
 msgid "Folio returned an unknown debt snapshot status."
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:209
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:231
+msgid "Folio returned documents for a different customer."
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:326
+msgid "Folio returned invalid document details."
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:79
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:165
+msgid "Folio warehouse"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:212
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:77
 msgid "Generate report"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:235
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:518
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:124
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:134
+msgid "Historical price"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:132
+msgid ""
+"Historical prices are shown for reference only. A future repeat order will "
+"use current WooCommerce prices."
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:81
+msgid "Included in accounting"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:238
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:521
 msgid "Invoice date"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:166
+msgid "Items"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:131
+msgid "Items available for repeat order"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:118
+msgid "Line"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:126
+msgid "Linked payments"
 msgstr ""
 
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:51
@@ -293,21 +464,38 @@ msgstr ""
 msgid "Multiple site customers are linked"
 msgstr ""
 
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:120
+msgid "Name"
+msgstr ""
+
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:118
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:175
 msgid "Next page"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:63
+msgid "No"
 msgstr ""
 
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:153
 msgid "No customers exceed the selected payable threshold."
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:136
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:58
+msgid "No documents were found for the selected period."
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:139
 msgid "No operations were found for the selected period."
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:223
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:506
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:226
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:509
 msgid "No."
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:82
+msgid "Non-cash payment"
 msgstr ""
 
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:183
@@ -318,33 +506,52 @@ msgstr ""
 msgid "Not linked to a site customer"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:234
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:517
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:64
+msgid "Not specified"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:237
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:520
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:128
 msgid "Note"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:147
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:412
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:86
+msgid "Number of items"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:60
+msgid ""
+"Only active Folio documents are included. Archived documents are not shown "
+"yet."
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:150
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:415
 msgid "Opening"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:156
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:480
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:159
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:483
 msgid "Opening balance"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:228
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:511
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:231
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:514
 msgid "Opening debt"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:224
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:507
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:227
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:510
 msgid "Operation"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:163
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:487
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:80
+msgid "Operation kind"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:166
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:490
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:105
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:171
 msgid "Overdue deferred / on sale"
@@ -363,40 +570,62 @@ msgstr ""
 msgid "Partners"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:165
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:489
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:168
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:492
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:107
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:173
 msgid "Payable now"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:204
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:68
+msgid "Payment"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:127
+msgid "Payment allocations"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:84
+msgid "Payment direction code"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:150
+msgid "Payments"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:145
+msgid "Period end"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:207
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:144
 msgid "Period start"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:141
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:477
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:144
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:480
 #, php-format
 msgid "Period: %1$s - %2$s"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:142
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:476
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:145
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:479
 msgid "Period: all time"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:164
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:488
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:167
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:491
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:106
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:172
 msgid "Prepayment"
 msgstr ""
 
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:116
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:173
 msgid "Previous page"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:197
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:200
 msgid "Print"
 msgstr ""
 
@@ -404,22 +633,26 @@ msgstr ""
 msgid "Profile"
 msgstr ""
 
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:122
+msgid "Quantity"
+msgstr ""
+
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:181
 msgid "Ready"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:149
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:430
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:152
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:433
 msgid "Receipt"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:158
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:482
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:161
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:485
 msgid "Receipt invoice total"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:230
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:513
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:233
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:516
 msgid "Receipt invoices"
 msgstr ""
 
@@ -427,21 +660,39 @@ msgstr ""
 msgid "Refresh debt data"
 msgstr ""
 
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:130
+msgid "Repeat order"
+msgstr ""
+
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:185
 msgid "Replaced by a newer snapshot"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:140
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:143
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:152
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:59
 #, php-format
 msgid "Request ID: %s"
 msgstr ""
 
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:121
+msgid "Requested quantity"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:83
+msgid "Return document"
+msgstr ""
+
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:69
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:152
 msgid "Rows per page"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:134
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:119
+msgid "SKU"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:137
 msgid "Select a period start date or generate the report for all time."
 msgstr ""
 
@@ -449,19 +700,37 @@ msgstr ""
 msgid "Select a valid Folio customer type."
 msgstr ""
 
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:314
+msgid "Select a valid Folio document."
+msgstr ""
+
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:220
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:272
 msgid "Select a valid number of rows per page."
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:114
+msgid "Select at least one document type."
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:268
+msgid "Select at least one valid document type."
 msgstr ""
 
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:56
 msgid "Short or full Folio name"
 msgstr ""
 
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:153
+msgid "Show documents"
+msgstr ""
+
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:40
 msgid "Status"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:382
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:385
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:196
 msgid "The Folio customer mapping is invalid. Please contact the manager."
 msgstr ""
 
@@ -469,16 +738,19 @@ msgstr ""
 msgid "The Folio debt snapshot request failed."
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:325
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:328
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:275
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:323
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:203
 msgid "The Folio service connection is unavailable."
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:338
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:347
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:341
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:350
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:280
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:334
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:207
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:215
 msgid "The Folio service is temporarily unavailable."
 msgstr ""
 
@@ -512,21 +784,37 @@ msgstr ""
 msgid "The debtors report uses a previously calculated Folio snapshot."
 msgstr ""
 
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:93
+msgid "The document has no items available for repeat order."
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:276
+msgid "The document page cursor is invalid."
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:262
+msgid "The document period must not exceed 366 days."
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:213
+msgid "The document request parameters were rejected by Folio."
+msgstr ""
+
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:190
 msgid "The latest debt snapshot refresh failed."
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:346
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:349
 msgid "The linked customer was not found in Folio."
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:135
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:350
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:360
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:138
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:353
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:363
 msgid "The report could not be generated. Please try again later."
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:133
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:136
 msgid "The report is being generated..."
 msgstr ""
 
@@ -536,7 +824,7 @@ msgid ""
 "recalculate every customer during viewing."
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:345
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:348
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:287
 msgid "The report parameters were rejected by Folio."
 msgstr ""
@@ -547,9 +835,13 @@ msgid ""
 "than the selected threshold."
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:137
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:140
 #, php-format
 msgid "The report was generated from active Folio documents as of %s."
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:214
+msgid "The requested Folio document was not found."
 msgstr ""
 
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:225
@@ -566,13 +858,23 @@ msgstr ""
 msgid "The snapshot is ready. You can generate the debtors report."
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:271
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:133
+msgid "This document cannot be repeated as an order."
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:94
+msgid "This document type cannot be repeated."
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:274
 msgid "This report is not available for the selected user."
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:248
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:375
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:444
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:251
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:378
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:447
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:104
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:193
 msgid "This report is not available for your account."
 msgstr ""
 
@@ -581,19 +883,26 @@ msgstr ""
 msgid "Threshold: more than %s UAH"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:161
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:485
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:76
+msgid "Total amount"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:164
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:488
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:103
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:169
 msgid "Total debt"
 msgstr ""
 
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:102
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:129
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:161
 msgid "Type"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:167
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:170
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:175
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:61
 msgid "UAH"
 msgstr ""
 
@@ -609,11 +918,15 @@ msgstr ""
 msgid "Updating"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:138
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:113
+msgid "View"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:141
 msgid "Warehouse"
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:143
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:146
 #, php-format
 msgid "Warehouses: %s"
 msgstr ""
@@ -623,8 +936,12 @@ msgstr ""
 msgid "Warning: debt data was calculated as of %s."
 msgstr ""
 
-#: wp-content/mu-plugins/pc-folio-customer-balance.php:453
+#: wp-content/mu-plugins/pc-folio-customer-balance.php:456
 msgid "XLSX export is temporarily unavailable."
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-documents.php:62
+msgid "Yes"
 msgstr ""
 
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:382
