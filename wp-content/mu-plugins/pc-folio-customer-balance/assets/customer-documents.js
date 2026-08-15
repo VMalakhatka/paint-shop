@@ -94,8 +94,12 @@
         return td;
     }
 
-    function documentNumber(document) {
-        return text(document.documentNumber) + text(document.documentNumberSuffix);
+    function documentNumber(folioDocument) {
+        var number = text(folioDocument.documentNumber).trim();
+        var suffix = text(folioDocument.documentNumberSuffix).trim();
+        if (!suffix) return number;
+        if (!number) return suffix;
+        return number + (/^[\/-]/.test(suffix) ? '' : ' \u00b7 ') + suffix;
     }
 
     function renderWarnings(warnings) {
@@ -109,27 +113,27 @@
     function renderList(result) {
         var documents = Array.isArray(result.documents) ? result.documents : [];
         rowsBox.replaceChildren();
-        documents.forEach(function (document) {
+        documents.forEach(function (folioDocument) {
             var row = documentNode('tr');
-            cell(row, labels.types[document.documentType] || text(document.documentType));
-            cell(row, documentNumber(document));
-            cell(row, dateText(document.documentDate));
-            cell(row, moneyText(document.totalAmount), 'is-money');
-            cell(row, document.documentType === 'PAYMENT' ? '\u2014' : (document.warehouseLabel || '\u2014'));
-            var accountingLabel = document.accounted === true
+            cell(row, labels.types[folioDocument.documentType] || text(folioDocument.documentType));
+            cell(row, documentNumber(folioDocument));
+            cell(row, dateText(folioDocument.documentDate));
+            cell(row, moneyText(folioDocument.totalAmount), 'is-money');
+            cell(row, folioDocument.documentType === 'PAYMENT' ? '\u2014' : (folioDocument.warehouseLabel || '\u2014'));
+            var accountingLabel = folioDocument.accounted === true
                 ? labels.accounted
-                : (document.accounted === false ? labels.notAccounted : '\u2014');
-            cell(row, accountingLabel, document.accounted === false ? 'is-not-accounted' : '');
-            cell(row, document.information || '\u2014');
-            cell(row, document.lineCount == null ? '\u2014' : text(document.lineCount));
+                : (folioDocument.accounted === false ? labels.notAccounted : '\u2014');
+            cell(row, accountingLabel, folioDocument.accounted === false ? 'is-not-accounted' : '');
+            cell(row, folioDocument.information || '\u2014');
+            cell(row, folioDocument.lineCount == null ? '\u2014' : text(folioDocument.lineCount));
             var actions = cell(row, '');
             var button = documentNode('button', 'button button-small');
             button.type = 'button';
-            button.textContent = document.documentType === 'PAYMENT' ? labels.types.PAYMENT : labels.fields.documentNumber;
+            button.textContent = folioDocument.documentType === 'PAYMENT' ? labels.types.PAYMENT : labels.fields.documentNumber;
             button.textContent = root.dataset.viewLabel || button.textContent;
             button.setAttribute('data-document-view', '');
-            button.dataset.documentType = document.documentType;
-            button.dataset.documentId = document.documentId;
+            button.dataset.documentType = folioDocument.documentType;
+            button.dataset.documentId = folioDocument.documentId;
             actions.appendChild(button);
             rowsBox.appendChild(row);
         });
@@ -197,13 +201,17 @@
         return String(value);
     }
 
-    function information(document) {
-        return text(document.information || document.additionalInfo || document.additionalInformation || document.documentInfo || document.infoText || document.info);
+    function information(folioDocument) {
+        return text(folioDocument.information || folioDocument.additionalInfo || folioDocument.additionalInformation || folioDocument.documentInfo || folioDocument.infoText || folioDocument.info);
     }
 
     function productLink(item, label) {
         var woo = item && item.woo ? item.woo : {};
-        if (!woo.found || !woo.url) return document.createTextNode(label || text(item && item.sku));
+        if (!woo.found || !woo.url) {
+            var fallback = documentNode('span');
+            fallback.textContent = label || text(item && item.sku);
+            return fallback;
+        }
         var link = documentNode('a');
         link.href = woo.url;
         link.target = '_blank';
@@ -297,24 +305,24 @@
     }
 
     function renderDetail(result) {
-        var document = result.document || {};
+        var folioDocument = result.document || {};
         detailContent.replaceChildren();
-        detailTitle.textContent = (labels.types[document.documentType] || text(document.documentType)) + ' ' + documentNumber(document);
+        detailTitle.textContent = (labels.types[folioDocument.documentType] || text(folioDocument.documentType)) + ' ' + documentNumber(folioDocument);
 
         var headerData = {
-            documentTypeLabel: labels.types[document.documentType] || text(document.documentType),
-            documentNumber: document.documentNumber,
-            documentNumberSuffix: document.documentNumberSuffix,
-            documentDate: document.documentDate,
-            totalAmount: document.totalAmount,
-            operationKind: document.operationKind,
-            information: information(document)
+            documentTypeLabel: labels.types[folioDocument.documentType] || text(folioDocument.documentType),
+            documentNumber: folioDocument.documentNumber,
+            documentNumberSuffix: folioDocument.documentNumberSuffix,
+            documentDate: folioDocument.documentDate,
+            totalAmount: folioDocument.totalAmount,
+            operationKind: folioDocument.operationKind,
+            information: information(folioDocument)
         };
-        if (document.documentType !== 'PAYMENT') {
-            headerData.warehouseLabel = document.warehouseLabel;
-            headerData.accounted = document.accounted;
-            headerData.nonCash = document.nonCash;
-            headerData.returnDocument = document.returnDocument;
+        if (folioDocument.documentType !== 'PAYMENT') {
+            headerData.warehouseLabel = folioDocument.warehouseLabel;
+            headerData.accounted = folioDocument.accounted;
+            headerData.nonCash = folioDocument.nonCash;
+            headerData.returnDocument = folioDocument.returnDocument;
         }
         var header = renderKeyValues(root.dataset.requisitesLabel, headerData, [
             'documentTypeLabel', 'documentNumber', 'documentNumberSuffix', 'documentDate', 'totalAmount',
@@ -322,16 +330,16 @@
         ]);
         if (header) detailContent.appendChild(header);
 
-        var requisites = document.documentRequisites || result.documentRequisites;
+        var requisites = folioDocument.documentRequisites || result.documentRequisites;
         var requisitesBlock = renderKeyValues(root.dataset.additionalLabel, requisites);
         if (requisitesBlock) detailContent.appendChild(requisitesBlock);
 
-        var paymentRequisites = document.paymentRequisites || result.paymentRequisites;
-        if (document.documentType === 'ACCOUNT' || document.documentType === 'PAYMENT') {
+        var paymentRequisites = folioDocument.paymentRequisites || result.paymentRequisites;
+        if (folioDocument.documentType === 'ACCOUNT' || folioDocument.documentType === 'PAYMENT') {
             var paymentBlock = renderKeyValues(root.dataset.paymentRequisitesLabel, paymentRequisites);
             if (paymentBlock) {
                 detailContent.appendChild(paymentBlock);
-            } else if (document.documentType === 'ACCOUNT') {
+            } else if (folioDocument.documentType === 'ACCOUNT') {
                 var paymentEmpty = documentNode('section', 'pc-folio-documents__detail-section pc-folio-documents__payment-requisites');
                 var paymentHeading = documentNode('h4');
                 var paymentText = documentNode('p');
@@ -342,7 +350,7 @@
             }
         }
 
-        var items = renderDataTable(root.dataset.itemsLabel, document.items || result.items, [
+        var items = renderDataTable(root.dataset.itemsLabel, folioDocument.items || result.items, [
             { key: 'lineNumber', label: root.dataset.lineLabel },
             { key: 'sku', label: root.dataset.skuLabel },
             { key: 'name', label: root.dataset.nameLabel, render: function (value, item) { return productLink(item, text(value)); } },
@@ -355,7 +363,7 @@
         ]);
         if (items) detailContent.appendChild(items);
 
-        var linked = renderDataTable(root.dataset.paymentsLabel, document.linkedPayments || result.linkedPayments, [
+        var linked = renderDataTable(root.dataset.paymentsLabel, folioDocument.linkedPayments || result.linkedPayments, [
             { key: 'documentNumber', label: labels.fields.documentNumber },
             { key: 'documentDate', label: labels.fields.documentDate, format: function (value) { return dateText(value); } },
             { key: 'amount', label: root.dataset.amountLabel, className: 'is-money', format: function (value) { return moneyText(value); } },
@@ -363,7 +371,7 @@
         ]);
         if (linked) detailContent.appendChild(linked);
 
-        var allocations = renderDataTable(root.dataset.allocationsLabel, document.allocations || result.allocations, [
+        var allocations = renderDataTable(root.dataset.allocationsLabel, folioDocument.allocations || result.allocations, [
             { key: 'documentNumber', label: labels.fields.documentNumber },
             { key: 'documentType', label: root.dataset.typeLabel, format: function (value) { return labels.types[value] || text(value); } },
             { key: 'amount', label: root.dataset.amountLabel, className: 'is-money', format: function (value) { return moneyText(value); } },
@@ -371,7 +379,7 @@
         ]);
         if (allocations) detailContent.appendChild(allocations);
 
-        var repeatOrder = document.repeatOrder || result.repeatOrder || {};
+        var repeatOrder = folioDocument.repeatOrder || result.repeatOrder || {};
         var repeatSection = documentNode('section', 'pc-folio-documents__detail-section pc-folio-documents__repeat');
         if (repeatOrder.allowed === true) {
             var repeatHeading = documentNode('h4');
@@ -405,7 +413,9 @@
             selectAll.checked = !!repeatSection.querySelector('[data-repeat-index]:not(:disabled)');
             selectAll.disabled = !selectAll.checked;
             selectAll.setAttribute('data-repeat-select-all', '');
-            selectAllLabel.append(selectAll, document.createTextNode(' ' + labels.selectAll));
+            var selectAllText = documentNode('span');
+            selectAllText.textContent = ' ' + labels.selectAll;
+            selectAllLabel.append(selectAll, selectAllText);
             repeatSection.appendChild(selectAllLabel);
             var repeatActions = documentNode('div', 'pc-folio-documents__repeat-actions');
             var cartButton = documentNode('button', 'button alt');
@@ -415,8 +425,8 @@
             draftButton.textContent = root.dataset.addDraftLabel;
             cartButton.dataset.repeatTarget = 'cart';
             draftButton.dataset.repeatTarget = 'draft';
-            cartButton.dataset.documentType = draftButton.dataset.documentType = document.documentType;
-            cartButton.dataset.documentId = draftButton.dataset.documentId = document.documentId;
+            cartButton.dataset.documentType = draftButton.dataset.documentType = folioDocument.documentType;
+            cartButton.dataset.documentId = draftButton.dataset.documentId = folioDocument.documentId;
             repeatActions.append(cartButton, draftButton);
             repeatSection.appendChild(repeatActions);
             repeatSection.appendChild(documentNode('div', 'pc-folio-documents__repeat-result'));
