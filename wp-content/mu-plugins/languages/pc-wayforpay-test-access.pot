@@ -1,0 +1,56 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: PC WayForPay Test Access 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-16 01:18+0200\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "All customers"
+msgstr ""
+
+msgid "Card payment testing"
+msgstr ""
+
+msgid "Checkout availability"
+msgstr ""
+
+msgid "Only selected test users"
+msgstr ""
+
+msgid "Open a user profile and enable WayForPay test access in the dedicated section."
+msgstr ""
+
+msgid "Open users"
+msgstr ""
+
+msgid "Save access mode"
+msgstr ""
+
+msgid "Select test users"
+msgstr ""
+
+msgid "Show WayForPay to this user in restricted mode"
+msgstr ""
+
+msgid "The user must sign in before opening checkout. Guests cannot use the test payment method."
+msgstr ""
+
+msgid "Use restricted mode while the merchant is being tested. The payment method remains enabled in WooCommerce but is shown only to selected signed-in users."
+msgstr ""
+
+msgid "WayForPay access"
+msgstr ""
+
+msgid "WayForPay is available to everyone when the gateway itself is enabled and available."
+msgstr ""
+
+msgid "WayForPay is hidden from guests and all users who do not have test access."
+msgstr ""
+
+msgid "WayForPay test access"
+msgstr ""
+
+msgid "You are not allowed to manage WayForPay access."
+msgstr ""

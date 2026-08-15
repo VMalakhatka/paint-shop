@@ -16,6 +16,7 @@ add_action('muplugins_loaded', function () {
         'pc-folio-customer-balance',
         'pc-folio-order-link',
         'pc-wayforpay-compliance',
+        'pc-wayforpay-test-access',
         'pc-stock-tap',
         'pc-wholesale-quick-order',
         'psu-force-per-page',
