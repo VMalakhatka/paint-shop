@@ -3,7 +3,7 @@
  * Plugin Name: PC WayForPay Compliance
  * Description: Publishes the legal, payment, delivery, refund, and seller details required for online payments.
  * Author: PaintCore
- * Version: 1.0.0
+ * Version: 1.1.0
  * Text Domain: pc-wayforpay-compliance
  */
 
@@ -282,6 +282,77 @@ function pc_wayforpay_page_url(string $key): string
 }
 
 /**
+ * Build the payment and delivery link shown along the purchase flow.
+ */
+function pc_wayforpay_purchase_guidance_html(string $context): string
+{
+    $messages = [
+        'cart' => __('Before checkout, review the available payment methods and the delivery terms.', 'pc-wayforpay-compliance'),
+        'checkout' => __('Before placing the order, review the payment and delivery terms.', 'pc-wayforpay-compliance'),
+        'order_pay' => __('Before paying for the order, review the payment and delivery terms.', 'pc-wayforpay-compliance'),
+    ];
+    $message = $messages[$context] ?? $messages['checkout'];
+
+    return sprintf(
+        '<aside class="pc-payment-delivery-guidance pc-payment-delivery-guidance--%1$s" aria-label="%2$s"><span>%3$s</span><a class="pc-payment-delivery-guidance__link" href="%4$s" target="_blank" rel="noopener">%5$s</a></aside>',
+        esc_attr($context),
+        esc_attr__('Payment and delivery terms', 'pc-wayforpay-compliance'),
+        esc_html($message),
+        esc_url(pc_wayforpay_page_url('payment_delivery')),
+        esc_html__('Payment and delivery', 'pc-wayforpay-compliance')
+    );
+}
+
+function pc_wayforpay_render_cart_guidance(): void
+{
+    echo wp_kses_post(pc_wayforpay_purchase_guidance_html('cart'));
+}
+add_action('woocommerce_proceed_to_checkout', 'pc_wayforpay_render_cart_guidance', 10);
+
+function pc_wayforpay_render_checkout_guidance(): void
+{
+    echo wp_kses_post(pc_wayforpay_purchase_guidance_html('checkout'));
+}
+add_action('woocommerce_review_order_before_submit', 'pc_wayforpay_render_checkout_guidance', 5);
+
+function pc_wayforpay_render_order_pay_guidance(): void
+{
+    echo wp_kses_post(pc_wayforpay_purchase_guidance_html('order_pay'));
+}
+add_action('woocommerce_pay_order_before_submit', 'pc_wayforpay_render_order_pay_guidance', 5);
+
+/**
+ * Keep the link available if a deployment still uses WooCommerce Cart or
+ * Checkout blocks. Classic templates render it through the hooks above.
+ *
+ * @param array<string,mixed> $block
+ */
+function pc_wayforpay_append_purchase_guidance_to_block(string $block_content, array $block): string
+{
+    if (is_admin()) {
+        return $block_content;
+    }
+
+    $block_name = (string) ($block['blockName'] ?? '');
+    if ($block_name === 'woocommerce/cart' && function_exists('is_cart') && is_cart()) {
+        return $block_content . pc_wayforpay_purchase_guidance_html('cart');
+    }
+
+    if (
+        $block_name === 'woocommerce/checkout'
+        && function_exists('is_checkout')
+        && is_checkout()
+        && (!function_exists('is_wc_endpoint_url') || !is_wc_endpoint_url('order-pay'))
+        && (!function_exists('is_wc_endpoint_url') || !is_wc_endpoint_url('order-received'))
+    ) {
+        return pc_wayforpay_purchase_guidance_html('checkout') . $block_content;
+    }
+
+    return $block_content;
+}
+add_filter('render_block', 'pc_wayforpay_append_purchase_guidance_to_block', 20, 2);
+
+/**
  * Legal links and seller identity must be visible from every storefront page.
  */
 function pc_wayforpay_render_legal_footer(): void
@@ -323,6 +394,8 @@ function pc_wayforpay_enqueue_styles(): void
         .pc-policy-updated{color:#616161;font-size:.875rem;margin-bottom:1.5rem}
         .pc-policy-lead{background:#f5f4f0;border-left:4px solid #d5a727;margin:0 0 2rem;padding:1rem 1.25rem}
         .pc-policy-lead p{margin:0}
+        .pc-payment-delivery-guidance{align-items:baseline;background:#f5f4f0;border-left:4px solid #d5a727;box-sizing:border-box;color:#333;display:flex;flex-wrap:wrap;gap:.35rem .7rem;margin:1rem 0;padding:.8rem 1rem;text-align:left;width:100%}
+        .pc-payment-delivery-guidance__link{font-weight:600;text-decoration:underline;text-underline-offset:3px}
         .entry-content .pc-seller-details{margin:0 0 2rem}
         .pc-seller-details>div{border-bottom:1px solid #e4e4e4;display:grid;gap:.5rem;grid-template-columns:minmax(180px,30%) 1fr;padding:.75rem 0}
         .pc-seller-details dt{font-weight:600}

@@ -1,0 +1,21 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: PC WayForPay Compliance 1.1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Domain: pc-wayforpay-compliance\n"
+
+msgid "Before checkout, review the available payment methods and the delivery terms."
+msgstr ""
+
+msgid "Before placing the order, review the payment and delivery terms."
+msgstr ""
+
+msgid "Before paying for the order, review the payment and delivery terms."
+msgstr ""
+
+msgid "Payment and delivery terms"
+msgstr ""
+
+msgid "Payment and delivery"
+msgstr ""
