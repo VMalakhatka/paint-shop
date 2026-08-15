@@ -101,7 +101,7 @@
     border-collapse: collapse;
     font-size: 14px;
     margin: 0;
-    min-width: 860px;
+    min-width: 1080px;
     width: 100%;
 }
 
@@ -125,6 +125,11 @@
     font-variant-numeric: tabular-nums;
     text-align: right;
     white-space: nowrap;
+}
+
+.pc-folio-documents .is-not-accounted {
+    color: #b32d2e;
+    font-weight: 700;
 }
 
 .pc-folio-documents__pagination {
@@ -191,6 +196,48 @@
     background: #f5f6f7;
     border-left: 4px solid #646970;
     padding: 14px;
+}
+
+.pc-folio-documents__payment-requisites {
+    border: 1px dashed #8c8f94;
+    padding: 12px;
+}
+
+.pc-folio-documents__repeat-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.pc-folio-documents__select-all {
+    align-items: center;
+    display: inline-flex;
+    font-weight: 600;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.pc-folio-documents__repeat-actions .button,
+.pc-folio-documents__repeat-result .button {
+    margin: 0;
+}
+
+.pc-folio-documents__repeat-result {
+    margin-top: 12px;
+}
+
+.pc-folio-documents__repeat-result p {
+    margin: 0 0 8px;
+}
+
+.pc-folio-documents__repeat-result .is-warning {
+    color: #996800;
+    font-weight: 700;
+}
+
+.pc-folio-documents__repeat-result ul {
+    margin: 0 0 12px 20px;
 }
 
 .pc-folio-documents__repeat .pc-folio-documents__detail-section {

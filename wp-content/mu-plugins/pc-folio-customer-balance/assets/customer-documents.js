@@ -77,7 +77,9 @@
                     var data = payload.data || {};
                     var message = data.message || labels.requestFailed;
                     if (data.reqId) message += ' ' + labels.requestId.replace('%s', data.reqId);
-                    throw new Error(message);
+                    var error = new Error(message);
+                    error.data = data;
+                    throw error;
                 }
                 return payload.data.result;
             });
@@ -112,8 +114,13 @@
             cell(row, labels.types[document.documentType] || text(document.documentType));
             cell(row, documentNumber(document));
             cell(row, dateText(document.documentDate));
-            cell(row, moneyText(document.totalAmount, document.currencyCode || labels.currency), 'is-money');
-            cell(row, document.warehouseId == null ? '\u2014' : text(document.warehouseId));
+            cell(row, moneyText(document.totalAmount), 'is-money');
+            cell(row, document.documentType === 'PAYMENT' ? '\u2014' : (document.warehouseLabel || '\u2014'));
+            var accountingLabel = document.accounted === true
+                ? labels.accounted
+                : (document.accounted === false ? labels.notAccounted : '\u2014');
+            cell(row, accountingLabel, document.accounted === false ? 'is-not-accounted' : '');
+            cell(row, document.information || '\u2014');
             cell(row, document.lineCount == null ? '\u2014' : text(document.lineCount));
             var actions = cell(row, '');
             var button = documentNode('button', 'button button-small');
@@ -183,10 +190,41 @@
     function valueText(value, key) {
         if (typeof value === 'boolean') return value ? labels.yes : labels.no;
         if (value == null || value === '') return labels.notSpecified;
+        if (key === 'documentDate') return dateText(value, false);
         if (/date|created|updated/i.test(key)) return dateText(value, true);
         if (/amount|price/i.test(key) && Number.isFinite(Number(value))) return moneyText(value);
         if (Array.isArray(value) || typeof value === 'object') return JSON.stringify(value);
         return String(value);
+    }
+
+    function information(document) {
+        return text(document.information || document.additionalInfo || document.additionalInformation || document.documentInfo || document.infoText || document.info);
+    }
+
+    function productLink(item, label) {
+        var woo = item && item.woo ? item.woo : {};
+        if (!woo.found || !woo.url) return document.createTextNode(label || text(item && item.sku));
+        var link = documentNode('a');
+        link.href = woo.url;
+        link.target = '_blank';
+        link.rel = 'noopener';
+        link.textContent = label || text(item.sku);
+        return link;
+    }
+
+    function stockText(item) {
+        var woo = item && item.woo ? item.woo : {};
+        if (!woo.found) return labels.productMissing;
+        var locations = Array.isArray(woo.locations) ? woo.locations.filter(function (location) {
+            return number(location.quantity) > 0;
+        }) : [];
+        if (locations.length) {
+            return locations.map(function (location) {
+                return text(location.name) + ' \u2014 ' + money.format(number(location.quantity));
+            }).join(', ');
+        }
+        if (!woo.inStock) return labels.stockEmpty;
+        return woo.stockTotal == null ? labels.notSpecified : labels.stockTotal.replace('%s', money.format(number(woo.stockTotal)));
     }
 
     function renderKeyValues(title, data, preferredKeys) {
@@ -196,8 +234,11 @@
         });
         if (!keys.length) return null;
         var section = documentNode('section', 'pc-folio-documents__detail-section');
-        var heading = documentNode('h4');
-        heading.textContent = title;
+        var heading = null;
+        if (title) {
+            heading = documentNode('h4');
+            heading.textContent = title;
+        }
         var list = documentNode('dl', 'pc-folio-documents__requisites');
         keys.forEach(function (key) {
             var wrapper = documentNode('div');
@@ -208,7 +249,8 @@
             wrapper.append(dt, dd);
             list.appendChild(wrapper);
         });
-        section.append(heading, list);
+        if (heading) section.appendChild(heading);
+        section.appendChild(list);
         return section;
     }
 
@@ -216,8 +258,11 @@
         rows = Array.isArray(rows) ? rows : [];
         if (!rows.length) return null;
         var section = documentNode('section', 'pc-folio-documents__detail-section');
-        var heading = documentNode('h4');
-        heading.textContent = title;
+        var heading = null;
+        if (title) {
+            heading = documentNode('h4');
+            heading.textContent = title;
+        }
         var wrap = documentNode('div', 'pc-folio-documents__detail-table-wrap');
         var table = documentNode('table', 'pc-folio-documents__detail-table');
         var head = documentNode('thead');
@@ -229,19 +274,25 @@
         });
         head.appendChild(headRow);
         var body = documentNode('tbody');
-        rows.forEach(function (item) {
+        rows.forEach(function (item, rowIndex) {
             var row = documentNode('tr');
             columns.forEach(function (column) {
                 var td = documentNode('td', column.className || '');
                 var value = item[column.key];
-                td.textContent = column.format ? column.format(value, item) : valueText(value, column.key);
+                if (column.render) {
+                    var rendered = column.render(value, item, rowIndex);
+                    if (rendered) td.appendChild(rendered);
+                } else {
+                    td.textContent = column.format ? column.format(value, item) : valueText(value, column.key);
+                }
                 row.appendChild(td);
             });
             body.appendChild(row);
         });
         table.append(head, body);
         wrap.appendChild(table);
-        section.append(heading, wrap);
+        if (heading) section.appendChild(heading);
+        section.appendChild(wrap);
         return section;
     }
 
@@ -250,23 +301,52 @@
         detailContent.replaceChildren();
         detailTitle.textContent = (labels.types[document.documentType] || text(document.documentType)) + ' ' + documentNumber(document);
 
-        var header = renderKeyValues(root.dataset.requisitesLabel, document, [
-            'documentType', 'documentId', 'documentNumber', 'documentNumberSuffix', 'documentDate',
-            'totalAmount', 'currencyAmount', 'currencyCode', 'warehouseId', 'operationKind', 'accounted',
-            'nonCash', 'returnDocument', 'paymentDirectionRaw', 'allocatedAmount', 'lineCount',
-            'canRepeatOrder', 'source'
+        var headerData = {
+            documentTypeLabel: labels.types[document.documentType] || text(document.documentType),
+            documentNumber: document.documentNumber,
+            documentNumberSuffix: document.documentNumberSuffix,
+            documentDate: document.documentDate,
+            totalAmount: document.totalAmount,
+            operationKind: document.operationKind,
+            information: information(document)
+        };
+        if (document.documentType !== 'PAYMENT') {
+            headerData.warehouseLabel = document.warehouseLabel;
+            headerData.accounted = document.accounted;
+            headerData.nonCash = document.nonCash;
+            headerData.returnDocument = document.returnDocument;
+        }
+        var header = renderKeyValues(root.dataset.requisitesLabel, headerData, [
+            'documentTypeLabel', 'documentNumber', 'documentNumberSuffix', 'documentDate', 'totalAmount',
+            'warehouseLabel', 'operationKind', 'accounted', 'nonCash', 'returnDocument', 'information'
         ]);
         if (header) detailContent.appendChild(header);
 
-        var requisites = document.documentRequisites || result.documentRequisites || document.paymentRequisites || result.paymentRequisites;
+        var requisites = document.documentRequisites || result.documentRequisites;
         var requisitesBlock = renderKeyValues(root.dataset.additionalLabel, requisites);
         if (requisitesBlock) detailContent.appendChild(requisitesBlock);
+
+        var paymentRequisites = document.paymentRequisites || result.paymentRequisites;
+        if (document.documentType === 'ACCOUNT' || document.documentType === 'PAYMENT') {
+            var paymentBlock = renderKeyValues(root.dataset.paymentRequisitesLabel, paymentRequisites);
+            if (paymentBlock) {
+                detailContent.appendChild(paymentBlock);
+            } else if (document.documentType === 'ACCOUNT') {
+                var paymentEmpty = documentNode('section', 'pc-folio-documents__detail-section pc-folio-documents__payment-requisites');
+                var paymentHeading = documentNode('h4');
+                var paymentText = documentNode('p');
+                paymentHeading.textContent = root.dataset.paymentRequisitesLabel;
+                paymentText.textContent = root.dataset.paymentRequisitesEmpty;
+                paymentEmpty.append(paymentHeading, paymentText);
+                detailContent.appendChild(paymentEmpty);
+            }
+        }
 
         var items = renderDataTable(root.dataset.itemsLabel, document.items || result.items, [
             { key: 'lineNumber', label: root.dataset.lineLabel },
             { key: 'sku', label: root.dataset.skuLabel },
-            { key: 'name', label: root.dataset.nameLabel },
-            { key: 'warehouseId', label: labels.fields.warehouseId },
+            { key: 'name', label: root.dataset.nameLabel, render: function (value, item) { return productLink(item, text(value)); } },
+            { key: 'warehouseLabel', label: labels.fields.warehouseLabel },
             { key: 'requestedQuantity', label: root.dataset.requestedQuantityLabel, className: 'is-money' },
             { key: 'quantity', label: root.dataset.quantityLabel, className: 'is-money' },
             { key: 'price', label: root.dataset.priceLabel, className: 'is-money', format: function (value) { return moneyText(value); } },
@@ -285,7 +365,7 @@
 
         var allocations = renderDataTable(root.dataset.allocationsLabel, document.allocations || result.allocations, [
             { key: 'documentNumber', label: labels.fields.documentNumber },
-            { key: 'documentType', label: root.dataset.typeLabel },
+            { key: 'documentType', label: root.dataset.typeLabel, format: function (value) { return labels.types[value] || text(value); } },
             { key: 'amount', label: root.dataset.amountLabel, className: 'is-money', format: function (value) { return moneyText(value); } },
             { key: 'note', label: root.dataset.noteLabel }
         ]);
@@ -293,20 +373,53 @@
 
         var repeatOrder = document.repeatOrder || result.repeatOrder || {};
         var repeatSection = documentNode('section', 'pc-folio-documents__detail-section pc-folio-documents__repeat');
-        var repeatHeading = documentNode('h4');
-        repeatHeading.textContent = root.dataset.repeatLabel;
-        repeatSection.appendChild(repeatHeading);
         if (repeatOrder.allowed === true) {
+            var repeatHeading = documentNode('h4');
+            repeatHeading.textContent = root.dataset.repeatItemsLabel;
+            repeatSection.appendChild(repeatHeading);
             var repeatNotice = documentNode('p');
             repeatNotice.textContent = root.dataset.repeatNotice;
             repeatSection.appendChild(repeatNotice);
-            var repeatItems = renderDataTable(root.dataset.repeatItemsLabel, repeatOrder.items, [
+            var selectionHelp = documentNode('p');
+            selectionHelp.textContent = labels.selectionHelp;
+            repeatSection.appendChild(selectionHelp);
+            var repeatItems = renderDataTable('', repeatOrder.items, [
+                { key: '_selected', label: root.dataset.selectLabel, render: function (value, item, rowIndex) {
+                    var checkbox = documentNode('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.checked = !!(item.woo && item.woo.found);
+                    checkbox.disabled = !checkbox.checked;
+                    checkbox.setAttribute('data-repeat-index', String(rowIndex));
+                    return checkbox;
+                } },
                 { key: 'sku', label: root.dataset.skuLabel },
-                { key: 'name', label: root.dataset.nameLabel },
+                { key: 'name', label: root.dataset.productLabel, render: function (value, item) { return productLink(item, text(value)); } },
                 { key: 'quantity', label: root.dataset.quantityLabel, className: 'is-money' },
-                { key: 'historicalPrice', label: root.dataset.historicalPriceLabel, className: 'is-money', format: function (value) { return moneyText(value); } }
+                { key: 'historicalPrice', label: root.dataset.historicalPriceLabel, className: 'is-money', format: function (value) { return moneyText(value); } },
+                { key: '_stock', label: root.dataset.currentStockLabel, format: function (value, item) { return stockText(item); } }
             ]);
             if (repeatItems) repeatSection.appendChild(repeatItems);
+            var selectAllLabel = documentNode('label', 'pc-folio-documents__select-all');
+            var selectAll = documentNode('input');
+            selectAll.type = 'checkbox';
+            selectAll.checked = !!repeatSection.querySelector('[data-repeat-index]:not(:disabled)');
+            selectAll.disabled = !selectAll.checked;
+            selectAll.setAttribute('data-repeat-select-all', '');
+            selectAllLabel.append(selectAll, document.createTextNode(' ' + labels.selectAll));
+            repeatSection.appendChild(selectAllLabel);
+            var repeatActions = documentNode('div', 'pc-folio-documents__repeat-actions');
+            var cartButton = documentNode('button', 'button alt');
+            var draftButton = documentNode('button', 'button');
+            cartButton.type = draftButton.type = 'button';
+            cartButton.textContent = root.dataset.addCartLabel;
+            draftButton.textContent = root.dataset.addDraftLabel;
+            cartButton.dataset.repeatTarget = 'cart';
+            draftButton.dataset.repeatTarget = 'draft';
+            cartButton.dataset.documentType = draftButton.dataset.documentType = document.documentType;
+            cartButton.dataset.documentId = draftButton.dataset.documentId = document.documentId;
+            repeatActions.append(cartButton, draftButton);
+            repeatSection.appendChild(repeatActions);
+            repeatSection.appendChild(documentNode('div', 'pc-folio-documents__repeat-result'));
         } else {
             var reason = documentNode('p');
             reason.textContent = labels.repeatReasons[repeatOrder.reason] || text(repeatOrder.reason) || root.dataset.repeatUnavailable;
@@ -316,6 +429,84 @@
         detailBox.hidden = false;
         detailBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
         setStatus('', '');
+    }
+
+    function selectedRepeatIndexes(section) {
+        return Array.prototype.slice.call(section.querySelectorAll('[data-repeat-index]:checked')).map(function (checkbox) {
+            return Number(checkbox.getAttribute('data-repeat-index'));
+        }).filter(Number.isInteger);
+    }
+
+    function repeatResult(section, result) {
+        var box = section.querySelector('.pc-folio-documents__repeat-result');
+        box.replaceChildren();
+        var message = documentNode('p');
+        message.textContent = result.target === 'draft' ? labels.draftSuccess : labels.cartSuccess;
+        box.appendChild(message);
+        if (Array.isArray(result.skipped) && result.skipped.length) {
+            var warning = documentNode('p', 'is-warning');
+            warning.textContent = labels.partialSuccess;
+            var list = documentNode('ul');
+            result.skipped.forEach(function (item) {
+                var row = documentNode('li');
+                row.textContent = (item.sku ? item.sku + ': ' : '') + text(item.message);
+                list.appendChild(row);
+            });
+            box.append(warning, list);
+        }
+        if (result.url) {
+            var link = documentNode('a', 'button');
+            link.href = result.url;
+            link.textContent = result.target === 'draft' ? root.dataset.openDraftLabel : root.dataset.openCartLabel;
+            box.appendChild(link);
+        }
+    }
+
+    function repeatError(section, error) {
+        var box = section.querySelector('.pc-folio-documents__repeat-result');
+        box.replaceChildren();
+        var message = documentNode('p', 'is-warning');
+        message.textContent = error.message || labels.requestFailed;
+        box.appendChild(message);
+        var skipped = error.data && Array.isArray(error.data.skipped) ? error.data.skipped : [];
+        if (skipped.length) {
+            var list = documentNode('ul');
+            skipped.forEach(function (item) {
+                var row = documentNode('li');
+                row.textContent = (item.sku ? item.sku + ': ' : '') + text(item.message);
+                list.appendChild(row);
+            });
+            box.appendChild(list);
+        }
+    }
+
+    function runRepeatAction(button) {
+        var section = button.closest('.pc-folio-documents__repeat');
+        var indexes = selectedRepeatIndexes(section);
+        if (!indexes.length) {
+            setStatus(labels.selectItems, 'error');
+            return;
+        }
+        var buttons = section.querySelectorAll('[data-repeat-target]');
+        buttons.forEach(function (item) { item.disabled = true; });
+        setStatus(labels.loading, 'loading');
+        request('pc_folio_customer_document_repeat', {
+            document_type: button.dataset.documentType,
+            document_id: button.dataset.documentId,
+            target: button.dataset.repeatTarget,
+            selected_indexes: JSON.stringify(indexes)
+        })
+            .then(function (result) {
+                repeatResult(section, result);
+                setStatus('', '');
+            })
+            .catch(function (error) {
+                repeatError(section, error);
+                setStatus(error.message || labels.requestFailed, 'error');
+            })
+            .finally(function () {
+                buttons.forEach(function (item) { item.disabled = false; });
+            });
     }
 
     function loadDetail(type, id) {
@@ -357,6 +548,18 @@
         loadList(false);
     });
     closeDetailButton.addEventListener('click', closeDetail);
+    detailContent.addEventListener('click', function (event) {
+        var selectAll = event.target.closest('[data-repeat-select-all]');
+        if (selectAll) {
+            var repeatSection = selectAll.closest('.pc-folio-documents__repeat');
+            repeatSection.querySelectorAll('[data-repeat-index]:not(:disabled)').forEach(function (checkbox) {
+                checkbox.checked = selectAll.checked;
+            });
+            return;
+        }
+        var button = event.target.closest('[data-repeat-target]');
+        if (button) runRepeatAction(button);
+    });
 
     loadList(true);
 }());

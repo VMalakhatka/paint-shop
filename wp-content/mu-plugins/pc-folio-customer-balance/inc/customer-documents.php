@@ -62,30 +62,42 @@ function pc_folio_documents_enqueue_assets(): void {
             'yes'           => __('Yes', 'pc-folio-customer-balance'),
             'no'            => __('No', 'pc-folio-customer-balance'),
             'notSpecified'  => __('Not specified', 'pc-folio-customer-balance'),
+            'accounted'     => __('Included', 'pc-folio-customer-balance'),
+            'notAccounted'  => __('Not included', 'pc-folio-customer-balance'),
+            'productMissing'=> __('The product is not available on the site.', 'pc-folio-customer-balance'),
+            'stockEmpty'    => __('Out of stock', 'pc-folio-customer-balance'),
+            'stockTotal'    => __('Total stock: %s', 'pc-folio-customer-balance'),
+            'cartSuccess'   => __('The selected items were added to the cart.', 'pc-folio-customer-balance'),
+            'draftSuccess'  => __('A draft order was created from the selected items.', 'pc-folio-customer-balance'),
+            'partialSuccess'=> __('Some items could not be added. Review the list below.', 'pc-folio-customer-balance'),
+            'selectItems'   => __('Select at least one item.', 'pc-folio-customer-balance'),
+            'selectAll'     => __('Select all available items', 'pc-folio-customer-balance'),
+            'selectionHelp' => __('All available items are selected by default. Clear the items you do not want to add.', 'pc-folio-customer-balance'),
             'types' => [
                 'ACCOUNT' => __('Account', 'pc-folio-customer-balance'),
                 'EXPENSE' => __('Expense invoice', 'pc-folio-customer-balance'),
                 'PAYMENT' => __('Payment', 'pc-folio-customer-balance'),
             ],
             'fields' => [
-                'documentType'         => __('Document type', 'pc-folio-customer-balance'),
-                'documentId'           => __('Folio document ID', 'pc-folio-customer-balance'),
+                'documentTypeLabel'    => __('Document type', 'pc-folio-customer-balance'),
                 'documentNumber'       => __('Document number', 'pc-folio-customer-balance'),
                 'documentNumberSuffix' => __('Document number suffix', 'pc-folio-customer-balance'),
                 'documentDate'         => __('Document date', 'pc-folio-customer-balance'),
                 'totalAmount'          => __('Total amount', 'pc-folio-customer-balance'),
-                'currencyAmount'       => __('Currency amount', 'pc-folio-customer-balance'),
-                'currencyCode'         => __('Currency', 'pc-folio-customer-balance'),
-                'warehouseId'          => __('Folio warehouse', 'pc-folio-customer-balance'),
+                'warehouseLabel'       => __('Folio warehouse', 'pc-folio-customer-balance'),
                 'operationKind'        => __('Operation kind', 'pc-folio-customer-balance'),
                 'accounted'            => __('Included in accounting', 'pc-folio-customer-balance'),
                 'nonCash'              => __('Non-cash payment', 'pc-folio-customer-balance'),
                 'returnDocument'       => __('Return document', 'pc-folio-customer-balance'),
-                'paymentDirectionRaw'  => __('Payment direction code', 'pc-folio-customer-balance'),
                 'allocatedAmount'      => __('Allocated amount', 'pc-folio-customer-balance'),
                 'lineCount'            => __('Number of items', 'pc-folio-customer-balance'),
                 'canRepeatOrder'       => __('Can be repeated as an order', 'pc-folio-customer-balance'),
-                'source'               => __('Data source', 'pc-folio-customer-balance'),
+                'information'          => __('Information', 'pc-folio-customer-balance'),
+                'payerCity'            => __('Customer city', 'pc-folio-customer-balance'),
+                'directorName'         => __('Director', 'pc-folio-customer-balance'),
+                'accountantName'       => __('Accountant', 'pc-folio-customer-balance'),
+                'payerPhone'           => __('Customer phone', 'pc-folio-customer-balance'),
+                'deliveryInfo'         => __('Delivery information', 'pc-folio-customer-balance'),
             ],
             'repeatReasons' => [
                 'PAYMENT_NOT_REPEATABLE'       => __('A payment cannot be repeated as an order.', 'pc-folio-customer-balance'),
@@ -121,17 +133,25 @@ function pc_folio_documents_render_endpoint(): void {
         data-requested-quantity-label="<?php echo esc_attr__('Requested quantity', 'pc-folio-customer-balance'); ?>"
         data-quantity-label="<?php echo esc_attr__('Quantity', 'pc-folio-customer-balance'); ?>"
         data-repeatable-label="<?php echo esc_attr__('Available for repeat order', 'pc-folio-customer-balance'); ?>"
+        data-current-stock-label="<?php echo esc_attr__('Current stock by warehouse', 'pc-folio-customer-balance'); ?>"
+        data-product-label="<?php echo esc_attr__('Product', 'pc-folio-customer-balance'); ?>"
+        data-select-label="<?php echo esc_attr__('Select', 'pc-folio-customer-balance'); ?>"
         data-price-label="<?php echo esc_attr__('Historical price', 'pc-folio-customer-balance'); ?>"
         data-amount-label="<?php echo esc_attr__('Amount', 'pc-folio-customer-balance'); ?>"
         data-payments-label="<?php echo esc_attr__('Linked payments', 'pc-folio-customer-balance'); ?>"
         data-allocations-label="<?php echo esc_attr__('Payment allocations', 'pc-folio-customer-balance'); ?>"
         data-note-label="<?php echo esc_attr__('Note', 'pc-folio-customer-balance'); ?>"
         data-type-label="<?php echo esc_attr__('Type', 'pc-folio-customer-balance'); ?>"
-        data-repeat-label="<?php echo esc_attr__('Repeat order', 'pc-folio-customer-balance'); ?>"
         data-repeat-items-label="<?php echo esc_attr__('Items available for repeat order', 'pc-folio-customer-balance'); ?>"
         data-repeat-notice="<?php echo esc_attr__('Historical prices are shown for reference only. A future repeat order will use current WooCommerce prices.', 'pc-folio-customer-balance'); ?>"
         data-repeat-unavailable="<?php echo esc_attr__('This document cannot be repeated as an order.', 'pc-folio-customer-balance'); ?>"
         data-historical-price-label="<?php echo esc_attr__('Historical price', 'pc-folio-customer-balance'); ?>"
+        data-add-cart-label="<?php echo esc_attr__('Add selected items to cart', 'pc-folio-customer-balance'); ?>"
+        data-add-draft-label="<?php echo esc_attr__('Save selected items as draft order', 'pc-folio-customer-balance'); ?>"
+        data-open-cart-label="<?php echo esc_attr__('Open cart', 'pc-folio-customer-balance'); ?>"
+        data-open-draft-label="<?php echo esc_attr__('Open draft order', 'pc-folio-customer-balance'); ?>"
+        data-payment-requisites-label="<?php echo esc_attr__('Payment requisites', 'pc-folio-customer-balance'); ?>"
+        data-payment-requisites-empty="<?php echo esc_attr__('Payment requisites have not yet been provided by Folio.', 'pc-folio-customer-balance'); ?>"
         aria-labelledby="pc-folio-documents-title">
         <header class="pc-folio-documents__header">
             <div>
@@ -146,7 +166,7 @@ function pc_folio_documents_render_endpoint(): void {
             <fieldset>
                 <legend><?php esc_html_e('Document types', 'pc-folio-customer-balance'); ?></legend>
                 <label><input type="checkbox" name="types" value="ACCOUNT" checked> <?php esc_html_e('Accounts', 'pc-folio-customer-balance'); ?></label>
-                <label><input type="checkbox" name="types" value="EXPENSE" checked> <?php esc_html_e('Expense invoices', 'pc-folio-customer-balance'); ?></label>
+                <label><input type="checkbox" name="types" value="EXPENSE" checked> <?php esc_html_e('Expense documents', 'pc-folio-customer-balance'); ?></label>
                 <label><input type="checkbox" name="types" value="PAYMENT" checked> <?php esc_html_e('Payments', 'pc-folio-customer-balance'); ?></label>
             </fieldset>
             <label><span><?php esc_html_e('Rows per page', 'pc-folio-customer-balance'); ?></span><select name="limit"><option>25</option><option selected>50</option><option>100</option></select></label>
@@ -163,6 +183,8 @@ function pc_folio_documents_render_endpoint(): void {
                     <th><?php esc_html_e('Date', 'pc-folio-customer-balance'); ?></th>
                     <th><?php esc_html_e('Amount', 'pc-folio-customer-balance'); ?></th>
                     <th><?php esc_html_e('Folio warehouse', 'pc-folio-customer-balance'); ?></th>
+                    <th><?php esc_html_e('Accounting', 'pc-folio-customer-balance'); ?></th>
+                    <th><?php esc_html_e('Information', 'pc-folio-customer-balance'); ?></th>
                     <th><?php esc_html_e('Items', 'pc-folio-customer-balance'); ?></th>
                     <th><?php esc_html_e('Actions', 'pc-folio-customer-balance'); ?></th>
                 </tr></thead>
@@ -233,11 +255,152 @@ function pc_folio_documents_validate_partner(array $data, array $context) {
     return true;
 }
 
+function pc_folio_documents_warehouse_label($warehouse_id, string $warehouse_name = ''): string {
+    $warehouse_name = trim($warehouse_name);
+    if ($warehouse_name !== '') {
+        return $warehouse_name;
+    }
+    $warehouse_id = trim((string) $warehouse_id);
+    if ($warehouse_id === '') {
+        return '';
+    }
+    if (function_exists('pc_folio_warehouse_label')) {
+        return pc_folio_warehouse_label($warehouse_id);
+    }
+    $labels = [
+        '1'  => __('Kyiv', 'pc-folio-customer-balance'),
+        '2'  => __('Kyiv workshop', 'pc-folio-customer-balance'),
+        '5'  => __('Odesa', 'pc-folio-customer-balance'),
+        '6'  => __('Odesa workshop', 'pc-folio-customer-balance'),
+        '7'  => __('Kyiv wholesale', 'pc-folio-customer-balance'),
+        '8'  => __('Kyiv wholesale workshop', 'pc-folio-customer-balance'),
+        '9'  => __('Transport', 'pc-folio-customer-balance'),
+        '15' => __('Odesa 15', 'pc-folio-customer-balance'),
+        '20' => __('Odesa 20', 'pc-folio-customer-balance'),
+    ];
+    return $labels[$warehouse_id] ?? sprintf(__('Warehouse %s', 'pc-folio-customer-balance'), $warehouse_id);
+}
+
+function pc_folio_documents_information(array $document): string {
+    foreach (['additionalInfo', 'additionalInformation', 'information', 'documentInfo', 'infoText', 'info'] as $key) {
+        $value = trim((string) ($document[$key] ?? ''));
+        if ($value !== '') {
+            return $value;
+        }
+    }
+    return '';
+}
+
+function pc_folio_documents_prepare_document(array $document, bool $with_products = false): array {
+    $document['warehouseLabel'] = pc_folio_documents_warehouse_label(
+        $document['warehouseId'] ?? '',
+        (string) ($document['warehouseName'] ?? ($document['folioWarehouseName'] ?? ''))
+    );
+    $document['information'] = pc_folio_documents_information($document);
+    if (!$with_products) {
+        return $document;
+    }
+
+    foreach (['items', 'repeatOrder'] as $container) {
+        $items = $container === 'repeatOrder'
+            ? ($document['repeatOrder']['items'] ?? null)
+            : ($document['items'] ?? null);
+        if (!is_array($items)) {
+            continue;
+        }
+        foreach ($items as $index => $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+            $item['warehouseLabel'] = pc_folio_documents_warehouse_label(
+                $item['warehouseId'] ?? '',
+                (string) ($item['warehouseName'] ?? ($item['folioWarehouseName'] ?? ''))
+            );
+            $item['woo'] = pc_folio_documents_product_context((string) ($item['sku'] ?? ''));
+            if ($container === 'repeatOrder') {
+                $document['repeatOrder']['items'][$index] = $item;
+            } else {
+                $document['items'][$index] = $item;
+            }
+        }
+    }
+    return $document;
+}
+
+function pc_folio_documents_product_context(string $sku): array {
+    static $cache = [];
+    $sku = trim($sku);
+    if (array_key_exists($sku, $cache)) {
+        return $cache[$sku];
+    }
+
+    $product_id = $sku !== '' && function_exists('wc_get_product_id_by_sku') ? (int) wc_get_product_id_by_sku($sku) : 0;
+    $product = $product_id > 0 ? wc_get_product($product_id) : false;
+    if (!$product instanceof WC_Product) {
+        return $cache[$sku] = [
+            'found' => false,
+            'productId' => 0,
+            'url' => '',
+            'purchasable' => false,
+            'inStock' => false,
+            'stockTotal' => 0,
+            'locations' => [],
+        ];
+    }
+
+    $locations = [];
+    if (function_exists('slu_collect_location_stocks_for_product')) {
+        $stock_rows = (array) slu_collect_location_stocks_for_product($product);
+        if (function_exists('slu_order_location_stocks_by_global_priority')) {
+            $stock_rows = slu_order_location_stocks_by_global_priority($stock_rows);
+        }
+        foreach ($stock_rows as $term_id => $row) {
+            $locations[] = [
+                'id' => (int) $term_id,
+                'name' => sanitize_text_field((string) ($row['name'] ?? '')),
+                'quantity' => (float) ($row['qty'] ?? 0),
+            ];
+        }
+    }
+
+    $stock_total = $product->get_stock_quantity();
+    if ($stock_total === null && $locations) {
+        $stock_total = array_sum(array_column($locations, 'quantity'));
+    }
+    return $cache[$sku] = [
+        'found' => true,
+        'productId' => $product->get_id(),
+        'url' => esc_url_raw($product->get_permalink()),
+        'purchasable' => $product->is_purchasable(),
+        'inStock' => $product->is_in_stock(),
+        'stockTotal' => $stock_total === null ? null : (float) $stock_total,
+        'locations' => $locations,
+    ];
+}
+
+function pc_folio_documents_fetch_detail(array $context, string $type, int $document_id) {
+    $path = sprintf('/admin/folio/customer-documents/%s/%d', rawurlencode($type), $document_id);
+    $data = pc_folio_documents_java_get($path, ['partnerShortName' => $context['short_name']]);
+    if (is_wp_error($data)) {
+        return $data;
+    }
+    $partner_check = pc_folio_documents_validate_partner($data, $context);
+    if (is_wp_error($partner_check)) {
+        return $partner_check;
+    }
+    if (!is_array($data['document'] ?? null)) {
+        return new WP_Error('invalid_document_detail', __('Folio returned invalid document details.', 'pc-folio-customer-balance'), ['status' => 502]);
+    }
+    $data['document'] = pc_folio_documents_prepare_document($data['document'], true);
+    return $data;
+}
+
 function pc_folio_documents_send_error(WP_Error $error): void {
     $data = $error->get_error_data();
     wp_send_json_error([
         'message' => $error->get_error_message(),
         'reqId' => is_array($data) ? (string) ($data['reqId'] ?? '') : '',
+        'skipped' => is_array($data) && is_array($data['skipped'] ?? null) ? $data['skipped'] : [],
     ], is_array($data) ? (int) ($data['status'] ?? 502) : 502);
 }
 
@@ -297,6 +460,9 @@ function pc_folio_documents_ajax_list(): void {
     if (!is_array($data['documents'] ?? null)) {
         pc_folio_documents_send_error(new WP_Error('invalid_document_list', __('Folio returned an invalid document list.', 'pc-folio-customer-balance'), ['status' => 502]));
     }
+    $data['documents'] = array_map(static function ($document): array {
+        return pc_folio_documents_prepare_document(is_array($document) ? $document : []);
+    }, $data['documents']);
     wp_send_json_success(['result' => $data]);
 }
 add_action('wp_ajax_pc_folio_customer_documents', 'pc_folio_documents_ajax_list');
@@ -313,18 +479,215 @@ function pc_folio_documents_ajax_detail(): void {
     if (!in_array($type, ['ACCOUNT', 'EXPENSE', 'PAYMENT'], true) || $document_id <= 0) {
         wp_send_json_error(['message' => __('Select a valid Folio document.', 'pc-folio-customer-balance')], 400);
     }
-    $path = sprintf('/admin/folio/customer-documents/%s/%d', rawurlencode($type), $document_id);
-    $data = pc_folio_documents_java_get($path, ['partnerShortName' => $context['short_name']]);
+    $data = pc_folio_documents_fetch_detail($context, $type, $document_id);
     if (is_wp_error($data)) {
         pc_folio_documents_send_error($data);
-    }
-    $partner_check = pc_folio_documents_validate_partner($data, $context);
-    if (is_wp_error($partner_check)) {
-        pc_folio_documents_send_error($partner_check);
-    }
-    if (!is_array($data['document'] ?? null)) {
-        pc_folio_documents_send_error(new WP_Error('invalid_document_detail', __('Folio returned invalid document details.', 'pc-folio-customer-balance'), ['status' => 502]));
     }
     wp_send_json_success(['result' => $data]);
 }
 add_action('wp_ajax_pc_folio_customer_document_detail', 'pc_folio_documents_ajax_detail');
+
+function pc_folio_documents_selected_indexes(): array {
+    $raw = isset($_POST['selected_indexes']) ? json_decode((string) wp_unslash($_POST['selected_indexes']), true) : null;
+    if (!is_array($raw)) {
+        return [];
+    }
+    $indexes = [];
+    foreach ($raw as $index) {
+        if (is_numeric($index) && (int) $index >= 0) {
+            $indexes[] = (int) $index;
+        }
+    }
+    return array_values(array_unique($indexes));
+}
+
+function pc_folio_documents_repeat_candidates(array $document, array $selected_indexes, string $target): array {
+    $repeat_order = is_array($document['repeatOrder'] ?? null) ? $document['repeatOrder'] : [];
+    if (($repeat_order['allowed'] ?? false) !== true || !is_array($repeat_order['items'] ?? null)) {
+        return [[], [[
+            'sku' => '',
+            'message' => __('This document cannot be repeated as an order.', 'pc-folio-customer-balance'),
+        ]]];
+    }
+
+    $selected = array_fill_keys($selected_indexes, true);
+    $candidates = [];
+    $skipped = [];
+    foreach ($repeat_order['items'] as $index => $item) {
+        if (!isset($selected[(int) $index]) || !is_array($item)) {
+            continue;
+        }
+        $sku = trim((string) ($item['sku'] ?? ''));
+        $quantity = function_exists('wc_stock_amount')
+            ? wc_stock_amount((float) ($item['quantity'] ?? 0))
+            : (float) ($item['quantity'] ?? 0);
+        $product_id = $sku !== '' ? (int) wc_get_product_id_by_sku($sku) : 0;
+        $product = $product_id > 0 ? wc_get_product($product_id) : false;
+        if (!$product instanceof WC_Product) {
+            $skipped[] = ['sku' => $sku, 'message' => __('The product was not found on the site.', 'pc-folio-customer-balance')];
+            continue;
+        }
+        if ($quantity <= 0) {
+            $skipped[] = ['sku' => $sku, 'message' => __('The product is not available for ordering.', 'pc-folio-customer-balance')];
+            continue;
+        }
+        if ($target === 'cart') {
+            if (!$product->is_purchasable()) {
+                $skipped[] = ['sku' => $sku, 'message' => __('The product is not available for ordering.', 'pc-folio-customer-balance')];
+                continue;
+            }
+            $stock_context = pc_folio_documents_product_context($sku);
+            $cart_quantity = function_exists('slu_cart_qty_for_product') ? (float) slu_cart_qty_for_product($product) : 0.0;
+            $stock_total = $stock_context['stockTotal'] ?? null;
+            $exceeds_location_stock = $stock_total !== null && ($quantity + $cart_quantity) > (float) $stock_total;
+            if (!$product->is_in_stock()
+                || $exceeds_location_stock
+                || (method_exists($product, 'has_enough_stock') && !$product->has_enough_stock($quantity + $cart_quantity))) {
+                $skipped[] = ['sku' => $sku, 'message' => __('There is not enough current stock for the requested quantity.', 'pc-folio-customer-balance')];
+                continue;
+            }
+            $maximum = (float) $product->get_max_purchase_quantity();
+            if ($maximum > 0 && $quantity > $maximum) {
+                $skipped[] = ['sku' => $sku, 'message' => __('The requested quantity exceeds the current purchase limit.', 'pc-folio-customer-balance')];
+                continue;
+            }
+        }
+        $candidates[] = ['sku' => $sku, 'quantity' => $quantity, 'product' => $product];
+    }
+    return [$candidates, $skipped];
+}
+
+function pc_folio_documents_load_cart(): bool {
+    if (!function_exists('WC')) {
+        return false;
+    }
+    if ((!WC()->session || !WC()->cart) && function_exists('wc_load_cart')) {
+        wc_load_cart();
+    }
+    if (!WC()->session || !WC()->cart) {
+        return false;
+    }
+    WC()->session->set_customer_session_cookie(true);
+    WC()->cart->get_cart();
+    return true;
+}
+
+function pc_folio_documents_add_candidates_to_cart(array $candidates, array $skipped): array {
+    if (!pc_folio_documents_load_cart()) {
+        return [0, $skipped, new WP_Error('cart_unavailable', __('The cart is temporarily unavailable.', 'pc-folio-customer-balance'), ['status' => 503])];
+    }
+    $added = 0;
+    foreach ($candidates as $candidate) {
+        /** @var WC_Product $product */
+        $product = $candidate['product'];
+        $quantity = $candidate['quantity'];
+        $product_id = $product->is_type('variation') ? $product->get_parent_id() : $product->get_id();
+        $variation_id = $product->is_type('variation') ? $product->get_id() : 0;
+        $variation = $product->is_type('variation') ? $product->get_variation_attributes() : [];
+        $result = WC()->cart->add_to_cart($product_id, $quantity, $variation_id, $variation);
+        if ($result) {
+            $added++;
+        } else {
+            $skipped[] = ['sku' => $candidate['sku'], 'message' => __('WooCommerce rejected this item.', 'pc-folio-customer-balance')];
+        }
+    }
+    return [$added, $skipped, null];
+}
+
+function pc_folio_documents_create_repeat_draft(array $context, array $document, array $candidates, array $skipped) {
+    if (!function_exists('wc_create_order') || !isset(wc_get_order_statuses()['wc-pc-draft'])) {
+        return new WP_Error('draft_unavailable', __('Draft orders are temporarily unavailable.', 'pc-folio-customer-balance'), ['status' => 503]);
+    }
+    if (!$candidates) {
+        return new WP_Error('empty_draft', __('No selected items are currently available for a draft order.', 'pc-folio-customer-balance'), ['status' => 422, 'skipped' => $skipped]);
+    }
+
+    $order = wc_create_order(['status' => 'wc-pc-draft', 'customer_id' => (int) $context['user_id']]);
+    if (!$order instanceof WC_Order) {
+        return new WP_Error('draft_create_failed', __('The draft order could not be created.', 'pc-folio-customer-balance'), ['status' => 500]);
+    }
+    $customer = new WC_Customer((int) $context['user_id']);
+    $order->set_address($customer->get_billing('edit'), 'billing');
+    $order->set_address($customer->get_shipping('edit'), 'shipping');
+    $order->set_created_via('folio-repeat');
+    $added = 0;
+    foreach ($candidates as $candidate) {
+        /** @var WC_Product $product */
+        $product = $candidate['product'];
+        $item_id = $order->add_product($product, $candidate['quantity']);
+        if (!$item_id) {
+            $skipped[] = ['sku' => $candidate['sku'], 'message' => __('WooCommerce rejected this item.', 'pc-folio-customer-balance')];
+            continue;
+        }
+        $added++;
+        $item = $order->get_item($item_id);
+        if ($item instanceof WC_Order_Item_Product && function_exists('PaintCore\\Stock\\pc_compute_and_stamp_item_plan')) {
+            try {
+                \PaintCore\Stock\pc_compute_and_stamp_item_plan($item, $product, (int) $candidate['quantity'], 'folio-repeat-draft');
+                $item->save();
+            } catch (Throwable $error) {
+                // The draft itself is still valid; allocation will be recalculated later if necessary.
+            }
+        }
+    }
+    if ($added === 0) {
+        $order->delete(true);
+        return new WP_Error('empty_draft', __('No selected items are currently available for a draft order.', 'pc-folio-customer-balance'), ['status' => 422, 'skipped' => $skipped]);
+    }
+    $number = trim((string) ($document['documentNumber'] ?? '') . (string) ($document['documentNumberSuffix'] ?? ''));
+    $order->update_meta_data('_pc_draft_title', sprintf(__('Repeat of Folio document %s', 'pc-folio-customer-balance'), $number));
+    $order->update_meta_data('_folio_repeat_source_type', sanitize_key((string) ($document['documentType'] ?? '')));
+    $order->update_meta_data('_folio_repeat_source_document_id', (int) ($document['documentId'] ?? 0));
+    $order->update_meta_data('_folio_repeat_source_document_number', $number);
+    $order->add_order_note(sprintf(__('Created from Folio document %s using current WooCommerce prices.', 'pc-folio-customer-balance'), $number), false, true);
+    $order->calculate_totals(false);
+    $order->save();
+    return ['order' => $order, 'added' => $added, 'skipped' => $skipped];
+}
+
+function pc_folio_documents_ajax_repeat_action(): void {
+    check_ajax_referer('pc_folio_customer_documents');
+    $context = pc_folio_documents_request_context();
+    if (is_wp_error($context)) {
+        pc_folio_documents_send_error($context);
+    }
+    $type = strtoupper(isset($_POST['document_type']) ? sanitize_key(wp_unslash($_POST['document_type'])) : '');
+    $document_id = isset($_POST['document_id']) ? (int) $_POST['document_id'] : 0;
+    $target = isset($_POST['target']) ? sanitize_key(wp_unslash($_POST['target'])) : '';
+    $selected_indexes = pc_folio_documents_selected_indexes();
+    if (!in_array($type, ['ACCOUNT', 'EXPENSE'], true) || $document_id <= 0 || !in_array($target, ['cart', 'draft'], true) || !$selected_indexes) {
+        wp_send_json_error(['message' => __('Select valid document items.', 'pc-folio-customer-balance')], 400);
+    }
+
+    $data = pc_folio_documents_fetch_detail($context, $type, $document_id);
+    if (is_wp_error($data)) {
+        pc_folio_documents_send_error($data);
+    }
+    [$candidates, $skipped] = pc_folio_documents_repeat_candidates($data['document'], $selected_indexes, $target);
+    if ($target === 'cart') {
+        [$added, $skipped, $error] = pc_folio_documents_add_candidates_to_cart($candidates, $skipped);
+        if ($error instanceof WP_Error) {
+            pc_folio_documents_send_error($error);
+        }
+        if ($added === 0) {
+            wp_send_json_error(['message' => __('No selected items were added to the cart.', 'pc-folio-customer-balance'), 'skipped' => $skipped], 422);
+        }
+        wp_send_json_success(['result' => ['target' => 'cart', 'added' => $added, 'skipped' => $skipped, 'url' => wc_get_cart_url()]]);
+    }
+
+    $draft = pc_folio_documents_create_repeat_draft($context, $data['document'], $candidates, $skipped);
+    if (is_wp_error($draft)) {
+        pc_folio_documents_send_error($draft);
+    }
+    /** @var WC_Order $order */
+    $order = $draft['order'];
+    $url = wc_get_endpoint_url('view-order', $order->get_id(), wc_get_page_permalink('myaccount'));
+    wp_send_json_success(['result' => [
+        'target' => 'draft',
+        'added' => (int) $draft['added'],
+        'skipped' => $draft['skipped'],
+        'orderId' => $order->get_id(),
+        'url' => $url,
+    ]]);
+}
+add_action('wp_ajax_pc_folio_customer_document_repeat', 'pc_folio_documents_ajax_repeat_action');
