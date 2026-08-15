@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Lavka Price Sync 0.3.0\n"
+"Project-Id-Version: Lavka Price Sync 0.4.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lavka-price-sync\n"
-"POT-Creation-Date: 2026-08-15T22:03:22+00:00\n"
+"POT-Creation-Date: 2026-08-15T22:57:33+00:00\n"
 "PO-Revision-Date: 2026-08-15T21:53:28+00:00\n"
 "Last-Translator: Volodymyr\n"
 "Language-Team: Russian\n"
@@ -29,25 +29,25 @@ msgstr ""
 "Синхронизация цен по ролям из Java-сервиса в WooCommerce (мета: "
 "_wpc_price_role_<роль>)."
 
-#: inc/accounting-prices-cron.php:60 inc/accounting-prices.php:481
+#: inc/accounting-prices-cron.php:92 inc/accounting-prices.php:528
 msgid "Java API returned an empty response."
 msgstr "API сервиса ФОЛИО вернул пустой ответ."
 
-#: inc/accounting-prices-cron.php:198 inc/accounting-prices.php:416
+#: inc/accounting-prices-cron.php:241 inc/accounting-prices.php:463
 msgid ""
 "The global Lavka lock is unavailable. The recalculation was not started."
 msgstr "Глобальная блокировка Lavka недоступна. Пересчёт не запущен."
 
-#: inc/accounting-prices-cron.php:206
+#: inc/accounting-prices-cron.php:249
 msgid "Full Folio accounting-price recalculation"
 msgstr "Полный пересчёт учётных цен ФОЛИО"
 
-#: inc/accounting-prices-cron.php:236
+#: inc/accounting-prices-cron.php:279
 msgid ""
 "The global Lavka lock became unavailable while the recalculation was running."
 msgstr "Глобальная блокировка Lavka стала недоступна во время пересчёта."
 
-#: inc/accounting-prices-cron.php:250
+#: inc/accounting-prices-cron.php:293
 msgid ""
 "The recalculation lost its global lock while another Lavka process is "
 "active. Manual review is required."
@@ -55,7 +55,7 @@ msgstr ""
 "Пересчёт потерял глобальную блокировку, пока активен другой процесс Lavka. "
 "Требуется ручная проверка."
 
-#: inc/accounting-prices-cron.php:259
+#: inc/accounting-prices-cron.php:302
 msgid ""
 "The recalculation global lock could not be restored. Manual review is "
 "required."
@@ -63,27 +63,59 @@ msgstr ""
 "Не удалось восстановить глобальную блокировку пересчёта. Требуется ручная "
 "проверка."
 
-#: inc/accounting-prices-cron.php:273 inc/accounting-prices.php:451
+#: inc/accounting-prices-cron.php:367
+msgid ""
+"The scheduled warehouse queue no longer matches the completed Java job. "
+"Check Folio manually before restarting it."
+msgstr ""
+"Очередь планового пересчёта складов больше не соответствует завершённому "
+"заданию Java. Перед повторным запуском проверьте ФОЛИО вручную."
+
+#: inc/accounting-prices-cron.php:388
+msgid ""
+"A warehouse recalculation ended after partial commits. The remaining "
+"warehouse queue is stopped until Folio is reviewed manually."
+msgstr ""
+"Пересчёт склада завершился после частичной фиксации изменений. Оставшаяся "
+"очередь складов остановлена до ручной проверки ФОЛИО."
+
+#: inc/accounting-prices-cron.php:389
+msgid ""
+"A warehouse recalculation has an unknown outcome. The remaining warehouse "
+"queue is stopped until Folio is reviewed manually."
+msgstr ""
+"Результат пересчёта склада неизвестен. Оставшаяся очередь складов остановлена "
+"до ручной проверки ФОЛИО."
+
+#: inc/accounting-prices-cron.php:399
+msgid ""
+"A warehouse recalculation failed. The remaining warehouses were not started; "
+"the weekly schedule remains enabled."
+msgstr ""
+"Пересчёт склада завершился ошибкой. Оставшиеся склады не запускались; "
+"недельное расписание остаётся включённым."
+
+#: inc/accounting-prices-cron.php:423 inc/accounting-prices.php:498
 msgid "Folio warehouse is required."
 msgstr "Необходимо указать склад ФОЛИО."
 
-#: inc/accounting-prices-cron.php:292
+#: inc/accounting-prices-cron.php:443
 msgid "A full Folio accounting-price recalculation is already running."
 msgstr "Полный пересчёт учётных цен ФОЛИО уже выполняется."
 
-#: inc/accounting-prices-cron.php:311 inc/accounting-prices.php:428
+#: inc/accounting-prices-cron.php:464 inc/accounting-prices.php:475
 msgid "Another Lavka synchronization is running."
 msgstr "Выполняется другая синхронизация Lavka."
 
-#: inc/accounting-prices-cron.php:442 inc/accounting-prices-cron.php:565
+#: inc/accounting-prices-cron.php:600 inc/accounting-prices-cron.php:723
 msgid "The recalculation outcome is unknown. Manual review is required."
 msgstr "Результат пересчёта неизвестен. Требуется ручная проверка."
 
-#: inc/accounting-prices-cron.php:462 inc/accounting-prices.php:46
+#: inc/accounting-prices-cron.php:620 inc/accounting-prices.php:48
 msgid "The server request failed."
 msgstr "Запрос к серверу не выполнен."
 
-#: inc/accounting-prices-cron.php:469
+#: inc/accounting-prices-cron.php:627
 msgid ""
 "The Java status endpoint remained unavailable for two hours. The "
 "recalculation outcome must be checked manually before any retry."
@@ -91,7 +123,7 @@ msgstr ""
 "Endpoint статуса Java оставался недоступен в течение двух часов. Перед любым "
 "повтором результат пересчёта необходимо проверить вручную."
 
-#: inc/accounting-prices-cron.php:491
+#: inc/accounting-prices-cron.php:649
 msgid ""
 "The Java service returned a different recalculation job. Automatic retries "
 "are disabled until manual review."
@@ -99,7 +131,7 @@ msgstr ""
 "Java-сервис вернул другое задание пересчёта. Автоматические повторы "
 "отключены до ручной проверки."
 
-#: inc/accounting-prices-cron.php:526
+#: inc/accounting-prices-cron.php:684
 msgid ""
 "The Java service restarted before the recalculation outcome was confirmed. "
 "Automatic retries are disabled until manual review."
@@ -107,7 +139,7 @@ msgstr ""
 "Java-сервис перезапустился до подтверждения результата пересчёта. "
 "Автоматические повторы отключены до ручной проверки."
 
-#: inc/accounting-prices-cron.php:573
+#: inc/accounting-prices-cron.php:731
 msgid ""
 "The Java service returned an unrecognized final status. Automatic retries "
 "are disabled until manual review."
@@ -115,7 +147,7 @@ msgstr ""
 "Java-сервис вернул неизвестный финальный статус. Автоматические повторы "
 "отключены до ручной проверки."
 
-#: inc/accounting-prices-cron.php:582
+#: inc/accounting-prices-cron.php:741
 msgid ""
 "The previous scheduled recalculation ended after partial commits. Review "
 "Folio before enabling the schedule again."
@@ -123,73 +155,77 @@ msgstr ""
 "Предыдущий плановый пересчёт завершился после частичной фиксации изменений. "
 "Проверьте ФОЛИО перед повторным включением расписания."
 
-#: inc/accounting-prices-cron.php:614
-msgid "The scheduled Folio recalculation has no valid warehouse."
-msgstr "Для планового пересчёта не выбран корректный склад ФОЛИО."
+#: inc/accounting-prices-cron.php:816
+msgid "The Java service did not accept the scheduled warehouse recalculation."
+msgstr "Сервис Java не принял плановый пересчёт склада."
 
-#: inc/accounting-prices-cron.php:663 inc/accounting-prices.php:385
+#: inc/accounting-prices-cron.php:831
+msgid "The scheduled Folio recalculation has no valid warehouses."
+msgstr "Для планового пересчёта не выбраны корректные склады ФОЛИО."
+
+#: inc/accounting-prices-cron.php:907 inc/accounting-prices.php:432
 msgid "You do not have permission to perform this operation."
 msgstr "У вас нет разрешения на выполнение этой операции."
 
 #: inc/accounting-prices.php:10 inc/accounting-prices.php:11
-#: inc/accounting-prices.php:186
+#: inc/accounting-prices.php:205
 msgid "Folio accounting prices"
 msgstr "Учётные цены ФОЛИО"
 
-#: inc/accounting-prices.php:45
+#: inc/accounting-prices.php:47
 msgid "Loading..."
 msgstr "Загрузка..."
 
-#: inc/accounting-prices.php:47
+#: inc/accounting-prices.php:49
 msgid "Unknown error."
 msgstr "Неизвестная ошибка."
 
-#: inc/accounting-prices.php:48
+#: inc/accounting-prices.php:50
 msgid "Select a Folio warehouse."
 msgstr "Выберите склад ФОЛИО."
 
-#: inc/accounting-prices.php:49
+#: inc/accounting-prices.php:51
 msgid "Select a warehouse"
 msgstr "Выберите склад"
 
-#: inc/accounting-prices.php:50
+#: inc/accounting-prices.php:52
 msgid "The Java service returned no warehouses."
 msgstr "Сервис ФОЛИО не вернул ни одного склада."
 
-#: inc/accounting-prices.php:51
+#: inc/accounting-prices.php:53
 msgid ""
 "The warehouse directory is unavailable. Enter the Folio warehouse ID "
 "manually."
 msgstr "Справочник складов недоступен. Введите ID склада ФОЛИО вручную."
 
-#: inc/accounting-prices.php:52
+#: inc/accounting-prices.php:54
 msgid "Enter a product SKU."
 msgstr "Введите артикул товара."
 
-#: inc/accounting-prices.php:53
+#: inc/accounting-prices.php:55
 msgid "Checking the product without changes..."
 msgstr "Проверяем товар без изменений..."
 
-#: inc/accounting-prices.php:54
+#: inc/accounting-prices.php:56
 msgid "Recalculating the product in Folio..."
 msgstr "Пересчитываем товар в ФОЛИО..."
 
-#: inc/accounting-prices.php:55
+#: inc/accounting-prices.php:57
 msgid ""
 "Starting the exact rollback preview of the native Folio recalculation..."
 msgstr ""
 "Запускаем точную предварительную проверку штатного пересчёта ФОЛИО с "
 "откатом..."
 
-#: inc/accounting-prices.php:56
+#: inc/accounting-prices.php:58
 msgid "Starting the native Folio warehouse recalculation..."
 msgstr "Запускаем штатный пересчёт склада ФОЛИО..."
 
-#: inc/accounting-prices.php:57
+#: inc/accounting-prices.php:59
 msgid "Recalculate this product in Folio now?"
 msgstr "Пересчитать этот товар в ФОЛИО сейчас?"
 
-#: inc/accounting-prices.php:58
+#: inc/accounting-prices.php:60
 msgid ""
 "Run the full native Folio recalculation for the selected warehouse? Java "
 "will first perform a rollback preflight and will commit only if it is clean."
@@ -198,38 +234,38 @@ msgstr ""
 "выполнит предварительную проверку с откатом и зафиксирует изменения, только "
 "если проверка пройдёт без ошибок."
 
-#: inc/accounting-prices.php:59
+#: inc/accounting-prices.php:61
 msgid "Run a successful preview for this SKU and warehouse first."
 msgstr "Сначала выполните успешную проверку этого артикула и склада."
 
-#: inc/accounting-prices.php:60
+#: inc/accounting-prices.php:62
 msgid ""
 "Complete an exact rollback preview for this warehouse before recalculation."
 msgstr ""
 "Перед пересчётом выполните точную предварительную проверку выбранного склада "
 "с откатом."
 
-#: inc/accounting-prices.php:61
+#: inc/accounting-prices.php:63
 msgid "The task was accepted. Waiting for progress..."
 msgstr "Задание принято. Ожидаем ход выполнения..."
 
-#: inc/accounting-prices.php:62
+#: inc/accounting-prices.php:64
 msgid "The task is running."
 msgstr "Задание выполняется."
 
-#: inc/accounting-prices.php:63
+#: inc/accounting-prices.php:65
 msgid "The task completed without warnings."
 msgstr "Задание завершено без предупреждений."
 
-#: inc/accounting-prices.php:64
+#: inc/accounting-prices.php:66
 msgid "The task stopped on a negative chronological stock."
 msgstr "Задание остановлено из-за отрицательного хронологического остатка."
 
-#: inc/accounting-prices.php:65
+#: inc/accounting-prices.php:67
 msgid "The task failed."
 msgstr "Задание завершилось ошибкой."
 
-#: inc/accounting-prices.php:66
+#: inc/accounting-prices.php:68
 msgid ""
 "The task failed after one or more portions were committed. Do not retry it "
 "automatically; check Folio manually."
@@ -237,7 +273,7 @@ msgstr ""
 "Задание завершилось ошибкой после фиксации одной или нескольких порций. Не "
 "повторяйте его автоматически; проверьте ФОЛИО вручную."
 
-#: inc/accounting-prices.php:67
+#: inc/accounting-prices.php:69
 msgid ""
 "The task outcome cannot be proven. Do not retry it; check Folio and the Java "
 "logs manually."
@@ -245,7 +281,7 @@ msgstr ""
 "Результат задания невозможно достоверно определить. Не повторяйте его; "
 "проверьте ФОЛИО и журналы Java вручную."
 
-#: inc/accounting-prices.php:68
+#: inc/accounting-prices.php:70
 msgid ""
 "The rollback preflight found negative chronological stock. Nothing was "
 "committed."
@@ -253,27 +289,27 @@ msgstr ""
 "Предварительная проверка с откатом обнаружила отрицательный хронологический "
 "остаток. Изменения не зафиксированы."
 
-#: inc/accounting-prices.php:69
+#: inc/accounting-prices.php:71
 msgid "No warehouse task has been started since the Java service restart."
 msgstr "После перезапуска сервиса ФОЛИО задания для склада ещё не запускались."
 
-#: inc/accounting-prices.php:70
+#: inc/accounting-prices.php:72
 msgid "The preview found no blocking problems."
 msgstr "Проверка не обнаружила проблем, блокирующих пересчёт."
 
-#: inc/accounting-prices.php:71
+#: inc/accounting-prices.php:73
 msgid "The preview found problems. Recalculation is blocked."
 msgstr "Проверка обнаружила проблемы. Пересчёт заблокирован."
 
-#: inc/accounting-prices.php:72
+#: inc/accounting-prices.php:74
 msgid "The product was recalculated in Folio."
 msgstr "Товар пересчитан в ФОЛИО."
 
-#: inc/accounting-prices.php:73
+#: inc/accounting-prices.php:75
 msgid "The procedure completed; the accounting price was already correct."
 msgstr "Процедура завершена; учётная цена уже была правильной."
 
-#: inc/accounting-prices.php:74
+#: inc/accounting-prices.php:76
 msgid ""
 "Only part of the warnings is shown. The complete negative-stock diagnostics "
 "remain in the Java log."
@@ -281,147 +317,147 @@ msgstr ""
 "Показана только часть предупреждений. Полная диагностика отрицательных "
 "остатков сохраняется в журнале сервиса ФОЛИО."
 
-#: inc/accounting-prices.php:75
+#: inc/accounting-prices.php:77
 msgid "No warnings were returned."
 msgstr "Предупреждений не получено."
 
-#: inc/accounting-prices.php:76
+#: inc/accounting-prices.php:78
 msgid "No state data was returned."
 msgstr "Данные о состоянии не получены."
 
-#: inc/accounting-prices.php:77
+#: inc/accounting-prices.php:79
 msgid "Before"
 msgstr "До"
 
-#: inc/accounting-prices.php:78
+#: inc/accounting-prices.php:80
 msgid "After"
 msgstr "После"
 
-#: inc/accounting-prices.php:79
+#: inc/accounting-prices.php:81
 msgid "Current SKU"
 msgstr "Текущий артикул"
 
-#: inc/accounting-prices.php:80
+#: inc/accounting-prices.php:82
 msgid "Phase"
 msgstr "Этап"
 
-#: inc/accounting-prices.php:81 inc/accounting-prices.php:93
+#: inc/accounting-prices.php:83 inc/accounting-prices.php:95
 msgid "Warehouse"
 msgstr "Склад"
 
-#: inc/accounting-prices.php:82
+#: inc/accounting-prices.php:84
 msgid "Document"
 msgstr "Документ"
 
-#: inc/accounting-prices.php:83
+#: inc/accounting-prices.php:85
 msgid "Date"
 msgstr "Дата"
 
-#: inc/accounting-prices.php:84
+#: inc/accounting-prices.php:86
 msgid "Before operation"
 msgstr "До операции"
 
-#: inc/accounting-prices.php:85
+#: inc/accounting-prices.php:87
 msgid "Operation"
 msgstr "Операция"
 
-#: inc/accounting-prices.php:86
+#: inc/accounting-prices.php:88
 msgid "After operation"
 msgstr "После операции"
 
-#: inc/accounting-prices.php:87
+#: inc/accounting-prices.php:89
 msgid "Shortage"
 msgstr "Дефицит"
 
-#: inc/accounting-prices.php:88
+#: inc/accounting-prices.php:90
 msgid "Reason"
 msgstr "Причина"
 
-#: inc/accounting-prices.php:89
+#: inc/accounting-prices.php:91
 msgid "Technical details"
 msgstr "Технические подробности"
 
-#: inc/accounting-prices.php:90
+#: inc/accounting-prices.php:92
 msgid "receipt"
 msgstr "приход"
 
-#: inc/accounting-prices.php:91
+#: inc/accounting-prices.php:93
 msgid "expense"
 msgstr "расход"
 
-#: inc/accounting-prices.php:92
+#: inc/accounting-prices.php:94
 msgid "operation"
 msgstr "операция"
 
-#: inc/accounting-prices.php:94
+#: inc/accounting-prices.php:96
 msgid "Physical quantity"
 msgstr "Физическое количество"
 
-#: inc/accounting-prices.php:95
+#: inc/accounting-prices.php:97
 msgid "Available quantity"
 msgstr "Доступное количество"
 
-#: inc/accounting-prices.php:96
+#: inc/accounting-prices.php:98
 msgid "Accounting quantity"
 msgstr "Учётное количество"
 
-#: inc/accounting-prices.php:97
+#: inc/accounting-prices.php:99
 msgid "Accounting price"
 msgstr "Учётная цена"
 
-#: inc/accounting-prices.php:98
+#: inc/accounting-prices.php:100
 msgid "Initial quantity"
 msgstr "Начальное количество"
 
-#: inc/accounting-prices.php:99
+#: inc/accounting-prices.php:101
 msgid "Accounting amount"
 msgstr "Учётная сумма"
 
-#: inc/accounting-prices.php:100
+#: inc/accounting-prices.php:102
 msgid "Accounted movements"
 msgstr "Учтённые движения"
 
-#: inc/accounting-prices.php:101
+#: inc/accounting-prices.php:103
 msgid "Procedure calls"
 msgstr "Вызовы процедуры"
 
-#: inc/accounting-prices.php:102
+#: inc/accounting-prices.php:104
 msgid "Rolled-back preflight portions"
 msgstr "Откаченные порции предварительной проверки"
 
-#: inc/accounting-prices.php:103
+#: inc/accounting-prices.php:105
 msgid "Committed portions"
 msgstr "Зафиксированные порции"
 
-#: inc/accounting-prices.php:104
+#: inc/accounting-prices.php:106
 msgid "Progress units"
 msgstr "Единицы прогресса"
 
-#: inc/accounting-prices.php:105
+#: inc/accounting-prices.php:107
 msgid "Warnings"
 msgstr "Предупреждения"
 
-#: inc/accounting-prices.php:106
+#: inc/accounting-prices.php:108
 msgid "SKU list copied."
 msgstr "Список артикулов скопирован."
 
-#: inc/accounting-prices.php:107
+#: inc/accounting-prices.php:109
 msgid "There are no warnings to export."
 msgstr "Нет предупреждений для экспорта."
 
-#: inc/accounting-prices.php:108
+#: inc/accounting-prices.php:110
 msgid "Java API returned HTTP"
 msgstr "API сервиса ФОЛИО вернул HTTP"
 
-#: inc/accounting-prices.php:109
+#: inc/accounting-prices.php:111
 msgid "Request ID"
 msgstr "ID запроса"
 
-#: inc/accounting-prices.php:110
+#: inc/accounting-prices.php:112
 msgid "Raw Java response"
 msgstr "Полный ответ сервиса ФОЛИО"
 
-#: inc/accounting-prices.php:111
+#: inc/accounting-prices.php:113
 msgid ""
 "Full recalculation becomes available after a successful exact rollback "
 "preview of the selected warehouse."
@@ -429,180 +465,206 @@ msgstr ""
 "Полный пересчёт станет доступен после успешной точной предварительной "
 "проверки выбранного склада с откатом."
 
-#: inc/accounting-prices.php:113 inc/accounting-prices.php:172
+#: inc/accounting-prices.php:115 inc/accounting-prices.php:175
 msgid "Not started"
 msgstr "Не запускалось"
 
-#: inc/accounting-prices.php:114
+#: inc/accounting-prices.php:116
 msgid "Busy"
 msgstr "Занято"
 
-#: inc/accounting-prices.php:115 inc/accounting-prices.php:173
+#: inc/accounting-prices.php:117 inc/accounting-prices.php:176
+#: inc/accounting-prices.php:188
 msgid "Queued"
 msgstr "В очереди"
 
-#: inc/accounting-prices.php:116 inc/accounting-prices.php:174 inc/logs.php:120
+#: inc/accounting-prices.php:118 inc/accounting-prices.php:177
+#: inc/accounting-prices.php:190 inc/logs.php:120
 msgid "Running"
 msgstr "Выполняется"
 
-#: inc/accounting-prices.php:117 inc/accounting-prices.php:177
+#: inc/accounting-prices.php:119 inc/accounting-prices.php:180
+#: inc/accounting-prices.php:193
 msgid "Completed"
 msgstr "Завершено"
 
-#: inc/accounting-prices.php:118 inc/accounting-prices.php:178
+#: inc/accounting-prices.php:120 inc/accounting-prices.php:181
 msgid "Stopped on negative stock"
 msgstr "Остановлено из-за отрицательного остатка"
 
-#: inc/accounting-prices.php:119 inc/accounting-prices.php:179
+#: inc/accounting-prices.php:121 inc/accounting-prices.php:182
+#: inc/accounting-prices.php:194
 msgid "Failed"
 msgstr "Ошибка"
 
-#: inc/accounting-prices.php:120 inc/accounting-prices.php:180
+#: inc/accounting-prices.php:122 inc/accounting-prices.php:183
+#: inc/accounting-prices.php:196
 msgid "Failed after partial recalculation"
 msgstr "Ошибка после частичного пересчёта"
 
-#: inc/accounting-prices.php:121 inc/accounting-prices.php:175
+#: inc/accounting-prices.php:123 inc/accounting-prices.php:178
 msgid "Check passed"
 msgstr "Проверка пройдена"
 
-#: inc/accounting-prices.php:122
+#: inc/accounting-prices.php:124
 msgid "Check blocked recalculation"
 msgstr "Проверка заблокировала пересчёт"
 
-#: inc/accounting-prices.php:123 inc/accounting-prices.php:176
+#: inc/accounting-prices.php:125 inc/accounting-prices.php:179
 msgid "Blocked by negative stock"
 msgstr "Заблокировано из-за отрицательного остатка"
 
-#: inc/accounting-prices.php:124 inc/accounting-prices.php:181
+#: inc/accounting-prices.php:126 inc/accounting-prices.php:184
+#: inc/accounting-prices.php:197
 msgid "Outcome unknown"
 msgstr "Результат неизвестен"
 
-#: inc/accounting-prices.php:125
+#: inc/accounting-prices.php:127
 msgid "Recalculated"
 msgstr "Пересчитано"
 
-#: inc/accounting-prices.php:126
+#: inc/accounting-prices.php:128
 msgid "Blocked"
 msgstr "Заблокировано"
 
-#: inc/accounting-prices.php:129
+#: inc/accounting-prices.php:131
 msgid "Waiting in queue"
 msgstr "Ожидание в очереди"
 
-#: inc/accounting-prices.php:130
+#: inc/accounting-prices.php:132
 msgid "Rollback preflight is running"
 msgstr "Выполняется предварительная проверка с откатом"
 
-#: inc/accounting-prices.php:131
+#: inc/accounting-prices.php:133
 msgid "Rollback preflight completed"
 msgstr "Предварительная проверка с откатом завершена"
 
-#: inc/accounting-prices.php:132
+#: inc/accounting-prices.php:134
 msgid "Applying recalculation portions"
 msgstr "Применяются порции пересчёта"
 
-#: inc/accounting-prices.php:133
+#: inc/accounting-prices.php:135
 msgid "Recalculation completed"
 msgstr "Пересчёт завершён"
 
-#: inc/accounting-prices.php:134
+#: inc/accounting-prices.php:136
 msgid "Recalculation stopped"
 msgstr "Пересчёт остановлен"
 
-#: inc/accounting-prices.php:135
+#: inc/accounting-prices.php:137
 msgid "Recalculation failed"
 msgstr "Ошибка пересчёта"
 
-#: inc/accounting-prices.php:136
+#: inc/accounting-prices.php:138
 msgid "Manual review required"
 msgstr "Требуется ручная проверка"
 
-#: inc/accounting-prices.php:139
+#: inc/accounting-prices.php:141
 msgid "Negative chronological stock"
 msgstr "Отрицательный хронологический остаток"
 
-#: inc/accounting-prices.php:140
+#: inc/accounting-prices.php:142
 msgid "Return movement requires review"
 msgstr "Возврат требует проверки"
 
-#: inc/accounting-prices.php:141
+#: inc/accounting-prices.php:143
 msgid "Accounted movement has zero quantity"
 msgstr "Учтённое движение имеет нулевое количество"
 
-#: inc/accounting-prices.php:142
+#: inc/accounting-prices.php:144
 msgid "Movement date is missing"
 msgstr "Отсутствует дата движения"
 
-#: inc/accounting-prices.php:143
+#: inc/accounting-prices.php:145
 msgid "Invalid legacy document key"
 msgstr "Некорректный технический ключ документа"
 
-#: inc/accounting-prices.php:144
+#: inc/accounting-prices.php:146
 msgid "Accounting method is not supported"
 msgstr "Метод учёта не поддерживается"
 
-#: inc/accounting-prices.php:145
+#: inc/accounting-prices.php:147
 msgid "Warehouse accounting group is not supported"
 msgstr "Учётная группа складов не поддерживается"
 
-#: inc/accounting-prices.php:146
+#: inc/accounting-prices.php:148
 msgid "Warehouse group settings do not match"
 msgstr "Настройки складов группы не совпадают"
 
-#: inc/accounting-prices.php:147
+#: inc/accounting-prices.php:149
 msgid "Folio excludes this product type"
 msgstr "ФОЛІО исключает этот тип товара"
 
-#: inc/accounting-prices.php:148
+#: inc/accounting-prices.php:150
 msgid "Folio temporary movement table is not empty"
 msgstr "Временная таблица движений ФОЛІО не пуста"
 
-#: inc/accounting-prices.php:163
+#: inc/accounting-prices.php:166
 msgid "Monday"
 msgstr "Понедельник"
 
-#: inc/accounting-prices.php:164
+#: inc/accounting-prices.php:167
 msgid "Tuesday"
 msgstr "Вторник"
 
-#: inc/accounting-prices.php:165
+#: inc/accounting-prices.php:168
 msgid "Wednesday"
 msgstr "Среда"
 
-#: inc/accounting-prices.php:166
+#: inc/accounting-prices.php:169
 msgid "Thursday"
 msgstr "Четверг"
 
-#: inc/accounting-prices.php:167
+#: inc/accounting-prices.php:170
 msgid "Friday"
 msgstr "Пятница"
 
-#: inc/accounting-prices.php:168
+#: inc/accounting-prices.php:171
 msgid "Saturday"
 msgstr "Суббота"
 
-#: inc/accounting-prices.php:169
+#: inc/accounting-prices.php:172
 msgid "Sunday"
 msgstr "Воскресенье"
 
 #: inc/accounting-prices.php:189
+msgid "Starting warehouse recalculation"
+msgstr "Запуск пересчёта склада"
+
+#: inc/accounting-prices.php:191
+msgid "Waiting for the global Lavka lock"
+msgstr "Ожидание глобальной блокировки Lavka"
+
+#: inc/accounting-prices.php:192
+msgid "Waiting for the next warehouse"
+msgstr "Ожидание следующего склада"
+
+#: inc/accounting-prices.php:195
+msgid "Could not start"
+msgstr "Не удалось запустить"
+
+#: inc/accounting-prices.php:198
+msgid "Stopped by administrator"
+msgstr "Остановлено администратором"
+
+#: inc/accounting-prices.php:208
 msgid "The automatic recalculation schedule was saved."
 msgstr "Расписание автоматического пересчёта сохранено."
 
-#: inc/accounting-prices.php:194
+#: inc/accounting-prices.php:213
 msgid "Confirm automatic Folio changes before enabling the schedule."
 msgstr ""
 "Подтвердите автоматические изменения в ФОЛИО перед включением расписания."
 
-#: inc/accounting-prices.php:195
-msgid "Select a Folio warehouse before enabling the schedule."
-msgstr "Выберите склад ФОЛИО перед включением расписания."
+#: inc/accounting-prices.php:214
+msgid "Select at least one Folio warehouse before enabling the schedule."
+msgstr "Перед включением расписания выберите хотя бы один склад ФОЛИО."
 
-#: inc/accounting-prices.php:201
+#: inc/accounting-prices.php:220
 msgid "Financial operation"
 msgstr "Финансовая операция"
 
-#: inc/accounting-prices.php:202
+#: inc/accounting-prices.php:221
 msgid ""
 "Preview is read-only. Apply changes Folio data and must be run only in an "
 "agreed maintenance window."
@@ -610,59 +672,59 @@ msgstr ""
 "Предварительная проверка ничего не изменяет. Применение изменяет данные "
 "ФОЛИО и должно выполняться только в согласованное окно обслуживания."
 
-#: inc/accounting-prices.php:206 inc/accounting-prices.php:298
+#: inc/accounting-prices.php:225
 msgid "Folio warehouse"
 msgstr "Склад ФОЛИО"
 
-#: inc/accounting-prices.php:208 inc/accounting-prices.php:305
+#: inc/accounting-prices.php:227 inc/accounting-prices.php:330
 msgid "Loading warehouses..."
 msgstr "Загрузка складов..."
 
-#: inc/accounting-prices.php:211
+#: inc/accounting-prices.php:230
 msgid "Folio warehouse ID"
 msgstr "ID склада ФОЛИО"
 
-#: inc/accounting-prices.php:212
+#: inc/accounting-prices.php:231
 msgid "Warehouse ID"
 msgstr "ID склада"
 
-#: inc/accounting-prices.php:216
+#: inc/accounting-prices.php:235
 msgid "Accounting price views"
 msgstr "Режимы работы с учётными ценами"
 
-#: inc/accounting-prices.php:218
+#: inc/accounting-prices.php:237
 msgid "One product"
 msgstr "Один товар"
 
-#: inc/accounting-prices.php:221
+#: inc/accounting-prices.php:240
 msgid "Entire warehouse"
 msgstr "Весь склад"
 
-#: inc/accounting-prices.php:226
+#: inc/accounting-prices.php:245
 msgid "Product accounting price"
 msgstr "Учётная цена товара"
 
-#: inc/accounting-prices.php:228
+#: inc/accounting-prices.php:247
 msgid "SKU"
 msgstr "Артикул"
 
-#: inc/accounting-prices.php:231
+#: inc/accounting-prices.php:250
 msgid "Check without changes"
 msgstr "Проверить без изменений"
 
-#: inc/accounting-prices.php:237
+#: inc/accounting-prices.php:256
 msgid "I reviewed the preview and confirm recalculation of this product."
 msgstr "Я просмотрел результат проверки и подтверждаю пересчёт этого товара."
 
-#: inc/accounting-prices.php:240
+#: inc/accounting-prices.php:259
 msgid "Recalculate product in Folio"
 msgstr "Пересчитать товар в ФОЛИО"
 
-#: inc/accounting-prices.php:248
+#: inc/accounting-prices.php:267
 msgid "Full native Folio recalculation"
 msgstr "Полный штатный пересчёт ФОЛИО"
 
-#: inc/accounting-prices.php:250
+#: inc/accounting-prices.php:269
 msgid ""
 "This mode runs the complete Folio I_UCHET_TOVAR algorithm. The preview "
 "executes every portion in a transaction and always rolls it back."
@@ -670,22 +732,22 @@ msgstr ""
 "Этот режим выполняет полный алгоритм ФОЛИО I_UCHET_TOVAR. Предварительная "
 "проверка выполняет каждую порцию в транзакции и всегда откатывает её."
 
-#: inc/accounting-prices.php:254
+#: inc/accounting-prices.php:273
 msgid "Run exact rollback preview"
 msgstr "Выполнить точную предварительную проверку с откатом"
 
-#: inc/accounting-prices.php:260
+#: inc/accounting-prices.php:279
 msgid ""
 "I have a current backup and confirm the agreed Folio maintenance window."
 msgstr ""
 "У меня есть актуальная резервная копия, и я подтверждаю согласованное окно "
 "обслуживания ФОЛИО."
 
-#: inc/accounting-prices.php:263
+#: inc/accounting-prices.php:282
 msgid "Run full native recalculation in Folio"
 msgstr "Запустить полный штатный пересчёт в ФОЛИО"
 
-#: inc/accounting-prices.php:265
+#: inc/accounting-prices.php:284
 msgid ""
 "Apply repeats the full rollback preflight and starts committing portions "
 "only when the preflight is clean."
@@ -693,11 +755,11 @@ msgstr ""
 "Применение повторяет полную предварительную проверку с откатом и начинает "
 "фиксировать порции только после успешной проверки."
 
-#: inc/accounting-prices.php:277
+#: inc/accounting-prices.php:296
 msgid "Automatic weekly recalculation"
 msgstr "Автоматический еженедельный пересчёт"
 
-#: inc/accounting-prices.php:278
+#: inc/accounting-prices.php:297
 msgid ""
 "The schedule is disabled by default. A scheduled run performs real Folio "
 "changes after Java completes its mandatory rollback preflight."
@@ -705,29 +767,37 @@ msgstr ""
 "Расписание по умолчанию отключено. Плановый запуск вносит реальные изменения "
 "в ФОЛИО после обязательной предварительной проверки Java с откатом."
 
-#: inc/accounting-prices.php:282
+#: inc/accounting-prices.php:301
 msgid "Schedule paused:"
 msgstr "Расписание приостановлено:"
 
-#: inc/accounting-prices.php:293
+#: inc/accounting-prices.php:312
 msgid "Enable weekly recalculation"
 msgstr "Включить еженедельный пересчёт"
 
+#: inc/accounting-prices.php:318
+msgid "Folio warehouses"
+msgstr "Склады ФОЛИО"
+
 #. translators: %d: numeric Folio warehouse ID.
-#: inc/accounting-prices.php:304
+#: inc/accounting-prices.php:325
 #, php-format
 msgid "Warehouse ID: %d"
 msgstr "ID склада: %d"
 
-#: inc/accounting-prices.php:310
+#: inc/accounting-prices.php:333
+msgid "Selected warehouses are recalculated sequentially, never in parallel."
+msgstr "Выбранные склады пересчитываются последовательно, никогда не параллельно."
+
+#: inc/accounting-prices.php:336
 msgid "Day of week"
 msgstr "День недели"
 
-#: inc/accounting-prices.php:318
+#: inc/accounting-prices.php:344
 msgid "Start time"
 msgstr "Время запуска"
 
-#: inc/accounting-prices.php:325
+#: inc/accounting-prices.php:351
 msgid ""
 "I understand that the schedule automatically changes accounting prices in "
 "Folio after a clean preflight."
@@ -736,7 +806,7 @@ msgstr ""
 "автоматически изменяет учётные цены в ФОЛИО."
 
 #. translators: %s: WordPress site time zone.
-#: inc/accounting-prices.php:332
+#: inc/accounting-prices.php:358
 #, php-format
 msgid ""
 "Time zone: %s. If another Lavka synchronization holds the global lock, the "
@@ -745,59 +815,73 @@ msgstr ""
 "Часовой пояс: %s. Если глобальную блокировку удерживает другая синхронизация "
 "Lavka, запуск будет отложен без отправки запроса в Java."
 
-#: inc/accounting-prices.php:338 inc/admin-ui.php:492
+#: inc/accounting-prices.php:364 inc/admin-ui.php:492
 msgid "Save schedule"
 msgstr "Сохранить расписание"
 
-#: inc/accounting-prices.php:344
+#: inc/accounting-prices.php:370
 msgid "Next scheduled run"
 msgstr "Следующий плановый запуск"
 
-#: inc/accounting-prices.php:347 inc/admin-ui.php:429
+#: inc/accounting-prices.php:373 inc/admin-ui.php:429
 msgid "Not scheduled"
 msgstr "Не запланировано"
 
-#: inc/accounting-prices.php:350
+#: inc/accounting-prices.php:376
 msgid "Last native job status"
 msgstr "Статус последнего штатного задания"
 
-#: inc/accounting-prices.php:353
+#: inc/accounting-prices.php:379
 msgid "No runs yet"
 msgstr "Запусков ещё не было"
 
-#: inc/accounting-prices.php:361
+#: inc/accounting-prices.php:382
+msgid "Last scheduled warehouse queue"
+msgstr "Последняя плановая очередь складов"
+
+#: inc/accounting-prices.php:386
+msgid "No scheduled runs yet"
+msgstr "Плановых запусков ещё не было"
+
+#. translators: 1: completed warehouse count, 2: total warehouse count.
+#: inc/accounting-prices.php:393
+#, php-format
+msgid "%1$d of %2$d warehouses completed"
+msgstr "Завершено складов: %1$d из %2$d"
+
+#: inc/accounting-prices.php:408
 msgid "Diagnostics and skipped products"
 msgstr "Диагностика и пропущенные товары"
 
-#: inc/accounting-prices.php:364
+#: inc/accounting-prices.php:411
 msgid "Copy SKU list"
 msgstr "Скопировать артикулы"
 
-#: inc/accounting-prices.php:367
+#: inc/accounting-prices.php:414
 msgid "Export CSV"
 msgstr "Экспортировать CSV"
 
-#: inc/accounting-prices.php:370
+#: inc/accounting-prices.php:417
 msgid "Export JSON"
 msgstr "Экспортировать JSON"
 
-#: inc/accounting-prices.php:392
+#: inc/accounting-prices.php:439
 msgid "Java Base URL is not configured."
 msgstr "Базовый адрес сервиса ФОЛИО не настроен."
 
-#: inc/accounting-prices.php:407
+#: inc/accounting-prices.php:454
 msgid "SKU and Folio warehouse are required."
 msgstr "Необходимо указать артикул и склад ФОЛИО."
 
-#: inc/accounting-prices.php:410 inc/accounting-prices.php:454
+#: inc/accounting-prices.php:457 inc/accounting-prices.php:501
 msgid "Explicit confirmation is required for Folio changes."
 msgstr "Для изменений в ФОЛИО требуется явное подтверждение."
 
-#: inc/accounting-prices.php:422
+#: inc/accounting-prices.php:469
 msgid "Single-product Folio accounting-price recalculation"
 msgstr "Пересчёт учётной цены одного товара в ФОЛИО"
 
-#: inc/accounting-prices.php:465
+#: inc/accounting-prices.php:512
 msgid "Unsupported accounting-price operation."
 msgstr "Операция с учётной ценой не поддерживается."
 

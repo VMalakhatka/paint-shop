@@ -158,6 +158,7 @@ function lps_render_accounting_prices_page(): void {
 
     $cron_options = lps_accounting_prices_native_cron_options();
     $native_job = lps_accounting_prices_native_job_state();
+    $native_batch = lps_accounting_prices_native_batch_state();
     $next_run = wp_next_scheduled(LPS_ACCOUNTING_PRICES_NATIVE_CRON_HOOK);
     $cron_saved = sanitize_key(wp_unslash($_GET['cron_saved'] ?? ''));
     $cron_error = sanitize_key(wp_unslash($_GET['cron_error'] ?? ''));
@@ -183,6 +184,22 @@ function lps_render_accounting_prices_page(): void {
         'OUTCOME_UNKNOWN' => __('Outcome unknown', 'lavka-price-sync'),
     ];
     $native_status = strtoupper((string)($native_job['status'] ?? ''));
+    $batch_status_labels = [
+        'QUEUED' => __('Queued', 'lavka-price-sync'),
+        'STARTING' => __('Starting warehouse recalculation', 'lavka-price-sync'),
+        'RUNNING' => __('Running', 'lavka-price-sync'),
+        'WAITING_LOCK' => __('Waiting for the global Lavka lock', 'lavka-price-sync'),
+        'WAITING_NEXT' => __('Waiting for the next warehouse', 'lavka-price-sync'),
+        'COMPLETED' => __('Completed', 'lavka-price-sync'),
+        'FAILED' => __('Failed', 'lavka-price-sync'),
+        'START_FAILED' => __('Could not start', 'lavka-price-sync'),
+        'FAILED_PARTIAL' => __('Failed after partial recalculation', 'lavka-price-sync'),
+        'OUTCOME_UNKNOWN' => __('Outcome unknown', 'lavka-price-sync'),
+        'DISABLED' => __('Stopped by administrator', 'lavka-price-sync'),
+    ];
+    $batch_status = strtoupper((string)($native_batch['status'] ?? ''));
+    $batch_total = count(lps_accounting_prices_native_normalize_warehouse_ids($native_batch['warehouse_ids'] ?? []));
+    $batch_completed = count(is_array($native_batch['results'] ?? null) ? $native_batch['results'] : []);
     ?>
     <div class="wrap lps-ap" id="lps-accounting-prices">
         <h1><?php echo esc_html__('Folio accounting prices', 'lavka-price-sync'); ?></h1>
@@ -194,7 +211,7 @@ function lps_render_accounting_prices_page(): void {
                 <?php
                 echo esc_html($cron_error === 'confirmation'
                     ? __('Confirm automatic Folio changes before enabling the schedule.', 'lavka-price-sync')
-                    : __('Select a Folio warehouse before enabling the schedule.', 'lavka-price-sync'));
+                    : __('Select at least one Folio warehouse before enabling the schedule.', 'lavka-price-sync'));
                 ?>
             </p></div>
         <?php endif; ?>
@@ -296,18 +313,25 @@ function lps_render_accounting_prices_page(): void {
                     </label>
 
                     <div class="lps-ap-cron-grid">
-                        <label>
-                            <span><?php echo esc_html__('Folio warehouse', 'lavka-price-sync'); ?></span>
-                            <select id="lps-ap-cron-warehouse" name="warehouse_id"
-                                    data-selected="<?php echo esc_attr((string)absint($cron_options['warehouse_id'] ?? 0)); ?>">
-                                <option value="<?php echo esc_attr((string)absint($cron_options['warehouse_id'] ?? 0)); ?>" selected>
-                                    <?php echo esc_html(absint($cron_options['warehouse_id'] ?? 0) > 0
+                        <fieldset class="lps-ap-cron-warehouses" id="lps-ap-cron-warehouses"
+                                  data-selected="<?php echo esc_attr(wp_json_encode($cron_options['warehouse_ids'])); ?>">
+                            <legend><?php echo esc_html__('Folio warehouses', 'lavka-price-sync'); ?></legend>
+                            <div class="lps-ap-cron-warehouse-options">
+                                <?php foreach ($cron_options['warehouse_ids'] as $warehouse_id): ?>
+                                    <label>
+                                        <input type="checkbox" name="warehouse_ids[]" value="<?php echo esc_attr((string)$warehouse_id); ?>" checked>
+                                        <?php
                                         /* translators: %d: numeric Folio warehouse ID. */
-                                        ? sprintf(__('Warehouse ID: %d', 'lavka-price-sync'), absint($cron_options['warehouse_id']))
-                                        : __('Loading warehouses...', 'lavka-price-sync')); ?>
-                                </option>
-                            </select>
-                        </label>
+                                        echo esc_html(sprintf(__('Warehouse ID: %d', 'lavka-price-sync'), $warehouse_id));
+                                        ?>
+                                    </label>
+                                <?php endforeach; ?>
+                                <?php if (!$cron_options['warehouse_ids']): ?>
+                                    <span class="description"><?php echo esc_html__('Loading warehouses...', 'lavka-price-sync'); ?></span>
+                                <?php endif; ?>
+                            </div>
+                            <p class="description"><?php echo esc_html__('Selected warehouses are recalculated sequentially, never in parallel.', 'lavka-price-sync'); ?></p>
+                        </fieldset>
                         <label>
                             <span><?php echo esc_html__('Day of week', 'lavka-price-sync'); ?></span>
                             <select name="weekday">
@@ -353,6 +377,27 @@ function lps_render_accounting_prices_page(): void {
                         <dd><?php echo esc_html($native_status !== ''
                             ? ($native_status_labels[$native_status] ?? $native_status)
                             : __('No runs yet', 'lavka-price-sync')); ?></dd>
+                    </div>
+                    <div>
+                        <dt><?php echo esc_html__('Last scheduled warehouse queue', 'lavka-price-sync'); ?></dt>
+                        <dd>
+                            <?php
+                            if ($batch_status === '') {
+                                echo esc_html__('No scheduled runs yet', 'lavka-price-sync');
+                            } else {
+                                echo esc_html($batch_status_labels[$batch_status] ?? $batch_status);
+                                if ($batch_total > 0) {
+                                    echo '<br>';
+                                    printf(
+                                        /* translators: 1: completed warehouse count, 2: total warehouse count. */
+                                        esc_html__('%1$d of %2$d warehouses completed', 'lavka-price-sync'),
+                                        $batch_completed,
+                                        $batch_total
+                                    );
+                                }
+                            }
+                            ?>
+                        </dd>
                     </div>
                 </dl>
             </section>

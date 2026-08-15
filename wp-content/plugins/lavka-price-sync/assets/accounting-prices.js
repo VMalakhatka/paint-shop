@@ -35,7 +35,7 @@
     copySkus: document.getElementById('lps-ap-copy-skus'),
     exportCsv: document.getElementById('lps-ap-export-csv'),
     exportJson: document.getElementById('lps-ap-export-json'),
-    cronWarehouse: document.getElementById('lps-ap-cron-warehouse')
+    cronWarehouses: document.getElementById('lps-ap-cron-warehouses')
   };
 
   const state = {
@@ -175,20 +175,25 @@
       elements.warehouse.disabled = false;
       if (previous && items.some((item) => String(item.id) === previous)) elements.warehouse.value = previous;
 
-      if (elements.cronWarehouse) {
-        const selected = elements.cronWarehouse.dataset.selected || '';
-        elements.cronWarehouse.replaceChildren();
-        elements.cronWarehouse.appendChild(make('option', '', t.selectWarehouse || 'Select warehouse'));
-        elements.cronWarehouse.firstChild.value = '';
-        items.forEach((warehouse) => {
-          const option = make('option', '', `${warehouse.id} — ${warehouse.name}`);
-          option.value = String(warehouse.id);
-          elements.cronWarehouse.appendChild(option);
-        });
-        if (selected && items.some((item) => String(item.id) === selected)) {
-          elements.cronWarehouse.value = selected;
+      if (elements.cronWarehouses) {
+        let selected = [];
+        try {
+          selected = JSON.parse(elements.cronWarehouses.dataset.selected || '[]').map(String);
+        } catch (error) {
+          selected = [];
         }
-        elements.cronWarehouse.disabled = false;
+        const options = elements.cronWarehouses.querySelector('.lps-ap-cron-warehouse-options');
+        options.replaceChildren();
+        items.forEach((warehouse) => {
+          const label = make('label');
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.name = 'warehouse_ids[]';
+          checkbox.value = String(warehouse.id);
+          checkbox.checked = selected.includes(String(warehouse.id));
+          label.append(checkbox, document.createTextNode(`${warehouse.id} — ${warehouse.name}`));
+          options.appendChild(label);
+        });
       }
       elements.warehouseStatus.textContent = '';
     } catch (error) {

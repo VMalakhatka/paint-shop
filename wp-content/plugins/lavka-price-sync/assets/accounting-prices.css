@@ -190,6 +190,44 @@
   display: block;
 }
 
+.lps-ap-cron-warehouses {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.lps-ap-cron-warehouses legend {
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+.lps-ap-cron-warehouse-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 7px 12px;
+  max-height: 190px;
+  padding: 10px;
+  overflow-y: auto;
+  border: 1px solid #8c8f94;
+  background: #fff;
+}
+
+.lps-ap-cron-grid .lps-ap-cron-warehouse-options label {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.lps-ap-cron-warehouse-options input {
+  width: auto;
+  margin-top: 2px;
+}
+
+.lps-ap-cron-warehouses > .description {
+  margin: 6px 0 0;
+}
+
 .lps-ap-cron-grid span {
   margin-bottom: 5px;
   font-weight: 600;
@@ -203,7 +241,7 @@
 
 .lps-ap-cron-status {
   display: grid;
-  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  grid-template-columns: repeat(3, minmax(220px, 1fr));
   gap: 10px;
   max-width: 920px;
   margin: 18px 0 0;

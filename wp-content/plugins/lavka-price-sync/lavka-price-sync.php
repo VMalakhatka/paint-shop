@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Lavka Price Sync
  * Description: Sync role-based prices from Java service to WooCommerce (meta: _wpc_price_role_<role>).
- * Version: 0.3.0
+ * Version: 0.4.0
  * Text Domain: lavka-price-sync
  * Domain Path: /languages
  */

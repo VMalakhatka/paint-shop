@@ -5,23 +5,46 @@ const LPS_ACCOUNTING_PRICES_NATIVE_FULL_PATH = '/admin/folio/accounting-prices/r
 const LPS_ACCOUNTING_PRICES_NATIVE_STATUS_PATH = '/admin/folio/accounting-prices/recalculate/native-full/status';
 const LPS_ACCOUNTING_PRICES_NATIVE_CRON_OPTION = 'lps_accounting_prices_native_cron';
 const LPS_ACCOUNTING_PRICES_NATIVE_JOB_OPTION = 'lps_accounting_prices_native_job';
+const LPS_ACCOUNTING_PRICES_NATIVE_BATCH_OPTION = 'lps_accounting_prices_native_batch';
 const LPS_ACCOUNTING_PRICES_NATIVE_CRON_HOOK = 'lps_accounting_prices_native_cron';
 const LPS_ACCOUNTING_PRICES_NATIVE_RETRY_HOOK = 'lps_accounting_prices_native_retry';
 const LPS_ACCOUNTING_PRICES_NATIVE_POLL_HOOK = 'lps_accounting_prices_native_poll';
+const LPS_ACCOUNTING_PRICES_NATIVE_BATCH_NEXT_HOOK = 'lps_accounting_prices_native_batch_next';
 const LPS_ACCOUNTING_PRICES_NATIVE_LOCK_PROCESS = 'accounting_prices_native_full';
 const LPS_ACCOUNTING_PRICES_NATIVE_POLL_OUTAGE_LIMIT = 2 * HOUR_IN_SECONDS;
 
 function lps_accounting_prices_native_cron_options(): array {
     $options = get_option(LPS_ACCOUNTING_PRICES_NATIVE_CRON_OPTION, []);
-
-    return wp_parse_args(is_array($options) ? $options : [], [
+    $options = wp_parse_args(is_array($options) ? $options : [], [
         'enabled' => false,
         'warehouse_id' => 0,
+        'warehouse_ids' => [],
         'weekday' => 'sun',
         'time' => '03:30',
         'automatic_apply_confirmed' => false,
         'paused_reason' => '',
     ]);
+
+    $warehouse_ids = lps_accounting_prices_native_normalize_warehouse_ids($options['warehouse_ids']);
+    if (!$warehouse_ids && absint($options['warehouse_id']) > 0) {
+        $warehouse_ids = [absint($options['warehouse_id'])];
+    }
+    $options['warehouse_ids'] = $warehouse_ids;
+    $options['warehouse_id'] = $warehouse_ids[0] ?? 0;
+
+    return $options;
+}
+
+function lps_accounting_prices_native_normalize_warehouse_ids($warehouse_ids): array {
+    if (!is_array($warehouse_ids)) $warehouse_ids = [$warehouse_ids];
+
+    $normalized = [];
+    foreach ($warehouse_ids as $warehouse_id) {
+        $warehouse_id = absint($warehouse_id);
+        if ($warehouse_id > 0) $normalized[$warehouse_id] = $warehouse_id;
+    }
+
+    return array_values($normalized);
 }
 
 function lps_accounting_prices_native_job_state(): array {
@@ -31,6 +54,15 @@ function lps_accounting_prices_native_job_state(): array {
 
 function lps_accounting_prices_native_store_job(array $state): void {
     update_option(LPS_ACCOUNTING_PRICES_NATIVE_JOB_OPTION, $state, false);
+}
+
+function lps_accounting_prices_native_batch_state(): array {
+    $state = get_option(LPS_ACCOUNTING_PRICES_NATIVE_BATCH_OPTION, []);
+    return is_array($state) ? $state : [];
+}
+
+function lps_accounting_prices_native_store_batch(array $state): void {
+    update_option(LPS_ACCOUNTING_PRICES_NATIVE_BATCH_OPTION, $state, false);
 }
 
 function lps_accounting_prices_native_log(string $event, array $data = []): void {
@@ -142,7 +174,7 @@ function lps_accounting_prices_native_reschedule(): ?int {
     lps_accounting_prices_native_log('cron_scheduled', [
         'message' => 'Native Folio accounting-price cron scheduled.',
         'scheduled_at' => $timestamp,
-        'context' => ['warehouse_id' => absint($options['warehouse_id'] ?? 0)],
+        'context' => ['warehouse_ids' => $options['warehouse_ids']],
     ]);
 
     return $timestamp;
@@ -180,6 +212,16 @@ function lps_accounting_prices_native_schedule_retry(?array $blocking_lock = nul
     return $scheduled ? $timestamp : null;
 }
 
+function lps_accounting_prices_native_schedule_batch_next(int $delay = 10): ?int {
+    $existing = wp_next_scheduled(LPS_ACCOUNTING_PRICES_NATIVE_BATCH_NEXT_HOOK);
+    if ($existing) return (int)$existing;
+
+    $timestamp = time() + max(5, $delay);
+    return wp_schedule_single_event($timestamp, LPS_ACCOUNTING_PRICES_NATIVE_BATCH_NEXT_HOOK)
+        ? $timestamp
+        : null;
+}
+
 function lps_accounting_prices_native_pause_schedule(string $reason): void {
     $options = lps_accounting_prices_native_cron_options();
     $options['enabled'] = false;
@@ -187,6 +229,7 @@ function lps_accounting_prices_native_pause_schedule(string $reason): void {
     update_option(LPS_ACCOUNTING_PRICES_NATIVE_CRON_OPTION, $options, false);
     wp_clear_scheduled_hook(LPS_ACCOUNTING_PRICES_NATIVE_CRON_HOOK);
     wp_clear_scheduled_hook(LPS_ACCOUNTING_PRICES_NATIVE_RETRY_HOOK);
+    wp_clear_scheduled_hook(LPS_ACCOUNTING_PRICES_NATIVE_BATCH_NEXT_HOOK);
 }
 
 function lps_accounting_prices_native_acquire_lock(string $source, int $warehouse_id): array {
@@ -265,7 +308,114 @@ function lps_accounting_prices_native_ensure_job_lock(array $state): array {
     return ['ok' => true, 'state' => $state, 'message' => ''];
 }
 
-function lps_accounting_prices_native_start(int $warehouse_id, bool $preview_only, string $source = 'manual'): array {
+function lps_accounting_prices_native_create_batch(array $warehouse_ids): array {
+    $warehouse_ids = lps_accounting_prices_native_normalize_warehouse_ids($warehouse_ids);
+    $state = [
+        'batch_id' => wp_generate_uuid4(),
+        'active' => true,
+        'status' => 'queued',
+        'warehouse_ids' => $warehouse_ids,
+        'pending_warehouse_ids' => $warehouse_ids,
+        'current_warehouse_id' => 0,
+        'results' => [],
+        'started_at' => current_time('mysql'),
+        'started_at_gmt' => current_time('mysql', true),
+        'completed_at' => '',
+        'error' => '',
+    ];
+    lps_accounting_prices_native_store_batch($state);
+
+    lps_accounting_prices_native_log('accounting_recalculation_batch_created', [
+        'message' => 'Scheduled native Folio accounting-price batch created.',
+        'context' => [
+            'batch_id' => $state['batch_id'],
+            'warehouse_ids' => $warehouse_ids,
+        ],
+    ]);
+
+    return $state;
+}
+
+function lps_accounting_prices_native_stop_batch(string $status, string $message, bool $pause_schedule = false): array {
+    $batch = lps_accounting_prices_native_batch_state();
+    if (!$batch) return [];
+
+    $batch['active'] = false;
+    $batch['status'] = sanitize_key($status);
+    $batch['error'] = sanitize_textarea_field($message);
+    $batch['completed_at'] = current_time('mysql');
+    $batch['completed_at_gmt'] = current_time('mysql', true);
+    lps_accounting_prices_native_store_batch($batch);
+    wp_clear_scheduled_hook(LPS_ACCOUNTING_PRICES_NATIVE_BATCH_NEXT_HOOK);
+
+    if ($pause_schedule) lps_accounting_prices_native_pause_schedule($message);
+
+    return $batch;
+}
+
+function lps_accounting_prices_native_complete_batch_warehouse(array $job_state, string $status, array $body = []): void {
+    $batch_id = sanitize_text_field((string)($job_state['batch_id'] ?? ''));
+    if ($batch_id === '') return;
+
+    $batch = lps_accounting_prices_native_batch_state();
+    if (empty($batch['active']) || !hash_equals((string)($batch['batch_id'] ?? ''), $batch_id)) return;
+
+    $warehouse_id = absint($job_state['warehouse_id'] ?? 0);
+    if ($warehouse_id < 1 || absint($batch['current_warehouse_id'] ?? 0) !== $warehouse_id) {
+        lps_accounting_prices_native_stop_batch(
+            'outcome_unknown',
+            __('The scheduled warehouse queue no longer matches the completed Java job. Check Folio manually before restarting it.', 'lavka-price-sync'),
+            true
+        );
+        return;
+    }
+
+    $batch['results'][] = [
+        'warehouse_id' => $warehouse_id,
+        'job_id' => sanitize_text_field((string)($job_state['job_id'] ?? '')),
+        'status' => sanitize_key($status),
+        'warning_count' => absint($body['warningCount'] ?? ($job_state['warning_count'] ?? 0)),
+        'error' => sanitize_textarea_field((string)($body['error'] ?? ($job_state['error'] ?? ''))),
+        'completed_at' => current_time('mysql'),
+    ];
+    $batch['current_warehouse_id'] = 0;
+
+    if (in_array($status, ['FAILED_PARTIAL', 'OUTCOME_UNKNOWN'], true)) {
+        lps_accounting_prices_native_store_batch($batch);
+        lps_accounting_prices_native_stop_batch(
+            strtolower($status),
+            $status === 'FAILED_PARTIAL'
+                ? __('A warehouse recalculation ended after partial commits. The remaining warehouse queue is stopped until Folio is reviewed manually.', 'lavka-price-sync')
+                : __('A warehouse recalculation has an unknown outcome. The remaining warehouse queue is stopped until Folio is reviewed manually.', 'lavka-price-sync'),
+            true
+        );
+        return;
+    }
+
+    if ($status === 'FAILED') {
+        lps_accounting_prices_native_store_batch($batch);
+        lps_accounting_prices_native_stop_batch(
+            'failed',
+            __('A warehouse recalculation failed. The remaining warehouses were not started; the weekly schedule remains enabled.', 'lavka-price-sync')
+        );
+        return;
+    }
+
+    if (!empty($batch['pending_warehouse_ids'])) {
+        $batch['status'] = 'waiting_next';
+        lps_accounting_prices_native_store_batch($batch);
+        lps_accounting_prices_native_schedule_batch_next();
+        return;
+    }
+
+    $batch['active'] = false;
+    $batch['status'] = 'completed';
+    $batch['completed_at'] = current_time('mysql');
+    $batch['completed_at_gmt'] = current_time('mysql', true);
+    lps_accounting_prices_native_store_batch($batch);
+}
+
+function lps_accounting_prices_native_start(int $warehouse_id, bool $preview_only, string $source = 'manual', string $batch_id = ''): array {
     if ($warehouse_id < 1) {
         return [
             'ok' => false,
@@ -279,9 +429,10 @@ function lps_accounting_prices_native_start(int $warehouse_id, bool $preview_onl
         $latest = lps_accounting_prices_native_poll(false);
         $existing = lps_accounting_prices_native_job_state();
         if (!empty($existing['running'])) {
+            $retry_scheduled = false;
             if (in_array($source, ['cron', 'retry'], true)) {
                 $blocking_lock = function_exists('lavka_ecosystem_lock_get') ? lavka_ecosystem_lock_get() : null;
-                lps_accounting_prices_native_schedule_retry($blocking_lock);
+                $retry_scheduled = (bool)lps_accounting_prices_native_schedule_retry($blocking_lock);
             }
             return [
                 'ok' => false,
@@ -291,6 +442,7 @@ function lps_accounting_prices_native_start(int $warehouse_id, bool $preview_onl
                     'running' => true,
                     'message' => __('A full Folio accounting-price recalculation is already running.', 'lavka-price-sync'),
                 ],
+                'retryScheduled' => $retry_scheduled,
             ];
         }
     }
@@ -298,8 +450,9 @@ function lps_accounting_prices_native_start(int $warehouse_id, bool $preview_onl
     $source = in_array($source, ['manual', 'cron', 'retry', 'recovery'], true) ? $source : 'manual';
     $lock = lps_accounting_prices_native_acquire_lock($source, $warehouse_id);
     if (empty($lock['ok'])) {
+        $retry_scheduled = false;
         if (in_array($source, ['cron', 'retry'], true)) {
-            lps_accounting_prices_native_schedule_retry($lock['lock'] ?? null);
+            $retry_scheduled = (bool)lps_accounting_prices_native_schedule_retry($lock['lock'] ?? null);
         }
 
         return [
@@ -311,6 +464,7 @@ function lps_accounting_prices_native_start(int $warehouse_id, bool $preview_onl
                 'message' => $lock['message'] ?? __('Another Lavka synchronization is running.', 'lavka-price-sync'),
                 'lock' => $lock['lock'] ?? null,
             ],
+            'retryScheduled' => $retry_scheduled,
         ];
     }
 
@@ -352,6 +506,7 @@ function lps_accounting_prices_native_start(int $warehouse_id, bool $preview_onl
         'poll_errors' => 0,
         'accepted_at' => current_time('mysql'),
         'accepted_at_gmt' => current_time('mysql', true),
+        'batch_id' => sanitize_text_field($batch_id),
     ]);
     // A 202 response means Java owns an asynchronous job even if its first state is still QUEUED.
     $state['running'] = true;
@@ -396,6 +551,9 @@ function lps_accounting_prices_native_mark_unknown(array $state, string $message
     lps_accounting_prices_native_store_job($state);
     lps_accounting_prices_native_pause_schedule($message);
     wp_clear_scheduled_hook(LPS_ACCOUNTING_PRICES_NATIVE_POLL_HOOK);
+    if (!empty($state['batch_id'])) {
+        lps_accounting_prices_native_complete_batch_warehouse($state, 'OUTCOME_UNKNOWN', $body);
+    }
 
     lps_accounting_prices_native_log('accounting_recalculation_outcome_unknown', [
         'level' => 'error',
@@ -577,7 +735,8 @@ function lps_accounting_prices_native_poll(bool $schedule_next = true): array {
 
     wp_clear_scheduled_hook(LPS_ACCOUNTING_PRICES_NATIVE_POLL_HOOK);
     lps_accounting_prices_native_release_lock($state);
-    if ($status === 'FAILED_PARTIAL') {
+    lps_accounting_prices_native_complete_batch_warehouse($state, $status, $body);
+    if ($status === 'FAILED_PARTIAL' && empty($state['batch_id'])) {
         lps_accounting_prices_native_pause_schedule(
             __('The previous scheduled recalculation ended after partial commits. Review Folio before enabling the schedule again.', 'lavka-price-sync')
         );
@@ -601,6 +760,64 @@ function lps_accounting_prices_native_poll(bool $schedule_next = true): array {
     return $result;
 }
 
+function lps_accounting_prices_native_continue_batch(string $source = 'cron'): array {
+    $batch = lps_accounting_prices_native_batch_state();
+    if (empty($batch['active']) || empty($batch['batch_id'])) {
+        return ['ok' => false, 'httpStatus' => 409, 'body' => ['message' => 'batch_not_active']];
+    }
+
+    $job = lps_accounting_prices_native_job_state();
+    if (!empty($job['running'])) {
+        return ['ok' => false, 'httpStatus' => 409, 'body' => ['message' => 'job_running']];
+    }
+
+    $warehouse_id = absint($batch['current_warehouse_id'] ?? 0);
+    if ($warehouse_id < 1) {
+        $pending = lps_accounting_prices_native_normalize_warehouse_ids($batch['pending_warehouse_ids'] ?? []);
+        $warehouse_id = absint(array_shift($pending));
+        if ($warehouse_id < 1) {
+            $batch['active'] = false;
+            $batch['status'] = 'completed';
+            $batch['completed_at'] = current_time('mysql');
+            $batch['completed_at_gmt'] = current_time('mysql', true);
+            lps_accounting_prices_native_store_batch($batch);
+            return ['ok' => true, 'httpStatus' => 200, 'body' => ['status' => 'batch_completed']];
+        }
+
+        $batch['current_warehouse_id'] = $warehouse_id;
+        $batch['pending_warehouse_ids'] = $pending;
+    }
+
+    $batch['status'] = 'starting';
+    $batch['last_attempt_at'] = current_time('mysql');
+    lps_accounting_prices_native_store_batch($batch);
+
+    $result = lps_accounting_prices_native_start(
+        $warehouse_id,
+        false,
+        $source === 'retry' ? 'retry' : 'cron',
+        (string)$batch['batch_id']
+    );
+
+    if (!empty($result['ok']) && (int)($result['httpStatus'] ?? 0) === 202) {
+        $batch = lps_accounting_prices_native_batch_state();
+        $batch['status'] = 'running';
+        lps_accounting_prices_native_store_batch($batch);
+        return $result;
+    }
+
+    if (!empty($result['retryScheduled'])) {
+        $batch = lps_accounting_prices_native_batch_state();
+        $batch['status'] = 'waiting_lock';
+        lps_accounting_prices_native_store_batch($batch);
+        return $result;
+    }
+
+    $message = sanitize_textarea_field((string)($result['body']['message'] ?? __('The Java service did not accept the scheduled warehouse recalculation.', 'lavka-price-sync')));
+    lps_accounting_prices_native_stop_batch('start_failed', $message);
+    return $result;
+}
+
 function lps_accounting_prices_native_run_scheduled(string $source = 'cron'): array {
     $options = lps_accounting_prices_native_cron_options();
     if ($source === 'cron') lps_accounting_prices_native_reschedule();
@@ -609,13 +826,28 @@ function lps_accounting_prices_native_run_scheduled(string $source = 'cron'): ar
         return ['ok' => false, 'httpStatus' => 400, 'body' => ['message' => 'schedule_disabled']];
     }
 
-    $warehouse_id = absint($options['warehouse_id'] ?? 0);
-    if ($warehouse_id < 1) {
-        lps_accounting_prices_native_pause_schedule(__('The scheduled Folio recalculation has no valid warehouse.', 'lavka-price-sync'));
-        return ['ok' => false, 'httpStatus' => 400, 'body' => ['message' => 'warehouse_required']];
+    $warehouse_ids = lps_accounting_prices_native_normalize_warehouse_ids($options['warehouse_ids'] ?? []);
+    if (!$warehouse_ids) {
+        lps_accounting_prices_native_pause_schedule(__('The scheduled Folio recalculation has no valid warehouses.', 'lavka-price-sync'));
+        return ['ok' => false, 'httpStatus' => 400, 'body' => ['message' => 'warehouses_required']];
     }
 
-    return lps_accounting_prices_native_start($warehouse_id, false, $source === 'retry' ? 'retry' : 'cron');
+    $batch = lps_accounting_prices_native_batch_state();
+    if ($source === 'cron') {
+        if (!empty($batch['active'])) {
+            lps_accounting_prices_native_log('accounting_recalculation_batch_skipped', [
+                'level' => 'warning',
+                'message' => 'A new scheduled batch was skipped because the previous batch is still active.',
+                'context' => ['batch_id' => $batch['batch_id'] ?? ''],
+            ]);
+            return ['ok' => false, 'httpStatus' => 409, 'body' => ['message' => 'batch_already_active']];
+        }
+        lps_accounting_prices_native_create_batch($warehouse_ids);
+    } elseif (empty($batch['active'])) {
+        return ['ok' => false, 'httpStatus' => 409, 'body' => ['message' => 'batch_not_active']];
+    }
+
+    return lps_accounting_prices_native_continue_batch($source);
 }
 
 add_action(LPS_ACCOUNTING_PRICES_NATIVE_CRON_HOOK, function () {
@@ -630,6 +862,10 @@ add_action(LPS_ACCOUNTING_PRICES_NATIVE_POLL_HOOK, function () {
     lps_accounting_prices_native_poll(true);
 });
 
+add_action(LPS_ACCOUNTING_PRICES_NATIVE_BATCH_NEXT_HOOK, function () {
+    lps_accounting_prices_native_continue_batch('cron');
+});
+
 function lps_accounting_prices_native_maybe_schedule(): void {
     $options = lps_accounting_prices_native_cron_options();
     if (!empty($options['enabled']) && !wp_next_scheduled(LPS_ACCOUNTING_PRICES_NATIVE_CRON_HOOK)) {
@@ -637,7 +873,15 @@ function lps_accounting_prices_native_maybe_schedule(): void {
     }
 
     $state = lps_accounting_prices_native_job_state();
-    if (empty($state['running'])) return;
+    if (empty($state['running'])) {
+        $batch = lps_accounting_prices_native_batch_state();
+        if (!empty($batch['active'])
+            && !wp_next_scheduled(LPS_ACCOUNTING_PRICES_NATIVE_RETRY_HOOK)
+            && !wp_next_scheduled(LPS_ACCOUNTING_PRICES_NATIVE_BATCH_NEXT_HOOK)) {
+            lps_accounting_prices_native_schedule_batch_next(10);
+        }
+        return;
+    }
 
     $lock = function_exists('lavka_ecosystem_lock_get') ? lavka_ecosystem_lock_get() : null;
     $token = (string)($state['lock_token'] ?? '');
@@ -664,7 +908,9 @@ add_action('admin_post_lps_accounting_prices_save_cron', function () {
     check_admin_referer('lps_accounting_prices_save_cron');
 
     $enabled = !empty($_POST['enabled']);
-    $warehouse_id = absint($_POST['warehouse_id'] ?? 0);
+    $warehouse_ids = lps_accounting_prices_native_normalize_warehouse_ids(
+        isset($_POST['warehouse_ids']) ? (array)wp_unslash($_POST['warehouse_ids']) : []
+    );
     $weekday = sanitize_key(wp_unslash($_POST['weekday'] ?? 'sun'));
     $allowed_days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
     if (!in_array($weekday, $allowed_days, true)) $weekday = 'sun';
@@ -673,7 +919,7 @@ add_action('admin_post_lps_accounting_prices_save_cron', function () {
     $confirmed = !empty($_POST['automatic_apply_confirmed']);
 
     $error = '';
-    if ($enabled && $warehouse_id < 1) {
+    if ($enabled && !$warehouse_ids) {
         $error = 'warehouse';
     } elseif ($enabled && !$confirmed) {
         $error = 'confirmation';
@@ -682,13 +928,24 @@ add_action('admin_post_lps_accounting_prices_save_cron', function () {
     if ($error === '') {
         update_option(LPS_ACCOUNTING_PRICES_NATIVE_CRON_OPTION, [
             'enabled' => $enabled,
-            'warehouse_id' => $warehouse_id,
+            'warehouse_id' => $warehouse_ids[0] ?? 0,
+            'warehouse_ids' => $warehouse_ids,
             'weekday' => $weekday,
             'time' => $time,
             'automatic_apply_confirmed' => $confirmed,
             'paused_reason' => '',
         ], false);
         wp_clear_scheduled_hook(LPS_ACCOUNTING_PRICES_NATIVE_RETRY_HOOK);
+        wp_clear_scheduled_hook(LPS_ACCOUNTING_PRICES_NATIVE_BATCH_NEXT_HOOK);
+        if (!$enabled) {
+            $batch = lps_accounting_prices_native_batch_state();
+            if (!empty($batch['active'])) {
+                $batch['active'] = false;
+                $batch['status'] = 'disabled';
+                $batch['completed_at'] = current_time('mysql');
+                lps_accounting_prices_native_store_batch($batch);
+            }
+        }
         lps_accounting_prices_native_reschedule();
     }
 
@@ -705,4 +962,5 @@ function lps_accounting_prices_native_clear_schedules(): void {
     wp_clear_scheduled_hook(LPS_ACCOUNTING_PRICES_NATIVE_CRON_HOOK);
     wp_clear_scheduled_hook(LPS_ACCOUNTING_PRICES_NATIVE_RETRY_HOOK);
     wp_clear_scheduled_hook(LPS_ACCOUNTING_PRICES_NATIVE_POLL_HOOK);
+    wp_clear_scheduled_hook(LPS_ACCOUNTING_PRICES_NATIVE_BATCH_NEXT_HOOK);
 }
