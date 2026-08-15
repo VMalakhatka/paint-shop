@@ -43,6 +43,17 @@
     margin: 4px 0 0;
 }
 
+.pc-folio-debtors__snapshot-actions {
+    display: grid;
+    gap: 8px;
+}
+
+.pc-folio-debtors__snapshot-actions .button {
+    margin: 0;
+    min-height: 36px;
+    white-space: nowrap;
+}
+
 .pc-folio-debtors__snapshot[data-status="active"] [data-pc-snapshot-state] { color: #008a20; }
 .pc-folio-debtors__snapshot[data-status="failed"] [data-pc-snapshot-state] { color: #b32d2e; }
 .pc-folio-debtors__snapshot[data-status="building"] [data-pc-snapshot-state] { color: #996800; }
@@ -75,6 +86,35 @@
 .pc-folio-debtors__snapshot-message.is-error {
     background: #fcf0f1;
     border-left: 4px solid #d63638;
+}
+
+.pc-folio-debtors__database-activity {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    margin-top: 8px;
+    padding: 9px 12px;
+}
+
+.pc-folio-debtors__database-activity.is-running {
+    border-left: 4px solid #2271b1;
+}
+
+.pc-folio-debtors__database-activity.is-blocked,
+.pc-folio-debtors__database-activity.is-error,
+.pc-folio-debtors__database-activity.is-unavailable {
+    background: #fcf0f1;
+    border-left: 4px solid #d63638;
+}
+
+.pc-folio-debtors__database-activity.is-idle-session,
+.pc-folio-debtors__database-activity.is-not-detected {
+    background: #fcf9e8;
+    border-left: 4px solid #dba617;
+}
+
+.pc-folio-debtors__database-activity.is-loading {
+    background: #eef6fb;
+    border-left: 4px solid #2271b1;
 }
 
 .pc-folio-debtors__filters {

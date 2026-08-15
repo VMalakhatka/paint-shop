@@ -42,9 +42,13 @@ function pc_folio_debtors_render_page(): void {
                 <div><dt><?php esc_html_e('Completed', 'pc-folio-customer-balance'); ?></dt><dd data-pc-snapshot-completed>&mdash;</dd></div>
                 <div><dt><?php esc_html_e('Customers calculated', 'pc-folio-customer-balance'); ?></dt><dd data-pc-snapshot-total>&mdash;</dd></div>
             </dl>
-            <button type="button" class="button" data-pc-snapshot-refresh><?php esc_html_e('Refresh debt data', 'pc-folio-customer-balance'); ?></button>
+            <div class="pc-folio-debtors__snapshot-actions">
+                <button type="button" class="button" data-pc-snapshot-refresh><?php esc_html_e('Refresh debt data', 'pc-folio-customer-balance'); ?></button>
+                <button type="button" class="button" data-pc-snapshot-activity><?php esc_html_e('Check database activity', 'pc-folio-customer-balance'); ?></button>
+            </div>
         </section>
         <div class="pc-folio-debtors__snapshot-message" data-pc-snapshot-message role="status" aria-live="polite"></div>
+        <div class="pc-folio-debtors__database-activity" data-pc-snapshot-activity-result role="status" aria-live="polite" hidden></div>
 
         <form class="pc-folio-debtors__filters" data-pc-debtors-form>
             <label>
@@ -145,7 +149,7 @@ function pc_folio_debtors_enqueue_assets(): void {
         'ajaxUrl' => admin_url('admin-ajax.php'),
         'nonce'   => wp_create_nonce('pc_folio_customer_debtors'),
         'today'   => current_time('Y-m-d'),
-        'pollInterval' => 5000,
+        'pollInterval' => 45000,
         'labels'  => [
             'loading'       => __('The debtors report is being generated. This may take some time...', 'pc-folio-customer-balance'),
             'requestFailed' => __('The debtors report could not be generated. Please try again later.', 'pc-folio-customer-balance'),
@@ -185,13 +189,26 @@ function pc_folio_debtors_enqueue_assets(): void {
                 'superseded'     => __('Replaced by a newer snapshot', 'pc-folio-customer-balance'),
                 'unknown'        => __('Unknown status', 'pc-folio-customer-balance'),
                 'readyMessage'   => __('The snapshot is ready. You can generate the debtors report.', 'pc-folio-customer-balance'),
-                'buildingMessage'=> __('Debt data is being updated. The report will become available after completion.', 'pc-folio-customer-balance'),
+                'buildingMessage'=> __('The first debt snapshot is still being prepared. A ready report is not available yet.', 'pc-folio-customer-balance'),
+                'buildingWithActive' => __('Showing data as of %1$s. The update for %2$s started at %3$s and is still running.', 'pc-folio-customer-balance'),
                 'notReadyMessage'=> __('The debt snapshot has not been created yet. Start an administrative refresh.', 'pc-folio-customer-balance'),
                 'failedMessage'  => __('The latest debt snapshot refresh failed.', 'pc-folio-customer-balance'),
+                'failedWithActive' => __('The latest update failed. The ready report as of %s remains available.', 'pc-folio-customer-balance'),
                 'emptyMessage'   => __('The snapshot contains no customers. Refresh the debt data before generating the report.', 'pc-folio-customer-balance'),
                 'staleMessage'   => __('Warning: debt data was calculated as of %s.', 'pc-folio-customer-balance'),
                 'accepted'       => __('The debt snapshot refresh has started.', 'pc-folio-customer-balance'),
                 'running'        => __('A debt snapshot refresh is already running.', 'pc-folio-customer-balance'),
+                'activityChecking' => __('Checking database activity...', 'pc-folio-customer-balance'),
+                'activityFailed' => __('Database activity could not be checked.', 'pc-folio-customer-balance'),
+                'activityChecked' => __('Checked: %s', 'pc-folio-customer-balance'),
+                'activitySessions' => __('Sessions: detected %1$s, active %2$s, blocked %3$s, idle %4$s.', 'pc-folio-customer-balance'),
+                'activityStates' => [
+                    'RUNNING'      => __('The debt calculation is running.', 'pc-folio-customer-balance'),
+                    'BLOCKED'      => __('The debt calculation is waiting for a database lock.', 'pc-folio-customer-balance'),
+                    'IDLE_SESSION' => __('The calculation session is temporarily idle.', 'pc-folio-customer-balance'),
+                    'NOT_DETECTED' => __('The calculation was not detected at this moment.', 'pc-folio-customer-balance'),
+                    'UNAVAILABLE'  => __('Database activity is unavailable.', 'pc-folio-customer-balance'),
+                ],
             ],
         ],
     ]);
@@ -354,6 +371,41 @@ function pc_folio_debtors_snapshot_request(string $method) {
     return $data;
 }
 
+function pc_folio_debtors_database_activity_request() {
+    if (!function_exists('lps_java_get')) {
+        return new WP_Error('folio_connection_unavailable', __('The Folio service connection is unavailable.', 'pc-folio-customer-balance'), ['status' => 503]);
+    }
+
+    $response = lps_java_get('/admin/folio/customer-debtors/snapshot/database-activity', ['timeout' => 30]);
+    if (is_wp_error($response)) {
+        return new WP_Error('folio_database_activity_unavailable', __('The Folio service is temporarily unavailable.', 'pc-folio-customer-balance'), ['status' => 503]);
+    }
+
+    $code = (int) wp_remote_retrieve_response_code($response);
+    $data = json_decode((string) wp_remote_retrieve_body($response), true);
+    if ($code < 200 || $code >= 300 || !is_array($data)) {
+        return new WP_Error('folio_database_activity_http_error', __('The Folio database activity request failed.', 'pc-folio-customer-balance'), [
+            'status' => $code >= 400 && $code < 600 ? $code : 502,
+            'reqId'  => is_array($data) ? sanitize_text_field((string) ($data['reqId'] ?? $data['requestId'] ?? '')) : '',
+        ]);
+    }
+
+    $state = sanitize_key((string) ($data['state'] ?? ''));
+    $state = strtoupper($state);
+    if (($data['ok'] ?? false) !== true || !in_array($state, ['RUNNING', 'BLOCKED', 'IDLE_SESSION', 'NOT_DETECTED', 'UNAVAILABLE'], true)) {
+        return new WP_Error('invalid_folio_database_activity', __('Folio returned an invalid database activity response.', 'pc-folio-customer-balance'), ['status' => 502]);
+    }
+
+    return [
+        'state'            => $state,
+        'checkedAt'        => sanitize_text_field((string) ($data['checkedAt'] ?? '')),
+        'detectedSessions' => max(0, (int) ($data['detectedSessions'] ?? 0)),
+        'activeSessions'   => max(0, (int) ($data['activeSessions'] ?? 0)),
+        'blockedSessions'  => max(0, (int) ($data['blockedSessions'] ?? 0)),
+        'idleSessions'     => max(0, (int) ($data['idleSessions'] ?? 0)),
+    ];
+}
+
 function pc_folio_debtors_send_error(WP_Error $error): void {
     $error_data = $error->get_error_data();
     wp_send_json_error([
@@ -389,6 +441,20 @@ function pc_folio_debtors_snapshot_refresh_ajax(): void {
     wp_send_json_success(['snapshot' => $result]);
 }
 add_action('wp_ajax_pc_folio_customer_debtors_snapshot_refresh', 'pc_folio_debtors_snapshot_refresh_ajax');
+
+function pc_folio_debtors_database_activity_ajax(): void {
+    check_ajax_referer('pc_folio_customer_debtors');
+    if (!pc_folio_debtors_can_view()) {
+        wp_send_json_error(['message' => __('You do not have permission to view this report.', 'pc-folio-customer-balance')], 403);
+    }
+
+    $activity = pc_folio_debtors_database_activity_request();
+    if (is_wp_error($activity)) {
+        pc_folio_debtors_send_error($activity);
+    }
+    wp_send_json_success(['activity' => $activity]);
+}
+add_action('wp_ajax_pc_folio_customer_debtors_database_activity', 'pc_folio_debtors_database_activity_ajax');
 
 function pc_folio_debtors_ajax(): void {
     check_ajax_referer('pc_folio_customer_debtors');

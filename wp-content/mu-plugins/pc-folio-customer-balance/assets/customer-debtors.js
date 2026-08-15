@@ -22,12 +22,17 @@
     var snapshotTotal = root.querySelector('[data-pc-snapshot-total]');
     var snapshotMessage = root.querySelector('[data-pc-snapshot-message]');
     var refreshButton = root.querySelector('[data-pc-snapshot-refresh]');
+    var activityButton = root.querySelector('[data-pc-snapshot-activity]');
+    var activityResult = root.querySelector('[data-pc-snapshot-activity-result]');
     var offset = 0;
     var reportController = null;
     var snapshotController = null;
+    var activityController = null;
     var snapshotPollTimer = null;
     var currentSnapshot = null;
+    var currentActiveGenerationId = null;
     var loadAfterReady = false;
+    var reportRendered = false;
     var money = new Intl.NumberFormat('uk-UA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     var dateFormatter = new Intl.DateTimeFormat('uk-UA');
 
@@ -75,11 +80,46 @@
         }[status] || labels.unknown;
     }
 
+    function activeSnapshot(snapshot) {
+        if (!snapshot || typeof snapshot !== 'object') return null;
+        if (snapshot.activeSnapshot && typeof snapshot.activeSnapshot === 'object') {
+            return snapshot.activeSnapshot;
+        }
+        if (snapshot.status === 'ACTIVE' && snapshot.running !== true) {
+            return {
+                generationId: snapshot.generationId,
+                asOfDate: snapshot.asOfDate,
+                completedAt: snapshot.completedAt,
+                totalClients: snapshot.totalClients
+            };
+        }
+        return null;
+    }
+
+    function buildingSnapshot(snapshot) {
+        if (!snapshot || typeof snapshot !== 'object') return null;
+        if (snapshot.building && typeof snapshot.building === 'object') {
+            return snapshot.building;
+        }
+        if (snapshot.status === 'BUILDING' || snapshot.running === true) {
+            return {
+                generationId: snapshot.generationId,
+                asOfDate: snapshot.asOfDate,
+                startedAt: snapshot.startedAt,
+                triggerSource: snapshot.triggerSource
+            };
+        }
+        return null;
+    }
+
     function snapshotIsReady(snapshot) {
-        return snapshot
-            && snapshot.status === 'ACTIVE'
-            && snapshot.running !== true
-            && number(snapshot.totalClients) > 0;
+        return activeSnapshot(snapshot) !== null;
+    }
+
+    function formatIndexed(template, values) {
+        return values.reduce(function (message, value, index) {
+            return message.replace('%' + String(index + 1) + '$s', value);
+        }, template);
     }
 
     function setReportAvailability(enabled) {
@@ -99,33 +139,50 @@
         stopSnapshotPolling();
         snapshotPollTimer = window.setTimeout(function () {
             checkSnapshot(true);
-        }, number(pcFolioDebtors.pollInterval) || 5000);
+        }, number(pcFolioDebtors.pollInterval) || 45000);
     }
 
     function renderSnapshot(snapshot) {
         var labels = pcFolioDebtors.labels.snapshot;
         var status = String(snapshot.status || '');
-        var building = status === 'BUILDING' || snapshot.running === true;
-        var ready = snapshotIsReady(snapshot);
+        var building = buildingSnapshot(snapshot);
+        var active = activeSnapshot(snapshot);
+        var previousGenerationId = currentActiveGenerationId;
+        var activeGenerationId = active && active.generationId != null ? String(active.generationId) : null;
+        var activeChanged = previousGenerationId !== null && activeGenerationId !== null && previousGenerationId !== activeGenerationId;
         currentSnapshot = snapshot;
+        currentActiveGenerationId = activeGenerationId;
 
         snapshotRoot.dataset.status = building ? 'building' : status.toLowerCase();
         snapshotState.textContent = building ? labels.building : snapshotLabel(status);
-        snapshotDate.textContent = dateText(snapshot.asOfDate) || '\u2014';
-        snapshotCompleted.textContent = dateTimeText(snapshot.completedAt) || '\u2014';
-        snapshotTotal.textContent = String(number(snapshot.totalClients));
-        refreshButton.disabled = building;
-        setReportAvailability(ready);
+        snapshotDate.textContent = dateText(active && active.asOfDate) || '\u2014';
+        snapshotCompleted.textContent = dateTimeText(active && active.completedAt) || '\u2014';
+        snapshotTotal.textContent = active ? String(number(active.totalClients)) : '\u2014';
+        refreshButton.disabled = !!building;
+        setReportAvailability(!!active);
 
-        if (ready) {
-            stopSnapshotPolling();
-            if (snapshot.asOfDate && String(snapshot.asOfDate).substring(0, 10) < pcFolioDebtors.today) {
-                setSnapshotMessage(labels.staleMessage.replace('%s', dateText(snapshot.asOfDate)), 'warning');
+        if (active) {
+            if (building) {
+                setSnapshotMessage(formatIndexed(labels.buildingWithActive, [
+                    dateText(active.asOfDate) || '\u2014',
+                    dateText(building.asOfDate) || '\u2014',
+                    dateTimeText(building.startedAt) || '\u2014'
+                ]), 'info');
+                scheduleSnapshotCheck();
+            } else if (status === 'FAILED') {
+                stopSnapshotPolling();
+                setSnapshotMessage(labels.failedWithActive.replace('%s', dateText(active.asOfDate)), 'warning');
+            } else if (active.asOfDate && String(active.asOfDate).substring(0, 10) < pcFolioDebtors.today) {
+                stopSnapshotPolling();
+                setSnapshotMessage(labels.staleMessage.replace('%s', dateText(active.asOfDate)), 'warning');
             } else {
+                stopSnapshotPolling();
                 setSnapshotMessage(labels.readyMessage, 'success');
             }
             if (loadAfterReady) {
                 loadAfterReady = false;
+                loadReport();
+            } else if (activeChanged && reportRendered) {
                 loadReport();
             }
             return;
@@ -148,7 +205,7 @@
         }
     }
 
-    function ajaxRequest(action, signal) {
+    function ajaxRequest(action, signal, responseKey) {
         var body = new URLSearchParams();
         body.set('action', action);
         body.set('_ajax_nonce', pcFolioDebtors.nonce);
@@ -167,7 +224,7 @@
                     }
                     throw new Error(message);
                 }
-                return payload.data.snapshot;
+                return payload.data[responseKey || 'snapshot'];
             });
         });
     }
@@ -175,7 +232,7 @@
     function checkSnapshot(silent) {
         if (snapshotController) snapshotController.abort();
         snapshotController = new AbortController();
-        setReportAvailability(false);
+        if (!snapshotIsReady(currentSnapshot)) setReportAvailability(false);
         if (!silent) setSnapshotMessage(pcFolioDebtors.labels.snapshot.checking, 'loading');
 
         return ajaxRequest('pc_folio_customer_debtors_snapshot_status', snapshotController.signal)
@@ -183,9 +240,8 @@
             .catch(function (error) {
                 if (error.name === 'AbortError') return;
                 stopSnapshotPolling();
-                currentSnapshot = null;
                 refreshButton.disabled = false;
-                setReportAvailability(false);
+                setReportAvailability(snapshotIsReady(currentSnapshot));
                 setSnapshotMessage(error.message || pcFolioDebtors.labels.snapshot.statusFailed, 'error');
             });
     }
@@ -194,15 +250,17 @@
         if (snapshotController) snapshotController.abort();
         snapshotController = new AbortController();
         stopSnapshotPolling();
-        currentSnapshot = null;
-        if (reportController) reportController.abort();
-        metaBox.hidden = true;
-        summaryBox.hidden = true;
-        tableWrap.hidden = true;
-        pagination.hidden = true;
-        setStatus('', '');
+        var hasActiveSnapshot = snapshotIsReady(currentSnapshot);
+        if (!hasActiveSnapshot) {
+            if (reportController) reportController.abort();
+            metaBox.hidden = true;
+            summaryBox.hidden = true;
+            tableWrap.hidden = true;
+            pagination.hidden = true;
+            setStatus('', '');
+        }
         refreshButton.disabled = true;
-        setReportAvailability(false);
+        setReportAvailability(hasActiveSnapshot);
         setSnapshotMessage(pcFolioDebtors.labels.snapshot.refreshing, 'loading');
 
         ajaxRequest('pc_folio_customer_debtors_snapshot_refresh', snapshotController.signal)
@@ -216,8 +274,44 @@
             .catch(function (error) {
                 if (error.name === 'AbortError') return;
                 refreshButton.disabled = false;
+                setReportAvailability(snapshotIsReady(currentSnapshot));
                 setSnapshotMessage(error.message || pcFolioDebtors.labels.snapshot.refreshFailed, 'error');
             });
+    }
+
+    function renderDatabaseActivity(activity) {
+        var labels = pcFolioDebtors.labels.snapshot;
+        var state = String(activity.state || 'UNAVAILABLE');
+        var message = labels.activityStates[state] || labels.activityStates.UNAVAILABLE;
+        var sessions = formatIndexed(labels.activitySessions, [
+            String(number(activity.detectedSessions)),
+            String(number(activity.activeSessions)),
+            String(number(activity.blockedSessions)),
+            String(number(activity.idleSessions))
+        ]);
+        var checked = labels.activityChecked.replace('%s', dateTimeText(activity.checkedAt) || '\u2014');
+        activityResult.textContent = message + ' ' + sessions + ' ' + checked;
+        activityResult.className = 'pc-folio-debtors__database-activity is-' + state.toLowerCase().replace(/_/g, '-');
+        activityResult.hidden = false;
+    }
+
+    function checkDatabaseActivity() {
+        if (activityController) activityController.abort();
+        activityController = new AbortController();
+        activityButton.disabled = true;
+        activityResult.textContent = pcFolioDebtors.labels.snapshot.activityChecking;
+        activityResult.className = 'pc-folio-debtors__database-activity is-loading';
+        activityResult.hidden = false;
+
+        ajaxRequest('pc_folio_customer_debtors_database_activity', activityController.signal, 'activity')
+            .then(renderDatabaseActivity)
+            .catch(function (error) {
+                if (error.name === 'AbortError') return;
+                activityResult.textContent = error.message || pcFolioDebtors.labels.snapshot.activityFailed;
+                activityResult.className = 'pc-folio-debtors__database-activity is-error';
+                activityResult.hidden = false;
+            })
+            .finally(function () { activityButton.disabled = false; });
     }
 
     function appendTextCell(row, value, className) {
@@ -350,6 +444,7 @@
         renderSummary(summary);
         renderRows(debtors);
         renderPagination(summary, limit);
+        reportRendered = true;
         setStatus(debtors.length ? '' : pcFolioDebtors.labels.empty, debtors.length ? '' : 'info');
     }
 
@@ -418,6 +513,7 @@
         loadReport();
     });
     refreshButton.addEventListener('click', refreshSnapshot);
+    activityButton.addEventListener('click', checkDatabaseActivity);
 
     setReportAvailability(false);
     checkSnapshot(false);
