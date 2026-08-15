@@ -2,8 +2,6 @@
 if (!defined('ABSPATH')) exit;
 
 const LPS_ACCOUNTING_PRICES_SINGLE_PATH = '/admin/folio/accounting-prices/recalculate';
-const LPS_ACCOUNTING_PRICES_FULL_PATH = '/admin/folio/accounting-prices/recalculate/full';
-const LPS_ACCOUNTING_PRICES_STATUS_PATH = '/admin/folio/accounting-prices/recalculate/full/status';
 const LPS_ACCOUNTING_PRICES_WAREHOUSES_PATH = '/ref/warehouses';
 
 add_action('admin_menu', function () {
@@ -42,7 +40,7 @@ add_action('admin_enqueue_scripts', function () {
         'ajaxUrl' => admin_url('admin-ajax.php'),
         'nonce' => wp_create_nonce('lps_accounting_prices'),
         'pollInterval' => 3000,
-        'storageKey' => 'lpsAccountingPriceJobId',
+        'storageKey' => 'lpsNativeAccountingPriceJobId',
         'i18n' => [
             'loading' => __('Loading...', 'lavka-price-sync'),
             'networkError' => __('The server request failed.', 'lavka-price-sync'),
@@ -54,18 +52,20 @@ add_action('admin_enqueue_scripts', function () {
             'skuRequired' => __('Enter a product SKU.', 'lavka-price-sync'),
             'previewRunning' => __('Checking the product without changes...', 'lavka-price-sync'),
             'applyRunning' => __('Recalculating the product in Folio...', 'lavka-price-sync'),
-            'fullPreviewStarting' => __('Starting a read-only warehouse check...', 'lavka-price-sync'),
-            'fullApplyStarting' => __('Starting the warehouse recalculation...', 'lavka-price-sync'),
+            'fullPreviewStarting' => __('Starting the exact rollback preview of the native Folio recalculation...', 'lavka-price-sync'),
+            'fullApplyStarting' => __('Starting the native Folio warehouse recalculation...', 'lavka-price-sync'),
             'confirmSingleApply' => __('Recalculate this product in Folio now?', 'lavka-price-sync'),
-            'confirmFullApply' => __('Recalculate accounting prices for the entire selected warehouse? Previously committed products cannot be rolled back as one batch.', 'lavka-price-sync'),
+            'confirmFullApply' => __('Run the full native Folio recalculation for the selected warehouse? Java will first perform a rollback preflight and will commit only if it is clean.', 'lavka-price-sync'),
             'previewRequired' => __('Run a successful preview for this SKU and warehouse first.', 'lavka-price-sync'),
-            'fullPreviewRequired' => __('Complete a full read-only check for this warehouse before recalculation.', 'lavka-price-sync'),
+            'fullPreviewRequired' => __('Complete an exact rollback preview for this warehouse before recalculation.', 'lavka-price-sync'),
             'requestAccepted' => __('The task was accepted. Waiting for progress...', 'lavka-price-sync'),
             'jobRunning' => __('The task is running.', 'lavka-price-sync'),
             'jobCompleted' => __('The task completed without warnings.', 'lavka-price-sync'),
-            'jobWarnings' => __('The task completed with warnings. Some products were skipped.', 'lavka-price-sync'),
             'jobStopped' => __('The task stopped on a negative chronological stock.', 'lavka-price-sync'),
             'jobFailed' => __('The task failed.', 'lavka-price-sync'),
+            'jobFailedPartial' => __('The task failed after one or more portions were committed. Do not retry it automatically; check Folio manually.', 'lavka-price-sync'),
+            'jobOutcomeUnknown' => __('The task outcome cannot be proven. Do not retry it; check Folio and the Java logs manually.', 'lavka-price-sync'),
+            'jobBlockedNegative' => __('The rollback preflight found negative chronological stock. Nothing was committed.', 'lavka-price-sync'),
             'idle' => __('No warehouse task has been started since the Java service restart.', 'lavka-price-sync'),
             'previewReady' => __('The preview found no blocking problems.', 'lavka-price-sync'),
             'previewBlocked' => __('The preview found problems. Recalculation is blocked.', 'lavka-price-sync'),
@@ -77,6 +77,7 @@ add_action('admin_enqueue_scripts', function () {
             'before' => __('Before', 'lavka-price-sync'),
             'after' => __('After', 'lavka-price-sync'),
             'currentSku' => __('Current SKU', 'lavka-price-sync'),
+            'phase' => __('Phase', 'lavka-price-sync'),
             'warehouse' => __('Warehouse', 'lavka-price-sync'),
             'document' => __('Document', 'lavka-price-sync'),
             'date' => __('Date', 'lavka-price-sync'),
@@ -97,33 +98,42 @@ add_action('admin_enqueue_scripts', function () {
             'initialQuantity' => __('Initial quantity', 'lavka-price-sync'),
             'accountingAmount' => __('Accounting amount', 'lavka-price-sync'),
             'movementCount' => __('Accounted movements', 'lavka-price-sync'),
-            'totalProducts' => __('Total products', 'lavka-price-sync'),
-            'processedProducts' => __('Processed products', 'lavka-price-sync'),
-            'eligibleProducts' => __('Eligible products', 'lavka-price-sync'),
-            'recalculatedProducts' => __('Recalculated products', 'lavka-price-sync'),
-            'priceChangedProducts' => __('Prices changed', 'lavka-price-sync'),
-            'skippedProducts' => __('Skipped products', 'lavka-price-sync'),
+            'procedureCalls' => __('Procedure calls', 'lavka-price-sync'),
+            'preflightChunks' => __('Rolled-back preflight portions', 'lavka-price-sync'),
+            'committedChunks' => __('Committed portions', 'lavka-price-sync'),
+            'progressUnits' => __('Progress units', 'lavka-price-sync'),
             'warningCount' => __('Warnings', 'lavka-price-sync'),
             'copyDone' => __('SKU list copied.', 'lavka-price-sync'),
             'exportEmpty' => __('There are no warnings to export.', 'lavka-price-sync'),
             'httpError' => __('Java API returned HTTP', 'lavka-price-sync'),
             'requestId' => __('Request ID', 'lavka-price-sync'),
             'rawResponse' => __('Raw Java response', 'lavka-price-sync'),
-            'applyAvailableAfterPreview' => __('Full recalculation becomes available after a completed read-only check of the selected warehouse.', 'lavka-price-sync'),
+            'applyAvailableAfterPreview' => __('Full recalculation becomes available after a successful exact rollback preview of the selected warehouse.', 'lavka-price-sync'),
             'statusLabels' => [
                 'IDLE' => __('Not started', 'lavka-price-sync'),
                 'BUSY' => __('Busy', 'lavka-price-sync'),
                 'QUEUED' => __('Queued', 'lavka-price-sync'),
                 'RUNNING' => __('Running', 'lavka-price-sync'),
                 'COMPLETED' => __('Completed', 'lavka-price-sync'),
-                'COMPLETED_WITH_WARNINGS' => __('Completed with warnings', 'lavka-price-sync'),
                 'STOPPED_ON_NEGATIVE_STOCK' => __('Stopped on negative stock', 'lavka-price-sync'),
                 'FAILED' => __('Failed', 'lavka-price-sync'),
                 'FAILED_PARTIAL' => __('Failed after partial recalculation', 'lavka-price-sync'),
                 'PREVIEW_READY' => __('Check passed', 'lavka-price-sync'),
                 'PREVIEW_BLOCKED' => __('Check blocked recalculation', 'lavka-price-sync'),
+                'BLOCKED_NEGATIVE_STOCK' => __('Blocked by negative stock', 'lavka-price-sync'),
+                'OUTCOME_UNKNOWN' => __('Outcome unknown', 'lavka-price-sync'),
                 'RECALCULATED' => __('Recalculated', 'lavka-price-sync'),
                 'BLOCKED' => __('Blocked', 'lavka-price-sync'),
+            ],
+            'phaseLabels' => [
+                'QUEUED' => __('Waiting in queue', 'lavka-price-sync'),
+                'PRECHECK_RUNNING' => __('Rollback preflight is running', 'lavka-price-sync'),
+                'PRECHECK_COMPLETED' => __('Rollback preflight completed', 'lavka-price-sync'),
+                'APPLY_RUNNING' => __('Applying recalculation portions', 'lavka-price-sync'),
+                'COMPLETED' => __('Recalculation completed', 'lavka-price-sync'),
+                'STOPPED' => __('Recalculation stopped', 'lavka-price-sync'),
+                'FAILED' => __('Recalculation failed', 'lavka-price-sync'),
+                'MANUAL_REVIEW' => __('Manual review required', 'lavka-price-sync'),
             ],
             'warningLabels' => [
                 'NEGATIVE_CHRONOLOGICAL_STOCK' => __('Negative chronological stock', 'lavka-price-sync'),
@@ -143,9 +153,49 @@ add_action('admin_enqueue_scripts', function () {
 
 function lps_render_accounting_prices_page(): void {
     if (!current_user_can(LPS_CAP)) return;
+
+    $cron_options = lps_accounting_prices_native_cron_options();
+    $native_job = lps_accounting_prices_native_job_state();
+    $next_run = wp_next_scheduled(LPS_ACCOUNTING_PRICES_NATIVE_CRON_HOOK);
+    $cron_saved = sanitize_key(wp_unslash($_GET['cron_saved'] ?? ''));
+    $cron_error = sanitize_key(wp_unslash($_GET['cron_error'] ?? ''));
+    $weekdays = [
+        'mon' => __('Monday', 'lavka-price-sync'),
+        'tue' => __('Tuesday', 'lavka-price-sync'),
+        'wed' => __('Wednesday', 'lavka-price-sync'),
+        'thu' => __('Thursday', 'lavka-price-sync'),
+        'fri' => __('Friday', 'lavka-price-sync'),
+        'sat' => __('Saturday', 'lavka-price-sync'),
+        'sun' => __('Sunday', 'lavka-price-sync'),
+    ];
+    $native_status_labels = [
+        'IDLE' => __('Not started', 'lavka-price-sync'),
+        'QUEUED' => __('Queued', 'lavka-price-sync'),
+        'RUNNING' => __('Running', 'lavka-price-sync'),
+        'PREVIEW_READY' => __('Check passed', 'lavka-price-sync'),
+        'BLOCKED_NEGATIVE_STOCK' => __('Blocked by negative stock', 'lavka-price-sync'),
+        'COMPLETED' => __('Completed', 'lavka-price-sync'),
+        'STOPPED_ON_NEGATIVE_STOCK' => __('Stopped on negative stock', 'lavka-price-sync'),
+        'FAILED' => __('Failed', 'lavka-price-sync'),
+        'FAILED_PARTIAL' => __('Failed after partial recalculation', 'lavka-price-sync'),
+        'OUTCOME_UNKNOWN' => __('Outcome unknown', 'lavka-price-sync'),
+    ];
+    $native_status = strtoupper((string)($native_job['status'] ?? ''));
     ?>
     <div class="wrap lps-ap" id="lps-accounting-prices">
         <h1><?php echo esc_html__('Folio accounting prices', 'lavka-price-sync'); ?></h1>
+
+        <?php if ($cron_saved === '1'): ?>
+            <div class="notice notice-success is-dismissible"><p><?php echo esc_html__('The automatic recalculation schedule was saved.', 'lavka-price-sync'); ?></p></div>
+        <?php elseif ($cron_saved === '0'): ?>
+            <div class="notice notice-error"><p>
+                <?php
+                echo esc_html($cron_error === 'confirmation'
+                    ? __('Confirm automatic Folio changes before enabling the schedule.', 'lavka-price-sync')
+                    : __('Select a Folio warehouse before enabling the schedule.', 'lavka-price-sync'));
+                ?>
+            </p></div>
+        <?php endif; ?>
 
         <div class="notice notice-warning inline lps-ap-safety">
             <p><strong><?php echo esc_html__('Financial operation', 'lavka-price-sync'); ?></strong></p>
@@ -195,14 +245,13 @@ function lps_render_accounting_prices_page(): void {
         </section>
 
         <section class="lps-ap-panel" data-lps-ap-panel="full" hidden>
-            <h2><?php echo esc_html__('Warehouse accounting prices', 'lavka-price-sync'); ?></h2>
+            <h2><?php echo esc_html__('Full native Folio recalculation', 'lavka-price-sync'); ?></h2>
+            <p class="description lps-ap-native-description">
+                <?php echo esc_html__('This mode runs the complete Folio I_UCHET_TOVAR algorithm. The preview executes every portion in a transaction and always rolls it back.', 'lavka-price-sync'); ?>
+            </p>
             <div class="lps-ap-form-row">
-                <label>
-                    <input type="checkbox" id="lps-ap-continue-negative" checked>
-                    <?php echo esc_html__('Skip products with negative chronological stock and continue.', 'lavka-price-sync'); ?>
-                </label>
                 <button type="button" class="button button-primary" id="lps-ap-full-preview">
-                    <?php echo esc_html__('Check entire warehouse without changes', 'lavka-price-sync'); ?>
+                    <?php echo esc_html__('Run exact rollback preview', 'lavka-price-sync'); ?>
                 </button>
             </div>
             <div class="lps-ap-danger-zone">
@@ -211,9 +260,9 @@ function lps_render_accounting_prices_page(): void {
                     <?php echo esc_html__('I have a current backup and confirm the agreed Folio maintenance window.', 'lavka-price-sync'); ?>
                 </label>
                 <button type="button" class="button lps-ap-danger-button" id="lps-ap-full-apply" disabled>
-                    <?php echo esc_html__('Recalculate entire warehouse in Folio', 'lavka-price-sync'); ?>
+                    <?php echo esc_html__('Run full native recalculation in Folio', 'lavka-price-sync'); ?>
                 </button>
-                <span class="description"><?php echo esc_html__('Full recalculation becomes available after a completed read-only check of the selected warehouse.', 'lavka-price-sync'); ?></span>
+                <span class="description"><?php echo esc_html__('Apply repeats the full rollback preflight and starts committing portions only when the preflight is clean.', 'lavka-price-sync'); ?></span>
             </div>
             <div id="lps-ap-full-notice" class="lps-ap-result-notice" hidden></div>
             <div id="lps-ap-progress" hidden>
@@ -223,6 +272,88 @@ function lps_render_accounting_prices_page(): void {
                 <p id="lps-ap-progress-label" class="description"></p>
             </div>
             <div id="lps-ap-full-summary"></div>
+
+            <section class="lps-ap-cron-settings" aria-labelledby="lps-ap-cron-heading">
+                <h3 id="lps-ap-cron-heading"><?php echo esc_html__('Automatic weekly recalculation', 'lavka-price-sync'); ?></h3>
+                <p><?php echo esc_html__('The schedule is disabled by default. A scheduled run performs real Folio changes after Java completes its mandatory rollback preflight.', 'lavka-price-sync'); ?></p>
+
+                <?php if (!empty($cron_options['paused_reason'])): ?>
+                    <div class="notice notice-error inline"><p>
+                        <strong><?php echo esc_html__('Schedule paused:', 'lavka-price-sync'); ?></strong>
+                        <?php echo esc_html((string)$cron_options['paused_reason']); ?>
+                    </p></div>
+                <?php endif; ?>
+
+                <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" class="lps-ap-cron-form">
+                    <input type="hidden" name="action" value="lps_accounting_prices_save_cron">
+                    <?php wp_nonce_field('lps_accounting_prices_save_cron'); ?>
+
+                    <label class="lps-ap-cron-toggle">
+                        <input type="checkbox" name="enabled" value="1" <?php checked(!empty($cron_options['enabled'])); ?>>
+                        <strong><?php echo esc_html__('Enable weekly recalculation', 'lavka-price-sync'); ?></strong>
+                    </label>
+
+                    <div class="lps-ap-cron-grid">
+                        <label>
+                            <span><?php echo esc_html__('Folio warehouse', 'lavka-price-sync'); ?></span>
+                            <select id="lps-ap-cron-warehouse" name="warehouse_id"
+                                    data-selected="<?php echo esc_attr((string)absint($cron_options['warehouse_id'] ?? 0)); ?>">
+                                <option value="<?php echo esc_attr((string)absint($cron_options['warehouse_id'] ?? 0)); ?>" selected>
+                                    <?php echo esc_html(absint($cron_options['warehouse_id'] ?? 0) > 0
+                                        /* translators: %d: numeric Folio warehouse ID. */
+                                        ? sprintf(__('Warehouse ID: %d', 'lavka-price-sync'), absint($cron_options['warehouse_id']))
+                                        : __('Loading warehouses...', 'lavka-price-sync')); ?>
+                                </option>
+                            </select>
+                        </label>
+                        <label>
+                            <span><?php echo esc_html__('Day of week', 'lavka-price-sync'); ?></span>
+                            <select name="weekday">
+                                <?php foreach ($weekdays as $value => $label): ?>
+                                    <option value="<?php echo esc_attr($value); ?>" <?php selected($cron_options['weekday'], $value); ?>><?php echo esc_html($label); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </label>
+                        <label>
+                            <span><?php echo esc_html__('Start time', 'lavka-price-sync'); ?></span>
+                            <input type="time" name="time" value="<?php echo esc_attr((string)$cron_options['time']); ?>" required>
+                        </label>
+                    </div>
+
+                    <label class="lps-ap-cron-confirm">
+                        <input type="checkbox" name="automatic_apply_confirmed" value="1" <?php checked(!empty($cron_options['automatic_apply_confirmed'])); ?>>
+                        <?php echo esc_html__('I understand that the schedule automatically changes accounting prices in Folio after a clean preflight.', 'lavka-price-sync'); ?>
+                    </label>
+
+                    <p class="description">
+                        <?php
+                        printf(
+                            /* translators: %s: WordPress site time zone. */
+                            esc_html__('Time zone: %s. If another Lavka synchronization holds the global lock, the run is postponed without sending a request to Java.', 'lavka-price-sync'),
+                            esc_html(wp_timezone_string())
+                        );
+                        ?>
+                    </p>
+                    <p>
+                        <button type="submit" class="button button-primary"><?php echo esc_html__('Save schedule', 'lavka-price-sync'); ?></button>
+                    </p>
+                </form>
+
+                <dl class="lps-ap-cron-status">
+                    <div>
+                        <dt><?php echo esc_html__('Next scheduled run', 'lavka-price-sync'); ?></dt>
+                        <dd><?php echo esc_html($next_run
+                            ? wp_date(get_option('date_format') . ' ' . get_option('time_format'), $next_run, wp_timezone())
+                            : __('Not scheduled', 'lavka-price-sync')); ?></dd>
+                    </div>
+                    <div>
+                        <dt><?php echo esc_html__('Last native job status', 'lavka-price-sync'); ?></dt>
+                        <dd><?php echo esc_html($native_status !== ''
+                            ? ($native_status_labels[$native_status] ?? $native_status)
+                            : __('No runs yet', 'lavka-price-sync')); ?></dd>
+                    </div>
+                </dl>
+            </section>
         </section>
 
         <section class="lps-ap-warnings" id="lps-ap-warnings" hidden>
@@ -279,18 +410,42 @@ function lps_accounting_prices_ajax(): void {
                 wp_send_json_error(['message' => __('Explicit confirmation is required for Folio changes.', 'lavka-price-sync')], 400);
             }
 
+            $single_lock_token = '';
+            if (!$preview_only) {
+                if (!function_exists('lavka_ecosystem_lock_acquire')) {
+                    wp_send_json_error(['message' => __('The global Lavka lock is unavailable. The recalculation was not started.', 'lavka-price-sync')], 503);
+                }
+                $single_lock = lavka_ecosystem_lock_acquire(
+                    'lavka-price-sync',
+                    'accounting_price_single',
+                    'manual',
+                    __('Single-product Folio accounting-price recalculation', 'lavka-price-sync'),
+                    10 * MINUTE_IN_SECONDS,
+                    ['warehouse_id' => $warehouse_id, 'sku' => $sku]
+                );
+                if (empty($single_lock['ok'])) {
+                    wp_send_json_error([
+                        'message' => $single_lock['message'] ?? __('Another Lavka synchronization is running.', 'lavka-price-sync'),
+                        'lock' => $single_lock['lock'] ?? null,
+                    ], 409);
+                }
+                $single_lock_token = (string)($single_lock['token'] ?? '');
+            }
+
             $response = lps_java_post(LPS_ACCOUNTING_PRICES_SINGLE_PATH, [
                 'sku' => $sku,
                 'warehouseId' => $warehouse_id,
                 'previewOnly' => $preview_only,
             ]);
+            if ($single_lock_token !== '' && function_exists('lavka_ecosystem_lock_release')) {
+                lavka_ecosystem_lock_release($single_lock_token);
+            }
             lps_accounting_prices_send_response($response);
             break;
 
         case 'full_start':
             $warehouse_id = absint($_POST['warehouseId'] ?? 0);
             $preview_only = (string)($_POST['previewOnly'] ?? '1') === '1';
-            $continue_on_negative = (string)($_POST['continueOnNegativeStock'] ?? '1') === '1';
 
             if ($warehouse_id < 1) {
                 wp_send_json_error(['message' => __('Folio warehouse is required.', 'lavka-price-sync')], 400);
@@ -299,17 +454,11 @@ function lps_accounting_prices_ajax(): void {
                 wp_send_json_error(['message' => __('Explicit confirmation is required for Folio changes.', 'lavka-price-sync')], 400);
             }
 
-            $response = lps_java_post(LPS_ACCOUNTING_PRICES_FULL_PATH, [
-                'warehouseId' => $warehouse_id,
-                'previewOnly' => $preview_only,
-                'continueOnNegativeStock' => $continue_on_negative,
-            ], ['timeout' => 30]);
-            lps_accounting_prices_send_response($response);
+            wp_send_json_success(lps_accounting_prices_native_start($warehouse_id, $preview_only, 'manual'));
             break;
 
         case 'full_status':
-            $response = lps_java_get(LPS_ACCOUNTING_PRICES_STATUS_PATH, ['timeout' => 30]);
-            lps_accounting_prices_send_response($response);
+            wp_send_json_success(lps_accounting_prices_native_poll(true));
             break;
 
         default:

@@ -134,6 +134,7 @@
 .lps-ap-status-completed_with_warnings,
 .lps-ap-status-stopped_on_negative_stock,
 .lps-ap-status-preview_blocked,
+.lps-ap-status-blocked_negative_stock,
 .lps-ap-status-blocked {
   border-color: #dba617;
   color: #674b00;
@@ -142,10 +143,84 @@
 
 .lps-ap-status-failed,
 .lps-ap-status-failed_partial,
+.lps-ap-status-outcome_unknown,
 .lps-ap-status-busy {
   border-color: #d63638;
   color: #8a2424;
   background: #fcf0f1;
+}
+
+.lps-ap-phase {
+  color: #50575e;
+  font-weight: 600;
+}
+
+.lps-ap-native-description {
+  max-width: 960px;
+}
+
+.lps-ap-cron-settings {
+  max-width: 1120px;
+  margin-top: 28px;
+  padding: 18px;
+  border: 1px solid #c3c4c7;
+  border-left: 4px solid #2271b1;
+  background: #fff;
+}
+
+.lps-ap-cron-settings h3 {
+  margin-top: 0;
+}
+
+.lps-ap-cron-toggle,
+.lps-ap-cron-confirm {
+  display: block;
+  margin: 14px 0;
+}
+
+.lps-ap-cron-grid {
+  display: grid;
+  grid-template-columns: minmax(260px, 2fr) minmax(180px, 1fr) minmax(150px, 1fr);
+  gap: 14px;
+  max-width: 920px;
+}
+
+.lps-ap-cron-grid label,
+.lps-ap-cron-grid span {
+  display: block;
+}
+
+.lps-ap-cron-grid span {
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+.lps-ap-cron-grid select,
+.lps-ap-cron-grid input {
+  width: 100%;
+  max-width: none;
+}
+
+.lps-ap-cron-status {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 10px;
+  max-width: 920px;
+  margin: 18px 0 0;
+}
+
+.lps-ap-cron-status > div {
+  padding: 10px;
+  border: 1px solid #dcdcde;
+  background: #f6f7f7;
+}
+
+.lps-ap-cron-status dt {
+  font-weight: 600;
+}
+
+.lps-ap-cron-status dd {
+  margin: 6px 0 0;
 }
 
 .lps-ap-state-section {
@@ -315,6 +390,11 @@
 
   .lps-ap-counters {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lps-ap-cron-grid,
+  .lps-ap-cron-status {
+    grid-template-columns: 1fr;
   }
 }
 

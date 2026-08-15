@@ -20,7 +20,6 @@
     singleApply: document.getElementById('lps-ap-single-apply'),
     singleNotice: document.getElementById('lps-ap-single-notice'),
     singleResult: document.getElementById('lps-ap-single-result'),
-    continueNegative: document.getElementById('lps-ap-continue-negative'),
     fullPreview: document.getElementById('lps-ap-full-preview'),
     fullConfirm: document.getElementById('lps-ap-full-confirm'),
     fullApply: document.getElementById('lps-ap-full-apply'),
@@ -35,7 +34,8 @@
     truncated: document.getElementById('lps-ap-truncated'),
     copySkus: document.getElementById('lps-ap-copy-skus'),
     exportCsv: document.getElementById('lps-ap-export-csv'),
-    exportJson: document.getElementById('lps-ap-export-json')
+    exportJson: document.getElementById('lps-ap-export-json'),
+    cronWarehouse: document.getElementById('lps-ap-cron-warehouse')
   };
 
   const state = {
@@ -44,7 +44,8 @@
     warningsTruncated: false,
     pollTimer: null,
     fullRunning: false,
-    lastFullPreviewWarehouse: 0
+    lastFullPreviewWarehouse: 0,
+    manualReviewRequired: false
   };
 
   function text(value) {
@@ -150,6 +151,10 @@
     return t.statusLabels?.[status] || status || '—';
   }
 
+  function phaseLabel(phase) {
+    return t.phaseLabels?.[phase] || phase || '—';
+  }
+
   async function loadWarehouses() {
     try {
       elements.warehouseStatus.textContent = t.loading || 'Loading...';
@@ -169,6 +174,22 @@
       });
       elements.warehouse.disabled = false;
       if (previous && items.some((item) => String(item.id) === previous)) elements.warehouse.value = previous;
+
+      if (elements.cronWarehouse) {
+        const selected = elements.cronWarehouse.dataset.selected || '';
+        elements.cronWarehouse.replaceChildren();
+        elements.cronWarehouse.appendChild(make('option', '', t.selectWarehouse || 'Select warehouse'));
+        elements.cronWarehouse.firstChild.value = '';
+        items.forEach((warehouse) => {
+          const option = make('option', '', `${warehouse.id} — ${warehouse.name}`);
+          option.value = String(warehouse.id);
+          elements.cronWarehouse.appendChild(option);
+        });
+        if (selected && items.some((item) => String(item.id) === selected)) {
+          elements.cronWarehouse.value = selected;
+        }
+        elements.cronWarehouse.disabled = false;
+      }
       elements.warehouseStatus.textContent = '';
     } catch (error) {
       elements.warehouse.hidden = true;
@@ -297,44 +318,51 @@
 
   function renderFull(body) {
     elements.fullSummary.replaceChildren();
-    const status = String(body?.status || 'IDLE');
-    const running = body?.running === true;
+    const status = String(body?.status || 'IDLE').toUpperCase();
+    const phase = String(body?.phase || '').toUpperCase();
+    const running = body?.running === true || status === 'QUEUED';
     state.fullRunning = running;
-    if (!running && body?.request?.previewOnly === true && ['COMPLETED', 'COMPLETED_WITH_WARNINGS'].includes(status)) {
+    state.manualReviewRequired = ['FAILED_PARTIAL', 'OUTCOME_UNKNOWN'].includes(status);
+    if (!running && body?.request?.previewOnly === true && status === 'PREVIEW_READY') {
       state.lastFullPreviewWarehouse = Number(body.request.warehouseId || 0);
-    } else if (!running && body?.request?.previewOnly === false && ['COMPLETED', 'COMPLETED_WITH_WARNINGS', 'FAILED', 'FAILED_PARTIAL'].includes(status)) {
+    } else if (!running && body?.request?.previewOnly === false && ['COMPLETED', 'BLOCKED_NEGATIVE_STOCK', 'STOPPED_ON_NEGATIVE_STOCK', 'FAILED', 'FAILED_PARTIAL', 'OUTCOME_UNKNOWN'].includes(status)) {
       state.lastFullPreviewWarehouse = 0;
     }
-    elements.fullPreview.disabled = running;
+    elements.fullPreview.disabled = running || state.manualReviewRequired;
     elements.fullApply.disabled = running
+      || state.manualReviewRequired
       || !elements.fullConfirm.checked
       || state.lastFullPreviewWarehouse !== selectedWarehouseId();
 
-    const total = Number(body?.totalProducts || 0);
-    const processed = Number(body?.processedProducts || 0);
-    const percent = total > 0 ? Math.min(100, Math.round((processed / total) * 100)) : 0;
-    elements.progress.hidden = !running && total === 0;
+    const total = Number(body?.totalUnits || 0);
+    const processed = Number(body?.progressUnits || 0);
+    const hasProvidedPercent = body?.progressPercent !== null && body?.progressPercent !== undefined && body?.progressPercent !== '';
+    const providedPercent = Number(body?.progressPercent);
+    const percent = hasProvidedPercent && Number.isFinite(providedPercent)
+      ? Math.max(0, Math.min(100, Math.round(providedPercent)))
+      : (total > 0 ? Math.min(100, Math.round((processed / total) * 100)) : 0);
+    elements.progress.hidden = !running && total === 0 && processed === 0;
     elements.progressTrack?.setAttribute('aria-valuenow', String(percent));
     if (elements.progressBar) elements.progressBar.style.width = `${percent}%`;
     if (elements.progressLabel) {
-      const current = body?.currentSku ? ` · ${t.currentSku || 'Current SKU'}: ${body.currentSku}` : '';
-      elements.progressLabel.textContent = `${formatInteger(processed)} / ${formatInteger(total)} (${percent}%)${current}`;
+      const current = body?.currentArt ? ` · ${t.currentSku || 'Current SKU'}: ${body.currentArt}` : '';
+      const currentPhase = phase ? ` · ${t.phase || 'Phase'}: ${phaseLabel(phase)}` : '';
+      elements.progressLabel.textContent = `${formatInteger(processed)} / ${formatInteger(total)} (${percent}%)${currentPhase}${current}`;
     }
 
     const header = make('div', 'lps-ap-result-header');
     header.appendChild(make('span', `lps-ap-status lps-ap-status-${status.toLowerCase()}`, statusLabel(status)));
     if (body?.jobId) header.appendChild(make('code', '', body.jobId));
     if (body?.request?.warehouseId) header.appendChild(make('span', '', warehouseLabel(body.request.warehouseId)));
+    if (phase) header.appendChild(make('span', 'lps-ap-phase', `${t.phase || 'Phase'}: ${phaseLabel(phase)}`));
     elements.fullSummary.appendChild(header);
 
     const counters = make('div', 'lps-ap-counters');
     counters.append(
-      counter(t.totalProducts || 'Total products', body?.totalProducts),
-      counter(t.processedProducts || 'Processed', body?.processedProducts),
-      counter(t.eligibleProducts || 'Eligible', body?.eligibleProducts),
-      counter(t.recalculatedProducts || 'Recalculated', body?.recalculatedProducts, 'success'),
-      counter(t.priceChangedProducts || 'Prices changed', body?.priceChangedProducts, 'success'),
-      counter(t.skippedProducts || 'Skipped', body?.skippedProducts, Number(body?.skippedProducts) > 0 ? 'warning' : ''),
+      counter(t.procedureCalls || 'Procedure calls', body?.procedureCalls),
+      counter(t.preflightChunks || 'Preflight portions', body?.preflightChunks),
+      counter(t.committedChunks || 'Committed portions', body?.committedChunks, Number(body?.committedChunks) > 0 ? 'success' : ''),
+      counter(t.progressUnits || 'Progress units', `${formatInteger(processed)} / ${formatInteger(total)}`),
       counter(t.warningCount || 'Warnings', body?.warningCount, Number(body?.warningCount) > 0 ? 'warning' : '')
     );
     elements.fullSummary.appendChild(counters);
@@ -342,18 +370,24 @@
     const warnings = collectWarnings(body);
     renderWarnings(warnings, Boolean(body?.warningsTruncated));
 
-    if (body?.error) {
-      setNotice(elements.fullNotice, 'error', `${t.jobFailed || 'Task failed'} ${body.error}`, body);
-    } else if (running) {
+    if (running) {
       setNotice(elements.fullNotice, 'info', t.jobRunning || 'Task running');
+    } else if (status === 'PREVIEW_READY') {
+      setNotice(elements.fullNotice, 'success', t.previewReady || 'Preview ready');
+    } else if (status === 'BLOCKED_NEGATIVE_STOCK') {
+      setNotice(elements.fullNotice, 'warning', t.jobBlockedNegative || 'Preflight blocked recalculation', body);
     } else if (status === 'COMPLETED') {
       setNotice(elements.fullNotice, 'success', t.jobCompleted || 'Task completed');
-    } else if (status === 'COMPLETED_WITH_WARNINGS') {
-      setNotice(elements.fullNotice, 'warning', t.jobWarnings || 'Task completed with warnings');
     } else if (status === 'STOPPED_ON_NEGATIVE_STOCK') {
       setNotice(elements.fullNotice, 'warning', t.jobStopped || 'Task stopped');
-    } else if (status === 'FAILED' || status === 'FAILED_PARTIAL' || status === 'BUSY') {
+    } else if (status === 'FAILED_PARTIAL') {
+      setNotice(elements.fullNotice, 'error', t.jobFailedPartial || 'Manual review is required', body);
+    } else if (status === 'OUTCOME_UNKNOWN') {
+      setNotice(elements.fullNotice, 'error', t.jobOutcomeUnknown || 'The outcome is unknown', body);
+    } else if (status === 'FAILED' || status === 'BUSY') {
       setNotice(elements.fullNotice, 'error', body?.error || t.jobFailed || 'Task failed', body);
+    } else if (body?.error) {
+      setNotice(elements.fullNotice, 'error', `${t.jobFailed || 'Task failed'} ${body.error}`, body);
     } else if (status === 'IDLE') {
       setNotice(elements.fullNotice, 'info', t.idle || 'No task started');
     }
@@ -530,11 +564,11 @@
     state.pollTimer = window.setTimeout(async () => {
       try {
         const result = await request('full_status');
+        renderFull(result.body || {});
         if (result.httpStatus < 200 || result.httpStatus >= 300) {
           setNotice(elements.fullNotice, 'error', javaError(result), result.body);
           return;
         }
-        renderFull(result.body || {});
         if (result.body?.running === true || result.body?.status === 'QUEUED') pollFullStatus(config.pollInterval || 3000);
       } catch (error) {
         setNotice(elements.fullNotice, 'error', error.message || t.networkError || 'Request failed');
@@ -563,7 +597,6 @@
       const result = await request('full_start', {
         warehouseId,
         previewOnly,
-        continueOnNegativeStock: elements.continueNegative.checked,
         confirmApply: previewOnly ? 0 : 1
       });
       renderFull(result.body || {});
@@ -573,8 +606,9 @@
           pollFullStatus(1000);
         } else {
           state.fullRunning = false;
-          elements.fullPreview.disabled = false;
+          elements.fullPreview.disabled = state.manualReviewRequired;
           elements.fullApply.disabled = !elements.fullConfirm.checked
+            || state.manualReviewRequired
             || state.lastFullPreviewWarehouse !== selectedWarehouseId();
         }
         return;
@@ -585,8 +619,9 @@
       setNotice(elements.fullNotice, 'error', error.message || t.networkError || 'Request failed');
     } finally {
       if (!state.fullRunning) {
-        elements.fullPreview.disabled = false;
+        elements.fullPreview.disabled = state.manualReviewRequired;
         elements.fullApply.disabled = !elements.fullConfirm.checked
+          || state.manualReviewRequired
           || state.lastFullPreviewWarehouse !== selectedWarehouseId();
       }
     }
