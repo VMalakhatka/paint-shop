@@ -118,7 +118,7 @@ function pc_folio_documents_render_endpoint(): void {
     }
 
     $date_to = current_time('Y-m-d');
-    $date_from = wp_date('Y-m-d', strtotime('-1 year +1 day', current_time('timestamp')));
+    $date_from = current_datetime()->modify('-1 month')->format('Y-m-d');
     ?>
     <section class="pc-folio-documents"
         data-pc-folio-documents

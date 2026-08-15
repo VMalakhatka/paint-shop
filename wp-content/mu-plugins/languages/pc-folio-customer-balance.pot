@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: PC Folio Customer Balance 0.8.0\n"
+"Project-Id-Version: PC Folio Customer Balance 0.8.1\n"
 "Report-Msgid-Bugs-To: \n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
