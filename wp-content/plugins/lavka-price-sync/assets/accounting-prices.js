@@ -687,5 +687,5 @@
   });
 
   loadWarehouses();
-  pollFullStatus(0);
+  if (config.pollOnLoad === true) pollFullStatus(0);
 })();

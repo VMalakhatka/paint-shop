@@ -22,6 +22,7 @@ add_action('admin_enqueue_scripts', function () {
     $css_path = dirname(__DIR__) . '/assets/accounting-prices.css';
     $js_path = dirname(__DIR__) . '/assets/accounting-prices.js';
     $plugin_file = dirname(__DIR__) . '/lavka-price-sync.php';
+    $native_job = lps_accounting_prices_native_job_state();
 
     wp_enqueue_style(
         'lps-accounting-prices',
@@ -41,6 +42,7 @@ add_action('admin_enqueue_scripts', function () {
         'nonce' => wp_create_nonce('lps_accounting_prices'),
         'pollInterval' => 3000,
         'storageKey' => 'lpsNativeAccountingPriceJobId',
+        'pollOnLoad' => !empty($native_job['running']),
         'i18n' => [
             'loading' => __('Loading...', 'lavka-price-sync'),
             'networkError' => __('The server request failed.', 'lavka-price-sync'),
