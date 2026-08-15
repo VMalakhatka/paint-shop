@@ -3,7 +3,7 @@
  * Plugin Name: PC WayForPay Compliance
  * Description: Publishes the legal, payment, delivery, refund, and seller details required for online payments.
  * Author: PaintCore
- * Version: 1.1.0
+ * Version: 1.2.0
  * Text Domain: pc-wayforpay-compliance
  */
 
@@ -13,6 +13,9 @@ if (!defined('ABSPATH')) {
 
 const PC_WAYFORPAY_CONTENT_VERSION = '2026-08-15-5';
 const PC_WAYFORPAY_PAGES_OPTION = 'pc_wayforpay_compliance_page_ids';
+const PC_WAYFORPAY_CHECKOUT_VERSION = '2026-08-15-1';
+const PC_WAYFORPAY_CHECKOUT_VERSION_OPTION = 'pc_wayforpay_classic_checkout_version';
+const PC_WAYFORPAY_CHECKOUT_BACKUP_META = '_pc_wayforpay_checkout_block_backup';
 
 /**
  * Page identities are kept separate from their content so internal links can be
@@ -263,6 +266,51 @@ function pc_wayforpay_install_pages(): void
     }
 }
 add_action('init', 'pc_wayforpay_install_pages', 20);
+
+/**
+ * Keep the assigned WooCommerce checkout compatible with the legacy WayForPay
+ * gateway. The gateway is available in shortcode checkout, but it does not
+ * register a payment method for WooCommerce Checkout Blocks.
+ */
+function pc_wayforpay_install_classic_checkout(): void
+{
+    if (get_option(PC_WAYFORPAY_CHECKOUT_VERSION_OPTION) === PC_WAYFORPAY_CHECKOUT_VERSION) {
+        return;
+    }
+
+    $checkout_page_id = absint(get_option('woocommerce_checkout_page_id'));
+    if (!$checkout_page_id || get_post_type($checkout_page_id) !== 'page') {
+        return;
+    }
+
+    $content = (string) get_post_field('post_content', $checkout_page_id, 'raw');
+    if (strpos($content, '[woocommerce_checkout') !== false) {
+        update_option(PC_WAYFORPAY_CHECKOUT_VERSION_OPTION, PC_WAYFORPAY_CHECKOUT_VERSION, false);
+        return;
+    }
+
+    // Do not overwrite an unknown custom checkout implementation.
+    if (!has_block('woocommerce/checkout', $content)) {
+        return;
+    }
+
+    if (!metadata_exists('post', $checkout_page_id, PC_WAYFORPAY_CHECKOUT_BACKUP_META)) {
+        update_post_meta($checkout_page_id, PC_WAYFORPAY_CHECKOUT_BACKUP_META, wp_slash($content));
+    }
+
+    $result = wp_update_post(wp_slash([
+        'ID' => $checkout_page_id,
+        'post_content' => "<!-- wp:shortcode -->\n[woocommerce_checkout]\n<!-- /wp:shortcode -->",
+    ]), true);
+
+    if (is_wp_error($result) || !$result) {
+        return;
+    }
+
+    update_post_meta($checkout_page_id, '_pc_wayforpay_checkout_migrated_version', PC_WAYFORPAY_CHECKOUT_VERSION);
+    update_option(PC_WAYFORPAY_CHECKOUT_VERSION_OPTION, PC_WAYFORPAY_CHECKOUT_VERSION, false);
+}
+add_action('init', 'pc_wayforpay_install_classic_checkout', 25);
 
 /**
  * Return a managed page URL without hard-coding a deployment domain.
