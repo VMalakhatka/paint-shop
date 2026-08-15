@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the Lavka Price Sync plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Lavka Price Sync 0.1.0\n"
+"Project-Id-Version: Lavka Price Sync 0.2.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lavka-price-sync\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-06-26T18:19:59+00:00\n"
+"POT-Creation-Date: 2026-08-15T20:27:24+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: lavka-price-sync\n"
@@ -24,6 +24,488 @@ msgstr ""
 #. Description of the plugin
 #: lavka-price-sync.php
 msgid "Sync role-based prices from Java service to WooCommerce (meta: _wpc_price_role_<role>)."
+msgstr ""
+
+#: inc/accounting-prices.php:12
+#: inc/accounting-prices.php:13
+#: inc/accounting-prices.php:146
+msgid "Folio accounting prices"
+msgstr ""
+
+#: inc/accounting-prices.php:45
+msgid "Loading..."
+msgstr ""
+
+#: inc/accounting-prices.php:46
+msgid "The server request failed."
+msgstr ""
+
+#: inc/accounting-prices.php:47
+msgid "Unknown error."
+msgstr ""
+
+#: inc/accounting-prices.php:48
+msgid "Select a Folio warehouse."
+msgstr ""
+
+#: inc/accounting-prices.php:49
+msgid "Select a warehouse"
+msgstr ""
+
+#: inc/accounting-prices.php:50
+msgid "The Java service returned no warehouses."
+msgstr ""
+
+#: inc/accounting-prices.php:51
+msgid "The warehouse directory is unavailable. Enter the Folio warehouse ID manually."
+msgstr ""
+
+#: inc/accounting-prices.php:52
+msgid "Enter a product SKU."
+msgstr ""
+
+#: inc/accounting-prices.php:53
+msgid "Checking the product without changes..."
+msgstr ""
+
+#: inc/accounting-prices.php:54
+msgid "Recalculating the product in Folio..."
+msgstr ""
+
+#: inc/accounting-prices.php:55
+msgid "Starting a read-only warehouse check..."
+msgstr ""
+
+#: inc/accounting-prices.php:56
+msgid "Starting the warehouse recalculation..."
+msgstr ""
+
+#: inc/accounting-prices.php:57
+msgid "Recalculate this product in Folio now?"
+msgstr ""
+
+#: inc/accounting-prices.php:58
+msgid "Recalculate accounting prices for the entire selected warehouse? Previously committed products cannot be rolled back as one batch."
+msgstr ""
+
+#: inc/accounting-prices.php:59
+msgid "Run a successful preview for this SKU and warehouse first."
+msgstr ""
+
+#: inc/accounting-prices.php:60
+msgid "Complete a full read-only check for this warehouse before recalculation."
+msgstr ""
+
+#: inc/accounting-prices.php:61
+msgid "The task was accepted. Waiting for progress..."
+msgstr ""
+
+#: inc/accounting-prices.php:62
+msgid "The task is running."
+msgstr ""
+
+#: inc/accounting-prices.php:63
+msgid "The task completed without warnings."
+msgstr ""
+
+#: inc/accounting-prices.php:64
+msgid "The task completed with warnings. Some products were skipped."
+msgstr ""
+
+#: inc/accounting-prices.php:65
+msgid "The task stopped on a negative chronological stock."
+msgstr ""
+
+#: inc/accounting-prices.php:66
+msgid "The task failed."
+msgstr ""
+
+#: inc/accounting-prices.php:67
+msgid "No warehouse task has been started since the Java service restart."
+msgstr ""
+
+#: inc/accounting-prices.php:68
+msgid "The preview found no blocking problems."
+msgstr ""
+
+#: inc/accounting-prices.php:69
+msgid "The preview found problems. Recalculation is blocked."
+msgstr ""
+
+#: inc/accounting-prices.php:70
+msgid "The product was recalculated in Folio."
+msgstr ""
+
+#: inc/accounting-prices.php:71
+msgid "The procedure completed; the accounting price was already correct."
+msgstr ""
+
+#: inc/accounting-prices.php:72
+msgid "Only part of the warnings is shown. The complete negative-stock diagnostics remain in the Java log."
+msgstr ""
+
+#: inc/accounting-prices.php:73
+msgid "No warnings were returned."
+msgstr ""
+
+#: inc/accounting-prices.php:74
+msgid "No state data was returned."
+msgstr ""
+
+#: inc/accounting-prices.php:75
+msgid "Before"
+msgstr ""
+
+#: inc/accounting-prices.php:76
+msgid "After"
+msgstr ""
+
+#: inc/accounting-prices.php:77
+msgid "Current SKU"
+msgstr ""
+
+#: inc/accounting-prices.php:78
+#: inc/accounting-prices.php:90
+msgid "Warehouse"
+msgstr ""
+
+#: inc/accounting-prices.php:79
+msgid "Document"
+msgstr ""
+
+#: inc/accounting-prices.php:80
+msgid "Date"
+msgstr ""
+
+#: inc/accounting-prices.php:81
+msgid "Before operation"
+msgstr ""
+
+#: inc/accounting-prices.php:82
+msgid "Operation"
+msgstr ""
+
+#: inc/accounting-prices.php:83
+msgid "After operation"
+msgstr ""
+
+#: inc/accounting-prices.php:84
+msgid "Shortage"
+msgstr ""
+
+#: inc/accounting-prices.php:85
+msgid "Reason"
+msgstr ""
+
+#: inc/accounting-prices.php:86
+msgid "Technical details"
+msgstr ""
+
+#: inc/accounting-prices.php:87
+msgid "receipt"
+msgstr ""
+
+#: inc/accounting-prices.php:88
+msgid "expense"
+msgstr ""
+
+#: inc/accounting-prices.php:89
+msgid "operation"
+msgstr ""
+
+#: inc/accounting-prices.php:91
+msgid "Physical quantity"
+msgstr ""
+
+#: inc/accounting-prices.php:92
+msgid "Available quantity"
+msgstr ""
+
+#: inc/accounting-prices.php:93
+msgid "Accounting quantity"
+msgstr ""
+
+#: inc/accounting-prices.php:94
+msgid "Accounting price"
+msgstr ""
+
+#: inc/accounting-prices.php:95
+msgid "Initial quantity"
+msgstr ""
+
+#: inc/accounting-prices.php:96
+msgid "Accounting amount"
+msgstr ""
+
+#: inc/accounting-prices.php:97
+msgid "Accounted movements"
+msgstr ""
+
+#: inc/accounting-prices.php:98
+msgid "Total products"
+msgstr ""
+
+#: inc/accounting-prices.php:99
+msgid "Processed products"
+msgstr ""
+
+#: inc/accounting-prices.php:100
+msgid "Eligible products"
+msgstr ""
+
+#: inc/accounting-prices.php:101
+msgid "Recalculated products"
+msgstr ""
+
+#: inc/accounting-prices.php:102
+msgid "Prices changed"
+msgstr ""
+
+#: inc/accounting-prices.php:103
+msgid "Skipped products"
+msgstr ""
+
+#: inc/accounting-prices.php:104
+msgid "Warnings"
+msgstr ""
+
+#: inc/accounting-prices.php:105
+msgid "SKU list copied."
+msgstr ""
+
+#: inc/accounting-prices.php:106
+msgid "There are no warnings to export."
+msgstr ""
+
+#: inc/accounting-prices.php:107
+msgid "Java API returned HTTP"
+msgstr ""
+
+#: inc/accounting-prices.php:108
+msgid "Request ID"
+msgstr ""
+
+#: inc/accounting-prices.php:109
+msgid "Raw Java response"
+msgstr ""
+
+#: inc/accounting-prices.php:110
+#: inc/accounting-prices.php:214
+msgid "Full recalculation becomes available after a completed read-only check of the selected warehouse."
+msgstr ""
+
+#: inc/accounting-prices.php:112
+msgid "Not started"
+msgstr ""
+
+#: inc/accounting-prices.php:113
+msgid "Busy"
+msgstr ""
+
+#: inc/accounting-prices.php:114
+msgid "Queued"
+msgstr ""
+
+#: inc/accounting-prices.php:115
+#: inc/logs.php:120
+msgid "Running"
+msgstr ""
+
+#: inc/accounting-prices.php:116
+msgid "Completed"
+msgstr ""
+
+#: inc/accounting-prices.php:117
+msgid "Completed with warnings"
+msgstr ""
+
+#: inc/accounting-prices.php:118
+msgid "Stopped on negative stock"
+msgstr ""
+
+#: inc/accounting-prices.php:119
+msgid "Failed"
+msgstr ""
+
+#: inc/accounting-prices.php:120
+msgid "Failed after partial recalculation"
+msgstr ""
+
+#: inc/accounting-prices.php:121
+msgid "Check passed"
+msgstr ""
+
+#: inc/accounting-prices.php:122
+msgid "Check blocked recalculation"
+msgstr ""
+
+#: inc/accounting-prices.php:123
+msgid "Recalculated"
+msgstr ""
+
+#: inc/accounting-prices.php:124
+msgid "Blocked"
+msgstr ""
+
+#: inc/accounting-prices.php:127
+msgid "Negative chronological stock"
+msgstr ""
+
+#: inc/accounting-prices.php:128
+msgid "Return movement requires review"
+msgstr ""
+
+#: inc/accounting-prices.php:129
+msgid "Accounted movement has zero quantity"
+msgstr ""
+
+#: inc/accounting-prices.php:130
+msgid "Movement date is missing"
+msgstr ""
+
+#: inc/accounting-prices.php:131
+msgid "Invalid legacy document key"
+msgstr ""
+
+#: inc/accounting-prices.php:132
+msgid "Accounting method is not supported"
+msgstr ""
+
+#: inc/accounting-prices.php:133
+msgid "Warehouse accounting group is not supported"
+msgstr ""
+
+#: inc/accounting-prices.php:134
+msgid "Warehouse group settings do not match"
+msgstr ""
+
+#: inc/accounting-prices.php:135
+msgid "Folio excludes this product type"
+msgstr ""
+
+#: inc/accounting-prices.php:136
+msgid "Folio temporary movement table is not empty"
+msgstr ""
+
+#: inc/accounting-prices.php:149
+msgid "Financial operation"
+msgstr ""
+
+#: inc/accounting-prices.php:150
+msgid "Preview is read-only. Apply changes Folio data and must be run only in an agreed maintenance window."
+msgstr ""
+
+#: inc/accounting-prices.php:154
+msgid "Folio warehouse"
+msgstr ""
+
+#: inc/accounting-prices.php:156
+msgid "Loading warehouses..."
+msgstr ""
+
+#: inc/accounting-prices.php:159
+msgid "Folio warehouse ID"
+msgstr ""
+
+#: inc/accounting-prices.php:160
+msgid "Warehouse ID"
+msgstr ""
+
+#: inc/accounting-prices.php:164
+msgid "Accounting price views"
+msgstr ""
+
+#: inc/accounting-prices.php:166
+msgid "One product"
+msgstr ""
+
+#: inc/accounting-prices.php:169
+msgid "Entire warehouse"
+msgstr ""
+
+#: inc/accounting-prices.php:174
+msgid "Product accounting price"
+msgstr ""
+
+#: inc/accounting-prices.php:176
+msgid "SKU"
+msgstr ""
+
+#: inc/accounting-prices.php:179
+msgid "Check without changes"
+msgstr ""
+
+#: inc/accounting-prices.php:185
+msgid "I reviewed the preview and confirm recalculation of this product."
+msgstr ""
+
+#: inc/accounting-prices.php:188
+msgid "Recalculate product in Folio"
+msgstr ""
+
+#: inc/accounting-prices.php:196
+msgid "Warehouse accounting prices"
+msgstr ""
+
+#: inc/accounting-prices.php:200
+msgid "Skip products with negative chronological stock and continue."
+msgstr ""
+
+#: inc/accounting-prices.php:203
+msgid "Check entire warehouse without changes"
+msgstr ""
+
+#: inc/accounting-prices.php:209
+msgid "I have a current backup and confirm the agreed Folio maintenance window."
+msgstr ""
+
+#: inc/accounting-prices.php:212
+msgid "Recalculate entire warehouse in Folio"
+msgstr ""
+
+#: inc/accounting-prices.php:228
+msgid "Diagnostics and skipped products"
+msgstr ""
+
+#: inc/accounting-prices.php:231
+msgid "Copy SKU list"
+msgstr ""
+
+#: inc/accounting-prices.php:234
+msgid "Export CSV"
+msgstr ""
+
+#: inc/accounting-prices.php:237
+msgid "Export JSON"
+msgstr ""
+
+#: inc/accounting-prices.php:252
+msgid "You do not have permission to perform this operation."
+msgstr ""
+
+#: inc/accounting-prices.php:259
+msgid "Java Base URL is not configured."
+msgstr ""
+
+#: inc/accounting-prices.php:274
+msgid "SKU and Folio warehouse are required."
+msgstr ""
+
+#: inc/accounting-prices.php:277
+#: inc/accounting-prices.php:297
+msgid "Explicit confirmation is required for Folio changes."
+msgstr ""
+
+#: inc/accounting-prices.php:294
+msgid "Folio warehouse is required."
+msgstr ""
+
+#: inc/accounting-prices.php:314
+msgid "Unsupported accounting-price operation."
+msgstr ""
+
+#: inc/accounting-prices.php:330
+msgid "Java API returned an empty response."
 msgstr ""
 
 #: inc/admin-ui.php:8
@@ -297,11 +779,11 @@ msgstr ""
 msgid "Once Weekly"
 msgstr ""
 
-#: inc/cron.php:84
+#: inc/cron.php:112
 msgid "Price synchronization"
 msgstr ""
 
-#: inc/cron.php:96
+#: inc/cron.php:124
 #: inc/sync.php:7
 msgid "Synchronization is already running. Please try again later."
 msgstr ""
@@ -348,10 +830,6 @@ msgstr ""
 
 #: inc/logs.php:106
 msgid "CSV"
-msgstr ""
-
-#: inc/logs.php:120
-msgid "Running"
 msgstr ""
 
 #: inc/logs.php:122

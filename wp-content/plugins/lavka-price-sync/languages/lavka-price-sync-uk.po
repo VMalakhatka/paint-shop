@@ -1,11 +1,11 @@
-# Copyright (C) 2025 
+# Copyright (C) 2026
 # This file is distributed under the same license as the Lavka Price Sync plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Lavka Price Sync 0.1.0\n"
+"Project-Id-Version: Lavka Price Sync 0.2.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lavka-price-sync\n"
-"POT-Creation-Date: 2026-06-26T18:19:59+00:00\n"
-"PO-Revision-Date: 2025-10-13T20:03:35+00:00\n"
+"POT-Creation-Date: 2026-08-15T20:27:24+00:00\n"
+"PO-Revision-Date: 2026-08-15T20:18:33+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: uk\n"
@@ -14,8 +14,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: lavka-price-sync\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 #. Plugin Name of the plugin
 #: lavka-price-sync.php inc/admin-ui.php:7 inc/admin-ui.php:102
@@ -30,6 +30,504 @@ msgid ""
 msgstr ""
 "Синхронізація цін за ролями з Java-сервісу до WooCommerce (мета: "
 "_wpc_price_role_<роль>)."
+
+#: inc/accounting-prices.php:12 inc/accounting-prices.php:13
+#: inc/accounting-prices.php:146
+msgid "Folio accounting prices"
+msgstr "Облікові ціни ФОЛІО"
+
+#: inc/accounting-prices.php:45
+msgid "Loading..."
+msgstr "Завантаження..."
+
+#: inc/accounting-prices.php:46
+msgid "The server request failed."
+msgstr "Запит до сервера не виконано."
+
+#: inc/accounting-prices.php:47
+msgid "Unknown error."
+msgstr "Невідома помилка."
+
+#: inc/accounting-prices.php:48
+msgid "Select a Folio warehouse."
+msgstr "Оберіть склад ФОЛІО."
+
+#: inc/accounting-prices.php:49
+msgid "Select a warehouse"
+msgstr "Оберіть склад"
+
+#: inc/accounting-prices.php:50
+msgid "The Java service returned no warehouses."
+msgstr "Сервіс ФОЛІО не повернув жодного складу."
+
+#: inc/accounting-prices.php:51
+msgid ""
+"The warehouse directory is unavailable. Enter the Folio warehouse ID "
+"manually."
+msgstr "Довідник складів недоступний. Введіть ID складу ФОЛІО вручну."
+
+#: inc/accounting-prices.php:52
+msgid "Enter a product SKU."
+msgstr "Введіть артикул товару."
+
+#: inc/accounting-prices.php:53
+msgid "Checking the product without changes..."
+msgstr "Перевіряємо товар без змін..."
+
+#: inc/accounting-prices.php:54
+msgid "Recalculating the product in Folio..."
+msgstr "Перераховуємо товар у ФОЛІО..."
+
+#: inc/accounting-prices.php:55
+msgid "Starting a read-only warehouse check..."
+msgstr "Запускаємо перевірку складу без змін..."
+
+#: inc/accounting-prices.php:56
+msgid "Starting the warehouse recalculation..."
+msgstr "Запускаємо перерахунок складу..."
+
+#: inc/accounting-prices.php:57
+msgid "Recalculate this product in Folio now?"
+msgstr "Перерахувати цей товар у ФОЛІО зараз?"
+
+#: inc/accounting-prices.php:58
+msgid ""
+"Recalculate accounting prices for the entire selected warehouse? Previously "
+"committed products cannot be rolled back as one batch."
+msgstr ""
+"Перерахувати облікові ціни всього вибраного складу? Уже зафіксовані товари "
+"неможливо відкотити одним пакетом."
+
+#: inc/accounting-prices.php:59
+msgid "Run a successful preview for this SKU and warehouse first."
+msgstr "Спочатку виконайте успішну перевірку цього артикулу та складу."
+
+#: inc/accounting-prices.php:60
+msgid ""
+"Complete a full read-only check for this warehouse before recalculation."
+msgstr "Перед перерахунком завершіть повну перевірку цього складу без змін."
+
+#: inc/accounting-prices.php:61
+msgid "The task was accepted. Waiting for progress..."
+msgstr "Завдання прийнято. Очікуємо на перебіг виконання..."
+
+#: inc/accounting-prices.php:62
+msgid "The task is running."
+msgstr "Завдання виконується."
+
+#: inc/accounting-prices.php:63
+msgid "The task completed without warnings."
+msgstr "Завдання завершено без попереджень."
+
+#: inc/accounting-prices.php:64
+msgid "The task completed with warnings. Some products were skipped."
+msgstr "Завдання завершено з попередженнями. Деякі товари пропущено."
+
+#: inc/accounting-prices.php:65
+msgid "The task stopped on a negative chronological stock."
+msgstr "Завдання зупинено через від'ємний хронологічний залишок."
+
+#: inc/accounting-prices.php:66
+msgid "The task failed."
+msgstr "Завдання завершилося помилкою."
+
+#: inc/accounting-prices.php:67
+msgid "No warehouse task has been started since the Java service restart."
+msgstr "Після перезапуску сервісу ФОЛІО завдання для складу ще не запускалися."
+
+#: inc/accounting-prices.php:68
+msgid "The preview found no blocking problems."
+msgstr "Перевірка не виявила проблем, що блокують перерахунок."
+
+#: inc/accounting-prices.php:69
+msgid "The preview found problems. Recalculation is blocked."
+msgstr "Перевірка виявила проблеми. Перерахунок заблоковано."
+
+#: inc/accounting-prices.php:70
+msgid "The product was recalculated in Folio."
+msgstr "Товар перераховано у ФОЛІО."
+
+#: inc/accounting-prices.php:71
+msgid "The procedure completed; the accounting price was already correct."
+msgstr "Процедуру завершено; облікова ціна вже була правильною."
+
+#: inc/accounting-prices.php:72
+msgid ""
+"Only part of the warnings is shown. The complete negative-stock diagnostics "
+"remain in the Java log."
+msgstr ""
+"Показано лише частину попереджень. Повна діагностика від'ємних залишків "
+"зберігається в журналі сервісу ФОЛІО."
+
+#: inc/accounting-prices.php:73
+msgid "No warnings were returned."
+msgstr "Попереджень не отримано."
+
+#: inc/accounting-prices.php:74
+msgid "No state data was returned."
+msgstr "Дані про стан не отримано."
+
+#: inc/accounting-prices.php:75
+msgid "Before"
+msgstr "До"
+
+#: inc/accounting-prices.php:76
+msgid "After"
+msgstr "Після"
+
+#: inc/accounting-prices.php:77
+msgid "Current SKU"
+msgstr "Поточний артикул"
+
+#: inc/accounting-prices.php:78 inc/accounting-prices.php:90
+msgid "Warehouse"
+msgstr "Склад"
+
+#: inc/accounting-prices.php:79
+msgid "Document"
+msgstr "Документ"
+
+#: inc/accounting-prices.php:80
+msgid "Date"
+msgstr "Дата"
+
+#: inc/accounting-prices.php:81
+msgid "Before operation"
+msgstr "До операції"
+
+#: inc/accounting-prices.php:82
+msgid "Operation"
+msgstr "Операція"
+
+#: inc/accounting-prices.php:83
+msgid "After operation"
+msgstr "Після операції"
+
+#: inc/accounting-prices.php:84
+msgid "Shortage"
+msgstr "Дефіцит"
+
+#: inc/accounting-prices.php:85
+msgid "Reason"
+msgstr "Причина"
+
+#: inc/accounting-prices.php:86
+msgid "Technical details"
+msgstr "Технічні подробиці"
+
+#: inc/accounting-prices.php:87
+msgid "receipt"
+msgstr "прихід"
+
+#: inc/accounting-prices.php:88
+msgid "expense"
+msgstr "витрата"
+
+#: inc/accounting-prices.php:89
+msgid "operation"
+msgstr "операція"
+
+#: inc/accounting-prices.php:91
+msgid "Physical quantity"
+msgstr "Фізична кількість"
+
+#: inc/accounting-prices.php:92
+msgid "Available quantity"
+msgstr "Доступна кількість"
+
+#: inc/accounting-prices.php:93
+msgid "Accounting quantity"
+msgstr "Облікова кількість"
+
+#: inc/accounting-prices.php:94
+msgid "Accounting price"
+msgstr "Облікова ціна"
+
+#: inc/accounting-prices.php:95
+msgid "Initial quantity"
+msgstr "Початкова кількість"
+
+#: inc/accounting-prices.php:96
+msgid "Accounting amount"
+msgstr "Облікова сума"
+
+#: inc/accounting-prices.php:97
+msgid "Accounted movements"
+msgstr "Враховані рухи"
+
+#: inc/accounting-prices.php:98
+msgid "Total products"
+msgstr "Усього товарів"
+
+#: inc/accounting-prices.php:99
+msgid "Processed products"
+msgstr "Перевірено товарів"
+
+#: inc/accounting-prices.php:100
+msgid "Eligible products"
+msgstr "Допущено до перерахунку"
+
+#: inc/accounting-prices.php:101
+msgid "Recalculated products"
+msgstr "Перераховано товарів"
+
+#: inc/accounting-prices.php:102
+msgid "Prices changed"
+msgstr "Ціни змінено"
+
+#: inc/accounting-prices.php:103
+msgid "Skipped products"
+msgstr "Пропущено товарів"
+
+#: inc/accounting-prices.php:104
+msgid "Warnings"
+msgstr "Попередження"
+
+#: inc/accounting-prices.php:105
+msgid "SKU list copied."
+msgstr "Список артикулів скопійовано."
+
+#: inc/accounting-prices.php:106
+msgid "There are no warnings to export."
+msgstr "Немає попереджень для експорту."
+
+#: inc/accounting-prices.php:107
+msgid "Java API returned HTTP"
+msgstr "API сервісу ФОЛІО повернув HTTP"
+
+#: inc/accounting-prices.php:108
+msgid "Request ID"
+msgstr "ID запиту"
+
+#: inc/accounting-prices.php:109
+msgid "Raw Java response"
+msgstr "Повна відповідь сервісу ФОЛІО"
+
+#: inc/accounting-prices.php:110 inc/accounting-prices.php:214
+msgid ""
+"Full recalculation becomes available after a completed read-only check of "
+"the selected warehouse."
+msgstr "Повний перерахунок стане доступним після завершеної перевірки вибраного складу без змін."
+
+#: inc/accounting-prices.php:112
+msgid "Not started"
+msgstr "Не запускалося"
+
+#: inc/accounting-prices.php:113
+msgid "Busy"
+msgstr "Зайнято"
+
+#: inc/accounting-prices.php:114
+msgid "Queued"
+msgstr "У черзі"
+
+#: inc/accounting-prices.php:115 inc/logs.php:120
+msgid "Running"
+msgstr "Виконується"
+
+#: inc/accounting-prices.php:116
+msgid "Completed"
+msgstr "Завершено"
+
+#: inc/accounting-prices.php:117
+msgid "Completed with warnings"
+msgstr "Завершено з попередженнями"
+
+#: inc/accounting-prices.php:118
+msgid "Stopped on negative stock"
+msgstr "Зупинено через від'ємний залишок"
+
+#: inc/accounting-prices.php:119
+msgid "Failed"
+msgstr "Помилка"
+
+#: inc/accounting-prices.php:120
+msgid "Failed after partial recalculation"
+msgstr "Помилка після часткового перерахунку"
+
+#: inc/accounting-prices.php:121
+msgid "Check passed"
+msgstr "Перевірку пройдено"
+
+#: inc/accounting-prices.php:122
+msgid "Check blocked recalculation"
+msgstr "Перевірка заблокувала перерахунок"
+
+#: inc/accounting-prices.php:123
+msgid "Recalculated"
+msgstr "Перераховано"
+
+#: inc/accounting-prices.php:124
+msgid "Blocked"
+msgstr "Заблоковано"
+
+#: inc/accounting-prices.php:127
+msgid "Negative chronological stock"
+msgstr "Від'ємний хронологічний залишок"
+
+#: inc/accounting-prices.php:128
+msgid "Return movement requires review"
+msgstr "Повернення потребує перевірки"
+
+#: inc/accounting-prices.php:129
+msgid "Accounted movement has zero quantity"
+msgstr "Врахований рух має нульову кількість"
+
+#: inc/accounting-prices.php:130
+msgid "Movement date is missing"
+msgstr "Відсутня дата руху"
+
+#: inc/accounting-prices.php:131
+msgid "Invalid legacy document key"
+msgstr "Некоректний технічний ключ документа"
+
+#: inc/accounting-prices.php:132
+msgid "Accounting method is not supported"
+msgstr "Метод обліку не підтримується"
+
+#: inc/accounting-prices.php:133
+msgid "Warehouse accounting group is not supported"
+msgstr "Облікова група складів не підтримується"
+
+#: inc/accounting-prices.php:134
+msgid "Warehouse group settings do not match"
+msgstr "Налаштування складів групи не збігаються"
+
+#: inc/accounting-prices.php:135
+msgid "Folio excludes this product type"
+msgstr "ФОЛІО виключає цей тип товару"
+
+#: inc/accounting-prices.php:136
+msgid "Folio temporary movement table is not empty"
+msgstr "Тимчасова таблиця рухів ФОЛІО не порожня"
+
+#: inc/accounting-prices.php:149
+msgid "Financial operation"
+msgstr "Фінансова операція"
+
+#: inc/accounting-prices.php:150
+msgid ""
+"Preview is read-only. Apply changes Folio data and must be run only in an "
+"agreed maintenance window."
+msgstr ""
+"Попередня перевірка нічого не змінює. Застосування змінює дані ФОЛІО та має "
+"виконуватися лише в погоджене вікно обслуговування."
+
+#: inc/accounting-prices.php:154
+msgid "Folio warehouse"
+msgstr "Склад ФОЛІО"
+
+#: inc/accounting-prices.php:156
+msgid "Loading warehouses..."
+msgstr "Завантаження складів..."
+
+#: inc/accounting-prices.php:159
+msgid "Folio warehouse ID"
+msgstr "ID складу ФОЛІО"
+
+#: inc/accounting-prices.php:160
+msgid "Warehouse ID"
+msgstr "ID складу"
+
+#: inc/accounting-prices.php:164
+msgid "Accounting price views"
+msgstr "Режими роботи з обліковими цінами"
+
+#: inc/accounting-prices.php:166
+msgid "One product"
+msgstr "Один товар"
+
+#: inc/accounting-prices.php:169
+msgid "Entire warehouse"
+msgstr "Увесь склад"
+
+#: inc/accounting-prices.php:174
+msgid "Product accounting price"
+msgstr "Облікова ціна товару"
+
+#: inc/accounting-prices.php:176
+msgid "SKU"
+msgstr "Артикул"
+
+#: inc/accounting-prices.php:179
+msgid "Check without changes"
+msgstr "Перевірити без змін"
+
+#: inc/accounting-prices.php:185
+msgid "I reviewed the preview and confirm recalculation of this product."
+msgstr ""
+"Я переглянув результат перевірки та підтверджую перерахунок цього товару."
+
+#: inc/accounting-prices.php:188
+msgid "Recalculate product in Folio"
+msgstr "Перерахувати товар у ФОЛІО"
+
+#: inc/accounting-prices.php:196
+msgid "Warehouse accounting prices"
+msgstr "Облікові ціни складу"
+
+#: inc/accounting-prices.php:200
+msgid "Skip products with negative chronological stock and continue."
+msgstr "Пропускати товари з від'ємним хронологічним залишком і продовжувати."
+
+#: inc/accounting-prices.php:203
+msgid "Check entire warehouse without changes"
+msgstr "Перевірити весь склад без змін"
+
+#: inc/accounting-prices.php:209
+msgid ""
+"I have a current backup and confirm the agreed Folio maintenance window."
+msgstr ""
+"Я маю актуальну резервну копію та підтверджую погоджене вікно обслуговування "
+"ФОЛІО."
+
+#: inc/accounting-prices.php:212
+msgid "Recalculate entire warehouse in Folio"
+msgstr "Перерахувати весь склад у ФОЛІО"
+
+#: inc/accounting-prices.php:228
+msgid "Diagnostics and skipped products"
+msgstr "Діагностика та пропущені товари"
+
+#: inc/accounting-prices.php:231
+msgid "Copy SKU list"
+msgstr "Скопіювати артикули"
+
+#: inc/accounting-prices.php:234
+msgid "Export CSV"
+msgstr "Експортувати CSV"
+
+#: inc/accounting-prices.php:237
+msgid "Export JSON"
+msgstr "Експортувати JSON"
+
+#: inc/accounting-prices.php:252
+msgid "You do not have permission to perform this operation."
+msgstr "У вас немає дозволу на виконання цієї операції."
+
+#: inc/accounting-prices.php:259
+msgid "Java Base URL is not configured."
+msgstr "Базову адресу сервісу ФОЛІО не налаштовано."
+
+#: inc/accounting-prices.php:274
+msgid "SKU and Folio warehouse are required."
+msgstr "Потрібно вказати артикул і склад ФОЛІО."
+
+#: inc/accounting-prices.php:277 inc/accounting-prices.php:297
+msgid "Explicit confirmation is required for Folio changes."
+msgstr "Для змін у ФОЛІО потрібне явне підтвердження."
+
+#: inc/accounting-prices.php:294
+msgid "Folio warehouse is required."
+msgstr "Потрібно вказати склад ФОЛІО."
+
+#: inc/accounting-prices.php:314
+msgid "Unsupported accounting-price operation."
+msgstr "Операція з обліковою ціною не підтримується."
+
+#: inc/accounting-prices.php:330
+msgid "Java API returned an empty response."
+msgstr "API сервісу ФОЛІО повернув порожню відповідь."
 
 #: inc/admin-ui.php:8
 msgid "Price Sync"
@@ -305,11 +803,11 @@ msgstr "Запустити зараз"
 msgid "Once Weekly"
 msgstr "Раз на тиждень"
 
-#: inc/cron.php:84
+#: inc/cron.php:112
 msgid "Price synchronization"
 msgstr "Синхронізація цін"
 
-#: inc/cron.php:96 inc/sync.php:7
+#: inc/cron.php:124 inc/sync.php:7
 msgid "Synchronization is already running. Please try again later."
 msgstr "Синхронізація вже виконується. Спробуйте пізніше."
 
@@ -352,10 +850,6 @@ msgstr "Прогрес"
 #: inc/logs.php:106
 msgid "CSV"
 msgstr "CSV"
-
-#: inc/logs.php:120
-msgid "Running"
-msgstr "Виконується"
 
 #: inc/logs.php:122
 msgid "OK"
