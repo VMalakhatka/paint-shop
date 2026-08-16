@@ -276,7 +276,7 @@ msgid "The procedure completed; the accounting price was already correct."
 msgstr ""
 
 #: inc/accounting-prices.php:76
-msgid "Only part of the warnings is shown. The complete negative-stock diagnostics remain in the Java log."
+msgid "Only part of the warnings is shown. The complete diagnostics remain in the Java log."
 msgstr ""
 
 #: inc/accounting-prices.php:77
@@ -1224,4 +1224,40 @@ msgstr ""
 
 #: inc/sync.php:302
 msgid "Manual listed price synchronization"
+msgstr ""
+
+#: inc/accounting-prices.php
+msgid "Accounting price in currency"
+msgstr ""
+
+#: inc/accounting-prices.php
+msgid "Sale price"
+msgstr ""
+
+#: inc/accounting-prices.php
+msgid "Sale price in currency"
+msgstr ""
+
+#: inc/accounting-prices.php
+msgid "Price basis"
+msgstr ""
+
+#: inc/accounting-prices.php
+msgid "Reserved quantity"
+msgstr ""
+
+#: inc/accounting-prices.php
+msgid "Scanning products for safe recalculation"
+msgstr ""
+
+#: inc/accounting-prices.php
+msgid "Recalculation application completed"
+msgstr ""
+
+#: inc/accounting-prices.php
+msgid "Recalculation application stopped"
+msgstr ""
+
+#: inc/accounting-prices.php
+msgid "Zero accounting price with a sale price"
 msgstr ""

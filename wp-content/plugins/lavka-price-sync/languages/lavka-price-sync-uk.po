@@ -365,12 +365,8 @@ msgid "The procedure completed; the accounting price was already correct."
 msgstr "Процедуру завершено; облікова ціна вже була правильною."
 
 #: inc/accounting-prices.php:76
-msgid ""
-"Only part of the warnings is shown. The complete negative-stock diagnostics "
-"remain in the Java log."
-msgstr ""
-"Показано лише частину попереджень. Повна діагностика від'ємних залишків "
-"зберігається в журналі сервісу ФОЛІО."
+msgid "Only part of the warnings is shown. The complete diagnostics remain in the Java log."
+msgstr "Показано лише частину попереджень. Повна діагностика зберігається в журналі сервісу ФОЛІО."
 
 #: inc/accounting-prices.php:77
 msgid "No warnings were returned."
@@ -1343,6 +1339,42 @@ msgstr ""
 #: inc/sync.php:302
 msgid "Manual listed price synchronization"
 msgstr "Ручна синхронізація цін для зазначених SKU"
+
+#: inc/accounting-prices.php
+msgid "Accounting price in currency"
+msgstr "Облікова ціна у валюті"
+
+#: inc/accounting-prices.php
+msgid "Sale price"
+msgstr "Продажна ціна"
+
+#: inc/accounting-prices.php
+msgid "Sale price in currency"
+msgstr "Продажна ціна у валюті"
+
+#: inc/accounting-prices.php
+msgid "Price basis"
+msgstr "База ціни"
+
+#: inc/accounting-prices.php
+msgid "Reserved quantity"
+msgstr "Зарезервована кількість"
+
+#: inc/accounting-prices.php
+msgid "Scanning products for safe recalculation"
+msgstr "Перевірка товарів для безпечного перерахунку"
+
+#: inc/accounting-prices.php
+msgid "Recalculation application completed"
+msgstr "Застосування перерахунку завершено"
+
+#: inc/accounting-prices.php
+msgid "Recalculation application stopped"
+msgstr "Застосування перерахунку зупинено"
+
+#: inc/accounting-prices.php
+msgid "Zero accounting price with a sale price"
+msgstr "Нульова облікова ціна за наявності продажної ціни"
 
 #~ msgid "Starting a read-only warehouse check..."
 #~ msgstr "Запускаємо перевірку складу без змін..."

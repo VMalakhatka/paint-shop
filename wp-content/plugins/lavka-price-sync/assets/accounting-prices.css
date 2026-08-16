@@ -387,6 +387,24 @@
   margin: 6px 0;
 }
 
+.lps-ap-warning-facts {
+  display: grid;
+  grid-template-columns: minmax(150px, auto) 1fr;
+  gap: 3px 10px;
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  border-left: 3px solid #dba617;
+  background: #fcf9e8;
+}
+
+.lps-ap-warning-facts dt {
+  font-weight: 600;
+}
+
+.lps-ap-warning-facts dd {
+  margin: 0;
+}
+
 .lps-ap-warning-reason details,
 .lps-ap-raw {
   margin-top: 8px;

@@ -472,6 +472,25 @@
       if (details.skipped === true) reason.appendChild(make('strong', 'lps-ap-warning-label', t.skippedProduct || 'Product skipped'));
       reason.append(make('code', '', warningCode));
       if (warning?.message) reason.appendChild(make('p', '', warning.message));
+      if (warningCode === 'ZERO_ACCOUNTING_PRICE_WITH_SALE_PRICE') {
+        const current = details.currentState || {};
+        const facts = make('dl', 'lps-ap-warning-facts');
+        [
+          [t.accountingPrice || 'Accounting price', details.accountingPrice],
+          [t.accountingCurrencyPrice || 'Accounting price in currency', details.accountingCurrencyPrice],
+          [t.salePrice || 'Sale price', details.salePrice],
+          [t.saleCurrencyPrice || 'Sale price in currency', details.saleCurrencyPrice],
+          [t.priceBasis || 'Price basis', details.priceBasis],
+          [t.physicalQuantity || 'Physical quantity', current.physicalQuantity],
+          [t.reservedQuantity || 'Reserved quantity', current.reservedQuantity],
+          [t.availableQuantity || 'Available quantity', current.availableQuantity],
+          [t.accountingQuantity || 'Accounting quantity', current.accountingQuantity]
+        ].forEach(([label, value]) => {
+          if (value === null || value === undefined || value === '') return;
+          facts.append(make('dt', '', label), make('dd', '', typeof value === 'number' ? formatNumber(value) : value));
+        });
+        reason.appendChild(facts);
+      }
       const technical = make('details');
       technical.append(
         make('summary', '', t.details || 'Technical details'),
@@ -531,7 +550,14 @@
         currentPhysicalQuantity: current.physicalQuantity ?? '',
         currentAvailableQuantity: current.availableQuantity ?? '',
         currentAccountingQuantity: current.accountingQuantity ?? '',
-        currentAccountingPrice: current.accountingPrice ?? ''
+        currentAccountingPrice: current.accountingPrice ?? '',
+        currentReservedQuantity: current.reservedQuantity ?? '',
+        accountingPrice: details.accountingPrice ?? '',
+        accountingCurrencyPrice: details.accountingCurrencyPrice ?? '',
+        salePrice: details.salePrice ?? '',
+        saleCurrencyPrice: details.saleCurrencyPrice ?? '',
+        priceBasis: details.priceBasis ?? '',
+        fixedMarkup: details.fixedMarkup ?? ''
       };
     });
   }
