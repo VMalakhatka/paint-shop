@@ -621,6 +621,10 @@ msgid "Rollback preflight completed"
 msgstr "Предварительная проверка с откатом завершена"
 
 #: inc/accounting-prices.php:134
+msgid "Preparing safe exclusion of problem products"
+msgstr "Подготовка безопасного пропуска проблемных товаров"
+
+#: inc/accounting-prices.php:134
 msgid "Applying recalculation portions"
 msgstr "Применяются порции пересчёта"
 

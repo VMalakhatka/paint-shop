@@ -138,6 +138,7 @@ add_action('admin_enqueue_scripts', function () {
                 'QUEUED' => __('Waiting in queue', 'lavka-price-sync'),
                 'PRECHECK_RUNNING' => __('Rollback preflight is running', 'lavka-price-sync'),
                 'PRECHECK_COMPLETED' => __('Rollback preflight completed', 'lavka-price-sync'),
+                'QUARANTINE_PREPARATION' => __('Preparing safe exclusion of problem products', 'lavka-price-sync'),
                 'APPLY_RUNNING' => __('Applying recalculation portions', 'lavka-price-sync'),
                 'COMPLETED' => __('Recalculation completed', 'lavka-price-sync'),
                 'STOPPED' => __('Recalculation stopped', 'lavka-price-sync'),

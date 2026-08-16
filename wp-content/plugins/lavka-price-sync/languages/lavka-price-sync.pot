@@ -533,6 +533,10 @@ msgid "Rollback preflight completed"
 msgstr ""
 
 #: inc/accounting-prices.php:134
+msgid "Preparing safe exclusion of problem products"
+msgstr ""
+
+#: inc/accounting-prices.php:134
 msgid "Applying recalculation portions"
 msgstr ""
 
