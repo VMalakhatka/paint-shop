@@ -132,6 +132,7 @@
 }
 
 .lps-ap-status-completed_with_warnings,
+.lps-ap-status-preview_ready_with_warnings,
 .lps-ap-status-stopped_on_negative_stock,
 .lps-ap-status-preview_blocked,
 .lps-ap-status-blocked_negative_stock,

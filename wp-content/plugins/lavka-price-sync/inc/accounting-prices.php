@@ -63,6 +63,7 @@ add_action('admin_enqueue_scripts', function () {
             'requestAccepted' => __('The task was accepted. Waiting for progress...', 'lavka-price-sync'),
             'jobRunning' => __('The task is running.', 'lavka-price-sync'),
             'jobCompleted' => __('The task completed without warnings.', 'lavka-price-sync'),
+            'jobCompletedWithWarnings' => __('Safe products were recalculated. Problem products were skipped; review the warnings.', 'lavka-price-sync'),
             'jobStopped' => __('The task stopped on a negative chronological stock.', 'lavka-price-sync'),
             'jobFailed' => __('The task failed.', 'lavka-price-sync'),
             'jobFailedPartial' => __('The task failed after one or more portions were committed. Do not retry it automatically; check Folio manually.', 'lavka-price-sync'),
@@ -70,6 +71,7 @@ add_action('admin_enqueue_scripts', function () {
             'jobBlockedNegative' => __('The rollback preflight found negative chronological stock. Nothing was committed.', 'lavka-price-sync'),
             'idle' => __('No warehouse task has been started since the Java service restart.', 'lavka-price-sync'),
             'previewReady' => __('The preview found no blocking problems.', 'lavka-price-sync'),
+            'previewReadyWithWarnings' => __('The preview completed with skipped problem products. Applying changes to the remaining products is allowed.', 'lavka-price-sync'),
             'previewBlocked' => __('The preview found problems. Recalculation is blocked.', 'lavka-price-sync'),
             'recalculated' => __('The product was recalculated in Folio.', 'lavka-price-sync'),
             'notChanged' => __('The procedure completed; the accounting price was already correct.', 'lavka-price-sync'),
@@ -90,6 +92,7 @@ add_action('admin_enqueue_scripts', function () {
             'shortage' => __('Shortage', 'lavka-price-sync'),
             'reason' => __('Reason', 'lavka-price-sync'),
             'details' => __('Technical details', 'lavka-price-sync'),
+            'skippedProduct' => __('Product skipped', 'lavka-price-sync'),
             'receipt' => __('receipt', 'lavka-price-sync'),
             'expense' => __('expense', 'lavka-price-sync'),
             'unknownOperation' => __('operation', 'lavka-price-sync'),
@@ -112,17 +115,19 @@ add_action('admin_enqueue_scripts', function () {
             'requestId' => __('Request ID', 'lavka-price-sync'),
             'rawResponse' => __('Raw Java response', 'lavka-price-sync'),
             'applyAvailableAfterPreview' => __('Full recalculation becomes available after a successful exact rollback preview of the selected warehouse.', 'lavka-price-sync'),
-            'fullPreviewUnsafe' => __('The preview returned PREVIEW_READY, but its safety checks are incomplete. Applying changes remains blocked.', 'lavka-price-sync'),
+            'fullPreviewUnsafe' => __('The preview returned a successful status, but its safety checks are incomplete. Applying changes remains blocked.', 'lavka-price-sync'),
             'statusLabels' => [
                 'IDLE' => __('Not started', 'lavka-price-sync'),
                 'BUSY' => __('Busy', 'lavka-price-sync'),
                 'QUEUED' => __('Queued', 'lavka-price-sync'),
                 'RUNNING' => __('Running', 'lavka-price-sync'),
                 'COMPLETED' => __('Completed', 'lavka-price-sync'),
+                'COMPLETED_WITH_WARNINGS' => __('Completed with skipped products', 'lavka-price-sync'),
                 'STOPPED_ON_NEGATIVE_STOCK' => __('Stopped on negative stock', 'lavka-price-sync'),
                 'FAILED' => __('Failed', 'lavka-price-sync'),
                 'FAILED_PARTIAL' => __('Failed after partial recalculation', 'lavka-price-sync'),
                 'PREVIEW_READY' => __('Check passed', 'lavka-price-sync'),
+                'PREVIEW_READY_WITH_WARNINGS' => __('Check passed with skipped products', 'lavka-price-sync'),
                 'PREVIEW_BLOCKED' => __('Check blocked recalculation', 'lavka-price-sync'),
                 'BLOCKED_NEGATIVE_STOCK' => __('Blocked by negative stock', 'lavka-price-sync'),
                 'OUTCOME_UNKNOWN' => __('Outcome unknown', 'lavka-price-sync'),
@@ -141,6 +146,8 @@ add_action('admin_enqueue_scripts', function () {
             ],
             'warningLabels' => [
                 'NEGATIVE_CHRONOLOGICAL_STOCK' => __('Negative chronological stock', 'lavka-price-sync'),
+                'ZERO_ACCOUNTING_QUANTITY_DENOMINATOR' => __('Zero accounting quantity denominator', 'lavka-price-sync'),
+                'AMBIGUOUS_MOVEMENT_ORDER' => __('Ambiguous movement order', 'lavka-price-sync'),
                 'RETURN_MOVEMENT_REQUIRES_REVIEW' => __('Return movement requires review', 'lavka-price-sync'),
                 'ZERO_QUANTITY_ACCOUNTED_MOVEMENT' => __('Accounted movement has zero quantity', 'lavka-price-sync'),
                 'MOVEMENT_DATE_MISSING' => __('Movement date is missing', 'lavka-price-sync'),
@@ -178,8 +185,10 @@ function lps_render_accounting_prices_page(): void {
         'QUEUED' => __('Queued', 'lavka-price-sync'),
         'RUNNING' => __('Running', 'lavka-price-sync'),
         'PREVIEW_READY' => __('Check passed', 'lavka-price-sync'),
+        'PREVIEW_READY_WITH_WARNINGS' => __('Check passed with skipped products', 'lavka-price-sync'),
         'BLOCKED_NEGATIVE_STOCK' => __('Blocked by negative stock', 'lavka-price-sync'),
         'COMPLETED' => __('Completed', 'lavka-price-sync'),
+        'COMPLETED_WITH_WARNINGS' => __('Completed with skipped products', 'lavka-price-sync'),
         'STOPPED_ON_NEGATIVE_STOCK' => __('Stopped on negative stock', 'lavka-price-sync'),
         'FAILED' => __('Failed', 'lavka-price-sync'),
         'FAILED_PARTIAL' => __('Failed after partial recalculation', 'lavka-price-sync'),
@@ -193,6 +202,7 @@ function lps_render_accounting_prices_page(): void {
         'WAITING_LOCK' => __('Waiting for the global Lavka lock', 'lavka-price-sync'),
         'WAITING_NEXT' => __('Waiting for the next warehouse', 'lavka-price-sync'),
         'COMPLETED' => __('Completed', 'lavka-price-sync'),
+        'COMPLETED_WITH_WARNINGS' => __('Completed with skipped products', 'lavka-price-sync'),
         'BLOCKED_NEGATIVE_STOCK' => __('Blocked by negative stock', 'lavka-price-sync'),
         'STOPPED_ON_NEGATIVE_STOCK' => __('Stopped on negative stock', 'lavka-price-sync'),
         'FAILED' => __('Failed', 'lavka-price-sync'),
@@ -209,12 +219,14 @@ function lps_render_accounting_prices_page(): void {
     ];
     $batch_total = count(lps_accounting_prices_native_normalize_warehouse_ids($native_batch['warehouse_ids'] ?? []));
     $batch_results = is_array($native_batch['results'] ?? null) ? $native_batch['results'] : [];
-    $batch_success_status = $batch_stage === 'preview' ? 'preview_ready' : 'completed';
+    $batch_success_statuses = $batch_stage === 'preview'
+        ? ['preview_ready', 'preview_ready_with_warnings']
+        : ['completed', 'completed_with_warnings'];
     $batch_completed = count(array_filter(
         $batch_results,
         static fn($result): bool => is_array($result)
             && sanitize_key((string)($result['stage'] ?? 'apply')) === $batch_stage
-            && sanitize_key((string)($result['status'] ?? '')) === $batch_success_status
+            && in_array(sanitize_key((string)($result['status'] ?? '')), $batch_success_statuses, true)
     ));
     ?>
     <div class="wrap lps-ap" id="lps-accounting-prices">

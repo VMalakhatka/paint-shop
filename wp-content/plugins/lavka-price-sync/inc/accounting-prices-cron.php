@@ -263,8 +263,10 @@ function lps_accounting_prices_native_release_lock(array $state): void {
 function lps_accounting_prices_native_terminal_statuses(): array {
     return [
         'PREVIEW_READY',
+        'PREVIEW_READY_WITH_WARNINGS',
         'BLOCKED_NEGATIVE_STOCK',
         'COMPLETED',
+        'COMPLETED_WITH_WARNINGS',
         'STOPPED_ON_NEGATIVE_STOCK',
         'FAILED',
         'FAILED_PARTIAL',
@@ -396,24 +398,27 @@ function lps_accounting_prices_native_complete_batch_warehouse(array $job_state,
 
     $phase = strtoupper((string)($body['phase'] ?? ($job_state['phase'] ?? '')));
     $error = trim((string)($body['error'] ?? ($job_state['error'] ?? '')));
-    $warnings = isset($body['warnings']) && is_array($body['warnings']) ? $body['warnings'] : [];
     $errors = isset($body['errors']) && is_array($body['errors']) ? $body['errors'] : [];
     $not_running = array_key_exists('running', $body) && $body['running'] === false;
-    $preview_is_safe = $status === 'PREVIEW_READY'
+    $request = isset($body['request']) && is_array($body['request']) ? $body['request'] : [];
+    $response_preview_only = array_key_exists('previewOnly', $request) ? (bool)$request['previewOnly'] : null;
+    $preview_is_safe = in_array($status, ['PREVIEW_READY', 'PREVIEW_READY_WITH_WARNINGS'], true)
         && $phase === 'PRECHECK_COMPLETED'
         && $not_running
+        && $response_preview_only === true
         && absint($body['committedChunks'] ?? ($job_state['committed_chunks'] ?? 0)) === 0
-        && absint($body['warningCount'] ?? ($job_state['warning_count'] ?? 0)) === 0
         && $error === ''
-        && !$warnings
         && !$errors;
-    $apply_is_complete = $status === 'COMPLETED'
+    $apply_is_complete = in_array($status, ['COMPLETED', 'COMPLETED_WITH_WARNINGS'], true)
         && $phase === 'APPLY_COMPLETED'
         && $not_running
-        && $error === '';
+        && $response_preview_only === false
+        && $error === ''
+        && !$errors;
 
-    // Every preview must be proven clean before the batch enters its apply
-    // stage. During apply, only a proven COMPLETED result advances the queue.
+    // Every preview must reach an explicitly successful terminal status before
+    // apply. Warnings may represent safely skipped SKUs and do not block the
+    // queue. During apply, only a proven successful completion advances it.
     if (($stage === 'preview' && !$preview_is_safe) || ($stage === 'apply' && !$apply_is_complete)) {
         $messages = [
             'BLOCKED_NEGATIVE_STOCK' => __('The rollback preflight found negative chronological stock. The remaining warehouse queue and the weekly schedule are stopped.', 'lavka-price-sync'),
@@ -422,9 +427,9 @@ function lps_accounting_prices_native_complete_batch_warehouse(array $job_state,
             'OUTCOME_UNKNOWN' => __('A warehouse recalculation has an unknown outcome. The remaining warehouse queue is stopped until Folio is reviewed manually.', 'lavka-price-sync'),
             'FAILED' => __('A warehouse recalculation failed. The remaining warehouse queue and the weekly schedule are stopped.', 'lavka-price-sync'),
         ];
-        if ($stage === 'preview' && $status === 'PREVIEW_READY') {
+        if ($stage === 'preview' && in_array($status, ['PREVIEW_READY', 'PREVIEW_READY_WITH_WARNINGS'], true)) {
             $message = __('A warehouse preview returned PREVIEW_READY without all required safety guarantees. The warehouse queue and the weekly schedule are stopped.', 'lavka-price-sync');
-        } elseif ($stage === 'apply' && $status === 'COMPLETED') {
+        } elseif ($stage === 'apply' && in_array($status, ['COMPLETED', 'COMPLETED_WITH_WARNINGS'], true)) {
             $message = __('A warehouse recalculation returned COMPLETED without all required completion guarantees. The warehouse queue and the weekly schedule are stopped.', 'lavka-price-sync');
         } else {
             $message = $messages[$status]
@@ -791,7 +796,7 @@ function lps_accounting_prices_native_poll(bool $schedule_next = true): array {
     }
 
     lps_accounting_prices_native_log('accounting_recalculation_finished', [
-        'level' => in_array($status, ['COMPLETED', 'PREVIEW_READY'], true) ? 'info' : 'warning',
+        'level' => in_array($status, ['COMPLETED', 'COMPLETED_WITH_WARNINGS', 'PREVIEW_READY', 'PREVIEW_READY_WITH_WARNINGS'], true) ? 'info' : 'warning',
         'source' => $state['source'] ?? 'cron',
         'token' => $state['lock_token'] ?? '',
         'message' => 'Native Folio accounting-price recalculation finished.',

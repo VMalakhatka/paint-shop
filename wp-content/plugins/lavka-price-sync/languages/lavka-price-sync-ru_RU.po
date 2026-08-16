@@ -306,6 +306,10 @@ msgid "The task completed without warnings."
 msgstr "Задание завершено без предупреждений."
 
 #: inc/accounting-prices.php:66
+msgid "Safe products were recalculated. Problem products were skipped; review the warnings."
+msgstr "Безопасные товары пересчитаны. Проблемные товары пропущены; проверьте предупреждения."
+
+#: inc/accounting-prices.php:66
 msgid "The task stopped on a negative chronological stock."
 msgstr "Задание остановлено из-за отрицательного хронологического остатка."
 
@@ -344,6 +348,10 @@ msgstr "После перезапуска сервиса ФОЛИО задани
 #: inc/accounting-prices.php:72
 msgid "The preview found no blocking problems."
 msgstr "Проверка не обнаружила проблем, блокирующих пересчёт."
+
+#: inc/accounting-prices.php:74
+msgid "The preview completed with skipped problem products. Applying changes to the remaining products is allowed."
+msgstr "Проверка завершена с пропущенными проблемными товарами. Применение изменений к остальным товарам разрешено."
 
 #: inc/accounting-prices.php:73
 msgid "The preview found problems. Recalculation is blocked."
@@ -428,6 +436,10 @@ msgstr "Причина"
 #: inc/accounting-prices.php:91
 msgid "Technical details"
 msgstr "Технические подробности"
+
+#: inc/accounting-prices.php:95
+msgid "Product skipped"
+msgstr "Товар пропущен"
 
 #: inc/accounting-prices.php:92
 msgid "receipt"
@@ -519,10 +531,10 @@ msgstr ""
 
 #: inc/accounting-prices.php:115
 msgid ""
-"The preview returned PREVIEW_READY, but its safety checks are incomplete. "
+"The preview returned a successful status, but its safety checks are incomplete. "
 "Applying changes remains blocked."
 msgstr ""
-"Предварительная проверка вернула PREVIEW_READY, но проверки безопасности не "
+"Предварительная проверка вернула успешный статус, но проверки безопасности не "
 "завершены. Применение изменений остаётся заблокированным."
 
 #: inc/accounting-prices.php:115 inc/accounting-prices.php:175
@@ -548,6 +560,11 @@ msgstr "Выполняется"
 msgid "Completed"
 msgstr "Завершено"
 
+#: inc/accounting-prices.php:125 inc/accounting-prices.php:191
+#: inc/accounting-prices.php:205
+msgid "Completed with skipped products"
+msgstr "Завершено с пропущенными товарами"
+
 #: inc/accounting-prices.php:120 inc/accounting-prices.php:181
 msgid "Stopped on negative stock"
 msgstr "Остановлено из-за отрицательного остатка"
@@ -565,6 +582,10 @@ msgstr "Ошибка после частичного пересчёта"
 #: inc/accounting-prices.php:123 inc/accounting-prices.php:178
 msgid "Check passed"
 msgstr "Проверка пройдена"
+
+#: inc/accounting-prices.php:130 inc/accounting-prices.php:188
+msgid "Check passed with skipped products"
+msgstr "Проверка пройдена с пропущенными товарами"
 
 #: inc/accounting-prices.php:124
 msgid "Check blocked recalculation"
@@ -622,6 +643,14 @@ msgstr "Требуется ручная проверка"
 #: inc/accounting-prices.php:141
 msgid "Negative chronological stock"
 msgstr "Отрицательный хронологический остаток"
+
+#: inc/accounting-prices.php:149
+msgid "Zero accounting quantity denominator"
+msgstr "Нулевой знаменатель учётного количества"
+
+#: inc/accounting-prices.php:150
+msgid "Ambiguous movement order"
+msgstr "Неоднозначный порядок складских движений"
 
 #: inc/accounting-prices.php:142
 msgid "Return movement requires review"

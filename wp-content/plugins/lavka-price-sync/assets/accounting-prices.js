@@ -327,21 +327,20 @@
     const phase = String(body?.phase || '').toUpperCase();
     const running = body?.running === true || status === 'QUEUED';
     const warnings = collectWarnings(body);
+    const previewSucceeded = ['PREVIEW_READY', 'PREVIEW_READY_WITH_WARNINGS'].includes(status);
     const previewIsSafe = body?.running === false
       && body?.request?.previewOnly === true
-      && status === 'PREVIEW_READY'
+      && previewSucceeded
       && phase === 'PRECHECK_COMPLETED'
       && Number(body?.committedChunks || 0) === 0
-      && Number(body?.warningCount || 0) === 0
-      && !body?.error
-      && warnings.length === 0;
+      && !body?.error;
     state.fullRunning = running;
     state.manualReviewRequired = ['FAILED_PARTIAL', 'OUTCOME_UNKNOWN'].includes(status);
     if (previewIsSafe) {
       state.lastFullPreviewWarehouse = Number(body.request.warehouseId || 0);
     } else if (!running && body?.request?.previewOnly === true) {
       state.lastFullPreviewWarehouse = 0;
-    } else if (!running && body?.request?.previewOnly === false && ['COMPLETED', 'BLOCKED_NEGATIVE_STOCK', 'STOPPED_ON_NEGATIVE_STOCK', 'FAILED', 'FAILED_PARTIAL', 'OUTCOME_UNKNOWN'].includes(status)) {
+    } else if (!running && body?.request?.previewOnly === false && ['COMPLETED', 'COMPLETED_WITH_WARNINGS', 'BLOCKED_NEGATIVE_STOCK', 'STOPPED_ON_NEGATIVE_STOCK', 'FAILED', 'FAILED_PARTIAL', 'OUTCOME_UNKNOWN'].includes(status)) {
       state.lastFullPreviewWarehouse = 0;
     }
     elements.fullPreview.disabled = running || state.manualReviewRequired;
@@ -388,14 +387,22 @@
 
     if (running) {
       setNotice(elements.fullNotice, 'info', t.jobRunning || 'Task running');
-    } else if (status === 'PREVIEW_READY' && previewIsSafe) {
-      setNotice(elements.fullNotice, 'success', t.previewReady || 'Preview ready');
-    } else if (status === 'PREVIEW_READY') {
+    } else if (previewSucceeded && previewIsSafe) {
+      setNotice(
+        elements.fullNotice,
+        status === 'PREVIEW_READY_WITH_WARNINGS' ? 'warning' : 'success',
+        status === 'PREVIEW_READY_WITH_WARNINGS'
+          ? (t.previewReadyWithWarnings || 'Preview completed with skipped products. Applying changes is allowed.')
+          : (t.previewReady || 'Preview ready')
+      );
+    } else if (previewSucceeded) {
       setNotice(elements.fullNotice, 'error', t.fullPreviewUnsafe || 'Preview safety checks are incomplete', body);
     } else if (status === 'BLOCKED_NEGATIVE_STOCK') {
       setNotice(elements.fullNotice, 'warning', t.jobBlockedNegative || 'Preflight blocked recalculation', body);
     } else if (status === 'COMPLETED') {
       setNotice(elements.fullNotice, 'success', t.jobCompleted || 'Task completed');
+    } else if (status === 'COMPLETED_WITH_WARNINGS') {
+      setNotice(elements.fullNotice, 'warning', t.jobCompletedWithWarnings || 'Safe products were recalculated; problem products were skipped.');
     } else if (status === 'STOPPED_ON_NEGATIVE_STOCK') {
       setNotice(elements.fullNotice, 'warning', t.jobStopped || 'Task stopped');
     } else if (status === 'FAILED_PARTIAL') {
@@ -462,6 +469,7 @@
       const warningCode = warning?.code || 'WARNING';
       const warningLabel = t.warningLabels?.[warningCode];
       if (warningLabel) reason.appendChild(make('strong', 'lps-ap-warning-label', warningLabel));
+      if (details.skipped === true) reason.appendChild(make('strong', 'lps-ap-warning-label', t.skippedProduct || 'Product skipped'));
       reason.append(make('code', '', warningCode));
       if (warning?.message) reason.appendChild(make('p', '', warning.message));
       const technical = make('details');
@@ -504,6 +512,7 @@
       return {
         sku: details.sku || '',
         warehouseId: details.warehouseId || operation.warehouseId || '',
+        skipped: details.skipped === true ? 'true' : 'false',
         code: warning?.code || '',
         message: warning?.message || '',
         documentType: operation.documentType || '',
