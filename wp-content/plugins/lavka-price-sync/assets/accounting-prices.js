@@ -326,10 +326,21 @@
     const status = String(body?.status || 'IDLE').toUpperCase();
     const phase = String(body?.phase || '').toUpperCase();
     const running = body?.running === true || status === 'QUEUED';
+    const warnings = collectWarnings(body);
+    const previewIsSafe = body?.running === false
+      && body?.request?.previewOnly === true
+      && status === 'PREVIEW_READY'
+      && phase === 'PRECHECK_COMPLETED'
+      && Number(body?.committedChunks || 0) === 0
+      && Number(body?.warningCount || 0) === 0
+      && !body?.error
+      && warnings.length === 0;
     state.fullRunning = running;
     state.manualReviewRequired = ['FAILED_PARTIAL', 'OUTCOME_UNKNOWN'].includes(status);
-    if (!running && body?.request?.previewOnly === true && status === 'PREVIEW_READY') {
+    if (previewIsSafe) {
       state.lastFullPreviewWarehouse = Number(body.request.warehouseId || 0);
+    } else if (!running && body?.request?.previewOnly === true) {
+      state.lastFullPreviewWarehouse = 0;
     } else if (!running && body?.request?.previewOnly === false && ['COMPLETED', 'BLOCKED_NEGATIVE_STOCK', 'STOPPED_ON_NEGATIVE_STOCK', 'FAILED', 'FAILED_PARTIAL', 'OUTCOME_UNKNOWN'].includes(status)) {
       state.lastFullPreviewWarehouse = 0;
     }
@@ -351,8 +362,9 @@
     if (elements.progressBar) elements.progressBar.style.width = `${percent}%`;
     if (elements.progressLabel) {
       const current = body?.currentArt ? ` · ${t.currentSku || 'Current SKU'}: ${body.currentArt}` : '';
+      const next = body?.nextArt ? ` · ${t.nextSku || 'Next SKU'}: ${body.nextArt}` : '';
       const currentPhase = phase ? ` · ${t.phase || 'Phase'}: ${phaseLabel(phase)}` : '';
-      elements.progressLabel.textContent = `${formatInteger(processed)} / ${formatInteger(total)} (${percent}%)${currentPhase}${current}`;
+      elements.progressLabel.textContent = `${formatInteger(processed)} / ${formatInteger(total)} (${percent}%)${currentPhase}${current}${next}`;
     }
 
     const header = make('div', 'lps-ap-result-header');
@@ -372,13 +384,14 @@
     );
     elements.fullSummary.appendChild(counters);
 
-    const warnings = collectWarnings(body);
     renderWarnings(warnings, Boolean(body?.warningsTruncated));
 
     if (running) {
       setNotice(elements.fullNotice, 'info', t.jobRunning || 'Task running');
-    } else if (status === 'PREVIEW_READY') {
+    } else if (status === 'PREVIEW_READY' && previewIsSafe) {
       setNotice(elements.fullNotice, 'success', t.previewReady || 'Preview ready');
+    } else if (status === 'PREVIEW_READY') {
+      setNotice(elements.fullNotice, 'error', t.fullPreviewUnsafe || 'Preview safety checks are incomplete', body);
     } else if (status === 'BLOCKED_NEGATIVE_STOCK') {
       setNotice(elements.fullNotice, 'warning', t.jobBlockedNegative || 'Preflight blocked recalculation', body);
     } else if (status === 'COMPLETED') {

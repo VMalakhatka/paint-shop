@@ -40,7 +40,7 @@ add_action('admin_enqueue_scripts', function () {
     wp_localize_script('lps-accounting-prices', 'LPS_ACCOUNTING_PRICES', [
         'ajaxUrl' => admin_url('admin-ajax.php'),
         'nonce' => wp_create_nonce('lps_accounting_prices'),
-        'pollInterval' => 3000,
+        'pollInterval' => 5000,
         'storageKey' => 'lpsNativeAccountingPriceJobId',
         'pollOnLoad' => !empty($native_job['running']),
         'i18n' => [
@@ -79,6 +79,7 @@ add_action('admin_enqueue_scripts', function () {
             'before' => __('Before', 'lavka-price-sync'),
             'after' => __('After', 'lavka-price-sync'),
             'currentSku' => __('Current SKU', 'lavka-price-sync'),
+            'nextSku' => __('Next SKU', 'lavka-price-sync'),
             'phase' => __('Phase', 'lavka-price-sync'),
             'warehouse' => __('Warehouse', 'lavka-price-sync'),
             'document' => __('Document', 'lavka-price-sync'),
@@ -111,6 +112,7 @@ add_action('admin_enqueue_scripts', function () {
             'requestId' => __('Request ID', 'lavka-price-sync'),
             'rawResponse' => __('Raw Java response', 'lavka-price-sync'),
             'applyAvailableAfterPreview' => __('Full recalculation becomes available after a successful exact rollback preview of the selected warehouse.', 'lavka-price-sync'),
+            'fullPreviewUnsafe' => __('The preview returned PREVIEW_READY, but its safety checks are incomplete. Applying changes remains blocked.', 'lavka-price-sync'),
             'statusLabels' => [
                 'IDLE' => __('Not started', 'lavka-price-sync'),
                 'BUSY' => __('Busy', 'lavka-price-sync'),
@@ -191,6 +193,8 @@ function lps_render_accounting_prices_page(): void {
         'WAITING_LOCK' => __('Waiting for the global Lavka lock', 'lavka-price-sync'),
         'WAITING_NEXT' => __('Waiting for the next warehouse', 'lavka-price-sync'),
         'COMPLETED' => __('Completed', 'lavka-price-sync'),
+        'BLOCKED_NEGATIVE_STOCK' => __('Blocked by negative stock', 'lavka-price-sync'),
+        'STOPPED_ON_NEGATIVE_STOCK' => __('Stopped on negative stock', 'lavka-price-sync'),
         'FAILED' => __('Failed', 'lavka-price-sync'),
         'START_FAILED' => __('Could not start', 'lavka-price-sync'),
         'FAILED_PARTIAL' => __('Failed after partial recalculation', 'lavka-price-sync'),
@@ -198,8 +202,20 @@ function lps_render_accounting_prices_page(): void {
         'DISABLED' => __('Stopped by administrator', 'lavka-price-sync'),
     ];
     $batch_status = strtoupper((string)($native_batch['status'] ?? ''));
+    $batch_stage = sanitize_key((string)($native_batch['stage'] ?? 'apply'));
+    $batch_stage_labels = [
+        'preview' => __('Preview stage', 'lavka-price-sync'),
+        'apply' => __('Apply stage', 'lavka-price-sync'),
+    ];
     $batch_total = count(lps_accounting_prices_native_normalize_warehouse_ids($native_batch['warehouse_ids'] ?? []));
-    $batch_completed = count(is_array($native_batch['results'] ?? null) ? $native_batch['results'] : []);
+    $batch_results = is_array($native_batch['results'] ?? null) ? $native_batch['results'] : [];
+    $batch_success_status = $batch_stage === 'preview' ? 'preview_ready' : 'completed';
+    $batch_completed = count(array_filter(
+        $batch_results,
+        static fn($result): bool => is_array($result)
+            && sanitize_key((string)($result['stage'] ?? 'apply')) === $batch_stage
+            && sanitize_key((string)($result['status'] ?? '')) === $batch_success_status
+    ));
     ?>
     <div class="wrap lps-ap" id="lps-accounting-prices">
         <h1><?php echo esc_html__('Folio accounting prices', 'lavka-price-sync'); ?></h1>
@@ -330,7 +346,7 @@ function lps_render_accounting_prices_page(): void {
                                     <span class="description"><?php echo esc_html__('Loading warehouses...', 'lavka-price-sync'); ?></span>
                                 <?php endif; ?>
                             </div>
-                            <p class="description"><?php echo esc_html__('Selected warehouses are recalculated sequentially, never in parallel.', 'lavka-price-sync'); ?></p>
+                            <p class="description"><?php echo esc_html__('Selected warehouses are processed sequentially: first all previews, then all recalculations. Warehouses are never processed in parallel.', 'lavka-price-sync'); ?></p>
                         </fieldset>
                         <label>
                             <span><?php echo esc_html__('Day of week', 'lavka-price-sync'); ?></span>
@@ -348,7 +364,7 @@ function lps_render_accounting_prices_page(): void {
 
                     <label class="lps-ap-cron-confirm">
                         <input type="checkbox" name="automatic_apply_confirmed" value="1" <?php checked(!empty($cron_options['automatic_apply_confirmed'])); ?>>
-                        <?php echo esc_html__('I understand that the schedule automatically changes accounting prices in Folio after a clean preflight.', 'lavka-price-sync'); ?>
+                        <?php echo esc_html__('I understand that the schedule first checks every selected warehouse and then automatically changes accounting prices in Folio only if all previews are clean.', 'lavka-price-sync'); ?>
                     </label>
 
                     <p class="description">
@@ -386,14 +402,26 @@ function lps_render_accounting_prices_page(): void {
                                 echo esc_html__('No scheduled runs yet', 'lavka-price-sync');
                             } else {
                                 echo esc_html($batch_status_labels[$batch_status] ?? $batch_status);
+                                if (isset($batch_stage_labels[$batch_stage])) {
+                                    echo ' · ' . esc_html($batch_stage_labels[$batch_stage]);
+                                }
                                 if ($batch_total > 0) {
                                     echo '<br>';
-                                    printf(
-                                        /* translators: 1: completed warehouse count, 2: total warehouse count. */
-                                        esc_html__('%1$d of %2$d warehouses completed', 'lavka-price-sync'),
-                                        $batch_completed,
-                                        $batch_total
-                                    );
+                                    if ($batch_stage === 'preview') {
+                                        printf(
+                                            /* translators: 1: completed warehouse preview count, 2: total warehouse count. */
+                                            esc_html__('%1$d of %2$d warehouse previews completed', 'lavka-price-sync'),
+                                            $batch_completed,
+                                            $batch_total
+                                        );
+                                    } else {
+                                        printf(
+                                            /* translators: 1: completed warehouse count, 2: total warehouse count. */
+                                            esc_html__('%1$d of %2$d warehouses completed', 'lavka-price-sync'),
+                                            $batch_completed,
+                                            $batch_total
+                                        );
+                                    }
                                 }
                             }
                             ?>

@@ -119,6 +119,7 @@ function lps_accounting_prices_native_state_from_body(array $body, array $state 
         'total_units' => absint($body['totalUnits'] ?? 0),
         'progress_percent' => isset($body['progressPercent']) ? max(0, min(100, (int)$body['progressPercent'])) : null,
         'current_art' => sanitize_text_field((string)($body['currentArt'] ?? '')),
+        'next_art' => sanitize_text_field((string)($body['nextArt'] ?? '')),
         'last_committed_art' => sanitize_text_field((string)($body['lastCommittedArt'] ?? '')),
         'warning_count' => absint($body['warningCount'] ?? 0),
         'error' => sanitize_textarea_field((string)($body['error'] ?? '')),
@@ -314,6 +315,7 @@ function lps_accounting_prices_native_create_batch(array $warehouse_ids): array 
         'batch_id' => wp_generate_uuid4(),
         'active' => true,
         'status' => 'queued',
+        'stage' => 'preview',
         'warehouse_ids' => $warehouse_ids,
         'pending_warehouse_ids' => $warehouse_ids,
         'current_warehouse_id' => 0,
@@ -354,6 +356,7 @@ function lps_accounting_prices_native_stop_batch(string $status, string $message
 }
 
 function lps_accounting_prices_native_complete_batch_warehouse(array $job_state, string $status, array $body = []): void {
+    $status = strtoupper(trim($status));
     $batch_id = sanitize_text_field((string)($job_state['batch_id'] ?? ''));
     if ($batch_id === '') return;
 
@@ -370,7 +373,18 @@ function lps_accounting_prices_native_complete_batch_warehouse(array $job_state,
         return;
     }
 
+    $stage = sanitize_key((string)($batch['stage'] ?? 'apply'));
+    if (!in_array($stage, ['preview', 'apply'], true)) {
+        lps_accounting_prices_native_stop_batch(
+            'outcome_unknown',
+            __('The scheduled warehouse queue has an unknown stage. Check Folio manually before restarting it.', 'lavka-price-sync'),
+            true
+        );
+        return;
+    }
+
     $batch['results'][] = [
+        'stage' => $stage,
         'warehouse_id' => $warehouse_id,
         'job_id' => sanitize_text_field((string)($job_state['job_id'] ?? '')),
         'status' => sanitize_key($status),
@@ -380,28 +394,62 @@ function lps_accounting_prices_native_complete_batch_warehouse(array $job_state,
     ];
     $batch['current_warehouse_id'] = 0;
 
-    if (in_array($status, ['FAILED_PARTIAL', 'OUTCOME_UNKNOWN'], true)) {
+    $phase = strtoupper((string)($body['phase'] ?? ($job_state['phase'] ?? '')));
+    $error = trim((string)($body['error'] ?? ($job_state['error'] ?? '')));
+    $warnings = isset($body['warnings']) && is_array($body['warnings']) ? $body['warnings'] : [];
+    $errors = isset($body['errors']) && is_array($body['errors']) ? $body['errors'] : [];
+    $not_running = array_key_exists('running', $body) && $body['running'] === false;
+    $preview_is_safe = $status === 'PREVIEW_READY'
+        && $phase === 'PRECHECK_COMPLETED'
+        && $not_running
+        && absint($body['committedChunks'] ?? ($job_state['committed_chunks'] ?? 0)) === 0
+        && absint($body['warningCount'] ?? ($job_state['warning_count'] ?? 0)) === 0
+        && $error === ''
+        && !$warnings
+        && !$errors;
+    $apply_is_complete = $status === 'COMPLETED'
+        && $phase === 'APPLY_COMPLETED'
+        && $not_running
+        && $error === '';
+
+    // Every preview must be proven clean before the batch enters its apply
+    // stage. During apply, only a proven COMPLETED result advances the queue.
+    if (($stage === 'preview' && !$preview_is_safe) || ($stage === 'apply' && !$apply_is_complete)) {
+        $messages = [
+            'BLOCKED_NEGATIVE_STOCK' => __('The rollback preflight found negative chronological stock. The remaining warehouse queue and the weekly schedule are stopped.', 'lavka-price-sync'),
+            'STOPPED_ON_NEGATIVE_STOCK' => __('A warehouse recalculation stopped on negative chronological stock. The remaining warehouse queue and the weekly schedule are stopped.', 'lavka-price-sync'),
+            'FAILED_PARTIAL' => __('A warehouse recalculation ended after partial commits. The remaining warehouse queue is stopped until Folio is reviewed manually.', 'lavka-price-sync'),
+            'OUTCOME_UNKNOWN' => __('A warehouse recalculation has an unknown outcome. The remaining warehouse queue is stopped until Folio is reviewed manually.', 'lavka-price-sync'),
+            'FAILED' => __('A warehouse recalculation failed. The remaining warehouse queue and the weekly schedule are stopped.', 'lavka-price-sync'),
+        ];
+        if ($stage === 'preview' && $status === 'PREVIEW_READY') {
+            $message = __('A warehouse preview returned PREVIEW_READY without all required safety guarantees. The warehouse queue and the weekly schedule are stopped.', 'lavka-price-sync');
+        } elseif ($stage === 'apply' && $status === 'COMPLETED') {
+            $message = __('A warehouse recalculation returned COMPLETED without all required completion guarantees. The warehouse queue and the weekly schedule are stopped.', 'lavka-price-sync');
+        } else {
+            $message = $messages[$status]
+                ?? __('The Java service returned an unexpected final status. The remaining warehouse queue and the weekly schedule are stopped until manual review.', 'lavka-price-sync');
+        }
+
         lps_accounting_prices_native_store_batch($batch);
         lps_accounting_prices_native_stop_batch(
-            strtolower($status),
-            $status === 'FAILED_PARTIAL'
-                ? __('A warehouse recalculation ended after partial commits. The remaining warehouse queue is stopped until Folio is reviewed manually.', 'lavka-price-sync')
-                : __('A warehouse recalculation has an unknown outcome. The remaining warehouse queue is stopped until Folio is reviewed manually.', 'lavka-price-sync'),
+            strtolower($status ?: 'outcome_unknown'),
+            $message,
             true
         );
         return;
     }
 
-    if ($status === 'FAILED') {
+    if (!empty($batch['pending_warehouse_ids'])) {
+        $batch['status'] = 'waiting_next';
         lps_accounting_prices_native_store_batch($batch);
-        lps_accounting_prices_native_stop_batch(
-            'failed',
-            __('A warehouse recalculation failed. The remaining warehouses were not started; the weekly schedule remains enabled.', 'lavka-price-sync')
-        );
+        lps_accounting_prices_native_schedule_batch_next();
         return;
     }
 
-    if (!empty($batch['pending_warehouse_ids'])) {
+    if ($stage === 'preview') {
+        $batch['stage'] = 'apply';
+        $batch['pending_warehouse_ids'] = lps_accounting_prices_native_normalize_warehouse_ids($batch['warehouse_ids'] ?? []);
         $batch['status'] = 'waiting_next';
         lps_accounting_prices_native_store_batch($batch);
         lps_accounting_prices_native_schedule_batch_next();
@@ -776,6 +824,15 @@ function lps_accounting_prices_native_continue_batch(string $source = 'cron'): a
         $pending = lps_accounting_prices_native_normalize_warehouse_ids($batch['pending_warehouse_ids'] ?? []);
         $warehouse_id = absint(array_shift($pending));
         if ($warehouse_id < 1) {
+            if (sanitize_key((string)($batch['stage'] ?? 'apply')) === 'preview') {
+                $batch['stage'] = 'apply';
+                $batch['pending_warehouse_ids'] = lps_accounting_prices_native_normalize_warehouse_ids($batch['warehouse_ids'] ?? []);
+                $batch['status'] = 'waiting_next';
+                lps_accounting_prices_native_store_batch($batch);
+                lps_accounting_prices_native_schedule_batch_next();
+                return ['ok' => true, 'httpStatus' => 202, 'body' => ['status' => 'apply_stage_queued']];
+            }
+
             $batch['active'] = false;
             $batch['status'] = 'completed';
             $batch['completed_at'] = current_time('mysql');
@@ -794,7 +851,7 @@ function lps_accounting_prices_native_continue_batch(string $source = 'cron'): a
 
     $result = lps_accounting_prices_native_start(
         $warehouse_id,
-        false,
+        sanitize_key((string)($batch['stage'] ?? 'apply')) === 'preview',
         $source === 'retry' ? 'retry' : 'cron',
         (string)$batch['batch_id']
     );
@@ -814,7 +871,7 @@ function lps_accounting_prices_native_continue_batch(string $source = 'cron'): a
     }
 
     $message = sanitize_textarea_field((string)($result['body']['message'] ?? __('The Java service did not accept the scheduled warehouse recalculation.', 'lavka-price-sync')));
-    lps_accounting_prices_native_stop_batch('start_failed', $message);
+    lps_accounting_prices_native_stop_batch('start_failed', $message, true);
     return $result;
 }
 

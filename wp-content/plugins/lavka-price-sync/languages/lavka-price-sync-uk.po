@@ -71,6 +71,30 @@ msgstr ""
 "Черга планового перерахунку складів більше не відповідає завершеному завданню "
 "Java. Перед повторним запуском перевірте ФОЛІО вручну."
 
+#: inc/accounting-prices-cron.php:381
+msgid ""
+"The scheduled warehouse queue has an unknown stage. Check Folio manually "
+"before restarting it."
+msgstr ""
+"Планова черга складів має невідомий етап. Перед повторним запуском перевірте "
+"ФОЛІО вручну."
+
+#: inc/accounting-prices-cron.php:389
+msgid ""
+"The rollback preflight found negative chronological stock. The remaining "
+"warehouse queue and the weekly schedule are stopped."
+msgstr ""
+"Попередня перевірка з відкатом виявила від'ємний хронологічний залишок. "
+"Решту черги складів і тижневий розклад зупинено."
+
+#: inc/accounting-prices-cron.php:390
+msgid ""
+"A warehouse recalculation stopped on negative chronological stock. The "
+"remaining warehouse queue and the weekly schedule are stopped."
+msgstr ""
+"Перерахунок складу зупинено через від'ємний хронологічний залишок. Решту "
+"черги складів і тижневий розклад зупинено."
+
 #: inc/accounting-prices-cron.php:388
 msgid ""
 "A warehouse recalculation ended after partial commits. The remaining "
@@ -87,13 +111,37 @@ msgstr ""
 "Результат перерахунку складу невідомий. Решту черги складів зупинено до "
 "ручної перевірки ФОЛІО."
 
-#: inc/accounting-prices-cron.php:399
+#: inc/accounting-prices-cron.php:393
 msgid ""
-"A warehouse recalculation failed. The remaining warehouses were not started; "
-"the weekly schedule remains enabled."
+"A warehouse recalculation failed. The remaining warehouse queue and the "
+"weekly schedule are stopped."
 msgstr ""
-"Перерахунок складу завершився помилкою. Решту складів не запущено; тижневий "
-"розклад залишається увімкненим."
+"Перерахунок складу завершився помилкою. Решту черги складів і тижневий "
+"розклад зупинено."
+
+#: inc/accounting-prices-cron.php:396
+msgid ""
+"The Java service returned an unexpected final status. The remaining "
+"warehouse queue and the weekly schedule are stopped until manual review."
+msgstr ""
+"Java-сервіс повернув неочікуваний фінальний статус. Решту черги складів і "
+"тижневий розклад зупинено до ручної перевірки."
+
+#: inc/accounting-prices-cron.php:428
+msgid ""
+"A warehouse preview returned PREVIEW_READY without all required safety "
+"guarantees. The warehouse queue and the weekly schedule are stopped."
+msgstr ""
+"Попередня перевірка складу повернула PREVIEW_READY без усіх обов'язкових "
+"гарантій безпеки. Чергу складів і тижневий розклад зупинено."
+
+#: inc/accounting-prices-cron.php:430
+msgid ""
+"A warehouse recalculation returned COMPLETED without all required completion "
+"guarantees. The warehouse queue and the weekly schedule are stopped."
+msgstr ""
+"Перерахунок складу повернув COMPLETED без усіх обов'язкових підтверджень "
+"завершення. Чергу складів і тижневий розклад зупинено."
 
 #: inc/accounting-prices-cron.php:423 inc/accounting-prices.php:498
 msgid "Folio warehouse is required."
@@ -337,6 +385,10 @@ msgid "Current SKU"
 msgstr "Поточний артикул"
 
 #: inc/accounting-prices.php:82
+msgid "Next SKU"
+msgstr "Наступний артикул"
+
+#: inc/accounting-prices.php:82
 msgid "Phase"
 msgstr "Етап"
 
@@ -463,6 +515,14 @@ msgid ""
 msgstr ""
 "Повний перерахунок стане доступним після успішної точної попередньої "
 "перевірки вибраного складу з відкатом."
+
+#: inc/accounting-prices.php:115
+msgid ""
+"The preview returned PREVIEW_READY, but its safety checks are incomplete. "
+"Applying changes remains blocked."
+msgstr ""
+"Попередня перевірка повернула PREVIEW_READY, але перевірки безпеки не "
+"завершені. Застосування змін залишається заблокованим."
 
 #: inc/accounting-prices.php:115 inc/accounting-prices.php:175
 msgid "Not started"
@@ -784,9 +844,13 @@ msgstr "Склади ФОЛІО"
 msgid "Warehouse ID: %d"
 msgstr "ID складу: %d"
 
-#: inc/accounting-prices.php:333
-msgid "Selected warehouses are recalculated sequentially, never in parallel."
-msgstr "Вибрані склади перераховуються послідовно, ніколи не паралельно."
+#: inc/accounting-prices.php:346
+msgid ""
+"Selected warehouses are processed sequentially: first all previews, then all "
+"recalculations. Warehouses are never processed in parallel."
+msgstr ""
+"Вибрані склади обробляються послідовно: спочатку всі попередні перевірки, "
+"потім усі перерахунки. Склади ніколи не обробляються паралельно."
 
 #: inc/accounting-prices.php:336
 msgid "Day of week"
@@ -796,13 +860,14 @@ msgstr "День тижня"
 msgid "Start time"
 msgstr "Час запуску"
 
-#: inc/accounting-prices.php:351
+#: inc/accounting-prices.php:364
 msgid ""
-"I understand that the schedule automatically changes accounting prices in "
-"Folio after a clean preflight."
+"I understand that the schedule first checks every selected warehouse and "
+"then automatically changes accounting prices in Folio only if all previews "
+"are clean."
 msgstr ""
-"Я розумію, що після успішної попередньої перевірки розклад автоматично "
-"змінює облікові ціни у ФОЛІО."
+"Я розумію, що розклад спочатку перевіряє кожен вибраний склад і лише після "
+"успішних перевірок усіх складів автоматично змінює облікові ціни у ФОЛІО."
 
 #. translators: %s: WordPress site time zone.
 #: inc/accounting-prices.php:358
@@ -841,6 +906,20 @@ msgstr "Остання планова черга складів"
 #: inc/accounting-prices.php:386
 msgid "No scheduled runs yet"
 msgstr "Планових запусків ще не було"
+
+#: inc/accounting-prices.php:405
+msgid "Preview stage"
+msgstr "Етап попередньої перевірки"
+
+#: inc/accounting-prices.php:406
+msgid "Apply stage"
+msgstr "Етап застосування"
+
+#. translators: 1: completed warehouse preview count, 2: total warehouse count.
+#: inc/accounting-prices.php:410
+#, php-format
+msgid "%1$d of %2$d warehouse previews completed"
+msgstr "Завершено перевірок складів: %1$d із %2$d"
 
 #. translators: 1: completed warehouse count, 2: total warehouse count.
 #: inc/accounting-prices.php:393
