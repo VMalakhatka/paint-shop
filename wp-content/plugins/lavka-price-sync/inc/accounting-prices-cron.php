@@ -99,6 +99,39 @@ function lps_accounting_prices_native_decode_response($response): array {
     ];
 }
 
+function lps_accounting_prices_native_sanitize_report_value($value, int $depth = 0) {
+    if ($depth > 5) return null;
+    if ($value === null || is_bool($value) || is_int($value) || is_float($value)) return $value;
+    if (is_string($value)) {
+        $value = sanitize_textarea_field($value);
+        return function_exists('mb_substr') ? mb_substr($value, 0, 4000) : substr($value, 0, 4000);
+    }
+    if (!is_array($value)) return sanitize_text_field((string)$value);
+
+    $result = [];
+    $count = 0;
+    foreach ($value as $key => $item) {
+        if (++$count > 100) break;
+        $safe_key = is_int($key)
+            ? $key
+            : preg_replace('/[^A-Za-z0-9_.-]/', '', (string)$key);
+        if ($safe_key === '') continue;
+        $result[$safe_key] = lps_accounting_prices_native_sanitize_report_value($item, $depth + 1);
+    }
+    return $result;
+}
+
+function lps_accounting_prices_native_sanitize_issues($issues): array {
+    if (!is_array($issues)) return [];
+
+    $result = [];
+    foreach (array_slice($issues, 0, 500) as $issue) {
+        if (!is_array($issue)) $issue = ['message' => (string)$issue];
+        $result[] = lps_accounting_prices_native_sanitize_report_value($issue);
+    }
+    return $result;
+}
+
 function lps_accounting_prices_native_state_from_body(array $body, array $state = []): array {
     $request = isset($body['request']) && is_array($body['request']) ? $body['request'] : [];
     $status = sanitize_key((string)($body['status'] ?? ($state['status'] ?? '')));
@@ -121,7 +154,15 @@ function lps_accounting_prices_native_state_from_body(array $body, array $state 
         'current_art' => sanitize_text_field((string)($body['currentArt'] ?? '')),
         'next_art' => sanitize_text_field((string)($body['nextArt'] ?? '')),
         'last_committed_art' => sanitize_text_field((string)($body['lastCommittedArt'] ?? '')),
-        'warning_count' => absint($body['warningCount'] ?? 0),
+        'warning_count' => absint($body['warningCount'] ?? ($state['warning_count'] ?? 0)),
+        'warnings_truncated' => array_key_exists('warningsTruncated', $body)
+            ? !empty($body['warningsTruncated'])
+            : !empty($state['warnings_truncated']),
+        'warnings' => lps_accounting_prices_native_sanitize_issues($body['warnings'] ?? ($state['warnings'] ?? [])),
+        'errors' => lps_accounting_prices_native_sanitize_issues($body['errors'] ?? ($state['errors'] ?? [])),
+        'failed_chunk' => isset($body['failedChunk']) && is_array($body['failedChunk'])
+            ? lps_accounting_prices_native_sanitize_report_value($body['failedChunk'])
+            : ($state['failed_chunk'] ?? []),
         'error' => sanitize_textarea_field((string)($body['error'] ?? '')),
         'last_checked_at' => current_time('mysql'),
         'last_checked_at_gmt' => current_time('mysql', true),
@@ -320,6 +361,7 @@ function lps_accounting_prices_native_create_batch(array $warehouse_ids): array 
         'stage' => 'preview',
         'warehouse_ids' => $warehouse_ids,
         'pending_warehouse_ids' => $warehouse_ids,
+        'approved_warehouse_ids' => [],
         'current_warehouse_id' => 0,
         'results' => [],
         'started_at' => current_time('mysql'),
@@ -338,6 +380,89 @@ function lps_accounting_prices_native_create_batch(array $warehouse_ids): array 
     ]);
 
     return $state;
+}
+
+function lps_accounting_prices_native_batch_final_status(array $batch): string {
+    $has_errors = false;
+    $has_warnings = false;
+    foreach ((array)($batch['results'] ?? []) as $result) {
+        if (!is_array($result)) continue;
+        $outcome = sanitize_key((string)($result['outcome'] ?? ''));
+        if ($outcome === 'error') $has_errors = true;
+        if ($outcome === 'warning' || absint($result['warning_count'] ?? 0) > 0) $has_warnings = true;
+    }
+
+    if ($has_errors) return 'completed_with_errors';
+    if ($has_warnings) return 'completed_with_warnings';
+    return 'completed';
+}
+
+function lps_accounting_prices_native_finish_batch(array $batch): array {
+    $batch['active'] = false;
+    $batch['status'] = lps_accounting_prices_native_batch_final_status($batch);
+    $batch['completed_at'] = current_time('mysql');
+    $batch['completed_at_gmt'] = current_time('mysql', true);
+    $batch['current_warehouse_id'] = 0;
+    lps_accounting_prices_native_store_batch($batch);
+    wp_clear_scheduled_hook(LPS_ACCOUNTING_PRICES_NATIVE_BATCH_NEXT_HOOK);
+    return $batch;
+}
+
+function lps_accounting_prices_native_advance_batch(array $batch): array {
+    if (!empty($batch['pending_warehouse_ids'])) {
+        $batch['status'] = 'waiting_next';
+        lps_accounting_prices_native_store_batch($batch);
+        lps_accounting_prices_native_schedule_batch_next();
+        return $batch;
+    }
+
+    if (sanitize_key((string)($batch['stage'] ?? 'apply')) === 'preview') {
+        $batch['stage'] = 'apply';
+        $batch['pending_warehouse_ids'] = lps_accounting_prices_native_normalize_warehouse_ids(
+            $batch['approved_warehouse_ids'] ?? []
+        );
+        if (!$batch['pending_warehouse_ids']) return lps_accounting_prices_native_finish_batch($batch);
+
+        $batch['status'] = 'waiting_next';
+        lps_accounting_prices_native_store_batch($batch);
+        lps_accounting_prices_native_schedule_batch_next();
+        return $batch;
+    }
+
+    return lps_accounting_prices_native_finish_batch($batch);
+}
+
+function lps_accounting_prices_native_batch_result(
+    array $job_state,
+    array $body,
+    string $stage,
+    string $status,
+    string $outcome,
+    string $message = ''
+): array {
+    return [
+        'stage' => $stage,
+        'warehouse_id' => absint($job_state['warehouse_id'] ?? 0),
+        'job_id' => sanitize_text_field((string)($job_state['job_id'] ?? '')),
+        'status' => sanitize_key($status),
+        'phase' => sanitize_key((string)($body['phase'] ?? ($job_state['phase'] ?? ''))),
+        'outcome' => sanitize_key($outcome),
+        'warning_count' => absint($body['warningCount'] ?? ($job_state['warning_count'] ?? 0)),
+        'warnings_truncated' => !empty($body['warningsTruncated']) || !empty($job_state['warnings_truncated']),
+        'warnings' => lps_accounting_prices_native_sanitize_issues($body['warnings'] ?? ($job_state['warnings'] ?? [])),
+        'errors' => lps_accounting_prices_native_sanitize_issues($body['errors'] ?? ($job_state['errors'] ?? [])),
+        'failed_chunk' => isset($body['failedChunk']) && is_array($body['failedChunk'])
+            ? lps_accounting_prices_native_sanitize_report_value($body['failedChunk'])
+            : ($job_state['failed_chunk'] ?? []),
+        'error' => sanitize_textarea_field($message !== '' ? $message : (string)($body['error'] ?? ($job_state['error'] ?? ''))),
+        'started_at' => sanitize_text_field((string)($body['startedAt'] ?? ($job_state['started_at'] ?? ''))),
+        'completed_at' => sanitize_text_field((string)($body['completedAt'] ?? current_time('mysql'))),
+        'procedure_calls' => absint($body['procedureCalls'] ?? ($job_state['procedure_calls'] ?? 0)),
+        'preflight_chunks' => absint($body['preflightChunks'] ?? ($job_state['preflight_chunks'] ?? 0)),
+        'committed_chunks' => absint($body['committedChunks'] ?? ($job_state['committed_chunks'] ?? 0)),
+        'progress_units' => absint($body['progressUnits'] ?? ($job_state['progress_units'] ?? 0)),
+        'total_units' => absint($body['totalUnits'] ?? ($job_state['total_units'] ?? 0)),
+    ];
 }
 
 function lps_accounting_prices_native_stop_batch(string $status, string $message, bool $pause_schedule = false): array {
@@ -385,17 +510,6 @@ function lps_accounting_prices_native_complete_batch_warehouse(array $job_state,
         return;
     }
 
-    $batch['results'][] = [
-        'stage' => $stage,
-        'warehouse_id' => $warehouse_id,
-        'job_id' => sanitize_text_field((string)($job_state['job_id'] ?? '')),
-        'status' => sanitize_key($status),
-        'warning_count' => absint($body['warningCount'] ?? ($job_state['warning_count'] ?? 0)),
-        'error' => sanitize_textarea_field((string)($body['error'] ?? ($job_state['error'] ?? ''))),
-        'completed_at' => current_time('mysql'),
-    ];
-    $batch['current_warehouse_id'] = 0;
-
     $phase = strtoupper((string)($body['phase'] ?? ($job_state['phase'] ?? '')));
     $error = trim((string)($body['error'] ?? ($job_state['error'] ?? '')));
     $errors = isset($body['errors']) && is_array($body['errors']) ? $body['errors'] : [];
@@ -416,25 +530,39 @@ function lps_accounting_prices_native_complete_batch_warehouse(array $job_state,
         && $error === ''
         && !$errors;
 
-    // Every preview must reach an explicitly successful terminal status before
-    // apply. Warnings may represent safely skipped SKUs and do not block the
-    // queue. During apply, only a proven successful completion advances it.
-    if (($stage === 'preview' && !$preview_is_safe) || ($stage === 'apply' && !$apply_is_complete)) {
+    $successful = $stage === 'preview' ? $preview_is_safe : $apply_is_complete;
+    $fatal = in_array($status, ['FAILED_PARTIAL', 'OUTCOME_UNKNOWN'], true);
+
+    if ($successful) {
+        $outcome = absint($body['warningCount'] ?? ($job_state['warning_count'] ?? 0)) > 0
+            || substr($status, -14) === '_WITH_WARNINGS'
+            ? 'warning'
+            : 'success';
+        $batch['results'][] = lps_accounting_prices_native_batch_result(
+            $job_state,
+            $body,
+            $stage,
+            $status,
+            $outcome
+        );
+        if ($stage === 'preview') {
+            $approved = lps_accounting_prices_native_normalize_warehouse_ids($batch['approved_warehouse_ids'] ?? []);
+            $approved[] = $warehouse_id;
+            $batch['approved_warehouse_ids'] = lps_accounting_prices_native_normalize_warehouse_ids($approved);
+        }
+        $batch['current_warehouse_id'] = 0;
+        lps_accounting_prices_native_advance_batch($batch);
+        return;
+    }
+
+    if ($fatal) {
         $messages = [
-            'BLOCKED_NEGATIVE_STOCK' => __('The rollback preflight found negative chronological stock. The remaining warehouse queue and the weekly schedule are stopped.', 'lavka-price-sync'),
-            'STOPPED_ON_NEGATIVE_STOCK' => __('A warehouse recalculation stopped on negative chronological stock. The remaining warehouse queue and the weekly schedule are stopped.', 'lavka-price-sync'),
             'FAILED_PARTIAL' => __('A warehouse recalculation ended after partial commits. The remaining warehouse queue is stopped until Folio is reviewed manually.', 'lavka-price-sync'),
             'OUTCOME_UNKNOWN' => __('A warehouse recalculation has an unknown outcome. The remaining warehouse queue is stopped until Folio is reviewed manually.', 'lavka-price-sync'),
-            'FAILED' => __('A warehouse recalculation failed. The remaining warehouse queue and the weekly schedule are stopped.', 'lavka-price-sync'),
         ];
-        if ($stage === 'preview' && in_array($status, ['PREVIEW_READY', 'PREVIEW_READY_WITH_WARNINGS'], true)) {
-            $message = __('A warehouse preview returned PREVIEW_READY without all required safety guarantees. The warehouse queue and the weekly schedule are stopped.', 'lavka-price-sync');
-        } elseif ($stage === 'apply' && in_array($status, ['COMPLETED', 'COMPLETED_WITH_WARNINGS'], true)) {
-            $message = __('A warehouse recalculation returned COMPLETED without all required completion guarantees. The warehouse queue and the weekly schedule are stopped.', 'lavka-price-sync');
-        } else {
-            $message = $messages[$status]
-                ?? __('The Java service returned an unexpected final status. The remaining warehouse queue and the weekly schedule are stopped until manual review.', 'lavka-price-sync');
-        }
+        $message = $messages[$status];
+        $batch['results'][] = lps_accounting_prices_native_batch_result($job_state, $body, $stage, $status, 'fatal', $message);
+        $batch['current_warehouse_id'] = 0;
 
         lps_accounting_prices_native_store_batch($batch);
         lps_accounting_prices_native_stop_batch(
@@ -445,27 +573,23 @@ function lps_accounting_prices_native_complete_batch_warehouse(array $job_state,
         return;
     }
 
-    if (!empty($batch['pending_warehouse_ids'])) {
-        $batch['status'] = 'waiting_next';
-        lps_accounting_prices_native_store_batch($batch);
-        lps_accounting_prices_native_schedule_batch_next();
-        return;
+    $messages = [
+        'BLOCKED_NEGATIVE_STOCK' => __('The warehouse preview found negative chronological stock. Problem products were recorded and this warehouse was skipped; the queue continues.', 'lavka-price-sync'),
+        'STOPPED_ON_NEGATIVE_STOCK' => __('The warehouse recalculation stopped on negative chronological stock. The error was recorded and the queue continues with the next warehouse.', 'lavka-price-sync'),
+        'FAILED' => __('The warehouse recalculation failed. The error was recorded and the queue continues with the next warehouse.', 'lavka-price-sync'),
+    ];
+    if ($stage === 'preview' && in_array($status, ['PREVIEW_READY', 'PREVIEW_READY_WITH_WARNINGS'], true)) {
+        $message = __('The warehouse preview returned a success status without all required completion fields. The warehouse was skipped and the queue continues.', 'lavka-price-sync');
+    } elseif ($stage === 'apply' && in_array($status, ['COMPLETED', 'COMPLETED_WITH_WARNINGS'], true)) {
+        $message = __('The warehouse recalculation returned a success status without all required completion fields. The result was recorded and the queue continues.', 'lavka-price-sync');
+    } else {
+        $message = $messages[$status]
+            ?? __('The warehouse returned a terminal error. It was recorded and the queue continues with the next warehouse.', 'lavka-price-sync');
     }
 
-    if ($stage === 'preview') {
-        $batch['stage'] = 'apply';
-        $batch['pending_warehouse_ids'] = lps_accounting_prices_native_normalize_warehouse_ids($batch['warehouse_ids'] ?? []);
-        $batch['status'] = 'waiting_next';
-        lps_accounting_prices_native_store_batch($batch);
-        lps_accounting_prices_native_schedule_batch_next();
-        return;
-    }
-
-    $batch['active'] = false;
-    $batch['status'] = 'completed';
-    $batch['completed_at'] = current_time('mysql');
-    $batch['completed_at_gmt'] = current_time('mysql', true);
-    lps_accounting_prices_native_store_batch($batch);
+    $batch['results'][] = lps_accounting_prices_native_batch_result($job_state, $body, $stage, $status, 'error', $message);
+    $batch['current_warehouse_id'] = 0;
+    lps_accounting_prices_native_advance_batch($batch);
 }
 
 function lps_accounting_prices_native_start(int $warehouse_id, bool $preview_only, string $source = 'manual', string $batch_id = ''): array {
@@ -831,18 +955,20 @@ function lps_accounting_prices_native_continue_batch(string $source = 'cron'): a
         if ($warehouse_id < 1) {
             if (sanitize_key((string)($batch['stage'] ?? 'apply')) === 'preview') {
                 $batch['stage'] = 'apply';
-                $batch['pending_warehouse_ids'] = lps_accounting_prices_native_normalize_warehouse_ids($batch['warehouse_ids'] ?? []);
+                $batch['pending_warehouse_ids'] = lps_accounting_prices_native_normalize_warehouse_ids(
+                    $batch['approved_warehouse_ids'] ?? []
+                );
+                if (!$batch['pending_warehouse_ids']) {
+                    lps_accounting_prices_native_finish_batch($batch);
+                    return ['ok' => true, 'httpStatus' => 200, 'body' => ['status' => 'batch_completed_with_errors']];
+                }
                 $batch['status'] = 'waiting_next';
                 lps_accounting_prices_native_store_batch($batch);
                 lps_accounting_prices_native_schedule_batch_next();
                 return ['ok' => true, 'httpStatus' => 202, 'body' => ['status' => 'apply_stage_queued']];
             }
 
-            $batch['active'] = false;
-            $batch['status'] = 'completed';
-            $batch['completed_at'] = current_time('mysql');
-            $batch['completed_at_gmt'] = current_time('mysql', true);
-            lps_accounting_prices_native_store_batch($batch);
+            lps_accounting_prices_native_finish_batch($batch);
             return ['ok' => true, 'httpStatus' => 200, 'body' => ['status' => 'batch_completed']];
         }
 
@@ -876,7 +1002,33 @@ function lps_accounting_prices_native_continue_batch(string $source = 'cron'): a
     }
 
     $message = sanitize_textarea_field((string)($result['body']['message'] ?? __('The Java service did not accept the scheduled warehouse recalculation.', 'lavka-price-sync')));
-    lps_accounting_prices_native_stop_batch('start_failed', $message, true);
+    $batch = lps_accounting_prices_native_batch_state();
+    if (!empty($batch['active']) && absint($batch['current_warehouse_id'] ?? 0) === $warehouse_id) {
+        $stage = sanitize_key((string)($batch['stage'] ?? 'preview'));
+        $start_body = is_array($result['body'] ?? null) ? $result['body'] : [];
+        $start_body['errors'] = [[
+            'code' => 'START_FAILED',
+            'message' => $message,
+            'details' => [
+                'httpStatus' => absint($result['httpStatus'] ?? 0),
+                'requestId' => sanitize_text_field((string)($start_body['reqId'] ?? '')),
+            ],
+        ]];
+        $batch['results'][] = lps_accounting_prices_native_batch_result(
+            [
+                'warehouse_id' => $warehouse_id,
+                'job_id' => '',
+                'started_at' => $batch['last_attempt_at'] ?? current_time('mysql'),
+            ],
+            $start_body,
+            $stage,
+            'START_FAILED',
+            'error',
+            $message
+        );
+        $batch['current_warehouse_id'] = 0;
+        lps_accounting_prices_native_advance_batch($batch);
+    }
     return $result;
 }
 

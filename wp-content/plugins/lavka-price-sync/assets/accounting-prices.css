@@ -317,6 +317,55 @@
   background: #fcf9e8;
 }
 
+.lps-ap-failed-chunk {
+  max-width: 1120px;
+  margin: 16px 0 20px;
+  padding: 14px;
+  border: 1px solid #d63638;
+  border-left-width: 4px;
+  background: #fcf0f1;
+}
+
+.lps-ap-failed-chunk h3 {
+  margin: 0 0 6px;
+}
+
+.lps-ap-failed-chunk-grid {
+  display: grid;
+  grid-template-columns: minmax(210px, 0.7fr) minmax(220px, 1.3fr);
+  gap: 1px;
+  margin: 14px 0;
+  border: 1px solid #dcdcde;
+  background: #dcdcde;
+}
+
+.lps-ap-failed-chunk-grid dt,
+.lps-ap-failed-chunk-grid dd {
+  min-width: 0;
+  margin: 0;
+  padding: 8px 10px;
+  overflow-wrap: anywhere;
+  background: #fff;
+}
+
+.lps-ap-failed-chunk-grid dt {
+  font-weight: 600;
+}
+
+.lps-ap-failed-chunk-rollback,
+.lps-ap-failed-chunk-retry {
+  margin: 8px 0 0;
+  font-weight: 600;
+}
+
+.lps-ap-failed-chunk-rollback {
+  color: #006b1b;
+}
+
+.lps-ap-failed-chunk-retry {
+  color: #8a2424;
+}
+
 #lps-ap-progress {
   max-width: 1120px;
   margin: 18px 0;
@@ -426,6 +475,66 @@
   overflow-wrap: anywhere;
 }
 
+.lps-ap-batch-report {
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid #c3c4c7;
+}
+
+.lps-ap-batch-report h4 {
+  margin: 0 0 4px;
+  font-size: 16px;
+}
+
+.lps-ap-table-wrap {
+  margin-top: 12px;
+  overflow-x: auto;
+}
+
+.lps-ap-batch-table {
+  min-width: 1050px;
+}
+
+.lps-ap-batch-table td {
+  vertical-align: top;
+}
+
+.lps-ap-batch-table td p {
+  margin: 5px 0 0;
+}
+
+.lps-ap-batch-table details {
+  margin-top: 6px;
+}
+
+.lps-ap-batch-table summary {
+  cursor: pointer;
+}
+
+.lps-ap-batch-table pre {
+  max-width: 520px;
+  max-height: 260px;
+  overflow: auto;
+  padding: 8px;
+  border: 1px solid #c3c4c7;
+  background: #fff;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.lps-ap-batch-row.is-warning td:first-child {
+  border-left: 4px solid #dba617;
+}
+
+.lps-ap-batch-row.is-error td:first-child,
+.lps-ap-batch-row.is-fatal td:first-child {
+  border-left: 4px solid #d63638;
+}
+
+.lps-ap-batch-row.is-success td:first-child {
+  border-left: 4px solid #00a32a;
+}
+
 @media (max-width: 782px) {
   .lps-ap-toolbar,
   .lps-ap-form-row,
@@ -451,6 +560,10 @@
 
   .lps-ap-cron-grid,
   .lps-ap-cron-status {
+    grid-template-columns: 1fr;
+  }
+
+  .lps-ap-failed-chunk-grid {
     grid-template-columns: 1fr;
   }
 }

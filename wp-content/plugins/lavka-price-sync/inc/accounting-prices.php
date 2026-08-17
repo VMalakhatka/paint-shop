@@ -66,6 +66,18 @@ add_action('admin_enqueue_scripts', function () {
             'jobCompletedWithWarnings' => __('Safe products were recalculated. Problem products were skipped; review the warnings.', 'lavka-price-sync'),
             'jobStopped' => __('The task stopped on a negative chronological stock.', 'lavka-price-sync'),
             'jobFailed' => __('The task failed.', 'lavka-price-sync'),
+            'failedChunk' => __('Rejected recalculation portion', 'lavka-price-sync'),
+            'failedChunkDescription' => __('These values belong to the portion rejected by Folio validation. The progress values above may describe a previously accepted portion.', 'lavka-price-sync'),
+            'failedChunkRolledBack' => __('No portions were committed. Changes from the failed operation were rolled back.', 'lavka-price-sync'),
+            'failedChunkNoRetry' => __('Do not retry automatically. Correct the cause and start a new preview manually.', 'lavka-price-sync'),
+            'inputArt' => __('Input article', 'lavka-price-sync'),
+            'outputArt' => __('Output article', 'lavka-price-sync'),
+            'failedNextArt' => __('Next article returned for the rejected portion', 'lavka-price-sync'),
+            'returnCode' => __('Return code', 'lavka-price-sync'),
+            'currentUnits' => __('Current units', 'lavka-price-sync'),
+            'totalUnits' => __('Total units', 'lavka-price-sync'),
+            'problemDate' => __('Problem date', 'lavka-price-sync'),
+            'validationError' => __('Validation error', 'lavka-price-sync'),
             'jobFailedPartial' => __('The task failed after one or more portions were committed. Do not retry it automatically; check Folio manually.', 'lavka-price-sync'),
             'jobOutcomeUnknown' => __('The task outcome cannot be proven. Do not retry it; check Folio and the Java logs manually.', 'lavka-price-sync'),
             'jobBlockedNegative' => __('The rollback preflight found negative chronological stock. Nothing was committed.', 'lavka-price-sync'),
@@ -82,6 +94,9 @@ add_action('admin_enqueue_scripts', function () {
             'after' => __('After', 'lavka-price-sync'),
             'currentSku' => __('Current SKU', 'lavka-price-sync'),
             'nextSku' => __('Next SKU', 'lavka-price-sync'),
+            'progressCurrentSku' => __('Last article reported for overall progress', 'lavka-price-sync'),
+            'progressNextSku' => __('Next overall progress cursor', 'lavka-price-sync'),
+            'failedSafety' => __('Failed operation safety status', 'lavka-price-sync'),
             'phase' => __('Phase', 'lavka-price-sync'),
             'warehouse' => __('Warehouse', 'lavka-price-sync'),
             'document' => __('Document', 'lavka-price-sync'),
@@ -172,6 +187,116 @@ add_action('admin_enqueue_scripts', function () {
     ]);
 });
 
+function lps_accounting_prices_batch_report_rows(array $batch): array {
+    $rows = [];
+    foreach ((array)($batch['results'] ?? []) as $result) {
+        if (!is_array($result)) continue;
+
+        $base = [
+            'completed_at' => sanitize_text_field((string)($result['completed_at'] ?? '')),
+            'stage' => sanitize_key((string)($result['stage'] ?? '')),
+            'warehouse_id' => absint($result['warehouse_id'] ?? 0),
+            'job_id' => sanitize_text_field((string)($result['job_id'] ?? '')),
+            'status' => strtoupper(sanitize_key((string)($result['status'] ?? ''))),
+            'phase' => strtoupper(sanitize_key((string)($result['phase'] ?? ''))),
+            'outcome' => sanitize_key((string)($result['outcome'] ?? '')),
+        ];
+        $issues = [];
+        foreach ((array)($result['warnings'] ?? []) as $issue) {
+            if (is_array($issue)) $issues[] = ['severity' => 'warning', 'issue' => $issue];
+        }
+        foreach ((array)($result['errors'] ?? []) as $issue) {
+            if (is_array($issue)) $issues[] = ['severity' => 'error', 'issue' => $issue];
+        }
+        $failed_chunk = isset($result['failed_chunk']) && is_array($result['failed_chunk'])
+            ? $result['failed_chunk']
+            : [];
+        if ($base['status'] === 'FAILED' && $failed_chunk) {
+            $issues[] = [
+                'severity' => 'error',
+                'issue' => [
+                    'code' => 'FAILED_CHUNK',
+                    'message' => __('Rejected recalculation portion', 'lavka-price-sync'),
+                    'details' => $failed_chunk,
+                ],
+            ];
+        }
+        if (!empty($result['warnings_truncated'])) {
+            $issues[] = [
+                'severity' => 'warning',
+                'issue' => [
+                    'code' => 'WARNINGS_TRUNCATED',
+                    'message' => __('Only part of the warnings was returned by the service. The complete diagnostics remain in the Folio service log.', 'lavka-price-sync'),
+                    'details' => ['warningCount' => absint($result['warning_count'] ?? 0)],
+                ],
+            ];
+        }
+
+        if (!$issues) {
+            $fallback_message = (string)($result['error'] ?? '');
+            if ($fallback_message === '' && absint($result['warning_count'] ?? 0) > 0) {
+                /* translators: %d: number of warnings reported without item details. */
+                $fallback_message = sprintf(__('%d warnings were reported without item details.', 'lavka-price-sync'), absint($result['warning_count']));
+            }
+            $issues[] = [
+                'severity' => $base['outcome'] === 'error' || $base['outcome'] === 'fatal' ? 'error' : $base['outcome'],
+                'issue' => [
+                    'code' => $base['status'],
+                    'message' => $fallback_message,
+                    'details' => [],
+                ],
+            ];
+        }
+
+        foreach ($issues as $entry) {
+            $issue = $entry['issue'];
+            $details = isset($issue['details']) && is_array($issue['details']) ? $issue['details'] : [];
+            $rows[] = array_merge($base, [
+                'severity' => sanitize_key((string)$entry['severity']),
+                'code' => strtoupper(sanitize_key((string)($issue['code'] ?? $base['status']))),
+                'sku' => sanitize_text_field((string)($details['sku'] ?? ($details['art'] ?? ($details['inputArt'] ?? ($issue['sku'] ?? ''))))),
+                'message' => sanitize_textarea_field((string)($issue['message'] ?? ($result['error'] ?? ''))),
+                'skipped' => !empty($details['skipped']),
+                'details' => $details,
+            ]);
+        }
+    }
+    return $rows;
+}
+
+function lps_accounting_prices_batch_details_text(array $details): string {
+    $parts = [];
+    $operation = isset($details['operation']) && is_array($details['operation']) ? $details['operation'] : [];
+    $current = isset($details['currentState']) && is_array($details['currentState']) ? $details['currentState'] : [];
+    $fields = [
+        __('Warehouse', 'lavka-price-sync') => $details['warehouseId'] ?? ($operation['warehouseId'] ?? null),
+        __('Document', 'lavka-price-sync') => $operation['documentNumber'] ?? ($operation['documentId'] ?? ($details['documentNumber'] ?? null)),
+        __('Date', 'lavka-price-sync') => $operation['documentDate'] ?? ($details['documentDate'] ?? null),
+        __('Before operation', 'lavka-price-sync') => $details['quantityBefore'] ?? null,
+        __('Operation', 'lavka-price-sync') => $operation['quantity'] ?? ($operation['operationQuantity'] ?? ($details['operationQuantity'] ?? null)),
+        __('After operation', 'lavka-price-sync') => $details['quantityAfter'] ?? null,
+        __('Shortage', 'lavka-price-sync') => $details['shortageQuantity'] ?? ($details['shortage'] ?? null),
+        __('Accounting price', 'lavka-price-sync') => $details['accountingPrice'] ?? ($current['accountingPrice'] ?? null),
+        __('Sale price', 'lavka-price-sync') => $details['salePrice'] ?? ($current['salePrice'] ?? null),
+        __('Accounting quantity', 'lavka-price-sync') => $details['accountingQuantity'] ?? ($current['accountingQuantity'] ?? null),
+        __('Physical quantity', 'lavka-price-sync') => $details['physicalQuantity'] ?? ($current['physicalQuantity'] ?? null),
+        __('Input article', 'lavka-price-sync') => $details['inputArt'] ?? null,
+        __('Output article', 'lavka-price-sync') => $details['outputArt'] ?? null,
+        __('Next article returned for the rejected portion', 'lavka-price-sync') => $details['nextArt'] ?? null,
+        __('Return code', 'lavka-price-sync') => $details['returnCode'] ?? null,
+        __('Current units', 'lavka-price-sync') => $details['currentUnits'] ?? null,
+        __('Total units', 'lavka-price-sync') => $details['totalUnits'] ?? null,
+        __('Problem date', 'lavka-price-sync') => $details['problemDate'] ?? null,
+        __('Validation error', 'lavka-price-sync') => $details['validationError'] ?? null,
+    ];
+    foreach ($fields as $label => $value) {
+        if ($value === '' || $value === null) continue;
+        $parts[] = $label . ': ' . (is_scalar($value) ? (string)$value : wp_json_encode($value));
+    }
+    if (!empty($details['skipped'])) $parts[] = __('Product skipped', 'lavka-price-sync');
+    return implode('; ', $parts);
+}
+
 function lps_render_accounting_prices_page(): void {
     if (!current_user_can(LPS_CAP)) return;
 
@@ -213,6 +338,7 @@ function lps_render_accounting_prices_page(): void {
         'WAITING_NEXT' => __('Waiting for the next warehouse', 'lavka-price-sync'),
         'COMPLETED' => __('Completed', 'lavka-price-sync'),
         'COMPLETED_WITH_WARNINGS' => __('Completed with skipped products', 'lavka-price-sync'),
+        'COMPLETED_WITH_ERRORS' => __('Completed with warehouse errors', 'lavka-price-sync'),
         'BLOCKED_NEGATIVE_STOCK' => __('Blocked by negative stock', 'lavka-price-sync'),
         'STOPPED_ON_NEGATIVE_STOCK' => __('Stopped on negative stock', 'lavka-price-sync'),
         'FAILED' => __('Failed', 'lavka-price-sync'),
@@ -229,6 +355,7 @@ function lps_render_accounting_prices_page(): void {
     ];
     $batch_total = count(lps_accounting_prices_native_normalize_warehouse_ids($native_batch['warehouse_ids'] ?? []));
     $batch_results = is_array($native_batch['results'] ?? null) ? $native_batch['results'] : [];
+    $batch_report_rows = lps_accounting_prices_batch_report_rows($native_batch);
     $batch_success_statuses = $batch_stage === 'preview'
         ? ['preview_ready', 'preview_ready_with_warnings']
         : ['completed', 'completed_with_warnings'];
@@ -237,6 +364,15 @@ function lps_render_accounting_prices_page(): void {
         static fn($result): bool => is_array($result)
             && sanitize_key((string)($result['stage'] ?? 'apply')) === $batch_stage
             && in_array(sanitize_key((string)($result['status'] ?? '')), $batch_success_statuses, true)
+    ));
+    $batch_error_count = count(array_filter(
+        $batch_results,
+        static fn($result): bool => is_array($result)
+            && in_array(sanitize_key((string)($result['outcome'] ?? '')), ['error', 'fatal'], true)
+    ));
+    $batch_warning_count = array_sum(array_map(
+        static fn($result): int => is_array($result) ? absint($result['warning_count'] ?? 0) : 0,
+        $batch_results
     ));
     ?>
     <div class="wrap lps-ap" id="lps-accounting-prices">
@@ -368,7 +504,7 @@ function lps_render_accounting_prices_page(): void {
                                     <span class="description"><?php echo esc_html__('Loading warehouses...', 'lavka-price-sync'); ?></span>
                                 <?php endif; ?>
                             </div>
-                            <p class="description"><?php echo esc_html__('Selected warehouses are processed sequentially: first all previews, then all recalculations. Warehouses are never processed in parallel.', 'lavka-price-sync'); ?></p>
+                            <p class="description"><?php echo esc_html__('Selected warehouses are processed sequentially: first all previews, then recalculation of warehouses whose preview completed safely. Problem products are skipped and recorded; one warehouse error does not stop the remaining queue.', 'lavka-price-sync'); ?></p>
                         </fieldset>
                         <label>
                             <span><?php echo esc_html__('Day of week', 'lavka-price-sync'); ?></span>
@@ -386,7 +522,7 @@ function lps_render_accounting_prices_page(): void {
 
                     <label class="lps-ap-cron-confirm">
                         <input type="checkbox" name="automatic_apply_confirmed" value="1" <?php checked(!empty($cron_options['automatic_apply_confirmed'])); ?>>
-                        <?php echo esc_html__('I understand that the schedule first checks every selected warehouse and then automatically changes accounting prices in Folio only if all previews are clean.', 'lavka-price-sync'); ?>
+                        <?php echo esc_html__('I understand that the schedule checks every selected warehouse and recalculates all safe products. Problem products and failed warehouses are recorded in the report while the remaining queue continues.', 'lavka-price-sync'); ?>
                     </label>
 
                     <p class="description">
@@ -445,11 +581,84 @@ function lps_render_accounting_prices_page(): void {
                                         );
                                     }
                                 }
+                                if ($batch_error_count > 0 || $batch_warning_count > 0) {
+                                    echo '<br>';
+                                    printf(
+                                        /* translators: 1: recorded warehouse error count, 2: warning count. */
+                                        esc_html__('Recorded warehouse errors: %1$d; warnings: %2$d', 'lavka-price-sync'),
+                                        $batch_error_count,
+                                        $batch_warning_count
+                                    );
+                                }
                             }
                             ?>
                         </dd>
                     </div>
                 </dl>
+
+                <?php if ($batch_results): ?>
+                    <section class="lps-ap-batch-report" aria-labelledby="lps-ap-batch-report-heading">
+                        <div class="lps-ap-section-heading">
+                            <div>
+                                <h4 id="lps-ap-batch-report-heading"><?php echo esc_html__('Last scheduled recalculation report', 'lavka-price-sync'); ?></h4>
+                                <p class="description"><?php echo esc_html__('The report preserves when and why a product or warehouse was skipped. Safe products continue to be recalculated.', 'lavka-price-sync'); ?></p>
+                            </div>
+                            <a class="button" href="<?php echo esc_url(wp_nonce_url(
+                                admin_url('admin-post.php?action=lps_accounting_prices_export_batch_report'),
+                                'lps_accounting_prices_export_batch_report'
+                            )); ?>">
+                                <?php echo esc_html__('Export detailed CSV', 'lavka-price-sync'); ?>
+                            </a>
+                        </div>
+
+                        <div class="lps-ap-table-wrap">
+                            <table class="widefat striped lps-ap-batch-table">
+                                <thead><tr>
+                                    <th><?php echo esc_html__('When', 'lavka-price-sync'); ?></th>
+                                    <th><?php echo esc_html__('Stage', 'lavka-price-sync'); ?></th>
+                                    <th><?php echo esc_html__('Warehouse', 'lavka-price-sync'); ?></th>
+                                    <th><?php echo esc_html__('Result', 'lavka-price-sync'); ?></th>
+                                    <th><?php echo esc_html__('SKU', 'lavka-price-sync'); ?></th>
+                                    <th><?php echo esc_html__('Reason', 'lavka-price-sync'); ?></th>
+                                    <th><?php echo esc_html__('Explanation', 'lavka-price-sync'); ?></th>
+                                </tr></thead>
+                                <tbody>
+                                <?php foreach ($batch_report_rows as $row): ?>
+                                    <?php
+                                    $severity = sanitize_key((string)$row['severity']);
+                                    $stage_label = $batch_stage_labels[$row['stage']] ?? strtoupper((string)$row['stage']);
+                                    $status_label = $native_status_labels[$row['status']]
+                                        ?? ($batch_status_labels[$row['status']] ?? $row['status']);
+                                    $details_text = lps_accounting_prices_batch_details_text($row['details']);
+                                    ?>
+                                    <tr class="lps-ap-batch-row is-<?php echo esc_attr($severity ?: 'success'); ?>">
+                                        <td><?php echo esc_html((string)$row['completed_at']); ?></td>
+                                        <td><?php echo esc_html((string)$stage_label); ?></td>
+                                        <td><?php echo esc_html((string)$row['warehouse_id']); ?></td>
+                                        <td><?php echo esc_html((string)$status_label); ?></td>
+                                        <td><code><?php echo esc_html((string)($row['sku'] ?: '—')); ?></code></td>
+                                        <td>
+                                            <strong><?php echo esc_html((string)$row['code']); ?></strong>
+                                            <?php if ($row['message'] !== ''): ?><p><?php echo esc_html((string)$row['message']); ?></p><?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <?php if ($details_text !== ''): ?><p><?php echo esc_html($details_text); ?></p><?php endif; ?>
+                                            <?php if ($row['details']): ?>
+                                                <details>
+                                                    <summary><?php echo esc_html__('Technical details', 'lavka-price-sync'); ?></summary>
+                                                    <pre><?php echo esc_html((string)wp_json_encode($row['details'], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)); ?></pre>
+                                                </details>
+                                            <?php elseif ($details_text === '' && $row['message'] === ''): ?>
+                                                <?php echo esc_html__('No problems were reported for this warehouse.', 'lavka-price-sync'); ?>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                <?php endif; ?>
             </section>
         </section>
 
@@ -476,6 +685,54 @@ function lps_render_accounting_prices_page(): void {
 }
 
 add_action('wp_ajax_lps_accounting_prices', 'lps_accounting_prices_ajax');
+
+add_action('admin_post_lps_accounting_prices_export_batch_report', function (): void {
+    if (!current_user_can(LPS_CAP)) {
+        wp_die(esc_html__('You do not have permission to perform this operation.', 'lavka-price-sync'));
+    }
+    check_admin_referer('lps_accounting_prices_export_batch_report');
+
+    $batch = lps_accounting_prices_native_batch_state();
+    $rows = lps_accounting_prices_batch_report_rows($batch);
+    $filename = 'folio-accounting-price-report-' . wp_date('Ymd-His') . '.csv';
+
+    nocache_headers();
+    header('Content-Type: text/csv; charset=UTF-8');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    echo "\xEF\xBB\xBF";
+    $output = fopen('php://output', 'wb');
+    if ($output === false) exit;
+
+    fputcsv($output, [
+        __('When', 'lavka-price-sync'),
+        __('Stage', 'lavka-price-sync'),
+        __('Warehouse', 'lavka-price-sync'),
+        __('Result', 'lavka-price-sync'),
+        __('Severity', 'lavka-price-sync'),
+        __('SKU', 'lavka-price-sync'),
+        __('Reason', 'lavka-price-sync'),
+        __('Explanation', 'lavka-price-sync'),
+        __('Technical details', 'lavka-price-sync'),
+        __('Java job ID', 'lavka-price-sync'),
+    ], ';', '"', '');
+
+    foreach ($rows as $row) {
+        fputcsv($output, [
+            $row['completed_at'],
+            $row['stage'],
+            $row['warehouse_id'],
+            $row['status'],
+            $row['severity'],
+            $row['sku'],
+            $row['code'],
+            $row['message'] !== '' ? $row['message'] : lps_accounting_prices_batch_details_text($row['details']),
+            wp_json_encode($row['details'], JSON_UNESCAPED_UNICODE),
+            $row['job_id'],
+        ], ';', '"', '');
+    }
+    fclose($output);
+    exit;
+});
 
 function lps_accounting_prices_ajax(): void {
     if (!current_user_can(LPS_CAP)) {

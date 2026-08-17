@@ -321,6 +321,57 @@
     return box;
   }
 
+  function renderFailedChunk(body) {
+    if (String(body?.status || '').toUpperCase() !== 'FAILED') return null;
+    const chunk = body?.failedChunk;
+    const hasChunk = chunk && typeof chunk === 'object' && !Array.isArray(chunk);
+
+    const section = make('section', 'lps-ap-failed-chunk');
+    section.appendChild(make(
+      'h3',
+      '',
+      hasChunk ? (t.failedChunk || 'Rejected recalculation portion') : (t.failedSafety || 'Failed operation safety status')
+    ));
+    if (hasChunk) {
+      section.appendChild(make(
+        'p',
+        'description',
+        t.failedChunkDescription || 'These values belong to the rejected portion; progress values may describe an earlier portion.'
+      ));
+
+      const fields = [
+        [t.inputArt || 'Input article', chunk.inputArt],
+        [t.outputArt || 'Output article', chunk.outputArt],
+        [t.failedNextArt || 'Next article returned for the rejected portion', chunk.nextArt],
+        [t.returnCode || 'Return code', chunk.returnCode],
+        [t.currentUnits || 'Current units', chunk.currentUnits],
+        [t.totalUnits || 'Total units', chunk.totalUnits],
+        [t.problemDate || 'Problem date', chunk.problemDate],
+        [t.validationError || 'Validation error', chunk.validationError]
+      ];
+      const details = make('dl', 'lps-ap-failed-chunk-grid');
+      fields.forEach(([label, value]) => {
+        const displayValue = value && typeof value === 'object' ? JSON.stringify(value) : value;
+        details.append(make('dt', '', label), make('dd', '', displayValue));
+      });
+      section.appendChild(details);
+    }
+
+    if (Number(body?.committedChunks || 0) === 0) {
+      section.appendChild(make(
+        'p',
+        'lps-ap-failed-chunk-rollback',
+        t.failedChunkRolledBack || 'No portions were committed. Changes from the failed operation were rolled back.'
+      ));
+    }
+    section.appendChild(make(
+      'p',
+      'lps-ap-failed-chunk-retry',
+      t.failedChunkNoRetry || 'Do not retry automatically. Correct the cause and start a new preview manually.'
+    ));
+    return section;
+  }
+
   function renderFull(body) {
     elements.fullSummary.replaceChildren();
     const status = String(body?.status || 'IDLE').toUpperCase();
@@ -360,8 +411,14 @@
     elements.progressTrack?.setAttribute('aria-valuenow', String(percent));
     if (elements.progressBar) elements.progressBar.style.width = `${percent}%`;
     if (elements.progressLabel) {
-      const current = body?.currentArt ? ` · ${t.currentSku || 'Current SKU'}: ${body.currentArt}` : '';
-      const next = body?.nextArt ? ` · ${t.nextSku || 'Next SKU'}: ${body.nextArt}` : '';
+      const currentLabel = status === 'FAILED'
+        ? (t.progressCurrentSku || 'Last article reported for overall progress')
+        : (t.currentSku || 'Current SKU');
+      const nextLabel = status === 'FAILED'
+        ? (t.progressNextSku || 'Next overall progress cursor')
+        : (t.nextSku || 'Next SKU');
+      const current = body?.currentArt ? ` · ${currentLabel}: ${body.currentArt}` : '';
+      const next = body?.nextArt ? ` · ${nextLabel}: ${body.nextArt}` : '';
       const currentPhase = phase ? ` · ${t.phase || 'Phase'}: ${phaseLabel(phase)}` : '';
       elements.progressLabel.textContent = `${formatInteger(processed)} / ${formatInteger(total)} (${percent}%)${currentPhase}${current}${next}`;
     }
@@ -382,6 +439,9 @@
       counter(t.warningCount || 'Warnings', body?.warningCount, Number(body?.warningCount) > 0 ? 'warning' : '')
     );
     elements.fullSummary.appendChild(counters);
+
+    const failedChunk = renderFailedChunk(body);
+    if (failedChunk) elements.fullSummary.appendChild(failedChunk);
 
     renderWarnings(warnings, Boolean(body?.warningsTruncated));
 
