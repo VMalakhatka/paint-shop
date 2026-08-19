@@ -1,0 +1,454 @@
+.lavr-profit-report {
+    max-width: 1680px;
+}
+
+.lavr-profit-report h1,
+.lavr-profit-report h2,
+.lavr-profit-report h3 {
+    letter-spacing: 0;
+}
+
+.lavr-profit-report h2 {
+    margin: 0 0 12px;
+    font-size: 20px;
+}
+
+.lavr-profit-toolbar,
+.lavr-profit-manual,
+.lavr-profit-summary,
+.lavr-profit-warnings-section,
+.lavr-profit-expenses,
+.lavr-profit-controls,
+.lavr-profit-audit {
+    margin-top: 16px;
+}
+
+.lavr-profit-toolbar {
+    display: flex;
+    align-items: end;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid #c3c4c7;
+    background: #fff;
+}
+
+.lavr-profit-field {
+    min-width: 180px;
+}
+
+.lavr-profit-field label,
+.lavr-profit-audit-filters label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.lavr-profit-field input,
+.lavr-profit-audit-filters select {
+    width: 100%;
+    min-height: 36px;
+}
+
+.lavr-profit-field-error {
+    margin: 5px 0 0;
+    color: #b32d2e;
+}
+
+.lavr-profit-run-state {
+    align-self: center;
+    color: #50575e;
+}
+
+.lavr-profit-notice {
+    margin: 16px 0 0;
+    padding: 10px 12px;
+}
+
+.lavr-profit-notice p {
+    margin: 0 10px 8px 0;
+}
+
+.lavr-profit-manual,
+.lavr-profit-controls {
+    padding: 0;
+    border: 1px solid #c3c4c7;
+    background: #fff;
+}
+
+.lavr-profit-manual > summary,
+.lavr-profit-controls > summary {
+    padding: 12px 14px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.lavr-profit-manual[open],
+.lavr-profit-controls[open] {
+    padding-bottom: 14px;
+}
+
+.lavr-profit-manual-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(180px, 1fr));
+    gap: 14px;
+    padding: 4px 14px 12px;
+}
+
+.lavr-profit-manual-help {
+    margin: 0;
+    padding: 2px 14px 10px;
+}
+
+.lavr-profit-manual > .button {
+    margin-left: 14px;
+}
+
+.lavr-profit-input-suffix {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 32px;
+    align-items: center;
+}
+
+.lavr-profit-input-suffix span {
+    text-align: center;
+    font-weight: 600;
+}
+
+.lavr-profit-summary,
+.lavr-profit-warnings-section,
+.lavr-profit-expenses,
+.lavr-profit-audit {
+    padding: 16px;
+    border-left: 4px solid #2271b1;
+    background: #fff;
+}
+
+.lavr-profit-heading-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.lavr-profit-heading-row .description {
+    margin: 0;
+}
+
+.lavr-profit-badge {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 3px;
+    font-weight: 600;
+}
+
+.lavr-profit-badge.is-complete {
+    color: #0a4b2c;
+    background: #d7f0df;
+}
+
+.lavr-profit-badge.is-incomplete {
+    color: #6e4b00;
+    background: #fcf0c5;
+}
+
+.lavr-profit-cities {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.lavr-profit-city {
+    border: 1px solid #c3c4c7;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.lavr-profit-city h3 {
+    margin: 0;
+    padding: 11px 14px;
+    border-bottom: 1px solid #dcdcde;
+    background: #f6f7f7;
+    font-size: 17px;
+}
+
+.lavr-profit-metrics {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(120px, 1fr));
+}
+
+.lavr-profit-metric {
+    min-width: 0;
+    padding: 12px;
+    border-right: 1px solid #dcdcde;
+}
+
+.lavr-profit-metric:last-child {
+    border-right: 0;
+}
+
+.lavr-profit-metric.is-emphasized {
+    background: #f0f6fc;
+}
+
+.lavr-profit-metric-label,
+.lavr-profit-metric-value {
+    display: block;
+}
+
+.lavr-profit-metric-label {
+    min-height: 34px;
+    color: #50575e;
+    font-size: 12px;
+}
+
+.lavr-profit-metric-value {
+    margin-top: 7px;
+    font-size: 17px;
+    white-space: nowrap;
+}
+
+.lavr-profit-metric-value.is-negative {
+    color: #b32d2e;
+}
+
+.lavr-profit-metric-value.is-positive {
+    color: #08783f;
+}
+
+.lavr-profit-warnings {
+    display: grid;
+    gap: 8px;
+}
+
+.lavr-profit-warning {
+    padding: 10px 12px;
+    border-left: 4px solid #72aee6;
+    background: #f0f6fc;
+}
+
+.lavr-profit-warning.is-action {
+    border-left-color: #d63638;
+    background: #fcf0f1;
+}
+
+.lavr-profit-warning.is-manual {
+    border-left-color: #dba617;
+    background: #fcf9e8;
+}
+
+.lavr-profit-warning-heading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.lavr-profit-warning p {
+    margin: 7px 0 0;
+}
+
+.lavr-profit-warning pre {
+    max-height: 220px;
+    overflow: auto;
+    padding: 8px;
+    background: #fff;
+}
+
+.lavr-profit-segments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+}
+
+.lavr-profit-segment {
+    min-height: 32px;
+    padding: 0 10px;
+    border: 1px solid #8c8f94;
+    border-right-width: 0;
+    background: #fff;
+    cursor: pointer;
+}
+
+.lavr-profit-segment:first-child {
+    border-radius: 4px 0 0 4px;
+}
+
+.lavr-profit-segment:last-child {
+    border-right-width: 1px;
+    border-radius: 0 4px 4px 0;
+}
+
+.lavr-profit-segment.is-active {
+    color: #fff;
+    border-color: #2271b1;
+    background: #2271b1;
+}
+
+.lavr-profit-table-wrap {
+    width: 100%;
+    margin-top: 12px;
+    overflow-x: auto;
+}
+
+.lavr-profit-table-wrap table {
+    min-width: 980px;
+    table-layout: auto;
+}
+
+.lavr-profit-table-wrap th,
+.lavr-profit-table-wrap td {
+    vertical-align: top;
+}
+
+.lavr-profit-table-wrap td.num,
+.lavr-profit-table-wrap th.num {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.lavr-profit-empty {
+    padding: 24px !important;
+    text-align: center;
+    color: #646970;
+}
+
+.lavr-profit-category,
+.lavr-profit-treatment-code,
+.lavr-profit-document-number {
+    display: block;
+    margin-top: 4px;
+}
+
+.lavr-profit-control-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+    gap: 1px;
+    margin: 4px 14px 14px;
+    background: #dcdcde;
+}
+
+.lavr-profit-control-item {
+    padding: 10px 12px;
+    background: #fff;
+}
+
+.lavr-profit-control-item span,
+.lavr-profit-control-item strong,
+.lavr-profit-control-item small {
+    display: block;
+}
+
+.lavr-profit-control-item strong {
+    margin-top: 5px;
+}
+
+.lavr-profit-tax-pools {
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) minmax(120px, auto);
+    max-width: 560px;
+    margin: 0 14px;
+}
+
+.lavr-profit-tax-pools dt,
+.lavr-profit-tax-pools dd {
+    margin: 0;
+    padding: 7px 9px;
+    border-bottom: 1px solid #dcdcde;
+}
+
+.lavr-profit-tax-pools dd {
+    text-align: right;
+}
+
+.lavr-profit-controls h3 {
+    margin-left: 14px;
+}
+
+.lavr-profit-inline-notice {
+    margin: 12px 14px 0 !important;
+    padding: 8px 10px;
+}
+
+.lavr-profit-audit-filters {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(160px, 1fr)) auto auto;
+    align-items: end;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.lavr-profit-checkbox {
+    display: flex !important;
+    align-items: center;
+    min-height: 36px;
+    white-space: nowrap;
+}
+
+.lavr-profit-checkbox input {
+    margin-top: 0;
+}
+
+#lavr-profit-audit-table {
+    min-width: 1450px;
+}
+
+.lavr-profit-document-number {
+    white-space: nowrap;
+}
+
+#lavr-profit-result.is-stale {
+    opacity: 0.68;
+}
+
+@media (max-width: 1280px) {
+    .lavr-profit-manual-grid {
+        grid-template-columns: repeat(3, minmax(180px, 1fr));
+    }
+
+    .lavr-profit-cities {
+        grid-template-columns: 1fr;
+    }
+
+    .lavr-profit-audit-filters {
+        grid-template-columns: repeat(3, minmax(150px, 1fr));
+    }
+}
+
+@media (max-width: 782px) {
+    .lavr-profit-toolbar,
+    .lavr-profit-heading-row {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .lavr-profit-toolbar .button,
+    .lavr-profit-heading-row .button {
+        width: 100%;
+    }
+
+    .lavr-profit-manual-grid,
+    .lavr-profit-control-grid,
+    .lavr-profit-audit-filters {
+        grid-template-columns: 1fr;
+    }
+
+    .lavr-profit-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .lavr-profit-metric {
+        border-bottom: 1px solid #dcdcde;
+    }
+
+    .lavr-profit-segments {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .lavr-profit-segment,
+    .lavr-profit-segment:first-child,
+    .lavr-profit-segment:last-child {
+        border: 1px solid #8c8f94;
+        border-radius: 0;
+    }
+}

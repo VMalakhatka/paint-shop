@@ -1,15 +1,15 @@
-# Copyright (C) 2025 Volodymyr
+# Copyright (C) 2026 Volodymyr
 # This file is distributed under the same license as the Lavka Reports plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Lavka Reports 0.1.0\n"
+"Project-Id-Version: Lavka Reports 0.2.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lavka-reports\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-10-11T16:33:44+00:00\n"
+"POT-Creation-Date: 2026-08-18T20:45:01+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: lavka-reports\n"
@@ -60,6 +60,423 @@ msgstr ""
 
 #: inc/class-admin.php:88
 msgid "Step 1 — choose the analysis period, warehouses, and operation types to exclude. These settings will be used to build the report query."
+msgstr ""
+
+#: inc/class-profit-report.php:18
+#: inc/class-profit-report.php:56
+msgid "Monthly Folio profit report"
+msgstr ""
+
+#: inc/class-profit-report.php:19
+msgid "Folio profit"
+msgstr ""
+
+#: inc/class-profit-report.php:52
+#: inc/class-profit-report.php:190
+msgid "You do not have permission to view this report."
+msgstr ""
+
+#: inc/class-profit-report.php:60
+msgid "Report month"
+msgstr ""
+
+#: inc/class-profit-report.php:64
+msgid "Calculate report"
+msgstr ""
+
+#: inc/class-profit-report.php:72
+msgid "Manual report parameters"
+msgstr ""
+
+#: inc/class-profit-report.php:73
+msgid "Leave an unverified value empty. Enter zero only when zero has been explicitly confirmed."
+msgstr ""
+
+#: inc/class-profit-report.php:76
+msgid "Odesa master class income"
+msgstr ""
+
+#: inc/class-profit-report.php:80
+msgid "Odesa master class returns"
+msgstr ""
+
+#: inc/class-profit-report.php:84
+msgid "Odesa additional salary"
+msgstr ""
+
+#: inc/class-profit-report.php:88
+msgid "Odesa employee share"
+msgstr ""
+
+#: inc/class-profit-report.php:93
+#: inc/class-profit-report.php:310
+msgid "Share of officially employed Odesa staff."
+msgstr ""
+
+#: inc/class-profit-report.php:96
+msgid "RUB to UAH rate"
+msgstr ""
+
+#: inc/class-profit-report.php:101
+msgid "Recalculate with these parameters"
+msgstr ""
+
+#: inc/class-profit-report.php:109
+msgid "Profit by city"
+msgstr ""
+
+#: inc/class-profit-report.php:118
+msgid "Warnings and checks"
+msgstr ""
+
+#: inc/class-profit-report.php:124
+msgid "Expense breakdown"
+msgstr ""
+
+#: inc/class-profit-report.php:125
+msgid "Filter expenses by city"
+msgstr ""
+
+#: inc/class-profit-report.php:130
+#: inc/class-profit-report.php:158
+#: inc/class-profit-report.php:324
+msgid "City"
+msgstr ""
+
+#: inc/class-profit-report.php:131
+msgid "Expense"
+msgstr ""
+
+#: inc/class-profit-report.php:132
+msgid "Documents"
+msgstr ""
+
+#: inc/class-profit-report.php:133
+msgid "Amount"
+msgstr ""
+
+#: inc/class-profit-report.php:134
+msgid "Profit impact"
+msgstr ""
+
+#: inc/class-profit-report.php:135
+#: inc/class-profit-report.php:160
+#: inc/class-profit-report.php:174
+#: inc/class-profit-report.php:326
+msgid "Accounting treatment"
+msgstr ""
+
+#: inc/class-profit-report.php:143
+msgid "Control totals"
+msgstr ""
+
+#: inc/class-profit-report.php:150
+msgid "Document audit"
+msgstr ""
+
+#: inc/class-profit-report.php:151
+msgid "The audit is loaded separately and does not change Folio data."
+msgstr ""
+
+#: inc/class-profit-report.php:153
+msgid "Load document audit"
+msgstr ""
+
+#: inc/class-profit-report.php:159
+#: inc/class-profit-report.php:325
+msgid "Category"
+msgstr ""
+
+#: inc/class-profit-report.php:161
+msgid "Only unclassified"
+msgstr ""
+
+#: inc/class-profit-report.php:162
+msgid "Export loaded rows to CSV"
+msgstr ""
+
+#: inc/class-profit-report.php:167
+msgid "Date and document"
+msgstr ""
+
+#: inc/class-profit-report.php:168
+#: inc/class-profit-report.php:315
+msgid "Flow"
+msgstr ""
+
+#: inc/class-profit-report.php:169
+#: inc/class-profit-report.php:316
+msgid "Warehouse"
+msgstr ""
+
+#: inc/class-profit-report.php:170
+msgid "Purpose / code / name / class"
+msgstr ""
+
+#: inc/class-profit-report.php:171
+#: inc/class-profit-report.php:321
+msgid "Source amount"
+msgstr ""
+
+#: inc/class-profit-report.php:172
+msgid "Report amount"
+msgstr ""
+
+#: inc/class-profit-report.php:173
+msgid "City / category"
+msgstr ""
+
+#: inc/class-profit-report.php:175
+#: inc/class-profit-report.php:327
+msgid "Included in profit"
+msgstr ""
+
+#: inc/class-profit-report.php:176
+#: inc/class-profit-report.php:328
+msgid "Reason"
+msgstr ""
+
+#: inc/class-profit-report.php:196
+msgid "Unknown report operation."
+msgstr ""
+
+#: inc/class-profit-report.php:201
+msgid "Enter a valid report month."
+msgstr ""
+
+#: inc/class-profit-report.php:218
+msgid "Enter a valid non-negative decimal value."
+msgstr ""
+
+#: inc/class-profit-report.php:222
+msgid "The report parameter is outside the allowed range."
+msgstr ""
+
+#: inc/class-profit-report.php:233
+msgid "Java service URL is not configured."
+msgstr ""
+
+#: inc/class-profit-report.php:263
+msgid "Calculating report..."
+msgstr ""
+
+#: inc/class-profit-report.php:264
+msgid "Recalculating; the previous result is still shown."
+msgstr ""
+
+#: inc/class-profit-report.php:265
+msgid "Loading document audit..."
+msgstr ""
+
+#: inc/class-profit-report.php:266
+msgid "Report complete"
+msgstr ""
+
+#: inc/class-profit-report.php:267
+msgid "Needs review"
+msgstr ""
+
+#. translators: %s is the local date and time when the report was calculated.
+#: inc/class-profit-report.php:269
+#, php-format
+msgid "Calculated at %s"
+msgstr ""
+
+#: inc/class-profit-report.php:270
+msgid "No data for the selected month."
+msgstr ""
+
+#: inc/class-profit-report.php:271
+msgid "No expenses match this filter."
+msgstr ""
+
+#: inc/class-profit-report.php:272
+msgid "No audit documents match this filter."
+msgstr ""
+
+#: inc/class-profit-report.php:273
+msgid "Try again"
+msgstr ""
+
+#: inc/class-profit-report.php:274
+msgid "The Folio report could not be loaded. Try again."
+msgstr ""
+
+#: inc/class-profit-report.php:275
+msgid "The Folio service returned an invalid response."
+msgstr ""
+
+#: inc/class-profit-report.php:276
+msgid "All"
+msgstr ""
+
+#: inc/class-profit-report.php:277
+msgid "Kyiv"
+msgstr ""
+
+#: inc/class-profit-report.php:278
+msgid "Odesa"
+msgstr ""
+
+#: inc/class-profit-report.php:279
+msgid "Unallocated"
+msgstr ""
+
+#: inc/class-profit-report.php:280
+msgid "Base gross profit"
+msgstr ""
+
+#: inc/class-profit-report.php:281
+msgid "Manual adjustments"
+msgstr ""
+
+#: inc/class-profit-report.php:282
+msgid "Gross profit"
+msgstr ""
+
+#: inc/class-profit-report.php:283
+#: inc/class-profit-report.php:296
+msgid "Operating expenses"
+msgstr ""
+
+#: inc/class-profit-report.php:284
+msgid "Profit"
+msgstr ""
+
+#: inc/class-profit-report.php:285
+msgid "Deducted from profit"
+msgstr ""
+
+#: inc/class-profit-report.php:286
+msgid "Included in inventory cost"
+msgstr ""
+
+#: inc/class-profit-report.php:287
+msgid "Not a report expense"
+msgstr ""
+
+#: inc/class-profit-report.php:288
+msgid "Needs a rule"
+msgstr ""
+
+#: inc/class-profit-report.php:289
+msgid "This amount is already included in inventory cost and is not deducted again."
+msgstr ""
+
+#: inc/class-profit-report.php:290
+msgid "Action required"
+msgstr ""
+
+#: inc/class-profit-report.php:291
+msgid "Manual input required"
+msgstr ""
+
+#: inc/class-profit-report.php:292
+msgid "Information"
+msgstr ""
+
+#: inc/class-profit-report.php:293
+msgid "Details"
+msgstr ""
+
+#: inc/class-profit-report.php:294
+msgid "Selected documents"
+msgstr ""
+
+#: inc/class-profit-report.php:295
+msgid "Selected document amount"
+msgstr ""
+
+#: inc/class-profit-report.php:297
+msgid "Capitalized in inventory"
+msgstr ""
+
+#: inc/class-profit-report.php:298
+msgid "Excluded documents"
+msgstr ""
+
+#: inc/class-profit-report.php:299
+msgid "Unclassified documents"
+msgstr ""
+
+#: inc/class-profit-report.php:300
+msgid "Tax pools"
+msgstr ""
+
+#: inc/class-profit-report.php:301
+msgid "The document audit is limited to the first 500 rows."
+msgstr ""
+
+#: inc/class-profit-report.php:302
+msgid "Only the currently loaded audit rows are exported."
+msgstr ""
+
+#: inc/class-profit-report.php:303
+msgid "Bank"
+msgstr ""
+
+#: inc/class-profit-report.php:304
+msgid "Cash"
+msgstr ""
+
+#: inc/class-profit-report.php:305
+msgid "UAH"
+msgstr ""
+
+#: inc/class-profit-report.php:306
+msgid "RUB"
+msgstr ""
+
+#: inc/class-profit-report.php:307
+msgid "Yes"
+msgstr ""
+
+#: inc/class-profit-report.php:308
+msgid "No"
+msgstr ""
+
+#: inc/class-profit-report.php:309
+msgid "3 of 7 employees"
+msgstr ""
+
+#: inc/class-profit-report.php:311
+msgid "documents"
+msgstr ""
+
+#: inc/class-profit-report.php:312
+msgid "Select a report month."
+msgstr ""
+
+#: inc/class-profit-report.php:313
+msgid "Date"
+msgstr ""
+
+#: inc/class-profit-report.php:314
+msgid "Document"
+msgstr ""
+
+#: inc/class-profit-report.php:317
+msgid "Purpose code"
+msgstr ""
+
+#: inc/class-profit-report.php:318
+msgid "Expense code"
+msgstr ""
+
+#: inc/class-profit-report.php:319
+msgid "Name"
+msgstr ""
+
+#: inc/class-profit-report.php:320
+msgid "Document class"
+msgstr ""
+
+#: inc/class-profit-report.php:322
+msgid "Source currency"
+msgstr ""
+
+#: inc/class-profit-report.php:323
+msgid "Report amount, UAH"
 msgstr ""
 
 #: inc/no-movement/class-settings.php:33
