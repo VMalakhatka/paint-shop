@@ -174,6 +174,12 @@
         return params;
     }
 
+    function showRunState(message, kind) {
+        nodes.runState.hidden = !message;
+        nodes.runState.className = 'lavr-profit-run-state' + (kind ? ' is-' + kind : '');
+        nodes.runState.textContent = message || '';
+    }
+
     function setBusy(operation, busy) {
         if (operation === 'audit') {
             state.auditLoading = busy;
@@ -181,13 +187,16 @@
             nodes.calculate.disabled = busy;
             nodes.recalculate.disabled = busy;
             nodes.loadAudit.textContent = busy ? labels.loadingAudit : nodes.loadAudit.dataset.defaultLabel;
+            root.setAttribute('aria-busy', busy ? 'true' : 'false');
+            if (busy) showRunState(labels.loadingAudit, 'loading');
             return;
         }
         state.loading = busy;
         nodes.calculate.disabled = busy;
         nodes.recalculate.disabled = busy;
         nodes.loadAudit.disabled = busy;
-        nodes.runState.textContent = busy ? (state.report ? labels.recalculating : labels.loading) : '';
+        root.setAttribute('aria-busy', busy ? 'true' : 'false');
+        if (busy) showRunState(state.report ? labels.recalculating : labels.loading, 'loading');
         nodes.result.classList.toggle('is-stale', busy && !!state.report);
     }
 
@@ -286,14 +295,17 @@
             if (operation === 'audit') {
                 state.audit = data;
                 renderAudit();
+                showRunState(labels.auditReady, 'success');
             } else {
                 state.report = data;
                 state.reportParams = Object.assign({}, params);
                 state.audit = null;
                 renderReport();
+                showRunState(labels.reportReady, 'success');
             }
         } catch (error) {
             const retry = Number(error.status || 0) >= 500 || !error.status ? operation : null;
+            showRunState(labels.requestFailed, 'error');
             showError(error.message || labels.generalError, retry, error.field || '');
         } finally {
             setBusy(operation, false);

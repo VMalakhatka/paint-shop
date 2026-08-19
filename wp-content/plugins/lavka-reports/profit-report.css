@@ -56,7 +56,38 @@
 
 .lavr-profit-run-state {
     align-self: center;
-    color: #50575e;
+    min-height: 20px;
+    padding: 8px 11px;
+    border-left: 4px solid #72aee6;
+    color: #1d2327;
+    background: #f0f6fc;
+    font-weight: 600;
+}
+
+.lavr-profit-run-state.is-loading::before {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin: 0 8px -2px 0;
+    border: 2px solid #a7aaad;
+    border-top-color: #2271b1;
+    border-radius: 50%;
+    content: '';
+    animation: lavr-profit-spin 0.8s linear infinite;
+}
+
+.lavr-profit-run-state.is-success {
+    border-left-color: #00a32a;
+    background: #edfaef;
+}
+
+.lavr-profit-run-state.is-error {
+    border-left-color: #d63638;
+    background: #fcf0f1;
+}
+
+@keyframes lavr-profit-spin {
+    to { transform: rotate(360deg); }
 }
 
 .lavr-profit-notice {

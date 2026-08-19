@@ -24,7 +24,8 @@ class Lavka_Reports_Profit_Report {
     }
 
     public function assets($hook) {
-        if ('lavka-reports_page_' . self::PAGE_SLUG !== $hook) return;
+        $requested_page = isset($_GET['page']) ? sanitize_key(wp_unslash($_GET['page'])) : '';
+        if ('lavka-reports_page_' . self::PAGE_SLUG !== $hook && self::PAGE_SLUG !== $requested_page) return;
 
         wp_enqueue_style(
             'lavr-profit-report',
@@ -63,7 +64,7 @@ class Lavka_Reports_Profit_Report {
                 <button type="button" class="button button-primary" id="lavr-profit-calculate">
                     <?php echo esc_html__('Calculate report', 'lavka-reports'); ?>
                 </button>
-                <div class="lavr-profit-run-state" id="lavr-profit-run-state" aria-live="polite"></div>
+                <div class="lavr-profit-run-state" id="lavr-profit-run-state" aria-live="polite" hidden></div>
             </section>
 
             <div id="lavr-profit-error" class="notice notice-error lavr-profit-notice" hidden></div>
@@ -263,6 +264,9 @@ class Lavka_Reports_Profit_Report {
             'loading' => __('Calculating report...', 'lavka-reports'),
             'recalculating' => __('Recalculating; the previous result is still shown.', 'lavka-reports'),
             'loadingAudit' => __('Loading document audit...', 'lavka-reports'),
+            'reportReady' => __('Report calculated successfully.', 'lavka-reports'),
+            'auditReady' => __('Document audit loaded successfully.', 'lavka-reports'),
+            'requestFailed' => __('The operation failed. Review the error below.', 'lavka-reports'),
             'complete' => __('Report complete', 'lavka-reports'),
             'incomplete' => __('Needs review', 'lavka-reports'),
             /* translators: %s is the local date and time when the report was calculated. */
