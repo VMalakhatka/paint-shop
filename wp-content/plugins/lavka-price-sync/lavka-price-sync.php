@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Lavka Price Sync
  * Description: Sync role-based prices from Java service to WooCommerce (meta: _wpc_price_role_<role>).
- * Version: 0.5.0
+ * Version: 0.6.0
  * Text Domain: lavka-price-sync
  * Domain Path: /languages
  */
@@ -27,6 +27,7 @@ require_once __DIR__.'/inc/helpers.php';
 require_once __DIR__.'/inc/logs.php';
 require_once __DIR__ . '/inc/cron.php';
 require_once __DIR__ . '/inc/accounting-prices-cron.php';
+require_once __DIR__ . '/inc/accounting-price-campaign.php';
 
 register_activation_hook(__FILE__, function () {
     if (function_exists('lps_cron_reschedule_price')) lps_cron_reschedule_price();

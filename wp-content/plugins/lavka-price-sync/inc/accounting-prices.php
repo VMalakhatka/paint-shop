@@ -21,6 +21,7 @@ add_action('admin_enqueue_scripts', function () {
 
     $css_path = dirname(__DIR__) . '/assets/accounting-prices.css';
     $js_path = dirname(__DIR__) . '/assets/accounting-prices.js';
+    $campaign_js_path = dirname(__DIR__) . '/assets/accounting-price-campaign.js';
     $plugin_file = dirname(__DIR__) . '/lavka-price-sync.php';
     $native_job = lps_accounting_prices_native_job_state();
 
@@ -35,6 +36,13 @@ add_action('admin_enqueue_scripts', function () {
         plugins_url('assets/accounting-prices.js', $plugin_file),
         [],
         @filemtime($js_path) ?: '1.0',
+        true
+    );
+    wp_enqueue_script(
+        'lps-accounting-price-campaign',
+        plugins_url('assets/accounting-price-campaign.js', $plugin_file),
+        ['lps-accounting-prices'],
+        @filemtime($campaign_js_path) ?: '1.0',
         true
     );
     wp_localize_script('lps-accounting-prices', 'LPS_ACCOUNTING_PRICES', [
@@ -185,6 +193,70 @@ add_action('admin_enqueue_scripts', function () {
             ],
         ],
     ]);
+    wp_localize_script('lps-accounting-price-campaign', 'LPS_ACCOUNTING_PRICE_CAMPAIGN', [
+        'ajaxUrl' => admin_url('admin-ajax.php'),
+        'nonce' => wp_create_nonce('lps_accounting_prices'),
+        'pollInterval' => 5000,
+        'i18n' => [
+            'startConfirm' => __('Start the accounting-price SKU campaign for the selected warehouse?', 'lavka-price-sync'),
+            'stopConfirm' => __('Stop accepting new batches after the current operation and build the final snapshot?', 'lavka-price-sync'),
+            'warehouseRequired' => __('Select a Folio warehouse.', 'lavka-price-sync'),
+            'confirmationRequired' => __('Confirm the maintenance window before starting the campaign.', 'lavka-price-sync'),
+            'requestFailed' => __('The server request failed.', 'lavka-price-sync'),
+            'idle' => __('No SKU campaign has been started yet.', 'lavka-price-sync'),
+            'noReports' => __('The campaign has not completed any batches yet.', 'lavka-price-sync'),
+            'noWarnings' => __('No skipped products or warnings were recorded.', 'lavka-price-sync'),
+            'warningsTruncated' => __('Only part of the warnings is shown. The complete diagnostics remain in the Java log.', 'lavka-price-sync'),
+            'stopRequested' => __('Safe stop requested. The current operation will finish and the final snapshot will be built.', 'lavka-price-sync'),
+            'status' => __('Status', 'lavka-price-sync'),
+            'phase' => __('Phase', 'lavka-price-sync'),
+            'warehouse' => __('Warehouse', 'lavka-price-sync'),
+            'processed' => __('Processed SKU', 'lavka-price-sync'),
+            'batches' => __('Successful batches', 'lavka-price-sync'),
+            'warnings' => __('Warnings', 'lavka-price-sync'),
+            'errors' => __('Errors', 'lavka-price-sync'),
+            'failedWarehouses' => __('Failed warehouses', 'lavka-price-sync'),
+            'currentBatch' => __('Current SKU batch', 'lavka-price-sync'),
+            'statesBefore' => __('Snapshot states before processing', 'lavka-price-sync'),
+            'statesAfter' => __('Snapshot states after processing', 'lavka-price-sync'),
+            'reports' => __('Batch and warehouse report', 'lavka-price-sync'),
+            'warningReport' => __('Skipped products and diagnostics', 'lavka-price-sync'),
+            'when' => __('When', 'lavka-price-sync'),
+            'result' => __('Result', 'lavka-price-sync'),
+            'skuCount' => __('SKU count', 'lavka-price-sync'),
+            'duration' => __('Duration', 'lavka-price-sync'),
+            'reason' => __('Reason', 'lavka-price-sync'),
+            'message' => __('Message', 'lavka-price-sync'),
+            'sku' => __('SKU', 'lavka-price-sync'),
+            'details' => __('Technical details', 'lavka-price-sync'),
+            'seconds' => __('sec.', 'lavka-price-sync'),
+            'statusLabels' => [
+                'IDLE' => __('Not started', 'lavka-price-sync'),
+                'RUNNING' => __('Running', 'lavka-price-sync'),
+                'COMPLETED' => __('Completed', 'lavka-price-sync'),
+                'COMPLETED_WITH_WARNINGS' => __('Completed with skipped products', 'lavka-price-sync'),
+                'PAUSED' => __('Stopped safely', 'lavka-price-sync'),
+                'MANUAL_REVIEW' => __('Manual review required', 'lavka-price-sync'),
+                'FAILED_PARTIAL' => __('Failed after partial recalculation', 'lavka-price-sync'),
+                'OUTCOME_UNKNOWN' => __('Outcome unknown', 'lavka-price-sync'),
+            ],
+            'phaseLabels' => [
+                'SNAPSHOT_BEFORE_START' => __('Starting the initial product snapshot', 'lavka-price-sync'),
+                'SNAPSHOT_BEFORE_POLL' => __('Building the initial product snapshot', 'lavka-price-sync'),
+                'SELECT_BATCH' => __('Selecting products from snapshot states', 'lavka-price-sync'),
+                'RANGE_STARTING' => __('Starting the selected SKU batch', 'lavka-price-sync'),
+                'RANGE_POLL' => __('Recalculating the selected SKU batch', 'lavka-price-sync'),
+                'QUARANTINE_PREPARATION' => __('Preparing safe skips for problem products', 'lavka-price-sync'),
+                'SNAPSHOT_AFTER_START' => __('Starting the mandatory final snapshot', 'lavka-price-sync'),
+                'SNAPSHOT_AFTER_POLL' => __('Building the mandatory final snapshot', 'lavka-price-sync'),
+                'WAITING_LOCK' => __('Waiting for the global Lavka lock', 'lavka-price-sync'),
+                'WAITING_JAVA_SLOT' => __('Waiting for the Folio accounting-price slot', 'lavka-price-sync'),
+                'WAITING_SNAPSHOT' => __('Waiting to restart the snapshot request', 'lavka-price-sync'),
+                'MANUAL_REVIEW' => __('Manual review required', 'lavka-price-sync'),
+                'COMPLETED' => __('Campaign completed', 'lavka-price-sync'),
+            ],
+        ],
+    ]);
 });
 
 function lps_accounting_prices_batch_report_rows(array $batch): array {
@@ -303,6 +375,9 @@ function lps_render_accounting_prices_page(): void {
     $cron_options = lps_accounting_prices_native_cron_options();
     $native_job = lps_accounting_prices_native_job_state();
     $native_batch = lps_accounting_prices_native_batch_state();
+    $campaign_state = function_exists('lps_accounting_price_campaign_state')
+        ? lps_accounting_price_campaign_state()
+        : [];
     $next_run = wp_next_scheduled(LPS_ACCOUNTING_PRICES_NATIVE_CRON_HOOK);
     $cron_saved = sanitize_key(wp_unslash($_GET['cron_saved'] ?? ''));
     $cron_error = sanitize_key(wp_unslash($_GET['cron_error'] ?? ''));
@@ -413,6 +488,9 @@ function lps_render_accounting_prices_page(): void {
             <button type="button" class="nav-tab" data-lps-ap-tab="full" aria-selected="false">
                 <?php echo esc_html__('Entire warehouse', 'lavka-price-sync'); ?>
             </button>
+            <button type="button" class="nav-tab" data-lps-ap-tab="campaign" aria-selected="false">
+                <?php echo esc_html__('SKU campaign and schedule', 'lavka-price-sync'); ?>
+            </button>
         </nav>
 
         <section class="lps-ap-panel" data-lps-ap-panel="single">
@@ -465,10 +543,39 @@ function lps_render_accounting_prices_page(): void {
                 <p id="lps-ap-progress-label" class="description"></p>
             </div>
             <div id="lps-ap-full-summary"></div>
+        </section>
+
+        <section class="lps-ap-panel lps-ap-campaign-panel" data-lps-ap-panel="campaign" hidden>
+            <h2><?php echo esc_html__('Accounting-price SKU campaign', 'lavka-price-sync'); ?></h2>
+            <p class="description lps-ap-native-description">
+                <?php echo esc_html__('The campaign builds a fresh snapshot, selects only UNVERIFIED, NEW and DIRTY products, recalculates them in sequential native-range batches, and finishes with a mandatory verification snapshot. FAILED and VERIFIED products are never selected automatically.', 'lavka-price-sync'); ?>
+            </p>
+            <div class="lps-ap-campaign-actions">
+                <label>
+                    <input type="checkbox" id="lps-ap-campaign-confirm">
+                    <?php echo esc_html__('I confirm the Folio maintenance window and understand that native-range apply changes accounting prices.', 'lavka-price-sync'); ?>
+                </label>
+                <div>
+                    <button type="button" class="button button-primary" id="lps-ap-campaign-start" disabled>
+                        <?php echo esc_html__('Start SKU campaign for selected warehouse', 'lavka-price-sync'); ?>
+                    </button>
+                    <button type="button" class="button" id="lps-ap-campaign-stop" <?php disabled(empty($campaign_state['active'])); ?>>
+                        <?php echo esc_html__('Stop safely after current operation', 'lavka-price-sync'); ?>
+                    </button>
+                    <a class="button" href="<?php echo esc_url(wp_nonce_url(
+                        admin_url('admin-post.php?action=lps_accounting_price_campaign_export'),
+                        'lps_accounting_price_campaign_export'
+                    )); ?>">
+                        <?php echo esc_html__('Export campaign report CSV', 'lavka-price-sync'); ?>
+                    </a>
+                </div>
+            </div>
+            <div id="lps-ap-campaign-notice" class="lps-ap-result-notice" hidden></div>
+            <div id="lps-ap-campaign-dashboard" class="lps-ap-campaign-dashboard" aria-live="polite"></div>
 
             <section class="lps-ap-cron-settings" aria-labelledby="lps-ap-cron-heading">
-                <h3 id="lps-ap-cron-heading"><?php echo esc_html__('Automatic weekly recalculation', 'lavka-price-sync'); ?></h3>
-                <p><?php echo esc_html__('The schedule is disabled by default. A scheduled run performs real Folio changes after Java completes its mandatory rollback preflight.', 'lavka-price-sync'); ?></p>
+                <h3 id="lps-ap-cron-heading"><?php echo esc_html__('Automatic weekly SKU campaign', 'lavka-price-sync'); ?></h3>
+                <p><?php echo esc_html__('The schedule is disabled by default. Warehouses run sequentially. The first campaign also includes UNVERIFIED products; regular runs select only NEW and DIRTY states.', 'lavka-price-sync'); ?></p>
 
                 <?php if (!empty($cron_options['paused_reason'])): ?>
                     <div class="notice notice-error inline"><p>
@@ -483,7 +590,7 @@ function lps_render_accounting_prices_page(): void {
 
                     <label class="lps-ap-cron-toggle">
                         <input type="checkbox" name="enabled" value="1" <?php checked(!empty($cron_options['enabled'])); ?>>
-                        <strong><?php echo esc_html__('Enable weekly recalculation', 'lavka-price-sync'); ?></strong>
+                        <strong><?php echo esc_html__('Enable weekly SKU campaign', 'lavka-price-sync'); ?></strong>
                     </label>
 
                     <div class="lps-ap-cron-grid">
@@ -504,7 +611,7 @@ function lps_render_accounting_prices_page(): void {
                                     <span class="description"><?php echo esc_html__('Loading warehouses...', 'lavka-price-sync'); ?></span>
                                 <?php endif; ?>
                             </div>
-                            <p class="description"><?php echo esc_html__('Selected warehouses are processed sequentially: first all previews, then recalculation of warehouses whose preview completed safely. Problem products are skipped and recorded; one warehouse error does not stop the remaining queue.', 'lavka-price-sync'); ?></p>
+                            <p class="description"><?php echo esc_html__('Selected warehouses are processed sequentially. A regular FAILED result stops only the current warehouse; FAILED_PARTIAL or OUTCOME_UNKNOWN stops the whole campaign for manual review.', 'lavka-price-sync'); ?></p>
                         </fieldset>
                         <label>
                             <span><?php echo esc_html__('Day of week', 'lavka-price-sync'); ?></span>
@@ -518,11 +625,27 @@ function lps_render_accounting_prices_page(): void {
                             <span><?php echo esc_html__('Start time', 'lavka-price-sync'); ?></span>
                             <input type="time" name="time" value="<?php echo esc_attr((string)$cron_options['time']); ?>" required>
                         </label>
+                        <label>
+                            <span><?php echo esc_html__('First batch size', 'lavka-price-sync'); ?></span>
+                            <input type="number" name="campaign_initial_batch_size" min="1" max="500" value="<?php echo esc_attr((string)$cron_options['campaign_initial_batch_size']); ?>">
+                        </label>
+                        <label>
+                            <span><?php echo esc_html__('Maximum batch size', 'lavka-price-sync'); ?></span>
+                            <input type="number" name="campaign_max_batch_size" min="1" max="500" value="<?php echo esc_attr((string)$cron_options['campaign_max_batch_size']); ?>">
+                        </label>
+                        <label>
+                            <span><?php echo esc_html__('Maintenance window, minutes', 'lavka-price-sync'); ?></span>
+                            <input type="number" name="campaign_window_minutes" min="30" max="720" value="<?php echo esc_attr((string)$cron_options['campaign_window_minutes']); ?>">
+                        </label>
+                        <label>
+                            <span><?php echo esc_html__('Snapshot horizon, months', 'lavka-price-sync'); ?></span>
+                            <input type="number" name="campaign_horizon_months" min="12" max="36" value="<?php echo esc_attr((string)$cron_options['campaign_horizon_months']); ?>">
+                        </label>
                     </div>
 
                     <label class="lps-ap-cron-confirm">
                         <input type="checkbox" name="automatic_apply_confirmed" value="1" <?php checked(!empty($cron_options['automatic_apply_confirmed'])); ?>>
-                        <?php echo esc_html__('I understand that the schedule checks every selected warehouse and recalculates all safe products. Problem products and failed warehouses are recorded in the report while the remaining queue continues.', 'lavka-price-sync'); ?>
+                        <?php echo esc_html__('I understand that the schedule performs real native-range recalculation for eligible snapshot states. Problem products are skipped and recorded, and every processed warehouse receives a final verification snapshot.', 'lavka-price-sync'); ?>
                     </label>
 
                     <p class="description">
@@ -813,6 +936,25 @@ function lps_accounting_prices_ajax(): void {
 
         case 'full_status':
             wp_send_json_success(lps_accounting_prices_native_poll(true));
+            break;
+
+        case 'campaign_start':
+            $warehouse_id = absint($_POST['warehouseId'] ?? 0);
+            if ($warehouse_id < 1) {
+                wp_send_json_error(['message' => __('Folio warehouse is required.', 'lavka-price-sync')], 400);
+            }
+            if ((string)($_POST['confirmApply'] ?? '') !== '1') {
+                wp_send_json_error(['message' => __('Explicit confirmation is required for Folio changes.', 'lavka-price-sync')], 400);
+            }
+            wp_send_json_success(lps_accounting_price_campaign_create([$warehouse_id], 'manual'));
+            break;
+
+        case 'campaign_status':
+            wp_send_json_success(lps_accounting_price_campaign_public_state());
+            break;
+
+        case 'campaign_stop':
+            wp_send_json_success(lps_accounting_price_campaign_request_stop());
             break;
 
         default:

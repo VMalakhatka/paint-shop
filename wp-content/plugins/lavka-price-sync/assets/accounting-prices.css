@@ -160,6 +160,82 @@
   max-width: 960px;
 }
 
+.lps-ap-campaign-panel {
+  max-width: 1440px;
+}
+
+.lps-ap-campaign-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  max-width: 1120px;
+  margin: 18px 0;
+  padding: 14px;
+  border-left: 4px solid #dba617;
+  background: #fff;
+}
+
+.lps-ap-campaign-actions > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lps-ap-campaign-dashboard {
+  max-width: 1440px;
+  margin: 18px 0 24px;
+}
+
+.lps-ap-campaign-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+
+.lps-ap-campaign-card {
+  min-height: 64px;
+  padding: 10px;
+  border: 1px solid #c3c4c7;
+  background: #fff;
+}
+
+.lps-ap-campaign-card span,
+.lps-ap-campaign-card strong {
+  display: block;
+}
+
+.lps-ap-campaign-card strong {
+  margin-top: 8px;
+  font-size: 17px;
+}
+
+.lps-ap-campaign-card.is-success {
+  border-left: 4px solid #00a32a;
+}
+
+.lps-ap-campaign-card.is-warning {
+  border-left: 4px solid #dba617;
+}
+
+.lps-ap-campaign-card.is-error {
+  border-left: 4px solid #d63638;
+}
+
+.lps-ap-current-batch {
+  margin: 14px 0;
+  padding: 10px 12px;
+  border: 1px solid #c3c4c7;
+  background: #fff;
+}
+
+.lps-ap-current-batch pre {
+  max-height: 220px;
+  overflow: auto;
+  white-space: pre-wrap;
+}
+
 .lps-ap-cron-settings {
   max-width: 1120px;
   margin-top: 28px;
@@ -539,7 +615,8 @@
   .lps-ap-toolbar,
   .lps-ap-form-row,
   .lps-ap-apply-row,
-  .lps-ap-danger-zone {
+  .lps-ap-danger-zone,
+  .lps-ap-campaign-actions {
     align-items: stretch;
     flex-direction: column;
   }
@@ -552,6 +629,11 @@
   .lps-ap-danger-zone .button {
     width: 100%;
     max-width: none;
+  }
+
+  .lps-ap-campaign-actions > div,
+  .lps-ap-campaign-actions .button {
+    width: 100%;
   }
 
   .lps-ap-counters {

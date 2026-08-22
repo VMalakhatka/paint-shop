@@ -23,6 +23,10 @@ function lps_accounting_prices_native_cron_options(): array {
         'time' => '03:30',
         'automatic_apply_confirmed' => false,
         'paused_reason' => '',
+        'campaign_initial_batch_size' => 100,
+        'campaign_max_batch_size' => 500,
+        'campaign_window_minutes' => 240,
+        'campaign_horizon_months' => 24,
     ]);
 
     $warehouse_ids = lps_accounting_prices_native_normalize_warehouse_ids($options['warehouse_ids']);
@@ -272,6 +276,9 @@ function lps_accounting_prices_native_pause_schedule(string $reason): void {
     wp_clear_scheduled_hook(LPS_ACCOUNTING_PRICES_NATIVE_CRON_HOOK);
     wp_clear_scheduled_hook(LPS_ACCOUNTING_PRICES_NATIVE_RETRY_HOOK);
     wp_clear_scheduled_hook(LPS_ACCOUNTING_PRICES_NATIVE_BATCH_NEXT_HOOK);
+    if (function_exists('lps_accounting_price_campaign_clear_ticks')) {
+        lps_accounting_price_campaign_clear_ticks();
+    }
 }
 
 function lps_accounting_prices_native_acquire_lock(string $source, int $warehouse_id): array {
@@ -1033,6 +1040,22 @@ function lps_accounting_prices_native_continue_batch(string $source = 'cron'): a
 }
 
 function lps_accounting_prices_native_run_scheduled(string $source = 'cron'): array {
+    if (function_exists('lps_accounting_price_campaign_run_scheduled')) {
+        if ($source !== 'cron') {
+            $campaign = lps_accounting_price_campaign_state();
+            if (!empty($campaign['active'])) {
+                lps_accounting_price_campaign_schedule_tick(1);
+                return ['ok' => true, 'httpStatus' => 202, 'body' => lps_accounting_price_campaign_public_state($campaign)];
+            }
+        }
+        $result = lps_accounting_price_campaign_run_scheduled($source);
+        return [
+            'ok' => !empty($result['ok']),
+            'httpStatus' => absint($result['httpStatus'] ?? 200),
+            'body' => $result,
+        ];
+    }
+
     $options = lps_accounting_prices_native_cron_options();
     if ($source === 'cron') lps_accounting_prices_native_reschedule();
 
@@ -1131,6 +1154,10 @@ add_action('admin_post_lps_accounting_prices_save_cron', function () {
     $time = sanitize_text_field(wp_unslash($_POST['time'] ?? '03:30'));
     if (!preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/', $time)) $time = '03:30';
     $confirmed = !empty($_POST['automatic_apply_confirmed']);
+    $initial_batch_size = max(1, min(500, absint($_POST['campaign_initial_batch_size'] ?? 100)));
+    $max_batch_size = max($initial_batch_size, min(500, absint($_POST['campaign_max_batch_size'] ?? 500)));
+    $window_minutes = max(30, min(720, absint($_POST['campaign_window_minutes'] ?? 240)));
+    $horizon_months = max(12, min(36, absint($_POST['campaign_horizon_months'] ?? 24)));
 
     $error = '';
     if ($enabled && !$warehouse_ids) {
@@ -1148,10 +1175,17 @@ add_action('admin_post_lps_accounting_prices_save_cron', function () {
             'time' => $time,
             'automatic_apply_confirmed' => $confirmed,
             'paused_reason' => '',
+            'campaign_initial_batch_size' => $initial_batch_size,
+            'campaign_max_batch_size' => $max_batch_size,
+            'campaign_window_minutes' => $window_minutes,
+            'campaign_horizon_months' => $horizon_months,
         ], false);
         wp_clear_scheduled_hook(LPS_ACCOUNTING_PRICES_NATIVE_RETRY_HOOK);
         wp_clear_scheduled_hook(LPS_ACCOUNTING_PRICES_NATIVE_BATCH_NEXT_HOOK);
         if (!$enabled) {
+            if (function_exists('lps_accounting_price_campaign_request_stop')) {
+                lps_accounting_price_campaign_request_stop();
+            }
             $batch = lps_accounting_prices_native_batch_state();
             if (!empty($batch['active'])) {
                 $batch['active'] = false;
@@ -1177,4 +1211,7 @@ function lps_accounting_prices_native_clear_schedules(): void {
     wp_clear_scheduled_hook(LPS_ACCOUNTING_PRICES_NATIVE_RETRY_HOOK);
     wp_clear_scheduled_hook(LPS_ACCOUNTING_PRICES_NATIVE_POLL_HOOK);
     wp_clear_scheduled_hook(LPS_ACCOUNTING_PRICES_NATIVE_BATCH_NEXT_HOOK);
+    if (function_exists('lps_accounting_price_campaign_clear_ticks')) {
+        lps_accounting_price_campaign_clear_ticks();
+    }
 }

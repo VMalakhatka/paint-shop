@@ -64,7 +64,7 @@ Term meta `lavka_folio_warehouses` хранит упорядоченный сп�
 | `s3_media_links` | связи изображения с SKU/товаром и состояние обработки |
 | `sync_product_state` | cursor/state полной синхронизации |
 | `folio_product_media_requests` | идемпотентность media-команд ФОЛИО |
-| `folio_product_snapshot_*` | поколения и состояния проверки товаров ФОЛИО |
+| `folio_product_snapshot_generation`, `folio_product_snapshot_item` | поколения и состояния проверки товаров ФОЛИО; Java создаёт эти таблицы без WordPress-префикса |
 | `folio_product_*metrics*`, alerts | аналитика товара и предупреждения |
 | `folio_customer_balance_snapshot_*` | подготовленный снимок должников |
 
@@ -82,6 +82,8 @@ Term meta `lavka_folio_warehouses` хранит упорядоченный сп�
 - `REMOVED` — больше не присутствует в ФОЛИО.
 
 До завершения baseline WordPress выбирает `UNVERIFIED`, `NEW`, `DIRTY`; после него — только `NEW`, `DIRTY`. Java не принимает `onlyDirty=true`, поэтому выбор SKU является обязанностью WordPress server-side.
+
+Состояние текущей оркестрации хранится в option `lps_accounting_price_sku_campaign`. Оно содержит campaign/job IDs, склад, фазу, текущий пакет, диагностические результаты и запрос безопасной остановки. Настройки еженедельного запуска и размеров пакетов находятся в `lps_accounting_prices_native_cron`. Не редактируй эти сериализованные options вручную; используй административный UI и функции владельца.
 
 ## Настройки, которые нельзя хардкодить
 
