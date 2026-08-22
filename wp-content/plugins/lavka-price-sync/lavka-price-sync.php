@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Lavka Price Sync
  * Description: Sync role-based prices from Java service to WooCommerce (meta: _wpc_price_role_<role>).
- * Version: 0.4.0
+ * Version: 0.5.0
  * Text Domain: lavka-price-sync
  * Domain Path: /languages
  */
@@ -41,6 +41,7 @@ require_once __DIR__.'/inc/admin-ui.php';
 require_once __DIR__.'/inc/mapping.php';
 require_once __DIR__.'/inc/sync.php';
 require_once __DIR__.'/inc/accounting-prices.php';
+require_once __DIR__.'/inc/product-analytics.php';
 
 add_action('init', function () {
   foreach (['administrator','shop_manager'] as $r) {

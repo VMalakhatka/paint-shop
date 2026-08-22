@@ -1,0 +1,72 @@
+# Пользователи, роли, заказы и оплаты
+
+## Пользователь и ФОЛИО
+
+- Новая guest purchase может создать WordPress user с ролью `customer` и связать его с default Internet Client ФОЛИО.
+- При существующем email заказ связывается с найденным пользователем по правилам guest-register plugin; не создавай дубликат без проверки.
+- Связь с реальным оптовиком/дилером задаётся на user edit через partners API и user meta.
+- `_folio_partner_id` и `_folio_partner_short_name` в текущем контракте содержат короткое имя/ID ФОЛИО; сохраняй их согласованно.
+- Финансовые tabs разрешай только при подтверждённом short name и допустимой роли/политике.
+
+## Роли и договоры
+
+Woo role не является названием договора ФОЛИО. Используй mapping:
+
+```text
+Woo role -> lps_role_contract_map -> Folio contract
+```
+
+Примеры подтверждённых mapping могут измениться; всегда читай option. Если mapping отсутствует, передавай пустое contract value, а не slug `customer`/`administrator`.
+
+## Заказ -> ФОЛИО
+
+1. Woo order собирает client/header/items/allocation plan.
+2. Preview всегда отправляет `preview_only=true` в Java `/admin/folio/order-accounts`.
+3. Java распределяет по Folio warehouses и возвращает `documents[]`, warnings/errors.
+4. Create использует тот же stable contract с `preview_only=false` и idempotent `externalRequestId`.
+5. Ответ сохраняется через helper multiple-documents meta.
+
+Java отвечает за складское распределение внутри ФОЛИО; PHP строит Woo parent/children по сохранённому ответу и не повторяет stock algorithm.
+
+## Split lifecycle
+
+- Один реальный document: reuse исходного Woo order, status `processing`, сохранить связь.
+- Несколько documents: исходный order становится справочным `pc-draft`; на каждый real account создаётся child `processing`.
+- `missing_stock_account`: child `on-hold` с крупным понятным уведомлением клиенту.
+- Parent хранит `_folio_child_order_ids`; child хранит `_folio_parent_order_id`/`_folio_split_from_order_id`.
+- Повторный create children должен быть идемпотентным и не создавать дубликаты.
+- Названия складов для клиента получай из mapping; цифровой warehouse ID показывай только в техническом блоке.
+- Родитель и children должны показывать взаимные ссылки в admin; клиенту объясняй split и товары ожидания.
+
+## Документы клиента
+
+- `ACCOUNT` -> «Рахунок».
+- `EXPENSE` -> «Видаткова накладна».
+- `PAYMENT` -> «Платіж».
+- Не показывай клиенту внутренний document ID, source DTO name, нерасшифрованный currency code или служебное поле без бизнес-смысла.
+- Number suffix показывай отдельно и не используй display number для detail lookup: route должен получать устойчивые type/id из API.
+- Warehouse ID преобразуй через справочник.
+- `additionalInfo` полезно и в реестре, и в detail header.
+- Repeat order использует SKU/quantity из документа, но цену и доступность берёт текущие из Woo.
+
+## WayForPay
+
+- Текущий gateway поддерживает classic checkout, а не Checkout Blocks.
+- Основные Woo cart/checkout должны быть shortcode-страницами для текущей интеграции.
+- Пока магазин WayForPay в test mode, gateway можно показывать только пользователям из собственного test-access списка.
+- Service/return URLs задаются настройками gateway; не хардкодь ID страницы.
+- Успешная платёжная страница ещё не означает production activation merchant.
+- Перед общим включением должны существовать доступные страницы: условия, возврат, оплата/доставка и контакты продавца.
+
+Не копируй merchant login, secret key и реквизиты в документацию, код или диагностику.
+
+## Статусы и понятные сообщения
+
+| Сценарий | Woo status | Сообщение клиенту |
+|---|---|---|
+| Реальный счёт | `processing` | заказ принят, указан склад/отправление |
+| Нехватка | `on-hold` | товара нет; менеджер свяжется для согласования |
+| Parent после split | `pc-draft` | заказ разделён на отдельные счета/склады |
+| Ошибка Java до создания | исходный order сохраняется | обработку проверит менеджер |
+
+Не обещай клиенту создание документа ФОЛИО, если Java вернула ошибку или outcome неизвестен.
