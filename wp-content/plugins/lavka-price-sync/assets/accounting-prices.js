@@ -35,7 +35,8 @@
     copySkus: document.getElementById('lps-ap-copy-skus'),
     exportCsv: document.getElementById('lps-ap-export-csv'),
     exportJson: document.getElementById('lps-ap-export-json'),
-    cronWarehouses: document.getElementById('lps-ap-cron-warehouses')
+    cronWarehouses: document.getElementById('lps-ap-cron-warehouses'),
+    savedWarehouses: document.getElementById('lps-ap-saved-warehouses')
   };
 
   const state = {
@@ -194,6 +195,19 @@
           label.append(checkbox, document.createTextNode(`${warehouse.id} — ${warehouse.name}`));
           options.appendChild(label);
         });
+      }
+      if (elements.savedWarehouses) {
+        let savedIds = [];
+        try {
+          savedIds = JSON.parse(elements.savedWarehouses.dataset.warehouseIds || '[]').map(String);
+        } catch (error) {
+          savedIds = [];
+        }
+        const labels = savedIds.map((id) => {
+          const warehouse = items.find((item) => String(item.id) === id);
+          return warehouse ? `${warehouse.id} — ${warehouse.name}` : id;
+        });
+        if (labels.length) elements.savedWarehouses.textContent = labels.join(', ');
       }
       elements.warehouseStatus.textContent = '';
     } catch (error) {

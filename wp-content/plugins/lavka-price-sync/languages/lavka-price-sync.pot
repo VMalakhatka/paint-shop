@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-22T05:09:21+00:00\n"
+"POT-Creation-Date: 2026-08-23T04:46:30+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: lavka-price-sync\n"
@@ -193,15 +193,15 @@ msgstr ""
 
 #: inc/accounting-price-campaign.php:913
 #: inc/accounting-prices-cron.php:1144
-#: inc/accounting-prices.php:814
-#: inc/accounting-prices.php:862
+#: inc/accounting-prices.php:896
+#: inc/accounting-prices.php:944
 msgid "You do not have permission to perform this operation."
 msgstr ""
 
 #: inc/accounting-price-campaign.php:927
 #: inc/accounting-prices.php:224
-#: inc/accounting-prices.php:740
-#: inc/accounting-prices.php:830
+#: inc/accounting-prices.php:822
+#: inc/accounting-prices.php:912
 msgid "When"
 msgstr ""
 
@@ -214,24 +214,24 @@ msgstr ""
 #: inc/accounting-prices.php:122
 #: inc/accounting-prices.php:213
 #: inc/accounting-prices.php:344
-#: inc/accounting-prices.php:742
-#: inc/accounting-prices.php:832
+#: inc/accounting-prices.php:824
+#: inc/accounting-prices.php:914
 #: inc/product-analytics.php:60
 msgid "Warehouse"
 msgstr ""
 
 #: inc/accounting-price-campaign.php:930
 #: inc/accounting-prices.php:225
-#: inc/accounting-prices.php:743
-#: inc/accounting-prices.php:833
+#: inc/accounting-prices.php:825
+#: inc/accounting-prices.php:915
 msgid "Result"
 msgstr ""
 
 #: inc/accounting-price-campaign.php:931
 #: inc/accounting-prices.php:230
-#: inc/accounting-prices.php:499
-#: inc/accounting-prices.php:744
-#: inc/accounting-prices.php:835
+#: inc/accounting-prices.php:509
+#: inc/accounting-prices.php:826
+#: inc/accounting-prices.php:917
 #: inc/product-analytics.php:71
 msgid "SKU"
 msgstr ""
@@ -249,8 +249,8 @@ msgstr ""
 #: inc/accounting-price-campaign.php:934
 #: inc/accounting-prices.php:117
 #: inc/accounting-prices.php:231
-#: inc/accounting-prices.php:771
-#: inc/accounting-prices.php:838
+#: inc/accounting-prices.php:853
+#: inc/accounting-prices.php:920
 msgid "Technical details"
 msgstr ""
 
@@ -274,12 +274,12 @@ msgid "Only the most recent diagnostics are stored in WordPress. Review the Java
 msgstr ""
 
 #: inc/accounting-prices-cron.php:96
-#: inc/accounting-prices.php:977
+#: inc/accounting-prices.php:1059
 msgid "Java API returned an empty response."
 msgstr ""
 
 #: inc/accounting-prices-cron.php:290
-#: inc/accounting-prices.php:893
+#: inc/accounting-prices.php:975
 msgid "The global Lavka lock is unavailable. The recalculation was not started."
 msgstr ""
 
@@ -340,8 +340,8 @@ msgid "The warehouse returned a terminal error. It was recorded and the queue co
 msgstr ""
 
 #: inc/accounting-prices-cron.php:607
-#: inc/accounting-prices.php:928
-#: inc/accounting-prices.php:944
+#: inc/accounting-prices.php:1010
+#: inc/accounting-prices.php:1026
 msgid "Folio warehouse is required."
 msgstr ""
 
@@ -350,7 +350,7 @@ msgid "A full Folio accounting-price recalculation is already running."
 msgstr ""
 
 #: inc/accounting-prices-cron.php:648
-#: inc/accounting-prices.php:905
+#: inc/accounting-prices.php:987
 msgid "Another Lavka synchronization is running."
 msgstr ""
 
@@ -395,7 +395,7 @@ msgstr ""
 
 #: inc/accounting-prices.php:10
 #: inc/accounting-prices.php:11
-#: inc/accounting-prices.php:454
+#: inc/accounting-prices.php:464
 msgid "Folio accounting prices"
 msgstr ""
 
@@ -656,8 +656,8 @@ msgstr ""
 
 #: inc/accounting-prices.php:116
 #: inc/accounting-prices.php:228
-#: inc/accounting-prices.php:745
-#: inc/accounting-prices.php:836
+#: inc/accounting-prices.php:827
+#: inc/accounting-prices.php:918
 msgid "Reason"
 msgstr ""
 
@@ -785,7 +785,7 @@ msgstr ""
 
 #: inc/accounting-prices.php:148
 #: inc/accounting-prices.php:234
-#: inc/accounting-prices.php:394
+#: inc/accounting-prices.php:404
 msgid "Not started"
 msgstr ""
 
@@ -794,59 +794,59 @@ msgid "Busy"
 msgstr ""
 
 #: inc/accounting-prices.php:150
-#: inc/accounting-prices.php:395
-#: inc/accounting-prices.php:409
+#: inc/accounting-prices.php:405
+#: inc/accounting-prices.php:419
 msgid "Queued"
 msgstr ""
 
 #: inc/accounting-prices.php:151
 #: inc/accounting-prices.php:235
-#: inc/accounting-prices.php:396
-#: inc/accounting-prices.php:411
+#: inc/accounting-prices.php:406
+#: inc/accounting-prices.php:421
 #: inc/logs.php:120
 msgid "Running"
 msgstr ""
 
 #: inc/accounting-prices.php:152
 #: inc/accounting-prices.php:236
-#: inc/accounting-prices.php:400
-#: inc/accounting-prices.php:414
+#: inc/accounting-prices.php:410
+#: inc/accounting-prices.php:424
 msgid "Completed"
 msgstr ""
 
 #: inc/accounting-prices.php:153
 #: inc/accounting-prices.php:237
-#: inc/accounting-prices.php:401
-#: inc/accounting-prices.php:415
+#: inc/accounting-prices.php:411
+#: inc/accounting-prices.php:425
 msgid "Completed with skipped products"
 msgstr ""
 
 #: inc/accounting-prices.php:154
-#: inc/accounting-prices.php:402
-#: inc/accounting-prices.php:418
+#: inc/accounting-prices.php:412
+#: inc/accounting-prices.php:428
 msgid "Stopped on negative stock"
 msgstr ""
 
 #: inc/accounting-prices.php:155
-#: inc/accounting-prices.php:403
-#: inc/accounting-prices.php:419
+#: inc/accounting-prices.php:413
+#: inc/accounting-prices.php:429
 msgid "Failed"
 msgstr ""
 
 #: inc/accounting-prices.php:156
 #: inc/accounting-prices.php:240
-#: inc/accounting-prices.php:404
-#: inc/accounting-prices.php:421
+#: inc/accounting-prices.php:414
+#: inc/accounting-prices.php:431
 msgid "Failed after partial recalculation"
 msgstr ""
 
 #: inc/accounting-prices.php:157
-#: inc/accounting-prices.php:397
+#: inc/accounting-prices.php:407
 msgid "Check passed"
 msgstr ""
 
 #: inc/accounting-prices.php:158
-#: inc/accounting-prices.php:398
+#: inc/accounting-prices.php:408
 msgid "Check passed with skipped products"
 msgstr ""
 
@@ -855,15 +855,15 @@ msgid "Check blocked recalculation"
 msgstr ""
 
 #: inc/accounting-prices.php:160
-#: inc/accounting-prices.php:399
-#: inc/accounting-prices.php:417
+#: inc/accounting-prices.php:409
+#: inc/accounting-prices.php:427
 msgid "Blocked by negative stock"
 msgstr ""
 
 #: inc/accounting-prices.php:161
 #: inc/accounting-prices.php:241
-#: inc/accounting-prices.php:405
-#: inc/accounting-prices.php:422
+#: inc/accounting-prices.php:415
+#: inc/accounting-prices.php:432
 msgid "Outcome unknown"
 msgstr ""
 
@@ -1092,7 +1092,7 @@ msgid "Building the mandatory final snapshot"
 msgstr ""
 
 #: inc/accounting-prices.php:252
-#: inc/accounting-prices.php:412
+#: inc/accounting-prices.php:422
 msgid "Waiting for the global Lavka lock"
 msgstr ""
 
@@ -1143,336 +1143,407 @@ msgid "Saturday"
 msgstr ""
 
 #: inc/accounting-prices.php:391
+#: inc/accounting-prices.php:402
 msgid "Sunday"
 msgstr ""
 
-#: inc/accounting-prices.php:410
-msgid "Starting warehouse recalculation"
+#: inc/accounting-prices.php:394
+msgid "Paused after an error"
 msgstr ""
 
-#: inc/accounting-prices.php:413
-msgid "Waiting for the next warehouse"
+#: inc/accounting-prices.php:396
+msgid "Enabled"
 msgstr ""
 
-#: inc/accounting-prices.php:416
-msgid "Completed with warehouse errors"
+#: inc/accounting-prices.php:397
+msgid "Disabled"
+msgstr ""
+
+#: inc/accounting-prices.php:401
+msgid "No warehouses selected"
 msgstr ""
 
 #: inc/accounting-prices.php:420
-msgid "Could not start"
+msgid "Starting warehouse recalculation"
 msgstr ""
 
 #: inc/accounting-prices.php:423
+msgid "Waiting for the next warehouse"
+msgstr ""
+
+#: inc/accounting-prices.php:426
+msgid "Completed with warehouse errors"
+msgstr ""
+
+#: inc/accounting-prices.php:430
+msgid "Could not start"
+msgstr ""
+
+#: inc/accounting-prices.php:433
 msgid "Stopped by administrator"
 msgstr ""
 
-#: inc/accounting-prices.php:428
+#: inc/accounting-prices.php:438
 msgid "Preview stage"
 msgstr ""
 
-#: inc/accounting-prices.php:429
+#: inc/accounting-prices.php:439
 msgid "Apply stage"
 msgstr ""
 
-#: inc/accounting-prices.php:457
+#: inc/accounting-prices.php:467
 msgid "The automatic recalculation schedule was saved."
 msgstr ""
 
-#: inc/accounting-prices.php:462
+#: inc/accounting-prices.php:472
 msgid "Confirm automatic Folio changes before enabling the schedule."
 msgstr ""
 
-#: inc/accounting-prices.php:463
+#: inc/accounting-prices.php:473
 msgid "Select at least one Folio warehouse before enabling the schedule."
 msgstr ""
 
-#: inc/accounting-prices.php:469
+#: inc/accounting-prices.php:479
 msgid "Financial operation"
 msgstr ""
 
-#: inc/accounting-prices.php:470
+#: inc/accounting-prices.php:480
 msgid "Preview is read-only. Apply changes Folio data and must be run only in an agreed maintenance window."
 msgstr ""
 
-#: inc/accounting-prices.php:474
+#: inc/accounting-prices.php:484
 #: inc/product-analytics.php:150
 msgid "Folio warehouse"
 msgstr ""
 
-#: inc/accounting-prices.php:476
-#: inc/accounting-prices.php:611
+#: inc/accounting-prices.php:486
+#: inc/accounting-prices.php:693
 msgid "Loading warehouses..."
 msgstr ""
 
-#: inc/accounting-prices.php:479
+#: inc/accounting-prices.php:489
 msgid "Folio warehouse ID"
 msgstr ""
 
-#: inc/accounting-prices.php:480
+#: inc/accounting-prices.php:490
 msgid "Warehouse ID"
 msgstr ""
 
-#: inc/accounting-prices.php:484
+#: inc/accounting-prices.php:494
 msgid "Accounting price views"
 msgstr ""
 
-#: inc/accounting-prices.php:486
+#: inc/accounting-prices.php:496
 msgid "One product"
 msgstr ""
 
-#: inc/accounting-prices.php:489
+#: inc/accounting-prices.php:499
 msgid "Entire warehouse"
 msgstr ""
 
-#: inc/accounting-prices.php:492
+#: inc/accounting-prices.php:502
 msgid "SKU campaign and schedule"
 msgstr ""
 
-#: inc/accounting-prices.php:497
+#: inc/accounting-prices.php:507
 msgid "Product accounting price"
 msgstr ""
 
-#: inc/accounting-prices.php:502
+#: inc/accounting-prices.php:512
 msgid "Check without changes"
 msgstr ""
 
-#: inc/accounting-prices.php:508
+#: inc/accounting-prices.php:518
 msgid "I reviewed the preview and confirm recalculation of this product."
 msgstr ""
 
-#: inc/accounting-prices.php:511
+#: inc/accounting-prices.php:521
 msgid "Recalculate product in Folio"
 msgstr ""
 
-#: inc/accounting-prices.php:519
+#: inc/accounting-prices.php:529
 msgid "Full native Folio recalculation"
 msgstr ""
 
-#: inc/accounting-prices.php:521
+#: inc/accounting-prices.php:531
 msgid "This mode runs the complete Folio I_UCHET_TOVAR algorithm. The preview executes every portion in a transaction and always rolls it back."
 msgstr ""
 
-#: inc/accounting-prices.php:525
+#: inc/accounting-prices.php:535
 msgid "Run exact rollback preview"
 msgstr ""
 
-#: inc/accounting-prices.php:531
+#: inc/accounting-prices.php:541
 msgid "I have a current backup and confirm the agreed Folio maintenance window."
 msgstr ""
 
-#: inc/accounting-prices.php:534
+#: inc/accounting-prices.php:544
 msgid "Run full native recalculation in Folio"
 msgstr ""
 
-#: inc/accounting-prices.php:536
+#: inc/accounting-prices.php:546
 msgid "Apply repeats the full rollback preflight and starts committing portions only when the preflight is clean."
 msgstr ""
 
-#: inc/accounting-prices.php:549
+#: inc/accounting-prices.php:559
 msgid "Accounting-price SKU campaign"
 msgstr ""
 
-#: inc/accounting-prices.php:551
+#: inc/accounting-prices.php:561
 msgid "The campaign builds a fresh snapshot, selects only UNVERIFIED, NEW and DIRTY products, recalculates them in sequential native-range batches, and finishes with a mandatory verification snapshot. FAILED and VERIFIED products are never selected automatically."
 msgstr ""
 
-#: inc/accounting-prices.php:556
+#: inc/accounting-prices.php:566
 msgid "I confirm the Folio maintenance window and understand that native-range apply changes accounting prices."
 msgstr ""
 
-#: inc/accounting-prices.php:560
+#: inc/accounting-prices.php:570
 msgid "Start SKU campaign for selected warehouse"
 msgstr ""
 
-#: inc/accounting-prices.php:563
+#: inc/accounting-prices.php:573
 msgid "Stop safely after current operation"
 msgstr ""
 
-#: inc/accounting-prices.php:569
+#: inc/accounting-prices.php:579
 msgid "Export campaign report CSV"
 msgstr ""
 
-#: inc/accounting-prices.php:577
+#: inc/accounting-prices.php:587
 msgid "Automatic weekly SKU campaign"
 msgstr ""
 
-#: inc/accounting-prices.php:578
+#: inc/accounting-prices.php:588
 msgid "The schedule is disabled by default. Warehouses run sequentially. The first campaign also includes UNVERIFIED products; regular runs select only NEW and DIRTY states."
 msgstr ""
 
-#: inc/accounting-prices.php:582
-msgid "Schedule paused:"
+#: inc/accounting-prices.php:591
+msgid "Saved schedule"
 msgstr ""
 
-#: inc/accounting-prices.php:593
-msgid "Enable weekly SKU campaign"
+#: inc/accounting-prices.php:594
+msgid "Schedule status"
 msgstr ""
 
-#: inc/accounting-prices.php:599
-msgid "Folio warehouses"
+#: inc/accounting-prices.php:598
+msgid "Selected Folio warehouses"
 msgstr ""
 
-#. translators: %d: numeric Folio warehouse ID.
-#: inc/accounting-prices.php:606
+#: inc/accounting-prices.php:603
+msgid "Weekly start"
+msgstr ""
+
+#. translators: 1: weekday, 2: local start time, 3: WordPress timezone.
+#: inc/accounting-prices.php:608
 #, php-format
-msgid "Warehouse ID: %d"
-msgstr ""
-
-#: inc/accounting-prices.php:614
-msgid "Selected warehouses are processed sequentially. A regular FAILED result stops only the current warehouse; FAILED_PARTIAL or OUTCOME_UNKNOWN stops the whole campaign for manual review."
+msgid "%1$s at %2$s (%3$s)"
 msgstr ""
 
 #: inc/accounting-prices.php:617
-msgid "Day of week"
+msgid "Maintenance window"
 msgstr ""
 
-#: inc/accounting-prices.php:625
-msgid "Start time"
+#. translators: %d: maintenance window length in minutes.
+#: inc/accounting-prices.php:622
+#, php-format
+msgid "%d minutes"
 msgstr ""
 
 #: inc/accounting-prices.php:629
-msgid "First batch size"
+msgid "SKU batch sizes"
 msgstr ""
 
-#: inc/accounting-prices.php:633
-msgid "Maximum batch size"
-msgstr ""
-
-#: inc/accounting-prices.php:637
-msgid "Maintenance window, minutes"
-msgstr ""
-
-#: inc/accounting-prices.php:641
-msgid "Snapshot horizon, months"
-msgstr ""
-
-#: inc/accounting-prices.php:648
-msgid "I understand that the schedule performs real native-range recalculation for eligible snapshot states. Problem products are skipped and recorded, and every processed warehouse receives a final verification snapshot."
-msgstr ""
-
-#. translators: %s: WordPress site time zone.
-#: inc/accounting-prices.php:655
+#. translators: 1: first batch size, 2: maximum batch size.
+#: inc/accounting-prices.php:634
 #, php-format
-msgid "Time zone: %s. If another Lavka synchronization holds the global lock, the run is postponed without sending a request to Java."
+msgid "first %1$d, maximum %2$d"
 msgstr ""
 
-#: inc/accounting-prices.php:661
-#: inc/admin-ui.php:492
-msgid "Save schedule"
+#: inc/accounting-prices.php:642
+msgid "Snapshot horizon"
 msgstr ""
 
-#: inc/accounting-prices.php:667
+#. translators: %d: snapshot horizon in months.
+#: inc/accounting-prices.php:647
+#, php-format
+msgid "%d months"
+msgstr ""
+
+#: inc/accounting-prices.php:654
+#: inc/accounting-prices.php:749
 msgid "Next scheduled run"
 msgstr ""
 
-#: inc/accounting-prices.php:670
+#: inc/accounting-prices.php:657
+#: inc/accounting-prices.php:752
 #: inc/admin-ui.php:429
 msgid "Not scheduled"
 msgstr ""
 
-#: inc/accounting-prices.php:673
+#: inc/accounting-prices.php:664
+msgid "Schedule paused:"
+msgstr ""
+
+#: inc/accounting-prices.php:675
+msgid "Enable weekly SKU campaign"
+msgstr ""
+
+#: inc/accounting-prices.php:681
+msgid "Folio warehouses"
+msgstr ""
+
+#. translators: %d: numeric Folio warehouse ID.
+#: inc/accounting-prices.php:688
+#, php-format
+msgid "Warehouse ID: %d"
+msgstr ""
+
+#: inc/accounting-prices.php:696
+msgid "Selected warehouses are processed sequentially. A regular FAILED result stops only the current warehouse; FAILED_PARTIAL or OUTCOME_UNKNOWN stops the whole campaign for manual review."
+msgstr ""
+
+#: inc/accounting-prices.php:699
+msgid "Day of week"
+msgstr ""
+
+#: inc/accounting-prices.php:707
+msgid "Start time"
+msgstr ""
+
+#: inc/accounting-prices.php:711
+msgid "First batch size"
+msgstr ""
+
+#: inc/accounting-prices.php:715
+msgid "Maximum batch size"
+msgstr ""
+
+#: inc/accounting-prices.php:719
+msgid "Maintenance window, minutes"
+msgstr ""
+
+#: inc/accounting-prices.php:723
+msgid "Snapshot horizon, months"
+msgstr ""
+
+#: inc/accounting-prices.php:730
+msgid "I understand that the schedule performs real native-range recalculation for eligible snapshot states. Problem products are skipped and recorded, and every processed warehouse receives a final verification snapshot."
+msgstr ""
+
+#. translators: %s: WordPress site time zone.
+#: inc/accounting-prices.php:737
+#, php-format
+msgid "Time zone: %s. If another Lavka synchronization holds the global lock, the run is postponed without sending a request to Java."
+msgstr ""
+
+#: inc/accounting-prices.php:743
+#: inc/admin-ui.php:492
+msgid "Save schedule"
+msgstr ""
+
+#: inc/accounting-prices.php:755
 msgid "Last native job status"
 msgstr ""
 
-#: inc/accounting-prices.php:676
+#: inc/accounting-prices.php:758
 msgid "No runs yet"
 msgstr ""
 
-#: inc/accounting-prices.php:679
+#: inc/accounting-prices.php:761
 msgid "Last scheduled warehouse queue"
 msgstr ""
 
-#: inc/accounting-prices.php:683
+#: inc/accounting-prices.php:765
 msgid "No scheduled runs yet"
 msgstr ""
 
 #. translators: 1: completed warehouse preview count, 2: total warehouse count.
-#: inc/accounting-prices.php:694
+#: inc/accounting-prices.php:776
 #, php-format
 msgid "%1$d of %2$d warehouse previews completed"
 msgstr ""
 
 #. translators: 1: completed warehouse count, 2: total warehouse count.
-#: inc/accounting-prices.php:701
+#: inc/accounting-prices.php:783
 #, php-format
 msgid "%1$d of %2$d warehouses completed"
 msgstr ""
 
 #. translators: 1: recorded warehouse error count, 2: warning count.
-#: inc/accounting-prices.php:711
+#: inc/accounting-prices.php:793
 #, php-format
 msgid "Recorded warehouse errors: %1$d; warnings: %2$d"
 msgstr ""
 
-#: inc/accounting-prices.php:726
+#: inc/accounting-prices.php:808
 msgid "Last scheduled recalculation report"
 msgstr ""
 
-#: inc/accounting-prices.php:727
+#: inc/accounting-prices.php:809
 msgid "The report preserves when and why a product or warehouse was skipped. Safe products continue to be recalculated."
 msgstr ""
 
-#: inc/accounting-prices.php:733
+#: inc/accounting-prices.php:815
 msgid "Export detailed CSV"
 msgstr ""
 
-#: inc/accounting-prices.php:741
-#: inc/accounting-prices.php:831
+#: inc/accounting-prices.php:823
+#: inc/accounting-prices.php:913
 msgid "Stage"
 msgstr ""
 
-#: inc/accounting-prices.php:746
-#: inc/accounting-prices.php:837
+#: inc/accounting-prices.php:828
+#: inc/accounting-prices.php:919
 msgid "Explanation"
 msgstr ""
 
-#: inc/accounting-prices.php:775
+#: inc/accounting-prices.php:857
 msgid "No problems were reported for this warehouse."
 msgstr ""
 
-#: inc/accounting-prices.php:790
+#: inc/accounting-prices.php:872
 msgid "Diagnostics and skipped products"
 msgstr ""
 
-#: inc/accounting-prices.php:793
+#: inc/accounting-prices.php:875
 msgid "Copy SKU list"
 msgstr ""
 
-#: inc/accounting-prices.php:796
+#: inc/accounting-prices.php:878
 msgid "Export CSV"
 msgstr ""
 
-#: inc/accounting-prices.php:799
+#: inc/accounting-prices.php:881
 msgid "Export JSON"
 msgstr ""
 
-#: inc/accounting-prices.php:834
+#: inc/accounting-prices.php:916
 msgid "Severity"
 msgstr ""
 
-#: inc/accounting-prices.php:839
+#: inc/accounting-prices.php:921
 msgid "Java job ID"
 msgstr ""
 
-#: inc/accounting-prices.php:869
+#: inc/accounting-prices.php:951
 msgid "Java Base URL is not configured."
 msgstr ""
 
-#: inc/accounting-prices.php:884
+#: inc/accounting-prices.php:966
 msgid "SKU and Folio warehouse are required."
 msgstr ""
 
-#: inc/accounting-prices.php:887
-#: inc/accounting-prices.php:931
-#: inc/accounting-prices.php:947
+#: inc/accounting-prices.php:969
+#: inc/accounting-prices.php:1013
+#: inc/accounting-prices.php:1029
 msgid "Explicit confirmation is required for Folio changes."
 msgstr ""
 
-#: inc/accounting-prices.php:899
+#: inc/accounting-prices.php:981
 msgid "Single-product Folio accounting-price recalculation"
 msgstr ""
 
-#: inc/accounting-prices.php:961
+#: inc/accounting-prices.php:1043
 msgid "Unsupported accounting-price operation."
 msgstr ""
 

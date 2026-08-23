@@ -249,6 +249,23 @@
   margin-top: 0;
 }
 
+.lps-ap-saved-schedule {
+  max-width: 920px;
+  margin: 16px 0;
+  padding: 14px;
+  border-left: 4px solid #00a32a;
+  background: #f0f6fc;
+}
+
+.lps-ap-saved-schedule h4 {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+
+.lps-ap-saved-schedule .lps-ap-cron-status {
+  margin-top: 0;
+}
+
 .lps-ap-cron-toggle,
 .lps-ap-cron-confirm {
   display: block;
