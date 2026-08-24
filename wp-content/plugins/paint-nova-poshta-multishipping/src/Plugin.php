@@ -7,6 +7,7 @@ use Paint\NovaPoshta\Admin\SettingsPage;
 use Paint\NovaPoshta\Domain\AllocationSnapshotBuilder;
 use Paint\NovaPoshta\Domain\TtnNormalizer;
 use Paint\NovaPoshta\Infrastructure\ApiClient;
+use Paint\NovaPoshta\Infrastructure\SenderDirectory;
 use Paint\NovaPoshta\Infrastructure\ShipmentRepository;
 
 defined('ABSPATH') || exit;
@@ -24,7 +25,7 @@ final class Plugin
     {
         $repository = new ShipmentRepository();
         $api = new ApiClient();
-        $settings = new SettingsPage($api);
+        $settings = new SettingsPage($api, new SenderDirectory($api));
         $settings->hooks();
 
         $order_panel = new OrderPanel(
@@ -35,4 +36,3 @@ final class Plugin
         $order_panel->hooks();
     }
 }
-

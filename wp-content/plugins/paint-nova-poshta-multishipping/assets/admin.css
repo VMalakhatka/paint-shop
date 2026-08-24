@@ -13,11 +13,45 @@
     overflow-x: auto;
 }
 
-.pnpm-mappings input[type="text"] {
-    width: 190px;
+.pnpm-mappings {
+    min-width: 1420px;
 }
 
-#pnpm-test-api-result {
+.pnpm-mappings select,
+.pnpm-mappings input[type="text"] {
+    width: 100%;
+    min-width: 170px;
+}
+
+.pnpm-mappings th,
+.pnpm-mappings td {
+    vertical-align: top;
+}
+
+.pnpm-technical-ref {
+    margin-top: 8px;
+}
+
+.pnpm-technical-ref summary {
+    color: #646970;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.pnpm-technical-ref input[type="text"] {
+    margin-top: 5px;
+    font-family: monospace;
+    font-size: 12px;
+}
+
+.pnpm-city-label {
+    display: block;
+    margin-top: 5px;
+    color: #50575e;
+}
+
+#pnpm-test-api-result,
+#pnpm-load-senders-result {
     display: inline-block;
     margin-left: 10px;
     font-weight: 600;

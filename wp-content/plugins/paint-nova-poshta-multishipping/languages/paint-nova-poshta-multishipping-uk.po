@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Paint Nova Poshta Multishipping 0.1.0\n"
+"Project-Id-Version: Paint Nova Poshta Multishipping 0.2.0\n"
 "Language: uk\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -48,6 +48,36 @@ msgstr "Перевіряємо підключення..."
 msgid "Connection check failed."
 msgstr "Не вдалося перевірити підключення."
 
+msgid "Load senders from Nova Poshta"
+msgstr "Завантажити відправників з Нової пошти"
+
+msgid "Loading sender profile..."
+msgstr "Завантажуємо профіль відправника..."
+
+msgid "Sender profile could not be loaded."
+msgstr "Не вдалося завантажити профіль відправника."
+
+msgid "Choose a business sender"
+msgstr "Оберіть бізнес-відправника"
+
+msgid "Choose a sender address"
+msgstr "Оберіть адресу відправника"
+
+msgid "Choose a contact person"
+msgstr "Оберіть контактну особу"
+
+msgid "Ready"
+msgstr "Готово"
+
+msgid "Incomplete"
+msgstr "Не заповнено"
+
+msgid "Disabled"
+msgstr "Вимкнено"
+
+msgid "Saved Ref"
+msgstr "Збережений Ref"
+
 msgid "Warehouse senders"
 msgstr "Відправники за складами"
 
@@ -62,6 +92,18 @@ msgstr "Увімкнено"
 
 msgid "Sender type"
 msgstr "Тип відправника"
+
+msgid "Business sender"
+msgstr "Бізнес-відправник"
+
+msgid "Sender address or branch"
+msgstr "Адреса або відділення відправника"
+
+msgid "Contact person"
+msgstr "Контактна особа"
+
+msgid "Status"
+msgstr "Статус"
 
 msgid "City Ref"
 msgstr "Ref міста"
@@ -83,6 +125,12 @@ msgstr "Відділення / поштомат"
 
 msgid "Sender address"
 msgstr "Адреса відправника"
+
+msgid "Load senders first"
+msgstr "Спочатку завантажте відправників"
+
+msgid "Technical Ref"
+msgstr "Технічний Ref"
 
 msgid "Save Nova Poshta settings"
 msgstr "Зберегти налаштування Нової пошти"
@@ -134,6 +182,18 @@ msgstr "API Нової пошти повернуло некоректну від
 
 msgid "Nova Poshta rejected the request."
 msgstr "Нова пошта відхилила запит."
+
+msgid "No sender was found for this Nova Poshta business account."
+msgstr "Для цього бізнес-акаунта Нової пошти не знайдено відправника."
+
+msgid "Nova Poshta rejected the sender directory request."
+msgstr "Нова пошта відхилила запит довідника відправника."
+
+msgid "%d sender profile loaded."
+msgid_plural "%d sender profiles loaded."
+msgstr[0] "Завантажено %d профіль відправника."
+msgstr[1] "Завантажено %d профілі відправників."
+msgstr[2] "Завантажено %d профілів відправників."
 
 msgid "Real Nova Poshta write operations are disabled."
 msgstr "Реальні операції запису в Нову пошту вимкнено."
