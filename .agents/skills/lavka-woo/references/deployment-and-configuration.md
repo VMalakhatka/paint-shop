@@ -8,7 +8,7 @@
 - Production WordPress: `/var/www/virtuals/kreul.com.ua`.
 - Production checkout репозитория: `~/deploy/paint-shop`.
 - Запускаемый production deploy: `~/deploy_safe.sh`.
-- Версионный источник deploy-скрипта: `wp-content/deploy_safe.sh`.
+- Версионный источник deploy-скрипта на production: `~/deploy/paint-shop/wp-content/deploy_safe.sh`.
 - Скрипты, которые deploy переносит в `$HOME`: `deploy_db.sh` и `export_and_push.sh`.
 - `update_ops.sh` умеет вручную переносить также `deploy_safe.sh` и `full_backup.sh`.
 
@@ -34,19 +34,28 @@ ssh -o ConnectTimeout=10 kreul 'echo connected ok'
 
 ### Где находится deploy-скрипт и как сделать его запускаемым
 
-Исходник: `wp-content/deploy_safe.sh`. Запускаемая production-копия:
-`~/deploy_safe.sh`. При ручном восстановлении на сервере:
+Запускаемая production-копия: `~/deploy_safe.sh`. Её единственный версионный источник
+после `git pull`: `~/deploy/paint-shop/wp-content/deploy_safe.sh`.
+
+Файл `/var/www/virtuals/kreul.com.ua/wp-content/deploy_safe.sh` не участвует в
+запуске `dcode` и специально не синхронизируется как часть WordPress web-root. Его
+дата не является признаком актуальности production deploy. Это подтверждено на
+production 2026-08-24: Git checkout был актуален, а файл в web-root оставался старым.
+
+При первом bootstrap или если запускаемая копия старее механизма self-update, на
+сервере установи её именно из checkout:
 
 ```bash
 ssh kreul
-cp -f /var/www/virtuals/kreul.com.ua/wp-content/deploy_safe.sh ~/deploy_safe.sh
+cp -f ~/deploy/paint-shop/wp-content/deploy_safe.sh ~/deploy_safe.sh
 chmod 755 ~/deploy_safe.sh
 ```
 
-Текущий deploy не переносит сам себя в начале запуска. В конце он сравнивает исходник
-с `~/deploy_safe.sh`, создаёт `~/deploy_safe.sh.next`, выполняет `chmod 755` и заменяет
-старую копию. Поэтому изменение deploy-алгоритма вступает в силу со следующего
-запуска; при проблеме используйте ручную копию выше или `update_ops.sh`.
+После bootstrap текущий deploy не переносит сам себя в начале запуска. В конце он
+сравнивает checkout-источник с `~/deploy_safe.sh`, создаёт `~/deploy_safe.sh.next`,
+выполняет `chmod 755` и заменяет старую копию. Поэтому изменение deploy-алгоритма
+вступает в силу со следующего запуска. Старая версия, в которой этого блока ещё нет,
+сама обновиться не сможет: используй bootstrap-команду выше, затем запускай `dcode`.
 
 ### Серверные алиасы
 
@@ -65,15 +74,115 @@ alias dcode-dry="DRY_RUN=1 ~/deploy_safe.sh"
 
 ## Конфигурация и `.env`
 
-Для WordPress production-конфигурация берётся из серверного `wp-config.php`, server
-environment и WordPress options по назначению. `deploy_safe.sh` не копирует локальный
-`.env`, `.env.prod` или `wp-config.php` из Git и не должен этого делать. Не переносить
-секреты через plugin commit, manifest, HTML или обычный лог. После добавления новой
-интеграции отдельно настроить на production нужные constants/env/options и только
-потом активировать plugin.
+Проверено локально и на production 2026-08-24: WordPress сейчас не использует файлы
+`.env`, `.env.local` или `.env.prod` и не загружает Dotenv. Фактическая схема:
+
+- `wp-config.php` — router окружения; отслеживается Git;
+- `wp-config.common.php` — общие constants; отслеживается Git;
+- `wp-config.local.php` — локальная БД/debug/paths; существует локально и игнорируется Git;
+- `wp-config.production.php` — production БД/Redis/log paths; существует только в
+  рабочем web-root production и игнорируется Git.
+
+`deploy_safe.sh` не синхронизирует корневые `wp-config*.php`. Поэтому версии
+`wp-config.php` и `wp-config.common.php` в production web-root могут отличаться от
+checkout `~/deploy/paint-shop`; deploy plugin-кода это не исправляет. Перед изменением
+конфигурации сравнивай структуру без вывода значений и применяй отдельный
+preview/backup/config-deploy сценарий.
+
+Подтверждённый долг безопасности: отслеживаемый `wp-config.common.php` содержит
+WordPress authentication salts/keys и cache salt как литералы. Не добавлять туда новые
+секреты. Эти значения считать попавшими в Git history; переносить их в server
+environment или отдельный ignored configuration, затем ротировать с пониманием, что
+смена WordPress salts завершит активные пользовательские сессии.
+
+Целевая модель: tracked `wp-config.php` и `wp-config.common.php` содержат только
+несекретную логику/defaults; локальные и production secrets приходят из environment
+или отдельных ignored файлов с минимальными правами. Не помещать production `.env`
+в публичный web-root. Если выбирать Dotenv, сначала добавить проверенный loader и
+хранить файл вне document root; одного создания `.env.prod` недостаточно.
+
+Не переносить секреты через plugin commit, manifest, HTML или обычный лог. После
+добавления новой интеграции отдельно настроить на production нужные constants/env/options
+и только потом активировать plugin.
+
+В этом репозитории WordPress не использует `.env.local`/`.env.prod`. Фактическая
+схема конфигурации такая:
+
+- `wp-config.php` — отслеживаемый Git загрузчик окружения;
+- `wp-config.common.php` — отслеживаемые общие несекретные настройки;
+- `wp-config.local.php` — локальные секреты и настройки, исключён Git;
+- `wp-config.production.php` — production-секреты и настройки, исключён Git;
+- `wp-config.staging.php` — аналогично для staging, если окружение создано.
+
+При наличии `wp-config.local.php` загрузчик автоматически выбирает `local`, иначе —
+`production`, если `WP_ENVIRONMENT_TYPE` не задан заранее. Поэтому секрет новой
+WordPress-интеграции добавляй отдельно в локальный и серверный environment-specific
+PHP-конфиг, а не в отслеживаемые `wp-config.php`/`wp-config.common.php`.
+
+Для `paint-nova-poshta-multishipping`:
+
+```php
+define('PNPM_NOVA_POSHTA_API_KEY', 'secret-from-this-environment');
+define('PNPM_ALLOW_REAL_TTN', false);
+```
+
+`PNPM_NOVA_POSHTA_API_KEY` также может поступать из настоящего server environment,
+доступного PHP через `getenv()`, но один лишь файл `.env` WordPress автоматически не
+загружает. `PNPM_ALLOW_REAL_TTN` текущая версия плагина читает только как PHP-константу;
+до отдельного production-разрешения оставляй `false` или не определяй вообще.
 
 Для Java/Docker-проекта используется отдельный deploy-скрипт и отдельные env-файлы;
 не смешивай его `.env.prod` с WordPress deploy этого skill.
+
+### Безопасный перенос `wp-config.production.php`
+
+Обычный `dcode` не переносит environment-specific конфиги. Если локальная
+административная копия `wp-config.production.php` обновлена, передавай её отдельной
+операцией через SSH, не добавляя файл в Git и не печатая его содержимое:
+
+```bash
+cd '/Users/admin/Local Sites/paint/app/public'
+php -l wp-config.production.php
+scp wp-config.production.php \
+  kreul:/var/www/virtuals/kreul.com.ua/wp-config.production.php.next
+ssh kreul
+```
+
+На сервере сначала проверь staged-файл, затем создай закрытую резервную копию и
+только после этого атомарно замени рабочий конфиг:
+
+```bash
+/opt/remi/php83/root/bin/php -l \
+  /var/www/virtuals/kreul.com.ua/wp-config.production.php.next
+
+backup="$HOME/wp-config.production.php.backup-$(date +%Y%m%d-%H%M%S)"
+cp -p /var/www/virtuals/kreul.com.ua/wp-config.production.php "$backup"
+chmod 600 "$backup"
+echo "Backup: $backup"
+
+chgrp apache /var/www/virtuals/kreul.com.ua/wp-config.production.php.next
+chmod 640 /var/www/virtuals/kreul.com.ua/wp-config.production.php.next
+mv -f /var/www/virtuals/kreul.com.ua/wp-config.production.php.next \
+  /var/www/virtuals/kreul.com.ua/wp-config.production.php
+```
+
+После замены проверяй только факт наличия constants и безопасное значение write-флага,
+не значение API-ключа. Для Nova Poshta:
+
+```bash
+/opt/remi/php83/root/bin/php /bin/wp-cli.phar \
+  --path=/var/www/virtuals/kreul.com.ua eval '
+echo defined("PNPM_NOVA_POSHTA_API_KEY") && PNPM_NOVA_POSHTA_API_KEY !== ""
+    ? "Nova Poshta key configured\n" : "Nova Poshta key missing\n";
+echo defined("PNPM_ALLOW_REAL_TTN") && PNPM_ALLOW_REAL_TTN === false
+    ? "Real TTN disabled\n" : "Check real TTN flag\n";
+'
+```
+
+Если проверка WordPress после замены не проходит, восстанови **конкретный** путь к
+backup, напечатанный в серверной сессии, и повтори PHP lint. Не используй wildcard
+для выбора резервной копии. Активация plugin является отдельным production-решением
+и выполняется только после успешной проверки constants и read-only API.
 
 ## Источники конфигурации
 
@@ -193,7 +302,7 @@ dcode
 скрипт всё ещё может выполнить `git pull`, создать каталоги и выполнить подготовочные
 проверки. Перед критическим изменением дополнительно проверяй diff и backup.
 
-Важный bootstrap-нюанс: текущий `~/deploy_safe.sh` обновляет сам себя только в конце запуска. Если в коммите изменён сам deploy-алгоритм или впервые добавлен manifest, первый запуск подтянет новую версию для следующего запуска; второй применит её:
+Важный bootstrap-нюанс: текущий `~/deploy_safe.sh` обновляет сам себя только в конце запуска. Это работает только после установки версии с self-update. Если сервер ещё использует более старый скрипт, сначала выполни bootstrap из раздела выше. После этого при изменении deploy-алгоритма первый запуск подтянет новую версию для следующего запуска, второй применит её:
 
 ```bash
 ~/deploy_safe.sh
@@ -294,6 +403,18 @@ ssh kreul '/opt/remi/php83/root/bin/php /bin/wp-cli.phar --path=/var/www/virtual
 - Очистку WP cache и OPcache выполняет deploy, но проверяй фактический UI.
 - Для cron/action scheduler проверь наличие события и первый безопасный run отдельно.
 - Для proxy/API проверь HTTP, JSON body, reqId и safe failure; зелёный HTTP сам по себе не доказывает бизнес-результат.
+- Для нового plugin не считай список файлов в FTP/SFTP-клиенте доказательством: он может
+  быть не обновлён. Строки `f+++++++++` в выводе `rsync` означают, что файл скопирован;
+  затем подтверди это на сервере и проверь activation отдельно:
+
+```bash
+ssh kreul 'stat -c "%s bytes | %y | %n" /var/www/virtuals/kreul.com.ua/wp-content/plugins/<slug>/<slug>.php'
+ssh kreul 'find /var/www/virtuals/kreul.com.ua/wp-content/plugins/<slug> -type f | wc -l'
+ssh kreul '/opt/remi/php83/root/bin/php /bin/wp-cli.phar --path=/var/www/virtuals/kreul.com.ua plugin status <slug>'
+```
+
+  Наличие файлов и activation — разные состояния: для `manual` plugin после успешной
+  копии остаётся inactive до явного `wp plugin activate`.
 
 ## Что делает deploy_safe.sh
 

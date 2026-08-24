@@ -65,10 +65,17 @@ Term meta `lavka_folio_warehouses` хранит упорядоченный сп�
 | `sync_product_state` | cursor/state полной синхронизации |
 | `folio_product_media_requests` | идемпотентность media-команд ФОЛИО |
 | `folio_product_snapshot_generation`, `folio_product_snapshot_item` | поколения и состояния проверки товаров ФОЛИО; Java создаёт эти таблицы без WordPress-префикса |
+| `folio_product_movement_fact` | активные строки движения за горизонт: класс движения, регулярный/разовый спрос, условия оплаты, сегмент клиента, контрагент и текущий поставщик |
 | `folio_product_*metrics*`, alerts | аналитика товара и предупреждения |
 | `folio_customer_balance_snapshot_*` | подготовленный снимок должников |
 
 Точный набор колонок узнавай через `SHOW CREATE TABLE`/`DESCRIBE` перед изменением. Таблица с названием `snapshot` является проекцией, а не источником ФОЛИО.
+
+`folio_product_movement_fact` заменяется Java атомарно для одного склада при
+успешной публикации поколения. WordPress читает готовые `movement_class`,
+`demand_mode`, `payment_terms`, `customer_segment` и флаги влияния; не
+пересчитывает их из `VID_DOC`. `current_supplier` — назначение карточки на дату
+snapshot, а `counterparty_*` — исторический контрагент документа.
 
 ## Состояния проверки учётных цен
 

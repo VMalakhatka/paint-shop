@@ -1,4 +1,4 @@
 interface:
   display_name: "Lavka Woo"
-  short_description: "Розробка й підтримка сайту Lavka Woo"
-  default_prompt: "Use $lavka-woo to safely analyze, update, or document this Lavka WooCommerce project."
+  short_description: "Разработка и поддержка Lavka/KREUL"
+  default_prompt: "Используй $lavka-woo для безопасного анализа, изменения, настройки или деплоя проекта Lavka/KREUL."
