@@ -1,0 +1,13 @@
+# slug|activation policy
+# manual: copy/update only; production activation requires an explicit operator action.
+# ensure-active: deploy_safe.sh verifies that the plugin is active after copying.
+lavka-price-sync|manual
+lavka-reports|manual
+lavka-sync|manual
+paint-core|manual
+paint-shop-ux|ensure-active
+role-price|manual
+lavka-total-sync|manual
+pc-order-import-export|manual
+lavka-product-media-upload|manual
+paint-nova-poshta-multishipping|manual

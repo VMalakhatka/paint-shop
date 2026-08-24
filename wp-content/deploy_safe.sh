@@ -7,6 +7,7 @@ REPO=~/deploy/paint-shop
 PLUG="$WP/wp-content/plugins"
 THEMES="$WP/wp-content/themes"
 THEMES_PLUG="$THEMES/plugins"
+PLUGIN_MANIFEST="$REPO/wp-content/deploy_plugins.list"
 LOG=~/deploy.log
 BACKUP_DIR=/mnt/backup/backups_kreul
 
@@ -118,6 +119,39 @@ grep -q '. ~/.bashrc' ~/.bash_profile || echo '. ~/.bashrc' >> ~/.bash_profile
 echo "== Preflight =="
 mkdir -p "$PLUG"
 
+if [ ! -f "$PLUGIN_MANIFEST" ]; then
+  echo "❌ Не найден manifest собственных плагинов: $PLUGIN_MANIFEST"
+  exit 1
+fi
+
+CUSTOM_PLUGINS=()
+ENSURE_ACTIVE_PLUGINS=()
+while IFS='|' read -r plugin_slug activation_policy; do
+  plugin_slug="${plugin_slug%%[[:space:]]*}"
+  activation_policy="${activation_policy%%[[:space:]]*}"
+  [ -z "$plugin_slug" ] && continue
+  [[ "$plugin_slug" == \#* ]] && continue
+  if [[ ! "$plugin_slug" =~ ^[a-z0-9][a-z0-9-]*$ ]]; then
+    echo "❌ Некорректный slug в $PLUGIN_MANIFEST: $plugin_slug"
+    exit 1
+  fi
+  if [ "$activation_policy" != "manual" ] && [ "$activation_policy" != "ensure-active" ]; then
+    echo "❌ Некорректная политика активации для $plugin_slug: $activation_policy"
+    exit 1
+  fi
+  if [ ! -d "$REPO/wp-content/plugins/$plugin_slug" ]; then
+    echo "❌ В manifest указан отсутствующий каталог: wp-content/plugins/$plugin_slug"
+    exit 1
+  fi
+  CUSTOM_PLUGINS+=( "$plugin_slug" )
+  [ "$activation_policy" = "ensure-active" ] && ENSURE_ACTIVE_PLUGINS+=( "$plugin_slug" )
+done < "$PLUGIN_MANIFEST"
+
+if [ "${#CUSTOM_PLUGINS[@]}" -eq 0 ]; then
+  echo "❌ Manifest собственных плагинов пуст: $PLUGIN_MANIFEST"
+  exit 1
+fi
+
 # 0) Быстрые бэкапы (не блокируют работу)
 TS=$(date +%Y%m%d-%H%M%S)
 
@@ -166,48 +200,62 @@ if [ -d "$THEMES_PLUG" ]; then
 fi
 
 mkdir -p "$WP/wp-content/mu-plugins" \
-         "$WP/wp-content/themes/generatepress-child" \
-         "$PLUG/lavka-sync" "$PLUG/lavka-sync/lavka-price-sync" \
-         "$PLUG/lavka-sync/lavka-reports" "$PLUG/paint-core" "$PLUG/paint-shop-ux" "$PLUG/role-price" "$PLUG/lavka-total-sync" "$PLUG/pc-order-import-export" "$PLUG/lavka-product-media-upload" "$PLUG/paint-nova-poshta-multishipping"
+         "$WP/wp-content/themes/generatepress-child"
+
+for plugin_slug in "${CUSTOM_PLUGINS[@]}"; do
+  mkdir -p "$PLUG/$plugin_slug"
+done
 
 # 2) Синхроним ТОЛЬКО наши каталоги
 rsync "${RSYNC[@]}" wp-content/mu-plugins/                 "$WP/wp-content/mu-plugins/"
 rsync "${RSYNC[@]}" wp-content/themes/generatepress-child/  "$WP/wp-content/themes/generatepress-child/"
-rsync "${RSYNC[@]}" wp-content/plugins/lavka-price-sync/          "$PLUG/lavka-price-sync/"
-rsync "${RSYNC[@]}" wp-content/plugins/lavka-reports/          "$PLUG/lavka-reports/"
-rsync "${RSYNC[@]}" wp-content/plugins/lavka-sync/          "$PLUG/lavka-sync/"
-rsync "${RSYNC[@]}" wp-content/plugins/paint-core/          "$PLUG/paint-core/"
-rsync "${RSYNC[@]}" wp-content/plugins/paint-shop-ux/       "$PLUG/paint-shop-ux/"
-rsync "${RSYNC[@]}" wp-content/plugins/role-price/          "$PLUG/role-price/"
-rsync "${RSYNC[@]}" wp-content/plugins/lavka-total-sync/          "$PLUG/lavka-total-sync/"
-rsync "${RSYNC[@]}" wp-content/plugins/pc-order-import-export/   "$PLUG/pc-order-import-export/"
-rsync "${RSYNC[@]}" wp-content/plugins/lavka-product-media-upload/ "$PLUG/lavka-product-media-upload/"
-rsync "${RSYNC[@]}" wp-content/plugins/paint-nova-poshta-multishipping/ "$PLUG/paint-nova-poshta-multishipping/"
+for plugin_slug in "${CUSTOM_PLUGINS[@]}"; do
+  echo "== Plugin: $plugin_slug =="
+  rsync "${RSYNC[@]}" "$REPO/wp-content/plugins/$plugin_slug/" "$PLUG/$plugin_slug/"
+done
 
 # Сброс OPcache (если включён)
 ( /opt/remi/php83/root/bin/php -r 'if(function_exists("opcache_reset")){opcache_reset();echo "✓ OPcache reset\n";}else{echo "ℹ OPcache not available\n";}' ) || true
 
-# На всякий случай активируем наш UX плагин
-/opt/remi/php83/root/bin/php /bin/wp-cli.phar --path="$WP" plugin activate paint-shop-ux || true
+# Автоматически активируем только плагины с политикой ensure-active в manifest.
+# Новые и финансовые интеграции должны оставаться manual до явного решения оператора.
+if [ "${DRY_RUN:-0}" != "1" ]; then
+  for plugin_slug in "${ENSURE_ACTIVE_PLUGINS[@]}"; do
+    /opt/remi/php83/root/bin/php /bin/wp-cli.phar --path="$WP" plugin activate "$plugin_slug" || true
+  done
+fi
 
 # 3) Права (мягко; ошибки игнорируем)
-for p in \
-  "$WP/wp-content/mu-plugins" \
-  "$WP/wp-content/themes/generatepress-child" \
-  "$PLUG/lavka-price-sync" \
-  "$PLUG/lavka-reports" \
-  "$PLUG/lavka-sync" \
-  "$PLUG/paint-core" \
-  "$PLUG/paint-shop-ux" \
-  "$PLUG/role-price" \
-  "$PLUG/rlavka-total-sync" \
-  "$PLUG/pc-order-import-export" \
-  "$PLUG/lavka-product-media-upload" \
-  "$PLUG/paint-nova-poshta-multishipping"
+DEPLOY_PATHS=(
+  "$WP/wp-content/mu-plugins"
+  "$WP/wp-content/themes/generatepress-child"
+)
+for plugin_slug in "${CUSTOM_PLUGINS[@]}"; do
+  DEPLOY_PATHS+=( "$PLUG/$plugin_slug" )
+done
+
+for p in "${DEPLOY_PATHS[@]}"
 do
   find "$p" -type d -exec chmod 755 {} \; 2>/dev/null || true
   find "$p" -type f -exec chmod 644 {} \; 2>/dev/null || true
 done
+
+echo "== Статус собственных плагинов =="
+ACTIVE_PLUGIN_LIST="$(/opt/remi/php83/root/bin/php /bin/wp-cli.phar --path="$WP" plugin list --status=active --field=name 2>/dev/null || true)"
+while IFS='|' read -r plugin_slug activation_policy; do
+  plugin_slug="${plugin_slug%%[[:space:]]*}"
+  activation_policy="${activation_policy%%[[:space:]]*}"
+  [ -z "$plugin_slug" ] && continue
+  [[ "$plugin_slug" == \#* ]] && continue
+  if grep -Fqx "$plugin_slug" <<< "$ACTIVE_PLUGIN_LIST"; then
+    echo "✓ $plugin_slug: файлы обновлены, плагин активен"
+  elif [ "$activation_policy" = "manual" ]; then
+    echo "⚠ $plugin_slug: файлы обновлены, плагин НЕ активен (manual)"
+    echo "  Для активации: wp --path=$WP plugin activate $plugin_slug"
+  else
+    echo "❌ $plugin_slug: политика ensure-active, но плагин не активен"
+  fi
+done < "$PLUGIN_MANIFEST"
 
 # 4) Post-sync проверка записи в plugins
 TEST_FILE="$PLUG/deploy-test.txt"

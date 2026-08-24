@@ -26,6 +26,8 @@
 - `docs/WAYFORPAY_TEST_ACCESS.md` — тестовый доступ к WayForPay.
 - `docs/ROADMAP_*.md` — планы, не доказательство реализованного поведения.
 - `docs/VARIABLE_PRODUCTS_NEW_CHAT_BRIEF.md` — отдельное проектирование вариативных товаров.
+- `wp-content/deploy_safe.sh` и `wp-content/deploy_plugins.list` — production deploy собственных каталогов и политика активации.
+- `wp-content/plugins/<slug>/README.md` — plugin-specific конфигурация и незавершённые этапы, если файл существует.
 
 ## Документация Java/Folio
 
