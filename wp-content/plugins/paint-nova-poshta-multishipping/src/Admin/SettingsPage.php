@@ -4,6 +4,7 @@ namespace Paint\NovaPoshta\Admin;
 
 use Paint\NovaPoshta\Infrastructure\ApiClient;
 use Paint\NovaPoshta\Infrastructure\SenderDirectory;
+use Paint\NovaPoshta\Infrastructure\WarehouseDirectory;
 
 defined('ABSPATH') || exit;
 
@@ -11,7 +12,8 @@ final class SettingsPage
 {
     public function __construct(
         private readonly ApiClient $api,
-        private readonly SenderDirectory $senders
+        private readonly SenderDirectory $senders,
+        private readonly WarehouseDirectory $warehouses
     ) {
     }
 
@@ -21,6 +23,7 @@ final class SettingsPage
         add_action('admin_post_pnpm_save_settings', [$this, 'save']);
         add_action('wp_ajax_pnpm_test_api', [$this, 'testApi']);
         add_action('wp_ajax_pnpm_load_senders', [$this, 'loadSenders']);
+        add_action('wp_ajax_pnpm_search_handover_points', [$this, 'searchHandoverPoints']);
         add_action('admin_enqueue_scripts', [$this, 'assets']);
     }
 
@@ -53,6 +56,12 @@ final class SettingsPage
             'chooseSender' => __('Choose a business sender', 'paint-nova-poshta-multishipping'),
             'chooseAddress' => __('Choose a sender address', 'paint-nova-poshta-multishipping'),
             'chooseContact' => __('Choose a contact person', 'paint-nova-poshta-multishipping'),
+            'chooseHandoverPoint' => __('Choose the Nova Poshta handover point', 'paint-nova-poshta-multishipping'),
+            'handoverQueryRequired' => __('Enter a branch number, parcel locker number, street, or landmark.', 'paint-nova-poshta-multishipping'),
+            'loadingHandoverPoints' => __('Searching Nova Poshta handover points...', 'paint-nova-poshta-multishipping'),
+            'handoverPointsFailed' => __('Nova Poshta handover points could not be loaded.', 'paint-nova-poshta-multishipping'),
+            'handoverPointsEmpty' => __('No available handover points were found.', 'paint-nova-poshta-multishipping'),
+            'handoverNotRequired' => __('Not required: Nova Poshta courier collects parcels from the registered address.', 'paint-nova-poshta-multishipping'),
             'mappingReady' => __('Ready', 'paint-nova-poshta-multishipping'),
             'mappingIncomplete' => __('Incomplete', 'paint-nova-poshta-multishipping'),
             'mappingDisabled' => __('Disabled', 'paint-nova-poshta-multishipping'),
@@ -125,7 +134,7 @@ final class SettingsPage
 
                 <section class="pnpm-section">
                     <h2><?php esc_html_e('Warehouse senders', 'paint-nova-poshta-multishipping'); ?></h2>
-                    <p><?php esc_html_e('Map each WooCommerce Stock Location to a sender branch or sender address from the same Nova Poshta business account.', 'paint-nova-poshta-multishipping'); ?></p>
+                    <p><?php esc_html_e('Map each WooCommerce Stock Location to a registered sender address. For self-drop-off, also choose the exact Nova Poshta branch or parcel locker where parcels will be handed over.', 'paint-nova-poshta-multishipping'); ?></p>
                     <div class="pnpm-table-wrap">
                         <table class="widefat striped pnpm-mappings">
                             <thead><tr>
@@ -133,7 +142,8 @@ final class SettingsPage
                                 <th><?php esc_html_e('Enabled', 'paint-nova-poshta-multishipping'); ?></th>
                                 <th><?php esc_html_e('Sender type', 'paint-nova-poshta-multishipping'); ?></th>
                                 <th><?php esc_html_e('Business sender', 'paint-nova-poshta-multishipping'); ?></th>
-                                <th><?php esc_html_e('Sender address or branch', 'paint-nova-poshta-multishipping'); ?></th>
+                                <th><?php esc_html_e('Registered sender address', 'paint-nova-poshta-multishipping'); ?></th>
+                                <th><?php esc_html_e('Nova Poshta handover point', 'paint-nova-poshta-multishipping'); ?></th>
                                 <th><?php esc_html_e('Contact person', 'paint-nova-poshta-multishipping'); ?></th>
                                 <th><?php esc_html_e('Phone', 'paint-nova-poshta-multishipping'); ?></th>
                                 <th><?php esc_html_e('Customer label', 'paint-nova-poshta-multishipping'); ?></th>
@@ -144,8 +154,18 @@ final class SettingsPage
                                 $id = (int) $location->term_id;
                                 $mapping = is_array($mappings[$id] ?? null) ? $mappings[$id] : [];
                                 $prefix = 'mapping[' . $id . ']';
+                                $sender_type = in_array(($mapping['sender_type'] ?? ''), ['warehouse', 'doors'], true)
+                                    ? $mapping['sender_type'] : 'warehouse';
                                 $required = ['counterparty_ref', 'city_ref', 'sender_address_ref', 'contact_ref', 'phone', 'customer_label'];
+                                if ($sender_type === 'warehouse') {
+                                    $required[] = 'handover_warehouse_ref';
+                                }
                                 $enabled = ($mapping['enabled'] ?? 'no') === 'yes';
+                                $handover_ref = trim((string) ($mapping['handover_warehouse_ref'] ?? ''));
+                                $handover_label = trim((string) ($mapping['handover_warehouse_label'] ?? ''));
+                                if ($handover_label === '') {
+                                    $handover_label = __('Search and choose a handover point', 'paint-nova-poshta-multishipping');
+                                }
                                 $ready = false;
                                 if ($enabled) {
                                     $ready = true;
@@ -161,9 +181,9 @@ final class SettingsPage
                                     <td><strong><?php echo esc_html($location->name); ?></strong><br><code><?php echo esc_html((string) $id); ?></code></td>
                                     <td><input type="checkbox" class="pnpm-enabled" name="<?php echo esc_attr($prefix); ?>[enabled]" value="yes" <?php checked($mapping['enabled'] ?? 'no', 'yes'); ?>></td>
                                     <td>
-                                        <select name="<?php echo esc_attr($prefix); ?>[sender_type]">
-                                            <option value="warehouse" <?php selected($mapping['sender_type'] ?? '', 'warehouse'); ?>><?php esc_html_e('Branch / parcel locker', 'paint-nova-poshta-multishipping'); ?></option>
-                                            <option value="doors" <?php selected($mapping['sender_type'] ?? '', 'doors'); ?>><?php esc_html_e('Sender address', 'paint-nova-poshta-multishipping'); ?></option>
+                                        <select class="pnpm-sender-type" name="<?php echo esc_attr($prefix); ?>[sender_type]">
+                                            <option value="warehouse" <?php selected($sender_type, 'warehouse'); ?>><?php esc_html_e('Drop off at a branch / parcel locker', 'paint-nova-poshta-multishipping'); ?></option>
+                                            <option value="doors" <?php selected($sender_type, 'doors'); ?>><?php esc_html_e('Courier pickup from sender address', 'paint-nova-poshta-multishipping'); ?></option>
                                         </select>
                                     </td>
                                     <td>
@@ -179,6 +199,27 @@ final class SettingsPage
                                         <small class="pnpm-city-label"></small>
                                         <?php $this->technicalRefInput($prefix, 'sender_address_ref', $mapping); ?>
                                         <?php $this->technicalRefInput($prefix, 'city_ref', $mapping); ?>
+                                    </td>
+                                    <td class="pnpm-handover-cell">
+                                        <div class="pnpm-handover-controls">
+                                            <input type="search" class="pnpm-handover-query" placeholder="<?php echo esc_attr__('Branch number or address', 'paint-nova-poshta-multishipping'); ?>">
+                                            <button type="button" class="button pnpm-search-handover" title="<?php echo esc_attr__('Search handover points', 'paint-nova-poshta-multishipping'); ?>">
+                                                <?php esc_html_e('Search', 'paint-nova-poshta-multishipping'); ?>
+                                            </button>
+                                        </div>
+                                        <select class="pnpm-handover-select" data-current="<?php echo esc_attr($handover_ref); ?>">
+                                            <option value="<?php echo esc_attr($handover_ref); ?>">
+                                                <?php echo esc_html($handover_label); ?>
+                                            </option>
+                                        </select>
+                                        <small class="pnpm-handover-help"></small>
+                                        <?php $this->technicalRefInput($prefix, 'handover_warehouse_ref', $mapping); ?>
+                                        <input
+                                            type="hidden"
+                                            class="pnpm-handover-warehouse-label"
+                                            name="<?php echo esc_attr($prefix); ?>[handover_warehouse_label]"
+                                            value="<?php echo esc_attr((string) ($mapping['handover_warehouse_label'] ?? '')); ?>"
+                                        >
                                     </td>
                                     <td>
                                         <select class="pnpm-contact-select" data-current="<?php echo esc_attr((string) ($mapping['contact_ref'] ?? '')); ?>">
@@ -225,6 +266,8 @@ final class SettingsPage
                 'counterparty_ref' => sanitize_text_field($mapping['counterparty_ref'] ?? ''),
                 'city_ref' => sanitize_text_field($mapping['city_ref'] ?? ''),
                 'sender_address_ref' => sanitize_text_field($mapping['sender_address_ref'] ?? ''),
+                'handover_warehouse_ref' => sanitize_text_field($mapping['handover_warehouse_ref'] ?? ''),
+                'handover_warehouse_label' => sanitize_text_field($mapping['handover_warehouse_label'] ?? ''),
                 'contact_ref' => sanitize_text_field($mapping['contact_ref'] ?? ''),
                 'phone' => preg_replace('/[^0-9+]/', '', (string) ($mapping['phone'] ?? '')),
                 'customer_label' => sanitize_text_field($mapping['customer_label'] ?? ''),
@@ -280,6 +323,30 @@ final class SettingsPage
                 count($result['counterparties'])
             ),
             'directory' => $result,
+        ]);
+    }
+
+    public function searchHandoverPoints(): void
+    {
+        check_ajax_referer('pnpm_test_api', 'nonce');
+        if (!current_user_can('manage_pnpm_shipments')) {
+            wp_send_json_error(['message' => __('Permission denied.', 'paint-nova-poshta-multishipping')], 403);
+        }
+
+        $city_ref = sanitize_text_field(wp_unslash((string) ($_POST['cityRef'] ?? '')));
+        $query = sanitize_text_field(wp_unslash((string) ($_POST['query'] ?? '')));
+        $result = $this->warehouses->search($city_ref, $query);
+        if (is_wp_error($result)) {
+            wp_send_json_error(['message' => $result->get_error_message()], 400);
+        }
+
+        wp_send_json_success([
+            'points' => $result,
+            'message' => sprintf(
+                /* translators: %d: handover point count. */
+                _n('%d handover point found.', '%d handover points found.', count($result), 'paint-nova-poshta-multishipping'),
+                count($result)
+            ),
         ]);
     }
 

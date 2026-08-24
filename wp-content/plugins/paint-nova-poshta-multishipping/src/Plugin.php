@@ -9,6 +9,7 @@ use Paint\NovaPoshta\Domain\TtnNormalizer;
 use Paint\NovaPoshta\Infrastructure\ApiClient;
 use Paint\NovaPoshta\Infrastructure\SenderDirectory;
 use Paint\NovaPoshta\Infrastructure\ShipmentRepository;
+use Paint\NovaPoshta\Infrastructure\WarehouseDirectory;
 
 defined('ABSPATH') || exit;
 
@@ -25,7 +26,11 @@ final class Plugin
     {
         $repository = new ShipmentRepository();
         $api = new ApiClient();
-        $settings = new SettingsPage($api, new SenderDirectory($api));
+        $settings = new SettingsPage(
+            $api,
+            new SenderDirectory($api),
+            new WarehouseDirectory($api)
+        );
         $settings->hooks();
 
         $order_panel = new OrderPanel(

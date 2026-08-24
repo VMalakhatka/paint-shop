@@ -33,21 +33,45 @@
         });
 
         $('.pnpm-mappings')
+            .on('change', '.pnpm-sender-type', function () {
+                var $row = $(this).closest('.pnpm-mapping-row');
+                toggleHandoverControls($row);
+                updateMappingStatus($row);
+            })
             .on('change', '.pnpm-counterparty-select', function () {
                 var $row = $(this).closest('.pnpm-mapping-row');
                 var ref = String($(this).val() || '');
                 $row.find('.pnpm-counterparty-ref').val(ref);
                 populateSenderDetails($row, ref, '', '');
+                clearHandoverPoint($row);
                 updateMappingStatus($row);
             })
             .on('change', '.pnpm-address-select', function () {
                 var $row = $(this).closest('.pnpm-mapping-row');
                 applyAddress($row, String($(this).val() || ''));
+                clearHandoverPoint($row);
                 updateMappingStatus($row);
             })
             .on('change', '.pnpm-contact-select', function () {
                 var $row = $(this).closest('.pnpm-mapping-row');
                 applyContact($row, String($(this).val() || ''), true);
+                updateMappingStatus($row);
+            })
+            .on('click', '.pnpm-search-handover', function () {
+                searchHandoverPoints($(this).closest('.pnpm-mapping-row'));
+            })
+            .on('keydown', '.pnpm-handover-query', function (event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    searchHandoverPoints($(this).closest('.pnpm-mapping-row'));
+                }
+            })
+            .on('change', '.pnpm-handover-select', function () {
+                var $row = $(this).closest('.pnpm-mapping-row');
+                var ref = String($(this).val() || '');
+                var label = ref ? String($(this).find('option:selected').text() || '') : '';
+                $row.find('.pnpm-handover-warehouse-ref').val(ref);
+                $row.find('.pnpm-handover-warehouse-label').val(label);
                 updateMappingStatus($row);
             })
             .on('change input', '.pnpm-enabled, .pnpm-ref-input, .pnpm-phone, .pnpm-customer-label', function () {
@@ -101,6 +125,8 @@
                     }
                 );
                 populateSenderDetails($row, currentCounterparty, currentAddress, currentContact);
+                restoreHandoverPoint($row);
+                toggleHandoverControls($row);
                 updateMappingStatus($row);
             });
         }
@@ -163,6 +189,90 @@
             }
         }
 
+        function searchHandoverPoints($row) {
+            var senderType = String($row.find('.pnpm-sender-type').val() || 'warehouse');
+            if (senderType !== 'warehouse') {
+                return;
+            }
+
+            var cityRef = $.trim(String($row.find('.pnpm-city-ref').val() || ''));
+            var query = $.trim(String($row.find('.pnpm-handover-query').val() || ''));
+            var $button = $row.find('.pnpm-search-handover');
+            var $help = $row.find('.pnpm-handover-help');
+            if (!cityRef || !query) {
+                $help.removeClass('pnpm-good').addClass('pnpm-bad').text(pnpmAdmin.handoverQueryRequired);
+                return;
+            }
+
+            $button.prop('disabled', true);
+            $help.removeClass('pnpm-good pnpm-bad').text(pnpmAdmin.loadingHandoverPoints);
+            $.post(pnpmAdmin.ajaxUrl, {
+                action: 'pnpm_search_handover_points',
+                nonce: pnpmAdmin.nonce,
+                cityRef: cityRef,
+                query: query
+            }).done(function (response) {
+                if (!response || !response.success || !response.data || !Array.isArray(response.data.points)) {
+                    showFailure($help, response, pnpmAdmin.handoverPointsFailed);
+                    return;
+                }
+
+                var points = response.data.points;
+                var currentRef = String($row.find('.pnpm-handover-warehouse-ref').val() || '');
+                var currentLabel = String($row.find('.pnpm-handover-warehouse-label').val() || '');
+                if (currentRef && currentLabel && !findByRef(points, currentRef)) {
+                    points.unshift({ref: currentRef, label: currentLabel});
+                }
+                fillSelect(
+                    $row.find('.pnpm-handover-select'),
+                    pnpmAdmin.chooseHandoverPoint,
+                    points,
+                    currentRef,
+                    function (item) {
+                        return item.label;
+                    }
+                );
+                $help.toggleClass('pnpm-good', points.length > 0)
+                    .toggleClass('pnpm-bad', points.length === 0)
+                    .text(points.length > 0 ? response.data.message : pnpmAdmin.handoverPointsEmpty);
+            }).fail(function (xhr) {
+                showFailure($help, xhr.responseJSON, pnpmAdmin.handoverPointsFailed);
+            }).always(function () {
+                $button.prop('disabled', false);
+            });
+        }
+
+        function clearHandoverPoint($row) {
+            $row.find('.pnpm-handover-warehouse-ref, .pnpm-handover-warehouse-label').val('');
+            $row.find('.pnpm-handover-select').empty().append($('<option>', {
+                value: '',
+                text: pnpmAdmin.chooseHandoverPoint
+            }));
+            $row.find('.pnpm-handover-help').removeClass('pnpm-good pnpm-bad').text('');
+        }
+
+        function restoreHandoverPoint($row) {
+            var ref = String($row.find('.pnpm-handover-warehouse-ref').val() || '');
+            var label = String($row.find('.pnpm-handover-warehouse-label').val() || '');
+            var $select = $row.find('.pnpm-handover-select');
+            $select.empty().append($('<option>', {
+                value: ref,
+                text: ref && label ? label : pnpmAdmin.chooseHandoverPoint
+            })).val(ref);
+        }
+
+        function toggleHandoverControls($row) {
+            var required = String($row.find('.pnpm-sender-type').val() || 'warehouse') === 'warehouse';
+            $row.find('.pnpm-handover-query, .pnpm-search-handover, .pnpm-handover-select')
+                .prop('disabled', !required);
+            var $help = $row.find('.pnpm-handover-help');
+            if (!required) {
+                $help.removeClass('pnpm-good pnpm-bad').text(pnpmAdmin.handoverNotRequired);
+            } else if ($help.text() === pnpmAdmin.handoverNotRequired) {
+                $help.text('');
+            }
+        }
+
         function currentCounterparty($row) {
             var ref = String($row.find('.pnpm-counterparty-ref').val() || '');
             return findByRef(
@@ -209,6 +319,9 @@
                 '.pnpm-phone',
                 '.pnpm-customer-label'
             ];
+            if (String($row.find('.pnpm-sender-type').val() || 'warehouse') === 'warehouse') {
+                required.push('.pnpm-handover-warehouse-ref');
+            }
             var ready = enabled && required.every(function (selector) {
                 return $.trim(String($row.find(selector).val() || '')) !== '';
             });
@@ -228,6 +341,11 @@
         }
 
         if ($sendersButton.length) {
+            $('.pnpm-mapping-row').each(function () {
+                restoreHandoverPoint($(this));
+                toggleHandoverControls($(this));
+                updateMappingStatus($(this));
+            });
             loadSenders(false);
         }
     });

@@ -14,13 +14,35 @@
 }
 
 .pnpm-mappings {
-    min-width: 1420px;
+    min-width: 1780px;
 }
 
 .pnpm-mappings select,
-.pnpm-mappings input[type="text"] {
+.pnpm-mappings input[type="text"],
+.pnpm-mappings input[type="search"] {
     width: 100%;
     min-width: 170px;
+}
+
+.pnpm-handover-cell {
+    min-width: 310px;
+}
+
+.pnpm-handover-controls {
+    display: grid;
+    grid-template-columns: minmax(170px, 1fr) auto;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+.pnpm-handover-controls .button {
+    min-height: 30px;
+}
+
+.pnpm-handover-help {
+    display: block;
+    margin-top: 5px;
+    color: #50575e;
 }
 
 .pnpm-mappings th,
