@@ -72,6 +72,8 @@ wp-content/plugins/*
 !wp-content/plugins/lavka-total-sync/**
 !wp-content/plugins/lavka-product-media-upload/
 !wp-content/plugins/lavka-product-media-upload/**
+!wp-content/plugins/paint-nova-poshta-multishipping/
+!wp-content/plugins/paint-nova-poshta-multishipping/**
 
 
 # === MU-plugins: либо отслеживаем все, либо только свои ===

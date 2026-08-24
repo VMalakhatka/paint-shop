@@ -18,6 +18,7 @@ description: "Разрабатывает, диагностирует и сопр
    - синхронизации, отчёты, медиа и регламентные действия: [operations.md](references/operations.md);
    - пользователи, цены, заказы, ФОЛИО и оплаты: [orders-roles-payments.md](references/orders-roles-payments.md).
 4. Для таблиц, процедур или записи в ФОЛИО дополнительно используй `$work-with-folio-mssql` и начни с его `references/source-map.md`.
+5. Для кабинета, API и операторских действий Checkbox используй `$checkbox-ua`; для цепочки WayForPay → Checkbox дополнительно используй `$checkbox-wayforpay-woo`.
 
 ## Непереговорные правила
 

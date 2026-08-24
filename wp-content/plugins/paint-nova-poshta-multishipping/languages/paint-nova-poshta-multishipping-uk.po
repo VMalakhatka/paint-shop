@@ -1,0 +1,139 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Paint Nova Poshta Multishipping 0.1.0\n"
+"Language: uk\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+msgid "Nova Poshta multishipping"
+msgstr "Багатоскладська Нова пошта"
+
+msgid "Nova Poshta shipments"
+msgstr "Відправлення Нової пошти"
+
+msgid "Nova Poshta settings saved."
+msgstr "Налаштування Нової пошти збережено."
+
+msgid "Real shipment creation is not implemented and API write operations are locked."
+msgstr "Створення реальних ТТН ще не реалізовано, а операції запису API заблоковано."
+
+msgid "API connection"
+msgstr "Підключення API"
+
+msgid "The API key is read only from PNPM_NOVA_POSHTA_API_KEY in wp-config.php or the server environment."
+msgstr "Ключ API читається лише з PNPM_NOVA_POSHTA_API_KEY у wp-config.php або середовищі сервера."
+
+msgid "API endpoint"
+msgstr "Адреса API"
+
+msgid "API key"
+msgstr "Ключ API"
+
+msgid "Not configured"
+msgstr "Не налаштовано"
+
+msgid "Write mode"
+msgstr "Режим запису"
+
+msgid "Locked"
+msgstr "Заблоковано"
+
+msgid "Check read-only API connection"
+msgstr "Перевірити API без запису"
+
+msgid "Checking connection..."
+msgstr "Перевіряємо підключення..."
+
+msgid "Connection check failed."
+msgstr "Не вдалося перевірити підключення."
+
+msgid "Warehouse senders"
+msgstr "Відправники за складами"
+
+msgid "Map each WooCommerce Stock Location to a sender branch or sender address from the same Nova Poshta business account."
+msgstr "Зіставте кожну Stock Location WooCommerce з відділенням або адресою відправника одного бізнес-акаунта Нової пошти."
+
+msgid "Stock Location"
+msgstr "Склад сайту"
+
+msgid "Enabled"
+msgstr "Увімкнено"
+
+msgid "Sender type"
+msgstr "Тип відправника"
+
+msgid "City Ref"
+msgstr "Ref міста"
+
+msgid "Sender address/branch Ref"
+msgstr "Ref адреси або відділення"
+
+msgid "Contact Ref"
+msgstr "Ref контактної особи"
+
+msgid "Phone"
+msgstr "Телефон"
+
+msgid "Customer label"
+msgstr "Назва для покупця"
+
+msgid "Branch / parcel locker"
+msgstr "Відділення / поштомат"
+
+msgid "Sender address"
+msgstr "Адреса відправника"
+
+msgid "Save Nova Poshta settings"
+msgstr "Зберегти налаштування Нової пошти"
+
+msgid "Read-only API connection is working."
+msgstr "Підключення API без запису працює."
+
+msgid "Safety mode:"
+msgstr "Безпечний режим:"
+
+msgid "diagnostics only; no real Nova Poshta shipment can be created."
+msgstr "лише діагностика; реальне відправлення Нової пошти створити неможливо."
+
+msgid "Actual warehouse allocation"
+msgstr "Фактичний розподіл за складами"
+
+msgid "No complete warehouse allocation was found."
+msgstr "Повного розподілу товарів за складами не знайдено."
+
+msgid "Shipment from %1$s: %2$s item units"
+msgstr "Відправлення зі складу %1$s: %2$s одиниць товару"
+
+msgid "Stored shipments"
+msgstr "Збережені відправлення"
+
+msgid "No shipment records have been created yet."
+msgstr "Записів відправлень ще немає."
+
+msgid "External customer TTN submission, private labels and manager approval will be enabled after the private-file and tracking layers are completed."
+msgstr "Передавання клієнтської ТТН, приватні маркировки та підтвердження менеджера будуть доступні після завершення приватного сховища й трекінгу."
+
+msgid "Paint Nova Poshta Multishipping requires WooCommerce."
+msgstr "Paint Nova Poshta Multishipping потребує WooCommerce."
+
+msgid "Permission denied."
+msgstr "Недостатньо прав."
+
+msgid "You are not allowed to manage Nova Poshta shipments."
+msgstr "У вас немає прав для керування відправленнями Нової пошти."
+
+msgid "Nova Poshta API key is not configured."
+msgstr "Ключ API Нової пошти не налаштовано."
+
+msgid "Nova Poshta API is unavailable."
+msgstr "API Нової пошти недоступне."
+
+msgid "Nova Poshta API returned an invalid response."
+msgstr "API Нової пошти повернуло некоректну відповідь."
+
+msgid "Nova Poshta rejected the request."
+msgstr "Нова пошта відхилила запит."
+
+msgid "Real Nova Poshta write operations are disabled."
+msgstr "Реальні операції запису в Нову пошту вимкнено."

@@ -1,0 +1,48 @@
+.pnpm-admin {
+    max-width: 1500px;
+}
+
+.pnpm-section {
+    margin: 20px 0;
+    padding: 18px;
+    border: 1px solid #c3c4c7;
+    background: #fff;
+}
+
+.pnpm-table-wrap {
+    overflow-x: auto;
+}
+
+.pnpm-mappings input[type="text"] {
+    width: 190px;
+}
+
+#pnpm-test-api-result {
+    display: inline-block;
+    margin-left: 10px;
+    font-weight: 600;
+}
+
+.pnpm-good {
+    color: #06752d;
+}
+
+.pnpm-bad {
+    color: #b32d2e;
+}
+
+.pnpm-order-panel details {
+    margin: 8px 0;
+    padding: 8px;
+    border-left: 3px solid #2271b1;
+    background: #f6f7f7;
+}
+
+.pnpm-order-panel summary {
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.pnpm-order-panel ul {
+    margin-left: 20px;
+}

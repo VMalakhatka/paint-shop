@@ -1,0 +1,4 @@
+interface:
+  display_name: "Checkbox.ua"
+  short_description: "Управление кабинетом и интеграциями Checkbox"
+  default_prompt: "Используй $checkbox-ua для безопасной работы с кабинетом или API Checkbox."
