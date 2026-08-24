@@ -2,6 +2,8 @@
 
 namespace Paint\NovaPoshta;
 
+use Paint\NovaPoshta\Domain\DeliveryPolicy;
+
 defined('ABSPATH') || exit;
 
 final class Activator
@@ -100,6 +102,7 @@ final class Activator
             'writes_enabled' => 'no',
             'external_ttn_enabled' => 'yes',
         ], '', false);
+        add_option(DeliveryPolicy::OPTION_NAME, DeliveryPolicy::defaults(), '', false);
 
         foreach (['administrator', 'shop_manager'] as $role_name) {
             $role = get_role($role_name);
@@ -109,4 +112,3 @@ final class Activator
         }
     }
 }
-

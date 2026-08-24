@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Paint Nova Poshta Multishipping 0.3.0\n"
+"Project-Id-Version: Paint Nova Poshta Multishipping 0.4.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/paint-nova-poshta-"
 "multishipping\n"
-"POT-Creation-Date: 2026-08-24T11:43:05+00:00\n"
+"POT-Creation-Date: 2026-08-24T16:36:13+00:00\n"
 "PO-Revision-Date: 2026-08-24 14:00+0200\n"
 "Last-Translator: Paint / Lavka\n"
 "Language-Team: Ukrainian\n"
@@ -22,7 +22,8 @@ msgstr "Багатоскладська Нова пошта"
 #. Description of the plugin
 #: paint-nova-poshta-multishipping.php
 msgid "Direct multi-warehouse Nova Poshta integration for WooCommerce orders."
-msgstr "Пряма багатоскладська інтеграція Нової пошти для замовлень WooCommerce."
+msgstr ""
+"Пряма багатоскладська інтеграція Нової пошти для замовлень WooCommerce."
 
 #. Author of the plugin
 #: paint-nova-poshta-multishipping.php
@@ -33,7 +34,7 @@ msgstr "Paint / Lavka"
 msgid "Paint Nova Poshta Multishipping requires WooCommerce."
 msgstr "Paint Nova Poshta Multishipping потребує WooCommerce."
 
-#: src/Admin/OrderPanel.php:46 src/Admin/SettingsPage.php:35
+#: src/Admin/OrderPanel.php:46 src/Admin/SettingsPage.php:36
 msgid "Nova Poshta shipments"
 msgstr "Відправлення Нової пошти"
 
@@ -75,101 +76,101 @@ msgstr ""
 "Передавання клієнтської ТТН, приватні маркировки та підтвердження менеджера "
 "будуть доступні після завершення приватного сховища й трекінгу."
 
-#: src/Admin/SettingsPage.php:34 src/Admin/SettingsPage.php:84
+#: src/Admin/SettingsPage.php:35 src/Admin/SettingsPage.php:87
 msgid "Nova Poshta multishipping"
 msgstr "Багатоскладська Нова пошта"
 
-#: src/Admin/SettingsPage.php:52
+#: src/Admin/SettingsPage.php:53
 msgid "Checking connection..."
 msgstr "Перевіряємо підключення..."
 
-#: src/Admin/SettingsPage.php:53
+#: src/Admin/SettingsPage.php:54
 msgid "Connection check failed."
 msgstr "Не вдалося перевірити підключення."
 
-#: src/Admin/SettingsPage.php:54
+#: src/Admin/SettingsPage.php:55
 msgid "Loading sender profile..."
 msgstr "Завантажуємо профіль відправника..."
 
-#: src/Admin/SettingsPage.php:55
+#: src/Admin/SettingsPage.php:56
 msgid "Sender profile could not be loaded."
 msgstr "Не вдалося завантажити профіль відправника."
 
-#: src/Admin/SettingsPage.php:56
+#: src/Admin/SettingsPage.php:57
 msgid "Choose a business sender"
 msgstr "Оберіть бізнес-відправника"
 
-#: src/Admin/SettingsPage.php:57
+#: src/Admin/SettingsPage.php:58
 msgid "Choose a sender address"
 msgstr "Оберіть адресу відправника"
 
-#: src/Admin/SettingsPage.php:58
+#: src/Admin/SettingsPage.php:59
 msgid "Choose a contact person"
 msgstr "Оберіть контактну особу"
 
-#: src/Admin/SettingsPage.php:59
+#: src/Admin/SettingsPage.php:60
 msgid "Choose the Nova Poshta handover point"
 msgstr "Оберіть точку передавання Новій пошті"
 
-#: src/Admin/SettingsPage.php:60
+#: src/Admin/SettingsPage.php:61
 msgid "Enter a branch number, parcel locker number, street, or landmark."
 msgstr "Введіть номер відділення, номер поштомата, вулицю або орієнтир."
 
-#: src/Admin/SettingsPage.php:61
+#: src/Admin/SettingsPage.php:62
 msgid "Searching Nova Poshta handover points..."
 msgstr "Шукаємо точки передавання Новій пошті..."
 
-#: src/Admin/SettingsPage.php:62
+#: src/Admin/SettingsPage.php:63
 msgid "Nova Poshta handover points could not be loaded."
 msgstr "Не вдалося завантажити точки передавання Новій пошті."
 
-#: src/Admin/SettingsPage.php:63
+#: src/Admin/SettingsPage.php:64
 msgid "No available handover points were found."
 msgstr "Доступних точок передавання не знайдено."
 
-#: src/Admin/SettingsPage.php:64
+#: src/Admin/SettingsPage.php:65
 msgid ""
 "Not required: Nova Poshta courier collects parcels from the registered "
 "address."
 msgstr ""
 "Не потрібно: кур'єр Нової пошти забирає посилки із зареєстрованої адреси."
 
-#: src/Admin/SettingsPage.php:65 src/Admin/SettingsPage.php:227
+#: src/Admin/SettingsPage.php:66 src/Admin/SettingsPage.php:235
 msgid "Ready"
 msgstr "Готово"
 
-#: src/Admin/SettingsPage.php:66 src/Admin/SettingsPage.php:227
+#: src/Admin/SettingsPage.php:67 src/Admin/SettingsPage.php:235
 msgid "Incomplete"
 msgstr "Не заповнено"
 
-#: src/Admin/SettingsPage.php:67 src/Admin/SettingsPage.php:227
+#: src/Admin/SettingsPage.php:68 src/Admin/SettingsPage.php:235
 msgid "Disabled"
 msgstr "Вимкнено"
 
-#: src/Admin/SettingsPage.php:68
+#: src/Admin/SettingsPage.php:69
 msgid "Saved Ref"
 msgstr "Збережений Ref"
 
-#: src/Admin/SettingsPage.php:75
+#: src/Admin/SettingsPage.php:76
 msgid "You are not allowed to manage Nova Poshta shipments."
 msgstr "У вас немає прав для керування відправленнями Нової пошти."
 
-#: src/Admin/SettingsPage.php:87
+#: src/Admin/SettingsPage.php:90
 msgid "Nova Poshta settings saved."
 msgstr "Налаштування Нової пошти збережено."
 
-#: src/Admin/SettingsPage.php:91
+#: src/Admin/SettingsPage.php:94
 msgid ""
 "Real shipment creation is not implemented and API write operations are "
 "locked."
 msgstr ""
 "Створення реальних ТТН ще не реалізовано, а операції запису API заблоковано."
 
-#: src/Admin/SettingsPage.php:99
+#: src/Admin/SettingsPage.php:102
 msgid "API connection"
 msgstr "Підключення API"
 
-#: src/Admin/SettingsPage.php:101
+#: src/Admin/SettingsPage.php:104
 msgid ""
 "The API key is read only from PNPM_NOVA_POSHTA_API_KEY in wp-config.php or "
 "the server environment."
@@ -177,39 +178,39 @@ msgstr ""
 "Ключ API читається лише з PNPM_NOVA_POSHTA_API_KEY у wp-config.php або "
 "середовищі сервера."
 
-#: src/Admin/SettingsPage.php:105
+#: src/Admin/SettingsPage.php:108
 msgid "API endpoint"
 msgstr "Адреса API"
 
-#: src/Admin/SettingsPage.php:109
+#: src/Admin/SettingsPage.php:112
 msgid "API key"
 msgstr "Ключ API"
 
-#: src/Admin/SettingsPage.php:114
+#: src/Admin/SettingsPage.php:117
 msgid "Not configured"
 msgstr "Не налаштовано"
 
-#: src/Admin/SettingsPage.php:119
+#: src/Admin/SettingsPage.php:122
 msgid "Write mode"
 msgstr "Режим запису"
 
-#: src/Admin/SettingsPage.php:120
+#: src/Admin/SettingsPage.php:123
 msgid "Locked"
 msgstr "Заблоковано"
 
-#: src/Admin/SettingsPage.php:124
+#: src/Admin/SettingsPage.php:127
 msgid "Check read-only API connection"
 msgstr "Перевірити API без запису"
 
-#: src/Admin/SettingsPage.php:129
+#: src/Admin/SettingsPage.php:132
 msgid "Load senders from Nova Poshta"
 msgstr "Завантажити відправників з Нової пошти"
 
-#: src/Admin/SettingsPage.php:136
+#: src/Admin/SettingsPage.php:139
 msgid "Warehouse senders"
 msgstr "Відправники за складами"
 
-#: src/Admin/SettingsPage.php:137
+#: src/Admin/SettingsPage.php:140
 msgid ""
 "Map each WooCommerce Stock Location to a registered sender address. For self-"
 "drop-off, also choose the exact Nova Poshta branch or parcel locker where "
@@ -219,94 +220,94 @@ msgstr ""
 "відправника. Для самостійного передавання також оберіть точне відділення або "
 "поштомат Нової пошти, куди здаватимуть посилки."
 
-#: src/Admin/SettingsPage.php:141
+#: src/Admin/SettingsPage.php:144
 msgid "Stock Location"
 msgstr "Склад сайту"
 
-#: src/Admin/SettingsPage.php:142
+#: src/Admin/SettingsPage.php:145
 msgid "Enabled"
 msgstr "Увімкнено"
 
-#: src/Admin/SettingsPage.php:143
+#: src/Admin/SettingsPage.php:146
 msgid "Sender type"
 msgstr "Тип відправника"
 
-#: src/Admin/SettingsPage.php:144
+#: src/Admin/SettingsPage.php:147
 msgid "Business sender"
 msgstr "Бізнес-відправник"
 
-#: src/Admin/SettingsPage.php:145
+#: src/Admin/SettingsPage.php:148
 msgid "Registered sender address"
 msgstr "Зареєстрована адреса відправника"
 
-#: src/Admin/SettingsPage.php:146
+#: src/Admin/SettingsPage.php:149
 msgid "Nova Poshta handover point"
 msgstr "Точка передавання Новій пошті"
 
-#: src/Admin/SettingsPage.php:147
+#: src/Admin/SettingsPage.php:150
 msgid "Contact person"
 msgstr "Контактна особа"
 
-#: src/Admin/SettingsPage.php:148
+#: src/Admin/SettingsPage.php:151
 msgid "Phone"
 msgstr "Телефон"
 
-#: src/Admin/SettingsPage.php:149
+#: src/Admin/SettingsPage.php:152
 msgid "Customer label"
 msgstr "Назва для покупця"
 
-#: src/Admin/SettingsPage.php:150
+#: src/Admin/SettingsPage.php:153
 msgid "Status"
 msgstr "Статус"
 
-#: src/Admin/SettingsPage.php:180
-msgid "Drop off at a branch / parcel locker"
-msgstr "Самостійно здати у відділенні / поштоматі"
-
-#: src/Admin/SettingsPage.php:181
-msgid "Courier pickup from sender address"
-msgstr "Забір кур'єром з адреси відправника"
-
-#: src/Admin/SettingsPage.php:186 src/Admin/SettingsPage.php:192
-#: src/Admin/SettingsPage.php:221
-msgid "Load senders first"
-msgstr "Спочатку завантажте відправників"
-
-#: src/Admin/SettingsPage.php:200
-msgid "Branch number or address"
-msgstr "Номер відділення або адреса"
-
-#: src/Admin/SettingsPage.php:201
-msgid "Search handover points"
-msgstr "Знайти точки передавання"
-
-#: src/Admin/SettingsPage.php:202
-msgid "Search"
-msgstr "Знайти"
-
-#: src/Admin/SettingsPage.php:207
+#: src/Admin/SettingsPage.php:170
 msgid "Search and choose a handover point"
 msgstr "Знайдіть і оберіть точку передавання"
 
-#: src/Admin/SettingsPage.php:235
+#: src/Admin/SettingsPage.php:188
+msgid "Drop off at a branch / parcel locker"
+msgstr "Самостійно здати у відділенні / поштоматі"
+
+#: src/Admin/SettingsPage.php:189
+msgid "Courier pickup from sender address"
+msgstr "Забір кур'єром з адреси відправника"
+
+#: src/Admin/SettingsPage.php:194 src/Admin/SettingsPage.php:200
+#: src/Admin/SettingsPage.php:229
+msgid "Load senders first"
+msgstr "Спочатку завантажте відправників"
+
+#: src/Admin/SettingsPage.php:208
+msgid "Branch number or address"
+msgstr "Номер відділення або адреса"
+
+#: src/Admin/SettingsPage.php:209
+msgid "Search handover points"
+msgstr "Знайти точки передавання"
+
+#: src/Admin/SettingsPage.php:210
+msgid "Search"
+msgstr "Знайти"
+
+#: src/Admin/SettingsPage.php:245
 msgid "Save Nova Poshta settings"
 msgstr "Зберегти налаштування Нової пошти"
 
-#: src/Admin/SettingsPage.php:244 src/Admin/SettingsPage.php:284
-#: src/Admin/SettingsPage.php:305 src/Admin/SettingsPage.php:328
+#: src/Admin/SettingsPage.php:254 src/Admin/SettingsPage.php:304
+#: src/Admin/SettingsPage.php:325 src/Admin/SettingsPage.php:348
 msgid "Permission denied."
 msgstr "Недостатньо прав."
 
-#: src/Admin/SettingsPage.php:294
+#: src/Admin/SettingsPage.php:314
 msgid "Nova Poshta rejected the request."
 msgstr "Нова пошта відхилила запит."
 
-#: src/Admin/SettingsPage.php:298
+#: src/Admin/SettingsPage.php:318
 msgid "Read-only API connection is working."
 msgstr "Підключення API без запису працює."
 
 #. translators: %d: sender count.
-#: src/Admin/SettingsPage.php:317
+#: src/Admin/SettingsPage.php:337
 #, php-format
 msgid "%d sender profile loaded."
 msgid_plural "%d sender profiles loaded."
@@ -315,7 +316,7 @@ msgstr[1] "Завантажено %d профілі відправників."
 msgstr[2] "Завантажено %d профілів відправників."
 
 #. translators: %d: handover point count.
-#: src/Admin/SettingsPage.php:342
+#: src/Admin/SettingsPage.php:362
 #, php-format
 msgid "%d handover point found."
 msgid_plural "%d handover points found."
@@ -323,9 +324,181 @@ msgstr[0] "Знайдено %d точку передавання."
 msgstr[1] "Знайдено %d точки передавання."
 msgstr[2] "Знайдено %d точок передавання."
 
-#: src/Admin/SettingsPage.php:353
+#: src/Admin/SettingsPage.php:373
 msgid "Technical Ref"
 msgstr "Технічний Ref"
+
+#: src/Admin/SettingsPage.php:388
+msgid "Guest customer"
+msgstr "Гість"
+
+#: src/Admin/SettingsPage.php:409
+msgid "Delivery payment and loyalty policy"
+msgstr "Оплата доставки та програма лояльності"
+
+#: src/Admin/SettingsPage.php:411
+msgid ""
+"These settings are saved for the next checkout stage. They do not yet change "
+"delivery prices or payment methods."
+msgstr ""
+"Ці налаштування зберігаються для наступного етапу checkout. Вони ще не "
+"змінюють вартість доставки або способи оплати."
+
+#: src/Admin/SettingsPage.php:414
+msgid "Customer groups"
+msgstr "Групи покупців"
+
+#: src/Admin/SettingsPage.php:415
+msgid ""
+"Assign storefront roles to the retail or partner policy. Unassigned roles "
+"use the retail policy."
+msgstr ""
+"Призначте ролям вітрини політику для роздрібних покупців або партнерів. Для "
+"непризначених ролей використовується політика роздрібних покупців."
+
+#: src/Admin/SettingsPage.php:419
+msgid "WordPress role"
+msgstr "Роль WordPress"
+
+#: src/Admin/SettingsPage.php:420
+msgid "Delivery policy"
+msgstr "Політика доставки"
+
+#: src/Admin/SettingsPage.php:428
+msgid "Use retail fallback"
+msgstr "Використовувати роздрібну політику"
+
+#: src/Admin/SettingsPage.php:429
+msgid "Retail customers"
+msgstr "Роздрібні покупці"
+
+#: src/Admin/SettingsPage.php:430
+msgid "Partners and wholesale customers"
+msgstr "Партнери та оптові покупці"
+
+#: src/Admin/SettingsPage.php:448
+msgid "Retail customer policy"
+msgstr "Політика для роздрібних покупців"
+
+#: src/Admin/SettingsPage.php:449
+msgid "Partner and wholesale policy"
+msgstr "Політика для партнерів та оптових покупців"
+
+#: src/Admin/SettingsPage.php:454
+msgid "Order threshold"
+msgstr "Поріг суми замовлення"
+
+#: src/Admin/SettingsPage.php:465
+msgid ""
+"The order merchandise total after discounts is used; shipping and fees are "
+"excluded."
+msgstr ""
+"Використовується сума товарів після знижок; доставку та додаткові збори не "
+"враховано."
+
+#: src/Admin/SettingsPage.php:468
+msgid "Store delivery allowance"
+msgstr "Бюджет магазину на доставку"
+
+#: src/Admin/SettingsPage.php:472
+msgid "Order range"
+msgstr "Діапазон замовлення"
+
+#: src/Admin/SettingsPage.php:473
+msgid "Allowance calculation"
+msgstr "Розрахунок бюджету"
+
+#: src/Admin/SettingsPage.php:474
+msgid "Value"
+msgstr "Значення"
+
+#: src/Admin/SettingsPage.php:475
+msgid "Maximum store contribution"
+msgstr "Максимальний внесок магазину"
+
+#: src/Admin/SettingsPage.php:478
+msgid "Below the threshold"
+msgstr "Нижче порога"
+
+#: src/Admin/SettingsPage.php:479
+msgid "At or above the threshold"
+msgstr "На рівні порога або вище"
+
+#: src/Admin/SettingsPage.php:483
+msgid ""
+"A zero maximum means no additional cap. Percentage values are entered as a "
+"number, for example 3 for three percent."
+msgstr ""
+"Нульовий максимум означає відсутність додаткового обмеження. Відсоток "
+"вводиться числом, наприклад 3 для трьох відсотків."
+
+#: src/Admin/SettingsPage.php:485
+msgid "Who pays each delivery component"
+msgstr "Хто сплачує кожну складову доставки"
+
+#: src/Admin/SettingsPage.php:489
+msgid "Delivery component"
+msgstr "Складова доставки"
+
+#: src/Admin/SettingsPage.php:490
+msgid "Payment rule"
+msgstr "Правило оплати"
+
+#: src/Admin/SettingsPage.php:498 src/Admin/SettingsPage.php:522
+msgid "Customer pays"
+msgstr "Сплачує покупець"
+
+#: src/Admin/SettingsPage.php:499 src/Admin/SettingsPage.php:523
+msgid "Store pays in full"
+msgstr "Повністю сплачує магазин"
+
+#: src/Admin/SettingsPage.php:500
+msgid "Use the store allowance, customer pays the remainder"
+msgstr "Використати бюджет магазину, залишок сплачує покупець"
+
+#: src/Admin/SettingsPage.php:509
+msgid "Cash on delivery"
+msgstr "Накладений платіж"
+
+#: src/Admin/SettingsPage.php:513
+msgid "Allow cash on delivery for a single shipment"
+msgstr "Дозволити накладений платіж для однієї посилки"
+
+#: src/Admin/SettingsPage.php:517
+msgid "Allow cash on delivery for orders from multiple warehouses"
+msgstr "Дозволити накладений платіж для замовлень із кількох складів"
+
+#: src/Admin/SettingsPage.php:520
+msgid "Cash on delivery commission"
+msgstr "Комісія за накладений платіж"
+
+#: src/Admin/SettingsPage.php:527
+msgid ""
+"When multi-shipment cash on delivery is disabled, checkout must offer "
+"prepayment methods instead."
+msgstr ""
+"Якщо накладений платіж для кількох посилок вимкнено, checkout має "
+"запропонувати способи передоплати."
+
+#: src/Admin/SettingsPage.php:543
+msgid "No allowance; customer pays"
+msgstr "Без бюджету; сплачує покупець"
+
+#: src/Admin/SettingsPage.php:544
+msgid "Store pays all selected components"
+msgstr "Магазин сплачує всі вибрані складові"
+
+#: src/Admin/SettingsPage.php:545
+msgid "Fixed amount"
+msgstr "Фіксована сума"
+
+#: src/Admin/SettingsPage.php:546
+msgid "Percentage of merchandise total"
+msgstr "Відсоток від суми товарів"
+
+#: src/Admin/SettingsPage.php:547
+msgid "Percentage of selected delivery components"
+msgstr "Відсоток від вибраних складових доставки"
 
 #. translators: %d: order item ID
 #: src/Domain/AllocationSnapshotBuilder.php:24
@@ -338,6 +511,34 @@ msgstr "Позиція замовлення %d не має розподілу з
 #, php-format
 msgid "Order item %1$d allocation is %2$s of %3$s."
 msgstr "Розподіл позиції замовлення %1$d становить %2$s із %3$s."
+
+#: src/Domain/DeliveryPolicy.php:142
+msgid "Base transport tariff"
+msgstr "Основний тариф перевезення"
+
+#: src/Domain/DeliveryPolicy.php:143
+msgid "Declared value commission"
+msgstr "Комісія за оголошену вартість"
+
+#: src/Domain/DeliveryPolicy.php:144
+msgid "Courier pickup from the sender"
+msgstr "Забір кур'єром у відправника"
+
+#: src/Domain/DeliveryPolicy.php:145
+msgid "Courier delivery to the recipient"
+msgstr "Доставка кур'єром одержувачу"
+
+#: src/Domain/DeliveryPolicy.php:146
+msgid "Parcel locker surcharge"
+msgstr "Доплата за поштомат"
+
+#: src/Domain/DeliveryPolicy.php:147
+msgid "Packaging and packing service"
+msgstr "Паковання та послуга пакування"
+
+#: src/Domain/DeliveryPolicy.php:148
+msgid "Second and subsequent warehouse shipments"
+msgstr "Друга та наступні посилки з інших складів"
 
 #: src/Domain/TtnNormalizer.php:16
 msgid "Enter the shipment number or official tracking link."
@@ -382,7 +583,9 @@ msgstr "Нова пошта відхилила запит довідника в�
 #: src/Infrastructure/WarehouseDirectory.php:26
 msgid ""
 "Choose a registered sender address and enter a branch number or address."
-msgstr "Оберіть зареєстровану адресу відправника та введіть номер відділення або адресу."
+msgstr ""
+"Оберіть зареєстровану адресу відправника та введіть номер відділення або "
+"адресу."
 
 #: src/Infrastructure/WarehouseDirectory.php:51
 msgid "Nova Poshta rejected the handover point search."

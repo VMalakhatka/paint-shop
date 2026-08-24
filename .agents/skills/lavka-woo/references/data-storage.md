@@ -36,6 +36,15 @@
 
 Hash не заменяет исправление derived state: при изменении visibility/search/media обновляй соответствующее состояние и индекс, а не только `_ms_hash`.
 
+### Нова пошта
+
+- `pnpm_location_mappings` — соответствие Stock Location зарегистрированному
+  отправителю, адресу и точке передачи НП.
+- `pnpm_delivery_policy_v1` — версия 1 политики оплаты доставки: mapping Woo roles
+  в `retail`/`partner`, пороги и бюджеты магазина, плательщики компонентов и COD.
+  Не редактировать сериализованный option вручную; использовать WooCommerce ->
+  «Відправлення Нової пошти».
+
 ### Заказ и документы ФОЛИО
 
 - `_folio_document_id`, `_folio_document_number`, `_folio_document_type`, `_folio_document_status`.

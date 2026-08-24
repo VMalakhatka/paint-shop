@@ -2,6 +2,7 @@
 
 namespace Paint\NovaPoshta\Admin;
 
+use Paint\NovaPoshta\Domain\DeliveryPolicy;
 use Paint\NovaPoshta\Infrastructure\ApiClient;
 use Paint\NovaPoshta\Infrastructure\SenderDirectory;
 use Paint\NovaPoshta\Infrastructure\WarehouseDirectory;
@@ -79,6 +80,8 @@ final class SettingsPage
         $mappings = is_array($mappings) ? $mappings : [];
         $locations = get_terms(['taxonomy' => 'location', 'hide_empty' => false]);
         $locations = is_wp_error($locations) ? [] : $locations;
+        $roles = $this->availableRoles();
+        $delivery_policy = DeliveryPolicy::load(array_keys($roles));
         ?>
         <div class="wrap pnpm-admin">
             <h1><?php esc_html_e('Nova Poshta multishipping', 'paint-nova-poshta-multishipping'); ?></h1>
@@ -237,6 +240,8 @@ final class SettingsPage
                     </div>
                 </section>
 
+                <?php $this->renderDeliveryPolicy($delivery_policy, $roles); ?>
+
                 <?php submit_button(__('Save Nova Poshta settings', 'paint-nova-poshta-multishipping')); ?>
             </form>
         </div>
@@ -274,6 +279,16 @@ final class SettingsPage
             ];
         }
         update_option('pnpm_location_mappings', $clean, false);
+
+        $available_roles = array_keys($this->availableRoles());
+        $raw_policy = isset($_POST['delivery_policy']) && is_array($_POST['delivery_policy'])
+            ? wp_unslash($_POST['delivery_policy'])
+            : [];
+        update_option(
+            DeliveryPolicy::OPTION_NAME,
+            DeliveryPolicy::sanitize($raw_policy, $available_roles),
+            false
+        );
 
         wp_safe_redirect(add_query_arg([
             'page' => 'pnpm-settings',
@@ -363,6 +378,191 @@ final class SettingsPage
                 value="<?php echo esc_attr((string) ($mapping[$field] ?? '')); ?>"
             >
         </details>
+        <?php
+    }
+
+    /** @return array<string,string> */
+    private function availableRoles(): array
+    {
+        $roles = [
+            'guest' => __('Guest customer', 'paint-nova-poshta-multishipping'),
+        ];
+        $registered_roles = wp_roles()->roles;
+        $customer_role_slugs = apply_filters('pnpm_delivery_customer_roles', [
+            'customer',
+            'subscriber',
+            'internet_client',
+            'partner',
+            'opt',
+            'opt_osn',
+            'schule',
+        ]);
+        foreach ((array) $customer_role_slugs as $slug) {
+            $slug = sanitize_key((string) $slug);
+            if ($slug !== '' && isset($registered_roles[$slug])) {
+                $roles[$slug] = translate_user_role((string) ($registered_roles[$slug]['name'] ?? $slug));
+            }
+        }
+
+        return $roles;
+    }
+
+    /** @param array<string,mixed> $policy
+     *  @param array<string,string> $roles
+     */
+    private function renderDeliveryPolicy(array $policy, array $roles): void
+    {
+        $segments = is_array($policy['role_segments'] ?? null) ? $policy['role_segments'] : [];
+        $profiles = is_array($policy['profiles'] ?? null) ? $policy['profiles'] : [];
+        ?>
+        <section class="pnpm-section pnpm-delivery-policy">
+            <h2><?php esc_html_e('Delivery payment and loyalty policy', 'paint-nova-poshta-multishipping'); ?></h2>
+            <div class="notice notice-info inline"><p>
+                <?php esc_html_e('These settings are saved for the next checkout stage. They do not yet change delivery prices or payment methods.', 'paint-nova-poshta-multishipping'); ?>
+            </p></div>
+
+            <h3><?php esc_html_e('Customer groups', 'paint-nova-poshta-multishipping'); ?></h3>
+            <p><?php esc_html_e('Assign storefront roles to the retail or partner policy. Unassigned roles use the retail policy.', 'paint-nova-poshta-multishipping'); ?></p>
+            <div class="pnpm-table-wrap">
+                <table class="widefat striped pnpm-role-policy">
+                    <thead><tr>
+                        <th><?php esc_html_e('WordPress role', 'paint-nova-poshta-multishipping'); ?></th>
+                        <th><?php esc_html_e('Delivery policy', 'paint-nova-poshta-multishipping'); ?></th>
+                    </tr></thead>
+                    <tbody>
+                    <?php foreach ($roles as $role_slug => $role_name) : ?>
+                        <tr>
+                            <td><strong><?php echo esc_html($role_name); ?></strong><br><code><?php echo esc_html($role_slug); ?></code></td>
+                            <td>
+                                <select name="delivery_policy[role_segments][<?php echo esc_attr($role_slug); ?>]">
+                                    <option value="" <?php selected($segments[$role_slug] ?? '', ''); ?>><?php esc_html_e('Use retail fallback', 'paint-nova-poshta-multishipping'); ?></option>
+                                    <option value="retail" <?php selected($segments[$role_slug] ?? '', 'retail'); ?>><?php esc_html_e('Retail customers', 'paint-nova-poshta-multishipping'); ?></option>
+                                    <option value="partner" <?php selected($segments[$role_slug] ?? '', 'partner'); ?>><?php esc_html_e('Partners and wholesale customers', 'paint-nova-poshta-multishipping'); ?></option>
+                                </select>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <?php foreach (['retail', 'partner'] as $profile_key) :
+                $profile = is_array($profiles[$profile_key] ?? null) ? $profiles[$profile_key] : [];
+                $threshold = (float) ($profile['threshold'] ?? 0);
+                $components = is_array($profile['components'] ?? null) ? $profile['components'] : [];
+                $cod = is_array($profile['cod'] ?? null) ? $profile['cod'] : [];
+                ?>
+                <div class="pnpm-policy-profile">
+                    <h3>
+                        <?php echo esc_html($profile_key === 'retail'
+                            ? __('Retail customer policy', 'paint-nova-poshta-multishipping')
+                            : __('Partner and wholesale policy', 'paint-nova-poshta-multishipping')); ?>
+                    </h3>
+
+                    <div class="pnpm-threshold-field">
+                        <label for="pnpm-<?php echo esc_attr($profile_key); ?>-threshold">
+                            <strong><?php esc_html_e('Order threshold', 'paint-nova-poshta-multishipping'); ?></strong>
+                        </label>
+                        <input
+                            id="pnpm-<?php echo esc_attr($profile_key); ?>-threshold"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            name="delivery_policy[profiles][<?php echo esc_attr($profile_key); ?>][threshold]"
+                            value="<?php echo esc_attr((string) $threshold); ?>"
+                        >
+                        <span><?php echo esc_html(get_woocommerce_currency_symbol()); ?></span>
+                        <p class="description"><?php esc_html_e('The order merchandise total after discounts is used; shipping and fees are excluded.', 'paint-nova-poshta-multishipping'); ?></p>
+                    </div>
+
+                    <h4><?php esc_html_e('Store delivery allowance', 'paint-nova-poshta-multishipping'); ?></h4>
+                    <div class="pnpm-table-wrap">
+                        <table class="widefat striped pnpm-policy-tiers">
+                            <thead><tr>
+                                <th><?php esc_html_e('Order range', 'paint-nova-poshta-multishipping'); ?></th>
+                                <th><?php esc_html_e('Allowance calculation', 'paint-nova-poshta-multishipping'); ?></th>
+                                <th><?php esc_html_e('Value', 'paint-nova-poshta-multishipping'); ?></th>
+                                <th><?php esc_html_e('Maximum store contribution', 'paint-nova-poshta-multishipping'); ?></th>
+                            </tr></thead>
+                            <tbody>
+                                <?php $this->renderPolicyTier($profile_key, 'below', $profile['below'] ?? [], __('Below the threshold', 'paint-nova-poshta-multishipping')); ?>
+                                <?php $this->renderPolicyTier($profile_key, 'above', $profile['above'] ?? [], __('At or above the threshold', 'paint-nova-poshta-multishipping')); ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="description"><?php esc_html_e('A zero maximum means no additional cap. Percentage values are entered as a number, for example 3 for three percent.', 'paint-nova-poshta-multishipping'); ?></p>
+
+                    <h4><?php esc_html_e('Who pays each delivery component', 'paint-nova-poshta-multishipping'); ?></h4>
+                    <div class="pnpm-table-wrap">
+                        <table class="widefat striped pnpm-policy-components">
+                            <thead><tr>
+                                <th><?php esc_html_e('Delivery component', 'paint-nova-poshta-multishipping'); ?></th>
+                                <th><?php esc_html_e('Payment rule', 'paint-nova-poshta-multishipping'); ?></th>
+                            </tr></thead>
+                            <tbody>
+                            <?php foreach (DeliveryPolicy::componentLabels() as $component_key => $label) : ?>
+                                <tr>
+                                    <td><?php echo esc_html($label); ?></td>
+                                    <td>
+                                        <select name="delivery_policy[profiles][<?php echo esc_attr($profile_key); ?>][components][<?php echo esc_attr($component_key); ?>]">
+                                            <option value="customer" <?php selected($components[$component_key] ?? 'customer', 'customer'); ?>><?php esc_html_e('Customer pays', 'paint-nova-poshta-multishipping'); ?></option>
+                                            <option value="store" <?php selected($components[$component_key] ?? 'customer', 'store'); ?>><?php esc_html_e('Store pays in full', 'paint-nova-poshta-multishipping'); ?></option>
+                                            <option value="budget" <?php selected($components[$component_key] ?? 'customer', 'budget'); ?>><?php esc_html_e('Use the store allowance, customer pays the remainder', 'paint-nova-poshta-multishipping'); ?></option>
+                                        </select>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h4><?php esc_html_e('Cash on delivery', 'paint-nova-poshta-multishipping'); ?></h4>
+                    <div class="pnpm-cod-policy">
+                        <label>
+                            <input type="hidden" name="delivery_policy[profiles][<?php echo esc_attr($profile_key); ?>][cod][single_shipment]" value="no">
+                            <input type="checkbox" name="delivery_policy[profiles][<?php echo esc_attr($profile_key); ?>][cod][single_shipment]" value="yes" <?php checked($cod['single_shipment'] ?? 'no', 'yes'); ?>>
+                            <?php esc_html_e('Allow cash on delivery for a single shipment', 'paint-nova-poshta-multishipping'); ?>
+                        </label>
+                        <label>
+                            <input type="hidden" name="delivery_policy[profiles][<?php echo esc_attr($profile_key); ?>][cod][multi_shipment]" value="no">
+                            <input type="checkbox" name="delivery_policy[profiles][<?php echo esc_attr($profile_key); ?>][cod][multi_shipment]" value="yes" <?php checked($cod['multi_shipment'] ?? 'no', 'yes'); ?>>
+                            <?php esc_html_e('Allow cash on delivery for orders from multiple warehouses', 'paint-nova-poshta-multishipping'); ?>
+                        </label>
+                        <label>
+                            <span><?php esc_html_e('Cash on delivery commission', 'paint-nova-poshta-multishipping'); ?></span>
+                            <select name="delivery_policy[profiles][<?php echo esc_attr($profile_key); ?>][cod][fee_payer]">
+                                <option value="customer" <?php selected($cod['fee_payer'] ?? 'customer', 'customer'); ?>><?php esc_html_e('Customer pays', 'paint-nova-poshta-multishipping'); ?></option>
+                                <option value="store" <?php selected($cod['fee_payer'] ?? 'customer', 'store'); ?>><?php esc_html_e('Store pays in full', 'paint-nova-poshta-multishipping'); ?></option>
+                                <option value="budget" <?php selected($cod['fee_payer'] ?? 'customer', 'budget'); ?>><?php esc_html_e('Use the store allowance, customer pays the remainder', 'paint-nova-poshta-multishipping'); ?></option>
+                            </select>
+                        </label>
+                    </div>
+                    <p class="description"><?php esc_html_e('When multi-shipment cash on delivery is disabled, checkout must offer prepayment methods instead.', 'paint-nova-poshta-multishipping'); ?></p>
+                </div>
+            <?php endforeach; ?>
+        </section>
+        <?php
+    }
+
+    /** @param array<string,mixed> $tier */
+    private function renderPolicyTier(string $profile_key, string $tier_key, array $tier, string $label): void
+    {
+        $prefix = 'delivery_policy[profiles][' . $profile_key . '][' . $tier_key . ']';
+        ?>
+        <tr>
+            <td><strong><?php echo esc_html($label); ?></strong></td>
+            <td>
+                <select name="<?php echo esc_attr($prefix); ?>[mode]">
+                    <option value="customer" <?php selected($tier['mode'] ?? 'customer', 'customer'); ?>><?php esc_html_e('No allowance; customer pays', 'paint-nova-poshta-multishipping'); ?></option>
+                    <option value="store" <?php selected($tier['mode'] ?? 'customer', 'store'); ?>><?php esc_html_e('Store pays all selected components', 'paint-nova-poshta-multishipping'); ?></option>
+                    <option value="fixed" <?php selected($tier['mode'] ?? 'customer', 'fixed'); ?>><?php esc_html_e('Fixed amount', 'paint-nova-poshta-multishipping'); ?></option>
+                    <option value="order_percent" <?php selected($tier['mode'] ?? 'customer', 'order_percent'); ?>><?php esc_html_e('Percentage of merchandise total', 'paint-nova-poshta-multishipping'); ?></option>
+                    <option value="delivery_percent" <?php selected($tier['mode'] ?? 'customer', 'delivery_percent'); ?>><?php esc_html_e('Percentage of selected delivery components', 'paint-nova-poshta-multishipping'); ?></option>
+                </select>
+            </td>
+            <td><input type="number" min="0" step="0.01" name="<?php echo esc_attr($prefix); ?>[value]" value="<?php echo esc_attr((string) ($tier['value'] ?? 0)); ?>"></td>
+            <td><input type="number" min="0" step="0.01" name="<?php echo esc_attr($prefix); ?>[cap]" value="<?php echo esc_attr((string) ($tier['cap'] ?? 0)); ?>"></td>
+        </tr>
         <?php
     }
 }

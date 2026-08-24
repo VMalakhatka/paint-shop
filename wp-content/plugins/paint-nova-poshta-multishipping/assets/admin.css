@@ -102,3 +102,84 @@
 .pnpm-order-panel ul {
     margin-left: 20px;
 }
+
+.pnpm-delivery-policy h3 {
+    margin-top: 28px;
+}
+
+.pnpm-delivery-policy h4 {
+    margin: 22px 0 10px;
+    font-size: 14px;
+}
+
+.pnpm-role-policy {
+    max-width: 720px;
+}
+
+.pnpm-role-policy th:first-child,
+.pnpm-role-policy td:first-child {
+    width: 46%;
+}
+
+.pnpm-role-policy select,
+.pnpm-policy-tiers select,
+.pnpm-policy-components select {
+    width: 100%;
+}
+
+.pnpm-policy-profile {
+    margin-top: 24px;
+    padding-top: 4px;
+    border-top: 3px solid #2271b1;
+}
+
+.pnpm-threshold-field {
+    display: grid;
+    grid-template-columns: minmax(180px, 280px) 160px auto;
+    align-items: center;
+    gap: 8px;
+    max-width: 720px;
+}
+
+.pnpm-threshold-field .description {
+    grid-column: 1 / -1;
+    margin: 0;
+}
+
+.pnpm-policy-tiers,
+.pnpm-policy-components {
+    max-width: 980px;
+}
+
+.pnpm-policy-tiers input[type="number"] {
+    width: 150px;
+}
+
+.pnpm-cod-policy {
+    display: grid;
+    gap: 10px;
+    max-width: 720px;
+}
+
+.pnpm-cod-policy label {
+    display: grid;
+    grid-template-columns: 24px minmax(240px, 1fr);
+    align-items: center;
+    gap: 6px;
+}
+
+.pnpm-cod-policy label:last-child {
+    grid-template-columns: minmax(240px, 1fr) minmax(220px, 300px);
+}
+
+@media (max-width: 782px) {
+    .pnpm-threshold-field,
+    .pnpm-cod-policy label,
+    .pnpm-cod-policy label:last-child {
+        grid-template-columns: 1fr;
+    }
+
+    .pnpm-threshold-field .description {
+        grid-column: auto;
+    }
+}
