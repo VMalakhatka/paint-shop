@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0",
+  "operation_key": "folio:expense:123456:SELL:v1",
+  "receipt_id": "39ea3580-6045-4dd6-9d5e-cf11d85f76aa",
+  "operation_type": "SELL",
+  "source": {
+    "system": "folio",
+    "entity_type": "EXPENSE",
+    "entity_id": "123456",
+    "document_number": "RN-000123",
+    "occurred_at": "2026-08-24T14:25:10+03:00"
+  },
+  "currency": "UAH",
+  "expected_total_cents": 12500,
+  "goods": [
+    {
+      "code": "SKU-1001",
+      "name": "Test product",
+      "price_cents": 12500,
+      "quantity_thousandths": 1000,
+      "line_total_cents": 12500,
+      "tax_codes": [8],
+      "discounts": []
+    }
+  ],
+  "payments": [
+    {
+      "type": "CASH",
+      "value_cents": 12500,
+      "label": "Cash"
+    }
+  ],
+  "discounts": []
+}

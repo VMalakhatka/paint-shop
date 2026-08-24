@@ -82,6 +82,13 @@ final class SettingsPage
         $locations = is_wp_error($locations) ? [] : $locations;
         $roles = $this->availableRoles();
         $delivery_policy = DeliveryPolicy::load(array_keys($roles));
+        $checkout_settings = wp_parse_args((array) get_option('pnpm_settings', []), [
+            'checkout_enabled' => 'yes',
+            'weight_mode' => 'grams',
+            'fallback_item_weight_kg' => 0.25,
+            'minimum_declared_cost' => 500,
+            'parcel_locker_surcharge' => 10,
+        ]);
         ?>
         <div class="wrap pnpm-admin">
             <h1><?php esc_html_e('Nova Poshta multishipping', 'paint-nova-poshta-multishipping'); ?></h1>
@@ -240,6 +247,7 @@ final class SettingsPage
                     </div>
                 </section>
 
+                <?php $this->renderCheckoutSettings($checkout_settings); ?>
                 <?php $this->renderDeliveryPolicy($delivery_policy, $roles); ?>
 
                 <?php submit_button(__('Save Nova Poshta settings', 'paint-nova-poshta-multishipping')); ?>
@@ -289,6 +297,18 @@ final class SettingsPage
             DeliveryPolicy::sanitize($raw_policy, $available_roles),
             false
         );
+
+        $stored_settings = get_option('pnpm_settings', []);
+        $stored_settings = is_array($stored_settings) ? $stored_settings : [];
+        $raw_checkout = isset($_POST['checkout_settings']) && is_array($_POST['checkout_settings'])
+            ? wp_unslash($_POST['checkout_settings'])
+            : [];
+        $stored_settings['checkout_enabled'] = ($raw_checkout['checkout_enabled'] ?? 'no') === 'yes' ? 'yes' : 'no';
+        $stored_settings['weight_mode'] = ($raw_checkout['weight_mode'] ?? 'grams') === 'woocommerce' ? 'woocommerce' : 'grams';
+        $stored_settings['fallback_item_weight_kg'] = max(0.01, (float) ($raw_checkout['fallback_item_weight_kg'] ?? 0.25));
+        $stored_settings['minimum_declared_cost'] = max(1.0, (float) ($raw_checkout['minimum_declared_cost'] ?? 500));
+        $stored_settings['parcel_locker_surcharge'] = max(0.0, (float) ($raw_checkout['parcel_locker_surcharge'] ?? 10));
+        update_option('pnpm_settings', $stored_settings, false);
 
         wp_safe_redirect(add_query_arg([
             'page' => 'pnpm-settings',
@@ -418,7 +438,7 @@ final class SettingsPage
         <section class="pnpm-section pnpm-delivery-policy">
             <h2><?php esc_html_e('Delivery payment and loyalty policy', 'paint-nova-poshta-multishipping'); ?></h2>
             <div class="notice notice-info inline"><p>
-                <?php esc_html_e('These settings are saved for the next checkout stage. They do not yet change delivery prices or payment methods.', 'paint-nova-poshta-multishipping'); ?>
+                <?php esc_html_e('These rules are applied when the customer selects Nova Poshta delivery at checkout.', 'paint-nova-poshta-multishipping'); ?>
             </p></div>
 
             <h3><?php esc_html_e('Customer groups', 'paint-nova-poshta-multishipping'); ?></h3>
@@ -540,6 +560,50 @@ final class SettingsPage
                     <p class="description"><?php esc_html_e('When multi-shipment cash on delivery is disabled, checkout must offer prepayment methods instead.', 'paint-nova-poshta-multishipping'); ?></p>
                 </div>
             <?php endforeach; ?>
+        </section>
+        <?php
+    }
+
+    /** @param array<string,mixed> $settings */
+    private function renderCheckoutSettings(array $settings): void
+    {
+        ?>
+        <section class="pnpm-section pnpm-checkout-settings">
+            <h2><?php esc_html_e('Checkout calculation', 'paint-nova-poshta-multishipping'); ?></h2>
+            <p><?php esc_html_e('The checkout uses the official Nova Poshta tariff API in read-only mode. These settings do not create shipments or TTNs.', 'paint-nova-poshta-multishipping'); ?></p>
+            <table class="form-table" role="presentation">
+                <tr>
+                    <th><?php esc_html_e('Customer checkout', 'paint-nova-poshta-multishipping'); ?></th>
+                    <td>
+                        <input type="hidden" name="checkout_settings[checkout_enabled]" value="no">
+                        <label><input type="checkbox" name="checkout_settings[checkout_enabled]" value="yes" <?php checked($settings['checkout_enabled'] ?? 'yes', 'yes'); ?>>
+                            <?php esc_html_e('Enable Nova Poshta fields and tariff calculation in classic checkout', 'paint-nova-poshta-multishipping'); ?>
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <th><label for="pnpm-weight-mode"><?php esc_html_e('Product weight storage', 'paint-nova-poshta-multishipping'); ?></label></th>
+                    <td>
+                        <select id="pnpm-weight-mode" name="checkout_settings[weight_mode]">
+                            <option value="grams" <?php selected($settings['weight_mode'] ?? 'grams', 'grams'); ?>><?php esc_html_e('Existing product values are grams', 'paint-nova-poshta-multishipping'); ?></option>
+                            <option value="woocommerce" <?php selected($settings['weight_mode'] ?? 'grams', 'woocommerce'); ?>><?php esc_html_e('Use the WooCommerce weight unit', 'paint-nova-poshta-multishipping'); ?></option>
+                        </select>
+                        <p class="description"><?php esc_html_e('The current Lavka catalogue usually stores gram values in the product weight field.', 'paint-nova-poshta-multishipping'); ?></p>
+                    </td>
+                </tr>
+                <tr>
+                    <th><label for="pnpm-fallback-weight"><?php esc_html_e('Fallback item weight', 'paint-nova-poshta-multishipping'); ?></label></th>
+                    <td><input id="pnpm-fallback-weight" type="number" min="0.01" step="0.01" name="checkout_settings[fallback_item_weight_kg]" value="<?php echo esc_attr((string) ($settings['fallback_item_weight_kg'] ?? 0.25)); ?>"> kg</td>
+                </tr>
+                <tr>
+                    <th><label for="pnpm-minimum-declared"><?php esc_html_e('Declared value comparison threshold', 'paint-nova-poshta-multishipping'); ?></label></th>
+                    <td><input id="pnpm-minimum-declared" type="number" min="1" step="1" name="checkout_settings[minimum_declared_cost]" value="<?php echo esc_attr((string) ($settings['minimum_declared_cost'] ?? 500)); ?>"> <?php echo esc_html(get_woocommerce_currency_symbol()); ?></td>
+                </tr>
+                <tr>
+                    <th><label for="pnpm-locker-surcharge"><?php esc_html_e('Parcel locker surcharge', 'paint-nova-poshta-multishipping'); ?></label></th>
+                    <td><input id="pnpm-locker-surcharge" type="number" min="0" step="0.01" name="checkout_settings[parcel_locker_surcharge]" value="<?php echo esc_attr((string) ($settings['parcel_locker_surcharge'] ?? 10)); ?>"> <?php echo esc_html(get_woocommerce_currency_symbol()); ?></td>
+                </tr>
+            </table>
         </section>
         <?php
     }

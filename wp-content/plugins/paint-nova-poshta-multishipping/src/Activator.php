@@ -101,6 +101,11 @@ final class Activator
             'api_base_url' => 'https://api.novaposhta.ua/v2.0/json/',
             'writes_enabled' => 'no',
             'external_ttn_enabled' => 'yes',
+            'checkout_enabled' => 'yes',
+            'weight_mode' => 'grams',
+            'fallback_item_weight_kg' => 0.25,
+            'minimum_declared_cost' => 500,
+            'parcel_locker_surcharge' => 10,
         ], '', false);
         add_option(DeliveryPolicy::OPTION_NAME, DeliveryPolicy::defaults(), '', false);
 

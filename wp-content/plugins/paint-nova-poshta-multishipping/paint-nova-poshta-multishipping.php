@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Paint Nova Poshta Multishipping
  * Description: Direct multi-warehouse Nova Poshta integration for WooCommerce orders.
- * Version: 0.4.0
+ * Version: 0.5.0
  * Author: Paint / Lavka
  * Text Domain: paint-nova-poshta-multishipping
  * Domain Path: /languages
@@ -14,7 +14,7 @@
 
 defined('ABSPATH') || exit;
 
-define('PNPM_VERSION', '0.4.0');
+define('PNPM_VERSION', '0.5.0');
 define('PNPM_FILE', __FILE__);
 define('PNPM_DIR', plugin_dir_path(__FILE__));
 define('PNPM_URL', plugin_dir_url(__FILE__));

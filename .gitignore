@@ -146,3 +146,6 @@ wp-content/languages/loco/**/backup-*.po~
 
 # Можно оставить пустую languages/ (если нужно)
 !wp-content/languages/.gitkeep
+
+!wp-content/plugins/pc-checkbox-fiscalization/
+!wp-content/plugins/pc-checkbox-fiscalization/**

@@ -1,0 +1,64 @@
+.pnpm-checkout-fields {
+    position: relative;
+    margin: 24px 0;
+    padding: 20px;
+    border: 1px solid #d7dce2;
+    border-left: 4px solid #e2231a;
+    background: #fff;
+}
+
+.pnpm-checkout-fields h3 {
+    margin: 0 0 8px;
+    font-size: 1.25rem;
+}
+
+.pnpm-checkout-intro,
+.pnpm-address-help {
+    color: #555f6b;
+}
+
+.pnpm-directory-results {
+    position: relative;
+    z-index: 30;
+    width: 100%;
+    max-height: 240px;
+    margin: -8px 0 14px;
+    overflow-y: auto;
+    border: 1px solid #c7ccd2;
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.pnpm-directory-option,
+.pnpm-directory-message {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    border: 0;
+    border-bottom: 1px solid #eceff2;
+    border-radius: 0;
+    background: #fff;
+    color: #20252b;
+    text-align: left;
+}
+
+.pnpm-directory-option:hover,
+.pnpm-directory-option:focus {
+    background: #f2f5f7;
+    color: #111;
+}
+
+.pnpm-directory-error,
+.pnpm-cod-note {
+    color: #b42318;
+}
+
+.pnpm-checkout-summary td {
+    line-height: 1.45;
+}
+
+@media (max-width: 600px) {
+    .pnpm-checkout-fields {
+        padding: 16px 12px;
+    }
+}
