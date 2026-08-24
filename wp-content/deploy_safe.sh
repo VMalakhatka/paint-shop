@@ -168,7 +168,7 @@ fi
 mkdir -p "$WP/wp-content/mu-plugins" \
          "$WP/wp-content/themes/generatepress-child" \
          "$PLUG/lavka-sync" "$PLUG/lavka-sync/lavka-price-sync" \
-         "$PLUG/lavka-sync/lavka-reports" "$PLUG/paint-core" "$PLUG/paint-shop-ux" "$PLUG/role-price" "$PLUG/lavka-total-sync" "$PLUG/pc-order-import-export" "$PLUG/lavka-product-media-upload"
+         "$PLUG/lavka-sync/lavka-reports" "$PLUG/paint-core" "$PLUG/paint-shop-ux" "$PLUG/role-price" "$PLUG/lavka-total-sync" "$PLUG/pc-order-import-export" "$PLUG/lavka-product-media-upload" "$PLUG/paint-nova-poshta-multishipping"
 
 # 2) Синхроним ТОЛЬКО наши каталоги
 rsync "${RSYNC[@]}" wp-content/mu-plugins/                 "$WP/wp-content/mu-plugins/"
@@ -182,6 +182,7 @@ rsync "${RSYNC[@]}" wp-content/plugins/role-price/          "$PLUG/role-price/"
 rsync "${RSYNC[@]}" wp-content/plugins/lavka-total-sync/          "$PLUG/lavka-total-sync/"
 rsync "${RSYNC[@]}" wp-content/plugins/pc-order-import-export/   "$PLUG/pc-order-import-export/"
 rsync "${RSYNC[@]}" wp-content/plugins/lavka-product-media-upload/ "$PLUG/lavka-product-media-upload/"
+rsync "${RSYNC[@]}" wp-content/plugins/paint-nova-poshta-multishipping/ "$PLUG/paint-nova-poshta-multishipping/"
 
 # Сброс OPcache (если включён)
 ( /opt/remi/php83/root/bin/php -r 'if(function_exists("opcache_reset")){opcache_reset();echo "✓ OPcache reset\n";}else{echo "ℹ OPcache not available\n";}' ) || true
@@ -201,7 +202,8 @@ for p in \
   "$PLUG/role-price" \
   "$PLUG/rlavka-total-sync" \
   "$PLUG/pc-order-import-export" \
-  "$PLUG/lavka-product-media-upload"
+  "$PLUG/lavka-product-media-upload" \
+  "$PLUG/paint-nova-poshta-multishipping"
 do
   find "$p" -type d -exec chmod 755 {} \; 2>/dev/null || true
   find "$p" -type f -exec chmod 644 {} \; 2>/dev/null || true
