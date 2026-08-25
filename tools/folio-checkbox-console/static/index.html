@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ФОЛИО → Checkbox</title>
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">Экспериментальная консоль</p>
+      <h1>ФОЛИО → Checkbox</h1>
+    </div>
+    <div id="mode-badge" class="mode-badge">Загрузка…</div>
+  </header>
+
+  <main class="shell">
+    <section id="alert" class="alert hidden" role="alert"></section>
+
+    <section id="login-panel" class="card narrow hidden">
+      <p class="step">Шаг 1</p>
+      <h2>Вход менеджера</h2>
+      <p class="muted">Это отдельная авторизация приложения. Она не заменяет кассира Checkbox.</p>
+      <form id="login-form" class="stack">
+        <label>
+          Логин
+          <input id="manager-username" name="username" autocomplete="username" required>
+        </label>
+        <label>
+          Пароль
+          <input id="manager-password" name="password" type="password" autocomplete="current-password" required>
+        </label>
+        <button type="submit" class="primary">Войти</button>
+      </form>
+    </section>
+
+    <section id="cashier-panel" class="card narrow hidden">
+      <div class="card-heading">
+        <div>
+          <p class="step">Шаг 2</p>
+          <h2>Авторизация кассира Checkbox</h2>
+        </div>
+        <button id="manager-logout" class="ghost" type="button">Выйти</button>
+      </div>
+      <p class="muted">PIN отправляется только для получения сессии Checkbox и не записывается в журнал.</p>
+      <form id="cashier-form" class="stack">
+        <label>
+          PIN кассира
+          <input id="cashier-pin" name="pin" type="password" inputmode="numeric" autocomplete="off" required>
+        </label>
+        <button type="submit" class="primary">Авторизовать кассира</button>
+      </form>
+    </section>
+
+    <section id="workspace" class="hidden">
+      <section class="context-grid">
+        <article class="context-card">
+          <span>Менеджер</span>
+          <strong id="context-manager">—</strong>
+        </article>
+        <article class="context-card">
+          <span>Кассир</span>
+          <strong id="context-cashier">—</strong>
+        </article>
+        <article class="context-card">
+          <span>Касса и смена</span>
+          <strong id="context-register">—</strong>
+        </article>
+        <article class="context-card">
+          <span>Среда</span>
+          <strong id="context-environment">—</strong>
+        </article>
+      </section>
+
+      <section class="toolbar card">
+        <div>
+          <p class="step">Шаг 3</p>
+          <h2>Расходные накладные</h2>
+          <p class="muted">ФОЛИО доступна только для чтения. Фискализация начинается после preview.</p>
+        </div>
+        <div class="toolbar-actions">
+          <button id="cashier-logout" class="ghost" type="button">Сменить кассира</button>
+          <button id="workspace-logout" class="ghost" type="button">Выйти</button>
+        </div>
+      </section>
+
+      <section class="card filters">
+        <label>С даты <input id="date-from" type="date"></label>
+        <label>По дату <input id="date-to" type="date"></label>
+        <button id="refresh-invoices" type="button">Обновить список</button>
+      </section>
+
+      <section class="table-card">
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Дата</th>
+                <th>Накладная</th>
+                <th>Клиент</th>
+                <th>Склад</th>
+                <th>Сумма</th>
+                <th>Готовность</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="invoice-rows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card operations-card">
+        <div class="card-heading">
+          <div>
+            <p class="step">Журнал</p>
+            <h2>Последние операции</h2>
+          </div>
+          <button id="refresh-operations" class="ghost" type="button">Обновить</button>
+        </div>
+        <div id="operations" class="operation-list"></div>
+      </section>
+    </section>
+  </main>
+
+  <dialog id="preview-dialog">
+    <form method="dialog" class="dialog-shell">
+      <div class="dialog-heading">
+        <div>
+          <p class="step">Preview</p>
+          <h2 id="preview-title">Накладная</h2>
+        </div>
+        <button class="icon-button" value="cancel" aria-label="Закрыть">×</button>
+      </div>
+      <div id="preview-details"></div>
+      <div class="preview-controls">
+        <label>
+          Форма оплаты
+          <select id="payment-type">
+            <option value="CASHLESS">Безналичная</option>
+            <option value="CASH">Наличная</option>
+          </select>
+        </label>
+        <label>
+          Revision
+          <input id="operation-revision" type="number" min="1" max="999" value="1">
+        </label>
+        <label class="check-row">
+          <input id="payment-confirmed" type="checkbox">
+          Фактическая оплата получена, форма и сумма проверены
+        </label>
+      </div>
+      <div id="preview-result" class="preview-result hidden"></div>
+      <div class="dialog-actions">
+        <button value="cancel" class="ghost">Отмена</button>
+        <button id="prepare-preview" type="button">Подготовить preview</button>
+        <button id="apply-operation" type="button" class="danger hidden">Сымитировать фискализацию</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>
+
