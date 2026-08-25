@@ -59,7 +59,7 @@ assert($validator->normalize($percent)['discounts'][0]['value'] === 1.5);
 $api = new Paint\CheckboxFiscalization\Infrastructure\ApiClient(new Paint\CheckboxFiscalization\Config());
 $payload = $api->receiptPayload($normalized);
 assert($payload['id'] === $command['receipt_id']);
-assert($payload['goods'][0]['total_sum'] === 12500);
+assert(!isset($payload['goods'][0]['total_sum']));
 assert($payload['goods'][0]['is_return'] === false);
 
 echo "CommandValidator smoke test passed.\n";

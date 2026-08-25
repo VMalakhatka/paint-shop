@@ -106,7 +106,7 @@ Required for every item:
 | `name` | string | Final name printed in the receipt. |
 | `price_cents` | integer | Unit price in kopiykas, non-negative. |
 | `quantity_thousandths` | integer | Quantity multiplied by 1000 (`1 = 0.001`, `1000 = 1`, `2500 = 2.5`). |
-| `line_total_cents` | integer | Final line contribution used for local total reconciliation. Sum of all lines must equal `expected_total_cents`. |
+| `line_total_cents` | integer | Final line contribution used for local total reconciliation. Sum of all lines must equal `expected_total_cents`; it is not sent as Checkbox `total_sum`, because this organisation calculates from price and quantity. |
 | `tax_codes` | array | One or more Checkbox tax codes. The Java side must supply them explicitly; the plugin does not assume a default. |
 | `discounts` | array | Line-level Checkbox discounts; use `[]` if absent. |
 

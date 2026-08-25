@@ -113,7 +113,6 @@ final class ApiClient
                 'quantity' => $item['quantity_thousandths'],
                 'is_return' => (bool) $item['is_return'],
                 'discounts' => $item['discounts'],
-                'total_sum' => $item['line_total_cents'],
             ];
         }
 
