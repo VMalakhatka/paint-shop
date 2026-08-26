@@ -1313,6 +1313,9 @@ msgstr ""
 msgid "Automatic weekly SKU campaign"
 msgstr ""
 
+msgid "Campaign parameters and weekly schedule"
+msgstr ""
+
 #: inc/accounting-prices.php:588
 msgid "The schedule is disabled by default. Warehouses run sequentially. The first campaign also includes UNVERIFIED products; regular runs select only NEW and DIRTY states."
 msgstr ""
@@ -1388,6 +1391,12 @@ msgstr ""
 msgid "Enable weekly SKU campaign"
 msgstr ""
 
+msgid "Campaign parameters"
+msgstr ""
+
+msgid "These parameters apply to both manual runs and the weekly schedule."
+msgstr ""
+
 #: inc/accounting-prices.php:681
 msgid "Folio warehouses"
 msgstr ""
@@ -1439,6 +1448,9 @@ msgstr ""
 #: inc/accounting-prices.php:743
 #: inc/admin-ui.php:492
 msgid "Save schedule"
+msgstr ""
+
+msgid "Save campaign parameters and schedule"
 msgstr ""
 
 #: inc/accounting-prices.php:755

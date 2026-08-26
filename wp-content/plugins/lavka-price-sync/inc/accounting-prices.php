@@ -584,91 +584,116 @@ function lps_render_accounting_prices_page(): void {
             <div id="lps-ap-campaign-dashboard" class="lps-ap-campaign-dashboard" aria-live="polite"></div>
 
             <section class="lps-ap-cron-settings" aria-labelledby="lps-ap-cron-heading">
-                <h3 id="lps-ap-cron-heading"><?php echo esc_html__('Automatic weekly SKU campaign', 'lavka-price-sync'); ?></h3>
-                <p><?php echo esc_html__('The schedule is disabled by default. Warehouses run sequentially. The first campaign also includes UNVERIFIED products; regular runs select only NEW and DIRTY states.', 'lavka-price-sync'); ?></p>
-
-                <section class="lps-ap-saved-schedule" aria-labelledby="lps-ap-saved-schedule-heading">
-                    <h4 id="lps-ap-saved-schedule-heading"><?php echo esc_html__('Saved schedule', 'lavka-price-sync'); ?></h4>
-                    <dl class="lps-ap-cron-status">
-                        <div>
-                            <dt><?php echo esc_html__('Schedule status', 'lavka-price-sync'); ?></dt>
-                            <dd><?php echo esc_html($saved_schedule_status); ?></dd>
-                        </div>
-                        <div>
-                            <dt><?php echo esc_html__('Selected Folio warehouses', 'lavka-price-sync'); ?></dt>
-                            <dd id="lps-ap-saved-warehouses"
-                                data-warehouse-ids="<?php echo esc_attr(wp_json_encode($saved_warehouse_ids)); ?>"><?php echo esc_html($saved_warehouse_text); ?></dd>
-                        </div>
-                        <div>
-                            <dt><?php echo esc_html__('Weekly start', 'lavka-price-sync'); ?></dt>
-                            <dd>
-                                <?php
-                                printf(
-                                    /* translators: 1: weekday, 2: local start time, 3: WordPress timezone. */
-                                    esc_html__('%1$s at %2$s (%3$s)', 'lavka-price-sync'),
-                                    esc_html($saved_weekday),
-                                    esc_html((string)($cron_options['time'] ?? '03:30')),
-                                    esc_html(wp_timezone_string())
-                                );
-                                ?>
-                            </dd>
-                        </div>
-                        <div>
-                            <dt><?php echo esc_html__('Maintenance window', 'lavka-price-sync'); ?></dt>
-                            <dd>
-                                <?php
-                                printf(
-                                    /* translators: %d: maintenance window length in minutes. */
-                                    esc_html__('%d minutes', 'lavka-price-sync'),
-                                    absint($cron_options['campaign_window_minutes'] ?? 240)
-                                );
-                                ?>
-                            </dd>
-                        </div>
-                        <div>
-                            <dt><?php echo esc_html__('SKU batch sizes', 'lavka-price-sync'); ?></dt>
-                            <dd>
-                                <?php
-                                printf(
-                                    /* translators: 1: first batch size, 2: maximum batch size. */
-                                    esc_html__('first %1$d, maximum %2$d', 'lavka-price-sync'),
-                                    absint($cron_options['campaign_initial_batch_size'] ?? 100),
-                                    absint($cron_options['campaign_max_batch_size'] ?? 500)
-                                );
-                                ?>
-                            </dd>
-                        </div>
-                        <div>
-                            <dt><?php echo esc_html__('Snapshot horizon', 'lavka-price-sync'); ?></dt>
-                            <dd>
-                                <?php
-                                printf(
-                                    /* translators: %d: snapshot horizon in months. */
-                                    esc_html__('%d months', 'lavka-price-sync'),
-                                    absint($cron_options['campaign_horizon_months'] ?? 24)
-                                );
-                                ?>
-                            </dd>
-                        </div>
-                        <div>
-                            <dt><?php echo esc_html__('Next scheduled run', 'lavka-price-sync'); ?></dt>
-                            <dd><?php echo esc_html($next_run
-                                ? wp_date(get_option('date_format') . ' ' . get_option('time_format'), $next_run, wp_timezone())
-                                : __('Not scheduled', 'lavka-price-sync')); ?></dd>
-                        </div>
-                    </dl>
-                </section>
-
-                <?php if (!empty($cron_options['paused_reason'])): ?>
-                    <div class="notice notice-error inline"><p>
-                        <strong><?php echo esc_html__('Schedule paused:', 'lavka-price-sync'); ?></strong>
-                        <?php echo esc_html((string)$cron_options['paused_reason']); ?>
-                    </p></div>
-                <?php endif; ?>
+                <h3 id="lps-ap-cron-heading"><?php echo esc_html__('Campaign parameters and weekly schedule', 'lavka-price-sync'); ?></h3>
 
                 <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" class="lps-ap-cron-form">
                     <input type="hidden" name="action" value="lps_accounting_prices_save_cron">
                     <?php wp_nonce_field('lps_accounting_prices_save_cron'); ?>
+
+                    <fieldset class="lps-ap-campaign-parameters">
+                        <legend><?php echo esc_html__('Campaign parameters', 'lavka-price-sync'); ?></legend>
+                        <p class="description"><?php echo esc_html__('These parameters apply to both manual runs and the weekly schedule.', 'lavka-price-sync'); ?></p>
+                        <div class="lps-ap-campaign-parameters-grid">
+                            <label>
+                                <span><?php echo esc_html__('First batch size', 'lavka-price-sync'); ?></span>
+                                <input type="number" name="campaign_initial_batch_size" min="1" max="500" value="<?php echo esc_attr((string)$cron_options['campaign_initial_batch_size']); ?>">
+                            </label>
+                            <label>
+                                <span><?php echo esc_html__('Maximum batch size', 'lavka-price-sync'); ?></span>
+                                <input type="number" name="campaign_max_batch_size" min="1" max="500" value="<?php echo esc_attr((string)$cron_options['campaign_max_batch_size']); ?>">
+                            </label>
+                            <label>
+                                <span><?php echo esc_html__('Maintenance window, minutes', 'lavka-price-sync'); ?></span>
+                                <input type="number" name="campaign_window_minutes" min="30" max="720" value="<?php echo esc_attr((string)$cron_options['campaign_window_minutes']); ?>">
+                            </label>
+                            <label>
+                                <span><?php echo esc_html__('Snapshot horizon, months', 'lavka-price-sync'); ?></span>
+                                <input type="number" name="campaign_horizon_months" min="12" max="36" value="<?php echo esc_attr((string)$cron_options['campaign_horizon_months']); ?>">
+                            </label>
+                        </div>
+                    </fieldset>
+
+                    <h4 class="lps-ap-schedule-parameters-heading"><?php echo esc_html__('Automatic weekly SKU campaign', 'lavka-price-sync'); ?></h4>
+                    <p><?php echo esc_html__('The schedule is disabled by default. Warehouses run sequentially. The first campaign also includes UNVERIFIED products; regular runs select only NEW and DIRTY states.', 'lavka-price-sync'); ?></p>
+
+                    <section class="lps-ap-saved-schedule" aria-labelledby="lps-ap-saved-schedule-heading">
+                        <h4 id="lps-ap-saved-schedule-heading"><?php echo esc_html__('Saved schedule', 'lavka-price-sync'); ?></h4>
+                        <dl class="lps-ap-cron-status">
+                            <div>
+                                <dt><?php echo esc_html__('Schedule status', 'lavka-price-sync'); ?></dt>
+                                <dd><?php echo esc_html($saved_schedule_status); ?></dd>
+                            </div>
+                            <div>
+                                <dt><?php echo esc_html__('Selected Folio warehouses', 'lavka-price-sync'); ?></dt>
+                                <dd id="lps-ap-saved-warehouses"
+                                    data-warehouse-ids="<?php echo esc_attr(wp_json_encode($saved_warehouse_ids)); ?>"><?php echo esc_html($saved_warehouse_text); ?></dd>
+                            </div>
+                            <div>
+                                <dt><?php echo esc_html__('Weekly start', 'lavka-price-sync'); ?></dt>
+                                <dd>
+                                    <?php
+                                    printf(
+                                        /* translators: 1: weekday, 2: local start time, 3: WordPress timezone. */
+                                        esc_html__('%1$s at %2$s (%3$s)', 'lavka-price-sync'),
+                                        esc_html($saved_weekday),
+                                        esc_html((string)($cron_options['time'] ?? '03:30')),
+                                        esc_html(wp_timezone_string())
+                                    );
+                                    ?>
+                                </dd>
+                            </div>
+                            <div>
+                                <dt><?php echo esc_html__('Maintenance window', 'lavka-price-sync'); ?></dt>
+                                <dd>
+                                    <?php
+                                    printf(
+                                        /* translators: %d: maintenance window length in minutes. */
+                                        esc_html__('%d minutes', 'lavka-price-sync'),
+                                        absint($cron_options['campaign_window_minutes'] ?? 240)
+                                    );
+                                    ?>
+                                </dd>
+                            </div>
+                            <div>
+                                <dt><?php echo esc_html__('SKU batch sizes', 'lavka-price-sync'); ?></dt>
+                                <dd>
+                                    <?php
+                                    printf(
+                                        /* translators: 1: first batch size, 2: maximum batch size. */
+                                        esc_html__('first %1$d, maximum %2$d', 'lavka-price-sync'),
+                                        absint($cron_options['campaign_initial_batch_size'] ?? 100),
+                                        absint($cron_options['campaign_max_batch_size'] ?? 500)
+                                    );
+                                    ?>
+                                </dd>
+                            </div>
+                            <div>
+                                <dt><?php echo esc_html__('Snapshot horizon', 'lavka-price-sync'); ?></dt>
+                                <dd>
+                                    <?php
+                                    printf(
+                                        /* translators: %d: snapshot horizon in months. */
+                                        esc_html__('%d months', 'lavka-price-sync'),
+                                        absint($cron_options['campaign_horizon_months'] ?? 24)
+                                    );
+                                    ?>
+                                </dd>
+                            </div>
+                            <div>
+                                <dt><?php echo esc_html__('Next scheduled run', 'lavka-price-sync'); ?></dt>
+                                <dd><?php echo esc_html($next_run
+                                    ? wp_date(get_option('date_format') . ' ' . get_option('time_format'), $next_run, wp_timezone())
+                                    : __('Not scheduled', 'lavka-price-sync')); ?></dd>
+                            </div>
+                        </dl>
+                    </section>
+
+                    <?php if (!empty($cron_options['paused_reason'])): ?>
+                        <div class="notice notice-error inline"><p>
+                            <strong><?php echo esc_html__('Schedule paused:', 'lavka-price-sync'); ?></strong>
+                            <?php echo esc_html((string)$cron_options['paused_reason']); ?>
+                        </p></div>
+                    <?php endif; ?>
 
                     <label class="lps-ap-cron-toggle">
                         <input type="checkbox" name="enabled" value="1" <?php checked(!empty($cron_options['enabled'])); ?>>
@@ -707,22 +732,6 @@ function lps_render_accounting_prices_page(): void {
                             <span><?php echo esc_html__('Start time', 'lavka-price-sync'); ?></span>
                             <input type="time" name="time" value="<?php echo esc_attr((string)$cron_options['time']); ?>" required>
                         </label>
-                        <label>
-                            <span><?php echo esc_html__('First batch size', 'lavka-price-sync'); ?></span>
-                            <input type="number" name="campaign_initial_batch_size" min="1" max="500" value="<?php echo esc_attr((string)$cron_options['campaign_initial_batch_size']); ?>">
-                        </label>
-                        <label>
-                            <span><?php echo esc_html__('Maximum batch size', 'lavka-price-sync'); ?></span>
-                            <input type="number" name="campaign_max_batch_size" min="1" max="500" value="<?php echo esc_attr((string)$cron_options['campaign_max_batch_size']); ?>">
-                        </label>
-                        <label>
-                            <span><?php echo esc_html__('Maintenance window, minutes', 'lavka-price-sync'); ?></span>
-                            <input type="number" name="campaign_window_minutes" min="30" max="720" value="<?php echo esc_attr((string)$cron_options['campaign_window_minutes']); ?>">
-                        </label>
-                        <label>
-                            <span><?php echo esc_html__('Snapshot horizon, months', 'lavka-price-sync'); ?></span>
-                            <input type="number" name="campaign_horizon_months" min="12" max="36" value="<?php echo esc_attr((string)$cron_options['campaign_horizon_months']); ?>">
-                        </label>
                     </div>
 
                     <label class="lps-ap-cron-confirm">
@@ -740,7 +749,7 @@ function lps_render_accounting_prices_page(): void {
                         ?>
                     </p>
                     <p>
-                        <button type="submit" class="button button-primary"><?php echo esc_html__('Save schedule', 'lavka-price-sync'); ?></button>
+                        <button type="submit" class="button button-primary"><?php echo esc_html__('Save campaign parameters and schedule', 'lavka-price-sync'); ?></button>
                     </p>
                 </form>
 

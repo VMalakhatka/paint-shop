@@ -1503,6 +1503,9 @@ msgstr "Экспортировать отчёт кампании CSV"
 msgid "Automatic weekly SKU campaign"
 msgstr "Автоматическая еженедельная кампания SKU"
 
+msgid "Campaign parameters and weekly schedule"
+msgstr "Параметры кампании и еженедельное расписание"
+
 #: inc/accounting-prices.php:588
 msgid ""
 "The schedule is disabled by default. Warehouses run sequentially. The first "
@@ -1582,6 +1585,12 @@ msgstr "Расписание приостановлено:"
 msgid "Enable weekly SKU campaign"
 msgstr "Включить еженедельную кампанию SKU"
 
+msgid "Campaign parameters"
+msgstr "Параметры кампании"
+
+msgid "These parameters apply to both manual runs and the weekly schedule."
+msgstr "Эти параметры применяются к ручному запуску и расписанию."
+
 #: inc/accounting-prices.php:681
 msgid "Folio warehouses"
 msgstr "Склады ФОЛИО"
@@ -1650,6 +1659,9 @@ msgstr ""
 #: inc/accounting-prices.php:743 inc/admin-ui.php:492
 msgid "Save schedule"
 msgstr "Сохранить расписание"
+
+msgid "Save campaign parameters and schedule"
+msgstr "Сохранить параметры кампании и расписание"
 
 #: inc/accounting-prices.php:755
 msgid "Last native job status"

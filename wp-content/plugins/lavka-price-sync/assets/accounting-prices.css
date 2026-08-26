@@ -272,6 +272,49 @@
   margin: 14px 0;
 }
 
+.lps-ap-campaign-parameters {
+  max-width: 920px;
+  margin: 18px 0 22px;
+  padding: 16px;
+  border: 1px solid #c3c4c7;
+  border-left: 4px solid #dba617;
+  background: #fcf9e8;
+}
+
+.lps-ap-campaign-parameters legend,
+.lps-ap-schedule-parameters-heading {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.lps-ap-campaign-parameters .description {
+  margin: 0 0 14px;
+}
+
+.lps-ap-campaign-parameters-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  gap: 14px;
+}
+
+.lps-ap-campaign-parameters-grid label,
+.lps-ap-campaign-parameters-grid span {
+  display: block;
+}
+
+.lps-ap-campaign-parameters-grid span {
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+.lps-ap-campaign-parameters-grid input {
+  width: 100%;
+}
+
+.lps-ap-schedule-parameters-heading {
+  margin: 0 0 8px;
+}
+
 .lps-ap-cron-grid {
   display: grid;
   grid-template-columns: minmax(260px, 2fr) minmax(180px, 1fr) minmax(150px, 1fr);
@@ -657,6 +700,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .lps-ap-campaign-parameters-grid,
   .lps-ap-cron-grid,
   .lps-ap-cron-status {
     grid-template-columns: 1fr;
