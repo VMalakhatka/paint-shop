@@ -171,6 +171,125 @@ function lps_accounting_price_campaign_select_skus(
     return array_values(array_filter(array_map('strval', (array)$rows), static fn(string $sku): bool => $sku !== ''));
 }
 
+function lps_accounting_price_campaign_report_states(): array {
+    return ['NEW', 'DIRTY', 'FAILED', 'REMOVED'];
+}
+
+function lps_accounting_price_campaign_state_reason(string $verification_state): string {
+    switch (strtoupper($verification_state)) {
+        case 'NEW':
+            return __('The product was first found in Folio and has not yet received a confirmed recalculation.', 'lavka-price-sync');
+        case 'DIRTY':
+            return __('The Folio movement fingerprint changed after the last confirmed recalculation.', 'lavka-price-sync');
+        case 'FAILED':
+            return __('The product recalculation failed. Review the saved error and correct the Folio data before retrying.', 'lavka-price-sync');
+        case 'REMOVED':
+            return __('The product existed in an earlier snapshot but is absent from the current Folio warehouse snapshot.', 'lavka-price-sync');
+        default:
+            return '';
+    }
+}
+
+function lps_accounting_price_campaign_report_scope(?array $state = null): array {
+    $state = $state ?? lps_accounting_price_campaign_state();
+    $warehouse_id = absint($state['current_warehouse_id'] ?? 0);
+    $source_database = sanitize_text_field((string)($state['source_database'] ?? ''));
+
+    if ($warehouse_id > 0 && $source_database === '') {
+        $generation = lps_accounting_price_campaign_latest_generation($warehouse_id);
+        $source_database = sanitize_text_field((string)($generation['source_database'] ?? ''));
+    }
+
+    return [$source_database, $warehouse_id];
+}
+
+function lps_accounting_price_campaign_snapshot_items(string $verification_state, int $page = 1, int $per_page = 50): array {
+    global $wpdb;
+
+    $verification_state = strtoupper(sanitize_key($verification_state));
+    if (!in_array($verification_state, lps_accounting_price_campaign_report_states(), true)) {
+        return ['ok' => false, 'message' => __('Select a supported snapshot state.', 'lavka-price-sync')];
+    }
+    if (!lps_accounting_price_campaign_tables_ready()) {
+        return ['ok' => false, 'message' => __('The Folio product snapshot tables are unavailable.', 'lavka-price-sync')];
+    }
+
+    [$source_database, $warehouse_id] = lps_accounting_price_campaign_report_scope();
+    if ($source_database === '' || $warehouse_id < 1) {
+        return ['ok' => false, 'message' => __('No completed snapshot is available for this campaign.', 'lavka-price-sync')];
+    }
+
+    $tables = lps_accounting_price_campaign_snapshot_tables();
+    $change_table = 'folio_product_snapshot_change';
+    $page = max(1, $page);
+    $per_page = in_array($per_page, [20, 50, 100, 500], true) ? $per_page : 50;
+    $total = (int)$wpdb->get_var($wpdb->prepare(
+        "SELECT COUNT(*) FROM {$tables['item']}
+         WHERE source_database = %s AND warehouse_id = %d AND verification_state = %s",
+        $source_database,
+        $warehouse_id,
+        $verification_state
+    ));
+    $pages = max(1, (int)ceil($total / $per_page));
+    $page = min($page, $pages);
+    $offset = ($page - 1) * $per_page;
+
+    $items = $wpdb->get_results($wpdb->prepare(
+        "SELECT sku, product_name, verification_state, present_in_folio,
+                movement_count, first_movement_date, last_movement_date,
+                first_seen_at, last_seen_at, last_observed_at, applied_at,
+                last_generation_id, last_error, observed_digest, applied_digest
+         FROM {$tables['item']}
+         WHERE source_database = %s AND warehouse_id = %d AND verification_state = %s
+         ORDER BY sku ASC LIMIT %d OFFSET %d",
+        $source_database,
+        $warehouse_id,
+        $verification_state,
+        $per_page,
+        $offset
+    ), ARRAY_A) ?: [];
+
+    $changes_by_sku = [];
+    $skus = array_values(array_filter(array_map(static fn(array $row): string => (string)($row['sku'] ?? ''), $items)));
+    if ($skus) {
+        $placeholders = implode(',', array_fill(0, count($skus), '%s'));
+        $change_args = array_merge([$source_database, $warehouse_id], $skus);
+        $changes = $wpdb->get_results($wpdb->prepare(
+            "SELECT sku, change_type, detected_at, generation_id
+             FROM {$change_table}
+             WHERE source_database = %s AND warehouse_id = %d AND sku IN ({$placeholders})
+             ORDER BY detected_at DESC, id DESC",
+            ...$change_args
+        ), ARRAY_A) ?: [];
+        foreach ($changes as $change) {
+            $sku = (string)($change['sku'] ?? '');
+            if ($sku !== '' && !isset($changes_by_sku[$sku])) {
+                $changes_by_sku[$sku] = $change;
+            }
+        }
+    }
+
+    foreach ($items as &$item) {
+        $sku = (string)($item['sku'] ?? '');
+        $item['latest_change'] = $changes_by_sku[$sku] ?? null;
+        $item['digest_matches'] = !empty($item['observed_digest'])
+            && hash_equals((string)$item['observed_digest'], (string)($item['applied_digest'] ?? ''));
+        unset($item['observed_digest'], $item['applied_digest']);
+    }
+    unset($item);
+
+    return [
+        'ok' => true,
+        'state' => $verification_state,
+        'warehouseId' => $warehouse_id,
+        'items' => $items,
+        'total' => $total,
+        'page' => $page,
+        'pages' => $pages,
+        'perPage' => $per_page,
+    ];
+}
+
 function lps_accounting_price_campaign_batch_size(array $state): int {
     $initial = max(1, min(500, absint($state['initial_batch_size'] ?? 100)));
     $maximum = max($initial, min(500, absint($state['max_batch_size'] ?? 500)));
@@ -908,6 +1027,76 @@ function lps_accounting_price_campaign_csv_cell($value): string {
 add_action(LPS_ACCOUNTING_PRICE_CAMPAIGN_TICK_HOOK, 'lps_accounting_price_campaign_tick');
 add_action('init', 'lps_accounting_price_campaign_maybe_resume', 31);
 
+add_action('admin_post_lps_accounting_price_snapshot_report_export', function (): void {
+    if (!current_user_can(LPS_CAP)) {
+        wp_die(esc_html__('You do not have permission to perform this operation.', 'lavka-price-sync'));
+    }
+    check_admin_referer('lps_accounting_price_snapshot_report_export');
+
+    $verification_state = strtoupper(sanitize_key(wp_unslash($_GET['verification_state'] ?? '')));
+    if (!in_array($verification_state, lps_accounting_price_campaign_report_states(), true)) {
+        wp_die(esc_html__('Select a supported snapshot state.', 'lavka-price-sync'));
+    }
+
+    $filename = 'folio-accounting-price-snapshot-' . strtolower($verification_state) . '-' . gmdate('Ymd-His') . '.csv';
+    nocache_headers();
+    header('Content-Type: text/csv; charset=UTF-8');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+    $output = fopen('php://output', 'wb');
+    if ($output === false) exit;
+    fwrite($output, "\xEF\xBB\xBF");
+    fputcsv($output, [
+        __('State', 'lavka-price-sync'),
+        __('Warehouse', 'lavka-price-sync'),
+        __('SKU', 'lavka-price-sync'),
+        __('Product', 'lavka-price-sync'),
+        __('Reason', 'lavka-price-sync'),
+        __('Last error', 'lavka-price-sync'),
+        __('Present in Folio', 'lavka-price-sync'),
+        __('Movements', 'lavka-price-sync'),
+        __('First movement', 'lavka-price-sync'),
+        __('Last movement', 'lavka-price-sync'),
+        __('Last observed', 'lavka-price-sync'),
+        __('Last recalculated', 'lavka-price-sync'),
+        __('Latest change', 'lavka-price-sync'),
+        __('Change detected', 'lavka-price-sync'),
+    ]);
+
+    $page = 1;
+    do {
+        $report = lps_accounting_price_campaign_snapshot_items($verification_state, $page, 500);
+        if (empty($report['ok'])) {
+            fclose($output);
+            exit;
+        }
+        foreach ((array)($report['items'] ?? []) as $item) {
+            if (!is_array($item)) continue;
+            $change = is_array($item['latest_change'] ?? null) ? $item['latest_change'] : [];
+            fputcsv($output, array_map('lps_accounting_price_campaign_csv_cell', [
+                $verification_state,
+                (string)($report['warehouseId'] ?? ''),
+                (string)($item['sku'] ?? ''),
+                (string)($item['product_name'] ?? ''),
+                lps_accounting_price_campaign_state_reason($verification_state),
+                (string)($item['last_error'] ?? ''),
+                !empty($item['present_in_folio']) ? __('Yes', 'lavka-price-sync') : __('No', 'lavka-price-sync'),
+                (string)($item['movement_count'] ?? 0),
+                (string)($item['first_movement_date'] ?? ''),
+                (string)($item['last_movement_date'] ?? ''),
+                (string)($item['last_observed_at'] ?? ''),
+                (string)($item['applied_at'] ?? ''),
+                (string)($change['change_type'] ?? ''),
+                (string)($change['detected_at'] ?? ''),
+            ]));
+        }
+        $page++;
+    } while ($page <= absint($report['pages'] ?? 1));
+
+    fclose($output);
+    exit;
+});
+
 add_action('admin_post_lps_accounting_price_campaign_export', function (): void {
     if (!current_user_can(LPS_CAP)) {
         wp_die(esc_html__('You do not have permission to perform this operation.', 'lavka-price-sync'));
@@ -931,6 +1120,12 @@ add_action('admin_post_lps_accounting_price_campaign_export', function (): void 
         __('SKU', 'lavka-price-sync'),
         __('SKU count', 'lavka-price-sync'),
         __('Message', 'lavka-price-sync'),
+        __('Document', 'lavka-price-sync'),
+        __('Problem date', 'lavka-price-sync'),
+        __('Before operation', 'lavka-price-sync'),
+        __('Operation quantity', 'lavka-price-sync'),
+        __('After operation', 'lavka-price-sync'),
+        __('Shortage', 'lavka-price-sync'),
         __('Technical details', 'lavka-price-sync'),
     ]);
 
@@ -944,6 +1139,12 @@ add_action('admin_post_lps_accounting_price_campaign_export', function (): void 
             trim((string)($report['first_sku'] ?? '') . (($report['last_sku'] ?? '') !== ($report['first_sku'] ?? '') ? ' … ' . (string)($report['last_sku'] ?? '') : '')),
             (string)($report['sku_count'] ?? 0),
             (string)($report['error'] ?? ''),
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
             (string)wp_json_encode($report, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
         ]));
     }
@@ -951,6 +1152,11 @@ add_action('admin_post_lps_accounting_price_campaign_export', function (): void 
     foreach ((array)($state['warnings'] ?? []) as $issue) {
         if (!is_array($issue)) continue;
         $details = is_array($issue['details'] ?? null) ? $issue['details'] : [];
+        $operation = is_array($details['operation'] ?? null) ? $details['operation'] : [];
+        $document = trim((string)($operation['documentNumber'] ?? ''));
+        if ($document === '') $document = trim((string)($operation['documentId'] ?? ''));
+        $document_type = trim((string)($operation['documentType'] ?? ''));
+        if ($document_type !== '') $document = trim($document_type . ' ' . $document);
         fputcsv($output, array_map('lps_accounting_price_campaign_csv_cell', [
             (string)($issue['recordedAt'] ?? ''),
             strtolower((string)($issue['severity'] ?? 'warning')) === 'error'
@@ -961,6 +1167,12 @@ add_action('admin_post_lps_accounting_price_campaign_export', function (): void 
             (string)($issue['sku'] ?? ($details['sku'] ?? ($details['art'] ?? ($details['inputArt'] ?? '')))),
             '1',
             (string)($issue['message'] ?? ''),
+            $document,
+            (string)($operation['documentDate'] ?? ($details['problemDate'] ?? '')),
+            (string)($details['quantityBefore'] ?? ''),
+            (string)($operation['quantity'] ?? ($details['movementQuantity'] ?? '')),
+            (string)($details['quantityAfter'] ?? ''),
+            (string)($details['shortageQuantity'] ?? ''),
             (string)wp_json_encode($details, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
         ]));
     }
@@ -973,6 +1185,12 @@ add_action('admin_post_lps_accounting_price_campaign_export', function (): void 
             '',
             '',
             __('Only the most recent diagnostics are stored in WordPress. Review the Java logs for the complete history.', 'lavka-price-sync'),
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
             '',
         ]));
     }

@@ -21,6 +21,8 @@
 
   let pollTimer = null;
   let campaignActive = false;
+  let selectedSnapshotState = '';
+  let snapshotReportRequest = 0;
 
   function node(tag, className, value) {
     const item = document.createElement(tag);
@@ -94,6 +96,131 @@
     return section;
   }
 
+  function interpolate(template, values) {
+    return String(template || '').replace(/%(\d+)\$d/g, (_, position) => String(values[Number(position) - 1] ?? ''));
+  }
+
+  function display(value) {
+    return value === 0 || value ? String(value) : '—';
+  }
+
+  function renderSnapshotItems(target, report) {
+    target.replaceChildren();
+    if (!report?.ok) {
+      target.append(node('div', 'notice notice-error inline', report?.message || t.requestFailed || 'Request failed'));
+      return;
+    }
+    if (!Array.isArray(report.items) || !report.items.length) {
+      target.append(node('p', 'description', t.noStateItems || 'No products'));
+      return;
+    }
+
+    const wrap = node('div', 'lps-ap-table-scroll');
+    const table = node('table', 'widefat striped lps-ap-snapshot-report-table');
+    const head = node('thead');
+    const header = node('tr');
+    [t.sku, t.product, t.state, t.stateReason, t.lastError, t.movements, t.movementPeriod, t.lastObserved, t.lastRecalculated, t.latestChange]
+      .forEach((label) => header.append(node('th', '', label)));
+    head.append(header);
+    const body = node('tbody');
+    report.items.forEach((item) => {
+      const change = item?.latest_change && typeof item.latest_change === 'object' ? item.latest_change : {};
+      const movementPeriod = [item?.first_movement_date, item?.last_movement_date].filter(Boolean).join(' – ') || '—';
+      const changeText = [change.change_type, change.detected_at].filter(Boolean).join(' · ') || '—';
+      const reason = t.stateReasons?.[item?.verification_state] || item?.verification_state || '—';
+      const row = node('tr');
+      row.append(
+        node('td', 'lps-ap-snapshot-sku', display(item?.sku)),
+        node('td', '', display(item?.product_name)),
+        node('td', '', display(item?.verification_state)),
+        node('td', '', reason),
+        node('td', item?.last_error ? 'is-error-text' : '', display(item?.last_error)),
+        node('td', '', integer.format(Number(item?.movement_count || 0))),
+        node('td', '', movementPeriod),
+        node('td', '', display(item?.last_observed_at)),
+        node('td', '', display(item?.applied_at)),
+        node('td', '', changeText)
+      );
+      body.append(row);
+    });
+    table.append(head, body);
+    wrap.append(table);
+    target.append(wrap);
+
+    const pagination = node('div', 'tablenav bottom lps-ap-snapshot-pagination');
+    const previous = node('button', 'button', t.previousPage || 'Previous');
+    previous.type = 'button';
+    previous.disabled = Number(report.page || 1) <= 1;
+    previous.addEventListener('click', () => loadSnapshotReport(target, report.state, Number(report.page) - 1));
+    const pageText = node('span', '', interpolate(t.pageOf || 'Page %1$d of %2$d', [report.page, report.pages]));
+    const next = node('button', 'button', t.nextPage || 'Next');
+    next.type = 'button';
+    next.disabled = Number(report.page || 1) >= Number(report.pages || 1);
+    next.addEventListener('click', () => loadSnapshotReport(target, report.state, Number(report.page) + 1));
+    pagination.append(previous, pageText, next);
+    target.append(pagination);
+  }
+
+  async function loadSnapshotReport(target, verificationState, page) {
+    const requestId = ++snapshotReportRequest;
+    target.replaceChildren(node('p', 'description', t.loading || 'Loading...'));
+    try {
+      const report = await request('campaign_snapshot_items', {
+        verificationState,
+        page: Math.max(1, Number(page || 1)),
+        perPage: 50
+      });
+      if (requestId !== snapshotReportRequest || selectedSnapshotState !== verificationState) return;
+      renderSnapshotItems(target, report);
+    } catch (error) {
+      if (requestId !== snapshotReportRequest) return;
+      target.replaceChildren(node('div', 'notice notice-error inline', error.message || t.requestFailed || 'Request failed'));
+    }
+  }
+
+  function renderSnapshotReportControls(counts) {
+    const states = ['NEW', 'DIRTY', 'FAILED', 'REMOVED'];
+    const available = states.filter((state) => Number(counts?.[state] || 0) > 0);
+    const section = node('section', 'lps-ap-state-section lps-ap-snapshot-report');
+    section.append(node('h3', '', t.stateReport || 'Snapshot state report'));
+    section.append(node('p', 'description', t.stateReportDescription || 'Open a state to view its products.'));
+
+    const actions = node('div', 'lps-ap-snapshot-report-actions');
+    const results = node('div', 'lps-ap-snapshot-report-results');
+    const exportLink = node('a', 'button', t.exportState || 'Export CSV');
+    exportLink.hidden = true;
+
+    const activate = (state) => {
+      selectedSnapshotState = state;
+      actions.querySelectorAll('button[data-state]').forEach((button) => {
+        button.classList.toggle('button-primary', button.dataset.state === state);
+      });
+      if (config.snapshotReportExportUrl) {
+        const url = new URL(config.snapshotReportExportUrl, window.location.href);
+        url.searchParams.set('verification_state', state);
+        exportLink.href = url.toString();
+        exportLink.hidden = false;
+      }
+      loadSnapshotReport(results, state, 1);
+    };
+
+    states.forEach((state) => {
+      const count = Number(counts?.[state] || 0);
+      const button = node('button', 'button', `${t.viewState || 'View'} ${state} (${integer.format(count)})`);
+      button.type = 'button';
+      button.dataset.state = state;
+      button.addEventListener('click', () => activate(state));
+      actions.append(button);
+    });
+    actions.append(exportLink);
+    section.append(actions, results);
+
+    const initial = available.includes(selectedSnapshotState) ? selectedSnapshotState : available[0];
+    if (initial) window.setTimeout(() => activate(initial), 0);
+    else results.append(node('p', 'description', t.noStateItems || 'No products'));
+    return section;
+  }
+
   function renderReports(reports) {
     const section = node('section', 'lps-ap-state-section');
     section.append(node('h3', '', t.reports || 'Reports'));
@@ -159,10 +286,49 @@
       const severity = String(warning?.severity || '').toLowerCase();
       const rowClass = severity === 'error' ? 'is-error' : (details.skipped ? 'is-warning' : '');
       const row = node('tr', rowClass ? `lps-ap-batch-row ${rowClass}` : '');
+      const messageCell = node('td');
+      messageCell.append(node('p', '', warning?.message || '—'));
+      if (String(warning?.code || '').toUpperCase() === 'NEGATIVE_CHRONOLOGICAL_STOCK') {
+        const operation = details.operation && typeof details.operation === 'object' ? details.operation : {};
+        const currentState = details.currentState && typeof details.currentState === 'object' ? details.currentState : {};
+        const documentNumber = operation.documentNumber || operation.documentId || '';
+        const document = [operation.documentType, documentNumber].filter(Boolean).join(' · ') || '—';
+        const operationKind = String(operation.kind || '').toUpperCase();
+        const operationLabel = operationKind === 'RECEIPT'
+          ? t.receipt
+          : (operationKind === 'EXPENSE' ? t.expense : (operation.kind || t.unknownOperation));
+        const operationValue = [operationLabel, operation.quantity].filter((value) => value === 0 || value).join(' · ') || '—';
+        const movementPosition = details.movementPosition || details.movementCount
+          ? `${display(details.movementPosition)} / ${display(details.movementCount)}`
+          : '—';
+        const explanation = node('div', 'lps-ap-negative-diagnostic');
+        explanation.append(node('p', 'lps-ap-negative-explanation', t.negativeStockExplanation || 'Chronological stock became negative.'));
+        const grid = node('dl', 'lps-ap-negative-grid');
+        [
+          [t.document, document],
+          [t.problemDate, operation.documentDate || details.problemDate],
+          [t.warehouse, operation.warehouseId || details.warehouseId],
+          [t.initialQuantity, details.initialQuantity],
+          [t.movementRecord, operation.recno],
+          [t.beforeOperation, details.quantityBefore],
+          [t.operationQuantity, operationValue],
+          [t.afterOperation, details.quantityAfter],
+          [t.shortage, details.shortageQuantity],
+          [t.movementPosition, movementPosition],
+          [t.currentPhysicalQuantity, currentState.physicalQuantity],
+          [t.currentAccountingQuantity, currentState.accountingQuantity]
+        ].forEach(([label, value]) => {
+          const item = node('div');
+          item.append(node('dt', '', label || '—'), node('dd', '', display(value)));
+          grid.append(item);
+        });
+        explanation.append(grid);
+        messageCell.append(explanation);
+      }
       row.append(
         node('td', '', sku || '—'),
         node('td', '', warning?.code || '—'),
-        node('td', '', warning?.message || '—'),
+        messageCell,
         detailCell
       );
       body.append(row);
@@ -232,6 +398,7 @@
     }
     if (state.countsAfter && Object.keys(state.countsAfter).length) {
       elements.dashboard.append(renderCounts(t.statesAfter || 'States after', state.countsAfter));
+      elements.dashboard.append(renderSnapshotReportControls(state.countsAfter));
     }
     elements.dashboard.append(renderReports(state.reports));
     elements.dashboard.append(renderWarnings(state.warnings, state.warningsTruncated));

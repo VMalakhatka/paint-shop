@@ -2352,3 +2352,102 @@ msgstr ""
 #: inc/sync.php:302
 msgid "Manual listed price synchronization"
 msgstr ""
+
+msgid "The product was first found in Folio and has not yet received a confirmed recalculation."
+msgstr ""
+
+msgid "The Folio movement fingerprint changed after the last confirmed recalculation."
+msgstr ""
+
+msgid "The product recalculation failed. Review the saved error and correct the Folio data before retrying."
+msgstr ""
+
+msgid "The product existed in an earlier snapshot but is absent from the current Folio warehouse snapshot."
+msgstr ""
+
+msgid "Select a supported snapshot state."
+msgstr ""
+
+msgid "The Folio product snapshot tables are unavailable."
+msgstr ""
+
+msgid "No completed snapshot is available for this campaign."
+msgstr ""
+
+msgid "State"
+msgstr ""
+
+msgid "Last error"
+msgstr ""
+
+msgid "Present in Folio"
+msgstr ""
+
+msgid "Movements"
+msgstr ""
+
+msgid "First movement"
+msgstr ""
+
+msgid "Last movement"
+msgstr ""
+
+msgid "Last observed"
+msgstr ""
+
+msgid "Last recalculated"
+msgstr ""
+
+msgid "Latest change"
+msgstr ""
+
+msgid "Change detected"
+msgstr ""
+
+msgid "No"
+msgstr ""
+
+msgid "Operation quantity"
+msgstr ""
+
+msgid "Snapshot state report"
+msgstr ""
+
+msgid "Open NEW, DIRTY, FAILED, or REMOVED to review the actual products behind the counters."
+msgstr ""
+
+msgid "View"
+msgstr ""
+
+msgid "Export selected state CSV"
+msgstr ""
+
+msgid "There are no products in this snapshot state."
+msgstr ""
+
+msgid "Why this state is assigned"
+msgstr ""
+
+msgid "Movement period"
+msgstr ""
+
+msgid "Previous page"
+msgstr ""
+
+msgid "Next page"
+msgstr ""
+
+msgid "The chronological stock became negative at this movement. Check the document date, quantity, warehouse, and movement order in Folio."
+msgstr ""
+
+msgid "Movement record"
+msgstr ""
+
+msgid "Movement position"
+msgstr ""
+
+msgid "Current physical quantity"
+msgstr ""
+
+msgid "Current accounting quantity"
+msgstr ""

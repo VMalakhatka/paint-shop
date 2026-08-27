@@ -236,6 +236,83 @@
   white-space: pre-wrap;
 }
 
+.lps-ap-snapshot-report {
+  padding: 16px;
+  border: 1px solid #c3c4c7;
+  border-left: 4px solid #2271b1;
+  background: #fff;
+}
+
+.lps-ap-snapshot-report-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.lps-ap-snapshot-report-results {
+  min-height: 44px;
+}
+
+.lps-ap-snapshot-report-table {
+  min-width: 1320px;
+}
+
+.lps-ap-snapshot-report-table th,
+.lps-ap-snapshot-report-table td {
+  vertical-align: top;
+}
+
+.lps-ap-snapshot-report-table .lps-ap-snapshot-sku {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.lps-ap-snapshot-report-table .is-error-text {
+  color: #b32d2e;
+}
+
+.lps-ap-snapshot-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.lps-ap-negative-diagnostic {
+  margin-top: 10px;
+  padding: 10px;
+  border-left: 4px solid #d63638;
+  background: #fcf0f1;
+}
+
+.lps-ap-negative-explanation {
+  margin: 0 0 9px;
+  font-weight: 600;
+}
+
+.lps-ap-negative-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(150px, 1fr));
+  gap: 7px 14px;
+  margin: 0;
+}
+
+.lps-ap-negative-grid div {
+  min-width: 0;
+}
+
+.lps-ap-negative-grid dt {
+  color: #646970;
+  font-size: 12px;
+}
+
+.lps-ap-negative-grid dd {
+  margin: 2px 0 0;
+  overflow-wrap: anywhere;
+  font-weight: 600;
+}
+
 .lps-ap-cron-settings {
   max-width: 1120px;
   margin-top: 28px;
@@ -701,6 +778,7 @@
   }
 
   .lps-ap-campaign-parameters-grid,
+  .lps-ap-negative-grid,
   .lps-ap-cron-grid,
   .lps-ap-cron-status {
     grid-template-columns: 1fr;

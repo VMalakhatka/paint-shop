@@ -196,6 +196,10 @@ add_action('admin_enqueue_scripts', function () {
     wp_localize_script('lps-accounting-price-campaign', 'LPS_ACCOUNTING_PRICE_CAMPAIGN', [
         'ajaxUrl' => admin_url('admin-ajax.php'),
         'nonce' => wp_create_nonce('lps_accounting_prices'),
+        'snapshotReportExportUrl' => wp_nonce_url(
+            admin_url('admin-post.php?action=lps_accounting_price_snapshot_report_export'),
+            'lps_accounting_price_snapshot_report_export'
+        ),
         'pollInterval' => 5000,
         'i18n' => [
             'startConfirm' => __('Start the accounting-price SKU campaign for the selected warehouse?', 'lavka-price-sync'),
@@ -203,6 +207,7 @@ add_action('admin_enqueue_scripts', function () {
             'warehouseRequired' => __('Select a Folio warehouse.', 'lavka-price-sync'),
             'confirmationRequired' => __('Confirm the maintenance window before starting the campaign.', 'lavka-price-sync'),
             'requestFailed' => __('The server request failed.', 'lavka-price-sync'),
+            'loading' => __('Loading...', 'lavka-price-sync'),
             'idle' => __('No SKU campaign has been started yet.', 'lavka-price-sync'),
             'noReports' => __('The campaign has not completed any batches yet.', 'lavka-price-sync'),
             'noWarnings' => __('No skipped products or warnings were recorded.', 'lavka-price-sync'),
@@ -219,8 +224,46 @@ add_action('admin_enqueue_scripts', function () {
             'currentBatch' => __('Current SKU batch', 'lavka-price-sync'),
             'statesBefore' => __('Snapshot states before processing', 'lavka-price-sync'),
             'statesAfter' => __('Snapshot states after processing', 'lavka-price-sync'),
+            'stateReport' => __('Snapshot state report', 'lavka-price-sync'),
+            'stateReportDescription' => __('Open NEW, DIRTY, FAILED, or REMOVED to review the actual products behind the counters.', 'lavka-price-sync'),
+            'viewState' => __('View', 'lavka-price-sync'),
+            'exportState' => __('Export selected state CSV', 'lavka-price-sync'),
+            'noStateItems' => __('There are no products in this snapshot state.', 'lavka-price-sync'),
+            'product' => __('Product', 'lavka-price-sync'),
+            'state' => __('State', 'lavka-price-sync'),
+            'stateReason' => __('Why this state is assigned', 'lavka-price-sync'),
+            'lastError' => __('Last error', 'lavka-price-sync'),
+            'movements' => __('Movements', 'lavka-price-sync'),
+            'movementPeriod' => __('Movement period', 'lavka-price-sync'),
+            'lastObserved' => __('Last observed', 'lavka-price-sync'),
+            'lastRecalculated' => __('Last recalculated', 'lavka-price-sync'),
+            'latestChange' => __('Latest change', 'lavka-price-sync'),
+            'previousPage' => __('Previous page', 'lavka-price-sync'),
+            'nextPage' => __('Next page', 'lavka-price-sync'),
+            'pageOf' => __('Page %1$d of %2$d', 'lavka-price-sync'),
+            'stateReasons' => [
+                'NEW' => __('The product was first found in Folio and has not yet received a confirmed recalculation.', 'lavka-price-sync'),
+                'DIRTY' => __('The Folio movement fingerprint changed after the last confirmed recalculation.', 'lavka-price-sync'),
+                'FAILED' => __('The product recalculation failed. Review the saved error and correct the Folio data before retrying.', 'lavka-price-sync'),
+                'REMOVED' => __('The product existed in an earlier snapshot but is absent from the current Folio warehouse snapshot.', 'lavka-price-sync'),
+            ],
             'reports' => __('Batch and warehouse report', 'lavka-price-sync'),
             'warningReport' => __('Skipped products and diagnostics', 'lavka-price-sync'),
+            'negativeStockExplanation' => __('The chronological stock became negative at this movement. Check the document date, quantity, warehouse, and movement order in Folio.', 'lavka-price-sync'),
+            'document' => __('Document', 'lavka-price-sync'),
+            'problemDate' => __('Problem date', 'lavka-price-sync'),
+            'initialQuantity' => __('Initial quantity', 'lavka-price-sync'),
+            'movementRecord' => __('Movement record', 'lavka-price-sync'),
+            'beforeOperation' => __('Before operation', 'lavka-price-sync'),
+            'operationQuantity' => __('Operation quantity', 'lavka-price-sync'),
+            'afterOperation' => __('After operation', 'lavka-price-sync'),
+            'shortage' => __('Shortage', 'lavka-price-sync'),
+            'movementPosition' => __('Movement position', 'lavka-price-sync'),
+            'currentPhysicalQuantity' => __('Current physical quantity', 'lavka-price-sync'),
+            'currentAccountingQuantity' => __('Current accounting quantity', 'lavka-price-sync'),
+            'receipt' => __('receipt', 'lavka-price-sync'),
+            'expense' => __('expense', 'lavka-price-sync'),
+            'unknownOperation' => __('operation', 'lavka-price-sync'),
             'when' => __('When', 'lavka-price-sync'),
             'result' => __('Result', 'lavka-price-sync'),
             'skuCount' => __('SKU count', 'lavka-price-sync'),
@@ -1042,6 +1085,14 @@ function lps_accounting_prices_ajax(): void {
 
         case 'campaign_status':
             wp_send_json_success(lps_accounting_price_campaign_public_state());
+            break;
+
+        case 'campaign_snapshot_items':
+            wp_send_json_success(lps_accounting_price_campaign_snapshot_items(
+                (string)wp_unslash($_POST['verificationState'] ?? ''),
+                absint($_POST['page'] ?? 1),
+                absint($_POST['perPage'] ?? 50)
+            ));
             break;
 
         case 'campaign_stop':

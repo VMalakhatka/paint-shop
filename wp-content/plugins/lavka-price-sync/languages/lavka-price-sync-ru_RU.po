@@ -2657,3 +2657,102 @@ msgstr "Ручная синхронизация цен для указанных
 
 #~ msgid "Lavka Price hourly"
 #~ msgstr "Lavka Price — ежечасно"
+
+msgid "The product was first found in Folio and has not yet received a confirmed recalculation."
+msgstr "Товар впервые найден в ФОЛИО, и для него ещё нет подтверждённого пересчёта."
+
+msgid "The Folio movement fingerprint changed after the last confirmed recalculation."
+msgstr "Отпечаток движений ФОЛИО изменился после последнего подтверждённого пересчёта."
+
+msgid "The product recalculation failed. Review the saved error and correct the Folio data before retrying."
+msgstr "Пересчёт товара завершился ошибкой. Просмотрите сохранённую ошибку и исправьте данные ФОЛИО перед повторным запуском."
+
+msgid "The product existed in an earlier snapshot but is absent from the current Folio warehouse snapshot."
+msgstr "Товар был в предыдущем снимке, но отсутствует в текущем снимке склада ФОЛИО."
+
+msgid "Select a supported snapshot state."
+msgstr "Выберите поддерживаемое состояние снимка."
+
+msgid "The Folio product snapshot tables are unavailable."
+msgstr "Таблицы снимка товаров ФОЛИО недоступны."
+
+msgid "No completed snapshot is available for this campaign."
+msgstr "Для этой кампании нет доступного завершённого снимка."
+
+msgid "State"
+msgstr "Состояние"
+
+msgid "Last error"
+msgstr "Последняя ошибка"
+
+msgid "Present in Folio"
+msgstr "Присутствует в ФОЛИО"
+
+msgid "Movements"
+msgstr "Движений"
+
+msgid "First movement"
+msgstr "Первое движение"
+
+msgid "Last movement"
+msgstr "Последнее движение"
+
+msgid "Last observed"
+msgstr "Последнее наблюдение"
+
+msgid "Last recalculated"
+msgstr "Последний пересчёт"
+
+msgid "Latest change"
+msgstr "Последнее изменение"
+
+msgid "Change detected"
+msgstr "Изменение обнаружено"
+
+msgid "No"
+msgstr "Нет"
+
+msgid "Operation quantity"
+msgstr "Количество операции"
+
+msgid "Snapshot state report"
+msgstr "Отчёт по состояниям снимка"
+
+msgid "Open NEW, DIRTY, FAILED, or REMOVED to review the actual products behind the counters."
+msgstr "Откройте NEW, DIRTY, FAILED или REMOVED, чтобы просмотреть товары, входящие в эти счётчики."
+
+msgid "View"
+msgstr "Просмотреть"
+
+msgid "Export selected state CSV"
+msgstr "Экспортировать выбранное состояние в CSV"
+
+msgid "There are no products in this snapshot state."
+msgstr "В этом состоянии снимка нет товаров."
+
+msgid "Why this state is assigned"
+msgstr "Почему назначено это состояние"
+
+msgid "Movement period"
+msgstr "Период движений"
+
+msgid "Previous page"
+msgstr "Предыдущая страница"
+
+msgid "Next page"
+msgstr "Следующая страница"
+
+msgid "The chronological stock became negative at this movement. Check the document date, quantity, warehouse, and movement order in Folio."
+msgstr "На этом движении хронологический остаток стал отрицательным. Проверьте в ФОЛИО дату документа, количество, склад и последовательность движений."
+
+msgid "Movement record"
+msgstr "Запись движения"
+
+msgid "Movement position"
+msgstr "Позиция движения"
+
+msgid "Current physical quantity"
+msgstr "Текущий физический остаток"
+
+msgid "Current accounting quantity"
+msgstr "Текущий учётный остаток"
