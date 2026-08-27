@@ -2744,3 +2744,105 @@ msgstr "Поточний фізичний залишок"
 
 msgid "Current accounting quantity"
 msgstr "Поточний обліковий залишок"
+
+msgid "Warehouse %d"
+msgstr "Склад %d"
+
+msgid "The snapshot marks this product as failed."
+msgstr "Знімок позначає цей товар як помилковий."
+
+msgid "All Folio warehouses"
+msgstr "Усі склади ФОЛІО"
+
+msgid "Loading the latest state of all Folio warehouses..."
+msgstr "Завантаження останнього стану всіх складів ФОЛІО..."
+
+msgid "Refresh warehouse overview"
+msgstr "Оновити огляд складів"
+
+msgid "Warehouses in directory"
+msgstr "Складів у довіднику"
+
+msgid "Never processed"
+msgstr "Ще не оброблялися"
+
+msgid "Warehouses with errors"
+msgstr "Складів із помилками"
+
+msgid "Negative stock cases"
+msgstr "Випадків від'ємного залишку"
+
+msgid "View negative stock for all warehouses"
+msgstr "Переглянути від'ємні залишки всіх складів"
+
+msgid "View errors for all warehouses"
+msgstr "Переглянути помилки всіх складів"
+
+msgid "Processing state"
+msgstr "Стан обробки"
+
+msgid "Last processing"
+msgstr "Остання обробка"
+
+msgid "Last snapshot"
+msgstr "Останній знімок"
+
+msgid "Last recalculation"
+msgstr "Останній перерахунок"
+
+msgid "Negative stock"
+msgstr "Від'ємний залишок"
+
+msgid "Actions"
+msgstr "Дії"
+
+msgid "View errors"
+msgstr "Переглянути помилки"
+
+msgid "View negative stock"
+msgstr "Переглянути від'ємний залишок"
+
+msgid "View products"
+msgstr "Переглянути товари"
+
+msgid "No diagnostics were recorded for the selected warehouses."
+msgstr "Для вибраних складів діагностику не зафіксовано."
+
+msgid "Detailed diagnostics from campaigns completed before this overview was added may be unavailable. Snapshot states and saved last errors are still shown."
+msgstr "Детальна діагностика кампаній, завершених до додавання цього огляду, може бути недоступною. Стани знімка та збережені останні помилки все одно відображаються."
+
+msgid "The Java warehouse directory is temporarily unavailable. Warehouses known from saved schedules and snapshots are still shown."
+msgstr "Довідник складів Java тимчасово недоступний. Склади, відомі зі збереженого розкладу та знімків, усе одно відображаються."
+
+msgid "Latest warehouse diagnostics"
+msgstr "Остання діагностика складів"
+
+msgid "Recorded at"
+msgstr "Зафіксовано"
+
+msgid "No snapshot has been created"
+msgstr "Знімок ще не створювався"
+
+msgid "Not processed yet"
+msgstr "Ще не оброблявся"
+
+msgid "Snapshot is being built"
+msgstr "Знімок формується"
+
+msgid "Processed before detailed history was enabled"
+msgstr "Оброблено до увімкнення детальної історії"
+
+msgid "Warehouse processing failed"
+msgstr "Обробка складу завершилася помилкою"
+
+msgid "Final snapshot confirmed"
+msgstr "Фінальний знімок підтверджено"
+
+msgid "Processing state for all Folio warehouses"
+msgstr "Стан обробки всіх складів ФОЛІО"
+
+msgid "This permanent overview shows the latest snapshot and processing result for every warehouse, including warehouses that have never been processed."
+msgstr "Цей постійний огляд показує останній знімок і результат обробки кожного складу, зокрема складів, які ще жодного разу не оброблялися."
+
+msgid "The warehouse directory is unavailable."
+msgstr "Довідник складів недоступний."

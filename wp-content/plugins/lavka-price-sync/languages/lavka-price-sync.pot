@@ -2451,3 +2451,105 @@ msgstr ""
 
 msgid "Current accounting quantity"
 msgstr ""
+
+msgid "Warehouse %d"
+msgstr ""
+
+msgid "The snapshot marks this product as failed."
+msgstr ""
+
+msgid "All Folio warehouses"
+msgstr ""
+
+msgid "Loading the latest state of all Folio warehouses..."
+msgstr ""
+
+msgid "Refresh warehouse overview"
+msgstr ""
+
+msgid "Warehouses in directory"
+msgstr ""
+
+msgid "Never processed"
+msgstr ""
+
+msgid "Warehouses with errors"
+msgstr ""
+
+msgid "Negative stock cases"
+msgstr ""
+
+msgid "View negative stock for all warehouses"
+msgstr ""
+
+msgid "View errors for all warehouses"
+msgstr ""
+
+msgid "Processing state"
+msgstr ""
+
+msgid "Last processing"
+msgstr ""
+
+msgid "Last snapshot"
+msgstr ""
+
+msgid "Last recalculation"
+msgstr ""
+
+msgid "Negative stock"
+msgstr ""
+
+msgid "Actions"
+msgstr ""
+
+msgid "View errors"
+msgstr ""
+
+msgid "View negative stock"
+msgstr ""
+
+msgid "View products"
+msgstr ""
+
+msgid "No diagnostics were recorded for the selected warehouses."
+msgstr ""
+
+msgid "Detailed diagnostics from campaigns completed before this overview was added may be unavailable. Snapshot states and saved last errors are still shown."
+msgstr ""
+
+msgid "The Java warehouse directory is temporarily unavailable. Warehouses known from saved schedules and snapshots are still shown."
+msgstr ""
+
+msgid "Latest warehouse diagnostics"
+msgstr ""
+
+msgid "Recorded at"
+msgstr ""
+
+msgid "No snapshot has been created"
+msgstr ""
+
+msgid "Not processed yet"
+msgstr ""
+
+msgid "Snapshot is being built"
+msgstr ""
+
+msgid "Processed before detailed history was enabled"
+msgstr ""
+
+msgid "Warehouse processing failed"
+msgstr ""
+
+msgid "Final snapshot confirmed"
+msgstr ""
+
+msgid "Processing state for all Folio warehouses"
+msgstr ""
+
+msgid "This permanent overview shows the latest snapshot and processing result for every warehouse, including warehouses that have never been processed."
+msgstr ""
+
+msgid "The warehouse directory is unavailable."
+msgstr ""

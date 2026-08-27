@@ -273,6 +273,29 @@ add_action('admin_enqueue_scripts', function () {
             'sku' => __('SKU', 'lavka-price-sync'),
             'details' => __('Technical details', 'lavka-price-sync'),
             'seconds' => __('sec.', 'lavka-price-sync'),
+            'allWarehouseOverview' => __('All Folio warehouses', 'lavka-price-sync'),
+            'warehouseOverviewLoading' => __('Loading the latest state of all Folio warehouses...', 'lavka-price-sync'),
+            'refreshOverview' => __('Refresh warehouse overview', 'lavka-price-sync'),
+            'warehousesTotal' => __('Warehouses in directory', 'lavka-price-sync'),
+            'notProcessed' => __('Never processed', 'lavka-price-sync'),
+            'warehousesWithErrors' => __('Warehouses with errors', 'lavka-price-sync'),
+            'negativeStockItems' => __('Negative stock cases', 'lavka-price-sync'),
+            'allNegativeStock' => __('View negative stock for all warehouses', 'lavka-price-sync'),
+            'allErrors' => __('View errors for all warehouses', 'lavka-price-sync'),
+            'processingState' => __('Processing state', 'lavka-price-sync'),
+            'lastProcessing' => __('Last processing', 'lavka-price-sync'),
+            'lastSnapshot' => __('Last snapshot', 'lavka-price-sync'),
+            'lastApplied' => __('Last recalculation', 'lavka-price-sync'),
+            'negativeStock' => __('Negative stock', 'lavka-price-sync'),
+            'actions' => __('Actions', 'lavka-price-sync'),
+            'viewErrors' => __('View errors', 'lavka-price-sync'),
+            'viewNegativeStock' => __('View negative stock', 'lavka-price-sync'),
+            'viewProducts' => __('View products', 'lavka-price-sync'),
+            'noWarehouseDiagnostics' => __('No diagnostics were recorded for the selected warehouses.', 'lavka-price-sync'),
+            'legacyDiagnosticsNotice' => __('Detailed diagnostics from campaigns completed before this overview was added may be unavailable. Snapshot states and saved last errors are still shown.', 'lavka-price-sync'),
+            'warehouseDirectoryUnavailable' => __('The Java warehouse directory is temporarily unavailable. Warehouses known from saved schedules and snapshots are still shown.', 'lavka-price-sync'),
+            'warehouseDiagnostics' => __('Latest warehouse diagnostics', 'lavka-price-sync'),
+            'recordedAt' => __('Recorded at', 'lavka-price-sync'),
             'statusLabels' => [
                 'IDLE' => __('Not started', 'lavka-price-sync'),
                 'RUNNING' => __('Running', 'lavka-price-sync'),
@@ -282,6 +305,12 @@ add_action('admin_enqueue_scripts', function () {
                 'MANUAL_REVIEW' => __('Manual review required', 'lavka-price-sync'),
                 'FAILED_PARTIAL' => __('Failed after partial recalculation', 'lavka-price-sync'),
                 'OUTCOME_UNKNOWN' => __('Outcome unknown', 'lavka-price-sync'),
+                'NO_SNAPSHOT' => __('No snapshot has been created', 'lavka-price-sync'),
+                'NOT_PROCESSED' => __('Not processed yet', 'lavka-price-sync'),
+                'BUILDING' => __('Snapshot is being built', 'lavka-price-sync'),
+                'LEGACY_PROCESSED' => __('Processed before detailed history was enabled', 'lavka-price-sync'),
+                'WAREHOUSE_FAILED' => __('Warehouse processing failed', 'lavka-price-sync'),
+                'SNAPSHOT_CONFIRMED' => __('Final snapshot confirmed', 'lavka-price-sync'),
             ],
             'phaseLabels' => [
                 'SNAPSHOT_BEFORE_START' => __('Starting the initial product snapshot', 'lavka-price-sync'),
@@ -625,6 +654,22 @@ function lps_render_accounting_prices_page(): void {
             </div>
             <div id="lps-ap-campaign-notice" class="lps-ap-result-notice" hidden></div>
             <div id="lps-ap-campaign-dashboard" class="lps-ap-campaign-dashboard" aria-live="polite"></div>
+
+            <section class="lps-ap-warehouse-overview" aria-labelledby="lps-ap-warehouse-overview-heading">
+                <div class="lps-ap-warehouse-overview-heading">
+                    <div>
+                        <h3 id="lps-ap-warehouse-overview-heading"><?php echo esc_html__('Processing state for all Folio warehouses', 'lavka-price-sync'); ?></h3>
+                        <p class="description"><?php echo esc_html__('This permanent overview shows the latest snapshot and processing result for every warehouse, including warehouses that have never been processed.', 'lavka-price-sync'); ?></p>
+                    </div>
+                    <button type="button" class="button" id="lps-ap-warehouse-overview-refresh">
+                        <?php echo esc_html__('Refresh warehouse overview', 'lavka-price-sync'); ?>
+                    </button>
+                </div>
+                <div id="lps-ap-warehouse-overview-notice" class="lps-ap-result-notice" hidden></div>
+                <div id="lps-ap-warehouse-overview-summary" class="lps-ap-campaign-overview"></div>
+                <div id="lps-ap-warehouse-overview-table" aria-live="polite"></div>
+                <div id="lps-ap-warehouse-overview-details" class="lps-ap-warehouse-overview-details" aria-live="polite"></div>
+            </section>
 
             <section class="lps-ap-cron-settings" aria-labelledby="lps-ap-cron-heading">
                 <h3 id="lps-ap-cron-heading"><?php echo esc_html__('Campaign parameters and weekly schedule', 'lavka-price-sync'); ?></h3>
@@ -999,7 +1044,14 @@ function lps_accounting_prices_ajax(): void {
 
     $operation = sanitize_key(wp_unslash($_POST['operation'] ?? ''));
     $options = lps_get_options();
-    if (empty($options['java_base_url'])) {
+    $local_operations = [
+        'campaign_status',
+        'campaign_snapshot_items',
+        'campaign_warehouse_overview',
+        'campaign_warehouse_diagnostics',
+        'campaign_stop',
+    ];
+    if (empty($options['java_base_url']) && !in_array($operation, $local_operations, true)) {
         wp_send_json_error(['message' => __('Java Base URL is not configured.', 'lavka-price-sync')], 400);
     }
 
@@ -1091,6 +1143,27 @@ function lps_accounting_prices_ajax(): void {
             wp_send_json_success(lps_accounting_price_campaign_snapshot_items(
                 (string)wp_unslash($_POST['verificationState'] ?? ''),
                 absint($_POST['page'] ?? 1),
+                absint($_POST['perPage'] ?? 50),
+                absint($_POST['warehouseId'] ?? 0),
+                sanitize_text_field(wp_unslash($_POST['sourceDatabase'] ?? ''))
+            ));
+            break;
+
+        case 'campaign_warehouse_overview':
+            $directory = lps_accounting_prices_warehouse_directory();
+            $overview = lps_accounting_price_campaign_warehouse_overview($directory['items'] ?? []);
+            $overview['directoryAvailable'] = !empty($directory['ok']);
+            if (empty($directory['ok'])) $overview['directoryMessage'] = (string)($directory['message'] ?? '');
+            wp_send_json_success($overview);
+            break;
+
+        case 'campaign_warehouse_diagnostics':
+            $directory = lps_accounting_prices_warehouse_directory();
+            wp_send_json_success(lps_accounting_price_campaign_diagnostics(
+                $directory['items'] ?? [],
+                absint($_POST['warehouseId'] ?? 0),
+                sanitize_key(wp_unslash($_POST['kind'] ?? 'all')),
+                absint($_POST['page'] ?? 1),
                 absint($_POST['perPage'] ?? 50)
             ));
             break;
@@ -1102,6 +1175,41 @@ function lps_accounting_prices_ajax(): void {
         default:
             wp_send_json_error(['message' => __('Unsupported accounting-price operation.', 'lavka-price-sync')], 400);
     }
+}
+
+function lps_accounting_prices_warehouse_directory(): array {
+    $options = lps_get_options();
+    if (empty($options['java_base_url'])) {
+        return ['ok' => false, 'items' => [], 'message' => __('Java Base URL is not configured.', 'lavka-price-sync')];
+    }
+    $response = lps_java_get(LPS_ACCOUNTING_PRICES_WAREHOUSES_PATH, ['timeout' => 30]);
+    if (is_wp_error($response)) {
+        return ['ok' => false, 'items' => [], 'message' => $response->get_error_message()];
+    }
+
+    $http_status = (int)wp_remote_retrieve_response_code($response);
+    $body = json_decode((string)wp_remote_retrieve_body($response), true);
+    if ($http_status < 200 || $http_status >= 300 || !is_array($body)) {
+        return [
+            'ok' => false,
+            'items' => [],
+            'message' => is_array($body)
+                ? sanitize_text_field((string)($body['message'] ?? $body['error'] ?? ''))
+                : __('The warehouse directory is unavailable.', 'lavka-price-sync'),
+        ];
+    }
+
+    $source = isset($body['items']) && is_array($body['items']) ? $body['items'] : $body;
+    $items = [];
+    foreach ((array)$source as $row) {
+        if (!is_array($row)) continue;
+        $id = $row['id'] ?? ($row['code'] ?? ($row['warehouseId'] ?? ''));
+        if (!is_numeric($id) || (int)$id < 1) continue;
+        $name = $row['name'] ?? ($row['title'] ?? ($row['warehouseName'] ?? (string)$id));
+        $items[] = ['id' => (int)$id, 'name' => sanitize_text_field((string)$name)];
+    }
+    usort($items, static fn(array $left, array $right): int => $left['id'] <=> $right['id']);
+    return ['ok' => true, 'items' => $items, 'message' => ''];
 }
 
 function lps_accounting_prices_send_response($response, bool $normalize_warehouses = false): void {

@@ -15,13 +15,19 @@
     start: document.getElementById('lps-ap-campaign-start'),
     stop: document.getElementById('lps-ap-campaign-stop'),
     notice: document.getElementById('lps-ap-campaign-notice'),
-    dashboard: document.getElementById('lps-ap-campaign-dashboard')
+    dashboard: document.getElementById('lps-ap-campaign-dashboard'),
+    overviewRefresh: document.getElementById('lps-ap-warehouse-overview-refresh'),
+    overviewNotice: document.getElementById('lps-ap-warehouse-overview-notice'),
+    overviewSummary: document.getElementById('lps-ap-warehouse-overview-summary'),
+    overviewTable: document.getElementById('lps-ap-warehouse-overview-table'),
+    overviewDetails: document.getElementById('lps-ap-warehouse-overview-details')
   };
   if (!elements.start || !elements.dashboard) return;
 
   let pollTimer = null;
   let campaignActive = false;
   let selectedSnapshotState = '';
+  let selectedSnapshotScope = '';
   let snapshotReportRequest = 0;
 
   function node(tag, className, value) {
@@ -104,6 +110,14 @@
     return value === 0 || value ? String(value) : '—';
   }
 
+  function formatDateTime(value) {
+    if (!value) return '—';
+    const parsed = new Date(String(value).replace(' ', 'T'));
+    return Number.isNaN(parsed.getTime())
+      ? String(value)
+      : new Intl.DateTimeFormat(locale, { dateStyle: 'short', timeStyle: 'short' }).format(parsed);
+  }
+
   function renderSnapshotItems(target, report) {
     target.replaceChildren();
     if (!report?.ok) {
@@ -151,26 +165,31 @@
     const previous = node('button', 'button', t.previousPage || 'Previous');
     previous.type = 'button';
     previous.disabled = Number(report.page || 1) <= 1;
-    previous.addEventListener('click', () => loadSnapshotReport(target, report.state, Number(report.page) - 1));
+    const scope = { warehouseId: report.warehouseId || 0, sourceDatabase: report.sourceDatabase || '' };
+    previous.addEventListener('click', () => loadSnapshotReport(target, report.state, Number(report.page) - 1, scope));
     const pageText = node('span', '', interpolate(t.pageOf || 'Page %1$d of %2$d', [report.page, report.pages]));
     const next = node('button', 'button', t.nextPage || 'Next');
     next.type = 'button';
     next.disabled = Number(report.page || 1) >= Number(report.pages || 1);
-    next.addEventListener('click', () => loadSnapshotReport(target, report.state, Number(report.page) + 1));
+    next.addEventListener('click', () => loadSnapshotReport(target, report.state, Number(report.page) + 1, scope));
     pagination.append(previous, pageText, next);
     target.append(pagination);
   }
 
-  async function loadSnapshotReport(target, verificationState, page) {
+  async function loadSnapshotReport(target, verificationState, page, scope) {
+    scope = scope || {};
+    const scopeKey = `${Number(scope.warehouseId || 0)}|${verificationState}`;
     const requestId = ++snapshotReportRequest;
     target.replaceChildren(node('p', 'description', t.loading || 'Loading...'));
     try {
       const report = await request('campaign_snapshot_items', {
         verificationState,
         page: Math.max(1, Number(page || 1)),
-        perPage: 50
+        perPage: 50,
+        warehouseId: Number(scope.warehouseId || 0),
+        sourceDatabase: scope.sourceDatabase || ''
       });
-      if (requestId !== snapshotReportRequest || selectedSnapshotState !== verificationState) return;
+      if (requestId !== snapshotReportRequest || selectedSnapshotScope !== scopeKey) return;
       renderSnapshotItems(target, report);
     } catch (error) {
       if (requestId !== snapshotReportRequest) return;
@@ -178,7 +197,8 @@
     }
   }
 
-  function renderSnapshotReportControls(counts) {
+  function renderSnapshotReportControls(counts, scope, initialState) {
+    scope = scope || {};
     const states = ['NEW', 'DIRTY', 'FAILED', 'REMOVED'];
     const available = states.filter((state) => Number(counts?.[state] || 0) > 0);
     const section = node('section', 'lps-ap-state-section lps-ap-snapshot-report');
@@ -192,16 +212,19 @@
 
     const activate = (state) => {
       selectedSnapshotState = state;
+      selectedSnapshotScope = `${Number(scope.warehouseId || 0)}|${state}`;
       actions.querySelectorAll('button[data-state]').forEach((button) => {
         button.classList.toggle('button-primary', button.dataset.state === state);
       });
       if (config.snapshotReportExportUrl) {
         const url = new URL(config.snapshotReportExportUrl, window.location.href);
         url.searchParams.set('verification_state', state);
+        if (scope.warehouseId) url.searchParams.set('warehouse_id', String(scope.warehouseId));
+        if (scope.sourceDatabase) url.searchParams.set('source_database', String(scope.sourceDatabase));
         exportLink.href = url.toString();
         exportLink.hidden = false;
       }
-      loadSnapshotReport(results, state, 1);
+      loadSnapshotReport(results, state, 1, scope);
     };
 
     states.forEach((state) => {
@@ -215,7 +238,9 @@
     actions.append(exportLink);
     section.append(actions, results);
 
-    const initial = available.includes(selectedSnapshotState) ? selectedSnapshotState : available[0];
+    const initial = states.includes(initialState)
+      ? initialState
+      : (available.includes(selectedSnapshotState) ? selectedSnapshotState : available[0]);
     if (initial) window.setTimeout(() => activate(initial), 0);
     else results.append(node('p', 'description', t.noStateItems || 'No products'));
     return section;
@@ -260,7 +285,7 @@
     return section;
   }
 
-  function renderWarnings(warnings, truncated) {
+  function renderWarnings(warnings, truncated, showWarehouse) {
     const section = node('section', 'lps-ap-state-section');
     section.append(node('h3', '', t.warningReport || 'Warnings'));
     if (!Array.isArray(warnings) || !warnings.length) {
@@ -273,7 +298,10 @@
     const table = node('table', 'widefat striped');
     const head = node('thead');
     const header = node('tr');
-    [t.sku, t.reason, t.message, t.details].forEach((label) => header.append(node('th', '', label)));
+    const headings = showWarehouse
+      ? [t.warehouse, t.sku, t.reason, t.message, t.recordedAt, t.details]
+      : [t.sku, t.reason, t.message, t.details];
+    headings.forEach((label) => header.append(node('th', '', label)));
     head.append(header);
     const body = node('tbody');
     warnings.forEach((warning) => {
@@ -325,12 +353,12 @@
         explanation.append(grid);
         messageCell.append(explanation);
       }
-      row.append(
-        node('td', '', sku || '—'),
-        node('td', '', warning?.code || '—'),
-        messageCell,
-        detailCell
-      );
+      if (showWarehouse) {
+        row.append(node('td', '', warning?.warehouseName || warning?.warehouseId || '—'));
+      }
+      row.append(node('td', '', sku || '—'), node('td', '', warning?.code || '—'), messageCell);
+      if (showWarehouse) row.append(node('td', '', formatDateTime(warning?.recordedAt)));
+      row.append(detailCell);
       body.append(row);
     });
     table.append(head, body);
@@ -339,7 +367,191 @@
     return section;
   }
 
+  function showWarehouseState(row, verificationState) {
+    elements.overviewDetails.replaceChildren(
+      renderSnapshotReportControls(
+        row.counts || {},
+        { warehouseId: row.warehouseId, sourceDatabase: row.sourceDatabase || '' },
+        verificationState
+      )
+    );
+    elements.overviewDetails.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function renderWarehouseDiagnostics(report) {
+    elements.overviewDetails.replaceChildren();
+    const section = node('section', 'lps-ap-state-section lps-ap-warehouse-diagnostics');
+    section.append(node('h3', '', t.warehouseDiagnostics || 'Latest warehouse diagnostics'));
+    if (!report?.ok) {
+      section.append(node('div', 'notice notice-error inline', report?.message || t.requestFailed || 'Request failed'));
+    } else if (!Array.isArray(report.items) || !report.items.length) {
+      section.append(node('p', 'description', t.noWarehouseDiagnostics || 'No diagnostics were recorded.'));
+    } else {
+      section.append(renderWarnings(report.items, Boolean(report.truncated), true));
+      const pagination = node('div', 'tablenav bottom lps-ap-snapshot-pagination');
+      const previous = node('button', 'button', t.previousPage || 'Previous');
+      previous.type = 'button';
+      previous.disabled = Number(report.page || 1) <= 1;
+      previous.addEventListener('click', () => loadWarehouseDiagnostics(report.warehouseId, report.kind, Number(report.page) - 1));
+      const pageText = node('span', '', interpolate(t.pageOf || 'Page %1$d of %2$d', [report.page, report.pages]));
+      const next = node('button', 'button', t.nextPage || 'Next');
+      next.type = 'button';
+      next.disabled = Number(report.page || 1) >= Number(report.pages || 1);
+      next.addEventListener('click', () => loadWarehouseDiagnostics(report.warehouseId, report.kind, Number(report.page) + 1));
+      pagination.append(previous, pageText, next);
+      section.append(pagination);
+    }
+    elements.overviewDetails.append(section);
+  }
+
+  async function loadWarehouseDiagnostics(warehouseId, kind, page) {
+    if (!elements.overviewDetails) return;
+    elements.overviewDetails.replaceChildren(node('p', 'description', t.loading || 'Loading...'));
+    try {
+      const report = await request('campaign_warehouse_diagnostics', {
+        warehouseId: Number(warehouseId || 0),
+        kind: kind || 'all',
+        page: Math.max(1, Number(page || 1)),
+        perPage: 50
+      });
+      renderWarehouseDiagnostics(report);
+    } catch (error) {
+      elements.overviewDetails.replaceChildren(node('div', 'notice notice-error inline', error.message || t.requestFailed || 'Request failed'));
+    }
+  }
+
+  function overviewStateButton(row, state) {
+    const count = Number(row?.counts?.[state] || 0);
+    if (!['NEW', 'DIRTY', 'FAILED', 'REMOVED'].includes(state) || count < 1) {
+      return node('span', '', integer.format(count));
+    }
+    const button = node('button', 'button-link lps-ap-count-link', integer.format(count));
+    button.type = 'button';
+    button.title = `${t.viewProducts || 'View products'}: ${state}`;
+    button.addEventListener('click', () => showWarehouseState(row, state));
+    return button;
+  }
+
+  function renderWarehouseOverview(overview) {
+    if (!elements.overviewSummary || !elements.overviewTable) return;
+    elements.overviewSummary.replaceChildren();
+    elements.overviewTable.replaceChildren();
+    if (!overview?.ok) {
+      elements.overviewTable.append(node('div', 'notice notice-error inline', overview?.message || t.requestFailed || 'Request failed'));
+      return;
+    }
+
+    const summary = overview.summary || {};
+    elements.overviewSummary.append(
+      card(t.warehousesTotal || 'Warehouses', integer.format(Number(summary.warehouses || 0))),
+      card(t.notProcessed || 'Never processed', integer.format(Number(summary.notProcessed || 0)), Number(summary.notProcessed || 0) ? 'warning' : ''),
+      card(t.warehousesWithErrors || 'Warehouses with errors', integer.format(Number(summary.withErrors || 0)), Number(summary.withErrors || 0) ? 'error' : ''),
+      card(t.negativeStockItems || 'Negative stock cases', integer.format(Number(summary.negativeStock || 0)), Number(summary.negativeStock || 0) ? 'error' : '')
+    );
+
+    if (elements.overviewNotice) {
+      if (!overview.directoryAvailable) {
+        elements.overviewNotice.hidden = false;
+        elements.overviewNotice.className = 'lps-ap-result-notice is-warning';
+        elements.overviewNotice.replaceChildren(node('p', '', t.warehouseDirectoryUnavailable || overview.directoryMessage || 'Warehouse directory unavailable'));
+      } else {
+        elements.overviewNotice.hidden = true;
+        elements.overviewNotice.replaceChildren();
+      }
+    }
+
+    const actions = node('div', 'lps-ap-warehouse-overview-actions');
+    const negativeButton = node('button', 'button', t.allNegativeStock || 'View all negative stock');
+    negativeButton.type = 'button';
+    negativeButton.addEventListener('click', () => loadWarehouseDiagnostics(0, 'negative', 1));
+    const errorsButton = node('button', 'button', t.allErrors || 'View all errors');
+    errorsButton.type = 'button';
+    errorsButton.addEventListener('click', () => loadWarehouseDiagnostics(0, 'errors', 1));
+    actions.append(negativeButton, errorsButton);
+    elements.overviewTable.append(actions);
+
+    const wrap = node('div', 'lps-ap-table-scroll');
+    const table = node('table', 'widefat striped lps-ap-warehouse-overview-table');
+    const head = node('thead');
+    const header = node('tr');
+    [
+      t.warehouse, t.processingState, t.lastProcessing, t.lastSnapshot,
+      'UNVERIFIED', 'NEW', 'DIRTY', 'FAILED', 'VERIFIED', 'REMOVED',
+      t.negativeStock, t.errors, t.actions
+    ].forEach((label) => header.append(node('th', '', label)));
+    head.append(header);
+    const body = node('tbody');
+
+    (overview.rows || []).forEach((row) => {
+      const tr = node('tr', row.hasEverProcessed ? '' : 'lps-ap-warehouse-not-processed');
+      const warehouse = node('td', 'lps-ap-warehouse-name');
+      warehouse.append(node('strong', '', `${row.warehouseId} — ${row.warehouseName}`));
+      if (row.lastError) warehouse.append(node('small', 'is-error-text', row.lastError));
+      const status = node('td');
+      status.append(node('span', `lps-ap-status lps-ap-status-${String(row.status || '').toLowerCase()}`, statusLabel(row.status)));
+      const negative = node('td');
+      if (Number(row.negativeCount || 0) > 0) {
+        const button = node('button', 'button-link is-error-text', integer.format(Number(row.negativeCount)));
+        button.type = 'button';
+        button.addEventListener('click', () => loadWarehouseDiagnostics(row.warehouseId, 'negative', 1));
+        negative.append(button);
+      } else negative.append('0');
+      const errors = node('td');
+      if (Number(row.errorCount || 0) > 0) {
+        const button = node('button', 'button-link is-error-text', integer.format(Number(row.errorCount)));
+        button.type = 'button';
+        button.addEventListener('click', () => loadWarehouseDiagnostics(row.warehouseId, 'errors', 1));
+        errors.append(button);
+      } else errors.append('0');
+      const rowActions = node('td', 'lps-ap-row-actions');
+      if (Number(row.errorCount || 0) > 0) {
+        const button = node('button', 'button button-small', t.viewErrors || 'View errors');
+        button.type = 'button';
+        button.addEventListener('click', () => loadWarehouseDiagnostics(row.warehouseId, 'errors', 1));
+        rowActions.append(button);
+      }
+      if (Number(row.negativeCount || 0) > 0) {
+        const button = node('button', 'button button-small', t.viewNegativeStock || 'View negative stock');
+        button.type = 'button';
+        button.addEventListener('click', () => loadWarehouseDiagnostics(row.warehouseId, 'negative', 1));
+        rowActions.append(button);
+      }
+      tr.append(
+        warehouse,
+        status,
+        node('td', '', formatDateTime(row.lastProcessedAt || row.lastAppliedAt)),
+        node('td', '', formatDateTime(row.activeSnapshot?.completed_at || row.latestAttempt?.completed_at)),
+        ...['UNVERIFIED', 'NEW', 'DIRTY', 'FAILED', 'VERIFIED', 'REMOVED'].map((state) => {
+          const cell = node('td', `lps-ap-state-count is-${state.toLowerCase()}`);
+          cell.append(overviewStateButton(row, state));
+          return cell;
+        }),
+        negative,
+        errors,
+        rowActions
+      );
+      body.append(tr);
+    });
+    table.append(head, body);
+    wrap.append(table);
+    elements.overviewTable.append(wrap, node('p', 'description', t.legacyDiagnosticsNotice || 'Older detailed diagnostics may be unavailable.'));
+  }
+
+  async function loadWarehouseOverview() {
+    if (!elements.overviewTable) return;
+    if (elements.overviewRefresh) elements.overviewRefresh.disabled = true;
+    elements.overviewTable.replaceChildren(node('p', 'description', t.warehouseOverviewLoading || t.loading || 'Loading...'));
+    try {
+      renderWarehouseOverview(await request('campaign_warehouse_overview'));
+    } catch (error) {
+      elements.overviewTable.replaceChildren(node('div', 'notice notice-error inline', error.message || t.requestFailed || 'Request failed'));
+    } finally {
+      if (elements.overviewRefresh) elements.overviewRefresh.disabled = false;
+    }
+  }
+
   function render(state) {
+    const wasActive = campaignActive;
     campaignActive = Boolean(state?.active);
     elements.start.disabled = campaignActive || !elements.confirm.checked || selectedWarehouseId() < 1;
     elements.stop.disabled = !campaignActive || Boolean(state?.stopRequested);
@@ -402,6 +614,7 @@
     }
     elements.dashboard.append(renderReports(state.reports));
     elements.dashboard.append(renderWarnings(state.warnings, state.warningsTruncated));
+    if (wasActive && !campaignActive) loadWarehouseOverview();
   }
 
   function schedulePoll(delay) {
@@ -465,5 +678,7 @@
   });
   elements.start.addEventListener('click', startCampaign);
   elements.stop.addEventListener('click', stopCampaign);
+  elements.overviewRefresh?.addEventListener('click', loadWarehouseOverview);
+  loadWarehouseOverview();
   loadStatus();
 }());

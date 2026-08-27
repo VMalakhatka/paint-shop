@@ -10,6 +10,9 @@ const LPS_ACCOUNTING_PRICE_CAMPAIGN_RANGE_PATH = '/admin/folio/accounting-prices
 const LPS_ACCOUNTING_PRICE_CAMPAIGN_RANGE_STATUS_PATH = '/admin/folio/accounting-prices/recalculate/native-range/status';
 const LPS_ACCOUNTING_PRICE_CAMPAIGN_MAX_REPORTS = 500;
 const LPS_ACCOUNTING_PRICE_CAMPAIGN_MAX_WARNINGS = 500;
+const LPS_ACCOUNTING_PRICE_CAMPAIGN_WAREHOUSE_HISTORY_PREFIX = 'lps_accounting_price_sku_campaign_warehouse_';
+const LPS_ACCOUNTING_PRICE_CAMPAIGN_WAREHOUSE_HISTORY_INDEX = 'lps_accounting_price_sku_campaign_warehouse_index';
+const LPS_ACCOUNTING_PRICE_CAMPAIGN_MAX_WAREHOUSE_ISSUES = 500;
 
 function lps_accounting_price_campaign_state(): array {
     $state = get_option(LPS_ACCOUNTING_PRICE_CAMPAIGN_OPTION, []);
@@ -20,6 +23,9 @@ function lps_accounting_price_campaign_store(array $state): void {
     $state['updated_at'] = current_time('mysql');
     $state['updated_at_gmt'] = current_time('mysql', true);
     update_option(LPS_ACCOUNTING_PRICE_CAMPAIGN_OPTION, $state, false);
+    if (empty($state['active']) && !empty($state['campaign_id']) && absint($state['current_warehouse_id'] ?? 0) > 0) {
+        lps_accounting_price_campaign_persist_warehouse_history($state);
+    }
 }
 
 function lps_accounting_price_campaign_schedule_tick(int $delay = 10): ?int {
@@ -120,6 +126,150 @@ function lps_accounting_price_campaign_latest_generation(int $warehouse_id): arr
     return is_array($row) ? $row : [];
 }
 
+function lps_accounting_price_campaign_latest_attempt(int $warehouse_id): array {
+    global $wpdb;
+    $tables = lps_accounting_price_campaign_snapshot_tables();
+    $row = $wpdb->get_row($wpdb->prepare(
+        "SELECT id, source_database, warehouse_id, horizon_months, status, trigger_source,
+                started_at, completed_at, last_heartbeat_at, total_products,
+                unverified_products, dirty_products, new_products, removed_products, error_message
+         FROM {$tables['generation']}
+         WHERE warehouse_id = %d
+         ORDER BY id DESC LIMIT 1",
+        $warehouse_id
+    ), ARRAY_A);
+    return is_array($row) ? $row : [];
+}
+
+function lps_accounting_price_campaign_history_ids(): array {
+    $ids = get_option(LPS_ACCOUNTING_PRICE_CAMPAIGN_WAREHOUSE_HISTORY_INDEX, []);
+    return function_exists('lps_accounting_prices_native_normalize_warehouse_ids')
+        ? lps_accounting_prices_native_normalize_warehouse_ids(is_array($ids) ? $ids : [])
+        : array_values(array_unique(array_filter(array_map('absint', is_array($ids) ? $ids : []))));
+}
+
+function lps_accounting_price_campaign_warehouse_history(int $warehouse_id): array {
+    if ($warehouse_id < 1) return [];
+    $history = get_option(LPS_ACCOUNTING_PRICE_CAMPAIGN_WAREHOUSE_HISTORY_PREFIX . $warehouse_id, []);
+    return is_array($history) ? $history : [];
+}
+
+function lps_accounting_price_campaign_issue_code(array $issue): string {
+    return strtoupper(sanitize_key((string)($issue['code'] ?? '')));
+}
+
+function lps_accounting_price_campaign_issue_is_error(array $issue): bool {
+    $severity = strtolower(sanitize_key((string)($issue['severity'] ?? '')));
+    return $severity === 'error' || in_array(lps_accounting_price_campaign_issue_code($issue), ['FAILED_CHUNK', 'WAREHOUSE_FAILED'], true);
+}
+
+function lps_accounting_price_campaign_history_from_state(array $state, int $warehouse_id): array {
+    if ($warehouse_id < 1 || empty($state['campaign_id'])) return [];
+
+    $reports = array_values(array_filter((array)($state['reports'] ?? []), static function ($report) use ($warehouse_id): bool {
+        return is_array($report) && absint($report['warehouse_id'] ?? 0) === $warehouse_id;
+    }));
+    $issues = array_values(array_filter((array)($state['warnings'] ?? []), static function ($issue) use ($warehouse_id): bool {
+        return is_array($issue) && absint($issue['warehouseId'] ?? ($issue['warehouse_id'] ?? 0)) === $warehouse_id;
+    }));
+    $is_current = absint($state['current_warehouse_id'] ?? 0) === $warehouse_id;
+    if (!$reports && !$issues && !$is_current) return [];
+
+    $final_report = [];
+    $processed_skus = 0;
+    foreach ($reports as $report) {
+        $status = strtoupper(sanitize_key((string)($report['status'] ?? '')));
+        if (in_array($status, ['COMPLETED', 'COMPLETED_WITH_WARNINGS'], true)) {
+            $processed_skus += absint($report['sku_count'] ?? 0);
+        }
+        if (in_array($status, ['WAREHOUSE_FAILED', 'SNAPSHOT_CONFIRMED'], true)) $final_report = $report;
+    }
+
+    $negative_count = 0;
+    $error_count = 0;
+    foreach ($issues as $issue) {
+        if (lps_accounting_price_campaign_issue_code($issue) === 'NEGATIVE_CHRONOLOGICAL_STOCK') $negative_count++;
+        if (lps_accounting_price_campaign_issue_is_error($issue)) $error_count++;
+    }
+
+    $status = 'RUNNING';
+    if ($final_report) {
+        $status = strtoupper(sanitize_key((string)($final_report['status'] ?? 'SNAPSHOT_CONFIRMED')));
+        if ($status === 'SNAPSHOT_CONFIRMED') $status = $issues ? 'COMPLETED_WITH_WARNINGS' : 'COMPLETED';
+    } elseif ($is_current && empty($state['active'])) {
+        $status = strtoupper(sanitize_key((string)($state['status'] ?? 'MANUAL_REVIEW')));
+    }
+
+    $completed_at = sanitize_text_field((string)($final_report['completed_at'] ?? ''));
+    if ($completed_at === '' && $is_current && empty($state['active'])) {
+        $completed_at = sanitize_text_field((string)($state['completed_at'] ?? ($state['updated_at'] ?? '')));
+    }
+
+    return [
+        'warehouse_id' => $warehouse_id,
+        'campaign_id' => sanitize_text_field((string)($state['campaign_id'] ?? '')),
+        'source' => sanitize_key((string)($state['source'] ?? 'manual')),
+        'source_database' => sanitize_text_field((string)($state['source_database'] ?? '')),
+        'status' => $status,
+        'started_at' => sanitize_text_field((string)($state['warehouse_started_at'] ?? ($state['started_at'] ?? ''))),
+        'completed_at' => $completed_at,
+        'processed_skus' => $processed_skus,
+        'counts_before' => $is_current && is_array($state['counts_before'] ?? null)
+            ? $state['counts_before']
+            : (is_array($final_report['counts_before'] ?? null) ? $final_report['counts_before'] : []),
+        'counts_after' => $is_current && is_array($state['counts_after'] ?? null)
+            ? $state['counts_after']
+            : (is_array($final_report['counts_after'] ?? null) ? $final_report['counts_after'] : []),
+        'negative_count' => $negative_count,
+        'error_count' => $error_count,
+        'warning_count' => count($issues) - $error_count,
+        'issues' => array_slice($issues, -LPS_ACCOUNTING_PRICE_CAMPAIGN_MAX_WAREHOUSE_ISSUES),
+        'issues_truncated' => !empty($state['warnings_truncated']) || count($issues) > LPS_ACCOUNTING_PRICE_CAMPAIGN_MAX_WAREHOUSE_ISSUES,
+        'error' => sanitize_textarea_field((string)($final_report['error'] ?? ($is_current ? ($state['error'] ?? '') : ''))),
+    ];
+}
+
+function lps_accounting_price_campaign_history_timestamp(array $history): int {
+    $value = (string)($history['completed_at'] ?? ($history['started_at'] ?? ''));
+    $timestamp = $value !== '' ? strtotime($value) : false;
+    return $timestamp === false ? 0 : $timestamp;
+}
+
+function lps_accounting_price_campaign_effective_history(int $warehouse_id, ?array $state = null): array {
+    $stored = lps_accounting_price_campaign_warehouse_history($warehouse_id);
+    $current = lps_accounting_price_campaign_history_from_state($state ?? lps_accounting_price_campaign_state(), $warehouse_id);
+    if (!$current) return $stored;
+    if (!$stored || lps_accounting_price_campaign_history_timestamp($current) >= lps_accounting_price_campaign_history_timestamp($stored)) {
+        return $current;
+    }
+    return $stored;
+}
+
+function lps_accounting_price_campaign_persist_warehouse_history(array $state, int $warehouse_id = 0): void {
+    $warehouse_id = $warehouse_id > 0 ? $warehouse_id : absint($state['current_warehouse_id'] ?? 0);
+    $history = lps_accounting_price_campaign_history_from_state($state, $warehouse_id);
+    if (!$history) return;
+
+    update_option(LPS_ACCOUNTING_PRICE_CAMPAIGN_WAREHOUSE_HISTORY_PREFIX . $warehouse_id, $history, false);
+    $ids = lps_accounting_price_campaign_history_ids();
+    $ids[] = $warehouse_id;
+    update_option(
+        LPS_ACCOUNTING_PRICE_CAMPAIGN_WAREHOUSE_HISTORY_INDEX,
+        lps_accounting_prices_native_normalize_warehouse_ids($ids),
+        false
+    );
+}
+
+function lps_accounting_price_campaign_persist_all_warehouse_history(array $state): void {
+    $warehouse_ids = lps_accounting_prices_native_normalize_warehouse_ids($state['warehouse_ids'] ?? []);
+    if (!$warehouse_ids && absint($state['current_warehouse_id'] ?? 0) > 0) {
+        $warehouse_ids = [absint($state['current_warehouse_id'])];
+    }
+    foreach ($warehouse_ids as $warehouse_id) {
+        lps_accounting_price_campaign_persist_warehouse_history($state, $warehouse_id);
+    }
+}
+
 function lps_accounting_price_campaign_counts(string $source_database, int $warehouse_id): array {
     global $wpdb;
     $tables = lps_accounting_price_campaign_snapshot_tables();
@@ -137,6 +287,258 @@ function lps_accounting_price_campaign_counts(string $source_database, int $ware
         if (array_key_exists($key, $counts)) $counts[$key] = absint($row['products'] ?? 0);
     }
     return $counts;
+}
+
+function lps_accounting_price_campaign_snapshot_warehouse_ids(): array {
+    global $wpdb;
+    if (!lps_accounting_price_campaign_tables_ready()) return [];
+    $tables = lps_accounting_price_campaign_snapshot_tables();
+    return lps_accounting_prices_native_normalize_warehouse_ids(
+        $wpdb->get_col("SELECT DISTINCT warehouse_id FROM {$tables['generation']} WHERE warehouse_id > 0 ORDER BY warehouse_id ASC")
+    );
+}
+
+function lps_accounting_price_campaign_last_applied_at(string $source_database, int $warehouse_id): string {
+    global $wpdb;
+    if ($source_database === '' || $warehouse_id < 1) return '';
+    $tables = lps_accounting_price_campaign_snapshot_tables();
+    return sanitize_text_field((string)$wpdb->get_var($wpdb->prepare(
+        "SELECT MAX(applied_at) FROM {$tables['item']} WHERE source_database = %s AND warehouse_id = %d",
+        $source_database,
+        $warehouse_id
+    )));
+}
+
+function lps_accounting_price_campaign_warehouse_overview(array $warehouse_directory = []): array {
+    if (!lps_accounting_price_campaign_tables_ready()) {
+        return ['ok' => false, 'message' => __('The Folio product snapshot tables are unavailable.', 'lavka-price-sync')];
+    }
+
+    $names = [];
+    $warehouse_ids = [];
+    foreach ($warehouse_directory as $warehouse) {
+        if (!is_array($warehouse)) continue;
+        $warehouse_id = absint($warehouse['id'] ?? 0);
+        if ($warehouse_id < 1) continue;
+        $warehouse_ids[] = $warehouse_id;
+        $names[$warehouse_id] = sanitize_text_field((string)($warehouse['name'] ?? $warehouse_id));
+    }
+    $warehouse_ids = array_merge(
+        $warehouse_ids,
+        lps_accounting_price_campaign_snapshot_warehouse_ids(),
+        lps_accounting_price_campaign_history_ids(),
+        lps_accounting_prices_native_normalize_warehouse_ids(lps_accounting_prices_native_cron_options()['warehouse_ids'] ?? []),
+        lps_accounting_prices_native_normalize_warehouse_ids(lps_accounting_price_campaign_state()['warehouse_ids'] ?? [])
+    );
+    $warehouse_ids = lps_accounting_prices_native_normalize_warehouse_ids($warehouse_ids);
+    sort($warehouse_ids, SORT_NUMERIC);
+
+    $state = lps_accounting_price_campaign_state();
+    $rows = [];
+    $summary = [
+        'warehouses' => count($warehouse_ids),
+        'notProcessed' => 0,
+        'withErrors' => 0,
+        'negativeStock' => 0,
+    ];
+
+    foreach ($warehouse_ids as $warehouse_id) {
+        $attempt = lps_accounting_price_campaign_latest_attempt($warehouse_id);
+        $active = lps_accounting_price_campaign_latest_generation($warehouse_id);
+        $source_database = sanitize_text_field((string)($active['source_database'] ?? ''));
+        $counts = $source_database !== ''
+            ? lps_accounting_price_campaign_counts($source_database, $warehouse_id)
+            : array_fill_keys(['UNVERIFIED', 'NEW', 'DIRTY', 'FAILED', 'VERIFIED', 'REMOVED'], 0);
+        $last_applied_at = lps_accounting_price_campaign_last_applied_at($source_database, $warehouse_id);
+        $history = lps_accounting_price_campaign_effective_history($warehouse_id, $state);
+        $has_processing_history = !empty($history['campaign_id']);
+        $has_ever_processed = $has_processing_history || $last_applied_at !== '';
+        $negative_count = absint($history['negative_count'] ?? 0);
+        $last_error = sanitize_textarea_field((string)($history['error'] ?? ($attempt['error_message'] ?? '')));
+        $error_count = max(
+            absint($history['error_count'] ?? 0),
+            absint($counts['FAILED'] ?? 0),
+            $last_error !== '' ? 1 : 0
+        );
+
+        $latest_status = strtoupper(sanitize_key((string)($attempt['status'] ?? '')));
+        $history_status = strtoupper(sanitize_key((string)($history['status'] ?? '')));
+        if (!$attempt) {
+            $display_status = 'NO_SNAPSHOT';
+        } elseif ($latest_status === 'BUILDING') {
+            $display_status = 'BUILDING';
+        } elseif (!$has_ever_processed) {
+            $display_status = 'NOT_PROCESSED';
+        } elseif ($history_status !== '') {
+            $display_status = $history_status;
+        } elseif ($latest_status === 'FAILED') {
+            $display_status = 'FAILED';
+        } else {
+            $display_status = 'LEGACY_PROCESSED';
+        }
+
+        if (!$has_ever_processed) $summary['notProcessed']++;
+        if ($error_count > 0 || in_array($display_status, ['FAILED', 'WAREHOUSE_FAILED', 'FAILED_PARTIAL', 'OUTCOME_UNKNOWN', 'MANUAL_REVIEW'], true)) {
+            $summary['withErrors']++;
+        }
+        $summary['negativeStock'] += $negative_count;
+
+        $rows[] = [
+            'warehouseId' => $warehouse_id,
+            'warehouseName' => $names[$warehouse_id] ?? sprintf(
+                /* translators: %d: Folio warehouse ID. */
+                __('Warehouse %d', 'lavka-price-sync'),
+                $warehouse_id
+            ),
+            'status' => $display_status,
+            'hasEverProcessed' => $has_ever_processed,
+            'latestAttempt' => $attempt,
+            'activeSnapshot' => $active,
+            'sourceDatabase' => $source_database,
+            'counts' => $counts,
+            'lastAppliedAt' => $last_applied_at,
+            'lastProcessedAt' => sanitize_text_field((string)($history['completed_at'] ?? '')),
+            'processedSkus' => absint($history['processed_skus'] ?? 0),
+            'negativeCount' => $negative_count,
+            'errorCount' => $error_count,
+            'warningCount' => absint($history['warning_count'] ?? 0),
+            'diagnosticsAvailable' => !empty($history['issues']),
+            'diagnosticsTruncated' => !empty($history['issues_truncated']),
+            'lastError' => $last_error,
+        ];
+    }
+
+    return [
+        'ok' => true,
+        'rows' => $rows,
+        'summary' => $summary,
+        'directoryAvailable' => !empty($warehouse_directory),
+        'generatedAt' => current_time('mysql'),
+    ];
+}
+
+function lps_accounting_price_campaign_diagnostics(
+    array $warehouse_directory = [],
+    int $warehouse_id = 0,
+    string $kind = 'all',
+    int $page = 1,
+    int $per_page = 50
+): array {
+    $overview = lps_accounting_price_campaign_warehouse_overview($warehouse_directory);
+    if (empty($overview['ok'])) return $overview;
+
+    $kind = in_array($kind, ['all', 'negative', 'errors'], true) ? $kind : 'all';
+    $names = [];
+    $scopes = [];
+    $warehouse_rows = [];
+    foreach ((array)($overview['rows'] ?? []) as $row) {
+        if (!is_array($row)) continue;
+        $row_warehouse_id = absint($row['warehouseId'] ?? 0);
+        if ($row_warehouse_id < 1 || ($warehouse_id > 0 && $row_warehouse_id !== $warehouse_id)) continue;
+        $names[$row_warehouse_id] = (string)($row['warehouseName'] ?? $row_warehouse_id);
+        $scopes[$row_warehouse_id] = sanitize_text_field((string)($row['sourceDatabase'] ?? ''));
+        $warehouse_rows[$row_warehouse_id] = $row;
+    }
+
+    $items = [];
+    $truncated = false;
+    $state = lps_accounting_price_campaign_state();
+    foreach ($scopes as $scope_warehouse_id => $source_database) {
+        $history = lps_accounting_price_campaign_effective_history($scope_warehouse_id, $state);
+        $truncated = $truncated || !empty($history['issues_truncated']);
+        foreach ((array)($history['issues'] ?? []) as $issue) {
+            if (!is_array($issue)) continue;
+            $code = lps_accounting_price_campaign_issue_code($issue);
+            $is_negative = $code === 'NEGATIVE_CHRONOLOGICAL_STOCK';
+            $is_error = lps_accounting_price_campaign_issue_is_error($issue);
+            if ($kind === 'negative' && !$is_negative) continue;
+            if ($kind === 'errors' && !$is_error) continue;
+            $issue['warehouseId'] = $scope_warehouse_id;
+            $issue['warehouseName'] = $names[$scope_warehouse_id] ?? (string)$scope_warehouse_id;
+            $items[] = $issue;
+        }
+
+        $warehouse_error = sanitize_textarea_field((string)($warehouse_rows[$scope_warehouse_id]['lastError'] ?? ''));
+        if ($kind !== 'negative' && $warehouse_error !== '') {
+            $already_present = false;
+            foreach ($items as $existing) {
+                if (absint($existing['warehouseId'] ?? 0) === $scope_warehouse_id
+                    && $warehouse_error === sanitize_textarea_field((string)($existing['message'] ?? ''))) {
+                    $already_present = true;
+                    break;
+                }
+            }
+            if (!$already_present) {
+                $items[] = [
+                    'severity' => 'error',
+                    'code' => 'WAREHOUSE_PROCESSING_ERROR',
+                    'message' => $warehouse_error,
+                    'details' => [],
+                    'recordedAt' => sanitize_text_field((string)($history['completed_at'] ?? '')),
+                    'warehouseId' => $scope_warehouse_id,
+                    'warehouseName' => $names[$scope_warehouse_id] ?? (string)$scope_warehouse_id,
+                ];
+            }
+        }
+
+        if ($kind !== 'negative' && $source_database !== '') {
+            global $wpdb;
+            $tables = lps_accounting_price_campaign_snapshot_tables();
+            $failed_items = $wpdb->get_results($wpdb->prepare(
+                "SELECT sku, product_name, last_error, last_observed_at
+                 FROM {$tables['item']}
+                 WHERE source_database = %s AND warehouse_id = %d AND verification_state = 'FAILED'
+                 ORDER BY sku ASC",
+                $source_database,
+                $scope_warehouse_id
+            ), ARRAY_A) ?: [];
+            foreach ($failed_items as $failed_item) {
+                $sku = (string)($failed_item['sku'] ?? '');
+                $already_present = false;
+                foreach ($items as $existing) {
+                    $details = is_array($existing['details'] ?? null) ? $existing['details'] : [];
+                    if (absint($existing['warehouseId'] ?? 0) === $scope_warehouse_id
+                        && $sku !== ''
+                        && $sku === (string)($existing['sku'] ?? ($details['sku'] ?? ($details['art'] ?? '')))) {
+                        $already_present = true;
+                        break;
+                    }
+                }
+                if ($already_present) continue;
+                $items[] = [
+                    'severity' => 'error',
+                    'code' => 'FAILED_SNAPSHOT_ITEM',
+                    'message' => (string)($failed_item['last_error'] ?? __('The snapshot marks this product as failed.', 'lavka-price-sync')),
+                    'sku' => $sku,
+                    'details' => ['productName' => (string)($failed_item['product_name'] ?? '')],
+                    'recordedAt' => (string)($failed_item['last_observed_at'] ?? ''),
+                    'warehouseId' => $scope_warehouse_id,
+                    'warehouseName' => $names[$scope_warehouse_id] ?? (string)$scope_warehouse_id,
+                ];
+            }
+        }
+    }
+
+    usort($items, static function (array $left, array $right): int {
+        return strcmp((string)($right['recordedAt'] ?? ''), (string)($left['recordedAt'] ?? ''));
+    });
+    $page = max(1, $page);
+    $per_page = in_array($per_page, [20, 50, 100], true) ? $per_page : 50;
+    $total = count($items);
+    $pages = max(1, (int)ceil($total / $per_page));
+    $page = min($page, $pages);
+
+    return [
+        'ok' => true,
+        'kind' => $kind,
+        'warehouseId' => $warehouse_id,
+        'items' => array_slice($items, ($page - 1) * $per_page, $per_page),
+        'total' => $total,
+        'page' => $page,
+        'pages' => $pages,
+        'perPage' => $per_page,
+        'truncated' => $truncated,
+    ];
 }
 
 function lps_accounting_price_campaign_select_skus(
@@ -203,7 +605,13 @@ function lps_accounting_price_campaign_report_scope(?array $state = null): array
     return [$source_database, $warehouse_id];
 }
 
-function lps_accounting_price_campaign_snapshot_items(string $verification_state, int $page = 1, int $per_page = 50): array {
+function lps_accounting_price_campaign_snapshot_items(
+    string $verification_state,
+    int $page = 1,
+    int $per_page = 50,
+    int $warehouse_id = 0,
+    string $source_database = ''
+): array {
     global $wpdb;
 
     $verification_state = strtoupper(sanitize_key($verification_state));
@@ -214,7 +622,13 @@ function lps_accounting_price_campaign_snapshot_items(string $verification_state
         return ['ok' => false, 'message' => __('The Folio product snapshot tables are unavailable.', 'lavka-price-sync')];
     }
 
-    [$source_database, $warehouse_id] = lps_accounting_price_campaign_report_scope();
+    $source_database = sanitize_text_field($source_database);
+    if ($warehouse_id < 1) {
+        [$source_database, $warehouse_id] = lps_accounting_price_campaign_report_scope();
+    } elseif ($source_database === '') {
+        $generation = lps_accounting_price_campaign_latest_generation($warehouse_id);
+        $source_database = sanitize_text_field((string)($generation['source_database'] ?? ''));
+    }
     if ($source_database === '' || $warehouse_id < 1) {
         return ['ok' => false, 'message' => __('No completed snapshot is available for this campaign.', 'lavka-price-sync')];
     }
@@ -282,6 +696,7 @@ function lps_accounting_price_campaign_snapshot_items(string $verification_state
         'ok' => true,
         'state' => $verification_state,
         'warehouseId' => $warehouse_id,
+        'sourceDatabase' => $source_database,
         'items' => $items,
         'total' => $total,
         'page' => $page,
@@ -381,6 +796,9 @@ function lps_accounting_price_campaign_create(array $warehouse_ids, string $sour
     if (!empty($native_job['running'])) {
         return ['ok' => false, 'httpStatus' => 409, 'message' => __('Another Folio accounting-price job is already running.', 'lavka-price-sync')];
     }
+    if (!empty($existing['campaign_id'])) {
+        lps_accounting_price_campaign_persist_all_warehouse_history($existing);
+    }
 
     $options = lps_accounting_prices_native_cron_options();
     $window_minutes = max(30, min(720, absint($options['campaign_window_minutes'] ?? 240)));
@@ -418,6 +836,7 @@ function lps_accounting_price_campaign_create(array $warehouse_ids, string $sour
         'poll_errors' => 0,
         'started_at' => current_time('mysql'),
         'started_at_gmt' => current_time('mysql', true),
+        'warehouse_started_at' => current_time('mysql'),
         'completed_at' => '',
         'error' => '',
         'message' => __('Preparing the first Folio product snapshot.', 'lavka-price-sync'),
@@ -846,6 +1265,7 @@ function lps_accounting_price_campaign_finish_warehouse(array &$state): void {
         'counts_after' => $state['counts_after'] ?? [],
         'error' => $state['warehouse_error'] ?? '',
     ]);
+    lps_accounting_price_campaign_persist_warehouse_history($state, $warehouse_id);
 
     $state['warehouse_index'] = absint($state['warehouse_index'] ?? 0) + 1;
     $warehouse_ids = lps_accounting_prices_native_normalize_warehouse_ids($state['warehouse_ids'] ?? []);
@@ -890,6 +1310,7 @@ function lps_accounting_price_campaign_finish_warehouse(array &$state): void {
     $state['counts_after'] = [];
     $state['warehouse_failed'] = false;
     $state['warehouse_error'] = '';
+    $state['warehouse_started_at'] = current_time('mysql');
     $state['phase'] = 'snapshot_before_start';
     $state['message'] = __('Preparing the next Folio warehouse snapshot.', 'lavka-price-sync');
     lps_accounting_price_campaign_store($state);
@@ -1034,6 +1455,8 @@ add_action('admin_post_lps_accounting_price_snapshot_report_export', function ()
     check_admin_referer('lps_accounting_price_snapshot_report_export');
 
     $verification_state = strtoupper(sanitize_key(wp_unslash($_GET['verification_state'] ?? '')));
+    $warehouse_id = absint($_GET['warehouse_id'] ?? 0);
+    $source_database = sanitize_text_field(wp_unslash($_GET['source_database'] ?? ''));
     if (!in_array($verification_state, lps_accounting_price_campaign_report_states(), true)) {
         wp_die(esc_html__('Select a supported snapshot state.', 'lavka-price-sync'));
     }
@@ -1065,7 +1488,13 @@ add_action('admin_post_lps_accounting_price_snapshot_report_export', function ()
 
     $page = 1;
     do {
-        $report = lps_accounting_price_campaign_snapshot_items($verification_state, $page, 500);
+        $report = lps_accounting_price_campaign_snapshot_items(
+            $verification_state,
+            $page,
+            500,
+            $warehouse_id,
+            $source_database
+        );
         if (empty($report['ok'])) {
             fclose($output);
             exit;

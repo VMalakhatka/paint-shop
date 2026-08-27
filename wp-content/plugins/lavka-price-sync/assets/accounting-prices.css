@@ -313,6 +313,94 @@
   font-weight: 600;
 }
 
+.lps-ap-warehouse-overview {
+  max-width: 100%;
+  margin: 28px 0;
+  padding: 18px;
+  border: 1px solid #c3c4c7;
+  border-left: 4px solid #2271b1;
+  background: #fff;
+}
+
+.lps-ap-warehouse-overview-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.lps-ap-warehouse-overview-heading h3 {
+  margin: 0 0 6px;
+}
+
+.lps-ap-warehouse-overview-actions,
+.lps-ap-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.lps-ap-warehouse-overview-actions {
+  margin: 16px 0 10px;
+}
+
+.lps-ap-warehouse-overview-table {
+  min-width: 1480px;
+}
+
+.lps-ap-warehouse-overview-table th,
+.lps-ap-warehouse-overview-table td {
+  vertical-align: top;
+}
+
+.lps-ap-warehouse-overview-table .lps-ap-warehouse-name {
+  min-width: 180px;
+}
+
+.lps-ap-warehouse-name strong,
+.lps-ap-warehouse-name small {
+  display: block;
+}
+
+.lps-ap-warehouse-name small {
+  max-width: 280px;
+  margin-top: 5px;
+}
+
+.lps-ap-state-count {
+  min-width: 70px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.lps-ap-count-link {
+  font-weight: 700;
+}
+
+.lps-ap-warehouse-not-processed td {
+  background: #fff8e5;
+}
+
+.lps-ap-warehouse-overview-table .is-error-text,
+.lps-ap-warehouse-diagnostics .is-error-text {
+  color: #b32d2e;
+}
+
+.lps-ap-warehouse-overview-details {
+  margin-top: 18px;
+}
+
+.lps-ap-warehouse-diagnostics {
+  padding: 16px;
+  border: 1px solid #c3c4c7;
+  background: #fff;
+}
+
+.lps-ap-warehouse-diagnostics > .lps-ap-state-section {
+  margin-top: 12px;
+}
+
 .lps-ap-cron-settings {
   max-width: 1120px;
   margin-top: 28px;
@@ -320,6 +408,17 @@
   border: 1px solid #c3c4c7;
   border-left: 4px solid #2271b1;
   background: #fff;
+}
+
+@media (max-width: 782px) {
+  .lps-ap-warehouse-overview-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .lps-ap-warehouse-overview-heading .button {
+    width: 100%;
+  }
 }
 
 .lps-ap-cron-settings h3 {
