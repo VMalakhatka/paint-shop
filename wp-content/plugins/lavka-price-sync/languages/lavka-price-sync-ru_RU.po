@@ -2858,3 +2858,9 @@ msgstr "Этот постоянный обзор показывает после
 
 msgid "The warehouse directory is unavailable."
 msgstr "Справочник складов недоступен."
+
+msgid "Snapshot interrupted by Java restart"
+msgstr "Снимок прерван перезапуском Java"
+
+msgid "The product snapshot was interrupted by a Java restart. No process is active. Start the campaign again; the previous active snapshot remains available."
+msgstr "Снимок товаров был прерван перезапуском Java. Активного процесса нет. Запустите кампанию заново; предыдущий активный снимок остаётся доступным."

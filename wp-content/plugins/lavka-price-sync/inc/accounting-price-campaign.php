@@ -741,6 +741,15 @@ function lps_accounting_price_campaign_deadline_reached(array $state): bool {
     return $deadline > 0 && time() >= $deadline;
 }
 
+function lps_accounting_price_campaign_snapshot_was_interrupted(array $status): bool {
+    if (!empty($status['running'])) return false;
+
+    $snapshot_status = strtoupper(sanitize_key((string)($status['status'] ?? '')));
+    $snapshot_phase = strtoupper(sanitize_key((string)($status['phase'] ?? '')));
+    return $snapshot_phase === 'RECOVERY_REQUIRED'
+        || in_array($snapshot_status, ['INTERRUPTED', 'QUEUED', 'BUILDING'], true);
+}
+
 function lps_accounting_price_campaign_public_state(?array $state = null): array {
     $state = $state ?? lps_accounting_price_campaign_state();
     $public = [
@@ -947,7 +956,7 @@ function lps_accounting_price_campaign_poll_snapshot(array &$state): void {
     $status_warehouse = absint($body['warehouseId'] ?? 0);
     $snapshot_status = strtoupper((string)($body['status'] ?? ''));
     $snapshot_running = !empty($body['running']);
-    if (!$snapshot_running && in_array($snapshot_status, ['QUEUED', 'BUILDING', 'INTERRUPTED'], true)) {
+    if (lps_accounting_price_campaign_snapshot_was_interrupted($body)) {
         lps_accounting_price_campaign_release_lock($state);
         $state['active'] = false;
         $state['status'] = 'manual_review';

@@ -2553,3 +2553,9 @@ msgstr ""
 
 msgid "The warehouse directory is unavailable."
 msgstr ""
+
+msgid "Snapshot interrupted by Java restart"
+msgstr ""
+
+msgid "The product snapshot was interrupted by a Java restart. No process is active. Start the campaign again; the previous active snapshot remains available."
+msgstr ""
