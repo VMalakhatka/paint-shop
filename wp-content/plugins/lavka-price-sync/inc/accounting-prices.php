@@ -324,6 +324,7 @@ add_action('admin_enqueue_scripts', function () {
                 'WAITING_LOCK' => __('Waiting for the global Lavka lock', 'lavka-price-sync'),
                 'WAITING_JAVA_SLOT' => __('Waiting for the Folio accounting-price slot', 'lavka-price-sync'),
                 'WAITING_SNAPSHOT' => __('Waiting to restart the snapshot request', 'lavka-price-sync'),
+                'SNAPSHOT_INTERRUPTED' => __('Snapshot interrupted by Java restart', 'lavka-price-sync'),
                 'MANUAL_REVIEW' => __('Manual review required', 'lavka-price-sync'),
                 'COMPLETED' => __('Campaign completed', 'lavka-price-sync'),
             ],

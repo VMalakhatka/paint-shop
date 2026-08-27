@@ -945,7 +945,22 @@ function lps_accounting_price_campaign_poll_snapshot(array &$state): void {
     $state['poll_errors'] = 0;
     $state['first_poll_error_at'] = 0;
     $status_warehouse = absint($body['warehouseId'] ?? 0);
-    if (!empty($body['running']) || in_array(strtoupper((string)($body['status'] ?? '')), ['QUEUED', 'BUILDING'], true)) {
+    $snapshot_status = strtoupper((string)($body['status'] ?? ''));
+    $snapshot_running = !empty($body['running']);
+    if (!$snapshot_running && in_array($snapshot_status, ['QUEUED', 'BUILDING', 'INTERRUPTED'], true)) {
+        lps_accounting_price_campaign_release_lock($state);
+        $state['active'] = false;
+        $state['status'] = 'manual_review';
+        $state['phase'] = 'snapshot_interrupted';
+        $state['error'] = __('The product snapshot was interrupted by a Java restart. No process is active. Start the campaign again; the previous active snapshot remains available.', 'lavka-price-sync');
+        $state['message'] = $state['error'];
+        $state['completed_at'] = current_time('mysql');
+        lps_accounting_price_campaign_store($state);
+        lps_accounting_price_campaign_clear_ticks();
+        lps_accounting_prices_native_pause_schedule($state['error']);
+        return;
+    }
+    if ($snapshot_running) {
         if ($status_warehouse > 0 && $status_warehouse !== absint($state['current_warehouse_id'] ?? 0)) {
             lps_accounting_price_campaign_release_lock($state);
             $state['phase'] = 'waiting_snapshot';
@@ -964,7 +979,7 @@ function lps_accounting_price_campaign_poll_snapshot(array &$state): void {
     }
 
     lps_accounting_price_campaign_release_lock($state);
-    $status = strtoupper((string)($body['status'] ?? ''));
+    $status = $snapshot_status;
     $generation_id = absint($body['generationId'] ?? 0);
     if (!empty($state['snapshot_start_uncertain'])
         && $generation_id <= absint($state['snapshot_previous_generation_id'] ?? 0)) {
