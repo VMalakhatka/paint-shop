@@ -29,6 +29,8 @@
   let selectedSnapshotState = '';
   let selectedSnapshotScope = '';
   let snapshotReportRequest = 0;
+  const openSnapshotReports = new Set();
+  let batchReportOpen = false;
 
   function node(tag, className, value) {
     const item = document.createElement(tag);
@@ -199,11 +201,15 @@
 
   function renderSnapshotReportControls(counts, scope, initialState) {
     scope = scope || {};
+    const reportKey = Number(scope.warehouseId || 0) > 0
+      ? `warehouse:${Number(scope.warehouseId)}`
+      : 'campaign';
     const states = ['NEW', 'DIRTY', 'FAILED', 'REMOVED'];
     const available = states.filter((state) => Number(counts?.[state] || 0) > 0);
-    const section = node('section', 'lps-ap-state-section lps-ap-snapshot-report');
-    section.append(node('h3', '', t.stateReport || 'Snapshot state report'));
-    section.append(node('p', 'description', t.stateReportDescription || 'Open a state to view its products.'));
+    const section = node('details', 'lps-ap-state-section lps-ap-snapshot-report lps-ap-collapsible-report');
+    const content = node('div', 'lps-ap-collapsible-report-content');
+    section.append(node('summary', '', t.stateReport || 'Snapshot state report'));
+    content.append(node('p', 'description', t.stateReportDescription || 'Open a state to view its products.'));
 
     const actions = node('div', 'lps-ap-snapshot-report-actions');
     const results = node('div', 'lps-ap-snapshot-report-results');
@@ -236,21 +242,48 @@
       actions.append(button);
     });
     actions.append(exportLink);
-    section.append(actions, results);
+    content.append(actions, results);
+    section.append(content);
 
     const initial = states.includes(initialState)
       ? initialState
       : (available.includes(selectedSnapshotState) ? selectedSnapshotState : available[0]);
-    if (initial) window.setTimeout(() => activate(initial), 0);
-    else results.append(node('p', 'description', t.noStateItems || 'No products'));
+    let initialized = false;
+    const initialize = () => {
+      if (initialized) return;
+      initialized = true;
+      if (initial) activate(initial);
+      else results.append(node('p', 'description', t.noStateItems || 'No products'));
+    };
+    section.addEventListener('toggle', () => {
+      if (section.open) {
+        openSnapshotReports.add(reportKey);
+        initialize();
+      } else {
+        openSnapshotReports.delete(reportKey);
+      }
+    });
+    if (states.includes(initialState)) {
+      openSnapshotReports.add(reportKey);
+    }
+    if (openSnapshotReports.has(reportKey)) {
+      section.open = true;
+      window.setTimeout(initialize, 0);
+    }
     return section;
   }
 
   function renderReports(reports) {
-    const section = node('section', 'lps-ap-state-section');
-    section.append(node('h3', '', t.reports || 'Reports'));
+    const section = node('details', 'lps-ap-state-section lps-ap-collapsible-report');
+    const content = node('div', 'lps-ap-collapsible-report-content');
+    section.append(node('summary', '', t.reports || 'Reports'));
+    section.open = batchReportOpen;
+    section.addEventListener('toggle', () => {
+      batchReportOpen = section.open;
+    });
     if (!Array.isArray(reports) || !reports.length) {
-      section.append(node('p', 'description', t.noReports || 'No reports'));
+      content.append(node('p', 'description', t.noReports || 'No reports'));
+      section.append(content);
       return section;
     }
 
@@ -281,7 +314,8 @@
     });
     table.append(head, body);
     wrap.append(table);
-    section.append(wrap);
+    content.append(wrap);
+    section.append(content);
     return section;
   }
 

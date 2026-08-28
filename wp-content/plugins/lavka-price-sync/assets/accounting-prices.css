@@ -578,6 +578,45 @@
   margin: 18px 0;
 }
 
+.lps-ap-collapsible-report {
+  border: 1px solid #c3c4c7;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.lps-ap-collapsible-report > summary {
+  padding: 12px 14px;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.lps-ap-collapsible-report > summary:hover {
+  background: #f6f7f7;
+}
+
+.lps-ap-collapsible-report > summary:focus-visible {
+  outline: 2px solid #2271b1;
+  outline-offset: -2px;
+}
+
+.lps-ap-collapsible-report[open] > summary {
+  border-bottom: 1px solid #dcdcde;
+}
+
+.lps-ap-collapsible-report-content {
+  padding: 12px 14px 14px;
+}
+
+.lps-ap-collapsible-report-content > :first-child {
+  margin-top: 0;
+}
+
+.lps-ap-collapsible-report-content > :last-child {
+  margin-bottom: 0;
+}
+
 .lps-ap-table-scroll {
   width: 100%;
   overflow-x: auto;
