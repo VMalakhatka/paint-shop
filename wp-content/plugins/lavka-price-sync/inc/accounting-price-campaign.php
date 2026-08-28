@@ -750,8 +750,44 @@ function lps_accounting_price_campaign_snapshot_was_interrupted(array $status): 
         || in_array($snapshot_status, ['INTERRUPTED', 'QUEUED', 'BUILDING'], true);
 }
 
+function lps_accounting_price_campaign_api_bool($value, bool $default = false): bool {
+    if (is_bool($value)) return $value;
+    if (is_int($value) || is_float($value)) return (int)$value === 1;
+    if (is_string($value)) {
+        $normalized = strtolower(trim($value));
+        if (in_array($normalized, ['1', 'true', 'yes', 'on'], true)) return true;
+        if (in_array($normalized, ['0', 'false', 'no', 'off', ''], true)) return false;
+    }
+    return $default;
+}
+
+function lps_accounting_price_campaign_normalize_skus(array $skus): array {
+    $normalized = [];
+    foreach ($skus as $sku) {
+        if (!is_scalar($sku)) continue;
+        $sku = trim((string)$sku);
+        if ($sku === '') continue;
+        $normalized[$sku] = $sku;
+    }
+    return array_values($normalized);
+}
+
 function lps_accounting_price_campaign_public_state(?array $state = null): array {
     $state = $state ?? lps_accounting_price_campaign_state();
+    $range = is_array($state['range_status'] ?? null) ? $state['range_status'] : [];
+    $range_progress = max(
+        absint($range['progressUnits'] ?? 0),
+        absint($range['processedSku'] ?? 0)
+    );
+    $range_total = absint($range['totalUnits'] ?? 0);
+    if ($range_total < 1 && !empty($state['current_skus'])) {
+        $range_total = count((array)$state['current_skus']);
+    }
+    $range['skuProgressUnits'] = min($range_progress, $range_total > 0 ? $range_total : $range_progress);
+    $range['skuTotalUnits'] = $range_total;
+    $range['skuProgressPercent'] = $range_total > 0
+        ? round(min(100, ($range_progress / $range_total) * 100), 2)
+        : 0;
     $public = [
         'active' => !empty($state['active']),
         'campaignId' => sanitize_text_field((string)($state['campaign_id'] ?? '')),
@@ -773,7 +809,7 @@ function lps_accounting_price_campaign_public_state(?array $state = null): array
         'countsBefore' => is_array($state['counts_before'] ?? null) ? $state['counts_before'] : [],
         'countsAfter' => is_array($state['counts_after'] ?? null) ? $state['counts_after'] : [],
         'snapshot' => is_array($state['snapshot_status'] ?? null) ? $state['snapshot_status'] : [],
-        'range' => is_array($state['range_status'] ?? null) ? $state['range_status'] : [],
+        'range' => $range,
         'reports' => is_array($state['reports'] ?? null) ? $state['reports'] : [],
         'warnings' => is_array($state['warnings'] ?? null) ? $state['warnings'] : [],
         'warningsTruncated' => !empty($state['warnings_truncated']),
@@ -1047,15 +1083,29 @@ function lps_accounting_price_campaign_request_matches(array $body, array $state
     $request = is_array($body['request'] ?? null) ? $body['request'] : [];
     if (absint($request['warehouseId'] ?? 0) !== absint($state['current_warehouse_id'] ?? 0)) return false;
     if (strtoupper(trim((string)($request['applyMode'] ?? ''))) !== 'SAFE_APPLY_ONLY') return false;
-    $expected = array_values(array_map('strval', (array)($state['current_skus'] ?? [])));
-    $actual = array_values(array_map('strval', (array)($request['skus'] ?? [])));
+    if (lps_accounting_price_campaign_api_bool($request['previewOnly'] ?? true, true)) return false;
+    if (!lps_accounting_price_campaign_api_bool($request['confirmApply'] ?? false)) return false;
+    $expected = lps_accounting_price_campaign_normalize_skus((array)($state['current_skus'] ?? []));
+    $actual = lps_accounting_price_campaign_normalize_skus((array)($request['skus'] ?? []));
     sort($expected, SORT_STRING);
     sort($actual, SORT_STRING);
     return $expected !== [] && $expected === $actual;
 }
 
 function lps_accounting_price_campaign_start_range(array &$state, array $skus): void {
-    $state['current_skus'] = array_values($skus);
+    $skus = lps_accounting_price_campaign_normalize_skus($skus);
+    if (!$skus || count($skus) > 500) {
+        lps_accounting_price_campaign_release_lock($state);
+        $state['active'] = false;
+        $state['status'] = 'manual_review';
+        $state['phase'] = 'invalid_sku_batch';
+        $state['error'] = __('The selected Folio SKU batch is empty or exceeds the 500 SKU safety limit. Nothing was sent for recalculation.', 'lavka-price-sync');
+        $state['completed_at'] = current_time('mysql');
+        lps_accounting_price_campaign_store($state);
+        lps_accounting_prices_native_pause_schedule($state['error']);
+        return;
+    }
+    $state['current_skus'] = $skus;
     $lock = lps_accounting_price_campaign_acquire_lock($state, 'native_range');
     if (empty($lock['ok'])) {
         $state['phase'] = 'waiting_lock';
@@ -1086,7 +1136,7 @@ function lps_accounting_price_campaign_start_range(array &$state, array $skus): 
             $status_response = lps_java_get(LPS_ACCOUNTING_PRICE_CAMPAIGN_RANGE_STATUS_PATH, ['timeout' => 30]);
             $status_result = lps_accounting_prices_native_decode_response($status_response);
             $status_body = is_array($status_result['body'] ?? null) ? $status_result['body'] : [];
-            if ($status_result['ok'] && !empty($status_body['running']) && lps_accounting_price_campaign_request_matches($status_body, $state)) {
+            if ($status_result['ok'] && lps_accounting_price_campaign_request_matches($status_body, $state)) {
                 $body = $status_body;
                 $accepted = true;
             }
@@ -1105,7 +1155,7 @@ function lps_accounting_price_campaign_start_range(array &$state, array $skus): 
             $status_response = lps_java_get(LPS_ACCOUNTING_PRICE_CAMPAIGN_RANGE_STATUS_PATH, ['timeout' => 30]);
             $status_result = lps_accounting_prices_native_decode_response($status_response);
             $status_body = is_array($status_result['body'] ?? null) ? $status_result['body'] : [];
-            if ($status_result['ok'] && !empty($status_body['running']) && lps_accounting_price_campaign_request_matches($status_body, $state)) {
+            if ($status_result['ok'] && lps_accounting_price_campaign_request_matches($status_body, $state)) {
                 $body = $status_body;
                 $accepted = true;
             }
@@ -1125,6 +1175,17 @@ function lps_accounting_price_campaign_start_range(array &$state, array $skus): 
     }
 
     $state['range_job_id'] = sanitize_text_field((string)($body['jobId'] ?? ''));
+    if ($state['range_job_id'] === '') {
+        lps_accounting_price_campaign_release_lock($state);
+        $state['active'] = false;
+        $state['status'] = 'outcome_unknown';
+        $state['phase'] = 'manual_review';
+        $state['error'] = __('The matching native-range task has no job ID. Automatic continuation is unsafe and was stopped.', 'lavka-price-sync');
+        $state['completed_at'] = current_time('mysql');
+        lps_accounting_price_campaign_store($state);
+        lps_accounting_prices_native_pause_schedule($state['error']);
+        return;
+    }
     $state['range_status'] = lps_accounting_prices_native_sanitize_report_value($body);
     $state['phase'] = 'range_poll';
     $state['message'] = __('The selected SKU batch is being recalculated in Folio.', 'lavka-price-sync');
@@ -1159,7 +1220,8 @@ function lps_accounting_price_campaign_poll_range(array &$state): void {
     $body = is_array($result['body'] ?? null) ? $result['body'] : [];
     $job_id = sanitize_text_field((string)($body['jobId'] ?? ''));
     $expected_job_id = sanitize_text_field((string)($state['range_job_id'] ?? ''));
-    if ($expected_job_id !== '' && $job_id !== '' && $expected_job_id !== $job_id) {
+    if ($expected_job_id === '' || $job_id === '' || $expected_job_id !== $job_id
+        || !lps_accounting_price_campaign_request_matches($body, $state)) {
         lps_accounting_price_campaign_release_lock($state);
         $state['active'] = false;
         $state['status'] = 'outcome_unknown';
@@ -1175,13 +1237,22 @@ function lps_accounting_price_campaign_poll_range(array &$state): void {
     $state['poll_errors'] = 0;
     $state['first_poll_error_at'] = 0;
     if (!empty($body['running']) || strtoupper((string)($body['status'] ?? '')) === 'QUEUED') {
+        $progress_units = max(
+            absint($body['progressUnits'] ?? 0),
+            absint($body['processedSku'] ?? 0)
+        );
+        $total_units = absint($body['totalUnits'] ?? count((array)($state['current_skus'] ?? [])));
         lps_accounting_price_campaign_touch_lock($state, [
             'phase' => $body['phase'] ?? 'range_running',
-            'progress_percent' => $body['progressPercent'] ?? null,
+            'progress_percent' => $total_units > 0 ? min(100, ($progress_units / $total_units) * 100) : 0,
+            'progress_units' => $progress_units,
+            'total_units' => $total_units,
             'current_art' => $body['currentArt'] ?? '',
+            'committed_chunks' => $body['committedChunks'] ?? 0,
+            'warning_count' => $body['warningCount'] ?? 0,
         ]);
         lps_accounting_price_campaign_store($state);
-        lps_accounting_price_campaign_schedule_tick(30);
+        lps_accounting_price_campaign_schedule_tick(5);
         return;
     }
 
@@ -1235,6 +1306,12 @@ function lps_accounting_price_campaign_poll_range(array &$state): void {
         'last_sku' => $skus ? end($skus) : '',
         'duration_seconds' => $elapsed,
         'warning_count' => absint($body['warningCount'] ?? count($warnings)),
+        'processed_sku' => absint($body['processedSku'] ?? ($body['progressUnits'] ?? 0)),
+        'total_units' => absint($body['totalUnits'] ?? count($skus)),
+        'procedure_calls' => absint($body['procedureCalls'] ?? 0),
+        'preflight_chunks' => absint($body['preflightChunks'] ?? 0),
+        'committed_chunks' => absint($body['committedChunks'] ?? 0),
+        'apply_mode' => sanitize_text_field((string)($body['request']['applyMode'] ?? '')),
         'warnings_truncated' => !empty($body['warningsTruncated']),
         'failed_chunk' => $failed_chunk ?: null,
         'error' => $body['error'] ?? '',
@@ -1571,12 +1648,14 @@ add_action('admin_post_lps_accounting_price_campaign_export', function (): void 
         __('When', 'lavka-price-sync'),
         __('Entry type', 'lavka-price-sync'),
         __('Warehouse', 'lavka-price-sync'),
+        __('Job ID', 'lavka-price-sync'),
         __('Result', 'lavka-price-sync'),
         __('SKU', 'lavka-price-sync'),
         __('SKU count', 'lavka-price-sync'),
         __('Message', 'lavka-price-sync'),
         __('Document', 'lavka-price-sync'),
         __('Problem date', 'lavka-price-sync'),
+        __('Movement record', 'lavka-price-sync'),
         __('Before operation', 'lavka-price-sync'),
         __('Operation quantity', 'lavka-price-sync'),
         __('After operation', 'lavka-price-sync'),
@@ -1590,10 +1669,12 @@ add_action('admin_post_lps_accounting_price_campaign_export', function (): void 
             (string)($report['completed_at'] ?? ''),
             __('Batch or warehouse result', 'lavka-price-sync'),
             (string)($report['warehouse_id'] ?? ''),
+            (string)($report['job_id'] ?? ''),
             (string)($report['status'] ?? ''),
             trim((string)($report['first_sku'] ?? '') . (($report['last_sku'] ?? '') !== ($report['first_sku'] ?? '') ? ' … ' . (string)($report['last_sku'] ?? '') : '')),
             (string)($report['sku_count'] ?? 0),
             (string)($report['error'] ?? ''),
+            '',
             '',
             '',
             '',
@@ -1608,9 +1689,11 @@ add_action('admin_post_lps_accounting_price_campaign_export', function (): void 
         if (!is_array($issue)) continue;
         $details = is_array($issue['details'] ?? null) ? $issue['details'] : [];
         $operation = is_array($details['operation'] ?? null) ? $details['operation'] : [];
-        $document = trim((string)($operation['documentNumber'] ?? ''));
-        if ($document === '') $document = trim((string)($operation['documentId'] ?? ''));
-        $document_type = trim((string)($operation['documentType'] ?? ''));
+        $document = trim((string)($operation['documentNumber'] ?? ($details['documentNumber'] ?? '')));
+        if ($document === '') {
+            $document = trim((string)($operation['documentId'] ?? ($details['documentId'] ?? '')));
+        }
+        $document_type = trim((string)($operation['documentType'] ?? ($details['documentType'] ?? '')));
         if ($document_type !== '') $document = trim($document_type . ' ' . $document);
         fputcsv($output, array_map('lps_accounting_price_campaign_csv_cell', [
             (string)($issue['recordedAt'] ?? ''),
@@ -1618,16 +1701,18 @@ add_action('admin_post_lps_accounting_price_campaign_export', function (): void 
                 ? __('Error', 'lavka-price-sync')
                 : __('Warning', 'lavka-price-sync'),
             (string)($issue['warehouseId'] ?? ''),
+            (string)($issue['jobId'] ?? ''),
             (string)($issue['code'] ?? ''),
             (string)($issue['sku'] ?? ($details['sku'] ?? ($details['art'] ?? ($details['inputArt'] ?? '')))),
             '1',
             (string)($issue['message'] ?? ''),
             $document,
-            (string)($operation['documentDate'] ?? ($details['problemDate'] ?? '')),
-            (string)($details['quantityBefore'] ?? ''),
-            (string)($operation['quantity'] ?? ($details['movementQuantity'] ?? '')),
-            (string)($details['quantityAfter'] ?? ''),
-            (string)($details['shortageQuantity'] ?? ''),
+            (string)($operation['documentDate'] ?? ($details['operationDate'] ?? ($details['problemDate'] ?? ''))),
+            (string)($operation['recno'] ?? ($operation['RECNO'] ?? ($details['recno'] ?? ($details['RECNO'] ?? '')))),
+            (string)($details['quantityBefore'] ?? ($operation['quantityBefore'] ?? '')),
+            (string)($operation['quantity'] ?? ($details['movementQuantity'] ?? ($details['operationQuantity'] ?? ''))),
+            (string)($details['quantityAfter'] ?? ($operation['quantityAfter'] ?? '')),
+            (string)($details['shortageQuantity'] ?? ($details['shortage'] ?? '')),
             (string)wp_json_encode($details, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
         ]));
     }
@@ -1636,10 +1721,12 @@ add_action('admin_post_lps_accounting_price_campaign_export', function (): void 
             current_time('mysql'),
             __('Warning', 'lavka-price-sync'),
             '',
+            '',
             'REPORT_TRUNCATED',
             '',
             '',
             __('Only the most recent diagnostics are stored in WordPress. Review the Java logs for the complete history.', 'lavka-price-sync'),
+            '',
             '',
             '',
             '',

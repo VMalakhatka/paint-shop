@@ -53,6 +53,22 @@
 
 Операции защищены общим `lavka_ecosystem_lock`; snapshot и native-range не должны пересекаться с другой массовой операцией Lavka. Размер первого пакета по умолчанию 100, максимальный 500; дальнейший размер ограничивается измеренным временем на SKU и остатком окна обслуживания.
 
+Каждая автоматическая порция native-range выполняется только в однопроходном режиме:
+
+```json
+{
+  "warehouseId": 5,
+  "skus": ["KR-84127", "СТИ-741449R"],
+  "previewOnly": false,
+  "confirmApply": true,
+  "applyMode": "SAFE_APPLY_ONLY"
+}
+```
+
+Не смешивай `skus[]` с `fromSku/toSku` и не отправляй больше 500 SKU. После HTTP 202 сохраняй `jobId`; GET status принадлежит кампании только при совпадении `jobId`, склада, полного набора SKU, `previewOnly=false`, `confirmApply=true` и `applyMode=SAFE_APPLY_ONLY`. После timeout/409 разрешено присоединиться к уже завершившейся задаче, если всё это совпало; повторный POST запрещён. `accepted=false` в GET является нормальным.
+
+Прогресс однопроходной порции считай только как `progressUnits/totalUnits` либо `processedSku/totalUnits`. Показывай `currentArt`, `committedChunks`, `warningCount` и процент. Не используй `procedureCurrentUnits/procedureTotalUnits`: это внутренние legacy-счётчики, и нулевой `procedureTotalUnits` для одного SKU допустим. В `SAFE_APPLY_ONLY` значение `preflightChunks=0` ожидаемо и подтверждает отсутствие отдельного rollback-preflight прохода.
+
 - `COMPLETED` и `COMPLETED_WITH_WARNINGS` продолжают очередь. Проблемные SKU с `details.skipped=true` остаются в диагностике.
 - Обычный `FAILED` завершает текущий склад, строит финальный snapshot и позволяет перейти к следующему складу.
 - `FAILED_PARTIAL` и `OUTCOME_UNKNOWN` останавливают всю кампанию и расписание до ручной проверки.

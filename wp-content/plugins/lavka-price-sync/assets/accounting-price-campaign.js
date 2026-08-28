@@ -316,7 +316,8 @@
       const row = node('tr', rowClass ? `lps-ap-batch-row ${rowClass}` : '');
       const messageCell = node('td');
       messageCell.append(node('p', '', warning?.message || '—'));
-      if (String(warning?.code || '').toUpperCase() === 'NEGATIVE_CHRONOLOGICAL_STOCK') {
+      const warningCode = String(warning?.code || '').toUpperCase();
+      if (warningCode === 'NEGATIVE_CHRONOLOGICAL_STOCK') {
         const operation = details.operation && typeof details.operation === 'object' ? details.operation : {};
         const currentState = details.currentState && typeof details.currentState === 'object' ? details.currentState : {};
         const documentNumber = operation.documentNumber || operation.documentId || '';
@@ -345,6 +346,30 @@
           [t.movementPosition, movementPosition],
           [t.currentPhysicalQuantity, currentState.physicalQuantity],
           [t.currentAccountingQuantity, currentState.accountingQuantity]
+        ].forEach(([label, value]) => {
+          const item = node('div');
+          item.append(node('dt', '', label || '—'), node('dd', '', display(value)));
+          grid.append(item);
+        });
+        explanation.append(grid);
+        messageCell.append(explanation);
+      } else if (['ZERO_ACCOUNTING_DENOMINATOR', 'ZERO_ACCOUNTING_QUANTITY_DENOMINATOR'].includes(warningCode)) {
+        const operation = details.operation && typeof details.operation === 'object' ? details.operation : {};
+        const documentNumber = operation.documentNumber || details.documentNumber || operation.documentId || details.documentId || '';
+        const documentType = operation.documentType || details.documentType || '';
+        const document = [documentType, documentNumber].filter(Boolean).join(' · ') || '—';
+        const explanation = node('div', 'lps-ap-negative-diagnostic');
+        explanation.append(node('p', 'lps-ap-negative-explanation', t.zeroDenominatorExplanation || 'The accounting formula denominator is zero. This SKU was rolled back and skipped.'));
+        const grid = node('dl', 'lps-ap-negative-grid');
+        [
+          [t.document, document],
+          [t.problemDate, details.operationDate || operation.documentDate || details.problemDate],
+          [t.movementRecord, details.recno || details.RECNO || operation.recno || operation.RECNO],
+          [t.formula, details.formula],
+          [t.numerator, details.numerator],
+          [t.denominator, details.denominator],
+          [t.beforeOperation, details.quantityBefore || operation.quantityBefore],
+          [t.operationQuantity, details.movementQuantity || details.operationQuantity || operation.quantity]
         ].forEach(([label, value]) => {
           const item = node('div');
           item.append(node('dt', '', label || '—'), node('dd', '', display(value)));
@@ -566,6 +591,11 @@
     const rangePhase = state.range?.running ? String(state.range?.phase || '').toUpperCase() : '';
     const snapshotPhase = state.snapshot?.running ? String(state.snapshot?.phase || '').toUpperCase() : '';
     const visiblePhase = rangePhase || snapshotPhase || state.phase;
+    const rangeProcessed = Number(state.range?.skuProgressUnits || 0);
+    const rangeTotal = Number(state.range?.skuTotalUnits || 0);
+    const rangeCommitted = Number(state.range?.committedChunks || 0);
+    const rangeWarnings = Number(state.range?.warningCount || 0);
+    const rangePercent = Number(state.range?.skuProgressPercent || 0);
     const overview = node('div', 'lps-ap-campaign-overview');
     overview.append(
       card(t.status || 'Status', statusLabel(state.status), state.status === 'COMPLETED' ? 'success' : ''),
@@ -577,6 +607,14 @@
       card(t.errors || 'Errors', integer.format(Number(state.errorCount || 0)), Number(state.errorCount || 0) ? 'error' : ''),
       card(t.failedWarehouses || 'Failed warehouses', integer.format(Number(state.failedWarehouses || 0)), Number(state.failedWarehouses || 0) ? 'error' : '')
     );
+    if (rangeTotal > 0) {
+      overview.append(
+        card(t.batchProgress || 'Current batch progress', `${integer.format(rangeProcessed)} / ${integer.format(rangeTotal)}`),
+        card(t.currentSku || 'Current SKU', display(state.range?.currentArt)),
+        card(t.committedSku || 'Successfully committed SKU', integer.format(rangeCommitted), rangeCommitted > 0 ? 'success' : ''),
+        card(t.batchWarnings || 'Warnings in current batch', integer.format(rangeWarnings), rangeWarnings > 0 ? 'warning' : '')
+      );
+    }
     elements.dashboard.append(overview);
 
     if (state.message || state.error) {
@@ -585,17 +623,19 @@
       elements.dashboard.append(message);
     }
 
-    const rangeProgress = Number(state.range?.progressPercent);
-    if (campaignActive && Number.isFinite(rangeProgress)) {
+    if (campaignActive && rangeTotal > 0 && Number.isFinite(rangePercent)) {
       const progress = node('div', 'lps-ap-progress-track');
       progress.setAttribute('role', 'progressbar');
       progress.setAttribute('aria-valuemin', '0');
       progress.setAttribute('aria-valuemax', '100');
-      progress.setAttribute('aria-valuenow', String(Math.max(0, Math.min(100, rangeProgress))));
+      progress.setAttribute('aria-valuenow', String(Math.max(0, Math.min(100, rangePercent))));
       const bar = node('span');
-      bar.style.width = `${Math.max(0, Math.min(100, rangeProgress))}%`;
+      bar.style.width = `${Math.max(0, Math.min(100, rangePercent))}%`;
       progress.append(bar);
-      elements.dashboard.append(progress);
+      elements.dashboard.append(
+        progress,
+        node('p', 'description', `${integer.format(rangeProcessed)} / ${integer.format(rangeTotal)} · ${rangePercent.toLocaleString(locale, { maximumFractionDigits: 1 })}%`)
+      );
     }
 
     if (Array.isArray(state.currentSkus) && state.currentSkus.length) {

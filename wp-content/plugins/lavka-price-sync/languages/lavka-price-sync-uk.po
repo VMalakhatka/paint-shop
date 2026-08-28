@@ -2852,3 +2852,33 @@ msgstr "Знімок перервано перезапуском Java"
 
 msgid "The product snapshot was interrupted by a Java restart. No process is active. Start the campaign again; the previous active snapshot remains available."
 msgstr "Знімок товарів було перервано перезапуском Java. Активного процесу немає. Запустіть кампанію знову; попередній активний знімок залишається доступним."
+
+msgid "Current batch progress"
+msgstr "Прогрес поточної порції"
+
+msgid "Successfully committed SKU"
+msgstr "Успішно зафіксовано SKU"
+
+msgid "The selected Folio SKU batch is empty or exceeds the 500 SKU safety limit. Nothing was sent for recalculation."
+msgstr "Вибрана порція SKU ФОЛІО порожня або перевищує безпечне обмеження у 500 SKU. Нічого не надіслано на перерахунок."
+
+msgid "The matching native-range task has no job ID. Automatic continuation is unsafe and was stopped."
+msgstr "Відповідне завдання native-range не має ID. Безпечне автоматичне продовження неможливе, тому його зупинено."
+
+msgid "Job ID"
+msgstr "ID завдання"
+
+msgid "The accounting formula denominator is zero. This SKU was rolled back and skipped; check the receipt price, document amount, tax data, and movement order in Folio."
+msgstr "Знаменник формули облікової ціни дорівнює нулю. Цей SKU відкочено та пропущено; перевірте ціну приходу, суму документа, податкові дані й порядок рухів у ФОЛІО."
+
+msgid "Formula"
+msgstr "Формула"
+
+msgid "Numerator"
+msgstr "Чисельник"
+
+msgid "Denominator"
+msgstr "Знаменник"
+
+msgid "Warnings in current batch"
+msgstr "Попередження в поточній порції"
