@@ -1046,6 +1046,7 @@ function lps_accounting_price_campaign_poll_snapshot(array &$state): void {
 function lps_accounting_price_campaign_request_matches(array $body, array $state): bool {
     $request = is_array($body['request'] ?? null) ? $body['request'] : [];
     if (absint($request['warehouseId'] ?? 0) !== absint($state['current_warehouse_id'] ?? 0)) return false;
+    if (strtoupper(trim((string)($request['applyMode'] ?? ''))) !== 'SAFE_APPLY_ONLY') return false;
     $expected = array_values(array_map('strval', (array)($state['current_skus'] ?? [])));
     $actual = array_values(array_map('strval', (array)($request['skus'] ?? [])));
     sort($expected, SORT_STRING);
@@ -1074,6 +1075,7 @@ function lps_accounting_price_campaign_start_range(array &$state, array $skus): 
         'skus' => array_values($skus),
         'previewOnly' => false,
         'confirmApply' => true,
+        'applyMode' => 'SAFE_APPLY_ONLY',
     ], ['timeout' => 30]);
     $result = lps_accounting_prices_native_decode_response($response);
     $body = is_array($result['body'] ?? null) ? $result['body'] : [];
