@@ -15,13 +15,30 @@
 - WordPress/WooCommerce: корень, содержащий этот skill.
 - Java/Folio: `/Users/admin/Documents/Toleran/Proect_Lavka/kreul_com_ua`.
 - Skill по ФОЛИО: `/Users/admin/Documents/Toleran/Proect_Lavka/kreul_com_ua/.agents/skills/work-with-folio-mssql/`.
+- Java Docker/build/env/deploy: personal skill `$build-java-docker-runtime`.
+- Структура, актуализация и контроль документации проекта:
+  `$lavka-project-documentation`.
 
 Пути относятся к рабочей машине и могут измениться. Перед изменением проверь существование пути через `rg --files`/`find`.
 
 ## Документация WordPress
 
+- `docs/README.md` — единая карта поддерживаемой документации и аудиторий.
+- `docs/SYSTEM_OVERVIEW.md` — сквозная архитектура, владельцы и зависимости.
+- `docs/BACKEND_GUIDE.md` — карта PHP/Java backend, окружений, API, разработки,
+  запуска и восстановления.
+- `docs/OPERATIONS_RUNBOOK.md` — синхронизации, отчёты, результаты и ошибки.
+- `docs/BOOTSTRAP_AND_RECOVERY.md` — локальный запуск, перенос и восстановление.
+- `docs/JAVA_DOCKER_RUNTIME.md` — Java Docker runtime, health, deploy и rollback.
+- `docs/SKILLS_CATALOG.md` — выбор и сочетание project/personal skills.
+- `docs/DOCUMENTATION_POLICY.md` и `docs/KNOWN_GAPS.md` — актуализация и очередь
+  неподтверждённых рисков.
 - `docs/SITE_USER_GUIDE_UK.md` — пользовательские сценарии сайта.
 - `docs/MEDIA_MANAGER_GUIDE_UK.md` — работа менеджера с медиабанком, S3 и ФОЛИО.
+- `WP_media_cloud.md` — конфигурация и migration checks Media Cloud/OVH; сверять с
+  текущими WordPress options и `$image-in-woo`.
+- `wp-content/plugins/lavka-product-media-upload/README.md` — текущие validation,
+  conflict, resume и batch-upload правила плагина.
 - `docs/FOLIO_ORDER_JSON_CONTRACT.md` — контракт заказов.
 - `docs/WAYFORPAY_TEST_ACCESS.md` — тестовый доступ к WayForPay.
 - `docs/ROADMAP_*.md` — планы, не доказательство реализованного поведения.

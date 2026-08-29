@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lavka Project Documentation"
+  short_description: "Документация и контроль актуальности Lavka"
+  default_prompt: "Используй $lavka-project-documentation, чтобы создать, обновить или проверить документацию проекта Lavka/KREUL вместе с затронутыми изменениями."

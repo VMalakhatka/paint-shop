@@ -11,15 +11,24 @@ description: "Разрабатывает, диагностирует и депл
 
 1. Прочитай [source-map.md](references/source-map.md) и выбери актуальный источник истины.
 2. Для задачи по коду или данным определи границу ответственности по [architecture.md](references/architecture.md).
-3. Загрузи только нужный справочник:
+3. Для структуры, создания, ревизии и documentation-impact checks используй
+   `$lavka-project-documentation` и его `references/document-map.md`.
+4. Загрузи только нужный справочник:
    - таблицы, meta и options: [data-storage.md](references/data-storage.md);
    - собственные и критические внешние плагины: [plugins.md](references/plugins.md);
    - страницы, кабинет и места вывода: [pages-and-ui.md](references/pages-and-ui.md);
    - синхронизации, отчёты, медиа и регламентные действия: [operations.md](references/operations.md);
    - разработка, конфигурация, deploy и rollback: [deployment-and-configuration.md](references/deployment-and-configuration.md);
    - пользователи, цены, заказы, ФОЛИО и оплаты: [orders-roles-payments.md](references/orders-roles-payments.md).
-4. Для таблиц, процедур или записи в ФОЛИО дополнительно используй `$work-with-folio-mssql` и начни с его `references/source-map.md`.
-5. Для кабинета, API и операторских действий Checkbox используй `$checkbox-ua`; для цепочки WayForPay → Checkbox дополнительно используй `$checkbox-wayforpay-woo`.
+5. Для таблиц, процедур или записи в ФОЛИО дополнительно используй `$work-with-folio-mssql` и начни с его `references/source-map.md`.
+6. Для Dockerfile/buildx, Java image/container, Compose, `.env`, health,
+   production `deploy.sh` и rollback используй `$build-java-docker-runtime`; для
+   host/VM/services — `$server-lavka`; для OVH service/contract/DNS/vRack/Object
+   Storage policy — `$manage-ovh-infrastructure`.
+7. Для Media Library, S3 object proof, attachments и Folio↔Woo reconcile используй
+   `$image-in-woo`; при изменении bucket/provider layer сочетай его с
+   `$manage-ovh-infrastructure`.
+8. Для кабинета, API и операторских действий Checkbox используй `$checkbox-ua`; для цепочки WayForPay → Checkbox дополнительно используй `$checkbox-wayforpay-woo`.
 
 ## Непереговорные правила
 
@@ -66,7 +75,21 @@ description: "Разрабатывает, диагностирует и депл
 3. Замени устаревшее утверждение, а не добавляй рядом противоречащую заметку.
 4. Гипотезу помечай как `Нужно проверить`; не превращай единичный сбой в общее правило.
 5. Не копируй сырые логи и приватные данные. Сохраняй только обезличенный инвариант и путь к источнику.
-6. После обновления запускай validator skill и проверку ссылок.
+6. Для любого изменения собственного кода, runtime/configuration или skill используй
+   `$lavka-project-documentation`. Задача не завершена, пока обновление основного
+   human-документа не находится в том же diff.
+   Изменение backend component, ownership, data flow, environment model или общего
+   development workflow обновляет `docs/BACKEND_GUIDE.md` либо точный документ,
+   на который он ссылается.
+7. После обновления запускай validator skill и
+   `python3 .agents/skills/lavka-project-documentation/scripts/check-documentation.py --working-tree`
+   из корня проекта.
+
+Инструкции для человека и инструкции Codex не смешивай. Если изменение затрагивает
+кнопки, статусы, конфигурацию, deploy, восстановление или бизнес-отчёт, обнови также
+один основной human-документ из `docs/` по правилам `docs/DOCUMENTATION_POLICY.md`.
+Skill reference хранит ownership/invariant/safety boundary и маршрут к подробной
+инструкции, но не дублирует весь operator runbook или API-контракт.
 
 ## Завершение задачи
 
