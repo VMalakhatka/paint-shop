@@ -2909,3 +2909,36 @@ msgstr "Постачальники"
 
 msgid "Select one or more suppliers. The mode controls whether they are included in or excluded from the product registry."
 msgstr "Виберіть одного або кількох постачальників. Режим визначає, чи включати їх до реєстру товарів, чи виключати з нього."
+
+msgid "Saved filter sets"
+msgstr "Збережені набори фільтрів"
+
+msgid "Select a saved filter set"
+msgstr "Виберіть збережений набір фільтрів"
+
+msgid "Filter set name"
+msgstr "Назва набору фільтрів"
+
+msgid "Save filter set"
+msgstr "Зберегти набір фільтрів"
+
+msgid "Delete selected set"
+msgstr "Видалити вибраний набір"
+
+msgid "The filter set has been saved."
+msgstr "Набір фільтрів збережено."
+
+msgid "The filter set has been deleted."
+msgstr "Набір фільтрів видалено."
+
+msgid "Enter a name for the filter set."
+msgstr "Введіть назву набору фільтрів."
+
+msgid "Delete the selected filter set?"
+msgstr "Видалити вибраний набір фільтрів?"
+
+msgid "The filter set data is invalid."
+msgstr "Дані набору фільтрів некоректні."
+
+msgid "No more than 30 saved filter sets are allowed."
+msgstr "Можна зберегти не більше 30 наборів фільтрів."

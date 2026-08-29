@@ -17,6 +17,10 @@
     filters: document.getElementById('lps-pa-filters'),
     supplierMode: document.getElementById('lps-pa-supplier-mode'),
     suppliers: document.getElementById('lps-pa-suppliers'),
+    presetSelect: document.getElementById('lps-pa-preset-select'),
+    presetName: document.getElementById('lps-pa-preset-name'),
+    presetSave: document.getElementById('lps-pa-preset-save'),
+    presetDelete: document.getElementById('lps-pa-preset-delete'),
     reset: document.getElementById('lps-pa-reset'),
     table: document.getElementById('lps-pa-products'),
     head: document.getElementById('lps-pa-products-head'),
@@ -35,6 +39,7 @@
     page: 1,
     sort: 'inventory_value',
     direction: 'DESC',
+    presets: [],
     productsRequest: 0
   };
 
@@ -183,6 +188,7 @@
       selectScope(el.scope.value);
       await loadFilterOptions();
       await loadReport();
+      await loadPresets();
     } catch (error) {
       showMessage(error.message || String(error), 'error');
     } finally {
@@ -219,6 +225,53 @@
       el.supplierMode.value = 'ANY';
     }
     syncSupplierFilter();
+  }
+
+  function renderPresets(selectedId = '') {
+    el.presetSelect.replaceChildren(new Option(t.selectPreset || 'Select a saved filter set', ''));
+    state.presets.forEach((preset) => {
+      el.presetSelect.append(new Option(preset.name, preset.id));
+    });
+    el.presetSelect.value = selectedId;
+    el.presetDelete.disabled = !selectedId;
+  }
+
+  async function loadPresets(selectedId = '') {
+    const data = await request('preset_list');
+    state.presets = Array.isArray(data.items) ? data.items : [];
+    renderPresets(selectedId);
+  }
+
+  function presetState() {
+    const payload = filterPayload();
+    delete payload.page;
+    return payload;
+  }
+
+  async function applyPreset(preset) {
+    const saved = preset?.state || {};
+    const scopeValue = `${saved.sourceDatabase || ''}|${Number(saved.warehouseId) || 0}`;
+    if (state.scopes.some((scope) => `${scope.source_database}|${scope.warehouse_id}` === scopeValue)) {
+      el.scope.value = scopeValue;
+      selectScope(scopeValue);
+      await loadFilterOptions();
+    }
+
+    ['search','health','verification','alertCode','severity','sales','inventoryMin','inventoryMax','lastSaleFrom','lastSaleTo','perPage'].forEach((name) => {
+      const field = el.filters.elements[name];
+      if (field) field.value = saved[name] || '';
+    });
+    el.supplierMode.value = ['INCLUDE', 'EXCLUDE'].includes(saved.supplierMode) ? saved.supplierMode : 'ANY';
+    const selectedSuppliers = new Set(String(saved.supplierValues || '').split(/\r?\n/).filter(Boolean));
+    Array.from(el.suppliers.options).forEach((option) => { option.selected = selectedSuppliers.has(option.value); });
+    syncSupplierFilter();
+
+    state.view = saved.view || 'all';
+    state.sort = saved.sort || 'inventory_value';
+    state.direction = saved.direction === 'ASC' ? 'ASC' : 'DESC';
+    state.page = 1;
+    el.views.forEach((button) => button.classList.toggle('button-primary', button.dataset.lpsPaView === state.view));
+    await loadReport();
   }
 
   async function loadReport() {
@@ -578,9 +631,54 @@
     }
   });
   el.supplierMode.addEventListener('change', syncSupplierFilter);
+  el.presetSelect.addEventListener('change', async () => {
+    const preset = state.presets.find((item) => item.id === el.presetSelect.value);
+    el.presetDelete.disabled = !preset;
+    el.presetName.value = preset?.name || '';
+    if (!preset) return;
+    try {
+      await applyPreset(preset);
+    } catch (error) {
+      showMessage(error.message || String(error), 'error');
+    }
+  });
+  el.presetSave.addEventListener('click', async () => {
+    const name = el.presetName.value.trim();
+    if (!name) {
+      showMessage(t.presetNameRequired || 'Enter a name for the filter set.', 'error');
+      el.presetName.focus();
+      return;
+    }
+    try {
+      const data = await request('preset_save', {
+        presetId: el.presetSelect.value || '',
+        presetName: name,
+        presetState: JSON.stringify(presetState())
+      });
+      state.presets = Array.isArray(data.items) ? data.items : [];
+      renderPresets(data.selectedId || '');
+      showMessage(t.presetSaved || 'The filter set has been saved.', 'success');
+    } catch (error) {
+      showMessage(error.message || String(error), 'error');
+    }
+  });
+  el.presetDelete.addEventListener('click', async () => {
+    const presetId = el.presetSelect.value;
+    if (!presetId || !window.confirm(t.confirmPresetDelete || 'Delete the selected filter set?')) return;
+    try {
+      const data = await request('preset_delete', {presetId});
+      state.presets = Array.isArray(data.items) ? data.items : [];
+      renderPresets();
+      el.presetName.value = '';
+      showMessage(t.presetDeleted || 'The filter set has been deleted.', 'success');
+    } catch (error) {
+      showMessage(error.message || String(error), 'error');
+    }
+  });
   el.filters.addEventListener('submit', (event) => { event.preventDefault(); state.page = 1; loadProducts().catch((error) => showMessage(error.message, 'error')); });
   el.reset.addEventListener('click', () => {
     el.filters.reset(); syncSupplierFilter(); state.view = 'all'; state.page = 1;
+    el.presetSelect.value = ''; el.presetName.value = ''; el.presetDelete.disabled = true;
     state.sort = 'inventory_value'; state.direction = 'DESC';
     el.views.forEach((button) => button.classList.toggle('button-primary', button.dataset.lpsPaView === 'all'));
     loadProducts().catch((error) => showMessage(error.message, 'error'));

@@ -2617,3 +2617,36 @@ msgstr ""
 #: inc/product-analytics.php
 msgid "Select one or more suppliers. The mode controls whether they are included in or excluded from the product registry."
 msgstr ""
+
+msgid "Saved filter sets"
+msgstr ""
+
+msgid "Select a saved filter set"
+msgstr ""
+
+msgid "Filter set name"
+msgstr ""
+
+msgid "Save filter set"
+msgstr ""
+
+msgid "Delete selected set"
+msgstr ""
+
+msgid "The filter set has been saved."
+msgstr ""
+
+msgid "The filter set has been deleted."
+msgstr ""
+
+msgid "Enter a name for the filter set."
+msgstr ""
+
+msgid "Delete the selected filter set?"
+msgstr ""
+
+msgid "The filter set data is invalid."
+msgstr ""
+
+msgid "No more than 30 saved filter sets are allowed."
+msgstr ""

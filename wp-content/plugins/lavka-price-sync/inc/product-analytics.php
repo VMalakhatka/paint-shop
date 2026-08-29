@@ -3,6 +3,7 @@ if (!defined('ABSPATH')) exit;
 
 const LPS_PRODUCT_ANALYTICS_PAGE = 'lps-product-analytics';
 const LPS_PRODUCT_ANALYTICS_NONCE = 'lps_product_analytics';
+const LPS_PRODUCT_ANALYTICS_PRESETS_META = 'lps_product_analytics_filter_presets';
 
 add_action('admin_menu', function (): void {
     add_submenu_page(
@@ -112,6 +113,11 @@ function lps_product_analytics_i18n(): array {
         'allCommercialSales' => __('Sales combine all confirmed external commercial channels.', 'lavka-price-sync'),
         'grossBeforeReturns' => __('Profit is gross profit before returns, not net or operating profit.', 'lavka-price-sync'),
         'noSuppliers' => __('No suppliers are available for this warehouse.', 'lavka-price-sync'),
+        'selectPreset' => __('Select a saved filter set', 'lavka-price-sync'),
+        'presetSaved' => __('The filter set has been saved.', 'lavka-price-sync'),
+        'presetDeleted' => __('The filter set has been deleted.', 'lavka-price-sync'),
+        'presetNameRequired' => __('Enter a name for the filter set.', 'lavka-price-sync'),
+        'confirmPresetDelete' => __('Delete the selected filter set?', 'lavka-price-sync'),
         'statusLabels' => [
             'HEALTHY' => __('Healthy', 'lavka-price-sync'),
             'STOCKOUT' => __('Stockout', 'lavka-price-sync'),
@@ -179,6 +185,16 @@ function lps_render_product_analytics_page(): void {
                 <button type="button" class="button<?php echo $key === 'all' ? ' button-primary' : ''; ?>" data-lps-pa-view="<?php echo esc_attr($key); ?>"><?php echo esc_html($label); ?></button>
             <?php endforeach; ?>
         </nav>
+
+        <section class="lps-pa-presets" aria-label="<?php echo esc_attr__('Saved filter sets', 'lavka-price-sync'); ?>">
+            <strong><?php echo esc_html__('Saved filter sets', 'lavka-price-sync'); ?></strong>
+            <select id="lps-pa-preset-select" aria-label="<?php echo esc_attr__('Select a saved filter set', 'lavka-price-sync'); ?>">
+                <option value=""><?php echo esc_html__('Select a saved filter set', 'lavka-price-sync'); ?></option>
+            </select>
+            <input type="text" id="lps-pa-preset-name" maxlength="80" placeholder="<?php echo esc_attr__('Filter set name', 'lavka-price-sync'); ?>">
+            <button type="button" class="button button-primary" id="lps-pa-preset-save"><?php echo esc_html__('Save filter set', 'lavka-price-sync'); ?></button>
+            <button type="button" class="button" id="lps-pa-preset-delete" disabled><?php echo esc_html__('Delete selected set', 'lavka-price-sync'); ?></button>
+        </section>
 
         <form id="lps-pa-filters" class="lps-pa-filters">
             <label>
@@ -389,6 +405,96 @@ function lps_product_analytics_supplier_filter(): array {
     ), static fn(string $value): bool => $value !== '')));
 
     return [$mode, array_slice($values, 0, 100)];
+}
+
+function lps_product_analytics_presets(): array {
+    $presets = get_user_meta(get_current_user_id(), LPS_PRODUCT_ANALYTICS_PRESETS_META, true);
+    if (!is_array($presets)) return [];
+
+    $items = [];
+    foreach ($presets as $preset) {
+        if (!is_array($preset) || empty($preset['id']) || empty($preset['name']) || !is_array($preset['state'] ?? null)) continue;
+        $items[] = [
+            'id' => sanitize_key((string)$preset['id']),
+            'name' => sanitize_text_field((string)$preset['name']),
+            'state' => lps_product_analytics_sanitize_preset_state($preset['state']),
+        ];
+    }
+    usort($items, static fn(array $a, array $b): int => strnatcasecmp($a['name'], $b['name']));
+    return $items;
+}
+
+function lps_product_analytics_sanitize_preset_state(array $state): array {
+    $scalar_keys = [
+        'sourceDatabase', 'search', 'health', 'verification', 'alertCode', 'severity',
+        'sales', 'supplierMode', 'inventoryMin', 'inventoryMax',
+        'lastSaleFrom', 'lastSaleTo', 'perPage', 'view', 'sort', 'direction',
+    ];
+    $clean = [];
+    foreach ($scalar_keys as $key) {
+        $clean[$key] = sanitize_text_field((string)($state[$key] ?? ''));
+    }
+    $clean['warehouseId'] = absint($state['warehouseId'] ?? 0);
+    $clean['supplierMode'] = in_array(strtoupper($clean['supplierMode']), ['ANY', 'INCLUDE', 'EXCLUDE'], true)
+        ? strtoupper($clean['supplierMode'])
+        : 'ANY';
+    $supplier_values = preg_split('/[\r\n]+/', (string)($state['supplierValues'] ?? '')) ?: [];
+    $supplier_values = array_values(array_unique(array_filter(array_map(
+        static fn($value): string => trim(sanitize_text_field($value)),
+        $supplier_values
+    ), static fn(string $value): bool => $value !== '')));
+    $clean['supplierValues'] = implode("\n", array_slice($supplier_values, 0, 100));
+    $clean['direction'] = strtoupper($clean['direction']) === 'ASC' ? 'ASC' : 'DESC';
+    return $clean;
+}
+
+function lps_product_analytics_save_preset(): array {
+    $name = trim(sanitize_text_field(wp_unslash($_POST['presetName'] ?? '')));
+    if ($name === '') {
+        wp_send_json_error(['message' => __('Enter a name for the filter set.', 'lavka-price-sync')], 400);
+    }
+    $name = function_exists('mb_substr') ? mb_substr($name, 0, 80) : substr($name, 0, 80);
+
+    $decoded = json_decode((string)wp_unslash($_POST['presetState'] ?? ''), true);
+    if (!is_array($decoded)) {
+        wp_send_json_error(['message' => __('The filter set data is invalid.', 'lavka-price-sync')], 400);
+    }
+    $state = lps_product_analytics_sanitize_preset_state($decoded);
+    $id = sanitize_key(wp_unslash($_POST['presetId'] ?? ''));
+    $presets = lps_product_analytics_presets();
+
+    $updated = false;
+    foreach ($presets as &$preset) {
+        if (($id !== '' && $preset['id'] === $id) || strcasecmp($preset['name'], $name) === 0) {
+            $preset['name'] = $name;
+            $preset['state'] = $state;
+            $id = $preset['id'];
+            $updated = true;
+            break;
+        }
+    }
+    unset($preset);
+
+    if (!$updated) {
+        if (count($presets) >= 30) {
+            wp_send_json_error(['message' => __('No more than 30 saved filter sets are allowed.', 'lavka-price-sync')], 400);
+        }
+        $id = str_replace('-', '', wp_generate_uuid4());
+        $presets[] = ['id' => $id, 'name' => $name, 'state' => $state];
+    }
+
+    update_user_meta(get_current_user_id(), LPS_PRODUCT_ANALYTICS_PRESETS_META, $presets);
+    return ['items' => lps_product_analytics_presets(), 'selectedId' => $id];
+}
+
+function lps_product_analytics_delete_preset(): array {
+    $id = sanitize_key(wp_unslash($_POST['presetId'] ?? ''));
+    $presets = array_values(array_filter(
+        lps_product_analytics_presets(),
+        static fn(array $preset): bool => $preset['id'] !== $id
+    ));
+    update_user_meta(get_current_user_id(), LPS_PRODUCT_ANALYTICS_PRESETS_META, $presets);
+    return ['items' => lps_product_analytics_presets()];
 }
 
 function lps_product_analytics_summary(string $source, int $warehouse): array {
@@ -639,6 +745,12 @@ function lps_product_analytics_ajax(): void {
 
     if ($operation === 'scopes') {
         $data = ['items' => lps_product_analytics_scopes()];
+    } elseif ($operation === 'preset_list') {
+        $data = ['items' => lps_product_analytics_presets()];
+    } elseif ($operation === 'preset_save') {
+        $data = lps_product_analytics_save_preset();
+    } elseif ($operation === 'preset_delete') {
+        $data = lps_product_analytics_delete_preset();
     } else {
         [$source, $warehouse] = lps_product_analytics_scope();
         switch ($operation) {

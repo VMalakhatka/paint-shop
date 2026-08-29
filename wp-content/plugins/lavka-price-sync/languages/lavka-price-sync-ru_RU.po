@@ -2921,3 +2921,36 @@ msgstr "Поставщики"
 
 msgid "Select one or more suppliers. The mode controls whether they are included in or excluded from the product registry."
 msgstr "Выберите одного или нескольких поставщиков. Режим определяет, включать их в реестр товаров или исключать из него."
+
+msgid "Saved filter sets"
+msgstr "Сохранённые наборы фильтров"
+
+msgid "Select a saved filter set"
+msgstr "Выберите сохранённый набор фильтров"
+
+msgid "Filter set name"
+msgstr "Название набора фильтров"
+
+msgid "Save filter set"
+msgstr "Сохранить набор фильтров"
+
+msgid "Delete selected set"
+msgstr "Удалить выбранный набор"
+
+msgid "The filter set has been saved."
+msgstr "Набор фильтров сохранён."
+
+msgid "The filter set has been deleted."
+msgstr "Набор фильтров удалён."
+
+msgid "Enter a name for the filter set."
+msgstr "Введите название набора фильтров."
+
+msgid "Delete the selected filter set?"
+msgstr "Удалить выбранный набор фильтров?"
+
+msgid "The filter set data is invalid."
+msgstr "Данные набора фильтров некорректны."
+
+msgid "No more than 30 saved filter sets are allowed."
+msgstr "Можно сохранить не более 30 наборов фильтров."
