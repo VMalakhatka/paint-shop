@@ -157,6 +157,22 @@
   width: 100%;
 }
 
+.lps-pa-supplier-filter {
+  grid-column: span 2;
+  display: grid;
+  grid-template-columns: minmax(180px, 0.8fr) minmax(260px, 1.2fr);
+  gap: 10px;
+}
+
+.lps-pa-supplier-filter > small {
+  grid-column: 1 / -1;
+  color: #646970;
+}
+
+.lps-pa-supplier-filter select[multiple] {
+  min-height: 92px;
+}
+
 .lps-pa-filter-actions {
   grid-column: 1 / -1;
   gap: 8px;
@@ -427,6 +443,8 @@ body.lps-pa-detail-open { overflow: hidden; }
   .lps-pa-snapshot { text-align: left; }
   .lps-pa-filters,
   .lps-pa-charts { grid-template-columns: 1fr; }
+  .lps-pa-supplier-filter { grid-column: 1; grid-template-columns: 1fr; }
+  .lps-pa-supplier-filter > small { grid-column: 1; }
   .lps-pa-detail-panel { width: calc(100vw - 30px); padding: 16px; }
   .lps-pa-metric-grid { grid-template-columns: 1fr; }
 }

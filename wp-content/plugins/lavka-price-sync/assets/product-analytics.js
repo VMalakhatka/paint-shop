@@ -15,6 +15,8 @@
     summary: document.getElementById('lps-pa-summary'),
     views: Array.from(root.querySelectorAll('[data-lps-pa-view]')),
     filters: document.getElementById('lps-pa-filters'),
+    supplierMode: document.getElementById('lps-pa-supplier-mode'),
+    suppliers: document.getElementById('lps-pa-suppliers'),
     reset: document.getElementById('lps-pa-reset'),
     table: document.getElementById('lps-pa-products'),
     head: document.getElementById('lps-pa-products-head'),
@@ -179,6 +181,7 @@
         el.scope.value = stored;
       }
       selectScope(el.scope.value);
+      await loadFilterOptions();
       await loadReport();
     } catch (error) {
       showMessage(error.message || String(error), 'error');
@@ -195,6 +198,27 @@
     if (state.sourceDatabase && state.warehouseId) {
       window.localStorage.setItem('lpsProductAnalyticsScope', `${state.sourceDatabase}|${state.warehouseId}`);
     }
+  }
+
+  function syncSupplierFilter() {
+    const enabled = el.supplierMode.value !== 'ANY' && el.suppliers.options.length > 0;
+    el.suppliers.disabled = !enabled;
+    if (!enabled) {
+      Array.from(el.suppliers.options).forEach((option) => { option.selected = false; });
+    }
+  }
+
+  async function loadFilterOptions() {
+    const data = await request('filter_options', scopePayload());
+    const suppliers = Array.isArray(data.suppliers) ? data.suppliers : [];
+    el.suppliers.replaceChildren(...suppliers.map((supplier) => new Option(supplier, supplier)));
+    if (!suppliers.length) {
+      const empty = new Option(t.noSuppliers || 'No suppliers are available for this warehouse.', '');
+      empty.disabled = true;
+      el.suppliers.append(empty);
+      el.supplierMode.value = 'ANY';
+    }
+    syncSupplierFilter();
   }
 
   async function loadReport() {
@@ -275,6 +299,8 @@
       alertCode: form.get('alertCode') || '',
       severity: form.get('severity') || '',
       sales: form.get('sales') || '',
+      supplierMode: form.get('supplierMode') || 'ANY',
+      supplierValues: form.getAll('supplierValues[]').join('\n'),
       inventoryMin: form.get('inventoryMin') || '',
       inventoryMax: form.get('inventoryMax') || '',
       lastSaleFrom: form.get('lastSaleFrom') || '',
@@ -533,11 +559,28 @@
     document.body.classList.remove('lps-pa-detail-open');
   }
 
-  el.scope.addEventListener('change', () => { selectScope(el.scope.value); loadReport(); });
-  el.reload.addEventListener('click', loadReport);
+  el.scope.addEventListener('change', async () => {
+    selectScope(el.scope.value);
+    el.supplierMode.value = 'ANY';
+    try {
+      await loadFilterOptions();
+      await loadReport();
+    } catch (error) {
+      showMessage(error.message || String(error), 'error');
+    }
+  });
+  el.reload.addEventListener('click', async () => {
+    try {
+      await loadFilterOptions();
+      await loadReport();
+    } catch (error) {
+      showMessage(error.message || String(error), 'error');
+    }
+  });
+  el.supplierMode.addEventListener('change', syncSupplierFilter);
   el.filters.addEventListener('submit', (event) => { event.preventDefault(); state.page = 1; loadProducts().catch((error) => showMessage(error.message, 'error')); });
   el.reset.addEventListener('click', () => {
-    el.filters.reset(); state.view = 'all'; state.page = 1;
+    el.filters.reset(); syncSupplierFilter(); state.view = 'all'; state.page = 1;
     state.sort = 'inventory_value'; state.direction = 'DESC';
     el.views.forEach((button) => button.classList.toggle('button-primary', button.dataset.lpsPaView === 'all'));
     loadProducts().catch((error) => showMessage(error.message, 'error'));

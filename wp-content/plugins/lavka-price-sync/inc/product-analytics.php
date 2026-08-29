@@ -111,6 +111,7 @@ function lps_product_analytics_i18n(): array {
         'approximation' => __('Operational analytics: period metrics are built from monthly buckets.', 'lavka-price-sync'),
         'allCommercialSales' => __('Sales combine all confirmed external commercial channels.', 'lavka-price-sync'),
         'grossBeforeReturns' => __('Profit is gross profit before returns, not net or operating profit.', 'lavka-price-sync'),
+        'noSuppliers' => __('No suppliers are available for this warehouse.', 'lavka-price-sync'),
         'statusLabels' => [
             'HEALTHY' => __('Healthy', 'lavka-price-sync'),
             'STOCKOUT' => __('Stockout', 'lavka-price-sync'),
@@ -239,6 +240,21 @@ function lps_render_product_analytics_page(): void {
                     <option value="without"><?php echo esc_html__('Without sales', 'lavka-price-sync'); ?></option>
                 </select>
             </label>
+            <div class="lps-pa-supplier-filter">
+                <label>
+                    <span><?php echo esc_html__('Current supplier filter', 'lavka-price-sync'); ?></span>
+                    <select name="supplierMode" id="lps-pa-supplier-mode">
+                        <option value="ANY"><?php echo esc_html__('Do not filter by supplier', 'lavka-price-sync'); ?></option>
+                        <option value="INCLUDE"><?php echo esc_html__('Include selected suppliers', 'lavka-price-sync'); ?></option>
+                        <option value="EXCLUDE"><?php echo esc_html__('Exclude selected suppliers', 'lavka-price-sync'); ?></option>
+                    </select>
+                </label>
+                <label>
+                    <span><?php echo esc_html__('Suppliers', 'lavka-price-sync'); ?></span>
+                    <select name="supplierValues[]" id="lps-pa-suppliers" multiple size="4" disabled></select>
+                </label>
+                <small><?php echo esc_html__('Select one or more suppliers. The mode controls whether they are included in or excluded from the product registry.', 'lavka-price-sync'); ?></small>
+            </div>
             <label>
                 <span><?php echo esc_html__('Minimum capital', 'lavka-price-sync'); ?></span>
                 <input type="number" name="inventoryMin" min="0" step="0.01">
@@ -346,6 +362,35 @@ function lps_product_analytics_scopes(): array {
     return $wpdb->get_results($sql, ARRAY_A) ?: [];
 }
 
+function lps_product_analytics_filter_options(string $source, int $warehouse): array {
+    global $wpdb;
+    $t = lps_product_analytics_tables();
+    $suppliers = $wpdb->get_col($wpdb->prepare(
+        "SELECT DISTINCT TRIM(current_supplier)
+           FROM {$t['current']}
+          WHERE source_database=%s AND warehouse_id=%d
+            AND current_supplier IS NOT NULL AND TRIM(current_supplier)<>''
+          ORDER BY TRIM(current_supplier)",
+        [$source, $warehouse]
+    )) ?: [];
+
+    return ['suppliers' => array_values(array_map('strval', $suppliers))];
+}
+
+function lps_product_analytics_supplier_filter(): array {
+    $mode = strtoupper(sanitize_key(wp_unslash($_POST['supplierMode'] ?? 'ANY')));
+    if (!in_array($mode, ['INCLUDE', 'EXCLUDE'], true)) $mode = 'ANY';
+
+    $raw = (string)wp_unslash($_POST['supplierValues'] ?? '');
+    $values = preg_split('/[\r\n]+/', $raw) ?: [];
+    $values = array_values(array_unique(array_filter(array_map(
+        static fn($value): string => trim(sanitize_text_field($value)),
+        $values
+    ), static fn(string $value): bool => $value !== '')));
+
+    return [$mode, array_slice($values, 0, 100)];
+}
+
 function lps_product_analytics_summary(string $source, int $warehouse): array {
     global $wpdb;
     $t = lps_product_analytics_tables();
@@ -423,6 +468,7 @@ function lps_product_analytics_products(string $source, int $warehouse): array {
     $inventory_max_raw = trim((string)wp_unslash($_POST['inventoryMax'] ?? ''));
     $last_sale_from = sanitize_text_field(wp_unslash($_POST['lastSaleFrom'] ?? ''));
     $last_sale_to = sanitize_text_field(wp_unslash($_POST['lastSaleTo'] ?? ''));
+    [$supplier_mode, $supplier_values] = lps_product_analytics_supplier_filter();
 
     $view_rules = [
         'data_issues' => ['alert' => 'DATA_ISSUE', 'sort' => 'inventory_value', 'direction' => 'DESC'],
@@ -470,6 +516,13 @@ function lps_product_analytics_products(string $source, int $warehouse): array {
     }
     if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $last_sale_to)) {
         $where[] = 'm.last_sale_date<=%s'; $args[] = $last_sale_to;
+    }
+    if ($supplier_mode !== 'ANY' && $supplier_values) {
+        $placeholders = implode(',', array_fill(0, count($supplier_values), '%s'));
+        $where[] = $supplier_mode === 'INCLUDE'
+            ? "m.current_supplier IN ({$placeholders})"
+            : "COALESCE(m.current_supplier,'') NOT IN ({$placeholders})";
+        array_push($args, ...$supplier_values);
     }
     $alert_filters = ["af.status='ACTIVE'"];
     $alert_args = [];
@@ -590,6 +643,7 @@ function lps_product_analytics_ajax(): void {
         [$source, $warehouse] = lps_product_analytics_scope();
         switch ($operation) {
             case 'summary': $data = lps_product_analytics_summary($source, $warehouse); break;
+            case 'filter_options': $data = lps_product_analytics_filter_options($source, $warehouse); break;
             case 'products': $data = lps_product_analytics_products($source, $warehouse); break;
             case 'product': $data = lps_product_analytics_product($source, $warehouse); break;
             default:

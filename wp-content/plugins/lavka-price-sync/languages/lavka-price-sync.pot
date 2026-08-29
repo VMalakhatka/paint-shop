@@ -2589,3 +2589,31 @@ msgstr ""
 
 msgid "Warnings in current batch"
 msgstr ""
+
+#: inc/product-analytics.php
+msgid "No suppliers are available for this warehouse."
+msgstr ""
+
+#: inc/product-analytics.php
+msgid "Current supplier filter"
+msgstr ""
+
+#: inc/product-analytics.php
+msgid "Do not filter by supplier"
+msgstr ""
+
+#: inc/product-analytics.php
+msgid "Include selected suppliers"
+msgstr ""
+
+#: inc/product-analytics.php
+msgid "Exclude selected suppliers"
+msgstr ""
+
+#: inc/product-analytics.php
+msgid "Suppliers"
+msgstr ""
+
+#: inc/product-analytics.php
+msgid "Select one or more suppliers. The mode controls whether they are included in or excluded from the product registry."
+msgstr ""

@@ -21,6 +21,7 @@
 | Пользоваться сайтом и кабинетом | [SITE_USER_GUIDE_UK.md](SITE_USER_GUIDE_UK.md) |
 | Загружать и исправлять изображения | [MEDIA_MANAGER_GUIDE_UK.md](MEDIA_MANAGER_GUIDE_UK.md) |
 | Проверить Woo → Java/Folio заказ | [FOLIO_ORDER_JSON_CONTRACT.md](FOLIO_ORDER_JSON_CONTRACT.md) |
+| Развивать фильтры и многоскладскую товарную аналитику | [FOLIO_PRODUCT_ANALYTICS_FILTERS_PLAN.md](FOLIO_PRODUCT_ANALYTICS_FILTERS_PLAN.md) |
 | Ограничить тестовый WayForPay | [WAYFORPAY_TEST_ACCESS.md](WAYFORPAY_TEST_ACCESS.md) |
 
 ## Аудитории

@@ -2086,7 +2086,7 @@ msgstr "Сторінка %1$d з %2$d"
 
 #: inc/product-analytics.php:10 inc/product-analytics.php:138
 msgid "Folio product analytics"
-msgstr ""
+msgstr "Товарна аналітика ФОЛІО"
 
 #: inc/product-analytics.php:11
 #, fuzzy
@@ -2100,15 +2100,15 @@ msgstr "Завантаження складів..."
 
 #: inc/product-analytics.php:56
 msgid "Product analytics could not be loaded."
-msgstr ""
+msgstr "Не вдалося завантажити товарну аналітику."
 
 #: inc/product-analytics.php:57
 msgid "No active Folio product snapshots are available yet."
-msgstr ""
+msgstr "Активних знімків товарів ФОЛІО ще немає."
 
 #: inc/product-analytics.php:58
 msgid "No products match the selected filters."
-msgstr ""
+msgstr "Жоден товар не відповідає вибраним фільтрам."
 
 #: inc/product-analytics.php:61
 #, fuzzy
@@ -2117,15 +2117,15 @@ msgstr "Товар пропущено"
 
 #: inc/product-analytics.php:66
 msgid "Capital in stock"
-msgstr ""
+msgstr "Капітал у запасах"
 
 #: inc/product-analytics.php:67
 msgid "Revenue, 365 days"
-msgstr ""
+msgstr "Виручка за 365 днів"
 
 #: inc/product-analytics.php:68
 msgid "Gross profit before returns, 365 days"
-msgstr ""
+msgstr "Валовий прибуток до повернень за 365 днів"
 
 #: inc/product-analytics.php:69 inc/product-analytics.php:171
 #, fuzzy
@@ -2134,7 +2134,7 @@ msgstr "Перевірити без змін"
 
 #: inc/product-analytics.php:70
 msgid "Capital in dead stock and overstock"
-msgstr ""
+msgstr "Капітал у мертвих і надлишкових запасах"
 
 #: inc/product-analytics.php:72
 #, fuzzy
@@ -2143,19 +2143,19 @@ msgstr "Один товар"
 
 #: inc/product-analytics.php:73
 msgid "Commercial sales total, 90 days"
-msgstr ""
+msgstr "Комерційні продажі, усього за 90 днів"
 
 #: inc/product-analytics.php:74
 msgid "Commercial sales total, 365 days"
-msgstr ""
+msgstr "Комерційні продажі, усього за 365 днів"
 
 #: inc/product-analytics.php:75
 msgid "Inventory turns"
-msgstr ""
+msgstr "Оборотність запасів"
 
 #: inc/product-analytics.php:76
 msgid "GMROI"
-msgstr ""
+msgstr "GMROI"
 
 #: inc/product-analytics.php:77
 #, fuzzy
@@ -2164,7 +2164,7 @@ msgstr "Дні тижня"
 
 #: inc/product-analytics.php:78
 msgid "Last sale"
-msgstr ""
+msgstr "Останній продаж"
 
 #: inc/product-analytics.php:79
 #, fuzzy
@@ -2178,7 +2178,7 @@ msgstr "Режими роботи з обліковими цінами"
 
 #: inc/product-analytics.php:82
 msgid "Alerts"
-msgstr ""
+msgstr "Попередження"
 
 #: inc/product-analytics.php:85
 #, fuzzy
@@ -2192,7 +2192,7 @@ msgstr "Поточна кількість одиниць"
 
 #: inc/product-analytics.php:87
 msgid "Monthly history"
-msgstr ""
+msgstr "Історія за місяцями"
 
 #: inc/product-analytics.php:88
 #, fuzzy
@@ -2201,31 +2201,31 @@ msgstr "Облікові ціни складу"
 
 #: inc/product-analytics.php:89
 msgid "Alert history"
-msgstr ""
+msgstr "Історія попереджень"
 
 #: inc/product-analytics.php:90
 msgid "Snapshot changes"
-msgstr ""
+msgstr "Зміни знімка"
 
 #: inc/product-analytics.php:91
 msgid "Month"
-msgstr ""
+msgstr "Місяць"
 
 #: inc/product-analytics.php:92
 msgid "Opening stock"
-msgstr ""
+msgstr "Запас на початок"
 
 #: inc/product-analytics.php:93
 msgid "Closing stock"
-msgstr ""
+msgstr "Запас на кінець"
 
 #: inc/product-analytics.php:94
 msgid "Opening inventory value"
-msgstr ""
+msgstr "Вартість запасу на початок"
 
 #: inc/product-analytics.php:95
 msgid "Closing inventory value"
-msgstr ""
+msgstr "Вартість запасу на кінець"
 
 #: inc/product-analytics.php:96
 #, fuzzy
@@ -2239,19 +2239,19 @@ msgstr "прихід"
 
 #: inc/product-analytics.php:98
 msgid "Commercial sales total"
-msgstr ""
+msgstr "Комерційні продажі, усього"
 
 #: inc/product-analytics.php:99
 msgid "Revenue"
-msgstr ""
+msgstr "Виручка"
 
 #: inc/product-analytics.php:100
 msgid "Cost of sales"
-msgstr ""
+msgstr "Собівартість продажів"
 
 #: inc/product-analytics.php:101
 msgid "Gross profit before returns"
-msgstr ""
+msgstr "Валовий прибуток до повернень"
 
 #: inc/product-analytics.php:102
 #, fuzzy
@@ -2265,25 +2265,27 @@ msgstr "Код повернення"
 
 #: inc/product-analytics.php:104
 msgid "Average capital"
-msgstr ""
+msgstr "Середній капітал"
 
 #: inc/product-analytics.php:105
 msgid "Sell-through"
-msgstr ""
+msgstr "Рівень реалізації запасу"
 
 #: inc/product-analytics.php:106
 msgid "Possible cross-warehouse analysis"
-msgstr ""
+msgstr "Можливий міжскладський аналіз"
 
 #: inc/product-analytics.php:107
 msgid ""
 "Another warehouse has available stock. A manager must check the safe "
 "transfer quantity."
 msgstr ""
+"На іншому складі є доступний запас. Менеджер має перевірити безпечну "
+"кількість для переміщення."
 
 #: inc/product-analytics.php:108 inc/product-analytics.php:286
 msgid "Close"
-msgstr ""
+msgstr "Закрити"
 
 #: inc/product-analytics.php:109
 #, fuzzy
@@ -2292,53 +2294,53 @@ msgstr "повтор"
 
 #: inc/product-analytics.php:110
 msgid "Active snapshot"
-msgstr ""
+msgstr "Активний знімок"
 
 #: inc/product-analytics.php:111
 msgid "Operational analytics: period metrics are built from monthly buckets."
-msgstr ""
+msgstr "Оперативна аналітика: показники періоду сформовано з місячних даних."
 
 #: inc/product-analytics.php:112
 msgid "Sales combine all confirmed external commercial channels."
-msgstr ""
+msgstr "Продажі об'єднують усі підтверджені зовнішні комерційні канали."
 
 #: inc/product-analytics.php:113
 msgid "Profit is gross profit before returns, not net or operating profit."
-msgstr ""
+msgstr "Прибуток є валовим до повернень, а не чистим чи операційним."
 
 #: inc/product-analytics.php:115 inc/product-analytics.php:191
 msgid "Healthy"
-msgstr ""
+msgstr "Норма"
 
 #: inc/product-analytics.php:116 inc/product-analytics.php:166
 #: inc/product-analytics.php:192 inc/product-analytics.php:217
 msgid "Stockout"
-msgstr ""
+msgstr "Дефіцит"
 
 #: inc/product-analytics.php:117 inc/product-analytics.php:167
 #: inc/product-analytics.php:193 inc/product-analytics.php:220
 msgid "Dead stock"
-msgstr ""
+msgstr "Мертвий запас"
 
 #: inc/product-analytics.php:118 inc/product-analytics.php:168
 #: inc/product-analytics.php:194 inc/product-analytics.php:219
 msgid "Overstock"
-msgstr ""
+msgstr "Надлишковий запас"
 
 #: inc/product-analytics.php:119 inc/product-analytics.php:195
 #: inc/product-analytics.php:218
 msgid "Low or negative margin"
-msgstr ""
+msgstr "Низька або від'ємна маржа"
 
 #: inc/product-analytics.php:120 inc/product-analytics.php:170
 #: inc/product-analytics.php:196 inc/product-analytics.php:221
 msgid "Demand fading"
-msgstr ""
+msgstr "Падіння попиту"
 
 #: inc/product-analytics.php:121 inc/product-analytics.php:197
 #: inc/product-analytics.php:216
 msgid "Data issue"
-msgstr ""
+msgstr "Проблема з даними"
 
 #: inc/product-analytics.php:122 inc/product-analytics.php:198
 #: inc/product-analytics.php:208
@@ -2348,11 +2350,11 @@ msgstr "Один товар"
 
 #: inc/product-analytics.php:123 inc/product-analytics.php:205
 msgid "Unverified"
-msgstr ""
+msgstr "Не перевірено"
 
 #: inc/product-analytics.php:124 inc/product-analytics.php:206
 msgid "Verified"
-msgstr ""
+msgstr "Перевірено"
 
 #: inc/product-analytics.php:125 inc/product-analytics.php:207
 #, fuzzy
@@ -2366,23 +2368,27 @@ msgstr "Помилка перерахунку"
 
 #: inc/product-analytics.php:127
 msgid "Removed from Folio"
-msgstr ""
+msgstr "Видалено з ФОЛІО"
 
 #: inc/product-analytics.php:139
 msgid ""
 "Read-only stock, capital and commercial-sales analytics from published Folio "
 "snapshots."
 msgstr ""
+"Аналітика запасів, капіталу й комерційних продажів з опублікованих знімків "
+"ФОЛІО без можливості зміни даних."
 
 #: inc/product-analytics.php:145
 msgid "Current reporting boundaries"
-msgstr ""
+msgstr "Поточні межі звіту"
 
 #: inc/product-analytics.php:146
 msgid ""
 "Sales are commercial sales total. Profit is gross profit before returns. "
 "Coverage is an analytical signal, not a purchase or transfer order."
 msgstr ""
+"Продажі показано як усі комерційні продажі. Прибуток є валовим до повернень. "
+"Покриття запасом є аналітичним сигналом, а не замовленням на закупівлю чи переміщення."
 
 #: inc/product-analytics.php:152
 #, fuzzy
@@ -2391,7 +2397,7 @@ msgstr "Завантаження складів..."
 
 #: inc/product-analytics.php:154
 msgid "Reload report"
-msgstr ""
+msgstr "Оновити звіт"
 
 #: inc/product-analytics.php:159
 #, fuzzy
@@ -2400,7 +2406,7 @@ msgstr "Склад"
 
 #: inc/product-analytics.php:161
 msgid "Saved analytics views"
-msgstr ""
+msgstr "Готові подання аналітики"
 
 #: inc/product-analytics.php:164
 #, fuzzy
@@ -2409,31 +2415,31 @@ msgstr "Допущено до перерахунку"
 
 #: inc/product-analytics.php:165
 msgid "Data issues"
-msgstr ""
+msgstr "Проблеми з даними"
 
 #: inc/product-analytics.php:169
 msgid "Low margin"
-msgstr ""
+msgstr "Низька маржа"
 
 #: inc/product-analytics.php:172
 msgid "Revenue leaders"
-msgstr ""
+msgstr "Лідери за виручкою"
 
 #: inc/product-analytics.php:173
 msgid "Profit leaders"
-msgstr ""
+msgstr "Лідери за прибутком"
 
 #: inc/product-analytics.php:174
 msgid "Capital efficiency"
-msgstr ""
+msgstr "Ефективність капіталу"
 
 #: inc/product-analytics.php:184
 msgid "SKU or product name"
-msgstr ""
+msgstr "Артикул або назва товару"
 
 #: inc/product-analytics.php:188
 msgid "Economic status"
-msgstr ""
+msgstr "Економічний стан"
 
 #: inc/product-analytics.php:190
 #, fuzzy
@@ -2442,7 +2448,7 @@ msgstr "Етап застосування"
 
 #: inc/product-analytics.php:202
 msgid "Verification state"
-msgstr ""
+msgstr "Стан перевірки"
 
 #: inc/product-analytics.php:204
 #, fuzzy
@@ -2451,11 +2457,11 @@ msgstr "Етап застосування"
 
 #: inc/product-analytics.php:213
 msgid "Active alert"
-msgstr ""
+msgstr "Активне попередження"
 
 #: inc/product-analytics.php:215
 msgid "All alerts"
-msgstr ""
+msgstr "Усі попередження"
 
 #: inc/product-analytics.php:225
 #, fuzzy
@@ -2464,55 +2470,55 @@ msgstr "Рівень"
 
 #: inc/product-analytics.php:227
 msgid "All severities"
-msgstr ""
+msgstr "Усі рівні важливості"
 
 #: inc/product-analytics.php:229
 msgid "High"
-msgstr ""
+msgstr "Високий"
 
 #: inc/product-analytics.php:230
 msgid "Medium"
-msgstr ""
+msgstr "Середній"
 
 #: inc/product-analytics.php:231
 msgid "Low"
-msgstr ""
+msgstr "Низький"
 
 #: inc/product-analytics.php:235
 msgid "Sales, 365 days"
-msgstr ""
+msgstr "Продажі за 365 днів"
 
 #: inc/product-analytics.php:237
 msgid "Any sales"
-msgstr ""
+msgstr "Будь-які продажі"
 
 #: inc/product-analytics.php:238
 msgid "With sales"
-msgstr ""
+msgstr "Є продажі"
 
 #: inc/product-analytics.php:239
 msgid "Without sales"
-msgstr ""
+msgstr "Без продажів"
 
 #: inc/product-analytics.php:243
 msgid "Minimum capital"
-msgstr ""
+msgstr "Мінімальний капітал"
 
 #: inc/product-analytics.php:247
 msgid "Maximum capital"
-msgstr ""
+msgstr "Максимальний капітал"
 
 #: inc/product-analytics.php:251
 msgid "Last sale from"
-msgstr ""
+msgstr "Останній продаж від"
 
 #: inc/product-analytics.php:255
 msgid "Last sale through"
-msgstr ""
+msgstr "Останній продаж до"
 
 #: inc/product-analytics.php:259
 msgid "Rows per page"
-msgstr ""
+msgstr "Рядків на сторінці"
 
 #: inc/product-analytics.php:267
 #, fuzzy
@@ -2521,7 +2527,7 @@ msgstr "Етап застосування"
 
 #: inc/product-analytics.php:268
 msgid "Reset"
-msgstr ""
+msgstr "Скинути"
 
 #: inc/product-analytics.php:319
 #, fuzzy
@@ -2535,11 +2541,11 @@ msgstr "Потрібно вказати склад ФОЛІО."
 
 #: inc/product-analytics.php:532
 msgid "The requested product was not found in this snapshot."
-msgstr ""
+msgstr "Запитаний товар не знайдено в цьому знімку."
 
 #: inc/product-analytics.php:570
 msgid "The analytics database query failed. Check the server log."
-msgstr ""
+msgstr "Помилка запиту до бази аналітики. Перевірте журнал сервера."
 
 #: inc/product-analytics.php:575
 #, fuzzy
@@ -2550,7 +2556,7 @@ msgstr "У вас немає дозволу на виконання цієї о�
 msgid ""
 "The Folio analytics tables have not been published to this WordPress "
 "database yet."
-msgstr ""
+msgstr "Таблиці аналітики ФОЛІО ще не опубліковано в цій базі WordPress."
 
 #: inc/product-analytics.php:596
 #, fuzzy
@@ -2882,3 +2888,24 @@ msgstr "Знаменник"
 
 msgid "Warnings in current batch"
 msgstr "Попередження в поточній порції"
+
+msgid "No suppliers are available for this warehouse."
+msgstr "Для цього складу немає доступних постачальників."
+
+msgid "Current supplier filter"
+msgstr "Відбір за поточним постачальником"
+
+msgid "Do not filter by supplier"
+msgstr "Не відбирати за постачальником"
+
+msgid "Include selected suppliers"
+msgstr "Включити вибраних постачальників"
+
+msgid "Exclude selected suppliers"
+msgstr "Виключити вибраних постачальників"
+
+msgid "Suppliers"
+msgstr "Постачальники"
+
+msgid "Select one or more suppliers. The mode controls whether they are included in or excluded from the product registry."
+msgstr "Виберіть одного або кількох постачальників. Режим визначає, чи включати їх до реєстру товарів, чи виключати з нього."
