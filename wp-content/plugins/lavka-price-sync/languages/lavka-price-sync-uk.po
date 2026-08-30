@@ -2652,6 +2652,9 @@ msgstr "Ручна синхронізація цін для зазначених
 #~ msgid "Lavka Price hourly"
 #~ msgstr "Lavka Price — щогодини"
 
+msgid "The product is present in the current Folio warehouse snapshot, but no successful accounting-price recalculation has been confirmed for it yet."
+msgstr "Товар присутній у поточному знімку складу ФОЛІО, але для нього ще не підтверджено успішний перерахунок облікової ціни."
+
 msgid "The product was first found in Folio and has not yet received a confirmed recalculation."
 msgstr "Товар уперше знайдено у ФОЛІО, і для нього ще немає підтвердженого перерахунку."
 
@@ -2712,8 +2715,8 @@ msgstr "Кількість операції"
 msgid "Snapshot state report"
 msgstr "Звіт за станами знімка"
 
-msgid "Open NEW, DIRTY, FAILED, or REMOVED to review the actual products behind the counters."
-msgstr "Відкрийте NEW, DIRTY, FAILED або REMOVED, щоб переглянути товари, які входять до цих лічильників."
+msgid "Open UNVERIFIED, NEW, DIRTY, FAILED, or REMOVED to review the actual products behind the counters."
+msgstr "Відкрийте UNVERIFIED, NEW, DIRTY, FAILED або REMOVED, щоб переглянути товари, які входять до цих лічильників."
 
 msgid "View"
 msgstr "Переглянути"
@@ -2781,6 +2784,9 @@ msgstr "Випадків від'ємного залишку"
 msgid "View negative stock for all warehouses"
 msgstr "Переглянути від'ємні залишки всіх складів"
 
+msgid "View warnings for all warehouses"
+msgstr "Переглянути попередження для всіх складів"
+
 msgid "View errors for all warehouses"
 msgstr "Переглянути помилки всіх складів"
 
@@ -2801,6 +2807,9 @@ msgstr "Від'ємний залишок"
 
 msgid "Actions"
 msgstr "Дії"
+
+msgid "View warnings"
+msgstr "Переглянути попередження"
 
 msgid "View errors"
 msgstr "Переглянути помилки"

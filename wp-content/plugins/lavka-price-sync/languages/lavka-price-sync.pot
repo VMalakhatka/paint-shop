@@ -2353,6 +2353,9 @@ msgstr ""
 msgid "Manual listed price synchronization"
 msgstr ""
 
+msgid "The product is present in the current Folio warehouse snapshot, but no successful accounting-price recalculation has been confirmed for it yet."
+msgstr ""
+
 msgid "The product was first found in Folio and has not yet received a confirmed recalculation."
 msgstr ""
 
@@ -2413,7 +2416,7 @@ msgstr ""
 msgid "Snapshot state report"
 msgstr ""
 
-msgid "Open NEW, DIRTY, FAILED, or REMOVED to review the actual products behind the counters."
+msgid "Open UNVERIFIED, NEW, DIRTY, FAILED, or REMOVED to review the actual products behind the counters."
 msgstr ""
 
 msgid "View"
@@ -2482,6 +2485,9 @@ msgstr ""
 msgid "View negative stock for all warehouses"
 msgstr ""
 
+msgid "View warnings for all warehouses"
+msgstr ""
+
 msgid "View errors for all warehouses"
 msgstr ""
 
@@ -2501,6 +2507,9 @@ msgid "Negative stock"
 msgstr ""
 
 msgid "Actions"
+msgstr ""
+
+msgid "View warnings"
 msgstr ""
 
 msgid "View errors"

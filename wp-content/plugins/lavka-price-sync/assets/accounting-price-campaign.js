@@ -204,7 +204,7 @@
     const reportKey = Number(scope.warehouseId || 0) > 0
       ? `warehouse:${Number(scope.warehouseId)}`
       : 'campaign';
-    const states = ['NEW', 'DIRTY', 'FAILED', 'REMOVED'];
+    const states = ['UNVERIFIED', 'NEW', 'DIRTY', 'FAILED', 'REMOVED'];
     const available = states.filter((state) => Number(counts?.[state] || 0) > 0);
     const section = node('details', 'lps-ap-state-section lps-ap-snapshot-report lps-ap-collapsible-report');
     const content = node('div', 'lps-ap-collapsible-report-content');
@@ -481,7 +481,7 @@
 
   function overviewStateButton(row, state) {
     const count = Number(row?.counts?.[state] || 0);
-    if (!['NEW', 'DIRTY', 'FAILED', 'REMOVED'].includes(state) || count < 1) {
+    if (!['UNVERIFIED', 'NEW', 'DIRTY', 'FAILED', 'REMOVED'].includes(state) || count < 1) {
       return node('span', '', integer.format(count));
     }
     const button = node('button', 'button-link lps-ap-count-link', integer.format(count));
@@ -505,7 +505,8 @@
       card(t.warehousesTotal || 'Warehouses', integer.format(Number(summary.warehouses || 0))),
       card(t.notProcessed || 'Never processed', integer.format(Number(summary.notProcessed || 0)), Number(summary.notProcessed || 0) ? 'warning' : ''),
       card(t.warehousesWithErrors || 'Warehouses with errors', integer.format(Number(summary.withErrors || 0)), Number(summary.withErrors || 0) ? 'error' : ''),
-      card(t.negativeStockItems || 'Negative stock cases', integer.format(Number(summary.negativeStock || 0)), Number(summary.negativeStock || 0) ? 'error' : '')
+      card(t.negativeStockItems || 'Negative stock cases', integer.format(Number(summary.negativeStock || 0)), Number(summary.negativeStock || 0) ? 'error' : ''),
+      card(t.warnings || 'Warnings', integer.format(Number(summary.warnings || 0)), Number(summary.warnings || 0) ? 'warning' : '')
     );
 
     if (elements.overviewNotice) {
@@ -526,7 +527,10 @@
     const errorsButton = node('button', 'button', t.allErrors || 'View all errors');
     errorsButton.type = 'button';
     errorsButton.addEventListener('click', () => loadWarehouseDiagnostics(0, 'errors', 1));
-    actions.append(negativeButton, errorsButton);
+    const warningsButton = node('button', 'button', t.allWarnings || 'View all warnings');
+    warningsButton.type = 'button';
+    warningsButton.addEventListener('click', () => loadWarehouseDiagnostics(0, 'warnings', 1));
+    actions.append(negativeButton, warningsButton, errorsButton);
     elements.overviewTable.append(actions);
 
     const wrap = node('div', 'lps-ap-table-scroll');
@@ -536,7 +540,7 @@
     [
       t.warehouse, t.processingState, t.lastProcessing, t.lastSnapshot,
       'UNVERIFIED', 'NEW', 'DIRTY', 'FAILED', 'VERIFIED', 'REMOVED',
-      t.negativeStock, t.errors, t.actions
+      t.negativeStock, t.warnings, t.errors, t.actions
     ].forEach((label) => header.append(node('th', '', label)));
     head.append(header);
     const body = node('tbody');
@@ -562,6 +566,13 @@
         button.addEventListener('click', () => loadWarehouseDiagnostics(row.warehouseId, 'errors', 1));
         errors.append(button);
       } else errors.append('0');
+      const warnings = node('td');
+      if (Number(row.warningCount || 0) > 0) {
+        const button = node('button', 'button-link', integer.format(Number(row.warningCount)));
+        button.type = 'button';
+        button.addEventListener('click', () => loadWarehouseDiagnostics(row.warehouseId, 'warnings', 1));
+        warnings.append(button);
+      } else warnings.append('0');
       const rowActions = node('td', 'lps-ap-row-actions');
       if (Number(row.errorCount || 0) > 0) {
         const button = node('button', 'button button-small', t.viewErrors || 'View errors');
@@ -575,6 +586,12 @@
         button.addEventListener('click', () => loadWarehouseDiagnostics(row.warehouseId, 'negative', 1));
         rowActions.append(button);
       }
+      if (Number(row.warningCount || 0) > 0) {
+        const button = node('button', 'button button-small', t.viewWarnings || 'View warnings');
+        button.type = 'button';
+        button.addEventListener('click', () => loadWarehouseDiagnostics(row.warehouseId, 'warnings', 1));
+        rowActions.append(button);
+      }
       tr.append(
         warehouse,
         status,
@@ -586,6 +603,7 @@
           return cell;
         }),
         negative,
+        warnings,
         errors,
         rowActions
       );

@@ -340,6 +340,7 @@ function lps_accounting_price_campaign_warehouse_overview(array $warehouse_direc
         'notProcessed' => 0,
         'withErrors' => 0,
         'negativeStock' => 0,
+        'warnings' => 0,
     ];
 
     foreach ($warehouse_ids as $warehouse_id) {
@@ -382,6 +383,7 @@ function lps_accounting_price_campaign_warehouse_overview(array $warehouse_direc
             $summary['withErrors']++;
         }
         $summary['negativeStock'] += $negative_count;
+        $summary['warnings'] += absint($history['warning_count'] ?? 0);
 
         $rows[] = [
             'warehouseId' => $warehouse_id,
@@ -427,7 +429,7 @@ function lps_accounting_price_campaign_diagnostics(
     $overview = lps_accounting_price_campaign_warehouse_overview($warehouse_directory);
     if (empty($overview['ok'])) return $overview;
 
-    $kind = in_array($kind, ['all', 'negative', 'errors'], true) ? $kind : 'all';
+    $kind = in_array($kind, ['all', 'negative', 'warnings', 'errors'], true) ? $kind : 'all';
     $names = [];
     $scopes = [];
     $warehouse_rows = [];
@@ -452,6 +454,7 @@ function lps_accounting_price_campaign_diagnostics(
             $is_negative = $code === 'NEGATIVE_CHRONOLOGICAL_STOCK';
             $is_error = lps_accounting_price_campaign_issue_is_error($issue);
             if ($kind === 'negative' && !$is_negative) continue;
+            if ($kind === 'warnings' && $is_error) continue;
             if ($kind === 'errors' && !$is_error) continue;
             $issue['warehouseId'] = $scope_warehouse_id;
             $issue['warehouseName'] = $names[$scope_warehouse_id] ?? (string)$scope_warehouse_id;
@@ -459,7 +462,7 @@ function lps_accounting_price_campaign_diagnostics(
         }
 
         $warehouse_error = sanitize_textarea_field((string)($warehouse_rows[$scope_warehouse_id]['lastError'] ?? ''));
-        if ($kind !== 'negative' && $warehouse_error !== '') {
+        if (in_array($kind, ['all', 'errors'], true) && $warehouse_error !== '') {
             $already_present = false;
             foreach ($items as $existing) {
                 if (absint($existing['warehouseId'] ?? 0) === $scope_warehouse_id
@@ -481,7 +484,7 @@ function lps_accounting_price_campaign_diagnostics(
             }
         }
 
-        if ($kind !== 'negative' && $source_database !== '') {
+        if (in_array($kind, ['all', 'errors'], true) && $source_database !== '') {
             global $wpdb;
             $tables = lps_accounting_price_campaign_snapshot_tables();
             $failed_items = $wpdb->get_results($wpdb->prepare(
@@ -574,11 +577,13 @@ function lps_accounting_price_campaign_select_skus(
 }
 
 function lps_accounting_price_campaign_report_states(): array {
-    return ['NEW', 'DIRTY', 'FAILED', 'REMOVED'];
+    return ['UNVERIFIED', 'NEW', 'DIRTY', 'FAILED', 'REMOVED'];
 }
 
 function lps_accounting_price_campaign_state_reason(string $verification_state): string {
     switch (strtoupper($verification_state)) {
+        case 'UNVERIFIED':
+            return __('The product is present in the current Folio warehouse snapshot, but no successful accounting-price recalculation has been confirmed for it yet.', 'lavka-price-sync');
         case 'NEW':
             return __('The product was first found in Folio and has not yet received a confirmed recalculation.', 'lavka-price-sync');
         case 'DIRTY':
