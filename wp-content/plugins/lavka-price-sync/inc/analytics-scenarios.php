@@ -142,7 +142,104 @@ function lps_analytics_scenario_sanitize_values($values, int $limit = 100): arra
     ))), 0, $limit);
 }
 
+function lps_analytics_scenario_default_profile_v4(): array {
+    return [
+        'schemaVersion' => 4,
+        'context' => ['sourceDatabase' => 'Paint_Ua', 'warehouseIds' => []],
+        'period' => ['from' => '', 'to' => ''],
+        'productFilters' => [],
+        'movementFilters' => [],
+        'calculation' => ['abcBasis' => 'GROSS_PROFIT', 'includeReturns' => true],
+        'page' => ['size' => 50],
+        'sort' => [['field' => 'grossProfit', 'direction' => 'DESC']],
+        'presentation' => ['activeTab' => 'products'],
+    ];
+}
+
+function lps_analytics_scenario_sanitize_selection($selection, int $limit = 500): array {
+    if (!is_array($selection)) return ['mode' => 'ANY', 'values' => []];
+    $mode = strtoupper(sanitize_text_field((string)($selection['mode'] ?? 'ANY')));
+    if (!in_array($mode, ['ANY', 'INCLUDE', 'EXCLUDE'], true)) $mode = 'ANY';
+    $values = lps_analytics_scenario_sanitize_values($selection['values'] ?? [], $limit);
+    if (!$values) $mode = 'ANY';
+    return ['mode' => $mode, 'values' => $values];
+}
+
+function lps_analytics_scenario_sanitize_profile_v4(array $profile): array {
+    $context = is_array($profile['context'] ?? null) ? $profile['context'] : [];
+    $source = sanitize_text_field((string)($context['sourceDatabase'] ?? 'Paint_Ua'));
+    if (!preg_match('/^[A-Za-z0-9_]+$/', $source)) $source = 'Paint_Ua';
+    $warehouses = is_array($context['warehouseIds'] ?? null) ? $context['warehouseIds'] : [];
+    $warehouses = array_values(array_unique(array_filter(array_map('absint', $warehouses), static fn(int $id): bool => $id > 0)));
+    sort($warehouses, SORT_NUMERIC);
+    $warehouses = array_slice($warehouses, 0, 50);
+
+    $period_in = is_array($profile['period'] ?? null) ? $profile['period'] : [];
+    $from = sanitize_text_field((string)($period_in['from'] ?? ''));
+    $to = sanitize_text_field((string)($period_in['to'] ?? ''));
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $from)) $from = '';
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $to)) $to = '';
+
+    $product_in = is_array($profile['productFilters'] ?? null) ? $profile['productFilters'] : [];
+    $movement_in = is_array($profile['movementFilters'] ?? null) ? $profile['movementFilters'] : [];
+    $product = [];
+    $search = sanitize_text_field((string)($product_in['search'] ?? ''));
+    if ($search !== '') $product['search'] = function_exists('mb_substr') ? mb_substr($search, 0, 200) : substr($search, 0, 200);
+    foreach ([
+        'skus', 'groups', 'groupLevel1', 'groupLevel2', 'groupLevel3', 'groupLevel4',
+        'groupLevel5', 'groupLevel6', 'departments', 'productTypes', 'units',
+        'currentSuppliers', 'supplierStates', 'brands', 'barcodes',
+    ] as $key) {
+        $selection = lps_analytics_scenario_sanitize_selection($product_in[$key] ?? null);
+        if ($selection['mode'] !== 'ANY') $product[$key] = $selection;
+    }
+    $movements = [];
+    foreach ([
+        'operationKinds', 'movementClasses', 'demandModes', 'documentTypes',
+        'stockDirections', 'paymentTerms', 'customerSegments', 'counterparties',
+        'organizationTypes', 'salesManagerCodes', 'sourceWarehouseIds', 'destinationWarehouseIds',
+    ] as $key) {
+        $selection = lps_analytics_scenario_sanitize_selection($movement_in[$key] ?? null);
+        if ($selection['mode'] !== 'ANY') $movements[$key] = $selection;
+    }
+
+    $calculation_in = is_array($profile['calculation'] ?? null) ? $profile['calculation'] : [];
+    $abc_basis = strtoupper(sanitize_text_field((string)($calculation_in['abcBasis'] ?? 'GROSS_PROFIT')));
+    if (!in_array($abc_basis, ['REVENUE', 'GROSS_PROFIT', 'SOLD_UNITS'], true)) $abc_basis = 'GROSS_PROFIT';
+
+    $page_in = is_array($profile['page'] ?? null) ? $profile['page'] : [];
+    $page_size = max(1, min(500, absint($page_in['size'] ?? 50)));
+    $allowed_sort = ['sku', 'productName', 'physicalQuantity', 'inventoryValue', 'soldUnits', 'salesRevenue', 'salesCogs', 'grossProfit', 'averageInventoryValue'];
+    $sort = [];
+    foreach (array_slice(is_array($profile['sort'] ?? null) ? $profile['sort'] : [], 0, 5) as $item) {
+        if (!is_array($item)) continue;
+        $field = sanitize_text_field((string)($item['field'] ?? ''));
+        if (!in_array($field, $allowed_sort, true)) continue;
+        $sort[] = ['field' => $field, 'direction' => strtoupper((string)($item['direction'] ?? 'DESC')) === 'ASC' ? 'ASC' : 'DESC'];
+    }
+    if (!$sort) $sort[] = ['field' => 'grossProfit', 'direction' => 'DESC'];
+    $presentation = is_array($profile['presentation'] ?? null) ? $profile['presentation'] : [];
+
+    return [
+        'schemaVersion' => 4,
+        'context' => ['sourceDatabase' => $source, 'warehouseIds' => $warehouses],
+        'period' => ['from' => $from, 'to' => $to],
+        'productFilters' => $product,
+        'movementFilters' => $movements,
+        'calculation' => [
+            'abcBasis' => $abc_basis,
+            'includeReturns' => !isset($calculation_in['includeReturns']) || rest_sanitize_boolean($calculation_in['includeReturns']),
+        ],
+        'page' => ['size' => $page_size],
+        'sort' => $sort,
+        'presentation' => ['activeTab' => sanitize_key((string)($presentation['activeTab'] ?? 'products')) === 'movements' ? 'movements' : 'products'],
+    ];
+}
+
 function lps_analytics_scenario_sanitize_profile(array $profile): array {
+    if ((int)($profile['schemaVersion'] ?? 1) >= 4 || isset($profile['productFilters']) || isset($profile['movementFilters'])) {
+        return lps_analytics_scenario_sanitize_profile_v4($profile);
+    }
     $default = lps_analytics_scenario_default_profile();
     $context = is_array($profile['context'] ?? null) ? $profile['context'] : [];
     $source = sanitize_text_field((string)($context['sourceDatabase'] ?? ''));
@@ -299,7 +396,7 @@ function lps_analytics_scenario_create(
         'description' => $description,
         'visibility' => $visibility,
         'status' => $status,
-        'schema_version' => 1,
+        'schema_version' => (int)$profile['schemaVersion'],
         'profile_json' => wp_json_encode($profile, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
         'version' => 1,
         'legacy_key' => $legacy_key,
@@ -364,18 +461,14 @@ function lps_analytics_scenario_request_payload(): array {
     $profile = lps_analytics_scenario_sanitize_profile($decoded);
     $source = (string)$profile['context']['sourceDatabase'];
     $warehouses = $profile['context']['warehouseIds'];
-    if ($source === '' || count($warehouses) !== 1) {
-        wp_send_json_error(['message' => __('Select an available Folio warehouse.', 'lavka-price-sync')], 400);
+    if ($source === '' || !$warehouses) {
+        wp_send_json_error(['message' => __('Select one or more available Folio warehouses.', 'lavka-price-sync')], 400);
     }
-    if (function_exists('lps_product_analytics_scopes')) {
-        $allowed = array_filter(
-            lps_product_analytics_scopes(),
-            static fn(array $scope): bool =>
-                (string)($scope['source_database'] ?? '') === $source
-                && (int)($scope['warehouse_id'] ?? 0) === (int)$warehouses[0]
-        );
-        if (!$allowed) {
-            wp_send_json_error(['message' => __('The selected Folio warehouse snapshot is no longer available.', 'lavka-price-sync')], 409);
+    if (function_exists('lps_accounting_prices_warehouse_directory')) {
+        $directory = lps_accounting_prices_warehouse_directory();
+        $allowed_ids = array_map(static fn(array $item): int => (int)($item['id'] ?? 0), (array)($directory['items'] ?? []));
+        if (empty($directory['ok']) || array_diff($warehouses, $allowed_ids)) {
+            wp_send_json_error(['message' => __('One or more selected Folio warehouses are not available.', 'lavka-price-sync')], 409);
         }
     }
 
@@ -411,11 +504,11 @@ function lps_analytics_scenario_save(): array {
             $next_version = $expected_version + 1;
             $updated = $wpdb->query($wpdb->prepare(
                 "UPDATE {$tables['scenario']}
-                    SET name=%s, description=%s, visibility=%s, status=%s, schema_version=1,
+                    SET name=%s, description=%s, visibility=%s, status=%s, schema_version=%d,
                         profile_json=%s, version=%d, updated_by=%d, updated_at=%s
                   WHERE id=%d AND version=%d",
                 [
-                    $payload['name'], $payload['description'], $payload['visibility'], $payload['status'],
+                    $payload['name'], $payload['description'], $payload['visibility'], $payload['status'], (int)$payload['profile']['schemaVersion'],
                     wp_json_encode($payload['profile'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
                     $next_version, get_current_user_id(), current_time('mysql'), $scenario_id, $expected_version,
                 ]
@@ -526,14 +619,31 @@ function lps_analytics_scenarios_ajax(): void {
             $data = ['items' => lps_analytics_scenarios_list(!empty($_POST['includeArchived']))];
             break;
         case 'bootstrap':
-            $missing = function_exists('lps_product_analytics_missing_tables')
-                ? lps_product_analytics_missing_tables()
-                : [];
+            $directory = function_exists('lps_accounting_prices_warehouse_directory')
+                ? lps_accounting_prices_warehouse_directory()
+                : ['ok' => false, 'items' => [], 'message' => __('The warehouse directory is unavailable.', 'lavka-price-sync')];
             $data = [
                 'items' => lps_analytics_scenarios_list(true),
-                'scopes' => !$missing && function_exists('lps_product_analytics_scopes') ? lps_product_analytics_scopes() : [],
-                'missingTables' => $missing,
+                'sourceDatabase' => function_exists('lps_product_analytics_v4_source_database') ? lps_product_analytics_v4_source_database() : 'Paint_Ua',
+                'warehouses' => array_values((array)($directory['items'] ?? [])),
+                'warehouseDirectoryReady' => !empty($directory['ok']),
+                'warehouseDirectoryMessage' => sanitize_text_field((string)($directory['message'] ?? '')),
             ];
+            break;
+        case 'v4_capabilities':
+            if (!function_exists('lps_product_analytics_v4_payload') || !function_exists('lps_product_analytics_v4_send_java')) {
+                wp_send_json_error(['message' => __('Product analytics is not available.', 'lavka-price-sync')], 503);
+            }
+            $payload = lps_product_analytics_v4_payload();
+            $source = sanitize_text_field((string)($payload['sourceDatabase'] ?? 'Paint_Ua'));
+            $warehouse_ids = lps_product_analytics_v4_warehouse_ids($payload['warehouseIds'] ?? []);
+            if ($source === '' || !$warehouse_ids) {
+                wp_send_json_error(['message' => __('Select one or more Folio warehouses.', 'lavka-price-sync')], 400);
+            }
+            lps_product_analytics_v4_send_java(LPS_PRODUCT_ANALYTICS_CAPABILITIES_PATH, [
+                'sourceDatabase' => $source,
+                'warehouseIds' => $warehouse_ids,
+            ]);
             break;
         case 'scope_options':
             if (!function_exists('lps_product_analytics_filter_options')) {
@@ -578,7 +688,7 @@ add_action('admin_enqueue_scripts', static function (): void {
 
     $plugin_file = dirname(__DIR__) . '/lavka-price-sync.php';
     $css_path = dirname(__DIR__) . '/assets/analytics-scenarios.css';
-    $js_path = dirname(__DIR__) . '/assets/analytics-scenarios.js';
+    $js_path = dirname(__DIR__) . '/assets/analytics-scenarios-v4.js';
     wp_enqueue_style(
         'lps-analytics-scenarios',
         plugins_url('assets/analytics-scenarios.css', $plugin_file),
@@ -587,7 +697,7 @@ add_action('admin_enqueue_scripts', static function (): void {
     );
     wp_enqueue_script(
         'lps-analytics-scenarios',
-        plugins_url('assets/analytics-scenarios.js', $plugin_file),
+        plugins_url('assets/analytics-scenarios-v4.js', $plugin_file),
         [],
         @filemtime($js_path) ?: '1.0',
         true
@@ -614,7 +724,14 @@ add_action('admin_enqueue_scripts', static function (): void {
             'shared' => __('Shared', 'lavka-price-sync'),
             'personal' => __('Personal', 'lavka-price-sync'),
             'version' => __('Version', 'lavka-price-sync'),
+            'selectWarehouses' => __('Select one or more Folio warehouses.', 'lavka-price-sync'),
+            'capabilitiesLoading' => __('Loading supported filters and dictionaries...', 'lavka-price-sync'),
+            'capabilitiesFailed' => __('Supported analytics filters could not be loaded.', 'lavka-price-sync'),
+            'any' => __('Do not apply this condition', 'lavka-price-sync'),
+            'include' => __('Include selected values', 'lavka-price-sync'),
+            'exclude' => __('Exclude selected values', 'lavka-price-sync'),
         ],
+        'analyticsI18n' => function_exists('lps_product_analytics_i18n') ? lps_product_analytics_i18n() : [],
     ]);
 });
 
@@ -801,8 +918,93 @@ function lps_render_analytics_scenario_movement_fields(): void {
     lps_analytics_scenario_select('movement_per_page', __('Rows per page', 'lavka-price-sync'), ['20' => '20', '50' => '50', '100' => '100'], 'data-scenario-movement="movementPerPage"');
 }
 
+function lps_render_analytics_scenarios_v4_page(): void {
+    $today = wp_date('Y-m-d');
+    $period_from = wp_date('Y-m-d', strtotime('-12 months +1 day', current_time('timestamp')));
+    ?>
+    <div class="wrap lps-as lps-as-v4" id="lps-analytics-scenarios" data-analytics-schema="4">
+        <div class="lps-as-heading">
+            <div>
+                <h1><?php echo esc_html__('Folio analytics scenarios', 'lavka-price-sync'); ?></h1>
+                <p class="description"><?php echo esc_html__('Save one reusable set of warehouses, product conditions, movement conditions and report parameters.', 'lavka-price-sync'); ?></p>
+            </div>
+            <a class="button" href="<?php echo esc_url(admin_url('admin.php?page=' . LPS_PRODUCT_ANALYTICS_PAGE)); ?>"><?php echo esc_html__('Open product analytics', 'lavka-price-sync'); ?></a>
+        </div>
+
+        <div id="lps-as-message" class="lps-as-message" hidden aria-live="polite"></div>
+        <div class="notice notice-info inline">
+            <p><?php echo esc_html__('Schema v4 scenarios support several warehouses. Only filters confirmed by the selected snapshots are stored and sent to reports.', 'lavka-price-sync'); ?></p>
+        </div>
+
+        <div class="lps-as-actions">
+            <button type="button" class="button button-primary" id="lps-as-new"><?php echo esc_html__('Create scenario', 'lavka-price-sync'); ?></button>
+            <button type="button" class="button" id="lps-as-duplicate" disabled><?php echo esc_html__('Create a copy', 'lavka-price-sync'); ?></button>
+            <button type="button" class="button" id="lps-as-archive" disabled><?php echo esc_html__('Archive', 'lavka-price-sync'); ?></button>
+            <span class="spinner" id="lps-as-spinner"></span>
+        </div>
+
+        <div class="lps-as-layout">
+            <aside class="lps-as-list" aria-label="<?php echo esc_attr__('Analytics scenarios', 'lavka-price-sync'); ?>"><div id="lps-as-list"></div></aside>
+            <main class="lps-as-editor">
+                <form id="lps-as-form">
+                    <input type="hidden" id="lps-as-id" value="">
+                    <input type="hidden" id="lps-as-version" value="0">
+                    <input type="hidden" id="lps-as-source" value="Paint_Ua">
+
+                    <section class="lps-as-section">
+                        <h2><?php echo esc_html__('Scenario', 'lavka-price-sync'); ?></h2>
+                        <div class="lps-as-grid">
+                            <label class="lps-as-wide"><span><?php echo esc_html__('Name', 'lavka-price-sync'); ?></span><input type="text" id="lps-as-name" maxlength="191" required></label>
+                            <label class="lps-as-wide"><span><?php echo esc_html__('Description', 'lavka-price-sync'); ?></span><textarea id="lps-as-description" rows="3"></textarea></label>
+                            <label><span><?php echo esc_html__('Access', 'lavka-price-sync'); ?></span><select id="lps-as-visibility"><option value="shared"><?php echo esc_html__('Shared with managers', 'lavka-price-sync'); ?></option><option value="personal"><?php echo esc_html__('Personal', 'lavka-price-sync'); ?></option></select></label>
+                            <label><span><?php echo esc_html__('Status', 'lavka-price-sync'); ?></span><select id="lps-as-status"><option value="active"><?php echo esc_html__('Active', 'lavka-price-sync'); ?></option><option value="archived"><?php echo esc_html__('Archived', 'lavka-price-sync'); ?></option></select></label>
+                            <label><span><?php echo esc_html__('Default registry', 'lavka-price-sync'); ?></span><select id="lps-as-active-tab"><option value="products"><?php echo esc_html__('Products', 'lavka-price-sync'); ?></option><option value="movements"><?php echo esc_html__('Product movements', 'lavka-price-sync'); ?></option></select></label>
+                        </div>
+                    </section>
+
+                    <section class="lps-as-section">
+                        <h2><?php echo esc_html__('Data scope and period', 'lavka-price-sync'); ?></h2>
+                        <div class="lps-as-grid">
+                            <label class="lps-as-wide"><span><?php echo esc_html__('Folio warehouses', 'lavka-price-sync'); ?></span><select id="lps-as-warehouses" multiple size="7" required disabled></select></label>
+                            <label><span><?php echo esc_html__('Period from', 'lavka-price-sync'); ?></span><input type="date" id="lps-as-period-from" value="<?php echo esc_attr($period_from); ?>" required></label>
+                            <label><span><?php echo esc_html__('Period through', 'lavka-price-sync'); ?></span><input type="date" id="lps-as-period-to" value="<?php echo esc_attr($today); ?>" required></label>
+                            <label><span><?php echo esc_html__('ABC basis', 'lavka-price-sync'); ?></span><select id="lps-as-abc-basis"><option value="GROSS_PROFIT"><?php echo esc_html__('Gross profit', 'lavka-price-sync'); ?></option><option value="REVENUE"><?php echo esc_html__('Revenue', 'lavka-price-sync'); ?></option><option value="SOLD_UNITS"><?php echo esc_html__('Sold units', 'lavka-price-sync'); ?></option></select></label>
+                            <label><span><?php echo esc_html__('Rows per page', 'lavka-price-sync'); ?></span><select id="lps-as-page-size"><option value="20">20</option><option value="50" selected>50</option><option value="100">100</option><option value="250">250</option></select></label>
+                            <label><span><?php echo esc_html__('Sort by', 'lavka-price-sync'); ?></span><select id="lps-as-sort-field"><option value="grossProfit"><?php echo esc_html__('Gross profit', 'lavka-price-sync'); ?></option><option value="salesRevenue"><?php echo esc_html__('Sales revenue', 'lavka-price-sync'); ?></option><option value="soldUnits"><?php echo esc_html__('Sold units', 'lavka-price-sync'); ?></option><option value="inventoryValue"><?php echo esc_html__('Capital in stock', 'lavka-price-sync'); ?></option><option value="averageInventoryValue"><?php echo esc_html__('Average inventory value', 'lavka-price-sync'); ?></option><option value="physicalQuantity"><?php echo esc_html__('Physical quantity', 'lavka-price-sync'); ?></option><option value="sku"><?php echo esc_html__('SKU', 'lavka-price-sync'); ?></option><option value="productName"><?php echo esc_html__('Product', 'lavka-price-sync'); ?></option></select></label>
+                            <label><span><?php echo esc_html__('Sort direction', 'lavka-price-sync'); ?></span><select id="lps-as-sort-direction"><option value="DESC"><?php echo esc_html__('Descending', 'lavka-price-sync'); ?></option><option value="ASC"><?php echo esc_html__('Ascending', 'lavka-price-sync'); ?></option></select></label>
+                            <label class="lps-as-checkbox"><input type="checkbox" id="lps-as-include-returns" checked><span><?php echo esc_html__('Include returns in the period report', 'lavka-price-sync'); ?></span></label>
+                        </div>
+                        <p class="description" id="lps-as-scope-meta"></p>
+                    </section>
+
+                    <details class="lps-as-section" open>
+                        <summary><h2><?php echo esc_html__('Product registry conditions', 'lavka-price-sync'); ?></h2></summary>
+                        <div class="lps-as-grid lps-as-filter-grid" id="lps-as-product-filter-grid">
+                            <label class="lps-as-wide"><span><?php echo esc_html__('SKU, product name or primary GTIN', 'lavka-price-sync'); ?></span><input type="search" id="lps-as-search" maxlength="200"></label>
+                            <div class="lps-as-selection lps-as-text-selection" data-lps-as-selection="skus" data-lps-as-section="product"><label><span><?php echo esc_html__('Exact SKUs', 'lavka-price-sync'); ?></span><textarea rows="4"></textarea></label><select class="lps-as-mode"><option value="ANY"><?php echo esc_html__('Do not apply this condition', 'lavka-price-sync'); ?></option><option value="INCLUDE"><?php echo esc_html__('Include selected values', 'lavka-price-sync'); ?></option><option value="EXCLUDE"><?php echo esc_html__('Exclude selected values', 'lavka-price-sync'); ?></option></select></div>
+                            <div class="lps-as-selection lps-as-text-selection" data-lps-as-selection="barcodes" data-lps-as-section="product"><label><span><?php echo esc_html__('Exact primary GTINs', 'lavka-price-sync'); ?></span><textarea rows="4"></textarea></label><select class="lps-as-mode"><option value="ANY"><?php echo esc_html__('Do not apply this condition', 'lavka-price-sync'); ?></option><option value="INCLUDE"><?php echo esc_html__('Include selected values', 'lavka-price-sync'); ?></option><option value="EXCLUDE"><?php echo esc_html__('Exclude selected values', 'lavka-price-sync'); ?></option></select></div>
+                        </div>
+                    </details>
+
+                    <details class="lps-as-section" open>
+                        <summary><h2><?php echo esc_html__('Movement registry conditions', 'lavka-price-sync'); ?></h2></summary>
+                        <p class="description lps-as-filter-note"><?php echo esc_html__('Movement conditions change period metrics only and never change current stock.', 'lavka-price-sync'); ?></p>
+                        <div class="lps-as-grid lps-as-filter-grid" id="lps-as-movement-filter-grid"></div>
+                    </details>
+
+                    <section class="lps-as-section lps-as-revisions" id="lps-as-revisions" hidden><h2><?php echo esc_html__('Revision history', 'lavka-price-sync'); ?></h2><div id="lps-as-revision-list"></div></section>
+                    <div class="lps-as-savebar"><button type="submit" class="button button-primary button-large" id="lps-as-save"><?php echo esc_html__('Save scenario', 'lavka-price-sync'); ?></button><span class="description" id="lps-as-editor-meta"></span></div>
+                </form>
+            </main>
+        </div>
+    </div>
+    <?php
+}
+
 function lps_render_analytics_scenarios_page(): void {
     if (!current_user_can(LPS_CAP)) return;
+    lps_render_analytics_scenarios_v4_page();
+    return;
     ?>
     <div class="wrap lps-as" id="lps-analytics-scenarios">
         <div class="lps-as-heading">

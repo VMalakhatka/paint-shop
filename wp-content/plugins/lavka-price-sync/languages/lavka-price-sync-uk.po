@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lavka-price-sync\n"
-"POT-Creation-Date: 2026-08-31T06:51:23+00:00\n"
+"POT-Creation-Date: 2026-08-31T12:58:36+00:00\n"
 "Language: uk\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -375,21 +375,23 @@ msgstr "Стан"
 #: inc/accounting-price-campaign.php:1655 inc/accounting-prices.php:109
 #: inc/accounting-prices.php:122 inc/accounting-prices.php:218
 #: inc/accounting-prices.php:428 inc/accounting-prices.php:933
-#: inc/accounting-prices.php:1023 inc/product-analytics.php:63
+#: inc/accounting-prices.php:1023 inc/product-analytics.php:65
 msgid "Warehouse"
 msgstr "Склад"
 
 #: inc/accounting-price-campaign.php:1583
 #: inc/accounting-price-campaign.php:1658 inc/accounting-prices.php:282
 #: inc/accounting-prices.php:593 inc/accounting-prices.php:935
-#: inc/accounting-prices.php:1026 inc/analytics-scenarios.php:751
-#: inc/analytics-scenarios.php:765 inc/product-analytics.php:74
-#: inc/product-analytics.php:559
+#: inc/accounting-prices.php:1026 inc/analytics-scenarios.php:868
+#: inc/analytics-scenarios.php:882 inc/analytics-scenarios.php:973
+#: inc/product-analytics.php:76 inc/product-analytics.php:388
+#: inc/product-analytics.php:809
 msgid "SKU"
 msgstr "Артикул"
 
 #: inc/accounting-price-campaign.php:1584 inc/accounting-prices.php:236
-#: inc/analytics-scenarios.php:752 inc/product-analytics.php:75
+#: inc/analytics-scenarios.php:869 inc/analytics-scenarios.php:973
+#: inc/product-analytics.php:77 inc/product-analytics.php:389
 msgid "Product"
 msgstr "Товар"
 
@@ -436,13 +438,13 @@ msgid "Change detected"
 msgstr "Зміну виявлено"
 
 #: inc/accounting-price-campaign.php:1620 inc/admin-ui.php:364
-#: inc/analytics-scenarios.php:796 inc/product-analytics.php:115
-#: inc/product-analytics.php:599
+#: inc/analytics-scenarios.php:913 inc/product-analytics.php:117
+#: inc/product-analytics.php:849
 msgid "Yes"
 msgstr "Так"
 
-#: inc/accounting-price-campaign.php:1620 inc/analytics-scenarios.php:796
-#: inc/product-analytics.php:116 inc/product-analytics.php:599
+#: inc/accounting-price-campaign.php:1620 inc/analytics-scenarios.php:913
+#: inc/product-analytics.php:118 inc/product-analytics.php:849
 msgid "No"
 msgstr "Ні"
 
@@ -515,8 +517,8 @@ msgstr "Технічні подробиці"
 msgid "Batch or warehouse result"
 msgstr "Результат порції або складу"
 
-#: inc/accounting-price-campaign.php:1706 inc/analytics-scenarios.php:671
-#: inc/logs.php:122 inc/product-analytics.php:347
+#: inc/accounting-price-campaign.php:1706 inc/analytics-scenarios.php:788
+#: inc/logs.php:122 inc/product-analytics.php:597
 msgid "Error"
 msgstr "Помилка"
 
@@ -734,7 +736,7 @@ msgstr "Невідома помилка."
 msgid "Select a Folio warehouse."
 msgstr "Оберіть склад ФОЛІО."
 
-#: inc/accounting-prices.php:59 inc/product-analytics.php:62
+#: inc/accounting-prices.php:59 inc/product-analytics.php:64
 msgid "Select a warehouse"
 msgstr "Оберіть склад"
 
@@ -1001,12 +1003,13 @@ msgid "operation"
 msgstr "операція"
 
 #: inc/accounting-prices.php:123 inc/accounting-prices.php:438
-#: inc/product-analytics.php:65
+#: inc/analytics-scenarios.php:973 inc/product-analytics.php:67
+#: inc/product-analytics.php:387
 msgid "Physical quantity"
 msgstr "Фізична кількість"
 
-#: inc/accounting-prices.php:124 inc/analytics-scenarios.php:753
-#: inc/product-analytics.php:67
+#: inc/accounting-prices.php:124 inc/analytics-scenarios.php:870
+#: inc/product-analytics.php:69
 msgid "Available quantity"
 msgstr "Доступна кількість"
 
@@ -1015,8 +1018,8 @@ msgid "Accounting quantity"
 msgstr "Облікова кількість"
 
 #: inc/accounting-prices.php:126 inc/accounting-prices.php:435
-#: inc/analytics-scenarios.php:693 inc/product-analytics.php:68
-#: inc/product-analytics.php:396
+#: inc/analytics-scenarios.php:810 inc/product-analytics.php:70
+#: inc/product-analytics.php:646
 msgid "Accounting price"
 msgstr "Облікова ціна"
 
@@ -1036,7 +1039,7 @@ msgstr "Продажна ціна у валюті"
 msgid "Price basis"
 msgstr "База ціни"
 
-#: inc/accounting-prices.php:131 inc/product-analytics.php:66
+#: inc/accounting-prices.php:131 inc/product-analytics.php:68
 msgid "Reserved quantity"
 msgstr "Зарезервована кількість"
 
@@ -1320,8 +1323,9 @@ msgstr ""
 "Запитано безпечну зупинку. Поточна операція завершиться, після чого буде "
 "сформовано фінальний знімок."
 
-#: inc/accounting-prices.php:216 inc/analytics-scenarios.php:844
-#: inc/logs.php:100 inc/product-analytics.php:87
+#: inc/accounting-prices.php:216 inc/analytics-scenarios.php:960
+#: inc/analytics-scenarios.php:1046 inc/logs.php:100
+#: inc/product-analytics.php:89
 msgid "Status"
 msgstr "Статус"
 
@@ -1397,11 +1401,11 @@ msgstr "Чому призначено цей стан"
 msgid "Movement period"
 msgstr "Період рухів"
 
-#: inc/accounting-prices.php:245
+#: inc/accounting-prices.php:245 inc/product-analytics.php:189
 msgid "Previous page"
 msgstr "Попередня сторінка"
 
-#: inc/accounting-prices.php:246
+#: inc/accounting-prices.php:246 inc/product-analytics.php:190
 msgid "Next page"
 msgstr "Наступна сторінка"
 
@@ -1768,8 +1772,8 @@ msgstr ""
 "Попередня перевірка нічого не змінює. Застосування змінює дані ФОЛІО та має "
 "виконуватися лише в погоджене вікно обслуговування."
 
-#: inc/accounting-prices.php:568 inc/analytics-scenarios.php:852
-#: inc/product-analytics.php:241
+#: inc/accounting-prices.php:568 inc/analytics-scenarios.php:1054
+#: inc/product-analytics.php:491
 msgid "Folio warehouse"
 msgstr "Склад ФОЛІО"
 
@@ -2011,7 +2015,8 @@ msgstr "Розклад призупинено:"
 msgid "Enable weekly SKU campaign"
 msgstr "Увімкнути щотижневу кампанію SKU"
 
-#: inc/accounting-prices.php:806
+#: inc/accounting-prices.php:806 inc/analytics-scenarios.php:968
+#: inc/product-analytics.php:333
 msgid "Folio warehouses"
 msgstr "Склади ФОЛІО"
 
@@ -2150,6 +2155,7 @@ msgid "Java job ID"
 msgstr "ID завдання сервісу ФОЛІО"
 
 #: inc/accounting-prices.php:1067 inc/accounting-prices.php:1195
+#: inc/product-analytics.php:1726
 msgid "Java Base URL is not configured."
 msgstr "Базову адресу сервісу ФОЛІО не налаштовано."
 
@@ -2170,7 +2176,8 @@ msgstr "Перерахунок облікової ціни одного това
 msgid "Unsupported accounting-price operation."
 msgstr "Операція з обліковою ціною не підтримується."
 
-#: inc/accounting-prices.php:1210
+#: inc/accounting-prices.php:1210 inc/analytics-scenarios.php:624
+#: inc/product-analytics.php:1760
 msgid "The warehouse directory is unavailable."
 msgstr "Довідник складів недоступний."
 
@@ -2218,11 +2225,11 @@ msgstr "Помилка:"
 msgid "Done"
 msgstr "Готово"
 
-#: inc/admin-ui.php:71 inc/product-analytics.php:90
+#: inc/admin-ui.php:71 inc/product-analytics.php:92
 msgid "Page"
 msgstr "Сторінка"
 
-#: inc/admin-ui.php:72 inc/product-analytics.php:91
+#: inc/admin-ui.php:72 inc/product-analytics.php:93
 msgid "of"
 msgstr "з"
 
@@ -2436,765 +2443,972 @@ msgstr "Зберегти розклад"
 msgid "Run now"
 msgstr "Запустити зараз"
 
-#: inc/analytics-scenarios.php:223 inc/analytics-scenarios.php:511
+#: inc/analytics-scenarios.php:320 inc/analytics-scenarios.php:604
 msgid "Unknown user"
 msgstr "Невідомий користувач"
 
-#: inc/analytics-scenarios.php:280
+#: inc/analytics-scenarios.php:377
 msgid "The scenario revision could not be saved."
 msgstr "Не вдалося зберегти ревізію сценарію."
 
-#: inc/analytics-scenarios.php:312
+#: inc/analytics-scenarios.php:409
 msgid "The analytics scenario could not be created."
 msgstr "Не вдалося створити сценарій аналітики."
 
-#: inc/analytics-scenarios.php:316
+#: inc/analytics-scenarios.php:413
 msgid "The created scenario could not be read."
 msgstr "Не вдалося прочитати створений сценарій."
 
-#: inc/analytics-scenarios.php:340
+#: inc/analytics-scenarios.php:437
 msgid "Imported from a personal product-analytics filter set."
 msgstr "Імпортовано з особистого набору фільтрів товарної аналітики."
 
-#: inc/analytics-scenarios.php:354
+#: inc/analytics-scenarios.php:451
 msgid "Enter a scenario name."
 msgstr "Введіть назву сценарію."
 
-#: inc/analytics-scenarios.php:362
+#: inc/analytics-scenarios.php:459
 msgid "The scenario data is invalid."
 msgstr "Дані сценарію некоректні."
 
-#: inc/analytics-scenarios.php:368 inc/analytics-scenarios.php:609
-msgid "Select an available Folio warehouse."
-msgstr "Виберіть доступний склад ФОЛІО."
+#: inc/analytics-scenarios.php:465
+msgid "Select one or more available Folio warehouses."
+msgstr "Виберіть один або кілька доступних складів ФОЛІО."
 
-#: inc/analytics-scenarios.php:378
-msgid "The selected Folio warehouse snapshot is no longer available."
-msgstr "Вибраний знімок складу ФОЛІО більше недоступний."
+#: inc/analytics-scenarios.php:471
+msgid "One or more selected Folio warehouses are not available."
+msgstr "Один або кілька вибраних складів ФОЛІО недоступні."
 
-#: inc/analytics-scenarios.php:404 inc/analytics-scenarios.php:443
-#: inc/analytics-scenarios.php:470 inc/analytics-scenarios.php:501
+#: inc/analytics-scenarios.php:497 inc/analytics-scenarios.php:536
+#: inc/analytics-scenarios.php:563 inc/analytics-scenarios.php:594
 msgid "The analytics scenario was not found."
 msgstr "Сценарій аналітики не знайдено."
 
-#: inc/analytics-scenarios.php:406 inc/analytics-scenarios.php:472
+#: inc/analytics-scenarios.php:499 inc/analytics-scenarios.php:565
 msgid "You cannot edit this analytics scenario."
 msgstr "Ви не можете редагувати цей сценарій аналітики."
 
-#: inc/analytics-scenarios.php:409
+#: inc/analytics-scenarios.php:502
 msgid "This scenario was changed by another user. Reload it before saving."
 msgstr "Цей сценарій змінив інший користувач. Оновіть його перед збереженням."
 
-#: inc/analytics-scenarios.php:423
+#: inc/analytics-scenarios.php:516
 msgid "The analytics scenario could not be updated."
 msgstr "Не вдалося оновити сценарій аналітики."
 
-#: inc/analytics-scenarios.php:425
+#: inc/analytics-scenarios.php:518
 msgid "The updated scenario could not be read."
 msgstr "Не вдалося прочитати оновлений сценарій."
 
 #. translators: %s: original scenario name.
-#: inc/analytics-scenarios.php:447
+#: inc/analytics-scenarios.php:540
 #, php-format
 msgid "Copy of %s"
 msgstr "Копія %s"
 
-#: inc/analytics-scenarios.php:474
+#: inc/analytics-scenarios.php:567
 msgid "This scenario was changed by another user. Reload it before archiving."
 msgstr "Цей сценарій змінив інший користувач. Оновіть його перед архівуванням."
 
-#: inc/analytics-scenarios.php:484
+#: inc/analytics-scenarios.php:577
 msgid "The analytics scenario could not be archived."
 msgstr "Не вдалося архівувати сценарій аналітики."
 
-#: inc/analytics-scenarios.php:486
+#: inc/analytics-scenarios.php:579
 msgid "The archived scenario could not be read."
 msgstr "Не вдалося прочитати архівований сценарій."
 
-#: inc/analytics-scenarios.php:519
+#: inc/analytics-scenarios.php:612
 msgid "You do not have permission to manage analytics scenarios."
 msgstr "У вас немає дозволу керувати сценаріями аналітики."
 
-#: inc/analytics-scenarios.php:540
+#: inc/analytics-scenarios.php:635 inc/analytics-scenarios.php:650
 msgid "Product analytics is not available."
 msgstr "Товарна аналітика недоступна."
 
-#: inc/analytics-scenarios.php:558
+#: inc/analytics-scenarios.php:641 inc/analytics-scenarios.php:727
+#: inc/product-analytics.php:167 inc/product-analytics.php:1662
+#: inc/product-analytics.php:1785
+msgid "Select one or more Folio warehouses."
+msgstr "Виберіть один або кілька складів ФОЛІО."
+
+#: inc/analytics-scenarios.php:668
 msgid "Unsupported analytics-scenario operation."
 msgstr "Операція зі сценарієм аналітики не підтримується."
 
-#: inc/analytics-scenarios.php:567 inc/analytics-scenarios.php:810
+#: inc/analytics-scenarios.php:677 inc/analytics-scenarios.php:928
+#: inc/analytics-scenarios.php:1012
 msgid "Folio analytics scenarios"
 msgstr "Сценарії аналітики ФОЛІО"
 
-#: inc/analytics-scenarios.php:568 inc/analytics-scenarios.php:829
+#: inc/analytics-scenarios.php:678 inc/analytics-scenarios.php:947
+#: inc/analytics-scenarios.php:1031
 msgid "Analytics scenarios"
 msgstr "Сценарії аналітики"
 
-#: inc/analytics-scenarios.php:601
+#: inc/analytics-scenarios.php:711
 msgid "Loading analytics scenarios..."
 msgstr "Завантаження сценаріїв аналітики..."
 
-#: inc/analytics-scenarios.php:602
+#: inc/analytics-scenarios.php:712
 msgid "Analytics scenarios could not be loaded."
 msgstr "Не вдалося завантажити сценарії аналітики."
 
-#: inc/analytics-scenarios.php:603
+#: inc/analytics-scenarios.php:713
 msgid "New scenario"
 msgstr "Новий сценарій"
 
-#: inc/analytics-scenarios.php:604
+#: inc/analytics-scenarios.php:714
 msgid "The analytics scenario has been saved."
 msgstr "Сценарій аналітики збережено."
 
-#: inc/analytics-scenarios.php:605
+#: inc/analytics-scenarios.php:715
 msgid "The analytics scenario has been archived."
 msgstr "Сценарій аналітики архівовано."
 
-#: inc/analytics-scenarios.php:606
+#: inc/analytics-scenarios.php:716
 msgid "Archive this analytics scenario?"
 msgstr "Архівувати цей сценарій аналітики?"
 
-#: inc/analytics-scenarios.php:607
+#: inc/analytics-scenarios.php:717
 msgid "Select a scenario to edit."
 msgstr "Виберіть сценарій для редагування."
 
-#: inc/analytics-scenarios.php:608
+#: inc/analytics-scenarios.php:718
 msgid "No analytics scenarios have been created yet."
 msgstr "Сценарії аналітики ще не створено."
 
-#: inc/analytics-scenarios.php:610
+#: inc/analytics-scenarios.php:719
+msgid "Select an available Folio warehouse."
+msgstr "Виберіть доступний склад ФОЛІО."
+
+#: inc/analytics-scenarios.php:720
 msgid "Warehouse filter options could not be loaded."
 msgstr "Не вдалося завантажити параметри фільтрів складу."
 
-#: inc/analytics-scenarios.php:611 inc/product-analytics.php:163
+#: inc/analytics-scenarios.php:721 inc/product-analytics.php:165
 msgid "Saved value is not available in the current snapshot"
 msgstr "Збережене значення відсутнє в поточному знімку"
 
-#: inc/analytics-scenarios.php:612 inc/analytics-scenarios.php:844
+#: inc/analytics-scenarios.php:722 inc/analytics-scenarios.php:960
+#: inc/analytics-scenarios.php:1046
 msgid "Active"
 msgstr "Активний"
 
-#: inc/analytics-scenarios.php:613 inc/analytics-scenarios.php:844
+#: inc/analytics-scenarios.php:723 inc/analytics-scenarios.php:960
+#: inc/analytics-scenarios.php:1046
 msgid "Archived"
 msgstr "Архівний"
 
-#: inc/analytics-scenarios.php:614
+#: inc/analytics-scenarios.php:724
 msgid "Shared"
 msgstr "Спільний"
 
-#: inc/analytics-scenarios.php:615 inc/analytics-scenarios.php:843
+#: inc/analytics-scenarios.php:725 inc/analytics-scenarios.php:959
+#: inc/analytics-scenarios.php:1045
 msgid "Personal"
 msgstr "Особистий"
 
-#: inc/analytics-scenarios.php:616
+#: inc/analytics-scenarios.php:726
 msgid "Version"
 msgstr "Версія"
 
-#: inc/analytics-scenarios.php:644 inc/product-analytics.php:297
+#: inc/analytics-scenarios.php:728 inc/product-analytics.php:168
+msgid "Loading supported filters and dictionaries..."
+msgstr "Завантаження доступних фільтрів і довідників..."
+
+#: inc/analytics-scenarios.php:729 inc/product-analytics.php:169
+msgid "Supported analytics filters could not be loaded."
+msgstr "Не вдалося завантажити доступні фільтри аналітики."
+
+#: inc/analytics-scenarios.php:730 inc/analytics-scenarios.php:984
+#: inc/analytics-scenarios.php:985 inc/product-analytics.php:174
+#: inc/product-analytics.php:414 inc/product-analytics.php:418
+msgid "Do not apply this condition"
+msgstr "Не застосовувати цю умову"
+
+#: inc/analytics-scenarios.php:731 inc/analytics-scenarios.php:984
+#: inc/analytics-scenarios.php:985 inc/product-analytics.php:172
+#: inc/product-analytics.php:414 inc/product-analytics.php:418
+msgid "Include selected values"
+msgstr "Включити вибрані значення"
+
+#: inc/analytics-scenarios.php:732 inc/analytics-scenarios.php:984
+#: inc/analytics-scenarios.php:985 inc/product-analytics.php:173
+#: inc/product-analytics.php:414 inc/product-analytics.php:418
+msgid "Exclude selected values"
+msgstr "Виключити вибрані значення"
+
+#: inc/analytics-scenarios.php:761 inc/product-analytics.php:547
 msgid "SKU or product name"
 msgstr "Артикул або назва товару"
 
-#: inc/analytics-scenarios.php:645 inc/product-analytics.php:301
+#: inc/analytics-scenarios.php:762 inc/product-analytics.php:551
 msgid "Economic status"
 msgstr "Економічний стан"
 
-#: inc/analytics-scenarios.php:646 inc/product-analytics.php:303
+#: inc/analytics-scenarios.php:763 inc/product-analytics.php:553
 msgid "All statuses"
 msgstr "Усі статуси"
 
-#: inc/analytics-scenarios.php:646 inc/product-analytics.php:165
-#: inc/product-analytics.php:304
+#: inc/analytics-scenarios.php:763 inc/product-analytics.php:255
+#: inc/product-analytics.php:554
 msgid "Healthy"
 msgstr "Норма"
 
-#: inc/analytics-scenarios.php:647 inc/analytics-scenarios.php:662
-#: inc/analytics-scenarios.php:744 inc/product-analytics.php:166
-#: inc/product-analytics.php:277 inc/product-analytics.php:305
-#: inc/product-analytics.php:331
+#: inc/analytics-scenarios.php:764 inc/analytics-scenarios.php:779
+#: inc/analytics-scenarios.php:861 inc/product-analytics.php:256
+#: inc/product-analytics.php:527 inc/product-analytics.php:555
+#: inc/product-analytics.php:581
 msgid "Stockout"
 msgstr "Дефіцит"
 
-#: inc/analytics-scenarios.php:647 inc/analytics-scenarios.php:663
-#: inc/analytics-scenarios.php:744 inc/product-analytics.php:167
-#: inc/product-analytics.php:278 inc/product-analytics.php:306
-#: inc/product-analytics.php:334
+#: inc/analytics-scenarios.php:764 inc/analytics-scenarios.php:780
+#: inc/analytics-scenarios.php:861 inc/product-analytics.php:257
+#: inc/product-analytics.php:528 inc/product-analytics.php:556
+#: inc/product-analytics.php:584
 msgid "Dead stock"
 msgstr "Мертвий запас"
 
-#: inc/analytics-scenarios.php:648 inc/analytics-scenarios.php:663
-#: inc/analytics-scenarios.php:745 inc/product-analytics.php:168
-#: inc/product-analytics.php:279 inc/product-analytics.php:307
-#: inc/product-analytics.php:333
+#: inc/analytics-scenarios.php:765 inc/analytics-scenarios.php:780
+#: inc/analytics-scenarios.php:862 inc/product-analytics.php:258
+#: inc/product-analytics.php:529 inc/product-analytics.php:557
+#: inc/product-analytics.php:583
 msgid "Overstock"
 msgstr "Надлишковий запас"
 
-#: inc/analytics-scenarios.php:648 inc/analytics-scenarios.php:662
-#: inc/analytics-scenarios.php:745 inc/product-analytics.php:169
-#: inc/product-analytics.php:280 inc/product-analytics.php:308
-#: inc/product-analytics.php:332
+#: inc/analytics-scenarios.php:765 inc/analytics-scenarios.php:779
+#: inc/analytics-scenarios.php:862 inc/product-analytics.php:259
+#: inc/product-analytics.php:530 inc/product-analytics.php:558
+#: inc/product-analytics.php:582
 msgid "Negative gross profit, 3 months"
 msgstr "Від'ємний валовий прибуток за 3 місяці"
 
-#: inc/analytics-scenarios.php:649 inc/analytics-scenarios.php:664
-#: inc/analytics-scenarios.php:746 inc/product-analytics.php:170
-#: inc/product-analytics.php:281 inc/product-analytics.php:309
-#: inc/product-analytics.php:335
+#: inc/analytics-scenarios.php:766 inc/analytics-scenarios.php:781
+#: inc/analytics-scenarios.php:863 inc/product-analytics.php:260
+#: inc/product-analytics.php:531 inc/product-analytics.php:559
+#: inc/product-analytics.php:585
 msgid "Demand fading"
 msgstr "Падіння попиту"
 
-#: inc/analytics-scenarios.php:649 inc/analytics-scenarios.php:661
-#: inc/product-analytics.php:172 inc/product-analytics.php:310
-#: inc/product-analytics.php:330
+#: inc/analytics-scenarios.php:766 inc/analytics-scenarios.php:778
+#: inc/product-analytics.php:262 inc/product-analytics.php:560
+#: inc/product-analytics.php:580
 msgid "Data issue"
 msgstr "Проблема з даними"
 
-#: inc/analytics-scenarios.php:650 inc/analytics-scenarios.php:655
-#: inc/product-analytics.php:173 inc/product-analytics.php:311
-#: inc/product-analytics.php:322
+#: inc/analytics-scenarios.php:767 inc/analytics-scenarios.php:772
+#: inc/product-analytics.php:263 inc/product-analytics.php:561
+#: inc/product-analytics.php:572
 msgid "New product"
 msgstr "Новий товар"
 
-#: inc/analytics-scenarios.php:650 inc/analytics-scenarios.php:664
-#: inc/product-analytics.php:171 inc/product-analytics.php:312
-#: inc/product-analytics.php:336
+#: inc/analytics-scenarios.php:767 inc/analytics-scenarios.php:781
+#: inc/product-analytics.php:261 inc/product-analytics.php:562
+#: inc/product-analytics.php:586
 msgid "Stock supported only by one-off sales"
 msgstr "Залишок підтримують лише разові продажі"
 
-#: inc/analytics-scenarios.php:652 inc/product-analytics.php:316
+#: inc/analytics-scenarios.php:769 inc/product-analytics.php:566
 msgid "Verification state"
 msgstr "Стан перевірки"
 
-#: inc/analytics-scenarios.php:653 inc/product-analytics.php:318
+#: inc/analytics-scenarios.php:770 inc/product-analytics.php:568
 msgid "All states"
 msgstr "Усі стани"
 
-#: inc/analytics-scenarios.php:653 inc/product-analytics.php:174
-#: inc/product-analytics.php:319
+#: inc/analytics-scenarios.php:770 inc/product-analytics.php:264
+#: inc/product-analytics.php:569
 msgid "Unverified"
 msgstr "Не перевірено"
 
-#: inc/analytics-scenarios.php:654 inc/product-analytics.php:175
-#: inc/product-analytics.php:320
+#: inc/analytics-scenarios.php:771 inc/product-analytics.php:265
+#: inc/product-analytics.php:570
 msgid "Verified"
 msgstr "Перевірено"
 
-#: inc/analytics-scenarios.php:654 inc/product-analytics.php:176
-#: inc/product-analytics.php:321
+#: inc/analytics-scenarios.php:771 inc/product-analytics.php:266
+#: inc/product-analytics.php:571
 msgid "Changed after verification"
 msgstr "Змінено після перевірки"
 
-#: inc/analytics-scenarios.php:655 inc/product-analytics.php:177
-#: inc/product-analytics.php:323
+#: inc/analytics-scenarios.php:772 inc/product-analytics.php:267
+#: inc/product-analytics.php:573
 msgid "Verification failed"
 msgstr "Перевірка неуспішна"
 
-#: inc/analytics-scenarios.php:657 inc/product-analytics.php:124
-#: inc/product-analytics.php:354
+#: inc/analytics-scenarios.php:774 inc/product-analytics.php:126
+#: inc/product-analytics.php:604
 msgid "Commercial sales total"
 msgstr "Комерційні продажі, усього"
 
-#: inc/analytics-scenarios.php:658 inc/product-analytics.php:356
+#: inc/analytics-scenarios.php:775 inc/product-analytics.php:606
 msgid "Any sales"
 msgstr "Будь-які продажі"
 
-#: inc/analytics-scenarios.php:658 inc/product-analytics.php:357
+#: inc/analytics-scenarios.php:775 inc/product-analytics.php:607
 msgid "With sales"
 msgstr "Є продажі"
 
-#: inc/analytics-scenarios.php:658 inc/product-analytics.php:358
+#: inc/analytics-scenarios.php:775 inc/product-analytics.php:608
 msgid "Without sales"
 msgstr "Без продажів"
 
-#: inc/analytics-scenarios.php:660 inc/product-analytics.php:327
+#: inc/analytics-scenarios.php:777 inc/product-analytics.php:577
 msgid "Active alert"
 msgstr "Активне попередження"
 
-#: inc/analytics-scenarios.php:661 inc/product-analytics.php:329
+#: inc/analytics-scenarios.php:778 inc/product-analytics.php:579
 msgid "All alerts"
 msgstr "Усі попередження"
 
-#: inc/analytics-scenarios.php:666 inc/product-analytics.php:340
+#: inc/analytics-scenarios.php:783 inc/product-analytics.php:590
 msgid "Alert status"
 msgstr "Статус попередження"
 
-#: inc/analytics-scenarios.php:667 inc/product-analytics.php:341
+#: inc/analytics-scenarios.php:784 inc/product-analytics.php:591
 msgid "Active and resolved alerts"
 msgstr "Активні та закриті попередження"
 
-#: inc/analytics-scenarios.php:667 inc/product-analytics.php:341
+#: inc/analytics-scenarios.php:784 inc/product-analytics.php:591
 msgid "Active alerts"
 msgstr "Активні попередження"
 
-#: inc/analytics-scenarios.php:668 inc/product-analytics.php:341
+#: inc/analytics-scenarios.php:785 inc/product-analytics.php:591
 msgid "Resolved alerts"
 msgstr "Закриті попередження"
 
-#: inc/analytics-scenarios.php:670 inc/product-analytics.php:344
+#: inc/analytics-scenarios.php:787 inc/product-analytics.php:594
 msgid "Alert severity"
 msgstr "Рівень попередження"
 
-#: inc/analytics-scenarios.php:671 inc/product-analytics.php:346
+#: inc/analytics-scenarios.php:788 inc/product-analytics.php:596
 msgid "All severities"
 msgstr "Усі рівні важливості"
 
-#: inc/analytics-scenarios.php:672 inc/product-analytics.php:348
+#: inc/analytics-scenarios.php:789 inc/product-analytics.php:598
 msgid "High"
 msgstr "Високий"
 
-#: inc/analytics-scenarios.php:672 inc/product-analytics.php:349
+#: inc/analytics-scenarios.php:789 inc/product-analytics.php:599
 msgid "Medium"
 msgstr "Середній"
 
-#: inc/analytics-scenarios.php:672 inc/product-analytics.php:350
+#: inc/analytics-scenarios.php:789 inc/product-analytics.php:600
 msgid "Low"
 msgstr "Низький"
 
-#: inc/analytics-scenarios.php:674 inc/product-analytics.php:363
+#: inc/analytics-scenarios.php:791 inc/product-analytics.php:613
 msgid "Current supplier filter"
 msgstr "Відбір за поточним постачальником"
 
-#: inc/analytics-scenarios.php:675 inc/product-analytics.php:365
+#: inc/analytics-scenarios.php:792 inc/product-analytics.php:615
 msgid "Do not filter by supplier"
 msgstr "Не відбирати за постачальником"
 
-#: inc/analytics-scenarios.php:676 inc/product-analytics.php:366
+#: inc/analytics-scenarios.php:793 inc/product-analytics.php:616
 msgid "Include selected suppliers"
 msgstr "Включити вибраних постачальників"
 
-#: inc/analytics-scenarios.php:677 inc/product-analytics.php:367
+#: inc/analytics-scenarios.php:794 inc/product-analytics.php:617
 msgid "Exclude selected suppliers"
 msgstr "Виключити вибраних постачальників"
 
-#: inc/analytics-scenarios.php:681 inc/product-analytics.php:371
+#: inc/analytics-scenarios.php:798 inc/product-analytics.php:621
 msgid "Suppliers"
 msgstr "Постачальники"
 
-#: inc/analytics-scenarios.php:685 inc/product-analytics.php:378
+#: inc/analytics-scenarios.php:802 inc/product-analytics.php:628
 msgid "Supplier data quality"
 msgstr "Якість призначення постачальника"
 
-#: inc/analytics-scenarios.php:686 inc/product-analytics.php:380
+#: inc/analytics-scenarios.php:803 inc/product-analytics.php:630
 msgid "Any supplier assignment"
 msgstr "Будь-яке призначення постачальника"
 
-#: inc/analytics-scenarios.php:686 inc/product-analytics.php:381
+#: inc/analytics-scenarios.php:803 inc/product-analytics.php:631
 msgid "Supplier assigned"
 msgstr "Постачальника призначено"
 
-#: inc/analytics-scenarios.php:687 inc/product-analytics.php:382
+#: inc/analytics-scenarios.php:804 inc/product-analytics.php:632
 msgid "Supplier missing"
 msgstr "Постачальник відсутній"
 
-#: inc/analytics-scenarios.php:687 inc/product-analytics.php:152
-#: inc/product-analytics.php:383
+#: inc/analytics-scenarios.php:804 inc/product-analytics.php:154
+#: inc/product-analytics.php:633
 msgid "Service code / requires verification"
 msgstr "Службовий код / потребує перевірки"
 
-#: inc/analytics-scenarios.php:689 inc/product-analytics.php:387
+#: inc/analytics-scenarios.php:806 inc/product-analytics.php:637
 msgid "Available stock sign"
 msgstr "Знак доступного залишку"
 
-#: inc/analytics-scenarios.php:690 inc/product-analytics.php:389
+#: inc/analytics-scenarios.php:807 inc/product-analytics.php:639
 msgid "Any available stock"
 msgstr "Будь-який доступний залишок"
 
-#: inc/analytics-scenarios.php:690 inc/product-analytics.php:390
+#: inc/analytics-scenarios.php:807 inc/product-analytics.php:640
 msgid "Zero or negative"
 msgstr "Нульовий або від'ємний"
 
-#: inc/analytics-scenarios.php:691 inc/product-analytics.php:391
+#: inc/analytics-scenarios.php:808 inc/product-analytics.php:641
 msgid "Exactly zero"
 msgstr "Точно нуль"
 
-#: inc/analytics-scenarios.php:691 inc/product-analytics.php:392
+#: inc/analytics-scenarios.php:808 inc/product-analytics.php:642
 msgid "Positive"
 msgstr "Додатний"
 
-#: inc/analytics-scenarios.php:694 inc/product-analytics.php:398
+#: inc/analytics-scenarios.php:811 inc/product-analytics.php:648
 msgid "Any accounting price"
 msgstr "Будь-яка облікова ціна"
 
-#: inc/analytics-scenarios.php:694 inc/product-analytics.php:399
+#: inc/analytics-scenarios.php:811 inc/product-analytics.php:649
 msgid "Zero accounting price"
 msgstr "Нульова облікова ціна"
 
-#: inc/analytics-scenarios.php:695 inc/product-analytics.php:400
+#: inc/analytics-scenarios.php:812 inc/product-analytics.php:650
 msgid "Positive accounting price"
 msgstr "Додатна облікова ціна"
 
-#: inc/analytics-scenarios.php:697 inc/product-analytics.php:425
+#: inc/analytics-scenarios.php:814 inc/product-analytics.php:675
 msgid "Demand period"
 msgstr "Період попиту"
 
-#: inc/analytics-scenarios.php:698 inc/product-analytics.php:427
+#: inc/analytics-scenarios.php:815 inc/product-analytics.php:677
 msgid "Current month"
 msgstr "Поточний місяць"
 
-#: inc/analytics-scenarios.php:698 inc/analytics-scenarios.php:727
-#: inc/product-analytics.php:428 inc/product-analytics.php:465
+#: inc/analytics-scenarios.php:815 inc/analytics-scenarios.php:844
+#: inc/product-analytics.php:678 inc/product-analytics.php:715
 msgid "3 months"
 msgstr "3 місяці"
 
-#: inc/analytics-scenarios.php:699 inc/analytics-scenarios.php:727
-#: inc/product-analytics.php:429 inc/product-analytics.php:465
+#: inc/analytics-scenarios.php:816 inc/analytics-scenarios.php:844
+#: inc/product-analytics.php:679 inc/product-analytics.php:715
 msgid "12 months"
 msgstr "12 місяців"
 
-#: inc/analytics-scenarios.php:699 inc/product-analytics.php:430
+#: inc/analytics-scenarios.php:816 inc/product-analytics.php:680
 msgid "24 months"
 msgstr "24 місяці"
 
-#: inc/analytics-scenarios.php:701 inc/product-analytics.php:203
-#: inc/product-analytics.php:434
+#: inc/analytics-scenarios.php:818 inc/product-analytics.php:293
+#: inc/product-analytics.php:684
 msgid "Regular demand"
 msgstr "Регулярний попит"
 
-#: inc/analytics-scenarios.php:702 inc/product-analytics.php:436
+#: inc/analytics-scenarios.php:819 inc/product-analytics.php:686
 msgid "Any regular demand"
 msgstr "Будь-який регулярний попит"
 
-#: inc/analytics-scenarios.php:702 inc/product-analytics.php:437
+#: inc/analytics-scenarios.php:819 inc/product-analytics.php:687
 msgid "With regular demand"
 msgstr "Є регулярний попит"
 
-#: inc/analytics-scenarios.php:703 inc/product-analytics.php:438
+#: inc/analytics-scenarios.php:820 inc/product-analytics.php:688
 msgid "Without regular demand"
 msgstr "Без регулярного попиту"
 
-#: inc/analytics-scenarios.php:705 inc/product-analytics.php:442
+#: inc/analytics-scenarios.php:822 inc/product-analytics.php:692
 msgid "One-off sales"
 msgstr "Разові продажі"
 
-#: inc/analytics-scenarios.php:706 inc/product-analytics.php:444
+#: inc/analytics-scenarios.php:823 inc/product-analytics.php:694
 msgid "Any one-off sales"
 msgstr "Будь-які разові продажі"
 
-#: inc/analytics-scenarios.php:706 inc/product-analytics.php:445
+#: inc/analytics-scenarios.php:823 inc/product-analytics.php:695
 msgid "With one-off sales"
 msgstr "Є разові продажі"
 
-#: inc/analytics-scenarios.php:707 inc/product-analytics.php:446
+#: inc/analytics-scenarios.php:824 inc/product-analytics.php:696
 msgid "Without one-off sales"
 msgstr "Без разових продажів"
 
-#: inc/analytics-scenarios.php:707 inc/product-analytics.php:447
+#: inc/analytics-scenarios.php:824 inc/product-analytics.php:697
 msgid "Only one-off sales, no regular demand"
 msgstr "Лише разові продажі, без регулярного попиту"
 
-#: inc/analytics-scenarios.php:711 inc/product-analytics.php:408
+#: inc/analytics-scenarios.php:828 inc/product-analytics.php:658
 msgid "Physical quantity from"
 msgstr "Фізична кількість від"
 
-#: inc/analytics-scenarios.php:711 inc/product-analytics.php:409
+#: inc/analytics-scenarios.php:828 inc/product-analytics.php:659
 msgid "Physical quantity through"
 msgstr "Фізична кількість до"
 
-#: inc/analytics-scenarios.php:712 inc/product-analytics.php:410
+#: inc/analytics-scenarios.php:829 inc/product-analytics.php:660
 msgid "Reserved quantity from"
 msgstr "Зарезервована кількість від"
 
-#: inc/analytics-scenarios.php:712 inc/product-analytics.php:411
+#: inc/analytics-scenarios.php:829 inc/product-analytics.php:661
 msgid "Reserved quantity through"
 msgstr "Зарезервована кількість до"
 
-#: inc/analytics-scenarios.php:713 inc/product-analytics.php:412
+#: inc/analytics-scenarios.php:830 inc/product-analytics.php:662
 msgid "Available quantity from"
 msgstr "Доступна кількість від"
 
-#: inc/analytics-scenarios.php:713 inc/product-analytics.php:413
+#: inc/analytics-scenarios.php:830 inc/product-analytics.php:663
 msgid "Available quantity through"
 msgstr "Доступна кількість до"
 
-#: inc/analytics-scenarios.php:714 inc/product-analytics.php:453
+#: inc/analytics-scenarios.php:831 inc/product-analytics.php:703
 msgid "Minimum capital"
 msgstr "Мінімальний капітал"
 
-#: inc/analytics-scenarios.php:714 inc/product-analytics.php:457
+#: inc/analytics-scenarios.php:831 inc/product-analytics.php:707
 msgid "Maximum capital"
 msgstr "Максимальний капітал"
 
-#: inc/analytics-scenarios.php:715 inc/product-analytics.php:469
+#: inc/analytics-scenarios.php:832 inc/product-analytics.php:719
 msgid "Revenue from"
 msgstr "Виручка від"
 
-#: inc/analytics-scenarios.php:715 inc/product-analytics.php:470
+#: inc/analytics-scenarios.php:832 inc/product-analytics.php:720
 msgid "Revenue through"
 msgstr "Виручка до"
 
-#: inc/analytics-scenarios.php:716 inc/product-analytics.php:471
+#: inc/analytics-scenarios.php:833 inc/product-analytics.php:721
 msgid "Gross profit from"
 msgstr "Валовий прибуток від"
 
-#: inc/analytics-scenarios.php:716 inc/product-analytics.php:472
+#: inc/analytics-scenarios.php:833 inc/product-analytics.php:722
 msgid "Gross profit through"
 msgstr "Валовий прибуток до"
 
-#: inc/analytics-scenarios.php:717 inc/product-analytics.php:473
+#: inc/analytics-scenarios.php:834 inc/product-analytics.php:723
 msgid "Average capital from"
 msgstr "Середній капітал від"
 
-#: inc/analytics-scenarios.php:717 inc/product-analytics.php:474
+#: inc/analytics-scenarios.php:834 inc/product-analytics.php:724
 msgid "Average capital through"
 msgstr "Середній капітал до"
 
-#: inc/analytics-scenarios.php:718 inc/product-analytics.php:475
+#: inc/analytics-scenarios.php:835 inc/product-analytics.php:725
 msgid "Gross margin from, %"
 msgstr "Валова маржа від, %"
 
-#: inc/analytics-scenarios.php:718 inc/product-analytics.php:476
+#: inc/analytics-scenarios.php:835 inc/product-analytics.php:726
 msgid "Gross margin through, %"
 msgstr "Валова маржа до, %"
 
-#: inc/analytics-scenarios.php:719 inc/product-analytics.php:477
+#: inc/analytics-scenarios.php:836 inc/product-analytics.php:727
 msgid "Inventory turns from"
 msgstr "Оборотність запасів від"
 
-#: inc/analytics-scenarios.php:719 inc/product-analytics.php:478
+#: inc/analytics-scenarios.php:836 inc/product-analytics.php:728
 msgid "Inventory turns through"
 msgstr "Оборотність запасів до"
 
-#: inc/analytics-scenarios.php:720 inc/product-analytics.php:479
+#: inc/analytics-scenarios.php:837 inc/product-analytics.php:729
 msgid "GMROI from"
 msgstr "GMROI від"
 
-#: inc/analytics-scenarios.php:720 inc/product-analytics.php:480
+#: inc/analytics-scenarios.php:837 inc/product-analytics.php:730
 msgid "GMROI through"
 msgstr "GMROI до"
 
-#: inc/analytics-scenarios.php:721 inc/product-analytics.php:481
+#: inc/analytics-scenarios.php:838 inc/product-analytics.php:731
 msgid "Coverage from, days"
 msgstr "Покриття від, днів"
 
-#: inc/analytics-scenarios.php:721 inc/product-analytics.php:482
+#: inc/analytics-scenarios.php:838 inc/product-analytics.php:732
 msgid "Coverage through, days"
 msgstr "Покриття до, днів"
 
-#: inc/analytics-scenarios.php:726 inc/product-analytics.php:464
+#: inc/analytics-scenarios.php:843 inc/product-analytics.php:714
 msgid "Financial period"
 msgstr "Фінансовий період"
 
-#: inc/analytics-scenarios.php:731 inc/product-analytics.php:491
+#: inc/analytics-scenarios.php:848 inc/product-analytics.php:741
 msgid "Last sale from"
 msgstr "Останній продаж від"
 
-#: inc/analytics-scenarios.php:731 inc/product-analytics.php:495
+#: inc/analytics-scenarios.php:848 inc/product-analytics.php:745
 msgid "Last sale through"
 msgstr "Останній продаж до"
 
-#: inc/analytics-scenarios.php:732 inc/product-analytics.php:503
+#: inc/analytics-scenarios.php:849 inc/product-analytics.php:753
 msgid "Last regular sale from"
 msgstr "Останній регулярний продаж від"
 
-#: inc/analytics-scenarios.php:732 inc/product-analytics.php:504
+#: inc/analytics-scenarios.php:849 inc/product-analytics.php:754
 msgid "Last regular sale through"
 msgstr "Останній регулярний продаж до"
 
-#: inc/analytics-scenarios.php:733 inc/product-analytics.php:505
+#: inc/analytics-scenarios.php:850 inc/product-analytics.php:755
 msgid "Last receipt from"
 msgstr "Останнє надходження від"
 
-#: inc/analytics-scenarios.php:733 inc/product-analytics.php:506
+#: inc/analytics-scenarios.php:850 inc/product-analytics.php:756
 msgid "Last receipt through"
 msgstr "Останнє надходження до"
 
-#: inc/analytics-scenarios.php:734 inc/product-analytics.php:507
+#: inc/analytics-scenarios.php:851 inc/product-analytics.php:757
 msgid "First movement from"
 msgstr "Перший рух від"
 
-#: inc/analytics-scenarios.php:734 inc/product-analytics.php:508
+#: inc/analytics-scenarios.php:851 inc/product-analytics.php:758
 msgid "First movement through"
 msgstr "Перший рух до"
 
-#: inc/analytics-scenarios.php:735 inc/product-analytics.php:509
+#: inc/analytics-scenarios.php:852 inc/product-analytics.php:759
 msgid "Last movement from"
 msgstr "Останній рух від"
 
-#: inc/analytics-scenarios.php:735 inc/product-analytics.php:510
+#: inc/analytics-scenarios.php:852 inc/product-analytics.php:760
 msgid "Last movement through"
 msgstr "Останній рух до"
 
-#: inc/analytics-scenarios.php:736 inc/product-analytics.php:511
+#: inc/analytics-scenarios.php:853 inc/product-analytics.php:761
 msgid "Alert first seen from"
 msgstr "Перше виявлення попередження від"
 
-#: inc/analytics-scenarios.php:736 inc/product-analytics.php:512
+#: inc/analytics-scenarios.php:853 inc/product-analytics.php:762
 msgid "Alert first seen through"
 msgstr "Перше виявлення попередження до"
 
-#: inc/analytics-scenarios.php:737 inc/product-analytics.php:513
+#: inc/analytics-scenarios.php:854 inc/product-analytics.php:763
 msgid "Alert last confirmed from"
 msgstr "Останнє підтвердження попередження від"
 
-#: inc/analytics-scenarios.php:737 inc/product-analytics.php:514
+#: inc/analytics-scenarios.php:854 inc/product-analytics.php:764
 msgid "Alert last confirmed through"
 msgstr "Останнє підтвердження попередження до"
 
-#: inc/analytics-scenarios.php:742
+#: inc/analytics-scenarios.php:859
 msgid "Product report view"
 msgstr "Подання звіту товарів"
 
-#: inc/analytics-scenarios.php:743 inc/product-analytics.php:275
+#: inc/analytics-scenarios.php:860 inc/product-analytics.php:525
 msgid "All products"
 msgstr "Усі товари"
 
-#: inc/analytics-scenarios.php:743 inc/product-analytics.php:276
+#: inc/analytics-scenarios.php:860 inc/product-analytics.php:526
 msgid "Data issues"
 msgstr "Проблеми з даними"
 
-#: inc/analytics-scenarios.php:746 inc/product-analytics.php:72
-#: inc/product-analytics.php:282
+#: inc/analytics-scenarios.php:863 inc/product-analytics.php:74
+#: inc/product-analytics.php:532
 msgid "Capital without sales"
 msgstr "Капітал без продажів"
 
-#: inc/analytics-scenarios.php:747 inc/product-analytics.php:283
+#: inc/analytics-scenarios.php:864 inc/product-analytics.php:533
 msgid "Revenue leaders"
 msgstr "Лідери за виручкою"
 
-#: inc/analytics-scenarios.php:747 inc/product-analytics.php:284
+#: inc/analytics-scenarios.php:864 inc/product-analytics.php:534
 msgid "Profit leaders"
 msgstr "Лідери за прибутком"
 
-#: inc/analytics-scenarios.php:748 inc/product-analytics.php:285
+#: inc/analytics-scenarios.php:865 inc/product-analytics.php:535
 msgid "Capital efficiency"
 msgstr "Ефективність капіталу"
 
-#: inc/analytics-scenarios.php:750
+#: inc/analytics-scenarios.php:867
 msgid "Product sort"
 msgstr "Сортування товарів"
 
-#: inc/analytics-scenarios.php:751 inc/product-analytics.php:69
+#: inc/analytics-scenarios.php:868 inc/analytics-scenarios.php:973
+#: inc/product-analytics.php:71 inc/product-analytics.php:385
 msgid "Capital in stock"
 msgstr "Капітал у запасах"
 
-#: inc/analytics-scenarios.php:752 inc/analytics-scenarios.php:800
-#: inc/product-analytics.php:76 inc/product-analytics.php:602
+#: inc/analytics-scenarios.php:869 inc/analytics-scenarios.php:917
+#: inc/product-analytics.php:78 inc/product-analytics.php:852
 msgid "Current supplier"
 msgstr "Поточний постачальник"
 
-#: inc/analytics-scenarios.php:753 inc/product-analytics.php:70
+#: inc/analytics-scenarios.php:870 inc/product-analytics.php:72
 msgid "Revenue, 365 days"
 msgstr "Виручка за 365 днів"
 
-#: inc/analytics-scenarios.php:754 inc/product-analytics.php:71
+#: inc/analytics-scenarios.php:871 inc/product-analytics.php:73
 msgid "Gross profit before returns, 365 days"
 msgstr "Валовий прибуток до повернень за 365 днів"
 
-#: inc/analytics-scenarios.php:756
+#: inc/analytics-scenarios.php:873 inc/analytics-scenarios.php:974
+#: inc/product-analytics.php:184 inc/product-analytics.php:393
 msgid "Sort direction"
 msgstr "Напрямок сортування"
 
-#: inc/analytics-scenarios.php:757
+#: inc/analytics-scenarios.php:874 inc/analytics-scenarios.php:974
+#: inc/product-analytics.php:186 inc/product-analytics.php:395
 msgid "Descending"
 msgstr "За спаданням"
 
-#: inc/analytics-scenarios.php:757
+#: inc/analytics-scenarios.php:874 inc/analytics-scenarios.php:974
+#: inc/product-analytics.php:185 inc/product-analytics.php:396
 msgid "Ascending"
 msgstr "За зростанням"
 
-#: inc/analytics-scenarios.php:759 inc/analytics-scenarios.php:801
-#: inc/product-analytics.php:523 inc/product-analytics.php:603
+#: inc/analytics-scenarios.php:876 inc/analytics-scenarios.php:918
+#: inc/analytics-scenarios.php:972 inc/product-analytics.php:400
+#: inc/product-analytics.php:773 inc/product-analytics.php:853
 msgid "Rows per page"
 msgstr "Рядків на сторінці"
 
-#: inc/analytics-scenarios.php:763 inc/product-analytics.php:557
+#: inc/analytics-scenarios.php:880 inc/product-analytics.php:807
 msgid "Document date from"
 msgstr "Дата документа від"
 
-#: inc/analytics-scenarios.php:764 inc/product-analytics.php:558
+#: inc/analytics-scenarios.php:881 inc/product-analytics.php:808
 msgid "Document date through"
 msgstr "Дата документа до"
 
-#: inc/analytics-scenarios.php:766 inc/product-analytics.php:99
-#: inc/product-analytics.php:560
+#: inc/analytics-scenarios.php:883 inc/product-analytics.php:101
+#: inc/product-analytics.php:810
 msgid "Document number"
 msgstr "Номер документа"
 
-#: inc/analytics-scenarios.php:767 inc/product-analytics.php:100
-#: inc/product-analytics.php:562
+#: inc/analytics-scenarios.php:884 inc/product-analytics.php:102
+#: inc/product-analytics.php:812
 msgid "Document type"
 msgstr "Тип документа"
 
-#: inc/analytics-scenarios.php:767 inc/product-analytics.php:114
-#: inc/product-analytics.php:563
+#: inc/analytics-scenarios.php:884 inc/product-analytics.php:116
+#: inc/product-analytics.php:813
 msgid "All document types"
 msgstr "Усі типи документів"
 
-#: inc/analytics-scenarios.php:768 inc/product-analytics.php:101
-#: inc/product-analytics.php:566
+#: inc/analytics-scenarios.php:885 inc/product-analytics.php:103
+#: inc/product-analytics.php:816
 msgid "Folio operation kind"
 msgstr "Вид операції ФОЛІО"
 
-#: inc/analytics-scenarios.php:768 inc/product-analytics.php:113
-#: inc/product-analytics.php:567
+#: inc/analytics-scenarios.php:885 inc/product-analytics.php:115
+#: inc/product-analytics.php:817
 msgid "All operation kinds"
 msgstr "Усі види операцій"
 
-#: inc/analytics-scenarios.php:771 inc/product-analytics.php:572
+#: inc/analytics-scenarios.php:888 inc/product-analytics.php:822
 msgid "All movement classes"
 msgstr "Усі класи руху"
 
-#: inc/analytics-scenarios.php:775 inc/product-analytics.php:102
-#: inc/product-analytics.php:570
+#: inc/analytics-scenarios.php:892 inc/product-analytics.php:104
+#: inc/product-analytics.php:820
 msgid "Movement class"
 msgstr "Клас руху"
 
-#: inc/analytics-scenarios.php:778 inc/product-analytics.php:103
-#: inc/product-analytics.php:580
+#: inc/analytics-scenarios.php:895 inc/product-analytics.php:105
+#: inc/product-analytics.php:830
 msgid "Stock direction"
 msgstr "Напрямок руху залишку"
 
-#: inc/analytics-scenarios.php:779 inc/product-analytics.php:107
-#: inc/product-analytics.php:581
+#: inc/analytics-scenarios.php:896 inc/product-analytics.php:109
+#: inc/product-analytics.php:831
 msgid "Demand mode"
 msgstr "Режим попиту"
 
-#: inc/analytics-scenarios.php:780 inc/product-analytics.php:108
-#: inc/product-analytics.php:582
+#: inc/analytics-scenarios.php:897 inc/product-analytics.php:110
+#: inc/product-analytics.php:238 inc/product-analytics.php:832
 msgid "Payment terms"
 msgstr "Умови оплати"
 
-#: inc/analytics-scenarios.php:781 inc/product-analytics.php:109
-#: inc/product-analytics.php:583
+#: inc/analytics-scenarios.php:898 inc/product-analytics.php:111
+#: inc/product-analytics.php:833
 msgid "Customer segment"
 msgstr "Сегмент клієнта"
 
-#: inc/analytics-scenarios.php:784 inc/product-analytics.php:587
+#: inc/analytics-scenarios.php:901 inc/product-analytics.php:837
 msgid "All values"
 msgstr "Усі значення"
 
-#: inc/analytics-scenarios.php:790 inc/product-analytics.php:111
-#: inc/product-analytics.php:591
+#: inc/analytics-scenarios.php:907 inc/product-analytics.php:113
+#: inc/product-analytics.php:841
 msgid "Included in accounting"
 msgstr "Враховується в обліку"
 
-#: inc/analytics-scenarios.php:790 inc/product-analytics.php:112
-#: inc/product-analytics.php:592
+#: inc/analytics-scenarios.php:907 inc/product-analytics.php:114
+#: inc/product-analytics.php:842
 msgid "Return document"
 msgstr "Документ повернення"
 
-#: inc/analytics-scenarios.php:791 inc/product-analytics.php:593
+#: inc/analytics-scenarios.php:908 inc/product-analytics.php:843
 msgid "Affects stock"
 msgstr "Впливає на залишок"
 
-#: inc/analytics-scenarios.php:791 inc/product-analytics.php:594
+#: inc/analytics-scenarios.php:908 inc/product-analytics.php:844
 msgid "Affects financial sales"
 msgstr "Впливає на фінансові продажі"
 
-#: inc/analytics-scenarios.php:792 inc/product-analytics.php:595
+#: inc/analytics-scenarios.php:909 inc/product-analytics.php:845
 msgid "Affects planning demand"
 msgstr "Впливає на плановий попит"
 
-#: inc/analytics-scenarios.php:796 inc/product-analytics.php:599
+#: inc/analytics-scenarios.php:913 inc/product-analytics.php:849
 msgid "Any value"
 msgstr "Будь-яке значення"
 
-#: inc/analytics-scenarios.php:799 inc/product-analytics.php:110
-#: inc/product-analytics.php:601
+#: inc/analytics-scenarios.php:916 inc/product-analytics.php:112
+#: inc/product-analytics.php:851
 msgid "Counterparty"
 msgstr "Контрагент"
 
-#: inc/analytics-scenarios.php:811
+#: inc/analytics-scenarios.php:929
+msgid ""
+"Save one reusable set of warehouses, product conditions, movement conditions "
+"and report parameters."
+msgstr ""
+"Збережіть єдиний набір складів, умов товару, умов руху та параметрів звіту "
+"для повторного використання."
+
+#: inc/analytics-scenarios.php:931 inc/analytics-scenarios.php:1015
+msgid "Open product analytics"
+msgstr "Відкрити товарну аналітику"
+
+#: inc/analytics-scenarios.php:936
+msgid ""
+"Schema v4 scenarios support several warehouses. Only filters confirmed by "
+"the selected snapshots are stored and sent to reports."
+msgstr ""
+"Сценарії схеми v4 підтримують кілька складів. У звіти зберігаються і "
+"передаються лише фільтри, підтверджені вибраними знімками."
+
+#: inc/analytics-scenarios.php:940 inc/analytics-scenarios.php:1024
+msgid "Create scenario"
+msgstr "Створити сценарій"
+
+#: inc/analytics-scenarios.php:941 inc/analytics-scenarios.php:1025
+msgid "Create a copy"
+msgstr "Створити копію"
+
+#: inc/analytics-scenarios.php:942 inc/analytics-scenarios.php:1026
+msgid "Archive"
+msgstr "Архівувати"
+
+#: inc/analytics-scenarios.php:955 inc/analytics-scenarios.php:1041
+msgid "Scenario"
+msgstr "Сценарій"
+
+#: inc/analytics-scenarios.php:957 inc/analytics-scenarios.php:1043
+msgid "Name"
+msgstr "Назва"
+
+#: inc/analytics-scenarios.php:958 inc/analytics-scenarios.php:1044
+msgid "Description"
+msgstr "Опис"
+
+#: inc/analytics-scenarios.php:959 inc/analytics-scenarios.php:1045
+msgid "Access"
+msgstr "Доступ"
+
+#: inc/analytics-scenarios.php:959 inc/analytics-scenarios.php:1045
+msgid "Shared with managers"
+msgstr "Спільний для менеджерів"
+
+#: inc/analytics-scenarios.php:961 inc/analytics-scenarios.php:1047
+msgid "Default registry"
+msgstr "Початковий реєстр"
+
+#: inc/analytics-scenarios.php:961 inc/analytics-scenarios.php:1047
+#: inc/product-analytics.php:66 inc/product-analytics.php:436
+#: inc/product-analytics.php:516
+msgid "Products"
+msgstr "Товари"
+
+#: inc/analytics-scenarios.php:961 inc/analytics-scenarios.php:1047
+#: inc/product-analytics.php:437 inc/product-analytics.php:517
+msgid "Product movements"
+msgstr "Рух товару"
+
+#: inc/analytics-scenarios.php:966
+msgid "Data scope and period"
+msgstr "Обсяг даних і період"
+
+#: inc/analytics-scenarios.php:969 inc/product-analytics.php:179
+#: inc/product-analytics.php:364
+msgid "Period from"
+msgstr "Початок періоду"
+
+#: inc/analytics-scenarios.php:970 inc/product-analytics.php:180
+#: inc/product-analytics.php:368
+msgid "Period through"
+msgstr "Кінець періоду"
+
+#: inc/analytics-scenarios.php:971 inc/product-analytics.php:181
+#: inc/product-analytics.php:372
+msgid "ABC basis"
+msgstr "Основа ABC-аналізу"
+
+#: inc/analytics-scenarios.php:971 inc/analytics-scenarios.php:973
+#: inc/product-analytics.php:374 inc/product-analytics.php:382
+msgid "Gross profit"
+msgstr "Валовий прибуток"
+
+#: inc/analytics-scenarios.php:971 inc/product-analytics.php:127
+#: inc/product-analytics.php:375
+msgid "Revenue"
+msgstr "Виручка"
+
+#: inc/analytics-scenarios.php:971 inc/analytics-scenarios.php:973
+#: inc/product-analytics.php:194 inc/product-analytics.php:376
+#: inc/product-analytics.php:384
+msgid "Sold units"
+msgstr "Продано одиниць"
+
+#: inc/analytics-scenarios.php:973 inc/product-analytics.php:183
+#: inc/product-analytics.php:380
+msgid "Sort by"
+msgstr "Сортувати за"
+
+#: inc/analytics-scenarios.php:973 inc/product-analytics.php:195
+#: inc/product-analytics.php:383
+msgid "Sales revenue"
+msgstr "Виручка від продажів"
+
+#: inc/analytics-scenarios.php:973 inc/product-analytics.php:197
+#: inc/product-analytics.php:386
+msgid "Average inventory value"
+msgstr "Середня вартість запасу"
+
+#: inc/analytics-scenarios.php:975 inc/product-analytics.php:182
+#: inc/product-analytics.php:405
+msgid "Include returns in the period report"
+msgstr "Враховувати повернення у звіті за період"
+
+#: inc/analytics-scenarios.php:981 inc/analytics-scenarios.php:1060
+msgid "Product registry conditions"
+msgstr "Умови реєстру товарів"
+
+#: inc/analytics-scenarios.php:983 inc/product-analytics.php:176
+#: inc/product-analytics.php:360
+msgid "SKU, product name or primary GTIN"
+msgstr "Артикул, назва товару або основний GTIN"
+
+#: inc/analytics-scenarios.php:984 inc/product-analytics.php:177
+#: inc/product-analytics.php:413
+msgid "Exact SKUs"
+msgstr "Точні артикули"
+
+#: inc/analytics-scenarios.php:985 inc/product-analytics.php:178
+#: inc/product-analytics.php:417
+msgid "Exact primary GTINs"
+msgstr "Точні основні штрихкоди GTIN"
+
+#: inc/analytics-scenarios.php:990 inc/analytics-scenarios.php:1065
+msgid "Movement registry conditions"
+msgstr "Умови реєстру руху товару"
+
+#: inc/analytics-scenarios.php:991
+msgid ""
+"Movement conditions change period metrics only and never change current "
+"stock."
+msgstr ""
+"Умови руху змінюють лише показники за період і ніколи не змінюють поточний "
+"залишок."
+
+#: inc/analytics-scenarios.php:995 inc/analytics-scenarios.php:1070
+msgid "Revision history"
+msgstr "Історія версій"
+
+#: inc/analytics-scenarios.php:996 inc/analytics-scenarios.php:1075
+msgid "Save scenario"
+msgstr "Зберегти сценарій"
+
+#: inc/analytics-scenarios.php:1013
 msgid ""
 "Create reusable, versioned conditions for the product registry and the Folio "
 "movement registry."
@@ -3202,11 +3416,7 @@ msgstr ""
 "Створюйте багаторазові версіоновані умови для реєстру товарів і реєстру руху "
 "ФОЛІО."
 
-#: inc/analytics-scenarios.php:813
-msgid "Open product analytics"
-msgstr "Відкрити товарну аналітику"
-
-#: inc/analytics-scenarios.php:818
+#: inc/analytics-scenarios.php:1020
 msgid ""
 "This stage applies one warehouse per report. The scenario format is "
 "versioned so multi-warehouse aggregation can be added without replacing "
@@ -3216,74 +3426,13 @@ msgstr ""
 "версіоновано, щоб згодом додати багатоскладську агрегацію без заміни "
 "збережених сценаріїв."
 
-#: inc/analytics-scenarios.php:822
-msgid "Create scenario"
-msgstr "Створити сценарій"
-
-#: inc/analytics-scenarios.php:823
-msgid "Create a copy"
-msgstr "Створити копію"
-
-#: inc/analytics-scenarios.php:824
-msgid "Archive"
-msgstr "Архівувати"
-
-#: inc/analytics-scenarios.php:839
-msgid "Scenario"
-msgstr "Сценарій"
-
-#: inc/analytics-scenarios.php:841
-msgid "Name"
-msgstr "Назва"
-
-#: inc/analytics-scenarios.php:842
-msgid "Description"
-msgstr "Опис"
-
-#: inc/analytics-scenarios.php:843
-msgid "Access"
-msgstr "Доступ"
-
-#: inc/analytics-scenarios.php:843
-msgid "Shared with managers"
-msgstr "Спільний для менеджерів"
-
-#: inc/analytics-scenarios.php:845
-msgid "Default registry"
-msgstr "Початковий реєстр"
-
-#: inc/analytics-scenarios.php:845 inc/product-analytics.php:64
-#: inc/product-analytics.php:266
-msgid "Products"
-msgstr "Товари"
-
-#: inc/analytics-scenarios.php:845 inc/product-analytics.php:267
-msgid "Product movements"
-msgstr "Рух товару"
-
-#: inc/analytics-scenarios.php:850
+#: inc/analytics-scenarios.php:1052
 msgid "Data scope"
 msgstr "Область даних"
 
-#: inc/analytics-scenarios.php:852 inc/product-analytics.php:243
+#: inc/analytics-scenarios.php:1054 inc/product-analytics.php:493
 msgid "Loading snapshots..."
 msgstr "Завантаження знімків..."
-
-#: inc/analytics-scenarios.php:858
-msgid "Product registry conditions"
-msgstr "Умови реєстру товарів"
-
-#: inc/analytics-scenarios.php:863
-msgid "Movement registry conditions"
-msgstr "Умови реєстру руху товару"
-
-#: inc/analytics-scenarios.php:868
-msgid "Revision history"
-msgstr "Історія версій"
-
-#: inc/analytics-scenarios.php:873
-msgid "Save scenario"
-msgstr "Зберегти сценарій"
 
 #: inc/cron.php:23
 msgid "Once Weekly"
@@ -3341,215 +3490,212 @@ msgstr "OK"
 msgid "No logs yet."
 msgstr "Логів ще немає."
 
-#: inc/product-analytics.php:11 inc/product-analytics.php:229
+#: inc/product-analytics.php:13 inc/product-analytics.php:320
+#: inc/product-analytics.php:479
 msgid "Folio product analytics"
 msgstr "Товарна аналітика ФОЛІО"
 
-#: inc/product-analytics.php:12
+#: inc/product-analytics.php:14
 msgid "Product analytics"
 msgstr "Товарна аналітика"
 
-#: inc/product-analytics.php:58
+#: inc/product-analytics.php:60
 msgid "Loading product analytics..."
 msgstr "Завантаження товарної аналітики..."
 
-#: inc/product-analytics.php:59
+#: inc/product-analytics.php:61
 msgid "Product analytics could not be loaded."
 msgstr "Не вдалося завантажити товарну аналітику."
 
-#: inc/product-analytics.php:60
+#: inc/product-analytics.php:62
 msgid "No active Folio product snapshots are available yet."
 msgstr "Активних знімків товарів ФОЛІО ще немає."
 
-#: inc/product-analytics.php:61
+#: inc/product-analytics.php:63
 msgid "No products match the selected filters."
 msgstr "Жоден товар не відповідає вибраним фільтрам."
 
-#: inc/product-analytics.php:73
+#: inc/product-analytics.php:75
 msgid "Capital in dead stock and overstock"
 msgstr "Капітал у мертвих і надлишкових запасах"
 
-#: inc/product-analytics.php:77
+#: inc/product-analytics.php:79
 msgid "Commercial sales total, 90 days"
 msgstr "Комерційні продажі, усього за 90 днів"
 
-#: inc/product-analytics.php:78
+#: inc/product-analytics.php:80
 msgid "Commercial sales total, 365 days"
 msgstr "Комерційні продажі, усього за 365 днів"
 
-#: inc/product-analytics.php:79
+#: inc/product-analytics.php:81
 msgid "Regular demand, 12 months"
 msgstr "Регулярний попит, 12 місяців"
 
-#: inc/product-analytics.php:80
+#: inc/product-analytics.php:82
 msgid "One-off sales, 12 months"
 msgstr "Разові продажі, 12 місяців"
 
-#: inc/product-analytics.php:81
+#: inc/product-analytics.php:83
 msgid "Inventory turns"
 msgstr "Оборотність запасів"
 
-#: inc/product-analytics.php:82
+#: inc/product-analytics.php:84
 msgid "GMROI"
 msgstr "GMROI"
 
-#: inc/product-analytics.php:83
+#: inc/product-analytics.php:85
 msgid "Coverage, days"
 msgstr "Покриття, днів"
 
-#: inc/product-analytics.php:84
+#: inc/product-analytics.php:86
 msgid "Last sale"
 msgstr "Останній продаж"
 
-#: inc/product-analytics.php:85
+#: inc/product-analytics.php:87
 msgid "Last regular sale"
 msgstr "Останній регулярний продаж"
 
-#: inc/product-analytics.php:86
+#: inc/product-analytics.php:88
 msgid "Last receipt"
 msgstr "Останнє надходження"
 
-#: inc/product-analytics.php:88
+#: inc/product-analytics.php:90
 msgid "Accounting-price verification"
 msgstr "Перевірка облікової ціни"
 
-#: inc/product-analytics.php:89
+#: inc/product-analytics.php:91
 msgid "Alerts"
 msgstr "Попередження"
 
-#: inc/product-analytics.php:92
+#: inc/product-analytics.php:94
 msgid "Product details"
 msgstr "Деталі товару"
 
-#: inc/product-analytics.php:93
+#: inc/product-analytics.php:95
 msgid "Current state"
 msgstr "Поточний стан"
 
-#: inc/product-analytics.php:94
+#: inc/product-analytics.php:96
 msgid "Monthly history"
 msgstr "Історія за місяцями"
 
-#: inc/product-analytics.php:95
+#: inc/product-analytics.php:97
 msgid "Warehouse comparison"
 msgstr "Порівняння складів"
 
-#: inc/product-analytics.php:96
+#: inc/product-analytics.php:98
 msgid "Alert history"
 msgstr "Історія попереджень"
 
-#: inc/product-analytics.php:97
+#: inc/product-analytics.php:99
 msgid "Snapshot changes"
 msgstr "Зміни знімка"
 
-#: inc/product-analytics.php:98
+#: inc/product-analytics.php:100
 msgid "Document date"
 msgstr "Дата документа"
 
-#: inc/product-analytics.php:104
+#: inc/product-analytics.php:106
 msgid "Signed quantity"
 msgstr "Кількість зі знаком"
 
-#: inc/product-analytics.php:105
+#: inc/product-analytics.php:107
 msgid "Sale amount"
 msgstr "Сума продажу"
 
-#: inc/product-analytics.php:106
+#: inc/product-analytics.php:108
 msgid "Accounting value"
 msgstr "Облікова сума"
 
-#: inc/product-analytics.php:117
+#: inc/product-analytics.php:119
 msgid "Month"
 msgstr "Місяць"
 
-#: inc/product-analytics.php:118
+#: inc/product-analytics.php:120
 msgid "Opening stock"
 msgstr "Запас на початок"
 
-#: inc/product-analytics.php:119
+#: inc/product-analytics.php:121
 msgid "Closing stock"
 msgstr "Запас на кінець"
 
-#: inc/product-analytics.php:120
+#: inc/product-analytics.php:122
 msgid "Opening inventory value"
 msgstr "Вартість запасу на початок"
 
-#: inc/product-analytics.php:121
+#: inc/product-analytics.php:123
 msgid "Closing inventory value"
 msgstr "Вартість запасу на кінець"
 
-#: inc/product-analytics.php:122
+#: inc/product-analytics.php:124
 msgid "Receipts"
 msgstr "Надходження"
 
-#: inc/product-analytics.php:123
+#: inc/product-analytics.php:125
 msgid "Receipt cost"
 msgstr "Собівартість надходжень"
 
-#: inc/product-analytics.php:125
-msgid "Revenue"
-msgstr "Виручка"
-
-#: inc/product-analytics.php:126
+#: inc/product-analytics.php:128 inc/product-analytics.php:196
 msgid "Cost of sales"
 msgstr "Собівартість продажів"
 
-#: inc/product-analytics.php:127
+#: inc/product-analytics.php:129
 msgid "Gross profit before returns"
 msgstr "Валовий прибуток до повернень"
 
-#: inc/product-analytics.php:128
+#: inc/product-analytics.php:130
 msgid "Regular sales quantity"
 msgstr "Кількість регулярних продажів"
 
-#: inc/product-analytics.php:129
+#: inc/product-analytics.php:131
 msgid "Regular sales revenue"
 msgstr "Виручка регулярних продажів"
 
-#: inc/product-analytics.php:130
+#: inc/product-analytics.php:132
 msgid "Regular sales cost"
 msgstr "Собівартість регулярних продажів"
 
-#: inc/product-analytics.php:131
+#: inc/product-analytics.php:133
 msgid "Regular gross profit"
 msgstr "Валовий прибуток регулярних продажів"
 
-#: inc/product-analytics.php:132
+#: inc/product-analytics.php:134
 msgid "One-off sales quantity"
 msgstr "Кількість разових продажів"
 
-#: inc/product-analytics.php:133
+#: inc/product-analytics.php:135
 msgid "One-off sales revenue"
 msgstr "Виручка разових продажів"
 
-#: inc/product-analytics.php:134
+#: inc/product-analytics.php:136
 msgid "One-off sales cost"
 msgstr "Собівартість разових продажів"
 
-#: inc/product-analytics.php:135
+#: inc/product-analytics.php:137
 msgid "One-off gross profit"
 msgstr "Валовий прибуток разових продажів"
 
-#: inc/product-analytics.php:136
+#: inc/product-analytics.php:138
 msgid "Returns"
 msgstr "Повернення"
 
-#: inc/product-analytics.php:137
+#: inc/product-analytics.php:139
 msgid "Return revenue"
 msgstr "Сума повернень"
 
-#: inc/product-analytics.php:138
+#: inc/product-analytics.php:140
 msgid "Average capital"
 msgstr "Середній капітал"
 
-#: inc/product-analytics.php:139
+#: inc/product-analytics.php:141
 msgid "Sell-through"
 msgstr "Рівень реалізації запасу"
 
-#: inc/product-analytics.php:140
+#: inc/product-analytics.php:142
 msgid "Possible cross-warehouse analysis"
 msgstr "Можливий міжскладський аналіз"
 
-#: inc/product-analytics.php:141
+#: inc/product-analytics.php:143
 msgid ""
 "Another warehouse has available stock. A manager must check the safe "
 "transfer quantity."
@@ -3557,45 +3703,46 @@ msgstr ""
 "На іншому складі є доступний запас. Менеджер має перевірити безпечну "
 "кількість для переміщення."
 
-#: inc/product-analytics.php:142 inc/product-analytics.php:620
+#: inc/product-analytics.php:144 inc/product-analytics.php:463
+#: inc/product-analytics.php:870
 msgid "Close"
 msgstr "Закрити"
 
-#: inc/product-analytics.php:143
+#: inc/product-analytics.php:145
 msgid "Retry"
 msgstr "Повторити"
 
-#: inc/product-analytics.php:144
+#: inc/product-analytics.php:146
 msgid "Active snapshot"
 msgstr "Активний знімок"
 
-#: inc/product-analytics.php:145
+#: inc/product-analytics.php:147
 msgid "Operational analytics: period metrics are built from monthly buckets."
 msgstr "Оперативна аналітика: показники періоду сформовано з місячних даних."
 
-#: inc/product-analytics.php:146
+#: inc/product-analytics.php:148
 msgid "Sales combine all confirmed external commercial channels."
 msgstr "Продажі об'єднують усі підтверджені зовнішні комерційні канали."
 
-#: inc/product-analytics.php:147
+#: inc/product-analytics.php:149
 msgid "Profit is gross profit before returns, not net or operating profit."
 msgstr "Прибуток є валовим до повернень, а не чистим чи операційним."
 
-#: inc/product-analytics.php:148
+#: inc/product-analytics.php:150
 msgid "No suppliers are available for this warehouse."
 msgstr "Для цього складу немає доступних постачальників."
 
-#: inc/product-analytics.php:149
+#: inc/product-analytics.php:151
 msgid "Suppliers could not be loaded."
 msgstr "Не вдалося завантажити постачальників."
 
 #. translators: 1: products with a supplier, 2: products without a supplier, 3: distinct supplier values.
-#: inc/product-analytics.php:151
+#: inc/product-analytics.php:153
 #, php-format
 msgid "Assigned: %1$s · missing: %2$s · supplier values: %3$s"
 msgstr "Призначено: %1$s · відсутній: %2$s · значень постачальника: %3$s"
 
-#: inc/product-analytics.php:153
+#: inc/product-analytics.php:155
 msgid ""
 "This warehouse uses analytics schema v1. Rebuild its snapshot with schema v2 "
 "to use suppliers, regular demand and movements."
@@ -3603,203 +3750,508 @@ msgstr ""
 "Цей склад використовує схему аналітики v1. Повторно сформуйте знімок за "
 "схемою v2, щоб використовувати постачальників, регулярний попит і рухи."
 
-#: inc/product-analytics.php:154
+#: inc/product-analytics.php:156
 msgid "movement rows"
 msgstr "рядків руху"
 
-#: inc/product-analytics.php:155
+#: inc/product-analytics.php:157
 msgid "No movements match the selected filters."
 msgstr "Жоден рух не відповідає вибраним фільтрам."
 
-#: inc/product-analytics.php:156 inc/product-analytics.php:257
+#: inc/product-analytics.php:158 inc/product-analytics.php:349
+#: inc/product-analytics.php:507
 msgid "Use temporary filters without a scenario"
 msgstr "Використовувати тимчасові фільтри без сценарію"
 
-#: inc/product-analytics.php:157
+#: inc/product-analytics.php:159
 msgid "The analytics scenario has been applied to both registries."
 msgstr "Сценарій аналітики застосовано до обох реєстрів."
 
-#: inc/product-analytics.php:158
+#: inc/product-analytics.php:160
 msgid "Temporary changes are applied. The saved scenario has not been changed."
 msgstr "Застосовано тимчасові зміни. Збережений сценарій не змінено."
 
-#: inc/product-analytics.php:159
+#: inc/product-analytics.php:161
 msgid "The saved warehouse for this scenario is not available."
 msgstr "Збережений у сценарії склад недоступний."
 
-#: inc/product-analytics.php:160
+#: inc/product-analytics.php:162 inc/product-analytics.php:410
 msgid "Product conditions"
 msgstr "Умови товарів"
 
-#: inc/product-analytics.php:161
+#: inc/product-analytics.php:163 inc/product-analytics.php:424
 msgid "Movement conditions"
 msgstr "Умови руху"
 
-#: inc/product-analytics.php:162
+#: inc/product-analytics.php:164
 msgid "No additional conditions"
 msgstr "Без додаткових умов"
 
-#: inc/product-analytics.php:178
+#: inc/product-analytics.php:166
+msgid "Analytics schema v4 is required. Rebuild the selected Folio snapshots."
+msgstr "Потрібна схема аналітики v4. Перебудуйте вибрані знімки ФОЛІО."
+
+#: inc/product-analytics.php:170
+msgid "Building the report from active snapshots..."
+msgstr "Формування звіту з активних знімків..."
+
+#: inc/product-analytics.php:171
+msgid "The source for this filter has not been confirmed yet."
+msgstr "Джерело даних для цього фільтра ще не підтверджено."
+
+#: inc/product-analytics.php:175
+msgid "Selected values"
+msgstr "Вибрані значення"
+
+#: inc/product-analytics.php:187 inc/product-analytics.php:430
+msgid "Build report"
+msgstr "Сформувати звіт"
+
+#: inc/product-analytics.php:188 inc/product-analytics.php:431
+msgid "Clear filters"
+msgstr "Очистити фільтри"
+
+#: inc/product-analytics.php:191 inc/product-analytics.php:440
+msgid "Totals for the whole filtered selection"
+msgstr "Підсумки для всієї відібраної сукупності"
+
+#: inc/product-analytics.php:192
+msgid "Products found"
+msgstr "Знайдено товарів"
+
+#: inc/product-analytics.php:193
+msgid "Warehouse rows"
+msgstr "Рядків за складами"
+
+#: inc/product-analytics.php:198
+msgid "Gross margin, %"
+msgstr "Валова маржа, %"
+
+#: inc/product-analytics.php:199
+msgid "ABC class"
+msgstr "Клас ABC"
+
+#: inc/product-analytics.php:200
+msgid "Primary GTIN"
+msgstr "Основний штрихкод GTIN"
+
+#: inc/product-analytics.php:201
+msgid "Warehouses"
+msgstr "Склади"
+
+#: inc/product-analytics.php:202
+msgid "Network order policy"
+msgstr "Політика замовлення для мережі"
+
+#: inc/product-analytics.php:203
+msgid "Stock in transit"
+msgstr "Товар у дорозі"
+
+#: inc/product-analytics.php:204
+msgid "Warehouse order policy"
+msgstr "Політика замовлення для складу"
+
+#: inc/product-analytics.php:205
+msgid "Confirmed quantity for planning"
+msgstr "Підтверджена кількість для планування"
+
+#: inc/product-analytics.php:206
+msgid "Not confirmed"
+msgstr "Не підтверджено"
+
+#: inc/product-analytics.php:207
+msgid "Snapshot is not ready"
+msgstr "Знімок ще не готовий"
+
+#: inc/product-analytics.php:208
+msgid "Ordering is blocked"
+msgstr "Замовлення заблоковано"
+
+#: inc/product-analytics.php:209
+msgid "Ordering is allowed"
+msgstr "Замовлення дозволено"
+
+#: inc/product-analytics.php:210
+msgid "Do not order for this warehouse"
+msgstr "Не замовляти для цього складу"
+
+#: inc/product-analytics.php:211
+msgid "Order by forecast only"
+msgstr "Замовляти лише за прогнозом"
+
+#: inc/product-analytics.php:212
+msgid "Forecast plus minimum reserve"
+msgstr "Прогноз і мінімальний резерв"
+
+#: inc/product-analytics.php:213
+msgid "No maximum stock limit"
+msgstr "Без обмеження максимального запасу"
+
+#: inc/product-analytics.php:214
+msgid "Maximum future stock"
+msgstr "Максимальний майбутній запас"
+
+#: inc/product-analytics.php:215
+msgid "Supplier origin confirmed"
+msgstr "Походження від постачальника підтверджено"
+
+#: inc/product-analytics.php:216
+msgid "Confirmed inbound suppliers"
+msgstr "Підтверджені постачальники товарів у дорозі"
+
+#: inc/product-analytics.php:217
+msgid "Minimum order quantity / package quantity"
+msgstr "Мінімальна партія / кількість в упаковці"
+
+#: inc/product-analytics.php:218
+msgid "Minimum / maximum stock"
+msgstr "Мінімальний / максимальний запас"
+
+#: inc/product-analytics.php:219
+msgid "legacy scenario"
+msgstr "старий сценарій"
+
+#: inc/product-analytics.php:221
+msgid "Product groups"
+msgstr "Групи товарів"
+
+#: inc/product-analytics.php:222
+msgid "Product group, level 1"
+msgstr "Група товару, рівень 1"
+
+#: inc/product-analytics.php:223
+msgid "Product group, level 2"
+msgstr "Група товару, рівень 2"
+
+#: inc/product-analytics.php:224
+msgid "Product group, level 3"
+msgstr "Група товару, рівень 3"
+
+#: inc/product-analytics.php:225
+msgid "Product group, level 4"
+msgstr "Група товару, рівень 4"
+
+#: inc/product-analytics.php:226
+msgid "Product group, level 5"
+msgstr "Група товару, рівень 5"
+
+#: inc/product-analytics.php:227
+msgid "Product group, level 6"
+msgstr "Група товару, рівень 6"
+
+#: inc/product-analytics.php:228
+msgid "Departments"
+msgstr "Відділи"
+
+#: inc/product-analytics.php:229
+msgid "Product types"
+msgstr "Типи товарів"
+
+#: inc/product-analytics.php:230
+msgid "Units of measure"
+msgstr "Одиниці виміру"
+
+#: inc/product-analytics.php:231
+msgid "Current product suppliers"
+msgstr "Поточні постачальники товару"
+
+#: inc/product-analytics.php:232
+msgid "Supplier assignment states"
+msgstr "Стани призначення постачальника"
+
+#: inc/product-analytics.php:233
+msgid "Folio operation kinds"
+msgstr "Види операцій ФОЛІО"
+
+#: inc/product-analytics.php:234
+msgid "Movement classes"
+msgstr "Класи руху"
+
+#: inc/product-analytics.php:235
+msgid "Demand modes"
+msgstr "Режими попиту"
+
+#: inc/product-analytics.php:236
+msgid "Document types"
+msgstr "Типи документів"
+
+#: inc/product-analytics.php:237
+msgid "Stock directions"
+msgstr "Напрямки руху запасу"
+
+#: inc/product-analytics.php:239
+msgid "Customer segments"
+msgstr "Сегменти клієнтів"
+
+#: inc/product-analytics.php:240
+msgid "Document counterparties"
+msgstr "Контрагенти документів"
+
+#: inc/product-analytics.php:241
+msgid "Organization types"
+msgstr "Типи організацій"
+
+#: inc/product-analytics.php:244
+msgid "Confirmed stock in transit"
+msgstr "Підтверджений товар у дорозі"
+
+#: inc/product-analytics.php:245
+msgid "No stock in transit"
+msgstr "Товару в дорозі немає"
+
+#: inc/product-analytics.php:246
+msgid "Negative transit stock: data error"
+msgstr "Від'ємний товар у дорозі: помилка даних"
+
+#: inc/product-analytics.php:247
+msgid "Opening transit balance has no confirmed origin"
+msgstr "Початковий залишок у дорозі не має підтвердженого походження"
+
+#: inc/product-analytics.php:248
+msgid "Transit stock has no confirmed supplier receipt"
+msgstr "Для товару в дорозі немає підтвердженого надходження від постачальника"
+
+#: inc/product-analytics.php:249
+msgid "Transit stock has mixed origin"
+msgstr "Товар у дорозі має змішане походження"
+
+#: inc/product-analytics.php:250
+msgid "SKU is absent from the transit warehouse"
+msgstr "Артикул відсутній на складі товарів у дорозі"
+
+#: inc/product-analytics.php:251
+msgid "Transit snapshot is not ready"
+msgstr "Знімок товарів у дорозі ще не готовий"
+
+#: inc/product-analytics.php:252
+msgid "Transit snapshot must be rebuilt"
+msgstr "Знімок товарів у дорозі потрібно перебудувати"
+
+#: inc/product-analytics.php:268
 msgid "Removed from Folio"
 msgstr "Видалено з ФОЛІО"
 
-#: inc/product-analytics.php:179
+#: inc/product-analytics.php:269
 msgid "Current assignment"
 msgstr "Поточне призначення"
 
-#: inc/product-analytics.php:180
+#: inc/product-analytics.php:270
 msgid "Missing assignment"
 msgstr "Призначення відсутнє"
 
-#: inc/product-analytics.php:181
+#: inc/product-analytics.php:271
 msgid "Sale"
 msgstr "Продаж"
 
-#: inc/product-analytics.php:182
+#: inc/product-analytics.php:272
 msgid "Customer return"
 msgstr "Повернення від покупця"
 
-#: inc/product-analytics.php:183
+#: inc/product-analytics.php:273
 msgid "Supplier return"
 msgstr "Повернення постачальнику"
 
-#: inc/product-analytics.php:184
+#: inc/product-analytics.php:274
 msgid "Purchase receipt"
 msgstr "Надходження від постачальника"
 
-#: inc/product-analytics.php:185
+#: inc/product-analytics.php:275
 msgid "Other receipt"
 msgstr "Інше надходження"
 
-#: inc/product-analytics.php:186
+#: inc/product-analytics.php:276
 msgid "Internal receipt"
 msgstr "Внутрішнє надходження"
 
-#: inc/product-analytics.php:187
+#: inc/product-analytics.php:277
 msgid "Internal expense"
 msgstr "Внутрішня витрата"
 
-#: inc/product-analytics.php:188
+#: inc/product-analytics.php:278
 msgid "Transfer in"
 msgstr "Надходження переміщення"
 
-#: inc/product-analytics.php:189
+#: inc/product-analytics.php:279
 msgid "Transfer out"
 msgstr "Витрата переміщення"
 
-#: inc/product-analytics.php:190
+#: inc/product-analytics.php:280
 msgid "Assembly input"
 msgstr "Надходження зі складання"
 
-#: inc/product-analytics.php:191
+#: inc/product-analytics.php:281
 msgid "Assembly output"
 msgstr "Витрата на складання"
 
-#: inc/product-analytics.php:192
+#: inc/product-analytics.php:282
 msgid "Inventory correction in"
 msgstr "Оприбуткування інвентаризації"
 
-#: inc/product-analytics.php:193
+#: inc/product-analytics.php:283
 msgid "Inventory correction out"
 msgstr "Списання інвентаризації"
 
-#: inc/product-analytics.php:194
+#: inc/product-analytics.php:284
 msgid "Defect receipt"
 msgstr "Надходження браку"
 
-#: inc/product-analytics.php:195
+#: inc/product-analytics.php:285
 msgid "Defect expense"
 msgstr "Витрата браку"
 
-#: inc/product-analytics.php:196
+#: inc/product-analytics.php:286
 msgid "Internal-use receipt"
 msgstr "Надходження з внутрішнього використання"
 
-#: inc/product-analytics.php:197
+#: inc/product-analytics.php:287
 msgid "Internal-use expense"
 msgstr "Витрата на внутрішнє використання"
 
-#: inc/product-analytics.php:198
+#: inc/product-analytics.php:288
 msgid "Marketing receipt"
 msgstr "Маркетингове надходження"
 
-#: inc/product-analytics.php:199
+#: inc/product-analytics.php:289
 msgid "Marketing expense"
 msgstr "Маркетингова витрата"
 
-#: inc/product-analytics.php:200
+#: inc/product-analytics.php:290
 msgid "Reservation"
 msgstr "Резервування"
 
-#: inc/product-analytics.php:201
+#: inc/product-analytics.php:291
 msgid "Other expense"
 msgstr "Інша витрата"
 
-#: inc/product-analytics.php:202
+#: inc/product-analytics.php:292
 msgid "Unclassified movement"
 msgstr "Некласифікований рух"
 
-#: inc/product-analytics.php:204
+#: inc/product-analytics.php:294
 msgid "One-off order"
 msgstr "Разове замовлення"
 
-#: inc/product-analytics.php:205
+#: inc/product-analytics.php:295
 msgid "Not applicable"
 msgstr "Не застосовується"
 
-#: inc/product-analytics.php:206
+#: inc/product-analytics.php:296
 msgid "Prepayment"
 msgstr "Передоплата"
 
-#: inc/product-analytics.php:207
+#: inc/product-analytics.php:297
 msgid "Deferred payment, 30 days"
 msgstr "Відстрочка платежу, 30 днів"
 
-#: inc/product-analytics.php:208
+#: inc/product-analytics.php:298
 msgid "Deferred payment, 60 days"
 msgstr "Відстрочка платежу, 60 днів"
 
-#: inc/product-analytics.php:209
+#: inc/product-analytics.php:299
 msgid "Deferred payment, 90 days"
 msgstr "Відстрочка платежу, 90 днів"
 
-#: inc/product-analytics.php:210
+#: inc/product-analytics.php:300
 msgid "Deferred payment, 180 days"
 msgstr "Відстрочка платежу, 180 днів"
 
-#: inc/product-analytics.php:211
+#: inc/product-analytics.php:301
 msgid "Payment on fact"
 msgstr "Оплата за фактом"
 
-#: inc/product-analytics.php:212
+#: inc/product-analytics.php:302
 msgid "Not specified"
 msgstr "Не вказано"
 
-#: inc/product-analytics.php:213
+#: inc/product-analytics.php:303
 msgid "Retail customer"
 msgstr "Роздрібний клієнт"
 
-#: inc/product-analytics.php:214
+#: inc/product-analytics.php:304
 msgid "Non-retail customer"
 msgstr "Нероздрібний клієнт"
 
-#: inc/product-analytics.php:215
+#: inc/product-analytics.php:305
 msgid "Unknown"
 msgstr "Невідомо"
 
-#: inc/product-analytics.php:216
+#: inc/product-analytics.php:306
 msgid "Incoming"
 msgstr "Надходження"
 
-#: inc/product-analytics.php:217
+#: inc/product-analytics.php:307
 msgid "Outgoing"
 msgstr "Витрата"
 
-#: inc/product-analytics.php:218
+#: inc/product-analytics.php:308
 msgid "No stock direction"
 msgstr "Без напрямку залишку"
 
-#: inc/product-analytics.php:230
+#: inc/product-analytics.php:321
+msgid ""
+"Read-only multi-warehouse stock, movement and profitability analytics from "
+"active Folio snapshots."
+msgstr ""
+"Аналітика залишків, руху й прибутковості за кількома складами з активних "
+"знімків ФОЛІО, без зміни даних."
+
+#: inc/product-analytics.php:327
+msgid "Reporting rules"
+msgstr "Правила звіту"
+
+#: inc/product-analytics.php:328
+msgid ""
+"Current stock is not changed by movement filters. Totals and financial "
+"ratios are calculated by the backend for the whole filtered selection."
+msgstr ""
+"Фільтри руху не змінюють поточний залишок. Підсумки та фінансові показники "
+"обчислює сервер для всієї відібраної сукупності."
+
+#: inc/product-analytics.php:335
+msgid ""
+"Select every warehouse that must be combined in one report. Capabilities are "
+"refreshed when this selection changes."
+msgstr ""
+"Виберіть усі склади, які потрібно об'єднати в одному звіті. Після зміни "
+"вибору доступні фільтри оновлюються."
+
+#: inc/product-analytics.php:337
+msgid "Reload capabilities"
+msgstr "Оновити доступні фільтри"
+
+#: inc/product-analytics.php:345 inc/product-analytics.php:503
+msgid "Folio analytics scenario"
+msgstr "Сценарій аналітики ФОЛІО"
+
+#: inc/product-analytics.php:347 inc/product-analytics.php:505
+msgid "Analytics scenario"
+msgstr "Сценарій аналітики"
+
+#: inc/product-analytics.php:351 inc/product-analytics.php:509
+msgid "Manage scenarios"
+msgstr "Керувати сценаріями"
+
+#: inc/product-analytics.php:425
+msgid ""
+"These conditions change period sales and profitability metrics only. They do "
+"not change current stock."
+msgstr ""
+"Ці умови змінюють лише показники продажів і прибутковості за період. "
+"Поточний залишок вони не змінюють."
+
+#: inc/product-analytics.php:435 inc/product-analytics.php:515
+msgid "Analytics section"
+msgstr "Розділ аналітики"
+
+#: inc/product-analytics.php:452
+msgid ""
+"This view shows period movement and financial metrics aggregated by product. "
+"Current stock remains the same as in the Products view."
+msgstr ""
+"Це подання показує рух і фінансові показники за період, згруповані за "
+"товаром. Поточний залишок такий самий, як у поданні «Товари»."
+
+#: inc/product-analytics.php:480
 msgid ""
 "Read-only stock, capital and commercial-sales analytics from published Folio "
 "snapshots."
@@ -3807,11 +4259,11 @@ msgstr ""
 "Аналітика запасів, капіталу й комерційних продажів з опублікованих знімків "
 "ФОЛІО без можливості зміни даних."
 
-#: inc/product-analytics.php:236
+#: inc/product-analytics.php:486
 msgid "Current reporting boundaries"
 msgstr "Поточні межі звіту"
 
-#: inc/product-analytics.php:237
+#: inc/product-analytics.php:487
 msgid ""
 "Sales are commercial sales total. Profit is gross profit before returns. "
 "Coverage is an analytical signal, not a purchase or transfer order."
@@ -3820,11 +4272,11 @@ msgstr ""
 "Покриття запасом є аналітичним сигналом, а не замовленням на закупівлю чи "
 "переміщення."
 
-#: inc/product-analytics.php:245
+#: inc/product-analytics.php:495
 msgid "Reload report"
 msgstr "Оновити звіт"
 
-#: inc/product-analytics.php:250
+#: inc/product-analytics.php:500
 msgid ""
 "The summary cards show the whole selected warehouse before scenario filters. "
 "Scenario conditions apply to the product and movement registries below."
@@ -3832,35 +4284,19 @@ msgstr ""
 "Підсумкові картки показують увесь вибраний склад до застосування фільтрів "
 "сценарію. Умови сценарію діють на реєстри товарів і руху нижче."
 
-#: inc/product-analytics.php:251
+#: inc/product-analytics.php:501
 msgid "Warehouse-wide summary"
 msgstr "Підсумок усього складу"
 
-#: inc/product-analytics.php:253
-msgid "Folio analytics scenario"
-msgstr "Сценарій аналітики ФОЛІО"
-
-#: inc/product-analytics.php:255
-msgid "Analytics scenario"
-msgstr "Сценарій аналітики"
-
-#: inc/product-analytics.php:259
-msgid "Manage scenarios"
-msgstr "Керувати сценаріями"
-
-#: inc/product-analytics.php:265
-msgid "Analytics section"
-msgstr "Розділ аналітики"
-
-#: inc/product-analytics.php:272
+#: inc/product-analytics.php:522
 msgid "Saved analytics views"
 msgstr "Готові подання аналітики"
 
-#: inc/product-analytics.php:294
+#: inc/product-analytics.php:544
 msgid "Temporary product filter overrides"
 msgstr "Тимчасові зміни фільтрів товарів"
 
-#: inc/product-analytics.php:374
+#: inc/product-analytics.php:624
 msgid ""
 "Select one or more suppliers. The mode controls whether they are included in "
 "or excluded from the product registry."
@@ -3868,31 +4304,31 @@ msgstr ""
 "Виберіть одного або кількох постачальників. Режим визначає, чи включати їх "
 "до реєстру товарів, чи виключати з нього."
 
-#: inc/product-analytics.php:404
+#: inc/product-analytics.php:654
 msgid "Stock and capital filters"
 msgstr "Фільтри залишків і капіталу"
 
-#: inc/product-analytics.php:422
+#: inc/product-analytics.php:672
 msgid "Demand filters"
 msgstr "Фільтри попиту"
 
-#: inc/product-analytics.php:461
+#: inc/product-analytics.php:711
 msgid "Financial efficiency filters"
 msgstr "Фільтри фінансової ефективності"
 
-#: inc/product-analytics.php:499
+#: inc/product-analytics.php:749
 msgid "Additional date filters"
 msgstr "Додаткові фільтри за датами"
 
-#: inc/product-analytics.php:531
+#: inc/product-analytics.php:781
 msgid "Apply filters"
 msgstr "Застосувати фільтри"
 
-#: inc/product-analytics.php:532 inc/product-analytics.php:606
+#: inc/product-analytics.php:782 inc/product-analytics.php:856
 msgid "Reset"
 msgstr "Скинути"
 
-#: inc/product-analytics.php:551
+#: inc/product-analytics.php:801
 msgid ""
 "This registry shows published Folio movement facts. Filtering is performed "
 "server-side and does not recalculate the product summary cards above."
@@ -3900,15 +4336,15 @@ msgstr ""
 "Цей реєстр показує опубліковані рухи ФОЛІО. Фільтрація виконується на "
 "сервері й не перераховує підсумкові показники товарів вище."
 
-#: inc/product-analytics.php:554
+#: inc/product-analytics.php:804
 msgid "Temporary movement filter overrides"
 msgstr "Тимчасові зміни фільтрів руху"
 
-#: inc/product-analytics.php:605
+#: inc/product-analytics.php:855
 msgid "Apply movement filters"
 msgstr "Застосувати фільтри руху"
 
-#: inc/product-analytics.php:662
+#: inc/product-analytics.php:912
 msgid ""
 "The Folio movement facts have not been published to this WordPress database "
 "yet. Rebuild the snapshot with analytics schema v2."
@@ -3916,54 +4352,74 @@ msgstr ""
 "Факти руху ФОЛІО ще не опубліковано в цій базі WordPress. Повторно сформуйте "
 "знімок за схемою аналітики v2."
 
-#: inc/product-analytics.php:671
+#: inc/product-analytics.php:921
 msgid "A Folio source database and warehouse are required."
 msgstr "Потрібно вибрати базу даних і склад ФОЛІО."
 
-#: inc/product-analytics.php:714
+#: inc/product-analytics.php:964
 msgid ""
 "No completed active Folio product snapshot is available for this warehouse."
 msgstr "Для цього складу немає завершеного активного знімка товарів ФОЛІО."
 
-#: inc/product-analytics.php:912
+#: inc/product-analytics.php:1162
 msgid "Enter a name for the filter set."
 msgstr "Введіть назву набору фільтрів."
 
-#: inc/product-analytics.php:918
+#: inc/product-analytics.php:1168
 msgid "The filter set data is invalid."
 msgstr "Дані набору фільтрів некоректні."
 
-#: inc/product-analytics.php:938
+#: inc/product-analytics.php:1188
 msgid "No more than 30 saved filter sets are allowed."
 msgstr "Можна зберегти не більше 30 наборів фільтрів."
 
-#: inc/product-analytics.php:1006 inc/product-analytics.php:1210
+#: inc/product-analytics.php:1256 inc/product-analytics.php:1460
 msgid "This snapshot must be rebuilt with analytics schema v2."
 msgstr "Цей знімок потрібно повторно сформувати за схемою аналітики v2."
 
-#: inc/product-analytics.php:1309
+#: inc/product-analytics.php:1559
 msgid "A product SKU is required."
 msgstr "Потрібно вказати артикул товару."
 
-#: inc/product-analytics.php:1318
+#: inc/product-analytics.php:1568
 msgid "The requested product was not found in this snapshot."
 msgstr "Запитаний товар не знайдено в цьому знімку."
 
-#: inc/product-analytics.php:1356
+#: inc/product-analytics.php:1606
 msgid "The analytics database query failed. Check the server log."
 msgstr "Помилка запиту до бази аналітики. Перевірте журнал сервера."
 
-#: inc/product-analytics.php:1361
+#: inc/product-analytics.php:1617
+msgid "The product-analytics request is invalid."
+msgstr "Запит товарної аналітики некоректний."
+
+#: inc/product-analytics.php:1658
+msgid "The Folio source database is invalid."
+msgstr "Вказано некоректну базу даних ФОЛІО."
+
+#: inc/product-analytics.php:1669
+msgid "Select a valid report period."
+msgstr "Виберіть коректний період звіту."
+
+#: inc/product-analytics.php:1740
+msgid "The Folio analytics service returned an invalid response."
+msgstr "Сервіс аналітики ФОЛІО повернув некоректну відповідь."
+
+#: inc/product-analytics.php:1746
+msgid "The Folio analytics request failed."
+msgstr "Запит аналітики ФОЛІО не виконано."
+
+#: inc/product-analytics.php:1772
 msgid "You do not have permission to view product analytics."
 msgstr "У вас немає дозволу на перегляд товарної аналітики."
 
-#: inc/product-analytics.php:1368
+#: inc/product-analytics.php:1802
 msgid ""
 "The Folio analytics tables have not been published to this WordPress "
 "database yet."
 msgstr "Таблиці аналітики ФОЛІО ще не опубліковано в цій базі WordPress."
 
-#: inc/product-analytics.php:1390
+#: inc/product-analytics.php:1824
 msgid "Unsupported product-analytics operation."
 msgstr "Операція товарної аналітики не підтримується."
 

@@ -48,6 +48,34 @@
   min-width: min(460px, 100%);
 }
 
+.lps-pa-scope-panel {
+  max-width: 1100px;
+  padding: 16px;
+  border: 1px solid #c3c4c7;
+  background: #fff;
+}
+
+.lps-pa-scope-panel > label,
+.lps-pa-scope-panel > select {
+  display: block;
+}
+
+.lps-pa-scope-panel > select {
+  width: min(760px, 100%);
+  min-height: 138px;
+  margin: 8px 0;
+}
+
+.lps-pa-warning-list {
+  display: grid;
+  gap: 6px;
+  margin: 12px 0;
+}
+
+.lps-pa-warning-list .notice {
+  margin: 0 !important;
+}
+
 .lps-pa-message {
   margin: 15px 0;
   padding: 12px 14px;
@@ -219,6 +247,124 @@
 .lps-pa-filter-actions {
   grid-column: 1 / -1;
   gap: 8px;
+}
+
+.lps-pa-v4-form {
+  margin: 18px 0;
+}
+
+.lps-pa-v4-primary {
+  display: grid;
+  grid-template-columns: minmax(280px, 2fr) repeat(6, minmax(140px, 1fr));
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid #c3c4c7;
+  background: #fff;
+}
+
+.lps-pa-v4-primary label > span,
+.lps-pa-selection label > span,
+.lps-pa-text-selection label > span {
+  display: block;
+  min-height: 34px;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.lps-pa-v4-primary input,
+.lps-pa-v4-primary select,
+.lps-pa-selection select,
+.lps-pa-text-selection textarea,
+.lps-pa-text-selection select {
+  width: 100%;
+}
+
+.lps-pa-v4-primary .lps-pa-checkbox {
+  display: flex;
+  grid-column: 1 / -1;
+  gap: 8px;
+  align-items: center;
+}
+
+.lps-pa-v4-primary .lps-pa-checkbox input {
+  width: auto;
+}
+
+.lps-pa-v4-primary .lps-pa-checkbox span {
+  min-height: 0;
+  margin: 0;
+}
+
+.lps-pa-v4-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(220px, 1fr));
+  gap: 12px;
+  padding: 14px;
+}
+
+.lps-pa-selection,
+.lps-pa-text-selection {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 7px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #dcdcde;
+  background: #f6f7f7;
+}
+
+.lps-pa-selection .lps-pa-values {
+  min-height: 118px;
+}
+
+.lps-pa-filter-note {
+  margin: 12px 14px 0;
+}
+
+.lps-pa-v4-actions {
+  display: flex;
+  margin: 12px 0 22px;
+}
+
+.lps-pa-state {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.lps-pa-state.is-good { color: #008a20; }
+.lps-pa-state.is-warning { color: #996800; }
+.lps-pa-state.is-danger { color: #b32d2e; }
+.lps-pa-state.is-unknown { color: #646970; }
+
+.lps-pa table .num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.lps-pa-detail-metrics,
+.lps-pa-detail-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 8px;
+}
+
+.lps-pa-detail-metrics > div,
+.lps-pa-detail-list > div {
+  padding: 10px;
+  border: 1px solid #dcdcde;
+  background: #f6f7f7;
+}
+
+.lps-pa-detail-metrics dt,
+.lps-pa-detail-list dt {
+  color: #50575e;
+}
+
+.lps-pa-detail-metrics dd,
+.lps-pa-detail-list dd {
+  margin: 5px 0 0;
+  font-weight: 650;
 }
 
 .lps-pa-filter-section {
@@ -500,6 +646,8 @@ body.lps-pa-detail-open { overflow: hidden; }
 @media (max-width: 1280px) {
   .lps-pa-filters { grid-template-columns: repeat(3, minmax(170px, 1fr)); }
   .lps-pa-filter-grid { grid-template-columns: repeat(2, minmax(160px, 1fr)); }
+  .lps-pa-v4-primary { grid-template-columns: repeat(3, minmax(180px, 1fr)); }
+  .lps-pa-v4-filter-grid { grid-template-columns: repeat(2, minmax(220px, 1fr)); }
   .lps-pa-scenario-picker { grid-template-columns: 1fr 1fr; }
   .lps-pa-scenario-picker > label { grid-column: 1 / -1; }
   .lps-pa-metric-grid { grid-template-columns: repeat(2, minmax(160px, 1fr)); }
@@ -510,6 +658,8 @@ body.lps-pa-detail-open { overflow: hidden; }
   .lps-pa-snapshot { text-align: left; }
   .lps-pa-filters,
   .lps-pa-filter-grid,
+  .lps-pa-v4-primary,
+  .lps-pa-v4-filter-grid,
   .lps-pa-charts,
   .lps-pa-scenario-picker { grid-template-columns: 1fr; }
   .lps-pa-scenario-picker > label { grid-column: 1; }
@@ -517,4 +667,6 @@ body.lps-pa-detail-open { overflow: hidden; }
   .lps-pa-supplier-filter > small { grid-column: 1; }
   .lps-pa-detail-panel { width: calc(100vw - 30px); padding: 16px; }
   .lps-pa-metric-grid { grid-template-columns: 1fr; }
+  .lps-pa-detail-metrics,
+  .lps-pa-detail-list { grid-template-columns: 1fr; }
 }

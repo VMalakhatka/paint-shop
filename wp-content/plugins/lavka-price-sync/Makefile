@@ -21,6 +21,7 @@ UTF8 := LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
 
 pot:
 	$(UTF8) wp i18n make-pot . $(POT) --domain=$(TEXTDOM) --exclude=node_modules,vendor,dist,build,tests
+	@perl -pi -e 's/[ \t]+$$//' $(POT)
 
 # 2) Init .po if missing and merge updates from .pot
 merge: pot
@@ -32,8 +33,8 @@ merge: pot
 	  echo "Init $(PO_RU)"; \
 	  $(UTF8) msginit --no-translator --input=$(POT) --locale=ru_RU --output-file=$(PO_RU); \
 	fi
-	$(UTF8) msgmerge --update $(PO_UA) $(POT)
-	$(UTF8) msgmerge --update $(PO_RU) $(POT)
+	$(UTF8) msgmerge --update --no-fuzzy-matching $(PO_UA) $(POT)
+	$(UTF8) msgmerge --update --no-fuzzy-matching $(PO_RU) $(POT)
 
 # 3) Build .mo
 mo: FORCE

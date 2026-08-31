@@ -89,7 +89,7 @@ idempotency key, наблюдаемый terminal status и план восста
 | Цены по ролям | Folio contract -> Java -> role-price meta -> runtime Woo price | plugin README + runbook |
 | Woo-заказ -> ФОЛИО | Woo order -> PHP preview/proxy -> Java allocation/idempotency -> Folio documents | [FOLIO_ORDER_JSON_CONTRACT.md](FOLIO_ORDER_JSON_CONTRACT.md) + Java API |
 | Учётные цены | WordPress campaign -> Java job/status -> Folio procedure -> postcheck/snapshot | Java `FOLIO_ACCOUNTING_PRICE_*` docs |
-| Товарная аналитика | Folio read-only snapshot -> Java calculation -> MariaDB `folio_product_*` -> PHP screen | Java `FOLIO_PRODUCT_SNAPSHOT_API.md` + [план полного контракта сценариев](api/FOLIO_PRODUCT_ANALYTICS_SCENARIOS_BACKEND_TASK.md) |
+| Товарная аналитика | Folio read-only snapshot -> Java calculation -> MariaDB `folio_product_*` -> WordPress nonce/capability proxy -> PHP screen | Java `FOLIO_PRODUCT_ANALYTICS_API.md` + [WordPress frontend schema v4](api/FOLIO_PRODUCT_ANALYTICS_FRONTEND_V4.md) |
 | Баланс/должники/документы | Woo user mapping -> PHP proxy -> Java read/snapshot -> Folio | Java `FOLIO_CUSTOMER_*` docs |
 | Изображения | Media Library -> Media Cloud/S3 -> Java/Folio preview/apply -> Woo attachment assignment | [MEDIA_MANAGER_GUIDE_UK.md](MEDIA_MANAGER_GUIDE_UK.md) |
 
