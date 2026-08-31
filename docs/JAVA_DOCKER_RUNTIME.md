@@ -60,6 +60,11 @@ Java API `kreul_com_ua`. Он дополняет общий
 - server-side API tokens;
 - TLS/truststore settings;
 - write-enable, sync и feature flags;
+- окно ожидания планового рестарта Folio MSSQL:
+  `LAVKA_FOLIO_ACCOUNTING_PRICE_NATIVE_RESTART_WAIT_SECONDS` (по умолчанию 600)
+  и интервал probe
+  `LAVKA_FOLIO_ACCOUNTING_PRICE_NATIVE_RESTART_PROBE_INTERVAL_SECONDS`
+  (по умолчанию 15);
 - JVM/resource/log settings.
 
 Не печатайте значения через `cat`, shell tracing, `docker inspect`, full environment
@@ -67,6 +72,12 @@ dump или raw application properties. Для каждого endpoint фикс�
 `loopback`, `host.docker.internal`, Compose service, private network или remote TLS.
 Перед start отдельно подтверждайте write-enable flags: название файла `.env` не
 означает безопасный local profile.
+
+Эти два restart-параметра не разрешают слепой retry `JDBC commit failed`.
+`native-range` продолжает работу только после fingerprint/postcheck-доказательства:
+подтверждённый rollback повторяется один раз, подтверждённый commit не повторяется,
+а неоднозначный исход остаётся `OUTCOME_UNKNOWN`. Механизм работает, только если
+Java-container не перезапускался вместе с MSSQL.
 
 ## Локальная проверка и запуск
 

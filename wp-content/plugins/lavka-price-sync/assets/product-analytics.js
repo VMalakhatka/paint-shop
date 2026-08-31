@@ -13,10 +13,14 @@
     message: document.getElementById('lps-pa-message'),
     snapshot: document.getElementById('lps-pa-snapshot'),
     summary: document.getElementById('lps-pa-summary'),
+    tabs: Array.from(root.querySelectorAll('[data-lps-pa-tab]')),
+    panels: Array.from(root.querySelectorAll('[data-lps-pa-panel]')),
     views: Array.from(root.querySelectorAll('[data-lps-pa-view]')),
     filters: document.getElementById('lps-pa-filters'),
     supplierMode: document.getElementById('lps-pa-supplier-mode'),
     suppliers: document.getElementById('lps-pa-suppliers'),
+    supplierMeta: document.getElementById('lps-pa-supplier-meta'),
+    documentType: document.getElementById('lps-pa-document-type'),
     presetSelect: document.getElementById('lps-pa-preset-select'),
     presetName: document.getElementById('lps-pa-preset-name'),
     presetSave: document.getElementById('lps-pa-preset-save'),
@@ -27,6 +31,14 @@
     body: document.querySelector('#lps-pa-products tbody'),
     tableMeta: document.getElementById('lps-pa-table-meta'),
     pagination: document.getElementById('lps-pa-pagination'),
+    movementFilters: document.getElementById('lps-pa-movement-filters'),
+    movementReset: document.getElementById('lps-pa-movement-reset'),
+    operationKind: document.getElementById('lps-pa-operation-kind'),
+    movementsTable: document.getElementById('lps-pa-movements'),
+    movementsHead: document.getElementById('lps-pa-movements-head'),
+    movementsBody: document.querySelector('#lps-pa-movements tbody'),
+    movementsMeta: document.getElementById('lps-pa-movements-meta'),
+    movementsPagination: document.getElementById('lps-pa-movements-pagination'),
     detail: document.getElementById('lps-pa-detail'),
     detailContent: document.getElementById('lps-pa-detail-content')
   };
@@ -40,27 +52,53 @@
     sort: 'inventory_value',
     direction: 'DESC',
     presets: [],
-    productsRequest: 0
+    productsRequest: 0,
+    movementPage: 1,
+    movementRequest: 0,
+    activeTab: 'products',
+    analyticsSchemaVersion: 0
   };
 
   const columns = [
     ['sku', t.sku || 'SKU', 'sku'],
     ['product_name', t.product || 'Product', 'product_name'],
-    ['physical_quantity', t.physicalQuantity || 'Physical quantity'],
-    ['reserved_quantity', t.reservedQuantity || 'Reserved quantity'],
-    ['available_quantity', t.availableQuantity || 'Available quantity'],
-    ['accounting_price', t.accountingPrice || 'Accounting price'],
+    ['current_supplier', t.supplier || 'Current supplier', 'current_supplier'],
+    ['physical_quantity', t.physicalQuantity || 'Physical quantity', 'physical_quantity'],
+    ['reserved_quantity', t.reservedQuantity || 'Reserved quantity', 'reserved_quantity'],
+    ['available_quantity', t.availableQuantity || 'Available quantity', 'available_quantity'],
+    ['accounting_price', t.accountingPrice || 'Accounting price', 'accounting_price'],
     ['inventory_value', t.inventoryValue || 'Capital in stock', 'inventory_value'],
-    ['sold_units_90d', t.sales90 || 'Sales, 90 days'],
+    ['sold_units_90d', t.sales90 || 'Sales, 90 days', 'sold_units_90d'],
     ['sold_units_365d', t.sales365 || 'Sales, 365 days', 'sold_units_365d'],
+    ['regular_sold_units_365d', t.regularSales365 || 'Regular demand, 12 months', 'regular_sold_units_365d'],
+    ['one_off_sold_units_365d', t.oneOffSales365 || 'One-off sales, 12 months', 'one_off_sold_units_365d'],
     ['revenue_365d', t.revenue365 || 'Revenue, 365 days', 'revenue_365d'],
     ['gross_profit_365d', t.grossProfit365 || 'Gross profit, 365 days', 'gross_profit_365d'],
     ['inventory_turns_365d', t.turns || 'Inventory turns', 'inventory_turns_365d'],
     ['gmroi_365d', t.gmroi || 'GMROI', 'gmroi_365d'],
     ['coverage_days', t.coverage || 'Coverage, days', 'coverage_days'],
     ['last_sale_date', t.lastSale || 'Last sale', 'last_sale_date'],
-    ['last_receipt_date', t.lastReceipt || 'Last receipt'],
-    ['states', t.status || 'Status']
+    ['last_regular_sale_date', t.lastRegularSale || 'Last regular sale', 'last_regular_sale_date'],
+    ['last_receipt_date', t.lastReceipt || 'Last receipt', 'last_receipt_date'],
+    ['states', t.status || 'Status', 'health_status']
+  ];
+
+  const movementColumns = [
+    ['document_date', t.documentDate || 'Document date'],
+    ['document_number', t.documentNumber || 'Document number'],
+    ['document_type', t.documentType || 'Document type'],
+    ['sku', t.sku || 'SKU'],
+    ['operation_kind', t.operationKind || 'Folio operation kind'],
+    ['movement_class', t.movementClass || 'Movement class'],
+    ['signed_quantity', t.signedQuantity || 'Signed quantity'],
+    ['sale_amount', t.saleAmount || 'Sale amount'],
+    ['accounting_value', t.accountingValue || 'Accounting value'],
+    ['demand_mode', t.demandMode || 'Demand mode'],
+    ['payment_terms', t.paymentTerms || 'Payment terms'],
+    ['counterparty_name', t.counterparty || 'Counterparty'],
+    ['current_supplier', t.supplier || 'Current supplier'],
+    ['accounted', t.accounted || 'Included in accounting'],
+    ['return_flag', t.returnFlag || 'Return document']
   ];
 
   function node(tag, className = '', text = '') {
@@ -179,7 +217,8 @@
       const stored = window.localStorage.getItem('lpsProductAnalyticsScope') || '';
       state.scopes.forEach((scope) => {
         const value = `${scope.source_database}|${scope.warehouse_id}`;
-        const caption = `${t.warehouse || 'Warehouse'} #${scope.warehouse_id} · ${scope.source_database}`;
+        const version = Number(scope.analytics_schema_version) || 1;
+        const caption = `${t.warehouse || 'Warehouse'} #${scope.warehouse_id} · ${scope.source_database} · v${version}`;
         el.scope.appendChild(new Option(caption, value));
       });
       if (stored && state.scopes.some((scope) => `${scope.source_database}|${scope.warehouse_id}` === stored)) {
@@ -201,6 +240,8 @@
     state.sourceDatabase = sourceDatabase;
     state.warehouseId = Number(warehouse) || 0;
     state.page = 1;
+    const scope = state.scopes.find((item) => `${item.source_database}|${item.warehouse_id}` === String(value || ''));
+    state.analyticsSchemaVersion = Number(scope?.analytics_schema_version) || 1;
     if (state.sourceDatabase && state.warehouseId) {
       window.localStorage.setItem('lpsProductAnalyticsScope', `${state.sourceDatabase}|${state.warehouseId}`);
     }
@@ -215,16 +256,81 @@
   }
 
   async function loadFilterOptions() {
-    const data = await request('filter_options', scopePayload());
-    const suppliers = Array.isArray(data.suppliers) ? data.suppliers : [];
-    el.suppliers.replaceChildren(...suppliers.map((supplier) => new Option(supplier, supplier)));
-    if (!suppliers.length) {
-      const empty = new Option(t.noSuppliers || 'No suppliers are available for this warehouse.', '');
-      empty.disabled = true;
-      el.suppliers.append(empty);
+    el.suppliers.disabled = true;
+    el.supplierMeta.className = 'lps-pa-supplier-meta is-loading';
+    el.supplierMeta.textContent = t.loading || 'Loading...';
+    try {
+      const data = await request('filter_options', scopePayload());
+      const schemaVersion = Number(data.analyticsSchemaVersion) || 1;
+      state.analyticsSchemaVersion = schemaVersion;
+      if (schemaVersion < 2) {
+        el.suppliers.replaceChildren();
+        el.supplierMode.value = 'ANY';
+        el.supplierMeta.className = 'lps-pa-supplier-meta is-warning';
+        el.supplierMeta.textContent = t.schemaUpgradeRequired || 'Rebuild this snapshot with analytics schema v2.';
+        syncSupplierFilter();
+        clearReportOutput();
+        showMessage(t.schemaUpgradeRequired || 'Rebuild this snapshot with analytics schema v2.', 'warning');
+        return;
+      }
+
+      const suppliers = Array.isArray(data.suppliers) ? data.suppliers : [];
+      const options = suppliers.map((supplier) => {
+        const item = typeof supplier === 'string' ? {value: supplier, products: null, state: 'CURRENT'} : supplier;
+        const value = String(item?.value || '').trim();
+        const count = numeric(item?.products);
+        const review = item?.state === 'REVIEW' || value === '1';
+        const caption = `${value}${count === null ? '' : ` (${formatInteger(count)})`}${review ? ` · ${t.supplierServiceCode || 'Service code / requires verification'}` : ''}`;
+        const option = new Option(caption, value);
+        option.dataset.state = String(item?.state || 'CURRENT');
+        return option;
+      }).filter((option) => option.value !== '');
+      el.suppliers.replaceChildren(...options);
+      if (!options.length) {
+        const empty = new Option(t.noSuppliers || 'No suppliers are available for this warehouse.', '');
+        empty.disabled = true;
+        el.suppliers.append(empty);
+        el.supplierMode.value = 'ANY';
+      }
+      const stats = data.supplierStats || {};
+      const pattern = t.supplierStats || 'Assigned: %1$s · missing: %2$s · supplier values: %3$s';
+      el.supplierMeta.className = 'lps-pa-supplier-meta';
+      el.supplierMeta.textContent = pattern
+        .replace('%1$s', formatInteger(stats.assignedProducts))
+        .replace('%2$s', formatInteger(stats.missingProducts))
+        .replace('%3$s', formatInteger(stats.distinctSuppliers));
+      const operationKinds = Array.isArray(data.movementOptions?.operationKinds) ? data.movementOptions.operationKinds : [];
+      const selectedOperation = el.operationKind.value;
+      el.operationKind.replaceChildren(new Option(t.allOperationKinds || 'All operation kinds', ''));
+      operationKinds.forEach((item) => {
+        const value = String(item?.value || '').trim();
+        if (value) el.operationKind.append(new Option(`${value} (${formatInteger(item.movements)})`, value));
+      });
+      if (Array.from(el.operationKind.options).some((option) => option.value === selectedOperation)) {
+        el.operationKind.value = selectedOperation;
+      }
+      const documentTypes = Array.isArray(data.movementOptions?.documentTypes) ? data.movementOptions.documentTypes : [];
+      const selectedDocumentType = el.documentType.value;
+      el.documentType.replaceChildren(new Option(t.allDocumentTypes || 'All document types', ''));
+      documentTypes.forEach((item) => {
+        const value = String(item?.value || '').trim();
+        if (value) el.documentType.append(new Option(`${value} (${formatInteger(item.movements)})`, value));
+      });
+      if (Array.from(el.documentType.options).some((option) => option.value === selectedDocumentType)) {
+        el.documentType.value = selectedDocumentType;
+      }
+      syncSupplierFilter();
+    } catch (error) {
+      el.suppliers.replaceChildren();
       el.supplierMode.value = 'ANY';
+      const failed = new Option(t.suppliersLoadFailed || 'Suppliers could not be loaded.', '');
+      failed.disabled = true;
+      el.suppliers.append(failed);
+      el.supplierMeta.className = 'lps-pa-supplier-meta is-error';
+      el.supplierMeta.textContent = `${t.suppliersLoadFailed || 'Suppliers could not be loaded.'} ${error.message || String(error)}`;
+      syncSupplierFilter();
+      throw error;
     }
-    syncSupplierFilter();
   }
 
   function renderPresets(selectedId = '') {
@@ -257,7 +363,15 @@
       await loadFilterOptions();
     }
 
-    ['search','health','verification','alertCode','severity','sales','inventoryMin','inventoryMax','lastSaleFrom','lastSaleTo','perPage'].forEach((name) => {
+    [
+      'search','health','verification','alertCode','alertStatus','severity','sales','supplierQuality','availableSign',
+      'accountingPriceMode','physicalMin','physicalMax','reservedMin','reservedMax','availableMin','availableMax',
+      'demandPeriod','regularDemand','oneOffDemand','inventoryMin','inventoryMax','financePeriod','revenueMin','revenueMax',
+      'profitMin','profitMax','averageCapitalMin','averageCapitalMax','marginMin','marginMax','turnsMin','turnsMax','gmroiMin','gmroiMax',
+      'coverageMin','coverageMax','lastSaleFrom','lastSaleTo','lastRegularSaleFrom','lastRegularSaleTo',
+      'lastReceiptFrom','lastReceiptTo','firstMovementFrom','firstMovementTo','lastMovementFrom','lastMovementTo',
+      'alertFirstSeenFrom','alertFirstSeenTo','alertLastSeenFrom','alertLastSeenTo','perPage'
+    ].forEach((name) => {
       const field = el.filters.elements[name];
       if (field) field.value = saved[name] || '';
     });
@@ -276,6 +390,11 @@
 
   async function loadReport() {
     if (!state.sourceDatabase || !state.warehouseId) return;
+    if (state.analyticsSchemaVersion < 2) {
+      clearReportOutput();
+      showMessage(t.schemaUpgradeRequired || 'Rebuild this snapshot with analytics schema v2.', 'warning');
+      return;
+    }
     setBusy(true);
     showMessage();
     try {
@@ -285,6 +404,17 @@
     } finally {
       setBusy(false);
     }
+  }
+
+  function clearReportOutput() {
+    el.summary.replaceChildren();
+    el.snapshot.replaceChildren();
+    el.body.replaceChildren();
+    el.tableMeta.textContent = '';
+    el.pagination.replaceChildren();
+    el.movementsBody.replaceChildren();
+    el.movementsMeta.textContent = '';
+    el.movementsPagination.replaceChildren();
   }
 
   function summaryCard(labelText, value, type = 'number', emphasis = '') {
@@ -315,6 +445,10 @@
     meta.append(node('strong', '', t.dataAsOf || 'Active snapshot'));
     meta.append(node('span', '', formatDate(generation.completed_at, true)));
     if (generation.horizon_months) meta.append(node('span', '', `${generation.horizon_months} mo.`));
+    meta.append(node('span', '', `schema v${Number(generation.analytics_schema_version) || 1}`));
+    if (numeric(generation.movement_fact_rows) !== null) {
+      meta.append(node('span', '', `${formatInteger(generation.movement_fact_rows)} ${t.movementRows || 'movement rows'}`));
+    }
     el.snapshot.replaceChildren(meta);
 
     const strips = node('div', 'lps-pa-strips');
@@ -350,14 +484,54 @@
       health: form.get('health') || '',
       verification: form.get('verification') || '',
       alertCode: form.get('alertCode') || '',
+      alertStatus: form.get('alertStatus') || 'ANY',
       severity: form.get('severity') || '',
       sales: form.get('sales') || '',
       supplierMode: form.get('supplierMode') || 'ANY',
       supplierValues: form.getAll('supplierValues[]').join('\n'),
+      supplierQuality: form.get('supplierQuality') || 'ANY',
+      availableSign: form.get('availableSign') || 'ANY',
+      accountingPriceMode: form.get('accountingPriceMode') || 'ANY',
+      physicalMin: form.get('physicalMin') || '',
+      physicalMax: form.get('physicalMax') || '',
+      reservedMin: form.get('reservedMin') || '',
+      reservedMax: form.get('reservedMax') || '',
+      availableMin: form.get('availableMin') || '',
+      availableMax: form.get('availableMax') || '',
+      demandPeriod: form.get('demandPeriod') || '365',
+      regularDemand: form.get('regularDemand') || 'ANY',
+      oneOffDemand: form.get('oneOffDemand') || 'ANY',
       inventoryMin: form.get('inventoryMin') || '',
       inventoryMax: form.get('inventoryMax') || '',
+      financePeriod: form.get('financePeriod') || '365',
+      revenueMin: form.get('revenueMin') || '',
+      revenueMax: form.get('revenueMax') || '',
+      profitMin: form.get('profitMin') || '',
+      profitMax: form.get('profitMax') || '',
+      averageCapitalMin: form.get('averageCapitalMin') || '',
+      averageCapitalMax: form.get('averageCapitalMax') || '',
+      marginMin: form.get('marginMin') || '',
+      marginMax: form.get('marginMax') || '',
+      turnsMin: form.get('turnsMin') || '',
+      turnsMax: form.get('turnsMax') || '',
+      gmroiMin: form.get('gmroiMin') || '',
+      gmroiMax: form.get('gmroiMax') || '',
+      coverageMin: form.get('coverageMin') || '',
+      coverageMax: form.get('coverageMax') || '',
       lastSaleFrom: form.get('lastSaleFrom') || '',
       lastSaleTo: form.get('lastSaleTo') || '',
+      lastRegularSaleFrom: form.get('lastRegularSaleFrom') || '',
+      lastRegularSaleTo: form.get('lastRegularSaleTo') || '',
+      lastReceiptFrom: form.get('lastReceiptFrom') || '',
+      lastReceiptTo: form.get('lastReceiptTo') || '',
+      firstMovementFrom: form.get('firstMovementFrom') || '',
+      firstMovementTo: form.get('firstMovementTo') || '',
+      lastMovementFrom: form.get('lastMovementFrom') || '',
+      lastMovementTo: form.get('lastMovementTo') || '',
+      alertFirstSeenFrom: form.get('alertFirstSeenFrom') || '',
+      alertFirstSeenTo: form.get('alertFirstSeenTo') || '',
+      alertLastSeenFrom: form.get('alertLastSeenFrom') || '',
+      alertLastSeenTo: form.get('alertLastSeenTo') || '',
       perPage: form.get('perPage') || 50,
       view: state.view,
       page: state.page,
@@ -375,6 +549,11 @@
       td.append(button);
     } else if (key === 'product_name') {
       td.textContent = row.product_name || '—';
+    } else if (key === 'current_supplier') {
+      td.textContent = row.current_supplier || '—';
+      if (String(row.current_supplier || '').trim() === '1') {
+        td.append(node('span', 'lps-pa-badge is-unverified', t.supplierServiceCode || 'Service code / requires verification'));
+      }
     } else if (['accounting_price','inventory_value','revenue_365d','gross_profit_365d'].includes(key)) {
       td.textContent = formatMoney(row[key]);
       if (key === 'gross_profit_365d' && numeric(row[key]) < 0) td.classList.add('is-negative');
@@ -382,7 +561,7 @@
       td.textContent = formatRatio(row[key]);
     } else if (key === 'coverage_days') {
       td.textContent = formatNumber(row[key], 0);
-    } else if (['last_sale_date','last_receipt_date'].includes(key)) {
+    } else if (['last_sale_date','last_regular_sale_date','last_receipt_date'].includes(key)) {
       td.textContent = formatDate(row[key]);
     } else if (key === 'states') {
       const list = node('div', 'lps-pa-badges');
@@ -453,6 +632,75 @@
     el.pagination.append(previous, node('span', '', `${t.page || 'Page'} ${data.page} ${t.of || 'of'} ${data.pages}`), next);
   }
 
+  function movementPayload() {
+    const form = new FormData(el.movementFilters);
+    const payload = {...scopePayload(), movementPage: state.movementPage};
+    for (const [key, value] of form.entries()) payload[key] = value;
+    return payload;
+  }
+
+  function movementCell(row, key) {
+    const td = node('td');
+    if (key === 'document_date') td.textContent = formatDate(row[key]);
+    else if (key === 'document_number') td.textContent = row[key] === null || row[key] === undefined || row[key] === ''
+      ? '—'
+      : String(row[key]).replace(/\.0+$/, '');
+    else if (['sale_amount','accounting_value'].includes(key)) td.textContent = formatMoney(row[key]);
+    else if (key === 'signed_quantity') td.textContent = formatNumber(row[key]);
+    else if (['accounted','return_flag'].includes(key)) td.textContent = Number(row[key]) === 1 ? (t.yes || 'Yes') : (t.no || 'No');
+    else if (key === 'counterparty_name') td.textContent = row.counterparty_name || row.counterparty_short_name || '—';
+    else if (['movement_class','demand_mode','payment_terms'].includes(key)) td.append(badge(row[key]));
+    else td.textContent = row[key] || '—';
+    return td;
+  }
+
+  async function loadMovements() {
+    if (!state.sourceDatabase || !state.warehouseId) return;
+    if (state.analyticsSchemaVersion < 2) {
+      showMessage(t.schemaUpgradeRequired || 'Rebuild this snapshot with analytics schema v2.', 'warning');
+      return;
+    }
+    const requestId = ++state.movementRequest;
+    setBusy(true);
+    try {
+      const data = await request('movements', movementPayload());
+      if (requestId !== state.movementRequest) return;
+      state.movementPage = Number(data.page) || 1;
+      el.movementsHead.replaceChildren(...movementColumns.map(([, caption]) => node('th', '', caption)));
+      el.movementsBody.replaceChildren();
+      (data.items || []).forEach((row) => {
+        const tr = node('tr');
+        movementColumns.forEach(([key]) => tr.append(movementCell(row, key)));
+        el.movementsBody.append(tr);
+      });
+      if (!(data.items || []).length) {
+        const td = node('td', 'lps-pa-empty', t.noMovements || 'No movements match the selected filters.');
+        td.colSpan = movementColumns.length;
+        const tr = node('tr'); tr.append(td); el.movementsBody.append(tr);
+      }
+      el.movementsMeta.textContent = `${formatInteger(data.total)} · ${t.page || 'Page'} ${data.page} ${t.of || 'of'} ${data.pages}`;
+      el.movementsPagination.replaceChildren();
+      const previous = node('button', 'button', '‹');
+      previous.type = 'button'; previous.disabled = data.page <= 1;
+      previous.addEventListener('click', () => { state.movementPage -= 1; loadMovements(); });
+      const next = node('button', 'button', '›');
+      next.type = 'button'; next.disabled = data.page >= data.pages;
+      next.addEventListener('click', () => { state.movementPage += 1; loadMovements(); });
+      el.movementsPagination.append(previous, node('span', '', `${t.page || 'Page'} ${data.page} ${t.of || 'of'} ${data.pages}`), next);
+    } catch (error) {
+      showMessage(error.message || String(error), 'error');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function selectTab(tab) {
+    state.activeTab = tab === 'movements' ? 'movements' : 'products';
+    el.tabs.forEach((button) => button.classList.toggle('nav-tab-active', button.dataset.lpsPaTab === state.activeTab));
+    el.panels.forEach((panel) => { panel.hidden = panel.dataset.lpsPaPanel !== state.activeTab; });
+    if (state.activeTab === 'movements') loadMovements();
+  }
+
   function metricGrid(row) {
     const grid = node('dl', 'lps-pa-metric-grid');
     const values = [
@@ -461,12 +709,15 @@
       [t.availableQuantity, formatNumber(row.available_quantity)],
       [t.inventoryValue, formatMoney(row.inventory_value)],
       [t.sales365, formatNumber(row.sold_units_365d)],
+      [t.regularSales365, formatNumber(row.regular_sold_units_365d)],
+      [t.oneOffSales365, formatNumber(row.one_off_sold_units_365d)],
       [t.revenue365, formatMoney(row.revenue_365d)],
       [t.grossProfit365, formatMoney(row.gross_profit_365d)],
       [t.turns, formatRatio(row.inventory_turns_365d)],
       [t.gmroi, formatRatio(row.gmroi_365d)],
       [t.coverage, formatNumber(row.coverage_days, 0)],
       [t.lastSale, formatDate(row.last_sale_date)],
+      [t.lastRegularSale, formatDate(row.last_regular_sale_date)],
       [t.lastReceipt, formatDate(row.last_receipt_date)]
     ];
     values.forEach(([caption, value]) => grid.append(node('dt', '', caption || ''), node('dd', '', value)));
@@ -513,12 +764,17 @@
       t.month,t.openingStock,t.closingStock,t.openingInventoryValue || 'Opening inventory value',
       t.closingInventoryValue || 'Closing inventory value',t.receipts,t.receiptCost || 'Receipt cost',
       t.sales,t.revenue,t.cogs,t.grossProfit,t.returns,t.returnRevenue || 'Return revenue',
+      t.regularSales,t.regularRevenue,t.regularCogs,t.regularGrossProfit,
+      t.oneOffSales,t.oneOffRevenue,t.oneOffCogs,t.oneOffGrossProfit,
       t.averageCapital,t.turns,t.gmroi,t.sellThrough
     ];
     const keys = [
       'month_start','opening_quantity','closing_quantity','opening_inventory_value',
       'closing_inventory_value','receipt_quantity','receipt_cost','sales_quantity','sales_revenue',
-      'sales_cogs','gross_profit','return_quantity','return_revenue','average_inventory_value',
+      'sales_cogs','gross_profit','return_quantity','return_revenue',
+      'regular_sales_quantity','regular_sales_revenue','regular_sales_cogs','regular_gross_profit',
+      'one_off_sales_quantity','one_off_sales_revenue','one_off_sales_cogs','one_off_gross_profit',
+      'average_inventory_value',
       'inventory_turns','gmroi','sell_through_percent'
     ];
     const trh = node('tr'); headers.forEach((caption) => trh.append(node('th', '', caption || '')));
@@ -527,7 +783,11 @@
     months.forEach((row) => {
       const tr = node('tr');
       keys.forEach((key) => {
-        const money = ['opening_inventory_value','closing_inventory_value','receipt_cost','sales_revenue','sales_cogs','gross_profit','return_revenue','average_inventory_value'].includes(key);
+        const money = [
+          'opening_inventory_value','closing_inventory_value','receipt_cost','sales_revenue','sales_cogs',
+          'gross_profit','return_revenue','regular_sales_revenue','regular_sales_cogs','regular_gross_profit',
+          'one_off_sales_revenue','one_off_sales_cogs','one_off_gross_profit','average_inventory_value'
+        ].includes(key);
         const value = key === 'month_start' ? formatDate(row[key]) : money ? formatMoney(row[key]) : formatNumber(row[key]);
         const td = node('td', key === 'gross_profit' && numeric(row[key]) < 0 ? 'is-negative' : '', value);
         tr.append(td);
@@ -618,6 +878,7 @@
     try {
       await loadFilterOptions();
       await loadReport();
+      if (state.activeTab === 'movements') await loadMovements();
     } catch (error) {
       showMessage(error.message || String(error), 'error');
     }
@@ -626,11 +887,19 @@
     try {
       await loadFilterOptions();
       await loadReport();
+      if (state.activeTab === 'movements') await loadMovements();
     } catch (error) {
       showMessage(error.message || String(error), 'error');
     }
   });
   el.supplierMode.addEventListener('change', syncSupplierFilter);
+  el.tabs.forEach((button) => button.addEventListener('click', () => selectTab(button.dataset.lpsPaTab)));
+  el.movementFilters.addEventListener('submit', (event) => {
+    event.preventDefault(); state.movementPage = 1; loadMovements();
+  });
+  el.movementReset.addEventListener('click', () => {
+    el.movementFilters.reset(); state.movementPage = 1; loadMovements();
+  });
   el.presetSelect.addEventListener('change', async () => {
     const preset = state.presets.find((item) => item.id === el.presetSelect.value);
     el.presetDelete.disabled = !preset;

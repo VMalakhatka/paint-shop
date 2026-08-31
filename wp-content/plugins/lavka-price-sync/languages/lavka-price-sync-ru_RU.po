@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Lavka Price Sync 0.6.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lavka-price-sync\n"
-"POT-Creation-Date: 2026-08-23T04:46:30+00:00\n"
+"POT-Creation-Date: 2026-08-30T20:20:59+00:00\n"
 "PO-Revision-Date: 2026-08-22T07:30:00+00:00\n"
 "Last-Translator: Volodymyr\n"
 "Language-Team: Russian\n"
@@ -28,19 +28,79 @@ msgstr ""
 "Синхронизация цен по ролям из Java-сервиса в WooCommerce (мета: "
 "_wpc_price_role_<роль>)."
 
-#: inc/accounting-price-campaign.php:54
+#: inc/accounting-price-campaign.php:60
 msgid "The global Lavka lock is unavailable. The SKU campaign was not started."
 msgstr "Глобальная блокировка Lavka недоступна. Кампания SKU не запущена."
 
-#: inc/accounting-price-campaign.php:63
+#: inc/accounting-price-campaign.php:69
 msgid "Folio accounting-price SKU campaign"
 msgstr "Кампания пересчёта учётных цен ФОЛИО по SKU"
 
-#: inc/accounting-price-campaign.php:251
+#: inc/accounting-price-campaign.php:314 inc/accounting-price-campaign.php:627
+msgid "The Folio product snapshot tables are unavailable."
+msgstr "Таблицы снимка товаров ФОЛИО недоступны."
+
+#. translators: %d: Folio warehouse ID.
+#: inc/accounting-price-campaign.php:392
+#, php-format
+msgid "Warehouse %d"
+msgstr "Склад %d"
+
+#: inc/accounting-price-campaign.php:514
+msgid "The snapshot marks this product as failed."
+msgstr "Снимок помечает этот товар как ошибочный."
+
+#: inc/accounting-price-campaign.php:586 inc/accounting-prices.php:249
+msgid ""
+"The product is present in the current Folio warehouse snapshot, but no "
+"successful accounting-price recalculation has been confirmed for it yet."
+msgstr ""
+"Товар присутствует в текущем снимке склада ФОЛІО, но для него ещё не "
+"подтверждён успешный пересчёт учётной цены."
+
+#: inc/accounting-price-campaign.php:588 inc/accounting-prices.php:250
+msgid ""
+"The product was first found in Folio and has not yet received a confirmed "
+"recalculation."
+msgstr ""
+"Товар впервые найден в ФОЛИО, и для него ещё нет подтверждённого пересчёта."
+
+#: inc/accounting-price-campaign.php:590 inc/accounting-prices.php:251
+msgid ""
+"The Folio movement fingerprint changed after the last confirmed "
+"recalculation."
+msgstr ""
+"Отпечаток движений ФОЛИО изменился после последнего подтверждённого "
+"пересчёта."
+
+#: inc/accounting-price-campaign.php:592 inc/accounting-prices.php:252
+msgid ""
+"The product recalculation failed. Review the saved error and correct the "
+"Folio data before retrying."
+msgstr ""
+"Пересчёт товара завершился ошибкой. Просмотрите сохранённую ошибку и "
+"исправьте данные ФОЛИО перед повторным запуском."
+
+#: inc/accounting-price-campaign.php:594 inc/accounting-prices.php:253
+msgid ""
+"The product existed in an earlier snapshot but is absent from the current "
+"Folio warehouse snapshot."
+msgstr ""
+"Товар был в предыдущем снимке, но отсутствует в текущем снимке склада ФОЛИО."
+
+#: inc/accounting-price-campaign.php:624 inc/accounting-price-campaign.php:1569
+msgid "Select a supported snapshot state."
+msgstr "Выберите поддерживаемое состояние снимка."
+
+#: inc/accounting-price-campaign.php:638
+msgid "No completed snapshot is available for this campaign."
+msgstr "Для этой кампании нет доступного завершённого снимка."
+
+#: inc/accounting-price-campaign.php:835
 msgid "Select at least one Folio warehouse."
 msgstr "Выберите хотя бы один склад ФОЛИО."
 
-#: inc/accounting-price-campaign.php:254
+#: inc/accounting-price-campaign.php:838
 msgid ""
 "The Folio product snapshot tables are unavailable. Build or migrate the "
 "snapshot storage first."
@@ -48,27 +108,27 @@ msgstr ""
 "Таблицы снимков товаров ФОЛИО недоступны. Сначала создайте или обновите "
 "хранилище снимков."
 
-#: inc/accounting-price-campaign.php:259
+#: inc/accounting-price-campaign.php:843
 msgid "An accounting-price SKU campaign is already running."
 msgstr "Кампания пересчёта учётных цен по SKU уже выполняется."
 
-#: inc/accounting-price-campaign.php:263
+#: inc/accounting-price-campaign.php:847
 msgid "Another Folio accounting-price job is already running."
 msgstr "Другое задание пересчёта учётных цен ФОЛИО уже выполняется."
 
-#: inc/accounting-price-campaign.php:304
+#: inc/accounting-price-campaign.php:892
 msgid "Preparing the first Folio product snapshot."
 msgstr "Подготовка первого снимка товаров ФОЛИО."
 
-#: inc/accounting-price-campaign.php:313
+#: inc/accounting-price-campaign.php:901
 msgid "The SKU campaign was accepted."
 msgstr "Кампания SKU принята к выполнению."
 
-#: inc/accounting-price-campaign.php:328 inc/accounting-price-campaign.php:500
+#: inc/accounting-price-campaign.php:916 inc/accounting-price-campaign.php:1118
 msgid "Waiting for the global Lavka lock."
 msgstr "Ожидание глобальной блокировки Lavka."
 
-#: inc/accounting-price-campaign.php:347
+#: inc/accounting-price-campaign.php:935
 msgid ""
 "The Folio product snapshot request was rejected. Check the Java "
 "configuration before retrying."
@@ -76,7 +136,7 @@ msgstr ""
 "Запрос снимка товаров ФОЛИО отклонён. Перед повторной попыткой проверьте "
 "настройки Java."
 
-#: inc/accounting-price-campaign.php:358
+#: inc/accounting-price-campaign.php:946
 msgid ""
 "The Folio product snapshot is already running. Waiting for its result "
 "without sending a duplicate request."
@@ -84,7 +144,7 @@ msgstr ""
 "Снимок товаров ФОЛИО уже формируется. Ожидаем результат без повторного "
 "запроса."
 
-#: inc/accounting-price-campaign.php:366
+#: inc/accounting-price-campaign.php:954
 msgid ""
 "The snapshot start result is unknown. Checking status without repeating the "
 "request."
@@ -92,11 +152,11 @@ msgstr ""
 "Результат запуска снимка неизвестен. Проверяем состояние без повторного "
 "запроса."
 
-#: inc/accounting-price-campaign.php:376
+#: inc/accounting-price-campaign.php:964
 msgid "The Folio product snapshot is being built."
 msgstr "Формируется снимок товаров ФОЛИО."
 
-#: inc/accounting-price-campaign.php:392
+#: inc/accounting-price-campaign.php:980
 msgid ""
 "The snapshot status remained unavailable for two hours. Automatic "
 "continuation was stopped."
@@ -104,14 +164,23 @@ msgstr ""
 "Статус снимка оставался недоступным два часа. Автоматическое продолжение "
 "остановлено."
 
-#: inc/accounting-price-campaign.php:398
+#: inc/accounting-price-campaign.php:986
 msgid ""
 "The snapshot status is temporarily unavailable. Waiting without starting "
 "another job."
 msgstr ""
 "Состояние снимка временно недоступно. Ожидаем без запуска другого задания."
 
-#: inc/accounting-price-campaign.php:414
+#: inc/accounting-price-campaign.php:1005
+msgid ""
+"The product snapshot was interrupted by a Java restart. No process is "
+"active. Start the campaign again; the previous active snapshot remains "
+"available."
+msgstr ""
+"Снимок товаров был прерван перезапуском Java. Активного процесса нет. "
+"Запустите кампанию заново; предыдущий активный снимок остаётся доступным."
+
+#: inc/accounting-price-campaign.php:1017
 msgid ""
 "Another Folio warehouse snapshot is running. The campaign will wait without "
 "sending a duplicate request."
@@ -119,7 +188,7 @@ msgstr ""
 "Формируется снимок другого склада ФОЛИО. Кампания подождёт без повторного "
 "запроса."
 
-#: inc/accounting-price-campaign.php:435
+#: inc/accounting-price-campaign.php:1038
 msgid ""
 "The previous snapshot is still active and no new snapshot was started. A new "
 "request will be attempted later."
@@ -127,11 +196,11 @@ msgstr ""
 "Предыдущий снимок всё ещё активен, а новый не запущен. Новая попытка будет "
 "выполнена позже."
 
-#: inc/accounting-price-campaign.php:444
+#: inc/accounting-price-campaign.php:1047
 msgid "The Folio product snapshot did not become active."
 msgstr "Снимок товаров ФОЛИО не стал активным."
 
-#: inc/accounting-price-campaign.php:458
+#: inc/accounting-price-campaign.php:1061
 msgid ""
 "The active snapshot was built, but its source database could not be resolved "
 "in WordPress."
@@ -139,12 +208,20 @@ msgstr ""
 "Активный снимок создан, но WordPress не смог определить его исходную базу "
 "данных."
 
-#: inc/accounting-price-campaign.php:474
+#: inc/accounting-price-campaign.php:1077
 msgid ""
 "The fresh snapshot is ready. Selecting products that require recalculation."
 msgstr "Свежий снимок готов. Выбираем товары, требующие перерасчёта."
 
-#: inc/accounting-price-campaign.php:534
+#: inc/accounting-price-campaign.php:1107
+msgid ""
+"The selected Folio SKU batch is empty or exceeds the 500 SKU safety limit. "
+"Nothing was sent for recalculation."
+msgstr ""
+"Выбранная порция SKU ФОЛИО пуста или превышает безопасное ограничение в 500 "
+"SKU. Ничего не отправлено на перерасчёт."
+
+#: inc/accounting-price-campaign.php:1153
 msgid ""
 "The Folio accounting-price slot is busy. No duplicate request was sent; the "
 "campaign will check again later."
@@ -152,7 +229,7 @@ msgstr ""
 "Слот перерасчёта учётных цен ФОЛИО занят. Повторный запрос не отправлен; "
 "кампания проверит состояние позже."
 
-#: inc/accounting-price-campaign.php:556
+#: inc/accounting-price-campaign.php:1175
 msgid ""
 "The native-range start outcome could not be proven. Do not retry "
 "automatically."
@@ -160,11 +237,19 @@ msgstr ""
 "Результат запуска native-range невозможно достоверно определить. Не "
 "повторяйте запрос автоматически."
 
-#: inc/accounting-price-campaign.php:566
+#: inc/accounting-price-campaign.php:1188
+msgid ""
+"The matching native-range task has no job ID. Automatic continuation is "
+"unsafe and was stopped."
+msgstr ""
+"У соответствующего задания native-range отсутствует ID. Безопасное "
+"автоматическое продолжение невозможно и было остановлено."
+
+#: inc/accounting-price-campaign.php:1196
 msgid "The selected SKU batch is being recalculated in Folio."
 msgstr "Выбранный пакет SKU пересчитывается в ФОЛИО."
 
-#: inc/accounting-price-campaign.php:582
+#: inc/accounting-price-campaign.php:1212
 msgid ""
 "The native-range status remained unavailable for two hours. Do not retry "
 "automatically; verify Folio manually."
@@ -172,7 +257,7 @@ msgstr ""
 "Статус native-range оставался недоступным два часа. Не повторяйте операцию "
 "автоматически; проверьте ФОЛИО вручную."
 
-#: inc/accounting-price-campaign.php:588
+#: inc/accounting-price-campaign.php:1218
 msgid ""
 "The native-range status is temporarily unavailable. Waiting without "
 "repeating apply."
@@ -180,20 +265,20 @@ msgstr ""
 "Состояние native-range временно недоступно. Ожидаем без повторного "
 "применения."
 
-#: inc/accounting-price-campaign.php:603
+#: inc/accounting-price-campaign.php:1234
 msgid ""
 "The Java service returned a different native-range job. Manual review is "
 "required."
 msgstr ""
 "Java-сервис вернул другое задание native-range. Требуется ручная проверка."
 
-#: inc/accounting-price-campaign.php:655
+#: inc/accounting-price-campaign.php:1295
 msgid "The native-range job rejected a chunk. Automatic retry is disabled."
 msgstr ""
 "Задание native-range отклонило порцию. Автоматическая повторная попытка "
 "отключена."
 
-#: inc/accounting-price-campaign.php:693
+#: inc/accounting-price-campaign.php:1339
 msgid ""
 "The safe products were recalculated; problem products were recorded and "
 "skipped."
@@ -201,15 +286,15 @@ msgstr ""
 "Безопасные товары пересчитаны; проблемные товары записаны в отчёт и "
 "пропущены."
 
-#: inc/accounting-price-campaign.php:694
+#: inc/accounting-price-campaign.php:1340
 msgid "The SKU batch was recalculated successfully."
 msgstr "Пакет SKU успешно пересчитан."
 
-#: inc/accounting-price-campaign.php:704
+#: inc/accounting-price-campaign.php:1350
 msgid "The SKU campaign requires a manual Folio review before any retry."
 msgstr "Перед повторной попыткой кампания SKU требует ручной проверки ФОЛИО."
 
-#: inc/accounting-price-campaign.php:713
+#: inc/accounting-price-campaign.php:1359
 msgid ""
 "The current warehouse failed. The campaign will verify its snapshot and "
 "continue with the next warehouse."
@@ -217,7 +302,7 @@ msgstr ""
 "Пересчёт текущего склада завершился ошибкой. Кампания проверит его снимок и "
 "продолжит со следующего склада."
 
-#: inc/accounting-price-campaign.php:742
+#: inc/accounting-price-campaign.php:1389
 msgid ""
 "The SKU campaign stopped safely after the current operation and final "
 "snapshot."
@@ -225,7 +310,7 @@ msgstr ""
 "Кампания SKU безопасно остановлена после текущей операции и финального "
 "снимка."
 
-#: inc/accounting-price-campaign.php:744
+#: inc/accounting-price-campaign.php:1391
 msgid ""
 "The maintenance window ended. The campaign stopped safely after the "
 "mandatory final snapshot; remaining warehouses will be handled by a later "
@@ -235,15 +320,15 @@ msgstr ""
 "обязательного финального снимка; остальные склады обработает следующая "
 "кампания."
 
-#: inc/accounting-price-campaign.php:746
+#: inc/accounting-price-campaign.php:1393
 msgid "The accounting-price SKU campaign completed."
 msgstr "Кампания перерасчёта учётных цен по SKU завершена."
 
-#: inc/accounting-price-campaign.php:775
+#: inc/accounting-price-campaign.php:1423
 msgid "Preparing the next Folio warehouse snapshot."
 msgstr "Подготовка снимка следующего склада ФОЛИО."
 
-#: inc/accounting-price-campaign.php:791
+#: inc/accounting-price-campaign.php:1439
 msgid ""
 "No new SKU batch was accepted because the maintenance window is ending. "
 "Building the mandatory final snapshot."
@@ -251,13 +336,13 @@ msgstr ""
 "Новая порция SKU не принята, поскольку окно обслуживания завершается. "
 "Формируем обязательный финальный снимок."
 
-#: inc/accounting-price-campaign.php:822
+#: inc/accounting-price-campaign.php:1470
 msgid ""
 "The maintenance window is ending. Building the mandatory final snapshot."
 msgstr ""
 "Окно обслуживания завершается. Формируем обязательный финальный снимок."
 
-#: inc/accounting-price-campaign.php:830
+#: inc/accounting-price-campaign.php:1478
 msgid ""
 "There is not enough safe time for another batch. Building the mandatory "
 "final snapshot."
@@ -265,7 +350,7 @@ msgstr ""
 "Безопасного времени для следующей порции недостаточно. Формируем "
 "обязательный финальный снимок."
 
-#: inc/accounting-price-campaign.php:844
+#: inc/accounting-price-campaign.php:1492
 msgid ""
 "No more eligible SKU remain in this warehouse. Building the mandatory final "
 "snapshot."
@@ -273,7 +358,7 @@ msgstr ""
 "На этом складе больше нет подходящих SKU. Формируем обязательный финальный "
 "снимок."
 
-#: inc/accounting-price-campaign.php:869
+#: inc/accounting-price-campaign.php:1517
 msgid ""
 "The SKU campaign reached an unknown phase. Automatic continuation was "
 "stopped."
@@ -281,7 +366,7 @@ msgstr ""
 "Кампания SKU перешла в неизвестную фазу. Автоматическое продолжение "
 "остановлено."
 
-#: inc/accounting-price-campaign.php:881
+#: inc/accounting-price-campaign.php:1529
 msgid ""
 "The campaign will stop after the current operation and mandatory final "
 "snapshot."
@@ -289,66 +374,169 @@ msgstr ""
 "Кампания остановится после текущей операции и обязательного финального "
 "снимка."
 
-#: inc/accounting-price-campaign.php:913 inc/accounting-prices-cron.php:1144
-#: inc/accounting-prices.php:896 inc/accounting-prices.php:944
+#: inc/accounting-price-campaign.php:1561
+#: inc/accounting-price-campaign.php:1639 inc/accounting-prices-cron.php:1144
+#: inc/accounting-prices.php:1005 inc/accounting-prices.php:1053
 msgid "You do not have permission to perform this operation."
 msgstr "У вас нет разрешения на выполнение этой операции."
 
-#: inc/accounting-price-campaign.php:927 inc/accounting-prices.php:224
-#: inc/accounting-prices.php:822 inc/accounting-prices.php:912
-msgid "When"
-msgstr "Когда"
+#: inc/accounting-price-campaign.php:1581 inc/accounting-prices.php:237
+msgid "State"
+msgstr "Состояние"
 
-#: inc/accounting-price-campaign.php:928
-msgid "Entry type"
-msgstr "Тип записи"
-
-#: inc/accounting-price-campaign.php:929 inc/accounting-prices.php:109
-#: inc/accounting-prices.php:122 inc/accounting-prices.php:213
-#: inc/accounting-prices.php:344 inc/accounting-prices.php:824
-#: inc/accounting-prices.php:914 inc/product-analytics.php:60
+#: inc/accounting-price-campaign.php:1582
+#: inc/accounting-price-campaign.php:1655 inc/accounting-prices.php:109
+#: inc/accounting-prices.php:122 inc/accounting-prices.php:218
+#: inc/accounting-prices.php:428 inc/accounting-prices.php:933
+#: inc/accounting-prices.php:1023 inc/product-analytics.php:61
 msgid "Warehouse"
 msgstr "Склад"
 
-#: inc/accounting-price-campaign.php:930 inc/accounting-prices.php:225
-#: inc/accounting-prices.php:825 inc/accounting-prices.php:915
-msgid "Result"
-msgstr "Результат"
-
-#: inc/accounting-price-campaign.php:931 inc/accounting-prices.php:230
-#: inc/accounting-prices.php:509 inc/accounting-prices.php:826
-#: inc/accounting-prices.php:917 inc/product-analytics.php:71
+#: inc/accounting-price-campaign.php:1583
+#: inc/accounting-price-campaign.php:1658 inc/accounting-prices.php:282
+#: inc/accounting-prices.php:593 inc/accounting-prices.php:935
+#: inc/accounting-prices.php:1026 inc/product-analytics.php:72
+#: inc/product-analytics.php:546
 msgid "SKU"
 msgstr "Артикул"
 
-#: inc/accounting-price-campaign.php:932 inc/accounting-prices.php:226
+#: inc/accounting-price-campaign.php:1584 inc/accounting-prices.php:236
+#: inc/product-analytics.php:73
+msgid "Product"
+msgstr "Товар"
+
+#: inc/accounting-price-campaign.php:1585 inc/accounting-prices.php:116
+#: inc/accounting-prices.php:280 inc/accounting-prices.php:936
+#: inc/accounting-prices.php:1027
+msgid "Reason"
+msgstr "Причина"
+
+#: inc/accounting-price-campaign.php:1586 inc/accounting-prices.php:239
+msgid "Last error"
+msgstr "Последняя ошибка"
+
+#: inc/accounting-price-campaign.php:1587
+msgid "Present in Folio"
+msgstr "Присутствует в ФОЛИО"
+
+#: inc/accounting-price-campaign.php:1588 inc/accounting-prices.php:240
+msgid "Movements"
+msgstr "Движений"
+
+#: inc/accounting-price-campaign.php:1589
+msgid "First movement"
+msgstr "Первое движение"
+
+#: inc/accounting-price-campaign.php:1590
+msgid "Last movement"
+msgstr "Последнее движение"
+
+#: inc/accounting-price-campaign.php:1591 inc/accounting-prices.php:242
+msgid "Last observed"
+msgstr "Последнее наблюдение"
+
+#: inc/accounting-price-campaign.php:1592 inc/accounting-prices.php:243
+msgid "Last recalculated"
+msgstr "Последний пересчёт"
+
+#: inc/accounting-price-campaign.php:1593 inc/accounting-prices.php:244
+msgid "Latest change"
+msgstr "Последнее изменение"
+
+#: inc/accounting-price-campaign.php:1594
+msgid "Change detected"
+msgstr "Изменение обнаружено"
+
+#: inc/accounting-price-campaign.php:1620 inc/admin-ui.php:364
+#: inc/product-analytics.php:113 inc/product-analytics.php:586
+msgid "Yes"
+msgstr "Да"
+
+#: inc/accounting-price-campaign.php:1620 inc/product-analytics.php:114
+#: inc/product-analytics.php:586
+msgid "No"
+msgstr "Нет"
+
+#: inc/accounting-price-campaign.php:1653 inc/accounting-prices.php:276
+#: inc/accounting-prices.php:931 inc/accounting-prices.php:1021
+msgid "When"
+msgstr "Когда"
+
+#: inc/accounting-price-campaign.php:1654
+msgid "Entry type"
+msgstr "Тип записи"
+
+#: inc/accounting-price-campaign.php:1656
+msgid "Job ID"
+msgstr "ID задания"
+
+#: inc/accounting-price-campaign.php:1657 inc/accounting-prices.php:277
+#: inc/accounting-prices.php:934 inc/accounting-prices.php:1024
+msgid "Result"
+msgstr "Результат"
+
+#: inc/accounting-price-campaign.php:1659 inc/accounting-prices.php:278
 msgid "SKU count"
 msgstr "Количество SKU"
 
-#: inc/accounting-price-campaign.php:933 inc/accounting-prices.php:229
+#: inc/accounting-price-campaign.php:1660 inc/accounting-prices.php:281
 msgid "Message"
 msgstr "Сообщение"
 
-#: inc/accounting-price-campaign.php:934 inc/accounting-prices.php:117
-#: inc/accounting-prices.php:231 inc/accounting-prices.php:853
-#: inc/accounting-prices.php:920
+#: inc/accounting-price-campaign.php:1661 inc/accounting-prices.php:110
+#: inc/accounting-prices.php:259 inc/accounting-prices.php:429
+msgid "Document"
+msgstr "Документ"
+
+#: inc/accounting-price-campaign.php:1662 inc/accounting-prices.php:87
+#: inc/accounting-prices.php:260 inc/accounting-prices.php:445
+msgid "Problem date"
+msgstr "Дата проблемы"
+
+#: inc/accounting-price-campaign.php:1663 inc/accounting-prices.php:262
+msgid "Movement record"
+msgstr "Запись движения"
+
+#: inc/accounting-price-campaign.php:1664 inc/accounting-prices.php:112
+#: inc/accounting-prices.php:263 inc/accounting-prices.php:431
+msgid "Before operation"
+msgstr "До операции"
+
+#: inc/accounting-price-campaign.php:1665 inc/accounting-prices.php:264
+msgid "Operation quantity"
+msgstr "Количество операции"
+
+#: inc/accounting-price-campaign.php:1666 inc/accounting-prices.php:114
+#: inc/accounting-prices.php:265 inc/accounting-prices.php:433
+msgid "After operation"
+msgstr "После операции"
+
+#: inc/accounting-price-campaign.php:1667 inc/accounting-prices.php:115
+#: inc/accounting-prices.php:266 inc/accounting-prices.php:434
+msgid "Shortage"
+msgstr "Дефицит"
+
+#: inc/accounting-price-campaign.php:1668 inc/accounting-prices.php:117
+#: inc/accounting-prices.php:283 inc/accounting-prices.php:962
+#: inc/accounting-prices.php:1029
 msgid "Technical details"
 msgstr "Технические подробности"
 
-#: inc/accounting-price-campaign.php:941
+#: inc/accounting-price-campaign.php:1675
 msgid "Batch or warehouse result"
 msgstr "Результат порции или склада"
 
-#: inc/accounting-price-campaign.php:957 inc/logs.php:122
-#: inc/product-analytics.php:228
+#: inc/accounting-price-campaign.php:1706 inc/logs.php:122
+#: inc/product-analytics.php:337
 msgid "Error"
 msgstr "Ошибка"
 
-#: inc/accounting-price-campaign.php:958 inc/accounting-price-campaign.php:970
+#: inc/accounting-price-campaign.php:1707
+#: inc/accounting-price-campaign.php:1727
 msgid "Warning"
 msgstr "Предупреждение"
 
-#: inc/accounting-price-campaign.php:975
+#: inc/accounting-price-campaign.php:1733
 msgid ""
 "Only the most recent diagnostics are stored in WordPress. Review the Java "
 "logs for the complete history."
@@ -356,11 +544,11 @@ msgstr ""
 "В WordPress хранится только последняя часть диагностики. Полную историю "
 "смотрите в журналах Java."
 
-#: inc/accounting-prices-cron.php:96 inc/accounting-prices.php:1059
+#: inc/accounting-prices-cron.php:96 inc/accounting-prices.php:1239
 msgid "Java API returned an empty response."
 msgstr "API сервиса ФОЛИО вернул пустой ответ."
 
-#: inc/accounting-prices-cron.php:290 inc/accounting-prices.php:975
+#: inc/accounting-prices-cron.php:290 inc/accounting-prices.php:1091
 msgid ""
 "The global Lavka lock is unavailable. The recalculation was not started."
 msgstr "Глобальная блокировка Lavka недоступна. Пересчёт не запущен."
@@ -471,8 +659,8 @@ msgstr ""
 "Склад вернул конечную ошибку. Она записана, очередь продолжается со "
 "следующего склада."
 
-#: inc/accounting-prices-cron.php:607 inc/accounting-prices.php:1010
-#: inc/accounting-prices.php:1026
+#: inc/accounting-prices-cron.php:607 inc/accounting-prices.php:1126
+#: inc/accounting-prices.php:1142
 msgid "Folio warehouse is required."
 msgstr "Необходимо указать склад ФОЛИО."
 
@@ -480,7 +668,7 @@ msgstr "Необходимо указать склад ФОЛИО."
 msgid "A full Folio accounting-price recalculation is already running."
 msgstr "Полный пересчёт учётных цен ФОЛИО уже выполняется."
 
-#: inc/accounting-prices-cron.php:648 inc/accounting-prices.php:987
+#: inc/accounting-prices-cron.php:648 inc/accounting-prices.php:1103
 msgid "Another Lavka synchronization is running."
 msgstr "Выполняется другая синхронизация Lavka."
 
@@ -489,7 +677,7 @@ msgid "The recalculation outcome is unknown. Manual review is required."
 msgstr "Результат пересчёта неизвестен. Требуется ручная проверка."
 
 #: inc/accounting-prices-cron.php:804 inc/accounting-prices.php:56
-#: inc/accounting-prices.php:205
+#: inc/accounting-prices.php:209
 msgid "The server request failed."
 msgstr "Запрос к серверу не выполнен."
 
@@ -542,11 +730,11 @@ msgid "The scheduled Folio recalculation has no valid warehouses."
 msgstr "Для планового пересчёта не выбраны корректные склады ФОЛИО."
 
 #: inc/accounting-prices.php:10 inc/accounting-prices.php:11
-#: inc/accounting-prices.php:464
+#: inc/accounting-prices.php:548
 msgid "Folio accounting prices"
 msgstr "Учётные цены ФОЛИО"
 
-#: inc/accounting-prices.php:55
+#: inc/accounting-prices.php:55 inc/accounting-prices.php:210
 msgid "Loading..."
 msgstr "Загрузка..."
 
@@ -554,11 +742,11 @@ msgstr "Загрузка..."
 msgid "Unknown error."
 msgstr "Неизвестная ошибка."
 
-#: inc/accounting-prices.php:58 inc/accounting-prices.php:203
+#: inc/accounting-prices.php:58 inc/accounting-prices.php:207
 msgid "Select a Folio warehouse."
 msgstr "Выберите склад ФОЛИО."
 
-#: inc/accounting-prices.php:59 inc/product-analytics.php:59
+#: inc/accounting-prices.php:59 inc/product-analytics.php:60
 msgid "Select a warehouse"
 msgstr "Выберите склад"
 
@@ -647,7 +835,7 @@ msgstr "Задание остановлено из-за отрицательно
 msgid "The task failed."
 msgstr "Задание завершилось ошибкой."
 
-#: inc/accounting-prices.php:77 inc/accounting-prices.php:291
+#: inc/accounting-prices.php:77 inc/accounting-prices.php:375
 msgid "Rejected recalculation portion"
 msgstr "Отклонённая порция перерасчёта"
 
@@ -674,35 +862,31 @@ msgstr ""
 "Не повторяйте автоматически. Устраните причину и вручную запустите новую "
 "предварительную проверку."
 
-#: inc/accounting-prices.php:81 inc/accounting-prices.php:355
+#: inc/accounting-prices.php:81 inc/accounting-prices.php:439
 msgid "Input article"
 msgstr "Входной артикул"
 
-#: inc/accounting-prices.php:82 inc/accounting-prices.php:356
+#: inc/accounting-prices.php:82 inc/accounting-prices.php:440
 msgid "Output article"
 msgstr "Выходной артикул"
 
-#: inc/accounting-prices.php:83 inc/accounting-prices.php:357
+#: inc/accounting-prices.php:83 inc/accounting-prices.php:441
 msgid "Next article returned for the rejected portion"
 msgstr "Следующий артикул, возвращённый для отклонённой порции"
 
-#: inc/accounting-prices.php:84 inc/accounting-prices.php:358
+#: inc/accounting-prices.php:84 inc/accounting-prices.php:442
 msgid "Return code"
 msgstr "Код возврата"
 
-#: inc/accounting-prices.php:85 inc/accounting-prices.php:359
+#: inc/accounting-prices.php:85 inc/accounting-prices.php:443
 msgid "Current units"
 msgstr "Текущее количество единиц"
 
-#: inc/accounting-prices.php:86 inc/accounting-prices.php:360
+#: inc/accounting-prices.php:86 inc/accounting-prices.php:444
 msgid "Total units"
 msgstr "Общее количество единиц"
 
-#: inc/accounting-prices.php:87 inc/accounting-prices.php:361
-msgid "Problem date"
-msgstr "Дата проблемы"
-
-#: inc/accounting-prices.php:88 inc/accounting-prices.php:362
+#: inc/accounting-prices.php:88 inc/accounting-prices.php:446
 msgid "Validation error"
 msgstr "Ошибка проверки"
 
@@ -758,7 +942,7 @@ msgstr "Товар пересчитан в ФОЛИО."
 msgid "The procedure completed; the accounting price was already correct."
 msgstr "Процедура завершена; учётная цена уже была правильной."
 
-#: inc/accounting-prices.php:98 inc/accounting-prices.php:209
+#: inc/accounting-prices.php:98 inc/accounting-prices.php:214
 msgid ""
 "Only part of the warnings is shown. The complete diagnostics remain in the "
 "Java log."
@@ -782,7 +966,7 @@ msgstr "До"
 msgid "After"
 msgstr "После"
 
-#: inc/accounting-prices.php:103
+#: inc/accounting-prices.php:103 inc/accounting-prices.php:221
 msgid "Current SKU"
 msgstr "Текущий артикул"
 
@@ -802,70 +986,49 @@ msgstr "Следующий курсор общего прогресса"
 msgid "Failed operation safety status"
 msgstr "Состояние безопасности неудачной операции"
 
-#: inc/accounting-prices.php:108 inc/accounting-prices.php:212
+#: inc/accounting-prices.php:108 inc/accounting-prices.php:217
 msgid "Phase"
 msgstr "Этап"
 
-#: inc/accounting-prices.php:110 inc/accounting-prices.php:345
-msgid "Document"
-msgstr "Документ"
-
-#: inc/accounting-prices.php:111 inc/accounting-prices.php:346
+#: inc/accounting-prices.php:111 inc/accounting-prices.php:430
 msgid "Date"
 msgstr "Дата"
 
-#: inc/accounting-prices.php:112 inc/accounting-prices.php:347
-msgid "Before operation"
-msgstr "До операции"
-
-#: inc/accounting-prices.php:113 inc/accounting-prices.php:348
+#: inc/accounting-prices.php:113 inc/accounting-prices.php:432
 msgid "Operation"
 msgstr "Операция"
 
-#: inc/accounting-prices.php:114 inc/accounting-prices.php:349
-msgid "After operation"
-msgstr "После операции"
-
-#: inc/accounting-prices.php:115 inc/accounting-prices.php:350
-msgid "Shortage"
-msgstr "Дефицит"
-
-#: inc/accounting-prices.php:116 inc/accounting-prices.php:228
-#: inc/accounting-prices.php:827 inc/accounting-prices.php:918
-msgid "Reason"
-msgstr "Причина"
-
-#: inc/accounting-prices.php:118 inc/accounting-prices.php:368
+#: inc/accounting-prices.php:118 inc/accounting-prices.php:452
 msgid "Product skipped"
 msgstr "Товар пропущен"
 
-#: inc/accounting-prices.php:119
+#: inc/accounting-prices.php:119 inc/accounting-prices.php:273
 msgid "receipt"
 msgstr "приход"
 
-#: inc/accounting-prices.php:120
+#: inc/accounting-prices.php:120 inc/accounting-prices.php:274
 msgid "expense"
 msgstr "расход"
 
-#: inc/accounting-prices.php:121
+#: inc/accounting-prices.php:121 inc/accounting-prices.php:275
 msgid "operation"
 msgstr "операция"
 
-#: inc/accounting-prices.php:123 inc/accounting-prices.php:354
-#: inc/product-analytics.php:62
+#: inc/accounting-prices.php:123 inc/accounting-prices.php:438
+#: inc/product-analytics.php:63
 msgid "Physical quantity"
 msgstr "Физическое количество"
 
-#: inc/accounting-prices.php:124 inc/product-analytics.php:64
+#: inc/accounting-prices.php:124 inc/product-analytics.php:65
 msgid "Available quantity"
 msgstr "Доступное количество"
 
-#: inc/accounting-prices.php:125 inc/accounting-prices.php:353
+#: inc/accounting-prices.php:125 inc/accounting-prices.php:437
 msgid "Accounting quantity"
 msgstr "Учётное количество"
 
-#: inc/accounting-prices.php:126 inc/accounting-prices.php:351
-#: inc/product-analytics.php:65
+#: inc/accounting-prices.php:126 inc/accounting-prices.php:435
+#: inc/product-analytics.php:66 inc/product-analytics.php:386
 msgid "Accounting price"
 msgstr "Учётная цена"
 
@@ -873,7 +1036,7 @@ msgstr "Учётная цена"
 msgid "Accounting price in currency"
 msgstr "Учётная цена в валюте"
 
-#: inc/accounting-prices.php:128 inc/accounting-prices.php:352
+#: inc/accounting-prices.php:128 inc/accounting-prices.php:436
 msgid "Sale price"
 msgstr "Продажная цена"
 
@@ -885,11 +1048,11 @@ msgstr "Продажная цена в валюте"
 msgid "Price basis"
 msgstr "База цены"
 
-#: inc/accounting-prices.php:131 inc/product-analytics.php:63
+#: inc/accounting-prices.php:131 inc/product-analytics.php:64
 msgid "Reserved quantity"
 msgstr "Зарезервированное количество"
 
-#: inc/accounting-prices.php:132
+#: inc/accounting-prices.php:132 inc/accounting-prices.php:261
 msgid "Initial quantity"
 msgstr "Начальное количество"
 
@@ -917,7 +1080,7 @@ msgstr "Зафиксированные порции"
 msgid "Progress units"
 msgstr "Единицы прогресса"
 
-#: inc/accounting-prices.php:139 inc/accounting-prices.php:216
+#: inc/accounting-prices.php:139 inc/accounting-prices.php:225
 msgid "Warnings"
 msgstr "Предупреждения"
 
@@ -957,8 +1120,8 @@ msgstr ""
 "Предварительная проверка вернула успешный статус, но проверки безопасности "
 "не завершены. Применение изменений остаётся заблокированным."
 
-#: inc/accounting-prices.php:148 inc/accounting-prices.php:234
-#: inc/accounting-prices.php:404
+#: inc/accounting-prices.php:148 inc/accounting-prices.php:311
+#: inc/accounting-prices.php:488
 msgid "Not started"
 msgstr "Не запускалось"
 
@@ -966,46 +1129,46 @@ msgstr "Не запускалось"
 msgid "Busy"
 msgstr "Занято"
 
-#: inc/accounting-prices.php:150 inc/accounting-prices.php:405
-#: inc/accounting-prices.php:419
+#: inc/accounting-prices.php:150 inc/accounting-prices.php:489
+#: inc/accounting-prices.php:503
 msgid "Queued"
 msgstr "В очереди"
 
-#: inc/accounting-prices.php:151 inc/accounting-prices.php:235
-#: inc/accounting-prices.php:406 inc/accounting-prices.php:421 inc/logs.php:120
+#: inc/accounting-prices.php:151 inc/accounting-prices.php:312
+#: inc/accounting-prices.php:490 inc/accounting-prices.php:505 inc/logs.php:120
 msgid "Running"
 msgstr "Выполняется"
 
-#: inc/accounting-prices.php:152 inc/accounting-prices.php:236
-#: inc/accounting-prices.php:410 inc/accounting-prices.php:424
+#: inc/accounting-prices.php:152 inc/accounting-prices.php:313
+#: inc/accounting-prices.php:494 inc/accounting-prices.php:508
 msgid "Completed"
 msgstr "Завершено"
 
-#: inc/accounting-prices.php:153 inc/accounting-prices.php:237
-#: inc/accounting-prices.php:411 inc/accounting-prices.php:425
+#: inc/accounting-prices.php:153 inc/accounting-prices.php:314
+#: inc/accounting-prices.php:495 inc/accounting-prices.php:509
 msgid "Completed with skipped products"
 msgstr "Завершено с пропущенными товарами"
 
-#: inc/accounting-prices.php:154 inc/accounting-prices.php:412
-#: inc/accounting-prices.php:428
+#: inc/accounting-prices.php:154 inc/accounting-prices.php:496
+#: inc/accounting-prices.php:512
 msgid "Stopped on negative stock"
 msgstr "Остановлено из-за отрицательного остатка"
 
-#: inc/accounting-prices.php:155 inc/accounting-prices.php:413
-#: inc/accounting-prices.php:429
+#: inc/accounting-prices.php:155 inc/accounting-prices.php:497
+#: inc/accounting-prices.php:513
 msgid "Failed"
 msgstr "Ошибка"
 
-#: inc/accounting-prices.php:156 inc/accounting-prices.php:240
-#: inc/accounting-prices.php:414 inc/accounting-prices.php:431
+#: inc/accounting-prices.php:156 inc/accounting-prices.php:317
+#: inc/accounting-prices.php:498 inc/accounting-prices.php:515
 msgid "Failed after partial recalculation"
 msgstr "Ошибка после частичного пересчёта"
 
-#: inc/accounting-prices.php:157 inc/accounting-prices.php:407
+#: inc/accounting-prices.php:157 inc/accounting-prices.php:491
 msgid "Check passed"
 msgstr "Проверка пройдена"
 
-#: inc/accounting-prices.php:158 inc/accounting-prices.php:408
+#: inc/accounting-prices.php:158 inc/accounting-prices.php:492
 msgid "Check passed with skipped products"
 msgstr "Проверка пройдена с пропущенными товарами"
 
@@ -1013,13 +1176,13 @@ msgstr "Проверка пройдена с пропущенными товар
 msgid "Check blocked recalculation"
 msgstr "Проверка заблокировала пересчёт"
 
-#: inc/accounting-prices.php:160 inc/accounting-prices.php:409
-#: inc/accounting-prices.php:427
+#: inc/accounting-prices.php:160 inc/accounting-prices.php:493
+#: inc/accounting-prices.php:511
 msgid "Blocked by negative stock"
 msgstr "Заблокировано из-за отрицательного остатка"
 
-#: inc/accounting-prices.php:161 inc/accounting-prices.php:241
-#: inc/accounting-prices.php:415 inc/accounting-prices.php:432
+#: inc/accounting-prices.php:161 inc/accounting-prices.php:318
+#: inc/accounting-prices.php:499 inc/accounting-prices.php:516
 msgid "Outcome unknown"
 msgstr "Результат неизвестен"
 
@@ -1075,8 +1238,8 @@ msgstr "Пересчёт остановлен"
 msgid "Recalculation failed"
 msgstr "Ошибка пересчёта"
 
-#: inc/accounting-prices.php:177 inc/accounting-prices.php:239
-#: inc/accounting-prices.php:255
+#: inc/accounting-prices.php:177 inc/accounting-prices.php:316
+#: inc/accounting-prices.php:339
 msgid "Manual review required"
 msgstr "Требуется ручная проверка"
 
@@ -1132,12 +1295,12 @@ msgstr "ФОЛІО исключает этот тип товара"
 msgid "Folio temporary movement table is not empty"
 msgstr "Временная таблица движений ФОЛІО не пуста"
 
-#: inc/accounting-prices.php:201
+#: inc/accounting-prices.php:205
 msgid "Start the accounting-price SKU campaign for the selected warehouse?"
 msgstr ""
 "Запустить кампанию перерасчёта учётных цен по SKU для выбранного склада?"
 
-#: inc/accounting-prices.php:202
+#: inc/accounting-prices.php:206
 msgid ""
 "Stop accepting new batches after the current operation and build the final "
 "snapshot?"
@@ -1145,23 +1308,23 @@ msgstr ""
 "После текущей операции прекратить принимать новые порции и сформировать "
 "финальный снимок?"
 
-#: inc/accounting-prices.php:204
+#: inc/accounting-prices.php:208
 msgid "Confirm the maintenance window before starting the campaign."
 msgstr "Подтвердите окно обслуживания перед запуском кампании."
 
-#: inc/accounting-prices.php:206
+#: inc/accounting-prices.php:211
 msgid "No SKU campaign has been started yet."
 msgstr "Кампания SKU ещё не запускалась."
 
-#: inc/accounting-prices.php:207
+#: inc/accounting-prices.php:212
 msgid "The campaign has not completed any batches yet."
 msgstr "Кампания ещё не завершила ни одной порции."
 
-#: inc/accounting-prices.php:208
+#: inc/accounting-prices.php:213
 msgid "No skipped products or warnings were recorded."
 msgstr "Пропущенных товаров и предупреждений не зафиксировано."
 
-#: inc/accounting-prices.php:210
+#: inc/accounting-prices.php:215
 msgid ""
 "Safe stop requested. The current operation will finish and the final "
 "snapshot will be built."
@@ -1169,107 +1332,344 @@ msgstr ""
 "Запрошена безопасная остановка. Текущая операция завершится, после чего "
 "будет сформирован финальный снимок."
 
-#: inc/accounting-prices.php:211 inc/logs.php:100 inc/product-analytics.php:80
+#: inc/accounting-prices.php:216 inc/logs.php:100 inc/product-analytics.php:85
 msgid "Status"
 msgstr "Статус"
 
-#: inc/accounting-prices.php:214
+#: inc/accounting-prices.php:219
 msgid "Processed SKU"
 msgstr "Обработано SKU"
 
-#: inc/accounting-prices.php:215
+#: inc/accounting-prices.php:220
+msgid "Current batch progress"
+msgstr "Прогресс текущей порции"
+
+#: inc/accounting-prices.php:222
+msgid "Successfully committed SKU"
+msgstr "Успешно зафиксировано SKU"
+
+#: inc/accounting-prices.php:223
+msgid "Warnings in current batch"
+msgstr "Предупреждения в текущей порции"
+
+#: inc/accounting-prices.php:224
 msgid "Successful batches"
 msgstr "Успешные порции"
 
-#: inc/accounting-prices.php:217
+#: inc/accounting-prices.php:226
 msgid "Errors"
 msgstr "Ошибки"
 
-#: inc/accounting-prices.php:218
+#: inc/accounting-prices.php:227
 msgid "Failed warehouses"
 msgstr "Склады с ошибками"
 
-#: inc/accounting-prices.php:219
+#: inc/accounting-prices.php:228
 msgid "Current SKU batch"
 msgstr "Текущий пакет SKU"
 
-#: inc/accounting-prices.php:220
+#: inc/accounting-prices.php:229
 msgid "Snapshot states before processing"
 msgstr "Состояния снимка до обработки"
 
-#: inc/accounting-prices.php:221
+#: inc/accounting-prices.php:230
 msgid "Snapshot states after processing"
 msgstr "Состояния снимка после обработки"
 
-#: inc/accounting-prices.php:222
+#: inc/accounting-prices.php:231
+msgid "Snapshot state report"
+msgstr "Отчёт по состояниям снимка"
+
+#: inc/accounting-prices.php:232
+msgid ""
+"Open UNVERIFIED, NEW, DIRTY, FAILED, or REMOVED to review the actual "
+"products behind the counters."
+msgstr ""
+"Откройте UNVERIFIED, NEW, DIRTY, FAILED или REMOVED, чтобы просмотреть "
+"товары, входящие в эти счётчики."
+
+#: inc/accounting-prices.php:233
+msgid "View"
+msgstr "Просмотреть"
+
+#: inc/accounting-prices.php:234
+msgid "Export selected state CSV"
+msgstr "Экспортировать выбранное состояние в CSV"
+
+#: inc/accounting-prices.php:235
+msgid "There are no products in this snapshot state."
+msgstr "В этом состоянии снимка нет товаров."
+
+#: inc/accounting-prices.php:238
+msgid "Why this state is assigned"
+msgstr "Почему назначено это состояние"
+
+#: inc/accounting-prices.php:241
+msgid "Movement period"
+msgstr "Период движений"
+
+#: inc/accounting-prices.php:245
+msgid "Previous page"
+msgstr "Предыдущая страница"
+
+#: inc/accounting-prices.php:246
+msgid "Next page"
+msgstr "Следующая страница"
+
+#. translators: 1: processed page number, 2: total pages.
+#: inc/accounting-prices.php:247 inc/logs.php:172
+#, php-format
+msgid "Page %1$d of %2$d"
+msgstr "Страница %1$d из %2$d"
+
+#: inc/accounting-prices.php:255
 msgid "Batch and warehouse report"
 msgstr "Отчёт по пакетам и складам"
 
-#: inc/accounting-prices.php:223
+#: inc/accounting-prices.php:256
 msgid "Skipped products and diagnostics"
 msgstr "Пропущенные товары и диагностика"
 
-#: inc/accounting-prices.php:227
+#: inc/accounting-prices.php:257
+msgid ""
+"The chronological stock became negative at this movement. Check the document "
+"date, quantity, warehouse, and movement order in Folio."
+msgstr ""
+"На этом движении хронологический остаток стал отрицательным. Проверьте в "
+"ФОЛИО дату документа, количество, склад и последовательность движений."
+
+#: inc/accounting-prices.php:258
+msgid ""
+"The accounting formula denominator is zero. This SKU was rolled back and "
+"skipped; check the receipt price, document amount, tax data, and movement "
+"order in Folio."
+msgstr ""
+"Знаменатель формулы учётной цены равен нулю. Этот SKU откатан и пропущен; "
+"проверьте цену прихода, сумму документа, налоговые данные и порядок движений "
+"в ФОЛІО."
+
+#: inc/accounting-prices.php:267
+msgid "Formula"
+msgstr "Формула"
+
+#: inc/accounting-prices.php:268
+msgid "Numerator"
+msgstr "Числитель"
+
+#: inc/accounting-prices.php:269
+msgid "Denominator"
+msgstr "Знаменатель"
+
+#: inc/accounting-prices.php:270
+msgid "Movement position"
+msgstr "Позиция движения"
+
+#: inc/accounting-prices.php:271
+msgid "Current physical quantity"
+msgstr "Текущий физический остаток"
+
+#: inc/accounting-prices.php:272
+msgid "Current accounting quantity"
+msgstr "Текущий учётный остаток"
+
+#: inc/accounting-prices.php:279
 msgid "Duration"
 msgstr "Продолжительность"
 
-#: inc/accounting-prices.php:232
+#: inc/accounting-prices.php:284
 msgid "sec."
 msgstr "с"
 
-#: inc/accounting-prices.php:238
+#: inc/accounting-prices.php:285
+msgid "All Folio warehouses"
+msgstr "Все склады ФОЛИО"
+
+#: inc/accounting-prices.php:286
+msgid "Loading the latest state of all Folio warehouses..."
+msgstr "Загрузка последнего состояния всех складов ФОЛИО..."
+
+#: inc/accounting-prices.php:287 inc/accounting-prices.php:677
+msgid "Refresh warehouse overview"
+msgstr "Обновить обзор складов"
+
+#: inc/accounting-prices.php:288
+msgid "Warehouses in directory"
+msgstr "Складов в справочнике"
+
+#: inc/accounting-prices.php:289
+msgid "Never processed"
+msgstr "Ещё не обрабатывались"
+
+#: inc/accounting-prices.php:290
+msgid "Warehouses with errors"
+msgstr "Складов с ошибками"
+
+#: inc/accounting-prices.php:291
+msgid "Negative stock cases"
+msgstr "Случаев отрицательного остатка"
+
+#: inc/accounting-prices.php:292
+msgid "View negative stock for all warehouses"
+msgstr "Посмотреть отрицательные остатки всех складов"
+
+#: inc/accounting-prices.php:293
+msgid "View warnings for all warehouses"
+msgstr "Просмотреть предупреждения по всем складам"
+
+#: inc/accounting-prices.php:294
+msgid "View errors for all warehouses"
+msgstr "Посмотреть ошибки всех складов"
+
+#: inc/accounting-prices.php:295
+msgid "Processing state"
+msgstr "Состояние обработки"
+
+#: inc/accounting-prices.php:296
+msgid "Last processing"
+msgstr "Последняя обработка"
+
+#: inc/accounting-prices.php:297
+msgid "Last snapshot"
+msgstr "Последний снимок"
+
+#: inc/accounting-prices.php:298
+msgid "Last recalculation"
+msgstr "Последний перерасчёт"
+
+#: inc/accounting-prices.php:299
+msgid "Negative stock"
+msgstr "Отрицательный остаток"
+
+#: inc/accounting-prices.php:300
+msgid "Actions"
+msgstr "Действия"
+
+#: inc/accounting-prices.php:301
+msgid "View errors"
+msgstr "Посмотреть ошибки"
+
+#: inc/accounting-prices.php:302
+msgid "View warnings"
+msgstr "Просмотреть предупреждения"
+
+#: inc/accounting-prices.php:303
+msgid "View negative stock"
+msgstr "Посмотреть отрицательный остаток"
+
+#: inc/accounting-prices.php:304
+msgid "View products"
+msgstr "Посмотреть товары"
+
+#: inc/accounting-prices.php:305
+msgid "No diagnostics were recorded for the selected warehouses."
+msgstr "Для выбранных складов диагностика не зафиксирована."
+
+#: inc/accounting-prices.php:306
+msgid ""
+"Detailed diagnostics from campaigns completed before this overview was added "
+"may be unavailable. Snapshot states and saved last errors are still shown."
+msgstr ""
+"Подробная диагностика кампаний, завершённых до добавления этого обзора, "
+"может быть недоступна. Состояния снимка и сохранённые последние ошибки всё "
+"равно отображаются."
+
+#: inc/accounting-prices.php:307
+msgid ""
+"The Java warehouse directory is temporarily unavailable. Warehouses known "
+"from saved schedules and snapshots are still shown."
+msgstr ""
+"Справочник складов Java временно недоступен. Склады, известные из "
+"сохранённого расписания и снимков, всё равно отображаются."
+
+#: inc/accounting-prices.php:308
+msgid "Latest warehouse diagnostics"
+msgstr "Последняя диагностика складов"
+
+#: inc/accounting-prices.php:309
+msgid "Recorded at"
+msgstr "Зафиксировано"
+
+#: inc/accounting-prices.php:315
 msgid "Stopped safely"
 msgstr "Безопасно остановлено"
 
-#: inc/accounting-prices.php:244
+#: inc/accounting-prices.php:319
+msgid "No snapshot has been created"
+msgstr "Снимок ещё не создавался"
+
+#: inc/accounting-prices.php:320
+msgid "Not processed yet"
+msgstr "Ещё не обрабатывался"
+
+#: inc/accounting-prices.php:321
+msgid "Snapshot is being built"
+msgstr "Снимок формируется"
+
+#: inc/accounting-prices.php:322
+msgid "Processed before detailed history was enabled"
+msgstr "Обработано до включения подробной истории"
+
+#: inc/accounting-prices.php:323
+msgid "Warehouse processing failed"
+msgstr "Обработка склада завершилась ошибкой"
+
+#: inc/accounting-prices.php:324
+msgid "Final snapshot confirmed"
+msgstr "Финальный снимок подтверждён"
+
+#: inc/accounting-prices.php:327
 msgid "Starting the initial product snapshot"
 msgstr "Запуск начального снимка товаров"
 
-#: inc/accounting-prices.php:245
+#: inc/accounting-prices.php:328
 msgid "Building the initial product snapshot"
 msgstr "Формирование начального снимка товаров"
 
-#: inc/accounting-prices.php:246
+#: inc/accounting-prices.php:329
 msgid "Selecting products from snapshot states"
 msgstr "Выбор товаров по состояниям снимка"
 
-#: inc/accounting-prices.php:247
+#: inc/accounting-prices.php:330
 msgid "Starting the selected SKU batch"
 msgstr "Запуск выбранной порции SKU"
 
-#: inc/accounting-prices.php:248
+#: inc/accounting-prices.php:331
 msgid "Recalculating the selected SKU batch"
 msgstr "Пересчёт выбранного пакета SKU"
 
-#: inc/accounting-prices.php:249
+#: inc/accounting-prices.php:332
 msgid "Preparing safe skips for problem products"
 msgstr "Подготовка безопасного пропуска проблемных товаров"
 
-#: inc/accounting-prices.php:250
+#: inc/accounting-prices.php:333
 msgid "Starting the mandatory final snapshot"
 msgstr "Запуск обязательного финального снимка"
 
-#: inc/accounting-prices.php:251
+#: inc/accounting-prices.php:334
 msgid "Building the mandatory final snapshot"
 msgstr "Формирование обязательного финального снимка"
 
-#: inc/accounting-prices.php:252 inc/accounting-prices.php:422
+#: inc/accounting-prices.php:335 inc/accounting-prices.php:506
 msgid "Waiting for the global Lavka lock"
 msgstr "Ожидание глобальной блокировки Lavka"
 
-#: inc/accounting-prices.php:253
+#: inc/accounting-prices.php:336
 msgid "Waiting for the Folio accounting-price slot"
 msgstr "Ожидание доступного окна пересчёта учётных цен ФОЛИО"
 
-#: inc/accounting-prices.php:254
+#: inc/accounting-prices.php:337
 msgid "Waiting to restart the snapshot request"
 msgstr "Ожидание безопасного повторного запуска снимка"
 
-#: inc/accounting-prices.php:256
+#: inc/accounting-prices.php:338
+msgid "Snapshot interrupted by Java restart"
+msgstr "Снимок прерван перезапуском Java"
+
+#: inc/accounting-prices.php:340
 msgid "Campaign completed"
 msgstr "Кампания завершена"
 
-#: inc/accounting-prices.php:301
+#: inc/accounting-prices.php:385
 msgid ""
 "Only part of the warnings was returned by the service. The complete "
 "diagnostics remain in the Folio service log."
@@ -1278,101 +1678,101 @@ msgstr ""
 "журнале сервиса ФОЛИО."
 
 #. translators: %d: number of warnings reported without item details.
-#: inc/accounting-prices.php:311
+#: inc/accounting-prices.php:395
 #, php-format
 msgid "%d warnings were reported without item details."
 msgstr "%d предупреждений получено без подробностей о товарах."
 
-#: inc/accounting-prices.php:385
+#: inc/accounting-prices.php:469
 msgid "Monday"
 msgstr "Понедельник"
 
-#: inc/accounting-prices.php:386
+#: inc/accounting-prices.php:470
 msgid "Tuesday"
 msgstr "Вторник"
 
-#: inc/accounting-prices.php:387
+#: inc/accounting-prices.php:471
 msgid "Wednesday"
 msgstr "Среда"
 
-#: inc/accounting-prices.php:388
+#: inc/accounting-prices.php:472
 msgid "Thursday"
 msgstr "Четверг"
 
-#: inc/accounting-prices.php:389
+#: inc/accounting-prices.php:473
 msgid "Friday"
 msgstr "Пятница"
 
-#: inc/accounting-prices.php:390
+#: inc/accounting-prices.php:474
 msgid "Saturday"
 msgstr "Суббота"
 
-#: inc/accounting-prices.php:391 inc/accounting-prices.php:402
+#: inc/accounting-prices.php:475 inc/accounting-prices.php:486
 msgid "Sunday"
 msgstr "Воскресенье"
 
-#: inc/accounting-prices.php:394
+#: inc/accounting-prices.php:478
 msgid "Paused after an error"
 msgstr "Приостановлено после ошибки"
 
-#: inc/accounting-prices.php:396
+#: inc/accounting-prices.php:480
 msgid "Enabled"
 msgstr "Включено"
 
-#: inc/accounting-prices.php:397
+#: inc/accounting-prices.php:481
 msgid "Disabled"
 msgstr "Выключено"
 
-#: inc/accounting-prices.php:401
+#: inc/accounting-prices.php:485
 msgid "No warehouses selected"
 msgstr "Склады не выбраны"
 
-#: inc/accounting-prices.php:420
+#: inc/accounting-prices.php:504
 msgid "Starting warehouse recalculation"
 msgstr "Запуск пересчёта склада"
 
-#: inc/accounting-prices.php:423
+#: inc/accounting-prices.php:507
 msgid "Waiting for the next warehouse"
 msgstr "Ожидание следующего склада"
 
-#: inc/accounting-prices.php:426
+#: inc/accounting-prices.php:510
 msgid "Completed with warehouse errors"
 msgstr "Завершено с ошибками отдельных складов"
 
-#: inc/accounting-prices.php:430
+#: inc/accounting-prices.php:514
 msgid "Could not start"
 msgstr "Не удалось запустить"
 
-#: inc/accounting-prices.php:433
+#: inc/accounting-prices.php:517
 msgid "Stopped by administrator"
 msgstr "Остановлено администратором"
 
-#: inc/accounting-prices.php:438
+#: inc/accounting-prices.php:522
 msgid "Preview stage"
 msgstr "Этап предварительной проверки"
 
-#: inc/accounting-prices.php:439
+#: inc/accounting-prices.php:523
 msgid "Apply stage"
 msgstr "Этап применения"
 
-#: inc/accounting-prices.php:467
+#: inc/accounting-prices.php:551
 msgid "The automatic recalculation schedule was saved."
 msgstr "Расписание автоматического пересчёта сохранено."
 
-#: inc/accounting-prices.php:472
+#: inc/accounting-prices.php:556
 msgid "Confirm automatic Folio changes before enabling the schedule."
 msgstr ""
 "Подтвердите автоматические изменения в ФОЛИО перед включением расписания."
 
-#: inc/accounting-prices.php:473
+#: inc/accounting-prices.php:557
 msgid "Select at least one Folio warehouse before enabling the schedule."
 msgstr "Перед включением расписания выберите хотя бы один склад ФОЛИО."
 
-#: inc/accounting-prices.php:479
+#: inc/accounting-prices.php:563
 msgid "Financial operation"
 msgstr "Финансовая операция"
 
-#: inc/accounting-prices.php:480
+#: inc/accounting-prices.php:564
 msgid ""
 "Preview is read-only. Apply changes Folio data and must be run only in an "
 "agreed maintenance window."
@@ -1380,59 +1780,59 @@ msgstr ""
 "Предварительная проверка ничего не изменяет. Применение изменяет данные "
 "ФОЛИО и должно выполняться только в согласованное окно обслуживания."
 
-#: inc/accounting-prices.php:484 inc/product-analytics.php:150
+#: inc/accounting-prices.php:568 inc/product-analytics.php:236
 msgid "Folio warehouse"
 msgstr "Склад ФОЛИО"
 
-#: inc/accounting-prices.php:486 inc/accounting-prices.php:693
+#: inc/accounting-prices.php:570 inc/accounting-prices.php:818
 msgid "Loading warehouses..."
 msgstr "Загрузка складов..."
 
-#: inc/accounting-prices.php:489
+#: inc/accounting-prices.php:573
 msgid "Folio warehouse ID"
 msgstr "ID склада ФОЛИО"
 
-#: inc/accounting-prices.php:490
+#: inc/accounting-prices.php:574
 msgid "Warehouse ID"
 msgstr "ID склада"
 
-#: inc/accounting-prices.php:494
+#: inc/accounting-prices.php:578
 msgid "Accounting price views"
 msgstr "Режимы работы с учётными ценами"
 
-#: inc/accounting-prices.php:496
+#: inc/accounting-prices.php:580
 msgid "One product"
 msgstr "Один товар"
 
-#: inc/accounting-prices.php:499
+#: inc/accounting-prices.php:583
 msgid "Entire warehouse"
 msgstr "Весь склад"
 
-#: inc/accounting-prices.php:502
+#: inc/accounting-prices.php:586
 msgid "SKU campaign and schedule"
 msgstr "Кампания SKU и расписание"
 
-#: inc/accounting-prices.php:507
+#: inc/accounting-prices.php:591
 msgid "Product accounting price"
 msgstr "Учётная цена товара"
 
-#: inc/accounting-prices.php:512
+#: inc/accounting-prices.php:596
 msgid "Check without changes"
 msgstr "Проверить без изменений"
 
-#: inc/accounting-prices.php:518
+#: inc/accounting-prices.php:602
 msgid "I reviewed the preview and confirm recalculation of this product."
 msgstr "Я просмотрел результат проверки и подтверждаю пересчёт этого товара."
 
-#: inc/accounting-prices.php:521
+#: inc/accounting-prices.php:605
 msgid "Recalculate product in Folio"
 msgstr "Пересчитать товар в ФОЛИО"
 
-#: inc/accounting-prices.php:529
+#: inc/accounting-prices.php:613
 msgid "Full native Folio recalculation"
 msgstr "Полный штатный пересчёт ФОЛИО"
 
-#: inc/accounting-prices.php:531
+#: inc/accounting-prices.php:615
 msgid ""
 "This mode runs the complete Folio I_UCHET_TOVAR algorithm. The preview "
 "executes every portion in a transaction and always rolls it back."
@@ -1440,22 +1840,22 @@ msgstr ""
 "Этот режим выполняет полный алгоритм ФОЛИО I_UCHET_TOVAR. Предварительная "
 "проверка выполняет каждую порцию в транзакции и всегда откатывает её."
 
-#: inc/accounting-prices.php:535
+#: inc/accounting-prices.php:619
 msgid "Run exact rollback preview"
 msgstr "Выполнить точную предварительную проверку с откатом"
 
-#: inc/accounting-prices.php:541
+#: inc/accounting-prices.php:625
 msgid ""
 "I have a current backup and confirm the agreed Folio maintenance window."
 msgstr ""
 "У меня есть актуальная резервная копия, и я подтверждаю согласованное окно "
 "обслуживания ФОЛИО."
 
-#: inc/accounting-prices.php:544
+#: inc/accounting-prices.php:628
 msgid "Run full native recalculation in Folio"
 msgstr "Запустить полный штатный пересчёт в ФОЛИО"
 
-#: inc/accounting-prices.php:546
+#: inc/accounting-prices.php:630
 msgid ""
 "Apply repeats the full rollback preflight and starts committing portions "
 "only when the preflight is clean."
@@ -1463,11 +1863,11 @@ msgstr ""
 "Применение повторяет полную предварительную проверку с откатом и начинает "
 "фиксировать порции только после успешной проверки."
 
-#: inc/accounting-prices.php:559
+#: inc/accounting-prices.php:643
 msgid "Accounting-price SKU campaign"
 msgstr "Кампания пересчёта учётных цен по SKU"
 
-#: inc/accounting-prices.php:561
+#: inc/accounting-prices.php:645
 msgid ""
 "The campaign builds a fresh snapshot, selects only UNVERIFIED, NEW and DIRTY "
 "products, recalculates them in sequential native-range batches, and finishes "
@@ -1479,7 +1879,7 @@ msgstr ""
 "завершается обязательным проверочным снимком. Товары FAILED и VERIFIED "
 "автоматически не выбираются."
 
-#: inc/accounting-prices.php:566
+#: inc/accounting-prices.php:650
 msgid ""
 "I confirm the Folio maintenance window and understand that native-range "
 "apply changes accounting prices."
@@ -1487,26 +1887,63 @@ msgstr ""
 "Подтверждаю окно обслуживания ФОЛИО и понимаю, что применение native-range "
 "изменяет учётные цены."
 
-#: inc/accounting-prices.php:570
+#: inc/accounting-prices.php:654
 msgid "Start SKU campaign for selected warehouse"
 msgstr "Запустить кампанию SKU для выбранного склада"
 
-#: inc/accounting-prices.php:573
+#: inc/accounting-prices.php:657
 msgid "Stop safely after current operation"
 msgstr "Безопасно остановить после текущей операции"
 
-#: inc/accounting-prices.php:579
+#: inc/accounting-prices.php:663
 msgid "Export campaign report CSV"
 msgstr "Экспортировать отчёт кампании CSV"
 
-#: inc/accounting-prices.php:587
-msgid "Automatic weekly SKU campaign"
-msgstr "Автоматическая еженедельная кампания SKU"
+#: inc/accounting-prices.php:673
+msgid "Processing state for all Folio warehouses"
+msgstr "Состояние обработки всех складов ФОЛИО"
 
+#: inc/accounting-prices.php:674
+msgid ""
+"This permanent overview shows the latest snapshot and processing result for "
+"every warehouse, including warehouses that have never been processed."
+msgstr ""
+"Этот постоянный обзор показывает последний снимок и результат обработки "
+"каждого склада, включая склады, которые ещё ни разу не обрабатывались."
+
+#: inc/accounting-prices.php:687
 msgid "Campaign parameters and weekly schedule"
 msgstr "Параметры кампании и еженедельное расписание"
 
-#: inc/accounting-prices.php:588
+#: inc/accounting-prices.php:694
+msgid "Campaign parameters"
+msgstr "Параметры кампании"
+
+#: inc/accounting-prices.php:695
+msgid "These parameters apply to both manual runs and the weekly schedule."
+msgstr "Эти параметры применяются к ручному запуску и расписанию."
+
+#: inc/accounting-prices.php:698
+msgid "First batch size"
+msgstr "Размер первого пакета"
+
+#: inc/accounting-prices.php:702
+msgid "Maximum batch size"
+msgstr "Максимальный размер пакета"
+
+#: inc/accounting-prices.php:706
+msgid "Maintenance window, minutes"
+msgstr "Окно обслуживания, минут"
+
+#: inc/accounting-prices.php:710
+msgid "Snapshot horizon, months"
+msgstr "Глубина снимка, месяцев"
+
+#: inc/accounting-prices.php:716
+msgid "Automatic weekly SKU campaign"
+msgstr "Автоматическая еженедельная кампания SKU"
+
+#: inc/accounting-prices.php:717
 msgid ""
 "The schedule is disabled by default. Warehouses run sequentially. The first "
 "campaign also includes UNVERIFIED products; regular runs select only NEW and "
@@ -1516,92 +1953,86 @@ msgstr ""
 "Первая кампания также включает товары UNVERIFIED; регулярные запуски "
 "выбирают только состояния NEW и DIRTY."
 
-#: inc/accounting-prices.php:591
+#: inc/accounting-prices.php:720
 msgid "Saved schedule"
 msgstr "Сохранённое расписание"
 
-#: inc/accounting-prices.php:594
+#: inc/accounting-prices.php:723
 msgid "Schedule status"
 msgstr "Статус расписания"
 
-#: inc/accounting-prices.php:598
+#: inc/accounting-prices.php:727
 msgid "Selected Folio warehouses"
 msgstr "Выбранные склады ФОЛИО"
 
-#: inc/accounting-prices.php:603
+#: inc/accounting-prices.php:732
 msgid "Weekly start"
 msgstr "Еженедельный запуск"
 
 #. translators: 1: weekday, 2: local start time, 3: WordPress timezone.
-#: inc/accounting-prices.php:608
+#: inc/accounting-prices.php:737
 #, php-format
 msgid "%1$s at %2$s (%3$s)"
 msgstr "%1$s в %2$s (%3$s)"
 
-#: inc/accounting-prices.php:617
+#: inc/accounting-prices.php:746
 msgid "Maintenance window"
 msgstr "Окно обслуживания"
 
 #. translators: %d: maintenance window length in minutes.
-#: inc/accounting-prices.php:622
+#: inc/accounting-prices.php:751
 #, php-format
 msgid "%d minutes"
 msgstr "%d минут"
 
-#: inc/accounting-prices.php:629
+#: inc/accounting-prices.php:758
 msgid "SKU batch sizes"
 msgstr "Размеры пакетов SKU"
 
 #. translators: 1: first batch size, 2: maximum batch size.
-#: inc/accounting-prices.php:634
+#: inc/accounting-prices.php:763
 #, php-format
 msgid "first %1$d, maximum %2$d"
 msgstr "первый %1$d, максимум %2$d"
 
-#: inc/accounting-prices.php:642
+#: inc/accounting-prices.php:771
 msgid "Snapshot horizon"
 msgstr "Глубина снимка"
 
 #. translators: %d: snapshot horizon in months.
-#: inc/accounting-prices.php:647
+#: inc/accounting-prices.php:776
 #, php-format
 msgid "%d months"
 msgstr "%d месяцев"
 
-#: inc/accounting-prices.php:654 inc/accounting-prices.php:749
+#: inc/accounting-prices.php:783 inc/accounting-prices.php:858
 msgid "Next scheduled run"
 msgstr "Следующий плановый запуск"
 
-#: inc/accounting-prices.php:657 inc/accounting-prices.php:752
+#: inc/accounting-prices.php:786 inc/accounting-prices.php:861
 #: inc/admin-ui.php:429
 msgid "Not scheduled"
 msgstr "Не запланировано"
 
-#: inc/accounting-prices.php:664
+#: inc/accounting-prices.php:793
 msgid "Schedule paused:"
 msgstr "Расписание приостановлено:"
 
-#: inc/accounting-prices.php:675
+#: inc/accounting-prices.php:800
 msgid "Enable weekly SKU campaign"
 msgstr "Включить еженедельную кампанию SKU"
 
-msgid "Campaign parameters"
-msgstr "Параметры кампании"
-
-msgid "These parameters apply to both manual runs and the weekly schedule."
-msgstr "Эти параметры применяются к ручному запуску и расписанию."
-
-#: inc/accounting-prices.php:681
+#: inc/accounting-prices.php:806
 msgid "Folio warehouses"
 msgstr "Склады ФОЛИО"
 
 #. translators: %d: numeric Folio warehouse ID.
-#: inc/accounting-prices.php:688
+#: inc/accounting-prices.php:813
 #, php-format
 msgid "Warehouse ID: %d"
 msgstr "ID склада: %d"
 
-#: inc/accounting-prices.php:696
+#: inc/accounting-prices.php:821
 msgid ""
 "Selected warehouses are processed sequentially. A regular FAILED result "
 "stops only the current warehouse; FAILED_PARTIAL or OUTCOME_UNKNOWN stops "
@@ -1611,31 +2042,15 @@ msgstr ""
 "останавливает только текущий склад; FAILED_PARTIAL или OUTCOME_UNKNOWN "
 "останавливает всю кампанию для ручной проверки."
 
-#: inc/accounting-prices.php:699
+#: inc/accounting-prices.php:824
 msgid "Day of week"
 msgstr "День недели"
 
-#: inc/accounting-prices.php:707
+#: inc/accounting-prices.php:832
 msgid "Start time"
 msgstr "Время запуска"
 
-#: inc/accounting-prices.php:711
-msgid "First batch size"
-msgstr "Размер первого пакета"
-
-#: inc/accounting-prices.php:715
-msgid "Maximum batch size"
-msgstr "Максимальный размер пакета"
-
-#: inc/accounting-prices.php:719
-msgid "Maintenance window, minutes"
-msgstr "Окно обслуживания, минут"
-
-#: inc/accounting-prices.php:723
-msgid "Snapshot horizon, months"
-msgstr "Глубина снимка, месяцев"
-
-#: inc/accounting-prices.php:730
+#: inc/accounting-prices.php:839
 msgid ""
 "I understand that the schedule performs real native-range recalculation for "
 "eligible snapshot states. Problem products are skipped and recorded, and "
@@ -1647,7 +2062,7 @@ msgstr ""
 "снимок."
 
 #. translators: %s: WordPress site time zone.
-#: inc/accounting-prices.php:737
+#: inc/accounting-prices.php:846
 #, php-format
 msgid ""
 "Time zone: %s. If another Lavka synchronization holds the global lock, the "
@@ -1656,52 +2071,49 @@ msgstr ""
 "Часовой пояс: %s. Если глобальную блокировку удерживает другая синхронизация "
 "Lavka, запуск будет отложен без отправки запроса в Java."
 
-#: inc/accounting-prices.php:743 inc/admin-ui.php:492
-msgid "Save schedule"
-msgstr "Сохранить расписание"
-
+#: inc/accounting-prices.php:852
 msgid "Save campaign parameters and schedule"
 msgstr "Сохранить параметры кампании и расписание"
 
-#: inc/accounting-prices.php:755
+#: inc/accounting-prices.php:864
 msgid "Last native job status"
 msgstr "Статус последнего штатного задания"
 
-#: inc/accounting-prices.php:758
+#: inc/accounting-prices.php:867
 msgid "No runs yet"
 msgstr "Запусков ещё не было"
 
-#: inc/accounting-prices.php:761
+#: inc/accounting-prices.php:870
 msgid "Last scheduled warehouse queue"
 msgstr "Последняя плановая очередь складов"
 
-#: inc/accounting-prices.php:765
+#: inc/accounting-prices.php:874
 msgid "No scheduled runs yet"
 msgstr "Плановых запусков ещё не было"
 
 #. translators: 1: completed warehouse preview count, 2: total warehouse count.
-#: inc/accounting-prices.php:776
+#: inc/accounting-prices.php:885
 #, php-format
 msgid "%1$d of %2$d warehouse previews completed"
 msgstr "Завершено проверок складов: %1$d из %2$d"
 
 #. translators: 1: completed warehouse count, 2: total warehouse count.
-#: inc/accounting-prices.php:783
+#: inc/accounting-prices.php:892
 #, php-format
 msgid "%1$d of %2$d warehouses completed"
 msgstr "Завершено складов: %1$d из %2$d"
 
 #. translators: 1: recorded warehouse error count, 2: warning count.
-#: inc/accounting-prices.php:793
+#: inc/accounting-prices.php:902
 #, php-format
 msgid "Recorded warehouse errors: %1$d; warnings: %2$d"
 msgstr "Зафиксировано ошибок складов: %1$d; предупреждений: %2$d"
 
-#: inc/accounting-prices.php:808
+#: inc/accounting-prices.php:917
 msgid "Last scheduled recalculation report"
 msgstr "Отчёт последнего планового пересчёта"
 
-#: inc/accounting-prices.php:809
+#: inc/accounting-prices.php:918
 msgid ""
 "The report preserves when and why a product or warehouse was skipped. Safe "
 "products continue to be recalculated."
@@ -1709,66 +2121,70 @@ msgstr ""
 "Отчёт сохраняет, когда и почему товар или склад был пропущен. Безопасные "
 "товары продолжают пересчитываться."
 
-#: inc/accounting-prices.php:815
+#: inc/accounting-prices.php:924
 msgid "Export detailed CSV"
 msgstr "Экспортировать подробный CSV"
 
-#: inc/accounting-prices.php:823 inc/accounting-prices.php:913
+#: inc/accounting-prices.php:932 inc/accounting-prices.php:1022
 msgid "Stage"
 msgstr "Этап"
 
-#: inc/accounting-prices.php:828 inc/accounting-prices.php:919
+#: inc/accounting-prices.php:937 inc/accounting-prices.php:1028
 msgid "Explanation"
 msgstr "Пояснение"
 
-#: inc/accounting-prices.php:857
+#: inc/accounting-prices.php:966
 msgid "No problems were reported for this warehouse."
 msgstr "Для этого склада проблем не зафиксировано."
 
-#: inc/accounting-prices.php:872
+#: inc/accounting-prices.php:981
 msgid "Diagnostics and skipped products"
 msgstr "Диагностика и пропущенные товары"
 
-#: inc/accounting-prices.php:875
+#: inc/accounting-prices.php:984
 msgid "Copy SKU list"
 msgstr "Скопировать артикулы"
 
-#: inc/accounting-prices.php:878
+#: inc/accounting-prices.php:987
 msgid "Export CSV"
 msgstr "Экспортировать CSV"
 
-#: inc/accounting-prices.php:881
+#: inc/accounting-prices.php:990
 msgid "Export JSON"
 msgstr "Экспортировать JSON"
 
-#: inc/accounting-prices.php:916
+#: inc/accounting-prices.php:1025
 msgid "Severity"
 msgstr "Уровень"
 
-#: inc/accounting-prices.php:921
+#: inc/accounting-prices.php:1030
 msgid "Java job ID"
 msgstr "ID задания сервиса ФОЛИО"
 
-#: inc/accounting-prices.php:951
+#: inc/accounting-prices.php:1067 inc/accounting-prices.php:1195
 msgid "Java Base URL is not configured."
 msgstr "Базовый адрес сервиса ФОЛИО не настроен."
 
-#: inc/accounting-prices.php:966
+#: inc/accounting-prices.php:1082
 msgid "SKU and Folio warehouse are required."
 msgstr "Необходимо указать артикул и склад ФОЛИО."
 
-#: inc/accounting-prices.php:969 inc/accounting-prices.php:1013
-#: inc/accounting-prices.php:1029
+#: inc/accounting-prices.php:1085 inc/accounting-prices.php:1129
+#: inc/accounting-prices.php:1145
 msgid "Explicit confirmation is required for Folio changes."
 msgstr "Для изменений в ФОЛИО требуется явное подтверждение."
 
-#: inc/accounting-prices.php:981
+#: inc/accounting-prices.php:1097
 msgid "Single-product Folio accounting-price recalculation"
 msgstr "Пересчёт учётной цены одного товара в ФОЛИО"
 
-#: inc/accounting-prices.php:1043
+#: inc/accounting-prices.php:1188
 msgid "Unsupported accounting-price operation."
 msgstr "Операция с учётной ценой не поддерживается."
+
+#: inc/accounting-prices.php:1210
+msgid "The warehouse directory is unavailable."
+msgstr "Справочник складов недоступен."
 
 #: inc/admin-ui.php:8
 msgid "Price Sync"
@@ -1814,11 +2230,11 @@ msgstr "Ошибка:"
 msgid "Done"
 msgstr "Готово"
 
-#: inc/admin-ui.php:71 inc/product-analytics.php:83
+#: inc/admin-ui.php:71 inc/product-analytics.php:88
 msgid "Page"
 msgstr "Страница"
 
-#: inc/admin-ui.php:72 inc/product-analytics.php:84
+#: inc/admin-ui.php:72 inc/product-analytics.php:89
 msgid "of"
 msgstr "из"
 
@@ -1938,10 +2354,6 @@ msgstr "Расписание синхронизации цен"
 msgid "Enable"
 msgstr "Включить"
 
-#: inc/admin-ui.php:364
-msgid "Yes"
-msgstr "Да"
-
 #: inc/admin-ui.php:370 inc/logs.php:99
 msgid "Mode"
 msgstr "Режим"
@@ -2028,6 +2440,10 @@ msgstr "Часовой пояс сайта: %s"
 msgid "Batch size per run"
 msgstr "Размер пакета за один запуск"
 
+#: inc/admin-ui.php:492
+msgid "Save schedule"
+msgstr "Сохранить расписание"
+
 #: inc/admin-ui.php:495
 msgid "Run now"
 msgstr "Запустить сейчас"
@@ -2088,204 +2504,295 @@ msgstr "OK"
 msgid "No logs yet."
 msgstr "Логов пока нет."
 
-#. translators: 1: processed page number, 2: total pages.
-#: inc/logs.php:172
-#, php-format
-msgid "Page %1$d of %2$d"
-msgstr "Страница %1$d из %2$d"
-
-#: inc/product-analytics.php:10 inc/product-analytics.php:138
+#: inc/product-analytics.php:11 inc/product-analytics.php:224
 msgid "Folio product analytics"
 msgstr "Товарная аналитика ФОЛИО"
 
-#: inc/product-analytics.php:11
-#, fuzzy
+#: inc/product-analytics.php:12
 msgid "Product analytics"
-msgstr "Учётная цена товара"
-
-#: inc/product-analytics.php:55
-#, fuzzy
-msgid "Loading product analytics..."
-msgstr "Загрузка складов..."
+msgstr "Товарная аналитика"
 
 #: inc/product-analytics.php:56
+msgid "Loading product analytics..."
+msgstr "Загрузка товарной аналитики..."
+
+#: inc/product-analytics.php:57
 msgid "Product analytics could not be loaded."
 msgstr "Не удалось загрузить товарную аналитику."
 
-#: inc/product-analytics.php:57
+#: inc/product-analytics.php:58
 msgid "No active Folio product snapshots are available yet."
 msgstr "Активных снимков товаров ФОЛИО пока нет."
 
-#: inc/product-analytics.php:58
+#: inc/product-analytics.php:59
 msgid "No products match the selected filters."
 msgstr "Нет товаров, соответствующих выбранным фильтрам."
 
-#: inc/product-analytics.php:61
-#, fuzzy
+#: inc/product-analytics.php:62 inc/product-analytics.php:248
 msgid "Products"
-msgstr "Товар пропущен"
+msgstr "Товары"
 
-#: inc/product-analytics.php:66
+#: inc/product-analytics.php:67
 msgid "Capital in stock"
 msgstr "Капитал в запасах"
 
-#: inc/product-analytics.php:67
+#: inc/product-analytics.php:68
 msgid "Revenue, 365 days"
 msgstr "Выручка за 365 дней"
 
-#: inc/product-analytics.php:68
+#: inc/product-analytics.php:69
 msgid "Gross profit before returns, 365 days"
 msgstr "Валовая прибыль до возвратов за 365 дней"
 
-#: inc/product-analytics.php:69 inc/product-analytics.php:171
-#, fuzzy
+#: inc/product-analytics.php:70 inc/product-analytics.php:264
 msgid "Capital without sales"
-msgstr "Проверить без изменений"
+msgstr "Капитал без продаж"
 
-#: inc/product-analytics.php:70
+#: inc/product-analytics.php:71
 msgid "Capital in dead stock and overstock"
 msgstr "Капитал в мёртвых и избыточных запасах"
 
-#: inc/product-analytics.php:72
-#, fuzzy
-msgid "Product"
-msgstr "Один товар"
+#: inc/product-analytics.php:74 inc/product-analytics.php:589
+msgid "Current supplier"
+msgstr "Текущий поставщик"
 
-#: inc/product-analytics.php:73
+#: inc/product-analytics.php:75
 msgid "Commercial sales total, 90 days"
 msgstr "Коммерческие продажи, всего за 90 дней"
 
-#: inc/product-analytics.php:74
+#: inc/product-analytics.php:76
 msgid "Commercial sales total, 365 days"
 msgstr "Коммерческие продажи, всего за 365 дней"
 
-#: inc/product-analytics.php:75
+#: inc/product-analytics.php:77
+msgid "Regular demand, 12 months"
+msgstr "Регулярный спрос, 12 месяцев"
+
+#: inc/product-analytics.php:78
+msgid "One-off sales, 12 months"
+msgstr "Разовые продажи, 12 месяцев"
+
+#: inc/product-analytics.php:79
 msgid "Inventory turns"
 msgstr "Оборачиваемость запасов"
 
-#: inc/product-analytics.php:76
+#: inc/product-analytics.php:80
 msgid "GMROI"
 msgstr "GMROI"
 
-#: inc/product-analytics.php:77
-#, fuzzy
+#: inc/product-analytics.php:81
 msgid "Coverage, days"
-msgstr "Дни недели"
+msgstr "Покрытие, дней"
 
-#: inc/product-analytics.php:78
+#: inc/product-analytics.php:82
 msgid "Last sale"
 msgstr "Последняя продажа"
 
-#: inc/product-analytics.php:79
-#, fuzzy
+#: inc/product-analytics.php:83
+msgid "Last regular sale"
+msgstr "Последняя регулярная продажа"
+
+#: inc/product-analytics.php:84
 msgid "Last receipt"
-msgstr "приход"
+msgstr "Последний приход"
 
-#: inc/product-analytics.php:81
-#, fuzzy
+#: inc/product-analytics.php:86
 msgid "Accounting-price verification"
-msgstr "Режимы работы с учётными ценами"
+msgstr "Проверка учётной цены"
 
-#: inc/product-analytics.php:82
+#: inc/product-analytics.php:87
 msgid "Alerts"
 msgstr "Предупреждения"
 
-#: inc/product-analytics.php:85
-#, fuzzy
+#: inc/product-analytics.php:90
 msgid "Product details"
-msgstr "Товар пропущен"
+msgstr "Детали товара"
 
-#: inc/product-analytics.php:86
-#, fuzzy
+#: inc/product-analytics.php:91
 msgid "Current state"
-msgstr "Текущее количество единиц"
+msgstr "Текущее состояние"
 
-#: inc/product-analytics.php:87
+#: inc/product-analytics.php:92
 msgid "Monthly history"
 msgstr "История по месяцам"
 
-#: inc/product-analytics.php:88
-#, fuzzy
+#: inc/product-analytics.php:93
 msgid "Warehouse comparison"
-msgstr "Учётные цены склада"
+msgstr "Сравнение складов"
 
-#: inc/product-analytics.php:89
+#: inc/product-analytics.php:94
 msgid "Alert history"
 msgstr "История предупреждений"
 
-#: inc/product-analytics.php:90
+#: inc/product-analytics.php:95
 msgid "Snapshot changes"
 msgstr "Изменения снимка"
 
-#: inc/product-analytics.php:91
+#: inc/product-analytics.php:96
+msgid "Document date"
+msgstr "Дата документа"
+
+#: inc/product-analytics.php:97 inc/product-analytics.php:547
+msgid "Document number"
+msgstr "Номер документа"
+
+#: inc/product-analytics.php:98 inc/product-analytics.php:549
+msgid "Document type"
+msgstr "Тип документа"
+
+#: inc/product-analytics.php:99 inc/product-analytics.php:553
+msgid "Folio operation kind"
+msgstr "Вид операции ФОЛИО"
+
+#: inc/product-analytics.php:100 inc/product-analytics.php:557
+msgid "Movement class"
+msgstr "Класс движения"
+
+#: inc/product-analytics.php:101 inc/product-analytics.php:567
+msgid "Stock direction"
+msgstr "Направление движения остатка"
+
+#: inc/product-analytics.php:102
+msgid "Signed quantity"
+msgstr "Количество со знаком"
+
+#: inc/product-analytics.php:103
+msgid "Sale amount"
+msgstr "Сумма продажи"
+
+#: inc/product-analytics.php:104
+msgid "Accounting value"
+msgstr "Учётная сумма"
+
+#: inc/product-analytics.php:105 inc/product-analytics.php:568
+msgid "Demand mode"
+msgstr "Режим спроса"
+
+#: inc/product-analytics.php:106 inc/product-analytics.php:569
+msgid "Payment terms"
+msgstr "Условия оплаты"
+
+#: inc/product-analytics.php:107 inc/product-analytics.php:570
+msgid "Customer segment"
+msgstr "Сегмент клиента"
+
+#: inc/product-analytics.php:108 inc/product-analytics.php:588
+msgid "Counterparty"
+msgstr "Контрагент"
+
+#: inc/product-analytics.php:109 inc/product-analytics.php:578
+msgid "Included in accounting"
+msgstr "Учитывается в учёте"
+
+#: inc/product-analytics.php:110 inc/product-analytics.php:579
+msgid "Return document"
+msgstr "Документ возврата"
+
+#: inc/product-analytics.php:111 inc/product-analytics.php:554
+msgid "All operation kinds"
+msgstr "Все виды операций"
+
+#: inc/product-analytics.php:112 inc/product-analytics.php:550
+msgid "All document types"
+msgstr "Все типы документов"
+
+#: inc/product-analytics.php:115
 msgid "Month"
 msgstr "Месяц"
 
-#: inc/product-analytics.php:92
+#: inc/product-analytics.php:116
 msgid "Opening stock"
 msgstr "Запас на начало"
 
-#: inc/product-analytics.php:93
+#: inc/product-analytics.php:117
 msgid "Closing stock"
 msgstr "Запас на конец"
 
-#: inc/product-analytics.php:94
+#: inc/product-analytics.php:118
 msgid "Opening inventory value"
 msgstr "Стоимость запаса на начало"
 
-#: inc/product-analytics.php:95
+#: inc/product-analytics.php:119
 msgid "Closing inventory value"
 msgstr "Стоимость запаса на конец"
 
-#: inc/product-analytics.php:96
-#, fuzzy
+#: inc/product-analytics.php:120
 msgid "Receipts"
-msgstr "приход"
+msgstr "Приходы"
 
-#: inc/product-analytics.php:97
-#, fuzzy
+#: inc/product-analytics.php:121
 msgid "Receipt cost"
-msgstr "приход"
+msgstr "Себестоимость приходов"
 
-#: inc/product-analytics.php:98
+#: inc/product-analytics.php:122 inc/product-analytics.php:344
 msgid "Commercial sales total"
 msgstr "Коммерческие продажи, всего"
 
-#: inc/product-analytics.php:99
+#: inc/product-analytics.php:123
 msgid "Revenue"
 msgstr "Выручка"
 
-#: inc/product-analytics.php:100
+#: inc/product-analytics.php:124
 msgid "Cost of sales"
 msgstr "Себестоимость продаж"
 
-#: inc/product-analytics.php:101
+#: inc/product-analytics.php:125
 msgid "Gross profit before returns"
 msgstr "Валовая прибыль до возвратов"
 
-#: inc/product-analytics.php:102
-#, fuzzy
+#: inc/product-analytics.php:126
+msgid "Regular sales quantity"
+msgstr "Количество регулярных продаж"
+
+#: inc/product-analytics.php:127
+msgid "Regular sales revenue"
+msgstr "Выручка регулярных продаж"
+
+#: inc/product-analytics.php:128
+msgid "Regular sales cost"
+msgstr "Себестоимость регулярных продаж"
+
+#: inc/product-analytics.php:129
+msgid "Regular gross profit"
+msgstr "Валовая прибыль регулярных продаж"
+
+#: inc/product-analytics.php:130
+msgid "One-off sales quantity"
+msgstr "Количество разовых продаж"
+
+#: inc/product-analytics.php:131
+msgid "One-off sales revenue"
+msgstr "Выручка разовых продаж"
+
+#: inc/product-analytics.php:132
+msgid "One-off sales cost"
+msgstr "Себестоимость разовых продаж"
+
+#: inc/product-analytics.php:133
+msgid "One-off gross profit"
+msgstr "Валовая прибыль разовых продаж"
+
+#: inc/product-analytics.php:134
 msgid "Returns"
-msgstr "Код возврата"
+msgstr "Возвраты"
 
-#: inc/product-analytics.php:103
-#, fuzzy
+#: inc/product-analytics.php:135
 msgid "Return revenue"
-msgstr "Код возврата"
+msgstr "Сумма возвратов"
 
-#: inc/product-analytics.php:104
+#: inc/product-analytics.php:136
 msgid "Average capital"
 msgstr "Средний капитал"
 
-#: inc/product-analytics.php:105
+#: inc/product-analytics.php:137
 msgid "Sell-through"
 msgstr "Уровень реализации запаса"
 
-#: inc/product-analytics.php:106
+#: inc/product-analytics.php:138
 msgid "Possible cross-warehouse analysis"
 msgstr "Возможен межскладской анализ"
 
-#: inc/product-analytics.php:107
+#: inc/product-analytics.php:139
 msgid ""
 "Another warehouse has available stock. A manager must check the safe "
 "transfer quantity."
@@ -2293,94 +2800,310 @@ msgstr ""
 "На другом складе есть доступный запас. Менеджер должен проверить безопасное "
 "количество для перемещения."
 
-#: inc/product-analytics.php:108 inc/product-analytics.php:286
+#: inc/product-analytics.php:140 inc/product-analytics.php:606
 msgid "Close"
 msgstr "Закрыть"
 
-#: inc/product-analytics.php:109
-#, fuzzy
+#: inc/product-analytics.php:141
 msgid "Retry"
-msgstr "повтор"
+msgstr "Повторить"
 
-#: inc/product-analytics.php:110
+#: inc/product-analytics.php:142
 msgid "Active snapshot"
 msgstr "Активный снимок"
 
-#: inc/product-analytics.php:111
+#: inc/product-analytics.php:143
 msgid "Operational analytics: period metrics are built from monthly buckets."
 msgstr "Оперативная аналитика: показатели периода собраны из месячных данных."
 
-#: inc/product-analytics.php:112
+#: inc/product-analytics.php:144
 msgid "Sales combine all confirmed external commercial channels."
 msgstr "Продажи объединяют все подтверждённые внешние коммерческие каналы."
 
-#: inc/product-analytics.php:113
+#: inc/product-analytics.php:145
 msgid "Profit is gross profit before returns, not net or operating profit."
 msgstr "Прибыль является валовой до возвратов, а не чистой или операционной."
 
-#: inc/product-analytics.php:115 inc/product-analytics.php:191
+#: inc/product-analytics.php:146
+msgid "No suppliers are available for this warehouse."
+msgstr "Для этого склада нет доступных поставщиков."
+
+#: inc/product-analytics.php:147
+msgid "Suppliers could not be loaded."
+msgstr "Не удалось загрузить поставщиков."
+
+#. translators: 1: products with a supplier, 2: products without a supplier, 3: distinct supplier values.
+#: inc/product-analytics.php:149
+#, php-format
+msgid "Assigned: %1$s · missing: %2$s · supplier values: %3$s"
+msgstr "Назначено: %1$s · отсутствует: %2$s · значений поставщика: %3$s"
+
+#: inc/product-analytics.php:150 inc/product-analytics.php:373
+msgid "Service code / requires verification"
+msgstr "Служебный код / требует проверки"
+
+#: inc/product-analytics.php:151
+msgid ""
+"This warehouse uses analytics schema v1. Rebuild its snapshot with schema v2 "
+"to use suppliers, regular demand and movements."
+msgstr ""
+"Этот склад использует схему аналитики v1. Повторно сформируйте снимок по "
+"схеме v2, чтобы использовать поставщиков, регулярный спрос и движения."
+
+#: inc/product-analytics.php:152
+msgid "movement rows"
+msgstr "строк движения"
+
+#: inc/product-analytics.php:153
+msgid "No movements match the selected filters."
+msgstr "Нет движений, соответствующих выбранным фильтрам."
+
+#: inc/product-analytics.php:154 inc/product-analytics.php:277
+#: inc/product-analytics.php:278
+msgid "Select a saved filter set"
+msgstr "Выберите сохранённый набор фильтров"
+
+#: inc/product-analytics.php:155
+msgid "The filter set has been saved."
+msgstr "Набор фильтров сохранён."
+
+#: inc/product-analytics.php:156
+msgid "The filter set has been deleted."
+msgstr "Набор фильтров удалён."
+
+#: inc/product-analytics.php:157 inc/product-analytics.php:898
+msgid "Enter a name for the filter set."
+msgstr "Введите название набора фильтров."
+
+#: inc/product-analytics.php:158
+msgid "Delete the selected filter set?"
+msgstr "Удалить выбранный набор фильтров?"
+
+#: inc/product-analytics.php:160 inc/product-analytics.php:294
 msgid "Healthy"
 msgstr "Норма"
 
-#: inc/product-analytics.php:116 inc/product-analytics.php:166
-#: inc/product-analytics.php:192 inc/product-analytics.php:217
+#: inc/product-analytics.php:161 inc/product-analytics.php:259
+#: inc/product-analytics.php:295 inc/product-analytics.php:321
 msgid "Stockout"
 msgstr "Дефицит"
 
-#: inc/product-analytics.php:117 inc/product-analytics.php:167
-#: inc/product-analytics.php:193 inc/product-analytics.php:220
+#: inc/product-analytics.php:162 inc/product-analytics.php:260
+#: inc/product-analytics.php:296 inc/product-analytics.php:324
 msgid "Dead stock"
 msgstr "Мёртвый запас"
 
-#: inc/product-analytics.php:118 inc/product-analytics.php:168
-#: inc/product-analytics.php:194 inc/product-analytics.php:219
+#: inc/product-analytics.php:163 inc/product-analytics.php:261
+#: inc/product-analytics.php:297 inc/product-analytics.php:323
 msgid "Overstock"
 msgstr "Избыточный запас"
 
-#: inc/product-analytics.php:119 inc/product-analytics.php:195
-#: inc/product-analytics.php:218
-msgid "Low or negative margin"
-msgstr "Низкая или отрицательная маржа"
+#: inc/product-analytics.php:164 inc/product-analytics.php:262
+#: inc/product-analytics.php:298 inc/product-analytics.php:322
+msgid "Negative gross profit, 3 months"
+msgstr "Отрицательная валовая прибыль за 3 месяца"
 
-#: inc/product-analytics.php:120 inc/product-analytics.php:170
-#: inc/product-analytics.php:196 inc/product-analytics.php:221
+#: inc/product-analytics.php:165 inc/product-analytics.php:263
+#: inc/product-analytics.php:299 inc/product-analytics.php:325
 msgid "Demand fading"
 msgstr "Падение спроса"
 
-#: inc/product-analytics.php:121 inc/product-analytics.php:197
-#: inc/product-analytics.php:216
+#: inc/product-analytics.php:166 inc/product-analytics.php:302
+#: inc/product-analytics.php:326
+msgid "Stock supported only by one-off sales"
+msgstr "Остаток поддерживают только разовые продажи"
+
+#: inc/product-analytics.php:167 inc/product-analytics.php:300
+#: inc/product-analytics.php:320
 msgid "Data issue"
 msgstr "Проблема с данными"
 
-#: inc/product-analytics.php:122 inc/product-analytics.php:198
-#: inc/product-analytics.php:208
-#, fuzzy
+#: inc/product-analytics.php:168 inc/product-analytics.php:301
+#: inc/product-analytics.php:312
 msgid "New product"
-msgstr "Один товар"
+msgstr "Новый товар"
 
-#: inc/product-analytics.php:123 inc/product-analytics.php:205
+#: inc/product-analytics.php:169 inc/product-analytics.php:309
 msgid "Unverified"
 msgstr "Не проверено"
 
-#: inc/product-analytics.php:124 inc/product-analytics.php:206
+#: inc/product-analytics.php:170 inc/product-analytics.php:310
 msgid "Verified"
 msgstr "Проверено"
 
-#: inc/product-analytics.php:125 inc/product-analytics.php:207
-#, fuzzy
+#: inc/product-analytics.php:171 inc/product-analytics.php:311
 msgid "Changed after verification"
-msgstr "Ошибка после частичного пересчёта"
+msgstr "Изменено после проверки"
 
-#: inc/product-analytics.php:126 inc/product-analytics.php:209
-#, fuzzy
+#: inc/product-analytics.php:172 inc/product-analytics.php:313
 msgid "Verification failed"
-msgstr "Ошибка пересчёта"
+msgstr "Проверка неуспешна"
 
-#: inc/product-analytics.php:127
+#: inc/product-analytics.php:173
 msgid "Removed from Folio"
 msgstr "Удалено из ФОЛИО"
 
-#: inc/product-analytics.php:139
+#: inc/product-analytics.php:174
+msgid "Current assignment"
+msgstr "Текущее назначение"
+
+#: inc/product-analytics.php:175
+msgid "Missing assignment"
+msgstr "Назначение отсутствует"
+
+#: inc/product-analytics.php:176
+msgid "Sale"
+msgstr "Продажа"
+
+#: inc/product-analytics.php:177
+msgid "Customer return"
+msgstr "Возврат от покупателя"
+
+#: inc/product-analytics.php:178
+msgid "Supplier return"
+msgstr "Возврат поставщику"
+
+#: inc/product-analytics.php:179
+msgid "Purchase receipt"
+msgstr "Приход от поставщика"
+
+#: inc/product-analytics.php:180
+msgid "Other receipt"
+msgstr "Другой приход"
+
+#: inc/product-analytics.php:181
+msgid "Internal receipt"
+msgstr "Внутренний приход"
+
+#: inc/product-analytics.php:182
+msgid "Internal expense"
+msgstr "Внутренний расход"
+
+#: inc/product-analytics.php:183
+msgid "Transfer in"
+msgstr "Приход перемещения"
+
+#: inc/product-analytics.php:184
+msgid "Transfer out"
+msgstr "Расход перемещения"
+
+#: inc/product-analytics.php:185
+msgid "Assembly input"
+msgstr "Приход со сборки"
+
+#: inc/product-analytics.php:186
+msgid "Assembly output"
+msgstr "Расход на сборку"
+
+#: inc/product-analytics.php:187
+msgid "Inventory correction in"
+msgstr "Оприходование инвентаризации"
+
+#: inc/product-analytics.php:188
+msgid "Inventory correction out"
+msgstr "Списание инвентаризации"
+
+#: inc/product-analytics.php:189
+msgid "Defect receipt"
+msgstr "Приход брака"
+
+#: inc/product-analytics.php:190
+msgid "Defect expense"
+msgstr "Расход брака"
+
+#: inc/product-analytics.php:191
+msgid "Internal-use receipt"
+msgstr "Приход с внутреннего использования"
+
+#: inc/product-analytics.php:192
+msgid "Internal-use expense"
+msgstr "Расход на внутреннее использование"
+
+#: inc/product-analytics.php:193
+msgid "Marketing receipt"
+msgstr "Маркетинговый приход"
+
+#: inc/product-analytics.php:194
+msgid "Marketing expense"
+msgstr "Маркетинговый расход"
+
+#: inc/product-analytics.php:195
+msgid "Reservation"
+msgstr "Резервирование"
+
+#: inc/product-analytics.php:196
+msgid "Other expense"
+msgstr "Другой расход"
+
+#: inc/product-analytics.php:197
+msgid "Unclassified movement"
+msgstr "Неклассифицированное движение"
+
+#: inc/product-analytics.php:198 inc/product-analytics.php:424
+msgid "Regular demand"
+msgstr "Регулярный спрос"
+
+#: inc/product-analytics.php:199
+msgid "One-off order"
+msgstr "Разовый заказ"
+
+#: inc/product-analytics.php:200
+msgid "Not applicable"
+msgstr "Не применяется"
+
+#: inc/product-analytics.php:201
+msgid "Prepayment"
+msgstr "Предоплата"
+
+#: inc/product-analytics.php:202
+msgid "Deferred payment, 30 days"
+msgstr "Отсрочка платежа, 30 дней"
+
+#: inc/product-analytics.php:203
+msgid "Deferred payment, 60 days"
+msgstr "Отсрочка платежа, 60 дней"
+
+#: inc/product-analytics.php:204
+msgid "Deferred payment, 90 days"
+msgstr "Отсрочка платежа, 90 дней"
+
+#: inc/product-analytics.php:205
+msgid "Deferred payment, 180 days"
+msgstr "Отсрочка платежа, 180 дней"
+
+#: inc/product-analytics.php:206
+msgid "Payment on fact"
+msgstr "Оплата по факту"
+
+#: inc/product-analytics.php:207
+msgid "Not specified"
+msgstr "Не указано"
+
+#: inc/product-analytics.php:208
+msgid "Retail customer"
+msgstr "Розничный клиент"
+
+#: inc/product-analytics.php:209
+msgid "Non-retail customer"
+msgstr "Нерозничный клиент"
+
+#: inc/product-analytics.php:210
+msgid "Unknown"
+msgstr "Неизвестно"
+
+#: inc/product-analytics.php:211
+msgid "Incoming"
+msgstr "Приход"
+
+#: inc/product-analytics.php:212
+msgid "Outgoing"
+msgstr "Расход"
+
+#: inc/product-analytics.php:213
+msgid "No stock direction"
+msgstr "Без направления остатка"
+
+#: inc/product-analytics.php:225
 msgid ""
 "Read-only stock, capital and commercial-sales analytics from published Folio "
 "snapshots."
@@ -2388,190 +3111,557 @@ msgstr ""
 "Аналитика запасов, капитала и коммерческих продаж из опубликованных снимков "
 "ФОЛИО без возможности изменения данных."
 
-#: inc/product-analytics.php:145
+#: inc/product-analytics.php:231
 msgid "Current reporting boundaries"
 msgstr "Текущие границы отчёта"
 
-#: inc/product-analytics.php:146
+#: inc/product-analytics.php:232
 msgid ""
 "Sales are commercial sales total. Profit is gross profit before returns. "
 "Coverage is an analytical signal, not a purchase or transfer order."
 msgstr ""
-"Продажи показаны как все коммерческие продажи. Прибыль является валовой до возвратов. "
-"Покрытие запасом является аналитическим сигналом, а не заказом на закупку или перемещение."
+"Продажи показаны как все коммерческие продажи. Прибыль является валовой до "
+"возвратов. Покрытие запасом является аналитическим сигналом, а не заказом на "
+"закупку или перемещение."
 
-#: inc/product-analytics.php:152
-#, fuzzy
+#: inc/product-analytics.php:238
 msgid "Loading snapshots..."
-msgstr "Загрузка складов..."
+msgstr "Загрузка снимков..."
 
-#: inc/product-analytics.php:154
+#: inc/product-analytics.php:240
 msgid "Reload report"
 msgstr "Обновить отчёт"
 
-#: inc/product-analytics.php:159
-#, fuzzy
+#: inc/product-analytics.php:245
 msgid "Warehouse summary"
-msgstr "Склад"
+msgstr "Итог по складу"
 
-#: inc/product-analytics.php:161
+#: inc/product-analytics.php:247
+msgid "Analytics section"
+msgstr "Раздел аналитики"
+
+#: inc/product-analytics.php:249
+msgid "Product movements"
+msgstr "Движения товара"
+
+#: inc/product-analytics.php:254
 msgid "Saved analytics views"
 msgstr "Готовые представления аналитики"
 
-#: inc/product-analytics.php:164
-#, fuzzy
+#: inc/product-analytics.php:257
 msgid "All products"
-msgstr "Допущено к пересчёту"
+msgstr "Все товары"
 
-#: inc/product-analytics.php:165
+#: inc/product-analytics.php:258
 msgid "Data issues"
 msgstr "Проблемы с данными"
 
-#: inc/product-analytics.php:169
-msgid "Low margin"
-msgstr "Низкая маржа"
-
-#: inc/product-analytics.php:172
+#: inc/product-analytics.php:265
 msgid "Revenue leaders"
 msgstr "Лидеры по выручке"
 
-#: inc/product-analytics.php:173
+#: inc/product-analytics.php:266
 msgid "Profit leaders"
 msgstr "Лидеры по прибыли"
 
-#: inc/product-analytics.php:174
+#: inc/product-analytics.php:267
 msgid "Capital efficiency"
 msgstr "Эффективность капитала"
 
-#: inc/product-analytics.php:184
+#: inc/product-analytics.php:275 inc/product-analytics.php:276
+msgid "Saved filter sets"
+msgstr "Сохранённые наборы фильтров"
+
+#: inc/product-analytics.php:280
+msgid "Filter set name"
+msgstr "Название набора фильтров"
+
+#: inc/product-analytics.php:281
+msgid "Save filter set"
+msgstr "Сохранить набор фильтров"
+
+#: inc/product-analytics.php:282
+msgid "Delete selected set"
+msgstr "Удалить выбранный набор"
+
+#: inc/product-analytics.php:287
 msgid "SKU or product name"
 msgstr "Артикул или название товара"
 
-#: inc/product-analytics.php:188
+#: inc/product-analytics.php:291
 msgid "Economic status"
 msgstr "Экономическое состояние"
 
-#: inc/product-analytics.php:190
-#, fuzzy
+#: inc/product-analytics.php:293
 msgid "All statuses"
-msgstr "Этап применения"
+msgstr "Все статусы"
 
-#: inc/product-analytics.php:202
+#: inc/product-analytics.php:306
 msgid "Verification state"
 msgstr "Состояние проверки"
 
-#: inc/product-analytics.php:204
-#, fuzzy
+#: inc/product-analytics.php:308
 msgid "All states"
-msgstr "Этап применения"
+msgstr "Все состояния"
 
-#: inc/product-analytics.php:213
+#: inc/product-analytics.php:317
 msgid "Active alert"
 msgstr "Активное предупреждение"
 
-#: inc/product-analytics.php:215
+#: inc/product-analytics.php:319
 msgid "All alerts"
 msgstr "Все предупреждения"
 
-#: inc/product-analytics.php:225
-#, fuzzy
-msgid "Alert severity"
-msgstr "Уровень"
+#: inc/product-analytics.php:330
+msgid "Alert status"
+msgstr "Статус предупреждения"
 
-#: inc/product-analytics.php:227
+#: inc/product-analytics.php:331
+msgid "Active and resolved alerts"
+msgstr "Активные и закрытые предупреждения"
+
+#: inc/product-analytics.php:331
+msgid "Active alerts"
+msgstr "Активные предупреждения"
+
+#: inc/product-analytics.php:331
+msgid "Resolved alerts"
+msgstr "Закрытые предупреждения"
+
+#: inc/product-analytics.php:334
+msgid "Alert severity"
+msgstr "Уровень предупреждения"
+
+#: inc/product-analytics.php:336
 msgid "All severities"
 msgstr "Все уровни важности"
 
-#: inc/product-analytics.php:229
+#: inc/product-analytics.php:338
 msgid "High"
 msgstr "Высокий"
 
-#: inc/product-analytics.php:230
+#: inc/product-analytics.php:339
 msgid "Medium"
 msgstr "Средний"
 
-#: inc/product-analytics.php:231
+#: inc/product-analytics.php:340
 msgid "Low"
 msgstr "Низкий"
 
-#: inc/product-analytics.php:235
-msgid "Sales, 365 days"
-msgstr "Продажи за 365 дней"
-
-#: inc/product-analytics.php:237
+#: inc/product-analytics.php:346
 msgid "Any sales"
 msgstr "Любые продажи"
 
-#: inc/product-analytics.php:238
+#: inc/product-analytics.php:347
 msgid "With sales"
 msgstr "Есть продажи"
 
-#: inc/product-analytics.php:239
+#: inc/product-analytics.php:348
 msgid "Without sales"
 msgstr "Без продаж"
 
-#: inc/product-analytics.php:243
+#: inc/product-analytics.php:353
+msgid "Current supplier filter"
+msgstr "Отбор по текущему поставщику"
+
+#: inc/product-analytics.php:355
+msgid "Do not filter by supplier"
+msgstr "Не отбирать по поставщику"
+
+#: inc/product-analytics.php:356
+msgid "Include selected suppliers"
+msgstr "Включить выбранных поставщиков"
+
+#: inc/product-analytics.php:357
+msgid "Exclude selected suppliers"
+msgstr "Исключить выбранных поставщиков"
+
+#: inc/product-analytics.php:361
+msgid "Suppliers"
+msgstr "Поставщики"
+
+#: inc/product-analytics.php:364
+msgid ""
+"Select one or more suppliers. The mode controls whether they are included in "
+"or excluded from the product registry."
+msgstr ""
+"Выберите одного или нескольких поставщиков. Режим определяет, включать их в "
+"реестр товаров или исключать из него."
+
+#: inc/product-analytics.php:368
+msgid "Supplier data quality"
+msgstr "Качество назначения поставщика"
+
+#: inc/product-analytics.php:370
+msgid "Any supplier assignment"
+msgstr "Любое назначение поставщика"
+
+#: inc/product-analytics.php:371
+msgid "Supplier assigned"
+msgstr "Поставщик назначен"
+
+#: inc/product-analytics.php:372
+msgid "Supplier missing"
+msgstr "Поставщик отсутствует"
+
+#: inc/product-analytics.php:377
+msgid "Available stock sign"
+msgstr "Знак доступного остатка"
+
+#: inc/product-analytics.php:379
+msgid "Any available stock"
+msgstr "Любой доступный остаток"
+
+#: inc/product-analytics.php:380
+msgid "Zero or negative"
+msgstr "Нулевой или отрицательный"
+
+#: inc/product-analytics.php:381
+msgid "Exactly zero"
+msgstr "Точно ноль"
+
+#: inc/product-analytics.php:382
+msgid "Positive"
+msgstr "Положительный"
+
+#: inc/product-analytics.php:388
+msgid "Any accounting price"
+msgstr "Любая учётная цена"
+
+#: inc/product-analytics.php:389
+msgid "Zero accounting price"
+msgstr "Нулевая учётная цена"
+
+#: inc/product-analytics.php:390
+msgid "Positive accounting price"
+msgstr "Положительная учётная цена"
+
+#: inc/product-analytics.php:394
+msgid "Stock and capital filters"
+msgstr "Фильтры остатков и капитала"
+
+#: inc/product-analytics.php:398
+msgid "Physical quantity from"
+msgstr "Физическое количество от"
+
+#: inc/product-analytics.php:399
+msgid "Physical quantity through"
+msgstr "Физическое количество до"
+
+#: inc/product-analytics.php:400
+msgid "Reserved quantity from"
+msgstr "Зарезервированное количество от"
+
+#: inc/product-analytics.php:401
+msgid "Reserved quantity through"
+msgstr "Зарезервированное количество до"
+
+#: inc/product-analytics.php:402
+msgid "Available quantity from"
+msgstr "Доступное количество от"
+
+#: inc/product-analytics.php:403
+msgid "Available quantity through"
+msgstr "Доступное количество до"
+
+#: inc/product-analytics.php:412
+msgid "Demand filters"
+msgstr "Фильтры спроса"
+
+#: inc/product-analytics.php:415
+msgid "Demand period"
+msgstr "Период спроса"
+
+#: inc/product-analytics.php:417
+msgid "Current month"
+msgstr "Текущий месяц"
+
+#: inc/product-analytics.php:418 inc/product-analytics.php:455
+msgid "3 months"
+msgstr "3 месяца"
+
+#: inc/product-analytics.php:419 inc/product-analytics.php:455
+msgid "12 months"
+msgstr "12 месяцев"
+
+#: inc/product-analytics.php:420
+msgid "24 months"
+msgstr "24 месяца"
+
+#: inc/product-analytics.php:426
+msgid "Any regular demand"
+msgstr "Любой регулярный спрос"
+
+#: inc/product-analytics.php:427
+msgid "With regular demand"
+msgstr "Есть регулярный спрос"
+
+#: inc/product-analytics.php:428
+msgid "Without regular demand"
+msgstr "Без регулярного спроса"
+
+#: inc/product-analytics.php:432
+msgid "One-off sales"
+msgstr "Разовые продажи"
+
+#: inc/product-analytics.php:434
+msgid "Any one-off sales"
+msgstr "Любые разовые продажи"
+
+#: inc/product-analytics.php:435
+msgid "With one-off sales"
+msgstr "Есть разовые продажи"
+
+#: inc/product-analytics.php:436
+msgid "Without one-off sales"
+msgstr "Без разовых продаж"
+
+#: inc/product-analytics.php:437
+msgid "Only one-off sales, no regular demand"
+msgstr "Только разовые продажи, без регулярного спроса"
+
+#: inc/product-analytics.php:443
 msgid "Minimum capital"
 msgstr "Минимальный капитал"
 
-#: inc/product-analytics.php:247
+#: inc/product-analytics.php:447
 msgid "Maximum capital"
 msgstr "Максимальный капитал"
 
-#: inc/product-analytics.php:251
+#: inc/product-analytics.php:451
+msgid "Financial efficiency filters"
+msgstr "Фильтры финансовой эффективности"
+
+#: inc/product-analytics.php:454
+msgid "Financial period"
+msgstr "Финансовый период"
+
+#: inc/product-analytics.php:459
+msgid "Revenue from"
+msgstr "Выручка от"
+
+#: inc/product-analytics.php:460
+msgid "Revenue through"
+msgstr "Выручка до"
+
+#: inc/product-analytics.php:461
+msgid "Gross profit from"
+msgstr "Валовая прибыль от"
+
+#: inc/product-analytics.php:462
+msgid "Gross profit through"
+msgstr "Валовая прибыль до"
+
+#: inc/product-analytics.php:463
+msgid "Average capital from"
+msgstr "Средний капитал от"
+
+#: inc/product-analytics.php:464
+msgid "Average capital through"
+msgstr "Средний капитал до"
+
+#: inc/product-analytics.php:465
+msgid "Gross margin from, %"
+msgstr "Валовая маржа от, %"
+
+#: inc/product-analytics.php:466
+msgid "Gross margin through, %"
+msgstr "Валовая маржа до, %"
+
+#: inc/product-analytics.php:467
+msgid "Inventory turns from"
+msgstr "Оборачиваемость запасов от"
+
+#: inc/product-analytics.php:468
+msgid "Inventory turns through"
+msgstr "Оборачиваемость запасов до"
+
+#: inc/product-analytics.php:469
+msgid "GMROI from"
+msgstr "GMROI от"
+
+#: inc/product-analytics.php:470
+msgid "GMROI through"
+msgstr "GMROI до"
+
+#: inc/product-analytics.php:471
+msgid "Coverage from, days"
+msgstr "Покрытие от, дней"
+
+#: inc/product-analytics.php:472
+msgid "Coverage through, days"
+msgstr "Покрытие до, дней"
+
+#: inc/product-analytics.php:481
 msgid "Last sale from"
 msgstr "Последняя продажа от"
 
-#: inc/product-analytics.php:255
+#: inc/product-analytics.php:485
 msgid "Last sale through"
 msgstr "Последняя продажа до"
 
-#: inc/product-analytics.php:259
+#: inc/product-analytics.php:489
+msgid "Additional date filters"
+msgstr "Дополнительные фильтры по датам"
+
+#: inc/product-analytics.php:493
+msgid "Last regular sale from"
+msgstr "Последняя регулярная продажа от"
+
+#: inc/product-analytics.php:494
+msgid "Last regular sale through"
+msgstr "Последняя регулярная продажа до"
+
+#: inc/product-analytics.php:495
+msgid "Last receipt from"
+msgstr "Последний приход от"
+
+#: inc/product-analytics.php:496
+msgid "Last receipt through"
+msgstr "Последний приход до"
+
+#: inc/product-analytics.php:497
+msgid "First movement from"
+msgstr "Первое движение от"
+
+#: inc/product-analytics.php:498
+msgid "First movement through"
+msgstr "Первое движение до"
+
+#: inc/product-analytics.php:499
+msgid "Last movement from"
+msgstr "Последнее движение от"
+
+#: inc/product-analytics.php:500
+msgid "Last movement through"
+msgstr "Последнее движение до"
+
+#: inc/product-analytics.php:501
+msgid "Alert first seen from"
+msgstr "Первое обнаружение предупреждения от"
+
+#: inc/product-analytics.php:502
+msgid "Alert first seen through"
+msgstr "Первое обнаружение предупреждения до"
+
+#: inc/product-analytics.php:503
+msgid "Alert last confirmed from"
+msgstr "Последнее подтверждение предупреждения от"
+
+#: inc/product-analytics.php:504
+msgid "Alert last confirmed through"
+msgstr "Последнее подтверждение предупреждения до"
+
+#: inc/product-analytics.php:513 inc/product-analytics.php:590
 msgid "Rows per page"
 msgstr "Строк на странице"
 
-#: inc/product-analytics.php:267
-#, fuzzy
+#: inc/product-analytics.php:521
 msgid "Apply filters"
-msgstr "Этап применения"
+msgstr "Применить фильтры"
 
-#: inc/product-analytics.php:268
+#: inc/product-analytics.php:522 inc/product-analytics.php:593
 msgid "Reset"
 msgstr "Сбросить"
 
-#: inc/product-analytics.php:319
-#, fuzzy
+#: inc/product-analytics.php:540
+msgid ""
+"This registry shows published Folio movement facts. Filtering is performed "
+"server-side and does not recalculate the product summary cards above."
+msgstr ""
+"Этот реестр показывает опубликованные движения ФОЛІО. Фильтрация выполняется "
+"на сервере и не пересчитывает итоговые показатели товаров выше."
+
+#: inc/product-analytics.php:544
+msgid "Document date from"
+msgstr "Дата документа от"
+
+#: inc/product-analytics.php:545
+msgid "Document date through"
+msgstr "Дата документа до"
+
+#: inc/product-analytics.php:559
+msgid "All movement classes"
+msgstr "Все классы движения"
+
+#: inc/product-analytics.php:574
+msgid "All values"
+msgstr "Все значения"
+
+#: inc/product-analytics.php:580
+msgid "Affects stock"
+msgstr "Влияет на остаток"
+
+#: inc/product-analytics.php:581
+msgid "Affects financial sales"
+msgstr "Влияет на финансовые продажи"
+
+#: inc/product-analytics.php:582
+msgid "Affects planning demand"
+msgstr "Влияет на плановый спрос"
+
+#: inc/product-analytics.php:586
+msgid "Any value"
+msgstr "Любое значение"
+
+#: inc/product-analytics.php:592
+msgid "Apply movement filters"
+msgstr "Применить фильтры движения"
+
+#: inc/product-analytics.php:648
+msgid ""
+"The Folio movement facts have not been published to this WordPress database "
+"yet. Rebuild the snapshot with analytics schema v2."
+msgstr ""
+"Факты движения ФОЛІО ещё не опубликованы в этой базе WordPress. Повторно "
+"сформируйте снимок по схеме аналитики v2."
+
+#: inc/product-analytics.php:657
 msgid "A Folio source database and warehouse are required."
-msgstr "Необходимо указать артикул и склад ФОЛИО."
+msgstr "Нужно выбрать базу данных и склад ФОЛИО."
 
-#: inc/product-analytics.php:523
-#, fuzzy
+#: inc/product-analytics.php:700
+msgid ""
+"No completed active Folio product snapshot is available for this warehouse."
+msgstr "Для этого склада нет завершённого активного снимка товаров ФОЛІО."
+
+#: inc/product-analytics.php:904
+msgid "The filter set data is invalid."
+msgstr "Данные набора фильтров некорректны."
+
+#: inc/product-analytics.php:924
+msgid "No more than 30 saved filter sets are allowed."
+msgstr "Можно сохранить не более 30 наборов фильтров."
+
+#: inc/product-analytics.php:992 inc/product-analytics.php:1196
+msgid "This snapshot must be rebuilt with analytics schema v2."
+msgstr "Этот снимок нужно повторно сформировать по схеме аналитики v2."
+
+#: inc/product-analytics.php:1295
 msgid "A product SKU is required."
-msgstr "Необходимо указать склад ФОЛИО."
+msgstr "Нужно указать артикул товара."
 
-#: inc/product-analytics.php:532
+#: inc/product-analytics.php:1304
 msgid "The requested product was not found in this snapshot."
 msgstr "Запрошенный товар не найден в этом снимке."
 
-#: inc/product-analytics.php:570
+#: inc/product-analytics.php:1342
 msgid "The analytics database query failed. Check the server log."
 msgstr "Ошибка запроса к базе аналитики. Проверьте журнал сервера."
 
-#: inc/product-analytics.php:575
-#, fuzzy
+#: inc/product-analytics.php:1347
 msgid "You do not have permission to view product analytics."
-msgstr "У вас нет разрешения на выполнение этой операции."
+msgstr "У вас нет разрешения на просмотр товарной аналитики."
 
-#: inc/product-analytics.php:582
+#: inc/product-analytics.php:1354
 msgid ""
 "The Folio analytics tables have not been published to this WordPress "
 "database yet."
 msgstr "Таблицы аналитики ФОЛИО ещё не опубликованы в этой базе WordPress."
 
-#: inc/product-analytics.php:596
-#, fuzzy
+#: inc/product-analytics.php:1376
 msgid "Unsupported product-analytics operation."
-msgstr "Операция с учётной ценой не поддерживается."
+msgstr "Операция товарной аналитики не поддерживается."
 
 #: inc/sync.php:215
 msgid "Manual paged price synchronization"
@@ -2589,377 +3679,8 @@ msgstr ""
 msgid "Manual listed price synchronization"
 msgstr "Ручная синхронизация цен для указанных SKU"
 
-#~ msgid ""
-#~ "The schedule is disabled by default. A scheduled run performs real Folio "
-#~ "changes after Java completes its mandatory rollback preflight."
-#~ msgstr ""
-#~ "Расписание по умолчанию отключено. Плановый запуск вносит реальные "
-#~ "изменения в ФОЛИО после обязательной предварительной проверки Java с "
-#~ "откатом."
-
-#~ msgid ""
-#~ "Selected warehouses are processed sequentially: first all previews, then "
-#~ "recalculation of warehouses whose preview completed safely. Problem "
-#~ "products are skipped and recorded; one warehouse error does not stop the "
-#~ "remaining queue."
-#~ msgstr ""
-#~ "Выбранные склады обрабатываются последовательно: сначала все "
-#~ "предварительные проверки, затем пересчёт складов, проверка которых "
-#~ "завершилась безопасно. Проблемные товары пропускаются и записываются; "
-#~ "ошибка одного склада не останавливает остальную очередь."
-
-#~ msgid ""
-#~ "I understand that the schedule checks every selected warehouse and "
-#~ "recalculates all safe products. Problem products and failed warehouses "
-#~ "are recorded in the report while the remaining queue continues."
-#~ msgstr ""
-#~ "Я понимаю, что расписание проверяет каждый выбранный склад и "
-#~ "пересчитывает все безопасные товары. Проблемные товары и склады с "
-#~ "ошибками записываются в отчёт, а остальная очередь продолжается."
-
-#~ msgid ""
-#~ "The Java service returned an unexpected final status. The remaining "
-#~ "warehouse queue and the weekly schedule are stopped until manual review."
-#~ msgstr ""
-#~ "Java-сервис вернул неожиданный финальный статус. Оставшаяся очередь "
-#~ "складов и недельное расписание остановлены до ручной проверки."
-
-#~ msgid ""
-#~ "A warehouse preview returned PREVIEW_READY without all required safety "
-#~ "guarantees. The warehouse queue and the weekly schedule are stopped."
-#~ msgstr ""
-#~ "Предварительная проверка склада вернула PREVIEW_READY без всех "
-#~ "обязательных гарантий безопасности. Очередь складов и недельное "
-#~ "расписание остановлены."
-
-#~ msgid "Starting a read-only warehouse check..."
-#~ msgstr "Запускаем проверку склада без изменений..."
-
-#~ msgid ""
-#~ "Recalculate accounting prices for the entire selected warehouse? "
-#~ "Previously committed products cannot be rolled back as one batch."
-#~ msgstr ""
-#~ "Пересчитать учётные цены всего выбранного склада? Уже зафиксированные "
-#~ "товары невозможно откатить одним пакетом."
-
-#~ msgid "The task completed with warnings. Some products were skipped."
-#~ msgstr "Задание завершено с предупреждениями. Некоторые товары пропущены."
-
-#~ msgid "Recalculated products"
-#~ msgstr "Пересчитано товаров"
-
-#~ msgid "Prices changed"
-#~ msgstr "Цены изменены"
-
-#~ msgid "Skip products with negative chronological stock and continue."
-#~ msgstr ""
-#~ "Пропускать товары с отрицательным хронологическим остатком и продолжать."
-
-#~ msgid "Check entire warehouse without changes"
-#~ msgstr "Проверить весь склад без изменений"
-
-#~ msgid "Recalculate entire warehouse in Folio"
-#~ msgstr "Пересчитать весь склад в ФОЛИО"
-
-#~ msgid "Lavka Price hourly"
-#~ msgstr "Lavka Price — ежечасно"
-
-msgid "The product is present in the current Folio warehouse snapshot, but no successful accounting-price recalculation has been confirmed for it yet."
-msgstr "Товар присутствует в текущем снимке склада ФОЛІО, но для него ещё не подтверждён успешный пересчёт учётной цены."
-
-msgid "The product was first found in Folio and has not yet received a confirmed recalculation."
-msgstr "Товар впервые найден в ФОЛИО, и для него ещё нет подтверждённого пересчёта."
-
-msgid "The Folio movement fingerprint changed after the last confirmed recalculation."
-msgstr "Отпечаток движений ФОЛИО изменился после последнего подтверждённого пересчёта."
-
-msgid "The product recalculation failed. Review the saved error and correct the Folio data before retrying."
-msgstr "Пересчёт товара завершился ошибкой. Просмотрите сохранённую ошибку и исправьте данные ФОЛИО перед повторным запуском."
-
-msgid "The product existed in an earlier snapshot but is absent from the current Folio warehouse snapshot."
-msgstr "Товар был в предыдущем снимке, но отсутствует в текущем снимке склада ФОЛИО."
-
-msgid "Select a supported snapshot state."
-msgstr "Выберите поддерживаемое состояние снимка."
-
-msgid "The Folio product snapshot tables are unavailable."
-msgstr "Таблицы снимка товаров ФОЛИО недоступны."
-
-msgid "No completed snapshot is available for this campaign."
-msgstr "Для этой кампании нет доступного завершённого снимка."
-
-msgid "State"
-msgstr "Состояние"
-
-msgid "Last error"
-msgstr "Последняя ошибка"
-
-msgid "Present in Folio"
-msgstr "Присутствует в ФОЛИО"
-
-msgid "Movements"
-msgstr "Движений"
-
-msgid "First movement"
-msgstr "Первое движение"
-
-msgid "Last movement"
-msgstr "Последнее движение"
-
-msgid "Last observed"
-msgstr "Последнее наблюдение"
-
-msgid "Last recalculated"
-msgstr "Последний пересчёт"
-
-msgid "Latest change"
-msgstr "Последнее изменение"
-
-msgid "Change detected"
-msgstr "Изменение обнаружено"
-
-msgid "No"
-msgstr "Нет"
-
-msgid "Operation quantity"
-msgstr "Количество операции"
-
-msgid "Snapshot state report"
-msgstr "Отчёт по состояниям снимка"
-
-msgid "Open UNVERIFIED, NEW, DIRTY, FAILED, or REMOVED to review the actual products behind the counters."
-msgstr "Откройте UNVERIFIED, NEW, DIRTY, FAILED или REMOVED, чтобы просмотреть товары, входящие в эти счётчики."
-
-msgid "View"
-msgstr "Просмотреть"
-
-msgid "Export selected state CSV"
-msgstr "Экспортировать выбранное состояние в CSV"
-
-msgid "There are no products in this snapshot state."
-msgstr "В этом состоянии снимка нет товаров."
-
-msgid "Why this state is assigned"
-msgstr "Почему назначено это состояние"
-
-msgid "Movement period"
-msgstr "Период движений"
-
-msgid "Previous page"
-msgstr "Предыдущая страница"
-
-msgid "Next page"
-msgstr "Следующая страница"
-
-msgid "The chronological stock became negative at this movement. Check the document date, quantity, warehouse, and movement order in Folio."
-msgstr "На этом движении хронологический остаток стал отрицательным. Проверьте в ФОЛИО дату документа, количество, склад и последовательность движений."
-
-msgid "Movement record"
-msgstr "Запись движения"
-
-msgid "Movement position"
-msgstr "Позиция движения"
-
-msgid "Current physical quantity"
-msgstr "Текущий физический остаток"
-
-msgid "Current accounting quantity"
-msgstr "Текущий учётный остаток"
-
-msgid "Warehouse %d"
-msgstr "Склад %d"
-
-msgid "The snapshot marks this product as failed."
-msgstr "Снимок помечает этот товар как ошибочный."
-
-msgid "All Folio warehouses"
-msgstr "Все склады ФОЛИО"
-
-msgid "Loading the latest state of all Folio warehouses..."
-msgstr "Загрузка последнего состояния всех складов ФОЛИО..."
-
-msgid "Refresh warehouse overview"
-msgstr "Обновить обзор складов"
-
-msgid "Warehouses in directory"
-msgstr "Складов в справочнике"
-
-msgid "Never processed"
-msgstr "Ещё не обрабатывались"
-
-msgid "Warehouses with errors"
-msgstr "Складов с ошибками"
-
-msgid "Negative stock cases"
-msgstr "Случаев отрицательного остатка"
-
-msgid "View negative stock for all warehouses"
-msgstr "Посмотреть отрицательные остатки всех складов"
-
-msgid "View warnings for all warehouses"
-msgstr "Просмотреть предупреждения по всем складам"
-
-msgid "View errors for all warehouses"
-msgstr "Посмотреть ошибки всех складов"
-
-msgid "Processing state"
-msgstr "Состояние обработки"
-
-msgid "Last processing"
-msgstr "Последняя обработка"
-
-msgid "Last snapshot"
-msgstr "Последний снимок"
-
-msgid "Last recalculation"
-msgstr "Последний перерасчёт"
-
-msgid "Negative stock"
-msgstr "Отрицательный остаток"
-
-msgid "Actions"
-msgstr "Действия"
-
-msgid "View warnings"
-msgstr "Просмотреть предупреждения"
-
-msgid "View errors"
-msgstr "Посмотреть ошибки"
-
-msgid "View negative stock"
-msgstr "Посмотреть отрицательный остаток"
-
-msgid "View products"
-msgstr "Посмотреть товары"
-
-msgid "No diagnostics were recorded for the selected warehouses."
-msgstr "Для выбранных складов диагностика не зафиксирована."
-
-msgid "Detailed diagnostics from campaigns completed before this overview was added may be unavailable. Snapshot states and saved last errors are still shown."
-msgstr "Подробная диагностика кампаний, завершённых до добавления этого обзора, может быть недоступна. Состояния снимка и сохранённые последние ошибки всё равно отображаются."
-
-msgid "The Java warehouse directory is temporarily unavailable. Warehouses known from saved schedules and snapshots are still shown."
-msgstr "Справочник складов Java временно недоступен. Склады, известные из сохранённого расписания и снимков, всё равно отображаются."
-
-msgid "Latest warehouse diagnostics"
-msgstr "Последняя диагностика складов"
-
-msgid "Recorded at"
-msgstr "Зафиксировано"
-
-msgid "No snapshot has been created"
-msgstr "Снимок ещё не создавался"
-
-msgid "Not processed yet"
-msgstr "Ещё не обрабатывался"
-
-msgid "Snapshot is being built"
-msgstr "Снимок формируется"
-
-msgid "Processed before detailed history was enabled"
-msgstr "Обработано до включения подробной истории"
-
-msgid "Warehouse processing failed"
-msgstr "Обработка склада завершилась ошибкой"
-
-msgid "Final snapshot confirmed"
-msgstr "Финальный снимок подтверждён"
-
-msgid "Processing state for all Folio warehouses"
-msgstr "Состояние обработки всех складов ФОЛИО"
-
-msgid "This permanent overview shows the latest snapshot and processing result for every warehouse, including warehouses that have never been processed."
-msgstr "Этот постоянный обзор показывает последний снимок и результат обработки каждого склада, включая склады, которые ещё ни разу не обрабатывались."
-
-msgid "The warehouse directory is unavailable."
-msgstr "Справочник складов недоступен."
-
-msgid "Snapshot interrupted by Java restart"
-msgstr "Снимок прерван перезапуском Java"
-
-msgid "The product snapshot was interrupted by a Java restart. No process is active. Start the campaign again; the previous active snapshot remains available."
-msgstr "Снимок товаров был прерван перезапуском Java. Активного процесса нет. Запустите кампанию заново; предыдущий активный снимок остаётся доступным."
-
-msgid "Current batch progress"
-msgstr "Прогресс текущей порции"
-
-msgid "Successfully committed SKU"
-msgstr "Успешно зафиксировано SKU"
-
-msgid "The selected Folio SKU batch is empty or exceeds the 500 SKU safety limit. Nothing was sent for recalculation."
-msgstr "Выбранная порция SKU ФОЛИО пуста или превышает безопасное ограничение в 500 SKU. Ничего не отправлено на перерасчёт."
-
-msgid "The matching native-range task has no job ID. Automatic continuation is unsafe and was stopped."
-msgstr "У соответствующего задания native-range отсутствует ID. Безопасное автоматическое продолжение невозможно и было остановлено."
-
-msgid "Job ID"
-msgstr "ID задания"
-
-msgid "The accounting formula denominator is zero. This SKU was rolled back and skipped; check the receipt price, document amount, tax data, and movement order in Folio."
-msgstr "Знаменатель формулы учётной цены равен нулю. Этот SKU откатан и пропущен; проверьте цену прихода, сумму документа, налоговые данные и порядок движений в ФОЛІО."
-
-msgid "Formula"
-msgstr "Формула"
-
-msgid "Numerator"
-msgstr "Числитель"
-
-msgid "Denominator"
-msgstr "Знаменатель"
-
-msgid "Warnings in current batch"
-msgstr "Предупреждения в текущей порции"
-
-msgid "No suppliers are available for this warehouse."
-msgstr "Для этого склада нет доступных поставщиков."
-
-msgid "Current supplier filter"
-msgstr "Отбор по текущему поставщику"
-
-msgid "Do not filter by supplier"
-msgstr "Не отбирать по поставщику"
-
-msgid "Include selected suppliers"
-msgstr "Включить выбранных поставщиков"
-
-msgid "Exclude selected suppliers"
-msgstr "Исключить выбранных поставщиков"
-
-msgid "Suppliers"
-msgstr "Поставщики"
-
-msgid "Select one or more suppliers. The mode controls whether they are included in or excluded from the product registry."
-msgstr "Выберите одного или нескольких поставщиков. Режим определяет, включать их в реестр товаров или исключать из него."
-
-msgid "Saved filter sets"
-msgstr "Сохранённые наборы фильтров"
-
-msgid "Select a saved filter set"
-msgstr "Выберите сохранённый набор фильтров"
-
-msgid "Filter set name"
-msgstr "Название набора фильтров"
-
-msgid "Save filter set"
-msgstr "Сохранить набор фильтров"
-
-msgid "Delete selected set"
-msgstr "Удалить выбранный набор"
-
-msgid "The filter set has been saved."
-msgstr "Набор фильтров сохранён."
-
-msgid "The filter set has been deleted."
-msgstr "Набор фильтров удалён."
-
-msgid "Enter a name for the filter set."
-msgstr "Введите название набора фильтров."
-
-msgid "Delete the selected filter set?"
-msgstr "Удалить выбранный набор фильтров?"
-
-msgid "The filter set data is invalid."
-msgstr "Данные набора фильтров некорректны."
-
-msgid "No more than 30 saved filter sets are allowed."
-msgstr "Можно сохранить не более 30 наборов фильтров."
+#~ msgid "Low or negative margin"
+#~ msgstr "Низкая или отрицательная маржа"
+
+#~ msgid "Low margin"
+#~ msgstr "Низкая маржа"

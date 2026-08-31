@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the Lavka Price Sync plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Lavka Price Sync 0.6.0\n"
+"Project-Id-Version: Lavka Price Sync 0.6.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lavka-price-sync\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-23T04:46:30+00:00\n"
+"POT-Creation-Date: 2026-08-30T20:20:59+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: lavka-price-sync\n"
@@ -26,260 +26,447 @@ msgstr ""
 msgid "Sync role-based prices from Java service to WooCommerce (meta: _wpc_price_role_<role>)."
 msgstr ""
 
-#: inc/accounting-price-campaign.php:54
+#: inc/accounting-price-campaign.php:60
 msgid "The global Lavka lock is unavailable. The SKU campaign was not started."
 msgstr ""
 
-#: inc/accounting-price-campaign.php:63
+#: inc/accounting-price-campaign.php:69
 msgid "Folio accounting-price SKU campaign"
 msgstr ""
 
-#: inc/accounting-price-campaign.php:251
-msgid "Select at least one Folio warehouse."
+#: inc/accounting-price-campaign.php:314
+#: inc/accounting-price-campaign.php:627
+msgid "The Folio product snapshot tables are unavailable."
 msgstr ""
 
-#: inc/accounting-price-campaign.php:254
-msgid "The Folio product snapshot tables are unavailable. Build or migrate the snapshot storage first."
-msgstr ""
-
-#: inc/accounting-price-campaign.php:259
-msgid "An accounting-price SKU campaign is already running."
-msgstr ""
-
-#: inc/accounting-price-campaign.php:263
-msgid "Another Folio accounting-price job is already running."
-msgstr ""
-
-#: inc/accounting-price-campaign.php:304
-msgid "Preparing the first Folio product snapshot."
-msgstr ""
-
-#: inc/accounting-price-campaign.php:313
-msgid "The SKU campaign was accepted."
-msgstr ""
-
-#: inc/accounting-price-campaign.php:328
-#: inc/accounting-price-campaign.php:500
-msgid "Waiting for the global Lavka lock."
-msgstr ""
-
-#: inc/accounting-price-campaign.php:347
-msgid "The Folio product snapshot request was rejected. Check the Java configuration before retrying."
-msgstr ""
-
-#: inc/accounting-price-campaign.php:358
-msgid "The Folio product snapshot is already running. Waiting for its result without sending a duplicate request."
-msgstr ""
-
-#: inc/accounting-price-campaign.php:366
-msgid "The snapshot start result is unknown. Checking status without repeating the request."
-msgstr ""
-
-#: inc/accounting-price-campaign.php:376
-msgid "The Folio product snapshot is being built."
-msgstr ""
-
+#. translators: %d: Folio warehouse ID.
 #: inc/accounting-price-campaign.php:392
-msgid "The snapshot status remained unavailable for two hours. Automatic continuation was stopped."
+#, php-format
+msgid "Warehouse %d"
 msgstr ""
 
-#: inc/accounting-price-campaign.php:398
-msgid "The snapshot status is temporarily unavailable. Waiting without starting another job."
+#: inc/accounting-price-campaign.php:514
+msgid "The snapshot marks this product as failed."
 msgstr ""
 
-#: inc/accounting-price-campaign.php:414
-msgid "Another Folio warehouse snapshot is running. The campaign will wait without sending a duplicate request."
-msgstr ""
-
-#: inc/accounting-price-campaign.php:435
-msgid "The previous snapshot is still active and no new snapshot was started. A new request will be attempted later."
-msgstr ""
-
-#: inc/accounting-price-campaign.php:444
-msgid "The Folio product snapshot did not become active."
-msgstr ""
-
-#: inc/accounting-price-campaign.php:458
-msgid "The active snapshot was built, but its source database could not be resolved in WordPress."
-msgstr ""
-
-#: inc/accounting-price-campaign.php:474
-msgid "The fresh snapshot is ready. Selecting products that require recalculation."
-msgstr ""
-
-#: inc/accounting-price-campaign.php:534
-msgid "The Folio accounting-price slot is busy. No duplicate request was sent; the campaign will check again later."
-msgstr ""
-
-#: inc/accounting-price-campaign.php:556
-msgid "The native-range start outcome could not be proven. Do not retry automatically."
-msgstr ""
-
-#: inc/accounting-price-campaign.php:566
-msgid "The selected SKU batch is being recalculated in Folio."
-msgstr ""
-
-#: inc/accounting-price-campaign.php:582
-msgid "The native-range status remained unavailable for two hours. Do not retry automatically; verify Folio manually."
+#: inc/accounting-price-campaign.php:586
+#: inc/accounting-prices.php:249
+msgid "The product is present in the current Folio warehouse snapshot, but no successful accounting-price recalculation has been confirmed for it yet."
 msgstr ""
 
 #: inc/accounting-price-campaign.php:588
+#: inc/accounting-prices.php:250
+msgid "The product was first found in Folio and has not yet received a confirmed recalculation."
+msgstr ""
+
+#: inc/accounting-price-campaign.php:590
+#: inc/accounting-prices.php:251
+msgid "The Folio movement fingerprint changed after the last confirmed recalculation."
+msgstr ""
+
+#: inc/accounting-price-campaign.php:592
+#: inc/accounting-prices.php:252
+msgid "The product recalculation failed. Review the saved error and correct the Folio data before retrying."
+msgstr ""
+
+#: inc/accounting-price-campaign.php:594
+#: inc/accounting-prices.php:253
+msgid "The product existed in an earlier snapshot but is absent from the current Folio warehouse snapshot."
+msgstr ""
+
+#: inc/accounting-price-campaign.php:624
+#: inc/accounting-price-campaign.php:1569
+msgid "Select a supported snapshot state."
+msgstr ""
+
+#: inc/accounting-price-campaign.php:638
+msgid "No completed snapshot is available for this campaign."
+msgstr ""
+
+#: inc/accounting-price-campaign.php:835
+msgid "Select at least one Folio warehouse."
+msgstr ""
+
+#: inc/accounting-price-campaign.php:838
+msgid "The Folio product snapshot tables are unavailable. Build or migrate the snapshot storage first."
+msgstr ""
+
+#: inc/accounting-price-campaign.php:843
+msgid "An accounting-price SKU campaign is already running."
+msgstr ""
+
+#: inc/accounting-price-campaign.php:847
+msgid "Another Folio accounting-price job is already running."
+msgstr ""
+
+#: inc/accounting-price-campaign.php:892
+msgid "Preparing the first Folio product snapshot."
+msgstr ""
+
+#: inc/accounting-price-campaign.php:901
+msgid "The SKU campaign was accepted."
+msgstr ""
+
+#: inc/accounting-price-campaign.php:916
+#: inc/accounting-price-campaign.php:1118
+msgid "Waiting for the global Lavka lock."
+msgstr ""
+
+#: inc/accounting-price-campaign.php:935
+msgid "The Folio product snapshot request was rejected. Check the Java configuration before retrying."
+msgstr ""
+
+#: inc/accounting-price-campaign.php:946
+msgid "The Folio product snapshot is already running. Waiting for its result without sending a duplicate request."
+msgstr ""
+
+#: inc/accounting-price-campaign.php:954
+msgid "The snapshot start result is unknown. Checking status without repeating the request."
+msgstr ""
+
+#: inc/accounting-price-campaign.php:964
+msgid "The Folio product snapshot is being built."
+msgstr ""
+
+#: inc/accounting-price-campaign.php:980
+msgid "The snapshot status remained unavailable for two hours. Automatic continuation was stopped."
+msgstr ""
+
+#: inc/accounting-price-campaign.php:986
+msgid "The snapshot status is temporarily unavailable. Waiting without starting another job."
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1005
+msgid "The product snapshot was interrupted by a Java restart. No process is active. Start the campaign again; the previous active snapshot remains available."
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1017
+msgid "Another Folio warehouse snapshot is running. The campaign will wait without sending a duplicate request."
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1038
+msgid "The previous snapshot is still active and no new snapshot was started. A new request will be attempted later."
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1047
+msgid "The Folio product snapshot did not become active."
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1061
+msgid "The active snapshot was built, but its source database could not be resolved in WordPress."
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1077
+msgid "The fresh snapshot is ready. Selecting products that require recalculation."
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1107
+msgid "The selected Folio SKU batch is empty or exceeds the 500 SKU safety limit. Nothing was sent for recalculation."
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1153
+msgid "The Folio accounting-price slot is busy. No duplicate request was sent; the campaign will check again later."
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1175
+msgid "The native-range start outcome could not be proven. Do not retry automatically."
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1188
+msgid "The matching native-range task has no job ID. Automatic continuation is unsafe and was stopped."
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1196
+msgid "The selected SKU batch is being recalculated in Folio."
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1212
+msgid "The native-range status remained unavailable for two hours. Do not retry automatically; verify Folio manually."
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1218
 msgid "The native-range status is temporarily unavailable. Waiting without repeating apply."
 msgstr ""
 
-#: inc/accounting-price-campaign.php:603
+#: inc/accounting-price-campaign.php:1234
 msgid "The Java service returned a different native-range job. Manual review is required."
 msgstr ""
 
-#: inc/accounting-price-campaign.php:655
+#: inc/accounting-price-campaign.php:1295
 msgid "The native-range job rejected a chunk. Automatic retry is disabled."
 msgstr ""
 
-#: inc/accounting-price-campaign.php:693
+#: inc/accounting-price-campaign.php:1339
 msgid "The safe products were recalculated; problem products were recorded and skipped."
 msgstr ""
 
-#: inc/accounting-price-campaign.php:694
+#: inc/accounting-price-campaign.php:1340
 msgid "The SKU batch was recalculated successfully."
 msgstr ""
 
-#: inc/accounting-price-campaign.php:704
+#: inc/accounting-price-campaign.php:1350
 msgid "The SKU campaign requires a manual Folio review before any retry."
 msgstr ""
 
-#: inc/accounting-price-campaign.php:713
+#: inc/accounting-price-campaign.php:1359
 msgid "The current warehouse failed. The campaign will verify its snapshot and continue with the next warehouse."
 msgstr ""
 
-#: inc/accounting-price-campaign.php:742
+#: inc/accounting-price-campaign.php:1389
 msgid "The SKU campaign stopped safely after the current operation and final snapshot."
 msgstr ""
 
-#: inc/accounting-price-campaign.php:744
+#: inc/accounting-price-campaign.php:1391
 msgid "The maintenance window ended. The campaign stopped safely after the mandatory final snapshot; remaining warehouses will be handled by a later campaign."
 msgstr ""
 
-#: inc/accounting-price-campaign.php:746
+#: inc/accounting-price-campaign.php:1393
 msgid "The accounting-price SKU campaign completed."
 msgstr ""
 
-#: inc/accounting-price-campaign.php:775
+#: inc/accounting-price-campaign.php:1423
 msgid "Preparing the next Folio warehouse snapshot."
 msgstr ""
 
-#: inc/accounting-price-campaign.php:791
+#: inc/accounting-price-campaign.php:1439
 msgid "No new SKU batch was accepted because the maintenance window is ending. Building the mandatory final snapshot."
 msgstr ""
 
-#: inc/accounting-price-campaign.php:822
+#: inc/accounting-price-campaign.php:1470
 msgid "The maintenance window is ending. Building the mandatory final snapshot."
 msgstr ""
 
-#: inc/accounting-price-campaign.php:830
+#: inc/accounting-price-campaign.php:1478
 msgid "There is not enough safe time for another batch. Building the mandatory final snapshot."
 msgstr ""
 
-#: inc/accounting-price-campaign.php:844
+#: inc/accounting-price-campaign.php:1492
 msgid "No more eligible SKU remain in this warehouse. Building the mandatory final snapshot."
 msgstr ""
 
-#: inc/accounting-price-campaign.php:869
+#: inc/accounting-price-campaign.php:1517
 msgid "The SKU campaign reached an unknown phase. Automatic continuation was stopped."
 msgstr ""
 
-#: inc/accounting-price-campaign.php:881
+#: inc/accounting-price-campaign.php:1529
 msgid "The campaign will stop after the current operation and mandatory final snapshot."
 msgstr ""
 
-#: inc/accounting-price-campaign.php:913
+#: inc/accounting-price-campaign.php:1561
+#: inc/accounting-price-campaign.php:1639
 #: inc/accounting-prices-cron.php:1144
-#: inc/accounting-prices.php:896
-#: inc/accounting-prices.php:944
+#: inc/accounting-prices.php:1005
+#: inc/accounting-prices.php:1053
 msgid "You do not have permission to perform this operation."
 msgstr ""
 
-#: inc/accounting-price-campaign.php:927
-#: inc/accounting-prices.php:224
-#: inc/accounting-prices.php:822
-#: inc/accounting-prices.php:912
-msgid "When"
+#: inc/accounting-price-campaign.php:1581
+#: inc/accounting-prices.php:237
+msgid "State"
 msgstr ""
 
-#: inc/accounting-price-campaign.php:928
-msgid "Entry type"
-msgstr ""
-
-#: inc/accounting-price-campaign.php:929
+#: inc/accounting-price-campaign.php:1582
+#: inc/accounting-price-campaign.php:1655
 #: inc/accounting-prices.php:109
 #: inc/accounting-prices.php:122
-#: inc/accounting-prices.php:213
-#: inc/accounting-prices.php:344
-#: inc/accounting-prices.php:824
-#: inc/accounting-prices.php:914
-#: inc/product-analytics.php:60
+#: inc/accounting-prices.php:218
+#: inc/accounting-prices.php:428
+#: inc/accounting-prices.php:933
+#: inc/accounting-prices.php:1023
+#: inc/product-analytics.php:61
 msgid "Warehouse"
 msgstr ""
 
-#: inc/accounting-price-campaign.php:930
-#: inc/accounting-prices.php:225
-#: inc/accounting-prices.php:825
-#: inc/accounting-prices.php:915
-msgid "Result"
-msgstr ""
-
-#: inc/accounting-price-campaign.php:931
-#: inc/accounting-prices.php:230
-#: inc/accounting-prices.php:509
-#: inc/accounting-prices.php:826
-#: inc/accounting-prices.php:917
-#: inc/product-analytics.php:71
+#: inc/accounting-price-campaign.php:1583
+#: inc/accounting-price-campaign.php:1658
+#: inc/accounting-prices.php:282
+#: inc/accounting-prices.php:593
+#: inc/accounting-prices.php:935
+#: inc/accounting-prices.php:1026
+#: inc/product-analytics.php:72
+#: inc/product-analytics.php:546
 msgid "SKU"
 msgstr ""
 
-#: inc/accounting-price-campaign.php:932
-#: inc/accounting-prices.php:226
+#: inc/accounting-price-campaign.php:1584
+#: inc/accounting-prices.php:236
+#: inc/product-analytics.php:73
+msgid "Product"
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1585
+#: inc/accounting-prices.php:116
+#: inc/accounting-prices.php:280
+#: inc/accounting-prices.php:936
+#: inc/accounting-prices.php:1027
+msgid "Reason"
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1586
+#: inc/accounting-prices.php:239
+msgid "Last error"
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1587
+msgid "Present in Folio"
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1588
+#: inc/accounting-prices.php:240
+msgid "Movements"
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1589
+msgid "First movement"
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1590
+msgid "Last movement"
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1591
+#: inc/accounting-prices.php:242
+msgid "Last observed"
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1592
+#: inc/accounting-prices.php:243
+msgid "Last recalculated"
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1593
+#: inc/accounting-prices.php:244
+msgid "Latest change"
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1594
+msgid "Change detected"
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1620
+#: inc/admin-ui.php:364
+#: inc/product-analytics.php:113
+#: inc/product-analytics.php:586
+msgid "Yes"
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1620
+#: inc/product-analytics.php:114
+#: inc/product-analytics.php:586
+msgid "No"
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1653
+#: inc/accounting-prices.php:276
+#: inc/accounting-prices.php:931
+#: inc/accounting-prices.php:1021
+msgid "When"
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1654
+msgid "Entry type"
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1656
+msgid "Job ID"
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1657
+#: inc/accounting-prices.php:277
+#: inc/accounting-prices.php:934
+#: inc/accounting-prices.php:1024
+msgid "Result"
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1659
+#: inc/accounting-prices.php:278
 msgid "SKU count"
 msgstr ""
 
-#: inc/accounting-price-campaign.php:933
-#: inc/accounting-prices.php:229
+#: inc/accounting-price-campaign.php:1660
+#: inc/accounting-prices.php:281
 msgid "Message"
 msgstr ""
 
-#: inc/accounting-price-campaign.php:934
+#: inc/accounting-price-campaign.php:1661
+#: inc/accounting-prices.php:110
+#: inc/accounting-prices.php:259
+#: inc/accounting-prices.php:429
+msgid "Document"
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1662
+#: inc/accounting-prices.php:87
+#: inc/accounting-prices.php:260
+#: inc/accounting-prices.php:445
+msgid "Problem date"
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1663
+#: inc/accounting-prices.php:262
+msgid "Movement record"
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1664
+#: inc/accounting-prices.php:112
+#: inc/accounting-prices.php:263
+#: inc/accounting-prices.php:431
+msgid "Before operation"
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1665
+#: inc/accounting-prices.php:264
+msgid "Operation quantity"
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1666
+#: inc/accounting-prices.php:114
+#: inc/accounting-prices.php:265
+#: inc/accounting-prices.php:433
+msgid "After operation"
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1667
+#: inc/accounting-prices.php:115
+#: inc/accounting-prices.php:266
+#: inc/accounting-prices.php:434
+msgid "Shortage"
+msgstr ""
+
+#: inc/accounting-price-campaign.php:1668
 #: inc/accounting-prices.php:117
-#: inc/accounting-prices.php:231
-#: inc/accounting-prices.php:853
-#: inc/accounting-prices.php:920
+#: inc/accounting-prices.php:283
+#: inc/accounting-prices.php:962
+#: inc/accounting-prices.php:1029
 msgid "Technical details"
 msgstr ""
 
-#: inc/accounting-price-campaign.php:941
+#: inc/accounting-price-campaign.php:1675
 msgid "Batch or warehouse result"
 msgstr ""
 
-#: inc/accounting-price-campaign.php:957
+#: inc/accounting-price-campaign.php:1706
 #: inc/logs.php:122
-#: inc/product-analytics.php:228
+#: inc/product-analytics.php:337
 msgid "Error"
 msgstr ""
 
-#: inc/accounting-price-campaign.php:958
-#: inc/accounting-price-campaign.php:970
+#: inc/accounting-price-campaign.php:1707
+#: inc/accounting-price-campaign.php:1727
 msgid "Warning"
 msgstr ""
 
-#: inc/accounting-price-campaign.php:975
+#: inc/accounting-price-campaign.php:1733
 msgid "Only the most recent diagnostics are stored in WordPress. Review the Java logs for the complete history."
 msgstr ""
 
 #: inc/accounting-prices-cron.php:96
-#: inc/accounting-prices.php:1059
+#: inc/accounting-prices.php:1239
 msgid "Java API returned an empty response."
 msgstr ""
 
 #: inc/accounting-prices-cron.php:290
-#: inc/accounting-prices.php:975
+#: inc/accounting-prices.php:1091
 msgid "The global Lavka lock is unavailable. The recalculation was not started."
 msgstr ""
 
@@ -340,8 +527,8 @@ msgid "The warehouse returned a terminal error. It was recorded and the queue co
 msgstr ""
 
 #: inc/accounting-prices-cron.php:607
-#: inc/accounting-prices.php:1010
-#: inc/accounting-prices.php:1026
+#: inc/accounting-prices.php:1126
+#: inc/accounting-prices.php:1142
 msgid "Folio warehouse is required."
 msgstr ""
 
@@ -350,7 +537,7 @@ msgid "A full Folio accounting-price recalculation is already running."
 msgstr ""
 
 #: inc/accounting-prices-cron.php:648
-#: inc/accounting-prices.php:987
+#: inc/accounting-prices.php:1103
 msgid "Another Lavka synchronization is running."
 msgstr ""
 
@@ -361,7 +548,7 @@ msgstr ""
 
 #: inc/accounting-prices-cron.php:804
 #: inc/accounting-prices.php:56
-#: inc/accounting-prices.php:205
+#: inc/accounting-prices.php:209
 msgid "The server request failed."
 msgstr ""
 
@@ -395,11 +582,12 @@ msgstr ""
 
 #: inc/accounting-prices.php:10
 #: inc/accounting-prices.php:11
-#: inc/accounting-prices.php:464
+#: inc/accounting-prices.php:548
 msgid "Folio accounting prices"
 msgstr ""
 
 #: inc/accounting-prices.php:55
+#: inc/accounting-prices.php:210
 msgid "Loading..."
 msgstr ""
 
@@ -408,12 +596,12 @@ msgid "Unknown error."
 msgstr ""
 
 #: inc/accounting-prices.php:58
-#: inc/accounting-prices.php:203
+#: inc/accounting-prices.php:207
 msgid "Select a Folio warehouse."
 msgstr ""
 
 #: inc/accounting-prices.php:59
-#: inc/product-analytics.php:59
+#: inc/product-analytics.php:60
 msgid "Select a warehouse"
 msgstr ""
 
@@ -486,7 +674,7 @@ msgid "The task failed."
 msgstr ""
 
 #: inc/accounting-prices.php:77
-#: inc/accounting-prices.php:291
+#: inc/accounting-prices.php:375
 msgid "Rejected recalculation portion"
 msgstr ""
 
@@ -503,42 +691,37 @@ msgid "Do not retry automatically. Correct the cause and start a new preview man
 msgstr ""
 
 #: inc/accounting-prices.php:81
-#: inc/accounting-prices.php:355
+#: inc/accounting-prices.php:439
 msgid "Input article"
 msgstr ""
 
 #: inc/accounting-prices.php:82
-#: inc/accounting-prices.php:356
+#: inc/accounting-prices.php:440
 msgid "Output article"
 msgstr ""
 
 #: inc/accounting-prices.php:83
-#: inc/accounting-prices.php:357
+#: inc/accounting-prices.php:441
 msgid "Next article returned for the rejected portion"
 msgstr ""
 
 #: inc/accounting-prices.php:84
-#: inc/accounting-prices.php:358
+#: inc/accounting-prices.php:442
 msgid "Return code"
 msgstr ""
 
 #: inc/accounting-prices.php:85
-#: inc/accounting-prices.php:359
+#: inc/accounting-prices.php:443
 msgid "Current units"
 msgstr ""
 
 #: inc/accounting-prices.php:86
-#: inc/accounting-prices.php:360
+#: inc/accounting-prices.php:444
 msgid "Total units"
 msgstr ""
 
-#: inc/accounting-prices.php:87
-#: inc/accounting-prices.php:361
-msgid "Problem date"
-msgstr ""
-
 #: inc/accounting-prices.php:88
-#: inc/accounting-prices.php:362
+#: inc/accounting-prices.php:446
 msgid "Validation error"
 msgstr ""
 
@@ -579,7 +762,7 @@ msgid "The procedure completed; the accounting price was already correct."
 msgstr ""
 
 #: inc/accounting-prices.php:98
-#: inc/accounting-prices.php:209
+#: inc/accounting-prices.php:214
 msgid "Only part of the warnings is shown. The complete diagnostics remain in the Java log."
 msgstr ""
 
@@ -600,6 +783,7 @@ msgid "After"
 msgstr ""
 
 #: inc/accounting-prices.php:103
+#: inc/accounting-prices.php:221
 msgid "Current SKU"
 msgstr ""
 
@@ -620,83 +804,60 @@ msgid "Failed operation safety status"
 msgstr ""
 
 #: inc/accounting-prices.php:108
-#: inc/accounting-prices.php:212
+#: inc/accounting-prices.php:217
 msgid "Phase"
 msgstr ""
 
-#: inc/accounting-prices.php:110
-#: inc/accounting-prices.php:345
-msgid "Document"
-msgstr ""
-
 #: inc/accounting-prices.php:111
-#: inc/accounting-prices.php:346
+#: inc/accounting-prices.php:430
 msgid "Date"
 msgstr ""
 
-#: inc/accounting-prices.php:112
-#: inc/accounting-prices.php:347
-msgid "Before operation"
-msgstr ""
-
 #: inc/accounting-prices.php:113
-#: inc/accounting-prices.php:348
+#: inc/accounting-prices.php:432
 msgid "Operation"
 msgstr ""
 
-#: inc/accounting-prices.php:114
-#: inc/accounting-prices.php:349
-msgid "After operation"
-msgstr ""
-
-#: inc/accounting-prices.php:115
-#: inc/accounting-prices.php:350
-msgid "Shortage"
-msgstr ""
-
-#: inc/accounting-prices.php:116
-#: inc/accounting-prices.php:228
-#: inc/accounting-prices.php:827
-#: inc/accounting-prices.php:918
-msgid "Reason"
-msgstr ""
-
 #: inc/accounting-prices.php:118
-#: inc/accounting-prices.php:368
+#: inc/accounting-prices.php:452
 msgid "Product skipped"
 msgstr ""
 
 #: inc/accounting-prices.php:119
+#: inc/accounting-prices.php:273
 msgid "receipt"
 msgstr ""
 
 #: inc/accounting-prices.php:120
+#: inc/accounting-prices.php:274
 msgid "expense"
 msgstr ""
 
 #: inc/accounting-prices.php:121
+#: inc/accounting-prices.php:275
 msgid "operation"
 msgstr ""
 
 #: inc/accounting-prices.php:123
-#: inc/accounting-prices.php:354
-#: inc/product-analytics.php:62
+#: inc/accounting-prices.php:438
+#: inc/product-analytics.php:63
 msgid "Physical quantity"
 msgstr ""
 
 #: inc/accounting-prices.php:124
-#: inc/product-analytics.php:64
+#: inc/product-analytics.php:65
 msgid "Available quantity"
 msgstr ""
 
 #: inc/accounting-prices.php:125
-#: inc/accounting-prices.php:353
+#: inc/accounting-prices.php:437
 msgid "Accounting quantity"
 msgstr ""
 
 #: inc/accounting-prices.php:126
-#: inc/accounting-prices.php:351
-#: inc/product-analytics.php:65
+#: inc/accounting-prices.php:435
+#: inc/product-analytics.php:66
+#: inc/product-analytics.php:386
 msgid "Accounting price"
 msgstr ""
 
@@ -705,7 +866,7 @@ msgid "Accounting price in currency"
 msgstr ""
 
 #: inc/accounting-prices.php:128
-#: inc/accounting-prices.php:352
+#: inc/accounting-prices.php:436
 msgid "Sale price"
 msgstr ""
 
@@ -718,11 +879,12 @@ msgid "Price basis"
 msgstr ""
 
 #: inc/accounting-prices.php:131
-#: inc/product-analytics.php:63
+#: inc/product-analytics.php:64
 msgid "Reserved quantity"
 msgstr ""
 
 #: inc/accounting-prices.php:132
+#: inc/accounting-prices.php:261
 msgid "Initial quantity"
 msgstr ""
 
@@ -751,7 +913,7 @@ msgid "Progress units"
 msgstr ""
 
 #: inc/accounting-prices.php:139
-#: inc/accounting-prices.php:216
+#: inc/accounting-prices.php:225
 msgid "Warnings"
 msgstr ""
 
@@ -784,8 +946,8 @@ msgid "The preview returned a successful status, but its safety checks are incom
 msgstr ""
 
 #: inc/accounting-prices.php:148
-#: inc/accounting-prices.php:234
-#: inc/accounting-prices.php:404
+#: inc/accounting-prices.php:311
+#: inc/accounting-prices.php:488
 msgid "Not started"
 msgstr ""
 
@@ -794,59 +956,59 @@ msgid "Busy"
 msgstr ""
 
 #: inc/accounting-prices.php:150
-#: inc/accounting-prices.php:405
-#: inc/accounting-prices.php:419
+#: inc/accounting-prices.php:489
+#: inc/accounting-prices.php:503
 msgid "Queued"
 msgstr ""
 
 #: inc/accounting-prices.php:151
-#: inc/accounting-prices.php:235
-#: inc/accounting-prices.php:406
-#: inc/accounting-prices.php:421
+#: inc/accounting-prices.php:312
+#: inc/accounting-prices.php:490
+#: inc/accounting-prices.php:505
 #: inc/logs.php:120
 msgid "Running"
 msgstr ""
 
 #: inc/accounting-prices.php:152
-#: inc/accounting-prices.php:236
-#: inc/accounting-prices.php:410
-#: inc/accounting-prices.php:424
+#: inc/accounting-prices.php:313
+#: inc/accounting-prices.php:494
+#: inc/accounting-prices.php:508
 msgid "Completed"
 msgstr ""
 
 #: inc/accounting-prices.php:153
-#: inc/accounting-prices.php:237
-#: inc/accounting-prices.php:411
-#: inc/accounting-prices.php:425
+#: inc/accounting-prices.php:314
+#: inc/accounting-prices.php:495
+#: inc/accounting-prices.php:509
 msgid "Completed with skipped products"
 msgstr ""
 
 #: inc/accounting-prices.php:154
-#: inc/accounting-prices.php:412
-#: inc/accounting-prices.php:428
+#: inc/accounting-prices.php:496
+#: inc/accounting-prices.php:512
 msgid "Stopped on negative stock"
 msgstr ""
 
 #: inc/accounting-prices.php:155
-#: inc/accounting-prices.php:413
-#: inc/accounting-prices.php:429
+#: inc/accounting-prices.php:497
+#: inc/accounting-prices.php:513
 msgid "Failed"
 msgstr ""
 
 #: inc/accounting-prices.php:156
-#: inc/accounting-prices.php:240
-#: inc/accounting-prices.php:414
-#: inc/accounting-prices.php:431
+#: inc/accounting-prices.php:317
+#: inc/accounting-prices.php:498
+#: inc/accounting-prices.php:515
 msgid "Failed after partial recalculation"
 msgstr ""
 
 #: inc/accounting-prices.php:157
-#: inc/accounting-prices.php:407
+#: inc/accounting-prices.php:491
 msgid "Check passed"
 msgstr ""
 
 #: inc/accounting-prices.php:158
-#: inc/accounting-prices.php:408
+#: inc/accounting-prices.php:492
 msgid "Check passed with skipped products"
 msgstr ""
 
@@ -855,15 +1017,15 @@ msgid "Check blocked recalculation"
 msgstr ""
 
 #: inc/accounting-prices.php:160
-#: inc/accounting-prices.php:409
-#: inc/accounting-prices.php:427
+#: inc/accounting-prices.php:493
+#: inc/accounting-prices.php:511
 msgid "Blocked by negative stock"
 msgstr ""
 
 #: inc/accounting-prices.php:161
-#: inc/accounting-prices.php:241
-#: inc/accounting-prices.php:415
-#: inc/accounting-prices.php:432
+#: inc/accounting-prices.php:318
+#: inc/accounting-prices.php:499
+#: inc/accounting-prices.php:516
 msgid "Outcome unknown"
 msgstr ""
 
@@ -920,8 +1082,8 @@ msgid "Recalculation failed"
 msgstr ""
 
 #: inc/accounting-prices.php:177
-#: inc/accounting-prices.php:239
-#: inc/accounting-prices.php:255
+#: inc/accounting-prices.php:316
+#: inc/accounting-prices.php:339
 msgid "Manual review required"
 msgstr ""
 
@@ -977,586 +1139,814 @@ msgstr ""
 msgid "Folio temporary movement table is not empty"
 msgstr ""
 
-#: inc/accounting-prices.php:201
+#: inc/accounting-prices.php:205
 msgid "Start the accounting-price SKU campaign for the selected warehouse?"
 msgstr ""
 
-#: inc/accounting-prices.php:202
+#: inc/accounting-prices.php:206
 msgid "Stop accepting new batches after the current operation and build the final snapshot?"
 msgstr ""
 
-#: inc/accounting-prices.php:204
+#: inc/accounting-prices.php:208
 msgid "Confirm the maintenance window before starting the campaign."
 msgstr ""
 
-#: inc/accounting-prices.php:206
+#: inc/accounting-prices.php:211
 msgid "No SKU campaign has been started yet."
 msgstr ""
 
-#: inc/accounting-prices.php:207
+#: inc/accounting-prices.php:212
 msgid "The campaign has not completed any batches yet."
 msgstr ""
 
-#: inc/accounting-prices.php:208
+#: inc/accounting-prices.php:213
 msgid "No skipped products or warnings were recorded."
 msgstr ""
 
-#: inc/accounting-prices.php:210
+#: inc/accounting-prices.php:215
 msgid "Safe stop requested. The current operation will finish and the final snapshot will be built."
 msgstr ""
 
-#: inc/accounting-prices.php:211
+#: inc/accounting-prices.php:216
 #: inc/logs.php:100
-#: inc/product-analytics.php:80
+#: inc/product-analytics.php:85
 msgid "Status"
 msgstr ""
 
-#: inc/accounting-prices.php:214
+#: inc/accounting-prices.php:219
 msgid "Processed SKU"
 msgstr ""
 
-#: inc/accounting-prices.php:215
-msgid "Successful batches"
-msgstr ""
-
-#: inc/accounting-prices.php:217
-msgid "Errors"
-msgstr ""
-
-#: inc/accounting-prices.php:218
-msgid "Failed warehouses"
-msgstr ""
-
-#: inc/accounting-prices.php:219
-msgid "Current SKU batch"
-msgstr ""
-
 #: inc/accounting-prices.php:220
-msgid "Snapshot states before processing"
-msgstr ""
-
-#: inc/accounting-prices.php:221
-msgid "Snapshot states after processing"
+msgid "Current batch progress"
 msgstr ""
 
 #: inc/accounting-prices.php:222
-msgid "Batch and warehouse report"
+msgid "Successfully committed SKU"
 msgstr ""
 
 #: inc/accounting-prices.php:223
-msgid "Skipped products and diagnostics"
+msgid "Warnings in current batch"
+msgstr ""
+
+#: inc/accounting-prices.php:224
+msgid "Successful batches"
+msgstr ""
+
+#: inc/accounting-prices.php:226
+msgid "Errors"
 msgstr ""
 
 #: inc/accounting-prices.php:227
-msgid "Duration"
+msgid "Failed warehouses"
+msgstr ""
+
+#: inc/accounting-prices.php:228
+msgid "Current SKU batch"
+msgstr ""
+
+#: inc/accounting-prices.php:229
+msgid "Snapshot states before processing"
+msgstr ""
+
+#: inc/accounting-prices.php:230
+msgid "Snapshot states after processing"
+msgstr ""
+
+#: inc/accounting-prices.php:231
+msgid "Snapshot state report"
 msgstr ""
 
 #: inc/accounting-prices.php:232
-msgid "sec."
+msgid "Open UNVERIFIED, NEW, DIRTY, FAILED, or REMOVED to review the actual products behind the counters."
+msgstr ""
+
+#: inc/accounting-prices.php:233
+msgid "View"
+msgstr ""
+
+#: inc/accounting-prices.php:234
+msgid "Export selected state CSV"
+msgstr ""
+
+#: inc/accounting-prices.php:235
+msgid "There are no products in this snapshot state."
 msgstr ""
 
 #: inc/accounting-prices.php:238
-msgid "Stopped safely"
+msgid "Why this state is assigned"
 msgstr ""
 
-#: inc/accounting-prices.php:244
-msgid "Starting the initial product snapshot"
+#: inc/accounting-prices.php:241
+msgid "Movement period"
 msgstr ""
 
 #: inc/accounting-prices.php:245
-msgid "Building the initial product snapshot"
+msgid "Previous page"
 msgstr ""
 
 #: inc/accounting-prices.php:246
-msgid "Selecting products from snapshot states"
+msgid "Next page"
 msgstr ""
 
+#. translators: 1: processed page number, 2: total pages.
 #: inc/accounting-prices.php:247
-msgid "Starting the selected SKU batch"
+#: inc/logs.php:172
+#, php-format
+msgid "Page %1$d of %2$d"
 msgstr ""
 
-#: inc/accounting-prices.php:248
-msgid "Recalculating the selected SKU batch"
-msgstr ""
-
-#: inc/accounting-prices.php:249
-msgid "Preparing safe skips for problem products"
-msgstr ""
-
-#: inc/accounting-prices.php:250
-msgid "Starting the mandatory final snapshot"
-msgstr ""
-
-#: inc/accounting-prices.php:251
-msgid "Building the mandatory final snapshot"
-msgstr ""
-
-#: inc/accounting-prices.php:252
-#: inc/accounting-prices.php:422
-msgid "Waiting for the global Lavka lock"
-msgstr ""
-
-#: inc/accounting-prices.php:253
-msgid "Waiting for the Folio accounting-price slot"
-msgstr ""
-
-#: inc/accounting-prices.php:254
-msgid "Waiting to restart the snapshot request"
+#: inc/accounting-prices.php:255
+msgid "Batch and warehouse report"
 msgstr ""
 
 #: inc/accounting-prices.php:256
-msgid "Campaign completed"
+msgid "Skipped products and diagnostics"
+msgstr ""
+
+#: inc/accounting-prices.php:257
+msgid "The chronological stock became negative at this movement. Check the document date, quantity, warehouse, and movement order in Folio."
+msgstr ""
+
+#: inc/accounting-prices.php:258
+msgid "The accounting formula denominator is zero. This SKU was rolled back and skipped; check the receipt price, document amount, tax data, and movement order in Folio."
+msgstr ""
+
+#: inc/accounting-prices.php:267
+msgid "Formula"
+msgstr ""
+
+#: inc/accounting-prices.php:268
+msgid "Numerator"
+msgstr ""
+
+#: inc/accounting-prices.php:269
+msgid "Denominator"
+msgstr ""
+
+#: inc/accounting-prices.php:270
+msgid "Movement position"
+msgstr ""
+
+#: inc/accounting-prices.php:271
+msgid "Current physical quantity"
+msgstr ""
+
+#: inc/accounting-prices.php:272
+msgid "Current accounting quantity"
+msgstr ""
+
+#: inc/accounting-prices.php:279
+msgid "Duration"
+msgstr ""
+
+#: inc/accounting-prices.php:284
+msgid "sec."
+msgstr ""
+
+#: inc/accounting-prices.php:285
+msgid "All Folio warehouses"
+msgstr ""
+
+#: inc/accounting-prices.php:286
+msgid "Loading the latest state of all Folio warehouses..."
+msgstr ""
+
+#: inc/accounting-prices.php:287
+#: inc/accounting-prices.php:677
+msgid "Refresh warehouse overview"
+msgstr ""
+
+#: inc/accounting-prices.php:288
+msgid "Warehouses in directory"
+msgstr ""
+
+#: inc/accounting-prices.php:289
+msgid "Never processed"
+msgstr ""
+
+#: inc/accounting-prices.php:290
+msgid "Warehouses with errors"
+msgstr ""
+
+#: inc/accounting-prices.php:291
+msgid "Negative stock cases"
+msgstr ""
+
+#: inc/accounting-prices.php:292
+msgid "View negative stock for all warehouses"
+msgstr ""
+
+#: inc/accounting-prices.php:293
+msgid "View warnings for all warehouses"
+msgstr ""
+
+#: inc/accounting-prices.php:294
+msgid "View errors for all warehouses"
+msgstr ""
+
+#: inc/accounting-prices.php:295
+msgid "Processing state"
+msgstr ""
+
+#: inc/accounting-prices.php:296
+msgid "Last processing"
+msgstr ""
+
+#: inc/accounting-prices.php:297
+msgid "Last snapshot"
+msgstr ""
+
+#: inc/accounting-prices.php:298
+msgid "Last recalculation"
+msgstr ""
+
+#: inc/accounting-prices.php:299
+msgid "Negative stock"
+msgstr ""
+
+#: inc/accounting-prices.php:300
+msgid "Actions"
 msgstr ""
 
 #: inc/accounting-prices.php:301
+msgid "View errors"
+msgstr ""
+
+#: inc/accounting-prices.php:302
+msgid "View warnings"
+msgstr ""
+
+#: inc/accounting-prices.php:303
+msgid "View negative stock"
+msgstr ""
+
+#: inc/accounting-prices.php:304
+msgid "View products"
+msgstr ""
+
+#: inc/accounting-prices.php:305
+msgid "No diagnostics were recorded for the selected warehouses."
+msgstr ""
+
+#: inc/accounting-prices.php:306
+msgid "Detailed diagnostics from campaigns completed before this overview was added may be unavailable. Snapshot states and saved last errors are still shown."
+msgstr ""
+
+#: inc/accounting-prices.php:307
+msgid "The Java warehouse directory is temporarily unavailable. Warehouses known from saved schedules and snapshots are still shown."
+msgstr ""
+
+#: inc/accounting-prices.php:308
+msgid "Latest warehouse diagnostics"
+msgstr ""
+
+#: inc/accounting-prices.php:309
+msgid "Recorded at"
+msgstr ""
+
+#: inc/accounting-prices.php:315
+msgid "Stopped safely"
+msgstr ""
+
+#: inc/accounting-prices.php:319
+msgid "No snapshot has been created"
+msgstr ""
+
+#: inc/accounting-prices.php:320
+msgid "Not processed yet"
+msgstr ""
+
+#: inc/accounting-prices.php:321
+msgid "Snapshot is being built"
+msgstr ""
+
+#: inc/accounting-prices.php:322
+msgid "Processed before detailed history was enabled"
+msgstr ""
+
+#: inc/accounting-prices.php:323
+msgid "Warehouse processing failed"
+msgstr ""
+
+#: inc/accounting-prices.php:324
+msgid "Final snapshot confirmed"
+msgstr ""
+
+#: inc/accounting-prices.php:327
+msgid "Starting the initial product snapshot"
+msgstr ""
+
+#: inc/accounting-prices.php:328
+msgid "Building the initial product snapshot"
+msgstr ""
+
+#: inc/accounting-prices.php:329
+msgid "Selecting products from snapshot states"
+msgstr ""
+
+#: inc/accounting-prices.php:330
+msgid "Starting the selected SKU batch"
+msgstr ""
+
+#: inc/accounting-prices.php:331
+msgid "Recalculating the selected SKU batch"
+msgstr ""
+
+#: inc/accounting-prices.php:332
+msgid "Preparing safe skips for problem products"
+msgstr ""
+
+#: inc/accounting-prices.php:333
+msgid "Starting the mandatory final snapshot"
+msgstr ""
+
+#: inc/accounting-prices.php:334
+msgid "Building the mandatory final snapshot"
+msgstr ""
+
+#: inc/accounting-prices.php:335
+#: inc/accounting-prices.php:506
+msgid "Waiting for the global Lavka lock"
+msgstr ""
+
+#: inc/accounting-prices.php:336
+msgid "Waiting for the Folio accounting-price slot"
+msgstr ""
+
+#: inc/accounting-prices.php:337
+msgid "Waiting to restart the snapshot request"
+msgstr ""
+
+#: inc/accounting-prices.php:338
+msgid "Snapshot interrupted by Java restart"
+msgstr ""
+
+#: inc/accounting-prices.php:340
+msgid "Campaign completed"
+msgstr ""
+
+#: inc/accounting-prices.php:385
 msgid "Only part of the warnings was returned by the service. The complete diagnostics remain in the Folio service log."
 msgstr ""
 
 #. translators: %d: number of warnings reported without item details.
-#: inc/accounting-prices.php:311
+#: inc/accounting-prices.php:395
 #, php-format
 msgid "%d warnings were reported without item details."
 msgstr ""
 
-#: inc/accounting-prices.php:385
+#: inc/accounting-prices.php:469
 msgid "Monday"
 msgstr ""
 
-#: inc/accounting-prices.php:386
+#: inc/accounting-prices.php:470
 msgid "Tuesday"
 msgstr ""
 
-#: inc/accounting-prices.php:387
+#: inc/accounting-prices.php:471
 msgid "Wednesday"
 msgstr ""
 
-#: inc/accounting-prices.php:388
+#: inc/accounting-prices.php:472
 msgid "Thursday"
 msgstr ""
 
-#: inc/accounting-prices.php:389
+#: inc/accounting-prices.php:473
 msgid "Friday"
 msgstr ""
 
-#: inc/accounting-prices.php:390
+#: inc/accounting-prices.php:474
 msgid "Saturday"
 msgstr ""
 
-#: inc/accounting-prices.php:391
-#: inc/accounting-prices.php:402
+#: inc/accounting-prices.php:475
+#: inc/accounting-prices.php:486
 msgid "Sunday"
 msgstr ""
 
-#: inc/accounting-prices.php:394
+#: inc/accounting-prices.php:478
 msgid "Paused after an error"
 msgstr ""
 
-#: inc/accounting-prices.php:396
+#: inc/accounting-prices.php:480
 msgid "Enabled"
 msgstr ""
 
-#: inc/accounting-prices.php:397
+#: inc/accounting-prices.php:481
 msgid "Disabled"
 msgstr ""
 
-#: inc/accounting-prices.php:401
+#: inc/accounting-prices.php:485
 msgid "No warehouses selected"
 msgstr ""
 
-#: inc/accounting-prices.php:420
+#: inc/accounting-prices.php:504
 msgid "Starting warehouse recalculation"
 msgstr ""
 
-#: inc/accounting-prices.php:423
+#: inc/accounting-prices.php:507
 msgid "Waiting for the next warehouse"
 msgstr ""
 
-#: inc/accounting-prices.php:426
+#: inc/accounting-prices.php:510
 msgid "Completed with warehouse errors"
 msgstr ""
 
-#: inc/accounting-prices.php:430
+#: inc/accounting-prices.php:514
 msgid "Could not start"
 msgstr ""
 
-#: inc/accounting-prices.php:433
+#: inc/accounting-prices.php:517
 msgid "Stopped by administrator"
 msgstr ""
 
-#: inc/accounting-prices.php:438
+#: inc/accounting-prices.php:522
 msgid "Preview stage"
 msgstr ""
 
-#: inc/accounting-prices.php:439
+#: inc/accounting-prices.php:523
 msgid "Apply stage"
 msgstr ""
 
-#: inc/accounting-prices.php:467
+#: inc/accounting-prices.php:551
 msgid "The automatic recalculation schedule was saved."
 msgstr ""
 
-#: inc/accounting-prices.php:472
+#: inc/accounting-prices.php:556
 msgid "Confirm automatic Folio changes before enabling the schedule."
 msgstr ""
 
-#: inc/accounting-prices.php:473
+#: inc/accounting-prices.php:557
 msgid "Select at least one Folio warehouse before enabling the schedule."
 msgstr ""
 
-#: inc/accounting-prices.php:479
+#: inc/accounting-prices.php:563
 msgid "Financial operation"
 msgstr ""
 
-#: inc/accounting-prices.php:480
+#: inc/accounting-prices.php:564
 msgid "Preview is read-only. Apply changes Folio data and must be run only in an agreed maintenance window."
 msgstr ""
 
-#: inc/accounting-prices.php:484
-#: inc/product-analytics.php:150
+#: inc/accounting-prices.php:568
+#: inc/product-analytics.php:236
 msgid "Folio warehouse"
 msgstr ""
 
-#: inc/accounting-prices.php:486
-#: inc/accounting-prices.php:693
+#: inc/accounting-prices.php:570
+#: inc/accounting-prices.php:818
 msgid "Loading warehouses..."
 msgstr ""
 
-#: inc/accounting-prices.php:489
+#: inc/accounting-prices.php:573
 msgid "Folio warehouse ID"
 msgstr ""
 
-#: inc/accounting-prices.php:490
+#: inc/accounting-prices.php:574
 msgid "Warehouse ID"
 msgstr ""
 
-#: inc/accounting-prices.php:494
+#: inc/accounting-prices.php:578
 msgid "Accounting price views"
 msgstr ""
 
-#: inc/accounting-prices.php:496
+#: inc/accounting-prices.php:580
 msgid "One product"
 msgstr ""
 
-#: inc/accounting-prices.php:499
+#: inc/accounting-prices.php:583
 msgid "Entire warehouse"
 msgstr ""
 
-#: inc/accounting-prices.php:502
+#: inc/accounting-prices.php:586
 msgid "SKU campaign and schedule"
 msgstr ""
 
-#: inc/accounting-prices.php:507
+#: inc/accounting-prices.php:591
 msgid "Product accounting price"
 msgstr ""
 
-#: inc/accounting-prices.php:512
+#: inc/accounting-prices.php:596
 msgid "Check without changes"
 msgstr ""
 
-#: inc/accounting-prices.php:518
+#: inc/accounting-prices.php:602
 msgid "I reviewed the preview and confirm recalculation of this product."
 msgstr ""
 
-#: inc/accounting-prices.php:521
+#: inc/accounting-prices.php:605
 msgid "Recalculate product in Folio"
 msgstr ""
 
-#: inc/accounting-prices.php:529
+#: inc/accounting-prices.php:613
 msgid "Full native Folio recalculation"
 msgstr ""
 
-#: inc/accounting-prices.php:531
+#: inc/accounting-prices.php:615
 msgid "This mode runs the complete Folio I_UCHET_TOVAR algorithm. The preview executes every portion in a transaction and always rolls it back."
 msgstr ""
 
-#: inc/accounting-prices.php:535
+#: inc/accounting-prices.php:619
 msgid "Run exact rollback preview"
 msgstr ""
 
-#: inc/accounting-prices.php:541
+#: inc/accounting-prices.php:625
 msgid "I have a current backup and confirm the agreed Folio maintenance window."
 msgstr ""
 
-#: inc/accounting-prices.php:544
+#: inc/accounting-prices.php:628
 msgid "Run full native recalculation in Folio"
 msgstr ""
 
-#: inc/accounting-prices.php:546
+#: inc/accounting-prices.php:630
 msgid "Apply repeats the full rollback preflight and starts committing portions only when the preflight is clean."
 msgstr ""
 
-#: inc/accounting-prices.php:559
+#: inc/accounting-prices.php:643
 msgid "Accounting-price SKU campaign"
 msgstr ""
 
-#: inc/accounting-prices.php:561
+#: inc/accounting-prices.php:645
 msgid "The campaign builds a fresh snapshot, selects only UNVERIFIED, NEW and DIRTY products, recalculates them in sequential native-range batches, and finishes with a mandatory verification snapshot. FAILED and VERIFIED products are never selected automatically."
 msgstr ""
 
-#: inc/accounting-prices.php:566
+#: inc/accounting-prices.php:650
 msgid "I confirm the Folio maintenance window and understand that native-range apply changes accounting prices."
 msgstr ""
 
-#: inc/accounting-prices.php:570
+#: inc/accounting-prices.php:654
 msgid "Start SKU campaign for selected warehouse"
 msgstr ""
 
-#: inc/accounting-prices.php:573
+#: inc/accounting-prices.php:657
 msgid "Stop safely after current operation"
 msgstr ""
 
-#: inc/accounting-prices.php:579
+#: inc/accounting-prices.php:663
 msgid "Export campaign report CSV"
 msgstr ""
 
-#: inc/accounting-prices.php:587
-msgid "Automatic weekly SKU campaign"
+#: inc/accounting-prices.php:673
+msgid "Processing state for all Folio warehouses"
 msgstr ""
 
+#: inc/accounting-prices.php:674
+msgid "This permanent overview shows the latest snapshot and processing result for every warehouse, including warehouses that have never been processed."
+msgstr ""
+
+#: inc/accounting-prices.php:687
 msgid "Campaign parameters and weekly schedule"
 msgstr ""
 
-#: inc/accounting-prices.php:588
+#: inc/accounting-prices.php:694
+msgid "Campaign parameters"
+msgstr ""
+
+#: inc/accounting-prices.php:695
+msgid "These parameters apply to both manual runs and the weekly schedule."
+msgstr ""
+
+#: inc/accounting-prices.php:698
+msgid "First batch size"
+msgstr ""
+
+#: inc/accounting-prices.php:702
+msgid "Maximum batch size"
+msgstr ""
+
+#: inc/accounting-prices.php:706
+msgid "Maintenance window, minutes"
+msgstr ""
+
+#: inc/accounting-prices.php:710
+msgid "Snapshot horizon, months"
+msgstr ""
+
+#: inc/accounting-prices.php:716
+msgid "Automatic weekly SKU campaign"
+msgstr ""
+
+#: inc/accounting-prices.php:717
 msgid "The schedule is disabled by default. Warehouses run sequentially. The first campaign also includes UNVERIFIED products; regular runs select only NEW and DIRTY states."
 msgstr ""
 
-#: inc/accounting-prices.php:591
+#: inc/accounting-prices.php:720
 msgid "Saved schedule"
 msgstr ""
 
-#: inc/accounting-prices.php:594
+#: inc/accounting-prices.php:723
 msgid "Schedule status"
 msgstr ""
 
-#: inc/accounting-prices.php:598
+#: inc/accounting-prices.php:727
 msgid "Selected Folio warehouses"
 msgstr ""
 
-#: inc/accounting-prices.php:603
+#: inc/accounting-prices.php:732
 msgid "Weekly start"
 msgstr ""
 
 #. translators: 1: weekday, 2: local start time, 3: WordPress timezone.
-#: inc/accounting-prices.php:608
+#: inc/accounting-prices.php:737
 #, php-format
 msgid "%1$s at %2$s (%3$s)"
 msgstr ""
 
-#: inc/accounting-prices.php:617
+#: inc/accounting-prices.php:746
 msgid "Maintenance window"
 msgstr ""
 
 #. translators: %d: maintenance window length in minutes.
-#: inc/accounting-prices.php:622
+#: inc/accounting-prices.php:751
 #, php-format
 msgid "%d minutes"
 msgstr ""
 
-#: inc/accounting-prices.php:629
+#: inc/accounting-prices.php:758
 msgid "SKU batch sizes"
 msgstr ""
 
 #. translators: 1: first batch size, 2: maximum batch size.
-#: inc/accounting-prices.php:634
+#: inc/accounting-prices.php:763
 #, php-format
 msgid "first %1$d, maximum %2$d"
 msgstr ""
 
-#: inc/accounting-prices.php:642
+#: inc/accounting-prices.php:771
 msgid "Snapshot horizon"
 msgstr ""
 
 #. translators: %d: snapshot horizon in months.
-#: inc/accounting-prices.php:647
+#: inc/accounting-prices.php:776
 #, php-format
 msgid "%d months"
 msgstr ""
 
-#: inc/accounting-prices.php:654
-#: inc/accounting-prices.php:749
+#: inc/accounting-prices.php:783
+#: inc/accounting-prices.php:858
 msgid "Next scheduled run"
 msgstr ""
 
-#: inc/accounting-prices.php:657
-#: inc/accounting-prices.php:752
+#: inc/accounting-prices.php:786
+#: inc/accounting-prices.php:861
 #: inc/admin-ui.php:429
 msgid "Not scheduled"
 msgstr ""
 
-#: inc/accounting-prices.php:664
+#: inc/accounting-prices.php:793
 msgid "Schedule paused:"
 msgstr ""
 
-#: inc/accounting-prices.php:675
+#: inc/accounting-prices.php:800
 msgid "Enable weekly SKU campaign"
 msgstr ""
 
-msgid "Campaign parameters"
-msgstr ""
-
-msgid "These parameters apply to both manual runs and the weekly schedule."
-msgstr ""
-
-#: inc/accounting-prices.php:681
+#: inc/accounting-prices.php:806
 msgid "Folio warehouses"
 msgstr ""
 
 #. translators: %d: numeric Folio warehouse ID.
-#: inc/accounting-prices.php:688
+#: inc/accounting-prices.php:813
 #, php-format
 msgid "Warehouse ID: %d"
 msgstr ""
 
-#: inc/accounting-prices.php:696
+#: inc/accounting-prices.php:821
 msgid "Selected warehouses are processed sequentially. A regular FAILED result stops only the current warehouse; FAILED_PARTIAL or OUTCOME_UNKNOWN stops the whole campaign for manual review."
 msgstr ""
 
-#: inc/accounting-prices.php:699
+#: inc/accounting-prices.php:824
 msgid "Day of week"
 msgstr ""
 
-#: inc/accounting-prices.php:707
+#: inc/accounting-prices.php:832
 msgid "Start time"
 msgstr ""
 
-#: inc/accounting-prices.php:711
-msgid "First batch size"
-msgstr ""
-
-#: inc/accounting-prices.php:715
-msgid "Maximum batch size"
-msgstr ""
-
-#: inc/accounting-prices.php:719
-msgid "Maintenance window, minutes"
-msgstr ""
-
-#: inc/accounting-prices.php:723
-msgid "Snapshot horizon, months"
-msgstr ""
-
-#: inc/accounting-prices.php:730
+#: inc/accounting-prices.php:839
 msgid "I understand that the schedule performs real native-range recalculation for eligible snapshot states. Problem products are skipped and recorded, and every processed warehouse receives a final verification snapshot."
 msgstr ""
 
 #. translators: %s: WordPress site time zone.
-#: inc/accounting-prices.php:737
+#: inc/accounting-prices.php:846
 #, php-format
 msgid "Time zone: %s. If another Lavka synchronization holds the global lock, the run is postponed without sending a request to Java."
 msgstr ""
 
-#: inc/accounting-prices.php:743
-#: inc/admin-ui.php:492
-msgid "Save schedule"
-msgstr ""
-
+#: inc/accounting-prices.php:852
 msgid "Save campaign parameters and schedule"
 msgstr ""
 
-#: inc/accounting-prices.php:755
+#: inc/accounting-prices.php:864
 msgid "Last native job status"
 msgstr ""
 
-#: inc/accounting-prices.php:758
+#: inc/accounting-prices.php:867
 msgid "No runs yet"
 msgstr ""
 
-#: inc/accounting-prices.php:761
+#: inc/accounting-prices.php:870
 msgid "Last scheduled warehouse queue"
 msgstr ""
 
-#: inc/accounting-prices.php:765
+#: inc/accounting-prices.php:874
 msgid "No scheduled runs yet"
 msgstr ""
 
 #. translators: 1: completed warehouse preview count, 2: total warehouse count.
-#: inc/accounting-prices.php:776
+#: inc/accounting-prices.php:885
 #, php-format
 msgid "%1$d of %2$d warehouse previews completed"
 msgstr ""
 
 #. translators: 1: completed warehouse count, 2: total warehouse count.
-#: inc/accounting-prices.php:783
+#: inc/accounting-prices.php:892
 #, php-format
 msgid "%1$d of %2$d warehouses completed"
 msgstr ""
 
 #. translators: 1: recorded warehouse error count, 2: warning count.
-#: inc/accounting-prices.php:793
+#: inc/accounting-prices.php:902
 #, php-format
 msgid "Recorded warehouse errors: %1$d; warnings: %2$d"
 msgstr ""
 
-#: inc/accounting-prices.php:808
+#: inc/accounting-prices.php:917
 msgid "Last scheduled recalculation report"
 msgstr ""
 
-#: inc/accounting-prices.php:809
+#: inc/accounting-prices.php:918
 msgid "The report preserves when and why a product or warehouse was skipped. Safe products continue to be recalculated."
 msgstr ""
 
-#: inc/accounting-prices.php:815
+#: inc/accounting-prices.php:924
 msgid "Export detailed CSV"
 msgstr ""
 
-#: inc/accounting-prices.php:823
-#: inc/accounting-prices.php:913
+#: inc/accounting-prices.php:932
+#: inc/accounting-prices.php:1022
 msgid "Stage"
 msgstr ""
 
-#: inc/accounting-prices.php:828
-#: inc/accounting-prices.php:919
+#: inc/accounting-prices.php:937
+#: inc/accounting-prices.php:1028
 msgid "Explanation"
 msgstr ""
 
-#: inc/accounting-prices.php:857
+#: inc/accounting-prices.php:966
 msgid "No problems were reported for this warehouse."
 msgstr ""
 
-#: inc/accounting-prices.php:872
+#: inc/accounting-prices.php:981
 msgid "Diagnostics and skipped products"
 msgstr ""
 
-#: inc/accounting-prices.php:875
+#: inc/accounting-prices.php:984
 msgid "Copy SKU list"
 msgstr ""
 
-#: inc/accounting-prices.php:878
+#: inc/accounting-prices.php:987
 msgid "Export CSV"
 msgstr ""
 
-#: inc/accounting-prices.php:881
+#: inc/accounting-prices.php:990
 msgid "Export JSON"
 msgstr ""
 
-#: inc/accounting-prices.php:916
+#: inc/accounting-prices.php:1025
 msgid "Severity"
 msgstr ""
 
-#: inc/accounting-prices.php:921
+#: inc/accounting-prices.php:1030
 msgid "Java job ID"
 msgstr ""
 
-#: inc/accounting-prices.php:951
+#: inc/accounting-prices.php:1067
+#: inc/accounting-prices.php:1195
 msgid "Java Base URL is not configured."
 msgstr ""
 
-#: inc/accounting-prices.php:966
+#: inc/accounting-prices.php:1082
 msgid "SKU and Folio warehouse are required."
 msgstr ""
 
-#: inc/accounting-prices.php:969
-#: inc/accounting-prices.php:1013
-#: inc/accounting-prices.php:1029
+#: inc/accounting-prices.php:1085
+#: inc/accounting-prices.php:1129
+#: inc/accounting-prices.php:1145
 msgid "Explicit confirmation is required for Folio changes."
 msgstr ""
 
-#: inc/accounting-prices.php:981
+#: inc/accounting-prices.php:1097
 msgid "Single-product Folio accounting-price recalculation"
 msgstr ""
 
-#: inc/accounting-prices.php:1043
+#: inc/accounting-prices.php:1188
 msgid "Unsupported accounting-price operation."
+msgstr ""
+
+#: inc/accounting-prices.php:1210
+msgid "The warehouse directory is unavailable."
 msgstr ""
 
 #: inc/admin-ui.php:8
@@ -1610,12 +2000,12 @@ msgid "Done"
 msgstr ""
 
 #: inc/admin-ui.php:71
-#: inc/product-analytics.php:83
+#: inc/product-analytics.php:88
 msgid "Page"
 msgstr ""
 
 #: inc/admin-ui.php:72
-#: inc/product-analytics.php:84
+#: inc/product-analytics.php:89
 msgid "of"
 msgstr ""
 
@@ -1725,10 +2115,6 @@ msgstr ""
 msgid "Enable"
 msgstr ""
 
-#: inc/admin-ui.php:364
-msgid "Yes"
-msgstr ""
-
 #: inc/admin-ui.php:370
 #: inc/logs.php:99
 msgid "Mode"
@@ -1816,6 +2202,10 @@ msgstr ""
 msgid "Batch size per run"
 msgstr ""
 
+#: inc/admin-ui.php:492
+msgid "Save schedule"
+msgstr ""
+
 #: inc/admin-ui.php:495
 msgid "Run now"
 msgstr ""
@@ -1881,463 +2271,1177 @@ msgstr ""
 msgid "No logs yet."
 msgstr ""
 
-#. translators: 1: processed page number, 2: total pages.
-#: inc/logs.php:172
-#, php-format
-msgid "Page %1$d of %2$d"
-msgstr ""
-
-#: inc/product-analytics.php:10
-#: inc/product-analytics.php:138
+#: inc/product-analytics.php:11
+#: inc/product-analytics.php:224
 msgid "Folio product analytics"
 msgstr ""
 
-#: inc/product-analytics.php:11
+#: inc/product-analytics.php:12
 msgid "Product analytics"
 msgstr ""
 
-#: inc/product-analytics.php:55
+#: inc/product-analytics.php:56
 msgid "Loading product analytics..."
 msgstr ""
 
-#: inc/product-analytics.php:56
+#: inc/product-analytics.php:57
 msgid "Product analytics could not be loaded."
 msgstr ""
 
-#: inc/product-analytics.php:57
+#: inc/product-analytics.php:58
 msgid "No active Folio product snapshots are available yet."
 msgstr ""
 
-#: inc/product-analytics.php:58
+#: inc/product-analytics.php:59
 msgid "No products match the selected filters."
 msgstr ""
 
-#: inc/product-analytics.php:61
+#: inc/product-analytics.php:62
+#: inc/product-analytics.php:248
 msgid "Products"
 msgstr ""
 
-#: inc/product-analytics.php:66
+#: inc/product-analytics.php:67
 msgid "Capital in stock"
 msgstr ""
 
-#: inc/product-analytics.php:67
+#: inc/product-analytics.php:68
 msgid "Revenue, 365 days"
 msgstr ""
 
-#: inc/product-analytics.php:68
+#: inc/product-analytics.php:69
 msgid "Gross profit before returns, 365 days"
 msgstr ""
 
-#: inc/product-analytics.php:69
-#: inc/product-analytics.php:171
+#: inc/product-analytics.php:70
+#: inc/product-analytics.php:264
 msgid "Capital without sales"
 msgstr ""
 
-#: inc/product-analytics.php:70
+#: inc/product-analytics.php:71
 msgid "Capital in dead stock and overstock"
 msgstr ""
 
-#: inc/product-analytics.php:72
-msgid "Product"
-msgstr ""
-
-#: inc/product-analytics.php:73
-msgid "Commercial sales total, 90 days"
-msgstr ""
-
 #: inc/product-analytics.php:74
-msgid "Commercial sales total, 365 days"
+#: inc/product-analytics.php:589
+msgid "Current supplier"
 msgstr ""
 
 #: inc/product-analytics.php:75
-msgid "Inventory turns"
+msgid "Commercial sales total, 90 days"
 msgstr ""
 
 #: inc/product-analytics.php:76
-msgid "GMROI"
+msgid "Commercial sales total, 365 days"
 msgstr ""
 
 #: inc/product-analytics.php:77
-msgid "Coverage, days"
+msgid "Regular demand, 12 months"
 msgstr ""
 
 #: inc/product-analytics.php:78
-msgid "Last sale"
+msgid "One-off sales, 12 months"
 msgstr ""
 
 #: inc/product-analytics.php:79
-msgid "Last receipt"
+msgid "Inventory turns"
+msgstr ""
+
+#: inc/product-analytics.php:80
+msgid "GMROI"
 msgstr ""
 
 #: inc/product-analytics.php:81
-msgid "Accounting-price verification"
+msgid "Coverage, days"
 msgstr ""
 
 #: inc/product-analytics.php:82
-msgid "Alerts"
+msgid "Last sale"
 msgstr ""
 
-#: inc/product-analytics.php:85
-msgid "Product details"
+#: inc/product-analytics.php:83
+msgid "Last regular sale"
+msgstr ""
+
+#: inc/product-analytics.php:84
+msgid "Last receipt"
 msgstr ""
 
 #: inc/product-analytics.php:86
-msgid "Current state"
+msgid "Accounting-price verification"
 msgstr ""
 
 #: inc/product-analytics.php:87
-msgid "Monthly history"
-msgstr ""
-
-#: inc/product-analytics.php:88
-msgid "Warehouse comparison"
-msgstr ""
-
-#: inc/product-analytics.php:89
-msgid "Alert history"
+msgid "Alerts"
 msgstr ""
 
 #: inc/product-analytics.php:90
-msgid "Snapshot changes"
+msgid "Product details"
 msgstr ""
 
 #: inc/product-analytics.php:91
-msgid "Month"
+msgid "Current state"
 msgstr ""
 
 #: inc/product-analytics.php:92
-msgid "Opening stock"
+msgid "Monthly history"
 msgstr ""
 
 #: inc/product-analytics.php:93
-msgid "Closing stock"
+msgid "Warehouse comparison"
 msgstr ""
 
 #: inc/product-analytics.php:94
-msgid "Opening inventory value"
+msgid "Alert history"
 msgstr ""
 
 #: inc/product-analytics.php:95
-msgid "Closing inventory value"
+msgid "Snapshot changes"
 msgstr ""
 
 #: inc/product-analytics.php:96
-msgid "Receipts"
+msgid "Document date"
 msgstr ""
 
 #: inc/product-analytics.php:97
-msgid "Receipt cost"
+#: inc/product-analytics.php:547
+msgid "Document number"
 msgstr ""
 
 #: inc/product-analytics.php:98
-msgid "Commercial sales total"
+#: inc/product-analytics.php:549
+msgid "Document type"
 msgstr ""
 
 #: inc/product-analytics.php:99
-msgid "Revenue"
+#: inc/product-analytics.php:553
+msgid "Folio operation kind"
 msgstr ""
 
 #: inc/product-analytics.php:100
-msgid "Cost of sales"
+#: inc/product-analytics.php:557
+msgid "Movement class"
 msgstr ""
 
 #: inc/product-analytics.php:101
-msgid "Gross profit before returns"
+#: inc/product-analytics.php:567
+msgid "Stock direction"
 msgstr ""
 
 #: inc/product-analytics.php:102
-msgid "Returns"
+msgid "Signed quantity"
 msgstr ""
 
 #: inc/product-analytics.php:103
-msgid "Return revenue"
+msgid "Sale amount"
 msgstr ""
 
 #: inc/product-analytics.php:104
-msgid "Average capital"
+msgid "Accounting value"
 msgstr ""
 
 #: inc/product-analytics.php:105
-msgid "Sell-through"
+#: inc/product-analytics.php:568
+msgid "Demand mode"
 msgstr ""
 
 #: inc/product-analytics.php:106
-msgid "Possible cross-warehouse analysis"
+#: inc/product-analytics.php:569
+msgid "Payment terms"
 msgstr ""
 
 #: inc/product-analytics.php:107
-msgid "Another warehouse has available stock. A manager must check the safe transfer quantity."
+#: inc/product-analytics.php:570
+msgid "Customer segment"
 msgstr ""
 
 #: inc/product-analytics.php:108
-#: inc/product-analytics.php:286
-msgid "Close"
+#: inc/product-analytics.php:588
+msgid "Counterparty"
 msgstr ""
 
 #: inc/product-analytics.php:109
-msgid "Retry"
+#: inc/product-analytics.php:578
+msgid "Included in accounting"
 msgstr ""
 
 #: inc/product-analytics.php:110
-msgid "Active snapshot"
+#: inc/product-analytics.php:579
+msgid "Return document"
 msgstr ""
 
 #: inc/product-analytics.php:111
-msgid "Operational analytics: period metrics are built from monthly buckets."
+#: inc/product-analytics.php:554
+msgid "All operation kinds"
 msgstr ""
 
 #: inc/product-analytics.php:112
-msgid "Sales combine all confirmed external commercial channels."
-msgstr ""
-
-#: inc/product-analytics.php:113
-msgid "Profit is gross profit before returns, not net or operating profit."
+#: inc/product-analytics.php:550
+msgid "All document types"
 msgstr ""
 
 #: inc/product-analytics.php:115
-#: inc/product-analytics.php:191
-msgid "Healthy"
+msgid "Month"
 msgstr ""
 
 #: inc/product-analytics.php:116
-#: inc/product-analytics.php:166
-#: inc/product-analytics.php:192
-#: inc/product-analytics.php:217
-msgid "Stockout"
+msgid "Opening stock"
 msgstr ""
 
 #: inc/product-analytics.php:117
-#: inc/product-analytics.php:167
-#: inc/product-analytics.php:193
-#: inc/product-analytics.php:220
-msgid "Dead stock"
+msgid "Closing stock"
 msgstr ""
 
 #: inc/product-analytics.php:118
-#: inc/product-analytics.php:168
-#: inc/product-analytics.php:194
-#: inc/product-analytics.php:219
-msgid "Overstock"
+msgid "Opening inventory value"
 msgstr ""
 
 #: inc/product-analytics.php:119
-#: inc/product-analytics.php:195
-#: inc/product-analytics.php:218
-msgid "Low or negative margin"
+msgid "Closing inventory value"
 msgstr ""
 
 #: inc/product-analytics.php:120
-#: inc/product-analytics.php:170
-#: inc/product-analytics.php:196
-#: inc/product-analytics.php:221
-msgid "Demand fading"
+msgid "Receipts"
 msgstr ""
 
 #: inc/product-analytics.php:121
-#: inc/product-analytics.php:197
-#: inc/product-analytics.php:216
-msgid "Data issue"
+msgid "Receipt cost"
 msgstr ""
 
 #: inc/product-analytics.php:122
-#: inc/product-analytics.php:198
-#: inc/product-analytics.php:208
-msgid "New product"
+#: inc/product-analytics.php:344
+msgid "Commercial sales total"
 msgstr ""
 
 #: inc/product-analytics.php:123
-#: inc/product-analytics.php:205
-msgid "Unverified"
+msgid "Revenue"
 msgstr ""
 
 #: inc/product-analytics.php:124
-#: inc/product-analytics.php:206
-msgid "Verified"
+msgid "Cost of sales"
 msgstr ""
 
 #: inc/product-analytics.php:125
-#: inc/product-analytics.php:207
-msgid "Changed after verification"
+msgid "Gross profit before returns"
 msgstr ""
 
 #: inc/product-analytics.php:126
-#: inc/product-analytics.php:209
-msgid "Verification failed"
+msgid "Regular sales quantity"
 msgstr ""
 
 #: inc/product-analytics.php:127
-msgid "Removed from Folio"
+msgid "Regular sales revenue"
+msgstr ""
+
+#: inc/product-analytics.php:128
+msgid "Regular sales cost"
+msgstr ""
+
+#: inc/product-analytics.php:129
+msgid "Regular gross profit"
+msgstr ""
+
+#: inc/product-analytics.php:130
+msgid "One-off sales quantity"
+msgstr ""
+
+#: inc/product-analytics.php:131
+msgid "One-off sales revenue"
+msgstr ""
+
+#: inc/product-analytics.php:132
+msgid "One-off sales cost"
+msgstr ""
+
+#: inc/product-analytics.php:133
+msgid "One-off gross profit"
+msgstr ""
+
+#: inc/product-analytics.php:134
+msgid "Returns"
+msgstr ""
+
+#: inc/product-analytics.php:135
+msgid "Return revenue"
+msgstr ""
+
+#: inc/product-analytics.php:136
+msgid "Average capital"
+msgstr ""
+
+#: inc/product-analytics.php:137
+msgid "Sell-through"
+msgstr ""
+
+#: inc/product-analytics.php:138
+msgid "Possible cross-warehouse analysis"
 msgstr ""
 
 #: inc/product-analytics.php:139
-msgid "Read-only stock, capital and commercial-sales analytics from published Folio snapshots."
+msgid "Another warehouse has available stock. A manager must check the safe transfer quantity."
+msgstr ""
+
+#: inc/product-analytics.php:140
+#: inc/product-analytics.php:606
+msgid "Close"
+msgstr ""
+
+#: inc/product-analytics.php:141
+msgid "Retry"
+msgstr ""
+
+#: inc/product-analytics.php:142
+msgid "Active snapshot"
+msgstr ""
+
+#: inc/product-analytics.php:143
+msgid "Operational analytics: period metrics are built from monthly buckets."
+msgstr ""
+
+#: inc/product-analytics.php:144
+msgid "Sales combine all confirmed external commercial channels."
 msgstr ""
 
 #: inc/product-analytics.php:145
-msgid "Current reporting boundaries"
+msgid "Profit is gross profit before returns, not net or operating profit."
 msgstr ""
 
 #: inc/product-analytics.php:146
-msgid "Sales are commercial sales total. Profit is gross profit before returns. Coverage is an analytical signal, not a purchase or transfer order."
+msgid "No suppliers are available for this warehouse."
+msgstr ""
+
+#: inc/product-analytics.php:147
+msgid "Suppliers could not be loaded."
+msgstr ""
+
+#. translators: 1: products with a supplier, 2: products without a supplier, 3: distinct supplier values.
+#: inc/product-analytics.php:149
+#, php-format
+msgid "Assigned: %1$s · missing: %2$s · supplier values: %3$s"
+msgstr ""
+
+#: inc/product-analytics.php:150
+#: inc/product-analytics.php:373
+msgid "Service code / requires verification"
+msgstr ""
+
+#: inc/product-analytics.php:151
+msgid "This warehouse uses analytics schema v1. Rebuild its snapshot with schema v2 to use suppliers, regular demand and movements."
 msgstr ""
 
 #: inc/product-analytics.php:152
-msgid "Loading snapshots..."
+msgid "movement rows"
+msgstr ""
+
+#: inc/product-analytics.php:153
+msgid "No movements match the selected filters."
 msgstr ""
 
 #: inc/product-analytics.php:154
-msgid "Reload report"
+#: inc/product-analytics.php:277
+#: inc/product-analytics.php:278
+msgid "Select a saved filter set"
 msgstr ""
 
-#: inc/product-analytics.php:159
-msgid "Warehouse summary"
+#: inc/product-analytics.php:155
+msgid "The filter set has been saved."
+msgstr ""
+
+#: inc/product-analytics.php:156
+msgid "The filter set has been deleted."
+msgstr ""
+
+#: inc/product-analytics.php:157
+#: inc/product-analytics.php:898
+msgid "Enter a name for the filter set."
+msgstr ""
+
+#: inc/product-analytics.php:158
+msgid "Delete the selected filter set?"
+msgstr ""
+
+#: inc/product-analytics.php:160
+#: inc/product-analytics.php:294
+msgid "Healthy"
 msgstr ""
 
 #: inc/product-analytics.php:161
-msgid "Saved analytics views"
+#: inc/product-analytics.php:259
+#: inc/product-analytics.php:295
+#: inc/product-analytics.php:321
+msgid "Stockout"
+msgstr ""
+
+#: inc/product-analytics.php:162
+#: inc/product-analytics.php:260
+#: inc/product-analytics.php:296
+#: inc/product-analytics.php:324
+msgid "Dead stock"
+msgstr ""
+
+#: inc/product-analytics.php:163
+#: inc/product-analytics.php:261
+#: inc/product-analytics.php:297
+#: inc/product-analytics.php:323
+msgid "Overstock"
 msgstr ""
 
 #: inc/product-analytics.php:164
-msgid "All products"
+#: inc/product-analytics.php:262
+#: inc/product-analytics.php:298
+#: inc/product-analytics.php:322
+msgid "Negative gross profit, 3 months"
 msgstr ""
 
 #: inc/product-analytics.php:165
-msgid "Data issues"
+#: inc/product-analytics.php:263
+#: inc/product-analytics.php:299
+#: inc/product-analytics.php:325
+msgid "Demand fading"
+msgstr ""
+
+#: inc/product-analytics.php:166
+#: inc/product-analytics.php:302
+#: inc/product-analytics.php:326
+msgid "Stock supported only by one-off sales"
+msgstr ""
+
+#: inc/product-analytics.php:167
+#: inc/product-analytics.php:300
+#: inc/product-analytics.php:320
+msgid "Data issue"
+msgstr ""
+
+#: inc/product-analytics.php:168
+#: inc/product-analytics.php:301
+#: inc/product-analytics.php:312
+msgid "New product"
 msgstr ""
 
 #: inc/product-analytics.php:169
-msgid "Low margin"
+#: inc/product-analytics.php:309
+msgid "Unverified"
+msgstr ""
+
+#: inc/product-analytics.php:170
+#: inc/product-analytics.php:310
+msgid "Verified"
+msgstr ""
+
+#: inc/product-analytics.php:171
+#: inc/product-analytics.php:311
+msgid "Changed after verification"
 msgstr ""
 
 #: inc/product-analytics.php:172
-msgid "Revenue leaders"
+#: inc/product-analytics.php:313
+msgid "Verification failed"
 msgstr ""
 
 #: inc/product-analytics.php:173
-msgid "Profit leaders"
+msgid "Removed from Folio"
 msgstr ""
 
 #: inc/product-analytics.php:174
-msgid "Capital efficiency"
+msgid "Current assignment"
+msgstr ""
+
+#: inc/product-analytics.php:175
+msgid "Missing assignment"
+msgstr ""
+
+#: inc/product-analytics.php:176
+msgid "Sale"
+msgstr ""
+
+#: inc/product-analytics.php:177
+msgid "Customer return"
+msgstr ""
+
+#: inc/product-analytics.php:178
+msgid "Supplier return"
+msgstr ""
+
+#: inc/product-analytics.php:179
+msgid "Purchase receipt"
+msgstr ""
+
+#: inc/product-analytics.php:180
+msgid "Other receipt"
+msgstr ""
+
+#: inc/product-analytics.php:181
+msgid "Internal receipt"
+msgstr ""
+
+#: inc/product-analytics.php:182
+msgid "Internal expense"
+msgstr ""
+
+#: inc/product-analytics.php:183
+msgid "Transfer in"
 msgstr ""
 
 #: inc/product-analytics.php:184
-msgid "SKU or product name"
+msgid "Transfer out"
+msgstr ""
+
+#: inc/product-analytics.php:185
+msgid "Assembly input"
+msgstr ""
+
+#: inc/product-analytics.php:186
+msgid "Assembly output"
+msgstr ""
+
+#: inc/product-analytics.php:187
+msgid "Inventory correction in"
 msgstr ""
 
 #: inc/product-analytics.php:188
-msgid "Economic status"
+msgid "Inventory correction out"
+msgstr ""
+
+#: inc/product-analytics.php:189
+msgid "Defect receipt"
 msgstr ""
 
 #: inc/product-analytics.php:190
-msgid "All statuses"
+msgid "Defect expense"
+msgstr ""
+
+#: inc/product-analytics.php:191
+msgid "Internal-use receipt"
+msgstr ""
+
+#: inc/product-analytics.php:192
+msgid "Internal-use expense"
+msgstr ""
+
+#: inc/product-analytics.php:193
+msgid "Marketing receipt"
+msgstr ""
+
+#: inc/product-analytics.php:194
+msgid "Marketing expense"
+msgstr ""
+
+#: inc/product-analytics.php:195
+msgid "Reservation"
+msgstr ""
+
+#: inc/product-analytics.php:196
+msgid "Other expense"
+msgstr ""
+
+#: inc/product-analytics.php:197
+msgid "Unclassified movement"
+msgstr ""
+
+#: inc/product-analytics.php:198
+#: inc/product-analytics.php:424
+msgid "Regular demand"
+msgstr ""
+
+#: inc/product-analytics.php:199
+msgid "One-off order"
+msgstr ""
+
+#: inc/product-analytics.php:200
+msgid "Not applicable"
+msgstr ""
+
+#: inc/product-analytics.php:201
+msgid "Prepayment"
 msgstr ""
 
 #: inc/product-analytics.php:202
-msgid "Verification state"
+msgid "Deferred payment, 30 days"
+msgstr ""
+
+#: inc/product-analytics.php:203
+msgid "Deferred payment, 60 days"
 msgstr ""
 
 #: inc/product-analytics.php:204
-msgid "All states"
+msgid "Deferred payment, 90 days"
+msgstr ""
+
+#: inc/product-analytics.php:205
+msgid "Deferred payment, 180 days"
+msgstr ""
+
+#: inc/product-analytics.php:206
+msgid "Payment on fact"
+msgstr ""
+
+#: inc/product-analytics.php:207
+msgid "Not specified"
+msgstr ""
+
+#: inc/product-analytics.php:208
+msgid "Retail customer"
+msgstr ""
+
+#: inc/product-analytics.php:209
+msgid "Non-retail customer"
+msgstr ""
+
+#: inc/product-analytics.php:210
+msgid "Unknown"
+msgstr ""
+
+#: inc/product-analytics.php:211
+msgid "Incoming"
+msgstr ""
+
+#: inc/product-analytics.php:212
+msgid "Outgoing"
 msgstr ""
 
 #: inc/product-analytics.php:213
-msgid "Active alert"
-msgstr ""
-
-#: inc/product-analytics.php:215
-msgid "All alerts"
+msgid "No stock direction"
 msgstr ""
 
 #: inc/product-analytics.php:225
-msgid "Alert severity"
-msgstr ""
-
-#: inc/product-analytics.php:227
-msgid "All severities"
-msgstr ""
-
-#: inc/product-analytics.php:229
-msgid "High"
-msgstr ""
-
-#: inc/product-analytics.php:230
-msgid "Medium"
+msgid "Read-only stock, capital and commercial-sales analytics from published Folio snapshots."
 msgstr ""
 
 #: inc/product-analytics.php:231
-msgid "Low"
+msgid "Current reporting boundaries"
 msgstr ""
 
-#: inc/product-analytics.php:235
-msgid "Sales, 365 days"
-msgstr ""
-
-#: inc/product-analytics.php:237
-msgid "Any sales"
+#: inc/product-analytics.php:232
+msgid "Sales are commercial sales total. Profit is gross profit before returns. Coverage is an analytical signal, not a purchase or transfer order."
 msgstr ""
 
 #: inc/product-analytics.php:238
-msgid "With sales"
+msgid "Loading snapshots..."
 msgstr ""
 
-#: inc/product-analytics.php:239
-msgid "Without sales"
+#: inc/product-analytics.php:240
+msgid "Reload report"
 msgstr ""
 
-#: inc/product-analytics.php:243
-msgid "Minimum capital"
+#: inc/product-analytics.php:245
+msgid "Warehouse summary"
 msgstr ""
 
 #: inc/product-analytics.php:247
-msgid "Maximum capital"
+msgid "Analytics section"
 msgstr ""
 
-#: inc/product-analytics.php:251
-msgid "Last sale from"
+#: inc/product-analytics.php:249
+msgid "Product movements"
 msgstr ""
 
-#: inc/product-analytics.php:255
-msgid "Last sale through"
+#: inc/product-analytics.php:254
+msgid "Saved analytics views"
 msgstr ""
 
-#: inc/product-analytics.php:259
-msgid "Rows per page"
+#: inc/product-analytics.php:257
+msgid "All products"
+msgstr ""
+
+#: inc/product-analytics.php:258
+msgid "Data issues"
+msgstr ""
+
+#: inc/product-analytics.php:265
+msgid "Revenue leaders"
+msgstr ""
+
+#: inc/product-analytics.php:266
+msgid "Profit leaders"
 msgstr ""
 
 #: inc/product-analytics.php:267
-msgid "Apply filters"
+msgid "Capital efficiency"
 msgstr ""
 
-#: inc/product-analytics.php:268
-msgid "Reset"
+#: inc/product-analytics.php:275
+#: inc/product-analytics.php:276
+msgid "Saved filter sets"
+msgstr ""
+
+#: inc/product-analytics.php:280
+msgid "Filter set name"
+msgstr ""
+
+#: inc/product-analytics.php:281
+msgid "Save filter set"
+msgstr ""
+
+#: inc/product-analytics.php:282
+msgid "Delete selected set"
+msgstr ""
+
+#: inc/product-analytics.php:287
+msgid "SKU or product name"
+msgstr ""
+
+#: inc/product-analytics.php:291
+msgid "Economic status"
+msgstr ""
+
+#: inc/product-analytics.php:293
+msgid "All statuses"
+msgstr ""
+
+#: inc/product-analytics.php:306
+msgid "Verification state"
+msgstr ""
+
+#: inc/product-analytics.php:308
+msgid "All states"
+msgstr ""
+
+#: inc/product-analytics.php:317
+msgid "Active alert"
 msgstr ""
 
 #: inc/product-analytics.php:319
-msgid "A Folio source database and warehouse are required."
+msgid "All alerts"
 msgstr ""
 
-#: inc/product-analytics.php:523
-msgid "A product SKU is required."
+#: inc/product-analytics.php:330
+msgid "Alert status"
 msgstr ""
 
-#: inc/product-analytics.php:532
-msgid "The requested product was not found in this snapshot."
+#: inc/product-analytics.php:331
+msgid "Active and resolved alerts"
 msgstr ""
 
-#: inc/product-analytics.php:570
-msgid "The analytics database query failed. Check the server log."
+#: inc/product-analytics.php:331
+msgid "Active alerts"
 msgstr ""
 
-#: inc/product-analytics.php:575
-msgid "You do not have permission to view product analytics."
+#: inc/product-analytics.php:331
+msgid "Resolved alerts"
+msgstr ""
+
+#: inc/product-analytics.php:334
+msgid "Alert severity"
+msgstr ""
+
+#: inc/product-analytics.php:336
+msgid "All severities"
+msgstr ""
+
+#: inc/product-analytics.php:338
+msgid "High"
+msgstr ""
+
+#: inc/product-analytics.php:339
+msgid "Medium"
+msgstr ""
+
+#: inc/product-analytics.php:340
+msgid "Low"
+msgstr ""
+
+#: inc/product-analytics.php:346
+msgid "Any sales"
+msgstr ""
+
+#: inc/product-analytics.php:347
+msgid "With sales"
+msgstr ""
+
+#: inc/product-analytics.php:348
+msgid "Without sales"
+msgstr ""
+
+#: inc/product-analytics.php:353
+msgid "Current supplier filter"
+msgstr ""
+
+#: inc/product-analytics.php:355
+msgid "Do not filter by supplier"
+msgstr ""
+
+#: inc/product-analytics.php:356
+msgid "Include selected suppliers"
+msgstr ""
+
+#: inc/product-analytics.php:357
+msgid "Exclude selected suppliers"
+msgstr ""
+
+#: inc/product-analytics.php:361
+msgid "Suppliers"
+msgstr ""
+
+#: inc/product-analytics.php:364
+msgid "Select one or more suppliers. The mode controls whether they are included in or excluded from the product registry."
+msgstr ""
+
+#: inc/product-analytics.php:368
+msgid "Supplier data quality"
+msgstr ""
+
+#: inc/product-analytics.php:370
+msgid "Any supplier assignment"
+msgstr ""
+
+#: inc/product-analytics.php:371
+msgid "Supplier assigned"
+msgstr ""
+
+#: inc/product-analytics.php:372
+msgid "Supplier missing"
+msgstr ""
+
+#: inc/product-analytics.php:377
+msgid "Available stock sign"
+msgstr ""
+
+#: inc/product-analytics.php:379
+msgid "Any available stock"
+msgstr ""
+
+#: inc/product-analytics.php:380
+msgid "Zero or negative"
+msgstr ""
+
+#: inc/product-analytics.php:381
+msgid "Exactly zero"
+msgstr ""
+
+#: inc/product-analytics.php:382
+msgid "Positive"
+msgstr ""
+
+#: inc/product-analytics.php:388
+msgid "Any accounting price"
+msgstr ""
+
+#: inc/product-analytics.php:389
+msgid "Zero accounting price"
+msgstr ""
+
+#: inc/product-analytics.php:390
+msgid "Positive accounting price"
+msgstr ""
+
+#: inc/product-analytics.php:394
+msgid "Stock and capital filters"
+msgstr ""
+
+#: inc/product-analytics.php:398
+msgid "Physical quantity from"
+msgstr ""
+
+#: inc/product-analytics.php:399
+msgid "Physical quantity through"
+msgstr ""
+
+#: inc/product-analytics.php:400
+msgid "Reserved quantity from"
+msgstr ""
+
+#: inc/product-analytics.php:401
+msgid "Reserved quantity through"
+msgstr ""
+
+#: inc/product-analytics.php:402
+msgid "Available quantity from"
+msgstr ""
+
+#: inc/product-analytics.php:403
+msgid "Available quantity through"
+msgstr ""
+
+#: inc/product-analytics.php:412
+msgid "Demand filters"
+msgstr ""
+
+#: inc/product-analytics.php:415
+msgid "Demand period"
+msgstr ""
+
+#: inc/product-analytics.php:417
+msgid "Current month"
+msgstr ""
+
+#: inc/product-analytics.php:418
+#: inc/product-analytics.php:455
+msgid "3 months"
+msgstr ""
+
+#: inc/product-analytics.php:419
+#: inc/product-analytics.php:455
+msgid "12 months"
+msgstr ""
+
+#: inc/product-analytics.php:420
+msgid "24 months"
+msgstr ""
+
+#: inc/product-analytics.php:426
+msgid "Any regular demand"
+msgstr ""
+
+#: inc/product-analytics.php:427
+msgid "With regular demand"
+msgstr ""
+
+#: inc/product-analytics.php:428
+msgid "Without regular demand"
+msgstr ""
+
+#: inc/product-analytics.php:432
+msgid "One-off sales"
+msgstr ""
+
+#: inc/product-analytics.php:434
+msgid "Any one-off sales"
+msgstr ""
+
+#: inc/product-analytics.php:435
+msgid "With one-off sales"
+msgstr ""
+
+#: inc/product-analytics.php:436
+msgid "Without one-off sales"
+msgstr ""
+
+#: inc/product-analytics.php:437
+msgid "Only one-off sales, no regular demand"
+msgstr ""
+
+#: inc/product-analytics.php:443
+msgid "Minimum capital"
+msgstr ""
+
+#: inc/product-analytics.php:447
+msgid "Maximum capital"
+msgstr ""
+
+#: inc/product-analytics.php:451
+msgid "Financial efficiency filters"
+msgstr ""
+
+#: inc/product-analytics.php:454
+msgid "Financial period"
+msgstr ""
+
+#: inc/product-analytics.php:459
+msgid "Revenue from"
+msgstr ""
+
+#: inc/product-analytics.php:460
+msgid "Revenue through"
+msgstr ""
+
+#: inc/product-analytics.php:461
+msgid "Gross profit from"
+msgstr ""
+
+#: inc/product-analytics.php:462
+msgid "Gross profit through"
+msgstr ""
+
+#: inc/product-analytics.php:463
+msgid "Average capital from"
+msgstr ""
+
+#: inc/product-analytics.php:464
+msgid "Average capital through"
+msgstr ""
+
+#: inc/product-analytics.php:465
+msgid "Gross margin from, %"
+msgstr ""
+
+#: inc/product-analytics.php:466
+msgid "Gross margin through, %"
+msgstr ""
+
+#: inc/product-analytics.php:467
+msgid "Inventory turns from"
+msgstr ""
+
+#: inc/product-analytics.php:468
+msgid "Inventory turns through"
+msgstr ""
+
+#: inc/product-analytics.php:469
+msgid "GMROI from"
+msgstr ""
+
+#: inc/product-analytics.php:470
+msgid "GMROI through"
+msgstr ""
+
+#: inc/product-analytics.php:471
+msgid "Coverage from, days"
+msgstr ""
+
+#: inc/product-analytics.php:472
+msgid "Coverage through, days"
+msgstr ""
+
+#: inc/product-analytics.php:481
+msgid "Last sale from"
+msgstr ""
+
+#: inc/product-analytics.php:485
+msgid "Last sale through"
+msgstr ""
+
+#: inc/product-analytics.php:489
+msgid "Additional date filters"
+msgstr ""
+
+#: inc/product-analytics.php:493
+msgid "Last regular sale from"
+msgstr ""
+
+#: inc/product-analytics.php:494
+msgid "Last regular sale through"
+msgstr ""
+
+#: inc/product-analytics.php:495
+msgid "Last receipt from"
+msgstr ""
+
+#: inc/product-analytics.php:496
+msgid "Last receipt through"
+msgstr ""
+
+#: inc/product-analytics.php:497
+msgid "First movement from"
+msgstr ""
+
+#: inc/product-analytics.php:498
+msgid "First movement through"
+msgstr ""
+
+#: inc/product-analytics.php:499
+msgid "Last movement from"
+msgstr ""
+
+#: inc/product-analytics.php:500
+msgid "Last movement through"
+msgstr ""
+
+#: inc/product-analytics.php:501
+msgid "Alert first seen from"
+msgstr ""
+
+#: inc/product-analytics.php:502
+msgid "Alert first seen through"
+msgstr ""
+
+#: inc/product-analytics.php:503
+msgid "Alert last confirmed from"
+msgstr ""
+
+#: inc/product-analytics.php:504
+msgid "Alert last confirmed through"
+msgstr ""
+
+#: inc/product-analytics.php:513
+#: inc/product-analytics.php:590
+msgid "Rows per page"
+msgstr ""
+
+#: inc/product-analytics.php:521
+msgid "Apply filters"
+msgstr ""
+
+#: inc/product-analytics.php:522
+#: inc/product-analytics.php:593
+msgid "Reset"
+msgstr ""
+
+#: inc/product-analytics.php:540
+msgid "This registry shows published Folio movement facts. Filtering is performed server-side and does not recalculate the product summary cards above."
+msgstr ""
+
+#: inc/product-analytics.php:544
+msgid "Document date from"
+msgstr ""
+
+#: inc/product-analytics.php:545
+msgid "Document date through"
+msgstr ""
+
+#: inc/product-analytics.php:559
+msgid "All movement classes"
+msgstr ""
+
+#: inc/product-analytics.php:574
+msgid "All values"
+msgstr ""
+
+#: inc/product-analytics.php:580
+msgid "Affects stock"
+msgstr ""
+
+#: inc/product-analytics.php:581
+msgid "Affects financial sales"
 msgstr ""
 
 #: inc/product-analytics.php:582
+msgid "Affects planning demand"
+msgstr ""
+
+#: inc/product-analytics.php:586
+msgid "Any value"
+msgstr ""
+
+#: inc/product-analytics.php:592
+msgid "Apply movement filters"
+msgstr ""
+
+#: inc/product-analytics.php:648
+msgid "The Folio movement facts have not been published to this WordPress database yet. Rebuild the snapshot with analytics schema v2."
+msgstr ""
+
+#: inc/product-analytics.php:657
+msgid "A Folio source database and warehouse are required."
+msgstr ""
+
+#: inc/product-analytics.php:700
+msgid "No completed active Folio product snapshot is available for this warehouse."
+msgstr ""
+
+#: inc/product-analytics.php:904
+msgid "The filter set data is invalid."
+msgstr ""
+
+#: inc/product-analytics.php:924
+msgid "No more than 30 saved filter sets are allowed."
+msgstr ""
+
+#: inc/product-analytics.php:992
+#: inc/product-analytics.php:1196
+msgid "This snapshot must be rebuilt with analytics schema v2."
+msgstr ""
+
+#: inc/product-analytics.php:1295
+msgid "A product SKU is required."
+msgstr ""
+
+#: inc/product-analytics.php:1304
+msgid "The requested product was not found in this snapshot."
+msgstr ""
+
+#: inc/product-analytics.php:1342
+msgid "The analytics database query failed. Check the server log."
+msgstr ""
+
+#: inc/product-analytics.php:1347
+msgid "You do not have permission to view product analytics."
+msgstr ""
+
+#: inc/product-analytics.php:1354
 msgid "The Folio analytics tables have not been published to this WordPress database yet."
 msgstr ""
 
-#: inc/product-analytics.php:596
+#: inc/product-analytics.php:1376
 msgid "Unsupported product-analytics operation."
 msgstr ""
 
@@ -2351,311 +3455,4 @@ msgstr ""
 
 #: inc/sync.php:302
 msgid "Manual listed price synchronization"
-msgstr ""
-
-msgid "The product is present in the current Folio warehouse snapshot, but no successful accounting-price recalculation has been confirmed for it yet."
-msgstr ""
-
-msgid "The product was first found in Folio and has not yet received a confirmed recalculation."
-msgstr ""
-
-msgid "The Folio movement fingerprint changed after the last confirmed recalculation."
-msgstr ""
-
-msgid "The product recalculation failed. Review the saved error and correct the Folio data before retrying."
-msgstr ""
-
-msgid "The product existed in an earlier snapshot but is absent from the current Folio warehouse snapshot."
-msgstr ""
-
-msgid "Select a supported snapshot state."
-msgstr ""
-
-msgid "The Folio product snapshot tables are unavailable."
-msgstr ""
-
-msgid "No completed snapshot is available for this campaign."
-msgstr ""
-
-msgid "State"
-msgstr ""
-
-msgid "Last error"
-msgstr ""
-
-msgid "Present in Folio"
-msgstr ""
-
-msgid "Movements"
-msgstr ""
-
-msgid "First movement"
-msgstr ""
-
-msgid "Last movement"
-msgstr ""
-
-msgid "Last observed"
-msgstr ""
-
-msgid "Last recalculated"
-msgstr ""
-
-msgid "Latest change"
-msgstr ""
-
-msgid "Change detected"
-msgstr ""
-
-msgid "No"
-msgstr ""
-
-msgid "Operation quantity"
-msgstr ""
-
-msgid "Snapshot state report"
-msgstr ""
-
-msgid "Open UNVERIFIED, NEW, DIRTY, FAILED, or REMOVED to review the actual products behind the counters."
-msgstr ""
-
-msgid "View"
-msgstr ""
-
-msgid "Export selected state CSV"
-msgstr ""
-
-msgid "There are no products in this snapshot state."
-msgstr ""
-
-msgid "Why this state is assigned"
-msgstr ""
-
-msgid "Movement period"
-msgstr ""
-
-msgid "Previous page"
-msgstr ""
-
-msgid "Next page"
-msgstr ""
-
-msgid "The chronological stock became negative at this movement. Check the document date, quantity, warehouse, and movement order in Folio."
-msgstr ""
-
-msgid "Movement record"
-msgstr ""
-
-msgid "Movement position"
-msgstr ""
-
-msgid "Current physical quantity"
-msgstr ""
-
-msgid "Current accounting quantity"
-msgstr ""
-
-msgid "Warehouse %d"
-msgstr ""
-
-msgid "The snapshot marks this product as failed."
-msgstr ""
-
-msgid "All Folio warehouses"
-msgstr ""
-
-msgid "Loading the latest state of all Folio warehouses..."
-msgstr ""
-
-msgid "Refresh warehouse overview"
-msgstr ""
-
-msgid "Warehouses in directory"
-msgstr ""
-
-msgid "Never processed"
-msgstr ""
-
-msgid "Warehouses with errors"
-msgstr ""
-
-msgid "Negative stock cases"
-msgstr ""
-
-msgid "View negative stock for all warehouses"
-msgstr ""
-
-msgid "View warnings for all warehouses"
-msgstr ""
-
-msgid "View errors for all warehouses"
-msgstr ""
-
-msgid "Processing state"
-msgstr ""
-
-msgid "Last processing"
-msgstr ""
-
-msgid "Last snapshot"
-msgstr ""
-
-msgid "Last recalculation"
-msgstr ""
-
-msgid "Negative stock"
-msgstr ""
-
-msgid "Actions"
-msgstr ""
-
-msgid "View warnings"
-msgstr ""
-
-msgid "View errors"
-msgstr ""
-
-msgid "View negative stock"
-msgstr ""
-
-msgid "View products"
-msgstr ""
-
-msgid "No diagnostics were recorded for the selected warehouses."
-msgstr ""
-
-msgid "Detailed diagnostics from campaigns completed before this overview was added may be unavailable. Snapshot states and saved last errors are still shown."
-msgstr ""
-
-msgid "The Java warehouse directory is temporarily unavailable. Warehouses known from saved schedules and snapshots are still shown."
-msgstr ""
-
-msgid "Latest warehouse diagnostics"
-msgstr ""
-
-msgid "Recorded at"
-msgstr ""
-
-msgid "No snapshot has been created"
-msgstr ""
-
-msgid "Not processed yet"
-msgstr ""
-
-msgid "Snapshot is being built"
-msgstr ""
-
-msgid "Processed before detailed history was enabled"
-msgstr ""
-
-msgid "Warehouse processing failed"
-msgstr ""
-
-msgid "Final snapshot confirmed"
-msgstr ""
-
-msgid "Processing state for all Folio warehouses"
-msgstr ""
-
-msgid "This permanent overview shows the latest snapshot and processing result for every warehouse, including warehouses that have never been processed."
-msgstr ""
-
-msgid "The warehouse directory is unavailable."
-msgstr ""
-
-msgid "Snapshot interrupted by Java restart"
-msgstr ""
-
-msgid "The product snapshot was interrupted by a Java restart. No process is active. Start the campaign again; the previous active snapshot remains available."
-msgstr ""
-
-msgid "Current batch progress"
-msgstr ""
-
-msgid "Successfully committed SKU"
-msgstr ""
-
-msgid "The selected Folio SKU batch is empty or exceeds the 500 SKU safety limit. Nothing was sent for recalculation."
-msgstr ""
-
-msgid "The matching native-range task has no job ID. Automatic continuation is unsafe and was stopped."
-msgstr ""
-
-msgid "Job ID"
-msgstr ""
-
-msgid "The accounting formula denominator is zero. This SKU was rolled back and skipped; check the receipt price, document amount, tax data, and movement order in Folio."
-msgstr ""
-
-msgid "Formula"
-msgstr ""
-
-msgid "Numerator"
-msgstr ""
-
-msgid "Denominator"
-msgstr ""
-
-msgid "Warnings in current batch"
-msgstr ""
-
-#: inc/product-analytics.php
-msgid "No suppliers are available for this warehouse."
-msgstr ""
-
-#: inc/product-analytics.php
-msgid "Current supplier filter"
-msgstr ""
-
-#: inc/product-analytics.php
-msgid "Do not filter by supplier"
-msgstr ""
-
-#: inc/product-analytics.php
-msgid "Include selected suppliers"
-msgstr ""
-
-#: inc/product-analytics.php
-msgid "Exclude selected suppliers"
-msgstr ""
-
-#: inc/product-analytics.php
-msgid "Suppliers"
-msgstr ""
-
-#: inc/product-analytics.php
-msgid "Select one or more suppliers. The mode controls whether they are included in or excluded from the product registry."
-msgstr ""
-
-msgid "Saved filter sets"
-msgstr ""
-
-msgid "Select a saved filter set"
-msgstr ""
-
-msgid "Filter set name"
-msgstr ""
-
-msgid "Save filter set"
-msgstr ""
-
-msgid "Delete selected set"
-msgstr ""
-
-msgid "The filter set has been saved."
-msgstr ""
-
-msgid "The filter set has been deleted."
-msgstr ""
-
-msgid "Enter a name for the filter set."
-msgstr ""
-
-msgid "Delete the selected filter set?"
-msgstr ""
-
-msgid "The filter set data is invalid."
-msgstr ""
-
-msgid "No more than 30 saved filter sets are allowed."
 msgstr ""
