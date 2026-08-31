@@ -42,6 +42,8 @@ add_action('admin_enqueue_scripts', function (): void {
     wp_localize_script('lps-product-analytics', 'LPS_PRODUCT_ANALYTICS', [
         'ajaxUrl' => admin_url('admin-ajax.php'),
         'nonce' => wp_create_nonce(LPS_PRODUCT_ANALYTICS_NONCE),
+        'scenarioNonce' => wp_create_nonce(LPS_ANALYTICS_SCENARIOS_NONCE),
+        'scenarioUrl' => admin_url('admin.php?page=' . LPS_ANALYTICS_SCENARIOS_PAGE),
         'currency' => $currency,
         'locale' => str_replace('_', '-', determine_locale()),
         'i18n' => lps_product_analytics_i18n(),
@@ -151,11 +153,14 @@ function lps_product_analytics_i18n(): array {
         'schemaUpgradeRequired' => __('This warehouse uses analytics schema v1. Rebuild its snapshot with schema v2 to use suppliers, regular demand and movements.', 'lavka-price-sync'),
         'movementRows' => __('movement rows', 'lavka-price-sync'),
         'noMovements' => __('No movements match the selected filters.', 'lavka-price-sync'),
-        'selectPreset' => __('Select a saved filter set', 'lavka-price-sync'),
-        'presetSaved' => __('The filter set has been saved.', 'lavka-price-sync'),
-        'presetDeleted' => __('The filter set has been deleted.', 'lavka-price-sync'),
-        'presetNameRequired' => __('Enter a name for the filter set.', 'lavka-price-sync'),
-        'confirmPresetDelete' => __('Delete the selected filter set?', 'lavka-price-sync'),
+        'selectScenario' => __('Use temporary filters without a scenario', 'lavka-price-sync'),
+        'scenarioApplied' => __('The analytics scenario has been applied to both registries.', 'lavka-price-sync'),
+        'scenarioModified' => __('Temporary changes are applied. The saved scenario has not been changed.', 'lavka-price-sync'),
+        'scenarioUnavailable' => __('The saved warehouse for this scenario is not available.', 'lavka-price-sync'),
+        'scenarioProducts' => __('Product conditions', 'lavka-price-sync'),
+        'scenarioMovements' => __('Movement conditions', 'lavka-price-sync'),
+        'scenarioAllValues' => __('No additional conditions', 'lavka-price-sync'),
+        'scenarioSavedUnavailableValue' => __('Saved value is not available in the current snapshot', 'lavka-price-sync'),
         'statusLabels' => [
             'HEALTHY' => __('Healthy', 'lavka-price-sync'),
             'STOCKOUT' => __('Stockout', 'lavka-price-sync'),
@@ -242,7 +247,20 @@ function lps_render_product_analytics_page(): void {
         </div>
 
         <div id="lps-pa-message" class="lps-pa-message" hidden></div>
-        <section id="lps-pa-summary" class="lps-pa-summary" aria-label="<?php echo esc_attr__('Warehouse summary', 'lavka-price-sync'); ?>"></section>
+        <p class="description lps-pa-summary-boundary"><?php echo esc_html__('The summary cards show the whole selected warehouse before scenario filters. Scenario conditions apply to the product and movement registries below.', 'lavka-price-sync'); ?></p>
+        <section id="lps-pa-summary" class="lps-pa-summary" aria-label="<?php echo esc_attr__('Warehouse-wide summary', 'lavka-price-sync'); ?>"></section>
+
+        <section class="lps-pa-scenarios" aria-label="<?php echo esc_attr__('Folio analytics scenario', 'lavka-price-sync'); ?>">
+            <div class="lps-pa-scenario-picker">
+                <label for="lps-pa-scenario-select"><strong><?php echo esc_html__('Analytics scenario', 'lavka-price-sync'); ?></strong></label>
+                <select id="lps-pa-scenario-select">
+                    <option value=""><?php echo esc_html__('Use temporary filters without a scenario', 'lavka-price-sync'); ?></option>
+                </select>
+                <a class="button" href="<?php echo esc_url(admin_url('admin.php?page=' . LPS_ANALYTICS_SCENARIOS_PAGE)); ?>"><?php echo esc_html__('Manage scenarios', 'lavka-price-sync'); ?></a>
+                <span id="lps-pa-scenario-status" class="description" aria-live="polite"></span>
+            </div>
+            <div id="lps-pa-scenario-summary" class="lps-pa-scenario-summary" hidden></div>
+        </section>
 
         <nav class="nav-tab-wrapper lps-pa-tabs" aria-label="<?php echo esc_attr__('Analytics section', 'lavka-price-sync'); ?>">
             <button type="button" class="nav-tab nav-tab-active" data-lps-pa-tab="products"><?php echo esc_html__('Products', 'lavka-price-sync'); ?></button>
@@ -272,16 +290,8 @@ function lps_render_product_analytics_page(): void {
             <?php endforeach; ?>
         </nav>
 
-        <section class="lps-pa-presets" aria-label="<?php echo esc_attr__('Saved filter sets', 'lavka-price-sync'); ?>">
-            <strong><?php echo esc_html__('Saved filter sets', 'lavka-price-sync'); ?></strong>
-            <select id="lps-pa-preset-select" aria-label="<?php echo esc_attr__('Select a saved filter set', 'lavka-price-sync'); ?>">
-                <option value=""><?php echo esc_html__('Select a saved filter set', 'lavka-price-sync'); ?></option>
-            </select>
-            <input type="text" id="lps-pa-preset-name" maxlength="80" placeholder="<?php echo esc_attr__('Filter set name', 'lavka-price-sync'); ?>">
-            <button type="button" class="button button-primary" id="lps-pa-preset-save"><?php echo esc_html__('Save filter set', 'lavka-price-sync'); ?></button>
-            <button type="button" class="button" id="lps-pa-preset-delete" disabled><?php echo esc_html__('Delete selected set', 'lavka-price-sync'); ?></button>
-        </section>
-
+        <details class="lps-pa-filter-editor">
+            <summary><?php echo esc_html__('Temporary product filter overrides', 'lavka-price-sync'); ?></summary>
         <form id="lps-pa-filters" class="lps-pa-filters">
             <label>
                 <span><?php echo esc_html__('SKU or product name', 'lavka-price-sync'); ?></span>
@@ -522,6 +532,7 @@ function lps_render_product_analytics_page(): void {
                 <button type="button" class="button" id="lps-pa-reset"><?php echo esc_html__('Reset', 'lavka-price-sync'); ?></button>
             </div>
         </form>
+        </details>
 
         <section class="lps-pa-registry">
             <div class="lps-pa-table-meta" id="lps-pa-table-meta"></div>
@@ -539,6 +550,8 @@ function lps_render_product_analytics_page(): void {
             <div class="notice notice-info inline">
                 <p><?php echo esc_html__('This registry shows published Folio movement facts. Filtering is performed server-side and does not recalculate the product summary cards above.', 'lavka-price-sync'); ?></p>
             </div>
+            <details class="lps-pa-filter-editor">
+                <summary><?php echo esc_html__('Temporary movement filter overrides', 'lavka-price-sync'); ?></summary>
             <form id="lps-pa-movement-filters" class="lps-pa-filters lps-pa-movement-filters">
                 <?php $movement_labels = lps_product_analytics_i18n()['statusLabels']; ?>
                 <label><span><?php echo esc_html__('Document date from', 'lavka-price-sync'); ?></span><input type="date" name="documentDateFrom"></label>
@@ -593,6 +606,7 @@ function lps_render_product_analytics_page(): void {
                     <button type="button" class="button" id="lps-pa-movement-reset"><?php echo esc_html__('Reset', 'lavka-price-sync'); ?></button>
                 </div>
             </form>
+            </details>
             <div class="lps-pa-table-meta" id="lps-pa-movements-meta"></div>
             <div class="lps-pa-table-scroll">
                 <table class="widefat striped" id="lps-pa-movements"><thead><tr id="lps-pa-movements-head"></tr></thead><tbody></tbody></table>

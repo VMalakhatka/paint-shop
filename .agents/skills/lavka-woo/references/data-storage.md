@@ -77,6 +77,8 @@ Term meta `lavka_folio_warehouses` хранит упорядоченный сп�
 | `folio_product_movement_fact` | активные строки движения за горизонт: класс движения, регулярный/разовый спрос, условия оплаты, сегмент клиента, контрагент и текущий поставщик |
 | `folio_product_*metrics*`, alerts | аналитика товара и предупреждения |
 | `folio_customer_balance_snapshot_*` | подготовленный снимок должников |
+| `wp_lps_analytics_scenarios` | общие и личные сценарии аналитики ФОЛІО; фактический префикс берётся из `$wpdb->prefix` |
+| `wp_lps_analytics_scenario_revisions` | неизменяемые ревизии сценариев для истории и контроля версий |
 
 Точный набор колонок узнавай через `SHOW CREATE TABLE`/`DESCRIBE` перед изменением. Таблица с названием `snapshot` является проекцией, а не источником ФОЛИО.
 
@@ -85,6 +87,17 @@ Term meta `lavka_folio_warehouses` хранит упорядоченный сп�
 `demand_mode`, `payment_terms`, `customer_segment` и флаги влияния; не
 пересчитывает их из `VID_DOC`. `current_supplier` — назначение карточки на дату
 snapshot, а `counterparty_*` — исторический контрагент документа.
+
+Сценарий аналитики имеет `schemaVersion=1` и хранит `context`, `products`,
+`movements`, `presentation`. В `context.warehouseIds` технически используется
+массив, но интерфейс первой версии сохраняет один склад. `visibility=shared`
+доступна менеджерам, `visibility=personal` — владельцу; `status=archived` скрывает
+сценарий из рабочего выбора без физического удаления. Поле `version` используется
+для optimistic locking, а каждое успешное сохранение создаёт строку ревизии.
+
+Старые фильтры из user meta `lps_product_analytics_filter_presets` импортируются
+один раз в личные сценарии. Исходный meta не удаляется. Не редактируй JSON или
+ревизии напрямую SQL: используй административный интерфейс и AJAX владельца.
 
 ## Состояния проверки учётных цен
 

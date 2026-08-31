@@ -21,10 +21,9 @@
     suppliers: document.getElementById('lps-pa-suppliers'),
     supplierMeta: document.getElementById('lps-pa-supplier-meta'),
     documentType: document.getElementById('lps-pa-document-type'),
-    presetSelect: document.getElementById('lps-pa-preset-select'),
-    presetName: document.getElementById('lps-pa-preset-name'),
-    presetSave: document.getElementById('lps-pa-preset-save'),
-    presetDelete: document.getElementById('lps-pa-preset-delete'),
+    scenarioSelect: document.getElementById('lps-pa-scenario-select'),
+    scenarioSummary: document.getElementById('lps-pa-scenario-summary'),
+    scenarioStatus: document.getElementById('lps-pa-scenario-status'),
     reset: document.getElementById('lps-pa-reset'),
     table: document.getElementById('lps-pa-products'),
     head: document.getElementById('lps-pa-products-head'),
@@ -51,7 +50,9 @@
     page: 1,
     sort: 'inventory_value',
     direction: 'DESC',
-    presets: [],
+    scenarios: [],
+    activeScenarioId: 0,
+    applyingScenario: false,
     productsRequest: 0,
     movementPage: 1,
     movementRequest: 0,
@@ -145,6 +146,23 @@
     return payload.data;
   }
 
+  async function scenarioRequest(operation, data = {}) {
+    const body = new URLSearchParams({
+      action: 'lps_analytics_scenarios',
+      _ajax_nonce: config.scenarioNonce || '',
+      operation,
+      ...data
+    });
+    const response = await fetch(config.ajaxUrl, {
+      method: 'POST', credentials: 'same-origin',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'}, body: body.toString()
+    });
+    let payload;
+    try { payload = await response.json(); } catch (error) { throw new Error(`${t.loadFailed || 'Product analytics could not be loaded.'} HTTP ${response.status}`); }
+    if (!response.ok || !payload?.success) throw new Error(payload?.data?.message || t.loadFailed || 'Product analytics could not be loaded.');
+    return payload.data;
+  }
+
   function numeric(value) {
     if (value === null || value === undefined || value === '') return null;
     const number = Number(value);
@@ -226,8 +244,8 @@
       }
       selectScope(el.scope.value);
       await loadFilterOptions();
-      await loadReport();
-      await loadPresets();
+      const applied = await loadScenarios();
+      if (!applied) await loadReport();
     } catch (error) {
       showMessage(error.message || String(error), 'error');
     } finally {
@@ -333,59 +351,111 @@
     }
   }
 
-  function renderPresets(selectedId = '') {
-    el.presetSelect.replaceChildren(new Option(t.selectPreset || 'Select a saved filter set', ''));
-    state.presets.forEach((preset) => {
-      el.presetSelect.append(new Option(preset.name, preset.id));
+  function renderScenarios(selectedId = 0) {
+    el.scenarioSelect.replaceChildren(new Option(t.selectScenario || 'Use temporary filters without a scenario', ''));
+    state.scenarios.filter((scenario) => scenario.status === 'active').forEach((scenario) => {
+      el.scenarioSelect.append(new Option(scenario.name, String(scenario.id)));
     });
-    el.presetSelect.value = selectedId;
-    el.presetDelete.disabled = !selectedId;
+    el.scenarioSelect.value = selectedId ? String(selectedId) : '';
   }
 
-  async function loadPresets(selectedId = '') {
-    const data = await request('preset_list');
-    state.presets = Array.isArray(data.items) ? data.items : [];
-    renderPresets(selectedId);
+  function setFormValues(form, values = {}) {
+    Object.entries(values).forEach(([name, value]) => {
+      if (['supplierValues', 'view', 'sort', 'direction'].includes(name)) return;
+      const field = form.elements[name];
+      if (field) field.value = value ?? '';
+    });
   }
 
-  function presetState() {
-    const payload = filterPayload();
-    delete payload.page;
-    return payload;
+  function activeConditions(values = {}, ignored = []) {
+    return Object.entries(values).filter(([key, value]) => {
+      if (ignored.includes(key) || value === '' || value === null || value === undefined) return false;
+      if (['ANY', 'all', '50', 'DESC', '365'].includes(String(value))) return false;
+      return !(Array.isArray(value) && value.length === 0);
+    });
   }
 
-  async function applyPreset(preset) {
-    const saved = preset?.state || {};
-    const scopeValue = `${saved.sourceDatabase || ''}|${Number(saved.warehouseId) || 0}`;
-    if (state.scopes.some((scope) => `${scope.source_database}|${scope.warehouse_id}` === scopeValue)) {
-      el.scope.value = scopeValue;
-      selectScope(scopeValue);
-      await loadFilterOptions();
+  function scenarioConditionLabel(group, key) {
+    const form = group === 'products' ? el.filters : el.movementFilters;
+    const field = form.elements[key === 'supplierValues' ? 'supplierValues[]' : key];
+    return field?.closest('label')?.querySelector('span')?.textContent?.trim() || key;
+  }
+
+  function preserveScenarioOption(select, value) {
+    const normalized = String(value || '').trim();
+    if (!normalized || Array.from(select.options).some((option) => option.value === normalized)) return;
+    select.append(new Option(`${normalized} · ${t.scenarioSavedUnavailableValue || 'Saved value is not available in the current snapshot'}`, normalized));
+  }
+
+  function renderScenarioSummary(scenario) {
+    el.scenarioSummary.replaceChildren();
+    if (!scenario) { el.scenarioSummary.hidden = true; el.scenarioStatus.textContent = ''; return; }
+    const products = activeConditions(scenario.profile?.products, ['view', 'sort', 'direction', 'perPage']);
+    const movements = activeConditions(scenario.profile?.movements, ['movementPerPage']);
+    const addGroup = (groupName, caption, entries) => {
+      const group = node('div', 'lps-pa-scenario-group'); group.append(node('strong', '', caption));
+      if (!entries.length) group.append(node('span', 'description', t.scenarioAllValues || 'No additional conditions'));
+      entries.slice(0, 8).forEach(([key, value]) => group.append(node('span', 'lps-pa-scenario-chip', `${scenarioConditionLabel(groupName, key)}: ${Array.isArray(value) ? value.join(', ') : value}`)));
+      if (entries.length > 8) group.append(node('span', 'lps-pa-scenario-chip', `+${entries.length - 8}`));
+      el.scenarioSummary.append(group);
+    };
+    addGroup('products', t.scenarioProducts || 'Product conditions', products);
+    addGroup('movements', t.scenarioMovements || 'Movement conditions', movements);
+    el.scenarioSummary.hidden = false;
+  }
+
+  function markScenarioModified() {
+    if (!state.activeScenarioId || state.applyingScenario) return;
+    el.scenarioStatus.textContent = t.scenarioModified || 'Temporary changes are applied. The saved scenario has not been changed.';
+    el.scenarioStatus.classList.add('is-modified');
+  }
+
+  async function applyScenario(scenario) {
+    if (!scenario) {
+      state.activeScenarioId = 0; window.localStorage.removeItem('lpsProductAnalyticsScenario');
+      renderScenarioSummary(null); return false;
     }
+    state.applyingScenario = true;
+    try {
+      const profile = scenario.profile || {};
+      const warehouseId = Number(profile.context?.warehouseIds?.[0]) || 0;
+      const scopeValue = `${profile.context?.sourceDatabase || ''}|${warehouseId}`;
+      if (!state.scopes.some((scope) => `${scope.source_database}|${scope.warehouse_id}` === scopeValue)) {
+        throw new Error(t.scenarioUnavailable || 'The saved warehouse for this scenario is not available.');
+      }
+      el.scope.value = scopeValue; selectScope(scopeValue);
+      el.filters.reset(); el.movementFilters.reset();
+      await loadFilterOptions();
+      (profile.products?.supplierValues || []).forEach((value) => preserveScenarioOption(el.suppliers, value));
+      preserveScenarioOption(el.documentType, profile.movements?.documentType);
+      preserveScenarioOption(el.operationKind, profile.movements?.operationKind);
+      setFormValues(el.filters, profile.products || {});
+      setFormValues(el.movementFilters, profile.movements || {});
+      el.supplierMode.value = ['INCLUDE', 'EXCLUDE'].includes(profile.products?.supplierMode) ? profile.products.supplierMode : 'ANY';
+      const suppliers = new Set((profile.products?.supplierValues || []).map(String));
+      Array.from(el.suppliers.options).forEach((option) => { option.selected = suppliers.has(option.value); });
+      syncSupplierFilter();
+      state.view = profile.products?.view || 'all'; state.sort = profile.products?.sort || 'inventory_value';
+      state.direction = profile.products?.direction === 'ASC' ? 'ASC' : 'DESC'; state.page = 1; state.movementPage = 1;
+      el.views.forEach((button) => button.classList.toggle('button-primary', button.dataset.lpsPaView === state.view));
+      state.activeScenarioId = Number(scenario.id); el.scenarioSelect.value = String(scenario.id);
+      window.localStorage.setItem('lpsProductAnalyticsScenario', String(scenario.id));
+      renderScenarioSummary(scenario); el.scenarioStatus.classList.remove('is-modified');
+      el.scenarioStatus.textContent = t.scenarioApplied || 'The analytics scenario has been applied to both registries.';
+      selectTab(profile.presentation?.activeTab || 'products', false);
+      await loadReport();
+      if (state.activeTab === 'movements') await loadMovements();
+      return true;
+    } finally { state.applyingScenario = false; }
+  }
 
-    [
-      'search','health','verification','alertCode','alertStatus','severity','sales','supplierQuality','availableSign',
-      'accountingPriceMode','physicalMin','physicalMax','reservedMin','reservedMax','availableMin','availableMax',
-      'demandPeriod','regularDemand','oneOffDemand','inventoryMin','inventoryMax','financePeriod','revenueMin','revenueMax',
-      'profitMin','profitMax','averageCapitalMin','averageCapitalMax','marginMin','marginMax','turnsMin','turnsMax','gmroiMin','gmroiMax',
-      'coverageMin','coverageMax','lastSaleFrom','lastSaleTo','lastRegularSaleFrom','lastRegularSaleTo',
-      'lastReceiptFrom','lastReceiptTo','firstMovementFrom','firstMovementTo','lastMovementFrom','lastMovementTo',
-      'alertFirstSeenFrom','alertFirstSeenTo','alertLastSeenFrom','alertLastSeenTo','perPage'
-    ].forEach((name) => {
-      const field = el.filters.elements[name];
-      if (field) field.value = saved[name] || '';
-    });
-    el.supplierMode.value = ['INCLUDE', 'EXCLUDE'].includes(saved.supplierMode) ? saved.supplierMode : 'ANY';
-    const selectedSuppliers = new Set(String(saved.supplierValues || '').split(/\r?\n/).filter(Boolean));
-    Array.from(el.suppliers.options).forEach((option) => { option.selected = selectedSuppliers.has(option.value); });
-    syncSupplierFilter();
-
-    state.view = saved.view || 'all';
-    state.sort = saved.sort || 'inventory_value';
-    state.direction = saved.direction === 'ASC' ? 'ASC' : 'DESC';
-    state.page = 1;
-    el.views.forEach((button) => button.classList.toggle('button-primary', button.dataset.lpsPaView === state.view));
-    await loadReport();
+  async function loadScenarios() {
+    const data = await scenarioRequest('list');
+    state.scenarios = Array.isArray(data.items) ? data.items : [];
+    const requested = Number(new URLSearchParams(location.search).get('scenario')) || Number(window.localStorage.getItem('lpsProductAnalyticsScenario')) || 0;
+    renderScenarios(requested);
+    const scenario = state.scenarios.find((item) => item.id === requested && item.status === 'active');
+    return scenario ? applyScenario(scenario) : false;
   }
 
   async function loadReport() {
@@ -694,11 +764,11 @@
     }
   }
 
-  function selectTab(tab) {
+  function selectTab(tab, load = true) {
     state.activeTab = tab === 'movements' ? 'movements' : 'products';
     el.tabs.forEach((button) => button.classList.toggle('nav-tab-active', button.dataset.lpsPaTab === state.activeTab));
     el.panels.forEach((panel) => { panel.hidden = panel.dataset.lpsPaPanel !== state.activeTab; });
-    if (state.activeTab === 'movements') loadMovements();
+    if (load && state.activeTab === 'movements') loadMovements();
   }
 
   function metricGrid(row) {
@@ -873,6 +943,7 @@
   }
 
   el.scope.addEventListener('change', async () => {
+    markScenarioModified();
     selectScope(el.scope.value);
     el.supplierMode.value = 'ANY';
     try {
@@ -892,67 +963,38 @@
       showMessage(error.message || String(error), 'error');
     }
   });
-  el.supplierMode.addEventListener('change', syncSupplierFilter);
+  el.supplierMode.addEventListener('change', () => { syncSupplierFilter(); markScenarioModified(); });
   el.tabs.forEach((button) => button.addEventListener('click', () => selectTab(button.dataset.lpsPaTab)));
   el.movementFilters.addEventListener('submit', (event) => {
-    event.preventDefault(); state.movementPage = 1; loadMovements();
+    event.preventDefault(); markScenarioModified(); state.movementPage = 1; loadMovements();
   });
   el.movementReset.addEventListener('click', () => {
-    el.movementFilters.reset(); state.movementPage = 1; loadMovements();
+    el.movementFilters.reset(); markScenarioModified(); state.movementPage = 1; loadMovements();
   });
-  el.presetSelect.addEventListener('change', async () => {
-    const preset = state.presets.find((item) => item.id === el.presetSelect.value);
-    el.presetDelete.disabled = !preset;
-    el.presetName.value = preset?.name || '';
-    if (!preset) return;
+  el.scenarioSelect.addEventListener('change', async () => {
+    const scenario = state.scenarios.find((item) => item.id === Number(el.scenarioSelect.value));
     try {
-      await applyPreset(preset);
+      if (scenario) await applyScenario(scenario);
+      else {
+        state.activeScenarioId = 0;
+        window.localStorage.removeItem('lpsProductAnalyticsScenario');
+        renderScenarioSummary(null);
+        el.scenarioStatus.textContent = '';
+      }
     } catch (error) {
       showMessage(error.message || String(error), 'error');
     }
   });
-  el.presetSave.addEventListener('click', async () => {
-    const name = el.presetName.value.trim();
-    if (!name) {
-      showMessage(t.presetNameRequired || 'Enter a name for the filter set.', 'error');
-      el.presetName.focus();
-      return;
-    }
-    try {
-      const data = await request('preset_save', {
-        presetId: el.presetSelect.value || '',
-        presetName: name,
-        presetState: JSON.stringify(presetState())
-      });
-      state.presets = Array.isArray(data.items) ? data.items : [];
-      renderPresets(data.selectedId || '');
-      showMessage(t.presetSaved || 'The filter set has been saved.', 'success');
-    } catch (error) {
-      showMessage(error.message || String(error), 'error');
-    }
-  });
-  el.presetDelete.addEventListener('click', async () => {
-    const presetId = el.presetSelect.value;
-    if (!presetId || !window.confirm(t.confirmPresetDelete || 'Delete the selected filter set?')) return;
-    try {
-      const data = await request('preset_delete', {presetId});
-      state.presets = Array.isArray(data.items) ? data.items : [];
-      renderPresets();
-      el.presetName.value = '';
-      showMessage(t.presetDeleted || 'The filter set has been deleted.', 'success');
-    } catch (error) {
-      showMessage(error.message || String(error), 'error');
-    }
-  });
-  el.filters.addEventListener('submit', (event) => { event.preventDefault(); state.page = 1; loadProducts().catch((error) => showMessage(error.message, 'error')); });
+  el.filters.addEventListener('submit', (event) => { event.preventDefault(); markScenarioModified(); state.page = 1; loadProducts().catch((error) => showMessage(error.message, 'error')); });
   el.reset.addEventListener('click', () => {
     el.filters.reset(); syncSupplierFilter(); state.view = 'all'; state.page = 1;
-    el.presetSelect.value = ''; el.presetName.value = ''; el.presetDelete.disabled = true;
+    markScenarioModified();
     state.sort = 'inventory_value'; state.direction = 'DESC';
     el.views.forEach((button) => button.classList.toggle('button-primary', button.dataset.lpsPaView === 'all'));
     loadProducts().catch((error) => showMessage(error.message, 'error'));
   });
   el.views.forEach((button) => button.addEventListener('click', () => {
+    markScenarioModified();
     state.view = button.dataset.lpsPaView || 'all'; state.page = 1;
     el.views.forEach((item) => item.classList.toggle('button-primary', item === button));
     loadProducts().catch((error) => showMessage(error.message, 'error'));
@@ -966,11 +1008,13 @@
       el.views.forEach((item) => item.classList.toggle('button-primary', item.dataset.lpsPaView === state.view));
     }
     if (button.dataset.verification) el.filters.elements.verification.value = button.dataset.verification;
+    markScenarioModified();
     state.page = 1; loadProducts().catch((error) => showMessage(error.message, 'error'));
   });
   el.table.addEventListener('click', (event) => {
     const sort = event.target.closest('[data-sort]');
     if (sort) {
+      markScenarioModified();
       state.direction = state.sort === sort.dataset.sort && state.direction === 'DESC' ? 'ASC' : 'DESC';
       state.sort = sort.dataset.sort;
       state.view = 'all';
