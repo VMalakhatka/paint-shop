@@ -29,7 +29,8 @@
         nextCursor: null,
         cursorHistory: [],
         busy: false,
-        pendingScenario: null
+        pendingScenario: null,
+        applyingScenario: false
     };
 
     const el = (id) => document.getElementById(id);
@@ -334,10 +335,12 @@
     function currentRequest(cursor) {
         const productFilters = collectFilters('product');
         const search = el('lps-pa-search').value.trim();
+        const scenario = state.scenarios.find((item) => String(item.id) === scenarioSelect.value);
         if (search) productFilters.search = search;
         return {
             sourceDatabase: state.sourceDatabase,
             warehouseIds: state.warehouseIds,
+            scenario: scenario ? { id: Number(scenario.id), version: Number(scenario.version) } : null,
             period: { from: el('lps-pa-period-from').value, to: el('lps-pa-period-to').value },
             productFilters: productFilters,
             movementFilters: collectFilters('movement'),
@@ -469,6 +472,7 @@
 
     function renderQuery(data) {
         const totals = data.totals || {};
+        renderReportScenario(data.scenarioContext || null);
         el('lps-pa-summary').innerHTML = metricCards(totals.metrics || {}, totals);
         renderWarnings(el('lps-pa-query-warnings'), data.warnings || [], 'query');
         const countText = label('productCount', 'Products found') + ': ' + number(totals.productCount || 0) + ' · ' + label('warehouseRows', 'Warehouse rows') + ': ' + number(totals.warehouseRowCount || 0);
@@ -479,6 +483,30 @@
         renderPagination(el('lps-pa-pagination'));
         renderPagination(el('lps-pa-movements-pagination'));
         root.querySelectorAll('[data-lps-pa-detail-index]').forEach((button) => button.addEventListener('click', () => openDetail(Number(button.dataset.lpsPaDetailIndex))));
+    }
+
+    function renderReportScenario(context) {
+        const node = el('lps-pa-scenario-status');
+        if (!node) return;
+        node.classList.remove('is-modified');
+        if (!context) {
+            node.textContent = label('temporaryReport', 'The report uses temporary filters without a saved scenario.');
+            return;
+        }
+        const name = context.scenarioName || ('#' + Number(context.scenarioId || 0));
+        const version = Number(context.scenarioVersion || 0);
+        const prefix = label('reportScenario', 'Report scenario') + ': ' + name + ' · ' + label('version', 'Version') + ' ' + version;
+        if (context.applicationMode === 'MODIFIED') {
+            node.textContent = prefix + ' · ' + label('reportScenarioModified', 'temporary changes were applied');
+            node.classList.add('is-modified');
+            return;
+        }
+        if (context.applicationMode === 'LEGACY_CONVERTED') {
+            node.textContent = prefix + ' · ' + label('reportScenarioLegacy', 'converted to analytics schema v4');
+            node.classList.add('is-modified');
+            return;
+        }
+        node.textContent = prefix;
     }
 
     function policyDescription(policy) {
@@ -562,6 +590,7 @@
         el('lps-pa-page-size').value = '50';
         if (!preserveScenario) scenarioSelect.value = '';
         el('lps-pa-scenario-status').textContent = '';
+        el('lps-pa-scenario-status').classList.remove('is-modified');
     }
 
     function setSelection(section, name, selection) {
@@ -608,6 +637,7 @@
     }
 
     function applyScenarioFields(profile) {
+        state.applyingScenario = true;
         resetSelections(true);
         const productFilters = profile.productFilters || {};
         const movementFilters = profile.movementFilters || {};
@@ -629,6 +659,15 @@
         }
         switchTab(profile.presentation && profile.presentation.activeTab);
         el('lps-pa-scenario-status').textContent = label('scenarioApplied', 'The analytics scenario has been applied.');
+        el('lps-pa-scenario-status').classList.remove('is-modified');
+        state.applyingScenario = false;
+    }
+
+    function markScenarioModified() {
+        if (state.applyingScenario || !scenarioSelect.value) return;
+        const node = el('lps-pa-scenario-status');
+        node.textContent = label('scenarioModified', 'Temporary changes are applied. The saved scenario has not been changed.');
+        node.classList.add('is-modified');
     }
 
     async function applyScenario() {
@@ -648,9 +687,11 @@
         await loadCapabilities();
     }
 
-    warehouseSelect.addEventListener('change', () => { state.pendingScenario = null; loadCapabilities(); });
+    warehouseSelect.addEventListener('change', () => { markScenarioModified(); state.pendingScenario = null; loadCapabilities(); });
     el('lps-pa-reload').addEventListener('click', loadCapabilities);
     form.addEventListener('submit', (event) => { event.preventDefault(); state.currentCursor = null; state.cursorHistory = []; runQuery(null, false); });
+    form.addEventListener('input', markScenarioModified);
+    form.addEventListener('change', markScenarioModified);
     el('lps-pa-reset').addEventListener('click', () => resetSelections(false));
     scenarioSelect.addEventListener('change', applyScenario);
     root.querySelectorAll('[data-lps-pa-tab]').forEach((button) => button.addEventListener('click', () => switchTab(button.dataset.lpsPaTab)));

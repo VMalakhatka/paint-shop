@@ -162,6 +162,15 @@
   количество или класс продажи.
 - Для закупки группируй по `current_supplier`, но показывай `MISSING` и не
   подменяй им контрагента исторического прихода.
+- Для schema v4 браузер передаёт ссылку на WordPress-сценарий как `id + version`
+  только в proxy `v4_query`. WordPress проверяет доступ, активность и текущую
+  версию сценария, не передаёт эту ссылку в Java и добавляет к успешному ответу
+  `scenarioContext` с UUID, именем, версией и режимом `SAVED`, `MODIFIED` либо
+  `LEGACY_CONVERTED`. При сравнении с сохранённым сценарием cursor и порядок
+  значений фильтра игнорируются; устаревшая версия даёт HTTP 409
+  `ANALYTICS_SCENARIO_VERSION_CONFLICT`. Полный контракт и приёмка:
+  `docs/api/FOLIO_PRODUCT_ANALYTICS_FRONTEND_V4.md` и
+  `docs/OPERATIONS_RUNBOOK.md` (проверено 2026-09-02).
 
 ## Для менеджера
 

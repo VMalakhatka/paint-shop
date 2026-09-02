@@ -158,6 +158,11 @@ function lps_product_analytics_i18n(): array {
         'selectScenario' => __('Use temporary filters without a scenario', 'lavka-price-sync'),
         'scenarioApplied' => __('The analytics scenario has been applied to both registries.', 'lavka-price-sync'),
         'scenarioModified' => __('Temporary changes are applied. The saved scenario has not been changed.', 'lavka-price-sync'),
+        'temporaryReport' => __('The report uses temporary filters without a saved scenario.', 'lavka-price-sync'),
+        'reportScenario' => __('Report scenario', 'lavka-price-sync'),
+        'reportScenarioModified' => __('temporary changes were applied', 'lavka-price-sync'),
+        'reportScenarioLegacy' => __('converted to analytics schema v4', 'lavka-price-sync'),
+        'version' => __('Version', 'lavka-price-sync'),
         'scenarioUnavailable' => __('The saved warehouse for this scenario is not available.', 'lavka-price-sync'),
         'scenarioProducts' => __('Product conditions', 'lavka-price-sync'),
         'scenarioMovements' => __('Movement conditions', 'lavka-price-sync'),
@@ -1722,7 +1727,102 @@ function lps_product_analytics_v4_sanitize_query(array $payload): array {
     ];
 }
 
-function lps_product_analytics_v4_send_java(string $path, array $payload): void {
+function lps_product_analytics_v4_scenario_query_fingerprint(array $query): string {
+    $query['page']['cursor'] = null;
+    foreach (['productFilters', 'movementFilters'] as $filter_key) {
+        $filters = isset($query[$filter_key]) ? (array)$query[$filter_key] : [];
+        ksort($filters, SORT_STRING);
+        foreach ($filters as $name => $selection) {
+            if (!is_array($selection) || !isset($selection['values']) || !is_array($selection['values'])) continue;
+            $values = array_values(array_map('strval', $selection['values']));
+            sort($values, SORT_STRING);
+            $filters[$name]['values'] = $values;
+        }
+        $query[$filter_key] = $filters ?: new stdClass();
+    }
+    return (string)wp_json_encode($query);
+}
+
+function lps_product_analytics_v4_scenario_context(array $payload, array $query): ?array {
+    $reference = is_array($payload['scenario'] ?? null) ? $payload['scenario'] : [];
+    $scenario_id = absint($reference['id'] ?? 0);
+    if ($scenario_id < 1) return null;
+
+    $expected_version = absint($reference['version'] ?? 0);
+    if ($expected_version < 1) {
+        wp_send_json_error([
+            'message' => __('The analytics scenario version is required.', 'lavka-price-sync'),
+            'code' => 'ANALYTICS_SCENARIO_VERSION_REQUIRED',
+        ], 400);
+    }
+    if (!function_exists('lps_analytics_scenario_row') || !function_exists('lps_analytics_scenario_decode_row')) {
+        wp_send_json_error([
+            'message' => __('Analytics scenarios are unavailable.', 'lavka-price-sync'),
+            'code' => 'ANALYTICS_SCENARIOS_UNAVAILABLE',
+        ], 503);
+    }
+
+    $row = lps_analytics_scenario_row($scenario_id);
+    if (!$row) {
+        wp_send_json_error([
+            'message' => __('The selected analytics scenario was not found or is not available to you.', 'lavka-price-sync'),
+            'code' => 'ANALYTICS_SCENARIO_NOT_FOUND',
+        ], 404);
+    }
+    $scenario = lps_analytics_scenario_decode_row($row);
+    $current_version = (int)($scenario['version'] ?? 0);
+    if ($current_version !== $expected_version) {
+        wp_send_json_error([
+            'message' => __('The analytics scenario was changed in another session. Reload it before building the report.', 'lavka-price-sync'),
+            'code' => 'ANALYTICS_SCENARIO_VERSION_CONFLICT',
+            'expectedVersion' => $expected_version,
+            'currentVersion' => $current_version,
+        ], 409);
+    }
+    if ((string)($scenario['status'] ?? '') !== 'active') {
+        wp_send_json_error([
+            'message' => __('The selected analytics scenario is archived.', 'lavka-price-sync'),
+            'code' => 'ANALYTICS_SCENARIO_ARCHIVED',
+        ], 409);
+    }
+
+    $schema_version = (int)($scenario['schemaVersion'] ?? 1);
+    $matches_saved_scenario = false;
+    $application_mode = 'LEGACY_CONVERTED';
+    if ($schema_version >= 4) {
+        $profile = is_array($scenario['profile'] ?? null) ? $scenario['profile'] : [];
+        $profile_context = is_array($profile['context'] ?? null) ? $profile['context'] : [];
+        $saved_query = [
+            'sourceDatabase' => (string)($profile_context['sourceDatabase'] ?? ''),
+            'warehouseIds' => array_values((array)($profile_context['warehouseIds'] ?? [])),
+            'period' => (array)($profile['period'] ?? []),
+            'productFilters' => !empty($profile['productFilters']) ? (array)$profile['productFilters'] : new stdClass(),
+            'movementFilters' => !empty($profile['movementFilters']) ? (array)$profile['movementFilters'] : new stdClass(),
+            'calculation' => (array)($profile['calculation'] ?? []),
+            'page' => [
+                'size' => absint($profile['page']['size'] ?? 50),
+                'cursor' => null,
+            ],
+            'sort' => array_values((array)($profile['sort'] ?? [])),
+        ];
+        $matches_saved_scenario = lps_product_analytics_v4_scenario_query_fingerprint($saved_query)
+            === lps_product_analytics_v4_scenario_query_fingerprint($query);
+        $application_mode = $matches_saved_scenario ? 'SAVED' : 'MODIFIED';
+    }
+
+    return [
+        'scenarioId' => (int)$scenario['id'],
+        'scenarioUuid' => (string)$scenario['uuid'],
+        'scenarioName' => (string)$scenario['name'],
+        'scenarioVersion' => $current_version,
+        'scenarioSchemaVersion' => $schema_version,
+        'applicationMode' => $application_mode,
+        'matchesSavedScenario' => $matches_saved_scenario,
+        'updatedAt' => (string)($scenario['updatedAt'] ?? ''),
+    ];
+}
+
+function lps_product_analytics_v4_send_java(string $path, array $payload, ?array $scenario_context = null): void {
     $options = lps_get_options();
     if (empty($options['java_base_url'])) {
         wp_send_json_error(['message' => __('Java Base URL is not configured.', 'lavka-price-sync')], 503);
@@ -1752,6 +1852,9 @@ function lps_product_analytics_v4_send_java(string $path, array $payload): void 
             'httpStatus' => $http_status,
             'body' => $body,
         ], in_array($http_status, [400, 403, 404, 409, 422, 429, 503], true) ? $http_status : 502);
+    }
+    if ($path === LPS_PRODUCT_ANALYTICS_QUERY_PATH) {
+        $body['scenarioContext'] = $scenario_context;
     }
     wp_send_json_success($body);
 }
@@ -1792,9 +1895,12 @@ function lps_product_analytics_ajax(): void {
         ]);
     }
     if ($operation === 'v4_query') {
+        $payload = lps_product_analytics_v4_payload();
+        $query = lps_product_analytics_v4_sanitize_query($payload);
         lps_product_analytics_v4_send_java(
             LPS_PRODUCT_ANALYTICS_QUERY_PATH,
-            lps_product_analytics_v4_sanitize_query(lps_product_analytics_v4_payload())
+            $query,
+            lps_product_analytics_v4_scenario_context($payload, $query)
         );
     }
 
