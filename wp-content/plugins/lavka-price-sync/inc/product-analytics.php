@@ -428,6 +428,8 @@ function lps_render_product_analytics_v4_page(): void {
 
             <div class="lps-pa-filter-actions lps-pa-v4-actions">
                 <button type="submit" class="button button-primary button-large" id="lps-pa-build"><?php echo esc_html__('Build report', 'lavka-price-sync'); ?></button>
+                <span class="spinner lps-pa-build-spinner" id="lps-pa-build-spinner" aria-hidden="true"></span>
+                <span class="lps-pa-build-status" id="lps-pa-build-status" role="status" aria-live="polite"></span>
                 <button type="button" class="button" id="lps-pa-reset"><?php echo esc_html__('Clear filters', 'lavka-price-sync'); ?></button>
             </div>
         </form>

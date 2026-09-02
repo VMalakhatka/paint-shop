@@ -13,6 +13,7 @@ const LPS_ACCOUNTING_PRICE_CAMPAIGN_MAX_WARNINGS = 500;
 const LPS_ACCOUNTING_PRICE_CAMPAIGN_WAREHOUSE_HISTORY_PREFIX = 'lps_accounting_price_sku_campaign_warehouse_';
 const LPS_ACCOUNTING_PRICE_CAMPAIGN_WAREHOUSE_HISTORY_INDEX = 'lps_accounting_price_sku_campaign_warehouse_index';
 const LPS_ACCOUNTING_PRICE_CAMPAIGN_MAX_WAREHOUSE_ISSUES = 500;
+const LPS_ACCOUNTING_PRICE_CAMPAIGN_UNSUPPORTED_MODE_ERROR = 'PRODUCT_SNAPSHOT_ACCOUNTING_MODE_UNSUPPORTED';
 
 function lps_accounting_price_campaign_state(): array {
     $state = get_option(LPS_ACCOUNTING_PRICE_CAMPAIGN_OPTION, []);
@@ -182,7 +183,9 @@ function lps_accounting_price_campaign_history_from_state(array $state, int $war
         if (in_array($status, ['COMPLETED', 'COMPLETED_WITH_WARNINGS'], true)) {
             $processed_skus += absint($report['sku_count'] ?? 0);
         }
-        if (in_array($status, ['WAREHOUSE_FAILED', 'SNAPSHOT_CONFIRMED'], true)) $final_report = $report;
+        if (in_array($status, ['WAREHOUSE_FAILED', 'WAREHOUSE_SKIPPED_UNSUPPORTED_MODE', 'SNAPSHOT_CONFIRMED'], true)) {
+            $final_report = $report;
+        }
     }
 
     $negative_count = 0;
@@ -755,6 +758,70 @@ function lps_accounting_price_campaign_snapshot_was_interrupted(array $status): 
         || in_array($snapshot_status, ['INTERRUPTED', 'QUEUED', 'BUILDING'], true);
 }
 
+function lps_accounting_price_campaign_snapshot_has_unsupported_mode(array $status): bool {
+    return strtoupper(trim((string)($status['errorCode'] ?? '')))
+        === LPS_ACCOUNTING_PRICE_CAMPAIGN_UNSUPPORTED_MODE_ERROR;
+}
+
+function lps_accounting_price_campaign_skip_unsupported_warehouse(array &$state, array $snapshot): void {
+    lps_accounting_price_campaign_release_lock($state);
+
+    $warehouse_id = absint($state['current_warehouse_id'] ?? 0);
+    $source_error = sanitize_textarea_field((string)($snapshot['error'] ?? ($snapshot['message'] ?? '')));
+    $recommendation = sanitize_textarea_field((string)($snapshot['recommendation'] ?? ''));
+    $details = [
+        'skipped' => true,
+        'errorCode' => LPS_ACCOUNTING_PRICE_CAMPAIGN_UNSUPPORTED_MODE_ERROR,
+        'accountingRawCode' => array_key_exists('accountingRawCode', $snapshot)
+            ? $snapshot['accountingRawCode']
+            : null,
+        'accountingMode' => sanitize_text_field((string)($snapshot['accountingMode'] ?? '')),
+        'recommendation' => $recommendation,
+        'snapshotStatus' => strtoupper(sanitize_key((string)($snapshot['status'] ?? 'FAILED'))),
+        'sourceError' => $source_error,
+    ];
+    $message = __('This warehouse uses a Folio accounting mode that is not yet supported by product snapshots. It was skipped before native-range; the campaign will continue with the next warehouse.', 'lavka-price-sync');
+
+    $state['snapshot_status'] = lps_accounting_prices_native_sanitize_report_value($snapshot);
+    $state['skipped_warehouses'] = absint($state['skipped_warehouses'] ?? 0) + 1;
+    $state['warning_count'] = absint($state['warning_count'] ?? 0) + 1;
+    $state['warehouse_skipped'] = true;
+    $state['warehouse_skip_code'] = LPS_ACCOUNTING_PRICE_CAMPAIGN_UNSUPPORTED_MODE_ERROR;
+    $state['warehouse_skip_details'] = $details;
+    $state['warehouse_error'] = $source_error;
+    $state['counts_before'] = [];
+    $state['counts_after'] = [];
+    $state['current_skus'] = [];
+    $state['range_job_id'] = '';
+    $state['range_status'] = [];
+    $state['phase'] = 'warehouse_skipped_unsupported_mode';
+    $state['error'] = '';
+    $state['message'] = $message;
+
+    lps_accounting_price_campaign_append_warnings($state, [[
+        'severity' => 'warning',
+        'code' => LPS_ACCOUNTING_PRICE_CAMPAIGN_UNSUPPORTED_MODE_ERROR,
+        'message' => $message,
+        'details' => $details,
+        'recordedAt' => current_time('mysql'),
+        'warehouseId' => $warehouse_id,
+    ]]);
+    lps_accounting_price_campaign_log('accounting_price_campaign_warehouse_skipped', [
+        'source' => $state['source'] ?? 'manual',
+        'message' => 'Warehouse skipped because its Folio accounting mode is not supported by product snapshots.',
+        'context' => [
+            'campaign_id' => $state['campaign_id'] ?? '',
+            'warehouse_id' => $warehouse_id,
+            'error_code' => LPS_ACCOUNTING_PRICE_CAMPAIGN_UNSUPPORTED_MODE_ERROR,
+            'accounting_raw_code' => $details['accountingRawCode'],
+            'accounting_mode' => $details['accountingMode'],
+            'recommendation' => $recommendation,
+        ],
+    ]);
+
+    lps_accounting_price_campaign_finish_warehouse($state);
+}
+
 function lps_accounting_price_campaign_api_bool($value, bool $default = false): bool {
     if (is_bool($value)) return $value;
     if (is_int($value) || is_float($value)) return (int)$value === 1;
@@ -811,6 +878,7 @@ function lps_accounting_price_campaign_public_state(?array $state = null): array
         'warningCount' => absint($state['warning_count'] ?? 0),
         'errorCount' => absint($state['error_count'] ?? 0),
         'failedWarehouses' => absint($state['failed_warehouses'] ?? 0),
+        'skippedWarehouses' => absint($state['skipped_warehouses'] ?? 0),
         'countsBefore' => is_array($state['counts_before'] ?? null) ? $state['counts_before'] : [],
         'countsAfter' => is_array($state['counts_after'] ?? null) ? $state['counts_after'] : [],
         'snapshot' => is_array($state['snapshot_status'] ?? null) ? $state['snapshot_status'] : [],
@@ -876,11 +944,15 @@ function lps_accounting_price_campaign_create(array $warehouse_ids, string $sour
         'warning_count' => 0,
         'error_count' => 0,
         'failed_warehouses' => 0,
+        'skipped_warehouses' => 0,
         'warnings_truncated' => false,
         'warnings' => [],
         'reports' => [],
         'counts_before' => [],
         'counts_after' => [],
+        'warehouse_skipped' => false,
+        'warehouse_skip_code' => '',
+        'warehouse_skip_details' => [],
         'stop_requested' => false,
         'lock_token' => '',
         'poll_errors' => 0,
@@ -927,6 +999,10 @@ function lps_accounting_price_campaign_start_snapshot(array &$state, string $sta
     $result = lps_accounting_prices_native_decode_response($response);
     $body = is_array($result['body'] ?? null) ? $result['body'] : [];
     if (!$result['ok'] || empty($body['accepted'])) {
+        if ($stage === 'before' && lps_accounting_price_campaign_snapshot_has_unsupported_mode($body)) {
+            lps_accounting_price_campaign_skip_unsupported_warehouse($state, $body);
+            return;
+        }
         if (in_array((int)$result['httpStatus'], [400, 403, 404, 422], true)) {
             lps_accounting_price_campaign_release_lock($state);
             $state['active'] = false;
@@ -1041,6 +1117,11 @@ function lps_accounting_price_campaign_poll_snapshot(array &$state): void {
         return;
     }
     if ($status !== 'ACTIVE') {
+        if (($state['snapshot_stage'] ?? 'before') === 'before'
+            && lps_accounting_price_campaign_snapshot_has_unsupported_mode($body)) {
+            lps_accounting_price_campaign_skip_unsupported_warehouse($state, $body);
+            return;
+        }
         $state['status'] = 'manual_review';
         $state['phase'] = 'snapshot_failed';
         $state['active'] = false;
@@ -1365,13 +1446,25 @@ function lps_accounting_price_campaign_poll_range(array &$state): void {
 
 function lps_accounting_price_campaign_finish_warehouse(array &$state): void {
     $warehouse_id = absint($state['current_warehouse_id'] ?? 0);
+    $warehouse_skipped = !empty($state['warehouse_skipped']);
+    $report_status = $warehouse_skipped
+        ? 'WAREHOUSE_SKIPPED_UNSUPPORTED_MODE'
+        : (!empty($state['warehouse_failed']) ? 'WAREHOUSE_FAILED' : 'SNAPSHOT_CONFIRMED');
+    $skip_details = is_array($state['warehouse_skip_details'] ?? null)
+        ? $state['warehouse_skip_details']
+        : [];
     lps_accounting_price_campaign_append_report($state, [
         'warehouse_id' => $warehouse_id,
-        'status' => !empty($state['warehouse_failed']) ? 'WAREHOUSE_FAILED' : 'SNAPSHOT_CONFIRMED',
+        'status' => $report_status,
         'sku_count' => 0,
         'counts_before' => $state['counts_before'] ?? [],
         'counts_after' => $state['counts_after'] ?? [],
-        'error' => $state['warehouse_error'] ?? '',
+        'message' => $warehouse_skipped ? ($state['message'] ?? '') : '',
+        'error' => $warehouse_skipped ? '' : ($state['warehouse_error'] ?? ''),
+        'error_code' => $warehouse_skipped ? ($state['warehouse_skip_code'] ?? '') : '',
+        'accounting_raw_code' => $warehouse_skipped ? ($skip_details['accountingRawCode'] ?? null) : null,
+        'accounting_mode' => $warehouse_skipped ? ($skip_details['accountingMode'] ?? '') : '',
+        'recommendation' => $warehouse_skipped ? ($skip_details['recommendation'] ?? '') : '',
     ]);
     lps_accounting_price_campaign_persist_warehouse_history($state, $warehouse_id);
 
@@ -1417,6 +1510,9 @@ function lps_accounting_price_campaign_finish_warehouse(array &$state): void {
     $state['counts_before'] = [];
     $state['counts_after'] = [];
     $state['warehouse_failed'] = false;
+    $state['warehouse_skipped'] = false;
+    $state['warehouse_skip_code'] = '';
+    $state['warehouse_skip_details'] = [];
     $state['warehouse_error'] = '';
     $state['warehouse_started_at'] = current_time('mysql');
     $state['phase'] = 'snapshot_before_start';
@@ -1678,7 +1774,9 @@ add_action('admin_post_lps_accounting_price_campaign_export', function (): void 
             (string)($report['status'] ?? ''),
             trim((string)($report['first_sku'] ?? '') . (($report['last_sku'] ?? '') !== ($report['first_sku'] ?? '') ? ' … ' . (string)($report['last_sku'] ?? '') : '')),
             (string)($report['sku_count'] ?? 0),
-            (string)($report['error'] ?? ''),
+            (string)((string)($report['error'] ?? '') !== ''
+                ? $report['error']
+                : ($report['message'] ?? '')),
             '',
             '',
             '',

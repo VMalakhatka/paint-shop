@@ -1451,6 +1451,18 @@ msgstr ""
 msgid "Final snapshot confirmed"
 msgstr ""
 
+#: inc/accounting-prices.php
+msgid "Skipped warehouses"
+msgstr ""
+
+#: inc/accounting-prices.php
+msgid "Warehouse skipped: unsupported Folio accounting mode"
+msgstr ""
+
+#: inc/accounting-price-campaign.php
+msgid "This warehouse uses a Folio accounting mode that is not yet supported by product snapshots. It was skipped before native-range; the campaign will continue with the next warehouse."
+msgstr ""
+
 #: inc/accounting-prices.php:327
 msgid "Starting the initial product snapshot"
 msgstr ""

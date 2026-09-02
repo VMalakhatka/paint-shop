@@ -323,7 +323,20 @@
 
 .lps-pa-v4-actions {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   margin: 12px 0 22px;
+}
+
+.lps-pa-v4-actions .spinner {
+  float: none;
+  margin: 0 0 0 2px;
+}
+
+.lps-pa-build-status {
+  min-width: 240px;
+  color: #50575e;
+  font-weight: 600;
 }
 
 .lps-pa-state {
@@ -669,4 +682,5 @@ body.lps-pa-detail-open { overflow: hidden; }
   .lps-pa-metric-grid { grid-template-columns: 1fr; }
   .lps-pa-detail-metrics,
   .lps-pa-detail-list { grid-template-columns: 1fr; }
+  .lps-pa-build-status { min-width: 0; width: 100%; }
 }

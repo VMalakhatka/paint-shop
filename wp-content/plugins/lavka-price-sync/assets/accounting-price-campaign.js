@@ -307,7 +307,7 @@
         node('td', '', statusLabel(String(report.status || '').toUpperCase())),
         node('td', '', integer.format(Number(report.sku_count || 0))),
         node('td', '', report.duration_seconds ? `${integer.format(Number(report.duration_seconds))} ${t.seconds || 'sec.'}` : '—'),
-        node('td', '', report.error || '—'),
+        node('td', '', report.error || report.message || '—'),
         details
       );
       body.append(row);
@@ -657,7 +657,8 @@
       card(t.batches || 'Batches', integer.format(Number(state.successfulBatches || 0))),
       card(t.warnings || 'Warnings', integer.format(Number(state.warningCount || 0)), Number(state.warningCount || 0) ? 'warning' : ''),
       card(t.errors || 'Errors', integer.format(Number(state.errorCount || 0)), Number(state.errorCount || 0) ? 'error' : ''),
-      card(t.failedWarehouses || 'Failed warehouses', integer.format(Number(state.failedWarehouses || 0)), Number(state.failedWarehouses || 0) ? 'error' : '')
+      card(t.failedWarehouses || 'Failed warehouses', integer.format(Number(state.failedWarehouses || 0)), Number(state.failedWarehouses || 0) ? 'error' : ''),
+      card(t.skippedWarehouses || 'Skipped warehouses', integer.format(Number(state.skippedWarehouses || 0)), Number(state.skippedWarehouses || 0) ? 'warning' : '')
     );
     if (rangeTotal > 0) {
       overview.append(

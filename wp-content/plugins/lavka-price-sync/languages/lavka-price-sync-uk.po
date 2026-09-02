@@ -1610,6 +1610,18 @@ msgstr "Обробка складу завершилася помилкою"
 msgid "Final snapshot confirmed"
 msgstr "Фінальний знімок підтверджено"
 
+#: inc/accounting-prices.php
+msgid "Skipped warehouses"
+msgstr "Пропущені склади"
+
+#: inc/accounting-prices.php
+msgid "Warehouse skipped: unsupported Folio accounting mode"
+msgstr "Склад пропущено: непідтримуваний режим обліку ФОЛІО"
+
+#: inc/accounting-price-campaign.php
+msgid "This warehouse uses a Folio accounting mode that is not yet supported by product snapshots. It was skipped before native-range; the campaign will continue with the next warehouse."
+msgstr "Склад використовує режим обліку ФОЛІО, який ще не підтримується знімками товарів. Склад пропущено до запуску native-range; кампанія продовжить роботу з наступним складом."
+
 #: inc/accounting-prices.php:327
 msgid "Starting the initial product snapshot"
 msgstr "Запуск початкового знімка товарів"

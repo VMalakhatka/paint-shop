@@ -66,13 +66,25 @@
         return value == null || value === '' ? '—' : moneyFormat.format(Number(value));
     }
 
-    function setBusy(busy, message) {
+    function setBusy(busy, message, activity) {
         state.busy = busy;
         const spinner = el('lps-pa-spinner');
         if (spinner) spinner.classList.toggle('is-active', busy);
-        [el('lps-pa-build'), el('lps-pa-reload')].forEach((button) => {
+        const buildButton = el('lps-pa-build');
+        const buildSpinner = el('lps-pa-build-spinner');
+        const buildStatus = el('lps-pa-build-status');
+        const queryBusy = busy && activity === 'query';
+        [buildButton, el('lps-pa-reload')].forEach((button) => {
             if (button) button.disabled = busy;
         });
+        if (buildButton) {
+            if (!buildButton.dataset.idleLabel) buildButton.dataset.idleLabel = buildButton.textContent;
+            buildButton.textContent = queryBusy ? message : buildButton.dataset.idleLabel;
+            buildButton.setAttribute('aria-busy', queryBusy ? 'true' : 'false');
+        }
+        if (buildSpinner) buildSpinner.classList.toggle('is-active', queryBusy);
+        if (buildStatus) buildStatus.textContent = queryBusy ? message : '';
+        if (form) form.setAttribute('aria-busy', queryBusy ? 'true' : 'false');
         if (message) setMessage(message, 'info');
     }
 
@@ -227,10 +239,7 @@
 
     function renderCapabilityWarnings() {
         const warnings = (state.capabilities && state.capabilities.warnings) || [];
-        const unsupported = Object.entries((state.capabilities && state.capabilities.filters) || {})
-            .filter((entry) => !entry[1].supported && entry[1].reason)
-            .map((entry) => ({ code: entry[0], message: entry[1].reason }));
-        renderWarnings(el('lps-pa-capability-warnings'), warnings.concat(unsupported), 'capabilities');
+        renderWarnings(el('lps-pa-capability-warnings'), warnings, 'capabilities');
     }
 
     function renderFilters() {
@@ -346,7 +355,7 @@
             setMessage(label('schemaV4Required', 'Analytics schema v4 is required.'), 'warning');
             return;
         }
-        setBusy(true, label('queryRunning', 'Building report...'));
+        setBusy(true, label('queryRunning', 'Building report...'), 'query');
         try {
             const request = currentRequest(cursor);
             const data = await api('v4_query', request);

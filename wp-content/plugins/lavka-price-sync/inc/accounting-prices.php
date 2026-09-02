@@ -225,6 +225,7 @@ add_action('admin_enqueue_scripts', function () {
             'warnings' => __('Warnings', 'lavka-price-sync'),
             'errors' => __('Errors', 'lavka-price-sync'),
             'failedWarehouses' => __('Failed warehouses', 'lavka-price-sync'),
+            'skippedWarehouses' => __('Skipped warehouses', 'lavka-price-sync'),
             'currentBatch' => __('Current SKU batch', 'lavka-price-sync'),
             'statesBefore' => __('Snapshot states before processing', 'lavka-price-sync'),
             'statesAfter' => __('Snapshot states after processing', 'lavka-price-sync'),
@@ -321,6 +322,7 @@ add_action('admin_enqueue_scripts', function () {
                 'BUILDING' => __('Snapshot is being built', 'lavka-price-sync'),
                 'LEGACY_PROCESSED' => __('Processed before detailed history was enabled', 'lavka-price-sync'),
                 'WAREHOUSE_FAILED' => __('Warehouse processing failed', 'lavka-price-sync'),
+                'WAREHOUSE_SKIPPED_UNSUPPORTED_MODE' => __('Warehouse skipped: unsupported Folio accounting mode', 'lavka-price-sync'),
                 'SNAPSHOT_CONFIRMED' => __('Final snapshot confirmed', 'lavka-price-sync'),
             ],
             'phaseLabels' => [
