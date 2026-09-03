@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: PC Order Import/Export 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/pc-order-import-"
 "export\n"
-"POT-Creation-Date: 2025-09-13T14:20:37+00:00\n"
+"POT-Creation-Date: 2026-09-03T20:56:44+00:00\n"
 "PO-Revision-Date: 2025-09-11 00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -28,12 +28,13 @@ msgstr ""
 "Експорт кошика/замовлень у CSV/XLSX + імпорт у кошик/чернетку. Інтеграція з "
 "WooCommerce."
 
-#: inc/CartToDraft.php:82 inc/DraftToCart.php:32 inc/Exporter.php:10
-#: inc/ImporterCart.php:18 inc/ImporterDraft.php:85
+#: inc/CartToDraft.php:82 inc/DraftFolioWorkflow.php:891 inc/DraftToCart.php:32
+#: inc/Exporter.php:10 inc/ImporterCart.php:18 inc/ImporterDraft.php:85
 msgid "Security check failed (bad nonce)."
 msgstr "Помилка перевірки безпеки (невірний ключ)."
 
-#: inc/CartToDraft.php:90 inc/ImporterCart.php:21
+#: inc/CartToDraft.php:90 inc/DraftFolioWorkflow.php:617
+#: inc/ImporterCart.php:21
 msgid "Cart is not available."
 msgstr "Кошик недоступний."
 
@@ -41,17 +42,372 @@ msgstr "Кошик недоступний."
 msgid "Cannot create draft order."
 msgstr "Не вдалося створити чернетку замовлення."
 
+#: inc/DraftFolioWorkflow.php:42
+msgid "Draft processing"
+msgstr "Обробка чернетки"
+
+#: inc/DraftFolioWorkflow.php:46
+msgid ""
+"The Folio warehouse for non-accounting drafts is not configured. Ask a "
+"manager to select it in Lavka settings."
+msgstr ""
+"Склад ФОЛІО для необлікових чернеток не налаштовано. Попросіть менеджера "
+"вибрати його в налаштуваннях Лавки."
+
+#: inc/DraftFolioWorkflow.php:53 inc/DraftFolioWorkflow.php:207
+#: inc/DraftFolioWorkflow.php:375
+msgid ""
+"A Folio document is already linked to this draft. Repeated creation is "
+"blocked."
+msgstr ""
+"До цієї чернетки вже прив’язано документ ФОЛІО. Повторне створення "
+"заблоковано."
+
+#: inc/DraftFolioWorkflow.php:68
+#, php-format
+msgid "Non-accounting Folio warehouse: %s"
+msgstr "Склад ФОЛІО для необлікового документа: %s"
+
+#: inc/DraftFolioWorkflow.php:79
+msgid "Load available quantities into the cart"
+msgstr "Завантажити доступну кількість у кошик"
+
+#: inc/DraftFolioWorkflow.php:80
+msgid ""
+"Available quantities will replace the current cart. The unavailable "
+"remainder will stay in this draft and will be prepared as a non-accounting "
+"Folio document."
+msgstr ""
+"Доступна кількість замінить поточний кошик. Недоступний залишок залишиться в "
+"цій чернетці та буде підготовлений як необліковий документ ФОЛІО."
+
+#: inc/DraftFolioWorkflow.php:87
+msgid "Send the entire draft to a non-accounting Folio document"
+msgstr "Передати всю чернетку в необліковий документ ФОЛІО"
+
+#: inc/DraftFolioWorkflow.php:88
+msgid ""
+"The cart will not change. The whole draft will be prepared in Folio without "
+"accounting stock movement."
+msgstr ""
+"Кошик не зміниться. Усю чернетку буде підготовлено у ФОЛІО без руху "
+"облікових залишків."
+
+#: inc/DraftFolioWorkflow.php:91
+msgid "Processing…"
+msgstr "Обробка…"
+
+#: inc/DraftFolioWorkflow.php:128
+msgid "Preview without recording"
+msgstr "Попередній перегляд без запису"
+
+#: inc/DraftFolioWorkflow.php:136
+msgid "Product"
+msgstr "Товар"
+
+#: inc/DraftFolioWorkflow.php:137
+msgid "Requested"
+msgstr "Замовлено"
+
+#: inc/DraftFolioWorkflow.php:138
+msgid "To cart"
+msgstr "У кошик"
+
+#: inc/DraftFolioWorkflow.php:139
+msgid "To non-accounting Folio document"
+msgstr "У необліковий документ ФОЛІО"
+
+#: inc/DraftFolioWorkflow.php:159
+msgid "Folio preview:"
+msgstr "Попередній перегляд ФОЛІО:"
+
+#: inc/DraftFolioWorkflow.php:168
+msgid "without number"
+msgstr "без номера"
+
+#: inc/DraftFolioWorkflow.php:174
+msgid ""
+"All requested quantities are currently available. No non-accounting Folio "
+"document will be created."
+msgstr ""
+"Уся замовлена кількість зараз доступна. Необліковий документ ФОЛІО не "
+"створюватиметься."
+
+#: inc/DraftFolioWorkflow.php:178
+msgid "Confirm cart and Folio remainder"
+msgstr "Підтвердити кошик і залишок у ФОЛІО"
+
+#: inc/DraftFolioWorkflow.php:179
+msgid "Confirm non-accounting Folio document"
+msgstr "Підтвердити необліковий документ ФОЛІО"
+
+#: inc/DraftFolioWorkflow.php:188
+msgid "Cancel"
+msgstr "Скасувати"
+
+#: inc/DraftFolioWorkflow.php:191
+msgid ""
+"The cart is already prepared. Run the whole-draft preview below to retry "
+"recording the remaining draft in Folio."
+msgstr ""
+"Кошик уже підготовлено. Запустіть нижче попередній перегляд усієї чернетки, "
+"щоб повторити запис її залишку у ФОЛІО."
+
+#: inc/DraftFolioWorkflow.php:203
+msgid "Unknown draft processing mode."
+msgstr "Невідомий режим обробки чернетки."
+
+#: inc/DraftFolioWorkflow.php:212
+msgid "The Folio warehouse for non-accounting drafts is not configured."
+msgstr "Склад ФОЛІО для необлікових чернеток не налаштовано."
+
+#: inc/DraftFolioWorkflow.php:218
+msgid "The draft has no valid product lines."
+msgstr "У чернетці немає коректних товарних позицій."
+
+#: inc/DraftFolioWorkflow.php:227 inc/DraftFolioWorkflow.php:324
+msgid "Folio preview failed."
+msgstr "Не вдалося виконати попередній перегляд ФОЛІО."
+
+#. translators: %s: technical error returned while preparing the preview.
+#: inc/DraftFolioWorkflow.php:235
+#, php-format
+msgid "Could not prepare the preview: %s"
+msgstr "Не вдалося підготувати попередній перегляд: %s"
+
+#: inc/DraftFolioWorkflow.php:257
+msgid "Preview is ready. Check the quantities and confirm the operation."
+msgstr ""
+"Попередній перегляд готовий. Перевірте кількість і підтвердьте операцію."
+
+#: inc/DraftFolioWorkflow.php:268
+msgid "The preview has expired. Run it again before confirming."
+msgstr ""
+"Термін дії попереднього перегляду минув. Запустіть його знову перед "
+"підтвердженням."
+
+#: inc/DraftFolioWorkflow.php:274
+msgid ""
+"The draft lines changed after preview. Review and run the preview again."
+msgstr ""
+"Позиції чернетки змінилися після попереднього перегляду. Перевірте чернетку "
+"та запустіть попередній перегляд знову."
+
+#. translators: %s: technical error returned while validating the draft.
+#: inc/DraftFolioWorkflow.php:286
+#, php-format
+msgid "Could not verify the draft before confirmation: %s"
+msgstr "Не вдалося перевірити чернетку перед підтвердженням: %s"
+
+#: inc/DraftFolioWorkflow.php:293
+msgid ""
+"The draft or stock allocation changed after preview. Review and run the "
+"preview again."
+msgstr ""
+"Чернетка або розподіл залишків змінилися після попереднього перегляду. "
+"Перевірте дані та запустіть попередній перегляд знову."
+
+#: inc/DraftFolioWorkflow.php:302
+#, php-format
+msgid "Could not prepare the cart: %s"
+msgstr "Не вдалося підготувати кошик: %s"
+
+#: inc/DraftFolioWorkflow.php:308
+msgid ""
+"The cart operation did not finish. Check the cart and the draft before "
+"trying again."
+msgstr ""
+"Операцію з кошиком не завершено. Перед повторною спробою перевірте кошик і "
+"чернетку."
+
+#: inc/DraftFolioWorkflow.php:319
+msgid ""
+"All available quantities were loaded into the cart. No Folio remainder "
+"document is needed."
+msgstr ""
+"Усю доступну кількість завантажено в кошик. Документ ФОЛІО для залишку не "
+"потрібен."
+
+#: inc/DraftFolioWorkflow.php:342
+#, php-format
+msgid "The cart was prepared, but the updated Folio preview failed: %s"
+msgstr ""
+"Кошик підготовлено, але оновлений перегляд ФОЛІО завершився помилкою: %s"
+
+#: inc/DraftFolioWorkflow.php:349
+msgid ""
+"Some quantities changed while the cart was being prepared. The actual "
+"remainder stays in the draft. Review the updated preview before creating the "
+"Folio document."
+msgstr ""
+"Під час підготовки кошика деяка кількість змінилася. Фактичний залишок "
+"залишився в чернетці. Перевірте оновлений перегляд перед створенням "
+"документа ФОЛІО."
+
+#: inc/DraftFolioWorkflow.php:363
+msgid ""
+"The available quantities were loaded into the cart. Continue with the "
+"standard checkout."
+msgstr ""
+"Доступну кількість завантажено в кошик. Продовжуйте стандартне оформлення "
+"замовлення."
+
+#: inc/DraftFolioWorkflow.php:370
+msgid "There is nothing to send to Folio."
+msgstr "Немає даних для передавання у ФОЛІО."
+
+#: inc/DraftFolioWorkflow.php:380
+msgid "Folio document creation failed."
+msgstr "Не вдалося створити документ ФОЛІО."
+
+#: inc/DraftFolioWorkflow.php:384
+msgid ""
+"The Woo draft is safe, but the Folio document was not confirmed. Review the "
+"error and confirm manually; no automatic retry will be made."
+msgstr ""
+"Чернетку на сайті збережено, але документ ФОЛІО не підтверджено. Перевірте "
+"помилку та підтвердьте вручну; автоматичної повторної спроби не буде."
+
+#: inc/DraftFolioWorkflow.php:395
+#, php-format
+msgid "Folio accepted the document, but Woo could not save its link: %s"
+msgstr "ФОЛІО прийняла документ, але сайт не зміг зберегти зв’язок із ним: %s"
+
+#: inc/DraftFolioWorkflow.php:401
+msgid ""
+"Do not create another Folio document manually. Contact a manager and retry "
+"confirmation with the same preview."
+msgstr ""
+"Не створюйте ще один документ ФОЛІО вручну. Зверніться до менеджера та "
+"повторіть підтвердження з тим самим попереднім переглядом."
+
+#: inc/DraftFolioWorkflow.php:410
+msgid ""
+"Available quantities are in the cart. The unavailable remainder stays in the "
+"draft and was recorded in a non-accounting Folio document."
+msgstr ""
+"Доступна кількість у кошику. Недоступний залишок збережено в чернетці та "
+"записано в необліковому документі ФОЛІО."
+
+#: inc/DraftFolioWorkflow.php:412
+msgid ""
+"No products were available for the cart. The full draft remains saved and "
+"was recorded in a non-accounting Folio document."
+msgstr ""
+"Для кошика немає доступних товарів. Усю чернетку збережено та записано в "
+"необліковому документі ФОЛІО."
+
+#: inc/DraftFolioWorkflow.php:415
+msgid ""
+"The entire draft was recorded in a non-accounting Folio document. The cart "
+"was not changed."
+msgstr ""
+"Усю чернетку записано в необліковому документі ФОЛІО. Кошик не змінено."
+
+#: inc/DraftFolioWorkflow.php:475 inc/DraftFolioWorkflow.php:543
+msgid "Folio order integration is unavailable."
+msgstr "Інтеграція замовлень із ФОЛІО недоступна."
+
+#: inc/DraftFolioWorkflow.php:479
+msgid "Could not build the Folio draft payload."
+msgstr "Не вдалося сформувати дані чернетки для ФОЛІО."
+
+#: inc/DraftFolioWorkflow.php:497
+#, php-format
+msgid "The draft line “%s” has no SKU and cannot be sent to Folio."
+msgstr "Позиція чернетки «%s» не має артикулу й не може бути передана у ФОЛІО."
+
+#: inc/DraftFolioWorkflow.php:522
+msgid "There are no draft quantities to send to Folio."
+msgstr "У чернетці немає кількості для передавання у ФОЛІО."
+
+#. translators: 1: HTTP status code, 2: Folio error details.
+#: inc/DraftFolioWorkflow.php:568
+#, php-format
+msgid "Folio service returned HTTP %1$d: %2$s"
+msgstr "Сервіс ФОЛІО повернув HTTP %1$d: %2$s"
+
+#. translators: %d: HTTP status code.
+#: inc/DraftFolioWorkflow.php:570
+#, php-format
+msgid "Folio service returned HTTP %d."
+msgstr "Сервіс ФОЛІО повернув HTTP %d."
+
+#: inc/DraftFolioWorkflow.php:575
+msgid "Folio rejected the operation."
+msgstr "ФОЛІО відхилила операцію."
+
+#: inc/DraftFolioWorkflow.php:593
+msgid ""
+"Folio did not return exactly one non-accounting document. The operation was "
+"blocked."
+msgstr ""
+"ФОЛІО не повернула рівно один необліковий документ. Операцію заблоковано."
+
+#: inc/DraftFolioWorkflow.php:600
+msgid ""
+"Folio returned a document for an unexpected warehouse. The operation was "
+"blocked."
+msgstr "ФОЛІО повернула документ для іншого складу. Операцію заблоковано."
+
+#: inc/DraftFolioWorkflow.php:608
+msgid ""
+"Folio did not explicitly confirm a non-accounting document. The operation "
+"was blocked."
+msgstr ""
+"ФОЛІО не підтвердила явно, що документ є необліковим. Операцію заблоковано."
+
+#: inc/DraftFolioWorkflow.php:705
+#, php-format
+msgid "Draft loaded into cart: %1$s units added, %2$s units kept in the draft."
+msgstr ""
+"Чернетку завантажено в кошик: додано %1$s од., у чернетці залишено %2$s од."
+
+#: inc/DraftFolioWorkflow.php:749
+msgid "Could not save the Folio response on the draft."
+msgstr "Не вдалося зберегти відповідь ФОЛІО в чернетці."
+
+#: inc/DraftFolioWorkflow.php:767
+#, php-format
+msgid ""
+"A non-accounting Folio document was created on warehouse %s. The draft "
+"status was preserved."
+msgstr ""
+"На складі %s створено необліковий документ ФОЛІО. Статус чернетки збережено."
+
+#: inc/DraftFolioWorkflow.php:877 inc/DraftToCart.php:42 inc/Exporter.php:31
+msgid "Order not found."
+msgstr "Замовлення не знайдено."
+
+#: inc/DraftFolioWorkflow.php:880 inc/DraftToCart.php:49 inc/Exporter.php:36
+msgid "You do not have permission to perform this action."
+msgstr "У вас немає прав для виконання цієї дії."
+
+#: inc/DraftFolioWorkflow.php:883
+msgid "Only a draft order can use this operation."
+msgstr "Ця операція доступна лише для замовлення-чернетки."
+
+#: inc/DraftFolioWorkflow.php:904
+msgid "warehouse is not selected"
+msgstr "склад не вибрано"
+
+#. translators: %d: Folio warehouse ID.
+#: inc/DraftFolioWorkflow.php:910
+#, php-format
+msgid "Folio warehouse %d"
+msgstr "Склад ФОЛІО %d"
+
 #: inc/DraftToCart.php:37 inc/Exporter.php:28
 msgid "Order ID is missing."
 msgstr "Відсутній ID замовлення."
 
-#: inc/DraftToCart.php:42 inc/Exporter.php:31
-msgid "Order not found."
-msgstr "Замовлення не знайдено."
-
-#: inc/DraftToCart.php:49 inc/Exporter.php:36
-msgid "You do not have permission to perform this action."
-msgstr "У вас немає прав для виконання цієї дії."
+#: inc/DraftToCart.php:55
+msgid ""
+"Review available quantities and the non-accounting Folio remainder before "
+"loading this draft into the cart."
+msgstr ""
+"Перед завантаженням чернетки в кошик перевірте доступну кількість і "
+"необліковий залишок ФОЛІО."
 
 #. translators: %s: location name
 #: inc/Exporter.php:94 inc/Exporter.php:159
@@ -60,20 +416,20 @@ msgid "Warehouse: %s"
 msgstr "Склад: %s"
 
 #: inc/Helpers.php:10
-msgid "Download CSV"
-msgstr "Завантажити CSV"
+msgid "Download to CSV"
+msgstr "Завантажити у CSV"
 
 #: inc/Helpers.php:11
-msgid "Download XLSX"
-msgstr "Завантажити XLSX"
+msgid "Download to XLSX"
+msgstr "Завантажити у XLSX"
 
 #: inc/Helpers.php:12
-msgid "Configure export"
-msgstr "Налаштувати експорт"
+msgid "Configure export columns"
+msgstr "Налаштувати колонки експорту"
 
 #: inc/Helpers.php:13
-msgid "Row format:"
-msgstr "Формат рядків:"
+msgid "Choose how to split warehouses in export:"
+msgstr "Вибрати, як розділяти склади в експорті:"
 
 #: inc/Helpers.php:14
 msgid "Aggregate (write \"Allocation: ...\" in Notes)"
@@ -83,11 +439,11 @@ msgstr "Загальний (у примітках «Списання: …»)"
 msgid "Separate per location"
 msgstr "Окремо по складах"
 
-#: inc/Helpers.php:16
+#: inc/Helpers.php:16 inc/Ui.php:115
 msgid "SKU"
 msgstr "Артикул"
 
-#: inc/Helpers.php:17
+#: inc/Helpers.php:17 inc/Ui.php:116
 msgid "GTIN"
 msgstr "Штрихкод"
 
@@ -95,11 +451,11 @@ msgstr "Штрихкод"
 msgid "Name"
 msgstr "Назва"
 
-#: inc/Helpers.php:19
+#: inc/Helpers.php:19 inc/Ui.php:117
 msgid "Qty"
 msgstr "К-сть"
 
-#: inc/Helpers.php:20
+#: inc/Helpers.php:20 inc/Ui.php:118
 msgid "Price"
 msgstr "Ціна"
 
@@ -306,7 +662,7 @@ msgstr "Файл не було завантажено."
 msgid "Empty file or invalid format."
 msgstr "Порожній файл або невірний формат."
 
-#: inc/ImporterCart.php:56 inc/Ui.php:324
+#: inc/ImporterCart.php:56 inc/Ui.php:415
 msgid "Added"
 msgstr "Додано"
 
@@ -329,7 +685,7 @@ msgstr "Не вдалося створити чернетку замовленн
 msgid "Added to draft"
 msgstr "Додано у чернетку"
 
-#: inc/Ui.php:58 inc/Ui.php:140 inc/Ui.php:171
+#: inc/Ui.php:58 inc/Ui.php:227 inc/Ui.php:250
 msgid "Draft title (optional)"
 msgstr "Назва чернетки (необов’язково)"
 
@@ -337,29 +693,9 @@ msgstr "Назва чернетки (необов’язково)"
 msgid "Saving…"
 msgstr "Зберігаю…"
 
-#: inc/Ui.php:62 inc/Ui.php:172
+#: inc/Ui.php:62 inc/Ui.php:251
 msgid "Save to draft"
 msgstr "Зберегти у чернетку"
-
-#: inc/Ui.php:95
-msgid "Title"
-msgstr "Назва"
-
-#: inc/Ui.php:107
-msgid "(untitled)"
-msgstr "(без назви)"
-
-#: inc/Ui.php:134
-msgid "Import into draft order"
-msgstr "Імпортувати у чернетку замовлення"
-
-#: inc/Ui.php:134 inc/Ui.php:275
-msgid "(CSV / XLSX)"
-msgstr "(CSV / XLSX)"
-
-#: inc/Ui.php:141
-msgid "Import to draft"
-msgstr "Імпортувати у чернетку"
 
 #: inc/Ui.php:78
 #, php-format
@@ -372,17 +708,16 @@ msgstr ""
 "назви колонок. Мінімальний формат: %1$s або %2$s. Назви колонок можуть бути "
 "українською, російською або англійською."
 
-#: inc/Ui.php:88
+#: inc/Ui.php:87
 msgid "Detailed file import instructions"
 msgstr "Детальна інструкція з імпорту файлу"
 
-#: inc/Ui.php:95
+#: inc/Ui.php:94
 #, php-format
-msgid ""
-"%1$s is the product SKU, %2$s is the barcode, and %3$s is the quantity."
+msgid "%1$s is the product SKU, %2$s is the barcode, and %3$s is the quantity."
 msgstr "%1$s — артикул товару, %2$s — штрихкод, %3$s — кількість."
 
-#: inc/Ui.php:105
+#: inc/Ui.php:103
 msgid ""
 "Use either SKU or GTIN to identify the product. If both columns are present, "
 "GTIN is checked first, then SKU."
@@ -390,7 +725,7 @@ msgstr ""
 "Для визначення товару використовуйте SKU або GTIN. Якщо є обидві колонки, "
 "спочатку перевіряється GTIN, потім SKU."
 
-#: inc/Ui.php:106
+#: inc/Ui.php:104
 msgid ""
 "Quantity must be greater than 0. Empty, zero, or negative quantities are "
 "skipped."
@@ -398,7 +733,7 @@ msgstr ""
 "Кількість має бути більшою за 0. Порожні, нульові або від’ємні кількості "
 "пропускаються."
 
-#: inc/Ui.php:107
+#: inc/Ui.php:105
 msgid ""
 "CSV delimiters are detected automatically: semicolon, comma, tab, or "
 "vertical bar. Semicolon is recommended."
@@ -406,13 +741,14 @@ msgstr ""
 "Роздільники CSV визначаються автоматично: крапка з комою, кома, табуляція "
 "або вертикальна риска. Рекомендовано використовувати крапку з комою."
 
-#: inc/Ui.php:108
-msgid "The optional price column can be used when importing into a draft order."
+#: inc/Ui.php:106
+msgid ""
+"The optional price column can be used when importing into a draft order."
 msgstr ""
 "Необов’язкову колонку ціни можна використовувати під час імпорту у чернетку "
 "замовлення."
 
-#: inc/Ui.php:109
+#: inc/Ui.php:107
 msgid ""
 "After import, a draft order is created. It is not a completed order yet; "
 "review it before adding it to the cart."
@@ -420,24 +756,48 @@ msgstr ""
 "Після імпорту створюється чернетка замовлення. Це ще не завершене "
 "замовлення; перевірте його перед додаванням у кошик."
 
-#: inc/Ui.php:110
+#: inc/Ui.php:108
 msgid "The import report shows which rows were added, skipped, or not found."
 msgstr ""
 "Звіт імпорту показує, які рядки було додано, пропущено або не знайдено."
 
-#: inc/Ui.php:114
+#: inc/Ui.php:112
 msgid "Supported column names include:"
 msgstr "Підтримувані назви колонок:"
 
-#: inc/Ui.php:123
+#: inc/Ui.php:122
 msgid "Examples:"
 msgstr "Приклади:"
 
-#: inc/Ui.php:163
+#: inc/Ui.php:162
+msgid "Title"
+msgstr "Назва"
+
+#: inc/Ui.php:174
+msgid "(untitled)"
+msgstr "(без назви)"
+
+#: inc/Ui.php:191
+msgid "Process draft"
+msgstr "Обробити чернетку"
+
+#: inc/Ui.php:221
+msgid "Import into draft order"
+msgstr "Імпортувати у чернетку замовлення"
+
+#: inc/Ui.php:221 inc/Ui.php:351
+msgid "(CSV / XLSX)"
+msgstr "(CSV / XLSX)"
+
+#: inc/Ui.php:228
+msgid "Import to draft"
+msgstr "Імпортувати у чернетку"
+
+#: inc/Ui.php:242
 msgid "Save current cart to draft"
 msgstr "Зберегти поточний кошик у чернетку"
 
-#: inc/Ui.php:176
+#: inc/Ui.php:255
 msgid ""
 "Tip: add a meaningful name (e.g., \"Template Chernivtsi\") to easily find "
 "this draft later."
@@ -445,24 +805,25 @@ msgstr ""
 "Порада: додайте зрозумілу назву (наприклад, «Шаблон Чернівці»), щоб легко "
 "знайти цей чернетку пізніше."
 
-#: inc/Ui.php:198
-msgid "Add to cart"
-msgstr "Додати у кошик"
-
-#: inc/Ui.php:231
+#: inc/Ui.php:307
 msgid "XLSX is unavailable on this server"
 msgstr "XLSX недоступний на цьому сервері"
 
-#: inc/Ui.php:275
+#: inc/Ui.php:351
 msgid "Import"
 msgstr "Імпорт"
 
-#: inc/Ui.php:283
+#: inc/Ui.php:356
+#, php-format
+msgid "CSV format: %1$s or %2$s."
+msgstr "Формат CSV: %1$s або %2$s."
+
+#: inc/Ui.php:367
 msgid "Import to cart"
 msgstr "Імпортувати у кошик"
 
 #. translators: %1$s and %2$s are code examples like sku;qty, gtin;qty
-#: inc/Ui.php:292
+#: inc/Ui.php:376
 #, php-format
 msgid ""
 "CSV format: %1$s or %2$s. Delimiter \";\" or \",\". Decimals: dot or comma; "
@@ -471,75 +832,64 @@ msgstr ""
 "Формат CSV: %1$s або %2$s. Розділювач «;» або «,». Дробові: крапка або кома; "
 "роздільники тисяч ігноруються."
 
-#: inc/Ui.php:323
+#: inc/Ui.php:414
 msgid "Importing…"
 msgstr "Імпортую…"
 
-#: inc/Ui.php:325
+#: inc/Ui.php:416
 msgid "Skipped"
 msgstr "Пропущено"
 
-#: inc/Ui.php:326
+#: inc/Ui.php:417
 msgid "Import error."
 msgstr "Помилка імпорту."
 
-#: inc/Ui.php:327
+#: inc/Ui.php:418
 msgid "Connection error."
 msgstr "Помилка з’єднання."
 
-#: inc/Ui.php:328
+#: inc/Ui.php:419
 msgid "Open in admin"
 msgstr "Відкрити в адмінці"
 
-#: inc/Ui.php:329
+#: inc/Ui.php:420
 msgid "View order"
 msgstr "Переглянути замовлення"
 
-#: inc/Ui.php:330
+#: inc/Ui.php:421
 msgid "Imported"
 msgstr "Імпортований"
 
-#: inc/Helpers.php:10
-msgid "Download to CSV"
-msgstr "Завантажити у CSV"
-
-#: inc/Helpers.php:11
-msgid "Download to XLSX"
-msgstr "Завантажити у XLSX"
-
-#: inc/Helpers.php:12
-msgid "Configure export columns"
-msgstr "Налаштувати колонки експорту"
-
-#: inc/Helpers.php:13
-msgid "Choose how to split warehouses in export:"
-msgstr "Вибрати, як розділяти склади в експорті:"
-
-#: inc/Ui.php
-msgid "To cart"
-msgstr "У кошик"
-
-#: inc/Ui.php
-msgid "Load draft into cart"
-msgstr "Завантажити чернетку у кошик"
-
-#: inc/Ui.php
-#, php-format
-msgid "CSV format: %1$s or %2$s."
-msgstr "Формат CSV: %1$s або %2$s."
-
-#: inc/Ui.php
+#: inc/Ui.php:422
 msgid "Draft order created"
 msgstr "Чернетку замовлення створено"
 
-#: inc/Ui.php
+#: inc/Ui.php:423
 msgid "Open new draft"
 msgstr "Відкрити нову чернетку"
 
-#: inc/Ui.php
+#: inc/Ui.php:424
 msgid "Refresh list"
 msgstr "Оновити список"
 
-#: inc/Ui.php
+#: inc/Ui.php:425
 msgid "The orders list below has not been refreshed yet."
 msgstr "Список замовлень нижче ще не оновлено."
+
+#~ msgid "Download CSV"
+#~ msgstr "Завантажити CSV"
+
+#~ msgid "Download XLSX"
+#~ msgstr "Завантажити XLSX"
+
+#~ msgid "Configure export"
+#~ msgstr "Налаштувати експорт"
+
+#~ msgid "Row format:"
+#~ msgstr "Формат рядків:"
+
+#~ msgid "Add to cart"
+#~ msgstr "Додати у кошик"
+
+#~ msgid "Load draft into cart"
+#~ msgstr "Завантажити чернетку у кошик"

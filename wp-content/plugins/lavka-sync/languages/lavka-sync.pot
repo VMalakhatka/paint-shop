@@ -1,4 +1,4 @@
-# Copyright (C) 2026 
+# Copyright (C) 2026
 # This file is distributed under the same license as the Lavka Sync plugin.
 msgid ""
 msgstr ""
@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-03T10:08:27+00:00\n"
+"POT-Creation-Date: 2026-09-03T20:31:43+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: lavka-sync\n"
@@ -180,7 +180,7 @@ msgstr ""
 #: inc/admin-ui.php:1581
 #: inc/admin-ui.php:2494
 #: inc/admin-ui.php:2585
-#: inc/warehouse-map.php:216
+#: inc/warehouse-map.php:217
 msgid "You do not have sufficient permissions to access this page."
 msgstr ""
 
@@ -545,7 +545,7 @@ msgid "Export CSV"
 msgstr ""
 
 #: inc/admin-ui.php:2525
-#: inc/warehouse-map.php:300
+#: inc/warehouse-map.php:308
 msgid "ID"
 msgstr ""
 
@@ -589,112 +589,134 @@ msgstr ""
 msgid "No logs yet."
 msgstr ""
 
-#: inc/warehouse-map.php:173
 #: inc/warehouse-map.php:174
-#: inc/warehouse-map.php:283
+#: inc/warehouse-map.php:175
+#: inc/warehouse-map.php:291
 msgid "Lavka settings"
 msgstr ""
 
-#: inc/warehouse-map.php:269
+#: inc/warehouse-map.php:277
 msgid "Saved."
 msgstr ""
 
-#: inc/warehouse-map.php:286
+#: inc/warehouse-map.php:294
 msgid "Configure global warehouse groups and customer-facing names. Analytics scenarios reference these groups and do not copy their warehouse membership."
 msgstr ""
 
-#: inc/warehouse-map.php:291
+#: inc/warehouse-map.php:299
 msgid "Relations use stable term IDs, system slugs and Folio warehouse IDs. Changing a public name does not change stock, order or analytics references."
 msgstr ""
 
-#: inc/warehouse-map.php:301
-#: inc/warehouse-map.php:323
+#: inc/warehouse-map.php:309
+#: inc/warehouse-map.php:331
 msgid "Customer-facing group name"
 msgstr ""
 
-#: inc/warehouse-map.php:302
-#: inc/warehouse-map.php:337
+#: inc/warehouse-map.php:310
+#: inc/warehouse-map.php:345
 msgid "Linked MSSQL warehouses (codes)"
 msgstr ""
 
-#: inc/warehouse-map.php:303
-#: inc/warehouse-map.php:355
+#: inc/warehouse-map.php:311
+#: inc/warehouse-map.php:363
 msgid "Folio warehouses (id:priority)"
 msgstr ""
 
-#: inc/warehouse-map.php:304
+#: inc/warehouse-map.php:312
 msgid "Pick from directory"
 msgstr ""
 
-#: inc/warehouse-map.php:332
+#: inc/warehouse-map.php:340
 msgid "System slug:"
 msgstr ""
 
-#: inc/warehouse-map.php:345
+#: inc/warehouse-map.php:353
 msgid "e.g. D01, D02, D05"
 msgstr ""
 
-#: inc/warehouse-map.php:349
+#: inc/warehouse-map.php:357
 msgid "CSV list of codes (spaces optional)."
 msgstr ""
 
-#: inc/warehouse-map.php:363
+#: inc/warehouse-map.php:371
 msgid "e.g. 7:10, 8:20"
 msgstr ""
 
-#: inc/warehouse-map.php:367
+#: inc/warehouse-map.php:375
 msgid "Lower priority number is used first. Used for Folio account split."
 msgstr ""
 
 #. translators: 1: external warehouse code, 2: name
-#: inc/warehouse-map.php:379
+#. translators: 1: Folio warehouse ID, 2: warehouse name
+#: inc/warehouse-map.php:387
+#: inc/warehouse-map.php:475
 #, php-format
 msgid "%1$s — %2$s"
 msgstr ""
 
-#: inc/warehouse-map.php:386
+#: inc/warehouse-map.php:394
 msgid "Apply codes"
 msgstr ""
 
-#: inc/warehouse-map.php:389
+#: inc/warehouse-map.php:397
 msgid "Apply Folio"
 msgstr ""
 
-#: inc/warehouse-map.php:392
+#: inc/warehouse-map.php:400
 msgid "Clear"
 msgstr ""
 
-#: inc/warehouse-map.php:398
+#: inc/warehouse-map.php:406
 msgid "MSSQL directory is not available. Enter codes manually or check Java endpoint <code>/ref/warehouses</code>."
 msgstr ""
 
 #. translators: %s: taxonomy name
-#: inc/warehouse-map.php:409
+#: inc/warehouse-map.php:417
 #, php-format
 msgid "No Woo locations found (taxonomy “%s”)."
 msgstr ""
 
-#: inc/warehouse-map.php:435
+#: inc/warehouse-map.php:443
 msgid "Public Folio warehouse names"
 msgstr ""
 
-#: inc/warehouse-map.php:436
+#: inc/warehouse-map.php:444
 msgid "These names are shown in orders, reports and customer notices. Folio warehouse IDs remain unchanged."
 msgstr ""
 
-#: inc/warehouse-map.php:439
+#: inc/warehouse-map.php:447
 msgid "Folio warehouse ID"
 msgstr ""
 
-#: inc/warehouse-map.php:440
+#: inc/warehouse-map.php:448
 msgid "Directory name"
 msgstr ""
 
-#: inc/warehouse-map.php:441
+#: inc/warehouse-map.php:449
 msgid "Customer-facing name"
 msgstr ""
 
-#: inc/warehouse-map.php:455
+#: inc/warehouse-map.php:463
+msgid "Non-accounting draft documents"
+msgstr ""
+
+#: inc/warehouse-map.php:464
+msgid "Select the Folio warehouse used for unavailable draft quantities and prepaid out-of-stock drafts. These documents do not change accounting stock."
+msgstr ""
+
+#: inc/warehouse-map.php:466
+msgid "Folio warehouse"
+msgstr ""
+
+#: inc/warehouse-map.php:468
+msgid "Select warehouse"
+msgstr ""
+
+#: inc/warehouse-map.php:482
+msgid "The operation always shows a Folio preview first. The real document is created only after separate confirmation."
+msgstr ""
+
+#: inc/warehouse-map.php:486
 msgid "Save Lavka settings"
 msgstr ""
 

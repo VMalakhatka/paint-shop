@@ -29,8 +29,7 @@ class Plugin {
         add_action('wp_ajax_pcoe_draft_to_cart',        [DraftToCart::class, 'handle']);
         add_action('wp_ajax_nopriv_pcoe_draft_to_cart', [DraftToCart::class, 'handle']);
 
-          DraftToCart::hooks();
-          CartToDraft::hooks(); 
+        DraftFolioWorkflow::hooks();
 
         // Вимкнути емейли для pc-draft
         ImporterDraft::mute_emails_for_drafts();

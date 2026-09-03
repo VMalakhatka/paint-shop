@@ -187,8 +187,8 @@ DEF-456;3</code></pre>
             }
 
             $actions['pcoe-draft-to-cart'] = [
-                'url'  => \PaintCore\PCOE\DraftToCart::action_url((int)$order->get_id(), ['clear' => '1']),
-                'name' => __('To cart', 'pc-order-import-export'),
+                'url'  => $order->get_view_order_url() . '#pcoe-draft-folio',
+                'name' => __('Process draft', 'pc-order-import-export'),
                 'class' => 'pcoe-draft-to-cart',
             ];
 
@@ -267,15 +267,12 @@ public static function render_account_import_block(): void
 
         echo self::render_controls_html('order', (int)$order->get_id());
 
-        // Кнопка «В кошик!» — доступна власнику замовлення або менеджеру
+        // Безпечні дії з чернеткою доступні власнику замовлення або менеджеру.
         $can_manage = current_user_can('manage_woocommerce');
         $is_owner   = (int)$order->get_user_id() === (int)get_current_user_id();
 
-        if ( $can_manage || $is_owner ) {
-            $url = \PaintCore\PCOE\DraftToCart::action_url((int)$order->get_id(), ['clear' => '1']);
-            echo '<p style="margin-top:10px">
-                    <a class="button" href="'.esc_url($url).'">'.esc_html__('Load draft into cart', 'pc-order-import-export').'</a>
-                </p>';
+        if ( $order->has_status('pc-draft') && ($can_manage || $is_owner) ) {
+            DraftFolioWorkflow::render($order);
         }
 }
     /* ===================== INTERNAL HTML BUILDERS ===================== */
@@ -433,6 +430,37 @@ public static function render_account_import_block(): void
     protected static function inline_css(): string
     {
         return '
+        .pcoe-draft-folio {
+            margin: 28px 0;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+        .pcoe-draft-folio__actions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+            margin: 16px 0;
+        }
+        .pcoe-draft-folio__action {
+            padding: 16px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+        .pcoe-draft-folio__preview {
+            margin: 18px 0;
+            padding: 16px;
+            border-left: 4px solid #3858e9;
+            background: #f6f7f7;
+        }
+        .pcoe-draft-folio__confirm {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+        @media (max-width: 720px) {
+            .pcoe-draft-folio__actions { grid-template-columns: 1fr; }
+        }
         .woocommerce-account table.woocommerce-orders-table td.woocommerce-orders-table__cell-order-actions,
         .woocommerce-account table.woocommerce-orders-table td.order-actions {
             display: flex !important;

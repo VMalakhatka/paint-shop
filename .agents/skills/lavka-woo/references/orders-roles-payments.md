@@ -28,6 +28,26 @@ Woo role -> lps_role_contract_map -> Folio contract
 
 Java отвечает за складское распределение внутри ФОЛИО; PHP строит Woo parent/children по сохранённому ответу и не повторяет stock algorithm.
 
+## Черновик -> корзина / необліковий документ
+
+- Владелец процесса: `pc-order-import-export/inc/DraftFolioWorkflow.php`.
+- Действие доступно только владельцу `pc-draft` или Woo manager.
+- Режим `partial_to_cart`: актуально доступное количество заменяет корзину,
+  недоступный остаток остаётся в том же черновике и после отдельного apply
+  записывается одним необліковим документом ФОЛІО.
+- Режим `whole_draft`: корзина не меняется, весь черновик записывается как
+  необліковий документ, например для предоплаченного отсутствующего товара.
+- Склад берётся из option `pcoe_folio_non_accounting_warehouse_id`; для текущего
+  production-процесса ожидается ID `7`. Не привязывай логику к имени склада.
+- Payload принудительно задаёт `accountingEnabled=false`, выбранный `warehouseId`
+  и `sourceInfo=нет на складе`; synthetic allocation остаётся непустым.
+- Preview и apply разделены. Apply использует тот же `externalRequestId`; после
+  timeout/unknown outcome нет автоматического retry.
+- Остаток черновика fingerprint-проверяется, связь с уже созданным документом
+  блокирует дубликат, статус `pc-draft` сохраняется.
+- Старый AJAX `pcoe_draft_to_cart` не должен напрямую переносить `pc-draft`: он
+  только направляет пользователя в новый preview-процесс.
+
 ## Split lifecycle
 
 - Один реальный document: reuse исходного Woo order, status `processing`, сохранить связь.

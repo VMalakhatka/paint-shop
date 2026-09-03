@@ -49,6 +49,17 @@ class DraftToCart
             wp_die( esc_html__( 'You do not have permission to perform this action.', 'pc-order-import-export' ), '', ['response'=>403] );
         }
 
+        if ( $order->has_status('pc-draft') ) {
+            if ( function_exists('wc_add_notice') ) {
+                wc_add_notice(
+                    __('Review available quantities and the non-accounting Folio remainder before loading this draft into the cart.', 'pc-order-import-export'),
+                    'notice'
+                );
+            }
+            wp_safe_redirect($order->get_view_order_url() . '#pcoe-draft-folio');
+            exit;
+        }
+
         if ( function_exists('WC') && WC()->cart ) {
             if ( isset($_GET['clear']) && $_GET['clear'] ) {
                 WC()->cart->empty_cart();

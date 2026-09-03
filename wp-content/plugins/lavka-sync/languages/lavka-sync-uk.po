@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Lavka Sync 0.2.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lavka-sync\n"
-"POT-Creation-Date: 2026-09-03T08:42:50+00:00\n"
+"POT-Creation-Date: 2026-09-03T20:31:43+00:00\n"
 "PO-Revision-Date: 2025-09-28T07:10:54+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -164,7 +164,7 @@ msgid "OK"
 msgstr "ОК"
 
 #: inc/admin-ui.php:211 inc/admin-ui.php:1581 inc/admin-ui.php:2494
-#: inc/admin-ui.php:2585 inc/warehouse-map.php:216
+#: inc/admin-ui.php:2585 inc/warehouse-map.php:217
 msgid "You do not have sufficient permissions to access this page."
 msgstr "У вас недостатньо прав для доступу до цієї сторінки."
 
@@ -517,7 +517,7 @@ msgstr "Логи"
 msgid "Export CSV"
 msgstr "Експорт CSV"
 
-#: inc/admin-ui.php:2525 inc/warehouse-map.php:300
+#: inc/admin-ui.php:2525 inc/warehouse-map.php:308
 msgid "ID"
 msgstr "ID"
 
@@ -561,84 +561,90 @@ msgstr "ні"
 msgid "No logs yet."
 msgstr "Ще немає логів."
 
-#: inc/warehouse-map.php:173 inc/warehouse-map.php:174
-#: inc/warehouse-map.php:283
+#: inc/warehouse-map.php:174 inc/warehouse-map.php:175
+#: inc/warehouse-map.php:291
 msgid "Lavka settings"
 msgstr "Лавка: налаштування"
 
-#: inc/warehouse-map.php:269
+#: inc/warehouse-map.php:277
 msgid "Saved."
 msgstr "Збережено."
 
-#: inc/warehouse-map.php:286
+#: inc/warehouse-map.php:294
 msgid ""
 "Configure global warehouse groups and customer-facing names. Analytics "
 "scenarios reference these groups and do not copy their warehouse membership."
-msgstr "Налаштуйте глобальні групи складів та зрозумілі назви. Сценарії аналітики посилаються на ці групи й не копіюють їхній склад."
+msgstr ""
+"Налаштуйте глобальні групи складів та зрозумілі назви. Сценарії аналітики "
+"посилаються на ці групи й не копіюють їхній склад."
 
-#: inc/warehouse-map.php:291
+#: inc/warehouse-map.php:299
 msgid ""
 "Relations use stable term IDs, system slugs and Folio warehouse IDs. "
 "Changing a public name does not change stock, order or analytics references."
-msgstr "Зв’язки використовують стабільні ID термінів, системні слаги та ID складів ФОЛІО. Зміна публічної назви не змінює зв’язки залишків, замовлень чи аналітики."
+msgstr ""
+"Зв’язки використовують стабільні ID термінів, системні слаги та ID складів "
+"ФОЛІО. Зміна публічної назви не змінює зв’язки залишків, замовлень чи "
+"аналітики."
 
-#: inc/warehouse-map.php:301 inc/warehouse-map.php:323
+#: inc/warehouse-map.php:309 inc/warehouse-map.php:331
 msgid "Customer-facing group name"
 msgstr "Назва групи для користувачів"
 
-#: inc/warehouse-map.php:302 inc/warehouse-map.php:337
+#: inc/warehouse-map.php:310 inc/warehouse-map.php:345
 msgid "Linked MSSQL warehouses (codes)"
 msgstr "Прив’язані MSSQL-склади (коди)"
 
-#: inc/warehouse-map.php:303 inc/warehouse-map.php:355
+#: inc/warehouse-map.php:311 inc/warehouse-map.php:363
 msgid "Folio warehouses (id:priority)"
 msgstr "Склади ФОЛІО (id:пріоритет)"
 
-#: inc/warehouse-map.php:304
+#: inc/warehouse-map.php:312
 msgid "Pick from directory"
 msgstr "Вибрати з довідника"
 
-#: inc/warehouse-map.php:332
+#: inc/warehouse-map.php:340
 msgid "System slug:"
 msgstr "Системний слаг:"
 
-#: inc/warehouse-map.php:345
+#: inc/warehouse-map.php:353
 msgid "e.g. D01, D02, D05"
 msgstr "напр. D01, D02, D05"
 
-#: inc/warehouse-map.php:349
+#: inc/warehouse-map.php:357
 msgid "CSV list of codes (spaces optional)."
 msgstr "CSV-список кодів (пробіли необов’язкові)."
 
-#: inc/warehouse-map.php:363
+#: inc/warehouse-map.php:371
 msgid "e.g. 7:10, 8:20"
 msgstr "наприклад, 7:10, 8:20"
 
-#: inc/warehouse-map.php:367
+#: inc/warehouse-map.php:375
 msgid "Lower priority number is used first. Used for Folio account split."
 msgstr ""
 "Менше число пріоритету використовується першим. Використовується для "
 "розподілу рахунку ФОЛІО."
 
 #. translators: 1: external warehouse code, 2: name
-#: inc/warehouse-map.php:379
+#. translators: 1: Folio warehouse ID, 2: warehouse name
+#: inc/warehouse-map.php:387 inc/warehouse-map.php:475
 #, php-format
 msgid "%1$s — %2$s"
 msgstr "%1$s — %2$s"
 
-#: inc/warehouse-map.php:386
+#: inc/warehouse-map.php:394
 msgid "Apply codes"
 msgstr "Застосувати коди"
 
-#: inc/warehouse-map.php:389
+#: inc/warehouse-map.php:397
 msgid "Apply Folio"
 msgstr "Застосувати ФОЛІО"
 
-#: inc/warehouse-map.php:392
+#: inc/warehouse-map.php:400
 msgid "Clear"
 msgstr "Очистити"
 
-#: inc/warehouse-map.php:398
+#: inc/warehouse-map.php:406
 msgid ""
 "MSSQL directory is not available. Enter codes manually or check Java "
 "endpoint <code>/ref/warehouses</code>."
@@ -647,34 +653,66 @@ msgstr ""
 "<code>/ref/warehouses</code>."
 
 #. translators: %s: taxonomy name
-#: inc/warehouse-map.php:409
+#: inc/warehouse-map.php:417
 #, php-format
 msgid "No Woo locations found (taxonomy “%s”)."
 msgstr "Не знайдено складів Woo (таксономія “%s”)."
 
-#: inc/warehouse-map.php:435
+#: inc/warehouse-map.php:443
 msgid "Public Folio warehouse names"
 msgstr "Зрозумілі назви складів ФОЛІО"
 
-#: inc/warehouse-map.php:436
+#: inc/warehouse-map.php:444
 msgid ""
 "These names are shown in orders, reports and customer notices. Folio "
 "warehouse IDs remain unchanged."
-msgstr "Ці назви показуються в замовленнях, звітах і повідомленнях клієнтам. ID складів ФОЛІО не змінюються."
+msgstr ""
+"Ці назви показуються в замовленнях, звітах і повідомленнях клієнтам. ID "
+"складів ФОЛІО не змінюються."
 
-#: inc/warehouse-map.php:439
+#: inc/warehouse-map.php:447
 msgid "Folio warehouse ID"
 msgstr "ID складу ФОЛІО"
 
-#: inc/warehouse-map.php:440
+#: inc/warehouse-map.php:448
 msgid "Directory name"
 msgstr "Назва у довіднику"
 
-#: inc/warehouse-map.php:441
+#: inc/warehouse-map.php:449
 msgid "Customer-facing name"
 msgstr "Назва для користувачів"
 
-#: inc/warehouse-map.php:455
+#: inc/warehouse-map.php:463
+msgid "Non-accounting draft documents"
+msgstr "Необлікові документи з чернеток"
+
+#: inc/warehouse-map.php:464
+msgid ""
+"Select the Folio warehouse used for unavailable draft quantities and prepaid "
+"out-of-stock drafts. These documents do not change accounting stock."
+msgstr ""
+"Виберіть склад ФОЛІО для недоступного залишку чернетки та передплачених "
+"замовлень відсутнього товару. Ці документи не змінюють облікові залишки."
+
+#: inc/warehouse-map.php:466
+#, fuzzy
+msgid "Folio warehouse"
+msgstr "ID складу ФОЛІО"
+
+#: inc/warehouse-map.php:468
+#, fuzzy
+msgid "Select warehouse"
+msgstr "За складами"
+
+#: inc/warehouse-map.php:482
+msgid ""
+"The operation always shows a Folio preview first. The real document is "
+"created only after separate confirmation."
+msgstr ""
+"Операція завжди спочатку показує попередній перегляд ФОЛІО. Реальний документ "
+"створюється лише після окремого підтвердження."
+
+#: inc/warehouse-map.php:486
 msgid "Save Lavka settings"
 msgstr "Зберегти налаштування Лавка"
 

@@ -111,6 +111,7 @@ function lavka_set_location_folio_warehouses(int $term_id, array $warehouses): v
 }
 
 const LAVKA_PUBLIC_WAREHOUSE_LABELS_OPTION = 'lavka_public_warehouse_labels';
+const LAVKA_FOLIO_NON_ACCOUNTING_WAREHOUSE_OPTION = 'pcoe_folio_non_accounting_warehouse_id';
 
 function lavka_get_public_warehouse_labels(): array {
     $labels = get_option(LAVKA_PUBLIC_WAREHOUSE_LABELS_OPTION, []);
@@ -264,6 +265,13 @@ function lavka_render_warehouses_page() {
             if ($warehouse_id !== '' && $label !== '') $public_labels[$warehouse_id] = $label;
         }
         update_option(LAVKA_PUBLIC_WAREHOUSE_LABELS_OPTION, $public_labels, false);
+
+        $non_accounting_warehouse_id = absint($_POST['non_accounting_warehouse_id'] ?? 0);
+        if ($non_accounting_warehouse_id > 0) {
+            update_option(LAVKA_FOLIO_NON_ACCOUNTING_WAREHOUSE_OPTION, $non_accounting_warehouse_id, false);
+        } else {
+            delete_option(LAVKA_FOLIO_NON_ACCOUNTING_WAREHOUSE_OPTION);
+        }
 
         echo '<div class="notice notice-success is-dismissible"><p>' .
              esc_html__('Saved.', 'lavka-sync') .
@@ -450,6 +458,29 @@ function lavka_render_warehouses_page() {
           <?php endforeach; ?>
           </tbody>
         </table>
+
+        <?php $non_accounting_warehouse_id = (int)get_option(LAVKA_FOLIO_NON_ACCOUNTING_WAREHOUSE_OPTION, 0); ?>
+        <h2><?php echo esc_html__('Non-accounting draft documents', 'lavka-sync'); ?></h2>
+        <p><?php echo esc_html__('Select the Folio warehouse used for unavailable draft quantities and prepaid out-of-stock drafts. These documents do not change accounting stock.', 'lavka-sync'); ?></p>
+        <p>
+          <label for="lavka-non-accounting-warehouse"><strong><?php echo esc_html__('Folio warehouse', 'lavka-sync'); ?></strong></label><br>
+          <select id="lavka-non-accounting-warehouse" name="non_accounting_warehouse_id">
+            <option value="0"><?php echo esc_html__('Select warehouse', 'lavka-sync'); ?></option>
+            <?php foreach ($warehouse_options as $warehouse_id => $directory_name):
+                $display_name = $public_labels[$warehouse_id] ?? $directory_name;
+            ?>
+              <option value="<?php echo esc_attr($warehouse_id); ?>" <?php selected($non_accounting_warehouse_id, (int)$warehouse_id); ?>>
+                <?php
+                /* translators: 1: Folio warehouse ID, 2: warehouse name */
+                echo esc_html(sprintf(__('%1$s — %2$s', 'lavka-sync'), $warehouse_id, $display_name));
+                ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
+        </p>
+        <p class="description">
+          <?php echo esc_html__('The operation always shows a Folio preview first. The real document is created only after separate confirmation.', 'lavka-sync'); ?>
+        </p>
 
         <p style="margin-top:12px">
           <?php submit_button(__('Save Lavka settings', 'lavka-sync'), 'primary', 'submit', false); ?>

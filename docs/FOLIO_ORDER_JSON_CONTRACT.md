@@ -296,7 +296,7 @@ Java should:
 5. Select the final Folio warehouse per line or per document.
 6. Put the selected final warehouse into the actual Java `/admin/folio/accounts` request `warehouseId`.
 7. If `documentNumber` is empty, allocate the next valid numeric Folio document number.
-8. Create non-stock-impacting draft documents for cart/import draft flows when requested later. In Folio this is a non-accounting account.
+8. Create non-stock-impacting documents for cart/import draft flows. In Folio this is a non-accounting account.
 9. Create real documents for order execution flows when requested later.
 10. Return enough data for Woo to persist the Folio link in order meta.
 
@@ -306,7 +306,62 @@ Woo should not:
 2. Guess missing Folio accounting fields.
 3. Send incomplete fields as if they were confirmed business values.
 4. Mark an order completed based only on preview JSON.
-5. Choose the final Folio `warehouseId` at order header level.
+5. Choose the final Folio `warehouseId` at order header level, except for the
+   explicit single-warehouse non-accounting draft workflow described below.
+
+## Implemented Draft-to-Cart / Non-accounting Workflow
+
+Owner: `pc-order-import-export/inc/DraftFolioWorkflow.php`.
+
+The workflow is available only for a Woo order with status `pc-draft` and only
+to its owner or a WooCommerce manager. Both operations require a Java preview
+and a separate explicit apply:
+
+1. `partial_to_cart` recalculates current Woo allocation, replaces the cart with
+   the currently loadable quantities, keeps the unavailable remainder in the
+   same Woo draft, and creates one non-accounting Folio document for that
+   remainder.
+2. `whole_draft` leaves the cart unchanged and creates one non-accounting Folio
+   document for every valid line of the draft. This is intended for prepaid
+   out-of-stock orders.
+
+The target Folio warehouse is an explicit administrator setting stored in
+`pcoe_folio_non_accounting_warehouse_id`; it is not derived from an editable
+warehouse name. For the current business process the production setting must be
+Folio warehouse `7`. The payload deliberately overrides:
+
+```text
+woo_order.status = pc-draft
+folio_account_header.warehouseId = configured warehouse ID
+folio_account_header.accountingEnabled = false
+folio_account_header.sourceInfo = нет на складе
+split_strategy = single_non_accounting_warehouse
+```
+
+Each line still contains a complete synthetic allocation to the configured
+warehouse so Java validation does not receive an empty allocation. The Java
+endpoint remains `/admin/folio/order-accounts`.
+
+Safety and idempotency rules:
+
+- preview does not modify Woo or Folio;
+- apply reuses the exact preview payload and its stable `externalRequestId`;
+- draft lines and allocation are fingerprinted; a change requires a new preview;
+- after the cart is prepared, the remaining draft lines have a separate
+  fingerprint so a manual edit cannot be sent using stale Folio data;
+- an unknown or failed apply is never retried automatically;
+- the preview transient is retained for a deliberate manual retry;
+- preview and apply must return exactly one document with the configured
+  warehouse and an explicit `accounting_enabled=false`; any other response is
+  blocked;
+- an existing linked Folio document blocks repeated creation;
+- the draft keeps status `pc-draft`; the non-accounting document never proves a
+  real stock write-off.
+
+Woo stores the full response in `_folio_documents_result`, the single document
+link in the standard `_folio_document_*` meta, and workflow diagnostics in
+`_pcoe_folio_non_accounting_*` meta. All order access and persistence use
+WooCommerce CRUD and are HPOS compatible.
 
 ## Expected Java Response Draft
 
