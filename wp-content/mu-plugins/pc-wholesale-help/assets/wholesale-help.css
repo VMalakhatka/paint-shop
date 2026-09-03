@@ -85,6 +85,8 @@
 .pc-help-card--accent { border-color: #d7c6ea; background: var(--pc-help-lilac); }
 .pc-help-card h3 { margin: 0 0 7px; color: var(--pc-help-ink); font-size: 18px; }
 .pc-help-card p { margin: 0; color: var(--pc-help-muted); }
+.pc-help-draft-scenarios .pc-help-card ul { margin: 14px 0 0; padding-left: 20px; }
+.pc-help-draft-scenarios .pc-help-card li + li { margin-top: 7px; }
 
 .pc-help-note, .pc-help-warning { margin: 18px 0; padding: 15px 18px; border-radius: 14px; }
 .pc-help-note { border-left: 4px solid var(--pc-help-purple); background: var(--pc-help-lilac); }

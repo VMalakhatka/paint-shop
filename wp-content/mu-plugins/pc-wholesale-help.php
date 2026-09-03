@@ -2,7 +2,7 @@
 /**
  * Plugin Name: PC Wholesale Customer Help
  * Description: Role-gated customer guide, My Account endpoint and contextual help links for wholesale ordering.
- * Version: 1.1.0
+ * Version: 1.2.0
  * Author: PaintCore
  * Text Domain: pc-wholesale-help
  * Domain Path: /languages
@@ -11,7 +11,7 @@
 defined('ABSPATH') || exit;
 
 const PC_WHOLESALE_HELP_ENDPOINT = 'yak-zamovyty';
-const PC_WHOLESALE_HELP_VERSION = '1.1.0';
+const PC_WHOLESALE_HELP_VERSION = '1.2.0';
 
 /**
  * One allow-list shared by the quick-order page and the customer guide.
@@ -195,8 +195,8 @@ add_action('woocommerce_before_checkout_form', 'pc_wholesale_help_checkout_link'
 
 function pc_wholesale_help_orders_link(): void {
     pc_wholesale_help_render_context_links(__('Drafts and repeating previous orders', 'pc-wholesale-help'), [
-        'chernetky'        => __('Drafts', 'pc-wholesale-help'),
-        'stari-zamovlennia'=> __('Previous orders', 'pc-wholesale-help'),
+        'chernetky'        => __('Save a draft', 'pc-wholesale-help'),
+        'stari-zamovlennia'=> __('Process a draft', 'pc-wholesale-help'),
     ]);
 }
 add_action('woocommerce_before_account_orders', 'pc_wholesale_help_orders_link', 2);
@@ -287,7 +287,7 @@ function pc_wholesale_help_render_endpoint(): void {
             <a href="#import"><span>5</span><?php esc_html_e('Import', 'pc-wholesale-help'); ?></a>
             <a href="#eksport"><span>6</span><?php esc_html_e('Export', 'pc-wholesale-help'); ?></a>
             <a href="#chernetky"><span>7</span><?php esc_html_e('Drafts', 'pc-wholesale-help'); ?></a>
-            <a href="#stari-zamovlennia"><span>8</span><?php esc_html_e('Previous orders', 'pc-wholesale-help'); ?></a>
+            <a href="#stari-zamovlennia"><span>8</span><?php esc_html_e('Draft processing', 'pc-wholesale-help'); ?></a>
             <a href="#oformlennia"><span>9</span><?php esc_html_e('Checkout', 'pc-wholesale-help'); ?></a>
             <a href="#rozpodil"><span>10</span><?php esc_html_e('Warehouse split', 'pc-wholesale-help'); ?></a>
             <a href="#balans"><span>11</span><?php esc_html_e('Balance', 'pc-wholesale-help'); ?></a>
@@ -392,9 +392,36 @@ function pc_wholesale_help_render_endpoint(): void {
         </section>
 
         <section class="pc-help-section" id="stari-zamovlennia">
-            <div class="pc-help-section__heading"><span>08</span><div><h2><?php esc_html_e('Repeat a draft or a previous order', 'pc-wholesale-help'); ?></h2><p><?php esc_html_e('For a draft, press “To cart”. For a previous order, open its details and press “Load draft into cart”.', 'pc-wholesale-help'); ?></p></div></div>
-            <div class="pc-help-warning"><strong><?php esc_html_e('Protect the current cart.', 'pc-wholesale-help'); ?></strong> <?php esc_html_e('Loading a draft or previous order first clears the current cart and then adds products from the selected order. Save or export the current cart first if you need it.', 'pc-wholesale-help'); ?></div>
-            <p><?php esc_html_e('Deleted or unavailable products may be skipped. Prices, availability and warehouse allocation are recalculated. For selected items without clearing the cart, repeat products from a Folio invoice instead.', 'pc-wholesale-help'); ?></p>
+            <div class="pc-help-section__heading"><span>08</span><div><h2><?php esc_html_e('How to process a draft', 'pc-wholesale-help'); ?></h2><p><?php esc_html_e('Open “My orders”, press “Process draft” next to the required draft, and choose one of two scenarios.', 'pc-wholesale-help'); ?></p></div></div>
+            <div class="pc-help-note"><strong><?php esc_html_e('Preview first, apply second.', 'pc-wholesale-help'); ?></strong> <?php esc_html_e('The preview shows the result without changing the cart or recording a Folio document. The operation runs only after a separate confirmation (apply).', 'pc-wholesale-help'); ?></div>
+            <div class="pc-help-grid pc-help-grid--two pc-help-draft-scenarios">
+                <div class="pc-help-card pc-help-card--accent">
+                    <h3><?php esc_html_e('Available goods to cart; remainder stays in the draft', 'pc-wholesale-help'); ?></h3>
+                    <p><?php esc_html_e('Choose “Load available quantities into the cart”. The preview table shows the requested quantity, the quantity available for the cart, and the unavailable remainder.', 'pc-wholesale-help'); ?></p>
+                    <ul>
+                        <li><?php esc_html_e('After apply, the current cart is cleared and replaced with the currently available quantities at current prices.', 'pc-wholesale-help'); ?></li>
+                        <li><?php esc_html_e('The unavailable quantity remains in the same draft.', 'pc-wholesale-help'); ?></li>
+                        <li><?php esc_html_e('The unavailable remainder is recorded as one non-accounting Folio document.', 'pc-wholesale-help'); ?></li>
+                    </ul>
+                </div>
+                <div class="pc-help-card">
+                    <h3><?php esc_html_e('Entire draft to a non-accounting Folio document', 'pc-wholesale-help'); ?></h3>
+                    <p><?php esc_html_e('Choose “Send the entire draft to a non-accounting Folio document”, for example for a prepaid order that is currently out of stock.', 'pc-wholesale-help'); ?></p>
+                    <ul>
+                        <li><?php esc_html_e('Review the preview and then confirm the separate apply action.', 'pc-wholesale-help'); ?></li>
+                        <li><?php esc_html_e('The entire valid draft is recorded in one non-accounting Folio document.', 'pc-wholesale-help'); ?></li>
+                        <li><?php esc_html_e('The current cart remains unchanged.', 'pc-wholesale-help'); ?></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="pc-help-warning"><strong><?php esc_html_e('Protect the current cart.', 'pc-wholesale-help'); ?></strong> <?php esc_html_e('Only the first scenario clears and replaces the current cart. Save the cart as a separate draft or export it before apply if you need its current contents.', 'pc-wholesale-help'); ?></div>
+            <div class="pc-help-note"><strong><?php esc_html_e('No warehouse movement.', 'pc-wholesale-help'); ?></strong> <?php
+                /* translators: %s is the exact note stored in the Folio document. */
+                printf(esc_html__('The non-accounting document is created on Folio warehouse 7 with the note %s. It does not write off, reserve, or otherwise move warehouse stock.', 'pc-wholesale-help'), '<code>нет на складе</code>');
+            ?></div>
+            <p><?php esc_html_e('If Folio returns an error or the result is unknown, the site keeps the draft and does not retry automatically. Review the message and deliberately repeat apply using the same preview. If draft lines or availability changed, run a new preview.', 'pc-wholesale-help'); ?></p>
+            <h3><?php esc_html_e('Repeat a previous completed order', 'pc-wholesale-help'); ?></h3>
+            <p><?php esc_html_e('Open the order details and use the available repeat action. Current prices, availability and warehouse allocation are recalculated. To add only selected products without clearing the cart, repeat them from a Folio document.', 'pc-wholesale-help'); ?></p>
         </section>
 
         <section class="pc-help-section" id="oformlennia">

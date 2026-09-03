@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: PC Wholesale Customer Help 1.1.0\n"
+"Project-Id-Version: PC Wholesale Customer Help 1.2.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mu-plugins\n"
-"POT-Creation-Date: 2026-09-03T16:51:03+00:00\n"
+"POT-Creation-Date: 2026-09-03T21:26:19+00:00\n"
 "PO-Revision-Date: 2026-09-03 00:00+0000\n"
 "Last-Translator: PaintCore\n"
 "Language-Team: PaintCore\n"
@@ -67,8 +67,7 @@ msgstr "Імпорт"
 msgid "Export"
 msgstr "Експорт"
 
-#: pc-wholesale-help.php:183 pc-wholesale-help.php:198
-#: pc-wholesale-help.php:289
+#: pc-wholesale-help.php:183 pc-wholesale-help.php:289
 msgid "Drafts"
 msgstr "Чернетки"
 
@@ -88,9 +87,13 @@ msgstr "Розділення по складах"
 msgid "Drafts and repeating previous orders"
 msgstr "Чернетки та повторення попередніх замовлень"
 
-#: pc-wholesale-help.php:199 pc-wholesale-help.php:290
-msgid "Previous orders"
-msgstr "Старі замовлення"
+#: pc-wholesale-help.php:198
+msgid "Save a draft"
+msgstr "Зберегти чернетку"
+
+#: pc-wholesale-help.php:199
+msgid "Process a draft"
+msgstr "Обробити чернетку"
 
 #: pc-wholesale-help.php:205
 msgid "Export or repeat this order"
@@ -152,6 +155,10 @@ msgstr "Каталог"
 #: pc-wholesale-help.php:285
 msgid "Product list"
 msgstr "Товар списком"
+
+#: pc-wholesale-help.php:290
+msgid "Draft processing"
+msgstr "Обробка чернетки"
 
 #: pc-wholesale-help.php:293
 msgid "Balance"
@@ -563,46 +570,142 @@ msgid "Open my orders"
 msgstr "Відкрити мої замовлення"
 
 #: pc-wholesale-help.php:395
-msgid "Repeat a draft or a previous order"
-msgstr "Повторіть чернетку або старе замовлення"
+msgid "How to process a draft"
+msgstr "Як обробити чернетку"
 
 #: pc-wholesale-help.php:395
 msgid ""
-"For a draft, press “To cart”. For a previous order, open its details and "
-"press “Load draft into cart”."
+"Open “My orders”, press “Process draft” next to the required draft, and "
+"choose one of two scenarios."
 msgstr ""
-"Для чернетки натисніть «У кошик». Для старого замовлення відкрийте деталі й "
-"натисніть «Завантажити чернетку у кошик»."
+"Відкрийте «Мої замовлення», біля потрібної чернетки натисніть «Обробити "
+"чернетку» та виберіть один із двох сценаріїв."
 
 #: pc-wholesale-help.php:396
+msgid "Preview first, apply second."
+msgstr "Спочатку preview, потім apply."
+
+#: pc-wholesale-help.php:396
+msgid ""
+"The preview shows the result without changing the cart or recording a Folio "
+"document. The operation runs only after a separate confirmation (apply)."
+msgstr ""
+"Preview показує результат без зміни кошика і без запису документа ФОЛІО. "
+"Операція виконується лише після окремого підтвердження — apply."
+
+#: pc-wholesale-help.php:399
+msgid "Available goods to cart; remainder stays in the draft"
+msgstr "Доступний товар у кошик; залишок — у чернетці"
+
+#: pc-wholesale-help.php:400
+msgid ""
+"Choose “Load available quantities into the cart”. The preview table shows "
+"the requested quantity, the quantity available for the cart, and the "
+"unavailable remainder."
+msgstr ""
+"Виберіть «Завантажити доступну кількість у кошик». Таблиця preview покаже "
+"замовлену кількість, доступну кількість для кошика та недоступний залишок."
+
+#: pc-wholesale-help.php:402
+msgid ""
+"After apply, the current cart is cleared and replaced with the currently "
+"available quantities at current prices."
+msgstr ""
+"Після apply поточний кошик очищається і замінюється доступними зараз товарами "
+"за актуальними цінами."
+
+#: pc-wholesale-help.php:403
+msgid "The unavailable quantity remains in the same draft."
+msgstr "Недоступна кількість залишається в цій самій чернетці."
+
+#: pc-wholesale-help.php:404
+msgid ""
+"The unavailable remainder is recorded as one non-accounting Folio document."
+msgstr "Недоступний залишок записується одним необліковим документом ФОЛІО."
+
+#: pc-wholesale-help.php:408
+msgid "Entire draft to a non-accounting Folio document"
+msgstr "Усю чернетку в необліковий документ ФОЛІО"
+
+#: pc-wholesale-help.php:409
+msgid ""
+"Choose “Send the entire draft to a non-accounting Folio document”, for "
+"example for a prepaid order that is currently out of stock."
+msgstr ""
+"Виберіть «Передати всю чернетку в необліковий документ ФОЛІО», наприклад для "
+"передплаченого замовлення, якого зараз немає на складі."
+
+#: pc-wholesale-help.php:411
+msgid "Review the preview and then confirm the separate apply action."
+msgstr "Перевірте preview, а потім окремо підтвердьте дію apply."
+
+#: pc-wholesale-help.php:412
+msgid ""
+"The entire valid draft is recorded in one non-accounting Folio document."
+msgstr "Уся дійсна чернетка записується одним необліковим документом ФОЛІО."
+
+#: pc-wholesale-help.php:413
+msgid "The current cart remains unchanged."
+msgstr "Поточний кошик залишається без змін."
+
+#: pc-wholesale-help.php:417
 msgid "Protect the current cart."
 msgstr "Збережіть поточний кошик."
 
-#: pc-wholesale-help.php:396
+#: pc-wholesale-help.php:417
 msgid ""
-"Loading a draft or previous order first clears the current cart and then "
-"adds products from the selected order. Save or export the current cart first "
-"if you need it."
+"Only the first scenario clears and replaces the current cart. Save the cart "
+"as a separate draft or export it before apply if you need its current "
+"contents."
 msgstr ""
-"Завантаження чернетки або старого замовлення спочатку очищає поточний кошик, "
-"а потім додає товари з вибраного замовлення. Якщо поточний кошик потрібен, "
-"спочатку збережіть або вивантажте його."
+"Лише перший сценарій очищає і замінює поточний кошик. Якщо його вміст "
+"потрібен, до apply збережіть кошик в окрему чернетку або вивантажте у файл."
 
-#: pc-wholesale-help.php:397
+#: pc-wholesale-help.php:418
+msgid "No warehouse movement."
+msgstr "Без складського руху."
+
+#. translators: %s is the exact note stored in the Folio document.
+#: pc-wholesale-help.php:420
+#, php-format
 msgid ""
-"Deleted or unavailable products may be skipped. Prices, availability and "
-"warehouse allocation are recalculated. For selected items without clearing "
-"the cart, repeat products from a Folio invoice instead."
+"The non-accounting document is created on Folio warehouse 7 with the note "
+"%s. It does not write off, reserve, or otherwise move warehouse stock."
 msgstr ""
-"Видалені або недоступні товари можуть бути пропущені. Ціни, наявність і "
-"розподіл по складах перераховуються. Щоб додати лише вибрані позиції без "
-"очищення кошика, повторіть товари з документа ФОЛІО."
+"Необліковий документ створюється на складі ФОЛІО 7 з позначкою %s. Він не "
+"списує, не резервує і не переміщує товарні залишки."
 
-#: pc-wholesale-help.php:401
+#: pc-wholesale-help.php:422
+msgid ""
+"If Folio returns an error or the result is unknown, the site keeps the draft "
+"and does not retry automatically. Review the message and deliberately repeat "
+"apply using the same preview. If draft lines or availability changed, run a "
+"new preview."
+msgstr ""
+"Якщо ФОЛІО повернула помилку або результат невідомий, сайт зберігає чернетку "
+"і не повторює операцію автоматично. Перевірте повідомлення та свідомо "
+"повторіть apply з тим самим preview. Якщо позиції чернетки або наявність "
+"змінилися, виконайте новий preview."
+
+#: pc-wholesale-help.php:423
+msgid "Repeat a previous completed order"
+msgstr "Повторити попереднє оформлене замовлення"
+
+#: pc-wholesale-help.php:424
+msgid ""
+"Open the order details and use the available repeat action. Current prices, "
+"availability and warehouse allocation are recalculated. To add only selected "
+"products without clearing the cart, repeat them from a Folio document."
+msgstr ""
+"Відкрийте деталі замовлення та скористайтеся доступною дією повторення. Поточні "
+"ціни, наявність і розподіл по складах перераховуються. Щоб додати лише вибрані "
+"товари без очищення кошика, повторіть їх із документа ФОЛІО."
+
+#: pc-wholesale-help.php:428
 msgid "Complete checkout"
 msgstr "Оформіть замовлення"
 
-#: pc-wholesale-help.php:401
+#: pc-wholesale-help.php:428
 msgid ""
 "Check contact details, recipient, delivery, payment, products, quantities "
 "and totals before confirming."
@@ -610,50 +713,50 @@ msgstr ""
 "Перед підтвердженням перевірте контакти, отримувача, доставку, оплату, "
 "товари, кількість і суму."
 
-#: pc-wholesale-help.php:403
+#: pc-wholesale-help.php:430
 msgid "Open checkout"
 msgstr "Відкрийте оформлення"
 
-#: pc-wholesale-help.php:403
+#: pc-wholesale-help.php:430
 msgid "Go from the reviewed cart to checkout."
 msgstr "Перейдіть із перевіреного кошика до оформлення."
 
-#: pc-wholesale-help.php:404
+#: pc-wholesale-help.php:431
 msgid "Complete delivery"
 msgstr "Заповніть доставку"
 
-#: pc-wholesale-help.php:404
+#: pc-wholesale-help.php:431
 msgid ""
 "For Nova Poshta, choose the displayed branch, parcel locker or address "
 "fields."
 msgstr ""
 "Для Нової пошти виберіть показані поля відділення, поштомата або адреси."
 
-#: pc-wholesale-help.php:405
+#: pc-wholesale-help.php:432
 msgid "Choose payment"
 msgstr "Виберіть оплату"
 
-#: pc-wholesale-help.php:405
+#: pc-wholesale-help.php:432
 msgid "Select one of the methods available for your account."
 msgstr "Виберіть один зі способів, доступних для вашого облікового запису."
 
-#: pc-wholesale-help.php:406
+#: pc-wholesale-help.php:433
 msgid "Confirm once"
 msgstr "Підтвердьте один раз"
 
-#: pc-wholesale-help.php:406
+#: pc-wholesale-help.php:433
 msgid "Wait for Folio processing to finish; do not submit a duplicate order."
 msgstr "Дочекайтеся завершення обробки ФОЛІО; не створюйте дубль замовлення."
 
-#: pc-wholesale-help.php:408
+#: pc-wholesale-help.php:435
 msgid "Go to checkout"
 msgstr "Перейти до оформлення"
 
-#: pc-wholesale-help.php:412
+#: pc-wholesale-help.php:439
 msgid "Why an order may be split"
 msgstr "Чому замовлення може розділитися"
 
-#: pc-wholesale-help.php:412
+#: pc-wholesale-help.php:439
 msgid ""
 "Folio creates warehouse documents separately. One WooCommerce cart may "
 "therefore become several linked orders, invoices or shipments."
@@ -661,19 +764,19 @@ msgstr ""
 "ФОЛІО створює складські документи окремо. Тому один кошик WooCommerce може "
 "стати кількома пов’язаними замовленнями, рахунками або відправленнями."
 
-#: pc-wholesale-help.php:414
+#: pc-wholesale-help.php:441
 msgid "One warehouse"
 msgstr "Один склад"
 
-#: pc-wholesale-help.php:414
+#: pc-wholesale-help.php:441
 msgid "One order and one Folio document remain."
 msgstr "Залишаються одне замовлення й один документ ФОЛІО."
 
-#: pc-wholesale-help.php:415
+#: pc-wholesale-help.php:442
 msgid "Several warehouses"
 msgstr "Кілька складів"
 
-#: pc-wholesale-help.php:415
+#: pc-wholesale-help.php:442
 msgid ""
 "Linked child orders appear for individual warehouses and may be shipped "
 "separately."
@@ -681,11 +784,11 @@ msgstr ""
 "Для окремих складів з’являються пов’язані дочірні замовлення, які можуть "
 "відправлятися окремо."
 
-#: pc-wholesale-help.php:416
+#: pc-wholesale-help.php:443
 msgid "Stock shortage"
 msgstr "Нестача товару"
 
-#: pc-wholesale-help.php:416
+#: pc-wholesale-help.php:443
 msgid ""
 "The available part may be processed while the missing part waits for a "
 "manager review."
@@ -693,19 +796,19 @@ msgstr ""
 "Доступну частину може бути оформлено, а відсутня частина чекатиме перевірки "
 "менеджера."
 
-#: pc-wholesale-help.php:418
+#: pc-wholesale-help.php:445
 msgid "Do not pay linked child orders separately"
 msgstr "Не сплачуйте пов’язані дочірні замовлення окремо"
 
-#: pc-wholesale-help.php:418
+#: pc-wholesale-help.php:445
 msgid "unless a manager clearly asks you to do so."
 msgstr "якщо менеджер прямо не попросив це зробити."
 
-#: pc-wholesale-help.php:422
+#: pc-wholesale-help.php:449
 msgid "View the customer balance"
 msgstr "Перегляньте баланс із клієнтом"
 
-#: pc-wholesale-help.php:422
+#: pc-wholesale-help.php:449
 msgid ""
 "Choose a start date or all time, generate the report, then export XLSX or "
 "print it if needed."
@@ -713,7 +816,7 @@ msgstr ""
 "Виберіть початкову дату або весь період, сформуйте звіт, а потім за потреби "
 "експортуйте XLSX або надрукуйте."
 
-#: pc-wholesale-help.php:423
+#: pc-wholesale-help.php:450
 msgid ""
 "The report may show opening balance, invoices, payments, total debt, overdue "
 "amount, prepayment and the amount due now. The table below explains each "
@@ -723,15 +826,15 @@ msgstr ""
 "прострочену суму, передплату та суму до сплати зараз. Таблиця нижче пояснює "
 "кожну операцію і баланс до та після неї."
 
-#: pc-wholesale-help.php:425
+#: pc-wholesale-help.php:452
 msgid "Open customer balance"
 msgstr "Відкрити баланс із клієнтом"
 
-#: pc-wholesale-help.php:430
+#: pc-wholesale-help.php:457
 msgid "View and repeat Folio documents"
 msgstr "Переглядайте та повторюйте документи ФОЛІО"
 
-#: pc-wholesale-help.php:430
+#: pc-wholesale-help.php:457
 msgid ""
 "Choose a period and document types, then open an invoice, expense invoice or "
 "payment for details."
@@ -739,7 +842,7 @@ msgstr ""
 "Виберіть період і типи документів, потім відкрийте рахунок, видаткову "
 "накладну або платіж."
 
-#: pc-wholesale-help.php:431
+#: pc-wholesale-help.php:458
 msgid ""
 "From an invoice or expense invoice, select the products you need and add "
 "them to the current cart or save them as a new draft. The current cart is "
@@ -749,11 +852,11 @@ msgstr ""
 "поточного кошика або збережіть як нову чернетку. У цьому сценарії поточний "
 "кошик не очищається."
 
-#: pc-wholesale-help.php:432
+#: pc-wholesale-help.php:459
 msgid "Historical prices are for reference only."
 msgstr "Старі ціни наведено лише для довідки."
 
-#: pc-wholesale-help.php:432
+#: pc-wholesale-help.php:459
 msgid ""
 "The new cart always uses current prices, availability and allocation. "
 "Payments and returns cannot be repeated as an order."
@@ -761,15 +864,15 @@ msgstr ""
 "Новий кошик завжди використовує поточні ціни, наявність і списання. Платежі "
 "та повернення не можна повторити як замовлення."
 
-#: pc-wholesale-help.php:434
+#: pc-wholesale-help.php:461
 msgid "Open Folio documents"
 msgstr "Відкрити документи ФОЛІО"
 
-#: pc-wholesale-help.php:439
+#: pc-wholesale-help.php:466
 msgid "Need help?"
 msgstr "Потрібна допомога?"
 
-#: pc-wholesale-help.php:439
+#: pc-wholesale-help.php:466
 msgid ""
 "Tell the wholesale manager your WooCommerce order number and what you "
 "expected to see. Never send your password or bank card details."
@@ -777,6 +880,25 @@ msgstr ""
 "Повідомте оптовому менеджеру номер замовлення WooCommerce і що ви очікували "
 "побачити. Ніколи не надсилайте пароль або дані банківської картки."
 
-#: pc-wholesale-help.php:440
+#: pc-wholesale-help.php:467
 msgid "Back to top"
 msgstr "На початок"
+
+#~ msgid "Previous orders"
+#~ msgstr "Старі замовлення"
+
+#~ msgid ""
+#~ "For a draft, press “To cart”. For a previous order, open its details and "
+#~ "press “Load draft into cart”."
+#~ msgstr ""
+#~ "Для чернетки натисніть «У кошик». Для старого замовлення відкрийте деталі "
+#~ "й натисніть «Завантажити чернетку у кошик»."
+
+#~ msgid ""
+#~ "Loading a draft or previous order first clears the current cart and then "
+#~ "adds products from the selected order. Save or export the current cart "
+#~ "first if you need it."
+#~ msgstr ""
+#~ "Завантаження чернетки або старого замовлення спочатку очищає поточний "
+#~ "кошик, а потім додає товари з вибраного замовлення. Якщо поточний кошик "
+#~ "потрібен, спочатку збережіть або вивантажте його."
