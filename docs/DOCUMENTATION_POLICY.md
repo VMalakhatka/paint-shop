@@ -7,7 +7,8 @@
 
 | Вид знания | Где хранить |
 |---|---|
-| Пользовательский сценарий | `SITE_USER_GUIDE_UK.md` |
+| Общий пользовательский сценарий | `SITE_USER_GUIDE_UK.md` |
+| Оптовый заказ, импорт/экспорт, черновики, повтор заказа, склады, checkout, баланс и документы клиента | `WHOLESALE_CUSTOMER_GUIDE_UK.md` |
 | Операторские кнопки, статусы, ошибки, stopping condition | `OPERATIONS_RUNBOOK.md` |
 | Полный media workflow | `MEDIA_MANAGER_GUIDE_UK.md` |
 | Архитектура и ownership | `SYSTEM_OVERVIEW.md` |
@@ -40,6 +41,7 @@
 | Изменение | Обязательная документация |
 |---|---|
 | Новый/изменённый admin screen | operator runbook, UI strings/translations |
+| Изменение оптового каталога, импорта/экспорта, черновиков, повторного заказа, выбора склада, checkout split, баланса или документов клиента | `WHOLESALE_CUSTOMER_GUIDE_UK.md` и при необходимости общий user guide |
 | Новый sync/job/cron/status | owner, lock, preview/apply, terminal states, retry/recovery |
 | Новый Java endpoint/field/status | API-контракт и WordPress consumer |
 | Изменение backend component/ownership/data flow | `BACKEND_GUIDE.md` или `SYSTEM_OVERVIEW.md` |

@@ -25,6 +25,7 @@ REQUIRED = (
     "docs/SKILLS_CATALOG.md",
     "docs/DOCUMENTATION_POLICY.md",
     "docs/KNOWN_GAPS.md",
+    "docs/WHOLESALE_CUSTOMER_GUIDE_UK.md",
 )
 
 
@@ -71,6 +72,21 @@ IMPACT_RULES = (
         ),
     ),
     ImpactRule(
+        "wholesale customer ordering, warehouse allocation and Folio account views",
+        (
+            "wp-content/mu-plugins/pc-wholesale-quick-order.php",
+            "wp-content/mu-plugins/pc-folio-order-link.php",
+            "wp-content/mu-plugins/pc-folio-customer-balance.php",
+            "wp-content/plugins/paint-core/inc/header-allocation-switcher.php",
+            "wp-content/plugins/paint-core/inc/catalog-qty-add-to-cart.php",
+            "wp-content/plugins/paint-core/inc/stock-locations-display.php",
+            "wp-content/plugins/paint-core/assets/css/catalog-qty.css",
+            "wp-content/plugins/paint-core/assets/js/catalog-qty.js",
+            "wp-content/plugins/paint-shop-ux/**",
+        ),
+        ("docs/WHOLESALE_CUSTOMER_GUIDE_UK.md",),
+    ),
+    ImpactRule(
         "checkout, orders, payments, fiscalization and delivery",
         (
             "wp-content/plugins/paint-core/**",
@@ -86,6 +102,7 @@ IMPACT_RULES = (
         (
             "docs/OPERATIONS_RUNBOOK.md",
             "docs/SITE_USER_GUIDE_UK.md",
+            "docs/WHOLESALE_CUSTOMER_GUIDE_UK.md",
             "docs/SYSTEM_OVERVIEW.md",
             "docs/FOLIO_ORDER_JSON_CONTRACT.md",
             "docs/WAYFORPAY_TEST_ACCESS.md",
@@ -117,6 +134,7 @@ IMPACT_RULES = (
         ),
         (
             "docs/SITE_USER_GUIDE_UK.md",
+            "docs/WHOLESALE_CUSTOMER_GUIDE_UK.md",
             "docs/SYSTEM_OVERVIEW.md",
             ".agents/skills/lavka-woo/references/pages-and-ui.md",
         ),

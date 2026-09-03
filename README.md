@@ -25,9 +25,11 @@ MariaDB, OVH/S3, платёжными и логистическими серви
 - [Пробелы и риски](docs/KNOWN_GAPS.md) — приоритетная очередь того, что ещё нужно
   подтвердить или автоматизировать.
 
-Инструкции для конечного пользователя находятся в
-[SITE_USER_GUIDE_UK.md](docs/SITE_USER_GUIDE_UK.md), а полный workflow изображений —
-в [MEDIA_MANAGER_GUIDE_UK.md](docs/MEDIA_MANAGER_GUIDE_UK.md).
+Общая инструкция для конечного пользователя находится в
+[SITE_USER_GUIDE_UK.md](docs/SITE_USER_GUIDE_UK.md), отдельная понятная инструкция
+для оптового клиента — в
+[WHOLESALE_CUSTOMER_GUIDE_UK.md](docs/WHOLESALE_CUSTOMER_GUIDE_UK.md), а полный
+workflow изображений — в [MEDIA_MANAGER_GUIDE_UK.md](docs/MEDIA_MANAGER_GUIDE_UK.md).
 
 ## Границы репозиториев
 
