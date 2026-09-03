@@ -18,7 +18,16 @@
         'organizationTypes'
     ];
     const dictionaryKeys = { groups: 'productGroups' };
-    const state = { scenarios: [], warehouses: [], capabilities: null, compatible: null, selectedId: 0, busy: false, pendingProfile: null };
+    const state = {
+        scenarios: [],
+        warehouses: [],
+        capabilities: null,
+        compatible: null,
+        selectedId: 0,
+        busy: false,
+        pendingProfile: null,
+        capabilitiesRequestId: 0
+    };
     const el = (id) => document.getElementById(id);
     const warehouses = el('lps-as-warehouses');
     const form = el('lps-as-form');
@@ -38,6 +47,8 @@
         const create = el('lps-as-new');
         const duplicate = el('lps-as-duplicate');
         const archive = el('lps-as-archive');
+        warehouses.disabled = busy || !warehouses.options.length;
+        root.querySelectorAll('.lps-as-list-item').forEach((button) => { button.disabled = busy; });
         if (save) save.disabled = busy || state.compatible === false;
         if (create) create.disabled = busy;
         if (duplicate) duplicate.disabled = busy || !state.selectedId;
@@ -100,7 +111,7 @@
             return;
         }
         list.innerHTML = state.scenarios.map((scenario) =>
-            '<button type="button" class="lps-as-list-item' + (Number(scenario.id) === state.selectedId ? ' is-selected' : '') + '" data-scenario-id="' + Number(scenario.id) + '">' +
+            '<button type="button" class="lps-as-list-item' + (Number(scenario.id) === state.selectedId ? ' is-selected' : '') + '" data-scenario-id="' + Number(scenario.id) + '"' + (state.busy ? ' disabled' : '') + '>' +
             '<strong>' + escapeHtml(scenario.name) + '</strong><span>' + escapeHtml((scenario.status === 'archived' ? i18n.archivedStatus : i18n.active) || scenario.status) +
             ' · v' + Number(scenario.version || 1) + ' · analytics v' + Number(scenario.schemaVersion || 1) + '</span></button>'
         ).join('');
@@ -120,7 +131,11 @@
         const cap = capability(name);
         if (!cap || !cap.supported) return '';
         const caption = (analyticsI18n.filterLabels && analyticsI18n.filterLabels[name]) || name;
-        const options = dictionary(name).map((item) => '<option value="' + escapeHtml(item.code) + '">' + escapeHtml((item.name || item.code) + (item.count == null ? '' : ' (' + item.count + ')')) + '</option>').join('');
+        const options = dictionary(name).map((item) => {
+            const value = item.code == null ? (item.value == null ? item.id : item.value) : item.code;
+            if (value == null) return '';
+            return '<option value="' + escapeHtml(value) + '">' + escapeHtml((item.name || item.label || value) + (item.count == null ? '' : ' (' + item.count + ')')) + '</option>';
+        }).join('');
         return '<div class="lps-as-selection" data-lps-as-selection="' + escapeHtml(name) + '" data-lps-as-section="' + section + '">' +
             '<label><span>' + escapeHtml(caption) + '</span><select class="lps-as-values" multiple size="6">' + options + '</select></label>' +
             '<select class="lps-as-mode">' + modeOptions(cap.modes) + '</select></div>';
@@ -151,6 +166,7 @@
     }
 
     async function loadCapabilities() {
+        const requestId = ++state.capabilitiesRequestId;
         const warehouseIds = selectedWarehouseIds();
         if (!warehouseIds.length) {
             state.capabilities = null;
@@ -166,6 +182,7 @@
             const data = await api('v4_capabilities', { payloadJson: {
                 sourceDatabase: el('lps-as-source').value || 'Paint_Ua', warehouseIds: warehouseIds
             } });
+            if (requestId !== state.capabilitiesRequestId) return;
             state.capabilities = data;
             state.compatible = Number(data.analyticsSchemaVersion) >= 4 && data.compatibleGeneration === true;
             renderFilters();
@@ -181,11 +198,14 @@
                 state.pendingProfile = null;
             }
         } catch (error) {
+            if (requestId !== state.capabilitiesRequestId) return;
             state.capabilities = null;
             state.compatible = false;
             setMessage(errorMessage(error), 'error');
             el('lps-as-scope-meta').textContent = i18n.capabilitiesFailed || 'Filters could not be loaded.';
-        } finally { setBusy(false); }
+        } finally {
+            if (requestId === state.capabilitiesRequestId) setBusy(false);
+        }
     }
 
     function parseTextValues(text) {
@@ -244,7 +264,16 @@
         if (mode) mode.value = ['INCLUDE', 'EXCLUDE'].includes(selection.mode) ? selection.mode : 'ANY';
         const select = container.querySelector('.lps-as-values');
         const textarea = container.querySelector('textarea');
-        if (select) Array.from(select.options).forEach((option) => { option.selected = values.includes(option.value); });
+        if (select) {
+            const existing = new Set(Array.from(select.options).map((option) => option.value));
+            values.forEach((value) => {
+                if (existing.has(value)) return;
+                const option = new Option(value + ' · ' + label('savedUnavailableValue', 'Saved value is not available in the current snapshot'), value);
+                option.dataset.unavailable = 'true';
+                select.appendChild(option);
+            });
+            Array.from(select.options).forEach((option) => { option.selected = values.includes(option.value); });
+        }
         if (textarea) textarea.value = values.join('\n');
         if (mode) mode.dispatchEvent(new Event('change'));
     }
@@ -293,6 +322,7 @@
         const selected = (profile.context && profile.context.warehouseIds || []).map(Number);
         Array.from(warehouses.options).forEach((option) => { option.selected = selected.includes(Number(option.value)); });
         state.pendingProfile = profile;
+        setMessage((i18n.capabilitiesLoading || 'Loading supported filters and dictionaries...') + ' ' + scenario.name, 'info');
         await loadCapabilities();
     }
 
@@ -300,6 +330,7 @@
         state.selectedId = 0;
         state.capabilities = null;
         state.compatible = null;
+        state.pendingProfile = null;
         Array.from(warehouses.options).forEach((option) => { option.selected = false; });
         el('lps-as-id').value = '';
         el('lps-as-version').value = '0';
@@ -329,7 +360,6 @@
         el('lps-as-status').value = scenario.status === 'archived' ? 'archived' : 'active';
         el('lps-as-editor-meta').textContent = (i18n.version || 'Version') + ' ' + (scenario.version || 1) + ' · ' + (scenario.owner || '');
         renderList();
-        setBusy(false);
         await loadScenarioProfile(scenario);
         loadRevisions(id);
     }

@@ -30,7 +30,10 @@
         cursorHistory: [],
         busy: false,
         pendingScenario: null,
-        applyingScenario: false
+        applyingScenario: false,
+        activeScenarioProfile: null,
+        scenarioModified: false,
+        capabilitiesRequestId: 0
     };
 
     const el = (id) => document.getElementById(id);
@@ -75,9 +78,11 @@
         const buildSpinner = el('lps-pa-build-spinner');
         const buildStatus = el('lps-pa-build-status');
         const queryBusy = busy && activity === 'query';
-        [buildButton, el('lps-pa-reload')].forEach((button) => {
+        [buildButton, el('lps-pa-reload'), el('lps-pa-reset')].forEach((button) => {
             if (button) button.disabled = busy;
         });
+        if (scenarioSelect) scenarioSelect.disabled = busy;
+        if (warehouseSelect) warehouseSelect.disabled = busy || !warehouseSelect.options.length;
         if (buildButton) {
             if (!buildButton.dataset.idleLabel) buildButton.dataset.idleLabel = buildButton.textContent;
             buildButton.textContent = queryBusy ? message : buildButton.dataset.idleLabel;
@@ -229,8 +234,10 @@
         const cap = capability(name);
         if (!cap || !cap.supported) return '';
         const options = dictionary(name).map((item) => {
-            const caption = (item.name || item.code) + (item.count == null ? '' : ' (' + number(item.count) + ')');
-            return '<option value="' + escapeHtml(item.code) + '">' + escapeHtml(caption) + '</option>';
+            const value = item.code == null ? (item.value == null ? item.id : item.value) : item.code;
+            if (value == null) return '';
+            const caption = (item.name || item.label || value) + (item.count == null ? '' : ' (' + number(item.count) + ')');
+            return '<option value="' + escapeHtml(value) + '">' + escapeHtml(caption) + '</option>';
         }).join('');
         const caption = (i18n.filterLabels && i18n.filterLabels[name]) || name;
         return '<div class="lps-pa-selection" data-lps-selection="' + escapeHtml(name) + '" data-lps-section="' + section + '">' +
@@ -271,7 +278,8 @@
         ).join('');
     }
 
-    async function loadCapabilities() {
+    async function loadCapabilities(activity) {
+        const requestId = ++state.capabilitiesRequestId;
         state.warehouseIds = selectedWarehouseIds();
         rememberWarehouses();
         if (!state.warehouseIds.length) {
@@ -279,12 +287,13 @@
             setMessage(label('selectWarehouses', 'Select warehouses.'), 'warning');
             return;
         }
-        setBusy(true, label('capabilitiesLoading', 'Loading supported filters...'));
+        setBusy(true, label('capabilitiesLoading', 'Loading supported filters...'), activity || 'capabilities');
         try {
             const data = await api('v4_capabilities', {
                 sourceDatabase: state.sourceDatabase,
                 warehouseIds: state.warehouseIds
             });
+            if (requestId !== state.capabilitiesRequestId) return;
             state.capabilities = data;
             renderSnapshotContext();
             renderCapabilityWarnings();
@@ -299,10 +308,11 @@
                 state.pendingScenario = null;
             }
         } catch (error) {
+            if (requestId !== state.capabilitiesRequestId) return;
             state.capabilities = null;
             setMessage(errorMessage(error), 'error');
         } finally {
-            setBusy(false);
+            if (requestId === state.capabilitiesRequestId) setBusy(false);
         }
     }
 
@@ -332,10 +342,34 @@
         return output;
     }
 
+    function requestFromSavedScenario(profile, scenario, cursor) {
+        const productFilters = Object.assign({}, profile.productFilters || {});
+        const movementFilters = Object.assign({}, profile.movementFilters || {});
+        const calculation = profile.calculation || {};
+        const sort = Array.isArray(profile.sort) && profile.sort[0] ? profile.sort : [{ field: 'grossProfit', direction: 'DESC' }];
+        return {
+            sourceDatabase: state.sourceDatabase,
+            warehouseIds: state.warehouseIds,
+            scenario: { id: Number(scenario.id), version: Number(scenario.version) },
+            period: Object.assign({}, profile.period || {}),
+            productFilters: productFilters,
+            movementFilters: movementFilters,
+            calculation: {
+                abcBasis: calculation.abcBasis || 'GROSS_PROFIT',
+                includeReturns: calculation.includeReturns !== false
+            },
+            page: { size: Number((profile.page || {}).size || 50), cursor: cursor || null },
+            sort: sort.map((item) => Object.assign({}, item))
+        };
+    }
+
     function currentRequest(cursor) {
         const productFilters = collectFilters('product');
         const search = el('lps-pa-search').value.trim();
         const scenario = state.scenarios.find((item) => String(item.id) === scenarioSelect.value);
+        if (scenario && state.activeScenarioProfile && !state.scenarioModified) {
+            return requestFromSavedScenario(state.activeScenarioProfile, scenario, cursor);
+        }
         if (search) productFilters.search = search;
         return {
             sourceDatabase: state.sourceDatabase,
@@ -356,6 +390,10 @@
     async function runQuery(cursor, fromHistory) {
         if (!state.capabilities || Number(state.capabilities.analyticsSchemaVersion) < 4 || !state.capabilities.compatibleGeneration) {
             setMessage(label('schemaV4Required', 'Analytics schema v4 is required.'), 'warning');
+            return;
+        }
+        if (scenarioSelect.value && !state.activeScenarioProfile && !state.scenarioModified) {
+            setMessage(label('capabilitiesLoading', 'Loading supported filters and dictionaries...'), 'warning');
             return;
         }
         setBusy(true, label('queryRunning', 'Building report...'), 'query');
@@ -588,7 +626,12 @@
         el('lps-pa-sort-field').value = 'grossProfit';
         el('lps-pa-sort-direction').value = 'DESC';
         el('lps-pa-page-size').value = '50';
-        if (!preserveScenario) scenarioSelect.value = '';
+        if (!preserveScenario) {
+            scenarioSelect.value = '';
+            state.pendingScenario = null;
+            state.activeScenarioProfile = null;
+            state.scenarioModified = false;
+        }
         el('lps-pa-scenario-status').textContent = '';
         el('lps-pa-scenario-status').classList.remove('is-modified');
     }
@@ -602,7 +645,16 @@
         const values = Array.isArray(selection.values) ? selection.values.map(String) : [];
         const select = container.querySelector('.lps-pa-values');
         const textarea = container.querySelector('textarea');
-        if (select) Array.from(select.options).forEach((option) => { option.selected = values.includes(option.value); });
+        if (select) {
+            const existing = new Set(Array.from(select.options).map((option) => option.value));
+            values.forEach((value) => {
+                if (existing.has(value)) return;
+                const option = new Option(value + ' · ' + label('scenarioSavedUnavailableValue', 'Saved value is not available in the current snapshot'), value);
+                option.dataset.unavailable = 'true';
+                select.appendChild(option);
+            });
+            Array.from(select.options).forEach((option) => { option.selected = values.includes(option.value); });
+        }
         if (textarea) textarea.value = values.join('\n');
         if (mode) mode.dispatchEvent(new Event('change'));
     }
@@ -658,6 +710,8 @@
             el('lps-pa-sort-direction').value = profile.sort[0].direction === 'ASC' ? 'ASC' : 'DESC';
         }
         switchTab(profile.presentation && profile.presentation.activeTab);
+        state.activeScenarioProfile = JSON.parse(JSON.stringify(profile));
+        state.scenarioModified = false;
         el('lps-pa-scenario-status').textContent = label('scenarioApplied', 'The analytics scenario has been applied.');
         el('lps-pa-scenario-status').classList.remove('is-modified');
         state.applyingScenario = false;
@@ -665,6 +719,7 @@
 
     function markScenarioModified() {
         if (state.applyingScenario || !scenarioSelect.value) return;
+        state.scenarioModified = true;
         const node = el('lps-pa-scenario-status');
         node.textContent = label('scenarioModified', 'Temporary changes are applied. The saved scenario has not been changed.');
         node.classList.add('is-modified');
@@ -674,6 +729,9 @@
         const scenario = state.scenarios.find((item) => String(item.id) === scenarioSelect.value);
         if (!scenario) { resetSelections(); return; }
         const profile = normalizeScenarioProfile(scenario);
+        state.activeScenarioProfile = null;
+        state.scenarioModified = false;
+        el('lps-pa-scenario-status').textContent = label('capabilitiesLoading', 'Loading supported filters and dictionaries...') + ' ' + scenario.name;
         const context = profile.context || {};
         if (context.sourceDatabase) state.sourceDatabase = context.sourceDatabase;
         const available = Array.from(warehouseSelect.options).map((option) => Number(option.value));
@@ -684,7 +742,7 @@
         }
         Array.from(warehouseSelect.options).forEach((option) => { option.selected = requested.includes(Number(option.value)); });
         state.pendingScenario = profile;
-        await loadCapabilities();
+        await loadCapabilities('scenario');
     }
 
     warehouseSelect.addEventListener('change', () => { markScenarioModified(); state.pendingScenario = null; loadCapabilities(); });
