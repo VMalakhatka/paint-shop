@@ -45,6 +45,7 @@ require_once __DIR__.'/inc/mapping.php';
 require_once __DIR__.'/inc/sync.php';
 require_once __DIR__.'/inc/accounting-prices.php';
 require_once __DIR__.'/inc/product-analytics.php';
+require_once __DIR__.'/inc/product-analytics-export.php';
 
 add_action('init', function () {
   foreach (['administrator','shop_manager'] as $r) {

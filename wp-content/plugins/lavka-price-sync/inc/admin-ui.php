@@ -3,37 +3,50 @@ if (!defined('ABSPATH')) exit;
 
 /** Menu */
 add_action('admin_menu', function () {
-    add_menu_page(
-        __('Lavka Price Sync', 'lavka-price-sync'),
-        __('Price Sync', 'lavka-price-sync'),
-        LPS_CAP,
-        'lps-main',
-        'lps_render_settings_page',
-        'dashicons-tag', // 💰 более подходящая иконка для цен
-        66                // свободная позиция в меню
-    );
-    add_submenu_page('lps-main',
-        __('Settings', 'lavka-price-sync'),
-        __('Settings', 'lavka-price-sync'),
-        LPS_CAP,
-        'lps-main',
-        'lps_render_settings_page'
-    );
-    add_submenu_page('lps-main',
+    $parent = function_exists('paint_core_lavka_admin_parent_slug') ? paint_core_lavka_admin_parent_slug() : '';
+    if ($parent !== '') {
+        add_submenu_page($parent,
+            __('Lavka price sync settings', 'lavka-price-sync'),
+            __('Lavka price sync settings', 'lavka-price-sync'),
+            LPS_CAP,
+            'lps-main',
+            'lps_render_settings_page'
+        );
+    } else {
+        add_menu_page(
+            __('Lavka price sync', 'lavka-price-sync'),
+            __('Lavka price sync', 'lavka-price-sync'),
+            LPS_CAP,
+            'lps-main',
+            'lps_render_settings_page',
+            'dashicons-tag',
+            66
+        );
+    }
+    if ($parent === '') {
+        add_submenu_page('lps-main',
+            __('Settings', 'lavka-price-sync'),
+            __('Settings', 'lavka-price-sync'),
+            LPS_CAP,
+            'lps-main',
+            'lps_render_settings_page'
+        );
+    }
+    add_submenu_page($parent !== '' ? $parent : 'lps-main',
         __('Mapping', 'lavka-price-sync'),
         __('Mapping', 'lavka-price-sync'),
         LPS_CAP,
         'lps-mapping',
         'lps_render_mapping_page'
     );
-    add_submenu_page('lps-main',
+    add_submenu_page($parent !== '' ? $parent : 'lps-main',
         __('Run', 'lavka-price-sync'),
         __('Run', 'lavka-price-sync'),
         LPS_CAP,
         'lps-run',
         'lps_render_run_page'
     );
-    add_submenu_page('lps-main',
+    add_submenu_page($parent !== '' ? $parent : 'lps-main',
         __('Logs', 'lavka-price-sync'),
         __('Logs', 'lavka-price-sync'),
         LPS_CAP,

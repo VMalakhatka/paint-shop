@@ -14,7 +14,7 @@ class Lavka_Reports_Profit_Report {
 
     public function menu() {
         add_submenu_page(
-            Lavka_Reports_Admin::PAGE_SLUG,
+            function_exists('paint_core_lavka_admin_parent_slug') ? paint_core_lavka_admin_parent_slug() : Lavka_Reports_Admin::PAGE_SLUG,
             __('Monthly Folio profit report', 'lavka-reports'),
             __('Folio profit', 'lavka-reports'),
             'manage_woocommerce',

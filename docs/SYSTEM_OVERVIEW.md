@@ -55,7 +55,7 @@ OVH service -> physical host -> hypervisor -> Windows VM
 | Компоновка и стили | `generatepress-child` | код child theme и визуальная проверка |
 | Общие остатки и allocation | `paint-core` | код, Woo product/order state |
 | Полная синхронизация карточек и категорий | `lavka-total-sync` + Java `/sync/run` | код обоих владельцев и run status |
-| Остатки и mapping складов | `lavka-sync` | Java/staging, location mapping и Woo stock |
+| Остатки, названия и глобальные группы складов | `lavka-sync` | стабильные location term ID/slug, `lavka_folio_warehouses`, Folio warehouse ID и Woo stock |
 | Цены по ролям | `lavka-price-sync` + `role-price` | mapping роли к договору и product meta |
 | Учётные цены и snapshot | Java + `lavka-price-sync` | Java job status и MariaDB generation |
 | Статистика товара | Java projection + `lavka-price-sync` | активное поколение `folio_product_*` |
@@ -100,6 +100,10 @@ order и диагностические guards. У них нет обычной 
   OVH S3 — bytes, а OVH Manager — bucket policy/contract. Эти роли не взаимозаменяемы.
 - Все массовые процессы используют единый ecosystem lock.
 - Страница статистики не запускает перерасчёт учётных цен.
+- Сценарий аналитики хранит выбор складов, но не копирует состав глобальной
+  группы. WordPress передаёт Java актуальные группы и SHA-256 revision; Java
+  хранит каноническую подневную доступность физических складов и не закрепляет
+  изменяемые группы внутри product snapshot.
 - `*РАЗОВАЯ` входит в финансовый факт, но исключается из регулярного закупочного
   спроса; условия оплаты не изменяют класс движения.
 

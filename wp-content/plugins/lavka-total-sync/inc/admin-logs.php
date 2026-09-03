@@ -76,7 +76,7 @@ function lts_logs_render_context($action, $raw) {
 // [LTS] ANCHOR: submenu - Logs
 add_action('admin_menu', function(){
     add_submenu_page(
-        'lts-main',
+        function_exists('paint_core_lavka_admin_parent_slug') ? paint_core_lavka_admin_parent_slug() : 'lts-main',
         __('Total Sync Logs','lavka-total-sync'),
         __('Logs','lavka-total-sync'),
         LTS_CAP,

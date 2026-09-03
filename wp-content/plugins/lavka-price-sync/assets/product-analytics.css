@@ -410,6 +410,18 @@
   color: #50575e;
 }
 
+.lps-pa-export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 8px 0 12px;
+}
+
+.lps-pa-export-actions .description {
+  margin-left: 4px;
+}
+
 .lps-pa-table-scroll {
   width: 100%;
   overflow: auto;
@@ -447,6 +459,12 @@
 
 .lps-pa-sort-arrow {
   margin-left: 4px;
+}
+
+.lps-pa-metric-help {
+  cursor: help;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
 }
 
 .lps-pa-sku {

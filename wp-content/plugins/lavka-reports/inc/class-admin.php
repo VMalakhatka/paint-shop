@@ -12,15 +12,26 @@ class Lavka_Reports_Admin {
     }
 
     public function menu(){
-       add_menu_page(
-            __('Звіти Lavka', 'lavka-reports'),
-            __('Звіти Lavka', 'lavka-reports'),
-            'manage_woocommerce',
-            self::PAGE_SLUG,
-            [$this,'render_page'],
-            'dashicons-analytics',
-            59
-        );
+       if (function_exists('paint_core_lavka_admin_parent_slug')) {
+           add_submenu_page(
+               paint_core_lavka_admin_parent_slug(),
+               __('Lavka reports', 'lavka-reports'),
+               __('Lavka reports', 'lavka-reports'),
+               'manage_woocommerce',
+               self::PAGE_SLUG,
+               [$this,'render_page']
+           );
+       } else {
+           add_menu_page(
+               __('Lavka reports', 'lavka-reports'),
+               __('Lavka reports', 'lavka-reports'),
+               'manage_woocommerce',
+               self::PAGE_SLUG,
+               [$this,'render_page'],
+               'dashicons-analytics',
+               59
+           );
+       }
     }
 
     public function register_settings(){
@@ -67,7 +78,8 @@ class Lavka_Reports_Admin {
         }
 
     public function assets($hook){
-        if ($hook !== 'toplevel_page_' . self::PAGE_SLUG) return;
+        $page = sanitize_key(wp_unslash($_GET['page'] ?? ''));
+        if ($page !== self::PAGE_SLUG) return;
         wp_enqueue_style('lavr-reports', LAVR_URL.'reports.css', [], LAVR_VER);
         wp_enqueue_script('lavr-reports', LAVR_URL.'reports.js', ['jquery'], LAVR_VER, true);
         wp_localize_script('lavr-reports', 'LavkaReports', [

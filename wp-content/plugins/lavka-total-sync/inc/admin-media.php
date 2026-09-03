@@ -351,7 +351,7 @@ add_action('wp_ajax_lts_media_reindex_cron_status', function(){
 /** Добавляем подпункт меню под "Total Sync" */
 add_action('admin_menu', function () {
     add_submenu_page(
-        'lts-main',
+        function_exists('paint_core_lavka_admin_parent_slug') ? paint_core_lavka_admin_parent_slug() : 'lts-main',
         __('Media Sync (images)', 'lavka-total-sync'),
         __('Media Sync (images)', 'lavka-total-sync'),
         defined('LTS_CAP') ? LTS_CAP : 'manage_options',

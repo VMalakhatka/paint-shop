@@ -22,7 +22,7 @@ class Stock_Import_CSV_Lite {
 
     public function menu() {
         add_submenu_page(
-            'tools.php',
+            function_exists('paint_core_lavka_admin_parent_slug') ? paint_core_lavka_admin_parent_slug() : 'tools.php',
             __( 'Stock Import (Lite)', 'stock-import-csv-lite' ),
             __( 'Stock Import (Lite)', 'stock-import-csv-lite' ),
             self::CAP,

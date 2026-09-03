@@ -110,12 +110,68 @@ function lavka_set_location_folio_warehouses(int $term_id, array $warehouses): v
     else       delete_term_meta($term_id, 'lavka_folio_warehouses');
 }
 
+const LAVKA_PUBLIC_WAREHOUSE_LABELS_OPTION = 'lavka_public_warehouse_labels';
+
+function lavka_get_public_warehouse_labels(): array {
+    $labels = get_option(LAVKA_PUBLIC_WAREHOUSE_LABELS_OPTION, []);
+    if (!is_array($labels)) return [];
+
+    $out = [];
+    foreach ($labels as $id => $label) {
+        $id = trim((string)$id);
+        $label = trim((string)$label);
+        if ($id !== '' && $label !== '') $out[$id] = $label;
+    }
+    return $out;
+}
+
+add_filter('pc_folio_warehouse_labels', function (array $labels): array {
+    foreach (lavka_get_public_warehouse_labels() as $id => $label) {
+        $labels[(string)$id] = $label;
+    }
+    return $labels;
+});
+
+/**
+ * Returns the global warehouse groups used by stock display and analytics.
+ * Stable relations are based on taxonomy term IDs/slugs and Folio IDs, never
+ * on the editable customer-facing name.
+ */
+function lavka_get_global_warehouse_groups(): array {
+    $taxonomy = apply_filters('lavka_location_taxonomy', 'location');
+    $terms = get_terms(['taxonomy' => $taxonomy, 'hide_empty' => false]);
+    if (is_wp_error($terms)) return [];
+
+    $groups = [];
+    foreach ($terms as $term) {
+        $warehouses = lavka_get_location_folio_warehouses((int)$term->term_id);
+        $warehouse_ids = array_values(array_map(
+            static fn(array $row): int => (int)$row['id'],
+            array_filter($warehouses, static fn(array $row): bool => (int)$row['id'] > 0)
+        ));
+        if (!$warehouse_ids) continue;
+
+        $groups[] = [
+            'termId' => (int)$term->term_id,
+            'code' => (string)$term->slug,
+            'name' => (string)$term->name,
+            'warehouseIds' => $warehouse_ids,
+            'availabilityMode' => 'ANY_ELIGIBLE_MEMBER',
+        ];
+    }
+    return $groups;
+}
+
+function lavka_get_global_warehouse_groups_revision(): string {
+    return hash('sha256', wp_json_encode(lavka_get_global_warehouse_groups()));
+}
+
 /** ===== admin page: Warehouses mapping ===== */
 add_action('admin_menu', function () {
     add_submenu_page(
-        'lavka-sync',
-        __('Warehouses mapping', 'lavka-sync'),
-        __('Warehouses', 'lavka-sync'),
+        function_exists('paint_core_lavka_admin_parent_slug') ? paint_core_lavka_admin_parent_slug() : 'lavka-sync',
+        __('Lavka settings', 'lavka-sync'),
+        __('Lavka settings', 'lavka-sync'),
         'manage_lavka_sync',
         'lavka-warehouses',
         'lavka_render_warehouses_page'
@@ -162,6 +218,20 @@ function lavka_render_warehouses_page() {
 
     // save
     if (!empty($_POST['_lavka_wh_nonce']) && wp_verify_nonce($_POST['_lavka_wh_nonce'], 'lavka_wh_save')) {
+        $tax = apply_filters('lavka_location_taxonomy', 'location');
+        $names_by_term = (array)wp_unslash($_POST['location_names'] ?? []);
+        foreach ($names_by_term as $tid => $name) {
+            $tid = (int)$tid;
+            $name = trim(sanitize_text_field($name));
+            $term = $tid > 0 ? get_term($tid, $tax) : null;
+            if ($name === '' || !$term || is_wp_error($term)) continue;
+
+            wp_update_term($tid, $tax, [
+                'name' => $name,
+                'slug' => (string)$term->slug,
+            ]);
+        }
+
         $codesByTerm = (array)($_POST['codes'] ?? []);
         foreach ($codesByTerm as $tid => $val) {
             $tid = (int)$tid;
@@ -186,6 +256,15 @@ function lavka_render_warehouses_page() {
 
             lavka_set_location_folio_warehouses($tid, $warehouses);
         }
+
+        $public_labels = [];
+        foreach ((array)wp_unslash($_POST['warehouse_labels'] ?? []) as $warehouse_id => $label) {
+            $warehouse_id = trim(sanitize_text_field($warehouse_id));
+            $label = trim(sanitize_text_field($label));
+            if ($warehouse_id !== '' && $label !== '') $public_labels[$warehouse_id] = $label;
+        }
+        update_option(LAVKA_PUBLIC_WAREHOUSE_LABELS_OPTION, $public_labels, false);
+
         echo '<div class="notice notice-success is-dismissible"><p>' .
              esc_html__('Saved.', 'lavka-sync') .
              '</p></div>';
@@ -201,12 +280,16 @@ function lavka_render_warehouses_page() {
     ?>
 
     <div class="wrap">
-      <h1><?php echo esc_html(__('Warehouses mapping', 'lavka-sync')); ?></h1>
+      <h1><?php echo esc_html(__('Lavka settings', 'lavka-sync')); ?></h1>
       <p>
         <?php echo wp_kses_post(
-          __('Match: <strong>Woo → MSSQL</strong>. One Woo location aggregates sums from selected MSSQL warehouses.', 'lavka-sync')
+          __('Configure global warehouse groups and customer-facing names. Analytics scenarios reference these groups and do not copy their warehouse membership.', 'lavka-sync')
         ); ?>
       </p>
+
+      <div class="notice notice-info inline"><p>
+        <?php echo esc_html__('Relations use stable term IDs, system slugs and Folio warehouse IDs. Changing a public name does not change stock, order or analytics references.', 'lavka-sync'); ?>
+      </p></div>
 
       <form method="post" action="">
         <?php wp_nonce_field('lavka_wh_save', '_lavka_wh_nonce'); ?>
@@ -215,7 +298,7 @@ function lavka_render_warehouses_page() {
           <thead>
             <tr>
               <th style="width:70px"><?php echo esc_html(__('ID', 'lavka-sync')); ?></th>
-              <th><?php echo esc_html(__('Woo location', 'lavka-sync')); ?></th>
+              <th><?php echo esc_html(__('Customer-facing group name', 'lavka-sync')); ?></th>
               <th><?php echo esc_html(__('Linked MSSQL warehouses (codes)', 'lavka-sync')); ?></th>
               <th><?php echo esc_html(__('Folio warehouses (id:priority)', 'lavka-sync')); ?></th>
               <th style="width:340px"><?php echo esc_html(__('Pick from directory', 'lavka-sync')); ?></th>
@@ -236,8 +319,17 @@ function lavka_render_warehouses_page() {
             <tr>
               <td><?php echo (int)$tid; ?></td>
               <td>
-                <strong><?php echo esc_html($t->name); ?></strong><br>
-                <code><?php echo esc_html($t->slug); ?></code>
+                <label class="screen-reader-text" for="lavka-location-name-<?php echo (int)$tid; ?>">
+                  <?php echo esc_html__('Customer-facing group name', 'lavka-sync'); ?>
+                </label>
+                <input
+                  type="text"
+                  id="lavka-location-name-<?php echo (int)$tid; ?>"
+                  class="regular-text"
+                  name="location_names[<?php echo (int)$tid; ?>]"
+                  value="<?php echo esc_attr($t->name); ?>"
+                ><br>
+                <small><?php echo esc_html__('System slug:', 'lavka-sync'); ?> <code><?php echo esc_html($t->slug); ?></code></small>
               </td>
 
               <td>
@@ -322,8 +414,45 @@ function lavka_render_warehouses_page() {
           </tbody>
         </table>
 
+        <?php
+        $public_labels = lavka_get_public_warehouse_labels();
+        $warehouse_options = [];
+        foreach ($ext as $row) {
+            $warehouse_options[(string)$row['code']] = (string)$row['name'];
+        }
+        foreach ($terms as $term) {
+            foreach (lavka_get_location_folio_warehouses((int)$term->term_id) as $warehouse) {
+                $id = (string)$warehouse['id'];
+                if (!isset($warehouse_options[$id])) $warehouse_options[$id] = $id;
+            }
+        }
+        foreach ($public_labels as $id => $label) {
+            if (!isset($warehouse_options[$id])) $warehouse_options[$id] = $label;
+        }
+        uksort($warehouse_options, 'strnatcasecmp');
+        ?>
+
+        <h2><?php echo esc_html__('Public Folio warehouse names', 'lavka-sync'); ?></h2>
+        <p><?php echo esc_html__('These names are shown in orders, reports and customer notices. Folio warehouse IDs remain unchanged.', 'lavka-sync'); ?></p>
+        <table class="widefat striped" style="max-width:960px">
+          <thead><tr>
+            <th style="width:120px"><?php echo esc_html__('Folio warehouse ID', 'lavka-sync'); ?></th>
+            <th><?php echo esc_html__('Directory name', 'lavka-sync'); ?></th>
+            <th><?php echo esc_html__('Customer-facing name', 'lavka-sync'); ?></th>
+          </tr></thead>
+          <tbody>
+          <?php foreach ($warehouse_options as $warehouse_id => $directory_name): ?>
+            <tr>
+              <td><code><?php echo esc_html($warehouse_id); ?></code></td>
+              <td><?php echo esc_html($directory_name); ?></td>
+              <td><input type="text" class="regular-text" name="warehouse_labels[<?php echo esc_attr($warehouse_id); ?>]" value="<?php echo esc_attr($public_labels[$warehouse_id] ?? $directory_name); ?>"></td>
+            </tr>
+          <?php endforeach; ?>
+          </tbody>
+        </table>
+
         <p style="margin-top:12px">
-          <?php submit_button(__('Save mappings', 'lavka-sync'), 'primary', 'submit', false); ?>
+          <?php submit_button(__('Save Lavka settings', 'lavka-sync'), 'primary', 'submit', false); ?>
         </p>
       </form>
     </div>

@@ -67,7 +67,7 @@ add_action('admin_menu', function () {
     $cap = defined('LTS_CAP') ? LTS_CAP : 'manage_options';
 
     add_submenu_page(
-        'lts-main',
+        function_exists('paint_core_lavka_admin_parent_slug') ? paint_core_lavka_admin_parent_slug() : 'lts-main',
         __('Cron summary', 'lavka-total-sync'),
         __('Cron summary', 'lavka-total-sync'),
         $cap,

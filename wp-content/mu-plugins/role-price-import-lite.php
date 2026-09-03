@@ -22,7 +22,7 @@ class RP_Import_Lite {
 
     public function menu(){
         add_submenu_page(
-            'tools.php',
+            function_exists('paint_core_lavka_admin_parent_slug') ? paint_core_lavka_admin_parent_slug() : 'tools.php',
             __( 'Role Price Import (CSV)', 'role-price-import-lite' ),
             __( 'Role Price Import (CSV)', 'role-price-import-lite' ),
             self::CAP,

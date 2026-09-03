@@ -133,15 +133,26 @@ function lavka_get_auto_mov_cfg(): array {
 
 /** Меню + страница настроек */
 add_action('admin_menu', function () {
-    add_menu_page(
-        __('Lavka Synck', 'lavka-sync'),
-        __('Lavka Synck', 'lavka-sync'),
-        'manage_lavka_sync',
-        'lavka-sync',
-        'lavka_sync_render_page',
-        'dashicons-update',
-        58
-    );
+    if (function_exists('paint_core_lavka_admin_parent_slug')) {
+        add_submenu_page(
+            paint_core_lavka_admin_parent_slug(),
+            __('Lavka stock sync', 'lavka-sync'),
+            __('Lavka stock sync', 'lavka-sync'),
+            'manage_lavka_sync',
+            'lavka-sync',
+            'lavka_sync_render_page'
+        );
+    } else {
+        add_menu_page(
+            __('Lavka stock sync', 'lavka-sync'),
+            __('Lavka stock sync', 'lavka-sync'),
+            'manage_lavka_sync',
+            'lavka-sync',
+            'lavka_sync_render_page',
+            'dashicons-update',
+            58
+        );
+    }
 
     // (если есть) Logs/Reports тоже лучше на manage_lavka_sync
 });
@@ -1532,20 +1543,20 @@ add_action('wp_ajax_lavka_pull_java', function(){
 
 
 add_action('admin_menu', function () {
-    add_menu_page(
-        __('Lavka Reports', 'lavka-sync'),
-        __('Lavka Reports', 'lavka-sync'),
+    add_submenu_page(
+        function_exists('paint_core_lavka_admin_parent_slug') ? paint_core_lavka_admin_parent_slug() : 'lavka-sync',
+        __('Lavka stock report', 'lavka-sync'),
+        __('Lavka stock report', 'lavka-sync'),
         'view_lavka_reports',
-        'lavka-reports',
-        'lavka_reports_render_page',
-        'dashicons-chart-line',
-        59
+        'lavka-stock-report',
+        'lavka_reports_render_page'
     );
 });
 
 // Подключаем скрипты/стили только на нашей странице
 add_action('admin_enqueue_scripts', function ($hook) {
-    if ($hook !== 'toplevel_page_lavka-reports') return;
+    $page = sanitize_key(wp_unslash($_GET['page'] ?? ''));
+    if ($page !== 'lavka-stock-report') return;
     // Chart.js
     wp_enqueue_script('chartjs', 'https://cdn.jsdelivr.net/npm/chart.js', [], null, true);
     // Наш JS
@@ -2468,7 +2479,7 @@ function lavka_log_write(array $data) {
 // 1) Пункт меню "Logs" под вашим родительским "lavka-sync"
 add_action('admin_menu', function () {
     add_submenu_page(
-        'lavka-sync',                // slug родительской страницы (вашей)
+        function_exists('paint_core_lavka_admin_parent_slug') ? paint_core_lavka_admin_parent_slug() : 'lavka-sync',
         __('Lavka Logs', 'lavka-sync'),  // Title
         __('Logs', 'lavka-sync'),    // Label в меню
         'manage_lavka_sync',         // capability

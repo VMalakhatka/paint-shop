@@ -2,19 +2,168 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Paint Core 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/paint-core\n"
-"POT-Creation-Date: 2025-09-12T20:00:35+00:00\n"
+"POT-Creation-Date: 2026-09-03T10:09:24+00:00\n"
+"PO-Revision-Date: 2026-09-03T12:15:00+02:00\n"
+"Last-Translator: Lavka Team\n"
+"Language-Team: Ukrainian\n"
 "Language: uk\n"
+"MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Domain: paint-core\n"
 
 #. Plugin Name of the plugin
 #: paint-core.php
 msgid "Paint Core"
-msgstr ""
+msgstr "Ядро Paint"
 
 #. Description of the plugin
 #: paint-core.php
 msgid "Core helpers for Paint Shop."
+msgstr "Основні функції магазину Paint."
+
+#: inc/admin-lavka-hub.php:19 inc/admin-lavka-hub.php:20
+#: inc/admin-lavka-hub.php:63
+msgid "Lavka"
+msgstr "Лавка"
+
+#: inc/admin-lavka-hub.php:30 inc/admin-lavka-hub.php:31
+#: inc/admin-lavka-hub.php:86
+msgid "Lavka overview"
+msgstr "Лавка: огляд"
+
+#: inc/admin-lavka-hub.php:40 inc/admin-lavka-hub.php:87
+msgid "Lavka settings"
+msgstr "Лавка: налаштування"
+
+#: inc/admin-lavka-hub.php:41 inc/admin-lavka-hub.php:88
+msgid "Lavka stock sync"
+msgstr "Лавка: синхронізація залишків"
+
+#: inc/admin-lavka-hub.php:42
+msgid "Lavka full sync"
+msgstr "Лавка: повна синхронізація"
+
+#: inc/admin-lavka-hub.php:43
+msgid "Lavka price sync"
+msgstr "Лавка: синхронізація цін"
+
+#: inc/admin-lavka-hub.php:44 inc/admin-lavka-hub.php:100
+msgid "Lavka Folio accounting prices"
+msgstr "Лавка: облікові ціни ФОЛІО"
+
+#: inc/admin-lavka-hub.php:45 inc/admin-lavka-hub.php:101
+msgid "Lavka analytics scenarios"
+msgstr "Лавка: сценарії аналітики"
+
+#: inc/admin-lavka-hub.php:46 inc/admin-lavka-hub.php:102
+msgid "Lavka product analytics"
+msgstr "Лавка: товарна аналітика"
+
+#: inc/admin-lavka-hub.php:47 inc/admin-lavka-hub.php:103
+msgid "Lavka reports"
+msgstr "Лавка: звіти"
+
+#: inc/admin-lavka-hub.php:48 inc/admin-lavka-hub.php:105
+msgid "Lavka events"
+msgstr "Лавка: події"
+
+#: inc/admin-lavka-hub.php:54
+msgid "You do not have sufficient permissions to access this page."
+msgstr "У вас недостатньо прав для доступу до цієї сторінки."
+
+#: inc/admin-lavka-hub.php:64
+msgid ""
+"Synchronization, Folio operations, analytics and service tools are collected "
+"in this section."
 msgstr ""
+"У цьому розділі зібрано синхронізацію, операції ФОЛІО, аналітику та службові "
+"інструменти."
+
+#: inc/admin-lavka-hub.php:66
+msgid "Main sections"
+msgstr "Основні розділи"
+
+#: inc/admin-lavka-hub.php:89
+msgid "Lavka stock report"
+msgstr "Лавка: звіт про залишки"
+
+#: inc/admin-lavka-hub.php:90
+msgid "Lavka stock sync logs"
+msgstr "Лавка: журнал синхронізації залишків"
+
+#: inc/admin-lavka-hub.php:91
+msgid "Lavka full sync settings"
+msgstr "Лавка: налаштування повної синхронізації"
+
+#: inc/admin-lavka-hub.php:92
+msgid "Lavka run full sync"
+msgstr "Лавка: запустити повну синхронізацію"
+
+#: inc/admin-lavka-hub.php:93
+msgid "Lavka full sync logs"
+msgstr "Лавка: журнал повної синхронізації"
+
+#: inc/admin-lavka-hub.php:94
+msgid "Lavka media sync"
+msgstr "Лавка: синхронізація медіа"
+
+#: inc/admin-lavka-hub.php:95
+msgid "Lavka sync schedule"
+msgstr "Лавка: розклад синхронізації"
+
+#: inc/admin-lavka-hub.php:96
+msgid "Lavka price sync settings"
+msgstr "Лавка: налаштування синхронізації цін"
+
+#: inc/admin-lavka-hub.php:97
+msgid "Lavka price mapping"
+msgstr "Лавка: відповідність цін"
+
+#: inc/admin-lavka-hub.php:98
+msgid "Lavka run price sync"
+msgstr "Лавка: запустити синхронізацію цін"
+
+#: inc/admin-lavka-hub.php:99
+msgid "Lavka price sync logs"
+msgstr "Лавка: журнал синхронізації цін"
+
+#: inc/admin-lavka-hub.php:104
+msgid "Lavka Folio profit"
+msgstr "Лавка: прибуток ФОЛІО"
+
+#: inc/admin-lavka-hub.php:106
+msgid "Lavka role price import"
+msgstr "Лавка: імпорт рольових цін"
+
+#: inc/admin-lavka-hub.php:107
+msgid "Lavka stock import"
+msgstr "Лавка: імпорт залишків"
+
+#: inc/admin-lavka-hub.php:108
+msgid "Lavka manual stock sync"
+msgstr "Лавка: ручна синхронізація залишків"
+
+#: inc/admin-lavka-hub.php:109
+msgid "Lavka product image batches"
+msgstr "Лавка: пакети зображень товарів"
+
+#: inc/admin-lavka-hub.php:110
+msgid "Lavka Nova Poshta"
+msgstr "Лавка: Нова пошта"
+
+#: inc/admin-lavka-hub.php:111
+msgid "Lavka Checkbox fiscalization"
+msgstr "Лавка: фіскалізація Checkbox"
+
+#: inc/admin-lavka-hub.php:112
+msgid "Lavka WayForPay test access"
+msgstr "Лавка: тестовий доступ WayForPay"
+
+#: inc/admin-lavka-hub.php:113
+msgid "Lavka Folio debtors"
+msgstr "Лавка: боржники ФОЛІО"
 
 #: inc/catalog-qty-add-to-cart.php:164
 msgid "Minus"
@@ -38,32 +187,32 @@ msgstr "Цей товар зараз недоступний на складі."
 msgid "Only %d units are available in stock."
 msgstr "Доступно лише %d шт. на складі."
 
-#: inc/header-allocation-switcher.php:154
+#: inc/header-allocation-switcher.php:149
 msgid "Allocation"
 msgstr "Списання"
 
-#: inc/header-allocation-switcher.php:155
+#: inc/header-allocation-switcher.php:150
 msgid "Allocation:"
 msgstr "Списання:"
 
-#: inc/header-allocation-switcher.php:157
+#: inc/header-allocation-switcher.php:152
 msgid "Allocation mode"
 msgstr "Режим списання"
 
-#: inc/header-allocation-switcher.php:158
+#: inc/header-allocation-switcher.php:153
 msgid "Auto"
 msgstr "Вирішує система з якого складу"
 
-#: inc/header-allocation-switcher.php:159
+#: inc/header-allocation-switcher.php:154
 msgid "Preferred location first"
 msgstr "З пріоритетом обраного"
 
-#: inc/header-allocation-switcher.php:160
+#: inc/header-allocation-switcher.php:155
 msgid "Only selected location"
 msgstr "Лише обраний склад"
 
-#: inc/header-allocation-switcher.php:163 inc/order-attach-csv.php:113
-#: inc/order-attach-csv.php:121
+#: inc/header-allocation-switcher.php:158 inc/order-attach-csv.php:114
+#: inc/order-attach-csv.php:122
 msgid "Location"
 msgstr "Склад"
 
@@ -79,31 +228,32 @@ msgstr "Списати за планом"
 msgid "Restore stock from plan"
 msgstr "Повернути за планом"
 
-#: inc/order-attach-csv.php:109 inc/order-attach-csv.php:117
+#: inc/order-attach-csv.php:110 inc/order-attach-csv.php:118
 #: inc/sku-gtin-admin-columns.php:29 inc/sku-gtin-admin-columns.php:34
 msgid "SKU"
 msgstr "Артикль"
 
-#: inc/order-attach-csv.php:110 inc/order-attach-csv.php:118
+#: inc/order-attach-csv.php:111 inc/order-attach-csv.php:119
 #: inc/sku-gtin-admin-columns.php:30 inc/sku-gtin-admin-columns.php:35
-#: inc/sku-gtin-admin-columns.php:159
+#: inc/sku-gtin-admin-columns.php:160
 msgid "GTIN"
 msgstr "Штрих код"
 
-#: inc/order-attach-csv.php:111 inc/order-attach-csv.php:119
+#: inc/order-attach-csv.php:112 inc/order-attach-csv.php:120
 msgid "Quantity"
 msgstr "Кількість"
 
-#: inc/order-attach-csv.php:112 inc/order-attach-csv.php:120
+#: inc/order-attach-csv.php:113 inc/order-attach-csv.php:121
 msgid "Price"
 msgstr "Ціна"
 
-#: inc/order-attach-csv.php:114
+#: inc/order-attach-csv.php:115
 msgid "Notes"
 msgstr "Примітки"
 
 # translators: %s is a human-readable stock allocation like "Одеса — 3, Київ — 1"
-#: inc/order-attach-csv.php:197
+#. translators: %s: warehouse allocation summary for the order item.
+#: inc/order-attach-csv.php:199
 #, php-format
 msgid "Write-off: %s"
 msgstr "Списання: %s"

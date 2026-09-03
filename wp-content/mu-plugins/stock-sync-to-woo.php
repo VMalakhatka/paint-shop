@@ -22,7 +22,7 @@ class PC_Stock_Sync_Woo {
 
     public function menu() {
         add_submenu_page(
-            'tools.php',
+            function_exists('paint_core_lavka_admin_parent_slug') ? paint_core_lavka_admin_parent_slug() : 'tools.php',
             esc_html__('Stock sync → WooCommerce', 'stock-sync-to-woo'),
             esc_html__('Stock sync → Woo', 'stock-sync-to-woo'),
             self::CAP,

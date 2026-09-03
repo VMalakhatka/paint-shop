@@ -14,30 +14,39 @@ if (!defined('ABSPATH')) exit;
  * Register admin menu and submenus.
  */
 add_action('admin_menu', function() {
-    // Top-level menu
-    add_menu_page(
-        __('Lavka Total Sync', 'lavka-total-sync'),
-        __('Total Sync', 'lavka-total-sync'),
-        LTS_CAP,
-        'lts-main',
-        'lts_render_settings_page',
-        'dashicons-admin-generic',
-        65
-    );
-
-    // Settings
-    add_submenu_page(
-        'lts-main',
-        __('Settings', 'lavka-total-sync'),
-        __('Settings', 'lavka-total-sync'),
-        LTS_CAP,
-        'lts-main',
-        'lts_render_settings_page'
-    );
+    $parent = function_exists('paint_core_lavka_admin_parent_slug') ? paint_core_lavka_admin_parent_slug() : '';
+    if ($parent !== '') {
+        add_submenu_page(
+            $parent,
+            __('Lavka full sync settings', 'lavka-total-sync'),
+            __('Lavka full sync settings', 'lavka-total-sync'),
+            LTS_CAP,
+            'lts-main',
+            'lts_render_settings_page'
+        );
+    } else {
+        add_menu_page(
+            __('Lavka full sync', 'lavka-total-sync'),
+            __('Lavka full sync', 'lavka-total-sync'),
+            LTS_CAP,
+            'lts-main',
+            'lts_render_settings_page',
+            'dashicons-admin-generic',
+            65
+        );
+        add_submenu_page(
+            'lts-main',
+            __('Lavka full sync settings', 'lavka-total-sync'),
+            __('Lavka full sync settings', 'lavka-total-sync'),
+            LTS_CAP,
+            'lts-main',
+            'lts_render_settings_page'
+        );
+    }
 
     // Run
     add_submenu_page(
-        'lts-main',
+        $parent !== '' ? $parent : 'lts-main',
         __('Run', 'lavka-total-sync'),
         __('Run', 'lavka-total-sync'),
         LTS_CAP,

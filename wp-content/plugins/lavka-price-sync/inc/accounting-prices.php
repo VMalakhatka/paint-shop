@@ -6,7 +6,7 @@ const LPS_ACCOUNTING_PRICES_WAREHOUSES_PATH = '/ref/warehouses';
 
 add_action('admin_menu', function () {
     add_submenu_page(
-        'lps-main',
+        function_exists('paint_core_lavka_admin_parent_slug') ? paint_core_lavka_admin_parent_slug() : 'lps-main',
         __('Folio accounting prices', 'lavka-price-sync'),
         __('Folio accounting prices', 'lavka-price-sync'),
         LPS_CAP,

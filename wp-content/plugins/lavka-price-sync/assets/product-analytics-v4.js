@@ -3,6 +3,7 @@
 
     const config = window.LPS_PRODUCT_ANALYTICS || {};
     const i18n = config.i18n || {};
+    const globalWarehouseGroups = Array.isArray(config.warehouseGroups) ? config.warehouseGroups : [];
     const root = document.getElementById('lps-product-analytics');
     if (!root || root.dataset.analyticsSchema !== '4') return;
 
@@ -68,6 +69,13 @@
 
     function money(value) {
         return value == null || value === '' ? '—' : moneyFormat.format(Number(value));
+    }
+
+    function metricCaption(caption, help) {
+        const text = escapeHtml(caption);
+        return help
+            ? '<abbr class="lps-pa-metric-help" title="' + escapeHtml(help) + '">' + text + '</abbr>'
+            : text;
     }
 
     function setBusy(busy, message, activity) {
@@ -342,6 +350,43 @@
         return output;
     }
 
+    function availabilitySupported() {
+        const feature = state.capabilities && state.capabilities.features && state.capabilities.features.availability;
+        return Boolean(feature && feature.supported === true);
+    }
+
+    function availabilityCalculation() {
+        if (!availabilitySupported()) return null;
+        const selected = new Set(state.warehouseIds.map(Number));
+        const groups = globalWarehouseGroups.filter((group) => {
+            const ids = Array.isArray(group.warehouseIds) ? group.warehouseIds.map(Number) : [];
+            return ids.length && ids.every((id) => selected.has(id));
+        }).map((group) => ({
+            code: String(group.code || ''),
+            name: String(group.name || group.code || ''),
+            warehouseIds: group.warehouseIds.map(Number),
+            availabilityMode: 'ANY_ELIGIBLE_MEMBER'
+        }));
+        return {
+            enabled: true,
+            basis: 'PHYSICAL_END_OF_DAY',
+            minimumStockEligibility: 'CURRENT_POLICY_GT_ZERO',
+            presentation: 'WAREHOUSES_AND_GROUPS',
+            warehouseGroupsRevision: String(config.warehouseGroupsRevision || ''),
+            warehouseGroups: groups
+        };
+    }
+
+    function calculationPayload(source) {
+        const calculation = {
+            abcBasis: source.abcBasis || 'GROSS_PROFIT',
+            includeReturns: source.includeReturns !== false
+        };
+        const availability = availabilityCalculation();
+        if (availability) calculation.availability = availability;
+        return calculation;
+    }
+
     function requestFromSavedScenario(profile, scenario, cursor) {
         const productFilters = Object.assign({}, profile.productFilters || {});
         const movementFilters = Object.assign({}, profile.movementFilters || {});
@@ -354,10 +399,7 @@
             period: Object.assign({}, profile.period || {}),
             productFilters: productFilters,
             movementFilters: movementFilters,
-            calculation: {
-                abcBasis: calculation.abcBasis || 'GROSS_PROFIT',
-                includeReturns: calculation.includeReturns !== false
-            },
+            calculation: calculationPayload(calculation),
             page: { size: Number((profile.page || {}).size || 50), cursor: cursor || null },
             sort: sort.map((item) => Object.assign({}, item))
         };
@@ -378,13 +420,47 @@
             period: { from: el('lps-pa-period-from').value, to: el('lps-pa-period-to').value },
             productFilters: productFilters,
             movementFilters: collectFilters('movement'),
-            calculation: {
+            calculation: calculationPayload({
                 abcBasis: el('lps-pa-abc-basis').value,
                 includeReturns: el('lps-pa-include-returns').checked
-            },
+            }),
             page: { size: Number(el('lps-pa-page-size').value || 50), cursor: cursor || null },
             sort: [{ field: el('lps-pa-sort-field').value, direction: el('lps-pa-sort-direction').value }]
         };
+    }
+
+    function exportReport(format, tab) {
+        if (!state.capabilities || !state.capabilities.compatibleGeneration) {
+            setMessage(label('schemaV4Required', 'Analytics schema v4 is required.'), 'warning');
+            return;
+        }
+        const exportForm = document.createElement('form');
+        exportForm.method = 'post';
+        exportForm.action = config.exportUrl;
+        exportForm.target = '_blank';
+        exportForm.hidden = true;
+        const request = currentRequest(null);
+        const fields = {
+            action: 'lps_product_analytics_export',
+            _wpnonce: config.exportNonce,
+            format: format,
+            reportTab: tab,
+            payloadJson: JSON.stringify(request)
+        };
+        Object.entries(fields).forEach(([name, value]) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = value == null ? '' : String(value);
+            exportForm.appendChild(input);
+        });
+        document.body.appendChild(exportForm);
+        setMessage(label('exportPreparing', 'Preparing the complete report file...'), 'success');
+        exportForm.submit();
+        window.setTimeout(() => {
+            exportForm.remove();
+            setMessage('', '');
+        }, 1500);
     }
 
     async function runQuery(cursor, fromHistory) {
@@ -423,11 +499,11 @@
             [label('salesRevenue', 'Sales revenue'), money(metrics.salesRevenue), ''],
             [label('grossProfit', 'Gross profit'), money(metrics.grossProfit), 'is-profit'],
             [label('averageInventoryValue', 'Average inventory value'), money(metrics.averageInventoryValue), 'is-capital'],
-            [label('turns', 'Inventory turns'), number(metrics.inventoryTurns), ''],
-            [label('gmroi', 'GMROI'), number(metrics.gmroi), ''],
-            [label('coverage', 'Coverage, days'), number(metrics.coverageDays), '']
+            [label('turns', 'Inventory turns'), number(metrics.inventoryTurns), '', ''],
+            [label('gmroi', 'GMROI'), number(metrics.gmroi), '', label('gmroiHelp', '')],
+            [label('coverage', 'Stock coverage, days'), number(metrics.coverageDays), '', label('coverageHelp', '')]
         ];
-        return cards.map((card) => '<article class="lps-pa-card ' + card[2] + '"><span>' + escapeHtml(card[0]) + '</span><strong>' + escapeHtml(card[1]) + '</strong></article>').join('');
+        return cards.map((card) => '<article class="lps-pa-card ' + card[2] + '"><span>' + metricCaption(card[0], card[3]) + '</span><strong>' + escapeHtml(card[1]) + '</strong></article>').join('');
     }
 
     function renderWarnings(node, warnings, kind) {
@@ -465,10 +541,20 @@
     }
 
     function movementHeaders() {
-        return [label('abcClass', 'ABC'), label('sku', 'SKU'), label('product', 'Product'), label('soldUnits', 'Sold units'),
+        const headers = [label('abcClass', 'ABC'), label('sku', 'SKU'), label('product', 'Product'), label('soldUnits', 'Sold units'),
             label('regularSales', 'Regular sales'), label('oneOffSales', 'One-off sales'), label('returns', 'Returns'),
             label('salesRevenue', 'Revenue'), label('salesCogs', 'Cost'), label('grossProfit', 'Gross profit'),
-            label('grossMarginPercent', 'Margin, %'), label('turns', 'Turns'), label('gmroi', 'GMROI'), label('coverage', 'Coverage'), label('details', 'Details')];
+            label('grossMarginPercent', 'Margin, %'), label('turns', 'Turns'),
+            { caption: label('gmroi', 'GMROI'), help: label('gmroiHelp', '') },
+            { caption: label('coverage', 'Stock coverage, days'), help: label('coverageHelp', '') }];
+        if (availabilitySupported()) {
+            headers.push(
+                { caption: label('stockoutDays', 'Days without stock'), help: label('stockoutHelp', '') },
+                { caption: label('stockoutPercent', 'Days without stock, %'), help: label('stockoutHelp', '') }
+            );
+        }
+        headers.push(label('details', 'Details'));
+        return headers;
     }
 
     function productRow(row, index) {
@@ -486,10 +572,19 @@
 
     function movementRow(row, index) {
         const metrics = row.metrics || {};
+        const availability = row.availability || {};
+        let availabilityCells = '';
+        if (availabilitySupported()) {
+            const notApplicable = availability.status === 'NOT_APPLICABLE';
+            const fallback = availability.status ? (i18n.statusLabels && i18n.statusLabels[availability.status]) || availability.status : '—';
+            availabilityCells = '<td class="num">' + escapeHtml(notApplicable ? label('notApplicable', 'Not applicable') : (availability.stockoutDays == null ? fallback : number(availability.stockoutDays))) + '</td>' +
+                '<td class="num">' + escapeHtml(notApplicable ? label('notApplicable', 'Not applicable') : (availability.stockoutPercent == null ? fallback : number(availability.stockoutPercent) + '%')) + '</td>';
+        }
         return '<tr><td><strong>' + escapeHtml(row.abcClass || '—') + '</strong></td><td><code>' + escapeHtml(row.sku || '') + '</code></td><td>' + escapeHtml(row.productName || '') + '</td>' +
             '<td class="num">' + number(metrics.soldUnits) + '</td><td class="num">' + number(metrics.regularSoldUnits) + '</td><td class="num">' + number(metrics.oneOffSoldUnits) + '</td><td class="num">' + number(metrics.returnQuantity) + '</td>' +
             '<td class="num">' + money(metrics.salesRevenue) + '</td><td class="num">' + money(metrics.salesCogs) + '</td><td class="num">' + money(metrics.grossProfit) + '</td>' +
             '<td class="num">' + number(metrics.grossMarginPercent) + '</td><td class="num">' + number(metrics.inventoryTurns) + '</td><td class="num">' + number(metrics.gmroi) + '</td><td class="num">' + number(metrics.coverageDays) + '</td>' +
+            availabilityCells +
             '<td><button type="button" class="button button-small" data-lps-pa-detail-index="' + index + '">' + escapeHtml(label('details', 'Details')) + '</button></td></tr>';
     }
 
@@ -497,7 +592,11 @@
         const head = el(headId);
         const table = el(tableId);
         if (!head || !table) return;
-        head.innerHTML = headers.map((caption) => '<th>' + escapeHtml(caption) + '</th>').join('');
+        head.innerHTML = headers.map((header) => {
+            const caption = typeof header === 'object' ? header.caption : header;
+            const help = typeof header === 'object' ? header.help : '';
+            return '<th>' + metricCaption(caption, help) + '</th>';
+        }).join('');
         table.querySelector('tbody').innerHTML = rowsHtml || '<tr><td colspan="' + headers.length + '">' + escapeHtml(label('noProducts', 'No products match the selected filters.')) + '</td></tr>';
     }
 
@@ -570,10 +669,36 @@
             ['salesCogs', label('salesCogs', 'Cost of sales'), true], ['grossProfit', label('grossProfit', 'Gross profit'), true],
             ['regularSoldUnits', label('regularSales', 'Regular sales'), false], ['oneOffSoldUnits', label('oneOffSales', 'One-off sales'), false],
             ['returnQuantity', label('returns', 'Returns'), false], ['averageInventoryValue', label('averageInventoryValue', 'Average inventory value'), true],
-            ['inventoryTurns', label('turns', 'Inventory turns'), false], ['gmroi', label('gmroi', 'GMROI'), false],
-            ['grossMarginPercent', label('grossMarginPercent', 'Gross margin, %'), false], ['coverageDays', label('coverage', 'Coverage, days'), false]
+            ['inventoryTurns', label('turns', 'Inventory turns'), false, ''],
+            ['gmroi', label('gmroi', 'GMROI'), false, label('gmroiHelp', '')],
+            ['grossMarginPercent', label('grossMarginPercent', 'Gross margin, %'), false, ''],
+            ['coverageDays', label('coverage', 'Stock coverage, days'), false, label('coverageHelp', '')]
         ];
-        return '<dl class="lps-pa-detail-metrics">' + items.map((item) => '<div><dt>' + escapeHtml(item[1]) + '</dt><dd>' + escapeHtml(item[2] ? money(metrics[item[0]]) : number(metrics[item[0]])) + '</dd></div>').join('') + '</dl>';
+        return '<dl class="lps-pa-detail-metrics">' + items.map((item) => '<div><dt>' + metricCaption(item[1], item[3]) + '</dt><dd>' + escapeHtml(item[2] ? money(metrics[item[0]]) : number(metrics[item[0]])) + '</dd></div>').join('') + '</dl>';
+    }
+
+    function availabilityDisplay(availability, field, percent) {
+        if (!availability || !availability.status) return '—';
+        if (availability.status === 'NOT_APPLICABLE') return label('notApplicable', 'Not applicable');
+        if (availability[field] == null) return (i18n.statusLabels && i18n.statusLabels[availability.status]) || availability.status;
+        return number(availability[field]) + (percent ? '%' : '');
+    }
+
+    function groupAvailabilitySection(row) {
+        if (!availabilitySupported()) return '';
+        const groups = Array.isArray(row.warehouseGroupBreakdown) ? row.warehouseGroupBreakdown : [];
+        if (!groups.length) return '';
+        return '<section><h3>' + escapeHtml(label('groupAvailability', 'Availability by combined warehouse')) + '</h3><div class="lps-pa-table-scroll"><table class="widefat striped"><thead><tr>' +
+            '<th>' + escapeHtml(label('warehouseGroups', 'Combined warehouse')) + '</th>' +
+            '<th>' + escapeHtml(label('warehouses', 'Warehouses')) + '</th>' +
+            '<th>' + metricCaption(label('stockoutDays', 'Days without stock'), label('stockoutHelp', '')) + '</th>' +
+            '<th>' + metricCaption(label('stockoutPercent', 'Days without stock, %'), label('stockoutHelp', '')) + '</th>' +
+            '</tr></thead><tbody>' + groups.map((item) => {
+                const availability = item.availability || {};
+                return '<tr><td><strong>' + escapeHtml(item.name || item.code || '—') + '</strong></td><td>' + escapeHtml((item.warehouseIds || []).join(', ')) + '</td>' +
+                    '<td class="num">' + escapeHtml(availabilityDisplay(availability, 'stockoutDays', false)) + '</td>' +
+                    '<td class="num">' + escapeHtml(availabilityDisplay(availability, 'stockoutPercent', true)) + '</td></tr>';
+            }).join('') + '</tbody></table></div></section>';
     }
 
     function openDetail(index) {
@@ -584,6 +709,9 @@
         const breakdown = Array.isArray(row.warehouseBreakdown) ? row.warehouseBreakdown : [];
         const transit = row.inTransitStock || null;
         const transitSuppliers = transit && Array.isArray(transit.suppliers) ? transit.suppliers : [];
+        const availabilityHeaders = availabilitySupported()
+            ? '<th>' + metricCaption(label('stockoutDays', 'Days without stock'), label('stockoutHelp', '')) + '</th><th>' + metricCaption(label('stockoutPercent', 'Days without stock, %'), label('stockoutHelp', '')) + '</th>'
+            : '';
         const content = '<header class="lps-pa-detail-header"><div><h2 id="lps-pa-detail-title">' + escapeHtml(row.sku) + ' · ' + escapeHtml(row.productName) + '</h2><p>' + escapeHtml(label('abcClass', 'ABC class')) + ': <strong>' + escapeHtml(row.abcClass || '—') + '</strong></p></div></header>' +
             '<section><h3>' + escapeHtml(label('currentState', 'Current state')) + '</h3>' + metricDetails(row.metrics || {}) + '</section>' +
             '<section><h3>' + escapeHtml(label('product', 'Product')) + '</h3><dl class="lps-pa-detail-list">' +
@@ -593,9 +721,16 @@
             '<div><dt>' + escapeHtml((i18n.filterLabels && i18n.filterLabels.productTypes) || 'Product type') + '</dt><dd>' + escapeHtml(dimensions.productTypeName || '—') + '</dd></div>' +
             '<div><dt>' + escapeHtml(label('supplier', 'Current supplier')) + '</dt><dd>' + escapeHtml((dimensions.currentSuppliers || []).join(', ') || '—') + '</dd></div>' +
             '<div><dt>' + escapeHtml(label('minimumOrderAndPackage', 'Minimum order quantity / package quantity')) + '</dt><dd>' + escapeHtml(number(dimensions.minimumOrderQuantity)) + ' / ' + escapeHtml(number(dimensions.packageQuantity)) + '</dd></div></dl></section>' +
-            '<section><h3>' + escapeHtml(label('warehouses', 'Warehouses')) + '</h3><div class="lps-pa-table-scroll"><table class="widefat striped"><thead><tr><th>' + escapeHtml(label('warehouse', 'Warehouse')) + '</th><th>' + escapeHtml(label('supplier', 'Supplier')) + '</th><th>' + escapeHtml(label('availableQuantity', 'Available')) + '</th><th>' + escapeHtml(label('minimumAndMaximumStock', 'Minimum / maximum stock')) + '</th><th>' + escapeHtml(label('localOrderPolicy', 'Order policy')) + '</th></tr></thead><tbody>' +
-            breakdown.map((item) => '<tr><td>' + escapeHtml(item.warehouseName || item.warehouseId) + '</td><td>' + escapeHtml(item.currentSupplier || '—') + '</td><td class="num">' + number((item.metrics || {}).availableQuantity) + '</td><td>' + number((item.orderPolicy || {}).minimumStock) + ' / ' + number((item.orderPolicy || {}).maximumStock) + '</td><td>' + escapeHtml(policyDescription(item.orderPolicy)) + '</td></tr>').join('') +
+            '<section><h3>' + escapeHtml(label('warehouses', 'Warehouses')) + '</h3><div class="lps-pa-table-scroll"><table class="widefat striped"><thead><tr><th>' + escapeHtml(label('warehouse', 'Warehouse')) + '</th><th>' + escapeHtml(label('supplier', 'Supplier')) + '</th><th>' + escapeHtml(label('availableQuantity', 'Available')) + '</th><th>' + escapeHtml(label('minimumAndMaximumStock', 'Minimum / maximum stock')) + '</th><th>' + escapeHtml(label('localOrderPolicy', 'Order policy')) + '</th>' + availabilityHeaders + '</tr></thead><tbody>' +
+            breakdown.map((item) => {
+                const availability = item.availability || {};
+                const availabilityCells = availabilitySupported()
+                    ? '<td class="num">' + escapeHtml(availabilityDisplay(availability, 'stockoutDays', false)) + '</td><td class="num">' + escapeHtml(availabilityDisplay(availability, 'stockoutPercent', true)) + '</td>'
+                    : '';
+                return '<tr><td>' + escapeHtml(item.warehouseName || item.warehouseId) + '</td><td>' + escapeHtml(item.currentSupplier || '—') + '</td><td class="num">' + number((item.metrics || {}).availableQuantity) + '</td><td>' + number((item.orderPolicy || {}).minimumStock) + ' / ' + number((item.orderPolicy || {}).maximumStock) + '</td><td>' + escapeHtml(policyDescription(item.orderPolicy)) + '</td>' + availabilityCells + '</tr>';
+            }).join('') +
             '</tbody></table></div></section>' +
+            groupAvailabilitySection(row) +
             '<section><h3>' + escapeHtml(label('networkPolicy', 'Network order policy')) + '</h3><p>' + networkHtml(row.networkOrderPolicy) + '</p>' + (row.networkOrderPolicy && row.networkOrderPolicy.policy ? '<p>' + escapeHtml(policyDescription(row.networkOrderPolicy.policy)) + '</p>' : '') + '</section>' +
             '<section><h3>' + escapeHtml(label('transitStock', 'Stock in transit')) + '</h3><p>' + transitHtml(transit) + '</p>' +
             (transit ? '<p>' + escapeHtml(label('supplierOriginConfirmed', 'Supplier origin confirmed')) + ': <strong>' + escapeHtml(transit.supplierOriginConfirmed === true ? label('yes', 'Yes') : label('no', 'No')) + '</strong></p>' : '') +
@@ -753,6 +888,7 @@
     el('lps-pa-reset').addEventListener('click', () => resetSelections(false));
     scenarioSelect.addEventListener('change', applyScenario);
     root.querySelectorAll('[data-lps-pa-tab]').forEach((button) => button.addEventListener('click', () => switchTab(button.dataset.lpsPaTab)));
+    root.querySelectorAll('[data-lps-pa-export]').forEach((button) => button.addEventListener('click', () => exportReport(button.dataset.lpsPaExport, button.dataset.lpsPaExportTab)));
     root.querySelectorAll('[data-lps-pa-close]').forEach((button) => button.addEventListener('click', closeDetail));
     root.addEventListener('click', (event) => {
         const button = event.target.closest('[data-lps-page]');

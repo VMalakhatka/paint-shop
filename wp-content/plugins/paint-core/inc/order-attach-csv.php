@@ -195,6 +195,7 @@ add_filter('woocommerce_email_attachments', function ($attachments, $email_id, $
             }
         } else { // summary
             $loc_label = pc_order_item_location_label($item); // "Одеса — 3, Київ — 1" либо одно значение
+            /* translators: %s: warehouse allocation summary for the order item. */
             $notes     = $loc_label !== '' ? sprintf(__('Write-off: %s', 'paint-core'), $loc_label) : '';
             $rows[] = [
                 $sku ?: '',

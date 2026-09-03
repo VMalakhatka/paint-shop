@@ -116,7 +116,8 @@ idempotency key, наблюдаемый terminal status и план восста
 
 - environment-specific database/cache/log configuration;
 - server-side Java proxy URL, authentication и timeout;
-- options владельцев plugins: warehouses, role contracts, schedules, batch limits;
+- options владельцев plugins: warehouse labels, location-term warehouse groups,
+  role contracts, schedules, batch limits;
 - external services: WayForPay, Checkbox, Nova Poshta, Media Cloud/S3;
 - аварийные live-write flags с выключенным default.
 

@@ -673,7 +673,7 @@ add_action('wp_ajax_lps_analytics_scenarios', 'lps_analytics_scenarios_ajax');
 
 add_action('admin_menu', static function (): void {
     add_submenu_page(
-        'lps-main',
+        function_exists('paint_core_lavka_admin_parent_slug') ? paint_core_lavka_admin_parent_slug() : 'lps-main',
         __('Folio analytics scenarios', 'lavka-price-sync'),
         __('Analytics scenarios', 'lavka-price-sync'),
         LPS_CAP,
@@ -835,7 +835,7 @@ function lps_render_analytics_scenario_product_fields(): void {
         'marginMin' => __('Gross margin from, %', 'lavka-price-sync'), 'marginMax' => __('Gross margin through, %', 'lavka-price-sync'),
         'turnsMin' => __('Inventory turns from', 'lavka-price-sync'), 'turnsMax' => __('Inventory turns through', 'lavka-price-sync'),
         'gmroiMin' => __('GMROI from', 'lavka-price-sync'), 'gmroiMax' => __('GMROI through', 'lavka-price-sync'),
-        'coverageMin' => __('Coverage from, days', 'lavka-price-sync'), 'coverageMax' => __('Coverage through, days', 'lavka-price-sync'),
+        'coverageMin' => __('Stock coverage from, days', 'lavka-price-sync'), 'coverageMax' => __('Stock coverage through, days', 'lavka-price-sync'),
     ];
     foreach ($numeric as $key => $label) {
         lps_analytics_scenario_input('product_' . $key, $label, 'number', 'data-scenario-product="' . esc_attr($key) . '"', '0.01');

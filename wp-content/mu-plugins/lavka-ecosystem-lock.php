@@ -518,7 +518,9 @@ function lavka_ecosystem_lock_reschedule_single_event(
  * Registers the shared Lavka event journal under the WordPress Tools menu.
  */
 function lavka_ecosystem_events_register_admin_page(): void {
-    add_management_page(
+    $parent = function_exists('paint_core_lavka_admin_parent_slug') ? paint_core_lavka_admin_parent_slug() : 'tools.php';
+    add_submenu_page(
+        $parent,
         __('Lavka events', 'lavka-ecosystem'),
         __('Lavka events', 'lavka-ecosystem'),
         'manage_options',
