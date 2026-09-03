@@ -2,17 +2,32 @@
 # This file is distributed under the same license as the PC Wholesale Customer Help plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: PC Wholesale Customer Help 1.0.0\n"
+"Project-Id-Version: PC Wholesale Customer Help 1.1.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mu-plugins\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: PaintCore\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-03T16:20:53+00:00\n"
+"POT-Creation-Date: 2026-09-03T16:51:03+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: pc-wholesale-help\n"
+
+#. Plugin Name of the plugin
+#: pc-wholesale-help.php
+msgid "PC Wholesale Customer Help"
+msgstr ""
+
+#. Description of the plugin
+#: pc-wholesale-help.php
+msgid "Role-gated customer guide, My Account endpoint and contextual help links for wholesale ordering."
+msgstr ""
+
+#. Author of the plugin
+#: pc-wholesale-help.php
+msgid "PaintCore"
+msgstr ""
 
 #: pc-wholesale-help.php:55
 #: pc-wholesale-help.php:79
@@ -28,546 +43,596 @@ msgstr ""
 msgid "Help for this page"
 msgstr ""
 
-#: pc-wholesale-help.php:156
+#: pc-wholesale-help.php:168
 msgid "Open instructions"
 msgstr ""
 
-#: pc-wholesale-help.php:163
+#: pc-wholesale-help.php:173
 msgid "How to choose products in the catalogue"
 msgstr ""
 
-#: pc-wholesale-help.php:169
+#: pc-wholesale-help.php:179
 msgid "Cart, import, export and drafts"
 msgstr ""
 
-#: pc-wholesale-help.php:174
-msgid "Checkout and splitting an order by warehouses"
-msgstr ""
-
-#: pc-wholesale-help.php:179
-msgid "Drafts and repeating previous orders"
-msgstr ""
-
-#: pc-wholesale-help.php:184
-msgid "Export or repeat this order"
-msgstr ""
-
-#: pc-wholesale-help.php:189
-msgid "How to read the customer balance"
-msgstr ""
-
-#: pc-wholesale-help.php:194
-msgid "How to view and repeat Folio documents"
-msgstr ""
-
-#: pc-wholesale-help.php:249
-msgid "Wholesale customer guide"
-msgstr ""
-
-#: pc-wholesale-help.php:250
-msgid "How to order on the KREUL website"
-msgstr ""
-
-#: pc-wholesale-help.php:251
-msgid "Choose products in the catalogue, as a list or from a file; check warehouses; save drafts; repeat previous purchases and view Folio documents."
-msgstr ""
-
-#: pc-wholesale-help.php:253
-msgid "Open catalogue"
-msgstr ""
-
-#: pc-wholesale-help.php:254
-msgid "Order from a list"
-msgstr ""
-
-#: pc-wholesale-help.php:255
-msgid "Open cart"
-msgstr ""
-
-#: pc-wholesale-help.php:256
-msgid "My orders"
-msgstr ""
-
-#: pc-wholesale-help.php:260
-msgid "Guide contents"
-msgstr ""
-
-#: pc-wholesale-help.php:261
-msgid "Warehouse mode"
-msgstr ""
-
-#: pc-wholesale-help.php:262
-msgid "Catalogue"
-msgstr ""
-
-#: pc-wholesale-help.php:263
-msgid "Product list"
-msgstr ""
-
-#: pc-wholesale-help.php:264
+#: pc-wholesale-help.php:180
+#: pc-wholesale-help.php:286
 msgid "Cart"
 msgstr ""
 
-#: pc-wholesale-help.php:265
+#: pc-wholesale-help.php:181
+#: pc-wholesale-help.php:287
 msgid "Import"
 msgstr ""
 
-#: pc-wholesale-help.php:266
+#: pc-wholesale-help.php:182
+#: pc-wholesale-help.php:288
 msgid "Export"
 msgstr ""
 
-#: pc-wholesale-help.php:267
+#: pc-wholesale-help.php:183
+#: pc-wholesale-help.php:198
+#: pc-wholesale-help.php:289
 msgid "Drafts"
 msgstr ""
 
-#: pc-wholesale-help.php:268
-msgid "Previous orders"
+#: pc-wholesale-help.php:189
+msgid "Checkout and splitting an order by warehouses"
 msgstr ""
 
-#: pc-wholesale-help.php:269
+#: pc-wholesale-help.php:190
+#: pc-wholesale-help.php:291
 msgid "Checkout"
 msgstr ""
 
-#: pc-wholesale-help.php:270
+#: pc-wholesale-help.php:191
+#: pc-wholesale-help.php:292
 msgid "Warehouse split"
 msgstr ""
 
+#: pc-wholesale-help.php:197
+msgid "Drafts and repeating previous orders"
+msgstr ""
+
+#: pc-wholesale-help.php:199
+#: pc-wholesale-help.php:290
+msgid "Previous orders"
+msgstr ""
+
+#: pc-wholesale-help.php:205
+msgid "Export or repeat this order"
+msgstr ""
+
+#: pc-wholesale-help.php:210
+msgid "How to read the customer balance"
+msgstr ""
+
+#: pc-wholesale-help.php:215
+msgid "How to view and repeat Folio documents"
+msgstr ""
+
 #: pc-wholesale-help.php:271
-msgid "Balance"
+msgid "Wholesale customer guide"
 msgstr ""
 
 #: pc-wholesale-help.php:272
-msgid "Folio documents"
+msgid "How to order on the KREUL website"
+msgstr ""
+
+#: pc-wholesale-help.php:273
+msgid "Choose products in the catalogue, as a list or from a file; check warehouses; save drafts; repeat previous purchases and view Folio documents."
+msgstr ""
+
+#: pc-wholesale-help.php:275
+msgid "Open catalogue"
 msgstr ""
 
 #: pc-wholesale-help.php:276
-msgid "Choose how products are written off from warehouses"
+msgid "Order from a list"
 msgstr ""
 
-#: pc-wholesale-help.php:276
-msgid "Select the mode before adding products. If you change it later, review the entire cart again."
-msgstr ""
-
-#: pc-wholesale-help.php:278
-msgid "The system decides"
+#: pc-wholesale-help.php:277
+msgid "Open cart"
 msgstr ""
 
 #: pc-wholesale-help.php:278
-msgid "Recommended: the site automatically distributes the required quantity among available warehouses."
-msgstr ""
-
-#: pc-wholesale-help.php:279
-msgid "Selected warehouse first"
-msgstr ""
-
-#: pc-wholesale-help.php:279
-msgid "The site takes products from the selected warehouse first and covers any shortage from other warehouses."
-msgstr ""
-
-#: pc-wholesale-help.php:280
-msgid "Selected warehouse only"
-msgstr ""
-
-#: pc-wholesale-help.php:280
-msgid "Only stock from one selected warehouse may be ordered. Other warehouses are not used."
+msgid "My orders"
 msgstr ""
 
 #: pc-wholesale-help.php:282
-msgid "Look for “Allocation”."
+msgid "Guide contents"
 msgstr ""
 
-#: pc-wholesale-help.php:282
-msgid "It shows the exact warehouse and quantity that will be used for each product."
+#: pc-wholesale-help.php:283
+msgid "Warehouse mode"
 msgstr ""
 
-#: pc-wholesale-help.php:286
-msgid "Order from catalogue cards"
+#: pc-wholesale-help.php:284
+msgid "Catalogue"
 msgstr ""
 
-#: pc-wholesale-help.php:286
-msgid "Best when you want to browse photos, categories and product variants."
-msgstr ""
-
-#: pc-wholesale-help.php:288
-msgid "Open the catalogue"
-msgstr ""
-
-#: pc-wholesale-help.php:288
-msgid "Choose a category or use search."
-msgstr ""
-
-#: pc-wholesale-help.php:289
-msgid "Check the product"
-msgstr ""
-
-#: pc-wholesale-help.php:289
-msgid "Review the SKU, your price and stock by warehouse."
-msgstr ""
-
-#: pc-wholesale-help.php:290
-msgid "Enter the quantity"
-msgstr ""
-
-#: pc-wholesale-help.php:290
-msgid "Use the minus, plus or quantity field, then press the cart button."
-msgstr ""
-
-#: pc-wholesale-help.php:291
-msgid "Review the cart"
-msgstr ""
-
-#: pc-wholesale-help.php:291
-msgid "Check every item and its warehouse allocation before checkout."
+#: pc-wholesale-help.php:285
+msgid "Product list"
 msgstr ""
 
 #: pc-wholesale-help.php:293
+msgid "Balance"
+msgstr ""
+
+#: pc-wholesale-help.php:294
+msgid "Folio documents"
+msgstr ""
+
+#: pc-wholesale-help.php:298
+msgid "Choose how products are written off from warehouses"
+msgstr ""
+
+#: pc-wholesale-help.php:298
+msgid "Select the mode before adding products. If you change it later, review the entire cart again."
+msgstr ""
+
+#: pc-wholesale-help.php:300
+msgid "The system decides"
+msgstr ""
+
+#: pc-wholesale-help.php:300
+msgid "Recommended: the site automatically distributes the required quantity among available warehouses."
+msgstr ""
+
+#: pc-wholesale-help.php:301
+msgid "Selected warehouse first"
+msgstr ""
+
+#: pc-wholesale-help.php:301
+msgid "The site takes products from the selected warehouse first and covers any shortage from other warehouses."
+msgstr ""
+
+#: pc-wholesale-help.php:302
+msgid "Selected warehouse only"
+msgstr ""
+
+#: pc-wholesale-help.php:302
+msgid "Only stock from one selected warehouse may be ordered. Other warehouses are not used."
+msgstr ""
+
+#: pc-wholesale-help.php:304
+msgid "Look for “Allocation”."
+msgstr ""
+
+#: pc-wholesale-help.php:304
+msgid "It shows the exact warehouse and quantity that will be used for each product."
+msgstr ""
+
+#: pc-wholesale-help.php:308
+msgid "Order from catalogue cards"
+msgstr ""
+
+#: pc-wholesale-help.php:308
+msgid "Best when you want to browse photos, categories and product variants."
+msgstr ""
+
+#: pc-wholesale-help.php:310
+msgid "Open the catalogue"
+msgstr ""
+
+#: pc-wholesale-help.php:310
+msgid "Choose a category or use search."
+msgstr ""
+
+#: pc-wholesale-help.php:311
+msgid "Check the product"
+msgstr ""
+
+#: pc-wholesale-help.php:311
+msgid "Review the SKU, your price and stock by warehouse."
+msgstr ""
+
+#: pc-wholesale-help.php:312
+msgid "Enter the quantity"
+msgstr ""
+
+#: pc-wholesale-help.php:312
+msgid "Use the minus, plus or quantity field, then press the cart button."
+msgstr ""
+
+#: pc-wholesale-help.php:313
+msgid "Review the cart"
+msgstr ""
+
+#: pc-wholesale-help.php:313
+msgid "Check every item and its warehouse allocation before checkout."
+msgstr ""
+
+#: pc-wholesale-help.php:315
 msgid "Go to catalogue"
 msgstr ""
 
-#: pc-wholesale-help.php:294
+#: pc-wholesale-help.php:316
 msgid "Catalogue cards with quantity and stock by warehouse"
 msgstr ""
 
-#: pc-wholesale-help.php:294
+#: pc-wholesale-help.php:316
 msgid "Click the image to enlarge it."
 msgstr ""
 
-#: pc-wholesale-help.php:298
+#: pc-wholesale-help.php:320
 msgid "Order products from a list"
 msgstr ""
 
-#: pc-wholesale-help.php:298
+#: pc-wholesale-help.php:320
 msgid "Best for a large order when you already know product names or SKUs."
 msgstr ""
 
-#: pc-wholesale-help.php:300
+#: pc-wholesale-help.php:322
 msgid "Open “Product list”"
 msgstr ""
 
-#: pc-wholesale-help.php:300
+#: pc-wholesale-help.php:322
 msgid "Sort by title, SKU or price; hide products with zero availability if needed."
 msgstr ""
 
-#: pc-wholesale-help.php:301
+#: pc-wholesale-help.php:323
 msgid "Enter quantities"
 msgstr ""
 
-#: pc-wholesale-help.php:301
+#: pc-wholesale-help.php:323
 msgid "Fill in the quantity only for products you need."
 msgstr ""
 
-#: pc-wholesale-help.php:302
+#: pc-wholesale-help.php:324
 msgid "Add all"
 msgstr ""
 
-#: pc-wholesale-help.php:302
+#: pc-wholesale-help.php:324
 msgid "Press “Add all to cart” before moving to another page of the list."
 msgstr ""
 
-#: pc-wholesale-help.php:303
+#: pc-wholesale-help.php:325
 msgid "Check the result"
 msgstr ""
 
-#: pc-wholesale-help.php:303
+#: pc-wholesale-help.php:325
 msgid "Read the message with selected and added items, then open the cart."
 msgstr ""
 
-#: pc-wholesale-help.php:305
+#: pc-wholesale-help.php:327
 msgid "Go to product list"
 msgstr ""
 
-#: pc-wholesale-help.php:307
+#: pc-wholesale-help.php:329
 msgid "Controls on the product list page"
 msgstr ""
 
-#: pc-wholesale-help.php:307
+#: pc-wholesale-help.php:329
 msgid "Sorting, hiding zero stock and adding selected quantities."
 msgstr ""
 
-#: pc-wholesale-help.php:308
+#: pc-wholesale-help.php:330
 msgid "Wholesale quick-order table"
 msgstr ""
 
-#: pc-wholesale-help.php:308
+#: pc-wholesale-help.php:330
 msgid "Products, SKU, price, cart quantity, availability and new quantity."
 msgstr ""
 
-#: pc-wholesale-help.php:313
+#: pc-wholesale-help.php:335
 msgid "Check the cart"
 msgstr ""
 
-#: pc-wholesale-help.php:313
+#: pc-wholesale-help.php:335
 msgid "For every item, check the product, SKU, price, quantity, subtotal and the “Allocation” line."
 msgstr ""
 
-#: pc-wholesale-help.php:314
+#: pc-wholesale-help.php:336
 msgid "Example:"
 msgstr ""
 
-#: pc-wholesale-help.php:314
+#: pc-wholesale-help.php:336
 msgid "“Allocation: Kyiv — 2, Odesa — 3” means that five units will be collected from two warehouses."
 msgstr ""
 
-#: pc-wholesale-help.php:315
+#: pc-wholesale-help.php:337
 msgid "Cart with one item split between two warehouses"
 msgstr ""
 
-#: pc-wholesale-help.php:315
+#: pc-wholesale-help.php:337
 msgid "A split is normal in automatic warehouse mode."
 msgstr ""
 
-#: pc-wholesale-help.php:319
+#: pc-wholesale-help.php:341
 msgid "Import your order from a file"
 msgstr ""
 
-#: pc-wholesale-help.php:319
+#: pc-wholesale-help.php:341
 msgid "Supported files: CSV, XLSX and XLS. The first row must contain column names."
 msgstr ""
 
-#: pc-wholesale-help.php:320
-msgid "Download CSV template"
-msgstr ""
-
-#: pc-wholesale-help.php:322
-msgid "Import to cart"
-msgstr ""
-
-#: pc-wholesale-help.php:322
-msgid "Open the import block in the cart, choose a file and import it. New products are added to the products already in the cart."
-msgstr ""
-
-#: pc-wholesale-help.php:323
-msgid "Import to draft"
-msgstr ""
-
-#: pc-wholesale-help.php:323
-msgid "Open “My orders”, choose a file and optionally enter a draft title. The current cart is not changed."
-msgstr ""
-
-#: pc-wholesale-help.php:325
-msgid "Use sku or gtin/barcode for the product and qty for quantity. Empty, zero and negative quantities are skipped. Always review the row-by-row import report."
-msgstr ""
-
-#: pc-wholesale-help.php:326
-msgid "Current data wins."
-msgstr ""
-
-#: pc-wholesale-help.php:326
-msgid "The cart uses your current WooCommerce price, current availability and current warehouse mode, not the price from the file."
-msgstr ""
-
-#: pc-wholesale-help.php:327
-msgid "Cart controls for export, import and saving a draft"
-msgstr ""
-
-#: pc-wholesale-help.php:327
-msgid "CSV/XLSX export, import and draft controls are located below the cart totals."
-msgstr ""
-
-#: pc-wholesale-help.php:331
-msgid "Export the cart or an order"
-msgstr ""
-
-#: pc-wholesale-help.php:331
-msgid "Export is available in the cart and on the details page of each previous order."
-msgstr ""
-
-#: pc-wholesale-help.php:333
-msgid "Choose columns"
-msgstr ""
-
-#: pc-wholesale-help.php:333
-msgid "SKU, barcode, title, quantity, price, total and notes are available."
-msgstr ""
-
-#: pc-wholesale-help.php:334
-msgid "Choose warehouse format"
-msgstr ""
-
-#: pc-wholesale-help.php:334
-msgid "Use one product row with allocation in notes, or separate rows for each warehouse."
-msgstr ""
-
-#: pc-wholesale-help.php:335
-msgid "Download the file"
-msgstr ""
-
-#: pc-wholesale-help.php:335
-msgid "Choose CSV or XLSX. Export does not change or clear the cart."
-msgstr ""
-
-#: pc-wholesale-help.php:340
-msgid "Save the cart as a draft"
-msgstr ""
-
-#: pc-wholesale-help.php:340
-msgid "Enter an optional title in the cart and press “Save as draft”. The draft will appear in “My orders”."
-msgstr ""
-
-#: pc-wholesale-help.php:341
-msgid "Important:"
-msgstr ""
-
-#: pc-wholesale-help.php:341
-msgid "After a successful save, the current cart is cleared. A draft does not reserve stock."
-msgstr ""
-
 #: pc-wholesale-help.php:342
-msgid "Open my orders"
+msgid "Column names can be Ukrainian, Russian, or English, and columns can appear in any order."
+msgstr ""
+
+#: pc-wholesale-help.php:344
+msgid "SKU / article"
+msgstr ""
+
+#: pc-wholesale-help.php:345
+msgid "GTIN / barcode"
 msgstr ""
 
 #: pc-wholesale-help.php:346
-msgid "Repeat a draft or a previous order"
-msgstr ""
-
-#: pc-wholesale-help.php:346
-msgid "For a draft, press “To cart”. For a previous order, open its details and press “Load draft into cart”."
-msgstr ""
-
-#: pc-wholesale-help.php:347
-msgid "Protect the current cart."
-msgstr ""
-
-#: pc-wholesale-help.php:347
-msgid "Loading a draft or previous order first clears the current cart and then adds products from the selected order. Save or export the current cart first if you need it."
+msgid "Quantity"
 msgstr ""
 
 #: pc-wholesale-help.php:348
-msgid "Deleted or unavailable products may be skipped. Prices, availability and warehouse allocation are recalculated. For selected items without clearing the cart, repeat products from a Folio invoice instead."
+msgid "Search order:"
 msgstr ""
 
-#: pc-wholesale-help.php:352
-msgid "Complete checkout"
+#: pc-wholesale-help.php:348
+msgid "If both SKU and GTIN are present in a row, the site checks GTIN first. If no product is found, it then searches by SKU."
 msgstr ""
 
-#: pc-wholesale-help.php:352
-msgid "Check contact details, recipient, delivery, payment, products, quantities and totals before confirming."
+#: pc-wholesale-help.php:350
+msgid "Excel example"
 msgstr ""
 
-#: pc-wholesale-help.php:354
-msgid "Open checkout"
+#: pc-wholesale-help.php:350
+msgid "One row may contain only SKU, another only GTIN, and a row may contain both."
 msgstr ""
 
-#: pc-wholesale-help.php:354
-msgid "Go from the reviewed cart to checkout."
-msgstr ""
-
-#: pc-wholesale-help.php:355
-msgid "Complete delivery"
-msgstr ""
-
-#: pc-wholesale-help.php:355
-msgid "For Nova Poshta, choose the displayed branch, parcel locker or address fields."
-msgstr ""
-
-#: pc-wholesale-help.php:356
-msgid "Choose payment"
-msgstr ""
-
-#: pc-wholesale-help.php:356
-msgid "Select one of the methods available for your account."
-msgstr ""
-
-#: pc-wholesale-help.php:357
-msgid "Confirm once"
-msgstr ""
-
-#: pc-wholesale-help.php:357
-msgid "Wait for Folio processing to finish; do not submit a duplicate order."
-msgstr ""
-
-#: pc-wholesale-help.php:359
-msgid "Go to checkout"
-msgstr ""
-
+#. translators: %1$s is the GTIN column name; %2$s is the quantity column name.
 #: pc-wholesale-help.php:363
-msgid "Why an order may be split"
-msgstr ""
-
-#: pc-wholesale-help.php:363
-msgid "Folio creates warehouse documents separately. One WooCommerce cart may therefore become several linked orders, invoices or shipments."
-msgstr ""
-
-#: pc-wholesale-help.php:365
-msgid "One warehouse"
-msgstr ""
-
-#: pc-wholesale-help.php:365
-msgid "One order and one Folio document remain."
-msgstr ""
-
-#: pc-wholesale-help.php:366
-msgid "Several warehouses"
-msgstr ""
-
-#: pc-wholesale-help.php:366
-msgid "Linked child orders appear for individual warehouses and may be shipped separately."
+#, php-format
+msgid "The combination %1$s + %2$s is supported. The rows in the Excel file are examples; replace or delete them before import."
 msgstr ""
 
 #: pc-wholesale-help.php:367
-msgid "Stock shortage"
+msgid "Download CSV template"
 msgstr ""
 
-#: pc-wholesale-help.php:367
-msgid "The available part may be processed while the missing part waits for a manager review."
+#: pc-wholesale-help.php:368
+msgid "Download Excel example"
 msgstr ""
 
-#: pc-wholesale-help.php:369
-msgid "Do not pay linked child orders separately"
+#: pc-wholesale-help.php:371
+msgid "Import to cart"
 msgstr ""
 
-#: pc-wholesale-help.php:369
-msgid "unless a manager clearly asks you to do so."
+#: pc-wholesale-help.php:371
+msgid "Open the import block in the cart, choose a file and import it. New products are added to the products already in the cart."
 msgstr ""
 
-#: pc-wholesale-help.php:373
-msgid "View the customer balance"
+#: pc-wholesale-help.php:372
+msgid "Import to draft"
 msgstr ""
 
-#: pc-wholesale-help.php:373
-msgid "Choose a start date or all time, generate the report, then export XLSX or print it if needed."
+#: pc-wholesale-help.php:372
+msgid "Open “My orders”, choose a file and optionally enter a draft title. The current cart is not changed."
 msgstr ""
 
 #: pc-wholesale-help.php:374
-msgid "The report may show opening balance, invoices, payments, total debt, overdue amount, prepayment and the amount due now. The table below explains each operation and the balance before and after it."
+msgid "Use SKU/article or GTIN/barcode for the product and a supported quantity column such as qty, q-ty or Кількість. Empty, zero and negative quantities are skipped. Always review the row-by-row import report."
 msgstr ""
 
 #: pc-wholesale-help.php:375
-msgid "Open customer balance"
+msgid "Current data wins."
 msgstr ""
 
-#: pc-wholesale-help.php:379
-msgid "View and repeat Folio documents"
+#: pc-wholesale-help.php:375
+msgid "The cart uses your current WooCommerce price, current availability and current warehouse mode, not the price from the file."
 msgstr ""
 
-#: pc-wholesale-help.php:379
-msgid "Choose a period and document types, then open an invoice, expense invoice or payment for details."
+#: pc-wholesale-help.php:376
+msgid "Cart controls for export, import and saving a draft"
+msgstr ""
+
+#: pc-wholesale-help.php:376
+msgid "CSV/XLSX export, import and draft controls are located below the cart totals."
 msgstr ""
 
 #: pc-wholesale-help.php:380
-msgid "From an invoice or expense invoice, select the products you need and add them to the current cart or save them as a new draft. The current cart is not cleared in this workflow."
+msgid "Export the cart or an order"
 msgstr ""
 
-#: pc-wholesale-help.php:381
-msgid "Historical prices are for reference only."
-msgstr ""
-
-#: pc-wholesale-help.php:381
-msgid "The new cart always uses current prices, availability and allocation. Payments and returns cannot be repeated as an order."
+#: pc-wholesale-help.php:380
+msgid "Export is available in the cart and on the details page of each previous order."
 msgstr ""
 
 #: pc-wholesale-help.php:382
+msgid "Choose columns"
+msgstr ""
+
+#: pc-wholesale-help.php:382
+msgid "SKU, barcode, title, quantity, price, total and notes are available."
+msgstr ""
+
+#: pc-wholesale-help.php:383
+msgid "Choose warehouse format"
+msgstr ""
+
+#: pc-wholesale-help.php:383
+msgid "Use one product row with allocation in notes, or separate rows for each warehouse."
+msgstr ""
+
+#: pc-wholesale-help.php:384
+msgid "Download the file"
+msgstr ""
+
+#: pc-wholesale-help.php:384
+msgid "Choose CSV or XLSX. Export does not change or clear the cart."
+msgstr ""
+
+#: pc-wholesale-help.php:389
+msgid "Save the cart as a draft"
+msgstr ""
+
+#: pc-wholesale-help.php:389
+msgid "Enter an optional title in the cart and press “Save as draft”. The draft will appear in “My orders”."
+msgstr ""
+
+#: pc-wholesale-help.php:390
+msgid "Important:"
+msgstr ""
+
+#: pc-wholesale-help.php:390
+msgid "After a successful save, the current cart is cleared. A draft does not reserve stock."
+msgstr ""
+
+#: pc-wholesale-help.php:391
+msgid "Open my orders"
+msgstr ""
+
+#: pc-wholesale-help.php:395
+msgid "Repeat a draft or a previous order"
+msgstr ""
+
+#: pc-wholesale-help.php:395
+msgid "For a draft, press “To cart”. For a previous order, open its details and press “Load draft into cart”."
+msgstr ""
+
+#: pc-wholesale-help.php:396
+msgid "Protect the current cart."
+msgstr ""
+
+#: pc-wholesale-help.php:396
+msgid "Loading a draft or previous order first clears the current cart and then adds products from the selected order. Save or export the current cart first if you need it."
+msgstr ""
+
+#: pc-wholesale-help.php:397
+msgid "Deleted or unavailable products may be skipped. Prices, availability and warehouse allocation are recalculated. For selected items without clearing the cart, repeat products from a Folio invoice instead."
+msgstr ""
+
+#: pc-wholesale-help.php:401
+msgid "Complete checkout"
+msgstr ""
+
+#: pc-wholesale-help.php:401
+msgid "Check contact details, recipient, delivery, payment, products, quantities and totals before confirming."
+msgstr ""
+
+#: pc-wholesale-help.php:403
+msgid "Open checkout"
+msgstr ""
+
+#: pc-wholesale-help.php:403
+msgid "Go from the reviewed cart to checkout."
+msgstr ""
+
+#: pc-wholesale-help.php:404
+msgid "Complete delivery"
+msgstr ""
+
+#: pc-wholesale-help.php:404
+msgid "For Nova Poshta, choose the displayed branch, parcel locker or address fields."
+msgstr ""
+
+#: pc-wholesale-help.php:405
+msgid "Choose payment"
+msgstr ""
+
+#: pc-wholesale-help.php:405
+msgid "Select one of the methods available for your account."
+msgstr ""
+
+#: pc-wholesale-help.php:406
+msgid "Confirm once"
+msgstr ""
+
+#: pc-wholesale-help.php:406
+msgid "Wait for Folio processing to finish; do not submit a duplicate order."
+msgstr ""
+
+#: pc-wholesale-help.php:408
+msgid "Go to checkout"
+msgstr ""
+
+#: pc-wholesale-help.php:412
+msgid "Why an order may be split"
+msgstr ""
+
+#: pc-wholesale-help.php:412
+msgid "Folio creates warehouse documents separately. One WooCommerce cart may therefore become several linked orders, invoices or shipments."
+msgstr ""
+
+#: pc-wholesale-help.php:414
+msgid "One warehouse"
+msgstr ""
+
+#: pc-wholesale-help.php:414
+msgid "One order and one Folio document remain."
+msgstr ""
+
+#: pc-wholesale-help.php:415
+msgid "Several warehouses"
+msgstr ""
+
+#: pc-wholesale-help.php:415
+msgid "Linked child orders appear for individual warehouses and may be shipped separately."
+msgstr ""
+
+#: pc-wholesale-help.php:416
+msgid "Stock shortage"
+msgstr ""
+
+#: pc-wholesale-help.php:416
+msgid "The available part may be processed while the missing part waits for a manager review."
+msgstr ""
+
+#: pc-wholesale-help.php:418
+msgid "Do not pay linked child orders separately"
+msgstr ""
+
+#: pc-wholesale-help.php:418
+msgid "unless a manager clearly asks you to do so."
+msgstr ""
+
+#: pc-wholesale-help.php:422
+msgid "View the customer balance"
+msgstr ""
+
+#: pc-wholesale-help.php:422
+msgid "Choose a start date or all time, generate the report, then export XLSX or print it if needed."
+msgstr ""
+
+#: pc-wholesale-help.php:423
+msgid "The report may show opening balance, invoices, payments, total debt, overdue amount, prepayment and the amount due now. The table below explains each operation and the balance before and after it."
+msgstr ""
+
+#: pc-wholesale-help.php:425
+msgid "Open customer balance"
+msgstr ""
+
+#: pc-wholesale-help.php:430
+msgid "View and repeat Folio documents"
+msgstr ""
+
+#: pc-wholesale-help.php:430
+msgid "Choose a period and document types, then open an invoice, expense invoice or payment for details."
+msgstr ""
+
+#: pc-wholesale-help.php:431
+msgid "From an invoice or expense invoice, select the products you need and add them to the current cart or save them as a new draft. The current cart is not cleared in this workflow."
+msgstr ""
+
+#: pc-wholesale-help.php:432
+msgid "Historical prices are for reference only."
+msgstr ""
+
+#: pc-wholesale-help.php:432
+msgid "The new cart always uses current prices, availability and allocation. Payments and returns cannot be repeated as an order."
+msgstr ""
+
+#: pc-wholesale-help.php:434
 msgid "Open Folio documents"
 msgstr ""
 
-#: pc-wholesale-help.php:386
+#: pc-wholesale-help.php:439
 msgid "Need help?"
 msgstr ""
 
-#: pc-wholesale-help.php:386
+#: pc-wholesale-help.php:439
 msgid "Tell the wholesale manager your WooCommerce order number and what you expected to see. Never send your password or bank card details."
 msgstr ""
 
-#: pc-wholesale-help.php:387
+#: pc-wholesale-help.php:440
 msgid "Back to top"
 msgstr ""

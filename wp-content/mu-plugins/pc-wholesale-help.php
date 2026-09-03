@@ -2,7 +2,7 @@
 /**
  * Plugin Name: PC Wholesale Customer Help
  * Description: Role-gated customer guide, My Account endpoint and contextual help links for wholesale ordering.
- * Version: 1.0.0
+ * Version: 1.1.0
  * Author: PaintCore
  * Text Domain: pc-wholesale-help
  * Domain Path: /languages
@@ -11,7 +11,7 @@
 defined('ABSPATH') || exit;
 
 const PC_WHOLESALE_HELP_ENDPOINT = 'yak-zamovyty';
-const PC_WHOLESALE_HELP_VERSION = '1.0.0';
+const PC_WHOLESALE_HELP_VERSION = '1.1.0';
 
 /**
  * One allow-list shared by the quick-order page and the customer guide.
@@ -339,12 +339,39 @@ function pc_wholesale_help_render_endpoint(): void {
 
         <section class="pc-help-section" id="import">
             <div class="pc-help-section__heading"><span>05</span><div><h2><?php esc_html_e('Import your order from a file', 'pc-wholesale-help'); ?></h2><p><?php esc_html_e('Supported files: CSV, XLSX and XLS. The first row must contain column names.', 'pc-wholesale-help'); ?></p></div></div>
-            <div class="pc-help-code"><code>sku;qty<br>ABC-123;2<br>DEF-456;5</code><a href="<?php echo esc_url(pc_wholesale_help_asset_url('wholesale-order-template.csv')); ?>" download><?php esc_html_e('Download CSV template', 'pc-wholesale-help'); ?></a></div>
+            <p><?php esc_html_e('Column names can be Ukrainian, Russian, or English, and columns can appear in any order.', 'pc-wholesale-help'); ?></p>
+            <div class="pc-help-grid pc-help-grid--three pc-help-aliases">
+                <div class="pc-help-card"><h3><?php esc_html_e('SKU / article', 'pc-wholesale-help'); ?></h3><p><code>sku</code>, <code>SKU</code>, <code>Артикул</code>, <code>Код</code>, <code>Код товару</code>, <code>article</code>, <code>mpn</code>, <code>model sku</code></p></div>
+                <div class="pc-help-card"><h3><?php esc_html_e('GTIN / barcode', 'pc-wholesale-help'); ?></h3><p><code>gtin</code>, <code>GTIN</code>, <code>ean</code>, <code>ean13</code>, <code>upc</code>, <code>barcode</code>, <code>Штрих код</code>, <code>Штрих-код</code>, <code>Штрихкод</code></p></div>
+                <div class="pc-help-card"><h3><?php esc_html_e('Quantity', 'pc-wholesale-help'); ?></h3><p><code>qty</code>, <code>q-ty</code>, <code>quantity</code>, <code>qnt</code>, <code>count</code>, <code>Кількість</code>, <code>К-сть</code>, <code>Количество</code>, <code>К-во</code>, <code>шт</code>, <code>pcs</code>, <code>pieces</code></p></div>
+            </div>
+            <div class="pc-help-note"><strong><?php esc_html_e('Search order:', 'pc-wholesale-help'); ?></strong> <?php esc_html_e('If both SKU and GTIN are present in a row, the site checks GTIN first. If no product is found, it then searches by SKU.', 'pc-wholesale-help'); ?></div>
+            <div class="pc-help-sheet-example">
+                <div class="pc-help-sheet-example__title"><strong><?php esc_html_e('Excel example', 'pc-wholesale-help'); ?></strong><span><?php esc_html_e('One row may contain only SKU, another only GTIN, and a row may contain both.', 'pc-wholesale-help'); ?></span></div>
+                <div class="pc-help-sheet-example__scroll">
+                    <table>
+                        <thead><tr><th>sku</th><th>gtin</th><th>q-ty</th></tr></thead>
+                        <tbody>
+                            <tr><td>SKU-PRYKLAD-001</td><td></td><td>2</td></tr>
+                            <tr><td></td><td>4820000000001</td><td>5</td></tr>
+                            <tr><td>SKU-PRYKLAD-003</td><td>4820000000002</td><td>1</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p><?php
+                    /* translators: %1$s is the GTIN column name; %2$s is the quantity column name. */
+                    printf(esc_html__('The combination %1$s + %2$s is supported. The rows in the Excel file are examples; replace or delete them before import.', 'pc-wholesale-help'), '<code>gtin</code>', '<code>q-ty</code>');
+                ?></p>
+            </div>
+            <div class="pc-help-downloads">
+                <a href="<?php echo esc_url(pc_wholesale_help_asset_url('wholesale-order-template.csv')); ?>" download><?php esc_html_e('Download CSV template', 'pc-wholesale-help'); ?></a>
+                <a href="<?php echo esc_url(pc_wholesale_help_asset_url('wholesale-order-template.xlsx')); ?>" download><?php esc_html_e('Download Excel example', 'pc-wholesale-help'); ?></a>
+            </div>
             <div class="pc-help-grid pc-help-grid--two">
                 <div class="pc-help-card"><h3><?php esc_html_e('Import to cart', 'pc-wholesale-help'); ?></h3><p><?php esc_html_e('Open the import block in the cart, choose a file and import it. New products are added to the products already in the cart.', 'pc-wholesale-help'); ?></p></div>
                 <div class="pc-help-card"><h3><?php esc_html_e('Import to draft', 'pc-wholesale-help'); ?></h3><p><?php esc_html_e('Open “My orders”, choose a file and optionally enter a draft title. The current cart is not changed.', 'pc-wholesale-help'); ?></p></div>
             </div>
-            <p><?php esc_html_e('Use sku or gtin/barcode for the product and qty for quantity. Empty, zero and negative quantities are skipped. Always review the row-by-row import report.', 'pc-wholesale-help'); ?></p>
+            <p><?php esc_html_e('Use SKU/article or GTIN/barcode for the product and a supported quantity column such as qty, q-ty or Кількість. Empty, zero and negative quantities are skipped. Always review the row-by-row import report.', 'pc-wholesale-help'); ?></p>
             <div class="pc-help-warning"><strong><?php esc_html_e('Current data wins.', 'pc-wholesale-help'); ?></strong> <?php esc_html_e('The cart uses your current WooCommerce price, current availability and current warehouse mode, not the price from the file.', 'pc-wholesale-help'); ?></div>
             <?php pc_wholesale_help_image('import-to-cart-and-draft.jpg', __('Cart controls for export, import and saving a draft', 'pc-wholesale-help'), __('CSV/XLSX export, import and draft controls are located below the cart totals.', 'pc-wholesale-help')); ?>
         </section>

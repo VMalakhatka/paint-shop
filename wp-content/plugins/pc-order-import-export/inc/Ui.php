@@ -114,7 +114,7 @@ class Ui
               <ul style="margin:0 0 8px 18px">
                 <li><?php printf('%s: <code>sku</code>, <code>SKU</code>, <code>Артикул</code>, <code>Код товара</code>, <code>Код продукту</code>', esc_html__('SKU', 'pc-order-import-export')); ?></li>
                 <li><?php printf('%s: <code>gtin</code>, <code>GTIN</code>, <code>ean</code>, <code>barcode</code>, <code>Штрих-код</code>, <code>Штрихкод</code>', esc_html__('GTIN', 'pc-order-import-export')); ?></li>
-                <li><?php printf('%s: <code>qty</code>, <code>Qty</code>, <code>Количество</code>, <code>К-во</code>, <code>К-сть</code>, <code>Кількість</code>, <code>шт</code>', esc_html__('Qty', 'pc-order-import-export')); ?></li>
+                <li><?php printf('%s: <code>qty</code>, <code>q-ty</code>, <code>quantity</code>, <code>qnt</code>, <code>count</code>, <code>Количество</code>, <code>К-во</code>, <code>К-сть</code>, <code>Кількість</code>, <code>шт</code>, <code>pcs</code>, <code>pieces</code>', esc_html__('Qty', 'pc-order-import-export')); ?></li>
                 <li><?php printf('%s: <code>price</code>, <code>Price</code>, <code>Цена</code>, <code>Ціна</code>, <code>Вартість</code>', esc_html__('Price', 'pc-order-import-export')); ?></li>
               </ul>
 
@@ -124,7 +124,7 @@ class Ui
               <pre style="white-space:pre-wrap; margin:0 0 6px; padding:8px; background:#f7f7f7; border-radius:4px"><code>sku;qty
 ABC-123;10
 DEF-456;3</code></pre>
-              <pre style="white-space:pre-wrap; margin:0; padding:8px; background:#f7f7f7; border-radius:4px"><code>Штрих-код;К-сть
+              <pre style="white-space:pre-wrap; margin:0; padding:8px; background:#f7f7f7; border-radius:4px"><code>gtin;q-ty
 4820000000001;10
 4820000000002;3</code></pre>
             </div>

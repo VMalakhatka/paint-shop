@@ -1,6 +1,8 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: PC Wholesale Customer Help 1.0.0\n"
+"Project-Id-Version: PC Wholesale Customer Help 1.1.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mu-plugins\n"
+"POT-Creation-Date: 2026-09-03T16:51:03+00:00\n"
 "PO-Revision-Date: 2026-09-03 00:00+0000\n"
 "Last-Translator: PaintCore\n"
 "Language-Team: PaintCore\n"
@@ -10,419 +12,771 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+#. Plugin Name of the plugin
+#: pc-wholesale-help.php
+msgid "PC Wholesale Customer Help"
+msgstr "Інструкція для оптового клієнта"
+
+#. Description of the plugin
+#: pc-wholesale-help.php
+msgid ""
+"Role-gated customer guide, My Account endpoint and contextual help links for "
+"wholesale ordering."
+msgstr ""
+"Інструкція для оптових клієнтів з обмеженням за ролями, розділом у кабінеті "
+"та контекстними посиланнями."
+
+#. Author of the plugin
+#: pc-wholesale-help.php
+msgid "PaintCore"
+msgstr "PaintCore"
+
+#: pc-wholesale-help.php:55 pc-wholesale-help.php:79 pc-wholesale-help.php:86
 msgid "How to order"
 msgstr "Як замовляти"
 
+#: pc-wholesale-help.php:118
 msgid "This guide is available to wholesale customers after signing in."
 msgstr "Ця інструкція доступна оптовим клієнтам після входу в кабінет."
 
+#: pc-wholesale-help.php:152
 msgid "Help for this page"
 msgstr "Допомога для цієї сторінки"
 
+#: pc-wholesale-help.php:168
 msgid "Open instructions"
 msgstr "Відкрити інструкцію"
 
+#: pc-wholesale-help.php:173
 msgid "How to choose products in the catalogue"
 msgstr "Як вибирати товари в каталозі"
 
+#: pc-wholesale-help.php:179
 msgid "Cart, import, export and drafts"
 msgstr "Кошик, імпорт, експорт і чернетки"
 
-msgid "Checkout and splitting an order by warehouses"
-msgstr "Оформлення та розділення замовлення по складах"
-
-msgid "Drafts and repeating previous orders"
-msgstr "Чернетки та повторення попередніх замовлень"
-
-msgid "Export or repeat this order"
-msgstr "Як вивантажити або повторити це замовлення"
-
-msgid "How to read the customer balance"
-msgstr "Як переглядати баланс із клієнтом"
-
-msgid "How to view and repeat Folio documents"
-msgstr "Як переглядати та повторювати документи ФОЛІО"
-
-msgid "Wholesale customer guide"
-msgstr "Інструкція для оптового клієнта"
-
-msgid "How to order on the KREUL website"
-msgstr "Як замовляти на сайті KREUL"
-
-msgid "Choose products in the catalogue, as a list or from a file; check warehouses; save drafts; repeat previous purchases and view Folio documents."
-msgstr "Вибирайте товари в каталозі, списком або з файлу; перевіряйте склади; зберігайте чернетки; повторюйте попередні покупки та переглядайте документи ФОЛІО."
-
-msgid "Open catalogue"
-msgstr "Відкрити каталог"
-
-msgid "Order from a list"
-msgstr "Замовити списком"
-
-msgid "Open cart"
-msgstr "Відкрити кошик"
-
-msgid "My orders"
-msgstr "Мої замовлення"
-
-msgid "Guide contents"
-msgstr "Зміст інструкції"
-
-msgid "Warehouse mode"
-msgstr "Режим складу"
-
-msgid "Catalogue"
-msgstr "Каталог"
-
-msgid "Product list"
-msgstr "Товар списком"
-
+#: pc-wholesale-help.php:180 pc-wholesale-help.php:286
 msgid "Cart"
 msgstr "Кошик"
 
+#: pc-wholesale-help.php:181 pc-wholesale-help.php:287
 msgid "Import"
 msgstr "Імпорт"
 
+#: pc-wholesale-help.php:182 pc-wholesale-help.php:288
 msgid "Export"
 msgstr "Експорт"
 
+#: pc-wholesale-help.php:183 pc-wholesale-help.php:198
+#: pc-wholesale-help.php:289
 msgid "Drafts"
 msgstr "Чернетки"
 
-msgid "Previous orders"
-msgstr "Старі замовлення"
+#: pc-wholesale-help.php:189
+msgid "Checkout and splitting an order by warehouses"
+msgstr "Оформлення та розділення замовлення по складах"
 
+#: pc-wholesale-help.php:190 pc-wholesale-help.php:291
 msgid "Checkout"
 msgstr "Оформлення"
 
+#: pc-wholesale-help.php:191 pc-wholesale-help.php:292
 msgid "Warehouse split"
 msgstr "Розділення по складах"
 
+#: pc-wholesale-help.php:197
+msgid "Drafts and repeating previous orders"
+msgstr "Чернетки та повторення попередніх замовлень"
+
+#: pc-wholesale-help.php:199 pc-wholesale-help.php:290
+msgid "Previous orders"
+msgstr "Старі замовлення"
+
+#: pc-wholesale-help.php:205
+msgid "Export or repeat this order"
+msgstr "Як вивантажити або повторити це замовлення"
+
+#: pc-wholesale-help.php:210
+msgid "How to read the customer balance"
+msgstr "Як переглядати баланс із клієнтом"
+
+#: pc-wholesale-help.php:215
+msgid "How to view and repeat Folio documents"
+msgstr "Як переглядати та повторювати документи ФОЛІО"
+
+#: pc-wholesale-help.php:271
+msgid "Wholesale customer guide"
+msgstr "Інструкція для оптового клієнта"
+
+#: pc-wholesale-help.php:272
+msgid "How to order on the KREUL website"
+msgstr "Як замовляти на сайті KREUL"
+
+#: pc-wholesale-help.php:273
+msgid ""
+"Choose products in the catalogue, as a list or from a file; check "
+"warehouses; save drafts; repeat previous purchases and view Folio documents."
+msgstr ""
+"Вибирайте товари в каталозі, списком або з файлу; перевіряйте склади; "
+"зберігайте чернетки; повторюйте попередні покупки та переглядайте документи "
+"ФОЛІО."
+
+#: pc-wholesale-help.php:275
+msgid "Open catalogue"
+msgstr "Відкрити каталог"
+
+#: pc-wholesale-help.php:276
+msgid "Order from a list"
+msgstr "Замовити списком"
+
+#: pc-wholesale-help.php:277
+msgid "Open cart"
+msgstr "Відкрити кошик"
+
+#: pc-wholesale-help.php:278
+msgid "My orders"
+msgstr "Мої замовлення"
+
+#: pc-wholesale-help.php:282
+msgid "Guide contents"
+msgstr "Зміст інструкції"
+
+#: pc-wholesale-help.php:283
+msgid "Warehouse mode"
+msgstr "Режим складу"
+
+#: pc-wholesale-help.php:284
+msgid "Catalogue"
+msgstr "Каталог"
+
+#: pc-wholesale-help.php:285
+msgid "Product list"
+msgstr "Товар списком"
+
+#: pc-wholesale-help.php:293
 msgid "Balance"
 msgstr "Баланс"
 
+#: pc-wholesale-help.php:294
 msgid "Folio documents"
 msgstr "Документи ФОЛІО"
 
+#: pc-wholesale-help.php:298
 msgid "Choose how products are written off from warehouses"
 msgstr "Виберіть, як списувати товари зі складів"
 
-msgid "Select the mode before adding products. If you change it later, review the entire cart again."
-msgstr "Виберіть режим до додавання товарів. Якщо зміните його пізніше, ще раз перевірте весь кошик."
+#: pc-wholesale-help.php:298
+msgid ""
+"Select the mode before adding products. If you change it later, review the "
+"entire cart again."
+msgstr ""
+"Виберіть режим до додавання товарів. Якщо зміните його пізніше, ще раз "
+"перевірте весь кошик."
 
+#: pc-wholesale-help.php:300
 msgid "The system decides"
 msgstr "Вирішує система"
 
-msgid "Recommended: the site automatically distributes the required quantity among available warehouses."
-msgstr "Рекомендовано: сайт автоматично розподіляє потрібну кількість між доступними складами."
+#: pc-wholesale-help.php:300
+msgid ""
+"Recommended: the site automatically distributes the required quantity among "
+"available warehouses."
+msgstr ""
+"Рекомендовано: сайт автоматично розподіляє потрібну кількість між доступними "
+"складами."
 
+#: pc-wholesale-help.php:301
 msgid "Selected warehouse first"
 msgstr "Спочатку обраний склад"
 
-msgid "The site takes products from the selected warehouse first and covers any shortage from other warehouses."
-msgstr "Сайт спочатку бере товари з обраного складу, а нестачу — з інших складів."
+#: pc-wholesale-help.php:301
+msgid ""
+"The site takes products from the selected warehouse first and covers any "
+"shortage from other warehouses."
+msgstr ""
+"Сайт спочатку бере товари з обраного складу, а нестачу — з інших складів."
 
+#: pc-wholesale-help.php:302
 msgid "Selected warehouse only"
 msgstr "Лише обраний склад"
 
-msgid "Only stock from one selected warehouse may be ordered. Other warehouses are not used."
-msgstr "Замовити можна лише залишок одного обраного складу. Інші склади не використовуються."
+#: pc-wholesale-help.php:302
+msgid ""
+"Only stock from one selected warehouse may be ordered. Other warehouses are "
+"not used."
+msgstr ""
+"Замовити можна лише залишок одного обраного складу. Інші склади не "
+"використовуються."
 
+#: pc-wholesale-help.php:304
 msgid "Look for “Allocation”."
 msgstr "Перевіряйте рядок «Списання»."
 
-msgid "It shows the exact warehouse and quantity that will be used for each product."
+#: pc-wholesale-help.php:304
+msgid ""
+"It shows the exact warehouse and quantity that will be used for each product."
 msgstr "Він показує точний склад і кількість для кожного товару."
 
+#: pc-wholesale-help.php:308
 msgid "Order from catalogue cards"
 msgstr "Замовляйте з карток каталогу"
 
+#: pc-wholesale-help.php:308
 msgid "Best when you want to browse photos, categories and product variants."
 msgstr "Зручно, коли потрібно переглядати фото, категорії та варіанти товару."
 
+#: pc-wholesale-help.php:310
 msgid "Open the catalogue"
 msgstr "Відкрийте каталог"
 
+#: pc-wholesale-help.php:310
 msgid "Choose a category or use search."
 msgstr "Виберіть категорію або скористайтеся пошуком."
 
+#: pc-wholesale-help.php:311
 msgid "Check the product"
 msgstr "Перевірте товар"
 
+#: pc-wholesale-help.php:311
 msgid "Review the SKU, your price and stock by warehouse."
 msgstr "Перегляньте артикул, свою ціну та залишки по складах."
 
+#: pc-wholesale-help.php:312
 msgid "Enter the quantity"
 msgstr "Вкажіть кількість"
 
+#: pc-wholesale-help.php:312
 msgid "Use the minus, plus or quantity field, then press the cart button."
-msgstr "Скористайтеся мінусом, плюсом або полем кількості, потім натисніть кнопку кошика."
+msgstr ""
+"Скористайтеся мінусом, плюсом або полем кількості, потім натисніть кнопку "
+"кошика."
 
+#: pc-wholesale-help.php:313
 msgid "Review the cart"
 msgstr "Перевірте кошик"
 
+#: pc-wholesale-help.php:313
 msgid "Check every item and its warehouse allocation before checkout."
 msgstr "Перед оформленням перевірте кожну позицію та її розподіл по складах."
 
+#: pc-wholesale-help.php:315
 msgid "Go to catalogue"
 msgstr "Перейти до каталогу"
 
+#: pc-wholesale-help.php:316
 msgid "Catalogue cards with quantity and stock by warehouse"
 msgstr "Картки каталогу з кількістю та залишками по складах"
 
+#: pc-wholesale-help.php:316
 msgid "Click the image to enlarge it."
 msgstr "Натисніть зображення, щоб збільшити його."
 
+#: pc-wholesale-help.php:320
 msgid "Order products from a list"
 msgstr "Замовляйте товари списком"
 
+#: pc-wholesale-help.php:320
 msgid "Best for a large order when you already know product names or SKUs."
 msgstr "Зручно для великого замовлення, коли відомі назви або артикули."
 
+#: pc-wholesale-help.php:322
 msgid "Open “Product list”"
 msgstr "Відкрийте «Товар списком»"
 
-msgid "Sort by title, SKU or price; hide products with zero availability if needed."
-msgstr "Сортуйте за назвою, артикулом або ціною; за потреби сховайте товари з нульовим залишком."
+#: pc-wholesale-help.php:322
+msgid ""
+"Sort by title, SKU or price; hide products with zero availability if needed."
+msgstr ""
+"Сортуйте за назвою, артикулом або ціною; за потреби сховайте товари з "
+"нульовим залишком."
 
+#: pc-wholesale-help.php:323
 msgid "Enter quantities"
 msgstr "Введіть кількість"
 
+#: pc-wholesale-help.php:323
 msgid "Fill in the quantity only for products you need."
 msgstr "Заповніть кількість лише для потрібних товарів."
 
+#: pc-wholesale-help.php:324
 msgid "Add all"
 msgstr "Додайте все"
 
+#: pc-wholesale-help.php:324
 msgid "Press “Add all to cart” before moving to another page of the list."
-msgstr "Натисніть «Додати все в кошик» перед переходом на іншу сторінку списку."
+msgstr ""
+"Натисніть «Додати все в кошик» перед переходом на іншу сторінку списку."
 
+#: pc-wholesale-help.php:325
 msgid "Check the result"
 msgstr "Перевірте результат"
 
+#: pc-wholesale-help.php:325
 msgid "Read the message with selected and added items, then open the cart."
-msgstr "Прочитайте повідомлення про вибрані й додані позиції, потім відкрийте кошик."
+msgstr ""
+"Прочитайте повідомлення про вибрані й додані позиції, потім відкрийте кошик."
 
+#: pc-wholesale-help.php:327
 msgid "Go to product list"
 msgstr "Перейти до списку товарів"
 
+#: pc-wholesale-help.php:329
 msgid "Controls on the product list page"
 msgstr "Керування на сторінці товарів списком"
 
+#: pc-wholesale-help.php:329
 msgid "Sorting, hiding zero stock and adding selected quantities."
-msgstr "Сортування, приховування нульових залишків і додавання вибраної кількості."
+msgstr ""
+"Сортування, приховування нульових залишків і додавання вибраної кількості."
 
+#: pc-wholesale-help.php:330
 msgid "Wholesale quick-order table"
 msgstr "Таблиця швидкого оптового замовлення"
 
+#: pc-wholesale-help.php:330
 msgid "Products, SKU, price, cart quantity, availability and new quantity."
 msgstr "Товари, артикул, ціна, кількість у кошику, наявність і нова кількість."
 
+#: pc-wholesale-help.php:335
 msgid "Check the cart"
 msgstr "Перевірте кошик"
 
-msgid "For every item, check the product, SKU, price, quantity, subtotal and the “Allocation” line."
-msgstr "Для кожної позиції перевірте товар, артикул, ціну, кількість, суму та рядок «Списання»."
+#: pc-wholesale-help.php:335
+msgid ""
+"For every item, check the product, SKU, price, quantity, subtotal and the "
+"“Allocation” line."
+msgstr ""
+"Для кожної позиції перевірте товар, артикул, ціну, кількість, суму та рядок "
+"«Списання»."
 
+#: pc-wholesale-help.php:336
 msgid "Example:"
 msgstr "Приклад:"
 
-msgid "“Allocation: Kyiv — 2, Odesa — 3” means that five units will be collected from two warehouses."
-msgstr "«Списання: Київ — 2, Одеса — 3» означає, що п’ять одиниць буде зібрано з двох складів."
+#: pc-wholesale-help.php:336
+msgid ""
+"“Allocation: Kyiv — 2, Odesa — 3” means that five units will be collected "
+"from two warehouses."
+msgstr ""
+"«Списання: Київ — 2, Одеса — 3» означає, що п’ять одиниць буде зібрано з "
+"двох складів."
 
+#: pc-wholesale-help.php:337
 msgid "Cart with one item split between two warehouses"
 msgstr "Кошик з однією позицією, розділеною між двома складами"
 
+#: pc-wholesale-help.php:337
 msgid "A split is normal in automatic warehouse mode."
 msgstr "Розділення є нормальною роботою автоматичного режиму складу."
 
+#: pc-wholesale-help.php:341
 msgid "Import your order from a file"
 msgstr "Імпортуйте своє замовлення з файлу"
 
-msgid "Supported files: CSV, XLSX and XLS. The first row must contain column names."
+#: pc-wholesale-help.php:341
+msgid ""
+"Supported files: CSV, XLSX and XLS. The first row must contain column names."
 msgstr "Підтримуються CSV, XLSX і XLS. Перший рядок має містити назви колонок."
 
+#: pc-wholesale-help.php:342
+msgid ""
+"Column names can be Ukrainian, Russian, or English, and columns can appear "
+"in any order."
+msgstr ""
+"Назви колонок можуть бути українською, російською або англійською, а порядок "
+"колонок може бути будь-яким."
+
+#: pc-wholesale-help.php:344
+msgid "SKU / article"
+msgstr "SKU / артикул"
+
+#: pc-wholesale-help.php:345
+msgid "GTIN / barcode"
+msgstr "GTIN / штрихкод"
+
+#: pc-wholesale-help.php:346
+msgid "Quantity"
+msgstr "Кількість"
+
+#: pc-wholesale-help.php:348
+msgid "Search order:"
+msgstr "Порядок пошуку:"
+
+#: pc-wholesale-help.php:348
+msgid ""
+"If both SKU and GTIN are present in a row, the site checks GTIN first. If no "
+"product is found, it then searches by SKU."
+msgstr ""
+"Якщо в рядку є і SKU, і GTIN, сайт спочатку перевіряє GTIN. Якщо товар не "
+"знайдено, тоді виконується пошук за SKU."
+
+#: pc-wholesale-help.php:350
+msgid "Excel example"
+msgstr "Приклад Excel"
+
+#: pc-wholesale-help.php:350
+msgid ""
+"One row may contain only SKU, another only GTIN, and a row may contain both."
+msgstr ""
+"В одному рядку може бути лише SKU, в іншому — лише GTIN, а також можна "
+"заповнити обидва."
+
+#. translators: %1$s is the GTIN column name; %2$s is the quantity column name.
+#: pc-wholesale-help.php:363
+#, php-format
+msgid ""
+"The combination %1$s + %2$s is supported. The rows in the Excel file are "
+"examples; replace or delete them before import."
+msgstr ""
+"Комбінація %1$s + %2$s підтримується. Рядки у файлі Excel є прикладами — "
+"замініть або видаліть їх перед імпортом."
+
+#: pc-wholesale-help.php:367
 msgid "Download CSV template"
 msgstr "Завантажити шаблон CSV"
 
+#: pc-wholesale-help.php:368
+msgid "Download Excel example"
+msgstr "Завантажити приклад Excel"
+
+#: pc-wholesale-help.php:371
 msgid "Import to cart"
 msgstr "Імпорт у кошик"
 
-msgid "Open the import block in the cart, choose a file and import it. New products are added to the products already in the cart."
-msgstr "Відкрийте блок імпорту в кошику, виберіть файл та імпортуйте його. Нові товари додаються до тих, що вже є в кошику."
+#: pc-wholesale-help.php:371
+msgid ""
+"Open the import block in the cart, choose a file and import it. New products "
+"are added to the products already in the cart."
+msgstr ""
+"Відкрийте блок імпорту в кошику, виберіть файл та імпортуйте його. Нові "
+"товари додаються до тих, що вже є в кошику."
 
+#: pc-wholesale-help.php:372
 msgid "Import to draft"
 msgstr "Імпорт у чернетку"
 
-msgid "Open “My orders”, choose a file and optionally enter a draft title. The current cart is not changed."
-msgstr "Відкрийте «Мої замовлення», виберіть файл і за бажанням введіть назву чернетки. Поточний кошик не змінюється."
+#: pc-wholesale-help.php:372
+msgid ""
+"Open “My orders”, choose a file and optionally enter a draft title. The "
+"current cart is not changed."
+msgstr ""
+"Відкрийте «Мої замовлення», виберіть файл і за бажанням введіть назву "
+"чернетки. Поточний кошик не змінюється."
 
-msgid "Use sku or gtin/barcode for the product and qty for quantity. Empty, zero and negative quantities are skipped. Always review the row-by-row import report."
-msgstr "Для товару використовуйте sku або gtin/barcode, для кількості — qty. Порожні, нульові та від’ємні кількості пропускаються. Завжди перевіряйте звіт по кожному рядку."
+#: pc-wholesale-help.php:374
+msgid ""
+"Use SKU/article or GTIN/barcode for the product and a supported quantity "
+"column such as qty, q-ty or Кількість. Empty, zero and negative quantities "
+"are skipped. Always review the row-by-row import report."
+msgstr ""
+"Для товару використовуйте SKU/артикул або GTIN/штрихкод, а для кількості — "
+"підтримувану колонку, наприклад qty, q-ty чи Кількість. Порожні, нульові та "
+"від’ємні кількості пропускаються. Завжди перевіряйте звіт по кожному рядку."
 
+#: pc-wholesale-help.php:375
 msgid "Current data wins."
 msgstr "Застосовуються поточні дані."
 
-msgid "The cart uses your current WooCommerce price, current availability and current warehouse mode, not the price from the file."
-msgstr "Кошик використовує вашу поточну ціну WooCommerce, актуальну наявність і поточний режим складу, а не ціну з файлу."
+#: pc-wholesale-help.php:375
+msgid ""
+"The cart uses your current WooCommerce price, current availability and "
+"current warehouse mode, not the price from the file."
+msgstr ""
+"Кошик використовує вашу поточну ціну WooCommerce, актуальну наявність і "
+"поточний режим складу, а не ціну з файлу."
 
+#: pc-wholesale-help.php:376
 msgid "Cart controls for export, import and saving a draft"
 msgstr "Керування експортом, імпортом і збереженням чернетки в кошику"
 
-msgid "CSV/XLSX export, import and draft controls are located below the cart totals."
+#: pc-wholesale-help.php:376
+msgid ""
+"CSV/XLSX export, import and draft controls are located below the cart totals."
 msgstr "Експорт CSV/XLSX, імпорт і чернетки розташовані під підсумками кошика."
 
+#: pc-wholesale-help.php:380
 msgid "Export the cart or an order"
 msgstr "Вивантажте кошик або замовлення"
 
-msgid "Export is available in the cart and on the details page of each previous order."
-msgstr "Експорт доступний у кошику та на сторінці деталей кожного попереднього замовлення."
+#: pc-wholesale-help.php:380
+msgid ""
+"Export is available in the cart and on the details page of each previous "
+"order."
+msgstr ""
+"Експорт доступний у кошику та на сторінці деталей кожного попереднього "
+"замовлення."
 
+#: pc-wholesale-help.php:382
 msgid "Choose columns"
 msgstr "Виберіть колонки"
 
+#: pc-wholesale-help.php:382
 msgid "SKU, barcode, title, quantity, price, total and notes are available."
 msgstr "Доступні артикул, штрихкод, назва, кількість, ціна, сума та примітки."
 
+#: pc-wholesale-help.php:383
 msgid "Choose warehouse format"
 msgstr "Виберіть формат складів"
 
-msgid "Use one product row with allocation in notes, or separate rows for each warehouse."
-msgstr "Використовуйте один рядок товару зі списанням у примітках або окремі рядки для кожного складу."
+#: pc-wholesale-help.php:383
+msgid ""
+"Use one product row with allocation in notes, or separate rows for each "
+"warehouse."
+msgstr ""
+"Використовуйте один рядок товару зі списанням у примітках або окремі рядки "
+"для кожного складу."
 
+#: pc-wholesale-help.php:384
 msgid "Download the file"
 msgstr "Завантажте файл"
 
+#: pc-wholesale-help.php:384
 msgid "Choose CSV or XLSX. Export does not change or clear the cart."
 msgstr "Виберіть CSV або XLSX. Експорт не змінює і не очищає кошик."
 
+#: pc-wholesale-help.php:389
 msgid "Save the cart as a draft"
 msgstr "Збережіть кошик у чернетку"
 
-msgid "Enter an optional title in the cart and press “Save as draft”. The draft will appear in “My orders”."
-msgstr "За бажанням введіть назву в кошику та натисніть «Зберегти у чернетку». Чернетка з’явиться в «Моїх замовленнях»."
+#: pc-wholesale-help.php:389
+msgid ""
+"Enter an optional title in the cart and press “Save as draft”. The draft "
+"will appear in “My orders”."
+msgstr ""
+"За бажанням введіть назву в кошику та натисніть «Зберегти у чернетку». "
+"Чернетка з’явиться в «Моїх замовленнях»."
 
+#: pc-wholesale-help.php:390
 msgid "Important:"
 msgstr "Важливо:"
 
-msgid "After a successful save, the current cart is cleared. A draft does not reserve stock."
-msgstr "Після успішного збереження поточний кошик очищається. Чернетка не резервує товар."
+#: pc-wholesale-help.php:390
+msgid ""
+"After a successful save, the current cart is cleared. A draft does not "
+"reserve stock."
+msgstr ""
+"Після успішного збереження поточний кошик очищається. Чернетка не резервує "
+"товар."
 
+#: pc-wholesale-help.php:391
 msgid "Open my orders"
 msgstr "Відкрити мої замовлення"
 
+#: pc-wholesale-help.php:395
 msgid "Repeat a draft or a previous order"
 msgstr "Повторіть чернетку або старе замовлення"
 
-msgid "For a draft, press “To cart”. For a previous order, open its details and press “Load draft into cart”."
-msgstr "Для чернетки натисніть «У кошик». Для старого замовлення відкрийте деталі й натисніть «Завантажити чернетку у кошик»."
+#: pc-wholesale-help.php:395
+msgid ""
+"For a draft, press “To cart”. For a previous order, open its details and "
+"press “Load draft into cart”."
+msgstr ""
+"Для чернетки натисніть «У кошик». Для старого замовлення відкрийте деталі й "
+"натисніть «Завантажити чернетку у кошик»."
 
+#: pc-wholesale-help.php:396
 msgid "Protect the current cart."
 msgstr "Збережіть поточний кошик."
 
-msgid "Loading a draft or previous order first clears the current cart and then adds products from the selected order. Save or export the current cart first if you need it."
-msgstr "Завантаження чернетки або старого замовлення спочатку очищає поточний кошик, а потім додає товари з вибраного замовлення. Якщо поточний кошик потрібен, спочатку збережіть або вивантажте його."
+#: pc-wholesale-help.php:396
+msgid ""
+"Loading a draft or previous order first clears the current cart and then "
+"adds products from the selected order. Save or export the current cart first "
+"if you need it."
+msgstr ""
+"Завантаження чернетки або старого замовлення спочатку очищає поточний кошик, "
+"а потім додає товари з вибраного замовлення. Якщо поточний кошик потрібен, "
+"спочатку збережіть або вивантажте його."
 
-msgid "Deleted or unavailable products may be skipped. Prices, availability and warehouse allocation are recalculated. For selected items without clearing the cart, repeat products from a Folio invoice instead."
-msgstr "Видалені або недоступні товари можуть бути пропущені. Ціни, наявність і розподіл по складах перераховуються. Щоб додати лише вибрані позиції без очищення кошика, повторіть товари з документа ФОЛІО."
+#: pc-wholesale-help.php:397
+msgid ""
+"Deleted or unavailable products may be skipped. Prices, availability and "
+"warehouse allocation are recalculated. For selected items without clearing "
+"the cart, repeat products from a Folio invoice instead."
+msgstr ""
+"Видалені або недоступні товари можуть бути пропущені. Ціни, наявність і "
+"розподіл по складах перераховуються. Щоб додати лише вибрані позиції без "
+"очищення кошика, повторіть товари з документа ФОЛІО."
 
+#: pc-wholesale-help.php:401
 msgid "Complete checkout"
 msgstr "Оформіть замовлення"
 
-msgid "Check contact details, recipient, delivery, payment, products, quantities and totals before confirming."
-msgstr "Перед підтвердженням перевірте контакти, отримувача, доставку, оплату, товари, кількість і суму."
+#: pc-wholesale-help.php:401
+msgid ""
+"Check contact details, recipient, delivery, payment, products, quantities "
+"and totals before confirming."
+msgstr ""
+"Перед підтвердженням перевірте контакти, отримувача, доставку, оплату, "
+"товари, кількість і суму."
 
+#: pc-wholesale-help.php:403
 msgid "Open checkout"
 msgstr "Відкрийте оформлення"
 
+#: pc-wholesale-help.php:403
 msgid "Go from the reviewed cart to checkout."
 msgstr "Перейдіть із перевіреного кошика до оформлення."
 
+#: pc-wholesale-help.php:404
 msgid "Complete delivery"
 msgstr "Заповніть доставку"
 
-msgid "For Nova Poshta, choose the displayed branch, parcel locker or address fields."
-msgstr "Для Нової пошти виберіть показані поля відділення, поштомата або адреси."
+#: pc-wholesale-help.php:404
+msgid ""
+"For Nova Poshta, choose the displayed branch, parcel locker or address "
+"fields."
+msgstr ""
+"Для Нової пошти виберіть показані поля відділення, поштомата або адреси."
 
+#: pc-wholesale-help.php:405
 msgid "Choose payment"
 msgstr "Виберіть оплату"
 
+#: pc-wholesale-help.php:405
 msgid "Select one of the methods available for your account."
 msgstr "Виберіть один зі способів, доступних для вашого облікового запису."
 
+#: pc-wholesale-help.php:406
 msgid "Confirm once"
 msgstr "Підтвердьте один раз"
 
+#: pc-wholesale-help.php:406
 msgid "Wait for Folio processing to finish; do not submit a duplicate order."
 msgstr "Дочекайтеся завершення обробки ФОЛІО; не створюйте дубль замовлення."
 
+#: pc-wholesale-help.php:408
 msgid "Go to checkout"
 msgstr "Перейти до оформлення"
 
+#: pc-wholesale-help.php:412
 msgid "Why an order may be split"
 msgstr "Чому замовлення може розділитися"
 
-msgid "Folio creates warehouse documents separately. One WooCommerce cart may therefore become several linked orders, invoices or shipments."
-msgstr "ФОЛІО створює складські документи окремо. Тому один кошик WooCommerce може стати кількома пов’язаними замовленнями, рахунками або відправленнями."
+#: pc-wholesale-help.php:412
+msgid ""
+"Folio creates warehouse documents separately. One WooCommerce cart may "
+"therefore become several linked orders, invoices or shipments."
+msgstr ""
+"ФОЛІО створює складські документи окремо. Тому один кошик WooCommerce може "
+"стати кількома пов’язаними замовленнями, рахунками або відправленнями."
 
+#: pc-wholesale-help.php:414
 msgid "One warehouse"
 msgstr "Один склад"
 
+#: pc-wholesale-help.php:414
 msgid "One order and one Folio document remain."
 msgstr "Залишаються одне замовлення й один документ ФОЛІО."
 
+#: pc-wholesale-help.php:415
 msgid "Several warehouses"
 msgstr "Кілька складів"
 
-msgid "Linked child orders appear for individual warehouses and may be shipped separately."
-msgstr "Для окремих складів з’являються пов’язані дочірні замовлення, які можуть відправлятися окремо."
+#: pc-wholesale-help.php:415
+msgid ""
+"Linked child orders appear for individual warehouses and may be shipped "
+"separately."
+msgstr ""
+"Для окремих складів з’являються пов’язані дочірні замовлення, які можуть "
+"відправлятися окремо."
 
+#: pc-wholesale-help.php:416
 msgid "Stock shortage"
 msgstr "Нестача товару"
 
-msgid "The available part may be processed while the missing part waits for a manager review."
-msgstr "Доступну частину може бути оформлено, а відсутня частина чекатиме перевірки менеджера."
+#: pc-wholesale-help.php:416
+msgid ""
+"The available part may be processed while the missing part waits for a "
+"manager review."
+msgstr ""
+"Доступну частину може бути оформлено, а відсутня частина чекатиме перевірки "
+"менеджера."
 
+#: pc-wholesale-help.php:418
 msgid "Do not pay linked child orders separately"
 msgstr "Не сплачуйте пов’язані дочірні замовлення окремо"
 
+#: pc-wholesale-help.php:418
 msgid "unless a manager clearly asks you to do so."
 msgstr "якщо менеджер прямо не попросив це зробити."
 
+#: pc-wholesale-help.php:422
 msgid "View the customer balance"
 msgstr "Перегляньте баланс із клієнтом"
 
-msgid "Choose a start date or all time, generate the report, then export XLSX or print it if needed."
-msgstr "Виберіть початкову дату або весь період, сформуйте звіт, а потім за потреби експортуйте XLSX або надрукуйте."
+#: pc-wholesale-help.php:422
+msgid ""
+"Choose a start date or all time, generate the report, then export XLSX or "
+"print it if needed."
+msgstr ""
+"Виберіть початкову дату або весь період, сформуйте звіт, а потім за потреби "
+"експортуйте XLSX або надрукуйте."
 
-msgid "The report may show opening balance, invoices, payments, total debt, overdue amount, prepayment and the amount due now. The table below explains each operation and the balance before and after it."
-msgstr "Звіт може показувати початковий баланс, накладні, платежі, загальний борг, прострочену суму, передплату та суму до сплати зараз. Таблиця нижче пояснює кожну операцію і баланс до та після неї."
+#: pc-wholesale-help.php:423
+msgid ""
+"The report may show opening balance, invoices, payments, total debt, overdue "
+"amount, prepayment and the amount due now. The table below explains each "
+"operation and the balance before and after it."
+msgstr ""
+"Звіт може показувати початковий баланс, накладні, платежі, загальний борг, "
+"прострочену суму, передплату та суму до сплати зараз. Таблиця нижче пояснює "
+"кожну операцію і баланс до та після неї."
 
+#: pc-wholesale-help.php:425
 msgid "Open customer balance"
 msgstr "Відкрити баланс із клієнтом"
 
+#: pc-wholesale-help.php:430
 msgid "View and repeat Folio documents"
 msgstr "Переглядайте та повторюйте документи ФОЛІО"
 
-msgid "Choose a period and document types, then open an invoice, expense invoice or payment for details."
-msgstr "Виберіть період і типи документів, потім відкрийте рахунок, видаткову накладну або платіж."
+#: pc-wholesale-help.php:430
+msgid ""
+"Choose a period and document types, then open an invoice, expense invoice or "
+"payment for details."
+msgstr ""
+"Виберіть період і типи документів, потім відкрийте рахунок, видаткову "
+"накладну або платіж."
 
-msgid "From an invoice or expense invoice, select the products you need and add them to the current cart or save them as a new draft. The current cart is not cleared in this workflow."
-msgstr "У рахунку або видатковій накладній виберіть потрібні товари й додайте їх до поточного кошика або збережіть як нову чернетку. У цьому сценарії поточний кошик не очищається."
+#: pc-wholesale-help.php:431
+msgid ""
+"From an invoice or expense invoice, select the products you need and add "
+"them to the current cart or save them as a new draft. The current cart is "
+"not cleared in this workflow."
+msgstr ""
+"У рахунку або видатковій накладній виберіть потрібні товари й додайте їх до "
+"поточного кошика або збережіть як нову чернетку. У цьому сценарії поточний "
+"кошик не очищається."
 
+#: pc-wholesale-help.php:432
 msgid "Historical prices are for reference only."
 msgstr "Старі ціни наведено лише для довідки."
 
-msgid "The new cart always uses current prices, availability and allocation. Payments and returns cannot be repeated as an order."
-msgstr "Новий кошик завжди використовує поточні ціни, наявність і списання. Платежі та повернення не можна повторити як замовлення."
+#: pc-wholesale-help.php:432
+msgid ""
+"The new cart always uses current prices, availability and allocation. "
+"Payments and returns cannot be repeated as an order."
+msgstr ""
+"Новий кошик завжди використовує поточні ціни, наявність і списання. Платежі "
+"та повернення не можна повторити як замовлення."
 
+#: pc-wholesale-help.php:434
 msgid "Open Folio documents"
 msgstr "Відкрити документи ФОЛІО"
 
+#: pc-wholesale-help.php:439
 msgid "Need help?"
 msgstr "Потрібна допомога?"
 
-msgid "Tell the wholesale manager your WooCommerce order number and what you expected to see. Never send your password or bank card details."
-msgstr "Повідомте оптовому менеджеру номер замовлення WooCommerce і що ви очікували побачити. Ніколи не надсилайте пароль або дані банківської картки."
+#: pc-wholesale-help.php:439
+msgid ""
+"Tell the wholesale manager your WooCommerce order number and what you "
+"expected to see. Never send your password or bank card details."
+msgstr ""
+"Повідомте оптовому менеджеру номер замовлення WooCommerce і що ви очікували "
+"побачити. Ніколи не надсилайте пароль або дані банківської картки."
 
+#: pc-wholesale-help.php:440
 msgid "Back to top"
 msgstr "На початок"
