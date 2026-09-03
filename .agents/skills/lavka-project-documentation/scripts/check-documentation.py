@@ -75,6 +75,8 @@ IMPACT_RULES = (
         "wholesale customer ordering, warehouse allocation and Folio account views",
         (
             "wp-content/mu-plugins/pc-wholesale-quick-order.php",
+            "wp-content/mu-plugins/pc-wholesale-help.php",
+            "wp-content/mu-plugins/pc-wholesale-help/**",
             "wp-content/mu-plugins/pc-folio-order-link.php",
             "wp-content/mu-plugins/pc-folio-customer-balance.php",
             "wp-content/plugins/paint-core/inc/header-allocation-switcher.php",

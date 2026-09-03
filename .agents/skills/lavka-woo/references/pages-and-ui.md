@@ -34,8 +34,16 @@
 Базовый shortcode расширяется endpoint-ами собственных MU-плагинов:
 
 - заказы и child orders;
+- `Як замовляти` (`yak-zamovyty`) — структурированная оптовая справка перед logout;
 - `Баланс із клієнтом` — только при подтверждённой связи с ФОЛИО и допустимой роли;
 - `Документи ФОЛІО` — счета, расходные накладные и платежи, детали и repeat-order items.
+
+`pc-wholesale-help` хранит единый server-side allow-list ролей `partner`, `opt`,
+`opt_osn`, `schule`. Он применяется к справке, меню и `pc-wholesale-quick-order`;
+обычный `customer` и гость не получают контент или AJAX быстрого заказа. На
+каталоге, странице списка, cart, checkout, orders, balance и Folio documents
+контекстная ссылка ведёт сразу к тематическому anchor справки. Проверено по коду:
+2026-09-03.
 
 Если custom endpoint перенаправляет на заказы, сначала проверь rewrite rules, endpoint registration, user meta mapping и capability/role gate. Не ослабляй доступ, пока не определена конкретная ложная проверка.
 

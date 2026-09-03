@@ -18,6 +18,7 @@ add_action('muplugins_loaded', function () {
         'pc-wayforpay-compliance',
         'pc-wayforpay-test-access',
         'pc-stock-tap',
+        'pc-wholesale-help',
         'pc-wholesale-quick-order',
         'psu-force-per-page',
         'psu-search-filters',

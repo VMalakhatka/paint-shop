@@ -2,7 +2,7 @@
 /*
 Plugin Name: PC Wholesale Quick Order
 Description: Табличний «швидкий заказ» для оптовиків + масове додавання в кошик.
-Version: 1.3.2
+Version: 1.4.0
 Author: PaintCore
 Text Domain: pc-wholesale-quick-order
 Domain Path: /languages
@@ -90,6 +90,10 @@ function pcqo_render_stock_html(int $product_id): string {
 add_shortcode('pc_quick_order', function($atts){
     if (!function_exists('wc_get_product')) return '';
     $L = pcqo_labels();
+
+    if (function_exists('pc_wholesale_customer_can_access') && !pc_wholesale_customer_can_access()) {
+        return '<p>' . esc_html($L['norights']) . '</p>';
+    }
 
     $a = shortcode_atts([
         'cat'        => '',
@@ -219,6 +223,13 @@ ob_start(); ?>
 
     // Крихти (Breadcrumbs)
     $pcqo_render_breadcrumbs($cat_slugs);
+
+    if (function_exists('pc_wholesale_help_render_context_link')) {
+        pc_wholesale_help_render_context_link(
+            'spyskom',
+            __('How to order products from this list', 'pc-wholesale-help')
+        );
+    }
 
     // Якщо немає товарів — показуємо повідомлення та завершуємо
     if ( ! $q->have_posts() ) : ?>
@@ -378,6 +389,9 @@ add_action('wp_ajax_pc_bulk_add_to_cart',        'pc_qo_bulk_add');
 add_action('wp_ajax_nopriv_pc_bulk_add_to_cart', 'pc_qo_bulk_add');
 function pc_qo_bulk_add(){
     check_ajax_referer('pc_bulk_add');
+    if (function_exists('pc_wholesale_customer_can_access') && !pc_wholesale_customer_can_access()) {
+        wp_send_json_error(['msg' => pcqo_labels()['norights']], 403);
+    }
     if (empty($_POST['items']) || !is_array($_POST['items'])) wp_send_json_error(['msg'=>__('Empty request','pc-wholesale-quick-order')]);
 
     $added = 0;

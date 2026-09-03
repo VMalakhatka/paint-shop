@@ -1,0 +1,428 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: PC Wholesale Customer Help 1.0.0\n"
+"PO-Revision-Date: 2026-09-03 00:00+0000\n"
+"Last-Translator: PaintCore\n"
+"Language-Team: PaintCore\n"
+"Language: uk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "How to order"
+msgstr "Як замовляти"
+
+msgid "This guide is available to wholesale customers after signing in."
+msgstr "Ця інструкція доступна оптовим клієнтам після входу в кабінет."
+
+msgid "Help for this page"
+msgstr "Допомога для цієї сторінки"
+
+msgid "Open instructions"
+msgstr "Відкрити інструкцію"
+
+msgid "How to choose products in the catalogue"
+msgstr "Як вибирати товари в каталозі"
+
+msgid "Cart, import, export and drafts"
+msgstr "Кошик, імпорт, експорт і чернетки"
+
+msgid "Checkout and splitting an order by warehouses"
+msgstr "Оформлення та розділення замовлення по складах"
+
+msgid "Drafts and repeating previous orders"
+msgstr "Чернетки та повторення попередніх замовлень"
+
+msgid "Export or repeat this order"
+msgstr "Як вивантажити або повторити це замовлення"
+
+msgid "How to read the customer balance"
+msgstr "Як переглядати баланс із клієнтом"
+
+msgid "How to view and repeat Folio documents"
+msgstr "Як переглядати та повторювати документи ФОЛІО"
+
+msgid "Wholesale customer guide"
+msgstr "Інструкція для оптового клієнта"
+
+msgid "How to order on the KREUL website"
+msgstr "Як замовляти на сайті KREUL"
+
+msgid "Choose products in the catalogue, as a list or from a file; check warehouses; save drafts; repeat previous purchases and view Folio documents."
+msgstr "Вибирайте товари в каталозі, списком або з файлу; перевіряйте склади; зберігайте чернетки; повторюйте попередні покупки та переглядайте документи ФОЛІО."
+
+msgid "Open catalogue"
+msgstr "Відкрити каталог"
+
+msgid "Order from a list"
+msgstr "Замовити списком"
+
+msgid "Open cart"
+msgstr "Відкрити кошик"
+
+msgid "My orders"
+msgstr "Мої замовлення"
+
+msgid "Guide contents"
+msgstr "Зміст інструкції"
+
+msgid "Warehouse mode"
+msgstr "Режим складу"
+
+msgid "Catalogue"
+msgstr "Каталог"
+
+msgid "Product list"
+msgstr "Товар списком"
+
+msgid "Cart"
+msgstr "Кошик"
+
+msgid "Import"
+msgstr "Імпорт"
+
+msgid "Export"
+msgstr "Експорт"
+
+msgid "Drafts"
+msgstr "Чернетки"
+
+msgid "Previous orders"
+msgstr "Старі замовлення"
+
+msgid "Checkout"
+msgstr "Оформлення"
+
+msgid "Warehouse split"
+msgstr "Розділення по складах"
+
+msgid "Balance"
+msgstr "Баланс"
+
+msgid "Folio documents"
+msgstr "Документи ФОЛІО"
+
+msgid "Choose how products are written off from warehouses"
+msgstr "Виберіть, як списувати товари зі складів"
+
+msgid "Select the mode before adding products. If you change it later, review the entire cart again."
+msgstr "Виберіть режим до додавання товарів. Якщо зміните його пізніше, ще раз перевірте весь кошик."
+
+msgid "The system decides"
+msgstr "Вирішує система"
+
+msgid "Recommended: the site automatically distributes the required quantity among available warehouses."
+msgstr "Рекомендовано: сайт автоматично розподіляє потрібну кількість між доступними складами."
+
+msgid "Selected warehouse first"
+msgstr "Спочатку обраний склад"
+
+msgid "The site takes products from the selected warehouse first and covers any shortage from other warehouses."
+msgstr "Сайт спочатку бере товари з обраного складу, а нестачу — з інших складів."
+
+msgid "Selected warehouse only"
+msgstr "Лише обраний склад"
+
+msgid "Only stock from one selected warehouse may be ordered. Other warehouses are not used."
+msgstr "Замовити можна лише залишок одного обраного складу. Інші склади не використовуються."
+
+msgid "Look for “Allocation”."
+msgstr "Перевіряйте рядок «Списання»."
+
+msgid "It shows the exact warehouse and quantity that will be used for each product."
+msgstr "Він показує точний склад і кількість для кожного товару."
+
+msgid "Order from catalogue cards"
+msgstr "Замовляйте з карток каталогу"
+
+msgid "Best when you want to browse photos, categories and product variants."
+msgstr "Зручно, коли потрібно переглядати фото, категорії та варіанти товару."
+
+msgid "Open the catalogue"
+msgstr "Відкрийте каталог"
+
+msgid "Choose a category or use search."
+msgstr "Виберіть категорію або скористайтеся пошуком."
+
+msgid "Check the product"
+msgstr "Перевірте товар"
+
+msgid "Review the SKU, your price and stock by warehouse."
+msgstr "Перегляньте артикул, свою ціну та залишки по складах."
+
+msgid "Enter the quantity"
+msgstr "Вкажіть кількість"
+
+msgid "Use the minus, plus or quantity field, then press the cart button."
+msgstr "Скористайтеся мінусом, плюсом або полем кількості, потім натисніть кнопку кошика."
+
+msgid "Review the cart"
+msgstr "Перевірте кошик"
+
+msgid "Check every item and its warehouse allocation before checkout."
+msgstr "Перед оформленням перевірте кожну позицію та її розподіл по складах."
+
+msgid "Go to catalogue"
+msgstr "Перейти до каталогу"
+
+msgid "Catalogue cards with quantity and stock by warehouse"
+msgstr "Картки каталогу з кількістю та залишками по складах"
+
+msgid "Click the image to enlarge it."
+msgstr "Натисніть зображення, щоб збільшити його."
+
+msgid "Order products from a list"
+msgstr "Замовляйте товари списком"
+
+msgid "Best for a large order when you already know product names or SKUs."
+msgstr "Зручно для великого замовлення, коли відомі назви або артикули."
+
+msgid "Open “Product list”"
+msgstr "Відкрийте «Товар списком»"
+
+msgid "Sort by title, SKU or price; hide products with zero availability if needed."
+msgstr "Сортуйте за назвою, артикулом або ціною; за потреби сховайте товари з нульовим залишком."
+
+msgid "Enter quantities"
+msgstr "Введіть кількість"
+
+msgid "Fill in the quantity only for products you need."
+msgstr "Заповніть кількість лише для потрібних товарів."
+
+msgid "Add all"
+msgstr "Додайте все"
+
+msgid "Press “Add all to cart” before moving to another page of the list."
+msgstr "Натисніть «Додати все в кошик» перед переходом на іншу сторінку списку."
+
+msgid "Check the result"
+msgstr "Перевірте результат"
+
+msgid "Read the message with selected and added items, then open the cart."
+msgstr "Прочитайте повідомлення про вибрані й додані позиції, потім відкрийте кошик."
+
+msgid "Go to product list"
+msgstr "Перейти до списку товарів"
+
+msgid "Controls on the product list page"
+msgstr "Керування на сторінці товарів списком"
+
+msgid "Sorting, hiding zero stock and adding selected quantities."
+msgstr "Сортування, приховування нульових залишків і додавання вибраної кількості."
+
+msgid "Wholesale quick-order table"
+msgstr "Таблиця швидкого оптового замовлення"
+
+msgid "Products, SKU, price, cart quantity, availability and new quantity."
+msgstr "Товари, артикул, ціна, кількість у кошику, наявність і нова кількість."
+
+msgid "Check the cart"
+msgstr "Перевірте кошик"
+
+msgid "For every item, check the product, SKU, price, quantity, subtotal and the “Allocation” line."
+msgstr "Для кожної позиції перевірте товар, артикул, ціну, кількість, суму та рядок «Списання»."
+
+msgid "Example:"
+msgstr "Приклад:"
+
+msgid "“Allocation: Kyiv — 2, Odesa — 3” means that five units will be collected from two warehouses."
+msgstr "«Списання: Київ — 2, Одеса — 3» означає, що п’ять одиниць буде зібрано з двох складів."
+
+msgid "Cart with one item split between two warehouses"
+msgstr "Кошик з однією позицією, розділеною між двома складами"
+
+msgid "A split is normal in automatic warehouse mode."
+msgstr "Розділення є нормальною роботою автоматичного режиму складу."
+
+msgid "Import your order from a file"
+msgstr "Імпортуйте своє замовлення з файлу"
+
+msgid "Supported files: CSV, XLSX and XLS. The first row must contain column names."
+msgstr "Підтримуються CSV, XLSX і XLS. Перший рядок має містити назви колонок."
+
+msgid "Download CSV template"
+msgstr "Завантажити шаблон CSV"
+
+msgid "Import to cart"
+msgstr "Імпорт у кошик"
+
+msgid "Open the import block in the cart, choose a file and import it. New products are added to the products already in the cart."
+msgstr "Відкрийте блок імпорту в кошику, виберіть файл та імпортуйте його. Нові товари додаються до тих, що вже є в кошику."
+
+msgid "Import to draft"
+msgstr "Імпорт у чернетку"
+
+msgid "Open “My orders”, choose a file and optionally enter a draft title. The current cart is not changed."
+msgstr "Відкрийте «Мої замовлення», виберіть файл і за бажанням введіть назву чернетки. Поточний кошик не змінюється."
+
+msgid "Use sku or gtin/barcode for the product and qty for quantity. Empty, zero and negative quantities are skipped. Always review the row-by-row import report."
+msgstr "Для товару використовуйте sku або gtin/barcode, для кількості — qty. Порожні, нульові та від’ємні кількості пропускаються. Завжди перевіряйте звіт по кожному рядку."
+
+msgid "Current data wins."
+msgstr "Застосовуються поточні дані."
+
+msgid "The cart uses your current WooCommerce price, current availability and current warehouse mode, not the price from the file."
+msgstr "Кошик використовує вашу поточну ціну WooCommerce, актуальну наявність і поточний режим складу, а не ціну з файлу."
+
+msgid "Cart controls for export, import and saving a draft"
+msgstr "Керування експортом, імпортом і збереженням чернетки в кошику"
+
+msgid "CSV/XLSX export, import and draft controls are located below the cart totals."
+msgstr "Експорт CSV/XLSX, імпорт і чернетки розташовані під підсумками кошика."
+
+msgid "Export the cart or an order"
+msgstr "Вивантажте кошик або замовлення"
+
+msgid "Export is available in the cart and on the details page of each previous order."
+msgstr "Експорт доступний у кошику та на сторінці деталей кожного попереднього замовлення."
+
+msgid "Choose columns"
+msgstr "Виберіть колонки"
+
+msgid "SKU, barcode, title, quantity, price, total and notes are available."
+msgstr "Доступні артикул, штрихкод, назва, кількість, ціна, сума та примітки."
+
+msgid "Choose warehouse format"
+msgstr "Виберіть формат складів"
+
+msgid "Use one product row with allocation in notes, or separate rows for each warehouse."
+msgstr "Використовуйте один рядок товару зі списанням у примітках або окремі рядки для кожного складу."
+
+msgid "Download the file"
+msgstr "Завантажте файл"
+
+msgid "Choose CSV or XLSX. Export does not change or clear the cart."
+msgstr "Виберіть CSV або XLSX. Експорт не змінює і не очищає кошик."
+
+msgid "Save the cart as a draft"
+msgstr "Збережіть кошик у чернетку"
+
+msgid "Enter an optional title in the cart and press “Save as draft”. The draft will appear in “My orders”."
+msgstr "За бажанням введіть назву в кошику та натисніть «Зберегти у чернетку». Чернетка з’явиться в «Моїх замовленнях»."
+
+msgid "Important:"
+msgstr "Важливо:"
+
+msgid "After a successful save, the current cart is cleared. A draft does not reserve stock."
+msgstr "Після успішного збереження поточний кошик очищається. Чернетка не резервує товар."
+
+msgid "Open my orders"
+msgstr "Відкрити мої замовлення"
+
+msgid "Repeat a draft or a previous order"
+msgstr "Повторіть чернетку або старе замовлення"
+
+msgid "For a draft, press “To cart”. For a previous order, open its details and press “Load draft into cart”."
+msgstr "Для чернетки натисніть «У кошик». Для старого замовлення відкрийте деталі й натисніть «Завантажити чернетку у кошик»."
+
+msgid "Protect the current cart."
+msgstr "Збережіть поточний кошик."
+
+msgid "Loading a draft or previous order first clears the current cart and then adds products from the selected order. Save or export the current cart first if you need it."
+msgstr "Завантаження чернетки або старого замовлення спочатку очищає поточний кошик, а потім додає товари з вибраного замовлення. Якщо поточний кошик потрібен, спочатку збережіть або вивантажте його."
+
+msgid "Deleted or unavailable products may be skipped. Prices, availability and warehouse allocation are recalculated. For selected items without clearing the cart, repeat products from a Folio invoice instead."
+msgstr "Видалені або недоступні товари можуть бути пропущені. Ціни, наявність і розподіл по складах перераховуються. Щоб додати лише вибрані позиції без очищення кошика, повторіть товари з документа ФОЛІО."
+
+msgid "Complete checkout"
+msgstr "Оформіть замовлення"
+
+msgid "Check contact details, recipient, delivery, payment, products, quantities and totals before confirming."
+msgstr "Перед підтвердженням перевірте контакти, отримувача, доставку, оплату, товари, кількість і суму."
+
+msgid "Open checkout"
+msgstr "Відкрийте оформлення"
+
+msgid "Go from the reviewed cart to checkout."
+msgstr "Перейдіть із перевіреного кошика до оформлення."
+
+msgid "Complete delivery"
+msgstr "Заповніть доставку"
+
+msgid "For Nova Poshta, choose the displayed branch, parcel locker or address fields."
+msgstr "Для Нової пошти виберіть показані поля відділення, поштомата або адреси."
+
+msgid "Choose payment"
+msgstr "Виберіть оплату"
+
+msgid "Select one of the methods available for your account."
+msgstr "Виберіть один зі способів, доступних для вашого облікового запису."
+
+msgid "Confirm once"
+msgstr "Підтвердьте один раз"
+
+msgid "Wait for Folio processing to finish; do not submit a duplicate order."
+msgstr "Дочекайтеся завершення обробки ФОЛІО; не створюйте дубль замовлення."
+
+msgid "Go to checkout"
+msgstr "Перейти до оформлення"
+
+msgid "Why an order may be split"
+msgstr "Чому замовлення може розділитися"
+
+msgid "Folio creates warehouse documents separately. One WooCommerce cart may therefore become several linked orders, invoices or shipments."
+msgstr "ФОЛІО створює складські документи окремо. Тому один кошик WooCommerce може стати кількома пов’язаними замовленнями, рахунками або відправленнями."
+
+msgid "One warehouse"
+msgstr "Один склад"
+
+msgid "One order and one Folio document remain."
+msgstr "Залишаються одне замовлення й один документ ФОЛІО."
+
+msgid "Several warehouses"
+msgstr "Кілька складів"
+
+msgid "Linked child orders appear for individual warehouses and may be shipped separately."
+msgstr "Для окремих складів з’являються пов’язані дочірні замовлення, які можуть відправлятися окремо."
+
+msgid "Stock shortage"
+msgstr "Нестача товару"
+
+msgid "The available part may be processed while the missing part waits for a manager review."
+msgstr "Доступну частину може бути оформлено, а відсутня частина чекатиме перевірки менеджера."
+
+msgid "Do not pay linked child orders separately"
+msgstr "Не сплачуйте пов’язані дочірні замовлення окремо"
+
+msgid "unless a manager clearly asks you to do so."
+msgstr "якщо менеджер прямо не попросив це зробити."
+
+msgid "View the customer balance"
+msgstr "Перегляньте баланс із клієнтом"
+
+msgid "Choose a start date or all time, generate the report, then export XLSX or print it if needed."
+msgstr "Виберіть початкову дату або весь період, сформуйте звіт, а потім за потреби експортуйте XLSX або надрукуйте."
+
+msgid "The report may show opening balance, invoices, payments, total debt, overdue amount, prepayment and the amount due now. The table below explains each operation and the balance before and after it."
+msgstr "Звіт може показувати початковий баланс, накладні, платежі, загальний борг, прострочену суму, передплату та суму до сплати зараз. Таблиця нижче пояснює кожну операцію і баланс до та після неї."
+
+msgid "Open customer balance"
+msgstr "Відкрити баланс із клієнтом"
+
+msgid "View and repeat Folio documents"
+msgstr "Переглядайте та повторюйте документи ФОЛІО"
+
+msgid "Choose a period and document types, then open an invoice, expense invoice or payment for details."
+msgstr "Виберіть період і типи документів, потім відкрийте рахунок, видаткову накладну або платіж."
+
+msgid "From an invoice or expense invoice, select the products you need and add them to the current cart or save them as a new draft. The current cart is not cleared in this workflow."
+msgstr "У рахунку або видатковій накладній виберіть потрібні товари й додайте їх до поточного кошика або збережіть як нову чернетку. У цьому сценарії поточний кошик не очищається."
+
+msgid "Historical prices are for reference only."
+msgstr "Старі ціни наведено лише для довідки."
+
+msgid "The new cart always uses current prices, availability and allocation. Payments and returns cannot be repeated as an order."
+msgstr "Новий кошик завжди використовує поточні ціни, наявність і списання. Платежі та повернення не можна повторити як замовлення."
+
+msgid "Open Folio documents"
+msgstr "Відкрити документи ФОЛІО"
+
+msgid "Need help?"
+msgstr "Потрібна допомога?"
+
+msgid "Tell the wholesale manager your WooCommerce order number and what you expected to see. Never send your password or bank card details."
+msgstr "Повідомте оптовому менеджеру номер замовлення WooCommerce і що ви очікували побачити. Ніколи не надсилайте пароль або дані банківської картки."
+
+msgid "Back to top"
+msgstr "На початок"

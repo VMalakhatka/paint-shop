@@ -6,7 +6,7 @@
 Практическая карта исходного кода, API, окружений, разработки и запуска находится в
 [BACKEND_GUIDE.md](BACKEND_GUIDE.md).
 
-Проверено по коду WordPress, проектным skills и Java-документации: 2026-08-29.
+Проверено по коду WordPress, проектным skills и Java-документации: 2026-09-03.
 
 ## Карта системы
 
@@ -57,6 +57,7 @@ OVH service -> physical host -> hypervisor -> Windows VM
 | Полная синхронизация карточек и категорий | `lavka-total-sync` + Java `/sync/run` | код обоих владельцев и run status |
 | Остатки, названия и глобальные группы складов | `lavka-sync` | стабильные location term ID/slug, `lavka_folio_warehouses`, Folio warehouse ID и Woo stock |
 | Цены по ролям | `lavka-price-sync` + `role-price` | mapping роли к договору и product meta |
+| Оптовая справка и единый доступ к быстрому заказу | `pc-wholesale-help` + `pc-wholesale-quick-order` | server-side allow-list ролей `partner`, `opt`, `opt_osn`, `schule` |
 | Учётные цены и snapshot | Java + `lavka-price-sync` | Java job status и MariaDB generation |
 | Статистика товара | Java projection + `lavka-price-sync` | активное поколение `folio_product_*` |
 | Отчёты | `lavka-reports` и профильные MU-плагины | Java response + параметры и контрольные суммы |
@@ -81,8 +82,9 @@ OVH service -> physical host -> hypervisor -> Windows VM
 - `pc-checkbox-fiscalization` — универсальный исполнитель Checkbox.
 
 MU-плагины загружаются автоматически. Критические группы: ecosystem lock/events,
-Folio customer/order integration, checkout compliance, stock staging/sync, quick
-order и диагностические guards. У них нет обычной кнопки активации.
+Folio customer/order integration, checkout compliance, stock staging/sync,
+role-gated quick order, `pc-wholesale-help` с контекстной справкой и диагностические
+guards. У них нет обычной кнопки активации.
 
 Полная карта и актуальные ограничения находятся в
 `.agents/skills/lavka-woo/references/plugins.md`.
