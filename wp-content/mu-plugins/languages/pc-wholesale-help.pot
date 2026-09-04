@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-04T10:41:11+00:00\n"
+"POT-Creation-Date: 2026-09-04T11:01:07+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: pc-wholesale-help\n"
@@ -602,113 +602,121 @@ msgid "For Nova Poshta, choose the displayed branch, parcel locker or address fi
 msgstr ""
 
 #: pc-wholesale-help.php:433
-msgid "Choose payment"
+msgid "Add a note for the manager"
 msgstr ""
 
 #: pc-wholesale-help.php:433
+msgid "If needed, enter an order note. Its first 30 characters are also passed to the Folio document; the complete note remains in the site order."
+msgstr ""
+
+#: pc-wholesale-help.php:434
+msgid "Choose payment"
+msgstr ""
+
+#: pc-wholesale-help.php:434
 msgid "Select one of the methods available for your account."
 msgstr ""
 
-#: pc-wholesale-help.php:434
+#: pc-wholesale-help.php:435
 msgid "Confirm once"
 msgstr ""
 
-#: pc-wholesale-help.php:434
+#: pc-wholesale-help.php:435
 msgid "Wait for Folio processing to finish; do not submit a duplicate order."
 msgstr ""
 
-#: pc-wholesale-help.php:436
+#: pc-wholesale-help.php:437
 msgid "Go to checkout"
 msgstr ""
 
-#: pc-wholesale-help.php:440
+#: pc-wholesale-help.php:441
 msgid "Why an order may be split"
 msgstr ""
 
-#: pc-wholesale-help.php:440
+#: pc-wholesale-help.php:441
 msgid "Folio creates warehouse documents separately. One WooCommerce cart may therefore become several linked orders, invoices or shipments."
 msgstr ""
 
-#: pc-wholesale-help.php:442
+#: pc-wholesale-help.php:443
 msgid "One warehouse"
 msgstr ""
 
-#: pc-wholesale-help.php:442
+#: pc-wholesale-help.php:443
 msgid "One order and one Folio document remain."
 msgstr ""
 
-#: pc-wholesale-help.php:443
+#: pc-wholesale-help.php:444
 msgid "Several warehouses"
 msgstr ""
 
-#: pc-wholesale-help.php:443
+#: pc-wholesale-help.php:444
 msgid "Linked child orders appear for individual warehouses and may be shipped separately."
 msgstr ""
 
-#: pc-wholesale-help.php:444
+#: pc-wholesale-help.php:445
 msgid "Stock shortage"
 msgstr ""
 
-#: pc-wholesale-help.php:444
+#: pc-wholesale-help.php:445
 msgid "The available part may be processed while the missing part waits for a manager review."
 msgstr ""
 
-#: pc-wholesale-help.php:446
+#: pc-wholesale-help.php:447
 msgid "Do not pay linked child orders separately"
 msgstr ""
 
-#: pc-wholesale-help.php:446
+#: pc-wholesale-help.php:447
 msgid "unless a manager clearly asks you to do so."
 msgstr ""
 
-#: pc-wholesale-help.php:450
+#: pc-wholesale-help.php:451
 msgid "View the customer balance"
 msgstr ""
 
-#: pc-wholesale-help.php:450
+#: pc-wholesale-help.php:451
 msgid "Choose a start date or all time, generate the report, then export XLSX or print it if needed."
 msgstr ""
 
-#: pc-wholesale-help.php:451
+#: pc-wholesale-help.php:452
 msgid "The report may show opening balance, invoices, payments, total debt, overdue amount, prepayment and the amount due now. The table below explains each operation and the balance before and after it."
 msgstr ""
 
-#: pc-wholesale-help.php:453
+#: pc-wholesale-help.php:454
 msgid "Open customer balance"
 msgstr ""
 
-#: pc-wholesale-help.php:458
+#: pc-wholesale-help.php:459
 msgid "View and repeat Folio documents"
 msgstr ""
 
-#: pc-wholesale-help.php:458
+#: pc-wholesale-help.php:459
 msgid "Choose a period and document types, then open an invoice, expense invoice or payment for details."
 msgstr ""
 
-#: pc-wholesale-help.php:459
+#: pc-wholesale-help.php:460
 msgid "From an invoice or expense invoice, select the products you need and add them to the current cart or save them as a new draft. The current cart is not cleared in this workflow."
 msgstr ""
 
-#: pc-wholesale-help.php:460
+#: pc-wholesale-help.php:461
 msgid "Historical prices are for reference only."
 msgstr ""
 
-#: pc-wholesale-help.php:460
+#: pc-wholesale-help.php:461
 msgid "The new cart always uses current prices, availability and allocation. Payments and returns cannot be repeated as an order."
 msgstr ""
 
-#: pc-wholesale-help.php:462
+#: pc-wholesale-help.php:463
 msgid "Open Folio documents"
 msgstr ""
 
-#: pc-wholesale-help.php:467
+#: pc-wholesale-help.php:468
 msgid "Need help?"
 msgstr ""
 
-#: pc-wholesale-help.php:467
+#: pc-wholesale-help.php:468
 msgid "Tell the wholesale manager your WooCommerce order number and what you expected to see. Never send your password or bank card details."
 msgstr ""
 
-#: pc-wholesale-help.php:468
+#: pc-wholesale-help.php:469
 msgid "Back to top"
 msgstr ""

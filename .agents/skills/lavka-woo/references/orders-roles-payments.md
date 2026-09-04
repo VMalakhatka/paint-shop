@@ -26,6 +26,13 @@ Woo role -> lps_role_contract_map -> Folio contract
 4. Create использует тот же stable contract с `preview_only=false` и idempotent `externalRequestId`.
 5. Ответ сохраняется через helper multiple-documents meta.
 
+Для обычного учитываемого счёта `folio_account_header.sourceInfo` берётся из
+`WC_Order::get_customer_note()`, сокращается до 30 UTF-8 символов и записывается
+Java в `SCL_NAKL.L_CP1_PLAT` (поле «Откуда узнал»). Полный комментарий остаётся в
+Woo order. Если комментарий пуст, PHP использует fallback с названием сайта и
+покупателем. Для `missing_stock_account` Java по-прежнему заменяет значение на
+`нет на складе`.
+
 Java отвечает за складское распределение внутри ФОЛИО; PHP строит Woo parent/children по сохранённому ответу и не повторяет stock algorithm.
 
 ## Черновик -> корзина / необліковий документ
@@ -60,6 +67,9 @@ Java отвечает за складское распределение вну�
 - Parent хранит `_folio_child_order_ids`; child хранит `_folio_parent_order_id`/`_folio_split_from_order_id`.
 - Повторный create children должен быть идемпотентным и не создавать дубликаты.
 - Названия складов для клиента получай из mapping; цифровой warehouse ID показывай только в техническом блоке.
+- Колонка `ФОЛІО` в списке заказов показывает номер и склад только при прямой
+  связи этого Woo order с одним документом ФОЛІО. Для справочного parent после
+  split выводи `—`; не подставляй склад из line items или сохранённого плана.
 - Родитель и children должны показывать взаимные ссылки в admin; клиенту объясняй split и товары ожидания.
 
 ## Документы клиента

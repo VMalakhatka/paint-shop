@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PC Wholesale Customer Help 1.2.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mu-plugins\n"
-"POT-Creation-Date: 2026-09-04T10:41:11+00:00\n"
+"POT-Creation-Date: 2026-09-04T11:01:07+00:00\n"
 "PO-Revision-Date: 2026-09-03 00:00+0000\n"
 "Last-Translator: PaintCore\n"
 "Language-Team: PaintCore\n"
@@ -737,30 +737,43 @@ msgstr ""
 "Для Нової пошти виберіть показані поля відділення, поштомата або адреси."
 
 #: pc-wholesale-help.php:433
+msgid "Add a note for the manager"
+msgstr "Додайте примітку для менеджера"
+
+#: pc-wholesale-help.php:433
+msgid ""
+"If needed, enter an order note. Its first 30 characters are also passed to "
+"the Folio document; the complete note remains in the site order."
+msgstr ""
+"За потреби введіть примітку до замовлення. Її перші 30 символів також "
+"передаються до документа ФОЛІО; повний текст залишається у замовленні на "
+"сайті."
+
+#: pc-wholesale-help.php:434
 msgid "Choose payment"
 msgstr "Виберіть оплату"
 
-#: pc-wholesale-help.php:433
+#: pc-wholesale-help.php:434
 msgid "Select one of the methods available for your account."
 msgstr "Виберіть один зі способів, доступних для вашого облікового запису."
 
-#: pc-wholesale-help.php:434
+#: pc-wholesale-help.php:435
 msgid "Confirm once"
 msgstr "Підтвердьте один раз"
 
-#: pc-wholesale-help.php:434
+#: pc-wholesale-help.php:435
 msgid "Wait for Folio processing to finish; do not submit a duplicate order."
 msgstr "Дочекайтеся завершення обробки ФОЛІО; не створюйте дубль замовлення."
 
-#: pc-wholesale-help.php:436
+#: pc-wholesale-help.php:437
 msgid "Go to checkout"
 msgstr "Перейти до оформлення"
 
-#: pc-wholesale-help.php:440
+#: pc-wholesale-help.php:441
 msgid "Why an order may be split"
 msgstr "Чому замовлення може розділитися"
 
-#: pc-wholesale-help.php:440
+#: pc-wholesale-help.php:441
 msgid ""
 "Folio creates warehouse documents separately. One WooCommerce cart may "
 "therefore become several linked orders, invoices or shipments."
@@ -768,19 +781,19 @@ msgstr ""
 "ФОЛІО створює складські документи окремо. Тому один кошик WooCommerce може "
 "стати кількома пов’язаними замовленнями, рахунками або відправленнями."
 
-#: pc-wholesale-help.php:442
+#: pc-wholesale-help.php:443
 msgid "One warehouse"
 msgstr "Один склад"
 
-#: pc-wholesale-help.php:442
+#: pc-wholesale-help.php:443
 msgid "One order and one Folio document remain."
 msgstr "Залишаються одне замовлення й один документ ФОЛІО."
 
-#: pc-wholesale-help.php:443
+#: pc-wholesale-help.php:444
 msgid "Several warehouses"
 msgstr "Кілька складів"
 
-#: pc-wholesale-help.php:443
+#: pc-wholesale-help.php:444
 msgid ""
 "Linked child orders appear for individual warehouses and may be shipped "
 "separately."
@@ -788,11 +801,11 @@ msgstr ""
 "Для окремих складів з’являються пов’язані дочірні замовлення, які можуть "
 "відправлятися окремо."
 
-#: pc-wholesale-help.php:444
+#: pc-wholesale-help.php:445
 msgid "Stock shortage"
 msgstr "Нестача товару"
 
-#: pc-wholesale-help.php:444
+#: pc-wholesale-help.php:445
 msgid ""
 "The available part may be processed while the missing part waits for a "
 "manager review."
@@ -800,19 +813,19 @@ msgstr ""
 "Доступну частину може бути оформлено, а відсутня частина чекатиме перевірки "
 "менеджера."
 
-#: pc-wholesale-help.php:446
+#: pc-wholesale-help.php:447
 msgid "Do not pay linked child orders separately"
 msgstr "Не сплачуйте пов’язані дочірні замовлення окремо"
 
-#: pc-wholesale-help.php:446
+#: pc-wholesale-help.php:447
 msgid "unless a manager clearly asks you to do so."
 msgstr "якщо менеджер прямо не попросив це зробити."
 
-#: pc-wholesale-help.php:450
+#: pc-wholesale-help.php:451
 msgid "View the customer balance"
 msgstr "Перегляньте баланс із клієнтом"
 
-#: pc-wholesale-help.php:450
+#: pc-wholesale-help.php:451
 msgid ""
 "Choose a start date or all time, generate the report, then export XLSX or "
 "print it if needed."
@@ -820,7 +833,7 @@ msgstr ""
 "Виберіть початкову дату або весь період, сформуйте звіт, а потім за потреби "
 "експортуйте XLSX або надрукуйте."
 
-#: pc-wholesale-help.php:451
+#: pc-wholesale-help.php:452
 msgid ""
 "The report may show opening balance, invoices, payments, total debt, overdue "
 "amount, prepayment and the amount due now. The table below explains each "
@@ -830,15 +843,15 @@ msgstr ""
 "прострочену суму, передплату та суму до сплати зараз. Таблиця нижче пояснює "
 "кожну операцію і баланс до та після неї."
 
-#: pc-wholesale-help.php:453
+#: pc-wholesale-help.php:454
 msgid "Open customer balance"
 msgstr "Відкрити баланс із клієнтом"
 
-#: pc-wholesale-help.php:458
+#: pc-wholesale-help.php:459
 msgid "View and repeat Folio documents"
 msgstr "Переглядайте та повторюйте документи ФОЛІО"
 
-#: pc-wholesale-help.php:458
+#: pc-wholesale-help.php:459
 msgid ""
 "Choose a period and document types, then open an invoice, expense invoice or "
 "payment for details."
@@ -846,7 +859,7 @@ msgstr ""
 "Виберіть період і типи документів, потім відкрийте рахунок, видаткову "
 "накладну або платіж."
 
-#: pc-wholesale-help.php:459
+#: pc-wholesale-help.php:460
 msgid ""
 "From an invoice or expense invoice, select the products you need and add "
 "them to the current cart or save them as a new draft. The current cart is "
@@ -856,11 +869,11 @@ msgstr ""
 "поточного кошика або збережіть як нову чернетку. У цьому сценарії поточний "
 "кошик не очищається."
 
-#: pc-wholesale-help.php:460
+#: pc-wholesale-help.php:461
 msgid "Historical prices are for reference only."
 msgstr "Старі ціни наведено лише для довідки."
 
-#: pc-wholesale-help.php:460
+#: pc-wholesale-help.php:461
 msgid ""
 "The new cart always uses current prices, availability and allocation. "
 "Payments and returns cannot be repeated as an order."
@@ -868,15 +881,15 @@ msgstr ""
 "Новий кошик завжди використовує поточні ціни, наявність і списання. Платежі "
 "та повернення не можна повторити як замовлення."
 
-#: pc-wholesale-help.php:462
+#: pc-wholesale-help.php:463
 msgid "Open Folio documents"
 msgstr "Відкрити документи ФОЛІО"
 
-#: pc-wholesale-help.php:467
+#: pc-wholesale-help.php:468
 msgid "Need help?"
 msgstr "Потрібна допомога?"
 
-#: pc-wholesale-help.php:467
+#: pc-wholesale-help.php:468
 msgid ""
 "Tell the wholesale manager your WooCommerce order number and what you "
 "expected to see. Never send your password or bank card details."
@@ -884,7 +897,7 @@ msgstr ""
 "Повідомте оптовому менеджеру номер замовлення WooCommerce і що ви очікували "
 "побачити. Ніколи не надсилайте пароль або дані банківської картки."
 
-#: pc-wholesale-help.php:468
+#: pc-wholesale-help.php:469
 msgid "Back to top"
 msgstr "На початок"
 

@@ -782,22 +782,22 @@ if (!function_exists('pc_folio_render_my_account_orders_column')) {
      */
     function pc_folio_render_my_account_orders_column(\WC_Order $order): void
     {
-        $message = pc_folio_get_order_customer_message($order);
-        $warehouse_id = pc_folio_get_order_warehouse_id_for_customer($order);
         $link = pc_folio_get_order_document_link($order);
+        $has_direct_document = ($link['document_id'] ?? '') !== '' || ($link['document_number'] ?? '') !== '';
         $parts = [];
+
+        if (!$has_direct_document) {
+            echo '&mdash;';
+            return;
+        }
 
         if (($link['document_number'] ?? '') !== '') {
             $parts[] = '#' . $link['document_number'];
         }
+
+        $warehouse_id = pc_folio_get_order_warehouse_id_for_customer($order);
         if ($warehouse_id !== '') {
             $parts[] = pc_folio_warehouse_label($warehouse_id);
-        }
-        if (!$parts && !empty($message['child_order_ids'])) {
-            $parts[] = sprintf(__('%d Folio orders', 'pc-folio-order-link'), count($message['child_order_ids']));
-        }
-        if (!$parts && (($message['type'] ?? '') === 'error')) {
-            $parts[] = __('manager check', 'pc-folio-order-link');
         }
 
         echo $parts ? esc_html(implode(' · ', $parts)) : '&mdash;';
@@ -1691,8 +1691,11 @@ if (!function_exists('pc_folio_build_account_header_preview')) {
             $site_customer_name = pc_folio_preview_text($order->get_billing_email());
         }
         $site_name = pc_folio_preview_text(get_bloginfo('name'));
-        $source_info = trim($site_name . ($site_customer_name !== '' ? ' + ' . $site_customer_name : ''));
-        $source_info = pc_folio_header_short_text($source_info !== '' ? $source_info : 'Internet order');
+        $fallback_source_info = trim($site_name . ($site_customer_name !== '' ? ' + ' . $site_customer_name : ''));
+        $checkout_note = wp_strip_all_tags((string) $order->get_customer_note(), true);
+        $source_info = pc_folio_header_short_text(
+            $checkout_note !== '' ? $checkout_note : ($fallback_source_info !== '' ? $fallback_source_info : 'Internet order')
+        );
         $additional_info = pc_folio_header_short_text(sprintf(
             'Int %s %s',
             $order->get_order_number(),

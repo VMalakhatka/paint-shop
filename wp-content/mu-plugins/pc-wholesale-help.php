@@ -430,8 +430,9 @@ function pc_wholesale_help_render_endpoint(): void {
             <ol class="pc-help-steps">
                 <?php pc_wholesale_help_step('1', __('Open checkout', 'pc-wholesale-help'), __('Go from the reviewed cart to checkout.', 'pc-wholesale-help')); ?>
                 <?php pc_wholesale_help_step('2', __('Complete delivery', 'pc-wholesale-help'), __('For Nova Poshta, choose the displayed branch, parcel locker or address fields.', 'pc-wholesale-help')); ?>
-                <?php pc_wholesale_help_step('3', __('Choose payment', 'pc-wholesale-help'), __('Select one of the methods available for your account.', 'pc-wholesale-help')); ?>
-                <?php pc_wholesale_help_step('4', __('Confirm once', 'pc-wholesale-help'), __('Wait for Folio processing to finish; do not submit a duplicate order.', 'pc-wholesale-help')); ?>
+                <?php pc_wholesale_help_step('3', __('Add a note for the manager', 'pc-wholesale-help'), __('If needed, enter an order note. Its first 30 characters are also passed to the Folio document; the complete note remains in the site order.', 'pc-wholesale-help')); ?>
+                <?php pc_wholesale_help_step('4', __('Choose payment', 'pc-wholesale-help'), __('Select one of the methods available for your account.', 'pc-wholesale-help')); ?>
+                <?php pc_wholesale_help_step('5', __('Confirm once', 'pc-wholesale-help'), __('Wait for Folio processing to finish; do not submit a duplicate order.', 'pc-wholesale-help')); ?>
             </ol>
             <a class="pc-help-inline-action" href="<?php echo esc_url($checkout_url); ?>"><?php esc_html_e('Go to checkout', 'pc-wholesale-help'); ?> →</a>
         </section>

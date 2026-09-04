@@ -56,8 +56,8 @@ orders from that response.
     "receiverName": "CLASSIC",
     "payerShortName": "FOLIO_SHORT_NAME",
     "folioUser": "buh",
-    "sourceInfo": "Интернет заказ сайт",
-    "additionalInfo": "Customer checkout note",
+    "sourceInfo": "Коперніка",
+    "additionalInfo": "Int 116873 2026-07-23 12:34",
     "priceContractType": "ПАРТНЁР",
     "notCash": true,
     "accountingEnabled": true,
@@ -213,8 +213,13 @@ Currently fixed to `buh` on the Woo side because the authoritative Folio login/u
 
 `folio_account_header.sourceInfo`
 
-Built from site/customer information and trimmed to 30 UTF-8 characters because
-Folio stores it in `L_CP1_PLAT varchar(30)`.
+For a normal accounting document, uses the customer's checkout order note and is
+trimmed to 30 UTF-8 characters because Folio stores it in
+`L_CP1_PLAT varchar(30)` (the **«Откуда узнал»** field in the current Folio UI).
+The complete note remains stored on the Woo order. If checkout contains no note,
+Woo sends the existing site/customer source fallback so the required Java field
+does not become empty. For `missing_stock_account`, Java deliberately overrides
+this value with `нет на складе`.
 
 `folio_account_header.additionalInfo`
 
@@ -569,4 +574,4 @@ Planned safe sequence:
 7. Should Java calculate `payload_hash`, or should Woo calculate it before sending?
 8. Should Java trust Woo-provided `folioUser=buh`, or should Java override it from its Folio auth/config?
 9. Should empty `documentNumber` mean "allocate last + 1" in Java?
-10. Are `receiverName=CLASSIC`, `sourceInfo=Интернет заказ сайт`, and `folioOperationKind=*ПРЕДОПЛАТ` valid dictionary values on production?
+10. Are `receiverName=CLASSIC` and `folioOperationKind=*ПРЕДОПЛАТ` valid dictionary values on production?
