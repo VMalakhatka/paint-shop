@@ -17,7 +17,7 @@
 | Правила актуализации и checks | `docs/DOCUMENTATION_POLICY.md` |
 | Неподтверждённые риски и очередь | `docs/KNOWN_GAPS.md` |
 | Пользовательские сценарии | `docs/SITE_USER_GUIDE_UK.md` |
-| Оптовая справка на сайте, заказ, импорт/экспорт, черновики, повтор старого заказа, склады, checkout split, баланс и документы ФОЛІО | `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md` |
+| Оптовая справка на сайте, заказ, импорт/экспорт, черновики, повтор старого заказа, склады, checkout split, баланс и документы ФОЛІО | Канон: `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md`; публикация: `wp-content/mu-plugins/pc-wholesale-help.php` + assets/i18n |
 | Media workflow оператора | `docs/MEDIA_MANAGER_GUIDE_UK.md` |
 | Точный request/response/status | Java `docs/api` или contract владельца plugin |
 | Конфигурация/lifecycle одного plugin | `wp-content/plugins/<slug>/README.md` |
@@ -35,7 +35,7 @@ Roadmap, brief и TODO являются планом или рабочим ма�
 | WordPress deploy/config/restore | Bootstrap/recovery | `$lavka-woo` |
 | Java Docker/env/health/deploy | Java runtime runbook | `$build-java-docker-runtime` |
 | Media Library/S3/Folio media | Media guide | `$image-in-woo`; provider layer — `$manage-ovh-infrastructure` |
-| Оптовая справка/контекстные ссылки, каталог/список, импорт/экспорт, черновики, повтор заказа, выбор склада, checkout split, баланс и документы клиента | Wholesale customer guide | `$lavka-woo`; при затрагивании ФОЛІО — `$work-with-folio-mssql` |
+| Оптовая справка/контекстные ссылки, каталог/список, импорт/экспорт, черновики, повтор заказа, выбор склада, checkout split, баланс и документы клиента | Wholesale customer guide + опубликованная «Як замовляти» | `$lavka-woo`; `$lavka-project-documentation` контролирует handoff; при затрагивании ФОЛІО — `$work-with-folio-mssql` |
 | MSSQL schema/business rule | Java API/reference владельца | `$work-with-folio-mssql` |
 | Skill boundary/composition | Skills catalog | `$skill-creator` + `$personal-skill-router` при составном каталоге |
 | Новый неизвестный риск | Known gaps | владелец соответствующего слоя |

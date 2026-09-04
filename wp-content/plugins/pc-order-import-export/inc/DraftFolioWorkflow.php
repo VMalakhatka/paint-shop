@@ -613,7 +613,7 @@ class DraftFolioWorkflow
 
     private static function prepare_cart_and_remainder(\WC_Order $order, array $analysis): array
     {
-        if (!function_exists('WC') || !WC()->cart) {
+        if (!self::ensure_cart_loaded()) {
             throw new \RuntimeException(__('Cart is not available.', 'pc-order-import-export'));
         }
         WC()->cart->empty_cart();
@@ -711,6 +711,27 @@ class DraftFolioWorkflow
         WC()->cart->set_session();
 
         return $actual;
+    }
+
+    private static function ensure_cart_loaded(): bool
+    {
+        if (!function_exists('WC')) {
+            return false;
+        }
+
+        // admin-post.php is not a storefront request, so WooCommerce does not
+        // initialize the customer session and cart there automatically.
+        if ((!WC()->session || !WC()->cart) && function_exists('wc_load_cart')) {
+            wc_load_cart();
+        }
+        if (!WC()->session || !WC()->cart) {
+            return false;
+        }
+
+        WC()->session->set_customer_session_cookie(true);
+        WC()->cart->get_cart();
+
+        return true;
     }
 
     private static function set_draft_item_quantity(\WC_Order $order, int $item_id, float $requested, float $remainder): void

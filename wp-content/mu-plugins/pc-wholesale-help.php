@@ -400,6 +400,7 @@ function pc_wholesale_help_render_endpoint(): void {
                     <p><?php esc_html_e('Choose “Load available quantities into the cart”. The preview table shows the requested quantity, the quantity available for the cart, and the unavailable remainder.', 'pc-wholesale-help'); ?></p>
                     <ul>
                         <li><?php esc_html_e('After apply, the current cart is cleared and replaced with the currently available quantities at current prices.', 'pc-wholesale-help'); ?></li>
+                        <li><?php esc_html_e('An empty current cart is valid: after apply, the site initializes it in your current session and adds the available part of the draft.', 'pc-wholesale-help'); ?></li>
                         <li><?php esc_html_e('The unavailable quantity remains in the same draft.', 'pc-wholesale-help'); ?></li>
                         <li><?php esc_html_e('The unavailable remainder is recorded as one non-accounting Folio document.', 'pc-wholesale-help'); ?></li>
                     </ul>
