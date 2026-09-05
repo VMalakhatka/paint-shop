@@ -203,3 +203,14 @@
 - Для WP: проверка HPOS, capability, nonce, idempotency и повторного запроса.
 - Для UI: desktop/mobile screenshot и отсутствие overflow/наложения.
 - Для длительной операции: общий lock, poll interval, terminal statuses, unknown outcome и recovery path.
+
+### Profit report и потеря native-range job (2026-09-05)
+
+Источник: `lavka-reports/profit-report.js`, `inc/class-profit-report.php`,
+`lavka-price-sync/inc/accounting-price-campaign.php`, Java profit DTO/контракт
+после `6a9186d`. Java владеет автоматическим `masterClass`; PHP/JS не отправляют
+legacy ручные МК. Default зарплаты не превращать в request override без ввода.
+При `IDLE`/утрате ожидаемого job ID кампания сохраняет контекст и останавливает
+apply до проверки результата; snapshot не доказывает исход COMMIT. Подробный
+операторский сценарий — `docs/OPERATIONS_RUNBOOK.md`, отложенная ревизия —
+`docs/KNOWN_GAPS.md`.

@@ -14,6 +14,7 @@
         expenseFilter: 'ALL',
         lastOperation: 'summary',
         reportParams: null,
+        salaryOverride: false,
     };
 
     const nodes = {
@@ -43,8 +44,9 @@
         taxShare: document.getElementById('lavr-profit-tax-share'),
         taxShareHelp: document.getElementById('lavr-profit-tax-share-help'),
         rubRate: document.getElementById('lavr-profit-rub-rate'),
-        masterIncome: document.getElementById('lavr-profit-master-income'),
-        masterReturn: document.getElementById('lavr-profit-master-return'),
+        masterClass: document.getElementById('lavr-profit-master-class'),
+        masterAudit: document.getElementById('lavr-profit-master-audit'),
+        salarySource: document.getElementById('lavr-profit-salary-source'),
         additionalSalary: document.getElementById('lavr-profit-additional-salary'),
     };
 
@@ -58,8 +60,11 @@
         UNCLASSIFIED_DOCUMENTS: 'action',
         UNKNOWN_TAX_POOL: 'action',
         AMBIGUOUS_EXPLICIT_PERIOD: 'action',
-        MASTER_CLASS_MANUAL_INPUT_REQUIRED: 'manual',
-        ODESA_ADDITIONAL_WORKS_UNCONFIRMED: 'manual',
+        MASTER_CLASS_ARTICLE_NOT_FOUND: 'action',
+        MASTER_CLASS_DUPLICATE_MOVEMENT_ROWS: 'action',
+        MASTER_CLASS_NEGATIVE_SOURCE_AMOUNT: 'action',
+        MASTER_CLASS_LINES_IGNORED: 'action',
+        MASTER_CLASS_LEGACY_PARAMETERS_IGNORED: 'action',
         IMPORT_TRANSPORT_CAPITALIZED: 'info',
         LEGACY_FLOAT_ROUNDING: 'info',
         NOLOCK_READ: 'info',
@@ -164,7 +169,8 @@
 
     function requestParams() {
         const params = { month: nodes.month.value };
-        const fields = [nodes.masterIncome, nodes.masterReturn, nodes.additionalSalary, nodes.rubRate];
+        const fields = [nodes.rubRate];
+        if (state.salaryOverride) fields.push(nodes.additionalSalary);
         fields.forEach((field) => {
             const value = field.value.trim();
             if (value !== '') params[field.dataset.param] = value.replace(',', '.');
@@ -320,13 +326,9 @@
         if (nodes.rubRate.value === '' && inputs.rubToUahRate != null) {
             nodes.rubRate.value = String(inputs.rubToUahRate);
         }
-        [
-            [nodes.masterIncome, inputs.odesaMasterClassIncome],
-            [nodes.masterReturn, inputs.odesaMasterClassReturn],
-            [nodes.additionalSalary, inputs.odesaAdditionalSalary],
-        ].forEach(([field, value]) => {
-            if (field.value === '' && compareDecimalToZero(value) !== 0) field.value = String(value);
-        });
+        if (!state.salaryOverride) nodes.additionalSalary.value = inputs.odesaAdditionalSalary == null ? '' : String(inputs.odesaAdditionalSalary);
+        const source = inputs.odesaAdditionalSalarySource === 'REQUEST_OVERRIDE' ? labels.salaryOverride : labels.salaryDefault;
+        nodes.salarySource.textContent = labels.salaryApplied + ': ' + formatMoney(inputs.odesaAdditionalSalary, 'UAH') + ' · ' + source;
         updateTaxShareHelp();
     }
 
@@ -521,6 +523,8 @@
             : '';
         applyInitialInputs(data.inputs || {});
         renderCities(data.cities || []);
+        renderMasterClass(data.masterClass);
+        nodes.masterAudit.hidden = true;
         renderWarnings(data.warnings || []);
         renderExpenseFilters();
         renderExpenses();
@@ -591,7 +595,56 @@
         });
     }
 
+    function renderMasterClass(data) {
+        clear(nodes.masterClass);
+        nodes.masterClass.appendChild(textElement('h2', '', labels.masterTitle));
+        if (!data) {
+            nodes.masterClass.appendChild(textElement('p', 'notice notice-error inline', labels.masterUnavailable));
+            return;
+        }
+        if (!data.articleFound) nodes.masterClass.appendChild(textElement('p', 'notice notice-error inline', labels.masterMissing));
+        nodes.masterClass.appendChild(textElement('p', '', labels.sku + ': ' + (data.sku || '') + ' · ' + labels.warehouse + ': ' + data.warehouseId));
+        const grid = textElement('div', 'lavr-profit-metrics', '');
+        [['masterIncome', 'income'], ['masterReturns', 'returns'], ['masterNet', 'netContribution'], ['masterBase', 'grossProfitAlreadyInBase'], ['masterAdjustment', 'grossAdjustmentApplied']].forEach(([label, key]) => grid.appendChild(metric(labels[label], data[key])));
+        nodes.masterClass.appendChild(grid);
+        [['incomeLines','incomeLineCount'], ['returnLines','returnLineCount'], ['ignoredLines','ignoredLineCount'], ['duplicateLines','duplicateLineCount'], ['source','source']].forEach(([label,key]) => nodes.masterClass.appendChild(textElement('p', 'description', labels[label] + ': ' + (data[key] == null ? '' : data[key]))));
+        if (data.auditTruncated) nodes.masterClass.appendChild(textElement('p', 'notice notice-warning inline', labels.masterTruncated));
+    }
+
+    function renderMasterAudit() {
+        const data = state.audit || {};
+        clear(nodes.masterAudit);
+        nodes.masterAudit.hidden = false;
+        nodes.masterAudit.appendChild(textElement('h3', '', labels.masterAuditTitle));
+        if (!data.masterClass || !Array.isArray(data.masterClassDocuments)) {
+            nodes.masterAudit.appendChild(textElement('p', 'notice notice-error inline', labels.masterUnavailable));
+            return;
+        }
+        if (data.masterClass.auditTruncated) nodes.masterAudit.appendChild(textElement('p', 'notice notice-warning inline', labels.masterTruncated));
+        if (!data.masterClass.articleFound) nodes.masterAudit.appendChild(textElement('p', 'notice notice-error inline', labels.masterMissing));
+        const wrap = textElement('div', 'lavr-profit-table-wrap', '');
+        const table = textElement('table', 'widefat striped', '');
+        const head = document.createElement('thead');
+        const header = document.createElement('tr');
+        ['csvDate','csvDocument','line','sku','warehouse','documentTypes','operationKind','returnFlag','accounted','quantity','unitPrice','csvSourceAmount','classification','masterIncluded','csvReason'].forEach(key => header.appendChild(textElement('th', '', labels[key])));
+        head.appendChild(header); table.appendChild(head);
+        const body = document.createElement('tbody');
+        data.masterClassDocuments.forEach(line => {
+            const row = document.createElement('tr');
+            [formatDate(line.documentDate), [line.documentNumber, line.documentNumberSuffix].filter(Boolean).join(' ') + ' / ' + line.documentId,
+                line.lineNumber + ' / ' + line.movementId, line.sku, line.warehouseId,
+                [line.documentType,line.movementType].join(' / '), line.operationKind,
+                line.returnDocument ? labels.yes : labels.no, line.accounted ? labels.yes : labels.no,
+                line.quantity, formatMoney(line.unitPrice,line.currency), formatMoney(line.amount,line.currency) + ' · ' + (line.amountSource || ''),
+                line.classification, line.includedInMasterClassContribution ? labels.yes : labels.no, line.reason].forEach(value => row.appendChild(tableCell(value)));
+            body.appendChild(row);
+        });
+        table.appendChild(body); wrap.appendChild(table); nodes.masterAudit.appendChild(wrap);
+        if (!data.masterClassDocuments.length) nodes.masterAudit.appendChild(textElement('p', '', labels.masterAuditEmpty));
+    }
+
     function renderAudit() {
+        renderMasterAudit();
         const rows = (state.audit && state.audit.documents) || [];
         nodes.auditContent.hidden = false;
         selectOptions(nodes.auditCity, uniqueValues(rows, 'city'), labels.all, cityLabel);
@@ -636,6 +689,13 @@
         link.remove();
         URL.revokeObjectURL(url);
     }
+
+    nodes.additionalSalary.addEventListener('input', () => { state.salaryOverride = nodes.additionalSalary.value.trim() !== ''; });
+    nodes.month.addEventListener('change', () => {
+        state.salaryOverride = false;
+        nodes.additionalSalary.value = '';
+        nodes.salarySource.textContent = '';
+    });
 
     nodes.loadAudit.dataset.defaultLabel = nodes.loadAudit.textContent.trim();
     nodes.month.value = previousMonth();

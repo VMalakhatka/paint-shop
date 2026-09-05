@@ -538,3 +538,122 @@ msgstr ""
 #: inc/no-movement/class-settings.php:100
 msgid "Total qty"
 msgstr ""
+
+
+msgid "Leave additional salary empty to use the server default. Enter zero to override it with zero."
+msgstr ""
+
+
+msgid "Master class adjustment"
+msgstr ""
+
+
+msgid "Odesa master class"
+msgstr ""
+
+
+msgid "Automatic master class data is unavailable. Check the Java report version."
+msgstr ""
+
+
+msgid "The master class article was not found. This is not a confirmed zero."
+msgstr ""
+
+
+msgid "Master class income"
+msgstr ""
+
+
+msgid "Master class returns"
+msgstr ""
+
+
+msgid "Net contribution"
+msgstr ""
+
+
+msgid "Gross profit already included in the base"
+msgstr ""
+
+
+msgid "Applied gross adjustment"
+msgstr ""
+
+
+msgid "Income lines"
+msgstr ""
+
+
+msgid "Return lines"
+msgstr ""
+
+
+msgid "Ignored lines"
+msgstr ""
+
+
+msgid "Duplicate lines"
+msgstr ""
+
+
+msgid "Source"
+msgstr ""
+
+
+msgid "Server default"
+msgstr ""
+
+
+msgid "Request override"
+msgstr ""
+
+
+msgid "Applied additional salary"
+msgstr ""
+
+
+msgid "Master class invoice audit"
+msgstr ""
+
+
+msgid "The master class audit is truncated by the server. Not all lines are shown."
+msgstr ""
+
+
+msgid "No master class invoice lines."
+msgstr ""
+
+
+msgid "Line / movement ID"
+msgstr ""
+
+
+msgid "Document / movement type"
+msgstr ""
+
+
+msgid "Operation"
+msgstr ""
+
+
+msgid "Return"
+msgstr ""
+
+
+msgid "Accounted"
+msgstr ""
+
+
+msgid "Quantity"
+msgstr ""
+
+
+msgid "Unit price"
+msgstr ""
+
+
+msgid "Classification"
+msgstr ""
+
+msgid "Included in master class contribution"
+msgstr ""

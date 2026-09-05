@@ -544,3 +544,122 @@ msgstr "Назва"
 #: inc/no-movement/class-settings.php:100
 msgid "Total qty"
 msgstr "Загальна кількість"
+
+
+msgid "Leave additional salary empty to use the server default. Enter zero to override it with zero."
+msgstr "Залиште додаткову зарплату порожньою для серверного значення. Введіть нуль, щоб застосувати нуль."
+
+
+msgid "Master class adjustment"
+msgstr "Коригування МК"
+
+
+msgid "Odesa master class"
+msgstr "Майстер-клас Одеси"
+
+
+msgid "Automatic master class data is unavailable. Check the Java report version."
+msgstr "Автоматичні дані МК недоступні. Перевірте версію звіту Java."
+
+
+msgid "The master class article was not found. This is not a confirmed zero."
+msgstr "Артикул МК не знайдено. Це не підтверджений нуль."
+
+
+msgid "Master class income"
+msgstr "Дохід МК"
+
+
+msgid "Master class returns"
+msgstr "Повернення МК"
+
+
+msgid "Net contribution"
+msgstr "Чистий внесок"
+
+
+msgid "Gross profit already included in the base"
+msgstr "Валовий прибуток, уже врахований у базі"
+
+
+msgid "Applied gross adjustment"
+msgstr "Застосоване коригування"
+
+
+msgid "Income lines"
+msgstr "Рядки доходу"
+
+
+msgid "Return lines"
+msgstr "Рядки повернень"
+
+
+msgid "Ignored lines"
+msgstr "Пропущені рядки"
+
+
+msgid "Duplicate lines"
+msgstr "Повторні рядки"
+
+
+msgid "Source"
+msgstr "Джерело"
+
+
+msgid "Server default"
+msgstr "Серверне значення"
+
+
+msgid "Request override"
+msgstr "Перевизначено в запиті"
+
+
+msgid "Applied additional salary"
+msgstr "Застосована додаткова зарплата"
+
+
+msgid "Master class invoice audit"
+msgstr "Аудит накладних МК"
+
+
+msgid "The master class audit is truncated by the server. Not all lines are shown."
+msgstr "Аудит МК обмежено сервером. Показано не всі рядки."
+
+
+msgid "No master class invoice lines."
+msgstr "Рядків накладних МК немає."
+
+
+msgid "Line / movement ID"
+msgstr "Рядок / ID руху"
+
+
+msgid "Document / movement type"
+msgstr "Тип документа / руху"
+
+
+msgid "Operation"
+msgstr "Операція"
+
+
+msgid "Return"
+msgstr "Повернення"
+
+
+msgid "Accounted"
+msgstr "Враховано"
+
+
+msgid "Quantity"
+msgstr "Кількість"
+
+
+msgid "Unit price"
+msgstr "Ціна одиниці"
+
+
+msgid "Classification"
+msgstr "Класифікація"
+
+msgid "Included in master class contribution"
+msgstr "Враховано у внеску МК"

@@ -868,6 +868,8 @@ function lps_accounting_price_campaign_public_state(?array $state = null): array
         'phase' => strtoupper(sanitize_key((string)($state['phase'] ?? 'IDLE'))),
         'warehouseIds' => lps_accounting_prices_native_normalize_warehouse_ids($state['warehouse_ids'] ?? []),
         'warehouseIndex' => absint($state['warehouse_index'] ?? 0),
+        'expectedJobId' => sanitize_text_field((string)($state['range_job_id'] ?? '')),
+        'reviewRequired' => ($state['status'] ?? '') === 'outcome_unknown',
         'currentWarehouseId' => absint($state['current_warehouse_id'] ?? 0),
         'sourceDatabase' => sanitize_text_field((string)($state['source_database'] ?? '')),
         'initialMode' => !empty($state['include_unverified']),
@@ -897,7 +899,7 @@ function lps_accounting_price_campaign_public_state(?array $state = null): array
     return $public;
 }
 
-function lps_accounting_price_campaign_create(array $warehouse_ids, string $source = 'manual'): array {
+function lps_accounting_price_campaign_create(array $warehouse_ids, string $source = 'manual', string $reviewed_campaign_id = ''): array {
     $warehouse_ids = lps_accounting_prices_native_normalize_warehouse_ids($warehouse_ids);
     if (!$warehouse_ids) {
         return ['ok' => false, 'httpStatus' => 400, 'message' => __('Select at least one Folio warehouse.', 'lavka-price-sync')];
@@ -910,6 +912,10 @@ function lps_accounting_price_campaign_create(array $warehouse_ids, string $sour
     if (!empty($existing['active'])) {
         return ['ok' => false, 'httpStatus' => 409, 'message' => __('An accounting-price SKU campaign is already running.', 'lavka-price-sync'), 'state' => lps_accounting_price_campaign_public_state($existing)];
     }
+    if (($existing['status'] ?? '') === 'outcome_unknown'
+        && ($source !== 'manual' || $reviewed_campaign_id === '' || $reviewed_campaign_id !== ($existing['campaign_id'] ?? ''))) {
+        return ['ok' => false, 'httpStatus' => 409, 'message' => __('Review the unresolved operation before starting another campaign. A fresh snapshot alone does not prove the commit outcome.', 'lavka-price-sync')];
+    }
     $native_job = lps_accounting_prices_native_job_state();
     if (!empty($native_job['running'])) {
         return ['ok' => false, 'httpStatus' => 409, 'message' => __('Another Folio accounting-price job is already running.', 'lavka-price-sync')];
@@ -921,6 +927,15 @@ function lps_accounting_price_campaign_create(array $warehouse_ids, string $sour
     $options = lps_accounting_prices_native_cron_options();
     $window_minutes = max(30, min(720, absint($options['campaign_window_minutes'] ?? 240)));
     $state = [
+        'reviewed_operation' => ($existing['status'] ?? '') === 'outcome_unknown' ? [
+            'campaign_id' => $existing['campaign_id'] ?? '',
+            'job_id' => $existing['range_job_id'] ?? '',
+            'warehouse_id' => $existing['current_warehouse_id'] ?? 0,
+            'skus' => $existing['current_skus'] ?? [],
+            'last_progress' => $existing['range_status'] ?? [],
+            'reviewed_by' => get_current_user_id(),
+            'reviewed_at' => current_time('mysql'),
+        ] : ($existing['reviewed_operation'] ?? []),
         'campaign_id' => wp_generate_uuid4(),
         'active' => true,
         'source' => in_array($source, ['manual', 'cron', 'recovery'], true) ? $source : 'manual',
@@ -1306,13 +1321,14 @@ function lps_accounting_price_campaign_poll_range(array &$state): void {
     $body = is_array($result['body'] ?? null) ? $result['body'] : [];
     $job_id = sanitize_text_field((string)($body['jobId'] ?? ''));
     $expected_job_id = sanitize_text_field((string)($state['range_job_id'] ?? ''));
-    if ($expected_job_id === '' || $job_id === '' || $expected_job_id !== $job_id
+    if (strtoupper(trim((string)($body['status'] ?? ''))) === 'IDLE'
+        || $expected_job_id === '' || $job_id === '' || $expected_job_id !== $job_id
         || !lps_accounting_price_campaign_request_matches($body, $state)) {
         lps_accounting_price_campaign_release_lock($state);
         $state['active'] = false;
         $state['status'] = 'outcome_unknown';
         $state['phase'] = 'manual_review';
-        $state['error'] = __('The Java service returned a different native-range job. Manual review is required.', 'lavka-price-sync');
+        $state['error'] = __('The job connection was lost. Java may have restarted. The outcome must be reviewed.', 'lavka-price-sync');
         $state['completed_at'] = current_time('mysql');
         lps_accounting_price_campaign_store($state);
         lps_accounting_prices_native_pause_schedule($state['error']);

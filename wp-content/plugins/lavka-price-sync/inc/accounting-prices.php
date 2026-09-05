@@ -202,6 +202,9 @@ add_action('admin_enqueue_scripts', function () {
         ),
         'pollInterval' => 5000,
         'i18n' => [
+            'reviewConfirm' => __('Have you checked the unresolved operation in Folio, including the possible commit? A fresh snapshot alone is not proof. Continue only after this review; the campaign will rebuild the snapshot before selecting SKU.', 'lavka-price-sync'),
+            'reviewHelp' => __('Keep the old job ID, warehouse, SKU and last known progress. Check the unresolved operation in Folio before continuing. The next manual start rebuilds the snapshot; no apply is retried automatically.', 'lavka-price-sync'),
+            'expectedJob' => __('Last expected job ID', 'lavka-price-sync'),
             'startConfirm' => __('Start the accounting-price SKU campaign for the selected warehouse?', 'lavka-price-sync'),
             'stopConfirm' => __('Stop accepting new batches after the current operation and build the final snapshot?', 'lavka-price-sync'),
             'warehouseRequired' => __('Select a Folio warehouse.', 'lavka-price-sync'),
@@ -1146,7 +1149,7 @@ function lps_accounting_prices_ajax(): void {
             if ((string)($_POST['confirmApply'] ?? '') !== '1') {
                 wp_send_json_error(['message' => __('Explicit confirmation is required for Folio changes.', 'lavka-price-sync')], 400);
             }
-            wp_send_json_success(lps_accounting_price_campaign_create([$warehouse_id], 'manual'));
+            wp_send_json_success(lps_accounting_price_campaign_create([$warehouse_id], 'manual', sanitize_text_field(wp_unslash($_POST['reviewedCampaignId'] ?? ''))));
             break;
 
         case 'campaign_status':

@@ -4624,3 +4624,39 @@ msgstr ""
 #: inc/sync.php:302
 msgid "Manual listed price synchronization"
 msgstr ""
+
+
+msgid "Source"
+msgstr ""
+
+
+msgid "Return"
+msgstr ""
+
+
+msgid "Accounted"
+msgstr ""
+
+
+msgid "Quantity"
+msgstr ""
+
+
+msgid "The job connection was lost. Java may have restarted. The outcome must be reviewed."
+msgstr ""
+
+
+msgid "Review the unresolved operation before starting another campaign. A fresh snapshot alone does not prove the commit outcome."
+msgstr ""
+
+
+msgid "Have you checked the unresolved operation in Folio, including the possible commit? A fresh snapshot alone is not proof. Continue only after this review; the campaign will rebuild the snapshot before selecting SKU."
+msgstr ""
+
+
+msgid "Keep the old job ID, warehouse, SKU and last known progress. Check the unresolved operation in Folio before continuing. The next manual start rebuilds the snapshot; no apply is retried automatically."
+msgstr ""
+
+
+msgid "Last expected job ID"
+msgstr ""

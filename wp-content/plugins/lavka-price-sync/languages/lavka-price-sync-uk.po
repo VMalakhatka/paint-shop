@@ -4711,3 +4711,39 @@ msgstr "Ручна синхронізація цін для зазначених
 
 #~ msgid "Low margin"
 #~ msgstr "Низька маржа"
+
+
+msgid "Source"
+msgstr "Джерело"
+
+
+msgid "Return"
+msgstr "Повернення"
+
+
+msgid "Accounted"
+msgstr "Враховано"
+
+
+msgid "Quantity"
+msgstr "Кількість"
+
+
+msgid "The job connection was lost. Java may have restarted. The outcome must be reviewed."
+msgstr "Зв’язок із завданням втрачено. Можливий перезапуск Java. Потрібна перевірка результату."
+
+
+msgid "Review the unresolved operation before starting another campaign. A fresh snapshot alone does not prove the commit outcome."
+msgstr "Перевірте незавершену операцію перед запуском іншої кампанії. Сам свіжий знімок не доводить результат COMMIT."
+
+
+msgid "Have you checked the unresolved operation in Folio, including the possible commit? A fresh snapshot alone is not proof. Continue only after this review; the campaign will rebuild the snapshot before selecting SKU."
+msgstr "Ви перевірили незавершену операцію у ФОЛІО, включно з можливим COMMIT? Сам свіжий знімок не є доказом. Продовжуйте лише після перевірки; кампанія оновить знімок перед вибором артикулів."
+
+
+msgid "Keep the old job ID, warehouse, SKU and last known progress. Check the unresolved operation in Folio before continuing. The next manual start rebuilds the snapshot; no apply is retried automatically."
+msgstr "Збережіть старий ID завдання, склад, артикули й останній відомий прогрес. Перевірте незавершену операцію у ФОЛІО перед продовженням. Наступний ручний запуск оновить знімок; apply автоматично не повторюється."
+
+
+msgid "Last expected job ID"
+msgstr "Останній очікуваний ID завдання"

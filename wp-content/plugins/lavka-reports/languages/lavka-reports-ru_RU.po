@@ -543,3 +543,122 @@ msgstr "Название"
 #: inc/no-movement/class-settings.php:100
 msgid "Total qty"
 msgstr "Общее количество"
+
+
+msgid "Leave additional salary empty to use the server default. Enter zero to override it with zero."
+msgstr "Оставьте дополнительную зарплату пустой для серверного значения. Введите ноль, чтобы применить ноль."
+
+
+msgid "Master class adjustment"
+msgstr "Корректировка МК"
+
+
+msgid "Odesa master class"
+msgstr "Мастер-класс Одессы"
+
+
+msgid "Automatic master class data is unavailable. Check the Java report version."
+msgstr "Автоматические данные МК недоступны. Проверьте версию отчёта Java."
+
+
+msgid "The master class article was not found. This is not a confirmed zero."
+msgstr "Артикул МК не найден. Это не подтверждённый ноль."
+
+
+msgid "Master class income"
+msgstr "Доход МК"
+
+
+msgid "Master class returns"
+msgstr "Возвраты МК"
+
+
+msgid "Net contribution"
+msgstr "Чистый вклад"
+
+
+msgid "Gross profit already included in the base"
+msgstr "Валовая прибыль, уже учтённая в базе"
+
+
+msgid "Applied gross adjustment"
+msgstr "Применённая корректировка"
+
+
+msgid "Income lines"
+msgstr "Строки дохода"
+
+
+msgid "Return lines"
+msgstr "Строки возвратов"
+
+
+msgid "Ignored lines"
+msgstr "Пропущенные строки"
+
+
+msgid "Duplicate lines"
+msgstr "Повторные строки"
+
+
+msgid "Source"
+msgstr "Источник"
+
+
+msgid "Server default"
+msgstr "Серверное значение"
+
+
+msgid "Request override"
+msgstr "Переопределено в запросе"
+
+
+msgid "Applied additional salary"
+msgstr "Применённая дополнительная зарплата"
+
+
+msgid "Master class invoice audit"
+msgstr "Аудит накладных МК"
+
+
+msgid "The master class audit is truncated by the server. Not all lines are shown."
+msgstr "Аудит МК ограничен сервером. Показаны не все строки."
+
+
+msgid "No master class invoice lines."
+msgstr "Строк накладных МК нет."
+
+
+msgid "Line / movement ID"
+msgstr "Строка / ID движения"
+
+
+msgid "Document / movement type"
+msgstr "Тип документа / движения"
+
+
+msgid "Operation"
+msgstr "Операция"
+
+
+msgid "Return"
+msgstr "Возврат"
+
+
+msgid "Accounted"
+msgstr "Учтено"
+
+
+msgid "Quantity"
+msgstr "Количество"
+
+
+msgid "Unit price"
+msgstr "Цена единицы"
+
+
+msgid "Classification"
+msgstr "Классификация"
+
+msgid "Included in master class contribution"
+msgstr "Учтено во вкладе МК"

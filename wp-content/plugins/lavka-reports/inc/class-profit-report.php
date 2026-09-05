@@ -71,19 +71,12 @@ class Lavka_Reports_Profit_Report {
 
             <details class="lavr-profit-manual" id="lavr-profit-manual">
                 <summary><?php echo esc_html__('Manual report parameters', 'lavka-reports'); ?></summary>
-                <p class="description lavr-profit-manual-help"><?php echo esc_html__('Leave an unverified value empty. Enter zero only when zero has been explicitly confirmed.', 'lavka-reports'); ?></p>
+                <p class="description lavr-profit-manual-help"><?php echo esc_html__('Leave additional salary empty to use the server default. Enter zero to override it with zero.', 'lavka-reports'); ?></p>
                 <div class="lavr-profit-manual-grid">
-                    <div class="lavr-profit-field">
-                        <label for="lavr-profit-master-income"><?php echo esc_html__('Odesa master class income', 'lavka-reports'); ?></label>
-                        <input type="text" inputmode="decimal" id="lavr-profit-master-income" data-param="odesaMasterClassIncome" autocomplete="off">
-                    </div>
-                    <div class="lavr-profit-field">
-                        <label for="lavr-profit-master-return"><?php echo esc_html__('Odesa master class returns', 'lavka-reports'); ?></label>
-                        <input type="text" inputmode="decimal" id="lavr-profit-master-return" data-param="odesaMasterClassReturn" autocomplete="off">
-                    </div>
                     <div class="lavr-profit-field">
                         <label for="lavr-profit-additional-salary"><?php echo esc_html__('Odesa additional salary', 'lavka-reports'); ?></label>
                         <input type="text" inputmode="decimal" id="lavr-profit-additional-salary" data-param="odesaAdditionalSalary" autocomplete="off">
+                        <p id="lavr-profit-salary-source" class="description"></p>
                     </div>
                     <div class="lavr-profit-field">
                         <label for="lavr-profit-tax-share"><?php echo esc_html__('Odesa employee share', 'lavka-reports'); ?></label>
@@ -114,6 +107,8 @@ class Lavka_Reports_Profit_Report {
                     </div>
                     <div id="lavr-profit-cities" class="lavr-profit-cities"></div>
                 </section>
+
+                <section id="lavr-profit-master-class" class="lavr-profit-summary" aria-live="polite"></section>
 
                 <section id="lavr-profit-warnings-section" class="lavr-profit-warnings-section" hidden aria-labelledby="lavr-profit-warnings-title">
                     <h2 id="lavr-profit-warnings-title"><?php echo esc_html__('Warnings and checks', 'lavka-reports'); ?></h2>
@@ -153,6 +148,7 @@ class Lavka_Reports_Profit_Report {
                         </div>
                         <button type="button" class="button" id="lavr-profit-load-audit"><?php echo esc_html__('Load document audit', 'lavka-reports'); ?></button>
                     </div>
+                    <div id="lavr-profit-master-audit" hidden></div>
                     <div id="lavr-profit-audit-content" hidden>
                         <div id="lavr-profit-audit-note" class="notice notice-warning inline" hidden></div>
                         <div class="lavr-profit-audit-filters">
@@ -206,8 +202,6 @@ class Lavka_Reports_Profit_Report {
         $rules = [
             'odesaTaxShare'          => ['min' => 0, 'max' => 1, 'positive' => false],
             'rubToUahRate'           => ['min' => 0, 'max' => null, 'positive' => true],
-            'odesaMasterClassIncome' => ['min' => 0, 'max' => null, 'positive' => false],
-            'odesaMasterClassReturn' => ['min' => 0, 'max' => null, 'positive' => false],
             'odesaAdditionalSalary'  => ['min' => 0, 'max' => null, 'positive' => false],
         ];
 
@@ -261,6 +255,36 @@ class Lavka_Reports_Profit_Report {
 
     private function translations() {
         return [
+            'masterIncluded' => __('Included in master class contribution', 'lavka-reports'),
+            'masterTitle' => __('Odesa master class', 'lavka-reports'),
+            'masterUnavailable' => __('Automatic master class data is unavailable. Check the Java report version.', 'lavka-reports'),
+            'masterMissing' => __('The master class article was not found. This is not a confirmed zero.', 'lavka-reports'),
+            'sku' => __('SKU', 'lavka-reports'),
+            'warehouse' => __('Warehouse', 'lavka-reports'),
+            'masterIncome' => __('Master class income', 'lavka-reports'),
+            'masterReturns' => __('Master class returns', 'lavka-reports'),
+            'masterNet' => __('Net contribution', 'lavka-reports'),
+            'masterBase' => __('Gross profit already included in the base', 'lavka-reports'),
+            'masterAdjustment' => __('Applied gross adjustment', 'lavka-reports'),
+            'incomeLines' => __('Income lines', 'lavka-reports'),
+            'returnLines' => __('Return lines', 'lavka-reports'),
+            'ignoredLines' => __('Ignored lines', 'lavka-reports'),
+            'duplicateLines' => __('Duplicate lines', 'lavka-reports'),
+            'source' => __('Source', 'lavka-reports'),
+            'salaryDefault' => __('Server default', 'lavka-reports'),
+            'salaryOverride' => __('Request override', 'lavka-reports'),
+            'salaryApplied' => __('Applied additional salary', 'lavka-reports'),
+            'masterAuditTitle' => __('Master class invoice audit', 'lavka-reports'),
+            'masterTruncated' => __('The master class audit is truncated by the server. Not all lines are shown.', 'lavka-reports'),
+            'masterAuditEmpty' => __('No master class invoice lines.', 'lavka-reports'),
+            'line' => __('Line / movement ID', 'lavka-reports'),
+            'documentTypes' => __('Document / movement type', 'lavka-reports'),
+            'operationKind' => __('Operation', 'lavka-reports'),
+            'returnFlag' => __('Return', 'lavka-reports'),
+            'accounted' => __('Accounted', 'lavka-reports'),
+            'quantity' => __('Quantity', 'lavka-reports'),
+            'unitPrice' => __('Unit price', 'lavka-reports'),
+            'classification' => __('Classification', 'lavka-reports'),
             'loading' => __('Calculating report...', 'lavka-reports'),
             'recalculating' => __('Recalculating; the previous result is still shown.', 'lavka-reports'),
             'loadingAudit' => __('Loading document audit...', 'lavka-reports'),
@@ -282,7 +306,7 @@ class Lavka_Reports_Profit_Report {
             'odesa' => __('Odesa', 'lavka-reports'),
             'unallocated' => __('Unallocated', 'lavka-reports'),
             'baseGrossProfit' => __('Base gross profit', 'lavka-reports'),
-            'manualGrossAdjustments' => __('Manual adjustments', 'lavka-reports'),
+            'manualGrossAdjustments' => __('Master class adjustment', 'lavka-reports'),
             'grossProfit' => __('Gross profit', 'lavka-reports'),
             'operatingExpenses' => __('Operating expenses', 'lavka-reports'),
             'profit' => __('Profit', 'lavka-reports'),

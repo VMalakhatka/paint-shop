@@ -26,6 +26,7 @@
 
   let pollTimer = null;
   let campaignActive = false;
+  let reviewCampaignId = '';
   let selectedSnapshotState = '';
   let selectedSnapshotScope = '';
   let snapshotReportRequest = 0;
@@ -630,6 +631,8 @@
   function render(state) {
     const wasActive = campaignActive;
     campaignActive = Boolean(state?.active);
+    reviewCampaignId = state?.reviewRequired ? state.campaignId : '';
+    if (!campaignActive) window.clearTimeout(pollTimer);
     elements.start.disabled = campaignActive || !elements.confirm.checked || selectedWarehouseId() < 1;
     elements.stop.disabled = !campaignActive || Boolean(state?.stopRequested);
     elements.confirm.disabled = campaignActive;
@@ -640,8 +643,8 @@
       return;
     }
 
-    const rangePhase = state.range?.running ? String(state.range?.phase || '').toUpperCase() : '';
-    const snapshotPhase = state.snapshot?.running ? String(state.snapshot?.phase || '').toUpperCase() : '';
+    const rangePhase = campaignActive && state.range?.running ? String(state.range?.phase || '').toUpperCase() : '';
+    const snapshotPhase = campaignActive && state.snapshot?.running ? String(state.snapshot?.phase || '').toUpperCase() : '';
     const visiblePhase = rangePhase || snapshotPhase || state.phase;
     const rangeProcessed = Number(state.range?.skuProgressUnits || 0);
     const rangeTotal = Number(state.range?.skuTotalUnits || 0);
@@ -669,6 +672,8 @@
       );
     }
     elements.dashboard.append(overview);
+    if (state.expectedJobId) elements.dashboard.append(node('p', '', t.expectedJob + ': ' + state.expectedJobId));
+    if (reviewCampaignId) elements.dashboard.append(node('p', 'notice notice-warning inline', t.reviewHelp));
 
     if (state.message || state.error) {
       const message = node('div', `lps-ap-result-notice is-${state.error ? 'error' : 'info'}`);
@@ -731,12 +736,13 @@
     const warehouseId = selectedWarehouseId();
     if (!warehouseId) return showNotice('error', t.warehouseRequired || 'Select warehouse');
     if (!elements.confirm.checked) return showNotice('error', t.confirmationRequired || 'Confirmation required');
+    if (reviewCampaignId && !window.confirm(t.reviewConfirm)) return;
     if (!window.confirm(t.startConfirm || 'Start campaign?')) return;
 
     elements.start.disabled = true;
     hideNotice();
     try {
-      const result = await request('campaign_start', { warehouseId, confirmApply: 1 });
+      const result = await request('campaign_start', { warehouseId, confirmApply: 1, reviewedCampaignId: reviewCampaignId });
       if (!result.ok) throw new Error(result.message || t.requestFailed || 'Request failed');
       render(result.state || {});
       schedulePoll(1000);
