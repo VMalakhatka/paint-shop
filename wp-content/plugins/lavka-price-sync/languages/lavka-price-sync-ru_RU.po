@@ -4760,3 +4760,16 @@ msgstr "Сохраните старый ID задания, склад, арти�
 
 msgid "Last expected job ID"
 msgstr "Последний ожидаемый ID задания"
+
+msgid "Queue paused: insufficient time"
+msgstr "Очередь приостановлена — недостаточно времени"
+
+msgid "Partially processed: insufficient time"
+msgstr "Обработано частично — недостаточно времени"
+
+msgid "Not processed: insufficient time"
+msgstr "Не обработано — недостаточно времени"
+
+#, php-format
+msgid "Not enough time for another batch. The queue is paused after the final snapshot. Eligible SKU remaining in this warehouse: %d. Subsequent warehouses were not started."
+msgstr "Недостаточно времени для следующего пакета. Очередь приостановлена после финального снимка. На этом складе осталось SKU для перерасчёта: %d. Следующие склады не запускались."

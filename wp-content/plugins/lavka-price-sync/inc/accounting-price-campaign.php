@@ -183,7 +183,7 @@ function lps_accounting_price_campaign_history_from_state(array $state, int $war
         if (in_array($status, ['COMPLETED', 'COMPLETED_WITH_WARNINGS'], true)) {
             $processed_skus += absint($report['sku_count'] ?? 0);
         }
-        if (in_array($status, ['WAREHOUSE_FAILED', 'WAREHOUSE_SKIPPED_UNSUPPORTED_MODE', 'SNAPSHOT_CONFIRMED'], true)) {
+        if (in_array($status, ['WAREHOUSE_FAILED', 'WAREHOUSE_SKIPPED_UNSUPPORTED_MODE', 'SNAPSHOT_CONFIRMED', 'PARTIAL_TIME_LIMIT', 'NOT_PROCESSED_TIME_LIMIT'], true)) {
             $final_report = $report;
         }
     }
@@ -217,6 +217,8 @@ function lps_accounting_price_campaign_history_from_state(array $state, int $war
         'started_at' => sanitize_text_field((string)($state['warehouse_started_at'] ?? ($state['started_at'] ?? ''))),
         'completed_at' => $completed_at,
         'processed_skus' => $processed_skus,
+        'remaining_skus' => absint($final_report['remaining_skus'] ?? 0),
+        'stop_reason' => sanitize_key((string)($final_report['stop_reason'] ?? '')),
         'counts_before' => $is_current && is_array($state['counts_before'] ?? null)
             ? $state['counts_before']
             : (is_array($final_report['counts_before'] ?? null) ? $final_report['counts_before'] : []),
@@ -889,6 +891,8 @@ function lps_accounting_price_campaign_public_state(?array $state = null): array
         'warnings' => is_array($state['warnings'] ?? null) ? $state['warnings'] : [],
         'warningsTruncated' => !empty($state['warnings_truncated']),
         'stopRequested' => !empty($state['stop_requested']),
+        'stopReason' => sanitize_key((string)($state['stop_reason'] ?? '')),
+        'remainingSkus' => absint($state['remaining_skus'] ?? 0),
         'startedAt' => sanitize_text_field((string)($state['started_at'] ?? '')),
         'completedAt' => sanitize_text_field((string)($state['completed_at'] ?? '')),
         'deadlineAt' => absint($state['deadline_at'] ?? 0),
@@ -1462,10 +1466,30 @@ function lps_accounting_price_campaign_poll_range(array &$state): void {
 
 function lps_accounting_price_campaign_finish_warehouse(array &$state): void {
     $warehouse_id = absint($state['current_warehouse_id'] ?? 0);
+    // The admission budget can expire before the wall-clock deadline.
+    $time_exhausted = ($state['stop_reason'] ?? '') === 'time_limit'
+        || lps_accounting_price_campaign_deadline_reached($state)
+        || lps_accounting_price_campaign_batch_size($state) < 1;
+    if ($time_exhausted) $state['stop_reason'] = 'time_limit';
+    $counts_after = (array)($state['counts_after'] ?? []);
+    $remaining = absint($counts_after['NEW'] ?? 0) + absint($counts_after['DIRTY'] ?? 0)
+        + (!empty($state['include_unverified']) ? absint($counts_after['UNVERIFIED'] ?? 0) : 0);
+    $state['remaining_skus'] = $remaining;
     $warehouse_skipped = !empty($state['warehouse_skipped']);
     $report_status = $warehouse_skipped
         ? 'WAREHOUSE_SKIPPED_UNSUPPORTED_MODE'
         : (!empty($state['warehouse_failed']) ? 'WAREHOUSE_FAILED' : 'SNAPSHOT_CONFIRMED');
+    $time_message = '';
+    if ($time_exhausted) {
+        $time_message = sprintf(
+            __('Not enough time for another batch. The queue is paused after the final snapshot. Eligible SKU remaining in this warehouse: %d. Subsequent warehouses were not started.', 'lavka-price-sync'),
+            $remaining
+        );
+        if ($remaining > 0 && $report_status === 'SNAPSHOT_CONFIRMED') {
+            $history = lps_accounting_price_campaign_history_from_state($state, $warehouse_id);
+            $report_status = !empty($history['processed_skus']) ? 'PARTIAL_TIME_LIMIT' : 'NOT_PROCESSED_TIME_LIMIT';
+        }
+    }
     $skip_details = is_array($state['warehouse_skip_details'] ?? null)
         ? $state['warehouse_skip_details']
         : [];
@@ -1475,7 +1499,9 @@ function lps_accounting_price_campaign_finish_warehouse(array &$state): void {
         'sku_count' => 0,
         'counts_before' => $state['counts_before'] ?? [],
         'counts_after' => $state['counts_after'] ?? [],
-        'message' => $warehouse_skipped ? ($state['message'] ?? '') : '',
+        'message' => $warehouse_skipped ? ($state['message'] ?? '') : $time_message,
+        'stop_reason' => $state['stop_reason'] ?? '',
+        'remaining_skus' => $remaining,
         'error' => $warehouse_skipped ? '' : ($state['warehouse_error'] ?? ''),
         'error_code' => $warehouse_skipped ? ($state['warehouse_skip_code'] ?? '') : '',
         'accounting_raw_code' => $warehouse_skipped ? ($skip_details['accountingRawCode'] ?? null) : null,
@@ -1487,14 +1513,17 @@ function lps_accounting_price_campaign_finish_warehouse(array &$state): void {
     $state['warehouse_index'] = absint($state['warehouse_index'] ?? 0) + 1;
     $warehouse_ids = lps_accounting_prices_native_normalize_warehouse_ids($state['warehouse_ids'] ?? []);
     $deadline_reached = lps_accounting_price_campaign_deadline_reached($state);
-    if ($state['warehouse_index'] >= count($warehouse_ids) || !empty($state['stop_requested']) || $deadline_reached) {
+    if ($state['warehouse_index'] >= count($warehouse_ids) || !empty($state['stop_requested']) || $deadline_reached || $time_exhausted) {
         $state['active'] = false;
         $state['status'] = (!empty($state['stop_requested']) || $deadline_reached)
             ? 'paused'
             : (($state['warning_count'] ?? 0) > 0 || ($state['failed_warehouses'] ?? 0) > 0 ? 'completed_with_warnings' : 'completed');
         $state['phase'] = 'completed';
         $state['completed_at'] = current_time('mysql');
-        if (!empty($state['stop_requested'])) {
+        if ($time_exhausted) {
+            $state['status'] = 'paused_time_limit';
+            $state['message'] = $time_message;
+        } elseif (!empty($state['stop_requested'])) {
             $state['message'] = __('The SKU campaign stopped safely after the current operation and final snapshot.', 'lavka-price-sync');
         } elseif ($deadline_reached) {
             $state['message'] = __('The maintenance window ended. The campaign stopped safely after the mandatory final snapshot; remaining warehouses will be handled by a later campaign.', 'lavka-price-sync');
@@ -1530,6 +1559,8 @@ function lps_accounting_price_campaign_finish_warehouse(array &$state): void {
     $state['warehouse_skip_code'] = '';
     $state['warehouse_skip_details'] = [];
     $state['warehouse_error'] = '';
+    $state['stop_reason'] = '';
+    $state['remaining_skus'] = 0;
     $state['warehouse_started_at'] = current_time('mysql');
     $state['phase'] = 'snapshot_before_start';
     $state['message'] = __('Preparing the next Folio warehouse snapshot.', 'lavka-price-sync');
@@ -1545,6 +1576,7 @@ function lps_accounting_price_campaign_tick(): array {
     if (in_array($phase, ['waiting_lock', 'waiting_java_slot', 'range_starting'], true)
         && !empty($state['current_skus'])
         && (!empty($state['stop_requested']) || lps_accounting_price_campaign_deadline_reached($state))) {
+        if (lps_accounting_price_campaign_deadline_reached($state)) $state['stop_reason'] = 'time_limit';
         $state['current_skus'] = [];
         $state['range_job_id'] = '';
         $state['phase'] = 'snapshot_after_start';
@@ -1578,6 +1610,7 @@ function lps_accounting_price_campaign_tick(): array {
             break;
         case 'select_batch':
             if (!empty($state['stop_requested']) || lps_accounting_price_campaign_deadline_reached($state)) {
+                if (lps_accounting_price_campaign_deadline_reached($state)) $state['stop_reason'] = 'time_limit';
                 $state['phase'] = 'snapshot_after_start';
                 $state['message'] = __('The maintenance window is ending. Building the mandatory final snapshot.', 'lavka-price-sync');
                 lps_accounting_price_campaign_store($state);
@@ -1586,6 +1619,7 @@ function lps_accounting_price_campaign_tick(): array {
             }
             $batch_size = lps_accounting_price_campaign_batch_size($state);
             if ($batch_size < 1) {
+                $state['stop_reason'] = 'time_limit';
                 $state['phase'] = 'snapshot_after_start';
                 $state['message'] = __('There is not enough safe time for another batch. Building the mandatory final snapshot.', 'lavka-price-sync');
                 lps_accounting_price_campaign_store($state);

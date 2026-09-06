@@ -4660,3 +4660,16 @@ msgstr ""
 
 msgid "Last expected job ID"
 msgstr ""
+
+msgid "Queue paused: insufficient time"
+msgstr ""
+
+msgid "Partially processed: insufficient time"
+msgstr ""
+
+msgid "Not processed: insufficient time"
+msgstr ""
+
+#, php-format
+msgid "Not enough time for another batch. The queue is paused after the final snapshot. Eligible SKU remaining in this warehouse: %d. Subsequent warehouses were not started."
+msgstr ""
