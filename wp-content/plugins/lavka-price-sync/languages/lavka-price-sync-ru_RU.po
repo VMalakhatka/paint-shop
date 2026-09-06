@@ -4761,6 +4761,205 @@ msgstr "Сохраните старый ID задания, склад, арти�
 msgid "Last expected job ID"
 msgstr "Последний ожидаемый ID задания"
 
+msgid "Enable purchase planning and select destination groups in the scenario."
+msgstr "Включите планирование закупки и выберите группы назначения в сценарии."
+
+msgid "Every destination group must exist and all its warehouses must be included in the analytics scenario."
+msgstr "Каждая группа назначения должна существовать, а все её склады — входить в сценарий аналитики."
+
+msgid "Destination groups must not share physical warehouses."
+msgstr "Группы назначения не могут содержать одни и те же физические склады."
+
+msgid "Set a receiving warehouse, lead time, target coverage and safety stock days for every destination group."
+msgstr "Для каждой группы укажите склад приёмки, срок поставки, целевой и страховой запас в днях."
+
+msgid "Supplier order preview"
+msgstr "Формирование заказа поставщику — предварительный расчёт"
+
+msgid "Receiving warehouse"
+msgstr "Склад приёмки"
+
+msgid "Lead time, days"
+msgstr "Срок поставки, дней"
+
+msgid "Stock after arrival, days"
+msgstr "Запас после поступления, дней"
+
+msgid "Safety stock, days"
+msgstr "Страховой запас, дней"
+
+msgid "Building purchase preview..."
+msgstr "Формируется предварительный расчёт закупки..."
+
+msgid "SKU loaded"
+msgstr "Загружено SKU"
+
+msgid "Preview complete. No orders or transfers were created."
+msgstr "Предварительный расчёт завершён. Заказы и перемещения не создавались."
+
+msgid "Preview incomplete. Export is unavailable. Start a new calculation."
+msgstr "Расчёт неполный. Экспорт недоступен. Запустите новый расчёт."
+
+msgid "Purchase preview could not be calculated."
+msgstr "Не удалось рассчитать закупку."
+
+msgid "Review required"
+msgstr "Нужна проверка"
+
+msgid "Preview ready"
+msgstr "Предварительный расчёт готов"
+
+msgid "Combined warehouse"
+msgstr "Объединённый склад"
+
+msgid "Target stock"
+msgstr "Целевой запас"
+
+msgid "Need before expected receipts"
+msgstr "Потребность до ожидаемых поступлений"
+
+msgid "Suggested transfers between groups"
+msgstr "Рекомендуемые перемещения между группами"
+
+msgid "Suggested purchase quantity"
+msgstr "Рекомендуемая закупка"
+
+msgid "Manager quantity"
+msgstr "Количество менеджера"
+
+msgid "Preview quantity after review"
+msgstr "Количество после проверки"
+
+msgid "Reason for adjustment"
+msgstr "Причина корректировки"
+
+msgid "Supply inputs and review"
+msgstr "Параметры поставки и проверка"
+
+msgid "Confirmed transit allocated to this group"
+msgstr "Подтверждённый транзит для этой группы"
+
+msgid "Other confirmed incoming orders, excluding transit"
+msgstr "Другие подтверждённые поступления без транзита"
+
+msgid "Supplier pack quantity"
+msgstr "Кратность упаковки поставщика"
+
+msgid "Supplier minimum order quantity"
+msgstr "Минимальная партия поставщика"
+
+msgid "Confirmed transit shared by all groups"
+msgstr "Подтверждённый транзит на все группы"
+
+msgid "Recalculate this SKU preview"
+msgstr "Пересчитать предварительный расчёт SKU"
+
+msgid "Previous"
+msgstr "Предыдущая"
+
+msgid "Next"
+msgstr "Следующая"
+
+msgid "Warehouse metrics or stock policy are incomplete. Missing data is not zero stock."
+msgstr "Показатели склада или правила запаса неполны. Отсутствующие данные не означают нулевой остаток."
+
+msgid "The receiving warehouse stock policy does not allow this purchase."
+msgstr "Правила склада приёмки не разрешают эту закупку."
+
+msgid "Network purchase permission is missing or blocked."
+msgstr "Разрешение закупки для сети отсутствует или заблокировано."
+
+msgid "Profit is negative or unknown. A purchase recommendation requires review."
+msgstr "Прибыль отрицательная или неизвестна. Для рекомендации закупки нужна проверка."
+
+msgid "Confirm transit, other incoming orders, supplier pack and minimum order quantity. Enter zero only when confirmed."
+msgstr "Подтвердите транзит, другие поступления, упаковку и минимальную партию. Указывайте ноль только после проверки."
+
+msgid "The same transit stock was allocated more than once: group allocations exceed the confirmed total."
+msgstr "Транзит распределён повторно: сумма по группам превышает подтверждённый общий остаток."
+
+msgid "The resulting receipt exceeds the receiving warehouse stock limit."
+msgstr "Поступление превышает лимит запаса склада приёмки."
+
+msgid "The quantity does not respect the supplier pack or minimum order."
+msgstr "Количество не соответствует упаковке или минимальной партии поставщика."
+
+msgid "Enter a reason for the manager adjustment."
+msgstr "Укажите причину корректировки менеджером."
+
+msgid "A single current supplier must be confirmed for this SKU."
+msgstr "Для этого SKU нужно подтвердить одного текущего поставщика."
+
+msgid "Purchase planning"
+msgstr "Планирование закупки"
+
+msgid "Enable supplier order preview"
+msgstr "Включить предварительный расчёт заказа поставщику"
+
+msgid "Suggest transfers from surplus destination groups first"
+msgstr "Сначала предлагать перемещения излишков между группами назначения"
+
+msgid "Open supplier order preview"
+msgstr "Открыть предварительный расчёт закупки"
+
+msgid "The preview has expired. Start a new calculation."
+msgstr "Срок хранения расчёта истёк. Запустите новый расчёт."
+
+msgid "The scenario or warehouse groups changed. Start a new preview."
+msgstr "Сценарий или группы складов изменились. Запустите новый расчёт."
+
+msgid "The scenario changed or is not active. Reload the page."
+msgstr "Сценарий изменился или неактивен. Обновите страницу."
+
+msgid "Enable returns in the analytics scenario before building a purchase preview."
+msgstr "Перед расчётом закупки включите возвраты в сценарии аналитики."
+
+msgid "The preview page changed. Start a new calculation."
+msgstr "Страница расчёта изменилась. Запустите новый расчёт."
+
+msgid "The analytics response is incomplete. No purchase preview was accepted."
+msgstr "Ответ аналитики неполный. Расчёт закупки не принят."
+
+msgid "Snapshot generations changed while loading. Start a new preview."
+msgstr "Поколения снимков изменились при загрузке. Запустите новый расчёт."
+
+msgid "The preview exceeds 10000 SKU. Narrow the scenario filters."
+msgstr "Расчёт превышает 10000 SKU. Сузьте отборы сценария."
+
+msgid "The analytics response contains missing or repeated SKU."
+msgstr "Ответ аналитики содержит пустые или повторные SKU."
+
+msgid "Complete the preview before adjusting quantities."
+msgstr "Завершите расчёт перед корректировкой количеств."
+
+msgid "Enter valid non-negative quantities and a positive pack quantity."
+msgstr "Укажите корректные неотрицательные количества и положительную кратность упаковки."
+
+msgid "Access denied."
+msgstr "Доступ запрещён."
+
+msgid "Invalid request."
+msgstr "Некорректный запрос."
+
+msgid "Preview only. Demand uses regular observed sales; returns are shown separately. Lost sales during stockouts are not estimated. No Folio documents, WooCommerce orders or stock reservations are created."
+msgstr "Только предварительный расчёт. Спрос определяется по регулярным фактическим продажам; возвраты показаны отдельно. Потерянные продажи при отсутствии товара не оцениваются. Документы ФОЛИО, заказы WooCommerce и резервы не создаются."
+
+msgid "Calculate preview"
+msgstr "Рассчитать предварительно"
+
+msgid "Cancel"
+msgstr "Отменить"
+
+msgid "Source warnings"
+msgstr "Предупреждения источника"
+
+msgid "Export XLSX"
+msgstr "Экспортировать XLSX"
+
+msgid "Complete the preview before exporting."
+msgstr "Завершите расчёт перед экспортом."
+
+
 msgid "Queue paused: insufficient time"
 msgstr "Очередь приостановлена — недостаточно времени"
 

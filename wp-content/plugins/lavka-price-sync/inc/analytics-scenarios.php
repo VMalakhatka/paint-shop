@@ -153,6 +153,7 @@ function lps_analytics_scenario_default_profile_v4(): array {
         'page' => ['size' => 50],
         'sort' => [['field' => 'grossProfit', 'direction' => 'DESC']],
         'presentation' => ['activeTab' => 'products'],
+        'purchasePlanning' => lps_purchase_profile([]),
     ];
 }
 
@@ -233,6 +234,7 @@ function lps_analytics_scenario_sanitize_profile_v4(array $profile): array {
         'page' => ['size' => $page_size],
         'sort' => $sort,
         'presentation' => ['activeTab' => sanitize_key((string)($presentation['activeTab'] ?? 'products')) === 'movements' ? 'movements' : 'products'],
+        'purchasePlanning' => lps_purchase_profile(is_array($profile['purchasePlanning'] ?? null) ? $profile['purchasePlanning'] : []),
     ];
 }
 
@@ -459,6 +461,13 @@ function lps_analytics_scenario_request_payload(): array {
         wp_send_json_error(['message' => __('The scenario data is invalid.', 'lavka-price-sync')], 400);
     }
     $profile = lps_analytics_scenario_sanitize_profile($decoded);
+    if (!empty($profile['purchasePlanning']['enabled'])) {
+        try {
+            lps_purchase_resolve_groups($profile, function_exists('lavka_get_global_warehouse_groups') ? lavka_get_global_warehouse_groups() : []);
+        } catch (InvalidArgumentException $error) {
+            wp_send_json_error(['message' => $error->getMessage()], 400);
+        }
+    }
     $source = (string)$profile['context']['sourceDatabase'];
     $warehouses = $profile['context']['warehouseIds'];
     if ($source === '' || !$warehouses) {
@@ -706,6 +715,8 @@ add_action('admin_enqueue_scripts', static function (): void {
         'ajaxUrl' => admin_url('admin-ajax.php'),
         'nonce' => wp_create_nonce(LPS_ANALYTICS_SCENARIOS_NONCE),
         'analyticsUrl' => admin_url('admin.php?page=' . LPS_PRODUCT_ANALYTICS_PAGE),
+        'warehouseGroups' => function_exists('lavka_get_global_warehouse_groups') ? lavka_get_global_warehouse_groups() : [],
+        'purchaseI18n' => lps_purchase_i18n(),
         'locale' => str_replace('_', '-', determine_locale()),
         'i18n' => [
             'loading' => __('Loading analytics scenarios...', 'lavka-price-sync'),
@@ -992,6 +1003,7 @@ function lps_render_analytics_scenarios_v4_page(): void {
                         <div class="lps-as-grid lps-as-filter-grid" id="lps-as-movement-filter-grid"></div>
                     </details>
 
+                    <?php lps_purchase_scenario_fields(); ?>
                     <section class="lps-as-section lps-as-revisions" id="lps-as-revisions" hidden><h2><?php echo esc_html__('Revision history', 'lavka-price-sync'); ?></h2><div id="lps-as-revision-list"></div></section>
                     <div class="lps-as-savebar"><button type="submit" class="button button-primary button-large" id="lps-as-save"><?php echo esc_html__('Save scenario', 'lavka-price-sync'); ?></button><span class="description" id="lps-as-editor-meta"></span></div>
                 </form>

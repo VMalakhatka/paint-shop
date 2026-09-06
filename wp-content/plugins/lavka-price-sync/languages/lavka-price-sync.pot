@@ -4661,6 +4661,205 @@ msgstr ""
 msgid "Last expected job ID"
 msgstr ""
 
+msgid "Enable purchase planning and select destination groups in the scenario."
+msgstr ""
+
+msgid "Every destination group must exist and all its warehouses must be included in the analytics scenario."
+msgstr ""
+
+msgid "Destination groups must not share physical warehouses."
+msgstr ""
+
+msgid "Set a receiving warehouse, lead time, target coverage and safety stock days for every destination group."
+msgstr ""
+
+msgid "Supplier order preview"
+msgstr ""
+
+msgid "Receiving warehouse"
+msgstr ""
+
+msgid "Lead time, days"
+msgstr ""
+
+msgid "Stock after arrival, days"
+msgstr ""
+
+msgid "Safety stock, days"
+msgstr ""
+
+msgid "Building purchase preview..."
+msgstr ""
+
+msgid "SKU loaded"
+msgstr ""
+
+msgid "Preview complete. No orders or transfers were created."
+msgstr ""
+
+msgid "Preview incomplete. Export is unavailable. Start a new calculation."
+msgstr ""
+
+msgid "Purchase preview could not be calculated."
+msgstr ""
+
+msgid "Review required"
+msgstr ""
+
+msgid "Preview ready"
+msgstr ""
+
+msgid "Combined warehouse"
+msgstr ""
+
+msgid "Target stock"
+msgstr ""
+
+msgid "Need before expected receipts"
+msgstr ""
+
+msgid "Suggested transfers between groups"
+msgstr ""
+
+msgid "Suggested purchase quantity"
+msgstr ""
+
+msgid "Manager quantity"
+msgstr ""
+
+msgid "Preview quantity after review"
+msgstr ""
+
+msgid "Reason for adjustment"
+msgstr ""
+
+msgid "Supply inputs and review"
+msgstr ""
+
+msgid "Confirmed transit allocated to this group"
+msgstr ""
+
+msgid "Other confirmed incoming orders, excluding transit"
+msgstr ""
+
+msgid "Supplier pack quantity"
+msgstr ""
+
+msgid "Supplier minimum order quantity"
+msgstr ""
+
+msgid "Confirmed transit shared by all groups"
+msgstr ""
+
+msgid "Recalculate this SKU preview"
+msgstr ""
+
+msgid "Previous"
+msgstr ""
+
+msgid "Next"
+msgstr ""
+
+msgid "Warehouse metrics or stock policy are incomplete. Missing data is not zero stock."
+msgstr ""
+
+msgid "The receiving warehouse stock policy does not allow this purchase."
+msgstr ""
+
+msgid "Network purchase permission is missing or blocked."
+msgstr ""
+
+msgid "Profit is negative or unknown. A purchase recommendation requires review."
+msgstr ""
+
+msgid "Confirm transit, other incoming orders, supplier pack and minimum order quantity. Enter zero only when confirmed."
+msgstr ""
+
+msgid "The same transit stock was allocated more than once: group allocations exceed the confirmed total."
+msgstr ""
+
+msgid "The resulting receipt exceeds the receiving warehouse stock limit."
+msgstr ""
+
+msgid "The quantity does not respect the supplier pack or minimum order."
+msgstr ""
+
+msgid "Enter a reason for the manager adjustment."
+msgstr ""
+
+msgid "A single current supplier must be confirmed for this SKU."
+msgstr ""
+
+msgid "Purchase planning"
+msgstr ""
+
+msgid "Enable supplier order preview"
+msgstr ""
+
+msgid "Suggest transfers from surplus destination groups first"
+msgstr ""
+
+msgid "Open supplier order preview"
+msgstr ""
+
+msgid "The preview has expired. Start a new calculation."
+msgstr ""
+
+msgid "The scenario or warehouse groups changed. Start a new preview."
+msgstr ""
+
+msgid "The scenario changed or is not active. Reload the page."
+msgstr ""
+
+msgid "Enable returns in the analytics scenario before building a purchase preview."
+msgstr ""
+
+msgid "The preview page changed. Start a new calculation."
+msgstr ""
+
+msgid "The analytics response is incomplete. No purchase preview was accepted."
+msgstr ""
+
+msgid "Snapshot generations changed while loading. Start a new preview."
+msgstr ""
+
+msgid "The preview exceeds 10000 SKU. Narrow the scenario filters."
+msgstr ""
+
+msgid "The analytics response contains missing or repeated SKU."
+msgstr ""
+
+msgid "Complete the preview before adjusting quantities."
+msgstr ""
+
+msgid "Enter valid non-negative quantities and a positive pack quantity."
+msgstr ""
+
+msgid "Access denied."
+msgstr ""
+
+msgid "Invalid request."
+msgstr ""
+
+msgid "Preview only. Demand uses regular observed sales; returns are shown separately. Lost sales during stockouts are not estimated. No Folio documents, WooCommerce orders or stock reservations are created."
+msgstr ""
+
+msgid "Calculate preview"
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid "Source warnings"
+msgstr ""
+
+msgid "Export XLSX"
+msgstr ""
+
+msgid "Complete the preview before exporting."
+msgstr ""
+
+
 msgid "Queue paused: insufficient time"
 msgstr ""
 

@@ -245,8 +245,43 @@
             calculation: { abcBasis: el('lps-as-abc-basis').value, includeReturns: el('lps-as-include-returns').checked },
             page: { size: Number(el('lps-as-page-size').value || 50) },
             sort: [{ field: el('lps-as-sort-field').value, direction: el('lps-as-sort-direction').value }],
-            presentation: { activeTab: el('lps-as-active-tab').value }
+            presentation: { activeTab: el('lps-as-active-tab').value },
+            purchasePlanning: collectPurchasePlanning()
         };
+    }
+
+    function collectPurchasePlanning() {
+        const groups = [];
+        el('lps-as-purchase-groups').querySelectorAll('[data-purchase-group]').forEach((row) => {
+            if (!row.querySelector('[data-field="selected"]').checked) return;
+            const group = { code: row.dataset.purchaseGroup };
+            ['receivingWarehouseId', 'leadTimeDays', 'targetDays', 'safetyDays'].forEach((field) => {
+                const value = row.querySelector('[data-field="' + field + '"]').value;
+                group[field] = value === '' ? null : Number(value);
+            });
+            groups.push(group);
+        });
+        return { version: 1, enabled: el('lps-as-purchase-enabled').checked, allowTransfers: el('lps-as-purchase-transfers').checked, groups: groups };
+    }
+
+    function applyPurchasePlanning(plan) {
+        plan = plan || {};
+        el('lps-as-purchase-enabled').checked = plan.enabled === true;
+        el('lps-as-purchase-transfers').checked = plan.allowTransfers === true;
+        const saved = new Map((plan.groups || []).map((group) => [group.code, group]));
+        const groups = [...(config.warehouseGroups || [])];
+        saved.forEach((group, code) => { if (!groups.some((item) => item.code === code)) groups.push({ code: code, name: code + ' · ' + i18n.savedUnavailableValue, warehouseIds: [group.receivingWarehouseId] }); });
+        el('lps-as-purchase-groups').innerHTML = groups.map((group) => {
+            const value = saved.get(group.code) || {};
+            const t = config.purchaseI18n || {};
+            const options = '<option value="">—</option>' + group.warehouseIds.map((id) => {
+                const warehouse = state.warehouses.find((item) => Number(item.id) === Number(id));
+                return '<option value="' + Number(id) + '"' + (Number(value.receivingWarehouseId) === Number(id) ? ' selected' : '') + '>' + escapeHtml(warehouse ? warehouse.id + ' · ' + warehouse.name : id) + '</option>';
+            }).join('');
+            return '<fieldset class="lps-as-purchase-group" data-purchase-group="' + escapeHtml(group.code) + '"><legend><label><input type="checkbox" data-field="selected"' + (saved.has(group.code) ? ' checked' : '') + '> ' + escapeHtml(group.name) + ' [' + group.warehouseIds.map(Number).join(', ') + ']</label></legend><div class="lps-as-grid">' +
+                '<label><span>' + escapeHtml(t.receivingWarehouse) + '</span><select data-field="receivingWarehouseId">' + options + '</select></label>' +
+                ['leadTimeDays', 'targetDays', 'safetyDays'].map((field) => '<label><span>' + escapeHtml(t[field]) + '</span><input type="number" min="' + (field === 'targetDays' ? 1 : 0) + '" max="' + (field === 'safetyDays' ? 365 : 730) + '" step="1" data-field="' + field + '" value="' + escapeHtml(value[field] == null ? '' : value[field]) + '"></label>').join('') + '</div></fieldset>';
+        }).join('');
     }
 
     function clearSelections() {
@@ -315,6 +350,7 @@
         el('lps-as-sort-field').value = sort.field || 'grossProfit';
         el('lps-as-sort-direction').value = sort.direction === 'ASC' ? 'ASC' : 'DESC';
         el('lps-as-active-tab').value = (normalized.presentation || {}).activeTab === 'movements' ? 'movements' : 'products';
+        applyPurchasePlanning(normalized.purchasePlanning);
     }
 
     async function loadScenarioProfile(scenario) {
@@ -342,6 +378,7 @@
         el('lps-as-editor-meta').textContent = i18n.newScenario || 'New scenario';
         el('lps-as-revisions').hidden = true;
         clearSelections();
+        applyPurchasePlanning(null);
         renderFilters();
         el('lps-as-scope-meta').textContent = i18n.selectWarehouses || 'Select warehouses.';
         renderList();

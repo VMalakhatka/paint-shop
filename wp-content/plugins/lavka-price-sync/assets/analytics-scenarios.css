@@ -39,6 +39,9 @@ details.lps-as-section > .lps-as-grid { border-top: 1px solid #dcdcde; }
 .lps-as-message { margin: 14px 0; padding: 12px 14px; border-left: 4px solid #2271b1; background: #fff; }
 .lps-as-message.is-error { border-color: #d63638; background: #fcf0f1; }
 .lps-as-message.is-success { border-color: #00a32a; background: #edfaef; }
+.lps-as-purchase-body { padding: 0 16px 16px; }
+.lps-as-purchase-group { margin: 18px 0; border: 0; border-top: 1px solid #dcdcde; padding: 12px 0; }
+.lps-as-purchase-group legend { font-weight: 600; }
 @media (max-width: 1200px) { .lps-as-grid { grid-template-columns: repeat(2, minmax(160px, 1fr)); } }
 @media (max-width: 782px) {
   .lps-as-heading { align-items: flex-start; flex-direction: column; }

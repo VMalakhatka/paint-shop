@@ -28,6 +28,7 @@ require_once __DIR__.'/inc/logs.php';
 require_once __DIR__ . '/inc/cron.php';
 require_once __DIR__ . '/inc/accounting-prices-cron.php';
 require_once __DIR__ . '/inc/accounting-price-campaign.php';
+require_once __DIR__ . '/inc/purchase-planning-model.php';
 require_once __DIR__ . '/inc/analytics-scenarios.php';
 
 register_activation_hook(__FILE__, function () {
@@ -46,6 +47,7 @@ require_once __DIR__.'/inc/sync.php';
 require_once __DIR__.'/inc/accounting-prices.php';
 require_once __DIR__.'/inc/product-analytics.php';
 require_once __DIR__.'/inc/product-analytics-export.php';
+require_once __DIR__.'/inc/purchase-planning.php';
 
 add_action('init', function () {
   foreach (['administrator','shop_manager'] as $r) {
