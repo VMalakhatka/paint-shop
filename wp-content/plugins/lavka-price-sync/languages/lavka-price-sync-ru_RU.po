@@ -4960,6 +4960,66 @@ msgid "Complete the preview before exporting."
 msgstr "Завершите расчёт перед экспортом."
 
 
+msgid "Invalid availability context or filter."
+msgstr "Некорректный контекст или отбор наличия."
+
+msgid "Physical stock availability"
+msgstr "Физическое наличие товара"
+
+msgid "Include daily stock availability"
+msgstr "Добавить подневное наличие товара"
+
+msgid "Availability context"
+msgstr "Склад или группа для наличия"
+
+msgid "Details only / single warehouse"
+msgstr "Только детализация / единственный склад"
+
+msgid "Availability %, from"
+msgstr "Наличие, % от"
+
+msgid "Availability %, through"
+msgstr "Наличие, % до"
+
+msgid "Stockout %, from"
+msgstr "Отсутствие, % от"
+
+msgid "Stockout %, through"
+msgstr "Отсутствие, % до"
+
+msgid "End-of-day physical stock only. The current assortment policy applies to the whole period, including new products. Intraday stockouts and historical reservations are not measured. Use completed days before the earliest snapshot date."
+msgstr "Только физический остаток на конец дня. Текущие правила ассортимента применяются ко всему периоду, также для новых товаров. Отсутствие внутри дня и исторические резервы не измеряются. Выберите завершённые дни до самой ранней даты снимка."
+
+msgid "Availability, %"
+msgstr "Наличие, %"
+
+msgid "Select a warehouse or group for availability"
+msgstr "Выберите склад или группу для наличия"
+
+msgid "Current assortment policy applies to the whole period, not historical policy."
+msgstr "Текущие правила ассортимента применены ко всему периоду, а не исторические."
+
+msgid "Negative physical stock was found."
+msgstr "Обнаружен отрицательный физический остаток."
+
+msgid "Availability details (JSON)"
+msgstr "Подробности наличия (JSON)"
+
+msgid "Physical warehouse availability details (JSON)"
+msgstr "Подробности наличия на физических складах (JSON)"
+
+msgid "Group availability details (JSON)"
+msgstr "Подробности наличия групп (JSON)"
+
+msgid "Snapshot context (JSON)"
+msgstr "Контекст снимков (JSON)"
+
+msgid "The analytics response is incomplete. Restart the export."
+msgstr "Ответ аналитики неполный. Запустите экспорт заново."
+
+msgid "Snapshot generations changed. Restart the export."
+msgstr "Поколения снимков изменились. Запустите экспорт заново."
+
 msgid "Queue paused: insufficient time"
 msgstr "Очередь приостановлена — недостаточно времени"
 

@@ -32,10 +32,11 @@ add_action('admin_enqueue_scripts', function (): void {
         [],
         @filemtime($css_path) ?: '1.0'
     );
+    lps_availability_enqueue();
     wp_enqueue_script(
         'lps-product-analytics',
         plugins_url('assets/product-analytics-v4.js', $plugin_file),
-        [],
+        ['lps-product-availability'],
         @filemtime($js_path) ?: '1.0',
         true
     );
@@ -93,6 +94,7 @@ function lps_product_analytics_i18n(): array {
         'stockoutPercent' => __('Days without stock, %', 'lavka-price-sync'),
         'stockoutHelp' => __('The share of eligible days in the selected period when physical stock was zero or negative. Warehouses with zero minimum stock are not applicable.', 'lavka-price-sync'),
         'availabilityStatus' => __('Availability status', 'lavka-price-sync'),
+        'availabilityPercent' => __('Availability, %', 'lavka-price-sync'),
         'warehouseGroups' => __('Combined warehouses', 'lavka-price-sync'),
         'groupAvailability' => __('Availability by combined warehouse', 'lavka-price-sync'),
         'notApplicable' => __('Not applicable', 'lavka-price-sync'),
@@ -320,6 +322,10 @@ function lps_product_analytics_i18n(): array {
             'DATA_INCOMPLETE' => __('Daily stock history is incomplete', 'lavka-price-sync'),
             'PERIOD_OUTSIDE_HORIZON' => __('The period is outside the availability horizon', 'lavka-price-sync'),
             'SNAPSHOT_NOT_READY' => __('Snapshot is not ready', 'lavka-price-sync'),
+            'CONTEXT_REQUIRED' => __('Select a warehouse or group for availability', 'lavka-price-sync'),
+            'CURRENT_POLICY_APPLIED_TO_PERIOD' => __('Current assortment policy applies to the whole period, not historical policy.', 'lavka-price-sync'),
+            'NEGATIVE_PHYSICAL_STOCK' => __('Negative physical stock was found.', 'lavka-price-sync'),
+            'INCOMPLETE_DAILY_HISTORY' => __('Daily stock history is incomplete', 'lavka-price-sync'),
             'PREPAYMENT' => __('Prepayment', 'lavka-price-sync'),
             'DEFERRED_30' => __('Deferred payment, 30 days', 'lavka-price-sync'),
             'DEFERRED_60' => __('Deferred payment, 60 days', 'lavka-price-sync'),
@@ -414,6 +420,7 @@ function lps_render_product_analytics_v4_page(): void {
                         <option value="physicalQuantity"><?php echo esc_html__('Physical quantity', 'lavka-price-sync'); ?></option>
                         <option value="sku"><?php echo esc_html__('SKU', 'lavka-price-sync'); ?></option>
                         <option value="productName"><?php echo esc_html__('Product', 'lavka-price-sync'); ?></option>
+                        <?php lps_availability_sort_options(); ?>
                     </select>
                 </label>
                 <label>
@@ -433,6 +440,7 @@ function lps_render_product_analytics_v4_page(): void {
                 </label>
             </section>
 
+            <?php lps_availability_fields(); ?>
             <details class="lps-pa-filter-editor" open>
                 <summary><?php echo esc_html__('Product conditions', 'lavka-price-sync'); ?></summary>
                 <div class="lps-pa-v4-filter-grid" id="lps-pa-product-filter-grid">
@@ -1692,7 +1700,8 @@ function lps_product_analytics_v4_sanitize_filter_map(array $input, array $selec
 }
 
 function lps_product_analytics_v4_sanitize_availability(array $input, array $warehouse_ids): ?array {
-    if (empty($input['enabled'])) return null;
+    $profile = lps_availability_profile($input);
+    if (empty($profile['enabled'])) return null;
 
     $basis = strtoupper(sanitize_key((string)($input['basis'] ?? 'PHYSICAL_END_OF_DAY')));
     $eligibility = strtoupper(sanitize_key((string)($input['minimumStockEligibility'] ?? 'CURRENT_POLICY_GT_ZERO')));
@@ -1727,14 +1736,19 @@ function lps_product_analytics_v4_sanitize_availability(array $input, array $war
         ? lavka_get_global_warehouse_groups_revision()
         : '';
 
-    return [
+    if ((!empty($profile['warehouseId']) && !in_array($profile['warehouseId'], $warehouse_ids, true))
+        || (!empty($profile['groupCode']) && !in_array($profile['groupCode'], array_column($groups, 'code'), true))
+        || (!empty($profile['filter']) && empty($profile['warehouseId']) && empty($profile['groupCode']) && count($warehouse_ids) !== 1)) {
+        wp_send_json_error(['message' => __('Invalid availability context or filter.', 'lavka-price-sync')], 400);
+    }
+    return array_merge($profile, [
         'enabled' => true,
         'basis' => $basis,
         'minimumStockEligibility' => $eligibility,
         'presentation' => $presentation,
         'warehouseGroupsRevision' => $revision,
         'warehouseGroups' => $groups,
-    ];
+    ]);
 }
 
 function lps_product_analytics_v4_sanitize_query(array $payload): array {
@@ -1785,7 +1799,7 @@ function lps_product_analytics_v4_sanitize_query(array $payload): array {
     $cursor = sanitize_text_field((string)($page_input['cursor'] ?? ''));
 
     $sort_input = is_array($payload['sort'] ?? null) ? $payload['sort'] : [];
-    $allowed_sort = ['sku', 'productName', 'physicalQuantity', 'inventoryValue', 'soldUnits', 'salesRevenue', 'salesCogs', 'grossProfit', 'averageInventoryValue', 'availabilityPercent', 'stockoutPercent'];
+    $allowed_sort = ['sku', 'productName', 'physicalQuantity', 'inventoryValue', 'soldUnits', 'salesRevenue', 'salesCogs', 'grossProfit', 'averageInventoryValue', 'availabilityPercent', 'stockoutPercent', 'availabilityStatus'];
     $sort = [];
     foreach (array_slice($sort_input, 0, 5) as $item) {
         if (!is_array($item)) continue;
@@ -1812,8 +1826,12 @@ function lps_product_analytics_v4_sanitize_query(array $payload): array {
 
 function lps_product_analytics_v4_scenario_query_fingerprint(array $query): string {
     $query['page']['cursor'] = null;
-    // Availability groups are global runtime configuration, not scenario data.
-    if (isset($query['calculation']['availability'])) unset($query['calculation']['availability']);
+    // Compare saved availability filters, but not runtime group membership/revision.
+    if (isset($query['calculation']['availability'])) {
+        $profile = lps_availability_profile($query['calculation']['availability']);
+        if (empty($profile['enabled'])) unset($query['calculation']['availability']);
+        else $query['calculation']['availability'] = $profile;
+    }
     foreach (['productFilters', 'movementFilters'] as $filter_key) {
         $filters = isset($query[$filter_key]) ? (array)$query[$filter_key] : [];
         ksort($filters, SORT_STRING);

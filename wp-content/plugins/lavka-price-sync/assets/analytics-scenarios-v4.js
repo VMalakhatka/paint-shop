@@ -31,6 +31,10 @@
     const el = (id) => document.getElementById(id);
     const warehouses = el('lps-as-warehouses');
     const form = el('lps-as-form');
+    const availabilityEditor = window.LPS_AVAILABILITY(root, config.warehouseGroups || [], warehouses);
+    ['availabilityPercent', 'stockoutPercent', 'availabilityStatus'].forEach((key) => {
+        el('lps-as-sort-field').add(new Option(analyticsI18n[key] || key, key));
+    });
 
     function escapeHtml(value) {
         return String(value == null ? '' : value)
@@ -242,7 +246,7 @@
             period: { from: el('lps-as-period-from').value, to: el('lps-as-period-to').value },
             productFilters: productFilters,
             movementFilters: collectFilters('movement'),
-            calculation: { abcBasis: el('lps-as-abc-basis').value, includeReturns: el('lps-as-include-returns').checked },
+            calculation: { abcBasis: el('lps-as-abc-basis').value, includeReturns: el('lps-as-include-returns').checked, availability: availabilityEditor.read() },
             page: { size: Number(el('lps-as-page-size').value || 50) },
             sort: [{ field: el('lps-as-sort-field').value, direction: el('lps-as-sort-direction').value }],
             presentation: { activeTab: el('lps-as-active-tab').value },
@@ -343,6 +347,7 @@
             if (normalized.period.to) el('lps-as-period-to').value = normalized.period.to;
         }
         const calculation = normalized.calculation || {};
+        availabilityEditor.apply(calculation.availability);
         el('lps-as-abc-basis').value = calculation.abcBasis || 'GROSS_PROFIT';
         el('lps-as-include-returns').checked = calculation.includeReturns !== false;
         el('lps-as-page-size').value = String((normalized.page || {}).size || 50);
@@ -379,6 +384,7 @@
         el('lps-as-revisions').hidden = true;
         clearSelections();
         applyPurchasePlanning(null);
+        availabilityEditor.apply(null);
         renderFilters();
         el('lps-as-scope-meta').textContent = i18n.selectWarehouses || 'Select warehouses.';
         renderList();

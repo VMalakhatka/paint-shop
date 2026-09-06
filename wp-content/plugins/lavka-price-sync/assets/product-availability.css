@@ -1,0 +1,5 @@
+[data-availability-editor] > p { margin: 14px; }
+[data-availability-editor] > div { padding: 14px; gap: 16px; }
+[data-availability-editor] > div > label { display: grid; align-content: start; gap: 6px; min-width: 0; }
+[data-availability-editor] > div input,
+[data-availability-editor] > div select { width: 100%; min-width: 0; max-width: 100%; }

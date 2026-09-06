@@ -4947,6 +4947,66 @@ msgid "Complete the preview before exporting."
 msgstr "Завершіть розрахунок перед експортом."
 
 
+msgid "Invalid availability context or filter."
+msgstr "Некоректний контекст або відбір наявності."
+
+msgid "Physical stock availability"
+msgstr "Фізична наявність товару"
+
+msgid "Include daily stock availability"
+msgstr "Додати поденну наявність товару"
+
+msgid "Availability context"
+msgstr "Склад або група для наявності"
+
+msgid "Details only / single warehouse"
+msgstr "Лише деталізація / єдиний склад"
+
+msgid "Availability %, from"
+msgstr "Наявність, % від"
+
+msgid "Availability %, through"
+msgstr "Наявність, % до"
+
+msgid "Stockout %, from"
+msgstr "Відсутність, % від"
+
+msgid "Stockout %, through"
+msgstr "Відсутність, % до"
+
+msgid "End-of-day physical stock only. The current assortment policy applies to the whole period, including new products. Intraday stockouts and historical reservations are not measured. Use completed days before the earliest snapshot date."
+msgstr "Лише фізичний залишок на кінець дня. Поточні правила асортименту застосовуються до всього періоду, також для нових товарів. Відсутність протягом дня та історичні резерви не вимірюються. Оберіть завершені дні до найранішої дати знімка."
+
+msgid "Availability, %"
+msgstr "Наявність, %"
+
+msgid "Select a warehouse or group for availability"
+msgstr "Оберіть склад або групу для наявності"
+
+msgid "Current assortment policy applies to the whole period, not historical policy."
+msgstr "Поточні правила асортименту застосовано до всього періоду, а не історичні."
+
+msgid "Negative physical stock was found."
+msgstr "Виявлено від'ємний фізичний залишок."
+
+msgid "Availability details (JSON)"
+msgstr "Подробиці наявності (JSON)"
+
+msgid "Physical warehouse availability details (JSON)"
+msgstr "Подробиці наявності на фізичних складах (JSON)"
+
+msgid "Group availability details (JSON)"
+msgstr "Подробиці наявності груп (JSON)"
+
+msgid "Snapshot context (JSON)"
+msgstr "Контекст знімків (JSON)"
+
+msgid "The analytics response is incomplete. Restart the export."
+msgstr "Відповідь аналітики неповна. Запустіть експорт знову."
+
+msgid "Snapshot generations changed. Restart the export."
+msgstr "Покоління знімків змінилися. Запустіть експорт знову."
+
 msgid "Queue paused: insufficient time"
 msgstr "Чергу призупинено — недостатньо часу"
 

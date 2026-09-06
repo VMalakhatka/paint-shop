@@ -210,7 +210,7 @@ function lps_analytics_scenario_sanitize_profile_v4(array $profile): array {
 
     $page_in = is_array($profile['page'] ?? null) ? $profile['page'] : [];
     $page_size = max(1, min(500, absint($page_in['size'] ?? 50)));
-    $allowed_sort = ['sku', 'productName', 'physicalQuantity', 'inventoryValue', 'soldUnits', 'salesRevenue', 'salesCogs', 'grossProfit', 'averageInventoryValue'];
+    $allowed_sort = ['sku', 'productName', 'physicalQuantity', 'inventoryValue', 'soldUnits', 'salesRevenue', 'salesCogs', 'grossProfit', 'averageInventoryValue', 'availabilityPercent', 'stockoutPercent', 'availabilityStatus'];
     $sort = [];
     foreach (array_slice(is_array($profile['sort'] ?? null) ? $profile['sort'] : [], 0, 5) as $item) {
         if (!is_array($item)) continue;
@@ -230,6 +230,7 @@ function lps_analytics_scenario_sanitize_profile_v4(array $profile): array {
         'calculation' => [
             'abcBasis' => $abc_basis,
             'includeReturns' => !isset($calculation_in['includeReturns']) || rest_sanitize_boolean($calculation_in['includeReturns']),
+            ...(!empty($calculation_in['availability']) ? ['availability' => lps_availability_profile((array)$calculation_in['availability'])] : []),
         ],
         'page' => ['size' => $page_size],
         'sort' => $sort,
@@ -704,10 +705,11 @@ add_action('admin_enqueue_scripts', static function (): void {
         [],
         @filemtime($css_path) ?: '1.0'
     );
+    lps_availability_enqueue();
     wp_enqueue_script(
         'lps-analytics-scenarios',
         plugins_url('assets/analytics-scenarios-v4.js', $plugin_file),
-        [],
+        ['lps-product-availability'],
         @filemtime($js_path) ?: '1.0',
         true
     );
@@ -1003,6 +1005,7 @@ function lps_render_analytics_scenarios_v4_page(): void {
                         <div class="lps-as-grid lps-as-filter-grid" id="lps-as-movement-filter-grid"></div>
                     </details>
 
+                    <?php lps_availability_fields(); ?>
                     <?php lps_purchase_scenario_fields(); ?>
                     <section class="lps-as-section lps-as-revisions" id="lps-as-revisions" hidden><h2><?php echo esc_html__('Revision history', 'lavka-price-sync'); ?></h2><div id="lps-as-revision-list"></div></section>
                     <div class="lps-as-savebar"><button type="submit" class="button button-primary button-large" id="lps-as-save"><?php echo esc_html__('Save scenario', 'lavka-price-sync'); ?></button><span class="description" id="lps-as-editor-meta"></span></div>

@@ -11,8 +11,8 @@ function lps_product_analytics_export_scalar($value) {
 function lps_product_analytics_export_availability(array $availability): array {
     return [
         (string)($availability['status'] ?? ''),
-        lps_product_analytics_export_scalar($availability['stockoutDays'] ?? null),
-        lps_product_analytics_export_scalar($availability['stockoutPercent'] ?? null),
+        ($availability['status'] ?? '') === 'MEASURED' ? lps_product_analytics_export_scalar($availability['stockoutDays'] ?? null) : '',
+        ($availability['status'] ?? '') === 'MEASURED' ? lps_product_analytics_export_scalar($availability['stockoutPercent'] ?? null) : '',
     ];
 }
 
@@ -26,14 +26,16 @@ function lps_product_analytics_export_breakdown(array $rows, bool $groups = fals
             : ($row['warehouseName'] ?? $row['warehouseId'] ?? ''));
         if ($name === '') continue;
         $status = (string)($availability['status'] ?? '');
-        $days = $availability['stockoutDays'] ?? null;
-        $percent = $availability['stockoutPercent'] ?? null;
+        $days = $status === 'MEASURED' ? ($availability['stockoutDays'] ?? null) : null;
+        $percent = $status === 'MEASURED' ? ($availability['stockoutPercent'] ?? null) : null;
         $detail = [];
         /* translators: %s: number of days without stock. */
         if ($days !== null) $detail[] = sprintf(__('%s days', 'lavka-price-sync'), (string)$days);
         /* translators: %s: percentage of days without stock. */
         if ($percent !== null) $detail[] = sprintf(__('%s%%', 'lavka-price-sync'), (string)$percent);
-        if (!$detail && $status !== '') $detail[] = $status;
+        if ($status !== '') $detail[] = $status;
+        if (!empty($availability['basis'])) $detail[] = (string)$availability['basis'];
+        if (!empty($availability['warnings'])) $detail[] = wp_json_encode($availability['warnings'], JSON_UNESCAPED_UNICODE);
         $parts[] = $name . ($detail ? ': ' . implode(', ', $detail) : '');
     }
     return implode(' | ', $parts);
@@ -69,6 +71,10 @@ function lps_product_analytics_export_columns(string $tab): array {
         ['key' => 'availabilityStatus', 'label' => __('Availability status', 'lavka-price-sync')],
         ['key' => 'stockoutDays', 'label' => __('Days without stock', 'lavka-price-sync')],
         ['key' => 'stockoutPercent', 'label' => __('Days without stock, %', 'lavka-price-sync')],
+        ['key' => 'availabilityDetails', 'label' => __('Availability details (JSON)', 'lavka-price-sync')],
+        ['key' => 'physicalAvailabilityDetails', 'label' => __('Physical warehouse availability details (JSON)', 'lavka-price-sync')],
+        ['key' => 'groupAvailabilityDetails', 'label' => __('Group availability details (JSON)', 'lavka-price-sync')],
+        ['key' => 'snapshotContext', 'label' => __('Snapshot context (JSON)', 'lavka-price-sync')],
         ['key' => 'warehouseAvailability', 'label' => __('Availability by warehouse', 'lavka-price-sync')],
         ['key' => 'groupAvailability', 'label' => __('Availability by combined warehouse', 'lavka-price-sync')],
         ['key' => 'warehouseGroupsRevision', 'label' => __('Warehouse group revision', 'lavka-price-sync')],
@@ -89,6 +95,9 @@ function lps_product_analytics_export_row(array $row, string $tab, string $wareh
         'availabilityStatus' => $availability_status,
         'stockoutDays' => $stockout_days,
         'stockoutPercent' => $stockout_percent,
+        'availabilityDetails' => wp_json_encode($availability, JSON_UNESCAPED_UNICODE),
+        'physicalAvailabilityDetails' => wp_json_encode(array_map(static fn($item) => ['warehouseId' => $item['warehouseId'] ?? null, 'availability' => $item['availability'] ?? null], (array)($row['warehouseBreakdown'] ?? [])), JSON_UNESCAPED_UNICODE),
+        'groupAvailabilityDetails' => wp_json_encode($row['warehouseGroupBreakdown'] ?? [], JSON_UNESCAPED_UNICODE),
         'warehouseAvailability' => lps_product_analytics_export_breakdown((array)($row['warehouseBreakdown'] ?? [])),
         'groupAvailability' => lps_product_analytics_export_breakdown((array)($row['warehouseGroupBreakdown'] ?? []), true),
         'warehouseGroupsRevision' => $warehouse_groups_revision,
@@ -107,22 +116,42 @@ function lps_product_analytics_export_fetch_rows(array $query, string $tab) {
     $metadata = null;
     $cursor = null;
     $seen_cursors = [];
+    $context = null;
+    $seen_skus = [];
+    $total = null;
     do {
         $query['page'] = ['size' => 500, 'cursor' => $cursor];
         $response = lps_product_analytics_v4_request_java(LPS_PRODUCT_ANALYTICS_QUERY_PATH, $query);
         if (is_wp_error($response)) return $response;
+        if (!is_array($response['context'] ?? null) || !is_array($response['rows'] ?? null) || !isset($response['totals']['productCount']) || !empty($response['errors'])) {
+            return new WP_Error('export_incomplete', __('The analytics response is incomplete. Restart the export.', 'lavka-price-sync'));
+        }
+        if ($context !== null && ($context !== $response['context'] || $total !== (int)$response['totals']['productCount'])) {
+            return new WP_Error('export_generation_changed', __('Snapshot generations changed. Restart the export.', 'lavka-price-sync'));
+        }
+        $context = $response['context'];
+        $total = (int)$response['totals']['productCount'];
         if ($metadata === null) {
             $metadata = lps_product_analytics_export_metadata($query, $response);
         }
         $revision = (string)($metadata['warehouseGroupsRevision'] ?? '');
         foreach ((array)($response['rows'] ?? []) as $row) {
-            if (is_array($row)) $rows[] = lps_product_analytics_export_row($row, $tab, $revision);
+            $sku = is_array($row) ? (string)($row['sku'] ?? '') : '';
+            if ($sku === '' || isset($seen_skus[$sku])) return new WP_Error('export_incomplete', __('The analytics response is incomplete. Restart the export.', 'lavka-price-sync'));
+            $seen_skus[$sku] = true;
+            $record = lps_product_analytics_export_row($row, $tab, $revision);
+            $record['snapshotContext'] = wp_json_encode($context, JSON_UNESCAPED_UNICODE);
+            $rows[] = $record;
             if (count($rows) > LPS_PRODUCT_ANALYTICS_EXPORT_ROW_LIMIT) {
                 return new WP_Error('export_too_large', __('The report is too large to export safely. Narrow the filters and try again.', 'lavka-price-sync'));
             }
         }
         $next = trim((string)($response['nextCursor'] ?? ''));
-        if ($next === '') break;
+        if ($next === '') {
+            if (count($rows) !== $total) return new WP_Error('export_incomplete', __('The analytics response is incomplete. Restart the export.', 'lavka-price-sync'));
+            break;
+        }
+        if (!$response['rows']) return new WP_Error('export_incomplete', __('The analytics response is incomplete. Restart the export.', 'lavka-price-sync'));
         if (isset($seen_cursors[$next])) {
             return new WP_Error('export_cursor_loop', __('The analytics service returned a repeated page cursor.', 'lavka-price-sync'));
         }
@@ -150,7 +179,7 @@ function lps_product_analytics_export_metadata(array $query, array $response): a
         'scenario' => !empty($scenario['id'])
             ? sprintf('#%d v%d', (int)$scenario['id'], (int)($scenario['version'] ?? 0))
             : __('Temporary filters', 'lavka-price-sync'),
-        'generationId' => (string)($generation['id'] ?? $response['generationId'] ?? ''),
+        'generationId' => isset($response['context']) ? wp_json_encode($response['context'], JSON_UNESCAPED_UNICODE) : (string)($generation['id'] ?? $response['generationId'] ?? ''),
         'warehouseGroupsRevision' => (string)($availability['warehouseGroupsRevision'] ?? ''),
         'warehouseGroups' => implode(' | ', array_map(static function (array $group): string {
             return sprintf(

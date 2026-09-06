@@ -4860,6 +4860,66 @@ msgid "Complete the preview before exporting."
 msgstr ""
 
 
+msgid "Invalid availability context or filter."
+msgstr ""
+
+msgid "Physical stock availability"
+msgstr ""
+
+msgid "Include daily stock availability"
+msgstr ""
+
+msgid "Availability context"
+msgstr ""
+
+msgid "Details only / single warehouse"
+msgstr ""
+
+msgid "Availability %, from"
+msgstr ""
+
+msgid "Availability %, through"
+msgstr ""
+
+msgid "Stockout %, from"
+msgstr ""
+
+msgid "Stockout %, through"
+msgstr ""
+
+msgid "End-of-day physical stock only. The current assortment policy applies to the whole period, including new products. Intraday stockouts and historical reservations are not measured. Use completed days before the earliest snapshot date."
+msgstr ""
+
+msgid "Availability, %"
+msgstr ""
+
+msgid "Select a warehouse or group for availability"
+msgstr ""
+
+msgid "Current assortment policy applies to the whole period, not historical policy."
+msgstr ""
+
+msgid "Negative physical stock was found."
+msgstr ""
+
+msgid "Availability details (JSON)"
+msgstr ""
+
+msgid "Physical warehouse availability details (JSON)"
+msgstr ""
+
+msgid "Group availability details (JSON)"
+msgstr ""
+
+msgid "Snapshot context (JSON)"
+msgstr ""
+
+msgid "The analytics response is incomplete. Restart the export."
+msgstr ""
+
+msgid "Snapshot generations changed. Restart the export."
+msgstr ""
+
 msgid "Queue paused: insufficient time"
 msgstr ""
 

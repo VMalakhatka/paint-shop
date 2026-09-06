@@ -39,6 +39,7 @@
 
     const el = (id) => document.getElementById(id);
     const warehouseSelect = el('lps-pa-warehouses');
+    const availabilityEditor = window.LPS_AVAILABILITY(root, globalWarehouseGroups, warehouseSelect);
     const sourceInput = el('lps-pa-source');
     const form = el('lps-pa-v4-filters');
     const productFilterGrid = el('lps-pa-product-filter-grid');
@@ -303,6 +304,7 @@
             });
             if (requestId !== state.capabilitiesRequestId) return;
             state.capabilities = data;
+            availabilityEditor.refresh();
             renderSnapshotContext();
             renderCapabilityWarnings();
             renderFilters();
@@ -352,11 +354,14 @@
 
     function availabilitySupported() {
         const feature = state.capabilities && state.capabilities.features && state.capabilities.features.availability;
-        return Boolean(feature && feature.supported === true);
+        const daily = state.capabilities && state.capabilities.filters && state.capabilities.filters.dailyStockout;
+        return Boolean(state.capabilities && state.capabilities.compatibleGeneration === true
+            && Number(state.capabilities.analyticsSchemaVersion) >= 5 && daily && daily.supported === true
+            && feature && feature.supported === true);
     }
 
-    function availabilityCalculation() {
-        if (!availabilitySupported()) return null;
+    function availabilityCalculation(settings) {
+        if (!settings || !settings.enabled) return null;
         const selected = new Set(state.warehouseIds.map(Number));
         const groups = globalWarehouseGroups.filter((group) => {
             const ids = Array.isArray(group.warehouseIds) ? group.warehouseIds.map(Number) : [];
@@ -367,14 +372,14 @@
             warehouseIds: group.warehouseIds.map(Number),
             availabilityMode: 'ANY_ELIGIBLE_MEMBER'
         }));
-        return {
+        return Object.assign({}, settings, {
             enabled: true,
             basis: 'PHYSICAL_END_OF_DAY',
             minimumStockEligibility: 'CURRENT_POLICY_GT_ZERO',
             presentation: 'WAREHOUSES_AND_GROUPS',
             warehouseGroupsRevision: String(config.warehouseGroupsRevision || ''),
             warehouseGroups: groups
-        };
+        });
     }
 
     function calculationPayload(source) {
@@ -382,7 +387,7 @@
             abcBasis: source.abcBasis || 'GROSS_PROFIT',
             includeReturns: source.includeReturns !== false
         };
-        const availability = availabilityCalculation();
+        const availability = availabilityCalculation(source.availability || availabilityEditor.read());
         if (availability) calculation.availability = availability;
         return calculation;
     }
@@ -537,7 +542,8 @@
     function productHeaders() {
         return [label('abcClass', 'ABC'), label('sku', 'SKU') + ' / ' + label('gtin', 'GTIN'), label('product', 'Product'),
             label('physicalQuantity', 'Physical'), label('reservedQuantity', 'Reserved'), label('availableQuantity', 'Available'),
-            label('inventoryValue', 'Capital'), label('networkPolicy', 'Network policy'), label('transitStock', 'Stock in transit'), label('details', 'Details')];
+            label('inventoryValue', 'Capital'), label('networkPolicy', 'Network policy'), label('transitStock', 'Stock in transit'),
+            ...(availabilitySupported() ? [label('stockoutDays', 'Days without stock'), label('stockoutPercent', 'Days without stock, %')] : []), label('details', 'Details')];
     }
 
     function movementHeaders() {
@@ -567,19 +573,13 @@
             '<td><strong>' + escapeHtml(row.productName || '') + '</strong>' + (suppliers ? '<br><small>' + escapeHtml(label('supplier', 'Supplier')) + ': ' + escapeHtml(suppliers) + '</small>' : '') + '</td>' +
             '<td class="num">' + number(metrics.physicalQuantity) + '</td><td class="num">' + number(metrics.reservedQuantity) + '</td><td class="num">' + number(metrics.availableQuantity) + '</td>' +
             '<td class="num">' + money(metrics.inventoryValue) + '</td><td>' + networkHtml(row.networkOrderPolicy) + '</td><td>' + transitHtml(row.inTransitStock) + '</td>' +
+            availabilityCellsHtml(row.availability) +
             '<td><button type="button" class="button button-small" data-lps-pa-detail-index="' + index + '">' + escapeHtml(label('details', 'Details')) + '</button></td></tr>';
     }
 
     function movementRow(row, index) {
         const metrics = row.metrics || {};
-        const availability = row.availability || {};
-        let availabilityCells = '';
-        if (availabilitySupported()) {
-            const notApplicable = availability.status === 'NOT_APPLICABLE';
-            const fallback = availability.status ? (i18n.statusLabels && i18n.statusLabels[availability.status]) || availability.status : '—';
-            availabilityCells = '<td class="num">' + escapeHtml(notApplicable ? label('notApplicable', 'Not applicable') : (availability.stockoutDays == null ? fallback : number(availability.stockoutDays))) + '</td>' +
-                '<td class="num">' + escapeHtml(notApplicable ? label('notApplicable', 'Not applicable') : (availability.stockoutPercent == null ? fallback : number(availability.stockoutPercent) + '%')) + '</td>';
-        }
+        const availabilityCells = availabilityCellsHtml(row.availability);
         return '<tr><td><strong>' + escapeHtml(row.abcClass || '—') + '</strong></td><td><code>' + escapeHtml(row.sku || '') + '</code></td><td>' + escapeHtml(row.productName || '') + '</td>' +
             '<td class="num">' + number(metrics.soldUnits) + '</td><td class="num">' + number(metrics.regularSoldUnits) + '</td><td class="num">' + number(metrics.oneOffSoldUnits) + '</td><td class="num">' + number(metrics.returnQuantity) + '</td>' +
             '<td class="num">' + money(metrics.salesRevenue) + '</td><td class="num">' + money(metrics.salesCogs) + '</td><td class="num">' + money(metrics.grossProfit) + '</td>' +
@@ -680,8 +680,18 @@
     function availabilityDisplay(availability, field, percent) {
         if (!availability || !availability.status) return '—';
         if (availability.status === 'NOT_APPLICABLE') return label('notApplicable', 'Not applicable');
-        if (availability[field] == null) return (i18n.statusLabels && i18n.statusLabels[availability.status]) || availability.status;
+        if (availability.status !== 'MEASURED' || availability[field] == null) return statusLabel(availability.status);
         return number(availability[field]) + (percent ? '%' : '');
+    }
+
+    function availabilityWarnings(availability) {
+        return (availability && availability.warnings || []).map((warning) => statusLabel(typeof warning === 'string' ? warning : warning.code)).join('; ');
+    }
+
+    function availabilityCellsHtml(availability) {
+        if (!availabilitySupported()) return '';
+        return '<td class="num">' + escapeHtml(availabilityDisplay(availability, 'stockoutDays', false)) + '</td><td class="num">' +
+            escapeHtml(availabilityDisplay(availability, 'stockoutPercent', true)) + '</td>';
     }
 
     function groupAvailabilitySection(row) {
@@ -695,7 +705,7 @@
             '<th>' + metricCaption(label('stockoutPercent', 'Days without stock, %'), label('stockoutHelp', '')) + '</th>' +
             '</tr></thead><tbody>' + groups.map((item) => {
                 const availability = item.availability || {};
-                return '<tr><td><strong>' + escapeHtml(item.name || item.code || '—') + '</strong></td><td>' + escapeHtml((item.warehouseIds || []).join(', ')) + '</td>' +
+                return '<tr><td><strong>' + escapeHtml(item.name || item.code || '—') + '</strong><p class="description">' + escapeHtml(availabilityWarnings(availability)) + '</p></td><td>' + escapeHtml((item.warehouseIds || []).join(', ')) + '</td>' +
                     '<td class="num">' + escapeHtml(availabilityDisplay(availability, 'stockoutDays', false)) + '</td>' +
                     '<td class="num">' + escapeHtml(availabilityDisplay(availability, 'stockoutPercent', true)) + '</td></tr>';
             }).join('') + '</tbody></table></div></section>';
@@ -727,7 +737,7 @@
                 const availabilityCells = availabilitySupported()
                     ? '<td class="num">' + escapeHtml(availabilityDisplay(availability, 'stockoutDays', false)) + '</td><td class="num">' + escapeHtml(availabilityDisplay(availability, 'stockoutPercent', true)) + '</td>'
                     : '';
-                return '<tr><td>' + escapeHtml(item.warehouseName || item.warehouseId) + '</td><td>' + escapeHtml(item.currentSupplier || '—') + '</td><td class="num">' + number((item.metrics || {}).availableQuantity) + '</td><td>' + number((item.orderPolicy || {}).minimumStock) + ' / ' + number((item.orderPolicy || {}).maximumStock) + '</td><td>' + escapeHtml(policyDescription(item.orderPolicy)) + '</td>' + availabilityCells + '</tr>';
+                return '<tr><td>' + escapeHtml(item.warehouseName || item.warehouseId) + '<p class="description">' + escapeHtml(availabilityWarnings(availability)) + '</p></td><td>' + escapeHtml(item.currentSupplier || '—') + '</td><td class="num">' + number((item.metrics || {}).availableQuantity) + '</td><td>' + number((item.orderPolicy || {}).minimumStock) + ' / ' + number((item.orderPolicy || {}).maximumStock) + '</td><td>' + escapeHtml(policyDescription(item.orderPolicy)) + '</td>' + availabilityCells + '</tr>';
             }).join('') +
             '</tbody></table></div></section>' +
             groupAvailabilitySection(row) +
@@ -758,6 +768,7 @@
         root.querySelectorAll('.lps-pa-text-selection textarea').forEach((node) => { node.value = ''; });
         el('lps-pa-abc-basis').value = 'GROSS_PROFIT';
         el('lps-pa-include-returns').checked = true;
+        availabilityEditor.apply(null);
         el('lps-pa-sort-field').value = 'grossProfit';
         el('lps-pa-sort-direction').value = 'DESC';
         el('lps-pa-page-size').value = '50';
@@ -836,6 +847,7 @@
             if (profile.period.to) el('lps-pa-period-to').value = profile.period.to;
         }
         if (profile.calculation) {
+            availabilityEditor.apply(profile.calculation.availability);
             if (['REVENUE', 'GROSS_PROFIT', 'SOLD_UNITS'].includes(profile.calculation.abcBasis)) el('lps-pa-abc-basis').value = profile.calculation.abcBasis;
             el('lps-pa-include-returns').checked = profile.calculation.includeReturns !== false;
         }
