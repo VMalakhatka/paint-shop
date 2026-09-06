@@ -2,6 +2,14 @@
 
 ## Физическое наличие schema v5
 
+Независимая очередь снимков на странице аналитики принадлежит
+`lavka-price-sync/inc/analytics-snapshot-queue.php`; option/hook
+`lps_analytics_snapshot_queue` / `lps_analytics_snapshot_queue_tick`.
+Использует общий ecosystem lock, но не состояние/историю price campaign.
+POST snapshot intent сохраняется перед отправкой; неизвестный ответ не повторяется.
+Не вызывай перерасчёт учётных цен ради обновления schema аналитики.
+Операторские шаги и WP-Cron диагностика: `docs/OPERATIONS_RUNBOOK.md`.
+
 Владелец истории и группового расчёта: Java, контракт
 `FOLIO_PRODUCT_AVAILABILITY_FRONTEND_V5.md`. PHP передаёт глобальные группы и
 ревизию при выполнении; сценарий хранит только включение, контекст и отборы.

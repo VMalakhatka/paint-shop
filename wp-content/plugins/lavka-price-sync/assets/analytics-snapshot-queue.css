@@ -1,0 +1,4 @@
+.lps-snapshot-queue-body { padding: 16px; }
+.lps-snapshot-queue-body .lps-pa-toolbar { flex-wrap: wrap; align-items: center; }
+#lps-snapshot-horizon { width: 90px; }
+#lps-snapshot-details { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 420px; overflow: auto; }

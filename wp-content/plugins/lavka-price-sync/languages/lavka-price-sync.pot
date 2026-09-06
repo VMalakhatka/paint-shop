@@ -4920,6 +4920,117 @@ msgstr ""
 msgid "Snapshot generations changed. Restart the export."
 msgstr ""
 
+msgid "Snapshot queue stopped after the current warehouse."
+msgstr ""
+
+msgid "Snapshot queue finished. Accounting prices were not recalculated."
+msgstr ""
+
+msgid "Snapshot queue stopped before the next warehouse."
+msgstr ""
+
+msgid "Waiting for the accounting-price operation to finish."
+msgstr ""
+
+msgid "The global Lavka lock is unavailable."
+msgstr ""
+
+msgid "Analytics snapshots without price recalculation"
+msgstr ""
+
+msgid "Snapshot queue lost its lock. No next warehouse was started."
+msgstr ""
+
+msgid "Snapshot status is unavailable. Waiting without repeating POST."
+msgstr ""
+
+msgid "Another snapshot is running. Waiting without starting a new one."
+msgstr ""
+
+msgid "Snapshot request sent. Checking status without repeating POST."
+msgstr ""
+
+msgid "Snapshot request was rejected."
+msgstr ""
+
+msgid "Snapshot is running. Accounting prices are not being recalculated by this queue."
+msgstr ""
+
+msgid "Snapshot interrupted by Java restart. No active process remains. Start the snapshot queue again."
+msgstr ""
+
+msgid "The snapshot result does not match this request. No automatic retry was made."
+msgstr ""
+
+msgid "Snapshot did not complete successfully."
+msgstr ""
+
+msgid "The snapshot queue is busy. Try again shortly."
+msgstr ""
+
+msgid "A snapshot queue is already active."
+msgstr ""
+
+msgid "Select warehouses and confirm the snapshot workload."
+msgstr ""
+
+msgid "Snapshot horizon must be between 12 and 36 months."
+msgstr ""
+
+msgid "Snapshot queue accepted. No accounting-price recalculation will be run."
+msgstr ""
+
+msgid "The current snapshot will finish; subsequent warehouses will not start."
+msgstr ""
+
+msgid "Update analytics snapshots without price recalculation"
+msgstr ""
+
+msgid "Uses the warehouses selected above, one at a time. Reads Folio and updates MariaDB only; does not change Folio documents, stock or accounting prices. Reading may hold locks and create server load."
+msgstr ""
+
+msgid "I confirm the workload for the selected warehouses."
+msgstr ""
+
+msgid "Update analytics snapshots"
+msgstr ""
+
+msgid "Stop after the current snapshot"
+msgstr ""
+
+msgid "Analytics schema version"
+msgstr ""
+
+msgid "Checking snapshot queue..."
+msgstr ""
+
+msgid "Snapshot queue request failed. Check status before starting again."
+msgstr ""
+
+msgid "No analytics snapshot queue has been started."
+msgstr ""
+
+msgid "Snapshots finished. Reload capabilities before building the report."
+msgstr ""
+
+msgid "Waiting"
+msgstr ""
+
+msgid "Completed with warnings"
+msgstr ""
+
+msgid "Stopped"
+msgstr ""
+
+msgid "Interrupted"
+msgstr ""
+
+msgid "Snapshot built; update Java for schema v5"
+msgstr ""
+
+msgid "Skipped: unsupported accounting mode"
+msgstr ""
+
 msgid "Queue paused: insufficient time"
 msgstr ""
 

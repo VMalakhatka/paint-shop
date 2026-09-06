@@ -372,6 +372,7 @@ function lps_render_product_analytics_v4_page(): void {
             </div>
         </section>
 
+        <?php lps_analytics_snapshot_render(); ?>
         <div id="lps-pa-message" class="lps-pa-message" hidden aria-live="polite"></div>
         <div id="lps-pa-capability-warnings" class="lps-pa-warning-list" hidden></div>
 

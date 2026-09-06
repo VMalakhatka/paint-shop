@@ -5007,6 +5007,117 @@ msgstr "Відповідь аналітики неповна. Запустіть
 msgid "Snapshot generations changed. Restart the export."
 msgstr "Покоління знімків змінилися. Запустіть експорт знову."
 
+msgid "Snapshot queue stopped after the current warehouse."
+msgstr "Чергу знімків зупинено після поточного складу."
+
+msgid "Snapshot queue finished. Accounting prices were not recalculated."
+msgstr "Чергу знімків завершено. Облікові ціни не перераховувалися."
+
+msgid "Snapshot queue stopped before the next warehouse."
+msgstr "Чергу знімків зупинено перед наступним складом."
+
+msgid "Waiting for the accounting-price operation to finish."
+msgstr "Очікування завершення операції з обліковими цінами."
+
+msgid "The global Lavka lock is unavailable."
+msgstr "Глобальне блокування Лавка недоступне."
+
+msgid "Analytics snapshots without price recalculation"
+msgstr "Знімки аналітики без перерахунку цін"
+
+msgid "Snapshot queue lost its lock. No next warehouse was started."
+msgstr "Черга знімків втратила блокування. Наступний склад не запускався."
+
+msgid "Snapshot status is unavailable. Waiting without repeating POST."
+msgstr "Статус знімка недоступний. Очікуємо без повторного запуску."
+
+msgid "Another snapshot is running. Waiting without starting a new one."
+msgstr "Виконується інший знімок. Очікуємо без запуску нового."
+
+msgid "Snapshot request sent. Checking status without repeating POST."
+msgstr "Запит знімка надіслано. Перевіряємо статус без повторного запуску."
+
+msgid "Snapshot request was rejected."
+msgstr "Запит знімка відхилено."
+
+msgid "Snapshot is running. Accounting prices are not being recalculated by this queue."
+msgstr "Знімок формується. Ця черга не перераховує облікові ціни."
+
+msgid "Snapshot interrupted by Java restart. No active process remains. Start the snapshot queue again."
+msgstr "Знімок перервано перезапуском Java. Активного процесу немає. Запустіть чергу знімків знову."
+
+msgid "The snapshot result does not match this request. No automatic retry was made."
+msgstr "Результат знімка не відповідає цьому запиту. Автоматичного повтору не було."
+
+msgid "Snapshot did not complete successfully."
+msgstr "Знімок не завершився успішно."
+
+msgid "The snapshot queue is busy. Try again shortly."
+msgstr "Черга знімків зайнята. Спробуйте трохи пізніше."
+
+msgid "A snapshot queue is already active."
+msgstr "Черга знімків уже активна."
+
+msgid "Select warehouses and confirm the snapshot workload."
+msgstr "Оберіть склади та підтвердьте навантаження від знімків."
+
+msgid "Snapshot horizon must be between 12 and 36 months."
+msgstr "Глибина знімка має бути від 12 до 36 місяців."
+
+msgid "Snapshot queue accepted. No accounting-price recalculation will be run."
+msgstr "Чергу знімків прийнято. Перерахунок облікових цін не запускатиметься."
+
+msgid "The current snapshot will finish; subsequent warehouses will not start."
+msgstr "Поточний знімок буде завершено; наступні склади не запускатимуться."
+
+msgid "Update analytics snapshots without price recalculation"
+msgstr "Оновити знімки аналітики без перерахунку цін"
+
+msgid "Uses the warehouses selected above, one at a time. Reads Folio and updates MariaDB only; does not change Folio documents, stock or accounting prices. Reading may hold locks and create server load."
+msgstr "Використовує обрані вище склади по черзі. Читає ФОЛІО та оновлює лише MariaDB; не змінює документи, залишки чи облікові ціни ФОЛІО. Читання може утримувати блокування та навантажувати сервер."
+
+msgid "I confirm the workload for the selected warehouses."
+msgstr "Підтверджую навантаження для обраних складів."
+
+msgid "Update analytics snapshots"
+msgstr "Оновити знімки аналітики"
+
+msgid "Stop after the current snapshot"
+msgstr "Зупинити після поточного знімка"
+
+msgid "Analytics schema version"
+msgstr "Версія схеми аналітики"
+
+msgid "Checking snapshot queue..."
+msgstr "Перевіряємо чергу знімків…"
+
+msgid "Snapshot queue request failed. Check status before starting again."
+msgstr "Помилка запиту черги знімків. Перевірте статус перед новим запуском."
+
+msgid "No analytics snapshot queue has been started."
+msgstr "Черга знімків аналітики ще не запускалася."
+
+msgid "Snapshots finished. Reload capabilities before building the report."
+msgstr "Знімки завершено. Оновіть доступні фільтри перед формуванням звіту."
+
+msgid "Waiting"
+msgstr "Очікування"
+
+msgid "Completed with warnings"
+msgstr "Завершено з попередженнями"
+
+msgid "Stopped"
+msgstr "Зупинено"
+
+msgid "Interrupted"
+msgstr "Перервано"
+
+msgid "Snapshot built; update Java for schema v5"
+msgstr "Знімок створено; оновіть Java для схеми v5"
+
+msgid "Skipped: unsupported accounting mode"
+msgstr "Пропущено: непідтримуваний режим обліку"
+
 msgid "Queue paused: insufficient time"
 msgstr "Чергу призупинено — недостатньо часу"
 
