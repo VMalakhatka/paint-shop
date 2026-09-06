@@ -22,30 +22,30 @@ function lps_transit_matches(array $value, array $ids): bool {
 }
 
 function lps_purchase_transit(array $transit, array $warehouse_ids): array {
-    if (($transit['calculationVersion'] ?? 0) === 2) {
-        $unknown = ['quantity' => null, 'status' => $transit['status'] ?? 'INCOMPLETE_TRANSIT_DATA', 'issue' => 'TRANSIT_NOT_CONFIRMED'];
+    $version = (int)($transit['calculationVersion'] ?? 0);
+    if ($version === 3) {
+        $status = (string)($transit['networkPlanningStatus'] ?? $transit['status'] ?? 'INCOMPLETE_TRANSIT_DATA');
+        $unknown = ['quantity' => null, 'status' => $status, 'issue' => 'NETWORK_TRANSIT_NOT_READY'];
         if (!lps_transit_matches($transit, $warehouse_ids)) return ['quantity' => null, 'status' => 'TRANSIT_SOURCE_MISMATCH', 'issue' => 'TRANSIT_SOURCE_MISMATCH'];
         if (!$warehouse_ids) return ($transit['enabled'] ?? null) === false && ($transit['status'] ?? '') === 'DISABLED'
             ? ['quantity' => 0.0, 'status' => 'DISABLED', 'issue' => null] : $unknown;
-        if (($transit['enabled'] ?? null) !== true || ($transit['ready'] ?? null) !== true) return $unknown;
+        if (($transit['enabled'] ?? null) !== true || ($transit['networkPlanningReady'] ?? null) !== true
+            || ($transit['networkSnapshotConsistency']['confirmed'] ?? null) !== true) return $unknown;
         $sources = $transit['sources'] ?? [];
         $ids = array_column($sources, 'warehouseId'); sort($ids, SORT_NUMERIC);
         if ($ids !== $warehouse_ids) return $unknown;
         $sum = 0.0;
         foreach ($sources as $source) {
-            // Validate each legacy-shaped source, not the diagnostic known subtotal.
-            unset($source['calculationVersion']);
-            $confirmed = lps_purchase_transit($source, [(int)$source['warehouseId']]);
-            $source_quantity = lps_purchase_number($source['availableForPlanningQuantity'] ?? null);
-            if ($confirmed['quantity'] === null || $source_quantity === null || abs($confirmed['quantity'] - $source_quantity) > 0.000001) return $unknown;
-            $sum += $confirmed['quantity'];
+            $source_quantity = lps_purchase_number($source['availableForNetworkPlanningQuantity'] ?? null);
+            if ($source_quantity === null || !in_array($source['status'] ?? '', ['AVAILABLE_PHYSICAL_STOCK', 'NO_AVAILABLE_TRANSIT_STOCK'], true)
+                || (int)($source['generationId'] ?? 0) < 1) return $unknown;
+            $sum += $source_quantity;
         }
-        $quantity = lps_purchase_number($transit['availableForPlanningQuantity'] ?? null);
-        if ($quantity === null || abs($quantity - $sum) > 0.000001
-            || !in_array($transit['status'] ?? '', ['CONFIRMED_SUPPLIER_ORIGIN', 'NO_IN_TRANSIT_STOCK'], true)
-            || ($quantity > 0 && ($transit['supplierOriginConfirmed'] ?? null) !== true)) return $unknown;
-        return ['quantity' => $quantity, 'status' => $transit['status'], 'issue' => null];
+        $quantity = lps_purchase_number($transit['availableForNetworkPlanningQuantity'] ?? null);
+        if ($quantity === null || abs($quantity - $sum) > 0.000001) return $unknown;
+        return ['quantity' => $quantity, 'status' => $status, 'issue' => null];
     }
+    if ($version > 0) return ['quantity' => null, 'status' => 'TRANSIT_CONTRACT_OUTDATED', 'issue' => 'TRANSIT_CONTRACT_OUTDATED'];
     if (!$warehouse_ids) return ['quantity' => 0.0, 'status' => 'TRANSIT_DISABLED', 'issue' => null];
     // The current contract has one source. Never silently accept a partial source set.
     if (count($warehouse_ids) !== 1 || (int)($transit['warehouseId'] ?? 0) !== $warehouse_ids[0]) {
@@ -245,6 +245,8 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
         'supplier' => $row['dimensions']['currentSuppliers'] ?? [], 'transitPool' => $transit_pool,
         'transitStatus' => $confirmed_transit['status'], 'transitWarehouseIds' => $transit_ids,
         'transitGenerationId' => $transit['generationId'] ?? null,
+        'transitConsistency' => $transit['networkSnapshotConsistency'] ?? null,
+        'supplierTransitQuantity' => $transit['supplierInTransitAvailableQuantity'] ?? null,
         'transitSources' => $transit['sources'] ?? ($transit ? [$transit] : []),
         'transitWarnings' => $transit['warnings'] ?? [], 'groups' => array_values($result)];
 }

@@ -224,7 +224,11 @@ function lps_product_analytics_i18n(): array {
         'gtin' => __('Primary GTIN', 'lavka-price-sync'),
         'warehouses' => __('Warehouses', 'lavka-price-sync'),
         'networkPolicy' => __('Network order policy', 'lavka-price-sync'),
-        'transitStock' => __('Stock in transit', 'lavka-price-sync'),
+        'transitStock' => __('Stock at transport warehouses', 'lavka-price-sync'),
+        'transportWarehouseStock' => __('Stock at transport warehouses', 'lavka-price-sync'),
+        'supplierTransitStock' => __('Stock in transit from supplier', 'lavka-price-sync'),
+        'networkConsistency' => __('Combined network snapshot', 'lavka-price-sync'),
+        'networkRecommendation' => __('Backend recommendation', 'lavka-price-sync'),
         'technicalDetails' => __('Technical details', 'lavka-price-sync'),
         'localOrderPolicy' => __('Warehouse order policy', 'lavka-price-sync'),
         'planningQuantity' => __('Confirmed quantity for planning', 'lavka-price-sync'),
@@ -267,6 +271,11 @@ function lps_product_analytics_i18n(): array {
         ],
         'transitLabels' => [
             'DISABLED' => __('Disabled', 'lavka-price-sync'),
+            'AVAILABLE_PHYSICAL_STOCK' => __('Available stock at transport warehouse', 'lavka-price-sync'),
+            'NO_AVAILABLE_TRANSIT_STOCK' => __('No available stock at transport warehouse', 'lavka-price-sync'),
+            'NETWORK_SNAPSHOT_CONSISTENCY_UNCONFIRMED' => __('Combined network snapshot is not confirmed', 'lavka-price-sync'),
+            'INCOMPLETE_NETWORK_SNAPSHOTS' => __('Network snapshots are incomplete', 'lavka-price-sync'),
+            'TRANSIT_CONTRACT_OUTDATED' => __('The Java transit calculation must be updated to version 3.', 'lavka-price-sync'),
             'TRANSIT_SCOPE_OVERLAP' => __('Transit stock is already included in the analysis warehouses.', 'lavka-price-sync'),
             'INCOMPLETE_TRANSIT_DATA' => __('Transit data is incomplete.', 'lavka-price-sync'),
             'INCOMPLETE_SNAPSHOT_METADATA' => __('Transit snapshot dates are incomplete.', 'lavka-price-sync'),
@@ -1957,7 +1966,7 @@ function lps_product_analytics_v4_request_java(string $path, array $payload) {
         ]);
         if (is_wp_error($probe)) return $probe;
         $support[$key] = ($probe['features']['configurableTransit']['supported'] ?? null) === true
-            && ($probe['transit']['configurable'] ?? null) === true && ($probe['transit']['calculationVersion'] ?? 0) === 2;
+            && ($probe['transit']['configurable'] ?? null) === true && ($probe['transit']['calculationVersion'] ?? 0) === 3;
     }
     unset($payload['calculation']['transit']);
     if ($support[$key]) $payload['calculation']['transit'] = $config;
@@ -1965,7 +1974,7 @@ function lps_product_analytics_v4_request_java(string $path, array $payload) {
     if (is_wp_error($body)) return $body;
     if ($support[$key]) {
         $context = $path === LPS_PRODUCT_ANALYTICS_QUERY_PATH ? ($body['context']['transit'] ?? []) : ($body['transit'] ?? []);
-        if (($context['calculationVersion'] ?? 0) !== 2 || !lps_transit_matches($context, $config['warehouseIds'])) {
+        if (($context['calculationVersion'] ?? 0) !== 3 || !lps_transit_matches($context, $config['warehouseIds'])) {
             return new WP_Error('TRANSIT_SOURCE_MISMATCH', __('The transit response does not match the selected sources.', 'lavka-price-sync'), ['status' => 502]);
         }
         $ids = array_column($context['sources'] ?? [], 'warehouseId'); sort($ids, SORT_NUMERIC);
@@ -1974,7 +1983,7 @@ function lps_product_analytics_v4_request_java(string $path, array $payload) {
             $transit = $row['inTransitStock'] ?? [];
             $generations = array_column($transit['sources'] ?? [], 'generationId', 'warehouseId'); ksort($generations);
             $expected = array_column($context['sources'] ?? [], 'generationId', 'warehouseId'); ksort($expected);
-            if (($transit['calculationVersion'] ?? 0) !== 2 || !lps_transit_matches($transit, $config['warehouseIds']) || $generations !== $expected) {
+            if (($transit['calculationVersion'] ?? 0) !== 3 || !lps_transit_matches($transit, $config['warehouseIds']) || $generations !== $expected) {
                 return new WP_Error('TRANSIT_SOURCE_MISMATCH', __('The transit response does not match the selected sources.', 'lavka-price-sync'), ['status' => 502]);
             }
         }

@@ -26,7 +26,7 @@ function lps_java_post($path, $payload, $options) {
         if (empty($GLOBALS['modern'])) return ['ok' => true];
         $config = $payload['calculation']['transit'] ?? ['warehouseIds' => [9], 'configurationRevision' => hash('sha256', '[9]')];
         return ['ok' => true, 'features' => ['configurableTransit' => ['supported' => true]],
-            'transit' => $config + ['configurable' => true, 'calculationVersion' => 2,
+            'transit' => $config + ['configurable' => true, 'calculationVersion' => 3,
                 'sources' => array_values(array_filter($GLOBALS['sources'], fn($s) => in_array($s['warehouseId'], $config['warehouseIds'], true)))]];
     }
     return array_shift($GLOBALS['responses']);
@@ -38,23 +38,29 @@ require __DIR__ . '/../inc/product-analytics-export.php';
 function check($ok, $message) { if (!$ok) throw new RuntimeException($message); }
 $ids = [9, 10];
 $sources = array_map(fn($id, $quantity) => ['warehouseId' => $id, 'warehouseName' => 'Transport ' . $id, 'generationId' => $id + 100,
-    'status' => 'CONFIRMED_SUPPLIER_ORIGIN', 'supplierOriginConfirmed' => true, 'availableForPlanningQuantity' => $quantity,
+    'status' => 'AVAILABLE_PHYSICAL_STOCK', 'availableForNetworkPlanningQuantity' => $quantity,
+    'supplierOriginStatus' => 'MIXED_ORIGIN', 'supplierOriginConfirmed' => false, 'supplierInTransitAvailableQuantity' => null,
     'physicalQuantity' => $quantity, 'reservedQuantity' => 0, 'availableQuantity' => $quantity], [9, 10], [12, 8]);
-$transit = lps_transit_configuration() + ['calculationVersion' => 2, 'enabled' => true, 'ready' => true,
-    'status' => 'CONFIRMED_SUPPLIER_ORIGIN', 'supplierOriginConfirmed' => true,
-    'availableForPlanningQuantity' => 20, 'knownAvailableForPlanningQuantity' => 20, 'sources' => $sources];
-check(lps_purchase_transit($transit, $ids)['quantity'] === 20.0, '12 + 8 = full confirmed 20');
-$bad = $transit; $bad['sources'][1]['status'] = 'MIXED_ORIGIN';
-check(lps_purchase_transit($bad, $ids)['quantity'] === null, 'Do not trust aggregate when a source is unknown');
-$bad['ready'] = false; $bad['availableForPlanningQuantity'] = null; $bad['knownAvailableForPlanningQuantity'] = 12;
-check(lps_purchase_transit($bad, $ids)['quantity'] === null, 'Known subtotal is not complete transit');
+$consistency = ['status' => 'CONFIRMED', 'confirmed' => true, 'salesSources' => [], 'transitSources' => []];
+$transit = lps_transit_configuration() + ['calculationVersion' => 3, 'enabled' => true, 'ready' => true,
+    'networkPlanningReady' => true, 'networkPlanningStatus' => 'AVAILABLE_PHYSICAL_STOCK',
+    'networkSnapshotConsistency' => $consistency, 'availableForNetworkPlanningQuantity' => 20,
+    'supplierInTransitAvailableQuantity' => null, 'sources' => $sources];
+check(lps_purchase_transit($transit, $ids)['quantity'] === 20.0, '12 + 8 physical network stock = 20 despite mixed supplier origin');
+$bad = $transit; $bad['sources'][1]['status'] = 'INCONSISTENT_TRANSIT_BALANCE';
+check(lps_purchase_transit($bad, $ids)['quantity'] === null, 'Do not trust aggregate when a physical source is invalid');
+$bad['networkPlanningReady'] = false; $bad['availableForNetworkPlanningQuantity'] = null;
+check(lps_purchase_transit($bad, $ids)['quantity'] === null, 'Diagnostic source subtotal is not certified network stock');
 $bad = $transit; $bad['sources'][] = $sources[0];
 check(lps_purchase_transit($bad, $ids)['quantity'] === null, 'Reject duplicate sources');
 $bad = $transit; $bad['configurationRevision'] = 'wrong';
 check(lps_purchase_transit($bad, $ids)['issue'] === 'TRANSIT_SOURCE_MISMATCH', 'Validate configuration hash');
-$bad = $transit; $bad['ready'] = false; $bad['status'] = 'TRANSIT_SCOPE_OVERLAP'; $bad['availableForPlanningQuantity'] = null;
+$bad = $transit; $bad['networkPlanningReady'] = false; $bad['networkPlanningStatus'] = 'TRANSIT_SCOPE_OVERLAP'; $bad['availableForNetworkPlanningQuantity'] = null;
 check(lps_purchase_transit($bad, $ids)['quantity'] === null, 'Scope overlap is never deducted');
-$empty = ['calculationVersion' => 2, 'warehouseIds' => [], 'configurationRevision' => hash('sha256', '[]'), 'enabled' => false, 'status' => 'DISABLED'];
+$bad = $transit; $bad['networkPlanningReady'] = false; $bad['networkPlanningStatus'] = 'NETWORK_SNAPSHOT_CONSISTENCY_UNCONFIRMED';
+$bad['networkSnapshotConsistency'] = ['status' => 'NETWORK_SNAPSHOT_CONSISTENCY_UNCONFIRMED', 'confirmed' => false]; $bad['availableForNetworkPlanningQuantity'] = null;
+check(lps_purchase_transit($bad, $ids)['quantity'] === null, 'Independent snapshots block the automatic deduction');
+$empty = ['calculationVersion' => 3, 'warehouseIds' => [], 'configurationRevision' => hash('sha256', '[]'), 'enabled' => false, 'status' => 'DISABLED', 'availableForNetworkPlanningQuantity' => 0];
 check(lps_purchase_transit($empty, [])['quantity'] === 0.0, 'Explicit disabled configuration');
 $group = ['code' => 'kyiv', 'name' => 'Kyiv', 'warehouseIds' => [1], 'receivingWarehouseId' => 1, 'leadTimeDays' => 0, 'targetDays' => 30, 'safetyDays' => 0];
 $row = ['sku' => 'TEST', 'inTransitStock' => $transit, 'dimensions' => ['currentSuppliers' => ['Kreul'], 'packageQuantity' => 10, 'minimumOrderQuantity' => 10],
@@ -65,6 +71,10 @@ $a = lps_purchase_calculate($row, [$group], 30, false, ['kyiv' => ['openOrders' 
 check($a['groups'][0]['finalQuantity'] === null, 'Manual zero does not confirm deduplication');
 $a = lps_purchase_calculate($row, [$group], 30, false, ['kyiv' => ['openOrders' => 0, 'receiptsReviewed' => true]]);
 check($a['groups'][0]['finalQuantity'] === 40.0 && $a['groups'][0]['target'] === 90.0, 'Reviewed transit reduces purchase, not forecast');
+check($a['transitConsistency']['confirmed'] === true && $a['supplierTransitQuantity'] === null, 'Preview exposes consistency and supplier subset separately');
+$blocked_row = $row; $blocked_row['inTransitStock'] = $bad;
+$blocked = lps_purchase_calculate($blocked_row, [$group], 30, false, ['kyiv' => ['openOrders' => 0, 'receiptsReviewed' => true]]);
+check($blocked['groups'][0]['finalQuantity'] === null && in_array('NETWORK_TRANSIT_NOT_READY', $blocked['groups'][0]['issues'], true), 'Current independent snapshots block purchase even after manager review');
 $query = ['sourceDatabase' => 'Paint_Ua', 'warehouseIds' => [1], 'period' => ['from' => '2026-08-01', 'to' => '2026-08-30'], 'page' => ['size' => 50]];
 $frozen = lps_product_analytics_v4_sanitize_query($query + ['calculation' => ['transit' => ['warehouseIds' => [99]]]]);
 check($frozen['calculation']['transit'] === lps_transit_configuration(), 'Browser cannot override global sources');
@@ -97,7 +107,7 @@ check(is_wp_error(lps_product_analytics_export_fetch_rows($frozen, 'products')),
 $ids = [9];
 check(is_wp_error(lps_product_analytics_v4_request_java(LPS_PRODUCT_ANALYTICS_QUERY_PATH, $frozen)), 'Global setting drift invalidates frozen query');
 $ids = [];
-$disabled = lps_transit_configuration() + ['calculationVersion' => 2, 'enabled' => false, 'ready' => true, 'status' => 'DISABLED', 'sources' => [], 'availableForPlanningQuantity' => 0];
+$disabled = lps_transit_configuration() + ['calculationVersion' => 3, 'enabled' => false, 'ready' => true, 'status' => 'DISABLED', 'sources' => [], 'availableForNetworkPlanningQuantity' => 0];
 $response['context']['transit'] = $disabled;
 $response['rows'][0]['inTransitStock'] = $disabled;
 $responses = [$response];
@@ -105,4 +115,4 @@ $body = lps_product_analytics_v4_request_java(LPS_PRODUCT_ANALYTICS_QUERY_PATH, 
 check(!is_wp_error($body) && end($requests)[1]['calculation']['transit']['warehouseIds'] === [], 'Send explicit empty list, never fall back to 9');
 $ids = range(1, 17);
 check(is_wp_error(lps_product_analytics_v4_request_java(LPS_PRODUCT_ANALYTICS_QUERY_PATH, $query)), 'Enforce 16-source limit before HTTP');
-echo "PASS: v2 totals/sources, incomplete/disabled/overlap, manager review, capability gate, server config, export and generation drift\n";
+echo "PASS: v3 physical/supplier split, consistency/disabled/overlap, manager review, capability gate, export and generation drift\n";

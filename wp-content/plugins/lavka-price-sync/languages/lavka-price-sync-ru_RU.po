@@ -5191,3 +5191,36 @@ msgstr "Настройки транспортных складов измени�
 
 msgid "Transit source snapshot (JSON)"
 msgstr "Снимок источника транзита (JSON)"
+
+msgid "Transport warehouse stock available to network planning"
+msgstr "Остаток транспортных складов, доступный для планирования сети"
+
+msgid "Stock in transit from supplier"
+msgstr "Товар в пути от поставщика"
+
+msgid "Stock at transport warehouses"
+msgstr "Остаток на транспортных складах"
+
+msgid "Combined network snapshot"
+msgstr "Согласованный снимок сети"
+
+msgid "Backend recommendation"
+msgstr "Рекомендация бэкенда"
+
+msgid "Available stock at transport warehouse"
+msgstr "Доступный остаток на транспортном складе"
+
+msgid "No available stock at transport warehouse"
+msgstr "На транспортном складе нет доступного остатка"
+
+msgid "Combined network snapshot is not confirmed"
+msgstr "Согласованный снимок сети не подтверждён"
+
+msgid "Network snapshots are incomplete"
+msgstr "Снимки сети неполные"
+
+msgid "The Java transit calculation must be updated to version 3."
+msgstr "Расчёт транзита в Java нужно обновить до версии 3."
+
+msgid "Transport warehouse stock is visible, but the combined network snapshot is not confirmed. The purchase recommendation is blocked."
+msgstr "Остаток транспортных складов виден, но согласованный снимок сети не подтверждён. Рекомендация закупки заблокирована."

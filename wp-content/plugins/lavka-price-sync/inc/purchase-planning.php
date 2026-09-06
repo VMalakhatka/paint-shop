@@ -38,7 +38,10 @@ function lps_purchase_i18n(): array {
         'openOrders' => __('Other confirmed incoming orders, excluding transit', 'lavka-price-sync'),
         'pack' => __('Supplier pack quantity', 'lavka-price-sync'),
         'moq' => __('Supplier minimum order quantity', 'lavka-price-sync'),
-        'transitPool' => __('Confirmed transit shared by all groups', 'lavka-price-sync'),
+        'transitPool' => __('Transport warehouse stock available to network planning', 'lavka-price-sync'),
+        'supplierTransit' => __('Stock in transit from supplier', 'lavka-price-sync'),
+        'networkConsistency' => __('Combined network snapshot', 'lavka-price-sync'),
+        'networkRecommendation' => __('Backend recommendation', 'lavka-price-sync'),
         'transitWarehouses' => __('Transport warehouses', 'lavka-price-sync'),
         'transitStatus' => __('Transit data status', 'lavka-price-sync'),
         'receiptsReviewed' => __('I checked receipt dates and destinations, and excluded transit quantities from other incoming orders.', 'lavka-price-sync'),
@@ -57,6 +60,8 @@ function lps_purchase_i18n(): array {
             'TRANSIT_OVERALLOCATED' => __('The same transit stock was allocated more than once: group allocations exceed the confirmed total.', 'lavka-price-sync'),
             'TRANSIT_SOURCE_MISMATCH' => __('Java returned a different transport warehouse set. Update the backend for the transport warehouses selected in Lavka settings.', 'lavka-price-sync'),
             'TRANSIT_NOT_CONFIRMED' => __('Transit stock or its supplier origin is not confirmed. Manual input cannot replace missing source data.', 'lavka-price-sync'),
+            'NETWORK_TRANSIT_NOT_READY' => __('Transport warehouse stock is visible, but the combined network snapshot is not confirmed. The purchase recommendation is blocked.', 'lavka-price-sync'),
+            'TRANSIT_CONTRACT_OUTDATED' => __('The Java transit calculation must be updated to version 3.', 'lavka-price-sync'),
             'TRANSIT_DESTINATION_OVERLAP' => __('A transport warehouse is also a purchase destination group member. Remove the overlap to avoid counting stock twice.', 'lavka-price-sync'),
             'RECEIPTS_REVIEW_REQUIRED' => __('Confirm that transit and other incoming orders do not contain the same quantities, and check arrival dates and destinations.', 'lavka-price-sync'),
             'DESTINATION_MAXIMUM_EXCEEDED' => __('The resulting receipt exceeds the receiving warehouse stock limit.', 'lavka-price-sync'),
@@ -89,7 +94,7 @@ function lps_purchase_session_key(string $token): string {
 function lps_purchase_session(string $token): array {
     $state = get_transient(lps_purchase_session_key($token));
     if (!is_array($state)) throw new InvalidArgumentException(__('The preview has expired. Start a new calculation.', 'lavka-price-sync'));
-    if (($state['transitContractVersion'] ?? 0) !== 2 || ($state['transitWarehouseIds'] ?? null) !== lps_purchase_transit_warehouses()) {
+    if (($state['transitContractVersion'] ?? 0) !== 3 || ($state['transitWarehouseIds'] ?? null) !== lps_purchase_transit_warehouses()) {
         throw new InvalidArgumentException(__('Transport warehouse settings changed. Start a new preview.', 'lavka-price-sync'));
     }
     $row = lps_analytics_scenario_row((int)$state['scenario']['id']);
@@ -128,7 +133,7 @@ function lps_purchase_start(int $id, int $version): array {
     $token = bin2hex(random_bytes(16));
     $state = ['scenario' => ['id' => $scenario['id'], 'uuid' => $scenario['uuid'], 'name' => $scenario['name'], 'version' => $scenario['version']],
         'query' => $query, 'groups' => $groups, 'groupsRevision' => lavka_get_global_warehouse_groups_revision(),
-        'transitWarehouseIds' => $transit_ids, 'transitGenerationId' => null, 'transitContractVersion' => 2,
+        'transitWarehouseIds' => $transit_ids, 'transitGenerationId' => null, 'transitContractVersion' => 3,
         'periodDays' => $days, 'allowTransfers' => $profile['purchasePlanning']['allowTransfers'],
         'rows' => [], 'edits' => [], 'page' => 0, 'cursor' => null, 'seenCursors' => [], 'complete' => false,
         'context' => null, 'createdAt' => wp_date('Y-m-d H:i:s')];

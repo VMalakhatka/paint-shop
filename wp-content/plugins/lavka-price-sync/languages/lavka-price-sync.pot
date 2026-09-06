@@ -5091,3 +5091,36 @@ msgstr ""
 
 msgid "Transit source snapshot (JSON)"
 msgstr ""
+
+msgid "Transport warehouse stock available to network planning"
+msgstr ""
+
+msgid "Stock in transit from supplier"
+msgstr ""
+
+msgid "Stock at transport warehouses"
+msgstr ""
+
+msgid "Combined network snapshot"
+msgstr ""
+
+msgid "Backend recommendation"
+msgstr ""
+
+msgid "Available stock at transport warehouse"
+msgstr ""
+
+msgid "No available stock at transport warehouse"
+msgstr ""
+
+msgid "Combined network snapshot is not confirmed"
+msgstr ""
+
+msgid "Network snapshots are incomplete"
+msgstr ""
+
+msgid "The Java transit calculation must be updated to version 3."
+msgstr ""
+
+msgid "Transport warehouse stock is visible, but the combined network snapshot is not confirmed. The purchase recommendation is blocked."
+msgstr ""

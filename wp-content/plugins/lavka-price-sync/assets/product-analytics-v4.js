@@ -528,7 +528,14 @@
     function transitHtml(transit) {
         if (!transit) return '<span class="lps-pa-state is-unknown">' + escapeHtml(label('unknownValue', 'Not confirmed')) + '</span>';
         const captions = i18n.transitLabels || {};
-        const ready = transit.calculationVersion !== 2 || transit.ready === true;
+        if (transit.calculationVersion === 3) {
+            const status = transit.networkPlanningStatus || transit.status || 'INCOMPLETE_TRANSIT_DATA';
+            const confirmed = transit.networkPlanningReady === true && transit.availableForNetworkPlanningQuantity != null;
+            const neutral = transit.enabled === false && status === 'DISABLED';
+            const amount = confirmed || neutral ? '<strong>' + number(transit.availableForNetworkPlanningQuantity || 0) + '</strong>' : '';
+            return '<span class="lps-pa-state ' + (confirmed ? 'is-good' : (neutral ? 'is-neutral' : 'is-warning')) + '">' + escapeHtml(captions[status] || status) + '</span>' + amount;
+        }
+        const ready = transit.calculationVersion == null && transit.ready === true;
         const confirmed = ready && transit.status === 'CONFIRMED_SUPPLIER_ORIGIN' && transit.supplierOriginConfirmed === true && transit.availableForPlanningQuantity != null;
         const neutral = ready && transit.status === 'NO_IN_TRANSIT_STOCK' && transit.availableForPlanningQuantity != null;
         const css = confirmed ? 'is-good' : (neutral ? 'is-neutral' : 'is-warning');
@@ -539,9 +546,14 @@
     function transitSourcesHtml(transit) {
         if (!transit) return '';
         const sources = Array.isArray(transit.sources) ? transit.sources : [transit];
-        return sources.map((source) => '<section><h4>' + escapeHtml(source.warehouseId == null ? '—' : source.warehouseId) + ' · ' + escapeHtml(source.warehouseName || '') + '</h4>' +
-            '<p>' + transitHtml(source) + ' · ' + escapeHtml(source.asOf || '') + ' · ' + escapeHtml(source.completedAt || '') + '</p>' +
+        const consistency = transit.networkSnapshotConsistency || null;
+        return (consistency ? '<p><strong>' + escapeHtml(label('networkConsistency', 'Combined network snapshot')) + ':</strong> ' + escapeHtml((i18n.transitLabels || {})[consistency.status] || consistency.status || '—') + '</p>' +
+            '<p><strong>' + escapeHtml(label('networkRecommendation', 'Backend recommendation')) + ':</strong> ' + escapeHtml(consistency.recommendation || '—') + '</p>' : '') +
+            sources.map((source) => '<section><h4>' + escapeHtml(source.warehouseId == null ? '—' : source.warehouseId) + ' · ' + escapeHtml(source.warehouseName || '') + '</h4>' +
+            '<p><span class="lps-pa-state ' + (source.availableForNetworkPlanningQuantity != null ? 'is-good' : 'is-warning') + '">' + escapeHtml((i18n.transitLabels || {})[source.status] || source.status || label('unknownValue', 'Not confirmed')) + '</span>' +
+            '<strong>' + (source.availableForNetworkPlanningQuantity == null ? escapeHtml(label('unknownValue', 'Not confirmed')) : number(source.availableForNetworkPlanningQuantity)) + '</strong> · ' + escapeHtml(source.asOf || '') + ' · ' + escapeHtml(source.completedAt || '') + '</p>' +
             '<p>' + escapeHtml(label('physicalQuantity', 'Physical')) + ': ' + number(source.physicalQuantity) + ' · ' + escapeHtml(label('reservedQuantity', 'Reserved')) + ': ' + number(source.reservedQuantity) + ' · ' + escapeHtml(label('availableQuantity', 'Available')) + ': ' + number(source.availableQuantity) + '</p>' +
+            '<p>' + escapeHtml(label('supplierTransitStock', 'Stock in transit from supplier')) + ': <strong>' + (source.supplierInTransitAvailableQuantity == null ? escapeHtml(label('unknownValue', 'Not confirmed')) : number(source.supplierInTransitAvailableQuantity)) + '</strong> · ' + escapeHtml((i18n.transitLabels || {})[source.supplierOriginStatus] || source.supplierOriginStatus || '') + '</p>' +
             '<ul>' + (source.suppliers || []).map((supplier) => '<li>' + escapeHtml(supplier.name || supplier.code || '') + '</li>').join('') + '</ul>' +
             '<details><summary>' + escapeHtml(label('technicalDetails', 'Technical details')) + '</summary><pre>' + escapeHtml(JSON.stringify(source, null, 2)) + '</pre></details></section>').join('') +
             '<ul>' + (transit.warnings || []).map((warning) => '<li>' + escapeHtml(typeof warning === 'string' ? warning : (warning.message || warning.code || '')) + '</li>').join('') + '</ul>';
@@ -755,8 +767,8 @@
             '</tbody></table></div></section>' +
             groupAvailabilitySection(row) +
             '<section><h3>' + escapeHtml(label('networkPolicy', 'Network order policy')) + '</h3><p>' + networkHtml(row.networkOrderPolicy) + '</p>' + (row.networkOrderPolicy && row.networkOrderPolicy.policy ? '<p>' + escapeHtml(policyDescription(row.networkOrderPolicy.policy)) + '</p>' : '') + '</section>' +
-            '<section><h3>' + escapeHtml(label('transitStock', 'Stock in transit')) + '</h3><p>' + transitHtml(transit) + '</p>' +
-            (transit ? '<p>' + escapeHtml(label('supplierOriginConfirmed', 'Supplier origin confirmed')) + ': <strong>' + escapeHtml(transit.supplierOriginConfirmed === true ? label('yes', 'Yes') : label('no', 'No')) + '</strong></p>' : '') +
+            '<section><h3>' + escapeHtml(label('transportWarehouseStock', 'Stock at transport warehouses')) + '</h3><p>' + transitHtml(transit) + '</p>' +
+            (transit ? '<p>' + escapeHtml(label('supplierTransitStock', 'Stock in transit from supplier')) + ': <strong>' + (transit.supplierInTransitAvailableQuantity == null ? escapeHtml(label('unknownValue', 'Not confirmed')) : number(transit.supplierInTransitAvailableQuantity)) + '</strong></p>' : '') +
             transitSourcesHtml(transit) + '</section>';
         el('lps-pa-detail-content').innerHTML = content;
         el('lps-pa-detail').hidden = false;
