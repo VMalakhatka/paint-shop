@@ -5043,3 +5043,51 @@ msgstr ""
 #, php-format
 msgid "Not enough time for another batch. The queue is paused after the final snapshot. Eligible SKU remaining in this warehouse: %d. Subsequent warehouses were not started."
 msgstr ""
+
+msgid "Select at most 16 transport warehouses."
+msgstr ""
+
+msgid "The transit response does not match the selected sources."
+msgstr ""
+
+msgid "Configurable transit requires a Java update."
+msgstr ""
+
+msgid "I checked receipt dates and destinations, and excluded transit quantities from other incoming orders."
+msgstr ""
+
+msgid "Confirm that transit and other incoming orders do not contain the same quantities, and check arrival dates and destinations."
+msgstr ""
+
+msgid "Transit stock is already included in the analysis warehouses."
+msgstr ""
+
+msgid "Transit data is incomplete."
+msgstr ""
+
+msgid "Transit snapshot dates are incomplete."
+msgstr ""
+
+msgid "Transit stock and reservations do not reconcile."
+msgstr ""
+
+msgid "Transport warehouses"
+msgstr ""
+
+msgid "Transit data status"
+msgstr ""
+
+msgid "Java returned a different transport warehouse set. Update the backend for the transport warehouses selected in Lavka settings."
+msgstr ""
+
+msgid "Transit stock or its supplier origin is not confirmed. Manual input cannot replace missing source data."
+msgstr ""
+
+msgid "A transport warehouse is also a purchase destination group member. Remove the overlap to avoid counting stock twice."
+msgstr ""
+
+msgid "Transport warehouse settings changed. Start a new preview."
+msgstr ""
+
+msgid "Transit source snapshot (JSON)"
+msgstr ""

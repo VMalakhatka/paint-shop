@@ -87,6 +87,7 @@
 .lps-pa-message.is-error { border-color: #d63638; background: #fcf0f1; }
 .lps-pa-message.is-success { border-color: #00a32a; background: #edfaef; }
 
+#lps-pa-detail pre { white-space: pre-wrap; overflow-wrap: anywhere; max-width: 100%; }
 .lps-pa-summary {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));

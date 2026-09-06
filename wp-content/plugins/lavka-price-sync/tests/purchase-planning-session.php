@@ -15,6 +15,7 @@ function wp_date($format) { return date($format); }
 function lps_analytics_scenario_row($id) { return $id === 1 ? $GLOBALS['scenario'] : null; }
 function lps_analytics_scenario_decode_row($row) { return $row; }
 function lavka_get_global_warehouse_groups_revision() { return $GLOBALS['revision'] ?? 'revision-1'; }
+function lavka_get_transit_warehouse_ids() { return $GLOBALS['transitIds'] ?? [9]; }
 function lavka_get_global_warehouse_groups() { return [['code' => 'group', 'name' => 'Group', 'warehouseIds' => [1, 7]]]; }
 function lps_product_analytics_v4_sanitize_query($query) { return $query; }
 function lps_product_analytics_v4_request_java($path, $query) { $GLOBALS['queries'][] = $query; return $GLOBALS['response']; }
@@ -38,7 +39,8 @@ $user = 2;
 rejected(fn() => lps_purchase_session($token), 'Preview token must be user-bound');
 $user = 1;
 rejected(fn() => lps_purchase_start(1, 1), 'Reject stale scenario version');
-$response = ['ok' => true, 'rows' => [['sku' => 'ONE']], 'context' => ['analyticsSchemaVersion' => 4,
+$transit = ['warehouseId' => 9, 'generationId' => 99, 'status' => 'NO_IN_TRANSIT_STOCK'];
+$response = ['ok' => true, 'rows' => [['sku' => 'ONE', 'inTransitStock' => $transit]], 'context' => ['analyticsSchemaVersion' => 4,
     'periodFrom' => '2026-08-01', 'periodTo' => '2026-08-30', 'warehouses' => [['id' => 1, 'generationId' => 10], ['id' => 7, 'generationId' => 11]]],
     'totals' => ['productCount' => 2], 'errors' => [], 'nextCursor' => 'page-two'];
 $first = lps_purchase_page($token, 0);
@@ -50,9 +52,17 @@ rejected(fn() => lps_purchase_page($token, 0), 'Reject duplicate page');
 $response['context']['warehouses'][0]['generationId'] = 11;
 rejected(fn() => lps_purchase_page($token, 1), 'Reject generation drift');
 $response['context']['warehouses'][0]['generationId'] = 10;
-$response['rows'] = [['sku' => 'TWO']]; $response['nextCursor'] = null;
+$response['rows'] = [['sku' => 'TWO', 'inTransitStock' => $transit]]; $response['nextCursor'] = null;
+$response['rows'][0]['inTransitStock']['generationId'] = 100;
+rejected(fn() => lps_purchase_page($token, 1), 'Reject transit source generation drift');
+$response['rows'][0]['inTransitStock']['generationId'] = 99;
 $last = lps_purchase_page($token, 1);
 check($last['complete'] && $last['loaded'] === 2, 'Only accept complete unique SKU set');
+$transitIds = [9, 10];
+rejected(fn() => lps_purchase_session($token), 'Transport configuration change invalidates adjustment and export');
+$transitIds = [];
+rejected(fn() => lps_purchase_session($token), 'Disabling transit also invalidates preview');
+$transitIds = [9];
 $revision = 'revision-2';
 rejected(fn() => lps_purchase_session($token), 'Reject changed group revision');
 $revision = 'revision-1';

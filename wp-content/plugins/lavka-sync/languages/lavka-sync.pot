@@ -725,3 +725,18 @@ msgstr ""
 #, php-format
 msgid "Lavka Sync: file %s is missing."
 msgstr ""
+
+msgid "Select at most 16 transport warehouses."
+msgstr ""
+
+msgid "Up to 16 transport warehouses. Each source needs a current analytics snapshot. Configurable transit requires the updated Java API; older deployments cannot calculate a different source set."
+msgstr ""
+
+msgid "Transport warehouses"
+msgstr ""
+
+msgid "Confirmed stock in transit reduces the purchase quantity, not the sales forecast. No selection disables this deduction. Transport warehouses must not be part of purchase destination groups."
+msgstr ""
+
+msgid "The current Java API supplies transit data only for warehouse 9. Other selections require backend support; purchase preview will not substitute warehouse 9 or treat missing data as zero. The analytics report still shows the API transit source."
+msgstr ""

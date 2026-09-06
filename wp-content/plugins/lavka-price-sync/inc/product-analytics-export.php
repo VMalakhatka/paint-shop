@@ -75,6 +75,9 @@ function lps_product_analytics_export_columns(string $tab): array {
         ['key' => 'physicalAvailabilityDetails', 'label' => __('Physical warehouse availability details (JSON)', 'lavka-price-sync')],
         ['key' => 'groupAvailabilityDetails', 'label' => __('Group availability details (JSON)', 'lavka-price-sync')],
         ['key' => 'snapshotContext', 'label' => __('Snapshot context (JSON)', 'lavka-price-sync')],
+        ['key' => 'transitQuantity', 'label' => __('Confirmed stock in transit', 'lavka-price-sync')],
+        ['key' => 'transitStatus', 'label' => __('Transit data status', 'lavka-price-sync')],
+        ['key' => 'transitDetails', 'label' => __('Transit source snapshot (JSON)', 'lavka-price-sync')],
         ['key' => 'warehouseAvailability', 'label' => __('Availability by warehouse', 'lavka-price-sync')],
         ['key' => 'groupAvailability', 'label' => __('Availability by combined warehouse', 'lavka-price-sync')],
         ['key' => 'warehouseGroupsRevision', 'label' => __('Warehouse group revision', 'lavka-price-sync')],
@@ -87,6 +90,9 @@ function lps_product_analytics_export_row(array $row, string $tab, string $wareh
     $availability = is_array($row['availability'] ?? null) ? $row['availability'] : [];
     [$availability_status, $stockout_days, $stockout_percent] = lps_product_analytics_export_availability($availability);
     $data = [
+        'transitQuantity' => lps_purchase_transit($row['inTransitStock'] ?? [], lps_purchase_transit_warehouses())['quantity'],
+        'transitStatus' => $row['inTransitStock']['status'] ?? 'UNKNOWN',
+        'transitDetails' => wp_json_encode($row['inTransitStock'] ?? null, JSON_UNESCAPED_UNICODE),
         'abc' => (string)($row['abcClass'] ?? ''),
         'sku' => (string)($row['sku'] ?? ''),
         'gtin' => (string)($dimensions['primaryBarcode'] ?? ''),

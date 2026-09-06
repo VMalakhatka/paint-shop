@@ -825,3 +825,18 @@ msgstr "Lavka Sync: файл %s отсутствует."
 
 #~ msgid "Synchronize"
 #~ msgstr "Синхронизировать"
+
+msgid "Select at most 16 transport warehouses."
+msgstr "Выберите не более 16 транспортных складов."
+
+msgid "Up to 16 transport warehouses. Each source needs a current analytics snapshot. Configurable transit requires the updated Java API; older deployments cannot calculate a different source set."
+msgstr "До 16 транспортных складов. Для каждого источника нужен актуальный снимок аналитики. Выбор источников транзита требует обновлённого Java API; старые версии не рассчитывают другой набор складов."
+
+msgid "Transport warehouses"
+msgstr "Транспортные склады"
+
+msgid "Confirmed stock in transit reduces the purchase quantity, not the sales forecast. No selection disables this deduction. Transport warehouses must not be part of purchase destination groups."
+msgstr "Подтверждённый товар в пути уменьшает количество закупки, а не прогноз продаж. Если склады не выбраны, это вычитание отключено. Транспортные склады не должны входить в группы назначения закупки."
+
+msgid "The current Java API supplies transit data only for warehouse 9. Other selections require backend support; purchase preview will not substitute warehouse 9 or treat missing data as zero. The analytics report still shows the API transit source."
+msgstr "Текущий Java API предоставляет транзитные данные только для склада 9. Другой выбор требует поддержки бэкенда: предварительный расчёт закупки не подставляет склад 9 и не считает отсутствующие данные нулём. Отчёт аналитики пока показывает источник транзита из API."

@@ -225,6 +225,7 @@ function lps_product_analytics_i18n(): array {
         'warehouses' => __('Warehouses', 'lavka-price-sync'),
         'networkPolicy' => __('Network order policy', 'lavka-price-sync'),
         'transitStock' => __('Stock in transit', 'lavka-price-sync'),
+        'technicalDetails' => __('Technical details', 'lavka-price-sync'),
         'localOrderPolicy' => __('Warehouse order policy', 'lavka-price-sync'),
         'planningQuantity' => __('Confirmed quantity for planning', 'lavka-price-sync'),
         'unknownValue' => __('Not confirmed', 'lavka-price-sync'),
@@ -265,6 +266,12 @@ function lps_product_analytics_i18n(): array {
             'organizationTypes' => __('Organization types', 'lavka-price-sync'),
         ],
         'transitLabels' => [
+            'DISABLED' => __('Disabled', 'lavka-price-sync'),
+            'TRANSIT_SCOPE_OVERLAP' => __('Transit stock is already included in the analysis warehouses.', 'lavka-price-sync'),
+            'INCOMPLETE_TRANSIT_DATA' => __('Transit data is incomplete.', 'lavka-price-sync'),
+            'INCOMPLETE_SNAPSHOT_METADATA' => __('Transit snapshot dates are incomplete.', 'lavka-price-sync'),
+            'INCONSISTENT_TRANSIT_BALANCE' => __('Transit stock and reservations do not reconcile.', 'lavka-price-sync'),
+            'TRANSIT_SOURCE_MISMATCH' => __('The transit response does not match the selected sources.', 'lavka-price-sync'),
             'CONFIRMED_SUPPLIER_ORIGIN' => __('Confirmed stock in transit', 'lavka-price-sync'),
             'NO_IN_TRANSIT_STOCK' => __('No stock in transit', 'lavka-price-sync'),
             'NEGATIVE_TRANSIT_STOCK' => __('Negative transit stock: data error', 'lavka-price-sync'),
@@ -1753,6 +1760,9 @@ function lps_product_analytics_v4_sanitize_availability(array $input, array $war
 }
 
 function lps_product_analytics_v4_sanitize_query(array $payload): array {
+    if (isset($payload['transitConfigurationRevision']) && $payload['transitConfigurationRevision'] !== lps_transit_configuration()['configurationRevision']) {
+        wp_send_json_error(['message' => __('Transport warehouse settings changed. Start a new preview.', 'lavka-price-sync')], 409);
+    }
     $source = sanitize_text_field((string)($payload['sourceDatabase'] ?? lps_product_analytics_v4_source_database()));
     if (!preg_match('/^[A-Za-z0-9_]+$/', $source)) {
         wp_send_json_error(['message' => __('The Folio source database is invalid.', 'lavka-price-sync')], 400);
@@ -1786,6 +1796,7 @@ function lps_product_analytics_v4_sanitize_query(array $payload): array {
     $abc_basis = strtoupper(sanitize_key((string)($calculation_input['abcBasis'] ?? 'GROSS_PROFIT')));
     if (!in_array($abc_basis, ['REVENUE', 'GROSS_PROFIT', 'SOLD_UNITS'], true)) $abc_basis = 'GROSS_PROFIT';
     $calculation = [
+        'transit' => lps_transit_configuration(),
         'abcBasis' => $abc_basis,
         'includeReturns' => !isset($calculation_input['includeReturns']) || rest_sanitize_boolean($calculation_input['includeReturns']),
     ];
@@ -1826,6 +1837,7 @@ function lps_product_analytics_v4_sanitize_query(array $payload): array {
 }
 
 function lps_product_analytics_v4_scenario_query_fingerprint(array $query): string {
+    unset($query['calculation']['transit']);
     $query['page']['cursor'] = null;
     // Compare saved availability filters, but not runtime group membership/revision.
     if (isset($query['calculation']['availability'])) {
@@ -1927,6 +1939,56 @@ function lps_product_analytics_v4_scenario_context(array $payload, array $query)
 }
 
 function lps_product_analytics_v4_request_java(string $path, array $payload) {
+    if (!in_array($path, [LPS_PRODUCT_ANALYTICS_CAPABILITIES_PATH, LPS_PRODUCT_ANALYTICS_QUERY_PATH], true)) {
+        return lps_product_analytics_v4_request_java_raw($path, $payload);
+    }
+    $config = lps_transit_configuration();
+    if (count($config['warehouseIds']) > 16) return new WP_Error('INVALID_TRANSIT_CONFIGURATION', __('Select at most 16 transport warehouses.', 'lavka-price-sync'), ['status' => 400]);
+    if (isset($payload['calculation']['transit']) && $payload['calculation']['transit'] !== $config) {
+        return new WP_Error('TRANSIT_CONFIGURATION_CHANGED', __('Transport warehouse settings changed. Start a new preview.', 'lavka-price-sync'), ['status' => 409]);
+    }
+    // Probe without the new field first, including on older deployments. Cache only
+    // feature support within this PHP request, never source generations across requests.
+    static $support = [];
+    $key = wp_json_encode([lps_get_options()['java_base_url'] ?? '', $payload['sourceDatabase'] ?? '', $payload['warehouseIds'] ?? []]);
+    if (!array_key_exists($key, $support)) {
+        $probe = lps_product_analytics_v4_request_java_raw(LPS_PRODUCT_ANALYTICS_CAPABILITIES_PATH, [
+            'sourceDatabase' => $payload['sourceDatabase'] ?? 'Paint_Ua', 'warehouseIds' => $payload['warehouseIds'] ?? [],
+        ]);
+        if (is_wp_error($probe)) return $probe;
+        $support[$key] = ($probe['features']['configurableTransit']['supported'] ?? null) === true
+            && ($probe['transit']['configurable'] ?? null) === true && ($probe['transit']['calculationVersion'] ?? 0) === 2;
+    }
+    unset($payload['calculation']['transit']);
+    if ($support[$key]) $payload['calculation']['transit'] = $config;
+    $body = lps_product_analytics_v4_request_java_raw($path, $payload);
+    if (is_wp_error($body)) return $body;
+    if ($support[$key]) {
+        $context = $path === LPS_PRODUCT_ANALYTICS_QUERY_PATH ? ($body['context']['transit'] ?? []) : ($body['transit'] ?? []);
+        if (($context['calculationVersion'] ?? 0) !== 2 || !lps_transit_matches($context, $config['warehouseIds'])) {
+            return new WP_Error('TRANSIT_SOURCE_MISMATCH', __('The transit response does not match the selected sources.', 'lavka-price-sync'), ['status' => 502]);
+        }
+        $ids = array_column($context['sources'] ?? [], 'warehouseId'); sort($ids, SORT_NUMERIC);
+        if ($ids !== $config['warehouseIds']) return new WP_Error('TRANSIT_SOURCE_MISMATCH', __('The transit response does not match the selected sources.', 'lavka-price-sync'), ['status' => 502]);
+        foreach ($body['rows'] ?? [] as $row) {
+            $transit = $row['inTransitStock'] ?? [];
+            $generations = array_column($transit['sources'] ?? [], 'generationId', 'warehouseId'); ksort($generations);
+            $expected = array_column($context['sources'] ?? [], 'generationId', 'warehouseId'); ksort($expected);
+            if (($transit['calculationVersion'] ?? 0) !== 2 || !lps_transit_matches($transit, $config['warehouseIds']) || $generations !== $expected) {
+                return new WP_Error('TRANSIT_SOURCE_MISMATCH', __('The transit response does not match the selected sources.', 'lavka-price-sync'), ['status' => 502]);
+            }
+        }
+    } elseif ($config['warehouseIds'] !== [9]) {
+        $body['warnings'][] = ['code' => 'TRANSIT_SOURCE_MISMATCH', 'message' => __('Configurable transit requires a Java update.', 'lavka-price-sync')];
+        foreach ($body['rows'] ?? [] as $index => $row) {
+            $body['rows'][$index]['inTransitStock']['availableForPlanningQuantity'] = null;
+            $body['rows'][$index]['inTransitStock']['status'] = 'TRANSIT_SOURCE_MISMATCH';
+        }
+    }
+    return $body;
+}
+
+function lps_product_analytics_v4_request_java_raw(string $path, array $payload) {
     $options = lps_get_options();
     if (empty($options['java_base_url'])) {
         return new WP_Error('java_not_configured', __('Java Base URL is not configured.', 'lavka-price-sync'), ['status' => 503]);

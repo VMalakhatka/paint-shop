@@ -44,6 +44,9 @@
         el('results').innerHTML = state.rows.slice(state.page * 25, state.page * 25 + 25).map((row, offset) => {
             const index = state.page * 25 + offset;
             return '<section class="lps-purchase-sku"><h2>' + escape(row.sku) + ' · ' + escape(row.productName) + '</h2><p>' + escape(row.supplier.join(', ')) + ' · ' + escape(t.transitPool) + ': ' + display(row.transitPool) + '</p>' +
+                '<p>' + escape(t.transitWarehouses) + ': ' + escape((row.transitWarehouseIds || []).join(', ') || '—') + ' · ' + escape(t.transitStatus) + ': ' + escape((t.transitLabels || {})[row.transitStatus] || row.transitStatus) + '</p>' +
+                '<details><summary>' + escape(t.transitWarehouses) + '</summary>' + (row.transitSources || []).map((source) => '<p><strong>' + escape(source.warehouseId) + ' · ' + escape(source.warehouseName || '') + '</strong>: ' + display(source.availableForPlanningQuantity) + ' · ' + escape((t.transitLabels || {})[source.status] || source.status) + ' · ' + escape(source.completedAt || source.asOf || '') + '</p><pre>' + escape(JSON.stringify(source, null, 2)) + '</pre>').join('') +
+                '<ul>' + (row.transitWarnings || []).map((warning) => '<li>' + escape(typeof warning === 'string' ? warning : (warning.message || warning.code || '')) + '</li>').join('') + '</ul></details>' +
                 '<div class="lps-purchase-scroll"><table class="widefat striped"><thead><tr>' + headings.map((key) => '<th>' + escape(t[key]) + '</th>').join('') + '</tr></thead><tbody>' +
                 row.groups.map((group) => '<tr><th>' + escape(group.groupName) + '<small>' + escape(t.receivingWarehouse) + ': ' + group.receivingWarehouseId + '</small></th>' +
                     ['physical', 'available', 'regularSales', 'returns', 'coverageDays', 'target', 'needBeforeReceipts'].map((key) => '<td>' + display(group[key]) + '</td>').join('') +
@@ -51,7 +54,7 @@
                 '</tbody></table></div><details><summary>' + escape(t.details) + '</summary><form data-edit-form="' + index + '">' + row.groups.map((group) =>
                     '<fieldset data-group="' + escape(group.groupCode) + '"><legend>' + escape(group.groupName) + '</legend><div class="lps-purchase-inputs">' +
                     ['inTransit', 'openOrders', 'pack', 'moq'].map((key) => input(key, group.inputs[key], t[key])).join('') +
-                    input('quantity', group.managerQuantity, t.quantity) + input('reason', group.managerReason, t.reason, 'text') + '</div><ul class="lps-purchase-review">' +
+                    input('quantity', group.managerQuantity, t.quantity) + input('reason', group.managerReason, t.reason, 'text') + '</div><label><input type="checkbox" data-field="receiptsReviewed"' + (group.receiptsReviewed ? ' checked' : '') + '> ' + escape(t.receiptsReviewed) + '</label><ul class="lps-purchase-review">' +
                     group.issues.map((issue) => '<li>' + escape(t.issues[issue] || issue) + '</li>').join('') + '</ul></fieldset>').join('') +
                 '<button class="button" type="submit"' + (!state.complete || state.busy ? ' disabled' : '') + '>' + escape(t.apply) + '</button></form></details></section>';
         }).join('');
@@ -62,7 +65,7 @@
             const groups = {};
             form.querySelectorAll('[data-group]').forEach((fieldset) => {
                 const values = {};
-                fieldset.querySelectorAll('[data-field]').forEach((field) => { values[field.dataset.field] = field.type === 'text' ? field.value : (field.value === '' ? null : Number(field.value)); });
+                fieldset.querySelectorAll('[data-field]').forEach((field) => { values[field.dataset.field] = field.type === 'checkbox' ? field.checked : (field.type === 'text' ? field.value : (field.value === '' ? null : Number(field.value))); });
                 groups[fieldset.dataset.group] = values;
             });
             busy(true);
@@ -94,7 +97,7 @@
             const started = await api('start', { scenarioId: Number(option.value), version: Number(option.dataset.version) });
             if (requestId !== state.requestId) return;
             state.token = started.token;
-            const parameters = { scenario: started.scenario, groups: started.groups, warehouseGroupsRevision: started.groupsRevision, query: started.query };
+            const parameters = { scenario: started.scenario, groups: started.groups, warehouseGroupsRevision: started.groupsRevision, transitWarehouseIds: started.transitWarehouseIds, query: started.query };
             el('parameters').textContent = JSON.stringify(parameters, null, 2);
             el('context').textContent = started.scenario.name + ' · v' + started.scenario.version + ' · ' + started.query.period.from + ' — ' + started.query.period.to + ' · ' + started.groups.map((group) => group.name + ' [' + group.warehouseIds.join(', ') + ']').join('; ');
             let page = 0;

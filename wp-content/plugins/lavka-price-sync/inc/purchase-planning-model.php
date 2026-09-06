@@ -7,6 +7,61 @@ function lps_purchase_number($value, float $min = 0, float $max = 1000000000): ?
     return is_finite($number) && $number >= $min && $number <= $max ? $number : null;
 }
 
+function lps_purchase_transit_warehouses(): array {
+    return function_exists('lavka_get_transit_warehouse_ids') ? lavka_get_transit_warehouse_ids() : [9];
+}
+
+function lps_transit_configuration(): array {
+    $ids = lps_purchase_transit_warehouses();
+    return ['warehouseIds' => $ids, 'configurationRevision' => hash('sha256', json_encode(array_values($ids)))];
+}
+
+function lps_transit_matches(array $value, array $ids): bool {
+    return ($value['warehouseIds'] ?? null) === $ids
+        && ($value['configurationRevision'] ?? '') === hash('sha256', json_encode(array_values($ids)));
+}
+
+function lps_purchase_transit(array $transit, array $warehouse_ids): array {
+    if (($transit['calculationVersion'] ?? 0) === 2) {
+        $unknown = ['quantity' => null, 'status' => $transit['status'] ?? 'INCOMPLETE_TRANSIT_DATA', 'issue' => 'TRANSIT_NOT_CONFIRMED'];
+        if (!lps_transit_matches($transit, $warehouse_ids)) return ['quantity' => null, 'status' => 'TRANSIT_SOURCE_MISMATCH', 'issue' => 'TRANSIT_SOURCE_MISMATCH'];
+        if (!$warehouse_ids) return ($transit['enabled'] ?? null) === false && ($transit['status'] ?? '') === 'DISABLED'
+            ? ['quantity' => 0.0, 'status' => 'DISABLED', 'issue' => null] : $unknown;
+        if (($transit['enabled'] ?? null) !== true || ($transit['ready'] ?? null) !== true) return $unknown;
+        $sources = $transit['sources'] ?? [];
+        $ids = array_column($sources, 'warehouseId'); sort($ids, SORT_NUMERIC);
+        if ($ids !== $warehouse_ids) return $unknown;
+        $sum = 0.0;
+        foreach ($sources as $source) {
+            // Validate each legacy-shaped source, not the diagnostic known subtotal.
+            unset($source['calculationVersion']);
+            $confirmed = lps_purchase_transit($source, [(int)$source['warehouseId']]);
+            $source_quantity = lps_purchase_number($source['availableForPlanningQuantity'] ?? null);
+            if ($confirmed['quantity'] === null || $source_quantity === null || abs($confirmed['quantity'] - $source_quantity) > 0.000001) return $unknown;
+            $sum += $confirmed['quantity'];
+        }
+        $quantity = lps_purchase_number($transit['availableForPlanningQuantity'] ?? null);
+        if ($quantity === null || abs($quantity - $sum) > 0.000001
+            || !in_array($transit['status'] ?? '', ['CONFIRMED_SUPPLIER_ORIGIN', 'NO_IN_TRANSIT_STOCK'], true)
+            || ($quantity > 0 && ($transit['supplierOriginConfirmed'] ?? null) !== true)) return $unknown;
+        return ['quantity' => $quantity, 'status' => $transit['status'], 'issue' => null];
+    }
+    if (!$warehouse_ids) return ['quantity' => 0.0, 'status' => 'TRANSIT_DISABLED', 'issue' => null];
+    // The current contract has one source. Never silently accept a partial source set.
+    if (count($warehouse_ids) !== 1 || (int)($transit['warehouseId'] ?? 0) !== $warehouse_ids[0]) {
+        return ['quantity' => null, 'status' => 'TRANSIT_SOURCE_MISMATCH', 'issue' => 'TRANSIT_SOURCE_MISMATCH'];
+    }
+    $status = (string)($transit['status'] ?? 'UNKNOWN');
+    $quantity = null;
+    if ((int)($transit['generationId'] ?? 0) > 0) {
+        if ($status === 'NO_IN_TRANSIT_STOCK') $quantity = 0.0;
+        elseif ($status === 'CONFIRMED_SUPPLIER_ORIGIN' && ($transit['supplierOriginConfirmed'] ?? null) === true) {
+            $quantity = lps_purchase_number($transit['availableForPlanningQuantity'] ?? null);
+        }
+    }
+    return ['quantity' => $quantity, 'status' => $status, 'issue' => $quantity === null ? 'TRANSIT_NOT_CONFIRMED' : null];
+}
+
 function lps_purchase_profile(array $input): array {
     $groups = [];
     foreach (array_slice((array)($input['groups'] ?? []), 0, 50) as $group) {
@@ -63,18 +118,21 @@ function lps_purchase_period_days(array $period): int {
 }
 
 // Operates on Java's confirmed metrics; never reconstructs Folio movements.
-function lps_purchase_calculate(array $row, array $groups, int $period_days, bool $allow_transfers, array $edits = []): array {
+function lps_purchase_calculate(array $row, array $groups, int $period_days, bool $allow_transfers, array $edits = [], ?array $transit_ids = null): array {
     $members = array_column((array)($row['warehouseBreakdown'] ?? []), null, 'warehouseId');
     $transit = $row['inTransitStock'] ?? [];
-    $transit_pool = ($transit['status'] ?? '') === 'NO_IN_TRANSIT_STOCK' ? 0.0
-        : (($transit['supplierOriginConfirmed'] ?? null) === true
-            ? lps_purchase_number($transit['availableForPlanningQuantity'] ?? null) : null);
+    $transit_ids = $transit_ids ?? lps_purchase_transit_warehouses();
+    $confirmed_transit = lps_purchase_transit($transit, $transit_ids);
+    $transit_pool = $confirmed_transit['quantity'];
     $network = $row['networkOrderPolicy'] ?? [];
     $result = [];
     $allocated_transit = 0;
     foreach ($groups as $group) {
         $edit = $edits[$group['code']] ?? [];
         $issues = [];
+        if ($confirmed_transit['issue']) $issues[] = $confirmed_transit['issue'];
+        if ($transit_ids && ($edit['receiptsReviewed'] ?? false) !== true) $issues[] = 'RECEIPTS_REVIEW_REQUIRED';
+        if (array_intersect($group['warehouseIds'], $transit_ids)) $issues[] = 'TRANSIT_DESTINATION_OVERLAP';
         if (count((array)($row['dimensions']['currentSuppliers'] ?? [])) !== 1) $issues[] = 'SUPPLIER_NOT_CONFIRMED';
         $physical = $available = $sales = $returns = $reserve = 0.0;
         $cap = 0.0;
@@ -114,7 +172,7 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
         $daily = $valid ? $sales / $period_days : null;
         $target = $valid && $eligible ? $daily * ($group['leadTimeDays'] + $group['targetDays'] + $group['safetyDays']) + $reserve : null;
         if ($target !== null && !$unlimited) $target = min($target, $cap);
-        $incoming = lps_purchase_number($edit['inTransit'] ?? ($transit_pool === 0.0 ? 0 : null));
+        $incoming = lps_purchase_number($edit['inTransit'] ?? ((count($groups) === 1 || $transit_pool === 0.0) ? $transit_pool : null));
         $open_orders = lps_purchase_number($edit['openOrders'] ?? null);
         $pack = lps_purchase_number($edit['pack'] ?? ($row['dimensions']['packageQuantity'] ?? null), 0.000001);
         $moq = lps_purchase_number($edit['moq'] ?? ($row['dimensions']['minimumOrderQuantity'] ?? null));
@@ -128,6 +186,7 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
             'returns' => $valid ? $returns : null, 'coverageDays' => $daily > 0 ? $available / $daily : null,
             'target' => $target, 'needBeforeReceipts' => $target === null ? null : max(0, $target - $available),
             'inputs' => ['inTransit' => $incoming, 'openOrders' => $open_orders, 'pack' => $pack, 'moq' => $moq],
+            'receiptsReviewed' => ($edit['receiptsReviewed'] ?? false) === true,
             'position' => $position, 'ready' => $ready, 'issues' => $issues,
             'transferIn' => 0, 'transferOut' => 0, 'transfers' => [],
             'recommendedQuantity' => null, 'managerQuantity' => lps_purchase_number($edit['quantity'] ?? null),
@@ -184,5 +243,8 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
     unset($item);
     return ['sku' => $row['sku'] ?? '', 'productName' => $row['productName'] ?? '',
         'supplier' => $row['dimensions']['currentSuppliers'] ?? [], 'transitPool' => $transit_pool,
-        'transitStatus' => $transit['status'] ?? 'UNKNOWN', 'groups' => array_values($result)];
+        'transitStatus' => $confirmed_transit['status'], 'transitWarehouseIds' => $transit_ids,
+        'transitGenerationId' => $transit['generationId'] ?? null,
+        'transitSources' => $transit['sources'] ?? ($transit ? [$transit] : []),
+        'transitWarnings' => $transit['warnings'] ?? [], 'groups' => array_values($result)];
 }

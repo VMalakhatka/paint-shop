@@ -112,6 +112,24 @@ function lavka_set_location_folio_warehouses(int $term_id, array $warehouses): v
 
 const LAVKA_PUBLIC_WAREHOUSE_LABELS_OPTION = 'lavka_public_warehouse_labels';
 const LAVKA_FOLIO_NON_ACCOUNTING_WAREHOUSE_OPTION = 'pcoe_folio_non_accounting_warehouse_id';
+const LAVKA_TRANSIT_WAREHOUSES_OPTION = 'lavka_transit_warehouse_ids';
+
+function lavka_normalize_transit_warehouses(array $values): array {
+    $ids = [];
+    foreach ($values as $value) {
+        if ((!is_int($value) && !is_string($value)) || !preg_match('/^[1-9][0-9]*$/D', (string)$value) || (float)$value > 2147483647) continue;
+        $ids[] = (int)$value;
+    }
+    $ids = array_values(array_unique($ids));
+    sort($ids, SORT_NUMERIC);
+    return $ids;
+}
+
+function lavka_get_transit_warehouse_ids(): array {
+    // Preserve the existing Java source until the operator explicitly saves a selection.
+    $stored = get_option(LAVKA_TRANSIT_WAREHOUSES_OPTION, [9]);
+    return lavka_normalize_transit_warehouses(is_array($stored) ? $stored : []);
+}
 
 function lavka_get_public_warehouse_labels(): array {
     $labels = get_option(LAVKA_PUBLIC_WAREHOUSE_LABELS_OPTION, []);
@@ -219,6 +237,9 @@ function lavka_render_warehouses_page() {
 
     // save
     if (!empty($_POST['_lavka_wh_nonce']) && wp_verify_nonce($_POST['_lavka_wh_nonce'], 'lavka_wh_save')) {
+        if (count(lavka_normalize_transit_warehouses((array)wp_unslash($_POST['transit_warehouse_ids'] ?? []))) > 16) {
+            wp_die(esc_html__('Select at most 16 transport warehouses.', 'lavka-sync'));
+        }
         $tax = apply_filters('lavka_location_taxonomy', 'location');
         $names_by_term = (array)wp_unslash($_POST['location_names'] ?? []);
         foreach ($names_by_term as $tid => $name) {
@@ -265,6 +286,11 @@ function lavka_render_warehouses_page() {
             if ($warehouse_id !== '' && $label !== '') $public_labels[$warehouse_id] = $label;
         }
         update_option(LAVKA_PUBLIC_WAREHOUSE_LABELS_OPTION, $public_labels, false);
+
+        if (isset($_POST['transit_warehouses_present'])) {
+            update_option(LAVKA_TRANSIT_WAREHOUSES_OPTION,
+                lavka_normalize_transit_warehouses((array)wp_unslash($_POST['transit_warehouse_ids'] ?? [])), false);
+        }
 
         $non_accounting_warehouse_id = absint($_POST['non_accounting_warehouse_id'] ?? 0);
         if ($non_accounting_warehouse_id > 0) {
@@ -437,8 +463,27 @@ function lavka_render_warehouses_page() {
         foreach ($public_labels as $id => $label) {
             if (!isset($warehouse_options[$id])) $warehouse_options[$id] = $label;
         }
+        $transit_ids = lavka_get_transit_warehouse_ids();
+        foreach ($transit_ids as $id) {
+            if (!isset($warehouse_options[$id])) $warehouse_options[$id] = (string)$id;
+        }
         uksort($warehouse_options, 'strnatcasecmp');
         ?>
+
+        <h2><?php echo esc_html__('Transport warehouses', 'lavka-sync'); ?></h2>
+        <input type="hidden" name="transit_warehouses_present" value="1">
+        <fieldset>
+          <legend class="screen-reader-text"><?php echo esc_html__('Transport warehouses', 'lavka-sync'); ?></legend>
+          <?php foreach ($warehouse_options as $warehouse_id => $directory_name):
+              if (!preg_match('/^[1-9][0-9]*$/D', (string)$warehouse_id)) continue;
+          ?>
+            <label style="display:block;margin:6px 0"><input type="checkbox" name="transit_warehouse_ids[]" value="<?php echo esc_attr($warehouse_id); ?>" <?php checked(in_array((int)$warehouse_id, $transit_ids, true)); ?>>
+              <?php echo esc_html($warehouse_id . ' — ' . ($public_labels[$warehouse_id] ?? $directory_name)); ?>
+            </label>
+          <?php endforeach; ?>
+        </fieldset>
+        <p><?php echo esc_html__('Confirmed stock in transit reduces the purchase quantity, not the sales forecast. No selection disables this deduction. Transport warehouses must not be part of purchase destination groups.', 'lavka-sync'); ?></p>
+        <p><?php echo esc_html__('Up to 16 transport warehouses. Each source needs a current analytics snapshot. Configurable transit requires the updated Java API; older deployments cannot calculate a different source set.', 'lavka-sync'); ?></p>
 
         <h2><?php echo esc_html__('Public Folio warehouse names', 'lavka-sync'); ?></h2>
         <p><?php echo esc_html__('These names are shown in orders, reports and customer notices. Folio warehouse IDs remain unchanged.', 'lavka-sync'); ?></p>

@@ -19,7 +19,10 @@ class WP_Error {
 }
 function is_wp_error($v) { return $v instanceof WP_Error; }
 function lps_get_options() { return ['java_base_url' => 'fixture']; }
-function lps_java_post($path, $query, $options) { $GLOBALS['queries'][] = $query; return array_shift($GLOBALS['responses']); }
+function lps_java_post($path, $query, $options) {
+    if ($path === LPS_PRODUCT_ANALYTICS_CAPABILITIES_PATH) return ['ok' => true];
+    $GLOBALS['queries'][] = $query; return array_shift($GLOBALS['responses']);
+}
 function wp_remote_retrieve_response_code($r) { return $r['http'] ?? 200; }
 function wp_remote_retrieve_body($r) { return json_encode($r); }
 require __DIR__ . '/../inc/product-availability.php';

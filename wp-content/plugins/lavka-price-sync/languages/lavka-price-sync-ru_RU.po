@@ -5143,3 +5143,51 @@ msgstr "Не обработано — недостаточно времени"
 #, php-format
 msgid "Not enough time for another batch. The queue is paused after the final snapshot. Eligible SKU remaining in this warehouse: %d. Subsequent warehouses were not started."
 msgstr "Недостаточно времени для следующего пакета. Очередь приостановлена после финального снимка. На этом складе осталось SKU для перерасчёта: %d. Следующие склады не запускались."
+
+msgid "Select at most 16 transport warehouses."
+msgstr "Выберите не более 16 транспортных складов."
+
+msgid "The transit response does not match the selected sources."
+msgstr "Ответ по транзиту не соответствует выбранным источникам."
+
+msgid "Configurable transit requires a Java update."
+msgstr "Настройка источников транзита требует обновления Java."
+
+msgid "I checked receipt dates and destinations, and excluded transit quantities from other incoming orders."
+msgstr "Я проверил даты и назначение поступлений и исключил транзитные количества из других ожидаемых заказов."
+
+msgid "Confirm that transit and other incoming orders do not contain the same quantities, and check arrival dates and destinations."
+msgstr "Подтвердите отсутствие дублирования количеств в транзите и других ожидаемых заказах; проверьте даты прибытия и назначение."
+
+msgid "Transit stock is already included in the analysis warehouses."
+msgstr "Транзитный остаток уже включён в склады анализа."
+
+msgid "Transit data is incomplete."
+msgstr "Данные транзита неполные."
+
+msgid "Transit snapshot dates are incomplete."
+msgstr "Даты транзитного снимка неполные."
+
+msgid "Transit stock and reservations do not reconcile."
+msgstr "Транзитный остаток и резервы не согласуются."
+
+msgid "Transport warehouses"
+msgstr "Транспортные склады"
+
+msgid "Transit data status"
+msgstr "Состояние данных транзита"
+
+msgid "Java returned a different transport warehouse set. Update the backend for the transport warehouses selected in Lavka settings."
+msgstr "Java вернула другой набор транспортных складов. Нужна поддержка бэкенда для складов, выбранных в настройках Лавка."
+
+msgid "Transit stock or its supplier origin is not confirmed. Manual input cannot replace missing source data."
+msgstr "Транзитный остаток или его происхождение от поставщика не подтверждены. Ручной ввод не заменяет отсутствующие данные источника."
+
+msgid "A transport warehouse is also a purchase destination group member. Remove the overlap to avoid counting stock twice."
+msgstr "Транспортный склад также входит в группу назначения закупки. Устраните пересечение, чтобы не учесть остаток дважды."
+
+msgid "Transport warehouse settings changed. Start a new preview."
+msgstr "Настройки транспортных складов изменились. Сформируйте новый предварительный расчёт."
+
+msgid "Transit source snapshot (JSON)"
+msgstr "Снимок источника транзита (JSON)"

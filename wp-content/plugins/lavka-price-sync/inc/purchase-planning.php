@@ -39,6 +39,13 @@ function lps_purchase_i18n(): array {
         'pack' => __('Supplier pack quantity', 'lavka-price-sync'),
         'moq' => __('Supplier minimum order quantity', 'lavka-price-sync'),
         'transitPool' => __('Confirmed transit shared by all groups', 'lavka-price-sync'),
+        'transitWarehouses' => __('Transport warehouses', 'lavka-price-sync'),
+        'transitStatus' => __('Transit data status', 'lavka-price-sync'),
+        'receiptsReviewed' => __('I checked receipt dates and destinations, and excluded transit quantities from other incoming orders.', 'lavka-price-sync'),
+        'transitLabels' => (function_exists('lps_product_analytics_i18n') ? lps_product_analytics_i18n()['transitLabels'] : []) + [
+            'TRANSIT_DISABLED' => __('Disabled', 'lavka-price-sync'),
+            'TRANSIT_SOURCE_MISMATCH' => __('Review required', 'lavka-price-sync'),
+        ],
         'apply' => __('Recalculate this SKU preview', 'lavka-price-sync'),
         'previous' => __('Previous', 'lavka-price-sync'), 'next' => __('Next', 'lavka-price-sync'),
         'issues' => [
@@ -48,6 +55,10 @@ function lps_purchase_i18n(): array {
             'PROFIT_REVIEW_REQUIRED' => __('Profit is negative or unknown. A purchase recommendation requires review.', 'lavka-price-sync'),
             'SUPPLY_INPUTS_REQUIRED' => __('Confirm transit, other incoming orders, supplier pack and minimum order quantity. Enter zero only when confirmed.', 'lavka-price-sync'),
             'TRANSIT_OVERALLOCATED' => __('The same transit stock was allocated more than once: group allocations exceed the confirmed total.', 'lavka-price-sync'),
+            'TRANSIT_SOURCE_MISMATCH' => __('Java returned a different transport warehouse set. Update the backend for the transport warehouses selected in Lavka settings.', 'lavka-price-sync'),
+            'TRANSIT_NOT_CONFIRMED' => __('Transit stock or its supplier origin is not confirmed. Manual input cannot replace missing source data.', 'lavka-price-sync'),
+            'TRANSIT_DESTINATION_OVERLAP' => __('A transport warehouse is also a purchase destination group member. Remove the overlap to avoid counting stock twice.', 'lavka-price-sync'),
+            'RECEIPTS_REVIEW_REQUIRED' => __('Confirm that transit and other incoming orders do not contain the same quantities, and check arrival dates and destinations.', 'lavka-price-sync'),
             'DESTINATION_MAXIMUM_EXCEEDED' => __('The resulting receipt exceeds the receiving warehouse stock limit.', 'lavka-price-sync'),
             'PACK_OR_MOQ_VIOLATION' => __('The quantity does not respect the supplier pack or minimum order.', 'lavka-price-sync'),
             'MANAGER_REASON_REQUIRED' => __('Enter a reason for the manager adjustment.', 'lavka-price-sync'),
@@ -78,6 +89,9 @@ function lps_purchase_session_key(string $token): string {
 function lps_purchase_session(string $token): array {
     $state = get_transient(lps_purchase_session_key($token));
     if (!is_array($state)) throw new InvalidArgumentException(__('The preview has expired. Start a new calculation.', 'lavka-price-sync'));
+    if (($state['transitContractVersion'] ?? 0) !== 2 || ($state['transitWarehouseIds'] ?? null) !== lps_purchase_transit_warehouses()) {
+        throw new InvalidArgumentException(__('Transport warehouse settings changed. Start a new preview.', 'lavka-price-sync'));
+    }
     $row = lps_analytics_scenario_row((int)$state['scenario']['id']);
     if (!$row || (int)$row['version'] !== (int)$state['scenario']['version'] || $row['status'] !== 'active'
         || $state['groupsRevision'] !== lavka_get_global_warehouse_groups_revision()) {
@@ -96,6 +110,15 @@ function lps_purchase_start(int $id, int $version): array {
     $profile = $scenario['profile'];
     if (empty($profile['calculation']['includeReturns'])) throw new InvalidArgumentException(__('Enable returns in the analytics scenario before building a purchase preview.', 'lavka-price-sync'));
     $groups = lps_purchase_resolve_groups($profile, function_exists('lavka_get_global_warehouse_groups') ? lavka_get_global_warehouse_groups() : []);
+    $transit_ids = lps_purchase_transit_warehouses();
+    if (array_intersect($profile['context']['warehouseIds'], $transit_ids)) {
+        throw new InvalidArgumentException(lps_purchase_i18n()['issues']['TRANSIT_DESTINATION_OVERLAP']);
+    }
+    foreach ($groups as $group) {
+        if (array_intersect($group['warehouseIds'], $transit_ids)) {
+            throw new InvalidArgumentException(lps_purchase_i18n()['issues']['TRANSIT_DESTINATION_OVERLAP']);
+        }
+    }
     $days = lps_purchase_period_days($profile['period']);
     $query = lps_product_analytics_v4_sanitize_query([
         'sourceDatabase' => $profile['context']['sourceDatabase'], 'warehouseIds' => $profile['context']['warehouseIds'],
@@ -105,11 +128,13 @@ function lps_purchase_start(int $id, int $version): array {
     $token = bin2hex(random_bytes(16));
     $state = ['scenario' => ['id' => $scenario['id'], 'uuid' => $scenario['uuid'], 'name' => $scenario['name'], 'version' => $scenario['version']],
         'query' => $query, 'groups' => $groups, 'groupsRevision' => lavka_get_global_warehouse_groups_revision(),
+        'transitWarehouseIds' => $transit_ids, 'transitGenerationId' => null, 'transitContractVersion' => 2,
         'periodDays' => $days, 'allowTransfers' => $profile['purchasePlanning']['allowTransfers'],
         'rows' => [], 'edits' => [], 'page' => 0, 'cursor' => null, 'seenCursors' => [], 'complete' => false,
         'context' => null, 'createdAt' => wp_date('Y-m-d H:i:s')];
     set_transient(lps_purchase_session_key($token), $state, 2 * HOUR_IN_SECONDS);
-    return ['token' => $token, 'scenario' => $state['scenario'], 'groups' => $groups, 'query' => $query, 'groupsRevision' => $state['groupsRevision']];
+    return ['token' => $token, 'scenario' => $state['scenario'], 'groups' => $groups, 'query' => $query, 'groupsRevision' => $state['groupsRevision'],
+        'transitWarehouseIds' => $transit_ids];
 }
 
 function lps_purchase_page(string $token, int $page): array {
@@ -142,7 +167,16 @@ function lps_purchase_page(string $token, int $page): array {
         $sku = (string)($row['sku'] ?? '');
         if ($sku === '' || isset($state['rows'][$sku])) throw new RuntimeException(__('The analytics response contains missing or repeated SKU.', 'lavka-price-sync'));
         $state['rows'][$sku] = $row;
-        $results[] = lps_purchase_calculate($row, $state['groups'], $state['periodDays'], $state['allowTransfers']);
+        $result = lps_purchase_calculate($row, $state['groups'], $state['periodDays'], $state['allowTransfers'], [], $state['transitWarehouseIds']);
+        if ($state['transitWarehouseIds'] && $result['transitPool'] !== null) {
+            $generation = array_column($result['transitSources'], 'generationId', 'warehouseId');
+            ksort($generation, SORT_NUMERIC);
+            if ($state['transitGenerationId'] !== null && $state['transitGenerationId'] !== $generation) {
+                throw new RuntimeException(__('Snapshot generations changed while loading. Start a new preview.', 'lavka-price-sync'));
+            }
+            $state['transitGenerationId'] = $generation;
+        }
+        $results[] = $result;
     }
     $next = (string)($body['nextCursor'] ?? '');
     if ($next !== '' && (isset($state['seenCursors'][$next]) || !$body['rows'])) throw new RuntimeException(__('The analytics service returned a repeated page cursor.', 'lavka-price-sync'));
@@ -170,9 +204,10 @@ function lps_purchase_adjust(string $token, string $sku, array $input): array {
             $edits[$group['code']][$field] = $number;
         }
         $edits[$group['code']]['reason'] = sanitize_text_field((string)($source['reason'] ?? ''));
+        $edits[$group['code']]['receiptsReviewed'] = ($source['receiptsReviewed'] ?? false) === true;
     }
     $state['edits'][$sku] = $edits;
-    $result = lps_purchase_calculate($state['rows'][$sku], $state['groups'], $state['periodDays'], $state['allowTransfers'], $edits);
+    $result = lps_purchase_calculate($state['rows'][$sku], $state['groups'], $state['periodDays'], $state['allowTransfers'], $edits, $state['transitWarehouseIds']);
     set_transient(lps_purchase_session_key($token), $state, 2 * HOUR_IN_SECONDS);
     return ['item' => $result];
 }
@@ -254,6 +289,11 @@ add_action('admin_post_lps_purchase_export', static function (): void {
         $keys = ['sku', 'product', 'group', 'receivingWarehouse', 'available', 'sales', 'returns', 'coverage', 'target', 'need', 'transfer', 'inTransit', 'openOrders', 'pack', 'moq', 'purchase', 'quantity', 'final', 'reason'];
         $columns = array_map(static fn($key) => ['key' => $key, 'label' => $t[$key]], $keys);
         $columns[] = ['key' => 'status', 'label' => __('Status', 'lavka-price-sync')];
+        $columns[] = ['key' => 'transitWarehouses', 'label' => $t['transitWarehouses']];
+        $columns[] = ['key' => 'transitStatus', 'label' => $t['transitStatus']];
+        $columns[] = ['key' => 'transitPool', 'label' => $t['transitPool']];
+        $columns[] = ['key' => 'receiptsReviewed', 'label' => $t['receiptsReviewed']];
+        $columns[] = ['key' => 'transitSource', 'label' => __('Transit source snapshot (JSON)', 'lavka-price-sync')];
         foreach (['supplier' => __('Current supplier', 'lavka-price-sync'), 'scenario' => __('Analytics scenario', 'lavka-price-sync'),
             'period' => __('Report period', 'lavka-price-sync'), 'leadTimeDays' => $t['leadTimeDays'], 'targetDays' => $t['targetDays'],
             'safetyDays' => $t['safetyDays'], 'groupsRevision' => __('Warehouse group revision', 'lavka-price-sync')] as $key => $label) {
@@ -261,7 +301,7 @@ add_action('admin_post_lps_purchase_export', static function (): void {
         }
         $rows = [];
         foreach ($state['rows'] as $sku => $raw) {
-            $calculated = lps_purchase_calculate($raw, $state['groups'], $state['periodDays'], $state['allowTransfers'], $state['edits'][$sku] ?? []);
+            $calculated = lps_purchase_calculate($raw, $state['groups'], $state['periodDays'], $state['allowTransfers'], $state['edits'][$sku] ?? [], $state['transitWarehouseIds']);
             foreach ($calculated['groups'] as $group) {
                 $record = ['sku' => (string)$sku, 'product' => $calculated['productName'], 'group' => $group['groupName'],
                     'receivingWarehouse' => $group['receivingWarehouseId'], 'available' => $group['available'], 'sales' => $group['regularSales'],
@@ -274,7 +314,9 @@ add_action('admin_post_lps_purchase_export', static function (): void {
                 $record += ['supplier' => implode(', ', $calculated['supplier']), 'scenario' => $state['scenario']['name'] . ' v' . $state['scenario']['version'],
                     'period' => $state['query']['period']['from'] . ' - ' . $state['query']['period']['to'],
                     'leadTimeDays' => $settings['leadTimeDays'], 'targetDays' => $settings['targetDays'], 'safetyDays' => $settings['safetyDays'],
-                    'groupsRevision' => $state['groupsRevision']];
+                    'groupsRevision' => $state['groupsRevision'], 'transitWarehouses' => implode(', ', $state['transitWarehouseIds']),
+                    'transitStatus' => $calculated['transitStatus'], 'transitPool' => $calculated['transitPool'], 'receiptsReviewed' => $group['receiptsReviewed'] ? 'YES' : 'NO',
+                    'transitSource' => wp_json_encode($raw['inTransitStock'] ?? null, JSON_UNESCAPED_UNICODE)];
                 foreach ($record as &$value) if (is_string($value) && preg_match('/^[\s]*[=+@\-]/u', $value)) $value = "'" . $value;
                 unset($value);
                 $rows[] = $record;
@@ -284,6 +326,8 @@ add_action('admin_post_lps_purchase_export', static function (): void {
         $metadata['scenario'] = $state['scenario']['name'] . ' v' . $state['scenario']['version'];
         if (preg_match('/^[\s]*[=+@\-]/u', $metadata['scenario'])) $metadata['scenario'] = "'" . $metadata['scenario'];
         $metadata['warehouseGroupsRevision'] = $state['groupsRevision'];
+        $metadata['transitWarehouseIds'] = wp_json_encode($state['transitWarehouseIds']);
+        $metadata['transitGenerationId'] = $state['transitGenerationId'];
         $metadata['warehouseGroups'] = wp_json_encode($state['groups'], JSON_UNESCAPED_UNICODE);
         $metadata['generationId'] = wp_json_encode($state['context'], JSON_UNESCAPED_UNICODE);
         $filename = 'purchase-preview-' . gmdate('Ymd-His');

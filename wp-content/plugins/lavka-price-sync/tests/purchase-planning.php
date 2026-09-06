@@ -35,9 +35,9 @@ check(!isset($saved['purchasePlanning']['groups'][0]['warehouseIds']), 'Do not c
 $groups = lps_purchase_resolve_groups($saved, $configured);
 $row = ['sku' => 'TEST-1', 'productName' => 'Test', 'dimensions' => ['currentSuppliers' => ['Kreul'], 'packageQuantity' => 10, 'minimumOrderQuantity' => 10],
     'metrics' => ['grossProfit' => 100], 'networkOrderPolicy' => ['orderAllowed' => true, 'status' => 'ALLOWED'],
-    'inTransitStock' => ['status' => 'NO_IN_TRANSIT_STOCK'],
+    'inTransitStock' => ['warehouseId' => 9, 'generationId' => 99, 'status' => 'NO_IN_TRANSIT_STOCK'],
     'warehouseBreakdown' => [member(1, 10, 60), member(7, 20, 30), member(5, 200, 30)]];
-$inputs = ['kyiv' => ['openOrders' => 0], 'odesa' => ['openOrders' => 0]];
+$inputs = ['kyiv' => ['openOrders' => 0, 'receiptsReviewed' => true], 'odesa' => ['openOrders' => 0, 'receiptsReviewed' => true]];
 $a = lps_purchase_calculate($row, $groups, 30, false, $inputs);
 check($a['groups'][0]['regularSales'] === 90.0 && $a['groups'][0]['target'] === 90.0, 'Aggregate group demand exactly once');
 check($a['groups'][0]['coverageDays'] === 10.0, 'Group coverage is computed from total stock and demand');
@@ -53,7 +53,7 @@ $edits = $inputs;
 $edits['kyiv'] += ['pack' => 14, 'moq' => 100];
 $a = lps_purchase_calculate($row, $groups, 30, false, $edits);
 check($a['groups'][0]['recommendedQuantity'] === 112.0, 'Round to supplier pack after MOQ');
-$edits['kyiv'] = ['openOrders' => 0, 'quantity' => 20, 'reason' => 'Manager confirmed'];
+$edits['kyiv'] = ['openOrders' => 0, 'quantity' => 20, 'reason' => 'Manager confirmed', 'receiptsReviewed' => true];
 $a = lps_purchase_calculate($row, $groups, 30, false, $edits);
 check($a['groups'][0]['finalQuantity'] === 20.0, 'Allow valid manager adjustment with reason');
 $edits['kyiv']['quantity'] = 21;
@@ -72,10 +72,37 @@ array_shift($bad['warehouseBreakdown']);
 $a = lps_purchase_calculate($bad, $groups, 30, false, $inputs);
 check($a['groups'][0]['available'] === null && $a['groups'][0]['finalQuantity'] === null, 'Missing member is not zero');
 $bad = $row;
-$bad['inTransitStock'] = ['supplierOriginConfirmed' => true, 'availableForPlanningQuantity' => 20];
+$bad['inTransitStock'] = ['warehouseId' => 9, 'generationId' => 99, 'status' => 'CONFIRMED_SUPPLIER_ORIGIN', 'supplierOriginConfirmed' => true, 'availableForPlanningQuantity' => 20];
 $edits = ['kyiv' => ['openOrders' => 0, 'inTransit' => 15], 'odesa' => ['openOrders' => 0, 'inTransit' => 10]];
 $a = lps_purchase_calculate($bad, $groups, 30, true, $edits);
 check($a['groups'][0]['finalQuantity'] === null && $a['groups'][1]['transferOut'] === 0, 'Do not allocate transit twice');
+$single = [$groups[0]];
+$a = lps_purchase_calculate($bad, $single, 30, false, $inputs);
+check($a['groups'][0]['inputs']['inTransit'] === 20.0 && $a['groups'][0]['recommendedQuantity'] === 40.0, 'Single destination automatically deducts confirmed transit');
+check($a['groups'][0]['target'] === 90.0 && $a['groups'][0]['regularSales'] === 90.0, 'Transit must not change demand forecast');
+$a = lps_purchase_calculate($bad, $groups, 30, false, ['kyiv' => ['openOrders' => 0, 'inTransit' => 20, 'receiptsReviewed' => true], 'odesa' => ['openOrders' => 0, 'inTransit' => 0, 'receiptsReviewed' => true]]);
+check($a['groups'][0]['recommendedQuantity'] === 40.0 && $a['groups'][1]['inputs']['inTransit'] === 0.0, 'Shared pool deducted only from allocated group');
+$a = lps_purchase_calculate($bad, $groups, 30, false, $inputs);
+check($a['groups'][0]['finalQuantity'] === null, 'Several destinations require explicit allocation');
+foreach ([[9, 10], [10]] as $ids) {
+    $a = lps_purchase_calculate($bad, $single, 30, false, $edits, $ids);
+    check($a['transitPool'] === null && in_array('TRANSIT_SOURCE_MISMATCH', $a['groups'][0]['issues'], true), 'Never use legacy source for another configured set');
+}
+$a = lps_purchase_calculate($bad, $single, 30, false, $inputs, []);
+check($a['groups'][0]['recommendedQuantity'] === 60.0 && $a['transitPool'] === 0.0, 'Explicit empty configuration disables deduction');
+$bad['inTransitStock']['warehouseId'] = 7;
+$a = lps_purchase_calculate($bad, $single, 30, false, $inputs, [7]);
+check(in_array('TRANSIT_DESTINATION_OVERLAP', $a['groups'][0]['issues'], true), 'Prevent double counting on-hand and in-transit stock');
+$bad['inTransitStock']['warehouseId'] = 9;
+foreach (['MIXED_ORIGIN', 'NEGATIVE_TRANSIT_STOCK', 'OPENING_BALANCE_UNATTRIBUTED', 'UNKNOWN'] as $status) {
+    $bad['inTransitStock']['status'] = $status;
+    $a = lps_purchase_calculate($bad, $single, 30, false, $edits);
+    check($a['transitPool'] === null && $a['groups'][0]['finalQuantity'] === null, 'Manual allocation must not bypass unconfirmed source: ' . $status);
+}
+$bad['inTransitStock']['status'] = 'CONFIRMED_SUPPLIER_ORIGIN';
+$bad['inTransitStock']['generationId'] = null;
+$a = lps_purchase_calculate($bad, $single, 30, false, $edits);
+check($a['groups'][0]['finalQuantity'] === null, 'Require a source snapshot generation');
 $bad = $row;
 $bad['warehouseBreakdown'][1]['orderPolicy']['maximumStockLimited'] = true;
 $bad['warehouseBreakdown'][1]['orderPolicy']['maximumStockLimit'] = 25;
