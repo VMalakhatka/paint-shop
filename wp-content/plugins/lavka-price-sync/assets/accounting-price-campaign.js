@@ -279,6 +279,20 @@
         disclosure.append(node('pre', '', JSON.stringify(details, null, 2)));
         errorCell.append(disclosure);
       }
+      if (item?.verification_state === 'FAILED' && report.sourceDatabase && report.warehouseId) {
+        const diagnosticButton = node('button', 'button button-small', t.viewPersistentDiagnostics || 'View permanent diagnostics');
+        diagnosticButton.type = 'button';
+        diagnosticButton.addEventListener('click', () => {
+          persistentDiagnostics.filters = { sku: item?.sku || '' };
+          persistentDiagnostics.cursors = [0];
+          persistentDiagnostics.page = 0;
+          loadPersistentDiagnostics({
+            warehouseId: report.warehouseId,
+            sourceDatabase: report.sourceDatabase
+          }, 0);
+        });
+        errorCell.append(diagnosticButton);
+      }
       row.append(
         node('td', 'lps-ap-snapshot-sku', display(item?.sku)),
         node('td', '', display(item?.product_name)),
