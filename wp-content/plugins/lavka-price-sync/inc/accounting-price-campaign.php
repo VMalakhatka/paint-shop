@@ -178,10 +178,14 @@ function lps_accounting_price_campaign_history_from_state(array $state, int $war
 
     $final_report = [];
     $processed_skus = 0;
+    $committed_skus = 0;
+    $skipped_skus = 0;
     foreach ($reports as $report) {
         $status = strtoupper(sanitize_key((string)($report['status'] ?? '')));
         if (in_array($status, ['COMPLETED', 'COMPLETED_WITH_WARNINGS'], true)) {
-            $processed_skus += absint($report['sku_count'] ?? 0);
+            $processed_skus += absint($report['processed_sku'] ?? ($report['sku_count'] ?? 0));
+            $committed_skus += absint($report['committed_chunks'] ?? 0);
+            $skipped_skus += absint($report['skipped_sku'] ?? 0);
         }
         if (in_array($status, ['WAREHOUSE_FAILED', 'WAREHOUSE_SKIPPED_UNSUPPORTED_MODE', 'SNAPSHOT_CONFIRMED', 'PARTIAL_TIME_LIMIT', 'NOT_PROCESSED_TIME_LIMIT'], true)) {
             $final_report = $report;
@@ -217,6 +221,8 @@ function lps_accounting_price_campaign_history_from_state(array $state, int $war
         'started_at' => sanitize_text_field((string)($state['warehouse_started_at'] ?? ($state['started_at'] ?? ''))),
         'completed_at' => $completed_at,
         'processed_skus' => $processed_skus,
+        'committed_skus' => $committed_skus,
+        'skipped_skus' => $skipped_skus,
         'remaining_skus' => absint($final_report['remaining_skus'] ?? 0),
         'stop_reason' => sanitize_key((string)($final_report['stop_reason'] ?? '')),
         'counts_before' => $is_current && is_array($state['counts_before'] ?? null)
@@ -878,6 +884,8 @@ function lps_accounting_price_campaign_public_state(?array $state = null): array
         'currentBatchSize' => count((array)($state['current_skus'] ?? [])),
         'currentSkus' => array_values(array_map('strval', (array)($state['current_skus'] ?? []))),
         'processedSkus' => absint($state['processed_skus'] ?? 0),
+        'committedSkus' => absint($state['committed_skus'] ?? 0),
+        'skippedSkus' => absint($state['skipped_skus'] ?? 0),
         'successfulBatches' => absint($state['successful_batches'] ?? 0),
         'warningCount' => absint($state['warning_count'] ?? 0),
         'errorCount' => absint($state['error_count'] ?? 0),
@@ -959,6 +967,8 @@ function lps_accounting_price_campaign_create(array $warehouse_ids, string $sour
         'horizon_months' => max(12, min(36, absint($options['campaign_horizon_months'] ?? 24))),
         'deadline_at' => time() + $window_minutes * MINUTE_IN_SECONDS,
         'processed_skus' => 0,
+        'committed_skus' => 0,
+        'skipped_skus' => 0,
         'successful_batches' => 0,
         'warning_count' => 0,
         'error_count' => 0,
@@ -1400,9 +1410,46 @@ function lps_accounting_price_campaign_poll_range(array &$state): void {
             'jobId' => $job_id,
         ]]);
     }
+    $last_known_sku = trim((string)($body['currentArt'] ?? ''));
+    if ($last_known_sku === '') $last_known_sku = trim((string)($body['checkpointArt'] ?? ''));
+    $has_structured_sku = !empty($failed_chunk);
+    foreach (array_merge($warnings, $errors) as $issue) {
+        if (!is_array($issue)) continue;
+        $details = is_array($issue['details'] ?? null) ? $issue['details'] : [];
+        $issue_sku = trim((string)($details['sku'] ?? ($details['art'] ?? ($details['inputArt'] ?? ($issue['sku'] ?? '')))));
+        if ($issue_sku !== '') {
+            $has_structured_sku = true;
+            break;
+        }
+    }
+    $legacy_context_added = $status === 'FAILED' && !$has_structured_sku && $last_known_sku !== '';
+    if ($legacy_context_added) {
+        lps_accounting_price_campaign_append_warnings($state, [[
+            'severity' => 'error',
+            'code' => 'LAST_KNOWN_FAILURE_CONTEXT',
+            'sku' => $last_known_sku,
+            'message' => __('Java did not return structured failure details. This SKU is the last known processing context, not a confirmed cause.', 'lavka-price-sync'),
+            'details' => [
+                'sku' => $last_known_sku,
+                'contextOnly' => true,
+                'currentArt' => sanitize_text_field((string)($body['currentArt'] ?? '')),
+                'checkpointArt' => sanitize_text_field((string)($body['checkpointArt'] ?? '')),
+                'jobId' => $job_id,
+            ],
+            'recordedAt' => $recorded_at,
+            'warehouseId' => $recorded_warehouse_id,
+            'jobId' => $job_id,
+        ]]);
+    }
     $state['warnings_truncated'] = !empty($state['warnings_truncated']) || !empty($body['warningsTruncated']);
     $state['warning_count'] = absint($state['warning_count'] ?? 0) + absint($body['warningCount'] ?? count($warnings));
-    $state['error_count'] = absint($state['error_count'] ?? 0) + count($errors) + ($failed_chunk ? 1 : 0);
+    $state['error_count'] = absint($state['error_count'] ?? 0) + count($errors)
+        + ($failed_chunk || ($legacy_context_added && !$errors) ? 1 : 0);
+    $processed_count = array_key_exists('processedSku', $body)
+        ? min(count($skus), absint($body['processedSku']))
+        : count($skus);
+    $committed_count = min($processed_count, absint($body['committedChunks'] ?? 0));
+    $skipped_count = max(0, $processed_count - $committed_count);
     lps_accounting_price_campaign_append_report($state, [
         'warehouse_id' => absint($state['current_warehouse_id'] ?? 0),
         'job_id' => $job_id,
@@ -1412,11 +1459,12 @@ function lps_accounting_price_campaign_poll_range(array &$state): void {
         'last_sku' => $skus ? end($skus) : '',
         'duration_seconds' => $elapsed,
         'warning_count' => absint($body['warningCount'] ?? count($warnings)),
-        'processed_sku' => absint($body['processedSku'] ?? ($body['progressUnits'] ?? 0)),
+        'processed_sku' => $processed_count,
         'total_units' => absint($body['totalUnits'] ?? count($skus)),
         'procedure_calls' => absint($body['procedureCalls'] ?? 0),
         'preflight_chunks' => absint($body['preflightChunks'] ?? 0),
-        'committed_chunks' => absint($body['committedChunks'] ?? 0),
+        'committed_chunks' => $committed_count,
+        'skipped_sku' => $skipped_count,
         'apply_mode' => sanitize_text_field((string)($body['request']['applyMode'] ?? '')),
         'warnings_truncated' => !empty($body['warningsTruncated']),
         'failed_chunk' => $failed_chunk ?: null,
@@ -1425,7 +1473,9 @@ function lps_accounting_price_campaign_poll_range(array &$state): void {
 
     if (in_array($status, ['COMPLETED', 'COMPLETED_WITH_WARNINGS'], true)) {
         $count = count($skus);
-        $state['processed_skus'] = absint($state['processed_skus'] ?? 0) + $count;
+        $state['processed_skus'] = absint($state['processed_skus'] ?? 0) + $processed_count;
+        $state['committed_skus'] = absint($state['committed_skus'] ?? 0) + $committed_count;
+        $state['skipped_skus'] = absint($state['skipped_skus'] ?? 0) + $skipped_count;
         $state['successful_batches'] = absint($state['successful_batches'] ?? 0) + 1;
         if ($count > 0) {
             $sample = $elapsed / $count;
@@ -1482,6 +1532,7 @@ function lps_accounting_price_campaign_finish_warehouse(array &$state): void {
     $time_message = '';
     if ($time_exhausted) {
         $time_message = sprintf(
+            /* translators: %d: number of eligible SKU left in the current warehouse. */
             __('Not enough time for another batch. The queue is paused after the final snapshot. Eligible SKU remaining in this warehouse: %d. Subsequent warehouses were not started.', 'lavka-price-sync'),
             $remaining
         );

@@ -129,9 +129,20 @@ OVH-плана и явного подтверждения.
 - `PREVIEW_READY` и `PREVIEW_READY_WITH_WARNINGS` допускают apply после review.
 - `COMPLETED` и `COMPLETED_WITH_WARNINGS` продолжают очередь; skipped остаются в
   отчёте.
+- Для каждой порции отдельно сверять обработанные, подтверждённо записанные и
+  пропущенные SKU. Пропущенный SKU с `committed=false` не изменён в ФОЛІО и не
+  получает `VERIFIED`.
+- `ACCOUNTING_PRICE_DIVIDE_BY_ZERO` допускает продолжение только при
+  `skipped=true`, `committed=false`, `rollbackConfirmed=true`. В интерфейсе
+  проверить базу, склад, SKU, job ID, этап, SQL error code/state/message,
+  подтверждение rollback и рекомендацию. При `formulaConfirmed=false` или
+  `documentConfirmed=false` формула и документы ниже являются только кандидатами,
+  а не доказанной причиной.
 - `FAILED` завершает склад и требует проверки.
 - `FAILED_PARTIAL`, `OUTCOME_UNKNOWN` или прерванный snapshot останавливают всю
   кампанию и расписание до ручного расследования.
+- Старые ответы `FAILED` без `failedChunk` показывают `currentArt/checkpointArt`
+  только как последний известный контекст. Автоматический повтор запрещён.
 - Единственное безопасное исключение для начального snapshot — точный Java-код
   `PRODUCT_SNAPSHOT_ACCOUNTING_MODE_UNSUPPORTED`. Такой склад получает статус
   `WAREHOUSE_SKIPPED_UNSUPPORTED_MODE`, его `accountingRawCode`, `accountingMode`
@@ -168,6 +179,11 @@ OVH-плана и явного подтверждения.
   успешным результатом с пропусками. Причину смотреть через отдельное действие
   «Попередження» по складу; `FAILED` и системные ошибки остаются в отдельном
   отчёте ошибок.
+- Постоянная арифметическая история доступна после деплоя Java с Flyway V14 через
+  действие склада «Постійна діагностика». Она фильтруется по обязательным базе и
+  складу, а также точному SKU, job ID, preview/apply и датам; CSV сохраняет полный
+  JSON. До V14 интерфейс показывает предупреждение и продолжает использовать
+  текущие campaign/snapshot отчёты.
 
 ## Статистика товара и закупочные решения
 

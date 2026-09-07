@@ -27,6 +27,7 @@ require_once __DIR__.'/inc/helpers.php';
 require_once __DIR__.'/inc/logs.php';
 require_once __DIR__ . '/inc/cron.php';
 require_once __DIR__ . '/inc/accounting-prices-cron.php';
+require_once __DIR__ . '/inc/accounting-price-diagnostics.php';
 require_once __DIR__ . '/inc/accounting-price-campaign.php';
 require_once __DIR__ . '/inc/purchase-planning-model.php';
 require_once __DIR__ . '/inc/product-availability.php';

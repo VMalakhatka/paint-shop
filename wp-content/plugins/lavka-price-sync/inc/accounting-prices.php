@@ -180,6 +180,7 @@ add_action('admin_enqueue_scripts', function () {
                 'NEGATIVE_CHRONOLOGICAL_STOCK' => __('Negative chronological stock', 'lavka-price-sync'),
                 'ZERO_ACCOUNTING_QUANTITY_DENOMINATOR' => __('Zero accounting quantity denominator', 'lavka-price-sync'),
                 'ZERO_ACCOUNTING_PRICE_WITH_SALE_PRICE' => __('Zero accounting price with a sale price', 'lavka-price-sync'),
+                'ACCOUNTING_PRICE_DIVIDE_BY_ZERO' => __('Accounting-price calculation divided by zero', 'lavka-price-sync'),
                 'AMBIGUOUS_MOVEMENT_ORDER' => __('Ambiguous movement order', 'lavka-price-sync'),
                 'RETURN_MOVEMENT_REQUIRES_REVIEW' => __('Return movement requires review', 'lavka-price-sync'),
                 'ZERO_QUANTITY_ACCOUNTED_MOVEMENT' => __('Accounted movement has zero quantity', 'lavka-price-sync'),
@@ -199,6 +200,10 @@ add_action('admin_enqueue_scripts', function () {
         'snapshotReportExportUrl' => wp_nonce_url(
             admin_url('admin-post.php?action=lps_accounting_price_snapshot_report_export'),
             'lps_accounting_price_snapshot_report_export'
+        ),
+        'diagnosticExportUrl' => wp_nonce_url(
+            admin_url('admin-post.php?action=lps_accounting_price_diagnostic_export'),
+            'lps_accounting_price_diagnostic_export'
         ),
         'pollInterval' => 5000,
         'i18n' => [
@@ -220,9 +225,12 @@ add_action('admin_enqueue_scripts', function () {
             'phase' => __('Phase', 'lavka-price-sync'),
             'warehouse' => __('Warehouse', 'lavka-price-sync'),
             'processed' => __('Processed SKU', 'lavka-price-sync'),
+            'committedTotal' => __('Committed SKU', 'lavka-price-sync'),
+            'skippedTotal' => __('Skipped SKU', 'lavka-price-sync'),
             'batchProgress' => __('Current batch progress', 'lavka-price-sync'),
             'currentSku' => __('Current SKU', 'lavka-price-sync'),
             'committedSku' => __('Successfully committed SKU', 'lavka-price-sync'),
+            'skippedSku' => __('Skipped SKU in current batch', 'lavka-price-sync'),
             'batchWarnings' => __('Warnings in current batch', 'lavka-price-sync'),
             'batches' => __('Successful batches', 'lavka-price-sync'),
             'warnings' => __('Warnings', 'lavka-price-sync'),
@@ -310,6 +318,38 @@ add_action('admin_enqueue_scripts', function () {
             'legacyDiagnosticsNotice' => __('Detailed diagnostics from campaigns completed before this overview was added may be unavailable. Snapshot states and saved last errors are still shown.', 'lavka-price-sync'),
             'warehouseDirectoryUnavailable' => __('The Java warehouse directory is temporarily unavailable. Warehouses known from saved schedules and snapshots are still shown.', 'lavka-price-sync'),
             'warehouseDiagnostics' => __('Latest warehouse diagnostics', 'lavka-price-sync'),
+            'persistentDiagnostics' => __('Permanent arithmetic diagnostic log', 'lavka-price-sync'),
+            'viewPersistentDiagnostics' => __('View permanent diagnostics', 'lavka-price-sync'),
+            'persistentDiagnosticsUnavailable' => __('The permanent diagnostic log is unavailable until Java and MariaDB migration V14 are deployed.', 'lavka-price-sync'),
+            'diagnosticFilters' => __('Diagnostic filters', 'lavka-price-sync'),
+            'database' => __('Database', 'lavka-price-sync'),
+            'jobId' => __('Java job ID', 'lavka-price-sync'),
+            'mode' => __('Mode', 'lavka-price-sync'),
+            'allModes' => __('Preview and apply', 'lavka-price-sync'),
+            'previewMode' => __('Preview', 'lavka-price-sync'),
+            'applyMode' => __('Apply', 'lavka-price-sync'),
+            'dateFrom' => __('Date from', 'lavka-price-sync'),
+            'dateTo' => __('Date to', 'lavka-price-sync'),
+            'applyFilters' => __('Apply filters', 'lavka-price-sync'),
+            'exportDiagnostics' => __('Export diagnostic CSV', 'lavka-price-sync'),
+            'newerDiagnostics' => __('Newer records', 'lavka-price-sync'),
+            'olderDiagnostics' => __('Older records', 'lavka-price-sync'),
+            'noPersistentDiagnostics' => __('No permanent diagnostics match these filters.', 'lavka-price-sync'),
+            'recordId' => __('Record ID', 'lavka-price-sync'),
+            'stage' => __('Stage', 'lavka-price-sync'),
+            'sqlErrorCode' => __('SQL error code', 'lavka-price-sync'),
+            'sqlState' => __('SQL state', 'lavka-price-sync'),
+            'rollbackConfirmed' => __('Rollback confirmed', 'lavka-price-sync'),
+            'committed' => __('Committed', 'lavka-price-sync'),
+            'yes' => __('Yes', 'lavka-price-sync'),
+            'no' => __('No', 'lavka-price-sync'),
+            'recommendation' => __('Recommendation', 'lavka-price-sync'),
+            'notCommittedExplanation' => __('This SKU was not written to Folio and was not marked VERIFIED. The campaign continues with the remaining safe products.', 'lavka-price-sync'),
+            'formulaNotConfirmed' => __('The exact formula that caused the division has not been confirmed.', 'lavka-price-sync'),
+            'documentNotConfirmed' => __('The cause document has not been confirmed. Documents listed below are diagnostic candidates for review, not proven causes.', 'lavka-price-sync'),
+            'inspectionCandidates' => __('Diagnostic document candidates', 'lavka-price-sync'),
+            'lastKnownContext' => __('Last known processing context', 'lavka-price-sync'),
+            'lastKnownContextExplanation' => __('This SKU is the last article reported before the old failure response. It is context for investigation, not proof that this product caused the error.', 'lavka-price-sync'),
             'recordedAt' => __('Recorded at', 'lavka-price-sync'),
             'statusLabels' => [
                 'IDLE' => __('Not started', 'lavka-price-sync'),
@@ -384,6 +424,36 @@ function lps_accounting_prices_batch_report_rows(array $batch): array {
                     'details' => $failed_chunk,
                 ],
             ];
+        }
+        $has_structured_sku = false;
+        foreach ($issues as $entry) {
+            $issue = is_array($entry['issue'] ?? null) ? $entry['issue'] : [];
+            $details = is_array($issue['details'] ?? null) ? $issue['details'] : [];
+            $issue_sku = trim((string)($details['sku'] ?? ($details['art'] ?? ($details['inputArt'] ?? ($issue['sku'] ?? '')))));
+            if ($issue_sku !== '') {
+                $has_structured_sku = true;
+                break;
+            }
+        }
+        if ($base['status'] === 'FAILED' && !$failed_chunk && !$has_structured_sku) {
+            $last_known_sku = sanitize_text_field((string)($result['current_art'] ?? ($result['checkpoint_art'] ?? '')));
+            if ($last_known_sku !== '') {
+                $issues[] = [
+                    'severity' => 'error',
+                    'issue' => [
+                        'code' => 'LAST_KNOWN_FAILURE_CONTEXT',
+                        'sku' => $last_known_sku,
+                        'message' => __('Java did not return structured failure details. This SKU is the last known processing context, not a confirmed cause.', 'lavka-price-sync'),
+                        'details' => [
+                            'sku' => $last_known_sku,
+                            'contextOnly' => true,
+                            'currentArt' => sanitize_text_field((string)($result['current_art'] ?? '')),
+                            'checkpointArt' => sanitize_text_field((string)($result['checkpoint_art'] ?? '')),
+                            'jobId' => $base['job_id'],
+                        ],
+                    ],
+                ];
+            }
         }
         if (!empty($result['warnings_truncated'])) {
             $issues[] = [
@@ -1069,6 +1139,7 @@ function lps_accounting_prices_ajax(): void {
         'campaign_snapshot_items',
         'campaign_warehouse_overview',
         'campaign_warehouse_diagnostics',
+        'campaign_persistent_diagnostics',
         'campaign_stop',
     ];
     if (empty($options['java_base_url']) && !in_array($operation, $local_operations, true)) {
@@ -1186,6 +1257,18 @@ function lps_accounting_prices_ajax(): void {
                 absint($_POST['page'] ?? 1),
                 absint($_POST['perPage'] ?? 50)
             ));
+            break;
+
+        case 'campaign_persistent_diagnostics':
+            wp_send_json_success(lps_accounting_price_diagnostic_query([
+                'sourceDatabase' => wp_unslash($_POST['sourceDatabase'] ?? ''),
+                'warehouseId' => $_POST['warehouseId'] ?? 0,
+                'sku' => wp_unslash($_POST['sku'] ?? ''),
+                'jobId' => wp_unslash($_POST['jobId'] ?? ''),
+                'mode' => wp_unslash($_POST['mode'] ?? 'all'),
+                'dateFrom' => wp_unslash($_POST['dateFrom'] ?? ''),
+                'dateTo' => wp_unslash($_POST['dateTo'] ?? ''),
+            ], absint($_POST['beforeId'] ?? 0), absint($_POST['perPage'] ?? 50)));
             break;
 
         case 'campaign_stop':

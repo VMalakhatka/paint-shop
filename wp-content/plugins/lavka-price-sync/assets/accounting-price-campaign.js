@@ -32,6 +32,7 @@
   let snapshotReportRequest = 0;
   const openSnapshotReports = new Set();
   let batchReportOpen = false;
+  const persistentDiagnostics = { scope: null, filters: {}, cursors: [0], page: 0 };
 
   function node(tag, className, value) {
     const item = document.createElement(tag);
@@ -111,6 +112,78 @@
 
   function display(value) {
     return value === 0 || value ? String(value) : '—';
+  }
+
+  function yesNo(value) {
+    if (value !== true && value !== false) return '—';
+    return value ? (t.yes || 'Yes') : (t.no || 'No');
+  }
+
+  function appendDiagnosticCandidates(target, details) {
+    const candidates = [];
+    ['inspectionWarnings', 'inspectionErrors'].forEach((key) => {
+      (Array.isArray(details?.[key]) ? details[key] : []).forEach((entry) => {
+        const value = entry?.details && typeof entry.details === 'object' ? entry.details : entry;
+        if (value && typeof value === 'object') candidates.push(value);
+      });
+    });
+    if (!candidates.length) return;
+    const block = node('details', 'lps-ap-diagnostic-candidates');
+    block.append(node('summary', '', `${t.inspectionCandidates || 'Diagnostic document candidates'} (${candidates.length})`));
+    const list = node('div', 'lps-ap-diagnostic-candidate-list');
+    candidates.forEach((candidate) => {
+      const operation = candidate.operation && typeof candidate.operation === 'object' ? candidate.operation : candidate;
+      const item = node('dl', 'lps-ap-negative-grid');
+      [
+        [t.document, [operation.documentType, operation.documentNumber || operation.documentId].filter(Boolean).join(' · ')],
+        [t.dateFrom || 'Date', operation.documentDate || candidate.operationDate || candidate.problemDate],
+        [t.movementRecord, operation.recno || operation.RECNO || candidate.recno || candidate.RECNO],
+        [t.beforeOperation, candidate.quantityBefore || operation.quantityBefore],
+        [t.operationQuantity, operation.quantity || candidate.movementQuantity || candidate.operationQuantity],
+        [t.afterOperation, candidate.quantityAfter || operation.quantityAfter],
+        [t.currentPhysicalQuantity, candidate.physicalQuantity],
+        [t.currentAccountingQuantity, candidate.accountingQuantity]
+      ].forEach(([label, value]) => {
+        if (value === undefined || value === null || value === '') return;
+        const row = node('div');
+        row.append(node('dt', '', label || '—'), node('dd', '', display(value)));
+        item.append(row);
+      });
+      list.append(item);
+    });
+    block.append(list);
+    target.append(block);
+  }
+
+  function appendArithmeticDiagnostic(target, details, metadata) {
+    const sqlErrors = Array.isArray(details?.sqlErrors) ? details.sqlErrors : [];
+    const sqlError = sqlErrors.find((entry) => entry && typeof entry === 'object') || {};
+    const grid = node('dl', 'lps-ap-negative-grid');
+    [
+      [t.database, metadata?.sourceDatabase || details?.sourceDatabase],
+      [t.warehouse, metadata?.warehouseId || details?.warehouseId],
+      [t.sku, metadata?.sku || details?.sku],
+      [t.jobId, metadata?.jobId || details?.jobId],
+      [t.stage, details?.stage],
+      [t.reason, metadata?.errorCode],
+      [t.sqlErrorCode, sqlError.errorCode],
+      [t.sqlState, sqlError.sqlState],
+      [t.message, sqlError.message],
+      [t.rollbackConfirmed, yesNo(details?.rollbackConfirmed)],
+      [t.committed, yesNo(details?.committed)],
+      [t.recommendation, details?.recommendation]
+    ].forEach(([label, value]) => {
+      if (value === undefined || value === null || value === '') return;
+      const item = node('div');
+      item.append(node('dt', '', label || '—'), node('dd', '', display(value)));
+      grid.append(item);
+    });
+    target.append(grid);
+    if (details?.committed === false) target.append(node('p', 'notice notice-info inline', t.notCommittedExplanation || 'This SKU was not written and was not marked VERIFIED.'));
+    if (details?.formulaConfirmed === false) target.append(node('p', 'notice notice-warning inline', t.formulaNotConfirmed || 'The exact formula has not been confirmed.'));
+    if (details?.documentConfirmed === false) target.append(node('p', 'notice notice-warning inline', t.documentNotConfirmed || 'The cause document has not been confirmed.'));
+    appendDiagnosticCandidates(target, details);
+    if (details?.inspectionError) target.append(node('p', 'description', String(details.inspectionError)));
   }
 
   function formatDateTime(value) {
@@ -412,6 +485,24 @@
         });
         explanation.append(grid);
         messageCell.append(explanation);
+      } else if (warningCode === 'ACCOUNTING_PRICE_DIVIDE_BY_ZERO') {
+        const explanation = node('div', 'lps-ap-negative-diagnostic');
+        explanation.append(node('p', 'lps-ap-negative-explanation', t.zeroDenominatorExplanation || 'The accounting formula divided by zero. This SKU was rolled back and skipped.'));
+        appendArithmeticDiagnostic(explanation, details, {
+          sourceDatabase: details.sourceDatabase,
+          warehouseId: warning?.warehouseId || details.warehouseId,
+          sku,
+          jobId: warning?.jobId || details.jobId,
+          errorCode: warningCode
+        });
+        messageCell.append(explanation);
+      } else if (warningCode === 'LAST_KNOWN_FAILURE_CONTEXT' || details.contextOnly === true) {
+        const explanation = node('div', 'lps-ap-negative-diagnostic');
+        explanation.append(
+          node('p', 'lps-ap-negative-explanation', t.lastKnownContext || 'Last known processing context'),
+          node('p', 'notice notice-warning inline', t.lastKnownContextExplanation || 'This SKU is context, not a confirmed cause.')
+        );
+        messageCell.append(explanation);
       }
       if (showWarehouse) {
         row.append(node('td', '', warning?.warehouseName || warning?.warehouseId || '—'));
@@ -475,6 +566,133 @@
         perPage: 50
       });
       renderWarehouseDiagnostics(report);
+    } catch (error) {
+      elements.overviewDetails.replaceChildren(node('div', 'notice notice-error inline', error.message || t.requestFailed || 'Request failed'));
+    }
+  }
+
+  function diagnosticExportUrl(filters) {
+    if (!config.diagnosticExportUrl) return '';
+    const url = new URL(config.diagnosticExportUrl, window.location.href);
+    url.searchParams.set('source_database', filters.sourceDatabase || '');
+    url.searchParams.set('warehouse_id', String(filters.warehouseId || 0));
+    if (filters.sku) url.searchParams.set('sku', filters.sku);
+    if (filters.jobId) url.searchParams.set('job_id', filters.jobId);
+    if (filters.mode && filters.mode !== 'all') url.searchParams.set('mode', filters.mode);
+    if (filters.dateFrom) url.searchParams.set('date_from', filters.dateFrom);
+    if (filters.dateTo) url.searchParams.set('date_to', filters.dateTo);
+    return url.toString();
+  }
+
+  function diagnosticFilter(label, name, type, value) {
+    const wrapper = node('label');
+    wrapper.append(node('span', '', label));
+    const input = node('input');
+    input.name = name;
+    input.type = type || 'text';
+    input.value = value || '';
+    wrapper.append(input);
+    return wrapper;
+  }
+
+  function renderPersistentDiagnostics(report) {
+    elements.overviewDetails.replaceChildren();
+    const section = node('section', 'lps-ap-state-section lps-ap-persistent-diagnostics');
+    section.append(node('h3', '', t.persistentDiagnostics || 'Permanent arithmetic diagnostic log'));
+    if (!report?.ok) {
+      section.append(node('div', 'notice notice-error inline', report?.message || t.requestFailed || 'Request failed'));
+      elements.overviewDetails.append(section);
+      return;
+    }
+    const filters = report.filters || persistentDiagnostics.filters || {};
+    const form = node('form', 'lps-ap-diagnostic-filters');
+    form.append(
+      diagnosticFilter(t.sku || 'SKU', 'sku', 'text', filters.sku),
+      diagnosticFilter(t.jobId || 'Java job ID', 'jobId', 'text', filters.jobId),
+      diagnosticFilter(t.dateFrom || 'Date from', 'dateFrom', 'date', filters.dateFrom),
+      diagnosticFilter(t.dateTo || 'Date to', 'dateTo', 'date', filters.dateTo)
+    );
+    const modeLabel = node('label');
+    modeLabel.append(node('span', '', t.mode || 'Mode'));
+    const mode = node('select'); mode.name = 'mode';
+    [['all', t.allModes || 'Preview and apply'], ['preview', t.previewMode || 'Preview'], ['apply', t.applyMode || 'Apply']].forEach(([value, label]) => {
+      const option = node('option', '', label); option.value = value; option.selected = (filters.mode || 'all') === value; mode.append(option);
+    });
+    modeLabel.append(mode);
+    const submit = node('button', 'button button-primary', t.applyFilters || 'Apply filters'); submit.type = 'submit';
+    form.append(modeLabel, submit);
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      persistentDiagnostics.filters = Object.fromEntries(new FormData(form).entries());
+      persistentDiagnostics.cursors = [0]; persistentDiagnostics.page = 0;
+      loadPersistentDiagnostics(persistentDiagnostics.scope, 0);
+    });
+    section.append(node('p', 'description', `${t.database || 'Database'}: ${filters.sourceDatabase || '—'} · ${t.warehouse || 'Warehouse'}: ${filters.warehouseId || '—'}`), form);
+    if (!report.available) {
+      section.append(node('div', 'notice notice-warning inline', report.message || t.persistentDiagnosticsUnavailable || 'Permanent diagnostics are unavailable.'));
+      elements.overviewDetails.append(section);
+      return;
+    }
+    const exportUrl = diagnosticExportUrl(filters);
+    if (exportUrl) {
+      const exportLink = node('a', 'button', t.exportDiagnostics || 'Export diagnostic CSV');
+      exportLink.href = exportUrl;
+      section.append(exportLink);
+    }
+    if (!Array.isArray(report.items) || !report.items.length) {
+      section.append(node('p', 'description', t.noPersistentDiagnostics || 'No diagnostics match these filters.'));
+    } else {
+      const wrap = node('div', 'lps-ap-table-scroll');
+      const table = node('table', 'widefat striped lps-ap-diagnostic-table');
+      const head = node('thead'); const header = node('tr');
+      [t.recordedAt, t.mode, t.sku, t.reason, t.message, t.details].forEach((label) => header.append(node('th', '', label)));
+      head.append(header); const body = node('tbody');
+      report.items.forEach((item) => {
+        const row = node('tr', 'lps-ap-batch-row is-warning');
+        const message = node('td'); message.append(node('p', '', item.message || '—'));
+        appendArithmeticDiagnostic(message, item.details || {}, item);
+        const technical = node('td'); const disclosure = node('details');
+        disclosure.append(node('summary', '', t.details || 'Details'), node('pre', '', JSON.stringify(item.details || {}, null, 2))); technical.append(disclosure);
+        const cells = [
+          node('td', '', formatDateTime(item.createdAt)),
+          node('td', '', item.previewOnly ? (t.previewMode || 'Preview') : (t.applyMode || 'Apply')),
+          node('td', 'lps-ap-snapshot-sku', item.sku || '—'),
+          node('td', '', item.errorCode || '—'), message, technical
+        ];
+        [t.recordedAt, t.mode, t.sku, t.reason, t.message, t.details].forEach((label, index) => {
+          cells[index].dataset.label = label || '—';
+        });
+        row.append(...cells);
+        body.append(row);
+      });
+      table.append(head, body); wrap.append(table); section.append(wrap);
+    }
+    const pagination = node('div', 'tablenav bottom lps-ap-snapshot-pagination');
+    const newer = node('button', 'button', t.newerDiagnostics || 'Newer records'); newer.type = 'button'; newer.disabled = persistentDiagnostics.page <= 0;
+    newer.addEventListener('click', () => {
+      persistentDiagnostics.page = Math.max(0, persistentDiagnostics.page - 1);
+      loadPersistentDiagnostics(persistentDiagnostics.scope, persistentDiagnostics.cursors[persistentDiagnostics.page] || 0);
+    });
+    const older = node('button', 'button', t.olderDiagnostics || 'Older records'); older.type = 'button'; older.disabled = !report.hasMore || !report.nextBeforeId;
+    older.addEventListener('click', () => {
+      persistentDiagnostics.page += 1;
+      persistentDiagnostics.cursors[persistentDiagnostics.page] = Number(report.nextBeforeId || 0);
+      loadPersistentDiagnostics(persistentDiagnostics.scope, persistentDiagnostics.cursors[persistentDiagnostics.page]);
+    });
+    pagination.append(newer, node('span', '', String(persistentDiagnostics.page + 1)), older); section.append(pagination);
+    elements.overviewDetails.append(section);
+  }
+
+  async function loadPersistentDiagnostics(scope, beforeId) {
+    if (!elements.overviewDetails || !scope) return;
+    persistentDiagnostics.scope = scope;
+    const filters = Object.assign({}, persistentDiagnostics.filters, scope);
+    persistentDiagnostics.filters = filters;
+    elements.overviewDetails.replaceChildren(node('p', 'description', t.loading || 'Loading...'));
+    try {
+      renderPersistentDiagnostics(await request('campaign_persistent_diagnostics', Object.assign({}, filters, {
+        beforeId: Number(beforeId || 0), perPage: 20
+      })));
     } catch (error) {
       elements.overviewDetails.replaceChildren(node('div', 'notice notice-error inline', error.message || t.requestFailed || 'Request failed'));
     }
@@ -581,6 +799,16 @@
         button.addEventListener('click', () => loadWarehouseDiagnostics(row.warehouseId, 'errors', 1));
         rowActions.append(button);
       }
+      if (row.sourceDatabase) {
+        const button = node('button', 'button button-small', t.viewPersistentDiagnostics || 'View permanent diagnostics');
+        button.type = 'button';
+        button.addEventListener('click', () => {
+          persistentDiagnostics.filters = {};
+          persistentDiagnostics.cursors = [0]; persistentDiagnostics.page = 0;
+          loadPersistentDiagnostics({ warehouseId: row.warehouseId, sourceDatabase: row.sourceDatabase }, 0);
+        });
+        rowActions.append(button);
+      }
       if (Number(row.negativeCount || 0) > 0) {
         const button = node('button', 'button button-small', t.viewNegativeStock || 'View negative stock');
         button.type = 'button';
@@ -651,12 +879,17 @@
     const rangeCommitted = Number(state.range?.committedChunks || 0);
     const rangeWarnings = Number(state.range?.warningCount || 0);
     const rangePercent = Number(state.range?.skuProgressPercent || 0);
+    const rangeStatus = String(state.range?.status || '').toUpperCase();
+    const terminalRange = ['COMPLETED', 'COMPLETED_WITH_WARNINGS'].includes(rangeStatus);
+    const rangeSkipped = terminalRange ? Math.max(0, rangeProcessed - rangeCommitted) : 0;
     const overview = node('div', 'lps-ap-campaign-overview');
     overview.append(
       card(t.status || 'Status', statusLabel(state.status), state.status === 'COMPLETED' ? 'success' : ''),
       card(t.phase || 'Phase', phaseLabel(visiblePhase)),
       card(t.warehouse || 'Warehouse', state.currentWarehouseId || '—'),
       card(t.processed || 'Processed', integer.format(Number(state.processedSkus || 0))),
+      card(t.committedTotal || 'Committed', integer.format(Number(state.committedSkus || 0)), Number(state.committedSkus || 0) ? 'success' : ''),
+      card(t.skippedTotal || 'Skipped', integer.format(Number(state.skippedSkus || 0)), Number(state.skippedSkus || 0) ? 'warning' : ''),
       card(t.batches || 'Batches', integer.format(Number(state.successfulBatches || 0))),
       card(t.warnings || 'Warnings', integer.format(Number(state.warningCount || 0)), Number(state.warningCount || 0) ? 'warning' : ''),
       card(t.errors || 'Errors', integer.format(Number(state.errorCount || 0)), Number(state.errorCount || 0) ? 'error' : ''),
@@ -668,6 +901,7 @@
         card(t.batchProgress || 'Current batch progress', `${integer.format(rangeProcessed)} / ${integer.format(rangeTotal)}`),
         card(t.currentSku || 'Current SKU', display(state.range?.currentArt)),
         card(t.committedSku || 'Successfully committed SKU', integer.format(rangeCommitted), rangeCommitted > 0 ? 'success' : ''),
+        card(t.skippedSku || 'Skipped SKU in current batch', integer.format(rangeSkipped), rangeSkipped > 0 ? 'warning' : ''),
         card(t.batchWarnings || 'Warnings in current batch', integer.format(rangeWarnings), rangeWarnings > 0 ? 'warning' : '')
       );
     }

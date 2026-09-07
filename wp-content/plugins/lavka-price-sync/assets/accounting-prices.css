@@ -758,6 +758,45 @@
   gap: 8px;
 }
 
+.lps-ap-diagnostic-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  align-items: end;
+  gap: 10px;
+  max-width: 1200px;
+  margin: 14px 0;
+}
+
+.lps-ap-diagnostic-filters label,
+.lps-ap-diagnostic-filters label > span {
+  display: block;
+}
+
+.lps-ap-diagnostic-filters label > span {
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.lps-ap-diagnostic-filters input,
+.lps-ap-diagnostic-filters select {
+  width: 100%;
+  min-height: 36px;
+}
+
+.lps-ap-diagnostic-table {
+  min-width: 1100px;
+}
+
+.lps-ap-diagnostic-candidates {
+  margin-top: 10px;
+}
+
+.lps-ap-diagnostic-candidate-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+
 .lps-ap-warning-table {
   table-layout: auto;
 }
@@ -887,6 +926,58 @@
 }
 
 @media (max-width: 782px) {
+  .lps-ap-diagnostic-table {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    border: 0;
+    background: transparent;
+    table-layout: fixed;
+  }
+
+  .lps-ap-diagnostic-table thead {
+    display: none;
+  }
+
+  .lps-ap-diagnostic-table tbody,
+  .lps-ap-diagnostic-table tr,
+  .lps-ap-diagnostic-table td {
+    display: block;
+    width: auto;
+  }
+
+  .lps-ap-diagnostic-table tr {
+    margin-bottom: 14px;
+    border: 1px solid #c3c4c7;
+    background: #fff;
+  }
+
+  .lps-ap-diagnostic-table td {
+    padding: 9px 10px;
+    border: 0;
+    border-bottom: 1px solid #dcdcde;
+    overflow-wrap: anywhere;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  .lps-ap-diagnostic-table td:nth-child(3),
+  .lps-ap-diagnostic-table td:nth-child(4) {
+    word-break: break-all;
+  }
+
+  .lps-ap-diagnostic-table td:last-child {
+    border-bottom: 0;
+  }
+
+  .lps-ap-diagnostic-table td::before {
+    display: block;
+    margin-bottom: 4px;
+    color: #50575e;
+    font-weight: 600;
+    content: attr(data-label);
+  }
+
   .lps-ap-toolbar,
   .lps-ap-form-row,
   .lps-ap-apply-row,
@@ -920,6 +1011,10 @@
   .lps-ap-cron-grid,
   .lps-ap-cron-status {
     grid-template-columns: 1fr;
+  }
+
+  .lps-ap-diagnostic-table .lps-ap-negative-grid dd {
+    word-break: break-all;
   }
 
   .lps-ap-failed-chunk-grid {
