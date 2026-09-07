@@ -932,3 +932,7 @@ msgstr "На початок"
 #~ "Завантаження чернетки або старого замовлення спочатку очищає поточний "
 #~ "кошик, а потім додає товари з вибраного замовлення. Якщо поточний кошик "
 #~ "потрібен, спочатку збережіть або вивантажте його."
+
+#: pc-wholesale-help.php
+msgid "A manager can prepare a draft for you. It appears in My orders without changing your current cart. If the manager has already submitted it to Folio, check the result with the manager before placing another order."
+msgstr "Менеджер може підготувати чернетку для вас. Вона з’явиться в «Моїх замовленнях», не змінюючи поточний кошик. Якщо менеджер уже надіслав її до ФОЛІО, уточніть результат у менеджера перед новим замовленням."

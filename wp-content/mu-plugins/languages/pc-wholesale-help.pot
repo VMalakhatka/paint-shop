@@ -720,3 +720,7 @@ msgstr ""
 #: pc-wholesale-help.php:469
 msgid "Back to top"
 msgstr ""
+
+#: pc-wholesale-help.php
+msgid "A manager can prepare a draft for you. It appears in My orders without changing your current cart. If the manager has already submitted it to Folio, check the result with the manager before placing another order."
+msgstr ""

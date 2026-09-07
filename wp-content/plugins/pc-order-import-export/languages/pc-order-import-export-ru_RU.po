@@ -887,3 +887,399 @@ msgstr "Список заказов ниже ещё не обновлён."
 
 #~ msgid "Add to cart"
 #~ msgstr "Добавлено в корзину"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Customer workspace"
+msgstr "Работа с клиентами"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Select a customer, prepare a draft and review Folio accounts by warehouse."
+msgstr "Выберите клиента, подготовьте черновик и проверьте счета ФОЛИО по складам."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Find customer by name, company or email"
+msgstr "Найти клиента по имени, компании или email"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Find customer"
+msgstr "Найти клиента"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "No customers found."
+msgstr "Клиенты не найдены."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Up to 30 customers are shown. Refine the search if needed."
+msgstr "Показано до 30 клиентов. При необходимости уточните поиск."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Folio customer:"
+msgstr "Клиент ФОЛИО:"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Price role:"
+msgstr "Ценовая роль:"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "The draft belongs to this customer. Manager actions are recorded separately."
+msgstr "Черновик принадлежит этому клиенту. Действия менеджера записываются отдельно."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Customer drafts and orders"
+msgstr "Черновики и заказы клиента"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Folio documents"
+msgstr "Документы ФОЛИО"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Customer balance"
+msgstr "Баланс клиента"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Link the customer to Folio in the user profile before preparing Folio documents. Drafts are available now."
+msgstr "Перед подготовкой документов ФОЛИО привяжите клиента к контрагенту в его профиле. Черновики уже доступны."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "New customer draft"
+msgstr "Новый черновик клиента"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Draft title"
+msgstr "Название черновика"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Create empty draft"
+msgstr "Создать пустой черновик"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Import Excel or CSV"
+msgstr "Импорт Excel или CSV"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Up to 10 MB and 2000 rows. File prices are kept for reference; Folio preparation uses current customer prices."
+msgstr "До 10 МБ и 2000 строк. Цены из файла сохраняются для справки; подготовка ФОЛИО использует текущие цены клиента."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Import into customer draft"
+msgstr "Импортировать в черновик клиента"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Download Excel template"
+msgstr "Скачать шаблон Excel"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Order"
+msgstr "Заказ"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Amount"
+msgstr "Сумма"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Previous page"
+msgstr "Предыдущая страница"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Next page"
+msgstr "Следующая страница"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Order #%s"
+msgstr "Заказ №%s"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Open WooCommerce order"
+msgstr "Открыть заказ WooCommerce"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Copy to a new draft"
+msgstr "Скопировать в новый черновик"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Folio documents were created. This draft is locked against duplicate creation."
+msgstr "Документы ФОЛИО созданы. Повторное создание из этого черновика заблокировано."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Operation needs review. Do not submit it again or create a replacement until its Folio result is checked."
+msgstr "Операцию нужно проверить. Не отправляйте её повторно и не создавайте замену, пока не проверен результат в ФОЛИО."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Operation ID:"
+msgstr "ID операции:"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "SKU / product"
+msgstr "Артикул / товар"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Quantity"
+msgstr "Количество"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Saved unit price"
+msgstr "Сохранённая цена за единицу"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Set quantity to 0 to remove a line. Save changes before previewing."
+msgstr "Чтобы удалить строку, укажите количество 0. Сохраните изменения перед просмотром."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Add product by SKU"
+msgstr "Добавить товар по артикулу"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Order note"
+msgstr "Примечание к заказу"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Save customer draft"
+msgstr "Сохранить черновик клиента"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Source order:"
+msgstr "Исходный заказ:"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Prepare Folio documents"
+msgstr "Подготовка документов ФОЛИО"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "This is the customer working basket. Preparation recalculates customer prices and stock; the customer website cart stays separate."
+msgstr "Это рабочая корзина клиента. Подготовка пересчитывает цены клиента и остатки; корзина клиента на сайте остаётся отдельной."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Operation"
+msgstr "Операция"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Accounts by warehouse"
+msgstr "Счета по складам"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Entire draft without reservation"
+msgstr "Весь черновик без резервирования"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Warehouse mode"
+msgstr "Режим склада"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Automatic allocation"
+msgstr "Автоматическое распределение"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Prioritize selected warehouse"
+msgstr "Приоритет выбранного склада"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Selected warehouse only"
+msgstr "Только выбранный склад"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Warehouse"
+msgstr "Склад"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Available quantities become accounts with reservation. Shortages become separate non-accounting documents. Creating accounts does not create an expense invoice."
+msgstr "Доступное количество попадает в счета с резервированием. Недостача — в отдельные неучитываемые документы. Создание счетов не создаёт расходную накладную."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Preview prices and warehouses"
+msgstr "Посмотреть цены и склады"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "I checked this customer, quantities, prices and warehouses and confirm creation in Folio."
+msgstr "Я проверил клиента, количество, цены и склады и подтверждаю создание в ФОЛИО."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Confirm and create Folio documents"
+msgstr "Подтвердить и создать документы ФОЛИО"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Saved Folio documents"
+msgstr "Сохранённые документы ФОЛИО"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Select a customer account."
+msgstr "Выберите учётную запись клиента."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "The request failed. Reload the workspace to check the saved result before trying again."
+msgstr "Запрос не выполнен. Обновите страницу и проверьте сохранённый результат перед повтором."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "A product has no valid customer price."
+msgstr "У товара нет корректной цены для клиента."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "The order does not belong to the selected customer."
+msgstr "Заказ не принадлежит выбранному клиенту."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "This draft is locked. Check its Folio result or create a new copy."
+msgstr "Этот черновик заблокирован. Проверьте результат ФОЛИО или создайте новую копию."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Another operation is running. Reload the workspace shortly."
+msgstr "Выполняется другая операция. Вскоре обновите страницу."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "The customer is not linked to Folio."
+msgstr "Клиент не привязан к ФОЛИО."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Reload the workspace before creating a draft."
+msgstr "Обновите страницу перед созданием черновика."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "The draft changed in another window. Reload it before continuing."
+msgstr "Черновик изменён в другом окне. Обновите его перед продолжением."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Unknown workspace action."
+msgstr "Неизвестное действие рабочего кабинета."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Use a customer draft in the manager workspace."
+msgstr "Используйте черновик клиента в кабинете менеджера."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Select a valid Folio document."
+msgstr "Выберите корректный документ ФОЛИО."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Manager copied Folio items into the customer draft."
+msgstr "Менеджер скопировал позиции ФОЛИО в черновик клиента."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Upload a CSV or Excel file up to 10 MB."
+msgstr "Загрузите файл CSV или Excel до 10 МБ."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Use a file with 1 to 2000 product rows."
+msgstr "Используйте файл с 1–2000 товарных строк."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "No rows were imported. Correct the file and try again."
+msgstr "Ни одна строка не импортирована. Исправьте файл и повторите попытку."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Manager created a customer draft."
+msgstr "Менеджер создал черновик клиента."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "The customer draft was saved."
+msgstr "Черновик клиента сохранён."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "A source product is no longer available. Copy selected Folio items instead."
+msgstr "Исходный товар больше недоступен. Скопируйте выбранные позиции ФОЛИО."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Manager created a new copy using current customer prices."
+msgstr "Менеджер создал новую копию по текущим ценам клиента."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Enter whole quantities from 0 to 1000000."
+msgstr "Укажите целое количество от 0 до 1000000."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Enter a valid product SKU and quantity."
+msgstr "Укажите корректный артикул товара и количество."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Manager updated the customer draft."
+msgstr "Менеджер обновил черновик клиента."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Select a valid warehouse mode."
+msgstr "Выберите корректный режим склада."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Warehouses are unavailable."
+msgstr "Склады недоступны."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Select a warehouse linked to Folio."
+msgstr "Выберите склад, привязанный к ФОЛИО."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Select the non-accounting Folio warehouse in Lavka settings."
+msgstr "Выберите склад ФОЛИО для неучитываемых документов в настройках Lavka."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Each line needs an existing product SKU and a positive whole quantity."
+msgstr "Каждая строка должна содержать артикул существующего товара и положительное целое количество."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Folio returned an unexpected result. Check the saved operation before continuing."
+msgstr "ФОЛИО вернула неожиданный результат. Проверьте сохранённую операцию перед продолжением."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Folio did not confirm the result. Reload the workspace and check the operation status."
+msgstr "ФОЛИО не подтвердила результат. Обновите страницу и проверьте статус операции."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Preview only. No Folio documents have been created. Confirm after checking quantities, prices and warehouses."
+msgstr "Это только просмотр. Документы ФОЛИО не созданы. Подтвердите после проверки количества, цен и складов."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Confirm the reviewed operation first."
+msgstr "Сначала подтвердите просмотренную операцию."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "This operation was already submitted. Check the saved result; automatic resubmission is blocked."
+msgstr "Эта операция уже отправлена. Проверьте сохранённый результат; автоматическая повторная отправка заблокирована."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "The preview expired or the draft changed. Create a new preview."
+msgstr "Срок просмотра истёк или черновик изменён. Создайте новый просмотр."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Customer prices or stock allocation changed. Create a new preview."
+msgstr "Цены клиента или распределение остатков изменились. Создайте новый просмотр."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Folio was saved, but Woo order finalization needs review."
+msgstr "ФОЛИО сохранена, но завершение заказа Woo требует проверки."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Created from the manager workspace."
+msgstr "Создано из кабинета менеджера."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Manager confirmed Folio documents for this customer."
+msgstr "Менеджер подтвердил документы ФОЛИО для этого клиента."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "The operation needs review. Do not submit it again. Check the saved Folio documents and operation ID."
+msgstr "Операцию нужно проверить. Не отправляйте её повторно. Проверьте сохранённые документы ФОЛИО и ID операции."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "The Folio warehouse cannot be matched to the prepared stock allocation."
+msgstr "Склад ФОЛИО не соответствует подготовленному распределению остатков."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Folio warehouse"
+msgstr "Склад ФОЛИО"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Document"
+msgstr "Документ"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Items and amounts"
+msgstr "Позиции и суммы"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Account with reservation"
+msgstr "Счёт с резервированием"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Non-accounting document"
+msgstr "Неучитываемый документ"
+
+#: inc/ManagerWorkspace.php
+msgid "Save draft changes before continuing."
+msgstr "Сохраните изменения черновика перед продолжением."

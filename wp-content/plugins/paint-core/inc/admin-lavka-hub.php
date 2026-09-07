@@ -137,11 +137,13 @@ add_action('admin_menu', function (): void {
 /** Enhance only rendered, permission-filtered links; keep WordPress routes intact. */
 add_action('admin_enqueue_scripts', function (): void {
     $groups = [
-        ['id' => 'stock', 'label' => __('Stock', 'paint-core'), 'pages' => ['lavka-warehouses', 'lavka-sync', 'lavka-stock-report', 'lavka-logs']],
+        ['id' => 'stock', 'label' => __('Stock', 'paint-core'), 'pages' => ['lavka-sync', 'lavka-stock-report', 'lavka-logs']],
         ['id' => 'full-sync', 'label' => __('Full synchronization', 'paint-core'), 'pages' => ['lts-main', 'lts-run', 'lts-logs', 'lts-media', 'lts-cron-summary']],
-        ['id' => 'prices', 'label' => __('Prices and analytics', 'paint-core'), 'pages' => ['lps-main', 'lps-mapping', 'lps-run', 'lps-logs', 'lps-accounting-prices', 'lps-analytics-scenarios', 'lps-product-analytics', 'lps-purchase-planning']],
+        ['id' => 'prices', 'label' => __('Prices', 'paint-core'), 'pages' => ['lps-main', 'lps-mapping', 'lps-run', 'lps-logs', 'role-price-import-lite']],
+        ['id' => 'analytics', 'label' => __('Analytics', 'paint-core'), 'pages' => ['lps-analytics-scenarios', 'lps-product-analytics', 'lps-purchase-planning']],
+        ['id' => 'maintenance', 'label' => __('Database maintenance', 'paint-core'), 'pages' => ['lps-accounting-prices']],
         ['id' => 'reports', 'label' => __('Reports', 'paint-core'), 'pages' => ['lavka-reports', 'lavka-profit-report']],
-        ['id' => 'tools', 'label' => __('Import and tools', 'paint-core'), 'pages' => ['role-price-import-lite', 'stock-import-csv-lite', 'pc-stock-sync-woo']],
+        ['id' => 'tools', 'label' => __('Import and tools', 'paint-core'), 'pages' => ['stock-import-csv-lite', 'pc-stock-sync-woo']],
     ];
     foreach (['css', 'js'] as $extension) {
         $relative = 'assets/admin-lavka-menu.' . $extension;

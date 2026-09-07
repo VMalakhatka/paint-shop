@@ -394,6 +394,7 @@ function pc_wholesale_help_render_endpoint(): void {
         <section class="pc-help-section" id="stari-zamovlennia">
             <div class="pc-help-section__heading"><span>08</span><div><h2><?php esc_html_e('How to process a draft', 'pc-wholesale-help'); ?></h2><p><?php esc_html_e('Open “My orders”, press “Process draft” next to the required draft, and choose one of two scenarios.', 'pc-wholesale-help'); ?></p></div></div>
             <div class="pc-help-note"><strong><?php esc_html_e('Preview first, apply second.', 'pc-wholesale-help'); ?></strong> <?php esc_html_e('The preview shows the result without changing the cart or recording a Folio document. The operation runs only after a separate confirmation (apply).', 'pc-wholesale-help'); ?></div>
+            <p><?php esc_html_e('A manager can prepare a draft for you. It appears in My orders without changing your current cart. If the manager has already submitted it to Folio, check the result with the manager before placing another order.', 'pc-wholesale-help'); ?></p>
             <div class="pc-help-grid pc-help-grid--two pc-help-draft-scenarios">
                 <div class="pc-help-card pc-help-card--accent">
                     <h3><?php esc_html_e('Available goods to cart; remainder stays in the draft', 'pc-wholesale-help'); ?></h3>

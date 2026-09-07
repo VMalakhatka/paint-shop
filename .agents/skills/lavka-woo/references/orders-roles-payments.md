@@ -113,3 +113,31 @@ Java отвечает за складское распределение вну�
 | Ошибка Java до создания | исходный order сохраняется | обработку проверит менеджер |
 
 Не обещай клиенту создание документа ФОЛИО, если Java вернула ошибку или outcome неизвестен.
+
+## Manager workspace (2026-09-07)
+
+Подтверждено локальным кодом и тестом с HTTP-заглушкой: `pc-order-import-export`
+владеет `pcoe-customers` / `pcoe_manager`. Для менеджерских операций передавай
+явный `customer_id`, проверяй `manage_woocommerce`, nonce и владельца Woo-заказа;
+не переноси клиентский `get_current_user_id()` в owner нового черновика. Короткий
+контекст расчёта цены обязан восстановить пользователя и `WC()->customer` до
+авторизации/записи; корзина и её preference не переключаются. Явный preference
+поддерживается `pc_build_alloc_plan` без изменения поведения вызовов без аргумента.
+
+`_pcoe_manager_command` — durable marker до внешнего POST. Любое незавершённое
+состояние блокирует повторную отправку; не очищай marker для обхода неизвестного
+результата. Старые UI mutate-маршруты используют общий per-order MariaDB lock,
+а manager command учитывается в `pc_folio_order_has_saved_documents`. Учётные
+результаты и stock-plan дочерних заказов сверяются с полученным складом ФОЛИО.
+Создание расходной/реальной отгрузки этим модулем не реализовано. Каноническая
+инструкция: `docs/OPERATIONS_RUNBOOK.md`, раздел «Работа менеджера с клиентскими
+документами»; backend ownership — `docs/BACKEND_GUIDE.md`. Production не проверен.
+
+### Аргументы frontend hooks клиентских документов
+
+Проверено локально 2026-09-07 по `customer-documents.php` и regression test
+`pc-order-import-export/tests/frontend-document-assets.php`: `wp_enqueue_scripts`
+вызывает `pc_folio_documents_enqueue_assets` с `accepted_args=0`. Пустой аргумент
+WordPress не является числовым ID клиента; менеджер передаёт ID прямым вызовом.
+При расширении сигнатур проверять реальные hooks витрины, не только admin/CLI.
+Диагностика: `docs/BOOTSTRAP_AND_RECOVERY.md`, раздел о падении витрины.

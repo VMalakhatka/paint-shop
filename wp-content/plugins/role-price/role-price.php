@@ -21,7 +21,7 @@ add_filter('woocommerce_product_get_price',          'vp_role_price_override', 5
 add_filter('woocommerce_product_variation_get_price','vp_role_price_override', 5, 2);
 
 function vp_role_price_override($price, $product) {
-    if ((is_admin() && !wp_doing_ajax()) || ! $product) return $price;
+    if ((is_admin() && !wp_doing_ajax() && !apply_filters('rp_customer_price_context', false)) || ! $product) return $price;
 
     $user = wp_get_current_user();
     if (!$user || empty($user->roles)) return $price;

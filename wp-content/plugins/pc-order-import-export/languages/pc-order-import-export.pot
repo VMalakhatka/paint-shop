@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-03T20:56:44+00:00\n"
+"POT-Creation-Date: 2026-09-07T17:45:53+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: pc-order-import-export\n"
@@ -25,7 +25,7 @@ msgid "Export cart/orders to CSV/XLSX + import to cart/draft. WooCommerce integr
 msgstr ""
 
 #: inc/CartToDraft.php:82
-#: inc/DraftFolioWorkflow.php:891
+#: inc/DraftFolioWorkflow.php:915
 #: inc/DraftToCart.php:32
 #: inc/Exporter.php:10
 #: inc/ImporterCart.php:18
@@ -79,6 +79,7 @@ msgid "The cart will not change. The whole draft will be prepared in Folio witho
 msgstr ""
 
 #: inc/DraftFolioWorkflow.php:91
+#: inc/ManagerWorkspace.php:50
 msgid "Processing…"
 msgstr ""
 
@@ -236,6 +237,7 @@ msgstr ""
 
 #: inc/DraftFolioWorkflow.php:475
 #: inc/DraftFolioWorkflow.php:543
+#: inc/ManagerWorkspace.php:324
 msgid "Folio order integration is unavailable."
 msgstr ""
 
@@ -285,37 +287,45 @@ msgstr ""
 msgid "Draft loaded into cart: %1$s units added, %2$s units kept in the draft."
 msgstr ""
 
-#: inc/DraftFolioWorkflow.php:749
+#: inc/DraftFolioWorkflow.php:770
 msgid "Could not save the Folio response on the draft."
 msgstr ""
 
-#: inc/DraftFolioWorkflow.php:767
+#: inc/DraftFolioWorkflow.php:788
 #, php-format
 msgid "A non-accounting Folio document was created on warehouse %s. The draft status was preserved."
 msgstr ""
 
-#: inc/DraftFolioWorkflow.php:877
+#: inc/DraftFolioWorkflow.php:898
 #: inc/DraftToCart.php:42
 #: inc/Exporter.php:31
 msgid "Order not found."
 msgstr ""
 
-#: inc/DraftFolioWorkflow.php:880
+#: inc/DraftFolioWorkflow.php:901
 #: inc/DraftToCart.php:49
 #: inc/Exporter.php:36
+#: inc/ManagerWorkspace.php:35
+#: inc/ManagerWorkspace.php:61
+#: inc/ManagerWorkspace.php:170
 msgid "You do not have permission to perform this action."
 msgstr ""
 
-#: inc/DraftFolioWorkflow.php:883
+#: inc/DraftFolioWorkflow.php:904
+#: inc/ManagerWorkspace.php:452
+msgid "This operation was already submitted. Check the saved result; automatic resubmission is blocked."
+msgstr ""
+
+#: inc/DraftFolioWorkflow.php:907
 msgid "Only a draft order can use this operation."
 msgstr ""
 
-#: inc/DraftFolioWorkflow.php:904
+#: inc/DraftFolioWorkflow.php:928
 msgid "warehouse is not selected"
 msgstr ""
 
 #. translators: %d: Folio warehouse ID.
-#: inc/DraftFolioWorkflow.php:910
+#: inc/DraftFolioWorkflow.php:934
 #, php-format
 msgid "Folio warehouse %d"
 msgstr ""
@@ -552,6 +562,7 @@ msgid "Row"
 msgstr ""
 
 #: inc/Helpers.php:461
+#: inc/manager-view.php:73
 msgid "Status"
 msgstr ""
 
@@ -608,11 +619,424 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: inc/ImporterDraft.php:106
+#: inc/ManagerWorkspace.php:125
 msgid "Failed to create draft order."
 msgstr ""
 
 #: inc/ImporterDraft.php:168
+#: inc/ManagerWorkspace.php:251
 msgid "Added to draft"
+msgstr ""
+
+#: inc/manager-view.php:19
+#: inc/ManagerWorkspace.php:25
+msgid "Customer workspace"
+msgstr ""
+
+#: inc/manager-view.php:20
+msgid "Select a customer, prepare a draft and review Folio accounts by warehouse."
+msgstr ""
+
+#: inc/manager-view.php:26
+msgid "Find customer by name, company or email"
+msgstr ""
+
+#: inc/manager-view.php:28
+msgid "Find customer"
+msgstr ""
+
+#: inc/manager-view.php:35
+msgid "No customers found."
+msgstr ""
+
+#: inc/manager-view.php:38
+msgid "Up to 30 customers are shown. Refine the search if needed."
+msgstr ""
+
+#: inc/manager-view.php:47
+msgid "Folio customer:"
+msgstr ""
+
+#: inc/manager-view.php:48
+msgid "Price role:"
+msgstr ""
+
+#: inc/manager-view.php:49
+msgid "The draft belongs to this customer. Manager actions are recorded separately."
+msgstr ""
+
+#: inc/manager-view.php:50
+#: inc/manager-view.php:68
+msgid "Customer drafts and orders"
+msgstr ""
+
+#: inc/manager-view.php:51
+msgid "Folio documents"
+msgstr ""
+
+#: inc/manager-view.php:52
+msgid "Customer balance"
+msgstr ""
+
+#: inc/manager-view.php:53
+msgid "Link the customer to Folio in the user profile before preparing Folio documents. Drafts are available now."
+msgstr ""
+
+#: inc/manager-view.php:56
+msgid "New customer draft"
+msgstr ""
+
+#: inc/manager-view.php:58
+#: inc/manager-view.php:63
+#: inc/manager-view.php:73
+#: inc/manager-view.php:90
+msgid "Draft title"
+msgstr ""
+
+#: inc/manager-view.php:59
+msgid "Create empty draft"
+msgstr ""
+
+#: inc/manager-view.php:62
+msgid "Import Excel or CSV"
+msgstr ""
+
+#: inc/manager-view.php:64
+msgid "Up to 10 MB and 2000 rows. File prices are kept for reference; Folio preparation uses current customer prices."
+msgstr ""
+
+#: inc/manager-view.php:65
+msgid "Import into customer draft"
+msgstr ""
+
+#: inc/manager-view.php:66
+msgid "Download Excel template"
+msgstr ""
+
+#: inc/manager-view.php:73
+msgid "Order"
+msgstr ""
+
+#: inc/manager-view.php:73
+#: inc/manager-view.php:91
+msgid "Amount"
+msgstr ""
+
+#: inc/manager-view.php:76
+msgid "Previous page"
+msgstr ""
+
+#: inc/manager-view.php:77
+msgid "Next page"
+msgstr ""
+
+#: inc/manager-view.php:83
+#, php-format
+msgid "Order #%s"
+msgstr ""
+
+#: inc/manager-view.php:84
+msgid "Open WooCommerce order"
+msgstr ""
+
+#: inc/manager-view.php:86
+msgid "Copy to a new draft"
+msgstr ""
+
+#: inc/manager-view.php:87
+msgid "Folio documents were created. This draft is locked against duplicate creation."
+msgstr ""
+
+#: inc/manager-view.php:87
+msgid "Operation needs review. Do not submit it again or create a replacement until its Folio result is checked."
+msgstr ""
+
+#: inc/manager-view.php:88
+msgid "Operation ID:"
+msgstr ""
+
+#: inc/manager-view.php:91
+msgid "SKU / product"
+msgstr ""
+
+#: inc/manager-view.php:91
+#: inc/manager-view.php:95
+msgid "Quantity"
+msgstr ""
+
+#: inc/manager-view.php:91
+msgid "Saved unit price"
+msgstr ""
+
+#: inc/manager-view.php:94
+msgid "Set quantity to 0 to remove a line. Save changes before previewing."
+msgstr ""
+
+#: inc/manager-view.php:95
+msgid "Add product by SKU"
+msgstr ""
+
+#: inc/manager-view.php:96
+msgid "Order note"
+msgstr ""
+
+#: inc/manager-view.php:97
+msgid "Save customer draft"
+msgstr ""
+
+#: inc/manager-view.php:99
+msgid "Source order:"
+msgstr ""
+
+#: inc/manager-view.php:101
+msgid "Prepare Folio documents"
+msgstr ""
+
+#: inc/manager-view.php:102
+msgid "This is the customer working basket. Preparation recalculates customer prices and stock; the customer website cart stays separate."
+msgstr ""
+
+#: inc/manager-view.php:104
+msgid "Operation"
+msgstr ""
+
+#: inc/manager-view.php:104
+msgid "Accounts by warehouse"
+msgstr ""
+
+#: inc/manager-view.php:104
+msgid "Entire draft without reservation"
+msgstr ""
+
+#: inc/manager-view.php:105
+msgid "Warehouse mode"
+msgstr ""
+
+#: inc/manager-view.php:105
+msgid "Automatic allocation"
+msgstr ""
+
+#: inc/manager-view.php:105
+msgid "Prioritize selected warehouse"
+msgstr ""
+
+#: inc/manager-view.php:105
+msgid "Selected warehouse only"
+msgstr ""
+
+#: inc/manager-view.php:106
+msgid "Warehouse"
+msgstr ""
+
+#: inc/manager-view.php:107
+msgid "Available quantities become accounts with reservation. Shortages become separate non-accounting documents. Creating accounts does not create an expense invoice."
+msgstr ""
+
+#: inc/manager-view.php:108
+msgid "Preview prices and warehouses"
+msgstr ""
+
+#: inc/manager-view.php:110
+msgid "I checked this customer, quantities, prices and warehouses and confirm creation in Folio."
+msgstr ""
+
+#: inc/manager-view.php:110
+msgid "Confirm and create Folio documents"
+msgstr ""
+
+#: inc/manager-view.php:112
+msgid "Saved Folio documents"
+msgstr ""
+
+#: inc/ManagerWorkspace.php:39
+msgid "Select a customer account."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:51
+msgid "Save draft changes before continuing."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:52
+msgid "The request failed. Reload the workspace to check the saved result before trying again."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:76
+msgid "A product has no valid customer price."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:89
+msgid "The order does not belong to the selected customer."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:105
+msgid "This draft is locked. Check its Folio result or create a new copy."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:137
+#: inc/ManagerWorkspace.php:160
+msgid "Another operation is running. Reload the workspace shortly."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:177
+#: inc/ManagerWorkspace.php:220
+#: inc/ManagerWorkspace.php:335
+msgid "The customer is not linked to Folio."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:186
+#: inc/ManagerWorkspace.php:272
+msgid "Reload the workspace before creating a draft."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:202
+msgid "The draft changed in another window. Reload it before continuing."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:206
+#: inc/ManagerWorkspace.php:238
+msgid "Unknown workspace action."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:216
+msgid "Use a customer draft in the manager workspace."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:218
+msgid "Select a valid Folio document."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:235
+msgid "Manager copied Folio items into the customer draft."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:243
+#: inc/ManagerWorkspace.php:246
+msgid "Upload a CSV or Excel file up to 10 MB."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:248
+msgid "Use a file with 1 to 2000 product rows."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:259
+msgid "No rows were imported. Correct the file and try again."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:265
+msgid "Manager created a customer draft."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:266
+msgid "The customer draft was saved."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:278
+msgid "A source product is no longer available. Copy selected Folio items instead."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:286
+msgid "Manager created a new copy using current customer prices."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:293
+#: inc/ManagerWorkspace.php:299
+msgid "Enter whole quantities from 0 to 1000000."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:306
+msgid "Enter a valid product SKU and quantity."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:319
+msgid "Manager updated the customer draft."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:325
+msgid "Select a valid warehouse mode."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:327
+msgid "Warehouses are unavailable."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:333
+#: inc/ManagerWorkspace.php:376
+#: inc/ManagerWorkspace.php:380
+msgid "Select a warehouse linked to Folio."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:345
+msgid "Select the non-accounting Folio warehouse in Lavka settings."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:353
+msgid "Each line needs an existing product SKU and a positive whole quantity."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:395
+msgid "Folio returned an unexpected result. Check the saved operation before continuing."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:424
+#: inc/ManagerWorkspace.php:428
+msgid "Folio did not confirm the result. Reload the workspace and check the operation status."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:443
+msgid "Preview only. No Folio documents have been created. Confirm after checking quantities, prices and warehouses."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:447
+msgid "Confirm the reviewed operation first."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:457
+msgid "The preview expired or the draft changed. Create a new preview."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:459
+msgid "Customer prices or stock allocation changed. Create a new preview."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:484
+#: inc/ManagerWorkspace.php:487
+msgid "Folio was saved, but Woo order finalization needs review."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:488
+msgid "Created from the manager workspace."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:492
+msgid "Manager confirmed Folio documents for this customer."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:498
+msgid "The operation needs review. Do not submit it again. Check the saved Folio documents and operation ID."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:523
+msgid "The Folio warehouse cannot be matched to the prepared stock allocation."
+msgstr ""
+
+#: inc/ManagerWorkspace.php:528
+msgid "Folio warehouse"
+msgstr ""
+
+#: inc/ManagerWorkspace.php:528
+msgid "Document"
+msgstr ""
+
+#: inc/ManagerWorkspace.php:528
+msgid "Items and amounts"
+msgstr ""
+
+#: inc/ManagerWorkspace.php:531
+msgid "Account with reservation"
+msgstr ""
+
+#: inc/ManagerWorkspace.php:531
+msgid "Non-accounting document"
 msgstr ""
 
 #: inc/Ui.php:58

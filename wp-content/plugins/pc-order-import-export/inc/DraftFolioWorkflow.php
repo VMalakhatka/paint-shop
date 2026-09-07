@@ -900,6 +900,9 @@ class DraftFolioWorkflow
         if (!self::can_access($order)) {
             wp_die(esc_html__('You do not have permission to perform this action.', 'pc-order-import-export'), '', ['response' => 403]);
         }
+        if ($order->get_meta('_pcoe_manager_command', true)) {
+            wp_die(esc_html__('This operation was already submitted. Check the saved result; automatic resubmission is blocked.', 'pc-order-import-export'), '', ['response' => 409]);
+        }
         if (!$order->has_status('pc-draft')) {
             wp_die(esc_html__('Only a draft order can use this operation.', 'pc-order-import-export'), '', ['response' => 409]);
         }

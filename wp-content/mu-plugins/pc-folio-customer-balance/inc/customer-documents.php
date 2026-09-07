@@ -38,19 +38,22 @@ function pc_folio_documents_is_endpoint(): bool {
     return function_exists('is_wc_endpoint_url') && is_wc_endpoint_url(PC_FOLIO_DOCUMENTS_ENDPOINT);
 }
 
-function pc_folio_documents_enqueue_assets(): void {
-    $context = pc_folio_balance_user_context();
-    if (!pc_folio_documents_is_endpoint() || !$context) {
+function pc_folio_documents_enqueue_assets(int $manager_customer_id = 0): void {
+    $manager_customer_id = current_user_can('manage_woocommerce') ? $manager_customer_id : 0;
+    $context = $manager_customer_id > 0 ? pc_folio_balance_user_context($manager_customer_id, false) : pc_folio_balance_user_context();
+    if ((!pc_folio_documents_is_endpoint() && $manager_customer_id <= 0) || !$context) {
         return;
     }
 
     $base_url = content_url('/mu-plugins/pc-folio-customer-balance/assets/');
     wp_enqueue_style('pc-folio-customer-documents', $base_url . 'customer-documents.css', [], PC_FOLIO_BALANCE_VERSION);
-    wp_enqueue_script('pc-folio-customer-documents', $base_url . 'customer-documents.js', [], PC_FOLIO_BALANCE_VERSION, true);
+    wp_enqueue_script('pc-folio-customer-documents', $base_url . 'customer-documents.js', [], (string) filemtime(__DIR__ . '/../assets/customer-documents.js'), true);
     wp_localize_script('pc-folio-customer-documents', 'pcFolioDocuments', [
         'ajaxUrl' => admin_url('admin-ajax.php'),
         'nonce'   => wp_create_nonce('pc_folio_customer_documents'),
         'today'   => current_time('Y-m-d'),
+        'managerCustomerId' => $manager_customer_id,
+        'managerNonce' => $manager_customer_id > 0 ? wp_create_nonce('pcoe_manager') : '',
         'labels'  => [
             'loading'       => __('Folio documents are being loaded...', 'pc-folio-customer-balance'),
             'detailsLoading'=> __('Document details are being loaded...', 'pc-folio-customer-balance'),
@@ -108,10 +111,12 @@ function pc_folio_documents_enqueue_assets(): void {
         ],
     ]);
 }
-add_action('wp_enqueue_scripts', 'pc_folio_documents_enqueue_assets');
+// WordPress supplies an empty hook argument; it is not a manager customer ID.
+add_action('wp_enqueue_scripts', 'pc_folio_documents_enqueue_assets', 10, 0);
 
-function pc_folio_documents_render_endpoint(): void {
-    $context = pc_folio_balance_user_context();
+function pc_folio_documents_render_endpoint(int $manager_customer_id = 0): void {
+    $manager_customer_id = current_user_can('manage_woocommerce') ? $manager_customer_id : 0;
+    $context = $manager_customer_id > 0 ? pc_folio_balance_user_context($manager_customer_id, false) : pc_folio_balance_user_context();
     if (!$context) {
         echo '<p class="woocommerce-error">' . esc_html__('This report is not available for your account.', 'pc-folio-customer-balance') . '</p>';
         return;
@@ -207,10 +212,10 @@ function pc_folio_documents_render_endpoint(): void {
     </section>
     <?php
 }
-add_action('woocommerce_account_' . PC_FOLIO_DOCUMENTS_ENDPOINT . '_endpoint', 'pc_folio_documents_render_endpoint');
+add_action('woocommerce_account_' . PC_FOLIO_DOCUMENTS_ENDPOINT . '_endpoint', static function (): void { pc_folio_documents_render_endpoint(); });
 
 function pc_folio_documents_request_context() {
-    $context = pc_folio_balance_user_context();
+    $context = apply_filters('pc_folio_documents_request_context', pc_folio_balance_user_context());
     if (!$context) {
         return new WP_Error('forbidden', __('This report is not available for your account.', 'pc-folio-customer-balance'), ['status' => 403]);
     }

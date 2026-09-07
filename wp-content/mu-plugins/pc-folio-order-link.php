@@ -249,7 +249,8 @@ if (!function_exists('pc_folio_order_has_saved_documents')) {
         $result = pc_folio_get_order_documents_result($order);
         $link = pc_folio_get_order_document_link($order);
 
-        return !empty($result['documents'])
+        return !empty($order->get_meta('_pcoe_manager_command', true))
+            || !empty($result['documents'])
             || !empty($link['document_id'])
             || !empty($link['document_number']);
     }
@@ -1110,6 +1111,7 @@ if (!function_exists('pc_folio_create_child_order_item')) {
         $order_item->add_meta_data('_folio_warehouse_id', (string) ($folio_item['folio_warehouse_id'] ?? ($folio_item['warehouseId'] ?? '')), true);
         $order_item->add_meta_data('_folio_allocation_status', (string) ($folio_item['allocation_status'] ?? ($folio_item['allocationStatus'] ?? '')), true);
 
+        do_action('pc_folio_child_order_item_prepared', $parent_order, $order_item, $folio_item);
         $child_order->add_item($order_item);
     }
 }

@@ -58,9 +58,20 @@
         statusBox.className = 'pc-folio-documents__status' + (kind ? ' is-' + kind : '');
     }
 
+    var managerRepeatKeys = {};
     function request(action, params, signal) {
         var body = new URLSearchParams();
-        body.set('action', action);
+        body.set('action', pcFolioDocuments.managerCustomerId ? 'pcoe_manager' : action);
+        if (pcFolioDocuments.managerCustomerId) {
+            body.set('operation', action);
+            body.set('customer_id', pcFolioDocuments.managerCustomerId);
+            body.set('manager_nonce', pcFolioDocuments.managerNonce);
+            if (action === 'pc_folio_customer_document_repeat') {
+                var repeatKey = JSON.stringify(params || {});
+                if (!managerRepeatKeys[repeatKey]) managerRepeatKeys[repeatKey] = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) { var r = crypto.getRandomValues(new Uint8Array(1))[0] & 15; return (c === 'x' ? r : (r & 3) | 8).toString(16); });
+                body.set('request_key', managerRepeatKeys[repeatKey]);
+            }
+        }
         body.set('_ajax_nonce', pcFolioDocuments.nonce);
         Object.keys(params || {}).forEach(function (key) {
             if (params[key] !== '' && params[key] != null) body.set(key, String(params[key]));
@@ -427,7 +438,8 @@
             draftButton.dataset.repeatTarget = 'draft';
             cartButton.dataset.documentType = draftButton.dataset.documentType = folioDocument.documentType;
             cartButton.dataset.documentId = draftButton.dataset.documentId = folioDocument.documentId;
-            repeatActions.append(cartButton, draftButton);
+            if (!pcFolioDocuments.managerCustomerId) repeatActions.append(cartButton);
+            repeatActions.append(draftButton);
             repeatSection.appendChild(repeatActions);
             repeatSection.appendChild(documentNode('div', 'pc-folio-documents__repeat-result'));
         } else {

@@ -256,3 +256,25 @@ evidence остаются в [KNOWN_GAPS.md](KNOWN_GAPS.md), а не маски�
 WordPress и Java имеют отдельные versioned documentation-impact checks. Каждый
 проверяет только свой репозиторий; связь Java change -> WordPress backend/runtime
 runbook пока обеспечивается skills и review, а не одним общим CI.
+
+### Менеджерский контекст клиента
+
+Проверено по локальному коду 2026-09-07. `pc-order-import-export/inc/ManagerWorkspace.php`
+владеет страницей `pcoe-customers` и AJAX `pcoe_manager`; инструкция —
+[Работа менеджера с клиентскими документами](OPERATIONS_RUNBOOK.md#работа-менеджера-с-клиентскими-документами).
+Авторизация проверяет менеджера (`manage_woocommerce` + nonce), принадлежность
+заказа проверяется по выбранному `customer_id`. Цены читаются в коротком контексте
+клиента с обязательным восстановлением текущего пользователя и `WC()->customer`;
+авторизация и запись не выполняются внутри этого контекста. Аллокатор `paint-core`
+принимает необязательный явный preference; отсутствие аргумента сохраняет прежнее
+поведение клиентской корзины. ФОЛИО payload и создание/связь дочерних заказов
+переиспользуют `pc-folio-order-link`; Java остаётся владельцем окончательного
+складского распределения и учётных записей. Hook `pc_folio_child_order_item_prepared`
+фиксирует складской план менеджерского дочернего заказа до смены статуса.
+
+Manager audit meta: `_pcoe_manager_created_by`, `_pcoe_manager_updated_by`,
+`_pcoe_source_order_id`; durable command: `_pcoe_manager_command`. Preview и результаты
+обычного повтора нового черновика хранятся в ограниченных по времени transients.
+Новая таблица и миграция не нужны. Фильтр `pc_folio_documents_request_context`
+устанавливается только после проверки manager endpoint; публичный клиентский
+endpoint по умолчанию сохраняет контекст вошедшего клиента.

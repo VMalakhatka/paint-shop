@@ -271,8 +271,8 @@ msgid "Full synchronization"
 msgstr "Полная синхронизация"
 
 #: inc/admin-lavka-hub.php
-msgid "Prices and analytics"
-msgstr "Цены и аналитика"
+msgid "Prices"
+msgstr "Цены"
 
 #: inc/admin-lavka-hub.php
 msgid "Reports"
@@ -281,3 +281,11 @@ msgstr "Отчёты"
 #: inc/admin-lavka-hub.php
 msgid "Import and tools"
 msgstr "Импорт и инструменты"
+
+#: inc/admin-lavka-hub.php
+msgid "Analytics"
+msgstr "Аналитика"
+
+#: inc/admin-lavka-hub.php
+msgid "Database maintenance"
+msgstr "Обслуживание базы"

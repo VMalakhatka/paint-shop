@@ -61,12 +61,12 @@ function pc_ajax_set_alloc_pref() {
  * ЕДИНАЯ точка расчёта плана списания под текущие предпочтения пользователя.
  * Возвращает массив вида [term_id => qty, ...]
  */
-function pc_build_alloc_plan(\WC_Product $product, int $need): array {
+function pc_build_alloc_plan(\WC_Product $product, int $need, ?array $preference = null): array {
     $need = max(0, (int)$need);
     if ($need === 0) return [];
     if ( ! function_exists('slu_collect_location_stocks_for_product')) return [];
 
-    $pref = function_exists('pc_get_alloc_pref') ? pc_get_alloc_pref() : ['mode'=>'auto','term_id'=>0];
+    $pref = $preference ?? (function_exists('pc_get_alloc_pref') ? pc_get_alloc_pref() : ['mode'=>'auto','term_id'=>0]);
     $mode = $pref['mode'] ?? 'auto';
     $sel  = (int)($pref['term_id'] ?? 0);
 
