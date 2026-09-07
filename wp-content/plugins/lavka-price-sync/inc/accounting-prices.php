@@ -205,6 +205,10 @@ add_action('admin_enqueue_scripts', function () {
             admin_url('admin-post.php?action=lps_accounting_price_diagnostic_export'),
             'lps_accounting_price_diagnostic_export'
         ),
+        'diagnosticExportXlsxUrl' => wp_nonce_url(
+            admin_url('admin-post.php?action=lps_accounting_price_diagnostic_export_xlsx'),
+            'lps_accounting_price_diagnostic_export_xlsx'
+        ),
         'pollInterval' => 5000,
         'i18n' => [
             'reviewConfirm' => __('Have you checked the unresolved operation in Folio, including the possible commit? A fresh snapshot alone is not proof. Continue only after this review; the campaign will rebuild the snapshot before selecting SKU.', 'lavka-price-sync'),
@@ -332,6 +336,7 @@ add_action('admin_enqueue_scripts', function () {
             'dateTo' => __('Date to', 'lavka-price-sync'),
             'applyFilters' => __('Apply filters', 'lavka-price-sync'),
             'exportDiagnostics' => __('Export diagnostic CSV', 'lavka-price-sync'),
+            'exportDiagnosticsXlsx' => __('Export diagnostic XLSX', 'lavka-price-sync'),
             'newerDiagnostics' => __('Newer records', 'lavka-price-sync'),
             'olderDiagnostics' => __('Older records', 'lavka-price-sync'),
             'noPersistentDiagnostics' => __('No permanent diagnostics match these filters.', 'lavka-price-sync'),

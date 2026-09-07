@@ -611,9 +611,9 @@
     }
   }
 
-  function diagnosticExportUrl(filters) {
-    if (!config.diagnosticExportUrl) return '';
-    const url = new URL(config.diagnosticExportUrl, window.location.href);
+  function diagnosticExportUrl(filters, baseUrl) {
+    if (!baseUrl) return '';
+    const url = new URL(baseUrl, window.location.href);
     url.searchParams.set('source_database', filters.sourceDatabase || '');
     url.searchParams.set('warehouse_id', String(filters.warehouseId || 0));
     if (filters.sku) url.searchParams.set('sku', filters.sku);
@@ -673,10 +673,16 @@
       elements.overviewDetails.append(section);
       return;
     }
-    const exportUrl = diagnosticExportUrl(filters);
+    const exportUrl = diagnosticExportUrl(filters, config.diagnosticExportUrl);
     if (exportUrl) {
       const exportLink = node('a', 'button', t.exportDiagnostics || 'Export diagnostic CSV');
       exportLink.href = exportUrl;
+      section.append(exportLink);
+    }
+    const exportXlsxUrl = diagnosticExportUrl(filters, config.diagnosticExportXlsxUrl);
+    if (exportXlsxUrl) {
+      const exportLink = node('a', 'button', t.exportDiagnosticsXlsx || 'Export diagnostic XLSX');
+      exportLink.href = exportXlsxUrl;
       section.append(exportLink);
     }
     if (!Array.isArray(report.items) || !report.items.length) {
