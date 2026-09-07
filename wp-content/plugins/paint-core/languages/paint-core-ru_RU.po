@@ -261,3 +261,23 @@ msgstr "Списание: %s"
 #: inc/stock-locations-display.php:213 inc/stock-locations-display.php:216
 msgid "Warehouse"
 msgstr "Склад"
+
+#: inc/admin-lavka-hub.php
+msgid "Stock"
+msgstr "Остатки"
+
+#: inc/admin-lavka-hub.php
+msgid "Full synchronization"
+msgstr "Полная синхронизация"
+
+#: inc/admin-lavka-hub.php
+msgid "Prices and analytics"
+msgstr "Цены и аналитика"
+
+#: inc/admin-lavka-hub.php
+msgid "Reports"
+msgstr "Отчёты"
+
+#: inc/admin-lavka-hub.php
+msgid "Import and tools"
+msgstr "Импорт и инструменты"

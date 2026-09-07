@@ -276,3 +276,23 @@ msgstr ""
 #: inc/stock-locations-display.php:216
 msgid "Warehouse"
 msgstr ""
+
+#: inc/admin-lavka-hub.php
+msgid "Stock"
+msgstr ""
+
+#: inc/admin-lavka-hub.php
+msgid "Full synchronization"
+msgstr ""
+
+#: inc/admin-lavka-hub.php
+msgid "Prices and analytics"
+msgstr ""
+
+#: inc/admin-lavka-hub.php
+msgid "Reports"
+msgstr ""
+
+#: inc/admin-lavka-hub.php
+msgid "Import and tools"
+msgstr ""

@@ -1,0 +1,35 @@
+#adminmenu .lavka-menu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 12px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    line-height: 1.4;
+    text-align: start;
+    cursor: pointer;
+}
+#adminmenu .lavka-menu-toggle::after {
+    content: '\203A';
+    font-size: 18px;
+    transition: transform .15s;
+}
+#adminmenu .lavka-menu-toggle[aria-expanded="true"]::after { transform: rotate(90deg); }
+#adminmenu .lavka-menu-toggle:hover,
+#adminmenu .lavka-menu-toggle:focus-visible { color: #72aee6; background: rgba(255,255,255,.06); }
+#adminmenu .lavka-menu-toggle:focus-visible { outline: 2px solid #72aee6; outline-offset: -2px; }
+#adminmenu .lavka-menu-active > .lavka-menu-toggle { color: #fff; font-weight: 600; }
+#adminmenu .lavka-menu-children { margin: 0 10px 6px; padding: 0; list-style: none; border-inline-start: 2px solid #50575e; }
+#adminmenu .lavka-menu-children[hidden] { display: none !important; }
+#adminmenu .lavka-menu-children a { padding-inline-start: 12px; font-size: 12px; }
+@media screen and (max-width: 782px) {
+    #adminmenu .lavka-menu-toggle { min-height: 44px; padding: 10px 12px; font-size: 16px; }
+    #adminmenu .lavka-menu-children a { min-height: 24px; font-size: 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    #adminmenu .lavka-menu-toggle::after { transition: none; }
+}

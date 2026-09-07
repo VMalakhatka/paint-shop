@@ -45,7 +45,10 @@ function lps_accounting_price_diagnostic_query(array $input, int $before_id = 0,
 
     $where = ['source_database = %s', 'warehouse_id = %d'];
     $args = [$filters['sourceDatabase'], $filters['warehouseId']];
-    if ($filters['sku'] !== '') { $where[] = 'sku = %s'; $args[] = $filters['sku']; }
+    if ($filters['sku'] !== '') {
+        $where[] = 'HEX(sku) = %s';
+        $args[] = strtoupper(bin2hex($filters['sku']));
+    }
     if ($filters['jobId'] !== '') { $where[] = 'job_id = %s'; $args[] = $filters['jobId']; }
     if ($filters['mode'] !== 'all') { $where[] = 'preview_only = %d'; $args[] = $filters['mode'] === 'preview' ? 1 : 0; }
     if ($filters['dateFrom'] !== '') { $where[] = 'created_at >= %s'; $args[] = $filters['dateFrom'] . ' 00:00:00'; }

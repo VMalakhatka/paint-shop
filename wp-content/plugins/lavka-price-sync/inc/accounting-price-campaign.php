@@ -727,11 +727,12 @@ function lps_accounting_price_campaign_snapshot_items(
                 $diagnostic_codes[$code] = $code;
             }
         }
-        $placeholders = implode(',', array_fill(0, count($skus), '%s'));
+        $sku_hexes = array_map(static fn(string $sku): string => strtoupper(bin2hex($sku)), $skus);
+        $placeholders = implode(',', array_fill(0, count($sku_hexes), '%s'));
         $code_placeholders = implode(',', array_fill(0, count($diagnostic_codes), '%s'));
         $diagnostic_rows = [];
         if ($diagnostic_codes) {
-            $diagnostic_args = array_merge([$source_database, $warehouse_id], $skus, array_values($diagnostic_codes));
+            $diagnostic_args = array_merge([$source_database, $warehouse_id], $sku_hexes, array_values($diagnostic_codes));
             $diagnostic_rows = $wpdb->get_results($wpdb->prepare(
                 "SELECT d.id, d.job_id, d.sku, d.preview_only, d.error_code, d.message,
                         d.diagnostics_json, d.created_at
@@ -740,7 +741,7 @@ function lps_accounting_price_campaign_snapshot_items(
                      SELECT sku, error_code, MAX(id) AS id
                      FROM " . LPS_ACCOUNTING_PRICE_DIAGNOSTIC_TABLE . "
                      WHERE source_database = %s AND warehouse_id = %d
-                       AND sku IN ({$placeholders})
+                       AND HEX(sku) IN ({$placeholders})
                        AND error_code IN ({$code_placeholders})
                      GROUP BY sku, error_code
                  ) latest ON latest.id = d.id
@@ -767,11 +768,11 @@ function lps_accounting_price_campaign_snapshot_items(
             $diagnostic_row = $wpdb->get_row($wpdb->prepare(
                 "SELECT id, job_id, sku, preview_only, error_code, message, diagnostics_json, created_at
                  FROM " . LPS_ACCOUNTING_PRICE_DIAGNOSTIC_TABLE . "
-                 WHERE source_database = %s AND warehouse_id = %d AND sku = %s AND error_code = %s
+                 WHERE source_database = %s AND warehouse_id = %d AND HEX(sku) = %s AND error_code = %s
                  ORDER BY id DESC LIMIT 1",
                 $source_database,
                 $warehouse_id,
-                $sku,
+                strtoupper(bin2hex($sku)),
                 $code
             ), ARRAY_A);
             if (is_array($diagnostic_row)) {

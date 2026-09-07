@@ -67,7 +67,7 @@ check($report['available'] && count($report['items']) === 1, 'Filtered V14 journ
 check($report['items'][0]['details']['long'] === $long, 'Long diagnostic JSON must remain intact.');
 check(str_contains($wpdb->lastQuery, "source_database = 'Paint_Ua'"), 'Database isolation must be present in the prepared query.');
 check(str_contains($wpdb->lastQuery, 'warehouse_id = 5'), 'Warehouse isolation must be present in the prepared query.');
-check(str_contains($wpdb->lastQuery, "sku = '=DANGEROUS-SKU'"), 'SKU filter must be exact.');
+check(str_contains($wpdb->lastQuery, "HEX(sku) = '" . strtoupper(bin2hex('=DANGEROUS-SKU')) . "'"), 'SKU filter must use an exact charset-safe hexadecimal value.');
 check(str_contains($wpdb->lastQuery, "job_id = 'job-91'"), 'Job filter must be exact.');
 check(str_contains($wpdb->lastQuery, 'preview_only = 0'), 'Apply/preview mode must be filterable.');
 check(str_contains($wpdb->lastQuery, 'id < 100') && str_contains($wpdb->lastQuery, 'ORDER BY id DESC'), 'Journal pagination must use descending ID keysets.');
