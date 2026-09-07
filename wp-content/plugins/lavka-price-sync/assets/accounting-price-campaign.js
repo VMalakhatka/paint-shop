@@ -186,6 +186,45 @@
     if (details?.inspectionError) target.append(node('p', 'description', String(details.inspectionError)));
   }
 
+  function appendNegativeStockDiagnostic(target, details) {
+    const operation = details?.operation && typeof details.operation === 'object' ? details.operation : {};
+    const currentState = details?.currentState && typeof details.currentState === 'object' ? details.currentState : {};
+    const documentNumber = operation.documentNumber || operation.documentId || '';
+    const document = [operation.documentType, documentNumber].filter(Boolean).join(' · ') || '—';
+    const operationKind = String(operation.kind || '').toUpperCase();
+    const operationLabel = operationKind === 'RECEIPT'
+      ? t.receipt
+      : (operationKind === 'EXPENSE' ? t.expense : (operation.kind || t.unknownOperation));
+    const operationValue = [operationLabel, operation.quantity].filter((value) => value === 0 || value).join(' · ') || '—';
+    const movementPosition = details?.movementPosition || details?.movementCount
+      ? `${display(details.movementPosition)} / ${display(details.movementCount)}`
+      : '—';
+    const explanation = node('div', 'lps-ap-negative-diagnostic');
+    explanation.append(node('p', 'lps-ap-negative-explanation', t.negativeStockExplanation || 'Chronological stock became negative.'));
+    const grid = node('dl', 'lps-ap-negative-grid');
+    [
+      [t.document, document],
+      [t.problemDate, operation.documentDate || details?.problemDate],
+      [t.warehouse, operation.warehouseId || details?.warehouseId],
+      [t.initialQuantity, details?.initialQuantity],
+      [t.movementRecord, operation.recno],
+      [t.beforeOperation, details?.quantityBefore],
+      [t.operationQuantity, operationValue],
+      [t.afterOperation, details?.quantityAfter],
+      [t.shortage, details?.shortageQuantity],
+      [t.movementPosition, movementPosition],
+      [t.currentPhysicalQuantity, currentState.physicalQuantity],
+      [t.currentAccountingQuantity, currentState.accountingQuantity]
+    ].forEach(([label, value]) => {
+      if (value === undefined || value === null || value === '') return;
+      const item = node('div');
+      item.append(node('dt', '', label || '—'), node('dd', '', display(value)));
+      grid.append(item);
+    });
+    explanation.append(grid);
+    target.append(explanation);
+  }
+
   function formatDateTime(value) {
     if (!value) return '—';
     const parsed = new Date(String(value).replace(' ', 'T'));
@@ -219,12 +258,33 @@
       const changeText = [change.change_type, change.detected_at].filter(Boolean).join(' · ') || '—';
       const reason = t.stateReasons?.[item?.verification_state] || item?.verification_state || '—';
       const row = node('tr');
+      const errorCell = node('td', item?.last_error ? 'is-error-text' : '');
+      errorCell.append(node('p', '', display(item?.last_error)));
+      const diagnostic = item?.latest_diagnostic && typeof item.latest_diagnostic === 'object'
+        ? item.latest_diagnostic
+        : null;
+      if (diagnostic) {
+        const details = diagnostic.details && typeof diagnostic.details === 'object' ? diagnostic.details : {};
+        const disclosure = node('details', 'lps-ap-inline-diagnostic');
+        disclosure.append(node('summary', '', t.details || 'Details'));
+        if (String(diagnostic.errorCode || '').toUpperCase() === 'NEGATIVE_CHRONOLOGICAL_STOCK') {
+          appendNegativeStockDiagnostic(disclosure, details);
+        } else {
+          appendArithmeticDiagnostic(disclosure, details, Object.assign({}, diagnostic, {
+            sourceDatabase: report.sourceDatabase,
+            warehouseId: report.warehouseId,
+            sku: item?.sku
+          }));
+        }
+        disclosure.append(node('pre', '', JSON.stringify(details, null, 2)));
+        errorCell.append(disclosure);
+      }
       row.append(
         node('td', 'lps-ap-snapshot-sku', display(item?.sku)),
         node('td', '', display(item?.product_name)),
         node('td', '', display(item?.verification_state)),
         node('td', '', reason),
-        node('td', item?.last_error ? 'is-error-text' : '', display(item?.last_error)),
+        errorCell,
         node('td', '', integer.format(Number(item?.movement_count || 0))),
         node('td', '', movementPeriod),
         node('td', '', display(item?.last_observed_at)),
@@ -426,41 +486,7 @@
       messageCell.append(node('p', '', warning?.message || '—'));
       const warningCode = String(warning?.code || '').toUpperCase();
       if (warningCode === 'NEGATIVE_CHRONOLOGICAL_STOCK') {
-        const operation = details.operation && typeof details.operation === 'object' ? details.operation : {};
-        const currentState = details.currentState && typeof details.currentState === 'object' ? details.currentState : {};
-        const documentNumber = operation.documentNumber || operation.documentId || '';
-        const document = [operation.documentType, documentNumber].filter(Boolean).join(' · ') || '—';
-        const operationKind = String(operation.kind || '').toUpperCase();
-        const operationLabel = operationKind === 'RECEIPT'
-          ? t.receipt
-          : (operationKind === 'EXPENSE' ? t.expense : (operation.kind || t.unknownOperation));
-        const operationValue = [operationLabel, operation.quantity].filter((value) => value === 0 || value).join(' · ') || '—';
-        const movementPosition = details.movementPosition || details.movementCount
-          ? `${display(details.movementPosition)} / ${display(details.movementCount)}`
-          : '—';
-        const explanation = node('div', 'lps-ap-negative-diagnostic');
-        explanation.append(node('p', 'lps-ap-negative-explanation', t.negativeStockExplanation || 'Chronological stock became negative.'));
-        const grid = node('dl', 'lps-ap-negative-grid');
-        [
-          [t.document, document],
-          [t.problemDate, operation.documentDate || details.problemDate],
-          [t.warehouse, operation.warehouseId || details.warehouseId],
-          [t.initialQuantity, details.initialQuantity],
-          [t.movementRecord, operation.recno],
-          [t.beforeOperation, details.quantityBefore],
-          [t.operationQuantity, operationValue],
-          [t.afterOperation, details.quantityAfter],
-          [t.shortage, details.shortageQuantity],
-          [t.movementPosition, movementPosition],
-          [t.currentPhysicalQuantity, currentState.physicalQuantity],
-          [t.currentAccountingQuantity, currentState.accountingQuantity]
-        ].forEach(([label, value]) => {
-          const item = node('div');
-          item.append(node('dt', '', label || '—'), node('dd', '', display(value)));
-          grid.append(item);
-        });
-        explanation.append(grid);
-        messageCell.append(explanation);
+        appendNegativeStockDiagnostic(messageCell, details);
       } else if (['ZERO_ACCOUNTING_DENOMINATOR', 'ZERO_ACCOUNTING_QUANTITY_DENOMINATOR'].includes(warningCode)) {
         const operation = details.operation && typeof details.operation === 'object' ? details.operation : {};
         const documentNumber = operation.documentNumber || details.documentNumber || operation.documentId || details.documentId || '';
@@ -598,7 +624,7 @@
   function renderPersistentDiagnostics(report) {
     elements.overviewDetails.replaceChildren();
     const section = node('section', 'lps-ap-state-section lps-ap-persistent-diagnostics');
-    section.append(node('h3', '', t.persistentDiagnostics || 'Permanent arithmetic diagnostic log'));
+    section.append(node('h3', '', t.persistentDiagnostics || 'Permanent accounting-price diagnostic log'));
     if (!report?.ok) {
       section.append(node('div', 'notice notice-error inline', report?.message || t.requestFailed || 'Request failed'));
       elements.overviewDetails.append(section);
@@ -650,7 +676,11 @@
       report.items.forEach((item) => {
         const row = node('tr', 'lps-ap-batch-row is-warning');
         const message = node('td'); message.append(node('p', '', item.message || '—'));
-        appendArithmeticDiagnostic(message, item.details || {}, item);
+        if (String(item.errorCode || '').toUpperCase() === 'NEGATIVE_CHRONOLOGICAL_STOCK') {
+          appendNegativeStockDiagnostic(message, item.details || {});
+        } else {
+          appendArithmeticDiagnostic(message, item.details || {}, item);
+        }
         const technical = node('td'); const disclosure = node('details');
         disclosure.append(node('summary', '', t.details || 'Details'), node('pre', '', JSON.stringify(item.details || {}, null, 2))); technical.append(disclosure);
         const cells = [

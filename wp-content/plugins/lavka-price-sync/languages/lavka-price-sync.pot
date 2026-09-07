@@ -1594,7 +1594,7 @@ msgid "Latest warehouse diagnostics"
 msgstr ""
 
 #: inc/accounting-prices.php:321
-msgid "Permanent arithmetic diagnostic log"
+msgid "Permanent accounting-price diagnostic log"
 msgstr ""
 
 #: inc/accounting-prices.php:322

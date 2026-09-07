@@ -1789,8 +1789,8 @@ msgid "Latest warehouse diagnostics"
 msgstr "Последняя диагностика складов"
 
 #: inc/accounting-prices.php:321
-msgid "Permanent arithmetic diagnostic log"
-msgstr "Постоянный журнал арифметической диагностики"
+msgid "Permanent accounting-price diagnostic log"
+msgstr "Постоянный журнал диагностики учётных цен"
 
 #: inc/accounting-prices.php:322
 msgid "View permanent diagnostics"

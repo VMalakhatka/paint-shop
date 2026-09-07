@@ -680,6 +680,7 @@ function lps_accounting_price_campaign_snapshot_items(
     ), ARRAY_A) ?: [];
 
     $changes_by_sku = [];
+    $diagnostics_by_sku = [];
     $skus = array_values(array_filter(array_map(static fn(array $row): string => (string)($row['sku'] ?? ''), $items)));
     if ($skus) {
         $placeholders = implode(',', array_fill(0, count($skus), '%s'));
@@ -699,9 +700,52 @@ function lps_accounting_price_campaign_snapshot_items(
         }
     }
 
+    if ($verification_state === 'FAILED' && $skus && lps_accounting_price_diagnostic_table_ready()) {
+        $placeholders = implode(',', array_fill(0, count($skus), '%s'));
+        $diagnostic_args = array_merge([$source_database, $warehouse_id], $skus);
+        $diagnostic_rows = $wpdb->get_results($wpdb->prepare(
+            "SELECT diagnostic.id, diagnostic.job_id, diagnostic.sku,
+                    diagnostic.preview_only, diagnostic.error_code, diagnostic.message,
+                    diagnostic.diagnostics_json, diagnostic.created_at
+             FROM " . LPS_ACCOUNTING_PRICE_DIAGNOSTIC_TABLE . " diagnostic
+             JOIN (
+                 SELECT sku, MAX(id) AS id
+                 FROM " . LPS_ACCOUNTING_PRICE_DIAGNOSTIC_TABLE . "
+                 WHERE source_database = %s AND warehouse_id = %d
+                   AND sku IN ({$placeholders})
+                 GROUP BY sku
+             ) latest ON latest.id = diagnostic.id",
+            ...$diagnostic_args
+        ), ARRAY_A) ?: [];
+        foreach ($diagnostic_rows as $diagnostic_row) {
+            $sku = (string)($diagnostic_row['sku'] ?? '');
+            $details = json_decode((string)($diagnostic_row['diagnostics_json'] ?? ''), true);
+            if (!is_array($details)) {
+                $details = ['diagnosticsMalformed' => true];
+            }
+            if ($sku !== '') {
+                $diagnostics_by_sku[$sku] = [
+                    'id' => absint($diagnostic_row['id'] ?? 0),
+                    'jobId' => sanitize_text_field((string)($diagnostic_row['job_id'] ?? '')),
+                    'previewOnly' => !empty($diagnostic_row['preview_only']),
+                    'errorCode' => sanitize_text_field((string)($diagnostic_row['error_code'] ?? '')),
+                    'message' => sanitize_textarea_field((string)($diagnostic_row['message'] ?? '')),
+                    'details' => $details,
+                    'createdAt' => sanitize_text_field((string)($diagnostic_row['created_at'] ?? '')),
+                ];
+            }
+        }
+    }
+
     foreach ($items as &$item) {
         $sku = (string)($item['sku'] ?? '');
         $item['latest_change'] = $changes_by_sku[$sku] ?? null;
+        $diagnostic = $diagnostics_by_sku[$sku] ?? null;
+        $diagnostic_code = is_array($diagnostic) ? (string)($diagnostic['errorCode'] ?? '') : '';
+        $last_error = (string)($item['last_error'] ?? '');
+        $item['latest_diagnostic'] = $diagnostic_code !== '' && str_contains($last_error, $diagnostic_code)
+            ? $diagnostic
+            : null;
         $item['digest_matches'] = !empty($item['observed_digest'])
             && hash_equals((string)$item['observed_digest'], (string)($item['applied_digest'] ?? ''));
         unset($item['observed_digest'], $item['applied_digest']);

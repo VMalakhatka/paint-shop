@@ -318,7 +318,7 @@ add_action('admin_enqueue_scripts', function () {
             'legacyDiagnosticsNotice' => __('Detailed diagnostics from campaigns completed before this overview was added may be unavailable. Snapshot states and saved last errors are still shown.', 'lavka-price-sync'),
             'warehouseDirectoryUnavailable' => __('The Java warehouse directory is temporarily unavailable. Warehouses known from saved schedules and snapshots are still shown.', 'lavka-price-sync'),
             'warehouseDiagnostics' => __('Latest warehouse diagnostics', 'lavka-price-sync'),
-            'persistentDiagnostics' => __('Permanent arithmetic diagnostic log', 'lavka-price-sync'),
+            'persistentDiagnostics' => __('Permanent accounting-price diagnostic log', 'lavka-price-sync'),
             'viewPersistentDiagnostics' => __('View permanent diagnostics', 'lavka-price-sync'),
             'persistentDiagnosticsUnavailable' => __('The permanent diagnostic log is unavailable until Java and MariaDB migration V14 are deployed.', 'lavka-price-sync'),
             'diagnosticFilters' => __('Diagnostic filters', 'lavka-price-sync'),
