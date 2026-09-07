@@ -188,13 +188,9 @@ add_action('admin_post_lps_accounting_price_diagnostic_export', function (): voi
     $output = fopen('php://output', 'wb');
     if ($output === false) exit;
     fwrite($output, "\xEF\xBB\xBF");
-    $headers_written = false;
+    fputcsv($output, array_keys(lps_accounting_price_diagnostic_export_values([])));
     foreach (lps_accounting_price_diagnostic_export_items($filters) as $item) {
         $values = lps_accounting_price_diagnostic_export_values($item);
-        if (!$headers_written) {
-            fputcsv($output, array_keys($values));
-            $headers_written = true;
-        }
         fputcsv($output, array_map('lps_accounting_price_diagnostic_csv_value', array_values($values)));
     }
     fclose($output);

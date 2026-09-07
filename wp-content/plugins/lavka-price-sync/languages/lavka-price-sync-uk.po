@@ -635,14 +635,12 @@ msgid "Mode"
 msgstr "Режим"
 
 #: inc/accounting-price-diagnostics.php:121 inc/accounting-prices.php:333
-#, fuzzy
 msgid "Preview"
-msgstr "Етап попередньої перевірки"
+msgstr "Попередня перевірка"
 
 #: inc/accounting-price-diagnostics.php:121 inc/accounting-prices.php:334
-#, fuzzy
 msgid "Apply"
-msgstr "Етап застосування"
+msgstr "Застосування"
 
 #: inc/accounting-price-diagnostics.php:122 inc/accounting-prices.php:330
 #: inc/accounting-prices.php:1113
@@ -660,14 +658,12 @@ msgid "Document type"
 msgstr "Тип документа"
 
 #: inc/accounting-price-diagnostics.php:127
-#, fuzzy
 msgid "Document No."
-msgstr "Документ"
+msgstr "Номер документа"
 
 #: inc/accounting-price-diagnostics.php:128
-#, fuzzy
 msgid "Document ID"
-msgstr "Документ"
+msgstr "ID документа"
 
 #: inc/accounting-price-diagnostics.php:129 inc/product-analytics.php:119
 msgid "Document date"
@@ -688,37 +684,32 @@ msgid "Movement position"
 msgstr "Позиція руху"
 
 #: inc/accounting-price-diagnostics.php:138
-#, fuzzy
 msgid "Movement count"
-msgstr "Умови руху"
+msgstr "Кількість рухів"
 
 #: inc/accounting-price-diagnostics.php:139 inc/accounting-prices.php:287
 msgid "Current physical quantity"
 msgstr "Поточний фізичний залишок"
 
 #: inc/accounting-price-diagnostics.php:140
-#, fuzzy
 msgid "Current available quantity"
-msgstr "Поточний фізичний залишок"
+msgstr "Поточний доступний залишок"
 
 #: inc/accounting-price-diagnostics.php:141 inc/accounting-prices.php:288
 msgid "Current accounting quantity"
 msgstr "Поточний обліковий залишок"
 
 #: inc/accounting-price-diagnostics.php:142
-#, fuzzy
 msgid "Current accounting price"
-msgstr "Будь-яка облікова ціна"
+msgstr "Поточна облікова ціна"
 
 #: inc/accounting-price-diagnostics.php:143
-#, fuzzy
 msgid "Trigger movement confirmed"
-msgstr "Причинний документ підтверджено"
+msgstr "Проблемний рух підтверджено"
 
 #: inc/accounting-price-diagnostics.php:144
-#, fuzzy
 msgid "Business root cause confirmed"
-msgstr "Причинний документ підтверджено"
+msgstr "Бізнес-першопричину підтверджено"
 
 #: inc/accounting-price-diagnostics.php:145 inc/accounting-prices.php:345
 msgid "SQL error code"
@@ -745,9 +736,8 @@ msgid "Cause document confirmed"
 msgstr "Причинний документ підтверджено"
 
 #: inc/accounting-price-diagnostics.php:151 inc/accounting-prices.php:351
-#, fuzzy
 msgid "Recommendation"
-msgstr "Рекомендація бекенду"
+msgstr "Рекомендація"
 
 #: inc/accounting-price-diagnostics.php:181
 #: inc/accounting-price-diagnostics.php:219
@@ -758,14 +748,12 @@ msgstr ""
 "Постійний журнал діагностики облікових цін недоступний для цього складу."
 
 #: inc/accounting-price-diagnostics.php:226
-#, fuzzy
 msgid "XLSX export is temporarily unavailable."
-msgstr "Бібліотека XLSX недоступна."
+msgstr "Експорт XLSX тимчасово недоступний."
 
 #: inc/accounting-price-diagnostics.php:231
-#, fuzzy
 msgid "Diagnostics"
-msgstr "Фільтри діагностики"
+msgstr "Діагностика"
 
 #: inc/accounting-prices-cron.php:96 inc/accounting-prices.php:1335
 msgid "Java API returned an empty response."
@@ -1880,9 +1868,8 @@ msgid "Export diagnostic CSV"
 msgstr "Експортувати діагностику CSV"
 
 #: inc/accounting-prices.php:339
-#, fuzzy
 msgid "Export diagnostic XLSX"
-msgstr "Експортувати діагностику CSV"
+msgstr "Експортувати діагностику XLSX"
 
 #: inc/accounting-prices.php:340
 msgid "Newer records"
