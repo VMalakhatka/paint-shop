@@ -608,6 +608,23 @@ function lps_accounting_price_campaign_state_reason(string $verification_state):
     }
 }
 
+function lps_accounting_price_campaign_diagnostic_item(array $row): array {
+    $raw_details = (string)($row['diagnostics_json'] ?? '');
+    $details = json_decode($raw_details, true);
+    if (!is_array($details)) {
+        $details = ['diagnosticsMalformed' => true, 'rawDiagnostics' => $raw_details];
+    }
+    return [
+        'id' => absint($row['id'] ?? 0),
+        'jobId' => sanitize_text_field((string)($row['job_id'] ?? '')),
+        'previewOnly' => !empty($row['preview_only']),
+        'errorCode' => sanitize_text_field((string)($row['error_code'] ?? '')),
+        'message' => sanitize_textarea_field((string)($row['message'] ?? '')),
+        'details' => $details,
+        'createdAt' => sanitize_text_field((string)($row['created_at'] ?? '')),
+    ];
+}
+
 function lps_accounting_price_campaign_report_scope(?array $state = null): array {
     $state = $state ?? lps_accounting_price_campaign_state();
     $warehouse_id = absint($state['current_warehouse_id'] ?? 0);
@@ -733,20 +750,32 @@ function lps_accounting_price_campaign_snapshot_items(
         }
         foreach ($diagnostic_rows as $diagnostic_row) {
             $sku = (string)($diagnostic_row['sku'] ?? '');
-            $details = json_decode((string)($diagnostic_row['diagnostics_json'] ?? ''), true);
-            if (!is_array($details)) {
-                $details = ['diagnosticsMalformed' => true];
-            }
             if ($sku !== '' && !isset($diagnostics_by_sku[$sku])) {
-                $diagnostics_by_sku[$sku] = [
-                    'id' => absint($diagnostic_row['id'] ?? 0),
-                    'jobId' => sanitize_text_field((string)($diagnostic_row['job_id'] ?? '')),
-                    'previewOnly' => !empty($diagnostic_row['preview_only']),
-                    'errorCode' => sanitize_text_field((string)($diagnostic_row['error_code'] ?? '')),
-                    'message' => sanitize_textarea_field((string)($diagnostic_row['message'] ?? '')),
-                    'details' => $details,
-                    'createdAt' => sanitize_text_field((string)($diagnostic_row['created_at'] ?? '')),
-                ];
+                $diagnostics_by_sku[$sku] = lps_accounting_price_campaign_diagnostic_item($diagnostic_row);
+            }
+        }
+
+        // FAILED rows are exceptional and few. An exact fallback keeps the summary
+        // available even if MariaDB does not return the grouped lookup as expected.
+        foreach ($items as $item) {
+            $sku = (string)($item['sku'] ?? '');
+            if ($sku === '' || isset($diagnostics_by_sku[$sku])) continue;
+            $last_error = trim((string)($item['last_error'] ?? ''));
+            $separator = strpos($last_error, ':');
+            $code = strtoupper(trim($separator === false ? $last_error : substr($last_error, 0, $separator)));
+            if ($code === '' || !preg_match('/^[A-Z0-9_]+$/', $code)) continue;
+            $diagnostic_row = $wpdb->get_row($wpdb->prepare(
+                "SELECT id, job_id, sku, preview_only, error_code, message, diagnostics_json, created_at
+                 FROM " . LPS_ACCOUNTING_PRICE_DIAGNOSTIC_TABLE . "
+                 WHERE source_database = %s AND warehouse_id = %d AND sku = %s AND error_code = %s
+                 ORDER BY id DESC LIMIT 1",
+                $source_database,
+                $warehouse_id,
+                $sku,
+                $code
+            ), ARRAY_A);
+            if (is_array($diagnostic_row)) {
+                $diagnostics_by_sku[$sku] = lps_accounting_price_campaign_diagnostic_item($diagnostic_row);
             }
         }
     }

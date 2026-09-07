@@ -104,4 +104,10 @@ $export = lps_accounting_price_campaign_snapshot_export_values([
 ], ['warehouseId' => 5], 'FAILED');
 check($export['Document No.'] === 62 && $export['Document date'] === '2026-07-23T00:00:00', 'Snapshot exports expose error document details');
 check($export['Before operation'] === 27 && $export['After operation'] === -23 && $export['Shortage'] === 23, 'Snapshot exports expose negative stock quantities');
+$diagnostic = lps_accounting_price_campaign_diagnostic_item([
+    'id' => 17,
+    'error_code' => 'NEGATIVE_CHRONOLOGICAL_STOCK',
+    'diagnostics_json' => json_encode(['operation' => ['documentNumber' => 62, 'documentDate' => '2026-07-23T00:00:00']]),
+]);
+check($diagnostic['details']['operation']['documentNumber'] === 62, 'Snapshot rows preserve document details from the exact diagnostic record');
 echo "PASS: campaign budget, final snapshot, history, remaining counts and warning continuation\n";
