@@ -10,6 +10,7 @@ function absint($value): int { return abs((int)$value); }
 function sanitize_key($value): string { return strtolower((string)$value); }
 function sanitize_text_field($value): string { return (string)$value; }
 function sanitize_textarea_field($value): string { return (string)$value; }
+function wp_json_encode($value, $flags = 0) { return json_encode($value, $flags); }
 function current_time($type, $gmt = false) { return date('Y-m-d H:i:s'); }
 function get_option($key, $default = false) { return $GLOBALS['options'][$key] ?? $default; }
 function update_option($key, $value, $autoload = false) { $GLOBALS['options'][$key] = $value; }
@@ -80,4 +81,27 @@ $state['deadline_at'] = time() + 3600;
 $state['warnings'] = [['warehouseId' => 5, 'code' => 'NEGATIVE_CHRONOLOGICAL_STOCK', 'severity' => 'warning']];
 lps_accounting_price_campaign_finish_warehouse($state);
 check($state['active'] && $state['current_warehouse_id'] === 6, 'Warnings alone must not pause queue');
+
+$export = lps_accounting_price_campaign_snapshot_export_values([
+    'sku' => 'ТП-0001',
+    'verification_state' => 'FAILED',
+    'last_error' => 'NEGATIVE_CHRONOLOGICAL_STOCK: negative',
+    'latest_diagnostic' => [
+        'errorCode' => 'NEGATIVE_CHRONOLOGICAL_STOCK',
+        'details' => [
+            'quantityBefore' => 27,
+            'quantityAfter' => -23,
+            'shortageQuantity' => 23,
+            'operation' => [
+                'documentType' => 'Р',
+                'documentNumber' => 62,
+                'documentDate' => '2026-07-23T00:00:00',
+                'recno' => 8997390,
+                'quantity' => 50,
+            ],
+        ],
+    ],
+], ['warehouseId' => 5], 'FAILED');
+check($export['Document No.'] === 62 && $export['Document date'] === '2026-07-23T00:00:00', 'Snapshot exports expose error document details');
+check($export['Before operation'] === 27 && $export['After operation'] === -23 && $export['Shortage'] === 23, 'Snapshot exports expose negative stock quantities');
 echo "PASS: campaign budget, final snapshot, history, remaining counts and warning continuation\n";

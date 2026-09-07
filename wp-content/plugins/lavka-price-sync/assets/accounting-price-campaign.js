@@ -248,7 +248,7 @@
     const table = node('table', 'widefat striped lps-ap-snapshot-report-table');
     const head = node('thead');
     const header = node('tr');
-    [t.sku, t.product, t.state, t.stateReason, t.lastError, t.movements, t.movementPeriod, t.lastObserved, t.lastRecalculated, t.latestChange]
+    [t.sku, t.product, t.state, t.stateReason, t.lastError, t.errorDetails, t.movements, t.movementPeriod, t.lastObserved, t.lastRecalculated, t.latestChange]
       .forEach((label) => header.append(node('th', '', label)));
     head.append(header);
     const body = node('tbody');
@@ -263,21 +263,19 @@
       const diagnostic = item?.latest_diagnostic && typeof item.latest_diagnostic === 'object'
         ? item.latest_diagnostic
         : null;
+      const errorDetailsCell = node('td', 'lps-ap-error-details');
+      const details = diagnostic?.details && typeof diagnostic.details === 'object' ? diagnostic.details : {};
+      const operation = details?.operation && typeof details.operation === 'object' ? details.operation : {};
       if (diagnostic) {
-        const details = diagnostic.details && typeof diagnostic.details === 'object' ? diagnostic.details : {};
-        const disclosure = node('details', 'lps-ap-inline-diagnostic');
-        disclosure.append(node('summary', '', t.details || 'Details'));
-        if (String(diagnostic.errorCode || '').toUpperCase() === 'NEGATIVE_CHRONOLOGICAL_STOCK') {
-          appendNegativeStockDiagnostic(disclosure, details);
-        } else {
-          appendArithmeticDiagnostic(disclosure, details, Object.assign({}, diagnostic, {
-            sourceDatabase: report.sourceDatabase,
-            warehouseId: report.warehouseId,
-            sku: item?.sku
-          }));
-        }
-        disclosure.append(node('pre', '', JSON.stringify(details, null, 2)));
-        errorCell.append(disclosure);
+        const documentParts = [operation.documentType, operation.documentNumber ?? operation.documentId]
+          .filter((value) => value !== undefined && value !== null && String(value) !== '');
+        errorDetailsCell.append(
+          node('strong', '', documentParts.length ? `${t.document || 'Document'}: ${documentParts.join(' · ')}` : '—'),
+          node('br'),
+          node('span', '', operation.documentDate ? formatDateTime(operation.documentDate) : '—')
+        );
+      } else {
+        errorDetailsCell.append(node('span', '', '—'));
       }
       if (item?.verification_state === 'FAILED' && report.sourceDatabase && report.warehouseId) {
         const diagnosticButton = node('button', 'button button-small', t.viewPersistentDiagnostics || 'View permanent diagnostics');
@@ -291,7 +289,7 @@
             sourceDatabase: report.sourceDatabase
           }, 0);
         });
-        errorCell.append(diagnosticButton);
+        errorDetailsCell.append(node('br'), diagnosticButton);
       }
       row.append(
         node('td', 'lps-ap-snapshot-sku', display(item?.sku)),
@@ -299,6 +297,7 @@
         node('td', '', display(item?.verification_state)),
         node('td', '', reason),
         errorCell,
+        errorDetailsCell,
         node('td', '', integer.format(Number(item?.movement_count || 0))),
         node('td', '', movementPeriod),
         node('td', '', display(item?.last_observed_at)),
@@ -363,6 +362,8 @@
     const results = node('div', 'lps-ap-snapshot-report-results');
     const exportLink = node('a', 'button', t.exportState || 'Export CSV');
     exportLink.hidden = true;
+    const exportXlsxLink = node('a', 'button', t.exportStateXlsx || 'Export XLSX');
+    exportXlsxLink.hidden = true;
 
     const activate = (state) => {
       selectedSnapshotState = state;
@@ -378,6 +379,14 @@
         exportLink.href = url.toString();
         exportLink.hidden = false;
       }
+      if (config.snapshotReportExportXlsxUrl) {
+        const url = new URL(config.snapshotReportExportXlsxUrl, window.location.href);
+        url.searchParams.set('verification_state', state);
+        if (scope.warehouseId) url.searchParams.set('warehouse_id', String(scope.warehouseId));
+        if (scope.sourceDatabase) url.searchParams.set('source_database', String(scope.sourceDatabase));
+        exportXlsxLink.href = url.toString();
+        exportXlsxLink.hidden = false;
+      }
       loadSnapshotReport(results, state, 1, scope);
     };
 
@@ -389,7 +398,7 @@
       button.addEventListener('click', () => activate(state));
       actions.append(button);
     });
-    actions.append(exportLink);
+    actions.append(exportLink, exportXlsxLink);
     content.append(actions, results);
     section.append(content);
 

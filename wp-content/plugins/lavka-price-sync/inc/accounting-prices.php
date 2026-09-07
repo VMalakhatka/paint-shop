@@ -201,6 +201,10 @@ add_action('admin_enqueue_scripts', function () {
             admin_url('admin-post.php?action=lps_accounting_price_snapshot_report_export'),
             'lps_accounting_price_snapshot_report_export'
         ),
+        'snapshotReportExportXlsxUrl' => wp_nonce_url(
+            admin_url('admin-post.php?action=lps_accounting_price_snapshot_report_export_xlsx'),
+            'lps_accounting_price_snapshot_report_export_xlsx'
+        ),
         'diagnosticExportUrl' => wp_nonce_url(
             admin_url('admin-post.php?action=lps_accounting_price_diagnostic_export'),
             'lps_accounting_price_diagnostic_export'
@@ -248,11 +252,13 @@ add_action('admin_enqueue_scripts', function () {
             'stateReportDescription' => __('Open UNVERIFIED, NEW, DIRTY, FAILED, or REMOVED to review the actual products behind the counters.', 'lavka-price-sync'),
             'viewState' => __('View', 'lavka-price-sync'),
             'exportState' => __('Export selected state CSV', 'lavka-price-sync'),
+            'exportStateXlsx' => __('Export selected state XLSX', 'lavka-price-sync'),
             'noStateItems' => __('There are no products in this snapshot state.', 'lavka-price-sync'),
             'product' => __('Product', 'lavka-price-sync'),
             'state' => __('State', 'lavka-price-sync'),
             'stateReason' => __('Why this state is assigned', 'lavka-price-sync'),
             'lastError' => __('Last error', 'lavka-price-sync'),
+            'errorDetails' => __('Error details', 'lavka-price-sync'),
             'movements' => __('Movements', 'lavka-price-sync'),
             'movementPeriod' => __('Movement period', 'lavka-price-sync'),
             'lastObserved' => __('Last observed', 'lavka-price-sync'),

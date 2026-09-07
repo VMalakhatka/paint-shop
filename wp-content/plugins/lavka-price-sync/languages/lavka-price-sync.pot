@@ -343,6 +343,10 @@ msgstr ""
 msgid "Last error"
 msgstr ""
 
+#: inc/accounting-prices.php
+msgid "Error details"
+msgstr ""
+
 #: inc/accounting-price-campaign.php:1828
 msgid "Present in Folio"
 msgstr ""
@@ -1484,6 +1488,10 @@ msgstr ""
 
 #: inc/accounting-prices.php:250
 msgid "Export selected state CSV"
+msgstr ""
+
+#: inc/accounting-prices.php
+msgid "Export selected state XLSX"
 msgstr ""
 
 #: inc/accounting-prices.php:251

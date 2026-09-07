@@ -462,6 +462,10 @@ msgstr "Причина"
 msgid "Last error"
 msgstr "Остання помилка"
 
+#: inc/accounting-prices.php
+msgid "Error details"
+msgstr "Деталі помилки"
+
 #: inc/accounting-price-campaign.php:1828
 msgid "Present in Folio"
 msgstr "Наявний у ФОЛІО"
@@ -1649,6 +1653,10 @@ msgstr "Переглянути"
 #: inc/accounting-prices.php:250
 msgid "Export selected state CSV"
 msgstr "Експортувати вибраний стан у CSV"
+
+#: inc/accounting-prices.php
+msgid "Export selected state XLSX"
+msgstr "Експортувати вибраний стан у XLSX"
 
 #: inc/accounting-prices.php:251
 msgid "There are no products in this snapshot state."

@@ -701,29 +701,43 @@ function lps_accounting_price_campaign_snapshot_items(
     }
 
     if ($verification_state === 'FAILED' && $skus && lps_accounting_price_diagnostic_table_ready()) {
+        $diagnostic_codes = [];
+        foreach ($items as $item) {
+            $last_error = trim((string)($item['last_error'] ?? ''));
+            $separator = strpos($last_error, ':');
+            $code = strtoupper(trim($separator === false ? $last_error : substr($last_error, 0, $separator)));
+            if ($code !== '' && preg_match('/^[A-Z0-9_]+$/', $code)) {
+                $diagnostic_codes[$code] = $code;
+            }
+        }
         $placeholders = implode(',', array_fill(0, count($skus), '%s'));
-        $diagnostic_args = array_merge([$source_database, $warehouse_id], $skus);
-        $diagnostic_rows = $wpdb->get_results($wpdb->prepare(
-            "SELECT diagnostic.id, diagnostic.job_id, diagnostic.sku,
-                    diagnostic.preview_only, diagnostic.error_code, diagnostic.message,
-                    diagnostic.diagnostics_json, diagnostic.created_at
-             FROM " . LPS_ACCOUNTING_PRICE_DIAGNOSTIC_TABLE . " diagnostic
-             JOIN (
-                 SELECT sku, MAX(id) AS id
-                 FROM " . LPS_ACCOUNTING_PRICE_DIAGNOSTIC_TABLE . "
-                 WHERE source_database = %s AND warehouse_id = %d
-                   AND sku IN ({$placeholders})
-                 GROUP BY sku
-             ) latest ON latest.id = diagnostic.id",
-            ...$diagnostic_args
-        ), ARRAY_A) ?: [];
+        $code_placeholders = implode(',', array_fill(0, count($diagnostic_codes), '%s'));
+        $diagnostic_rows = [];
+        if ($diagnostic_codes) {
+            $diagnostic_args = array_merge([$source_database, $warehouse_id], $skus, array_values($diagnostic_codes));
+            $diagnostic_rows = $wpdb->get_results($wpdb->prepare(
+                "SELECT d.id, d.job_id, d.sku, d.preview_only, d.error_code, d.message,
+                        d.diagnostics_json, d.created_at
+                 FROM " . LPS_ACCOUNTING_PRICE_DIAGNOSTIC_TABLE . " d
+                 JOIN (
+                     SELECT sku, error_code, MAX(id) AS id
+                     FROM " . LPS_ACCOUNTING_PRICE_DIAGNOSTIC_TABLE . "
+                     WHERE source_database = %s AND warehouse_id = %d
+                       AND sku IN ({$placeholders})
+                       AND error_code IN ({$code_placeholders})
+                     GROUP BY sku, error_code
+                 ) latest ON latest.id = d.id
+                 ORDER BY d.id DESC",
+                ...$diagnostic_args
+            ), ARRAY_A) ?: [];
+        }
         foreach ($diagnostic_rows as $diagnostic_row) {
             $sku = (string)($diagnostic_row['sku'] ?? '');
             $details = json_decode((string)($diagnostic_row['diagnostics_json'] ?? ''), true);
             if (!is_array($details)) {
                 $details = ['diagnosticsMalformed' => true];
             }
-            if ($sku !== '') {
+            if ($sku !== '' && !isset($diagnostics_by_sku[$sku])) {
                 $diagnostics_by_sku[$sku] = [
                     'id' => absint($diagnostic_row['id'] ?? 0),
                     'jobId' => sanitize_text_field((string)($diagnostic_row['job_id'] ?? '')),
@@ -1794,6 +1808,66 @@ function lps_accounting_price_campaign_csv_cell($value): string {
     return preg_match('/^[=+\-@]/u', $value) ? "'" . $value : $value;
 }
 
+function lps_accounting_price_campaign_snapshot_export_values(array $item, array $report, string $verification_state): array {
+    $change = is_array($item['latest_change'] ?? null) ? $item['latest_change'] : [];
+    $diagnostic = is_array($item['latest_diagnostic'] ?? null) ? $item['latest_diagnostic'] : [];
+    $details = is_array($diagnostic['details'] ?? null) ? $diagnostic['details'] : [];
+    $operation = is_array($details['operation'] ?? null) ? $details['operation'] : [];
+    return [
+        __('State', 'lavka-price-sync') => $verification_state,
+        __('Warehouse', 'lavka-price-sync') => (string)($report['warehouseId'] ?? ''),
+        __('SKU', 'lavka-price-sync') => (string)($item['sku'] ?? ''),
+        __('Product', 'lavka-price-sync') => (string)($item['product_name'] ?? ''),
+        __('Reason', 'lavka-price-sync') => lps_accounting_price_campaign_state_reason($verification_state),
+        __('Last error', 'lavka-price-sync') => (string)($item['last_error'] ?? ''),
+        __('Diagnostic code', 'lavka-price-sync') => (string)($diagnostic['errorCode'] ?? ''),
+        __('Document type', 'lavka-price-sync') => $operation['documentType'] ?? '',
+        __('Document No.', 'lavka-price-sync') => $operation['documentNumber'] ?? '',
+        __('Document ID', 'lavka-price-sync') => $operation['documentId'] ?? '',
+        __('Document date', 'lavka-price-sync') => $operation['documentDate'] ?? '',
+        __('Movement record', 'lavka-price-sync') => $operation['recno'] ?? '',
+        __('Before operation', 'lavka-price-sync') => $details['quantityBefore'] ?? '',
+        __('Operation quantity', 'lavka-price-sync') => $operation['quantity'] ?? '',
+        __('After operation', 'lavka-price-sync') => $details['quantityAfter'] ?? '',
+        __('Shortage', 'lavka-price-sync') => $details['shortageQuantity'] ?? '',
+        __('Present in Folio', 'lavka-price-sync') => !empty($item['present_in_folio']) ? __('Yes', 'lavka-price-sync') : __('No', 'lavka-price-sync'),
+        __('Movements', 'lavka-price-sync') => (int)($item['movement_count'] ?? 0),
+        __('First movement', 'lavka-price-sync') => (string)($item['first_movement_date'] ?? ''),
+        __('Last movement', 'lavka-price-sync') => (string)($item['last_movement_date'] ?? ''),
+        __('Last observed', 'lavka-price-sync') => (string)($item['last_observed_at'] ?? ''),
+        __('Last recalculated', 'lavka-price-sync') => (string)($item['applied_at'] ?? ''),
+        __('Latest change', 'lavka-price-sync') => (string)($change['change_type'] ?? ''),
+        __('Change detected', 'lavka-price-sync') => (string)($change['detected_at'] ?? ''),
+        __('Technical details', 'lavka-price-sync') => $details
+            ? wp_json_encode($details, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
+            : '',
+    ];
+}
+
+function lps_accounting_price_campaign_snapshot_export_items(
+    string $verification_state,
+    int $warehouse_id,
+    string $source_database
+): Generator {
+    $page = 1;
+    do {
+        $report = lps_accounting_price_campaign_snapshot_items(
+            $verification_state,
+            $page,
+            500,
+            $warehouse_id,
+            $source_database
+        );
+        if (empty($report['ok'])) return;
+        foreach ((array)($report['items'] ?? []) as $item) {
+            if (is_array($item)) {
+                yield lps_accounting_price_campaign_snapshot_export_values($item, $report, $verification_state);
+            }
+        }
+        $page++;
+    } while ($page <= absint($report['pages'] ?? 1));
+}
+
 add_action(LPS_ACCOUNTING_PRICE_CAMPAIGN_TICK_HOOK, 'lps_accounting_price_campaign_tick');
 add_action('init', 'lps_accounting_price_campaign_maybe_resume', 31);
 
@@ -1818,60 +1892,76 @@ add_action('admin_post_lps_accounting_price_snapshot_report_export', function ()
     $output = fopen('php://output', 'wb');
     if ($output === false) exit;
     fwrite($output, "\xEF\xBB\xBF");
-    fputcsv($output, [
-        __('State', 'lavka-price-sync'),
-        __('Warehouse', 'lavka-price-sync'),
-        __('SKU', 'lavka-price-sync'),
-        __('Product', 'lavka-price-sync'),
-        __('Reason', 'lavka-price-sync'),
-        __('Last error', 'lavka-price-sync'),
-        __('Present in Folio', 'lavka-price-sync'),
-        __('Movements', 'lavka-price-sync'),
-        __('First movement', 'lavka-price-sync'),
-        __('Last movement', 'lavka-price-sync'),
-        __('Last observed', 'lavka-price-sync'),
-        __('Last recalculated', 'lavka-price-sync'),
-        __('Latest change', 'lavka-price-sync'),
-        __('Change detected', 'lavka-price-sync'),
-    ]);
-
-    $page = 1;
-    do {
-        $report = lps_accounting_price_campaign_snapshot_items(
-            $verification_state,
-            $page,
-            500,
-            $warehouse_id,
-            $source_database
-        );
-        if (empty($report['ok'])) {
-            fclose($output);
-            exit;
-        }
-        foreach ((array)($report['items'] ?? []) as $item) {
-            if (!is_array($item)) continue;
-            $change = is_array($item['latest_change'] ?? null) ? $item['latest_change'] : [];
-            fputcsv($output, array_map('lps_accounting_price_campaign_csv_cell', [
-                $verification_state,
-                (string)($report['warehouseId'] ?? ''),
-                (string)($item['sku'] ?? ''),
-                (string)($item['product_name'] ?? ''),
-                lps_accounting_price_campaign_state_reason($verification_state),
-                (string)($item['last_error'] ?? ''),
-                !empty($item['present_in_folio']) ? __('Yes', 'lavka-price-sync') : __('No', 'lavka-price-sync'),
-                (string)($item['movement_count'] ?? 0),
-                (string)($item['first_movement_date'] ?? ''),
-                (string)($item['last_movement_date'] ?? ''),
-                (string)($item['last_observed_at'] ?? ''),
-                (string)($item['applied_at'] ?? ''),
-                (string)($change['change_type'] ?? ''),
-                (string)($change['detected_at'] ?? ''),
-            ]));
-        }
-        $page++;
-    } while ($page <= absint($report['pages'] ?? 1));
+    $headers = array_keys(lps_accounting_price_campaign_snapshot_export_values([], ['warehouseId' => $warehouse_id], $verification_state));
+    fputcsv($output, $headers);
+    foreach (lps_accounting_price_campaign_snapshot_export_items($verification_state, $warehouse_id, $source_database) as $values) {
+        fputcsv($output, array_map('lps_accounting_price_campaign_csv_cell', array_values($values)));
+    }
 
     fclose($output);
+    exit;
+});
+
+add_action('admin_post_lps_accounting_price_snapshot_report_export_xlsx', function (): void {
+    if (!current_user_can(LPS_CAP)) {
+        wp_die(esc_html__('You do not have permission to perform this operation.', 'lavka-price-sync'));
+    }
+    check_admin_referer('lps_accounting_price_snapshot_report_export_xlsx');
+
+    $verification_state = strtoupper(sanitize_key(wp_unslash($_GET['verification_state'] ?? '')));
+    $warehouse_id = absint($_GET['warehouse_id'] ?? 0);
+    $source_database = sanitize_text_field(wp_unslash($_GET['source_database'] ?? ''));
+    if (!in_array($verification_state, lps_accounting_price_campaign_report_states(), true)) {
+        wp_die(esc_html__('Select a supported snapshot state.', 'lavka-price-sync'));
+    }
+    if (!class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class)) {
+        $autoload = WP_CONTENT_DIR . '/vendor/autoload.php';
+        if (is_readable($autoload)) require_once $autoload;
+    }
+    if (!class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class)) {
+        wp_die(esc_html__('XLSX export is temporarily unavailable.', 'lavka-price-sync'), '', ['response' => 503]);
+    }
+
+    $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+    $sheet->setTitle(mb_substr($verification_state, 0, 31));
+    $headers = array_keys(lps_accounting_price_campaign_snapshot_export_values([], ['warehouseId' => $warehouse_id], $verification_state));
+    foreach ($headers as $index => $header) {
+        $sheet->setCellValueExplicit([$index + 1, 1], $header, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+    }
+    $row_number = 2;
+    foreach (lps_accounting_price_campaign_snapshot_export_items($verification_state, $warehouse_id, $source_database) as $values) {
+        foreach (array_values($values) as $index => $value) {
+            $value = is_scalar($value) ? $value : '';
+            if (is_int($value) || is_float($value)) {
+                $sheet->setCellValueExplicit([$index + 1, $row_number], $value, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+            } else {
+                $sheet->setCellValueExplicit([$index + 1, $row_number], mb_substr((string)$value, 0, 32000), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            }
+        }
+        $row_number++;
+    }
+
+    $column_count = count($headers);
+    $last_column = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($column_count);
+    $last_row = max(1, $row_number - 1);
+    $sheet->getStyle("A1:{$last_column}1")->getFont()->setBold(true)->getColor()->setRGB('FFFFFF');
+    $sheet->getStyle("A1:{$last_column}1")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('4472C4');
+    $sheet->getStyle("A1:{$last_column}{$last_row}")->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_TOP)->setWrapText(true);
+    $sheet->setAutoFilter("A1:{$last_column}{$last_row}");
+    $sheet->freezePane('A2');
+    for ($column = 1; $column <= $column_count; $column++) {
+        $sheet->getColumnDimensionByColumn($column)->setWidth($column === $column_count ? 45 : 18);
+    }
+
+    $filename = 'folio-accounting-price-snapshot-' . strtolower($verification_state) . '-' . gmdate('Ymd-His') . '.xlsx';
+    while (ob_get_level() > 0) ob_end_clean();
+    nocache_headers();
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    header('X-Content-Type-Options: nosniff');
+    (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save('php://output');
+    $spreadsheet->disconnectWorksheets();
     exit;
 });
 
