@@ -120,6 +120,7 @@ class Lavka_Reports_Profit_Report {
                     <div id="lavr-profit-cities" class="lavr-profit-cities"></div>
                 </section>
 
+                <section id="lavr-profit-sections" class="lavr-profit-summary" hidden></section>
                 <section id="lavr-profit-master-class" class="lavr-profit-summary" aria-live="polite"></section>
 
                 <section id="lavr-profit-warnings-section" class="lavr-profit-warnings-section" hidden aria-labelledby="lavr-profit-warnings-title">
@@ -201,7 +202,9 @@ class Lavka_Reports_Profit_Report {
         if (!current_user_can('manage_woocommerce')) {
             wp_send_json_error(['message' => __('You do not have permission to view this report.', 'lavka-reports')], 403);
         }
-        check_ajax_referer(self::NONCE_ACTION, 'nonce');
+        if (false === check_ajax_referer(self::NONCE_ACTION, 'nonce', false)) {
+            wp_send_json_error(['code' => 'REPORT_SESSION_EXPIRED', 'message' => __('Your report session has expired. Reload the page and select the report month again.', 'lavka-reports')], 403);
+        }
 
         $operation = sanitize_key(wp_unslash($_POST['operation'] ?? 'summary'));
         if (!in_array($operation, ['summary', 'audit'], true)) {
@@ -214,23 +217,14 @@ class Lavka_Reports_Profit_Report {
         }
 
         $query = ['month' => $month];
-        $rules = [
-            'odesaTaxShare'          => ['min' => 0, 'max' => 1, 'positive' => false],
-            'rubToUahRate'           => ['min' => 0, 'max' => null, 'positive' => true],
-            'kyivAdditionalSalary'   => ['min' => 0, 'max' => null, 'positive' => false],
-            'odesaAdditionalSalary'  => ['min' => 0, 'max' => null, 'positive' => false],
-        ];
-
-        foreach ($rules as $name => $rule) {
+        // Java owns semantic ranges and marks their dependent sections unavailable.
+        $parameters = ['odesaTaxShare', 'rubToUahRate', 'kyivAdditionalSalary', 'odesaAdditionalSalary'];
+        foreach ($parameters as $name) {
             $raw = isset($_POST[$name]) ? trim(sanitize_text_field(wp_unslash($_POST[$name]))) : '';
             if ('' === $raw) continue;
             $value = str_replace(',', '.', $raw);
-            if (!preg_match('/^\d+(?:\.\d+)?$/', $value)) {
-                wp_send_json_error(['field' => $name, 'message' => __('Enter a valid non-negative decimal value.', 'lavka-reports')], 400);
-            }
-            $number = (float) $value;
-            if (($rule['positive'] && $number <= 0) || (!$rule['positive'] && $number < $rule['min']) || (null !== $rule['max'] && $number > $rule['max'])) {
-                wp_send_json_error(['field' => $name, 'message' => __('The report parameter is outside the allowed range.', 'lavka-reports')], 400);
+            if (strlen($value) > 100 || !preg_match('/^[+-]?\d+(?:\.\d+)?$/', $value)) {
+                wp_send_json_error(['field' => $name, 'message' => __('Enter a valid decimal value.', 'lavka-reports')], 400);
             }
             $query[$name] = $value;
         }
@@ -383,7 +377,26 @@ class Lavka_Reports_Profit_Report {
             'allExpenseRows' => __('All expense rows', 'lavka-reports'),
             'exportReady' => __('Excel file prepared from the displayed snapshot.', 'lavka-reports'),
             'exportFailed' => __('Could not export the report. Check the audit and try again.', 'lavka-reports'),
+            'accessExpired' => __('Report access was denied or the session expired. Reload the page and sign in again if needed.', 'lavka-reports'),
+            'partialReady' => __('Report partially calculated. Available sections are shown; review skipped sections.', 'lavka-reports'),
+            'partialReport' => __('Partial report', 'lavka-reports'),
+            'sectionStatus' => __('Report section availability', 'lavka-reports'),
+            'partialHelp' => __('A skipped section does not stop other sections. Dependent amounts remain unavailable, not zero; the final profit may be unavailable.', 'lavka-reports'),
+            'sectionDisplayFailed' => __('This section could not be displayed. Other sections remain available.', 'lavka-reports'),
+            'previousSnapshot' => __('The values below belong to the previous successful response. The new request did not update them.', 'lavka-reports'),
+            'available' => __('Available', 'lavka-reports'),
+            'unavailable' => __('Skipped: unavailable', 'lavka-reports'),
             'fields' => [
+                'section' => __('Section', 'lavka-reports'),
+                'errorCode' => __('Error code', 'lavka-reports'),
+                'errorId' => __('Diagnostic ID', 'lavka-reports'),
+                'EXPENSE_INPUTS' => __('Expense parameters', 'lavka-reports'),
+                'EXPENSES' => __('Expenses', 'lavka-reports'),
+                'GROSS_MARGIN' => __('Gross margin', 'lavka-reports'),
+                'MASTER_CLASS' => __('Odesa master class', 'lavka-reports'),
+                'INVENTORY_KYIV' => __('Kyiv inventory', 'lavka-reports'),
+                'INVENTORY_ODESA' => __('Odesa inventory', 'lavka-reports'),
+
                 'selectedDocumentCount' => __('Selected documents', 'lavka-reports'),
                 'selectedDocumentAmount' => __('Selected document amount', 'lavka-reports'),
                 'operatingExpenseTotal' => __('Operating expenses total', 'lavka-reports'),

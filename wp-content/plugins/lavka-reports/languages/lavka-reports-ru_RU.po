@@ -1090,3 +1090,79 @@ msgstr "Доходы МК Одессы (автоматически)"
 #: inc/class-profit-report.php
 msgid "Odesa master class returns (automatic)"
 msgstr "Возвраты МК Одессы (автоматически)"
+
+#: inc/class-profit-report.php
+msgid "Report partially calculated. Available sections are shown; review skipped sections."
+msgstr "Отчёт рассчитан частично. Доступные разделы показаны; проверьте пропущенные разделы."
+
+#: inc/class-profit-report.php
+msgid "Partial report"
+msgstr "Частичный отчёт"
+
+#: inc/class-profit-report.php
+msgid "Report section availability"
+msgstr "Доступность разделов отчёта"
+
+#: inc/class-profit-report.php
+msgid "A skipped section does not stop other sections. Dependent amounts remain unavailable, not zero; the final profit may be unavailable."
+msgstr "Пропущенный раздел не останавливает остальные. Зависимые суммы остаются недоступными, а не нулевыми; итоговая прибыль может быть недоступна."
+
+#: inc/class-profit-report.php
+msgid "This section could not be displayed. Other sections remain available."
+msgstr "Этот раздел не удалось отобразить. Остальные разделы остаются доступными."
+
+#: inc/class-profit-report.php
+msgid "The values below belong to the previous successful response. The new request did not update them."
+msgstr "Значения ниже относятся к предыдущему успешному ответу. Новый запрос их не обновил."
+
+#: inc/class-profit-report.php
+msgid "Available"
+msgstr "Доступно"
+
+#: inc/class-profit-report.php
+msgid "Skipped: unavailable"
+msgstr "Пропущено: недоступно"
+
+#: inc/class-profit-report.php
+msgid "Section"
+msgstr "Раздел"
+
+#: inc/class-profit-report.php
+msgid "Error code"
+msgstr "Код ошибки"
+
+#: inc/class-profit-report.php
+msgid "Diagnostic ID"
+msgstr "ID диагностики"
+
+#: inc/class-profit-report.php
+msgid "Expenses"
+msgstr "Расходы"
+
+#: inc/class-profit-report.php
+msgid "Gross margin"
+msgstr "Валовая маржа"
+
+#: inc/class-profit-report.php
+msgid "Kyiv inventory"
+msgstr "Запасы Киева"
+
+#: inc/class-profit-report.php
+msgid "Odesa inventory"
+msgstr "Запасы Одессы"
+
+#: inc/class-profit-report.php
+msgid "Enter a valid decimal value."
+msgstr "Введите корректное десятичное число."
+
+#: inc/class-profit-report.php
+msgid "Expense parameters"
+msgstr "Параметры расходов"
+
+#: inc/class-profit-report.php
+msgid "Your report session has expired. Reload the page and select the report month again."
+msgstr "Сессия отчёта истекла. Обновите страницу и снова выберите месяц отчёта."
+
+#: inc/class-profit-report.php
+msgid "Report access was denied or the session expired. Reload the page and sign in again if needed."
+msgstr "Доступ к отчёту отклонён или сессия истекла. Обновите страницу и при необходимости войдите снова."

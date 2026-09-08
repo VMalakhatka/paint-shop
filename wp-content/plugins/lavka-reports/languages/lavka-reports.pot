@@ -1085,3 +1085,79 @@ msgstr ""
 #: inc/class-profit-report.php
 msgid "Odesa master class returns (automatic)"
 msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Report partially calculated. Available sections are shown; review skipped sections."
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Partial report"
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Report section availability"
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "A skipped section does not stop other sections. Dependent amounts remain unavailable, not zero; the final profit may be unavailable."
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "This section could not be displayed. Other sections remain available."
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "The values below belong to the previous successful response. The new request did not update them."
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Available"
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Skipped: unavailable"
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Section"
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Error code"
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Diagnostic ID"
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Expenses"
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Gross margin"
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Kyiv inventory"
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Odesa inventory"
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Enter a valid decimal value."
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Expense parameters"
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Your report session has expired. Reload the page and select the report month again."
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Report access was denied or the session expired. Reload the page and sign in again if needed."
+msgstr ""

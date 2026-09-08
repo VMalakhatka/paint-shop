@@ -19,12 +19,14 @@
         revision: 0,
         dirty: false,
         exporting: false,
+        displayWarnings: [],
     };
 
     const nodes = {
         kyivSalary: document.getElementById("lavr-profit-kyiv-salary"),
         kyivSalarySource: document.getElementById("lavr-profit-kyiv-salary-source"),
         exportXlsx: document.getElementById("lavr-profit-export-xlsx"),
+        sections: document.getElementById('lavr-profit-sections'),
         resultPeriod: document.getElementById("lavr-profit-result-period"),
         expenseNote: document.getElementById("lavr-profit-expense-note"),
         policy: document.getElementById("lavr-profit-policy"),
@@ -69,13 +71,15 @@
         UNCLASSIFIED: labels.unclassifiedTreatment,
     };
     const warningGroups = {
+        PROFIT_REPORT_SECTION_UNAVAILABLE: 'action',
+        CLIENT_SECTION_UNAVAILABLE: 'action',
         UNCLASSIFIED_DOCUMENTS: 'action',
         UNKNOWN_TAX_POOL: 'action',
         AMBIGUOUS_EXPLICIT_PERIOD: 'action',
         MASTER_CLASS_ARTICLE_NOT_FOUND: 'action',
         MASTER_CLASS_DUPLICATE_MOVEMENT_ROWS: 'action',
         MASTER_CLASS_NEGATIVE_SOURCE_AMOUNT: 'action',
-        MASTER_CLASS_LINES_IGNORED: 'action',
+        MASTER_CLASS_LINES_IGNORED: 'info',
         MASTER_CLASS_LEGACY_PARAMETERS_IGNORED: 'action',
         IMPORT_TRANSPORT_CAPITALIZED: 'info',
         LEGACY_FLOAT_ROUNDING: 'info',
@@ -274,6 +278,7 @@
             body: formData,
         });
         const wrapper = await response.json().catch(() => null);
+        if ([401, 403].includes(response.status)) throw { status: response.status, message: (wrapper && wrapper.data && wrapper.data.message) || labels.accessExpired, errorCode: wrapper && wrapper.data && wrapper.data.code };
         if (!wrapper) throw { status: response.status, message: labels.invalidResponse };
         if (!wrapper.success) {
             const data = wrapper.data || {};
@@ -299,7 +304,7 @@
                 || body.message
                 || body.title
                 || labels.generalError;
-            throw { status: httpStatus, message, field };
+            throw { status: httpStatus, message, field, errorCode: body.code || body.errorCode, errorId: body.errorId || body.requestId };
         }
         return body;
     }
@@ -329,13 +334,13 @@
                 state.audit = data;
                 renderReport();
                 renderAudit();
-                showRunState(labels.auditReady, 'success');
+                showRunState(hasUnavailableSections(data) ? labels.partialReady : labels.auditReady, hasUnavailableSections(data) ? 'warning' : 'success');
             } else {
                 state.report = data;
                 state.reportParams = Object.assign({}, params);
                 state.audit = null;
                 renderReport();
-                showRunState(labels.reportReady, 'success');
+                showRunState(hasUnavailableSections(data) ? labels.partialReady : labels.reportReady, hasUnavailableSections(data) ? 'warning' : 'success');
             }
             return true;
         } catch (error) {
@@ -343,6 +348,9 @@
             const retry = Number(error.status || 0) >= 500 || !error.status ? operation : null;
             showRunState(labels.requestFailed, 'error');
             showError(error.message || labels.generalError, retry, error.field || '');
+            const diagnostic = [error.status ? 'HTTP ' + error.status : '', error.errorCode, error.errorId].filter(Boolean).join(' · ');
+            if (diagnostic) nodes.error.appendChild(textElement('p', 'description', diagnostic));
+            if (state.report) nodes.error.appendChild(textElement('p', '', labels.previousSnapshot));
         } finally {
             setBusy(operation, false);
             updateAvailability();
@@ -360,7 +368,7 @@
         if (!state.salaryOverride) nodes.additionalSalary.value = inputs.odesaAdditionalSalary == null ? '' : String(inputs.odesaAdditionalSalary);
         const source = inputs.odesaAdditionalSalarySource === 'REQUEST_OVERRIDE' ? labels.salaryOverride : labels.salaryDefault;
         nodes.salarySource.textContent = labels.salaryApplied + ': ' + formatMoney(inputs.odesaAdditionalSalary, 'UAH') + ' · ' + source;
-        nodes.kyivSalary.disabled = inputs.kyivAdditionalSalary == null;
+        nodes.kyivSalary.disabled = !Object.prototype.hasOwnProperty.call(inputs, 'kyivAdditionalSalary');
         if (!state.kyivSalaryOverride) nodes.kyivSalary.value = inputs.kyivAdditionalSalary == null ? '' : String(inputs.kyivAdditionalSalary);
         nodes.kyivSalarySource.textContent = nodes.kyivSalary.disabled ? labels.legacyKyiv : labels.salaryApplied + ': ' + formatMoney(inputs.kyivAdditionalSalary, 'UAH') + ' · ' + (inputs.kyivAdditionalSalarySource === 'REQUEST_OVERRIDE' ? labels.salaryOverride : labels.salaryDefault);
         updateTaxShareHelp();
@@ -381,7 +389,7 @@
         item.className = 'lavr-profit-metric' + (emphasized ? ' is-emphasized' : '');
         item.appendChild(textElement('span', 'lavr-profit-metric-label', label));
         const amount = textElement('strong', 'lavr-profit-metric-value', formatMoney(value, 'UAH'));
-        if (emphasized) {
+        if (emphasized && value != null && value !== '') {
             const sign = compareDecimalToZero(value);
             amount.classList.add(sign < 0 ? 'is-negative' : 'is-positive');
         }
@@ -418,7 +426,7 @@
 
     function renderWarnings(warnings) {
         clear(nodes.warnings);
-        const items = (warnings || []).slice().sort((a, b) => warningPriority(a.code) - warningPriority(b.code));
+        const items = (warnings || []).filter(warning => warning && typeof warning === 'object').sort((a, b) => warningPriority(a.code) - warningPriority(b.code));
         nodes.warningsSection.hidden = items.length === 0;
         items.forEach((warning) => {
             const group = warningGroup(warning.code);
@@ -449,7 +457,7 @@
         button.addEventListener('click', () => {
             state.expenseFilter = value;
             renderExpenseFilters();
-            renderExpenses();
+            safeRender(labels.allExpenseRows, document.getElementById('lavr-profit-expenses-table'), renderExpenses);
         });
         return button;
     }
@@ -477,8 +485,8 @@
 
     function renderExpenses() {
         const data = state.report || {};
-        nodes.expenseNote.textContent = Array.isArray(data.expenseLines) ? labels.detailedRows : labels.legacyRows;
-        renderGrid(document.getElementById('lavr-profit-expenses-table'), expenseColumns(), expenseRows(data).filter(item => matchesCity(item.city, state.expenseFilter)));
+        nodes.expenseNote.textContent = sectionUnavailable(data, 'EXPENSES') ? labels.unavailable + '. ' + labels.partialHelp : Array.isArray(data.expenseLines) ? labels.detailedRows : labels.legacyRows;
+        renderGrid(document.getElementById('lavr-profit-expenses-table'), expenseColumns(), expenseRows(data).filter(item => matchesCity(item.city, state.expenseFilter)), sectionUnavailable(data, 'EXPENSES') ? labels.unavailable : null);
     }
 
     function controlItem(label, value, extra) {
@@ -494,7 +502,7 @@
         clear(nodes.controlsContent);
         const grid = document.createElement('div');
         grid.className = 'lavr-profit-control-grid';
-        grid.appendChild(controlItem(labels.selectedDocuments, String(controls.selectedDocumentCount || 0)));
+        grid.appendChild(controlItem(labels.selectedDocuments, printable(controls.selectedDocumentCount)));
         grid.appendChild(controlItem(labels.selectedAmount, formatMoney(controls.selectedDocumentAmount, 'UAH')));
         grid.appendChild(controlItem(labels.operatingTotal, formatMoney(controls.operatingExpenseTotal, 'UAH')));
         grid.appendChild(controlItem(labels.capitalizedTotal, formatMoney(controls.capitalizedCostTotal, 'UAH')));
@@ -502,7 +510,7 @@
         grid.appendChild(controlItem(
             labels.unclassifiedTotal,
             formatMoney(controls.unclassifiedDocumentAmount, 'UAH'),
-            String(controls.unclassifiedDocumentCount || 0) + ' ' + labels.documentsLower
+            printable(controls.unclassifiedDocumentCount) + ' ' + labels.documentsLower
         ));
         nodes.controlsContent.appendChild(grid);
 
@@ -536,15 +544,21 @@
             ? labels.calculatedAt.replace('%s', formatDateTime(data.calculatedAt))
             : '';
         nodes.resultPeriod.textContent = labels.reportMonth + ": " + data.month;
-        renderSupplement(data);
-        applyInitialInputs(data.inputs || {});
-        renderCities(data.cities || []);
-        renderMasterClass(data.masterClass);
+        state.displayWarnings = [];
+        safeRender(labels.appliedParameters, nodes.policy, () => renderSupplement(data));
+        safeRender(labels.appliedParameters, null, () => applyInitialInputs(data.inputs || {}));
+        safeRender(labels.profitByCity, nodes.cities, () => renderCities(data.cities || []));
+        safeRender(labels.masterTitle, nodes.masterClass, () => renderMasterClass(data.masterClass));
         nodes.masterAudit.hidden = true;
-        renderWarnings(data.warnings || []);
         renderExpenseFilters();
-        renderExpenses();
-        renderControls(data.controls || {});
+        safeRender(labels.allExpenseRows, document.getElementById('lavr-profit-expenses-table'), renderExpenses);
+        safeRender(labels.controlTotals, nodes.controlsContent, () => renderControls(data.controls || {}));
+        renderSectionStatus(data);
+        renderWarnings([...(Array.isArray(data.warnings) ? data.warnings : []), ...state.displayWarnings]);
+        if (hasUnavailableSections(data)) {
+            nodes.completeness.textContent = labels.partialReport;
+            nodes.completeness.className = 'lavr-profit-badge is-incomplete';
+        }
         nodes.auditContent.hidden = true;
         nodes.auditNote.hidden = true;
         nodes.loadAudit.disabled = false;
@@ -571,7 +585,8 @@
     }
 
     function filteredAuditRows() {
-        const rows = ((state.audit && state.audit.documents) || []).slice();
+        const source = state.audit && state.audit.documents;
+        const rows = Array.isArray(source) ? source.slice() : [];
         return rows.filter((row) => {
             if (nodes.auditCity.value && row.city !== nodes.auditCity.value) return false;
             if (nodes.auditCategory.value && row.category !== nodes.auditCategory.value) return false;
@@ -583,7 +598,7 @@
 
     function renderAuditRows() {
         const rows = filteredAuditRows();
-        renderGrid(document.getElementById('lavr-profit-audit-table'), documentColumns(rows), rows);
+        renderGrid(document.getElementById('lavr-profit-audit-table'), documentColumns(rows), rows, sectionUnavailable(state.audit, 'EXPENSES') ? labels.unavailable : null);
     }
 
     function renderMasterClass(data) {
@@ -635,16 +650,19 @@
     }
 
     function renderAudit() {
-        renderMasterAudit();
-        const rows = (state.audit && state.audit.documents) || [];
+        safeRender(labels.masterAuditTitle, nodes.masterAudit, renderMasterAudit);
+        const source = state.audit && state.audit.documents;
+        const rows = Array.isArray(source) ? source : [];
         nodes.auditContent.hidden = false;
         selectOptions(nodes.auditCity, uniqueValues(rows, 'city'), labels.all, cityLabel);
         selectOptions(nodes.auditCategory, uniqueValues(rows, 'category'), labels.all);
         selectOptions(nodes.auditTreatment, uniqueValues(rows, 'accountingTreatment'), labels.all, treatmentLabel);
         const truncated = !!(state.audit && state.audit.controls && state.audit.controls.auditTruncated);
         nodes.auditNote.hidden = false;
-        nodes.auditNote.textContent = labels.auditCoverage + ' · ' + labels.fields.documentCount + ': ' + rows.length + (truncated ? ' · ' + labels.auditTruncated + ' ' + labels.exportLoaded : '');
-        renderAuditRows();
+        nodes.auditNote.textContent = sectionUnavailable(state.audit, 'EXPENSES') ? labels.unavailable + '. ' + labels.partialHelp : labels.auditCoverage + ' · ' + labels.fields.documentCount + ': ' + rows.length + (truncated ? ' · ' + labels.auditTruncated + ' ' + labels.exportLoaded : '');
+        safeRender(labels.auditTitle, document.getElementById('lavr-profit-audit-table'), renderAuditRows);
+        renderSectionStatus(state.audit);
+        renderWarnings([...(state.audit.warnings || []), ...state.displayWarnings]);
     }
 
     function csvValue(value) {
@@ -670,6 +688,37 @@
         URL.revokeObjectURL(url);
     }
 
+    function sectionUnavailable(data, key) {
+        return !!(data && data.sections && data.sections[key] && data.sections[key].status !== 'AVAILABLE');
+    }
+    function hasUnavailableSections(data) {
+        return state.displayWarnings.length > 0 || Object.values(data.sections || {}).some(section => section && section.status !== 'AVAILABLE');
+    }
+    function safeRender(name, target, render) {
+        try { render(); } catch (error) {
+            state.displayWarnings.push({code: 'CLIENT_SECTION_UNAVAILABLE', message: labels.sectionDisplayFailed, details: {section: name}});
+            if (target) {
+                clear(target);
+                if (target.tagName === 'TABLE') {
+                    const body = document.createElement('tbody'), row = document.createElement('tr');
+                    row.appendChild(tableCell(labels.sectionDisplayFailed)); body.appendChild(row); target.appendChild(body);
+                } else target.appendChild(textElement('p', 'notice notice-warning inline', labels.sectionDisplayFailed));
+            }
+        }
+    }
+    function sectionRows(data) {
+        return Object.entries(data.sections || {}).map(([key, value]) => ({section: fieldLabel(key), ...(value || {})}));
+    }
+    function renderSectionStatus(data) {
+        clear(nodes.sections);
+        const rows = sectionRows(data);
+        nodes.sections.hidden = !rows.length && !state.displayWarnings.length;
+        if (nodes.sections.hidden) return;
+        nodes.sections.appendChild(textElement('h2', '', labels.sectionStatus));
+        nodes.sections.appendChild(textElement('p', 'description', labels.partialHelp));
+        if (rows.length) appendGrid(nodes.sections, dynamicColumns(rows, ['section', 'status', 'message', 'errorCode', 'errorId']), rows);
+    }
+
     function warningGroup(code) {
         return warningGroups[code] || (/PERIOD|NEGATIVE_CLOSING|ZERO_VALUE_CLOSING/.test(code || '') ? 'action' : 'info');
     }
@@ -677,7 +726,7 @@
     function updateAvailability() {
         const busy = state.loading || state.auditLoading;
         nodes.exportXlsx.disabled = busy || state.exporting || state.dirty || !state.report;
-        nodes.exportAudit.disabled = busy || state.dirty || !state.audit;
+        nodes.exportAudit.disabled = busy || state.dirty || !state.audit || sectionUnavailable(state.audit, 'EXPENSES');
         nodes.loadAudit.disabled = busy || state.dirty || !state.report;
         nodes.result.classList.toggle('is-stale', busy || state.dirty);
     }
@@ -738,11 +787,12 @@
     function displayValue(col, row) {
         const value = col.get(row);
         if (col.money) return formatMoney(value, col.key === 'sourceAmount' ? row.sourceCurrency : col.key === 'amount' || col.key === 'unitPrice' ? row.currency : 'UAH');
+        if (col.key === 'status' && ['AVAILABLE', 'UNAVAILABLE'].includes(value)) return value === 'AVAILABLE' ? labels.available : labels.unavailable;
         if (col.key === 'city') return cityLabel(value);
         if (col.key === 'accountingTreatment') return treatmentLabel(value);
         return printable(value);
     }
-    function renderGrid(table, columns, rows) {
+    function renderGrid(table, columns, rows, emptyMessage) {
         clear(table);
         const head = document.createElement('thead'), header = document.createElement('tr');
         columns.forEach(col => header.appendChild(textElement('th', '', col.title)));
@@ -754,7 +804,7 @@
             body.appendChild(row);
         });
         if (!rows.length) {
-            const row = document.createElement('tr'), cell = tableCell(labels.noData, 'lavr-profit-empty');
+            const row = document.createElement('tr'), cell = tableCell(emptyMessage || labels.noData, 'lavr-profit-empty');
             cell.colSpan = columns.length; row.appendChild(cell); body.appendChild(row);
         }
         table.appendChild(body);
@@ -781,13 +831,18 @@
             ...Object.entries(data.inputs || {}), ...Object.entries(data.periodPolicy || {})].map(([key, value]) => ({ parameter: fieldLabel(key), value: printable(value) }));
     }
     function renderSupplement(data) {
+        safeRender(labels.appliedParameters, nodes.policy, () => {
         clear(nodes.policy);
         if (!data.periodPolicy) nodes.policy.appendChild(textElement('p', '', labels.legacyPeriod));
         appendGrid(nodes.policy, ['parameter', 'value'].map(key => columnSpec(key)), parameterRows(data));
+        });
+        safeRender(labels.inventoryTitle, nodes.inventory, () => {
         clear(nodes.inventory);
         nodes.inventory.appendChild(textElement('p', 'description', labels.inventoryHelp));
         const inventory = inventoryRows(data);
         appendGrid(nodes.inventory, dynamicColumns(inventory, ['city', 'warehouseId', 'warehouseName', 'openingAccountingValue', 'closingAccountingValue', 'accountingValueChange']), inventory);
+        });
+        safeRender(labels.periodDiagnostics, nodes.diagnostics, () => {
         clear(nodes.diagnostics);
         const rows = diagnosticRows(data);
         nodes.diagnostics.hidden = !rows.length && !data.periodDiagnosticsTruncated;
@@ -797,6 +852,7 @@
             if (data.periodDiagnosticsTruncated) nodes.diagnostics.appendChild(textElement('p', '', labels.diagnosticsTruncated));
             appendGrid(nodes.diagnostics, documentColumns(rows), rows);
         }
+        });
     }
 
     function downloadBlob(blob, filename) {
@@ -821,17 +877,18 @@
         };
         ['KYIV', 'ODESA'].forEach(city => {
             const rows = expenseRows(data).filter(row => matchesCity(row.city, city));
-            add(cityLabel(city), expenseColumns(), rows, Array.isArray(data.expenseLines) ? labels.detailedRows : labels.legacyRows);
+            add(cityLabel(city), expenseColumns(), rows, sectionUnavailable(data, 'EXPENSES') ? labels.unavailable : Array.isArray(data.expenseLines) ? labels.detailedRows : labels.legacyRows);
         });
         add(labels.profitByCity, dynamicColumns(data.cities || [], ['city', 'baseGrossProfit', 'manualGrossAdjustments', 'grossProfit', 'operatingExpenses', 'profit']), data.cities || []);
         add(labels.appliedParameters, ['parameter', 'value'].map(key => columnSpec(key)), parameterRows(data));
         const controls = data.controls ? [data.controls] : [];
-        add(labels.controlTotals, dynamicColumns(controls), controls, labels.controlsHelp);
+        add(labels.controlTotals, dynamicColumns(controls), controls, data.controls ? labels.controlsHelp : labels.unavailable + '. ' + labels.partialHelp);
         add(labels.warningsTitle, dynamicColumns(data.warnings || [], ['code', 'message', 'details']), data.warnings || [], data.complete ? labels.complete : labels.incomplete);
         const inventory = inventoryRows(data);
         add(labels.inventoryTitle, dynamicColumns(inventory), inventory, labels.inventoryHelp);
+        if (data.sections) add(labels.sectionStatus, dynamicColumns(sectionRows(data), ['section', 'status', 'message', 'errorCode', 'errorId']), sectionRows(data), labels.partialHelp);
         const documents = data.documents || [];
-        add(labels.auditTitle, documentColumns(documents), documents, data.controls && data.controls.auditTruncated ? labels.auditTruncated : labels.auditCoverage);
+        add(labels.auditTitle, documentColumns(documents), documents, sectionUnavailable(data, 'EXPENSES') ? labels.unavailable + '. ' + labels.partialHelp : data.controls && data.controls.auditTruncated ? labels.auditTruncated : labels.auditCoverage);
         const diagnostics = diagnosticRows(data);
         add(labels.periodDiagnostics, documentColumns(diagnostics), diagnostics, labels.diagnosticsHelp + (data.periodDiagnosticsTruncated ? ' ' + labels.diagnosticsTruncated : ''));
         add(labels.masterTitle, dynamicColumns(data.masterClass ? [data.masterClass] : []), data.masterClass ? [data.masterClass] : [], data.masterClass ? labels.exportSnapshot : labels.masterUnavailable);
@@ -848,8 +905,9 @@
             if (!state.audit && !(await loadReport('audit'))) return;
             if (state.dirty || !state.audit) return;
             const data = state.audit;
-            if (!Array.isArray(data.documents)) throw new Error(labels.invalidResponse);
-            const bytes = LavkaProfitXlsx.build(buildWorkbookSheets(data));
+            if (!Array.isArray(data.documents) && !(data.sections && data.sections.EXPENSES && data.sections.EXPENSES.status === 'UNAVAILABLE')) throw new Error(labels.invalidResponse);
+            const exportData = { ...data, complete: data.complete && !hasUnavailableSections(data), warnings: [...(data.warnings || []), ...state.displayWarnings] };
+            const bytes = LavkaProfitXlsx.build(buildWorkbookSheets(exportData));
             downloadBlob(new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), 'folio-profit-' + data.month + '.xlsx');
             showRunState(labels.exportReady, 'success');
         } catch (error) {

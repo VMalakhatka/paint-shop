@@ -43,3 +43,23 @@ for name in ('profit.xlsx', 'java-contract.xlsx'):
             expected = {row['lineId']: float(row['amount']) for row in fixture['expenseLines'] if row['city'] == city}
             assert observed == expected, city
     print('PASS:', name, 'CRC, schema, coverage, precision and literal text')
+
+partial = openpyxl.load_workbook(folder / 'partial.xlsx')
+assert 'Report section availability' in partial.sheetnames
+section_rows = list(partial['Report section availability'].values)
+assert any('UNAVAILABLE' in row for row in section_rows)
+profit = partial['Profit by city']
+headers = [cell.value for cell in profit[3]]
+assert profit.cell(5, headers.index('Profit') + 1).value == '—'
+assert partial['Kyiv'].max_row > 3
+print('PASS: partial.xlsx availability and unknown dependent profit preserved')
+
+partial_java = openpyxl.load_workbook(folder / 'partial-java.xlsx')
+assert 'Report section availability' in partial_java.sheetnames
+profit = partial_java['Profit by city']
+headers = [cell.value for cell in profit[3]]
+assert all(profit.cell(row, headers.index('Profit') + 1).value == '—' for row in [4, 5])
+assert partial_java['Control totals'].max_row <= 3
+assert not any(cell.data_type == 'n' and cell.value is not None for row in partial_java['Control totals'] for cell in row)
+assert partial_java['Inventory accounting value'].max_row > 3
+print('PASS: partial-java.xlsx failed expenses preserve unknown totals and available inventory')

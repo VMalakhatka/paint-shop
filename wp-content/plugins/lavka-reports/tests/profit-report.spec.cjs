@@ -41,8 +41,16 @@ async function setup(options={}) {
    // Multipart FormData: extract only test parameters.
    const field=name=>{const m=post.match(new RegExp('name="'+name+'"\\r\\n\\r\\n([^\\r]*)'));return m&&m[1];};
    const month=field('month'),operation=field('operation');requests.push({month,operation,kyiv:field('kyivAdditionalSalary'),odesa:field('odesaAdditionalSalary')});
-   const data=options.backend ? {...JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/profit-report.json'),'utf8')), month} : fixture(month,options.legacy);
-   if(operation==='audit') data.cities[0].profit='81.00';
+   if(options.expire && requests.length>1){await route.fulfill({status:403,contentType:'application/json',body:'-1'});return;}
+   const data=options.backendPartial ? {...JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/profit-report-partial.json'),'utf8')), month} : options.backend ? {...JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/profit-report.json'),'utf8')), month} : fixture(month,options.legacy);
+   if(operation==='audit' && !options.backendPartial) data.cities[0].profit='81.00';
+   if(options.partial) {
+    data.sections={EXPENSES:{status:'AVAILABLE'},GROSS_MARGIN:{status:'AVAILABLE'},MASTER_CLASS:{status:'UNAVAILABLE',errorCode:'MASTER_CLASS_UNAVAILABLE',errorId:'test-123',message:'Synthetic unavailable source'},INVENTORY_KYIV:{status:'AVAILABLE'},INVENTORY_ODESA:{status:'AVAILABLE'}};
+    data.masterClass=null;data.masterClassDocuments=null;data.cities[1].grossProfit=null;data.cities[1].profit=null;data.cities[1].manualGrossAdjustments=null;
+   }
+   if(options.badInventory)data.inventory=[null];
+   if(options.ignoredOnly){data.warnings=[{code:'MASTER_CLASS_LINES_IGNORED',message:'One row skipped'}];data.complete=true;}
+
    const reply=()=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,data:{httpStatus:200,bodyRaw:JSON.stringify(data)}})});
    if(options.hold && requests.length>1){held=reply;return;}await reply();
   }else await route.fulfill({status:200,contentType:'text/html',body:html});
@@ -112,5 +120,61 @@ test('real Java DTO fixture: 32 stable rows, separate diagnostics, numeric strin
  const download=await downloadPromise;await download.saveAs(path.join(output,'java-contract.xlsx'));
  await page.screenshot({path:path.join(output,'java-contract.png'),fullPage:true});
  assert.match(await page.locator('#lavr-profit-audit-table').innerText(),/SHARED_TAX_MALAFOP/);
+ assert.deepEqual(errors,[]);await page.close();
+});
+
+test('unavailable master class preserves expenses, Kyiv and export with explicit null dependent amounts',async()=>{
+ const {page,errors}=await setup({partial:true});
+ assert.match(await page.locator('#lavr-profit-run-state').innerText(),/partially calculated/);
+ assert.match(await page.locator('#lavr-profit-sections').innerText(),/test-123/);
+ assert.equal(await page.locator('#lavr-profit-expenses-table tbody tr').count(),3);
+ const odesa=page.locator('#lavr-profit-cities article').nth(1);
+ assert.equal(await odesa.locator('.is-emphasized .lavr-profit-metric-value').innerText(),'—');
+ assert.equal(await odesa.locator('.is-emphasized .is-positive').count(),0);
+ assert.equal(await page.locator('#lavr-profit-export-xlsx').isEnabled(),true);
+ const downloadPromise=page.waitForEvent('download');await page.locator('#lavr-profit-export-xlsx').click();
+ await (await downloadPromise).saveAs(path.join(output,'partial.xlsx'));
+ assert.deepEqual(errors,[]);await page.close();
+});
+test('one malformed independent section cannot prevent city cards or expenses from rendering',async()=>{
+ const {page,errors}=await setup({badInventory:true});
+ assert.equal(await page.locator('#lavr-profit-cities article').count(),2);
+ assert.equal(await page.locator('#lavr-profit-expenses-table tbody tr').count(),3);
+ assert.match(await page.locator('#lavr-profit-warnings').innerText(),/CLIENT_SECTION_UNAVAILABLE/);
+ assert.match(await page.locator('#lavr-profit-run-state').innerText(),/partially calculated/);
+ assert.deepEqual(errors,[]);await page.close();
+});
+test('ignored master class line is advisory and does not fail loading',async()=>{
+ const {page,errors}=await setup({ignoredOnly:true});
+ assert.match(await page.locator('#lavr-profit-run-state').innerText(),/successfully/);
+ assert.equal(await page.locator('#lavr-profit-warnings .is-info').count(),1);
+ assert.equal(await page.locator('#lavr-profit-error').isVisible(),false);
+ assert.equal(await page.locator('#lavr-profit-expenses-table tbody tr').count(),3);
+ assert.deepEqual(errors,[]);await page.close();
+});
+
+test('expired WordPress nonce gives a reload instruction instead of blaming report data',async()=>{
+ const {page,errors,requests}=await setup({expire:true});
+ await page.locator('#lavr-profit-calculate').click();
+ await page.waitForFunction(()=>!document.getElementById('lavr-profit-error').hidden);
+ const error=await page.locator('#lavr-profit-error').innerText();
+ assert.match(error,/session expired/);
+ assert.match(error,/previous successful response/);
+ assert.match(error,/HTTP 403/);
+ assert.equal(await page.locator('#lavr-profit-export-xlsx').isEnabled(),false);
+ assert.equal(requests.length,2);assert.deepEqual(errors,[]);await page.close();
+});
+
+test('Java partial DTO: failed expenses preserve gross margin and inventory without zero totals',async()=>{
+ const {page,errors}=await setup({backendPartial:true});
+ assert.match(await page.locator('#lavr-profit-run-state').innerText(),/partially calculated/);
+ assert.equal(await page.locator('#lavr-profit-cities .is-emphasized .is-positive').count(),0);
+ assert.deepEqual(await page.locator('#lavr-profit-cities .is-emphasized .lavr-profit-metric-value').allTextContents(),['—','—']);
+ assert.match(await page.locator('#lavr-profit-sections').innerText(),/Skipped: unavailable/);
+ assert.doesNotMatch(await page.locator('#lavr-profit-controls-content').textContent(),/0,00/);
+ const downloadPromise=page.waitForEvent('download');await page.locator('#lavr-profit-export-xlsx').click();
+ await (await downloadPromise).saveAs(path.join(output,'partial-java.xlsx'));
+ await page.screenshot({path:path.join(output,'partial-java.png'),fullPage:true});
+ assert.equal(await page.locator('#lavr-profit-error').isVisible(),false);
  assert.deepEqual(errors,[]);await page.close();
 });

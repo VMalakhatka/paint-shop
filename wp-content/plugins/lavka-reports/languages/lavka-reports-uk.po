@@ -1091,3 +1091,79 @@ msgstr "Доходи МК Одеси (автоматично)"
 #: inc/class-profit-report.php
 msgid "Odesa master class returns (automatic)"
 msgstr "Повернення МК Одеси (автоматично)"
+
+#: inc/class-profit-report.php
+msgid "Report partially calculated. Available sections are shown; review skipped sections."
+msgstr "Звіт розраховано частково. Доступні розділи показано; перевірте пропущені розділи."
+
+#: inc/class-profit-report.php
+msgid "Partial report"
+msgstr "Частковий звіт"
+
+#: inc/class-profit-report.php
+msgid "Report section availability"
+msgstr "Доступність розділів звіту"
+
+#: inc/class-profit-report.php
+msgid "A skipped section does not stop other sections. Dependent amounts remain unavailable, not zero; the final profit may be unavailable."
+msgstr "Пропущений розділ не зупиняє інші. Залежні суми залишаються недоступними, а не нульовими; підсумковий прибуток може бути недоступним."
+
+#: inc/class-profit-report.php
+msgid "This section could not be displayed. Other sections remain available."
+msgstr "Цей розділ не вдалося показати. Інші розділи залишаються доступними."
+
+#: inc/class-profit-report.php
+msgid "The values below belong to the previous successful response. The new request did not update them."
+msgstr "Значення нижче належать попередній успішній відповіді. Новий запит їх не оновив."
+
+#: inc/class-profit-report.php
+msgid "Available"
+msgstr "Доступно"
+
+#: inc/class-profit-report.php
+msgid "Skipped: unavailable"
+msgstr "Пропущено: недоступно"
+
+#: inc/class-profit-report.php
+msgid "Section"
+msgstr "Розділ"
+
+#: inc/class-profit-report.php
+msgid "Error code"
+msgstr "Код помилки"
+
+#: inc/class-profit-report.php
+msgid "Diagnostic ID"
+msgstr "ID діагностики"
+
+#: inc/class-profit-report.php
+msgid "Expenses"
+msgstr "Витрати"
+
+#: inc/class-profit-report.php
+msgid "Gross margin"
+msgstr "Валова маржа"
+
+#: inc/class-profit-report.php
+msgid "Kyiv inventory"
+msgstr "Запаси Києва"
+
+#: inc/class-profit-report.php
+msgid "Odesa inventory"
+msgstr "Запаси Одеси"
+
+#: inc/class-profit-report.php
+msgid "Enter a valid decimal value."
+msgstr "Введіть коректне десяткове число."
+
+#: inc/class-profit-report.php
+msgid "Expense parameters"
+msgstr "Параметри витрат"
+
+#: inc/class-profit-report.php
+msgid "Your report session has expired. Reload the page and select the report month again."
+msgstr "Сесія звіту завершилася. Оновіть сторінку та знову виберіть місяць звіту."
+
+#: inc/class-profit-report.php
+msgid "Report access was denied or the session expired. Reload the page and sign in again if needed."
+msgstr "Доступ до звіту відхилено або сесія завершилася. Оновіть сторінку та за потреби увійдіть знову."

@@ -1,6 +1,6 @@
 # Lavka Reports — monthly Folio profit
 
-Frontend version 0.3.0. Verified against local code and the synthetic Java DTO
+Frontend version 0.3.1. Verified against local code and the synthetic Java DTO
 fixture on 2026-09-08; this does not assert a production deployment.
 
 ## Ownership and contract
@@ -65,6 +65,7 @@ formula prefixes. No downloaded file or raw API response is saved to WordPress.
 Run PHP syntax checks, JS syntax checks, gettext format checks, and:
 
 ```sh
+php wp-content/plugins/lavka-reports/tests/profit-proxy.php
 node --test wp-content/plugins/lavka-reports/tests/profit-report.spec.cjs
 python3 wp-content/plugins/lavka-reports/tests/check-profit-xlsx.py /path/to/test/output
 ```
@@ -90,3 +91,41 @@ Folio or rerun mutating campaigns as a frontend rollback. The old API remains
 readable through the explicit legacy fallback.
 
 Manager workflow: [operations runbook](../../../docs/OPERATIONS_RUNBOOK.md#прибыль).
+
+
+## Partial availability (0.3.1)
+
+A successful response can include `sections`, a map from section code to
+`{status: AVAILABLE|UNAVAILABLE, message, errorCode, errorId}`. The page and a
+separate Excel sheet display this map. A failed source leaves dependent city
+amounts null (displayed as `—`, without positive-profit styling); it does not
+remove unrelated sections or disable export. The final result is explicitly partial.
+
+`MASTER_CLASS_LINES_IGNORED` is advisory: those movement rows are already excluded,
+and the warning alone neither rejects the response nor stops other calculations.
+Each independent display block also catches its own rendering error, adds
+`CLIENT_SECTION_UNAVAILABLE`, and continues. This guard does not repair or
+recalculate backend amounts. Fatal transport/request errors remain errors, with
+safe HTTP/diagnostic IDs where provided; old values are explicitly identified as
+a previous snapshot.
+
+Incident check 2026-09-08: the open production tab still ran 0.2.2 while server
+files were 0.3.0. After reload, July returned successfully with 35 expense rows.
+A direct Java request and a normal WordPress read also succeeded (about 20–23s).
+The earlier failure could not be reproduced; neither the warning nor a particular
+timeout was established as its cause. Local partial-availability changes require
+a matching Java API release; the successful live check used the earlier contract.
+
+Optional numeric parameters retain decimal syntax validation in PHP (up to100
+characters), but semantic ranges are evaluated by Java. Negative amounts and
+out-of-range shares reach Java instead of causing PHP to abort the whole report.
+`EXPENSE_INPUTS`/`EXPENSES` can become unavailable; their controls and dependent
+amounts stay unknown. A malformed decimal such as `abc`, an invalid month or a
+disabled feature remains a request error requiring correction. This is not a
+promise to silently accept every invalid input or replace it with a default.
+
+Expired WordPress nonce responses now return `REPORT_SESSION_EXPIRED`/HTTP403
+with a reload instruction. Legacy `-1`/403 is recognized by JS too. Authorization
+and nonce checks are retained and never bypassed. Nonce expiry is a plausible,
+but unproven, explanation for the old-tab incident; this change makes future
+failures diagnosable instead of presenting a generic Folio loading error.
