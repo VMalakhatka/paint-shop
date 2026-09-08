@@ -1289,3 +1289,47 @@ msgstr "Неураховуваний документ"
 #: inc/ManagerWorkspace.php
 msgid "Save draft changes before continuing."
 msgstr "Збережіть зміни чернетки перед продовженням."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Customer role"
+msgstr "Роль клієнта"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "All roles"
+msgstr "Усі ролі"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "City"
+msgstr "Місто"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "All cities"
+msgstr "Усі міста"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Filter customers"
+msgstr "Застосувати фільтри"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Reset filters"
+msgstr "Скинути фільтри"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Customers found: %s"
+msgstr "Знайдено клієнтів: %s"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "City comes from the customer billing address in WooCommerce."
+msgstr "Місто вказано з платіжної адреси клієнта у WooCommerce."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "WooCommerce customer"
+msgstr "Клієнт WooCommerce"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Not linked to Folio"
+msgstr "Не прив’язано до ФОЛІО"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "All customers"
+msgstr "Усі клієнти"

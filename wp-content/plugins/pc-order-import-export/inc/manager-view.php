@@ -20,24 +20,40 @@ $form_fields = static function (string $operation) use ($customer_id, $order): v
 <p><?php esc_html_e('Select a customer, prepare a draft and review Folio accounts by warehouse.', 'pc-order-import-export'); ?></p>
 <?php if ($error): ?><div class="notice notice-error"><p><?php echo esc_html($error); ?></p></div><?php endif; ?>
 <div id="pcoe-manager-status" role="status" aria-live="polite"></div>
+<?php if (!$user):
+$role = sanitize_key($_GET['customer_role'] ?? '');
+$city = sanitize_text_field(wp_unslash($_GET['customer_city'] ?? ''));
+$directory_page = max(1, absint($_GET['customers_page'] ?? 1));
+$directory = ManagerWorkspace::directory($search, $role, $city, $directory_page);
+$role_names = wp_roles()->get_names();
+$directory_url = add_query_arg(['page' => ManagerWorkspace::PAGE, 'customer_search' => $search, 'customer_role' => $role, 'customer_city' => $city], admin_url('admin.php'));
+?>
 <section class="pcoe-card">
-<form method="get" class="pcoe-search">
+<form method="get" class="pcoe-directory-filters">
 <input type="hidden" name="page" value="<?php echo esc_attr(ManagerWorkspace::PAGE); ?>">
-<label for="pcoe-search"><?php esc_html_e('Find customer by name, company or email', 'pc-order-import-export'); ?></label>
-<input id="pcoe-search" name="customer_search" type="search" value="<?php echo esc_attr($search); ?>" minlength="2" required>
-<button class="button"><?php esc_html_e('Find customer', 'pc-order-import-export'); ?></button>
+<label for="pcoe-search"><?php esc_html_e('Find customer by name, company or email', 'pc-order-import-export'); ?><input id="pcoe-search" name="customer_search" type="search" value="<?php echo esc_attr($search); ?>"></label>
+<label for="pcoe-role"><?php esc_html_e('Customer role', 'pc-order-import-export'); ?><select id="pcoe-role" name="customer_role"><option value=""><?php esc_html_e('All roles', 'pc-order-import-export'); ?></option><?php foreach (['customer', 'opt', 'partner'] as $key): ?><option value="<?php echo esc_attr($key); ?>" <?php selected($role, $key); ?>><?php echo esc_html(translate_user_role($role_names[$key] ?? $key)); ?></option><?php endforeach; ?></select></label>
+<label for="pcoe-city"><?php esc_html_e('City', 'pc-order-import-export'); ?><select id="pcoe-city" name="customer_city"><option value=""><?php esc_html_e('All cities', 'pc-order-import-export'); ?></option><?php foreach ($directory['cities'] as $value): ?><option <?php selected($city, $value); ?> value="<?php echo esc_attr($value); ?>"><?php echo esc_html($value); ?></option><?php endforeach; ?></select></label>
+<div class="pcoe-actions"><button class="button button-primary"><?php esc_html_e('Filter customers', 'pc-order-import-export'); ?></button><a class="button" href="<?php echo esc_url(ManagerWorkspace::url(0)); ?>"><?php esc_html_e('Reset filters', 'pc-order-import-export'); ?></a></div>
 </form>
-<?php if (mb_strlen($search) >= 2):
-    $query = new \WP_User_Query(['role__in' => ['customer', 'opt', 'partner'], 'number' => 30, 'search' => '*' . $search . '*', 'search_columns' => ['user_login', 'user_email', 'display_name']]);
-    $matches = $query->get_results();
-    $by_company = get_users(['role__in' => ['customer', 'opt', 'partner'], 'number' => 30, 'meta_query' => ['relation' => 'OR', ['key' => 'billing_company', 'value' => $search, 'compare' => 'LIKE'], ['key' => '_folio_partner_name', 'value' => $search, 'compare' => 'LIKE'], ['key' => '_folio_partner_short_name', 'value' => $search, 'compare' => 'LIKE']]]);
-    $found = []; foreach (array_merge($matches, $by_company) as $match) $found[$match->ID] = $match;
-    if (!$found) echo '<p>' . esc_html__('No customers found.', 'pc-order-import-export') . '</p>';
-    echo '<ul class="pcoe-customers">';
-    foreach (array_slice($found, 0, 30) as $match) echo '<li><a href="' . esc_url(ManagerWorkspace::url($match->ID)) . '">' . esc_html($match->display_name) . '</a> · ' . esc_html($match->user_email) . ' · ' . esc_html(get_user_meta($match->ID, 'billing_company', true)) . '</li>';
-    echo '</ul><p class="description">' . esc_html__('Up to 30 customers are shown. Refine the search if needed.', 'pc-order-import-export') . '</p>';
-endif; ?>
-</section>
+<p><?php echo esc_html(sprintf(__('Customers found: %s', 'pc-order-import-export'), number_format_i18n($directory['total']))); ?></p>
+<p class="description"><?php esc_html_e('City comes from the customer billing address in WooCommerce.', 'pc-order-import-export'); ?></p>
+<?php if (!$directory['users']): ?><p><?php esc_html_e('No customers found.', 'pc-order-import-export'); ?></p><?php else: ?>
+<div class="pcoe-scroll"><table class="widefat striped"><thead><tr>
+<th scope="col"><?php esc_html_e('WooCommerce customer', 'pc-order-import-export'); ?></th><th scope="col"><?php esc_html_e('Folio customer:', 'pc-order-import-export'); ?></th><th scope="col"><?php esc_html_e('Customer role', 'pc-order-import-export'); ?></th><th scope="col"><?php esc_html_e('City', 'pc-order-import-export'); ?></th>
+</tr></thead><tbody>
+<?php foreach ($directory['users'] as $match):
+$folio_name = trim((string) get_user_meta($match->ID, '_folio_partner_name', true));
+$folio_short = trim((string) get_user_meta($match->ID, '_folio_partner_short_name', true));
+?><tr><td><a href="<?php echo esc_url(ManagerWorkspace::url($match->ID)); ?>"><strong><?php echo esc_html($match->display_name); ?></strong></a><br><?php echo esc_html(get_user_meta($match->ID, 'billing_company', true)); ?><br><?php echo esc_html($match->user_email); ?></td>
+<td><?php echo esc_html($folio_name ?: ($folio_short ?: __('Not linked to Folio', 'pc-order-import-export'))); ?><?php if ($folio_short && $folio_short !== $folio_name): ?><br><span class="description"><?php echo esc_html($folio_short); ?></span><?php endif; ?></td>
+<td><?php echo esc_html(implode(', ', array_map(static fn($r) => translate_user_role($role_names[$r] ?? $r), array_intersect($match->roles, ['customer', 'opt', 'partner'])))); ?></td><td><?php echo esc_html(get_user_meta($match->ID, 'billing_city', true) ?: '—'); ?></td></tr>
+<?php endforeach; ?></tbody></table></div>
+<nav class="pcoe-actions">
+<?php if ($directory_page > 1): ?><a class="button" href="<?php echo esc_url(add_query_arg('customers_page', $directory_page - 1, $directory_url)); ?>"><?php esc_html_e('Previous page', 'pc-order-import-export'); ?></a><?php endif; ?>
+<?php if ($directory_page * 25 < $directory['total']): ?><a class="button" href="<?php echo esc_url(add_query_arg('customers_page', $directory_page + 1, $directory_url)); ?>"><?php esc_html_e('Next page', 'pc-order-import-export'); ?></a><?php endif; ?></nav>
+<?php endif; ?></section>
+<?php else: ?><a class="button" href="<?php echo esc_url(ManagerWorkspace::url(0)); ?>"><?php esc_html_e('All customers', 'pc-order-import-export'); ?></a><?php endif; ?>
 <?php if ($user):
 $context = function_exists('pc_folio_balance_user_context') ? pc_folio_balance_user_context($customer_id, false) : [];
 ?>

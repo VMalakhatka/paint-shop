@@ -1283,3 +1283,47 @@ msgstr "Неучитываемый документ"
 #: inc/ManagerWorkspace.php
 msgid "Save draft changes before continuing."
 msgstr "Сохраните изменения черновика перед продолжением."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Customer role"
+msgstr "Роль клиента"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "All roles"
+msgstr "Все роли"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "City"
+msgstr "Город"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "All cities"
+msgstr "Все города"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Filter customers"
+msgstr "Применить фильтры"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Reset filters"
+msgstr "Сбросить фильтры"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Customers found: %s"
+msgstr "Найдено клиентов: %s"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "City comes from the customer billing address in WooCommerce."
+msgstr "Город указан из платёжного адреса клиента в WooCommerce."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "WooCommerce customer"
+msgstr "Клиент WooCommerce"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Not linked to Folio"
+msgstr "Не привязан к ФОЛИО"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "All customers"
+msgstr "Все клиенты"

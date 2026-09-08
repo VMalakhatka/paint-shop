@@ -57,6 +57,30 @@ class ManagerWorkspace
         } catch (\Throwable $e) { /* Customer has not been selected yet. */ }
     }
 
+    /** Directory reads local Woo profiles and cached Folio names; no Folio request. */
+    public static function directory(string $search, string $role, string $city, int $page): array {
+        if (!current_user_can('manage_woocommerce')) throw new \RuntimeException('Forbidden');
+        global $wpdb;
+        $roles = ['customer', 'opt', 'partner'];
+        $args = ['role__in' => in_array($role, $roles, true) ? [$role] : $roles,
+            'number' => 25, 'paged' => max(1, $page), 'orderby' => ['display_name' => 'ASC', 'ID' => 'ASC']];
+        $query = new \WP_User_Query();
+        $filter = static function ($candidate) use ($query, $search, $city, $wpdb): void {
+            if ($candidate !== $query) return;
+            if ($search !== '') {
+                $like = '%' . $wpdb->esc_like($search) . '%';
+                $candidate->query_where .= $wpdb->prepare(" AND ({$wpdb->users}.display_name LIKE %s OR {$wpdb->users}.user_email LIKE %s OR {$wpdb->users}.user_login LIKE %s OR EXISTS (SELECT 1 FROM {$wpdb->usermeta} directory_search WHERE directory_search.user_id = {$wpdb->users}.ID AND directory_search.meta_key IN ('billing_company','first_name','last_name','_folio_partner_name','_folio_partner_short_name') AND directory_search.meta_value LIKE %s))", $like, $like, $like, $like);
+            }
+            if ($city !== '') $candidate->query_where .= $wpdb->prepare(" AND EXISTS (SELECT 1 FROM {$wpdb->usermeta} directory_city WHERE directory_city.user_id = {$wpdb->users}.ID AND directory_city.meta_key = 'billing_city' AND TRIM(directory_city.meta_value) = %s)", $city);
+        };
+        add_action('pre_user_query', $filter);
+        try { $query->prepare_query($args); $query->query(); }
+        finally { remove_action('pre_user_query', $filter); }
+        $city_query = new \WP_User_Query(['role__in' => $roles, 'number' => 1, 'fields' => 'ID', 'count_total' => false]);
+        $cities = $wpdb->get_col("SELECT DISTINCT TRIM(directory_city.meta_value) " . $city_query->query_from . " INNER JOIN {$wpdb->usermeta} directory_city ON directory_city.user_id = {$wpdb->users}.ID AND directory_city.meta_key = 'billing_city' " . $city_query->query_where . " AND TRIM(directory_city.meta_value) <> '' ORDER BY 1");
+        return ['users' => $query->get_results(), 'total' => $query->get_total(), 'cities' => $cities];
+    }
+
     public static function render(): void {
         if (!current_user_can('manage_woocommerce')) wp_die(esc_html__('You do not have permission to perform this action.', 'pc-order-import-export'));
         require PCOE_DIR . '/inc/manager-view.php';
