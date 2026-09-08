@@ -33,10 +33,11 @@ class Lavka_Reports_Profit_Report {
             [],
             LAVR_VER
         );
+        wp_enqueue_script('lavr-profit-xlsx', LAVR_URL . 'profit-xlsx.js', [], LAVR_VER, true);
         wp_enqueue_script(
             'lavr-profit-report',
             LAVR_URL . 'profit-report.js',
-            [],
+            ['lavr-profit-xlsx'],
             LAVR_VER,
             true
         );
@@ -79,6 +80,11 @@ class Lavka_Reports_Profit_Report {
                         <p id="lavr-profit-salary-source" class="description"></p>
                     </div>
                     <div class="lavr-profit-field">
+                        <label for="lavr-profit-kyiv-salary"><?php echo esc_html__('Kyiv additional work', 'lavka-reports'); ?></label>
+                        <input type="text" inputmode="decimal" id="lavr-profit-kyiv-salary" data-param="kyivAdditionalSalary" autocomplete="off">
+                        <p id="lavr-profit-kyiv-salary-source" class="description"></p>
+                    </div>
+                    <div class="lavr-profit-field">
                         <label for="lavr-profit-tax-share"><?php echo esc_html__('Odesa employee share', 'lavka-reports'); ?></label>
                         <div class="lavr-profit-input-suffix">
                             <input type="text" inputmode="decimal" id="lavr-profit-tax-share" data-param="odesaTaxShare" autocomplete="off">
@@ -97,6 +103,12 @@ class Lavka_Reports_Profit_Report {
             </details>
 
             <div id="lavr-profit-result" hidden>
+                <div class="lavr-profit-heading-row lavr-profit-export-bar">
+                    <strong id="lavr-profit-result-period"></strong>
+                    <button type="button" class="button" id="lavr-profit-export-xlsx"><?php echo esc_html__('Export report to Excel', 'lavka-reports'); ?></button>
+                </div>
+                <p class="description"><?php echo esc_html__('Excel includes both cities and all loaded audit rows, regardless of the table filters. Missing audit data is loaded before export.', 'lavka-reports'); ?></p>
+                <details class="lavr-profit-controls"><summary><?php echo esc_html__('Applied parameters and selection period', 'lavka-reports'); ?></summary><div id="lavr-profit-policy"></div></details>
                 <section class="lavr-profit-summary" aria-labelledby="lavr-profit-summary-title">
                     <div class="lavr-profit-heading-row">
                         <div>
@@ -120,6 +132,7 @@ class Lavka_Reports_Profit_Report {
                         <h2 id="lavr-profit-expenses-title"><?php echo esc_html__('Expense breakdown', 'lavka-reports'); ?></h2>
                         <div class="lavr-profit-segments" id="lavr-profit-expense-filter" role="group" aria-label="<?php echo esc_attr__('Filter expenses by city', 'lavka-reports'); ?>"></div>
                     </div>
+                    <p id="lavr-profit-expense-note" class="description"></p>
                     <div class="lavr-profit-table-wrap">
                         <table class="widefat striped" id="lavr-profit-expenses-table">
                             <thead><tr>
@@ -140,6 +153,8 @@ class Lavka_Reports_Profit_Report {
                     <div id="lavr-profit-controls-content"></div>
                 </details>
 
+                <details class="lavr-profit-controls"><summary><?php echo esc_html__('Inventory accounting value', 'lavka-reports'); ?></summary><div id="lavr-profit-inventory"></div></details>
+                <section id="lavr-profit-period-diagnostics" class="lavr-profit-audit" hidden></section>
                 <section class="lavr-profit-audit" aria-labelledby="lavr-profit-audit-title">
                     <div class="lavr-profit-heading-row">
                         <div>
@@ -202,6 +217,7 @@ class Lavka_Reports_Profit_Report {
         $rules = [
             'odesaTaxShare'          => ['min' => 0, 'max' => 1, 'positive' => false],
             'rubToUahRate'           => ['min' => 0, 'max' => null, 'positive' => true],
+            'kyivAdditionalSalary'   => ['min' => 0, 'max' => null, 'positive' => false],
             'odesaAdditionalSalary'  => ['min' => 0, 'max' => null, 'positive' => false],
         ];
 
@@ -338,6 +354,166 @@ class Lavka_Reports_Profit_Report {
             'shareHelp' => __('Share of officially employed Odesa staff.', 'lavka-reports'),
             'documentsLower' => __('documents', 'lavka-reports'),
             'monthRequired' => __('Select a report month.', 'lavka-reports'),
+            'reportMonth' => __('Report month', 'lavka-reports'),
+            'detailedRows' => __('Detailed rows and selection rules supplied by Java. Manual amounts have no documents.', 'lavka-reports'),
+            'legacyRows' => __('The server returns category totals. Detailed expense rows and selection rules require the updated Java API.', 'lavka-reports'),
+            'legacyKyiv' => __('Available after the Java API update. Default: 0 UAH.', 'lavka-reports'),
+            'legacyPeriod' => __('The server did not supply the selection period. Do not assume the new period rules were applied.', 'lavka-reports'),
+            'parametersChanged' => __('Parameters changed. Recalculate before loading audit or exporting.', 'lavka-reports'),
+            'allWarehouses' => __('All warehouses', 'lavka-reports'),
+            'onlyWarehouses' => __('Only warehouses', 'lavka-reports'),
+            'exceptWarehouses' => __('Except warehouses', 'lavka-reports'),
+            'notUsed' => __('Not used', 'lavka-reports'),
+            'anyPurpose' => __('Any purpose code', 'lavka-reports'),
+            'cityTotal' => __('City total', 'lavka-reports'),
+            'inventoryHelp' => __('Inventory value is informational and is not added to profit. City totals and their warehouse details must not be summed together.', 'lavka-reports'),
+            'periodDiagnostics' => __('Period checks', 'lavka-reports'),
+            'diagnosticsHelp' => __('Separate period register. Documents belonging to another month are expected exclusions. Problematic amounts included in totals require review; see inclusion, impact and reason.', 'lavka-reports'),
+            'diagnosticsTruncated' => __('The period diagnostic list is truncated; this is not a complete document register.', 'lavka-reports'),
+            'snapshot' => __('Calculated at (Kyiv time)', 'lavka-reports'),
+            'exportSnapshot' => __('Snapshot of one API response. Folio data can change; see warnings and completeness.', 'lavka-reports'),
+            'profitByCity' => __('Profit by city', 'lavka-reports'),
+            'appliedParameters' => __('Applied parameters', 'lavka-reports'),
+            'controlTotals' => __('Control totals', 'lavka-reports'),
+            'controlsHelp' => __('Control totals cover the whole report. Manual amounts do not increase document count. Shared tax documents can affect two city rows.', 'lavka-reports'),
+            'warningsTitle' => __('Warnings and checks', 'lavka-reports'),
+            'inventoryTitle' => __('Inventory accounting value', 'lavka-reports'),
+            'auditTitle' => __('Document audit', 'lavka-reports'),
+            'auditCoverage' => __('Loaded regular audit. Also check the separate period diagnostic register for problematic candidates.', 'lavka-reports'),
+            'allExpenseRows' => __('All expense rows', 'lavka-reports'),
+            'exportReady' => __('Excel file prepared from the displayed snapshot.', 'lavka-reports'),
+            'exportFailed' => __('Could not export the report. Check the audit and try again.', 'lavka-reports'),
+            'fields' => [
+                'selectedDocumentCount' => __('Selected documents', 'lavka-reports'),
+                'selectedDocumentAmount' => __('Selected document amount', 'lavka-reports'),
+                'operatingExpenseTotal' => __('Operating expenses total', 'lavka-reports'),
+                'capitalizedCostTotal' => __('Capitalized inventory cost', 'lavka-reports'),
+                'excludedDocumentAmount' => __('Excluded document amount', 'lavka-reports'),
+                'unclassifiedDocumentAmount' => __('Unclassified document amount', 'lavka-reports'),
+                'unclassifiedDocumentCount' => __('Unclassified documents', 'lavka-reports'),
+                'periodDiagnosticCount' => __('Period diagnostic candidates', 'lavka-reports'),
+                'periodProblemCount' => __('Problematic periods', 'lavka-reports'),
+                'provisionalDocumentCount' => __('Provisional documents', 'lavka-reports'),
+                'provisionalDocumentAmount' => __('Provisional document amount', 'lavka-reports'),
+                'provisionalOperatingExpenseTotal' => __('Provisional operating expenses', 'lavka-reports'),
+                'auditTruncated' => __('Audit truncated', 'lavka-reports'),
+                'taxPools' => __('Tax pools', 'lavka-reports'),
+                'documentReason' => __('Document classification reason', 'lavka-reports'),
+                'income' => __('Master class income', 'lavka-reports'),
+                'returns' => __('Master class returns', 'lavka-reports'),
+                'netContribution' => __('Master class net contribution', 'lavka-reports'),
+                'grossProfitAlreadyInBase' => __('Master class profit already in base', 'lavka-reports'),
+                'grossAdjustmentApplied' => __('Applied master class adjustment', 'lavka-reports'),
+                'sku' => __('SKU', 'lavka-reports'),
+                'articleFound' => __('Article found', 'lavka-reports'),
+                'incomeLineCount' => __('Income lines', 'lavka-reports'),
+                'returnLineCount' => __('Return lines', 'lavka-reports'),
+                'ignoredLineCount' => __('Ignored lines', 'lavka-reports'),
+                'duplicateLineCount' => __('Duplicate lines', 'lavka-reports'),
+                'movementId' => __('Movement ID', 'lavka-reports'),
+                'documentId' => __('Document ID', 'lavka-reports'),
+                'documentNumberSuffix' => __('Document number suffix', 'lavka-reports'),
+                'lineNumber' => __('Line number', 'lavka-reports'),
+                'documentType' => __('Document type', 'lavka-reports'),
+                'movementType' => __('Movement type', 'lavka-reports'),
+                'operationKind' => __('Operation', 'lavka-reports'),
+                'returnDocument' => __('Return document', 'lavka-reports'),
+                'accounted' => __('Accounted', 'lavka-reports'),
+                'classification' => __('Classification', 'lavka-reports'),
+                'quantity' => __('Quantity', 'lavka-reports'),
+                'unitPrice' => __('Unit price', 'lavka-reports'),
+                'currency' => __('Currency', 'lavka-reports'),
+                'amountSource' => __('Amount source', 'lavka-reports'),
+                'includedInMasterClassContribution' => __('Included in master class contribution', 'lavka-reports'),
+                'odesaMasterClassIncome' => __('Odesa master class income (automatic)', 'lavka-reports'),
+                'odesaMasterClassReturn' => __('Odesa master class returns (automatic)', 'lavka-reports'),
+
+                'city' => __('City', 'lavka-reports'),
+                'label' => __('Expense', 'lavka-reports'),
+                'expenseCodes' => __('Short organization name', 'lavka-reports'),
+                'operationTypes' => __('Operation type', 'lavka-reports'),
+                'operationRequired' => __('Operation filter required', 'lavka-reports'),
+                'purposeCodes' => __('Purpose code filter', 'lavka-reports'),
+                'cashWarehouses' => __('Cash warehouses', 'lavka-reports'),
+                'bankWarehouses' => __('Bank warehouses', 'lavka-reports'),
+                'documentCount' => __('Documents', 'lavka-reports'),
+                'amount' => __('Amount', 'lavka-reports'),
+                'profitImpact' => __('Profit impact', 'lavka-reports'),
+                'accountingTreatment' => __('Accounting treatment', 'lavka-reports'),
+                'source' => __('Source', 'lavka-reports'),
+                'note' => __('Selection details', 'lavka-reports'),
+                'lineId' => __('Expense row ID', 'lavka-reports'),
+                'category' => __('Category', 'lavka-reports'),
+                'documentDate' => __('Document date', 'lavka-reports'),
+                'documentNumber' => __('Document number', 'lavka-reports'),
+                'paymentId' => __('Payment ID', 'lavka-reports'),
+                'expenseCode' => __('Expense code', 'lavka-reports'),
+                'documentClass' => __('Document class', 'lavka-reports'),
+                'purposeCode' => __('Purpose code', 'lavka-reports'),
+                'stream' => __('Flow', 'lavka-reports'),
+                'warehouseId' => __('Warehouse', 'lavka-reports'),
+                'sourceInfo' => __('Information source', 'lavka-reports'),
+                'sourceAmount' => __('Source amount', 'lavka-reports'),
+                'sourceCurrency' => __('Source currency', 'lavka-reports'),
+                'reportAmount' => __('Report amount, UAH', 'lavka-reports'),
+                'reportCurrency' => __('Report currency', 'lavka-reports'),
+                'appliedRate' => __('Applied exchange rate', 'lavka-reports'),
+                'kyivAllocation' => __('Kyiv allocation, UAH', 'lavka-reports'),
+                'odesaAllocation' => __('Odesa allocation, UAH', 'lavka-reports'),
+                'resolvedMonth' => __('Resolved month', 'lavka-reports'),
+                'periodSource' => __('Period source', 'lavka-reports'),
+                'periodNote' => __('Period markers', 'lavka-reports'),
+                'periodStatus' => __('Period status', 'lavka-reports'),
+                'includedInProfit' => __('Included in profit', 'lavka-reports'),
+                'includedInTotals' => __('Included in totals', 'lavka-reports'),
+                'amountTreatment' => __('Amount treatment', 'lavka-reports'),
+                'reason' => __('Reason', 'lavka-reports'),
+                'warnings' => __('Warnings', 'lavka-reports'),
+                'expenseLineId' => __('Expense row ID', 'lavka-reports'),
+                'expenseLineIds' => __('Related expense rows', 'lavka-reports'),
+                'parameter' => __('Parameter', 'lavka-reports'),
+                'value' => __('Value', 'lavka-reports'),
+                'month' => __('Report month', 'lavka-reports'),
+                'calculatedAt' => __('Calculated at (Kyiv time)', 'lavka-reports'),
+                'ruleVersion' => __('Rule version', 'lavka-reports'),
+                'complete' => __('Complete', 'lavka-reports'),
+                'warehouseName' => __('Warehouse name', 'lavka-reports'),
+                'warehouseIds' => __('Warehouse IDs', 'lavka-reports'),
+                'openingAccountingValue' => __('Opening inventory value', 'lavka-reports'),
+                'closingAccountingValue' => __('Closing inventory value', 'lavka-reports'),
+                'accountingValueChange' => __('Inventory value change', 'lavka-reports'),
+                'openingPositionCount' => __('Opening positions', 'lavka-reports'),
+                'closingPositionCount' => __('Closing positions', 'lavka-reports'),
+                'negativeClosingPositionCount' => __('Negative closing positions', 'lavka-reports'),
+                'zeroValueClosingPositionCount' => __('Zero value closing positions', 'lavka-reports'),
+                'baseGrossProfit' => __('Base gross profit', 'lavka-reports'),
+                'manualGrossAdjustments' => __('Master class adjustment', 'lavka-reports'),
+                'grossProfit' => __('Gross profit', 'lavka-reports'),
+                'operatingExpenses' => __('Operating expenses', 'lavka-reports'),
+                'profit' => __('Profit', 'lavka-reports'),
+                'code' => __('Code', 'lavka-reports'),
+                'message' => __('Message', 'lavka-reports'),
+                'details' => __('Details', 'lavka-reports'),
+                'candidateFrom' => __('Candidate period start', 'lavka-reports'),
+                'candidateToExclusive' => __('Candidate period end (exclusive)', 'lavka-reports'),
+                'explicitPeriodPriority' => __('Note period takes priority', 'lavka-reports'),
+                'description' => __('Description', 'lavka-reports'),
+                'odesaTaxShare' => __('Odesa employee share', 'lavka-reports'),
+                'rubToUahRate' => __('RUB to UAH rate', 'lavka-reports'),
+                'kyivAdditionalSalary' => __('Kyiv additional work', 'lavka-reports'),
+                'odesaAdditionalSalary' => __('Odesa additional salary', 'lavka-reports'),
+                'kyivAdditionalSalarySource' => __('Kyiv additional work source', 'lavka-reports'),
+                'odesaAdditionalSalarySource' => __('Odesa additional salary source', 'lavka-reports'),
+                'kyivWarehouseIds' => __('Kyiv sales warehouses', 'lavka-reports'),
+                'odesaWarehouseIds' => __('Odesa sales warehouses', 'lavka-reports'),
+                'kyivStockWarehouseIds' => __('Kyiv inventory warehouses', 'lavka-reports'),
+                'odesaStockWarehouseIds' => __('Odesa inventory warehouses', 'lavka-reports'),
+                'taxAllocationMethod' => __('Tax allocation method', 'lavka-reports'),
+                'status' => __('Status', 'lavka-reports'),
+                'name' => __('Name', 'lavka-reports'),
+                'filters' => __('Selection rules', 'lavka-reports'),
+                'sortOrder' => __('Row order', 'lavka-reports'),
+            ],
             'csvDate' => __('Date', 'lavka-reports'),
             'csvDocument' => __('Document', 'lavka-reports'),
             'csvFlow' => __('Flow', 'lavka-reports'),

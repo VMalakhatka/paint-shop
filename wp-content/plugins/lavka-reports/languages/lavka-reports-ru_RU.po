@@ -662,3 +662,431 @@ msgstr "Классификация"
 
 msgid "Included in master class contribution"
 msgstr "Учтено во вкладе МК"
+
+#: inc/class-profit-report.php
+msgid "Detailed rows and selection rules supplied by Java. Manual amounts have no documents."
+msgstr "Подробные строки и правила отбора получены от Java. Ручные суммы не имеют документов."
+
+#: inc/class-profit-report.php
+msgid "The server returns category totals. Detailed expense rows and selection rules require the updated Java API."
+msgstr "Сервер возвращает итоги категорий. Для отдельных строк и отборов требуется обновление Java API."
+
+#: inc/class-profit-report.php
+msgid "Available after the Java API update. Default: 0 UAH."
+msgstr "Доступно после обновления Java API. По умолчанию: 0 грн."
+
+#: inc/class-profit-report.php
+msgid "The server did not supply the selection period. Do not assume the new period rules were applied."
+msgstr "Сервер не передал период отбора. Применение новых правил периода не подтверждено."
+
+#: inc/class-profit-report.php
+msgid "Parameters changed. Recalculate before loading audit or exporting."
+msgstr "Параметры изменены. Пересчитайте отчёт перед аудитом или экспортом."
+
+#: inc/class-profit-report.php
+msgid "All warehouses"
+msgstr "Все склады"
+
+#: inc/class-profit-report.php
+msgid "Only warehouses"
+msgstr "Только склады"
+
+#: inc/class-profit-report.php
+msgid "Except warehouses"
+msgstr "Кроме складов"
+
+#: inc/class-profit-report.php
+msgid "Not used"
+msgstr "Не используется"
+
+#: inc/class-profit-report.php
+msgid "Any purpose code"
+msgstr "Любой код назначения"
+
+#: inc/class-profit-report.php
+msgid "City total"
+msgstr "Итого город"
+
+#: inc/class-profit-report.php
+msgid "Inventory value is informational and is not added to profit. City totals and their warehouse details must not be summed together."
+msgstr "Стоимость запасов — справочно, к прибыли не добавляется. Не суммируйте строку города повторно с его складами."
+
+#: inc/class-profit-report.php
+msgid "Period checks"
+msgstr "Проверка периодов"
+
+#: inc/class-profit-report.php
+msgid "Separate period register. Documents belonging to another month are expected exclusions. Problematic amounts included in totals require review; see inclusion, impact and reason."
+msgstr "Отдельный реестр периодов. Документы другого месяца исключены штатно. Спорные суммы, включённые в итоги, требуют проверки: смотрите включение, влияние и причину."
+
+#: inc/class-profit-report.php
+msgid "The period diagnostic list is truncated; this is not a complete document register."
+msgstr "Список диагностики периодов ограничен; это не полный реестр документов."
+
+#: inc/class-profit-report.php
+msgid "Calculated at (Kyiv time)"
+msgstr "Рассчитано (время Киева)"
+
+#: inc/class-profit-report.php
+msgid "Snapshot of one API response. Folio data can change; see warnings and completeness."
+msgstr "Снимок одного ответа API. Данные ФОЛИО могут меняться; смотрите предупреждения и полноту."
+
+#: inc/class-profit-report.php
+msgid "Applied parameters"
+msgstr "Применённые параметры"
+
+#: inc/class-profit-report.php
+msgid "Control totals cover the whole report. Manual amounts do not increase document count. Shared tax documents can affect two city rows."
+msgstr "Контрольные итоги охватывают весь отчёт. Ручные суммы не увеличивают количество документов. Общий налоговый документ может влиять на строки двух городов."
+
+#: inc/class-profit-report.php
+msgid "Inventory accounting value"
+msgstr "Учётная стоимость запасов"
+
+#: inc/class-profit-report.php
+msgid "Loaded regular audit. Also check the separate period diagnostic register for problematic candidates."
+msgstr "Загруженный основной аудит. Проблемные кандидаты — в отдельном реестре проверки периодов."
+
+#: inc/class-profit-report.php
+msgid "All expense rows"
+msgstr "Все строки расходов"
+
+#: inc/class-profit-report.php
+msgid "Excel file prepared from the displayed snapshot."
+msgstr "Файл Excel подготовлен из показанного снимка отчёта."
+
+#: inc/class-profit-report.php
+msgid "Could not export the report. Check the audit and try again."
+msgstr "Не удалось экспортировать отчёт. Проверьте аудит и повторите попытку."
+
+#: inc/class-profit-report.php
+msgid "Kyiv additional work"
+msgstr "Дополнительные работы Киев"
+
+#: inc/class-profit-report.php
+msgid "Export report to Excel"
+msgstr "Экспорт отчёта в Excel"
+
+#: inc/class-profit-report.php
+msgid "Excel includes both cities and all loaded audit rows, regardless of the table filters. Missing audit data is loaded before export."
+msgstr "Excel содержит оба города и все загруженные строки аудита независимо от фильтров таблицы. Перед экспортом недостающий аудит загружается."
+
+#: inc/class-profit-report.php
+msgid "Applied parameters and selection period"
+msgstr "Применённые параметры и период отбора"
+
+#: inc/class-profit-report.php
+msgid "Short organization name"
+msgstr "Краткое имя организации"
+
+#: inc/class-profit-report.php
+msgid "Operation type"
+msgstr "Тип операции"
+
+#: inc/class-profit-report.php
+msgid "Operation filter required"
+msgstr "Обязательный отбор по операции"
+
+#: inc/class-profit-report.php
+msgid "Purpose code filter"
+msgstr "Отбор по коду назначения"
+
+#: inc/class-profit-report.php
+msgid "Cash warehouses"
+msgstr "Расход (склады)"
+
+#: inc/class-profit-report.php
+msgid "Bank warehouses"
+msgstr "Банк (склады)"
+
+#: inc/class-profit-report.php
+msgid "Selection details"
+msgstr "Подробности отбора"
+
+#: inc/class-profit-report.php
+msgid "Expense row ID"
+msgstr "ID строки расходов"
+
+#: inc/class-profit-report.php
+msgid "Document date"
+msgstr "Дата документа"
+
+#: inc/class-profit-report.php
+msgid "Document number"
+msgstr "Номер документа"
+
+#: inc/class-profit-report.php
+msgid "Payment ID"
+msgstr "ID платежа"
+
+#: inc/class-profit-report.php
+msgid "Information source"
+msgstr "Источник информации"
+
+#: inc/class-profit-report.php
+msgid "Report currency"
+msgstr "Валюта отчёта"
+
+#: inc/class-profit-report.php
+msgid "Applied exchange rate"
+msgstr "Применённый курс"
+
+#: inc/class-profit-report.php
+msgid "Kyiv allocation, UAH"
+msgstr "Доля Киева, грн"
+
+#: inc/class-profit-report.php
+msgid "Odesa allocation, UAH"
+msgstr "Доля Одессы, грн"
+
+#: inc/class-profit-report.php
+msgid "Resolved month"
+msgstr "Месяц отнесения"
+
+#: inc/class-profit-report.php
+msgid "Period source"
+msgstr "Источник периода"
+
+#: inc/class-profit-report.php
+msgid "Period markers"
+msgstr "Маркеры периода"
+
+#: inc/class-profit-report.php
+msgid "Period status"
+msgstr "Статус периода"
+
+#: inc/class-profit-report.php
+msgid "Included in totals"
+msgstr "Включено в итоги"
+
+#: inc/class-profit-report.php
+msgid "Amount treatment"
+msgstr "Как учтена сумма"
+
+#: inc/class-profit-report.php
+msgid "Warnings"
+msgstr "Предупреждения"
+
+#: inc/class-profit-report.php
+msgid "Related expense rows"
+msgstr "Связанные строки расходов"
+
+#: inc/class-profit-report.php
+msgid "Parameter"
+msgstr "Параметр"
+
+#: inc/class-profit-report.php
+msgid "Value"
+msgstr "Значение"
+
+#: inc/class-profit-report.php
+msgid "Rule version"
+msgstr "Версия правил"
+
+#: inc/class-profit-report.php
+msgid "Complete"
+msgstr "Полный"
+
+#: inc/class-profit-report.php
+msgid "Warehouse name"
+msgstr "Название склада"
+
+#: inc/class-profit-report.php
+msgid "Warehouse IDs"
+msgstr "Склады"
+
+#: inc/class-profit-report.php
+msgid "Opening inventory value"
+msgstr "Запасы на начало"
+
+#: inc/class-profit-report.php
+msgid "Closing inventory value"
+msgstr "Запасы на конец"
+
+#: inc/class-profit-report.php
+msgid "Inventory value change"
+msgstr "Изменение стоимости запасов"
+
+#: inc/class-profit-report.php
+msgid "Opening positions"
+msgstr "Позиций на начало"
+
+#: inc/class-profit-report.php
+msgid "Closing positions"
+msgstr "Позиций на конец"
+
+#: inc/class-profit-report.php
+msgid "Negative closing positions"
+msgstr "Отрицательные остатки"
+
+#: inc/class-profit-report.php
+msgid "Zero value closing positions"
+msgstr "Остатки с нулевой стоимостью"
+
+#: inc/class-profit-report.php
+msgid "Code"
+msgstr "Код"
+
+#: inc/class-profit-report.php
+msgid "Message"
+msgstr "Сообщение"
+
+#: inc/class-profit-report.php
+msgid "Candidate period start"
+msgstr "Начало отбора"
+
+#: inc/class-profit-report.php
+msgid "Candidate period end (exclusive)"
+msgstr "Конец отбора (не включительно)"
+
+#: inc/class-profit-report.php
+msgid "Note period takes priority"
+msgstr "Приоритет периода примечания"
+
+#: inc/class-profit-report.php
+msgid "Description"
+msgstr "Описание"
+
+#: inc/class-profit-report.php
+msgid "Kyiv additional work source"
+msgstr "Источник доплаты Киева"
+
+#: inc/class-profit-report.php
+msgid "Odesa additional salary source"
+msgstr "Источник доплаты Одессы"
+
+#: inc/class-profit-report.php
+msgid "Kyiv sales warehouses"
+msgstr "Склады продаж Киева"
+
+#: inc/class-profit-report.php
+msgid "Odesa sales warehouses"
+msgstr "Склады продаж Одессы"
+
+#: inc/class-profit-report.php
+msgid "Kyiv inventory warehouses"
+msgstr "Склады запасов Киева"
+
+#: inc/class-profit-report.php
+msgid "Odesa inventory warehouses"
+msgstr "Склады запасов Одессы"
+
+#: inc/class-profit-report.php
+msgid "Tax allocation method"
+msgstr "Метод распределения налогов"
+
+#: inc/class-profit-report.php
+msgid "Status"
+msgstr "Статус"
+
+#: inc/class-profit-report.php
+msgid "Selection rules"
+msgstr "Правила отбора"
+
+#: inc/class-profit-report.php
+msgid "Row order"
+msgstr "Порядок строки"
+
+#: inc/class-profit-report.php
+msgid "Operating expenses total"
+msgstr "Операционные расходы"
+
+#: inc/class-profit-report.php
+msgid "Capitalized inventory cost"
+msgstr "Капитализировано в запасах"
+
+#: inc/class-profit-report.php
+msgid "Excluded document amount"
+msgstr "Сумма исключённых документов"
+
+#: inc/class-profit-report.php
+msgid "Unclassified document amount"
+msgstr "Сумма неклассифицированных документов"
+
+#: inc/class-profit-report.php
+msgid "Period diagnostic candidates"
+msgstr "Кандидаты диагностики периодов"
+
+#: inc/class-profit-report.php
+msgid "Problematic periods"
+msgstr "Проблемные периоды"
+
+#: inc/class-profit-report.php
+msgid "Provisional documents"
+msgstr "Предварительно учтённые документы"
+
+#: inc/class-profit-report.php
+msgid "Provisional document amount"
+msgstr "Сумма предварительно учтённых документов"
+
+#: inc/class-profit-report.php
+msgid "Provisional operating expenses"
+msgstr "Предварительные операционные расходы"
+
+#: inc/class-profit-report.php
+msgid "Audit truncated"
+msgstr "Аудит ограничен"
+
+#: inc/class-profit-report.php
+msgid "Document classification reason"
+msgstr "Причина классификации документа"
+
+#: inc/class-profit-report.php
+msgid "Master class net contribution"
+msgstr "Доходы МК минус возвраты"
+
+#: inc/class-profit-report.php
+msgid "Master class profit already in base"
+msgstr "МК уже учтено в базе"
+
+#: inc/class-profit-report.php
+msgid "Applied master class adjustment"
+msgstr "Применённая корректировка МК"
+
+#: inc/class-profit-report.php
+msgid "Article found"
+msgstr "Товар найден"
+
+#: inc/class-profit-report.php
+msgid "Movement ID"
+msgstr "ID движения"
+
+#: inc/class-profit-report.php
+msgid "Document ID"
+msgstr "ID документа"
+
+#: inc/class-profit-report.php
+msgid "Document number suffix"
+msgstr "Дополнение номера"
+
+#: inc/class-profit-report.php
+msgid "Line number"
+msgstr "Номер строки"
+
+#: inc/class-profit-report.php
+msgid "Document type"
+msgstr "Тип накладной"
+
+#: inc/class-profit-report.php
+msgid "Movement type"
+msgstr "Тип движения"
+
+#: inc/class-profit-report.php
+msgid "Return document"
+msgstr "Накладная возврата"
+
+#: inc/class-profit-report.php
+msgid "Currency"
+msgstr "Валюта"
+
+#: inc/class-profit-report.php
+msgid "Amount source"
+msgstr "Источник суммы"
+
+#: inc/class-profit-report.php
+msgid "Odesa master class income (automatic)"
+msgstr "Доходы МК Одессы (автоматически)"
+
+#: inc/class-profit-report.php
+msgid "Odesa master class returns (automatic)"
+msgstr "Возвраты МК Одессы (автоматически)"

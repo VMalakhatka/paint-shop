@@ -15,9 +15,21 @@
         lastOperation: 'summary',
         reportParams: null,
         salaryOverride: false,
+        kyivSalaryOverride: false,
+        revision: 0,
+        dirty: false,
+        exporting: false,
     };
 
     const nodes = {
+        kyivSalary: document.getElementById("lavr-profit-kyiv-salary"),
+        kyivSalarySource: document.getElementById("lavr-profit-kyiv-salary-source"),
+        exportXlsx: document.getElementById("lavr-profit-export-xlsx"),
+        resultPeriod: document.getElementById("lavr-profit-result-period"),
+        expenseNote: document.getElementById("lavr-profit-expense-note"),
+        policy: document.getElementById("lavr-profit-policy"),
+        inventory: document.getElementById("lavr-profit-inventory"),
+        diagnostics: document.getElementById("lavr-profit-period-diagnostics"),
         month: document.getElementById('lavr-profit-month'),
         calculate: document.getElementById('lavr-profit-calculate'),
         recalculate: document.getElementById('lavr-profit-recalculate'),
@@ -100,6 +112,7 @@
     }
 
     function formatMoney(value, currency) {
+        if (value == null || value === "") return "—";
         const parts = decimalParts(value);
         if (!parts) return String(value == null ? '' : value);
         let grouped;
@@ -147,10 +160,12 @@
 
     function formatDateTime(value) {
         if (!value) return '';
-        const date = new Date(value);
+        const numeric = typeof value === "number" || /^\d+(\.\d+)?$/.test(String(value));
+        const timestamp = numeric ? Number(value) : value;
+        const date = new Date(numeric && timestamp < 100000000000 ? timestamp * 1000 : timestamp);
         if (Number.isNaN(date.getTime())) return String(value);
         return new Intl.DateTimeFormat('uk-UA', {
-            day: '2-digit', month: '2-digit', year: 'numeric',
+            timeZone: 'Europe/Kyiv', day: '2-digit', month: '2-digit', year: 'numeric',
             hour: '2-digit', minute: '2-digit', second: '2-digit',
         }).format(date);
     }
@@ -159,7 +174,7 @@
         const value = String(city || '').toUpperCase();
         if (value === 'KYIV' || value === 'KIEV') return labels.kyiv;
         if (value === 'ODESA' || value === 'ODESSA') return labels.odesa;
-        if (!value || value === 'UNALLOCATED') return labels.unallocated;
+        if (!value || ['UNALLOCATED', 'NONE', 'SHARED'].includes(value)) return labels.unallocated;
         return city;
     }
 
@@ -171,6 +186,7 @@
         const params = { month: nodes.month.value };
         const fields = [nodes.rubRate];
         if (state.salaryOverride) fields.push(nodes.additionalSalary);
+        if (state.kyivSalaryOverride && !nodes.kyivSalary.disabled) fields.push(nodes.kyivSalary);
         fields.forEach((field) => {
             const value = field.value.trim();
             if (value !== '') params[field.dataset.param] = value.replace(',', '.');
@@ -189,6 +205,8 @@
     function setBusy(operation, busy) {
         if (operation === 'audit') {
             state.auditLoading = busy;
+            nodes.exportXlsx.disabled = busy || state.exporting || state.dirty;
+            nodes.exportAudit.disabled = busy || state.dirty;
             nodes.loadAudit.disabled = busy;
             nodes.calculate.disabled = busy;
             nodes.recalculate.disabled = busy;
@@ -198,6 +216,7 @@
             return;
         }
         state.loading = busy;
+        nodes.exportXlsx.disabled = busy || state.exporting || state.dirty;
         nodes.calculate.disabled = busy;
         nodes.recalculate.disabled = busy;
         nodes.loadAudit.disabled = busy;
@@ -286,11 +305,14 @@
     }
 
     async function loadReport(operation) {
+        if (state.loading || state.auditLoading || (operation === 'audit' && state.dirty)) return false;
+        const revision = state.revision;
         if (!nodes.month.value) {
             showError(labels.monthRequired, null, 'month');
             return;
         }
         hideError();
+        if (operation === 'summary') state.dirty = true;
         state.lastOperation = operation;
         setBusy(operation, true);
         const params = operation === 'audit' && state.reportParams
@@ -298,8 +320,14 @@
             : requestParams();
         try {
             const data = await proxyRequest(operation, params);
+            if (revision !== state.revision) return false;
+            if (data.month !== params.month || !Array.isArray(data.cities)) throw { message: labels.invalidResponse };
+            state.dirty = false;
+            state.report = data;
+            state.reportParams = Object.assign({}, params);
             if (operation === 'audit') {
                 state.audit = data;
+                renderReport();
                 renderAudit();
                 showRunState(labels.auditReady, 'success');
             } else {
@@ -309,12 +337,15 @@
                 renderReport();
                 showRunState(labels.reportReady, 'success');
             }
+            return true;
         } catch (error) {
+            if (revision !== state.revision) return false;
             const retry = Number(error.status || 0) >= 500 || !error.status ? operation : null;
             showRunState(labels.requestFailed, 'error');
             showError(error.message || labels.generalError, retry, error.field || '');
         } finally {
             setBusy(operation, false);
+            updateAvailability();
         }
     }
 
@@ -329,6 +360,9 @@
         if (!state.salaryOverride) nodes.additionalSalary.value = inputs.odesaAdditionalSalary == null ? '' : String(inputs.odesaAdditionalSalary);
         const source = inputs.odesaAdditionalSalarySource === 'REQUEST_OVERRIDE' ? labels.salaryOverride : labels.salaryDefault;
         nodes.salarySource.textContent = labels.salaryApplied + ': ' + formatMoney(inputs.odesaAdditionalSalary, 'UAH') + ' · ' + source;
+        nodes.kyivSalary.disabled = inputs.kyivAdditionalSalary == null;
+        if (!state.kyivSalaryOverride) nodes.kyivSalary.value = inputs.kyivAdditionalSalary == null ? '' : String(inputs.kyivAdditionalSalary);
+        nodes.kyivSalarySource.textContent = nodes.kyivSalary.disabled ? labels.legacyKyiv : labels.salaryApplied + ': ' + formatMoney(inputs.kyivAdditionalSalary, 'UAH') + ' · ' + (inputs.kyivAdditionalSalarySource === 'REQUEST_OVERRIDE' ? labels.salaryOverride : labels.salaryDefault);
         updateTaxShareHelp();
     }
 
@@ -378,7 +412,7 @@
     }
 
     function warningPriority(code) {
-        const group = warningGroups[code] || 'info';
+        const group = warningGroup(code);
         return group === 'action' ? 0 : group === 'manual' ? 1 : 2;
     }
 
@@ -387,7 +421,7 @@
         const items = (warnings || []).slice().sort((a, b) => warningPriority(a.code) - warningPriority(b.code));
         nodes.warningsSection.hidden = items.length === 0;
         items.forEach((warning) => {
-            const group = warningGroups[warning.code] || 'info';
+            const group = warningGroup(warning.code);
             const item = document.createElement('div');
             item.className = 'lavr-profit-warning is-' + group;
             const title = group === 'action' ? labels.warningAction : group === 'manual' ? labels.warningManual : labels.warningInfo;
@@ -433,7 +467,7 @@
         if (filter === 'ALL') return true;
         if (filter === 'KYIV') return city === 'KYIV' || city === 'KIEV';
         if (filter === 'ODESA') return city === 'ODESA' || city === 'ODESSA';
-        return !value || city === 'UNALLOCATED';
+        return !value || ['UNALLOCATED', 'NONE', 'SHARED'].includes(city);
     }
 
     function tableCell(text, className) {
@@ -442,33 +476,9 @@
     }
 
     function renderExpenses() {
-        clear(nodes.expensesBody);
-        const expenses = ((state.report && state.report.expenses) || []).filter((item) => matchesCity(item.city, state.expenseFilter));
-        if (!expenses.length) {
-            const row = document.createElement('tr');
-            const cell = tableCell(labels.noExpenses, 'lavr-profit-empty');
-            cell.colSpan = 6;
-            row.appendChild(cell);
-            nodes.expensesBody.appendChild(row);
-            return;
-        }
-        expenses.forEach((expense) => {
-            const row = document.createElement('tr');
-            row.appendChild(tableCell(cityLabel(expense.city)));
-            const labelCell = tableCell(expense.label || expense.category || '');
-            if (expense.category) labelCell.appendChild(textElement('code', 'lavr-profit-category', expense.category));
-            row.appendChild(labelCell);
-            row.appendChild(tableCell(expense.documentCount == null ? '0' : expense.documentCount, 'num'));
-            row.appendChild(tableCell(formatMoney(expense.amount, 'UAH'), 'num'));
-            row.appendChild(tableCell(formatMoney(expense.profitImpact, 'UAH'), 'num'));
-            const treatment = tableCell(treatmentLabel(expense.accountingTreatment));
-            treatment.appendChild(textElement('code', 'lavr-profit-treatment-code', expense.accountingTreatment || ''));
-            if (expense.accountingTreatment === 'CAPITALIZED_IN_INVENTORY') {
-                treatment.title = labels.capitalizedHelp;
-            }
-            row.appendChild(treatment);
-            nodes.expensesBody.appendChild(row);
-        });
+        const data = state.report || {};
+        nodes.expenseNote.textContent = Array.isArray(data.expenseLines) ? labels.detailedRows : labels.legacyRows;
+        renderGrid(document.getElementById('lavr-profit-expenses-table'), expenseColumns(), expenseRows(data).filter(item => matchesCity(item.city, state.expenseFilter)));
     }
 
     function controlItem(label, value, extra) {
@@ -496,6 +506,10 @@
         ));
         nodes.controlsContent.appendChild(grid);
 
+        nodes.controlsContent.appendChild(textElement('p', 'description', labels.controlsHelp));
+        const known = new Set(['selectedDocumentCount', 'selectedDocumentAmount', 'operatingExpenseTotal', 'capitalizedCostTotal', 'excludedDocumentAmount', 'unclassifiedDocumentAmount', 'unclassifiedDocumentCount', 'auditTruncated', 'taxPools']);
+        const extra = Object.entries(controls).filter(([key]) => !known.has(key)).map(([key, value]) => ({ parameter: fieldLabel(key), value: printable(value) }));
+        if (extra.length) appendGrid(nodes.controlsContent, ['parameter', 'value'].map(key => columnSpec(key)), extra);
         const pools = controls.taxPools || {};
         const keys = Object.keys(pools);
         if (keys.length) {
@@ -521,6 +535,8 @@
         nodes.calculatedAt.textContent = data.calculatedAt
             ? labels.calculatedAt.replace('%s', formatDateTime(data.calculatedAt))
             : '';
+        nodes.resultPeriod.textContent = labels.reportMonth + ": " + data.month;
+        renderSupplement(data);
         applyInitialInputs(data.inputs || {});
         renderCities(data.cities || []);
         renderMasterClass(data.masterClass);
@@ -566,33 +582,8 @@
     }
 
     function renderAuditRows() {
-        clear(nodes.auditBody);
         const rows = filteredAuditRows();
-        if (!rows.length) {
-            const row = document.createElement('tr');
-            const cell = tableCell(labels.noAudit, 'lavr-profit-empty');
-            cell.colSpan = 10;
-            row.appendChild(cell);
-            nodes.auditBody.appendChild(row);
-            return;
-        }
-        rows.forEach((documentLine) => {
-            const row = document.createElement('tr');
-            const documentCell = tableCell(formatDate(documentLine.documentDate));
-            documentCell.appendChild(textElement('strong', 'lavr-profit-document-number', documentLine.documentNumber || ''));
-            row.appendChild(documentCell);
-            row.appendChild(tableCell(documentLine.stream === 'BANK' ? labels.bank : documentLine.stream === 'CASH' ? labels.cash : documentLine.stream || ''));
-            row.appendChild(tableCell(documentLine.warehouseId == null ? '' : documentLine.warehouseId));
-            const codes = [documentLine.purposeCode, documentLine.expenseCode, documentLine.name, documentLine.documentClass].filter(Boolean);
-            row.appendChild(tableCell(codes.join(' · ')));
-            row.appendChild(tableCell(formatMoney(documentLine.sourceAmount, documentLine.sourceCurrency), 'num'));
-            row.appendChild(tableCell(formatMoney(documentLine.reportAmount, 'UAH'), 'num'));
-            row.appendChild(tableCell([cityLabel(documentLine.city), documentLine.category].filter(Boolean).join(' · ')));
-            row.appendChild(tableCell(treatmentLabel(documentLine.accountingTreatment)));
-            row.appendChild(tableCell(documentLine.includedInProfit ? labels.yes : labels.no));
-            row.appendChild(tableCell(documentLine.reason || ''));
-            nodes.auditBody.appendChild(row);
-        });
+        renderGrid(document.getElementById('lavr-profit-audit-table'), documentColumns(rows), rows);
     }
 
     function renderMasterClass(data) {
@@ -651,53 +642,241 @@
         selectOptions(nodes.auditCategory, uniqueValues(rows, 'category'), labels.all);
         selectOptions(nodes.auditTreatment, uniqueValues(rows, 'accountingTreatment'), labels.all, treatmentLabel);
         const truncated = !!(state.audit && state.audit.controls && state.audit.controls.auditTruncated);
-        nodes.auditNote.hidden = !truncated;
-        nodes.auditNote.textContent = truncated ? labels.auditTruncated + ' ' + labels.exportLoaded : '';
+        nodes.auditNote.hidden = false;
+        nodes.auditNote.textContent = labels.auditCoverage + ' · ' + labels.fields.documentCount + ': ' + rows.length + (truncated ? ' · ' + labels.auditTruncated + ' ' + labels.exportLoaded : '');
         renderAuditRows();
     }
 
     function csvValue(value) {
-        const string = String(value == null ? '' : value);
+        let string = String(value == null ? '' : value);
+        if (/^[\s]*[=+@-]/.test(string) || /^[\t\r\n]/.test(string)) string = "'" + string;
         return '"' + string.replace(/"/g, '""') + '"';
     }
 
     function exportAudit() {
+        if (state.dirty || state.loading || state.auditLoading) return;
         const rows = filteredAuditRows();
-        const headings = [
-            labels.csvDate, labels.csvDocument, labels.csvFlow, labels.csvWarehouse,
-            labels.csvPurpose, labels.csvExpenseCode, labels.csvName, labels.csvClass,
-            labels.csvSourceAmount, labels.csvSourceCurrency, labels.csvReportAmount,
-            labels.csvCity, labels.csvCategory, labels.csvTreatment, labels.csvIncluded, labels.csvReason,
-        ];
-        const lines = [headings.map(csvValue).join(';')];
-        rows.forEach((row) => {
-            lines.push([
-                row.documentDate, row.documentNumber, row.stream, row.warehouseId,
-                row.purposeCode, row.expenseCode, row.name, row.documentClass,
-                row.sourceAmount, row.sourceCurrency, row.reportAmount,
-                row.city, row.category, row.accountingTreatment,
-                row.includedInProfit ? labels.yes : labels.no, row.reason,
-            ].map(csvValue).join(';'));
-        });
+        const columns = documentColumns(rows);
+        const lines = [columns.map(col => csvValue(col.title)).join(';')];
+        rows.forEach(row => lines.push(columns.map(col => csvValue(printable(col.get(row)))).join(';')));
         const blob = new Blob(['\uFEFF' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = 'folio-profit-audit-' + nodes.month.value + '.csv';
+        link.download = 'folio-profit-audit-' + state.report.month + '.csv';
         document.body.appendChild(link);
         link.click();
         link.remove();
         URL.revokeObjectURL(url);
     }
 
+    function warningGroup(code) {
+        return warningGroups[code] || (/PERIOD|NEGATIVE_CLOSING|ZERO_VALUE_CLOSING/.test(code || '') ? 'action' : 'info');
+    }
+
+    function updateAvailability() {
+        const busy = state.loading || state.auditLoading;
+        nodes.exportXlsx.disabled = busy || state.exporting || state.dirty || !state.report;
+        nodes.exportAudit.disabled = busy || state.dirty || !state.audit;
+        nodes.loadAudit.disabled = busy || state.dirty || !state.report;
+        nodes.result.classList.toggle('is-stale', busy || state.dirty);
+    }
+
+    function invalidateResult() {
+        state.revision++;
+        state.dirty = true;
+        showRunState(labels.parametersChanged, 'warning');
+        updateAvailability();
+    }
+
+    function printable(value) {
+        if (value == null) return '—';
+        if (typeof value === 'boolean') return value ? labels.yes : labels.no;
+        if (Array.isArray(value)) return value.map(printable).join(' · ');
+        return typeof value === 'object' ? JSON.stringify(value) : String(value);
+    }
+
+    function fieldLabel(key) { return (labels.fields || {})[key] || key; }
+    const moneyFields = new Set(['amount', 'profitImpact', 'sourceAmount', 'reportAmount', 'kyivAllocation', 'odesaAllocation', 'unitPrice',
+        'openingAccountingValue', 'closingAccountingValue', 'accountingValueChange', 'baseGrossProfit', 'manualGrossAdjustments', 'grossProfit', 'operatingExpenses', 'profit',
+        'selectedDocumentAmount', 'operatingExpenseTotal', 'capitalizedCostTotal', 'excludedDocumentAmount', 'unclassifiedDocumentAmount', 'provisionalDocumentAmount', 'provisionalOperatingExpenseTotal',
+        'income', 'returns', 'netContribution', 'grossProfitAlreadyInBase', 'grossAdjustmentApplied']);
+    const numberFields = new Set(['selectedDocumentCount', 'unclassifiedDocumentCount', 'periodDiagnosticCount', 'periodProblemCount', 'provisionalDocumentCount', 'documentCount', 'quantity', 'appliedRate', 'openingPositionCount', 'closingPositionCount', 'negativeClosingPositionCount', 'zeroValueClosingPositionCount']);
+    function columnSpec(key, getter) { return { key, title: fieldLabel(key), get: getter || (row => row[key]), money: moneyFields.has(key), number: numberFields.has(key) }; }
+    function dynamicColumns(rows, preferred) {
+        const keys = [...new Set([...(preferred || []), ...rows.flatMap(row => Object.keys(row))])];
+        return keys.map(key => columnSpec(key));
+    }
+    function expenseRows(data) {
+        return Array.isArray(data.expenseLines) ? data.expenseLines.slice().sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)) : (data.expenses || []);
+    }
+    function warehouseSelection(filters, stream) {
+        if (!filters) return '—';
+        const mode = filters[stream + 'WarehouseMode'];
+        const ids = filters[stream + 'WarehouseIds'];
+        if (mode === 'ALL') return labels.allWarehouses;
+        if (mode === 'NONE') return labels.notUsed;
+        if (mode === 'INCLUDE') return labels.onlyWarehouses + ': ' + printable(ids);
+        if (mode === 'EXCLUDE') return labels.exceptWarehouses + ': ' + printable(ids);
+        return [mode, ids && ids.length ? printable(ids) : null].filter(Boolean).join(' · ') || '—';
+    }
+    function expenseColumns() {
+        return [columnSpec('city'), columnSpec('label'), columnSpec('documentCount'), columnSpec('amount'), columnSpec('profitImpact'),
+            columnSpec('expenseCodes', r => r.filters && r.filters.expenseCodes),
+            columnSpec('operationTypes', r => r.filters && r.filters.operationTypes),
+            columnSpec('operationRequired', r => r.filters && r.filters.operationRequired),
+            columnSpec('purposeCodes', r => !r.filters ? null : r.filters.purposeCodes && r.filters.purposeCodes.length ? r.filters.purposeCodes : labels.anyPurpose),
+            columnSpec('cashWarehouses', r => warehouseSelection(r.filters, 'cash')),
+            columnSpec('bankWarehouses', r => warehouseSelection(r.filters, 'bank')),
+            columnSpec('accountingTreatment'), columnSpec('source'), columnSpec('note', r => r.filters && r.filters.note), columnSpec('lineId'), columnSpec('category')];
+    }
+    function documentColumns(rows) {
+        return dynamicColumns(rows, ['documentDate', 'documentNumber', 'paymentId', 'expenseCode', 'documentClass', 'purposeCode', 'stream', 'warehouseId',
+            'sourceInfo', 'sourceAmount', 'sourceCurrency', 'appliedRate', 'reportAmount', 'city', 'category', 'profitImpact', 'kyivAllocation', 'odesaAllocation',
+            'resolvedMonth', 'periodSource', 'periodNote', 'periodStatus', 'includedInProfit', 'accountingTreatment', 'reason', 'warnings', 'expenseLineId', 'expenseLineIds']);
+    }
+    function displayValue(col, row) {
+        const value = col.get(row);
+        if (col.money) return formatMoney(value, col.key === 'sourceAmount' ? row.sourceCurrency : col.key === 'amount' || col.key === 'unitPrice' ? row.currency : 'UAH');
+        if (col.key === 'city') return cityLabel(value);
+        if (col.key === 'accountingTreatment') return treatmentLabel(value);
+        return printable(value);
+    }
+    function renderGrid(table, columns, rows) {
+        clear(table);
+        const head = document.createElement('thead'), header = document.createElement('tr');
+        columns.forEach(col => header.appendChild(textElement('th', '', col.title)));
+        head.appendChild(header); table.appendChild(head);
+        const body = document.createElement('tbody');
+        rows.forEach(item => {
+            const row = document.createElement('tr');
+            columns.forEach(col => row.appendChild(tableCell(displayValue(col, item), col.money || col.number ? 'num' : '')));
+            body.appendChild(row);
+        });
+        if (!rows.length) {
+            const row = document.createElement('tr'), cell = tableCell(labels.noData, 'lavr-profit-empty');
+            cell.colSpan = columns.length; row.appendChild(cell); body.appendChild(row);
+        }
+        table.appendChild(body);
+    }
+    function appendGrid(container, columns, rows) {
+        const wrap = textElement('div', 'lavr-profit-table-wrap', '');
+        const table = textElement('table', 'widefat striped', '');
+        renderGrid(table, columns, rows); wrap.appendChild(table); container.appendChild(wrap);
+    }
+    function inventoryRows(data) {
+        return (data.inventory || []).flatMap(city => {
+            const { warehouses, ...total } = city;
+            return [{ ...total, warehouseName: labels.cityTotal }, ...(warehouses || []).map(row => ({ city: city.city, ...row }))];
+        });
+    }
+    function diagnosticRows(data) {
+        return (data.periodDiagnostics || []).map(item => {
+            const { document: payment, ...diagnostic } = item;
+            return { ...(payment || {}), documentReason: payment && payment.reason, ...diagnostic };
+        });
+    }
+    function parameterRows(data) {
+        return [['month', data.month], ['calculatedAt', formatDateTime(data.calculatedAt)], ['ruleVersion', data.ruleVersion], ['complete', data.complete],
+            ...Object.entries(data.inputs || {}), ...Object.entries(data.periodPolicy || {})].map(([key, value]) => ({ parameter: fieldLabel(key), value: printable(value) }));
+    }
+    function renderSupplement(data) {
+        clear(nodes.policy);
+        if (!data.periodPolicy) nodes.policy.appendChild(textElement('p', '', labels.legacyPeriod));
+        appendGrid(nodes.policy, ['parameter', 'value'].map(key => columnSpec(key)), parameterRows(data));
+        clear(nodes.inventory);
+        nodes.inventory.appendChild(textElement('p', 'description', labels.inventoryHelp));
+        const inventory = inventoryRows(data);
+        appendGrid(nodes.inventory, dynamicColumns(inventory, ['city', 'warehouseId', 'warehouseName', 'openingAccountingValue', 'closingAccountingValue', 'accountingValueChange']), inventory);
+        clear(nodes.diagnostics);
+        const rows = diagnosticRows(data);
+        nodes.diagnostics.hidden = !rows.length && !data.periodDiagnosticsTruncated;
+        if (!nodes.diagnostics.hidden) {
+            nodes.diagnostics.appendChild(textElement('h2', '', labels.periodDiagnostics));
+            nodes.diagnostics.appendChild(textElement('p', 'notice notice-warning inline lavr-profit-inline-notice', labels.diagnosticsHelp));
+            if (data.periodDiagnosticsTruncated) nodes.diagnostics.appendChild(textElement('p', '', labels.diagnosticsTruncated));
+            appendGrid(nodes.diagnostics, documentColumns(rows), rows);
+        }
+    }
+
+    function downloadBlob(blob, filename) {
+        const url = URL.createObjectURL(blob), link = document.createElement('a');
+        link.href = url; link.download = filename;
+        document.body.appendChild(link); link.click(); link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+    function workbookRows(columns, rows) {
+        return [columns.map(col => col.title), ...rows.map(row => columns.map(col => {
+            const value = col.get(row);
+            if ((col.money || col.number) && value != null && value !== '') return { type: 'number', value, money: col.money };
+            return printable(value);
+        }))];
+    }
+    function buildWorkbookSheets(data) {
+        const sheets = [];
+        const add = (name, columns, rows, note) => {
+            sheets.push({ name, rows: [[labels.reportMonth, data.month, labels.snapshot, formatDateTime(data.calculatedAt)],
+                [note || labels.exportSnapshot], ...workbookRows(columns, rows)], headerRows: [1, 3], freezeRows: 3, mergeRows: [2],
+                widths: columns.map(col => ['label', 'reason', 'note', 'message', 'value', 'parameter'].includes(col.key) ? 46 : col.money ? 20 : 26) });
+        };
+        ['KYIV', 'ODESA'].forEach(city => {
+            const rows = expenseRows(data).filter(row => matchesCity(row.city, city));
+            add(cityLabel(city), expenseColumns(), rows, Array.isArray(data.expenseLines) ? labels.detailedRows : labels.legacyRows);
+        });
+        add(labels.profitByCity, dynamicColumns(data.cities || [], ['city', 'baseGrossProfit', 'manualGrossAdjustments', 'grossProfit', 'operatingExpenses', 'profit']), data.cities || []);
+        add(labels.appliedParameters, ['parameter', 'value'].map(key => columnSpec(key)), parameterRows(data));
+        const controls = data.controls ? [data.controls] : [];
+        add(labels.controlTotals, dynamicColumns(controls), controls, labels.controlsHelp);
+        add(labels.warningsTitle, dynamicColumns(data.warnings || [], ['code', 'message', 'details']), data.warnings || [], data.complete ? labels.complete : labels.incomplete);
+        const inventory = inventoryRows(data);
+        add(labels.inventoryTitle, dynamicColumns(inventory), inventory, labels.inventoryHelp);
+        const documents = data.documents || [];
+        add(labels.auditTitle, documentColumns(documents), documents, data.controls && data.controls.auditTruncated ? labels.auditTruncated : labels.auditCoverage);
+        const diagnostics = diagnosticRows(data);
+        add(labels.periodDiagnostics, documentColumns(diagnostics), diagnostics, labels.diagnosticsHelp + (data.periodDiagnosticsTruncated ? ' ' + labels.diagnosticsTruncated : ''));
+        add(labels.masterTitle, dynamicColumns(data.masterClass ? [data.masterClass] : []), data.masterClass ? [data.masterClass] : [], data.masterClass ? labels.exportSnapshot : labels.masterUnavailable);
+        add(labels.masterAuditTitle, dynamicColumns(data.masterClassDocuments || [], ['documentDate', 'documentNumber', 'documentId', 'lineNumber', 'movementId', 'sku', 'amount']), data.masterClassDocuments || [], data.masterClass && data.masterClass.auditTruncated ? labels.masterTruncated : labels.exportSnapshot);
+        // Preserve unallocated lines and additional fields without inventing city allocations.
+        add(labels.allExpenseRows, dynamicColumns(expenseRows(data)), expenseRows(data));
+        return sheets;
+    }
+    async function exportWorkbook() {
+        if (state.exporting || state.loading || state.auditLoading || state.dirty || !state.report) return;
+        state.exporting = true;
+        updateAvailability();
+        try {
+            if (!state.audit && !(await loadReport('audit'))) return;
+            if (state.dirty || !state.audit) return;
+            const data = state.audit;
+            if (!Array.isArray(data.documents)) throw new Error(labels.invalidResponse);
+            const bytes = LavkaProfitXlsx.build(buildWorkbookSheets(data));
+            downloadBlob(new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), 'folio-profit-' + data.month + '.xlsx');
+            showRunState(labels.exportReady, 'success');
+        } catch (error) {
+            showError(labels.exportFailed, null);
+        } finally {
+            state.exporting = false;
+            updateAvailability();
+        }
+    }
+
+    nodes.kyivSalary.addEventListener('input', () => { state.kyivSalaryOverride = nodes.kyivSalary.value.trim() !== ''; });
     nodes.additionalSalary.addEventListener('input', () => { state.salaryOverride = nodes.additionalSalary.value.trim() !== ''; });
     nodes.month.addEventListener('change', () => {
         state.salaryOverride = false;
+        state.kyivSalaryOverride = false;
+        nodes.kyivSalary.value = "";
+        nodes.kyivSalarySource.textContent = "";
         nodes.additionalSalary.value = '';
         nodes.salarySource.textContent = '';
     });
 
     nodes.loadAudit.dataset.defaultLabel = nodes.loadAudit.textContent.trim();
+    nodes.exportXlsx.addEventListener('click', exportWorkbook);
+    [nodes.month, nodes.additionalSalary, nodes.kyivSalary, nodes.taxShare, nodes.rubRate].forEach(field => {
+        field.addEventListener('input', invalidateResult);
+        field.addEventListener('change', invalidateResult);
+    });
     nodes.month.value = previousMonth();
     nodes.calculate.addEventListener('click', () => loadReport('summary'));
     nodes.recalculate.addEventListener('click', () => loadReport('summary'));

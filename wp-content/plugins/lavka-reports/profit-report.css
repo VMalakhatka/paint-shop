@@ -483,3 +483,14 @@
         border-radius: 0;
     }
 }
+
+/* Detailed rules stay in horizontal table scroll on narrow screens. */
+.lavr-profit-export-bar { margin-top: 18px; padding: 14px; background: #fff; border-left: 4px solid #2271b1; }
+#lavr-profit-expenses-table { min-width: 2400px; }
+#lavr-profit-audit-table, #lavr-profit-period-diagnostics table { min-width: 4600px; }
+.lavr-profit-table-wrap th { min-width: 100px; }
+.lavr-profit-table-wrap td { max-width: 460px; overflow-wrap: anywhere; vertical-align: top; }
+.lavr-profit-table-wrap td.num { white-space: nowrap; }
+#lavr-profit-policy table { min-width: 600px; }
+#lavr-profit-policy th:first-child { width: 42%; }
+.lavr-profit-run-state.is-warning { border-left-color: #dba617; background: #fcf9e8; }
