@@ -77,7 +77,7 @@ add_action('admin_init', 'pc_wayforpay_register_access_setting');
 function pc_wayforpay_add_access_page(): void
 {
     add_submenu_page(
-        'woocommerce',
+        function_exists('paint_core_lavka_admin_parent_slug') ? paint_core_lavka_admin_parent_slug() : 'woocommerce',
         __('WayForPay access', 'pc-wayforpay-test-access'),
         __('WayForPay access', 'pc-wayforpay-test-access'),
         'manage_woocommerce',

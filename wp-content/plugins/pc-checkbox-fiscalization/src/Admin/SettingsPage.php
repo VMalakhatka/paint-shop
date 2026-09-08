@@ -28,7 +28,9 @@ final class SettingsPage
 
     public function menu(): void
     {
-        $parent = class_exists('WooCommerce') ? 'woocommerce' : 'tools.php';
+        $parent = function_exists('paint_core_lavka_admin_parent_slug')
+            ? paint_core_lavka_admin_parent_slug()
+            : (class_exists('WooCommerce') ? 'woocommerce' : 'tools.php');
         add_submenu_page(
             $parent,
             __('Checkbox fiscalization', 'pc-checkbox-fiscalization'),

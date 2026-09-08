@@ -31,7 +31,7 @@ final class SettingsPage
     public function menu(): void
     {
         add_submenu_page(
-            'woocommerce',
+            function_exists('paint_core_lavka_admin_parent_slug') ? paint_core_lavka_admin_parent_slug() : 'woocommerce',
             __('Nova Poshta multishipping', 'paint-nova-poshta-multishipping'),
             __('Nova Poshta shipments', 'paint-nova-poshta-multishipping'),
             'manage_pnpm_shipments',

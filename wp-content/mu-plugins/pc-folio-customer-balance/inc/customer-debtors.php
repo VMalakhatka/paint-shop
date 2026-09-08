@@ -10,7 +10,7 @@ function pc_folio_debtors_can_view(): bool {
 
 function pc_folio_debtors_register_page(): void {
     add_submenu_page(
-        'woocommerce',
+        function_exists('paint_core_lavka_admin_parent_slug') ? paint_core_lavka_admin_parent_slug() : 'woocommerce',
         __('Folio debtors', 'pc-folio-customer-balance'),
         __('Folio debtors', 'pc-folio-customer-balance'),
         'manage_woocommerce',

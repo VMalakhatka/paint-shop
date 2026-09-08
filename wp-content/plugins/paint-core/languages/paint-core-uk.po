@@ -289,3 +289,7 @@ msgstr "Аналітика"
 #: inc/admin-lavka-hub.php
 msgid "Database maintenance"
 msgstr "Обслуговування бази"
+
+#: inc/admin-lavka-hub.php
+msgid "Customer relations"
+msgstr "Робота з клієнтами"

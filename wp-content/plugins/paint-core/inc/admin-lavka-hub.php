@@ -137,6 +137,8 @@ add_action('admin_menu', function (): void {
 /** Enhance only rendered, permission-filtered links; keep WordPress routes intact. */
 add_action('admin_enqueue_scripts', function (): void {
     $groups = [
+        ['id' => 'settings', 'label' => __('Lavka settings', 'paint-core'), 'pages' => ['lavka-warehouses', 'pnpm-settings', 'pc-checkbox-fiscalization', 'pc-wayforpay-test-access']],
+        ['id' => 'customers', 'label' => __('Customer relations', 'paint-core'), 'pages' => ['pc-folio-customer-debtors']],
         ['id' => 'stock', 'label' => __('Stock', 'paint-core'), 'pages' => ['lavka-sync', 'lavka-stock-report', 'lavka-logs']],
         ['id' => 'full-sync', 'label' => __('Full synchronization', 'paint-core'), 'pages' => ['lts-main', 'lts-run', 'lts-logs', 'lts-media', 'lts-cron-summary']],
         ['id' => 'prices', 'label' => __('Prices', 'paint-core'), 'pages' => ['lps-main', 'lps-mapping', 'lps-run', 'lps-logs', 'role-price-import-lite']],

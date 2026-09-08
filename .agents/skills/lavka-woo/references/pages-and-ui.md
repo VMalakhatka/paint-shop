@@ -49,6 +49,15 @@
 
 ## Административные интерфейсы
 
+Навигацией Lavka владеет `paint-core/inc/admin-lavka-hub.php` и
+`assets/admin-lavka-menu.*`; каноническая карта путей — раздел «Раскрываемое меню
+Лавка» в `docs/OPERATIONS_RUNBOOK.md`. При переносе между WooCommerce и Lavka
+меняй parent при регистрации страницы в плагине-владельце с fallback без
+paint-core, сохраняя slug/capability/callback; одной JS-перегруппировки недостаточно.
+Нова пошта, Checkbox и тестовый WayForPay входят в настройки, должники — в работу
+с клиентами, пакетная загрузка изображений остаётся в Media. Проверено по коду и
+изолированной проверке регистрации с/без paint-core и WooCommerce: 2026-09-08.
+
 - `Повна синхронізація` — карточки, категории, media reconcile, cron/logs.
 - `Синхронізація цін` — role prices, contracts, accounting price и product analytics.
 - `Синхронізація цін → Сценарії аналітики` — общие и личные версионируемые

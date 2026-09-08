@@ -73,3 +73,7 @@ $result = pc_checkbox_fiscalize($command, 'preview');
 Callers should first use `preview`, then `validate`, and only then request `fiscalize` after the test register and shift are confirmed.
 
 See [docs/JAVA_ENDPOINT_CONTRACT.md](docs/JAVA_ENDPOINT_CONTRACT.md) for the complete v1 contract.
+
+## Admin navigation
+
+With paint-core active, open **Лавка → Лавка: налаштування → Лавка: фіскалізація Checkbox**. The page slug and `manage_pc_checkbox_fiscalization` capability are unchanged. Without paint-core the page remains under WooCommerce, or Tools if WooCommerce is unavailable. Navigation updated in local code on 2026-09-08; production requires deployment.
