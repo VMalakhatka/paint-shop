@@ -14,6 +14,10 @@ const LPS_ACCOUNTING_PRICE_CAMPAIGN_WAREHOUSE_HISTORY_PREFIX = 'lps_accounting_p
 const LPS_ACCOUNTING_PRICE_CAMPAIGN_WAREHOUSE_HISTORY_INDEX = 'lps_accounting_price_sku_campaign_warehouse_index';
 const LPS_ACCOUNTING_PRICE_CAMPAIGN_MAX_WAREHOUSE_ISSUES = 500;
 const LPS_ACCOUNTING_PRICE_CAMPAIGN_UNSUPPORTED_MODE_ERROR = 'PRODUCT_SNAPSHOT_ACCOUNTING_MODE_UNSUPPORTED';
+const LPS_ACCOUNTING_PRICE_CAMPAIGN_RETRYABLE_LOCK_ERROR = 'FOLIO_LOCK_BUSY_RETRYABLE_AFTER_SNAPSHOT';
+const LPS_ACCOUNTING_PRICE_CAMPAIGN_LOCK_RETRY_DELAY = 600;
+const LPS_ACCOUNTING_PRICE_CAMPAIGN_LOCK_RETRY_RESERVE = 900;
+const LPS_ACCOUNTING_PRICE_CAMPAIGN_LOCK_RETRY_MIN_WINDOW = 1500;
 
 function lps_accounting_price_campaign_state(): array {
     $state = get_option(LPS_ACCOUNTING_PRICE_CAMPAIGN_OPTION, []);
@@ -182,7 +186,7 @@ function lps_accounting_price_campaign_history_from_state(array $state, int $war
     $skipped_skus = 0;
     foreach ($reports as $report) {
         $status = strtoupper(sanitize_key((string)($report['status'] ?? '')));
-        if (in_array($status, ['COMPLETED', 'COMPLETED_WITH_WARNINGS'], true)) {
+        if (in_array($status, ['COMPLETED', 'COMPLETED_WITH_WARNINGS', 'LOCK_RETRY_SCHEDULED'], true)) {
             $processed_skus += absint($report['processed_sku'] ?? ($report['sku_count'] ?? 0));
             $committed_skus += absint($report['committed_chunks'] ?? 0);
             $skipped_skus += absint($report['skipped_sku'] ?? 0);
@@ -845,6 +849,30 @@ function lps_accounting_price_campaign_deadline_reached(array $state): bool {
     return $deadline > 0 && time() >= $deadline;
 }
 
+function lps_accounting_price_campaign_retryable_lock_failure(array $body): bool {
+    $status = strtoupper(trim((string)($body['status'] ?? '')));
+    $error_code = strtoupper(trim((string)($body['errorCode'] ?? '')));
+    $request = is_array($body['request'] ?? null) ? $body['request'] : [];
+    $processed = absint($body['processedSku'] ?? 0);
+    $committed = absint($body['committedChunks'] ?? 0);
+
+    return empty($body['running'])
+        && in_array($status, ['FAILED', 'FAILED_PARTIAL'], true)
+        && $error_code === LPS_ACCOUNTING_PRICE_CAMPAIGN_RETRYABLE_LOCK_ERROR
+        && array_key_exists('processedSku', $body)
+        && array_key_exists('committedChunks', $body)
+        && $committed <= $processed
+        && empty($body['failedChunk'])
+        && strtoupper(trim((string)($request['applyMode'] ?? ''))) === 'SAFE_APPLY_ONLY'
+        && !lps_accounting_price_campaign_api_bool($request['previewOnly'] ?? null, true)
+        && lps_accounting_price_campaign_api_bool($request['confirmApply'] ?? null, false);
+}
+
+function lps_accounting_price_campaign_seconds_remaining(array $state): int {
+    $deadline = absint($state['deadline_at'] ?? 0);
+    return $deadline > 0 ? max(0, $deadline - time()) : 0;
+}
+
 function lps_accounting_price_campaign_snapshot_was_interrupted(array $status): bool {
     if (!empty($status['running'])) return false;
 
@@ -989,6 +1017,10 @@ function lps_accounting_price_campaign_public_state(?array $state = null): array
         'stopRequested' => !empty($state['stop_requested']),
         'stopReason' => sanitize_key((string)($state['stop_reason'] ?? '')),
         'remainingSkus' => absint($state['remaining_skus'] ?? 0),
+        'lockRetryCount' => absint($state['lock_retry_count'] ?? 0),
+        'retryAt' => absint($state['retry_at'] ?? 0),
+        'lastRetryJobId' => sanitize_text_field((string)($state['last_retry_job_id'] ?? '')),
+        'lastRetryErrorCode' => sanitize_text_field((string)($state['last_retry_error_code'] ?? '')),
         'startedAt' => sanitize_text_field((string)($state['started_at'] ?? '')),
         'completedAt' => sanitize_text_field((string)($state['completed_at'] ?? '')),
         'deadlineAt' => absint($state['deadline_at'] ?? 0),
@@ -1062,6 +1094,10 @@ function lps_accounting_price_campaign_create(array $warehouse_ids, string $sour
         'error_count' => 0,
         'failed_warehouses' => 0,
         'skipped_warehouses' => 0,
+        'lock_retry_count' => 0,
+        'retry_at' => 0,
+        'last_retry_job_id' => '',
+        'last_retry_error_code' => '',
         'warnings_truncated' => false,
         'warnings' => [],
         'reports' => [],
@@ -1464,6 +1500,7 @@ function lps_accounting_price_campaign_poll_range(array &$state): void {
     $status = strtoupper((string)($body['status'] ?? ''));
     $skus = array_values(array_map('strval', (array)($state['current_skus'] ?? [])));
     $elapsed = max(1, time() - absint($state['range_started_at_unix'] ?? time()));
+    $retryable_lock = lps_accounting_price_campaign_retryable_lock_failure($body);
     $warnings = is_array($body['warnings'] ?? null) ? $body['warnings'] : [];
     $errors = is_array($body['errors'] ?? null) ? $body['errors'] : [];
     $failed_chunk = is_array($body['failedChunk'] ?? null) ? $body['failedChunk'] : [];
@@ -1479,14 +1516,18 @@ function lps_accounting_price_campaign_poll_range(array &$state): void {
     unset($warning);
     foreach ($errors as &$error) {
         if (!is_array($error)) $error = ['message' => (string)$error];
-        if (empty($error['severity'])) $error['severity'] = 'error';
+        if ($retryable_lock) {
+            $error['severity'] = 'warning';
+        } elseif (empty($error['severity'])) {
+            $error['severity'] = 'error';
+        }
         $error['recordedAt'] = $recorded_at;
         $error['warehouseId'] = $recorded_warehouse_id;
         $error['jobId'] = $job_id;
     }
     unset($error);
     lps_accounting_price_campaign_append_warnings($state, $warnings);
-    lps_accounting_price_campaign_append_warnings($state, $errors);
+    if (!$retryable_lock) lps_accounting_price_campaign_append_warnings($state, $errors);
     if ($failed_chunk) {
         lps_accounting_price_campaign_append_warnings($state, [[
             'severity' => 'error',
@@ -1510,7 +1551,7 @@ function lps_accounting_price_campaign_poll_range(array &$state): void {
             break;
         }
     }
-    $legacy_context_added = $status === 'FAILED' && !$has_structured_sku && $last_known_sku !== '';
+    $legacy_context_added = !$retryable_lock && $status === 'FAILED' && !$has_structured_sku && $last_known_sku !== '';
     if ($legacy_context_added) {
         lps_accounting_price_campaign_append_warnings($state, [[
             'severity' => 'error',
@@ -1531,8 +1572,8 @@ function lps_accounting_price_campaign_poll_range(array &$state): void {
     }
     $state['warnings_truncated'] = !empty($state['warnings_truncated']) || !empty($body['warningsTruncated']);
     $state['warning_count'] = absint($state['warning_count'] ?? 0) + absint($body['warningCount'] ?? count($warnings));
-    $state['error_count'] = absint($state['error_count'] ?? 0) + count($errors)
-        + ($failed_chunk || ($legacy_context_added && !$errors) ? 1 : 0);
+    $state['error_count'] = absint($state['error_count'] ?? 0) + ($retryable_lock ? 0 : count($errors))
+        + (!$retryable_lock && ($failed_chunk || ($legacy_context_added && !$errors)) ? 1 : 0);
     $processed_count = array_key_exists('processedSku', $body)
         ? min(count($skus), absint($body['processedSku']))
         : count($skus);
@@ -1541,7 +1582,8 @@ function lps_accounting_price_campaign_poll_range(array &$state): void {
     lps_accounting_price_campaign_append_report($state, [
         'warehouse_id' => absint($state['current_warehouse_id'] ?? 0),
         'job_id' => $job_id,
-        'status' => $status,
+        'status' => $retryable_lock ? 'LOCK_RETRY_SCHEDULED' : $status,
+        'source_status' => $status,
         'sku_count' => count($skus),
         'first_sku' => $skus[0] ?? '',
         'last_sku' => $skus ? end($skus) : '',
@@ -1556,8 +1598,61 @@ function lps_accounting_price_campaign_poll_range(array &$state): void {
         'apply_mode' => sanitize_text_field((string)($body['request']['applyMode'] ?? '')),
         'warnings_truncated' => !empty($body['warningsTruncated']),
         'failed_chunk' => $failed_chunk ?: null,
+        'error_code' => sanitize_text_field((string)($body['errorCode'] ?? '')),
         'error' => $body['error'] ?? '',
     ]);
+
+    if ($retryable_lock) {
+        $state['processed_skus'] = absint($state['processed_skus'] ?? 0) + $processed_count;
+        $state['committed_skus'] = absint($state['committed_skus'] ?? 0) + $committed_count;
+        $state['skipped_skus'] = absint($state['skipped_skus'] ?? 0) + $skipped_count;
+        $state['lock_retry_count'] = absint($state['lock_retry_count'] ?? 0) + 1;
+        $state['last_retry_job_id'] = $job_id;
+        $state['last_retry_error_code'] = LPS_ACCOUNTING_PRICE_CAMPAIGN_RETRYABLE_LOCK_ERROR;
+        $state['current_skus'] = [];
+        $state['range_job_id'] = '';
+        $state['range_status'] = [];
+        $state['cursor'] = '';
+        $state['snapshot_generation_id'] = 0;
+        $state['snapshot_attempt_stage'] = '';
+        $state['snapshot_stage'] = 'before';
+        $state['snapshot_status'] = [];
+        $state['error'] = '';
+
+        $remaining_seconds = lps_accounting_price_campaign_seconds_remaining($state);
+        if ($remaining_seconds >= LPS_ACCOUNTING_PRICE_CAMPAIGN_LOCK_RETRY_MIN_WINDOW) {
+            $state['retry_at'] = time() + LPS_ACCOUNTING_PRICE_CAMPAIGN_LOCK_RETRY_DELAY;
+            $state['status'] = 'waiting_retry';
+            $state['phase'] = 'waiting_lock_retry';
+            $state['message'] = __('The Folio lock is busy. The current SKU transaction was rolled back and earlier commits were verified. A fresh snapshot will be started automatically in 10 minutes.', 'lavka-price-sync');
+            lps_accounting_price_campaign_append_warnings($state, [[
+                'severity' => 'warning',
+                'code' => LPS_ACCOUNTING_PRICE_CAMPAIGN_RETRYABLE_LOCK_ERROR,
+                'message' => $state['message'],
+                'details' => [
+                    'sourceStatus' => $status,
+                    'processedSku' => $processed_count,
+                    'committedSku' => $committed_count,
+                    'retryAt' => $state['retry_at'],
+                ],
+                'recordedAt' => $recorded_at,
+                'warehouseId' => $recorded_warehouse_id,
+                'jobId' => $job_id,
+            ]]);
+            $state['warning_count'] = absint($state['warning_count'] ?? 0) + 1;
+            lps_accounting_price_campaign_store($state);
+            lps_accounting_price_campaign_schedule_tick(LPS_ACCOUNTING_PRICE_CAMPAIGN_LOCK_RETRY_DELAY);
+            return;
+        }
+
+        $state['retry_at'] = 0;
+        $state['stop_reason'] = 'time_limit';
+        $state['phase'] = 'snapshot_after_start';
+        $state['message'] = __('There is not enough maintenance-window time for a safe automatic retry. Building the mandatory final snapshot.', 'lavka-price-sync');
+        lps_accounting_price_campaign_store($state);
+        lps_accounting_price_campaign_schedule_tick(1);
+        return;
+    }
 
     if (in_array($status, ['COMPLETED', 'COMPLETED_WITH_WARNINGS'], true)) {
         $count = count($skus);
@@ -1712,6 +1807,45 @@ function lps_accounting_price_campaign_tick(): array {
     if (empty($state['active'])) return lps_accounting_price_campaign_public_state($state);
 
     $phase = sanitize_key((string)($state['phase'] ?? 'snapshot_before_start'));
+    if ($phase === 'waiting_lock_retry') {
+        $retry_at = absint($state['retry_at'] ?? 0);
+        if (!empty($state['stop_requested'])) {
+            $state['retry_at'] = 0;
+            $state['phase'] = 'snapshot_after_start';
+            $state['message'] = __('The automatic retry was cancelled by a safe-stop request. Building the mandatory final snapshot.', 'lavka-price-sync');
+            lps_accounting_price_campaign_store($state);
+            lps_accounting_price_campaign_schedule_tick(1);
+            return lps_accounting_price_campaign_public_state($state);
+        }
+        if ($retry_at > time()) {
+            lps_accounting_price_campaign_store($state);
+            lps_accounting_price_campaign_schedule_tick($retry_at - time());
+            return lps_accounting_price_campaign_public_state($state);
+        }
+        if (lps_accounting_price_campaign_seconds_remaining($state) < LPS_ACCOUNTING_PRICE_CAMPAIGN_LOCK_RETRY_RESERVE) {
+            $state['retry_at'] = 0;
+            $state['stop_reason'] = 'time_limit';
+            $state['phase'] = 'snapshot_after_start';
+            $state['message'] = __('The retry delay ended without the required 15-minute reserve. Building the mandatory final snapshot.', 'lavka-price-sync');
+            lps_accounting_price_campaign_store($state);
+            lps_accounting_price_campaign_schedule_tick(1);
+            return lps_accounting_price_campaign_public_state($state);
+        }
+
+        $state['retry_at'] = 0;
+        $state['status'] = 'running';
+        $state['phase'] = 'snapshot_before_start';
+        $state['snapshot_stage'] = 'before';
+        $state['snapshot_attempt_stage'] = '';
+        $state['snapshot_generation_id'] = 0;
+        $state['snapshot_status'] = [];
+        $state['source_database'] = '';
+        $state['cursor'] = '';
+        $state['message'] = __('The lock retry delay ended. Building a fresh snapshot before selecting the remaining SKU.', 'lavka-price-sync');
+        lps_accounting_price_campaign_store($state);
+        lps_accounting_price_campaign_schedule_tick(1);
+        return lps_accounting_price_campaign_public_state($state);
+    }
     if (in_array($phase, ['waiting_lock', 'waiting_java_slot', 'range_starting'], true)
         && !empty($state['current_skus'])
         && (!empty($state['stop_requested']) || lps_accounting_price_campaign_deadline_reached($state))) {

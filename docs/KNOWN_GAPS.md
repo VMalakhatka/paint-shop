@@ -132,6 +132,13 @@ preview/apply/live-write, кому приходит incident notification и к�
 
 ## Аналитика и закупки
 
+- Frontend автоматического повтора SKU campaign после временной SQL-блокировки
+  реализован, но остаётся неактивным до Java-контракта
+  `FOLIO_LOCK_BUSY_RETRYABLE_AFTER_SNAPSHOT`. Старый текст ошибки без этого
+  верхнеуровневого кода намеренно останавливает кампанию для ручной проверки.
+  Условия безопасной выдачи кода и тесты описаны в
+  [backend-задаче](api/FOLIO_ACCOUNTING_PRICE_LOCK_RETRY_BACKEND_TASK.md).
+
 - Постоянный журнал арифметических ошибок учётной цены требует совместного
   релиза: Java с Flyway V14 должна быть задеплоена раньше WordPress-интерфейса.
   До V14 доступны только текущие campaign/snapshot diagnostics. Для SQL 8134

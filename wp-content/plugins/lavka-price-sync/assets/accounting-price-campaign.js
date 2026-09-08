@@ -964,6 +964,15 @@
         card(t.batchWarnings || 'Warnings in current batch', integer.format(rangeWarnings), rangeWarnings > 0 ? 'warning' : '')
       );
     }
+    if (Number(state.lockRetryCount || 0) > 0) {
+      overview.append(card(t.automaticLockRetries || 'Automatic lock retries', integer.format(Number(state.lockRetryCount || 0)), 'warning'));
+    }
+    if (Number(state.retryAt || 0) > 0) {
+      overview.append(card(
+        t.nextSafeRetry || 'Next safe retry',
+        new Date(Number(state.retryAt) * 1000).toLocaleString(locale)
+      ));
+    }
     elements.dashboard.append(overview);
     if (state.expectedJobId) elements.dashboard.append(node('p', '', t.expectedJob + ': ' + state.expectedJobId));
     if (reviewCampaignId) elements.dashboard.append(node('p', 'notice notice-warning inline', t.reviewHelp));
