@@ -20,6 +20,7 @@
         dirty: false,
         exporting: false,
         displayWarnings: [],
+        savedMetadata: null,
     };
 
     const nodes = {
@@ -310,6 +311,10 @@
     }
 
     async function loadReport(operation) {
+        if (config.savedMode) {
+            if (operation === 'audit') { if (state.audit && !state.dirty) renderAudit(); return !!state.audit; }
+            return window.LavkaProfitHistory ? window.LavkaProfitHistory.calculateMonth(requestParams()) : false;
+        }
         if (state.loading || state.auditLoading || (operation === 'audit' && state.dirty)) return false;
         const revision = state.revision;
         if (!nodes.month.value) {
@@ -827,8 +832,9 @@
         });
     }
     function parameterRows(data) {
+        const saved = state.savedMetadata && data === state.report ? Object.entries(state.savedMetadata).map(([key,value]) => ['saved.' + key,value]) : [];
         return [['month', data.month], ['calculatedAt', formatDateTime(data.calculatedAt)], ['ruleVersion', data.ruleVersion], ['complete', data.complete],
-            ...Object.entries(data.inputs || {}), ...Object.entries(data.periodPolicy || {})].map(([key, value]) => ({ parameter: fieldLabel(key), value: printable(value) }));
+            ...Object.entries(data.inputs || {}), ...Object.entries(data.periodPolicy || {}), ...saved].map(([key, value]) => ({ parameter: fieldLabel(key), value: printable(value) }));
     }
     function renderSupplement(data) {
         safeRender(labels.appliedParameters, nodes.policy, () => {
@@ -907,8 +913,10 @@
             const data = state.audit;
             if (!Array.isArray(data.documents) && !(data.sections && data.sections.EXPENSES && data.sections.EXPENSES.status === 'UNAVAILABLE')) throw new Error(labels.invalidResponse);
             const exportData = { ...data, complete: data.complete && !hasUnavailableSections(data), warnings: [...(data.warnings || []), ...state.displayWarnings] };
-            const bytes = LavkaProfitXlsx.build(buildWorkbookSheets(exportData));
-            downloadBlob(new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), 'folio-profit-' + data.month + '.xlsx');
+            const sheets = buildWorkbookSheets(exportData);
+            if (state.savedMetadata) sheets.push({name:'Saved revision',rows:Object.entries(state.savedMetadata).map(([k,v])=>[k,printable(v)]),widths:[30,65]});
+            const bytes = LavkaProfitXlsx.build(sheets);
+            downloadBlob(new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), 'folio-profit-' + data.month + (state.savedMetadata ? '-r' + state.savedMetadata.revisionId : '') + '.xlsx');
             showRunState(labels.exportReady, 'success');
         } catch (error) {
             showError(labels.exportFailed, null);
@@ -944,5 +952,32 @@
     [nodes.auditCity, nodes.auditCategory, nodes.auditTreatment].forEach((select) => select.addEventListener('change', renderAuditRows));
     nodes.auditUnclassified.addEventListener('change', renderAuditRows);
 
-    loadReport('summary');
+    if (config.savedMode) {
+        window.LavkaProfitViewer = {
+            params: requestParams,
+            version: () => state.revision,
+            showSaved(wrapper) {
+                const data = wrapper.report;
+                if (!data || !Array.isArray(data.cities) || data.month !== wrapper.month) throw new Error(labels.invalidResponse);
+                state.revision++; state.dirty = false;
+                state.report = data; state.audit = data; state.reportParams = {month: data.month};
+                state.savedMetadata = {revisionId: wrapper.revisionId, requestId: wrapper.requestId, status: wrapper.status, auditComplete: wrapper.auditComplete, published: wrapper.published};
+                nodes.month.value = data.month;
+                state.salaryOverride = false; state.kyivSalaryOverride = false;
+                [nodes.taxShare,nodes.rubRate,nodes.additionalSalary,nodes.kyivSalary].forEach(n => { n.value = ''; });
+                hideError(); renderReport(); renderAudit();
+                state.salaryOverride = data.inputs && data.inputs.odesaAdditionalSalarySource === 'REQUEST_OVERRIDE';
+                state.kyivSalaryOverride = data.inputs && data.inputs.kyivAdditionalSalarySource === 'REQUEST_OVERRIDE';
+                showRunState(labels.reportMonth + ': ' + data.month + ' · ' + wrapper.status + ' · ' + wrapper.revisionId, 'success');
+                updateAvailability();
+            },
+            clear() { invalidateResult(); nodes.result.hidden = true; },
+            sheets(wrapper) {
+                const sheets = buildWorkbookSheets(wrapper.report);
+                sheets.push({name:'Saved revision',rows:Object.entries({month:wrapper.month,revisionId:wrapper.revisionId,requestId:wrapper.requestId,status:wrapper.status,auditComplete:wrapper.auditComplete,published:wrapper.published,createdAt:wrapper.createdAt,completedAt:wrapper.completedAt}).map(([k,v])=>[k,printable(v)]),widths:[30,65]});
+                return sheets;
+            }
+        };
+        updateAvailability();
+    } else loadReport('summary');
 })();

@@ -46,7 +46,9 @@ class Lavka_Reports_Profit_Report {
             'action'  => self::AJAX_ACTION,
             'nonce'   => wp_create_nonce(self::NONCE_ACTION),
             'i18n'    => $this->translations(),
+            'savedMode' => true,
         ]);
+        Lavka_Reports_Profit_History::assets();
     }
 
     public function render_page() {
@@ -56,6 +58,7 @@ class Lavka_Reports_Profit_Report {
         ?>
         <div class="wrap lavr-profit-report" id="lavr-profit-report">
             <h1><?php echo esc_html__('Monthly Folio profit report', 'lavka-reports'); ?></h1>
+            <?php if (class_exists('Lavka_Reports_Profit_History')) Lavka_Reports_Profit_History::render_toolbar(); ?>
 
             <section class="lavr-profit-toolbar" aria-labelledby="lavr-profit-period-title">
                 <div class="lavr-profit-field">

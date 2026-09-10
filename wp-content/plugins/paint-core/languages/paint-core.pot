@@ -308,3 +308,7 @@ msgstr ""
 #: inc/admin-lavka-hub.php
 msgid "Customer relations"
 msgstr ""
+
+#: inc/admin-lavka-hub.php
+msgid "Lavka Folio document audit"
+msgstr ""

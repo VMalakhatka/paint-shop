@@ -1167,3 +1167,554 @@ msgstr "Сесія звіту завершилася. Оновіть сторі�
 #: inc/class-profit-report.php
 msgid "Report access was denied or the session expired. Reload the page and sign in again if needed."
 msgstr "Доступ до звіту відхилено або сесія завершилася. Оновіть сторінку та за потреби увійдіть знову."
+
+#: inc/class-document-audit.php
+msgid "Folio document audit"
+msgstr "Аудит документів ФОЛІО"
+
+#: inc/class-document-audit.php
+msgid ""
+"Check cash and bank documents by document date, across all warehouses and "
+"both directions. This report does not change documents or profit "
+"calculations."
+msgstr ""
+"Перевірка касових і банківських документів за датою документа, усіма "
+"складами та обома напрямками. Звіт не змінює документи або розрахунок "
+"прибутку."
+
+#: inc/class-document-audit.php
+msgid "Date from"
+msgstr "Дата з"
+
+#: inc/class-document-audit.php
+msgid "Date to"
+msgstr "Дата до"
+
+#: inc/class-document-audit.php
+msgid "Check documents"
+msgstr "Перевірити документи"
+
+#: inc/class-document-audit.php
+msgid "Stop loading"
+msgstr "Зупинити завантаження"
+
+#: inc/class-document-audit.php
+msgid "Export loaded registry to Excel"
+msgstr "Завантажений реєстр в Excel"
+
+#: inc/class-document-audit.php
+msgid "Loading documents…"
+msgstr "Завантаження документів…"
+
+#: inc/class-document-audit.php
+msgid "Loading finished. Review findings and coverage below."
+msgstr "Завантаження завершено. Перегляньте результати та охоплення нижче."
+
+#: inc/class-document-audit.php
+msgid ""
+"Incomplete loading. Received documents are preserved; this is not a full "
+"audit."
+msgstr ""
+"Завантаження неповне. Отримані документи збережено; це не повний аудит."
+
+#: inc/class-document-audit.php
+msgid "Dates changed. Run the audit again before exporting."
+msgstr "Дати змінено. Перед експортом запустіть аудит знову."
+
+#: inc/class-document-audit.php
+msgid "Could not load the audit. Check Java availability and retry."
+msgstr ""
+"Не вдалося завантажити аудит. Перевірте доступність Java та повторіть "
+"спробу."
+
+#: inc/class-document-audit.php
+msgid "Invalid or inconsistent audit response. Reload the audit."
+msgstr "Некоректна або неузгоджена відповідь аудиту. Запустіть аудит знову."
+
+#: inc/class-document-audit.php
+msgid "Select valid dates, in order, covering no more than 366 days."
+msgstr "Оберіть коректний діапазон дат, не більше 366 днів."
+
+#: inc/class-document-audit.php
+msgid "Audit coverage"
+msgstr "Охоплення аудиту"
+
+#: inc/class-document-audit.php
+msgid "Document registry"
+msgstr "Реєстр документів"
+
+#: inc/class-document-audit.php
+msgid "Rules and their sources"
+msgstr "Правила та їхні джерела"
+
+#: inc/class-document-audit.php
+msgid "Checks passed"
+msgstr "Перевірки пройдено"
+
+#: inc/class-document-audit.php
+msgid "Document error"
+msgstr "Помилка документа"
+
+#: inc/class-document-audit.php
+msgid "Rule review needed"
+msgstr "Потрібне уточнення правила"
+
+#: inc/class-document-audit.php
+msgid ""
+"Checks passed means only the implemented checks passed. Unchecked areas "
+"remain listed below."
+msgstr ""
+"Пройдено лише реалізовані перевірки. Неперевірені області зазначені нижче."
+
+#: inc/class-document-audit.php
+msgid ""
+"Live reading, not a frozen snapshot: documents may change while pages are "
+"loading."
+msgstr ""
+"Поточне читання, не фіксований знімок: документи можуть змінитися під час "
+"завантаження сторінок."
+
+#: inc/class-document-audit.php
+msgid "Loaded documents"
+msgstr "Завантажено документів"
+
+#: inc/class-document-audit.php
+msgid "Source document count"
+msgstr "Кількість документів джерела"
+
+#: inc/class-document-audit.php
+msgid "Register"
+msgstr "Реєстр"
+
+#: inc/class-document-audit.php
+msgid "Direction"
+msgstr "Напрямок"
+
+#: inc/class-document-audit.php
+msgid "Organization short code"
+msgstr "Коротка назва організації"
+
+#: inc/class-document-audit.php
+msgid "Note / period evidence"
+msgstr "Примітка / ознаки періоду"
+
+#: inc/class-document-audit.php
+msgid "Resolved period"
+msgstr "Визначений період"
+
+#: inc/class-document-audit.php
+msgid "Findings"
+msgstr "Зауваження"
+
+#: inc/class-document-audit.php
+msgid "Actual"
+msgstr "Фактично"
+
+#: inc/class-document-audit.php
+msgid "Expected"
+msgstr "Очікується"
+
+#: inc/class-document-audit.php
+msgid "Recommended action"
+msgstr "Рекомендована дія"
+
+#: inc/class-document-audit.php
+msgid "Field"
+msgstr "Поле"
+
+#: inc/class-document-audit.php
+msgid "Rule IDs"
+msgstr "ID правил"
+
+#: inc/class-document-audit.php
+msgid "Search loaded documents"
+msgstr "Пошук серед завантажених документів"
+
+#: inc/class-document-audit.php
+msgid "No documents match these filters."
+msgstr "Немає документів за цими фільтрами."
+
+#: inc/class-document-audit.php
+msgid "Previous page"
+msgstr "Попередня сторінка"
+
+#: inc/class-document-audit.php
+msgid "Next page"
+msgstr "Наступна сторінка"
+
+#: inc/class-document-audit.php
+msgid "Shown / filtered"
+msgstr "Показано / відібрано"
+
+#: inc/class-document-audit.php
+msgid "Rules version"
+msgstr "Версія правил"
+
+#: inc/class-document-audit.php
+msgid "Calculated at"
+msgstr "Розраховано"
+
+#: inc/class-document-audit.php
+msgid "Not checked"
+msgstr "Не перевірено"
+
+#: inc/class-document-audit.php
+msgid "Coverage warnings"
+msgstr "Зауваження щодо охоплення"
+
+#: inc/class-document-audit.php
+msgid "Incoming"
+msgstr "Прихід"
+
+#: inc/class-document-audit.php
+msgid "Outgoing"
+msgstr "Витрата"
+
+#: inc/class-document-audit.php
+msgid "Unknown"
+msgstr "Невідомо"
+
+#: inc/class-document-audit.php
+msgid "Sensitive values masked"
+msgstr "Чутливі значення приховано"
+
+#: inc/class-document-audit.php
+msgid "Source sheet / rows"
+msgstr "Лист джерела / рядки"
+
+#: inc/class-document-audit.php
+msgid "Rule limitations"
+msgstr "Обмеження правила"
+
+#: inc/class-document-audit.php
+msgid "Audit details"
+msgstr "Паспорт аудиту"
+
+#: inc/class-document-audit.php
+msgid ""
+"Excel contains every loaded document, regardless of the display filters, "
+"plus findings, rules and coverage."
+msgstr ""
+"Excel містить усі завантажені документи незалежно від фільтрів, зауваження, "
+"правила та охоплення."
+
+#: inc/class-document-audit.php
+msgid "All source pages loaded"
+msgstr "Усі сторінки джерела завантажено"
+
+#: inc/class-document-audit.php
+msgid "Date selection basis"
+msgstr "Основа відбору дат"
+
+#: inc/class-document-audit.php
+msgid "Read consistency"
+msgstr "Узгодженість читання"
+
+#: inc/class-document-audit.php
+msgid "Directions"
+msgstr "Напрямки"
+
+#: inc/class-document-audit.php
+msgid "Registers"
+msgstr "Реєстри"
+
+#: inc/class-document-audit.php
+msgid "Rules coverage complete"
+msgstr "Правила охоплюють усі випадки"
+
+#: inc/class-document-audit.php
+msgid "Last source page complete"
+msgstr "Остання сторінка джерела повна"
+
+#: inc/class-document-audit.php
+msgid "Rule evidence"
+msgstr "Підстава правила"
+
+#: inc/class-document-audit.php
+msgid "Period requirement"
+msgstr "Вимога до періоду"
+
+#: inc/class-document-audit.php
+msgid "Required information source"
+msgstr "Обов’язкове джерело інформації"
+
+#: inc/class-document-audit.php
+msgid "Expected operation types"
+msgstr "Очікувані типи операцій"
+
+#: inc/class-document-audit.php
+msgid "Organization codes"
+msgstr "Коди організацій"
+
+#: inc/class-document-audit.php
+msgid "Profit treatment"
+msgstr "Облік у прибутку"
+
+#: inc/class-document-audit.php
+msgid "Recognition"
+msgstr "Розпізнавання"
+
+#: inc/class-document-audit.php
+msgid "Organization name"
+msgstr "Назва організації"
+
+#: inc/class-document-audit.php
+msgid "Amount unit verification"
+msgstr "Перевірка одиниці суми"
+
+#: inc/class-document-audit.php
+msgid ""
+"Amounts are shown as SUM_POR. COD_VALUT alone does not confirm their "
+"currency. No currency conversion or total is calculated."
+msgstr ""
+"Суми показано як SUM_POR. COD_VALUT сам по собі не підтверджує їхню валюту. "
+"Конвертація та загальна сума не розраховуються."
+
+#: inc/class-document-audit.php
+msgid "Category code"
+msgstr "Код категорії"
+
+#: inc/class-document-audit.php
+msgid "Source sheet"
+msgstr "Лист джерела"
+
+#: inc/class-document-audit.php
+msgid "Source rows"
+msgstr "Рядки джерела"
+
+#: inc/class-document-audit.php
+msgid ""
+"Document audit is disabled in Java. The administrator must restrict API "
+"access before enabling LAVKA_FOLIO_DOCUMENT_AUDIT_ENABLED."
+msgstr ""
+"Аудит документів вимкнено в Java. Перед увімкненням "
+"LAVKA_FOLIO_DOCUMENT_AUDIT_ENABLED адміністратор має обмежити доступ до API."
+
+#: inc/class-document-audit.php
+msgid "Period evidence"
+msgstr "Ознаки періоду"
+
+#: inc/class-document-audit.php
+msgid ""
+"Your audit session has expired. Reload the page and select the dates again."
+msgstr "Сеанс аудиту завершився. Оновіть сторінку й оберіть дати знову."
+
+#: inc/class-profit-history.php
+msgid "Saved Lavka profit"
+msgstr "Збережений прибуток Лавки"
+
+#: inc/class-profit-history.php
+msgid "From month"
+msgstr "З місяця"
+
+#: inc/class-profit-history.php
+msgid "Through month"
+msgstr "До місяця включно"
+
+#: inc/class-profit-history.php
+msgid "View saved reports"
+msgstr "Показати збережені звіти"
+
+#: inc/class-profit-history.php
+msgid "Calculate and save selected months"
+msgstr "Розрахувати та зберегти обрані місяці"
+
+#: inc/class-profit-history.php
+msgid "Stop after current month"
+msgstr "Зупинити після поточного місяця"
+
+#: inc/class-profit-history.php
+msgid "Export saved period to Excel"
+msgstr "Збережений період в Excel"
+
+#: inc/class-profit-history.php
+msgid ""
+"Viewing saved reports does not read Folio. Calculation is a separate action "
+"that saves a new monthly revision."
+msgstr ""
+"Перегляд збережених звітів не звертається до ФОЛІО. Розрахунок — окрема дія,"
+" що зберігає нову версію місяця."
+
+#: inc/class-profit-history.php
+msgid ""
+"When calculating a range, the manual parameters below apply to each month. A"
+" blank additional salary uses the server default for each month; zero "
+"overrides it."
+msgstr ""
+"При розрахунку діапазону ручні параметри нижче застосовуються до кожного "
+"місяця. Порожня доплата означає серверне значення для кожного місяця; нуль "
+"його перевизначає."
+
+#: inc/class-profit-history.php
+msgid ""
+"Period profit and expenses are summed by month. Inventory uses the opening "
+"value of the first month and closing value of the last month."
+msgstr ""
+"Прибуток і витрати періоду підсумовуються за місяцями. Для запасів "
+"використовуються початок першого та кінець останнього місяця."
+
+#: inc/class-profit-history.php
+msgid "Loading saved reports…"
+msgstr "Завантаження збережених звітів…"
+
+#: inc/class-profit-history.php
+msgid "Saved reports loaded. Folio was not recalculated."
+msgstr "Збережені звіти завантажено. ФОЛІО не перераховувалося."
+
+#: inc/class-profit-history.php
+msgid "No saved report"
+msgstr "Немає збереженого звіту"
+
+#: inc/class-profit-history.php
+msgid "Month"
+msgstr "Місяць"
+
+#: inc/class-profit-history.php
+msgid "Revision"
+msgstr "Версія"
+
+#: inc/class-profit-history.php
+msgid "Saved at"
+msgstr "Збережено"
+
+#: inc/class-profit-history.php
+msgid "Open saved month"
+msgstr "Відкрити збережений місяць"
+
+#: inc/class-profit-history.php
+msgid "Monthly revisions"
+msgstr "Версії місяця"
+
+#: inc/class-profit-history.php
+msgid "Period totals"
+msgstr "Підсумки періоду"
+
+#: inc/class-profit-history.php
+msgid ""
+"There are no saved reports in this period. Calculate the required months "
+"explicitly."
+msgstr ""
+"За цей період немає збережених звітів. Окремо розрахуйте потрібні місяці."
+
+#: inc/class-profit-history.php
+msgid "The saved report response is invalid or belongs to another period."
+msgstr "Відповідь збереженого звіту некоректна або належить іншому періоду."
+
+#: inc/class-profit-history.php
+msgid ""
+"Could not load saved reports. Check the Java service and report storage."
+msgstr ""
+"Не вдалося завантажити збережені звіти. Перевірте Java та сховище звітів."
+
+#: inc/class-profit-history.php
+msgid ""
+"The calculation result is not confirmed. Refresh saved reports before "
+"repeating calculation; a revision may already have been saved."
+msgstr ""
+"Результат розрахунку не підтверджено. Оновіть збережені звіти перед "
+"повтором: версія вже могла зберегтися."
+
+#: inc/class-profit-history.php
+msgid "The selected period changed. Load saved reports again."
+msgstr "Обраний період змінено. Завантажте збережені звіти знову."
+
+#: inc/class-profit-history.php
+msgid "Calculating and saving month"
+msgstr "Розрахунок і збереження місяця"
+
+#: inc/class-profit-history.php
+msgid "Monthly calculations finished. Review saved results and warnings."
+msgstr ""
+"Розрахунок місяців завершено. Перегляньте збережені результати та "
+"зауваження."
+
+#: inc/class-profit-history.php
+msgid "Stopped before the next month. Completed revisions remain saved."
+msgstr "Зупинено перед наступним місяцем. Завершені версії збережено."
+
+#: inc/class-profit-history.php
+msgid "Current saved result"
+msgstr "Поточний збережений результат"
+
+#: inc/class-profit-history.php
+msgid "Preliminary revision"
+msgstr "Попередня версія"
+
+#: inc/class-profit-history.php
+msgid "Incomplete period: missing or preliminary results require review."
+msgstr ""
+"Період неповний: відсутні або попередні результати потребують перевірки."
+
+#: inc/class-profit-history.php
+msgid "Select a valid month range."
+msgstr "Оберіть коректний діапазон місяців."
+
+#: inc/class-profit-history.php
+msgid "Monthly detail and calculation parameters"
+msgstr "Деталі місяця та параметри розрахунку"
+
+#: inc/class-profit-history.php
+msgid "Calculate and save this month"
+msgstr "Розрахувати та зберегти цей місяць"
+
+#: inc/class-profit-history.php
+msgid "Show saved audit"
+msgstr "Показати збережений аудит"
+
+#: inc/class-profit-history.php
+msgid ""
+"The month export uses this saved revision and its saved audit. It does not "
+"recalculate Folio."
+msgstr ""
+"Експорт місяця використовує цю збережену версію та її аудит. Він не "
+"перераховує ФОЛІО."
+
+#: inc/class-profit-history.php
+msgid ""
+"No current revision; preliminary versions are available in monthly "
+"revisions."
+msgstr "Немає поточної версії; попередні версії доступні в історії місяця."
+
+#: inc/class-profit-history.php
+msgid "Calculation request ID"
+msgstr "ID запиту розрахунку"
+
+#: inc/class-profit-history.php
+msgid "Saved revision"
+msgstr "Збережена версія"
+
+#: inc/class-profit-history.php
+msgid ""
+"Audit document quality first. Profit selection rules remain unchanged until "
+"discrepancies are reviewed."
+msgstr ""
+"Спочатку перевірте якість документів аудитом. Правила відбору прибутку "
+"залишаються незмінними до розгляду розбіжностей."
+
+#: inc/class-profit-history.php
+msgid "Latest attempt"
+msgstr "Остання спроба"
+
+#: inc/class-profit-history.php
+msgid "Older revisions"
+msgstr "Старіші версії"
+
+#: inc/class-profit-history.php
+msgid "Invalid saved profit report request."
+msgstr "Некоректний запит збереженого звіту прибутку."
+
+#: inc/class-profit-history.php
+msgid "Calculation completed"
+msgstr "Розрахунок завершено"
+
+#: inc/class-profit-history.php
+msgid "Calculation time"
+msgstr "Час розрахунку"
+
+#: inc/class-profit-history.php
+msgid "Unfinished attempt"
+msgstr "Незавершена спроба"
+
+#: inc/class-profit-history.php
+msgid "Failed attempt"
+msgstr "Спроба з помилкою"

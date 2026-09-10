@@ -293,3 +293,7 @@ msgstr "Обслуживание базы"
 #: inc/admin-lavka-hub.php
 msgid "Customer relations"
 msgstr "Работа с клиентами"
+
+#: inc/admin-lavka-hub.php
+msgid "Lavka Folio document audit"
+msgstr "Лавка: аудит документов ФОЛИО"

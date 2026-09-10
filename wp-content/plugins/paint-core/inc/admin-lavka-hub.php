@@ -102,6 +102,7 @@ add_action('admin_menu', function (): void {
         'lps-product-analytics' => __('Lavka product analytics', 'paint-core'),
         'lavka-reports' => __('Lavka reports', 'paint-core'),
         'lavka-profit-report' => __('Lavka Folio profit', 'paint-core'),
+        'lavka-document-audit' => __('Lavka Folio document audit', 'paint-core'),
         'lavka-ecosystem-events' => __('Lavka events', 'paint-core'),
         'role-price-import-lite' => __('Lavka role price import', 'paint-core'),
         'stock-import-csv-lite' => __('Lavka stock import', 'paint-core'),
@@ -144,7 +145,7 @@ add_action('admin_enqueue_scripts', function (): void {
         ['id' => 'prices', 'label' => __('Prices', 'paint-core'), 'pages' => ['lps-main', 'lps-mapping', 'lps-run', 'lps-logs', 'role-price-import-lite']],
         ['id' => 'analytics', 'label' => __('Analytics', 'paint-core'), 'pages' => ['lps-analytics-scenarios', 'lps-product-analytics', 'lps-purchase-planning']],
         ['id' => 'maintenance', 'label' => __('Database maintenance', 'paint-core'), 'pages' => ['lps-accounting-prices']],
-        ['id' => 'reports', 'label' => __('Reports', 'paint-core'), 'pages' => ['lavka-reports', 'lavka-profit-report']],
+        ['id' => 'reports', 'label' => __('Reports', 'paint-core'), 'pages' => ['lavka-reports', 'lavka-profit-report', 'lavka-document-audit']],
         ['id' => 'tools', 'label' => __('Import and tools', 'paint-core'), 'pages' => ['stock-import-csv-lite', 'pc-stock-sync-woo']],
     ];
     foreach (['css', 'js'] as $extension) {

@@ -19,6 +19,7 @@ production approval или документацию внешнего серви�
 | `$build-java-docker-runtime` | Java/Spring Boot, Dockerfile/Compose, env contract, image, container health и deploy/rollback; human runbook — `JAVA_DOCKER_RUNTIME.md` | физического host, WordPress и бизнес-данных ФОЛИО |
 | `$folio-inventory-profit-planning` | остатки, прибыль, капитал, ABC/XYZ, прогноз, закупки | низкоуровневого доступа к ФОЛИО |
 | `$lavka-profit-report` | месячная прибыль Киева/Одессы: отбор расходов, МК, периоды примечаний, налоги, аудит и сверка сайта с Excel | SKU-прогноза закупок, доступа к базе, разрешения менять формулы или production |
+| `$folio-document-rules` | заполнение денежных документов, обязательные поля, реестр ошибок/неподтверждённых правил и полнота аудита | расчёта прибыли, доступа к базе и разрешения исправлять ФОЛИО |
 | `$image-in-woo` | Media Library, Media Cloud, S3 object proof, attachments, gallery и Folio↔Woo reconcile | bucket policy, billing и общей синхронизации без media |
 | `$integrate-nova-poshta-woo` | отделения, почтоматы, многоскладские ТТН, COD, tracking | доставок без Новой почты |
 | `$checkbox-ua` | кабинет/API Checkbox, кассы, смены, чеки, возвраты, отчёты | определения, какую оплату WayForPay фискализировать |

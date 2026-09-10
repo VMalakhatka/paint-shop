@@ -129,3 +129,13 @@ with a reload instruction. Legacy `-1`/403 is recognized by JS too. Authorizatio
 and nonce checks are retained and never bypassed. Nonce expiry is a plausible,
 but unproven, explanation for the old-tab incident; this change makes future
 failures diagnosable instead of presenting a generic Folio loading error.
+
+## Saved profit history (0.5.0)
+
+Profit opens saved application-DB results by default. Explicit monthly calculation
+creates a revision; a range contains1..24months, missing values are never zero.
+Full month/audit/range exports read fixed saved revisions, not live Folio.
+Java V15 migration is required; no production migration was performed during
+development. Failed/uncertain saves preserve older history and never auto-retry.
+See [consumer contract](../../../docs/api/FOLIO_PROFIT_SAVED_REPORTS_FRONTEND.md)
+and [operator runbook](../../../docs/OPERATIONS_RUNBOOK.md#прибыль).

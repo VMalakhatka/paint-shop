@@ -1161,3 +1161,521 @@ msgstr ""
 #: inc/class-profit-report.php
 msgid "Report access was denied or the session expired. Reload the page and sign in again if needed."
 msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Folio document audit"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid ""
+"Check cash and bank documents by document date, across all warehouses and "
+"both directions. This report does not change documents or profit "
+"calculations."
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Date from"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Date to"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Check documents"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Stop loading"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Export loaded registry to Excel"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Loading documents…"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Loading finished. Review findings and coverage below."
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid ""
+"Incomplete loading. Received documents are preserved; this is not a full "
+"audit."
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Dates changed. Run the audit again before exporting."
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Could not load the audit. Check Java availability and retry."
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Invalid or inconsistent audit response. Reload the audit."
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Select valid dates, in order, covering no more than 366 days."
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Audit coverage"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Document registry"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Rules and their sources"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Checks passed"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Document error"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Rule review needed"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid ""
+"Checks passed means only the implemented checks passed. Unchecked areas "
+"remain listed below."
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid ""
+"Live reading, not a frozen snapshot: documents may change while pages are "
+"loading."
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Loaded documents"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Source document count"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Register"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Direction"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Organization short code"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Note / period evidence"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Resolved period"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Findings"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Actual"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Expected"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Recommended action"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Field"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Rule IDs"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Search loaded documents"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "No documents match these filters."
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Previous page"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Next page"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Shown / filtered"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Rules version"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Calculated at"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Not checked"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Coverage warnings"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Incoming"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Outgoing"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Unknown"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Sensitive values masked"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Source sheet / rows"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Rule limitations"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Audit details"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid ""
+"Excel contains every loaded document, regardless of the display filters, "
+"plus findings, rules and coverage."
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "All source pages loaded"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Date selection basis"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Read consistency"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Directions"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Registers"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Rules coverage complete"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Last source page complete"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Rule evidence"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Period requirement"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Required information source"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Expected operation types"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Organization codes"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Profit treatment"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Recognition"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Organization name"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Amount unit verification"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid ""
+"Amounts are shown as SUM_POR. COD_VALUT alone does not confirm their "
+"currency. No currency conversion or total is calculated."
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Category code"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Source sheet"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Source rows"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid ""
+"Document audit is disabled in Java. The administrator must restrict API "
+"access before enabling LAVKA_FOLIO_DOCUMENT_AUDIT_ENABLED."
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid "Period evidence"
+msgstr ""
+
+#: inc/class-document-audit.php
+msgid ""
+"Your audit session has expired. Reload the page and select the dates again."
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "Saved Lavka profit"
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "From month"
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "Through month"
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "View saved reports"
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "Calculate and save selected months"
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "Stop after current month"
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "Export saved period to Excel"
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid ""
+"Viewing saved reports does not read Folio. Calculation is a separate action "
+"that saves a new monthly revision."
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid ""
+"When calculating a range, the manual parameters below apply to each month. A"
+" blank additional salary uses the server default for each month; zero "
+"overrides it."
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid ""
+"Period profit and expenses are summed by month. Inventory uses the opening "
+"value of the first month and closing value of the last month."
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "Loading saved reports…"
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "Saved reports loaded. Folio was not recalculated."
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "No saved report"
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "Month"
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "Revision"
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "Saved at"
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "Open saved month"
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "Monthly revisions"
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "Period totals"
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid ""
+"There are no saved reports in this period. Calculate the required months "
+"explicitly."
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "The saved report response is invalid or belongs to another period."
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid ""
+"Could not load saved reports. Check the Java service and report storage."
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid ""
+"The calculation result is not confirmed. Refresh saved reports before "
+"repeating calculation; a revision may already have been saved."
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "The selected period changed. Load saved reports again."
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "Calculating and saving month"
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "Monthly calculations finished. Review saved results and warnings."
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "Stopped before the next month. Completed revisions remain saved."
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "Current saved result"
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "Preliminary revision"
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "Incomplete period: missing or preliminary results require review."
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "Select a valid month range."
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "Monthly detail and calculation parameters"
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "Calculate and save this month"
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "Show saved audit"
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid ""
+"The month export uses this saved revision and its saved audit. It does not "
+"recalculate Folio."
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid ""
+"No current revision; preliminary versions are available in monthly "
+"revisions."
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "Calculation request ID"
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "Saved revision"
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid ""
+"Audit document quality first. Profit selection rules remain unchanged until "
+"discrepancies are reviewed."
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "Latest attempt"
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "Older revisions"
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "Invalid saved profit report request."
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "Calculation completed"
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "Calculation time"
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "Unfinished attempt"
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "Failed attempt"
+msgstr ""

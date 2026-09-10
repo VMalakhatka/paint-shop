@@ -278,3 +278,21 @@ Manager audit meta: `_pcoe_manager_created_by`, `_pcoe_manager_updated_by`,
 Новая таблица и миграция не нужны. Фильтр `pc_folio_documents_request_context`
 устанавливается только после проверки manager endpoint; публичный клиентский
 endpoint по умолчанию сохраняет контекст вошедшего клиента.
+
+### Аудит заполнения документов ФОЛИО
+
+Самостоятельный read-only Java `/admin/folio/document-audit` и WordPress
+`lavka-reports/inc/class-document-audit.php` + `document-audit.js`.
+Категория/проверки/версия принадлежат Java; WordPress отображает и экспортирует
+реестр, контролирует права, nonce и пагинацию. Profit classifier не меняется.
+Подробности, закрытый доступ и запуск:
+[контракт потребителя](api/FOLIO_DOCUMENT_AUDIT_FRONTEND.md),
+[runbook](OPERATIONS_RUNBOOK.md#аудит-документов-фолио).
+
+### Сохранённая прибыль
+
+Java владеет V15 `folio_profit_report_month/revision` в application MariaDB,
+идемпотентным расчётом и итогами диапазона. WordPress0.5.0 читает историю через
+`class-profit-history.php`; `profit-history.js` открывает неизменённый DTO
+в существующем viewer. В ФОЛИО нет новых таблиц/записей.
+[Контракт и запуск](api/FOLIO_PROFIT_SAVED_REPORTS_FRONTEND.md).

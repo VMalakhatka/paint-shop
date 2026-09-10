@@ -13,7 +13,9 @@
 | Разрабатывать и сопровождать backend PHP/Java/Folio | [BACKEND_GUIDE.md](BACKEND_GUIDE.md) |
 | Запустить синхронизацию, увидеть результат или разобрать ошибку | [OPERATIONS_RUNBOOK.md](OPERATIONS_RUNBOOK.md) |
 | Сохранить и показать точную причину отрицательного хронологического остатка | [задание Java и frontend-контракт](api/FOLIO_NEGATIVE_STOCK_DIAGNOSTICS_BACKEND_TASK.md) |
+| Смотреть сохранённые месяцы прибыли и итог диапазона | [история прибыли](api/FOLIO_PROFIT_SAVED_REPORTS_FRONTEND.md) |
 | Проверять месячную прибыль, подробные отборы и Excel-экспорт | [операционный runbook](OPERATIONS_RUNBOOK.md#прибыль), [backend-задача](api/FOLIO_PROFIT_REPORT_RECONCILIATION_BACKEND_TASK.md) |
+| Проверять заполнение кассовых/банковских документов ФОЛИО | [аудит документов](api/FOLIO_DOCUMENT_AUDIT_FRONTEND.md), [runbook](OPERATIONS_RUNBOOK.md#аудит-документов-фолио) |
 | Безопасно продолжить SKU campaign после временной блокировки ФОЛІО | [контракт автоматического повтора](api/FOLIO_ACCOUNTING_PRICE_LOCK_RETRY_BACKEND_TASK.md) |
 | Развернуть локально, перенести на новую платформу или восстановить | [BOOTSTRAP_AND_RECOVERY.md](BOOTSTRAP_AND_RECOVERY.md) |
 | Собрать, запустить, диагностировать или развернуть Java container | [JAVA_DOCKER_RUNTIME.md](JAVA_DOCKER_RUNTIME.md) |

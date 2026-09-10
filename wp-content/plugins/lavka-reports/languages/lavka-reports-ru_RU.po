@@ -1166,3 +1166,554 @@ msgstr "Сессия отчёта истекла. Обновите страни�
 #: inc/class-profit-report.php
 msgid "Report access was denied or the session expired. Reload the page and sign in again if needed."
 msgstr "Доступ к отчёту отклонён или сессия истекла. Обновите страницу и при необходимости войдите снова."
+
+#: inc/class-document-audit.php
+msgid "Folio document audit"
+msgstr "Аудит документов ФОЛИО"
+
+#: inc/class-document-audit.php
+msgid ""
+"Check cash and bank documents by document date, across all warehouses and "
+"both directions. This report does not change documents or profit "
+"calculations."
+msgstr ""
+"Проверка кассовых и банковских документов по дате документа, всем складам и "
+"обоим направлениям. Отчёт не меняет документы или расчёт прибыли."
+
+#: inc/class-document-audit.php
+msgid "Date from"
+msgstr "Дата с"
+
+#: inc/class-document-audit.php
+msgid "Date to"
+msgstr "Дата по"
+
+#: inc/class-document-audit.php
+msgid "Check documents"
+msgstr "Проверить документы"
+
+#: inc/class-document-audit.php
+msgid "Stop loading"
+msgstr "Остановить загрузку"
+
+#: inc/class-document-audit.php
+msgid "Export loaded registry to Excel"
+msgstr "Загруженный реестр в Excel"
+
+#: inc/class-document-audit.php
+msgid "Loading documents…"
+msgstr "Загрузка документов…"
+
+#: inc/class-document-audit.php
+msgid "Loading finished. Review findings and coverage below."
+msgstr "Загрузка завершена. Проверьте результаты и охват ниже."
+
+#: inc/class-document-audit.php
+msgid ""
+"Incomplete loading. Received documents are preserved; this is not a full "
+"audit."
+msgstr ""
+"Загрузка неполная. Полученные документы сохранены; это не полный аудит."
+
+#: inc/class-document-audit.php
+msgid "Dates changed. Run the audit again before exporting."
+msgstr "Даты изменены. Перед экспортом запустите аудит снова."
+
+#: inc/class-document-audit.php
+msgid "Could not load the audit. Check Java availability and retry."
+msgstr ""
+"Не удалось загрузить аудит. Проверьте доступность Java и повторите попытку."
+
+#: inc/class-document-audit.php
+msgid "Invalid or inconsistent audit response. Reload the audit."
+msgstr "Некорректный или несогласованный ответ аудита. Запустите аудит снова."
+
+#: inc/class-document-audit.php
+msgid "Select valid dates, in order, covering no more than 366 days."
+msgstr "Выберите корректный диапазон дат, не более 366 дней."
+
+#: inc/class-document-audit.php
+msgid "Audit coverage"
+msgstr "Охват аудита"
+
+#: inc/class-document-audit.php
+msgid "Document registry"
+msgstr "Реестр документов"
+
+#: inc/class-document-audit.php
+msgid "Rules and their sources"
+msgstr "Правила и их источники"
+
+#: inc/class-document-audit.php
+msgid "Checks passed"
+msgstr "Проверки пройдены"
+
+#: inc/class-document-audit.php
+msgid "Document error"
+msgstr "Ошибка документа"
+
+#: inc/class-document-audit.php
+msgid "Rule review needed"
+msgstr "Нужно уточнить правило"
+
+#: inc/class-document-audit.php
+msgid ""
+"Checks passed means only the implemented checks passed. Unchecked areas "
+"remain listed below."
+msgstr ""
+"Пройдены только реализованные проверки. Непроверенные области указаны ниже."
+
+#: inc/class-document-audit.php
+msgid ""
+"Live reading, not a frozen snapshot: documents may change while pages are "
+"loading."
+msgstr ""
+"Текущее чтение, не зафиксированный снимок: документы могут измениться при "
+"загрузке страниц."
+
+#: inc/class-document-audit.php
+msgid "Loaded documents"
+msgstr "Загружено документов"
+
+#: inc/class-document-audit.php
+msgid "Source document count"
+msgstr "Количество документов источника"
+
+#: inc/class-document-audit.php
+msgid "Register"
+msgstr "Реестр"
+
+#: inc/class-document-audit.php
+msgid "Direction"
+msgstr "Направление"
+
+#: inc/class-document-audit.php
+msgid "Organization short code"
+msgstr "Краткое имя организации"
+
+#: inc/class-document-audit.php
+msgid "Note / period evidence"
+msgstr "Примечание / признаки периода"
+
+#: inc/class-document-audit.php
+msgid "Resolved period"
+msgstr "Определённый период"
+
+#: inc/class-document-audit.php
+msgid "Findings"
+msgstr "Замечания"
+
+#: inc/class-document-audit.php
+msgid "Actual"
+msgstr "Фактически"
+
+#: inc/class-document-audit.php
+msgid "Expected"
+msgstr "Ожидается"
+
+#: inc/class-document-audit.php
+msgid "Recommended action"
+msgstr "Рекомендуемое действие"
+
+#: inc/class-document-audit.php
+msgid "Field"
+msgstr "Поле"
+
+#: inc/class-document-audit.php
+msgid "Rule IDs"
+msgstr "ID правил"
+
+#: inc/class-document-audit.php
+msgid "Search loaded documents"
+msgstr "Поиск среди загруженных документов"
+
+#: inc/class-document-audit.php
+msgid "No documents match these filters."
+msgstr "Нет документов по этим фильтрам."
+
+#: inc/class-document-audit.php
+msgid "Previous page"
+msgstr "Предыдущая страница"
+
+#: inc/class-document-audit.php
+msgid "Next page"
+msgstr "Следующая страница"
+
+#: inc/class-document-audit.php
+msgid "Shown / filtered"
+msgstr "Показано / отобрано"
+
+#: inc/class-document-audit.php
+msgid "Rules version"
+msgstr "Версия правил"
+
+#: inc/class-document-audit.php
+msgid "Calculated at"
+msgstr "Рассчитано"
+
+#: inc/class-document-audit.php
+msgid "Not checked"
+msgstr "Не проверено"
+
+#: inc/class-document-audit.php
+msgid "Coverage warnings"
+msgstr "Замечания по охвату"
+
+#: inc/class-document-audit.php
+msgid "Incoming"
+msgstr "Приход"
+
+#: inc/class-document-audit.php
+msgid "Outgoing"
+msgstr "Расход"
+
+#: inc/class-document-audit.php
+msgid "Unknown"
+msgstr "Неизвестно"
+
+#: inc/class-document-audit.php
+msgid "Sensitive values masked"
+msgstr "Чувствительные значения скрыты"
+
+#: inc/class-document-audit.php
+msgid "Source sheet / rows"
+msgstr "Лист источника / строки"
+
+#: inc/class-document-audit.php
+msgid "Rule limitations"
+msgstr "Ограничения правила"
+
+#: inc/class-document-audit.php
+msgid "Audit details"
+msgstr "Паспорт аудита"
+
+#: inc/class-document-audit.php
+msgid ""
+"Excel contains every loaded document, regardless of the display filters, "
+"plus findings, rules and coverage."
+msgstr ""
+"Excel содержит все загруженные документы независимо от фильтров, замечания, "
+"правила и охват."
+
+#: inc/class-document-audit.php
+msgid "All source pages loaded"
+msgstr "Все страницы источника загружены"
+
+#: inc/class-document-audit.php
+msgid "Date selection basis"
+msgstr "Основа отбора дат"
+
+#: inc/class-document-audit.php
+msgid "Read consistency"
+msgstr "Согласованность чтения"
+
+#: inc/class-document-audit.php
+msgid "Directions"
+msgstr "Направления"
+
+#: inc/class-document-audit.php
+msgid "Registers"
+msgstr "Реестры"
+
+#: inc/class-document-audit.php
+msgid "Rules coverage complete"
+msgstr "Правила охватывают все случаи"
+
+#: inc/class-document-audit.php
+msgid "Last source page complete"
+msgstr "Последняя страница источника полная"
+
+#: inc/class-document-audit.php
+msgid "Rule evidence"
+msgstr "Основание правила"
+
+#: inc/class-document-audit.php
+msgid "Period requirement"
+msgstr "Требование к периоду"
+
+#: inc/class-document-audit.php
+msgid "Required information source"
+msgstr "Обязательный источник информации"
+
+#: inc/class-document-audit.php
+msgid "Expected operation types"
+msgstr "Ожидаемые типы операций"
+
+#: inc/class-document-audit.php
+msgid "Organization codes"
+msgstr "Коды организаций"
+
+#: inc/class-document-audit.php
+msgid "Profit treatment"
+msgstr "Учёт в прибыли"
+
+#: inc/class-document-audit.php
+msgid "Recognition"
+msgstr "Распознавание"
+
+#: inc/class-document-audit.php
+msgid "Organization name"
+msgstr "Название организации"
+
+#: inc/class-document-audit.php
+msgid "Amount unit verification"
+msgstr "Проверка единицы суммы"
+
+#: inc/class-document-audit.php
+msgid ""
+"Amounts are shown as SUM_POR. COD_VALUT alone does not confirm their "
+"currency. No currency conversion or total is calculated."
+msgstr ""
+"Суммы показаны как SUM_POR. COD_VALUT сам по себе не подтверждает их валюту."
+" Конвертация и общая сумма не рассчитываются."
+
+#: inc/class-document-audit.php
+msgid "Category code"
+msgstr "Код категории"
+
+#: inc/class-document-audit.php
+msgid "Source sheet"
+msgstr "Лист источника"
+
+#: inc/class-document-audit.php
+msgid "Source rows"
+msgstr "Строки источника"
+
+#: inc/class-document-audit.php
+msgid ""
+"Document audit is disabled in Java. The administrator must restrict API "
+"access before enabling LAVKA_FOLIO_DOCUMENT_AUDIT_ENABLED."
+msgstr ""
+"Аудит документов отключён в Java. Перед включением "
+"LAVKA_FOLIO_DOCUMENT_AUDIT_ENABLED администратор должен ограничить доступ к "
+"API."
+
+#: inc/class-document-audit.php
+msgid "Period evidence"
+msgstr "Признаки периода"
+
+#: inc/class-document-audit.php
+msgid ""
+"Your audit session has expired. Reload the page and select the dates again."
+msgstr "Сеанс аудита завершился. Обновите страницу и выберите даты снова."
+
+#: inc/class-profit-history.php
+msgid "Saved Lavka profit"
+msgstr "Сохранённая прибыль Лавки"
+
+#: inc/class-profit-history.php
+msgid "From month"
+msgstr "С месяца"
+
+#: inc/class-profit-history.php
+msgid "Through month"
+msgstr "По месяц включительно"
+
+#: inc/class-profit-history.php
+msgid "View saved reports"
+msgstr "Показать сохранённые отчёты"
+
+#: inc/class-profit-history.php
+msgid "Calculate and save selected months"
+msgstr "Рассчитать и сохранить выбранные месяцы"
+
+#: inc/class-profit-history.php
+msgid "Stop after current month"
+msgstr "Остановить после текущего месяца"
+
+#: inc/class-profit-history.php
+msgid "Export saved period to Excel"
+msgstr "Сохранённый период в Excel"
+
+#: inc/class-profit-history.php
+msgid ""
+"Viewing saved reports does not read Folio. Calculation is a separate action "
+"that saves a new monthly revision."
+msgstr ""
+"Просмотр сохранённых отчётов не обращается к ФОЛИО. Расчёт — отдельное "
+"действие, сохраняющее новую версию месяца."
+
+#: inc/class-profit-history.php
+msgid ""
+"When calculating a range, the manual parameters below apply to each month. A"
+" blank additional salary uses the server default for each month; zero "
+"overrides it."
+msgstr ""
+"При расчёте диапазона ручные параметры ниже применяются к каждому месяцу. "
+"Пустая доплата означает серверное значение для каждого месяца; ноль его "
+"переопределяет."
+
+#: inc/class-profit-history.php
+msgid ""
+"Period profit and expenses are summed by month. Inventory uses the opening "
+"value of the first month and closing value of the last month."
+msgstr ""
+"Прибыль и расходы периода суммируются по месяцам. Для запасов используются "
+"начало первого и конец последнего месяца."
+
+#: inc/class-profit-history.php
+msgid "Loading saved reports…"
+msgstr "Загрузка сохранённых отчётов…"
+
+#: inc/class-profit-history.php
+msgid "Saved reports loaded. Folio was not recalculated."
+msgstr "Сохранённые отчёты загружены. ФОЛИО не пересчитывалось."
+
+#: inc/class-profit-history.php
+msgid "No saved report"
+msgstr "Нет сохранённого отчёта"
+
+#: inc/class-profit-history.php
+msgid "Month"
+msgstr "Месяц"
+
+#: inc/class-profit-history.php
+msgid "Revision"
+msgstr "Версия"
+
+#: inc/class-profit-history.php
+msgid "Saved at"
+msgstr "Сохранено"
+
+#: inc/class-profit-history.php
+msgid "Open saved month"
+msgstr "Открыть сохранённый месяц"
+
+#: inc/class-profit-history.php
+msgid "Monthly revisions"
+msgstr "Версии месяца"
+
+#: inc/class-profit-history.php
+msgid "Period totals"
+msgstr "Итоги периода"
+
+#: inc/class-profit-history.php
+msgid ""
+"There are no saved reports in this period. Calculate the required months "
+"explicitly."
+msgstr ""
+"За этот период нет сохранённых отчётов. Отдельно рассчитайте нужные месяцы."
+
+#: inc/class-profit-history.php
+msgid "The saved report response is invalid or belongs to another period."
+msgstr ""
+"Ответ сохранённого отчёта некорректен или относится к другому периоду."
+
+#: inc/class-profit-history.php
+msgid ""
+"Could not load saved reports. Check the Java service and report storage."
+msgstr ""
+"Не удалось загрузить сохранённые отчёты. Проверьте Java и хранилище отчётов."
+
+#: inc/class-profit-history.php
+msgid ""
+"The calculation result is not confirmed. Refresh saved reports before "
+"repeating calculation; a revision may already have been saved."
+msgstr ""
+"Результат расчёта не подтверждён. Обновите сохранённые отчёты перед "
+"повтором: версия уже могла сохраниться."
+
+#: inc/class-profit-history.php
+msgid "The selected period changed. Load saved reports again."
+msgstr "Выбранный период изменён. Загрузите сохранённые отчёты снова."
+
+#: inc/class-profit-history.php
+msgid "Calculating and saving month"
+msgstr "Расчёт и сохранение месяца"
+
+#: inc/class-profit-history.php
+msgid "Monthly calculations finished. Review saved results and warnings."
+msgstr ""
+"Расчёт месяцев завершён. Проверьте сохранённые результаты и замечания."
+
+#: inc/class-profit-history.php
+msgid "Stopped before the next month. Completed revisions remain saved."
+msgstr "Остановлено перед следующим месяцем. Завершённые версии сохранены."
+
+#: inc/class-profit-history.php
+msgid "Current saved result"
+msgstr "Текущий сохранённый результат"
+
+#: inc/class-profit-history.php
+msgid "Preliminary revision"
+msgstr "Предварительная версия"
+
+#: inc/class-profit-history.php
+msgid "Incomplete period: missing or preliminary results require review."
+msgstr ""
+"Период неполный: отсутствующие или предварительные результаты требуют "
+"проверки."
+
+#: inc/class-profit-history.php
+msgid "Select a valid month range."
+msgstr "Выберите корректный диапазон месяцев."
+
+#: inc/class-profit-history.php
+msgid "Monthly detail and calculation parameters"
+msgstr "Детали месяца и параметры расчёта"
+
+#: inc/class-profit-history.php
+msgid "Calculate and save this month"
+msgstr "Рассчитать и сохранить этот месяц"
+
+#: inc/class-profit-history.php
+msgid "Show saved audit"
+msgstr "Показать сохранённый аудит"
+
+#: inc/class-profit-history.php
+msgid ""
+"The month export uses this saved revision and its saved audit. It does not "
+"recalculate Folio."
+msgstr ""
+"Экспорт месяца использует эту сохранённую версию и её аудит. Он не "
+"пересчитывает ФОЛИО."
+
+#: inc/class-profit-history.php
+msgid ""
+"No current revision; preliminary versions are available in monthly "
+"revisions."
+msgstr "Нет текущей версии; предварительные версии доступны в истории месяца."
+
+#: inc/class-profit-history.php
+msgid "Calculation request ID"
+msgstr "ID запроса расчёта"
+
+#: inc/class-profit-history.php
+msgid "Saved revision"
+msgstr "Сохранённая версия"
+
+#: inc/class-profit-history.php
+msgid ""
+"Audit document quality first. Profit selection rules remain unchanged until "
+"discrepancies are reviewed."
+msgstr ""
+"Сначала проверьте качество документов аудитом. Правила отбора прибыли "
+"остаются неизменными до разбора расхождений."
+
+#: inc/class-profit-history.php
+msgid "Latest attempt"
+msgstr "Последняя попытка"
+
+#: inc/class-profit-history.php
+msgid "Older revisions"
+msgstr "Более старые версии"
+
+#: inc/class-profit-history.php
+msgid "Invalid saved profit report request."
+msgstr "Некорректный запрос сохранённого отчёта прибыли."
+
+#: inc/class-profit-history.php
+msgid "Calculation completed"
+msgstr "Расчёт завершён"
+
+#: inc/class-profit-history.php
+msgid "Calculation time"
+msgstr "Время расчёта"
+
+#: inc/class-profit-history.php
+msgid "Unfinished attempt"
+msgstr "Незавершённая попытка"
+
+#: inc/class-profit-history.php
+msgid "Failed attempt"
+msgstr "Попытка с ошибкой"
