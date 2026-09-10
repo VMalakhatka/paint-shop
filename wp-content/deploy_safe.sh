@@ -179,6 +179,8 @@ echo "Backups: $BACKUP_DIR/backup-plugins-$TS.tgz, $BACKUP_DIR/backup-theme-gene
 rotate_keep_latest() {
   local pattern="$1"
   local keep="${2:-2}"   # по умолчанию оставляем 2
+  # No backups of this kind yet is a normal state, including with pipefail.
+  compgen -G "$pattern" >/dev/null || return 0
   ls -1t $pattern 2>/dev/null | tail -n +$((keep+1)) | xargs -r rm -f
 }
 
@@ -291,6 +293,7 @@ fi
 rotate_keep_latest() {
   local pattern="$1"
   local keep="${2:-2}"   # по умолчанию оставлять 2
+  compgen -G "$pattern" >/dev/null || return 0
   ls -1t $pattern 2>/dev/null | tail -n +$((keep+1)) | xargs -r rm -f
 }
 
