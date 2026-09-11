@@ -9,4 +9,12 @@ if (!$registration) throw new RuntimeException('Document assets hook missing');
 $hook = new WP_Hook();
 $hook->add_filter('pcoe_frontend_regression', $registration['function'], 10, $registration['accepted_args']);
 $hook->do_action(['']);
+
+$script = file_get_contents(WP_CONTENT_DIR . '/mu-plugins/pc-folio-customer-balance/assets/customer-documents.js');
+if (!is_string($script)
+    || strpos($script, 'var managerCustomerId = Number.parseInt(pcFolioDocuments.managerCustomerId, 10);') === false
+    || strpos($script, "body.set('action', managerMode ? 'pcoe_manager' : action);") === false
+    || strpos($script, 'pcFolioDocuments.managerCustomerId ?') !== false) {
+    throw new RuntimeException('Customer document requests must not treat the localized string "0" as manager mode.');
+}
 WP_CLI::success('Frontend document assets tolerate the WordPress empty action argument.');

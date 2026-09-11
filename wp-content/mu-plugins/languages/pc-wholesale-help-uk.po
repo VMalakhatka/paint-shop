@@ -870,6 +870,16 @@ msgstr ""
 "кошик не очищається."
 
 #: pc-wholesale-help.php:461
+msgid ""
+"If the section and your Folio customer name are visible but loading reports a "
+"permission error, refresh the page once. If it happens again, tell the manager "
+"your login and the time of the error."
+msgstr ""
+"Якщо розділ і ваше ім'я клієнта ФОЛІО відображаються, але під час завантаження "
+"з'являється повідомлення про відсутність прав, один раз оновіть сторінку. Якщо "
+"помилка повториться, повідомте менеджеру свій логін і час помилки."
+
+#: pc-wholesale-help.php:461
 msgid "Historical prices are for reference only."
 msgstr "Старі ціни наведено лише для довідки."
 

@@ -25,6 +25,9 @@
     var nextCursor = '';
     var hasMore = false;
     var labels = pcFolioDocuments.labels;
+    var managerCustomerId = Number.parseInt(pcFolioDocuments.managerCustomerId, 10);
+    managerCustomerId = Number.isInteger(managerCustomerId) && managerCustomerId > 0 ? managerCustomerId : 0;
+    var managerMode = managerCustomerId > 0;
     var money = new Intl.NumberFormat('uk-UA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     var dateFormatter = new Intl.DateTimeFormat('uk-UA');
 
@@ -61,10 +64,10 @@
     var managerRepeatKeys = {};
     function request(action, params, signal) {
         var body = new URLSearchParams();
-        body.set('action', pcFolioDocuments.managerCustomerId ? 'pcoe_manager' : action);
-        if (pcFolioDocuments.managerCustomerId) {
+        body.set('action', managerMode ? 'pcoe_manager' : action);
+        if (managerMode) {
             body.set('operation', action);
-            body.set('customer_id', pcFolioDocuments.managerCustomerId);
+            body.set('customer_id', managerCustomerId);
             body.set('manager_nonce', pcFolioDocuments.managerNonce);
             if (action === 'pc_folio_customer_document_repeat') {
                 var repeatKey = JSON.stringify(params || {});
@@ -438,7 +441,7 @@
             draftButton.dataset.repeatTarget = 'draft';
             cartButton.dataset.documentType = draftButton.dataset.documentType = folioDocument.documentType;
             cartButton.dataset.documentId = draftButton.dataset.documentId = folioDocument.documentId;
-            if (!pcFolioDocuments.managerCustomerId) repeatActions.append(cartButton);
+            if (!managerMode) repeatActions.append(cartButton);
             repeatActions.append(draftButton);
             repeatSection.appendChild(repeatActions);
             repeatSection.appendChild(documentNode('div', 'pc-folio-documents__repeat-result'));

@@ -459,6 +459,7 @@ function pc_wholesale_help_render_endpoint(): void {
         <section class="pc-help-section" id="folio">
             <div class="pc-help-section__heading"><span>12</span><div><h2><?php esc_html_e('View and repeat Folio documents', 'pc-wholesale-help'); ?></h2><p><?php esc_html_e('Choose a period and document types, then open an invoice, expense invoice or payment for details.', 'pc-wholesale-help'); ?></p></div></div>
             <p><?php esc_html_e('From an invoice or expense invoice, select the products you need and add them to the current cart or save them as a new draft. The current cart is not cleared in this workflow.', 'pc-wholesale-help'); ?></p>
+            <p><?php esc_html_e('If the section and your Folio customer name are visible but loading reports a permission error, refresh the page once. If it happens again, tell the manager your login and the time of the error.', 'pc-wholesale-help'); ?></p>
             <div class="pc-help-warning"><strong><?php esc_html_e('Historical prices are for reference only.', 'pc-wholesale-help'); ?></strong> <?php esc_html_e('The new cart always uses current prices, availability and allocation. Payments and returns cannot be repeated as an order.', 'pc-wholesale-help'); ?></div>
             <?php if ($folio_available): ?>
                 <a class="pc-help-inline-action" href="<?php echo esc_url($documents_url); ?>"><?php esc_html_e('Open Folio documents', 'pc-wholesale-help'); ?> →</a>
