@@ -945,3 +945,21 @@ msgstr "На початок"
 #: pc-wholesale-help.php
 msgid "A manager can prepare a draft for you. It appears in My orders without changing your current cart. If the manager has already submitted it to Folio, check the result with the manager before placing another order."
 msgstr "Менеджер может подготовить черновик для вас. Он появится в «Моих заказах», не меняя текущую корзину. Если менеджер уже отправил его в ФОЛИО, уточните результат у менеджера перед новым заказом."
+
+msgid "Fewer category transitions."
+msgstr "Меньше переходов между категориями."
+
+msgid "Starting with the second category level, all products from that branch appear below the child category tiles, including products from deeper subcategories."
+msgstr "Начиная со второго уровня категории, под плитками дочерних разделов показываются все товары этой ветки, включая товары из более глубоких подкатегорий."
+
+msgid "Choose a category or search by product name, SKU or barcode."
+msgstr "Выберите категорию или найдите товар по названию, артикулу либо штрихкоду."
+
+msgid "Apply filters"
+msgstr "Примените фильтры"
+
+msgid "Combine brand, warehouse, stock availability and price; use Reset to return to the full category list."
+msgstr "Сочетайте бренд, склад, наличие и цену; кнопка «Сбросить» возвращает полный список категории."
+
+msgid "Changing a quantity or removing an item updates only that row and the cart totals. While the request is running, the cart shows “Updating cart…”; wait for it to finish instead of repeating the action."
+msgstr "Изменение количества или удаление товара обновляет только нужную строку и итоги корзины. Пока выполняется запрос, корзина показывает «Обновление корзины…»; дождитесь завершения и не повторяйте действие."

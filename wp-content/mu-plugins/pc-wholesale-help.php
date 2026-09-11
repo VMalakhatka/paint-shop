@@ -306,11 +306,13 @@ function pc_wholesale_help_render_endpoint(): void {
 
         <section class="pc-help-section" id="katalog">
             <div class="pc-help-section__heading"><span>02</span><div><h2><?php esc_html_e('Order from catalogue cards', 'pc-wholesale-help'); ?></h2><p><?php esc_html_e('Best when you want to browse photos, categories and product variants.', 'pc-wholesale-help'); ?></p></div></div>
+            <div class="pc-help-note"><strong><?php esc_html_e('Fewer category transitions.', 'pc-wholesale-help'); ?></strong> <?php esc_html_e('Starting with the second category level, all products from that branch appear below the child category tiles, including products from deeper subcategories.', 'pc-wholesale-help'); ?></div>
             <ol class="pc-help-steps">
-                <?php pc_wholesale_help_step('1', __('Open the catalogue', 'pc-wholesale-help'), __('Choose a category or use search.', 'pc-wholesale-help')); ?>
-                <?php pc_wholesale_help_step('2', __('Check the product', 'pc-wholesale-help'), __('Review the SKU, your price and stock by warehouse.', 'pc-wholesale-help')); ?>
-                <?php pc_wholesale_help_step('3', __('Enter the quantity', 'pc-wholesale-help'), __('Use the minus, plus or quantity field, then press the cart button.', 'pc-wholesale-help')); ?>
-                <?php pc_wholesale_help_step('4', __('Review the cart', 'pc-wholesale-help'), __('Check every item and its warehouse allocation before checkout.', 'pc-wholesale-help')); ?>
+                <?php pc_wholesale_help_step('1', __('Open the catalogue', 'pc-wholesale-help'), __('Choose a category or search by product name, SKU or barcode.', 'pc-wholesale-help')); ?>
+                <?php pc_wholesale_help_step('2', __('Apply filters', 'pc-wholesale-help'), __('Combine brand, warehouse, stock availability and price; use Reset to return to the full category list.', 'pc-wholesale-help')); ?>
+                <?php pc_wholesale_help_step('3', __('Check the product', 'pc-wholesale-help'), __('Review the SKU, your price and stock by warehouse.', 'pc-wholesale-help')); ?>
+                <?php pc_wholesale_help_step('4', __('Enter the quantity', 'pc-wholesale-help'), __('Use the minus, plus or quantity field, then press the cart button.', 'pc-wholesale-help')); ?>
+                <?php pc_wholesale_help_step('5', __('Review the cart', 'pc-wholesale-help'), __('Check every item and its warehouse allocation before checkout.', 'pc-wholesale-help')); ?>
             </ol>
             <a class="pc-help-inline-action" href="<?php echo esc_url($shop_url); ?>"><?php esc_html_e('Go to catalogue', 'pc-wholesale-help'); ?> →</a>
             <?php pc_wholesale_help_image('catalog-product-cards.jpg', __('Catalogue cards with quantity and stock by warehouse', 'pc-wholesale-help'), __('Click the image to enlarge it.', 'pc-wholesale-help')); ?>
@@ -333,6 +335,7 @@ function pc_wholesale_help_render_endpoint(): void {
 
         <section class="pc-help-section" id="koshyk">
             <div class="pc-help-section__heading"><span>04</span><div><h2><?php esc_html_e('Check the cart', 'pc-wholesale-help'); ?></h2><p><?php esc_html_e('For every item, check the product, SKU, price, quantity, subtotal and the “Allocation” line.', 'pc-wholesale-help'); ?></p></div></div>
+            <p><?php esc_html_e('Changing a quantity or removing an item updates only that row and the cart totals. While the request is running, the cart shows “Updating cart…”; wait for it to finish instead of repeating the action.', 'pc-wholesale-help'); ?></p>
             <div class="pc-help-note pc-help-note--example"><strong><?php esc_html_e('Example:', 'pc-wholesale-help'); ?></strong> <?php esc_html_e('“Allocation: Kyiv — 2, Odesa — 3” means that five units will be collected from two warehouses.', 'pc-wholesale-help'); ?></div>
             <?php pc_wholesale_help_image('cart-warehouse-split.jpg', __('Cart with one item split between two warehouses', 'pc-wholesale-help'), __('A split is normal in automatic warehouse mode.', 'pc-wholesale-help')); ?>
         </section>

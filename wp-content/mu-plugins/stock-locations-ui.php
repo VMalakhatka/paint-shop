@@ -148,6 +148,11 @@ if (!function_exists('slu_cart_qty_for_product')) {
 if (!function_exists('slu_collect_location_stocks_for_product')) {
     /** collect “name — qty” across all locations attached to the product */
     function slu_collect_location_stocks_for_product(WC_Product $product): array{
+        $cache_key = (int) $product->get_id();
+        if (isset($GLOBALS['slu_location_stock_request_cache'][$cache_key])) {
+            return $GLOBALS['slu_location_stock_request_cache'][$cache_key];
+        }
+
         $result   = [];
         $term_ids = wp_get_object_terms($product->get_id(), 'location', ['fields'=>'ids','hide_empty'=>false]);
         if (is_wp_error($term_ids)) $term_ids = [];
@@ -156,7 +161,10 @@ if (!function_exists('slu_collect_location_stocks_for_product')) {
             $term_ids = get_terms(['taxonomy'=>'location','fields'=>'ids','hide_empty'=>false]);
             if (is_wp_error($term_ids)) $term_ids = [];
         }
-        if (empty($term_ids)) return $result;
+        if (empty($term_ids)) {
+            $GLOBALS['slu_location_stock_request_cache'][$cache_key] = $result;
+            return $result;
+        }
 
         $is_var    = $product->is_type('variation');
         $parent_id = $is_var ? (int)$product->get_parent_id() : 0;
@@ -176,9 +184,70 @@ if (!function_exists('slu_collect_location_stocks_for_product')) {
 
             $result[$tid] = ['name'=>$term->name, 'qty'=>$qty];
         }
+        $GLOBALS['slu_location_stock_request_cache'][$cache_key] = $result;
         return $result;
     }
 }
+
+if (!function_exists('slu_prime_location_stock_caches_for_cart')) {
+    /** Prime product meta and taxonomy caches in batches before cart validation. */
+    function slu_prime_location_stock_caches_for_cart($cart): void {
+        static $primed = false;
+        if ($primed || !($cart instanceof WC_Cart) || $cart->is_empty()) return;
+
+        $product_ids = [];
+        foreach ($cart->get_cart() as $item) {
+            $product_id = (int) ($item['product_id'] ?? 0);
+            $variation_id = (int) ($item['variation_id'] ?? 0);
+            if ($product_id > 0) $product_ids[$product_id] = $product_id;
+            if ($variation_id > 0) $product_ids[$variation_id] = $variation_id;
+        }
+        if (!$product_ids) return;
+
+        $ids = array_values($product_ids);
+        update_meta_cache('post', $ids);
+        update_object_term_cache($ids, 'product');
+
+        $location_ids = get_terms([
+            'taxonomy'   => 'location',
+            'fields'     => 'ids',
+            'hide_empty' => false,
+        ]);
+        if (!is_wp_error($location_ids) && $location_ids) {
+            _prime_term_caches(array_map('intval', $location_ids), true);
+        }
+
+        $primed = true;
+    }
+}
+add_action('woocommerce_cart_loaded_from_session', 'slu_prime_location_stock_caches_for_cart', 5);
+
+if (!function_exists('slu_clear_location_stock_request_cache')) {
+    function slu_clear_location_stock_request_cache(int $object_id): void {
+        unset($GLOBALS['slu_location_stock_request_cache'][$object_id]);
+
+        $parent_id = (int) wp_get_post_parent_id($object_id);
+        if ($parent_id > 0) {
+            unset($GLOBALS['slu_location_stock_request_cache'][$parent_id]);
+        }
+    }
+}
+
+add_action('added_post_meta', function ($meta_id, $object_id, $meta_key): void {
+    if (strpos((string) $meta_key, '_stock_at_') === 0) {
+        slu_clear_location_stock_request_cache((int) $object_id);
+    }
+}, 10, 3);
+add_action('updated_post_meta', function ($meta_id, $object_id, $meta_key): void {
+    if (strpos((string) $meta_key, '_stock_at_') === 0) {
+        slu_clear_location_stock_request_cache((int) $object_id);
+    }
+}, 10, 3);
+add_action('deleted_post_meta', function ($meta_ids, $object_id, $meta_key): void {
+    if (strpos((string) $meta_key, '_stock_at_') === 0) {
+        slu_clear_location_stock_request_cache((int) $object_id);
+    }
+}, 10, 3);
 
 if (!function_exists('slu_order_location_stocks_by_global_priority')) {
     /**

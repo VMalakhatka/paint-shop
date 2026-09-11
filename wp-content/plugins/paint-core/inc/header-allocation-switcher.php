@@ -116,12 +116,29 @@ function pc_build_alloc_plan(\WC_Product $product, int $need, ?array $preference
 function pc_calc_plan_for(\WC_Product $product, int $qty): array {
     $qty = max(0, (int)$qty);
     if ($qty === 0) return [];
+
+    $pref = function_exists('pc_get_alloc_pref') ? pc_get_alloc_pref() : ['mode' => 'auto', 'term_id' => 0];
+    $cache_key = implode(':', [
+        (int) $product->get_id(),
+        $qty,
+        (string) ($pref['mode'] ?? 'auto'),
+        (int) ($pref['term_id'] ?? 0),
+    ]);
+    static $request_cache = [];
+    if (array_key_exists($cache_key, $request_cache)) {
+        return $request_cache[$cache_key];
+    }
+
     // 1) внешний фильтр (кто-то может переопределить всё целиком)
     $from_filter = (array) apply_filters('slu_allocation_plan', [], $product, $qty, 'frontend-preview');
-    if (!empty($from_filter)) return $from_filter;
+    if (!empty($from_filter)) {
+        $request_cache[$cache_key] = $from_filter;
+        return $from_filter;
+    }
 
     // 2) централизованный расчёт
-    return pc_build_alloc_plan($product, $qty);
+    $request_cache[$cache_key] = pc_build_alloc_plan($product, $qty, $pref);
+    return $request_cache[$cache_key];
 }
 
 /* ============================ UI в шапке ============================ */
@@ -280,21 +297,39 @@ add_action('wp_footer', function () {
 
 /* ============================ Пересчёт и хранение «плана» для корзины ============================ */
 
-/** Пересчитать планы для всех позиций корзины */
+/** Пересчитать план для одной позиции корзины. */
+function pc_recalc_alloc_plan_for_cart_item(string $cart_item_key): void {
+    if (!function_exists('WC') || !WC() || !WC()->cart) return;
+
+    $item = WC()->cart->get_cart_item($cart_item_key);
+    $prod = $item['data'] ?? null;
+    $qty  = (int) ($item['quantity'] ?? 0);
+
+    if ($prod instanceof \WC_Product && $qty > 0) {
+        WC()->cart->cart_contents[$cart_item_key]['pc_alloc_plan'] = pc_calc_plan_for($prod, $qty);
+    }
+}
+
+/** Пересчитать планы для всех позиций корзины один раз за запрос. */
 function pc_recalc_alloc_plans_for_cart(): void {
     if (!function_exists('WC') || !WC() || !WC()->cart) return;
+    static $running = false;
+    if ($running) return;
+
+    $running = true;
     foreach (WC()->cart->get_cart() as $key => $item) {
-        $prod = $item['data'] ?? null;
-        $qty  = (int)($item['quantity'] ?? 0);
-        if ($prod instanceof \WC_Product && $qty > 0) {
-            WC()->cart->cart_contents[$key]['pc_alloc_plan'] = pc_calc_plan_for($prod, $qty);
-        }
+        pc_recalc_alloc_plan_for_cart_item((string) $key);
     }
     WC()->cart->set_session();
+    $running = false;
 }
-add_action('woocommerce_cart_loaded_from_session',         'pc_recalc_alloc_plans_for_cart', 20);
-add_action('woocommerce_add_to_cart',                      'pc_recalc_alloc_plans_for_cart', 20, 0);
-add_action('woocommerce_after_cart_item_quantity_update',  'pc_recalc_alloc_plans_for_cart', 20, 2);
+add_action('woocommerce_cart_loaded_from_session', 'pc_recalc_alloc_plans_for_cart', 30);
+add_action('woocommerce_add_to_cart', function ($cart_item_key): void {
+    pc_recalc_alloc_plan_for_cart_item((string) $cart_item_key);
+}, 20, 1);
+add_action('woocommerce_after_cart_item_quantity_update', function ($cart_item_key): void {
+    pc_recalc_alloc_plan_for_cart_item((string) $cart_item_key);
+}, 20, 1);
 
 // AJAX: пересчитать планы (дергаем из JS при смене селектов)
 add_action('wp_ajax_pc_recalc_alloc_plans',      function(){ pc_recalc_alloc_plans_for_cart(); wp_send_json_success(); });

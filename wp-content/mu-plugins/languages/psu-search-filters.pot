@@ -28,3 +28,36 @@ msgstr ""
 #: psu-search-filters.php
 msgid "PaintCore"
 msgstr ""
+
+msgid "Search products"
+msgstr ""
+
+msgid "Name, SKU or barcode"
+msgstr ""
+
+msgid "Brand"
+msgstr ""
+
+msgid "All brands"
+msgstr ""
+
+msgid "Warehouses"
+msgstr ""
+
+msgid "In stock only"
+msgstr ""
+
+msgid "Price"
+msgstr ""
+
+msgid "From"
+msgstr ""
+
+msgid "To"
+msgstr ""
+
+msgid "Apply filters"
+msgstr ""
+
+msgid "Reset"
+msgstr ""

@@ -3,7 +3,7 @@
 Plugin Name: Paint Shop UX
 Description: UX improvements for WooCommerce catalog: compact titles, square thumbnails, per-page switcher, graceful fallbacks.
 Author: Volodymyr
-Version: 1.1.0
+Version: 1.2.0
 Text Domain: paint-shop-ux
 Domain Path: /languages
 */
@@ -154,33 +154,37 @@ function psu_subcategory_thumbnail( $category ) {
      *  2) Пробуем взять картинку любого товара
      *     в этой категории ИЛИ в дочерних
      *  ========================= */
-    $q = new WC_Product_Query([
-        'status'    => 'publish',
-        'limit'     => 20,              // ⬅ важно: больше 1
-        'orderby'   => 'date',
-        'order'     => 'DESC',
-        'tax_query' => [[
-            'taxonomy'         => 'product_cat',
-            'field'            => 'term_id',
-            'terms'            => [$category->term_id],
-            'include_children' => true,
-        ]],
-    ]);
+    $cache_key = 'psu_cat_thumb_v1_' . (int) $category->term_id;
+    $cached = get_transient($cache_key);
 
-    $products = $q->get_products();
+    if (!is_array($cached)) {
+        $q = new WC_Product_Query([
+            'status'    => 'publish',
+            'limit'     => 20,
+            'orderby'   => 'date',
+            'order'     => 'DESC',
+            'return'    => 'ids',
+            'tax_query' => [[
+                'taxonomy'         => 'product_cat',
+                'field'            => 'term_id',
+                'terms'            => [(int) $category->term_id],
+                'include_children' => true,
+            ]],
+        ]);
 
-    if (!empty($products)) {
-        foreach ($products as $product) {
-            if ($product instanceof WC_Product && $product->get_image_id()) {
-                echo wp_get_attachment_image(
-                    $product->get_image_id(),
-                    $size,
-                    false,
-                    ['loading' => 'lazy']
-                );
-                return;
-            }
+        $fallback_id = 0;
+        foreach ($q->get_products() as $product_id) {
+            $fallback_id = (int) get_post_thumbnail_id((int) $product_id);
+            if ($fallback_id > 0) break;
         }
+        $cached = ['attachment_id' => $fallback_id];
+        set_transient($cache_key, $cached, DAY_IN_SECONDS);
+    }
+
+    $fallback_id = (int) ($cached['attachment_id'] ?? 0);
+    if ($fallback_id > 0) {
+        echo wp_get_attachment_image($fallback_id, $size, false, ['loading' => 'lazy']);
+        return;
     }
 
 
@@ -193,6 +197,48 @@ function psu_subcategory_thumbnail( $category ) {
     echo '<span class="psu-cat-faux-title">' . esc_html( $name ) . '</span>';
     echo '</div>';
 }
+
+/**
+ * Starting with the second visible category level, keep child tiles and show
+ * every product from the selected branch on the same page.
+ */
+function psu_category_archive_has_filters(): bool {
+    $known = ['s', 'brand', 'location', 'in_stock', 'min_price', 'max_price', 'rating_filter'];
+    foreach (array_keys($_GET) as $raw_key) {
+        $key = sanitize_key((string) $raw_key);
+        if (in_array($key, $known, true) || strpos($key, 'filter_') === 0 || strpos($key, 'query_type_') === 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function psu_is_expanded_category_archive(): bool {
+    if (!function_exists('is_product_category') || !is_product_category()) return false;
+    if (is_paged() || psu_category_archive_has_filters()) return false;
+
+    $term_id = get_queried_object_id();
+    if ($term_id <= 0) return false;
+
+    return count(get_ancestors($term_id, 'product_cat', 'taxonomy')) >= 1;
+}
+
+add_action('wp', function () {
+    if (!psu_is_expanded_category_archive()) return;
+
+    remove_filter('woocommerce_product_loop_start', 'woocommerce_maybe_show_product_subcategories');
+});
+
+add_action('woocommerce_before_shop_loop', function () {
+    if (!psu_is_expanded_category_archive()) return;
+
+    $columns = max(1, (int) wc_get_loop_prop('columns', wc_get_default_products_per_row()));
+    woocommerce_output_product_categories([
+        'parent_id' => get_queried_object_id(),
+        'before'    => '<ul class="products columns-' . esc_attr($columns) . ' psu-expanded-subcategories">',
+        'after'     => '</ul>',
+    ]);
+}, 5);
 
 /**
  * Force alphabetical order for product categories

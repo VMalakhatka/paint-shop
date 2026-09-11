@@ -145,21 +145,25 @@ function pc_cartguard_get_allowed_qty_for_cart(WC_Product $product, int $current
 /* ================== ENFORCE LIMITS ================== */
 
 function pc_cartguard_enforce_limits() {
+    static $running = false;
+    if ($running) return;
     if (!function_exists('WC')) return;
     $cart = WC()->cart;
     if (!$cart || empty($cart->get_cart())) { pc_cg_log('enforce: no cart or empty'); return; }
+
+    $running = true;
 
     // FAILSAFE: режим "только выбранный склад", но склад ещё не выбран — не трогаем корзину
     if (function_exists('pc_get_alloc_pref')) {
         $pref = pc_get_alloc_pref();
         if (($pref['mode'] ?? 'auto') === 'single' && (int)($pref['term_id'] ?? 0) <= 0) {
             pc_cg_log('enforce: skip (single mode but no term selected)');
+            $running = false;
             return;
         }
     }
 
     $changed_any = false;
-    if (function_exists('wc_clear_notices')) wc_clear_notices();
     foreach ($cart->get_cart() as $key => $item) {
         if (empty($item['product_id'])) continue;
 
@@ -181,7 +185,7 @@ function pc_cartguard_enforce_limits() {
         }
 
         if ($current_qty > $allowed_max) {
-            $cart->set_quantity($key, $allowed_max, true);
+            $cart->set_quantity($key, $allowed_max, false);
             wc_add_notice(
                 sprintf(__('Quantity for “%1$s” adjusted to %2$d per stock availability.', 'pc-cart-guard'), $product->get_name(), $allowed_max),
                 'notice'
@@ -191,13 +195,17 @@ function pc_cartguard_enforce_limits() {
     }
 
     if ($changed_any) {
-        $cart->calculate_totals();
-        pc_cg_log('enforce: totals recalculated');
+        if (current_filter() !== 'woocommerce_before_calculate_totals') {
+            $cart->calculate_totals();
+            pc_cg_log('enforce: totals recalculated');
+        }
     } else {
         pc_cg_log('enforce: nothing changed');
     }
+
+    $running = false;
 }
-add_action('woocommerce_cart_loaded_from_session', 'pc_cartguard_enforce_limits', 20);
+add_action('woocommerce_cart_loaded_from_session', 'pc_cartguard_enforce_limits', 10);
 add_action('woocommerce_before_calculate_totals', 'pc_cartguard_enforce_limits', 20);
 
 /* ================== AJAX ADJUST (optional) ================== */
@@ -247,6 +255,86 @@ function pc_cart_item_extras(){
 
 add_action('wp_ajax_pc_cart_adjust',        'pc_cart_adjust_qty');
 add_action('wp_ajax_nopriv_pc_cart_adjust', 'pc_cart_adjust_qty');
+
+add_action('wp_ajax_pc_cart_update_item',        'pc_cartguard_update_item');
+add_action('wp_ajax_nopriv_pc_cart_update_item', 'pc_cartguard_update_item');
+
+/** Update one classic-cart row and return only the changed subtotal and totals. */
+function pc_cartguard_update_item() {
+    check_ajax_referer('pc_cart_update_item', 'nonce');
+
+    if (!function_exists('WC') || !WC()->cart) {
+        wp_send_json_error(['message' => __('Cart is unavailable.', 'pc-cart-guard')], 503);
+    }
+
+    $cart = WC()->cart;
+    $cart_item_key = isset($_POST['cart_item_key'])
+        ? sanitize_text_field(wp_unslash($_POST['cart_item_key']))
+        : '';
+    $requested_qty = isset($_POST['quantity']) ? max(0, (int) $_POST['quantity']) : -1;
+    $cart_item = $cart_item_key !== '' ? $cart->get_cart_item($cart_item_key) : [];
+    $product = $cart_item['data'] ?? null;
+
+    if ($requested_qty < 0 || !$product instanceof WC_Product) {
+        wp_send_json_error(['message' => __('Cart item was not found.', 'pc-cart-guard')], 404);
+    }
+
+    $old_qty = (int) ($cart_item['quantity'] ?? 0);
+    $target_qty = $requested_qty;
+    $allowed_max = pc_cartguard_get_allowed_qty_for_cart($product, $old_qty);
+
+    if ($target_qty > $allowed_max) {
+        $target_qty = $allowed_max;
+        wc_add_notice(
+            sprintf(__('Quantity for “%1$s” adjusted to %2$d per stock availability.', 'pc-cart-guard'), $product->get_name(), $allowed_max),
+            'notice'
+        );
+    }
+
+    if ($target_qty > 0) {
+        $valid = apply_filters('woocommerce_update_cart_validation', true, $cart_item_key, $cart_item, $target_qty);
+        if (!$valid) {
+            ob_start();
+            wc_print_notices();
+            $notices = ob_get_clean();
+            wp_send_json_error([
+                'message' => __('The quantity could not be updated.', 'pc-cart-guard'),
+                'notices' => $notices,
+            ], 409);
+        }
+
+        $cart->set_quantity($cart_item_key, $target_qty, false);
+        $cart->calculate_totals();
+    } else {
+        $cart->remove_cart_item($cart_item_key);
+    }
+
+    $cart->set_session();
+
+    ob_start();
+    woocommerce_cart_totals();
+    $totals_html = ob_get_clean();
+
+    ob_start();
+    wc_print_notices();
+    $notices_html = ob_get_clean();
+
+    $subtotal_html = $target_qty > 0
+        ? $cart->get_product_subtotal($product, $target_qty)
+        : '';
+
+    wp_send_json_success([
+        'cart_item_key' => $cart_item_key,
+        'quantity'      => $target_qty,
+        'allowed_max'   => $allowed_max,
+        'subtotal_html' => $subtotal_html,
+        'totals_html'   => $totals_html,
+        'notices_html'  => $notices_html,
+        'cart_count'    => $cart->get_cart_contents_count(),
+        'cart_empty'    => $cart->is_empty(),
+        'cart_hash'     => $cart->get_cart_hash(),
+    ]);
+}
 
 function pc_cart_adjust_qty() {
     check_ajax_referer('pc_cart_adj', 'nonce');
@@ -329,6 +417,8 @@ add_action('wp_enqueue_scripts', function () {
       .slu-stock-mini strong{font-weight:600;color:#333}
       .slu-stock-mini .is-preferred{font-weight:600}
       .slu-stock-mini .slu-nb{display:inline-flex;gap:.25em;white-space:nowrap}
+      .cart_item.pc-cart-item-updating{opacity:.6;pointer-events:none}
+      .pc-cart-item-status{display:block;margin-top:.25rem;font-size:12px;color:#333}
     ';
     wp_register_style('pc-cart-inline', false);
     wp_enqueue_style('pc-cart-inline');
@@ -337,20 +427,36 @@ add_action('wp_enqueue_scripts', function () {
     // JS
     wp_enqueue_script('jquery');
 
+    wp_add_inline_script(
+        'jquery',
+        'window.pcCartGuardUpdate = ' . wp_json_encode([
+            'ajaxUrl' => admin_url('admin-ajax.php'),
+            'nonce'   => wp_create_nonce('pc_cart_update_item'),
+            'updating' => __('Updating cart…', 'pc-cart-guard'),
+        ]) . ';',
+        'before'
+    );
+
     // (1) Кламп qty — Classic + Blocks
     wp_add_inline_script('jquery', <<<'JS'
 jQuery(function($){
   var QTY_SEL = '.pc-cart-qty, .quantity .qty';
+  var config = window.pcCartGuardUpdate || {};
+  var pending = {};
+  var running = false;
+  var timers = {};
 
-  // Кламп для классики
   function clamp($inp){
-    var max  = parseFloat($inp.attr('max'))  || Infinity;
-    var min  = parseFloat($inp.attr('min'))  || 0;
-    var step = parseFloat($inp.attr('step')) || 1;
-    var v    = String($inp.val()||'').trim().replace(',', '.');
-    var n    = parseFloat(v); if(!isFinite(n)) n = min;
+    var max  = parseFloat($inp.attr('max'));
+    var min  = parseFloat($inp.attr('min'));
+    var step = parseFloat($inp.attr('step'));
+    if (!isFinite(max)) max = Infinity;
+    if (!isFinite(min)) min = 0;
+    if (!isFinite(step) || step <= 0) step = 1;
+    var n = parseFloat(String($inp.val() || '').trim().replace(',', '.'));
+    if (!isFinite(n)) n = min;
     n = Math.max(min, Math.min(max, n));
-    if (step>0) n = Math.floor(n/step)*step;
+    n = Math.floor(n / step) * step;
     $inp.val(n);
     return n;
   }
@@ -361,7 +467,6 @@ jQuery(function($){
     if ($btn.length){
       $btn.prop('disabled', false).trigger('click');
     } else if ($form.length) {
-      // фоллбек: принудительно добавим флажок и отправим форму
       if (!$form.find('input[name="update_cart"]').length){
         $('<input type="hidden" name="update_cart" value="1">').appendTo($form);
       }
@@ -369,18 +474,132 @@ jQuery(function($){
     }
   }
 
-  // qty клампим и обновляем форму
-  $(document).on('input', QTY_SEL, function(){ clamp($(this)); });
-  var t=null;
-  $(document).on('blur', QTY_SEL, function(){
-    if ($('form.woocommerce-cart-form').length){
-      clearTimeout(t); t=setTimeout(requestClassicUpdate, 60);
+  function itemKey($input){
+    var direct = String($input.data('cart-item-key') || '');
+    if (direct) return direct;
+    var match = String($input.attr('name') || '').match(/^cart\[([^\]]+)\]\[qty\]$/);
+    return match ? match[1] : '';
+  }
+
+  function showNotices(html){
+    if (!html) return;
+    var $wrap = $('.woocommerce-notices-wrapper:first');
+    if ($wrap.length) $wrap.html(html);
+  }
+
+  function finishNext(){
+    $('.pc-cart-item-status').remove();
+    $('.cart_item.pc-cart-item-updating').removeClass('pc-cart-item-updating').removeAttr('aria-busy');
+    running = false;
+    processNext();
+  }
+
+  function processNext(){
+    if (running) return;
+    var keys = Object.keys(pending);
+    if (!keys.length) return;
+
+    var key = keys[0];
+    var job = pending[key];
+    delete pending[key];
+    running = true;
+
+    var $input = job.input;
+    var $row = $input.closest('.cart_item');
+    $row.addClass('pc-cart-item-updating').attr('aria-busy', 'true');
+    $input.siblings('.pc-cart-item-status').remove();
+    $('<span class="pc-cart-item-status" role="status"></span>')
+      .text(config.updating || '')
+      .insertAfter($input);
+
+    $.ajax({
+      type: 'POST',
+      url: config.ajaxUrl,
+      dataType: 'json',
+      data: {
+        action: 'pc_cart_update_item',
+        nonce: config.nonce,
+        cart_item_key: key,
+        quantity: job.quantity
+      }
+    }).done(function(response){
+      if (!response || !response.success || !response.data){
+        if (response && response.data && response.data.notices) showNotices(response.data.notices);
+        requestClassicUpdate();
+        return;
+      }
+
+      var data = response.data;
+      showNotices(data.notices_html);
+      if (data.cart_empty){
+        window.location.reload();
+        return;
+      }
+
+      if (parseInt(data.quantity, 10) <= 0){
+        $row.remove();
+      } else {
+        $input.val(data.quantity)
+          .attr('max', data.allowed_max)
+          .attr('data-current-qty', data.quantity);
+        $row.find('.product-subtotal').html(data.subtotal_html);
+        $row.removeClass('pc-cart-item-updating').removeAttr('aria-busy');
+      }
+
+      if (data.totals_html){
+        $('.cart_totals').replaceWith(data.totals_html);
+      }
+      $(document.body).trigger('updated_cart_totals');
+      $(document.body).trigger('updated_wc_div');
+    }).fail(function(xhr){
+      if (xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.notices){
+        showNotices(xhr.responseJSON.data.notices);
+      }
+      requestClassicUpdate();
+    }).always(finishNext);
+  }
+
+  function queueUpdate($input, quantity, delay){
+    var key = itemKey($input);
+    if (!key || !config.ajaxUrl || !config.nonce){
+      requestClassicUpdate();
+      return;
     }
+
+    clearTimeout(timers[key]);
+    timers[key] = setTimeout(function(){
+      pending[key] = {
+        input: $input,
+        quantity: Math.max(0, parseInt(quantity, 10) || 0)
+      };
+      processNext();
+    }, delay || 0);
+  }
+
+  $(document).on('input change', QTY_SEL, function(){
+    var $input = $(this);
+    queueUpdate($input, clamp($input), 450);
+  });
+  $(document).on('blur', QTY_SEL, function(){
+    var $input = $(this);
+    queueUpdate($input, clamp($input), 0);
   });
   $(document).on('click', '.quantity .plus, .quantity .minus', function(){
-    var $inp = $(this).closest('.quantity').find('input.qty');
-    setTimeout(function(){ clamp($inp); requestClassicUpdate(); }, 0);
+    var $input = $(this).closest('.quantity').find('input.qty');
+    setTimeout(function(){ queueUpdate($input, clamp($input), 120); }, 0);
   });
+
+  document.addEventListener('click', function(event){
+    var link = event.target.closest && event.target.closest('.woocommerce-cart-form .product-remove > a');
+    if (!link) return;
+    var $row = $(link).closest('.cart_item');
+    var $input = $row.find(QTY_SEL).first();
+    if (!$input.length) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    queueUpdate($input, 0, 0);
+  }, true);
+
   $(document.body).on('updated_wc_div wc_fragments_refreshed', function(){
     $(QTY_SEL).each(function(){ clamp($(this)); });
   });
@@ -484,7 +703,8 @@ add_filter('woocommerce_cart_item_quantity', function ($product_quantity, $cart_
          . '<input type="number" class="input-text qty text pc-cart-qty" '
          . 'name="'.esc_attr($name).'" value="'.esc_attr($current).'" '
          . 'min="0" max="'.esc_attr($max).'" step="'.esc_attr($step).'" '
-         . 'data-allowed="'.esc_attr($max).'" />'
+         . 'data-allowed="'.esc_attr($max).'" data-current-qty="'.esc_attr($current).'" '
+         . 'data-cart-item-key="'.esc_attr($cart_item_key).'" />'
          . '</div>';
 }, 20, 3);
 

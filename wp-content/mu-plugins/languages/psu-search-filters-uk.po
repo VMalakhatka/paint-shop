@@ -33,3 +33,36 @@ msgstr "Базові фільтри для вітрин Woo (location / in_stock
 #: psu-search-filters.php
 msgid "PaintCore"
 msgstr "PaintCore"
+
+msgid "Search products"
+msgstr "Пошук товарів"
+
+msgid "Name, SKU or barcode"
+msgstr "Назва, артикул або штрихкод"
+
+msgid "Brand"
+msgstr "Бренд"
+
+msgid "All brands"
+msgstr "Усі бренди"
+
+msgid "Warehouses"
+msgstr "Склади"
+
+msgid "In stock only"
+msgstr "Лише в наявності"
+
+msgid "Price"
+msgstr "Ціна"
+
+msgid "From"
+msgstr "Від"
+
+msgid "To"
+msgstr "До"
+
+msgid "Apply filters"
+msgstr "Застосувати фільтри"
+
+msgid "Reset"
+msgstr "Скинути"

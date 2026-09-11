@@ -43,3 +43,15 @@ msgstr ""
 #, php-format
 msgid "Quantity for “%1$s” adjusted to %2$d per stock availability."
 msgstr ""
+
+msgid "Cart is unavailable."
+msgstr ""
+
+msgid "Cart item was not found."
+msgstr ""
+
+msgid "The quantity could not be updated."
+msgstr ""
+
+msgid "Updating cart…"
+msgstr ""

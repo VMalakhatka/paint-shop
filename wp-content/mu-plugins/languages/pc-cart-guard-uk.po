@@ -49,3 +49,15 @@ msgstr "«%s» тимчасово недоступний на вибраній �
 #, php-format
 msgid "Quantity for “%1$s” adjusted to %2$d per stock availability."
 msgstr "Кількість для «%1$s» скориговано до %2$d згідно з доступністю на складі."
+
+msgid "Cart is unavailable."
+msgstr "Кошик недоступний."
+
+msgid "Cart item was not found."
+msgstr "Позицію кошика не знайдено."
+
+msgid "The quantity could not be updated."
+msgstr "Не вдалося оновити кількість."
+
+msgid "Updating cart…"
+msgstr "Оновлення кошика…"
