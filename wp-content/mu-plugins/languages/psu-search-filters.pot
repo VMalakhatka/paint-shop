@@ -65,6 +65,10 @@ msgstr ""
 msgid "Category"
 msgstr ""
 
+#, php-format
+msgid "Page %1$d of %2$d"
+msgstr ""
+
 msgid "Supplier"
 msgstr ""
 

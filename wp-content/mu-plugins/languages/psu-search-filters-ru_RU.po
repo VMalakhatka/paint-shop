@@ -70,6 +70,10 @@ msgstr "Сбросить"
 msgid "Category"
 msgstr "Категория"
 
+#, php-format
+msgid "Page %1$d of %2$d"
+msgstr "Страница %1$d из %2$d"
+
 msgid "Supplier"
 msgstr "Поставщик"
 

@@ -360,6 +360,24 @@ function psu_render_catalog_filters(): void {
 add_action('woocommerce_before_shop_loop', 'psu_render_catalog_filters', 7);
 add_action('woocommerce_no_products_found', 'psu_render_catalog_filters', 5);
 
+function psu_render_catalog_pagination(): void {
+    if (wc_get_loop_prop('is_shortcode') || !woocommerce_products_will_display()) return;
+    $total = max(1, (int) wc_get_loop_prop('total_pages'));
+    $current = max(1, (int) wc_get_loop_prop('current_page'));
+    echo '<div class="psu-catalog-pagination"><p>' . esc_html(sprintf(
+        __('Page %1$d of %2$d', 'psu-search-filters'), $current, $total
+    )) . '</p>';
+    woocommerce_pagination();
+    echo '</div>';
+}
+
+add_action('wp', function (): void {
+    if (!function_exists('is_shop') || !(is_shop() || is_product_taxonomy() || is_search())) return;
+    remove_action('woocommerce_after_shop_loop', 'woocommerce_pagination', 10);
+    add_action('woocommerce_before_shop_loop', 'psu_render_catalog_pagination', 35);
+    add_action('woocommerce_after_shop_loop', 'psu_render_catalog_pagination', 10);
+});
+
 add_action('wp_enqueue_scripts', function () {
     if (!function_exists('is_woocommerce') || !(is_shop() || is_product_taxonomy() || is_search())) return;
 
@@ -384,6 +402,13 @@ add_action('wp_enqueue_scripts', function () {
         .psu-catalog-filters__actions button:focus-visible{outline:2px solid #28644c;outline-offset:3px}
         .psu-catalog-filters__actions a{font-size:13px}
         .psu-expanded-subcategories{padding-bottom:18px;border-bottom:1px solid #ddd}
+        .psu-catalog-pagination{clear:both;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 16px;margin:16px 0;width:100%}
+        .psu-catalog-pagination>p{margin:0;font-size:14px;font-weight:600}
+        .woocommerce .psu-catalog-pagination nav.woocommerce-pagination{display:block;margin:0;max-width:100%}
+        .woocommerce .psu-catalog-pagination ul.page-numbers{display:flex;flex-wrap:wrap;border:0;margin:0;gap:4px;white-space:normal}
+        .woocommerce .psu-catalog-pagination ul.page-numbers li{border:0;float:none}
+        .woocommerce .psu-catalog-pagination ul.page-numbers li a,.woocommerce .psu-catalog-pagination ul.page-numbers li span{min-width:36px;min-height:36px;display:flex;align-items:center;justify-content:center;border:1px solid #ddd;border-radius:4px;padding:6px;font-size:14px}
+        .woocommerce .psu-catalog-pagination ul.page-numbers li .current{background:#28644c;border-color:#28644c;color:#fff}
         @media(max-width:900px){.psu-catalog-filters{grid-template-columns:1fr 1fr}}
         @media(max-width:600px){.psu-catalog-filters{grid-template-columns:1fr}.psu-catalog-filters__actions button{min-height:44px}}
     ');

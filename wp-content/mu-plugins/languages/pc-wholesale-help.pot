@@ -741,6 +741,9 @@ msgstr ""
 msgid "Apply filters"
 msgstr ""
 
+msgid "Page numbers above and below the products show the current and total pages. Your category and filters stay selected when changing pages."
+msgstr ""
+
 msgid "Combine supplier, warehouse, stock availability and price within the current category and its subcategories. Reset returns to this category. Products follow the supplier order set by the shop; full descriptions are available on product pages."
 msgstr ""
 

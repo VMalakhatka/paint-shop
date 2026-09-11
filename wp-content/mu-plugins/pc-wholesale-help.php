@@ -307,6 +307,7 @@ function pc_wholesale_help_render_endpoint(): void {
         <section class="pc-help-section" id="katalog">
             <div class="pc-help-section__heading"><span>02</span><div><h2><?php esc_html_e('Order from catalogue cards', 'pc-wholesale-help'); ?></h2><p><?php esc_html_e('Best when you want to browse photos, categories and product variants.', 'pc-wholesale-help'); ?></p></div></div>
             <div class="pc-help-note"><strong><?php esc_html_e('Fewer category transitions.', 'pc-wholesale-help'); ?></strong> <?php esc_html_e('Starting with the second category level, all products from that branch appear below the child category tiles, including products from deeper subcategories.', 'pc-wholesale-help'); ?></div>
+            <p><?php esc_html_e('Page numbers above and below the products show the current and total pages. Your category and filters stay selected when changing pages.', 'pc-wholesale-help'); ?></p>
             <ol class="pc-help-steps">
                 <?php pc_wholesale_help_step('1', __('Open the catalogue', 'pc-wholesale-help'), __('Choose a category or search by product name, SKU or barcode.', 'pc-wholesale-help')); ?>
                 <?php pc_wholesale_help_step('2', __('Apply filters', 'pc-wholesale-help'), __('Combine supplier, warehouse, stock availability and price within the current category and its subcategories. Reset returns to this category. Products follow the supplier order set by the shop; full descriptions are available on product pages.', 'pc-wholesale-help')); ?>

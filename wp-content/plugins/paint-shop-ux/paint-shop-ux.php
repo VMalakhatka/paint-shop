@@ -229,6 +229,12 @@ add_action('wp', function () {
     if (!psu_is_expanded_category_archive()) return;
 
     remove_filter('woocommerce_product_loop_start', 'woocommerce_maybe_show_product_subcategories');
+    $category_id = get_queried_object_id();
+    // Woo counters and pagination must also know this archive displays products.
+    add_filter('get_term_metadata', static function ($value, $object_id, $key, $single) use ($category_id) {
+        if ((int) $object_id !== $category_id || $key !== 'display_type') return $value;
+        return $single ? 'both' : ['both'];
+    }, 10, 4);
 });
 
 add_action('woocommerce_before_shop_loop', function () {

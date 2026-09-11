@@ -958,6 +958,9 @@ msgstr "Выберите категорию или найдите товар п�
 msgid "Apply filters"
 msgstr "Примените фильтры"
 
+msgid "Page numbers above and below the products show the current and total pages. Your category and filters stay selected when changing pages."
+msgstr "Над товарами и под ними показаны текущая страница, общее количество страниц и номера для перехода. Категория и фильтры сохраняются при переходе."
+
 msgid "Combine supplier, warehouse, stock availability and price within the current category and its subcategories. Reset returns to this category. Products follow the supplier order set by the shop; full descriptions are available on product pages."
 msgstr "Сочетайте поставщика, склад, наличие и цену в пределах текущей категории и её подкатегорий. «Сбросить» возвращает к этой категории. Товары показаны в порядке поставщиков, заданном магазином; полные описания доступны в карточках товаров."
 
