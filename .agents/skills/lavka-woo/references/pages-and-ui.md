@@ -31,7 +31,11 @@
   meta keys, а `psu-search-filters` добавляет их в custom fields Relevanssi через
   `relevanssi_index_custom_fields` независимо от выбранного режима полей. После
   первого деплоя этой настройки нужен полный rebuild индекса.
-- Карточка товара показывает SKU, категории/бренд, stock/allocation и desktop-поиск под артикулом.
+- Карточка товара показывает SKU, категории/бренд, stock/allocation и
+  desktop-поиск под артикулом. На single product после meta выводится
+  подтверждённый GTIN из `_wc_gtin_code` или совместимых barcode keys; значения
+  проходят проверку длины и контрольной цифры. В catalog loop штрихкод не
+  выводится.
 - Поиск обслуживает Relevanssi. При изменении SKU/visibility/content выполняй reindex через API Relevanssi.
 - Пользователю показывай понятное название склада из mapping, а цифровой Folio warehouse ID оставляй техническим.
 

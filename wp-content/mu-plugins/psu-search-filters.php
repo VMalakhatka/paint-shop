@@ -2,7 +2,7 @@
 /*
 Plugin Name: PSU Search & Filters
 Description: Базовые фильтры для витрин Woo (location / in_stock). Поиск — Relevanssi.
-Version: 1.2.1
+Version: 1.3.0
 Author: PaintCore
 Text Domain: psu-search-filters
 Domain Path: /languages
@@ -28,6 +28,78 @@ function psu_add_relevanssi_identifier_meta_keys($fields): array {
     return array_values(array_unique(array_merge($current, psu_searchable_identifier_meta_keys())));
 }
 add_filter('relevanssi_index_custom_fields', 'psu_add_relevanssi_identifier_meta_keys', 20, 2);
+
+function psu_normalize_display_barcode($value): string {
+    $barcode = trim((string) $value);
+    $length = strlen($barcode);
+
+    if (!preg_match('/^\d+$/', $barcode) || !in_array($length, [8, 12, 13, 14], true)) {
+        return '';
+    }
+
+    $sum = 0;
+    $weight = 3;
+    for ($index = $length - 2; $index >= 0; $index--) {
+        $sum += ((int) $barcode[$index]) * $weight;
+        $weight = $weight === 3 ? 1 : 3;
+    }
+
+    $expected_check_digit = (10 - ($sum % 10)) % 10;
+    return $expected_check_digit === (int) $barcode[$length - 1] ? $barcode : '';
+}
+
+function psu_product_display_barcode(WC_Product $product): string {
+    $keys = apply_filters('psu_product_barcode_meta_keys', [
+        '_wc_gtin_code',
+        '_gtin',
+        '_wpm_gtin_code',
+        '_alg_ean',
+        '_ean',
+        '_sku_gtin',
+    ]);
+    $product_ids = [$product->get_id()];
+    if ($product->is_type('variation') && $product->get_parent_id()) {
+        $product_ids[] = $product->get_parent_id();
+    }
+
+    foreach (array_unique(array_map('intval', $product_ids)) as $product_id) {
+        foreach ((array) $keys as $key) {
+            $barcode = psu_normalize_display_barcode(get_post_meta($product_id, (string) $key, true));
+            if ($barcode !== '') return $barcode;
+        }
+    }
+
+    return '';
+}
+
+add_action('woocommerce_single_product_summary', function () {
+    global $product;
+    if (!($product instanceof WC_Product)) return;
+
+    $barcode = psu_product_display_barcode($product);
+    if ($barcode === '') return;
+
+    echo '<div class="psu-product-barcode">'
+        . '<span class="psu-product-barcode__label">Штрихкод:</span>'
+        . '<span class="psu-product-barcode__value">' . esc_html($barcode) . '</span>'
+        . '</div>';
+}, 41);
+
+add_action('wp_enqueue_scripts', function () {
+    if (!function_exists('is_product') || !is_product()) return;
+
+    wp_register_style('psu-product-barcode-inline', false);
+    wp_enqueue_style('psu-product-barcode-inline');
+    wp_add_inline_style('psu-product-barcode-inline', '
+        .psu-product-barcode{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;margin:10px 0 0;font-size:15px;line-height:1.45;color:#333}
+        .psu-product-barcode__label{font-weight:600}
+        .psu-product-barcode__value{font-variant-numeric:tabular-nums;overflow-wrap:anywhere;user-select:all}
+        @media(max-width:480px){
+            .single-product .product_title,.single-product .woocommerce-breadcrumb{overflow-wrap:anywhere}
+            .psu-product-barcode{width:100%;margin-top:8px;font-size:14px}
+        }
+    ');
+});
 
 function psu_find_exact_identifier_product_ids(string $needle): array {
     global $wpdb;

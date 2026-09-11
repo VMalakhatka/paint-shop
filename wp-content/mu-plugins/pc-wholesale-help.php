@@ -2,7 +2,7 @@
 /**
  * Plugin Name: PC Wholesale Customer Help
  * Description: Role-gated customer guide, My Account endpoint and contextual help links for wholesale ordering.
- * Version: 1.2.0
+ * Version: 1.2.1
  * Author: PaintCore
  * Text Domain: pc-wholesale-help
  * Domain Path: /languages
@@ -11,7 +11,7 @@
 defined('ABSPATH') || exit;
 
 const PC_WHOLESALE_HELP_ENDPOINT = 'yak-zamovyty';
-const PC_WHOLESALE_HELP_VERSION = '1.2.0';
+const PC_WHOLESALE_HELP_VERSION = '1.2.1';
 
 /**
  * One allow-list shared by the quick-order page and the customer guide.
@@ -310,7 +310,7 @@ function pc_wholesale_help_render_endpoint(): void {
             <ol class="pc-help-steps">
                 <?php pc_wholesale_help_step('1', __('Open the catalogue', 'pc-wholesale-help'), __('Choose a category or search by product name, SKU or barcode.', 'pc-wholesale-help')); ?>
                 <?php pc_wholesale_help_step('2', __('Apply filters', 'pc-wholesale-help'), __('Combine brand, warehouse, stock availability and price; use Reset to return to the full category list.', 'pc-wholesale-help')); ?>
-                <?php pc_wholesale_help_step('3', __('Check the product', 'pc-wholesale-help'), __('Review the SKU, your price and stock by warehouse.', 'pc-wholesale-help')); ?>
+                <?php pc_wholesale_help_step('3', __('Check the product', 'pc-wholesale-help'), __('Review the SKU, available barcode, your price and stock by warehouse.', 'pc-wholesale-help')); ?>
                 <?php pc_wholesale_help_step('4', __('Enter the quantity', 'pc-wholesale-help'), __('Use the minus, plus or quantity field, then press the cart button.', 'pc-wholesale-help')); ?>
                 <?php pc_wholesale_help_step('5', __('Review the cart', 'pc-wholesale-help'), __('Check every item and its warehouse allocation before checkout.', 'pc-wholesale-help')); ?>
             </ol>

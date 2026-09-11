@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: PC Wholesale Customer Help 1.2.0\n"
+"Project-Id-Version: PC Wholesale Customer Help 1.2.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mu-plugins\n"
 "POT-Creation-Date: 2026-09-04T11:01:07+00:00\n"
 "PO-Revision-Date: 2026-09-03 00:00+0000\n"
@@ -241,8 +241,8 @@ msgid "Check the product"
 msgstr "Перевірте товар"
 
 #: pc-wholesale-help.php:311
-msgid "Review the SKU, your price and stock by warehouse."
-msgstr "Перегляньте артикул, свою ціну та залишки по складах."
+msgid "Review the SKU, available barcode, your price and stock by warehouse."
+msgstr "Проверьте артикул, доступный штрихкод, свою цену и остатки по складам."
 
 #: pc-wholesale-help.php:312
 msgid "Enter the quantity"

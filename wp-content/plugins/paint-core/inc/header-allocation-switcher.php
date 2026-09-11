@@ -12,6 +12,17 @@ defined('ABSPATH') || exit;
  *  - single: списывать только с выбранного склада, без добора
  */
 
+add_action('wp_enqueue_scripts', function (): void {
+    $relative_path = 'assets/css/header-allocation-switcher.css';
+    $absolute_path = PAINT_CORE_PATH . $relative_path;
+    wp_enqueue_style(
+        'paint-core-header-allocation-switcher',
+        PAINT_CORE_URL . $relative_path,
+        [],
+        file_exists($absolute_path) ? (string) filemtime($absolute_path) : null
+    );
+});
+
 /* ============================ Helpers ============================ */
 
 /** Прочитать предпочтение пользователя */

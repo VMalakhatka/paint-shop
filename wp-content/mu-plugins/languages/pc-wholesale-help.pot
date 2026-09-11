@@ -230,7 +230,7 @@ msgid "Check the product"
 msgstr ""
 
 #: pc-wholesale-help.php:311
-msgid "Review the SKU, your price and stock by warehouse."
+msgid "Review the SKU, available barcode, your price and stock by warehouse."
 msgstr ""
 
 #: pc-wholesale-help.php:312
