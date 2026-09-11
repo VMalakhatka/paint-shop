@@ -38,6 +38,7 @@ add_action('admin_menu', function (): void {
 function paint_core_lavka_admin_links(): array {
     return [
         ['page' => 'lavka-warehouses', 'cap' => 'manage_lavka_sync', 'label' => __('Lavka settings', 'paint-core')],
+        ['page' => 'psu-catalog-suppliers', 'cap' => 'manage_woocommerce', 'label' => __('Lavka: catalogue suppliers', 'psu-search-filters')],
         ['page' => 'lavka-sync', 'cap' => 'manage_lavka_sync', 'label' => __('Lavka stock sync', 'paint-core')],
         ['page' => 'lts-main', 'cap' => 'manage_lavka_sync', 'label' => __('Lavka full sync', 'paint-core')],
         ['page' => 'lps-main', 'cap' => 'manage_lavka_prices', 'label' => __('Lavka price sync', 'paint-core')],
@@ -85,6 +86,7 @@ add_action('admin_menu', function (): void {
     $labels = [
         'lavka-hub' => __('Lavka overview', 'paint-core'),
         'lavka-warehouses' => __('Lavka settings', 'paint-core'),
+        'psu-catalog-suppliers' => __('Lavka: catalogue suppliers', 'psu-search-filters'),
         'lavka-sync' => __('Lavka stock sync', 'paint-core'),
         'lavka-stock-report' => __('Lavka stock report', 'paint-core'),
         'lavka-logs' => __('Lavka stock sync logs', 'paint-core'),
@@ -138,7 +140,7 @@ add_action('admin_menu', function (): void {
 /** Enhance only rendered, permission-filtered links; keep WordPress routes intact. */
 add_action('admin_enqueue_scripts', function (): void {
     $groups = [
-        ['id' => 'settings', 'label' => __('Lavka settings', 'paint-core'), 'pages' => ['lavka-warehouses', 'pnpm-settings', 'pc-checkbox-fiscalization', 'pc-wayforpay-test-access']],
+        ['id' => 'settings', 'label' => __('Lavka settings', 'paint-core'), 'pages' => ['lavka-warehouses', 'psu-catalog-suppliers', 'pnpm-settings', 'pc-checkbox-fiscalization', 'pc-wayforpay-test-access']],
         ['id' => 'customers', 'label' => __('Customer relations', 'paint-core'), 'pages' => ['pc-folio-customer-debtors']],
         ['id' => 'stock', 'label' => __('Stock', 'paint-core'), 'pages' => ['lavka-sync', 'lavka-stock-report', 'lavka-logs']],
         ['id' => 'full-sync', 'label' => __('Full synchronization', 'paint-core'), 'pages' => ['lts-main', 'lts-run', 'lts-logs', 'lts-media', 'lts-cron-summary']],

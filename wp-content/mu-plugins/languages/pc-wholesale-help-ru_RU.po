@@ -958,8 +958,8 @@ msgstr "Выберите категорию или найдите товар п�
 msgid "Apply filters"
 msgstr "Примените фильтры"
 
-msgid "Combine brand, warehouse, stock availability and price; use Reset to return to the full category list."
-msgstr "Сочетайте бренд, склад, наличие и цену; кнопка «Сбросить» возвращает полный список категории."
+msgid "Combine supplier, warehouse, stock availability and price within the current category and its subcategories. Reset returns to this category. Products follow the supplier order set by the shop; full descriptions are available on product pages."
+msgstr "Сочетайте поставщика, склад, наличие и цену в пределах текущей категории и её подкатегорий. «Сбросить» возвращает к этой категории. Товары показаны в порядке поставщиков, заданном магазином; полные описания доступны в карточках товаров."
 
 msgid "Changing a quantity or removing an item updates only that row and the cart totals. While the request is running, the cart shows “Updating cart…”; wait for it to finish instead of repeating the action."
 msgstr "Изменение количества или удаление товара обновляет только нужную строку и итоги корзины. Пока выполняется запрос, корзина показывает «Обновление корзины…»; дождитесь завершения и не повторяйте действие."

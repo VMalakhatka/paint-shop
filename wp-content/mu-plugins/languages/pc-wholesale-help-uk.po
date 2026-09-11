@@ -959,8 +959,8 @@ msgstr "Виберіть категорію або знайдіть товар �
 msgid "Apply filters"
 msgstr "Застосуйте фільтри"
 
-msgid "Combine brand, warehouse, stock availability and price; use Reset to return to the full category list."
-msgstr "Поєднуйте бренд, склад, наявність і ціну; кнопка «Скинути» повертає повний список категорії."
+msgid "Combine supplier, warehouse, stock availability and price within the current category and its subcategories. Reset returns to this category. Products follow the supplier order set by the shop; full descriptions are available on product pages."
+msgstr "Поєднуйте постачальника, склад, наявність і ціну в межах поточної категорії та її підкатегорій. «Скинути» повертає до цієї категорії. Товари показуються за порядком постачальників, заданим магазином; повні описи доступні у картках товарів."
 
 msgid "Changing a quantity or removing an item updates only that row and the cart totals. While the request is running, the cart shows “Updating cart…”; wait for it to finish instead of repeating the action."
 msgstr "Зміна кількості або видалення товару оновлює лише потрібний рядок і підсумки кошика. Поки триває запит, кошик показує «Оновлення кошика…»; дочекайтеся завершення і не повторюйте дію."

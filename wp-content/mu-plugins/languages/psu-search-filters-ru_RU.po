@@ -66,3 +66,42 @@ msgstr "Применить фильтры"
 
 msgid "Reset"
 msgstr "Сбросить"
+
+msgid "Category"
+msgstr "Категория"
+
+msgid "Supplier"
+msgstr "Поставщик"
+
+msgid "All suppliers"
+msgstr "Все поставщики"
+
+msgid "Lavka: catalogue suppliers"
+msgstr "Лавка: поставщики каталога"
+
+msgid "You do not have permission to manage suppliers."
+msgstr "Недостаточно прав для управления поставщиками."
+
+msgid "Supplier settings saved."
+msgstr "Настройки поставщиков сохранены."
+
+msgid "Search"
+msgstr "Найти"
+
+msgid "Show in filter"
+msgstr "Показывать в фильтре"
+
+msgid "Display order"
+msgstr "Порядок показа"
+
+msgid "Products"
+msgstr "Товары"
+
+msgid "Show %s in filter"
+msgstr "Показывать %s в фильтре"
+
+msgid "Display order: %s"
+msgstr "Порядок показа: %s"
+
+msgid "Save supplier settings"
+msgstr "Сохранить настройки поставщиков"

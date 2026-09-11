@@ -203,10 +203,12 @@ function psu_subcategory_thumbnail( $category ) {
  * every product from the selected branch on the same page.
  */
 function psu_category_archive_has_filters(): bool {
-    $known = ['s', 'brand', 'location', 'in_stock', 'min_price', 'max_price', 'rating_filter'];
+    $known = ['s', 'catalog_search', 'brand', 'location', 'in_stock', 'min_price', 'max_price', 'rating_filter'];
     foreach (array_keys($_GET) as $raw_key) {
         $key = sanitize_key((string) $raw_key);
-        if (in_array($key, $known, true) || strpos($key, 'filter_') === 0 || strpos($key, 'query_type_') === 0) {
+        $value = $_GET[$raw_key];
+        $has_value = is_array($value) ? count($value) > 0 : trim((string) $value) !== '';
+        if ($has_value && (in_array($key, $known, true) || strpos($key, 'filter_') === 0 || strpos($key, 'query_type_') === 0)) {
             return true;
         }
     }
@@ -474,7 +476,7 @@ add_action('pre_get_posts', function ($q) {
     if (is_admin() || !$q->is_main_query()) return;
 
     // shop + category pages
-    if (is_shop() || is_product_category()) {
+    if ((is_shop() || is_product_category()) && empty($_GET['orderby']) && !$q->get('_psu_original_search')) {
 
         // ❗ важно: именно tax_query
         $q->set('orderby', 'name');

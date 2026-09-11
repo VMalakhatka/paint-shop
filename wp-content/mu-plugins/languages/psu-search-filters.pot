@@ -61,3 +61,42 @@ msgstr ""
 
 msgid "Reset"
 msgstr ""
+
+msgid "Category"
+msgstr ""
+
+msgid "Supplier"
+msgstr ""
+
+msgid "All suppliers"
+msgstr ""
+
+msgid "Lavka: catalogue suppliers"
+msgstr ""
+
+msgid "You do not have permission to manage suppliers."
+msgstr ""
+
+msgid "Supplier settings saved."
+msgstr ""
+
+msgid "Search"
+msgstr ""
+
+msgid "Show in filter"
+msgstr ""
+
+msgid "Display order"
+msgstr ""
+
+msgid "Products"
+msgstr ""
+
+msgid "Show %s in filter"
+msgstr ""
+
+msgid "Display order: %s"
+msgstr ""
+
+msgid "Save supplier settings"
+msgstr ""

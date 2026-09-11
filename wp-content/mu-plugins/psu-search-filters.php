@@ -2,12 +2,62 @@
 /*
 Plugin Name: PSU Search & Filters
 Description: Базовые фильтры для витрин Woo (location / in_stock). Поиск — Relevanssi.
-Version: 1.3.0
+Version: 1.4.0
 Author: PaintCore
 Text Domain: psu-search-filters
 Domain Path: /languages
 */
 if (!defined('ABSPATH')) exit;
+
+require_once __DIR__ . '/psu-catalog-suppliers.php';
+
+// An empty search parameter makes WordPress discard the archive route.
+add_filter('request', function (array $vars): array {
+    if (is_admin()) return $vars;
+    if (isset($_GET['psu_filters'])) {
+        foreach (['min_price', 'max_price'] as $price_key) {
+            if (isset($_GET[$price_key]) && $_GET[$price_key] === '') {
+                unset($_GET[$price_key], $vars[$price_key]);
+            }
+        }
+        $search = isset($_GET['catalog_search']) && is_string($_GET['catalog_search'])
+            ? trim(sanitize_text_field(wp_unslash($_GET['catalog_search']))) : '';
+        if ($search !== '') {
+            $vars['s'] = $search;
+        } else {
+            unset($vars['s']);
+        }
+        if (isset($_GET['product_cat']) && is_string($_GET['product_cat'])) {
+            $vars['product_cat'] = sanitize_title(wp_unslash($_GET['product_cat']));
+        }
+    }
+    if (!empty($vars['product_cat']) && is_string($vars['product_cat'])) {
+        // Otherwise Woo's is_shop() takes precedence over the category template.
+        unset($vars['post_type']);
+    }
+    return $vars;
+});
+
+add_action('pre_get_posts', function (WP_Query $query): void {
+    if (is_admin() || !$query->is_main_query()) return;
+    $slug = $query->get('product_cat');
+    if (!is_string($slug) || $slug === '') return;
+    $term = get_term_by('slug', basename($slug), 'product_cat');
+    if ($term instanceof WP_Term) {
+        $query->queried_object = $term;
+        $query->queried_object_id = $term->term_id;
+    }
+}, 5);
+
+function psu_catalog_search_text(): string {
+    $raw = $_GET['catalog_search'] ?? $_GET['s'] ?? '';
+    return is_string($raw) ? trim(sanitize_text_field(wp_unslash($raw))) : '';
+}
+
+add_filter('woocommerce_is_filtered', function (bool $filtered): bool {
+    return $filtered || !empty($_GET['brand']) || !empty($_GET['location'])
+        || !empty($_GET['in_stock']) || psu_catalog_search_text() !== '';
+});
 
 function psu_searchable_identifier_meta_keys(): array {
     return [
@@ -144,7 +194,8 @@ add_action('pre_get_posts', function(WP_Query $q){
         return;
     }
 
-    $search = isset($_GET['s']) ? trim(sanitize_text_field(wp_unslash($_GET['s']))) : '';
+    $q->set('_psu_catalog_query', true);
+    $search = psu_catalog_search_text();
     if ($search !== '') {
         $exact_ids = psu_find_exact_identifier_product_ids($search);
         if ($exact_ids) {
@@ -211,6 +262,11 @@ add_filter('get_search_query', function ($search) {
 });
 
 function psu_catalog_filter_url(): string {
+    $category = psu_catalog_category();
+    if ($category) {
+        $url = get_term_link($category);
+        if (!is_wp_error($url)) return $url;
+    }
     if (function_exists('is_product_taxonomy') && is_product_taxonomy()) {
         $term = get_queried_object();
         $url = $term instanceof WP_Term ? get_term_link($term) : new WP_Error();
@@ -220,7 +276,16 @@ function psu_catalog_filter_url(): string {
     return home_url('/');
 }
 
-add_action('woocommerce_before_shop_loop', function () {
+function psu_catalog_category(): ?WP_Term {
+    $term = get_queried_object();
+    if ($term instanceof WP_Term && $term->taxonomy === 'product_cat') return $term;
+    $slug = get_query_var('product_cat');
+    if (!is_string($slug) || $slug === '') return null;
+    $term = get_term_by('slug', basename($slug), 'product_cat');
+    return $term instanceof WP_Term ? $term : null;
+}
+
+function psu_render_catalog_filters(): void {
     if (!function_exists('is_woocommerce') || !(is_shop() || is_product_taxonomy() || is_search())) return;
 
     $selected_locations = [];
@@ -236,31 +301,32 @@ add_action('woocommerce_before_shop_loop', function () {
         'orderby'    => 'name',
         'order'      => 'ASC',
     ]);
-    $brands = get_terms([
-        'taxonomy'   => 'product_brand',
-        'hide_empty' => true,
-        'orderby'    => 'name',
-        'order'      => 'ASC',
-    ]);
+    $brands = psu_catalog_supplier_terms(true);
     if (is_wp_error($locations)) $locations = [];
     if (is_wp_error($brands)) $brands = [];
 
-    $search = isset($_GET['s']) ? sanitize_text_field(wp_unslash($_GET['s'])) : '';
+    $search = psu_catalog_search_text();
+    $category = psu_catalog_category();
     $brand = isset($_GET['brand']) ? sanitize_title(wp_unslash($_GET['brand'])) : '';
     $min_price = isset($_GET['min_price']) ? wc_format_decimal(wp_unslash($_GET['min_price'])) : '';
     $max_price = isset($_GET['max_price']) ? wc_format_decimal(wp_unslash($_GET['max_price'])) : '';
     ?>
     <form class="psu-catalog-filters" method="get" action="<?php echo esc_url(psu_catalog_filter_url()); ?>">
+        <input type="hidden" name="psu_filters" value="1">
+        <?php if ($category): ?>
+            <input type="hidden" name="product_cat" value="<?php echo esc_attr($category->slug); ?>">
+            <div class="psu-catalog-filters__category"><?php echo esc_html__('Category', 'psu-search-filters') . ': '; ?><strong><?php echo esc_html($category->name); ?></strong></div>
+        <?php endif; ?>
         <div class="psu-catalog-filters__search">
             <label for="psu-catalog-search"><?php esc_html_e('Search products', 'psu-search-filters'); ?></label>
-            <input id="psu-catalog-search" type="search" name="s" value="<?php echo esc_attr($search); ?>" placeholder="<?php echo esc_attr__('Name, SKU or barcode', 'psu-search-filters'); ?>">
-            <input type="hidden" name="post_type" value="product">
+            <input id="psu-catalog-search" type="search" name="catalog_search" value="<?php echo esc_attr($search); ?>" placeholder="<?php echo esc_attr__('Name, SKU or barcode', 'psu-search-filters'); ?>">
+            <?php if (!$category): ?><input type="hidden" name="post_type" value="product"><?php endif; ?>
         </div>
 
         <label class="psu-catalog-filters__field">
-            <span><?php esc_html_e('Brand', 'psu-search-filters'); ?></span>
+            <span><?php esc_html_e('Supplier', 'psu-search-filters'); ?></span>
             <select name="brand">
-                <option value=""><?php esc_html_e('All brands', 'psu-search-filters'); ?></option>
+                <option value=""><?php esc_html_e('All suppliers', 'psu-search-filters'); ?></option>
                 <?php foreach ($brands as $brand_term): ?>
                     <option value="<?php echo esc_attr($brand_term->slug); ?>" <?php selected($brand, $brand_term->slug); ?>><?php echo esc_html($brand_term->name); ?></option>
                 <?php endforeach; ?>
@@ -290,7 +356,9 @@ add_action('woocommerce_before_shop_loop', function () {
         </div>
     </form>
     <?php
-}, 7);
+}
+add_action('woocommerce_before_shop_loop', 'psu_render_catalog_filters', 7);
+add_action('woocommerce_no_products_found', 'psu_render_catalog_filters', 5);
 
 add_action('wp_enqueue_scripts', function () {
     if (!function_exists('is_woocommerce') || !(is_shop() || is_product_taxonomy() || is_search())) return;
@@ -308,11 +376,16 @@ add_action('wp_enqueue_scripts', function () {
         .psu-catalog-filters__locations label>span,.psu-catalog-filters__stock>span{display:inline;margin:0;font-weight:400}
         .psu-catalog-filters__price{display:grid;grid-template-columns:1fr 1fr;gap:8px}
         .psu-catalog-filters__price>span{grid-column:1/-1}
-        .psu-catalog-filters__actions{display:flex;align-items:center;gap:12px}
-        .psu-catalog-filters__actions button{min-height:40px;margin:0}
+        .psu-catalog-filters__category{grid-column:1/-1;font-size:13px;color:#555}
+        .psu-catalog-filters>*{min-width:0}
+        .psu-catalog-filters__actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+        .psu-catalog-filters__actions button{min-height:36px;margin:0;padding:7px 12px;border:1px solid #28644c;border-radius:4px;background:#28644c;color:#fff;font-size:13px;line-height:20px;font-weight:600;white-space:nowrap;cursor:pointer}
+        .psu-catalog-filters__actions button:hover{background:#1d4b39}
+        .psu-catalog-filters__actions button:focus-visible{outline:2px solid #28644c;outline-offset:3px}
+        .psu-catalog-filters__actions a{font-size:13px}
         .psu-expanded-subcategories{padding-bottom:18px;border-bottom:1px solid #ddd}
         @media(max-width:900px){.psu-catalog-filters{grid-template-columns:1fr 1fr}}
-        @media(max-width:600px){.psu-catalog-filters{grid-template-columns:1fr}.psu-catalog-filters__actions button{flex:1 1 auto}}
+        @media(max-width:600px){.psu-catalog-filters{grid-template-columns:1fr}.psu-catalog-filters__actions button{min-height:44px}}
     ');
 });
 
