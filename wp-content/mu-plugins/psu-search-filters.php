@@ -2,7 +2,7 @@
 /*
 Plugin Name: PSU Search & Filters
 Description: Базовые фильтры для витрин Woo (location / in_stock). Поиск — Relevanssi.
-Version: 1.2.0
+Version: 1.2.1
 Author: PaintCore
 Text Domain: psu-search-filters
 Domain Path: /languages
@@ -22,11 +22,12 @@ function psu_searchable_identifier_meta_keys(): array {
     ];
 }
 
-/** Keep Relevanssi aligned with the fields actually written by product sync. */
-add_filter('option_relevanssi_index_fields', function ($fields) {
-    $current = array_filter(array_map('trim', explode(',', (string) $fields)));
-    return implode(',', array_values(array_unique(array_merge($current, psu_searchable_identifier_meta_keys()))));
-});
+/** Keep identifier fields indexed regardless of the Relevanssi custom-field mode. */
+function psu_add_relevanssi_identifier_meta_keys($fields): array {
+    $current = is_array($fields) ? $fields : [];
+    return array_values(array_unique(array_merge($current, psu_searchable_identifier_meta_keys())));
+}
+add_filter('relevanssi_index_custom_fields', 'psu_add_relevanssi_identifier_meta_keys', 20, 2);
 
 function psu_find_exact_identifier_product_ids(string $needle): array {
     global $wpdb;
