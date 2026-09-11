@@ -44,6 +44,8 @@
         el('results').innerHTML = state.rows.slice(state.page * 25, state.page * 25 + 25).map((row, offset) => {
             const index = state.page * 25 + offset;
             return '<section class="lps-purchase-sku"><h2>' + escape(row.sku) + ' · ' + escape(row.productName) + '</h2><p>' + escape(row.supplier.join(', ')) + ' · ' + escape(t.transitPool) + ': ' + display(row.transitPool) + '</p>' +
+                (row.supplierPrices || []).map((price) => '<details><summary>' + escape(t.supplierPrices) + ' · ' + escape(price.supplier) + ' #' + price.versionId + ' · ' + escape((t.supplierPriceLabels || {})[price.status] || price.status) + '</summary>' +
+                    price.offers.map((offer) => '<p>' + escape(offer.article) + ' · GTIN ' + escape(offer.originalGtin) + ' · VE ' + escape(offer.pack) + ' · ' + escape(offer.price == null ? '—' : offer.price) + ' ' + escape(offer.currency) + ' · ' + escape((t.supplierPriceLabels || {})[offer.priceBasis] || offer.priceBasis) + '</p><p>' + escape(offer.issues.map((key) => (t.supplierPriceLabels || {})[key] || key).join('; ')) + '</p>').join('') + '</details>').join('') +
                 '<p>' + escape(t.transitWarehouses) + ': ' + escape((row.transitWarehouseIds || []).join(', ') || '—') + ' · ' + escape(t.transitStatus) + ': ' + escape((t.transitLabels || {})[row.transitStatus] || row.transitStatus) + '</p>' +
                 '<details><summary>' + escape(t.transitWarehouses) + '</summary>' +
                 (row.transitConsistency ? '<p><strong>' + escape(t.networkConsistency) + ':</strong> ' + escape((t.transitLabels || {})[row.transitConsistency.status] || row.transitConsistency.status || '—') + '</p><p><strong>' + escape(t.networkRecommendation) + ':</strong> ' + escape(row.transitConsistency.recommendation || '—') + '</p>' : '') +
@@ -57,7 +59,8 @@
                 '</tbody></table></div><details><summary>' + escape(t.details) + '</summary><form data-edit-form="' + index + '">' + row.groups.map((group) =>
                     '<fieldset data-group="' + escape(group.groupCode) + '"><legend>' + escape(group.groupName) + '</legend><div class="lps-purchase-inputs">' +
                     ['inTransit', 'openOrders', 'pack', 'moq'].map((key) => input(key, group.inputs[key], t[key])).join('') +
-                    input('quantity', group.managerQuantity, t.quantity) + input('reason', group.managerReason, t.reason, 'text') + '</div><label><input type="checkbox" data-field="receiptsReviewed"' + (group.receiptsReviewed ? ' checked' : '') + '> ' + escape(t.receiptsReviewed) + '</label><ul class="lps-purchase-review">' +
+                    '<label><span>' + escape(t.respectPack) + '</span><input type="checkbox" data-field="respectPack"' + (group.respectPack ? ' checked' : '') + '></label>' +
+                    input('quantity', group.managerQuantity, t.quantity) + input('reason', group.managerReason, t.reason, 'text') + '</div><p>' + escape(t.packHelp) + '</p><label><input type="checkbox" data-field="receiptsReviewed"' + (group.receiptsReviewed ? ' checked' : '') + '> ' + escape(t.receiptsReviewed) + '</label><ul class="lps-purchase-review">' +
                     group.issues.map((issue) => '<li>' + escape(t.issues[issue] || issue) + '</li>').join('') + '</ul></fieldset>').join('') +
                 '<button class="button" type="submit"' + (!state.complete || state.busy ? ' disabled' : '') + '>' + escape(t.apply) + '</button></form></details></section>';
         }).join('');

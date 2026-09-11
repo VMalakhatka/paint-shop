@@ -265,11 +265,12 @@
             });
             groups.push(group);
         });
-        return { version: 1, enabled: el('lps-as-purchase-enabled').checked, allowTransfers: el('lps-as-purchase-transfers').checked, groups: groups };
+        return { version: 1, respectPack: el('lps-as-purchase-pack').checked, enabled: el('lps-as-purchase-enabled').checked, allowTransfers: el('lps-as-purchase-transfers').checked, groups: groups };
     }
 
     function applyPurchasePlanning(plan) {
         plan = plan || {};
+        el('lps-as-purchase-pack').checked = plan.respectPack !== false;
         el('lps-as-purchase-enabled').checked = plan.enabled === true;
         el('lps-as-purchase-transfers').checked = plan.allowTransfers === true;
         const saved = new Map((plan.groups || []).map((group) => [group.code, group]));

@@ -27,7 +27,7 @@
 | Оформить оптовый заказ, импортировать/экспортировать список, сохранить черновик, повторить старый заказ, увидеть разделение, баланс и документы | [WHOLESALE_CUSTOMER_GUIDE_UK.md](WHOLESALE_CUSTOMER_GUIDE_UK.md) |
 | Загружать и исправлять изображения | [MEDIA_MANAGER_GUIDE_UK.md](MEDIA_MANAGER_GUIDE_UK.md) |
 | Проверить Woo → Java/Folio заказ | [FOLIO_ORDER_JSON_CONTRACT.md](FOLIO_ORDER_JSON_CONTRACT.md) |
-| Пользоваться и развивать многоскладскую товарную аналитику | [WordPress frontend schema v4](api/FOLIO_PRODUCT_ANALYTICS_FRONTEND_V4.md), [план фильтров](FOLIO_PRODUCT_ANALYTICS_FILTERS_PLAN.md), [подневная доступность](api/FOLIO_PRODUCT_AVAILABILITY_BACKEND_TASK.md) и [историческое задание Java](api/FOLIO_PRODUCT_ANALYTICS_SCENARIOS_BACKEND_TASK.md) |
+| Пользоваться и развивать многоскладскую товарную аналитику | [Карта владельцев и реализации](BACKEND_GUIDE.md#товарная-аналитика-карта-реализации), [WordPress v4 / Java v6](api/FOLIO_PRODUCT_ANALYTICS_FRONTEND_V4.md), [операторский регламент](OPERATIONS_RUNBOOK.md#наличие-товара-и-объединённые-склады-schema-v5), [план фильтров](FOLIO_PRODUCT_ANALYTICS_FILTERS_PLAN.md) и [историческое задание Java](api/FOLIO_PRODUCT_ANALYTICS_SCENARIOS_BACKEND_TASK.md) |
 | Ограничить тестовый WayForPay | [WAYFORPAY_TEST_ACCESS.md](WAYFORPAY_TEST_ACCESS.md) |
 
 ## Аудитории
@@ -105,3 +105,5 @@ media guide и операционный runbook. Для
 
 Текущая очередь превращения черновиков в проверяемые инструкции находится в
 [KNOWN_GAPS.md](KNOWN_GAPS.md).
+
+Прайсы поставщиков: [загрузка XLSX, варианты VE, активация и ограничения](OPERATIONS_RUNBOOK.md#импорт-прайса-поставщика).

@@ -75,6 +75,7 @@ function lps_purchase_profile(array $input): array {
         ];
     }
     return ['version' => 1, 'enabled' => !empty($input['enabled']),
+        'respectPack' => ($input['respectPack'] ?? true) !== false,
         'allowTransfers' => !empty($input['allowTransfers']), 'groups' => $groups];
 }
 
@@ -100,7 +101,7 @@ function lps_purchase_resolve_groups(array $profile, array $configured): array {
             || $group['leadTimeDays'] === null || $group['targetDays'] === null || $group['safetyDays'] === null) {
             throw new InvalidArgumentException(__('Set a receiving warehouse, lead time, target coverage and safety stock days for every destination group.', 'lavka-price-sync'));
         }
-        $resolved[] = array_merge($group, ['name' => $current['name'], 'warehouseIds' => $current['warehouseIds']]);
+        $resolved[] = array_merge($group, ['respectPack' => ($plan['respectPack'] ?? true) !== false, 'name' => $current['name'], 'warehouseIds' => $current['warehouseIds']]);
     }
     return $resolved;
 }
@@ -129,6 +130,7 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
     $allocated_transit = 0;
     foreach ($groups as $group) {
         $edit = $edits[$group['code']] ?? [];
+        $respect_pack = ($edit['respectPack'] ?? $group['respectPack'] ?? true) !== false;
         $issues = [];
         if ($confirmed_transit['issue']) $issues[] = $confirmed_transit['issue'];
         if ($transit_ids && ($edit['receiptsReviewed'] ?? false) !== true) $issues[] = 'RECEIPTS_REVIEW_REQUIRED';
@@ -144,7 +146,7 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
             $metrics = $member['metrics'] ?? [];
             // Missing warehouse rows are unknown, not proof of zero stock.
             foreach (['physicalQuantity', 'availableQuantity', 'regularSoldUnits', 'returnQuantity'] as $key) {
-                if (lps_purchase_number($metrics[$key] ?? null) === null) $valid = false;
+                if (lps_purchase_number($metrics[$key] ?? null, in_array($key, ['physicalQuantity', 'availableQuantity'], true) ? -1000000000 : 0) === null) $valid = false;
             }
             $physical += (float)($metrics['physicalQuantity'] ?? 0);
             $available += (float)($metrics['availableQuantity'] ?? 0);
@@ -177,15 +179,16 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
         $pack = lps_purchase_number($edit['pack'] ?? ($row['dimensions']['packageQuantity'] ?? null), 0.000001);
         $moq = lps_purchase_number($edit['moq'] ?? ($row['dimensions']['minimumOrderQuantity'] ?? null));
         $allocated_transit += $incoming ?? 0;
-        $ready = !$issues && $incoming !== null && $open_orders !== null && $pack !== null && $moq !== null;
+        $ready = !$issues && $incoming !== null && $open_orders !== null && (!$respect_pack || $pack !== null) && $moq !== null;
         $position = $available + ($incoming ?? 0) + ($open_orders ?? 0);
         $result[$group['code']] = [
             'groupCode' => $group['code'], 'groupName' => $group['name'], 'warehouseIds' => $group['warehouseIds'],
             'receivingWarehouseId' => $group['receivingWarehouseId'], 'physical' => $valid ? $physical : null,
             'available' => $valid ? $available : null, 'regularSales' => $valid ? $sales : null,
-            'returns' => $valid ? $returns : null, 'coverageDays' => $daily > 0 ? $available / $daily : null,
+            'returns' => $valid ? $returns : null, 'coverageDays' => $daily > 0 ? max(0, $available) / $daily : null,
             'target' => $target, 'needBeforeReceipts' => $target === null ? null : max(0, $target - $available),
             'inputs' => ['inTransit' => $incoming, 'openOrders' => $open_orders, 'pack' => $pack, 'moq' => $moq],
+            'respectPack' => $respect_pack,
             'receiptsReviewed' => ($edit['receiptsReviewed'] ?? false) === true,
             'position' => $position, 'ready' => $ready, 'issues' => $issues,
             'transferIn' => 0, 'transferOut' => 0, 'transfers' => [],
@@ -225,7 +228,7 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
     foreach ($result as $code => &$item) {
         if ($item['ready']) {
             $need = max(0, $item['target'] - $item['position'] - $item['transferIn'] + $item['transferOut']);
-            $item['recommendedQuantity'] = $need <= 0.000001 ? 0 : round(ceil((max($need, $item['inputs']['moq']) - 0.0000001) / $item['inputs']['pack']) * $item['inputs']['pack'], 6);
+            $item['recommendedQuantity'] = $need <= 0.000001 ? 0 : ($item['respectPack'] ? round(ceil((max($need, $item['inputs']['moq']) - 0.0000001) / $item['inputs']['pack']) * $item['inputs']['pack'], 6) : round(max($need, $item['inputs']['moq']), 6));
             $destination = $members[$item['receivingWarehouseId']];
             $policy = $destination['orderPolicy'];
             $quantity = $item['managerQuantity'] ?? $item['recommendedQuantity'];
@@ -233,7 +236,7 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
                 $item['issues'][] = 'DESTINATION_MAXIMUM_EXCEEDED';
                 $item['recommendedQuantity'] = null;
             }
-            if ($quantity > 0 && ($quantity + 0.000001 < $item['inputs']['moq'] || abs($quantity / $item['inputs']['pack'] - round($quantity / $item['inputs']['pack'])) > 0.000001)) $item['issues'][] = 'PACK_OR_MOQ_VIOLATION';
+            if ($quantity > 0 && ($quantity + 0.000001 < $item['inputs']['moq'] || ($item['respectPack'] && abs($quantity / $item['inputs']['pack'] - round($quantity / $item['inputs']['pack'])) > 0.000001))) $item['issues'][] = 'PACK_OR_MOQ_VIOLATION';
         } else $item['issues'][] = 'SUPPLY_INPUTS_REQUIRED';
         if ($item['managerQuantity'] !== null && $item['managerReason'] === '') $item['issues'][] = 'MANAGER_REASON_REQUIRED';
         $item['finalQuantity'] = !$item['issues'] ? ($item['managerQuantity'] ?? $item['recommendedQuantity']) : null;
@@ -242,6 +245,7 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
     }
     unset($item);
     return ['sku' => $row['sku'] ?? '', 'productName' => $row['productName'] ?? '',
+        'supplierPrices' => $row['supplierPrices'] ?? [],
         'supplier' => $row['dimensions']['currentSuppliers'] ?? [], 'transitPool' => $transit_pool,
         'transitStatus' => $confirmed_transit['status'], 'transitWarehouseIds' => $transit_ids,
         'transitGenerationId' => $transit['generationId'] ?? null,

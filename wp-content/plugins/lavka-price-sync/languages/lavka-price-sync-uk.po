@@ -5819,3 +5819,275 @@ msgstr "Ручна синхронізація цін для зазначених
 
 #~ msgid "Confirmed transit shared by all groups"
 #~ msgstr "Підтверджений транзит на всі групи"
+
+#: inc/purchase-planning.php
+msgid "Respect pack quantity"
+msgstr "Враховувати кратність упаковки"
+
+#: inc/purchase-planning.php
+msgid "Without pack rounding, the supplier minimum order still applies. Pack discounts are not calculated."
+msgstr "Без округлення до упаковки мінімальне замовлення постачальника залишається чинним. Знижки за упаковку не розраховуються."
+
+#: inc/purchase-planning.php
+msgid "Start a new preview with corrected free stock snapshots (schema 6)."
+msgstr "Оновіть знімки з виправленим вільним залишком (схема 6) і почніть новий розрахунок."
+
+#: inc/supplier-prices-admin.php
+msgid "Supplier price lists"
+msgstr "Прайси постачальників"
+
+#: inc/supplier-prices-admin.php
+msgid "Supplier"
+msgstr "Постачальник"
+
+#: inc/supplier-prices-admin.php
+msgid "Upload XLSX"
+msgstr "Завантажити XLSX"
+
+#: inc/supplier-prices-admin.php
+msgid "Worksheet"
+msgstr "Аркуш"
+
+#: inc/supplier-prices-admin.php
+msgid "Header row"
+msgstr "Рядок заголовків"
+
+#: inc/supplier-prices-admin.php
+msgid "Supplier article"
+msgstr "Артикул постачальника"
+
+#: inc/supplier-prices-admin.php
+msgid "GTIN"
+msgstr "GTIN"
+
+#: inc/supplier-prices-admin.php
+msgid "VE Unit"
+msgstr "VE Unit"
+
+#: inc/supplier-prices-admin.php
+msgid "List price"
+msgstr "Ціна прайсу"
+
+#: inc/supplier-prices-admin.php
+msgid "Discount"
+msgstr "Знижка"
+
+#: inc/supplier-prices-admin.php
+msgid "Invoice price"
+msgstr "Ціна в рахунку"
+
+#: inc/supplier-prices-admin.php
+msgid "Netto marker"
+msgstr "Позначка Netto"
+
+#: inc/supplier-prices-admin.php
+msgid "Currency"
+msgstr "Валюта"
+
+#: inc/supplier-prices-admin.php
+msgid "Valid from"
+msgstr "Діє з"
+
+#: inc/supplier-prices-admin.php
+msgid "Per unit"
+msgstr "За одиницю"
+
+#: inc/supplier-prices-admin.php
+msgid "Per pack"
+msgstr "За упаковку"
+
+#: inc/supplier-prices-admin.php
+msgid "This is the complete supplier price list. Mark missing products as discontinued."
+msgstr "Це повний прайс постачальника. Позначити відсутні товари як зняті з виробництва."
+
+#: inc/supplier-prices-admin.php
+msgid "For Netto rows with an empty invoice price, use the list price without another discount."
+msgstr "Для рядків Netto з порожньою ціною рахунку використовувати ціну прайсу без додаткової знижки."
+
+#: inc/supplier-prices-admin.php
+msgid "Check import"
+msgstr "Перевірити імпорт"
+
+#: inc/supplier-prices-admin.php
+msgid "Activate this version"
+msgstr "Активувати цю версію"
+
+#: inc/supplier-prices-admin.php
+msgid "Download original"
+msgstr "Завантажити оригінал"
+
+#: inc/supplier-prices-admin.php
+msgid "Export review CSV"
+msgstr "Експорт перевірки CSV"
+
+#: inc/supplier-prices-admin.php
+msgid "Rows"
+msgstr "Рядки"
+
+#: inc/supplier-prices-admin.php
+msgid "Matched rows"
+msgstr "Зіставлені рядки"
+
+#: inc/supplier-prices-admin.php
+msgid "Rows requiring review"
+msgstr "Рядки для перевірки"
+
+#: inc/supplier-prices-admin.php
+msgid "Discontinued products"
+msgstr "Товари, зняті з виробництва"
+
+#: inc/supplier-prices-admin.php
+msgid "Present in price list"
+msgstr "Є в прайсі"
+
+#: inc/supplier-prices-admin.php
+msgid "Discontinued"
+msgstr "Знято з виробництва"
+
+#: inc/supplier-prices-admin.php
+msgid "Not included in partial update"
+msgstr "Не включено до часткового оновлення"
+
+#: inc/supplier-prices-admin.php
+msgid "GTIN is missing or invalid."
+msgstr "GTIN відсутній або некоректний."
+
+#: inc/supplier-prices-admin.php
+msgid "Supplier article is missing."
+msgstr "Артикул постачальника відсутній."
+
+#: inc/supplier-prices-admin.php
+msgid "GTIN matches several internal products."
+msgstr "GTIN відповідає кільком внутрішнім товарам."
+
+#: inc/supplier-prices-admin.php
+msgid "No internal product matches this GTIN."
+msgstr "Внутрішній товар із цим GTIN не знайдено."
+
+#: inc/supplier-prices-admin.php
+msgid "Pack quantity is missing or invalid."
+msgstr "Кількість в упаковці відсутня або некоректна."
+
+#: inc/supplier-prices-admin.php
+msgid "Price is missing or contains an Excel error."
+msgstr "Ціна відсутня або містить помилку Excel."
+
+#: inc/supplier-prices-admin.php
+msgid "The price formula or its saved result requires review."
+msgstr "Формула ціни або її збережений результат потребує перевірки."
+
+#: inc/supplier-prices-admin.php
+msgid "The same supplier article, GTIN and pack occur more than once."
+msgstr "Артикул постачальника, GTIN та упаковка повторюються."
+
+#: inc/supplier-prices-admin.php
+msgid "No supplier catalog is available. Check the supplier name and analytics snapshots."
+msgstr "Каталог постачальника недоступний. Перевірте назву та знімки аналітики."
+
+#: inc/supplier-prices-admin.php
+msgid "The catalog changed. Check the import again before activation."
+msgstr "Каталог змінився. Повторно перевірте імпорт перед активацією."
+
+#: inc/supplier-prices-admin.php
+msgid "The version changed. Reload and check the import again."
+msgstr "Версія змінилася. Оновіть сторінку та повторно перевірте імпорт."
+
+#: inc/supplier-prices-admin.php
+msgid "Invalid GTIN rows prevent activation of a full list. Correct them or import a partial update."
+msgstr "Рядки з некоректним GTIN блокують активацію повного прайсу. Виправте їх або імпортуйте часткове оновлення."
+
+#: inc/supplier-prices-admin.php
+msgid "This file and import configuration are already active."
+msgstr "Цей файл із цими параметрами імпорту вже активний."
+
+#: inc/supplier-prices-admin.php
+msgid "Check the worksheet, column letters, date and currency."
+msgstr "Перевірте аркуш, літери колонок, дату та валюту."
+
+#: inc/supplier-prices-admin.php
+msgid "Select an existing worksheet."
+msgstr "Виберіть наявний аркуш."
+
+#: inc/supplier-prices-admin.php
+msgid "No product rows were found with these settings."
+msgstr "За цими параметрами рядків товарів не знайдено."
+
+#: inc/supplier-prices-admin.php
+msgid "The file could not be uploaded."
+msgstr "Не вдалося завантажити файл."
+
+#: inc/supplier-prices-admin.php
+msgid "Upload an XLSX file."
+msgstr "Завантажте файл XLSX."
+
+#: inc/supplier-prices-admin.php
+msgid "The file exceeds the import size limit."
+msgstr "Файл перевищує обмеження розміру імпорту."
+
+#: inc/supplier-prices-admin.php
+msgid "The import exceeds the row limit."
+msgstr "Імпорт перевищує обмеження кількості рядків."
+
+#: inc/supplier-prices-admin.php
+msgid "PHP ZIP and SimpleXML extensions are required."
+msgstr "Потрібні розширення PHP ZIP та SimpleXML."
+
+#: inc/supplier-prices-admin.php
+msgid "Files with macros or external workbook links are not accepted."
+msgstr "Файли з макросами або зовнішніми посиланнями на книги не приймаються."
+
+#: inc/supplier-prices-admin.php
+msgid "The workbook contains unsupported XML declarations."
+msgstr "Книга містить непідтримувані оголошення XML."
+
+#: inc/supplier-prices-admin.php
+msgid "The XLSX file could not be read."
+msgstr "Не вдалося прочитати файл XLSX."
+
+#: inc/supplier-prices-admin.php
+msgid "The import could not be saved. No site prices were changed."
+msgstr "Не вдалося зберегти імпорт. Ціни сайту не змінено."
+
+#: inc/supplier-prices-admin.php
+msgid "The price list version was not found."
+msgstr "Версію прайсу не знайдено."
+
+#: inc/supplier-prices-admin.php
+msgid "Internal SKU"
+msgstr "Внутрішній артикул"
+
+#: inc/supplier-prices-admin.php
+msgid "Source row"
+msgstr "Рядок джерела"
+
+#: inc/supplier-prices-admin.php
+msgid "Uploaded"
+msgstr "Завантажено"
+
+#: inc/supplier-prices-admin.php
+msgid "Draft"
+msgstr "Чернетка"
+
+#: inc/supplier-prices-admin.php
+msgid "Supplier information only. Site and Folio prices, stock and product visibility are never changed."
+msgstr "Лише інформація постачальника. Ціни сайту та ФОЛІО, залишки й видимість товарів не змінюються."
+
+#: inc/supplier-prices-admin.php
+msgid "I reviewed the variants, price errors and discontinued products. Activate these supplier data only."
+msgstr "Варіанти, помилки цін і зняті товари перевірено. Активувати лише ці дані постачальника."
+
+#: inc/supplier-prices-admin.php
+msgid "Find SKU, GTIN or supplier article"
+msgstr "Знайти артикул, GTIN або артикул постачальника"
+
+#: inc/supplier-prices-admin.php
+msgid "Search"
+msgstr "Пошук"
+
+#: inc/supplier-prices-admin.php
+msgid "Supplier price list information"
+msgstr "Дані прайсу постачальника"
+
+#: inc/supplier-prices-admin.php
+msgid "Processing..."
+msgstr "Обробка…"

@@ -15,7 +15,8 @@
 .lps-purchase legend { font-weight: 600; }
 .lps-purchase-inputs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
 .lps-purchase-inputs span { display: block; margin-bottom: 6px; }
-.lps-purchase-inputs input { width: 100%; }
+.lps-purchase-inputs input { width: 100%; box-sizing: border-box; }
+.lps-purchase-inputs input[type="checkbox"] { width: auto; }
 .lps-purchase-review { color: #8a4b08; }
 .lps-purchase pre { white-space: pre-wrap; overflow-wrap: anywhere; }
 @media (max-width: 782px) { .lps-purchase-inputs { grid-template-columns: 1fr; } }

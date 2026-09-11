@@ -116,3 +116,34 @@ check(lps_purchase_period_days(['from' => '2024-02-01', 'to' => '2024-02-29']) =
 try { lps_purchase_period_days(['from' => '2026-02-30', 'to' => '2026-03-01']); throw new RuntimeException('Accepted invalid date'); }
 catch (InvalidArgumentException $expected) {}
 echo "PASS: scenario roundtrip, group demand, transfer conservation, policy gates, transit, pack/MOQ and manager adjustments\n";
+
+// User's KR-17817: observed sales 11, free stock 6, one pack of 6.
+$one = [['code' => 'one', 'name' => 'One', 'warehouseIds' => [1], 'receivingWarehouseId' => 1,
+    'leadTimeDays' => 0, 'targetDays' => 30, 'safetyDays' => 0]];
+$fixture = ['sku' => 'KR-17817', 'dimensions' => ['currentSuppliers' => ['Kreul'], 'packageQuantity' => 6, 'minimumOrderQuantity' => 0],
+    'metrics' => ['grossProfit' => 100], 'networkOrderPolicy' => ['orderAllowed' => true, 'status' => 'ALLOWED'],
+    'warehouseBreakdown' => [member(1, 6, 11)]];
+$edits = ['one' => ['openOrders' => 0]];
+check(lps_purchase_calculate($fixture, $one, 30, false, $edits, [])['groups'][0]['finalQuantity'] === 6.0, 'Pack rounding uses database pack');
+$edits['one']['respectPack'] = false;
+check(lps_purchase_calculate($fixture, $one, 30, false, $edits, [])['groups'][0]['finalQuantity'] === 5.0, 'Without pack rounding only the need is purchased');
+$edits['one'] += ['quantity' => 2, 'reason' => 'Unit purchase confirmed'];
+check(lps_purchase_calculate($fixture, $one, 30, false, $edits, [])['groups'][0]['finalQuantity'] === 2.0, 'Two units allowed without pack rounding');
+$edits['one']['respectPack'] = true;
+check(lps_purchase_calculate($fixture, $one, 30, false, $edits, [])['groups'][0]['finalQuantity'] === null, 'Two units rejected when pack rounding enabled');
+$edits['one']['respectPack'] = false;
+$fixture['dimensions']['minimumOrderQuantity'] = 3;
+check(lps_purchase_calculate($fixture, $one, 30, false, $edits, [])['groups'][0]['finalQuantity'] === null, 'Ignoring pack does not ignore supplier MOQ');
+$fixture['dimensions']['minimumOrderQuantity'] = 0;
+$fixture['dimensions']['packageQuantity'] = null;
+check(lps_purchase_calculate($fixture, $one, 30, false, $edits, [])['groups'][0]['finalQuantity'] === 2.0, 'Unknown pack is not required when disabled');
+$edits['one']['quantity'] = 0;
+check(lps_purchase_calculate($fixture, $one, 30, false, $edits, [])['groups'][0]['finalQuantity'] === 0.0, 'Explicit zero manager override is retained');
+$fixture['warehouseBreakdown'][0]['metrics']['availableQuantity'] = -11;
+$fixture['warehouseBreakdown'][0]['metrics']['physicalQuantity'] = 19;
+unset($edits['one']['quantity']);
+$negative = lps_purchase_calculate($fixture, $one, 30, false, $edits, [])['groups'][0];
+check($negative['available'] === -11.0 && $negative['finalQuantity'] === 22.0, 'Negative free stock increases deficit and is not missing data');
+$profile['purchasePlanning']['respectPack'] = false;
+check(lps_analytics_scenario_sanitize_profile($profile)['purchasePlanning']['respectPack'] === false, 'Scenario retains unpacked mode');
+echo "PASS: packing modes, manual unit orders, MOQ, zero override and negative free stock\n";

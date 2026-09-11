@@ -80,6 +80,48 @@ idempotency key, наблюдаемый terminal status и план восста
 - `.agents/skills/work-with-folio-mssql/` — legacy compatibility и безопасная работа
   с Paint_Ua/Paint_Rus.
 
+## Товарная аналитика: карта реализации
+
+Проверено: 2026-09-10, локальные исходники WordPress и Java; production не проверялся.
+Доменный владелец — `$folio-inventory-profit-planning`; WordPress сопровождает
+`$lavka-woo`, Java/ФОЛІО — `$work-with-folio-mssql`, документы —
+`$lavka-project-documentation`.
+
+| Область | Владелец кода | Подтверждённая реализация и граница |
+|---|---|---|
+| Лавка: сценарії аналітики | `lavka-price-sync/inc/analytics-scenarios.php`, `assets/analytics-scenarios-v4.js` | Имена, версии, таблица ревизий, архивирование, проверка конфликта версии; профиль v4 допускает наличие v5 и параметры purchase preview |
+| Лавка: товарна аналітика | `lavka-price-sync/inc/product-analytics.php`, `assets/product-analytics-v4.js` | Несколько складов, товар/движения, поддержанные include/exclude, серверные итоги, cursor; неподтверждённые измерения определяются capabilities |
+| Наличие и группы | `lavka-price-sync/inc/product-availability.php`; Java `FolioAvailabilityOptions`, `FolioProductAvailabilityHistory`, analytics service/DAO | Дни и проценты отсутствия, MIN=0, статусы качества; объединение по дням рассчитывает Java |
+| Глобальные группы и транспорт | `lavka-sync/inc/warehouse-map.php` | Состав групп, ревизия, список транспортных складов; сценарий хранит коды групп |
+| Учётные факты и метрики | Java `FolioProductSnapshotService`, source/snapshot DAO, `FolioProductAnalyticsService` и `FolioProductAnalyticsDao` | Движения, продажи, возвраты, остатки, себестоимость, валовая прибыль, GMROI, coverage; query читает MariaDB, снимок извлекается из ФОЛІО |
+| Транспортный остаток | Java `FolioTransitAnalytics`; WordPress transit consumer и purchase model | calculationVersion=3 разделяет физический и поставщицкий остаток; неподтверждённая согласованность сети блокирует закупку |
+| Формування замовлення постачальнику — попередній розрахунок | `lavka-price-sync/inc/purchase-planning.php`, `purchase-planning-model.php`, `assets/purchase-planning.js` | Групповая потребность, lead time/целевые/страховые дни, MOQ/упаковка, перемещения между группами, корректировка с причиной; только временный preview |
+| Экспорт | `lavka-price-sync/inc/product-analytics-export.php`, purchase export | CSV/XLSX, контроль полноты и поколений; параметры и объяснение расчёта сохраняются в выгрузке |
+| Обновление снимков | `lavka-price-sync/inc/analytics-snapshot-queue.php` | Последовательная очередь под общим lock, без перерасчёта цен; потерянный POST не повторяется автоматически |
+
+Формат WordPress-сценария v4 и версия Java-снимка — разные версии.
+Аудит 2026-09-10 относился к Java schema 5. Подготовленное 2026-09-11
+исправление свободного остатка использует `ANALYTICS_SCHEMA_VERSION=6` и требует
+обновлённых снимков; одной
+Flyway V13 недостаточно. Точные запросы и границы потребителя:
+[контракт WordPress](api/FOLIO_PRODUCT_ANALYTICS_FRONTEND_V4.md).
+Настройка и формулы preview остаются в
+[операторском регламенте](OPERATIONS_RUNBOOK.md#формирование-заказа-поставщику-preview).
+
+Проверено исполнением шести изолированных PHP suites в
+`wp-content/plugins/lavka-price-sync/tests/`: `purchase-planning.php`,
+`purchase-planning-session.php`, `product-availability.php`,
+`transport-warehouses.php`, `configurable-transit.php`, `analytics-snapshot-queue.php`.
+Все завершились PASS. Они не загружают рабочую ФОЛІО. Java-тесты analytics,
+availability и transit изучены по исходникам; новый запуск Maven не выполнялся.
+Браузерная приёмка desktop/mobile, реальная выдача файлов и сверка Paint_Ua
+в этом аудите не выполнены. Изменена только документация: i18n и deploy приложения
+не требуются. Перед будущим выпуском нужны совместимая Java, снимки v5 и UI-приёмка
+всех трёх разделов по регламенту.
+
+Оставшиеся ограничения и порядок развития:
+[аналитика и закупки](KNOWN_GAPS.md#аналитика-и-закупки).
+
 ## Основные потоки
 
 | Поток | Последовательность | Где точный контракт |
@@ -296,3 +338,28 @@ Java владеет V15 `folio_profit_report_month/revision` в application Mari
 `class-profit-history.php`; `profit-history.js` открывает неизменённый DTO
 в существующем viewer. В ФОЛИО нет новых таблиц/записей.
 [Контракт и запуск](api/FOLIO_PROFIT_SAVED_REPORTS_FRONTEND.md).
+
+
+### Изменение purchase preview от 2026-09-11
+
+Подготовлены выбор упаковки в сценарии/на SKU, сохранение режима в экспорте,
+допуск отрицательного свободного остатка и обязательная schema 6. Java-исправление
+source mapping находится в отдельной ветке `codex/purchase-preview-stock`.
+Проверки этого изменения: 50 Java unit-тестов в семи наборах, Maven package,
+шесть PHP suites, desktop/mobile UI fixture, UK/RU catalogs и documentation gates
+обоих репозиториев. Production и настоящая интеграционная UI-приёмка не выполнялись.
+Требования к выпуску и ограничения — в
+[операторском регламенте](OPERATIONS_RUNBOOK.md#обновление-preview-свободный-остаток-и-упаковка).
+
+
+### Дополнительные прайсы поставщиков
+
+Импорт XLSX принадлежит WordPress `lavka-price-sync`: `supplier-price-model.php`
+разбирает данные, `supplier-prices.php` хранит версии в двух prefixed InnoDB
+таблицах `lps_supplier_prices` / `lps_supplier_price_heads`,
+`supplier-prices-admin.php` предоставляет защищённый admin-post workflow.
+Источник сопоставлений — read-only активный `folio_product_metric_current`
+(поставщик, source_database, sku, primary_barcode, generation_id). Записи цен,
+товаров и складских метрик не меняются. Purchase preview закрепляет версии
+и добавляет `supplierPrices` в строки и экспорт.
+[Эксплуатация, ограничения, приёмка и откат](OPERATIONS_RUNBOOK.md#импорт-прайса-поставщика).

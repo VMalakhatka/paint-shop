@@ -51,6 +51,7 @@ require_once __DIR__.'/inc/product-analytics.php';
 require_once __DIR__.'/inc/analytics-snapshot-queue.php';
 require_once __DIR__.'/inc/product-analytics-export.php';
 require_once __DIR__.'/inc/purchase-planning.php';
+require_once __DIR__.'/inc/supplier-prices.php';
 
 add_action('init', function () {
   foreach (['administrator','shop_manager'] as $r) {

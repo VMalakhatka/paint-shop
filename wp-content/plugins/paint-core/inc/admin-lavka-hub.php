@@ -142,7 +142,7 @@ add_action('admin_enqueue_scripts', function (): void {
         ['id' => 'customers', 'label' => __('Customer relations', 'paint-core'), 'pages' => ['pc-folio-customer-debtors']],
         ['id' => 'stock', 'label' => __('Stock', 'paint-core'), 'pages' => ['lavka-sync', 'lavka-stock-report', 'lavka-logs']],
         ['id' => 'full-sync', 'label' => __('Full synchronization', 'paint-core'), 'pages' => ['lts-main', 'lts-run', 'lts-logs', 'lts-media', 'lts-cron-summary']],
-        ['id' => 'prices', 'label' => __('Prices', 'paint-core'), 'pages' => ['lps-main', 'lps-mapping', 'lps-run', 'lps-logs', 'role-price-import-lite']],
+        ['id' => 'prices', 'label' => __('Prices', 'paint-core'), 'pages' => ['lps-main', 'lps-mapping', 'lps-run', 'lps-logs', 'role-price-import-lite', 'lps-supplier-prices']],
         ['id' => 'analytics', 'label' => __('Analytics', 'paint-core'), 'pages' => ['lps-analytics-scenarios', 'lps-product-analytics', 'lps-purchase-planning']],
         ['id' => 'maintenance', 'label' => __('Database maintenance', 'paint-core'), 'pages' => ['lps-accounting-prices']],
         ['id' => 'reports', 'label' => __('Reports', 'paint-core'), 'pages' => ['lavka-reports', 'lavka-profit-report', 'lavka-document-audit']],

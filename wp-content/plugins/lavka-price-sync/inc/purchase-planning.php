@@ -7,6 +7,8 @@ const LPS_PURCHASE_MAX_SKUS = 10000;
 
 function lps_purchase_i18n(): array {
     return [
+        'supplierPrices' => __('Supplier price list information', 'lavka-price-sync'),
+        'supplierPriceLabels' => function_exists('lps_sp_labels') ? lps_sp_labels() : [],
         'title' => __('Supplier order preview', 'lavka-price-sync'),
         'receivingWarehouse' => __('Receiving warehouse', 'lavka-price-sync'),
         'leadTimeDays' => __('Lead time, days', 'lavka-price-sync'),
@@ -36,6 +38,8 @@ function lps_purchase_i18n(): array {
         'details' => __('Supply inputs and review', 'lavka-price-sync'),
         'inTransit' => __('Confirmed transit allocated to this group', 'lavka-price-sync'),
         'openOrders' => __('Other confirmed incoming orders, excluding transit', 'lavka-price-sync'),
+        'respectPack' => __('Respect pack quantity', 'lavka-price-sync'),
+        'packHelp' => __('Without pack rounding, the supplier minimum order still applies. Pack discounts are not calculated.', 'lavka-price-sync'),
         'pack' => __('Supplier pack quantity', 'lavka-price-sync'),
         'moq' => __('Supplier minimum order quantity', 'lavka-price-sync'),
         'transitPool' => __('Transport warehouse stock available to network planning', 'lavka-price-sync'),
@@ -79,6 +83,8 @@ function lps_purchase_scenario_fields(): void {
         <div class="lps-as-purchase-body">
             <p><label><input type="checkbox" id="lps-as-purchase-enabled"> <?php echo esc_html__('Enable supplier order preview', 'lavka-price-sync'); ?></label></p>
             <p><label><input type="checkbox" id="lps-as-purchase-transfers"> <?php echo esc_html__('Suggest transfers from surplus destination groups first', 'lavka-price-sync'); ?></label></p>
+            <p><label><input type="checkbox" id="lps-as-purchase-pack" checked> <?php echo esc_html__('Respect pack quantity', 'lavka-price-sync'); ?></label></p>
+            <p class="description"><?php echo esc_html__('Without pack rounding, the supplier minimum order still applies. Pack discounts are not calculated.', 'lavka-price-sync'); ?></p>
             <div id="lps-as-purchase-groups"></div>
             <a class="button" href="<?php echo esc_url(admin_url('admin.php?page=' . LPS_PURCHASE_PAGE)); ?>"><?php echo esc_html__('Open supplier order preview', 'lavka-price-sync'); ?></a>
         </div>
@@ -94,6 +100,7 @@ function lps_purchase_session_key(string $token): string {
 function lps_purchase_session(string $token): array {
     $state = get_transient(lps_purchase_session_key($token));
     if (!is_array($state)) throw new InvalidArgumentException(__('The preview has expired. Start a new calculation.', 'lavka-price-sync'));
+    if (($state['previewVersion'] ?? 0) !== 2) throw new InvalidArgumentException(__('Start a new preview with corrected free stock snapshots (schema 6).', 'lavka-price-sync'));
     if (($state['transitContractVersion'] ?? 0) !== 3 || ($state['transitWarehouseIds'] ?? null) !== lps_purchase_transit_warehouses()) {
         throw new InvalidArgumentException(__('Transport warehouse settings changed. Start a new preview.', 'lavka-price-sync'));
     }
@@ -131,7 +138,8 @@ function lps_purchase_start(int $id, int $version): array {
         'calculation' => $profile['calculation'], 'sort' => [['field' => 'sku', 'direction' => 'ASC']], 'page' => ['size' => 100],
     ]);
     $token = bin2hex(random_bytes(16));
-    $state = ['scenario' => ['id' => $scenario['id'], 'uuid' => $scenario['uuid'], 'name' => $scenario['name'], 'version' => $scenario['version']],
+    $state = ['previewVersion' => 2, 'scenario' => ['id' => $scenario['id'], 'uuid' => $scenario['uuid'], 'name' => $scenario['name'], 'version' => $scenario['version']],
+        'supplierPriceVersions' => function_exists('lps_sp_active_versions') ? lps_sp_active_versions($profile['context']['sourceDatabase']) : [],
         'query' => $query, 'groups' => $groups, 'groupsRevision' => lavka_get_global_warehouse_groups_revision(),
         'transitWarehouseIds' => $transit_ids, 'transitGenerationId' => null, 'transitContractVersion' => 3,
         'periodDays' => $days, 'allowTransfers' => $profile['purchasePlanning']['allowTransfers'],
@@ -157,7 +165,10 @@ function lps_purchase_page(string $token, int $page): array {
     $expected_ids = $query['warehouseIds'];
     sort($ids); sort($expected_ids);
     $generations = array_column((array)($context['warehouses'] ?? []), 'generationId');
-    if (($context['analyticsSchemaVersion'] ?? 0) < 4 || $ids !== $expected_ids
+    if (($context['analyticsSchemaVersion'] ?? 0) < 6) {
+        throw new RuntimeException(__('Start a new preview with corrected free stock snapshots (schema 6).', 'lavka-price-sync'));
+    }
+    if ($ids !== $expected_ids
         || count($generations) !== count($expected_ids) || count(array_filter($generations, static fn($id) => (int)$id > 0)) !== count($expected_ids)
         || ($context['periodFrom'] ?? '') !== $query['period']['from'] || ($context['periodTo'] ?? '') !== $query['period']['to']) {
         throw new RuntimeException(__('The analytics response is incomplete. No purchase preview was accepted.', 'lavka-price-sync'));
@@ -171,6 +182,7 @@ function lps_purchase_page(string $token, int $page): array {
     foreach ($body['rows'] as $row) {
         $sku = (string)($row['sku'] ?? '');
         if ($sku === '' || isset($state['rows'][$sku])) throw new RuntimeException(__('The analytics response contains missing or repeated SKU.', 'lavka-price-sync'));
+        $row['supplierPrices'] = function_exists('lps_sp_product') ? lps_sp_product($sku, (array)($row['dimensions']['currentSuppliers'] ?? []), $state['supplierPriceVersions'] ?? []) : [];
         $state['rows'][$sku] = $row;
         $result = lps_purchase_calculate($row, $state['groups'], $state['periodDays'], $state['allowTransfers'], [], $state['transitWarehouseIds']);
         if ($state['transitWarehouseIds'] && $result['transitPool'] !== null) {
@@ -208,6 +220,7 @@ function lps_purchase_adjust(string $token, string $sku, array $input): array {
             if ($value !== null && $value !== '' && $number === null) throw new InvalidArgumentException(__('Enter valid non-negative quantities and a positive pack quantity.', 'lavka-price-sync'));
             $edits[$group['code']][$field] = $number;
         }
+        $edits[$group['code']]['respectPack'] = ($source['respectPack'] ?? $group['respectPack'] ?? true) !== false;
         $edits[$group['code']]['reason'] = sanitize_text_field((string)($source['reason'] ?? ''));
         $edits[$group['code']]['receiptsReviewed'] = ($source['receiptsReviewed'] ?? false) === true;
     }
@@ -291,8 +304,9 @@ add_action('admin_post_lps_purchase_export', static function (): void {
         $state = lps_purchase_session((string)wp_unslash($_POST['token'] ?? ''));
         if (!$state['complete']) throw new InvalidArgumentException(__('Complete the preview before exporting.', 'lavka-price-sync'));
         $t = lps_purchase_i18n();
-        $keys = ['sku', 'product', 'group', 'receivingWarehouse', 'available', 'sales', 'returns', 'coverage', 'target', 'need', 'transfer', 'inTransit', 'openOrders', 'pack', 'moq', 'purchase', 'quantity', 'final', 'reason'];
+        $keys = ['sku', 'product', 'group', 'receivingWarehouse', 'available', 'sales', 'returns', 'coverage', 'target', 'need', 'transfer', 'inTransit', 'openOrders', 'pack', 'respectPack', 'moq', 'purchase', 'quantity', 'final', 'reason'];
         $columns = array_map(static fn($key) => ['key' => $key, 'label' => $t[$key]], $keys);
+        $columns[] = ['key' => 'supplierPrices', 'label' => $t['supplierPrices']];
         $columns[] = ['key' => 'status', 'label' => __('Status', 'lavka-price-sync')];
         $columns[] = ['key' => 'transitWarehouses', 'label' => $t['transitWarehouses']];
         $columns[] = ['key' => 'transitStatus', 'label' => $t['transitStatus']];
@@ -312,6 +326,8 @@ add_action('admin_post_lps_purchase_export', static function (): void {
                     'receivingWarehouse' => $group['receivingWarehouseId'], 'available' => $group['available'], 'sales' => $group['regularSales'],
                     'returns' => $group['returns'], 'coverage' => $group['coverageDays'], 'target' => $group['target'], 'need' => $group['needBeforeReceipts'],
                     'transfer' => wp_json_encode($group['transfers'], JSON_UNESCAPED_UNICODE),
+                    'supplierPrices' => wp_json_encode($raw['supplierPrices'] ?? [], JSON_UNESCAPED_UNICODE),
+                    'respectPack' => $group['respectPack'] ? 'YES' : 'NO',
                     'purchase' => $group['recommendedQuantity'], 'quantity' => $group['managerQuantity'], 'final' => $group['finalQuantity'], 'reason' => $group['managerReason'],
                     'status' => $group['status'] . ($group['issues'] ? ': ' . implode(', ', $group['issues']) : '')];
                 $record += $group['inputs'];
