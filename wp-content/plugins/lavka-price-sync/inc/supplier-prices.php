@@ -119,7 +119,8 @@ function lps_sp_activate(int $id, string $approval): void {
     if ($v['status']==='active' && hash_equals($v['approval_hash'],$approval)) return;
     if ($v['status']!=='draft' || !$approval || !hash_equals($v['approval_hash'],$approval)) throw new RuntimeException('VERSION_CHANGED');
     $config=lps_sp_decode($v['config_json']);$preview=lps_sp_decode($v['preview_json']);
-    if ($config['full'] && $preview['blockers']) throw new RuntimeException('FULL_IMPORT_BLOCKED');
+    // Unresolved source identifiers keep absent catalog products in REVIEW.
+    // Valid offers can still become active without inferring discontinuation.
     if (!hash_equals($v['catalog_hash'],hash('sha256',lps_sp_json(lps_sp_catalog($v['supplier'],$v['source_database']))))) throw new RuntimeException('CATALOG_CHANGED');
     if ($wpdb->query($wpdb->prepare("INSERT IGNORE INTO $h (scope_key,version_id) VALUES (%s,0)",$v['scope_key']))===false) throw new RuntimeException('STORAGE_ERROR');
     if ($wpdb->query('START TRANSACTION')===false) throw new RuntimeException('STORAGE_ERROR');

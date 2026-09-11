@@ -3,6 +3,13 @@ if (!defined('ABSPATH')) exit;
 
 function lps_sp_labels(): array {
     return [
+        'supplierStatus'=>__('Supplier status column','lavka-price-sync'),
+        'invoiceQuantity'=>__('Invoice quantity column','lavka-price-sync'),
+        'invoiceUnit'=>__('Invoice unit column','lavka-price-sync'),
+        'minimumOrder'=>__('Minimum order column','lavka-price-sync'),
+        'boxQuantity'=>__('Box quantity column','lavka-price-sync'),
+        'packGtin'=>__('Pack barcode column','lavka-price-sync'),
+        'WHILE_STOCK_LASTS'=>__('While stocks last','lavka-price-sync'),
         'sku'=>__('Internal SKU','lavka-price-sync'), 'status'=>__('Status','lavka-price-sync'), 'row'=>__('Source row','lavka-price-sync'),
         'uploaded'=>__('Uploaded','lavka-price-sync'), 'draft'=>__('Draft','lavka-price-sync'), 'active'=>__('Active','lavka-price-sync'), 'archived'=>__('Archived','lavka-price-sync'),
         'title'=>__('Supplier price lists','lavka-price-sync'),
@@ -43,7 +50,7 @@ function lps_sp_labels(): array {
         'FILE_TOO_LARGE'=>__('The file exceeds the import size limit.','lavka-price-sync'),
         'TOO_MANY_ROWS'=>__('The import exceeds the row limit.','lavka-price-sync'),
         'XLSX_SUPPORT_REQUIRED'=>__('PHP ZIP and SimpleXML extensions are required.','lavka-price-sync'),
-        'EXTERNAL_CONTENT'=>__('Files with macros or external workbook links are not accepted.','lavka-price-sync'),
+        'EXTERNAL_CONTENT'=>__('Macros and external worksheet targets are not accepted. Linked workbook formulas are never evaluated.','lavka-price-sync'),
         'UNSAFE_XML'=>__('The workbook contains unsupported XML declarations.','lavka-price-sync'),
         'INVALID_XLSX'=>__('The XLSX file could not be read.','lavka-price-sync'),
         'STORAGE_ERROR'=>__('The import could not be saved. No site prices were changed.','lavka-price-sync'),
@@ -69,6 +76,7 @@ add_action('admin_post_lps_supplier_prices', static function () {
     check_admin_referer('lps_supplier_prices');
     $id=absint($_POST['id']??0);
     try {
+        if (function_exists('wp_raise_memory_limit')) wp_raise_memory_limit('admin');
         lps_sp_install(); $op=sanitize_key($_POST['operation']??'');
         if ($op==='upload') $id=lps_sp_upload($_FILES['price_file']??[],sanitize_text_field(wp_unslash($_POST['supplier']??'')),sanitize_text_field($_POST['database']??''));
         elseif ($op==='preview') lps_sp_build($id,wp_unslash($_POST['config']??[]));
@@ -95,6 +103,7 @@ add_action('admin_post_lps_supplier_prices', static function () {
 function lps_sp_render(): void {
     if (!current_user_can(LPS_CAP)) return;
     global $wpdb;
+    if (function_exists('wp_raise_memory_limit')) wp_raise_memory_limit('admin');
     echo '<div class="wrap lps-sp"><h1>'.esc_html(lps_sp_label('title')).'</h1>';
     echo '<p>'.esc_html__('Supplier information only. Site and Folio prices, stock and product visibility are never changed.','lavka-price-sync').'</p>';
     echo '<style>.lps-sp .sp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;max-width:1000px}.lps-sp label{display:block;margin:8px 0}.lps-sp input:not([type=checkbox]),.lps-sp select{max-width:100%;box-sizing:border-box}.lps-sp .sp-scroll{overflow:auto}.lps-sp td{overflow-wrap:anywhere}.lps-sp .sp-scroll table{min-width:820px}.lps-sp td:nth-child(-n+3){white-space:nowrap}.lps-sp form{margin:16px 0}.lps-sp .sp-actions{display:flex;gap:15px;flex-wrap:wrap}</style>';
@@ -112,12 +121,14 @@ function lps_sp_render(): void {
             if ($config) echo '<p>'.esc_html(lps_sp_label('sheet').': '.$config['sheet'].' · '.lps_sp_label('validFrom').': '.$config['validFrom'].' · '.$config['currency'].' · '.lps_sp_label($config['priceBasis'])).'</p>';
             echo '<div class="sp-actions">';foreach (['download','export'] as $op) { lps_sp_form($op,$id);echo '<button class="button">'.esc_html(lps_sp_label($op)).'</button></form>'; }echo '</div>';
             if (in_array($v['status'],['uploaded','draft'],true)) {
-                $sheets=lps_sp_temporary($v,static fn($p)=>lps_sp_xlsx($p)['sheets']);lps_sp_form('preview',$id);
+                $sheets=lps_sp_temporary($v,static fn($p)=>lps_sp_xlsx($p)['sheets']);
+                if (!$config) $config=lps_sp_temporary($v,static fn($p)=>lps_sp_defaults(lps_sp_xlsx($p,$sheets[0])['rows']));
+                lps_sp_form('preview',$id);
                 echo '<div class="sp-grid"><label>'.esc_html(lps_sp_label('sheet')).' <select name="config[sheet]">';
                 foreach ($sheets as $sheet) echo '<option '.selected($config['sheet']??$sheets[0],$sheet,false).'>'.esc_html($sheet).'</option>';
                 echo '</select></label>';
-                foreach (['header'=>7,'article'=>'A','description'=>'C','gtin'=>'J','pack'=>'H','listPrice'=>'D','discount'=>'E','price'=>'F','net'=>'I','currency'=>'EUR','validFrom'=>''] as $key=>$default) {
-                    echo '<label>'.esc_html(lps_sp_label($key)).' <input name="config['.$key.']" value="'.esc_attr($config[$key]??$default).'" type="'.($key==='validFrom'?'date':($key==='header'?'number':'text')).'" required></label>';
+                foreach (['header'=>7,'article'=>'A','description'=>'C','gtin'=>'J','pack'=>'H','listPrice'=>'D','discount'=>'E','price'=>'F','net'=>'I','currency'=>'EUR','validFrom'=>'','supplierStatus'=>'','invoiceQuantity'=>'','invoiceUnit'=>'','minimumOrder'=>'','boxQuantity'=>'','packGtin'=>''] as $key=>$default) {
+                    echo '<label>'.esc_html(lps_sp_label($key)).' <input name="config['.$key.']" value="'.esc_attr($config[$key]??$default).'" type="'.($key==='validFrom'?'date':($key==='header'?'number':'text')).'" '.(in_array($key,['supplierStatus','invoiceQuantity','invoiceUnit','minimumOrder','boxQuantity','packGtin'],true)?'':'required').'></label>';
                 }
                 echo '<label>'.esc_html(lps_sp_label('priceBasis')).' <select name="config[priceBasis]">';
                 foreach (['UNIT','PACK'] as $basis) echo '<option value="'.$basis.'" '.selected($config['priceBasis']??'UNIT',$basis,false).'>'.esc_html(lps_sp_label($basis)).'</option>';
@@ -126,18 +137,19 @@ function lps_sp_render(): void {
                 echo '<button class="button button-primary">'.esc_html(lps_sp_label('preview')).'</button></form>';
             }
             if ($preview) {
+                if (!empty($config['full']) && !empty($preview['blockers'])) echo '<div class="notice notice-warning"><p>'.esc_html__('Some GTINs require review. You can activate the price list, but missing products will not be marked discontinued automatically.','lavka-price-sync').'</p></div>';
                 echo '<p>';foreach ($preview['counts'] as $key=>$value) echo esc_html(lps_sp_label($key)).': '.(int)$value.' · ';echo '</p>';
                 if ($v['status']==='draft') {
                     lps_sp_form('activate',$id);echo '<input type="hidden" name="approval" value="'.esc_attr($v['approval_hash']).'">';
-                    echo '<label><input type="checkbox" required> '.esc_html__('I reviewed the variants, price errors and discontinued products. Activate these supplier data only.','lavka-price-sync').'</label><button class="button button-primary" '.(!empty($config['full'])&&!empty($preview['blockers'])?'disabled':'').'>'.esc_html(lps_sp_label('activate')).'</button></form>';
+                    echo '<label><input type="checkbox" required> '.esc_html__('I reviewed the variants, price errors and discontinued products. Activate these supplier data only.','lavka-price-sync').'</label><button class="button button-primary" >'.esc_html(lps_sp_label('activate')).'</button></form>';
                 }
                 $filter=sanitize_text_field(wp_unslash($_GET['sku']??''));$page=max(1,absint($_GET['p']??1));
                 echo '<form method="get"><input type="hidden" name="page" value="lps-supplier-prices"><input type="hidden" name="version" value="'.$id.'"><label>'.esc_html__('Find SKU, GTIN or supplier article','lavka-price-sync').' <input name="sku" value="'.esc_attr($filter).'"></label><button class="button">'.esc_html__('Search','lavka-price-sync').'</button></form>';
                 $offers=array_values(array_filter($preview['offers'],static fn($r)=>$filter===''||stripos(($r['sku']??'').' '.$r['article'].' '.$r['originalGtin'],$filter)!==false));
                 echo '<div class="sp-scroll"><table class="widefat striped"><thead><tr>';
-                foreach (['sku','article','gtin','pack','price','currency','review'] as $k) echo '<th>'.esc_html(lps_sp_label($k)).'</th>';echo '</tr></thead><tbody>';
+                foreach (['sku','article','gtin','pack','price','currency','supplierStatus','invoiceQuantity','invoiceUnit','minimumOrder','boxQuantity','packGtin','review'] as $k) echo '<th>'.esc_html(lps_sp_label($k)).'</th>';echo '</tr></thead><tbody>';
                 foreach (array_slice($offers,($page-1)*50,50) as $r) {
-                    echo '<tr>';foreach (['sku','article','originalGtin','pack','price','currency'] as $k) echo '<td>'.esc_html($r[$k]??'—').'</td>';
+                    echo '<tr>';foreach (['sku','article','originalGtin','pack','price','currency','supplierStatus','invoiceQuantity','invoiceUnit','minimumOrder','boxQuantity','packGtin'] as $k) echo '<td>'.esc_html($r[$k]??'—').'</td>';
                     echo '<td>'.esc_html(implode(' ',array_map('lps_sp_label',$r['issues']))).'</td></tr>';
                 }
                 echo '</tbody></table></div><p>';

@@ -6091,3 +6091,30 @@ msgstr "Дані прайсу постачальника"
 #: inc/supplier-prices-admin.php
 msgid "Processing..."
 msgstr "Обробка…"
+
+msgid "Supplier status column"
+msgstr "Статус постачальника (колонка)"
+
+msgid "Invoice quantity column"
+msgstr "Кількість для ціни (колонка)"
+
+msgid "Invoice unit column"
+msgstr "Одиниця ціни (колонка)"
+
+msgid "Minimum order column"
+msgstr "Мінімальне замовлення (колонка)"
+
+msgid "Box quantity column"
+msgstr "Кількість у коробці (колонка)"
+
+msgid "Pack barcode column"
+msgstr "Штрихкод упаковки (колонка)"
+
+msgid "While stocks last"
+msgstr "До вичерпання запасів"
+
+msgid "Macros and external worksheet targets are not accepted. Linked workbook formulas are never evaluated."
+msgstr "Макроси та зовнішні адреси аркушів не допускаються. Формули пов’язаних книг не виконуються."
+
+msgid "Some GTINs require review. You can activate the price list, but missing products will not be marked discontinued automatically."
+msgstr "Деякі GTIN потребують перевірки. Прайс можна активувати, але відсутні товари не будуть автоматично позначені як зняті з виробництва."

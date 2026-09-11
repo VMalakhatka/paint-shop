@@ -21,7 +21,7 @@ function lps_sp_xlsx(string $path, ?string $sheet = null): array {
         for ($i = 0; $i < $zip->numFiles; $i++) {
             $stat = $zip->statIndex($i); $size += $stat['size'];
             if ($size > 64 * 1024 * 1024 || $zip->numFiles > 2000) throw new RuntimeException('FILE_TOO_LARGE');
-            if (preg_match('~vbaProject|externalLinks/~i', $stat['name'])) throw new RuntimeException('EXTERNAL_CONTENT');
+            if (preg_match('~vbaProject~i', $stat['name'])) throw new RuntimeException('EXTERNAL_CONTENT');
         }
         $read = static function ($name) use ($zip) {
             $value = $zip->getFromName($name);
@@ -30,6 +30,8 @@ function lps_sp_xlsx(string $path, ?string $sheet = null): array {
         };
         $rels = [];
         foreach ($read('xl/_rels/workbook.xml.rels')->xpath('/*[local-name()="Relationships"]/*[local-name()="Relationship"]') as $rel) {
+            // Only worksheet relationships are needed. Never fetch linked workbooks.
+            if (!str_ends_with((string)$rel['Type'], '/worksheet')) continue;
             if ((string)$rel['TargetMode'] === 'External') throw new RuntimeException('EXTERNAL_CONTENT');
             $target = (string)$rel['Target'];
             if (strpos($target, '..') !== false) throw new RuntimeException('INVALID_XLSX');
@@ -52,9 +54,9 @@ function lps_sp_xlsx(string $path, ?string $sheet = null): array {
         $rows = []; $cells = 0; $shared = [];
         foreach ($read($sheets[$sheet])->sheetData->row as $row) {
             $number = (int)$row['r'];
-            if ($number > 15000) throw new RuntimeException('TOO_MANY_ROWS');
+            if ($number > 30000) throw new RuntimeException('TOO_MANY_ROWS');
             foreach ($row->c as $cell) {
-                if (++$cells > 300000) throw new RuntimeException('FILE_TOO_LARGE');
+                if (++$cells > 650000) throw new RuntimeException('FILE_TOO_LARGE');
                 preg_match('/^([A-Z]+)[0-9]+$/', (string)$cell['r'], $m);
                 if (!$m) throw new RuntimeException('INVALID_XLSX');
                 $type = (string)$cell['t']; $value = (string)$cell->v;
@@ -107,6 +109,11 @@ function lps_sp_config(array $input, array $sheets): array {
         if (!preg_match('/^[A-Z]{1,2}$/D', $v)) throw new RuntimeException('INVALID_SETTINGS');
         $config[$key] = $v;
     }
+    foreach (['supplierStatus','invoiceQuantity','invoiceUnit','minimumOrder','boxQuantity','packGtin'] as $key) {
+        $v = strtoupper(trim((string)($input[$key] ?? '')));
+        if ($v !== '' && !preg_match('/^[A-Z]{1,2}$/D', $v)) throw new RuntimeException('INVALID_SETTINGS');
+        $config[$key] = $v;
+    }
     $config['currency'] = strtoupper(trim((string)($input['currency'] ?? 'EUR')));
     if (!in_array($config['currency'], ['EUR','USD','UAH','GBP','PLN','CHF'], true)) throw new RuntimeException('INVALID_SETTINGS');
     $config['priceBasis'] = ($input['priceBasis'] ?? '') === 'PACK' ? 'PACK' : 'UNIT';
@@ -130,7 +137,7 @@ function lps_sp_preview(array $rows, array $config, array $catalog): array {
     foreach ($rows as $number => $raw) {
         if ($number <= $config['header']) continue;
         $values = [];
-        foreach (['article','description','gtin','pack','listPrice','discount','price','net'] as $field) $values[$field] = trim((string)($raw[$config[$field]]['value'] ?? ''));
+        foreach (['article','description','gtin','pack','listPrice','discount','price','net','supplierStatus','invoiceQuantity','invoiceUnit','minimumOrder','boxQuantity','packGtin'] as $field) $values[$field] = trim((string)($raw[$config[$field] ?? '']['value'] ?? ''));
         if ($values['article'] === '' && $values['gtin'] === '') continue;
         $gtin = lps_sp_gtin($values['gtin']); $issues = [];
         if (!$gtin) { $issues[] = 'INVALID_GTIN'; $blockers[] = 'INVALID_GTIN'; }
@@ -149,8 +156,11 @@ function lps_sp_preview(array $rows, array $config, array $catalog): array {
             $normalized = str_replace(['$',' ','='], '', strtoupper($formula));
             $normalized = ltrim($normalized, '+');
             $list = lps_sp_decimal($values['listPrice']); $discount = lps_sp_decimal($values['discount']);
-            if ($normalized !== $expected || $list === null || $discount === null || (float)$discount > 1
-                || $price === null || abs((float)$price - (float)$list * (1-(float)$discount)) > 0.000001) {
+            $rounded = $normalized === 'ROUND(' . $expected . ',2)';
+            $calculated = (float)$list * (1-(float)$discount);
+            if ($rounded) $calculated = round($calculated, 2);
+            if ((!$rounded && $normalized !== $expected) || $list === null || $discount === null || (float)$discount > 1
+                || $price === null || abs((float)$price - $calculated) > 0.000001) {
                 $price = null; $issues[] = 'FORMULA_REVIEW';
             }
         }
@@ -163,7 +173,12 @@ function lps_sp_preview(array $rows, array $config, array $catalog): array {
             $issues[] = 'DUPLICATE_VARIANT'; $offers[$seen[$key]]['issues'][] = 'DUPLICATE_VARIANT';
         }
         $seen[$key] = count($offers);
-        $offers[] = ['row'=>(int)$number,'article'=>$values['article'],'description'=>$values['description'],
+        $supplierStatus = trim($values['supplierStatus']);
+        $discontinued = preg_match('/^DISCONTINUED(?:$|\s)/i', $supplierStatus) && (!preg_match('/\b(20[0-9]{2})\b/', $supplierStatus, $year) || (int)$year[1] <= (int)substr($config['validFrom'],0,4));
+        $offerStatus = $discontinued ? 'DISCONTINUED' : (preg_match('/^WHILE STOCK LASTS/i', $supplierStatus) ? 'WHILE_STOCK_LASTS' : 'PRESENT');
+        $offers[] = ['supplierStatus'=>$supplierStatus,'offerStatus'=>$offerStatus,
+            'invoiceQuantity'=>$values['invoiceQuantity'],'invoiceUnit'=>$values['invoiceUnit'],
+            'minimumOrder'=>$values['minimumOrder'],'boxQuantity'=>$values['boxQuantity'],'packGtin'=>$values['packGtin'], 'row'=>(int)$number,'article'=>$values['article'],'description'=>$values['description'],
             'gtin'=>$gtin,'originalGtin'=>$values['gtin'],'sku'=>$sku,'pack'=>$pack,'price'=>$price,
             'currency'=>$config['currency'],'validFrom'=>$config['validFrom'],'priceBasis'=>$config['priceBasis'],'priceSource'=>$priceSource,
             'listPrice'=>$values['listPrice'],'discount'=>$values['discount'],'net'=>$values['net'],'issues'=>$issues,'raw'=>$raw];
@@ -179,8 +194,25 @@ function lps_sp_preview(array $rows, array $config, array $catalog): array {
         elseif ($config['full']) $status = $blockers ? 'REVIEW' : 'DISCONTINUED';
         $statuses[$sku] = $status;
     }
+    $offerStates=[];
+    foreach ($offers as $offer) if ($offer['sku']!==null) $offerStates[$offer['sku']][$offer['offerStatus']]=true;
+    foreach ($offerStates as $sku=>$states) if (count($states)===1 && isset($states['DISCONTINUED'])) $statuses[$sku]='DISCONTINUED';
     return ['offers'=>$offers,'statuses'=>$statuses,'blockers'=>array_values(array_unique($blockers)),
         'counts'=>['rows'=>count($offers),'matched'=>count(array_filter($offers,static fn($r)=>$r['sku'] !== null)),
         'review'=>count(array_filter($offers,static fn($r)=>!empty($r['issues']))),
         'discontinued'=>count(array_filter($statuses,static fn($s)=>$s==='DISCONTINUED'))]];
+}
+
+
+function lps_sp_defaults(array $rows): array {
+    $value=static fn($r,$c)=>trim((string)($rows[$r][$c]['value']??''));
+    if ($value(1,'A')==='EAN' && $value(1,'B')==='REF' && $value(1,'O')==='PRIX NET 2026') {
+        return ['header'=>1,'article'=>'B','description'=>'D','gtin'=>'A','pack'=>'J','listPrice'=>'L','discount'=>'N','price'=>'O','net'=>'R',
+            'supplierStatus'=>'M','currency'=>'EUR','validFrom'=>'2026-08-01'];
+    }
+    if ($value(1,'A')==='ITEM NUMBER' && $value(1,'U')==='Price list VITALI 2026') {
+        return ['header'=>2,'article'=>'A','description'=>'O','gtin'=>'P','pack'=>'M','listPrice'=>'I','discount'=>'V','price'=>'U','net'=>'V',
+            'supplierStatus'=>'B','invoiceQuantity'=>'K','invoiceUnit'=>'L','minimumOrder'=>'M','boxQuantity'=>'N','packGtin'=>'R'];
+    }
+    return [];
 }

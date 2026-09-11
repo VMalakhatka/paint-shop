@@ -5888,3 +5888,30 @@ msgstr ""
 #: inc/supplier-prices-admin.php
 msgid "Processing..."
 msgstr ""
+
+msgid "Supplier status column"
+msgstr ""
+
+msgid "Invoice quantity column"
+msgstr ""
+
+msgid "Invoice unit column"
+msgstr ""
+
+msgid "Minimum order column"
+msgstr ""
+
+msgid "Box quantity column"
+msgstr ""
+
+msgid "Pack barcode column"
+msgstr ""
+
+msgid "While stocks last"
+msgstr ""
+
+msgid "Macros and external worksheet targets are not accepted. Linked workbook formulas are never evaluated."
+msgstr ""
+
+msgid "Some GTINs require review. You can activate the price list, but missing products will not be marked discontinued automatically."
+msgstr ""
