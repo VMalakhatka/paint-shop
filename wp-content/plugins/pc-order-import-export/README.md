@@ -100,8 +100,12 @@ For the selected pilot only, the processing workflow calls the normal add-to-car
 uses the quantity actually present in the cart after quantity filters, distributing
 it across duplicate product rows before changing draft remainders.
 No Java deployment, price recalculation, real document creation or mail is required.
-Canonical help and help code are updated; publication awaits deployment and runtime
-verification. Activation and migration were exercised only in the disposable test database.
+The single-customer production pilot was enabled on 2026-09-12. Scoped code/help
+release, schema setup and all-user access enumeration passed. Production runtime
+checks covered add/snooze/resume/remove, read-only rendering, pilot help and denied
+nonpilot/guest POST; the test list was left empty. No cart/order/stock changes or
+mail/Folio operations were performed in production. Full authenticated browser
+acceptance remains with the pilot customer. See the operations runbook.
 
 ## Price list
 
