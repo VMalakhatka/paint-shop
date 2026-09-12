@@ -110,6 +110,87 @@ class PriceList
         ];
     }
 
+    /** Build a compact tree before writing cells; keep no WC_Product objects between batches. */
+    public static function catalogue_rows(iterable $products, array $locations): \Generator
+    {
+        $terms = get_terms(['taxonomy'=>'product_cat', 'hide_empty'=>false, 'orderby'=>'name', 'order'=>'ASC', 'menu_order'=>false]);
+        if (is_wp_error($terms)) throw new \RuntimeException('Category tree unavailable');
+        $index = []; $paths = []; $children = []; $buckets = []; $used = [];
+        foreach ($terms as $term) {
+            $index[$term->term_id] = $term;
+            $children[(int)$term->parent][] = (int)$term->term_id;
+        }
+        foreach ($index as $id => $term) {
+            $path = []; $next = $id;
+            while ($next && isset($index[$next]) && !isset($path[$next])) {
+                $path[$next] = $next;
+                $next = (int)$index[$next]->parent;
+            }
+            if ($next) throw new \RuntimeException('Invalid category ancestry');
+            $paths[$id] = array_reverse(array_values($path));
+        }
+        $category_rank = array_flip(array_keys($index));
+        $suppliers = function_exists('psu_catalog_supplier_terms') ? psu_catalog_supplier_terms(false) : [];
+        $supplier_rank = array_flip(array_map('intval', wp_list_pluck($suppliers, 'term_id')));
+        $seen = [];
+        foreach ($products as $product) {
+            if (isset($seen[$product->get_id()])) continue;
+            $seen[$product->get_id()] = true;
+            $parent_id = $product->get_parent_id() ?: $product->get_id();
+            $categories = get_the_terms($parent_id, 'product_cat');
+            if (is_wp_error($categories)) throw new \RuntimeException('Product categories unavailable');
+            $assigned = array_map('intval', wp_list_pluck($categories ?: [], 'term_id'));
+            $category = (int)get_post_meta($parent_id, '_yoast_wpseo_primary_product_cat', true);
+            if (!in_array($category, $assigned, true) || !isset($paths[$category])) {
+                $category = 0;
+                foreach ($assigned as $id) {
+                    if (!isset($paths[$id])) continue;
+                    $depth = count($paths[$id]);
+                    $best_depth = count($paths[$category] ?? []);
+                    if ($depth > $best_depth || ($depth === $best_depth && $category_rank[$id] < ($category_rank[$category] ?? PHP_INT_MAX))) $category = $id;
+                }
+            }
+            foreach ($paths[$category] ?? [] as $id) $used[$id] = true;
+            $brands = get_the_terms($parent_id, 'product_brand');
+            $brands = !$brands || is_wp_error($brands) ? [] : $brands;
+            $rank = count($supplier_rank);
+            foreach ($brands as $brand) $rank = min($rank, $supplier_rank[$brand->term_id] ?? count($supplier_rank));
+            $price = $product->get_price();
+            $buckets[$category][] = [
+                'values' => [
+                    $product->get_sku(),
+                    function_exists('psu_product_display_barcode') ? psu_product_display_barcode($product) : '',
+                    $product->get_name(), implode(', ', wp_list_pluck($brands, 'name')),
+                    implode(' / ', array_map(static fn($id) => $index[$id]->name, $paths[$category] ?? [])),
+                    $price !== '' && is_numeric($price) ? wc_get_price_to_display($product, ['price'=>(float)$price]) : null,
+                    self::stock($product, $locations), null,
+                    $product->is_type('variation') ? $product->get_permalink() : get_permalink($parent_id),
+                ],
+                'rank' => $rank,
+                'id' => $product->get_id(),
+            ];
+        }
+        foreach ($buckets as &$items) {
+            usort($items, static fn($a, $b) => ($a['rank'] <=> $b['rank']) ?: strnatcasecmp($a['values'][2], $b['values'][2]) ?: ($a['id'] <=> $b['id']));
+        }
+        unset($items);
+        $walk = static function (int $id, int $depth) use (&$walk, $index, $children, $used, $buckets): \Generator {
+            yield ['heading'=>$id ? $index[$id]->name : __('Other products', 'pc-order-import-export'), 'depth'=>$depth];
+            foreach ($buckets[$id] ?? [] as $item) yield ['values'=>$item['values'], 'depth'=>$depth + 1];
+            foreach ($children[$id] ?? [] as $child) {
+                if (isset($used[$child])) yield from $walk($child, $depth + 1);
+            }
+        };
+        foreach ($children[0] ?? [] as $root) {
+            if (isset($used[$root])) yield from $walk($root, 0);
+        }
+        // Unassigned products still occur once, outside the normal category roots.
+        if (!empty($buckets[0])) {
+            yield ['heading'=>__('Other products', 'pc-order-import-export'), 'depth'=>0];
+            foreach ($buckets[0] as $item) yield ['values'=>$item['values'], 'depth'=>1];
+        }
+    }
+
     public static function workbook(iterable $products, array $locations): Spreadsheet
     {
         $book = new Spreadsheet();
@@ -118,32 +199,27 @@ class PriceList
         $sheet = $book->getActiveSheet();
         $sheet->setTitle('Lavka');
         $sheet->fromArray(self::headers(), null, 'A1');
-        $row = 1;
-        foreach ($products as $product) {
+        $row = 1; $headings = [];
+        foreach (self::catalogue_rows($products, $locations) as $entry) {
             $row++;
-            $parent_id = $product->get_parent_id() ?: $product->get_id();
-            $names = static function (string $taxonomy) use ($parent_id): string {
-                $terms = get_the_terms($parent_id, $taxonomy);
-                return !$terms || is_wp_error($terms) ? '' : implode(', ', wp_list_pluck($terms, 'name'));
-            };
-            $barcode = function_exists('psu_product_display_barcode') ? psu_product_display_barcode($product) : '';
-            $values = [$product->get_sku(), $barcode, $product->get_name(), $names('product_brand'), $names('product_cat')];
-            foreach ($values as $column => $value) {
+            $sheet->getRowDimension($row)->setOutlineLevel(min(7, $entry['depth']));
+            if (isset($entry['heading'])) {
+                $headings[$row] = $entry['depth'];
+                $sheet->mergeCells('C' . $row . ':I' . $row);
+                $sheet->setCellValueExplicit('C' . $row, $entry['heading'], DataType::TYPE_STRING);
+                continue;
+            }
+            $values = $entry['values'];
+            foreach (array_slice($values, 0, 5) as $column => $value) {
                 $sheet->setCellValueExplicit([$column + 1, $row], $value, DataType::TYPE_STRING);
             }
-            $price = $product->get_price();
-            if ($price !== '' && is_numeric($price)) {
-                $sheet->setCellValue('F' . $row, wc_get_price_to_display($product, ['price' => (float) $price]));
-            }
-            $stock = self::stock($product, $locations);
-            if ($stock !== null) $sheet->setCellValue('G' . $row, $stock);
-            $url = get_permalink($parent_id);
-            if ($product->is_type('variation')) $url = $product->get_permalink();
+            if ($values[5] !== null) $sheet->setCellValue('F' . $row, $values[5]);
+            if ($values[6] !== null) $sheet->setCellValue('G' . $row, $values[6]);
             $sheet->setCellValueExplicit('I' . $row, __('View product', 'pc-order-import-export'), DataType::TYPE_STRING);
-            $sheet->getCell('I' . $row)->getHyperlink()->setUrl($url);
+            $sheet->getCell('I' . $row)->getHyperlink()->setUrl($values[8]);
         }
         $sheet->freezePane('D2');
-        $sheet->setAutoFilter('A1:I' . $row);
+        $sheet->setShowSummaryBelow(false);
         $sheet->getStyle('A1:I1')->applyFromArray([
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
             'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => '27634F']],
@@ -164,6 +240,14 @@ class PriceList
             $validation->setType('decimal')->setOperator('greaterThanOrEqual')->setFormula1('0')
                 ->setAllowBlank(true)->setShowErrorMessage(true)->setErrorStyle('stop')
                 ->setError(__('Enter a quantity of zero or more.', 'pc-order-import-export'))->setSqref('H2:H' . $row);
+        }
+        foreach ($headings as $number => $depth) {
+            $sheet->getStyle('A' . $number . ':I' . $number)->applyFromArray([
+                'font'=>['bold'=>true, 'size'=>$depth === 0 ? 14 : 11, 'color'=>['rgb'=>$depth === 0 ? 'FFFFFF' : '263A40']],
+                'fill'=>['fillType'=>'solid', 'startColor'=>['rgb'=>$depth === 0 ? '27634F' : ($depth === 1 ? 'F1DE97' : 'E8EFF0')]],
+            ]);
+            $sheet->getStyle('C' . $number)->getAlignment()->setIndent(min(7, $depth));
+            $sheet->getRowDimension($number)->setRowHeight($depth === 0 ? 29 : 24);
         }
         $sheet->getHeaderFooter()->setOddHeader('&L' . get_bloginfo('name') . '&R' . wp_date('Y-m-d H:i'));
         $sheet->getPageSetup()->setOrientation('landscape')->setFitToWidth(1)->setFitToHeight(0);

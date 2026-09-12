@@ -1380,3 +1380,6 @@ msgstr "При клиентском импорте действуют текущ
 
 msgid "View product"
 msgstr "Посмотреть товар"
+
+msgid "Other products"
+msgstr "Другие товары"

@@ -764,3 +764,9 @@ msgstr ""
 
 msgid "Customer draft imports also use current account prices. After cart import, review the report, then refresh the list. Do not import again if the products were already added."
 msgstr ""
+
+msgid "Download the full XLSX price list in My orders or the cart. It follows the category tree of the website: expand and collapse groups using the outline buttons on the left in Excel. Each product appears once, with its barcode, your current price, combined Kyiv and Odesa stock, supplier, category path and product link. Unknown prices or stock remain blank. Out-of-stock products are included."
+msgstr ""
+
+msgid "Category headings are not order lines. Filled quantities in collapsed groups are still imported. Do not sort the entire sheet as a flat table: this would mix category headings with products."
+msgstr ""

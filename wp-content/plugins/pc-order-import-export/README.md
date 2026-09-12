@@ -30,6 +30,18 @@ The customer workflow is in
 
 ## Import Safety
 
+The sheet follows the `product_cat` tree with coloured category headings and Excel
+row outlines (summary above, maximum seven nested outline levels). Categories use
+the same alphabetical ordering as storefront tiles. Each product is written once:
+assigned Yoast primary category wins, otherwise the deepest assigned category,
+with alphabetical category order as a stable tie-breaker. Unassigned products go
+under Other products. Variations use their parent's categories. Within each group,
+configured supplier priority wins, then product name and ID.
+
+Header row/column keys stay unchanged. Category rows have no SKU or quantity, so
+existing import skips them. Collapsed rows are still imported when filled. There
+is no sheet-wide AutoFilter/sort, which would detach headings from their products.
+
 `Helpers` recognizes `Order quantity` / `Замовити` / `Заказать` and the combined
 stock header. It requires the explicit SKU and order columns. It does not fall
 back to stock/price columns, ignores unchosen rows, rejects invalid quantities,
@@ -53,8 +65,9 @@ Run `tests/price-list.php` via WP-CLI only on paint.local. It creates and delete
 isolated users/products/drafts, blocks external HTTP/mail, and checks role and
 nonce gates, workbook roundtrip, barcode formatting, stock and draft repricing.
 
-Local whole-catalogue check on 2026-09-12: 8,576 exported rows, about 7 seconds,
-315 MiB PHP peak with a 512 MiB limit (7-12 seconds across runs). Production capacity/timeout must be checked
+Local grouped-catalogue check on 2026-09-12: 8,576 unique products plus 1,752
+category headings, about 10 seconds, 331 MiB PHP peak with a 512 MiB limit.
+Production capacity/timeout must be checked
 after deployment; local timing is not a production guarantee. Existing 180-second
 PHP export allowance does not override a reverse-proxy timeout. Catalogue rows
 are read live, not as an atomic inventory snapshot, and do not reserve stock.

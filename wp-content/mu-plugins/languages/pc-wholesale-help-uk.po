@@ -982,3 +982,9 @@ msgstr "Заповніть жовту колонку «Замовити» та �
 
 msgid "Customer draft imports also use current account prices. After cart import, review the report, then refresh the list. Do not import again if the products were already added."
 msgstr "Клієнтський імпорт у чернетку також використовує поточні ціни облікового запису. Після імпорту в кошик перегляньте звіт, потім оновіть список. Не імпортуйте повторно, якщо товари вже додані."
+
+msgid "Download the full XLSX price list in My orders or the cart. It follows the category tree of the website: expand and collapse groups using the outline buttons on the left in Excel. Each product appears once, with its barcode, your current price, combined Kyiv and Odesa stock, supplier, category path and product link. Unknown prices or stock remain blank. Out-of-stock products are included."
+msgstr "Завантажте повний прайс XLSX у «Моїх замовленнях» або кошику. Він повторює дерево категорій сайту: розгортайте та згортайте групи кнопками структури зліва в Excel. Кожний товар наведений один раз зі штрихкодом, вашою поточною ціною, спільним залишком Києва та Одеси, постачальником, шляхом категорії та посиланням на товар. Невідомі ціни чи залишки залишаються порожніми. Товари без залишку також включені."
+
+msgid "Category headings are not order lines. Filled quantities in collapsed groups are still imported. Do not sort the entire sheet as a flat table: this would mix category headings with products."
+msgstr "Заголовки категорій не є позиціями замовлення. Заповнені кількості у згорнутих групах також імпортуються. Не сортуйте весь аркуш як плоску таблицю: це змішає заголовки категорій з товарами."

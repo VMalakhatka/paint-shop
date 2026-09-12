@@ -22,7 +22,7 @@ $ajax = static function (callable $callback): array {
     if (!is_array($result)) throw new RuntimeException('Invalid AJAX JSON: ' . $raw);
     return $result;
 };
-$uid = 0; $pids = []; $orders = []; $path = wp_tempnam('price-list-test-');
+$uid = 0; $pids = []; $orders = []; $terms = []; $path = wp_tempnam('price-list-test-');
 $original_user = get_current_user_id();
 add_action('woocommerce_new_order', static function ($id) use (&$orders) { $orders[] = $id; });
 try {
@@ -57,24 +57,51 @@ try {
         $product->save();
     }
     $products = array_map('wc_get_product', $pids);
+    $suffix = wp_generate_password(8, false);
+    foreach (['A Root'=>null, 'A Child'=>0, 'A Leaf'=>1, 'B Root'=>null] as $name => $parent) {
+        $term = wp_insert_term($name . ' ' . $suffix, 'product_cat', ['parent'=>$parent === null ? 0 : $terms[$parent]]);
+        $assert(!is_wp_error($term), 'Cannot create test category');
+        $terms[] = (int)$term['term_id'];
+    }
+    wp_set_object_terms($pids[0], [$terms[0], $terms[2], $terms[3]], 'product_cat');
+    wp_set_object_terms($pids[1], [$terms[3]], 'product_cat');
     $stock_before = $products[0]->get_stock_quantity();
     $_COOKIE['pc_alloc_pref'] = '{"mode":"auto","term_id":0}';
     $assert(PriceList::can_access(), 'Partner denied');
-    $book = PriceList::workbook($products, $locations);
+    $book = PriceList::workbook([$products[1], $products[0], $products[0]], $locations);
     $sheet = $book->getActiveSheet();
-    $assert((float)$sheet->getCell('F2')->getValue() === (float)wc_get_price_to_display($products[0]), 'Customer price mismatch');
+    $dataRow = 0; $skuRows = [];
+    for ($r = 2; $r <= $sheet->getHighestRow(); $r++) {
+        $sku = $sheet->getCell('A'.$r)->getValue();
+        if ($sku) $skuRows[] = $sku;
+        if ($sku === $products[0]->get_sku()) $dataRow = $r;
+    }
+    $assert(count($skuRows) === 2 && count(array_unique($skuRows)) === 2, 'Products duplicated across categories');
+    $assert($dataRow === 5 && $sheet->getCell('C2')->getValue() === 'A Root '.$suffix && $sheet->getCell('C3')->getValue() === 'A Child '.$suffix && $sheet->getCell('C4')->getValue() === 'A Leaf '.$suffix, 'Category tree/order is incorrect');
+    $assert($sheet->getRowDimension($dataRow)->getOutlineLevel() === 3 && !$sheet->getShowSummaryBelow(), 'Excel hierarchy is not collapsible above rows');
+    update_post_meta($pids[0], '_yoast_wpseo_primary_product_cat', $terms[3]);
+    $primary_rows = iterator_to_array(PriceList::catalogue_rows([$products[0]], $locations), false);
+    $assert(count($primary_rows) === 2 && $primary_rows[0]['heading'] === 'B Root '.$suffix, 'Assigned primary category ignored');
+    delete_post_meta($pids[0], '_yoast_wpseo_primary_product_cat');
+    $assert((float)$sheet->getCell('F'.$dataRow)->getValue() === (float)wc_get_price_to_display($products[0]), 'Customer price mismatch');
     $assert((float)$products[0]->get_price() === 70.0, 'Partner role price wrong');
-    $assert($sheet->getCell('B2')->getValue() === '012345678905', 'Leading barcode zero lost');
-    $assert($sheet->getCell('C2')->getDataType() === 's', 'Formula injection in title');
-    $assert((float)$sheet->getCell('G2')->getValue() === 8.0, 'Stock is not Kyiv + Odesa');
-    $assert($sheet->getCell('I2')->getHyperlink()->getUrl() === get_permalink($pids[0]), 'Wrong product link');
+    $assert($sheet->getCell('B'.$dataRow)->getValue() === '012345678905', 'Leading barcode zero lost');
+    $assert($sheet->getCell('C'.$dataRow)->getDataType() === 's', 'Formula injection in title');
+    $assert((float)$sheet->getCell('G'.$dataRow)->getValue() === 8.0, 'Stock is not Kyiv + Odesa');
+    $assert($sheet->getCell('I'.$dataRow)->getHyperlink()->getUrl() === get_permalink($pids[0]), 'Wrong product link');
     $rows = $sheet->toArray(null, false, false, false);
     [$map, $start] = Helpers::detect_colmap_and_start($rows);
     $assert(!empty($map['price_list']) && $map['qty'] === 7 && $map['price'] === null, 'Price-list mapping wrong');
     $assert(Helpers::price_list_import_error($rows, $map, $start) !== null, 'Empty order accepted');
-    $sheet->setCellValue('H2', 2);
-    $sheet->setCellValue('F2', 0.01);
+    $sheet->setCellValue('H'.$dataRow, 2);
+    $sheet->setCellValue('F'.$dataRow, 0.01);
+    $sheet->getRowDimension($dataRow)->setVisible(false);
     (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($book))->save($path);
+    $roundtrip = \PhpOffice\PhpSpreadsheet\IOFactory::load($path);
+    $assert(!$roundtrip->getActiveSheet()->getShowSummaryBelow()
+        && $roundtrip->getActiveSheet()->getRowDimension($dataRow)->getOutlineLevel() === 3
+        && !$roundtrip->getActiveSheet()->getRowDimension($dataRow)->getVisible(), 'XLSX outline metadata lost');
+    $roundtrip->disconnectWorksheets();
     [$loaded, $error] = Helpers::read_rows($path, 'lavka.xlsx');
     $assert(!$error, 'Cannot read generated XLSX');
     [$map, $start] = Helpers::detect_colmap_and_start($loaded);
@@ -99,7 +126,7 @@ try {
     [$m] = Helpers::detect_colmap_and_start($broken);
     $assert(Helpers::price_list_import_error($broken, $m, 1) !== null, 'Stock substituted for missing order column');
     foreach (['garbage', '=2+2', '-1', '1e999'] as $bad) {
-        $copy = $loaded; $copy[1][7] = $bad;
+        $copy = $loaded; $copy[$dataRow-1][7] = $bad;
         $result = Helpers::process_rows_with_adder($copy, $map, 1, ['adder'=>static fn() => true]);
         $assert($result['ok'] === 0 && $result['skipped'] === 1, 'Invalid quantity accepted: ' . $bad);
     }
@@ -130,6 +157,7 @@ try {
 } finally {
     foreach ($orders as $id) { $order = wc_get_order($id); if ($order) $order->delete(true); }
     foreach ($pids as $id) { $product = wc_get_product($id); if ($product) $product->delete(true); }
+    foreach (array_reverse($terms) as $id) wp_delete_term($id, 'product_cat');
     wp_set_current_user($original_user);
     if ($uid && !is_wp_error($uid)) { require_once ABSPATH . 'wp-admin/includes/user.php'; wp_delete_user($uid); }
     if ($path) @unlink($path);

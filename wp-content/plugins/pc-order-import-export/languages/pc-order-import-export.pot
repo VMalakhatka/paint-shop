@@ -1292,3 +1292,6 @@ msgstr ""
 
 msgid "View product"
 msgstr ""
+
+msgid "Other products"
+msgstr ""

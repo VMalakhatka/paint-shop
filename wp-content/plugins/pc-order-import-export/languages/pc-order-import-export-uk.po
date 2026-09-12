@@ -1386,3 +1386,6 @@ msgstr "Під час клієнтського імпорту діють пот�
 
 msgid "View product"
 msgstr "Переглянути товар"
+
+msgid "Other products"
+msgstr "Інші товари"
