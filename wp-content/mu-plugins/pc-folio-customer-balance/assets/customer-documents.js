@@ -318,10 +318,90 @@
         return section;
     }
 
+    function renderInvoiceActions(folioDocument) {
+        if (managerMode || ['ACCOUNT', 'EXPENSE'].indexOf(folioDocument.documentType) === -1 || folioDocument.returnDocument) return;
+        var section = documentNode('section', 'pc-folio-documents__invoice');
+        var heading = documentNode('h4');
+        heading.textContent = labels.invoiceTitle;
+        var invoiceForm = documentNode('form', 'pc-folio-documents__invoice-form');
+        var download = documentNode('button', 'button');
+        download.type = 'button';
+        download.textContent = labels.invoiceDownload;
+        var emailLabel = documentNode('label');
+        var emailText = documentNode('span');
+        emailText.textContent = labels.invoiceEmail;
+        var email = documentNode('input');
+        email.type = 'email';
+        email.required = true;
+        email.maxLength = 254;
+        email.autocomplete = 'email';
+        email.value = pcFolioDocuments.invoiceEmail || '';
+        emailLabel.append(emailText, email);
+        var send = documentNode('button', 'button');
+        send.type = 'submit';
+        send.textContent = labels.invoiceSend;
+        var status = documentNode('p');
+        status.setAttribute('role', 'status');
+        status.setAttribute('aria-live', 'polite');
+        var requestKey = '';
+        var attempted = false;
+        var busy = false;
+        email.addEventListener('input', function () { requestKey = ''; attempted = false; });
+        function run(mode) {
+            if (busy) return;
+            if (mode === 'email' && !invoiceForm.reportValidity()) return;
+            if (mode === 'email' && !requestKey) requestKey = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                var r = crypto.getRandomValues(new Uint8Array(1))[0] & 15;
+                return (c === 'x' ? r : (r & 3) | 8).toString(16);
+            });
+            // Reuse the key after a transport error; never automatically send a second email.
+            busy = true;
+            download.disabled = send.disabled = email.disabled = true;
+            status.textContent = labels.invoiceBusy;
+            section.setAttribute('aria-busy', 'true');
+            var body = new URLSearchParams({
+                action: 'pc_folio_customer_invoice', _ajax_nonce: pcFolioDocuments.nonce,
+                document_type: folioDocument.documentType, document_id: folioDocument.documentId,
+                mode: mode, email: email.value, request_key: requestKey
+            });
+            fetch(pcFolioDocuments.ajaxUrl, {method: 'POST', credentials: 'same-origin', body: body}).then(function (response) {
+                if (mode === 'download' && response.ok && (response.headers.get('content-type') || '').indexOf('spreadsheetml') !== -1) {
+                    return response.blob().then(function (blob) {
+                        var url = URL.createObjectURL(blob);
+                        var link = documentNode('a');
+                        link.href = url;
+                        link.download = 'folio-invoice-' + folioDocument.documentType.toLowerCase() + '-' + folioDocument.documentId + '.xlsx';
+                        document.body.appendChild(link);
+                        link.click();
+                        link.remove();
+                        setTimeout(function () { URL.revokeObjectURL(url); }, 30000);
+                        status.textContent = labels.invoiceDownloaded;
+                    });
+                }
+                return response.json().then(function (payload) {
+                    if (!response.ok || !payload.success) throw new Error((payload.data || {}).message || labels.invoiceFailed);
+                    status.textContent = labels.invoiceMailAccepted;
+                    attempted = true;
+                });
+            }).catch(function (error) { status.textContent = error.message || labels.invoiceFailed; }).finally(function () {
+                busy = false;
+                download.disabled = email.disabled = false;
+                send.disabled = attempted;
+                section.removeAttribute('aria-busy');
+            });
+        }
+        download.addEventListener('click', function () { run('download'); });
+        invoiceForm.addEventListener('submit', function (event) { event.preventDefault(); run('email'); });
+        invoiceForm.append(download, emailLabel, send);
+        section.append(heading, invoiceForm, status);
+        detailContent.appendChild(section);
+    }
+
     function renderDetail(result) {
         var folioDocument = result.document || {};
         detailContent.replaceChildren();
         detailTitle.textContent = (labels.types[folioDocument.documentType] || text(folioDocument.documentType)) + ' ' + documentNumber(folioDocument);
+        renderInvoiceActions(folioDocument);
 
         var headerData = {
             documentTypeLabel: labels.types[folioDocument.documentType] || text(folioDocument.documentType),

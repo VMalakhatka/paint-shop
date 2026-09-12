@@ -1206,3 +1206,129 @@ msgstr ""
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-debtors.php:462
 msgid "You do not have permission to view this report."
 msgstr ""
+
+msgid "Payment invoice"
+msgstr ""
+
+msgid "Invoice XLSX"
+msgstr ""
+
+msgid "Send by email"
+msgstr ""
+
+msgid "Recipient email"
+msgstr ""
+
+msgid "Preparing invoice..."
+msgstr ""
+
+msgid "Invoice downloaded."
+msgstr ""
+
+msgid ""
+"The invoice was accepted by the mail service. Delivery is not yet confirmed."
+msgstr ""
+
+msgid "The invoice could not be prepared. Please try again later."
+msgstr ""
+
+msgid ""
+"Payment invoice requisites must be configured and confirmed by the manager."
+msgstr ""
+
+msgid "Check the IBAN and tax ID."
+msgstr ""
+
+msgid "Lavka: payment invoices"
+msgstr ""
+
+msgid "Supplier / payment recipient"
+msgstr ""
+
+msgid "Tax ID"
+msgstr ""
+
+msgid "IBAN"
+msgstr ""
+
+msgid "Bank"
+msgstr ""
+
+msgid "Bank code (MFO)"
+msgstr ""
+
+msgid "Logo media ID"
+msgstr ""
+
+msgid "Settings saved."
+msgstr ""
+
+msgid ""
+"I have verified the payment recipient and bank details for generated "
+"invoices."
+msgstr ""
+
+msgid "This document cannot be used for a payment invoice."
+msgstr ""
+
+msgid ""
+"The document has incomplete or inconsistent amounts. Contact the manager."
+msgstr ""
+
+#, php-format
+msgid "Payment invoice No. %s"
+msgstr ""
+
+#, php-format
+msgid "Document date: %s"
+msgstr ""
+
+msgid "Customer"
+msgstr ""
+
+msgid ""
+"Full source document amount, not the outstanding balance. No new Folio "
+"document is created."
+msgstr ""
+
+msgid "Barcode"
+msgstr ""
+
+msgid "Price, UAH"
+msgstr ""
+
+msgid "Amount, UAH"
+msgstr ""
+
+msgid "Total, UAH"
+msgstr ""
+
+#, php-format
+msgid ""
+"Current catalogue barcodes. Items without a verified barcode: %d. Prices and "
+"amounts are from the source Folio document."
+msgstr ""
+
+msgid ""
+"This email request was already attempted. Check your inbox before sending "
+"again."
+msgstr ""
+
+msgid "Please wait before sending another invoice email."
+msgstr ""
+
+msgid "Enter a valid recipient email."
+msgstr ""
+
+msgid ""
+"Your payment invoice is attached as an Excel file. It contains the full "
+"source document amount, not the outstanding balance."
+msgstr ""
+
+msgid ""
+"The invoice could not be prepared or sent. Contact the manager before "
+"retrying an email."
+msgstr ""
+
+msgid "Choose logo"
+msgstr ""

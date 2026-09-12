@@ -966,3 +966,6 @@ msgstr "Сочетайте поставщика, склад, наличие и �
 
 msgid "Changing a quantity or removing an item updates only that row and the cart totals. While the request is running, the cart shows “Updating cart…”; wait for it to finish instead of repeating the action."
 msgstr "Изменение количества или удаление товара обновляет только нужную строку и итоги корзины. Пока выполняется запрос, корзина показывает «Обновление корзины…»; дождитесь завершения и не повторяйте действие."
+
+msgid "Open an invoice or expense invoice and choose Invoice XLSX to download a payment invoice with barcodes and historical prices. Send by email uses your account email, which you can replace with another address. The file contains the full document amount, not the outstanding balance; the original Folio document is not changed. Missing verified barcodes remain blank. Mail service acceptance does not confirm delivery."
+msgstr "Откройте счёт или расходную накладную и нажмите «Счёт XLSX», чтобы скачать счёт на оплату со штрихкодами и историческими ценами. «Отправить на email» использует адрес профиля; его можно заменить другим. Файл содержит полную сумму документа, а не остаток долга; исходный документ ФОЛИО не меняется. Отсутствующие проверенные штрихкоды остаются пустыми. Принятие почтовой службой не подтверждает доставку."

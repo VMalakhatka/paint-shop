@@ -3,6 +3,7 @@
 defined('ABSPATH') || exit;
 
 const PC_FOLIO_DOCUMENTS_ENDPOINT = 'folio-documents';
+require_once __DIR__ . '/customer-invoice.php';
 
 function pc_folio_documents_register_endpoint(): void {
     add_rewrite_endpoint(PC_FOLIO_DOCUMENTS_ENDPOINT, EP_ROOT | EP_PAGES);
@@ -46,15 +47,24 @@ function pc_folio_documents_enqueue_assets(int $manager_customer_id = 0): void {
     }
 
     $base_url = content_url('/mu-plugins/pc-folio-customer-balance/assets/');
-    wp_enqueue_style('pc-folio-customer-documents', $base_url . 'customer-documents.css', [], PC_FOLIO_BALANCE_VERSION);
+    wp_enqueue_style('pc-folio-customer-documents', $base_url . 'customer-documents.css', [], (string) filemtime(__DIR__ . '/../assets/customer-documents.css'));
     wp_enqueue_script('pc-folio-customer-documents', $base_url . 'customer-documents.js', [], (string) filemtime(__DIR__ . '/../assets/customer-documents.js'), true);
     wp_localize_script('pc-folio-customer-documents', 'pcFolioDocuments', [
         'ajaxUrl' => admin_url('admin-ajax.php'),
         'nonce'   => wp_create_nonce('pc_folio_customer_documents'),
         'today'   => current_time('Y-m-d'),
+        'invoiceEmail' => (string) (get_userdata((int) $context['user_id'])->user_email ?? ''),
         'managerCustomerId' => $manager_customer_id,
         'managerNonce' => $manager_customer_id > 0 ? wp_create_nonce('pcoe_manager') : '',
         'labels'  => [
+            'invoiceTitle' => __('Payment invoice', 'pc-folio-customer-balance'),
+            'invoiceDownload' => __('Invoice XLSX', 'pc-folio-customer-balance'),
+            'invoiceSend' => __('Send by email', 'pc-folio-customer-balance'),
+            'invoiceEmail' => __('Recipient email', 'pc-folio-customer-balance'),
+            'invoiceBusy' => __('Preparing invoice...', 'pc-folio-customer-balance'),
+            'invoiceDownloaded' => __('Invoice downloaded.', 'pc-folio-customer-balance'),
+            'invoiceMailAccepted' => __('The invoice was accepted by the mail service. Delivery is not yet confirmed.', 'pc-folio-customer-balance'),
+            'invoiceFailed' => __('The invoice could not be prepared. Please try again later.', 'pc-folio-customer-balance'),
             'loading'       => __('Folio documents are being loaded...', 'pc-folio-customer-balance'),
             'detailsLoading'=> __('Document details are being loaded...', 'pc-folio-customer-balance'),
             'requestFailed' => __('Folio documents could not be loaded. Please try again later.', 'pc-folio-customer-balance'),
@@ -383,7 +393,7 @@ function pc_folio_documents_product_context(string $sku): array {
     ];
 }
 
-function pc_folio_documents_fetch_detail(array $context, string $type, int $document_id) {
+function pc_folio_documents_fetch_detail(array $context, string $type, int $document_id, bool $with_products = true) {
     $path = sprintf('/admin/folio/customer-documents/%s/%d', rawurlencode($type), $document_id);
     $data = pc_folio_documents_java_get($path, ['partnerShortName' => $context['short_name']]);
     if (is_wp_error($data)) {
@@ -396,7 +406,7 @@ function pc_folio_documents_fetch_detail(array $context, string $type, int $docu
     if (!is_array($data['document'] ?? null)) {
         return new WP_Error('invalid_document_detail', __('Folio returned invalid document details.', 'pc-folio-customer-balance'), ['status' => 502]);
     }
-    $data['document'] = pc_folio_documents_prepare_document($data['document'], true);
+    $data['document'] = pc_folio_documents_prepare_document($data['document'], $with_products);
     return $data;
 }
 

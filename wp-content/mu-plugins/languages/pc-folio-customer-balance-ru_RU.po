@@ -1,0 +1,148 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: PC Folio Customer Balance\n"
+"PO-Revision-Date: 2026-09-12 16:00+0200\n"
+"Last-Translator: Lavka\n"
+"Language-Team: Russian\n"
+"MIME-Version: 1.0\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: ru_RU\n"
+
+msgid "Payment invoice"
+msgstr "Счёт на оплату"
+
+msgid "Invoice XLSX"
+msgstr "Счёт XLSX"
+
+msgid "Send by email"
+msgstr "Отправить на email"
+
+msgid "Recipient email"
+msgstr "Email получателя"
+
+msgid "Preparing invoice..."
+msgstr "Формируем счёт..."
+
+msgid "Invoice downloaded."
+msgstr "Счёт скачан."
+
+msgid ""
+"The invoice was accepted by the mail service. Delivery is not yet confirmed."
+msgstr "Счёт принят почтовой службой. Доставка ещё не подтверждена."
+
+msgid "The invoice could not be prepared. Please try again later."
+msgstr "Не удалось сформировать счёт. Попробуйте позже."
+
+msgid ""
+"Payment invoice requisites must be configured and confirmed by the manager."
+msgstr "Менеджер должен заполнить и подтвердить реквизиты счетов на оплату."
+
+msgid "Check the IBAN and tax ID."
+msgstr "Проверьте IBAN и налоговый номер."
+
+msgid "Lavka: payment invoices"
+msgstr "Лавка: счета на оплату"
+
+msgid "Supplier / payment recipient"
+msgstr "Поставщик / получатель оплаты"
+
+msgid "Tax ID"
+msgstr "Код ЕГРПОУ / РНОКПП"
+
+msgid "IBAN"
+msgstr "IBAN"
+
+msgid "Bank"
+msgstr "Банк"
+
+msgid "Bank code (MFO)"
+msgstr "МФО банка"
+
+msgid "Logo media ID"
+msgstr "ID логотипа в медиатеке"
+
+msgid "Settings saved."
+msgstr "Настройки сохранены."
+
+msgid ""
+"I have verified the payment recipient and bank details for generated "
+"invoices."
+msgstr ""
+"Подтверждаю правильность получателя оплаты и банковских реквизитов для "
+"счетов."
+
+msgid "This document cannot be used for a payment invoice."
+msgstr "Этот документ нельзя использовать для счёта на оплату."
+
+msgid ""
+"The document has incomplete or inconsistent amounts. Contact the manager."
+msgstr "Суммы документа неполные или не совпадают. Обратитесь к менеджеру."
+
+#, php-format
+msgid "Payment invoice No. %s"
+msgstr "Счёт на оплату № %s"
+
+#, php-format
+msgid "Document date: %s"
+msgstr "Дата документа: %s"
+
+msgid "Customer"
+msgstr "Покупатель"
+
+msgid ""
+"Full source document amount, not the outstanding balance. No new Folio "
+"document is created."
+msgstr ""
+"Полная сумма исходного документа, не остаток долга. Новый документ в ФОЛИО "
+"не создаётся."
+
+msgid "Barcode"
+msgstr "Штрихкод"
+
+msgid "Price, UAH"
+msgstr "Цена, грн"
+
+msgid "Amount, UAH"
+msgstr "Сумма, грн"
+
+msgid "Total, UAH"
+msgstr "Итого, грн"
+
+#, php-format
+msgid ""
+"Current catalogue barcodes. Items without a verified barcode: %d. Prices and "
+"amounts are from the source Folio document."
+msgstr ""
+"Штрихкоды из текущего каталога. Позиций без проверенного штрихкода: %d. Цены "
+"и суммы из исходного документа ФОЛИО."
+
+msgid ""
+"This email request was already attempted. Check your inbox before sending "
+"again."
+msgstr ""
+"Попытка отправки этого запроса уже выполнена. Проверьте почту перед "
+"повторной отправкой."
+
+msgid "Please wait before sending another invoice email."
+msgstr "Подождите перед отправкой следующего счёта."
+
+msgid "Enter a valid recipient email."
+msgstr "Введите корректный email получателя."
+
+msgid ""
+"Your payment invoice is attached as an Excel file. It contains the full "
+"source document amount, not the outstanding balance."
+msgstr ""
+"Счёт на оплату приложен в файле Excel. Он содержит полную сумму исходного "
+"документа, а не остаток долга."
+
+msgid ""
+"The invoice could not be prepared or sent. Contact the manager before "
+"retrying an email."
+msgstr ""
+"Не удалось сформировать или отправить счёт. Перед повторной отправкой "
+"обратитесь к менеджеру."
+
+msgid "Choose logo"
+msgstr "Выбрать логотип"

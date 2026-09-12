@@ -1226,6 +1226,144 @@ msgstr "У вас немає дозволу на оновлення цього �
 msgid "You do not have permission to view this report."
 msgstr "У вас немає дозволу на перегляд цього звіту."
 
+msgid "Payment invoice"
+msgstr "Рахунок на оплату"
+
+msgid "Invoice XLSX"
+msgstr "Рахунок XLSX"
+
+msgid "Send by email"
+msgstr "Надіслати на email"
+
+msgid "Recipient email"
+msgstr "Email отримувача"
+
+msgid "Preparing invoice..."
+msgstr "Формуємо рахунок..."
+
+msgid "Invoice downloaded."
+msgstr "Рахунок завантажено."
+
+msgid ""
+"The invoice was accepted by the mail service. Delivery is not yet confirmed."
+msgstr "Рахунок прийнято поштовою службою. Доставку ще не підтверджено."
+
+msgid "The invoice could not be prepared. Please try again later."
+msgstr "Не вдалося сформувати рахунок. Спробуйте пізніше."
+
+msgid ""
+"Payment invoice requisites must be configured and confirmed by the manager."
+msgstr "Менеджер має заповнити й підтвердити реквізити рахунків на оплату."
+
+msgid "Check the IBAN and tax ID."
+msgstr "Перевірте IBAN і податковий номер."
+
+msgid "Lavka: payment invoices"
+msgstr "Лавка: рахунки на оплату"
+
+msgid "Supplier / payment recipient"
+msgstr "Постачальник / отримувач оплати"
+
+msgid "Tax ID"
+msgstr "Код ЄДРПОУ / РНОКПП"
+
+msgid "IBAN"
+msgstr "IBAN"
+
+msgid "Bank"
+msgstr "Банк"
+
+msgid "Bank code (MFO)"
+msgstr "МФО банку"
+
+msgid "Logo media ID"
+msgstr "ID логотипа в медіатеці"
+
+msgid "Settings saved."
+msgstr "Налаштування збережено."
+
+msgid ""
+"I have verified the payment recipient and bank details for generated "
+"invoices."
+msgstr ""
+"Підтверджую правильність отримувача оплати й банківських реквізитів для "
+"рахунків."
+
+msgid "This document cannot be used for a payment invoice."
+msgstr "Цей документ не можна використати для рахунка на оплату."
+
+msgid ""
+"The document has incomplete or inconsistent amounts. Contact the manager."
+msgstr "Суми документа неповні або не збігаються. Зверніться до менеджера."
+
+#, php-format
+msgid "Payment invoice No. %s"
+msgstr "Рахунок на оплату № %s"
+
+#, php-format
+msgid "Document date: %s"
+msgstr "Дата документа: %s"
+
+msgid "Customer"
+msgstr "Покупець"
+
+msgid ""
+"Full source document amount, not the outstanding balance. No new Folio "
+"document is created."
+msgstr ""
+"Повна сума початкового документа, не залишок боргу. Новий документ у ФОЛІО "
+"не створюється."
+
+msgid "Barcode"
+msgstr "Штрихкод"
+
+msgid "Price, UAH"
+msgstr "Ціна, грн"
+
+msgid "Amount, UAH"
+msgstr "Сума, грн"
+
+msgid "Total, UAH"
+msgstr "Разом, грн"
+
+#, php-format
+msgid ""
+"Current catalogue barcodes. Items without a verified barcode: %d. Prices and "
+"amounts are from the source Folio document."
+msgstr ""
+"Штрихкоди з поточного каталогу. Позицій без перевіреного штрихкоду: %d. Ціни "
+"й суми з початкового документа ФОЛІО."
+
+msgid ""
+"This email request was already attempted. Check your inbox before sending "
+"again."
+msgstr ""
+"Спробу надсилання цього запиту вже виконано. Перевірте пошту перед повторним "
+"надсиланням."
+
+msgid "Please wait before sending another invoice email."
+msgstr "Зачекайте перед надсиланням наступного рахунка."
+
+msgid "Enter a valid recipient email."
+msgstr "Введіть коректний email отримувача."
+
+msgid ""
+"Your payment invoice is attached as an Excel file. It contains the full "
+"source document amount, not the outstanding balance."
+msgstr ""
+"Рахунок на оплату додано у файлі Excel. Він містить повну суму початкового "
+"документа, а не залишок боргу."
+
+msgid ""
+"The invoice could not be prepared or sent. Contact the manager before "
+"retrying an email."
+msgstr ""
+"Не вдалося сформувати або надіслати рахунок. Перед повторним надсиланням "
+"зверніться до менеджера."
+
+msgid "Choose logo"
+msgstr "Вибрати логотип"
+
 #~ msgid "Currency"
 #~ msgstr "Валюта"
 

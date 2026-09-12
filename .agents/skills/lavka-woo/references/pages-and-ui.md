@@ -129,3 +129,16 @@ paint-core, сохраняя slug/capability/callback; одной JS-перег�
   `docs/api/FOLIO_PRODUCT_ANALYTICS_SCENARIOS_BACKEND_TASK.md`.
 - Операторская приёмка сценария Kreul по складам `1, 5, 7` находится в разделе
   «Статистика товара и закупочные решения» файла `docs/OPERATIONS_RUNBOOK.md`.
+
+## Payment invoice export from customer documents
+
+`pc-folio-customer-balance/inc/customer-invoice.php` owns XLSX/email derived from
+the signed-in customer's ACCOUNT/EXPENSE. Reuse the server-side partner mapping
+and verify returned document identity; never accept posted prices or customer
+mapping. Confirmed payee details are runtime configuration, not `receiverName`
+from the source document. No Folio document write is part of this export.
+Current verified Woo barcodes are not historical document data; absent values
+stay blank. Manager workspace does not expose these invoice actions yet.
+Setup, mail acceptance/unknown-outcome semantics and acceptance tests:
+`docs/OPERATIONS_RUNBOOK.md`, section "Счёт на оплату из документа ФОЛИО".
+Source: local implementation and synthetic tests, 2026-09-12.
