@@ -1241,3 +1241,54 @@ msgstr ""
 #: inc/Ui.php:425
 msgid "The orders list below has not been refreshed yet."
 msgstr ""
+
+msgid "Preparing the full price list…"
+msgstr ""
+
+msgid "Could not download the price list. Please try again."
+msgstr ""
+
+msgid "Download full price list (XLSX)"
+msgstr ""
+
+msgid "Full price list"
+msgstr ""
+
+msgid "Supplier"
+msgstr ""
+
+msgid "Category"
+msgstr ""
+
+msgid "Your price (%1$s), %2$s"
+msgstr ""
+
+msgid "Stock: Kyiv + Odesa"
+msgstr ""
+
+msgid "Order quantity"
+msgstr ""
+
+msgid "Product information"
+msgstr ""
+
+msgid "Enter a quantity of zero or more."
+msgstr ""
+
+msgid "Access denied."
+msgstr ""
+
+msgid "Invalid order quantity."
+msgstr ""
+
+msgid "Keep the SKU and Order quantity columns in the price list."
+msgstr ""
+
+msgid "Enter a positive quantity in the Order quantity column first."
+msgstr ""
+
+msgid "Customer imports use current account prices, not prices from the file. Only managers can import custom draft prices."
+msgstr ""
+
+msgid "View product"
+msgstr ""

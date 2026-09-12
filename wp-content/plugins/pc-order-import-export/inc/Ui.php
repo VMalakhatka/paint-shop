@@ -103,7 +103,7 @@ class Ui
                 <li><?php echo esc_html__('Use either SKU or GTIN to identify the product. If both columns are present, GTIN is checked first, then SKU.', 'pc-order-import-export'); ?></li>
                 <li><?php echo esc_html__('Quantity must be greater than 0. Empty, zero, or negative quantities are skipped.', 'pc-order-import-export'); ?></li>
                 <li><?php echo esc_html__('CSV delimiters are detected automatically: semicolon, comma, tab, or vertical bar. Semicolon is recommended.', 'pc-order-import-export'); ?></li>
-                <li><?php echo esc_html__('The optional price column can be used when importing into a draft order.', 'pc-order-import-export'); ?></li>
+                <li><?php echo esc_html__('Customer imports use current account prices, not prices from the file. Only managers can import custom draft prices.', 'pc-order-import-export'); ?></li>
                 <li><?php echo esc_html__('After import, a draft order is created. It is not a completed order yet; review it before adding it to the cart.', 'pc-order-import-export'); ?></li>
                 <li><?php echo esc_html__('The import report shows which rows were added, skipped, or not found.', 'pc-order-import-export'); ?></li>
               </ul>
@@ -210,6 +210,7 @@ DEF-456;3</code></pre>
 /** Блок імпорту + кнопка «В чернетку» на сторінці "Мої замовлення" */
 public static function render_account_import_block(): void
 {
+    PriceList::render();
     $nonce_draft      = wp_create_nonce('pcoe_import_draft');      // для імпорту файлу у чернетку
     $nonce_cart_draft = wp_create_nonce('pcoe_cart_to_draft');      // для збереження кошика у чернетку
     $ajax             = admin_url('admin-ajax.php');
@@ -345,7 +346,8 @@ public static function render_account_import_block(): void
         $nonce_cart  = wp_create_nonce('pcoe_import_cart');
         $nonce_draft = wp_create_nonce('pcoe_import_draft');
 
-        ob_start(); ?>
+        ob_start();
+        PriceList::render(); ?>
         <div class="pcoe-import" style="margin-top:18px; padding-top:10px; border-top:1px dashed #e5e5e5">
             <details>
                 <summary> <strong><?php echo esc_html__('Import', 'pc-order-import-export'); ?></strong> <?php echo esc_html__('(CSV / XLSX)', 'pc-order-import-export'); ?></summary>
@@ -430,6 +432,11 @@ public static function render_account_import_block(): void
     protected static function inline_css(): string
     {
         return '
+        .pcoe-price-list { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin:16px 0; }
+        .pcoe-price-list .button { max-width:100%; white-space:normal; line-height:1.4; }
+        .pcoe-price-list-status { flex-basis:100%; overflow-wrap:anywhere; }
+        .pcoe-import input, #pcoe-import-form input { max-width:100%; min-width:0 !important; box-sizing:border-box; }
+        .pcoe-import input[type="text"] { flex:1 1 240px; width:100%; }
         .pcoe-draft-folio {
             margin: 28px 0;
             padding-top: 20px;

@@ -8,6 +8,7 @@ msgstr ""
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ru_RU\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -682,6 +683,7 @@ msgid "Draft (import) <span class=\"count\">(%s)</span>"
 msgid_plural "Draft (import) <span class=\"count\">(%s)</span>"
 msgstr[0] "Черновик (импорт) <span class=\"count\">(%s)</span>"
 msgstr[1] "Черновики (импорт) <span class=\"count\">(%s)</span>"
+msgstr[2] "Черновиков (импорт) <span class=\"count\">(%s)</span>"
 
 #: inc/ImporterDraft.php:106
 msgid "Failed to create draft order."
@@ -1327,3 +1329,54 @@ msgstr "Не привязан к ФОЛИО"
 #: inc/ManagerWorkspace.php inc/manager-view.php
 msgid "All customers"
 msgstr "Все клиенты"
+
+msgid "Preparing the full price list…"
+msgstr "Готовим полный прайс…"
+
+msgid "Could not download the price list. Please try again."
+msgstr "Не удалось скачать прайс. Попробуйте ещё раз."
+
+msgid "Download full price list (XLSX)"
+msgstr "Скачать полный прайс (XLSX)"
+
+msgid "Full price list"
+msgstr "Полный прайс"
+
+msgid "Supplier"
+msgstr "Поставщик"
+
+msgid "Category"
+msgstr "Категория"
+
+msgid "Your price (%1$s), %2$s"
+msgstr "Ваша цена (%1$s), %2$s"
+
+msgid "Stock: Kyiv + Odesa"
+msgstr "Остаток: Киев + Одесса"
+
+msgid "Order quantity"
+msgstr "Заказать"
+
+msgid "Product information"
+msgstr "Информация о товаре"
+
+msgid "Enter a quantity of zero or more."
+msgstr "Введите количество от нуля."
+
+msgid "Access denied."
+msgstr "Доступ запрещён."
+
+msgid "Invalid order quantity."
+msgstr "Некорректное количество заказа."
+
+msgid "Keep the SKU and Order quantity columns in the price list."
+msgstr "Сохраните колонки «Артикул» и «Заказать» в прайсе."
+
+msgid "Enter a positive quantity in the Order quantity column first."
+msgstr "Сначала укажите положительное количество в колонке «Заказать»."
+
+msgid "Customer imports use current account prices, not prices from the file. Only managers can import custom draft prices."
+msgstr "При клиентском импорте действуют текущие цены учётной записи, а не цены из файла. Только менеджер может импортировать произвольные цены черновика."
+
+msgid "View product"
+msgstr "Посмотреть товар"

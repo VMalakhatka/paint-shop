@@ -4,6 +4,36 @@ jQuery(function ($) {
   var KEY_COLS  = 'pcoeCols';
   var KEY_SPLIT = 'pcoeSplit';
 
+  $(document).on('click', '.pcoe-price-list-download', async function () {
+    var button = this;
+    if (button.disabled) return;
+    var status = button.closest('.pcoe-price-list').querySelector('[role="status"]');
+    button.disabled = true;
+    button.setAttribute('aria-busy', 'true');
+    status.textContent = button.dataset.pending;
+    try {
+      var response = await fetch(button.dataset.url, { credentials: 'same-origin', cache: 'no-store' });
+      if (!response.ok || !(response.headers.get('Content-Type') || '').includes('spreadsheetml')) {
+        throw new Error(button.dataset.error);
+      }
+      var blob = await response.blob();
+      var url = URL.createObjectURL(blob);
+      var link = document.createElement('a');
+      link.href = url;
+      link.download = 'lavka-price-list.xlsx';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+      status.textContent = '';
+    } catch (error) {
+      status.textContent = button.dataset.error;
+    } finally {
+      button.disabled = false;
+      button.removeAttribute('aria-busy');
+    }
+  });
+
   function readCols(scope){ try{ var all=JSON.parse(localStorage.getItem(KEY_COLS)||'{}'); return all[scope]||[]; }catch(e){ return []; } }
   function writeCols(scope, arr){ try{ var all=JSON.parse(localStorage.getItem(KEY_COLS)||'{}'); all[scope]=arr; localStorage.setItem(KEY_COLS, JSON.stringify(all)); }catch(e){} }
   function readSplit(scope){ try{ var all=JSON.parse(localStorage.getItem(KEY_SPLIT)||'{}'); return all[scope]||'agg'; }catch(e){ return 'agg'; } }
@@ -102,6 +132,8 @@ jQuery(function ($) {
   $(document).on('submit','#pcoe-import-form',function(e){
     e.preventDefault();
     var $f   = $(this), $msg = $f.find('.pcoe-import-msg');
+    if ($f.data('pending')) return false;
+    $f.data('pending', true).find('button[type="submit"]').prop('disabled', true);
     var fd = new FormData(this); fd.append('action','pcoe_import_cart');
     $msg.text(I18N.importing || 'Importing…');
     $.ajax({ url: AJAX, method: 'POST', data: fd, contentType: false, processData: false })
@@ -114,13 +146,19 @@ jQuery(function ($) {
             }
             $('.pcoe-import-report').html(resp.data.report_html);
           }
-          setTimeout(function(){ window.location.reload(); }, 1200);
+          if (!$f.find('.pcoe-refresh-cart').length) {
+            $('<button type="button" class="button pcoe-refresh-cart"></button>')
+              .text(I18N.refresh_list || 'Refresh list').appendTo($f)
+              .on('click', function () { window.location.reload(); });
+          }
         } else {
           $msg.text((resp && resp.data && resp.data.msg) ? resp.data.msg : (I18N.import_error || 'Import error.'));
         }
       })
-      .fail(function(){
-        $msg.text(I18N.conn_error || 'Connection error.');
+      .fail(function(xhr){
+        $msg.text((xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.msg) || I18N.conn_error || 'Connection error.');
+      }).always(function () {
+        $f.data('pending', false).find('button[type="submit"]').prop('disabled', false);
       });
     return false;
   });
@@ -128,6 +166,8 @@ jQuery(function ($) {
     // === Імпорт у чернетку
     $(document).on('submit','#pcoe-import-draft-form',function(){
     var $f   = $(this), $msg = $f.find('.pcoe-import-draft-msg');
+    if ($f.data('pending')) return false;
+    $f.data('pending', true).find('button[type="submit"]').prop('disabled', true);
     var $box = $('.pcoe-import-draft-result');
     $msg.text(I18N.importing); $box.hide();
 
@@ -165,8 +205,10 @@ jQuery(function ($) {
           $msg.text((resp && resp.data && resp.data.msg) ? resp.data.msg : (I18N.import_error || 'Import error.'));
         }
       })
-      .fail(function(){
-        $msg.text(I18N.conn_error || 'Connection error.');
+      .fail(function(xhr){
+        $msg.text((xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.msg) || I18N.conn_error || 'Connection error.');
+      }).always(function () {
+        $f.data('pending', false).find('button[type="submit"]').prop('disabled', false);
       });
 
     return false;

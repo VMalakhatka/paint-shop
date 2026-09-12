@@ -969,3 +969,15 @@ msgstr "Изменение количества или удаление това
 
 msgid "Open an invoice or expense invoice and choose Invoice XLSX to download a payment invoice with barcodes and historical prices. Send by email uses your account email, which you can replace with another address. The file contains the full document amount, not the outstanding balance; the original Folio document is not changed. Missing verified barcodes remain blank. Mail service acceptance does not confirm delivery."
 msgstr "Откройте счёт или расходную накладную и нажмите «Счёт XLSX», чтобы скачать счёт на оплату со штрихкодами и историческими ценами. «Отправить на email» использует адрес профиля; его можно заменить другим. Файл содержит полную сумму документа, а не остаток долга; исходный документ ФОЛИО не меняется. Отсутствующие проверенные штрихкоды остаются пустыми. Принятие почтовой службой не подтверждает доставку."
+
+msgid "Order from the full price list"
+msgstr "Заказ из полного прайса"
+
+msgid "In My orders or the cart, download the full XLSX price list. It contains one current price for your account, combined Kyiv and Odesa stock, barcodes, supplier and category filters, and product links. Unknown prices or stock remain blank. Out-of-stock catalogue products are included."
+msgstr "В «Моих заказах» или корзине скачайте полный прайс XLSX. В нём одна текущая цена для вашей учётной записи, общий остаток Киева и Одессы, штрихкоды, фильтры поставщиков и категорий и ссылки на товары. Неизвестные цены или остатки остаются пустыми. Товары каталога без остатка также включены."
+
+msgid "Fill in the yellow Order quantity column and upload the saved file into a draft or cart. Keep the column names and SKUs. Blank quantities and zeros are ignored; negative values, text and formulas are rejected. All filled rows are imported, including rows hidden by Excel filters. Products in this price list are matched by SKU, and current account prices replace the file prices. A draft does not reserve stock; the cart checks current availability."
+msgstr "Заполните жёлтую колонку «Заказать» и загрузите сохранённый файл в черновик или корзину. Сохраните названия колонок и артикулы. Пустые количества и нули игнорируются; отрицательные значения, текст и формулы не принимаются. Импортируются все заполненные строки, в том числе скрытые фильтрами Excel. В этом прайсе товары определяются по артикулу, а вместо цен из файла действуют текущие цены учётной записи. Черновик не резервирует товар; корзина проверяет текущую доступность."
+
+msgid "Customer draft imports also use current account prices. After cart import, review the report, then refresh the list. Do not import again if the products were already added."
+msgstr "Клиентский импорт в черновик также использует текущие цены учётной записи. После импорта в корзину просмотрите отчёт, затем обновите список. Не импортируйте повторно, если товары уже добавлены."

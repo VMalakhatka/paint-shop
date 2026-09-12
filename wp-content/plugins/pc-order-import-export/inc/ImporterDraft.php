@@ -96,6 +96,8 @@ class ImporterDraft
         if (!$rows) wp_send_json_error(['msg' => esc_html__('Empty file or invalid format.', 'pc-order-import-export')], 400);
 
         [$map, $start] = Helpers::detect_colmap_and_start($rows);
+        $validation_error = Helpers::price_list_import_error($rows, $map, $start);
+        if ($validation_error) wp_send_json_error(['msg' => $validation_error], 400);
 
         // создаём черновик
         $order = wc_create_order([
@@ -164,7 +166,8 @@ class ImporterDraft
         };
 
         $res = Helpers::process_rows_with_adder($rows, $map, $start, [
-            'allow_price' => true,                                                // черновик может принимать цену из файла
+            // Customer uploads always use current customer prices, including renamed templates.
+            'allow_price' => current_user_can('manage_woocommerce'),
             'ok_label'    => esc_html__('Added to draft', 'pc-order-import-export'),
             'adder'       => $adder,
         ]);

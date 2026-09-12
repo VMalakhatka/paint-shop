@@ -51,6 +51,12 @@
 
 ## Корзина и checkout
 
+- Полный клиентский XLSX-прайс принадлежит `pc-order-import-export/PriceList` и
+  доступен оптовым ролям в Orders и корзине. Цена одна, из текущего customer price
+  pipeline; остаток только по mapped selling locations Киева и Одессы. Импорт
+  заполняет только `Замовити`, идентифицирует SKU и заново получает цену клиента.
+  Подробности и границы: `wp-content/plugins/pc-order-import-export/README.md`.
+
 - Classic cart/checkout нужны для совместимости текущего WayForPay plugin.
 - Изменение количества и удаление строки classic cart выполняет
   `pc-cart-guard` через защищённый AJAX одной строки; ответ обновляет subtotal и

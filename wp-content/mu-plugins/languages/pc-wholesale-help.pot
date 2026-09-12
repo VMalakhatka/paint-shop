@@ -752,3 +752,15 @@ msgstr ""
 
 msgid "Open an invoice or expense invoice and choose Invoice XLSX to download a payment invoice with barcodes and historical prices. Send by email uses your account email, which you can replace with another address. The file contains the full document amount, not the outstanding balance; the original Folio document is not changed. Missing verified barcodes remain blank. Mail service acceptance does not confirm delivery."
 msgstr ""
+
+msgid "Order from the full price list"
+msgstr ""
+
+msgid "In My orders or the cart, download the full XLSX price list. It contains one current price for your account, combined Kyiv and Odesa stock, barcodes, supplier and category filters, and product links. Unknown prices or stock remain blank. Out-of-stock catalogue products are included."
+msgstr ""
+
+msgid "Fill in the yellow Order quantity column and upload the saved file into a draft or cart. Keep the column names and SKUs. Blank quantities and zeros are ignored; negative values, text and formulas are rejected. All filled rows are imported, including rows hidden by Excel filters. Products in this price list are matched by SKU, and current account prices replace the file prices. A draft does not reserve stock; the cart checks current availability."
+msgstr ""
+
+msgid "Customer draft imports also use current account prices. After cart import, review the report, then refresh the list. Do not import again if the products were already added."
+msgstr ""

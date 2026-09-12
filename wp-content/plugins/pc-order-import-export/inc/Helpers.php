@@ -167,6 +167,11 @@ public static function build_colmap(array $header): array {
     $map = ['sku'=>null,'gtin'=>null,'qty'=>null,'price'=>null];
     $h   = array_map([__CLASS__,'norm'], $header);
 
+    // The downloadable catalogue must never interpret stock as an order quantity.
+    $orderHeaders = array_map([__CLASS__, 'norm'], ['Order quantity', 'Замовити', 'Заказать']);
+    $catalogueHeaders = array_map([__CLASS__, 'norm'], ['Stock: Kyiv + Odesa', 'Залишок: Київ + Одеса', 'Остаток: Киев + Одесса']);
+    $isPriceList = (bool) array_intersect($h, array_merge($orderHeaders, $catalogueHeaders));
+
     foreach (['sku','gtin','qty','price'] as $k) {
         foreach ($syn[$k] as $want) {
             $pos = array_search($want, $h, true);
@@ -188,6 +193,16 @@ public static function build_colmap(array $header): array {
                 }
             }
         }
+    }
+
+    if ($isPriceList) {
+        $map['price_list'] = true;
+        $map['qty'] = null;
+        foreach ($h as $i => $title) {
+            if (in_array($title, $orderHeaders, true)) $map['qty'] = $i;
+        }
+        $map['price'] = null;
+        return $map;
     }
 
     // дефолты как раньше
@@ -278,9 +293,12 @@ public static function build_colmap(array $header): array {
                 try {
                     $xls   = \PhpOffice\PhpSpreadsheet\IOFactory::load($tmp);
                     $sheet = $xls->getActiveSheet();
-                    foreach ($sheet->toArray(null, true, true, false) as $r) {
+                    $rawRows = $sheet->toArray(null, false, false, false);
+                    $map = self::build_colmap(array_map('strval', $rawRows[0] ?? []));
+                    foreach (!empty($map['price_list']) ? $rawRows : $sheet->toArray(null, true, true, false) as $r) {
                         $rows[] = $r;
                     }
+                    $xls->disconnectWorksheets();
                     return [$rows, null];
                 } catch (\Throwable $e) {
                     return [[], sprintf(
@@ -408,6 +426,19 @@ public static function build_colmap(array $header): array {
         return [$map, $start];
     }
 
+    public static function price_list_import_error(array $rows, array $map, int $start): ?string {
+        if (empty($map['price_list'])) return null;
+        if (!PriceList::can_access()) return __('Access denied.', 'pc-order-import-export');
+        if (!isset($map['qty'], $map['sku'])) {
+            return __('Keep the SKU and Order quantity columns in the price list.', 'pc-order-import-export');
+        }
+        foreach (array_slice($rows, $start) as $row) {
+            $qty = self::parse_price(self::safe_val($row, $map['qty']));
+            if ($qty !== null && is_finite($qty) && $qty > 0) return null;
+        }
+        return __('Enter a positive quantity in the Order quantity column first.', 'pc-order-import-export');
+    }
+
     private static function strip_quotes(string $s): string {
         // срезаем только обрамляющие (“умные” тоже)
         return preg_replace('~^[\'"“”‚‛‘’]+|[\'"“”‚‛‘’]+$~u', '', $s);
@@ -500,7 +531,8 @@ public static function build_colmap(array $header): array {
      * @return array ['ok'=>int,'skipped'=>int,'report'=>array]
      */
     public static function process_rows_with_adder(array $rows, array $map, int $start, array $opts): array {
-        $allowPrice = (bool)($opts['allow_price'] ?? false);
+        $priceList = !empty($map['price_list']);
+        $allowPrice = !$priceList && (bool)($opts['allow_price'] ?? false);
         $okLabel    = (string)($opts['ok_label'] ?? 'Додано');
         $adder      = $opts['adder'] ?? null;
         if (!is_callable($adder)) {
@@ -515,7 +547,14 @@ public static function build_colmap(array $header): array {
             $r    = (array)$rows[$i];
             $sku  = self::safe_val($r, $map['sku']  ?? null);
             $gtin = self::safe_val($r, $map['gtin'] ?? null);
-            $qty  = wc_stock_amount( self::parse_qty(self::safe_val($r, $map['qty'] ?? null)) );
+            $rawQty = self::safe_val($r, $map['qty'] ?? null);
+            if ($priceList && (trim($rawQty) === '' || self::parse_price($rawQty) === 0.0)) continue;
+            if ($priceList && (self::parse_price($rawQty) === null || !is_finite((float) self::parse_price($rawQty)))) {
+                $skipped++;
+                $report[] = self::logRow($i+1, 'error', __('Invalid order quantity.', 'pc-order-import-export'));
+                continue;
+            }
+            $qty  = wc_stock_amount(self::parse_qty($rawQty));
             $price= $allowPrice ? self::parse_price(self::safe_val($r, $map['price'] ?? null)) : null;
 
             if ($qty <= 0) {
@@ -524,7 +563,7 @@ public static function build_colmap(array $header): array {
                 continue;
             }
 
-            $pid = self::resolve_product_id($sku, $gtin);
+            $pid = $priceList ? ($sku !== '' ? wc_get_product_id_by_sku($sku) : 0) : self::resolve_product_id($sku, $gtin);
             if (!$pid) {
                 $skipped++;
                 $report[] = self::logRow($i+1, 'error', __('Product not found by SKU/GTIN', 'pc-order-import-export'), compact('sku','gtin'));
@@ -532,7 +571,7 @@ public static function build_colmap(array $header): array {
             }
 
             $product = wc_get_product($pid);
-            if (!($product instanceof \WC_Product)) {
+            if (!($product instanceof \WC_Product) || ($priceList && (!PriceList::eligible($product) || !$product->is_purchasable()))) {
                 $skipped++;
                 $report[] = self::logRow($i+1, 'error', __('Product is unavailable', 'pc-order-import-export'), compact('pid'));
                 continue;
@@ -541,7 +580,7 @@ public static function build_colmap(array $header): array {
             $errExtra = [];
             $okAdd = false;
             try {
-                $okAdd = (bool) call_user_func($adder, $product, (float)$qty, $price, $errExtra);
+                $okAdd = (bool) $adder($product, (float)$qty, $price, $errExtra);
             } catch (\Throwable $e) {
                 $okAdd = false;
                 $errExtra['ex'] = $e->getMessage();

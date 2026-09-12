@@ -342,6 +342,9 @@ function pc_wholesale_help_render_endpoint(): void {
         </section>
 
         <section class="pc-help-section" id="import">
+            <h2><?php esc_html_e('Order from the full price list', 'pc-wholesale-help'); ?></h2>
+            <p><?php esc_html_e('In My orders or the cart, download the full XLSX price list. It contains one current price for your account, combined Kyiv and Odesa stock, barcodes, supplier and category filters, and product links. Unknown prices or stock remain blank. Out-of-stock catalogue products are included.', 'pc-wholesale-help'); ?></p>
+            <p><?php esc_html_e('Fill in the yellow Order quantity column and upload the saved file into a draft or cart. Keep the column names and SKUs. Blank quantities and zeros are ignored; negative values, text and formulas are rejected. All filled rows are imported, including rows hidden by Excel filters. Products in this price list are matched by SKU, and current account prices replace the file prices. A draft does not reserve stock; the cart checks current availability.', 'pc-wholesale-help'); ?></p>
             <div class="pc-help-section__heading"><span>05</span><div><h2><?php esc_html_e('Import your order from a file', 'pc-wholesale-help'); ?></h2><p><?php esc_html_e('Supported files: CSV, XLSX and XLS. The first row must contain column names.', 'pc-wholesale-help'); ?></p></div></div>
             <p><?php esc_html_e('Column names can be Ukrainian, Russian, or English, and columns can appear in any order.', 'pc-wholesale-help'); ?></p>
             <div class="pc-help-grid pc-help-grid--three pc-help-aliases">
@@ -377,6 +380,7 @@ function pc_wholesale_help_render_endpoint(): void {
             </div>
             <p><?php esc_html_e('Use SKU/article or GTIN/barcode for the product and a supported quantity column such as qty, q-ty or Кількість. Empty, zero and negative quantities are skipped. Always review the row-by-row import report.', 'pc-wholesale-help'); ?></p>
             <div class="pc-help-warning"><strong><?php esc_html_e('Current data wins.', 'pc-wholesale-help'); ?></strong> <?php esc_html_e('The cart uses your current WooCommerce price, current availability and current warehouse mode, not the price from the file.', 'pc-wholesale-help'); ?></div>
+            <p><?php esc_html_e('Customer draft imports also use current account prices. After cart import, review the report, then refresh the list. Do not import again if the products were already added.', 'pc-wholesale-help'); ?></p>
             <?php pc_wholesale_help_image('import-to-cart-and-draft.jpg', __('Cart controls for export, import and saving a draft', 'pc-wholesale-help'), __('CSV/XLSX export, import and draft controls are located below the cart totals.', 'pc-wholesale-help')); ?>
         </section>
 

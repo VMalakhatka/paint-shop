@@ -8,6 +8,7 @@ msgstr ""
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: uk\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -676,6 +677,7 @@ msgid "Draft (import) <span class=\"count\">(%s)</span>"
 msgid_plural "Draft (import) <span class=\"count\">(%s)</span>"
 msgstr[0] "Чернетка (імпорт) <span class=\"count\">(%s)</span>"
 msgstr[1] "Чернетки (імпорт) <span class=\"count\">(%s)</span>"
+msgstr[2] "Чернеток (імпорт) <span class=\"count\">(%s)</span>"
 
 #: inc/ImporterDraft.php:106
 msgid "Failed to create draft order."
@@ -1333,3 +1335,54 @@ msgstr "Не прив’язано до ФОЛІО"
 #: inc/ManagerWorkspace.php inc/manager-view.php
 msgid "All customers"
 msgstr "Усі клієнти"
+
+msgid "Preparing the full price list…"
+msgstr "Готуємо повний прайс…"
+
+msgid "Could not download the price list. Please try again."
+msgstr "Не вдалося завантажити прайс. Спробуйте ще раз."
+
+msgid "Download full price list (XLSX)"
+msgstr "Завантажити повний прайс (XLSX)"
+
+msgid "Full price list"
+msgstr "Повний прайс"
+
+msgid "Supplier"
+msgstr "Постачальник"
+
+msgid "Category"
+msgstr "Категорія"
+
+msgid "Your price (%1$s), %2$s"
+msgstr "Ваша ціна (%1$s), %2$s"
+
+msgid "Stock: Kyiv + Odesa"
+msgstr "Залишок: Київ + Одеса"
+
+msgid "Order quantity"
+msgstr "Замовити"
+
+msgid "Product information"
+msgstr "Інформація про товар"
+
+msgid "Enter a quantity of zero or more."
+msgstr "Введіть кількість від нуля."
+
+msgid "Access denied."
+msgstr "Доступ заборонено."
+
+msgid "Invalid order quantity."
+msgstr "Некоректна кількість замовлення."
+
+msgid "Keep the SKU and Order quantity columns in the price list."
+msgstr "Збережіть колонки «Артикул» та «Замовити» у прайсі."
+
+msgid "Enter a positive quantity in the Order quantity column first."
+msgstr "Спочатку вкажіть додатну кількість у колонці «Замовити»."
+
+msgid "Customer imports use current account prices, not prices from the file. Only managers can import custom draft prices."
+msgstr "Під час клієнтського імпорту діють поточні ціни облікового запису, а не ціни з файлу. Лише менеджер може імпортувати довільні ціни чернетки."
+
+msgid "View product"
+msgstr "Переглянути товар"

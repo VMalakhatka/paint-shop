@@ -17,6 +17,7 @@ class ImporterCart
         if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'pcoe_import_cart')) {
             wp_send_json_error(['msg' => esc_html__( 'Security check failed (bad nonce).', 'pc-order-import-export' )], 403);
         }
+        if (function_exists('WC') && !WC()->cart && function_exists('wc_load_cart')) wc_load_cart();
         if (!function_exists('WC') || !WC()->cart) {
             wp_send_json_error(['msg' => esc_html__( 'Cart is not available.', 'pc-order-import-export' )], 400);
         }
@@ -42,6 +43,8 @@ class ImporterCart
         if (!$rows) wp_send_json_error(['msg' => esc_html__( 'Empty file or invalid format.', 'pc-order-import-export' )], 400);
 
         [$map, $start] = Helpers::detect_colmap_and_start($rows);
+        $validation_error = Helpers::price_list_import_error($rows, $map, $start);
+        if ($validation_error) wp_send_json_error(['msg' => $validation_error], 400);
 
         // adder для кошика: довіряємо Woo — нехай він сам вирішує min/max, доступність, тощо
         $adder = function(\WC_Product $product, float $qty, ?float $price, array &$errExtra): bool {
