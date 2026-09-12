@@ -151,3 +151,17 @@ check($negative['available'] === -11.0 && $negative['finalQuantity'] === 22.0, '
 $profile['purchasePlanning']['respectPack'] = false;
 check(lps_analytics_scenario_sanitize_profile($profile)['purchasePlanning']['respectPack'] === false, 'Scenario retains unpacked mode');
 echo "PASS: packing modes, manual unit orders, MOQ, zero override and negative free stock\n";
+
+// Java returns every positive MIN as reserveAboveForecast, including 1 and 0.001.
+$fixture['warehouseBreakdown'][0] = member(1, 6, 12);
+$fixture['dimensions']['packageQuantity'] = 6;
+$edits = ['one' => ['openOrders' => 0, 'respectPack' => false]];
+$fixture['warehouseBreakdown'][0]['orderPolicy']['reserveAboveForecast'] = 1;
+$minimum = lps_purchase_calculate($fixture, $one, 30, false, $edits, [])['groups'][0];
+check($minimum['target'] === 13.0 && $minimum['finalQuantity'] === 7.0, 'MIN=1 is added to forecast through the Java policy');
+$fixture['warehouseBreakdown'][0]['orderPolicy']['reserveAboveForecast'] = 0.001;
+$minimum = lps_purchase_calculate($fixture, $one, 30, false, $edits, [])['groups'][0];
+check(abs($minimum['finalQuantity'] - 6.001) < 0.000001, 'Fractional minimum is retained without pack rounding');
+$edits['one']['respectPack'] = true;
+check(lps_purchase_calculate($fixture, $one, 30, false, $edits, [])['groups'][0]['finalQuantity'] === 12.0, 'Fractional minimum above a full pack rounds up to the next pack');
+echo "PASS: positive minimum reserve and fractional pack boundary\n";
