@@ -3,6 +3,12 @@
 .lps-purchase-toolbar select { max-width: 480px; width: 100%; }
 .lps-purchase-toolbar label { max-width: 100%; }
 .lps-purchase .notice { padding: 12px; }
+.lps-purchase-filters { display: grid; grid-template-columns: repeat(3, minmax(220px, 1fr)); gap: 14px; margin: 16px 0; padding: 14px; border: 1px solid #c3c4c7; background: #fff; }
+.lps-purchase-filters legend { padding: 0 6px; font-weight: 600; }
+.lps-purchase-filters label > span { display: block; margin-bottom: 6px; font-weight: 600; }
+.lps-purchase-filters select { width: 100%; }
+.lps-purchase-filters .description { grid-column: 1 / -1; margin: 0; }
+.lps-purchase-filter-meta { color: #50575e; margin: 5px 0; }
 .lps-purchase-sku { border-top: 1px solid #c3c4c7; padding: 16px 0; }
 .lps-purchase-sku h2 { font-size: 17px; line-height: 1.5; margin: 0; overflow-wrap: anywhere; }
 .lps-purchase-scroll { overflow-x: auto; max-width: 100%; }
@@ -19,4 +25,4 @@
 .lps-purchase-inputs input[type="checkbox"] { width: auto; }
 .lps-purchase-review { color: #8a4b08; }
 .lps-purchase pre { white-space: pre-wrap; overflow-wrap: anywhere; }
-@media (max-width: 782px) { .lps-purchase-inputs { grid-template-columns: 1fr; } }
+@media (max-width: 782px) { .lps-purchase-inputs, .lps-purchase-filters { grid-template-columns: 1fr; } }

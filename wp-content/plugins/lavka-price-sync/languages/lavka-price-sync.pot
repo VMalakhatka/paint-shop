@@ -5915,3 +5915,42 @@ msgstr ""
 
 msgid "Some GTINs require review. You can activate the price list, but missing products will not be marked discontinued automatically."
 msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Result filters"
+msgstr ""
+
+msgid "Hide products with minimum stock 0"
+msgstr ""
+
+msgid "Hide products without sales in the selected period"
+msgstr ""
+
+msgid "Product group"
+msgstr ""
+
+msgid "Product subgroup"
+msgstr ""
+
+msgid "To order"
+msgstr ""
+
+msgid "Has preliminary need"
+msgstr ""
+
+msgid "Has ready purchase recommendation"
+msgstr ""
+
+msgid "Reset filters"
+msgstr ""
+
+#. translators: %1$s: displayed product count; %2$s: total product count.
+#, php-format
+msgid "Shown: %1$s of %2$s products"
+msgstr ""
+
+msgid "Filters change only the on-screen view. Preliminary need is calculated before expected receipts; a ready recommendation appears only after all supply checks."
+msgstr ""
+
+msgid "Minimum stock"
+msgstr ""

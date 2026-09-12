@@ -6,7 +6,8 @@
     const t = config.i18n || {};
     const el = (name) => document.getElementById('lps-purchase-' + name);
     const number = new Intl.NumberFormat(config.locale || 'uk', { maximumFractionDigits: 3 });
-    const state = { token: '', rows: [], page: 0, busy: false, complete: false, controller: null, requestId: 0 };
+    const state = { token: '', rows: [], page: 0, busy: false, complete: false, controller: null, requestId: 0,
+        filters: { hideMinimumZero: false, hideNoSales: false, productGroup: '', productSubgroup: '', order: 'all' } };
     const escape = (value) => String(value == null ? '' : value).replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
     const display = (value) => value == null ? '—' : number.format(value);
     function message(text, error) {
@@ -34,16 +35,70 @@
     function input(field, value, label, type) {
         return '<label><span>' + escape(label) + '</span><input data-field="' + field + '" type="' + (type || 'number') + '"' + (type === 'text' ? ' maxlength="500"' : ' min="' + (field === 'pack' ? '0.000001' : '0') + '" step="any"') + ' value="' + escape(value) + '"></label>';
     }
+    function options(select, items, value) {
+        select.innerHTML = '<option value="">' + escape(t.allProducts) + '</option>' + items.map((item) => '<option value="' + escape(item.value) + '">' + escape(item.label) + '</option>').join('');
+        select.value = items.some((item) => item.value === value) ? value : '';
+        return select.value;
+    }
+    function updateFilterOptions() {
+        const groups = new Map();
+        state.rows.forEach((row) => {
+            const group = (row.filterData || {}).group || {};
+            if (group.value) groups.set(String(group.value), String(group.label || group.value));
+        });
+        const groupItems = Array.from(groups, ([value, label]) => ({ value, label })).sort((a, b) => a.label.localeCompare(b.label, config.locale || 'uk'));
+        state.filters.productGroup = options(el('product-group'), groupItems, state.filters.productGroup);
+        const subgroups = new Map();
+        state.rows.forEach((row) => {
+            const data = row.filterData || {};
+            if (state.filters.productGroup && String((data.group || {}).value || '') !== state.filters.productGroup) return;
+            (data.subgroups || []).forEach((item) => { if (item.value) subgroups.set(String(item.value), String(item.label || item.value)); });
+        });
+        const subgroupItems = Array.from(subgroups, ([value, label]) => ({ value, label })).sort((a, b) => a.label.localeCompare(b.label, config.locale || 'uk'));
+        state.filters.productSubgroup = options(el('product-subgroup'), subgroupItems, state.filters.productSubgroup);
+    }
+    function hasSales(row) {
+        const values = row.groups.map((group) => group.regularSales);
+        if (values.some((value) => value != null && Number(value) > 0)) return true;
+        return values.some((value) => value == null);
+    }
+    function visibleRows() {
+        return state.rows.filter((row) => {
+            const data = row.filterData || {};
+            if (state.filters.hideMinimumZero && data.minimumStock != null && Number(data.minimumStock) === 0) return false;
+            if (state.filters.hideNoSales && !hasSales(row)) return false;
+            if (state.filters.productGroup && String((data.group || {}).value || '') !== state.filters.productGroup) return false;
+            if (state.filters.productSubgroup && !(data.subgroups || []).some((item) => String(item.value) === state.filters.productSubgroup)) return false;
+            if (state.filters.order === 'need' && !row.groups.some((group) => group.needBeforeReceipts != null && Number(group.needBeforeReceipts) > 0)) return false;
+            if (state.filters.order === 'ready' && !row.groups.some((group) => group.recommendedQuantity != null && Number(group.recommendedQuantity) > 0)) return false;
+            return true;
+        });
+    }
+    function resetFilters() {
+        state.filters = { hideMinimumZero: false, hideNoSales: false, productGroup: '', productSubgroup: '', order: 'all' };
+        el('hide-minimum-zero').checked = false;
+        el('hide-no-sales').checked = false;
+        el('order-filter').value = 'all';
+    }
     function render() {
-        const pages = Math.max(1, Math.ceil(state.rows.length / 25));
+        updateFilterOptions();
+        const rows = visibleRows();
+        const pages = Math.max(1, Math.ceil(rows.length / 25));
         state.page = Math.min(state.page, pages - 1);
         el('page').textContent = (state.page + 1) + ' / ' + pages;
-        el('prev').disabled = state.page === 0;
-        el('next').disabled = state.page >= pages - 1;
+        el('prev').disabled = rows.length === 0 || state.page === 0;
+        el('next').disabled = rows.length === 0 || state.page >= pages - 1;
+        el('filters').disabled = state.rows.length === 0;
+        el('filter-count').textContent = String(t.filterCount || '%1$s / %2$s').replace('%1$s', number.format(rows.length)).replace('%2$s', number.format(state.rows.length));
         const headings = ['group', 'physical', 'available', 'sales', 'returns', 'coverage', 'target', 'need', 'transfer', 'purchase', 'final'];
-        el('results').innerHTML = state.rows.slice(state.page * 25, state.page * 25 + 25).map((row, offset) => {
-            const index = state.page * 25 + offset;
-            return '<section class="lps-purchase-sku"><h2>' + escape(row.sku) + ' · ' + escape(row.productName) + '</h2><p>' + escape(row.supplier.join(', ')) + ' · ' + escape(t.transitPool) + ': ' + display(row.transitPool) + '</p>' +
+        el('results').innerHTML = rows.length ? rows.slice(state.page * 25, state.page * 25 + 25).map((row) => {
+            const index = state.rows.indexOf(row);
+            const filterData = row.filterData || {};
+            const group = filterData.group || {};
+            const subgroup = (filterData.subgroups || []).length ? filterData.subgroups[filterData.subgroups.length - 1].label : '—';
+            return '<section class="lps-purchase-sku"><h2>' + escape(row.sku) + ' · ' + escape(row.productName) + '</h2>' +
+                '<p class="lps-purchase-filter-meta">' + escape(t.productGroup) + ': ' + escape(group.label || '—') + ' · ' + escape(t.productSubgroup) + ': ' + escape(subgroup) + ' · ' + escape(t.minimumStock) + ': ' + display(filterData.minimumStock) + '</p>' +
+                '<p>' + escape(row.supplier.join(', ')) + ' · ' + escape(t.transitPool) + ': ' + display(row.transitPool) + '</p>' +
                 (row.supplierPrices || []).map((price) => '<details><summary>' + escape(t.supplierPrices) + ' · ' + escape(price.supplier) + ' #' + price.versionId + ' · ' + escape((t.supplierPriceLabels || {})[price.status] || price.status) + '</summary>' +
                     price.offers.map((offer) => '<p>' + escape(offer.article) + ' · GTIN ' + escape(offer.originalGtin) + ' · VE ' + escape(offer.pack) + ' · ' + escape(offer.price == null ? '—' : offer.price) + ' ' + escape(offer.currency) + ' · ' + escape((t.supplierPriceLabels || {})[offer.priceBasis] || offer.priceBasis) + '</p>' + ['supplierStatus','invoiceQuantity','invoiceUnit','minimumOrder','boxQuantity','packGtin'].filter((key) => offer[key]).map((key) => '<p>' + escape((t.supplierPriceLabels || {})[key] || key) + ': ' + escape(offer[key]) + '</p>').join('') + '<p>' + escape(offer.issues.map((key) => (t.supplierPriceLabels || {})[key] || key).join('; ')) + '</p>').join('') + '</details>').join('') +
                 '<p>' + escape(t.transitWarehouses) + ': ' + escape((row.transitWarehouseIds || []).join(', ') || '—') + ' · ' + escape(t.transitStatus) + ': ' + escape((t.transitLabels || {})[row.transitStatus] || row.transitStatus) + '</p>' +
@@ -63,7 +118,7 @@
                     input('quantity', group.managerQuantity, t.quantity) + input('reason', group.managerReason, t.reason, 'text') + '</div><p>' + escape(t.packHelp) + '</p><label><input type="checkbox" data-field="receiptsReviewed"' + (group.receiptsReviewed ? ' checked' : '') + '> ' + escape(t.receiptsReviewed) + '</label><ul class="lps-purchase-review">' +
                     group.issues.map((issue) => '<li>' + escape(t.issues[issue] || issue) + '</li>').join('') + '</ul></fieldset>').join('') +
                 '<button class="button" type="submit"' + (!state.complete || state.busy ? ' disabled' : '') + '>' + escape(t.apply) + '</button></form></details></section>';
-        }).join('');
+        }).join('') : (state.rows.length ? '<p class="notice notice-info inline">' + escape(t.noFilterResults) + '</p>' : '');
         root.querySelectorAll('[data-edit-form]').forEach((form) => form.addEventListener('submit', async (event) => {
             event.preventDefault();
             if (state.busy || !state.complete) return;
@@ -95,6 +150,7 @@
         if (!option || !option.value) return;
         const requestId = ++state.requestId;
         state.rows = []; state.page = 0; state.complete = false; state.token = '';
+        resetFilters();
         state.controller = new AbortController();
         el('warnings').hidden = true;
         el('context').textContent = '';
@@ -131,10 +187,22 @@
     el('next').addEventListener('click', () => { state.page++; render(); });
     el('scenario').addEventListener('change', () => {
         state.rows = []; state.token = ''; state.complete = false; state.page = 0;
+        resetFilters();
         el('context').textContent = ''; el('message').textContent = ''; el('warnings').hidden = true;
         el('parameters').textContent = '';
         render(); busy(false);
     });
+    ['hide-minimum-zero', 'hide-no-sales', 'product-group', 'product-subgroup', 'order-filter'].forEach((name) => el(name).addEventListener('change', () => {
+        state.filters.hideMinimumZero = el('hide-minimum-zero').checked;
+        state.filters.hideNoSales = el('hide-no-sales').checked;
+        state.filters.productGroup = el('product-group').value;
+        if (name === 'product-group') state.filters.productSubgroup = '';
+        else state.filters.productSubgroup = el('product-subgroup').value;
+        state.filters.order = el('order-filter').value;
+        state.page = 0;
+        render();
+    }));
+    el('reset-filters').addEventListener('click', () => { resetFilters(); state.page = 0; render(); });
     root.querySelectorAll('[data-export]').forEach((button) => button.addEventListener('click', () => {
         if (!state.complete || state.busy) return;
         const form = document.createElement('form');

@@ -6118,3 +6118,42 @@ msgstr "Макроси та зовнішні адреси аркушів не д
 
 msgid "Some GTINs require review. You can activate the price list, but missing products will not be marked discontinued automatically."
 msgstr "Деякі GTIN потребують перевірки. Прайс можна активувати, але відсутні товари не будуть автоматично позначені як зняті з виробництва."
+
+#: inc/purchase-planning.php
+msgid "Result filters"
+msgstr "Фільтри результатів"
+
+msgid "Hide products with minimum stock 0"
+msgstr "Приховати товари з мінімальним запасом 0"
+
+msgid "Hide products without sales in the selected period"
+msgstr "Приховати товари без продажів за вибраний період"
+
+msgid "Product group"
+msgstr "Група товару"
+
+msgid "Product subgroup"
+msgstr "Підгрупа товару"
+
+msgid "To order"
+msgstr "До замовлення"
+
+msgid "Has preliminary need"
+msgstr "Є попередня потреба"
+
+msgid "Has ready purchase recommendation"
+msgstr "Є готова рекомендація до замовлення"
+
+msgid "Reset filters"
+msgstr "Скинути фільтри"
+
+#. translators: %1$s: displayed product count; %2$s: total product count.
+#, php-format
+msgid "Shown: %1$s of %2$s products"
+msgstr "Показано: %1$s із %2$s товарів"
+
+msgid "Filters change only the on-screen view. Preliminary need is calculated before expected receipts; a ready recommendation appears only after all supply checks."
+msgstr "Фільтри змінюють лише вигляд на екрані. Попередня потреба розраховується до очікуваних надходжень; готова рекомендація з’являється лише після всіх перевірок постачання."
+
+msgid "Minimum stock"
+msgstr "Мінімальний запас"

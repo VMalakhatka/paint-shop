@@ -55,6 +55,21 @@ function lps_purchase_i18n(): array {
         ],
         'apply' => __('Recalculate this SKU preview', 'lavka-price-sync'),
         'previous' => __('Previous', 'lavka-price-sync'), 'next' => __('Next', 'lavka-price-sync'),
+        'filters' => __('Result filters', 'lavka-price-sync'),
+        'hideMinimumZero' => __('Hide products with minimum stock 0', 'lavka-price-sync'),
+        'hideNoSales' => __('Hide products without sales in the selected period', 'lavka-price-sync'),
+        'productGroup' => __('Product group', 'lavka-price-sync'),
+        'productSubgroup' => __('Product subgroup', 'lavka-price-sync'),
+        'orderFilter' => __('To order', 'lavka-price-sync'),
+        'allProducts' => __('All products', 'lavka-price-sync'),
+        'preliminaryNeed' => __('Has preliminary need', 'lavka-price-sync'),
+        'readyRecommendation' => __('Has ready purchase recommendation', 'lavka-price-sync'),
+        'resetFilters' => __('Reset filters', 'lavka-price-sync'),
+        /* translators: %1$s: displayed product count; %2$s: total product count. */
+        'filterCount' => __('Shown: %1$s of %2$s products', 'lavka-price-sync'),
+        'noFilterResults' => __('No products match the selected filters.', 'lavka-price-sync'),
+        'filterHelp' => __('Filters change only the on-screen view. Preliminary need is calculated before expected receipts; a ready recommendation appears only after all supply checks.', 'lavka-price-sync'),
+        'minimumStock' => __('Minimum stock', 'lavka-price-sync'),
         'issues' => [
             'INCOMPLETE_WAREHOUSE_DATA' => __('Warehouse metrics or stock policy are incomplete. Missing data is not zero stock.', 'lavka-price-sync'),
             'DESTINATION_POLICY_BLOCKED' => __('The receiving warehouse stock policy does not allow this purchase.', 'lavka-price-sync'),
@@ -283,6 +298,21 @@ function lps_purchase_render(): void {
         </form>
         <div id="lps-purchase-message" role="status" aria-live="polite"></div>
         <div id="lps-purchase-context"></div>
+        <fieldset class="lps-purchase-filters" id="lps-purchase-filters" disabled>
+            <legend><?php echo esc_html__('Result filters', 'lavka-price-sync'); ?></legend>
+            <label><input type="checkbox" id="lps-purchase-hide-minimum-zero"> <?php echo esc_html__('Hide products with minimum stock 0', 'lavka-price-sync'); ?></label>
+            <label><input type="checkbox" id="lps-purchase-hide-no-sales"> <?php echo esc_html__('Hide products without sales in the selected period', 'lavka-price-sync'); ?></label>
+            <label><span><?php echo esc_html__('Product group', 'lavka-price-sync'); ?></span><select id="lps-purchase-product-group"><option value=""><?php echo esc_html__('All products', 'lavka-price-sync'); ?></option></select></label>
+            <label><span><?php echo esc_html__('Product subgroup', 'lavka-price-sync'); ?></span><select id="lps-purchase-product-subgroup"><option value=""><?php echo esc_html__('All products', 'lavka-price-sync'); ?></option></select></label>
+            <label><span><?php echo esc_html__('To order', 'lavka-price-sync'); ?></span><select id="lps-purchase-order-filter">
+                <option value="all"><?php echo esc_html__('All products', 'lavka-price-sync'); ?></option>
+                <option value="need"><?php echo esc_html__('Has preliminary need', 'lavka-price-sync'); ?></option>
+                <option value="ready"><?php echo esc_html__('Has ready purchase recommendation', 'lavka-price-sync'); ?></option>
+            </select></label>
+            <button class="button" type="button" id="lps-purchase-reset-filters"><?php echo esc_html__('Reset filters', 'lavka-price-sync'); ?></button>
+            <strong id="lps-purchase-filter-count"></strong>
+            <p class="description"><?php echo esc_html__('Filters change only the on-screen view. Preliminary need is calculated before expected receipts; a ready recommendation appears only after all supply checks.', 'lavka-price-sync'); ?></p>
+        </fieldset>
         <details><summary><?php echo esc_html__('Report parameters', 'lavka-price-sync'); ?></summary><pre id="lps-purchase-parameters"></pre></details>
         <details id="lps-purchase-warnings" hidden><summary><?php echo esc_html__('Source warnings', 'lavka-price-sync'); ?></summary><pre></pre></details>
         <div class="lps-purchase-toolbar">

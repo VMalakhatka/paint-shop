@@ -113,6 +113,10 @@ $overlapping[1]['warehouseIds'][] = 7;
 try { lps_purchase_resolve_groups($saved, $overlapping); throw new RuntimeException('Accepted overlapping groups'); }
 catch (InvalidArgumentException $expected) {}
 check(lps_purchase_period_days(['from' => '2024-02-01', 'to' => '2024-02-29']) === 29, 'Inclusive leap-year period');
+$filter = lps_purchase_filter_data(['minimumStock' => 0, 'groupLevel1Code' => 'ART', 'groupLevel1Name' => 'Art',
+    'groupLevel2Code' => 'PAINT', 'groupLevel2Name' => 'Paint', 'groupLevel3Code' => 'ACRYLIC', 'groupLevel3Name' => 'Acrylic']);
+check($filter['minimumStock'] === 0.0 && $filter['group']['value'] === 'ART', 'Expose exact minimum stock and primary group for result filters');
+check($filter['subgroups'][1] === ['value' => '3:ACRYLIC', 'label' => 'Art › Paint › Acrylic'], 'Expose hierarchical subgroup paths without guessing from names');
 try { lps_purchase_period_days(['from' => '2026-02-30', 'to' => '2026-03-01']); throw new RuntimeException('Accepted invalid date'); }
 catch (InvalidArgumentException $expected) {}
 echo "PASS: scenario roundtrip, group demand, transfer conservation, policy gates, transit, pack/MOQ and manager adjustments\n";

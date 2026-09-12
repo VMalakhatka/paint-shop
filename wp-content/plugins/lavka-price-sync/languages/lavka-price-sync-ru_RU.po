@@ -6134,3 +6134,42 @@ msgstr "Макросы и внешние адреса листов не допу
 
 msgid "Some GTINs require review. You can activate the price list, but missing products will not be marked discontinued automatically."
 msgstr "Некоторые GTIN требуют проверки. Прайс можно активировать, но отсутствующие товары не будут автоматически отмечены как снятые с производства."
+
+#: inc/purchase-planning.php
+msgid "Result filters"
+msgstr "Фильтры результатов"
+
+msgid "Hide products with minimum stock 0"
+msgstr "Скрыть товары с минимальным запасом 0"
+
+msgid "Hide products without sales in the selected period"
+msgstr "Скрыть товары без продаж за выбранный период"
+
+msgid "Product group"
+msgstr "Группа товара"
+
+msgid "Product subgroup"
+msgstr "Подгруппа товара"
+
+msgid "To order"
+msgstr "К заказу"
+
+msgid "Has preliminary need"
+msgstr "Есть предварительная потребность"
+
+msgid "Has ready purchase recommendation"
+msgstr "Есть готовая рекомендация к заказу"
+
+msgid "Reset filters"
+msgstr "Сбросить фильтры"
+
+#. translators: %1$s: displayed product count; %2$s: total product count.
+#, php-format
+msgid "Shown: %1$s of %2$s products"
+msgstr "Показано: %1$s из %2$s товаров"
+
+msgid "Filters change only the on-screen view. Preliminary need is calculated before expected receipts; a ready recommendation appears only after all supply checks."
+msgstr "Фильтры меняют только отображение на экране. Предварительная потребность рассчитывается до ожидаемых поступлений; готовая рекомендация появляется только после всех проверок поставки."
+
+msgid "Minimum stock"
+msgstr "Минимальный запас"

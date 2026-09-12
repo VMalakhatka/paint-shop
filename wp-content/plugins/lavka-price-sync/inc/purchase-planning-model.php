@@ -118,6 +118,30 @@ function lps_purchase_period_days(array $period): int {
     return (int)$dates['from']->diff($dates['to'])->days + 1;
 }
 
+function lps_purchase_filter_data(array $dimensions): array {
+    $group_name = trim((string)($dimensions['groupLevel1Name'] ?? ''));
+    $group_code = trim((string)($dimensions['groupLevel1Code'] ?? ''));
+    $group_value = $group_code !== '' ? $group_code : $group_name;
+    $path = $group_name !== '' ? [$group_name] : [];
+    $subgroups = [];
+    for ($level = 2; $level <= 6; $level++) {
+        $name = trim((string)($dimensions['groupLevel' . $level . 'Name'] ?? ''));
+        $code = trim((string)($dimensions['groupLevel' . $level . 'Code'] ?? ''));
+        if ($name === '' && $code === '') continue;
+        $label = $name !== '' ? $name : $code;
+        $path[] = $label;
+        $subgroups[] = [
+            'value' => $level . ':' . ($code !== '' ? $code : $name),
+            'label' => implode(' › ', $path),
+        ];
+    }
+    return [
+        'minimumStock' => lps_purchase_number($dimensions['minimumStock'] ?? null, -1000000000),
+        'group' => ['value' => $group_value, 'label' => $group_name !== '' ? $group_name : $group_code],
+        'subgroups' => $subgroups,
+    ];
+}
+
 // Operates on Java's confirmed metrics; never reconstructs Folio movements.
 function lps_purchase_calculate(array $row, array $groups, int $period_days, bool $allow_transfers, array $edits = [], ?array $transit_ids = null): array {
     $members = array_column((array)($row['warehouseBreakdown'] ?? []), null, 'warehouseId');
@@ -245,6 +269,7 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
     }
     unset($item);
     return ['sku' => $row['sku'] ?? '', 'productName' => $row['productName'] ?? '',
+        'filterData' => lps_purchase_filter_data((array)($row['dimensions'] ?? [])),
         'supplierPrices' => $row['supplierPrices'] ?? [],
         'supplier' => $row['dimensions']['currentSuppliers'] ?? [], 'transitPool' => $transit_pool,
         'transitStatus' => $confirmed_transit['status'], 'transitWarehouseIds' => $transit_ids,
