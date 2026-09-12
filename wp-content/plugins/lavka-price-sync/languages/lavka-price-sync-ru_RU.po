@@ -6173,3 +6173,127 @@ msgstr "Фильтры меняют только отображение на э�
 
 msgid "Minimum stock"
 msgstr "Минимальный запас"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Select a different supplier-order group as the replenishment source. Chained routes are not supported."
+msgstr "Выберите другую группу, заказывающую у поставщика, как источник пополнения. Цепочки перемещений не поддерживаются."
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Select a valid pack rounding mode."
+msgstr "Выберите допустимый режим округления упаковок."
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Set the demand multiplier between 1 and 100."
+msgstr "Укажите коэффициент спроса от 1 до 100."
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Applied"
+msgstr "Применено"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "At 1.1, estimated lost sales add at most 10% of actual sales: 100 + 120 becomes 110; 100 + 5 becomes 105. Requires measured availability history."
+msgstr "При 1,1 оценка потерянных продаж добавляет не больше 10% фактических: 100 + 120 → 110; 100 + 5 → 105. Нужна подтверждённая история наличия."
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Calculate the destination first. Its planned replenishment is deducted from the source group before the supplier order. This plan can include goods still to be purchased; it is not a Folio transfer."
+msgstr "Сначала рассчитывается потребность получателя. Плановое пополнение вычитается из остатка группы-источника перед заказом поставщику. План может включать ещё не купленный товар; документ ФОЛИО не создаётся."
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Enter a whole transfer quantity and a reason for the adjustment."
+msgstr "Укажите целое количество перемещения и причину корректировки."
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Estimate lost sales during stockouts"
+msgstr "Оценивать потерянные продажи за дни отсутствия"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Estimated lost sales before cap"
+msgstr "Оценка потерянных продаж до ограничения"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "First round to whole units, with halves down (6.5 → 6; 6.5001 → 7), then apply the selected pack mode. Supplier minimum order still applies. Pack discounts are not calculated."
+msgstr "Сначала округление до целых штук, половины вниз (6,5 → 6; 6,5001 → 7), затем — выбранный режим упаковок. Минимальный заказ поставщика учитывается. Скидки за упаковку не рассчитываются."
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Ignore packs"
+msgstr "Без учёта упаковок"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Lost sales added after cap"
+msgstr "Добавлено после ограничения"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Maximum demand multiplier"
+msgstr "Максимальный коэффициент спроса"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "No uplift allowed by cap"
+msgstr "Ограничение не позволяет добавлять прогноз"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Order from supplier"
+msgstr "Заказывать у поставщика"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Pack rounding"
+msgstr "Округление упаковок"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Planned replenishment in"
+msgstr "Плановое пополнение: вход"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Planned replenishment out"
+msgstr "Плановое пополнение: выход"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Preview only. Demand uses regular sales and, when enabled in the scenario, capped estimated lost sales from measured availability history. Returns are shown separately. No Folio documents, WooCommerce orders or stock reservations are created."
+msgstr "Предварительный расчёт. Спрос учитывает регулярные продажи и, если включено в сценарии, ограниченную оценку потерянных продаж по истории наличия. Возвраты показаны отдельно. Документы ФОЛИО, заказы WooCommerce и резервы не создаются."
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Replenish from group"
+msgstr "Пополнять из группы"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Required transfer override, units"
+msgstr "Корректировка требуемого перемещения, шт."
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Review the destination and source inputs before calculating the linked replenishment and supplier order."
+msgstr "Проверьте данные получателя и источника для расчёта связанного пополнения и заказа поставщику."
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Round packs down"
+msgstr "Упаковки: округлять вниз"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Round packs up"
+msgstr "Упаковки: округлять вверх"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Sales used for forecast"
+msgstr "Продажи для прогноза"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Start a new preview to apply the current rounding and demand settings."
+msgstr "Запустите новый расчёт для применения текущих настроек округления и спроса."
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Stockout correction"
+msgstr "Поправка на отсутствие"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Stockout correction requires measured group history and an updated Java estimate. Disable the correction to calculate from actual sales only."
+msgstr "Поправка требует подтверждённой истории группы и обновлённого расчёта Java. Отключите поправку для расчёта только по фактическим продажам."
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Stockout history is insufficient"
+msgstr "Недостаточно истории отсутствия"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "This group is replenished internally. Adjust its required transfer instead of a supplier purchase."
+msgstr "Эта группа пополняется перемещением. Корректируйте требуемое перемещение вместо закупки у поставщика."
+
+#: inc/purchase-planning.php
+msgid "The source stock and selected purchase do not cover the planned replenishment. Review rounding or the manual quantities."
+msgstr "Остаток источника и выбранная закупка не покрывают плановое пополнение. Проверьте округление или ручные количества."

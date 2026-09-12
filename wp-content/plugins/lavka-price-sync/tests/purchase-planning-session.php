@@ -72,3 +72,17 @@ $revision = 'revision-1';
 $scenario['version']++;
 rejected(fn() => lps_purchase_session($token), 'Reject changed scenario after completion');
 echo "PASS: user isolation, scenario versions, immutable filters, pagination completeness and generation/group drift\n";
+
+$scenario['profile']['purchasePlanning']['packRounding'] = 'DOWN';
+$scenario['profile']['purchasePlanning']['stockoutCorrectionEnabled'] = true;
+$scenario['profile']['purchasePlanning']['maxDemandMultiplier'] = 1.1;
+$scenario['profile']['calculation']['availability'] = ['enabled' => false, 'groupCode' => 'group', 'filter' => ['availabilityStatus' => ['MEASURED']]];
+$start = lps_purchase_start(1, $scenario['version']);
+check($start['groups'][0]['packRounding'] === 'DOWN' && $start['groups'][0]['maxDemandMultiplier'] === 1.1, 'Preview freezes scenario rounding and cap');
+check($start['query']['calculation']['availability']['enabled'] === true
+    && $start['query']['calculation']['availability']['groupCode'] === 'group'
+    && $start['query']['calculation']['availability']['filter'] === ['availabilityStatus' => ['MEASURED']], 'Correction enables history without erasing availability filters');
+$key = lps_purchase_session_key($start['token']);
+$sessions[$key]['previewVersion'] = 2;
+rejected(fn() => lps_purchase_session($start['token']), 'Old calculation version requires a fresh preview');
+echo "PASS: scenario demand/rounding snapshot, history request and old-preview invalidation\n";

@@ -90,7 +90,7 @@
         el('next').disabled = rows.length === 0 || state.page >= pages - 1;
         el('filters').disabled = state.rows.length === 0;
         el('filter-count').textContent = String(t.filterCount || '%1$s / %2$s').replace('%1$s', number.format(rows.length)).replace('%2$s', number.format(state.rows.length));
-        const headings = ['group', 'physical', 'available', 'sales', 'returns', 'coverage', 'target', 'need', 'transfer', 'purchase', 'final'];
+        const headings = ['group', 'purchase', 'final', 'physical', 'available', 'sales', 'appliedLostSales', 'adjustedSales', 'returns', 'coverage', 'target', 'need', 'plannedTransferIn', 'plannedTransferOut', 'transfer'];
         el('results').innerHTML = rows.length ? rows.slice(state.page * 25, state.page * 25 + 25).map((row) => {
             const index = state.rows.indexOf(row);
             const filterData = row.filterData || {};
@@ -109,13 +109,17 @@
                 '<ul>' + (row.transitWarnings || []).map((warning) => '<li>' + escape(typeof warning === 'string' ? warning : (warning.message || warning.code || '')) + '</li>').join('') + '</ul></details>' +
                 '<div class="lps-purchase-scroll"><table class="widefat striped"><thead><tr>' + headings.map((key) => '<th>' + escape(t[key]) + '</th>').join('') + '</tr></thead><tbody>' +
                 row.groups.map((group) => '<tr><th>' + escape(group.groupName) + '<small>' + escape(t.receivingWarehouse) + ': ' + group.receivingWarehouseId + '</small></th>' +
-                    ['physical', 'available', 'regularSales', 'returns', 'coverageDays', 'target', 'needBeforeReceipts'].map((key) => '<td>' + display(group[key]) + '</td>').join('') +
-                    '<td>' + group.transfers.map((transfer) => escape(transfer.fromName) + ': ' + display(transfer.quantity)).join('<br>') + (group.transferOut > 0 ? '<br>−' + display(group.transferOut) : '') + '</td><td>' + display(group.recommendedQuantity) + '</td><td>' + (group.finalQuantity == null ? '<span class="lps-purchase-review">' + escape(t.review) + '</span>' : display(group.finalQuantity)) + '</td></tr>').join('') +
+                    '<td>' + display(group.recommendedQuantity) + '</td><td>' + (group.finalQuantity == null ? '<span class="lps-purchase-review">' + escape(t.review) + '</span>' : display(group.finalQuantity)) + '</td>' +
+                    ['physical', 'available', 'regularSales'].map((key) => '<td>' + display(group[key]) + '</td>').join('') +
+                    '<td>' + display(group.demand.appliedLostSales) + '</td><td>' + display(group.demand.adjustedSales) + '</td>' +
+                    ['returns', 'coverageDays', 'target', 'needBeforeReceipts'].map((key) => '<td>' + display(group[key]) + '</td>').join('') +
+                    '<td>' + display(group.plannedTransferIn) + '</td><td>' + display(group.plannedTransferOut) + '</td>' +
+                    '<td>' + group.transfers.map((transfer) => escape(transfer.fromName) + ': ' + display(transfer.quantity)).join('<br>') + (group.transferOut > 0 ? '<br>−' + display(group.transferOut) : '') + '</td></tr>').join('') +
                 '</tbody></table></div><details><summary>' + escape(t.details) + '</summary><form data-edit-form="' + index + '">' + row.groups.map((group) =>
-                    '<fieldset data-group="' + escape(group.groupCode) + '"><legend>' + escape(group.groupName) + '</legend><div class="lps-purchase-inputs">' +
+                    '<fieldset data-group="' + escape(group.groupCode) + '"><legend>' + escape(group.groupName) + '</legend><p>' + escape(t.supplyFromGroupCode) + ': ' + escape(group.supplyFromGroupCode ? (row.groups.find((item) => item.groupCode === group.supplyFromGroupCode) || {}).groupName || group.supplyFromGroupCode : t.directSupplier) + '</p><div class="lps-purchase-inputs">' +
                     ['inTransit', 'openOrders', 'pack', 'moq'].map((key) => input(key, group.inputs[key], t[key])).join('') +
-                    '<label><span>' + escape(t.respectPack) + '</span><input type="checkbox" data-field="respectPack"' + (group.respectPack ? ' checked' : '') + '></label>' +
-                    input('quantity', group.managerQuantity, t.quantity) + input('reason', group.managerReason, t.reason, 'text') + '</div><p>' + escape(t.packHelp) + '</p><label><input type="checkbox" data-field="receiptsReviewed"' + (group.receiptsReviewed ? ' checked' : '') + '> ' + escape(t.receiptsReviewed) + '</label><ul class="lps-purchase-review">' +
+                    '<label><span>' + escape(t.packRounding) + '</span><select data-field="packRounding">' + Object.entries(t.packModes).map(([key, label]) => '<option value="' + key + '"' + (group.packRounding === key ? ' selected' : '') + '>' + escape(label) + '</option>').join('') + '</select></label>' +
+                    (group.supplyFromGroupCode ? input('requiredTransfer', group.requiredTransferOverride, t.requiredTransfer) : input('quantity', group.managerQuantity, t.quantity)) + input('reason', group.managerReason, t.reason, 'text') + '</div><p>' + escape(t.demandStatus) + ': ' + escape(t.demandStatuses[group.demand.status]) + ' · ' + escape(t.estimatedLostSales) + ': ' + display(group.demand.estimatedLostSales) + ' · ' + escape(t.maxDemandMultiplier) + ': ' + display(group.demand.maxDemandMultiplier) + '</p><p>' + escape(t.packHelp) + '</p><label><input type="checkbox" data-field="receiptsReviewed"' + (group.receiptsReviewed ? ' checked' : '') + '> ' + escape(t.receiptsReviewed) + '</label><ul class="lps-purchase-review">' +
                     group.issues.map((issue) => '<li>' + escape(t.issues[issue] || issue) + '</li>').join('') + '</ul></fieldset>').join('') +
                 '<button class="button" type="submit"' + (!state.complete || state.busy ? ' disabled' : '') + '>' + escape(t.apply) + '</button></form></details></section>';
         }).join('') : (state.rows.length ? '<p class="notice notice-info inline">' + escape(t.noFilterResults) + '</p>' : '');
@@ -126,7 +130,7 @@
             const groups = {};
             form.querySelectorAll('[data-group]').forEach((fieldset) => {
                 const values = {};
-                fieldset.querySelectorAll('[data-field]').forEach((field) => { values[field.dataset.field] = field.type === 'checkbox' ? field.checked : (field.type === 'text' ? field.value : (field.value === '' ? null : Number(field.value))); });
+                fieldset.querySelectorAll('[data-field]').forEach((field) => { values[field.dataset.field] = field.type === 'checkbox' ? field.checked : ((field.type === 'text' || field.tagName === 'SELECT') ? field.value : (field.value === '' ? null : Number(field.value))); });
                 groups[fieldset.dataset.group] = values;
             });
             busy(true);

@@ -21,6 +21,14 @@ $row = ['sku'=>'KR-17817','productName'=>'Acrylic marker','dimensions'=>['curren
     'metrics'=>['grossProfit'=>100],'networkOrderPolicy'=>['orderAllowed'=>true,'status'=>'ALLOWED'],
     'warehouseBreakdown'=>[['warehouseId'=>1,'metrics'=>['physicalQuantity'=>6,'availableQuantity'=>6,'regularSoldUnits'=>11,'returnQuantity'=>0],
         'orderPolicy'=>['orderAllowed'=>true,'reserveAboveForecast'=>0,'maximumStockLimited'=>false]]]];
+if (($argv[1] ?? '') === 'calculate-route') {
+    $groups[] = ['code'=>'odesa','name'=>'Odesa','warehouseIds'=>[5],'receivingWarehouseId'=>5,
+        'leadTimeDays'=>0,'targetDays'=>30,'safetyDays'=>0,'supplyFromGroupCode'=>'kyiv'];
+    $row['warehouseBreakdown'][] = ['warehouseId'=>5, 'metrics'=>['physicalQuantity'=>0,'availableQuantity'=>0,'regularSoldUnits'=>10,'returnQuantity'=>0],
+        'orderPolicy'=>['orderAllowed'=>true,'reserveAboveForecast'=>0,'maximumStockLimited'=>false]];
+    $edits = json_decode($argv[2] ?? '{}', true);
+    echo json_encode(lps_purchase_calculate($row, $groups, 30, false, $edits ?: ['kyiv'=>['openOrders'=>0], 'odesa'=>['openOrders'=>0]], [])); exit;
+}
 if (($argv[1] ?? '') === 'calculate') {
     $edits = json_decode($argv[2] ?? '{}', true);
     echo json_encode(lps_purchase_calculate($row, $groups, 30, false, $edits ?: ['kyiv'=>['openOrders'=>0]], [])); exit;

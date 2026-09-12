@@ -278,3 +278,16 @@ legacy ручные МК. Default зарплаты не превращать в 
 apply до проверки результата; snapshot не доказывает исход COMMIT. Подробный
 операторский сценарий — `docs/OPERATIONS_RUNBOOK.md`, отложенная ревизия —
 `docs/KNOWN_GAPS.md`.
+
+
+### Purchase scenario extension, 2026-09-12
+
+Канон: [поправка на отсутствие и маршрут пополнения](../../../../docs/OPERATIONS_RUNBOOK.md#поправка-на-дни-отсутствия-и-маршрут-одесса--киев-опт).
+Purchase profile v2 сохраняет packRounding NONE/UP/DOWN, stockoutCorrectionEnabled,
+maxDemandMultiplier и group.supplyFromGroupCode. Сначала округление штук half-down,
+затем MOQ/упаковка. Java владеет согласованной с available-day mask оценкой потерь,
+PHP только ограничивает её фактическими регулярными продажами × (K−1).
+Не подменять оценку totalSales/availableDays. Маршрут назначения → источник
+сначала резервирует плановое выбытие, затем считает закупку источника; план не
+доказывает готовность физического перемещения. Preview version 3 временный,
+долговечный черновик и согласованный сетевой снимок остаются отдельными этапами.

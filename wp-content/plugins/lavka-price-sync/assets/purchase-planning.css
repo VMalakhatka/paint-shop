@@ -12,7 +12,7 @@
 .lps-purchase-sku { border-top: 1px solid #c3c4c7; padding: 16px 0; }
 .lps-purchase-sku h2 { font-size: 17px; line-height: 1.5; margin: 0; overflow-wrap: anywhere; }
 .lps-purchase-scroll { overflow-x: auto; max-width: 100%; }
-.lps-purchase table { min-width: 1500px; table-layout: fixed; }
+.lps-purchase table { min-width: 2000px; table-layout: fixed; }
 .lps-purchase th, .lps-purchase td { overflow-wrap: anywhere; vertical-align: top; }
 .lps-purchase th:first-child { width: 160px; }
 .lps-purchase small { display: block; margin-top: 6px; font-weight: normal; }
@@ -21,7 +21,7 @@
 .lps-purchase legend { font-weight: 600; }
 .lps-purchase-inputs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
 .lps-purchase-inputs span { display: block; margin-bottom: 6px; }
-.lps-purchase-inputs input { width: 100%; box-sizing: border-box; }
+.lps-purchase-inputs input, .lps-purchase-inputs select { width: 100%; box-sizing: border-box; }
 .lps-purchase-inputs input[type="checkbox"] { width: auto; }
 .lps-purchase-review { color: #8a4b08; }
 .lps-purchase pre { white-space: pre-wrap; overflow-wrap: anywhere; }

@@ -263,14 +263,17 @@
                 const value = row.querySelector('[data-field="' + field + '"]').value;
                 group[field] = value === '' ? null : Number(value);
             });
+            group.supplyFromGroupCode = row.querySelector('[data-field="supplyFromGroupCode"]').value;
             groups.push(group);
         });
-        return { version: 1, respectPack: el('lps-as-purchase-pack').checked, enabled: el('lps-as-purchase-enabled').checked, allowTransfers: el('lps-as-purchase-transfers').checked, groups: groups };
+        return { version: 2, packRounding: el('lps-as-purchase-pack').value, stockoutCorrectionEnabled: el('lps-as-purchase-stockout').checked, maxDemandMultiplier: Number(el('lps-as-purchase-demand-cap').value), enabled: el('lps-as-purchase-enabled').checked, allowTransfers: el('lps-as-purchase-transfers').checked, groups: groups };
     }
 
     function applyPurchasePlanning(plan) {
         plan = plan || {};
-        el('lps-as-purchase-pack').checked = plan.respectPack !== false;
+        el('lps-as-purchase-pack').value = plan.packRounding || (plan.respectPack === false ? 'NONE' : 'UP');
+        el('lps-as-purchase-stockout').checked = plan.stockoutCorrectionEnabled === true;
+        el('lps-as-purchase-demand-cap').value = plan.maxDemandMultiplier == null ? 1.1 : plan.maxDemandMultiplier;
         el('lps-as-purchase-enabled').checked = plan.enabled === true;
         el('lps-as-purchase-transfers').checked = plan.allowTransfers === true;
         const saved = new Map((plan.groups || []).map((group) => [group.code, group]));
@@ -285,7 +288,8 @@
             }).join('');
             return '<fieldset class="lps-as-purchase-group" data-purchase-group="' + escapeHtml(group.code) + '"><legend><label><input type="checkbox" data-field="selected"' + (saved.has(group.code) ? ' checked' : '') + '> ' + escapeHtml(group.name) + ' [' + group.warehouseIds.map(Number).join(', ') + ']</label></legend><div class="lps-as-grid">' +
                 '<label><span>' + escapeHtml(t.receivingWarehouse) + '</span><select data-field="receivingWarehouseId">' + options + '</select></label>' +
-                ['leadTimeDays', 'targetDays', 'safetyDays'].map((field) => '<label><span>' + escapeHtml(t[field]) + '</span><input type="number" min="' + (field === 'targetDays' ? 1 : 0) + '" max="' + (field === 'safetyDays' ? 365 : 730) + '" step="1" data-field="' + field + '" value="' + escapeHtml(value[field] == null ? '' : value[field]) + '"></label>').join('') + '</div></fieldset>';
+                '<label><span>' + escapeHtml(t.supplyFromGroupCode) + '</span><select data-field="supplyFromGroupCode"><option value="">' + escapeHtml(t.directSupplier) + '</option>' + groups.filter((item) => item.code !== group.code).map((item) => '<option value="' + escapeHtml(item.code) + '"' + (value.supplyFromGroupCode === item.code ? ' selected' : '') + '>' + escapeHtml(item.name) + '</option>').join('') + '</select></label>' +
+                ['leadTimeDays', 'targetDays', 'safetyDays'].map((field) => '<label><span>' + escapeHtml(t[field]) + '</span><input type="number" min="' + (field === 'targetDays' ? 1 : 0) + '" max="' + (field === 'safetyDays' ? 365 : 730) + '" step="1" data-field="' + field + '" value="' + escapeHtml(value[field] == null ? '' : value[field]) + '"></label>').join('') + '</div><p>' + escapeHtml(t.routeHelp) + '</p></fieldset>';
         }).join('');
     }
 

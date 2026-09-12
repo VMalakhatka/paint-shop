@@ -5954,3 +5954,127 @@ msgstr ""
 
 msgid "Minimum stock"
 msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Select a different supplier-order group as the replenishment source. Chained routes are not supported."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Select a valid pack rounding mode."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Set the demand multiplier between 1 and 100."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Applied"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "At 1.1, estimated lost sales add at most 10% of actual sales: 100 + 120 becomes 110; 100 + 5 becomes 105. Requires measured availability history."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Calculate the destination first. Its planned replenishment is deducted from the source group before the supplier order. This plan can include goods still to be purchased; it is not a Folio transfer."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Enter a whole transfer quantity and a reason for the adjustment."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Estimate lost sales during stockouts"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Estimated lost sales before cap"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "First round to whole units, with halves down (6.5 → 6; 6.5001 → 7), then apply the selected pack mode. Supplier minimum order still applies. Pack discounts are not calculated."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Ignore packs"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Lost sales added after cap"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Maximum demand multiplier"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "No uplift allowed by cap"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Order from supplier"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Pack rounding"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Planned replenishment in"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Planned replenishment out"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Preview only. Demand uses regular sales and, when enabled in the scenario, capped estimated lost sales from measured availability history. Returns are shown separately. No Folio documents, WooCommerce orders or stock reservations are created."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Replenish from group"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Required transfer override, units"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Review the destination and source inputs before calculating the linked replenishment and supplier order."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Round packs down"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Round packs up"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Sales used for forecast"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Start a new preview to apply the current rounding and demand settings."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Stockout correction"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Stockout correction requires measured group history and an updated Java estimate. Disable the correction to calculate from actual sales only."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Stockout history is insufficient"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "This group is replenished internally. Adjust its required transfer instead of a supplier purchase."
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "The source stock and selected purchase do not cover the planned replenishment. Review rounding or the manual quantities."
+msgstr ""

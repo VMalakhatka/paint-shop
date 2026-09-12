@@ -45,7 +45,7 @@ check($a['groups'][0]['recommendedQuantity'] === 60.0, 'Purchase subtracts stock
 check($a['groups'][0]['returns'] === 4.0, 'Show returns without silently netting unclassified returns');
 $a = lps_purchase_calculate($row, $groups, 30, true, $inputs);
 check($a['groups'][0]['transferIn'] === 60.0 && $a['groups'][1]['transferOut'] === 60.0, 'Transfer conserves quantity');
-check($a['groups'][0]['recommendedQuantity'] === 0, 'Transfer reduces purchase need');
+check($a['groups'][0]['recommendedQuantity'] === 0.0, 'Transfer reduces purchase need');
 check($a['groups'][1]['available'] - $a['groups'][1]['transferOut'] >= $a['groups'][1]['target'], 'Protect donor target');
 $a = lps_purchase_calculate($row, $groups, 30, false);
 check($a['groups'][0]['finalQuantity'] === null, 'Unknown incoming orders are not silently zero');
@@ -161,7 +161,64 @@ $minimum = lps_purchase_calculate($fixture, $one, 30, false, $edits, [])['groups
 check($minimum['target'] === 13.0 && $minimum['finalQuantity'] === 7.0, 'MIN=1 is added to forecast through the Java policy');
 $fixture['warehouseBreakdown'][0]['orderPolicy']['reserveAboveForecast'] = 0.001;
 $minimum = lps_purchase_calculate($fixture, $one, 30, false, $edits, [])['groups'][0];
-check(abs($minimum['finalQuantity'] - 6.001) < 0.000001, 'Fractional minimum is retained without pack rounding');
+check($minimum['finalQuantity'] === 6.0 && abs($minimum['target'] - 12.001) < 0.000001, 'Fractional MIN retained in target, whole-unit rounding applied at purchase');
 $edits['one']['respectPack'] = true;
-check(lps_purchase_calculate($fixture, $one, 30, false, $edits, [])['groups'][0]['finalQuantity'] === 12.0, 'Fractional minimum above a full pack rounds up to the next pack');
+check(lps_purchase_calculate($fixture, $one, 30, false, $edits, [])['groups'][0]['finalQuantity'] === 6.0, 'Fractional MIN no longer forces an additional pack');
 echo "PASS: positive minimum reserve and fractional pack boundary\n";
+
+foreach ([[6.001, 'UP', 6], [6.5, 'UP', 6], [6.5001, 'UP', 12], [6.5001, 'NONE', 7],
+          [11.4, 'DOWN', 6], [5, 'DOWN', 0], [12.5, 'DOWN', 12], [0.001, 'UP', 0]] as [$need, $mode, $expected]) {
+    check(lps_purchase_rounded_quantity($need, 0, 6, $mode) === (float)$expected, "Unit and pack boundary: $need $mode");
+}
+$fixture['warehouseBreakdown'][0] = member(1, 0, 100);
+$one[0]['stockoutCorrectionEnabled'] = true;
+$one[0]['maxDemandMultiplier'] = 1.1;
+$fixture['warehouseGroupBreakdown'] = [['code' => 'one', 'warehouseIds' => [1], 'availability' => ['status' => 'MEASURED'],
+    'stockoutDemand' => ['status' => 'ESTIMATED', 'method' => 'SALES_ON_AVAILABLE_END_OF_DAY_DAYS_V1', 'estimatedLostSales' => 120]]];
+$edits = ['one' => ['openOrders' => 0, 'packRounding' => 'NONE']];
+$forecast = lps_purchase_calculate($fixture, $one, 30, false, $edits, [])['groups'][0];
+check(abs($forecast['demand']['adjustedSales'] - 110) < 0.000001 && $forecast['finalQuantity'] === 110.0, '100 actual + 120 estimated is capped at 110');
+$fixture['warehouseGroupBreakdown'][0]['stockoutDemand']['estimatedLostSales'] = 5;
+check(lps_purchase_calculate($fixture, $one, 30, false, $edits, [])['groups'][0]['finalQuantity'] === 105.0, '100 actual + 5 estimated remains 105');
+$fixture['warehouseGroupBreakdown'] = [];
+check(lps_purchase_calculate($fixture, $one, 30, false, $edits, [])['groups'][0]['target'] === null, 'Missing group history is not zero lost sales');
+$one[0]['maxDemandMultiplier'] = 1;
+check(lps_purchase_calculate($fixture, $one, 30, false, $edits, [])['groups'][0]['finalQuantity'] === 100.0, 'K=1 needs no estimate');
+$fixture['warehouseBreakdown'][0] = member(1, 0, 0);
+$one[0]['maxDemandMultiplier'] = 1.1;
+check(lps_purchase_calculate($fixture, $one, 30, false, $edits, [])['groups'][0]['finalQuantity'] === 0.0, 'Zero actual sales cannot be inflated by correction');
+$saved['purchasePlanning']['packRounding'] = 'DOWN';
+$saved['purchasePlanning']['stockoutCorrectionEnabled'] = true;
+$saved['purchasePlanning']['maxDemandMultiplier'] = 1.25;
+check(lps_analytics_scenario_sanitize_profile($saved) === $saved, 'New scenario controls roundtrip');
+
+// Odessa needs 30 - 10 = 20. Kyiv needs 90 + 20 - 30 = 80, only at the supplier destination.
+$groups[1]['supplyFromGroupCode'] = 'kyiv';
+$row['warehouseBreakdown'][2] = member(5, 10, 30);
+$routed = lps_purchase_calculate($row, $groups, 30, true, $inputs)['groups'];
+check($routed[1]['plannedTransferIn'] === 20.0 && $routed[0]['plannedTransferOut'] === 20.0, 'Destination requirement is conserved as source deduction');
+check($routed[1]['recommendedQuantity'] === 0.0 && $routed[0]['recommendedQuantity'] === 80.0, 'Order only at source, after reserving destination need');
+$inputs['odesa']['requiredTransfer'] = 50; $inputs['odesa']['reason'] = 'Manager demand';
+$routed = lps_purchase_calculate($row, $groups, 30, false, $inputs)['groups'];
+check($routed[0]['recommendedQuantity'] === 110.0 && $routed[1]['plannedTransferIn'] === 50.0, 'Manual replenishment can exceed current source stock and increases future purchase');
+$inputs['odesa']['requiredTransfer'] = 0;
+check(lps_purchase_calculate($row, $groups, 30, false, $inputs)['groups'][0]['recommendedQuantity'] === 60.0, 'Explicit transfer zero is retained');
+$inputs['odesa']['openOrders'] = null;
+check(lps_purchase_calculate($row, $groups, 30, false, $inputs)['groups'][0]['finalQuantity'] === null, 'Incomplete destination blocks linked source recommendation');
+$badPlan = $saved;
+$badPlan['purchasePlanning']['groups'][0]['supplyFromGroupCode'] = 'odesa';
+$badPlan['purchasePlanning']['groups'][1]['supplyFromGroupCode'] = 'kyiv';
+try { lps_purchase_resolve_groups($badPlan, $configured); throw new RuntimeException('Accepted circular replenishment'); }
+catch (InvalidArgumentException $expected) {}
+echo "PASS: whole-unit half-down rounding, all pack modes, capped lost demand and destination-first replenishment\n";
+
+$inputs['odesa'] = ['openOrders' => 0, 'receiptsReviewed' => true, 'requiredTransfer' => 50, 'reason' => 'Planned replenishment'];
+$inputs['kyiv'] = ['openOrders' => 0, 'receiptsReviewed' => true, 'quantity' => 0, 'reason' => 'No purchase'];
+$routed = lps_purchase_calculate($row, $groups, 30, false, $inputs)['groups'];
+check($routed[0]['finalQuantity'] === null && $routed[1]['finalQuantity'] === null, 'Manual source reduction cannot promise uncovered destination supply');
+$inputs['kyiv'] = ['openOrders' => 0, 'receiptsReviewed' => true];
+$reverse = lps_purchase_calculate($row, array_reverse($groups), 30, false, $inputs)['groups'];
+check($reverse[1]['finalQuantity'] === 110.0 && $reverse[0]['plannedTransferIn'] === 50.0, 'Route result does not depend on scenario group order');
+$groups[0]['packRounding'] = 'DOWN'; $inputs['kyiv']['moq'] = 115; $inputs['kyiv']['pack'] = 14;
+check(lps_purchase_calculate($row, $groups, 30, false, $inputs)['groups'][0]['finalQuantity'] === null, 'Pack down does not silently override supplier MOQ');
+echo "PASS: linked replenishment coverage, group order independence and down/MOQ review\n";
