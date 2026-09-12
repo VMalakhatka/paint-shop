@@ -52,6 +52,9 @@ invoice_assert($sheet->getCell('C14')->getDataType() === 's' && $sheet->getCell(
 invoice_assert($sheet->getCell('D14')->getDataType() === 's', 'Product text cannot inject spreadsheet formula');
 invoice_assert($sheet->getCell('D1')->getDataType() === 's', 'Document number cannot inject spreadsheet formula');
 invoice_assert($sheet->getCell('G16')->getCalculatedValue() === 31.25, 'Formula total matches authoritative total');
+invoice_assert($sheet->getCell('G10')->getValue() === 31.25, 'Invoice header shows full document total');
+$invoice_links = array_values(array_filter(paint_core_lavka_admin_links(), static fn($link) => $link['page'] === 'pc-folio-invoices'));
+invoice_assert(count($invoice_links) === 1 && $invoice_links[0]['cap'] === 'manage_options', 'Payee settings are discoverable in Lavka and limited to administrators');
 $path = sys_get_temp_dir() . '/folio-invoice-test.xlsx';
 (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($book))->save($path);
 (new \PhpOffice\PhpSpreadsheet\Writer\Html($book))->save(sys_get_temp_dir() . '/folio-invoice-test.html');

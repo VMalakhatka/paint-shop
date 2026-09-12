@@ -142,3 +142,5 @@ stay blank. Manager workspace does not expose these invoice actions yet.
 Setup, mail acceptance/unknown-outcome semantics and acceptance tests:
 `docs/OPERATIONS_RUNBOOK.md`, section "Счёт на оплату из документа ФОЛИО".
 Source: local implementation and synthetic tests, 2026-09-12.
+`pc-folio-invoices` belongs to the Lavka settings menu group and hub links;
+keep `manage_options` for payee editing. Runtime defaults survive code deploys.

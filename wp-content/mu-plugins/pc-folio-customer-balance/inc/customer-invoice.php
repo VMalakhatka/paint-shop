@@ -177,6 +177,12 @@ function pc_folio_invoice_workbook(array $model, array $settings): Spreadsheet {
         $string("C$row", $value);
         $sheet->getRowDimension($row)->setRowHeight(32);
     }
+    $sheet->mergeCells('A10:F10');
+    $string('A10', __('Total, UAH', 'pc-folio-customer-balance'));
+    $sheet->setCellValueExplicit('G10', $model['total'], DataType::TYPE_NUMERIC);
+    $sheet->getStyle('G10')->getNumberFormat()->setFormatCode('#,##0.00');
+    $sheet->getStyle('A10:G10')->getFont()->setBold(true)->setSize(14)->getColor()->setRGB('25634D');
+    $sheet->getRowDimension(10)->setRowHeight(28);
     $sheet->mergeCells('A11:G11');
     $string('A11', __('Full source document amount, not the outstanding balance. No new Folio document is created.', 'pc-folio-customer-balance'));
     $sheet->getRowDimension(11)->setRowHeight(32);
