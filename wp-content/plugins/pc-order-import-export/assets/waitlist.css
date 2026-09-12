@@ -1,0 +1,15 @@
+.pcoe-waitlist { margin-block: 1.5rem; }
+.pcoe-waitlist-form { display: flex; flex-wrap: wrap; align-items: end; gap: .75rem; margin-block: 1rem; }
+.pcoe-waitlist-form label { display: flex; flex-direction: column; gap: .3rem; max-width: 100%; }
+.pcoe-waitlist-form input { max-width: 100%; }
+.pcoe-waitlist-form input[type=number] { width: 8rem; }
+.pcoe-waitlist-card { padding: 1.25rem; margin-block: 1rem; border: 1px solid #d5ded6; border-radius: 8px; overflow-wrap: anywhere; }
+.pcoe-waitlist-card h3 { margin-top: 0; }
+.pcoe-waitlist-card ul { margin-left: 1.25rem; }
+.pcoe-waitlist-status { font-weight: 600; }
+.pcoe-track-consent { flex-basis: 100%; padding-block: .5rem; }
+.pcoe-waitlist button:disabled { opacity: .65; cursor: wait; }
+@media (max-width: 600px) {
+    .pcoe-waitlist-form > label, .pcoe-waitlist-form > button { width: 100%; }
+    .pcoe-waitlist-card { padding: .8rem; }
+}

@@ -1295,3 +1295,221 @@ msgstr ""
 
 msgid "Other products"
 msgstr ""
+
+#: inc/Waitlist.php
+msgid "Add to cart"
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Add to draft"
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Add to waiting list"
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Added to waiting list"
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Already bought these goods elsewhere or through a manager? Remove the completed request. Folio purchases are not reconciled automatically yet."
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Already in cart"
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Availability is checked when you open this page and again when adding to the cart. Checkout uses the usual current prices and warehouse settings."
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Availability is not confirmed"
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Availability is shared by all customers. This list does not reserve goods. Notices appear here; email delivery is not enabled yet."
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Available now"
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Barcode"
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Check the previous action before continuing."
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Could not complete the action. Check your cart and drafts before trying again."
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Customers can track products and drafts and see availability in their account. Email delivery is not enabled in this release."
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Draft created. Open it from the waiting list."
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Draft tracking"
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Enable waiting list"
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Enabling creates private waiting-list storage. Disabling preserves subscriptions. This does not change Folio or send messages."
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Enter a valid product SKU and a whole quantity from 1 to 100000. For a variable product, use the variation SKU."
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "I checked my cart and drafts — continue"
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Invalid action."
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Invalid product or quantity."
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "No active requests. Add a product or enable draft tracking."
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Remind me in 7 days"
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Remove empty or closed draft sources"
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Remove request"
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Review the quantity, pack size and selected warehouse. The requested quantity cannot currently be added."
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Save tracking preference"
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Selected quantity added to cart. The request stays tracked until you remove it."
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Show postponed requests now"
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Some products in your waiting list are available. Review your requests."
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "The draft was saved, but tracking was not enabled. Open the draft to enable it."
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "The list changed. Review it and try again."
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "The previous action may have completed. Check your cart and drafts before continuing. It will not be repeated automatically."
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "The quantity exceeds the remaining request. Update the waiting list first."
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "The waiting list is full. Remove old entries first (limit: 200 sources)."
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "This draft is not available for your account."
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "This product is already in a tracked draft. Open the source draft shown in the list."
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "This product is no longer available in the catalogue."
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "This request is no longer active."
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Track this draft and show availability notices in my account"
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Tracked draft"
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Tracking currently supports whole quantities from 1 to 100000."
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Waiting for stock"
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Waiting list"
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Waiting list is not available for this account."
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Waiting list updated."
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Waiting-list storage is unavailable. No messages were sent."
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "WooCommerce rejected the item. Check the cart before continuing."
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Waiting-list quantity"
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Remove completed draft requests"
+msgstr ""
+
+
+
+#: inc/Waitlist.php
+msgid "Pilot customer email"
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Only this wholesale customer can access the waiting list. An empty pilot selection allows nobody."
+msgstr ""
+
+#: inc/Waitlist.php
+msgid "Select an existing wholesale customer for the pilot."
+msgstr ""

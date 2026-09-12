@@ -50,11 +50,12 @@ class Ui
 
         ob_start(); ?>
         <div class="pcoe-cart-to-draft" style="margin:14px 0 6px">
-            <form action="<?php echo esc_url($action); ?>" method="get"
+            <form action="<?php echo esc_url($action); ?>" method="<?php echo Waitlist::allowed() ? 'post' : 'get'; ?>"
                 style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
                 <input type="hidden" name="action" value="pcoe_cart_to_draft">
                 <input type="hidden" name="_wpnonce" value="<?php echo esc_attr($nonce); ?>">
                 <input type="hidden" name="dest" value="orders">
+                <?php Waitlist::consent_field(); ?>
                 <input type="text" name="title" placeholder="<?php echo esc_attr__('Draft title (optional)', 'pc-order-import-export'); ?>"
                     style="min-width:260px">
                 <button class="button" type="submit"
@@ -225,6 +226,7 @@ public static function render_account_import_block(): void
               style="margin-top:12px; display:flex; gap:12px; align-items:center; flex-wrap:wrap">
           <input type="hidden" name="_wpnonce" value="<?php echo esc_attr($nonce_draft); ?>">
           <input type="file" name="file" accept=".csv,.xlsx,.xls" required>
+          <?php Waitlist::consent_field(); ?>
           <input type="text" name="title" placeholder="<?php echo esc_attr__('Draft title (optional)', 'pc-order-import-export'); ?>"  style="min-width:260px">
           <button type="submit" class="button"><?php echo esc_html__('Import to draft', 'pc-order-import-export'); ?> </button>
           <span class="pcoe-import-draft-msg" style="margin-left:8px; opacity:.8"></span>
@@ -248,6 +250,7 @@ public static function render_account_import_block(): void
           <input type="hidden" name="_wpnonce" value="<?php echo esc_attr($nonce_cart_draft); ?>">
           <input type="hidden" name="clear" value="1">
           <input type="hidden" name="dest" value="orders"><!-- після збереження → My account / Orders -->
+          <?php Waitlist::consent_field(); ?>
           <input type="text" name="title" placeholder="<?php echo esc_attr__('Draft title (optional)', 'pc-order-import-export'); ?>" style="min-width:260px">
           <button class="button" type="submit"> <?php echo esc_html__('Save to draft', 'pc-order-import-export'); ?> </button>
         </form>

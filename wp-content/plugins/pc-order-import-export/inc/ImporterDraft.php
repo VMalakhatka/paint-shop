@@ -190,11 +190,17 @@ class ImporterDraft
             $order->save();
         }
 
+        Waitlist::track_created($order);
+        $report_html = Helpers::render_report($res['report']);
+        if (Waitlist::allowed() && ($_POST['track_waitlist'] ?? '') === '1' && $order->get_meta('_pcoe_track_waitlist') !== 'yes') {
+            $report_html .= '<p role="alert">' . esc_html__('The draft was saved, but tracking was not enabled. Open the draft to enable it.', 'pc-order-import-export') . '</p>';
+        }
+
         wp_send_json_success([
             'order_id'    => $order_id,
             'imported'    => $res['ok'],
             'skipped'     => $res['skipped'],
-            'report_html' => Helpers::render_report($res['report']),
+            'report_html' => $report_html,
             'links'       => $links,
         ]);
     }

@@ -987,3 +987,19 @@ msgstr "Скачайте полный прайс XLSX в «Моих заказа
 
 msgid "Category headings are not order lines. Filled quantities in collapsed groups are still imported. Do not sort the entire sheet as a flat table: this would mix category headings with products."
 msgstr "Заголовки категорий не являются позициями заказа. Заполненные количества в свёрнутых группах также импортируются. Не сортируйте весь лист как плоскую таблицу: это смешает заголовки категорий с товарами."
+
+#: pc-wholesale-help.php
+msgid "Waiting list and draft tracking"
+msgstr "Список ожидания и отслеживание черновиков"
+
+#: pc-wholesale-help.php
+msgid "When the waiting list is enabled, add a product by SKU or choose tracking when creating a draft. Tracking is optional and can also be changed on the draft page. Availability notices appear in My Account; email notifications are not enabled yet."
+msgstr "Когда список ожидания включён, добавьте товар по артикулу или выберите отслеживание при создании черновика. Отслеживание добровольное; его также можно изменить на странице черновика. Уведомления о наличии появляются в кабинете; email-уведомления ещё не включены."
+
+#: pc-wholesale-help.php
+msgid "Open Waiting list to review the product, source date and quantity. Add selected goods to the cart, prepare a draft, postpone for seven days or remove the request. A product already in a tracked draft links to that draft. The list never reserves goods or replaces your cart."
+msgstr "Откройте список ожидания, чтобы проверить товар, дату источника и количество. Добавьте выбранные товары в корзину, подготовьте черновик, отложите на семь дней или удалите запрос. Если товар уже есть в отслеживаемом черновике, откройте его по ссылке. Список не резервирует товары и не заменяет корзину."
+
+#: pc-wholesale-help.php
+msgid "Purchases made through Folio are not reconciled automatically yet. Remove completed requests yourself. After an uncertain result, check your cart and drafts before acknowledging the previous action."
+msgstr "Покупки через ФОЛИО ещё не учитываются автоматически. Удаляйте выполненные запросы самостоятельно. После неопределённого результата проверьте корзину и черновики, прежде чем подтвердить проверку предыдущего действия."

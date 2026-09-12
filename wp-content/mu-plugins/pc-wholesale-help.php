@@ -431,6 +431,14 @@ function pc_wholesale_help_render_endpoint(): void {
                 printf(esc_html__('The non-accounting document is created on Folio warehouse 7 with the note %s. It does not write off, reserve, or otherwise move warehouse stock.', 'pc-wholesale-help'), '<code>нет на складе</code>');
             ?></div>
             <p><?php esc_html_e('If Folio returns an error or the result is unknown, the site keeps the draft and does not retry automatically. Review the message and deliberately repeat apply using the same preview. If draft lines or availability changed, run a new preview.', 'pc-wholesale-help'); ?></p>
+            <?php if (class_exists('\\PaintCore\\PCOE\\Waitlist') && \PaintCore\PCOE\Waitlist::allowed()): ?>
+            <div id="waiting-list" class="pc-help-card">
+                <h3><?php esc_html_e('Waiting list and draft tracking', 'pc-wholesale-help'); ?></h3>
+                <p><?php esc_html_e('When the waiting list is enabled, add a product by SKU or choose tracking when creating a draft. Tracking is optional and can also be changed on the draft page. Availability notices appear in My Account; email notifications are not enabled yet.', 'pc-wholesale-help'); ?></p>
+                <p><?php esc_html_e('Open Waiting list to review the product, source date and quantity. Add selected goods to the cart, prepare a draft, postpone for seven days or remove the request. A product already in a tracked draft links to that draft. The list never reserves goods or replaces your cart.', 'pc-wholesale-help'); ?></p>
+                <p><?php esc_html_e('Purchases made through Folio are not reconciled automatically yet. Remove completed requests yourself. After an uncertain result, check your cart and drafts before acknowledging the previous action.', 'pc-wholesale-help'); ?></p>
+            </div>
+            <?php endif; ?>
             <h3><?php esc_html_e('Repeat a previous completed order', 'pc-wholesale-help'); ?></h3>
             <p><?php esc_html_e('Open the order details and use the available repeat action. Current prices, availability and warehouse allocation are recalculated. To add only selected products without clearing the cart, repeat them from a Folio document.', 'pc-wholesale-help'); ?></p>
         </section>

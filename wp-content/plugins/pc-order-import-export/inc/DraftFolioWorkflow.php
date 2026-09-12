@@ -616,6 +616,27 @@ class DraftFolioWorkflow
         if (!self::ensure_cart_loaded()) {
             throw new \RuntimeException(__('Cart is not available.', 'pc-order-import-export'));
         }
+        // Preserve requested quantities before draft lines can be changed or deleted.
+        // An unfinished attempt is evidence of unknown outcome, never stockout demand.
+        $demand_attempt = '';
+        $demand_stock = [];
+        $waitlist_pilot = Waitlist::customer_allowed((int) $order->get_customer_id());
+        if ($waitlist_pilot && $order->get_meta('_pcoe_track_waitlist') === 'yes') {
+            $demand_attempt = wp_generate_uuid4();
+            $locations = PriceList::location_ids();
+            foreach ($analysis['rows'] as $item_id => $row) {
+                $product = wc_get_product((int) ($row['product_id'] ?? 0));
+                $demand_stock[$item_id] = [
+                    'purchasable' => $product instanceof \WC_Product && $product->is_purchasable(),
+                    'stock' => $product instanceof \WC_Product ? PriceList::stock($product, $locations) : null,
+                ];
+            }
+            $order->add_meta_data('_pcoe_demand_event', [
+                'attempt' => $demand_attempt, 'version' => 1, 'phase' => 'started',
+                'at' => gmdate('c'), 'rows' => $analysis['rows'], 'stock' => $demand_stock,
+            ]);
+            $order->save();
+        }
         WC()->cart->empty_cart();
 
         $actual = $analysis;
@@ -648,7 +669,7 @@ class DraftFolioWorkflow
             $groups[$group_key]['item_ids'][] = (int) $item_id;
         }
 
-        $added_item_ids = [];
+        $added_item_quantities = [];
         $added_cart_plans = [];
         foreach ($groups as $group) {
             $product = $group['product'] ?? null;
@@ -659,6 +680,9 @@ class DraftFolioWorkflow
             $variation_id = $product->is_type('variation') ? (int) $product->get_id() : 0;
             $variation = $product->is_type('variation') ? $product->get_variation_attributes() : [];
             $plan = self::normalise_plan((array) ($group['plan'] ?? []));
+            if ($waitlist_pilot && !apply_filters('woocommerce_add_to_cart_validation', true, $product_id, (float) ($group['quantity'] ?? 0), $variation_id, $variation, ['pc_alloc_plan' => $plan])) {
+                continue;
+            }
             $cart_key = WC()->cart->add_to_cart(
                 $product_id,
                 (float) ($group['quantity'] ?? 0),
@@ -669,9 +693,21 @@ class DraftFolioWorkflow
             if (!$cart_key) {
                 continue;
             }
-            $added_cart_plans[(string) $cart_key] = $plan;
+            $cart_item = WC()->cart->get_cart_item((string) $cart_key);
+            $delivered = $waitlist_pilot
+                ? min((float) ($group['quantity'] ?? 0), max(0.0, (float) ($cart_item['quantity'] ?? 0)))
+                : (float) ($group['quantity'] ?? 0);
+            $plan_left = $delivered;
+            $delivered_plan = [];
+            foreach ($plan as $location => $quantity) {
+                $take = min((float) $quantity, $plan_left);
+                if ($take > 0) $delivered_plan[$location] = $take;
+                $plan_left -= $take;
+            }
+            $added_cart_plans[(string) $cart_key] = $delivered_plan;
             foreach ((array) ($group['item_ids'] ?? []) as $item_id) {
-                $added_item_ids[(int) $item_id] = true;
+                $added_item_quantities[(int) $item_id] = min($delivered, (float) ($analysis['rows'][$item_id]['loadable'] ?? 0));
+                $delivered -= $added_item_quantities[(int) $item_id];
             }
         }
 
@@ -688,7 +724,7 @@ class DraftFolioWorkflow
                 continue;
             }
             $requested = (float) ($row['requested'] ?? 0);
-            $added = isset($added_item_ids[(int) $item_id]) ? (float) ($row['loadable'] ?? 0) : 0.0;
+            $added = (float) ($added_item_quantities[(int) $item_id] ?? 0);
 
             $remainder = max(0.0, $requested - $added);
             $actual['rows'][(int) $item_id]['loadable'] = $added;
@@ -698,6 +734,25 @@ class DraftFolioWorkflow
 
         $actual['loadable_total'] = array_sum(array_column($actual['rows'], 'loadable'));
         $actual['unavailable_total'] = array_sum(array_column($actual['rows'], 'unavailable'));
+        if ($demand_attempt !== '') {
+            $evidence = [];
+            foreach ($actual['rows'] as $item_id => $row) {
+                $original = $analysis['rows'][$item_id];
+                $evidence[$item_id] = [
+                    'product_id' => $row['product_id'], 'sku' => $row['sku'],
+                    'requested' => $original['requested'], 'planned' => $original['loadable'],
+                    'cart_added' => $row['loadable'], 'remaining' => $row['unavailable'],
+                    'reason' => WaitlistModel::remainder_reason(
+                        $demand_stock[$item_id]['purchasable'], $demand_stock[$item_id]['stock'],
+                        (float) $original['requested'], (float) $original['loadable'], (float) $row['loadable']
+                    ),
+                ];
+            }
+            $order->add_meta_data('_pcoe_demand_event', [
+                'attempt' => $demand_attempt, 'version' => 1, 'phase' => 'cart_prepared',
+                'at' => gmdate('c'), 'rows' => $evidence,
+            ]);
+        }
         $order->calculate_totals(false);
         $order->update_meta_data('_pcoe_cart_prepared_at', current_time('mysql'));
         /* translators: 1: quantity added to cart, 2: quantity left in draft. */

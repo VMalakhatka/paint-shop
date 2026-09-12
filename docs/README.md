@@ -24,6 +24,7 @@
 | Понять, что обязано обновляться вместе с изменением | [DOCUMENTATION_POLICY.md](DOCUMENTATION_POLICY.md) |
 | Увидеть неподтверждённые места и риски | [KNOWN_GAPS.md](KNOWN_GAPS.md) |
 | Пользоваться сайтом и кабинетом | [SITE_USER_GUIDE_UK.md](SITE_USER_GUIDE_UK.md) |
+| Развивать список ожидания и рекомендации клиентам | [план и этапы](CUSTOMER_RECOMMENDATIONS_PLAN.md) |
 | Оформить оптовый заказ, импортировать/экспортировать список, сохранить черновик, повторить старый заказ, увидеть разделение, баланс и документы | [WHOLESALE_CUSTOMER_GUIDE_UK.md](WHOLESALE_CUSTOMER_GUIDE_UK.md) |
 | Загружать и исправлять изображения | [MEDIA_MANAGER_GUIDE_UK.md](MEDIA_MANAGER_GUIDE_UK.md) |
 | Проверить Woo → Java/Folio заказ | [FOLIO_ORDER_JSON_CONTRACT.md](FOLIO_ORDER_JSON_CONTRACT.md) |

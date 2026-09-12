@@ -203,6 +203,8 @@ class CartToDraft
         try { $order->calculate_totals(false); } catch (\Throwable $e) {}
         $order->save();
 
+        Waitlist::track_created($order);
+
         $order_id = (int) $order->get_id();
 
         // Switch LOCK to created ID (subsequent click will reuse it)

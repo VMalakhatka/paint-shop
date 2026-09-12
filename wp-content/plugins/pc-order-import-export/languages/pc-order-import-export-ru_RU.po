@@ -887,9 +887,6 @@ msgstr "Список заказов ниже ещё не обновлён."
 #~ msgid "Row format:"
 #~ msgstr "Формат строк:"
 
-#~ msgid "Add to cart"
-#~ msgstr "Добавлено в корзину"
-
 #: inc/ManagerWorkspace.php inc/manager-view.php
 msgid "Customer workspace"
 msgstr "Работа с клиентами"
@@ -1383,3 +1380,221 @@ msgstr "Посмотреть товар"
 
 msgid "Other products"
 msgstr "Другие товары"
+
+#: inc/Waitlist.php
+msgid "Add to cart"
+msgstr "В корзину"
+
+#: inc/Waitlist.php
+msgid "Add to draft"
+msgstr "В черновик"
+
+#: inc/Waitlist.php
+msgid "Add to waiting list"
+msgstr "В список ожидания"
+
+#: inc/Waitlist.php
+msgid "Added to waiting list"
+msgstr "Добавлено в список ожидания"
+
+#: inc/Waitlist.php
+msgid "Already bought these goods elsewhere or through a manager? Remove the completed request. Folio purchases are not reconciled automatically yet."
+msgstr "Уже приобрели эти товары другим способом или через менеджера? Удалите выполненный запрос. Покупки в ФОЛИО ещё не учитываются автоматически."
+
+#: inc/Waitlist.php
+msgid "Already in cart"
+msgstr "Уже в корзине"
+
+#: inc/Waitlist.php
+msgid "Availability is checked when you open this page and again when adding to the cart. Checkout uses the usual current prices and warehouse settings."
+msgstr "Наличие проверяется при открытии страницы и повторно при добавлении в корзину. Заказ оформляется с обычными текущими ценами и настройками складов."
+
+#: inc/Waitlist.php
+msgid "Availability is not confirmed"
+msgstr "Наличие не подтверждено"
+
+#: inc/Waitlist.php
+msgid "Availability is shared by all customers. This list does not reserve goods. Notices appear here; email delivery is not enabled yet."
+msgstr "Наличие товаров одинаково для всех клиентов. Список не резервирует товары. Уведомления отображаются здесь; отправка на email ещё не включена."
+
+#: inc/Waitlist.php
+msgid "Available now"
+msgstr "Сейчас в наличии"
+
+#: inc/Waitlist.php
+msgid "Barcode"
+msgstr "Штрихкод"
+
+#: inc/Waitlist.php
+msgid "Check the previous action before continuing."
+msgstr "Проверьте результат предыдущего действия перед продолжением."
+
+#: inc/Waitlist.php
+msgid "Could not complete the action. Check your cart and drafts before trying again."
+msgstr "Не удалось завершить действие. Проверьте корзину и черновики перед повторной попыткой."
+
+#: inc/Waitlist.php
+msgid "Customers can track products and drafts and see availability in their account. Email delivery is not enabled in this release."
+msgstr "Клиенты могут отслеживать товары и черновики и видеть наличие в кабинете. В этой версии отправка email не включена."
+
+#: inc/Waitlist.php
+msgid "Draft created. Open it from the waiting list."
+msgstr "Черновик создан. Откройте его из списка ожидания."
+
+#: inc/Waitlist.php
+msgid "Draft tracking"
+msgstr "Отслеживание черновика"
+
+#: inc/Waitlist.php
+msgid "Enable waiting list"
+msgstr "Включить список ожидания"
+
+#: inc/Waitlist.php
+msgid "Enabling creates private waiting-list storage. Disabling preserves subscriptions. This does not change Folio or send messages."
+msgstr "Включение создаёт приватное хранилище списка ожидания. Выключение сохраняет подписки. Данные ФОЛИО не меняются, сообщения не отправляются."
+
+#: inc/Waitlist.php
+msgid "Enter a valid product SKU and a whole quantity from 1 to 100000. For a variable product, use the variation SKU."
+msgstr "Введите правильный артикул и целое количество от 1 до 100000. Для вариативного товара используйте артикул вариации."
+
+#: inc/Waitlist.php
+msgid "I checked my cart and drafts — continue"
+msgstr "Я проверил(а) корзину и черновики — продолжить"
+
+#: inc/Waitlist.php
+msgid "Invalid action."
+msgstr "Недопустимое действие."
+
+#: inc/Waitlist.php
+msgid "Invalid product or quantity."
+msgstr "Неверный товар или количество."
+
+#: inc/Waitlist.php
+msgid "No active requests. Add a product or enable draft tracking."
+msgstr "Активных запросов нет. Добавьте товар или включите отслеживание черновика."
+
+#: inc/Waitlist.php
+msgid "Remind me in 7 days"
+msgstr "Отложить на 7 дней"
+
+#: inc/Waitlist.php
+msgid "Remove empty or closed draft sources"
+msgstr "Убрать источники из пустых или закрытых черновиков"
+
+#: inc/Waitlist.php
+msgid "Remove request"
+msgstr "Больше не предлагать этот запрос"
+
+#: inc/Waitlist.php
+msgid "Review the quantity, pack size and selected warehouse. The requested quantity cannot currently be added."
+msgstr "Проверьте количество, кратность упаковки и выбранный склад. Сейчас запрошенное количество невозможно добавить."
+
+#: inc/Waitlist.php
+msgid "Save tracking preference"
+msgstr "Сохранить настройку отслеживания"
+
+#: inc/Waitlist.php
+msgid "Selected quantity added to cart. The request stays tracked until you remove it."
+msgstr "Выбранное количество добавлено в корзину. Запрос отслеживается, пока вы его не удалите."
+
+#: inc/Waitlist.php
+msgid "Show postponed requests now"
+msgstr "Показать отложенные запросы сейчас"
+
+#: inc/Waitlist.php
+msgid "Some products in your waiting list are available. Review your requests."
+msgstr "Некоторые товары из списка ожидания уже в наличии. Просмотрите свои запросы."
+
+#: inc/Waitlist.php
+msgid "The draft was saved, but tracking was not enabled. Open the draft to enable it."
+msgstr "Черновик сохранён, но отслеживание не включено. Откройте черновик, чтобы включить его."
+
+#: inc/Waitlist.php
+msgid "The list changed. Review it and try again."
+msgstr "Список изменился. Просмотрите его и попробуйте ещё раз."
+
+#: inc/Waitlist.php
+msgid "The previous action may have completed. Check your cart and drafts before continuing. It will not be repeated automatically."
+msgstr "Предыдущее действие могло завершиться. Перед продолжением проверьте корзину и черновики. Действие не будет повторяться автоматически."
+
+#: inc/Waitlist.php
+msgid "The quantity exceeds the remaining request. Update the waiting list first."
+msgstr "Количество превышает остаток запроса. Сначала обновите список ожидания."
+
+#: inc/Waitlist.php
+msgid "The waiting list is full. Remove old entries first (limit: 200 sources)."
+msgstr "Список ожидания заполнен. Сначала удалите старые записи (лимит: 200 источников)."
+
+#: inc/Waitlist.php
+msgid "This draft is not available for your account."
+msgstr "Этот черновик недоступен для вашей учётной записи."
+
+#: inc/Waitlist.php
+msgid "This product is already in a tracked draft. Open the source draft shown in the list."
+msgstr "Этот товар уже есть в отслеживаемом черновике. Откройте исходный черновик из списка."
+
+#: inc/Waitlist.php
+msgid "This product is no longer available in the catalogue."
+msgstr "Этого товара больше нет в каталоге."
+
+#: inc/Waitlist.php
+msgid "This request is no longer active."
+msgstr "Этот запрос больше не активен."
+
+#: inc/Waitlist.php
+msgid "Track this draft and show availability notices in my account"
+msgstr "Отслеживать этот черновик и сообщать о наличии в моём кабинете"
+
+#: inc/Waitlist.php
+msgid "Tracked draft"
+msgstr "Отслеживаемый черновик"
+
+#: inc/Waitlist.php
+msgid "Tracking currently supports whole quantities from 1 to 100000."
+msgstr "Отслеживание пока поддерживает целые количества от 1 до 100000."
+
+#: inc/Waitlist.php
+msgid "Waiting for stock"
+msgstr "Ожидаем поступления"
+
+#: inc/Waitlist.php
+msgid "Waiting list"
+msgstr "Список ожидания"
+
+#: inc/Waitlist.php
+msgid "Waiting list is not available for this account."
+msgstr "Список ожидания недоступен для этой учётной записи."
+
+#: inc/Waitlist.php
+msgid "Waiting list updated."
+msgstr "Список ожидания обновлён."
+
+#: inc/Waitlist.php
+msgid "Waiting-list storage is unavailable. No messages were sent."
+msgstr "Хранилище списка ожидания недоступно. Сообщения не отправлялись."
+
+#: inc/Waitlist.php
+msgid "WooCommerce rejected the item. Check the cart before continuing."
+msgstr "WooCommerce отклонил товар. Проверьте корзину перед продолжением."
+
+#: inc/Waitlist.php
+msgid "Waiting-list quantity"
+msgstr "Количество в запросе"
+
+#: inc/Waitlist.php
+msgid "Remove completed draft requests"
+msgstr "Убрать выполненные запросы из черновиков"
+
+
+
+#: inc/Waitlist.php
+msgid "Pilot customer email"
+msgstr "Email тестового клиента"
+
+#: inc/Waitlist.php
+msgid "Only this wholesale customer can access the waiting list. An empty pilot selection allows nobody."
+msgstr "Доступ к списку ожидания имеет только этот оптовый клиент. Без выбранного клиента доступ закрыт для всех."
+
+#: inc/Waitlist.php
+msgid "Select an existing wholesale customer for the pilot."
+msgstr "Выберите существующего оптового клиента для тестирования."

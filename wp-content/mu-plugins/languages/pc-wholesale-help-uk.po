@@ -988,3 +988,19 @@ msgstr "Завантажте повний прайс XLSX у «Моїх замо
 
 msgid "Category headings are not order lines. Filled quantities in collapsed groups are still imported. Do not sort the entire sheet as a flat table: this would mix category headings with products."
 msgstr "Заголовки категорій не є позиціями замовлення. Заповнені кількості у згорнутих групах також імпортуються. Не сортуйте весь аркуш як плоску таблицю: це змішає заголовки категорій з товарами."
+
+#: pc-wholesale-help.php
+msgid "Waiting list and draft tracking"
+msgstr "Список очікування та відстеження чернеток"
+
+#: pc-wholesale-help.php
+msgid "When the waiting list is enabled, add a product by SKU or choose tracking when creating a draft. Tracking is optional and can also be changed on the draft page. Availability notices appear in My Account; email notifications are not enabled yet."
+msgstr "Коли список очікування ввімкнено, додайте товар за артикулом або виберіть відстеження під час створення чернетки. Відстеження добровільне; його також можна змінити на сторінці чернетки. Повідомлення про наявність з'являються в кабінеті; email-сповіщення ще не ввімкнено."
+
+#: pc-wholesale-help.php
+msgid "Open Waiting list to review the product, source date and quantity. Add selected goods to the cart, prepare a draft, postpone for seven days or remove the request. A product already in a tracked draft links to that draft. The list never reserves goods or replaces your cart."
+msgstr "Відкрийте список очікування, щоб перевірити товар, дату джерела та кількість. Додайте вибрані товари до кошика, підготуйте чернетку, відкладіть на сім днів або видаліть запит. Якщо товар уже є у відстежуваній чернетці, відкрийте її за посиланням. Список не резервує товари й не замінює кошик."
+
+#: pc-wholesale-help.php
+msgid "Purchases made through Folio are not reconciled automatically yet. Remove completed requests yourself. After an uncertain result, check your cart and drafts before acknowledging the previous action."
+msgstr "Покупки через ФОЛІО ще не враховуються автоматично. Видаляйте виконані запити самостійно. Після невизначеного результату перевірте кошик і чернетки, перш ніж підтвердити перевірку попередньої дії."
