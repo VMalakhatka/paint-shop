@@ -26,7 +26,8 @@
         selectedId: 0,
         busy: false,
         pendingProfile: null,
-        capabilitiesRequestId: 0
+        capabilitiesRequestId: 0,
+        stockOnlyWarehouseIds: []
     };
     const el = (id) => document.getElementById(id);
     const warehouses = el('lps-as-warehouses');
@@ -52,6 +53,7 @@
         const duplicate = el('lps-as-duplicate');
         const archive = el('lps-as-archive');
         warehouses.disabled = busy || !warehouses.options.length;
+        root.querySelectorAll('[data-warehouse-usage]').forEach((node) => { node.disabled = busy; });
         root.querySelectorAll('.lps-as-list-item').forEach((button) => { button.disabled = busy; });
         if (save) save.disabled = busy || state.compatible === false;
         if (create) create.disabled = busy;
@@ -101,6 +103,21 @@
     function selectedWarehouseIds() {
         return Array.from(warehouses.selectedOptions).map((option) => Number(option.value)).filter((value) => value > 0).sort((a, b) => a - b);
     }
+
+    function renderWarehouseUsage() {
+        const scope = selectedWarehouseIds();
+        state.stockOnlyWarehouseIds = state.stockOnlyWarehouseIds.filter((id) => scope.includes(id));
+        const target = el('lps-as-warehouse-usage');
+        target.innerHTML = scope.map((id) => {
+            const warehouse = state.warehouses.find((item) => Number(item.id) === id);
+            return '<p><label>' + escapeHtml(id + ' — ' + (warehouse?.name || id)) + ' <select data-warehouse-usage="' + id + '">' +
+                '<option value="FULL">' + escapeHtml(i18n.warehouseFull || 'Full analytics') + '</option>' +
+                '<option value="STOCK_ONLY"' + (state.stockOnlyWarehouseIds.includes(id) ? ' selected' : '') + '>' + escapeHtml(i18n.warehouseStockOnly || 'Current stock only') + '</option></select></label></p>';
+        }).join('');
+    }
+    el('lps-as-warehouse-usage').addEventListener('change', () => {
+        state.stockOnlyWarehouseIds = Array.from(el('lps-as-warehouse-usage').querySelectorAll('select')).filter((node) => node.value === 'STOCK_ONLY').map((node) => Number(node.dataset.warehouseUsage)).sort((a,b) => a-b);
+    });
 
     function renderWarehouseOptions(items) {
         state.warehouses = Array.isArray(items) ? items : [];
@@ -246,7 +263,7 @@
             period: { from: el('lps-as-period-from').value, to: el('lps-as-period-to').value },
             productFilters: productFilters,
             movementFilters: collectFilters('movement'),
-            calculation: { abcBasis: el('lps-as-abc-basis').value, includeReturns: el('lps-as-include-returns').checked, availability: availabilityEditor.read() },
+            calculation: { abcBasis: el('lps-as-abc-basis').value, includeReturns: el('lps-as-include-returns').checked, availability: availabilityEditor.read(), stockOnlyWarehouseIds: state.stockOnlyWarehouseIds.filter((id) => selectedWarehouseIds().includes(id)) },
             page: { size: Number(el('lps-as-page-size').value || 50) },
             sort: [{ field: el('lps-as-sort-field').value, direction: el('lps-as-sort-direction').value }],
             presentation: { activeTab: el('lps-as-active-tab').value },
@@ -352,6 +369,8 @@
             if (normalized.period.to) el('lps-as-period-to').value = normalized.period.to;
         }
         const calculation = normalized.calculation || {};
+        state.stockOnlyWarehouseIds = (calculation.stockOnlyWarehouseIds || []).map(Number);
+        renderWarehouseUsage();
         availabilityEditor.apply(calculation.availability);
         el('lps-as-abc-basis').value = calculation.abcBasis || 'GROSS_PROFIT';
         el('lps-as-include-returns').checked = calculation.includeReturns !== false;
@@ -377,7 +396,9 @@
         state.capabilities = null;
         state.compatible = null;
         state.pendingProfile = null;
+        state.stockOnlyWarehouseIds = [];
         Array.from(warehouses.options).forEach((option) => { option.selected = false; });
+        renderWarehouseUsage();
         el('lps-as-id').value = '';
         el('lps-as-version').value = '0';
         el('lps-as-name').value = '';
@@ -483,7 +504,7 @@
         finally { setBusy(false); }
     }
 
-    warehouses.addEventListener('change', () => { state.pendingProfile = null; loadCapabilities(); });
+    warehouses.addEventListener('change', () => { state.pendingProfile = null; renderWarehouseUsage(); loadCapabilities(); });
     form.addEventListener('submit', saveScenario);
     el('lps-as-new').addEventListener('click', resetEditor);
     el('lps-as-duplicate').addEventListener('click', duplicateScenario);

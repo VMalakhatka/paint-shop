@@ -6281,3 +6281,30 @@ msgstr "Ця група поповнюється переміщенням. Ко�
 #: inc/purchase-planning.php
 msgid "The source stock and selected purchase do not cover the planned replenishment. Review rounding or the manual quantities."
 msgstr "Залишок джерела та вибрана закупівля не покривають планове поповнення. Перевірте округлення або ручні кількості."
+
+msgid "Invalid stock-only warehouse selection."
+msgstr "Некоректний вибір складів з урахуванням лише залишку."
+
+msgid "Stock-only warehouses must belong to the scenario."
+msgstr "Склади з урахуванням лише залишку мають входити до сценарію."
+
+msgid "A stock-only warehouse cannot receive a planned order. Select a warehouse with full analytics."
+msgstr "Склад з урахуванням лише залишку не можна вибрати отримувачем планового замовлення. Виберіть склад із повним обліком."
+
+msgid "Full analytics"
+msgstr "Повний облік"
+
+msgid "Current stock only"
+msgstr "Лише поточний залишок"
+
+msgid "Warehouse usage in this scenario"
+msgstr "Використання складів у цьому сценарії"
+
+msgid "Full analytics includes stock, sales, MIN/MAX and availability history. Current stock only contributes physical, reserved and free quantities; it does not contribute demand, MIN/MAX or financial metrics. To exclude a warehouse, remove it from the selection above."
+msgstr "Повний облік включає залишки, продажі, MIN/MAX та історію наявності. Режим «Лише поточний залишок» враховує фізичну, зарезервовану та вільну кількість; попит, MIN/MAX і фінансові показники цього складу не використовуються. Щоб виключити склад, приберіть його з вибору вище."
+
+msgid "Stock-only warehouse mode requires a Java update."
+msgstr "Для режиму «Лише залишок» потрібне оновлення Java."
+
+msgid "The analytics response did not apply the selected warehouse modes."
+msgstr "Відповідь аналітики не враховує вибрані режими складів."

@@ -81,6 +81,21 @@ function lps_purchase_rounded_quantity(float $need, float $moq, ?float $pack, st
     return round(($mode === 'DOWN' ? floor($packs + 0.0000001) : ceil($packs - 0.0000001)) * $pack, 6);
 }
 
+function lps_analytics_stock_only_ids(array $calculation, array $scope): array {
+    $values = $calculation['stockOnlyWarehouseIds'] ?? [];
+    if (!is_array($values)) throw new InvalidArgumentException(__('Invalid stock-only warehouse selection.', 'lavka-price-sync'));
+    $ids = [];
+    foreach ($values as $value) {
+        if ((!is_int($value) && !is_string($value)) || !preg_match('/^[1-9][0-9]*$/D', (string)$value)
+            || !in_array((int)$value, array_map('intval', $scope), true)) {
+            throw new InvalidArgumentException(__('Stock-only warehouses must belong to the scenario.', 'lavka-price-sync'));
+        }
+        $ids[] = (int)$value;
+    }
+    $ids = array_values(array_unique($ids)); sort($ids, SORT_NUMERIC);
+    return $ids;
+}
+
 function lps_purchase_demand(float $sales, array $group, array $row): array {
     $enabled = !empty($group['stockoutCorrectionEnabled']);
     $multiplier = (float)($group['maxDemandMultiplier'] ?? 1.1);
@@ -90,7 +105,7 @@ function lps_purchase_demand(float $sales, array $group, array $row): array {
     if ($multiplier == 1 || $sales == 0) return array_merge($base, ['status' => 'CAP_ZERO']);
     foreach ((array)($row['warehouseGroupBreakdown'] ?? []) as $source) {
         $ids = array_map('intval', (array)($source['warehouseIds'] ?? [])); sort($ids);
-        $expected = $group['warehouseIds']; sort($expected);
+        $expected = $group['demandWarehouseIds'] ?? $group['warehouseIds']; sort($expected);
         if (($source['code'] ?? '') !== $group['code'] || $ids !== $expected) continue;
         $estimate = $source['stockoutDemand'] ?? [];
         $lost = lps_purchase_number($estimate['estimatedLostSales'] ?? null);
@@ -133,6 +148,7 @@ function lps_purchase_resolve_groups(array $profile, array $configured): array {
     }
     $catalog = array_column($configured, null, 'code');
     $scope = array_map('intval', (array)($profile['context']['warehouseIds'] ?? []));
+    $stock_only = lps_analytics_stock_only_ids((array)($profile['calculation'] ?? []), $scope);
     $used = [];
     $resolved = [];
     foreach ($plan['groups'] as $group) {
@@ -144,6 +160,9 @@ function lps_purchase_resolve_groups(array $profile, array $configured): array {
             if (isset($used[$id])) throw new InvalidArgumentException(__('Destination groups must not share physical warehouses.', 'lavka-price-sync'));
             $used[$id] = true;
         }
+        if (in_array($group['receivingWarehouseId'], $stock_only, true)) {
+            throw new InvalidArgumentException(__('A stock-only warehouse cannot receive a planned order. Select a warehouse with full analytics.', 'lavka-price-sync'));
+        }
         if (!in_array($group['receivingWarehouseId'], $current['warehouseIds'], true)
             || $group['leadTimeDays'] === null || $group['targetDays'] === null || $group['safetyDays'] === null) {
             throw new InvalidArgumentException(__('Set a receiving warehouse, lead time, target coverage and safety stock days for every destination group.', 'lavka-price-sync'));
@@ -151,7 +170,9 @@ function lps_purchase_resolve_groups(array $profile, array $configured): array {
         $resolved[] = array_merge($group, ['packRounding' => lps_purchase_pack_mode($plan),
             'respectPack' => lps_purchase_pack_mode($plan) !== 'NONE',
             'stockoutCorrectionEnabled' => !empty($plan['stockoutCorrectionEnabled']),
-            'maxDemandMultiplier' => lps_purchase_number($plan['maxDemandMultiplier'] ?? 1.1, 1, 100) ?? 1.1, 'name' => $current['name'], 'warehouseIds' => $current['warehouseIds']]);
+            'maxDemandMultiplier' => lps_purchase_number($plan['maxDemandMultiplier'] ?? 1.1, 1, 100) ?? 1.1, 'name' => $current['name'], 'warehouseIds' => $current['warehouseIds'],
+            'stockOnlyWarehouseIds' => array_values(array_intersect($current['warehouseIds'], $stock_only)),
+            'demandWarehouseIds' => array_values(array_diff($current['warehouseIds'], $stock_only))]);
     }
     $destinations = array_column($resolved, null, 'code');
     foreach ($resolved as $group) {
@@ -228,11 +249,13 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
             $member = $members[$id] ?? null;
             $metrics = $member['metrics'] ?? [];
             // Missing warehouse rows are unknown, not proof of zero stock.
-            foreach (['physicalQuantity', 'availableQuantity', 'regularSoldUnits', 'returnQuantity'] as $key) {
+            $stock_only = in_array($id, $group['stockOnlyWarehouseIds'] ?? [], true);
+            foreach ($stock_only ? ['physicalQuantity', 'availableQuantity'] : ['physicalQuantity', 'availableQuantity', 'regularSoldUnits', 'returnQuantity'] as $key) {
                 if (lps_purchase_number($metrics[$key] ?? null, in_array($key, ['physicalQuantity', 'availableQuantity'], true) ? -1000000000 : 0) === null) $valid = false;
             }
             $physical += (float)($metrics['physicalQuantity'] ?? 0);
             $available += (float)($metrics['availableQuantity'] ?? 0);
+            if ($stock_only) continue;
             $sales += (float)($metrics['regularSoldUnits'] ?? 0);
             $returns += (float)($metrics['returnQuantity'] ?? 0);
             $policy = $member['orderPolicy'] ?? [];
@@ -268,6 +291,8 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
         $position = $available + ($incoming ?? 0) + ($open_orders ?? 0);
         $result[$group['code']] = [
             'groupCode' => $group['code'], 'groupName' => $group['name'], 'warehouseIds' => $group['warehouseIds'],
+            'stockOnlyWarehouseIds' => $group['stockOnlyWarehouseIds'] ?? [],
+            'demandWarehouseIds' => $group['demandWarehouseIds'] ?? $group['warehouseIds'],
             'receivingWarehouseId' => $group['receivingWarehouseId'],
             'supplyFromGroupCode' => $group['supplyFromGroupCode'] ?? '',
             'requiredTransferOverride' => lps_purchase_number($edit['requiredTransfer'] ?? null),

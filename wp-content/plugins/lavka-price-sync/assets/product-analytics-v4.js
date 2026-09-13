@@ -385,6 +385,7 @@
     function calculationPayload(source) {
         const calculation = {
             abcBasis: source.abcBasis || 'GROSS_PROFIT',
+            stockOnlyWarehouseIds: (source.stockOnlyWarehouseIds || []).map(Number).filter((id) => state.warehouseIds.includes(id)),
             includeReturns: source.includeReturns !== false
         };
         const availability = availabilityCalculation(source.availability || availabilityEditor.read());
@@ -427,6 +428,7 @@
             movementFilters: collectFilters('movement'),
             calculation: calculationPayload({
                 abcBasis: el('lps-pa-abc-basis').value,
+                stockOnlyWarehouseIds: state.activeScenarioProfile?.calculation?.stockOnlyWarehouseIds || [],
                 includeReturns: el('lps-pa-include-returns').checked
             }),
             page: { size: Number(el('lps-pa-page-size').value || 50), cursor: cursor || null },

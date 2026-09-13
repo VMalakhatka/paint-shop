@@ -6078,3 +6078,30 @@ msgstr ""
 #: inc/purchase-planning.php
 msgid "The source stock and selected purchase do not cover the planned replenishment. Review rounding or the manual quantities."
 msgstr ""
+
+msgid "Invalid stock-only warehouse selection."
+msgstr ""
+
+msgid "Stock-only warehouses must belong to the scenario."
+msgstr ""
+
+msgid "A stock-only warehouse cannot receive a planned order. Select a warehouse with full analytics."
+msgstr ""
+
+msgid "Full analytics"
+msgstr ""
+
+msgid "Current stock only"
+msgstr ""
+
+msgid "Warehouse usage in this scenario"
+msgstr ""
+
+msgid "Full analytics includes stock, sales, MIN/MAX and availability history. Current stock only contributes physical, reserved and free quantities; it does not contribute demand, MIN/MAX or financial metrics. To exclude a warehouse, remove it from the selection above."
+msgstr ""
+
+msgid "Stock-only warehouse mode requires a Java update."
+msgstr ""
+
+msgid "The analytics response did not apply the selected warehouse modes."
+msgstr ""

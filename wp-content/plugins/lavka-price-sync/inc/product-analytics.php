@@ -1806,6 +1806,7 @@ function lps_product_analytics_v4_sanitize_query(array $payload): array {
     if (!in_array($abc_basis, ['REVENUE', 'GROSS_PROFIT', 'SOLD_UNITS'], true)) $abc_basis = 'GROSS_PROFIT';
     $calculation = [
         'transit' => lps_transit_configuration(),
+        'stockOnlyWarehouseIds' => lps_analytics_stock_only_ids($calculation_input, $warehouse_ids),
         'abcBasis' => $abc_basis,
         'includeReturns' => !isset($calculation_input['includeReturns']) || rest_sanitize_boolean($calculation_input['includeReturns']),
     ];
@@ -1959,19 +1960,27 @@ function lps_product_analytics_v4_request_java(string $path, array $payload) {
     // Probe without the new field first, including on older deployments. Cache only
     // feature support within this PHP request, never source generations across requests.
     static $support = [];
+    static $usage_support = [];
     $key = wp_json_encode([lps_get_options()['java_base_url'] ?? '', $payload['sourceDatabase'] ?? '', $payload['warehouseIds'] ?? []]);
     if (!array_key_exists($key, $support)) {
         $probe = lps_product_analytics_v4_request_java_raw(LPS_PRODUCT_ANALYTICS_CAPABILITIES_PATH, [
             'sourceDatabase' => $payload['sourceDatabase'] ?? 'Paint_Ua', 'warehouseIds' => $payload['warehouseIds'] ?? [],
         ]);
         if (is_wp_error($probe)) return $probe;
+        $usage_support[$key] = ($probe['features']['warehouseUsage']['version'] ?? 0) === 1;
         $support[$key] = ($probe['features']['configurableTransit']['supported'] ?? null) === true
             && ($probe['transit']['configurable'] ?? null) === true && ($probe['transit']['calculationVersion'] ?? 0) === 3;
     }
     unset($payload['calculation']['transit']);
+    $stock_only = $payload['calculation']['stockOnlyWarehouseIds'] ?? [];
+    if ($stock_only && empty($usage_support[$key])) return new WP_Error('WAREHOUSE_USAGE_UNSUPPORTED', __('Stock-only warehouse mode requires a Java update.', 'lavka-price-sync'), ['status' => 409]);
     if ($support[$key]) $payload['calculation']['transit'] = $config;
     $body = lps_product_analytics_v4_request_java_raw($path, $payload);
     if (is_wp_error($body)) return $body;
+    if ($path === LPS_PRODUCT_ANALYTICS_QUERY_PATH && $stock_only
+        && ($body['appliedFilters']['calculation']['stockOnlyWarehouseIds'] ?? null) !== $stock_only) {
+        return new WP_Error('WAREHOUSE_USAGE_MISMATCH', __('The analytics response did not apply the selected warehouse modes.', 'lavka-price-sync'), ['status' => 502]);
+    }
     if ($support[$key]) {
         $context = $path === LPS_PRODUCT_ANALYTICS_QUERY_PATH ? ($body['context']['transit'] ?? []) : ($body['transit'] ?? []);
         if (($context['calculationVersion'] ?? 0) !== 3 || !lps_transit_matches($context, $config['warehouseIds'])) {

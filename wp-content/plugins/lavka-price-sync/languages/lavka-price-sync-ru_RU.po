@@ -6297,3 +6297,30 @@ msgstr "Эта группа пополняется перемещением. К�
 #: inc/purchase-planning.php
 msgid "The source stock and selected purchase do not cover the planned replenishment. Review rounding or the manual quantities."
 msgstr "Остаток источника и выбранная закупка не покрывают плановое пополнение. Проверьте округление или ручные количества."
+
+msgid "Invalid stock-only warehouse selection."
+msgstr "Некорректный выбор складов с учётом только остатка."
+
+msgid "Stock-only warehouses must belong to the scenario."
+msgstr "Склады с учётом только остатка должны входить в сценарий."
+
+msgid "A stock-only warehouse cannot receive a planned order. Select a warehouse with full analytics."
+msgstr "Склад с учётом только остатка нельзя выбрать получателем планируемого заказа. Выберите склад с полным учётом."
+
+msgid "Full analytics"
+msgstr "Полный учёт"
+
+msgid "Current stock only"
+msgstr "Только текущий остаток"
+
+msgid "Warehouse usage in this scenario"
+msgstr "Использование складов в этом сценарии"
+
+msgid "Full analytics includes stock, sales, MIN/MAX and availability history. Current stock only contributes physical, reserved and free quantities; it does not contribute demand, MIN/MAX or financial metrics. To exclude a warehouse, remove it from the selection above."
+msgstr "Полный учёт включает остатки, продажи, MIN/MAX и историю наличия. Режим «Только текущий остаток» учитывает физическое, зарезервированное и свободное количество; спрос, MIN/MAX и финансовые показатели с этого склада не используются. Чтобы исключить склад, уберите его из выбора выше."
+
+msgid "Stock-only warehouse mode requires a Java update."
+msgstr "Для режима «Только остаток» требуется обновление Java."
+
+msgid "The analytics response did not apply the selected warehouse modes."
+msgstr "Ответ аналитики не учитывает выбранные режимы складов."

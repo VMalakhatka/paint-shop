@@ -222,3 +222,29 @@ check($reverse[1]['finalQuantity'] === 110.0 && $reverse[0]['plannedTransferIn']
 $groups[0]['packRounding'] = 'DOWN'; $inputs['kyiv']['moq'] = 115; $inputs['kyiv']['pack'] = 14;
 check(lps_purchase_calculate($row, $groups, 30, false, $inputs)['groups'][0]['finalQuantity'] === null, 'Pack down does not silently override supplier MOQ');
 echo "PASS: linked replenishment coverage, group order independence and down/MOQ review\n";
+
+$stockProfile = ['context'=>['warehouseIds'=>[5,15]], 'calculation'=>['stockOnlyWarehouseIds'=>[15]],
+    'purchasePlanning'=>lps_purchase_profile(['enabled'=>true,'stockoutCorrectionEnabled'=>true,'maxDemandMultiplier'=>1.1,
+        'groups'=>[['code'=>'odesa','receivingWarehouseId'=>5,'leadTimeDays'=>0,'targetDays'=>30,'safetyDays'=>0]]])];
+$stockGroups = lps_purchase_resolve_groups($stockProfile,[['code'=>'odesa','name'=>'Odesa','warehouseIds'=>[5,15]]]);
+check($stockGroups[0]['demandWarehouseIds'] === [5], 'Stock-only storage is absent from demand history');
+$stockRow=['sku'=>'STOCK-ONLY','dimensions'=>['currentSuppliers'=>['Kreul'],'packageQuantity'=>1,'minimumOrderQuantity'=>0],
+    'metrics'=>['grossProfit'=>1],'networkOrderPolicy'=>['orderAllowed'=>true,'status'=>'ALLOWED'],
+    'warehouseBreakdown'=>[member(5,10,100),member(15,40,1000)],
+    'warehouseGroupBreakdown'=>[['code'=>'odesa','warehouseIds'=>[5],'availability'=>['status'=>'MEASURED'],
+        'stockoutDemand'=>['status'=>'ESTIMATED','method'=>'SALES_ON_AVAILABLE_END_OF_DAY_DAYS_V1','estimatedLostSales'=>20]]]];
+$stockRow['warehouseBreakdown'][0]['orderPolicy']['reserveAboveForecast']=2;
+$stockRow['warehouseBreakdown'][1]['orderPolicy']=['orderAllowed'=>null,'reserveAboveForecast'=>999,'maximumStockLimited'=>true,'maximumStockLimit'=>0];
+$stockResult=lps_purchase_calculate($stockRow,$stockGroups,30,false,['odesa'=>['openOrders'=>0]],[])['groups'][0];
+check($stockResult['available']===50.0 && $stockResult['regularSales']===100.0, 'Storage contributes stock but no sales');
+check(abs($stockResult['target']-112)<0.00001 && $stockResult['finalQuantity']===62.0, 'Storage MIN/MAX cannot inflate or block purchase; stock reduces it');
+check($stockResult['returns']===2.0, 'Storage returns do not contribute');
+$stockRow['warehouseBreakdown'][1]['metrics']=null;
+check(in_array('INCOMPLETE_WAREHOUSE_DATA',lps_purchase_calculate($stockRow,$stockGroups,30,false,[],[])['groups'][0]['issues'],true), 'Missing storage stock stays unknown');
+$stockProfile['purchasePlanning']['groups'][0]['receivingWarehouseId']=15;
+try {lps_purchase_resolve_groups($stockProfile,[['code'=>'odesa','name'=>'Odesa','warehouseIds'=>[5,15]]]);throw new RuntimeException('Stock-only receipt accepted');}
+catch(InvalidArgumentException $expected) {}
+check(lps_analytics_stock_only_ids(['stockOnlyWarehouseIds'=>['15',15]],[5,15])===[15], 'Stable stock-only normalization');
+try {lps_analytics_stock_only_ids(['stockOnlyWarehouseIds'=>[20]],[5,15]);throw new RuntimeException('Foreign warehouse accepted');}
+catch(InvalidArgumentException $expected) {}
+echo "PASS: stock-only quantities, ignored sales/returns/MIN/MAX, demand masks, missing stock and receipt validation\n";

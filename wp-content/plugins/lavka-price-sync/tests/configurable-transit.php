@@ -25,7 +25,7 @@ function lps_java_post($path, $payload, $options) {
     if ($path === LPS_PRODUCT_ANALYTICS_CAPABILITIES_PATH) {
         if (empty($GLOBALS['modern'])) return ['ok' => true];
         $config = $payload['calculation']['transit'] ?? ['warehouseIds' => [9], 'configurationRevision' => hash('sha256', '[9]')];
-        return ['ok' => true, 'features' => ['configurableTransit' => ['supported' => true]],
+        return ['ok' => true, 'features' => ['configurableTransit' => ['supported' => true], 'warehouseUsage'=>['version'=>empty($GLOBALS['usageModern'])?0:1]],
             'transit' => $config + ['configurable' => true, 'calculationVersion' => 3,
                 'sources' => array_values(array_filter($GLOBALS['sources'], fn($s) => in_array($s['warehouseId'], $config['warehouseIds'], true)))]];
     }
@@ -116,3 +116,11 @@ check(!is_wp_error($body) && end($requests)[1]['calculation']['transit']['wareho
 $ids = range(1, 17);
 check(is_wp_error(lps_product_analytics_v4_request_java(LPS_PRODUCT_ANALYTICS_QUERY_PATH, $query)), 'Enforce 16-source limit before HTTP');
 echo "PASS: v3 physical/supplier split, consistency/disabled/overlap, manager review, capability gate, export and generation drift\n";
+$ids=[]; $server='usage-old'; $modern=true;
+$stockQuery=$query; $stockQuery['calculation']['stockOnlyWarehouseIds']=[1];
+check(is_wp_error(lps_product_analytics_v4_request_java(LPS_PRODUCT_ANALYTICS_QUERY_PATH,$stockQuery)), 'Old Java must not silently ignore stock-only mode');
+$usageModern=true; $server='usage-new'; $responses=[$response];
+check(is_wp_error(lps_product_analytics_v4_request_java(LPS_PRODUCT_ANALYTICS_QUERY_PATH,$stockQuery)), 'Missing applied warehouse mode is rejected');
+$response['appliedFilters']['calculation']['stockOnlyWarehouseIds']=[1];$responses=[$response];
+check(!is_wp_error(lps_product_analytics_v4_request_java(LPS_PRODUCT_ANALYTICS_QUERY_PATH,$stockQuery)), 'Matching stock-only mode is accepted');
+echo "PASS: warehouse mode capability and response verification\n";

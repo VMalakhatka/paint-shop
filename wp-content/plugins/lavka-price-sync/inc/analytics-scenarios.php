@@ -229,6 +229,7 @@ function lps_analytics_scenario_sanitize_profile_v4(array $profile): array {
         'movementFilters' => $movements,
         'calculation' => [
             'abcBasis' => $abc_basis,
+            'stockOnlyWarehouseIds' => lps_analytics_stock_only_ids($calculation_in, $warehouses),
             'includeReturns' => !isset($calculation_in['includeReturns']) || rest_sanitize_boolean($calculation_in['includeReturns']),
             ...(!empty($calculation_in['availability']) ? ['availability' => lps_availability_profile((array)$calculation_in['availability'])] : []),
         ],
@@ -721,6 +722,8 @@ add_action('admin_enqueue_scripts', static function (): void {
         'purchaseI18n' => lps_purchase_i18n(),
         'locale' => str_replace('_', '-', determine_locale()),
         'i18n' => [
+            'warehouseFull' => __('Full analytics', 'lavka-price-sync'),
+            'warehouseStockOnly' => __('Current stock only', 'lavka-price-sync'),
             'loading' => __('Loading analytics scenarios...', 'lavka-price-sync'),
             'loadFailed' => __('Analytics scenarios could not be loaded.', 'lavka-price-sync'),
             'newScenario' => __('New scenario', 'lavka-price-sync'),
@@ -979,6 +982,10 @@ function lps_render_analytics_scenarios_v4_page(): void {
                         <h2><?php echo esc_html__('Data scope and period', 'lavka-price-sync'); ?></h2>
                         <div class="lps-as-grid">
                             <label class="lps-as-wide"><span><?php echo esc_html__('Folio warehouses', 'lavka-price-sync'); ?></span><select id="lps-as-warehouses" multiple size="7" required disabled></select></label>
+                            <div class="lps-as-wide"><h3><?php echo esc_html__('Warehouse usage in this scenario', 'lavka-price-sync'); ?></h3>
+                                <p class="description"><?php echo esc_html__('Full analytics includes stock, sales, MIN/MAX and availability history. Current stock only contributes physical, reserved and free quantities; it does not contribute demand, MIN/MAX or financial metrics. To exclude a warehouse, remove it from the selection above.', 'lavka-price-sync'); ?></p>
+                                <div id="lps-as-warehouse-usage"></div>
+                            </div>
                             <label><span><?php echo esc_html__('Period from', 'lavka-price-sync'); ?></span><input type="date" id="lps-as-period-from" value="<?php echo esc_attr($period_from); ?>" required></label>
                             <label><span><?php echo esc_html__('Period through', 'lavka-price-sync'); ?></span><input type="date" id="lps-as-period-to" value="<?php echo esc_attr($today); ?>" required></label>
                             <label><span><?php echo esc_html__('ABC basis', 'lavka-price-sync'); ?></span><select id="lps-as-abc-basis"><option value="GROSS_PROFIT"><?php echo esc_html__('Gross profit', 'lavka-price-sync'); ?></option><option value="REVENUE"><?php echo esc_html__('Revenue', 'lavka-price-sync'); ?></option><option value="SOLD_UNITS"><?php echo esc_html__('Sold units', 'lavka-price-sync'); ?></option></select></label>
