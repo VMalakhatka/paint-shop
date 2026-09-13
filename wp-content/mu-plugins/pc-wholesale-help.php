@@ -434,7 +434,7 @@ function pc_wholesale_help_render_endpoint(): void {
             <?php if (class_exists('\\PaintCore\\PCOE\\Waitlist') && \PaintCore\PCOE\Waitlist::allowed()): ?>
             <div id="waiting-list" class="pc-help-card">
                 <h3><?php esc_html_e('Waiting list and draft tracking', 'pc-wholesale-help'); ?></h3>
-                <p><?php esc_html_e('When the waiting list is enabled, add a product by SKU or choose tracking when creating a draft. Tracking is optional and can also be changed on the draft page. Availability notices appear in My Account; email notifications are not enabled yet.', 'pc-wholesale-help'); ?></p>
+                <p><?php esc_html_e('Add a product by SKU or choose tracking when creating a draft. In the waiting list, enable email notifications to receive stock notices without visiting the site. Background checks run about every 15 minutes. Postponing pauses notices for seven days; removing the request stops them. You can turn email notifications off at any time.', 'pc-wholesale-help'); ?></p>
                 <p><?php esc_html_e('Open Waiting list to review the product, source date and quantity. Add selected goods to the cart, prepare a draft, postpone for seven days or remove the request. A product already in a tracked draft links to that draft. The list never reserves goods or replaces your cart.', 'pc-wholesale-help'); ?></p>
                 <p><?php esc_html_e('Purchases made through Folio are not reconciled automatically yet. Remove completed requests yourself. After an uncertain result, check your cart and drafts before acknowledging the previous action.', 'pc-wholesale-help'); ?></p>
             </div>

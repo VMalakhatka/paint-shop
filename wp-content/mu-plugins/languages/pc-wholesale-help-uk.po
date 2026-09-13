@@ -1004,3 +1004,9 @@ msgstr "Відкрийте список очікування, щоб перев�
 #: pc-wholesale-help.php
 msgid "Purchases made through Folio are not reconciled automatically yet. Remove completed requests yourself. After an uncertain result, check your cart and drafts before acknowledging the previous action."
 msgstr "Покупки через ФОЛІО ще не враховуються автоматично. Видаляйте виконані запити самостійно. Після невизначеного результату перевірте кошик і чернетки, перш ніж підтвердити перевірку попередньої дії."
+
+
+
+#: pc-wholesale-help.php
+msgid "Add a product by SKU or choose tracking when creating a draft. In the waiting list, enable email notifications to receive stock notices without visiting the site. Background checks run about every 15 minutes. Postponing pauses notices for seven days; removing the request stops them. You can turn email notifications off at any time."
+msgstr "Додайте товар за артикулом або оберіть відстеження під час створення чернетки. У списку очікування увімкніть email, щоб отримувати повідомлення без відвідування сайту. Фонова перевірка виконується приблизно кожні 15 хвилин. Відкладання призупиняє повідомлення на сім днів, видалення запиту припиняє їх. Email можна вимкнути будь-коли."
