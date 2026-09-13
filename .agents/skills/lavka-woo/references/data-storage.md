@@ -6,6 +6,10 @@
 
 Проверено 2026-09-12 по коду worktree и одноразовым WordPress/MariaDB тестам;
 production не включён. Владелец — `pc-order-import-export/Waitlist*`.
+С 2026-09-13 `WaitlistMail` использует CAS той же строки для `mail_observed`,
+`mail_log` (claim перед транспортом), `email_enabled` и `email_consent_at`.
+Отдельный master option `pcoe_waitlist_mail_enabled`, журнал last-check
+`pcoe_waitlist_mail_health`. Unknown/failed не повторять автоматически.
 Пилот ограничен `pcoe_waitlist_pilot_user_id`: только выбранный существующий
 оптовый клиент; пустая настройка закрывает доступ всем, включая direct POST.
 Таблица `<prefix>pcoe_waitlist` создаётся только явным включением менеджером;

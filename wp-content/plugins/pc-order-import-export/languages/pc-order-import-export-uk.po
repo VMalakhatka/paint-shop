@@ -1591,8 +1591,6 @@ msgstr "Кількість у запиті"
 msgid "Remove completed draft requests"
 msgstr "Прибрати виконані запити з чернеток"
 
-
-
 #: inc/Waitlist.php
 msgid "Pilot customer email"
 msgstr "Email тестового клієнта"
@@ -1604,3 +1602,125 @@ msgstr "Доступ до списку очікування має лише це
 #: inc/Waitlist.php
 msgid "Select an existing wholesale customer for the pilot."
 msgstr "Виберіть наявного оптового клієнта для тестування."
+
+
+
+#: inc/Waitlist.php
+msgid "Customers can track products and drafts. Pilot email notifications require both the email service switch and customer consent."
+msgstr "Клієнти можуть відстежувати товари й чернетки. Для email потрібні ввімкнений сервіс і згода клієнта."
+
+#: inc/Waitlist.php
+msgid "Enabling creates private waiting-list storage. Disabling preserves subscriptions and stops background emails. Folio is not changed."
+msgstr "Увімкнення створює приватне сховище списку. Вимкнення зберігає підписки та зупиняє листи. ФОЛІО не змінюється."
+
+#: inc/Waitlist.php
+msgid "Enable background email for the pilot customer"
+msgstr "Увімкнути фонові email для тестового клієнта"
+
+#: inc/Waitlist.php
+msgid "Availability is shared by all customers. This list does not reserve goods. Enable email notifications below to hear about available products without visiting the site."
+msgstr "Наявність спільна для всіх клієнтів. Список не резервує товари. Увімкніть email нижче, щоб дізнаватися про доступні товари без відвідування сайту."
+
+#: inc/Waitlist.php
+msgid "Email me when waiting-list products are available"
+msgstr "Повідомляти мене email, коли товари зі списку є в наявності"
+
+#: inc/Waitlist.php
+msgid "Save email preference"
+msgstr "Зберегти налаштування email"
+
+#: inc/Waitlist.php
+msgid "With email notifications enabled, background checks run about every 15 minutes, even when you do not visit the site. Postponing pauses notices for that request; removing it stops them. Stock is checked again when adding to the cart."
+msgstr "Якщо email увімкнено, фонова перевірка виконується приблизно кожні 15 хвилин, навіть коли ви не відвідуєте сайт. Відкладання призупиняє повідомлення за цим запитом, видалення припиняє їх. Наявність повторно перевіряється при додаванні до кошика."
+
+#: inc/Waitlist.php
+msgid "Your waiting-list products are available — KREUL"
+msgstr "Товари з вашого списку очікування є в наявності — KREUL"
+
+#: inc/Waitlist.php
+msgid "Products from your waiting list are available now:"
+msgstr "Товари з вашого списку очікування зараз доступні:"
+
+#: inc/Waitlist.php
+msgid "Requested: %1$s. Available now: %2$s."
+msgstr "У запиті: %1$s. Зараз у наявності: %2$s."
+
+#: inc/Waitlist.php
+msgid "Stock is not reserved. Review current availability in your account before ordering."
+msgstr "Товар не зарезервовано. Перед замовленням перевірте актуальну наявність у кабінеті."
+
+#: inc/Waitlist.php
+msgid "To stop these emails, open your waiting list and turn off email notifications. You can also postpone or remove individual requests."
+msgstr "Щоб припинити ці листи, відкрийте список очікування та вимкніть email. Окремі запити можна відкласти або видалити."
+
+#: inc/Waitlist.php
+msgid "Email notification journal"
+msgstr "Журнал email-повідомлень"
+
+#: inc/Waitlist.php
+msgid "Accepted means handed to the mail service, not confirmed delivery. Failed or unknown attempts are not retried automatically."
+msgstr "Прийнято означає передачу поштовому сервісу, а не підтверджену доставку. Невдалі або непідтверджені спроби автоматично не повторюються."
+
+#: inc/Waitlist.php
+msgid "Last background check"
+msgstr "Остання фонова перевірка"
+
+#: inc/Waitlist.php
+msgid "Date"
+msgstr "Дата"
+
+#: inc/Waitlist.php
+msgid "Checked"
+msgstr "Перевірено"
+
+#: inc/Waitlist.php
+msgid "Email notifications are off"
+msgstr "Email-повідомлення вимкнено"
+
+#: inc/Waitlist.php
+msgid "Waiting for cart or draft review"
+msgstr "Очікуємо перевірки кошика або чернетки"
+
+#: inc/Waitlist.php
+msgid "Waiting for a recent completed stock update"
+msgstr "Очікуємо свіжого завершеного оновлення залишків"
+
+#: inc/Waitlist.php
+msgid "Journal full — sending paused"
+msgstr "Журнал заповнено — надсилання призупинено"
+
+#: inc/Waitlist.php
+msgid "Sending paused — review the previous attempt"
+msgstr "Надсилання призупинено — перевірте попередню спробу"
+
+#: inc/Waitlist.php
+msgid "Background check failed"
+msgstr "Помилка фонової перевірки"
+
+#: inc/Waitlist.php
+msgid "Not checked yet"
+msgstr "Ще не перевірено"
+
+#: inc/Waitlist.php
+msgid "Started — outcome not confirmed"
+msgstr "Розпочато — результат не підтверджено"
+
+#: inc/Waitlist.php
+msgid "Accepted by mail service"
+msgstr "Прийнято поштовим сервісом"
+
+#: inc/Waitlist.php
+msgid "Mail service reported failure"
+msgstr "Поштовий сервіс повідомив про помилку"
+
+#: inc/Waitlist.php
+msgid "Cancelled before sending"
+msgstr "Скасовано до надсилання"
+
+#: inc/Waitlist.php
+msgid "Test: KREUL waiting-list email notifications"
+msgstr "Тест: email-повідомлення списку очікування KREUL"
+
+#: inc/Waitlist.php
+msgid "This is a test of your waiting-list email notifications. It does not mean that your product has arrived. We will email you when tracked products are available. You can turn these emails off in your waiting list."
+msgstr "Це тест email-повідомлень вашого списку очікування. Він не означає, що товар надійшов. Ми напишемо, коли відстежувані товари будуть доступні. Вимкнути ці листи можна у списку очікування."

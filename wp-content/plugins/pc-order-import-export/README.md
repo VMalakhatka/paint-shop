@@ -1,9 +1,60 @@
 # Wholesale Price List
 
+## Background email — single-customer pilot
+
+Enabled for the authorized production pilot on 2026-09-13 (commit `7e02c40`).
+One explicit test email was accepted by the configured transport; the next scan
+produced no duplicate. Existing customer demand was preserved. Inbox delivery
+and an actual stock-arrival event still require acceptance. Owner: `WaitlistMail.php`; no new table or mail provider.
+Uses the configured WordPress mail transport. Enable `pcoe_waitlist_mail_enabled=yes`
+and the selected customer's `email_enabled=true` in their waiting-list state.
+Customer consent is separate from draft tracking and can be withdrawn in the account.
+The pilot owner explicitly authorized email for the existing test account; do not
+backfill consent for any other customer. The email address always comes from that
+account, never the browser or a versioned constant.
+
+`pcoe_waitlist_mail_tick` runs on a 15-minute WP schedule. A targeted server cron
+calls only that action as well, so absence of site traffic does not prevent checks.
+Do not run all Woo cron jobs to drive this feature. Disable either the waiting list
+or the master email switch to stop sending; user opt-out pauses that user's messages.
+
+Read shared selling-location stock only after a `lavka_sync_last_to` cursor no older
+than 24 hours and outside an active `lavka-sync` lock. Unknown stock never rearms an
+arrival episode. First observed positive stock sends an availability notice (not a
+claim of a new shipment), including requested and available quantities. Any positive
+quantity qualifies, so partial availability is reported. Continued positive stock,
+including increases, does not send again. Observed zero rearms the episode with a
+24-hour minimum interval per product. Snoozed/removed/closed draft requests are
+excluded. No cart or session is loaded by the scanner, and no order or stock is changed.
+
+The existing per-user CAS row stores `mail_observed`, `mail_log`, `email_enabled`
+and `email_consent_at`. A digest contains up to 20 products. Its durable `claimed`
+record is saved before calling `wp_mail`. Concurrent scans cannot claim the same
+revision. Recheck consent, pilot identity, active demand and stock readiness before
+transport. Completion merges only journal status into fresh state, preserving
+concurrent customer edits. A crash leaves `claimed` (unknown); false means `failed`;
+true means `accepted`, not delivered. Failed/unknown attempts pause sending pending
+operator review and are never automatically retried. Do not erase claims to retry.
+Cancellation after claim is logged and does not send. This is not an atomic transaction
+with the remote mail provider; do not claim exactly-once delivery.
+
+Manager journal: WooCommerce → Waiting list. Shows time, status and SKUs; underlying
+records contain quantities and a recipient hash, not message bodies or raw addresses.
+`pcoe_waitlist_mail_health` records the last scan and reason for a pause. The bounded
+pilot journal stops sending at 100 records; archival/review UI is a later expansion
+requirement. `WaitlistMail::send_test()` is CLI-only, uses a fixed claim key, and sends
+an explicitly labelled test email once. It does not assert any stock arrival.
+
+Validation: offline episode transitions plus isolated real WordPress/MariaDB tests
+in `tests/waitlist-mail-isolated.php` with intercepted mail: consent, background guest
+context, partial stock, nested concurrent scan, deduplication, snooze, stale cursor,
+removal, transport false/exception, durable unknown claim, test replay and schedule.
+Production recipient delivery requires inbox verification; acceptance alone is insufficient.
+
 ## Customer waiting list — stage 1
 
 Prepared in the isolated worktree on 2026-09-12. Disabled by default. Production rollout is limited to one explicitly selected pilot customer.
-No mail or Folio calls are part of rollout. Tests used a disposable MariaDB 11.4
+The initial rollout made no mail or Folio calls; background email is described above. Tests used a disposable MariaDB 11.4
 and fresh WordPress/WooCommerce with synthetic records and blocked HTTP/mail.
 Owner: `Waitlist.php` (account UI/actions), `WaitlistStore.php` (state),
 `WaitlistModel.php` (quantity, grouping and reason rules). No new plugin is needed;
@@ -52,7 +103,7 @@ validation. Product entry is by exact SKU (variation SKU for variable products),
 whole quantities 1–100000. Availability is shared across customers and uses the
 existing selling-location mapping; unknown stock remains unknown. Account dashboard
 and waiting list show current availability when opened, not a fabricated arrival
-event. No background scan or email subscription/delivery is implemented.
+event. Background email is available through the separate pilot switches described above.
 
 Cart addition is additive, validates current stock, existing cart quantity, purchase
 limits/pack step and the selected allocation mode. Current prices come from Woo.
@@ -100,8 +151,12 @@ For the selected pilot only, the processing workflow calls the normal add-to-car
 uses the quantity actually present in the cart after quantity filters, distributing
 it across duplicate product rows before changing draft remainders.
 No Java deployment, price recalculation, real document creation or mail is required.
-Canonical help and help code are updated; publication awaits deployment and runtime
-verification. Activation and migration were exercised only in the disposable test database.
+The single-customer production pilot was enabled on 2026-09-12. Scoped code/help
+release, schema setup and all-user access enumeration passed. Production runtime
+checks covered add/snooze/resume/remove, read-only rendering, pilot help and denied
+nonpilot/guest POST; the test list was left empty. No cart/order/stock changes or
+mail/Folio operations were performed in production. Full authenticated browser
+acceptance remains with the pilot customer. See the operations runbook.
 
 ## Price list
 

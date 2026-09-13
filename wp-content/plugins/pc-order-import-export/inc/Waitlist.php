@@ -3,13 +3,14 @@ namespace PaintCore\PCOE;
 
 defined('ABSPATH') || exit;
 
-/** Explicit demand and in-account availability notices. No Folio writes or mail. */
+/** Explicit demand and in-account availability notices. No Folio writes. Email is handled by WaitlistMail. */
 final class Waitlist
 {
     public const ENDPOINT = 'waiting-list';
 
     public static function hooks(): void {
         add_action('init', [self::class, 'endpoint']);
+        WaitlistMail::hooks();
         add_action('template_redirect', static function () {
             if (is_account_page() && is_wc_endpoint_url(self::ENDPOINT)) nocache_headers();
         });
@@ -43,7 +44,7 @@ final class Waitlist
         });
         add_action('wp_enqueue_scripts', static function () {
             if (!self::allowed()) return;
-            wp_enqueue_style('pcoe-waitlist', PCOE_URL . 'assets/waitlist.css', [], '1');
+            wp_enqueue_style('pcoe-waitlist', PCOE_URL . 'assets/waitlist.css', [], '2');
             wp_enqueue_script('pcoe-waitlist', PCOE_URL . 'assets/waitlist.js', [], '1', true);
         });
     }
@@ -70,8 +71,8 @@ final class Waitlist
     public static function settings(): void {
         if (!current_user_can('manage_woocommerce')) return;
         echo '<div class="wrap"><h1>' . esc_html__('Waiting list', 'pc-order-import-export') . '</h1>';
-        echo '<p>' . esc_html__('Customers can track products and drafts and see availability in their account. Email delivery is not enabled in this release.', 'pc-order-import-export') . '</p>';
-        echo '<p>' . esc_html__('Enabling creates private waiting-list storage. Disabling preserves subscriptions. This does not change Folio or send messages.', 'pc-order-import-export') . '</p>';
+        echo '<p>' . esc_html__('Customers can track products and drafts. Pilot email notifications require both the email service switch and customer consent.', 'pc-order-import-export') . '</p>';
+        echo '<p>' . esc_html__('Enabling creates private waiting-list storage. Disabling preserves subscriptions and stops background emails. Folio is not changed.', 'pc-order-import-export') . '</p>';
         echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">';
         wp_nonce_field('pcoe_waitlist_setup');
         echo '<input type="hidden" name="action" value="pcoe_waitlist_setup">';
@@ -79,8 +80,11 @@ final class Waitlist
         echo '<p><label>' . esc_html__('Pilot customer email', 'pc-order-import-export') . ' <input type="email" name="pilot_email" value="' . esc_attr($pilot ? $pilot->user_email : '') . '"></label></p>';
         echo '<p>' . esc_html__('Only this wholesale customer can access the waiting list. An empty pilot selection allows nobody.', 'pc-order-import-export') . '</p>';
         echo '<label><input type="checkbox" name="enabled" value="1" ' . checked(self::enabled(), true, false) . '> ' . esc_html__('Enable waiting list', 'pc-order-import-export') . '</label>';
+        echo '<p><label><input type="checkbox" name="mail_enabled" value="1" ' . checked(WaitlistMail::enabled(), true, false) . '> ' . esc_html__('Enable background email for the pilot customer', 'pc-order-import-export') . '</label></p>';
         submit_button();
-        echo '</form></div>';
+        echo '</form>';
+        WaitlistMail::settings();
+        echo '</div>';
     }
 
     public static function setup(): void {
@@ -101,6 +105,8 @@ final class Waitlist
         } else {
             update_option('pcoe_waitlist_enabled', 'no', false);
         }
+        update_option('pcoe_waitlist_mail_enabled', isset($_POST['enabled'], $_POST['mail_enabled']) && $_POST['mail_enabled'] === '1' ? 'yes' : 'no', false);
+        WaitlistMail::schedule();
         flush_rewrite_rules(false);
         wp_safe_redirect(admin_url('admin.php?page=pcoe-waitlist'));
         exit;
@@ -199,7 +205,8 @@ final class Waitlist
     }
 
     /** Current draft remainder is authoritative; rendering never changes stored intent. */
-    private static function effective_entries(array $entries): array {
+    public static function effective_entries(array $entries, ?int $owner = null): array {
+        $owner = $owner ?? get_current_user_id();
         $orders = [];
         foreach ($entries as &$entry) {
             if (empty($entry['draft_id'])) continue;
@@ -207,7 +214,7 @@ final class Waitlist
             if (!array_key_exists($id, $orders)) $orders[$id] = wc_get_order($id);
             $order = $orders[$id];
             $entry['quantity'] = 0;
-            if (!$order instanceof \WC_Order || !$order->has_status('pc-draft') || (int) $order->get_customer_id() !== get_current_user_id()) continue;
+            if (!$order instanceof \WC_Order || !$order->has_status('pc-draft') || (int) $order->get_customer_id() !== $owner) continue;
             $item = $order->get_item((int) $entry['item_id']);
             if ($item instanceof \WC_Order_Item_Product && (int) ($item->get_variation_id() ?: $item->get_product_id()) === (int) $entry['product_id']) {
                 $entry['quantity'] = max(0, (int) $item->get_quantity());
@@ -231,8 +238,13 @@ final class Waitlist
             echo '<p role="alert">' . esc_html__('Waiting-list storage is unavailable. No messages were sent.', 'pc-order-import-export') . '</p>'; return;
         }
         echo '<section class="pcoe-waitlist"><h2>' . esc_html__('Waiting list', 'pc-order-import-export') . '</h2>';
-        echo '<p>' . esc_html__('Availability is shared by all customers. This list does not reserve goods. Notices appear here; email delivery is not enabled yet.', 'pc-order-import-export') . '</p>';
+        echo '<p>' . esc_html__('Availability is shared by all customers. This list does not reserve goods. Enable email notifications below to hear about available products without visiting the site.', 'pc-order-import-export') . '</p>';
         echo '<p>' . esc_html__('Already bought these goods elsewhere or through a manager? Remove the completed request. Folio purchases are not reconciled automatically yet.', 'pc-order-import-export') . '</p>';
+        if (WaitlistMail::enabled()) {
+            self::form_start('email_preferences', $state['revision']);
+            echo '<label class="pcoe-email-consent"><input type="checkbox" name="email_enabled" value="1" ' . checked(!empty($state['email_enabled']), true, false) . '> ' . esc_html__('Email me when waiting-list products are available', 'pc-order-import-export') . '</label>';
+            echo '<button class="button" type="submit">' . esc_html__('Save email preference', 'pc-order-import-export') . '</button></form>';
+        }
         if (!empty($state['pending'])) {
             echo '<p role="alert">' . esc_html__('The previous action may have completed. Check your cart and drafts before continuing. It will not be repeated automatically.', 'pc-order-import-export') . '</p>';
             self::form_start('acknowledge', $state['revision']);
@@ -291,7 +303,7 @@ final class Waitlist
             self::form_start('clear_finished', $state['revision']);
             echo '<button class="button" type="submit">' . esc_html__('Remove completed draft requests', 'pc-order-import-export') . '</button></form>';
         }
-        echo '<p>' . esc_html__('Availability is checked when you open this page and again when adding to the cart. Checkout uses the usual current prices and warehouse settings.', 'pc-order-import-export') . '</p></section>';
+        echo '<p>' . esc_html__('With email notifications enabled, background checks run about every 15 minutes, even when you do not visit the site. Postponing pauses notices for that request; removing it stops them. Stock is checked again when adding to the cart.', 'pc-order-import-export') . '</p></section>';
     }
 
     private static function finish(string $message, string $type = 'success'): void {
@@ -311,8 +323,11 @@ final class Waitlist
                 throw new \RuntimeException(__('The list changed. Review it and try again.', 'pc-order-import-export'));
             }
             $operation = isset($_POST['operation']) && is_string($_POST['operation']) ? sanitize_key($_POST['operation']) : '';
-            if (!empty($state['pending']) && $operation !== 'acknowledge') throw new \RuntimeException(__('Check the previous action before continuing.', 'pc-order-import-export'));
-            if ($operation === 'acknowledge') {
+            if (!empty($state['pending']) && !in_array($operation, ['acknowledge', 'email_preferences'], true)) throw new \RuntimeException(__('Check the previous action before continuing.', 'pc-order-import-export'));
+            if ($operation === 'email_preferences') {
+                $state['email_enabled'] = ($_POST['email_enabled'] ?? '') === '1';
+                $state['email_consent_at'] = time();
+            } elseif ($operation === 'acknowledge') {
                 $state['pending'] = null;
             } elseif ($operation === 'track_draft') {
                 $order = wc_get_order(absint($_POST['draft_id'] ?? 0));
