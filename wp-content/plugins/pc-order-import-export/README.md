@@ -2,7 +2,10 @@
 
 ## Background email — single-customer pilot
 
-Implemented 2026-09-13. Owner: `WaitlistMail.php`; no new table or mail provider.
+Enabled for the authorized production pilot on 2026-09-13 (commit `7e02c40`).
+One explicit test email was accepted by the configured transport; the next scan
+produced no duplicate. Existing customer demand was preserved. Inbox delivery
+and an actual stock-arrival event still require acceptance. Owner: `WaitlistMail.php`; no new table or mail provider.
 Uses the configured WordPress mail transport. Enable `pcoe_waitlist_mail_enabled=yes`
 and the selected customer's `email_enabled=true` in their waiting-list state.
 Customer consent is separate from draft tracking and can be withdrawn in the account.
