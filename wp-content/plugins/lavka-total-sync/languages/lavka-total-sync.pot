@@ -1399,3 +1399,71 @@ msgstr ""
 #: inc/worker.php:12
 msgid "Background product data worker"
 msgstr ""
+
+#: inc/operator-help.php
+msgid "How to work with product images"
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Find the products"
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Use the missing-images report for current product coverage and the failed-links report for synchronization errors."
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Save the report"
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Set the filters and export XLSX before making corrections. Keep this starting snapshot."
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Preview the correction"
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Open the suggested image. Check the exact product, colour and size, then preview the Folio correction before confirming."
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Update the storefront"
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Run the corrected-product queue and inspect the storefront. Failed items remain queued for investigation."
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Before confirming a correction"
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Do not confirm an ambiguous match or an image that cannot be opened. The failed-links log is historical and may retain resolved errors. Judge the current state using the product page and entries after the latest synchronization."
+msgstr ""
+
+#: inc/operator-help.php
+msgid "If the operation was interrupted"
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Keep the XLSX report and the corrected-product queue. After an unknown outcome, ask the administrator to check the actual result before retrying. New source files belong in the batch uploader."
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Image workflow navigation"
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Review failed links"
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Corrected-product queue"
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Upload new product images"
+msgstr ""

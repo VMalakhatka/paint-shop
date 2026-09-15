@@ -213,6 +213,8 @@ final class Plugin
                 <?php echo esc_html__('Check the XLS/XLSX registry, then upload approved images and synchronize OVH/S3, Folio and WooCommerce in one controlled operation.', 'lavka-product-media-upload'); ?>
             </p>
 
+            <?php require __DIR__ . '/operator-help.php'; ?>
+
             <?php if (!\lpmu_writes_enabled()) : ?>
                 <div class="notice notice-info inline">
                     <p>
@@ -247,8 +249,8 @@ final class Plugin
                         </label>
                         <input id="lpmu-registry" type="file" accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
                         <p class="description">
-                            <?php echo esc_html__('The current four-column XLS and the new header-based template are supported.', 'lavka-product-media-upload'); ?>
-                            <a href="<?php echo esc_url($template_url); ?>"><?php echo esc_html__('Download the new XLSX template', 'lavka-product-media-upload'); ?></a>
+                            <?php echo esc_html__('Fill in the XLSX template and keep the column headers unchanged.', 'lavka-product-media-upload'); ?>
+                            <a href="<?php echo esc_url($template_url); ?>"><?php echo esc_html__('Download XLSX template', 'lavka-product-media-upload'); ?></a>
                         </p>
                     </div>
                     <div>
@@ -284,13 +286,10 @@ final class Plugin
                     </div>
                 </div>
 
-                <label class="lpmu-confirm">
-                    <input id="lpmu-legacy-main" type="checkbox" value="1">
-                    <?php echo esc_html__('For a four-column registry without roles, explicitly treat every row as a main product image.', 'lavka-product-media-upload'); ?>
-                </label>
+                <input id="lpmu-legacy-main" type="hidden" value="0">
                 <label class="lpmu-confirm">
                     <input id="lpmu-generate-names" type="checkbox" value="1" checked>
-                    <?php echo esc_html__('For header-based registries, generate canonical filenames from SKU or barcode. Legacy four-column registries always use column 2 as the authoritative filename.', 'lavka-product-media-upload'); ?>
+                    <?php echo esc_html__('Generate canonical filenames from SKU or barcode.', 'lavka-product-media-upload'); ?>
                 </label>
             </section>
 

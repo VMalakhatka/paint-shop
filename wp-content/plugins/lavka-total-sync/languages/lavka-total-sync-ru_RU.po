@@ -1362,3 +1362,71 @@ msgstr "Принудительный пересчет категорий про�
 
 #~ msgid "OVH/S3 index path:"
 #~ msgstr "Путь в индексе OVH/S3:"
+
+#: inc/operator-help.php
+msgid "How to work with product images"
+msgstr "Как работать с изображениями товаров"
+
+#: inc/operator-help.php
+msgid "Find the products"
+msgstr "Найдите товары"
+
+#: inc/operator-help.php
+msgid "Use the missing-images report for current product coverage and the failed-links report for synchronization errors."
+msgstr "Отчёт товаров без изображений показывает текущие пропуски, а отчёт неудачных привязок — ошибки синхронизации."
+
+#: inc/operator-help.php
+msgid "Save the report"
+msgstr "Сохраните отчёт"
+
+#: inc/operator-help.php
+msgid "Set the filters and export XLSX before making corrections. Keep this starting snapshot."
+msgstr "Установите фильтры и экспортируйте XLSX до исправлений. Сохраните исходный отчёт."
+
+#: inc/operator-help.php
+msgid "Preview the correction"
+msgstr "Просмотрите исправление"
+
+#: inc/operator-help.php
+msgid "Open the suggested image. Check the exact product, colour and size, then preview the Folio correction before confirming."
+msgstr "Откройте предложенное фото. Сверьте товар, цвет и размер, затем просмотрите исправление ФОЛИО и только после этого подтвердите его."
+
+#: inc/operator-help.php
+msgid "Update the storefront"
+msgstr "Обновите изображения на сайте"
+
+#: inc/operator-help.php
+msgid "Run the corrected-product queue and inspect the storefront. Failed items remain queued for investigation."
+msgstr "Запустите обновление очереди исправленных товаров и проверьте витрину. Товары с ошибками остаются в очереди для проверки."
+
+#: inc/operator-help.php
+msgid "Before confirming a correction"
+msgstr "Перед подтверждением исправления"
+
+#: inc/operator-help.php
+msgid "Do not confirm an ambiguous match or an image that cannot be opened. The failed-links log is historical and may retain resolved errors. Judge the current state using the product page and entries after the latest synchronization."
+msgstr "Не подтверждайте неоднозначное совпадение или фото, которое не открывается. Журнал неудачных привязок исторический и может содержать уже исправленные ошибки. Проверяйте текущий товар и записи после последней синхронизации."
+
+#: inc/operator-help.php
+msgid "If the operation was interrupted"
+msgstr "Если операция прервана"
+
+#: inc/operator-help.php
+msgid "Keep the XLSX report and the corrected-product queue. After an unknown outcome, ask the administrator to check the actual result before retrying. New source files belong in the batch uploader."
+msgstr "Сохраните XLSX-отчёт и очередь исправленных товаров. Если результат неизвестен, перед повтором попросите администратора проверить фактическое состояние. Новые файлы загружайте через страницу пакетов изображений."
+
+#: inc/operator-help.php
+msgid "Image workflow navigation"
+msgstr "Навигация работы с изображениями"
+
+#: inc/operator-help.php
+msgid "Review failed links"
+msgstr "Проверить неудачные привязки"
+
+#: inc/operator-help.php
+msgid "Corrected-product queue"
+msgstr "Очередь исправленных товаров"
+
+#: inc/operator-help.php
+msgid "Upload new product images"
+msgstr "Загрузить новые изображения товаров"
