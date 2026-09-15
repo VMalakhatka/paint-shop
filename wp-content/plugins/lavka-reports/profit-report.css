@@ -498,3 +498,22 @@
 /* Stored reports are separate from the detailed monthly viewer. */
 #lavr-profit-history label{display:flex;flex-direction:column;gap:5px}#lavr-profit-history td,#lavr-profit-history th{vertical-align:top;overflow-wrap:anywhere}#lph-totals,#lph-revisions{overflow:auto}#lph-totals table{min-width:1000px}#lph-months td:last-child{min-width:200px}#lph-months button{margin:2px}#lph-error{white-space:pre-wrap;padding:12px;border-left:4px solid #bd3030;background:#fff0f0}#lph-state,#lph-selected{font-weight:600}#lph-coverage{padding:10px;border-left:4px solid #bd8500;background:#fff8e5}@media(max-width:600px){#lavr-profit-history .lavr-profit-toolbar>*{width:100%}}
 #lavr-profit-history table{border-collapse:collapse;min-width:100%}#lavr-profit-history th,#lavr-profit-history td{padding:10px;text-align:left;border-bottom:1px solid #d8dfe8;min-width:110px}#lavr-profit-history th{background:#eef3fa}#lph-totals th:first-child,#lph-totals td:first-child{min-width:75px}#lph-totals th:not(:first-child),#lph-totals td:not(:first-child){min-width:140px}
+
+/* Manager guide: scoped typography keeps the report tables unchanged. */
+.lavr-profit-manager-help{margin:16px 0;background:#fff;border:1px solid #c3c4c7;border-radius:6px;color:#172d3c}
+.lavr-profit-manager-help>summary{padding:16px 20px;font-size:16px;font-weight:600;cursor:pointer;color:#123e58}
+.lavr-profit-manager-help>summary:hover{background:#eef5fa}
+.lavr-profit-manager-help>summary:focus-visible{outline:2px solid #2271b1;outline-offset:2px}
+.lavr-profit-manager-help[open]>summary{border-bottom:1px solid #dce5ec}
+.lavr-profit-guide{max-width:850px;padding:8px 24px 24px;font:17px/1.55 system-ui,sans-serif;overflow-wrap:anywhere}
+.lavr-profit-guide h2{font-size:28px;line-height:1.2;margin:20px 0;color:#172d3c}
+.lavr-profit-guide h3{font-size:21px;margin:28px 0 12px;color:#172d3c}
+.lavr-profit-guide p{font-size:inherit;line-height:inherit;margin:14px 0}
+.lavr-profit-guide ol{margin:0;padding-left:24px}
+.lavr-profit-guide li{margin:14px 0}
+.lavr-profit-guide strong{color:#123e58}
+.lavr-profit-guide-note{padding:10px 20px;background:#eef5fa;border-left:4px solid #286080}
+.lavr-profit-guide-note p{margin:6px 0}
+.lavr-profit-guide .lavr-profit-guide-footnote{font-size:14px;color:#52616b}
+.lavr-profit-manual-grid [hidden]{display:none!important}
+@media(max-width:600px){.lavr-profit-guide{padding:4px 16px 20px;font-size:16px}.lavr-profit-guide h2{font-size:24px}.lavr-profit-manager-help>summary{padding:14px 16px}.lavr-profit-guide-note{padding:10px 14px}}

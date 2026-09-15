@@ -59,6 +59,7 @@ async function setup(options={}) {
  await page.addStyleTag({content:'body{font-family:Arial;margin:20px}*{box-sizing:border-box} .widefat{border-collapse:collapse;width:100%}th,td{padding:8px;border-bottom:1px solid #ddd;text-align:left}button{padding:8px}'});
  await page.addStyleTag({path:path.join(base,'profit-report.css')});
  await page.addScriptTag({path:path.join(base,'profit-xlsx.js')});
+ await page.addScriptTag({path:path.join(base,'profit-manager.js')});
  await page.addScriptTag({path:path.join(base,'profit-report.js')});
  await page.waitForFunction(()=>!document.getElementById('lavr-profit-result').hidden);
  return {page,errors,requests,release:async()=>{assert(held);await held();}};
@@ -112,9 +113,9 @@ test('late response after month edit cannot replace the displayed snapshot or en
 });
 console.log('Test artifacts:',output);
 
-test('real Java DTO fixture: 32 stable rows, separate diagnostics, numeric strings and XLSX export',async()=>{
+test('real Java DTO fixture: 31 displayed rows, separate diagnostics, numeric strings and XLSX export',async()=>{
  const {page,errors}=await setup({backend:true});
- assert.equal(await page.locator('#lavr-profit-expenses-table tbody tr').count(),32);
+ assert.equal(await page.locator('#lavr-profit-expenses-table tbody tr').count(),31);
  assert.equal(await page.locator('#lavr-profit-period-diagnostics tbody tr').count(),2);
  const downloadPromise=page.waitForEvent('download');await page.locator('#lavr-profit-export-xlsx').click();
  const download=await downloadPromise;await download.saveAs(path.join(output,'java-contract.xlsx'));

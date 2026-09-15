@@ -1718,3 +1718,179 @@ msgstr "Незавершена спроба"
 #: inc/class-profit-history.php
 msgid "Failed attempt"
 msgstr "Спроба з помилкою"
+
+#: inc/class-profit-report.php
+msgid "Retail taxes"
+msgstr "Податки роздріб"
+
+#: inc/class-profit-report.php
+msgid "Wholesale taxes"
+msgstr "Податки гурт"
+
+#: inc/class-profit-report.php
+msgid "Total registered employees"
+msgstr "Усього оформлених працівників"
+
+#: inc/class-profit-report.php
+msgid "Registered employees: Kyiv"
+msgstr "Оформлених працівників: Київ"
+
+#: inc/class-profit-report.php
+msgid "Registered employees: Odesa"
+msgstr "Оформлених працівників: Одеса"
+
+#: inc/class-profit-report.php
+msgid "City share of retail taxes (fraction)"
+msgstr "Частка міста в роздрібних податках (дріб)"
+
+#: inc/class-profit-report.php
+msgid "Report, UAH"
+msgstr "Звіт, грн"
+
+#: inc/class-profit-report.php
+msgid "Manager check, UAH"
+msgstr "Перевірка менеджера, грн"
+
+#: inc/class-profit-report.php
+msgid "Manual parameter"
+msgstr "Ручний параметр"
+
+#: inc/class-profit-report.php
+msgid "City tax amount"
+msgstr "Податок міста"
+
+#: inc/class-profit-report.php
+msgid "Expense period: check M-1, M and M+1. A valid year and month in the note takes priority. Selection columns are for manual checking; see the audit for exceptions."
+msgstr "Період витрат: перевіряйте М−1, М і М+1. Правильні рік і місяць у примітці мають пріоритет. Колонки відбору — для ручної перевірки; винятки зазначено в аудиті."
+
+#: inc/class-profit-report.php
+msgid "Retail taxes: Odesa is rounded per document; Kyiv receives the remainder. Wholesale taxes belong entirely to Kyiv. Import transport is excluded from operating expenses."
+msgstr "Роздрібні податки: частка Одеси округлюється за кожним документом, Київ отримує залишок. Гуртові податки повністю належать Києву. Імпортний транспорт не входить до операційних витрат."
+
+#: inc/class-profit-report.php
+msgid "Tax formula is unavailable without a complete document audit. The saved report amount is shown."
+msgstr "Без повного аудиту документів формула податків недоступна. Показано суму збереженого звіту."
+
+#: inc/class-profit-report.php
+msgid "The last column is for your manual check. Employee counts must be whole numbers, with a positive total. Excel changes affect this file only. Use the same counts on both city sheets."
+msgstr "Остання колонка — для вашої перевірки. Кількість працівників — цілі числа, сума більша нуля. Зміни Excel діють лише у файлі. На обох аркушах зазначайте однакові числа працівників."
+
+#: inc/class-profit-report.php
+msgid "How to use this report"
+msgstr "Як користуватися звітом"
+
+#: inc/class-profit-report.php
+msgid "Select the same month in From month and Through month. For several months, select the first and last month."
+msgstr "Виберіть однаковий місяць у полях «З місяця» і «До місяця включно». Для періоду зазначте перший та останній місяць."
+
+#: inc/class-profit-report.php
+msgid "To open an existing result, click View saved reports, then Open saved month. No new calculation is needed."
+msgstr "Щоб відкрити готовий результат, натисніть «Показати збережені звіти», потім «Відкрити збережений місяць». Перераховувати не потрібно."
+
+#: inc/class-profit-report.php
+msgid "For a new calculation, open Manual report parameters. Choose By employee count and check Kyiv and Odesa staff, additional work and the RUB rate if applicable. Leave additional work blank for the default; enter 0 to cancel it."
+msgstr "Для нового розрахунку відкрийте «Ручні параметри звіту». Виберіть «За кількістю працівників» та перевірте працівників Києва й Одеси, доплати та курс RUB, якщо він потрібен. Порожня доплата — значення за замовчуванням; 0 — скасувати доплату."
+
+#: inc/class-profit-report.php
+msgid "Click Calculate and save selected months and wait. The same parameters apply to each selected month."
+msgstr "Натисніть «Розрахувати та зберегти обрані місяці» та дочекайтеся завершення. Параметри застосовуються до кожного вибраного місяця."
+
+#: inc/class-profit-report.php
+msgid "Check the month, profit and warnings. A dash means unavailable data, not zero. If a result needs review, send the Excel file and the warning to the person responsible."
+msgstr "Перевірте місяць, прибуток і попередження. Риска — немає даних, а не нуль. Якщо результат потребує перевірки, передайте Excel і попередження відповідальному."
+
+#: inc/class-profit-report.php
+msgid "Click Export report to Excel for the open month, or Export saved period to Excel for all selected months. Start with the Kyiv and Odesa sheets; use the last column for your check."
+msgstr "Натисніть «Експорт звіту в Excel» для відкритого місяця або «Збережений період в Excel» для всіх вибраних місяців. Почніть з аркушів Києва й Одеси; остання колонка — для вашої перевірки."
+
+#: inc/class-profit-report.php
+msgid "Retail tax allocation"
+msgstr "Розподіл роздрібних податків"
+
+#: inc/class-profit-report.php
+msgid "By employee count"
+msgstr "За кількістю працівників"
+
+#: inc/class-profit-report.php
+msgid "By saved Odesa share"
+msgstr "За збереженою часткою Одеси"
+
+#: inc/class-profit-report.php
+msgid "Enter an employee count from 0 to 1000000."
+msgstr "Введіть кількість працівників від 0 до 1000000."
+
+#: inc/class-profit-report.php
+msgid "Any"
+msgstr "будь-який"
+
+#: inc/class-profit-report.php
+msgid "Period totals are saved values. Editing city-sheet formulas does not update this summary."
+msgstr "Підсумки періоду — збережені значення. Зміна формул міських аркушів не оновлює цю зведену таблицю."
+
+#: inc/class-profit-report.php
+msgid "Manager instructions"
+msgstr "Інструкція для менеджера"
+
+#: inc/class-profit-report.php
+msgid "How to get a profit report"
+msgstr "Як отримати звіт про прибуток"
+
+#: inc/class-profit-report.php
+msgid "Select a month."
+msgstr "Виберіть місяць."
+
+#: inc/class-profit-report.php
+msgid "Open a saved report."
+msgstr "Відкрийте готовий звіт."
+
+#: inc/class-profit-report.php
+msgid "Check the parameters."
+msgstr "Перевірте параметри."
+
+#: inc/class-profit-report.php
+msgid "Calculate and save."
+msgstr "Розрахуйте та збережіть."
+
+#: inc/class-profit-report.php
+msgid "Review the result."
+msgstr "Перевірте результат."
+
+#: inc/class-profit-report.php
+msgid "Download Excel."
+msgstr "Завантажте Excel."
+
+#: inc/class-profit-report.php
+msgid "Default additional work: Kyiv UAH 0, Odesa UAH 5000. If staff or additional work changed between months, calculate those months separately."
+msgstr "Доплати за замовчуванням: Київ — 0 грн, Одеса — 5000 грн. Якщо кількість працівників або доплати змінювалися, розраховуйте місяці окремо."
+
+#: inc/class-profit-report.php
+msgid "How to read Excel"
+msgstr "Як читати Excel"
+
+#: inc/class-profit-report.php
+msgid "Start with the Kyiv and Odesa sheets. Selection columns follow the working template. Enter your own amount in the final Manager check, UAH column. Details and documents are on the following sheets. The downloaded file is usually in Downloads."
+msgstr "Почніть з аркушів «Київ» і «Одеса». Колонки відбору розташовані як у робочому шаблоні. В останню колонку «Перевірка менеджера, грн» внесіть свою суму. Подробиці та документи — на наступних аркушах. Завантажений файл зазвичай міститься в папці «Завантаження»."
+
+#: inc/class-profit-report.php
+msgid "Retail taxes — MALAFOP."
+msgstr "Податки Розн — МАЛАФОП."
+
+#: inc/class-profit-report.php
+msgid "Allocated by registered employee count. For example, Kyiv 4 and Odesa 3 gives shares of 4/7 and 3/7. Employee counts appear at the top of each city sheet."
+msgstr "Розподіляються за кількістю оформлених працівників. Наприклад, Київ 4, Одеса 3: частки 4/7 і 3/7. Кількість працівників наведена вгорі кожного міського аркуша."
+
+#: inc/class-profit-report.php
+msgid "Wholesale taxes — KONDFOP."
+msgstr "Податки ОПТ — КОНДФОП."
+
+#: inc/class-profit-report.php
+msgid "Allocated entirely to Kyiv."
+msgstr "Повністю належать до Києва."
+
+#: inc/class-profit-report.php
+msgid "With a complete audit, Excel contains retail tax and total formulas. Otherwise it shows the saved amount and an explanation. Editing Excel does not change the website. If you edit employee counts, use the same numbers on both city sheets."
+msgstr "За повного аудиту в Excel є формули роздрібних податків і підсумків. За неповного — збережена сума та пояснення. Зміни файлу не змінюють сайт. У разі ручної зміни кількості працівників зазначте однакові числа на обох міських аркушах."
+
+#: inc/class-profit-report.php
+msgid "After a connection error, open saved reports first: the result may already have been saved."
+msgstr "Після помилки з’єднання спочатку відкрийте збережені звіти: результат міг уже зберегтися."

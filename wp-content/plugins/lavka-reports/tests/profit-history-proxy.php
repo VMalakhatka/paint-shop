@@ -36,6 +36,9 @@ $r=request([]);verify($r->success && $GLOBALS['verb']==='GET' && str_ends_with($
 $r=request(['operation'=>'calculate','month'=>'2025-07','requestId'=>'11111111-2222-3333-4444-555555555555','odesaAdditionalSalary'=>'0','kyivAdditionalSalary'=>'','odesaTaxShare'=>'0.4285714286']);
 verify($r->success && $GLOBALS['verb']==='POST' && $GLOBALS['body']['odesaAdditionalSalary']==='0' && !isset($GLOBALS['body']['kyivAdditionalSalary']) && $GLOBALS['body']['odesaTaxShare']==='0.4285714286','POST preserves decimal precision and zero/omission');
 foreach ([['fromMonth'=>'2025-13'],['toMonth'=>'2028-01'],['toMonth'=>'2024-01'],['operation'=>[]],['operation'=>'calculate','month'=>'2025-07','requestId'=>'bad'],['operation'=>'month','month'=>'2025-07','revisionId'=>'1/../../']] as $params){$r=request($params);verify(!$r->success && $GLOBALS['http_calls']===0,'Reject invalid request before Java');}
+$r=request(['operation'=>'calculate','month'=>'2026-07','requestId'=>'11111111-2222-3333-4444-555555555555','kyivEmployeeCount'=>'7','odesaEmployeeCount'=>'0']);
+verify($r->success && $GLOBALS['body']['odesaEmployeeCount']===0 && $GLOBALS['body']['kyivEmployeeCount']===7 && !isset($GLOBALS['body']['odesaTaxShare']), 'Counts preserve zero without injecting legacy share');
+foreach (['', '1.5', '-1', '1000001'] as $bad) { $r=request(['operation'=>'calculate','month'=>'2026-07','requestId'=>'11111111-2222-3333-4444-555555555555','kyivEmployeeCount'=>$bad,'odesaEmployeeCount'=>'3']); verify(!$r->success && $GLOBALS['http_calls']===0, 'Reject malformed counts'); }
 $GLOBALS['nonce_valid']=false;$r=request([]);verify(!$r->success && $r->status===403 && $GLOBALS['http_calls']===0,'Nonce required');
 echo "PASS: saved report read/write separation, dates, request IDs and exact decimals\n";
 

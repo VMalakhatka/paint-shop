@@ -11,16 +11,17 @@ for name in ('profit.xlsx', 'java-contract.xlsx'):
     path = folder / name
     with zipfile.ZipFile(path) as archive:
         assert archive.testzip() is None, name
-        assert not any(b'<f>' in archive.read(member) for member in archive.namelist() if member.endswith('.xml'))
+        assert not any(b'<f>' in archive.read(member) for member in archive.namelist() if member.endswith('.xml') and member not in ('xl/worksheets/sheet1.xml', 'xl/worksheets/sheet2.xml'))
     book = openpyxl.load_workbook(path)
-    assert len(book.sheetnames) == 12
-    assert all(sheet.freeze_panes == 'A4' for sheet in book)
+    assert len(book.sheetnames) == 14
+    assert all(sheet.freeze_panes == 'A9' for sheet in list(book)[:2])
+    assert all(sheet.freeze_panes == 'A4' for sheet in list(book)[2:])
     if name == 'profit.xlsx':
-        kyiv = book['Kyiv']
+        kyiv = next(s for s in book if s.title.startswith('Kyiv '))
         headers = [cell.value for cell in kyiv[3]]
         zero = kyiv.cell(5, headers.index('Amount') + 1)
         assert zero.value == 0 and zero.data_type == 'n'
-        assert book['Odesa'].max_row == 4  # City filter must not remove Odesa from XLSX.
+        assert next(s for s in book if s.title.startswith('Odesa ')).max_row == 4  # City filter must not remove Odesa from XLSX.
         audit = book['Document audit']
         headers = [cell.value for cell in audit[3]]
         identity = audit.cell(4, headers.index('Payment ID') + 1)
@@ -35,7 +36,7 @@ for name in ('profit.xlsx', 'java-contract.xlsx'):
         assert book['Document audit'].max_row == len(fixture['documents']) + 3
         assert book['Period checks'].max_row == len(fixture['periodDiagnostics']) + 3
         for city, sheet_name in [('KYIV', 'Kyiv'), ('ODESA', 'Odesa')]:
-            sheet = book[sheet_name]
+            sheet = next(s for s in book if s.title.startswith(sheet_name + ' '))
             headers = [cell.value for cell in sheet[3]]
             amount_col = headers.index('Amount') + 1
             id_col = headers.index('Expense row ID') + 1

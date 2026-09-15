@@ -56,8 +56,10 @@ book; it does not populate old-Excel/new-manual-export columns with invented val
 
 `profit-xlsx.js` writes OOXML/ZIP without external libraries, requests or uploaded
 files. Amounts/counts are numeric cells; identifiers and text are literal strings.
-Values exceeding Excel's 15-digit numeric precision remain exact text. No formulas,
-macros, external links or executable document content are created. CSV neutralizes
+Values exceeding Excel's 15-digit numeric precision remain exact text. The manager
+layout creates local SUM/ROUND arithmetic formulas for employee allocation and
+dependent totals. Document text remains literal; macros, external links and
+executable document content are not created. CSV neutralizes
 formula prefixes. No downloaded file or raw API response is saved to WordPress.
 
 ## Verification
@@ -139,3 +141,29 @@ Java V15 migration is required; no production migration was performed during
 development. Failed/uncertain saves preserve older history and never auto-retry.
 See [consumer contract](../../../docs/api/FOLIO_PROFIT_SAVED_REPORTS_FRONTEND.md)
 and [operator runbook](../../../docs/OPERATIONS_RUNBOOK.md#прибыль).
+
+
+## Manager layout and retail/wholesale taxes (0.6.0)
+
+The first two XLSX sheets follow the manager template: number, expense, short
+organization name, operation, purpose, cash warehouses, bank warehouses, report
+amount and a blank manual-check column. Applied employee counts and local Excel
+formulas appear above the expenses; profit and master-class components appear
+below. Detailed source sheets are retained. No historical Excel values are invented.
+
+New calculations accept integer `kyivEmployeeCount` / `odesaEmployeeCount` instead
+of an Odesa share; the UI defaults are 4/3. PHP limits inputs to 0..1000000 per city;
+Java validates their combination and owns allocation. Old revisions with no counts
+keep their explicit legacy share. Never send both modes. `MALAFOP` rows display as
+retail taxes, `KONDFOP` as wholesale taxes, only in Kyiv (the old empty Odesa control
+row is omitted from the city view). Raw API fields remain in the detailed export.
+
+The Excel retail formula uses all returned retail tax documents, rounded per
+document exactly as Java: Odesa = ROUND(amount * OdesaCount / total, 2), Kyiv =
+amount - Odesa. If the audit is truncated, missing or inconsistent, retain the
+saved amount and explain why no formula is offered. Excel edits affect that file
+only. Counts on both city sheets must match when checking an alternative.
+
+Requires Java rules 2026-09-15.1; no new database migration beyond saved-history V15.
+Manager guide: [simple instructions](../../../docs/PROFIT_REPORT_MANAGER_RU.md).
+The same six steps appear in the page's expandable help, translated into RU/UK.

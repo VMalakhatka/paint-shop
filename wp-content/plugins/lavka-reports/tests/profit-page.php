@@ -4,6 +4,7 @@ define('ABSPATH', __DIR__);
 function add_action(...$args) {}
 function current_user_can($cap) { return true; }
 function __($text, $domain = '') { return $text; }
+function esc_html($text) { return htmlspecialchars((string)$text, ENT_QUOTES, 'UTF-8'); }
 function esc_html__($text, $domain = '') { return htmlspecialchars($text, ENT_QUOTES, 'UTF-8'); }
 function esc_attr__($text, $domain = '') { return esc_html__($text, $domain); }
 require dirname(__DIR__) . '/inc/class-profit-report.php';

@@ -111,7 +111,7 @@
         finally{reading=false;controls();}
     }
     function lockInputs(lock) {
-        if(lock){lockedFields=[...document.querySelectorAll('#lavr-profit-history input,#lavr-profit-month,#lavr-profit-manual input')].map(n=>[n,n.disabled]);lockedFields.forEach(([n])=>{n.disabled=true;});}
+        if(lock){lockedFields=[...document.querySelectorAll('#lavr-profit-history input,#lavr-profit-month,#lavr-profit-manual input,#lavr-profit-manual select')].map(n=>[n,n.disabled]);lockedFields.forEach(([n])=>{n.disabled=true;});}
         else {lockedFields.forEach(([n,disabled])=>{n.disabled=disabled;});lockedFields=[];}
     }
     async function calculate(selectedMonths, params) {
@@ -146,6 +146,7 @@
             const sheets=[{name:t('range'),rows:[['period',data.fromMonth,data.toMonth],['complete',text(data.complete)],...[[...cols.map(t)],...(data.totals||[]).map(r=>cols.map(k=>moneyKeys.includes(k)&&r[k]!=null?{type:'number',value:r[k],money:true}:text(r[k])))]],widths:cols.map(()=>24),headerRows:[3],freezeRows:3},
                 {name:t('month'),rows:[[t('month'),t('revision'),t('status'),t('rulesVersion')],...data.months.map(m=>[m.month,text(m.revisionId),m.status,text(m.ruleVersion)])],widths:[20,24,24,25],headerRows:[1]},
                 {name:t('warningsTitle'),rows:[['warnings',text(data.warnings)],['missingMonths',text(data.missingMonths)],['sourceDatabase',text(data.sourceDatabase)]]}];
+            sheets[0].rows.push([t('rangeFrozen')]); sheets[0].mergeRows=[sheets[0].rows.length];
             for(const m of data.months.filter(m=>m.revisionId)){
                 $('state').textContent=t('export')+': '+m.month;
                 const wrapper=await request('month',{month:m.month,revisionId:String(m.revisionId)});

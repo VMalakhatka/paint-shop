@@ -25,6 +25,7 @@ async function setup(mode='normal'){
    }
    if(mode==='slowOpen' && q.operation==='month')await new Promise(r=>setTimeout(r,500));
    if(mode==='java' && q.operation==='month')body=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/profit-saved-java.json'),'utf8'));
+   if(mode==='headcount' && ['month','calculate'].includes(q.operation))body={...body,report:{...JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/profit-headcount-java.json'),'utf8')),month:q.month}};
    if(mode==='wrongRevision'&&q.operation==='month')body.revisionId=777;
    return route.fulfill({contentType:'application/json',body:JSON.stringify({success:true,data:{httpStatus:200,bodyRaw:JSON.stringify(body)}})});
   }
@@ -32,7 +33,7 @@ async function setup(mode='normal'){
   return route.fulfill({contentType:'text/html',body:html});
  });
  await page.goto('https://profit.test/');await page.addStyleTag({content:'body{font-family:Arial;margin:20px}*{box-sizing:border-box}button{padding:7px}'});await page.addStyleTag({path:path.join(base,'profit-report.css')});
- for(const file of ['profit-xlsx.js','profit-report.js','profit-history.js'])await page.addScriptTag({path:path.join(base,file)});
+ for(const file of ['profit-xlsx.js','profit-manager.js','profit-report.js','profit-history.js'])await page.addScriptTag({path:path.join(base,file)});
  await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);
  return {page,requests,errors};
 }
@@ -55,3 +56,20 @@ test('revision mismatch and failed revision cannot masquerade as a saved report'
 test('Java saved DTO opens full stored report and exports without live audit',async()=>{const{page,requests,errors}=await setup('java');await range(page);await page.locator('#lph-months button').first().click();await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);assert.equal(await page.locator('#lph-error').isHidden(),true);assert.equal(await page.locator('#lavr-profit-result').isVisible(),true);const d=page.waitForEvent('download');await page.locator('#lavr-profit-export-xlsx').click();await(await d).saveAs(path.join(out,'java-month.xlsx'));assert(requests.every(r=>['range','month'].includes(r.operation)));assert.deepEqual(errors,[]);await page.close();});
 
 test('late saved detail cannot overwrite an edited month',async()=>{const{page,errors}=await setup('slowOpen');await range(page);await page.locator('#lph-months button').first().click();await page.locator('#lavr-profit-month').fill('2025-09');await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);assert.equal(await page.locator('#lavr-profit-month').inputValue(),'2025-09');assert.equal(await page.locator('#lavr-profit-result').isHidden(),true);assert.deepEqual(errors,[]);await page.close();});
+
+test('headcounts reach Java without legacy share and export the manager tax layout',async()=>{
+ const {page,requests,errors}=await setup('headcount');
+ await page.locator('#lph-months button').first().click();await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);
+ assert.equal(await page.locator('#lavr-profit-tax-mode').inputValue(),'counts');
+ assert.equal(await page.locator('#lavr-profit-kyiv-employees').inputValue(),'1');
+ assert.match(await page.locator('#lavr-profit-result').innerText(),/Retail taxes/);
+ const download=page.waitForEvent('download');await page.locator('#lavr-profit-export-xlsx').click();await(await download).saveAs(path.join(out,'manager-java.xlsx'));
+ await page.locator('#lavr-profit-manual summary').click();
+ await page.locator('#lavr-profit-kyiv-employees').fill('7');await page.locator('#lavr-profit-odesa-employees').fill('0');
+ assert.equal(await page.locator('#lavr-profit-export-xlsx').isDisabled(),true);
+ await page.screenshot({path:path.join(out,'manager-desktop.png'),fullPage:false});
+ await page.setViewportSize({width:390,height:844});await page.screenshot({path:path.join(out,'manager-mobile.png'),fullPage:false});
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true);
+ await page.locator('#lavr-profit-recalculate').click();await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);
+ const q=requests.find(r=>r.operation==='calculate');assert.equal(q.kyivEmployeeCount,'7');assert.equal(q.odesaEmployeeCount,'0');assert.equal(q.odesaTaxShare,undefined);assert.deepEqual(errors,[]);await page.close();
+});

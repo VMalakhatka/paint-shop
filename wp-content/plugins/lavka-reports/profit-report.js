@@ -57,6 +57,9 @@
         auditBody: document.querySelector('#lavr-profit-audit-table tbody'),
         exportAudit: document.getElementById('lavr-profit-export-audit'),
         taxShare: document.getElementById('lavr-profit-tax-share'),
+        taxMode: document.getElementById('lavr-profit-tax-mode'),
+        kyivEmployees: document.getElementById('lavr-profit-kyiv-employees'),
+        odesaEmployees: document.getElementById('lavr-profit-odesa-employees'),
         taxShareHelp: document.getElementById('lavr-profit-tax-share-help'),
         rubRate: document.getElementById('lavr-profit-rub-rate'),
         masterClass: document.getElementById('lavr-profit-master-class'),
@@ -197,7 +200,10 @@
             if (value !== '') params[field.dataset.param] = value.replace(',', '.');
         });
         const taxPercent = nodes.taxShare.value.trim().replace(',', '.');
-        if (taxPercent !== '') params.odesaTaxShare = shiftDecimal(taxPercent, -2);
+        if (nodes.taxMode.value === 'counts') {
+            params.kyivEmployeeCount = nodes.kyivEmployees.value;
+            params.odesaEmployeeCount = nodes.odesaEmployees.value;
+        } else if (taxPercent !== '') params.odesaTaxShare = shiftDecimal(taxPercent, -2);
         return params;
     }
 
@@ -364,6 +370,12 @@
 
     function applyInitialInputs(inputs) {
         if (!inputs) return;
+        if (inputs.kyivEmployeeCount != null && inputs.odesaEmployeeCount != null) {
+            nodes.taxMode.value = 'counts';
+            nodes.kyivEmployees.value = inputs.kyivEmployeeCount;
+            nodes.odesaEmployees.value = inputs.odesaEmployeeCount;
+        } else { nodes.taxMode.value = 'share'; }
+        updateEmployeeMode();
         if (nodes.taxShare.value === '' && inputs.odesaTaxShare != null) {
             nodes.taxShare.value = shiftDecimal(inputs.odesaTaxShare, 2);
         }
@@ -377,6 +389,11 @@
         if (!state.kyivSalaryOverride) nodes.kyivSalary.value = inputs.kyivAdditionalSalary == null ? '' : String(inputs.kyivAdditionalSalary);
         nodes.kyivSalarySource.textContent = nodes.kyivSalary.disabled ? labels.legacyKyiv : labels.salaryApplied + ': ' + formatMoney(inputs.kyivAdditionalSalary, 'UAH') + ' · ' + (inputs.kyivAdditionalSalarySource === 'REQUEST_OVERRIDE' ? labels.salaryOverride : labels.salaryDefault);
         updateTaxShareHelp();
+    }
+
+    function updateEmployeeMode() {
+        document.getElementById('lavr-profit-count-fields').hidden = nodes.taxMode.value !== 'counts';
+        document.getElementById('lavr-profit-legacy-share').hidden = nodes.taxMode.value !== 'share';
     }
 
     function updateTaxShareHelp() {
@@ -530,10 +547,11 @@
             const poolList = document.createElement('dl');
             poolList.className = 'lavr-profit-tax-pools';
             keys.forEach((key) => {
-                poolList.appendChild(textElement('dt', '', key));
+                poolList.appendChild(textElement('dt', '', key === 'MALAFOP' ? labels.retailTax + ' · МАЛАФОП' : key === 'KONDFOP' ? labels.wholesaleTax + ' · КОНДФОП' : key));
                 poolList.appendChild(textElement('dd', '', formatMoney(pools[key], 'UAH')));
             });
             nodes.controlsContent.appendChild(poolList);
+            nodes.controlsContent.appendChild(textElement('p', 'description', labels.taxFormulaHelp));
         }
         if (controls.auditTruncated) {
             nodes.controlsContent.appendChild(textElement('p', 'notice notice-warning inline lavr-profit-inline-notice', labels.auditTruncated));
@@ -762,7 +780,8 @@
         return keys.map(key => columnSpec(key));
     }
     function expenseRows(data) {
-        return Array.isArray(data.expenseLines) ? data.expenseLines.slice().sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)) : (data.expenses || []);
+        const rows = Array.isArray(data.expenseLines) ? data.expenseLines.slice().sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)) : (data.expenses || []);
+        return rows.filter(r => !(r.lineId === 'ODESA_TAX_KONDFOP' && Number(r.amount) === 0 && Number(r.profitImpact) === 0 && r.documentCount === 0)).map(row => ({...row, label: window.LavkaProfitManager.taxLabel(row, labels), filters: row.filters ? {...row.filters, purposeCodes: window.LavkaProfitManager.purpose(row)} : row.filters}));
     }
     function warehouseSelection(filters, stream) {
         if (!filters) return '—';
@@ -875,15 +894,15 @@
         }))];
     }
     function buildWorkbookSheets(data) {
-        const sheets = [];
+        const sheets = window.LavkaProfitManager.sheets(data, labels);
         const add = (name, columns, rows, note) => {
             sheets.push({ name, rows: [[labels.reportMonth, data.month, labels.snapshot, formatDateTime(data.calculatedAt)],
                 [note || labels.exportSnapshot], ...workbookRows(columns, rows)], headerRows: [1, 3], freezeRows: 3, mergeRows: [2],
                 widths: columns.map(col => ['label', 'reason', 'note', 'message', 'value', 'parameter'].includes(col.key) ? 46 : col.money ? 20 : 26) });
         };
         ['KYIV', 'ODESA'].forEach(city => {
-            const rows = expenseRows(data).filter(row => matchesCity(row.city, city));
-            add(cityLabel(city), expenseColumns(), rows, sectionUnavailable(data, 'EXPENSES') ? labels.unavailable : Array.isArray(data.expenseLines) ? labels.detailedRows : labels.legacyRows);
+            const rows = (Array.isArray(data.expenseLines) ? data.expenseLines : (data.expenses || [])).filter(row => matchesCity(row.city, city));
+            add(cityLabel(city) + ' ' + labels.detailedRows, expenseColumns(), rows, sectionUnavailable(data, 'EXPENSES') ? labels.unavailable : Array.isArray(data.expenseLines) ? labels.detailedRows : labels.legacyRows);
         });
         add(labels.profitByCity, dynamicColumns(data.cities || [], ['city', 'baseGrossProfit', 'manualGrossAdjustments', 'grossProfit', 'operatingExpenses', 'profit']), data.cities || []);
         add(labels.appliedParameters, ['parameter', 'value'].map(key => columnSpec(key)), parameterRows(data));
@@ -900,7 +919,8 @@
         add(labels.masterTitle, dynamicColumns(data.masterClass ? [data.masterClass] : []), data.masterClass ? [data.masterClass] : [], data.masterClass ? labels.exportSnapshot : labels.masterUnavailable);
         add(labels.masterAuditTitle, dynamicColumns(data.masterClassDocuments || [], ['documentDate', 'documentNumber', 'documentId', 'lineNumber', 'movementId', 'sku', 'amount']), data.masterClassDocuments || [], data.masterClass && data.masterClass.auditTruncated ? labels.masterTruncated : labels.exportSnapshot);
         // Preserve unallocated lines and additional fields without inventing city allocations.
-        add(labels.allExpenseRows, dynamicColumns(expenseRows(data)), expenseRows(data));
+        const rawLines = Array.isArray(data.expenseLines) ? data.expenseLines : (data.expenses || []);
+        add(labels.allExpenseRows, dynamicColumns(rawLines), rawLines);
         return sheets;
     }
     async function exportWorkbook() {
@@ -939,7 +959,7 @@
 
     nodes.loadAudit.dataset.defaultLabel = nodes.loadAudit.textContent.trim();
     nodes.exportXlsx.addEventListener('click', exportWorkbook);
-    [nodes.month, nodes.additionalSalary, nodes.kyivSalary, nodes.taxShare, nodes.rubRate].forEach(field => {
+    [nodes.month, nodes.additionalSalary, nodes.kyivSalary, nodes.taxShare, nodes.rubRate, nodes.taxMode, nodes.kyivEmployees, nodes.odesaEmployees].forEach(field => {
         field.addEventListener('input', invalidateResult);
         field.addEventListener('change', invalidateResult);
     });
@@ -949,6 +969,7 @@
     nodes.loadAudit.addEventListener('click', () => loadReport('audit'));
     nodes.exportAudit.addEventListener('click', exportAudit);
     nodes.taxShare.addEventListener('input', updateTaxShareHelp);
+    nodes.taxMode.addEventListener('change', updateEmployeeMode);
     [nodes.auditCity, nodes.auditCategory, nodes.auditTreatment].forEach((select) => select.addEventListener('change', renderAuditRows));
     nodes.auditUnclassified.addEventListener('change', renderAuditRows);
 
