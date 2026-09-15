@@ -6,6 +6,21 @@
   if (!root || !config.ajaxUrl) return;
 
   const t = config.i18n || {};
+  const everyDay = document.getElementById('lps-ap-every-day');
+  const dayInputs = Array.from(root.querySelectorAll('input[name="weekdays[]"]'));
+  if (everyDay) {
+    const syncDays = () => {
+      const selected = dayInputs.filter((input) => input.checked).length;
+      everyDay.checked = selected === 7;
+      everyDay.indeterminate = selected > 0 && selected < 7;
+    };
+    everyDay.addEventListener('change', () => {
+      dayInputs.forEach((input) => { input.checked = everyDay.checked; });
+      syncDays();
+    });
+    dayInputs.forEach((input) => input.addEventListener('change', syncDays));
+    syncDays();
+  }
   const locale = document.documentElement.lang || 'uk-UA';
   const numberFormatter = new Intl.NumberFormat(locale, { maximumFractionDigits: 4 });
   const integerFormatter = new Intl.NumberFormat(locale, { maximumFractionDigits: 0 });
@@ -185,15 +200,33 @@
         }
         const options = elements.cronWarehouses.querySelector('.lps-ap-cron-warehouse-options');
         options.replaceChildren();
-        items.forEach((warehouse) => {
+        // Preserve the saved queue, including IDs temporarily absent from the directory.
+        const byId = new Map(items.map((warehouse) => [String(warehouse.id), warehouse]));
+        const orderedIds = [...new Set([...selected, ...items.map((warehouse) => String(warehouse.id))])];
+        orderedIds.forEach((id, index) => {
+          const warehouse = byId.get(id);
+          const name = warehouse ? `${warehouse.id} — ${warehouse.name}` : id;
+          const row = make('div', 'lps-ap-warehouse-row');
           const label = make('label');
           const checkbox = document.createElement('input');
           checkbox.type = 'checkbox';
           checkbox.name = 'warehouse_ids[]';
-          checkbox.value = String(warehouse.id);
-          checkbox.checked = selected.includes(String(warehouse.id));
-          label.append(checkbox, document.createTextNode(`${warehouse.id} — ${warehouse.name}`));
-          options.appendChild(label);
+          checkbox.value = id;
+          checkbox.checked = selected.includes(id);
+          label.append(checkbox, document.createTextNode(name));
+          const position = document.createElement('input');
+          position.type = 'number';
+          position.name = `warehouse_positions[${id}]`;
+          position.min = '1';
+          position.max = '1000000';
+          position.step = '1';
+          position.value = String(index + 1);
+          position.required = true;
+          position.disabled = !checkbox.checked;
+          position.setAttribute('aria-label', `${elements.cronWarehouses.dataset.orderLabel}: ${name}`);
+          checkbox.addEventListener('change', () => { position.disabled = !checkbox.checked; });
+          row.append(label, position);
+          options.appendChild(row);
         });
       }
       if (elements.savedWarehouses) {

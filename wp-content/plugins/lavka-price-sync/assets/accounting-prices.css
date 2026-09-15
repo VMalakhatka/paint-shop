@@ -517,9 +517,9 @@
 
 .lps-ap-cron-warehouse-options {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 7px 12px;
-  max-height: 190px;
+  max-height: 440px;
   padding: 10px;
   overflow-y: auto;
   border: 1px solid #8c8f94;
@@ -550,6 +550,54 @@
 .lps-ap-cron-grid input {
   width: 100%;
   max-width: none;
+}
+
+.lps-ap-warehouse-row,
+.lps-ap-warehouse-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 72px;
+  gap: 10px;
+  align-items: center;
+}
+
+.lps-ap-warehouse-head {
+  padding: 0 10px;
+}
+
+.lps-ap-cron-grid input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+}
+
+.lps-ap-cron-days {
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+.lps-ap-cron-days legend {
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.lps-ap-cron-days label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+}
+
+.lps-ap-every-day {
+  border-bottom: 1px solid #dcdcde;
+  padding-bottom: 6px;
+  margin-bottom: 6px;
+}
+
+.lps-ap-warehouse-row label {
+  overflow-wrap: anywhere;
+  margin: 0;
 }
 
 .lps-ap-cron-status {

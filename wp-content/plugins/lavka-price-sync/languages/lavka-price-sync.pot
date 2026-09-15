@@ -6105,3 +6105,43 @@ msgstr ""
 
 msgid "The analytics response did not apply the selected warehouse modes."
 msgstr ""
+
+msgid "Every day"
+msgstr ""
+
+msgid "No days selected"
+msgstr ""
+
+msgid "Campaign parameters and schedule"
+msgstr ""
+
+msgid "These parameters apply to both manual runs and the schedule."
+msgstr ""
+
+msgid "Automatic SKU campaign"
+msgstr ""
+
+msgid "Warehouse processing order"
+msgstr ""
+
+msgid "Scheduled start"
+msgstr ""
+
+msgid "Enable scheduled SKU campaign"
+msgstr ""
+
+msgid "Processing order"
+msgstr ""
+
+msgid "Order"
+msgstr ""
+
+#, php-format
+msgid "Processing order: warehouse %d"
+msgstr ""
+
+msgid "Days of week"
+msgstr ""
+
+msgid "Select at least one day before enabling the schedule."
+msgstr ""

@@ -6324,3 +6324,43 @@ msgstr "Для режима «Только остаток» требуется �
 
 msgid "The analytics response did not apply the selected warehouse modes."
 msgstr "Ответ аналитики не учитывает выбранные режимы складов."
+
+msgid "Every day"
+msgstr "Ежедневно"
+
+msgid "No days selected"
+msgstr "Дни не выбраны"
+
+msgid "Campaign parameters and schedule"
+msgstr "Параметры кампании и расписание"
+
+msgid "These parameters apply to both manual runs and the schedule."
+msgstr "Эти параметры применяются к ручному запуску и расписанию."
+
+msgid "Automatic SKU campaign"
+msgstr "Автоматическая кампания SKU"
+
+msgid "Warehouse processing order"
+msgstr "Порядок обработки складов"
+
+msgid "Scheduled start"
+msgstr "Запуск по расписанию"
+
+msgid "Enable scheduled SKU campaign"
+msgstr "Включить кампанию SKU по расписанию"
+
+msgid "Processing order"
+msgstr "Порядок обработки"
+
+msgid "Order"
+msgstr "Очередь"
+
+#, php-format
+msgid "Processing order: warehouse %d"
+msgstr "Порядок обработки: склад %d"
+
+msgid "Days of week"
+msgstr "Дни недели"
+
+msgid "Select at least one day before enabling the schedule."
+msgstr "Выберите хотя бы один день перед включением расписания."
