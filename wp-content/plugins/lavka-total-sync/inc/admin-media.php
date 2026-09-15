@@ -2015,6 +2015,7 @@ function lts_render_media_sync_page() {
     ?>
     <div class="wrap">
         <h1><?php echo esc_html__('Media Sync (images)', 'lavka-total-sync'); ?></h1>
+        <?php require __DIR__ . '/operator-help.php'; ?>
 
         <p class="description">
             <?php

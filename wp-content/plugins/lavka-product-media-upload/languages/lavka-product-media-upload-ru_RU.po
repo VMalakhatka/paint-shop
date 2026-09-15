@@ -1582,3 +1582,123 @@ msgstr ""
 #~ msgstr ""
 #~ "Числовое значение могло потерять точность. Храните идентификаторы как "
 #~ "текст."
+
+#: inc/operator-help.php
+msgid "How to work with product images"
+msgstr "Как работать с изображениями товаров"
+
+#: inc/operator-help.php
+msgid "Prepare the files"
+msgstr "Подготовьте файлы"
+
+#: inc/operator-help.php
+msgid "Download the XLSX template below. Fill it in and select the matching JPEG, PNG or WebP files."
+msgstr "Скачайте шаблон XLSX ниже. Заполните его и выберите соответствующие файлы JPEG, PNG или WebP."
+
+#: inc/operator-help.php
+msgid "Check the batch"
+msgstr "Проверьте пакет"
+
+#: inc/operator-help.php
+msgid "Run the check first. Images and product links are not changed at this stage."
+msgstr "Сначала запустите проверку. На этом этапе изображения и их связи с товарами не меняются."
+
+#: inc/operator-help.php
+msgid "Review and upload"
+msgstr "Проверьте и загрузите"
+
+#: inc/operator-help.php
+msgid "Review READY rows and warnings, save the CSV report, then confirm the upload. Do not change the inputs after checking."
+msgstr "Проверьте строки READY и предупреждения, сохраните CSV-отчёт и подтвердите загрузку. После проверки не меняйте файлы и реестр."
+
+#: inc/operator-help.php
+msgid "Verify the result"
+msgstr "Проверьте результат"
+
+#: inc/operator-help.php
+msgid "Save the final CSV. Check the main photo and gallery order on the product page."
+msgstr "Сохраните итоговый CSV. Проверьте главное фото и порядок галереи на странице товара."
+
+#: inc/operator-help.php
+msgid "How to fill in the XLSX registry"
+msgstr "Как заполнить реестр XLSX"
+
+#: inc/operator-help.php
+msgid "One row describes one image assignment. Keep SKU and barcode cells as text to preserve leading zeroes."
+msgstr "Одна строка — одно назначение фотографии товару. Формат ячеек SKU и штрихкода должен быть текстовым, чтобы сохранить начальные нули."
+
+#: inc/operator-help.php
+msgid "Column"
+msgstr "Колонка"
+
+#: inc/operator-help.php
+msgid "What to enter"
+msgstr "Что указать"
+
+#: inc/operator-help.php
+msgid "Exact SKU on our website and in Folio."
+msgstr "Точный артикул на нашем сайте и в ФОЛИО."
+
+#: inc/operator-help.php
+msgid "Barcode; may be empty when SKU is provided."
+msgstr "Штрихкод; можно оставить пустым, если есть SKU."
+
+#: inc/operator-help.php
+msgid "Exact local filename including its extension, for example front.jpg."
+msgstr "Точное имя файла с расширением, например front.jpg."
+
+#: inc/operator-help.php
+msgid "main for the main image; gallery for an additional image."
+msgstr "main — главное фото; gallery — дополнительное фото."
+
+#: inc/operator-help.php
+msgid "Leave empty for main. For gallery use unique positions 1, 2, 3."
+msgstr "Для main оставьте пустым. Для gallery — неповторяющиеся позиции 1, 2, 3."
+
+#: inc/operator-help.php
+msgid "Use only one main image per product. Standard variations support a main image only. Automatic naming creates the website filename without renaming your local original."
+msgstr "Для товара укажите только одно главное фото. Для вариаций доступно только главное фото. Автоматическое именование создаёт имя для сайта, не переименовывая оригинал на компьютере."
+
+#: inc/operator-help.php
+msgid "What do the check results mean?"
+msgstr "Что означают результаты проверки?"
+
+#: inc/operator-help.php
+msgid "READY: review the product and role, then upload. Warnings need attention. Errors block the row: correct the file or registry and check again."
+msgstr "READY: сверьте товар и роль, затем загружайте. Предупреждения требуют внимания. Ошибка блокирует строку: исправьте файл или реестр и повторите проверку."
+
+#: inc/operator-help.php
+msgid "What if the image already exists?"
+msgstr "Что делать, если фото уже существует?"
+
+#: inc/operator-help.php
+msgid "A verified identical image with a valid Media Library record can be reused. The same filename with different content is blocked. An S3-only file needs an administrator to restore its Media Library record. Do not add -1 or upload a duplicate manually."
+msgstr "Проверенное одинаковое фото с корректной записью медиатеки можно использовать повторно. Одинаковое имя с другим содержимым блокируется. Для файла только в S3 администратор должен восстановить запись медиатеки. Не добавляйте -1 и не загружайте дубликат вручную."
+
+#: inc/operator-help.php
+msgid "How do I confirm success or recover from an interruption?"
+msgstr "Как подтвердить успех или действовать после прерывания?"
+
+#: inc/operator-help.php
+msgid "Success requires SUCCESS, completed and Folio applied/noop, with no errors. Save the final CSV and check the storefront. After a timeout, keep the report and ask the administrator to establish the result before retrying. Once resolved, recheck the same registry and files."
+msgstr "Успех: SUCCESS, completed и статус ФОЛИО applied/noop, без ошибок. Сохраните итоговый CSV и проверьте витрину. После тайм-аута сохраните отчёт и попросите администратора установить результат до повторного запуска. После выяснения повторно проверьте тот же реестр и файлы."
+
+#: inc/operator-help.php
+msgid "Image workflow navigation"
+msgstr "Навигация работы с изображениями"
+
+#: inc/operator-help.php
+msgid "Download XLSX template"
+msgstr "Скачать шаблон XLSX"
+
+#: inc/operator-help.php
+msgid "Check existing product images"
+msgstr "Проверить существующие изображения товаров"
+
+#: inc/operator-help.php
+msgid "Fill in the XLSX template and keep the column headers unchanged."
+msgstr "Заполните шаблон XLSX, не меняя заголовки колонок."
+
+#: inc/operator-help.php
+msgid "Generate canonical filenames from SKU or barcode."
+msgstr "Генерировать канонические имена файлов из артикула или штрихкода."
