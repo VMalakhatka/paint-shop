@@ -1,0 +1,100 @@
+# Copyright (C) 2026 Volodymyr
+# This file is distributed under the same license as the Paint Shop UX plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: Paint Shop UX 1.2.1\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/paint-shop-ux\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-09-15T20:16:29+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: paint-shop-ux\n"
+
+#. Plugin Name of the plugin
+#: paint-shop-ux.php
+msgid "Paint Shop UX"
+msgstr ""
+
+#. Description of the plugin
+#: paint-shop-ux.php
+msgid "UX improvements for WooCommerce catalog: compact titles, square thumbnails, per-page switcher, graceful fallbacks."
+msgstr ""
+
+#. Author of the plugin
+#: paint-shop-ux.php
+msgid "Volodymyr"
+msgstr ""
+
+#: inc/category-menu.php:88
+#: inc/category-menu.php:220
+#: inc/category-menu.php:235
+msgid "Categories could not be loaded."
+msgstr ""
+
+#: inc/category-menu.php:141
+msgid "Category not found."
+msgstr ""
+
+#: inc/category-menu.php:179
+msgid "Category menu is unavailable."
+msgstr ""
+
+#: inc/category-menu.php:182
+msgid "Unsupported language."
+msgstr ""
+
+#: inc/category-menu.php:208
+#: inc/category-menu.php:222
+msgid "Product categories"
+msgstr ""
+
+#: inc/category-menu.php:212
+#: inc/category-menu.php:225
+#: inc/category-menu.php:235
+msgid "Open catalogue"
+msgstr ""
+
+#: inc/category-menu.php:219
+#: inc/category-menu.php:254
+#, php-format
+msgid "Expand %s"
+msgstr ""
+
+#: inc/category-menu.php:219
+#: inc/category-menu.php:254
+#, php-format
+msgid "Collapse %s"
+msgstr ""
+
+#: inc/category-menu.php:220
+msgid "Loading categories..."
+msgstr ""
+
+#: inc/category-menu.php:221
+msgid "Retry"
+msgstr ""
+
+#: inc/category-menu.php:221
+#: inc/category-menu.php:262
+msgid "More categories"
+msgstr ""
+
+#: inc/category-menu.php:221
+msgid "No subcategories."
+msgstr ""
+
+#: paint-shop-ux.php:58
+msgid "Show:"
+msgstr ""
+
+#: paint-shop-ux.php:124
+msgid "Compact catalog title"
+msgstr ""
+
+#: paint-shop-ux.php:125
+msgid "Shown in product grid only."
+msgstr ""

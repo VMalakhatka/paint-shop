@@ -1,5 +1,13 @@
 # Copyright (C) 2026 Volodymyr Malakhatka
 # This file is distributed under the same license as the PC Stock Tap plugin.
+#: pc-wholesale-help.php
+msgid "In the category menu, select a name to open its page or use + to load subcategories. Use the minus button to collapse a branch and More categories to continue the list. If loading fails, choose Retry or open the category link. Without JavaScript, use category links and the subcategory tiles on their pages. The account, cart and checkout show an Open catalogue link instead of the tree."
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Category menu on a phone"
+msgstr ""
+
 msgid ""
 msgstr ""
 "Project-Id-Version: PC Stock Tap\n"

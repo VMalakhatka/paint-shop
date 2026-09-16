@@ -1,3 +1,11 @@
+#: pc-wholesale-help.php
+msgid "In the category menu, select a name to open its page or use + to load subcategories. Use the minus button to collapse a branch and More categories to continue the list. If loading fails, choose Retry or open the category link. Without JavaScript, use category links and the subcategory tiles on their pages. The account, cart and checkout show an Open catalogue link instead of the tree."
+msgstr "В меню категорий название открывает страницу, а + загружает подкатегории. Кнопка минуса сворачивает ветку, а «Ещё категории» продолжает список. Если загрузка не удалась, нажмите «Повторить» или откройте ссылку категории. Без JavaScript пользуйтесь ссылками категорий и плитками подкатегорий на их страницах. В кабинете, корзине и оформлении заказа вместо дерева есть «Открыть каталог»."
+
+#: pc-wholesale-help.php
+msgid "Category menu on a phone"
+msgstr "Меню категорий на телефоне"
+
 msgid ""
 msgstr ""
 "Project-Id-Version: PC Wholesale Customer Help 1.2.1\n"

@@ -81,6 +81,11 @@ idempotency key, наблюдаемый terminal status и план восста
 
 ### WordPress/PHP
 
+Меню категорий каталога принадлежит `paint-shop-ux`: подменяет только WPB widget
+`product_cat` до полного обхода дерева, читает ветки через собственный публичный
+GET endpoint без Java. Кэш, границы поддержки, локальная проверка и откат описаны
+в [README владельца](../wp-content/plugins/paint-shop-ux/README.md).
+
 - `wp-content/plugins/` — обычные собственные плагины с activation lifecycle.
 - `wp-content/mu-plugins/` — автоматически загружаемые integration/guard modules.
 - `wp-content/deploy_plugins.list` — allow-list обычных собственных plugins для deploy.

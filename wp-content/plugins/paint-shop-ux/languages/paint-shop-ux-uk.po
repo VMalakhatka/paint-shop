@@ -1,0 +1,43 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Paint Shop UX 1.2.1\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: uk\n"
+
+msgid "Product categories"
+msgstr "Категорії товарів"
+
+msgid "Open catalogue"
+msgstr "Відкрити каталог"
+
+msgid "Expand %s"
+msgstr "Розгорнути %s"
+
+msgid "Collapse %s"
+msgstr "Згорнути %s"
+
+msgid "Loading categories..."
+msgstr "Завантаження категорій..."
+
+msgid "Categories could not be loaded."
+msgstr "Не вдалося завантажити категорії."
+
+msgid "Retry"
+msgstr "Повторити"
+
+msgid "More categories"
+msgstr "Ще категорії"
+
+msgid "No subcategories."
+msgstr "Підкатегорій немає."
+
+msgid "Category not found."
+msgstr "Категорію не знайдено."
+
+msgid "Category menu is unavailable."
+msgstr "Меню категорій недоступне."
+
+msgid "Unsupported language."
+msgstr "Непідтримувана мова."
