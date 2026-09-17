@@ -1,11 +1,11 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
-/** Replaces only the published WPB product-category widget, before its walker runs. */
+/** Shared category renderer for the native widget and the transitional WPB adapter. */
 final class PSU_Category_Menu {
     const PAGE_SIZE = 30;
     const INITIAL_LIMIT = 60;
-    const VERSION = '1.2.1';
+    const VERSION = '1.3.0';
     private static $legacy_used = false;
     private static $dirty = false;
 
@@ -25,6 +25,16 @@ final class PSU_Category_Menu {
     }
 
     public static function config($widget_id) {
+        if (preg_match('/^psu_category_menu-(\d+)$/D', $widget_id, $match)) {
+            if (!is_active_widget(false, $widget_id, 'psu_category_menu', true)) return null;
+            $instances = get_option('widget_psu_category_menu', []);
+            if (!isset($instances[(int) $match[1]]) || !is_array($instances[(int) $match[1]])) return null;
+            return array_merge(PSU_Category_Widget::settings($instances[(int) $match[1]]), ['widget' => $widget_id]);
+        }
+        return self::legacy_config($widget_id);
+    }
+
+    public static function legacy_config($widget_id) {
         if (!preg_match('/^wpb_wmca_accordion_widget-(\d+)$/D', $widget_id, $match)) return null;
         if (!is_active_widget(false, $widget_id, 'wpb_wmca_accordion_widget', true)) return null;
         $instances = get_option('widget_wpb_wmca_accordion_widget', []);
@@ -193,7 +203,8 @@ final class PSU_Category_Menu {
     }
 
     public static function styles() {
-        if (!is_active_widget(false, false, 'wpb_wmca_accordion_widget', true)) return;
+        if (!is_active_widget(false, false, 'psu_category_menu', true)
+            && !is_active_widget(false, false, 'wpb_wmca_accordion_widget', true)) return;
         wp_enqueue_style('psu-category-menu', plugins_url('../assets/category-menu.css', __FILE__), [], self::VERSION);
     }
     private static function compact() {
@@ -202,8 +213,13 @@ final class PSU_Category_Menu {
     }
     public static function widget($instance, $widget, $args) {
         if ($instance === false || is_admin() || !apply_filters('psu_lazy_category_menu_enabled', true)) return $instance;
-        $config = self::config($widget->id);
+        $config = self::legacy_config($widget->id);
         if (!$config) return $instance;
+        self::render($instance, $widget, $args, $config);
+        return false;
+    }
+    public static function render($instance, $widget, $args, $config) {
+        if (!function_exists('wc_get_page_permalink') || !taxonomy_exists('product_cat')) return;
         echo wp_kses_post($args['before_widget']);
         $title = !empty($instance['title']) ? apply_filters('widget_title', $instance['title'], $instance, $widget->id_base) : __('Product categories', 'paint-shop-ux');
         echo wp_kses_post($args['before_title']) . wp_kses_post($title) . wp_kses_post($args['after_title']);
@@ -225,7 +241,6 @@ final class PSU_Category_Menu {
             echo '<noscript><a href="' . esc_url($shop) . '">' . esc_html__('Open catalogue', 'paint-shop-ux') . '</a></noscript>';
         }
         echo wp_kses_post($args['after_widget']);
-        return false;
     }
     private static function render_branch($config, $parent, $path, $current, $index, &$budget) {
         $limit = min(self::PAGE_SIZE, max(0, $budget));

@@ -3,9 +3,11 @@
 if (!defined('WP_CLI') || !WP_CLI || wp_get_environment_type() !== 'local') throw new RuntimeException('Local CLI only');
 function psu_menu_check($test, $message) { if (!$test) throw new RuntimeException($message); }
 $config = null;
-foreach (get_option('widget_wpb_wmca_accordion_widget', []) as $number => $instance) {
-    if (is_numeric($number)) $config = PSU_Category_Menu::config('wpb_wmca_accordion_widget-' . $number);
-    if ($config) break;
+foreach (['psu_category_menu', 'wpb_wmca_accordion_widget'] as $base) {
+    foreach (get_option('widget_' . $base, []) as $number => $instance) {
+        if (is_numeric($number)) $config = PSU_Category_Menu::config($base . '-' . $number);
+        if ($config) break 2;
+    }
 }
 psu_menu_check($config !== null, 'Expected active product category widget');
 psu_menu_check(PSU_Category_Menu::config('text-2') === null, 'Other widgets must not be replaced');

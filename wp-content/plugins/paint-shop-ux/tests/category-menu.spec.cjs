@@ -24,6 +24,10 @@ const path = require('node:path');
             await page.goto(base, {waitUntil: 'domcontentloaded'});
             const menu = page.locator('.psu-category-menu');
             await menu.waitFor();
+            if (process.env.PSU_EXPECT_NATIVE) {
+                assert((await menu.getAttribute('data-widget')).startsWith('psu_category_menu-'));
+                assert.equal(await page.locator('script[src*="wpb-accordion-menu-or-category"], link[href*="wpb-accordion-menu-or-category"]').count(), 0, 'No WPB assets after deactivation');
+            }
             assert(await menu.locator('a').count() <= 60);
             assert.equal(await page.locator('.wpb_category_n_menu_accordion_list').count(), 0, 'Old tree never rendered');
             assert.equal(await page.locator('script[src*="accordion-init"], script[src*="jquery.navgoco"], script[src*="jquery.cookie.js"]').count(), 0, 'Unused legacy scripts removed');
@@ -97,6 +101,7 @@ const path = require('node:path');
                     assert.deepEqual(actual, [...firstPage.items,...nextPage.items].map(n=>n.id), 'Pinned active branch returns to sorted position');
                 }
             }
+            assert.deepEqual(errors, [], 'No browser errors');
             results.push({width,links:await menu.locator('a').count(),errors});
             await context.close();
         }
@@ -126,7 +131,8 @@ const path = require('node:path');
             // Use a real local document origin; synthetic route documents trigger Chrome's loopback CORS guard.
             await ru.evaluate(html => {
                 const doc = new DOMParser().parseFromString(html, 'text/html');
-                document.querySelector('.widget_wpb_wmca_accordion_widget').replaceWith(doc.querySelector('.widget_wpb_wmca_accordion_widget'));
+                const selector = '.widget_psu_category_menu, .widget_wpb_wmca_accordion_widget';
+                document.querySelector(selector).replaceWith(doc.querySelector(selector));
             }, fs.readFileSync('/tmp/psu-category-menu-ru.html','utf8'));
             await ru.addScriptTag({url:base+'/wp-content/plugins/paint-shop-ux/assets/category-menu.js'});
             const toggle = ru.locator('.psu-category-menu__toggle').first();
