@@ -207,3 +207,5 @@ msgstr ""
 #: paint-shop-ux.php:127
 msgid "Shown in product grid only."
 msgstr ""
+msgid "Products per page"
+msgstr ""

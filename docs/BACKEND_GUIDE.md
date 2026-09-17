@@ -88,6 +88,14 @@ WPB widget. Перенос с резервной копией выполняет
 WPB автоматически не отключается. Кэш, границы поддержки, проверка и откат описаны
 в [README владельца](../wp-content/plugins/paint-shop-ux/README.md).
 
+Локальная версия меню 1.3.1 отделяет канонические URL общего кэша от quick-order
+контекста. Владелец rewrite — MU `PCQO_Category_Links`; тема не дублирует его.
+Размер страницы каталога принадлежит `psu-force-per-page.php`: стабильный выбор
+`pp`/`per_page`, одинаковые ограничения обоих query-полей и отсутствие viewport
+reload. Переключатель Paint Shop UX и форма `psu-search-filters.php` используют
+этот контракт. Production rollout этих двух локальных правок ещё не выполнен;
+проверки и ограничения — в [отчёте меню](CATEGORY_MENU_LOCAL_VERIFICATION_2026-09-15.md).
+
 - `wp-content/plugins/` — обычные собственные плагины с activation lifecycle.
 - `wp-content/mu-plugins/` — автоматически загружаемые integration/guard modules.
 - `wp-content/deploy_plugins.list` — allow-list обычных собственных plugins для deploy.

@@ -348,7 +348,8 @@ function psu_render_catalog_filters(): void {
             <input type="number" min="0" step="0.01" name="max_price" value="<?php echo esc_attr($max_price); ?>" placeholder="<?php echo esc_attr__('To', 'psu-search-filters'); ?>">
         </div>
 
-        <?php if (isset($_GET['pp'])): ?><input type="hidden" name="pp" value="<?php echo esc_attr((int) $_GET['pp']); ?>"><?php endif; ?>
+        <?php $page_size = function_exists('psufp_explicit_per_page') ? psufp_explicit_per_page() : []; ?>
+        <?php if ($page_size): ?><input type="hidden" name="<?php echo esc_attr($page_size[0]); ?>" value="<?php echo esc_attr($page_size[1]); ?>"><?php endif; ?>
         <?php if (isset($_GET['orderby'])): ?><input type="hidden" name="orderby" value="<?php echo esc_attr(sanitize_key(wp_unslash($_GET['orderby']))); ?>"><?php endif; ?>
         <div class="psu-catalog-filters__actions">
             <button type="submit"><?php esc_html_e('Apply filters', 'psu-search-filters'); ?></button>

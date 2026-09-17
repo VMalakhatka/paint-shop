@@ -11,37 +11,7 @@ add_filter('woocommerce_breadcrumb_defaults', function($defaults) {
 });
 
 
-/** ================= Quick Order: переписываем ссылки категорий ================= */
-
-// Слаг страницы «Швидке замовлення» (однократно)
-if (!defined('PCQO_PAGE_SLUG')) {
-    define('PCQO_PAGE_SLUG', 'shvydke-zamovlennia'); // замени на свой
-}
-
-/**
- * На странице с шорткодом [pc_quick_order] переписываем ссылки
- * категорий на ту же страницу с ?cat=<slug>.
- */
-add_filter('term_link', function ($url, $term, $taxonomy) {
-    if ($taxonomy !== 'product_cat' || is_admin()) return $url;
-
-    global $post;
-    if (!$post) return $url;
-
-    $is_quick_order_page =
-        is_page(PCQO_PAGE_SLUG) ||
-        has_shortcode((string)$post->post_content, 'pc_quick_order');
-
-    if (!$is_quick_order_page) return $url;
-
-    $page = $post ?: get_page_by_path(PCQO_PAGE_SLUG);
-    if (!$page) return $url;
-
-    $page_url = get_permalink(is_object($page) ? $page->ID : (int)$page);
-    if (!$page_url) return $url;
-
-    return add_query_arg('cat', $term->slug, $page_url);
-}, 10, 3);
+// Contextual category URLs are owned by PC Wholesale Quick Order, not the theme.
 
 add_filter('psu_products_per_page', fn()=>24);
 

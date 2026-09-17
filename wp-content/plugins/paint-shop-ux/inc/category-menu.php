@@ -5,7 +5,7 @@ if (!defined('ABSPATH')) exit;
 final class PSU_Category_Menu {
     const PAGE_SIZE = 30;
     const INITIAL_LIMIT = 60;
-    const VERSION = '1.3.0';
+    const VERSION = '1.3.1';
     private static $legacy_used = false;
     private static $dirty = false;
 
@@ -132,10 +132,11 @@ final class PSU_Category_Menu {
         return array_reverse(array_values($path));
     }
     private static function node($term, $config, $index) {
-        $url = get_term_link($term);
+        $url = class_exists('PCQO_Category_Links') ? PCQO_Category_Links::catalogue_url($term) : get_term_link($term);
         if (is_wp_error($url)) return null;
         return [
             'id' => $term->term_id,
+            'slug' => $term->slug,
             'name' => wp_strip_all_tags(html_entity_decode(apply_filters('list_cats', $term->name, $term), ENT_QUOTES, 'UTF-8')),
             'url' => $url, 'count' => $config['show_count'] ? (int) $term->count : null,
             'children' => (bool) self::children($term->term_id, $config, $index),
@@ -172,6 +173,16 @@ final class PSU_Category_Menu {
         return $result;
     }
 
+    /** Project public URLs after the shared cache; never store a page-specific link there. */
+    public static function links($branch, $quick_order_page = 0) {
+        if (!$quick_order_page || is_wp_error($branch)) return $branch;
+        $base = class_exists('PCQO_Category_Links') ? PCQO_Category_Links::page_url($quick_order_page) : '';
+        if (!$base) return new WP_Error('category_menu_missing', __('Category menu is unavailable.', 'paint-shop-ux'), ['status' => 404]);
+        foreach ($branch['items'] as &$item) $item['url'] = add_query_arg('cat', $item['slug'], $base);
+        unset($item);
+        return $branch;
+    }
+
     public static function routes() {
         register_rest_route('paint-shop-ux/v1', '/categories', [
             'methods' => 'GET', 'permission_callback' => '__return_true', 'callback' => [__CLASS__, 'request'],
@@ -181,6 +192,7 @@ final class PSU_Category_Menu {
                 'offset' => ['type' => 'integer', 'minimum' => 0, 'maximum' => 100000, 'default' => 0,
                     'validate_callback' => static function ($value) { return is_numeric($value) && (int) $value == $value && $value >= 0 && $value <= 100000; }],
                 'locale' => ['type' => 'string', 'default' => ''],
+                'quick_order_page' => ['type' => 'integer', 'minimum' => 0, 'default' => 0],
             ],
         ]);
     }
@@ -193,7 +205,7 @@ final class PSU_Category_Menu {
         }
         $switched = switch_to_locale($locale);
         try {
-            $branch = self::branch($config, (int) $request['parent'], (int) $request['offset']);
+            $branch = self::links(self::branch($config, (int) $request['parent'], (int) $request['offset']), (int) $request['quick_order_page']);
             if (is_wp_error($branch)) return $branch;
             $response = rest_ensure_response($branch);
             // Cache public DTOs server-side; never cache user-specific WordPress REST response headers.
@@ -229,20 +241,25 @@ final class PSU_Category_Menu {
         } else {
             wp_enqueue_script('psu-category-menu', plugins_url('../assets/category-menu.js', __FILE__), [], self::VERSION, true);
             $index = self::index();
+            $quick_order_page = class_exists('PCQO_Category_Links') ? PCQO_Category_Links::current_page_id() : 0;
             $current = is_tax('product_cat') ? get_queried_object_id() : 0;
+            if ($quick_order_page && isset($_GET['cat']) && is_string($_GET['cat'])) {
+                $term = get_term_by('slug', sanitize_title(wp_unslash($_GET['cat'])), 'product_cat');
+                if ($term) $current = $term->term_id;
+            }
             $path = is_wp_error($index) ? [] : self::path($current, $index);
             $budget = self::INITIAL_LIMIT;
             $labels = ['expand' => __('Expand %s', 'paint-shop-ux'), 'collapse' => __('Collapse %s', 'paint-shop-ux'),
                 'loading' => __('Loading categories...', 'paint-shop-ux'), 'error' => __('Categories could not be loaded.', 'paint-shop-ux'),
                 'retry' => __('Retry', 'paint-shop-ux'), 'more' => __('More categories', 'paint-shop-ux'), 'empty' => __('No subcategories.', 'paint-shop-ux')];
-            echo '<nav class="psu-category-menu" aria-label="' . esc_attr__('Product categories', 'paint-shop-ux') . '" data-widget="' . esc_attr($widget->id) . '" data-endpoint="' . esc_url(rest_url('paint-shop-ux/v1/categories')) . '" data-locale="' . esc_attr(get_locale()) . '" data-labels="' . esc_attr(wp_json_encode($labels)) . '">';
-            self::render_branch($config, 0, $path, $current, $index, $budget);
+            echo '<nav class="psu-category-menu" aria-label="' . esc_attr__('Product categories', 'paint-shop-ux') . '" data-widget="' . esc_attr($widget->id) . '" data-endpoint="' . esc_url(rest_url('paint-shop-ux/v1/categories')) . '" data-locale="' . esc_attr(get_locale()) . '" data-quick-order-page="' . (int) $quick_order_page . '" data-labels="' . esc_attr(wp_json_encode($labels)) . '">';
+            self::render_branch($config, 0, $path, $current, $index, $budget, $quick_order_page);
             echo '<div class="screen-reader-text" role="status" aria-live="polite"></div></nav>';
             echo '<noscript><a href="' . esc_url($shop) . '">' . esc_html__('Open catalogue', 'paint-shop-ux') . '</a></noscript>';
         }
         echo wp_kses_post($args['after_widget']);
     }
-    private static function render_branch($config, $parent, $path, $current, $index, &$budget) {
+    private static function render_branch($config, $parent, $path, $current, $index, &$budget, $quick_order_page) {
         $limit = min(self::PAGE_SIZE, max(0, $budget));
         $branch = $limit ? self::branch($config, $parent, 0, $limit) : ['items' => [], 'next' => 0];
         echo '<ul id="' . esc_attr($config['widget'] . '-branch-' . $parent) . '" data-parent="' . (int) $parent . '">';
@@ -258,6 +275,7 @@ final class PSU_Category_Menu {
                 if ($node) { $node['pinned'] = true; $branch['items'][] = $node; }
             }
         }
+        $branch = self::links($branch, $quick_order_page);
         $budget -= count($branch['items']);
         foreach ($branch['items'] as $node) {
             $open = $node['id'] === $next_path;
@@ -269,7 +287,7 @@ final class PSU_Category_Menu {
             if ($node['children']) echo '<button hidden type="button" class="psu-category-menu__toggle" aria-expanded="' . ($open ? 'true' : 'false') . '" aria-controls="' . esc_attr($list_id) . '" aria-label="' . esc_attr(sprintf($open ? __('Collapse %s', 'paint-shop-ux') : __('Expand %s', 'paint-shop-ux'), $name)) . '" data-name="' . esc_attr($name) . '"><span aria-hidden="true">+</span></button>';
             echo '</div>';
             if ($node['children']) {
-                if ($open) self::render_branch($config, $node['id'], array_slice($path, 1), $current, $index, $budget);
+                if ($open) self::render_branch($config, $node['id'], array_slice($path, 1), $current, $index, $budget, $quick_order_page);
                 else echo '<ul hidden id="' . esc_attr($list_id) . '" data-parent="' . (int) $node['id'] . '" data-unloaded="1"></ul>';
             }
             echo '</li>';

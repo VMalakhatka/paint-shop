@@ -2,7 +2,7 @@
 /*
 Plugin Name: PC Wholesale Quick Order
 Description: Табличний «швидкий заказ» для оптовиків + масове додавання в кошик.
-Version: 1.4.0
+Version: 1.4.1
 Author: PaintCore
 Text Domain: pc-wholesale-quick-order
 Domain Path: /languages
@@ -425,17 +425,37 @@ function pc_qo_bulk_add(){
     wp_send_json_success(['added'=>$added]);
 }
 
-/** Переписываем ссылки категорий на страницу со шорткодом */
-add_action('wp', function () {
-    if (!is_page()) return;
-    $post = get_post(); if (!$post) return;
-    if (!has_shortcode($post->post_content, 'pc_quick_order')) return;
+/** One owner for contextual links; shared category caches always request catalogue URLs. */
+final class PCQO_Category_Links {
+    private static $catalogue_depth = 0;
 
-    add_filter('term_link', function ($url, $term, $taxonomy) use ($post) {
-        if ($taxonomy !== 'product_cat') return $url;
-        return add_query_arg('cat', $term->slug, get_permalink($post));
-    }, 10, 3);
-});
+    public static function page_url($page_id) {
+        $page = get_post((int) $page_id);
+        if (!$page || $page->post_type !== 'page' || $page->post_status !== 'publish'
+            || $page->post_password || !has_shortcode($page->post_content, 'pc_quick_order')) return '';
+        return (string) get_permalink($page);
+    }
+
+    public static function current_page_id() {
+        if (is_admin() || !is_page() || !function_exists('pc_wholesale_customer_can_access')
+            || !pc_wholesale_customer_can_access()) return 0;
+        $id = get_queried_object_id();
+        return $id && self::page_url($id) ? $id : 0;
+    }
+
+    public static function catalogue_url($term) {
+        self::$catalogue_depth++;
+        try { return get_term_link($term); }
+        finally { self::$catalogue_depth--; }
+    }
+
+    public static function filter($url, $term, $taxonomy) {
+        if ($taxonomy !== 'product_cat' || self::$catalogue_depth) return $url;
+        $page = self::current_page_id();
+        return $page ? add_query_arg('cat', $term->slug, self::page_url($page)) : $url;
+    }
+}
+add_filter('term_link', [PCQO_Category_Links::class, 'filter'], 10, 3);
 
 /** Стили и JS */
 add_action('wp_enqueue_scripts', function(){

@@ -27,7 +27,32 @@ options; наличие новых файлов не означает, что si
 отключать на другом окружении без проверки его остальных widgets/shortcodes и
 builder content. Для отката сначала активировать WPB; конфликт более поздних
 widget edits нельзя затирать backup-ом. Источник: `paint-shop-ux/inc/category-*.php`
-и README владельца. Проверено локально 2026-09-17; production не изменён.
+и README владельца. Проверено локально и на production 2026-09-17: production
+sidebar перенесена явно, WPB отключён после аудита; исходные настройки сохранены.
+Результат и границы: `docs/CATEGORY_MENU_LOCAL_VERIFICATION_2026-09-15.md`.
+
+Локальная правка 1.3.1 (2026-09-17): cache хранит
+канонические URL/slug через scoped `PCQO_Category_Links::catalogue_url()`, не удаляя
+чужие term_link filters. Единственный rewrite принадлежит quick-order MU, не теме.
+Контекст публичной quick-order страницы проецируется после кэша и явно передаётся
+в REST; это не разрешение на доступ к содержимому. Production rollout этой правки
+ещё не выполнен. Источник: README Paint Shop UX и local context regression test.
+
+Размер страницы каталога принадлежит MU `psu-force-per-page.php`: валидный `pp`
+имеет приоритет над legacy `per_page`, затем default24/`psu_products_per_page`.
+Оба query-поля posts_per_page/posts_per_archive_page согласованы. Старые cookies
+колонок/рядов не используются; viewport не должен перезагружать документ.
+Paint Shop UX выводит переключатель, но не дублирует resolver. Фильтры сохраняют
+валидный выбор, смена размера сбрасывает только страницу. Проверено локально
+2026-09-17; production пока использует прежнее поведение.
+
+Приёмка этих двух изменений требует чистого browser Network trace (первое открытие
+1 document GET, resize 0, выбор размера/страницы 1) и настоящей оптовой сессии;
+имитация ролей в PHP не заменяет проверку доступа. Локальные browser fixtures
+создают только короткие сессии существующих пользователей; cleanup отзывает токены,
+не меняя права. Сопоставляй renderer в одном процессе и не выдавай колебания HTTP
+разных серий за эффект patch. Источник: tests и README Paint Shop UX, приёмка
+2026-09-17 в `docs/CATEGORY_MENU_LOCAL_VERIFICATION_2026-09-15.md`.
 
 Для `paint-nova-poshta-multishipping` не отождествляй адрес контрагента из
 `Counterparty/getCounterpartyAddresses` с физическим отделением/почтоматом сдачи.

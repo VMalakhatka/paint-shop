@@ -6,8 +6,19 @@
 
 ## Ленивое меню категорий
 
+Размер выдачи обслуживает MU `psu-force-per-page.php` 1.2.0. Приоритет:
+валидный целочисленный `pp` (6–120), затем `per_page` (1–200), затем
+`psu_products_per_page`/24. Cookies `psu_cols`/`psu_rows` игнорируются; измерение
+колонок и автоматический reload удалены. Адаптивные колонки задаёт CSS темы.
+Этот plugin выводит 12/24/48, возвращает на первую страницу при смене размера
+и сохраняет остальные параметры; фильтр MU сохраняет выбранный параметр.
+Основной query и Woo используют одно значение в обоих полях размера страницы.
+Вторичные запросы, обычный поиск записей, admin, single и feed не меняются.
+
 Ленивая загрузка реализована локально 2026-09-15; собственный виджет добавлен
-2026-09-17 в версии 1.3.0. Production в этих проверках не изменён.
+2026-09-17 в версии 1.3.0. В тот же день после deploy и отдельного разрешения
+владельца выполнен перенос production-виджета; WPB отключён после аудита зависимостей.
+Результат и границы проверки записаны в [отчёте](../../../docs/CATEGORY_MENU_LOCAL_VERIFICATION_2026-09-15.md).
 
 `inc/category-widget.php` регистрирует **«Категорії Лавки»** (`psu_category_menu`)
 в штатном экране виджетов WordPress. Настройки находятся в
@@ -56,6 +67,18 @@ Tab/Enter/Space, aria-expanded/controls, loading, ошибку и повтор. 
 - Transients TTL 1 час; ключ включает версию данных/кода, blog ID, locale, home URL,
   permalink configuration, настройки виджета, parent/offset/limit. В нём нет
   пользовательских данных. HTTP-ответ no-store; общий кэш находится на сервере.
+- В 1.3.1 общий кэш хранит канонические category URL и slug. Единственный владелец
+  quick-order rewrite — `PCQO_Category_Links` в MU `pc-wholesale-quick-order.php`;
+  дублирование в child theme удалено. Scoped `catalogue_url()` подавляет только
+  собственный rewrite, сохраняя остальные `term_link` filters. Версия 1.3.1 меняет
+  только namespace меню; глобальный cache flush не нужен.
+- На разрешённой странице `[pc_quick_order]` renderer отдельно проецирует ссылки
+  после чтения кэша. JS передаёт публичный `quick_order_page` в REST, поэтому
+  подгружаемые дети и следующие порции используют тот же контекст. Без параметра
+  REST всегда возвращает каталог. Ненулевой ID должен указывать на опубликованную
+  страницу без пароля с этим shortcode, иначе 404. Это публичная проекция URL,
+  не предоставление доступа: содержимое быстрого заказа по-прежнему проверяет
+  `pc_wholesale_customer_can_access()`. Произвольный redirect URL не принимается.
 - clean_term_cache/clean_taxonomy_cache и изменение order termmeta меняют namespace.
   WordPress count update/recount после синхронизации тоже вызывает clean_term_cache.
   В массовой операции смена namespace происходит в начале и на shutdown; во время
@@ -110,6 +133,14 @@ WP-CLI можно после проверки, что переноса уже н
 
 ### Проверка и откат
 
+Локальные regression suites 1.3.1: `tests/category-menu-context-local.php`
+(обе очередности прогрева, роли, UK/RU, глубокая ветка),
+`tests/catalog-page-size-local.php` и standalone PHP `tests/catalog-page-size-http.php`.
+`tests/catalog-http-benchmark.cjs` снимает семь последовательных GET на поверхность;
+сохраняет TTFB, размер распакованного тела и заголовок Content-Encoding.
+Не запускайте его одновременно с другими HTTP-тестами. Изменения 1.3.1 пока
+локальные, повтор production-проверки требуется после отдельно разрешённого deploy.
+
 Локальные проверки, до/после и ограничения: [отчёт](../../../docs/CATEGORY_MENU_LOCAL_VERIFICATION_2026-09-15.md).
 Интеграционный тест только для Local:
 
@@ -117,13 +148,43 @@ WP-CLI можно после проверки, что переноса уже н
 wp --exec='define("DISABLE_WP_CRON",true);define("WP_HTTP_BLOCK_EXTERNAL",true);' eval-file wp-content/plugins/paint-shop-ux/tests/category-menu-local.php
 node wp-content/plugins/paint-shop-ux/tests/category-menu.spec.cjs
 node wp-content/plugins/paint-shop-ux/tests/category-menu-http.cjs after
-wp --exec='define("DISABLE_WP_CRON",true);define("WP_HTTP_BLOCK_EXTERNAL",true);' eval-file wp-content/plugins/paint-shop-ux/tests/category-menu-benchmark.php
+wp --exec='define("DISABLE_WP_CRON",true);define("WP_HTTP_BLOCK_EXTERNAL",true);' eval-file wp-content/plugins/paint-shop-ux/tests/category-menu-native-benchmark-local.php
 ```
 
 Browser test требует Playwright и Chrome; `CHROME_BINARY`, `PSU_TEST_OUTPUT`
 задают browser/output paths. Тест читает локальные категории и меняет только кэш
 меню, не создаёт товары или заказы. PHP fixtures дополнительно проверяют глубокую
 иерархию, пустые ветки и защиту от циклов.
+
+Для полной приёмки контекстных ссылок и пагинации используйте свежую фикстуру и
+отдельные чистые браузерные сессии:
+
+```sh
+wp --exec='define("DISABLE_WP_CRON",true);define("WP_HTTP_BLOCK_EXTERNAL",true);' eval-file wp-content/plugins/paint-shop-ux/tests/category-browser-fixture-local.php prepare
+PSU_EXPECT_NATIVE=1 node wp-content/plugins/paint-shop-ux/tests/category-menu.spec.cjs
+PSU_TEST_PHP="$(command -v php)" node wp-content/plugins/paint-shop-ux/tests/catalog-browser-acceptance.cjs
+wp --exec='define("DISABLE_WP_CRON",true);define("WP_HTTP_BLOCK_EXTERNAL",true);' eval-file wp-content/plugins/paint-shop-ux/tests/category-browser-fixture-local.php cleanup
+```
+
+PHP должен использовать runtime запущенного Local-сайта. `prepare` создаёт
+часовые сессии существующих локальных оптового/розничного пользователей, не меняя
+профили и права, и свежую RU-разметку из текущего PHP. Данные сессий находятся
+только в `/tmp/psu-category-browser-session.json` с правами 0600; не публикуйте их.
+**cleanup обязателен даже после ошибки теста**: отзывает только эти токены, удаляет
+файл и восстанавливает исходный namespace меню, если его не менял кто-то ещё.
+Тест меняет только namespace меню для двух очередностей прогрева, не весь кэш.
+Недоступная роль отмечается как непроверенная, тест не создаёт пользователей.
+
+Browser acceptance записывает main-document GET до первой навигации, после resize,
+выбора 12/24/48 и страницы 2; отдельно проверяет настоящий оптовый доступ, обе
+очередности прогрева, обычные/ленивые/следующие/глубокие ссылки и отказ гостю/retail.
+Отчёт `/tmp/psu-catalog-browser-acceptance/network-and-results.json` не содержит
+cookies, заголовков авторизации или тел приватных страниц.
+
+Native benchmark сравнивает текущий renderer с известным `531867a` в одном
+WP-CLI-процессе: семь чередующихся пар по 100 тёплых вызовов. Старый класс получает
+отдельное имя и не регистрирует hooks. Первая сборка namespace не означает холодный
+WordPress: core caches общие. WPB включать для этого теста не нужно.
 
 Для старой конфигурации WPB до переноса для временного переключения допустим
 `add_filter('psu_lazy_category_menu_enabled', '__return_false')`; старое меню вновь
@@ -139,3 +200,5 @@ Browser test требует Playwright и Chrome; `CHROME_BINARY`, `PSU_TEST_OUT
 `PSU_ADMIN_SESSION`, не использует пользовательский профиль браузера.
 После деактивации запустите обычный browser smoke с `PSU_EXPECT_NATIVE=1`:
 проверяется также отсутствие WPB JS/CSS. Старый A/B benchmark требует активного WPB.
+`category-menu-benchmark.php` предназначен только для прежнего сравнения WPB/native
+до переноса; не активируйте WPB ради повторной приёмки уже перенесённого меню.

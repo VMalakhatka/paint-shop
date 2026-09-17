@@ -119,3 +119,8 @@ msgstr "Восстановить виджеты WPB"
 
 msgid "WPB is not disabled automatically. Check its other widgets, shortcodes and templates before deactivation. To restore the old menu, activate WPB first."
 msgstr "WPB не отключается автоматически. Перед отключением проверьте другие его виджеты, шорткоды и шаблоны. Для восстановления старого меню сначала включите WPB."
+msgid "Products per page"
+msgstr "Товаров на странице"
+
+msgid "Show:"
+msgstr "Показывать:"

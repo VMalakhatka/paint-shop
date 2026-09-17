@@ -39,7 +39,7 @@
             const loading = document.createElement('li'); loading.className = 'psu-category-menu__loading'; loading.textContent = labels.loading; list.append(loading);
             if (trigger) trigger.disabled = true;
             const url = new URL(menu.dataset.endpoint, location.href);
-            Object.entries({widget: menu.dataset.widget, parent: list.dataset.parent, offset, locale: menu.dataset.locale}).forEach(([k,v]) => url.searchParams.set(k,v));
+            Object.entries({widget: menu.dataset.widget, parent: list.dataset.parent, offset, locale: menu.dataset.locale, quick_order_page: menu.dataset.quickOrderPage || '0'}).forEach(([k,v]) => url.searchParams.set(k,v));
             const controller = new AbortController();
             const timeout = setTimeout(() => controller.abort(), 15000);
             const promise = fetch(url, {credentials: 'same-origin', signal: controller.signal})
