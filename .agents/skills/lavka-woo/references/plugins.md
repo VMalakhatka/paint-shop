@@ -31,12 +31,22 @@ widget edits нельзя затирать backup-ом. Источник: `paint
 sidebar перенесена явно, WPB отключён после аудита; исходные настройки сохранены.
 Результат и границы: `docs/CATEGORY_MENU_LOCAL_VERIFICATION_2026-09-15.md`.
 
-Локальная правка 1.3.1 (2026-09-17): cache хранит
+Проверено production read-only 2026-09-17: ветка меню 1.3.0 может сохранить
+контекстные quick-order URL в общем кэше и выдать их гостям на обычной витрине.
+`get_term_link()` здесь не является независимым от страницы: `term_link` меняют
+MU `pc-wholesale-quick-order.php` и child theme. При работе с меню обязательно
+проверять обе очередности прогрева «быстрый заказ → каталог/REST» и обратно;
+разделять нейтральные category data и контекстные ссылки. Не объявлять оптимизацию
+полностью принятой только по скорости. Причина, наблюдаемый отказ гостевого
+перехода и следующая задача: `docs/SITE_PERFORMANCE_AUDIT_2026-09-14.md`, раздел
+повторного production-аудита. Локальная правка 1.3.1 (2026-09-17): cache хранит
 канонические URL/slug через scoped `PCQO_Category_Links::catalogue_url()`, не удаляя
 чужие term_link filters. Единственный rewrite принадлежит quick-order MU, не теме.
 Контекст публичной quick-order страницы проецируется после кэша и явно передаётся
-в REST; это не разрешение на доступ к содержимому. Production rollout этой правки
-ещё не выполнен. Источник: README Paint Shop UX и local context regression test.
+в REST; это не разрешение на доступ к содержимому. После deploy владельцем
+production smoke 2026-09-17 подтвердил версию 1.3.1, обычные гостевые URL и
+неактивный WPB; отдельная разрешённая оптовая production-сессия не проверялась.
+Источник: README Paint Shop UX и отчёт `CATEGORY_MENU_LOCAL_VERIFICATION_2026-09-15.md`.
 
 Размер страницы каталога принадлежит MU `psu-force-per-page.php`: валидный `pp`
 имеет приоритет над legacy `per_page`, затем default24/`psu_products_per_page`.
@@ -44,7 +54,8 @@ sidebar перенесена явно, WPB отключён после ауди�
 колонок/рядов не используются; viewport не должен перезагружать документ.
 Paint Shop UX выводит переключатель, но не дублирует resolver. Фильтры сохраняют
 валидный выбор, смена размера сбрасывает только страницу. Проверено локально
-2026-09-17; production пока использует прежнее поведение.
+2026-09-17; production smoke после deploy подтвердил отсутствие прежнего reload
+скрипта. Полный Network trace выполнен локально, не на production.
 
 Приёмка этих двух изменений требует чистого browser Network trace (первое открытие
 1 document GET, resize 0, выбор размера/страницы 1) и настоящей оптовой сессии;
@@ -53,6 +64,15 @@ Paint Shop UX выводит переключатель, но не дублир�
 не меняя права. Сопоставляй renderer в одном процессе и не выдавай колебания HTTP
 разных серий за эффект patch. Источник: tests и README Paint Shop UX, приёмка
 2026-09-17 в `docs/CATEGORY_MENU_LOCAL_VERIFICATION_2026-09-15.md`.
+
+Frontend versioning Stock Locations принадлежит `paint-shop-ux/inc/slw-assets.php`
+(локальная 1.3.2, проверено 2026-09-17). Только известные handles и исходные
+host/port/path получают версию SLW + content hash; admin, CDN/replacements и
+нечитаемые файлы не трогать. Не deregister/dequeue и не кешировать вместе с JS
+персональные inline/localized данные. Local требует revalidation: 304 означает
+повторное использование тела, а не отсутствие сети. Browser cache тестировать
+без отключающего кеш interception. Серверные заголовки и production compression
+не принадлежат этому патчу; inventory/приёмка/откат — в README владельца.
 
 Для `paint-nova-poshta-multishipping` не отождествляй адрес контрагента из
 `Counterparty/getCounterpartyAddresses` с физическим отделением/почтоматом сдачи.

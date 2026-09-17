@@ -4,6 +4,56 @@
 остатки, цены, распределение складов или Java. Пользовательские действия описаны
 в [оптовой инструкции](../../../docs/WHOLESALE_CUSTOMER_GUIDE_UK.md).
 
+## Стабильные версии ресурсов Stock Locations
+
+С версии Paint Shop UX 1.3.2 модуль `inc/slw-assets.php` заменяет timestamp в URL
+известных frontend CSS/JS Stock Locations на `SLW_PLUGIN_VERSION` + первые 16
+символов SHA-256 файла. Проверено локально 2026-09-17 со Stock Locations 3.2.1.
+Содержимое перечитывается один раз на ресурс за PHP-запрос, без persistent cache:
+изменение файла обнаруживается и при сохранённом mtime; обновление версии SLW также
+меняет URL. Локальная настройка или миграция не требуется.
+
+| Handle | Файл SLW | Зависимости | Условие подключения владельцем |
+|---|---|---|---|
+| `slw-frontend-styles` | `css/frontend-style.css` | нет | frontend |
+| `slw-common-styles` | `css/common-style.css` | нет | frontend |
+| `slw-common-scripts` | `js/common.js` | jquery | frontend |
+| `slw-jquery-blockui` | `js/jquery.blockUI.js` | jquery | frontend |
+| `slw-frontend-product-underscore` | `js/underscore-min.js` | jquery | карточка товара |
+| `slw-frontend-product-scripts` | `js/product.js` | jquery-blockui | карточка товара |
+| `slw-archive-scripts` | `js/archive.js` | jquery-blockui | архив location |
+| `slw-frontend-cart-scripts` | `js/cart.js` | jquery-blockui | SLW show_in_cart=yes |
+
+Фильтры `script_loader_src`/`style_loader_src` меняют только `ver` перед выводом.
+Регистрация, dependencies, порядок, footer placement, inline/localized данные
+складов, цены, права и корзина остаются у прежних владельцев. Ничего не dequeue;
+это не дедупликация двух blockUI. Admin, неизвестные handles, изменённые пути/CDN
+под знакомым handle и отсутствующий/нечитаемый файл остаются без вмешательства.
+Если SLW отключён, модуль не действует. Проверка host/port/path ограничивает
+соответствие конкретным файлом установленного плагина.
+
+Серверные cache headers не меняются. Local nginx требует revalidation
+(`no-cache, public, must-revalidate, proxy-revalidate`), поэтому повторное посещение
+получает 304, а не гарантированные ноль сетевых обращений. Browser Resource Timing
+для четырёх общих файлов: 10 046 → 1 200 байт при повторном переходе, тела файлов
+повторно не передаются. Это счётчик браузера с условным учётом заголовков, не сетевой
+packet capture и не процент ускорения сайта. Полные условия и ограничения — в
+[отчёте скорости](../../../docs/SITE_PERFORMANCE_AUDIT_2026-09-14.md).
+
+Локальная проверка: `wp --exec='define("DISABLE_WP_CRON",true);define("WP_HTTP_BLOCK_EXTERNAL",true);' eval-file wp-content/plugins/paint-shop-ux/tests/slw-assets-local.php`.
+33 проверки охватывают стабильность, изменение content/version, сохранённый mtime,
+неизменность registry/inline data, admin, неизвестные ресурсы и missing file.
+Для browser cache test не отключать кеш и не использовать request interception,
+который его отключает. Проверять первый визит и обычный переход/повторный визит;
+hard reload не является тёплой навигацией.
+
+Откат только этой оптимизации: убрать подключение `inc/slw-assets.php` из основного
+файла Paint Shop UX и сам модуль; сохранить меню/пагинацию 1.3.1. SLW снова отдаст
+свои timestamp URL. Не отключать Paint Shop UX целиком и не сбрасывать общий кеш.
+Изменений пользовательского пути и строк интерфейса нет: оптовая инструкция и
+«Як замовляти» сохраняют прежнее содержание. Production-публикация 1.3.2 в этой
+работе не выполнялась.
+
 ## Ленивое меню категорий
 
 Размер выдачи обслуживает MU `psu-force-per-page.php` 1.2.0. Приоритет:
