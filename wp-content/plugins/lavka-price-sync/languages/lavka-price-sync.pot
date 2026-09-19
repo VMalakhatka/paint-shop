@@ -6105,3 +6105,19 @@ msgstr ""
 
 msgid "The analytics response did not apply the selected warehouse modes."
 msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Days with stock in group"
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Days without stock in group"
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Group stock history"
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Days without stock are counted when no eligible warehouse in the group has physical stock at the end of the day. Stock-only warehouses are excluded. A dash means history is unavailable, not zero days."
+msgstr ""

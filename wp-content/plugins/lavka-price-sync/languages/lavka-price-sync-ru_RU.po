@@ -6324,3 +6324,19 @@ msgstr "Для режима «Только остаток» требуется �
 
 msgid "The analytics response did not apply the selected warehouse modes."
 msgstr "Ответ аналитики не учитывает выбранные режимы складов."
+
+#: inc/purchase-planning.php
+msgid "Days with stock in group"
+msgstr "Дней с наличием в группе"
+
+#: inc/purchase-planning.php
+msgid "Days without stock in group"
+msgstr "Дней без наличия в группе"
+
+#: inc/purchase-planning.php
+msgid "Group stock history"
+msgstr "История наличия группы"
+
+#: inc/purchase-planning.php
+msgid "Days without stock are counted when no eligible warehouse in the group has physical stock at the end of the day. Stock-only warehouses are excluded. A dash means history is unavailable, not zero days."
+msgstr "Дни отсутствия считаются, когда на конец дня нет физического остатка ни на одном применимом складе группы. Склады «Только текущий остаток» не учитываются. Прочерк означает недоступную историю, а не ноль дней."

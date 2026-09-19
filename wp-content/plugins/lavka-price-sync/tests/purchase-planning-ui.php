@@ -19,6 +19,7 @@ $groups = [['code'=>'kyiv','name'=>'Kyiv','warehouseIds'=>[1],'receivingWarehous
 $row = ['sku'=>'KR-17817','productName'=>'Acrylic marker','dimensions'=>['currentSuppliers'=>['Kreul'],'packageQuantity'=>6,'minimumOrderQuantity'=>0,
     'minimumStock'=>1,'groupLevel1Code'=>'ART','groupLevel1Name'=>'Art materials','groupLevel3Code'=>'GLUE','groupLevel3Name'=>'Glue'],
     'metrics'=>['grossProfit'=>100],'networkOrderPolicy'=>['orderAllowed'=>true,'status'=>'ALLOWED'],
+    'warehouseGroupBreakdown'=>[['code'=>'kyiv','warehouseIds'=>[1], 'availability'=>['status'=>'MEASURED','availableDays'=>12,'stockoutDays'=>18]]],
     'warehouseBreakdown'=>[['warehouseId'=>1,'metrics'=>['physicalQuantity'=>6,'availableQuantity'=>6,'regularSoldUnits'=>11,'returnQuantity'=>0],
         'orderPolicy'=>['orderAllowed'=>true,'reserveAboveForecast'=>0,'maximumStockLimited'=>false]]]];
 if (($argv[1] ?? '') === 'calculate-route') {

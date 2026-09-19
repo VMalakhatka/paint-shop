@@ -248,3 +248,15 @@ check(lps_analytics_stock_only_ids(['stockOnlyWarehouseIds'=>['15',15]],[5,15])=
 try {lps_analytics_stock_only_ids(['stockOnlyWarehouseIds'=>[20]],[5,15]);throw new RuntimeException('Foreign warehouse accepted');}
 catch(InvalidArgumentException $expected) {}
 echo "PASS: stock-only quantities, ignored sales/returns/MIN/MAX, demand masks, missing stock and receipt validation\n";
+
+$stockRow['warehouseGroupBreakdown'][0]['availability'] = ['status'=>'MEASURED','availableDays'=>12,'stockoutDays'=>18];
+$history = lps_purchase_availability($stockGroups[0], $stockRow);
+check($history['availableDays'] === 12.0 && $history['stockoutDays'] === 18.0, 'Report uses demand group days, excluding stock-only members');
+$stockRow['warehouseGroupBreakdown'][0]['availability']['stockoutDays'] = 0;
+check(lps_purchase_availability($stockGroups[0], $stockRow)['stockoutDays'] === 0.0, 'Measured zero stockout days stays zero');
+$stockRow['warehouseGroupBreakdown'][0]['availability']['status'] = 'DATA_INCOMPLETE';
+check(lps_purchase_availability($stockGroups[0], $stockRow)['stockoutDays'] === null, 'Incomplete history never displays zero days');
+$stockRow['warehouseGroupBreakdown'][0]['availability']['status'] = 'MEASURED';
+$stockRow['warehouseGroupBreakdown'][0]['warehouseIds'] = [5,15];
+check(lps_purchase_availability($stockGroups[0], $stockRow)['stockoutDays'] === null, 'A history containing stock-only warehouses cannot be reused');
+echo "PASS: group stockout day reporting and unknown history\n";

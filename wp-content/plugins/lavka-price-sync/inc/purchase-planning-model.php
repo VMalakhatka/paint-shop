@@ -96,6 +96,24 @@ function lps_analytics_stock_only_ids(array $calculation, array $scope): array {
     return $ids;
 }
 
+function lps_purchase_availability(array $group, array $row): array {
+    $unknown = ['status' => 'HISTORY_NOT_READY', 'availableDays' => null, 'stockoutDays' => null];
+    $expected = array_map('intval', $group['demandWarehouseIds'] ?? $group['warehouseIds']);
+    sort($expected);
+    foreach ((array)($row['warehouseGroupBreakdown'] ?? []) as $source) {
+        $ids = array_map('intval', (array)($source['warehouseIds'] ?? []));
+        sort($ids);
+        if (($source['code'] ?? '') !== $group['code'] || $ids !== $expected) continue;
+        $history = $source['availability'] ?? [];
+        if (($history['status'] ?? '') !== 'MEASURED') return $unknown;
+        $available = lps_purchase_number($history['availableDays'] ?? null);
+        $stockout = lps_purchase_number($history['stockoutDays'] ?? null);
+        if ($available === null || $stockout === null) return $unknown;
+        return ['status' => 'MEASURED', 'availableDays' => $available, 'stockoutDays' => $stockout];
+    }
+    return $unknown;
+}
+
 function lps_purchase_demand(float $sales, array $group, array $row): array {
     $enabled = !empty($group['stockoutCorrectionEnabled']);
     $multiplier = (float)($group['maxDemandMultiplier'] ?? 1.1);
@@ -299,6 +317,7 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
             'plannedTransferIn' => 0.0, 'plannedTransferOut' => 0.0,
             'physical' => $valid ? $physical : null,
             'available' => $valid ? $available : null, 'regularSales' => $valid ? $sales : null,
+            'availability' => lps_purchase_availability($group, $row),
             'returns' => $valid ? $returns : null, 'coverageDays' => $daily > 0 ? max(0, $available) / $daily : null,
             'target' => $target, 'needBeforeReceipts' => $target === null ? null : max(0, $target - $available),
             'inputs' => ['inTransit' => $incoming, 'openOrders' => $open_orders, 'pack' => $pack, 'moq' => $moq],

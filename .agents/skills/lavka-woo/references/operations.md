@@ -287,6 +287,13 @@ apply до проверки результата; snapshot не доказыва
 ### Purchase scenario extension, 2026-09-12
 
 Канон: [поправка на отсутствие и маршрут пополнения](../../../../docs/OPERATIONS_RUNBOOK.md#поправка-на-дни-отсутствия-и-маршрут-одесса--киев-опт).
+Проверено по коду 2026-09-19: purchase preview запрашивает историю наличия и при
+выключенной поправке спроса, чтобы показать дни наличия/отсутствия по каждой группе
+в таблице и экспорте. `lps_purchase_availability` принимает только MEASURED-историю
+с совпадающими code и demandWarehouseIds; неизвестная история остаётся null.
+Показ истории не включает поправку спроса. Операторская трактовка — в
+`docs/OPERATIONS_RUNBOOK.md`, раздел формирования заказа.
+
 Purchase profile v2 сохраняет packRounding NONE/UP/DOWN, stockoutCorrectionEnabled,
 maxDemandMultiplier и group.supplyFromGroupCode. Сначала округление штук half-down,
 затем MOQ/упаковка. Java владеет согласованной с available-day mask оценкой потерь,

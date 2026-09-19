@@ -35,6 +35,7 @@ $scenario = ['id' => 1, 'uuid' => 'scenario-1', 'version' => 2, 'status' => 'act
     'calculation' => ['includeReturns' => true], 'purchasePlanning' => ['enabled' => true, 'allowTransfers' => false, 'groups' => [
         ['code' => 'group', 'receivingWarehouseId' => 7, 'leadTimeDays' => 5, 'targetDays' => 20, 'safetyDays' => 5]]]]];
 $token = lps_purchase_start(1, 2)['token'];
+check(lps_purchase_session($token)['query']['calculation']['availability']['enabled'] === true, 'Days of stockout are requested even with correction disabled');
 $user = 2;
 rejected(fn() => lps_purchase_session($token), 'Preview token must be user-bound');
 $user = 1;

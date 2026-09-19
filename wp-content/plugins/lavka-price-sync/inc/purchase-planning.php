@@ -26,6 +26,11 @@ function lps_purchase_i18n(): array {
         'available' => __('Available quantity', 'lavka-price-sync'),
         'physical' => __('Physical quantity', 'lavka-price-sync'),
         'sales' => __('Regular sales quantity', 'lavka-price-sync'),
+        'availableDays' => __('Days with stock in group', 'lavka-price-sync'),
+        'stockoutDays' => __('Days without stock in group', 'lavka-price-sync'),
+        'availabilityStatus' => __('Group stock history', 'lavka-price-sync'),
+        'availabilityStatuses' => ['MEASURED' => __('Measured', 'lavka-price-sync'), 'HISTORY_NOT_READY' => __('Stockout history is insufficient', 'lavka-price-sync')],
+        'availabilityHelp' => __('Days without stock are counted when no eligible warehouse in the group has physical stock at the end of the day. Stock-only warehouses are excluded. A dash means history is unavailable, not zero days.', 'lavka-price-sync'),
         'returns' => __('Returns', 'lavka-price-sync'),
         'coverage' => __('Stock coverage, days', 'lavka-price-sync'),
         'target' => __('Target stock', 'lavka-price-sync'),
@@ -170,9 +175,8 @@ function lps_purchase_start(int $id, int $version): array {
             throw new InvalidArgumentException(lps_purchase_i18n()['issues']['TRANSIT_DESTINATION_OVERLAP']);
         }
     }
-    if (!empty($profile['purchasePlanning']['stockoutCorrectionEnabled'])) {
-        $profile['calculation']['availability']['enabled'] = true;
-    }
+    // Report group history even when its demand correction is disabled.
+    $profile['calculation']['availability']['enabled'] = true;
     $days = lps_purchase_period_days($profile['period']);
     $query = lps_product_analytics_v4_sanitize_query([
         'sourceDatabase' => $profile['context']['sourceDatabase'], 'warehouseIds' => $profile['context']['warehouseIds'],
@@ -361,7 +365,7 @@ add_action('admin_post_lps_purchase_export', static function (): void {
         $state = lps_purchase_session((string)wp_unslash($_POST['token'] ?? ''));
         if (!$state['complete']) throw new InvalidArgumentException(__('Complete the preview before exporting.', 'lavka-price-sync'));
         $t = lps_purchase_i18n();
-        $keys = ['sku', 'product', 'group', 'receivingWarehouse', 'available', 'sales', 'estimatedLostSales', 'appliedLostSales', 'adjustedSales', 'maxDemandMultiplier', 'demandStatus', 'returns', 'coverage', 'target', 'need', 'transfer', 'supplyFromGroupCode', 'plannedTransferIn', 'plannedTransferOut', 'inTransit', 'openOrders', 'pack', 'packRounding', 'moq', 'purchase', 'quantity', 'final', 'reason'];
+        $keys = ['sku', 'product', 'group', 'receivingWarehouse', 'available', 'sales', 'availableDays', 'stockoutDays', 'availabilityStatus', 'estimatedLostSales', 'appliedLostSales', 'adjustedSales', 'maxDemandMultiplier', 'demandStatus', 'returns', 'coverage', 'target', 'need', 'transfer', 'supplyFromGroupCode', 'plannedTransferIn', 'plannedTransferOut', 'inTransit', 'openOrders', 'pack', 'packRounding', 'moq', 'purchase', 'quantity', 'final', 'reason'];
         $columns = array_map(static fn($key) => ['key' => $key, 'label' => $t[$key]], $keys);
         $columns[] = ['key' => 'supplierPrices', 'label' => $t['supplierPrices']];
         $columns[] = ['key' => 'status', 'label' => __('Status', 'lavka-price-sync')];
@@ -387,6 +391,8 @@ add_action('admin_post_lps_purchase_export', static function (): void {
                     'supplyFromGroupCode' => $group['supplyFromGroupCode'], 'plannedTransferIn' => $group['plannedTransferIn'], 'plannedTransferOut' => $group['plannedTransferOut'],
                     'packRounding' => $t['packModes'][$group['packRounding']],
                     'estimatedLostSales' => $group['demand']['estimatedLostSales'], 'appliedLostSales' => $group['demand']['appliedLostSales'],
+                    'availableDays' => $group['availability']['availableDays'], 'stockoutDays' => $group['availability']['stockoutDays'],
+                    'availabilityStatus' => $t['availabilityStatuses'][$group['availability']['status']],
                     'adjustedSales' => $group['demand']['adjustedSales'], 'maxDemandMultiplier' => $group['demand']['maxDemandMultiplier'],
                     'demandStatus' => $t['demandStatuses'][$group['demand']['status']],
                     'purchase' => $group['recommendedQuantity'], 'quantity' => $group['managerQuantity'], 'final' => $group['finalQuantity'], 'reason' => $group['managerReason'],
