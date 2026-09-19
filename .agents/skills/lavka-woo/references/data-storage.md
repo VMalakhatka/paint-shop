@@ -55,6 +55,19 @@ production не включён. Владелец — `pc-order-import-export/Wai
 
 Hash не заменяет исправление derived state: при изменении visibility/search/media обновляй соответствующее состояние и индекс, а не только `_ms_hash`.
 
+Единица измерения имеет **два пути хранения**: Java `SyncServiceImpl.mapDtoToWooProduct`
+пишет `edinIzmer` в meta `_edin_izmer`; PHP `lavka-total-sync/inc/sync_goods.php`
+пишет глобальный атрибут `pa_edin_izmer`, relationship и `_product_attributes`.
+Отсутствие taxonomy не доказывает отсутствие данных: проверено локально 2026-09-19
+на `KR-79406`/`KR-49602` и категории «Лаки»; значение есть в meta.
+Фильтр MU `psu-search-filters.php` читает непустую meta, иначе атрибут. Локальных
+конфликтов между этими источниками не найдено; это не доказательство актуальности
+любого из них при будущем расхождении. Не извлекать единицу из названия/фасовки,
+не схлопывать десятичную запятую и разные написания через slug. Secondary lookup
+Woo неполон: перестройка `wc_product_attributes_lookup` для фильтра не нужна.
+Чтение фильтра не запускает sync и не меняет данные. Контракт и приёмка описаны
+в README Paint Shop UX; действия покупателя в оптовой инструкции.
+
 ### Нова пошта
 
 - `pnpm_location_mappings` — соответствие Stock Location зарегистрированному

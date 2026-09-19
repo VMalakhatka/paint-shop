@@ -2,7 +2,7 @@
 /*
 Plugin Name: PSU Search & Filters
 Description: Базовые фильтры для витрин Woo (location / in_stock). Поиск — Relevanssi.
-Version: 1.4.0
+Version: 1.5.0
 Author: PaintCore
 Text Domain: psu-search-filters
 Domain Path: /languages
@@ -54,9 +54,91 @@ function psu_catalog_search_text(): string {
     return is_string($raw) ? trim(sanitize_text_field(wp_unslash($raw))) : '';
 }
 
+function psu_catalog_unit_selection(): string {
+    $value = $_GET['unit'] ?? '';
+    return is_string($value) ? trim(sanitize_text_field(wp_unslash($value))) : '';
+}
+
+/** $product_id_sql is an internal column expression, never request input. */
+function psu_catalog_unit_meta_sql(string $product_id_sql, ?string $unit = null): string {
+    global $wpdb;
+    $value_sql = $unit === null ? "TRIM(psu_um.meta_value) <> ''"
+        : $wpdb->prepare('BINARY TRIM(psu_um.meta_value) = BINARY %s', $unit);
+    return "EXISTS (SELECT 1 FROM {$wpdb->postmeta} psu_um
+        WHERE psu_um.post_id = {$product_id_sql} AND psu_um.meta_key = '_edin_izmer' AND {$value_sql})";
+}
+
+/** Java writes meta; the PHP importer writes the attribute. Prefer nonempty Java meta. */
+function psu_catalog_unit_where(string $product_id_sql, string $unit): string {
+    global $wpdb;
+    $meta = psu_catalog_unit_meta_sql($product_id_sql, $unit);
+    $has_meta = psu_catalog_unit_meta_sql($product_id_sql);
+    $term = $wpdb->prepare(
+        "EXISTS (SELECT 1 FROM {$wpdb->term_relationships} psu_ur
+         INNER JOIN {$wpdb->term_taxonomy} psu_ut ON psu_ut.term_taxonomy_id = psu_ur.term_taxonomy_id
+         INNER JOIN {$wpdb->terms} psu_un ON psu_un.term_id = psu_ut.term_id
+         WHERE psu_ur.object_id = {$product_id_sql} AND psu_ut.taxonomy = 'pa_edin_izmer'
+         AND BINARY TRIM(psu_un.name) = BINARY %s)", $unit
+    );
+    return " AND ({$meta} OR (NOT {$has_meta} AND {$term}))";
+}
+
+/** Read distinct values from both sync paths, without loading products or calling Java. */
+function psu_catalog_unit_values(?WP_Term $category = null): array {
+    global $wpdb;
+    $tax_query = [];
+    if ($category && $category->taxonomy === 'product_cat') {
+        $tax_query[] = ['taxonomy' => 'product_cat', 'field' => 'term_id', 'terms' => [$category->term_id]];
+    }
+    $visibility = wc_get_product_visibility_term_ids();
+    $excluded = array_filter([$visibility[is_search() ? 'exclude-from-search' : 'exclude-from-catalog'] ?? 0]);
+    if ($excluded) {
+        $tax_query[] = ['taxonomy' => 'product_visibility', 'field' => 'term_taxonomy_id', 'terms' => $excluded, 'operator' => 'NOT IN'];
+    }
+    $tax_sql = (new WP_Tax_Query($tax_query))->get_sql($wpdb->posts, 'ID');
+    $has_meta = psu_catalog_unit_meta_sql("{$wpdb->posts}.ID");
+    $scope = "{$wpdb->posts}.post_type = 'product' AND {$wpdb->posts}.post_status = 'publish' {$tax_sql['where']}";
+    $values = $wpdb->get_col(
+        "SELECT DISTINCT BINARY TRIM(psu_unit.meta_value) AS unit FROM {$wpdb->postmeta} psu_unit
+         INNER JOIN {$wpdb->posts} ON {$wpdb->posts}.ID = psu_unit.post_id
+         {$tax_sql['join']}
+         WHERE psu_unit.meta_key = '_edin_izmer' AND TRIM(psu_unit.meta_value) <> '' AND {$scope}
+         UNION
+         SELECT DISTINCT BINARY TRIM(psu_un.name) AS unit FROM {$wpdb->term_relationships} psu_ur
+         INNER JOIN {$wpdb->term_taxonomy} psu_ut ON psu_ut.term_taxonomy_id = psu_ur.term_taxonomy_id
+         INNER JOIN {$wpdb->terms} psu_un ON psu_un.term_id = psu_ut.term_id
+         INNER JOIN {$wpdb->posts} ON {$wpdb->posts}.ID = psu_ur.object_id
+         {$tax_sql['join']}
+         WHERE psu_ut.taxonomy = 'pa_edin_izmer' AND TRIM(psu_un.name) <> '' AND NOT {$has_meta} AND {$scope}"
+    );
+    usort($values, static fn($a, $b): int => strnatcasecmp($a, $b) ?: strcmp($a, $b));
+    return $values;
+}
+
+add_filter('posts_where', function (string $where, WP_Query $query): string {
+    $unit = $query->get('_psu_unit_filter');
+    if (is_admin() || !$query->is_main_query() || !is_string($unit) || $unit === '') return $where;
+    global $wpdb;
+    return $where . psu_catalog_unit_where("{$wpdb->posts}.ID", $unit);
+}, 20, 2);
+
+// Carry the selection with this search, not globals: secondary searches must stay unfiltered.
+add_filter('relevanssi_search_params', function (array $params, WP_Query $query): array {
+    $unit = $query->get('_psu_unit_filter');
+    if (!is_admin() && $query->is_main_query() && is_string($unit) && $unit !== '') {
+        if (!is_array($params['post_query'] ?? null)) $params['post_query'] = [];
+        $params['post_query']['_psu_unit_filter'] = $unit;
+    }
+    return $params;
+}, 20, 2);
+add_filter('relevanssi_post_query_filter', function (string $where, array $post_query): string {
+    $unit = $post_query['_psu_unit_filter'] ?? '';
+    return is_string($unit) && $unit !== '' ? $where . psu_catalog_unit_where('relevanssi.doc', $unit) : $where;
+}, 20, 2);
+
 add_filter('woocommerce_is_filtered', function (bool $filtered): bool {
     return $filtered || !empty($_GET['brand']) || !empty($_GET['location'])
-        || !empty($_GET['in_stock']) || psu_catalog_search_text() !== '';
+        || !empty($_GET['in_stock']) || psu_catalog_search_text() !== '' || psu_catalog_unit_selection() !== '';
 });
 
 function psu_searchable_identifier_meta_keys(): array {
@@ -183,7 +265,8 @@ function psu_find_exact_identifier_product_ids(string $needle): array {
  * Фильтры для витрин:
  * - ?location=slug1,slug2  (таксономия 'location')
  * - ?in_stock=1            (только в наличии)
- * Цену (?min_price/&max_price) и атрибуты (?filter_pa_*) обрабатывает сам Woo.
+ * Unit selection reads both synced storage formats, including in Relevanssi.
+ * Woo handles price (?min_price/&max_price) and its native attribute filters.
  */
 add_action('pre_get_posts', function(WP_Query $q){
     if (is_admin() || !$q->is_main_query()) return;
@@ -195,6 +278,8 @@ add_action('pre_get_posts', function(WP_Query $q){
     }
 
     $q->set('_psu_catalog_query', true);
+    $unit = psu_catalog_unit_selection();
+    $q->set('_psu_unit_filter', $unit);
     $search = psu_catalog_search_text();
     if ($search !== '') {
         $exact_ids = psu_find_exact_identifier_product_ids($search);
@@ -307,6 +392,8 @@ function psu_render_catalog_filters(): void {
 
     $search = psu_catalog_search_text();
     $category = psu_catalog_category();
+    $units = psu_catalog_unit_values($category);
+    $unit = psu_catalog_unit_selection();
     $brand = isset($_GET['brand']) ? sanitize_title(wp_unslash($_GET['brand'])) : '';
     $min_price = isset($_GET['min_price']) ? wc_format_decimal(wp_unslash($_GET['min_price'])) : '';
     $max_price = isset($_GET['max_price']) ? wc_format_decimal(wp_unslash($_GET['max_price'])) : '';
@@ -329,6 +416,19 @@ function psu_render_catalog_filters(): void {
                 <option value=""><?php esc_html_e('All suppliers', 'psu-search-filters'); ?></option>
                 <?php foreach ($brands as $brand_term): ?>
                     <option value="<?php echo esc_attr($brand_term->slug); ?>" <?php selected($brand, $brand_term->slug); ?>><?php echo esc_html($brand_term->name); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+
+        <label class="psu-catalog-filters__field">
+            <span><?php esc_html_e('Unit of measure', 'psu-search-filters'); ?></span>
+            <select name="unit">
+                <option value=""><?php esc_html_e('All units', 'psu-search-filters'); ?></option>
+                <?php if ($unit !== '' && !in_array($unit, $units, true)): ?>
+                    <option value="<?php echo esc_attr($unit); ?>" selected><?php echo esc_html($unit); ?></option>
+                <?php endif; ?>
+                <?php foreach ($units as $unit_value): ?>
+                    <option value="<?php echo esc_attr($unit_value); ?>" <?php selected($unit, $unit_value); ?>><?php echo esc_html($unit_value); ?></option>
                 <?php endforeach; ?>
             </select>
         </label>
@@ -385,10 +485,11 @@ add_action('wp_enqueue_scripts', function () {
     wp_register_style('psu-search-filters-inline', false);
     wp_enqueue_style('psu-search-filters-inline');
     wp_add_inline_style('psu-search-filters-inline', '
-        .psu-catalog-filters{display:grid;grid-template-columns:minmax(220px,2fr) minmax(160px,1fr) minmax(190px,1.2fr);gap:12px;align-items:end;margin:18px 0 22px;padding:14px;border:1px solid #d8d8d8;background:#fff}
+        .psu-catalog-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px;align-items:end;margin:18px 0 22px;padding:14px;border:1px solid #d8d8d8;background:#fff}
         .psu-catalog-filters label,.psu-catalog-filters fieldset,.psu-catalog-filters__price{margin:0}
         .psu-catalog-filters label>span,.psu-catalog-filters legend,.psu-catalog-filters__price>span{display:block;margin-bottom:5px;font-size:13px;font-weight:600}
         .psu-catalog-filters input[type="search"],.psu-catalog-filters input[type="number"],.psu-catalog-filters select{width:100%;min-height:40px;margin:0}
+        .psu-catalog-filters select{font-size:14px;padding:8px 10px}
         .psu-catalog-filters__locations{display:flex;min-width:0;padding:0;border:0;gap:10px;flex-wrap:wrap}
         .psu-catalog-filters__locations legend{width:100%}
         .psu-catalog-filters__locations label,.psu-catalog-filters__stock{display:flex;align-items:center;gap:6px;min-height:40px}
@@ -397,7 +498,7 @@ add_action('wp_enqueue_scripts', function () {
         .psu-catalog-filters__price>span{grid-column:1/-1}
         .psu-catalog-filters__category{grid-column:1/-1;font-size:13px;color:#555}
         .psu-catalog-filters>*{min-width:0}
-        .psu-catalog-filters__actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+        .psu-catalog-filters__actions{grid-column:1/-1;display:flex;justify-content:flex-end;align-items:center;gap:10px;flex-wrap:wrap}
         .psu-catalog-filters__actions button{min-height:36px;margin:0;padding:7px 12px;border:1px solid #28644c;border-radius:4px;background:#28644c;color:#fff;font-size:13px;line-height:20px;font-weight:600;white-space:nowrap;cursor:pointer}
         .psu-catalog-filters__actions button:hover{background:#1d4b39}
         .psu-catalog-filters__actions button:focus-visible{outline:2px solid #28644c;outline-offset:3px}
@@ -410,8 +511,7 @@ add_action('wp_enqueue_scripts', function () {
         .woocommerce .psu-catalog-pagination ul.page-numbers li{border:0;float:none}
         .woocommerce .psu-catalog-pagination ul.page-numbers li a,.woocommerce .psu-catalog-pagination ul.page-numbers li span{min-width:36px;min-height:36px;display:flex;align-items:center;justify-content:center;border:1px solid #ddd;border-radius:4px;padding:6px;font-size:14px}
         .woocommerce .psu-catalog-pagination ul.page-numbers li .current{background:#28644c;border-color:#28644c;color:#fff}
-        @media(max-width:900px){.psu-catalog-filters{grid-template-columns:1fr 1fr}}
-        @media(max-width:600px){.psu-catalog-filters{grid-template-columns:1fr}.psu-catalog-filters__actions button{min-height:44px}}
+        @media(max-width:600px){.psu-catalog-filters{grid-template-columns:1fr}.psu-catalog-filters__actions{justify-content:flex-start}.psu-catalog-filters__actions button{min-height:44px}}
     ');
 });
 

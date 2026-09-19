@@ -75,6 +75,12 @@ msgstr ""
 msgid "All suppliers"
 msgstr ""
 
+msgid "Unit of measure"
+msgstr ""
+
+msgid "All units"
+msgstr ""
+
 msgid "Lavka: catalogue suppliers"
 msgstr ""
 
