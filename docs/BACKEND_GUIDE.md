@@ -81,6 +81,28 @@ idempotency key, наблюдаемый terminal status и план восста
 
 ### WordPress/PHP
 
+Меню категорий каталога принадлежит `paint-shop-ux`: собственный виджет
+«Категорії Лавки» хранит настройки независимо от WPB и читает ветки `product_cat`
+через публичный GET endpoint без Java. До явного переноса сохранён адаптер старого
+WPB widget. Перенос с резервной копией выполняется в **Вигляд → Категорії Лавки**;
+WPB автоматически не отключается. Кэш, границы поддержки, проверка и откат описаны
+в [README владельца](../wp-content/plugins/paint-shop-ux/README.md).
+
+Версия меню 1.3.1 отделяет канонические URL общего кэша от quick-order
+контекста. Владелец rewrite — MU `PCQO_Category_Links`; тема не дублирует его.
+Размер страницы каталога принадлежит `psu-force-per-page.php`: стабильный выбор
+`pp`/`per_page`, одинаковые ограничения обоих query-полей и отсутствие viewport
+reload. Переключатель Paint Shop UX и форма `psu-search-filters.php` используют
+этот контракт. После deploy владельцем production smoke 2026-09-17 подтвердил
+native widget 1.3.1, отключённый WPB, обычные гостевые ссылки и отсутствие прежнего
+reload-скрипта; границы проверки — в [отчёте меню](CATEGORY_MENU_LOCAL_VERIFICATION_2026-09-15.md).
+
+Локальная 1.3.2 добавляет `paint-shop-ux/inc/slw-assets.php`: узкий compatibility
+layer для frontend URL Stock Locations. Версия ресурса зависит от версии SLW и
+содержимого файла, а динамические складские данные и зависимости не меняются.
+Серверные cache headers остаются вне этого модуля. Список handles, fallback,
+проверка и точечный откат — в [README владельца](../wp-content/plugins/paint-shop-ux/README.md).
+
 - `wp-content/plugins/` — обычные собственные плагины с activation lifecycle.
 - `wp-content/mu-plugins/` — автоматически загружаемые integration/guard modules.
 - `wp-content/deploy_plugins.list` — allow-list обычных собственных plugins для deploy.

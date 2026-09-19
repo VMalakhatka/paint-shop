@@ -6106,6 +6106,7 @@ msgstr ""
 msgid "The analytics response did not apply the selected warehouse modes."
 msgstr ""
 
+
 #: inc/purchase-planning.php
 msgid "Days with stock in group"
 msgstr ""
@@ -6120,4 +6121,44 @@ msgstr ""
 
 #: inc/purchase-planning.php
 msgid "Days without stock are counted when no eligible warehouse in the group has physical stock at the end of the day. Stock-only warehouses are excluded. A dash means history is unavailable, not zero days."
+
+msgid "Every day"
+msgstr ""
+
+msgid "No days selected"
+msgstr ""
+
+msgid "Campaign parameters and schedule"
+msgstr ""
+
+msgid "These parameters apply to both manual runs and the schedule."
+msgstr ""
+
+msgid "Automatic SKU campaign"
+msgstr ""
+
+msgid "Warehouse processing order"
+msgstr ""
+
+msgid "Scheduled start"
+msgstr ""
+
+msgid "Enable scheduled SKU campaign"
+msgstr ""
+
+msgid "Processing order"
+msgstr ""
+
+msgid "Order"
+msgstr ""
+
+#, php-format
+msgid "Processing order: warehouse %d"
+msgstr ""
+
+msgid "Days of week"
+msgstr ""
+
+msgid "Select at least one day before enabling the schedule."
+
 msgstr ""

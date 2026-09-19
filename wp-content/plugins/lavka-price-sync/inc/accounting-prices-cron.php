@@ -35,6 +35,7 @@ function lps_accounting_prices_native_cron_options(): array {
     }
     $options['warehouse_ids'] = $warehouse_ids;
     $options['warehouse_id'] = $warehouse_ids[0] ?? 0;
+    $options['weekdays'] = lps_accounting_prices_native_schedule_days($options);
 
     return $options;
 }
@@ -49,6 +50,28 @@ function lps_accounting_prices_native_normalize_warehouse_ids($warehouse_ids): a
     }
 
     return array_values($normalized);
+}
+
+function lps_accounting_prices_native_schedule_days(array $options): array {
+    // Missing array means a legacy weekly schedule; an explicit empty array stays empty.
+    $allowed = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+    $legacy = in_array($options['weekday'] ?? 'sun', $allowed, true) ? ($options['weekday'] ?? 'sun') : 'sun';
+    $days = array_key_exists('weekdays', $options) ? (array)$options['weekdays'] : [$legacy];
+    return array_values(array_intersect($allowed, array_filter($days, 'is_string')));
+}
+
+function lps_accounting_prices_native_order_warehouses($ids, array $positions): array {
+    $ids = lps_accounting_prices_native_normalize_warehouse_ids($ids);
+    $original = array_flip($ids);
+    $rank = static function (int $id) use ($positions): int {
+        $value = $positions[$id] ?? null;
+        return is_scalar($value) && ctype_digit((string)$value) && (int)$value > 0
+            ? min(1000000, (int)$value) : PHP_INT_MAX;
+    };
+    usort($ids, static function (int $a, int $b) use ($rank, $original): int {
+        return ($rank($a) <=> $rank($b)) ?: ($original[$a] <=> $original[$b]);
+    });
+    return $ids;
 }
 
 function lps_accounting_prices_native_job_state(): array {
@@ -176,9 +199,8 @@ function lps_accounting_prices_native_state_from_body(array $body, array $state 
 function lps_accounting_prices_native_calculate_next(array $options, ?int $from = null): ?int {
     if (empty($options['enabled']) || empty($options['automatic_apply_confirmed'])) return null;
 
-    $weekday_map = ['sun' => 0, 'mon' => 1, 'tue' => 2, 'wed' => 3, 'thu' => 4, 'fri' => 5, 'sat' => 6];
-    $weekday = sanitize_key((string)($options['weekday'] ?? 'sun'));
-    if (!isset($weekday_map[$weekday])) $weekday = 'sun';
+    $weekdays = lps_accounting_prices_native_schedule_days($options);
+    if (!$weekdays) return null;
 
     $time = (string)($options['time'] ?? '03:30');
     if (!preg_match('/^(\d{1,2}):(\d{2})$/', $time, $matches)) {
@@ -187,14 +209,15 @@ function lps_accounting_prices_native_calculate_next(array $options, ?int $from 
     $hour = max(0, min(23, (int)$matches[1]));
     $minute = max(0, min(59, (int)$matches[2]));
 
-    $now = new DateTimeImmutable('@' . ($from ?: time()));
+    $now = new DateTimeImmutable('@' . ($from ?? time()));
     $now = $now->setTimezone(wp_timezone());
-    $run = $now->setTime($hour, $minute, 0);
-    $days = ($weekday_map[$weekday] - (int)$run->format('w') + 7) % 7;
-    if ($days === 0 && $run <= $now) $days = 7;
-    if ($days > 0) $run = $run->modify('+' . $days . ' days');
-
-    return $run->getTimestamp();
+    for ($offset = 0; $offset <= 7; $offset++) {
+        $day = $now->modify('+' . $offset . ' days');
+        if (!in_array(strtolower($day->format('D')), $weekdays, true)) continue;
+        $run = $day->setTime($hour, $minute, 0);
+        if ($run > $now) return $run->getTimestamp();
+    }
+    return null;
 }
 
 function lps_accounting_prices_native_clear_regular_schedule(): void {
@@ -1145,12 +1168,15 @@ add_action('admin_post_lps_accounting_prices_save_cron', function () {
     check_admin_referer('lps_accounting_prices_save_cron');
 
     $enabled = !empty($_POST['enabled']);
-    $warehouse_ids = lps_accounting_prices_native_normalize_warehouse_ids(
-        isset($_POST['warehouse_ids']) ? (array)wp_unslash($_POST['warehouse_ids']) : []
+    $warehouse_ids = lps_accounting_prices_native_order_warehouses(
+        isset($_POST['warehouse_ids']) ? (array)wp_unslash($_POST['warehouse_ids']) : [],
+        isset($_POST['warehouse_positions']) ? (array)wp_unslash($_POST['warehouse_positions']) : []
     );
-    $weekday = sanitize_key(wp_unslash($_POST['weekday'] ?? 'sun'));
-    $allowed_days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
-    if (!in_array($weekday, $allowed_days, true)) $weekday = 'sun';
+    $weekdays = lps_accounting_prices_native_schedule_days(
+        isset($_POST['schedule_days_present']) || isset($_POST['weekdays'])
+            ? ['weekdays' => (array)wp_unslash($_POST['weekdays'] ?? [])]
+            : ['weekday' => sanitize_key(wp_unslash($_POST['weekday'] ?? 'sun'))]
+    );
     $time = sanitize_text_field(wp_unslash($_POST['time'] ?? '03:30'));
     if (!preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/', $time)) $time = '03:30';
     $confirmed = !empty($_POST['automatic_apply_confirmed']);
@@ -1162,6 +1188,8 @@ add_action('admin_post_lps_accounting_prices_save_cron', function () {
     $error = '';
     if ($enabled && !$warehouse_ids) {
         $error = 'warehouse';
+    } elseif ($enabled && !$weekdays) {
+        $error = 'weekdays';
     } elseif ($enabled && !$confirmed) {
         $error = 'confirmation';
     }
@@ -1171,7 +1199,8 @@ add_action('admin_post_lps_accounting_prices_save_cron', function () {
             'enabled' => $enabled,
             'warehouse_id' => $warehouse_ids[0] ?? 0,
             'warehouse_ids' => $warehouse_ids,
-            'weekday' => $weekday,
+            'weekday' => $weekdays[0] ?? 'sun',
+            'weekdays' => $weekdays,
             'time' => $time,
             'automatic_apply_confirmed' => $confirmed,
             'paused_reason' => '',

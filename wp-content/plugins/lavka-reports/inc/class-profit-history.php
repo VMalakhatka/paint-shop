@@ -60,6 +60,13 @@ class Lavka_Reports_Profit_History {
             $requestId = $_POST['requestId'] ?? '';
             if (!is_string($requestId) || !preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i', $requestId)) $this->bad();
             $body['requestId'] = $requestId;
+            foreach (['kyivEmployeeCount', 'odesaEmployeeCount'] as $key) {
+                if (!array_key_exists($key, $_POST)) continue;
+                $value = $_POST[$key];
+                if (!is_string($value) || !preg_match('/^\d{1,7}$/', $value) || (int)$value > 1000000) $this->bad();
+                $body[$key] = (int)$value;
+            }
+
             foreach (['odesaTaxShare','rubToUahRate','kyivAdditionalSalary','odesaAdditionalSalary'] as $key) {
                 $v = $_POST[$key] ?? '';
                 if (!is_string($v)) $this->bad();

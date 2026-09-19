@@ -1,0 +1,126 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Paint Shop UX 1.3.0\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: uk\n"
+
+msgid "Product categories"
+msgstr "Категорії товарів"
+
+msgid "Open catalogue"
+msgstr "Відкрити каталог"
+
+msgid "Expand %s"
+msgstr "Розгорнути %s"
+
+msgid "Collapse %s"
+msgstr "Згорнути %s"
+
+msgid "Loading categories..."
+msgstr "Завантаження категорій..."
+
+msgid "Categories could not be loaded."
+msgstr "Не вдалося завантажити категорії."
+
+msgid "Retry"
+msgstr "Повторити"
+
+msgid "More categories"
+msgstr "Ще категорії"
+
+msgid "No subcategories."
+msgstr "Підкатегорій немає."
+
+msgid "Category not found."
+msgstr "Категорію не знайдено."
+
+msgid "Category menu is unavailable."
+msgstr "Меню категорій недоступне."
+
+msgid "Unsupported language."
+msgstr "Непідтримувана мова."
+
+msgid "Lavka categories"
+msgstr "Категорії Лавки"
+
+msgid "Name"
+msgstr "Назва"
+
+msgid "Slug"
+msgstr "Слаг"
+
+msgid "Category ID"
+msgstr "ID категорії"
+
+msgid "Product count"
+msgstr "Кількість товарів"
+
+msgid "Category order"
+msgstr "Порядок категорій"
+
+msgid "Title"
+msgstr "Заголовок"
+
+msgid "Sort by"
+msgstr "Сортувати за"
+
+msgid "Sort direction"
+msgstr "Напрямок сортування"
+
+msgid "Ascending"
+msgstr "За зростанням"
+
+msgid "Descending"
+msgstr "За спаданням"
+
+msgid "Hide empty categories"
+msgstr "Приховувати порожні категорії"
+
+msgid "Show product counts"
+msgstr "Показувати кількість товарів"
+
+msgid "Category menu settings changed or could not be saved. Reload this page and check the saved migration before retrying."
+msgstr "Налаштування меню змінилися або їх не вдалося зберегти. Оновіть сторінку та перевірте збережений стан перенесення перед повторною спробою."
+
+msgid "Access denied."
+msgstr "Доступ заборонено."
+
+msgid "Activate WPB before restoring its widgets."
+msgstr "Увімкніть WPB перед відновленням його віджетів."
+
+msgid "Category menu settings saved."
+msgstr "Налаштування меню категорій збережено."
+
+msgid "Edit widgets"
+msgstr "Редагувати віджети"
+
+msgid "Current widget"
+msgstr "Поточний віджет"
+
+msgid "Replacement"
+msgstr "Заміна"
+
+msgid "No category widgets to migrate."
+msgstr "Немає віджетів категорій для перенесення."
+
+msgid "Unsupported WPB widget left unchanged:"
+msgstr "Непідтримуваний віджет WPB залишено без змін:"
+
+msgid "Replace category widgets"
+msgstr "Замінити віджети категорій"
+
+msgid "Migration backup is available."
+msgstr "Резервна копія налаштувань перенесення доступна."
+
+msgid "Restore WPB widgets"
+msgstr "Відновити віджети WPB"
+
+msgid "WPB is not disabled automatically. Check its other widgets, shortcodes and templates before deactivation. To restore the old menu, activate WPB first."
+msgstr "WPB не вимикається автоматично. Перед вимкненням перевірте інші його віджети, шорткоди та шаблони. Для відновлення старого меню спочатку увімкніть WPB."
+msgid "Products per page"
+msgstr "Товарів на сторінці"
+
+msgid "Show:"
+msgstr "Показувати:"

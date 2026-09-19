@@ -80,6 +80,12 @@ msgstr "Постачальник"
 msgid "All suppliers"
 msgstr "Усі постачальники"
 
+msgid "Unit of measure"
+msgstr "Одиниця виміру"
+
+msgid "All units"
+msgstr "Усі одиниці"
+
 msgid "Lavka: catalogue suppliers"
 msgstr "Лавка: постачальники каталогу"
 

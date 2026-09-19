@@ -3,11 +3,16 @@
 Plugin Name: Paint Shop UX
 Description: UX improvements for WooCommerce catalog: compact titles, square thumbnails, per-page switcher, graceful fallbacks.
 Author: Volodymyr
-Version: 1.2.0
+Version: 1.3.2
 Text Domain: paint-shop-ux
 Domain Path: /languages
 */
 if (!defined('ABSPATH')) exit;
+
+require_once __DIR__ . '/inc/category-menu.php';
+require_once __DIR__ . '/inc/category-widget.php';
+require_once __DIR__ . '/inc/category-menu-migration.php';
+require_once __DIR__ . '/inc/slw-assets.php';
 
 /** =======================
  *  i18n
@@ -17,45 +22,21 @@ add_action('init', function () {
 });
 
 /** =======================
- *  Products per page (?pp=)
- *  ======================= */
-add_filter('loop_shop_per_page', function ($per_page) {
-    $pp = isset($_GET['pp']) ? (int)$_GET['pp'] : 0;
-    if ($pp >= 6 && $pp <= 120) return $pp;
-
-    $pp_filter = (int)apply_filters('psu_products_per_page', 0);
-    if ($pp_filter >= 6 && $pp_filter <= 120) return $pp_filter;
-
-    return $per_page;
-}, 20);
-
-add_action('pre_get_posts', function ($q) {
-    if (is_admin() || !$q->is_main_query()) return;
-    if (function_exists('is_shop') && (is_shop() || is_product_taxonomy())) {
-        $pp = isset($_GET['pp']) ? (int)$_GET['pp'] : 0;
-        if ($pp >= 6 && $pp <= 120) {
-            $q->set('posts_per_page', $pp);
-            $q->set('posts_per_archive_page', $pp);
-        }
-    }
-}, 20);
-
-/** =======================
  *  Per-page UI (12 / 24 / 48)
  *  ======================= */
 add_action('woocommerce_before_shop_loop', function () {
-    if (!function_exists('is_shop') || (!is_shop() && !is_product_taxonomy())) return;
+    if (wc_get_loop_prop('is_shortcode')) return;
+    if (!is_shop() && !is_product_taxonomy() && !(is_search() && get_query_var('post_type') === 'product')) return;
 
-    $cur = isset($_GET['pp']) ? (int)$_GET['pp'] : 0;
-    if ($cur < 6 || $cur > 120) $cur = 0;
+    $cur = function_exists('psufp_calc_per_page') ? psufp_calc_per_page() : (int) wc_get_loop_prop('per_page');
 
-    $base = remove_query_arg('pp');
+    $base = remove_query_arg(['pp', 'per_page', 'paged', 'page'], get_pagenum_link(1, false));
     $mk = fn($v) => esc_url(add_query_arg('pp', (int)$v, $base));
 
-    echo '<div class="psu-per-page" role="group" aria-label="Products per page">';
+    echo '<div class="psu-per-page" role="group" aria-label="' . esc_attr__('Products per page', 'paint-shop-ux') . '">';
     echo '<span class="psu-per-page__label">' . esc_html__('Show:', 'paint-shop-ux') . '</span>';
     foreach ([12, 24, 48] as $v) {
-        echo '<a class="psu-per-page__btn' . ($cur === $v ? ' is-active' : '') . '" href="' . $mk($v) . '">' . $v . '</a>';
+        echo '<a class="psu-per-page__btn' . ($cur === $v ? ' is-active' : '') . '"' . ($cur === $v ? ' aria-current="true"' : '') . ' href="' . $mk($v) . '">' . $v . '</a>';
     }
     echo '</div>';
 }, 15);

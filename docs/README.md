@@ -11,8 +11,10 @@
 |---|---|
 | Понять устройство системы и владельца поведения | [SYSTEM_OVERVIEW.md](SYSTEM_OVERVIEW.md) |
 | Разрабатывать и сопровождать backend PHP/Java/Folio | [BACKEND_GUIDE.md](BACKEND_GUIDE.md) |
+| Ускорить сайт по результатам замеров 14.09.2026 | [Аудит скорости и порядок исправлений](SITE_PERFORMANCE_AUDIT_2026-09-14.md) |
 | Запустить синхронизацию, увидеть результат или разобрать ошибку | [OPERATIONS_RUNBOOK.md](OPERATIONS_RUNBOOK.md) |
 | Сохранить и показать точную причину отрицательного хронологического остатка | [задание Java и frontend-контракт](api/FOLIO_NEGATIVE_STOCK_DIAGNOSTICS_BACKEND_TASK.md) |
+| Менеджеру: запустить прибыль, проверить параметры и скачать Excel | [простая инструкция](PROFIT_REPORT_MANAGER_RU.md) |
 | Смотреть сохранённые месяцы прибыли и итог диапазона | [история прибыли](api/FOLIO_PROFIT_SAVED_REPORTS_FRONTEND.md) |
 | Проверять месячную прибыль, подробные отборы и Excel-экспорт | [операционный runbook](OPERATIONS_RUNBOOK.md#прибыль), [backend-задача](api/FOLIO_PROFIT_REPORT_RECONCILIATION_BACKEND_TASK.md) |
 | Проверять заполнение кассовых/банковских документов ФОЛИО | [аудит документов](api/FOLIO_DOCUMENT_AUDIT_FRONTEND.md), [runbook](OPERATIONS_RUNBOOK.md#аудит-документов-фолио) |

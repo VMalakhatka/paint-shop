@@ -1321,3 +1321,123 @@ msgstr ""
 #: inc/class-workflow-service.php:484
 msgid "The S3 index row has no valid size or ETag and cannot be used as Folio proof."
 msgstr ""
+
+#: inc/operator-help.php
+msgid "How to work with product images"
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Prepare the files"
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Download the XLSX template below. Fill it in and select the matching JPEG, PNG or WebP files."
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Check the batch"
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Run the check first. Images and product links are not changed at this stage."
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Review and upload"
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Review READY rows and warnings, save the CSV report, then confirm the upload. Do not change the inputs after checking."
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Verify the result"
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Save the final CSV. Check the main photo and gallery order on the product page."
+msgstr ""
+
+#: inc/operator-help.php
+msgid "How to fill in the XLSX registry"
+msgstr ""
+
+#: inc/operator-help.php
+msgid "One row describes one image assignment. Keep SKU and barcode cells as text to preserve leading zeroes."
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Column"
+msgstr ""
+
+#: inc/operator-help.php
+msgid "What to enter"
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Exact SKU on our website and in Folio."
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Barcode; may be empty when SKU is provided."
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Exact local filename including its extension, for example front.jpg."
+msgstr ""
+
+#: inc/operator-help.php
+msgid "main for the main image; gallery for an additional image."
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Leave empty for main. For gallery use unique positions 1, 2, 3."
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Use only one main image per product. Standard variations support a main image only. Automatic naming creates the website filename without renaming your local original."
+msgstr ""
+
+#: inc/operator-help.php
+msgid "What do the check results mean?"
+msgstr ""
+
+#: inc/operator-help.php
+msgid "READY: review the product and role, then upload. Warnings need attention. Errors block the row: correct the file or registry and check again."
+msgstr ""
+
+#: inc/operator-help.php
+msgid "What if the image already exists?"
+msgstr ""
+
+#: inc/operator-help.php
+msgid "A verified identical image with a valid Media Library record can be reused. The same filename with different content is blocked. An S3-only file needs an administrator to restore its Media Library record. Do not add -1 or upload a duplicate manually."
+msgstr ""
+
+#: inc/operator-help.php
+msgid "How do I confirm success or recover from an interruption?"
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Success requires SUCCESS, completed and Folio applied/noop, with no errors. Save the final CSV and check the storefront. After a timeout, keep the report and ask the administrator to establish the result before retrying. Once resolved, recheck the same registry and files."
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Image workflow navigation"
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Download XLSX template"
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Check existing product images"
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Fill in the XLSX template and keep the column headers unchanged."
+msgstr ""
+
+#: inc/operator-help.php
+msgid "Generate canonical filenames from SKU or barcode."
+msgstr ""

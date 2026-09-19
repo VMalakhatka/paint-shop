@@ -577,7 +577,10 @@ function lps_render_accounting_prices_page(): void {
     $saved_warehouse_text = $saved_warehouse_ids
         ? implode(', ', array_map('strval', $saved_warehouse_ids))
         : __('No warehouses selected', 'lavka-price-sync');
-    $saved_weekday = $weekdays[sanitize_key((string)($cron_options['weekday'] ?? 'sun'))] ?? __('Sunday', 'lavka-price-sync');
+    $saved_weekday = count($cron_options['weekdays']) === 7
+        ? __('Every day', 'lavka-price-sync')
+        : implode(', ', array_map(static fn($day) => $weekdays[$day], $cron_options['weekdays']));
+    if ($saved_weekday === '') $saved_weekday = __('No days selected', 'lavka-price-sync');
     $native_status_labels = [
         'IDLE' => __('Not started', 'lavka-price-sync'),
         'QUEUED' => __('Queued', 'lavka-price-sync'),
@@ -648,7 +651,9 @@ function lps_render_accounting_prices_page(): void {
                 <?php
                 echo esc_html($cron_error === 'confirmation'
                     ? __('Confirm automatic Folio changes before enabling the schedule.', 'lavka-price-sync')
-                    : __('Select at least one Folio warehouse before enabling the schedule.', 'lavka-price-sync'));
+                    : ($cron_error === 'weekdays'
+                        ? __('Select at least one day before enabling the schedule.', 'lavka-price-sync')
+                        : __('Select at least one Folio warehouse before enabling the schedule.', 'lavka-price-sync')));
                 ?>
             </p></div>
         <?php endif; ?>
@@ -778,7 +783,7 @@ function lps_render_accounting_prices_page(): void {
             </section>
 
             <section class="lps-ap-cron-settings" aria-labelledby="lps-ap-cron-heading">
-                <h3 id="lps-ap-cron-heading"><?php echo esc_html__('Campaign parameters and weekly schedule', 'lavka-price-sync'); ?></h3>
+                <h3 id="lps-ap-cron-heading"><?php echo esc_html__('Campaign parameters and schedule', 'lavka-price-sync'); ?></h3>
 
                 <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" class="lps-ap-cron-form">
                     <input type="hidden" name="action" value="lps_accounting_prices_save_cron">
@@ -786,7 +791,7 @@ function lps_render_accounting_prices_page(): void {
 
                     <fieldset class="lps-ap-campaign-parameters">
                         <legend><?php echo esc_html__('Campaign parameters', 'lavka-price-sync'); ?></legend>
-                        <p class="description"><?php echo esc_html__('These parameters apply to both manual runs and the weekly schedule.', 'lavka-price-sync'); ?></p>
+                        <p class="description"><?php echo esc_html__('These parameters apply to both manual runs and the schedule.', 'lavka-price-sync'); ?></p>
                         <div class="lps-ap-campaign-parameters-grid">
                             <label>
                                 <span><?php echo esc_html__('First batch size', 'lavka-price-sync'); ?></span>
@@ -807,7 +812,7 @@ function lps_render_accounting_prices_page(): void {
                         </div>
                     </fieldset>
 
-                    <h4 class="lps-ap-schedule-parameters-heading"><?php echo esc_html__('Automatic weekly SKU campaign', 'lavka-price-sync'); ?></h4>
+                    <h4 class="lps-ap-schedule-parameters-heading"><?php echo esc_html__('Automatic SKU campaign', 'lavka-price-sync'); ?></h4>
                     <p><?php echo esc_html__('The schedule is disabled by default. Warehouses run sequentially. The first campaign also includes UNVERIFIED products; regular runs select only NEW and DIRTY states.', 'lavka-price-sync'); ?></p>
 
                     <section class="lps-ap-saved-schedule" aria-labelledby="lps-ap-saved-schedule-heading">
@@ -818,12 +823,12 @@ function lps_render_accounting_prices_page(): void {
                                 <dd><?php echo esc_html($saved_schedule_status); ?></dd>
                             </div>
                             <div>
-                                <dt><?php echo esc_html__('Selected Folio warehouses', 'lavka-price-sync'); ?></dt>
+                                <dt><?php echo esc_html__('Warehouse processing order', 'lavka-price-sync'); ?></dt>
                                 <dd id="lps-ap-saved-warehouses"
                                     data-warehouse-ids="<?php echo esc_attr(wp_json_encode($saved_warehouse_ids)); ?>"><?php echo esc_html($saved_warehouse_text); ?></dd>
                             </div>
                             <div>
-                                <dt><?php echo esc_html__('Weekly start', 'lavka-price-sync'); ?></dt>
+                                <dt><?php echo esc_html__('Scheduled start', 'lavka-price-sync'); ?></dt>
                                 <dd>
                                     <?php
                                     printf(
@@ -891,15 +896,18 @@ function lps_render_accounting_prices_page(): void {
 
                     <label class="lps-ap-cron-toggle">
                         <input type="checkbox" name="enabled" value="1" <?php checked(!empty($cron_options['enabled'])); ?>>
-                        <strong><?php echo esc_html__('Enable weekly SKU campaign', 'lavka-price-sync'); ?></strong>
+                        <strong><?php echo esc_html__('Enable scheduled SKU campaign', 'lavka-price-sync'); ?></strong>
                     </label>
 
                     <div class="lps-ap-cron-grid">
                         <fieldset class="lps-ap-cron-warehouses" id="lps-ap-cron-warehouses"
-                                  data-selected="<?php echo esc_attr(wp_json_encode($cron_options['warehouse_ids'])); ?>">
+                                  data-selected="<?php echo esc_attr(wp_json_encode($cron_options['warehouse_ids'])); ?>"
+                                  data-order-label="<?php echo esc_attr__('Processing order', 'lavka-price-sync'); ?>">
                             <legend><?php echo esc_html__('Folio warehouses', 'lavka-price-sync'); ?></legend>
+                            <div class="lps-ap-warehouse-head"><span><?php echo esc_html__('Warehouse', 'lavka-price-sync'); ?></span><span><?php echo esc_html__('Order', 'lavka-price-sync'); ?></span></div>
                             <div class="lps-ap-cron-warehouse-options">
-                                <?php foreach ($cron_options['warehouse_ids'] as $warehouse_id): ?>
+                                <?php foreach ($cron_options['warehouse_ids'] as $position => $warehouse_id): ?>
+                                    <div class="lps-ap-warehouse-row">
                                     <label>
                                         <input type="checkbox" name="warehouse_ids[]" value="<?php echo esc_attr((string)$warehouse_id); ?>" checked>
                                         <?php
@@ -907,6 +915,10 @@ function lps_render_accounting_prices_page(): void {
                                         echo esc_html(sprintf(__('Warehouse ID: %d', 'lavka-price-sync'), $warehouse_id));
                                         ?>
                                     </label>
+                                    <input type="number" name="warehouse_positions[<?php echo esc_attr((string)$warehouse_id); ?>]" min="1" max="1000000" step="1" required
+                                           value="<?php echo esc_attr((string)($position + 1)); ?>"
+                                           aria-label="<?php echo esc_attr(sprintf(__('Processing order: warehouse %d', 'lavka-price-sync'), $warehouse_id)); ?>">
+                                    </div>
                                 <?php endforeach; ?>
                                 <?php if (!$cron_options['warehouse_ids']): ?>
                                     <span class="description"><?php echo esc_html__('Loading warehouses...', 'lavka-price-sync'); ?></span>
@@ -914,14 +926,16 @@ function lps_render_accounting_prices_page(): void {
                             </div>
                             <p class="description"><?php echo esc_html__('Selected warehouses are processed sequentially. A regular FAILED result stops only the current warehouse; FAILED_PARTIAL or OUTCOME_UNKNOWN stops the whole campaign for manual review.', 'lavka-price-sync'); ?></p>
                         </fieldset>
-                        <label>
-                            <span><?php echo esc_html__('Day of week', 'lavka-price-sync'); ?></span>
-                            <select name="weekday">
+                        <fieldset class="lps-ap-cron-days">
+                            <legend><?php echo esc_html__('Days of week', 'lavka-price-sync'); ?></legend>
+                            <input type="hidden" name="schedule_days_present" value="1">
+                            <label class="lps-ap-every-day"><input type="checkbox" id="lps-ap-every-day" <?php checked(count($cron_options['weekdays']) === 7); ?>> <?php echo esc_html__('Every day', 'lavka-price-sync'); ?></label>
+                            <div class="lps-ap-weekday-options">
                                 <?php foreach ($weekdays as $value => $label): ?>
-                                    <option value="<?php echo esc_attr($value); ?>" <?php selected($cron_options['weekday'], $value); ?>><?php echo esc_html($label); ?></option>
+                                    <label><input type="checkbox" name="weekdays[]" value="<?php echo esc_attr($value); ?>" <?php checked(in_array($value, $cron_options['weekdays'], true)); ?>> <?php echo esc_html($label); ?></label>
                                 <?php endforeach; ?>
-                            </select>
-                        </label>
+                            </div>
+                        </fieldset>
                         <label>
                             <span><?php echo esc_html__('Start time', 'lavka-price-sync'); ?></span>
                             <input type="time" name="time" value="<?php echo esc_attr((string)$cron_options['time']); ?>" required>

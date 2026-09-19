@@ -1679,3 +1679,179 @@ msgstr ""
 #: inc/class-profit-history.php
 msgid "Failed attempt"
 msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Retail taxes"
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Wholesale taxes"
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Total registered employees"
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Registered employees: Kyiv"
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Registered employees: Odesa"
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "City share of retail taxes (fraction)"
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Report, UAH"
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Manager check, UAH"
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Manual parameter"
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "City tax amount"
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Expense period: check M-1, M and M+1. A valid year and month in the note takes priority. Selection columns are for manual checking; see the audit for exceptions."
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Retail taxes: Odesa is rounded per document; Kyiv receives the remainder. Wholesale taxes belong entirely to Kyiv. Import transport is excluded from operating expenses."
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Tax formula is unavailable without a complete document audit. The saved report amount is shown."
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "The last column is for your manual check. Employee counts must be whole numbers, with a positive total. Excel changes affect this file only. Use the same counts on both city sheets."
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "How to use this report"
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Select the same month in From month and Through month. For several months, select the first and last month."
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "To open an existing result, click View saved reports, then Open saved month. No new calculation is needed."
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "For a new calculation, open Manual report parameters. Choose By employee count and check Kyiv and Odesa staff, additional work and the RUB rate if applicable. Leave additional work blank for the default; enter 0 to cancel it."
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Click Calculate and save selected months and wait. The same parameters apply to each selected month."
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Check the month, profit and warnings. A dash means unavailable data, not zero. If a result needs review, send the Excel file and the warning to the person responsible."
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Click Export report to Excel for the open month, or Export saved period to Excel for all selected months. Start with the Kyiv and Odesa sheets; use the last column for your check."
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Retail tax allocation"
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "By employee count"
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "By saved Odesa share"
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Enter an employee count from 0 to 1000000."
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Any"
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Period totals are saved values. Editing city-sheet formulas does not update this summary."
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Manager instructions"
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "How to get a profit report"
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Select a month."
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Open a saved report."
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Check the parameters."
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Calculate and save."
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Review the result."
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Download Excel."
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Default additional work: Kyiv UAH 0, Odesa UAH 5000. If staff or additional work changed between months, calculate those months separately."
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "How to read Excel"
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Start with the Kyiv and Odesa sheets. Selection columns follow the working template. Enter your own amount in the final Manager check, UAH column. Details and documents are on the following sheets. The downloaded file is usually in Downloads."
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Retail taxes — MALAFOP."
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Allocated by registered employee count. For example, Kyiv 4 and Odesa 3 gives shares of 4/7 and 3/7. Employee counts appear at the top of each city sheet."
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Wholesale taxes — KONDFOP."
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Allocated entirely to Kyiv."
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "With a complete audit, Excel contains retail tax and total formulas. Otherwise it shows the saved amount and an explanation. Editing Excel does not change the website. If you edit employee counts, use the same numbers on both city sheets."
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "After a connection error, open saved reports first: the result may already have been saved."
+msgstr ""
