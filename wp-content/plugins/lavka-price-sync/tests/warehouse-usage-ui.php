@@ -22,6 +22,6 @@ require $base . '/inc/analytics-scenarios.php';
 echo '<!doctype html><html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font:14px system-ui;margin:12px}input,select,button{font:inherit;max-width:100%}';
 echo file_get_contents($base . '/assets/analytics-scenarios.css'); echo '</style>';
 lps_render_analytics_scenarios_v4_page();
-echo '<script>window.LPS_ANALYTICS_SCENARIOS={ajaxUrl:"https://fixture.local/api",nonce:"fixture",warehouseGroups:[]};</script>';
+echo '<script>window.LPS_ANALYTICS_SCENARIOS=' . json_encode(['ajaxUrl'=>'https://fixture.local/api','nonce'=>'fixture','warehouseGroups'=>[['code'=>'odesa','name'=>'Odesa','warehouseIds'=>[5,15]]],'purchaseI18n'=>lps_purchase_i18n()]) . ';</script>';
 foreach (['product-availability.js', 'analytics-scenarios-v4.js'] as $script) echo '<script>' . file_get_contents($base . '/assets/' . $script) . '</script>';
 echo '</html>';

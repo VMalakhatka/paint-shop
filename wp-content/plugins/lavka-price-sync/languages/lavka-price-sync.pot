@@ -6162,3 +6162,23 @@ msgstr ""
 msgid "Select at least one day before enabling the schedule."
 
 msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Minimum-stock source warehouse"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Minimum stock added to forecast"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Only the selected warehouse contributes minimum stock above the forecast. Other group warehouses still contribute stock and demand according to their usage settings. Existing scenarios use the receiving warehouse by default."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Select a minimum-stock source from this group with full analytics."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "The minimum-stock source is unavailable or does not allow ordering. Check its warehouse policy."
+msgstr ""

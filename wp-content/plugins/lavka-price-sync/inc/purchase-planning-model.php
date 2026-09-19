@@ -144,6 +144,7 @@ function lps_purchase_profile(array $input): array {
         $groups[] = [
             'code' => sanitize_key((string)($group['code'] ?? '')),
             'receivingWarehouseId' => absint($group['receivingWarehouseId'] ?? 0),
+            'minimumWarehouseId' => absint($group['minimumWarehouseId'] ?? $group['receivingWarehouseId'] ?? 0),
             'supplyFromGroupCode' => sanitize_key((string)($group['supplyFromGroupCode'] ?? '')),
             'leadTimeDays' => lps_purchase_number($group['leadTimeDays'] ?? null, 0, 730),
             'targetDays' => lps_purchase_number($group['targetDays'] ?? null, 1, 730),
@@ -185,7 +186,11 @@ function lps_purchase_resolve_groups(array $profile, array $configured): array {
             || $group['leadTimeDays'] === null || $group['targetDays'] === null || $group['safetyDays'] === null) {
             throw new InvalidArgumentException(__('Set a receiving warehouse, lead time, target coverage and safety stock days for every destination group.', 'lavka-price-sync'));
         }
-        $resolved[] = array_merge($group, ['packRounding' => lps_purchase_pack_mode($plan),
+        $minimum_id = (int)($group['minimumWarehouseId'] ?? $group['receivingWarehouseId']);
+        if (!in_array($minimum_id, $current['warehouseIds'], true) || in_array($minimum_id, $stock_only, true)) {
+            throw new InvalidArgumentException(__('Select a minimum-stock source from this group with full analytics.', 'lavka-price-sync'));
+        }
+        $resolved[] = array_merge($group, ['minimumWarehouseId' => $minimum_id, 'packRounding' => lps_purchase_pack_mode($plan),
             'respectPack' => lps_purchase_pack_mode($plan) !== 'NONE',
             'stockoutCorrectionEnabled' => !empty($plan['stockoutCorrectionEnabled']),
             'maxDemandMultiplier' => lps_purchase_number($plan['maxDemandMultiplier'] ?? 1.1, 1, 100) ?? 1.1, 'name' => $current['name'], 'warehouseIds' => $current['warehouseIds'],
@@ -251,6 +256,7 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
     $allocated_transit = 0;
     foreach ($groups as $group) {
         $edit = $edits[$group['code']] ?? [];
+        $minimum_id = (int)($group['minimumWarehouseId'] ?? $group['receivingWarehouseId']);
         $pack_mode = lps_purchase_pack_mode($edit, lps_purchase_pack_mode($group));
         $respect_pack = $pack_mode !== 'NONE';
         $issues = [];
@@ -278,18 +284,26 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
             $returns += (float)($metrics['returnQuantity'] ?? 0);
             $policy = $member['orderPolicy'] ?? [];
             if (($policy['orderAllowed'] ?? null) === false) continue;
-            if (($policy['orderAllowed'] ?? null) !== true || lps_purchase_number($policy['reserveAboveForecast'] ?? null) === null) {
+            if (($policy['orderAllowed'] ?? null) !== true) {
                 $valid = false;
                 continue;
             }
             $eligible = true;
-            $reserve += (float)$policy['reserveAboveForecast'];
             if (($policy['maximumStockLimited'] ?? null) === false) $unlimited = true;
             elseif (($policy['maximumStockLimited'] ?? null) === true && lps_purchase_number($policy['maximumStockLimit'] ?? null) !== null) $cap += (float)$policy['maximumStockLimit'];
             else $valid = false;
         }
         $destination = $members[$group['receivingWarehouseId']] ?? [];
         $destination_policy = $destination['orderPolicy'] ?? [];
+        $minimum_source = $members[$minimum_id] ?? [];
+        $minimum_policy = $minimum_source['orderPolicy'] ?? [];
+        $reserve = lps_purchase_number($minimum_policy['reserveAboveForecast'] ?? null);
+        if (!in_array($minimum_id, $group['demandWarehouseIds'] ?? $group['warehouseIds'], true)
+            || in_array($minimum_id, $group['stockOnlyWarehouseIds'] ?? [], true)
+            || ($minimum_policy['orderAllowed'] ?? null) !== true || $reserve === null) {
+            $valid = false;
+            $issues[] = 'MINIMUM_SOURCE_NOT_READY';
+        }
         if (!$valid) $issues[] = 'INCOMPLETE_WAREHOUSE_DATA';
         if (!$eligible || ($destination_policy['orderAllowed'] ?? null) !== true) $issues[] = 'DESTINATION_POLICY_BLOCKED';
         if (($network['orderAllowed'] ?? null) !== true || ($network['status'] ?? '') !== 'ALLOWED') $issues[] = 'NETWORK_POLICY_NOT_CONFIRMED';
@@ -312,6 +326,9 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
             'stockOnlyWarehouseIds' => $group['stockOnlyWarehouseIds'] ?? [],
             'demandWarehouseIds' => $group['demandWarehouseIds'] ?? $group['warehouseIds'],
             'receivingWarehouseId' => $group['receivingWarehouseId'],
+            'minimumWarehouseId' => $minimum_id,
+            'minimumWarehouseName' => (string)($minimum_source['warehouseName'] ?? $minimum_id),
+            'minimumReserve' => $reserve,
             'supplyFromGroupCode' => $group['supplyFromGroupCode'] ?? '',
             'requiredTransferOverride' => lps_purchase_number($edit['requiredTransfer'] ?? null),
             'plannedTransferIn' => 0.0, 'plannedTransferOut' => 0.0,

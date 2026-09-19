@@ -260,3 +260,27 @@ $stockRow['warehouseGroupBreakdown'][0]['availability']['status'] = 'MEASURED';
 $stockRow['warehouseGroupBreakdown'][0]['warehouseIds'] = [5,15];
 check(lps_purchase_availability($stockGroups[0], $stockRow)['stockoutDays'] === null, 'A history containing stock-only warehouses cannot be reused');
 echo "PASS: group stockout day reporting and unknown history\n";
+
+$minRow = $row;
+$minRow['warehouseBreakdown'][0]['orderPolicy']['reserveAboveForecast'] = 6;
+$minRow['warehouseBreakdown'][1]['orderPolicy']['reserveAboveForecast'] = 1;
+$minRow['warehouseBreakdown'][2]['orderPolicy']['reserveAboveForecast'] = 2;
+$minResult = lps_purchase_calculate($minRow, $groups, 30, false, $inputs)['groups'][0];
+check($minResult['minimumWarehouseId'] === 7 && $minResult['minimumReserve'] === 1.0 && $minResult['target'] === 91.0, 'Kyiv adds only the selected wholesale MIN, not both warehouse minimums');
+$otherSource = $groups;
+$otherSource[0]['minimumWarehouseId'] = 1;
+$otherResult = lps_purchase_calculate($minRow, $otherSource, 30, false, $inputs)['groups'][0];
+check($otherResult['target'] === 96.0 && $otherResult['regularSales'] === $minResult['regularSales'] && $otherResult['available'] === $minResult['available'], 'Changing MIN source preserves group sales and stock');
+$minRow['warehouseBreakdown'][0]['orderPolicy']['reserveAboveForecast'] = 0.001;
+check(abs(lps_purchase_calculate($minRow, $otherSource, 30, false, $inputs)['groups'][0]['target'] - 90.001) < 0.000001, 'Fractional selected MIN is not rounded prematurely');
+unset($minRow['warehouseBreakdown'][0]['orderPolicy']['reserveAboveForecast']);
+check(lps_purchase_calculate($minRow, $otherSource, 30, false, $inputs)['groups'][0]['target'] === null, 'Unknown selected MIN blocks the target instead of using other warehouses');
+$badSource = $stockProfile;
+$badSource['purchasePlanning']['groups'][0]['minimumWarehouseId'] = 15;
+try { lps_purchase_resolve_groups($badSource, [['code'=>'odesa','name'=>'Odesa','warehouseIds'=>[5,15]]]); check(false, 'Stock-only warehouse cannot supply MIN'); }
+catch (InvalidArgumentException $expected) {}
+$badSource['purchasePlanning']['groups'][0]['minimumWarehouseId'] = 999;
+try { lps_purchase_resolve_groups($badSource, [['code'=>'odesa','name'=>'Odesa','warehouseIds'=>[5,15]]]); check(false, 'MIN source must belong to its group'); }
+catch (InvalidArgumentException $expected) {}
+check($saved['purchasePlanning']['groups'][0]['minimumWarehouseId'] === 7, 'Legacy scenario selects the receiving warehouse as MIN source');
+echo "PASS: selected MIN source, unchanged group demand, fractional/unknown MIN and source validation\n";

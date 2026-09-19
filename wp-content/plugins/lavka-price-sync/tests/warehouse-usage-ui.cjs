@@ -7,7 +7,7 @@ const html=execFileSync(process.env.PHP_BINARY||'php',[require('path').join(__di
  try {
  const page=await browser.newPage(); const errors=[];page.on('pageerror',e=>errors.push(e.message));
  let saved;
- const scenario=()=>({id:4,name:'Kreul',version:3,schemaVersion:4,status:'active',visibility:'shared',profile:saved||{schemaVersion:4,context:{warehouseIds:[5,15]},calculation:{stockOnlyWarehouseIds:[15]},period:{from:'2026-05-12',to:'2026-09-11'}}});
+ const scenario=()=>({id:4,name:'Kreul',version:3,schemaVersion:4,status:'active',visibility:'shared',profile:saved||{schemaVersion:4,context:{warehouseIds:[5,15]},calculation:{stockOnlyWarehouseIds:[15]},period:{from:'2026-05-12',to:'2026-09-11'},purchasePlanning:{enabled:true,groups:[{code:'odesa',receivingWarehouseId:5,leadTimeDays:0,targetDays:120,safetyDays:0}]}}});
  await page.route('https://fixture.local/api',async route=>{
   const params=new URLSearchParams(route.request().postData());const op=params.get('operation');
   let data;
@@ -24,10 +24,17 @@ const html=execFileSync(process.env.PHP_BINARY||'php',[require('path').join(__di
   const storage=page.locator('[data-warehouse-usage="15"]');
   await page.waitForFunction(()=>document.querySelector('[data-warehouse-usage="15"]')?.value==='STOCK_ONLY'&&!document.querySelector('#lps-as-save').disabled);
   assert.equal(await page.locator('[data-warehouse-usage="5"]').inputValue(),'FULL');
+  await page.locator('#lps-as-purchase-groups').evaluate(el=>{el.closest('details').open=true;});
+  assert.equal(await page.locator('[data-field="minimumWarehouseId"]').inputValue(),'5');
   await page.screenshot({path:require('path').join(require('os').tmpdir(),`warehouse-usage-${width}.png`),fullPage:true});
-  await storage.selectOption('FULL');await page.locator('#lps-as-save').click();
+  await storage.selectOption('FULL');
+  await page.locator('[data-field="minimumWarehouseId"]').selectOption('15');
+  await page.locator('#lps-as-save').click();
   await page.waitForFunction(()=>!document.querySelector('#lps-as-save').disabled);
   assert.deepEqual(saved.calculation.stockOnlyWarehouseIds,[]);
+  assert.equal(saved.purchasePlanning.groups[0].minimumWarehouseId,15);
+  assert.equal(await page.locator('[data-field="minimumWarehouseId"]').inputValue(),'15');
+  await page.locator('[data-field="minimumWarehouseId"]').selectOption('5');
   await storage.selectOption('STOCK_ONLY');await page.locator('#lps-as-save').click();
   await page.waitForFunction(()=>!document.querySelector('#lps-as-save').disabled);
   assert.deepEqual(saved.calculation.stockOnlyWarehouseIds,[15]);

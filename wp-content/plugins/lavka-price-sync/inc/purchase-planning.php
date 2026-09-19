@@ -11,6 +11,9 @@ function lps_purchase_i18n(): array {
         'supplierPriceLabels' => function_exists('lps_sp_labels') ? lps_sp_labels() : [],
         'title' => __('Supplier order preview', 'lavka-price-sync'),
         'receivingWarehouse' => __('Receiving warehouse', 'lavka-price-sync'),
+        'minimumWarehouse' => __('Minimum-stock source warehouse', 'lavka-price-sync'),
+        'minimumReserve' => __('Minimum stock added to forecast', 'lavka-price-sync'),
+        'minimumSourceHelp' => __('Only the selected warehouse contributes minimum stock above the forecast. Other group warehouses still contribute stock and demand according to their usage settings. Existing scenarios use the receiving warehouse by default.', 'lavka-price-sync'),
         'leadTimeDays' => __('Lead time, days', 'lavka-price-sync'),
         'targetDays' => __('Stock after arrival, days', 'lavka-price-sync'),
         'safetyDays' => __('Safety stock, days', 'lavka-price-sync'),
@@ -108,6 +111,7 @@ function lps_purchase_i18n(): array {
             'TRANSIT_DESTINATION_OVERLAP' => __('A transport warehouse is also a purchase destination group member. Remove the overlap to avoid counting stock twice.', 'lavka-price-sync'),
             'RECEIPTS_REVIEW_REQUIRED' => __('Confirm that transit and other incoming orders do not contain the same quantities, and check arrival dates and destinations.', 'lavka-price-sync'),
             'DESTINATION_MAXIMUM_EXCEEDED' => __('The resulting receipt exceeds the receiving warehouse stock limit.', 'lavka-price-sync'),
+            'MINIMUM_SOURCE_NOT_READY' => __('The minimum-stock source is unavailable or does not allow ordering. Check its warehouse policy.', 'lavka-price-sync'),
             'PACK_OR_MOQ_VIOLATION' => __('The quantity does not respect the supplier pack or minimum order.', 'lavka-price-sync'),
             'MANAGER_REASON_REQUIRED' => __('Enter a reason for the manager adjustment.', 'lavka-price-sync'),
             'SUPPLIER_NOT_CONFIRMED' => __('A single current supplier must be confirmed for this SKU.', 'lavka-price-sync'),
@@ -144,7 +148,7 @@ function lps_purchase_session_key(string $token): string {
 function lps_purchase_session(string $token): array {
     $state = get_transient(lps_purchase_session_key($token));
     if (!is_array($state)) throw new InvalidArgumentException(__('The preview has expired. Start a new calculation.', 'lavka-price-sync'));
-    if (($state['previewVersion'] ?? 0) !== 3) throw new InvalidArgumentException(__('Start a new preview to apply the current rounding and demand settings.', 'lavka-price-sync'));
+    if (($state['previewVersion'] ?? 0) !== 4) throw new InvalidArgumentException(__('Start a new preview to apply the current rounding and demand settings.', 'lavka-price-sync'));
     if (($state['transitContractVersion'] ?? 0) !== 3 || ($state['transitWarehouseIds'] ?? null) !== lps_purchase_transit_warehouses()) {
         throw new InvalidArgumentException(__('Transport warehouse settings changed. Start a new preview.', 'lavka-price-sync'));
     }
@@ -184,7 +188,7 @@ function lps_purchase_start(int $id, int $version): array {
         'calculation' => $profile['calculation'], 'sort' => [['field' => 'sku', 'direction' => 'ASC']], 'page' => ['size' => 100],
     ]);
     $token = bin2hex(random_bytes(16));
-    $state = ['previewVersion' => 3, 'scenario' => ['id' => $scenario['id'], 'uuid' => $scenario['uuid'], 'name' => $scenario['name'], 'version' => $scenario['version']],
+    $state = ['previewVersion' => 4, 'scenario' => ['id' => $scenario['id'], 'uuid' => $scenario['uuid'], 'name' => $scenario['name'], 'version' => $scenario['version']],
         'supplierPriceVersions' => function_exists('lps_sp_active_versions') ? lps_sp_active_versions($profile['context']['sourceDatabase']) : [],
         'query' => $query, 'groups' => $groups, 'groupsRevision' => lavka_get_global_warehouse_groups_revision(),
         'transitWarehouseIds' => $transit_ids, 'transitGenerationId' => null, 'transitContractVersion' => 3,
@@ -365,7 +369,7 @@ add_action('admin_post_lps_purchase_export', static function (): void {
         $state = lps_purchase_session((string)wp_unslash($_POST['token'] ?? ''));
         if (!$state['complete']) throw new InvalidArgumentException(__('Complete the preview before exporting.', 'lavka-price-sync'));
         $t = lps_purchase_i18n();
-        $keys = ['sku', 'product', 'group', 'receivingWarehouse', 'available', 'sales', 'availableDays', 'stockoutDays', 'availabilityStatus', 'estimatedLostSales', 'appliedLostSales', 'adjustedSales', 'maxDemandMultiplier', 'demandStatus', 'returns', 'coverage', 'target', 'need', 'transfer', 'supplyFromGroupCode', 'plannedTransferIn', 'plannedTransferOut', 'inTransit', 'openOrders', 'pack', 'packRounding', 'moq', 'purchase', 'quantity', 'final', 'reason'];
+        $keys = ['sku', 'product', 'group', 'receivingWarehouse', 'minimumWarehouse', 'minimumReserve', 'available', 'sales', 'availableDays', 'stockoutDays', 'availabilityStatus', 'estimatedLostSales', 'appliedLostSales', 'adjustedSales', 'maxDemandMultiplier', 'demandStatus', 'returns', 'coverage', 'target', 'need', 'transfer', 'supplyFromGroupCode', 'plannedTransferIn', 'plannedTransferOut', 'inTransit', 'openOrders', 'pack', 'packRounding', 'moq', 'purchase', 'quantity', 'final', 'reason'];
         $columns = array_map(static fn($key) => ['key' => $key, 'label' => $t[$key]], $keys);
         $columns[] = ['key' => 'supplierPrices', 'label' => $t['supplierPrices']];
         $columns[] = ['key' => 'status', 'label' => __('Status', 'lavka-price-sync')];
@@ -385,6 +389,7 @@ add_action('admin_post_lps_purchase_export', static function (): void {
             foreach ($calculated['groups'] as $group) {
                 $record = ['sku' => (string)$sku, 'product' => $calculated['productName'], 'group' => $group['groupName'],
                     'receivingWarehouse' => $group['receivingWarehouseId'], 'available' => $group['available'], 'sales' => $group['regularSales'],
+                    'minimumWarehouse' => $group['minimumWarehouseName'] . ' (#' . $group['minimumWarehouseId'] . ')', 'minimumReserve' => $group['minimumReserve'],
                     'returns' => $group['returns'], 'coverage' => $group['coverageDays'], 'target' => $group['target'], 'need' => $group['needBeforeReceipts'],
                     'transfer' => wp_json_encode($group['transfers'], JSON_UNESCAPED_UNICODE),
                     'supplierPrices' => wp_json_encode($raw['supplierPrices'] ?? [], JSON_UNESCAPED_UNICODE),

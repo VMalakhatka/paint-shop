@@ -6381,3 +6381,23 @@ msgstr "Дни недели"
 
 msgid "Select at least one day before enabling the schedule."
 msgstr "Выберите хотя бы один день перед включением расписания."
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Minimum-stock source warehouse"
+msgstr "Склад-источник минимального запаса"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Minimum stock added to forecast"
+msgstr "Минимальный запас сверх прогноза"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Only the selected warehouse contributes minimum stock above the forecast. Other group warehouses still contribute stock and demand according to their usage settings. Existing scenarios use the receiving warehouse by default."
+msgstr "К прогнозу добавляется минимальный запас только выбранного склада. Остатки и спрос других складов группы учитываются согласно их настройкам. В существующих сценариях по умолчанию используется склад получения."
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Select a minimum-stock source from this group with full analytics."
+msgstr "Выберите источник минимального запаса среди складов этой группы с полным учётом."
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "The minimum-stock source is unavailable or does not allow ordering. Check its warehouse policy."
+msgstr "Источник минимального запаса недоступен или не разрешает заказ. Проверьте политику склада."

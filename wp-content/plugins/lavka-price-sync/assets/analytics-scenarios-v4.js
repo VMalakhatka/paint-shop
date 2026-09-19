@@ -276,7 +276,7 @@
         el('lps-as-purchase-groups').querySelectorAll('[data-purchase-group]').forEach((row) => {
             if (!row.querySelector('[data-field="selected"]').checked) return;
             const group = { code: row.dataset.purchaseGroup };
-            ['receivingWarehouseId', 'leadTimeDays', 'targetDays', 'safetyDays'].forEach((field) => {
+            ['receivingWarehouseId', 'minimumWarehouseId', 'leadTimeDays', 'targetDays', 'safetyDays'].forEach((field) => {
                 const value = row.querySelector('[data-field="' + field + '"]').value;
                 group[field] = value === '' ? null : Number(value);
             });
@@ -299,14 +299,15 @@
         el('lps-as-purchase-groups').innerHTML = groups.map((group) => {
             const value = saved.get(group.code) || {};
             const t = config.purchaseI18n || {};
-            const options = '<option value="">—</option>' + group.warehouseIds.map((id) => {
+            const options = (selected) => '<option value="">—</option>' + group.warehouseIds.map((id) => {
                 const warehouse = state.warehouses.find((item) => Number(item.id) === Number(id));
-                return '<option value="' + Number(id) + '"' + (Number(value.receivingWarehouseId) === Number(id) ? ' selected' : '') + '>' + escapeHtml(warehouse ? warehouse.id + ' · ' + warehouse.name : id) + '</option>';
+                return '<option value="' + Number(id) + '"' + (Number(selected) === Number(id) ? ' selected' : '') + '>' + escapeHtml(warehouse ? warehouse.id + ' · ' + warehouse.name : id) + '</option>';
             }).join('');
             return '<fieldset class="lps-as-purchase-group" data-purchase-group="' + escapeHtml(group.code) + '"><legend><label><input type="checkbox" data-field="selected"' + (saved.has(group.code) ? ' checked' : '') + '> ' + escapeHtml(group.name) + ' [' + group.warehouseIds.map(Number).join(', ') + ']</label></legend><div class="lps-as-grid">' +
-                '<label><span>' + escapeHtml(t.receivingWarehouse) + '</span><select data-field="receivingWarehouseId">' + options + '</select></label>' +
+                '<label><span>' + escapeHtml(t.receivingWarehouse) + '</span><select data-field="receivingWarehouseId">' + options(value.receivingWarehouseId) + '</select></label>' +
+                '<label><span>' + escapeHtml(t.minimumWarehouse) + '</span><select data-field="minimumWarehouseId">' + options(value.minimumWarehouseId == null ? value.receivingWarehouseId : value.minimumWarehouseId) + '</select></label>' +
                 '<label><span>' + escapeHtml(t.supplyFromGroupCode) + '</span><select data-field="supplyFromGroupCode"><option value="">' + escapeHtml(t.directSupplier) + '</option>' + groups.filter((item) => item.code !== group.code).map((item) => '<option value="' + escapeHtml(item.code) + '"' + (value.supplyFromGroupCode === item.code ? ' selected' : '') + '>' + escapeHtml(item.name) + '</option>').join('') + '</select></label>' +
-                ['leadTimeDays', 'targetDays', 'safetyDays'].map((field) => '<label><span>' + escapeHtml(t[field]) + '</span><input type="number" min="' + (field === 'targetDays' ? 1 : 0) + '" max="' + (field === 'safetyDays' ? 365 : 730) + '" step="1" data-field="' + field + '" value="' + escapeHtml(value[field] == null ? '' : value[field]) + '"></label>').join('') + '</div><p>' + escapeHtml(t.routeHelp) + '</p></fieldset>';
+                ['leadTimeDays', 'targetDays', 'safetyDays'].map((field) => '<label><span>' + escapeHtml(t[field]) + '</span><input type="number" min="' + (field === 'targetDays' ? 1 : 0) + '" max="' + (field === 'safetyDays' ? 365 : 730) + '" step="1" data-field="' + field + '" value="' + escapeHtml(value[field] == null ? '' : value[field]) + '"></label>').join('') + '</div><p>' + escapeHtml(t.minimumSourceHelp) + '</p><p>' + escapeHtml(t.routeHelp) + '</p></fieldset>';
         }).join('');
     }
 

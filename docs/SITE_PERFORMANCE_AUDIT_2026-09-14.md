@@ -47,7 +47,8 @@ LCP, INP, мобильная сеть, действия с непустой ко
 Владелец: `wpb-accordion-menu-or-category`, виджет
 `widget_wpb_wmca_accordion_widget`, размещённый в правой колонке.
 Локальный код также содержит неограниченный обход категорий (`depth => 0`) в
-[shortcode](../wp-content/plugins/wpb-accordion-menu-or-category/inc/wpb-wmca-shortcodes.php).
+shortcode `wp-content/plugins/wpb-accordion-menu-or-category/inc/wpb-wmca-shortcodes.php`
+(файл стороннего плагина, не включённый в репозиторий).
 Отдельный read-only CLI-профиль `dynamic_sidebar('sidebar-1')` на production
 подтвердил **4,7393 с**, **619 830 байт**, **1 дополнительный SQL-запрос** для
 боковой колонки. Это не изолированный таймер одного widget и не обычный HTTP
