@@ -230,7 +230,7 @@ function lps_purchase_page(string $token, int $page): array {
     sort($ids); sort($expected_ids);
     $generations = array_column((array)($context['warehouses'] ?? []), 'generationId');
     if (($context['analyticsSchemaVersion'] ?? 0) < 7) {
-        throw new RuntimeException(__('Start a new preview to apply the current rounding and demand settings.', 'lavka-price-sync'));
+        throw new RuntimeException(__('Rebuild warehouse snapshots with the updated Java backend to capture internal reservations.', 'lavka-price-sync'));
     }
     if ($ids !== $expected_ids
         || count($generations) !== count($expected_ids) || count(array_filter($generations, static fn($id) => (int)$id > 0)) !== count($expected_ids)
