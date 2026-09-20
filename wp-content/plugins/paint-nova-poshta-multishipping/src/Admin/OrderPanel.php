@@ -64,7 +64,7 @@ final class OrderPanel
         ?>
         <div class="pnpm-order-panel">
             <p><strong><?php esc_html_e('Safety mode:', 'paint-nova-poshta-multishipping'); ?></strong>
-                <?php esc_html_e('diagnostics only; no real Nova Poshta shipment can be created.', 'paint-nova-poshta-multishipping'); ?>
+                <?php esc_html_e('Customer TTNs are stored locally. Creating or changing shipments in Nova Poshta is disabled.', 'paint-nova-poshta-multishipping'); ?>
             </p>
 
             <?php if ($snapshot['errors']) : ?>
@@ -105,9 +105,7 @@ final class OrderPanel
                 </ul>
             <?php endif; ?>
 
-            <p class="description">
-                <?php esc_html_e('External customer TTN submission, private labels and manager approval will be enabled after the private-file and tracking layers are completed.', 'paint-nova-poshta-multishipping'); ?>
-            </p>
+            <?php do_action('pnpm_order_panel', $order); ?>
         </div>
         <?php
     }

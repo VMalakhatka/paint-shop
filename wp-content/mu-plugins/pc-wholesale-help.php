@@ -457,6 +457,11 @@ function pc_wholesale_help_render_endpoint(): void {
                 <?php pc_wholesale_help_step('4', __('Choose payment', 'pc-wholesale-help'), __('Select one of the methods available for your account.', 'pc-wholesale-help')); ?>
                 <?php pc_wholesale_help_step('5', __('Confirm once', 'pc-wholesale-help'), __('Wait for Folio processing to finish; do not submit a duplicate order.', 'pc-wholesale-help')); ?>
             </ol>
+            <div class="pc-help-card" id="customer-ttn">
+                <h3><?php esc_html_e('Ship using your existing Nova Poshta TTN', 'pc-wholesale-help'); ?></h3>
+                <p><?php esc_html_e('At checkout, choose Ship using my Nova Poshta TTN. Enter one existing TTN, message or official tracking link for each displayed warehouse. Check the extracted numbers and goods, then confirm them.', 'pc-wholesale-help'); ?></p>
+                <p><?php esc_html_e('Delivery is 0 UAH in this order; carrier charges are paid under your TTN. Pay for our goods separately. The warehouse reviews the shipment before dispatch. You can see the numbers in your order; contact the manager for corrections. Uploading QR images or PDF labels is not available yet.', 'pc-wholesale-help'); ?></p>
+            </div>
             <a class="pc-help-inline-action" href="<?php echo esc_url($checkout_url); ?>"><?php esc_html_e('Go to checkout', 'pc-wholesale-help'); ?> →</a>
         </section>
 

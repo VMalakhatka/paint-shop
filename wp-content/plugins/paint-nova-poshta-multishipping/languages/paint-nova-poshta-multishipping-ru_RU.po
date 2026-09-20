@@ -1,0 +1,128 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: ru_RU\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+msgid "Ship using my Nova Poshta TTN"
+msgstr "Отправка по моей ТТН Новой почты"
+
+msgid "Enter one shipment number per warehouse."
+msgstr "Укажите один номер ТТН для каждого склада."
+
+msgid "Please ask the manager to arrange this warehouse shipment."
+msgstr "Обратитесь к менеджеру для оформления отправки со склада."
+
+msgid "Shipment saving is busy. Please try again."
+msgstr "Сохранение отправления занято. Попробуйте ещё раз."
+
+msgid "This order already has shipments. Contact the manager before changing a TTN."
+msgstr "В заказе уже есть отправления. Для изменения ТТН обратитесь к менеджеру."
+
+msgid "The shipment could not be saved. Contact the manager before retrying."
+msgstr "Не удалось сохранить отправление. Перед повтором обратитесь к менеджеру."
+
+msgid "Warehouse allocation changed. Please review the order."
+msgstr "Распределение товаров по складам изменилось. Проверьте заказ."
+
+msgid "The TTN could not be saved. It may already belong to another order. Contact the manager."
+msgstr "Не удалось сохранить ТТН. Возможно, она уже принадлежит другому заказу. Обратитесь к менеджеру."
+
+msgid "Enter one existing TTN per warehouse. Delivery is 0 UAH in this order; Nova Poshta services are paid under your TTN. The warehouse must approve it before dispatch."
+msgstr "Укажите одну готовую ТТН для каждого склада. Доставка в этом заказе — 0 грн; услуги Новой почты оплачиваются по вашей ТТН. Склад должен подтвердить её перед отправкой."
+
+msgid "Existing TTN, message or official tracking link"
+msgstr "Готовая ТТН, сообщение или официальная ссылка отслеживания"
+
+msgid "I checked the TTN numbers and assigned goods for every warehouse."
+msgstr "Я проверил номера ТТН и товары для каждого склада."
+
+msgid "How to submit your TTN"
+msgstr "Как передать свою ТТН"
+
+msgid "This shipping option is available only to signed-in wholesale customers."
+msgstr "Этот способ доставки доступен только авторизованным оптовым клиентам."
+
+msgid "Pay for our order separately. COD on the customer TTN belongs to its sender."
+msgstr "Оплатите наш заказ отдельно. Наложенный платёж клиентской ТТН принадлежит её отправителю."
+
+msgid "Confirm the TTN numbers and goods for every warehouse."
+msgstr "Подтвердите номера ТТН и товары для каждого склада."
+
+msgid "A TTN is already in use. Use a separate TTN for each warehouse and order."
+msgstr "ТТН уже используется. Для каждого склада и заказа нужна отдельная ТТН."
+
+msgid "Review the customer TTN fields before placing the order."
+msgstr "Проверьте поля клиентских ТТН перед оформлением заказа."
+
+msgid "Checking shipment..."
+msgstr "Проверяем отправление…"
+
+msgid "The action failed. Refresh the order before retrying."
+msgstr "Действие не выполнено. Обновите заказ перед повтором."
+
+msgid "Your Nova Poshta TTNs"
+msgstr "Ваши ТТН Новой почты"
+
+msgid "Shipments for the original order (all warehouses)"
+msgstr "Отправления исходного заказа (все склады)"
+
+msgid "Nova Poshta services are paid under your TTN. Contact the manager to correct a submitted TTN."
+msgstr "Услуги Новой почты оплачиваются по вашей ТТН. Для исправления переданной ТТН обратитесь к менеджеру."
+
+msgid "Manage customer TTNs in the original order"
+msgstr "Управление клиентскими ТТН в исходном заказе"
+
+msgid "Open official tracking"
+msgstr "Открыть официальное отслеживание"
+
+msgid "Tracking is unavailable; verify the TTN manually."
+msgstr "Отслеживание недоступно; проверьте ТТН вручную."
+
+msgid "Check Nova Poshta status"
+msgstr "Проверить статус Новой почты"
+
+msgid "I verified the sender warehouse, assigned goods, recipient, payer, COD, value, weight, places and label. This TTN is awaiting dispatch."
+msgstr "Я проверил склад отправителя, товары, получателя, плательщика, наложенный платёж, стоимость, вес, количество мест и маркировку. Эта ТТН ожидает отправки."
+
+msgid "Manual verification note (required if tracking is unavailable)"
+msgstr "Примечание ручной проверки (обязательно, если отслеживание недоступно)"
+
+msgid "Approve for warehouse handoff"
+msgstr "Подтвердить для передачи со склада"
+
+msgid "Approved by the warehouse"
+msgstr "Подтверждено складом"
+
+msgid "Submitted by customer; awaiting warehouse review"
+msgstr "Передано клиентом; ожидает проверки склада"
+
+msgid "Access denied."
+msgstr "Доступ запрещён."
+
+msgid "Shipment not found."
+msgstr "Отправление не найдено."
+
+msgid "Confirm the warehouse shipment checklist first."
+msgstr "Сначала подтвердите проверку данных отправления."
+
+msgid "Nova Poshta does not show this TTN as awaiting dispatch. Check it with the customer."
+msgstr "По данным Новой почты эта ТТН не ожидает отправки. Уточните её у клиента."
+
+msgid "Record how you manually verified the TTN (10–500 characters)."
+msgstr "Укажите, как вы проверили ТТН вручную (10–500 символов)."
+
+msgid "This order cannot be approved for dispatch."
+msgstr "Этот заказ нельзя подтвердить для отправки."
+
+msgid "Customer TTNs are stored locally. Creating or changing shipments in Nova Poshta is disabled."
+msgstr "Клиентские ТТН сохраняются на сайте. Создание или изменение отправлений в Новой почте отключены."
+
+msgid "Enter the shipment number or official tracking link."
+msgstr "Укажите номер ТТН или официальную ссылку отслеживания."
+
+msgid "Only an official Nova Poshta tracking link is allowed."
+msgstr "Разрешены только официальные ссылки отслеживания Новой почты."
+
+msgid "A canonical 14-digit shipment number was not found."
+msgstr "Укажите один 14-значный номер ТТН в поле склада."

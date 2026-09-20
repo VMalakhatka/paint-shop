@@ -1,8 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Paint Nova Poshta Multishipping 0.5.0\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/paint-nova-poshta-"
-"multishipping\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/paint-nova-poshta-multishipping\n"
 "POT-Creation-Date: 2026-08-24T18:51:18+00:00\n"
 "PO-Revision-Date: 2026-08-24 14:00+0200\n"
 "Last-Translator: Paint / Lavka\n"
@@ -11,8 +10,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 #. Plugin Name of the plugin
 #: paint-nova-poshta-multishipping.php
@@ -22,8 +20,7 @@ msgstr "Багатоскладська Нова пошта"
 #. Description of the plugin
 #: paint-nova-poshta-multishipping.php
 msgid "Direct multi-warehouse Nova Poshta integration for WooCommerce orders."
-msgstr ""
-"Пряма багатоскладська інтеграція Нової пошти для замовлень WooCommerce."
+msgstr "Пряма багатоскладська інтеграція Нової пошти для замовлень WooCommerce."
 
 #. Author of the plugin
 #: paint-nova-poshta-multishipping.php
@@ -69,12 +66,8 @@ msgid "No shipment records have been created yet."
 msgstr "Записів відправлень ще немає."
 
 #: src/Admin/OrderPanel.php:109
-msgid ""
-"External customer TTN submission, private labels and manager approval will "
-"be enabled after the private-file and tracking layers are completed."
-msgstr ""
-"Передавання клієнтської ТТН, приватні маркировки та підтвердження менеджера "
-"будуть доступні після завершення приватного сховища й трекінгу."
+msgid "External customer TTN submission, private labels and manager approval will be enabled after the private-file and tracking layers are completed."
+msgstr "Передавання клієнтської ТТН, приватні маркировки та підтвердження менеджера будуть доступні після завершення приватного сховища й трекінгу."
 
 #: src/Admin/SettingsPage.php:35 src/Admin/SettingsPage.php:94
 #: src/Shipping/NovaPoshtaShippingMethod.php:18
@@ -130,11 +123,8 @@ msgid "No available handover points were found."
 msgstr "Доступних точок передавання не знайдено."
 
 #: src/Admin/SettingsPage.php:65
-msgid ""
-"Not required: Nova Poshta courier collects parcels from the registered "
-"address."
-msgstr ""
-"Не потрібно: кур'єр Нової пошти забирає посилки із зареєстрованої адреси."
+msgid "Not required: Nova Poshta courier collects parcels from the registered address."
+msgstr "Не потрібно: кур'єр Нової пошти забирає посилки із зареєстрованої адреси."
 
 #: src/Admin/SettingsPage.php:66 src/Admin/SettingsPage.php:242
 msgid "Ready"
@@ -161,23 +151,16 @@ msgid "Nova Poshta settings saved."
 msgstr "Налаштування Нової пошти збережено."
 
 #: src/Admin/SettingsPage.php:101
-msgid ""
-"Real shipment creation is not implemented and API write operations are "
-"locked."
-msgstr ""
-"Створення реальних ТТН ще не реалізовано, а операції запису API заблоковано."
+msgid "Real shipment creation is not implemented and API write operations are locked."
+msgstr "Створення реальних ТТН ще не реалізовано, а операції запису API заблоковано."
 
 #: src/Admin/SettingsPage.php:109
 msgid "API connection"
 msgstr "Підключення API"
 
 #: src/Admin/SettingsPage.php:111
-msgid ""
-"The API key is read only from PNPM_NOVA_POSHTA_API_KEY in wp-config.php or "
-"the server environment."
-msgstr ""
-"Ключ API читається лише з PNPM_NOVA_POSHTA_API_KEY у wp-config.php або "
-"середовищі сервера."
+msgid "The API key is read only from PNPM_NOVA_POSHTA_API_KEY in wp-config.php or the server environment."
+msgstr "Ключ API читається лише з PNPM_NOVA_POSHTA_API_KEY у wp-config.php або середовищі сервера."
 
 #: src/Admin/SettingsPage.php:115
 msgid "API endpoint"
@@ -212,14 +195,8 @@ msgid "Warehouse senders"
 msgstr "Відправники за складами"
 
 #: src/Admin/SettingsPage.php:147
-msgid ""
-"Map each WooCommerce Stock Location to a registered sender address. For self-"
-"drop-off, also choose the exact Nova Poshta branch or parcel locker where "
-"parcels will be handed over."
-msgstr ""
-"Зіставте кожну Stock Location WooCommerce із зареєстрованою адресою "
-"відправника. Для самостійного передавання також оберіть точне відділення або "
-"поштомат Нової пошти, куди здаватимуть посилки."
+msgid "Map each WooCommerce Stock Location to a registered sender address. For self-drop-off, also choose the exact Nova Poshta branch or parcel locker where parcels will be handed over."
+msgstr "Зіставте кожну Stock Location WooCommerce із зареєстрованою адресою відправника. Для самостійного передавання також оберіть точне відділення або поштомат Нової пошти, куди здаватимуть посилки."
 
 #: src/Admin/SettingsPage.php:151
 msgid "Stock Location"
@@ -338,9 +315,7 @@ msgid "Delivery payment and loyalty policy"
 msgstr "Оплата доставки та програма лояльності"
 
 #: src/Admin/SettingsPage.php:441
-msgid ""
-"These rules are applied when the customer selects Nova Poshta delivery at "
-"checkout."
+msgid "These rules are applied when the customer selects Nova Poshta delivery at checkout."
 msgstr "Ці правила застосовуються, коли покупець обирає доставку Новою поштою під час оформлення замовлення."
 
 #: src/Admin/SettingsPage.php:444
@@ -348,12 +323,8 @@ msgid "Customer groups"
 msgstr "Групи покупців"
 
 #: src/Admin/SettingsPage.php:445
-msgid ""
-"Assign storefront roles to the retail or partner policy. Unassigned roles "
-"use the retail policy."
-msgstr ""
-"Призначте ролям вітрини політику для роздрібних покупців або партнерів. Для "
-"непризначених ролей використовується політика роздрібних покупців."
+msgid "Assign storefront roles to the retail or partner policy. Unassigned roles use the retail policy."
+msgstr "Призначте ролям вітрини політику для роздрібних покупців або партнерів. Для непризначених ролей використовується політика роздрібних покупців."
 
 #: src/Admin/SettingsPage.php:449
 msgid "WordPress role"
@@ -388,12 +359,8 @@ msgid "Order threshold"
 msgstr "Поріг суми замовлення"
 
 #: src/Admin/SettingsPage.php:495
-msgid ""
-"The order merchandise total after discounts is used; shipping and fees are "
-"excluded."
-msgstr ""
-"Використовується сума товарів після знижок; доставку та додаткові збори не "
-"враховано."
+msgid "The order merchandise total after discounts is used; shipping and fees are excluded."
+msgstr "Використовується сума товарів після знижок; доставку та додаткові збори не враховано."
 
 #: src/Admin/SettingsPage.php:498
 msgid "Store delivery allowance"
@@ -424,12 +391,8 @@ msgid "At or above the threshold"
 msgstr "На рівні порога або вище"
 
 #: src/Admin/SettingsPage.php:513
-msgid ""
-"A zero maximum means no additional cap. Percentage values are entered as a "
-"number, for example 3 for three percent."
-msgstr ""
-"Нульовий максимум означає відсутність додаткового обмеження. Відсоток "
-"вводиться числом, наприклад 3 для трьох відсотків."
+msgid "A zero maximum means no additional cap. Percentage values are entered as a number, for example 3 for three percent."
+msgstr "Нульовий максимум означає відсутність додаткового обмеження. Відсоток вводиться числом, наприклад 3 для трьох відсотків."
 
 #: src/Admin/SettingsPage.php:515
 msgid "Who pays each delivery component"
@@ -472,21 +435,15 @@ msgid "Cash on delivery commission"
 msgstr "Комісія за накладений платіж"
 
 #: src/Admin/SettingsPage.php:560
-msgid ""
-"When multi-shipment cash on delivery is disabled, checkout must offer "
-"prepayment methods instead."
-msgstr ""
-"Якщо накладений платіж для кількох посилок вимкнено, checkout має "
-"запропонувати способи передоплати."
+msgid "When multi-shipment cash on delivery is disabled, checkout must offer prepayment methods instead."
+msgstr "Якщо накладений платіж для кількох посилок вимкнено, checkout має запропонувати способи передоплати."
 
 #: src/Admin/SettingsPage.php:572
 msgid "Checkout calculation"
 msgstr "Розрахунок під час оформлення замовлення"
 
 #: src/Admin/SettingsPage.php:573
-msgid ""
-"The checkout uses the official Nova Poshta tariff API in read-only mode. "
-"These settings do not create shipments or TTNs."
+msgid "The checkout uses the official Nova Poshta tariff API in read-only mode. These settings do not create shipments or TTNs."
 msgstr "Оформлення замовлення використовує офіційний тарифний API Нової пошти лише для читання. Ці налаштування не створюють відправлень або ТТН."
 
 #: src/Admin/SettingsPage.php:576
@@ -510,9 +467,7 @@ msgid "Use the WooCommerce weight unit"
 msgstr "Використовувати одиницю ваги WooCommerce"
 
 #: src/Admin/SettingsPage.php:591
-msgid ""
-"The current Lavka catalogue usually stores gram values in the product weight "
-"field."
+msgid "The current Lavka catalogue usually stores gram values in the product weight field."
 msgstr "Поточний каталог Lavka зазвичай зберігає у полі ваги товару значення в грамах."
 
 #: src/Admin/SettingsPage.php:595
@@ -576,9 +531,7 @@ msgid "Nova Poshta delivery"
 msgstr "Доставка Новою поштою"
 
 #: src/Checkout/CheckoutIntegration.php:67
-msgid ""
-"Choose the destination. The site will calculate every warehouse parcel and "
-"apply your delivery policy."
+msgid "Choose the destination. The site will calculate every warehouse parcel and apply your delivery policy."
 msgstr "Оберіть місце отримання. Сайт розрахує кожну посилку зі складу та застосує правила оплати доставки."
 
 #: src/Checkout/CheckoutIntegration.php:73
@@ -606,9 +559,7 @@ msgid "Enter a number or address and choose from the list"
 msgstr "Введіть номер або адресу та оберіть зі списку"
 
 #: src/Checkout/CheckoutIntegration.php:103
-msgid ""
-"For courier delivery, fill in the shipping street and building in the "
-"standard address fields above."
+msgid "For courier delivery, fill in the shipping street and building in the standard address fields above."
 msgstr "Для кур'єрської доставки заповніть вулицю та номер будинку у стандартних полях адреси вище."
 
 #: src/Checkout/CheckoutIntegration.php:124
@@ -624,8 +575,7 @@ msgid "Enter the courier delivery street and building."
 msgstr "Вкажіть вулицю та номер будинку для кур'єрської доставки."
 
 #: src/Checkout/CheckoutIntegration.php:141
-msgid ""
-"Delivery has not been calculated yet. Check the Nova Poshta destination."
+msgid "Delivery has not been calculated yet. Check the Nova Poshta destination."
 msgstr "Доставку ще не розраховано. Перевірте місце отримання Нової пошти."
 
 #: src/Checkout/CheckoutIntegration.php:180
@@ -648,9 +598,7 @@ msgid "Carrier total: %1$s. Store contribution: %2$s."
 msgstr "Повна вартість перевізника: %1$s. Внесок магазину: %2$s."
 
 #: src/Checkout/CheckoutIntegration.php:193
-msgid ""
-"Cash on delivery is unavailable for this multi-warehouse delivery. Choose "
-"prepayment."
+msgid "Cash on delivery is unavailable for this multi-warehouse delivery. Choose prepayment."
 msgstr "Післяплата недоступна для цієї доставки з кількох складів. Оберіть передоплату."
 
 #. translators: %d: order item ID
@@ -719,17 +667,14 @@ msgstr "Паковання та послуга пакування"
 msgid "Second and subsequent warehouse shipments"
 msgstr "Друга та наступні посилки з інших складів"
 
-#: src/Domain/TtnNormalizer.php:16
 msgid "Enter the shipment number or official tracking link."
-msgstr "Введіть номер відправлення або офіційне посилання для відстеження."
+msgstr "Вкажіть номер ТТН або офіційне посилання відстеження."
 
-#: src/Domain/TtnNormalizer.php:29
 msgid "Only an official Nova Poshta tracking link is allowed."
-msgstr "Дозволено лише офіційне посилання Нової пошти для відстеження."
+msgstr "Дозволені лише офіційні посилання відстеження Нової пошти."
 
-#: src/Domain/TtnNormalizer.php:34
 msgid "A canonical 14-digit shipment number was not found."
-msgstr "Канонічний 14-значний номер відправлення не знайдено."
+msgstr "Вкажіть один 14-значний номер ТТН у полі складу."
 
 #: src/Infrastructure/ApiClient.php:35
 msgid "Invalid Nova Poshta API method."
@@ -772,11 +717,8 @@ msgid "Nova Poshta could not calculate the delivery cost."
 msgstr "Нова пошта не змогла розрахувати вартість доставки."
 
 #: src/Infrastructure/WarehouseDirectory.php:26
-msgid ""
-"Choose a registered sender address and enter a branch number or address."
-msgstr ""
-"Оберіть зареєстровану адресу відправника та введіть номер відділення або "
-"адресу."
+msgid "Choose a registered sender address and enter a branch number or address."
+msgstr "Оберіть зареєстровану адресу відправника та введіть номер відділення або адресу."
 
 #: src/Infrastructure/WarehouseDirectory.php:51
 msgid "Nova Poshta rejected the handover point search."
@@ -811,24 +753,116 @@ msgstr[0] "%1$s — %2$d посилка"
 msgstr[1] "%1$s — %2$d посилки"
 msgstr[2] "%1$s — %2$d посилок"
 
-#~ msgid ""
-#~ "These settings are saved for the next checkout stage. They do not yet "
-#~ "change delivery prices or payment methods."
-#~ msgstr ""
-#~ "Ці налаштування зберігаються для наступного етапу checkout. Вони ще не "
-#~ "змінюють вартість доставки або способи оплати."
+msgid "Ship using my Nova Poshta TTN"
+msgstr "Відправка за моєю ТТН Нової пошти"
 
-#~ msgid "Sender address or branch"
-#~ msgstr "Адреса або відділення відправника"
+msgid "Enter one shipment number per warehouse."
+msgstr "Вкажіть один номер ТТН для кожного складу."
 
-#~ msgid "City Ref"
-#~ msgstr "Ref міста"
+msgid "Please ask the manager to arrange this warehouse shipment."
+msgstr "Зверніться до менеджера для оформлення відправки зі складу."
 
-#~ msgid "Sender address/branch Ref"
-#~ msgstr "Ref адреси або відділення"
+msgid "Shipment saving is busy. Please try again."
+msgstr "Збереження відправлення зайняте. Спробуйте ще раз."
 
-#~ msgid "Contact Ref"
-#~ msgstr "Ref контактної особи"
+msgid "This order already has shipments. Contact the manager before changing a TTN."
+msgstr "У замовленні вже є відправлення. Для зміни ТТН зверніться до менеджера."
 
-#~ msgid "Sender address"
-#~ msgstr "Адреса відправника"
+msgid "The shipment could not be saved. Contact the manager before retrying."
+msgstr "Не вдалося зберегти відправлення. Перед повтором зверніться до менеджера."
+
+msgid "Warehouse allocation changed. Please review the order."
+msgstr "Розподіл товарів за складами змінився. Перевірте замовлення."
+
+msgid "The TTN could not be saved. It may already belong to another order. Contact the manager."
+msgstr "Не вдалося зберегти ТТН. Можливо, вона вже належить іншому замовленню. Зверніться до менеджера."
+
+msgid "Enter one existing TTN per warehouse. Delivery is 0 UAH in this order; Nova Poshta services are paid under your TTN. The warehouse must approve it before dispatch."
+msgstr "Вкажіть одну готову ТТН для кожного складу. Доставка в цьому замовленні — 0 грн; послуги Нової пошти оплачуються за вашою ТТН. Склад має підтвердити її перед відправленням."
+
+msgid "Existing TTN, message or official tracking link"
+msgstr "Готова ТТН, повідомлення або офіційне посилання відстеження"
+
+msgid "I checked the TTN numbers and assigned goods for every warehouse."
+msgstr "Я перевірив номери ТТН та товари для кожного складу."
+
+msgid "How to submit your TTN"
+msgstr "Як передати свою ТТН"
+
+msgid "This shipping option is available only to signed-in wholesale customers."
+msgstr "Цей спосіб доставки доступний лише авторизованим оптовим клієнтам."
+
+msgid "Pay for our order separately. COD on the customer TTN belongs to its sender."
+msgstr "Оплатіть наше замовлення окремо. Післяплата клієнтської ТТН належить її відправнику."
+
+msgid "Confirm the TTN numbers and goods for every warehouse."
+msgstr "Підтвердьте номери ТТН та товари для кожного складу."
+
+msgid "A TTN is already in use. Use a separate TTN for each warehouse and order."
+msgstr "ТТН вже використовується. Для кожного складу та замовлення потрібна окрема ТТН."
+
+msgid "Review the customer TTN fields before placing the order."
+msgstr "Перевірте поля клієнтських ТТН перед оформленням замовлення."
+
+msgid "Checking shipment..."
+msgstr "Перевіряємо відправлення…"
+
+msgid "The action failed. Refresh the order before retrying."
+msgstr "Дію не виконано. Оновіть замовлення перед повтором."
+
+msgid "Your Nova Poshta TTNs"
+msgstr "Ваші ТТН Нової пошти"
+
+msgid "Shipments for the original order (all warehouses)"
+msgstr "Відправлення початкового замовлення (усі склади)"
+
+msgid "Nova Poshta services are paid under your TTN. Contact the manager to correct a submitted TTN."
+msgstr "Послуги Нової пошти оплачуються за вашою ТТН. Для виправлення поданої ТТН зверніться до менеджера."
+
+msgid "Manage customer TTNs in the original order"
+msgstr "Керування клієнтськими ТТН у початковому замовленні"
+
+msgid "Open official tracking"
+msgstr "Відкрити офіційне відстеження"
+
+msgid "Tracking is unavailable; verify the TTN manually."
+msgstr "Відстеження недоступне; перевірте ТТН вручну."
+
+msgid "Check Nova Poshta status"
+msgstr "Перевірити статус Нової пошти"
+
+msgid "I verified the sender warehouse, assigned goods, recipient, payer, COD, value, weight, places and label. This TTN is awaiting dispatch."
+msgstr "Я перевірив склад відправника, товари, одержувача, платника, післяплату, вартість, вагу, кількість місць і маркировку. Ця ТТН очікує відправлення."
+
+msgid "Manual verification note (required if tracking is unavailable)"
+msgstr "Примітка ручної перевірки (обов’язкова, якщо відстеження недоступне)"
+
+msgid "Approve for warehouse handoff"
+msgstr "Підтвердити для передачі зі складу"
+
+msgid "Approved by the warehouse"
+msgstr "Підтверджено складом"
+
+msgid "Submitted by customer; awaiting warehouse review"
+msgstr "Передано клієнтом; очікує перевірки складу"
+
+msgid "Access denied."
+msgstr "Доступ заборонено."
+
+msgid "Shipment not found."
+msgstr "Відправлення не знайдено."
+
+msgid "Confirm the warehouse shipment checklist first."
+msgstr "Спочатку підтвердьте перевірку даних відправлення."
+
+msgid "Nova Poshta does not show this TTN as awaiting dispatch. Check it with the customer."
+msgstr "За даними Нової пошти ця ТТН не очікує відправлення. Уточніть її у клієнта."
+
+msgid "Record how you manually verified the TTN (10–500 characters)."
+msgstr "Вкажіть, як ви перевірили ТТН вручну (10–500 символів)."
+
+msgid "This order cannot be approved for dispatch."
+msgstr "Це замовлення не можна підтвердити для відправлення."
+
+msgid "Customer TTNs are stored locally. Creating or changing shipments in Nova Poshta is disabled."
+msgstr "Клієнтські ТТН зберігаються на сайті. Створення або зміна відправлень у Новій пошті вимкнені."

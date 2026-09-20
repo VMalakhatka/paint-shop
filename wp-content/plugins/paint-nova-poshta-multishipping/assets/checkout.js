@@ -1,5 +1,6 @@
 (function ($) {
     'use strict';
+    var externalDraft = {};
 
     var cityTimer = null;
     var pointTimer = null;
@@ -35,6 +36,17 @@
     }
 
     function updateFieldVisibility() {
+        var method = $('input[name^="shipping_method"]:checked, input[type="hidden"][name^="shipping_method"], select[name^="shipping_method"]').first().val() || '';
+        var external = method === 'pnpm_customer_ttn';
+        $('#pnpm-external-fields').prop('hidden', !external);
+        $('#pnpm-checkout-fields').toggle(!external);
+        $('#pnpm-external-fields textarea').each(function () {
+            if (Object.prototype.hasOwnProperty.call(externalDraft, this.id)) {
+                $(this).val(externalDraft[this.id]);
+                showExtractedNumber($(this));
+            }
+            $(this).prop('disabled', !external);
+        });
         var type = $('#pnpm_delivery_type').val() || 'branch';
         var address = type === 'address';
         $('#pnpm-point-fields').toggle(!address);
@@ -103,5 +115,15 @@
     });
 
     $(document.body).on('updated_checkout', updateFieldVisibility);
+    $(document.body).on('change', 'input[name^="shipping_method"], select[name^="shipping_method"]', updateFieldVisibility);
+    $(document.body).on('input', '#pnpm-external-fields textarea', function () {
+        externalDraft[this.id] = $(this).val();
+        showExtractedNumber($(this));
+        $('[name="pnpm_external_confirm"]').prop('checked', false);
+    });
+    function showExtractedNumber($field) {
+        var numbers = ($field.val().match(/(?<!\d)\d{14}(?!\d)/g) || []).filter(function (n, i, a) { return a.indexOf(n) === i; });
+        $field.closest('.pnpm-external-parcel').find('.pnpm-extracted-ttn').text(numbers.length === 1 ? 'TTN: ' + numbers[0] : '');
+    }
     $(updateFieldVisibility);
 })(jQuery);

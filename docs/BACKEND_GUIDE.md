@@ -207,6 +207,11 @@ availability и transit изучены по исходникам; новый з�
 - options владельцев plugins: warehouse labels, location-term warehouse groups,
   role contracts, schedules, batch limits;
 - external services: WayForPay, Checkbox, Nova Poshta, Media Cloud/S3;
+  клиентские ТТН НП с версии плагина 0.6.0 принимаются `ExternalTtnCheckout`,
+  сохраняются транзакционно в `ExternalShipmentStore` до обработки ФОЛИО,
+  проверяются/подтверждаются `ExternalTtnPanel`. Shipment остаётся у исходного
+  заказа при Folio split; это не платёж COD и не создание отправления нашим API.
+  Контракт, ограничения и тесты: [README НП](../wp-content/plugins/paint-nova-poshta-multishipping/README.md).
 - аварийные live-write flags с выключенным default.
 
 WordPress не загружает `.env` автоматически. Фактическая модель конфигурации и

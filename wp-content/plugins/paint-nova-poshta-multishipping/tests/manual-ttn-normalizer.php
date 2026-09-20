@@ -50,6 +50,13 @@ $cases = [
     ['https://novaposhta.ua/tracking/?cargo_number=20400000000000', '20400000000000'],
     ['https://evil.example/20400000000000', 'error'],
     ['not-a-shipment-number', 'error'],
+    ["Please ship from your warehouse\n TTN 20400000000000", '20400000000000'],
+    ['20400000000000 20400000000001', 'error'],
+    ['20400000000000 20400000000000', '20400000000000'],
+    ['120400000000000', 'error'],
+    ['My link: https://evil.example/20400000000000', 'error'],
+    ['https://novaposhta.ua.evil.example/20400000000000', 'error'],
+    [str_repeat('a', 2001) . '20400000000000', 'error'],
 ];
 
 foreach ($cases as [$input, $expected]) {

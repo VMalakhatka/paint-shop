@@ -176,7 +176,7 @@ final class CheckoutIntegration
 
     public function renderQuoteSummary(): void
     {
-        if (!WC()->session) {
+        if (!WC()->session || \Paint\NovaPoshta\Domain\ExternalShipmentPolicy::selected()) {
             return;
         }
         $quote = (array) WC()->session->get('pnpm_quote', []);

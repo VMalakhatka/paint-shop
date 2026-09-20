@@ -12,6 +12,11 @@
     font-size: 1.25rem;
 }
 
+#pnpm-external-fields[hidden] { display: none !important; }
+.pnpm-external-parcel { margin: 16px 0; padding: 12px 0; border-top: 1px solid #d7dce2; }
+.pnpm-external-parcel textarea { width: 100%; max-width: 100%; min-height: 76px; }
+.pnpm-extracted-ttn { font-weight: 600; overflow-wrap: anywhere; }
+
 .pnpm-checkout-intro,
 .pnpm-address-help {
     color: #555f6b;

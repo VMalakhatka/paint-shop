@@ -16,8 +16,12 @@ final class TtnNormalizer
             return new WP_Error('pnpm_ttn_empty', __('Enter the shipment number or official tracking link.', 'paint-nova-poshta-multishipping'));
         }
 
-        if (filter_var($input, FILTER_VALIDATE_URL)) {
-            $host = strtolower((string) wp_parse_url($input, PHP_URL_HOST));
+        if (strlen($input) > 2000) {
+            return new WP_Error('pnpm_ttn_invalid', __('Enter one shipment number per warehouse.', 'paint-nova-poshta-multishipping'));
+        }
+        preg_match_all('~https?://[^\s<>]+~i', $input, $urls);
+        foreach ($urls[0] as $url) {
+            $host = strtolower((string) wp_parse_url($url, PHP_URL_HOST));
             $allowed = apply_filters('pnpm_official_tracking_hosts', [
                 'tracking.novaposhta.ua',
                 'novaposhta.ua',
@@ -30,11 +34,11 @@ final class TtnNormalizer
             }
         }
 
-        if (!preg_match('/(?<!\d)(\d{14})(?!\d)/', $input, $matches)) {
+        preg_match_all('/(?<!\d)(\d{14})(?!\d)/', $input, $matches);
+        if (count(array_unique($matches[1])) !== 1) {
             return new WP_Error('pnpm_ttn_invalid', __('A canonical 14-digit shipment number was not found.', 'paint-nova-poshta-multishipping'));
         }
 
-        return (string) $matches[1];
+        return (string) $matches[1][0];
     }
 }
-

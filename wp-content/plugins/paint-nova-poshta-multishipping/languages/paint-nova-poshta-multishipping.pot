@@ -1,0 +1,927 @@
+# Copyright (C) 2026 Paint / Lavka
+# This file is distributed under the same license as the Paint Nova Poshta Multishipping plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: Paint Nova Poshta Multishipping 0.6.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/paint-nova-poshta-multishipping\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-09-20T15:23:12+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: paint-nova-poshta-multishipping\n"
+
+#. Plugin Name of the plugin
+#: paint-nova-poshta-multishipping.php
+msgid "Paint Nova Poshta Multishipping"
+msgstr ""
+
+#. Description of the plugin
+#: paint-nova-poshta-multishipping.php
+msgid "Direct multi-warehouse Nova Poshta integration for WooCommerce orders."
+msgstr ""
+
+#. Author of the plugin
+#: paint-nova-poshta-multishipping.php
+msgid "Paint / Lavka"
+msgstr ""
+
+#: paint-nova-poshta-multishipping.php:57
+msgid "Paint Nova Poshta Multishipping requires WooCommerce."
+msgstr ""
+
+#: src/Admin/ExternalTtnPanel.php:29
+msgid "Checking shipment..."
+msgstr ""
+
+#: src/Admin/ExternalTtnPanel.php:30
+#: src/Admin/ExternalTtnPanel.php:188
+#: src/Admin/ExternalTtnPanel.php:194
+msgid "The action failed. Refresh the order before retrying."
+msgstr ""
+
+#: src/Admin/ExternalTtnPanel.php:48
+msgid "Your Nova Poshta TTNs"
+msgstr ""
+
+#: src/Admin/ExternalTtnPanel.php:50
+msgid "Shipments for the original order (all warehouses)"
+msgstr ""
+
+#: src/Admin/ExternalTtnPanel.php:56
+msgid "Nova Poshta services are paid under your TTN. Contact the manager to correct a submitted TTN."
+msgstr ""
+
+#: src/Admin/ExternalTtnPanel.php:64
+msgid "Manage customer TTNs in the original order"
+msgstr ""
+
+#: src/Admin/ExternalTtnPanel.php:78
+msgid "Open official tracking"
+msgstr ""
+
+#: src/Admin/ExternalTtnPanel.php:80
+#: src/Admin/ExternalTtnPanel.php:119
+msgid "Tracking is unavailable; verify the TTN manually."
+msgstr ""
+
+#: src/Admin/ExternalTtnPanel.php:82
+msgid "Check Nova Poshta status"
+msgstr ""
+
+#: src/Admin/ExternalTtnPanel.php:84
+msgid "I verified the sender warehouse, assigned goods, recipient, payer, COD, value, weight, places and label. This TTN is awaiting dispatch."
+msgstr ""
+
+#: src/Admin/ExternalTtnPanel.php:85
+msgid "Manual verification note (required if tracking is unavailable)"
+msgstr ""
+
+#: src/Admin/ExternalTtnPanel.php:86
+msgid "Approve for warehouse handoff"
+msgstr ""
+
+#: src/Admin/ExternalTtnPanel.php:95
+#: src/Admin/ExternalTtnPanel.php:129
+msgid "Approved by the warehouse"
+msgstr ""
+
+#: src/Admin/ExternalTtnPanel.php:96
+msgid "Submitted by customer; awaiting warehouse review"
+msgstr ""
+
+#: src/Admin/ExternalTtnPanel.php:102
+msgid "Access denied."
+msgstr ""
+
+#: src/Admin/ExternalTtnPanel.php:107
+#: src/Admin/ExternalTtnPanel.php:144
+msgid "Shipment not found."
+msgstr ""
+
+#: src/Admin/ExternalTtnPanel.php:111
+msgid "Confirm the warehouse shipment checklist first."
+msgstr ""
+
+#: src/Admin/ExternalTtnPanel.php:123
+msgid "Nova Poshta does not show this TTN as awaiting dispatch. Check it with the customer."
+msgstr ""
+
+#: src/Admin/ExternalTtnPanel.php:126
+msgid "Record how you manually verified the TTN (10–500 characters)."
+msgstr ""
+
+#: src/Admin/ExternalTtnPanel.php:140
+#: src/Infrastructure/ExternalShipmentStore.php:21
+msgid "Shipment saving is busy. Please try again."
+msgstr ""
+
+#: src/Admin/ExternalTtnPanel.php:155
+msgid "This order cannot be approved for dispatch."
+msgstr ""
+
+#: src/Admin/ExternalTtnPanel.php:164
+#: src/Admin/ExternalTtnPanel.php:169
+#: src/Admin/ExternalTtnPanel.php:174
+#: src/Admin/ExternalTtnPanel.php:181
+#: src/Infrastructure/ExternalShipmentStore.php:93
+msgid "Warehouse allocation changed. Please review the order."
+msgstr ""
+
+#: src/Admin/OrderPanel.php:46
+#: src/Admin/SettingsPage.php:36
+msgid "Nova Poshta shipments"
+msgstr ""
+
+#: src/Admin/OrderPanel.php:66
+msgid "Safety mode:"
+msgstr ""
+
+#: src/Admin/OrderPanel.php:67
+msgid "Customer TTNs are stored locally. Creating or changing shipments in Nova Poshta is disabled."
+msgstr ""
+
+#: src/Admin/OrderPanel.php:74
+msgid "Actual warehouse allocation"
+msgstr ""
+
+#: src/Admin/OrderPanel.php:76
+msgid "No complete warehouse allocation was found."
+msgstr ""
+
+#. translators: 1: warehouse name, 2: quantity
+#: src/Admin/OrderPanel.php:83
+#, php-format
+msgid "Shipment from %1$s: %2$s item units"
+msgstr ""
+
+#: src/Admin/OrderPanel.php:97
+msgid "Stored shipments"
+msgstr ""
+
+#: src/Admin/OrderPanel.php:99
+msgid "No shipment records have been created yet."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:35
+#: src/Admin/SettingsPage.php:94
+#: src/Shipping/NovaPoshtaShippingMethod.php:18
+msgid "Nova Poshta multishipping"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:53
+msgid "Checking connection..."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:54
+msgid "Connection check failed."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:55
+msgid "Loading sender profile..."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:56
+msgid "Sender profile could not be loaded."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:57
+msgid "Choose a business sender"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:58
+msgid "Choose a sender address"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:59
+msgid "Choose a contact person"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:60
+msgid "Choose the Nova Poshta handover point"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:61
+msgid "Enter a branch number, parcel locker number, street, or landmark."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:62
+msgid "Searching Nova Poshta handover points..."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:63
+msgid "Nova Poshta handover points could not be loaded."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:64
+msgid "No available handover points were found."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:65
+msgid "Not required: Nova Poshta courier collects parcels from the registered address."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:66
+#: src/Admin/SettingsPage.php:242
+msgid "Ready"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:67
+#: src/Admin/SettingsPage.php:242
+msgid "Incomplete"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:68
+#: src/Admin/SettingsPage.php:242
+msgid "Disabled"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:69
+msgid "Saved Ref"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:76
+msgid "You are not allowed to manage Nova Poshta shipments."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:97
+msgid "Nova Poshta settings saved."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:101
+msgid "Real shipment creation is not implemented and API write operations are locked."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:109
+msgid "API connection"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:111
+msgid "The API key is read only from PNPM_NOVA_POSHTA_API_KEY in wp-config.php or the server environment."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:115
+msgid "API endpoint"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:119
+msgid "API key"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:124
+msgid "Not configured"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:129
+msgid "Write mode"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:130
+msgid "Locked"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:134
+msgid "Check read-only API connection"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:139
+msgid "Load senders from Nova Poshta"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:146
+msgid "Warehouse senders"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:147
+msgid "Map each WooCommerce Stock Location to a registered sender address. For self-drop-off, also choose the exact Nova Poshta branch or parcel locker where parcels will be handed over."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:151
+msgid "Stock Location"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:152
+msgid "Enabled"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:153
+msgid "Sender type"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:154
+msgid "Business sender"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:155
+msgid "Registered sender address"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:156
+msgid "Nova Poshta handover point"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:157
+msgid "Contact person"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:158
+msgid "Phone"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:159
+msgid "Customer label"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:160
+msgid "Status"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:177
+msgid "Search and choose a handover point"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:195
+msgid "Drop off at a branch / parcel locker"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:196
+msgid "Courier pickup from sender address"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:201
+#: src/Admin/SettingsPage.php:207
+#: src/Admin/SettingsPage.php:236
+msgid "Load senders first"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:215
+msgid "Branch number or address"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:216
+msgid "Search handover points"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:217
+msgid "Search"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:253
+msgid "Save Nova Poshta settings"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:262
+#: src/Admin/SettingsPage.php:324
+#: src/Admin/SettingsPage.php:345
+#: src/Admin/SettingsPage.php:368
+msgid "Permission denied."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:334
+msgid "Nova Poshta rejected the request."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:338
+msgid "Read-only API connection is working."
+msgstr ""
+
+#. translators: %d: sender count.
+#: src/Admin/SettingsPage.php:357
+#, php-format
+msgid "%d sender profile loaded."
+msgid_plural "%d sender profiles loaded."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: handover point count.
+#: src/Admin/SettingsPage.php:382
+#, php-format
+msgid "%d handover point found."
+msgid_plural "%d handover points found."
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/Admin/SettingsPage.php:393
+msgid "Technical Ref"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:408
+msgid "Guest customer"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:439
+msgid "Delivery payment and loyalty policy"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:441
+msgid "These rules are applied when the customer selects Nova Poshta delivery at checkout."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:444
+msgid "Customer groups"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:445
+msgid "Assign storefront roles to the retail or partner policy. Unassigned roles use the retail policy."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:449
+msgid "WordPress role"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:450
+msgid "Delivery policy"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:458
+msgid "Use retail fallback"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:459
+msgid "Retail customers"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:460
+msgid "Partners and wholesale customers"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:478
+msgid "Retail customer policy"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:479
+msgid "Partner and wholesale policy"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:484
+msgid "Order threshold"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:495
+msgid "The order merchandise total after discounts is used; shipping and fees are excluded."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:498
+msgid "Store delivery allowance"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:502
+msgid "Order range"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:503
+msgid "Allowance calculation"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:504
+msgid "Value"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:505
+msgid "Maximum store contribution"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:508
+msgid "Below the threshold"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:509
+msgid "At or above the threshold"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:513
+msgid "A zero maximum means no additional cap. Percentage values are entered as a number, for example 3 for three percent."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:515
+msgid "Who pays each delivery component"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:519
+msgid "Delivery component"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:520
+msgid "Payment rule"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:528
+#: src/Admin/SettingsPage.php:554
+msgid "Customer pays"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:529
+#: src/Admin/SettingsPage.php:555
+msgid "Store pays in full"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:530
+#: src/Admin/SettingsPage.php:556
+msgid "Use the store allowance, customer pays the remainder"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:539
+msgid "Cash on delivery"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:544
+msgid "Allow cash on delivery for a single shipment"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:549
+msgid "Allow cash on delivery for orders from multiple warehouses"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:552
+msgid "Cash on delivery commission"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:560
+msgid "When multi-shipment cash on delivery is disabled, checkout must offer prepayment methods instead."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:572
+msgid "Checkout calculation"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:573
+msgid "The checkout uses the official Nova Poshta tariff API in read-only mode. These settings do not create shipments or TTNs."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:576
+msgid "Customer checkout"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:580
+msgid "Enable Nova Poshta fields and tariff calculation in classic checkout"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:585
+msgid "Product weight storage"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:588
+msgid "Existing product values are grams"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:589
+msgid "Use the WooCommerce weight unit"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:591
+msgid "The current Lavka catalogue usually stores gram values in the product weight field."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:595
+msgid "Fallback item weight"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:599
+msgid "Declared value comparison threshold"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:603
+#: src/Domain/DeliveryPolicy.php:146
+msgid "Parcel locker surcharge"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:620
+msgid "No allowance; customer pays"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:621
+msgid "Store pays all selected components"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:622
+msgid "Fixed amount"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:623
+msgid "Percentage of merchandise total"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:624
+msgid "Percentage of selected delivery components"
+msgstr ""
+
+#: src/Checkout/CheckoutIntegration.php:51
+msgid "Searching Nova Poshta..."
+msgstr ""
+
+#: src/Checkout/CheckoutIntegration.php:52
+msgid "Nothing was found. Refine the search."
+msgstr ""
+
+#: src/Checkout/CheckoutIntegration.php:53
+msgid "Nova Poshta directory could not be loaded."
+msgstr ""
+
+#: src/Checkout/CheckoutIntegration.php:54
+#: src/Checkout/CheckoutIntegration.php:86
+msgid "Nova Poshta branch"
+msgstr ""
+
+#: src/Checkout/CheckoutIntegration.php:55
+#: src/Checkout/CheckoutIntegration.php:87
+msgid "Nova Poshta parcel locker"
+msgstr ""
+
+#: src/Checkout/CheckoutIntegration.php:66
+#: src/Shipping/NovaPoshtaShippingMethod.php:36
+#: src/Shipping/NovaPoshtaShippingMethod.php:40
+msgid "Nova Poshta delivery"
+msgstr ""
+
+#: src/Checkout/CheckoutIntegration.php:67
+msgid "Choose the destination. The site will calculate every warehouse parcel and apply your delivery policy."
+msgstr ""
+
+#: src/Checkout/CheckoutIntegration.php:73
+msgid "City or settlement"
+msgstr ""
+
+#: src/Checkout/CheckoutIntegration.php:74
+msgid "Start typing and choose a city from the list"
+msgstr ""
+
+#: src/Checkout/CheckoutIntegration.php:84
+msgid "How to receive the parcel"
+msgstr ""
+
+#: src/Checkout/CheckoutIntegration.php:88
+msgid "Courier delivery to the address"
+msgstr ""
+
+#: src/Checkout/CheckoutIntegration.php:97
+msgid "Branch or parcel locker"
+msgstr ""
+
+#: src/Checkout/CheckoutIntegration.php:98
+msgid "Enter a number or address and choose from the list"
+msgstr ""
+
+#: src/Checkout/CheckoutIntegration.php:103
+msgid "For courier delivery, fill in the shipping street and building in the standard address fields above."
+msgstr ""
+
+#: src/Checkout/CheckoutIntegration.php:132
+msgid "Choose a city from the Nova Poshta list."
+msgstr ""
+
+#: src/Checkout/CheckoutIntegration.php:135
+msgid "Choose a Nova Poshta branch or parcel locker from the list."
+msgstr ""
+
+#: src/Checkout/CheckoutIntegration.php:141
+msgid "Enter the courier delivery street and building."
+msgstr ""
+
+#: src/Checkout/CheckoutIntegration.php:149
+msgid "Delivery has not been calculated yet. Check the Nova Poshta destination."
+msgstr ""
+
+#: src/Checkout/CheckoutIntegration.php:185
+#: src/Checkout/CheckoutIntegration.php:197
+msgid "Nova Poshta calculation"
+msgstr ""
+
+#. translators: %d: parcel count.
+#: src/Checkout/CheckoutIntegration.php:200
+#, php-format
+msgid "%d parcel"
+msgid_plural "%d parcels"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: 1: carrier total, 2: store contribution.
+#: src/Checkout/CheckoutIntegration.php:205
+#, php-format
+msgid "Carrier total: %1$s. Store contribution: %2$s."
+msgstr ""
+
+#: src/Checkout/CheckoutIntegration.php:210
+msgid "Cash on delivery is unavailable for this multi-warehouse delivery. Choose prepayment."
+msgstr ""
+
+#: src/Checkout/ExternalTtnCheckout.php:72
+msgid "Enter one existing TTN per warehouse. Delivery is 0 UAH in this order; Nova Poshta services are paid under your TTN. The warehouse must approve it before dispatch."
+msgstr ""
+
+#: src/Checkout/ExternalTtnCheckout.php:88
+msgid "Existing TTN, message or official tracking link"
+msgstr ""
+
+#: src/Checkout/ExternalTtnCheckout.php:95
+msgid "I checked the TTN numbers and assigned goods for every warehouse."
+msgstr ""
+
+#: src/Checkout/ExternalTtnCheckout.php:98
+msgid "How to submit your TTN"
+msgstr ""
+
+#: src/Checkout/ExternalTtnCheckout.php:120
+#: src/Checkout/ExternalTtnCheckout.php:166
+#: src/Infrastructure/ExternalShipmentStore.php:35
+#: src/Infrastructure/ExternalShipmentStore.php:42
+msgid "This order already has shipments. Contact the manager before changing a TTN."
+msgstr ""
+
+#: src/Checkout/ExternalTtnCheckout.php:124
+msgid "This shipping option is available only to signed-in wholesale customers."
+msgstr ""
+
+#: src/Checkout/ExternalTtnCheckout.php:128
+msgid "Pay for our order separately. COD on the customer TTN belongs to its sender."
+msgstr ""
+
+#: src/Checkout/ExternalTtnCheckout.php:132
+msgid "Confirm the TTN numbers and goods for every warehouse."
+msgstr ""
+
+#: src/Checkout/ExternalTtnCheckout.php:138
+#: src/Domain/ExternalShipmentPolicy.php:35
+msgid "Please ask the manager to arrange this warehouse shipment."
+msgstr ""
+
+#: src/Checkout/ExternalTtnCheckout.php:152
+msgid "A TTN is already in use. Use a separate TTN for each warehouse and order."
+msgstr ""
+
+#: src/Checkout/ExternalTtnCheckout.php:179
+msgid "Review the customer TTN fields before placing the order."
+msgstr ""
+
+#. translators: %d: order item ID
+#: src/Domain/AllocationSnapshotBuilder.php:24
+#, php-format
+msgid "Order item %d has no warehouse allocation."
+msgstr ""
+
+#. translators: 1: item ID, 2: allocated quantity, 3: ordered quantity
+#: src/Domain/AllocationSnapshotBuilder.php:34
+#, php-format
+msgid "Order item %1$d allocation is %2$s of %3$s."
+msgstr ""
+
+#. translators: %s: product SKU.
+#: src/Domain/CartShipmentBuilder.php:32
+#, php-format
+msgid "No warehouse allocation was found for %s."
+msgstr ""
+
+#. translators: 1: SKU, 2: allocated quantity, 3: requested quantity.
+#: src/Domain/CartShipmentBuilder.php:42
+#, php-format
+msgid "Warehouse allocation for %1$s is %2$s of %3$s."
+msgstr ""
+
+#. translators: %d: Stock Location ID.
+#: src/Domain/CartShipmentBuilder.php:54
+#, php-format
+msgid "Stock location %d is not enabled for Nova Poshta."
+msgstr ""
+
+#. translators: %d: Stock Location ID.
+#: src/Domain/CartShipmentBuilder.php:62
+#, php-format
+msgid "Stock location %d has no Nova Poshta sender city."
+msgstr ""
+
+#. translators: %s: product SKU.
+#: src/Domain/CartShipmentBuilder.php:146
+#, php-format
+msgid "A fallback weight was used for %s."
+msgstr ""
+
+#: src/Domain/DeliveryPolicy.php:142
+msgid "Base transport tariff"
+msgstr ""
+
+#: src/Domain/DeliveryPolicy.php:143
+msgid "Declared value commission"
+msgstr ""
+
+#: src/Domain/DeliveryPolicy.php:144
+msgid "Courier pickup from the sender"
+msgstr ""
+
+#: src/Domain/DeliveryPolicy.php:145
+msgid "Courier delivery to the recipient"
+msgstr ""
+
+#: src/Domain/DeliveryPolicy.php:147
+msgid "Packaging and packing service"
+msgstr ""
+
+#: src/Domain/DeliveryPolicy.php:148
+msgid "Second and subsequent warehouse shipments"
+msgstr ""
+
+#: src/Domain/ExternalShipmentPolicy.php:42
+msgid "Ship using my Nova Poshta TTN"
+msgstr ""
+
+#: src/Domain/TtnNormalizer.php:16
+msgid "Enter the shipment number or official tracking link."
+msgstr ""
+
+#: src/Domain/TtnNormalizer.php:20
+msgid "Enter one shipment number per warehouse."
+msgstr ""
+
+#: src/Domain/TtnNormalizer.php:33
+msgid "Only an official Nova Poshta tracking link is allowed."
+msgstr ""
+
+#: src/Domain/TtnNormalizer.php:39
+msgid "A canonical 14-digit shipment number was not found."
+msgstr ""
+
+#: src/Infrastructure/ApiClient.php:35
+msgid "Invalid Nova Poshta API method."
+msgstr ""
+
+#: src/Infrastructure/ApiClient.php:42
+msgid "Real Nova Poshta write operations are disabled."
+msgstr ""
+
+#: src/Infrastructure/ApiClient.php:49
+msgid "Nova Poshta API key is not configured."
+msgstr ""
+
+#: src/Infrastructure/ApiClient.php:66
+msgid "Nova Poshta API is unavailable."
+msgstr ""
+
+#: src/Infrastructure/ApiClient.php:72
+msgid "Nova Poshta API returned an invalid response."
+msgstr ""
+
+#: src/Infrastructure/ExternalShipmentStore.php:46
+#: src/Infrastructure/ExternalShipmentStore.php:72
+msgid "The shipment could not be saved. Contact the manager before retrying."
+msgstr ""
+
+#: src/Infrastructure/ExternalShipmentStore.php:126
+msgid "The TTN could not be saved. It may already belong to another order. Contact the manager."
+msgstr ""
+
+#: src/Infrastructure/RecipientDirectory.php:69
+msgid "Nova Poshta rejected the city search."
+msgstr ""
+
+#: src/Infrastructure/SenderDirectory.php:77
+msgid "No sender was found for this Nova Poshta business account."
+msgstr ""
+
+#: src/Infrastructure/SenderDirectory.php:146
+msgid "Nova Poshta rejected the sender directory request."
+msgstr ""
+
+#: src/Infrastructure/TariffQuoteService.php:104
+msgid "Sender or recipient city is missing."
+msgstr ""
+
+#: src/Infrastructure/TariffQuoteService.php:131
+msgid "Nova Poshta could not calculate the delivery cost."
+msgstr ""
+
+#: src/Infrastructure/WarehouseDirectory.php:26
+msgid "Choose a registered sender address and enter a branch number or address."
+msgstr ""
+
+#: src/Infrastructure/WarehouseDirectory.php:51
+msgid "Nova Poshta rejected the handover point search."
+msgstr ""
+
+#: src/Shipping/NovaPoshtaShippingMethod.php:19
+msgid "Delivery by Nova Poshta from one or more warehouses."
+msgstr ""
+
+#: src/Shipping/NovaPoshtaShippingMethod.php:28
+msgid "Enable"
+msgstr ""
+
+#: src/Shipping/NovaPoshtaShippingMethod.php:30
+msgid "Enable Nova Poshta delivery"
+msgstr ""
+
+#: src/Shipping/NovaPoshtaShippingMethod.php:34
+msgid "Title"
+msgstr ""
+
+#: src/Shipping/NovaPoshtaShippingMethod.php:60
+msgid "No Nova Poshta shipments could be prepared."
+msgstr ""
+
+#. translators: 1: shipping method title, 2: parcel count.
+#: src/Shipping/NovaPoshtaShippingMethod.php:93
+#, php-format
+msgid "%1$s — %2$d parcel"
+msgid_plural "%1$s — %2$d parcels"
+msgstr[0] ""
+msgstr[1] ""
