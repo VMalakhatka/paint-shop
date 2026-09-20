@@ -283,11 +283,12 @@
             group.supplyFromGroupCode = row.querySelector('[data-field="supplyFromGroupCode"]').value;
             groups.push(group);
         });
-        return { version: 2, packRounding: el('lps-as-purchase-pack').value, stockoutCorrectionEnabled: el('lps-as-purchase-stockout').checked, maxDemandMultiplier: Number(el('lps-as-purchase-demand-cap').value), enabled: el('lps-as-purchase-enabled').checked, allowTransfers: el('lps-as-purchase-transfers').checked, groups: groups };
+        return { version: 2, internalTransferRoutes: el('lps-as-purchase-internal-routes').value, packRounding: el('lps-as-purchase-pack').value, stockoutCorrectionEnabled: el('lps-as-purchase-stockout').checked, maxDemandMultiplier: Number(el('lps-as-purchase-demand-cap').value), enabled: el('lps-as-purchase-enabled').checked, allowTransfers: el('lps-as-purchase-transfers').checked, groups: groups };
     }
 
     function applyPurchasePlanning(plan) {
         plan = plan || {};
+        el('lps-as-purchase-internal-routes').value = (plan.internalTransferRoutes || []).map((route) => [route.sourceWarehouseId, route.sourceInfo, route.destinationWarehouseId].join(' | ')).join('\n');
         el('lps-as-purchase-pack').value = plan.packRounding || (plan.respectPack === false ? 'NONE' : 'UP');
         el('lps-as-purchase-stockout').checked = plan.stockoutCorrectionEnabled === true;
         el('lps-as-purchase-demand-cap').value = plan.maxDemandMultiplier == null ? 1.1 : plan.maxDemandMultiplier;

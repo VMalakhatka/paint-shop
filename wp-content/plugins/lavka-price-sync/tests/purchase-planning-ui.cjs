@@ -13,7 +13,7 @@ const output=process.env.UI_OUTPUT_DIR || require('os').tmpdir();
  let fail=false;
  await page.route('https://fixture.local/api',async route=>{
   const request=new URLSearchParams(route.request().postData()); const op=request.get('operation');const payload=JSON.parse(request.get('payload'));
-  const data=op==='start'?{token:'fixture',scenario:{name:'Kreul',version:2},groups:[{name:'Kyiv',warehouseIds:[1]}],query:{period:{from:'2026-08-01',to:'2026-08-30'}}}:op==='page'?{items:[calculate(),calculateZero()],complete:true,page:1,loaded:2,total:2,warnings:[],context:{analyticsSchemaVersion:6}}:{item:calculate(payload.groups)};
+  const data=op==='start'?{token:'fixture',scenario:{name:'Kreul',version:2},groups:[{name:'Kyiv',warehouseIds:[1]}],query:{period:{from:'2026-08-01',to:'2026-08-30'}}}:op==='page'?{items:[calculate(),calculateZero()],complete:true,page:1,loaded:2,total:2,warnings:[],context:{analyticsSchemaVersion:7}}:{item:calculate(payload.groups)};
   await route.fulfill({status:fail?400:200,contentType:'application/json',body:JSON.stringify(fail?{success:false,data:{message:'Fixture validation error'}}:{success:true,data})});
  });
  for(const width of [1440,390]){
@@ -22,8 +22,8 @@ const output=process.env.UI_OUTPUT_DIR || require('os').tmpdir();
   await page.locator('[data-edit-form]').first().waitFor({state:'attached'});
   assert.equal(await page.locator('.lps-purchase-sku').count(),2);
   const historyRow = page.locator('.lps-purchase-sku').first().locator('tbody tr').first();
-  assert.equal(await historyRow.locator('td').nth(5).innerText(), '12');
-  assert.equal(await historyRow.locator('td').nth(6).innerText(), '18');
+  assert.equal(await historyRow.locator('td').nth(9).innerText(), '12');
+  assert.equal(await historyRow.locator('td').nth(10).innerText(), '18');
   assert.equal(await page.locator('.lps-purchase-sku').first().getByRole('columnheader', {name:'Days without stock in group', exact:true}).count(), 1);
   const form=page.locator('[data-edit-form="0"]');
   await form.locator('..').locator('summary').click();

@@ -6401,3 +6401,71 @@ msgstr "Выберите источник минимального запаса 
 #: inc/purchase-planning.php inc/purchase-planning-model.php
 msgid "The minimum-stock source is unavailable or does not allow ordering. Check its warehouse policy."
 msgstr "Источник минимального запаса недоступен или не разрешает заказ. Проверьте политику склада."
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Stock for purchase planning"
+msgstr "Запас для расчёта заказа"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Reserved for internal transfers"
+msgstr "Резерв на внутренние перемещения"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Internal reserve restored within group"
+msgstr "Возвращён внутренний резерв внутри группы"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Expected internal receipts from another group"
+msgstr "Ожидается перемещение из другой группы"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Internal transfer accounts"
+msgstr "Счета внутренних перемещений"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Internal transfer routes"
+msgstr "Направления внутренних перемещений"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "These accounts are already included in planning stock. Do not enter them again as transit or other incoming orders. Unknown destinations require a route in the scenario."
+msgstr "Эти счета уже учтены в запасе для заказа. Не добавляйте их повторно в транзит или другие поступления. Для неизвестного получателя задайте направление в сценарии."
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "One route per line: source warehouse number | exact source information from the account | destination warehouse number. Use 0 for a destination outside this network. Unmatched accounts require review."
+msgstr "Одно направление на строку: номер склада-отправителя | точный текст «Источник информации» счёта | номер склада-получателя. 0 — получатель вне этой сети. Счета без соответствия требуют проверки."
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Rebuild warehouse snapshots with the updated Java backend to capture internal reservations."
+msgstr "Обновите Java и сформируйте новые снимки складов для учёта внутренних резервов."
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Assign a destination to the internal transfer source information in the scenario."
+msgstr "Задайте в сценарии склад-получатель для источника информации внутреннего перемещения."
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Internal reservations exceed the reserved stock. Check the source snapshot before ordering."
+msgstr "Внутренние резервы превышают зарезервированный запас. Проверьте исходный снимок перед заказом."
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Internal receipts are included in preliminary stock. A final order requires a reconciled network snapshot to exclude already received goods."
+msgstr "Внутренние поступления учтены в предварительном запасе. Для окончательного заказа нужна сверка снимков сети, чтобы исключить уже полученные товары."
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Use one transfer route per line: source warehouse | source information | destination warehouse."
+msgstr "Укажите одно направление на строку: склад-отправитель | источник информации | склад-получатель."
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Invalid internal transfer routes."
+msgstr "Некорректные направления внутренних перемещений."
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Invalid or duplicate internal transfer route."
+msgstr "Некорректное или повторное направление внутреннего перемещения."
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Other confirmed incoming orders, excluding transit and internal transfers"
+msgstr "Другие подтверждённые поступления без транзита и внутренних перемещений"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "I checked receipt dates and destinations, and excluded transit and internal transfer accounts from other incoming orders."
+msgstr "Я проверил даты и получателей поступлений и исключил транзит и счета внутренних перемещений из других поступлений."

@@ -33,7 +33,7 @@ check($saved['productFilters'] === $profile['productFilters'] && $saved['movemen
 check($saved['purchasePlanning']['groups'][0]['code'] === 'kyiv', 'Keep stable group identity');
 check(!isset($saved['purchasePlanning']['groups'][0]['warehouseIds']), 'Do not copy mutable global composition into scenario');
 $groups = lps_purchase_resolve_groups($saved, $configured);
-$row = ['sku' => 'TEST-1', 'productName' => 'Test', 'dimensions' => ['currentSuppliers' => ['Kreul'], 'packageQuantity' => 10, 'minimumOrderQuantity' => 10],
+$row = ['internalTransferReservations' => ['calculationVersion' => 1, 'status' => 'CAPTURED', 'accounts' => []], 'sku' => 'TEST-1', 'productName' => 'Test', 'dimensions' => ['currentSuppliers' => ['Kreul'], 'packageQuantity' => 10, 'minimumOrderQuantity' => 10],
     'metrics' => ['grossProfit' => 100], 'networkOrderPolicy' => ['orderAllowed' => true, 'status' => 'ALLOWED'],
     'inTransitStock' => ['warehouseId' => 9, 'generationId' => 99, 'status' => 'NO_IN_TRANSIT_STOCK'],
     'warehouseBreakdown' => [member(1, 10, 60), member(7, 20, 30), member(5, 200, 30)]];
@@ -124,7 +124,7 @@ echo "PASS: scenario roundtrip, group demand, transfer conservation, policy gate
 // User's KR-17817: observed sales 11, free stock 6, one pack of 6.
 $one = [['code' => 'one', 'name' => 'One', 'warehouseIds' => [1], 'receivingWarehouseId' => 1,
     'leadTimeDays' => 0, 'targetDays' => 30, 'safetyDays' => 0]];
-$fixture = ['sku' => 'KR-17817', 'dimensions' => ['currentSuppliers' => ['Kreul'], 'packageQuantity' => 6, 'minimumOrderQuantity' => 0],
+$fixture = ['internalTransferReservations' => ['calculationVersion' => 1, 'status' => 'CAPTURED', 'accounts' => []], 'sku' => 'KR-17817', 'dimensions' => ['currentSuppliers' => ['Kreul'], 'packageQuantity' => 6, 'minimumOrderQuantity' => 0],
     'metrics' => ['grossProfit' => 100], 'networkOrderPolicy' => ['orderAllowed' => true, 'status' => 'ALLOWED'],
     'warehouseBreakdown' => [member(1, 6, 11)]];
 $edits = ['one' => ['openOrders' => 0]];
@@ -228,7 +228,7 @@ $stockProfile = ['context'=>['warehouseIds'=>[5,15]], 'calculation'=>['stockOnly
         'groups'=>[['code'=>'odesa','receivingWarehouseId'=>5,'leadTimeDays'=>0,'targetDays'=>30,'safetyDays'=>0]]])];
 $stockGroups = lps_purchase_resolve_groups($stockProfile,[['code'=>'odesa','name'=>'Odesa','warehouseIds'=>[5,15]]]);
 check($stockGroups[0]['demandWarehouseIds'] === [5], 'Stock-only storage is absent from demand history');
-$stockRow=['sku'=>'STOCK-ONLY','dimensions'=>['currentSuppliers'=>['Kreul'],'packageQuantity'=>1,'minimumOrderQuantity'=>0],
+$stockRow=['internalTransferReservations' => ['calculationVersion' => 1, 'status' => 'CAPTURED', 'accounts' => []], 'sku'=>'STOCK-ONLY','dimensions'=>['currentSuppliers'=>['Kreul'],'packageQuantity'=>1,'minimumOrderQuantity'=>0],
     'metrics'=>['grossProfit'=>1],'networkOrderPolicy'=>['orderAllowed'=>true,'status'=>'ALLOWED'],
     'warehouseBreakdown'=>[member(5,10,100),member(15,40,1000)],
     'warehouseGroupBreakdown'=>[['code'=>'odesa','warehouseIds'=>[5],'availability'=>['status'=>'MEASURED'],
@@ -284,3 +284,46 @@ try { lps_purchase_resolve_groups($badSource, [['code'=>'odesa','name'=>'Odesa',
 catch (InvalidArgumentException $expected) {}
 check($saved['purchasePlanning']['groups'][0]['minimumWarehouseId'] === 7, 'Legacy scenario selects the receiving warehouse as MIN source');
 echo "PASS: selected MIN source, unchanged group demand, fractional/unknown MIN and source validation\n";
+
+// Internal reservations are stock, never extra demand or a second outgoing transfer.
+$internalGroups = [
+    ['code'=>'kyiv','name'=>'Kyiv','warehouseIds'=>[1,7],'receivingWarehouseId'=>7,'leadTimeDays'=>0,'targetDays'=>30,'safetyDays'=>0,'packRounding'=>'NONE'],
+    ['code'=>'odesa','name'=>'Odesa','warehouseIds'=>[5],'receivingWarehouseId'=>5,'leadTimeDays'=>0,'targetDays'=>30,'safetyDays'=>0,'supplyFromGroupCode'=>'kyiv'],
+];
+$internalRow = ['sku'=>'INTERNAL', 'dimensions'=>['currentSuppliers'=>['Kreul'],'packageQuantity'=>6,'minimumOrderQuantity'=>0],
+    'metrics'=>['grossProfit'=>100], 'networkOrderPolicy'=>['orderAllowed'=>true,'status'=>'ALLOWED'],
+    'inTransitStock'=>['networkSnapshotConsistency'=>['confirmed'=>true]],
+    'warehouseBreakdown'=>[member(1,0,10),member(7,20,20),member(5,0,10)],
+    'internalTransferReservations'=>['calculationVersion'=>1,'status'=>'CAPTURED','accounts'=>[
+        ['sourceWarehouseId'=>7,'generationId'=>11,'documentId'=>100,'documentNumber'=>555279,'sourceInfo'=>'Odesa assembly','quantity'=>10],
+        ['sourceWarehouseId'=>7,'generationId'=>11,'documentId'=>101,'documentNumber'=>555291,'sourceInfo'=>'Kyiv assembly','quantity'=>5],
+    ]]];
+$internalRow['warehouseBreakdown'][1]['metrics']['availableQuantity']=2; // 15 internal + 3 client reserved.
+$internalInputs=['kyiv'=>['openOrders'=>0],'odesa'=>['openOrders'=>0]];
+$routes=lps_purchase_internal_routes("7 | Odesa assembly | 5\n7 | Kyiv assembly | 1");
+check($routes===lps_purchase_internal_routes($routes), 'Routes survive save/read without fuzzy label matching');
+$calc=static fn($r,$routes)=>lps_purchase_calculate($r,$internalGroups,30,false,$internalInputs,[],$routes);
+$ir=$calc($internalRow,$routes);
+check($ir['groups'][0]['available']===2.0 && $ir['groups'][0]['internalReserved']===15.0, 'Preserve free stock and expose internal reserved quantity');
+check($ir['groups'][0]['internalRestored']===5.0 && $ir['groups'][0]['planningAvailable']===7.0, 'Same-group reserve is restored once, client reserve stays deducted');
+check($ir['groups'][1]['internalIncoming']===10.0 && $ir['groups'][1]['plannedTransferIn']===0.0, 'Pending cross-group receipt replaces a new replenishment');
+check($ir['groups'][0]['recommendedQuantity']===23.0 && $ir['groups'][0]['plannedTransferOut']===0.0, 'Supplier order does not subtract an existing outgoing account twice');
+check($ir['groups'][0]['regularSales']===30.0, 'Reservations do not alter sales or forecast');
+$outside=$routes; $outside[0]['destinationWarehouseId']=0;
+$ir=$calc($internalRow,$outside);
+check($ir['groups'][1]['internalIncoming']===0.0 && $ir['groups'][0]['recommendedQuantity']===33.0, 'External destination remains deducted and does not supply Odesa');
+$ir=$calc($internalRow,[]);
+check($ir['groups'][0]['recommendedQuantity']===null && in_array('INTERNAL_TRANSFER_ROUTE_REQUIRED',$ir['groups'][0]['issues'],true), 'Unknown destination cannot silently become zero or eligible network stock');
+$stale=$internalRow; unset($stale['internalTransferReservations']);
+check(in_array('INTERNAL_TRANSFER_DATA_REQUIRED',$calc($stale,$routes)['groups'][0]['issues'],true), 'Old backend requires new snapshots');
+$duplicate=$internalRow; $duplicate['internalTransferReservations']['accounts'][]=$duplicate['internalTransferReservations']['accounts'][0];
+$ir=$calc($duplicate,$routes);
+check($ir['groups'][0]['planningAvailable']===2.0 && $ir['groups'][1]['internalIncoming']===0.0 && $ir['groups'][0]['finalQuantity']===null, 'Duplicate account cannot inflate stock');
+$mismatch=$internalRow; $mismatch['warehouseBreakdown'][1]['metrics']['availableQuantity']=19;
+$ir=$calc($mismatch,$routes);
+check(in_array('INTERNAL_TRANSFER_RESERVE_MISMATCH',$ir['groups'][0]['issues'],true) && $ir['groups'][0]['internalRestored']===0.0, 'Only quantities actually deducted from free stock can be restored');
+$independent=$internalRow; unset($independent['inTransitStock']);
+$ir=$calc($independent,$routes);
+check($ir['groups'][0]['planningAvailable']===7.0 && $ir['groups'][0]['finalQuantity']===null, 'Preliminary correction never bypasses network reconciliation, even with transit disabled');
+try { lps_purchase_internal_routes("7 | same | 1\n7 | same | 5"); throw new RuntimeException('Duplicate route accepted'); } catch (InvalidArgumentException $expected) {}
+echo "PASS: internal reservation routing, client reserves, network conservation, unknown/duplicate sources and reconciliation gates\n";
