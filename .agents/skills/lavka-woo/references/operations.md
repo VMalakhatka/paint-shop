@@ -332,3 +332,8 @@ Java schema 7 выделяет эти резервы; WordPress суммируе
 Java FolioProductMovementClassifier и docs/OPERATIONS_RUNBOOK.md («Активные счета
 на внутреннее перемещение»). Новая поправка требует только обновления сайта и нового
 preview v6, если Java и снимки schema 7 уже установлены.
+При `Column count doesn't match value count` на публикации снимка сначала
+сверяйте live/staging movement_fact и Flyway V16, а не повторяйте очередь.
+Подтверждено read-only на production 20.09.2026: live имела два новых поля,
+staging — нет, Java создавала schema 6. Порядок восстановления описан в
+`docs/OPERATIONS_RUNBOOK.md`, идемпотентная миграция принадлежит Java.
