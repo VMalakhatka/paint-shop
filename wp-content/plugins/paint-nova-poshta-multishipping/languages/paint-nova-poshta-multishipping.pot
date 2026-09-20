@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the Paint Nova Poshta Multishipping plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Paint Nova Poshta Multishipping 0.6.0\n"
+"Project-Id-Version: Paint Nova Poshta Multishipping 0.6.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/paint-nova-poshta-multishipping\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-20T15:23:12+00:00\n"
+"POT-Creation-Date: 2026-09-20T16:18:48+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: paint-nova-poshta-multishipping\n"
@@ -86,10 +86,12 @@ msgstr ""
 
 #: src/Admin/ExternalTtnPanel.php:95
 #: src/Admin/ExternalTtnPanel.php:129
+#: src/Email/DeliverySummary.php:87
 msgid "Approved by the warehouse"
 msgstr ""
 
 #: src/Admin/ExternalTtnPanel.php:96
+#: src/Email/DeliverySummary.php:88
 msgid "Submitted by customer; awaiting warehouse review"
 msgstr ""
 
@@ -107,6 +109,7 @@ msgid "Confirm the warehouse shipment checklist first."
 msgstr ""
 
 #: src/Admin/ExternalTtnPanel.php:123
+#: src/Infrastructure/ExternalTracking.php:21
 msgid "Nova Poshta does not show this TTN as awaiting dispatch. Check it with the customer."
 msgstr ""
 
@@ -839,6 +842,38 @@ msgstr ""
 
 #: src/Domain/TtnNormalizer.php:39
 msgid "A canonical 14-digit shipment number was not found."
+msgstr ""
+
+#: src/Email/DeliverySummary.php:76
+msgid "Delivery"
+msgstr ""
+
+#: src/Email/DeliverySummary.php:78
+msgid "Shipping details"
+msgstr ""
+
+#. translators: %s: original order number.
+#: src/Email/DeliverySummary.php:80
+#, php-format
+msgid "From original order #%s (all warehouses)."
+msgstr ""
+
+#: src/Email/DeliverySummary.php:84
+#: src/Email/DeliverySummary.php:93
+msgid "Customer TTN"
+msgstr ""
+
+#: src/Email/DeliverySummary.php:94
+msgid "Shipment registration needs manager review."
+msgstr ""
+
+#: src/Email/DeliverySummary.php:97
+msgid "Nova Poshta services are paid under the customer TTN. This does not confirm dispatch or payment for our goods."
+msgstr ""
+
+#: src/Email/DeliverySummary.php:104
+#: src/Email/DeliverySummary.php:111
+msgid "Original order"
 msgstr ""
 
 #: src/Infrastructure/ApiClient.php:35

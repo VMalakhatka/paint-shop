@@ -48,6 +48,7 @@ final class Plugin
         CheckoutIntegration::create()->hooks();
         (new \Paint\NovaPoshta\Checkout\ExternalTtnCheckout())->hooks();
         (new \Paint\NovaPoshta\Admin\ExternalTtnPanel())->hooks();
+        (new \Paint\NovaPoshta\Email\DeliverySummary())->hooks();
     }
 
     /** @param array<string,class-string> $methods @return array<string,class-string> */

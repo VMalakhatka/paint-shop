@@ -839,3 +839,6 @@ msgstr "При оформлении выберите «Отправка по м�
 
 msgid "Delivery is 0 UAH in this order; carrier charges are paid under your TTN. Pay for our goods separately. The warehouse reviews the shipment before dispatch. You can see the numbers in your order; contact the manager for corrections. Uploading QR images or PDF labels is not available yet."
 msgstr "Доставка в этом заказе — 0 грн; услуги перевозчика оплачиваются по вашей ТТН. Наши товары оплачивайте отдельно. Склад проверяет отправление перед передачей НП. Номера видны в заказе; для исправлений обратитесь к менеджеру. Загрузка QR-изображений или PDF-маркировки пока недоступна."
+
+msgid "Order emails to you and the store show the delivery method and your TTNs by warehouse before the products. For split orders, inherited shipping details are explicitly marked as covering all warehouses of the original order."
+msgstr "В письмах вам и магазину перед товарами показаны способ доставки и ваши ТТН по складам. Для разделённых заказов унаследованные данные доставки явно обозначены как отправления со всех складов исходного заказа."

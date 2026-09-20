@@ -126,3 +126,24 @@ msgstr "Разрешены только официальные ссылки от
 
 msgid "A canonical 14-digit shipment number was not found."
 msgstr "Укажите один 14-значный номер ТТН в поле склада."
+
+msgid "Delivery"
+msgstr "Доставка"
+
+msgid "Shipping details"
+msgstr "Данные отправления"
+
+msgid "From original order #%s (all warehouses)."
+msgstr "Из исходного заказа №%s (все склады)."
+
+msgid "Customer TTN"
+msgstr "ТТН клиента"
+
+msgid "Shipment registration needs manager review."
+msgstr "Регистрацию отправления должен проверить менеджер."
+
+msgid "Nova Poshta services are paid under the customer TTN. This does not confirm dispatch or payment for our goods."
+msgstr "Услуги Новой почты оплачиваются по ТТН клиента. Это не подтверждает отправку или оплату наших товаров."
+
+msgid "Original order"
+msgstr "Исходный заказ"

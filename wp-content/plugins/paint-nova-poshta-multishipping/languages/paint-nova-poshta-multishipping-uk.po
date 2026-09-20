@@ -866,3 +866,24 @@ msgstr "Це замовлення не можна підтвердити для 
 
 msgid "Customer TTNs are stored locally. Creating or changing shipments in Nova Poshta is disabled."
 msgstr "Клієнтські ТТН зберігаються на сайті. Створення або зміна відправлень у Новій пошті вимкнені."
+
+msgid "Delivery"
+msgstr "Доставка"
+
+msgid "Shipping details"
+msgstr "Дані відправлення"
+
+msgid "From original order #%s (all warehouses)."
+msgstr "З початкового замовлення №%s (усі склади)."
+
+msgid "Customer TTN"
+msgstr "ТТН клієнта"
+
+msgid "Shipment registration needs manager review."
+msgstr "Реєстрацію відправлення має перевірити менеджер."
+
+msgid "Nova Poshta services are paid under the customer TTN. This does not confirm dispatch or payment for our goods."
+msgstr "Послуги Нової пошти оплачуються за ТТН клієнта. Це не підтверджує відправку чи оплату наших товарів."
+
+msgid "Original order"
+msgstr "Початкове замовлення"

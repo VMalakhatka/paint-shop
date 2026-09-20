@@ -459,6 +459,7 @@ function pc_wholesale_help_render_endpoint(): void {
             </ol>
             <div class="pc-help-card" id="customer-ttn">
                 <h3><?php esc_html_e('Ship using your existing Nova Poshta TTN', 'pc-wholesale-help'); ?></h3>
+                <p><?php esc_html_e('Order emails to you and the store show the delivery method and your TTNs by warehouse before the products. For split orders, inherited shipping details are explicitly marked as covering all warehouses of the original order.', 'pc-wholesale-help'); ?></p>
                 <p><?php esc_html_e('At checkout, choose Ship using my Nova Poshta TTN. Enter one existing TTN, message or official tracking link for each displayed warehouse. Check the extracted numbers and goods, then confirm them.', 'pc-wholesale-help'); ?></p>
                 <p><?php esc_html_e('Delivery is 0 UAH in this order; carrier charges are paid under your TTN. Pay for our goods separately. The warehouse reviews the shipment before dispatch. You can see the numbers in your order; contact the manager for corrections. Uploading QR images or PDF labels is not available yet.', 'pc-wholesale-help'); ?></p>
             </div>
