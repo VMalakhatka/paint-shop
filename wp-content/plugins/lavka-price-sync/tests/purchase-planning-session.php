@@ -88,6 +88,6 @@ check($start['query']['calculation']['availability']['enabled'] === true
     && $start['query']['calculation']['availability']['groupCode'] === 'group'
     && $start['query']['calculation']['availability']['filter'] === ['availabilityStatus' => ['MEASURED']], 'Correction enables history without erasing availability filters');
 $key = lps_purchase_session_key($start['token']);
-$sessions[$key]['previewVersion'] = 3;
+$sessions[$key]['previewVersion'] = 5;
 rejected(fn() => lps_purchase_session($start['token']), 'Old calculation version requires a fresh preview');
 echo "PASS: scenario demand/rounding snapshot, history request and old-preview invalidation\n";

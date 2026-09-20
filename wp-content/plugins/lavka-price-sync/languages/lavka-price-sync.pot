@@ -6192,27 +6192,7 @@ msgid "Reserved for internal transfers"
 msgstr ""
 
 #: inc/purchase-planning.php inc/purchase-planning-model.php
-msgid "Internal reserve restored within group"
-msgstr ""
-
-#: inc/purchase-planning.php inc/purchase-planning-model.php
-msgid "Expected internal receipts from another group"
-msgstr ""
-
-#: inc/purchase-planning.php inc/purchase-planning-model.php
 msgid "Internal transfer accounts"
-msgstr ""
-
-#: inc/purchase-planning.php inc/purchase-planning-model.php
-msgid "Internal transfer routes"
-msgstr ""
-
-#: inc/purchase-planning.php inc/purchase-planning-model.php
-msgid "These accounts are already included in planning stock. Do not enter them again as transit or other incoming orders. Unknown destinations require a route in the scenario."
-msgstr ""
-
-#: inc/purchase-planning.php inc/purchase-planning-model.php
-msgid "One route per line: source warehouse number | exact source information from the account | destination warehouse number. Use 0 for a destination outside this network. Unmatched accounts require review."
 msgstr ""
 
 #: inc/purchase-planning.php inc/purchase-planning-model.php
@@ -6220,27 +6200,7 @@ msgid "Rebuild warehouse snapshots with the updated Java backend to capture inte
 msgstr ""
 
 #: inc/purchase-planning.php inc/purchase-planning-model.php
-msgid "Assign a destination to the internal transfer source information in the scenario."
-msgstr ""
-
-#: inc/purchase-planning.php inc/purchase-planning-model.php
 msgid "Internal reservations exceed the reserved stock. Check the source snapshot before ordering."
-msgstr ""
-
-#: inc/purchase-planning.php inc/purchase-planning-model.php
-msgid "Internal receipts are included in preliminary stock. A final order requires a reconciled network snapshot to exclude already received goods."
-msgstr ""
-
-#: inc/purchase-planning.php inc/purchase-planning-model.php
-msgid "Use one transfer route per line: source warehouse | source information | destination warehouse."
-msgstr ""
-
-#: inc/purchase-planning.php inc/purchase-planning-model.php
-msgid "Invalid internal transfer routes."
-msgstr ""
-
-#: inc/purchase-planning.php inc/purchase-planning-model.php
-msgid "Invalid or duplicate internal transfer route."
 msgstr ""
 
 #: inc/purchase-planning.php inc/purchase-planning-model.php
@@ -6249,4 +6209,8 @@ msgstr ""
 
 #: inc/purchase-planning.php inc/purchase-planning-model.php
 msgid "I checked receipt dates and destinations, and excluded transit and internal transfer accounts from other incoming orders."
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Internal transfer reserves are added back at the account warehouse, regardless of recipient. Customer reserves stay deducted. Do not add these accounts again as incoming stock."
 msgstr ""

@@ -6395,56 +6395,16 @@ msgid "Reserved for internal transfers"
 msgstr "Резерв на внутрішні переміщення"
 
 #: inc/purchase-planning.php inc/purchase-planning-model.php
-msgid "Internal reserve restored within group"
-msgstr "Повернуто внутрішній резерв у межах групи"
-
-#: inc/purchase-planning.php inc/purchase-planning-model.php
-msgid "Expected internal receipts from another group"
-msgstr "Очікується переміщення з іншої групи"
-
-#: inc/purchase-planning.php inc/purchase-planning-model.php
 msgid "Internal transfer accounts"
 msgstr "Рахунки внутрішніх переміщень"
-
-#: inc/purchase-planning.php inc/purchase-planning-model.php
-msgid "Internal transfer routes"
-msgstr "Напрямки внутрішніх переміщень"
-
-#: inc/purchase-planning.php inc/purchase-planning-model.php
-msgid "These accounts are already included in planning stock. Do not enter them again as transit or other incoming orders. Unknown destinations require a route in the scenario."
-msgstr "Ці рахунки вже враховано в запасі для замовлення. Не додавайте їх повторно до транзиту чи інших надходжень. Для невідомого отримувача задайте напрямок у сценарії."
-
-#: inc/purchase-planning.php inc/purchase-planning-model.php
-msgid "One route per line: source warehouse number | exact source information from the account | destination warehouse number. Use 0 for a destination outside this network. Unmatched accounts require review."
-msgstr "Один напрямок на рядок: номер складу-відправника | точний текст «Джерело інформації» рахунку | номер складу-отримувача. 0 — отримувач поза цією мережею. Рахунки без відповідності потребують перевірки."
 
 #: inc/purchase-planning.php inc/purchase-planning-model.php
 msgid "Rebuild warehouse snapshots with the updated Java backend to capture internal reservations."
 msgstr "Оновіть Java та сформуйте нові знімки складів для врахування внутрішніх резервів."
 
 #: inc/purchase-planning.php inc/purchase-planning-model.php
-msgid "Assign a destination to the internal transfer source information in the scenario."
-msgstr "Задайте у сценарії склад-отримувач для джерела інформації внутрішнього переміщення."
-
-#: inc/purchase-planning.php inc/purchase-planning-model.php
 msgid "Internal reservations exceed the reserved stock. Check the source snapshot before ordering."
 msgstr "Внутрішні резерви перевищують зарезервований запас. Перевірте вихідний знімок перед замовленням."
-
-#: inc/purchase-planning.php inc/purchase-planning-model.php
-msgid "Internal receipts are included in preliminary stock. A final order requires a reconciled network snapshot to exclude already received goods."
-msgstr "Внутрішні надходження враховано в попередньому запасі. Для остаточного замовлення потрібна звірка знімків мережі, щоб виключити вже отримані товари."
-
-#: inc/purchase-planning.php inc/purchase-planning-model.php
-msgid "Use one transfer route per line: source warehouse | source information | destination warehouse."
-msgstr "Вкажіть один напрямок на рядок: склад-відправник | джерело інформації | склад-отримувач."
-
-#: inc/purchase-planning.php inc/purchase-planning-model.php
-msgid "Invalid internal transfer routes."
-msgstr "Некоректні напрямки внутрішніх переміщень."
-
-#: inc/purchase-planning.php inc/purchase-planning-model.php
-msgid "Invalid or duplicate internal transfer route."
-msgstr "Некоректний або повторний напрямок внутрішнього переміщення."
 
 #: inc/purchase-planning.php inc/purchase-planning-model.php
 msgid "Other confirmed incoming orders, excluding transit and internal transfers"
@@ -6453,3 +6413,7 @@ msgstr "Інші підтверджені надходження без тран
 #: inc/purchase-planning.php inc/purchase-planning-model.php
 msgid "I checked receipt dates and destinations, and excluded transit and internal transfer accounts from other incoming orders."
 msgstr "Я перевірив дати й отримувачів надходжень та виключив транзит і рахунки внутрішніх переміщень з інших надходжень."
+
+#: inc/purchase-planning.php
+msgid "Internal transfer reserves are added back at the account warehouse, regardless of recipient. Customer reserves stay deducted. Do not add these accounts again as incoming stock."
+msgstr "Резерви внутрішніх переміщень додаються до запасу складу, де знаходиться рахунок, незалежно від отримувача. Клієнтські резерви залишаються віднятими. Не додавайте ці рахунки повторно як надходження."

@@ -30,6 +30,12 @@ if (($argv[1] ?? '') === 'calculate-route') {
     $edits = json_decode($argv[2] ?? '{}', true);
     echo json_encode(lps_purchase_calculate($row, $groups, 30, false, $edits ?: ['kyiv'=>['openOrders'=>0], 'odesa'=>['openOrders'=>0]], [])); exit;
 }
+if (($argv[1] ?? '') === 'calculate-internal') {
+    $row['warehouseBreakdown'][0]['metrics']['availableQuantity'] = 0;
+    $row['internalTransferReservations']['accounts'] = [['sourceWarehouseId'=>1,'generationId'=>10,
+        'documentId'=>100,'documentNumber'=>555279,'sourceInfo'=>null,'quantity'=>6]];
+    echo json_encode(lps_purchase_calculate($row, $groups, 30, false, ['kyiv'=>['openOrders'=>0]], [])); exit;
+}
 if (($argv[1] ?? '') === 'calculate') {
     $edits = json_decode($argv[2] ?? '{}', true);
     echo json_encode(lps_purchase_calculate($row, $groups, 30, false, $edits ?: ['kyiv'=>['openOrders'=>0]], [])); exit;
