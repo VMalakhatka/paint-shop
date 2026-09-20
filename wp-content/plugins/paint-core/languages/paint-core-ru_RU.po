@@ -297,3 +297,7 @@ msgstr "Работа с клиентами"
 #: inc/admin-lavka-hub.php
 msgid "Lavka Folio document audit"
 msgstr "Лавка: аудит документов ФОЛИО"
+
+#: inc/header-allocation-switcher.php
+msgid "Automatic distribution may split your order between Kyiv and Odesa into separate shipments. Choose one warehouse if you need a single shipment."
+msgstr "Внимание: автоматическое распределение может разделить заказ между Киевом и Одессой на отдельные отправления. Если нужна одна отправка, выберите только один склад."

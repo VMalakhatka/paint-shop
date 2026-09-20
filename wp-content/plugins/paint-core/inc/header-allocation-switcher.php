@@ -25,6 +25,29 @@ add_action('wp_enqueue_scripts', function (): void {
 
 /* ============================ Helpers ============================ */
 
+function pc_alloc_allows_multiple_locations(): bool {
+    return function_exists('pc_wholesale_customer_can_access')
+        && pc_wholesale_customer_can_access();
+}
+
+/** Enforce storefront policy even for old cookies and direct AJAX requests. */
+function pc_normalize_alloc_pref(array $pref): array {
+    $mode = in_array(($pref['mode'] ?? ''), ['auto', 'manual', 'single'], true)
+        ? $pref['mode'] : 'auto';
+    $term_id = max(0, (int) ($pref['term_id'] ?? 0));
+    if (!pc_alloc_allows_multiple_locations()) {
+        $mode = 'single';
+        $terms = get_terms(['taxonomy' => 'location', 'hide_empty' => false]);
+        $ids = is_wp_error($terms) ? [] : array_map(static function ($term) {
+            return (int) $term->term_id;
+        }, $terms);
+        if (!in_array($term_id, $ids, true)) {
+            $term_id = $ids[0] ?? 0;
+        }
+    }
+    return ['mode' => $mode, 'term_id' => $term_id];
+}
+
 /** Прочитать предпочтение пользователя */
 function pc_get_alloc_pref(): array {
     $pref = [];
@@ -35,18 +58,12 @@ function pc_get_alloc_pref(): array {
         $try = json_decode(stripslashes($_COOKIE['pc_alloc_pref']), true);
         if (is_array($try)) $pref = $try;
     }
-    $allowed = ['auto', 'manual', 'single']; // single = только выбранный склад
-    $mode    = in_array(($pref['mode'] ?? 'auto'), $allowed, true) ? $pref['mode'] : 'auto';
-    $termId  = max(0, (int)($pref['term_id'] ?? 0));
-    return ['mode' => $mode, 'term_id' => $termId];
+    return pc_normalize_alloc_pref($pref);
 }
 
 /** Сохранить предпочтение пользователя */
 function pc_set_alloc_pref(array $pref): void {
-    $allowed = ['auto', 'manual', 'single'];
-    $mode    = in_array(($pref['mode'] ?? 'auto'), $allowed, true) ? $pref['mode'] : 'auto';
-    $termId  = max(0, (int)($pref['term_id'] ?? 0));
-    $val     = ['mode' => $mode, 'term_id' => $termId];
+    $val = pc_normalize_alloc_pref($pref);
 
     if (function_exists('WC') && WC() && WC()->session) {
         WC()->session->set('pc_alloc_pref', $val);
@@ -140,6 +157,10 @@ function pc_calc_plan_for(\WC_Product $product, int $qty): array {
         return $request_cache[$cache_key];
     }
 
+    if (!pc_alloc_allows_multiple_locations()) {
+        return $request_cache[$cache_key] = pc_build_alloc_plan($product, $qty, $pref);
+    }
+
     // 1) внешний фильтр (кто-то может переопределить всё целиком)
     $from_filter = (array) apply_filters('slu_allocation_plan', [], $product, $qty, 'frontend-preview');
     if (!empty($from_filter)) {
@@ -173,15 +194,23 @@ function pc_render_alloc_control() {
 
     $nonce  = wp_create_nonce('pc_alloc_nonce');
     $ajax_u = admin_url('admin-ajax.php');
+    $multiple = pc_alloc_allows_multiple_locations();
     ?>
     <div class="pc-alloc" role="group" aria-label="<?php echo esc_attr__( 'Allocation', 'paint-core' ); ?>">
+      <?php if ($multiple): ?>
+      <p class="pc-alloc-warning"><?php echo esc_html__('Automatic distribution may split your order between Kyiv and Odesa into separate shipments. Choose one warehouse if you need a single shipment.', 'paint-core'); ?></p>
+      <?php endif; ?>
       <small><?php echo esc_html__( 'Allocation:', 'paint-core' ); ?></small>
 
+      <?php if ($multiple): ?>
       <select id="pc-slu-mode" class="pc-alloc-mode" aria-label="<?php echo esc_attr__( 'Allocation mode', 'paint-core' ); ?>">
         <option value="auto"   <?php selected($mode, 'auto');   ?>><?php echo esc_html__( 'Auto', 'paint-core' ); ?></option>
         <option value="manual" <?php selected($mode, 'manual'); ?>><?php echo esc_html__( 'Preferred location first', 'paint-core' ); ?></option>
         <option value="single" <?php selected($mode, 'single'); ?>><?php echo esc_html__( 'Only selected location', 'paint-core' ); ?></option>
       </select>
+      <?php else: ?>
+      <input type="hidden" id="pc-slu-mode" value="single">
+      <?php endif; ?>
 
       <select id="pc-slu-location" class="pc-alloc-term" aria-label="<?php echo esc_attr__( 'Location', 'paint-core' ); ?>"
               <?php disabled($mode === 'auto'); ?>>
@@ -370,6 +399,7 @@ add_filter('slu_allocation_plan', function($plan, $product, $need, $strategy){
         $need = max(0, (int)$need);
         if ($need === 0) return [];
 
+        if (!pc_alloc_allows_multiple_locations()) return pc_build_alloc_plan($product, $need);
         if (is_array($plan) && !empty($plan)) return $plan;
 
         return pc_build_alloc_plan($product, $need);

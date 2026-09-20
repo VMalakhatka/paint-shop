@@ -295,6 +295,7 @@ function pc_wholesale_help_render_endpoint(): void {
         </nav>
 
         <section class="pc-help-section" id="sklad">
+            <div class="pc-help-warning"><?php esc_html_e('Automatic distribution may split your order between Kyiv and Odesa into separate shipments. Choose one warehouse if you need a single shipment.', 'paint-core'); ?></div>
             <div class="pc-help-section__heading"><span>01</span><div><h2><?php esc_html_e('Choose how products are written off from warehouses', 'pc-wholesale-help'); ?></h2><p><?php esc_html_e('Select the mode before adding products. If you change it later, review the entire cart again.', 'pc-wholesale-help'); ?></p></div></div>
             <div class="pc-help-grid pc-help-grid--three">
                 <div class="pc-help-card pc-help-card--accent"><h3><?php esc_html_e('The system decides', 'pc-wholesale-help'); ?></h3><p><?php esc_html_e('Recommended: the site automatically distributes the required quantity among available warehouses.', 'pc-wholesale-help'); ?></p></div>

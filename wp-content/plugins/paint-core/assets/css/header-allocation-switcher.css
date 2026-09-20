@@ -7,11 +7,30 @@
 
 .pc-alloc {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   min-width: 0;
   max-width: 100%;
   gap: 8px;
   font: 14px/1.2 system-ui, sans-serif;
+}
+
+.pc-alloc-warning {
+  flex: 0 0 100%;
+  grid-column: 1 / -1;
+  margin: 0;
+  max-width: 560px;
+  padding: 6px 10px;
+  border-left: 3px solid #b78103;
+  background: #fff8e5;
+  color: #4a390e;
+  font-size: 12px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.pc-alloc input[type="hidden"] {
+  display: none;
 }
 
 .pc-alloc small {

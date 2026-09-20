@@ -312,3 +312,7 @@ msgstr ""
 #: inc/admin-lavka-hub.php
 msgid "Lavka Folio document audit"
 msgstr ""
+
+#: inc/header-allocation-switcher.php
+msgid "Automatic distribution may split your order between Kyiv and Odesa into separate shipments. Choose one warehouse if you need a single shipment."
+msgstr ""
