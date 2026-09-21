@@ -1,4 +1,5 @@
 <?php
+if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 // Isolated parser/matcher contract tests; no WordPress/product writes.
 define('ABSPATH', __DIR__ . '/');
 function __($s, $domain = '') { return $s; }

@@ -179,7 +179,9 @@ final class SupplierCatalog
         try {
             $manual = [];
             if (!empty($old['generation'])) {
-                foreach ($wpdb->get_results($wpdb->prepare("SELECT external_key,manual_sku FROM $table WHERE source=%s AND generation=%s AND manual_sku<>''", $id, $old['generation']), ARRAY_A) as $r) { $manual[$r['external_key']] = $r['manual_sku']; }
+                $previous = $wpdb->get_results($wpdb->prepare("SELECT external_key,manual_sku FROM $table WHERE source=%s AND generation=%s AND manual_sku<>''", $id, $old['generation']), ARRAY_A);
+                if (!is_array($previous)) { throw new \RuntimeException('CATALOGUE_READ_FAILED'); }
+                foreach ($previous as $r) { $manual[$r['external_key']] = $r['manual_sku']; }
             }
             if ($source['type'] === 'drive') { $rows = $this->drive_rows($source['url']); }
             else {
@@ -208,7 +210,9 @@ final class SupplierCatalog
             }
             if (!$count) { throw new \RuntimeException(__('No products found. Check the product element and field mapping.', 'lavka-product-media-upload')); }
             $active = ['generation' => $generation, 'count' => $count, 'updated' => current_time('mysql')];
-            update_option('lpmu_supplier_active_' . $id, $active, false);
+            if (!update_option('lpmu_supplier_active_' . $id, $active, false)) {
+                throw new \RuntimeException(__('The catalogue could not be saved. The previous version has been retained.', 'lavka-product-media-upload'));
+            }
             update_option('lpmu_supplier_status_' . $id, ['state' => 'complete', 'count' => $count], false);
             $wpdb->query($wpdb->prepare("DELETE FROM $table WHERE source=%s AND generation<>%s", $id, $generation));
             return $active;
@@ -226,6 +230,7 @@ final class SupplierCatalog
         $keys[] = '_sku';
         $placeholders = implode(',', array_fill(0, count($keys), '%s'));
         $data = $wpdb->get_results($wpdb->prepare("SELECT p.ID,m.meta_key,m.meta_value FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id=p.ID WHERE p.post_type IN ('product','product_variation') AND p.post_status<>'trash' AND m.meta_key IN ($placeholders) AND m.meta_value<>''", $keys), ARRAY_A);
+        if (!is_array($data)) { throw new \RuntimeException('PRODUCT_LOOKUP_FAILED'); }
         $out = ['sku' => [], 'barcode' => []];
         foreach ($data as $r) { $kind = $r['meta_key'] === '_sku' ? 'sku' : 'barcode'; $out[$kind][(string) $r['meta_value']][(int) $r['ID']] = true; }
         return $out;

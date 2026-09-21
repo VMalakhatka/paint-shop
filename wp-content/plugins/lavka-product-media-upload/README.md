@@ -210,7 +210,7 @@ State/lifecycle:
   `lpmu_supplier_schema=1`. No product tables are altered.
 - Per-source `lpmu_supplier_active_*`, `lpmu_supplier_status_*`,
   `lpmu_supplier_import_*`: non-autoloaded snapshot, progress and 15-minute import
-  lease. A failed import retains the old active snapshot; successful import removes
+  lease. A failed import (including a failed active-pointer write) retains the old active snapshot; successful import removes
   superseded staging rows. Match filters are projections from the last import;
   registry creation rechecks the live exact match. Manual corrections are retained
   across consecutive snapshots with the same supplier ID.
