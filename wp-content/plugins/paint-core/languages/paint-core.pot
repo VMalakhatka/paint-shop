@@ -316,3 +316,15 @@ msgstr ""
 #: inc/header-allocation-switcher.php
 msgid "Automatic distribution may split your order between Kyiv and Odesa into separate shipments. Choose one warehouse if you need a single shipment."
 msgstr ""
+
+#: inc/header-allocation-switcher.php
+msgid "Store:"
+msgstr ""
+
+#: inc/header-allocation-switcher.php
+msgid "Choose a store and add the items from the old automatic distribution again before checkout."
+msgstr ""
+
+#: inc/header-allocation-switcher.php
+msgid "Some items are no longer available in the chosen store. Please review your cart."
+msgstr ""

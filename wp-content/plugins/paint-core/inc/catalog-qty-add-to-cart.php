@@ -73,6 +73,9 @@ function pcux_available_qty(\WC_Product $product): int {
 
 /* ===== Доступно к добавлению (остаток минус уже в корзине) ===== */
 function pcux_available_for_add(\WC_Product $product): int {
+    if (function_exists('pc_alloc_allows_multiple_locations') && !\pc_alloc_allows_multiple_locations()) {
+        return \pc_retail_available_qty($product, (int) \pc_get_alloc_pref()['term_id']);
+    }
     // базовый доступный остаток (уже учитывает SINGLE через п.2)
     $total = (int) pcux_available_qty($product);
 
@@ -95,6 +98,9 @@ function pcux_available_for_add(\WC_Product $product): int {
 // SINGLE: если на выбранном складе 0 — товар нельзя купить
 add_filter('woocommerce_is_purchasable', function($ok, $product){
     if (!($product instanceof \WC_Product)) return $ok;
+    // Stock limits belong to add/update validation, not product-level eligibility:
+    // Woo also checks this while restoring items from a different selected store.
+    if (function_exists('pc_alloc_allows_multiple_locations') && !\pc_alloc_allows_multiple_locations()) return $ok;
     [$mode, $tid] = pc_pref_single_mode_term();
     if ($mode !== 'single' || $tid <= 0) return $ok;
     return pc_qty_on_term($product, $tid) > 0;
@@ -336,6 +342,9 @@ function ($passed, $cart_item_key, $values, $new_qty) {
 
         // При апдейте текущей строки мы «возвращаем» её старое кол-во во доступ
         $available_for_update = max(0, $available_for_add + $current_line_qty);
+        if (\function_exists('pc_alloc_allows_multiple_locations') && !\pc_alloc_allows_multiple_locations()) {
+            $available_for_update = \pc_retail_available_qty($product, \pc_retail_cart_location($values), (string) $cart_item_key);
+        }
 
         if ($available_for_update <= 0) {
             \wc_add_notice( \__( 'This product is currently unavailable in stock.', 'paint-core' ), 'error' );

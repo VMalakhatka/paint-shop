@@ -122,6 +122,9 @@ if (!function_exists('slu_total_available_qty')) {
 // available to add = total stock minus quantity already in cart
 if (!function_exists('slu_available_for_add')) {
     function slu_available_for_add(WC_Product $product): int {
+        if (function_exists('pc_alloc_allows_multiple_locations') && !pc_alloc_allows_multiple_locations()) {
+            return pc_retail_available_qty($product, (int) pc_get_alloc_pref()['term_id']);
+        }
         $total   = slu_total_available_qty($product);
         $in_cart = slu_cart_qty_for_product($product);
         return max(0, (int)$total - (int)$in_cart);
@@ -385,8 +388,8 @@ if (!function_exists('slu_get_allocation_plan')) {
 }
 
 if (!function_exists('slu_render_allocation_line')) {
-    function slu_render_allocation_line(WC_Product $product, int $need): string{
-        $plan = slu_get_allocation_plan($product, $need);
+    function slu_render_allocation_line(WC_Product $product, int $need, ?array $plan = null): string{
+        $plan = $plan ?? slu_get_allocation_plan($product, $need);
         if (empty($plan)) return '';
         $parts = [];
         foreach ($plan as $tid=>$qty) {
@@ -413,6 +416,26 @@ if (!function_exists('slu_render_stock_panel')) {
 
         $v = pc_build_stock_view($product);
         $L = slu_labels();
+
+        if (function_exists('pc_alloc_allows_multiple_locations') && !pc_alloc_allows_multiple_locations()) {
+            $selected = (int) ($opts['retail_location_id'] ?? pc_get_alloc_pref()['term_id']);
+            $all = slu_collect_location_stocks_for_product($product);
+            $term = get_term($selected, 'location');
+            $row = $all[$selected] ?? ['name' => ($term && !is_wp_error($term)) ? $term->name : '', 'qty' => 0];
+            $others = [];
+            $total = 0;
+            foreach ($all as $tid => $stock) {
+                $total += max(0, (int) $stock['qty']);
+                if ((int) $tid !== $selected && (int) $stock['qty'] > 0) $others[] = pc_fmt_loc_line($stock);
+            }
+            if ($o['hide_when_zero'] && $total <= 0) return '';
+            $html = '<div class="slu-stock-box ' . esc_attr($o['wrap_class']) . '">';
+            if ($o['show_primary']) $html .= '<div><strong>' . esc_html($L['from']) . ':</strong> <span class="is-preferred">' . pc_fmt_loc_line($row) . '</span></div>';
+            if ($o['show_others'] && $others) $html .= '<div><strong>' . esc_html($L['others']) . ':</strong> ' . implode(', ', $others) . '</div>';
+            if ($o['show_total']) $html .= '<div><strong>' . esc_html($L['total']) . ':</strong> <span class="slu-stock-total">' . $total . '</span></div>';
+            $html .= '</div>';
+            return apply_filters('slu_stock_panel_html', $html, $product, $v, $o);
+        }
 
         // "single" mode: only chosen location
         if ($v['mode'] === 'single') {
@@ -522,7 +545,9 @@ if (!function_exists('slu_cart_allocation_row')) {
         $qty = max(0, (int)($cart_item['quantity'] ?? 0));
         if ($qty <= 0) return $item_data;
 
-        $line = slu_render_allocation_line($product, $qty);
+        $plan = function_exists('pc_cart_item_alloc_plan') && !pc_alloc_allows_multiple_locations()
+            ? pc_cart_item_alloc_plan($cart_item) : null;
+        $line = slu_render_allocation_line($product, $qty, $plan);
         if ($line !== '') {
             $L = slu_labels();
             $item_data[] = [

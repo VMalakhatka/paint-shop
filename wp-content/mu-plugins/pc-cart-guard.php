@@ -39,11 +39,11 @@ function pc_cg_log($msg){
 /**
  * Рендер строки «Write-off: …»
  */
-function pc_cartguard_render_plan_html(WC_Product $product, int $qty): string {
+function pc_cartguard_render_plan_html(WC_Product $product, int $qty, array $item = []): string {
     // пробуем реальный план
     if (function_exists('pc_calc_plan_for')) {
         // ожидается массив вида [term_id => qty] под текущие настройки списания
-        $plan = pc_calc_plan_for($product, $qty, 'cart');
+        $plan = $item ? pc_cart_item_alloc_plan($item, $qty) : pc_calc_plan_for($product, $qty);
         if (is_array($plan) && $plan) {
             $parts = [];
 
@@ -92,7 +92,11 @@ function pc_cartguard_render_plan_html(WC_Product $product, int $qty): string {
 
 /* ================== CORE LIMITS ================== */
 
-function pc_cartguard_get_allowed_qty_for_cart(WC_Product $product, int $current_cart_qty): int {
+function pc_cartguard_get_allowed_qty_for_cart(WC_Product $product, int $current_cart_qty, array $item = [], string $item_key = ''): int {
+    if (function_exists('pc_alloc_allows_multiple_locations') && !pc_alloc_allows_multiple_locations()) {
+        // Zero at the pinned store is final; never fall back to another warehouse.
+        return pc_retail_available_qty($product, pc_retail_cart_location($item), $item_key);
+    }
     $maxQty = 0; 
     $src    = 'none';
 
@@ -166,12 +170,13 @@ function pc_cartguard_enforce_limits() {
     $changed_any = false;
     foreach ($cart->get_cart() as $key => $item) {
         if (empty($item['product_id'])) continue;
+        if (!pc_alloc_allows_multiple_locations() && !empty($item['pc_retail_location_review'])) continue;
 
-        $product = wc_get_product($item['product_id']);
+        $product = $item['data'] ?? wc_get_product($item['product_id']);
         if (!$product || !$product->is_purchasable()) { pc_cg_log('enforce: skip non-purch pid='.(int)$item['product_id']); continue; }
 
         $current_qty = (int) $item['quantity'];
-        $allowed_max = pc_cartguard_get_allowed_qty_for_cart($product, $current_qty);
+        $allowed_max = pc_cartguard_get_allowed_qty_for_cart($product, $current_qty, $item, (string) $key);
 
         if ($allowed_max <= 0) {
             // удаляем позицию ТИХО, а сообщение — как notice (не error)
@@ -222,12 +227,13 @@ function pc_cart_item_extras(){
         $product = $item['data'] ?? null; if (!$product instanceof WC_Product) continue;
         $qty     = (int) ($item['quantity'] ?? 0);
 
-        $plan_html   = apply_filters('pc_cart_show_plan', true)        ? pc_cartguard_render_plan_html($product, $qty) : '';
+        $plan_html   = apply_filters('pc_cart_show_plan', true)        ? pc_cartguard_render_plan_html($product, $qty, $item) : '';
         $stocks_html = '';
 
         if (apply_filters('pc_cart_show_stock_panel', true) && function_exists('slu_render_stock_panel')) {
             $panel = (string) slu_render_stock_panel($product, [
                 'wrap_class'       => 'slu-stock-mini',
+                'retail_location_id' => pc_retail_cart_location($item),
                 'show_primary'     => true,
                 'show_others'      => true,
                 'show_total'       => true,
@@ -238,9 +244,10 @@ function pc_cart_item_extras(){
             $stocks_html = '<div class="pc-cart-stocks" style="margin:.15rem 0 0">'.$panel.'</div>';
         }
 
-        $allowed = pc_cartguard_get_allowed_qty_for_cart($product, $qty);
+        $allowed = pc_cartguard_get_allowed_qty_for_cart($product, $qty, $item, (string) $item_key);
 
         $out[] = [
+            'cart_item_key' => $item_key,
             'product_id'   => $product->get_id(),
             'name'         => $product->get_name(),
             'permalink'    => $product->get_permalink(),
@@ -281,7 +288,7 @@ function pc_cartguard_update_item() {
 
     $old_qty = (int) ($cart_item['quantity'] ?? 0);
     $target_qty = $requested_qty;
-    $allowed_max = pc_cartguard_get_allowed_qty_for_cart($product, $old_qty);
+    $allowed_max = pc_cartguard_get_allowed_qty_for_cart($product, $old_qty, $cart_item, $cart_item_key);
 
     if ($target_qty > $allowed_max) {
         $target_qty = $allowed_max;
@@ -361,12 +368,15 @@ function pc_cart_adjust_qty() {
         wp_send_json_error(['msg' => 'no product']);
     }
 
-    $current_qty = 0; $item_key = null;
+    $current_qty = 0; $item_key = null; $matched_item = [];
     foreach ($cart->get_cart() as $key => $item) {
-        if ((int) $item['product_id'] === $pid) { $current_qty = (int) $item['quantity']; $item_key = $key; break; }
+        if (!pc_alloc_allows_multiple_locations() && pc_retail_cart_location($item) !== (int) pc_get_alloc_pref()['term_id']) continue;
+        if ((int) $item['product_id'] === $pid) {
+            $current_qty = (int) $item['quantity']; $item_key = $key; $matched_item = $item; break;
+        }
     }
 
-    $allowed_max = pc_cartguard_get_allowed_qty_for_cart($product, $current_qty);
+    $allowed_max = pc_cartguard_get_allowed_qty_for_cart($product, $current_qty, $matched_item, (string) $item_key);
     $target = $current_qty + $delta;
     if ($target < 0)              $target = 0;
     if ($target > $allowed_max)   $target = $allowed_max;
@@ -665,13 +675,14 @@ add_filter('woocommerce_cart_item_name', function ($name, $cart_item, $cart_item
 
     // — строка ПЛАНА
     if (apply_filters('pc_cart_show_plan', true)) {
-        $html .= pc_cartguard_render_plan_html($product, $qty);
+        $html .= pc_cartguard_render_plan_html($product, $qty, $cart_item);
     }
 
     // — зелёная мини-панель складов
     if (apply_filters('pc_cart_show_stock_panel', true) && function_exists('slu_render_stock_panel')) {
         $panel = (string) slu_render_stock_panel($product, [
             'wrap_class'       => 'slu-stock-mini',
+            'retail_location_id' => pc_retail_cart_location($cart_item),
             'show_primary'     => true,
             'show_others'      => true,
             'show_total'       => true,
@@ -693,7 +704,7 @@ add_filter('woocommerce_cart_item_quantity', function ($product_quantity, $cart_
     if (!$product instanceof WC_Product) return $product_quantity;
 
     $current = (int) $cart_item['quantity'];
-    $max     = pc_cartguard_get_allowed_qty_for_cart($product, $current);
+    $max     = pc_cartguard_get_allowed_qty_for_cart($product, $current, $cart_item, (string) $cart_item_key);
     $step    = max(1, (int) $product->get_min_purchase_quantity());
     $name    = "cart[{$cart_item_key}][qty]";
 

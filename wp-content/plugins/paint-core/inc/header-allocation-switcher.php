@@ -173,6 +173,84 @@ function pc_calc_plan_for(\WC_Product $product, int $qty): array {
     return $request_cache[$cache_key];
 }
 
+/* ============================ Retail cart locations ============================ */
+
+/** Retail cart identity includes the store chosen when adding the item. */
+function pc_retail_cart_location(array $item): int {
+    if (pc_alloc_allows_multiple_locations()) return 0;
+    if (isset($item['pc_retail_location_id'])) return (int) $item['pc_retail_location_id'];
+    $plan = array_filter((array) ($item['pc_alloc_plan'] ?? []));
+    if (count($plan) === 1) return (int) array_key_first($plan);
+    return (int) pc_get_alloc_pref()['term_id'];
+}
+
+function pc_cart_item_alloc_plan(array $item, ?int $quantity = null): array {
+    $product = $item['data'] ?? null;
+    if (!$product instanceof WC_Product) return [];
+    $qty = $quantity ?? (int) ($item['quantity'] ?? 0);
+    if (!pc_alloc_allows_multiple_locations()) {
+        if (!empty($item['pc_retail_location_review'])) return [];
+        return pc_build_alloc_plan($product, $qty, [
+            'mode' => 'single', 'term_id' => pc_retail_cart_location($item),
+        ]);
+    }
+    return pc_calc_plan_for($product, $qty);
+}
+
+/** Capacity for this store, excluding other lines reserving the same SKU there. */
+function pc_retail_available_qty(WC_Product $product, int $location, string $exclude_key = ''): int {
+    $available = array_sum(pc_build_alloc_plan($product, PHP_INT_MAX, ['mode' => 'single', 'term_id' => $location]));
+    if (function_exists('WC') && WC() && WC()->cart) {
+        foreach (WC()->cart->get_cart() as $key => $item) {
+            if ((string) $key === $exclude_key) continue;
+            $id = (int) (($item['variation_id'] ?? 0) ?: ($item['product_id'] ?? 0));
+            if ($id === (int) $product->get_id() && pc_retail_cart_location($item) === $location) {
+                $available -= (int) ($item['quantity'] ?? 0);
+            }
+        }
+    }
+    return max(0, (int) $available);
+}
+
+add_filter('woocommerce_add_cart_item_data', function (array $data): array {
+    // Never accept a warehouse supplied in cart-item data by the browser.
+    unset($data['pc_retail_location_id'], $data['pc_retail_location_review']);
+    if (!pc_alloc_allows_multiple_locations()) {
+        $data['pc_retail_location_id'] = (int) pc_get_alloc_pref()['term_id'];
+    }
+    return $data;
+}, 100);
+
+add_filter('woocommerce_get_cart_item_from_session', function (array $item): array {
+    if (pc_alloc_allows_multiple_locations()) {
+        unset($item['pc_retail_location_id'], $item['pc_retail_location_review']);
+    } elseif (!isset($item['pc_retail_location_id'])) {
+        if (count(array_filter((array) ($item['pc_alloc_plan'] ?? []))) > 1) {
+            // Old automatically split lines require an explicit choice, not reassignment.
+            $item['pc_retail_location_review'] = true;
+        } else {
+            $item['pc_retail_location_id'] = pc_retail_cart_location($item);
+        }
+    }
+    return $item;
+}, 5);
+
+add_action('woocommerce_check_cart_items', function (): void {
+    if (pc_alloc_allows_multiple_locations() || !WC()->cart) return;
+    foreach (WC()->cart->get_cart() as $key => $item) {
+        $product = $item['data'] ?? null;
+        if (!$product instanceof WC_Product) continue;
+        if (!empty($item['pc_retail_location_review'])) {
+            wc_add_notice(__('Choose a store and add the items from the old automatic distribution again before checkout.', 'paint-core'), 'error');
+            break;
+        }
+        if ((int) $item['quantity'] > pc_retail_available_qty($product, pc_retail_cart_location($item), (string) $key)) {
+            wc_add_notice(__('Some items are no longer available in the chosen store. Please review your cart.', 'paint-core'), 'error');
+            break;
+        }
+    }
+});
+
 /* ============================ UI в шапке ============================ */
 
 function pc_render_alloc_control() {
@@ -200,7 +278,7 @@ function pc_render_alloc_control() {
       <?php if ($multiple): ?>
       <p class="pc-alloc-warning"><?php echo esc_html__('Automatic distribution may split your order between Kyiv and Odesa into separate shipments. Choose one warehouse if you need a single shipment.', 'paint-core'); ?></p>
       <?php endif; ?>
-      <small><?php echo esc_html__( 'Allocation:', 'paint-core' ); ?></small>
+      <small><?php echo $multiple ? esc_html__('Allocation:', 'paint-core') : esc_html__('Store:', 'paint-core'); ?></small>
 
       <?php if ($multiple): ?>
       <select id="pc-slu-mode" class="pc-alloc-mode" aria-label="<?php echo esc_attr__( 'Allocation mode', 'paint-core' ); ?>">
@@ -236,6 +314,12 @@ function pc_render_alloc_control() {
             var $b     = $('body');
             var isCart = $b.hasClass('woocommerce-cart');
             var isCO   = $b.hasClass('woocommerce-checkout');
+
+            // Retail store changes affect future additions, not existing cart lines.
+            if (!<?php echo wp_json_encode($multiple); ?>) {
+                if (!isCart && !isCO) window.location.reload();
+                return;
+            }
 
             var recalc = $.post(ajaxu, {action:'pc_recalc_alloc_plans'});
 
@@ -346,7 +430,8 @@ function pc_recalc_alloc_plan_for_cart_item(string $cart_item_key): void {
     $qty  = (int) ($item['quantity'] ?? 0);
 
     if ($prod instanceof \WC_Product && $qty > 0) {
-        WC()->cart->cart_contents[$cart_item_key]['pc_alloc_plan'] = pc_calc_plan_for($prod, $qty);
+        if (!pc_alloc_allows_multiple_locations() && !empty($item['pc_retail_location_review'])) return;
+        WC()->cart->cart_contents[$cart_item_key]['pc_alloc_plan'] = pc_cart_item_alloc_plan($item);
     }
 }
 

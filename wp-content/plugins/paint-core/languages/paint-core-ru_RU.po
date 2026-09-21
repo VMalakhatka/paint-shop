@@ -301,3 +301,15 @@ msgstr "Лавка: аудит документов ФОЛИО"
 #: inc/header-allocation-switcher.php
 msgid "Automatic distribution may split your order between Kyiv and Odesa into separate shipments. Choose one warehouse if you need a single shipment."
 msgstr "Внимание: автоматическое распределение может разделить заказ между Киевом и Одессой на отдельные отправления. Если нужна одна отправка, выберите только один склад."
+
+#: inc/header-allocation-switcher.php
+msgid "Store:"
+msgstr "Магазин:"
+
+#: inc/header-allocation-switcher.php
+msgid "Choose a store and add the items from the old automatic distribution again before checkout."
+msgstr "Выберите магазин и повторно добавьте товары из старого автоматического распределения перед оформлением."
+
+#: inc/header-allocation-switcher.php
+msgid "Some items are no longer available in the chosen store. Please review your cart."
+msgstr "Некоторых товаров уже нет в выбранном магазине. Проверьте корзину."
