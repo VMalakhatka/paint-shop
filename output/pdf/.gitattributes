@@ -1,0 +1,2 @@
+# Final PDF handouts are binary artifacts, not line-oriented source files.
+*.pdf binary
