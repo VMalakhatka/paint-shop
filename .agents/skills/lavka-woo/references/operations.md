@@ -346,3 +346,13 @@ Production recovery 21.09.2026: Java `ac629d9`, V16 success, обе таблиц
 сохранённого расписания; не запускать native apply вне окна. Не переписывать
 старый failed-отчёт успехом. Rollback контейнера не откатывает DDL. Источник:
 `docs/OPERATIONS_RUNBOOK.md`, раздел «Восстановление production после частичной V16».
+
+## Supplier catalogue staging
+
+Проверено по коду 2026-09-21: `lavka-product-media-upload` содержит отдельные
+`SupplierFeed` / `SupplierCatalog`. XML/Drive и ежедневный cron меняют только staging
+каталога; фото проходят существующий multipart dry-run и подтверждённый upload.
+Не подменять это прямой записью URL в товар или импортом цены поставщика.
+Конфигурация источников требует `manage_options`; персональные URL и серверный
+Drive key не переносить в Git. Точный lifecycle и ограничения — README плагина;
+операторские действия — `docs/MEDIA_MANAGER_GUIDE_UK.md`.

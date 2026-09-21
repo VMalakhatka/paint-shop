@@ -1441,3 +1441,638 @@ msgstr ""
 #: inc/operator-help.php
 msgid "Generate canonical filenames from SKU or barcode."
 msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The request failed."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The response was interrupted. Check the catalogue status before retrying."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+#, php-format
+msgid "Selected photos: %d"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Choose a saved source"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Updated:"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "products / files"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The catalogue has not been loaded yet."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Reading catalogue… processed:"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "All"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "An administrator needs to add a supplier source first."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "No items match these filters. Load a catalogue or change the filters."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+#, php-format
+msgid "Page %1$d of %2$d"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The image is unavailable or unsupported."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Our product and current photos"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Current product photo"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "No photos assigned."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Exact SKU on our site"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Confirm product match"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+#, php-format
+msgid "Use our product %s for this supplier item? Check the colour, volume and packaging."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Supplier materials"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Video reference. Open it at the source; it is not uploaded as a product photo."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Open video"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Select photo"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Image role"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Choose a role"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Main image"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Gallery"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Gallery position"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Confirm our product before selecting its photos."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Supplier product information"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Supplier price (reference only)"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "No description provided."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Catalogue refreshed. Our product data and images have not been changed."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Source saved. You can now load its catalogue."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Select an XML file first."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+#, php-format
+msgid "Select up to %d photos per batch."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Choose a role for every selected photo and a positive gallery position."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+#, php-format
+msgid "Downloading photo %1$d of %2$d…"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The selected files exceed the upload limit. Choose a smaller batch."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Files and registry are prepared below. Run the mandatory check, review its results, then confirm upload."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Unique barcode match"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Exact SKU match"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Manually confirmed match"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Ambiguous identifiers — confirm manually"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Product match needed"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Product element"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Supplier product ID"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Supplier SKU"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Brand"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Category"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Description"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Image URLs"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Price"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Supplier catalogues"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Access denied."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "SUPPLIER MEDIA"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Find our products, compare photos and prepare a checked image batch."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Choose a source"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Match our products"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Select photos"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Check and upload"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Supplier or media folder"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Refresh catalogue"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Open source"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Upload a saved XML file"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "If the supplier blocks automatic downloading, save the XML in your browser and select it here. Maximum: 60 MiB and the server upload limit."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "XML catalogue file"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Read selected XML"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Configure sources"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Save a supplier once. XML field mapping can be adjusted for each format. Drive folders require a server API key for automatic reading."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Source name"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Source type"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Source URL"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Supplier SKUs exactly match our SKUs. Also allow SKU matching."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "XML field mapping"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Save source"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Add another source"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Name, supplier SKU, barcode or a list of supplier SKUs"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Show"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "All supplier products"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Matched to our products"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Our products without a main photo"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Need a product match"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Find products"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Prepare selected photos"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Clear selection"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Catalogue pages"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Previous"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Next"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "How to choose photos safely"
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Compare the exact product, colour, volume and packaging. The first supplier photo is not automatically the main image. Select its role explicitly."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "A barcode match must be unique. For ambiguous matches or lifestyle photos, confirm the exact SKU of our product. Saved manual matches are reused when the supplier ID stays the same."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Existing photos remain visible for comparison. Identical files can be reused; different content under an occupied filename is blocked by the image checker."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Prices and descriptions are supplier reference information. Catalogue refresh does not update our products. Videos open at the source and are not sent to the image uploader."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Use element names separated by / or | for field mapping."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The product element must be a single XML element name."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The server needs XMLReader and DOM support."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The XML file is empty or exceeds 60 MiB."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "XML with DTD or entities is not supported."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The catalogue exceeds 100,000 products."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Every product needs a unique supplier ID, SKU or barcode. Check the field mapping."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The XML is incomplete or malformed. The previous catalogue has been retained."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "No products found. Check the product element and field mapping."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Use a public HTTP or HTTPS URL without embedded credentials."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The supplier could not be reached. Try again later or upload a saved XML file."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The supplier refused the download. Open the source in your browser or upload a saved XML file."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The downloaded file is empty or too large."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Select a saved supplier."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Only an administrator can configure supplier sources."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Use a Google Drive folder link."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Enter the supplier name."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Enter an exact SKU of an existing product on our site."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "This catalogue is already being refreshed. Check its status before retrying."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The XML upload failed or exceeds 60 MiB."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The catalogue could not be saved. The previous version has been retained."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The catalogue changed. Reload the list and select the images again."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The image is unavailable or unsupported. Open the supplier source to check it."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Select a small batch of up to 20 images (or the server file limit)."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The product match changed. Refresh the catalogue or confirm the exact SKU again."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The matched product needs an exact SKU."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Choose a valid image role and gallery position. Variations support a main image only."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Use one main image and unique gallery positions for each product."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Automatic Drive reading needs a server Google Drive API key. Open the folder and use the image uploader for downloaded photos meanwhile."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Use / for nested elements and | for alternatives. Namespace prefixes are optional. Product element: offer for YML, item for Google RSS feeds."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Refresh this catalogue daily without publishing product changes."
+msgstr ""
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Upload photos downloaded to your computer"
+msgstr ""

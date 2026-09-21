@@ -416,3 +416,19 @@ source mapping находится в отдельной ветке `codex/purcha
 товаров и складских метрик не меняются. Purchase preview закрепляет версии
 и добавляет `supplierPrices` в строки и экспорт.
 [Эксплуатация, ограничения, приёмка и откат](OPERATIONS_RUNBOOK.md#импорт-прайса-поставщика).
+
+### Каталоги медиа поставщиков
+
+`lavka-product-media-upload` владеет `SupplierFeed` / `SupplierCatalog` и страницей
+`upload.php?page=lavka-supplier-catalogs`. XML и опциональное чтение Drive создают
+изолированные снимки `{prefix}lpmu_supplier_items`; поставщик не становится
+источником истины для цен, остатков или медиа ФОЛИО. `lpmu_supplier_daily` обновляет
+только снимок. Менеджер выбирает изображения и передаёт их через сформированный
+XLSX и обычные multipart files в существующий dry-run/apply загрузчика.
+
+Ключ Drive хранится серверным constant `LPMU_GOOGLE_DRIVE_API_KEY` вне Git;
+персональные feed URL — в закрытой option плагина. Создание staging schema,
+capabilities, ограничения HTTP/XML, восстановление, конфигурация и rollback:
+[README владельца](../wp-content/plugins/lavka-product-media-upload/README.md#supplier-catalogues-040).
+Действия менеджера и ограничения доступности источников:
+[медиа-инструкция](MEDIA_MANAGER_GUIDE_UK.md#каталоги-постачальників-xml-і-папки-google-drive).
