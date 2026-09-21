@@ -41,12 +41,16 @@ rejected(fn() => lps_purchase_session($token), 'Preview token must be user-bound
 $user = 1;
 rejected(fn() => lps_purchase_start(1, 1), 'Reject stale scenario version');
 $transit = ['warehouseId' => 9, 'generationId' => 99, 'status' => 'NO_IN_TRANSIT_STOCK'];
-$response = ['ok' => true, 'rows' => [['sku' => 'ONE', 'inTransitStock' => $transit]], 'context' => ['analyticsSchemaVersion' => 6,
+$response = ['ok' => true, 'rows' => [['sku' => 'ONE', 'inTransitStock' => $transit]], 'context' => ['analyticsSchemaVersion' => 7,
     'periodFrom' => '2026-08-01', 'periodTo' => '2026-08-30', 'warehouses' => [['id' => 1, 'generationId' => 10], ['id' => 7, 'generationId' => 11]]],
     'totals' => ['productCount' => 2], 'errors' => [], 'nextCursor' => 'page-two'];
 $response['context']['analyticsSchemaVersion'] = 5;
 rejected(fn() => lps_purchase_page($token, 0), 'Old free-stock interpretation is rejected');
-$response['context']['analyticsSchemaVersion'] = 6;
+$response['context']['analyticsSchemaVersion'] = 7;
+$response['rows'][0]['internalTransferReservations']=['calculationVersion'=>1,'status'=>'CAPTURED','accounts'=>[
+    ['sourceWarehouseId'=>7,'generationId'=>999,'documentId'=>123,'quantity'=>6]]];
+rejected(fn() => lps_purchase_page($token, 0), 'Reservation generation must match the stock snapshot');
+$response['rows'][0]['internalTransferReservations']['accounts']=[];
 $first = lps_purchase_page($token, 0);
 check(!$first['complete'] && $first['loaded'] === 1, 'Partial pagination stays incomplete');
 check($queries[0]['productFilters'] === $scenario['profile']['productFilters'], 'Keep supplier filter on query');
@@ -84,6 +88,6 @@ check($start['query']['calculation']['availability']['enabled'] === true
     && $start['query']['calculation']['availability']['groupCode'] === 'group'
     && $start['query']['calculation']['availability']['filter'] === ['availabilityStatus' => ['MEASURED']], 'Correction enables history without erasing availability filters');
 $key = lps_purchase_session_key($start['token']);
-$sessions[$key]['previewVersion'] = 3;
+$sessions[$key]['previewVersion'] = 5;
 rejected(fn() => lps_purchase_session($start['token']), 'Old calculation version requires a fresh preview');
 echo "PASS: scenario demand/rounding snapshot, history request and old-preview invalidation\n";

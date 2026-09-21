@@ -16,7 +16,7 @@ $base = dirname(__DIR__);
 require $base . '/inc/purchase-planning-model.php';
 require $base . '/inc/purchase-planning.php';
 $groups = [['code'=>'kyiv','name'=>'Kyiv','warehouseIds'=>[1],'receivingWarehouseId'=>1,'leadTimeDays'=>0,'targetDays'=>30,'safetyDays'=>0,'respectPack'=>true]];
-$row = ['sku'=>'KR-17817','productName'=>'Acrylic marker','dimensions'=>['currentSuppliers'=>['Kreul'],'packageQuantity'=>6,'minimumOrderQuantity'=>0,
+$row = ['internalTransferReservations'=>['calculationVersion'=>1,'status'=>'CAPTURED','accounts'=>[]], 'sku'=>'KR-17817','productName'=>'Acrylic marker','dimensions'=>['currentSuppliers'=>['Kreul'],'packageQuantity'=>6,'minimumOrderQuantity'=>0,
     'minimumStock'=>1,'groupLevel1Code'=>'ART','groupLevel1Name'=>'Art materials','groupLevel3Code'=>'GLUE','groupLevel3Name'=>'Glue'],
     'metrics'=>['grossProfit'=>100],'networkOrderPolicy'=>['orderAllowed'=>true,'status'=>'ALLOWED'],
     'warehouseGroupBreakdown'=>[['code'=>'kyiv','warehouseIds'=>[1], 'availability'=>['status'=>'MEASURED','availableDays'=>12,'stockoutDays'=>18]]],
@@ -29,6 +29,12 @@ if (($argv[1] ?? '') === 'calculate-route') {
         'orderPolicy'=>['orderAllowed'=>true,'reserveAboveForecast'=>0,'maximumStockLimited'=>false]];
     $edits = json_decode($argv[2] ?? '{}', true);
     echo json_encode(lps_purchase_calculate($row, $groups, 30, false, $edits ?: ['kyiv'=>['openOrders'=>0], 'odesa'=>['openOrders'=>0]], [])); exit;
+}
+if (($argv[1] ?? '') === 'calculate-internal') {
+    $row['warehouseBreakdown'][0]['metrics']['availableQuantity'] = 0;
+    $row['internalTransferReservations']['accounts'] = [['sourceWarehouseId'=>1,'generationId'=>10,
+        'documentId'=>100,'documentNumber'=>555279,'sourceInfo'=>null,'quantity'=>6]];
+    echo json_encode(lps_purchase_calculate($row, $groups, 30, false, ['kyiv'=>['openOrders'=>0]], [])); exit;
 }
 if (($argv[1] ?? '') === 'calculate') {
     $edits = json_decode($argv[2] ?? '{}', true);

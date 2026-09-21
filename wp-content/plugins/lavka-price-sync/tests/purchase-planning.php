@@ -33,7 +33,7 @@ check($saved['productFilters'] === $profile['productFilters'] && $saved['movemen
 check($saved['purchasePlanning']['groups'][0]['code'] === 'kyiv', 'Keep stable group identity');
 check(!isset($saved['purchasePlanning']['groups'][0]['warehouseIds']), 'Do not copy mutable global composition into scenario');
 $groups = lps_purchase_resolve_groups($saved, $configured);
-$row = ['sku' => 'TEST-1', 'productName' => 'Test', 'dimensions' => ['currentSuppliers' => ['Kreul'], 'packageQuantity' => 10, 'minimumOrderQuantity' => 10],
+$row = ['internalTransferReservations' => ['calculationVersion' => 1, 'status' => 'CAPTURED', 'accounts' => []], 'sku' => 'TEST-1', 'productName' => 'Test', 'dimensions' => ['currentSuppliers' => ['Kreul'], 'packageQuantity' => 10, 'minimumOrderQuantity' => 10],
     'metrics' => ['grossProfit' => 100], 'networkOrderPolicy' => ['orderAllowed' => true, 'status' => 'ALLOWED'],
     'inTransitStock' => ['warehouseId' => 9, 'generationId' => 99, 'status' => 'NO_IN_TRANSIT_STOCK'],
     'warehouseBreakdown' => [member(1, 10, 60), member(7, 20, 30), member(5, 200, 30)]];
@@ -124,7 +124,7 @@ echo "PASS: scenario roundtrip, group demand, transfer conservation, policy gate
 // User's KR-17817: observed sales 11, free stock 6, one pack of 6.
 $one = [['code' => 'one', 'name' => 'One', 'warehouseIds' => [1], 'receivingWarehouseId' => 1,
     'leadTimeDays' => 0, 'targetDays' => 30, 'safetyDays' => 0]];
-$fixture = ['sku' => 'KR-17817', 'dimensions' => ['currentSuppliers' => ['Kreul'], 'packageQuantity' => 6, 'minimumOrderQuantity' => 0],
+$fixture = ['internalTransferReservations' => ['calculationVersion' => 1, 'status' => 'CAPTURED', 'accounts' => []], 'sku' => 'KR-17817', 'dimensions' => ['currentSuppliers' => ['Kreul'], 'packageQuantity' => 6, 'minimumOrderQuantity' => 0],
     'metrics' => ['grossProfit' => 100], 'networkOrderPolicy' => ['orderAllowed' => true, 'status' => 'ALLOWED'],
     'warehouseBreakdown' => [member(1, 6, 11)]];
 $edits = ['one' => ['openOrders' => 0]];
@@ -228,7 +228,7 @@ $stockProfile = ['context'=>['warehouseIds'=>[5,15]], 'calculation'=>['stockOnly
         'groups'=>[['code'=>'odesa','receivingWarehouseId'=>5,'leadTimeDays'=>0,'targetDays'=>30,'safetyDays'=>0]]])];
 $stockGroups = lps_purchase_resolve_groups($stockProfile,[['code'=>'odesa','name'=>'Odesa','warehouseIds'=>[5,15]]]);
 check($stockGroups[0]['demandWarehouseIds'] === [5], 'Stock-only storage is absent from demand history');
-$stockRow=['sku'=>'STOCK-ONLY','dimensions'=>['currentSuppliers'=>['Kreul'],'packageQuantity'=>1,'minimumOrderQuantity'=>0],
+$stockRow=['internalTransferReservations' => ['calculationVersion' => 1, 'status' => 'CAPTURED', 'accounts' => []], 'sku'=>'STOCK-ONLY','dimensions'=>['currentSuppliers'=>['Kreul'],'packageQuantity'=>1,'minimumOrderQuantity'=>0],
     'metrics'=>['grossProfit'=>1],'networkOrderPolicy'=>['orderAllowed'=>true,'status'=>'ALLOWED'],
     'warehouseBreakdown'=>[member(5,10,100),member(15,40,1000)],
     'warehouseGroupBreakdown'=>[['code'=>'odesa','warehouseIds'=>[5],'availability'=>['status'=>'MEASURED'],
@@ -284,3 +284,57 @@ try { lps_purchase_resolve_groups($badSource, [['code'=>'odesa','name'=>'Odesa',
 catch (InvalidArgumentException $expected) {}
 check($saved['purchasePlanning']['groups'][0]['minimumWarehouseId'] === 7, 'Legacy scenario selects the receiving warehouse as MIN source');
 echo "PASS: selected MIN source, unchanged group demand, fractional/unknown MIN and source validation\n";
+
+// Internal reservations are stock, never extra demand or a second outgoing transfer.
+$internalGroups = [
+    ['code'=>'kyiv','name'=>'Kyiv','warehouseIds'=>[1,7],'receivingWarehouseId'=>7,'leadTimeDays'=>0,'targetDays'=>30,'safetyDays'=>0,'packRounding'=>'NONE'],
+    ['code'=>'odesa','name'=>'Odesa','warehouseIds'=>[5],'receivingWarehouseId'=>5,'leadTimeDays'=>0,'targetDays'=>30,'safetyDays'=>0,'supplyFromGroupCode'=>'kyiv'],
+];
+$internalRow = ['sku'=>'INTERNAL', 'dimensions'=>['currentSuppliers'=>['Kreul'],'packageQuantity'=>6,'minimumOrderQuantity'=>0],
+    'metrics'=>['grossProfit'=>100], 'networkOrderPolicy'=>['orderAllowed'=>true,'status'=>'ALLOWED'],
+    'inTransitStock'=>['networkSnapshotConsistency'=>['confirmed'=>true]],
+    'warehouseBreakdown'=>[member(1,0,10),member(7,20,20),member(5,0,10)],
+    'internalTransferReservations'=>['calculationVersion'=>1,'status'=>'CAPTURED','accounts'=>[
+        ['sourceWarehouseId'=>7,'generationId'=>11,'documentId'=>100,'documentNumber'=>555279,'sourceInfo'=>'Odesa assembly','quantity'=>10],
+        ['sourceWarehouseId'=>7,'generationId'=>11,'documentId'=>101,'documentNumber'=>555291,'sourceInfo'=>'Kyiv assembly','quantity'=>5],
+    ]]];
+$internalRow['warehouseBreakdown'][1]['metrics']['availableQuantity']=2; // 15 internal + 3 client reserved.
+$internalInputs=['kyiv'=>['openOrders'=>0],'odesa'=>['openOrders'=>0]];
+$calc=static fn($r)=>lps_purchase_calculate($r,$internalGroups,30,false,$internalInputs,[]);
+$ir=$calc($internalRow);
+check($ir['groups'][0]['available']===2.0 && $ir['groups'][0]['internalReserved']===15.0, 'Preserve free stock and expose internal reserved quantity');
+check($ir['groups'][0]['planningAvailable']===17.0 && $ir['groups'][0]['internalAtReceivingWarehouse']===15.0, 'Both accounts restore reserve at warehouse 7 only; client reserve remains deducted');
+check($ir['groups'][1]['planningAvailable']===0.0 && $ir['groups'][1]['plannedTransferIn']===10.0, 'Account recipient does not change Odesa stock or its replenishment forecast');
+check($ir['groups'][0]['recommendedQuantity']===23.0 && $ir['groups'][0]['plannedTransferOut']===10.0, 'Purchase uses restored stock before the separate planned replenishment');
+check($ir['groups'][0]['regularSales']===30.0, 'Reservations do not alter sales or forecast');
+$independent=$internalRow; unset($independent['inTransitStock']);
+$independent['internalTransferReservations']['accounts'][0]['sourceInfo']='Unknown recipient';
+$independent['internalTransferReservations']['accounts'][1]['sourceInfo']=null;
+$ir=$calc($independent);
+check($ir['groups'][0]['planningAvailable']===17.0 && $ir['groups'][0]['finalQuantity']===23.0, 'No routing or network reconciliation needed for source-warehouse restoration');
+$stale=$internalRow; unset($stale['internalTransferReservations']);
+check(in_array('INTERNAL_TRANSFER_DATA_REQUIRED',$calc($stale)['groups'][0]['issues'],true), 'Old backend requires new snapshots');
+$duplicate=$internalRow; $duplicate['internalTransferReservations']['accounts'][]=$duplicate['internalTransferReservations']['accounts'][0];
+$ir=$calc($duplicate);
+check($ir['groups'][0]['planningAvailable']===2.0 && $ir['groups'][0]['finalQuantity']===null, 'Duplicate account cannot inflate stock');
+$mismatch=$internalRow; $mismatch['warehouseBreakdown'][1]['metrics']['availableQuantity']=19;
+$ir=$calc($mismatch);
+check(in_array('INTERNAL_TRANSFER_RESERVE_MISMATCH',$ir['groups'][0]['issues'],true) && $ir['groups'][0]['internalRestored']===0.0, 'Only quantities deducted from free stock can be restored');
+$clientOnly=$internalRow; $clientOnly['internalTransferReservations']['accounts']=[];
+check($calc($clientOnly)['groups'][0]['planningAvailable']===2.0, 'Client reservations do not get restored');
+$elsewhere=$internalRow;
+$elsewhere['internalTransferReservations']['accounts'][0]['sourceWarehouseId']=5;
+$elsewhere['warehouseBreakdown'][2]['metrics']['physicalQuantity']=10;
+$elsewhere['warehouseBreakdown'][1]['metrics']['availableQuantity']=12;
+$ir=$calc($elsewhere);
+check($ir['groups'][0]['planningAvailable']===17.0 && $ir['groups'][1]['planningAvailable']===10.0, 'An account physically on warehouse 5 restores stock only in Odesa');
+$legacy=lps_purchase_profile(['internalTransferRoutes'=>'old invalid route']);
+check(!isset($legacy['internalTransferRoutes']), 'Legacy recipient rules are discarded and do not block saved scenarios');
+// Corrected stock is also available to the existing surplus-transfer planner.
+$surplusGroups=$internalGroups; unset($surplusGroups[1]['supplyFromGroupCode']);
+$surplus=$internalRow;
+$surplus['warehouseBreakdown'][0]['metrics']['regularSoldUnits']=0;
+$surplus['warehouseBreakdown'][1]['metrics']['regularSoldUnits']=0;
+$ir=lps_purchase_calculate($surplus,$surplusGroups,30,true,$internalInputs,[]);
+check($ir['groups'][0]['transferOut']===10.0 && $ir['groups'][1]['transferIn']===10.0, 'Surplus calculation uses the same corrected source stock');
+echo "PASS: source-only internal reserve correction, client reserves, recipient independence, replenishment and surplus transfers\n";
