@@ -214,13 +214,13 @@ State/lifecycle:
   superseded staging rows. Match filters are projections from the last import;
   registry creation rechecks the live exact match. Manual corrections are retained
   across consecutive snapshots with the same supplier ID.
-- Optional `lpmu_supplier_daily` WP-Cron event refreshes staging only. Disabled by
+- Optional `lpmu_supplier_daily` WP-Cron event refreshes staging only. Scheduled imports read only the saved URL, never ambient HTTP upload globals. Disabled by
   default; saved configuration controls scheduling. Deactivation unschedules events,
   retains configuration/table/media. Re-save a source to restore its schedule after
   reactivation. Status is visible on the catalogue page; no automatic notifications.
 - `LPMU_GOOGLE_DRIVE_API_KEY`: optional production/local config constant outside Git,
   server only; restrict to Drive API and server usage. Drive reader paginates public
-  folder metadata recursively, bounded to 200 folders/10,000 image/video files.
+  folder metadata recursively, bounded to 200 folders/10,000 image/video files/500 API pages.
   Access/resource-key restrictions can require supplier assistance. No OAuth flow,
   private Drive account access, video ingestion or video product assignment.
 

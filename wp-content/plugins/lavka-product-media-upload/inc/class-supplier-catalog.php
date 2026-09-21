@@ -126,7 +126,7 @@ final class SupplierCatalog
                 if ($all[$id]['daily'] && $all[$id]['url']) { wp_schedule_event(time() + DAY_IN_SECONDS, 'daily', 'lpmu_supplier_daily', [$id]); }
                 $result = ['id' => $id];
             } elseif ($op === 'refresh') {
-                $result = $this->refresh($id);
+                $result = $this->refresh($id, isset($_FILES['xml']) && is_array($_FILES['xml']) ? $_FILES['xml'] : []);
             } elseif ($op === 'status') {
                 self::source($id);
                 $result = ['status' => get_option('lpmu_supplier_status_' . $id, []), 'active' => self::active($id)];
@@ -139,7 +139,7 @@ final class SupplierCatalog
                 $match = (new ProductResolver())->resolve($sku, '');
                 if ($sku === '' || empty($match['ok'])) { throw new \RuntimeException(__('Enter an exact SKU of an existing product on our site.', 'lavka-product-media-upload')); }
                 global $wpdb;
-                $wpdb->update(self::table(), ['manual_sku' => $sku, 'product_id' => $match['product_id'], 'match_state' => 'manual'], ['id' => $item['id']]);
+                $wpdb->update(self::table(), ['manual_sku' => $match['product_sku'], 'product_id' => $match['product_id'], 'match_state' => 'manual'], ['id' => $item['id']]);
                 $result = ['ok' => true];
             } elseif ($op === 'registry') {
                 $result = $this->registry();
@@ -161,7 +161,7 @@ final class SupplierCatalog
         }
     }
 
-    private function refresh(string $id): array
+    private function refresh(string $id, array $upload = []): array
     {
         $source = self::source($id);
         $lock = 'lpmu_supplier_import_' . $id;
@@ -185,8 +185,7 @@ final class SupplierCatalog
             }
             if ($source['type'] === 'drive') { $rows = $this->drive_rows($source['url']); }
             else {
-                if (isset($_FILES['xml']) && (int) $_FILES['xml']['error'] !== UPLOAD_ERR_NO_FILE) {
-                    $upload = $_FILES['xml'];
+                if ($upload && (int) ($upload['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
                     if ((int) $upload['error'] !== UPLOAD_ERR_OK || !is_uploaded_file($upload['tmp_name']) || (int) $upload['size'] > SupplierFeed::MAX_BYTES) { throw new \RuntimeException(__('The XML upload failed or exceeds 60 MiB.', 'lavka-product-media-upload')); }
                     $path = wp_tempnam('supplier-xml');
                     if (!$path || !move_uploaded_file($upload['tmp_name'], $path)) { throw new \RuntimeException('TEMP_FILE'); }
@@ -402,7 +401,7 @@ final class SupplierCatalog
     private function drive_rows(string $url): \Generator
     {
         $headers = $this->drive_headers();
-        $queue = [[self::folder_id($url), '']]; $seen = []; $count = 0;
+        $queue = [[self::folder_id($url), '']]; $seen = []; $count = 0; $requests = 0;
         while ($queue) {
             [$folder, $category] = array_shift($queue);
             if (isset($seen[$folder])) { continue; }
@@ -410,6 +409,7 @@ final class SupplierCatalog
             if (count($seen) > 200) { throw new \RuntimeException('DRIVE_FOLDER_LIMIT'); }
             $token = '';
             do {
+                if (++$requests > 500) { throw new \RuntimeException('DRIVE_PAGE_LIMIT'); }
                 $api = add_query_arg(['q' => "'$folder' in parents and trashed = false", 'pageSize' => 100,
                     'fields' => 'nextPageToken,incompleteSearch,files(id,name,mimeType,webViewLink)', 'pageToken' => $token], 'https://www.googleapis.com/drive/v3/files');
                 $path = SupplierFeed::download($api, 2 * MB_IN_BYTES, $headers);
