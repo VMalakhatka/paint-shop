@@ -167,3 +167,16 @@ only. Counts on both city sheets must match when checking an alternative.
 Requires Java rules 2026-09-15.1; no new database migration beyond saved-history V15.
 Manager guide: [simple instructions](../../../docs/PROFIT_REPORT_MANAGER_RU.md).
 The same six steps appear in the page's expandable help, translated into RU/UK.
+
+## Tax firm lists (0.7.0)
+
+The profit page includes an editable retail/wholesale firm table. Java owns its
+versioned application storage and resolves all tax documents for the report month.
+The WP proxy validates codes, checks nonce/capability and forwards GET/PUT only.
+Settings conflicts and uncertain saves require explicit reload; no automatic retry.
+Calculations pin `taxSettingsVersion` for the selected month range. Saved revisions
+retain their own settings snapshot and historical values. Excel selection columns
+use Java's actual firm lists; unallocated taxes and documents remain visible.
+See [frontend contract](../../../docs/api/FOLIO_PROFIT_SAVED_REPORTS_FRONTEND.md)
+and [manager guide](../../../docs/PROFIT_REPORT_MANAGER_RU.md). Matching Java API
+and migration must be deployed before using the new editor/calculation guard.

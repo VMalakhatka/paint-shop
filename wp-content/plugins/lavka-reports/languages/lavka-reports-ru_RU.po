@@ -1893,3 +1893,119 @@ msgstr "При полном аудите в Excel есть формулы роз
 #: inc/class-profit-report.php
 msgid "After a connection error, open saved reports first: the result may already have been saved."
 msgstr "После ошибки соединения сначала откройте сохранённые отчёты: результат мог уже сохраниться."
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Tax firms: retail and wholesale"
+msgstr "Фирмы для налогов: розница и опт"
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Add all historical and current firm codes. No dates are needed: the report uses tax documents for the selected month. Retail taxes are shared between the cities; wholesale taxes belong to Kyiv."
+msgstr "Добавьте коды всех прежних и действующих фирм. Даты не нужны: отчёт учитывает налоговые документы выбранного месяца. Розничные налоги делятся между городами, оптовые относятся к Киеву."
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Unknown firms remain in the audit as unallocated taxes and require review. Saving these lists does not recalculate or change saved reports."
+msgstr "Налоги неизвестных фирм остаются в аудите как нераспределённые и требуют проверки. Сохранение списков не пересчитывает и не меняет сохранённые отчёты."
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Save firm lists"
+msgstr "Сохранить списки фирм"
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Reload saved lists"
+msgstr "Загрузить сохранённые списки"
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Retail tax firms"
+msgstr "Фирмы для розницы"
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Wholesale tax firms"
+msgstr "Фирмы для опта"
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Firm code in Folio"
+msgstr "Код фирмы в ФОЛИО"
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Add firm"
+msgstr "Добавить фирму"
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Remove row"
+msgstr "Удалить строку"
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Loading firm lists…"
+msgstr "Загрузка списков фирм…"
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Saving firm lists…"
+msgstr "Сохранение списков фирм…"
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Firm lists saved. They will apply to new calculations; saved reports remain unchanged."
+msgstr "Списки фирм сохранены. Они применятся к новым расчётам; сохранённые отчёты не изменились."
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Unsaved firm changes. Save them or reload the saved lists before calculating."
+msgstr "Есть несохранённые изменения фирм. Сохраните их или загрузите сохранённые списки перед расчётом."
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Settings version"
+msgstr "Версия настроек"
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Check the firm codes: blank or duplicate rows are not allowed. A firm cannot belong to both lists."
+msgstr "Проверьте коды: до 64 букв, цифр, дефисов или подчёркиваний; не более 100 фирм в списке. Пустые строки и повторы запрещены. Фирма не может входить в оба списка."
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Could not load tax settings. Check that the Java service supports tax firm lists."
+msgstr "Не удалось загрузить настройки налогов. Проверьте, что сервис Java обновлён и поддерживает списки фирм."
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Saving was not confirmed. Reload saved lists and check them before saving again."
+msgstr "Сохранение не подтверждено. Загрузите сохранённые списки и проверьте их перед повторной попыткой."
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Could not confirm the settings request. Reload saved lists before trying again."
+msgstr "Не удалось подтвердить результат запроса. Загрузите сохранённые списки перед повторной попыткой."
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Another user changed these lists. Reload saved lists, review them, then make your changes again."
+msgstr "Другой пользователь изменил списки. Загрузите сохранённые списки, проверьте их и внесите свои изменения заново."
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Discard your unsaved edits and load the saved firm lists?"
+msgstr "Отменить ваши несохранённые изменения и загрузить сохранённые списки фирм?"
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Wait for the current operation to finish."
+msgstr "Дождитесь завершения текущей операции."
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Tax rules used in this report"
+msgstr "Правила налогов в этом отчёте"
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Tax settings version"
+msgstr "Версия настроек налогов"
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Unallocated taxes"
+msgstr "Нераспределённые налоги"
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "This saved report does not contain a tax firm settings snapshot. Current lists are not applied to it."
+msgstr "Этот сохранённый отчёт не содержит списков налоговых фирм. Текущие настройки к нему не применяются."
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Retail taxes."
+msgstr "Налоги Розн."
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Wholesale taxes."
+msgstr "Налоги ОПТ."
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "No firms configured"
+msgstr "Фирмы не указаны"

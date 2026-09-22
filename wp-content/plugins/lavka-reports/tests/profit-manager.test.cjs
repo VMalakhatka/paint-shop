@@ -35,3 +35,8 @@ test('zero city count is retained, unavailable totals remain unavailable',()=>{
  const o=manager.sheets(d,labels)[1];assert.equal(o.rows[4][7].value,'0');assert.equal(o.rows.find(r=>r[1]==='profit')[7],'—');
 });
 module.exports={data,labels};
+test('historical tax firms use snapshot selection columns, including explicitly empty lists',()=>{
+ const d=data();d.expenseLines[0].filters={purposeCodes:['МИХНФОП','МАЛАФОП']};d.expenseLines[1].filters={purposeCodes:['КУЗНФОП','КОНДФОП']};
+ const k=manager.sheets(d,labels)[0];assert.equal(k.rows[8][4],'МИХНФОП / МАЛАФОП');assert.equal(k.rows[9][4],'КУЗНФОП / КОНДФОП');
+ assert.deepEqual(manager.purpose({...d.expenseLines[0],filters:{purposeCodes:[]}}),[]);
+});

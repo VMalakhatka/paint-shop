@@ -1855,3 +1855,119 @@ msgstr ""
 #: inc/class-profit-report.php
 msgid "After a connection error, open saved reports first: the result may already have been saved."
 msgstr ""
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Tax firms: retail and wholesale"
+msgstr ""
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Add all historical and current firm codes. No dates are needed: the report uses tax documents for the selected month. Retail taxes are shared between the cities; wholesale taxes belong to Kyiv."
+msgstr ""
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Unknown firms remain in the audit as unallocated taxes and require review. Saving these lists does not recalculate or change saved reports."
+msgstr ""
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Save firm lists"
+msgstr ""
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Reload saved lists"
+msgstr ""
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Retail tax firms"
+msgstr ""
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Wholesale tax firms"
+msgstr ""
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Firm code in Folio"
+msgstr ""
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Add firm"
+msgstr ""
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Remove row"
+msgstr ""
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Loading firm lists…"
+msgstr ""
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Saving firm lists…"
+msgstr ""
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Firm lists saved. They will apply to new calculations; saved reports remain unchanged."
+msgstr ""
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Unsaved firm changes. Save them or reload the saved lists before calculating."
+msgstr ""
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Settings version"
+msgstr ""
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Check the firm codes: blank or duplicate rows are not allowed. A firm cannot belong to both lists."
+msgstr ""
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Could not load tax settings. Check that the Java service supports tax firm lists."
+msgstr ""
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Saving was not confirmed. Reload saved lists and check them before saving again."
+msgstr ""
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Could not confirm the settings request. Reload saved lists before trying again."
+msgstr ""
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Another user changed these lists. Reload saved lists, review them, then make your changes again."
+msgstr ""
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Discard your unsaved edits and load the saved firm lists?"
+msgstr ""
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Wait for the current operation to finish."
+msgstr ""
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Tax rules used in this report"
+msgstr ""
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Tax settings version"
+msgstr ""
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Unallocated taxes"
+msgstr ""
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "This saved report does not contain a tax firm settings snapshot. Current lists are not applied to it."
+msgstr ""
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Retail taxes."
+msgstr ""
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "Wholesale taxes."
+msgstr ""
+
+#: inc/class-profit-tax-settings.php inc/class-profit-report.php
+msgid "No firms configured"
+msgstr ""

@@ -31,6 +31,7 @@
         resultPeriod: document.getElementById("lavr-profit-result-period"),
         expenseNote: document.getElementById("lavr-profit-expense-note"),
         policy: document.getElementById("lavr-profit-policy"),
+        taxDetails: document.getElementById("lavr-profit-tax-details"),
         inventory: document.getElementById("lavr-profit-inventory"),
         diagnostics: document.getElementById("lavr-profit-period-diagnostics"),
         month: document.getElementById('lavr-profit-month'),
@@ -547,7 +548,7 @@
             const poolList = document.createElement('dl');
             poolList.className = 'lavr-profit-tax-pools';
             keys.forEach((key) => {
-                poolList.appendChild(textElement('dt', '', key === 'MALAFOP' ? labels.retailTax + ' · МАЛАФОП' : key === 'KONDFOP' ? labels.wholesaleTax + ' · КОНДФОП' : key));
+                poolList.appendChild(textElement('dt', '', key === 'MALAFOP' ? labels.retailTax : key === 'KONDFOP' ? labels.wholesaleTax : key));
                 poolList.appendChild(textElement('dd', '', formatMoney(pools[key], 'UAH')));
             });
             nodes.controlsContent.appendChild(poolList);
@@ -798,7 +799,7 @@
             columnSpec('expenseCodes', r => r.filters && r.filters.expenseCodes),
             columnSpec('operationTypes', r => r.filters && r.filters.operationTypes),
             columnSpec('operationRequired', r => r.filters && r.filters.operationRequired),
-            columnSpec('purposeCodes', r => !r.filters ? null : r.filters.purposeCodes && r.filters.purposeCodes.length ? r.filters.purposeCodes : labels.anyPurpose),
+            columnSpec('purposeCodes', r => !r.filters ? null : r.filters.purposeCodes && r.filters.purposeCodes.length ? r.filters.purposeCodes : /_TAX_(MALAFOP|KONDFOP)$/.test(r.lineId || '') ? labels.noTaxFirms : labels.anyPurpose),
             columnSpec('cashWarehouses', r => warehouseSelection(r.filters, 'cash')),
             columnSpec('bankWarehouses', r => warehouseSelection(r.filters, 'bank')),
             columnSpec('accountingTreatment'), columnSpec('source'), columnSpec('note', r => r.filters && r.filters.note), columnSpec('lineId'), columnSpec('category')];
@@ -850,16 +851,46 @@
             return { ...(payment || {}), documentReason: payment && payment.reason, ...diagnostic };
         });
     }
+    function taxSettingsRows(data) {
+        const settings=data.taxDetails?.settings;
+        if(!settings)return [];
+        return [
+            {parameter:labels.taxSettingsVersion,value:settings.version},
+            {parameter:labels.retailTax,value:printable(settings.retailFirmCodes)},
+            {parameter:labels.wholesaleTax,value:printable(settings.wholesaleFirmCodes)}
+        ];
+    }
+    function taxTotals(data) {
+        if(!data.taxDetails)return [];
+        return [
+            {label:labels.retailTax,amount:data.taxDetails.retailAmount},
+            {label:labels.wholesaleTax,amount:data.taxDetails.wholesaleAmount},
+            {label:labels.unallocatedTax,amount:data.taxDetails.unallocatedAmount}
+        ];
+    }
     function parameterRows(data) {
         const saved = state.savedMetadata && data === state.report ? Object.entries(state.savedMetadata).map(([key,value]) => ['saved.' + key,value]) : [];
         return [['month', data.month], ['calculatedAt', formatDateTime(data.calculatedAt)], ['ruleVersion', data.ruleVersion], ['complete', data.complete],
-            ...Object.entries(data.inputs || {}), ...Object.entries(data.periodPolicy || {}), ...saved].map(([key, value]) => ({ parameter: fieldLabel(key), value: printable(value) }));
+            ...Object.entries(data.inputs || {}), ...Object.entries(data.periodPolicy || {}), ...saved].map(([key, value]) => ({ parameter: fieldLabel(key), value: printable(value) })).concat(taxSettingsRows(data));
     }
     function renderSupplement(data) {
         safeRender(labels.appliedParameters, nodes.policy, () => {
         clear(nodes.policy);
         if (!data.periodPolicy) nodes.policy.appendChild(textElement('p', '', labels.legacyPeriod));
         appendGrid(nodes.policy, ['parameter', 'value'].map(key => columnSpec(key)), parameterRows(data));
+        if(!data.taxDetails) nodes.policy.appendChild(textElement('p','description',labels.taxSettingsLegacy));
+        });
+        safeRender(labels.taxSettingsUsed,nodes.taxDetails,()=>{
+            clear(nodes.taxDetails);nodes.taxDetails.hidden=!data.taxDetails;
+            if(!data.taxDetails)return;
+            nodes.taxDetails.appendChild(textElement('h2','',labels.taxSettingsUsed));
+            appendGrid(nodes.taxDetails,['parameter','value'].map(key=>columnSpec(key)),taxSettingsRows(data));
+            appendGrid(nodes.taxDetails,['label','amount'].map(key=>columnSpec(key)),taxTotals(data));
+            const unknown=data.taxDetails.unallocatedDocuments || [];
+            if(unknown.length){
+                nodes.taxDetails.appendChild(textElement('h3','',labels.unallocatedTax));
+                appendGrid(nodes.taxDetails,documentColumns(unknown),unknown);
+            }
         });
         safeRender(labels.inventoryTitle, nodes.inventory, () => {
         clear(nodes.inventory);
@@ -906,6 +937,11 @@
         });
         add(labels.profitByCity, dynamicColumns(data.cities || [], ['city', 'baseGrossProfit', 'manualGrossAdjustments', 'grossProfit', 'operatingExpenses', 'profit']), data.cities || []);
         add(labels.appliedParameters, ['parameter', 'value'].map(key => columnSpec(key)), parameterRows(data));
+        if(data.taxDetails){
+            add(labels.taxSettingsUsed,['label','amount'].map(key=>columnSpec(key)),taxTotals(data));
+            const unknown=data.taxDetails.unallocatedDocuments || [];
+            add(labels.unallocatedTax,documentColumns(unknown),unknown);
+        }
         const controls = data.controls ? [data.controls] : [];
         add(labels.controlTotals, dynamicColumns(controls), controls, data.controls ? labels.controlsHelp : labels.unavailable + '. ' + labels.partialHelp);
         add(labels.warningsTitle, dynamicColumns(data.warnings || [], ['code', 'message', 'details']), data.warnings || [], data.complete ? labels.complete : labels.incomplete);

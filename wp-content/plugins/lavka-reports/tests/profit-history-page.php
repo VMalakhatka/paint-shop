@@ -9,6 +9,7 @@ function esc_html__($text, $domain = '') { return htmlspecialchars($text, ENT_QU
 function esc_attr__($text, $domain = '') { return esc_html__($text, $domain); }
 require dirname(__DIR__) . '/inc/class-profit-report.php';
 require dirname(__DIR__) . '/inc/class-profit-history.php';
+require dirname(__DIR__) . '/inc/class-profit-tax-settings.php';
 $page = new Lavka_Reports_Profit_Report();
 $translation_method = new ReflectionMethod($page, 'translations');
 $translation_method->setAccessible(true);

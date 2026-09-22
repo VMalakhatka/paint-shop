@@ -517,3 +517,8 @@
 .lavr-profit-guide .lavr-profit-guide-footnote{font-size:14px;color:#52616b}
 .lavr-profit-manual-grid [hidden]{display:none!important}
 @media(max-width:600px){.lavr-profit-guide{padding:4px 16px 20px;font-size:16px}.lavr-profit-guide h2{font-size:24px}.lavr-profit-manager-help>summary{padding:14px 16px}.lavr-profit-guide-note{padding:10px 14px}}
+
+.lavr-profit-tax-editor{padding:4px 20px 20px}.lavr-profit-tax-editor p{max-width:950px}
+#lpt-groups{display:flex;flex-wrap:wrap;gap:24px}#lpt-groups section{flex:1 1 320px;max-width:600px;min-width:0}
+#lpt-groups input{width:100%;max-width:100%}#lpt-groups td:last-child{width:125px}#lpt-groups section>.button{margin-top:10px}
+#lpt-error{color:#b32d2e;font-weight:600}#lpt-state{font-weight:600}

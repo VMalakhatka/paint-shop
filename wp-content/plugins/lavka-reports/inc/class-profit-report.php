@@ -50,6 +50,7 @@ class Lavka_Reports_Profit_Report {
             'savedMode' => true,
         ]);
         Lavka_Reports_Profit_History::assets();
+        Lavka_Reports_Profit_Tax_Settings::assets();
     }
 
     public function render_page() {
@@ -76,13 +77,14 @@ class Lavka_Reports_Profit_Report {
                     <h3><?php echo esc_html__('How to read Excel', 'lavka-reports'); ?></h3>
                     <p><?php echo esc_html__('Start with the Kyiv and Odesa sheets. Selection columns follow the working template. Enter your own amount in the final Manager check, UAH column. Details and documents are on the following sheets. The downloaded file is usually in Downloads.', 'lavka-reports'); ?></p>
                     <div class="lavr-profit-guide-note">
-                        <p><strong><?php echo esc_html__('Retail taxes — MALAFOP.', 'lavka-reports'); ?></strong> <?php echo esc_html__('Allocated by registered employee count. For example, Kyiv 4 and Odesa 3 gives shares of 4/7 and 3/7. Employee counts appear at the top of each city sheet.', 'lavka-reports'); ?></p>
-                        <p><strong><?php echo esc_html__('Wholesale taxes — KONDFOP.', 'lavka-reports'); ?></strong> <?php echo esc_html__('Allocated entirely to Kyiv.', 'lavka-reports'); ?></p>
+                        <p><strong><?php echo esc_html__('Retail taxes.', 'lavka-reports'); ?></strong> <?php echo esc_html__('Allocated by registered employee count. For example, Kyiv 4 and Odesa 3 gives shares of 4/7 and 3/7. Employee counts appear at the top of each city sheet.', 'lavka-reports'); ?></p>
+                        <p><strong><?php echo esc_html__('Wholesale taxes.', 'lavka-reports'); ?></strong> <?php echo esc_html__('Allocated entirely to Kyiv.', 'lavka-reports'); ?></p>
                     </div>
                     <p><?php echo esc_html__('With a complete audit, Excel contains retail tax and total formulas. Otherwise it shows the saved amount and an explanation. Editing Excel does not change the website. If you edit employee counts, use the same numbers on both city sheets.', 'lavka-reports'); ?></p>
                     <p class="lavr-profit-guide-footnote"><?php echo esc_html__('After a connection error, open saved reports first: the result may already have been saved.', 'lavka-reports'); ?></p>
                 </div>
             </details>
+            <?php if (class_exists('Lavka_Reports_Profit_Tax_Settings')) Lavka_Reports_Profit_Tax_Settings::render(); ?>
             <?php if (class_exists('Lavka_Reports_Profit_History')) Lavka_Reports_Profit_History::render_toolbar(); ?>
 
             <section class="lavr-profit-toolbar" aria-labelledby="lavr-profit-period-title">
@@ -193,6 +195,7 @@ class Lavka_Reports_Profit_Report {
                 </details>
 
                 <details class="lavr-profit-controls"><summary><?php echo esc_html__('Inventory accounting value', 'lavka-reports'); ?></summary><div id="lavr-profit-inventory"></div></details>
+                <section id="lavr-profit-tax-details" class="lavr-profit-audit" hidden></section>
                 <section id="lavr-profit-period-diagnostics" class="lavr-profit-audit" hidden></section>
                 <section class="lavr-profit-audit" aria-labelledby="lavr-profit-audit-title">
                     <div class="lavr-profit-heading-row">
@@ -314,6 +317,11 @@ class Lavka_Reports_Profit_Report {
         return [
             'rangeFrozen' => __('Period totals are saved values. Editing city-sheet formulas does not update this summary.', 'lavka-reports'),
             'anyFilter' => __('Any', 'lavka-reports'),
+            'noTaxFirms' => __('No firms configured', 'lavka-reports'),
+            'taxSettingsUsed' => __('Tax rules used in this report', 'lavka-reports'),
+            'taxSettingsVersion' => __('Tax settings version', 'lavka-reports'),
+            'taxSettingsLegacy' => __('This saved report does not contain a tax firm settings snapshot. Current lists are not applied to it.', 'lavka-reports'),
+            'unallocatedTax' => __('Unallocated taxes', 'lavka-reports'),
             'retailTax' => __('Retail taxes', 'lavka-reports'),
             'wholesaleTax' => __('Wholesale taxes', 'lavka-reports'),
             'employeeTotal' => __('Total registered employees', 'lavka-reports'),
@@ -464,6 +472,7 @@ class Lavka_Reports_Profit_Report {
                 'section' => __('Section', 'lavka-reports'),
                 'errorCode' => __('Error code', 'lavka-reports'),
                 'errorId' => __('Diagnostic ID', 'lavka-reports'),
+                'TAX_SETTINGS' => __('Tax firms: retail and wholesale', 'lavka-reports'),
                 'EXPENSE_INPUTS' => __('Expense parameters', 'lavka-reports'),
                 'EXPENSES' => __('Expenses', 'lavka-reports'),
                 'GROSS_MARGIN' => __('Gross margin', 'lavka-reports'),

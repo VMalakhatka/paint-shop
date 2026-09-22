@@ -105,3 +105,34 @@ V15, Java и WordPress0.5.0, проверка доступа, GET пустого
 листов в экспорте диапазона не меняет ссылки. Новые проверки:
 `tests/profit-manager.test.cjs`, headcount browser scenario и proxy zero/invalid cases.
 [Инструкция менеджеру](../PROFIT_REPORT_MANAGER_RU.md).
+
+## Tax firm lists (2026-09-22, lavka-reports 0.7.0)
+
+Java owns persistent retail/wholesale firm lists in application MariaDB. WordPress
+only edits them through nonce-protected, `manage_woocommerce`-restricted AJAX:
+GET/PUT `/admin/folio/profit-report/tax-settings`. Body and response:
+`{version, retailFirmCodes, wholesaleFirmCodes}`. No effective dates. Defaults:
+retail `МИХНФОП, МАЛАФОП`, wholesale `КУЗНФОП, КОНДФОП`. Each list may be empty;
+maximum 100 codes, each 1–64 letters/digits/underscore/hyphen, normalized to uppercase.
+Duplicates and overlap are invalid. PUT carries the last loaded version. A 409
+conflict or unconfirmed save preserves edits and requires an explicit reload;
+there is no automatic overwrite or retry.
+
+The editor appears above the report period. Saving settings does not recalculate
+reports. Unsaved edits block a new calculation; active report operations lock the
+editor. A new month/range calculation reads a settings version once and passes
+`taxSettingsVersion` to each saved calculate request. Java checks the version,
+preventing a campaign from silently mixing rules after another editor saves.
+Old callers omitting the field continue to use current settings.
+
+Each report carries `taxDetails.settings`, `retailAmount`, `wholesaleAmount`,
+`unallocatedAmount`, and `unallocatedDocuments`. The UI and export use only this
+snapshot, never today's lists when opening an old report. `taxDetails=null` means
+historical settings are unavailable, not default lists. Existing tax line IDs
+ending in `_TAX_MALAFOP` / `_TAX_KONDFOP` remain compatibility identifiers; actual
+selection columns use `filters.purposeCodes`. Unknown firms remain visible and
+make the report incomplete, while other sections remain available. Review the
+unallocated registry before accepting city profit totals.
+
+Deployment requires the matching Java API/migration. No production data changes
+or deployment are performed by this frontend implementation.

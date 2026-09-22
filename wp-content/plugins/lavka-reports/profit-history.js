@@ -25,6 +25,7 @@
     function currentRange() { return {fromMonth:$('from').value,toMonth:$('to').value}; }
     function controls() {
         const busy = reading || running || exporting;
+        window.LavkaProfitTaxSettings?.setReportBusy(busy);
         $('view').disabled=busy; $('calculate').disabled=busy; $('stop').disabled=!running || stop;
         $('export').disabled=busy || dirty || !saved || !saved.months.some(m=>m.revisionId);
         root.querySelectorAll('tbody button').forEach(b=>{b.disabled=busy;});
@@ -116,14 +117,16 @@
     }
     async function calculate(selectedMonths, params) {
         if(reading||running||exporting)return false;
+        try{window.LavkaProfitTaxSettings?.assertReady();}catch(e){setError(e.message);return false;}
         running=true;stop=false;++generation;lockInputs(true);controls();setError('');
         let failed=false;
         try{
+            const taxSettingsVersion=window.LavkaProfitTaxSettings ? await window.LavkaProfitTaxSettings.calculationVersion() : null;
             for(const month of selectedMonths){
                 if(stop)break;
                 const requestId=crypto.randomUUID();remember({month,requestId});
                 $('state').textContent=`${t('running')}: ${month} (${selectedMonths.indexOf(month)+1}/${selectedMonths.length}) · ${requestId}`;
-                const data=await request('calculate',{...params,month,requestId});
+                const data=await request('calculate',{...params,month,requestId,...(taxSettingsVersion===null?{}:{taxSettingsVersion})});
                 if(data.month!==month || data.requestId!==requestId || !activeStates.has(data.status) || !data.report || !data.revisionId)throw new Error(t('uncertain')+' '+text(data.status));
                 remember(null);viewer.showSaved(data);lockedFields.forEach(([n])=>{n.disabled=true;});controls();
                 $('selected').textContent=`${t('readonly')}: ${month} · ${t('revision')}: ${data.revisionId} · ${terminalLabel(data.status)} · ${t('published')}: ${text(data.publishedRevisionId)}`;

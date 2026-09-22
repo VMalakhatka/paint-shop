@@ -43,3 +43,8 @@ $GLOBALS['nonce_valid']=false;$r=request([]);verify(!$r->success && $r->status==
 echo "PASS: saved report read/write separation, dates, request IDs and exact decimals\n";
 
 $GLOBALS["nonce_valid"]=true;$GLOBALS["allowed"]=false;$r=request([]);verify(!$r->success && $r->status===403 && $GLOBALS["http_calls"]===0,"Capability required for reads and writes");
+$GLOBALS['allowed']=true;$GLOBALS['nonce_valid']=true;
+$r=request(['operation'=>'calculate','month'=>'2025-10','requestId'=>'11111111-1111-4111-8111-111111111111','taxSettingsVersion'=>'0']);
+verify($r->success && $GLOBALS['body']['taxSettingsVersion']===0,'Tax settings version zero preserved');
+foreach(['-1','1.1','9007199254740992','1e2'] as $v){$r=request(['operation'=>'calculate','month'=>'2025-10','requestId'=>'11111111-1111-4111-8111-111111111111','taxSettingsVersion'=>$v]);verify(!$r->success&&$GLOBALS['http_calls']===0,'Invalid tax version rejected');}
+echo "PASS: pinned tax settings version forwarding\n";

@@ -73,3 +73,22 @@ test('headcounts reach Java without legacy share and export the manager tax layo
  await page.locator('#lavr-profit-recalculate').click();await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);
  const q=requests.find(r=>r.operation==='calculate');assert.equal(q.kyivEmployeeCount,'7');assert.equal(q.odesaEmployeeCount,'0');assert.equal(q.odesaTaxShare,undefined);assert.deepEqual(errors,[]);await page.close();
 });
+
+test('a multi-month calculation pins one tax settings version and blocks unsaved edits',async()=>{
+ const {page,requests,errors}=await setup();await range(page);
+ await page.evaluate(()=>{window.taxVersionReads=0;window.LavkaProfitTaxSettings={setReportBusy(){},assertReady(){throw new Error('Unsaved tax firm edits');},async calculationVersion(){window.taxVersionReads++;return 3;}};});
+ await page.locator('#lph-calculate').click();assert.equal(requests.filter(r=>r.operation==='calculate').length,0);assert.match(await page.locator('#lph-error').innerText(),/Unsaved tax/);
+ await page.evaluate(()=>window.LavkaProfitTaxSettings.assertReady=()=>{});await page.locator('#lph-calculate').click();await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);
+ const calculations=requests.filter(r=>r.operation==='calculate');assert.equal(calculations.length,2);assert(calculations.every(r=>r.taxSettingsVersion==='3'));assert.equal(await page.evaluate(()=>window.taxVersionReads),1);assert.deepEqual(errors,[]);await page.close();
+});
+
+test('tax snapshots and unallocated documents are visible and exported with historical firm codes',async()=>{
+ const {page,errors}=await setup('headcount');await page.locator('#lph-months button').first().click();await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);
+ const fixture=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/profit-headcount-java.json'),'utf8'));
+ fixture.complete=false;fixture.taxDetails={settings:{version:2,retailFirmCodes:['МИХНФОП','МАЛАФОП'],wholesaleFirmCodes:['КУЗНФОП','КОНДФОП']},retailAmount:'0.02',wholesaleAmount:'2.00',unallocatedAmount:'55.00',unallocatedDocuments:[{paymentId:999,documentNumber:'unknown-tax-999',documentDate:'2025-10-01',reportAmount:'55.00',category:'TAXES',city:'UNALLOCATED',includedInProfit:false}]};
+ fixture.expenseLines.forEach(row=>{if(row.lineId?.endsWith('_TAX_MALAFOP'))row.filters={...row.filters,purposeCodes:['МИХНФОП','МАЛАФОП']};if(row.lineId?.endsWith('_TAX_KONDFOP'))row.filters={...row.filters,purposeCodes:['КУЗНФОП','КОНДФОП']};});
+ await page.evaluate(report=>window.LavkaProfitViewer.showSaved({month:report.month,revisionId:1,status:'PROVISIONAL',report}),fixture);
+ assert.match(await page.locator('#lavr-profit-result').innerText(),/МИХНФОП/);assert.match(await page.locator('#lavr-profit-result').innerText(),/unknown-tax-999/);
+ const sheets=await page.evaluate(report=>window.LavkaProfitViewer.sheets({month:report.month,revisionId:1,status:'PROVISIONAL',report}),fixture);
+ assert(sheets.some(s=>s.name==='Unallocated taxes'));assert(sheets.some(s=>s.rows.some(r=>r.includes('unknown-tax-999'))));assert(sheets[0].rows.some(r=>r[4]==='МИХНФОП / МАЛАФОП'));assert.deepEqual(errors,[]);await page.close();
+});

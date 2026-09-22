@@ -4,7 +4,7 @@
     const number = (value, money = true) => value == null ? '—' : {type:'number', value:String(value), money};
     const formula = (expression, value, money = true) => ({type:'formula', formula:expression, value:String(value), money});
     const taxLabel = (row, t) => /_TAX_MALAFOP$/.test(row.lineId || '') ? t.retailTax : /_TAX_KONDFOP$/.test(row.lineId || '') ? t.wholesaleTax : row.label;
-    const purpose = row => /_TAX_MALAFOP$/.test(row.lineId || '') ? ['МАЛАФОП'] : /_TAX_KONDFOP$/.test(row.lineId || '') ? ['КОНДФОП'] : row.filters?.purposeCodes;
+    const purpose = row => Array.isArray(row.filters?.purposeCodes) ? row.filters.purposeCodes : /_TAX_MALAFOP$/.test(row.lineId || '') ? ['МАЛАФОП'] : /_TAX_KONDFOP$/.test(row.lineId || '') ? ['КОНДФОП'] : row.filters?.purposeCodes;
     const selection = (f, key, t) => !f ? '—' : f[key+'WarehouseMode']==='ALL' ? t.allWarehouses : f[key+'WarehouseMode']==='NONE' ? '—' : (f[key+'WarehouseMode']==='EXCLUDE' ? t.exceptWarehouses+': ' : '')+(f[key+'WarehouseIds'] || []).join(', ');
     function sheets(data, t) {
         return ['KYIV','ODESA'].map(city => {
@@ -26,7 +26,7 @@
             const refs=new Map(), operating=[];
             lines.forEach((line,i)=>{
                 const f=line.filters, manual=line.source && line.source!=='FOLIO';
-                rows.push([i+1,taxLabel(line,t),(f?.expenseCodes || []).join(' / ') || (manual?t.manualAmount:'—'),manual?'—':(f?.operationTypes || []).join(' / ')||t.anyFilter,manual?'—':(purpose(line)||[]).join(' / ')||t.anyFilter,manual?'—':selection(f,'cash',t),manual?'—':selection(f,'bank',t),number(line.amount),'']);
+                rows.push([i+1,taxLabel(line,t),(f?.expenseCodes || []).join(' / ') || (manual?t.manualAmount:'—'),manual?'—':(f?.operationTypes || []).join(' / ')||t.anyFilter,manual?'—':(purpose(line)||[]).join(' / ')||(/_TAX_(MALAFOP|KONDFOP)$/.test(line.lineId || '')?t.noTaxFirms:t.anyFilter),manual?'—':selection(f,'cash',t),manual?'—':selection(f,'bank',t),number(line.amount),'']);
                 refs.set(line.lineId,rows.length);
                 if(line.accountingTreatment==='OPERATING_EXPENSE')operating.push('H'+rows.length);
             });
