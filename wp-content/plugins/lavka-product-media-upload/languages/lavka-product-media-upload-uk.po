@@ -2341,3 +2341,7 @@ msgstr "Оновлювати цей каталог щодня без публі�
 #: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
 msgid "Upload photos downloaded to your computer"
 msgstr "Завантажити фото, збережені на комп’ютері"
+
+#: inc/class-image-validator.php
+msgid "The SKU contains characters that cannot be used in an image filename."
+msgstr "Артикул містить символи, які неможливо використати в імені файла зображення."

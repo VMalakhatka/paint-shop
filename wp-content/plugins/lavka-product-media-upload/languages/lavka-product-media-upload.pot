@@ -2076,3 +2076,7 @@ msgstr ""
 #: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
 msgid "Upload photos downloaded to your computer"
 msgstr ""
+
+#: inc/class-image-validator.php
+msgid "The SKU contains characters that cannot be used in an image filename."
+msgstr ""

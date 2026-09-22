@@ -784,31 +784,35 @@ final class ImageValidator
             return ['ok' => false, 'message' => __('A canonical filename cannot be generated without an identifier.', 'lavka-product-media-upload')];
         }
 
+        // Keep established filename exceptions; all other Cyrillic is converted per character.
         $mapping = (array) apply_filters('lavka_product_media_upload_sku_prefix_map', [
-            'Ж' => 'g',
             'РСУ' => 'rcy',
-            'КЦМ-' => 'kcm-',
         ]);
-
-        $stem = $identifier;
-        $matched = false;
+        $stem = mb_strtolower($identifier, 'UTF-8');
         foreach ($mapping as $source_prefix => $target_prefix) {
-            if ($source_prefix !== '' && mb_strpos($identifier, (string) $source_prefix, 0, 'UTF-8') === 0) {
-                $stem = (string) $target_prefix . mb_substr($identifier, mb_strlen((string) $source_prefix, 'UTF-8'), null, 'UTF-8');
-                $matched = true;
+            $prefix = mb_strtolower((string) $source_prefix, 'UTF-8');
+            if ($prefix !== '' && mb_strpos($stem, $prefix, 0, 'UTF-8') === 0) {
+                $stem = mb_strtolower((string) $target_prefix, 'UTF-8') . mb_substr($stem, mb_strlen($prefix, 'UTF-8'), null, 'UTF-8');
                 break;
             }
         }
 
-        if (!$matched && preg_match('/[^\x20-\x7E]/u', $identifier)) {
-            return ['ok' => false, 'message' => __('The SKU uses a non-ASCII prefix without an explicit business mapping.', 'lavka-product-media-upload')];
-        }
-
-        $stem = strtolower($stem);
+        // Store filenames in ASCII, without changing the SKU used to resolve Woo/Folio.
+        // Ж -> g and Ц -> c follow the shop's agreed naming convention.
+        $stem = strtr($stem, [
+            'а' => 'a', 'б' => 'b', 'в' => 'v', 'г' => 'g', 'ґ' => 'g',
+            'д' => 'd', 'е' => 'e', 'ё' => 'yo', 'є' => 'ye', 'ж' => 'g',
+            'з' => 'z', 'и' => 'i', 'і' => 'i', 'ї' => 'yi', 'й' => 'y',
+            'к' => 'k', 'л' => 'l', 'м' => 'm', 'н' => 'n', 'о' => 'o',
+            'п' => 'p', 'р' => 'r', 'с' => 's', 'т' => 't', 'у' => 'u',
+            'ф' => 'f', 'х' => 'h', 'ц' => 'c', 'ч' => 'ch', 'ш' => 'sh',
+            'щ' => 'shch', 'ъ' => '', 'ы' => 'y', 'ь' => '', 'э' => 'e',
+            'ю' => 'yu', 'я' => 'ya',
+        ]);
         $stem = preg_replace('/\s+/', '-', $stem) ?? $stem;
         $stem = preg_replace('/-+/', '-', $stem) ?? $stem;
         if (!preg_match('/^[a-z0-9_-]+$/', $stem)) {
-            return ['ok' => false, 'message' => __('The identifier cannot be converted to a safe canonical filename without guessing.', 'lavka-product-media-upload')];
+            return ['ok' => false, 'message' => __('The SKU contains characters that cannot be used in an image filename.', 'lavka-product-media-upload')];
         }
 
         return ['ok' => true, 'stem' => $stem];

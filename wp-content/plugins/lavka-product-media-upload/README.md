@@ -54,7 +54,10 @@ P-296-010 gallery 2  -> p-296-010_3.jpg
 КЦМ-IT274 gallery 2 -> kcm-it274_3.jpg
 ```
 
-Unknown non-ASCII SKU prefixes are rejected instead of guessed.
+Ukrainian/Russian Cyrillic is transliterated per character throughout the filename
+stem (including mixed-script suffixes). Ж → g and Ц → c follow the shop convention.
+The existing РСУ → rcy exception remains; the prefix-map filter can still override
+known naming conventions. Other unsupported characters remain blocking errors.
 
 ## Conflict sources
 
@@ -257,7 +260,14 @@ Artizo actual schema and Drive real API reading are unverified until access is
 provided; a failed HTTP response is not an imported catalogue. See the dated human
 guide for acceptance evidence and source-specific limitations.
 
-The explicit `КЦМ-` → `kcm-` filename mapping was confirmed against assigned
-production media on 2026-09-22. It changes the generated filename only, never the
-product/Folio SKU. Nonstandard existing filenames remain unchanged; normal conflict
-and content checks still apply. Unknown prefixes and non-ASCII suffixes stay blocked.
+The `КЦМ-` → `kcm-` naming convention was confirmed against assigned production
+media on 2026-09-22 and is covered by the character table without a separate prefix
+rule. Conversion changes the generated filename only, never the product/Folio SKU. Nonstandard existing filenames remain unchanged; normal conflict
+and content checks still apply. Cyrillic prefixes and suffixes now use the character table; other unsupported
+characters stay blocked. Different source assets resolving to the same canonical
+name still fail the existing batch/WordPress/S3 conflict checks.
+
+Character conversion is case-insensitive and applies only to the generated filename.
+For example, `КЦМ-ЖЦ274` produces `kcm-gc274.jpg`. Soft/hard signs are omitted;
+Ukrainian-specific letters are explicitly listed in `canonical_stem`. No generic
+Unicode transliterator or environment-dependent locale mapping is used.
