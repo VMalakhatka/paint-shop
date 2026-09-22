@@ -842,3 +842,8 @@ msgstr "Доставка в этом заказе — 0 грн; услуги п�
 
 msgid "Order emails to you and the store show the delivery method and your TTNs by warehouse before the products. For split orders, inherited shipping details are explicitly marked as covering all warehouses of the original order."
 msgstr "В письмах вам и магазину перед товарами показаны способ доставки и ваши ТТН по складам. Для разделённых заказов унаследованные данные доставки явно обозначены как отправления со всех складов исходного заказа."
+msgid "On a phone, open Additional filters to choose supplier, unit, warehouses, availability or price. The active count stays visible when collapsed. Search, Apply filters and Reset remain available; collapsing does not clear your choices."
+msgstr "На телефоне откройте «Дополнительные фильтры», чтобы выбрать поставщика, единицу измерения, склады, наличие или цену. Число активных условий видно и в свёрнутом состоянии. Поиск, «Применить фильтры» и «Сбросить» остаются доступными; сворачивание не сбрасывает выбор."
+
+msgid "Compact catalogue on a phone"
+msgstr "Компактный каталог на телефоне"

@@ -397,6 +397,9 @@ function psu_render_catalog_filters(): void {
     $brand = isset($_GET['brand']) ? sanitize_title(wp_unslash($_GET['brand'])) : '';
     $min_price = isset($_GET['min_price']) ? wc_format_decimal(wp_unslash($_GET['min_price'])) : '';
     $max_price = isset($_GET['max_price']) ? wc_format_decimal(wp_unslash($_GET['max_price'])) : '';
+    $active_filters = (int) ($brand !== '') + (int) ($unit !== '')
+        + (int) !empty($selected_locations) + (int) !empty($_GET['in_stock'])
+        + (int) ($min_price !== '' || $max_price !== '');
     ?>
     <form class="psu-catalog-filters" method="get" action="<?php echo esc_url(psu_catalog_filter_url()); ?>">
         <input type="hidden" name="psu_filters" value="1">
@@ -410,6 +413,9 @@ function psu_render_catalog_filters(): void {
             <?php if (!$category): ?><input type="hidden" name="post_type" value="product"><?php endif; ?>
         </div>
 
+        <details class="psu-catalog-filters__advanced" open>
+            <summary><?php esc_html_e('Additional filters', 'psu-search-filters'); ?><?php if ($active_filters): ?> <span class="psu-catalog-filters__count"><?php echo esc_html(sprintf(__('%d active', 'psu-search-filters'), $active_filters)); ?></span><?php endif; ?></summary>
+            <div class="psu-catalog-filters__advanced-fields">
         <label class="psu-catalog-filters__field">
             <span><?php esc_html_e('Supplier', 'psu-search-filters'); ?></span>
             <select name="brand">
@@ -448,6 +454,8 @@ function psu_render_catalog_filters(): void {
             <input type="number" min="0" step="0.01" name="max_price" value="<?php echo esc_attr($max_price); ?>" placeholder="<?php echo esc_attr__('To', 'psu-search-filters'); ?>">
         </div>
 
+            </div>
+        </details>
         <?php $page_size = function_exists('psufp_explicit_per_page') ? psufp_explicit_per_page() : []; ?>
         <?php if ($page_size): ?><input type="hidden" name="<?php echo esc_attr($page_size[0]); ?>" value="<?php echo esc_attr($page_size[1]); ?>"><?php endif; ?>
         <?php if (isset($_GET['orderby'])): ?><input type="hidden" name="orderby" value="<?php echo esc_attr(sanitize_key(wp_unslash($_GET['orderby']))); ?>"><?php endif; ?>
@@ -456,6 +464,23 @@ function psu_render_catalog_filters(): void {
             <a href="<?php echo esc_url(psu_catalog_filter_url()); ?>"><?php esc_html_e('Reset', 'psu-search-filters'); ?></a>
         </div>
     </form>
+    <script>
+    (function () {
+        const form = document.currentScript.previousElementSibling;
+        const panel = form.querySelector('.psu-catalog-filters__advanced');
+        const mobile = window.matchMedia('(max-width: 768px)');
+        let mobileOpen = false;
+        function layout() { panel.open = !mobile.matches || mobileOpen; }
+        panel.addEventListener('toggle', function () {
+            if (mobile.matches) mobileOpen = panel.open;
+        });
+        form.addEventListener('invalid', function (event) {
+            if (panel.contains(event.target)) panel.open = true;
+        }, true);
+        mobile.addEventListener('change', layout);
+        layout();
+    })();
+    </script>
     <?php
 }
 add_action('woocommerce_before_shop_loop', 'psu_render_catalog_filters', 7);
@@ -498,6 +523,18 @@ add_action('wp_enqueue_scripts', function () {
         .psu-catalog-filters__price>span{grid-column:1/-1}
         .psu-catalog-filters__category{grid-column:1/-1;font-size:13px;color:#555}
         .psu-catalog-filters>*{min-width:0}
+        .psu-catalog-filters__advanced{grid-column:1/-1;min-width:0}
+        .psu-catalog-filters__advanced>summary{display:none;cursor:pointer;min-height:44px;padding:10px 0;font-weight:600;color:#28644c}
+        .psu-catalog-filters__advanced>summary:focus-visible{outline:2px solid #28644c;outline-offset:2px}
+        .psu-catalog-filters__count{font-size:12px;font-weight:400;margin-left:6px}
+        .psu-catalog-filters__advanced-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px;align-items:end}
+        @media(min-width:769px){.psu-catalog-filters__search{grid-column:1/-1}}
+        @media(max-width:768px){
+            .psu-catalog-filters{grid-template-columns:1fr;gap:6px;margin:10px 0 14px;padding:10px}
+            .psu-catalog-filters__advanced>summary{display:list-item;list-style-position:inside}
+            .psu-catalog-filters__advanced-fields{grid-template-columns:1fr;gap:10px;padding:6px 0 12px}
+            .psu-catalog-filters input[type="search"],.psu-catalog-filters input[type="number"],.psu-catalog-filters select{font-size:16px;min-height:44px}
+        }
         .psu-catalog-filters__actions{grid-column:1/-1;display:flex;justify-content:flex-end;align-items:center;gap:10px;flex-wrap:wrap}
         .psu-catalog-filters__actions button{min-height:36px;margin:0;padding:7px 12px;border:1px solid #28644c;border-radius:4px;background:#28644c;color:#fff;font-size:13px;line-height:20px;font-weight:600;white-space:nowrap;cursor:pointer}
         .psu-catalog-filters__actions button:hover{background:#1d4b39}
