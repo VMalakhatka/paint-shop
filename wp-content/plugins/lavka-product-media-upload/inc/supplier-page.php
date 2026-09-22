@@ -6,12 +6,14 @@ if (!defined('ABSPATH')) { exit; }
         <span class="lsc-eyebrow"><?php esc_html_e('SUPPLIER MEDIA', 'lavka-product-media-upload'); ?></span>
         <h1><?php esc_html_e('Supplier catalogues', 'lavka-product-media-upload'); ?></h1>
         <p><?php esc_html_e('Find our products, compare photos and prepare a checked image batch.', 'lavka-product-media-upload'); ?></p>
+        <h2><?php esc_html_e('Quick guide for the manager', 'lavka-product-media-upload'); ?></h2>
         <ol class="lsc-steps">
-            <li><?php esc_html_e('Choose a source', 'lavka-product-media-upload'); ?></li>
-            <li><?php esc_html_e('Match our products', 'lavka-product-media-upload'); ?></li>
-            <li><?php esc_html_e('Select photos', 'lavka-product-media-upload'); ?></li>
-            <li><?php esc_html_e('Check and upload', 'lavka-product-media-upload'); ?></li>
+            <li><?php esc_html_e('Find the products', 'lavka-product-media-upload'); ?><p><?php esc_html_e('Choose a supplier from the list. Search by name, SKU or barcode. To find active products needing photos, select “Our products without a main photo”, tick “Only products visible on our website” and click “Find products”.', 'lavka-product-media-upload'); ?></p></li>
+            <li><?php esc_html_e('Compare and select photos', 'lavka-product-media-upload'); ?><p><?php esc_html_e('Compare our product on the left with the supplier’s photos on the right: model, colour, size and packaging must match. Select the photos, choose the main image and set gallery positions. A correct automatic match needs no additional confirmation.', 'lavka-product-media-upload'); ?></p></li>
+            <li><?php esc_html_e('Prepare the selected photos', 'lavka-product-media-upload'); ?><p><?php esc_html_e('Click “Prepare selected photos” and wait. The uploader opens below on this page with the photos and XLSX registry already selected. You do not need to download a template or fill in a table. Do not reload the page before finishing the upload.', 'lavka-product-media-upload'); ?></p></li>
+            <li><?php esc_html_e('Check, upload and verify', 'lavka-product-media-upload'); ?><p><?php esc_html_e('Click “Check without writing”. Review errors and warnings; fix errors and check again. Then click “Upload and synchronize approved rows”. Wait for completion, save the CSV report and check the main photo and gallery on the product page.', 'lavka-product-media-upload'); ?></p></li>
         </ol>
+        <p><?php esc_html_e('If our product was not found or the match is wrong, enter its exact SKU and click “Confirm product match” before selecting photos. This saves the link between products; it does not upload images.', 'lavka-product-media-upload'); ?></p>
     </header>
     <div class="lsc-panel lsc-source">
         <label for="lsc-source"><?php esc_html_e('Supplier or media folder', 'lavka-product-media-upload'); ?></label>

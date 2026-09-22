@@ -2088,3 +2088,43 @@ msgstr ""
 #: inc/supplier-page.php
 msgid "Published products shown in the catalogue or search. Variations follow the parent product. Can be combined with the other filters."
 msgstr ""
+
+#: inc/supplier-page.php
+msgid "Quick guide for the manager"
+msgstr ""
+
+#: inc/supplier-page.php
+msgid "Find the products"
+msgstr ""
+
+#: inc/supplier-page.php
+msgid "Choose a supplier from the list. Search by name, SKU or barcode. To find active products needing photos, select “Our products without a main photo”, tick “Only products visible on our website” and click “Find products”."
+msgstr ""
+
+#: inc/supplier-page.php
+msgid "Compare and select photos"
+msgstr ""
+
+#: inc/supplier-page.php
+msgid "Compare our product on the left with the supplier’s photos on the right: model, colour, size and packaging must match. Select the photos, choose the main image and set gallery positions. A correct automatic match needs no additional confirmation."
+msgstr ""
+
+#: inc/supplier-page.php
+msgid "Prepare the selected photos"
+msgstr ""
+
+#: inc/supplier-page.php
+msgid "Click “Prepare selected photos” and wait. The uploader opens below on this page with the photos and XLSX registry already selected. You do not need to download a template or fill in a table. Do not reload the page before finishing the upload."
+msgstr ""
+
+#: inc/supplier-page.php
+msgid "Check, upload and verify"
+msgstr ""
+
+#: inc/supplier-page.php
+msgid "Click “Check without writing”. Review errors and warnings; fix errors and check again. Then click “Upload and synchronize approved rows”. Wait for completion, save the CSV report and check the main photo and gallery on the product page."
+msgstr ""
+
+#: inc/supplier-page.php
+msgid "If our product was not found or the match is wrong, enter its exact SKU and click “Confirm product match” before selecting photos. This saves the link between products; it does not upload images."
+msgstr ""

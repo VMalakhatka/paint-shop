@@ -2349,3 +2349,43 @@ msgstr "Только товары, видимые на нашем сайте"
 #: inc/supplier-page.php
 msgid "Published products shown in the catalogue or search. Variations follow the parent product. Can be combined with the other filters."
 msgstr "Опубликованные товары, которые показываются в каталоге или поиске. Для вариаций учитывается родительский товар. Можно сочетать с другими фильтрами."
+
+#: inc/supplier-page.php
+msgid "Quick guide for the manager"
+msgstr "Краткая инструкция для менеджера"
+
+#: inc/supplier-page.php
+msgid "Find the products"
+msgstr "Найдите товары"
+
+#: inc/supplier-page.php
+msgid "Choose a supplier from the list. Search by name, SKU or barcode. To find active products needing photos, select “Our products without a main photo”, tick “Only products visible on our website” and click “Find products”."
+msgstr "Выберите поставщика из списка. Ищите по названию, артикулу или штрихкоду. Чтобы найти активные товары без фото, выберите «Наши товары без главного фото», поставьте галочку «Только товары, видимые на нашем сайте» и нажмите «Найти товары»."
+
+#: inc/supplier-page.php
+msgid "Compare and select photos"
+msgstr "Сравните и выберите фото"
+
+#: inc/supplier-page.php
+msgid "Compare our product on the left with the supplier’s photos on the right: model, colour, size and packaging must match. Select the photos, choose the main image and set gallery positions. A correct automatic match needs no additional confirmation."
+msgstr "Сравните наш товар слева с фото поставщика справа: модель, цвет, размер и комплектация должны совпадать. Выберите фото, назначьте главное изображение и позиции в галерее. Правильное автоматическое совпадение дополнительно подтверждать не нужно."
+
+#: inc/supplier-page.php
+msgid "Prepare the selected photos"
+msgstr "Подготовьте выбранные фото"
+
+#: inc/supplier-page.php
+msgid "Click “Prepare selected photos” and wait. The uploader opens below on this page with the photos and XLSX registry already selected. You do not need to download a template or fill in a table. Do not reload the page before finishing the upload."
+msgstr "Нажмите «Подготовить выбранные фото» и подождите. Ниже на этой странице откроется загрузчик: фото и реестр XLSX уже будут выбраны. Скачивать шаблон и заполнять таблицу не нужно. Не обновляйте страницу до завершения загрузки."
+
+#: inc/supplier-page.php
+msgid "Check, upload and verify"
+msgstr "Проверьте, загрузите и сверьте результат"
+
+#: inc/supplier-page.php
+msgid "Click “Check without writing”. Review errors and warnings; fix errors and check again. Then click “Upload and synchronize approved rows”. Wait for completion, save the CSV report and check the main photo and gallery on the product page."
+msgstr "Нажмите «Проверить без записи». Просмотрите ошибки и предупреждения; исправьте ошибки и повторите проверку. Затем нажмите «Загрузить и синхронизировать одобренные строки». Дождитесь завершения, сохраните CSV-отчёт и проверьте главное фото и галерею на странице товара."
+
+#: inc/supplier-page.php
+msgid "If our product was not found or the match is wrong, enter its exact SKU and click “Confirm product match” before selecting photos. This saves the link between products; it does not upload images."
+msgstr "Если наш товар не найден или сопоставлен неправильно, введите его точный артикул и нажмите «Подтвердить соответствие товара» перед выбором фото. Это сохраняет связь между товарами, а не загружает изображения."
