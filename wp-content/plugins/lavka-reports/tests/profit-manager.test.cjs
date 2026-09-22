@@ -38,5 +38,9 @@ module.exports={data,labels};
 test('historical tax firms use snapshot selection columns, including explicitly empty lists',()=>{
  const d=data();d.expenseLines[0].filters={purposeCodes:['МИХНФОП','МАЛАФОП']};d.expenseLines[1].filters={purposeCodes:['КУЗНФОП','КОНДФОП']};
  const k=manager.sheets(d,labels)[0];assert.equal(k.rows[8][4],'МИХНФОП / МАЛАФОП');assert.equal(k.rows[9][4],'КУЗНФОП / КОНДФОП');
- assert.deepEqual(manager.purpose({...d.expenseLines[0],filters:{purposeCodes:[]}}),[]);
+ assert.deepEqual(manager.purpose({...d.expenseLines[0],filters:{purposeCodes:[]}},{retailFirmCodes:[],wholesaleFirmCodes:[]}),[]);
+});
+
+test('legacy empty selection metadata retains the old firm rather than inventing an empty configuration',()=>{
+ assert.deepEqual(manager.purpose({lineId:'KYIV_TAX_MALAFOP',filters:{purposeCodes:[]}}),['МАЛАФОП']);
 });

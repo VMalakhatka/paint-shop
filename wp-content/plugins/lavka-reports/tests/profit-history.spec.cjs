@@ -92,3 +92,20 @@ test('tax snapshots and unallocated documents are visible and exported with hist
  const sheets=await page.evaluate(report=>window.LavkaProfitViewer.sheets({month:report.month,revisionId:1,status:'PROVISIONAL',report}),fixture);
  assert(sheets.some(s=>s.name==='Unallocated taxes'));assert(sheets.some(s=>s.rows.some(r=>r.includes('unknown-tax-999'))));assert(sheets[0].rows.some(r=>r[4]==='МИХНФОП / МАЛАФОП'));assert.deepEqual(errors,[]);await page.close();
 });
+
+
+test('Java tax DTO renders every unallocated document and exports its settings snapshot',async()=>{
+ const {page,errors}=await setup('headcount');
+ const report=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/profit-tax-settings-java.json'),'utf8'));
+ const wrapper={month:report.month,revisionId:1,status:'PROVISIONAL',report};
+ await page.evaluate(w=>window.LavkaProfitViewer.showSaved(w),wrapper);
+ assert.match(await page.locator('#lavr-profit-tax-details').innerText(),/МИХНФОП/);
+ for(const row of report.taxDetails.unallocatedDocuments)assert.match(await page.locator('#lavr-profit-tax-details').innerText(),new RegExp(row.documentNumber));
+ await page.getByRole('button',{name:'Unallocated',exact:true}).click();assert.match(await page.locator('#lavr-profit-expenses-table').innerText(),/16,00/);
+ await page.locator('#lavr-profit-load-audit').click();await page.locator('#lavr-profit-audit-unclassified').check();assert.match(await page.locator('#lavr-profit-audit-table').innerText(),/SYNTHETIC-5/);
+ const sheets=await page.evaluate(w=>window.LavkaProfitViewer.sheets(w),wrapper);
+ const unknown=sheets.find(s=>s.name==='Unallocated taxes');assert.equal(unknown.rows.length,3+report.taxDetails.unallocatedDocuments.length);
+ const download=page.waitForEvent('download');await page.locator('#lavr-profit-export-xlsx').click();await(await download).saveAs(path.join(out,'tax-settings-java.xlsx'));
+ await page.locator('#lavr-profit-tax-details').screenshot({path:path.join(out,'tax-details-desktop.png')});
+ assert.deepEqual(errors,[]);await page.close();
+});

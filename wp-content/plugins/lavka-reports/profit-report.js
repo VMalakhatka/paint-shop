@@ -74,6 +74,7 @@
         CAPITALIZED_IN_INVENTORY: labels.capitalizedTreatment,
         EXCLUDED: labels.excludedTreatment,
         UNCLASSIFIED: labels.unclassifiedTreatment,
+        UNALLOCATED: labels.unallocatedTax,
     };
     const warningGroups = {
         PROFIT_REPORT_SECTION_UNAVAILABLE: 'action',
@@ -509,7 +510,7 @@
     function renderExpenses() {
         const data = state.report || {};
         nodes.expenseNote.textContent = sectionUnavailable(data, 'EXPENSES') ? labels.unavailable + '. ' + labels.partialHelp : Array.isArray(data.expenseLines) ? labels.detailedRows : labels.legacyRows;
-        renderGrid(document.getElementById('lavr-profit-expenses-table'), expenseColumns(), expenseRows(data).filter(item => matchesCity(item.city, state.expenseFilter)), sectionUnavailable(data, 'EXPENSES') ? labels.unavailable : null);
+        renderGrid(document.getElementById('lavr-profit-expenses-table'), expenseColumns(data.taxDetails?.settings), expenseRows(data).filter(item => matchesCity(item.city, state.expenseFilter)), sectionUnavailable(data, 'EXPENSES') ? labels.unavailable : null);
     }
 
     function controlItem(label, value, extra) {
@@ -615,7 +616,7 @@
             if (nodes.auditCity.value && row.city !== nodes.auditCity.value) return false;
             if (nodes.auditCategory.value && row.category !== nodes.auditCategory.value) return false;
             if (nodes.auditTreatment.value && row.accountingTreatment !== nodes.auditTreatment.value) return false;
-            if (nodes.auditUnclassified.checked && row.accountingTreatment !== 'UNCLASSIFIED') return false;
+            if (nodes.auditUnclassified.checked && !['UNCLASSIFIED','UNALLOCATED'].includes(row.accountingTreatment)) return false;
             return true;
         });
     }
@@ -782,7 +783,7 @@
     }
     function expenseRows(data) {
         const rows = Array.isArray(data.expenseLines) ? data.expenseLines.slice().sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)) : (data.expenses || []);
-        return rows.filter(r => !(r.lineId === 'ODESA_TAX_KONDFOP' && Number(r.amount) === 0 && Number(r.profitImpact) === 0 && r.documentCount === 0)).map(row => ({...row, label: window.LavkaProfitManager.taxLabel(row, labels), filters: row.filters ? {...row.filters, purposeCodes: window.LavkaProfitManager.purpose(row)} : row.filters}));
+        return rows.filter(r => !(r.lineId === 'ODESA_TAX_KONDFOP' && Number(r.amount) === 0 && Number(r.profitImpact) === 0 && r.documentCount === 0)).map(row => ({...row, label: window.LavkaProfitManager.taxLabel(row, labels), filters: row.filters ? {...row.filters, purposeCodes: window.LavkaProfitManager.purpose(row, data.taxDetails?.settings)} : row.filters}));
     }
     function warehouseSelection(filters, stream) {
         if (!filters) return '—';
@@ -794,12 +795,16 @@
         if (mode === 'EXCLUDE') return labels.exceptWarehouses + ': ' + printable(ids);
         return [mode, ids && ids.length ? printable(ids) : null].filter(Boolean).join(' · ') || '—';
     }
-    function expenseColumns() {
+    function expenseColumns(taxSettings) {
         return [columnSpec('city'), columnSpec('label'), columnSpec('documentCount'), columnSpec('amount'), columnSpec('profitImpact'),
             columnSpec('expenseCodes', r => r.filters && r.filters.expenseCodes),
             columnSpec('operationTypes', r => r.filters && r.filters.operationTypes),
             columnSpec('operationRequired', r => r.filters && r.filters.operationRequired),
-            columnSpec('purposeCodes', r => !r.filters ? null : r.filters.purposeCodes && r.filters.purposeCodes.length ? r.filters.purposeCodes : /_TAX_(MALAFOP|KONDFOP)$/.test(r.lineId || '') ? labels.noTaxFirms : labels.anyPurpose),
+            columnSpec('purposeCodes', r => {
+                if(!r.filters)return null;
+                const codes=window.LavkaProfitManager.purpose(r,taxSettings);
+                return codes?.length?codes:/_TAX_(MALAFOP|KONDFOP)$/.test(r.lineId || '')?labels.noTaxFirms:labels.anyPurpose;
+            }),
             columnSpec('cashWarehouses', r => warehouseSelection(r.filters, 'cash')),
             columnSpec('bankWarehouses', r => warehouseSelection(r.filters, 'bank')),
             columnSpec('accountingTreatment'), columnSpec('source'), columnSpec('note', r => r.filters && r.filters.note), columnSpec('lineId'), columnSpec('category')];
@@ -933,7 +938,7 @@
         };
         ['KYIV', 'ODESA'].forEach(city => {
             const rows = (Array.isArray(data.expenseLines) ? data.expenseLines : (data.expenses || [])).filter(row => matchesCity(row.city, city));
-            add(cityLabel(city) + ' ' + labels.detailedRows, expenseColumns(), rows, sectionUnavailable(data, 'EXPENSES') ? labels.unavailable : Array.isArray(data.expenseLines) ? labels.detailedRows : labels.legacyRows);
+            add(cityLabel(city) + ' ' + labels.detailedRows, expenseColumns(data.taxDetails?.settings), rows, sectionUnavailable(data, 'EXPENSES') ? labels.unavailable : Array.isArray(data.expenseLines) ? labels.detailedRows : labels.legacyRows);
         });
         add(labels.profitByCity, dynamicColumns(data.cities || [], ['city', 'baseGrossProfit', 'manualGrossAdjustments', 'grossProfit', 'operatingExpenses', 'profit']), data.cities || []);
         add(labels.appliedParameters, ['parameter', 'value'].map(key => columnSpec(key)), parameterRows(data));
