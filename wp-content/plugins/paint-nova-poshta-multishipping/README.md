@@ -143,7 +143,8 @@ wp plugin status paint-nova-poshta-multishipping
 ```
 
 Після активації відкрити Лавка → Лавка: налаштування → Лавка: Нова пошта. Без API-ключа read-only перевірка повинна показати зрозумілу помилку; створення ТТН відсутнє.
-# Checkout recovery: absent external TTN plan
+
+## Checkout recovery: absent external TTN plan
 
 Verified 2026-09-22: `ExternalShipmentStore::submit()` treats missing/empty
 `_pnpm_external_plan` as no external shipment and returns before acquiring a

@@ -54,6 +54,11 @@ Checkout incident, production 2026-09-22: ошибка
 тесты принадлежат NP-плагину. Восстановление требует отдельного разрешения,
 проверки дублей и сохранённого stable preview/apply payload; отменённые попытки
 не восстанавливать вместе с выбранным заказом.
+После восстановления `bacs` сверять исходный `date_paid`: Woo автоматически
+заполняет его при переходе в `processing`, даже без вызова `payment_complete()`.
+Не выдавать статус принятого Folio-счёта за подтверждение поступления денег.
+Источник: Woo `WC_Order::maybe_set_date_paid()`, production recovery 2026-09-22,
+`docs/OPERATIONS_RUNBOOK.md` («Обычный заказ остановился до отправки в ФОЛИО»).
 
 1. Woo order собирает client/header/items/allocation plan.
 2. Preview всегда отправляет `preview_only=true` в Java `/admin/folio/order-accounts`.
