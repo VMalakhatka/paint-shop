@@ -286,6 +286,27 @@ final class SupplierCatalog
         if ($filter === 'matched') { $where .= ' AND i.product_id>0'; }
         if ($filter === 'unmatched') { $where .= ' AND i.product_id=0'; }
         if ($filter === 'missing') { $where .= " AND i.product_id>0 AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} m WHERE m.post_id=i.product_id AND m.meta_key='_thumbnail_id' AND CAST(m.meta_value AS UNSIGNED)>0)"; }
+        if (($_POST['visible_only'] ?? '') === '1') {
+            // Read live Woo publication/visibility, including the variation's parent.
+            $visibility = "SELECT 1 FROM {$wpdb->term_relationships} vr
+                INNER JOIN {$wpdb->term_taxonomy} vt ON vt.term_taxonomy_id=vr.term_taxonomy_id
+                INNER JOIN {$wpdb->terms} vn ON vn.term_id=vt.term_id
+                WHERE vr.object_id=site_product.ID AND vt.taxonomy='product_visibility'";
+            $stock = get_option('woocommerce_hide_out_of_stock_items') === 'yes'
+                ? " AND NOT EXISTS ($visibility AND vn.slug='outofstock')" : '';
+            $where .= " AND EXISTS (
+                SELECT 1 FROM {$wpdb->posts} matched_product
+                INNER JOIN {$wpdb->posts} site_product ON site_product.ID=CASE
+                    WHEN matched_product.post_type='product_variation' THEN matched_product.post_parent
+                    ELSE matched_product.ID END
+                WHERE matched_product.ID=i.product_id AND matched_product.post_status='publish'
+                AND matched_product.post_type IN ('product','product_variation')
+                AND site_product.post_type='product' AND site_product.post_status='publish'
+                AND site_product.post_password=''
+                AND NOT (EXISTS ($visibility AND vn.slug='exclude-from-catalog')
+                    AND EXISTS ($visibility AND vn.slug='exclude-from-search'))$stock
+            )";
+        }
         $total = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table i WHERE $where", $args));
         $page = max(1, (int) ($_POST['page'] ?? 1));
         $rows = $wpdb->get_results($wpdb->prepare("SELECT i.* FROM $table i WHERE $where ORDER BY i.id LIMIT 12 OFFSET %d", array_merge($args, [($page - 1) * 12])), ARRAY_A);

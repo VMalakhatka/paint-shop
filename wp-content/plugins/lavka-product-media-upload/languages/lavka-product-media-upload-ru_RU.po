@@ -2341,3 +2341,11 @@ msgstr "Загрузить фото, сохранённые на компьют�
 #: inc/class-image-validator.php
 msgid "The SKU contains characters that cannot be used in an image filename."
 msgstr "Артикул содержит символы, которые невозможно использовать в имени файла изображения."
+
+#: inc/supplier-page.php
+msgid "Only products visible on our website"
+msgstr "Только товары, видимые на нашем сайте"
+
+#: inc/supplier-page.php
+msgid "Published products shown in the catalogue or search. Variations follow the parent product. Can be combined with the other filters."
+msgstr "Опубликованные товары, которые показываются в каталоге или поиске. Для вариаций учитывается родительский товар. Можно сочетать с другими фильтрами."

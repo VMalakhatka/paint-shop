@@ -271,3 +271,14 @@ Character conversion is case-insensitive and applies only to the generated filen
 For example, `КЦМ-ЖЦ274` produces `kcm-gc274.jpg`. Soft/hard signs are omitted;
 Ukrainian-specific letters are explicitly listed in `canonical_stem`. No generic
 Unicode transliterator or environment-dependent locale mapping is used.
+
+### Website visibility filter
+
+`visible_only=1` combines with all existing catalogue filters before counting and
+pagination. It reads live WordPress publication status and Woo visibility terms:
+matched product and variation parent must be published; the parent/site product
+must be password-free and not excluded from both catalogue and search. Catalogue-
+only and search-only products remain eligible. When Woo hides out-of-stock products,
+the parent/site product's `outofstock` visibility term excludes it. Unmatched,
+deleted, draft and private products are excluded. This filter does not change
+products, matches or selected photos; managers submit it with Find products.

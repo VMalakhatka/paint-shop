@@ -60,6 +60,10 @@ if (!defined('ABSPATH')) { exit; }
             <option value="missing"><?php esc_html_e('Our products without a main photo', 'lavka-product-media-upload'); ?></option>
             <option value="unmatched"><?php esc_html_e('Need a product match', 'lavka-product-media-upload'); ?></option>
         </select></label>
+        <div class="lsc-wide">
+            <label><input type="checkbox" name="visible_only" value="1" aria-describedby="lsc-visible-help"> <?php esc_html_e('Only products visible on our website', 'lavka-product-media-upload'); ?></label>
+            <p id="lsc-visible-help" class="description"><?php esc_html_e('Published products shown in the catalogue or search. Variations follow the parent product. Can be combined with the other filters.', 'lavka-product-media-upload'); ?></p>
+        </div>
         <div class="lsc-bottom"><button type="submit" class="button button-primary"><?php esc_html_e('Find products', 'lavka-product-media-upload'); ?></button></div>
     </form>
     <div class="lsc-toolbar lsc-basket"><strong id="lsc-selected"></strong><button type="button" id="lsc-prepare" class="button button-primary" disabled><?php esc_html_e('Prepare selected photos', 'lavka-product-media-upload'); ?></button><button type="button" id="lsc-clear" class="button"><?php esc_html_e('Clear selection', 'lavka-product-media-upload'); ?></button></div>

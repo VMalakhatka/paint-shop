@@ -2080,3 +2080,11 @@ msgstr ""
 #: inc/class-image-validator.php
 msgid "The SKU contains characters that cannot be used in an image filename."
 msgstr ""
+
+#: inc/supplier-page.php
+msgid "Only products visible on our website"
+msgstr ""
+
+#: inc/supplier-page.php
+msgid "Published products shown in the catalogue or search. Variations follow the parent product. Can be combined with the other filters."
+msgstr ""
