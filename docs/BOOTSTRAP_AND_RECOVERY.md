@@ -219,6 +219,12 @@ filename другим содержимым и не присваивать Woo ba
 
 ## Порядок ввода после восстановления
 
+Для частичной Flyway V16 и несовпадающих live/staging movement snapshot таблиц
+используйте [проверенный runtime-порядок](JAVA_DOCKER_RUNTIME.md#контролируемое-восстановление-v16)
+и [проверку бизнес-результата](OPERATIONS_RUNBOOK.md#восстановление-production-после-частичной-v16).
+Production recovery подтверждено 2026-09-21 на уровне миграции и runtime;
+возврат старого контейнера не отменяет DDL, а успешный health не заменяет снимок.
+
 1. Инфраструктура, DNS/TLS, storage и базы.
 2. MSSQL/Folio read-only connectivity.
 3. Java в safe/read-only режиме.

@@ -6401,3 +6401,35 @@ msgstr "Выберите источник минимального запаса 
 #: inc/purchase-planning.php inc/purchase-planning-model.php
 msgid "The minimum-stock source is unavailable or does not allow ordering. Check its warehouse policy."
 msgstr "Источник минимального запаса недоступен или не разрешает заказ. Проверьте политику склада."
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Stock for purchase planning"
+msgstr "Запас для расчёта заказа"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Reserved for internal transfers"
+msgstr "Резерв на внутренние перемещения"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Internal transfer accounts"
+msgstr "Счета внутренних перемещений"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Rebuild warehouse snapshots with the updated Java backend to capture internal reservations."
+msgstr "Обновите Java и сформируйте новые снимки складов для учёта внутренних резервов."
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Internal reservations exceed the reserved stock. Check the source snapshot before ordering."
+msgstr "Внутренние резервы превышают зарезервированный запас. Проверьте исходный снимок перед заказом."
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Other confirmed incoming orders, excluding transit and internal transfers"
+msgstr "Другие подтверждённые поступления без транзита и внутренних перемещений"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "I checked receipt dates and destinations, and excluded transit and internal transfer accounts from other incoming orders."
+msgstr "Я проверил даты и получателей поступлений и исключил транзит и счета внутренних перемещений из других поступлений."
+
+#: inc/purchase-planning.php
+msgid "Internal transfer reserves are added back at the account warehouse, regardless of recipient. Customer reserves stay deducted. Do not add these accounts again as incoming stock."
+msgstr "Резервы внутренних перемещений прибавляются к запасу склада, где находится счёт, независимо от получателя. Клиентские резервы остаются вычтенными. Не добавляйте эти счета повторно как поступления."

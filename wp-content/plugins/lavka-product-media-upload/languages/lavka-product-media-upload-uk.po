@@ -1706,3 +1706,638 @@ msgstr "Заповніть шаблон XLSX, не змінюючи заголо
 #: inc/operator-help.php
 msgid "Generate canonical filenames from SKU or barcode."
 msgstr "Генерувати канонічні імена файлів з артикулу або штрихкоду."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The request failed."
+msgstr "Не вдалося виконати запит."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The response was interrupted. Check the catalogue status before retrying."
+msgstr "Відповідь перервалася. Перевірте стан каталогу перед повтором."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+#, php-format
+msgid "Selected photos: %d"
+msgstr "Вибрано фото: %d"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Choose a saved source"
+msgstr "Виберіть збережене джерело"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Updated:"
+msgstr "Оновлено:"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "products / files"
+msgstr "товарів / файлів"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The catalogue has not been loaded yet."
+msgstr "Каталог ще не завантажено."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Reading catalogue… processed:"
+msgstr "Читання каталогу… оброблено:"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "All"
+msgstr "Усі"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "An administrator needs to add a supplier source first."
+msgstr "Спочатку адміністратор має додати джерело постачальника."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "No items match these filters. Load a catalogue or change the filters."
+msgstr "Немає результатів за цими фільтрами. Завантажте каталог або змініть фільтри."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+#, php-format
+msgid "Page %1$d of %2$d"
+msgstr "Сторінка %1$d з %2$d"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The image is unavailable or unsupported."
+msgstr "Зображення недоступне або не підтримується."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Our product and current photos"
+msgstr "Наш товар і поточні фото"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Current product photo"
+msgstr "Поточне фото товару"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "No photos assigned."
+msgstr "Фото не призначено."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Exact SKU on our site"
+msgstr "Точний артикул на нашому сайті"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Confirm product match"
+msgstr "Підтвердити відповідність товару"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+#, php-format
+msgid "Use our product %s for this supplier item? Check the colour, volume and packaging."
+msgstr "Використати наш товар %s для цієї позиції? Перевірте колір, об’єм та упаковку."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Supplier materials"
+msgstr "Матеріали постачальника"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Video reference. Open it at the source; it is not uploaded as a product photo."
+msgstr "Відеоматеріал. Відкрийте його у джерелі; він не завантажується як фото товару."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Open video"
+msgstr "Відкрити відео"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Select photo"
+msgstr "Вибрати фото"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Image role"
+msgstr "Роль зображення"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Choose a role"
+msgstr "Виберіть роль"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Main image"
+msgstr "Головне зображення"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Gallery"
+msgstr "Галерея"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Gallery position"
+msgstr "Позиція в галереї"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Confirm our product before selecting its photos."
+msgstr "Підтвердьте наш товар перед вибором його фото."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Supplier product information"
+msgstr "Інформація постачальника про товар"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Supplier price (reference only)"
+msgstr "Ціна постачальника (для довідки)"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "No description provided."
+msgstr "Опис не надано."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Catalogue refreshed. Our product data and images have not been changed."
+msgstr "Каталог оновлено. Дані та зображення наших товарів не змінено."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Source saved. You can now load its catalogue."
+msgstr "Джерело збережено. Тепер можна завантажити його каталог."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Select an XML file first."
+msgstr "Спочатку виберіть XML-файл."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+#, php-format
+msgid "Select up to %d photos per batch."
+msgstr "Виберіть до %d фото для одного пакета."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Choose a role for every selected photo and a positive gallery position."
+msgstr "Виберіть роль для кожного фото та додатну позицію в галереї."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+#, php-format
+msgid "Downloading photo %1$d of %2$d…"
+msgstr "Завантаження фото %1$d з %2$d…"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The selected files exceed the upload limit. Choose a smaller batch."
+msgstr "Вибрані файли перевищують ліміт завантаження. Зменште пакет."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Files and registry are prepared below. Run the mandatory check, review its results, then confirm upload."
+msgstr "Файли та реєстр підготовлено нижче. Запустіть обов’язкову перевірку, перегляньте результат і підтвердьте завантаження."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Unique barcode match"
+msgstr "Унікальний збіг штрихкоду"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Exact SKU match"
+msgstr "Точний збіг артикулу"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Manually confirmed match"
+msgstr "Відповідність підтверджено вручну"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Ambiguous identifiers — confirm manually"
+msgstr "Неоднозначні ідентифікатори — підтвердьте вручну"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Product match needed"
+msgstr "Потрібна відповідність товару"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Product element"
+msgstr "Елемент товару"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Supplier product ID"
+msgstr "ID товару постачальника"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Supplier SKU"
+msgstr "Артикул постачальника"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Brand"
+msgstr "Бренд"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Category"
+msgstr "Категорія"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Description"
+msgstr "Опис"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Image URLs"
+msgstr "Посилання на фото"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Price"
+msgstr "Ціна"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Supplier catalogues"
+msgstr "Каталоги постачальників"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Access denied."
+msgstr "Доступ заборонено."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "SUPPLIER MEDIA"
+msgstr "МАТЕРІАЛИ ПОСТАЧАЛЬНИКІВ"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Find our products, compare photos and prepare a checked image batch."
+msgstr "Знаходьте наші товари, порівнюйте фото та готуйте пакет зображень до перевірки."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Choose a source"
+msgstr "Виберіть джерело"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Match our products"
+msgstr "Зіставте наші товари"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Select photos"
+msgstr "Виберіть фото"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Check and upload"
+msgstr "Перевірте й завантажте"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Supplier or media folder"
+msgstr "Постачальник або папка матеріалів"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Refresh catalogue"
+msgstr "Оновити каталог"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Open source"
+msgstr "Відкрити джерело"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Upload a saved XML file"
+msgstr "Завантажити збережений XML-файл"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "If the supplier blocks automatic downloading, save the XML in your browser and select it here. Maximum: 60 MiB and the server upload limit."
+msgstr "Якщо постачальник блокує автоматичне завантаження, збережіть XML у браузері та виберіть його тут. Максимум: 60 МіБ та ліміт сервера."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "XML catalogue file"
+msgstr "XML-файл каталогу"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Read selected XML"
+msgstr "Прочитати вибраний XML"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Configure sources"
+msgstr "Налаштувати джерела"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Save a supplier once. XML field mapping can be adjusted for each format. Drive folders require a server API key for automatic reading."
+msgstr "Збережіть постачальника один раз. Відповідність полів XML можна налаштувати для кожного формату. Для автоматичного читання папок Drive потрібен API-ключ на сервері."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Source name"
+msgstr "Назва джерела"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Source type"
+msgstr "Тип джерела"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Source URL"
+msgstr "Посилання на джерело"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Supplier SKUs exactly match our SKUs. Also allow SKU matching."
+msgstr "Артикули постачальника точно збігаються з нашими. Дозволити також зіставлення за артикулом."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "XML field mapping"
+msgstr "Відповідність полів XML"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Save source"
+msgstr "Зберегти джерело"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Add another source"
+msgstr "Додати інше джерело"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Name, supplier SKU, barcode or a list of supplier SKUs"
+msgstr "Назва, артикул постачальника, штрихкод або список артикулів постачальника"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Show"
+msgstr "Показати"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "All supplier products"
+msgstr "Усі товари постачальника"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Matched to our products"
+msgstr "Зіставлені з нашими товарами"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Our products without a main photo"
+msgstr "Наші товари без головного фото"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Need a product match"
+msgstr "Потрібно зіставити товар"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Find products"
+msgstr "Знайти товари"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Prepare selected photos"
+msgstr "Підготувати вибрані фото"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Clear selection"
+msgstr "Очистити вибір"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Catalogue pages"
+msgstr "Сторінки каталогу"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Previous"
+msgstr "Назад"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Next"
+msgstr "Далі"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "How to choose photos safely"
+msgstr "Як правильно вибирати фото"
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Compare the exact product, colour, volume and packaging. The first supplier photo is not automatically the main image. Select its role explicitly."
+msgstr "Звірте конкретний товар, колір, об’єм та упаковку. Перше фото постачальника не стає головним автоматично. Виберіть його роль."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "A barcode match must be unique. For ambiguous matches or lifestyle photos, confirm the exact SKU of our product. Saved manual matches are reused when the supplier ID stays the same."
+msgstr "Збіг штрихкоду має бути унікальним. Для неоднозначних відповідностей або атмосферних фото підтвердьте точний артикул нашого товару. Ручні відповідності зберігаються, якщо ID постачальника не змінюється."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Existing photos remain visible for comparison. Identical files can be reused; different content under an occupied filename is blocked by the image checker."
+msgstr "Поточні фото видно для порівняння. Однакові файли можна використати повторно; інший вміст під зайнятим іменем блокується перевіркою."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Prices and descriptions are supplier reference information. Catalogue refresh does not update our products. Videos open at the source and are not sent to the image uploader."
+msgstr "Ціни та описи — довідкова інформація постачальника. Оновлення каталогу не змінює наші товари. Відео відкриваються у джерелі та не передаються в завантажувач зображень."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Use element names separated by / or | for field mapping."
+msgstr "Для налаштування полів використовуйте назви елементів із роздільниками / або вертикальною рискою."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The product element must be a single XML element name."
+msgstr "Елемент товару має бути однією назвою XML-елемента."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The server needs XMLReader and DOM support."
+msgstr "На сервері потрібна підтримка XMLReader і DOM."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The XML file is empty or exceeds 60 MiB."
+msgstr "XML-файл порожній або перевищує 60 МіБ."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "XML with DTD or entities is not supported."
+msgstr "XML із DTD або сутностями не підтримується."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The catalogue exceeds 100,000 products."
+msgstr "Каталог перевищує 100 000 товарів."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Every product needs a unique supplier ID, SKU or barcode. Check the field mapping."
+msgstr "Кожен товар повинен мати унікальний ID, артикул або штрихкод постачальника. Перевірте відповідність полів."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The XML is incomplete or malformed. The previous catalogue has been retained."
+msgstr "XML неповний або пошкоджений. Попередній каталог збережено."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "No products found. Check the product element and field mapping."
+msgstr "Товари не знайдено. Перевірте елемент товару та відповідність полів."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Use a public HTTP or HTTPS URL without embedded credentials."
+msgstr "Використайте публічне HTTP- або HTTPS-посилання без вбудованого логіна й пароля."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The supplier could not be reached. Try again later or upload a saved XML file."
+msgstr "Постачальник недоступний. Спробуйте пізніше або завантажте збережений XML-файл."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The supplier refused the download. Open the source in your browser or upload a saved XML file."
+msgstr "Постачальник відхилив завантаження. Відкрийте джерело у браузері або завантажте збережений XML-файл."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The downloaded file is empty or too large."
+msgstr "Завантажений файл порожній або завеликий."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Select a saved supplier."
+msgstr "Виберіть збереженого постачальника."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Only an administrator can configure supplier sources."
+msgstr "Налаштовувати джерела постачальників може лише адміністратор."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Use a Google Drive folder link."
+msgstr "Використайте посилання на папку Google Drive."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Enter the supplier name."
+msgstr "Введіть назву постачальника."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Enter an exact SKU of an existing product on our site."
+msgstr "Введіть точний артикул наявного товару на нашому сайті."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "This catalogue is already being refreshed. Check its status before retrying."
+msgstr "Цей каталог уже оновлюється. Перевірте його стан перед повтором."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The XML upload failed or exceeds 60 MiB."
+msgstr "Не вдалося завантажити XML або він перевищує 60 МіБ."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The catalogue could not be saved. The previous version has been retained."
+msgstr "Не вдалося зберегти каталог. Попередню версію збережено."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The catalogue changed. Reload the list and select the images again."
+msgstr "Каталог змінився. Оновіть список і виберіть зображення повторно."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The image is unavailable or unsupported. Open the supplier source to check it."
+msgstr "Зображення недоступне або не підтримується. Перевірте його у джерелі постачальника."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Select a small batch of up to 20 images (or the server file limit)."
+msgstr "Виберіть невеликий пакет до 20 зображень (або ліміту файлів сервера)."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The product match changed. Refresh the catalogue or confirm the exact SKU again."
+msgstr "Відповідність товару змінилася. Оновіть каталог або знову підтвердьте точний артикул."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "The matched product needs an exact SKU."
+msgstr "Зіставлений товар повинен мати точний артикул."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Choose a valid image role and gallery position. Variations support a main image only."
+msgstr "Виберіть правильну роль зображення та позицію в галереї. Варіації підтримують лише головне зображення."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Use one main image and unique gallery positions for each product."
+msgstr "Для кожного товару використовуйте одне головне зображення та унікальні позиції галереї."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Automatic Drive reading needs a server Google Drive API key. Open the folder and use the image uploader for downloaded photos meanwhile."
+msgstr "Для автоматичного читання Drive потрібен API-ключ Google Drive на сервері. Поки що відкрийте папку та скористайтеся завантажувачем для збережених фото."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Use / for nested elements and | for alternatives. Namespace prefixes are optional. Product element: offer for YML, item for Google RSS feeds."
+msgstr "Використовуйте / для вкладених елементів і вертикальну риску для альтернатив. Префікси просторів імен необов’язкові. Елемент товару: offer для YML, item для Google RSS."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Refresh this catalogue daily without publishing product changes."
+msgstr "Оновлювати цей каталог щодня без публікації змін товарів."
+
+
+#: inc/class-supplier-catalog.php inc/class-supplier-feed.php inc/supplier-page.php inc/supplier-strings.php
+msgid "Upload photos downloaded to your computer"
+msgstr "Завантажити фото, збережені на комп’ютері"

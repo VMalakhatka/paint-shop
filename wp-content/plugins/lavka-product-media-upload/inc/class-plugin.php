@@ -58,9 +58,9 @@ final class Plugin
         );
     }
 
-    public function enqueue_assets(string $hook): void
+    public function enqueue_assets(string $hook, bool $embedded = false): void
     {
-        if ($hook !== $this->page_hook) {
+        if (!$embedded && $hook !== $this->page_hook) {
             return;
         }
 
@@ -213,6 +213,7 @@ final class Plugin
                 <?php echo esc_html__('Check the XLS/XLSX registry, then upload approved images and synchronize OVH/S3, Folio and WooCommerce in one controlled operation.', 'lavka-product-media-upload'); ?>
             </p>
 
+            <p><a href="<?php echo esc_url(admin_url('upload.php?page=lavka-supplier-catalogs')); ?>"><?php echo esc_html__('Supplier catalogues', 'lavka-product-media-upload'); ?></a></p>
             <?php require __DIR__ . '/operator-help.php'; ?>
 
             <?php if (!\lpmu_writes_enabled()) : ?>

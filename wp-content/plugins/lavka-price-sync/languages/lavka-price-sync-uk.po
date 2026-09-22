@@ -6385,3 +6385,35 @@ msgstr "Виберіть джерело мінімального запасу с
 #: inc/purchase-planning.php inc/purchase-planning-model.php
 msgid "The minimum-stock source is unavailable or does not allow ordering. Check its warehouse policy."
 msgstr "Джерело мінімального запасу недоступне або не дозволяє замовлення. Перевірте політику складу."
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Stock for purchase planning"
+msgstr "Запас для розрахунку замовлення"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Reserved for internal transfers"
+msgstr "Резерв на внутрішні переміщення"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Internal transfer accounts"
+msgstr "Рахунки внутрішніх переміщень"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Rebuild warehouse snapshots with the updated Java backend to capture internal reservations."
+msgstr "Оновіть Java та сформуйте нові знімки складів для врахування внутрішніх резервів."
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Internal reservations exceed the reserved stock. Check the source snapshot before ordering."
+msgstr "Внутрішні резерви перевищують зарезервований запас. Перевірте вихідний знімок перед замовленням."
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Other confirmed incoming orders, excluding transit and internal transfers"
+msgstr "Інші підтверджені надходження без транзиту та внутрішніх переміщень"
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "I checked receipt dates and destinations, and excluded transit and internal transfer accounts from other incoming orders."
+msgstr "Я перевірив дати й отримувачів надходжень та виключив транзит і рахунки внутрішніх переміщень з інших надходжень."
+
+#: inc/purchase-planning.php
+msgid "Internal transfer reserves are added back at the account warehouse, regardless of recipient. Customer reserves stay deducted. Do not add these accounts again as incoming stock."
+msgstr "Резерви внутрішніх переміщень додаються до запасу складу, де знаходиться рахунок, незалежно від отримувача. Клієнтські резерви залишаються віднятими. Не додавайте ці рахунки повторно як надходження."

@@ -182,3 +182,75 @@ or trigger uploads or synchronization. Deploy the changed templates and language
 catalogs together; no activation or database migration is required for an active
 plugin. Rollback restores those files together. Live admin rendering must be checked
 after deployment.
+
+## Supplier catalogues (0.4.0)
+
+Owner: this plugin. `SupplierFeed` streams bounded XML with XMLReader/DOM; fields
+are plain element paths, not XPath. Entities/custom DTDs are rejected. The exact
+inert YML `shops.dtd` declaration is accepted with DTD loading/substitution disabled.
+`SupplierCatalog` owns the Media → Supplier catalogues admin page and staging only.
+Human workflow: [media manager guide](../../../docs/MEDIA_MANAGER_GUIDE_UK.md#каталоги-постачальників-xml-і-папки-google-drive).
+
+Capability: existing `lavka_product_media_upload_capability` + `upload_files`.
+Configuring sources additionally requires `manage_options`. AJAX and image proxy
+requests require nonces. Source URLs are not returned to non-admins, except Drive
+folder links. No anonymous routes. Browser previews/downloads use an authenticated
+bounded server proxy. HTTP(S) destinations and each redirect must resolve to public
+addresses; credential headers are never forwarded on redirects. Photos are limited
+to JPEG/PNG/WebP and 10 MiB (or a lower validator limit). Temporary downloads are
+removed after each request; there is no permanent mirror of the supplier media bank.
+
+State/lifecycle:
+
+- `lpmu_supplier_sources`: non-autoloaded private source configuration, XML mapping,
+  SKU-match opt-in and daily flag. Do not commit personal feed URLs or credentials.
+- `{prefix}lpmu_supplier_items`: separate catalogue snapshots with generation,
+  external ID hash, reference metadata, match projection and manual SKU. Created
+  lazily on an authenticated catalogue AJAX call with `dbDelta`; schema version
+  `lpmu_supplier_schema=1`. No product tables are altered.
+- Per-source `lpmu_supplier_active_*`, `lpmu_supplier_status_*`,
+  `lpmu_supplier_import_*`: non-autoloaded snapshot, progress and 15-minute import
+  lease. A failed import (including a failed active-pointer write) retains the old active snapshot; successful import removes
+  superseded staging rows. Match filters are projections from the last import;
+  registry creation rechecks the live exact match. Manual corrections are retained
+  across consecutive snapshots with the same supplier ID.
+- Optional `lpmu_supplier_daily` WP-Cron event refreshes staging only. Scheduled imports read only the saved URL, never ambient HTTP upload globals. Disabled by
+  default; saved configuration controls scheduling. Deactivation unschedules events,
+  retains configuration/table/media. Re-save a source to restore its schedule after
+  reactivation. Status is visible on the catalogue page; no automatic notifications.
+- `LPMU_GOOGLE_DRIVE_API_KEY`: optional production/local config constant outside Git,
+  server only; restrict to Drive API and server usage. Drive reader paginates public
+  folder metadata recursively, bounded to 200 folders/10,000 image/video files/500 API pages.
+  Access/resource-key restrictions can require supplier assistance. No OAuth flow,
+  private Drive account access, video ingestion or video product assignment.
+
+Selecting up to min(20, `max_file_uploads` - 1) photos downloads validated MIME blobs
+into the browser, generates a text-typed XLSX with **our** exact SKUs, then populates
+the existing uploader inputs. The original multipart upload checks, fingerprint,
+lock, S3 proof, Folio preview/apply and Woo workflow are unchanged. There is no
+trusted-local-file bypass and no direct remote-URL product assignment. A manager
+must run the existing dry run and confirm the full upload. Reference prices,
+descriptions/attributes are displayed as text and never written to products.
+
+Deploy with plugin assets/translations together (already in the deploy manifest).
+No reactivation is required. First admin use creates the staging table; configure
+sources in the UI or an administrator-only provisioning step. Back up plugin files
+and source options/table before upgrade. Rollback restores plugin files together and
+clears `lpmu_supplier_daily` scheduled hooks; keep staged data for investigation.
+Do not uninstall/delete media or revert product/Folio data as part of this rollback.
+
+Validation:
+
+```sh
+php wp-content/plugins/lavka-product-media-upload/tests/supplier-feed-test.php
+# Optionally pass a local XML path outside Git for a real-feed parse.
+# Local/development WordPress only, with Woo + uploader dependencies loaded:
+wp eval-file wp-content/plugins/lavka-product-media-upload/tests/supplier-wordpress-test.php
+```
+
+The WP integration test only creates temporary catalogue rows/options, removes them
+in `finally`, checks registry generation and snapshot recovery, and never calls the
+media upload/apply endpoint. The schema table remains installed locally.
+Artizo actual schema and Drive real API reading are unverified until access is
+provided; a failed HTTP response is not an imported catalogue. See the dated human
+guide for acceptance evidence and source-specific limitations.

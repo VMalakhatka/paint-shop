@@ -6182,3 +6182,35 @@ msgstr ""
 #: inc/purchase-planning.php inc/purchase-planning-model.php
 msgid "The minimum-stock source is unavailable or does not allow ordering. Check its warehouse policy."
 msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Stock for purchase planning"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Reserved for internal transfers"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Internal transfer accounts"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Rebuild warehouse snapshots with the updated Java backend to capture internal reservations."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Internal reservations exceed the reserved stock. Check the source snapshot before ordering."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "Other confirmed incoming orders, excluding transit and internal transfers"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-planning-model.php
+msgid "I checked receipt dates and destinations, and excluded transit and internal transfer accounts from other incoming orders."
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Internal transfer reserves are added back at the account warehouse, regardless of recipient. Customer reserves stay deducted. Do not add these accounts again as incoming stock."
+msgstr ""
