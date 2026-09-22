@@ -787,6 +787,7 @@ final class ImageValidator
         $mapping = (array) apply_filters('lavka_product_media_upload_sku_prefix_map', [
             'Ж' => 'g',
             'РСУ' => 'rcy',
+            'КЦМ-' => 'kcm-',
         ]);
 
         $stem = $identifier;

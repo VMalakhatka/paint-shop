@@ -50,6 +50,8 @@ P-296-010 gallery 1  -> p-296-010_2.jpg
 P-296-010 gallery 2  -> p-296-010_3.jpg
 Ж-AS-001 main        -> g-as-001.jpg
 РСУ-94100610 main    -> rcy-94100610.jpg
+КЦМ-IT274 main      -> kcm-it274.jpg
+КЦМ-IT274 gallery 2 -> kcm-it274_3.jpg
 ```
 
 Unknown non-ASCII SKU prefixes are rejected instead of guessed.
@@ -254,3 +256,8 @@ media upload/apply endpoint. The schema table remains installed locally.
 Artizo actual schema and Drive real API reading are unverified until access is
 provided; a failed HTTP response is not an imported catalogue. See the dated human
 guide for acceptance evidence and source-specific limitations.
+
+The explicit `КЦМ-` → `kcm-` filename mapping was confirmed against assigned
+production media on 2026-09-22. It changes the generated filename only, never the
+product/Folio SKU. Nonstandard existing filenames remain unchanged; normal conflict
+and content checks still apply. Unknown prefixes and non-ASCII suffixes stay blocked.
