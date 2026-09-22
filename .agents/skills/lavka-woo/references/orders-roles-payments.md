@@ -44,6 +44,17 @@ Woo role -> lps_role_contract_map -> Folio contract
 
 ## Заказ -> ФОЛИО
 
+Checkout incident, production 2026-09-22: ошибка
+`ExternalShipmentStore::submit()` в NP-плагине может прервать
+`woocommerce_checkout_order_created` уже после сохранения Woo-заказа, но до
+`woocommerce_checkout_order_processed` и отправки в ФОЛИО. При `pending` без
+`_folio_auto_status` сначала проверять PHP fatal log и сторонние checkout hooks,
+а не повторять Java create. Отсутствующий `_pnpm_external_plan` возвращает `''`;
+каст `(array)` создаёт непустой массив и небезопасен. Исправление и регрессионные
+тесты принадлежат NP-плагину. Восстановление требует отдельного разрешения,
+проверки дублей и сохранённого stable preview/apply payload; отменённые попытки
+не восстанавливать вместе с выбранным заказом.
+
 1. Woo order собирает client/header/items/allocation plan.
 2. Preview всегда отправляет `preview_only=true` в Java `/admin/folio/order-accounts`.
 3. Java распределяет по Folio warehouses и возвращает `documents[]`, warnings/errors.

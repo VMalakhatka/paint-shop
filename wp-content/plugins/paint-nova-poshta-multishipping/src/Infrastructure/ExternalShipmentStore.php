@@ -12,9 +12,18 @@ final class ExternalShipmentStore
     public function submit(WC_Order $order): void
     {
         global $wpdb;
-        $plan = (array) $order->get_meta('_pnpm_external_plan', true);
-        if (!$plan) {
+        $plan = $order->get_meta('_pnpm_external_plan', true);
+        if ($plan === '' || $plan === null || $plan === []) {
             return;
+        }
+        if (!is_array($plan)) {
+            throw new \RuntimeException(__('Review the customer TTN fields before placing the order.', 'paint-nova-poshta-multishipping'));
+        }
+        foreach ($plan as $parcel) {
+            if (!is_array($parcel) || !isset($parcel['location_id'], $parcel['ttn'], $parcel['label'], $parcel['items'])
+                || !is_array($parcel['items'])) {
+                throw new \RuntimeException(__('Review the customer TTN fields before placing the order.', 'paint-nova-poshta-multishipping'));
+            }
         }
         $lock = 'pnpm_order_' . $order->get_id();
         if ((int) $wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s, 5)', $lock)) !== 1) {

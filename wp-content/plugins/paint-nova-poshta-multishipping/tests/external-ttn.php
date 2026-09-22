@@ -46,6 +46,24 @@ try {
     WC()->session->set('chosen_shipping_methods', [Policy::RATE]);
     WC()->session->set('order_awaiting_payment', 0);
     $checkout = new ExternalTtnCheckout(); $store = new ExternalShipmentStore(); $repo = new ShipmentRepository(); $panel = new ExternalTtnPanel();
+    $ordinary = new WC_Order();
+    $ordinary->set_created_via('pnpm-local-test');
+    $ordinary->set_status('pending');
+    $ordinary->save();
+    $orders[] = $ordinary->get_id();
+    foreach (['', [], null] as $empty_plan) {
+        $ordinary->update_meta_data('_pnpm_external_plan', $empty_plan);
+        $checkout->persist($ordinary);
+        $assert(!$repo->findByOrder($ordinary->get_id()), 'Empty plan creates no shipments');
+    }
+    foreach (['broken', [''], [['location_id' => 901]]] as $invalid_plan) {
+        $ordinary->update_meta_data('_pnpm_external_plan', $invalid_plan);
+        $reject(fn() => $checkout->persist($ordinary));
+        $assert(!$repo->findByOrder($ordinary->get_id()), 'Malformed plan creates no shipments');
+    }
+    $ordinary->delete_meta_data('_pnpm_external_plan');
+    do_action('woocommerce_checkout_order_created', $ordinary);
+    $assert(!$repo->findByOrder($ordinary->get_id()), 'Ordinary checkout-created hook completes without TTN');
     $assert(Policy::allowed(), 'Wholesale allowed');
     $rates = $checkout->rates([], ['destination' => ['country' => 'UA']]);
     $assert(isset($rates[Policy::RATE]) && (float) $rates[Policy::RATE]->get_cost() === 0.0, 'Zero local shipping charge');

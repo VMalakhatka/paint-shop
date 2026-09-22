@@ -143,3 +143,13 @@ wp plugin status paint-nova-poshta-multishipping
 ```
 
 Після активації відкрити Лавка → Лавка: налаштування → Лавка: Нова пошта. Без API-ключа read-only перевірка повинна показати зрозумілу помилку; створення ТТН відсутнє.
+# Checkout recovery: absent external TTN plan
+
+Verified 2026-09-22: `ExternalShipmentStore::submit()` treats missing/empty
+`_pnpm_external_plan` as no external shipment and returns before acquiring a
+database lock. Do not cast missing Woo meta to an array: `(array) ''` is `['']`,
+not an empty array. Non-empty malformed plans are rejected before transaction
+work using the existing checkout validation message. Ordinary delivery does not
+require a customer TTN. The local `tests/external-ttn.php` suite covers empty
+meta, malformed records, the ordinary checkout-created hook, real synthetic
+multi-parcel persistence and idempotent retries; HTTP and email are intercepted.
