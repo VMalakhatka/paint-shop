@@ -5,7 +5,7 @@ if (!defined('ABSPATH')) exit;
 final class PSU_Category_Menu {
     const PAGE_SIZE = 30;
     const INITIAL_LIMIT = 60;
-    const VERSION = '1.3.1';
+    const VERSION = '1.3.2';
     private static $legacy_used = false;
     private static $dirty = false;
 
@@ -82,7 +82,7 @@ final class PSU_Category_Menu {
         return 'psu_cm_' . md5(wp_json_encode([
             self::VERSION, $kind, get_current_blog_id(), get_locale(), home_url('/'),
             get_option('psu_category_menu_version', '1'), get_option('woocommerce_permalinks'),
-            get_option('permalink_structure'), $parts,
+            get_option('permalink_structure'), self::excluded(), $parts,
         ]));
     }
 
@@ -96,32 +96,47 @@ final class PSU_Category_Menu {
             "SELECT term_id, parent, count FROM {$wpdb->term_taxonomy} WHERE taxonomy = %s", 'product_cat'
         ));
         if ($wpdb->last_error) return new WP_Error('category_query', __('Categories could not be loaded.', 'paint-shop-ux'));
-        $index = self::build_index($rows);
+        $index = self::build_index($rows, self::excluded());
         if (!self::$dirty) set_transient($key, $index, HOUR_IN_SECONDS);
         return $index;
     }
-    public static function build_index($rows) {
-        $parents = []; $children = []; $visible = [];
+    public static function excluded() {
+        $ids = get_option('psu_category_menu_excluded', []);
+        return is_array($ids) ? array_values(array_unique(array_filter(array_map('absint', array_filter($ids, 'is_scalar'))))) : [];
+    }
+    public static function build_index($rows, $excluded = []) {
+        $parents = []; $children = []; $visible = []; $blocked = [];
         foreach ($rows as $row) {
             $id = (int) $row->term_id;
             $parents[$id] = (int) $row->parent;
             $children[(int) $row->parent][] = $id;
         }
+        $todo = $excluded;
+        while ($todo) {
+            $id = (int) array_pop($todo);
+            if (isset($blocked[$id]) || !isset($parents[$id])) continue;
+            $blocked[$id] = true;
+            foreach ($children[$id] ?? [] as $child) $todo[] = $child;
+        }
         foreach ($rows as $row) {
-            if ((int) $row->count < 1) continue;
+            if ((int) $row->count < 1 || isset($blocked[(int) $row->term_id])) continue;
             $id = (int) $row->term_id;
             while ($id && isset($parents[$id]) && !isset($visible[$id])) {
                 $visible[$id] = true;
                 $id = $parents[$id];
             }
         }
-        return ['parents' => $parents, 'children' => $children, 'visible' => $visible];
+        return ['parents' => $parents, 'children' => $children, 'visible' => $visible, 'blocked' => $blocked];
+    }
+    private static function allowed($id, $config, $index) {
+        return isset($index['parents'][$id]) && !isset($index['blocked'][$id])
+            && (empty($config['hide_empty']) || isset($index['visible'][$id]));
     }
     private static function children($parent, $config, $index) {
         $ids = $index['children'][$parent] ?? [];
-        return $config['hide_empty'] ? array_values(array_filter($ids, static function ($id) use ($index) {
-            return isset($index['visible'][$id]);
-        })) : $ids;
+        return array_values(array_filter($ids, static function ($id) use ($index, $config) {
+            return self::allowed($id, $config, $index);
+        }));
     }
     public static function path($id, $index) {
         $path = [];
@@ -132,6 +147,8 @@ final class PSU_Category_Menu {
         return array_reverse(array_values($path));
     }
     private static function node($term, $config, $index) {
+        // The active-page pin must obey the same visibility rules as paginated branches.
+        if (!self::allowed($term->term_id, $config, $index)) return null;
         $url = class_exists('PCQO_Category_Links') ? PCQO_Category_Links::catalogue_url($term) : get_term_link($term);
         if (is_wp_error($url)) return null;
         return [
@@ -148,7 +165,7 @@ final class PSU_Category_Menu {
         if (is_array($cached)) return $cached;
         $index = self::index();
         if (is_wp_error($index)) return $index;
-        if ($parent && (!isset($index['parents'][$parent]) || ($config['hide_empty'] && !isset($index['visible'][$parent])))) {
+        if ($parent && !self::allowed($parent, $config, $index)) {
             return new WP_Error('category_missing', __('Category not found.', 'paint-shop-ux'), ['status' => 404]);
         }
         $ids = self::children($parent, $config, $index);

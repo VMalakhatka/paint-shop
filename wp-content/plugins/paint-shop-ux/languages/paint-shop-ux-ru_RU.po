@@ -124,3 +124,21 @@ msgstr "Товаров на странице"
 
 msgid "Show:"
 msgstr "Показывать:"
+
+msgid "Invalid category selection."
+msgstr "Некорректный выбор категорий."
+
+msgid "Category settings could not be saved."
+msgstr "Не удалось сохранить настройки категорий."
+
+msgid "Hidden categories"
+msgstr "Скрытые категории"
+
+msgid "Always hide categories and their subcategories"
+msgstr "Всегда скрывать категории и их подкатегории"
+
+msgid "Search categories"
+msgstr "Поиск категорий"
+
+msgid "Save changes"
+msgstr "Сохранить изменения"

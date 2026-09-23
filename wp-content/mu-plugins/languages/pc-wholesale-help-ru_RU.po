@@ -847,3 +847,6 @@ msgstr "На телефоне откройте «Дополнительные ф
 
 msgid "Compact catalogue on a phone"
 msgstr "Компактный каталог на телефоне"
+
+msgid "Empty branches and categories hidden by the shop do not appear in the menu. Parents remain when their available subcategories contain products. Out-of-stock products do not make a category empty."
+msgstr "Пустые ветки и категории, скрытые магазином, не показываются в меню. Родительские категории остаются, если товары есть в их доступных подкатегориях. Товары без наличия не делают категорию пустой."

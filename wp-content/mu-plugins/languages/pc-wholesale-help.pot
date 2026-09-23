@@ -816,3 +816,6 @@ msgstr ""
 
 msgid "Compact catalogue on a phone"
 msgstr ""
+
+msgid "Empty branches and categories hidden by the shop do not appear in the menu. Parents remain when their available subcategories contain products. Out-of-stock products do not make a category empty."
+msgstr ""

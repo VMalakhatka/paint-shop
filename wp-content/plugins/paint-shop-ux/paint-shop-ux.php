@@ -11,6 +11,7 @@ if (!defined('ABSPATH')) exit;
 
 require_once __DIR__ . '/inc/category-menu.php';
 require_once __DIR__ . '/inc/category-widget.php';
+require_once __DIR__ . '/inc/category-menu-visibility.php';
 require_once __DIR__ . '/inc/category-menu-migration.php';
 require_once __DIR__ . '/inc/slw-assets.php';
 

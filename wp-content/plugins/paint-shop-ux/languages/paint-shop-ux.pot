@@ -209,3 +209,21 @@ msgid "Shown in product grid only."
 msgstr ""
 msgid "Products per page"
 msgstr ""
+
+msgid "Invalid category selection."
+msgstr ""
+
+msgid "Category settings could not be saved."
+msgstr ""
+
+msgid "Hidden categories"
+msgstr ""
+
+msgid "Always hide categories and their subcategories"
+msgstr ""
+
+msgid "Search categories"
+msgstr ""
+
+msgid "Save changes"
+msgstr ""

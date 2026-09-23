@@ -130,6 +130,7 @@ final class PSU_Category_Menu_Migration {
         echo '<div class="wrap"><h1>' . esc_html__('Lavka categories', 'paint-shop-ux') . '</h1>';
         if ($result !== null || (!empty($_GET['saved']) && $saved)) echo '<div class="notice ' . (is_wp_error($result) ? 'notice-error' : 'notice-success') . '"><p>' . esc_html(is_wp_error($result) ? $result->get_error_message() : __('Category menu settings saved.', 'paint-shop-ux')) . '</p></div>';
         echo '<p><a href="' . esc_url(admin_url('widgets.php')) . '">' . esc_html__('Edit widgets', 'paint-shop-ux') . '</a></p>';
+        PSU_Category_Menu_Visibility::form();
         echo '<table class="widefat striped"><thead><tr><th>' . esc_html__('Current widget', 'paint-shop-ux') . '</th><th>' . esc_html__('Replacement', 'paint-shop-ux') . '</th></tr></thead><tbody>';
         foreach ($plan['replacements'] as $row) echo '<tr><td>' . esc_html($row['from']) . '</td><td>' . esc_html($row['to']) . '</td></tr>';
         if (!$plan['replacements']) echo '<tr><td colspan="2">' . esc_html__('No category widgets to migrate.', 'paint-shop-ux') . '</td></tr>';
