@@ -5,7 +5,7 @@ if (!defined('ABSPATH')) exit;
 final class PSU_Category_Menu {
     const PAGE_SIZE = 30;
     const INITIAL_LIMIT = 60;
-    const VERSION = '1.3.2';
+    const VERSION = '1.3.3';
     private static $legacy_used = false;
     private static $dirty = false;
 
@@ -22,6 +22,7 @@ final class PSU_Category_Menu {
         add_action('added_term_meta', [__CLASS__, 'term_meta_changed'], 10, 3);
         add_action('updated_term_meta', [__CLASS__, 'term_meta_changed'], 10, 3);
         add_action('deleted_term_meta', [__CLASS__, 'term_meta_changed'], 10, 3);
+        add_action('set_object_terms', [__CLASS__, 'visibility_changed'], 10, 4);
     }
 
     public static function config($widget_id) {
@@ -62,10 +63,13 @@ final class PSU_Category_Menu {
         return $clauses;
     }
     public static function term_meta_changed($meta_id, $term_id, $key) {
-        if (in_array($key, ['order', 'order_product_cat'], true)) {
+        if (in_array($key, ['order', 'order_product_cat', 'product_count_product_cat'], true)) {
             $term = get_term($term_id, 'product_cat');
             if ($term instanceof WP_Term) self::invalidate([], 'product_cat');
         }
+    }
+    public static function visibility_changed($object_id, $terms, $tt_ids, $taxonomy) {
+        if ($taxonomy === 'product_visibility') self::invalidate([], 'product_cat');
     }
     public static function invalidate($ids = [], $taxonomy = '') {
         if ($taxonomy !== '' && $taxonomy !== 'product_cat') return;
@@ -82,7 +86,7 @@ final class PSU_Category_Menu {
         return 'psu_cm_' . md5(wp_json_encode([
             self::VERSION, $kind, get_current_blog_id(), get_locale(), home_url('/'),
             get_option('psu_category_menu_version', '1'), get_option('woocommerce_permalinks'),
-            get_option('permalink_structure'), self::excluded(), $parts,
+            get_option('permalink_structure'), get_option('woocommerce_hide_out_of_stock_items'), self::excluded(), $parts,
         ]));
     }
 
@@ -92,9 +96,26 @@ final class PSU_Category_Menu {
         $index = self::$dirty ? false : get_transient($key);
         if (is_array($index)) return $index;
         global $wpdb;
-        $rows = $wpdb->get_results($wpdb->prepare(
-            "SELECT term_id, parent, count FROM {$wpdb->term_taxonomy} WHERE taxonomy = %s", 'product_cat'
-        ));
+        $visibility = wc_get_product_visibility_term_ids();
+        $excluded = [$visibility['exclude-from-catalog'] ?? 0];
+        if (get_option('woocommerce_hide_out_of_stock_items') === 'yes') $excluded[] = $visibility['outofstock'] ?? 0;
+        $excluded = implode(',', array_map('absint', $excluded));
+        // Direct catalogue-visible counts, not raw WP counts or Woo's descendant-padded counts.
+        // One aggregate per cache generation also keeps excluded-only parents truly empty.
+        $rows = $wpdb->get_results(
+            "SELECT tt.term_id, tt.parent, COALESCE(c.products, 0) AS count
+             FROM {$wpdb->term_taxonomy} tt
+             LEFT JOIN (
+                 SELECT tr.term_taxonomy_id, COUNT(*) AS products
+                 FROM {$wpdb->term_relationships} tr
+                 INNER JOIN {$wpdb->posts} p ON p.ID = tr.object_id AND p.post_type = 'product' AND p.post_status = 'publish'
+                 INNER JOIN {$wpdb->term_taxonomy} cat ON cat.term_taxonomy_id = tr.term_taxonomy_id AND cat.taxonomy = 'product_cat'
+                 WHERE NOT EXISTS (SELECT 1 FROM {$wpdb->term_relationships} hidden
+                     WHERE hidden.object_id = p.ID AND hidden.term_taxonomy_id IN ($excluded))
+                 GROUP BY tr.term_taxonomy_id
+             ) c ON c.term_taxonomy_id = tt.term_taxonomy_id
+             WHERE tt.taxonomy = 'product_cat'"
+        );
         if ($wpdb->last_error) return new WP_Error('category_query', __('Categories could not be loaded.', 'paint-shop-ux'));
         $index = self::build_index($rows, self::excluded());
         if (!self::$dirty) set_transient($key, $index, HOUR_IN_SECONDS);

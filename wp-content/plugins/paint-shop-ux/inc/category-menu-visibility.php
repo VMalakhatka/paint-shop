@@ -32,14 +32,34 @@ final class PSU_Category_Menu_Visibility {
         if (!current_user_can('edit_theme_options')) wp_send_json_error([], 403);
         check_ajax_referer('psu_category_visibility_search', 'security');
         $search = isset($_GET['term']) && is_string($_GET['term']) ? sanitize_text_field(wp_unslash($_GET['term'])) : '';
-        $page = max(1, absint($_GET['page'] ?? 1));
-        if ($page > 1000) wp_send_json_error([], 400);
-        $terms = get_terms(['taxonomy' => 'product_cat', 'hide_empty' => false, 'hierarchical' => false,
-            'search' => $search, 'orderby' => 'name', 'order' => 'ASC', 'number' => 31, 'offset' => ($page - 1) * 30]);
-        if (is_wp_error($terms)) wp_send_json_error([], 500);
+        $offset = absint($_GET['offset'] ?? 0);
+        if ($offset > 100000) wp_send_json_error([], 400);
+        $result = self::branch(absint($_GET['parent'] ?? 0), $offset, $search);
+        if (is_wp_error($result)) wp_send_json_error([], 500);
+        wp_send_json($result);
+    }
+
+    public static function branch($parent, $offset, $search = '') {
+        $index = PSU_Category_Menu::index();
+        if (is_wp_error($index)) return $index;
+        $args = ['taxonomy' => 'product_cat', 'hide_empty' => false, 'hierarchical' => false,
+            'orderby' => 'name', 'order' => 'ASC', 'number' => 31, 'offset' => $offset,
+            'psu_category_menu' => true];
+        if ($search !== '') $args['search'] = $search;
+        else {
+            $args['include'] = $index['children'][$parent] ?? [];
+            if (!$args['include']) return ['items' => [], 'next' => null];
+        }
+        $terms = get_terms($args);
+        if (is_wp_error($terms)) return $terms;
         $items = [];
-        foreach (array_slice($terms, 0, 30) as $term) $items[] = ['id' => $term->term_id, 'text' => self::label($term)];
-        wp_send_json(['results' => $items, 'pagination' => ['more' => count($terms) > 30]]);
+        foreach (array_slice($terms, 0, 30) as $term) {
+            $path = PSU_Category_Menu::path($term->term_id, $index);
+            array_pop($path);
+            $items[] = ['id' => $term->term_id, 'name' => wp_strip_all_tags(html_entity_decode($term->name, ENT_QUOTES, 'UTF-8')), 'path' => self::label($term),
+                'parents' => $path, 'children' => !empty($index['children'][$term->term_id])];
+        }
+        return ['items' => $items, 'next' => count($terms) > 30 ? $offset + 30 : null];
     }
 
     private static function label($term) {
@@ -54,11 +74,15 @@ final class PSU_Category_Menu_Visibility {
 
     public static function assets($hook) {
         if ($hook !== 'appearance_page_psu-category-menu') return;
-        wp_enqueue_style('woocommerce_admin_styles');
-        wp_enqueue_style('psu-category-visibility', plugins_url('../assets/category-visibility.css', __FILE__), ['woocommerce_admin_styles'], PSU_Category_Menu::VERSION);
-        wp_enqueue_script('psu-category-visibility', plugins_url('../assets/category-visibility.js', __FILE__), ['jquery', 'selectWoo'], PSU_Category_Menu::VERSION, true);
+        wp_enqueue_style('psu-category-visibility', plugins_url('../assets/category-visibility.css', __FILE__), ['dashicons'], PSU_Category_Menu::VERSION);
+        wp_enqueue_script('psu-category-visibility', plugins_url('../assets/category-visibility.js', __FILE__), [], PSU_Category_Menu::VERSION, true);
         wp_localize_script('psu-category-visibility', 'psuCategoryVisibility', [
             'url' => admin_url('admin-ajax.php'), 'nonce' => wp_create_nonce('psu_category_visibility_search'),
+            'labels' => ['expand' => __('Expand %s', 'paint-shop-ux'), 'collapse' => __('Collapse %s', 'paint-shop-ux'),
+                'hide' => __('Hide %s', 'paint-shop-ux'), 'remove' => __('Show %s again', 'paint-shop-ux'),
+                'loading' => __('Loading categories...', 'paint-shop-ux'), 'retry' => __('Retry', 'paint-shop-ux'),
+                'error' => __('Categories could not be loaded.', 'paint-shop-ux'), 'empty' => __('No categories found.', 'paint-shop-ux'),
+                'more' => __('More categories', 'paint-shop-ux')],
         ]);
     }
 
@@ -68,13 +92,16 @@ final class PSU_Category_Menu_Visibility {
         echo '<form class="psu-category-visibility" method="post" action="' . esc_url(admin_url('admin-post.php')) . '">';
         wp_nonce_field('psu_category_visibility');
         echo '<input type="hidden" name="action" value="psu_category_visibility_save">';
-        echo '<p><label for="psu-category-excluded">' . esc_html__('Always hide categories and their subcategories', 'paint-shop-ux') . '</label></p>';
-        echo '<select id="psu-category-excluded" name="excluded[]" multiple style="width:100%;max-width:720px" data-placeholder="' . esc_attr__('Search categories', 'paint-shop-ux') . '">';
+        echo '<p>' . esc_html__('Always hide categories and their subcategories', 'paint-shop-ux') . '</p>';
+        echo '<div data-selected>';
         foreach (PSU_Category_Menu::excluded() as $id) {
             $term = get_term($id, 'product_cat');
-            if ($term instanceof WP_Term) echo '<option selected value="' . (int) $id . '">' . esc_html(self::label($term)) . '</option>';
+            if ($term instanceof WP_Term) echo '<input type="hidden" name="excluded[]" value="' . (int) $id . '" data-label="' . esc_attr(self::label($term)) . '">';
         }
-        echo '</select>';
+        echo '</div><label for="psu-category-search">' . esc_html__('Search categories', 'paint-shop-ux') . '</label>';
+        echo '<input type="search" id="psu-category-search" autocomplete="off">';
+        echo '<div class="psu-visibility-status" role="status" aria-live="polite"></div>';
+        echo '<ul class="psu-visibility-tree" aria-label="' . esc_attr__('Product categories', 'paint-shop-ux') . '"></ul>';
         submit_button(__('Save changes', 'paint-shop-ux'));
         echo '</form>';
     }

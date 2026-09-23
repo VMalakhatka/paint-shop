@@ -142,3 +142,14 @@ msgstr "Поиск категорий"
 
 msgid "Save changes"
 msgstr "Сохранить изменения"
+
+#, php-format
+msgid "Hide %s"
+msgstr "Скрыть %s"
+
+#, php-format
+msgid "Show %s again"
+msgstr "Снова показывать %s"
+
+msgid "No categories found."
+msgstr "Категории не найдены."

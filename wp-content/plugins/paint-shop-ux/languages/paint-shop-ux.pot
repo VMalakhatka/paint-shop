@@ -227,3 +227,14 @@ msgstr ""
 
 msgid "Save changes"
 msgstr ""
+
+#, php-format
+msgid "Hide %s"
+msgstr ""
+
+#, php-format
+msgid "Show %s again"
+msgstr ""
+
+msgid "No categories found."
+msgstr ""

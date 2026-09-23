@@ -10,6 +10,7 @@ if (($args[0] ?? '') === 'cleanup') {
     if ($data['original'] === false) delete_option(PSU_Category_Menu_Visibility::OPTION);
     else update_option(PSU_Category_Menu_Visibility::OPTION, $data['original'], false);
     if (!empty($data['product'])) wc_get_product($data['product'])->delete(true);
+    if (!empty($data['hidden_product'])) wc_get_product($data['hidden_product'])->delete(true);
     foreach (array_reverse($data['terms']) as $id) wp_delete_term($id, 'product_cat');
     unlink($file);
     echo "Visibility browser fixture removed.\n";
@@ -39,5 +40,9 @@ try {
     $product = new WC_Product_Simple(); $product->set_name('PSU visibility browser fixture');
     $product->set_status('publish'); $product->set_regular_price('1'); $product->set_category_ids([$data['child']]);
     $data['product'] = $product->save(); $persist();
+    $hidden = new WC_Product_Simple(); $hidden->set_name('PSU hidden catalogue fixture');
+    $hidden->set_status('publish'); $hidden->set_regular_price('1'); $hidden->set_category_ids([$data['empty']]);
+    $hidden->set_catalog_visibility('hidden');
+    $data['hidden_product'] = $hidden->save(); $persist();
     echo "Local visibility browser fixture ready.\n";
 } finally { umask($mask); }

@@ -3,6 +3,7 @@
 if (!defined('WP_CLI') || !WP_CLI || wp_get_environment_type() !== 'local') throw new RuntimeException('Local CLI only');
 $original = get_option(PSU_Category_Menu_Visibility::OPTION, false);
 $user = get_current_user_id(); $terms = []; $product = null; $checks = 0;
+$stock_setting = get_option('woocommerce_hide_out_of_stock_items', false);
 $check = static function ($ok, $message) use (&$checks) { if (!$ok) throw new RuntimeException($message); $checks++; };
 $term = static function ($name, $parent = 0) use (&$terms) {
     $result = wp_insert_term('PSU visibility ' . $name . ' ' . wp_generate_uuid4(), 'product_cat', ['parent' => $parent]);
@@ -24,6 +25,25 @@ try {
     $index = PSU_Category_Menu::index();
     $check(!isset($index['visible'][$empty]), 'Empty category hidden');
     $check(isset($index['visible'][$root], $index['visible'][$child], $index['visible'][$leaf]), 'Parents with products only in descendants retained');
+    $product->set_catalog_visibility('hidden'); $product->save();
+    $hidden_index = PSU_Category_Menu::index();
+    $check(!isset($hidden_index['visible'][$root], $hidden_index['visible'][$leaf]), 'Published hidden products do not make categories nonempty');
+    $product->set_catalog_visibility('search'); $product->save();
+    $check(!isset(PSU_Category_Menu::index()['visible'][$leaf]), 'Search-only products are not catalogue products');
+    $product->set_catalog_visibility('visible'); $product->set_stock_status('outofstock'); $product->save();
+    update_option('woocommerce_hide_out_of_stock_items', 'no');
+    $check(isset(PSU_Category_Menu::index()['visible'][$leaf]), 'Out-of-stock remains visible when Woo allows it');
+    update_option('woocommerce_hide_out_of_stock_items', 'yes');
+    $check(!isset(PSU_Category_Menu::index()['visible'][$leaf]), 'Woo hide-out-of-stock setting is respected');
+    $product->set_stock_status('instock'); $product->save();
+    $product->set_status('draft'); $product->save();
+    $check(!isset(PSU_Category_Menu::index()['visible'][$leaf]), 'Drafts do not make a category nonempty');
+    $product->set_status('publish'); $product->save();
+    $index = PSU_Category_Menu::index();
+    $admin_branch = PSU_Category_Menu_Visibility::branch($root, 0);
+    $check(count($admin_branch['items']) === 30 && $admin_branch['next'] === 30, 'Admin tree has bounded branch pagination');
+    $check(count(PSU_Category_Menu_Visibility::branch($root, 30)['items']) === 4, 'Admin tree second page contains remaining children');
+    $check(PSU_Category_Menu_Visibility::branch($empty, 0) === ['items'=>[], 'next'=>null], 'Admin empty branch is available');
     $check(is_wp_error(PSU_Category_Menu::branch($config, $empty)), 'Empty category REST branch rejected');
     $render = new ReflectionMethod(PSU_Category_Menu::class, 'render_branch'); $render->setAccessible(true);
     $budget = 60;
@@ -63,5 +83,7 @@ try {
     foreach (array_reverse($terms) as $id) wp_delete_term($id, 'product_cat');
     if ($original === false) delete_option(PSU_Category_Menu_Visibility::OPTION);
     else update_option(PSU_Category_Menu_Visibility::OPTION, $original, false);
+    if ($stock_setting === false) delete_option('woocommerce_hide_out_of_stock_items');
+    else update_option('woocommerce_hide_out_of_stock_items', $stock_setting);
     wp_set_current_user($user);
 }

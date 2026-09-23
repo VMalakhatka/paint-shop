@@ -1,13 +1,24 @@
-.psu-category-visibility .select2-container {
-    max-width: 720px;
-}
-.psu-category-visibility .select2-selection__choice {
-    box-sizing: border-box;
-    max-width: 100%;
-    white-space: normal;
-    overflow-wrap: anywhere;
-}
-.psu-category-visibility .select2-search--inline,
-.psu-category-visibility .select2-search__field {
-    max-width: 100%;
+.psu-category-visibility { max-width: 720px; }
+.psu-category-visibility [hidden] { display: none !important; }
+.psu-category-visibility > label { display: block; margin: 16px 0 6px; font-weight: 600; }
+.psu-category-visibility input[type="search"] { width: 100%; margin: 0; min-height: 36px; }
+.psu-visibility-tree, .psu-visibility-tree ul { list-style: none; margin: 0; padding: 0; }
+.psu-visibility-tree { margin-top: 12px; max-height: 600px; overflow: auto; border: 1px solid #c3c4c7; background: #fff; padding: 0 12px; }
+.psu-visibility-tree li { margin: 0; }
+.psu-visibility-tree li > ul { margin-left: 14px; padding-left: 10px; border-left: 1px solid #d8dce0; }
+.psu-visibility-row { display: flex; align-items: center; min-height: 44px; border-bottom: 1px solid #edf0f1; }
+.psu-visibility-row label { flex: 1; min-width: 0; display: flex; align-items: start; gap: 10px; padding: 10px 0; }
+.psu-visibility-row input { flex: 0 0 auto; margin-top: 2px; }
+.psu-visibility-row label span, .psu-visibility-selected > span { min-width: 0; overflow-wrap: anywhere; }
+.psu-visibility-icon { display: inline-flex; justify-content: center; align-items: center; flex: 0 0 40px; width: 40px; height: 40px; border: 0; background: transparent; color: #206b51; cursor: pointer; }
+.psu-visibility-icon:hover { background: #edf5f1; }
+.psu-visibility-icon:focus-visible { outline: 2px solid #2271b1; outline-offset: -2px; }
+.psu-visibility-selected { display: flex; align-items: center; justify-content: space-between; gap: 8px; border-bottom: 1px solid #d8dce0; }
+.psu-visibility-action { padding: 12px 0; }
+.psu-visibility-tree .is-inherited > .psu-visibility-row { color: #646970; }
+.psu-visibility-status { color: #b32d2e; }
+@media (max-width: 600px) {
+    .psu-visibility-tree { max-height: 65vh; padding: 0 8px; }
+    .psu-visibility-tree li > ul { margin-left: 6px; padding-left: 6px; }
+    .psu-visibility-icon { flex-basis: 44px; width: 44px; height: 44px; }
 }
