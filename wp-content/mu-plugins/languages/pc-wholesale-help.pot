@@ -811,3 +811,8 @@ msgstr ""
 
 msgid "Order emails to you and the store show the delivery method and your TTNs by warehouse before the products. For split orders, inherited shipping details are explicitly marked as covering all warehouses of the original order."
 msgstr ""
+msgid "On a phone, open Additional filters to choose supplier, unit, warehouses, availability or price. The active count stays visible when collapsed. Search, Apply filters and Reset remain available; collapsing does not clear your choices."
+msgstr ""
+
+msgid "Compact catalogue on a phone"
+msgstr ""

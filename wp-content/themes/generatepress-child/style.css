@@ -402,3 +402,20 @@ body.admin-bar .woocommerce .woocommerce-products-header{ top: 46px; }
         white-space: normal; /* разрешаем перенос строк */
     }
 }
+
+/* Compact mobile header: keep warehouse controls and all contact details. */
+@media (max-width: 768px) {
+    .lavka-topbar__inner { flex-direction: row; align-items: center; gap: 12px; margin: 0; padding: 6px 12px; }
+    .lavka-topbar__logo svg { width: 96px !important; }
+    .lavka-topbar__info { min-width: 0; font-size: 12px; line-height: 1.35; }
+    #masthead .inside-header { padding: 8px 16px; gap: 8px; flex-direction: row; flex-wrap: wrap; align-items: center; }
+    #masthead .site-branding { flex: 1 1 0; min-width: 0; }
+    #masthead .site-branding .main-title { display: none; }
+    #masthead .pc-alloc { margin: 0; }
+    #masthead .pc-alloc select { min-height: 44px; font-size: 16px; }
+    #masthead .mobile-menu-control-wrapper { margin: 0; }
+    #masthead .menu-toggle { min-height: 44px; padding: 0 12px; line-height: 44px; }
+    #masthead #site-navigation { flex-basis: 100%; }
+    .woocommerce .site-main { margin-top: 12px; }
+    .woocommerce .woocommerce-products-header { position: static; margin-bottom: 10px; }
+}

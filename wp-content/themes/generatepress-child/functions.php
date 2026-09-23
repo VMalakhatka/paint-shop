@@ -1,7 +1,7 @@
 <?php
 // Подключение стилей дочерней темы
 add_action('wp_enqueue_scripts', function() {
-    wp_enqueue_style('generatepress-child-style', get_stylesheet_uri());
+    wp_enqueue_style('generatepress-child-style', get_stylesheet_uri(), [], (string) filemtime(get_stylesheet_directory() . '/style.css'));
 });
 
 // Хлебные крошки: меняем разделитель

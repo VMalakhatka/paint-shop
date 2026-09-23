@@ -115,3 +115,10 @@ msgstr "Порядок показа: %s"
 
 msgid "Save supplier settings"
 msgstr "Сохранить настройки поставщиков"
+
+msgid "Additional filters"
+msgstr "Дополнительные фильтры"
+
+#, php-format
+msgid "%d active"
+msgstr "Активных: %d"

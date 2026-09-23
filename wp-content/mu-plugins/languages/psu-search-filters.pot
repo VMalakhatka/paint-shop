@@ -110,3 +110,10 @@ msgstr ""
 
 msgid "Save supplier settings"
 msgstr ""
+
+msgid "Additional filters"
+msgstr ""
+
+#, php-format
+msgid "%d active"
+msgstr ""

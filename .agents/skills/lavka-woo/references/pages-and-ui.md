@@ -153,3 +153,11 @@ Setup, mail acceptance/unknown-outcome semantics and acceptance tests:
 Source: local implementation and synthetic tests, 2026-09-12.
 `pc-folio-invoices` belongs to the Lavka settings menu group and hub links;
 keep `manage_options` for payee editing. Runtime defaults survive code deploys.
+
+## Мобильный первый экран каталога
+
+Проверено локально 2026-09-22: `psu-search-filters.php` группирует дополнительные
+поля в native details; на ширине до 768 px они свёрнуты, активные группы условий
+отмечены счётчиком. Без JS поля открыты. Переключение ширины не отправляет форму.
+Шапкой и размером контактов владеет generatepress-child; выбор склада сохраняется.
+Инструкция и снимок — `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md` и pc-wholesale-help.
