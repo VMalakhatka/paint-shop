@@ -850,3 +850,6 @@ msgstr "Компактний каталог на телефоні"
 
 msgid "Empty branches and categories hidden by the shop do not appear in the menu. Only published products visible in the catalogue count, including products in available subcategories. Out-of-stock products count unless the shop hides them."
 msgstr "Порожні гілки та категорії, приховані магазином, не показуються в меню. Враховуються лише опубліковані товари, видимі в каталозі, зокрема в доступних підкатегоріях. Товари без наявності враховуються, якщо магазин не приховує їх."
+
+msgid "Categories hidden by the shop are also omitted from the category tiles on the home page and in subcategories."
+msgstr "Категорії, приховані магазином, також не показуються серед плиток категорій на головній та в підкатегоріях."

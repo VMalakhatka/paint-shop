@@ -4,6 +4,31 @@ if (!defined('ABSPATH')) exit;
 final class PSU_Category_Menu_Visibility {
     const OPTION = 'psu_category_menu_excluded';
 
+    public static function tile_args($args) {
+        if (!PSU_Category_Menu::excluded()) return $args;
+        $index = PSU_Category_Menu::index();
+        if (is_wp_error($index)) return $args;
+        $args['exclude'] = array_values(array_unique(array_merge(
+            wp_parse_id_list($args['exclude'] ?? []), array_keys($index['blocked'])
+        )));
+        return $args;
+    }
+
+    public static function tile_cache_key($key) {
+        // Woo caches the final hierarchy without query args. Retain WP's term-query
+        // cache, but bypass this outer cache while exclusions can affect the result.
+        return PSU_Category_Menu::excluded() ? false : $key;
+    }
+
+    public static function shortcode_tiles($terms) {
+        if (!is_array($terms) || !PSU_Category_Menu::excluded()) return $terms;
+        $index = PSU_Category_Menu::index();
+        if (is_wp_error($index)) return $terms;
+        return array_values(array_filter($terms, static function ($term) use ($index) {
+            return !isset($index['blocked'][$term->term_id]);
+        }));
+    }
+
     public static function save($ids) {
         if (!current_user_can('edit_theme_options')) return new WP_Error('forbidden', __('Access denied.', 'paint-shop-ux'));
         if (!is_array($ids)) return new WP_Error('invalid', __('Invalid category selection.', 'paint-shop-ux'));
@@ -109,3 +134,6 @@ final class PSU_Category_Menu_Visibility {
 add_action('admin_post_psu_category_visibility_save', [PSU_Category_Menu_Visibility::class, 'handle_post']);
 add_action('wp_ajax_psu_category_visibility_search', [PSU_Category_Menu_Visibility::class, 'search']);
 add_action('admin_enqueue_scripts', [PSU_Category_Menu_Visibility::class, 'assets']);
+add_filter('woocommerce_product_subcategories_args', [PSU_Category_Menu_Visibility::class, 'tile_args'], 100);
+add_filter('woocommerce_get_product_subcategories_cache_key', [PSU_Category_Menu_Visibility::class, 'tile_cache_key']);
+add_filter('woocommerce_product_categories', [PSU_Category_Menu_Visibility::class, 'shortcode_tiles']);

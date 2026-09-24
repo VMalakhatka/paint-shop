@@ -65,6 +65,10 @@ const fs = require('node:fs');
         const catalog = await guest.newPage();
         for (const width of [1280,390]) {
             await catalog.setViewportSize({width,height:900});
+            await catalog.goto('http://paint.local/', {waitUntil:'domcontentloaded'});
+            await catalog.locator('li.product-category').first().waitFor();
+            assert.equal(await catalog.locator('li.product-category a[href="'+fixture.root_url+'"]').count(),0,'Excluded root absent from guest home tiles');
+            await catalog.screenshot({path:'/tmp/psu-category-tiles-home-'+width+'.png',fullPage:true});
             for (const kind of ['empty','child']) {
                 await catalog.goto(fixture[kind+'_url'], {waitUntil:'domcontentloaded'});
                 const menu = catalog.locator('.psu-category-menu').first();
@@ -85,6 +89,8 @@ const fs = require('node:fs');
         await page.waitForURL(/visibility_saved=1/);
         await catalog.goto(fixture.child_url,{waitUntil:'domcontentloaded'});
         assert.equal(await catalog.locator('.psu-category-menu [data-category="'+fixture.root+'"]').count(),1,'Clearing exclusion restores parent');
+        await catalog.goto('http://paint.local/', {waitUntil:'domcontentloaded'});
+        assert.equal(await catalog.locator('li.product-category a[href="'+fixture.root_url+'"]').count(),1,'Clearing exclusion restores home tile');
         assert.equal(errors.length,0,errors.join('\n'));
         await guest.close();
         await context.close();

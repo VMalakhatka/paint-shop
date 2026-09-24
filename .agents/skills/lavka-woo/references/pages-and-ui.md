@@ -22,6 +22,10 @@
   вместе с потомками независимо от hide_empty, включая REST и пагинацию.
   Админка: Вигляд → Категорії Лавки; сохранение требует nonce/edit_theme_options.
   С версии меню 1.3.3 это lazy tree с галочками/поиском, включая пустые ветки.
+  Исключения также действуют на Woo tiles через scoped subcategories args и
+  product_categories shortcode filter; не расширять их на общий get_terms.
+  Woo hierarchy cache не включает args: при исключениях обходится только этот
+  слой, WordPress term-query cache остаётся активным.
   Не использовать raw term_taxonomy.count для hide_empty: опубликованный товар
   может быть exclude-from-catalog. Индекс агрегирует прямые visible counts;
   Woo product_count_product_cat включает потомков и не заменяет прямой счётчик
