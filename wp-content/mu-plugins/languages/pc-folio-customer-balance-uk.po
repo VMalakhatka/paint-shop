@@ -1391,3 +1391,6 @@ msgstr "Вибрати логотип"
 
 #~ msgid "Payment direction code"
 #~ msgstr "Код напрямку платежу"
+
+msgid "Payments marked PRD"
+msgstr "Платежі з позначкою ПРД"

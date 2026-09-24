@@ -107,7 +107,7 @@ function pc_folio_debtors_render_page(): void {
                         <th><?php esc_html_e('Total debt', 'pc-folio-customer-balance'); ?></th>
                         <th><?php esc_html_e('Deferred / on sale', 'pc-folio-customer-balance'); ?></th>
                         <th><?php esc_html_e('Overdue deferred / on sale', 'pc-folio-customer-balance'); ?></th>
-                        <th><?php esc_html_e('Prepayment', 'pc-folio-customer-balance'); ?></th>
+                        <th><?php esc_html_e('Payments marked PRD', 'pc-folio-customer-balance'); ?></th>
                         <th><?php esc_html_e('Payable now', 'pc-folio-customer-balance'); ?></th>
                         <th><?php esc_html_e('Customer on site', 'pc-folio-customer-balance'); ?></th>
                     </tr>
@@ -173,7 +173,7 @@ function pc_folio_debtors_enqueue_assets(): void {
                 'commonDebtTotal'             => __('Total debt', 'pc-folio-customer-balance'),
                 'deferredAmountTotal'         => __('Deferred / on sale', 'pc-folio-customer-balance'),
                 'overdueDeferredAmountTotal'  => __('Overdue deferred / on sale', 'pc-folio-customer-balance'),
-                'prepaymentAmountTotal'       => __('Prepayment', 'pc-folio-customer-balance'),
+                'prepaymentAmountTotal'       => __('Payments marked PRD', 'pc-folio-customer-balance'),
                 'payableNowTotal'             => __('Payable now', 'pc-folio-customer-balance'),
             ],
             'currency' => __('UAH', 'pc-folio-customer-balance'),

@@ -164,7 +164,7 @@ function pc_folio_balance_enqueue_assets_for_context(array $context, int $target
                 'commonDebt'            => __('Total debt', 'pc-folio-customer-balance'),
                 'deferredAmount'        => __('Deferred / on sale', 'pc-folio-customer-balance'),
                 'overdueDeferredAmount' => __('Overdue deferred / on sale', 'pc-folio-customer-balance'),
-                'prepaymentAmount'      => __('Prepayment', 'pc-folio-customer-balance'),
+                'prepaymentAmount'      => __('Payments marked PRD', 'pc-folio-customer-balance'),
                 'payableNow'            => __('Payable now', 'pc-folio-customer-balance'),
             ],
             'currency'      => __('UAH', 'pc-folio-customer-balance'),
@@ -488,7 +488,7 @@ function pc_folio_balance_export_xlsx(): void {
         'commonDebt'            => __('Total debt', 'pc-folio-customer-balance'),
         'deferredAmount'        => __('Deferred / on sale', 'pc-folio-customer-balance'),
         'overdueDeferredAmount' => __('Overdue deferred / on sale', 'pc-folio-customer-balance'),
-        'prepaymentAmount'      => __('Prepayment', 'pc-folio-customer-balance'),
+        'prepaymentAmount'      => __('Payments marked PRD', 'pc-folio-customer-balance'),
         'payableNow'            => __('Payable now', 'pc-folio-customer-balance'),
     ];
     $summary = is_array($report['summary'] ?? null) ? $report['summary'] : [];

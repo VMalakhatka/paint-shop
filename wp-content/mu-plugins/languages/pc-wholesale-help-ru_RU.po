@@ -863,3 +863,6 @@ msgstr "Используйте единый поиск над фильтрами
 
 msgid "Product suggestions"
 msgstr "Подсказки товаров"
+
+msgid "Payments marked PRD are shown for reference for the selected period. These received payments reduce total debt and are not added back to it. This figure is not the unused advance balance."
+msgstr "Платежи с пометкой ПРД показаны справочно за выбранный период. Полученные средства уменьшают общий долг и не прибавляются к нему повторно. Эта сумма не является остатком неиспользованного аванса."

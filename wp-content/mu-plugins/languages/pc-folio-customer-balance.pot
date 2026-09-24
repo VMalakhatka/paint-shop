@@ -1332,3 +1332,6 @@ msgstr ""
 
 msgid "Choose logo"
 msgstr ""
+
+msgid "Payments marked PRD"
+msgstr ""

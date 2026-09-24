@@ -832,3 +832,6 @@ msgstr ""
 
 msgid "Product suggestions"
 msgstr ""
+
+msgid "Payments marked PRD are shown for reference for the selected period. These received payments reduce total debt and are not added back to it. This figure is not the unused advance balance."
+msgstr ""
