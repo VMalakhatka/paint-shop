@@ -328,3 +328,7 @@ msgstr ""
 #: inc/header-allocation-switcher.php
 msgid "Some items are no longer available in the chosen store. Please review your cart."
 msgstr ""
+
+#: inc/admin-lavka-hub.php
+msgid "Customers and documents"
+msgstr ""

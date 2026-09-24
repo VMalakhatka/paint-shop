@@ -114,6 +114,7 @@ add_action('admin_menu', function (): void {
         'pnpm-settings' => __('Lavka Nova Poshta', 'paint-core'),
         'pc-checkbox-fiscalization' => __('Lavka Checkbox fiscalization', 'paint-core'),
         'pc-wayforpay-test-access' => __('Lavka WayForPay test access', 'paint-core'),
+        'pcoe-customers' => __('Customers and documents', 'paint-core'),
         'pc-folio-customer-debtors' => __('Lavka Folio debtors', 'paint-core'),
     ];
     $positions = array_flip(array_keys($labels));
@@ -142,7 +143,7 @@ add_action('admin_menu', function (): void {
 add_action('admin_enqueue_scripts', function (): void {
     $groups = [
         ['id' => 'settings', 'label' => __('Lavka settings', 'paint-core'), 'pages' => ['lavka-warehouses', 'psu-catalog-suppliers', 'pc-folio-invoices', 'pnpm-settings', 'pc-checkbox-fiscalization', 'pc-wayforpay-test-access']],
-        ['id' => 'customers', 'label' => __('Customer relations', 'paint-core'), 'pages' => ['pc-folio-customer-debtors']],
+        ['id' => 'customers', 'label' => __('Customer relations', 'paint-core'), 'pages' => ['pcoe-customers', 'pc-folio-customer-debtors']],
         ['id' => 'stock', 'label' => __('Stock', 'paint-core'), 'pages' => ['lavka-sync', 'lavka-stock-report', 'lavka-logs']],
         ['id' => 'full-sync', 'label' => __('Full synchronization', 'paint-core'), 'pages' => ['lts-main', 'lts-run', 'lts-logs', 'lts-media', 'lts-cron-summary']],
         ['id' => 'prices', 'label' => __('Prices', 'paint-core'), 'pages' => ['lps-main', 'lps-mapping', 'lps-run', 'lps-logs', 'role-price-import-lite', 'lps-supplier-prices']],

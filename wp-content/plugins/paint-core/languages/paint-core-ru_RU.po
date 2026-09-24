@@ -313,3 +313,7 @@ msgstr "Выберите магазин и повторно добавьте т�
 #: inc/header-allocation-switcher.php
 msgid "Some items are no longer available in the chosen store. Please review your cart."
 msgstr "Некоторых товаров уже нет в выбранном магазине. Проверьте корзину."
+
+#: inc/admin-lavka-hub.php
+msgid "Customers and documents"
+msgstr "Клиенты и документы"
