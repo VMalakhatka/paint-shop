@@ -117,7 +117,7 @@ function psu_catalog_unit_values(?WP_Term $category = null): array {
 
 add_filter('posts_where', function (string $where, WP_Query $query): string {
     $unit = $query->get('_psu_unit_filter');
-    if (is_admin() || !$query->is_main_query() || !is_string($unit) || $unit === '') return $where;
+    if ((!$query->get('_psu_suggest') && (is_admin() || !$query->is_main_query())) || !is_string($unit) || $unit === '') return $where;
     global $wpdb;
     return $where . psu_catalog_unit_where("{$wpdb->posts}.ID", $unit);
 }, 20, 2);
@@ -125,7 +125,7 @@ add_filter('posts_where', function (string $where, WP_Query $query): string {
 // Carry the selection with this search, not globals: secondary searches must stay unfiltered.
 add_filter('relevanssi_search_params', function (array $params, WP_Query $query): array {
     $unit = $query->get('_psu_unit_filter');
-    if (!is_admin() && $query->is_main_query() && is_string($unit) && $unit !== '') {
+    if (($query->get('_psu_suggest') || (!is_admin() && $query->is_main_query())) && is_string($unit) && $unit !== '') {
         if (!is_array($params['post_query'] ?? null)) $params['post_query'] = [];
         $params['post_query']['_psu_unit_filter'] = $unit;
     }
@@ -413,7 +413,7 @@ function psu_render_catalog_filters(): void {
             <?php if (!$category): ?><input type="hidden" name="post_type" value="product"><?php endif; ?>
         </div>
 
-        <details class="psu-catalog-filters__advanced" open>
+        <details class="psu-catalog-filters__advanced">
             <summary><?php esc_html_e('Additional filters', 'psu-search-filters'); ?><?php if ($active_filters): ?> <span class="psu-catalog-filters__count"><?php echo esc_html(sprintf(__('%d active', 'psu-search-filters'), $active_filters)); ?></span><?php endif; ?></summary>
             <div class="psu-catalog-filters__advanced-fields">
         <label class="psu-catalog-filters__field">
@@ -468,17 +468,9 @@ function psu_render_catalog_filters(): void {
     (function () {
         const form = document.currentScript.previousElementSibling;
         const panel = form.querySelector('.psu-catalog-filters__advanced');
-        const mobile = window.matchMedia('(max-width: 768px)');
-        let mobileOpen = false;
-        function layout() { panel.open = !mobile.matches || mobileOpen; }
-        panel.addEventListener('toggle', function () {
-            if (mobile.matches) mobileOpen = panel.open;
-        });
         form.addEventListener('invalid', function (event) {
             if (panel.contains(event.target)) panel.open = true;
         }, true);
-        mobile.addEventListener('change', layout);
-        layout();
     })();
     </script>
     <?php
@@ -524,7 +516,7 @@ add_action('wp_enqueue_scripts', function () {
         .psu-catalog-filters__category{grid-column:1/-1;font-size:13px;color:#555}
         .psu-catalog-filters>*{min-width:0}
         .psu-catalog-filters__advanced{grid-column:1/-1;min-width:0}
-        .psu-catalog-filters__advanced>summary{display:none;cursor:pointer;min-height:44px;padding:10px 0;font-weight:600;color:#28644c}
+        .psu-catalog-filters__advanced>summary{display:list-item;list-style-position:inside;cursor:pointer;min-height:44px;padding:10px 0;font-weight:600;color:#28644c}
         .psu-catalog-filters__advanced>summary:focus-visible{outline:2px solid #28644c;outline-offset:2px}
         .psu-catalog-filters__count{font-size:12px;font-weight:400;margin-left:6px}
         .psu-catalog-filters__advanced-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px;align-items:end}

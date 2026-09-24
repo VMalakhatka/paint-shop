@@ -238,3 +238,22 @@ msgstr ""
 
 msgid "No categories found."
 msgstr ""
+
+
+msgid "Searching..."
+msgstr ""
+
+msgid "No matching products."
+msgstr ""
+
+msgid "Suggestions are unavailable. You can still submit your search."
+msgstr ""
+
+msgid "Product suggestions"
+msgstr ""
+
+msgid "In stock"
+msgstr ""
+
+msgid "Out of stock"
+msgstr ""

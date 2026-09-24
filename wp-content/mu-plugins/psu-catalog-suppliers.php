@@ -25,7 +25,7 @@ function psu_catalog_supplier_terms(bool $visible_only = false): array {
 
 function psu_catalog_use_supplier_order(WP_Query $query): bool {
     if (is_admin() || !$query->is_main_query() || !$query->get('_psu_catalog_query')) return false;
-    if ($query->get('_psu_original_search')) return false;
+    if ($query->get('_psu_original_search') || $query->is_search()) return false;
     $order = isset($_GET['orderby']) && is_string($_GET['orderby']) ? sanitize_key($_GET['orderby']) : '';
     // Explicit customer sorting wins. The default catalogue order groups suppliers.
     return $order === '' || $order === 'menu_order';

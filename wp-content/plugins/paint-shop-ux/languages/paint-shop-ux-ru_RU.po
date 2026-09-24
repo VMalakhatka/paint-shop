@@ -153,3 +153,22 @@ msgstr "Снова показывать %s"
 
 msgid "No categories found."
 msgstr "Категории не найдены."
+
+
+msgid "Searching..."
+msgstr "Поиск…"
+
+msgid "No matching products."
+msgstr "Товары не найдены."
+
+msgid "Suggestions are unavailable. You can still submit your search."
+msgstr "Подсказки недоступны. Вы можете выполнить обычный поиск."
+
+msgid "Product suggestions"
+msgstr "Подсказки товаров"
+
+msgid "In stock"
+msgstr "В наличии"
+
+msgid "Out of stock"
+msgstr "Нет в наличии"

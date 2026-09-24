@@ -822,3 +822,13 @@ msgstr ""
 
 msgid "Categories hidden by the shop are also omitted from the category tiles on the home page and in subcategories."
 msgstr ""
+
+
+msgid "On a phone or computer, open Additional filters to choose supplier, unit, warehouses, availability or price. The active count stays visible when collapsed. Search, Apply filters and Reset remain available; collapsing does not clear your choices."
+msgstr ""
+
+msgid "Use the single search above the filters for names, SKUs, barcodes and other indexed fields. From two characters, suggestions show a photo, your price and warehouse availability. An exact SKU comes first. Suggestions respect the current category and filters. Open a suggestion or press Enter without selecting one for normal search; normal search also works when suggestions are unavailable."
+msgstr ""
+
+msgid "Product suggestions"
+msgstr ""

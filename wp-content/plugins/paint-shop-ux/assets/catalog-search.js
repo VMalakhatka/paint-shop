@@ -1,0 +1,146 @@
+/* Indexed suggestions enhance, but never replace, normal form submission. */
+(() => {
+    'use strict';
+    const config = window.psuCatalogSearch;
+    const input = document.getElementById('psu-catalog-search');
+    if (!config || !input) return;
+    const form = input.form;
+    const host = input.parentElement;
+    host.classList.add('psu-search-host');
+    const panel = document.createElement('div');
+    panel.className = 'psu-search-suggestions';
+    panel.hidden = true;
+    const status = document.createElement('div');
+    status.className = 'psu-search-status';
+    status.setAttribute('role', 'status');
+    const list = document.createElement('ul');
+    list.id = 'psu-search-options';
+    list.setAttribute('role', 'listbox');
+    list.setAttribute('aria-label', config.results);
+    panel.append(status, list);
+    host.append(panel);
+    input.setAttribute('role', 'combobox');
+    input.setAttribute('aria-autocomplete', 'list');
+    input.setAttribute('aria-controls', list.id);
+    input.setAttribute('aria-expanded', 'false');
+    input.setAttribute('autocomplete', 'off');
+    let controller, timer, generation = 0, selected = -1;
+
+    function layout() {
+        if (panel.hidden) return;
+        const bounds = host.getBoundingClientRect();
+        const viewport = window.visualViewport;
+        const top = viewport ? viewport.offsetTop : 0;
+        const bottom = viewport ? top + viewport.height : window.innerHeight;
+        const below = bottom - bounds.bottom - 12;
+        const above = bounds.top - top - 12;
+        const upward = below < 200 && above > below;
+        panel.classList.toggle('psu-search-suggestions--above', upward);
+        panel.style.maxHeight = Math.max(64, Math.min(420, upward ? above : below)) + 'px';
+    }
+
+    function close() {
+        clearTimeout(timer);
+        generation++;
+        if (controller) controller.abort();
+        panel.hidden = true;
+        input.setAttribute('aria-expanded', 'false');
+        input.removeAttribute('aria-activedescendant');
+        selected = -1;
+    }
+    function message(text) {
+        list.replaceChildren();
+        selected = -1;
+        input.removeAttribute('aria-activedescendant');
+        status.textContent = text;
+        status.hidden = !text;
+        panel.hidden = false;
+        input.setAttribute('aria-expanded', 'true');
+        layout();
+    }
+    function select(index) {
+        selected = index;
+        Array.from(list.children).forEach((row, i) => row.setAttribute('aria-selected', String(i === index)));
+        if (index >= 0) {
+            input.setAttribute('aria-activedescendant', list.children[index].id);
+            list.children[index].scrollIntoView({block: 'nearest'});
+        } else input.removeAttribute('aria-activedescendant');
+    }
+    async function search(version) {
+        controller = new AbortController();
+        const params = new URLSearchParams();
+        const allowed = ['catalog_search', 'product_cat', 'brand', 'unit', 'location[]', 'in_stock', 'min_price', 'max_price'];
+        new FormData(form).forEach((value, key) => { if (allowed.includes(key)) params.append(key, value); });
+        params.set('action', 'psu_catalog_suggest');
+        message(config.loading);
+        try {
+            const response = await fetch(config.url + '?' + params.toString(), {signal: controller.signal, credentials: 'same-origin', cache: 'no-store'});
+            if (!response.ok) throw new Error('HTTP');
+            const data = await response.json();
+            if (version !== generation) return;
+            if (!Array.isArray(data.items)) throw new Error('Payload');
+            message(data.items.length ? '' : config.empty);
+            data.items.forEach((product, i) => {
+                const row = document.createElement('li');
+                row.id = 'psu-search-option-' + i;
+                row.setAttribute('role', 'option');
+                row.setAttribute('aria-selected', 'false');
+                const link = document.createElement('a');
+                link.href = product.url;
+                link.tabIndex = -1;
+                const img = document.createElement('img');
+                img.src = product.image;
+                img.alt = '';
+                img.width = img.height = 56;
+                const info = document.createElement('span');
+                info.className = 'psu-search-info';
+                for (const [key, value] of Object.entries({name: product.name, sku: product.sku, stock: product.stock})) {
+                    const line = document.createElement('span');
+                    line.className = 'psu-search-' + key;
+                    line.textContent = value;
+                    info.append(line);
+                }
+                const price = document.createElement('span');
+                price.className = 'psu-search-price';
+                // Price HTML is generated by WooCommerce and sanitized by the endpoint.
+                price.innerHTML = product.price;
+                link.append(img, info, price);
+                row.append(link);
+                list.append(row);
+            });
+        } catch (error) {
+            if (version === generation && error.name !== 'AbortError') message(config.error);
+        }
+    }
+    function schedule() {
+        close();
+        const length = input.value.trim().length;
+        if (length < 2 || length > 100) return;
+        const version = generation;
+        timer = setTimeout(() => search(version), 300);
+    }
+    input.addEventListener('input', schedule);
+    input.addEventListener('focus', schedule);
+    form.addEventListener('change', event => { if (event.target !== input) close(); });
+    input.addEventListener('keydown', event => {
+        if (event.key === 'Escape') { event.preventDefault(); close(); return; }
+        if (panel.hidden || !list.children.length) return;
+        if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+            event.preventDefault();
+            const count = list.children.length;
+            select(selected < 0 ? (event.key === 'ArrowDown' ? 0 : count - 1)
+                : (selected + (event.key === 'ArrowDown' ? 1 : count - 1)) % count);
+        } else if (event.key === 'Enter' && selected >= 0) {
+            event.preventDefault();
+            window.location.assign(list.children[selected].querySelector('a').href);
+        }
+    });
+    document.addEventListener('pointerdown', event => { if (!host.contains(event.target)) close(); });
+    host.addEventListener('focusout', event => { if (!host.contains(event.relatedTarget)) close(); });
+    // Keep focus on the combobox until the link's click has been dispatched.
+    list.addEventListener('mousedown', event => event.preventDefault());
+    form.addEventListener('submit', close);
+    window.addEventListener('resize', layout);
+    window.addEventListener('scroll', layout, {capture:true, passive:true});
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', layout);
+})();

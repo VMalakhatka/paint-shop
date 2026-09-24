@@ -46,7 +46,8 @@
   как `s`, а `post_type` не должен переключать категорию на Woo shop template.
   `psu-catalog-suppliers.php` хранит видимость и порядок taxonomy `product_brand`
   в option `psu_catalog_suppliers`. Видимость скрывает только пункт фильтра,
-  порядок группирует все товары до пагинации (SQL и Relevanssi). См. раздел
+  порядок группирует товары без текстового поиска до пагинации; keyword search
+  сохраняет релевантность Relevanssi. См. раздел
   «Поставщики в каталоге» в `docs/OPERATIONS_RUNBOOK.md`.
   Woo хранит артикул в `_sku`; подтверждённые исторические штрихкоды Lavka
   находятся в `_wc_gtin_code`. Поле `_gtin` оставлено только для совместимости и
@@ -63,6 +64,12 @@
   проходят проверку длины и контрольной цифры. В catalog loop штрихкод не
   выводится.
 - Поиск обслуживает Relevanssi. При изменении SKU/visibility/content выполняй reindex через API Relevanssi.
+  Проверено локально 2026-09-24: `paint-shop-ux/inc/catalog-search.php` добавляет
+  подсказки в основное поле фильтров, скрывает дублирующий sidebar search только
+  в каталоге и не удаляет widget options. Публичный read-only admin-AJAX endpoint
+  учитывает категорию/фильтры, выдаёт цену текущего пользователя с private/no-store;
+  shared cache для payload недопустим. Unit SQL разрешён для secondary query
+  только с `_psu_suggest`. Сводка и проверки в README `paint-shop-ux`.
 - Пользователю показывай понятное название склада из mapping, а цифровой Folio warehouse ID оставляй техническим.
 
 ## Корзина и checkout

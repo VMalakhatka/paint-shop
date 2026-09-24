@@ -853,3 +853,13 @@ msgstr "Пустые ветки и категории, скрытые магаз
 
 msgid "Categories hidden by the shop are also omitted from the category tiles on the home page and in subcategories."
 msgstr "Категории, скрытые магазином, также не показываются среди плиток категорий на главной и в подкатегориях."
+
+
+msgid "On a phone or computer, open Additional filters to choose supplier, unit, warehouses, availability or price. The active count stays visible when collapsed. Search, Apply filters and Reset remain available; collapsing does not clear your choices."
+msgstr "На телефоне или компьютере откройте «Дополнительные фильтры», чтобы выбрать поставщика, единицу измерения, склады, наличие или цену. Счётчик активных условий виден и после сворачивания. Поиск, «Применить фильтры» и «Сбросить» остаются доступны; сворачивание не очищает выбор."
+
+msgid "Use the single search above the filters for names, SKUs, barcodes and other indexed fields. From two characters, suggestions show a photo, your price and warehouse availability. An exact SKU comes first. Suggestions respect the current category and filters. Open a suggestion or press Enter without selecting one for normal search; normal search also works when suggestions are unavailable."
+msgstr "Используйте единый поиск над фильтрами по названию, артикулу, штрихкоду и другим индексируемым полям. От двух символов подсказки показывают фото, вашу цену и наличие по складам. Точный артикул стоит первым. Подсказки учитывают текущую категорию и фильтры. Откройте подсказку или нажмите Enter без выбора для обычного поиска; он работает и когда подсказки недоступны."
+
+msgid "Product suggestions"
+msgstr "Подсказки товаров"
