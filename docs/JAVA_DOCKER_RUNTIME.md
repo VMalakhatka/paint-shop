@@ -210,3 +210,15 @@ Java `docs/api`, а изменение WordPress consumer — в докумен�
 [DOCUMENTATION_POLICY.md](DOCUMENTATION_POLICY.md). Зелёная автоматическая проверка
 подтверждает наличие связанного документа и исправность ссылок, но не заменяет
 ручную сверку команд с текущим Java-кодом.
+
+## Debt snapshot heartbeat (2026-09-24)
+
+В новой версии Java lease снимка задолженности по умолчанию — 120 секунд
+(`LAVKA_FOLIO_BALANCE_SNAPSHOT_LEASE_SECONDS`, минимум 60). Независимый daemon
+продлевает lease каждые 15 секунд, даже при долгом SQL. Recovery-проверка —
+30 секунд (`LAVKA_FOLIO_BALANCE_SNAPSHOT_RECOVERY_CHECK_MS`). При остановке процесса
+lease истекает автоматически; отсутствие SQL-сессии не является основанием для сброса.
+Проверьте явные runtime overrides при следующем деплое. Старая уже выданная lease
+не сокращается: см. [восстановление](BOOTSTRAP_AND_RECOVERY.md#снимок-задолженности-завис-после-деплоя-java).
+Источник: FolioCustomerBalanceSnapshotService и application.properties Java;
+изменение подготовлено в коде, в рамках этой задачи не задеплоено.
