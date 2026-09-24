@@ -866,3 +866,13 @@ msgstr "Підказки товарів"
 
 msgid "Payments marked PRD are shown for reference for the selected period. These received payments reduce total debt and are not added back to it. This figure is not the unused advance balance."
 msgstr "Платежі з позначкою ПРД показано довідково за вибраний період. Отримані кошти зменшують загальний борг і не додаються до нього повторно. Ця сума не є залишком невикористаного авансу."
+
+
+msgid "Choose units, suppliers and warehouses available in the current category and its subcategories. Equivalent unit spellings such as 50мл and 50 мл, or a trailing period after a unit, share one option and match all original spellings. Folio data is unchanged; volumes are not converted and units are not pack quantities. Products without a synced unit remain available when All units is selected."
+msgstr "Оберіть одиниці виміру, постачальників і склади, доступні в поточній категорії та її підкатегоріях. Варіанти на кшталт «50мл» / «50 мл» або «шт» / «шт.» об’єднано в одну опцію, яка знаходить усі початкові записи. Дані ФОЛІО не змінюються; об’єми не перераховуються, одиниця виміру не означає фасовку. Товари без переданої одиниці доступні при виборі «Усі одиниці»."
+
+msgid "Selected filters remain visible above products when Additional filters is collapsed, including on an empty result page. Use the cross to remove one restriction or Clear all to remove all restrictions. The category, sorting and page size stay unchanged; the page returns to the beginning. These labels show applied filters, not unsaved form changes."
+msgstr "Вибрані фільтри видно над товарами, коли «Додаткові фільтри» згорнуто, зокрема при порожній видачі. Хрестик прибирає одну умову, а «Скинути все» — всі обмеження. Категорія, сортування та кількість товарів на сторінці зберігаються; перегляд повертається на початок. Позначки показують застосовані фільтри, а не незбережені зміни форми."
+
+msgid "Selected filters on a phone"
+msgstr "Вибрані фільтри на телефоні"

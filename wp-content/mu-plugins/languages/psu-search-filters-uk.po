@@ -122,3 +122,37 @@ msgstr "Додаткові фільтри"
 #, php-format
 msgid "%d active"
 msgstr "Активних: %d"
+
+
+msgid "Selected filters"
+msgstr "Вибрані фільтри"
+
+msgid "Selected:"
+msgstr "Вибрано:"
+
+msgid "Clear all"
+msgstr "Скинути все"
+
+#, php-format
+msgid "Remove filter: %s"
+msgstr "Прибрати фільтр: %s"
+
+#, php-format
+msgid "Warehouse: %s"
+msgstr "Склад: %s"
+
+#, php-format
+msgid "Supplier: %s"
+msgstr "Постачальник: %s"
+
+#, php-format
+msgid "Search: %s"
+msgstr "Пошук: %s"
+
+#, php-format
+msgid "Price from: %s"
+msgstr "Ціна від: %s"
+
+#, php-format
+msgid "Price to: %s"
+msgstr "Ціна до: %s"

@@ -835,3 +835,13 @@ msgstr ""
 
 msgid "Payments marked PRD are shown for reference for the selected period. These received payments reduce total debt and are not added back to it. This figure is not the unused advance balance."
 msgstr ""
+
+
+msgid "Choose units, suppliers and warehouses available in the current category and its subcategories. Equivalent unit spellings such as 50мл and 50 мл, or a trailing period after a unit, share one option and match all original spellings. Folio data is unchanged; volumes are not converted and units are not pack quantities. Products without a synced unit remain available when All units is selected."
+msgstr ""
+
+msgid "Selected filters remain visible above products when Additional filters is collapsed, including on an empty result page. Use the cross to remove one restriction or Clear all to remove all restrictions. The category, sorting and page size stay unchanged; the page returns to the beginning. These labels show applied filters, not unsaved form changes."
+msgstr ""
+
+msgid "Selected filters on a phone"
+msgstr ""

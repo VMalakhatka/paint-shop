@@ -2,7 +2,7 @@
 /*
 Plugin Name: PSU Search & Filters
 Description: Базовые фильтры для витрин Woo (location / in_stock). Поиск — Relevanssi.
-Version: 1.5.0
+Version: 1.6.0
 Author: PaintCore
 Text Domain: psu-search-filters
 Domain Path: /languages
@@ -59,11 +59,50 @@ function psu_catalog_unit_selection(): string {
     return is_string($value) ? trim(sanitize_text_field(wp_unslash($value))) : '';
 }
 
+/** Presentation aliases only: no volume conversion or writes to Folio/Woo. */
+function psu_catalog_unit_label(string $value): string {
+    $clean = trim(preg_replace('/[\s\x{00a0}\x{202f}]+/u', ' ', $value));
+    if (preg_match('/^(\d+(?:[.,]\d+)?)\s*(мл|л|мг|г|гр|кг|шт)\.?$/ui', $clean, $parts)) {
+        return $parts[1] . ' ' . mb_strtolower($parts[2]);
+    }
+    if (preg_match('/^шт\.?$/ui', $clean)) return 'шт';
+    return trim($value);
+}
+
+function psu_catalog_unit_options(array $values): array {
+    $labels = array_values(array_unique(array_map('psu_catalog_unit_label', $values)));
+    usort($labels, static fn($a, $b): int => strnatcasecmp($a, $b) ?: strcmp($a, $b));
+    return $labels;
+}
+
+function psu_catalog_unit_aliases(string $unit): array {
+    global $wpdb;
+    static $groups = null;
+    if ($groups === null) {
+        // One request-local dictionary, including search-only products and both sync paths.
+        $values = $wpdb->get_col("SELECT DISTINCT BINARY TRIM(meta_value) FROM {$wpdb->postmeta}
+            WHERE meta_key = '_edin_izmer' AND TRIM(meta_value) <> ''
+            UNION SELECT DISTINCT BINARY TRIM(t.name) FROM {$wpdb->terms} t
+            INNER JOIN {$wpdb->term_taxonomy} tt ON tt.term_id = t.term_id
+            WHERE tt.taxonomy = 'pa_edin_izmer'");
+        $groups = [];
+        foreach ($values as $value) $groups[psu_catalog_unit_label($value)][] = $value;
+    }
+    return $groups[psu_catalog_unit_label($unit)] ?? [$unit];
+}
+
+/** Column is internal; values are always prepared, never interpolated. */
+function psu_catalog_unit_match_sql(string $column, string $unit): string {
+    global $wpdb;
+    $aliases = psu_catalog_unit_aliases($unit);
+    return $wpdb->prepare('BINARY TRIM(' . $column . ') IN (' . implode(',', array_fill(0, count($aliases), '%s')) . ')', ...$aliases);
+}
+
 /** $product_id_sql is an internal column expression, never request input. */
 function psu_catalog_unit_meta_sql(string $product_id_sql, ?string $unit = null): string {
     global $wpdb;
     $value_sql = $unit === null ? "TRIM(psu_um.meta_value) <> ''"
-        : $wpdb->prepare('BINARY TRIM(psu_um.meta_value) = BINARY %s', $unit);
+        : psu_catalog_unit_match_sql('psu_um.meta_value', $unit);
     return "EXISTS (SELECT 1 FROM {$wpdb->postmeta} psu_um
         WHERE psu_um.post_id = {$product_id_sql} AND psu_um.meta_key = '_edin_izmer' AND {$value_sql})";
 }
@@ -73,29 +112,20 @@ function psu_catalog_unit_where(string $product_id_sql, string $unit): string {
     global $wpdb;
     $meta = psu_catalog_unit_meta_sql($product_id_sql, $unit);
     $has_meta = psu_catalog_unit_meta_sql($product_id_sql);
-    $term = $wpdb->prepare(
+    $term_match = psu_catalog_unit_match_sql('psu_un.name', $unit);
+    $term =
         "EXISTS (SELECT 1 FROM {$wpdb->term_relationships} psu_ur
          INNER JOIN {$wpdb->term_taxonomy} psu_ut ON psu_ut.term_taxonomy_id = psu_ur.term_taxonomy_id
          INNER JOIN {$wpdb->terms} psu_un ON psu_un.term_id = psu_ut.term_id
          WHERE psu_ur.object_id = {$product_id_sql} AND psu_ut.taxonomy = 'pa_edin_izmer'
-         AND BINARY TRIM(psu_un.name) = BINARY %s)", $unit
-    );
+         AND {$term_match})";
     return " AND ({$meta} OR (NOT {$has_meta} AND {$term}))";
 }
 
 /** Read distinct values from both sync paths, without loading products or calling Java. */
 function psu_catalog_unit_values(?WP_Term $category = null): array {
     global $wpdb;
-    $tax_query = [];
-    if ($category && $category->taxonomy === 'product_cat') {
-        $tax_query[] = ['taxonomy' => 'product_cat', 'field' => 'term_id', 'terms' => [$category->term_id]];
-    }
-    $visibility = wc_get_product_visibility_term_ids();
-    $excluded = array_filter([$visibility[is_search() ? 'exclude-from-search' : 'exclude-from-catalog'] ?? 0]);
-    if ($excluded) {
-        $tax_query[] = ['taxonomy' => 'product_visibility', 'field' => 'term_taxonomy_id', 'terms' => $excluded, 'operator' => 'NOT IN'];
-    }
-    $tax_sql = (new WP_Tax_Query($tax_query))->get_sql($wpdb->posts, 'ID');
+    $tax_sql = psu_catalog_filter_scope($category);
     $has_meta = psu_catalog_unit_meta_sql("{$wpdb->posts}.ID");
     $scope = "{$wpdb->posts}.post_type = 'product' AND {$wpdb->posts}.post_status = 'publish' {$tax_sql['where']}";
     $values = $wpdb->get_col(
@@ -113,6 +143,33 @@ function psu_catalog_unit_values(?WP_Term $category = null): array {
     );
     usort($values, static fn($a, $b): int => strnatcasecmp($a, $b) ?: strcmp($a, $b));
     return $values;
+}
+
+function psu_catalog_filter_scope(?WP_Term $category): array {
+    global $wpdb;
+    $tax_query = [];
+    if ($category && $category->taxonomy === 'product_cat') {
+        $tax_query[] = ['taxonomy' => 'product_cat', 'field' => 'term_id', 'terms' => [$category->term_id]];
+    }
+    $visibility = wc_get_product_visibility_term_ids();
+    $excluded = array_filter([$visibility[is_search() ? 'exclude-from-search' : 'exclude-from-catalog'] ?? 0]);
+    if (get_option('woocommerce_hide_out_of_stock_items') === 'yes') $excluded[] = $visibility['outofstock'] ?? 0;
+    if ($excluded) {
+        $tax_query[] = ['taxonomy' => 'product_visibility', 'field' => 'term_taxonomy_id', 'terms' => $excluded, 'operator' => 'NOT IN'];
+    }
+    return (new WP_Tax_Query($tax_query))->get_sql($wpdb->posts, 'ID');
+}
+
+function psu_catalog_scoped_terms(array $terms, string $taxonomy, ?WP_Term $category, array $selected = []): array {
+    global $wpdb;
+    $sql = psu_catalog_filter_scope($category);
+    $ids = array_map('intval', $wpdb->get_col($wpdb->prepare(
+        "SELECT DISTINCT psu_ft.term_id FROM {$wpdb->term_taxonomy} psu_ft
+         INNER JOIN {$wpdb->term_relationships} psu_fr ON psu_fr.term_taxonomy_id = psu_ft.term_taxonomy_id
+         INNER JOIN {$wpdb->posts} ON {$wpdb->posts}.ID = psu_fr.object_id {$sql['join']}
+         WHERE psu_ft.taxonomy = %s AND {$wpdb->posts}.post_type = 'product'
+         AND {$wpdb->posts}.post_status = 'publish' {$sql['where']}", $taxonomy)));
+    return array_values(array_filter($terms, static fn($term) => in_array((int)$term->term_id, $ids, true) || in_array($term->slug, $selected, true)));
 }
 
 add_filter('posts_where', function (string $where, WP_Query $query): string {
@@ -392,9 +449,15 @@ function psu_render_catalog_filters(): void {
 
     $search = psu_catalog_search_text();
     $category = psu_catalog_category();
-    $units = psu_catalog_unit_values($category);
-    $unit = psu_catalog_unit_selection();
+    $units = psu_catalog_unit_options(psu_catalog_unit_values($category));
+    $unit = psu_catalog_unit_label(psu_catalog_unit_selection());
     $brand = isset($_GET['brand']) ? sanitize_title(wp_unslash($_GET['brand'])) : '';
+    $locations = psu_catalog_scoped_terms($locations, 'location', $category, $selected_locations);
+    $brands = psu_catalog_scoped_terms($brands, 'product_brand', $category, [$brand]);
+    if ($brand !== '' && !in_array($brand, wp_list_pluck($brands, 'slug'), true)) {
+        $selected_brand = get_term_by('slug', $brand, 'product_brand');
+        if ($selected_brand) $brands[] = $selected_brand;
+    }
     $min_price = isset($_GET['min_price']) ? wc_format_decimal(wp_unslash($_GET['min_price'])) : '';
     $max_price = isset($_GET['max_price']) ? wc_format_decimal(wp_unslash($_GET['max_price'])) : '';
     $active_filters = (int) ($brand !== '') + (int) ($unit !== '')
@@ -461,7 +524,7 @@ function psu_render_catalog_filters(): void {
         <?php if (isset($_GET['orderby'])): ?><input type="hidden" name="orderby" value="<?php echo esc_attr(sanitize_key(wp_unslash($_GET['orderby']))); ?>"><?php endif; ?>
         <div class="psu-catalog-filters__actions">
             <button type="submit"><?php esc_html_e('Apply filters', 'psu-search-filters'); ?></button>
-            <a href="<?php echo esc_url(psu_catalog_filter_url()); ?>"><?php esc_html_e('Reset', 'psu-search-filters'); ?></a>
+            <a href="<?php echo esc_url(psu_catalog_clear_filters_url()); ?>"><?php esc_html_e('Reset', 'psu-search-filters'); ?></a>
         </div>
     </form>
     <script>
@@ -473,7 +536,76 @@ function psu_render_catalog_filters(): void {
         }, true);
     })();
     </script>
-    <?php
+    <?php psu_render_active_filters();
+}
+
+/** Applied URL state, not unsaved form edits. Never carry page numbers or action parameters. */
+function psu_catalog_filter_state(): array {
+    $state = ['psu_filters'=>'1'];
+    foreach (['brand','unit','min_price','max_price','orderby','pp','per_page'] as $key) {
+        if (isset($_GET[$key]) && is_scalar($_GET[$key])) {
+            $value = trim(sanitize_text_field(wp_unslash((string)$_GET[$key])));
+            if ($value !== '') $state[$key] = $value;
+        }
+    }
+    $search = psu_catalog_search_text();
+    if ($search !== '') $state['catalog_search'] = $search;
+    if (!empty($_GET['in_stock'])) $state['in_stock'] = '1';
+    $locations = $_GET['location'] ?? [];
+    if (is_string($locations)) $locations = explode(',', $locations);
+    if (is_array($locations)) {
+        $locations = array_values(array_unique(array_filter(array_map('sanitize_title', wp_unslash(array_filter($locations, 'is_scalar'))))));
+        if ($locations) $state['location'] = $locations;
+    }
+    $category = psu_catalog_category();
+    if ($category) $state['product_cat'] = $category->slug;
+    else $state['post_type'] = 'product';
+    return $state;
+}
+
+function psu_catalog_clear_filters_url(): string {
+    return add_query_arg(array_intersect_key(psu_catalog_filter_state(), array_flip(['orderby','pp','per_page'])), psu_catalog_filter_url());
+}
+
+function psu_catalog_active_filters(): array {
+    $state = psu_catalog_filter_state();
+    $chips = [];
+    foreach (['catalog_search','unit','brand','in_stock','min_price','max_price'] as $key) {
+        if (!isset($state[$key])) continue;
+        $value = $state[$key];
+        if ($key === 'unit') $label = psu_catalog_unit_label($value);
+        elseif ($key === 'in_stock') $label = __('In stock only', 'psu-search-filters');
+        elseif ($key === 'brand') {
+            $term = get_term_by('slug', $value, 'product_brand');
+            $label = sprintf(__('Supplier: %s', 'psu-search-filters'), $term ? $term->name : $value);
+        } elseif ($key === 'catalog_search') $label = sprintf(__('Search: %s', 'psu-search-filters'), $value);
+        else $label = sprintf(__($key === 'min_price' ? 'Price from: %s' : 'Price to: %s', 'psu-search-filters'), $value . ' ' . html_entity_decode(get_woocommerce_currency_symbol(), ENT_QUOTES, 'UTF-8'));
+        $remaining = $state; unset($remaining[$key]);
+        $chips[] = ['key'=>$key,'label'=>$label,'url'=>add_query_arg($remaining, psu_catalog_filter_url())];
+    }
+    foreach ($state['location'] ?? [] as $slug) {
+        $term = get_term_by('slug', $slug, 'location');
+        $remaining = $state;
+        $remaining['location'] = array_values(array_diff($remaining['location'], [$slug]));
+        if (!$remaining['location']) unset($remaining['location']);
+        $chips[] = ['key'=>'location','label'=>sprintf(__('Warehouse: %s', 'psu-search-filters'), $term ? $term->name : $slug),
+            'url'=>add_query_arg($remaining, psu_catalog_filter_url())];
+    }
+    return $chips;
+}
+
+function psu_render_active_filters(): void {
+    $chips = psu_catalog_active_filters();
+    if (!$chips) return;
+    echo '<nav class="psu-active-filters" aria-label="' . esc_attr__('Selected filters', 'psu-search-filters') . '">';
+    echo '<strong>' . esc_html__('Selected:', 'psu-search-filters') . '</strong><ul>';
+    foreach ($chips as $chip) {
+        echo '<li><a data-filter="' . esc_attr($chip['key']) . '" href="' . esc_url($chip['url']) . '" aria-label="'
+            . esc_attr(sprintf(__('Remove filter: %s', 'psu-search-filters'), $chip['label'])) . '"><span>'
+            . esc_html($chip['label']) . '</span><span aria-hidden="true">&times;</span></a></li>';
+    }
+    echo '</ul><a class="psu-active-filters__clear" href="' . esc_url(psu_catalog_clear_filters_url()) . '">'
+        . esc_html__('Clear all', 'psu-search-filters') . '</a></nav>';
 }
 add_action('woocommerce_before_shop_loop', 'psu_render_catalog_filters', 7);
 add_action('woocommerce_no_products_found', 'psu_render_catalog_filters', 5);
@@ -532,6 +664,15 @@ add_action('wp_enqueue_scripts', function () {
         .psu-catalog-filters__actions button:hover{background:#1d4b39}
         .psu-catalog-filters__actions button:focus-visible{outline:2px solid #28644c;outline-offset:3px}
         .psu-catalog-filters__actions a{font-size:13px}
+        .psu-active-filters{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 18px;font-size:13px;min-width:0}
+        .psu-active-filters ul{display:contents;list-style:none;margin:0;padding:0}
+        .psu-active-filters li{display:flex;max-width:100%;margin:0;min-width:0}
+        .psu-active-filters li a{display:flex;align-items:center;gap:10px;min-height:44px;max-width:100%;padding:6px 10px;border:1px solid #b8ccc2;border-radius:4px;background:#edf5f1;color:#224f3d;text-decoration:none}
+        .psu-active-filters li a>span:first-child{min-width:0;overflow-wrap:anywhere}
+        .psu-active-filters li a>span:last-child{flex:none;font-size:20px;line-height:1}
+        .psu-active-filters a:hover{background:#dfeee6}
+        .psu-active-filters a:focus-visible{outline:2px solid #28644c;outline-offset:2px}
+        .psu-active-filters__clear{padding:10px 4px;min-height:44px}
         .psu-expanded-subcategories{padding-bottom:18px;border-bottom:1px solid #ddd}
         .psu-catalog-pagination{clear:both;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 16px;margin:16px 0;width:100%}
         .psu-catalog-pagination>p{margin:0;font-size:14px;font-weight:600}

@@ -117,3 +117,37 @@ msgstr ""
 #, php-format
 msgid "%d active"
 msgstr ""
+
+
+msgid "Selected filters"
+msgstr ""
+
+msgid "Selected:"
+msgstr ""
+
+msgid "Clear all"
+msgstr ""
+
+#, php-format
+msgid "Remove filter: %s"
+msgstr ""
+
+#, php-format
+msgid "Warehouse: %s"
+msgstr ""
+
+#, php-format
+msgid "Supplier: %s"
+msgstr ""
+
+#, php-format
+msgid "Search: %s"
+msgstr ""
+
+#, php-format
+msgid "Price from: %s"
+msgstr ""
+
+#, php-format
+msgid "Price to: %s"
+msgstr ""
