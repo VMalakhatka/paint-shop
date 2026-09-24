@@ -1394,3 +1394,9 @@ msgstr "Вибрати логотип"
 
 msgid "Payments marked PRD"
 msgstr "Платежі з позначкою ПРД"
+
+msgid "Update interrupted"
+msgstr "Оновлення перервано"
+
+msgid "The update was interrupted. You can restart it; the previous ready report remains available."
+msgstr "Оновлення перервано. Ви можете запустити його повторно; попередній готовий звіт залишається доступним."

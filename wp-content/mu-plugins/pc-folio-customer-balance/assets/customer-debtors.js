@@ -145,7 +145,8 @@
     function renderSnapshot(snapshot) {
         var labels = pcFolioDebtors.labels.snapshot;
         var status = String(snapshot.status || '');
-        var building = buildingSnapshot(snapshot);
+        var interrupted = snapshot.status === 'BUILDING' && snapshot.running === false;
+        var building = interrupted ? null : buildingSnapshot(snapshot);
         var active = activeSnapshot(snapshot);
         var previousGenerationId = currentActiveGenerationId;
         var activeGenerationId = active && active.generationId != null ? String(active.generationId) : null;
@@ -153,8 +154,8 @@
         currentSnapshot = snapshot;
         currentActiveGenerationId = activeGenerationId;
 
-        snapshotRoot.dataset.status = building ? 'building' : status.toLowerCase();
-        snapshotState.textContent = building ? labels.building : snapshotLabel(status);
+        snapshotRoot.dataset.status = interrupted ? 'interrupted' : (building ? 'building' : status.toLowerCase());
+        snapshotState.textContent = interrupted ? labels.interrupted : (building ? labels.building : snapshotLabel(status));
         snapshotDate.textContent = dateText(active && active.asOfDate) || '\u2014';
         snapshotCompleted.textContent = dateTimeText(active && active.completedAt) || '\u2014';
         snapshotTotal.textContent = active ? String(number(active.totalClients)) : '\u2014';
@@ -162,7 +163,10 @@
         setReportAvailability(!!active);
 
         if (active) {
-            if (building) {
+            if (interrupted) {
+                setSnapshotMessage(labels.interruptedMessage, 'warning');
+                scheduleSnapshotCheck();
+            } else if (building) {
                 setSnapshotMessage(formatIndexed(labels.buildingWithActive, [
                     dateText(active.asOfDate) || '\u2014',
                     dateText(building.asOfDate) || '\u2014',
@@ -188,7 +192,10 @@
             return;
         }
 
-        if (building) {
+        if (interrupted) {
+            setSnapshotMessage(labels.interruptedMessage, 'warning');
+            scheduleSnapshotCheck();
+        } else if (building) {
             setSnapshotMessage(labels.buildingMessage, 'loading');
             scheduleSnapshotCheck();
         } else if (status === 'NOT_READY') {

@@ -184,6 +184,8 @@ function pc_folio_debtors_enqueue_assets(): void {
                 'statusFailed'   => __('The debt snapshot status could not be checked.', 'pc-folio-customer-balance'),
                 'active'         => __('Ready', 'pc-folio-customer-balance'),
                 'building'       => __('Updating', 'pc-folio-customer-balance'),
+                'interrupted'    => __('Update interrupted', 'pc-folio-customer-balance'),
+                'interruptedMessage' => __('The update was interrupted. You can restart it; the previous ready report remains available.', 'pc-folio-customer-balance'),
                 'notReady'       => __('Not created', 'pc-folio-customer-balance'),
                 'failed'         => __('Update failed', 'pc-folio-customer-balance'),
                 'superseded'     => __('Replaced by a newer snapshot', 'pc-folio-customer-balance'),
