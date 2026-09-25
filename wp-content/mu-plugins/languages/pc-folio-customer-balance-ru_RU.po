@@ -155,3 +155,63 @@ msgstr "Обновление прервано"
 
 msgid "The update was interrupted. You can restart it; the previous ready report remains available."
 msgstr "Обновление прервано. Вы можете запустить его повторно; предыдущий готовый отчёт остаётся доступным."
+
+msgid "Total"
+msgstr "Итого"
+
+msgid "Folio short name"
+msgstr "Код ФОЛИО"
+
+msgid "Too many customers to export. Narrow the filters and try again."
+msgstr "Слишком много клиентов для экспорта. Уточните фильтры и повторите попытку."
+
+msgid "The report changed during export. Please try again."
+msgstr "Отчёт изменился во время экспорта. Повторите попытку."
+
+msgid "Export XLSX"
+msgstr "Экспортировать XLSX"
+
+msgid "Folio debtors"
+msgstr "Должники ФОЛИО"
+
+msgid "As of: %s"
+msgstr "По состоянию на: %s"
+
+msgid "Threshold: more than %s UAH"
+msgstr "Порог: больше %s грн"
+
+msgid "Customer search"
+msgstr "Поиск клиента"
+
+msgid "Customer type"
+msgstr "Тип клиента"
+
+msgid "Folio customer"
+msgstr "Клиент ФОЛИО"
+
+msgid "Type"
+msgstr "Тип"
+
+msgid "Total debt"
+msgstr "Общий долг"
+
+msgid "Deferred / on sale"
+msgstr "На отсрочке / реализации"
+
+msgid "Overdue deferred / on sale"
+msgstr "Просроченная отсрочка / реализация"
+
+msgid "Payable now"
+msgstr "К оплате"
+
+msgid "Customer on site"
+msgstr "Клиент на сайте"
+
+msgid "Partner"
+msgstr "Партнёр"
+
+msgid "Dealer"
+msgstr "Дилер"
+
+msgid "Buyer"
+msgstr "Покупатель"

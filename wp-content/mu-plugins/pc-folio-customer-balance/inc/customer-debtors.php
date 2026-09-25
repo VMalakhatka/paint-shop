@@ -79,6 +79,7 @@ function pc_folio_debtors_render_page(): void {
                 </select>
             </label>
             <button type="submit" class="button button-primary"><?php esc_html_e('Generate report', 'pc-folio-customer-balance'); ?></button>
+            <button type="button" class="button" data-pc-debtors-export disabled><?php esc_html_e('Export XLSX', 'pc-folio-customer-balance'); ?></button>
         </form>
 
         <p class="pc-folio-debtors__hint">
@@ -142,12 +143,14 @@ function pc_folio_debtors_enqueue_assets(): void {
         'pc-folio-customer-debtors',
         $base_url . 'customer-debtors.js',
         [],
-        PC_FOLIO_BALANCE_VERSION,
+        PC_FOLIO_BALANCE_VERSION . '-debtors-xlsx-1',
         true
     );
     wp_localize_script('pc-folio-customer-debtors', 'pcFolioDebtors', [
         'ajaxUrl' => admin_url('admin-ajax.php'),
         'nonce'   => wp_create_nonce('pc_folio_customer_debtors'),
+        'exportUrl' => admin_url('admin-post.php'),
+        'exportNonce' => wp_create_nonce('pc_folio_customer_debtors_export'),
         'today'   => current_time('Y-m-d'),
         'pollInterval' => 45000,
         'labels'  => [
@@ -481,3 +484,5 @@ function pc_folio_debtors_ajax(): void {
     wp_send_json_success(['report' => $report]);
 }
 add_action('wp_ajax_pc_folio_customer_debtors', 'pc_folio_debtors_ajax');
+
+require_once __DIR__ . '/customer-debtors-export.php';

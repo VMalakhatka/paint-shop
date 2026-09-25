@@ -14,6 +14,7 @@
     var pageLabel = root.querySelector('[data-pc-debtors-page]');
     var prevButton = root.querySelector('[data-pc-debtors-prev]');
     var nextButton = root.querySelector('[data-pc-debtors-next]');
+    var exportButton = root.querySelector('[data-pc-debtors-export]');
     var submitButton = form.querySelector('[type="submit"]');
     var snapshotRoot = root.querySelector('[data-pc-debtors-snapshot]');
     var snapshotState = root.querySelector('[data-pc-snapshot-state]');
@@ -124,6 +125,7 @@
 
     function setReportAvailability(enabled) {
         submitButton.disabled = !enabled;
+        exportButton.disabled = !enabled;
         if (!enabled) {
             prevButton.disabled = true;
             nextButton.disabled = true;
@@ -510,6 +512,25 @@
         offset = 0;
         loadAfterReady = true;
         checkSnapshot(false);
+    });
+    exportButton.addEventListener('click', function () {
+        if (!form.reportValidity()) return;
+        var download = document.createElement('form');
+        download.method = 'POST';
+        download.action = pcFolioDebtors.exportUrl;
+        download.target = '_blank';
+        download.hidden = true;
+        var values = {action: 'pc_folio_customer_debtors_export', _wpnonce: pcFolioDebtors.exportNonce,
+            min_payable: form.elements.min_payable.value, q: form.elements.q.value,
+            types: form.elements.types.value, limit: '200', offset: '0'};
+        Object.keys(values).forEach(function (key) {
+            var input = document.createElement('input');
+            input.type = 'hidden'; input.name = key; input.value = values[key];
+            download.appendChild(input);
+        });
+        document.body.appendChild(download);
+        download.submit();
+        download.remove();
     });
     prevButton.addEventListener('click', function () {
         offset = Math.max(0, offset - number(form.elements.limit.value));

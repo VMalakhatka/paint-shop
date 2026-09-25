@@ -1400,3 +1400,15 @@ msgstr "Оновлення перервано"
 
 msgid "The update was interrupted. You can restart it; the previous ready report remains available."
 msgstr "Оновлення перервано. Ви можете запустити його повторно; попередній готовий звіт залишається доступним."
+
+msgid "Total"
+msgstr "Разом"
+
+msgid "Folio short name"
+msgstr "Код ФОЛІО"
+
+msgid "Too many customers to export. Narrow the filters and try again."
+msgstr "Забагато клієнтів для експорту. Звузьте фільтри та спробуйте ще раз."
+
+msgid "The report changed during export. Please try again."
+msgstr "Звіт змінився під час експорту. Спробуйте ще раз."
