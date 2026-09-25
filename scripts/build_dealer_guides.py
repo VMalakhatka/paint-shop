@@ -22,8 +22,9 @@ M, CW = 36, W - 72
 
 
 class Guide:
-    def __init__(self, number, slug, title, pages):
+    def __init__(self, number, slug, title, pages, date='24.09.2026'):
         self.number, self.pages, self.n = number, pages, 0
+        self.date = date
         self.path = OUT / f'kreul-dealer-{number:02}-{slug}-uk.pdf'
         self.c = canvas.Canvas(str(self.path), pagesize=A4, invariant=True)
         self.c.setTitle(title)
@@ -50,7 +51,7 @@ class Guide:
         c.setStrokeColor(HexColor('#D5E0DA'));c.line(M,H-45,W-M,H-45)
         c.line(M,43,W-M,43)
         c.setFont('Body',8);c.setFillColor(MUTED)
-        c.drawString(M,28,'24.09.2026  ·  Приклади, не поточна пропозиція')
+        c.drawString(M,28,self.date + '  ·  Приклади, не поточна пропозиція')
         c.drawRightString(W-M,28,f'{self.n} / {self.pages}')
         c.linkURL(HELP,(M,20,340,39),relative=0)
         self.y=62
