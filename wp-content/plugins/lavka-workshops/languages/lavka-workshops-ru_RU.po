@@ -1,5 +1,5 @@
 msgid ""
-msgstr "Project-Id-Version: Lavka Workshops 1.0.0\nContent-Type: text/plain; charset=UTF-8\nLanguage: ru_RU\nMIME-Version: 1.0\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+msgstr "Project-Id-Version: Lavka Workshops 1.1.0\nContent-Type: text/plain; charset=UTF-8\nLanguage: ru_RU\nMIME-Version: 1.0\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 #, php-format
 msgid "%s min"
@@ -295,3 +295,63 @@ msgstr "Заявка обрабатывается. Немного подожди
 
 msgid "something beautiful."
 msgstr "для прекрасного."
+
+msgid "Introduce the idea and atmosphere in two or three sentences."
+msgstr "Опишите идею и атмосферу двумя-тремя предложениями."
+
+msgid "Give yourself a creative pause. At this workshop we will explore [technique] and create [artwork]. Choose your colours and enjoy the process at your own pace."
+msgstr "Подарите себе творческую паузу. На мастер-классе мы попробуем [техника] и создадим [работа]. Выбирайте свои цвета и наслаждайтесь процессом в своём темпе."
+
+msgid "Describe the result: the artwork, its size and the techniques guests will try."
+msgstr "Опишите результат: работу, её размер и техники, которые попробуют гости."
+
+msgid "You will create [artwork and size]. We will start with [first step], practise [technique] and add the finishing touches. Every participant will have their own unique result."
+msgstr "Вы создадите [работа и размер]. Начнём с [первый шаг], попробуем [техника] и добавим завершающие штрихи. У каждого участника получится своя неповторимая работа."
+
+msgid "Specify age and experience requirements. Do not promise suitability you have not checked."
+msgstr "Укажите возраст участников и необходимый опыт."
+
+msgid "This workshop is for [age group]. Experience required: [none / basic skills]. It is a lovely way to [try a new technique / spend time with friends / develop your skills]."
+msgstr "Занятие рассчитано на [возраст участников]. Необходимый опыт: [не нужен / базовые навыки]. Это возможность [попробовать новую технику / провести время с друзьями / развить свои умения]."
+
+msgid "List only the materials and services actually included in your price."
+msgstr "Перечислите материалы и услуги, которые входят в вашу цену."
+
+msgid "Included in the price:\\n• [canvas or other base]\\n• [paints and tools]\\n• [instructor guidance]\\n• [other included items]"
+msgstr "В стоимость входит:\n• [холст или другая основа]\n• [краски и инструменты]\n• [помощь мастера]\n• [другие включённые услуги]"
+
+msgid "What should guests bring? When can they collect their work? Explain cancellation terms."
+msgstr "Что взять с собой? Когда забрать работу? Какие условия отмены?"
+
+msgid "Please arrive [number] minutes before the start. Bring [what is needed]. Your artwork can be collected [when and how]. If your plans change, contact us [cancellation terms]."
+msgstr "Приходите за [количество] минут до начала. Возьмите с собой [что нужно]. Готовую работу можно забрать [когда и как]. Если планы изменятся, сообщите нам [условия отмены]."
+
+msgid "Your workshop article"
+msgstr "Ваша статья о мастер-классе"
+
+msgid "Fill in the sections below. The website will arrange them into a finished article. Empty sections are not shown."
+msgstr "Заполните разделы ниже — сайт соберёт из них готовую статью. Пустые разделы не показываются."
+
+msgid "View saved article"
+msgstr "Посмотреть сохранённую статью"
+
+msgid "Save your changes first, then open the article. Use the standard Preview changes button to preview unsaved text."
+msgstr "Сначала сохраните изменения, затем откройте статью. Для просмотра несохранённого текста нажмите стандартную кнопку предпросмотра."
+
+msgid "Article sections"
+msgstr "Разделы статьи"
+
+msgid "Insert example into empty section"
+msgstr "Вставить пример в пустой раздел"
+
+msgid "Example added. Replace the text in brackets with your details."
+msgstr "Пример добавлен. Замените текст в скобках своими данными."
+
+msgid "This section already contains text or a photo. Your content has been kept."
+msgstr "В этом разделе уже есть текст или фото. Ваше содержимое оставлено без изменений."
+
+msgid "1. Add a title and cover photo. 2. Fill in the article sections; insert examples into empty fields if useful. 3. Add dates, save and view your article."
+msgstr "1. Добавьте название и обложку. 2. Заполните разделы статьи; при необходимости вставьте примеры в пустые поля. 3. Добавьте даты, сохраните и посмотрите статью."
+
+msgid "About the workshop"
+msgstr "О мастер-классе"

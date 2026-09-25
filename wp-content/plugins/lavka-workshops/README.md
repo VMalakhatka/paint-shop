@@ -9,8 +9,16 @@ Operator guide: [Мастер-классы: расписание, статьи �
 
 ## Ownership and storage
 
-- `lavka_workshop`: public CPT, classic visual editor, featured image, excerpt,
-  content revisions. `_lw_sessions` is a validated array with stable date UUIDs,
+- `lavka_workshop`: public CPT, five standard visual article modules, featured image,
+  excerpt and content revisions. `inc/article-editor.php` uses core `wp_editor` with
+  visual mode, media and example buttons; no additional editor plugin is needed.
+  The modules compose a single canonical `post_content` with section comments;
+  there is no parallel article metadata. Normal WP revisions restore the whole article.
+  Known v1 headings are split read-only; unknown/wrapped layouts remain intact in
+  the first field. Saving needs capability, nonce and complete-form checks. Examples
+  fill empty sections only, and empty sections are omitted from the public article.
+  A hidden core content field is synchronized for WP autosave/preview.
+  `_lw_sessions` is a validated array with stable date UUIDs,
   Kyiv timestamps, city (`kyiv`/`odesa`), address, UAH price, duration and state.
   Article revisions do not restore schedule metadata.
 - `lavka_mk_request`: non-public CPT, forced private status, no REST exposure or
@@ -53,7 +61,9 @@ remove routes without deleting data. No uninstall data deletion handler.
 find wp-content/plugins/lavka-workshops -name '*.php' -print0 | xargs -0 -n1 php -l
 node --check wp-content/plugins/lavka-workshops/assets/admin.js
 node --check wp-content/plugins/lavka-workshops/assets/public.js
+node --check wp-content/plugins/lavka-workshops/assets/article-editor.js
 wp eval-file wp-content/plugins/lavka-workshops/tests/wordpress.php --skip-plugins --skip-themes
+wp eval-file wp-content/plugins/lavka-workshops/tests/article-editor.php --skip-plugins --skip-themes
 python3 .agents/skills/lavka-project-documentation/scripts/check-documentation.py --working-tree
 ```
 
@@ -61,6 +71,8 @@ The integration test is limited to `paint.local`, creates its own synthetic post
 and user, and cleans them in `finally`. It checks malformed dates, Kyiv timezone,
 consent/nonce, dedupe, request snapshots/privacy, full/past/cancelled/draft rejection,
 role boundaries and unauthorized save. Run after local activation so role exists.
+The article test covers legacy preservation, section round trips, sanitization,
+photos/shortcodes, authenticated saving, incomplete forms and revision restoration.
 Browser acceptance must additionally check real full-plugin runtime, classic editor,
 copy-date/save workflow, 1365px desktop and 390px mobile, filtering, actual AJAX
 success and error feedback. Test data never represents real enrollment.
@@ -69,3 +81,13 @@ Verified locally on 2026-09-25: 35 integration checks passed; browser checks at
 1365×950 and 390×844 passed for schedule filters, cover rendering, article, successful
 AJAX request, invalid-phone feedback with retry, instructor copy-date/save and
 request status save. Synthetic QA account and request were removed after acceptance.
+
+Version 1.1 acceptance (local, 2026-09-25): 24 article checks and 35 booking checks
+passed. Instructor UI verified visual formatting despite `rich_editing=false`,
+example insertion and non-overwrite, save/reopen and public rendering, existing
+demo decomposition without rewriting source, and narrow admin layout (553px CSS
+viewport). Both draft and published preview paths are covered by the integration
+test. Browser popup navigation and local-backup restore still need a manual check
+in the operator's normal browser. Administrator UI was not separately exercised;
+elevation of the disposable QA account was denied by automatic approval review.
+No production deployment; temporary QA account and article removed.

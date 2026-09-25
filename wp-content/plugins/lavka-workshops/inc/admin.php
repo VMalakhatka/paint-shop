@@ -3,14 +3,10 @@ namespace Lavka\Workshops;
 defined('ABSPATH') || exit;
 
 add_filter('use_block_editor_for_post_type', static fn($use, $type) => $type === 'lavka_workshop' ? false : $use, 10, 2);
-add_filter('default_content', static function ($content, $post) {
-    if ($post->post_type !== 'lavka_workshop' || $content) return $content;
-    return '<h2>' . esc_html__('What we will create', 'lavka-workshops') . '</h2><p>' . esc_html__('Describe the artwork and the experience in a few sentences.', 'lavka-workshops') . '</p><h2>' . esc_html__('Who it is for', 'lavka-workshops') . '</h2><p>' . esc_html__('Tell guests about the age range and experience level.', 'lavka-workshops') . '</p><h2>' . esc_html__('What is included', 'lavka-workshops') . '</h2><ul><li>' . esc_html__('Materials and tools', 'lavka-workshops') . '</li><li>' . esc_html__('Guidance from the instructor', 'lavka-workshops') . '</li></ul><h2>' . esc_html__('Good to know', 'lavka-workshops') . '</h2><p>' . esc_html__('Explain what to bring and when guests can collect their artwork.', 'lavka-workshops') . '</p>';
-}, 10, 2);
 add_action('add_meta_boxes', static function () {
     add_meta_box('lw-schedule', __('Dates and booking', 'lavka-workshops'), __NAMESPACE__ . '\\schedule_box', 'lavka_workshop', 'normal', 'high');
     add_meta_box('lw-guide', __('Three simple steps', 'lavka-workshops'), static function () {
-        echo '<p>' . esc_html__('1. Add a title and cover photo. 2. Write the article like a Word document; use Add Media for photos. 3. Fill in the dates below and publish.', 'lavka-workshops') . '</p><p>' . esc_html__('The excerpt is the short text on the schedule card. Preview lets you check the article before publishing.', 'lavka-workshops') . '</p><p><a href="' . esc_url(get_post_type_archive_link('lavka_workshop')) . '" target="_blank">' . esc_html__('View schedule', 'lavka-workshops') . '</a></p>';
+        echo '<p>' . esc_html__('1. Add a title and cover photo. 2. Fill in the article sections; insert examples into empty fields if useful. 3. Add dates, save and view your article.', 'lavka-workshops') . '</p><p>' . esc_html__('The excerpt is the short text on the schedule card. Preview lets you check the article before publishing.', 'lavka-workshops') . '</p><p><a href="' . esc_url(get_post_type_archive_link('lavka_workshop')) . '" target="_blank">' . esc_html__('View schedule', 'lavka-workshops') . '</a></p>';
     }, 'lavka_workshop', 'side', 'high');
 });
 function schedule_row(array $row, string $index): void {

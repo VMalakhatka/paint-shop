@@ -57,5 +57,9 @@ MariaDB хранит состояние сайта и проекции ФОЛИ�
 отдельного требования оплаты. Вместимость подтверждает мастер вручную; повтор
 телефона на одну дату идемпотентен. Woo admin guard допускает роль по capability
 `edit_lavka_workshops`, без выдачи `edit_posts`/`manage_woocommerce`.
+Пять визуальных разделов статьи собираются в единый `post_content`; отдельные
+article meta не создавать, иначе редакции и preview расходятся. Старый нестандартный
+текст целиком остаётся в первом разделе; чтение не мигрирует базу. Реализация:
+`inc/article-editor.php` и `tests/article-editor.php` внутри плагина.
 Источник: `wp-content/plugins/lavka-workshops/`; lifecycle и инструкция мастера —
 `docs/WORKSHOPS_GUIDE_RU.md`. Production-активация остаётся отдельным решением.
