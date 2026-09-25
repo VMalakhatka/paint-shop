@@ -1724,3 +1724,114 @@ msgstr "Тест: email-повідомлення списку очікуванн
 #: inc/Waitlist.php
 msgid "This is a test of your waiting-list email notifications. It does not mean that your product has arrived. We will email you when tracked products are available. You can turn these emails off in your waiting list."
 msgstr "Це тест email-повідомлень вашого списку очікування. Він не означає, що товар надійшов. Ми напишемо, коли відстежувані товари будуть доступні. Вимкнути ці листи можна у списку очікування."
+
+msgid "Customer confirmations"
+msgstr "Підтвердження клієнтів"
+
+msgid "Customer confirmation"
+msgstr "Підтвердження клієнта"
+
+msgid "Orders for confirmation"
+msgstr "Замовлення для підтвердження"
+
+msgid "Review and confirm order"
+msgstr "Перевірити та підтвердити замовлення"
+
+msgid "The order is unavailable for confirmation."
+msgstr "Замовлення недоступне для підтвердження."
+
+msgid "Another operation is running. Reload the page and try again."
+msgstr "Виконується інша операція. Оновіть сторінку та спробуйте ще раз."
+
+msgid "The confirmation could not be saved. Please try again."
+msgstr "Не вдалося зберегти підтвердження. Спробуйте ще раз."
+
+msgid "Several orders reference this document. Open the required website order."
+msgstr "З цим документом пов’язано кілька замовлень. Відкрийте потрібне замовлення сайту."
+
+msgid "Folio account"
+msgstr "Рахунок ФОЛІО"
+
+msgid "Website order"
+msgstr "Замовлення сайту"
+
+msgid "Other locations"
+msgstr "Інші регіони"
+
+msgid "Select delivery and payment from the available options."
+msgstr "Виберіть доставку й оплату з доступних варіантів."
+
+msgid "Enter recipient, phone and delivery details (up to 500 characters each)."
+msgstr "Укажіть отримувача, телефон і дані доставки (до 500 символів у кожному полі)."
+
+msgid "The order changed. Review it again before continuing."
+msgstr "Замовлення змінилося. Перевірте його повторно перед продовженням."
+
+msgid "The order changed. Ask the manager to send the updated version for confirmation."
+msgstr "Замовлення змінилося. Попросіть менеджера передати оновлену версію на підтвердження."
+
+msgid "Confirm that you have checked the order and selected conditions."
+msgstr "Підтвердьте, що перевірили замовлення та вибрані умови."
+
+msgid "Changed: new confirmation required"
+msgstr "Змінено: потрібне нове підтвердження"
+
+msgid "Confirmed by customer"
+msgstr "Підтверджено клієнтом"
+
+msgid "Awaiting customer confirmation"
+msgstr "Очікує підтвердження клієнта"
+
+msgid "Customer account link (login required):"
+msgstr "Посилання на кабінет клієнта (потрібен вхід):"
+
+msgid "Review current version"
+msgstr "Перевірити поточну версію"
+
+msgid "Delivery or payment options are unavailable. Contact the manager."
+msgstr "Варіанти доставки або оплати недоступні. Зверніться до менеджера."
+
+msgid "Delivery and payment are saved for the manager. Delivery availability and cost will be agreed separately; this does not make a payment or start shipment."
+msgstr "Доставку й оплату буде збережено для менеджера. Можливість і вартість доставки узгоджуються окремо; підтвердження не проводить оплату й не запускає відправлення."
+
+msgid "I have checked the products, quantities, prices, delivery and payment preferences and confirm this order."
+msgstr "Я перевірив товари, кількість, ціни та побажання щодо доставки й оплати та підтверджую це замовлення."
+
+msgid "Confirm order"
+msgstr "Підтвердити замовлення"
+
+msgid "Payment preference"
+msgstr "Бажаний спосіб оплати"
+
+msgid "Delivery preference"
+msgstr "Бажаний спосіб доставки"
+
+msgid "Recipient"
+msgstr "Отримувач"
+
+msgid "Phone"
+msgstr "Телефон"
+
+msgid "City, branch/address or pickup location; specify warehouses if destinations differ"
+msgstr "Місто, відділення/адреса або місце самовивозу; зазначте склади, якщо адреси різні"
+
+msgid "No orders awaiting confirmation."
+msgstr "Немає замовлень для підтвердження."
+
+msgid "Confirmation recorded; open to check current version"
+msgstr "Підтвердження записано; відкрийте для перевірки поточної версії"
+
+msgid "View saved confirmation"
+msgstr "Переглянути збережене підтвердження"
+
+msgid "The request appears in the customer account. No email is sent automatically."
+msgstr "Запит з’явиться в кабінеті клієнта. Лист автоматично не надсилається."
+
+msgid "Send for customer confirmation"
+msgstr "Передати на підтвердження клієнту"
+
+msgid "The current version could not be checked. Saved details are shown; confirmation is unavailable until verification succeeds."
+msgstr "Не вдалося перевірити поточну версію. Показано збережені дані; підтвердження недоступне до успішної перевірки."
+
+msgid "Verification required"
+msgstr "Потрібна перевірка"

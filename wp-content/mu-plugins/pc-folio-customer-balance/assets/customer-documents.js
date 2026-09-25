@@ -402,6 +402,15 @@
         detailContent.replaceChildren();
         detailTitle.textContent = (labels.types[folioDocument.documentType] || text(folioDocument.documentType)) + ' ' + documentNumber(folioDocument);
         renderInvoiceActions(folioDocument);
+        if (managerMode && pcFolioDocuments.approvalUrl && folioDocument.documentType === 'ACCOUNT' && !folioDocument.returnDocument) {
+            var approval = documentNode('a', 'button');
+            var approvalUrl = new URL(pcFolioDocuments.approvalUrl, window.location.href);
+            approvalUrl.searchParams.set('document_type', 'ACCOUNT');
+            approvalUrl.searchParams.set('document_id', String(folioDocument.documentId));
+            approval.href = approvalUrl.toString();
+            approval.textContent = pcFolioDocuments.approvalLabel;
+            detailContent.appendChild(approval);
+        }
 
         var headerData = {
             documentTypeLabel: labels.types[folioDocument.documentType] || text(folioDocument.documentType),

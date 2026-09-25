@@ -876,3 +876,15 @@ msgstr "Вибрані фільтри видно над товарами, кол
 
 msgid "Selected filters on a phone"
 msgstr "Вибрані фільтри на телефоні"
+
+msgid "Confirm an order prepared by a manager"
+msgstr "Підтвердіть замовлення, підготовлене менеджером"
+
+msgid "Open Orders for confirmation on your account dashboard. Review the products, quantities, prices and linked Folio accounts. Choose delivery and payment preferences, enter recipient, phone and city/branch/address or pickup location, then tick the review checkbox and confirm."
+msgstr "Відкрийте «Замовлення для підтвердження» на головній сторінці кабінету. Перевірте товари, кількість, ціни та пов’язані рахунки ФОЛІО. Виберіть побажання щодо доставки й оплати, вкажіть отримувача, телефон і місто/відділення/адресу або місце самовивозу, поставте галочку перевірки та підтвердьте."
+
+msgid "Your choices are saved for the manager. This confirmation does not charge you, change Folio documents or start shipment. Delivery availability and cost are agreed separately. If the order changes, ask the manager to send its updated version for confirmation."
+msgstr "Ваш вибір зберігається для менеджера. Підтвердження не списує кошти, не змінює документи ФОЛІО та не запускає відправлення. Можливість і вартість доставки узгоджуються окремо. Якщо замовлення змінено, попросіть менеджера передати оновлену версію на підтвердження."
+
+msgid "Open my account"
+msgstr "Відкрити мій кабінет"

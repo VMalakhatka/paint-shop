@@ -33,6 +33,7 @@ class Plugin {
 
         DraftFolioWorkflow::hooks();
         ManagerWorkspace::hooks();
+        CustomerApproval::hooks();
 
         // Вимкнути емейли для pc-draft
         ImporterDraft::mute_emails_for_drafts();

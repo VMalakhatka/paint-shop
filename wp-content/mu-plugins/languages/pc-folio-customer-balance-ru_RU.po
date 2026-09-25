@@ -215,3 +215,6 @@ msgstr "Дилер"
 
 msgid "Buyer"
 msgstr "Покупатель"
+
+msgid "Customer confirmation"
+msgstr "Подтверждение клиента"

@@ -1412,3 +1412,6 @@ msgstr "Забагато клієнтів для експорту. Звузьт�
 
 msgid "The report changed during export. Please try again."
 msgstr "Звіт змінився під час експорту. Спробуйте ще раз."
+
+msgid "Customer confirmation"
+msgstr "Підтвердження клієнта"

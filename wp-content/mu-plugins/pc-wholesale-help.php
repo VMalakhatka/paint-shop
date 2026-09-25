@@ -485,6 +485,13 @@ function pc_wholesale_help_render_endpoint(): void {
             <div class="pc-help-note"><strong><?php esc_html_e('Do not pay linked child orders separately', 'pc-wholesale-help'); ?></strong> <?php esc_html_e('unless a manager clearly asks you to do so.', 'pc-wholesale-help'); ?></div>
         </section>
 
+        <section class="pc-help-section" id="customer-confirmation">
+            <h2><?php esc_html_e('Confirm an order prepared by a manager', 'pc-wholesale-help'); ?></h2>
+            <p><?php esc_html_e('Open Orders for confirmation on your account dashboard. Review the products, quantities, prices and linked Folio accounts. Choose delivery and payment preferences, enter recipient, phone and city/branch/address or pickup location, then tick the review checkbox and confirm.', 'pc-wholesale-help'); ?></p>
+            <p><?php esc_html_e('Your choices are saved for the manager. This confirmation does not charge you, change Folio documents or start shipment. Delivery availability and cost are agreed separately. If the order changes, ask the manager to send its updated version for confirmation.', 'pc-wholesale-help'); ?></p>
+            <a class="pc-help-inline-action" href="<?php echo esc_url(wc_get_page_permalink('myaccount')); ?>"><?php esc_html_e('Open my account', 'pc-wholesale-help'); ?> →</a>
+        </section>
+
         <section class="pc-help-section" id="balans">
             <div class="pc-help-section__heading"><span>11</span><div><h2><?php esc_html_e('View the customer balance', 'pc-wholesale-help'); ?></h2><p><?php esc_html_e('Choose a start date or all time, generate the report, then export XLSX or print it if needed.', 'pc-wholesale-help'); ?></p></div></div>
             <p><?php esc_html_e('The report may show opening balance, invoices, payments, total debt, overdue amount, prepayment and the amount due now. The table below explains each operation and the balance before and after it.', 'pc-wholesale-help'); ?></p>
