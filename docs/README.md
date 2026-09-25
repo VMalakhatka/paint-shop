@@ -36,6 +36,7 @@
 | Выбрать skill Codex | [SKILLS_CATALOG.md](SKILLS_CATALOG.md) |
 | Понять, что обязано обновляться вместе с изменением | [DOCUMENTATION_POLICY.md](DOCUMENTATION_POLICY.md) |
 | Увидеть неподтверждённые места и риски | [KNOWN_GAPS.md](KNOWN_GAPS.md) |
+| Мастеру: вести расписание МК, статьи и заявки | [WORKSHOPS_GUIDE_RU.md](WORKSHOPS_GUIDE_RU.md) |
 | Пользоваться сайтом и кабинетом | [SITE_USER_GUIDE_UK.md](SITE_USER_GUIDE_UK.md) |
 | Развивать список ожидания и рекомендации клиентам | [план и этапы](CUSTOMER_RECOMMENDATIONS_PLAN.md) |
 | Оформить оптовый заказ, импортировать/экспортировать список, сохранить черновик, повторить старый заказ, увидеть разделение, баланс и документы | [WHOLESALE_CUSTOMER_GUIDE_UK.md](WHOLESALE_CUSTOMER_GUIDE_UK.md) |

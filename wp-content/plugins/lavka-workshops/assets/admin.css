@@ -1,0 +1,4 @@
+.lw-admin-scroll{overflow:auto}.lw-dates td{vertical-align:top;min-width:155px;padding:14px}.lw-dates label{display:block;font-weight:600;margin-bottom:12px}.lw-dates input:not([type=hidden]),.lw-dates select{display:block;width:100%;margin-top:5px;font-weight:400}.lw-dates .button{margin:4px 0}.lw-dates tr+tr td{border-top:1px solid #ddd}
+
+/* Configuration notices belong to administrators; save/error notices remain visible. */
+.lw-instructor .update-nag,.lw-instructor #smush-conflict-notice,.lw-instructor #new_post_type{display:none}

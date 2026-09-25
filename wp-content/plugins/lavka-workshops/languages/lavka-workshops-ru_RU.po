@@ -1,0 +1,297 @@
+msgid ""
+msgstr "Project-Id-Version: Lavka Workshops 1.0.0\nContent-Type: text/plain; charset=UTF-8\nLanguage: ru_RU\nMIME-Version: 1.0\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#, php-format
+msgid "%s min"
+msgstr "%s мин"
+
+msgid "1. Add a title and cover photo. 2. Write the article like a Word document; use Add Media for photos. 3. Fill in the dates below and publish."
+msgstr "1. Добавьте название и обложку. 2. Напишите статью как в Word; фото вставляйте кнопкой «Добавить медиа». 3. Заполните даты ниже и опубликуйте."
+
+msgid "A few hours offline. Something beautiful to take home."
+msgstr "Несколько часов для себя. Что-то прекрасное — с собой."
+
+msgid "A little time for creativity"
+msgstr "Немного времени для творчества"
+
+msgid "Add date"
+msgstr "Добавить дату"
+
+msgid "Add workshop"
+msgstr "Добавить мастер-класс"
+
+msgid "All cities"
+msgstr "Все города"
+
+msgid "All current dates are fully booked. Please check back for new dates."
+msgstr "На все текущие даты места уже заняты. Скоро добавим новые."
+
+msgid "All times are Kyiv time"
+msgstr "Время указано по Киеву"
+
+msgid "All upcoming dates"
+msgstr "Все ближайшие даты"
+
+msgid "All workshops"
+msgstr "Все мастер-классы"
+
+msgid "Author"
+msgstr "Автор"
+
+msgid "Availability"
+msgstr "Наличие мест"
+
+msgid "Booking open"
+msgstr "Запись открыта"
+
+msgid "Booking request"
+msgstr "Заявка на мастер-класс"
+
+msgid "Booking requests"
+msgstr "Заявки на МК"
+
+msgid "Cancelled"
+msgstr "Отменено"
+
+msgid "Check the date, city, address, duration and price in every row."
+msgstr "Проверьте дату, город, адрес, длительность и цену в каждой строке."
+
+msgid "Choose a date"
+msgstr "Выбрать дату"
+
+msgid "Choose a workshop, bring your curiosity and create something of your own."
+msgstr "Выберите мастер-класс, дайте волю любопытству и создайте что-то своё."
+
+msgid "Choose cover photo"
+msgstr "Выбрать фото обложки"
+
+msgid "Choose your date"
+msgstr "Выберите удобную дату"
+
+msgid "City"
+msgstr "Город"
+
+msgid "Confirmed"
+msgstr "Подтверждено"
+
+msgid "Contact the guest yourself. Changing the status does not send a message or change availability."
+msgstr "Свяжитесь с гостем самостоятельно. Изменение статуса не отправляет сообщений и не меняет наличие мест."
+
+msgid "Copy date"
+msgstr "Копировать дату"
+
+msgid "Could not confirm receipt. Your details are still here. Please try again; repeated requests will not create a duplicate."
+msgstr "Не удалось подтвердить получение. Ваши данные остались в форме. Попробуйте ещё раз — повтор не создаст дубль."
+
+msgid "Cover photo"
+msgstr "Фото обложки"
+
+msgid "Date"
+msgstr "Дата"
+
+msgid "Dates and booking"
+msgstr "Даты и запись"
+
+msgid "Describe the artwork and the experience in a few sentences."
+msgstr "Несколькими предложениями опишите работу, которую создадут гости, и процесс занятия."
+
+msgid "Duplicate date identifier. Reload the editor."
+msgstr "Повторяется идентификатор даты. Перезагрузите редактор."
+
+msgid "Duration, minutes"
+msgstr "Длительность, минуты"
+
+msgid "Edit workshop"
+msgstr "Редактировать мастер-класс"
+
+msgid "Explain what to bring and when guests can collect their artwork."
+msgstr "Расскажите, что взять с собой и когда можно забрать готовую работу."
+
+msgid "Explore workshop"
+msgstr "О мастер-классе"
+
+msgid "Fully booked"
+msgstr "Мест нет"
+
+msgid "Good to know"
+msgstr "Важно знать"
+
+msgid "Guest"
+msgstr "Гость"
+
+msgid "Guidance from the instructor"
+msgstr "Поддержка мастера"
+
+msgid "I agree to be contacted about this workshop using the details I provided."
+msgstr "Соглашаюсь на связь по поводу этого мастер-класса по указанным мной контактам."
+
+msgid "Kyiv"
+msgstr "Киев"
+
+msgid "LAVKA · CREATIVE STUDIO"
+msgstr "ЛАВКА · ТВОРЧЕСКАЯ СТУДИЯ"
+
+msgid "LET’S CREATE TOGETHER"
+msgstr "ДАВАЙТЕ ТВОРИТЬ ВМЕСТЕ"
+
+msgid "Make time for"
+msgstr "Найдите время"
+
+msgid "Materials and tools"
+msgstr "Материалы и инструменты"
+
+msgid "Materials, inspiration and your next favourite memory."
+msgstr "Материалы, вдохновение и ваше новое тёплое воспоминание."
+
+msgid "Move to trash"
+msgstr "Переместить в корзину"
+
+msgid "New creative dates are on their way"
+msgstr "Новые творческие встречи уже скоро"
+
+msgid "New dates will appear here soon. Please check the schedule later."
+msgstr "Скоро здесь появятся новые даты. Проверьте расписание позже."
+
+msgid "New request"
+msgstr "Новая заявка"
+
+msgid "No payment now. Your place is confirmed personally by the instructor."
+msgstr "Сейчас оплачивать не нужно. Мастер лично подтвердит ваше место."
+
+msgid "Odesa"
+msgstr "Одесса"
+
+msgid "Phone number"
+msgstr "Номер телефона"
+
+msgid "Please check your name, phone number and consent, then try again."
+msgstr "Проверьте имя, номер телефона и согласие и попробуйте ещё раз."
+
+msgid "Price, UAH"
+msgstr "Цена, грн"
+
+msgid "Privacy policy"
+msgstr "Политика конфиденциальности"
+
+msgid "Received"
+msgstr "Получено"
+
+msgid "Remove"
+msgstr "Убрать"
+
+msgid "Remove this date? Existing requests will remain in the request list."
+msgstr "Убрать эту дату? Существующие заявки останутся в списке заявок."
+
+msgid "Request a place"
+msgstr "Записаться на МК"
+
+msgid "Request received. The instructor will contact you to confirm your place."
+msgstr "Заявка получена. Мастер свяжется с вами, чтобы подтвердить место."
+
+msgid "Requests do not reserve seats automatically. Set Fully booked when the group is complete. If guests have already signed up, contact them before changing or cancelling a date."
+msgstr "Заявки не резервируют места автоматически. Когда группа набрана, выберите «Мест нет». Если уже есть заявки, свяжитесь с гостями перед изменением или отменой даты."
+
+msgid "Reset filters"
+msgstr "Сбросить фильтры"
+
+msgid "Save status"
+msgstr "Сохранить статус"
+
+msgid "Schedule not saved. The previous dates have been kept."
+msgstr "Расписание не сохранено. Предыдущие даты остались без изменений."
+
+msgid "Schedule pages"
+msgstr "Страницы расписания"
+
+msgid "Sending…"
+msgstr "Отправляем…"
+
+msgid "Show workshops"
+msgstr "Показать мастер-классы"
+
+msgid "Status"
+msgstr "Статус"
+
+msgid "Studio address"
+msgstr "Адрес студии"
+
+msgid "Tell guests about the age range and experience level."
+msgstr "Укажите возраст участников и нужный уровень опыта."
+
+msgid "The excerpt is the short text on the schedule card. Preview lets you check the article before publishing."
+msgstr "Отрывок — короткий текст на карточке расписания. Предпросмотр позволяет проверить статью перед публикацией."
+
+msgid "The request could not be saved. Please try again."
+msgstr "Не удалось сохранить заявку. Попробуйте ещё раз."
+
+msgid "There are no workshops for this selection yet. Try another city or month."
+msgstr "По этим условиям занятий пока нет. Выберите другой город или месяц."
+
+msgid "These are the details at the time of the request. Check the current schedule before confirming with the guest."
+msgstr "Это данные на момент заявки. Перед подтверждением гостю проверьте текущее расписание."
+
+msgid "This date is no longer available. Please reload and choose another date."
+msgstr "Запись на эту дату уже закрыта. Обновите страницу и выберите другую."
+
+msgid "This form has expired. Reload the page and try again."
+msgstr "Форма устарела. Обновите страницу и попробуйте ещё раз."
+
+msgid "Three simple steps"
+msgstr "Три простых шага"
+
+msgid "Time"
+msgstr "Время"
+
+msgid "Times are in Kyiv time. One article can have several dates. Copy a row to add the next class."
+msgstr "Время указано по Киеву. Одна статья может иметь несколько дат. Копируйте строку, чтобы добавить следующее занятие."
+
+msgid "Too many requests. Please try again in a few minutes."
+msgstr "Слишком много заявок. Попробуйте через несколько минут."
+
+msgid "Upcoming dates"
+msgstr "Ближайшие даты"
+
+msgid "Upcoming workshops"
+msgstr "Ближайшие мастер-классы"
+
+msgid "Use at most 100 dates per workshop."
+msgstr "Добавьте не больше 100 дат к одному мастер-классу."
+
+msgid "View schedule"
+msgstr "Посмотреть расписание"
+
+msgid "What is included"
+msgstr "Что входит в стоимость"
+
+msgid "What we will create"
+msgstr "Что мы создадим"
+
+msgid "When"
+msgstr "Когда"
+
+msgid "Who it is for"
+msgstr "Для кого этот мастер-класс"
+
+msgid "Workshop"
+msgstr "Мастер-класс"
+
+msgid "Workshop instructor"
+msgstr "Мастер МК"
+
+msgid "Workshops"
+msgstr "Мастер-классы"
+
+msgid "YOUR CREATIVE PAUSE"
+msgstr "ВАША ТВОРЧЕСКАЯ ПАУЗА"
+
+msgid "Your name"
+msgstr "Ваше имя"
+
+msgid "Your place at the table"
+msgstr "Ваше место за мольбертом"
+
+msgid "Your request is being processed. Please wait a moment and try again."
+msgstr "Заявка обрабатывается. Немного подождите и попробуйте ещё раз."
+
+msgid "something beautiful."
+msgstr "для прекрасного."

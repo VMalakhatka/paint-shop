@@ -16,6 +16,7 @@
 | Каталог и композиция skills | `docs/SKILLS_CATALOG.md` |
 | Правила актуализации и checks | `docs/DOCUMENTATION_POLICY.md` |
 | Неподтверждённые риски и очередь | `docs/KNOWN_GAPS.md` |
+| Расписание МК, статьи, заявки и роль мастера | `docs/WORKSHOPS_GUIDE_RU.md` |
 | Пользовательские сценарии | `docs/SITE_USER_GUIDE_UK.md` |
 | Оптовая справка на сайте, заказ, импорт/экспорт, черновики, повтор старого заказа, склады, checkout split, баланс и документы ФОЛІО | Канон: `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md`; публикация: `wp-content/mu-plugins/pc-wholesale-help.php` + assets/i18n |
 | Media workflow оператора | `docs/MEDIA_MANAGER_GUIDE_UK.md` |

@@ -1,0 +1,297 @@
+msgid ""
+msgstr "Project-Id-Version: Lavka Workshops 1.0.0\nContent-Type: text/plain; charset=UTF-8\nLanguage: \nMIME-Version: 1.0\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#, php-format
+msgid "%s min"
+msgstr ""
+
+msgid "1. Add a title and cover photo. 2. Write the article like a Word document; use Add Media for photos. 3. Fill in the dates below and publish."
+msgstr ""
+
+msgid "A few hours offline. Something beautiful to take home."
+msgstr ""
+
+msgid "A little time for creativity"
+msgstr ""
+
+msgid "Add date"
+msgstr ""
+
+msgid "Add workshop"
+msgstr ""
+
+msgid "All cities"
+msgstr ""
+
+msgid "All current dates are fully booked. Please check back for new dates."
+msgstr ""
+
+msgid "All times are Kyiv time"
+msgstr ""
+
+msgid "All upcoming dates"
+msgstr ""
+
+msgid "All workshops"
+msgstr ""
+
+msgid "Author"
+msgstr ""
+
+msgid "Availability"
+msgstr ""
+
+msgid "Booking open"
+msgstr ""
+
+msgid "Booking request"
+msgstr ""
+
+msgid "Booking requests"
+msgstr ""
+
+msgid "Cancelled"
+msgstr ""
+
+msgid "Check the date, city, address, duration and price in every row."
+msgstr ""
+
+msgid "Choose a date"
+msgstr ""
+
+msgid "Choose a workshop, bring your curiosity and create something of your own."
+msgstr ""
+
+msgid "Choose cover photo"
+msgstr ""
+
+msgid "Choose your date"
+msgstr ""
+
+msgid "City"
+msgstr ""
+
+msgid "Confirmed"
+msgstr ""
+
+msgid "Contact the guest yourself. Changing the status does not send a message or change availability."
+msgstr ""
+
+msgid "Copy date"
+msgstr ""
+
+msgid "Could not confirm receipt. Your details are still here. Please try again; repeated requests will not create a duplicate."
+msgstr ""
+
+msgid "Cover photo"
+msgstr ""
+
+msgid "Date"
+msgstr ""
+
+msgid "Dates and booking"
+msgstr ""
+
+msgid "Describe the artwork and the experience in a few sentences."
+msgstr ""
+
+msgid "Duplicate date identifier. Reload the editor."
+msgstr ""
+
+msgid "Duration, minutes"
+msgstr ""
+
+msgid "Edit workshop"
+msgstr ""
+
+msgid "Explain what to bring and when guests can collect their artwork."
+msgstr ""
+
+msgid "Explore workshop"
+msgstr ""
+
+msgid "Fully booked"
+msgstr ""
+
+msgid "Good to know"
+msgstr ""
+
+msgid "Guest"
+msgstr ""
+
+msgid "Guidance from the instructor"
+msgstr ""
+
+msgid "I agree to be contacted about this workshop using the details I provided."
+msgstr ""
+
+msgid "Kyiv"
+msgstr ""
+
+msgid "LAVKA · CREATIVE STUDIO"
+msgstr ""
+
+msgid "LET’S CREATE TOGETHER"
+msgstr ""
+
+msgid "Make time for"
+msgstr ""
+
+msgid "Materials and tools"
+msgstr ""
+
+msgid "Materials, inspiration and your next favourite memory."
+msgstr ""
+
+msgid "Move to trash"
+msgstr ""
+
+msgid "New creative dates are on their way"
+msgstr ""
+
+msgid "New dates will appear here soon. Please check the schedule later."
+msgstr ""
+
+msgid "New request"
+msgstr ""
+
+msgid "No payment now. Your place is confirmed personally by the instructor."
+msgstr ""
+
+msgid "Odesa"
+msgstr ""
+
+msgid "Phone number"
+msgstr ""
+
+msgid "Please check your name, phone number and consent, then try again."
+msgstr ""
+
+msgid "Price, UAH"
+msgstr ""
+
+msgid "Privacy policy"
+msgstr ""
+
+msgid "Received"
+msgstr ""
+
+msgid "Remove"
+msgstr ""
+
+msgid "Remove this date? Existing requests will remain in the request list."
+msgstr ""
+
+msgid "Request a place"
+msgstr ""
+
+msgid "Request received. The instructor will contact you to confirm your place."
+msgstr ""
+
+msgid "Requests do not reserve seats automatically. Set Fully booked when the group is complete. If guests have already signed up, contact them before changing or cancelling a date."
+msgstr ""
+
+msgid "Reset filters"
+msgstr ""
+
+msgid "Save status"
+msgstr ""
+
+msgid "Schedule not saved. The previous dates have been kept."
+msgstr ""
+
+msgid "Schedule pages"
+msgstr ""
+
+msgid "Sending…"
+msgstr ""
+
+msgid "Show workshops"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Studio address"
+msgstr ""
+
+msgid "Tell guests about the age range and experience level."
+msgstr ""
+
+msgid "The excerpt is the short text on the schedule card. Preview lets you check the article before publishing."
+msgstr ""
+
+msgid "The request could not be saved. Please try again."
+msgstr ""
+
+msgid "There are no workshops for this selection yet. Try another city or month."
+msgstr ""
+
+msgid "These are the details at the time of the request. Check the current schedule before confirming with the guest."
+msgstr ""
+
+msgid "This date is no longer available. Please reload and choose another date."
+msgstr ""
+
+msgid "This form has expired. Reload the page and try again."
+msgstr ""
+
+msgid "Three simple steps"
+msgstr ""
+
+msgid "Time"
+msgstr ""
+
+msgid "Times are in Kyiv time. One article can have several dates. Copy a row to add the next class."
+msgstr ""
+
+msgid "Too many requests. Please try again in a few minutes."
+msgstr ""
+
+msgid "Upcoming dates"
+msgstr ""
+
+msgid "Upcoming workshops"
+msgstr ""
+
+msgid "Use at most 100 dates per workshop."
+msgstr ""
+
+msgid "View schedule"
+msgstr ""
+
+msgid "What is included"
+msgstr ""
+
+msgid "What we will create"
+msgstr ""
+
+msgid "When"
+msgstr ""
+
+msgid "Who it is for"
+msgstr ""
+
+msgid "Workshop"
+msgstr ""
+
+msgid "Workshop instructor"
+msgstr ""
+
+msgid "Workshops"
+msgstr ""
+
+msgid "YOUR CREATIVE PAUSE"
+msgstr ""
+
+msgid "Your name"
+msgstr ""
+
+msgid "Your place at the table"
+msgstr ""
+
+msgid "Your request is being processed. Please wait a moment and try again."
+msgstr ""
+
+msgid "something beautiful."
+msgstr ""

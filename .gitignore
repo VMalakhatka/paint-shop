@@ -153,3 +153,6 @@ wp-content/languages/loco/**/backup-*.po~
 
 !wp-content/plugins/pc-checkbox-fiscalization/
 !wp-content/plugins/pc-checkbox-fiscalization/**
+
+!wp-content/plugins/lavka-workshops/
+!wp-content/plugins/lavka-workshops/**

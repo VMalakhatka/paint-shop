@@ -26,6 +26,7 @@ REQUIRED = (
     "docs/DOCUMENTATION_POLICY.md",
     "docs/KNOWN_GAPS.md",
     "docs/WHOLESALE_CUSTOMER_GUIDE_UK.md",
+    "docs/WORKSHOPS_GUIDE_RU.md",
 )
 
 
@@ -37,6 +38,11 @@ class ImpactRule:
 
 
 IMPACT_RULES = (
+    ImpactRule(
+        "workshop articles, schedule and booking requests",
+        ("wp-content/plugins/lavka-workshops/**",),
+        ("docs/WORKSHOPS_GUIDE_RU.md", "wp-content/plugins/lavka-workshops/README.md"),
+    ),
     ImpactRule(
         "synchronization, reports and Folio projections",
         (
@@ -122,6 +128,7 @@ IMPACT_RULES = (
         ),
         (
             "docs/BOOTSTRAP_AND_RECOVERY.md",
+            "docs/WORKSHOPS_GUIDE_RU.md",
             "docs/BACKEND_GUIDE.md",
             "docs/JAVA_DOCKER_RUNTIME.md",
             "docs/OPERATIONS_RUNBOOK.md",
