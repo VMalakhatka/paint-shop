@@ -2,12 +2,9 @@
 namespace Lavka\Workshops;
 defined('ABSPATH') || exit;
 
-add_filter('use_block_editor_for_post_type', static fn($use, $type) => $type === 'lavka_workshop' ? false : $use, 10, 2);
 add_action('add_meta_boxes', static function () {
     add_meta_box('lw-schedule', __('Dates and booking', 'lavka-workshops'), __NAMESPACE__ . '\\schedule_box', 'lavka_workshop', 'normal', 'high');
-    add_meta_box('lw-guide', __('Three simple steps', 'lavka-workshops'), static function () {
-        echo '<p>' . esc_html__('1. Add a title and cover photo. 2. Fill in the article sections; insert examples into empty fields if useful. 3. Add dates, save and view your article.', 'lavka-workshops') . '</p><p>' . esc_html__('The excerpt is the short text on the schedule card. Preview lets you check the article before publishing.', 'lavka-workshops') . '</p><p><a href="' . esc_url(get_post_type_archive_link('lavka_workshop')) . '" target="_blank">' . esc_html__('View schedule', 'lavka-workshops') . '</a></p>';
-    }, 'lavka_workshop', 'side', 'high');
+
 });
 function schedule_row(array $row, string $index): void {
     $prefix = 'lw_sessions[' . $index . ']';

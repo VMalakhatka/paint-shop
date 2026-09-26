@@ -1,0 +1,26 @@
+/* The same content styles run inside Gutenberg and on the published article. */
+.lw-publication,.editor-styles-wrapper{--lw-studio-ink:#292c29;--lw-studio-green:#42664d;--lw-studio-paper:#f7f5ef;--lw-studio-line:#dcded4}
+.lw-publication{color:var(--lw-studio-ink);font:17px/1.85 Arial,sans-serif;overflow-wrap:break-word}
+.lw-publication>*,.editor-styles-wrapper>.is-root-container>*{max-width:760px;margin-left:auto;margin-right:auto}
+.lw-publication>.lw-publication{max-width:none}
+.lw-publication .lw-composition,.lw-publication>.alignwide,.editor-styles-wrapper .lw-composition{max-width:1080px}
+.lw-publication>.alignfull{max-width:none}
+.lw-publication h2,.lw-publication h3,.editor-styles-wrapper h2,.editor-styles-wrapper h3{font-family:Georgia,'Times New Roman',serif;font-weight:400;color:#292c29;line-height:1.2;letter-spacing:-.02em}
+.lw-publication h2,.editor-styles-wrapper h2{font-size:34px;margin:0 0 22px}
+.lw-publication h3,.editor-styles-wrapper h3{font-size:26px}
+.lw-publication p,.editor-styles-wrapper p{font-size:17px;line-height:1.85;margin-bottom:22px}
+.lw-publication .lw-composition,.editor-styles-wrapper .lw-composition{margin-top:48px;margin-bottom:48px}
+.lw-publication .wp-block-columns,.editor-styles-wrapper .wp-block-columns{gap:36px;align-items:center}
+.lw-publication .wp-block-column,.editor-styles-wrapper .wp-block-column{min-width:0}
+.lw-publication figure,.editor-styles-wrapper figure{margin-top:0;margin-bottom:26px}
+.lw-publication img,.editor-styles-wrapper .wp-block-image img{border-radius:12px;max-width:100%;height:auto}
+.lw-publication .wp-block-image figcaption,.editor-styles-wrapper figcaption{font:13px/1.6 Arial,sans-serif;color:#71726a;text-align:center}
+.lw-publication .lw-note-card,.editor-styles-wrapper .lw-note-card{padding:36px;background:#eeefe6;border:1px solid #dce1d4;border-radius:14px}
+.lw-publication .lw-pullquote,.editor-styles-wrapper .lw-pullquote{padding:25px 36px;border-left:3px solid #99afa0}
+.lw-publication .wp-block-quote,.editor-styles-wrapper .wp-block-quote{border:0;margin:0;padding:0}
+.lw-publication .wp-block-quote p,.editor-styles-wrapper .wp-block-quote p{font:italic 27px/1.6 Georgia,serif}
+.lw-publication .wp-block-button__link,.editor-styles-wrapper .wp-block-button__link{background:#42664d;color:#fff;border-radius:6px;padding:14px 22px;font:600 15px/1.5 Arial,sans-serif;text-decoration:none}
+.lw-publication a:focus-visible{outline:3px solid #b9843f;outline-offset:4px}
+.lw-publication .wp-block-embed iframe,.lw-publication video{max-width:100%}
+.lw-block-article{display:block!important}.lw-block-article>.lw-booking{max-width:760px;margin:60px auto 0}
+@media(max-width:781px){.lw-publication .wp-block-columns{flex-wrap:wrap!important}.lw-publication .wp-block-column{flex-basis:100%!important}.lw-publication .lw-composition{margin-top:30px;margin-bottom:30px}.lw-publication .lw-note-card{padding:24px}.lw-publication h2{font-size:29px}.lw-publication .lw-pullquote{padding:16px 24px}}

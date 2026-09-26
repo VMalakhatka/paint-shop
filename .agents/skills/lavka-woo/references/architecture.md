@@ -57,9 +57,11 @@ MariaDB хранит состояние сайта и проекции ФОЛИ�
 отдельного требования оплаты. Вместимость подтверждает мастер вручную; повтор
 телефона на одну дату идемпотентен. Woo admin guard допускает роль по capability
 `edit_lavka_workshops`, без выдачи `edit_posts`/`manage_woocommerce`.
-Пять визуальных разделов статьи собираются в единый `post_content`; отдельные
-article meta не создавать, иначе редакции и preview расходятся. Старый нестандартный
-текст целиком остаётся в первом разделе; чтение не мигрирует базу. Реализация:
-`inc/article-editor.php` и `tests/article-editor.php` внутри плагина.
+С 2.0 (локально проверено 2026-09-26) статья редактируется Gutenberg; три стартовых
+макета и семь композиций состоят из core blocks в едином `post_content`.
+REST включён только для публичного CPT статей с обычными capability checks;
+заявки и `_lw_sessions` через REST не публиковать. Даты сохраняет совместимый
+метабокс. Legacy HTML не мигрировать на чтении: преобразование инициирует мастер.
+Источники: `inc/block-editor.php`, `inc/patterns.php`, `tests/block-editor.php`.
 Источник: `wp-content/plugins/lavka-workshops/`; lifecycle и инструкция мастера —
 `docs/WORKSHOPS_GUIDE_RU.md`. Production-активация остаётся отдельным решением.

@@ -64,7 +64,8 @@ function article(): void {
     the_post(); $id = get_the_ID();
     echo '<a class="lw-back" href="' . esc_url(get_post_type_archive_link('lavka_workshop')) . '">← ' . esc_html__('All workshops', 'lavka-workshops') . '</a><div class="lw-article-head"><div><span class="lw-eyebrow">' . esc_html__('YOUR CREATIVE PAUSE', 'lavka-workshops') . '</span><h1>' . esc_html(get_the_title()) . '</h1><p>' . esc_html(get_the_excerpt()) . '</p><a class="lw-button" href="#lw-booking">' . esc_html__('Choose a date', 'lavka-workshops') . ' <span aria-hidden="true">↗︎</span></a></div><div class="lw-hero-photo">';
     cover($id, 'full');
-    echo '</div></div><div class="lw-article-layout"><article class="lw-article-content">';
+    $blocks = has_blocks(get_the_content());
+    echo '</div></div><div class="lw-article-layout' . ($blocks ? ' lw-block-article' : '') . '"><article class="lw-article-content' . ($blocks ? ' lw-publication' : '') . '">';
     the_content();
     echo '</article><aside class="lw-booking" id="lw-booking"><span class="lw-eyebrow">' . esc_html__('LET’S CREATE TOGETHER', 'lavka-workshops') . '</span><h2>' . esc_html__('Your place at the table', 'lavka-workshops') . '</h2>';
     booking_form($id);
