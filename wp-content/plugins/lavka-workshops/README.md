@@ -65,12 +65,13 @@ The store is unaffected; authenticated staff use the normal booking flow for tes
 
 Local acceptance: 33 closed-access checks plus the existing 81 public-mode checks.
 Run `wp eval-file wp-content/plugins/lavka-workshops/tests/visibility.php --skip-plugins --skip-themes`.
-Production activation authorized 2026-09-26; see the guide for deployment evidence.
+Production 2.1 activation verified 2026-09-26 in closed mode; see the guide for
+backup paths, targeted deploy evidence, live demo links and acceptance results.
 
 ## Lifecycle
 
 Git allow-list registered; deploy manifest policy `manual`. Local activation verified
-2026-09-25. No secrets/options required. Production closed deployment is authorized; final checks are recorded in the guide.
+2026-09-25. No secrets/options required. Production closed deployment and activation verified 2026-09-26; checks are in the guide.
 Real content, instructor assignment and public menu launch are separate steps. Activation refreshes
 rewrite rules and capabilities only. No automatic demo seeding or database export.
 Deployment source and rollback details are in the operator guide; deactivate to
@@ -104,7 +105,7 @@ text/headings. Public demo `/master-klas/demo-gutenberg/` verified at desktop wi
 and 390 px mobile; the editor shows the same content styles. The Codex in-app browser
 left the Gutenberg iframe canvas blank; use Chrome for the authoring workflow.
 The local demo is not deployed or seeded automatically.
-Production deployment/activation remains pending. Gutenberg uses the WordPress core
+Production 2.1 is active in closed testing. Gutenberg uses the WordPress core
 already installed; do not install the separate experimental Gutenberg plugin.
 
 Templately's cloud-import editor assets are dequeued only on workshop screens;
