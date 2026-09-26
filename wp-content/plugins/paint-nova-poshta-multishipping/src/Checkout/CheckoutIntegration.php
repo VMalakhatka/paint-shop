@@ -36,6 +36,8 @@ final class CheckoutIntegration
         add_action('wp_ajax_nopriv_pnpm_search_recipient_cities', [$this, 'searchCities']);
         add_action('wp_ajax_pnpm_search_recipient_points', [$this, 'searchPoints']);
         add_action('wp_ajax_nopriv_pnpm_search_recipient_points', [$this, 'searchPoints']);
+        add_action('wp_ajax_pnpm_recipient_point', [$this, 'pointDetails']);
+        add_action('wp_ajax_nopriv_pnpm_recipient_point', [$this, 'pointDetails']);
     }
 
     public function assets(): void
@@ -53,6 +55,7 @@ final class CheckoutIntegration
             'requestFailed' => __('Nova Poshta directory could not be loaded.', 'paint-nova-poshta-multishipping'),
             'branchLabel' => __('Nova Poshta branch', 'paint-nova-poshta-multishipping'),
             'parcelLockerLabel' => __('Nova Poshta parcel locker', 'paint-nova-poshta-multishipping'),
+            'point' => PointCard::labels(),
         ]);
     }
 
@@ -99,7 +102,8 @@ final class CheckoutIntegration
             'custom_attributes' => ['autocomplete' => 'off'],
         ], (string) ($state['point_label'] ?? ''));
         echo '<input type="hidden" id="pnpm_point_ref" name="pnpm_point_ref" value="' . esc_attr((string) ($state['point_ref'] ?? '')) . '">';
-        echo '<div class="pnpm-directory-results" id="pnpm-point-results" hidden></div></div>';
+        echo '<div class="pnpm-directory-results" id="pnpm-point-results" aria-live="polite" hidden></div>';
+        echo '<div id="pnpm-point-card" class="pnpm-point-card" aria-live="polite" hidden></div></div>';
         echo '<p class="pnpm-address-help" id="pnpm-address-help">' . esc_html__('For courier delivery, fill in the shipping street and building in the standard address fields above.', 'paint-nova-poshta-multishipping') . '</p>';
         echo '</section>';
     }
@@ -228,13 +232,25 @@ final class CheckoutIntegration
         $city_ref = sanitize_text_field(wp_unslash((string) ($_GET['cityRef'] ?? '')));
         $query = sanitize_text_field(wp_unslash((string) ($_GET['query'] ?? '')));
         $kind = sanitize_key(wp_unslash((string) ($_GET['kind'] ?? 'branch')));
-        $result = $this->warehouses->search($city_ref, $query);
+        $expected = $kind === 'parcel_locker' ? 'postomat' : 'branch';
+        $result = $this->warehouses->searchPage($city_ref, $query, max(1, (int) ($_GET['page'] ?? 1)), $expected);
         if (is_wp_error($result)) {
             wp_send_json_error(['message' => $result->get_error_message()], 400);
         }
-        $expected = $kind === 'parcel_locker' ? 'postomat' : 'branch';
-        $result = array_values(array_filter($result, static fn(array $item): bool => ($item['kind'] ?? '') === $expected));
-        wp_send_json_success(['items' => $result]);
+        wp_send_json_success($result);
+    }
+
+    public function pointDetails(): void
+    {
+        check_ajax_referer('pnpm_checkout_directory', 'nonce');
+        $city = sanitize_text_field(wp_unslash((string) ($_GET['cityRef'] ?? '')));
+        $ref = sanitize_text_field(wp_unslash((string) ($_GET['ref'] ?? '')));
+        $result = $this->warehouses->find($city, $ref);
+        $kind = sanitize_key(wp_unslash((string) ($_GET['kind'] ?? 'branch')));
+        if (is_wp_error($result) || $result['kind'] !== ($kind === 'parcel_locker' ? 'postomat' : 'branch')) {
+            wp_send_json_error(['message' => __('The selected point could not be verified. Search and select it again.', 'paint-nova-poshta-multishipping')], 400);
+        }
+        wp_send_json_success(['item' => $result]);
     }
 
     /** @param array<string,mixed> $data @return array<string,string> */

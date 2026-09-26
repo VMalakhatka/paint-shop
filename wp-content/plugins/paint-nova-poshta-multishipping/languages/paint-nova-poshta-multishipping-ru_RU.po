@@ -147,3 +147,105 @@ msgstr "Услуги Новой почты оплачиваются по ТТН 
 
 msgid "Original order"
 msgstr "Исходный заказ"
+
+msgid "Point restrictions and hours"
+msgstr "Ограничения и график точки"
+
+msgid "Load more points"
+msgstr "Показать ещё отделения / почтоматы"
+
+msgid "No points of this type on this page. Load more or refine your search."
+msgstr "На этой странице нет точек выбранного типа. Загрузите следующие или уточните поиск."
+
+msgid "Try again"
+msgstr "Попробовать ещё раз"
+
+msgid "Not specified by Nova Poshta — check with the manager"
+msgstr "НП не указала — уточните у менеджера"
+
+msgid "Not specified"
+msgstr "Не указано"
+
+msgid "Maximum weight of one place (box)"
+msgstr "Максимальный вес одного места (коробки)"
+
+msgid "Maximum total shipment weight"
+msgstr "Максимальный вес всего отправления"
+
+msgid "Maximum declared value"
+msgstr "Максимальная объявленная стоимость"
+
+msgid "Receiving dimensions (length × width × height)"
+msgstr "Габариты получения (длина × ширина × высота)"
+
+msgid "Sending dimensions (length × width × height)"
+msgstr "Габариты отправления (длина × ширина × высота)"
+
+msgid "Directory status"
+msgstr "Статус в справочнике"
+
+msgid "Working (not a live open/closed indicator)"
+msgstr "Работает (не означает «открыто прямо сейчас»)"
+
+msgid "Not available for selection. Choose another point."
+msgstr "Недоступно для выбора. Выберите другую точку."
+
+msgid "kg"
+msgstr "кг"
+
+msgid "cm"
+msgstr "см"
+
+msgid "UAH"
+msgstr "грн"
+
+msgid "Weekly schedule from Nova Poshta"
+msgstr "Недельный график по данным НП"
+
+msgid "Day"
+msgstr "День"
+
+msgid "Opening hours"
+msgstr "Работа"
+
+msgid "Acceptance"
+msgstr "Приём"
+
+msgid "Delivery / issue"
+msgstr "Доставка / выдача"
+
+msgid "Mon"
+msgstr "Пн"
+
+msgid "Tue"
+msgstr "Вт"
+
+msgid "Wed"
+msgstr "Ср"
+
+msgid "Thu"
+msgstr "Чт"
+
+msgid "Fri"
+msgstr "Пт"
+
+msgid "Sat"
+msgstr "Сб"
+
+msgid "Sun"
+msgstr "Вс"
+
+msgid "Directory data may be cached for up to 15 minutes. Missing or zero limits do not mean unlimited. Hours are local to the point, not a promised delivery date."
+msgstr "Данные справочника могут кешироваться до 15 минут. Отсутствующий или нулевой лимит не означает «без ограничений». График указан по местному времени точки; это не обещанная дата доставки."
+
+msgid "These are directory restrictions, not confirmation that your order fits. The manager must check packed boxes, actual and volumetric weight, goods, access conditions and current Nova Poshta rules."
+msgstr "Это ограничения из справочника, а не подтверждение того, что ваш заказ подходит. Менеджер должен проверить упакованные коробки, фактический и объёмный вес, товары, условия доступа и актуальные правила НП."
+
+msgid "Check current Nova Poshta conditions"
+msgstr "Проверить актуальные условия Новой почты"
+
+msgid "How to choose a delivery point"
+msgstr "Как выбрать точку получения"
+
+msgid "The selected point could not be verified. Search and select it again."
+msgstr "Выбранную точку не удалось проверить. Найдите и выберите её ещё раз."

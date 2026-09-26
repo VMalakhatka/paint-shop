@@ -842,6 +842,7 @@ msgstr "Доставка в этом заказе — 0 грн; услуги п�
 
 msgid "Order emails to you and the store show the delivery method and your TTNs by warehouse before the products. For split orders, inherited shipping details are explicitly marked as covering all warehouses of the original order."
 msgstr "В письмах вам и магазину перед товарами показаны способ доставки и ваши ТТН по складам. Для разделённых заказов унаследованные данные доставки явно обозначены как отправления со всех складов исходного заказа."
+
 msgid "On a phone, open Additional filters to choose supplier, unit, warehouses, availability or price. The active count stays visible when collapsed. Search, Apply filters and Reset remain available; collapsing does not clear your choices."
 msgstr "На телефоне откройте «Дополнительные фильтры», чтобы выбрать поставщика, единицу измерения, склады, наличие или цену. Число активных условий видно и в свёрнутом состоянии. Поиск, «Применить фильтры» и «Сбросить» остаются доступными; сворачивание не сбрасывает выбор."
 
@@ -854,7 +855,6 @@ msgstr "Пустые ветки и категории, скрытые магаз
 msgid "Categories hidden by the shop are also omitted from the category tiles on the home page and in subcategories."
 msgstr "Категории, скрытые магазином, также не показываются среди плиток категорий на главной и в подкатегориях."
 
-
 msgid "On a phone or computer, open Additional filters to choose supplier, unit, warehouses, availability or price. The active count stays visible when collapsed. Search, Apply filters and Reset remain available; collapsing does not clear your choices."
 msgstr "На телефоне или компьютере откройте «Дополнительные фильтры», чтобы выбрать поставщика, единицу измерения, склады, наличие или цену. Счётчик активных условий виден и после сворачивания. Поиск, «Применить фильтры» и «Сбросить» остаются доступны; сворачивание не очищает выбор."
 
@@ -866,7 +866,6 @@ msgstr "Подсказки товаров"
 
 msgid "Payments marked PRD are shown for reference for the selected period. These received payments reduce total debt and are not added back to it. This figure is not the unused advance balance."
 msgstr "Платежи с пометкой ПРД показаны справочно за выбранный период. Полученные средства уменьшают общий долг и не прибавляются к нему повторно. Эта сумма не является остатком неиспользованного аванса."
-
 
 msgid "Choose units, suppliers and warehouses available in the current category and its subcategories. Equivalent unit spellings such as 50мл and 50 мл, or a trailing period after a unit, share one option and match all original spellings. Folio data is unchanged; volumes are not converted and units are not pack quantities. Products without a synced unit remain available when All units is selected."
 msgstr "Выберите единицы измерения, поставщиков и склады, доступные в текущей категории и её подкатегориях. Варианты вроде «50мл» / «50 мл» или «шт» / «шт.» объединены в один пункт, который находит все исходные записи. Данные ФОЛИО не меняются; объёмы не пересчитываются, единица измерения не означает фасовку. Товары без переданной единицы доступны при выборе «Все единицы»."
@@ -888,3 +887,15 @@ msgstr "Ваш выбор сохраняется для менеджера. По
 
 msgid "Open my account"
 msgstr "Открыть мой кабинет"
+
+msgid "Nova Poshta point restrictions"
+msgstr "Ограничения отделения или почтомата НП"
+
+msgid "Choose a city and delivery type, then search by point number or address. Use Load more points to continue beyond the first results, even if the current page has no points of your chosen type."
+msgstr "Выберите город и тип доставки, затем ищите по номеру или адресу точки. Кнопка «Показать ещё отделения / почтоматы» продолжает поиск после первых результатов, даже если на текущей странице нет точек выбранного типа."
+
+msgid "Selecting a point opens its card: weight per box and per shipment, receiving and sending dimensions, declared value limit, availability and weekly hours. Missing or zero API values mean that the limit needs clarification, not that there is no limit. Unavailable points cannot be selected."
+msgstr "После выбора открывается карточка точки: вес коробки и всего отправления, габариты получения и отправления, лимит объявленной стоимости, доступность и недельный график. Отсутствующие или нулевые значения API означают, что лимит нужно уточнить, а не что его нет. Недоступные точки выбрать нельзя."
+
+msgid "Directory data may be up to 15 minutes old. The card does not check whether your packed order fits. Confirm boxes, actual and volumetric weight, access and goods restrictions with the manager. If loading fails, retry; do not treat the missing card as permission to ship."
+msgstr "Данные справочника могут быть давностью до 15 минут. Карточка не проверяет пригодность упакованного заказа. Согласуйте коробки, фактический и объёмный вес, доступ и ограничения товаров с менеджером. Если загрузка не удалась, повторите её; отсутствие карточки не является разрешением на отправку."

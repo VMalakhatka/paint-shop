@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the Paint Nova Poshta Multishipping plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Paint Nova Poshta Multishipping 0.6.1\n"
+"Project-Id-Version: Paint Nova Poshta Multishipping 0.7.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/paint-nova-poshta-multishipping\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-20T16:18:48+00:00\n"
+"POT-Creation-Date: 2026-09-26T09:22:01+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: paint-nova-poshta-multishipping\n"
@@ -118,7 +118,7 @@ msgid "Record how you manually verified the TTN (10–500 characters)."
 msgstr ""
 
 #: src/Admin/ExternalTtnPanel.php:140
-#: src/Infrastructure/ExternalShipmentStore.php:21
+#: src/Infrastructure/ExternalShipmentStore.php:30
 msgid "Shipment saving is busy. Please try again."
 msgstr ""
 
@@ -130,7 +130,7 @@ msgstr ""
 #: src/Admin/ExternalTtnPanel.php:169
 #: src/Admin/ExternalTtnPanel.php:174
 #: src/Admin/ExternalTtnPanel.php:181
-#: src/Infrastructure/ExternalShipmentStore.php:93
+#: src/Infrastructure/ExternalShipmentStore.php:102
 msgid "Warehouse allocation changed. Please review the order."
 msgstr ""
 
@@ -611,89 +611,91 @@ msgstr ""
 msgid "Percentage of selected delivery components"
 msgstr ""
 
-#: src/Checkout/CheckoutIntegration.php:51
+#: src/Checkout/CheckoutIntegration.php:53
 msgid "Searching Nova Poshta..."
 msgstr ""
 
-#: src/Checkout/CheckoutIntegration.php:52
+#: src/Checkout/CheckoutIntegration.php:54
 msgid "Nothing was found. Refine the search."
 msgstr ""
 
-#: src/Checkout/CheckoutIntegration.php:53
+#: src/Checkout/CheckoutIntegration.php:55
+#: src/Infrastructure/WarehouseDirectory.php:51
 msgid "Nova Poshta directory could not be loaded."
 msgstr ""
 
-#: src/Checkout/CheckoutIntegration.php:54
-#: src/Checkout/CheckoutIntegration.php:86
+#: src/Checkout/CheckoutIntegration.php:56
+#: src/Checkout/CheckoutIntegration.php:89
 msgid "Nova Poshta branch"
 msgstr ""
 
-#: src/Checkout/CheckoutIntegration.php:55
-#: src/Checkout/CheckoutIntegration.php:87
+#: src/Checkout/CheckoutIntegration.php:57
+#: src/Checkout/CheckoutIntegration.php:90
 msgid "Nova Poshta parcel locker"
 msgstr ""
 
-#: src/Checkout/CheckoutIntegration.php:66
+#: src/Checkout/CheckoutIntegration.php:69
 #: src/Shipping/NovaPoshtaShippingMethod.php:36
 #: src/Shipping/NovaPoshtaShippingMethod.php:40
 msgid "Nova Poshta delivery"
 msgstr ""
 
-#: src/Checkout/CheckoutIntegration.php:67
+#: src/Checkout/CheckoutIntegration.php:70
 msgid "Choose the destination. The site will calculate every warehouse parcel and apply your delivery policy."
 msgstr ""
 
-#: src/Checkout/CheckoutIntegration.php:73
+#: src/Checkout/CheckoutIntegration.php:76
 msgid "City or settlement"
 msgstr ""
 
-#: src/Checkout/CheckoutIntegration.php:74
+#: src/Checkout/CheckoutIntegration.php:77
 msgid "Start typing and choose a city from the list"
 msgstr ""
 
-#: src/Checkout/CheckoutIntegration.php:84
+#: src/Checkout/CheckoutIntegration.php:87
 msgid "How to receive the parcel"
 msgstr ""
 
-#: src/Checkout/CheckoutIntegration.php:88
+#: src/Checkout/CheckoutIntegration.php:91
 msgid "Courier delivery to the address"
 msgstr ""
 
-#: src/Checkout/CheckoutIntegration.php:97
+#: src/Checkout/CheckoutIntegration.php:100
 msgid "Branch or parcel locker"
 msgstr ""
 
-#: src/Checkout/CheckoutIntegration.php:98
+#: src/Checkout/CheckoutIntegration.php:101
 msgid "Enter a number or address and choose from the list"
 msgstr ""
 
-#: src/Checkout/CheckoutIntegration.php:103
+#: src/Checkout/CheckoutIntegration.php:107
 msgid "For courier delivery, fill in the shipping street and building in the standard address fields above."
 msgstr ""
 
-#: src/Checkout/CheckoutIntegration.php:132
+#: src/Checkout/CheckoutIntegration.php:136
 msgid "Choose a city from the Nova Poshta list."
 msgstr ""
 
-#: src/Checkout/CheckoutIntegration.php:135
+#: src/Checkout/CheckoutIntegration.php:139
+#: src/Infrastructure/WarehouseDirectory.php:71
 msgid "Choose a Nova Poshta branch or parcel locker from the list."
 msgstr ""
 
-#: src/Checkout/CheckoutIntegration.php:141
+#: src/Checkout/CheckoutIntegration.php:145
 msgid "Enter the courier delivery street and building."
 msgstr ""
 
-#: src/Checkout/CheckoutIntegration.php:149
+#: src/Checkout/CheckoutIntegration.php:153
 msgid "Delivery has not been calculated yet. Check the Nova Poshta destination."
 msgstr ""
 
-#: src/Checkout/CheckoutIntegration.php:185
-#: src/Checkout/CheckoutIntegration.php:197
+#: src/Checkout/CheckoutIntegration.php:189
+#: src/Checkout/CheckoutIntegration.php:201
 msgid "Nova Poshta calculation"
 msgstr ""
 
 #. translators: %d: parcel count.
-#: src/Checkout/CheckoutIntegration.php:200
+#: src/Checkout/CheckoutIntegration.php:204
 #, php-format
 msgid "%d parcel"
 msgid_plural "%d parcels"
@@ -701,13 +703,18 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: 1: carrier total, 2: store contribution.
-#: src/Checkout/CheckoutIntegration.php:205
+#: src/Checkout/CheckoutIntegration.php:209
 #, php-format
 msgid "Carrier total: %1$s. Store contribution: %2$s."
 msgstr ""
 
-#: src/Checkout/CheckoutIntegration.php:210
+#: src/Checkout/CheckoutIntegration.php:214
 msgid "Cash on delivery is unavailable for this multi-warehouse delivery. Choose prepayment."
+msgstr ""
+
+#: src/Checkout/CheckoutIntegration.php:251
+#: src/Infrastructure/WarehouseDirectory.php:80
+msgid "The selected point could not be verified. Search and select it again."
 msgstr ""
 
 #: src/Checkout/ExternalTtnCheckout.php:72
@@ -728,8 +735,8 @@ msgstr ""
 
 #: src/Checkout/ExternalTtnCheckout.php:120
 #: src/Checkout/ExternalTtnCheckout.php:166
-#: src/Infrastructure/ExternalShipmentStore.php:35
-#: src/Infrastructure/ExternalShipmentStore.php:42
+#: src/Infrastructure/ExternalShipmentStore.php:44
+#: src/Infrastructure/ExternalShipmentStore.php:51
 msgid "This order already has shipments. Contact the manager before changing a TTN."
 msgstr ""
 
@@ -755,7 +762,141 @@ msgid "A TTN is already in use. Use a separate TTN for each warehouse and order.
 msgstr ""
 
 #: src/Checkout/ExternalTtnCheckout.php:179
+#: src/Infrastructure/ExternalShipmentStore.php:20
+#: src/Infrastructure/ExternalShipmentStore.php:25
 msgid "Review the customer TTN fields before placing the order."
+msgstr ""
+
+#: src/Checkout/PointCard.php:13
+msgid "Point restrictions and hours"
+msgstr ""
+
+#: src/Checkout/PointCard.php:14
+msgid "Load more points"
+msgstr ""
+
+#: src/Checkout/PointCard.php:15
+msgid "No points of this type on this page. Load more or refine your search."
+msgstr ""
+
+#: src/Checkout/PointCard.php:16
+msgid "Try again"
+msgstr ""
+
+#: src/Checkout/PointCard.php:17
+msgid "Not specified by Nova Poshta — check with the manager"
+msgstr ""
+
+#: src/Checkout/PointCard.php:18
+msgid "Not specified"
+msgstr ""
+
+#: src/Checkout/PointCard.php:19
+msgid "Maximum weight of one place (box)"
+msgstr ""
+
+#: src/Checkout/PointCard.php:20
+msgid "Maximum total shipment weight"
+msgstr ""
+
+#: src/Checkout/PointCard.php:21
+msgid "Maximum declared value"
+msgstr ""
+
+#: src/Checkout/PointCard.php:22
+msgid "Receiving dimensions (length × width × height)"
+msgstr ""
+
+#: src/Checkout/PointCard.php:23
+msgid "Sending dimensions (length × width × height)"
+msgstr ""
+
+#: src/Checkout/PointCard.php:24
+msgid "Directory status"
+msgstr ""
+
+#: src/Checkout/PointCard.php:25
+msgid "Working (not a live open/closed indicator)"
+msgstr ""
+
+#: src/Checkout/PointCard.php:26
+msgid "Not available for selection. Choose another point."
+msgstr ""
+
+#: src/Checkout/PointCard.php:27
+msgid "kg"
+msgstr ""
+
+#: src/Checkout/PointCard.php:28
+msgid "cm"
+msgstr ""
+
+#: src/Checkout/PointCard.php:29
+msgid "UAH"
+msgstr ""
+
+#: src/Checkout/PointCard.php:30
+msgid "Weekly schedule from Nova Poshta"
+msgstr ""
+
+#: src/Checkout/PointCard.php:31
+msgid "Day"
+msgstr ""
+
+#: src/Checkout/PointCard.php:32
+msgid "Opening hours"
+msgstr ""
+
+#: src/Checkout/PointCard.php:33
+msgid "Acceptance"
+msgstr ""
+
+#: src/Checkout/PointCard.php:34
+msgid "Delivery / issue"
+msgstr ""
+
+#: src/Checkout/PointCard.php:36
+msgid "Mon"
+msgstr ""
+
+#: src/Checkout/PointCard.php:37
+msgid "Tue"
+msgstr ""
+
+#: src/Checkout/PointCard.php:38
+msgid "Wed"
+msgstr ""
+
+#: src/Checkout/PointCard.php:39
+msgid "Thu"
+msgstr ""
+
+#: src/Checkout/PointCard.php:40
+msgid "Fri"
+msgstr ""
+
+#: src/Checkout/PointCard.php:41
+msgid "Sat"
+msgstr ""
+
+#: src/Checkout/PointCard.php:42
+msgid "Sun"
+msgstr ""
+
+#: src/Checkout/PointCard.php:44
+msgid "Directory data may be cached for up to 15 minutes. Missing or zero limits do not mean unlimited. Hours are local to the point, not a promised delivery date."
+msgstr ""
+
+#: src/Checkout/PointCard.php:45
+msgid "These are directory restrictions, not confirmation that your order fits. The manager must check packed boxes, actual and volumetric weight, goods, access conditions and current Nova Poshta rules."
+msgstr ""
+
+#: src/Checkout/PointCard.php:46
+msgid "Check current Nova Poshta conditions"
+msgstr ""
+
+#: src/Checkout/PointCard.php:47
+msgid "How to choose a delivery point"
 msgstr ""
 
 #. translators: %d: order item ID
@@ -896,12 +1037,12 @@ msgstr ""
 msgid "Nova Poshta API returned an invalid response."
 msgstr ""
 
-#: src/Infrastructure/ExternalShipmentStore.php:46
-#: src/Infrastructure/ExternalShipmentStore.php:72
+#: src/Infrastructure/ExternalShipmentStore.php:55
+#: src/Infrastructure/ExternalShipmentStore.php:81
 msgid "The shipment could not be saved. Contact the manager before retrying."
 msgstr ""
 
-#: src/Infrastructure/ExternalShipmentStore.php:126
+#: src/Infrastructure/ExternalShipmentStore.php:135
 msgid "The TTN could not be saved. It may already belong to another order. Contact the manager."
 msgstr ""
 
@@ -925,12 +1066,8 @@ msgstr ""
 msgid "Nova Poshta could not calculate the delivery cost."
 msgstr ""
 
-#: src/Infrastructure/WarehouseDirectory.php:26
+#: src/Infrastructure/WarehouseDirectory.php:35
 msgid "Choose a registered sender address and enter a branch number or address."
-msgstr ""
-
-#: src/Infrastructure/WarehouseDirectory.php:51
-msgid "Nova Poshta rejected the handover point search."
 msgstr ""
 
 #: src/Shipping/NovaPoshtaShippingMethod.php:19

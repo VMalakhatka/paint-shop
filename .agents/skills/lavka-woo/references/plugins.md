@@ -128,6 +128,15 @@ MU-плагины загружаются автоматически и не ви
 
 ## i18n
 
+Довідник точок НП, локально 2026-09-26: `WarehouseDirectory::searchPage` у 0.7.0
+пагінує сирі рядки до фільтрації типу; порожня сторінка branch/postomat не доводить
+відсутності наступних точок. `PointCard`/checkout показує API-ліміти, але не
+валідує запаковані місця замовлення. Нуль/відсутній ліміт — unknown, не unlimited;
+не змішувати PlaceMaxWeightAllowed та TotalMaxWeightAllowed. Exact Ref при
+відновленні картки перевіряється разом із CityRef/типом. Контракт і перевірки:
+README `paint-nova-poshta-multishipping`; інструкція —
+`docs/NOVA_POSHTA_WHOLESALE_GUIDE_UK.md`. Production 0.7.0 не розгорнуто.
+
 Клиентские ТТН, проверено локально 2026-09-20: `paint-nova-poshta-multishipping`
 0.6.0 принимает текст/ссылку на checkout только по `pc_wholesale_customer_roles`.
 Один логический shipping package → несколько физических складов. Shipment хранится

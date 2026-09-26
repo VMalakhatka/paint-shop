@@ -811,6 +811,7 @@ msgstr ""
 
 msgid "Order emails to you and the store show the delivery method and your TTNs by warehouse before the products. For split orders, inherited shipping details are explicitly marked as covering all warehouses of the original order."
 msgstr ""
+
 msgid "On a phone, open Additional filters to choose supplier, unit, warehouses, availability or price. The active count stays visible when collapsed. Search, Apply filters and Reset remain available; collapsing does not clear your choices."
 msgstr ""
 
@@ -822,7 +823,6 @@ msgstr ""
 
 msgid "Categories hidden by the shop are also omitted from the category tiles on the home page and in subcategories."
 msgstr ""
-
 
 msgid "On a phone or computer, open Additional filters to choose supplier, unit, warehouses, availability or price. The active count stays visible when collapsed. Search, Apply filters and Reset remain available; collapsing does not clear your choices."
 msgstr ""
@@ -836,7 +836,6 @@ msgstr ""
 msgid "Payments marked PRD are shown for reference for the selected period. These received payments reduce total debt and are not added back to it. This figure is not the unused advance balance."
 msgstr ""
 
-
 msgid "Choose units, suppliers and warehouses available in the current category and its subcategories. Equivalent unit spellings such as 50мл and 50 мл, or a trailing period after a unit, share one option and match all original spellings. Folio data is unchanged; volumes are not converted and units are not pack quantities. Products without a synced unit remain available when All units is selected."
 msgstr ""
 
@@ -844,4 +843,16 @@ msgid "Selected filters remain visible above products when Additional filters is
 msgstr ""
 
 msgid "Selected filters on a phone"
+msgstr ""
+
+msgid "Nova Poshta point restrictions"
+msgstr ""
+
+msgid "Choose a city and delivery type, then search by point number or address. Use Load more points to continue beyond the first results, even if the current page has no points of your chosen type."
+msgstr ""
+
+msgid "Selecting a point opens its card: weight per box and per shipment, receiving and sending dimensions, declared value limit, availability and weekly hours. Missing or zero API values mean that the limit needs clarification, not that there is no limit. Unavailable points cannot be selected."
+msgstr ""
+
+msgid "Directory data may be up to 15 minutes old. The card does not check whether your packed order fits. Confirm boxes, actual and volumetric weight, access and goods restrictions with the manager. If loading fails, retry; do not treat the missing card as permission to ship."
 msgstr ""
