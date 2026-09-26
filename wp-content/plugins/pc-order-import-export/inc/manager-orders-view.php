@@ -8,7 +8,7 @@ $url = add_query_arg('view', 'orders', ManagerWorkspace::url(0));
 ?>
 <section class="pcoe-card">
 <details><summary><strong><?php esc_html_e('Where to find order details', 'pc-order-import-export'); ?></strong></summary>
-<p><?php esc_html_e('Open an order number, then Open WooCommerce order. This opens the full order card, including customer contacts, billing and delivery addresses, items and payment method.', 'pc-order-import-export'); ?></p>
+<p><?php esc_html_e('Open an order number to see delivery, saved TTNs, recipient contacts, customer comments and order notes here. The WooCommerce button opens the full editor for additional actions.', 'pc-order-import-export'); ?></p>
 <p><?php esc_html_e('The customer checkout comment is shown with the order details. Order notes contain the status history and manager notes. A private note stays internal; a note to the customer may send an email. These notes are not an inbox for customer email replies.', 'pc-order-import-export'); ?></p>
 <p><?php esc_html_e('Review Nova Poshta shipment panels for saved TTNs and delivery status. A saved TTN does not by itself confirm dispatch. Review Folio document panels for linked warehouse documents. For a split order, also open its child orders.', 'pc-order-import-export'); ?></p>
 </details>

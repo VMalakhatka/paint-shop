@@ -47,6 +47,16 @@ try {
  $managers=get_users(['role__in'=>['administrator','shop_manager'],'number'=>1]);
  if (!$managers) throw new RuntimeException('Manager required');
  wp_set_current_user($managers[0]->ID); $_GET=['view'=>'orders'];
+ $order->set_customer_note('Test comment <script>alert(1)</script>');
+ $order->set_shipping_first_name('Test recipient'); $order->set_shipping_address_1('Test address');
+ $order->set_billing_phone('000000000');
+ ob_start(); PaintCore\PCOE\ManagerOrderDetails::render($order); $details = ob_get_clean();
+ $check(str_contains($details,'Test recipient') && str_contains($details,'Test address') && str_contains($details,'Test comment'), 'Inline delivery and comment');
+ $check(!str_contains($details,'<script>'), 'Customer comment escaped');
+ wp_set_current_user(0);
+ ob_start(); PaintCore\PCOE\ManagerOrderDetails::render($order); $check(ob_get_clean()==='', 'Private notes protected by manager capability');
+ wp_set_current_user($managers[0]->ID);
+
  ob_start(); PaintCore\PCOE\ManagerWorkspace::render(); $html=ob_get_clean();
  $check(str_contains($html,'<details>'), 'Manager help available');
  $clients = get_users(['role__in'=>['opt','partner'], 'number'=>1]);

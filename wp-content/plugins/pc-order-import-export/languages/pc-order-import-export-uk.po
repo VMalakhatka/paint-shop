@@ -1894,3 +1894,42 @@ msgstr "Доставку, ТТН, коментарі клієнта та іст�
 
 msgid "Customer comment"
 msgstr "Коментар клієнта"
+
+msgid "Delivery and customer comments"
+msgstr "Доставка та коментарі клієнта"
+
+msgid "Delivery from original order #%s (all warehouses)."
+msgstr "Доставка з початкового замовлення №%s (усі склади)."
+
+msgid "Delivery method not specified."
+msgstr "Спосіб доставки не вказано."
+
+msgid "Recipient and address"
+msgstr "Отримувач та адреса"
+
+msgid "No saved shipments yet."
+msgstr "Збережених відправлень поки немає."
+
+msgid "Tracking has not been checked yet."
+msgstr "Статус перевізника ще не перевірено."
+
+msgid "No customer comment."
+msgstr "Коментар клієнта відсутній."
+
+msgid "Original order comment"
+msgstr "Коментар початкового замовлення"
+
+msgid "Order history and notes"
+msgstr "Історія та примітки замовлення"
+
+msgid "No order notes."
+msgstr "Приміток до замовлення немає."
+
+msgid "Note to customer"
+msgstr "Примітка клієнту"
+
+msgid "Internal note"
+msgstr "Внутрішня примітка"
+
+msgid "Open an order number to see delivery, saved TTNs, recipient contacts, customer comments and order notes here. The WooCommerce button opens the full editor for additional actions."
+msgstr "Натисніть номер замовлення: тут є доставка, збережені ТТН, контакти отримувача, коментарі клієнта та примітки. Кнопка WooCommerce відкриває повний редактор для додаткових дій."

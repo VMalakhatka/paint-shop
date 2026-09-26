@@ -1692,3 +1692,42 @@ msgstr ""
 
 msgid "Customer comment"
 msgstr ""
+
+msgid "Delivery and customer comments"
+msgstr ""
+
+msgid "Delivery from original order #%s (all warehouses)."
+msgstr ""
+
+msgid "Delivery method not specified."
+msgstr ""
+
+msgid "Recipient and address"
+msgstr ""
+
+msgid "No saved shipments yet."
+msgstr ""
+
+msgid "Tracking has not been checked yet."
+msgstr ""
+
+msgid "No customer comment."
+msgstr ""
+
+msgid "Original order comment"
+msgstr ""
+
+msgid "Order history and notes"
+msgstr ""
+
+msgid "No order notes."
+msgstr ""
+
+msgid "Note to customer"
+msgstr ""
+
+msgid "Internal note"
+msgstr ""
+
+msgid "Open an order number to see delivery, saved TTNs, recipient contacts, customer comments and order notes here. The WooCommerce button opens the full editor for additional actions."
+msgstr ""
