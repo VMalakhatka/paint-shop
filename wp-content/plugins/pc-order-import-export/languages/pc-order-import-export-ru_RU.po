@@ -1861,3 +1861,30 @@ msgstr "Сначала новые заказы. Откройте заказ, ч�
 #: inc/ManagerNotifications.php inc/manager-orders-view.php inc/manager-view.php
 msgid "No orders found."
 msgstr "Заказы не найдены."
+
+msgid "Document date unavailable"
+msgstr "Дата документа отсутствует"
+
+msgid "No Folio documents are linked yet. Check the order card after processing."
+msgstr "Документы ФОЛИО ещё не привязаны. Проверьте карточку заказа после обработки."
+
+msgid "Full order details, delivery and notes"
+msgstr "Полная карточка заказа, доставка и заметки"
+
+msgid "Where to find order details"
+msgstr "Где найти подробности заказа"
+
+msgid "Open an order number, then Open WooCommerce order. This opens the full order card, including customer contacts, billing and delivery addresses, items and payment method."
+msgstr "Нажмите номер заказа, затем «Открыть заказ WooCommerce». Откроется полная карточка: контакты клиента, платёжный адрес и адрес доставки, товары и способ оплаты."
+
+msgid "The customer checkout comment is shown with the order details. Order notes contain the status history and manager notes. A private note stays internal; a note to the customer may send an email. These notes are not an inbox for customer email replies."
+msgstr "Комментарий клиента при оформлении показан в деталях заказа. Заметки к заказу содержат историю статусов и записи менеджера. Личная заметка остаётся внутренней; заметка клиенту может отправить email. Ответы клиента из почты сюда не поступают."
+
+msgid "Review Nova Poshta shipment panels for saved TTNs and delivery status. A saved TTN does not by itself confirm dispatch. Review Folio document panels for linked warehouse documents. For a split order, also open its child orders."
+msgstr "В блоках Новой почты проверяйте сохранённые ТТН и статус доставки. Наличие ТТН само по себе не подтверждает отправку. В блоках ФОЛИО смотрите связанные документы по складам. Для разделённого заказа откройте также дочерние заказы."
+
+msgid "For delivery, TTNs, customer comments and order history, open the full WooCommerce order card using the button below."
+msgstr "Доставку, ТТН, комментарии клиента и историю смотрите в полной карточке WooCommerce — кнопка ниже."
+
+msgid "Customer comment"
+msgstr "Комментарий клиента"

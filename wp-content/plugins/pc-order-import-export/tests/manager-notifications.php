@@ -24,6 +24,21 @@ $mail->object = $order;
 $check(str_starts_with($mail->get_subject(), 'customer@example.invalid | '), 'Woo subject hook active');
 $check(str_contains($mail->get_headers(), 'Reply-To: customer@example.invalid'), 'Woo header hook active');
 $check(str_contains($mail->get_content_html(), 'mailto:customer@example.invalid'), 'Actual HTML template contains reply link');
+$order->update_meta_data('_folio_documents_result', ['documents' => [
+ ['document_id' => 101, 'document_number' => 'A-101', 'document_date' => '2026-09-20T00:00:00', 'document_created_at' => '2026-09-26T10:00:00'],
+ ['document_id' => 102, 'document_number' => 'B&102', 'document_date' => [2026,9,21]],
+ ['document_id' => 103, 'document_number' => 'C-103', 'document_created_at' => '2026-09-26T10:00:00'],
+]]);
+$order->update_meta_data('_folio_document_id', 101); $order->update_meta_data('_folio_document_number', 'A-101');
+$rows = Notices::documents($order);
+$check(count($rows) === 3 && $rows[0]['date'] === '20.09.2026' && $rows[1]['date'] === '21.09.2026', 'Multiple warehouse dates and duplicate direct link');
+$check($rows[2]['date'] === '', 'Created timestamp never replaces document date');
+$check(str_contains($mail->get_content_html(), 'A-101') && str_contains($mail->get_content_html(), '20.09.2026'), 'Folio references in actual HTML email');
+$check(str_contains($mail->get_content_plain(), 'C-103'), 'Folio references in plain email');
+$preview = new WC_Order(); $preview->update_meta_data('_folio_documents_result', ['preview_only'=>true, 'documents'=>[['document_id'=>999,'document_number'=>'PREVIEW']]]);
+$check(Notices::documents($preview) === [], 'Preview excluded');
+$link = pc_folio_get_single_document_link(['document_id'=>101, 'document_number'=>'A-101', 'document_date'=>'2026-09-20T00:00:00']);
+$check($link['document_date'] === '2026-09-20T00:00:00', 'Date preserved in direct and child links');
 $empty = new WC_Order();
 $check(Notices::subject('New order',$empty)==='New order' && Notices::reply_url($empty)==='', 'Missing email');
 require_once ABSPATH.'wp-admin/includes/class-wp-screen.php'; require_once ABSPATH.'wp-admin/includes/screen.php';set_current_screen('dashboard');
@@ -33,6 +48,12 @@ try {
  if (!$managers) throw new RuntimeException('Manager required');
  wp_set_current_user($managers[0]->ID); $_GET=['view'=>'orders'];
  ob_start(); PaintCore\PCOE\ManagerWorkspace::render(); $html=ob_get_clean();
+ $check(str_contains($html,'<details>'), 'Manager help available');
+ $clients = get_users(['role__in'=>['opt','partner'], 'number'=>1]);
+ if (!$clients) throw new RuntimeException('Local wholesale customer required');
+ wp_set_current_user($clients[0]->ID);
+ ob_start(); pc_wholesale_help_render_endpoint(); $guide = ob_get_clean();
+ $check(str_contains($guide,'id="order-details"'), 'Wholesale guide section accessible');
  $check(str_contains($html,'nav-tab-active') && str_contains($html,'<table') && str_contains($html,'orders'), 'Manager orders tab renders');
 } finally { wp_set_current_user($original_user); $_GET=$original_get; }
 echo "PASS: $checks manager notification checks\n";

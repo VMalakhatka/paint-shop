@@ -102,7 +102,9 @@ $list = wc_get_orders(['customer_id' => $customer_id, 'limit' => 25, 'page' => $
 $editable = ManagerWorkspace::editable($order);
 $command = ManagerWorkspace::command($order);
 ?>
-<section class="pcoe-card"><h2><?php echo esc_html(sprintf(__('Order #%s', 'pc-order-import-export'), $order->get_order_number())); ?></h2>
+<section class="pcoe-card"><p><?php esc_html_e('For delivery, TTNs, customer comments and order history, open the full WooCommerce order card using the button below.', 'pc-order-import-export'); ?></p>
+<?php if ($order->get_customer_note()): ?><p><strong><?php esc_html_e('Customer comment', 'pc-order-import-export'); ?>:</strong> <?php echo nl2br(esc_html($order->get_customer_note())); ?></p><?php endif; ?>
+<h2><?php echo esc_html(sprintf(__('Order #%s', 'pc-order-import-export'), $order->get_order_number())); ?></h2>
 <div class="pcoe-actions"><a class="button" href="<?php echo esc_url($order->get_edit_order_url()); ?>"><?php esc_html_e('Open WooCommerce order', 'pc-order-import-export'); ?></a>
 <?php foreach (['csv' => 'CSV', 'xlsx' => 'Excel'] as $fmt => $label): ?><a class="button" href="<?php echo esc_url(add_query_arg(['action' => 'pcoe_export', 'type' => 'order', 'order_id' => $order->get_id(), 'fmt' => $fmt, '_wpnonce' => wp_create_nonce('pcoe_export')], admin_url('admin-ajax.php'))); ?>"><?php echo esc_html($label); ?></a><?php endforeach; ?>
 <form data-pcoe-manager><?php $form_fields('copy'); ?><button class="button"><?php esc_html_e('Copy to a new draft', 'pc-order-import-export'); ?></button></form></div>

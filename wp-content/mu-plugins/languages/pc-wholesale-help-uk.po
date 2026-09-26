@@ -899,3 +899,17 @@ msgstr "Після вибору відкривається картка точк
 
 msgid "Directory data may be up to 15 minutes old. The card does not check whether your packed order fits. Confirm boxes, actual and volumetric weight, access and goods restrictions with the manager. If loading fails, retry; do not treat the missing card as permission to ship."
 msgstr "Дані довідника можуть бути давністю до 15 хвилин. Картка не перевіряє придатність запакованого замовлення. Узгодьте коробки, фактичну й об’ємну вагу, доступ і обмеження товарів із менеджером. Якщо завантаження не вдалося, повторіть його; відсутність картки не є дозволом на відправлення."
+msgid "Where to find order details and delivery"
+msgstr "Де знайти подробиці замовлення та доставки"
+
+msgid "Order details and delivery"
+msgstr "Деталі замовлення та доставка"
+
+msgid "In My account, open My orders and choose View for the required order. The order page shows its date, status, products, totals, payment method, addresses and your checkout comment when provided."
+msgstr "У кабінеті відкрийте «Мої замовлення» та натисніть «Переглянути» біля потрібного замовлення. На сторінці є дата, статус, товари, суми, спосіб оплати, адреси та ваш коментар під час оформлення, якщо його було додано."
+
+msgid "Customer-visible order updates appear on the order page. Manager private notes and replies sent by email are not shown as a conversation here. Saved Nova Poshta TTNs appear in the delivery section; a TTN alone does not confirm dispatch."
+msgstr "На сторінці замовлення показано оновлення, доступні клієнту. Внутрішні записи менеджера та відповіді електронною поштою тут не утворюють переписку. Збережені ТТН Нової пошти є в розділі доставки; сама ТТН не підтверджує відправлення."
+
+msgid "For warehouse invoices and document lines, open Folio documents in My account. If an order was split, check each linked child order. Ask the manager if a document or shipment is not yet available."
+msgstr "Рахунки за складами та їхній склад дивіться в розділі «Документи ФОЛІО» в кабінеті. Якщо замовлення розділене, перевірте кожне пов’язане дочірнє замовлення. Якщо документа чи відправлення ще немає, зверніться до менеджера."

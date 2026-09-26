@@ -20,6 +20,7 @@ if (!function_exists('pc_folio_order_link_meta_keys')) {
         return [
             'document_id'           => '_folio_document_id',
             'document_number'       => '_folio_document_number',
+            'document_date'         => '_folio_document_date',
             'document_type'         => '_folio_document_type',
             'document_status'       => '_folio_document_status',
             'document_created_at'   => '_folio_document_created_at',
@@ -215,6 +216,7 @@ if (!function_exists('pc_folio_get_single_real_document_link')) {
             'document_number'       => (string) ($document['document_number'] ?? ($document['documentNumber'] ?? '')),
             'document_type'         => (string) ($document['document_type'] ?? ($document['documentType'] ?? '')),
             'document_status'       => (string) ($document['document_status'] ?? ($document['documentStatus'] ?? '')),
+            'document_date'         => pc_folio_document_created_at_text($document['document_date'] ?? ($document['documentDate'] ?? '')),
             'document_created_at'   => pc_folio_document_created_at_text($document['document_created_at'] ?? ($document['documentCreatedAt'] ?? '')),
             'document_payload_hash' => $payload_hash,
             'document_last_error'   => '',
@@ -233,6 +235,7 @@ if (!function_exists('pc_folio_get_single_document_link')) {
             'document_number'       => (string) ($document['document_number'] ?? ($document['documentNumber'] ?? '')),
             'document_type'         => (string) ($document['document_type'] ?? ($document['documentType'] ?? '')),
             'document_status'       => (string) ($document['document_status'] ?? ($document['documentStatus'] ?? '')),
+            'document_date'         => pc_folio_document_created_at_text($document['document_date'] ?? ($document['documentDate'] ?? '')),
             'document_created_at'   => pc_folio_document_created_at_text($document['document_created_at'] ?? ($document['documentCreatedAt'] ?? '')),
             'document_payload_hash' => $payload_hash,
             'document_last_error'   => '',

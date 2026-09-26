@@ -899,3 +899,17 @@ msgstr "После выбора открывается карточка точк
 
 msgid "Directory data may be up to 15 minutes old. The card does not check whether your packed order fits. Confirm boxes, actual and volumetric weight, access and goods restrictions with the manager. If loading fails, retry; do not treat the missing card as permission to ship."
 msgstr "Данные справочника могут быть давностью до 15 минут. Карточка не проверяет пригодность упакованного заказа. Согласуйте коробки, фактический и объёмный вес, доступ и ограничения товаров с менеджером. Если загрузка не удалась, повторите её; отсутствие карточки не является разрешением на отправку."
+msgid "Where to find order details and delivery"
+msgstr "Где найти подробности заказа и доставки"
+
+msgid "Order details and delivery"
+msgstr "Детали заказа и доставка"
+
+msgid "In My account, open My orders and choose View for the required order. The order page shows its date, status, products, totals, payment method, addresses and your checkout comment when provided."
+msgstr "В кабинете откройте «Мои заказы» и нажмите «Просмотр» возле нужного заказа. На странице есть дата, статус, товары, суммы, способ оплаты, адреса и ваш комментарий при оформлении, если он был добавлен."
+
+msgid "Customer-visible order updates appear on the order page. Manager private notes and replies sent by email are not shown as a conversation here. Saved Nova Poshta TTNs appear in the delivery section; a TTN alone does not confirm dispatch."
+msgstr "На странице заказа показаны обновления, доступные клиенту. Внутренние записи менеджера и ответы по электронной почте здесь не образуют переписку. Сохранённые ТТН Новой почты есть в разделе доставки; сама ТТН не подтверждает отправку."
+
+msgid "For warehouse invoices and document lines, open Folio documents in My account. If an order was split, check each linked child order. Ask the manager if a document or shipment is not yet available."
+msgstr "Счета по складам и их состав смотрите в разделе «Документы ФОЛИО» в кабинете. Если заказ разделён, проверьте каждый связанный дочерний заказ. Если документа или отправления ещё нет, обратитесь к менеджеру."

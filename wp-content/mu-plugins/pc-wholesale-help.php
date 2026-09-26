@@ -287,6 +287,7 @@ function pc_wholesale_help_render_endpoint(): void {
             <a href="#import"><span>5</span><?php esc_html_e('Import', 'pc-wholesale-help'); ?></a>
             <a href="#eksport"><span>6</span><?php esc_html_e('Export', 'pc-wholesale-help'); ?></a>
             <a href="#chernetky"><span>7</span><?php esc_html_e('Drafts', 'pc-wholesale-help'); ?></a>
+            <a href="#order-details"><?php esc_html_e('Order details and delivery', 'pc-wholesale-help'); ?></a>
             <a href="#stari-zamovlennia"><span>8</span><?php esc_html_e('Draft processing', 'pc-wholesale-help'); ?></a>
             <a href="#oformlennia"><span>9</span><?php esc_html_e('Checkout', 'pc-wholesale-help'); ?></a>
             <a href="#rozpodil"><span>10</span><?php esc_html_e('Warehouse split', 'pc-wholesale-help'); ?></a>
@@ -414,6 +415,12 @@ function pc_wholesale_help_render_endpoint(): void {
             <a class="pc-help-inline-action" href="<?php echo esc_url($orders_url); ?>"><?php esc_html_e('Open my orders', 'pc-wholesale-help'); ?> →</a>
         </section>
 
+        <section class="pc-help-section" id="order-details">
+            <h2><?php esc_html_e('Where to find order details and delivery', 'pc-wholesale-help'); ?></h2>
+            <p><?php esc_html_e('In My account, open My orders and choose View for the required order. The order page shows its date, status, products, totals, payment method, addresses and your checkout comment when provided.', 'pc-wholesale-help'); ?></p>
+            <p><?php esc_html_e('Customer-visible order updates appear on the order page. Manager private notes and replies sent by email are not shown as a conversation here. Saved Nova Poshta TTNs appear in the delivery section; a TTN alone does not confirm dispatch.', 'pc-wholesale-help'); ?></p>
+            <p><?php esc_html_e('For warehouse invoices and document lines, open Folio documents in My account. If an order was split, check each linked child order. Ask the manager if a document or shipment is not yet available.', 'pc-wholesale-help'); ?></p>
+        </section>
         <section class="pc-help-section" id="stari-zamovlennia">
             <div class="pc-help-section__heading"><span>08</span><div><h2><?php esc_html_e('How to process a draft', 'pc-wholesale-help'); ?></h2><p><?php esc_html_e('Open “My orders”, press “Process draft” next to the required draft, and choose one of two scenarios.', 'pc-wholesale-help'); ?></p></div></div>
             <div class="pc-help-note"><strong><?php esc_html_e('Preview first, apply second.', 'pc-wholesale-help'); ?></strong> <?php esc_html_e('The preview shows the result without changing the cart or recording a Folio document. The operation runs only after a separate confirmation (apply).', 'pc-wholesale-help'); ?></div>

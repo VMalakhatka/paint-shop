@@ -1665,3 +1665,30 @@ msgstr ""
 #: inc/ManagerNotifications.php inc/manager-orders-view.php inc/manager-view.php
 msgid "No orders found."
 msgstr ""
+
+msgid "Document date unavailable"
+msgstr ""
+
+msgid "No Folio documents are linked yet. Check the order card after processing."
+msgstr ""
+
+msgid "Full order details, delivery and notes"
+msgstr ""
+
+msgid "Where to find order details"
+msgstr ""
+
+msgid "Open an order number, then Open WooCommerce order. This opens the full order card, including customer contacts, billing and delivery addresses, items and payment method."
+msgstr ""
+
+msgid "The customer checkout comment is shown with the order details. Order notes contain the status history and manager notes. A private note stays internal; a note to the customer may send an email. These notes are not an inbox for customer email replies."
+msgstr ""
+
+msgid "Review Nova Poshta shipment panels for saved TTNs and delivery status. A saved TTN does not by itself confirm dispatch. Review Folio document panels for linked warehouse documents. For a split order, also open its child orders."
+msgstr ""
+
+msgid "For delivery, TTNs, customer comments and order history, open the full WooCommerce order card using the button below."
+msgstr ""
+
+msgid "Customer comment"
+msgstr ""
