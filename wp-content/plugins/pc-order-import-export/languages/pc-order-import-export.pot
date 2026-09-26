@@ -1633,3 +1633,35 @@ msgstr ""
 #: inc/Waitlist.php
 msgid "This is a test of your waiting-list email notifications. It does not mean that your product has arrived. We will email you when tracked products are available. You can turn these emails off in your waiting list."
 msgstr ""
+
+#: inc/ManagerNotifications.php inc/manager-orders-view.php inc/manager-view.php
+msgid "Customers"
+msgstr ""
+
+#: inc/ManagerNotifications.php inc/manager-orders-view.php inc/manager-view.php
+msgid "Orders"
+msgstr ""
+
+#: inc/ManagerNotifications.php inc/manager-orders-view.php inc/manager-view.php
+msgid "Customer"
+msgstr ""
+
+#: inc/ManagerNotifications.php inc/manager-orders-view.php inc/manager-view.php
+msgid "Guest"
+msgstr ""
+
+#: inc/ManagerNotifications.php inc/manager-orders-view.php inc/manager-view.php
+msgid "Contact"
+msgstr ""
+
+#: inc/ManagerNotifications.php inc/manager-orders-view.php inc/manager-view.php
+msgid "Reply to customer"
+msgstr ""
+
+#: inc/ManagerNotifications.php inc/manager-orders-view.php inc/manager-view.php
+msgid "Newest orders first. Open an order to review its items and linked Folio documents."
+msgstr ""
+
+#: inc/ManagerNotifications.php inc/manager-orders-view.php inc/manager-view.php
+msgid "No orders found."
+msgstr ""

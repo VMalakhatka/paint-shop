@@ -18,6 +18,12 @@ $form_fields = static function (string $operation) use ($customer_id, $order): v
 <div class="wrap pcoe-manager">
 <h1><?php esc_html_e('Customer workspace', 'pc-order-import-export'); ?></h1>
 <p><?php esc_html_e('Select a customer, prepare a draft and review Folio accounts by warehouse.', 'pc-order-import-export'); ?></p>
+<?php $orders_tab = !$customer_id && ($_GET['view'] ?? '') === 'orders'; ?>
+<nav class="nav-tab-wrapper">
+<a class="nav-tab <?php echo !$orders_tab ? 'nav-tab-active' : ''; ?>" href="<?php echo esc_url(ManagerWorkspace::url(0)); ?>"><?php esc_html_e('Customers', 'pc-order-import-export'); ?></a>
+<a class="nav-tab <?php echo $orders_tab ? 'nav-tab-active' : ''; ?>" href="<?php echo esc_url(add_query_arg('view', 'orders', ManagerWorkspace::url(0))); ?>"><?php esc_html_e('Orders', 'pc-order-import-export'); ?></a>
+</nav>
+<?php if ($orders_tab) { require __DIR__ . '/manager-orders-view.php'; echo '</div>'; return; } ?>
 <?php if ($error): ?><div class="notice notice-error"><p><?php echo esc_html($error); ?></p></div><?php endif; ?>
 <div id="pcoe-manager-status" role="status" aria-live="polite"></div>
 <?php if (!$user):

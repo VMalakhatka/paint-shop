@@ -1835,3 +1835,35 @@ msgstr "Не вдалося перевірити поточну версію. П
 
 msgid "Verification required"
 msgstr "Потрібна перевірка"
+
+#: inc/ManagerNotifications.php inc/manager-orders-view.php inc/manager-view.php
+msgid "Customers"
+msgstr "Клієнти"
+
+#: inc/ManagerNotifications.php inc/manager-orders-view.php inc/manager-view.php
+msgid "Orders"
+msgstr "Замовлення"
+
+#: inc/ManagerNotifications.php inc/manager-orders-view.php inc/manager-view.php
+msgid "Customer"
+msgstr "Клієнт"
+
+#: inc/ManagerNotifications.php inc/manager-orders-view.php inc/manager-view.php
+msgid "Guest"
+msgstr "Гість"
+
+#: inc/ManagerNotifications.php inc/manager-orders-view.php inc/manager-view.php
+msgid "Contact"
+msgstr "Зв’язок"
+
+#: inc/ManagerNotifications.php inc/manager-orders-view.php inc/manager-view.php
+msgid "Reply to customer"
+msgstr "Відповісти клієнту"
+
+#: inc/ManagerNotifications.php inc/manager-orders-view.php inc/manager-view.php
+msgid "Newest orders first. Open an order to review its items and linked Folio documents."
+msgstr "Спочатку найновіші замовлення. Відкрийте замовлення, щоб переглянути товари та пов’язані документи ФОЛІО."
+
+#: inc/ManagerNotifications.php inc/manager-orders-view.php inc/manager-view.php
+msgid "No orders found."
+msgstr "Замовлень не знайдено."

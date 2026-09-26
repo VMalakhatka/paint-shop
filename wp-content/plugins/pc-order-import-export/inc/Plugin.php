@@ -33,6 +33,7 @@ class Plugin {
 
         DraftFolioWorkflow::hooks();
         ManagerWorkspace::hooks();
+        ManagerNotifications::hooks();
         CustomerApproval::hooks();
 
         // Вимкнути емейли для pc-draft
