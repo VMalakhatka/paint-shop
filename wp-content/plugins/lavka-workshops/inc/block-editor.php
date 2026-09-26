@@ -25,6 +25,7 @@ add_action('enqueue_block_editor_assets', static function () {
     wp_localize_script('lw-block-editor', 'lwStudio', [
         'patterns' => studio_patterns(),
         'previewLink' => get_preview_post_link(get_post()),
+        'closedNotice' => section_closed() ? closed_notice() : '',
         'labels' => [
             'title' => __('Lavka · Publication studio', 'lavka-workshops'),
             'choose' => __('Choose a starting layout', 'lavka-workshops'),

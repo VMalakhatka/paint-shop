@@ -3,6 +3,8 @@
 namespace Lavka\Workshops;
 if (!defined('WP_CLI') || !WP_CLI || wp_parse_url(home_url(), PHP_URL_HOST) !== 'paint.local') throw new \RuntimeException('Local test only.');
 require_once dirname(__DIR__) . '/lavka-workshops.php';
+// Existing public-mode regression suite; do not change the site's stored visibility.
+add_filter('pre_option_lw_section_visibility', static fn() => 'public');
 register();
 if (!defined('DOING_AJAX')) define('DOING_AJAX', true);
 $GLOBALS['lw_checks'] = 0; $created = []; $user = 0;

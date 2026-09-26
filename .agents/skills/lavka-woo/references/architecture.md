@@ -64,4 +64,9 @@ REST включён только для публичного CPT статей с
 метабокс. Legacy HTML не мигрировать на чтении: преобразование инициирует мастер.
 Источники: `inc/block-editor.php`, `inc/patterns.php`, `tests/block-editor.php`.
 Источник: `wp-content/plugins/lavka-workshops/`; lifecycle и инструкция мастера —
-`docs/WORKSHOPS_GUIDE_RU.md`. Production-активация остаётся отдельным решением.
+`docs/WORKSHOPS_GUIDE_RU.md`. С 2.1 закрытый режим по умолчанию определяется
+`lw_section_visibility`: только `public` разрешает гостевой доступ. Gate в
+`inc/visibility.php` защищает страницы, запросы, REST, oEmbed и sitemap; AJAX и
+admin-post проверяют те же capabilities. Опубликованный статус не открывает раздел.
+Медиа/S3 остаются публичным хранилищем. Production closed activation разрешена
+владельцем 2026-09-26; результат приёмки записывать в основной инструкции.

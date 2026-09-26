@@ -35,6 +35,7 @@
                         h('strong',null,p.title),h('span',null,p.description)))),
                 h(Button,{variant:'tertiary',onClick:()=>setChooser(false)},labels.blank)),
             h(PluginDocumentSettingPanel,{name:'lavka-studio',title:labels.title,initialOpen:true},
+                lwStudio.closedNotice && h('p',{className:'lw-legacy-help'},lwStudio.closedNotice),
                 h('p',null,labels.help),
                 empty && h(Button,{variant:'primary',onClick:()=>setChooser(true)},labels.choose),
                 legacy && h('div',{className:'lw-legacy-help'},h('p',null,labels.legacyHelp),h(Button,{variant:'secondary',onClick:convert},labels.legacy)),

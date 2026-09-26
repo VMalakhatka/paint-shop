@@ -2,15 +2,16 @@
 /**
  * Plugin Name: Lavka Workshops
  * Description: Photo-led workshop schedule, visual articles and booking requests.
- * Version: 2.0.0
+ * Version: 2.1.0
  * Requires PHP: 8.1
  * Text Domain: lavka-workshops
  * Domain Path: /languages
  */
 namespace Lavka\Workshops;
 defined('ABSPATH') || exit;
-const VERSION = '2.0.0';
+const VERSION = '2.1.0';
 const FILE = __FILE__;
+require_once __DIR__ . '/inc/visibility.php';
 require_once __DIR__ . '/inc/sessions.php';
 require_once __DIR__ . '/inc/block-editor.php';
 require_once __DIR__ . '/inc/admin.php';
@@ -27,6 +28,7 @@ function register(): void {
         'menu_icon' => 'dashicons-art', 'supports' => ['title', 'editor', 'thumbnail', 'excerpt', 'revisions', 'author'],
         'capability_type' => ['lavka_workshop', 'lavka_workshops'], 'map_meta_cap' => true,
         'show_in_rest' => true,
+        'exclude_from_search' => section_closed(),
     ]);
     register_post_type('lavka_mk_request', [
         'labels' => ['name' => __('Booking requests', 'lavka-workshops'), 'singular_name' => __('Booking request', 'lavka-workshops'), 'edit_item' => __('Booking request', 'lavka-workshops')],

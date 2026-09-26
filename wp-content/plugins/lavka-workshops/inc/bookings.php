@@ -39,6 +39,7 @@ function request_reply(bool $success, string $message, int $id, int $status = 20
     wp_die(esc_html($message), esc_html__('Booking request', 'lavka-workshops'), ['response' => $status, 'back_link' => true]);
 }
 function request_nonce(): void {
+    if (!section_allowed()) { nocache_headers(); wp_send_json_error([], 404); }
     $id = absint(input_text($_GET, 'workshop'));
     if (get_post_type($id) !== 'lavka_workshop' || get_post_status($id) !== 'publish') wp_send_json_error([], 404);
     nocache_headers();
@@ -48,6 +49,7 @@ add_action('wp_ajax_lw_nonce', __NAMESPACE__ . '\\request_nonce');
 add_action('wp_ajax_nopriv_lw_nonce', __NAMESPACE__ . '\\request_nonce');
 
 function receive_request(): void {
+    if (!section_allowed()) { nocache_headers(); request_reply(false, __('Not found.', 'lavka-workshops'), 0, 404); }
     $id = absint(input_text($_POST, 'workshop'));
     $failure = __('Please check your name, phone number and consent, then try again.', 'lavka-workshops');
     if (get_post_type($id) !== 'lavka_workshop' || get_post_status($id) !== 'publish' ||

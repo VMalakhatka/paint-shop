@@ -49,11 +49,29 @@ Operator guide: [Мастер-классы: расписание, статьи �
 - Standard Media Library attachment rendering; no storage overrides in plugin code.
   English msgids plus complete Ukrainian/Russian PO/MO catalogs.
 
+## Closed production testing
+
+Version 2.1 adds `inc/visibility.php`: `lw_section_visibility` defaults to `closed`;
+only the exact value `public` opens the section. Staff access requires
+`manage_options` or `edit_lavka_workshops`, never simply being logged in.
+The early request gate returns uncached 404 before templates/redirects/feed output;
+query filters hide articles in mixed and suppressed-filter queries, REST articles
+are blocked, and AJAX/admin-post nonce/booking handlers enforce the same gate.
+Core/Rank Math/Yoast sitemap and oEmbed exclude closed workshops even for staff.
+Staff pages/REST content use no-store; existing caches must be cleared on a change
+of visibility. This is section access control, not private Media Library/S3 storage.
+Publishing a workshop does not open the section. No editor switch can open it.
+The store is unaffected; authenticated staff use the normal booking flow for tests.
+
+Local acceptance: 33 closed-access checks plus the existing 81 public-mode checks.
+Run `wp eval-file wp-content/plugins/lavka-workshops/tests/visibility.php --skip-plugins --skip-themes`.
+Production activation authorized 2026-09-26; see the guide for deployment evidence.
+
 ## Lifecycle
 
 Git allow-list registered; deploy manifest policy `manual`. Local activation verified
-2026-09-25. No secrets/options required. Production deployment, dry-run, activation,
-role assignment, real content/photos and menu link are pending. Activation refreshes
+2026-09-25. No secrets/options required. Production closed deployment is authorized; final checks are recorded in the guide.
+Real content, instructor assignment and public menu launch are separate steps. Activation refreshes
 rewrite rules and capabilities only. No automatic demo seeding or database export.
 Deployment source and rollback details are in the operator guide; deactivate to
 remove routes without deleting data. No uninstall data deletion handler.
