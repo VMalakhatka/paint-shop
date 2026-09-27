@@ -12,6 +12,7 @@ class ManagerWorkspace
     public static function hooks(): void {
         add_action('admin_menu', [self::class, 'menu'], 30);
         add_action('admin_enqueue_scripts', [self::class, 'assets']);
+        add_action('admin_post_pcoe_customer_managers',[CustomerManagers::class,'post']);
         add_action('wp_ajax_pcoe_manager', [self::class, 'ajax']);
         add_action('pc_folio_child_order_item_prepared', [self::class, 'stamp_child_plan'], 10, 3);
         foreach (['wp_ajax_pc_folio_order_create_java', 'wp_ajax_pc_folio_order_apply_saved_response',

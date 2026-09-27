@@ -2,21 +2,27 @@
 namespace PaintCore\PCOE;
 defined('ABSPATH') || exit;
 
-/** Manager transport has narrower write access than the website: assigned threads only. */
+/** Manager transport has narrower write access than the website: the assigned pair only. */
 final class TelegramManagers {
     public static function allowed(int $thread, int $user, string $scope='assigned'): bool {
         $post=get_post($thread);
         if (!user_can($user,'manage_woocommerce') || !$post || $post->post_type!==ConversationStore::THREAD || $post->post_status!=='private') return false;
         $assignee=(int)get_post_meta($thread,'_chat_assignee',true);
+        $secondary=(int)get_post_meta($thread,'_chat_secondary',true);
         $state=get_post_meta($thread,'_chat_state',true);
-        return $scope==='unassigned' ? !$assignee && $state==='waiting_manager' : $assignee===$user && $state!=='closed';
+        return $scope==='unassigned' ? !$assignee && !$secondary && $state==='waiting_manager' : $assignee && in_array($user,[$assignee,$secondary],true) && $state!=='closed';
     }
 
     private static function recipients(int $thread): array {
         $assignee=(int)get_post_meta($thread,'_chat_assignee',true);
         if ($assignee) {
-            $link=TelegramStore::active($assignee);
-            return $link && self::allowed($thread,$assignee) ? [$link] : [];
+            $links=[];
+            foreach (array_unique([$assignee,(int)get_post_meta($thread,'_chat_secondary',true)]) as $user) {
+                if (!$user) continue;
+                $link=TelegramStore::active($user);
+                if ($link && self::allowed($thread,$user)) $links[]=$link;
+            }
+            return $links;
         }
         global $wpdb;
         $records=$wpdb->get_results('SELECT user_id,data FROM '.TelegramStore::table()." WHERE kind='link' AND status='active'",ARRAY_A);
@@ -32,14 +38,18 @@ final class TelegramManagers {
     }
 
     public static function enqueue(int $thread, int $message): void {
-        foreach (self::recipients($thread) as $link) self::card('manager-message:'.$message,$thread,$link,$message);
+        $author=(int)get_post($message)->post_author;
+        foreach (self::recipients($thread) as $link) {
+            if (get_post_meta($message,'_chat_actor',true)==='manager' && (int)$link['user_id']===$author) continue;
+            self::card('manager-message:'.$message,$thread,$link,$message);
+        }
     }
 
     public static function assigned(int $thread, array $previous): void {
         if (!TelegramSettings::enabled() || !TelegramStore::ready()) return;
         $assignee=(int)get_post_meta($thread,'_chat_assignee',true);
         $state=get_post_meta($thread,'_chat_state',true);
-        if ($assignee===$previous['assignee'] && !($previous['state']==='closed' && $state!=='closed') && !(!$assignee && $previous['state']!=='waiting_manager' && $state==='waiting_manager')) return;
+        if ($assignee===$previous['assignee'] && (int)get_post_meta($thread,'_chat_secondary',true)===($previous['secondary']??0) && !($previous['state']==='closed' && $state!=='closed') && !(!$assignee && $previous['state']!=='waiting_manager' && $state==='waiting_manager')) return;
         $key='assignment:'.$thread.':'.get_post_meta($thread,'_chat_revision',true);
         foreach (self::recipients($thread) as $link) self::card($key,$thread,$link);
     }
@@ -67,6 +77,10 @@ final class TelegramManagers {
             $rows[]=[['text'=>__('Open on website','pc-order-import-export'),'url'=>Conversations::url(['chat_id'=>$thread],true)]];
             $body=$message?get_post($message)->post_content:'';
             $actor=$message && get_post_meta($message,'_chat_actor',true)==='manager'?__('Manager','pc-order-import-export'):__('Customer','pc-order-import-export');
+            if ($message && get_post_meta($message,'_chat_actor',true)==='manager') {
+                $author=get_userdata((int)get_post($message)->post_author);
+                if ($author) $actor.=' · '.mb_substr($author->display_name,0,60);
+            }
             $parts=max(1,(int)ceil(mb_strlen($body)/1400));
             for ($i=0;$i<$parts;$i++) {
                 $text=$header.($parts>1?' ('.($i+1).'/'.$parts.')':'')."\n\n".$actor.":\n".mb_substr($body,$i*1400,1400)."\n\n".$hint;
@@ -105,7 +119,7 @@ final class TelegramManagers {
             TelegramBridge::service($key,$chat,__('Manager mode: /threads shows your open conversations; /queue shows unassigned requests. Take a request, then use Reply on its bot message. All replies are public. /stop disconnects your Telegram.','pc-order-import-export'),$link);
             $scope=$text==='/queue'?'unassigned':'assigned';
             $query=new \WP_Query(['post_type'=>ConversationStore::THREAD,'post_status'=>'private','posts_per_page'=>10,'orderby'=>['modified'=>'DESC','ID'=>'DESC'],
-                'meta_query'=>[['key'=>'_chat_assignee','value'=>$scope==='unassigned'?0:$user,'type'=>'NUMERIC'],['key'=>'_chat_state','value'=>$scope==='unassigned'?'waiting_manager':'closed','compare'=>$scope==='unassigned'?'=':'!=']]]);
+                'meta_query'=>[$scope==='unassigned'?['key'=>'_chat_assignee','value'=>0,'type'=>'NUMERIC']:ConversationStore::manager_query($user),['key'=>'_chat_state','value'=>$scope==='unassigned'?'waiting_manager':'closed','compare'=>$scope==='unassigned'?'=':'!=']]]);
             foreach ($query->posts as $thread) self::card('manager-list:'.$key.':'.$thread->ID,$thread->ID,$link);
             if (!$query->posts) TelegramBridge::service($key.':empty',$chat,__('No requests in this queue. The full list is available on the website.','pc-order-import-export'),$link);
             return;

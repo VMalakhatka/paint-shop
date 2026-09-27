@@ -2291,3 +2291,52 @@ msgstr "Ответ сохранён в обращении №%d."
 #: inc/TelegramManagers.php:121
 msgid "Reply not saved: this request is not assigned to you or is closed. Check /threads or take an unassigned request via /queue."
 msgstr "Ответ не сохранён: обращение назначено не вам или закрыто. Проверьте /threads или возьмите обращение без ответственного через /queue."
+
+#: inc/CustomerManagers.php inc/ConversationStore.php
+msgid "Choose a primary manager and a different additional manager, or leave the additional manager empty."
+msgstr "Выберите основного и другого дополнительного менеджера или оставьте поле дополнительного пустым."
+
+#: inc/CustomerManagers.php inc/ConversationStore.php
+msgid "Customer managers changed. Refresh the customer card before saving."
+msgstr "Менеджеры клиента изменились. Обновите карточку клиента перед сохранением."
+
+#: inc/CustomerManagers.php inc/ConversationStore.php
+msgid "More than 200 open conversations. Save defaults without bulk application and update conversations separately."
+msgstr "Более 200 открытых обращений. Сохраните настройки без применения ко всем обращениям и измените их отдельно."
+
+#: inc/CustomerManagers.php inc/ConversationStore.php
+msgid "Unavailable manager — choose a replacement"
+msgstr "Недоступный менеджер — выберите замену"
+
+#: inc/CustomerManagers.php inc/ConversationStore.php
+msgid "Customer managers"
+msgstr "Менеджеры клиента"
+
+#: inc/CustomerManagers.php inc/ConversationStore.php
+msgid "New conversations inherit this pair. Both managers receive customer messages and public replies from their colleague in their connected Telegram. The primary manager remains responsible."
+msgstr "Новые обращения наследуют эту пару. Оба менеджера получают сообщения клиента и публичные ответы коллеги в своём подключённом Telegram. Основной менеджер остаётся ответственным."
+
+#: inc/CustomerManagers.php inc/ConversationStore.php
+msgid "Customer managers saved."
+msgstr "Менеджеры клиента сохранены."
+
+#: inc/CustomerManagers.php inc/ConversationStore.php
+msgid "Primary manager"
+msgstr "Основной менеджер"
+
+#: inc/CustomerManagers.php inc/ConversationStore.php
+msgid "Additional manager"
+msgstr "Дополнительный менеджер"
+
+#: inc/CustomerManagers.php inc/ConversationStore.php
+msgid "Also replace managers in all existing open conversations for this customer. Closed conversations keep their assignment."
+msgstr "Также заменить менеджеров во всех открытых обращениях этого клиента. В закрытых обращениях назначения не изменятся."
+
+#: inc/CustomerManagers.php inc/ConversationStore.php
+msgid "Save customer managers"
+msgstr "Сохранить менеджеров клиента"
+
+#: inc/CustomerManagers.php inc/ConversationStore.php
+#, php-format
+msgid "Additional manager: %s"
+msgstr "Дополнительный менеджер: %s"

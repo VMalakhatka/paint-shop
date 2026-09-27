@@ -322,14 +322,25 @@ step after deploy and operator configuration. See the customer `messages` help a
 bot. Staff need `manage_woocommerce`; only administrators change global bot config.
 The stored audience and live capabilities are checked during binding, receipt and
 delivery. Existing bindings without an audience remain customer-only.
-Customer messages go to the assignee or, when waiting and unassigned, all linked
-managers. Take request uses the canonical thread lock and assignment audit. Telegram
+Customer messages go to both assigned managers or, when waiting and unassigned,
+all linked managers. Public manager replies also notify their colleague, with the
+author's name, without echoing back to the author. Both can reply in their own name;
+the primary manager remains responsible. `CustomerManagers` owns the primary and
+optional additional manager defaults in customer user meta `_pcoe_chat_team`.
+New threads inherit the pair; an explicit checkbox replaces both managers in all
+open threads (maximum 200, atomic defaults/assignments/audit/outbox). Closed threads
+keep their assignment. Individual thread overrides never change customer defaults.
+The per-thread `_chat_secondary` defaults to zero for existing conversations.
+Take request uses the canonical thread lock and assignment audit. Telegram
 replies require a delivered message mapping and current assignment; no implicit
 customer selection, private notes, or closed-thread replies. Reassignment enqueues
 public context transactionally and invalidates previous recipients' pending cards.
 `/threads` and `/queue` show ten recent relevant cards; each card rechecks its scope
 before delivery. Disconnect/reconnect invalidates earlier reply and callback maps.
-No DDL, new token, or Java change is required. The existing client channel is
-confirmed on production by the owner; manager support awaits deploy and live checks.
-`tests/telegram.php` now includes `tests/telegram-managers.php` (106 total checks).
+No DDL, new token, or Java change is required. Saving customer defaults requires
+InnoDB posts/postmeta/usermeta. The existing client and single-manager channels are
+confirmed on production by the owner; paired managers await deploy and live checks.
+`tests/telegram.php` includes `tests/telegram-managers.php` and
+`tests/customer-managers.php` (149 total checks, including removal, role loss,
+colleague replies, optimistic revisions and bulk rollback).
 The runbook above covers setup, operator acceptance and rollback.

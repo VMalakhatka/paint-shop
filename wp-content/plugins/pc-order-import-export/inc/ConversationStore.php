@@ -30,7 +30,7 @@ final class ConversationStore {
     }
     public static function meta(int $id): array {
         self::read($id);
-        return ['assignee'=>(int)get_post_meta($id,'_chat_assignee',true), 'state'=>(string)get_post_meta($id,'_chat_state',true),
+        return ['assignee'=>(int)get_post_meta($id,'_chat_assignee',true), 'secondary'=>(int)get_post_meta($id,'_chat_secondary',true), 'state'=>(string)get_post_meta($id,'_chat_state',true),
             'order_id'=>(int)get_post_meta($id,'_chat_order',true), 'revision'=>(string)get_post_meta($id,'_chat_revision',true)];
     }
     /** Internal transaction boundary shared with channel adapters; callers authorize the actor. */
@@ -107,17 +107,20 @@ final class ConversationStore {
         $subject=trim(sanitize_text_field($subject));
         if ($subject==='' || mb_strlen($subject)>160) throw new \RuntimeException(__('Enter a subject of 1–160 characters.', 'pc-order-import-export'));
         $key=hash('sha256',$customer.':'.($order_id ? 'order:'.$order_id : 'request:'.$request));
-        return self::lock('start:'.$key,static function() use($key,$customer,$order_id,$subject,$text,$request) {
+        return self::lock('customer-team:'.$customer,static fn()=>self::lock('start:'.$key,static function() use($key,$customer,$order_id,$subject,$text,$request) {
             $id=self::find($key);
             if (!$id) {
                 $id=self::save(['post_type'=>self::THREAD,'post_status'=>'private','post_author'=>$customer,'post_name'=>$key,'post_title'=>$subject]);
                 self::set($id,'_chat_order',$order_id);
-                self::set($id,'_chat_assignee',self::manager()?get_current_user_id():0);
+                wp_cache_delete($customer,'user_meta');
+                [$primary,$secondary]=CustomerManagers::defaults($customer);
+                self::set($id,'_chat_assignee',$primary?: (self::manager()?get_current_user_id():0));
+                self::set($id,'_chat_secondary',$secondary);
                 self::set($id,'_chat_state','waiting_manager');
             }
             self::append($id,$text,false,$request);
             return $id;
-        });
+        }));
     }
     public static function reply(int $id,string $text,bool $internal,string $request): int {
         self::read($id);
@@ -142,19 +145,21 @@ final class ConversationStore {
             return $message;
         });
     }
-    public static function assign(int $id,int $manager,string $state,string $revision): void {
+    public static function assign(int $id,int $manager,string $state,string $revision,?int $secondary=null): void {
         if (!self::manager()) self::deny();
         if ($manager && !user_can($manager,'manage_woocommerce')) throw new \RuntimeException(__('Select an active manager.', 'pc-order-import-export'));
         if (!in_array($state,['waiting_manager','waiting_customer','closed'],true)) self::deny();
-        self::lock('thread:'.$id,static function() use($id,$manager,$state,$revision) {
+        self::lock('thread:'.$id,static function() use($id,$manager,$state,$revision,$secondary) {
             clean_post_cache($id);
             $meta=self::meta($id);
             if (!hash_equals($meta['revision'],$revision)) throw new \RuntimeException(__('Conversation changed. Refresh before changing its owner or state.', 'pc-order-import-export'));
-            if ($meta['assignee']===$manager && $meta['state']===$state) return;
+            $secondary=$secondary??($meta['assignee']===$manager?$meta['secondary']:0);
+            CustomerManagers::validate($manager,$secondary);
+            if ($meta['assignee']===$manager && $meta['secondary']===$secondary && $meta['state']===$state) return;
             self::save(['post_type'=>self::MESSAGE,'post_status'=>'private','post_parent'=>$id,'post_author'=>get_current_user_id(),
-                'post_content'=>sprintf(__('Assignment: %1$s. State: %2$s.', 'pc-order-import-export'),$manager?(get_userdata($manager)->display_name):__('Unassigned','pc-order-import-export'), Conversations::states()[$state]),
+                'post_content'=>sprintf(__('Assignment: %1$s. State: %2$s.', 'pc-order-import-export'),$manager?(get_userdata($manager)->display_name):__('Unassigned','pc-order-import-export'), Conversations::states()[$state]).' '.sprintf(__('Additional manager: %s','pc-order-import-export'),$secondary?get_userdata($secondary)->display_name:__('Unassigned','pc-order-import-export')),
                 'meta_input'=>['_chat_visibility'=>'internal','_chat_actor'=>'system']]);
-            self::set($id,'_chat_assignee',$manager); self::set($id,'_chat_state',$state); self::touch($id);
+            self::set($id,'_chat_assignee',$manager); self::set($id,'_chat_secondary',$secondary); self::set($id,'_chat_state',$state); self::touch($id);
             do_action('pcoe_chat_assignment_saved',$id,$meta);
         });
     }
@@ -179,9 +184,12 @@ final class ConversationStore {
         if (!get_current_user_id()) self::deny();
         $args=['post_type'=>self::THREAD,'post_status'=>'private','posts_per_page'=>20,'paged'=>max(1,$page),'orderby'=>['modified'=>'DESC','ID'=>'DESC']];
         if (!self::manager()) $args['author']=get_current_user_id(); elseif ($customer) $args['author']=$customer;
-        if ($filter==='mine' && self::manager()) $args['meta_query']=[['key'=>'_chat_assignee','value'=>get_current_user_id(),'type'=>'NUMERIC']];
+        if ($filter==='mine' && self::manager()) $args['meta_query']=self::manager_query(get_current_user_id());
         elseif ($filter==='unassigned' && self::manager()) $args['meta_query']=[['key'=>'_chat_assignee','value'=>0,'type'=>'NUMERIC']];
         elseif (in_array($filter,['waiting_manager','waiting_customer','closed'],true)) $args['meta_query']=[['key'=>'_chat_state','value'=>$filter]];
         return new \WP_Query($args);
+    }
+    public static function manager_query(int $user): array {
+        return ['relation'=>'OR',['key'=>'_chat_assignee','value'=>$user,'type'=>'NUMERIC'],['key'=>'_chat_secondary','value'=>$user,'type'=>'NUMERIC']];
     }
 }

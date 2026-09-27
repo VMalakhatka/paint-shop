@@ -987,3 +987,7 @@ msgstr ""
 
 msgid "Download the short illustrated guide (PDF, Ukrainian)"
 msgstr ""
+
+#: pc-wholesale-help/messages-guide.php
+msgid "If two managers support your conversation, either can reply. Continue in the same conversation; you do not need to connect another bot."
+msgstr ""

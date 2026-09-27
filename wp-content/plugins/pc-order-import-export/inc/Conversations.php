@@ -59,7 +59,7 @@ final class Conversations {
                 if (!self::enabled()) throw new \RuntimeException(__('Chat is not enabled.','pc-order-import-export'));
                 if ($op==='start') $id=ConversationStore::start(ConversationStore::manager()?absint($_POST['customer_id']??0):get_current_user_id(),absint($_POST['order_id']??0),(string)wp_unslash($_POST['subject']??''),(string)wp_unslash($_POST['message']??''),(string)($_POST['request_id']??''));
                 elseif ($op==='reply') ConversationStore::reply($id,(string)wp_unslash($_POST['message']??''),($_POST['visibility']??'')==='internal',(string)($_POST['request_id']??''));
-                elseif ($op==='assign') ConversationStore::assign($id,absint($_POST['assignee']??0),sanitize_key($_POST['state']??''),(string)($_POST['revision']??''));
+                elseif ($op==='assign') ConversationStore::assign($id,absint($_POST['assignee']??0),sanitize_key($_POST['state']??''),(string)($_POST['revision']??''),isset($_POST['secondary'])?absint($_POST['secondary']):null);
                 else ConversationStore::deny();
             }
             wp_safe_redirect(self::url($id?['chat_id'=>$id]:[])); exit;
@@ -120,9 +120,10 @@ final class Conversations {
         if (!$q->posts) echo '<p>'.esc_html__('No conversations yet.','pc-order-import-export').'</p>';
         foreach ($q->posts as $post) {
             $meta=ConversationStore::meta($post->ID); $owner=get_userdata((int)$post->post_author); $manager=$meta['assignee']?get_userdata($meta['assignee']):false;
+            $secondary=$admin && $meta['secondary']?get_userdata($meta['secondary']):false;
             $last=ConversationStore::latest($post->ID); $unread=$last && $last>(int)get_user_meta(get_current_user_id(),'_pcoe_chat_seen_'.$post->ID,true);
             echo '<article class="pcoe-chat-card"><a href="'.esc_url(self::url(['chat_id'=>$post->ID])).'"><strong>'.esc_html($post->post_title).'</strong></a>'.($unread?' <strong>'.esc_html__('Unread','pc-order-import-export').'</strong>':'');
-            echo '<p>'.esc_html(($admin && $owner?$owner->display_name.' · ':'').(self::states()[$meta['state']]??'').' · '.($manager?$manager->display_name:__('Unassigned','pc-order-import-export'))).'</p><small>'.esc_html(get_date_from_gmt($post->post_modified_gmt,'d.m.Y H:i')).'</small></article>';
+            echo '<p>'.esc_html(($admin && $owner?$owner->display_name.' · ':'').(self::states()[$meta['state']]??'').' · '.($manager?$manager->display_name:__('Unassigned','pc-order-import-export')).($secondary?' + '.$secondary->display_name:'')).'</p><small>'.esc_html(get_date_from_gmt($post->post_modified_gmt,'d.m.Y H:i')).'</small></article>';
         }
         self::pages($page,(int)$q->max_num_pages,'chat_page',['chat_filter'=>$filter]);
     }
@@ -162,9 +163,10 @@ final class Conversations {
         }
         if ($admin && self::enabled()) {
             echo '<form class="pcoe-chat-assignment" method="post" action="'.esc_url(admin_url('admin-post.php')).'">';self::fields('assign',$id);
-            echo '<input type="hidden" name="revision" value="'.esc_attr($meta['revision']).'"><label>'.esc_html__('Responsible manager','pc-order-import-export').'<select name="assignee"><option value="0">'.esc_html__('Unassigned','pc-order-import-export').'</option>';
-            foreach(get_users(['capability'=>'manage_woocommerce','orderby'=>'display_name']) as $u) echo '<option value="'.esc_attr($u->ID).'" '.selected($meta['assignee'],$u->ID,false).'>'.esc_html($u->display_name).'</option>';
-            echo '</select></label><label>'.esc_html__('State','pc-order-import-export').'<select name="state">';foreach(self::states() as $key=>$label) echo '<option value="'.esc_attr($key).'" '.selected($meta['state'],$key,false).'>'.esc_html($label).'</option>';
+            echo '<input type="hidden" name="revision" value="'.esc_attr($meta['revision']).'">';
+            CustomerManagers::select('assignee',__('Responsible manager','pc-order-import-export'),$meta['assignee']);
+            CustomerManagers::select('secondary',__('Additional manager','pc-order-import-export'),$meta['secondary']);
+            echo '<label>'.esc_html__('State','pc-order-import-export').'<select name="state">';foreach(self::states() as $key=>$label) echo '<option value="'.esc_attr($key).'" '.selected($meta['state'],$key,false).'>'.esc_html($label).'</option>';
             echo '</select></label><button class="button">'.esc_html__('Save assignment and state','pc-order-import-export').'</button></form>';
         }
         $page=max(1,absint($_GET['messages_page']??1));

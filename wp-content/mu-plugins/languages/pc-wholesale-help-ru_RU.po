@@ -1030,3 +1030,7 @@ msgstr "Открыть сообщения"
 
 msgid "Download the short illustrated guide (PDF, Ukrainian)"
 msgstr "Скачать краткую инструкцию с иллюстрациями (PDF, на украинском)"
+
+#: pc-wholesale-help/messages-guide.php
+msgid "If two managers support your conversation, either can reply. Continue in the same conversation; you do not need to connect another bot."
+msgstr "Если с вашим обращением работают два менеджера, ответить может каждый из них. Продолжайте ту же переписку — подключать другого бота не нужно."

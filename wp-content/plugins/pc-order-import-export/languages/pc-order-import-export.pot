@@ -2095,3 +2095,52 @@ msgstr ""
 #: inc/TelegramManagers.php:121
 msgid "Reply not saved: this request is not assigned to you or is closed. Check /threads or take an unassigned request via /queue."
 msgstr ""
+
+#: inc/CustomerManagers.php inc/ConversationStore.php
+msgid "Choose a primary manager and a different additional manager, or leave the additional manager empty."
+msgstr ""
+
+#: inc/CustomerManagers.php inc/ConversationStore.php
+msgid "Customer managers changed. Refresh the customer card before saving."
+msgstr ""
+
+#: inc/CustomerManagers.php inc/ConversationStore.php
+msgid "More than 200 open conversations. Save defaults without bulk application and update conversations separately."
+msgstr ""
+
+#: inc/CustomerManagers.php inc/ConversationStore.php
+msgid "Unavailable manager — choose a replacement"
+msgstr ""
+
+#: inc/CustomerManagers.php inc/ConversationStore.php
+msgid "Customer managers"
+msgstr ""
+
+#: inc/CustomerManagers.php inc/ConversationStore.php
+msgid "New conversations inherit this pair. Both managers receive customer messages and public replies from their colleague in their connected Telegram. The primary manager remains responsible."
+msgstr ""
+
+#: inc/CustomerManagers.php inc/ConversationStore.php
+msgid "Customer managers saved."
+msgstr ""
+
+#: inc/CustomerManagers.php inc/ConversationStore.php
+msgid "Primary manager"
+msgstr ""
+
+#: inc/CustomerManagers.php inc/ConversationStore.php
+msgid "Additional manager"
+msgstr ""
+
+#: inc/CustomerManagers.php inc/ConversationStore.php
+msgid "Also replace managers in all existing open conversations for this customer. Closed conversations keep their assignment."
+msgstr ""
+
+#: inc/CustomerManagers.php inc/ConversationStore.php
+msgid "Save customer managers"
+msgstr ""
+
+#: inc/CustomerManagers.php inc/ConversationStore.php
+#, php-format
+msgid "Additional manager: %s"
+msgstr ""

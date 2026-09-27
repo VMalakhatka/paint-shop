@@ -126,7 +126,7 @@ final class TelegramBridge {
     /** Called within the message transaction; private notes never enter either outbox. */
     public static function enqueue(int $thread,int $message,bool $internal): void {
         if($internal || !TelegramSettings::enabled())return;
-        if(get_post_meta($message,'_chat_actor',true)==='customer') { TelegramManagers::enqueue($thread,$message);return; }
+        TelegramManagers::enqueue($thread,$message);
         if(get_post_meta($message,'_chat_actor',true)!=='manager')return;
         $post=get_post($thread);$link=TelegramStore::active((int)$post->post_author);if(!$link || ($link['data']['audience']??'customer')!=='customer')return;
         switch_to_locale(get_user_locale((int)$post->post_author));
