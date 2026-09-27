@@ -936,3 +936,15 @@ msgstr "Отправить счёт на email"
 
 msgid "Check the recipient address, then select Send by email once. Wait for the result and check the inbox and spam folder. After an uncertain result, check your mail before retrying. Payments and returns cannot be used for a payment invoice. For partial payments, check the balance or ask the manager before paying."
 msgstr "Проверьте адрес получателя и один раз нажмите «Отправить на email». Дождитесь результата, проверьте почту и «Спам». После неопределённого результата проверьте почту перед повтором. Из платежей и возвратов счёт на оплату не формируется. При частичной оплате проверьте баланс или уточните остаток у менеджера."
+
+msgid "Messages with your manager"
+msgstr "Сообщения менеджеру"
+
+msgid "When chat is enabled, open Messages in My account. Create a subject, choose General question or one of your orders, and write your message. You can also start from Discuss this order on the order page."
+msgstr "Когда чат включён, откройте «Сообщения» в кабинете. Введите тему, выберите «Общий вопрос» или свой заказ и напишите сообщение. Также можно нажать «Обсудить этот заказ» на странице заказа."
+
+msgid "The conversation shows replies, its responsible manager and who should answer next. Open conversations refresh about every 15 seconds while the tab is active. Refresh the conversation list to check new requests. A new message reopens a closed conversation."
+msgstr "В обращении видны ответы, ответственный менеджер и кто должен ответить. Открытая переписка обновляется примерно каждые 15 секунд, пока вкладка активна. Для новых обращений обновите список. Новое сообщение клиента снова открывает закрытое обращение."
+
+msgid "This first stage supports text on the website. Files, email and Telegram delivery are not connected. A message does not confirm an order, make a payment or start shipment; use the separate order confirmation screen when requested."
+msgstr "На первом этапе доступен текст на сайте. Файлы, email и Telegram не подключены. Сообщение не подтверждает заказ, не выполняет оплату и не запускает отправку; для подтверждения используйте отдельную страницу по запросу менеджера."

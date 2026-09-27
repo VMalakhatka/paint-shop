@@ -294,6 +294,7 @@ function pc_wholesale_help_render_endpoint(): void {
             <a href="#import"><span>5</span><?php esc_html_e('Import', 'pc-wholesale-help'); ?></a>
             <a href="#eksport"><span>6</span><?php esc_html_e('Export', 'pc-wholesale-help'); ?></a>
             <a href="#chernetky"><span>7</span><?php esc_html_e('Drafts', 'pc-wholesale-help'); ?></a>
+            <a href="#messages"><?php esc_html_e('Messages with your manager', 'pc-wholesale-help'); ?></a>
             <a href="#order-details"><?php esc_html_e('Order details and delivery', 'pc-wholesale-help'); ?></a>
             <a href="#stari-zamovlennia"><span>8</span><?php esc_html_e('Draft processing', 'pc-wholesale-help'); ?></a>
             <a href="#oformlennia"><span>9</span><?php esc_html_e('Checkout', 'pc-wholesale-help'); ?></a>
@@ -425,6 +426,12 @@ function pc_wholesale_help_render_endpoint(): void {
             <a class="pc-help-inline-action" href="<?php echo esc_url($orders_url); ?>"><?php esc_html_e('Open my orders', 'pc-wholesale-help'); ?> →</a>
         </section>
 
+        <section class="pc-help-section" id="messages">
+            <h2><?php esc_html_e('Messages with your manager', 'pc-wholesale-help'); ?></h2>
+            <p><?php esc_html_e('When chat is enabled, open Messages in My account. Create a subject, choose General question or one of your orders, and write your message. You can also start from Discuss this order on the order page.', 'pc-wholesale-help'); ?></p>
+            <p><?php esc_html_e('The conversation shows replies, its responsible manager and who should answer next. Open conversations refresh about every 15 seconds while the tab is active. Refresh the conversation list to check new requests. A new message reopens a closed conversation.', 'pc-wholesale-help'); ?></p>
+            <p><?php esc_html_e('This first stage supports text on the website. Files, email and Telegram delivery are not connected. A message does not confirm an order, make a payment or start shipment; use the separate order confirmation screen when requested.', 'pc-wholesale-help'); ?></p>
+        </section>
         <section class="pc-help-section" id="order-details">
             <h2><?php esc_html_e('Where to find order details and delivery', 'pc-wholesale-help'); ?></h2>
             <p><?php esc_html_e('In My account, open My orders and choose View for the required order. The order page shows its date, status, products, totals, payment method, addresses and your checkout comment when provided.', 'pc-wholesale-help'); ?></p>

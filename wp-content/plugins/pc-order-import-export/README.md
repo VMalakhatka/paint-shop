@@ -271,3 +271,22 @@ plugin activation, schema migration or Java deployment is needed. Smoke-test as
 partner and opt: download, edit a few quantities, import to a draft, compare current
 prices. Use only an approved test account for cart/order writes on production.
 Rollback the release files together; existing drafts and orders are not deleted.
+
+
+## Customer conversations — stage 1 (2026-09-27)
+
+`Conversations` owns account/admin UI, nonce-protected text forms and polling;
+`ConversationStore` owns private records, access checks, assignment and queue states.
+It is an isolated module of this already-deployed plugin. Enable explicitly in
+Customer workspace → Conversations → Chat settings (manage_options), default off.
+No schema migration or Java changes. Requires InnoDB posts/postmeta and MySQL/MariaDB
+advisory locks; source-of-truth operations stay with existing Woo/Folio owners.
+See [operator setup, storage, checks and rollback](../../../docs/OPERATIONS_RUNBOOK.md#чат-клиента-и-очередь-обращений--этап-1-2026-09-27).
+
+Text only; one conversation per customer/Woo order or independent general topics.
+The first manager public reply claims an unassigned thread. Customer reply reopens
+closed conversations; internal notes never reach customers. Sends use actor/request
+idempotency, owner checks and a transaction; stale assignment revisions are rejected.
+The browser polls only the latest message page while visible, without replacing the
+composer. Email, Telegram, uploads and standalone Folio binding are not implemented.
+Local regression: `tests/conversations.php` (intercepted HTTP/mail, disposable records).

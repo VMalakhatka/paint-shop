@@ -13,6 +13,9 @@ add_action('template_redirect', function () {
     if ( is_admin() || wp_doing_ajax() ) return;
     if ( ! function_exists('is_account_page') ) return;
 
+    // Conversations use the account page with a query flag, without a rewrite endpoint.
+    if ( isset($_GET['pcoe_chat']) && class_exists('PaintCore\\PCOE\\Conversations') ) return;
+
     $is_root = is_account_page()
         && ( ! function_exists('is_wc_endpoint_url') || ! is_wc_endpoint_url() );
 

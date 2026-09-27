@@ -33,6 +33,7 @@ class Plugin {
 
         DraftFolioWorkflow::hooks();
         ManagerWorkspace::hooks();
+        Conversations::hooks();
         ManagerNotifications::hooks();
         CustomerApproval::hooks();
 

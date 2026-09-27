@@ -1933,3 +1933,150 @@ msgstr "Внутрішня примітка"
 
 msgid "Open an order number to see delivery, saved TTNs, recipient contacts, customer comments and order notes here. The WooCommerce button opens the full editor for additional actions."
 msgstr "Натисніть номер замовлення: тут є доставка, збережені ТТН, контакти отримувача, коментарі клієнта та примітки. Кнопка WooCommerce відкриває повний редактор для додаткових дій."
+
+msgid "All conversations"
+msgstr "Усі звернення"
+
+msgid "Assigned to me"
+msgstr "Призначені мені"
+
+msgid "Assignment: %1$s. State: %2$s."
+msgstr "Відповідальний: %1$s. Стан: %2$s."
+
+msgid "Chat is not enabled."
+msgstr "Чат ще не ввімкнено."
+
+msgid "Chat requires transactional storage. Contact the administrator."
+msgstr "Для чату потрібне транзакційне сховище. Зверніться до адміністратора."
+
+msgid "Chat settings"
+msgstr "Налаштування чату"
+
+msgid "Choose a customer to start a conversation"
+msgstr "Оберіть клієнта, щоб почати звернення"
+
+msgid "Closed"
+msgstr "Закрито"
+
+msgid "Conversation changed. Refresh before changing its owner or state."
+msgstr "Звернення змінилося. Оновіть сторінку перед зміною відповідального чи стану."
+
+msgid "Conversation is busy. Retry with the same message."
+msgstr "Звернення зараз обробляється. Повторіть з тим самим повідомленням."
+
+msgid "Conversation unavailable."
+msgstr "Звернення недоступне."
+
+msgid "Could not refresh messages. Reload the page."
+msgstr "Не вдалося оновити повідомлення. Оновіть сторінку."
+
+msgid "Could not save the conversation. Please retry."
+msgstr "Не вдалося зберегти звернення. Спробуйте ще раз."
+
+msgid "Customer conversations"
+msgstr "Звернення клієнтів"
+
+msgid "Conversations"
+msgstr "Звернення"
+
+msgid "Disable new messages"
+msgstr "Вимкнути нові повідомлення"
+
+msgid "Discuss this order"
+msgstr "Обговорити це замовлення"
+
+msgid "Enable chat"
+msgstr "Увімкнути чат"
+
+msgid "Enable text conversations for registered customers and wholesale accounts. No email or Telegram messages are sent."
+msgstr "Увімкнути текстові звернення для зареєстрованих покупців та оптових клієнтів. Email і Telegram не надсилаються."
+
+msgid "Enter a message of 1–5000 characters."
+msgstr "Введіть повідомлення від 1 до 5000 символів."
+
+msgid "Enter a subject of 1–160 characters."
+msgstr "Введіть тему від 1 до 160 символів."
+
+msgid "General question"
+msgstr "Загальне питання"
+
+msgid "Internal note — staff only"
+msgstr "Внутрішня примітка — лише співробітникам"
+
+msgid "Manager"
+msgstr "Менеджер"
+
+msgid "Manager reply needed"
+msgstr "Потрібна відповідь менеджера"
+
+msgid "Message not saved"
+msgstr "Повідомлення не збережено"
+
+msgid "Message visibility"
+msgstr "Видимість повідомлення"
+
+msgid "Messages"
+msgstr "Повідомлення"
+
+msgid "New conversation"
+msgstr "Нове звернення"
+
+msgid "No conversations yet."
+msgstr "Звернень поки немає."
+
+msgid "No messages yet."
+msgstr "Повідомлень поки немає."
+
+msgid "Open order conversation"
+msgstr "Відкрити обговорення замовлення"
+
+msgid "Please sign in."
+msgstr "Увійдіть до облікового запису."
+
+msgid "Refresh messages"
+msgstr "Оновити повідомлення"
+
+msgid "Related order"
+msgstr "Пов’язане замовлення"
+
+msgid "Responsible manager"
+msgstr "Відповідальний менеджер"
+
+msgid "Retry saving"
+msgstr "Повторити збереження"
+
+msgid "Return to messages"
+msgstr "Повернутися до повідомлень"
+
+msgid "Save assignment and state"
+msgstr "Зберегти відповідального та стан"
+
+msgid "Save message"
+msgstr "Зберегти повідомлення"
+
+msgid "Select an active manager."
+msgstr "Оберіть менеджера з доступом до замовлень."
+
+msgid "Send to customer"
+msgstr "Повідомлення клієнту"
+
+msgid "State"
+msgstr "Стан"
+
+msgid "Subject"
+msgstr "Тема"
+
+msgid "Unassigned"
+msgstr "Без відповідального"
+
+msgid "Unread"
+msgstr "Непрочитане"
+
+msgid "User"
+msgstr "Користувач"
+
+msgid "Waiting for customer"
+msgstr "Очікуємо клієнта"
+
+msgid "Write to customer"
+msgstr "Написати клієнту"

@@ -1927,3 +1927,150 @@ msgstr "Внутренняя заметка"
 
 msgid "Open an order number to see delivery, saved TTNs, recipient contacts, customer comments and order notes here. The WooCommerce button opens the full editor for additional actions."
 msgstr "Нажмите номер заказа: здесь есть доставка, сохранённые ТТН, контакты получателя, комментарии клиента и заметки. Кнопка WooCommerce открывает полный редактор для дополнительных действий."
+
+msgid "All conversations"
+msgstr "Все обращения"
+
+msgid "Assigned to me"
+msgstr "Назначенные мне"
+
+msgid "Assignment: %1$s. State: %2$s."
+msgstr "Ответственный: %1$s. Состояние: %2$s."
+
+msgid "Chat is not enabled."
+msgstr "Чат ещё не включён."
+
+msgid "Chat requires transactional storage. Contact the administrator."
+msgstr "Для чата нужно транзакционное хранилище. Обратитесь к администратору."
+
+msgid "Chat settings"
+msgstr "Настройки чата"
+
+msgid "Choose a customer to start a conversation"
+msgstr "Выберите клиента, чтобы начать обращение"
+
+msgid "Closed"
+msgstr "Закрыто"
+
+msgid "Conversation changed. Refresh before changing its owner or state."
+msgstr "Обращение изменилось. Обновите страницу перед сменой ответственного или состояния."
+
+msgid "Conversation is busy. Retry with the same message."
+msgstr "Обращение сейчас обрабатывается. Повторите с тем же сообщением."
+
+msgid "Conversation unavailable."
+msgstr "Обращение недоступно."
+
+msgid "Could not refresh messages. Reload the page."
+msgstr "Не удалось обновить сообщения. Обновите страницу."
+
+msgid "Could not save the conversation. Please retry."
+msgstr "Не удалось сохранить обращение. Повторите попытку."
+
+msgid "Customer conversations"
+msgstr "Обращения клиентов"
+
+msgid "Conversations"
+msgstr "Обращения"
+
+msgid "Disable new messages"
+msgstr "Отключить новые сообщения"
+
+msgid "Discuss this order"
+msgstr "Обсудить этот заказ"
+
+msgid "Enable chat"
+msgstr "Включить чат"
+
+msgid "Enable text conversations for registered customers and wholesale accounts. No email or Telegram messages are sent."
+msgstr "Включить текстовые обращения для зарегистрированных покупателей и оптовых клиентов. Email и Telegram не отправляются."
+
+msgid "Enter a message of 1–5000 characters."
+msgstr "Введите сообщение от 1 до 5000 символов."
+
+msgid "Enter a subject of 1–160 characters."
+msgstr "Введите тему от 1 до 160 символов."
+
+msgid "General question"
+msgstr "Общий вопрос"
+
+msgid "Internal note — staff only"
+msgstr "Внутренняя заметка — только сотрудникам"
+
+msgid "Manager"
+msgstr "Менеджер"
+
+msgid "Manager reply needed"
+msgstr "Нужен ответ менеджера"
+
+msgid "Message not saved"
+msgstr "Сообщение не сохранено"
+
+msgid "Message visibility"
+msgstr "Видимость сообщения"
+
+msgid "Messages"
+msgstr "Сообщения"
+
+msgid "New conversation"
+msgstr "Новое обращение"
+
+msgid "No conversations yet."
+msgstr "Обращений пока нет."
+
+msgid "No messages yet."
+msgstr "Сообщений пока нет."
+
+msgid "Open order conversation"
+msgstr "Открыть обсуждение заказа"
+
+msgid "Please sign in."
+msgstr "Войдите в учётную запись."
+
+msgid "Refresh messages"
+msgstr "Обновить сообщения"
+
+msgid "Related order"
+msgstr "Связанный заказ"
+
+msgid "Responsible manager"
+msgstr "Ответственный менеджер"
+
+msgid "Retry saving"
+msgstr "Повторить сохранение"
+
+msgid "Return to messages"
+msgstr "Вернуться к сообщениям"
+
+msgid "Save assignment and state"
+msgstr "Сохранить ответственного и состояние"
+
+msgid "Save message"
+msgstr "Сохранить сообщение"
+
+msgid "Select an active manager."
+msgstr "Выберите менеджера с доступом к заказам."
+
+msgid "Send to customer"
+msgstr "Сообщение клиенту"
+
+msgid "State"
+msgstr "Состояние"
+
+msgid "Subject"
+msgstr "Тема"
+
+msgid "Unassigned"
+msgstr "Без ответственного"
+
+msgid "Unread"
+msgstr "Непрочитанное"
+
+msgid "User"
+msgstr "Пользователь"
+
+msgid "Waiting for customer"
+msgstr "Ожидаем клиента"
+
+msgid "Write to customer"
+msgstr "Написать клиенту"

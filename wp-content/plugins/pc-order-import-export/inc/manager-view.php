@@ -18,11 +18,13 @@ $form_fields = static function (string $operation) use ($customer_id, $order): v
 <div class="wrap pcoe-manager">
 <h1><?php esc_html_e('Customer workspace', 'pc-order-import-export'); ?></h1>
 <p><?php esc_html_e('Select a customer, prepare a draft and review Folio accounts by warehouse.', 'pc-order-import-export'); ?></p>
-<?php $orders_tab = !$customer_id && ($_GET['view'] ?? '') === 'orders'; ?>
+<?php $messages_tab = ($_GET['view'] ?? '') === 'messages'; $orders_tab = !$customer_id && ($_GET['view'] ?? '') === 'orders'; ?>
 <nav class="nav-tab-wrapper">
-<a class="nav-tab <?php echo !$orders_tab ? 'nav-tab-active' : ''; ?>" href="<?php echo esc_url(ManagerWorkspace::url(0)); ?>"><?php esc_html_e('Customers', 'pc-order-import-export'); ?></a>
+<a class="nav-tab <?php echo !$orders_tab && !$messages_tab ? 'nav-tab-active' : ''; ?>" href="<?php echo esc_url(ManagerWorkspace::url(0)); ?>"><?php esc_html_e('Customers', 'pc-order-import-export'); ?></a>
 <a class="nav-tab <?php echo $orders_tab ? 'nav-tab-active' : ''; ?>" href="<?php echo esc_url(add_query_arg('view', 'orders', ManagerWorkspace::url(0))); ?>"><?php esc_html_e('Orders', 'pc-order-import-export'); ?></a>
+<a class="nav-tab <?php echo $messages_tab ? 'nav-tab-active' : ''; ?>" href="<?php echo esc_url(Conversations::url([],true)); ?>"><?php esc_html_e('Conversations', 'pc-order-import-export'); ?></a>
 </nav>
+<?php if ($messages_tab) { Conversations::render(); echo '</div>'; return; } ?>
 <?php if ($orders_tab) { require __DIR__ . '/manager-orders-view.php'; echo '</div>'; return; } ?>
 <?php if ($error): ?><div class="notice notice-error"><p><?php echo esc_html($error); ?></p></div><?php endif; ?>
 <div id="pcoe-manager-status" role="status" aria-live="polite"></div>
@@ -38,7 +40,7 @@ $directory_url = add_query_arg(['page' => ManagerWorkspace::PAGE, 'customer_sear
 <form method="get" class="pcoe-directory-filters">
 <input type="hidden" name="page" value="<?php echo esc_attr(ManagerWorkspace::PAGE); ?>">
 <label for="pcoe-search"><?php esc_html_e('Find customer by name, company or email', 'pc-order-import-export'); ?><input id="pcoe-search" name="customer_search" type="search" value="<?php echo esc_attr($search); ?>"></label>
-<label for="pcoe-role"><?php esc_html_e('Customer role', 'pc-order-import-export'); ?><select id="pcoe-role" name="customer_role"><option value=""><?php esc_html_e('All roles', 'pc-order-import-export'); ?></option><?php foreach (['customer', 'opt', 'partner'] as $key): ?><option value="<?php echo esc_attr($key); ?>" <?php selected($role, $key); ?>><?php echo esc_html(translate_user_role($role_names[$key] ?? $key)); ?></option><?php endforeach; ?></select></label>
+<label for="pcoe-role"><?php esc_html_e('Customer role', 'pc-order-import-export'); ?><select id="pcoe-role" name="customer_role"><option value=""><?php esc_html_e('All roles', 'pc-order-import-export'); ?></option><?php foreach (ManagerWorkspace::customer_roles() as $key): ?><option value="<?php echo esc_attr($key); ?>" <?php selected($role, $key); ?>><?php echo esc_html(translate_user_role($role_names[$key] ?? $key)); ?></option><?php endforeach; ?></select></label>
 <label for="pcoe-city"><?php esc_html_e('City', 'pc-order-import-export'); ?><select id="pcoe-city" name="customer_city"><option value=""><?php esc_html_e('All cities', 'pc-order-import-export'); ?></option><?php foreach ($directory['cities'] as $value): ?><option <?php selected($city, $value); ?> value="<?php echo esc_attr($value); ?>"><?php echo esc_html($value); ?></option><?php endforeach; ?></select></label>
 <div class="pcoe-actions"><button class="button button-primary"><?php esc_html_e('Filter customers', 'pc-order-import-export'); ?></button><a class="button" href="<?php echo esc_url(ManagerWorkspace::url(0)); ?>"><?php esc_html_e('Reset filters', 'pc-order-import-export'); ?></a></div>
 </form>
@@ -53,7 +55,7 @@ $folio_name = trim((string) get_user_meta($match->ID, '_folio_partner_name', tru
 $folio_short = trim((string) get_user_meta($match->ID, '_folio_partner_short_name', true));
 ?><tr><td><a href="<?php echo esc_url(ManagerWorkspace::url($match->ID)); ?>"><strong><?php echo esc_html($match->display_name); ?></strong></a><br><?php echo esc_html(get_user_meta($match->ID, 'billing_company', true)); ?><br><?php echo esc_html($match->user_email); ?></td>
 <td><?php echo esc_html($folio_name ?: ($folio_short ?: __('Not linked to Folio', 'pc-order-import-export'))); ?><?php if ($folio_short && $folio_short !== $folio_name): ?><br><span class="description"><?php echo esc_html($folio_short); ?></span><?php endif; ?></td>
-<td><?php echo esc_html(implode(', ', array_map(static fn($r) => translate_user_role($role_names[$r] ?? $r), array_intersect($match->roles, ['customer', 'opt', 'partner'])))); ?></td><td><?php echo esc_html(get_user_meta($match->ID, 'billing_city', true) ?: '—'); ?></td></tr>
+<td><?php echo esc_html(implode(', ', array_map(static fn($r) => translate_user_role($role_names[$r] ?? $r), array_intersect($match->roles, ManagerWorkspace::customer_roles())))); ?></td><td><?php echo esc_html(get_user_meta($match->ID, 'billing_city', true) ?: '—'); ?></td></tr>
 <?php endforeach; ?></tbody></table></div>
 <nav class="pcoe-actions">
 <?php if ($directory_page > 1): ?><a class="button" href="<?php echo esc_url(add_query_arg('customers_page', $directory_page - 1, $directory_url)); ?>"><?php esc_html_e('Previous page', 'pc-order-import-export'); ?></a><?php endif; ?>
@@ -65,6 +67,7 @@ $context = function_exists('pc_folio_balance_user_context') ? pc_folio_balance_u
 ?>
 <section class="pcoe-card pcoe-customer-heading">
 <h2><?php echo esc_html($user->display_name); ?></h2>
+<p><a class="button" href="<?php echo esc_url(Conversations::url(['new_customer'=>$customer_id,'new_order'=>$order?$order->get_id():0],true)); ?>"><?php esc_html_e('Write to customer', 'pc-order-import-export'); ?></a></p>
 <p><?php echo esc_html(get_user_meta($customer_id, 'billing_company', true)); ?> · <?php echo esc_html($user->user_email); ?></p>
 <p><?php esc_html_e('Folio customer:', 'pc-order-import-export'); ?> <strong><?php echo esc_html($context['name'] ?? ''); ?> <?php echo esc_html($context['short_name'] ?? ''); ?></strong></p>
 <p><?php esc_html_e('Price role:', 'pc-order-import-export'); ?> <?php $roles = wp_roles()->get_names(); echo esc_html(translate_user_role($roles[$user->roles[0] ?? ''] ?? '')); ?></p>

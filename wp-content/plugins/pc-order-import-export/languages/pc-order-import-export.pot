@@ -1731,3 +1731,150 @@ msgstr ""
 
 msgid "Open an order number to see delivery, saved TTNs, recipient contacts, customer comments and order notes here. The WooCommerce button opens the full editor for additional actions."
 msgstr ""
+
+msgid "All conversations"
+msgstr ""
+
+msgid "Assigned to me"
+msgstr ""
+
+msgid "Assignment: %1$s. State: %2$s."
+msgstr ""
+
+msgid "Chat is not enabled."
+msgstr ""
+
+msgid "Chat requires transactional storage. Contact the administrator."
+msgstr ""
+
+msgid "Chat settings"
+msgstr ""
+
+msgid "Choose a customer to start a conversation"
+msgstr ""
+
+msgid "Closed"
+msgstr ""
+
+msgid "Conversation changed. Refresh before changing its owner or state."
+msgstr ""
+
+msgid "Conversation is busy. Retry with the same message."
+msgstr ""
+
+msgid "Conversation unavailable."
+msgstr ""
+
+msgid "Could not refresh messages. Reload the page."
+msgstr ""
+
+msgid "Could not save the conversation. Please retry."
+msgstr ""
+
+msgid "Customer conversations"
+msgstr ""
+
+msgid "Conversations"
+msgstr ""
+
+msgid "Disable new messages"
+msgstr ""
+
+msgid "Discuss this order"
+msgstr ""
+
+msgid "Enable chat"
+msgstr ""
+
+msgid "Enable text conversations for registered customers and wholesale accounts. No email or Telegram messages are sent."
+msgstr ""
+
+msgid "Enter a message of 1–5000 characters."
+msgstr ""
+
+msgid "Enter a subject of 1–160 characters."
+msgstr ""
+
+msgid "General question"
+msgstr ""
+
+msgid "Internal note — staff only"
+msgstr ""
+
+msgid "Manager"
+msgstr ""
+
+msgid "Manager reply needed"
+msgstr ""
+
+msgid "Message not saved"
+msgstr ""
+
+msgid "Message visibility"
+msgstr ""
+
+msgid "Messages"
+msgstr ""
+
+msgid "New conversation"
+msgstr ""
+
+msgid "No conversations yet."
+msgstr ""
+
+msgid "No messages yet."
+msgstr ""
+
+msgid "Open order conversation"
+msgstr ""
+
+msgid "Please sign in."
+msgstr ""
+
+msgid "Refresh messages"
+msgstr ""
+
+msgid "Related order"
+msgstr ""
+
+msgid "Responsible manager"
+msgstr ""
+
+msgid "Retry saving"
+msgstr ""
+
+msgid "Return to messages"
+msgstr ""
+
+msgid "Save assignment and state"
+msgstr ""
+
+msgid "Save message"
+msgstr ""
+
+msgid "Select an active manager."
+msgstr ""
+
+msgid "Send to customer"
+msgstr ""
+
+msgid "State"
+msgstr ""
+
+msgid "Subject"
+msgstr ""
+
+msgid "Unassigned"
+msgstr ""
+
+msgid "Unread"
+msgstr ""
+
+msgid "User"
+msgstr ""
+
+msgid "Waiting for customer"
+msgstr ""
+
+msgid "Write to customer"
+msgstr ""

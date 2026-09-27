@@ -30,12 +30,14 @@ class ManagerWorkspace
         return add_query_arg(['page' => self::PAGE, 'customer_id' => $customer_id, 'order_id' => $order_id], admin_url('admin.php'));
     }
 
+    public static function customer_roles(): array { return array_values(array_unique(array_merge(['customer'], function_exists('pc_wholesale_customer_roles') ? pc_wholesale_customer_roles() : ['opt','partner']))); }
+
     public static function customer(int $id): \WP_User {
         if (!current_user_can('manage_woocommerce')) {
             throw new \RuntimeException(__('You do not have permission to perform this action.', 'pc-order-import-export'));
         }
         $user = get_userdata($id);
-        if (!$user instanceof \WP_User || !array_intersect(['customer', 'opt', 'partner'], $user->roles)) {
+        if (!$user instanceof \WP_User || !array_intersect(self::customer_roles(), $user->roles)) {
             throw new \RuntimeException(__('Select a customer account.', 'pc-order-import-export'));
         }
         return $user;
@@ -61,7 +63,7 @@ class ManagerWorkspace
     public static function directory(string $search, string $role, string $city, int $page): array {
         if (!current_user_can('manage_woocommerce')) throw new \RuntimeException('Forbidden');
         global $wpdb;
-        $roles = ['customer', 'opt', 'partner'];
+        $roles = self::customer_roles();
         $args = ['role__in' => in_array($role, $roles, true) ? [$role] : $roles,
             'number' => 25, 'paged' => max(1, $page), 'orderby' => ['display_name' => 'ASC', 'ID' => 'ASC']];
         $query = new \WP_User_Query();
