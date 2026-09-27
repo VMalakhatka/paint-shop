@@ -103,7 +103,8 @@ final class Conversations {
             echo '<details><summary>'.esc_html__('Chat settings','pc-order-import-export').'</summary><form method="post" action="'.esc_url(admin_url('admin-post.php')).'">';self::fields(self::enabled()?'disable':'enable');
             echo '<p>'.esc_html__('Enable text conversations for registered customers and wholesale accounts. Telegram is configured separately below.','pc-order-import-export').'</p><button class="button">'.esc_html(self::enabled()?__('Disable new messages','pc-order-import-export'):__('Enable chat','pc-order-import-export')).'</button></form></details>';
         }
-        if($admin)TelegramSettings::admin();else TelegramSettings::customer();
+        if($admin)TelegramSettings::admin();
+        TelegramSettings::customer();
         try {
             $id=absint($_GET['chat_id']??0);
             if ($id) self::thread($id); else { self::queue(); if(self::enabled()) self::new_form(); }

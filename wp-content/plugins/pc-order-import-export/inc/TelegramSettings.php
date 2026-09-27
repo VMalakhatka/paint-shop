@@ -86,22 +86,24 @@ final class TelegramSettings {
         echo '</details>';
     }
     public static function customer(): void {
-        if(ConversationStore::manager() || !ConversationStore::customer(get_current_user_id()))return;
+        if(TelegramStore::audience(get_current_user_id())==='')return;
+        $manager=ConversationStore::manager();
         $c=self::config();if(empty($c['bot']) || !TelegramStore::ready())return;
-        $link=TelegramStore::link(get_current_user_id());$status=$link['status']??'';
-        echo '<section class="pcoe-chat-card"><h3>Telegram</h3>';
+        $link=TelegramStore::link(get_current_user_id());$status=$link && TelegramStore::eligible(get_current_user_id(),$link['data'])?($link['status']??''):'';
+        echo '<section class="pcoe-chat-card"><h3>'.esc_html($manager?__('My Telegram for customer conversations','pc-order-import-export'):'Telegram').'</h3>';
         if($status==='active') {
-            echo '<p>'.esc_html__('Telegram is linked. New public manager replies will also arrive in the bot.','pc-order-import-export').'</p>';
+            echo '<p>'.esc_html($manager?__('Telegram is linked. Receive your assigned conversations and the unassigned queue. Reply to a specific bot message to answer the customer.','pc-order-import-export'):__('Telegram is linked. New public manager replies will also arrive in the bot.','pc-order-import-export')).'</p>';
+            if($manager)echo '<p>'.esc_html__('Use /threads for your conversations and /queue for unassigned requests. Take a request before replying. Replies are public; write internal notes only on the website.','pc-order-import-export').'</p>';
             echo '<p><a rel="noreferrer noopener" target="_blank" href="'.esc_url('https://t.me/'.$c['username']).'">'.esc_html__('Open Telegram bot','pc-order-import-export').'</a></p>';
             if(!self::enabled())echo '<p>'.esc_html__('Telegram delivery is currently paused by the store.','pc-order-import-export').'</p>';
             self::form('unlink',__('Disconnect Telegram','pc-order-import-export'));
         } elseif(self::enabled()) {
-            echo '<p>'.esc_html__('Link your own Telegram account to receive manager replies and write in the same conversations. After starting the bot, return here and confirm the account. Do not share the one-time link.','pc-order-import-export').'</p>';
+            echo '<p>'.esc_html($manager?__('Connect your own Telegram to receive customer messages and take unassigned requests. After Start, return here and confirm your identity. Do not share the one-time link.','pc-order-import-export'):__('Link your own Telegram account to receive manager replies and write in the same conversations. After starting the bot, return here and confirm the account. Do not share the one-time link.','pc-order-import-export')).'</p>';
             if($status==='pending' && ($link['data']['expires']??0)>=time()) {
                 echo '<p>'.esc_html(sprintf(__('Confirm Telegram account: %1$s (ID ending %2$s).','pc-order-import-export'),$link['data']['name'],substr($link['data']['chat'],-4))).'</p>';
                 self::form('confirm',__('Confirm my Telegram account','pc-order-import-export'),['generation'=>$link['data']['generation']]);
             }
-            self::form('link',__('Create one-time Telegram link','pc-order-import-export'));
+            self::form('link',$manager?__('Connect my Telegram','pc-order-import-export'):__('Create one-time Telegram link','pc-order-import-export'));
         }
         echo '</section>';
     }
@@ -113,7 +115,7 @@ final class TelegramSettings {
                 if($op==='configure')self::configure((string)wp_unslash($_POST['bot_token']??''));
                 else TelegramStore::gate(static function(){$c=self::config();$c['active']=false;update_option(self::OPTION,$c,false);});
             } else {
-                $user=get_current_user_id();if(!$user || !ConversationStore::customer($user) || ConversationStore::manager())ConversationStore::deny();
+                $user=get_current_user_id();if(!$user || TelegramStore::audience($user)==='')ConversationStore::deny();
                 if($op==='link') {
                     $code=TelegramStore::issue($user);$url='https://t.me/'.self::config()['username'].'?start='.$code;
                     nocache_headers();header('Referrer-Policy: no-referrer');

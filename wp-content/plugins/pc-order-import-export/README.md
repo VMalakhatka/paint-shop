@@ -315,3 +315,21 @@ supported for the same bot; changing bots requires a separate migration.
 Local mock integration: `wp eval-file wp-content/plugins/pc-order-import-export/tests/telegram.php`.
 All HTTP/mail are intercepted. A real bot round trip remains a release acceptance
 step after deploy and operator configuration. See the customer `messages` help anchor.
+
+### Manager Telegram (2026-09-27)
+
+`TelegramManagers` adds personal manager bindings in the same Conversations UI and
+bot. Staff need `manage_woocommerce`; only administrators change global bot config.
+The stored audience and live capabilities are checked during binding, receipt and
+delivery. Existing bindings without an audience remain customer-only.
+Customer messages go to the assignee or, when waiting and unassigned, all linked
+managers. Take request uses the canonical thread lock and assignment audit. Telegram
+replies require a delivered message mapping and current assignment; no implicit
+customer selection, private notes, or closed-thread replies. Reassignment enqueues
+public context transactionally and invalidates previous recipients' pending cards.
+`/threads` and `/queue` show ten recent relevant cards; each card rechecks its scope
+before delivery. Disconnect/reconnect invalidates earlier reply and callback maps.
+No DDL, new token, or Java change is required. The existing client channel is
+confirmed on production by the owner; manager support awaits deploy and live checks.
+`tests/telegram.php` now includes `tests/telegram-managers.php` (106 total checks).
+The runbook above covers setup, operator acceptance and rollback.

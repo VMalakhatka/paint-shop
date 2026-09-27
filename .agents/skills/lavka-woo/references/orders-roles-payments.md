@@ -231,9 +231,10 @@ Telegram добавлен отдельным этапом ниже.
 
 ### Telegram как канал того же чата — 2026-09-27
 
-`TelegramSettings/TelegramStore/TelegramBridge` в `pc-order-import-export` —
+`TelegramSettings/TelegramStore/TelegramBridge/TelegramManagers` в `pc-order-import-export` —
 единственные владельцы bot config, identity binding, webhook и outbox. Код проверен
-локально с подменой HTTP; реальный бот пока не включён. Канонические сообщения
+локально с подменой HTTP; клиентский production-обмен подтверждён владельцем
+2026-09-27, менеджерский ожидает deploy. Канонические сообщения
 остаются в ConversationStore. Привязка требует одноразового кода и отдельного
 подтверждения владельцем авторизованного кабинета; username/email не авторизация.
 Webhook проверяет секрет и private peer, reply mapping включает поколение связи.
@@ -244,3 +245,9 @@ Timeout/5xx/stale sending = unknown, без автоматической пов�
 планировщик, новая таблица и восстановление — `docs/OPERATIONS_RUNBOOK.md`, раздел
 «Telegram в клиентской переписке — этап 2». Setup создаёт schema и регистрирует
 webhook только по явной кнопке администратора. Не менять чужой webhook и bot ID.
+Менеджер с `manage_woocommerce` привязывает собственный peer с audience=manager;
+старые связи без audience остаются клиентскими и не получают новые права при
+смене роли. Менеджерский Reply требует доставленной карты текущего поколения и
+актуального назначения; claim сериализован с assign под thread lock. Общая очередь
+рассылается только подключённым менеджерам; карточки очереди/назначения заново
+проверяют получателя перед HTTP. Приватные заметки не экспортируются никому.

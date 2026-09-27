@@ -2215,3 +2215,79 @@ msgstr "Напишите сообщение для обращения №%d. В�
 
 msgid "Enable text conversations for registered customers and wholesale accounts. Telegram is configured separately below."
 msgstr "Включить текстовые обращения для зарегистрированных покупателей и оптовых клиентов. Telegram настраивается отдельно ниже."
+
+#: inc/TelegramSettings.php:93
+msgid "My Telegram for customer conversations"
+msgstr "Мой Telegram для работы с клиентами"
+
+#: inc/TelegramSettings.php:95
+msgid "Telegram is linked. Receive your assigned conversations and the unassigned queue. Reply to a specific bot message to answer the customer."
+msgstr "Telegram подключён. Вы будете получать свои обращения и общую очередь без ответственного. Чтобы ответить клиенту, выберите «Ответить» на конкретном сообщении бота."
+
+#: inc/TelegramSettings.php:96
+msgid "Use /threads for your conversations and /queue for unassigned requests. Take a request before replying. Replies are public; write internal notes only on the website."
+msgstr "Команда /threads показывает ваши обращения, /queue — без ответственного. Сначала возьмите обращение в работу. Ответы видит клиент; внутренние заметки пишите только на сайте."
+
+#: inc/TelegramSettings.php:101
+msgid "Connect your own Telegram to receive customer messages and take unassigned requests. After Start, return here and confirm your identity. Do not share the one-time link."
+msgstr "Подключите собственный Telegram, чтобы получать сообщения клиентов и брать обращения без ответственного. После Start вернитесь сюда и подтвердите свой аккаунт. Не передавайте одноразовую ссылку."
+
+#: inc/TelegramSettings.php:106
+msgid "Connect my Telegram"
+msgstr "Подключить мой Telegram"
+
+#: inc/TelegramManagers.php:57
+#, php-format
+msgid "Conversation #%1$d · %2$s"
+msgstr "Обращение №%1$d · %2$s"
+
+#: inc/TelegramManagers.php:58
+#, php-format
+msgid "Customer: %s"
+msgstr "Клиент: %s"
+
+#: inc/TelegramManagers.php:61
+msgid "Unassigned request. Take it before replying."
+msgstr "Обращение без ответственного. Сначала возьмите его в работу."
+
+#: inc/TelegramManagers.php:61
+msgid "Use Reply on this bot message to answer the customer. Your reply will be public."
+msgstr "Выберите «Ответить» на этом сообщении бота, чтобы ответить клиенту. Клиент увидит ваш ответ."
+
+#: inc/TelegramManagers.php:63
+msgid "Take request"
+msgstr "Взять в работу"
+
+#: inc/TelegramManagers.php:89
+msgid "This request button is no longer available. Use /queue to refresh the queue."
+msgstr "Эта кнопка обращения уже недоступна. Обновите очередь командой /queue."
+
+#: inc/TelegramManagers.php:99
+#, php-format
+msgid "Conversation #%d is assigned to you. Use Reply on its bot message to answer the customer."
+msgstr "Обращение №%d назначено вам. Выберите «Ответить» на его сообщении бота, чтобы ответить клиенту."
+
+#: inc/TelegramManagers.php:99
+msgid "This request was taken by another manager or closed. Use /queue to refresh the queue."
+msgstr "Это обращение уже взял другой менеджер или оно закрыто. Обновите очередь командой /queue."
+
+#: inc/TelegramManagers.php:102
+msgid "Manager mode: /threads shows your open conversations; /queue shows unassigned requests. Take a request, then use Reply on its bot message. All replies are public. /stop disconnects your Telegram."
+msgstr "Режим менеджера: /threads — ваши открытые обращения; /queue — обращения без ответственного. Возьмите обращение в работу, затем выберите «Ответить» на его сообщении бота. Все ответы видит клиент. /stop отключает ваш Telegram."
+
+#: inc/TelegramManagers.php:107
+msgid "No requests in this queue. The full list is available on the website."
+msgstr "В этой очереди нет обращений. Полный список доступен на сайте."
+
+#: inc/TelegramManagers.php:112
+msgid "Send text of 1–5000 characters using Reply on a specific bot message. Use /threads or /queue to find the request. Files and voice messages are not supported yet."
+msgstr "Отправьте текст от 1 до 5000 символов через «Ответить» на конкретном сообщении бота. Найдите обращение через /threads или /queue. Файлы и голосовые сообщения пока не поддерживаются."
+
+#: inc/TelegramManagers.php:121
+#, php-format
+msgid "Reply saved in conversation #%d."
+msgstr "Ответ сохранён в обращении №%d."
+
+#: inc/TelegramManagers.php:121
+msgid "Reply not saved: this request is not assigned to you or is closed. Check /threads or take an unassigned request via /queue."
+msgstr "Ответ не сохранён: обращение назначено не вам или закрыто. Проверьте /threads или возьмите обращение без ответственного через /queue."

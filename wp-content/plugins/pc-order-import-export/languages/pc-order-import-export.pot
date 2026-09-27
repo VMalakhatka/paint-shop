@@ -2019,3 +2019,79 @@ msgstr ""
 
 msgid "Enable text conversations for registered customers and wholesale accounts. Telegram is configured separately below."
 msgstr ""
+
+#: inc/TelegramSettings.php:93
+msgid "My Telegram for customer conversations"
+msgstr ""
+
+#: inc/TelegramSettings.php:95
+msgid "Telegram is linked. Receive your assigned conversations and the unassigned queue. Reply to a specific bot message to answer the customer."
+msgstr ""
+
+#: inc/TelegramSettings.php:96
+msgid "Use /threads for your conversations and /queue for unassigned requests. Take a request before replying. Replies are public; write internal notes only on the website."
+msgstr ""
+
+#: inc/TelegramSettings.php:101
+msgid "Connect your own Telegram to receive customer messages and take unassigned requests. After Start, return here and confirm your identity. Do not share the one-time link."
+msgstr ""
+
+#: inc/TelegramSettings.php:106
+msgid "Connect my Telegram"
+msgstr ""
+
+#: inc/TelegramManagers.php:57
+#, php-format
+msgid "Conversation #%1$d · %2$s"
+msgstr ""
+
+#: inc/TelegramManagers.php:58
+#, php-format
+msgid "Customer: %s"
+msgstr ""
+
+#: inc/TelegramManagers.php:61
+msgid "Unassigned request. Take it before replying."
+msgstr ""
+
+#: inc/TelegramManagers.php:61
+msgid "Use Reply on this bot message to answer the customer. Your reply will be public."
+msgstr ""
+
+#: inc/TelegramManagers.php:63
+msgid "Take request"
+msgstr ""
+
+#: inc/TelegramManagers.php:89
+msgid "This request button is no longer available. Use /queue to refresh the queue."
+msgstr ""
+
+#: inc/TelegramManagers.php:99
+#, php-format
+msgid "Conversation #%d is assigned to you. Use Reply on its bot message to answer the customer."
+msgstr ""
+
+#: inc/TelegramManagers.php:99
+msgid "This request was taken by another manager or closed. Use /queue to refresh the queue."
+msgstr ""
+
+#: inc/TelegramManagers.php:102
+msgid "Manager mode: /threads shows your open conversations; /queue shows unassigned requests. Take a request, then use Reply on its bot message. All replies are public. /stop disconnects your Telegram."
+msgstr ""
+
+#: inc/TelegramManagers.php:107
+msgid "No requests in this queue. The full list is available on the website."
+msgstr ""
+
+#: inc/TelegramManagers.php:112
+msgid "Send text of 1–5000 characters using Reply on a specific bot message. Use /threads or /queue to find the request. Files and voice messages are not supported yet."
+msgstr ""
+
+#: inc/TelegramManagers.php:121
+#, php-format
+msgid "Reply saved in conversation #%d."
+msgstr ""
+
+#: inc/TelegramManagers.php:121
+msgid "Reply not saved: this request is not assigned to you or is closed. Check /threads or take an unassigned request via /queue."
+msgstr ""

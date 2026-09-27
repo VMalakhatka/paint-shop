@@ -10,6 +10,7 @@ final class TelegramBridge {
         add_action('rest_api_init',static function(){register_rest_route('pcoe/v1','/telegram',[
             'methods'=>'POST','callback'=>[self::class,'webhook'],'permission_callback'=>[self::class,'authorize']]);});
         add_action('pcoe_chat_message_saved',[self::class,'enqueue'],10,3);
+        add_action('pcoe_chat_assignment_saved',[TelegramManagers::class,'assigned'],10,2);
         add_filter('cron_schedules',static function($items){$items['pcoe_minute']=['interval'=>60,'display'=>'PCOE minute'];return $items;});
         add_action('init',[self::class,'schedule']);add_action(self::HOOK,[self::class,'run']);
     }
@@ -51,7 +52,10 @@ final class TelegramBridge {
             $text=is_string($m['text']??null)?trim(sanitize_textarea_field($m['text'])):'';
             if(!$callback && preg_match('/^\/start\s+([a-f0-9]{48})$/D',$text,$match)) {
                 $ok=TelegramStore::pair($match[1],$chat,(string)($from['first_name']??'').' '.(string)($from['last_name']??''));
-                self::service($key,$chat,$ok?__('Return to Messages on the website, refresh the page and confirm your Telegram account.','pc-order-import-export'):__('This link is expired or unavailable. Create a new link in your website account.','pc-order-import-export'));return;
+                $record=$ok?TelegramStore::get('code:'.hash('sha256',$match[1])):null;
+                $manager=$record && TelegramStore::audience((int)$record['user_id'])==='manager';
+                self::service($key,$chat,$ok?__('Return to Messages on the website, refresh the page and confirm your Telegram account.','pc-order-import-export'):__('This link is expired or unavailable. Create a new link in your website account.','pc-order-import-export'),null,0,
+                    ['inline_keyboard'=>[[['text'=>__('Open on website','pc-order-import-export'),'url'=>Conversations::url([],$manager)]]]]);return;
             }
             $peer=TelegramStore::get(TelegramStore::peer($bot,$chat));$user=(int)($peer['user_id']??0);$link=$user?TelegramStore::active($user):null;
             if(!$peer || $peer['status']!=='active' || !$link || ($link['data']['chat']??'')!==$chat || ($link['data']['generation']??'')!==($peer['data']['generation']??'')) {
@@ -61,6 +65,9 @@ final class TelegramBridge {
             $original=get_current_user_id();wp_set_current_user($user);switch_to_locale(get_user_locale($user));
             try {
                 if(!$callback && $text==='/stop') { TelegramStore::revoke($user);self::service($key,$chat,__('Telegram disconnected. Your conversation history remains on the website.','pc-order-import-export'));return; }
+                if(($link['data']['audience']??'customer')==='manager') {
+                    TelegramManagers::receive($key,$text,$m,$callback,$link,self::uuid($key));return;
+                }
                 if($callback) {
                     $value=(string)($callback['data']??'');
                     if(!preg_match('/^thread:([0-9]+)$/D',$value,$match))return;
@@ -103,22 +110,25 @@ final class TelegramBridge {
             } finally { restore_previous_locale();wp_set_current_user($original); }
         }));
     }
-    private static function job(string $key,string $chat,array $payload,?array $link,int $thread=0,int $message=0): void {
+    public static function job(string $key,string $chat,array $payload,?array $link,int $thread=0,int $message=0,string $scope='assigned'): void {
         if(TelegramStore::get($key))return;
         TelegramStore::put($key,'job',(int)($link['user_id']??0),'pending',[
             'bot'=>TelegramSettings::config()['bot'],'chat'=>$chat,'generation'=>$link['data']['generation']??'',
+            'audience'=>$link['data']['audience']??'customer','scope'=>$scope,
             'payload'=>array_merge(['chat_id'=>$chat,'link_preview_options'=>['is_disabled'=>true]],$payload),
             'thread'=>$thread,'attempts'=>0,'not_before'=>0],$message);
     }
-    private static function service(string $key,string $chat,string $text,?array $link=null,int $thread=0,array $markup=[]): void {
-        if(!$markup)$markup=['inline_keyboard'=>[[['text'=>__('Open on website','pc-order-import-export'),'url'=>Conversations::url($thread?['chat_id'=>$thread]:[],false)]]]];
+    public static function service(string $key,string $chat,string $text,?array $link=null,int $thread=0,array $markup=[]): void {
+        if(!$markup)$markup=['inline_keyboard'=>[[['text'=>__('Open on website','pc-order-import-export'),'url'=>Conversations::url($thread?['chat_id'=>$thread]:[],($link['data']['audience']??'customer')==='manager')]]]];
         $job=$link?'response:'.$key:'service:'.TelegramSettings::config()['bot'].':'.$chat.':'.intdiv(time(),60).':'.substr(hash('sha256',$text),0,8);
         self::job($job,$chat,['text'=>$text,'reply_markup'=>$markup],$link,$thread);
     }
-    /** Called within the message transaction. Private notes and customer echoes are excluded. */
+    /** Called within the message transaction; private notes never enter either outbox. */
     public static function enqueue(int $thread,int $message,bool $internal): void {
-        if($internal || !TelegramSettings::enabled() || get_post_meta($message,'_chat_actor',true)!=='manager')return;
-        $post=get_post($thread);$link=TelegramStore::active((int)$post->post_author);if(!$link)return;
+        if($internal || !TelegramSettings::enabled())return;
+        if(get_post_meta($message,'_chat_actor',true)==='customer') { TelegramManagers::enqueue($thread,$message);return; }
+        if(get_post_meta($message,'_chat_actor',true)!=='manager')return;
+        $post=get_post($thread);$link=TelegramStore::active((int)$post->post_author);if(!$link || ($link['data']['audience']??'customer')!=='customer')return;
         switch_to_locale(get_user_locale((int)$post->post_author));
         try {
             $text=get_post($message)->post_content;$parts=max(1,(int)ceil(mb_strlen($text)/1800));
@@ -147,14 +157,15 @@ final class TelegramBridge {
             }
             if($job['status']!=='pending' || $d['not_before']>time())return;
             $link=$user?TelegramStore::active($user):null;
-            $valid=$d['bot']===TelegramSettings::config()['bot'] && (!$user || ($link && $link['data']['chat']===$d['chat'] && $link['data']['generation']===$d['generation']));
+            $manager=($d['audience']??'customer')==='manager';
+            $valid=$d['bot']===TelegramSettings::config()['bot'] && (!$user || ($link && $link['data']['chat']===$d['chat'] && $link['data']['generation']===$d['generation'] && ($link['data']['audience']??'customer')===($d['audience']??'customer')));
             if($user && !empty($d['thread'])) {
                 $conversation=get_post($d['thread']);
-                $valid=$valid && $conversation && $conversation->post_type===ConversationStore::THREAD && $conversation->post_status==='private' && (int)$conversation->post_author===$user;
+                $valid=$valid && $conversation && $conversation->post_type===ConversationStore::THREAD && $conversation->post_status==='private' && ($manager?TelegramManagers::allowed((int)$d['thread'],$user,$d['scope']??'assigned'):(int)$conversation->post_author===$user);
             }
             if($reference) {
                 $m=get_post($reference);$thread=$m?get_post($m->post_parent):null;
-                $valid=$valid && $m && $thread && $m->post_type===ConversationStore::MESSAGE && $m->post_status==='private' && $thread->post_type===ConversationStore::THREAD && (int)$thread->post_author===$user && get_post_meta($reference,'_chat_visibility',true)==='public' && get_post_meta($reference,'_chat_actor',true)==='manager';
+                $valid=$valid && $m && $thread && $m->post_type===ConversationStore::MESSAGE && $m->post_status==='private' && $thread->post_type===ConversationStore::THREAD && $m->post_parent===(int)$d['thread'] && get_post_meta($reference,'_chat_visibility',true)==='public' && ($manager || ((int)$thread->post_author===$user && get_post_meta($reference,'_chat_actor',true)==='manager'));
             }
             if(!$valid) { TelegramStore::put($key,'job',$user,'cancelled',$d,$reference);return; }
             $d['attempts']++;
@@ -172,7 +183,7 @@ final class TelegramBridge {
     }
     public static function status(int $message): string {
         if(!TelegramStore::ready())return '';
-        global $wpdb;$rows=$wpdb->get_col($wpdb->prepare('SELECT status FROM '.TelegramStore::table()." WHERE kind='job' AND reference_id=%d",$message));
+        global $wpdb;$rows=$wpdb->get_col($wpdb->prepare('SELECT status FROM '.TelegramStore::table()." WHERE kind='job' AND record_key LIKE 'message:%%' AND reference_id=%d",$message));
         if(!$rows)return '';
         $labels=['unknown'=>__('Telegram: delivery unknown; check with the customer before resending.','pc-order-import-export'),'failed'=>__('Telegram: delivery failed. The reply is saved on the website.','pc-order-import-export'),'cancelled'=>__('Telegram: delivery cancelled after disconnection.','pc-order-import-export'),'sending'=>__('Telegram: sending.','pc-order-import-export'),'pending'=>__('Telegram: queued.','pc-order-import-export'),'sent'=>__('Telegram: accepted by Telegram, not a read receipt.','pc-order-import-export')];
         foreach($labels as $state=>$label)if(in_array($state,$rows,true))return $label;

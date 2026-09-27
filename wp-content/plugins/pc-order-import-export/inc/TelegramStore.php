@@ -53,9 +53,16 @@ final class TelegramStore {
         return $wpdb->get_col($wpdb->prepare('SELECT record_key FROM '.self::table()." WHERE kind=%s AND status IN ($marks) ORDER BY id ASC LIMIT %d",array_merge([$kind],$states,[$limit])))?:[];
     }
     public static function link(int $user): ?array { return self::get('link:'.$user); }
+    /** Persist the audience: a later role change must never upgrade an old customer binding. */
+    public static function audience(int $user): string {
+        return user_can($user,'manage_woocommerce')?'manager':(ConversationStore::customer($user)?'customer':'');
+    }
+    public static function eligible(int $user,array $data): bool {
+        return self::audience($user)!=='' && self::audience($user)===($data['audience']??'customer');
+    }
     public static function active(int $user): ?array {
         $link=self::link($user);$config=TelegramSettings::config();
-        return $link && $link['status']==='active' && ($link['data']['bot']??'')===($config['bot']??'') && ConversationStore::customer($user) && !user_can($user,'manage_woocommerce') ? $link : null;
+        return $link && $link['status']==='active' && ($link['data']['bot']??'')===($config['bot']??'') && self::eligible($user,$link['data']) ? $link : null;
     }
     public static function peer(string $bot,string $chat): string { return 'peer:'.$bot.':'.$chat; }
     public static function revoke(int $user): void {
@@ -68,11 +75,13 @@ final class TelegramStore {
         self::put('link:'.$user,'link',$user,'revoked',['bot'=>$d['bot']??'']);
     }
     public static function issue(int $user): string {
-        if($user!==get_current_user_id() || !ConversationStore::customer($user) || ConversationStore::manager() || !TelegramSettings::enabled())ConversationStore::deny();
+        if($user!==get_current_user_id() || self::audience($user)==='' || !TelegramSettings::enabled())ConversationStore::deny();
         return self::gate(static fn()=>self::atomic(static function()use($user){
             if(self::active($user))ConversationStore::deny();
+            // Remove an obsolete peer after a role change before issuing the new audience binding.
+            self::revoke($user);
             $code=bin2hex(random_bytes(24));$generation=wp_generate_uuid4();$bot=TelegramSettings::config()['bot'];
-            self::put('link:'.$user,'link',$user,'issued',['bot'=>$bot,'generation'=>$generation,'expires'=>time()+900]);
+            self::put('link:'.$user,'link',$user,'issued',['bot'=>$bot,'audience'=>self::audience($user),'generation'=>$generation,'expires'=>time()+900]);
             self::put('code:'.hash('sha256',$code),'code',$user,'issued',['bot'=>$bot,'generation'=>$generation,'expires'=>time()+900]);
             return $code;
         }));
@@ -82,16 +91,16 @@ final class TelegramStore {
         $key='code:'.hash('sha256',$code);$record=self::get($key);$bot=TelegramSettings::config()['bot'];
         if(!$record || $record['status']!=='issued' || ($record['data']['expires']??0)<time() || ($record['data']['bot']??'')!==$bot)return false;
         $user=(int)$record['user_id'];$link=self::link($user);$peer=self::get(self::peer($bot,$chat));
-        if(!$link || $link['status']!=='issued' || ($link['data']['generation']??'')!==$record['data']['generation'] || !ConversationStore::customer($user) || user_can($user,'manage_woocommerce') || ($peer && $peer['status']==='active' && (int)$peer['user_id']!==$user))return false;
+        if(!$link || $link['status']!=='issued' || ($link['data']['generation']??'')!==$record['data']['generation'] || !self::eligible($user,$link['data']) || ($peer && $peer['status']==='active' && (int)$peer['user_id']!==$user))return false;
         self::put($key,'code',$user,'used',$record['data']);
         self::put('link:'.$user,'link',$user,'pending',array_merge($link['data'],['chat'=>$chat,'name'=>mb_substr(sanitize_text_field($name),0,80)]));
         return true;
     }
     public static function confirm(int $user,string $generation): void {
-        if($user!==get_current_user_id() || !ConversationStore::customer($user) || ConversationStore::manager() || !TelegramSettings::enabled())ConversationStore::deny();
+        if($user!==get_current_user_id() || self::audience($user)==='' || !TelegramSettings::enabled())ConversationStore::deny();
         self::gate(static fn()=>self::atomic(static function()use($user,$generation){
             $link=self::link($user);
-            if(!$link || $link['status']!=='pending' || ($link['data']['expires']??0)<time() || !hash_equals($link['data']['generation'],$generation))ConversationStore::deny();
+            if(!$link || $link['status']!=='pending' || !self::eligible($user,$link['data']) || ($link['data']['expires']??0)<time() || !hash_equals($link['data']['generation'],$generation))ConversationStore::deny();
             $d=$link['data'];$key=self::peer($d['bot'],$d['chat']);$peer=self::get($key);
             if($peer && $peer['status']==='active' && (int)$peer['user_id']!==$user)ConversationStore::deny();
             $d['linked_at']=time();unset($d['expires']);

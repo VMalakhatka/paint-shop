@@ -155,6 +155,7 @@ final class ConversationStore {
                 'post_content'=>sprintf(__('Assignment: %1$s. State: %2$s.', 'pc-order-import-export'),$manager?(get_userdata($manager)->display_name):__('Unassigned','pc-order-import-export'), Conversations::states()[$state]),
                 'meta_input'=>['_chat_visibility'=>'internal','_chat_actor'=>'system']]);
             self::set($id,'_chat_assignee',$manager); self::set($id,'_chat_state',$state); self::touch($id);
+            do_action('pcoe_chat_assignment_saved',$id,$meta);
         });
     }
     public static function messages(int $id,int $page=1): array {

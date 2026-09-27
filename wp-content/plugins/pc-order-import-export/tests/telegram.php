@@ -99,6 +99,7 @@ try {
  $send($incoming('/stop'));$check(Store::active($customer)===null,'Bot stop revokes connection');
  $pause=Settings::config();$pause['active']=false;update_option(Settings::OPTION,$pause,false);$result=$send($incoming('Paused'));$check(is_wp_error($result) && $result->get_error_data()['status']===503,'Paused webhook requests retry instead of discarding messages');$pause['active']=true;update_option(Settings::OPTION,$pause,false);
  $code=Store::issue($customer);$r=Store::get('code:'.hash('sha256',$code));$r['data']['expires']=time()-1;Store::put($r['record_key'],'code',$customer,'issued',$r['data']);$check(!Store::pair($code,$peer,'Test'),'Expired code refused');
+ require PCOE_DIR.'/tests/telegram-managers.php';
  $c=Settings::config();$c['site']='https://cloned.invalid/';update_option(Settings::OPTION,$c,false);$check(!Settings::enabled(),'Cloned database cannot enable transport on another site');
  echo "PASS: $checks Telegram checks; all HTTP/mail intercepted\n";
 } finally {
