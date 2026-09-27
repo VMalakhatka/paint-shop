@@ -960,3 +960,73 @@ msgstr "Новые ответы менеджера для вас приходя�
 
 msgid "To disconnect, use Disconnect Telegram in Messages or send /stop to the bot. Website history remains available. Delivery can take about a minute; Telegram acceptance does not mean the customer has read the message. Files, voice messages and order confirmation through the bot are not supported."
 msgstr "Для отключения нажмите «Отключить Telegram» в «Сообщения» или отправьте /stop боту. История на сайте остаётся доступной. Доставка может занимать около минуты; принятие Telegram не означает прочтение клиентом. Файлы, голосовые сообщения и подтверждение заказа через бота не поддерживаются."
+msgid "Write to the manager on the website"
+msgstr "Написать менеджеру на сайте"
+
+msgid "Sign in to your own account and open Messages. In New conversation, choose General question or your order, enter a subject (up to 160 characters) and a message (up to 5000 characters), then select Save message once."
+msgstr "Войдите в свой кабинет и откройте «Сообщения». В блоке «Новое обращение» выберите «Общий вопрос» или свой заказ, введите тему (до 160 символов) и текст (до 5000 символов). Один раз нажмите «Сохранить сообщение»."
+
+msgid "For an older order missing from the last 20 in the list, open that order and select Discuss this order. An existing order conversation is reused; open it instead of creating a duplicate. After saving, check that your text appears in the conversation history."
+msgstr "Если нужного заказа нет среди последних 20 в списке, откройте его в «Заказах» и нажмите «Обсудить этот заказ». Если переписка уже есть, откройте её вместо дубликата. После сохранения проверьте, что текст появился в истории обращения."
+
+msgid "Find a reply and understand the status"
+msgstr "Найти ответ и понять статус обращения"
+
+msgid "Open a conversation by its subject. All conversations and the status filters help you find it. Unread means there are messages since your last visit. Manager reply needed means it is the manager's turn; Waiting for customer means your reply is expected; Closed means the discussion was closed, not that the order was paid or shipped."
+msgstr "Откройте обращение по теме. Для поиска есть «Все обращения» и фильтры статуса. «Непрочитанное» означает сообщения после последнего просмотра. «Нужен ответ менеджера» — очередь менеджера; «Ожидаем клиента» — ожидается ваш ответ; «Закрыто» — обсуждение закрыто, а не оплачен или отправлен заказ."
+
+msgid "The latest conversation page refreshes about every 15 seconds in an active tab. Use Refresh messages if needed; refresh the list separately. A new customer reply reopens a closed conversation. The responsible manager may not be assigned yet. Staff-only notes are not visible to customers."
+msgstr "Страница с последними сообщениями обновляется примерно каждые 15 секунд в активной вкладке. При необходимости нажмите «Обновить сообщения»; список обращений обновляется отдельно. Новый ответ клиента снова открывает закрытое обращение. Ответственный менеджер может быть ещё не назначен. Внутренние заметки сотрудников клиентам не показываются."
+
+msgid "Connect Telegram: complete all four steps"
+msgstr "Подключить Telegram: пройдите все четыре шага"
+
+msgid "1. On the website: open Messages, find Telegram and select Create one-time Telegram link. Use your own website account. The link is personal and expires after 15 minutes; do not forward it or publish it in a screenshot."
+msgstr "1. На сайте: откройте «Сообщения», найдите блок Telegram и нажмите «Создать одноразовую ссылку Telegram». Работайте в своём кабинете. Ссылка личная и действует 15 минут — не пересылайте её и не публикуйте на снимках."
+
+msgid "2. In Telegram: follow Open Telegram bot from that page. Check that the intended Telegram account is selected, then press Start (or Restart if Telegram offers it). Opening the bot by its name alone does not link it to your website account."
+msgstr "2. В Telegram: перейдите по кнопке «Открыть Telegram-бота» с этой страницы. Проверьте, что выбран нужный Telegram-аккаунт, и нажмите Start / «Начать» (или перезапуск, если его предлагает Telegram). Просто найти бота по имени недостаточно для связывания с кабинетом."
+
+msgid "3. Back on the website: return to Messages and refresh the page. Check the displayed Telegram name and the last digits of its ID. If this is not your account, do not confirm; create a new link and start again with the correct account."
+msgstr "3. Снова на сайте: вернитесь в «Сообщения» и обновите страницу. Проверьте показанное имя Telegram и последние цифры его ID. Если это не ваш аккаунт, не подтверждайте: создайте новую ссылку и повторите подключение из правильного аккаунта."
+
+msgid "4. Confirm on the website: select Confirm my Telegram account. Success is the Telegram is linked message and the Disconnect Telegram button. Start without this confirmation is not a completed connection. Complete the confirmation before the 15-minute link expires."
+msgstr "4. Подтвердите на сайте: нажмите «Подтвердить мой Telegram-аккаунт». Признак успеха — текст «Telegram подключён» и кнопка «Отключить Telegram». Start без этого подтверждения не завершает подключение. Подтвердите до истечения 15 минут."
+
+msgid "Reply in Telegram to the correct conversation"
+msgstr "Ответить в Telegram в нужное обращение"
+
+msgid "New public manager replies are delivered to the bot and remain on the website. Old history is not imported into Telegram, and your own website messages are not echoed back to the bot. Read the whole conversation on the website."
+msgstr "Новые ответы менеджера для вас приходят в бот и остаются на сайте. Старая история не переносится в Telegram, а ваши собственные сообщения с сайта не дублируются в бот. Полную историю смотрите на сайте."
+
+msgid "For a specific order, use Telegram Reply on the bot message for that conversation. Alternatively, send /threads and press the desired conversation button: the selection lasts 30 minutes. The bot offers up to 10 recent conversations; use the website for older ones."
+msgstr "По конкретному заказу используйте «Ответить» (Reply) на сообщении бота именно этого обращения. Либо отправьте /threads и нажмите кнопку нужного обращения: выбор действует 30 минут. Бот предлагает до 10 последних обращений; более старые открывайте на сайте."
+
+msgid "/general clears the selected conversation for a general question. Text without Reply or an active selection goes to general questions, not automatically to your last order. /help shows the available choices. Check the bot's saved-message confirmation or the website history before sending again."
+msgstr "/general сбрасывает выбранное обращение для общего вопроса. Текст без Reply или активного выбора попадает в общие вопросы, а не автоматически в последний заказ. /help показывает доступные варианты. Перед повторной отправкой проверьте подтверждение сохранения от бота или историю на сайте."
+
+msgid "If the bot does not connect or a reply is delayed"
+msgstr "Если бот не подключается или ответ задерживается"
+
+msgid "Expired link or no confirmation button: generate a fresh link, open it in the correct Telegram account, press Start, then return and refresh Messages. If the Telegram block or linking button is absent, contact the manager; do not create your own bot or enter a bot token."
+msgstr "Ссылка просрочена или кнопки подтверждения нет: создайте новую ссылку, откройте её в правильном Telegram-аккаунте, нажмите Start, вернитесь и обновите «Сообщения». Если блока Telegram или кнопки подключения нет, обратитесь к менеджеру. Создавать своего бота или вводить токен не нужно."
+
+msgid "Replies are queued: delivery is not instant and the interval is not guaranteed. Check Messages on the website, whether the bot is blocked or muted in Telegram, and whether the store has paused delivery. Muted notifications do not mean the message was not saved. Telegram acceptance is not a read receipt."
+msgstr "Ответы идут через очередь: доставка не мгновенная, точное время не гарантировано. Проверьте «Сообщения» на сайте, не заблокирован ли бот и не отключены ли уведомления Telegram, а также не приостановил ли магазин доставку. Выключенный звук не означает, что сообщение не сохранилось. Принятие Telegram не подтверждает прочтение."
+
+msgid "If a reply cannot be linked, select the conversation again using /threads. After an uncertain send, check the website history first. Report the conversation number, approximate time and error text to the manager, without passwords, one-time links or Telegram sign-in codes."
+msgstr "Если ответ не удалось привязать, снова выберите обращение через /threads. После непонятного результата отправки сначала проверьте историю на сайте. Сообщите менеджеру номер обращения, примерное время и текст ошибки — без паролей, одноразовых ссылок и кодов входа Telegram."
+
+msgid "Disconnect Telegram and keep your history"
+msgstr "Отключить Telegram и сохранить историю"
+
+msgid "In Messages, select Disconnect Telegram, or send /stop to the bot. The website conversation history remains available. To connect again, repeat all four steps with a fresh link. After reconnecting, select the conversation using /threads rather than replying to old bot messages."
+msgstr "В «Сообщениях» нажмите «Отключить Telegram» или отправьте /stop боту. История переписки останется на сайте. Для повторного подключения пройдите все четыре шага с новой ссылкой. После повторного подключения выберите обращение через /threads вместо ответа на старые сообщения бота."
+
+msgid "Only text is supported, up to 5000 characters. Files, photos, voice messages and email chat are not supported yet. A chat message does not confirm an order, reserve goods, make a payment or start shipment. Use the separate order confirmation page when requested."
+msgstr "Поддерживается только текст до 5000 символов. Файлы, фото, голосовые сообщения и чат через email пока не поддерживаются. Сообщение не подтверждает заказ, не резервирует товар, не проводит оплату и не запускает отправку. По запросу менеджера используйте отдельную страницу подтверждения заказа."
+msgid "Open Messages"
+msgstr "Открыть сообщения"
+
+msgid "Download the short illustrated guide (PDF, Ukrainian)"
+msgstr "Скачать краткую инструкцию с иллюстрациями (PDF, на украинском)"

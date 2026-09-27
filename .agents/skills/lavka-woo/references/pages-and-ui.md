@@ -127,6 +127,14 @@ production-проверка этого дополнения пока не вып
 
 ## Административные интерфейсы
 
+Клиентские сообщения: `?pcoe_chat=1`, владелец `pc-order-import-export`.
+Детальная справка — `pc-wholesale-help/messages-guide.php`, канон в
+`docs/WHOLESALE_CUSTOMER_GUIDE_UK.md`, PDF 06 в `docs/DEALER_PDF_GUIDES_UK.md`.
+При документировании Telegram не считать Start завершением привязки: обязательны
+возврат на сайт, проверка личности и подтверждение до истечения 15 минут.
+Не создавать привязку и не отправлять реальные сообщения ради скриншота.
+Сверено 2026-09-27 с production hashes клиентского кода ae9b494 и экраном Safari.
+
 Навигацией Lavka владеет `paint-core/inc/admin-lavka-hub.php` и
 `assets/admin-lavka-menu.*`; каноническая карта путей — раздел «Раскрываемое меню
 Лавка» в `docs/OPERATIONS_RUNBOOK.md`. При переносе между WooCommerce и Lavka

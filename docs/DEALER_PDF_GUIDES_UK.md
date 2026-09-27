@@ -7,6 +7,18 @@
 
 ## Файли
 
+Новий матеріал 06 (27.09.2026): [Повідомлення та Telegram](../output/pdf/kreul-dealer-06-messages-telegram-uk.pdf),
+3 сторінки: звернення на сайті, 4 кроки прив’язування, Reply / threads, затримки й
+відключення. Картинки — підписані навчальні векторні схеми, не скриншоти реальної
+переписки. Особистих даних, кодів прив’язування чи секретів немає.
+Генератор: `scripts/build_dealer_messages_guide.py`; копія для завантаження із Help:
+`wp-content/mu-plugins/pc-wholesale-help/assets/kreul-messages-telegram-uk.pdf`.
+Канон — розділ «Повідомлення менеджеру та Telegram» основної інструкції;
+сайт — `pc-wholesale-help/messages-guide.php`, anchors `messages-new`,
+`messages-status`, `telegram-connect`, `telegram-reply`, `telegram-problems`,
+`telegram-disconnect`. PDF перевірено рендерингом усіх сторінок; посилання ведуть
+до кабінету та відповідних частин Help. Нове підключення бота не виконувалося.
+
 | Матеріал | Обсяг | Зміст |
 |---|---|---|
 | [Від кошика до документа](../output/pdf/kreul-dealer-01-checkout-uk.pdf) | 3 сторінки | Кошик, оформлення, перевірка результату, документи, розділення та невідомий результат |

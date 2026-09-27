@@ -917,3 +917,73 @@ msgstr ""
 
 msgid "To disconnect, use Disconnect Telegram in Messages or send /stop to the bot. Website history remains available. Delivery can take about a minute; Telegram acceptance does not mean the customer has read the message. Files, voice messages and order confirmation through the bot are not supported."
 msgstr ""
+msgid "Write to the manager on the website"
+msgstr ""
+
+msgid "Sign in to your own account and open Messages. In New conversation, choose General question or your order, enter a subject (up to 160 characters) and a message (up to 5000 characters), then select Save message once."
+msgstr ""
+
+msgid "For an older order missing from the last 20 in the list, open that order and select Discuss this order. An existing order conversation is reused; open it instead of creating a duplicate. After saving, check that your text appears in the conversation history."
+msgstr ""
+
+msgid "Find a reply and understand the status"
+msgstr ""
+
+msgid "Open a conversation by its subject. All conversations and the status filters help you find it. Unread means there are messages since your last visit. Manager reply needed means it is the manager's turn; Waiting for customer means your reply is expected; Closed means the discussion was closed, not that the order was paid or shipped."
+msgstr ""
+
+msgid "The latest conversation page refreshes about every 15 seconds in an active tab. Use Refresh messages if needed; refresh the list separately. A new customer reply reopens a closed conversation. The responsible manager may not be assigned yet. Staff-only notes are not visible to customers."
+msgstr ""
+
+msgid "Connect Telegram: complete all four steps"
+msgstr ""
+
+msgid "1. On the website: open Messages, find Telegram and select Create one-time Telegram link. Use your own website account. The link is personal and expires after 15 minutes; do not forward it or publish it in a screenshot."
+msgstr ""
+
+msgid "2. In Telegram: follow Open Telegram bot from that page. Check that the intended Telegram account is selected, then press Start (or Restart if Telegram offers it). Opening the bot by its name alone does not link it to your website account."
+msgstr ""
+
+msgid "3. Back on the website: return to Messages and refresh the page. Check the displayed Telegram name and the last digits of its ID. If this is not your account, do not confirm; create a new link and start again with the correct account."
+msgstr ""
+
+msgid "4. Confirm on the website: select Confirm my Telegram account. Success is the Telegram is linked message and the Disconnect Telegram button. Start without this confirmation is not a completed connection. Complete the confirmation before the 15-minute link expires."
+msgstr ""
+
+msgid "Reply in Telegram to the correct conversation"
+msgstr ""
+
+msgid "New public manager replies are delivered to the bot and remain on the website. Old history is not imported into Telegram, and your own website messages are not echoed back to the bot. Read the whole conversation on the website."
+msgstr ""
+
+msgid "For a specific order, use Telegram Reply on the bot message for that conversation. Alternatively, send /threads and press the desired conversation button: the selection lasts 30 minutes. The bot offers up to 10 recent conversations; use the website for older ones."
+msgstr ""
+
+msgid "/general clears the selected conversation for a general question. Text without Reply or an active selection goes to general questions, not automatically to your last order. /help shows the available choices. Check the bot's saved-message confirmation or the website history before sending again."
+msgstr ""
+
+msgid "If the bot does not connect or a reply is delayed"
+msgstr ""
+
+msgid "Expired link or no confirmation button: generate a fresh link, open it in the correct Telegram account, press Start, then return and refresh Messages. If the Telegram block or linking button is absent, contact the manager; do not create your own bot or enter a bot token."
+msgstr ""
+
+msgid "Replies are queued: delivery is not instant and the interval is not guaranteed. Check Messages on the website, whether the bot is blocked or muted in Telegram, and whether the store has paused delivery. Muted notifications do not mean the message was not saved. Telegram acceptance is not a read receipt."
+msgstr ""
+
+msgid "If a reply cannot be linked, select the conversation again using /threads. After an uncertain send, check the website history first. Report the conversation number, approximate time and error text to the manager, without passwords, one-time links or Telegram sign-in codes."
+msgstr ""
+
+msgid "Disconnect Telegram and keep your history"
+msgstr ""
+
+msgid "In Messages, select Disconnect Telegram, or send /stop to the bot. The website conversation history remains available. To connect again, repeat all four steps with a fresh link. After reconnecting, select the conversation using /threads rather than replying to old bot messages."
+msgstr ""
+
+msgid "Only text is supported, up to 5000 characters. Files, photos, voice messages and email chat are not supported yet. A chat message does not confirm an order, reserve goods, make a payment or start shipment. Use the separate order confirmation page when requested."
+msgstr ""
+msgid "Open Messages"
+msgstr ""
+
+msgid "Download the short illustrated guide (PDF, Ukrainian)"
+msgstr ""

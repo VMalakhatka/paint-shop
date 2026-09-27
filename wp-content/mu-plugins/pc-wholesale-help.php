@@ -428,13 +428,7 @@ function pc_wholesale_help_render_endpoint(): void {
 
         <section class="pc-help-section" id="messages">
             <h2><?php esc_html_e('Messages with your manager', 'pc-wholesale-help'); ?></h2>
-            <p><?php esc_html_e('When chat is enabled, open Messages in My account. Create a subject, choose General question or one of your orders, and write your message. You can also start from Discuss this order on the order page.', 'pc-wholesale-help'); ?></p>
-            <p><?php esc_html_e('The conversation shows replies, its responsible manager and who should answer next. Open conversations refresh about every 15 seconds while the tab is active. Refresh the conversation list to check new requests. A new message reopens a closed conversation.', 'pc-wholesale-help'); ?></p>
-            <p><?php esc_html_e('Text conversations are available on the website. Files and email are not connected. A message does not confirm an order, make a payment or start shipment; use the separate order confirmation screen when requested.', 'pc-wholesale-help'); ?></p>
-            <h3>Telegram</h3>
-            <p><?php esc_html_e('When the store enables Telegram, create a one-time link in Messages, open the bot and press Start. Return to Messages, refresh and confirm that the displayed Telegram account is yours. The link expires in 15 minutes; do not share it.', 'pc-wholesale-help'); ?></p>
-            <p><?php esc_html_e('New public manager replies then arrive both here and in Telegram. Reply to a bot message to keep the same conversation, or use /threads to choose one for 30 minutes. Text without a reply or active selection goes to general questions. Old messages are not imported into Telegram.', 'pc-wholesale-help'); ?></p>
-            <p><?php esc_html_e('To disconnect, use Disconnect Telegram in Messages or send /stop to the bot. Website history remains available. Delivery can take about a minute; Telegram acceptance does not mean the customer has read the message. Files, voice messages and order confirmation through the bot are not supported.', 'pc-wholesale-help'); ?></p>
+            <?php include __DIR__ . '/pc-wholesale-help/messages-guide.php'; ?>
         </section>
         <section class="pc-help-section" id="order-details">
             <h2><?php esc_html_e('Where to find order details and delivery', 'pc-wholesale-help'); ?></h2>

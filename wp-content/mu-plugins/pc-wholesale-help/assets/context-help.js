@@ -5,6 +5,14 @@
     if (!config || document.querySelector('.pc-wholesale-help') ||
         (window.pcFolioDocuments && Number(window.pcFolioDocuments.managerCustomerId) > 0)) return;
     var rules = [
+        ['.pcoe-chat > h2', 'messages'],
+        ['.pcoe-chat-filters', 'messages-status'],
+        ['.pcoe-chat-card:has(input[name="action"][value="pcoe_chat"]) > h3, .pcoe-chat form:has(input[name="operation"][value="start"]) button', 'messages-new'],
+        ['.pcoe-chat form:has(input[name="operation"][value="reply"]) button', 'messages-new'],
+        ['.pcoe-chat-card:has(input[name="action"][value="pcoe_telegram"]) > h3', 'telegram-connect'],
+        ['.pcoe-chat form:has(input[name="action"][value="pcoe_telegram"]):has(input[name="operation"][value="link"]) button, .pcoe-chat form:has(input[name="operation"][value="confirm"]) button', 'telegram-connect'],
+        ['.pcoe-chat form:has(input[name="operation"][value="unlink"]) button', 'telegram-disconnect'],
+        ['.pcoe-chat a[href^="https://t.me/"]', 'telegram-reply'],
         ['.psu-search-filters', 'katalog'],
         ['.pc-alloc, .pc-location-switcher', 'sklad'],
         ['.single_add_to_cart_button', 'katalog'],
