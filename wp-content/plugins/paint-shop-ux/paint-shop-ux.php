@@ -15,6 +15,7 @@ require_once __DIR__ . '/inc/category-menu-visibility.php';
 require_once __DIR__ . '/inc/catalog-search.php';
 require_once __DIR__ . '/inc/category-menu-migration.php';
 require_once __DIR__ . '/inc/slw-assets.php';
+require_once __DIR__ . '/inc/social-assets.php';
 
 /** =======================
  *  i18n

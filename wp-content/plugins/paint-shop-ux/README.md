@@ -433,3 +433,23 @@ WordPress: core caches общие. WPB включать для этого тес
 проверяется также отсутствие WPB JS/CSS. Старый A/B benchmark требует активного WPB.
 `category-menu-benchmark.php` предназначен только для прежнего сравнения WPB/native
 до переноса; не активируйте WPB ради повторной приёмки уже перенесённого меню.
+## Conditional social assets (2026-09-27)
+
+`inc/social-assets.php` removes WP Social's four global frontend assets only on
+the front page, shop, product taxonomies and product search without known social
+placements. Account, login, checkout, single products and other pages retain the
+vendor behavior. Fixed share placements, active login/share/counter widgets,
+Elementor and WP Social Pro conservatively retain assets. Unknown vendor handles
+also fail open. Direct custom theme integrations can return true from
+`psu_social_assets_required` to retain the head assets.
+
+Social markup rendered through content, shortcodes or text/block widgets restores
+the registered styles and footer scripts, retaining vendor dependencies and
+localized nonces. Styles print once before late markup. No vendor files, settings,
+roles, orders or customer workflows change; no new help text or translation is needed.
+
+Local regression: `tests/conditional-assets-local.php` (WP-CLI with external HTTP
+and cron disabled), `tests/conditional-assets.spec.cjs` (Playwright). The browser
+test requires the existing `catalog-search-session-local.php` temporary wholesale
+session; always run its `cleanup` afterwards. Import POSTs are intercepted, not
+sent to WordPress. See the performance audit for measured scope and deploy checks.

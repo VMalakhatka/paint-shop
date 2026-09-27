@@ -1,5 +1,20 @@
 # Wholesale Price List
 
+## Conditional frontend assets (2026-09-27)
+
+`Ui::enqueue_page_assets()` loads `pcoe-js`, translations and inline styles on
+cart pages, authenticated account orders/view-order and order-received pages.
+The cart import/export, account import and order export renderers also ensure
+assets for custom placements; late styles print once and the script stays in the
+footer. Home, catalog, product cards and account login/dashboard no longer load
+the import bundle unless a renderer actually needs it. Manager workspace and
+waiting-list assets retain their independent owners and hooks.
+
+This changes asset delivery only, not customer actions, imports, prices or Folio.
+No customer-guide/help/i18n change is required. Regression tests live in
+`paint-shop-ux/tests/conditional-assets-*`; browser import requests are mocked,
+so these tests do not claim an end-to-end import or financial acceptance.
+
 ## Background email — single-customer pilot
 
 Enabled for the authorized production pilot on 2026-09-13 (commit `7e02c40`).

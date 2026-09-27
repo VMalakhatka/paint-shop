@@ -152,7 +152,7 @@ DEF-456;3</code></pre>
         add_action('woocommerce_cart_is_empty', [self::class, 'render_cart_empty_block'], 20);
 
         // Скрипты
-        add_action('wp_enqueue_scripts', [self::class, 'enqueue_js']);
+        add_action('wp_enqueue_scripts', [self::class, 'enqueue_page_assets']);
 
         add_filter('woocommerce_my_account_my_orders_columns', function($cols){
             // вставимо після колонки "Order"
@@ -211,6 +211,7 @@ DEF-456;3</code></pre>
 /** Блок імпорту + кнопка «В чернетку» на сторінці "Мої замовлення" */
 public static function render_account_import_block(): void
 {
+    self::enqueue_js();
     PriceList::render();
     $nonce_draft      = wp_create_nonce('pcoe_import_draft');      // для імпорту файлу у чернетку
     $nonce_cart_draft = wp_create_nonce('pcoe_cart_to_draft');      // для збереження кошика у чернетку
@@ -285,6 +286,7 @@ public static function render_account_import_block(): void
     protected static function render_controls_html(string $scope, int $order_id = 0): string
     {
         if ($scope === 'cart' && (!function_exists('WC') || !WC()->cart)) return '';
+        self::enqueue_js();
 
         $L    = Helpers::labels();
         $cols = Helpers::columns();
@@ -343,6 +345,7 @@ public static function render_account_import_block(): void
     /** Импорт (в корзину + в черновик) — отображается только на странице корзины */
     protected static function render_import_html(string $scope): string
     {
+        self::enqueue_js();
         if ($scope !== 'cart') return '';
         if (!function_exists('WC') || !WC()->cart) return '';
 
@@ -392,8 +395,19 @@ public static function render_account_import_block(): void
 
     /* ===================== JS ===================== */
 
+    public static function enqueue_page_assets(): void
+    {
+        $cart = function_exists('is_cart') && is_cart();
+        $orders = function_exists('is_account_page') && is_account_page() && is_user_logged_in()
+            && (is_wc_endpoint_url('orders') || is_wc_endpoint_url('view-order'));
+        $received = function_exists('is_order_received_page') && is_order_received_page();
+        if ($cart || $orders || $received) self::enqueue_js();
+    }
+
     public static function enqueue_js(): void
     {
+        // Renderers can also be called outside the standard Woo page routes.
+        if (wp_script_is('pcoe-js', 'enqueued') || wp_script_is('pcoe-js', 'done')) return;
         wp_enqueue_script('jquery');
 
         $js_rel = '../assets/pcoe.js';
@@ -411,6 +425,7 @@ public static function render_account_import_block(): void
         wp_register_style('pcoe-inline', false, [], null);
         wp_enqueue_style('pcoe-inline');
         wp_add_inline_style('pcoe-inline', self::inline_css());
+        if (did_action('wp_head')) wp_print_styles(['pcoe-inline']);
 
         // Передаём ajaxUrl и i18n в pcoeVars
         wp_localize_script('pcoe-js', 'pcoeVars', [
