@@ -414,6 +414,9 @@ function pc_wholesale_help_render_endpoint(): void {
                 <?php pc_wholesale_help_step('2', __('Choose warehouse format', 'pc-wholesale-help'), __('Use one product row with allocation in notes, or separate rows for each warehouse.', 'pc-wholesale-help')); ?>
                 <?php pc_wholesale_help_step('3', __('Download the file', 'pc-wholesale-help'), __('Choose CSV or XLSX. Export does not change or clear the cart.', 'pc-wholesale-help')); ?>
             </ol>
+            <div style="max-width:390px">
+                <?php pc_wholesale_help_image('cart-export-mobile.png', __('Choose warehouse format', 'pc-wholesale-help'), __('Use one product row with allocation in notes, or separate rows for each warehouse.', 'pc-wholesale-help')); ?>
+            </div>
         </section>
 
         <section class="pc-help-section" id="chernetky">

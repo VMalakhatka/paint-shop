@@ -1,5 +1,24 @@
 # Wholesale Price List
 
+## Mobile export layout (2026-09-27)
+
+The export warehouse selector in `Ui.php` uses a bounded, wrapping label; at
+720 px and below the select occupies a separate full-width row. This is shared
+by cart and order export. Options, saved mode and export payloads are unchanged.
+No global overflow clipping, vendor changes, settings or migration are needed.
+
+Local acceptance: `tests/mobile-export.spec.cjs`, 320/360/390/768/1280 px, both
+warehouse modes and persisted selection after reload. It adds one product to a
+fresh anonymous local cart and removes it in `finally`; no order/checkout/Folio
+operation occurs. `PCOE_BEFORE=1` records baseline geometry without fixed-layout
+assertions. At 390 px the baseline document width was 485 px; after the fix it is
+390 px and the select fits the 330 px content area. No page JS errors.
+
+Customer guide and published help include the new mobile export screenshot,
+using existing translated captions. Deploy this plugin and the help assets;
+production acceptance is still pending. Rollback restores the previous plugin
+and help files, without any data operation.
+
 ## Conditional frontend assets (2026-09-27)
 
 `Ui::enqueue_page_assets()` loads `pcoe-js`, translations and inline styles on

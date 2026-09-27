@@ -315,7 +315,7 @@ public static function render_account_import_block(): void
               </a>
             <?php endif; ?>
 
-            <label style="display:flex;align-items:center;gap:6px;margin-left:auto">
+            <label class="pcoe-export__split">
               <span><?php echo esc_html($L['split_label']); ?></span>
               <select class="pcoe-split" data-scope="<?php echo esc_attr($scope); ?>">
                 <option value="agg"><?php echo esc_html($L['split_agg']); ?></option>
@@ -450,6 +450,13 @@ public static function render_account_import_block(): void
     protected static function inline_css(): string
     {
         return '
+        .pcoe-export__split { display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-left:auto; min-width:0; max-width:100%; }
+        .pcoe-export__split span { min-width:0; overflow-wrap:anywhere; }
+        .pcoe-export__split select { min-width:0; max-width:100%; box-sizing:border-box; }
+        @media (max-width: 720px) {
+            .pcoe-export__split { width:100%; flex-direction:column; align-items:stretch; }
+            .pcoe-export__split select { width:100%; }
+        }
         .pcoe-price-list { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin:16px 0; }
         .pcoe-price-list .button { max-width:100%; white-space:normal; line-height:1.4; }
         .pcoe-price-list-status { flex-basis:100%; overflow-wrap:anywhere; }
