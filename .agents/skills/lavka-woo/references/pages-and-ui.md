@@ -114,6 +114,15 @@
 контекстная ссылка ведёт сразу к тематическому anchor справки. Проверено по коду:
 2026-09-03.
 
+Локальное дополнение 2026-09-27: `pc-wholesale-help/assets/context-help.js`
+содержит явную карту UI selectors → help anchors; не определять действия по
+переведённому тексту кнопок. Ссылки role-gated через enqueue владельца, открываются
+в новой вкладке и восстанавливаются после AJAX без дублей. Для новой операции
+добавлять точный anchor и регрессию в `scripts/test-wholesale-context-help.cjs`.
+Документы имеют отдельные `folio-search`, `folio-repeat`, `folio-invoice`,
+`folio-invoice-email`; общий `folio` сохранён для старых ссылок. Deployment и
+production-проверка этого дополнения пока не выполнены.
+
 Если custom endpoint перенаправляет на заказы, сначала проверь rewrite rules, endpoint registration, user meta mapping и capability/role gate. Не ослабляй доступ, пока не определена конкретная ложная проверка.
 
 ## Административные интерфейсы

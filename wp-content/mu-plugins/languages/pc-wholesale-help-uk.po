@@ -913,3 +913,26 @@ msgstr "На сторінці замовлення показано оновле
 
 msgid "For warehouse invoices and document lines, open Folio documents in My account. If an order was split, check each linked child order. Ask the manager if a document or shipment is not yet available."
 msgstr "Рахунки за складами та їхній склад дивіться в розділі «Документи ФОЛІО» в кабінеті. Якщо замовлення розділене, перевірте кожне пов’язане дочірнє замовлення. Якщо документа чи відправлення ще немає, зверніться до менеджера."
+msgid "? How does this work?"
+msgstr "? Як це працює"
+
+msgid "Opens instructions in a new tab"
+msgstr "Відкриває інструкцію в новій вкладці"
+
+msgid "Find and open a document"
+msgstr "Знайти й відкрити документ"
+
+msgid "Choose the dates and document types, then select Show documents. Match the number, date, amount and warehouse, and select View. Scroll the table sideways if the action is not visible. Expand the period if the list is empty."
+msgstr "Виберіть дати й типи документів та натисніть «Показати документи». Звірте номер, дату, суму й склад та натисніть «Переглянути». Якщо кнопку не видно, прокрутіть таблицю вправо. Якщо список порожній, розширте період."
+
+msgid "Repeat selected products"
+msgstr "Повторити вибрані товари"
+
+msgid "Download a payment invoice"
+msgstr "Завантажити рахунок на оплату"
+
+msgid "Email a payment invoice"
+msgstr "Надіслати рахунок на email"
+
+msgid "Check the recipient address, then select Send by email once. Wait for the result and check the inbox and spam folder. After an uncertain result, check your mail before retrying. Payments and returns cannot be used for a payment invoice. For partial payments, check the balance or ask the manager before paying."
+msgstr "Перевірте адресу отримувача й один раз натисніть «Надіслати на email». Дочекайтеся результату, перевірте пошту та «Спам». Після невизначеного результату перевірте пошту перед повтором. Із платежів і повернень рахунок на оплату не формується. Якщо вже платили частково, перед оплатою перевірте баланс або уточніть залишок у менеджера."

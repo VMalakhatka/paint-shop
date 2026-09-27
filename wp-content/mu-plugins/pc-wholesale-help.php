@@ -228,6 +228,13 @@ function pc_wholesale_help_enqueue_assets(): void {
         [],
         file_exists($path) ? (string) filemtime($path) : PC_WHOLESALE_HELP_VERSION
     );
+    $script = WPMU_PLUGIN_DIR . '/pc-wholesale-help/assets/context-help.js';
+    wp_enqueue_script('pc-wholesale-context-help', pc_wholesale_help_asset_url('context-help.js'), [], (string) filemtime($script), true);
+    wp_localize_script('pc-wholesale-context-help', 'pcWholesaleContextHelp', [
+        'url' => pc_wholesale_help_url(),
+        'label' => __('? How does this work?', 'pc-wholesale-help'),
+        'newTab' => __('Opens instructions in a new tab', 'pc-wholesale-help'),
+    ]);
 }
 add_action('wp_enqueue_scripts', 'pc_wholesale_help_enqueue_assets');
 
@@ -516,8 +523,14 @@ function pc_wholesale_help_render_endpoint(): void {
 
         <section class="pc-help-section" id="folio">
             <div class="pc-help-section__heading"><span>12</span><div><h2><?php esc_html_e('View and repeat Folio documents', 'pc-wholesale-help'); ?></h2><p><?php esc_html_e('Choose a period and document types, then open an invoice, expense invoice or payment for details.', 'pc-wholesale-help'); ?></p></div></div>
+            <h3 id="folio-search"><?php esc_html_e('Find and open a document', 'pc-wholesale-help'); ?></h3>
+            <p><?php esc_html_e('Choose the dates and document types, then select Show documents. Match the number, date, amount and warehouse, and select View. Scroll the table sideways if the action is not visible. Expand the period if the list is empty.', 'pc-wholesale-help'); ?></p>
+            <h3 id="folio-repeat"><?php esc_html_e('Repeat selected products', 'pc-wholesale-help'); ?></h3>
             <p><?php esc_html_e('From an invoice or expense invoice, select the products you need and add them to the current cart or save them as a new draft. The current cart is not cleared in this workflow.', 'pc-wholesale-help'); ?></p>
+            <h3 id="folio-invoice"><?php esc_html_e('Download a payment invoice', 'pc-wholesale-help'); ?></h3>
             <p><?php esc_html_e('Open an invoice or expense invoice and choose Invoice XLSX to download a payment invoice with barcodes and historical prices. Send by email uses your account email, which you can replace with another address. The file contains the full document amount, not the outstanding balance; the original Folio document is not changed. Missing verified barcodes remain blank. Mail service acceptance does not confirm delivery.', 'pc-wholesale-help'); ?></p>
+            <h3 id="folio-invoice-email"><?php esc_html_e('Email a payment invoice', 'pc-wholesale-help'); ?></h3>
+            <p><?php esc_html_e('Check the recipient address, then select Send by email once. Wait for the result and check the inbox and spam folder. After an uncertain result, check your mail before retrying. Payments and returns cannot be used for a payment invoice. For partial payments, check the balance or ask the manager before paying.', 'pc-wholesale-help'); ?></p>
             <p><?php esc_html_e('If the section and your Folio customer name are visible but loading reports a permission error, refresh the page once. If it happens again, tell the manager your login and the time of the error.', 'pc-wholesale-help'); ?></p>
             <div class="pc-help-warning"><strong><?php esc_html_e('Historical prices are for reference only.', 'pc-wholesale-help'); ?></strong> <?php esc_html_e('The new cart always uses current prices, availability and allocation. Payments and returns cannot be repeated as an order.', 'pc-wholesale-help'); ?></div>
             <?php if ($folio_available): ?>

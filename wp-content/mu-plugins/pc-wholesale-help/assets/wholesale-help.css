@@ -156,3 +156,8 @@
 @media (prefers-reduced-motion: reduce) {
     .pc-help-figure img { transition: none; }
 }
+/* A separate link, never nested in a submit button. Safe after AJAX replacement. */
+.pc-context-help { display:inline-block; margin:4px 8px; padding:3px 0; font-size:12px; line-height:1.5; font-weight:400; text-decoration:underline; color:#11635d; vertical-align:middle; }
+.pc-context-help:focus-visible { outline:2px solid currentColor; outline-offset:3px; }
+.pc-wholesale-help h3[id] { scroll-margin-top:90px; }
+@media print { .pc-context-help { display:none; } }

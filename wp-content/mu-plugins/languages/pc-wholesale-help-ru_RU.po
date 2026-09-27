@@ -913,3 +913,26 @@ msgstr "На странице заказа показаны обновления
 
 msgid "For warehouse invoices and document lines, open Folio documents in My account. If an order was split, check each linked child order. Ask the manager if a document or shipment is not yet available."
 msgstr "Счета по складам и их состав смотрите в разделе «Документы ФОЛИО» в кабинете. Если заказ разделён, проверьте каждый связанный дочерний заказ. Если документа или отправления ещё нет, обратитесь к менеджеру."
+msgid "? How does this work?"
+msgstr "? Как это работает"
+
+msgid "Opens instructions in a new tab"
+msgstr "Открывает инструкцию в новой вкладке"
+
+msgid "Find and open a document"
+msgstr "Найти и открыть документ"
+
+msgid "Choose the dates and document types, then select Show documents. Match the number, date, amount and warehouse, and select View. Scroll the table sideways if the action is not visible. Expand the period if the list is empty."
+msgstr "Выберите даты и типы документов и нажмите «Показать документы». Сверьте номер, дату, сумму и склад и нажмите «Просмотреть». Если кнопку не видно, прокрутите таблицу вправо. Если список пуст, расширьте период."
+
+msgid "Repeat selected products"
+msgstr "Повторить выбранные товары"
+
+msgid "Download a payment invoice"
+msgstr "Скачать счёт на оплату"
+
+msgid "Email a payment invoice"
+msgstr "Отправить счёт на email"
+
+msgid "Check the recipient address, then select Send by email once. Wait for the result and check the inbox and spam folder. After an uncertain result, check your mail before retrying. Payments and returns cannot be used for a payment invoice. For partial payments, check the balance or ask the manager before paying."
+msgstr "Проверьте адрес получателя и один раз нажмите «Отправить на email». Дождитесь результата, проверьте почту и «Спам». После неопределённого результата проверьте почту перед повтором. Из платежей и возвратов счёт на оплату не формируется. При частичной оплате проверьте баланс или уточните остаток у менеджера."
