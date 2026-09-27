@@ -33,7 +33,8 @@ final class ConversationStore {
         return ['assignee'=>(int)get_post_meta($id,'_chat_assignee',true), 'state'=>(string)get_post_meta($id,'_chat_state',true),
             'order_id'=>(int)get_post_meta($id,'_chat_order',true), 'revision'=>(string)get_post_meta($id,'_chat_revision',true)];
     }
-    private static function lock(string $key, callable $fn) {
+    /** Internal transaction boundary shared with channel adapters; callers authorize the actor. */
+    public static function lock(string $key, callable $fn) {
         global $wpdb;
         $name='pcoe-chat:'.substr(hash('sha256',$wpdb->prefix.$key),0,45);
         if ((int)$wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s, 0)',$name))!==1) throw new \RuntimeException(__('Conversation is busy. Retry with the same message.', 'pc-order-import-export'));
@@ -136,6 +137,8 @@ final class ConversationStore {
             if (!$internal && self::manager() && !(int)get_post_meta($id,'_chat_assignee',true)) self::set($id,'_chat_assignee',get_current_user_id());
             if (!$internal) self::set($id,'_chat_state',self::manager()?'waiting_customer':'waiting_manager');
             self::touch($id);
+            // Channel adapters only enqueue durable work here. Never send HTTP inside this transaction.
+            do_action('pcoe_chat_message_saved',$id,$message,$internal);
             return $message;
         });
     }

@@ -34,6 +34,7 @@ class Plugin {
         DraftFolioWorkflow::hooks();
         ManagerWorkspace::hooks();
         Conversations::hooks();
+        TelegramBridge::hooks();
         ManagerNotifications::hooks();
         CustomerApproval::hooks();
 

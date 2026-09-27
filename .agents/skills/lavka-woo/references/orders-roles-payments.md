@@ -225,4 +225,22 @@ Default off, включение администратором отдельно 
 зависит от исключения редиректа в `pc-account-tweaks.php`. Обязательно проверять
 настоящий HTTP-путь, а не только renderer в CLI.
 Регламент и границы этапа 1: `docs/OPERATIONS_RUNBOOK.md`, раздел «Чат клиента
-и очередь обращений — этап 1». Telegram/email/standalone ФОЛИО не реализованы.
+и очередь обращений — этап 1». Email и standalone ФОЛИО не реализованы.
+Telegram добавлен отдельным этапом ниже.
+
+
+### Telegram как канал того же чата — 2026-09-27
+
+`TelegramSettings/TelegramStore/TelegramBridge` в `pc-order-import-export` —
+единственные владельцы bot config, identity binding, webhook и outbox. Код проверен
+локально с подменой HTTP; реальный бот пока не включён. Канонические сообщения
+остаются в ConversationStore. Привязка требует одноразового кода и отдельного
+подтверждения владельцем авторизованного кабинета; username/email не авторизация.
+Webhook проверяет секрет и private peer, reply mapping включает поколение связи.
+Внутренние заметки не отправляются. Дедупликация update и входящее сообщение,
+исходящий ответ и outbox записываются транзакционно; сеть вызывается после claim.
+Timeout/5xx/stale sending = unknown, без автоматической повторной отправки.
+Шифрованный токен и owning home URL хранятся в `pcoe_telegram_config`; endpoint,
+планировщик, новая таблица и восстановление — `docs/OPERATIONS_RUNBOOK.md`, раздел
+«Telegram в клиентской переписке — этап 2». Setup создаёт schema и регистрирует
+webhook только по явной кнопке администратора. Не менять чужой webhook и bot ID.

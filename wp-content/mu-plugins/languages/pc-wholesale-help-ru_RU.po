@@ -948,3 +948,15 @@ msgstr "В обращении видны ответы, ответственны�
 
 msgid "This first stage supports text on the website. Files, email and Telegram delivery are not connected. A message does not confirm an order, make a payment or start shipment; use the separate order confirmation screen when requested."
 msgstr "На первом этапе доступен текст на сайте. Файлы, email и Telegram не подключены. Сообщение не подтверждает заказ, не выполняет оплату и не запускает отправку; для подтверждения используйте отдельную страницу по запросу менеджера."
+
+msgid "Text conversations are available on the website. Files and email are not connected. A message does not confirm an order, make a payment or start shipment; use the separate order confirmation screen when requested."
+msgstr "Текстовая переписка доступна на сайте. Файлы и email не подключены. Сообщение не подтверждает заказ, не проводит оплату и не запускает отгрузку; для этого используйте отдельный экран подтверждения заказа."
+
+msgid "When the store enables Telegram, create a one-time link in Messages, open the bot and press Start. Return to Messages, refresh and confirm that the displayed Telegram account is yours. The link expires in 15 minutes; do not share it."
+msgstr "Когда магазин включит Telegram, создайте одноразовую ссылку в «Сообщения», откройте бота и нажмите Start. Вернитесь в «Сообщения», обновите страницу и подтвердите, что показанный Telegram-аккаунт принадлежит вам. Ссылка действует 15 минут; не передавайте её."
+
+msgid "New public manager replies then arrive both here and in Telegram. Reply to a bot message to keep the same conversation, or use /threads to choose one for 30 minutes. Text without a reply or active selection goes to general questions. Old messages are not imported into Telegram."
+msgstr "Новые ответы менеджера для вас приходят сюда и в Telegram. Отвечайте на сообщение бота, чтобы продолжить то же обращение, или выберите его командой /threads на 30 минут. Текст без ответа или активного выбора попадает в общие вопросы. Старые сообщения не переносятся в Telegram."
+
+msgid "To disconnect, use Disconnect Telegram in Messages or send /stop to the bot. Website history remains available. Delivery can take about a minute; Telegram acceptance does not mean the customer has read the message. Files, voice messages and order confirmation through the bot are not supported."
+msgstr "Для отключения нажмите «Отключить Telegram» в «Сообщения» или отправьте /stop боту. История на сайте остаётся доступной. Доставка может занимать около минуты; принятие Telegram не означает прочтение клиентом. Файлы, голосовые сообщения и подтверждение заказа через бота не поддерживаются."

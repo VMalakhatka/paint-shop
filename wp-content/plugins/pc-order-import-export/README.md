@@ -288,5 +288,30 @@ The first manager public reply claims an unassigned thread. Customer reply reope
 closed conversations; internal notes never reach customers. Sends use actor/request
 idempotency, owner checks and a transaction; stale assignment revisions are rejected.
 The browser polls only the latest message page while visible, without replacing the
-composer. Email, Telegram, uploads and standalone Folio binding are not implemented.
+composer. Email, uploads and standalone Folio binding are not implemented.
+Telegram is a separately enabled adapter described below.
 Local regression: `tests/conversations.php` (intercepted HTTP/mail, disposable records).
+
+
+## Telegram adapter — stage 2 (2026-09-27)
+
+`TelegramSettings`, `TelegramStore`, and `TelegramBridge` attach a private Telegram
+bot to the existing canonical conversations. Default off, explicitly configure from
+the manager Conversations tab as administrator. No new plugin or Java changes.
+An isolated bot, public HTTPS webhook and running WordPress cron are required.
+`pcoe_telegram_config` holds the encrypted token (AES-GCM with WP auth salt),
+webhook secret, bot identity, enabled flag and owning site URL. No secrets in Git.
+An explicit setup creates the InnoDB `{prefix}pcoe_telegram` table; deploy does not.
+
+A one-use 15-minute deep link only proposes the binding; the customer confirms the
+Telegram identity from the authenticated website account. Reply mappings include
+bot, peer and binding generation; unknown replies never guess a Woo order.
+Public manager replies enqueue atomically with the canonical message. Internal
+notes never leave the website. Telegram acceptance is not a read/approval receipt.
+Network uncertainty stays unknown and is not retried blindly. Token rotation is
+supported for the same bot; changing bots requires a separate migration.
+
+[Setup, privacy boundaries, queue, recovery and rollback](../../../docs/OPERATIONS_RUNBOOK.md#telegram-в-клиентской-переписке--этап-2-2026-09-27).
+Local mock integration: `wp eval-file wp-content/plugins/pc-order-import-export/tests/telegram.php`.
+All HTTP/mail are intercepted. A real bot round trip remains a release acceptance
+step after deploy and operator configuration. See the customer `messages` help anchor.

@@ -1878,3 +1878,144 @@ msgstr ""
 
 msgid "Write to customer"
 msgstr ""
+
+msgid "Bot token (leave empty to keep the saved token)"
+msgstr ""
+
+msgid "Bot token could not be verified."
+msgstr ""
+
+msgid "Choose a conversation, reply to a bot message, or write a general question. /stop disconnects Telegram."
+msgstr ""
+
+#, php-format
+msgid "Confirm Telegram account: %1$s (ID ending %2$s)."
+msgstr ""
+
+msgid "Confirm my Telegram account"
+msgstr ""
+
+msgid "Connect Telegram"
+msgstr ""
+
+msgid "Connect Telegram from Messages in your website account first."
+msgstr ""
+
+msgid "Could not protect the bot token."
+msgstr ""
+
+msgid "Create a dedicated bot with /newbot in @BotFather, then paste its token here. Use this bot only for this website. The token is stored encrypted and is never shown again."
+msgstr ""
+
+msgid "Create one-time Telegram link"
+msgstr ""
+
+msgid "Disconnect Telegram"
+msgstr ""
+
+msgid "General question from Telegram"
+msgstr ""
+
+msgid "Link your own Telegram account to receive manager replies and write in the same conversations. After starting the bot, return here and confirm the account. Do not share the one-time link."
+msgstr ""
+
+#, php-format
+msgid "Message saved in conversation #%d. The manager will reply here and on the website."
+msgstr ""
+
+msgid "Open Telegram bot"
+msgstr ""
+
+msgid "Open on website"
+msgstr ""
+
+msgid "Open the bot and press Start. Then return to Messages, refresh the page and confirm your Telegram account. The link expires in 15 minutes."
+msgstr ""
+
+msgid "Pause Telegram"
+msgstr ""
+
+msgid "Please send text only, up to 5000 characters. Use /threads to choose a conversation. Files and voice messages are not supported yet."
+msgstr ""
+
+msgid "Return to Messages on the website, refresh the page and confirm your Telegram account."
+msgstr ""
+
+msgid "Some Telegram deliveries need review. Open the relevant conversation to see their status. Unknown deliveries are not retried automatically."
+msgstr ""
+
+msgid "Telegram delivery is currently paused by the store."
+msgstr ""
+
+msgid "Telegram disconnected. Your conversation history remains on the website."
+msgstr ""
+
+msgid "Telegram is busy. Please retry."
+msgstr ""
+
+msgid "Telegram is enabled."
+msgstr ""
+
+msgid "Telegram is linked. New public manager replies will also arrive in the bot."
+msgstr ""
+
+msgid "Telegram is not enabled."
+msgstr ""
+
+msgid "Telegram record could not be saved."
+msgstr ""
+
+msgid "Telegram requires the public HTTPS site."
+msgstr ""
+
+msgid "Telegram setup"
+msgstr ""
+
+msgid "Telegram storage is unavailable."
+msgstr ""
+
+msgid "Telegram: accepted by Telegram, not a read receipt."
+msgstr ""
+
+msgid "Telegram: delivery cancelled after disconnection."
+msgstr ""
+
+msgid "Telegram: delivery failed. The reply is saved on the website."
+msgstr ""
+
+msgid "Telegram: delivery unknown; check with the customer before resending."
+msgstr ""
+
+msgid "Telegram: queued."
+msgstr ""
+
+msgid "Telegram: sending."
+msgstr ""
+
+msgid "This bot is already connected elsewhere, or its webhook could not be checked."
+msgstr ""
+
+msgid "This link is expired or unavailable. Create a new link in your website account."
+msgstr ""
+
+msgid "This reply could not be linked. Use /threads to select the conversation and send it again."
+msgstr ""
+
+msgid "Use the same bot. Changing bots requires a separate migration."
+msgstr ""
+
+msgid "Verify and enable Telegram"
+msgstr ""
+
+msgid "Webhook activation was not confirmed. The channel remains paused; retry setup explicitly."
+msgstr ""
+
+msgid "Write your general question to the manager."
+msgstr ""
+
+#, php-format
+msgid "Write your message for conversation #%d. Selection is valid for 30 minutes."
+msgstr ""
+
+msgid "Enable text conversations for registered customers and wholesale accounts. Telegram is configured separately below."
+msgstr ""

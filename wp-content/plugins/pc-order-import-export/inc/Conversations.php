@@ -101,8 +101,9 @@ final class Conversations {
         if (!self::enabled()) echo '<p>'.esc_html__('Chat is not enabled.','pc-order-import-export').'</p>';
         if ($admin && current_user_can('manage_options')) {
             echo '<details><summary>'.esc_html__('Chat settings','pc-order-import-export').'</summary><form method="post" action="'.esc_url(admin_url('admin-post.php')).'">';self::fields(self::enabled()?'disable':'enable');
-            echo '<p>'.esc_html__('Enable text conversations for registered customers and wholesale accounts. No email or Telegram messages are sent.','pc-order-import-export').'</p><button class="button">'.esc_html(self::enabled()?__('Disable new messages','pc-order-import-export'):__('Enable chat','pc-order-import-export')).'</button></form></details>';
+            echo '<p>'.esc_html__('Enable text conversations for registered customers and wholesale accounts. Telegram is configured separately below.','pc-order-import-export').'</p><button class="button">'.esc_html(self::enabled()?__('Disable new messages','pc-order-import-export'):__('Enable chat','pc-order-import-export')).'</button></form></details>';
         }
+        if($admin)TelegramSettings::admin();else TelegramSettings::customer();
         try {
             $id=absint($_GET['chat_id']??0);
             if ($id) self::thread($id); else { self::queue(); if(self::enabled()) self::new_form(); }
@@ -176,6 +177,8 @@ final class Conversations {
             $internal=get_post_meta($m->ID,'_chat_visibility',true)==='internal';$actor=get_post_meta($m->ID,'_chat_actor',true);
             $author=get_userdata((int)$m->post_author);$last=max($last,$m->ID);
             echo '<article class="pcoe-chat-message '.($internal?'is-internal':'').'" data-message="'.esc_attr($m->ID).'"><small>'.esc_html(($author?$author->display_name:__('User','pc-order-import-export')).' · '.get_date_from_gmt($m->post_date_gmt,'d.m.Y H:i').' · '.($internal?__('Internal note','pc-order-import-export'):($actor==='customer'?__('Customer','pc-order-import-export'):__('Manager','pc-order-import-export')))).'</small><p>'.nl2br(esc_html($m->post_content)).'</p></article>';
+            if(get_post_meta($m->ID,'_chat_channel',true)==='telegram')echo '<small>Telegram</small>';
+            if(ConversationStore::manager() && !$internal && $actor==='manager') { $delivery=TelegramBridge::status($m->ID);if($delivery)echo '<p class="pcoe-telegram-status">'.esc_html($delivery).'</p>'; }
         }
         if ($seen && $page===1 && $last) update_user_meta(get_current_user_id(),'_pcoe_chat_seen_'.$id,$last);
         if (!$data['messages']) echo '<p>'.esc_html__('No messages yet.','pc-order-import-export').'</p>';

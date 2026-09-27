@@ -905,3 +905,15 @@ msgstr ""
 
 msgid "This first stage supports text on the website. Files, email and Telegram delivery are not connected. A message does not confirm an order, make a payment or start shipment; use the separate order confirmation screen when requested."
 msgstr ""
+
+msgid "Text conversations are available on the website. Files and email are not connected. A message does not confirm an order, make a payment or start shipment; use the separate order confirmation screen when requested."
+msgstr ""
+
+msgid "When the store enables Telegram, create a one-time link in Messages, open the bot and press Start. Return to Messages, refresh and confirm that the displayed Telegram account is yours. The link expires in 15 minutes; do not share it."
+msgstr ""
+
+msgid "New public manager replies then arrive both here and in Telegram. Reply to a bot message to keep the same conversation, or use /threads to choose one for 30 minutes. Text without a reply or active selection goes to general questions. Old messages are not imported into Telegram."
+msgstr ""
+
+msgid "To disconnect, use Disconnect Telegram in Messages or send /stop to the bot. Website history remains available. Delivery can take about a minute; Telegram acceptance does not mean the customer has read the message. Files, voice messages and order confirmation through the bot are not supported."
+msgstr ""
