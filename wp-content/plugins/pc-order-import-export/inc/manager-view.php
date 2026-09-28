@@ -17,6 +17,7 @@ $form_fields = static function (string $operation) use ($customer_id, $order): v
 ?>
 <div class="wrap pcoe-manager">
 <h1><?php esc_html_e('Customer workspace', 'pc-order-import-export'); ?></h1>
+<?php ManagerHelp::link(); ?>
 <p><?php esc_html_e('Select a customer, prepare a draft and review Folio accounts by warehouse.', 'pc-order-import-export'); ?></p>
 <?php $messages_tab = ($_GET['view'] ?? '') === 'messages'; $orders_tab = !$customer_id && ($_GET['view'] ?? '') === 'orders'; ?>
 <nav class="nav-tab-wrapper">
@@ -24,6 +25,7 @@ $form_fields = static function (string $operation) use ($customer_id, $order): v
 <a class="nav-tab <?php echo $orders_tab ? 'nav-tab-active' : ''; ?>" href="<?php echo esc_url(add_query_arg('view', 'orders', ManagerWorkspace::url(0))); ?>"><?php esc_html_e('Orders', 'pc-order-import-export'); ?></a>
 <a class="nav-tab <?php echo $messages_tab ? 'nav-tab-active' : ''; ?>" href="<?php echo esc_url(Conversations::url([],true)); ?>"><?php esc_html_e('Conversations', 'pc-order-import-export'); ?></a>
 </nav>
+<p><a class="button" href="<?php echo esc_url(ManagerHelp::url()); ?>" target="_blank" rel="noopener noreferrer"><?php ManagerHelp::load(); esc_html_e('Manager guide', 'pcoe-manager-help'); ?></a></p>
 <?php if ($messages_tab) { Conversations::render(); echo '</div>'; return; } ?>
 <?php if ($orders_tab) { require __DIR__ . '/manager-orders-view.php'; echo '</div>'; return; } ?>
 <?php if ($error): ?><div class="notice notice-error"><p><?php echo esc_html($error); ?></p></div><?php endif; ?>
@@ -91,7 +93,7 @@ $context = function_exists('pc_folio_balance_user_context') ? pc_folio_balance_u
 <button class="button"><?php esc_html_e('Import into customer draft', 'pc-order-import-export'); ?></button>
 <a href="<?php echo esc_url(content_url('/mu-plugins/pc-wholesale-help/assets/wholesale-order-template.xlsx')); ?>"><?php esc_html_e('Download Excel template', 'pc-order-import-export'); ?></a>
 </form><div data-import-report></div></section>
-<section class="pcoe-card"><h2><?php esc_html_e('Customer drafts and orders', 'pc-order-import-export'); ?></h2>
+<section class="pcoe-card"><h2 data-pcoe-help="orders"><?php esc_html_e('Customer drafts and orders', 'pc-order-import-export'); ?></h2>
 <?php
 $page = max(1, absint($_GET['orders_page'] ?? 1));
 $list = wc_get_orders(['customer_id' => $customer_id, 'limit' => 25, 'page' => $page, 'paginate' => true, 'orderby' => 'date', 'order' => 'DESC']);
@@ -137,7 +139,7 @@ $command = ManagerWorkspace::command($order);
 <form data-pcoe-manager data-apply-form hidden><?php $form_fields('apply'); ?><input type="hidden" name="token" value=""><label><input type="checkbox" name="confirmation" value="1" required> <?php esc_html_e('I checked this customer, quantities, prices and warehouses and confirm creation in Folio.', 'pc-order-import-export'); ?></label><button class="button button-primary"><?php esc_html_e('Confirm and create Folio documents', 'pc-order-import-export'); ?></button></form>
 </section><?php endif; ?>
 <?php CustomerApproval::manager_link($order); ?>
-<?php $result = pc_folio_get_order_documents_result($order); if ($result): ?><section class="pcoe-card"><h2><?php esc_html_e('Saved Folio documents', 'pc-order-import-export'); ?></h2><?php ManagerWorkspace::documents_table($result);
+<?php $result = pc_folio_get_order_documents_result($order); if ($result): ?><section class="pcoe-card"><h2 data-pcoe-help="apply"><?php esc_html_e('Saved Folio documents', 'pc-order-import-export'); ?></h2><?php ManagerWorkspace::documents_table($result);
 $keys = pc_folio_order_documents_meta_keys(); foreach (array_filter((array) $order->get_meta($keys['child_order_ids'], true)) as $child_id): ?> <a class="button" href="<?php echo esc_url(ManagerWorkspace::url($customer_id, $child_id)); ?>">#<?php echo esc_html($child_id); ?></a> <?php endforeach; ?></section><?php endif; ?>
 <?php endif; ?>
 <?php if ($context && function_exists('pc_folio_documents_render_endpoint')): ?><section id="pcoe-folio-documents" class="pcoe-card"><?php pc_folio_documents_render_endpoint($customer_id); ?></section><?php endif; ?>

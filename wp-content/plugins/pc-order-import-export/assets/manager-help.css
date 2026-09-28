@@ -1,0 +1,4 @@
+.pcoe-help-link{display:inline-block;font-size:12px;font-weight:400;line-height:1.5;margin:4px 8px;color:#135e96;text-decoration:underline;text-underline-offset:3px;white-space:normal}
+.pcoe-help-link:focus-visible,.pcoe-help a:focus-visible{outline:2px solid #135e96;outline-offset:3px}
+.pcoe-help{max-width:960px}.pcoe-help p{font-size:15px;line-height:1.75;max-width:80ch}.pcoe-help .pcoe-card{scroll-margin-top:55px}.pcoe-help .pcoe-card:target{border-left:5px solid #2271b1;background:#f0f6fc}.pcoe-help-toc{background:#fff;border:1px solid #dcdcde;border-radius:8px;padding:20px;margin-top:20px}.pcoe-help-toc ol{columns:2;column-gap:35px}.pcoe-help-toc li{break-inside:avoid;padding:4px 0}.pcoe-help h2{line-height:1.4}
+@media(max-width:782px){.pcoe-help-toc ol{columns:1}.pcoe-help .pcoe-card{scroll-margin-top:65px}.pcoe-help-link{max-width:100%;box-sizing:border-box}.pcoe-manager .pcoe-actions>.pcoe-help-link{width:auto}}

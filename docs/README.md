@@ -40,6 +40,7 @@
 | Увидеть неподтверждённые места и риски | [KNOWN_GAPS.md](KNOWN_GAPS.md) |
 | Мастеру: вести расписание МК, статьи и заявки | [WORKSHOPS_GUIDE_RU.md](WORKSHOPS_GUIDE_RU.md) |
 | Пользоваться сайтом и кабинетом | [SITE_USER_GUIDE_UK.md](SITE_USER_GUIDE_UK.md) |
+| Менеджеру: весь раздел «Робота з клієнтами», черновики, документы, баланс, сообщения и Telegram | [MANAGER_CUSTOMER_GUIDE_UK.md](MANAGER_CUSTOMER_GUIDE_UK.md) |
 | Развивать список ожидания и рекомендации клиентам | [план и этапы](CUSTOMER_RECOMMENDATIONS_PLAN.md) |
 | Оформить оптовый заказ, импортировать/экспортировать список, сохранить черновик, повторить старый заказ, увидеть разделение, баланс и документы | [WHOLESALE_CUSTOMER_GUIDE_UK.md](WHOLESALE_CUSTOMER_GUIDE_UK.md) |
 | Отправить оптовому партнёру краткую наглядную памятку о возможностях сайта | [Рекламная PDF-памятка: файл, источники и обновление](WHOLESALE_PROMO_UK.md) |

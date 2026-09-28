@@ -27,6 +27,7 @@ REQUIRED = (
     "docs/KNOWN_GAPS.md",
     "docs/WHOLESALE_CUSTOMER_GUIDE_UK.md",
     "docs/WORKSHOPS_GUIDE_RU.md",
+    "docs/MANAGER_CUSTOMER_GUIDE_UK.md",
 )
 
 
@@ -38,6 +39,11 @@ class ImpactRule:
 
 
 IMPACT_RULES = (
+    ImpactRule(
+        "manager workspace contextual guide",
+        ("wp-content/plugins/pc-order-import-export/inc/ManagerHelp.php", "wp-content/plugins/pc-order-import-export/assets/manager-help.*", "wp-content/plugins/pc-order-import-export/languages/pcoe-manager-help*"),
+        ("docs/MANAGER_CUSTOMER_GUIDE_UK.md",),
+    ),
     ImpactRule(
         "workshop articles, schedule and booking requests",
         ("wp-content/plugins/lavka-workshops/**",),

@@ -12,6 +12,7 @@ class ManagerWorkspace
     public static function hooks(): void {
         add_action('admin_menu', [self::class, 'menu'], 30);
         add_action('admin_enqueue_scripts', [self::class, 'assets']);
+        add_action('admin_enqueue_scripts', [ManagerHelp::class, 'support_assets']);
         add_action('admin_post_pcoe_customer_managers',[CustomerManagers::class,'post']);
         add_action('wp_ajax_pcoe_manager', [self::class, 'ajax']);
         add_action('pc_folio_child_order_item_prepared', [self::class, 'stamp_child_plan'], 10, 3);
@@ -46,6 +47,7 @@ class ManagerWorkspace
 
     public static function assets(): void {
         if (($_GET['page'] ?? '') !== self::PAGE || !current_user_can('manage_woocommerce')) return;
+        ManagerHelp::assets();
         wp_enqueue_style('pcoe-manager', PCOE_URL . 'assets/manager.css', [], filemtime(PCOE_DIR . '/assets/manager.css'));
         wp_enqueue_script('pcoe-manager', PCOE_URL . 'assets/manager.js', [], filemtime(PCOE_DIR . '/assets/manager.js'), true);
         wp_localize_script('pcoe-manager', 'pcoeManager', [
@@ -86,6 +88,7 @@ class ManagerWorkspace
 
     public static function render(): void {
         if (!current_user_can('manage_woocommerce')) wp_die(esc_html__('You do not have permission to perform this action.', 'pc-order-import-export'));
+        if (($_GET['view'] ?? '') === 'help') { ManagerHelp::render(); return; }
         require PCOE_DIR . '/inc/manager-view.php';
     }
 

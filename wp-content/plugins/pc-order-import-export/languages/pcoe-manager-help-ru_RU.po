@@ -1,0 +1,205 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: ru_RU\n"
+
+msgid "Debtors: filter, export and data freshness"
+msgstr "Должники: отбор, экспорт и актуальность"
+
+msgid "Set the minimum payable amount, customer search and type, then generate the report. It includes amounts strictly greater than the threshold. Export XLSX for the selected report; use the individual customer balance to investigate a disputed amount."
+msgstr "Задайте минимальную сумму к оплате, поиск клиента и тип и сформируйте отчёт. Отбираются суммы строго больше порога. Скачайте XLSX выбранного отчёта; спорную сумму проверяйте в индивидуальном балансе клиента."
+
+msgid "The list uses a prepared snapshot, not a fresh calculation for each viewed customer. Check its status and calculation date. Refresh debt data starts a recalculation, not just a screen refresh: wait for completion and do not repeatedly click it. Check database activity helps diagnose a busy database; report a failure to the administrator without restarting it blindly."
+msgstr "Список использует подготовленный снимок, а не новый расчёт каждого клиента при просмотре. Проверьте статус и дату расчёта. «Обновить данные долгов» запускает перерасчёт, а не просто обновляет экран: дождитесь завершения и не нажимайте повторно. Проверка активности базы помогает выяснить её занятость; ошибку передайте администратору без слепого перезапуска."
+
+msgid "Generate, export or print a balance"
+msgstr "Сформировать, скачать или распечатать баланс"
+
+msgid "Choose the start date or All time and generate the report. Wait until the report is ready; then use Excel export or Print. Check the selected customer and report date before sharing. These files contain customer financial data and should be sent only to the authorised recipient."
+msgstr "Выберите начальную дату или «За всё время» и сформируйте отчёт. Дождитесь готовности, затем используйте Excel или печать. Перед передачей проверьте клиента и дату отчёта. Файлы содержат финансовые данные клиента — отправляйте их только уполномоченному получателю."
+
+msgid "? How it works"
+msgstr "? Как это работает"
+
+msgid "Manager guide"
+msgstr "Справка менеджера"
+
+msgid "Contents"
+msgstr "Содержание"
+
+msgid "Back to workspace"
+msgstr "К работе с клиентами"
+
+msgid "Open help in a new tab"
+msgstr "Открыть справку в новой вкладке"
+
+msgid "Customer workspace: start here"
+msgstr "Работа с клиентами: с чего начать"
+
+msgid "Open Customers to work with one customer, Orders for the common order list, or Conversations for messages. Help opens in a separate tab and does not submit forms."
+msgstr "Откройте «Клиенты» для работы с конкретным клиентом, «Заказы» для общего списка или «Сообщения» для переписки. Справка открывается в отдельной вкладке и не отправляет формы."
+
+msgid "Always check the selected customer before saving a draft, assigning managers or creating documents. Work under your own manager account; do not sign in as the customer."
+msgstr "Перед сохранением черновика, назначением менеджеров или созданием документов проверьте выбранного клиента. Работайте под своей учётной записью менеджера, а не под паролем клиента."
+
+msgid "Find and check a customer"
+msgstr "Найти и проверить клиента"
+
+msgid "Search by name, company or email, optionally select a role and city, then apply the filter. Clear filters if the customer is missing. City is taken from the billing address on the website."
+msgstr "Введите имя, компанию или email, при необходимости выберите роль и город и примените фильтр. Если клиента нет — сбросьте фильтры. Город берётся из платёжного адреса на сайте."
+
+msgid "Open the customer name. Check the email, price role and linked Folio customer (our accounting database). Without this link you can prepare drafts, but cannot prepare accounting documents; ask an administrator to check the user profile."
+msgstr "Нажмите имя клиента. Проверьте email, ценовую роль и привязку к ФОЛИО — нашей учётной базе. Без привязки можно готовить черновики, но не документы в базе; попросите администратора проверить профиль пользователя."
+
+msgid "Primary and additional managers"
+msgstr "Основной и дополнительный менеджеры"
+
+msgid "In Customer managers select a primary manager and, if needed, a different additional manager. Save. New conversations inherit this pair; the primary manager remains responsible."
+msgstr "В блоке «Менеджеры клиента» выберите основного и, при необходимости, другого дополнительного менеджера. Сохраните. Новые обращения получат эту пару; ответственным остаётся основной менеджер."
+
+msgid "The checkbox for existing open conversations replaces their managers too. Without it, only the defaults change. Closed conversations keep their assignment. Both connected managers receive customer messages and public replies from their colleague in Telegram."
+msgstr "Галочка применения к открытым обращениям заменяет менеджеров и в них. Без неё меняются только настройки для новых обращений. Закрытые обращения не меняются. Оба подключённых менеджера получают в Telegram сообщения клиента и публичные ответы коллеги."
+
+msgid "Create and edit a draft"
+msgstr "Создать и отредактировать черновик"
+
+msgid "In the customer card enter a draft title and create an empty draft. Add products by SKU and quantity, then save. Change quantities in the table; quantity 0 removes a line when you save."
+msgstr "В карточке клиента введите название и создайте пустой черновик. Добавьте товары по артикулу и количеству и сохраните. Количество меняйте в таблице; 0 удаляет строку после сохранения."
+
+msgid "A draft is a working list, not a reservation or a shipment. It belongs to the selected customer; the customer's website cart remains separate. Save changes before previewing. A processed or locked draft cannot be edited here."
+msgstr "Черновик — рабочий список, а не резерв или отгрузка. Он принадлежит выбранному клиенту; его корзина на сайте остаётся отдельной. Перед просмотром документов сохраните изменения. Обработанный или заблокированный черновик здесь нельзя редактировать."
+
+msgid "Import an order file"
+msgstr "Импортировать заказ из файла"
+
+msgid "Download the Excel template, fill product identifiers and quantities, then choose CSV, XLSX or XLS and import into a customer draft. Limits: 10 MB and 2000 rows. Keep barcodes as text to preserve leading zeroes."
+msgstr "Скачайте Excel-шаблон, заполните идентификаторы товаров и количество, выберите CSV, XLSX или XLS и импортируйте в черновик клиента. Ограничения: 10 МБ и 2000 строк. Штрихкоды храните как текст, чтобы не потерять начальные нули."
+
+msgid "Read the import report and verify the resulting items and quantities; do not assume every row was accepted. File prices are reference values. Preparation uses current customer prices, so check the preview total."
+msgstr "Прочитайте отчёт импорта и проверьте товары и количество: не все строки обязательно приняты. Цены файла справочные. Подготовка использует актуальные цены клиента — проверьте сумму в предварительном просмотре."
+
+msgid "Orders, export and repeat order"
+msgstr "Заказы, экспорт и повторный заказ"
+
+msgid "Orders shows the newest orders first. In a customer card the list contains only that customer's drafts and orders. Open a number to inspect it; use page navigation for older records."
+msgstr "Вкладка «Заказы» показывает сначала новые заказы. В карточке клиента список содержит только его черновики и заказы. Нажмите номер для просмотра; старые записи ищите на следующих страницах."
+
+msgid "CSV or Excel downloads the selected order. Copy to a new draft creates a separate working copy, not a second reservation. Check quantities and current customer prices before preparing it. Open WooCommerce order leads to the full editor."
+msgstr "CSV или Excel скачивает выбранный заказ. «Копировать в новый черновик» создаёт отдельную рабочую копию, а не второй резерв. Перед обработкой проверьте количество и актуальные цены клиента. «Открыть заказ WooCommerce» открывает полный редактор."
+
+msgid "Delivery, comments and order history"
+msgstr "Доставка, комментарии и история заказа"
+
+msgid "Review the recipient, contacts, address, delivery method, customer comment and saved shipment numbers. For a split order, delivery may be shown from the original order; also inspect the child orders."
+msgstr "Проверьте получателя, контакты, адрес, способ доставки, комментарий клиента и сохранённые номера отправлений. Для разделённого заказа доставка может показываться из исходного заказа; проверьте также дочерние заказы."
+
+msgid "A saved shipment number does not prove dispatch. Check the displayed tracking time and carrier status. Order history is not the conversation inbox: internal order notes stay internal, while a customer order note may send an email."
+msgstr "Сохранённый номер отправления не доказывает отгрузку. Смотрите время проверки и статус перевозчика. История заказа — не чат: внутренние заметки остаются внутренними, а заметка клиенту может отправить email."
+
+msgid "Preview prices, warehouses and documents"
+msgstr "Проверить цены, склады и документы"
+
+msgid "Save the draft. Choose Accounts by warehouse for available stock with reservation, or Entire draft without reservation for a non-accounting document. Automatic allocation uses the available warehouse plan; priority prefers the selected warehouse, while selected-only restricts allocation."
+msgstr "Сохраните черновик. Выберите «Счета по складам» для доступного товара с резервом или «Весь черновик без резервирования» для неучётного документа. Автоматический режим распределяет по складам; приоритет предпочитает выбранный склад, а режим только выбранного склада ограничивает распределение."
+
+msgid "Click Preview prices and warehouses. Preview creates no Folio documents. Check each SKU, quantity, price, warehouse and document type. Stock shortages may form separate non-accounting documents; these do not reserve stock or create stock movement. Creating accounts is not creating an expense invoice."
+msgstr "Нажмите предварительный просмотр цен и складов. Preview не создаёт документов в ФОЛИО. Проверьте каждый артикул, количество, цену, склад и тип документа. Дефицит может попасть в отдельные неучётные документы: они не резервируют товар и не создают складского движения. Создание счетов — не создание расходной накладной."
+
+msgid "Confirm creation and verify the result"
+msgstr "Подтвердить создание и проверить результат"
+
+msgid "Only after checking the preview, tick the confirmation and click Confirm and create Folio documents once. This is the real write (apply). If the preview expires or prices, allocation or draft change, generate a new preview."
+msgstr "Только после проверки preview поставьте галочку подтверждения и один раз нажмите создание документов ФОЛИО. Это реальная запись (apply). Если просмотр устарел или изменились цены, распределение или черновик — получите новый preview."
+
+msgid "Verify Saved Folio documents: document numbers, warehouses, items and amounts, plus child order links if the order was split. The source draft is locked against duplicate creation. A success notice alone is not a substitute for these documents."
+msgstr "Проверьте «Сохранённые документы ФОЛИО»: номера, склады, товары и суммы и ссылки на дочерние заказы при разделении. Исходный черновик блокируется от повторного создания. Самого сообщения об успехе недостаточно без проверки документов."
+
+msgid "If an operation stalls or needs review"
+msgstr "Если операция зависла или требует проверки"
+
+msgid "Reload the workspace and check the saved status, operation ID and documents. For sending, unknown or needs_review, do not repeat creation and do not create a replacement draft until the accounting result is checked."
+msgstr "Обновите рабочий раздел и проверьте сохранённый статус, ID операции и документы. Для sending, unknown или needs_review не повторяйте создание и не создавайте замену, пока результат в учётной базе не проверен."
+
+msgid "Send the administrator the order number, operation ID, time and error text through an approved private channel. A timeout can happen after the database saved documents; repeating the operation may duplicate them."
+msgstr "Передайте администратору номер заказа, ID операции, время и текст ошибки по согласованному приватному каналу. Тайм-аут возможен уже после записи документов в базу; повтор может создать дубликаты."
+
+msgid "Documents in our database"
+msgstr "Документы в нашей базе"
+
+msgid "In the linked customer card open Folio documents, set the period and available filters, and open the required document. Check its type, number, date, warehouse and items. A website order and an accounting document have different numbers; one order can have several documents."
+msgstr "В карточке привязанного клиента откройте «Документы ФОЛИО», задайте период и доступные фильтры и откройте нужный документ. Проверьте тип, номер, дату, склад и товары. Заказ сайта и учётный документ имеют разные номера; один заказ может иметь несколько документов."
+
+msgid "Use only the actions offered in this manager screen. Customer cart and payment-invoice actions may differ from the customer account. For a repeat order from a website order, use Copy to a new draft; viewing a database document does not create a new order."
+msgstr "Пользуйтесь действиями, доступными именно на менеджерском экране. Действия корзины и счёта на оплату могут отличаться от кабинета клиента. Для повтора заказа сайта используйте копирование в новый черновик; просмотр документа базы не создаёт нового заказа."
+
+msgid "Balance and reconciliation"
+msgstr "Баланс и сверка"
+
+msgid "Open Customer balance from the customer card. Verify the customer and period, then compare the opening balance, movements and closing balance with the underlying documents. Read the sign and labels shown by the report; an order total is not the customer's debt."
+msgstr "Откройте «Баланс клиента» из его карточки. Проверьте клиента и период, затем сверьте начальный остаток, движение и конечный остаток с документами. Ориентируйтесь на знак и подписи отчёта: сумма заказа не равна долгу клиента."
+
+msgid "For the common debtor list use the debtors report in the Lavka customer-work menu and check its snapshot date. Open an individual balance for reconciliation. Viewing reports does not record a payment or correct an accounting document."
+msgstr "Для общего списка должников откройте отчёт должников в меню работы с клиентами Lavka и проверьте дату снимка. Для сверки откройте индивидуальный баланс. Просмотр отчётов не проводит оплату и не исправляет учётный документ."
+
+msgid "Request customer confirmation"
+msgstr "Запросить подтверждение клиента"
+
+msgid "Open Customer confirmation from the order. Review the current version, then send it for customer confirmation. The request appears in the customer account; email is not sent automatically. Share the displayed customer-account link through your usual communication channel."
+msgstr "Из заказа откройте «Подтверждение клиента». Проверьте текущую версию и отправьте её на подтверждение. Запрос появится в кабинете клиента; email автоматически не отправляется. Передайте показанную ссылку на кабинет через обычный канал общения."
+
+msgid "The customer signs in, checks the items and selects delivery/payment preferences, then confirms consent. Check the saved status and time on the website. If the version changed, request new confirmation. Consent is not a payment, shipment or manager confirmation on behalf of the customer."
+msgstr "Клиент входит в свой кабинет, проверяет товары, выбирает пожелания по доставке и оплате и подтверждает согласие. Проверьте сохранённый статус и время на сайте. После изменения версии нужно новое подтверждение. Согласие не является оплатой, отгрузкой или подтверждением менеджера вместо клиента."
+
+msgid "Conversation queue and statuses"
+msgstr "Очередь обращений и статусы"
+
+msgid "Open Conversations. Use Assigned to me, Unassigned or the status filters. Open a conversation to see its customer, order, history and managers. Unread indicates unseen messages; it is not the same as a task status."
+msgstr "Откройте «Сообщения». Используйте фильтры «Назначенные мне», «Без ответственного» или статусы. В обращении видны клиент, заказ, история и менеджеры. «Непрочитанное» означает непросмотренные сообщения, а не статус задачи."
+
+msgid "Manager reply needed means the customer is waiting; Waiting for customer means you expect their reply; Closed means the conversation is finished. Save assignment and state after changes. A new customer reply can reopen a closed conversation. Closing a conversation does not close or cancel the order."
+msgstr "«Нужен ответ менеджера» — клиент ждёт; «Ожидаем клиента» — ждём его ответа; «Закрыто» — разговор завершён. После изменений сохраните назначение и статус. Новый ответ клиента может открыть закрытое обращение. Закрытие обращения не закрывает и не отменяет заказ."
+
+msgid "Write to a customer or add an internal note"
+msgstr "Написать клиенту или добавить внутреннюю заметку"
+
+msgid "In the customer card click Write to customer. Select a related order or General question, enter a subject and message, then save. If the order already has a conversation, open it instead of creating a duplicate."
+msgstr "В карточке клиента нажмите «Написать клиенту». Выберите связанный заказ или общий вопрос, введите тему и сообщение и сохраните. Если у заказа уже есть обращение — откройте его вместо дублирования."
+
+msgid "Before saving a reply, check visibility: Send to customer is public; Internal note is staff-only and is not sent to the customer or Telegram. Messages are text, up to 5000 characters. After an error check the conversation before retrying."
+msgstr "Перед сохранением ответа проверьте видимость: «Отправить клиенту» — публично; «Внутренняя заметка» — только персоналу, без отправки клиенту или в Telegram. Сообщения текстовые, до 5000 символов. После ошибки сначала проверьте историю обращения."
+
+msgid "Connect your Telegram: four steps"
+msgstr "Подключить свой Telegram: четыре шага"
+
+msgid "1. Sign in with your own manager account and open Conversations. In My Telegram for customer conversations click Connect my Telegram. This is your personal connection to the existing store bot; do not create another bot."
+msgstr "1. Войдите под своей учётной записью менеджера и откройте «Сообщения». В блоке своего Telegram для работы с клиентами нажмите подключение. Вы подключаете себя к существующему боту магазина — другого бота создавать не нужно."
+
+msgid "2. Open the one-time link in your own Telegram and press Start. 3. Return to the website and refresh Conversations. 4. Check the displayed Telegram identity and confirm your account. Start alone does not finish the connection. The link expires in 15 minutes; never forward it."
+msgstr "2. Откройте одноразовую ссылку в своём Telegram и нажмите Start. 3. Вернитесь на сайт и обновите «Сообщения». 4. Проверьте показанный Telegram-аккаунт и подтвердите его. Одного Start недостаточно. Ссылка действует 15 минут — никому её не пересылайте."
+
+msgid "Work with conversations in Telegram"
+msgstr "Работать с обращениями в Telegram"
+
+msgid "Use /threads for your open conversations and /queue for unassigned requests. Take an unassigned request before replying. Use Reply on the specific bot message, not a separate message without a reply target. Check the bot's saved-reply confirmation."
+msgstr "Команда /threads показывает ваши открытые обращения, /queue — обращения без ответственного. Сначала возьмите такое обращение в работу. Отвечайте через Reply / «Ответить» на конкретное сообщение бота, а не отдельным сообщением. Проверьте подтверждение бота о сохранении ответа."
+
+msgid "Telegram replies are public. Both assigned managers may work on the conversation; the primary remains responsible. Files and voice messages are not supported. The bot lists up to 10 recent matching conversations; use the website for the full list and internal notes."
+msgstr "Ответы из Telegram публичные. Оба назначенных менеджера могут работать с обращением; основной остаётся ответственным. Файлы и голосовые не поддерживаются. Бот показывает до 10 последних подходящих обращений; полный список и внутренние заметки — на сайте."
+
+msgid "Telegram delivery and disconnection"
+msgstr "Доставка в Telegram и отключение"
+
+msgid "If a message is missing, first check the website conversation, assignment, your connection and whether the bot is blocked or delivery paused. Delivery is asynchronous. Accepted by Telegram does not mean read by the customer. Unknown delivery is not automatically resent; ask the administrator to investigate."
+msgstr "Если сообщения нет, сначала проверьте историю на сайте, назначение, свою привязку, блокировку бота и паузу доставки. Доставка асинхронная. Принято Telegram не означает прочитано клиентом. Неизвестную доставку автоматически не повторяют — обратитесь к администратору."
+
+msgid "Disconnect Telegram on the website or send /stop to the bot to disconnect your account. Website conversation history remains. If the wrong Telegram identity is shown during connection, do not confirm it; create a new link and open it with your own account."
+msgstr "Чтобы отключить свой аккаунт, нажмите отключение Telegram на сайте или отправьте боту /stop. История на сайте сохраняется. Если при подключении показан чужой Telegram — не подтверждайте его; создайте новую ссылку и откройте из своего аккаунта."
+
+msgid "Administrator: shared chat and bot settings"
+msgstr "Администратору: общие настройки чата и бота"
+
+msgid "Chat settings and the bot token are store-wide administrator settings, not personal manager connection. Do not pause the bot or disable new messages to disconnect just yourself: these controls affect other users."
+msgstr "Настройки чата и токен бота — общие настройки магазина для администратора, а не личное подключение менеджера. Не ставьте бота на паузу и не отключайте новые сообщения ради отключения только себя: это влияет на других пользователей."
+
+msgid "Only for initial setup, an administrator creates a dedicated bot using /newbot in BotFather, enters its token in the website's Telegram settings and verifies/enables it. Do not reuse another service's bot or publish its token. For an already configured bot, managers use the personal connection above."
+msgstr "Только для первоначальной настройки администратор создаёт отдельного бота командой /newbot в BotFather, вводит токен в настройки Telegram сайта и проверяет/включает его. Не используйте бота другого сервиса и не публикуйте токен. Если бот уже настроен, менеджерам нужно лишь личное подключение выше."

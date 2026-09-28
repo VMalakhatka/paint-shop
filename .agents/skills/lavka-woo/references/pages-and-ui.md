@@ -127,6 +127,16 @@ production-проверка этого дополнения пока не вып
 
 ## Административные интерфейсы
 
+Менеджерская справка (код проверен 2026-09-28):
+`admin.php?page=pcoe-customers&view=help`, владелец `ManagerHelp` в
+`pc-order-import-export`. Канон: `docs/MANAGER_CUSTOMER_GUIDE_UK.md`.
+Отдельный домен `pcoe-manager-help` с English msgid и UK/RU переводами.
+Доступ и enqueue требуют `manage_woocommerce`; клиентскую справку не использовать
+вместо менеджерской. Контекстные ссылки задаются selectors/data-pcoe-help → anchor,
+не переводом текста кнопки; после AJAX восстанавливаются без дублей. Связанные
+экраны confirmations, balance и debtors получают свои тематические ссылки.
+Новая операция требует нового/обновлённого объяснения, mapping и теста.
+
 Клиентские сообщения: `?pcoe_chat=1`, владелец `pc-order-import-export`.
 Детальная справка — `pc-wholesale-help/messages-guide.php`, канон в
 `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md`, PDF 06 в `docs/DEALER_PDF_GUIDES_UK.md`.

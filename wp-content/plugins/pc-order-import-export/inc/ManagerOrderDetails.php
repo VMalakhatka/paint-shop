@@ -16,7 +16,7 @@ final class ManagerOrderDetails {
     public static function render(\WC_Order $order): void {
         if (!current_user_can('manage_woocommerce')) return;
         $source = self::source($order);
-        echo '<section class="pcoe-card"><h2>' . esc_html__('Delivery and customer comments', 'pc-order-import-export') . '</h2>';
+        echo '<section class="pcoe-card"><h2 data-pcoe-help="delivery">' . esc_html__('Delivery and customer comments', 'pc-order-import-export') . '</h2>';
         if ($source->get_id() !== $order->get_id()) echo '<p>' . esc_html(sprintf(__('Delivery from original order #%s (all warehouses).', 'pc-order-import-export'), $source->get_order_number())) . '</p>';
         $summary = class_exists('Paint\\NovaPoshta\\Email\\DeliverySummary') ? (new \Paint\NovaPoshta\Email\DeliverySummary())->render($order, true, false) : '';
         echo $summary ? wp_kses_post($summary) : '<p>' . esc_html($source->get_shipping_method() ?: __('Delivery method not specified.', 'pc-order-import-export')) . '</p>';
@@ -35,11 +35,11 @@ final class ManagerOrderDetails {
                 echo '</p>';
             }
         }
-        echo '<h3>' . esc_html__('Customer comment', 'pc-order-import-export') . '</h3><p>' . nl2br(esc_html($order->get_customer_note() ?: __('No customer comment.', 'pc-order-import-export'))) . '</p>';
+        echo '<h3 data-pcoe-help="delivery">' . esc_html__('Customer comment', 'pc-order-import-export') . '</h3><p>' . nl2br(esc_html($order->get_customer_note() ?: __('No customer comment.', 'pc-order-import-export'))) . '</p>';
         if ($source->get_id() !== $order->get_id() && $source->get_customer_note() && $source->get_customer_note() !== $order->get_customer_note()) {
             echo '<p><strong>' . esc_html__('Original order comment', 'pc-order-import-export') . '</strong><br>' . nl2br(esc_html($source->get_customer_note())) . '</p>';
         }
-        echo '<h3>' . esc_html__('Order history and notes', 'pc-order-import-export') . '</h3>';
+        echo '<h3 data-pcoe-help="delivery">' . esc_html__('Order history and notes', 'pc-order-import-export') . '</h3>';
         $page = max(1, absint($_GET['notes_page'] ?? 1));
         $notes = $order->get_id() ? wc_get_order_notes(['order_id'=>$order->get_id(), 'limit'=>21, 'offset'=>($page-1)*20, 'orderby'=>'comment_ID', 'order'=>'DESC']) : [];
         if (!$notes) echo '<p>' . esc_html__('No order notes.', 'pc-order-import-export') . '</p>';

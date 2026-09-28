@@ -344,3 +344,16 @@ confirmed on production by the owner; paired managers await deploy and live chec
 `tests/customer-managers.php` (149 total checks, including removal, role loss,
 colleague replies, optimistic revisions and bulk rollback).
 The runbook above covers setup, operator acceptance and rollback.
+# Manager contextual documentation
+
+The manager guide lives at `admin.php?page=pcoe-customers&view=help` and requires
+`manage_woocommerce`. Canonical Ukrainian instructions:
+`docs/MANAGER_CUSTOMER_GUIDE_UK.md` in the project root. `ManagerHelp.php` renders
+English gettext sources, with dedicated `pcoe-manager-help` UK/RU catalogs.
+`assets/manager-help.js` maps stable selectors and `data-pcoe-help` to exact
+anchors, preserves forms by opening a new tab, and handles AJAX without duplicate
+links. Related approval, balance and debtors admin screens are explicitly gated.
+No customer data, bot configuration or financial mutation is part of this help.
+Update guide, translations, anchors and tests together. Tests:
+`php wp-content/plugins/pc-order-import-export/tests/manager-help.php` and
+`node scripts/test-manager-help.cjs` (PLAYWRIGHT_MODULE may select the runtime).
