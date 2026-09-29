@@ -443,3 +443,20 @@ offline (saved contact switching, manual entry, disabled methods, consent and
 desktop/mobile layout). Run WP integration tests only on paint.local; HTTP/mail are mocked.
 Canonical instructions: manager/customer guides and OPERATIONS_RUNBOOK.md.
 Deploy the plugin, help MU file and translation catalogs; no Java or DDL change.
+
+
+## Nova Poshta on customer confirmation — 2026-09-29
+
+PCOE owns authorization, saved consent and ten-minute delivery estimate receipts.
+PNPM reuses its recipient directory/point card, tariff service and delivery policy.
+`DocumentShipmentBuilder` reads saved order allocation or uniquely mapped Folio
+warehouses; it never allocates current stock. The customer sees carrier/store/customer
+amounts, parcels and fallback-weight warnings. A receipt is invalidated by changes to
+destination, document, parcel inputs, policy or owner; non-permitted COD is rejected.
+Estimates remain separate from Woo totals and do not create shipments. Existing
+packaging/volumetric-weight limitations remain; a manager checks final charges.
+Deploy both plugins, MU help and translations together. No migration or new secret.
+Operator/rollback: `docs/OPERATIONS_RUNBOOK.md`, customer confirmation section.
+Local tests: PCOE `tests/approval-delivery.php`, `tests/approval-delivery-ui.cjs`,
+existing confirmation HTTP and PNPM point-directory/card regressions. HTTP/mail
+are intercepted; production verification remains pending deployment.

@@ -10,6 +10,7 @@
                 const value = values[key] || '';
                 field.value = field.tagName === 'SELECT' && !Array.from(field.options).some(option => option.value === value) ? '' : value;
             }
+            form.dispatchEvent(new CustomEvent('pcoe_contact_changed', {bubbles:true}));
         });
     });
 })();

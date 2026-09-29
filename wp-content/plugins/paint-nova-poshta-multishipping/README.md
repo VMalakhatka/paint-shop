@@ -170,3 +170,20 @@ work using the existing checkout validation message. Ordinary delivery does not
 require a customer TTN. The local `tests/external-ttn.php` suite covers empty
 meta, malformed records, the ordinary checkout-created hook, real synthetic
 multi-parcel persistence and idempotent retries; HTTP and email are intercepted.
+
+
+## Nova Poshta on customer confirmation — 2026-09-29
+
+PCOE owns authorization, saved consent and ten-minute delivery estimate receipts.
+PNPM reuses its recipient directory/point card, tariff service and delivery policy.
+`DocumentShipmentBuilder` reads saved order allocation or uniquely mapped Folio
+warehouses; it never allocates current stock. The customer sees carrier/store/customer
+amounts, parcels and fallback-weight warnings. A receipt is invalidated by changes to
+destination, document, parcel inputs, policy or owner; non-permitted COD is rejected.
+Estimates remain separate from Woo totals and do not create shipments. Existing
+packaging/volumetric-weight limitations remain; a manager checks final charges.
+Deploy both plugins, MU help and translations together. No migration or new secret.
+Operator/rollback: `docs/OPERATIONS_RUNBOOK.md`, customer confirmation section.
+Local tests: PCOE `tests/approval-delivery.php`, `tests/approval-delivery-ui.cjs`,
+existing confirmation HTTP and PNPM point-directory/card regressions. HTTP/mail
+are intercepted; production verification remains pending deployment.

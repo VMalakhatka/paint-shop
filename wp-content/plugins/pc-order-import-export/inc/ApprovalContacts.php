@@ -8,6 +8,7 @@ final class ApprovalContacts {
         if (!is_user_logged_in() || !function_exists('is_account_page') || !is_account_page() || !isset($_GET['pcoe_approval'])) return;
         wp_enqueue_script('pcoe-approval',PCOE_URL.'assets/approval.js',[],filemtime(PCOE_DIR.'/assets/approval.js'),true);
         wp_enqueue_style('pcoe-approval',PCOE_URL.'assets/approval.css',[],filemtime(PCOE_DIR.'/assets/approval.css'));
+        ApprovalDelivery::assets();
     }
 
     private static function contact($record,string $type): array {

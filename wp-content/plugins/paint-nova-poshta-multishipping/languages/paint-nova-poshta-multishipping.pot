@@ -1097,3 +1097,27 @@ msgid "%1$s — %2$d parcel"
 msgid_plural "%1$s — %2$d parcels"
 msgstr[0] ""
 msgstr[1] ""
+
+#: src/Infrastructure/ApprovalQuoteService.php src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
+msgid "Delivery cannot be calculated from the saved order warehouses. Ask the manager to check the products and sender settings."
+msgstr ""
+
+#: src/Infrastructure/ApprovalQuoteService.php src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
+msgid "Nova Poshta estimates require an order in UAH."
+msgstr ""
+
+#: src/Infrastructure/ApprovalQuoteService.php src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
+msgid "Nova Poshta delivery is currently unavailable."
+msgstr ""
+
+#: src/Infrastructure/ApprovalQuoteService.php src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
+msgid "The selected point cannot accept this parcel weight or declared value. Choose another point or courier delivery."
+msgstr ""
+
+#: src/Infrastructure/ApprovalQuoteService.php src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
+msgid "Choose the city and an available point from the Nova Poshta list, or enter a courier address."
+msgstr ""
+
+#: src/Infrastructure/ApprovalQuoteService.php src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
+msgid "Courier street and building"
+msgstr ""

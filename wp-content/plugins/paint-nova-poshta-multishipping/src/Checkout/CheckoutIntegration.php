@@ -45,9 +45,15 @@ final class CheckoutIntegration
         if (!function_exists('is_checkout') || !is_checkout() || is_order_received_page()) {
             return;
         }
+        $this->enqueueAssets();
+    }
+
+    public function enqueueAssets(bool $approval = false): void
+    {
         wp_enqueue_style('pnpm-checkout', PNPM_URL . 'assets/checkout.css', [], PNPM_VERSION);
-        wp_enqueue_script('pnpm-checkout', PNPM_URL . 'assets/checkout.js', ['jquery', 'wc-checkout'], PNPM_VERSION, true);
+        wp_enqueue_script('pnpm-checkout', PNPM_URL . 'assets/checkout.js', $approval ? ['jquery'] : ['jquery', 'wc-checkout'], filemtime(PNPM_DIR . 'assets/checkout.js'), true);
         wp_localize_script('pnpm-checkout', 'pnpmCheckout', [
+            'approval' => $approval,
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('pnpm_checkout_directory'),
             'searching' => __('Searching Nova Poshta...', 'paint-nova-poshta-multishipping'),
@@ -65,13 +71,18 @@ final class CheckoutIntegration
             return;
         }
         $state = WC()->session ? (array) WC()->session->get('pnpm_recipient', []) : [];
+        $this->renderDestination($state);
+    }
+
+    public function renderDestination(array $state = [], bool $approval = false): void
+    {
         echo '<section class="pnpm-checkout-fields" id="pnpm-checkout-fields">';
         echo '<h3>' . esc_html__('Nova Poshta delivery', 'paint-nova-poshta-multishipping') . '</h3>';
         echo '<p class="pnpm-checkout-intro">' . esc_html__('Choose the destination. The site will calculate every warehouse parcel and apply your delivery policy.', 'paint-nova-poshta-multishipping') . '</p>';
 
         woocommerce_form_field('pnpm_city_label', [
             'type' => 'text',
-            'required' => false,
+            'required' => $approval,
             'class' => ['form-row-wide', 'pnpm-directory-field'],
             'label' => __('City or settlement', 'paint-nova-poshta-multishipping'),
             'placeholder' => __('Start typing and choose a city from the list', 'paint-nova-poshta-multishipping'),
@@ -82,7 +93,7 @@ final class CheckoutIntegration
 
         woocommerce_form_field('pnpm_delivery_type', [
             'type' => 'select',
-            'required' => false,
+            'required' => $approval,
             'class' => ['form-row-wide'],
             'label' => __('How to receive the parcel', 'paint-nova-poshta-multishipping'),
             'options' => [
@@ -95,7 +106,7 @@ final class CheckoutIntegration
         echo '<div id="pnpm-point-fields">';
         woocommerce_form_field('pnpm_point_label', [
             'type' => 'text',
-            'required' => false,
+            'required' => $approval,
             'class' => ['form-row-wide', 'pnpm-directory-field'],
             'label' => __('Branch or parcel locker', 'paint-nova-poshta-multishipping'),
             'placeholder' => __('Enter a number or address and choose from the list', 'paint-nova-poshta-multishipping'),
@@ -104,7 +115,12 @@ final class CheckoutIntegration
         echo '<input type="hidden" id="pnpm_point_ref" name="pnpm_point_ref" value="' . esc_attr((string) ($state['point_ref'] ?? '')) . '">';
         echo '<div class="pnpm-directory-results" id="pnpm-point-results" aria-live="polite" hidden></div>';
         echo '<div id="pnpm-point-card" class="pnpm-point-card" aria-live="polite" hidden></div></div>';
-        echo '<p class="pnpm-address-help" id="pnpm-address-help">' . esc_html__('For courier delivery, fill in the shipping street and building in the standard address fields above.', 'paint-nova-poshta-multishipping') . '</p>';
+        echo '<div class="pnpm-address-help" id="pnpm-address-help">';
+        if ($approval) woocommerce_form_field('pnpm_address', ['type'=>'text', 'class'=>['form-row-wide'],
+            'label'=>__('Courier street and building', 'paint-nova-poshta-multishipping'),
+            'autocomplete'=>'shipping street-address', 'custom_attributes'=>['maxlength'=>'300']], '');
+        else echo '<p>' . esc_html__('For courier delivery, fill in the shipping street and building in the standard address fields above.', 'paint-nova-poshta-multishipping') . '</p>';
+        echo '</div>';
         echo '</section>';
     }
 

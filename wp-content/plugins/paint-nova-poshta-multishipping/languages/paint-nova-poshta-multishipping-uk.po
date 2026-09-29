@@ -989,3 +989,26 @@ msgstr "Як вибрати точку отримання"
 
 msgid "The selected point could not be verified. Search and select it again."
 msgstr "Вибрану точку не вдалося перевірити. Знайдіть і виберіть її ще раз."
+#: src/Infrastructure/ApprovalQuoteService.php src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
+msgid "Delivery cannot be calculated from the saved order warehouses. Ask the manager to check the products and sender settings."
+msgstr "Не вдалося розрахувати доставку за збереженими складами замовлення. Попросіть менеджера перевірити товари та налаштування відправників."
+
+#: src/Infrastructure/ApprovalQuoteService.php src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
+msgid "Nova Poshta estimates require an order in UAH."
+msgstr "Розрахунок Нової пошти доступний для замовлень у гривнях."
+
+#: src/Infrastructure/ApprovalQuoteService.php src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
+msgid "Nova Poshta delivery is currently unavailable."
+msgstr "Доставка Новою поштою зараз недоступна."
+
+#: src/Infrastructure/ApprovalQuoteService.php src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
+msgid "The selected point cannot accept this parcel weight or declared value. Choose another point or courier delivery."
+msgstr "Вага або оголошена вартість посилки перевищує ліміт вибраної точки. Виберіть іншу точку або кур’єрську доставку."
+
+#: src/Infrastructure/ApprovalQuoteService.php src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
+msgid "Choose the city and an available point from the Nova Poshta list, or enter a courier address."
+msgstr "Виберіть місто та доступну точку зі списку Нової пошти або введіть адресу кур’єрської доставки."
+
+#: src/Infrastructure/ApprovalQuoteService.php src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
+msgid "Courier street and building"
+msgstr "Вулиця та будинок для кур’єра"

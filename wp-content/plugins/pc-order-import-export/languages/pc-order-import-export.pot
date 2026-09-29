@@ -2366,3 +2366,53 @@ msgstr ""
 #: inc/ApprovalContacts.php inc/ApprovalNotifications.php inc/CustomerApproval.php
 msgid "The request appears in the customer account. On the next screen, use Email confirmation link to customer to send it to their profile email."
 msgstr ""
+
+#: inc/ApprovalDelivery.php inc/CustomerApproval.php
+msgid "Nova Poshta calculation is unavailable. Contact the manager."
+msgstr ""
+
+#: inc/ApprovalDelivery.php inc/CustomerApproval.php
+msgid "Calculate delivery after choosing the destination."
+msgstr ""
+
+#: inc/ApprovalDelivery.php inc/CustomerApproval.php
+msgid "Calculating delivery…"
+msgstr ""
+
+#: inc/ApprovalDelivery.php inc/CustomerApproval.php
+msgid "Delivery could not be calculated. Check the destination and try again."
+msgstr ""
+
+#: inc/ApprovalDelivery.php inc/CustomerApproval.php
+msgid "The delivery estimate expired. Calculate it again before confirming."
+msgstr ""
+
+#: inc/ApprovalDelivery.php inc/CustomerApproval.php
+msgid "Delivery is an estimate for this order, shown separately from its total. The manager will check packaging and final shipment conditions."
+msgstr ""
+
+#: inc/ApprovalDelivery.php inc/CustomerApproval.php
+msgid "Calculate delivery"
+msgstr ""
+
+#: inc/ApprovalDelivery.php inc/CustomerApproval.php
+#, php-format
+msgid "Estimated delivery for you: %1$s. Carrier total: %2$s. Store contribution: %3$s. Parcels: %4$d."
+msgstr ""
+
+#: inc/ApprovalDelivery.php inc/CustomerApproval.php
+#, php-format
+msgid "%1$s: %2$s"
+msgstr ""
+
+#: inc/ApprovalDelivery.php inc/CustomerApproval.php
+msgid "Cash on delivery is unavailable for this delivery. Choose another payment preference."
+msgstr ""
+
+#: inc/ApprovalDelivery.php inc/CustomerApproval.php
+msgid "The delivery estimate expired or changed. Calculate it again before confirming."
+msgstr ""
+
+#: inc/ApprovalDelivery.php inc/CustomerApproval.php
+msgid "Delivery estimate"
+msgstr ""

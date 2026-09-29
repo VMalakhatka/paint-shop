@@ -1003,3 +1003,7 @@ msgstr ""
 #: pc-wholesale-help.php
 msgid "Use saved customer details to choose your profile address or details from one of your orders. Check the recipient, phone and destination, or select Enter other details. These fields support browser autofill. Your changes are saved with this confirmation and do not overwrite your profile. After you confirm, your managers are notified and can review your choices."
 msgstr ""
+
+#: ../pc-wholesale-help.php
+msgid "For Nova Poshta, choose a city from the list, then a branch, parcel locker or courier address. Click Calculate delivery. You will see the parcel count, carrier estimate, store contribution and your share. Changing the destination requires a new calculation. The estimate is saved for the manager and does not change the order total or create a shipment. Packaging and final charges are checked by the manager."
+msgstr ""

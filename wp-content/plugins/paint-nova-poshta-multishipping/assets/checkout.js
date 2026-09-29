@@ -1,6 +1,7 @@
 (function ($) {
     'use strict';
     var externalDraft = {};
+    function deliveryChanged() { $(document.body).trigger(pnpmCheckout.approval ? 'pnpm_destination_changed' : 'update_checkout'); }
 
     var cityTimer = null;
     var pointTimer = null;
@@ -108,7 +109,7 @@
                 if (key !== pointKey()) { return; }
                 if (!response || !response.success || !response.data.item) { failed(); return; }
                 renderCard(response.data.item);
-                if (!response.data.item.selectable) { $('#pnpm_point_ref').val(''); $(document.body).trigger('update_checkout'); }
+                if (!response.data.item.selectable) { $('#pnpm_point_ref').val(''); deliveryChanged(); }
             }).fail(function (_, status) { if (status !== 'abort' && key === pointKey()) { failed(); } });
         function failed() {
             $card.empty(); message($card, pnpmCheckout.requestFailed, true);
@@ -159,9 +160,10 @@
 
     function updateFieldVisibility() {
         var method = $('input[name^="shipping_method"]:checked, input[type="hidden"][name^="shipping_method"], select[name^="shipping_method"]').first().val() || '';
+        if (pnpmCheckout.approval) { method = $('.pcoe-approval-form [name=delivery]').val() || ''; }
         var external = method === 'pnpm_customer_ttn';
         $('#pnpm-external-fields').prop('hidden', !external);
-        $('#pnpm-checkout-fields').toggle(!external);
+        $('#pnpm-checkout-fields').toggle(pnpmCheckout.approval ? method.indexOf('pnpm_nova_poshta:') === 0 : !external);
         $('#pnpm-external-fields textarea').each(function () {
             if (Object.prototype.hasOwnProperty.call(externalDraft, this.id)) {
                 $(this).val(externalDraft[this.id]);
@@ -175,7 +177,7 @@
         $('#pnpm-address-help').toggle(address);
         var label = type === 'parcel_locker' ? pnpmCheckout.parcelLockerLabel : pnpmCheckout.branchLabel;
         $('label[for="pnpm_point_label"]').text(label);
-        if (!external && !address) { restoreCard(); }
+        if (!external && !address && (!pnpmCheckout.approval || method.indexOf('pnpm_nova_poshta:') === 0)) { restoreCard(); }
     }
 
     $(document.body).on('input', '#pnpm_city_label', function () {
@@ -201,13 +203,13 @@
         $('#pnpm_city_ref').val($(this).data('ref'));
         $('#pnpm-city-results').prop('hidden', true).empty();
         resetPoint();
-        $(document.body).trigger('update_checkout');
+        deliveryChanged();
     });
 
     $(document.body).on('change', '#pnpm_delivery_type', function () {
         resetPoint();
         updateFieldVisibility();
-        $(document.body).trigger('update_checkout');
+        deliveryChanged();
     });
 
     $(document.body).on('input', '#pnpm_point_label', function () {
@@ -237,7 +239,7 @@
         cardKey = pointKey();
         renderCard(item);
         $('#pnpm-point-results').prop('hidden', true).empty();
-        $(document.body).trigger('update_checkout');
+        deliveryChanged();
     });
 
     $(document).on('click', function (event) {
@@ -247,6 +249,12 @@
     });
 
     $(document.body).on('updated_checkout', updateFieldVisibility);
+    $(document.body).on('pcoe_contact_changed', function () {
+        clearTimeout(cityTimer); cityGeneration++;
+        if (cityRequest) { cityRequest.abort(); }
+        resetPoint(); updateFieldVisibility();
+    });
+    $(document.body).on('change', '.pcoe-approval-form [name=delivery]', updateFieldVisibility);
     $(document.body).on('change', 'input[name^="shipping_method"], select[name^="shipping_method"]', updateFieldVisibility);
     $(document.body).on('input', '#pnpm-external-fields textarea', function () {
         externalDraft[this.id] = $(this).val();

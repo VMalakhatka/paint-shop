@@ -238,3 +238,7 @@ msgstr ""
 #: inc/ManagerHelp.php
 msgid "The customer can choose saved contact details from their profile or orders and edit them for this confirmation. Payment remains a preference for the manager. After confirmation, the requesting manager and the current assigned pair receive email notices; connected managers also receive a Telegram notice with a link. Review the saved status, time and conditions in Customer confirmations. If the order changes, request a new confirmation."
 msgstr ""
+
+#: inc/ManagerHelp.php
+msgid "For Nova Poshta, the customer selects a city and point or courier address and calculates delivery on the confirmation page. The saved result includes the destination, parcels and estimated customer/store shares. It uses the saved document warehouses and current delivery policy. If a warehouse or product cannot be identified, correct the order or sender mapping before asking the customer to retry. The estimate does not add delivery to the order total or create a waybill."
+msgstr ""

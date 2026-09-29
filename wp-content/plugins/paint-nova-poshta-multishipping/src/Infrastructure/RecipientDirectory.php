@@ -24,6 +24,7 @@ final class RecipientDirectory
         $cache_key = 'pnpm_recipient_cities_' . md5(mb_strtolower($query));
         $cached = get_transient($cache_key);
         if (is_array($cached)) {
+            $this->remember($cached);
             return $cached;
         }
 
@@ -57,7 +58,19 @@ final class RecipientDirectory
         }
         $cities = array_values($cities);
         set_transient($cache_key, $cities, self::CACHE_TTL);
+        $this->remember($cities);
         return $cities;
+    }
+
+    /** Only official search results can supply a confirmation recipient city. */
+    public function selected(string $ref) {
+        $city = preg_match('/^[a-f0-9-]{36}$/i', $ref) ? get_transient('pnpm_city_' . md5($ref)) : false;
+        return is_array($city) && ($city['ref'] ?? '') === $ref ? $city
+            : new WP_Error('pnpm_city_reselect', __('Choose a city from the Nova Poshta list.', 'paint-nova-poshta-multishipping'));
+    }
+
+    private function remember(array $cities): void {
+        foreach ($cities as $city) set_transient('pnpm_city_' . md5($city['ref']), $city, self::CACHE_TTL);
     }
 
     /** @param array<string,mixed> $response */

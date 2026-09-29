@@ -14,6 +14,7 @@ class CustomerApproval {
         add_action('admin_post_pcoe_approval_request', [self::class, 'request']);
         add_action('admin_post_pcoe_approval_confirm', [self::class, 'confirm']);
         add_action('admin_post_pcoe_approval_email', [ApprovalNotifications::class, 'post_email']);
+        add_action('wp_ajax_pcoe_approval_quote', [ApprovalDelivery::class, 'ajax']);
         add_action('wp_enqueue_scripts', [ApprovalContacts::class, 'assets']);
         add_action('woocommerce_account_dashboard', [self::class, 'account']);
         add_action('woocommerce_order_details_after_order_table', [self::class, 'order_link']);
@@ -195,6 +196,11 @@ class CustomerApproval {
                 $delivery[$method->get_rate_id()] = wp_strip_all_tags($zone['zone_name'] . ': ' . $method->get_title());
             }
         }
+        // Approval uses the maintained NP adapter. Do not offer a legacy NP method
+        // beside it: that method has no directory or quote on this page.
+        if (array_filter(array_keys($delivery), [ApprovalDelivery::class, 'selected'])) {
+            foreach (array_keys($delivery) as $id) if ($id === 'novaposhta' || str_starts_with($id, 'novaposhta:')) unset($delivery[$id]);
+        }
         return ['payment' => $payment, 'delivery' => $delivery];
     }
 
@@ -249,9 +255,19 @@ class CustomerApproval {
                 $data = self::data($post);
                 if (!self::authorize_customer((int) $post->post_author, get_current_user_id())
                     || (int) $data['source']['customer_id'] !== get_current_user_id()) self::unavailable();
-                $revision = self::revision(self::snapshot($data['source']));
-                $updated = self::confirmed($data, get_current_user_id(), $revision, wp_unslash($_POST), self::choices());
+                $snapshot = self::snapshot($data['source']);
+                $revision = self::revision($snapshot);
+                $input = wp_unslash($_POST); $quote = null;
+                if ($data['status'] === 'pending' && ApprovalDelivery::selected((string)($input['delivery'] ?? ''))) {
+                    $quote = ApprovalDelivery::validate($id, $data, $snapshot, $input);
+                    $input['destination'] = ApprovalDelivery::destination($quote);
+                }
+                $updated = self::confirmed($data, get_current_user_id(), $revision, $input, self::choices());
                 if ($updated === $data) return;
+                if ($quote) {
+                    $updated['nova_poshta'] = $quote;
+                    $updated['preferences']['delivery_quote'] = ApprovalDelivery::summary($quote);
+                }
                 $data = $updated;
                 self::save($data, $id);
             });
@@ -323,13 +339,14 @@ class CustomerApproval {
         wp_nonce_field('pcoe_approval_confirm');
         foreach (['action' => 'pcoe_approval_confirm', 'approval_id' => $post->ID, 'revision' => $data['revision']] as $key => $value) self::hidden($key, $value);
         ApprovalContacts::render($data['source'],$choices);
+        ApprovalDelivery::render();
         echo '<p>' . esc_html__('Delivery and payment are saved for the manager. Delivery availability and cost will be agreed separately; this does not make a payment or start shipment.', 'pc-order-import-export') . '</p>';
         echo '<p><label><input type="checkbox" name="consent" value="1" required> ' . esc_html__('I have checked the products, quantities, prices, delivery and payment preferences and confirm this order.', 'pc-order-import-export') . '</label></p>';
         echo '<button type="submit" class="button">' . esc_html__('Confirm order', 'pc-order-import-export') . '</button></form>';
     }
 
     public static function field_label(string $key): string {
-        $labels = ['payment' => __('Payment preference', 'pc-order-import-export'), 'delivery' => __('Delivery preference', 'pc-order-import-export'),
+        $labels = ['delivery_quote' => __('Delivery estimate', 'pc-order-import-export'), 'payment' => __('Payment preference', 'pc-order-import-export'), 'delivery' => __('Delivery preference', 'pc-order-import-export'),
             'recipient' => __('Recipient', 'pc-order-import-export'), 'phone' => __('Phone', 'pc-order-import-export'),
             'destination' => __('City, branch/address or pickup location; specify warehouses if destinations differ', 'pc-order-import-export')];
         return $labels[$key] ?? $key;
