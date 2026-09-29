@@ -399,3 +399,20 @@ node wp-content/plugins/pc-order-import-export/tests/manager-order-flow-ui.cjs /
 `PLAYWRIGHT_MODULE` can select the bundled Playwright installation. The integration
 harness requires `paint.local`, blocks HTTP/email and deletes its temporary data.
 Screenshots are written beside the fixture; none is a production order.
+
+
+## Customer confirmation link routing — 2026-09-29
+
+The MU `pc-account-tweaks.php` root-account redirect exempts `pcoe_approval`
+and `approval_page` while `CustomerApproval` is available. Approval ownership,
+role checks and consent remain in the plugin. Existing approval URLs keep their
+IDs; opening a link does not confirm it. Deploy the MU file together with help
+translations; no Java change, data migration or rewrite flush is required.
+
+Run `wp eval-file wp-content/plugins/pc-order-import-export/tests/customer-approval-http.php --skip-themes`
+on `paint.local` for ten real HTTP checks, including customer isolation and the
+ordinary root redirect. The test launches a GET-only loopback PHP server with
+outbound HTTP/mail and cron disabled, creates temporary records and cleans up.
+`PCOE_APPROVAL_HTTP_HTML=/tmp/approval.html` optionally exports the owner's HTML
+for offline visual review. Operator details: `docs/OPERATIONS_RUNBOOK.md`,
+customer instructions: `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md` and published help.

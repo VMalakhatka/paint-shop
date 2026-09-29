@@ -123,7 +123,18 @@
 `folio-invoice-email`; общий `folio` сохранён для старых ссылок. Deployment и
 production-проверка этого дополнения пока не выполнены.
 
-Если custom endpoint перенаправляет на заказы, сначала проверь rewrite rules, endpoint registration, user meta mapping и capability/role gate. Не ослабляй доступ, пока не определена конкретная ложная проверка.
+Если custom endpoint перенаправляет на заказы, сначала проверь владельца
+редиректа `pc-account-tweaks.php`. Query-маршруты не требуют rewrite endpoint:
+`pcoe_chat` обслуживает Conversations; `pcoe_approval` (ID запроса, не Woo-заказа)
+и `approval_page` — CustomerApproval. Они исключены из редиректа только при
+наличии соответствующего класса. Обычный корень кабинета ведёт на orders.
+Проверку роли/владельца оставлять в обработчике; исключение из редиректа не даёт
+доступ к чужой записи. Затем проверяй rewrite/endpoint, mapping и role gate;
+не ослабляй доступ. Код и реальный локальный HTTP сверены 2026-09-29:
+`pc-order-import-export/tests/customer-approval-http.php` (10 проверок, до
+исправления владелец получал 302 на orders). Старые approval-ссылки сохраняются,
+их не нужно пересоздавать. Выпуск и диагностика: `docs/OPERATIONS_RUNBOOK.md`,
+«Подтверждение подготовленного менеджером заказа».
 
 ## Административные интерфейсы
 

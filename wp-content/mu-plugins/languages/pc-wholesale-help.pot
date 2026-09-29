@@ -995,3 +995,7 @@ msgstr ""
 #: pc-wholesale-help.php
 msgid "The manager may request confirmation separately for reserved parts of your order by warehouse. Unavailable quantities stay separate and are not ready for assembly. Review the products in each confirmation request."
 msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Open the link sent by your manager, or Review and confirm order in your order details. Sign in with the account that owns the order. Review the products, quantities, prices and linked Folio accounts. Choose delivery and payment preferences, enter recipient, phone and city/branch/address or pickup location, then tick the review checkbox and confirm."
+msgstr ""

@@ -83,6 +83,7 @@ final class ManagerHelp {
             ]],
             'approval' => [__('Request customer confirmation', 'pcoe-manager-help'), [
                 __('Open Customer confirmation from the order. Review the current version, then send it for customer confirmation. The request appears in the customer account; email is not sent automatically. Share the displayed customer-account link through your usual communication channel.', 'pcoe-manager-help'),
+                __('Open the customer-account link exactly as generated. The pcoe_approval number identifies the confirmation request, not the Woo order. The customer must sign in with the account that owns the request. After the redirect fix, existing links work without recreating the request.', 'pcoe-manager-help'),
                 __('The customer signs in, checks the items and selects delivery/payment preferences, then confirms consent. Check the saved status and time on the website. If the version changed, request new confirmation. Consent is not a payment, shipment or manager confirmation on behalf of the customer.', 'pcoe-manager-help'),
             ]],
             'queue' => [__('Conversation queue and statuses', 'pcoe-manager-help'), [

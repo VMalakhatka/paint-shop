@@ -227,3 +227,7 @@ msgstr "Проверьте «Сохранённые документы ФОЛИ�
 #: inc/ManagerHelp.php
 msgid "If a completed operation saved only a non-accounting document but you need an order with reservation, use Prepare customer order in a new draft. Review the copied quantities and current prices, select the warehouse group and preview the order. The previous document and its operation history are preserved. For a pending or uncertain result, follow the error instructions before creating another draft."
 msgstr "Если завершённая операция сохранила только неучитываемый документ, а нужен заказ с резервом, нажмите «Подготовить заказ клиента в новом черновике». Проверьте скопированное количество и текущие цены, выберите группу складов и просмотрите заказ. Предыдущий документ и история операции сохраняются. Если результат ещё ожидается или неизвестен, сначала выполните инструкцию по ошибкам."
+
+#: inc/ManagerHelp.php
+msgid "Open the customer-account link exactly as generated. The pcoe_approval number identifies the confirmation request, not the Woo order. The customer must sign in with the account that owns the request. After the redirect fix, existing links work without recreating the request."
+msgstr "Передавайте ссылку на кабинет без изменений. Номер pcoe_approval обозначает запрос на подтверждение, а не заказ Woo. Клиент должен войти в учётную запись, которой принадлежит запрос. После исправления перенаправления сохранённые ссылки работают без повторного создания запроса."
