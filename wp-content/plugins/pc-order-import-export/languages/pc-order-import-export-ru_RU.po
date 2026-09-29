@@ -2340,3 +2340,120 @@ msgstr "Сохранить менеджеров клиента"
 #, php-format
 msgid "Additional manager: %s"
 msgstr "Дополнительный менеджер: %s"
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "A website warehouse group can include several Folio warehouses. Allocation follows their configured priorities and current Folio stock."
+msgstr "Группа складов сайта может содержать несколько складов ФОЛИО. Распределение учитывает их настроенные приоритеты и текущие остатки ФОЛИО."
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Confirm the reviewed action"
+msgstr "Подтвердить проверенное действие"
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Create customer order with Folio reservation"
+msgstr "Создать заказ клиента с резервом в ФОЛИО"
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Customer orders and confirmation"
+msgstr "Заказы клиента и подтверждение"
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "I checked the available quantities, shortages, customer prices and warehouses and confirm this customer order."
+msgstr "Я проверил доступное количество, нехватку, цены клиента и склады и подтверждаю оформление этого заказа."
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "I understand that the whole list will be saved without checking or reserving stock and will remain a Woo draft."
+msgstr "Я понимаю, что весь список будет сохранён без проверки и резервирования остатков и останется черновиком Woo."
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Next action"
+msgstr "Следующее действие"
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "No quantities are available for reservation. Customer order creation is unavailable; check stock or change the selected warehouse group and preview again."
+msgstr "Нет доступного количества для резервирования. Оформление заказа недоступно: проверьте остатки или измените группу складов и повторите просмотр."
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Only a non-accounting document was saved. To place a customer order with stock reservation, prepare a new draft using the button above. The saved Folio document and this operation remain unchanged."
+msgstr "Сохранён только неучитываемый документ. Чтобы оформить заказ клиента с резервом товара, подготовьте новый черновик кнопкой выше. Сохранённый документ ФОЛИО и эта операция останутся без изменений."
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Open each reserved order to request customer confirmation. The customer chooses delivery and payment preferences in that confirmation; nothing is sent automatically here."
+msgstr "Откройте каждый заказ с резервом, чтобы запросить подтверждение клиента. При подтверждении клиент выбирает пожелания по доставке и оплате; здесь ничего не отправляется автоматически."
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Place customer order from this draft"
+msgstr "Оформить заказ клиента из этого черновика"
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Prepare customer order in a new draft"
+msgstr "Подготовить заказ клиента в новом черновике"
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Prepare the available quantities as Woo orders with accounting Folio accounts and reservation, then request customer confirmation. Shortages are shown separately."
+msgstr "Подготовьте доступное количество как заказы Woo с учитываемыми счетами ФОЛИО и резервом, затем запросите подтверждение клиента. Нехватка отображается отдельно."
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Preview customer order and available stock"
+msgstr "Посмотреть заказ и доступные остатки"
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Preview only a non-accounting document"
+msgstr "Посмотреть только неучитываемый документ"
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Request customer confirmation"
+msgstr "Запросить подтверждение клиента"
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Reserved quantities become customer Woo orders linked to accounting Folio accounts. Shortages stay separate and are not ready for assembly. After creation, request customer confirmation from the reserved orders below."
+msgstr "Зарезервированное количество станет заказами клиента в Woo, связанными с учитываемыми счетами ФОЛИО. Нехватка останется отдельно и не готова к сборке. После создания запросите подтверждение клиента из заказов с резервом ниже."
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Reserved stock"
+msgstr "Товар в резерве"
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Result"
+msgstr "Результат"
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Review this order separately"
+msgstr "Проверить этот заказ отдельно"
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Save only the non-accounting Folio document"
+msgstr "Сохранить только неучитываемый документ ФОЛИО"
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Separate action: save the entire list without reservation"
+msgstr "Отдельное действие: сохранить весь список без резервирования"
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Shortage — not ready for assembly"
+msgstr "Нехватка — не готова к сборке"
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "The non-accounting action uses its configured warehouse. Use customer order preparation to choose a warehouse group and reserve stock."
+msgstr "Неучитываемый документ использует склад из настроек. Чтобы выбрать группу складов и зарезервировать товар, воспользуйтесь оформлением заказа клиента."
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "The selected action does not match this preview. Create a new preview before confirming."
+msgstr "Выбранное действие не соответствует этому просмотру. Создайте новый просмотр перед подтверждением."
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "This action saves the entire list in one non-accounting document on the configured warehouse. It does not check stock, split by availability or create a reserved Woo order."
+msgstr "Это действие сохраняет весь список одним неучитываемым документом на складе из настроек. Оно не проверяет остатки, не распределяет по наличию и не создаёт заказ Woo с резервом."
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Website warehouse group"
+msgstr "Группа складов сайта"
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+#, php-format
+msgid "Website warehouse group: %s"
+msgstr "Группа складов сайта: %s"
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Woo order"
+msgstr "Заказ Woo"

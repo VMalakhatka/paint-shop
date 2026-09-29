@@ -2144,3 +2144,120 @@ msgstr ""
 #, php-format
 msgid "Additional manager: %s"
 msgstr ""
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "A website warehouse group can include several Folio warehouses. Allocation follows their configured priorities and current Folio stock."
+msgstr ""
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Confirm the reviewed action"
+msgstr ""
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Create customer order with Folio reservation"
+msgstr ""
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Customer orders and confirmation"
+msgstr ""
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "I checked the available quantities, shortages, customer prices and warehouses and confirm this customer order."
+msgstr ""
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "I understand that the whole list will be saved without checking or reserving stock and will remain a Woo draft."
+msgstr ""
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Next action"
+msgstr ""
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "No quantities are available for reservation. Customer order creation is unavailable; check stock or change the selected warehouse group and preview again."
+msgstr ""
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Only a non-accounting document was saved. To place a customer order with stock reservation, prepare a new draft using the button above. The saved Folio document and this operation remain unchanged."
+msgstr ""
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Open each reserved order to request customer confirmation. The customer chooses delivery and payment preferences in that confirmation; nothing is sent automatically here."
+msgstr ""
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Place customer order from this draft"
+msgstr ""
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Prepare customer order in a new draft"
+msgstr ""
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Prepare the available quantities as Woo orders with accounting Folio accounts and reservation, then request customer confirmation. Shortages are shown separately."
+msgstr ""
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Preview customer order and available stock"
+msgstr ""
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Preview only a non-accounting document"
+msgstr ""
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Request customer confirmation"
+msgstr ""
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Reserved quantities become customer Woo orders linked to accounting Folio accounts. Shortages stay separate and are not ready for assembly. After creation, request customer confirmation from the reserved orders below."
+msgstr ""
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Reserved stock"
+msgstr ""
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Result"
+msgstr ""
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Review this order separately"
+msgstr ""
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Save only the non-accounting Folio document"
+msgstr ""
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Separate action: save the entire list without reservation"
+msgstr ""
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Shortage — not ready for assembly"
+msgstr ""
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "The non-accounting action uses its configured warehouse. Use customer order preparation to choose a warehouse group and reserve stock."
+msgstr ""
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "The selected action does not match this preview. Create a new preview before confirming."
+msgstr ""
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "This action saves the entire list in one non-accounting document on the configured warehouse. It does not check stock, split by availability or create a reserved Woo order."
+msgstr ""
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Website warehouse group"
+msgstr ""
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+#, php-format
+msgid "Website warehouse group: %s"
+msgstr ""
+
+#: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
+msgid "Woo order"
+msgstr ""

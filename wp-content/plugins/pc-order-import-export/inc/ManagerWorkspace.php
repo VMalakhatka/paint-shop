@@ -353,6 +353,7 @@ class ManagerWorkspace
     public static function payload(\WC_Order $order, \WP_User $user, string $mode, array $preference, string $key): array {
         if (!function_exists('pc_folio_build_order_preview_payload') || !function_exists('pc_build_alloc_plan')) throw new \RuntimeException(__('Folio order integration is unavailable.', 'pc-order-import-export'));
         if (!in_array($mode, ['accounts', 'non_accounting'], true) || !in_array($preference['mode'], ['auto', 'manual', 'single'], true)) throw new \RuntimeException(__('Select a valid warehouse mode.', 'pc-order-import-export'));
+        if ($mode === 'non_accounting' && ($preference['mode'] !== 'auto' || !empty($preference['term_id']))) throw new \RuntimeException(__('The non-accounting action uses its configured warehouse. Use customer order preparation to choose a warehouse group and reserve stock.','pc-order-import-export'));
         $terms = get_terms(['taxonomy' => 'location', 'hide_empty' => false]);
         if (is_wp_error($terms)) throw new \RuntimeException(__('Warehouses are unavailable.', 'pc-order-import-export'));
         $locations = [];
@@ -469,8 +470,9 @@ class ManagerWorkspace
         set_transient('pcoe_manager_preview_' . $token, ['actor' => get_current_user_id(), 'customer' => $user->ID,
             'order' => $order->get_id(), 'revision' => self::revision($order), 'mode' => $mode, 'preference' => $preference,
             'payload' => $payload, 'response' => $response], 15 * MINUTE_IN_SECONDS);
-        ob_start(); self::documents_table($response); $html = ob_get_clean();
-        return ['preview_html' => $html, 'token' => $token, 'message' => __('Preview only. No Folio documents have been created. Confirm after checking quantities, prices and warehouses.', 'pc-order-import-export')];
+        ob_start(); ManagerOrderFlow::summary($response,$mode,$preference); $html = ob_get_clean();
+        [$button,$confirmation]=ManagerOrderFlow::labels($mode);
+        return ['preview_html' => $html, 'token' => $token, 'mode'=>$mode, 'can_apply'=>ManagerOrderFlow::can_apply($response,$mode), 'apply_label'=>$button, 'confirmation_label'=>$confirmation, 'message' => __('Preview only. No Folio documents have been created. Confirm after checking quantities, prices and warehouses.', 'pc-order-import-export')];
     }
 
     private static function apply(\WC_Order $order, \WP_User $user): array {
@@ -485,6 +487,8 @@ class ManagerWorkspace
         $preview = get_transient('pcoe_manager_preview_' . $token);
         if (!$preview || $preview['actor'] !== get_current_user_id() || $preview['customer'] !== $user->ID || $preview['order'] !== $order->get_id()
             || !hash_equals($preview['revision'], self::revision($order))) throw new \RuntimeException(__('The preview expired or the draft changed. Create a new preview.', 'pc-order-import-export'));
+        if (($_POST['mode']??'') !== $preview['mode']) throw new \RuntimeException(__('The selected action does not match this preview. Create a new preview before confirming.','pc-order-import-export'));
+        if (!ManagerOrderFlow::can_apply($preview['response'],$preview['mode'])) throw new \RuntimeException(__('No quantities are available for reservation. Customer order creation is unavailable; check stock or change the selected warehouse group and preview again.','pc-order-import-export'));
         $fresh = self::payload($order, $user, $preview['mode'], $preview['preference'], $token);
         if (wp_json_encode($fresh) !== wp_json_encode($preview['payload'])) throw new \RuntimeException(__('Customer prices or stock allocation changed. Create a new preview.', 'pc-order-import-export'));
         $command = ['token' => $token, 'status' => 'sending', 'actor' => get_current_user_id(), 'customer' => $user->ID, 'started_at' => current_time('mysql'), 'payload' => $fresh];

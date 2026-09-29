@@ -107,12 +107,15 @@ $list = wc_get_orders(['customer_id' => $customer_id, 'limit' => 25, 'page' => $
 <?php else:
 $editable = ManagerWorkspace::editable($order);
 $command = ManagerWorkspace::command($order);
+$non_accounting_only = ManagerOrderFlow::non_accounting_only($order);
 ?>
+<?php if ($editable && $context): ?><p class="pcoe-actions"><a class="button button-primary" href="#pcoe-place-order"><?php esc_html_e('Place customer order from this draft','pc-order-import-export'); ?></a></p><?php endif; ?>
 <?php ManagerOrderDetails::render($order); ?>
 <section class="pcoe-card"><h2><?php echo esc_html(sprintf(__('Order #%s', 'pc-order-import-export'), $order->get_order_number())); ?></h2>
 <div class="pcoe-actions"><a class="button" href="<?php echo esc_url($order->get_edit_order_url()); ?>"><?php esc_html_e('Open WooCommerce order', 'pc-order-import-export'); ?></a>
 <?php foreach (['csv' => 'CSV', 'xlsx' => 'Excel'] as $fmt => $label): ?><a class="button" href="<?php echo esc_url(add_query_arg(['action' => 'pcoe_export', 'type' => 'order', 'order_id' => $order->get_id(), 'fmt' => $fmt, '_wpnonce' => wp_create_nonce('pcoe_export')], admin_url('admin-ajax.php'))); ?>"><?php echo esc_html($label); ?></a><?php endforeach; ?>
-<form data-pcoe-manager><?php $form_fields('copy'); ?><button class="button"><?php esc_html_e('Copy to a new draft', 'pc-order-import-export'); ?></button></form></div>
+<form data-pcoe-manager><?php $form_fields('copy'); ?><button class="button"><?php echo esc_html($non_accounting_only ? __('Prepare customer order in a new draft','pc-order-import-export') : __('Copy to a new draft', 'pc-order-import-export')); ?></button></form></div>
+<?php if ($non_accounting_only): ?><p class="pcoe-warning"><?php esc_html_e('Only a non-accounting document was saved. To place a customer order with stock reservation, prepare a new draft using the button above. The saved Folio document and this operation remain unchanged.','pc-order-import-export'); ?></p><?php endif; ?>
 <?php if ($command): ?><p class="pcoe-warning"><?php echo esc_html(($command['status'] ?? '') === 'complete' ? __('Folio documents were created. This draft is locked against duplicate creation.', 'pc-order-import-export') : __('Operation needs review. Do not submit it again or create a replacement until its Folio result is checked.', 'pc-order-import-export')); ?></p>
 <p><?php esc_html_e('Operation ID:', 'pc-order-import-export'); ?> <code><?php echo esc_html($command['token'] ?? ''); ?></code></p><?php endif; ?>
 <form data-pcoe-manager><?php $form_fields('save'); ?>
@@ -127,20 +130,28 @@ $command = ManagerWorkspace::command($order);
 </form>
 <?php if ($source = $order->get_meta('_pcoe_source_order_id')): ?><p><?php esc_html_e('Source order:', 'pc-order-import-export'); ?> <a href="<?php echo esc_url(ManagerWorkspace::url($customer_id, $source)); ?>">#<?php echo esc_html($source); ?></a></p><?php endif; ?>
 </section>
-<?php if ($editable && $context): ?><section class="pcoe-card"><h2><?php esc_html_e('Prepare Folio documents', 'pc-order-import-export'); ?></h2>
-<p><?php esc_html_e('This is the customer working basket. Preparation recalculates customer prices and stock; the customer website cart stays separate.', 'pc-order-import-export'); ?></p>
-<form data-pcoe-manager data-preview-form><?php $form_fields('preview'); ?>
-<div class="pcoe-actions"><label><?php esc_html_e('Operation', 'pc-order-import-export'); ?><select name="mode"><option value="accounts"><?php esc_html_e('Accounts by warehouse', 'pc-order-import-export'); ?></option><option value="non_accounting"><?php esc_html_e('Entire draft without reservation', 'pc-order-import-export'); ?></option></select></label>
-<label><?php esc_html_e('Warehouse mode', 'pc-order-import-export'); ?><select name="warehouse_mode"><option value="auto"><?php esc_html_e('Automatic allocation', 'pc-order-import-export'); ?></option><option value="manual"><?php esc_html_e('Prioritize selected warehouse', 'pc-order-import-export'); ?></option><option value="single"><?php esc_html_e('Selected warehouse only', 'pc-order-import-export'); ?></option></select></label>
-<label><?php esc_html_e('Warehouse', 'pc-order-import-export'); ?><select name="warehouse_id"><option value="0">—</option><?php $terms = get_terms(['taxonomy' => 'location', 'hide_empty' => false]); if (!is_wp_error($terms)) foreach ($terms as $term): ?><option value="<?php echo esc_attr($term->term_id); ?>"><?php echo esc_html($term->name); ?></option><?php endforeach; ?></select></label></div>
-<p class="description"><?php esc_html_e('Available quantities become accounts with reservation. Shortages become separate non-accounting documents. Creating accounts does not create an expense invoice.', 'pc-order-import-export'); ?></p>
-<button class="button"><?php esc_html_e('Preview prices and warehouses', 'pc-order-import-export'); ?></button></form>
+<?php if ($editable && $context): ?>
+<section id="pcoe-place-order" class="pcoe-card"><h2 data-pcoe-help="prepare"><?php esc_html_e('Place customer order from this draft','pc-order-import-export'); ?></h2>
+<p><?php esc_html_e('Prepare the available quantities as Woo orders with accounting Folio accounts and reservation, then request customer confirmation. Shortages are shown separately.','pc-order-import-export'); ?></p>
+<form data-pcoe-manager data-preview-form><?php $form_fields('preview'); ?><input type="hidden" name="mode" value="accounts">
+<div class="pcoe-actions"><label><?php esc_html_e('Warehouse mode', 'pc-order-import-export'); ?><select name="warehouse_mode"><option value="auto"><?php esc_html_e('Automatic allocation', 'pc-order-import-export'); ?></option><option value="manual"><?php esc_html_e('Prioritize selected warehouse', 'pc-order-import-export'); ?></option><option value="single"><?php esc_html_e('Selected warehouse only', 'pc-order-import-export'); ?></option></select></label>
+<label><?php esc_html_e('Website warehouse group','pc-order-import-export'); ?><select name="warehouse_id" disabled><option value="">—</option><?php $terms=get_terms(['taxonomy'=>'location','hide_empty'=>false]); if (!is_wp_error($terms)) foreach ($terms as $term):
+$mapped=pc_folio_get_location_warehouses_for_preview($term->term_id);
+$mapped_names=array_map(static fn($row)=>pc_folio_warehouse_label($row['id']),$mapped);
+?><option value="<?php echo esc_attr($term->term_id); ?>" data-folio-warehouses="<?php echo esc_attr(implode(' → ',$mapped_names)); ?>"><?php echo esc_html($term->name); ?></option><?php endforeach; ?></select></label></div>
+<p data-warehouse-description><?php esc_html_e('A website warehouse group can include several Folio warehouses. Allocation follows their configured priorities and current Folio stock.','pc-order-import-export'); ?></p>
+<p><?php esc_html_e('Available quantities become accounts with reservation. Shortages become separate non-accounting documents. Creating accounts does not create an expense invoice.', 'pc-order-import-export'); ?></p>
+<button class="button button-primary"><?php esc_html_e('Preview customer order and available stock','pc-order-import-export'); ?></button></form>
+<details class="pcoe-non-accounting"><summary><?php esc_html_e('Separate action: save the entire list without reservation','pc-order-import-export'); ?></summary>
+<p><?php esc_html_e('This action saves the entire list in one non-accounting document on the configured warehouse. It does not check stock, split by availability or create a reserved Woo order.','pc-order-import-export'); ?></p>
+<p><?php echo esc_html(sprintf(__('Non-accounting Folio warehouse: %s','pc-order-import-export'),pc_folio_warehouse_label(DraftFolioWorkflow::default_warehouse_id()))); ?></p>
+<form data-pcoe-manager data-preview-form><?php $form_fields('preview'); ?><input type="hidden" name="mode" value="non_accounting"><input type="hidden" name="warehouse_mode" value="auto"><input type="hidden" name="warehouse_id" value="0">
+<button class="button"><?php esc_html_e('Preview only a non-accounting document','pc-order-import-export'); ?></button></form></details>
 <div data-preview-result hidden></div>
-<form data-pcoe-manager data-apply-form hidden><?php $form_fields('apply'); ?><input type="hidden" name="token" value=""><label><input type="checkbox" name="confirmation" value="1" required> <?php esc_html_e('I checked this customer, quantities, prices and warehouses and confirm creation in Folio.', 'pc-order-import-export'); ?></label><button class="button button-primary"><?php esc_html_e('Confirm and create Folio documents', 'pc-order-import-export'); ?></button></form>
+<form data-pcoe-manager data-apply-form hidden><?php $form_fields('apply'); ?><input type="hidden" name="token" value=""><input type="hidden" name="mode" value=""><label><input type="checkbox" name="confirmation" value="1" required> <span data-confirmation-label></span></label><button class="button button-primary" data-apply-button><?php esc_html_e('Confirm the reviewed action','pc-order-import-export'); ?></button></form>
 </section><?php endif; ?>
-<?php CustomerApproval::manager_link($order); ?>
-<?php $result = pc_folio_get_order_documents_result($order); if ($result): ?><section class="pcoe-card"><h2 data-pcoe-help="apply"><?php esc_html_e('Saved Folio documents', 'pc-order-import-export'); ?></h2><?php ManagerWorkspace::documents_table($result);
-$keys = pc_folio_order_documents_meta_keys(); foreach (array_filter((array) $order->get_meta($keys['child_order_ids'], true)) as $child_id): ?> <a class="button" href="<?php echo esc_url(ManagerWorkspace::url($customer_id, $child_id)); ?>">#<?php echo esc_html($child_id); ?></a> <?php endforeach; ?></section><?php endif; ?>
+<?php $result=pc_folio_get_order_documents_result($order); if ($result): ?><section class="pcoe-card"><h2 data-pcoe-help="apply"><?php esc_html_e('Saved Folio documents','pc-order-import-export'); ?></h2><?php ManagerWorkspace::documents_table($result); ManagerOrderFlow::orders($order,$result); ?></section>
+<?php elseif (!$order->has_status('pc-draft')): CustomerApproval::manager_link($order); endif; ?>
 <?php endif; ?>
 <?php if ($context && function_exists('pc_folio_documents_render_endpoint')): ?><section id="pcoe-folio-documents" class="pcoe-card"><?php pc_folio_documents_render_endpoint($customer_id); ?></section><?php endif; ?>
 <?php endif; ?>

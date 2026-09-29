@@ -4,18 +4,37 @@
     if (!root) return;
     const status = root.querySelector('#pcoe-manager-status');
     const applyForm = root.querySelector('[data-apply-form]');
+    const orderForm = root.querySelector('[data-preview-form] input[value="accounts"]')?.form;
+    const groupHint = root.querySelector('[data-warehouse-description]');
+    const groupDefault = groupHint?.textContent || '';
+    function updateWarehouse() {
+        if (!orderForm) return;
+        const selected = orderForm.elements.warehouse_mode.value !== 'auto';
+        const group = orderForm.elements.warehouse_id;
+        group.disabled = !selected; group.required = selected;
+        groupHint.textContent = selected && group.selectedOptions[0]?.dataset.folioWarehouses ? group.selectedOptions[0].dataset.folioWarehouses : groupDefault;
+    }
+    orderForm?.addEventListener('change', updateWarehouse);
+    updateWarehouse();
     let busy = false;
     let dirty = false;
+    function clearPreview() {
+        if (!applyForm) return;
+        applyForm.hidden = true;
+        applyForm.elements.token.value = '';
+        applyForm.elements.mode.value = '';
+        applyForm.elements.confirmation.checked = false;
+        const preview = root.querySelector('[data-preview-result]');
+        if (preview) { preview.hidden = true; preview.innerHTML = ''; }
+    }
     root.addEventListener('input', function (event) {
         const editor = event.target.closest('form[data-pcoe-manager]');
         if (editor?.elements.operation?.value === 'save') {
             dirty = true;
-            const previewButton = root.querySelector('[data-preview-form] button');
-            if (previewButton) previewButton.disabled = true;
+            root.querySelectorAll('[data-preview-form] button').forEach(button => { button.disabled = true; });
         }
         if (applyForm && !applyForm.contains(event.target)) {
-            applyForm.hidden = true;
-            applyForm.elements.token.value = '';
+            clearPreview();
         }
     });
     root.querySelectorAll('form[data-pcoe-manager]').forEach(function (form) {
@@ -23,6 +42,7 @@
             event.preventDefault();
             if (busy || !form.reportValidity()) return;
             if (dirty && form.elements.operation.value !== 'save') { status.textContent = pcoeManager.saveFirst; return; }
+            if (form.hasAttribute('data-preview-form')) clearPreview();
             const body = new FormData(form);
             if (form.elements.operation.value === 'save') {
                 const quantities = {};
@@ -63,14 +83,17 @@
                     const preview = root.querySelector('[data-preview-result]');
                     preview.innerHTML = data.preview_html; preview.hidden = false;
                     applyForm.elements.token.value = data.token;
+                    applyForm.elements.mode.value = data.mode;
+                    applyForm.querySelector('[data-confirmation-label]').textContent = data.confirmation_label;
+                    applyForm.querySelector('[data-apply-button]').textContent = data.apply_label;
                     applyForm.elements.confirmation.checked = false;
-                    applyForm.hidden = false;
+                    applyForm.hidden = !data.can_apply;
                     preview.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
             } catch (error) {
                 status.textContent = error.message || pcoeManager.error;
                 status.className = 'notice notice-error';
-                if (form === applyForm) { applyForm.hidden = true; applyForm.elements.token.value = ''; }
+                if (form === applyForm) clearPreview();
             } finally {
                 busy = false; buttons.forEach(button => { button.disabled = dirty && !!button.closest('[data-preview-form]'); });
                 form.removeAttribute('aria-busy');

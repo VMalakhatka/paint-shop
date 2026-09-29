@@ -6,11 +6,11 @@ require_once ABSPATH . 'wp-admin/includes/class-wp-screen.php';
 require_once ABSPATH . 'wp-admin/includes/screen.php';
 set_current_screen('dashboard');
 add_filter('pre_wp_mail', '__return_true', PHP_INT_MAX);
-$orders = []; $users = []; $products = []; $terms = []; $checks = 0; $writes = 0; $http_failure = false;
+$orders = []; $users = []; $products = []; $terms = []; $checks = 0; $writes = 0; $http_failure = false; $with_shortage = false;
 $check = static function ($condition, $message) use (&$checks): void { if (!$condition) throw new RuntimeException($message); $checks++; };
 $invoke = static function ($method, ...$args) { return (new ReflectionMethod(Workspace::class, $method))->invoke(null, ...$args); };
 $expect_error = static function (callable $fn) use ($check): void { try { $fn(); } catch (Throwable $e) { $check(true, 'rejected'); return; } throw new RuntimeException('Expected rejection'); };
-add_filter('pre_http_request', static function ($pre, $args, $url) use (&$writes, &$http_failure) {
+add_filter('pre_http_request', static function ($pre, $args, $url) use (&$writes, &$http_failure, &$with_shortage) {
     if (!str_contains($url, '/admin/folio/order-accounts')) return new WP_Error('test_block', 'External HTTP blocked by test.');
     $payload = json_decode($args['body'], true);
     if (!$payload['preview_only']) { $writes++; if ($http_failure) return new WP_Error('timeout', 'Simulated timeout'); }
@@ -23,6 +23,14 @@ add_filter('pre_http_request', static function ($pre, $args, $url) use (&$writes
             'source_external_request_id' => $payload['folio_account_header']['externalRequestId'] . ':wh:' . $wid, 'items' => []];
         $documents[$wid]['items'][] = ['order_item_id' => $item['order_item_id'], 'sku' => $item['sku'], 'quantity' => $allocation['quantity'],
             'price' => $item['unit_price'], 'amount' => $allocation['quantity'] * $item['unit_price'], 'folio_warehouse_id' => $wid, 'allocation_status' => $accounted ? 'allocated' : 'non_accounting'];
+    }
+    if ($with_shortage && $payload['folio_account_header']['accountingEnabled']) {
+        $wid=array_key_first($documents);$missing=$documents[$wid]['items'][0];
+        $documents[$wid]['items'][0]['quantity']-=1;
+        $documents[$wid]['items'][0]['amount']=$documents[$wid]['items'][0]['quantity']*$missing['price'];
+        $missing['quantity']=1;$missing['amount']=$missing['price'];$missing['allocation_status']='missing_stock';
+        $documents['missing']=['document_id'=>999999,'document_number'=>'999999','folio_warehouse_id'=>$wid,
+            'document_type'=>'missing_stock_account','accounting_enabled'=>false,'source_external_request_id'=>$payload['folio_account_header']['externalRequestId'].':missing','items'=>[$missing]];
     }
     return ['response' => ['code' => $payload['preview_only'] ? 200 : 201], 'headers' => [], 'body' => wp_json_encode([
         'ok' => true, 'preview_only' => $payload['preview_only'], 'woo_order_id' => $payload['woo_order']['id'], 'documents' => array_values($documents), 'errors' => [], 'warnings' => []])];
@@ -85,9 +93,11 @@ try {
     $check((float) $stored['payload']['items'][0]['unit_price'] === 75.0, 'Preview uses customer price');
     $bad = $stored['response']; $bad['documents'][0]['items'][0]['quantity'] += 1;
     $expect_error(fn() => Workspace::validate_response($bad, $stored['payload'], true));
-    $_POST = ['token' => $preview['token']]; $expect_error(fn() => $invoke('apply', $order, $user));
+    $_POST = ['mode'=>'accounts','token' => $preview['token']]; $expect_error(fn() => $invoke('apply', $order, $user));
     $check($writes === 0, 'Confirmation required');
     $_POST['confirmation'] = '1';
+    $_POST['mode']='non_accounting';$expect_error(fn()=>$invoke('apply',$order,$user));
+    $check($writes===0,'Wrong operation cannot reuse account preview');$_POST['mode']='accounts';
     update_post_meta($product->get_id(), '_wpc_price_role_opt', '76');
     $expect_error(fn() => $invoke('apply', $order, $user)); $check($writes === 0, 'Stale price blocks apply');
     update_post_meta($product->get_id(), '_wpc_price_role_opt', '75');
@@ -109,7 +119,7 @@ try {
     $check($copy === $invoke('copy', $order, $user), 'Copy replay reuses draft');
     $_POST = ['mode' => 'accounts', 'warehouse_mode' => 'single', 'warehouse_id' => $terms[0]];
     $preview = $invoke('preview', $copy_order, $user); $http_failure = true;
-    $_POST = ['token' => $preview['token'], 'confirmation' => '1'];
+    $_POST = ['mode'=>'accounts','token' => $preview['token'], 'confirmation' => '1'];
     $expect_error(fn() => $invoke('apply', $copy_order, $user));
     $copy_order = wc_get_order($copy_id);
     $check($copy_order->get_meta('_pcoe_manager_command')['status'] === 'unknown', 'Timeout persisted as unknown');
@@ -125,11 +135,12 @@ try {
     $non_payload = get_transient('pcoe_manager_preview_' . $non_preview['token']);
     $check(count($non_payload['response']['documents']) === 1 && !$non_payload['response']['documents'][0]['accounting_enabled'], 'Whole non-accounting preview');
     $before_stock = array_map(fn($tid)=>get_post_meta($product->get_id(), '_stock_at_' . $tid, true), $terms);
-    $_POST = ['token' => $non_preview['token'], 'confirmation' => '1'];
+    $_POST = ['mode'=>'non_accounting','token' => $non_preview['token'], 'confirmation' => '1'];
     $invoke('apply', $non_order, $user); $non_order = wc_get_order($non_id);
     $check($non_order->has_status('pc-draft') && !Workspace::editable($non_order), 'Non-accounting stays draft and blocks duplication');
     $check($before_stock === array_map(fn($tid)=>get_post_meta($product->get_id(), '_stock_at_' . $tid, true), $terms), 'Non-accounting leaves stock unchanged');
     remove_filter('pcoe_folio_non_accounting_warehouse_id', $warehouse_filter);
+    require __DIR__.'/manager-order-flow.php';
     // Connection locks exclude a second DB connection without changing any data or grants.
     $second = new wpdb(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST);
     $name = $invoke('lock_name', 'order:' . $id);

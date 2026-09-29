@@ -362,3 +362,40 @@ No customer data, bot configuration or financial mutation is part of this help.
 Update guide, translations, anchors and tests together. Tests:
 `php wp-content/plugins/pc-order-import-export/tests/manager-help.php` and
 `node scripts/test-manager-help.cjs` (PLAYWRIGHT_MODULE may select the runtime).
+
+
+## Manager draft checkout and reserved orders — 2026-09-29
+
+The primary draft action prepares customer Woo orders with accounting Folio
+accounts and reservation. A website location is a group of Folio warehouses;
+selected-only keeps every warehouse in that group and Java applies its priorities.
+Whole-list non-accounting export is a separate collapsed action with its fixed
+warehouse displayed. It does not inspect stock or create a reserved Woo order.
+Previously the shared warehouse selector was silently ignored for this action.
+
+`ManagerOrderFlow` supplies action-specific preview/confirmation labels and actual
+linked Woo results. Apply requires the preview's mode, and an accounts preview
+must contain a reserved document. Starting another preview clears the previous
+confirmation, including on failure. Java still checks final stock during apply;
+the preview does not guarantee or reserve quantities. Completed non-accounting
+drafts offer a new working copy without resetting the original operation.
+Only actual reserved child orders offer the customer-confirmation shortcut;
+shortages are identified separately. No approval request is sent automatically.
+No Java change, schema migration or production data correction is included.
+
+Operator instructions: `docs/MANAGER_CUSTOMER_GUIDE_UK.md` (prepare/apply),
+published by `ManagerHelp.php`; customer confirmation note in
+`docs/WHOLESALE_CUSTOMER_GUIDE_UK.md` and `pc-wholesale-help.php`.
+Validation: `tests/manager-workspace.php` includes `tests/manager-order-flow.php`
+(53 integration assertions, all external HTTP/email mocked).
+
+Browser regression with real synthetic form markup (network blocked):
+
+```sh
+PCOE_ORDER_FLOW_UI_FIXTURE=/tmp/pcoe-flow.json wp eval-file wp-content/plugins/pc-order-import-export/tests/manager-workspace.php --skip-themes
+node wp-content/plugins/pc-order-import-export/tests/manager-order-flow-ui.cjs /tmp/pcoe-flow.json
+```
+
+`PLAYWRIGHT_MODULE` can select the bundled Playwright installation. The integration
+harness requires `paint.local`, blocks HTTP/email and deletes its temporary data.
+Screenshots are written beside the fixture; none is a production order.

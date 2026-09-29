@@ -202,3 +202,27 @@ msgstr ""
 
 msgid "Only for initial setup, an administrator creates a dedicated bot using /newbot in BotFather, enters its token in the website's Telegram settings and verifies/enables it. Do not reuse another service's bot or publish its token. For an already configured bot, managers use the personal connection above."
 msgstr ""
+
+#: inc/ManagerHelp.php
+msgid "Save the draft and open Place customer order from this draft. Automatic allocation uses the available warehouse plan; priority prefers the selected website warehouse group, while selected-only restricts allocation to that group. A group can contain several Folio warehouses: Kyiv includes Kyiv OPT and Kyiv, following their configured priorities and current stock."
+msgstr ""
+
+#: inc/ManagerHelp.php
+msgid "Click Preview customer order and available stock. Check each SKU, quantity, customer price, warehouse and document type. Preview creates no documents or reservations and expires after 15 minutes. If nothing can be reserved, order creation is unavailable. Shortages stay in separate non-accounting documents without reservation or stock movement. Creating accounts does not create an expense invoice."
+msgstr ""
+
+#: inc/ManagerHelp.php
+msgid "Separate action: save the entire list without reservation is a collapsed section for saving only a non-accounting document. It uses the configured non-accounting warehouse without a warehouse group selector and does not check availability. The entire list remains a Woo draft. Use this only when a document without reservation is intended."
+msgstr ""
+
+#: inc/ManagerHelp.php
+msgid "After checking the order preview, tick the confirmation and click Create customer order with Folio reservation once. This records the documents. Folio checks stock again at creation, so verify the actual result. If the preview expires or prices, allocation or draft change, generate a new preview. The separate non-accounting action has its own confirmation and Save only the non-accounting Folio document button."
+msgstr ""
+
+#: inc/ManagerHelp.php
+msgid "Verify Saved Folio documents: numbers, warehouses, items and amounts. Customer orders and confirmation lists the actual linked Woo orders. Open Request customer confirmation for each reserved order; shortage orders are marked as not ready for assembly. This link opens the confirmation screen and does not send a request automatically. The source draft is locked against duplicate creation."
+msgstr ""
+
+#: inc/ManagerHelp.php
+msgid "If a completed operation saved only a non-accounting document but you need an order with reservation, use Prepare customer order in a new draft. Review the copied quantities and current prices, select the warehouse group and preview the order. The previous document and its operation history are preserved. For a pending or uncertain result, follow the error instructions before creating another draft."
+msgstr ""

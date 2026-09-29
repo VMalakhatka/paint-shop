@@ -1034,3 +1034,7 @@ msgstr "Завантажити коротку інструкцію з ілюст
 #: pc-wholesale-help/messages-guide.php
 msgid "If two managers support your conversation, either can reply. Continue in the same conversation; you do not need to connect another bot."
 msgstr "Якщо з вашим зверненням працюють два менеджери, відповісти може кожен із них. Продовжуйте ту саму переписку — підключати іншого бота не потрібно."
+
+#: pc-wholesale-help.php
+msgid "The manager may request confirmation separately for reserved parts of your order by warehouse. Unavailable quantities stay separate and are not ready for assembly. Review the products in each confirmation request."
+msgstr "Менеджер може запросити підтвердження окремо для зарезервованих частин замовлення за складами. Відсутня кількість залишається окремо й не готова до збирання. Перевірте товари в кожному запиті на підтвердження."
