@@ -231,3 +231,11 @@ msgstr "Якщо завершена операція зберегла лише �
 #: inc/ManagerHelp.php
 msgid "Open the customer-account link exactly as generated. The pcoe_approval number identifies the confirmation request, not the Woo order. The customer must sign in with the account that owns the request. After the redirect fix, existing links work without recreating the request."
 msgstr "Передавайте посилання на кабінет без змін. Номер pcoe_approval позначає запит на підтвердження, а не замовлення Woo. Клієнт має увійти в обліковий запис, якому належить запит. Після виправлення перенаправлення збережені посилання працюють без повторного створення запиту."
+
+#: inc/ManagerHelp.php
+msgid "Open Customer confirmation from the order. Review the current version and send it for customer confirmation. On the saved request, click Email confirmation link to customer. Check the displayed profile email and mail status. Accepted by the mail service does not prove that the message reached the inbox. You can also share the same link in your usual conversation."
+msgstr "Із замовлення відкрийте «Підтвердження клієнта». Перевірте поточну версію та передайте її на підтвердження. У збереженому запиті натисніть «Надіслати посилання клієнту на email». Перевірте показану адресу з профілю та статус листа. «Прийнято поштовою службою» не доводить доставку у вхідні. Це саме посилання можна передати у звичній переписці."
+
+#: inc/ManagerHelp.php
+msgid "The customer can choose saved contact details from their profile or orders and edit them for this confirmation. Payment remains a preference for the manager. After confirmation, the requesting manager and the current assigned pair receive email notices; connected managers also receive a Telegram notice with a link. Review the saved status, time and conditions in Customer confirmations. If the order changes, request a new confirmation."
+msgstr "Клієнт може вибрати збережені контакти з профілю або своїх замовлень та змінити їх для цього підтвердження. Оплата залишається побажанням для менеджера. Після підтвердження менеджер, який створив запит, і поточна призначена пара отримують сповіщення на email; підключені менеджери також отримують повідомлення з посиланням у Telegram. Перевірте збережений статус, час та умови в «Підтвердження клієнтів». Після зміни замовлення потрібне нове підтвердження."

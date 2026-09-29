@@ -13,6 +13,8 @@ class CustomerApproval {
         add_action('admin_menu', [self::class, 'menu'], 41);
         add_action('admin_post_pcoe_approval_request', [self::class, 'request']);
         add_action('admin_post_pcoe_approval_confirm', [self::class, 'confirm']);
+        add_action('admin_post_pcoe_approval_email', [ApprovalNotifications::class, 'post_email']);
+        add_action('wp_enqueue_scripts', [ApprovalContacts::class, 'assets']);
         add_action('woocommerce_account_dashboard', [self::class, 'account']);
         add_action('woocommerce_order_details_after_order_table', [self::class, 'order_link']);
         add_action('woocommerce_admin_order_data_after_order_details', [self::class, 'manager_link']);
@@ -253,6 +255,8 @@ class CustomerApproval {
                 $data = $updated;
                 self::save($data, $id);
             });
+            try { ApprovalNotifications::confirmed($id); delete_post_meta($id,'_pcoe_approval_notify_error'); }
+            catch (\Throwable $e) { update_post_meta($id,'_pcoe_approval_notify_error',gmdate('c')); }
             wp_safe_redirect(self::customer_url($id)); exit;
         } catch (\Throwable $e) { wp_die(esc_html($e->getMessage()), '', ['response' => 409]); }
     }
@@ -306,6 +310,7 @@ class CustomerApproval {
         }
         if ($manager) {
             echo '<p>' . esc_html__('Customer account link (login required):', 'pc-order-import-export') . ' <a href="' . esc_url(self::customer_url($post->ID)) . '">' . esc_html(self::customer_url($post->ID)) . '</a></p>';
+            ApprovalNotifications::panel($post->ID,$data,$fresh);
             echo '<p><a class="button" href="' . esc_url(self::url($data['source'])) . '">' . esc_html__('Review current version', 'pc-order-import-export') . '</a></p>';
             return;
         }
@@ -314,23 +319,16 @@ class CustomerApproval {
         if ($data['status'] === 'confirmed') return;
         $choices = self::choices();
         if (!$choices['payment'] || !$choices['delivery']) { echo '<p>' . esc_html__('Delivery or payment options are unavailable. Contact the manager.', 'pc-order-import-export') . '</p>'; return; }
-        echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">';
+        echo '<form class="pcoe-approval-form" method="post" action="' . esc_url(admin_url('admin-post.php')) . '">';
         wp_nonce_field('pcoe_approval_confirm');
         foreach (['action' => 'pcoe_approval_confirm', 'approval_id' => $post->ID, 'revision' => $data['revision']] as $key => $value) self::hidden($key, $value);
-        foreach ($choices as $key => $options) {
-            echo '<p><label>' . esc_html(self::field_label($key)) . '<br><select name="' . esc_attr($key) . '" required><option value="">—</option>';
-            foreach ($options as $value => $label) echo '<option value="' . esc_attr($value) . '">' . esc_html($label) . '</option>';
-            echo '</select></label></p>';
-        }
-        foreach (['recipient', 'phone', 'destination'] as $key) {
-            echo '<p><label>' . esc_html(self::field_label($key)) . '<br><textarea name="' . esc_attr($key) . '" rows="2" maxlength="500" required style="width:100%"></textarea></label></p>';
-        }
+        ApprovalContacts::render($data['source'],$choices);
         echo '<p>' . esc_html__('Delivery and payment are saved for the manager. Delivery availability and cost will be agreed separately; this does not make a payment or start shipment.', 'pc-order-import-export') . '</p>';
         echo '<p><label><input type="checkbox" name="consent" value="1" required> ' . esc_html__('I have checked the products, quantities, prices, delivery and payment preferences and confirm this order.', 'pc-order-import-export') . '</label></p>';
         echo '<button type="submit" class="button">' . esc_html__('Confirm order', 'pc-order-import-export') . '</button></form>';
     }
 
-    private static function field_label(string $key): string {
+    public static function field_label(string $key): string {
         $labels = ['payment' => __('Payment preference', 'pc-order-import-export'), 'delivery' => __('Delivery preference', 'pc-order-import-export'),
             'recipient' => __('Recipient', 'pc-order-import-export'), 'phone' => __('Phone', 'pc-order-import-export'),
             'destination' => __('City, branch/address or pickup location; specify warehouses if destinations differ', 'pc-order-import-export')];
@@ -380,7 +378,7 @@ class CustomerApproval {
                 echo '<p>' . esc_html(get_userdata($source['customer_id'])->display_name) . '</p>';
                 self::table($snapshot);
                 if ($post = self::find($source)) echo '<p><a href="' . esc_url(self::url(['approval_id' => $post->ID])) . '">' . esc_html__('View saved confirmation', 'pc-order-import-export') . '</a></p>';
-                echo '<p>' . esc_html__('The request appears in the customer account. No email is sent automatically.', 'pc-order-import-export') . '</p>';
+                echo '<p>' . esc_html__('The request appears in the customer account. On the next screen, use Email confirmation link to customer to send it to their profile email.', 'pc-order-import-export') . '</p>';
                 echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">'; wp_nonce_field('pcoe_approval_request');
                 foreach (array_merge($source, ['document_type' => $source['type'], 'action' => 'pcoe_approval_request', 'revision' => self::revision($snapshot)]) as $key => $value) self::hidden($key, $value);
                 echo '<button class="button button-primary">' . esc_html__('Send for customer confirmation', 'pc-order-import-export') . '</button></form>';

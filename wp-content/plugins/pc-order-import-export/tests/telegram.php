@@ -101,6 +101,7 @@ try {
  $code=Store::issue($customer);$r=Store::get('code:'.hash('sha256',$code));$r['data']['expires']=time()-1;Store::put($r['record_key'],'code',$customer,'issued',$r['data']);$check(!Store::pair($code,$peer,'Test'),'Expired code refused');
  require PCOE_DIR.'/tests/telegram-managers.php';
  require PCOE_DIR.'/tests/customer-managers.php';
+ require PCOE_DIR.'/tests/approval-telegram.php';
  $c=Settings::config();$c['site']='https://cloned.invalid/';update_option(Settings::OPTION,$c,false);$check(!Settings::enabled(),'Cloned database cannot enable transport on another site');
  echo "PASS: $checks Telegram checks; all HTTP/mail intercepted\n";
 } finally {

@@ -2457,3 +2457,108 @@ msgstr "Группа складов сайта: %s"
 #: inc/ManagerOrderFlow.php inc/manager-view.php inc/ManagerWorkspace.php
 msgid "Woo order"
 msgstr "Заказ Woo"
+
+#: inc/ApprovalContacts.php inc/ApprovalNotifications.php inc/CustomerApproval.php
+msgid "Check the saved details or edit them for this order. Changes here do not overwrite your address book."
+msgstr "Проверьте сохранённые данные или измените их для этого заказа. Сохранённые адреса в профиле не перезаписываются."
+
+#: inc/ApprovalContacts.php inc/ApprovalNotifications.php inc/CustomerApproval.php
+#, php-format
+msgid "Details from order #%s"
+msgstr "Данные из заказа №%s"
+
+#: inc/ApprovalContacts.php inc/ApprovalNotifications.php inc/CustomerApproval.php
+msgid "Enter other details"
+msgstr "Ввести другие данные"
+
+#: inc/ApprovalContacts.php inc/ApprovalNotifications.php inc/CustomerApproval.php
+msgid "Saved billing/contact details"
+msgstr "Сохранённые платёжные и контактные данные"
+
+#: inc/ApprovalContacts.php inc/ApprovalNotifications.php inc/CustomerApproval.php
+msgid "Saved shipping address"
+msgstr "Сохранённый адрес доставки"
+
+#: inc/ApprovalContacts.php inc/ApprovalNotifications.php inc/CustomerApproval.php
+msgid "Use saved customer details"
+msgstr "Использовать сохранённые данные"
+
+#: inc/ApprovalContacts.php inc/ApprovalNotifications.php inc/CustomerApproval.php
+msgid "Accepted by the mail service"
+msgstr "Принято почтовой службой"
+
+#: inc/ApprovalContacts.php inc/ApprovalNotifications.php inc/CustomerApproval.php
+msgid "Confirmation is saved, but a manager notification needs checking."
+msgstr "Подтверждение сохранено, но уведомление менеджера требует проверки."
+
+#: inc/ApprovalContacts.php inc/ApprovalNotifications.php inc/CustomerApproval.php
+msgid "Confirmation saves your choices for the manager; it does not make a payment or start shipment."
+msgstr "Подтверждение сохраняет ваш выбор для менеджера; оно не проводит оплату и не запускает отправку."
+
+#: inc/ApprovalContacts.php inc/ApprovalNotifications.php inc/CustomerApproval.php
+#, php-format
+msgid "Customer confirmed %s"
+msgstr "Клиент подтвердил: %s"
+
+#: inc/ApprovalContacts.php inc/ApprovalNotifications.php inc/CustomerApproval.php
+msgid "Email confirmation link to customer"
+msgstr "Отправить ссылку клиенту на email"
+
+#: inc/ApprovalContacts.php inc/ApprovalNotifications.php inc/CustomerApproval.php
+msgid "Email confirmation link again"
+msgstr "Повторно отправить ссылку на email"
+
+#: inc/ApprovalContacts.php inc/ApprovalNotifications.php inc/CustomerApproval.php
+msgid "Email could not be recorded. Nothing was sent."
+msgstr "Не удалось записать отправку письма. Ничего не отправлено."
+
+#: inc/ApprovalContacts.php inc/ApprovalNotifications.php inc/CustomerApproval.php
+msgid "Email delivery is uncertain. Check the mail log before sending again."
+msgstr "Результат отправки неизвестен. Проверьте почтовый журнал перед повторной отправкой."
+
+#: inc/ApprovalContacts.php inc/ApprovalNotifications.php inc/CustomerApproval.php
+msgid "Email delivery is uncertain; check the mail log"
+msgstr "Результат отправки неизвестен; проверьте почтовый журнал"
+
+#: inc/ApprovalContacts.php inc/ApprovalNotifications.php inc/CustomerApproval.php
+msgid "Email sending failed"
+msgstr "Не удалось отправить письмо"
+
+#: inc/ApprovalContacts.php inc/ApprovalNotifications.php inc/CustomerApproval.php
+msgid "Email to customer:"
+msgstr "Письмо клиенту:"
+
+#: inc/ApprovalContacts.php inc/ApprovalNotifications.php inc/CustomerApproval.php
+#, php-format
+msgid "Manager notification — %1$s: %2$s"
+msgstr "Уведомление менеджера — %1$s: %2$s"
+
+#: inc/ApprovalContacts.php inc/ApprovalNotifications.php inc/CustomerApproval.php
+msgid "Not sent"
+msgstr "Не отправлено"
+
+#: inc/ApprovalContacts.php inc/ApprovalNotifications.php inc/CustomerApproval.php
+msgid "Open confirmation"
+msgstr "Открыть подтверждение"
+
+#: inc/ApprovalContacts.php inc/ApprovalNotifications.php inc/CustomerApproval.php
+#, php-format
+msgid "Please confirm %s"
+msgstr "Просим подтвердить: %s"
+
+#: inc/ApprovalContacts.php inc/ApprovalNotifications.php inc/CustomerApproval.php
+msgid "Please review your order, choose delivery and payment preferences, and confirm it in your account. Sign in with the account that owns this order."
+msgstr "Проверьте заказ, выберите пожелания по доставке и оплате и подтвердите его в кабинете. Войдите в учётную запись владельца заказа."
+
+#: inc/ApprovalContacts.php inc/ApprovalNotifications.php inc/CustomerApproval.php
+msgid "The customer profile has no valid email address."
+msgstr "В профиле клиента нет корректного адреса email."
+
+#: inc/ApprovalContacts.php inc/ApprovalNotifications.php inc/CustomerApproval.php
+#, php-format
+msgid "Total: %1$s %2$s"
+msgstr "Сумма: %1$s %2$s"
+
+#: inc/ApprovalContacts.php inc/ApprovalNotifications.php inc/CustomerApproval.php
+msgid "The request appears in the customer account. On the next screen, use Email confirmation link to customer to send it to their profile email."
+msgstr "Запрос появится в кабинете клиента. На следующем экране нажмите «Отправить ссылку клиенту на email», чтобы отправить его на адрес из профиля."

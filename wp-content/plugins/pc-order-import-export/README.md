@@ -410,9 +410,36 @@ IDs; opening a link does not confirm it. Deploy the MU file together with help
 translations; no Java change, data migration or rewrite flush is required.
 
 Run `wp eval-file wp-content/plugins/pc-order-import-export/tests/customer-approval-http.php --skip-themes`
-on `paint.local` for ten real HTTP checks, including customer isolation and the
-ordinary root redirect. The test launches a GET-only loopback PHP server with
+on `paint.local` for thirteen real HTTP checks, including customer isolation,
+the ordinary root redirect and idempotent confirmation with mocked email. The
+loopback PHP server permits reads and confirmation POSTs for its sole test fixture,
 outbound HTTP/mail and cron disabled, creates temporary records and cleans up.
 `PCOE_APPROVAL_HTTP_HTML=/tmp/approval.html` optionally exports the owner's HTML
 for offline visual review. Operator details: `docs/OPERATIONS_RUNBOOK.md`,
 customer instructions: `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md` and published help.
+
+
+## Approval contacts and notifications — 2026-09-29
+
+`ApprovalContacts` reads only the signed-in owner's Woo profile/current/recent
+order contacts, including saved Nova Poshta destinations. Native Woo form fields
+support browser autocomplete; selection is editable and never runs checkout or
+updates profile/order/shipment data. Only final preferences enter the approval.
+
+`ApprovalNotifications` provides a manager-only nonce/revision-checked email
+button addressed to the owning WP profile email. Mail event claims are durable;
+same-request replay is idempotent and unknown transport outcomes block resending.
+Customer confirmation emails the current manager pair plus the requesting manager
+(current capability checked, deduplicated). Email acceptance is distinct from
+delivery. A notification error cannot discard the saved consent.
+Connected managers also get a Telegram job with scope `approval`; delivery checks
+the approval revision, confirmed timestamp, current membership and binding. It
+uses the existing queue and sends no chat reply on the customer's behalf.
+
+Checks: `tests/approval-contacts-notifications.php`, `tests/approval-telegram.php`
+(included by `tests/telegram.php`), `tests/customer-approval-http.php` and existing
+approval tests. `tests/approval-contacts-ui.cjs` checks the exported HTTP owner HTML
+offline (saved contact switching, manual entry, disabled methods, consent and
+desktop/mobile layout). Run WP integration tests only on paint.local; HTTP/mail are mocked.
+Canonical instructions: manager/customer guides and OPERATIONS_RUNBOOK.md.
+Deploy the plugin, help MU file and translation catalogs; no Java or DDL change.

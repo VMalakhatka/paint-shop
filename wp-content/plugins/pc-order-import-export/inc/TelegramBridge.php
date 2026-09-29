@@ -110,11 +110,11 @@ final class TelegramBridge {
             } finally { restore_previous_locale();wp_set_current_user($original); }
         }));
     }
-    public static function job(string $key,string $chat,array $payload,?array $link,int $thread=0,int $message=0,string $scope='assigned'): void {
+    public static function job(string $key,string $chat,array $payload,?array $link,int $thread=0,int $message=0,string $scope='assigned',array $context=[]): void {
         if(TelegramStore::get($key))return;
         TelegramStore::put($key,'job',(int)($link['user_id']??0),'pending',[
             'bot'=>TelegramSettings::config()['bot'],'chat'=>$chat,'generation'=>$link['data']['generation']??'',
-            'audience'=>$link['data']['audience']??'customer','scope'=>$scope,
+            'audience'=>$link['data']['audience']??'customer','scope'=>$scope,'context'=>$context,
             'payload'=>array_merge(['chat_id'=>$chat,'link_preview_options'=>['is_disabled'=>true]],$payload),
             'thread'=>$thread,'attempts'=>0,'not_before'=>0],$message);
     }
@@ -159,6 +159,7 @@ final class TelegramBridge {
             $link=$user?TelegramStore::active($user):null;
             $manager=($d['audience']??'customer')==='manager';
             $valid=$d['bot']===TelegramSettings::config()['bot'] && (!$user || ($link && $link['data']['chat']===$d['chat'] && $link['data']['generation']===$d['generation'] && ($link['data']['audience']??'customer')===($d['audience']??'customer')));
+            if(($d['scope']??'')==='approval')$valid=$valid && $manager && ApprovalNotifications::telegram_allowed($user,(array)($d['context']??[]));
             if($user && !empty($d['thread'])) {
                 $conversation=get_post($d['thread']);
                 $valid=$valid && $conversation && $conversation->post_type===ConversationStore::THREAD && $conversation->post_status==='private' && ($manager?TelegramManagers::allowed((int)$d['thread'],$user,$d['scope']??'assigned'):(int)$conversation->post_author===$user);
