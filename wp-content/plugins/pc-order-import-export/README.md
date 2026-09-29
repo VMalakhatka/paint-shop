@@ -346,6 +346,11 @@ colleague replies, optimistic revisions and bulk rollback).
 The runbook above covers setup, operator acceptance and rollback.
 # Manager contextual documentation
 
+Tab help is grouped in `.pcoe-help-tab` and the navigation uses scoped flex
+layout: never insert ungrouped inline help among WordPress floated `.nav-tab`
+elements. Regression tests include core `wp-admin/css/common.css` and verify
+tab/help pairing and wrap at 320–1100 px (2026-09-29).
+
 The manager guide lives at `admin.php?page=pcoe-customers&view=help` and requires
 `manage_woocommerce`. Canonical Ukrainian instructions:
 `docs/MANAGER_CUSTOMER_GUIDE_UK.md` in the project root. `ManagerHelp.php` renders

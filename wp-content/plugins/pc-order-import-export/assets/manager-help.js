@@ -15,7 +15,17 @@
         a.href = cfg.url.replace(/#.*$/, '') + '#' + anchor;
         a.textContent = cfg.label; a.title = cfg.title;
         a.target = '_blank'; a.rel = 'noopener noreferrer';
-        target.after(a);
+        if (target.matches('.nav-tab')) {
+            // WordPress tabs float; a bare inline help sibling breaks their row.
+            let group = target.closest('.pcoe-help-tab');
+            if (!group) {
+                group = document.createElement('span');
+                group.className = 'pcoe-help-tab';
+                target.before(group);
+                group.append(target);
+            }
+            group.append(a);
+        } else target.after(a);
         links.set(anchor, a); attached.set(target, links);
     }
     const maps = [

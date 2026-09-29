@@ -12,6 +12,8 @@ const ids=new Set([...help.matchAll(/id="([a-z-]+)"/g)].map(m=>m[1]));
   const page=await browser.newPage(); await page.route('**/*',r=>r.abort());
   async function setup(html, screen='pcoe-customers') {
    await page.setContent('<html lang="uk"><body style="margin:16px;font:14px Arial"><div id="wpbody-content">'+html+'</div></body></html>');
+   // Exercise the real WordPress float rules, not only plugin styles.
+   await page.addStyleTag({content:fs.readFileSync(path.join(root,'wp-admin/css/common.css'),'utf8')});
    for(const file of ['manager.css','manager-help.css']) await page.addStyleTag({content:fs.readFileSync(path.join(base,'assets',file),'utf8')});
    await page.evaluate(screen=>{window.pcoeManagerHelp={page:screen,url:'https://example.invalid/wp-admin/admin.php?page=pcoe-customers&view=help#',label:'? Як це працює',title:'Відкрити довідку в новій вкладці'};},screen);
    await page.addScriptTag({content:js});
@@ -37,6 +39,25 @@ const ids=new Set([...help.matchAll(/id="([a-z-]+)"/g)].map(m=>m[1]));
    await setup('<div class="wrap"><h1>Report</h1><button>Action</button></div>',screen);
    assert.equal(await page.locator('.pcoe-help-link').count(),2);
    assert((await page.locator('button + a').getAttribute('href')).endsWith('#'+anchor));
+  }
+  const tabs='<div class="wrap pcoe-manager"><h1>Робота з клієнтами</h1><nav class="nav-tab-wrapper"><a class="nav-tab nav-tab-active" href="?page=pcoe-customers">Клієнти</a><a class="nav-tab" href="?page=pcoe-customers&view=orders">Замовлення</a><a class="nav-tab" href="?page=pcoe-customers&view=messages">Звернення</a></nav><div id="dynamic"></div></div>';
+  await setup(tabs);
+  assert.equal(await page.locator('.pcoe-help-tab').count(),3);
+  assert.equal(await page.locator('.nav-tab-wrapper > .pcoe-help-link').count(),0);
+  assert.deepEqual(await page.locator('.pcoe-help-tab').evaluateAll(groups=>groups.map(g=>[g.querySelector('.nav-tab').textContent,g.querySelector('.pcoe-help-link').hash])),[['Клієнти','#customers'],['Замовлення','#orders'],['Звернення','#queue']]);
+  await page.evaluate(()=>document.querySelector('#dynamic').append(document.createElement('p')));
+  await page.waitForTimeout(80);
+  assert.equal(await page.locator('.pcoe-help-tab').count(),3);
+  for(const width of [1100,768,390,320]) {
+   await page.setViewportSize({width,height:600});
+   const boxes=await page.locator('.pcoe-help-tab').evaluateAll(groups=>groups.map(g=>{
+    const t=g.querySelector('.nav-tab').getBoundingClientRect(), h=g.querySelector('.pcoe-help-link').getBoundingClientRect();
+    return {top:t.top,bottom:t.bottom,helpTop:h.top,left:t.left,helpLeft:h.left};
+   }));
+   assert(boxes.every(b=>b.helpTop>=b.bottom && Math.abs(b.left-b.helpLeft)<1),'Help stays below its own tab');
+   if(width>=768) assert(boxes.every(b=>Math.abs(b.top-boxes[0].top)<1),'Tabs share one baseline');
+   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Tab overflow');
+   await page.screenshot({path:`/tmp/manager-tabs-${width}.png`,fullPage:false});
   }
   await setup(help);
   assert.equal(await page.locator('.pcoe-help-link').count(),0,'No recursive help links');
