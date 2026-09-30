@@ -17,7 +17,7 @@ class Lavka_Reports_Profit_Tax_Settings {
         <details class="lavr-profit-manager-help" id="lavr-profit-tax-settings">
             <summary><?php echo esc_html__('Tax firms: retail and wholesale', 'lavka-reports'); ?></summary>
             <div class="lavr-profit-tax-editor">
-                <p><?php echo esc_html__('Add all historical and current firm codes. No dates are needed: the report uses tax documents for the selected month. Retail taxes are shared between the cities; wholesale taxes belong to Kyiv.', 'lavka-reports'); ?></p>
+                <p><?php echo esc_html__('Add all historical and current firm codes. No dates are needed: the report uses tax documents for the selected month. All retail and wholesale taxes belong to Kyiv.', 'lavka-reports'); ?></p>
                 <p><?php echo esc_html__('Unknown firms remain in the audit as unallocated taxes and require review. Saving these lists does not recalculate or change saved reports.', 'lavka-reports'); ?></p>
                 <div id="lpt-groups"></div>
                 <p id="lpt-version"></p>

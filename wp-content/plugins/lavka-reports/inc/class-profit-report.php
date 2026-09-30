@@ -73,14 +73,14 @@ class Lavka_Reports_Profit_Report {
                             <li><strong><?php echo esc_html__('Review the result.', 'lavka-reports'); ?></strong> <?php echo esc_html($guide['managerStep5']); ?></li>
                             <li><strong><?php echo esc_html__('Download Excel.', 'lavka-reports'); ?></strong> <?php echo esc_html($guide['managerStep6']); ?></li>
                     </ol>
-                    <p><?php echo esc_html__('Default additional work: Kyiv UAH 0, Odesa UAH 5000. If staff or additional work changed between months, calculate those months separately.', 'lavka-reports'); ?></p>
+                    <p><?php echo esc_html__('Additional work follows salary: Kyiv is not applicable (0), Odesa defaults to UAH 5000. Enter 0 explicitly to cancel the Odesa default.', 'lavka-reports'); ?></p>
                     <h3><?php echo esc_html__('How to read Excel', 'lavka-reports'); ?></h3>
                     <p><?php echo esc_html__('Start with the Kyiv and Odesa sheets. Selection columns follow the working template. Enter your own amount in the final Manager check, UAH column. Details and documents are on the following sheets. The downloaded file is usually in Downloads.', 'lavka-reports'); ?></p>
                     <div class="lavr-profit-guide-note">
-                        <p><strong><?php echo esc_html__('Retail taxes.', 'lavka-reports'); ?></strong> <?php echo esc_html__('Allocated by registered employee count. For example, Kyiv 4 and Odesa 3 gives shares of 4/7 and 3/7. Employee counts appear at the top of each city sheet.', 'lavka-reports'); ?></p>
+                        <p><strong><?php echo esc_html__('Retail taxes.', 'lavka-reports'); ?></strong> <?php echo esc_html__('Retail and wholesale taxes are combined in Kyiv. Odesa is 0. Employee proportions are not used for new calculations.', 'lavka-reports'); ?></p>
                         <p><strong><?php echo esc_html__('Wholesale taxes.', 'lavka-reports'); ?></strong> <?php echo esc_html__('Allocated entirely to Kyiv.', 'lavka-reports'); ?></p>
                     </div>
-                    <p><?php echo esc_html__('With a complete audit, Excel contains retail tax and total formulas. Otherwise it shows the saved amount and an explanation. Editing Excel does not change the website. If you edit employee counts, use the same numbers on both city sheets.', 'lavka-reports'); ?></p>
+                    <p><?php echo esc_html__('Excel shows selection criteria, totals and a blank manager check column. Import transport is below operating expenses and is not deducted again. Editing Excel does not change the website.', 'lavka-reports'); ?></p>
                     <p class="lavr-profit-guide-footnote"><?php echo esc_html__('After a connection error, open saved reports first: the result may already have been saved.', 'lavka-reports'); ?></p>
                 </div>
             </details>
@@ -104,16 +104,7 @@ class Lavka_Reports_Profit_Report {
                 <summary><?php echo esc_html__('Manual report parameters', 'lavka-reports'); ?></summary>
                 <p class="description lavr-profit-manual-help"><?php echo esc_html__('Leave additional salary empty to use the server default. Enter zero to override it with zero.', 'lavka-reports'); ?></p>
                 <div class="lavr-profit-manual-grid">
-                    <div class="lavr-profit-field">
-                        <label for="lavr-profit-tax-mode"><?php echo esc_html__('Retail tax allocation', 'lavka-reports'); ?></label>
-                        <select id="lavr-profit-tax-mode"><option value="counts"><?php echo esc_html__('By employee count', 'lavka-reports'); ?></option><option value="share"><?php echo esc_html__('By saved Odesa share', 'lavka-reports'); ?></option></select>
-                    </div>
-                    <div class="lavr-profit-field" id="lavr-profit-count-fields">
-                        <label for="lavr-profit-kyiv-employees"><?php echo esc_html__('Registered employees: Kyiv', 'lavka-reports'); ?></label>
-                        <input type="number" min="0" max="1000000" step="1" value="4" id="lavr-profit-kyiv-employees" data-param="kyivEmployeeCount">
-                        <label for="lavr-profit-odesa-employees"><?php echo esc_html__('Registered employees: Odesa', 'lavka-reports'); ?></label>
-                        <input type="number" min="0" max="1000000" step="1" value="3" id="lavr-profit-odesa-employees" data-param="odesaEmployeeCount">
-                    </div>
+                    <p class="description"><?php echo esc_html__('New calculations assign all retail and wholesale taxes and bank expenses to Kyiv. Employee proportions are not used. Saved reports retain their original rules.', 'lavka-reports'); ?></p>
                     <div class="lavr-profit-field">
                         <label for="lavr-profit-additional-salary"><?php echo esc_html__('Odesa additional salary', 'lavka-reports'); ?></label>
                         <input type="text" inputmode="decimal" id="lavr-profit-additional-salary" data-param="odesaAdditionalSalary" autocomplete="off">
@@ -121,16 +112,8 @@ class Lavka_Reports_Profit_Report {
                     </div>
                     <div class="lavr-profit-field">
                         <label for="lavr-profit-kyiv-salary"><?php echo esc_html__('Kyiv additional work', 'lavka-reports'); ?></label>
-                        <input type="text" inputmode="decimal" id="lavr-profit-kyiv-salary" data-param="kyivAdditionalSalary" autocomplete="off">
+                        <input type="text" inputmode="decimal" id="lavr-profit-kyiv-salary" value="0" disabled>
                         <p id="lavr-profit-kyiv-salary-source" class="description"></p>
-                    </div>
-                    <div class="lavr-profit-field" id="lavr-profit-legacy-share" hidden>
-                        <label for="lavr-profit-tax-share"><?php echo esc_html__('Odesa employee share', 'lavka-reports'); ?></label>
-                        <div class="lavr-profit-input-suffix">
-                            <input type="text" inputmode="decimal" id="lavr-profit-tax-share" data-param="odesaTaxShare" autocomplete="off">
-                            <span>%</span>
-                        </div>
-                        <p class="description" id="lavr-profit-tax-share-help"><?php echo esc_html__('Share of officially employed Odesa staff.', 'lavka-reports'); ?></p>
                     </div>
                     <div class="lavr-profit-field">
                         <label for="lavr-profit-rub-rate"><?php echo esc_html__('RUB to UAH rate', 'lavka-reports'); ?></label>
@@ -161,6 +144,7 @@ class Lavka_Reports_Profit_Report {
                 </section>
 
                 <section id="lavr-profit-sections" class="lavr-profit-summary" hidden></section>
+                <section id="lavr-profit-manager-template" class="lavr-profit-summary" hidden></section>
                 <section id="lavr-profit-master-class" class="lavr-profit-summary" aria-live="polite"></section>
 
                 <section id="lavr-profit-warnings-section" class="lavr-profit-warnings-section" hidden aria-labelledby="lavr-profit-warnings-title">
@@ -335,11 +319,21 @@ class Lavka_Reports_Profit_Report {
             'managerCriteriaHelp' => __('Expense period: check M-1, M and M+1. A valid year and month in the note takes priority. Selection columns are for manual checking; see the audit for exceptions.', 'lavka-reports'),
             'taxFormulaHelp' => __('Retail taxes: Odesa is rounded per document; Kyiv receives the remainder. Wholesale taxes belong entirely to Kyiv. Import transport is excluded from operating expenses.', 'lavka-reports'),
             'taxFormulaUnavailable' => __('Tax formula is unavailable without a complete document audit. The saved report amount is shown.', 'lavka-reports'),
+            'doNotFill' => __('Do not fill', 'lavka-reports'),
+            'cityExpenses' => __('City expenses', 'lavka-reports'),
+            'wholesaleSection' => __('Kyiv wholesale', 'lavka-reports'),
+            'outgoingInvoice' => __('Outgoing invoice', 'lavka-reports'),
+            'returnInvoice' => __('Incoming invoice: ВОЗВРАТ', 'lavka-reports'),
+            'profitTotals' => __('Profit totals', 'lavka-reports'),
+            'currentRulesHelp' => __('New calculations assign all retail and wholesale taxes and bank expenses to Kyiv. Employee proportions are not used. Saved reports retain their original rules.', 'lavka-reports'),
+            'managerCurrentHelp' => __('In Excel, the last column is for your manual check. Editing Excel does not change the website.', 'lavka-reports'),
+            'managerTemplate' => __('Manager table and selection criteria', 'lavka-reports'),
+            'grossProfitDetails' => __('Gross profit by customer category', 'lavka-reports'),
             'managerEditHelp' => __('The last column is for your manual check. Employee counts must be whole numbers, with a positive total. Excel changes affect this file only. Use the same counts on both city sheets.', 'lavka-reports'),
             'managerGuide' => __('How to use this report', 'lavka-reports'),
             'managerStep1' => __('Select the same month in From month and Through month. For several months, select the first and last month.', 'lavka-reports'),
             'managerStep2' => __('To open an existing result, click View saved reports, then Open saved month. No new calculation is needed.', 'lavka-reports'),
-            'managerStep3' => __('For a new calculation, open Manual report parameters. Choose By employee count and check Kyiv and Odesa staff, additional work and the RUB rate if applicable. Leave additional work blank for the default; enter 0 to cancel it.', 'lavka-reports'),
+            'managerStep3' => __('For a new calculation, check Odesa additional work and the RUB rate if applicable. Leave additional work blank for the default; enter 0 to cancel it.', 'lavka-reports'),
             'managerStep4' => __('Click Calculate and save selected months and wait. The same parameters apply to each selected month.', 'lavka-reports'),
             'managerStep5' => __('Check the month, profit and warnings. A dash means unavailable data, not zero. If a result needs review, send the Excel file and the warning to the person responsible.', 'lavka-reports'),
             'managerStep6' => __('Click Export report to Excel for the open month, or Export saved period to Excel for all selected months. Start with the Kyiv and Odesa sheets; use the last column for your check.', 'lavka-reports'),
@@ -348,7 +342,7 @@ class Lavka_Reports_Profit_Report {
             'shareChoice' => __('By saved Odesa share', 'lavka-reports'),
             'countError' => __('Enter an employee count from 0 to 1000000.', 'lavka-reports'),
             'masterIncluded' => __('Included in master class contribution', 'lavka-reports'),
-            'masterTitle' => __('Odesa master class', 'lavka-reports'),
+            'masterTitle' => __('Master classes', 'lavka-reports'),
             'masterUnavailable' => __('Automatic master class data is unavailable. Check the Java report version.', 'lavka-reports'),
             'masterMissing' => __('The master class article was not found. This is not a confirmed zero.', 'lavka-reports'),
             'sku' => __('SKU', 'lavka-reports'),
@@ -476,6 +470,8 @@ class Lavka_Reports_Profit_Report {
                 'EXPENSE_INPUTS' => __('Expense parameters', 'lavka-reports'),
                 'EXPENSES' => __('Expenses', 'lavka-reports'),
                 'GROSS_MARGIN' => __('Gross margin', 'lavka-reports'),
+                'MASTER_CLASS_KYIV' => __('Kyiv master class', 'lavka-reports'),
+                'MASTER_CLASS_ODESA' => __('Odesa master class', 'lavka-reports'),
                 'MASTER_CLASS' => __('Odesa master class', 'lavka-reports'),
                 'INVENTORY_KYIV' => __('Kyiv inventory', 'lavka-reports'),
                 'INVENTORY_ODESA' => __('Odesa inventory', 'lavka-reports'),
@@ -574,6 +570,8 @@ class Lavka_Reports_Profit_Report {
                 'ruleVersion' => __('Rule version', 'lavka-reports'),
                 'complete' => __('Complete', 'lavka-reports'),
                 'warehouseName' => __('Warehouse name', 'lavka-reports'),
+                'organizationTypes' => __('Customer category codes', 'lavka-reports'),
+                'lineCount' => __('Line count', 'lavka-reports'),
                 'warehouseIds' => __('Warehouse IDs', 'lavka-reports'),
                 'openingAccountingValue' => __('Opening inventory value', 'lavka-reports'),
                 'closingAccountingValue' => __('Closing inventory value', 'lavka-reports'),

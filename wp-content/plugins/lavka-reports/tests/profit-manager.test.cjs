@@ -44,3 +44,41 @@ test('historical tax firms use snapshot selection columns, including explicitly 
 test('legacy empty selection metadata retains the old firm rather than inventing an empty configuration',()=>{
  assert.deepEqual(manager.purpose({lineId:'KYIV_TAX_MALAFOP',filters:{purposeCodes:[]}}),['МАЛАФОП']);
 });
+
+function currentData(){
+ const d=data();d.inputs={taxAllocationMethod:'ALL_TAXES_KYIV'};
+ const line=(city,id,order,amount='0',extra={})=>({city,lineId:city+'_'+id,label:id,sortOrder:order,amount,profitImpact:amount,source:'FOLIO',accountingTreatment:'OPERATING_EXPENSE',filters:{expenseCodes:[id],cashWarehouseMode:'ALL',bankWarehouseMode:'ALL'},...extra});
+ d.expenseLines=[line('KYIV','SALARY',30,'10'),line('KYIV','SALARY_RUB',40,'2'),line('KYIV','ADDITIONAL_WORK',50,'0',{source:'NOT_APPLICABLE'}),line('KYIV','BANK_SERVICES',60,'1'),line('KYIV','TAXES',70,'3',{filters:{purposeCodes:['МИХНФОП','КОНДФОП'],cashWarehouseMode:'ALL',bankWarehouseMode:'ALL'}}),line('KYIV','RENT_WHOLESALE',150,'4'),line('KYIV','PHONE_KAL',160,'5'),line('KYIV','IMPORT_TRANSPORT',170,'12',{profitImpact:'0',accountingTreatment:'CAPITALIZED_IN_INVENTORY'}),line('ODESA','SALARY',30,'8'),line('ODESA','SALARY_RUB',40,'0',{source:'NOT_APPLICABLE'}),line('ODESA','ADDITIONAL_WORK',50,'5',{source:'REQUEST_OVERRIDE'}),line('ODESA','BANK_SERVICES',60,'0',{source:'NOT_APPLICABLE'}),line('ODESA','TAXES',70,'0',{source:'NOT_APPLICABLE'})];
+ d.cities[0]={city:'KYIV',baseGrossProfit:'100',manualGrossAdjustments:'7',grossProfit:'107',operatingExpenses:'25',profit:'82'};d.cities[1]={city:'ODESA',baseGrossProfit:'100',manualGrossAdjustments:'7',grossProfit:'107',operatingExpenses:'13',profit:'94'};
+ d.masterClassesByCity=Object.fromEntries(['KYIV','ODESA'].map(city=>[city,{sku:'Мастер-Класс июль',warehouseId:city==='KYIV'?1:5,articleFound:true,income:'10',returns:'2',netContribution:'8',grossProfitAlreadyInBase:'1',grossAdjustmentApplied:'7'}]));
+ d.masterClass=d.masterClassesByCity.ODESA;d.masterClassDocuments=[{documentId:'o'}];d.masterClassDocumentsByCity={KYIV:[{documentId:'k'}],ODESA:[{documentId:'o'}]};
+ d.grossProfitLines=['KYIV','ODESA'].flatMap(city=>[{city,label:'Own shops',organizationTypes:['S'],warehouseIds:city==='KYIV'?[1,7]:[5],amount:'90'},{city,label:'Other',organizationTypes:['C'],warehouseIds:city==='KYIV'?[1,7]:[5],amount:'10'}]);return d;
+}
+module.exports.currentData=currentData;
+test('current template mirrors cities, orders payroll and wholesale, excludes capitalized transport from total',()=>{
+ const [k,o]=manager.sheets(currentData(),labels);const find=(s,label)=>s.rows.findIndex(r=>r[1]===label);
+ assert.equal(find(k,'ADDITIONAL_WORK'),find(k,'SALARY_RUB')+1);assert.equal(find(o,'ADDITIONAL_WORK'),find(o,'SALARY_RUB')+1);
+ assert(find(k,'wholesaleSection')>find(k,'TAXES'));assert(find(k,'IMPORT_TRANSPORT')>find(k,'operatingExpenses'));
+ assert.equal(k.rows[find(k,'TAXES')][4],'МИХНФОП / КОНДФОП');assert.equal(o.rows[find(o,'TAXES')][2],'doNotFill');
+ const total=k.rows[find(k,'operatingExpenses')][7];assert.equal(total.value,'25');assert(!total.formula.includes('H'+(find(k,'IMPORT_TRANSPORT')+1)));
+ const numbers=[...k.rows,...o.rows].filter(r=>typeof r[0]==='number').map(r=>r[0]);assert.deepEqual(numbers,numbers.map((_,i)=>i+1));
+ for(const s of [k,o]){assert.equal(s.rows[find(s,'masterIncome')][5],s===k?1:5);assert.equal(s.rows[find(s,'baseGrossProfit — Other')][7].value,'10');assert(s.bordered);}
+ const xml=new TextDecoder().decode(writer.build([k,o]));assert.match(xml,/<borders count="2">/);assert.match(xml,/<c r="I5" s="4"/);assert.doesNotMatch(xml,/<f>.*ROUND/);
+});
+test('city master maps take precedence over legacy aliases and null remains unavailable',()=>{
+ const d=currentData();assert.equal(manager.masterDocuments(d).length,2);assert.deepEqual(manager.masterDocuments(d).map(r=>r.city),['KYIV','ODESA']);
+ d.masterClassesByCity.KYIV=null;d.cities[0].grossProfit=null;d.cities[0].profit=null;
+ const k=manager.sheets(d,labels)[0];assert.equal(k.rows.find(r=>r[1]==='masterIncome')[7],'—');assert.equal(k.rows.find(r=>r[1]==='profit — kyiv')[7],'—');
+});
+test('Java 2026-09-30 fixture preserves official totals, warehouse selections and full category coverage',()=>{
+ const d=require('./fixtures/profit-template-java.json'), sheets=manager.sheets(d,labels);
+ for(const [i,city] of ['KYIV','ODESA'].entries()){
+  const s=sheets[i],actual=d.cities.find(c=>c.city===city);
+  assert.equal(s.rows.find(r=>r[1]==='profit — '+(i?'odesa':'kyiv'))[7].value,actual.profit);
+  assert.equal(s.rows.find(r=>r[1]==='masterIncome')[5],i?5:1);
+  assert.equal(s.rows.filter(r=>String(r[1]).startsWith('baseGrossProfit — ')).length,7);
+  const bank=s.rows.find(r=>r[1]==='Услуги банка');assert.equal(bank[5],i?'—':'allWarehouses');assert.equal(bank[6],i?'—':'allWarehouses');
+  assert(!s.rows.some(r=>r[1]==='employeeTotal'));
+ }
+ assert.equal(manager.masterDocuments(d).length,4);assert.equal(manager.masterDocuments(d).filter(r=>r.city==='KYIV').length,2);
+});

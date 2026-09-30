@@ -522,3 +522,11 @@
 #lpt-groups{display:flex;flex-wrap:wrap;gap:24px}#lpt-groups section{flex:1 1 320px;max-width:600px;min-width:0}
 #lpt-groups input{width:100%;max-width:100%}#lpt-groups td:last-child{width:125px}#lpt-groups section>.button{margin-top:10px}
 #lpt-error{color:#b32d2e;font-weight:600}#lpt-state{font-weight:600}
+
+/* The website and manager workbook share the same ordered rows. */
+.lavr-profit-template-table { min-width:1100px; border-collapse:collapse; }
+.lavr-profit-template-table td,.lavr-profit-template-table th { border:1px solid #aeb8c4; vertical-align:top; }
+.lavr-profit-template-heading { background:#e8eef5; font-weight:600; }
+.lavr-profit-template-table .lavr-profit-number { text-align:right; white-space:nowrap; }
+#lavr-profit-manager-template details { margin:16px 0; }
+#lavr-profit-manager-template summary { cursor:pointer; font-size:17px; font-weight:600; margin-bottom:12px; }

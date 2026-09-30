@@ -82,10 +82,10 @@ test('new API: detailed selections, zero manual row, full XLSX, coherent audit s
  assert.match(await page.locator('#lavr-profit-audit-note').innerText(),/truncat|500/i);
  assert.match(await page.locator('#lavr-profit-controls-content').textContent(),/Problematic periods/);
  await page.locator('#lavr-profit-manual').evaluate(el=>el.open=true);
- await page.locator('#lavr-profit-kyiv-salary').fill('0');
+ await page.locator('#lavr-profit-additional-salary').fill('0');
  assert.equal(await page.locator('#lavr-profit-export-xlsx').isDisabled(),true);
  await page.locator('#lavr-profit-calculate').click();await page.waitForFunction(()=>!document.getElementById('lavr-profit-export-xlsx').disabled);
- assert.equal(requests.at(-1).kyiv,'0');
+ assert.equal(requests.at(-1).kyiv,null);
  await page.screenshot({path:path.join(output,'desktop.png'),fullPage:true});
  await page.setViewportSize({width:390,height:844});
  await page.screenshot({path:path.join(output,'mobile.png'),fullPage:true});

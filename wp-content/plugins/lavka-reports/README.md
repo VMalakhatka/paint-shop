@@ -143,7 +143,9 @@ See [consumer contract](../../../docs/api/FOLIO_PROFIT_SAVED_REPORTS_FRONTEND.md
 and [operator runbook](../../../docs/OPERATIONS_RUNBOOK.md#прибыль).
 
 
-## Manager layout and retail/wholesale taxes (0.6.0)
+## Historical manager layout and retail/wholesale taxes (0.6.0)
+
+This section describes saved revisions under the earlier rules. New calculations use the 0.8.0 contract below.
 
 The first two XLSX sheets follow the manager template: number, expense, short
 organization name, operation, purpose, cash warehouses, bank warehouses, report
@@ -180,3 +182,13 @@ use Java's actual firm lists; unallocated taxes and documents remain visible.
 See [frontend contract](../../../docs/api/FOLIO_PROFIT_SAVED_REPORTS_FRONTEND.md)
 and [manager guide](../../../docs/PROFIT_REPORT_MANAGER_RU.md). Matching Java API
 and migration must be deployed before using the new editor/calculation guard.
+
+## Manager template (0.8.0, ruleVersion 2026-09-30.1)
+
+New calculations use `inputs.taxAllocationMethod=ALL_TAXES_KYIV`: combined retail/wholesale taxes and all bank expenses belong to Kyiv; no employee inputs are sent. Kyiv additional work is not applicable, Odesa still defaults to 5000 with an explicit zero override. Historical saved snapshots retain their own allocation and export layout.
+
+The website and XLSX share `profit-manager.js` rows: mirrored city expenses, additional work directly after salary, Kyiv wholesale below city expenses, capitalized import transport below the operating total, master classes for each city and named profit totals with customer-category detail. Both city sheets have borders, continuous numbering and a blank manager-check column. Java owns all amounts and selections; the frontend does not reclassify documents.
+
+Additive DTO fields: `masterClassesByCity`, `masterClassDocumentsByCity`, `grossProfitLines`. Old master-class aliases are used only when city maps are absent, avoiding duplicate Odesa audit lines. New tax IDs are `KYIV_TAXES` / `ODESA_TAXES`. Null amounts remain unavailable, not zero. Selection columns show actual backend filters, including Kyiv gross warehouses 1/7 and MK warehouse 1 (Odesa 5). Gross categories sum to base gross profit before MK adjustment; they are not added a second time.
+
+Manager instructions: [PROFIT_REPORT_MANAGER_RU.md](../../../docs/PROFIT_REPORT_MANAGER_RU.md). New rules require the matching Java version; deploying WordPress alone preserves the old payload display.

@@ -2009,3 +2009,60 @@ msgstr "Налоги ОПТ."
 #: inc/class-profit-tax-settings.php inc/class-profit-report.php
 msgid "No firms configured"
 msgstr "Фирмы не указаны"
+
+msgid "Do not fill"
+msgstr "Не заполнять"
+
+msgid "City expenses"
+msgstr "Расходы города"
+
+msgid "Kyiv wholesale"
+msgstr "Опт Киева"
+
+msgid "Outgoing invoice"
+msgstr "Расходная накладная"
+
+msgid "Incoming invoice: ВОЗВРАТ"
+msgstr "Приходная накладная: ВОЗВРАТ"
+
+msgid "Profit totals"
+msgstr "Итоги прибыли"
+
+msgid "Master classes"
+msgstr "Мастер-классы"
+
+msgid "Kyiv master class"
+msgstr "Мастер-класс Киева"
+
+msgid "Manager table and selection criteria"
+msgstr "Таблица менеджера и отборы"
+
+msgid "Gross profit by customer category"
+msgstr "Валовая прибыль по категориям клиентов"
+
+msgid "New calculations assign all retail and wholesale taxes and bank expenses to Kyiv. Employee proportions are not used. Saved reports retain their original rules."
+msgstr "В новых расчётах все налоги розницы и опта и банковские расходы относятся на Киев. Пропорции работников не используются. Сохранённые отчёты сохраняют исходные правила."
+
+msgid "In Excel, the last column is for your manual check. Editing Excel does not change the website."
+msgstr "В Excel последняя колонка — для ручной проверки. Изменения в Excel не меняют сайт."
+
+msgid "Additional work follows salary: Kyiv is not applicable (0), Odesa defaults to UAH 5000. Enter 0 explicitly to cancel the Odesa default."
+msgstr "Дополнительные работы идут после зарплаты: Киев — не заполнять (0), Одесса — по умолчанию 5000 грн. Чтобы отменить доплату Одессы, укажите 0."
+
+msgid "Retail and wholesale taxes are combined in Kyiv. Odesa is 0. Employee proportions are not used for new calculations."
+msgstr "Налоги розницы и опта объединены на Киеве. Одесса — 0. Пропорции работников в новых расчётах не используются."
+
+msgid "Excel shows selection criteria, totals and a blank manager check column. Import transport is below operating expenses and is not deducted again. Editing Excel does not change the website."
+msgstr "В Excel есть отборы, итоги и пустая колонка проверки менеджера. Импортный транспорт находится ниже общих расходов и повторно не вычитается. Изменения в Excel не меняют сайт."
+
+msgid "For a new calculation, check Odesa additional work and the RUB rate if applicable. Leave additional work blank for the default; enter 0 to cancel it."
+msgstr "Для нового расчёта проверьте доплату Одессы и курс RUB, если нужен. Пустая доплата — значение по умолчанию; 0 отменяет доплату."
+
+msgid "Add all historical and current firm codes. No dates are needed: the report uses tax documents for the selected month. All retail and wholesale taxes belong to Kyiv."
+msgstr "Добавьте все исторические и текущие коды фирм. Даты не нужны: отчёт берёт налоговые документы выбранного месяца. Все налоги розницы и опта относятся на Киев."
+
+msgid "Customer category codes"
+msgstr "Коды категорий клиентов"
+
+msgid "Line count"
+msgstr "Количество строк"

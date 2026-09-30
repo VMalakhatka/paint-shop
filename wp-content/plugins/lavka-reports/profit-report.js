@@ -15,7 +15,6 @@
         lastOperation: 'summary',
         reportParams: null,
         salaryOverride: false,
-        kyivSalaryOverride: false,
         revision: 0,
         dirty: false,
         exporting: false,
@@ -57,11 +56,6 @@
         auditUnclassified: document.getElementById('lavr-profit-audit-unclassified'),
         auditBody: document.querySelector('#lavr-profit-audit-table tbody'),
         exportAudit: document.getElementById('lavr-profit-export-audit'),
-        taxShare: document.getElementById('lavr-profit-tax-share'),
-        taxMode: document.getElementById('lavr-profit-tax-mode'),
-        kyivEmployees: document.getElementById('lavr-profit-kyiv-employees'),
-        odesaEmployees: document.getElementById('lavr-profit-odesa-employees'),
-        taxShareHelp: document.getElementById('lavr-profit-tax-share-help'),
         rubRate: document.getElementById('lavr-profit-rub-rate'),
         masterClass: document.getElementById('lavr-profit-master-class'),
         masterAudit: document.getElementById('lavr-profit-master-audit'),
@@ -196,16 +190,10 @@
         const params = { month: nodes.month.value };
         const fields = [nodes.rubRate];
         if (state.salaryOverride) fields.push(nodes.additionalSalary);
-        if (state.kyivSalaryOverride && !nodes.kyivSalary.disabled) fields.push(nodes.kyivSalary);
         fields.forEach((field) => {
             const value = field.value.trim();
             if (value !== '') params[field.dataset.param] = value.replace(',', '.');
         });
-        const taxPercent = nodes.taxShare.value.trim().replace(',', '.');
-        if (nodes.taxMode.value === 'counts') {
-            params.kyivEmployeeCount = nodes.kyivEmployees.value;
-            params.odesaEmployeeCount = nodes.odesaEmployees.value;
-        } else if (taxPercent !== '') params.odesaTaxShare = shiftDecimal(taxPercent, -2);
         return params;
     }
 
@@ -372,40 +360,15 @@
 
     function applyInitialInputs(inputs) {
         if (!inputs) return;
-        if (inputs.kyivEmployeeCount != null && inputs.odesaEmployeeCount != null) {
-            nodes.taxMode.value = 'counts';
-            nodes.kyivEmployees.value = inputs.kyivEmployeeCount;
-            nodes.odesaEmployees.value = inputs.odesaEmployeeCount;
-        } else { nodes.taxMode.value = 'share'; }
-        updateEmployeeMode();
-        if (nodes.taxShare.value === '' && inputs.odesaTaxShare != null) {
-            nodes.taxShare.value = shiftDecimal(inputs.odesaTaxShare, 2);
-        }
         if (nodes.rubRate.value === '' && inputs.rubToUahRate != null) {
             nodes.rubRate.value = String(inputs.rubToUahRate);
         }
         if (!state.salaryOverride) nodes.additionalSalary.value = inputs.odesaAdditionalSalary == null ? '' : String(inputs.odesaAdditionalSalary);
         const source = inputs.odesaAdditionalSalarySource === 'REQUEST_OVERRIDE' ? labels.salaryOverride : labels.salaryDefault;
         nodes.salarySource.textContent = labels.salaryApplied + ': ' + formatMoney(inputs.odesaAdditionalSalary, 'UAH') + ' · ' + source;
-        nodes.kyivSalary.disabled = !Object.prototype.hasOwnProperty.call(inputs, 'kyivAdditionalSalary');
-        if (!state.kyivSalaryOverride) nodes.kyivSalary.value = inputs.kyivAdditionalSalary == null ? '' : String(inputs.kyivAdditionalSalary);
-        nodes.kyivSalarySource.textContent = nodes.kyivSalary.disabled ? labels.legacyKyiv : labels.salaryApplied + ': ' + formatMoney(inputs.kyivAdditionalSalary, 'UAH') + ' · ' + (inputs.kyivAdditionalSalarySource === 'REQUEST_OVERRIDE' ? labels.salaryOverride : labels.salaryDefault);
-        updateTaxShareHelp();
-    }
-
-    function updateEmployeeMode() {
-        document.getElementById('lavr-profit-count-fields').hidden = nodes.taxMode.value !== 'counts';
-        document.getElementById('lavr-profit-legacy-share').hidden = nodes.taxMode.value !== 'share';
-    }
-
-    function updateTaxShareHelp() {
-        const value = parseFloat(nodes.taxShare.value.replace(',', '.'));
-        const base = labels.threeOfSeven && Math.abs(value - (3 / 7 * 100)) < 0.02
-            ? labels.threeOfSeven
-            : '';
-        nodes.taxShareHelp.textContent = base
-            ? labels.shareHelp + ' ' + base + '.'
-            : labels.shareHelp;
+        nodes.kyivSalary.disabled = true;
+        nodes.kyivSalary.value = '0';
+        nodes.kyivSalarySource.textContent = labels.doNotFill;
     }
 
     function metric(label, value, emphasized) {
@@ -553,7 +516,7 @@
                 poolList.appendChild(textElement('dd', '', formatMoney(pools[key], 'UAH')));
             });
             nodes.controlsContent.appendChild(poolList);
-            nodes.controlsContent.appendChild(textElement('p', 'description', labels.taxFormulaHelp));
+            nodes.controlsContent.appendChild(textElement('p', 'description', window.LavkaProfitManager.currentLayout(state.report||{})?labels.currentRulesHelp:labels.taxFormulaHelp));
         }
         if (controls.auditTruncated) {
             nodes.controlsContent.appendChild(textElement('p', 'notice notice-warning inline lavr-profit-inline-notice', labels.auditTruncated));
@@ -573,7 +536,8 @@
         safeRender(labels.appliedParameters, nodes.policy, () => renderSupplement(data));
         safeRender(labels.appliedParameters, null, () => applyInitialInputs(data.inputs || {}));
         safeRender(labels.profitByCity, nodes.cities, () => renderCities(data.cities || []));
-        safeRender(labels.masterTitle, nodes.masterClass, () => renderMasterClass(data.masterClass));
+        safeRender(labels.managerTemplate, document.getElementById('lavr-profit-manager-template'), () => renderManagerTemplate(data));
+        safeRender(labels.masterTitle, nodes.masterClass, () => renderMasterClass(data));
         nodes.masterAudit.hidden = true;
         renderExpenseFilters();
         safeRender(labels.allExpenseRows, document.getElementById('lavr-profit-expenses-table'), renderExpenses);
@@ -626,20 +590,53 @@
         renderGrid(document.getElementById('lavr-profit-audit-table'), documentColumns(rows), rows, sectionUnavailable(state.audit, 'EXPENSES') ? labels.unavailable : null);
     }
 
-    function renderMasterClass(data) {
+    function renderManagerTemplate(data) {
+        const target=document.getElementById('lavr-profit-manager-template');
+        clear(target); target.hidden=!window.LavkaProfitManager.currentLayout(data);
+        if(target.hidden)return;
+        target.appendChild(textElement('h2','',labels.managerTemplate));
+        window.LavkaProfitManager.sheets(data,labels).forEach(sheet=>{
+            const details=document.createElement('details');details.open=true;
+            details.appendChild(textElement('summary','',sheet.name));
+            const wrap=textElement('div','lavr-profit-table-wrap',''),table=textElement('table','widefat lavr-profit-template-table','');
+            const body=document.createElement('tbody'), headings=new Set(sheet.headerRows), merged=new Set(sheet.mergeRows);
+            sheet.rows.forEach((row,i)=>{
+                const tr=document.createElement('tr');
+                if(headings.has(i+1))tr.className='lavr-profit-template-heading';
+                (merged.has(i+1)?row.slice(0,1):Array.from({length:8},(_,c)=>row[c]??'')).forEach(value=>{
+                    const typed=value&&typeof value==='object';
+                    const text=typed?(value.money?formatMoney(value.value,'UAH'):printable(value.value)):printable(value);
+                    const cell=textElement(headings.has(i+1)?'th':'td',typed?'lavr-profit-number':'',text);
+                    if(merged.has(i+1))cell.colSpan=8;
+                    tr.appendChild(cell);
+                });body.appendChild(tr);
+            });
+            table.appendChild(body);wrap.appendChild(table);details.appendChild(wrap);target.appendChild(details);
+        });
+    }
+
+    function renderMasterClass(report) {
         clear(nodes.masterClass);
         nodes.masterClass.appendChild(textElement('h2', '', labels.masterTitle));
+        Object.entries(window.LavkaProfitManager.masterClasses(report)).forEach(([city,data])=>{
+            const target=textElement('div','lavr-profit-master-city','');
+            nodes.masterClass.appendChild(target);
+            target.appendChild(textElement('h3','',cityLabel(city)));
+            renderMasterCity(data,target);
+        });
+    }
+    function renderMasterCity(data,target) {
         if (!data) {
-            nodes.masterClass.appendChild(textElement('p', 'notice notice-error inline', labels.masterUnavailable));
+            target.appendChild(textElement('p', 'notice notice-error inline', labels.masterUnavailable));
             return;
         }
-        if (!data.articleFound) nodes.masterClass.appendChild(textElement('p', 'notice notice-error inline', labels.masterMissing));
-        nodes.masterClass.appendChild(textElement('p', '', labels.sku + ': ' + (data.sku || '') + ' · ' + labels.warehouse + ': ' + data.warehouseId));
+        if (!data.articleFound) target.appendChild(textElement('p', 'notice notice-error inline', labels.masterMissing));
+        target.appendChild(textElement('p', '', labels.sku + ': ' + (data.sku || '') + ' · ' + labels.warehouse + ': ' + data.warehouseId));
         const grid = textElement('div', 'lavr-profit-metrics', '');
         [['masterIncome', 'income'], ['masterReturns', 'returns'], ['masterNet', 'netContribution'], ['masterBase', 'grossProfitAlreadyInBase'], ['masterAdjustment', 'grossAdjustmentApplied']].forEach(([label, key]) => grid.appendChild(metric(labels[label], data[key])));
-        nodes.masterClass.appendChild(grid);
-        [['incomeLines','incomeLineCount'], ['returnLines','returnLineCount'], ['ignoredLines','ignoredLineCount'], ['duplicateLines','duplicateLineCount'], ['source','source']].forEach(([label,key]) => nodes.masterClass.appendChild(textElement('p', 'description', labels[label] + ': ' + (data[key] == null ? '' : data[key]))));
-        if (data.auditTruncated) nodes.masterClass.appendChild(textElement('p', 'notice notice-warning inline', labels.masterTruncated));
+        target.appendChild(grid);
+        [['incomeLines','incomeLineCount'], ['returnLines','returnLineCount'], ['ignoredLines','ignoredLineCount'], ['duplicateLines','duplicateLineCount'], ['source','source']].forEach(([label,key]) => target.appendChild(textElement('p', 'description', labels[label] + ': ' + (data[key] == null ? '' : data[key]))));
+        if (data.auditTruncated) target.appendChild(textElement('p', 'notice notice-warning inline', labels.masterTruncated));
     }
 
     function renderMasterAudit() {
@@ -647,22 +644,25 @@
         clear(nodes.masterAudit);
         nodes.masterAudit.hidden = false;
         nodes.masterAudit.appendChild(textElement('h3', '', labels.masterAuditTitle));
-        if (!data.masterClass || !Array.isArray(data.masterClassDocuments)) {
+        const summaries=Object.values(window.LavkaProfitManager.masterClasses(data)).filter(Boolean);
+        const documents=window.LavkaProfitManager.masterDocuments(data);
+        if (!summaries.length || (!data.masterClassDocumentsByCity && !Array.isArray(data.masterClassDocuments))) {
             nodes.masterAudit.appendChild(textElement('p', 'notice notice-error inline', labels.masterUnavailable));
             return;
         }
-        if (data.masterClass.auditTruncated) nodes.masterAudit.appendChild(textElement('p', 'notice notice-warning inline', labels.masterTruncated));
-        if (!data.masterClass.articleFound) nodes.masterAudit.appendChild(textElement('p', 'notice notice-error inline', labels.masterMissing));
+        if (summaries.some(m=>m.auditTruncated)) nodes.masterAudit.appendChild(textElement('p', 'notice notice-warning inline', labels.masterTruncated));
+        if (summaries.some(m=>!m.articleFound)) nodes.masterAudit.appendChild(textElement('p', 'notice notice-error inline', labels.masterMissing));
         const wrap = textElement('div', 'lavr-profit-table-wrap', '');
         const table = textElement('table', 'widefat striped', '');
         const head = document.createElement('thead');
         const header = document.createElement('tr');
+        header.appendChild(textElement('th','',labels.fields.city));
         ['csvDate','csvDocument','line','sku','warehouse','documentTypes','operationKind','returnFlag','accounted','quantity','unitPrice','csvSourceAmount','classification','masterIncluded','csvReason'].forEach(key => header.appendChild(textElement('th', '', labels[key])));
         head.appendChild(header); table.appendChild(head);
         const body = document.createElement('tbody');
-        data.masterClassDocuments.forEach(line => {
+        documents.forEach(line => {
             const row = document.createElement('tr');
-            [formatDate(line.documentDate), [line.documentNumber, line.documentNumberSuffix].filter(Boolean).join(' ') + ' / ' + line.documentId,
+            [cityLabel(line.city),formatDate(line.documentDate), [line.documentNumber, line.documentNumberSuffix].filter(Boolean).join(' ') + ' / ' + line.documentId,
                 line.lineNumber + ' / ' + line.movementId, line.sku, line.warehouseId,
                 [line.documentType,line.movementType].join(' / '), line.operationKind,
                 line.returnDocument ? labels.yes : labels.no, line.accounted ? labels.yes : labels.no,
@@ -671,7 +671,7 @@
             body.appendChild(row);
         });
         table.appendChild(body); wrap.appendChild(table); nodes.masterAudit.appendChild(wrap);
-        if (!data.masterClassDocuments.length) nodes.masterAudit.appendChild(textElement('p', '', labels.masterAuditEmpty));
+        if (!documents.length) nodes.masterAudit.appendChild(textElement('p', '', labels.masterAuditEmpty));
     }
 
     function renderAudit() {
@@ -803,7 +803,7 @@
             columnSpec('purposeCodes', r => {
                 if(!r.filters)return null;
                 const codes=window.LavkaProfitManager.purpose(r,taxSettings);
-                return codes?.length?codes:/_TAX_(MALAFOP|KONDFOP)$/.test(r.lineId || '')?labels.noTaxFirms:labels.anyPurpose;
+                return codes?.length?codes:/(?:_TAX_(?:MALAFOP|KONDFOP)|_TAXES)$/.test(r.lineId || '')?labels.noTaxFirms:labels.anyPurpose;
             }),
             columnSpec('cashWarehouses', r => warehouseSelection(r.filters, 'cash')),
             columnSpec('bankWarehouses', r => warehouseSelection(r.filters, 'bank')),
@@ -957,8 +957,11 @@
         add(labels.auditTitle, documentColumns(documents), documents, sectionUnavailable(data, 'EXPENSES') ? labels.unavailable + '. ' + labels.partialHelp : data.controls && data.controls.auditTruncated ? labels.auditTruncated : labels.auditCoverage);
         const diagnostics = diagnosticRows(data);
         add(labels.periodDiagnostics, documentColumns(diagnostics), diagnostics, labels.diagnosticsHelp + (data.periodDiagnosticsTruncated ? ' ' + labels.diagnosticsTruncated : ''));
-        add(labels.masterTitle, dynamicColumns(data.masterClass ? [data.masterClass] : []), data.masterClass ? [data.masterClass] : [], data.masterClass ? labels.exportSnapshot : labels.masterUnavailable);
-        add(labels.masterAuditTitle, dynamicColumns(data.masterClassDocuments || [], ['documentDate', 'documentNumber', 'documentId', 'lineNumber', 'movementId', 'sku', 'amount']), data.masterClassDocuments || [], data.masterClass && data.masterClass.auditTruncated ? labels.masterTruncated : labels.exportSnapshot);
+        const masters = Object.entries(LavkaProfitManager.masterClasses(data)).filter(([,value])=>value).map(([city,value])=>({...value,city}));
+        const masterDocs = LavkaProfitManager.masterDocuments(data);
+        add(labels.masterTitle, dynamicColumns(masters, ['city','sku','income','returns','netContribution']), masters, masters.length ? labels.exportSnapshot : labels.masterUnavailable);
+        add(labels.masterAuditTitle, dynamicColumns(masterDocs, ['city','documentDate','documentNumber','documentId','lineNumber','movementId','sku','amount']), masterDocs, masters.some(row=>row.auditTruncated) ? labels.masterTruncated : labels.exportSnapshot);
+        if (Array.isArray(data.grossProfitLines)) add(labels.grossProfitDetails, dynamicColumns(data.grossProfitLines, ['city','label','organizationTypes','warehouseIds','amount']), data.grossProfitLines);
         // Preserve unallocated lines and additional fields without inventing city allocations.
         const rawLines = Array.isArray(data.expenseLines) ? data.expenseLines : (data.expenses || []);
         add(labels.allExpenseRows, dynamicColumns(rawLines), rawLines);
@@ -987,20 +990,18 @@
         }
     }
 
-    nodes.kyivSalary.addEventListener('input', () => { state.kyivSalaryOverride = nodes.kyivSalary.value.trim() !== ''; });
     nodes.additionalSalary.addEventListener('input', () => { state.salaryOverride = nodes.additionalSalary.value.trim() !== ''; });
     nodes.month.addEventListener('change', () => {
         state.salaryOverride = false;
-        state.kyivSalaryOverride = false;
-        nodes.kyivSalary.value = "";
-        nodes.kyivSalarySource.textContent = "";
+        nodes.kyivSalary.value = "0";
+        nodes.kyivSalarySource.textContent = labels.doNotFill;
         nodes.additionalSalary.value = '';
         nodes.salarySource.textContent = '';
     });
 
     nodes.loadAudit.dataset.defaultLabel = nodes.loadAudit.textContent.trim();
     nodes.exportXlsx.addEventListener('click', exportWorkbook);
-    [nodes.month, nodes.additionalSalary, nodes.kyivSalary, nodes.taxShare, nodes.rubRate, nodes.taxMode, nodes.kyivEmployees, nodes.odesaEmployees].forEach(field => {
+    [nodes.month, nodes.additionalSalary, nodes.rubRate].forEach(field => {
         field.addEventListener('input', invalidateResult);
         field.addEventListener('change', invalidateResult);
     });
@@ -1009,8 +1010,6 @@
     nodes.recalculate.addEventListener('click', () => loadReport('summary'));
     nodes.loadAudit.addEventListener('click', () => loadReport('audit'));
     nodes.exportAudit.addEventListener('click', exportAudit);
-    nodes.taxShare.addEventListener('input', updateTaxShareHelp);
-    nodes.taxMode.addEventListener('change', updateEmployeeMode);
     [nodes.auditCity, nodes.auditCategory, nodes.auditTreatment].forEach((select) => select.addEventListener('change', renderAuditRows));
     nodes.auditUnclassified.addEventListener('change', renderAuditRows);
 
@@ -1025,11 +1024,10 @@
                 state.report = data; state.audit = data; state.reportParams = {month: data.month};
                 state.savedMetadata = {revisionId: wrapper.revisionId, requestId: wrapper.requestId, status: wrapper.status, auditComplete: wrapper.auditComplete, published: wrapper.published};
                 nodes.month.value = data.month;
-                state.salaryOverride = false; state.kyivSalaryOverride = false;
-                [nodes.taxShare,nodes.rubRate,nodes.additionalSalary,nodes.kyivSalary].forEach(n => { n.value = ''; });
+                state.salaryOverride = false;
+                [nodes.rubRate,nodes.additionalSalary].forEach(n => { n.value = ''; });
                 hideError(); renderReport(); renderAudit();
                 state.salaryOverride = data.inputs && data.inputs.odesaAdditionalSalarySource === 'REQUEST_OVERRIDE';
-                state.kyivSalaryOverride = data.inputs && data.inputs.kyivAdditionalSalarySource === 'REQUEST_OVERRIDE';
                 showRunState(labels.reportMonth + ': ' + data.month + ' · ' + wrapper.status + ' · ' + wrapper.revisionId, 'success');
                 updateAvailability();
             },

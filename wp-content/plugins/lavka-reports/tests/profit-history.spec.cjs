@@ -57,21 +57,21 @@ test('Java saved DTO opens full stored report and exports without live audit',as
 
 test('late saved detail cannot overwrite an edited month',async()=>{const{page,errors}=await setup('slowOpen');await range(page);await page.locator('#lph-months button').first().click();await page.locator('#lavr-profit-month').fill('2025-09');await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);assert.equal(await page.locator('#lavr-profit-month').inputValue(),'2025-09');assert.equal(await page.locator('#lavr-profit-result').isHidden(),true);assert.deepEqual(errors,[]);await page.close();});
 
-test('headcounts reach Java without legacy share and export the manager tax layout',async()=>{
+test('historical headcounts stay in saved export, new requests omit obsolete allocation inputs',async()=>{
  const {page,requests,errors}=await setup('headcount');
  await page.locator('#lph-months button').first().click();await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);
- assert.equal(await page.locator('#lavr-profit-tax-mode').inputValue(),'counts');
- assert.equal(await page.locator('#lavr-profit-kyiv-employees').inputValue(),'1');
+ assert.equal(await page.locator('#lavr-profit-tax-mode').count(),0);
+ assert.equal(await page.locator('#lavr-profit-kyiv-employees').count(),0);
  assert.match(await page.locator('#lavr-profit-result').innerText(),/Retail taxes/);
  const download=page.waitForEvent('download');await page.locator('#lavr-profit-export-xlsx').click();await(await download).saveAs(path.join(out,'manager-java.xlsx'));
  await page.locator('#lavr-profit-manual summary').click();
- await page.locator('#lavr-profit-kyiv-employees').fill('7');await page.locator('#lavr-profit-odesa-employees').fill('0');
+ await page.locator('#lavr-profit-additional-salary').fill('0');
  assert.equal(await page.locator('#lavr-profit-export-xlsx').isDisabled(),true);
  await page.screenshot({path:path.join(out,'manager-desktop.png'),fullPage:false});
  await page.setViewportSize({width:390,height:844});await page.screenshot({path:path.join(out,'manager-mobile.png'),fullPage:false});
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true);
  await page.locator('#lavr-profit-recalculate').click();await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);
- const q=requests.find(r=>r.operation==='calculate');assert.equal(q.kyivEmployeeCount,'7');assert.equal(q.odesaEmployeeCount,'0');assert.equal(q.odesaTaxShare,undefined);assert.deepEqual(errors,[]);await page.close();
+ const q=requests.find(r=>r.operation==='calculate');assert.equal(q.kyivEmployeeCount,undefined);assert.equal(q.odesaEmployeeCount,undefined);assert.equal(q.odesaTaxShare,undefined);assert.deepEqual(errors,[]);await page.close();
 });
 
 test('a multi-month calculation pins one tax settings version and blocks unsaved edits',async()=>{
@@ -107,5 +107,31 @@ test('Java tax DTO renders every unallocated document and exports its settings s
  const unknown=sheets.find(s=>s.name==='Unallocated taxes');assert.equal(unknown.rows.length,3+report.taxDetails.unallocatedDocuments.length);
  const download=page.waitForEvent('download');await page.locator('#lavr-profit-export-xlsx').click();await(await download).saveAs(path.join(out,'tax-settings-java.xlsx'));
  await page.locator('#lavr-profit-tax-details').screenshot({path:path.join(out,'tax-details-desktop.png')});
+ assert.deepEqual(errors,[]);await page.close();
+});
+
+test('current Java template renders mirrored city sheets and exports both master classes once',async()=>{
+ const fixture=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/profit-template-java.json'),'utf8'));
+ const {page,errors}=await setup();
+ await page.evaluate(report=>window.LavkaProfitViewer.showSaved({month:report.month,revisionId:91,status:'COMPLETED',auditComplete:true,report}),fixture);
+ const tables=page.locator('#lavr-profit-manager-template table');assert.equal(await tables.count(),2);
+ for(const city of ['KYIV','ODESA']){
+  const table=tables.nth(city==='KYIV'?0:1);const text=await table.innerText();
+  assert(text.indexOf('Дополнительные работы')>text.indexOf('Зарплата RUB'));
+  assert(text.indexOf('Дополнительные работы')<text.indexOf('Услуги банка'));
+  assert.match(text,/Налоги/);assert.match(text,/Мои магазины/);
+ }
+ assert.equal(await page.locator('#lavr-profit-tax-mode').count(),0);
+ assert.equal(await page.locator('#lavr-profit-kyiv-salary').isDisabled(),true);
+ const sheets=await page.evaluate(report=>window.LavkaProfitViewer.sheets({month:report.month,revisionId:91,report}),fixture);
+ assert(sheets[0].bordered&&sheets[1].bordered);
+ const audit=sheets.find(s=>s.name==='Master class invoice audit');assert(audit);
+ const expected=Object.values(fixture.masterClassDocumentsByCity).reduce((n,rows)=>n+rows.length,0);
+ assert.equal(audit.rows.length-3,expected);
+ const download=page.waitForEvent('download');await page.locator('#lavr-profit-export-xlsx').click();await(await download).saveAs(path.join(out,'manager-current.xlsx'));
+ await page.locator('#lavr-profit-manager-template').screenshot({path:path.join(out,'manager-current-desktop.png')});
+ await page.setViewportSize({width:390,height:844});await page.screenshot({path:path.join(out,'manager-current-mobile.png'),fullPage:false});
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true);
+ assert.doesNotMatch(await page.locator('#lavr-profit-warnings').innerText(),/CLIENT_SECTION_UNAVAILABLE/);
  assert.deepEqual(errors,[]);await page.close();
 });
