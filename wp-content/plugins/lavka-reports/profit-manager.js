@@ -20,6 +20,7 @@
         const numeric=Number(value), date=new Date(value==null?NaN:Number.isFinite(numeric)?(numeric<100000000000?numeric*1000:numeric):value);
         return Number.isNaN(date.getTime())?'—':new Intl.DateTimeFormat('uk-UA',{timeZone:'Europe/Kyiv',dateStyle:'short',timeStyle:'short'}).format(date);
     }
+    const hiddenOdesaPlaceholder = row => ['ODESA_SALARY_RUB','ODESA_BANK_SERVICES','ODESA_TAXES','ODESA_ACCOUNTING'].includes(row.lineId) && row.source==='NOT_APPLICABLE' && row.amount!=null && row.profitImpact!=null && Number(row.amount)===0 && Number(row.profitImpact)===0;
     function templateSheets(data, t) {
         let sequence=0;
         return ['KYIV','ODESA'].map(city=>{
@@ -31,7 +32,7 @@
             heading(name);rows[0][7]=data.month;
             rows.push(['',t.snapshot,'',snapshotDate(data.calculatedAt),'','','',data.complete?t.complete:t.incomplete,'']);
             rows.push(['№',t.fields.label,t.fields.expenseCodes,t.fields.operationTypes,t.fields.purposeCodes,t.fields.cashWarehouses,t.fields.bankWarehouses,t.siteAmount,t.managerCheck]);headings.push(3);
-            const lines=(data.expenseLines||[]).filter(r=>r.city===city).slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
+            const lines=(data.expenseLines||[]).filter(r=>r.city===city&&!hiddenOdesaPlaceholder(r)).slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
             const wholesale=line=>['KYIV_RENT_WHOLESALE','KYIV_PHONE_KAL'].includes(line.lineId);
             const capitalized=line=>line.accountingTreatment==='CAPITALIZED_IN_INVENTORY';
             const refs=[];
@@ -55,8 +56,8 @@
             heading(t.masterTitle);
             const mk=masterClasses(data)[city];
             const mkRefs={};
-            for(const [key,label] of [['income',t.masterIncome],['returns',t.masterReturns],['netContribution',t.masterNet],['grossProfitAlreadyInBase',t.masterBase],['grossAdjustmentApplied',t.masterAdjustment]]){
-                const expression=key==='netContribution'&&mk?.income!=null&&mk?.returns!=null?`H${mkRefs.income}-H${mkRefs.returns}`:key==='grossAdjustmentApplied'&&mk?.netContribution!=null&&mk?.grossProfitAlreadyInBase!=null?`H${mkRefs.netContribution}-H${mkRefs.grossProfitAlreadyInBase}`:null;
+            for(const [key,label] of [['income',t.masterIncome],['returns',t.masterReturns],['netContribution',t.masterNet]]){
+                const expression=key==='netContribution'&&mk?.income!=null&&mk?.returns!=null?`H${mkRefs.income}-H${mkRefs.returns}`:null;
                 mkRefs[key]=amountRow(label,mk?.[key],expression);
                 if(key==='income'||key==='returns'){
                     const row=rows[rows.length-1];row[2]=mk?.sku||'—';row[3]=key==='income'?t.outgoingInvoice:t.returnInvoice;row[4]='—';row[5]=mk?.warehouseId??'—';row[6]='—';
@@ -64,13 +65,13 @@
             }
             heading(t.profitTotals);
             const grossLines=(data.grossProfitLines||[]).filter(r=>r.city===city).slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
-            const base=amountRow(t.fields.baseGrossProfit+' — '+name,result.baseGrossProfit,null,(grossLines[0]?.warehouseIds||[]).join(' / '));
+            amountRow(t.fields.baseGrossProfit+' — '+name,result.baseGrossProfit,null,(grossLines[0]?.warehouseIds||[]).join(' / '));
             grossLines.forEach(line=>{
                 amountRow(t.fields.baseGrossProfit+' — '+line.label,line.amount,null,(line.warehouseIds||[]).join(' / '));
                 rows[rows.length-1][2]=(line.organizationTypes||[]).join(' / ');
             });
             // City totals remain authoritative, even when one source/section is unavailable.
-            const gross=amountRow(t.fields.grossProfit+' — '+name,result.grossProfit,result.baseGrossProfit!=null&&mk?.grossAdjustmentApplied!=null&&Number(mk.grossAdjustmentApplied)===Number(result.manualGrossAdjustments)?`H${base}+H${mkRefs.grossAdjustmentApplied}`:null);
+            const gross=amountRow(t.fields.grossProfit+' — '+name,result.grossProfit);
             const op=amountRow(t.fields.operatingExpenses+' — '+name,result.operatingExpenses,`H${expenses}`);
             amountRow(t.fields.profit+' — '+name,result.profit,result.grossProfit!=null&&result.operatingExpenses!=null?`H${gross}-H${op}`:null);
             rows.push([t.managerCriteriaHelp]);merges.push(rows.length);

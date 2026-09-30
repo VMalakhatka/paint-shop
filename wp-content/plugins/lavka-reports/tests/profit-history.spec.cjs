@@ -117,10 +117,11 @@ test('current Java template renders mirrored city sheets and exports both master
  const tables=page.locator('#lavr-profit-manager-template table');assert.equal(await tables.count(),2);
  for(const city of ['KYIV','ODESA']){
   const table=tables.nth(city==='KYIV'?0:1);const text=await table.innerText();
-  assert(text.indexOf('Дополнительные работы')>text.indexOf('Зарплата RUB'));
-  assert(text.indexOf('Дополнительные работы')<text.indexOf('Услуги банка'));
-  assert.match(text,/Налоги/);assert.match(text,/Мои магазины/);
+  if(city==='KYIV'){assert(text.indexOf('Дополнительные работы')>text.indexOf('Зарплата RUB'));assert(text.indexOf('Дополнительные работы')<text.indexOf('Услуги банка'));assert.match(text,/Налоги/);}
+  else {assert.doesNotMatch(text,/Зарплата RUB|Услуги банка|Налоги —|Бухгалтерские услуги/);assert(text.indexOf('Дополнительные работы')>text.indexOf('Зарплата по документам'));}
+  assert.doesNotMatch(text,/Gross profit already included|Applied gross adjustment/);assert.match(text,/Мои магазины/);
  }
+ assert.equal(await page.locator('#lavr-profit-master-class .lavr-profit-metric').count(),6);
  assert.equal(await page.locator('#lavr-profit-tax-mode').count(),0);
  assert.equal(await page.locator('#lavr-profit-kyiv-salary').isDisabled(),true);
  const sheets=await page.evaluate(report=>window.LavkaProfitViewer.sheets({month:report.month,revisionId:91,report}),fixture);

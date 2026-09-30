@@ -57,9 +57,9 @@ function currentData(){
 module.exports.currentData=currentData;
 test('current template mirrors cities, orders payroll and wholesale, excludes capitalized transport from total',()=>{
  const [k,o]=manager.sheets(currentData(),labels);const find=(s,label)=>s.rows.findIndex(r=>r[1]===label);
- assert.equal(find(k,'ADDITIONAL_WORK'),find(k,'SALARY_RUB')+1);assert.equal(find(o,'ADDITIONAL_WORK'),find(o,'SALARY_RUB')+1);
+ assert.equal(find(k,'ADDITIONAL_WORK'),find(k,'SALARY_RUB')+1);assert.equal(find(o,'ADDITIONAL_WORK'),find(o,'SALARY')+1);
  assert(find(k,'wholesaleSection')>find(k,'TAXES'));assert(find(k,'IMPORT_TRANSPORT')>find(k,'operatingExpenses'));
- assert.equal(k.rows[find(k,'TAXES')][4],'МИХНФОП / КОНДФОП');assert.equal(o.rows[find(o,'TAXES')][2],'doNotFill');
+ assert.equal(k.rows[find(k,'TAXES')][4],'МИХНФОП / КОНДФОП');assert.equal(find(o,'TAXES'),-1);
  const total=k.rows[find(k,'operatingExpenses')][7];assert.equal(total.value,'25');assert(!total.formula.includes('H'+(find(k,'IMPORT_TRANSPORT')+1)));
  const numbers=[...k.rows,...o.rows].filter(r=>typeof r[0]==='number').map(r=>r[0]);assert.deepEqual(numbers,numbers.map((_,i)=>i+1));
  for(const s of [k,o]){assert.equal(s.rows[find(s,'masterIncome')][5],s===k?1:5);assert.equal(s.rows[find(s,'baseGrossProfit — Other')][7].value,'10');assert(s.bordered);}
@@ -77,8 +77,17 @@ test('Java 2026-09-30 fixture preserves official totals, warehouse selections an
   assert.equal(s.rows.find(r=>r[1]==='profit — '+(i?'odesa':'kyiv'))[7].value,actual.profit);
   assert.equal(s.rows.find(r=>r[1]==='masterIncome')[5],i?5:1);
   assert.equal(s.rows.filter(r=>String(r[1]).startsWith('baseGrossProfit — ')).length,7);
-  const bank=s.rows.find(r=>r[1]==='Услуги банка');assert.equal(bank[5],i?'—':'allWarehouses');assert.equal(bank[6],i?'—':'allWarehouses');
+  const bank=s.rows.find(r=>r[1]==='Услуги банка');if(i)assert.equal(bank,undefined);else{assert.equal(bank[5],'allWarehouses');assert.equal(bank[6],'allWarehouses');}
+  assert(!s.rows.some(r=>['masterBase','masterAdjustment'].includes(r[1])));
+  assert.equal(s.rows.find(r=>r[1]==='grossProfit — '+(i?'odesa':'kyiv'))[7].type,'number');
   assert(!s.rows.some(r=>r[1]==='employeeTotal'));
  }
  assert.equal(manager.masterDocuments(d).length,4);assert.equal(manager.masterDocuments(d).filter(r=>r.city==='KYIV').length,2);
+});
+
+test('unexpected nonzero or unavailable Odesa placeholders remain visible',()=>{
+ for(const value of ['5',null]){
+  const d=currentData(),r=d.expenseLines.find(r=>r.lineId==='ODESA_BANK_SERVICES');r.amount=value;r.profitImpact=value;
+  assert(manager.sheets(d,labels)[1].rows.some(r=>r[1]==='BANK_SERVICES'));
+ }
 });

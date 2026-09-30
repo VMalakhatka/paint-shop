@@ -397,7 +397,6 @@
             const grid = document.createElement('div');
             grid.className = 'lavr-profit-metrics';
             grid.appendChild(metric(labels.baseGrossProfit, city.baseGrossProfit));
-            grid.appendChild(metric(labels.manualGrossAdjustments, city.manualGrossAdjustments));
             grid.appendChild(metric(labels.grossProfit, city.grossProfit));
             grid.appendChild(metric(labels.operatingExpenses, city.operatingExpenses));
             grid.appendChild(metric(labels.profit, city.profit, true));
@@ -633,7 +632,7 @@
         if (!data.articleFound) target.appendChild(textElement('p', 'notice notice-error inline', labels.masterMissing));
         target.appendChild(textElement('p', '', labels.sku + ': ' + (data.sku || '') + ' · ' + labels.warehouse + ': ' + data.warehouseId));
         const grid = textElement('div', 'lavr-profit-metrics', '');
-        [['masterIncome', 'income'], ['masterReturns', 'returns'], ['masterNet', 'netContribution'], ['masterBase', 'grossProfitAlreadyInBase'], ['masterAdjustment', 'grossAdjustmentApplied']].forEach(([label, key]) => grid.appendChild(metric(labels[label], data[key])));
+        [['masterIncome', 'income'], ['masterReturns', 'returns'], ['masterNet', 'netContribution']].forEach(([label, key]) => grid.appendChild(metric(labels[label], data[key])));
         target.appendChild(grid);
         [['incomeLines','incomeLineCount'], ['returnLines','returnLineCount'], ['ignoredLines','ignoredLineCount'], ['duplicateLines','duplicateLineCount'], ['source','source']].forEach(([label,key]) => target.appendChild(textElement('p', 'description', labels[label] + ': ' + (data[key] == null ? '' : data[key]))));
         if (data.auditTruncated) target.appendChild(textElement('p', 'notice notice-warning inline', labels.masterTruncated));

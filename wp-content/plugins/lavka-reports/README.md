@@ -192,3 +192,7 @@ The website and XLSX share `profit-manager.js` rows: mirrored city expenses, add
 Additive DTO fields: `masterClassesByCity`, `masterClassDocumentsByCity`, `grossProfitLines`. Old master-class aliases are used only when city maps are absent, avoiding duplicate Odesa audit lines. New tax IDs are `KYIV_TAXES` / `ODESA_TAXES`. Null amounts remain unavailable, not zero. Selection columns show actual backend filters, including Kyiv gross warehouses 1/7 and MK warehouse 1 (Odesa 5). Gross categories sum to base gross profit before MK adjustment; they are not added a second time.
 
 Manager instructions: [PROFIT_REPORT_MANAGER_RU.md](../../../docs/PROFIT_REPORT_MANAGER_RU.md). New rules require the matching Java version; deploying WordPress alone preserves the old payload display.
+
+## Simplified manager view (0.8.1)
+
+The revised user workbook removes Odesa NOT_APPLICABLE zero placeholders for salary RUB, bank, taxes and accounting from the main website/XLSX table. Unexpected nonzero or unavailable amounts remain visible. Both cities show only master-class income, returns and net contribution. The technical base/adjustment fields remain in source data and detailed exports; Java calculations and saved results are unchanged. Adjusted gross profit is exported as the authoritative Java amount, not a formula referencing removed rows. Net contribution and final profit retain valid visible-row formulas. Historical export allocation rules are retained.
