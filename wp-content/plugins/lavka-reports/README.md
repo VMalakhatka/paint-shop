@@ -196,3 +196,11 @@ Manager instructions: [PROFIT_REPORT_MANAGER_RU.md](../../../docs/PROFIT_REPORT_
 ## Simplified manager view (0.8.1)
 
 The revised user workbook removes Odesa NOT_APPLICABLE zero placeholders for salary RUB, bank, taxes and accounting from the main website/XLSX table. Unexpected nonzero or unavailable amounts remain visible. Both cities show only master-class income, returns and net contribution. The technical base/adjustment fields remain in source data and detailed exports; Java calculations and saved results are unchanged. Adjusted gross profit is exported as the authoritative Java amount, not a formula referencing removed rows. Net contribution and final profit retain valid visible-row formulas. Historical export allocation rules are retained.
+
+## Manual column and fixed copy layout (0.9.0)
+
+For `ALL_TAXES_KYIV` reports the main sheets use the owner's 2026-10-01 row addresses: Kyiv 4–40, Odesa 4–32. A–G contain snapshot criteria, H contains blank manual inputs and the five exact owner formulas, I contains authoritative API values. Website H cells show formula text; XLSX H cells are real formulas. No report amount or API total is reconstructed from the manual column. Its gross formula deliberately matches the supplied template; the manager must fill either base gross or its categories, and is warned about the separate Folio MK adjustment.
+
+The copy button copies I4 through the last main result, including blank separators, with decimal commas suitable for the manager's Excel. Clipboard failure exposes a selectable read-only fallback. The shared row model drives both UI and export, preserving exact alignment. Unknown nonzero or unavailable rows are retained after the main table and flagged as outside manual formulas.
+
+The bank-household slot consumes `KYIV_HOUSEHOLD_BANK`; missing backend metadata is explicitly unavailable and never zero. All selection and classification changes remain Java-owned. Deploying this frontend cannot retroactively apply new filters to stored results. Manager workflow and limits: [PROFIT_REPORT_MANAGER_RU.md](../../../docs/PROFIT_REPORT_MANAGER_RU.md). Unit checks cover exact H formulas, row addresses, API total independence, absent rules and additional amounts.

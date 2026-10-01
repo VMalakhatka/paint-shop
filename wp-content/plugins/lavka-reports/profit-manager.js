@@ -21,67 +21,79 @@
         return Number.isNaN(date.getTime())?'—':new Intl.DateTimeFormat('uk-UA',{timeZone:'Europe/Kyiv',dateStyle:'short',timeStyle:'short'}).format(date);
     }
     const hiddenOdesaPlaceholder = row => ['ODESA_SALARY_RUB','ODESA_BANK_SERVICES','ODESA_TAXES','ODESA_ACCOUNTING'].includes(row.lineId) && row.source==='NOT_APPLICABLE' && row.amount!=null && row.profitImpact!=null && Number(row.amount)===0 && Number(row.profitImpact)===0;
-    function templateSheets(data, t) {
+    // Stable Excel row addresses match the owner's 2026-10-01 manual workbook.
+    // H belongs to the manager. I is always the authoritative API snapshot.
+    function manualTemplateSheets(data, t) {
         let sequence=0;
         return ['KYIV','ODESA'].map(city=>{
-            const name=city==='KYIV'?t.kyiv:t.odesa, rows=[], headings=[], merges=[];
-            const heading=label=>{rows.push(['',label]);headings.push(rows.length);};
-            const amountRow=(label,amount,expression,warehouses='')=>{
-                rows.push([++sequence,label,'','','',warehouses,'',expression&&amount!=null?formula(expression,amount):number(amount),'']);return rows.length;
-            };
-            heading(name);rows[0][7]=data.month;
-            rows.push(['',t.snapshot,'',snapshotDate(data.calculatedAt),'','','',data.complete?t.complete:t.incomplete,'']);
-            rows.push(['№',t.fields.label,t.fields.expenseCodes,t.fields.operationTypes,t.fields.purposeCodes,t.fields.cashWarehouses,t.fields.bankWarehouses,t.siteAmount,t.managerCheck]);headings.push(3);
-            const lines=(data.expenseLines||[]).filter(r=>r.city===city&&!hiddenOdesaPlaceholder(r)).slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
-            const wholesale=line=>['KYIV_RENT_WHOLESALE','KYIV_PHONE_KAL'].includes(line.lineId);
-            const capitalized=line=>line.accountingTreatment==='CAPITALIZED_IN_INVENTORY';
-            const refs=[];
-            const lineRow=line=>{
-                const f=line.filters, notApplicable=line.source==='NOT_APPLICABLE', manual=line.source&&line.source!=='FOLIO';
-                rows.push([++sequence,line.label,notApplicable?t.doNotFill:(f?.expenseCodes||[]).join(' / ')||(manual?t.manualAmount:'—'),
-                    manual?'—':(f?.operationTypes||[]).join(' / ')||t.anyFilter,
-                    manual?'—':(f?.purposeCodes||[]).join(' / ')||(/_TAXES$/.test(line.lineId)?t.noTaxFirms:t.anyFilter),
-                    manual?'—':selection(f,'cash',t),manual?'—':selection(f,'bank',t),number(line.amount),'']);
-                if(line.accountingTreatment==='OPERATING_EXPENSE')refs.push('H'+rows.length);
-            };
-            heading(t.cityExpenses);
-            lines.filter(l=>!wholesale(l)&&!capitalized(l)).forEach(lineRow);
-            const opt=lines.filter(wholesale);
-            if(opt.length){heading(t.wholesaleSection);opt.forEach(lineRow);}
+            const kyiv=city==='KYIV', name=kyiv?t.kyiv:t.odesa, end=kyiv?40:32;
+            const rows=Array.from({length:end},()=>Array(9).fill('')), headings=[1,3], merges=[], used=new Set();
             const result=(data.cities||[]).find(c=>c.city===city)||{};
-            const operating=lines.filter(l=>l.accountingTreatment==='OPERATING_EXPENSE');
-            const canSum=data.sections?.EXPENSES?.status!=='UNAVAILABLE'&&operating.length&&operating.every(l=>l.amount!=null&&l.profitImpact!=null&&Number(l.amount)===Number(l.profitImpact));
-            const expenses=amountRow(t.fields.operatingExpenses,result.operatingExpenses,canSum?'SUM('+refs.join(',')+')':null);headings.push(expenses);
-            lines.filter(capitalized).forEach(lineRow);
-            heading(t.masterTitle);
+            rows[0]=['№',t.fields.label,t.fields.expenseCodes,t.fields.operationTypes,t.fields.purposeCodes,t.fields.cashWarehouses,t.fields.bankWarehouses,t.manualTemplateAmount,t.siteAmount];
+            rows[1]=['',t.reportMonth,'','','','','',data.month,data.month];
+            rows[2][1]=name+' — '+t.cityExpenses;
+            const put=(r,label,amount)=>{rows[r-1][0]=++sequence;rows[r-1][1]=label;rows[r-1][8]=number(amount);};
+            const lines=Array.isArray(data.expenseLines)?data.expenseLines:[];
+            const expense=(r,id,fallback)=>{
+                used.add(id);const line=lines.find(l=>l.lineId===id&&l.city===city);
+                put(r,line?.label||fallback||t.unavailable,line?.amount);
+                if(!line){rows[r-1][2]=t.templateRuleUnavailable;return;}
+                const f=line.filters, na=line.source==='NOT_APPLICABLE',manual=line.source&&line.source!=='FOLIO';
+                rows[r-1][2]=na?t.doNotFill:(f?.expenseCodes||[]).join(' / ')||(manual?t.manualAmount:'—');
+                rows[r-1][3]=manual?'—':(f?.operationTypes||[]).join(' / ')||t.anyFilter;
+                rows[r-1][4]=manual?'—':(f?.purposeCodes||[]).join(' / ')||(/_TAXES$/.test(id)?t.noTaxFirms:t.anyFilter);
+                rows[r-1][5]=manual?'—':selection(f,'cash',t);rows[r-1][6]=manual?'—':selection(f,'bank',t);
+            };
+            const layout=kyiv?[
+                [4,'RENT_SHOP'],[5,'UTILITIES'],[6,'SALARY_UAH'],[7,'SALARY_RUB'],[8,'ADDITIONAL_SALARY'],
+                [9,'HOUSEHOLD_BANK',t.householdBank],[10,'ACCOUNTING'],[11,'HOUSEHOLD'],[12,'ADVERTISING'],
+                [13,'TRANSPORT_UKRAINE'],[14,'INTERNET'],[15,'PHONE'],[16,'BANK_SERVICES'],[17,'TAXES'],
+                [18,'IRREGULAR'],[19,'RENT_WHOLESALE'],[20,'PHONE_KAL']
+            ]:[[4,'RENT'],[5,'UTILITIES'],[6,'SALARY_DOCUMENTS'],[7,'ADDITIONAL_SALARY'],[8,'HOUSEHOLD'],
+                [9,'ADVERTISING'],[10,'TRANSPORT_UKRAINE'],[11,'INTERNET'],[12,'PHONE']];
+            layout.forEach(([r,id,label])=>expense(r,city+'_'+id,label));
+            const total=kyiv?22:14, master=kyiv?26:18, base=kyiv?32:24, gross=kyiv?38:30, op=gross+1, profit=gross+2;
+            put(total,t.fields.operatingExpenses,result.operatingExpenses);headings.push(total);
+            if(kyiv)expense(24,'KYIV_IMPORT_TRANSPORT');
+            rows[master-1][1]=t.masterTitle;headings.push(master);
             const mk=masterClasses(data)[city];
-            const mkRefs={};
-            for(const [key,label] of [['income',t.masterIncome],['returns',t.masterReturns],['netContribution',t.masterNet]]){
-                const expression=key==='netContribution'&&mk?.income!=null&&mk?.returns!=null?`H${mkRefs.income}-H${mkRefs.returns}`:null;
-                mkRefs[key]=amountRow(label,mk?.[key],expression);
-                if(key==='income'||key==='returns'){
-                    const row=rows[rows.length-1];row[2]=mk?.sku||'—';row[3]=key==='income'?t.outgoingInvoice:t.returnInvoice;row[4]='—';row[5]=mk?.warehouseId??'—';row[6]='—';
-                }
-            }
-            heading(t.profitTotals);
-            const grossLines=(data.grossProfitLines||[]).filter(r=>r.city===city).slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
-            amountRow(t.fields.baseGrossProfit+' — '+name,result.baseGrossProfit,null,(grossLines[0]?.warehouseIds||[]).join(' / '));
-            grossLines.forEach(line=>{
-                amountRow(t.fields.baseGrossProfit+' — '+line.label,line.amount,null,(line.warehouseIds||[]).join(' / '));
-                rows[rows.length-1][2]=(line.organizationTypes||[]).join(' / ');
+            [['income',t.masterIncome],['returns',t.masterReturns],['netContribution',t.masterNet]].forEach(([key,label],i)=>{
+                put(master+i+1,label,mk?.[key]);
+                if(i<2){const row=rows[master+i];row[2]=mk?.sku||'—';row[3]=i?t.returnInvoice:t.outgoingInvoice;row[4]='—';row[5]=mk?.warehouseId??'—';row[6]='—';}
             });
-            // City totals remain authoritative, even when one source/section is unavailable.
-            const gross=amountRow(t.fields.grossProfit+' — '+name,result.grossProfit);
-            const op=amountRow(t.fields.operatingExpenses+' — '+name,result.operatingExpenses,`H${expenses}`);
-            amountRow(t.fields.profit+' — '+name,result.profit,result.grossProfit!=null&&result.operatingExpenses!=null?`H${gross}-H${op}`:null);
-            rows.push([t.managerCriteriaHelp]);merges.push(rows.length);
-            rows.push([t.currentRulesHelp]);merges.push(rows.length);
-            rows.push([t.managerCurrentHelp]);merges.push(rows.length);
-            return {name,rows,widths:[7,40,28,28,28,20,20,21,24],headerRows:headings,freezeRows:3,mergeRows:merges,rowHeight:28,landscape:true,bordered:true};
+            rows[base-2][1]=t.profitTotals;headings.push(base-1);
+            put(base,t.fields.baseGrossProfit+' — '+name,result.baseGrossProfit);
+            const grossLines=(data.grossProfitLines||[]).filter(l=>l.city===city);
+            rows[base-1][5]=(grossLines[0]?.warehouseIds||[]).join(' / ');
+            ['OWN_SHOPS','PARTNERS','DEALERS','CUSTOMERS','ART_SALONS'].forEach((key,i)=>{
+                const id=city+'_GROSS_'+key,line=grossLines.find(l=>l.lineId===id);used.add(id);
+                put(base+i+1,t.fields.baseGrossProfit+' — '+(line?.label||t.grossCategoryLabels?.[key]||key),line?.amount);
+                rows[base+i][2]=(line?.organizationTypes||[]).join(' / ');rows[base+i][5]=(line?.warehouseIds||[]).join(' / ');
+            });
+            put(gross,t.fields.grossProfit+' — '+name,result.grossProfit);put(op,t.fields.operatingExpenses+' — '+name,result.operatingExpenses);put(profit,t.fields.profit+' — '+name,result.profit);
+            // These are the exact manual formulas in the supplied workbook, not API calculations.
+            const formulas=kyiv?{22:'SUM(H4:H21)',29:'H27-H28',38:'SUM(H29:H37)',39:'H22',40:'H38-H39'}:
+                {14:'SUM(H4:H13)',21:'H19-H20',30:'SUM(H21:H29)',31:'H14',32:'H30-H31'};
+            Object.entries(formulas).forEach(([r,f])=>{rows[Number(r)-1][7]=formula(f,0);});
+            headings.push(master+3,gross,op,profit);
+            // Do not discard an unexpected/historical nonzero line just to fit the manual template.
+            const extras=lines.filter(l=>l.city===city&&!used.has(l.lineId)&&!hiddenOdesaPlaceholder(l)&&
+                (l.amount==null||l.profitImpact==null||Number(l.amount)!==0||Number(l.profitImpact)!==0));
+            const grossExtras=grossLines.filter(l=>!used.has(l.lineId)&&(l.amount==null||Number(l.amount)!==0));
+            const notes=[t.manualTemplateHelp,t.manualGrossHelp,t.managerCriteriaHelp,t.currentRulesHelp,
+                t.snapshot+': '+snapshotDate(data.calculatedAt)+' · '+(data.complete?t.complete:t.incomplete)];
+            if(extras.length||grossExtras.length){
+                rows.push(['',t.templateExtraRows]);headings.push(rows.length);
+                extras.forEach(line=>expense(rows.push(Array(9).fill('')),line.lineId));
+                grossExtras.forEach(line=>{rows.push(Array(9).fill(''));put(rows.length,t.fields.baseGrossProfit+' — '+line.label,line.amount);});
+                notes.unshift(t.templateExtraHelp);
+            }
+            notes.forEach(note=>{rows.push([note]);merges.push(rows.length);});
+            return {name,city,rows,widths:[7,40,28,28,30,18,18,23,23],headerRows:headings,freezeRows:2,mergeRows:merges,rowHeight:28,landscape:true,bordered:true,manualColumn:7,reportColumn:8,copyStartRow:4,copyEndRow:end};
         });
     }
     function sheets(data, t) {
-        if(currentLayout(data))return templateSheets(data,t);
+        if(currentLayout(data))return manualTemplateSheets(data,t);
         return ['KYIV','ODESA'].map(city => {
             const inputs=data.inputs || {}, k=inputs.kyivEmployeeCount, o=inputs.odesaEmployeeCount;
             const counts=Number.isInteger(k)&&Number.isInteger(o)&&k>=0&&o>=0&&k+o>0;

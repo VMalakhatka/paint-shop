@@ -597,16 +597,33 @@
         window.LavkaProfitManager.sheets(data,labels).forEach(sheet=>{
             const details=document.createElement('details');details.open=true;
             details.appendChild(textElement('summary','',sheet.name));
+            if(sheet.reportColumn!=null){
+                const tools=textElement('div','lavr-profit-template-tools',''),copy=textElement('button','button',labels.copyReportColumn);
+                copy.type='button';copy.id='lavr-profit-copy-'+sheet.city;
+                const status=textElement('span','description','');status.setAttribute('role','status');
+                const fallback=document.createElement('textarea');fallback.readOnly=true;fallback.hidden=true;fallback.setAttribute('aria-label',labels.copyReportColumn);
+                copy.addEventListener('click',async()=>{
+                    const values=sheet.rows.slice(sheet.copyStartRow-1,sheet.copyEndRow).map(row=>{
+                        const value=row[sheet.reportColumn];
+                        return value&&typeof value==='object'?String(value.value).replace('.',','):String(value??'');
+                    }).join('\n');
+                    try{await navigator.clipboard.writeText(values);status.textContent=labels.reportColumnCopied;}
+                    catch(error){fallback.value=values;fallback.hidden=false;fallback.focus();fallback.select();status.textContent=labels.copyReportColumnFallback;}
+                });
+                tools.append(copy,status,fallback);details.appendChild(tools);
+            }
             const wrap=textElement('div','lavr-profit-table-wrap',''),table=textElement('table','widefat lavr-profit-template-table','');
             const body=document.createElement('tbody'), headings=new Set(sheet.headerRows), merged=new Set(sheet.mergeRows);
             sheet.rows.forEach((row,i)=>{
                 const tr=document.createElement('tr');
                 if(headings.has(i+1))tr.className='lavr-profit-template-heading';
-                (merged.has(i+1)?row.slice(0,1):Array.from({length:8},(_,c)=>row[c]??'')).forEach(value=>{
+                (merged.has(i+1)?row.slice(0,1):Array.from({length:sheet.reportColumn!=null?9:8},(_,c)=>row[c]??'')).forEach((value,c)=>{
                     const typed=value&&typeof value==='object';
-                    const text=typed?(value.money?formatMoney(value.value,'UAH'):printable(value.value)):printable(value);
+                    const manualFormula=c===sheet.manualColumn&&value?.type==='formula';
+                    const text=manualFormula?'='+value.formula:typed?(value.money?formatMoney(value.value,'UAH'):printable(value.value)):printable(value);
                     const cell=textElement(headings.has(i+1)?'th':'td',typed?'lavr-profit-number':'',text);
-                    if(merged.has(i+1))cell.colSpan=8;
+                    if(c===sheet.manualColumn)cell.classList.add('lavr-profit-manual-column');
+                    if(merged.has(i+1))cell.colSpan=sheet.reportColumn!=null?9:8;
                     tr.appendChild(cell);
                 });body.appendChild(tr);
             });

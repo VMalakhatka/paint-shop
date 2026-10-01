@@ -55,39 +55,35 @@ function currentData(){
  d.grossProfitLines=['KYIV','ODESA'].flatMap(city=>[{city,label:'Own shops',organizationTypes:['S'],warehouseIds:city==='KYIV'?[1,7]:[5],amount:'90'},{city,label:'Other',organizationTypes:['C'],warehouseIds:city==='KYIV'?[1,7]:[5],amount:'10'}]);return d;
 }
 module.exports.currentData=currentData;
-test('current template mirrors cities, orders payroll and wholesale, excludes capitalized transport from total',()=>{
- const [k,o]=manager.sheets(currentData(),labels);const find=(s,label)=>s.rows.findIndex(r=>r[1]===label);
- assert.equal(find(k,'ADDITIONAL_WORK'),find(k,'SALARY_RUB')+1);assert.equal(find(o,'ADDITIONAL_WORK'),find(o,'SALARY')+1);
- assert(find(k,'wholesaleSection')>find(k,'TAXES'));assert(find(k,'IMPORT_TRANSPORT')>find(k,'operatingExpenses'));
- assert.equal(k.rows[find(k,'TAXES')][4],'МИХНФОП / КОНДФОП');assert.equal(find(o,'TAXES'),-1);
- const total=k.rows[find(k,'operatingExpenses')][7];assert.equal(total.value,'25');assert(!total.formula.includes('H'+(find(k,'IMPORT_TRANSPORT')+1)));
- const numbers=[...k.rows,...o.rows].filter(r=>typeof r[0]==='number').map(r=>r[0]);assert.deepEqual(numbers,numbers.map((_,i)=>i+1));
- for(const s of [k,o]){assert.equal(s.rows[find(s,'masterIncome')][5],s===k?1:5);assert.equal(s.rows[find(s,'baseGrossProfit — Other')][7].value,'10');assert(s.bordered);}
- const xml=new TextDecoder().decode(writer.build([k,o]));assert.match(xml,/<borders count="2">/);assert.match(xml,/<c r="I5" s="4"/);assert.doesNotMatch(xml,/<f>.*ROUND/);
-});
-test('city master maps take precedence over legacy aliases and null remains unavailable',()=>{
- const d=currentData();assert.equal(manager.masterDocuments(d).length,2);assert.deepEqual(manager.masterDocuments(d).map(r=>r.city),['KYIV','ODESA']);
- d.masterClassesByCity.KYIV=null;d.cities[0].grossProfit=null;d.cities[0].profit=null;
- const k=manager.sheets(d,labels)[0];assert.equal(k.rows.find(r=>r[1]==='masterIncome')[7],'—');assert.equal(k.rows.find(r=>r[1]==='profit — kyiv')[7],'—');
-});
-test('Java 2026-09-30 fixture preserves official totals, warehouse selections and full category coverage',()=>{
- const d=require('./fixtures/profit-template-java.json'), sheets=manager.sheets(d,labels);
- for(const [i,city] of ['KYIV','ODESA'].entries()){
-  const s=sheets[i],actual=d.cities.find(c=>c.city===city);
-  assert.equal(s.rows.find(r=>r[1]==='profit — '+(i?'odesa':'kyiv'))[7].value,actual.profit);
-  assert.equal(s.rows.find(r=>r[1]==='masterIncome')[5],i?5:1);
-  assert.equal(s.rows.filter(r=>String(r[1]).startsWith('baseGrossProfit — ')).length,7);
-  const bank=s.rows.find(r=>r[1]==='Услуги банка');if(i)assert.equal(bank,undefined);else{assert.equal(bank[5],'allWarehouses');assert.equal(bank[6],'allWarehouses');}
-  assert(!s.rows.some(r=>['masterBase','masterAdjustment'].includes(r[1])));
-  assert.equal(s.rows.find(r=>r[1]==='grossProfit — '+(i?'odesa':'kyiv'))[7].type,'number');
-  assert(!s.rows.some(r=>r[1]==='employeeTotal'));
+test('manual H formulas and fixed addresses match the owner workbook; API values remain independent in I',()=>{
+ const d=require('./fixtures/profit-template-java.json'),[k,o]=manager.sheets(d,labels);
+ for(const [s,expected,end,city]of[
+  [k,{22:'SUM(H4:H21)',29:'H27-H28',38:'SUM(H29:H37)',39:'H22',40:'H38-H39'},40,'KYIV'],
+  [o,{14:'SUM(H4:H13)',21:'H19-H20',30:'SUM(H21:H29)',31:'H14',32:'H30-H31'},32,'ODESA']]){
+  assert.equal(s.rows[0][7],'manualTemplateAmount');assert.equal(s.rows[0][8],'siteAmount');
+  for(const[r,f]of Object.entries(expected)){assert.equal(s.rows[r-1][7].formula,f);assert.equal(s.rows[r-1][8].type,'number');}
+  assert.equal(s.rows[end-1][8].value,d.cities.find(c=>c.city===city).profit);
+  assert.equal(s.rows[3][7],'');assert.equal(s.copyStartRow,4);assert.equal(s.copyEndRow,end);
+  assert(s.bordered);assert.equal(s.freezeRows,2);
  }
- assert.equal(manager.masterDocuments(d).length,4);assert.equal(manager.masterDocuments(d).filter(r=>r.city==='KYIV').length,2);
+ assert.equal(k.rows[8][8],'—');assert.equal(k.rows[8][2],'templateRuleUnavailable');
+ assert.equal(k.rows[15][1],'Услуги банка');assert.equal(k.rows[18][1],'Аренда ОПТ');
+ assert.equal(k.rows[26][5],1);assert.equal(o.rows[18][5],5);
+ const xml=new TextDecoder().decode(writer.build([k,o]));
+ assert.match(xml,/<c r="H22"[^>]*><f>SUM\(H4:H21\)<\/f><v>0<\/v>/);
+ assert.match(xml,/<c r="I40"[^>]*><v>90.00<\/v>/);
+ assert.doesNotMatch(xml,/<c r="I\d+"[^>]*><f>/);
 });
-
-test('unexpected nonzero or unavailable Odesa placeholders remain visible',()=>{
- for(const value of ['5',null]){
-  const d=currentData(),r=d.expenseLines.find(r=>r.lineId==='ODESA_BANK_SERVICES');r.amount=value;r.profitImpact=value;
-  assert(manager.sheets(d,labels)[1].rows.some(r=>r[1]==='BANK_SERVICES'));
- }
+test('new bank household amounts and filters come only from Java, with no frontend splitting',()=>{
+ const d=structuredClone(require('./fixtures/profit-template-java.json'));
+ d.expenseLines.push({city:'KYIV',lineId:'KYIV_HOUSEHOLD_BANK',label:'Bank household',source:'FOLIO',amount:'123.45',profitImpact:'123.45',accountingTreatment:'OPERATING_EXPENSE',filters:{expenseCodes:['НЕРЕГУЛ'],operationTypes:['РАСХОДЫ КИЕВОПТ','РАСХОДЫ КИЕВА'],cashWarehouseMode:'NONE',bankWarehouseMode:'INCLUDE',bankWarehouseIds:[1,7]}});
+ const k=manager.sheets(d,labels)[0];assert.equal(k.rows[8][8].value,'123.45');assert.equal(k.rows[8][5],'—');assert.equal(k.rows[8][6],'1, 7');
+ assert.equal(k.rows[21][8].value,d.cities[0].operatingExpenses);
+});
+test('unavailable results and unexpected nonzero rows are visible without moving the copy range',()=>{
+ const d=structuredClone(require('./fixtures/profit-template-java.json'));
+ d.cities[1].profit=null;d.expenseLines.find(r=>r.lineId==='ODESA_BANK_SERVICES').amount='10';
+ const o=manager.sheets(d,labels)[1];assert.equal(o.rows[31][8],'—');assert.equal(o.copyEndRow,32);
+ assert(o.rows.slice(32).some(r=>r[8]?.value==='10'));assert(o.rows.some(r=>r[0]==='templateExtraHelp'));
+ assert.equal(manager.masterDocuments(d).length,4);
 });

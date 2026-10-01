@@ -115,6 +115,11 @@ test('current Java template renders mirrored city sheets and exports both master
  const {page,errors}=await setup();
  await page.evaluate(report=>window.LavkaProfitViewer.showSaved({month:report.month,revisionId:91,status:'COMPLETED',auditComplete:true,report}),fixture);
  const tables=page.locator('#lavr-profit-manager-template table');assert.equal(await tables.count(),2);
+ assert.equal(await tables.first().locator('tr').nth(21).locator('th').nth(7).innerText(),'=SUM(H4:H21)');
+ assert.equal(await tables.nth(1).locator('tr').nth(13).locator('th').nth(7).innerText(),'=SUM(H4:H13)');
+ await page.locator('#lavr-profit-copy-KYIV').click();
+ const copyTools=page.locator('.lavr-profit-template-tools').first();
+ assert.match(await copyTools.innerText(),/Copied|Copy the selected values/);
  for(const city of ['KYIV','ODESA']){
   const table=tables.nth(city==='KYIV'?0:1);const text=await table.innerText();
   if(city==='KYIV'){assert(text.indexOf('Дополнительные работы')>text.indexOf('Зарплата RUB'));assert(text.indexOf('Дополнительные работы')<text.indexOf('Услуги банка'));assert.match(text,/Налоги/);}

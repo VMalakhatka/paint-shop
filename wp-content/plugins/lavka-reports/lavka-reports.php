@@ -3,14 +3,14 @@
  * Plugin Name: Lavka Reports
  * Description: WooCommerce admin reports. Report #1: No movement by warehouses (settings step).
  * Author: Volodymyr
- * Version: 0.8.1
+ * Version: 0.9.0
  * Text Domain: lavka-reports
  * Domain Path: /languages
  */
 
 if (!defined('ABSPATH')) exit;
 
-define('LAVR_VER', '0.8.1');
+define('LAVR_VER', '0.9.0');
 define('LAVR_FILE', __FILE__);
 define('LAVR_PATH', plugin_dir_path(__FILE__));
 define('LAVR_URL',  plugin_dir_url(__FILE__));

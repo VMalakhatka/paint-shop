@@ -2067,3 +2067,67 @@ msgstr "Коди категорій клієнтів"
 
 msgid "Line count"
 msgstr "Кількість рядків"
+
+#: inc/class-profit-report.php
+msgid "Manual entry, UAH (H)"
+msgstr "Ручне введення, грн (H)"
+
+#: inc/class-profit-report.php
+msgid "Household services and expenses (bank)"
+msgstr "Господарські послуги та витрати (банк)"
+
+#: inc/class-profit-report.php
+msgid "This saved report does not contain this selection rule."
+msgstr "У збереженому звіті немає цього правила відбору."
+
+#: inc/class-profit-report.php
+msgid "Excel: H is the manual template; keep its formulas. I contains website values. Paste copied results into I4 or another comparison column starting at row 4, never over H."
+msgstr "Excel: H — ручний шаблон, зберігайте його формули. I — дані сайту. Вставляйте скопійовані результати в I4 або іншу колонку порівняння з 4-го рядка, не поверх H."
+
+#: inc/class-profit-report.php
+msgid "The manual gross-profit formula sums the base total and the category rows. Fill either the base or its categories, not both. Website totals include the Folio master-class adjustment and may differ from the manual formula."
+msgstr "Ручна формула валового прибутку підсумовує базовий підсумок і рядки категорій. Заповнюйте або базу, або її категорії. Підсумки сайту враховують коригування МК ФОЛІО та можуть відрізнятися від ручної формули."
+
+#: inc/class-profit-report.php
+msgid "Additional amounts outside the manual template"
+msgstr "Додаткові суми поза ручним шаблоном"
+
+#: inc/class-profit-report.php
+msgid "Additional rows are included in the website totals, but not in the manual H formulas. Review them before comparing totals."
+msgstr "Додаткові рядки враховані в підсумках сайту, але не в ручних формулах H. Перевірте їх перед порівнянням підсумків."
+
+#: inc/class-profit-report.php
+msgid "Copy website values for Excel"
+msgstr "Копіювати дані сайту для Excel"
+
+#: inc/class-profit-report.php
+msgid "Copied. Paste into I4 or a new comparison column from row 4. Keep the H formulas."
+msgstr "Скопійовано. Вставте в I4 або нову колонку порівняння з 4-го рядка. Збережіть формули H."
+
+#: inc/class-profit-report.php
+msgid "Copy the selected values and paste into I4. Keep the H formulas."
+msgstr "Скопіюйте виділені значення та вставте в I4. Збережіть формули H."
+
+#: inc/class-profit-report.php
+msgid "Own shops"
+msgstr "Мої магазини"
+
+#: inc/class-profit-report.php
+msgid "Partners"
+msgstr "Партнери"
+
+#: inc/class-profit-report.php
+msgid "Dealers"
+msgstr "Дилери"
+
+#: inc/class-profit-report.php
+msgid "Customers"
+msgstr "Покупці"
+
+#: inc/class-profit-report.php
+msgid "Art salons"
+msgstr "Художні салони"
+
+#: inc/class-profit-report.php
+msgid "Click Export report to Excel for the open month, or Export saved period to Excel for all selected months. On the new Kyiv and Odesa sheets, H is for manual entry with formulas and I contains website values."
+msgstr "Натисніть «Експорт звіту в Excel» для відкритого місяця або «Збережений період в Excel» для всіх вибраних місяців. На нових аркушах Києва й Одеси H — ручне введення з формулами, I — дані сайту."
