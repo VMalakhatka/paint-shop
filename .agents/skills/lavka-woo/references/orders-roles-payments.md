@@ -9,8 +9,13 @@ create_users/edit_users/promote_users, editable_roles ограничены custo
 ради документации. Quick-order allow-list шире customer balance/documents:
 последние требуют opt/partner и подтверждённую привязку. Mapping появляется
 на user-edit/profile, не user-new; выбрать результат недостаточно, нужен Update
-User. Создание профиля/письмо и привязка — разные шаги; сначала проверить точного
-контрагента, потом отправить ссылку пароля. Источник: read-only capabilities на
+User. Согласованный путь: менеджер регистрирует клиента через My Account в
+отдельном приватном окне; письмо пароля отправляется до настройки роли/ФОЛИО.
+Production 2026-10-02: регистрация, генерация username/password включены;
+стандартная форма содержит email, поля имени/фамилии требуют доработки.
+Не выдавать этот путь за полностью самостоятельный: завершение профиля пока
+требует администратора. Категория цен — opt/partner, не персональная скидка.
+Источник: read-only options/capabilities на
 production, Woo wc-user-functions, pc-folio-customer-map/balance и WordPress core.
 
 - Новая guest purchase может создать WordPress user с ролью `customer` и связать его с default Internet Client ФОЛИО.

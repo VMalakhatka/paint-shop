@@ -20,31 +20,31 @@ msgstr ""
 msgid "Register a new wholesale customer"
 msgstr ""
 
-msgid "Before you start: the current Shop manager role cannot create users or assign wholesale roles. Ask an administrator to perform steps 2–5. Do not grant the customer administrator or shop-manager rights. Manager workspace access alone is not user-management permission."
+msgid "Before you start: the manager registers the customer through My Account, not Users → Add New. Registration and password-link email are enabled. Current limitations: the standard registration form has email only, and Shop manager cannot edit customer profiles, assign wholesale roles or save Folio mapping. Until these permissions are implemented, an administrator completes steps 4–6."
 msgstr ""
 
-msgid "1. Collect the customer's email, contact name, company, phone and exact Folio customer name. Agree the price category with the responsible manager. Search Users by email first: if the account exists, edit it instead of creating a duplicate."
+msgid "1. Prepare the customer’s first name, last name and own email. Search Users by email first. If the account already exists, use that account; do not register a duplicate."
 msgstr ""
 
-msgid "2. Administrator: open Users → Add New (/wp-admin/user-new.php). Enter a unique username and the customer's own email. Select ONE agreed role: opt (Опт) or partner (Партнер) for wholesale access including balance and documents. Do not assign every role. opt_osn and schule allow quick ordering but do not currently unlock the customer balance/documents; do not promise identical access."
+msgid "2. Keep your manager session open. In a separate private browser window open https://kreul.com.ua/my-account/ and use Register with the customer’s email. The standard form currently has no first/last-name fields; an administrator fills them in the profile after registration. Adding these fields is a planned improvement."
 msgstr ""
 
-msgid "3. To invite the customer only after setup, untick Send the new user an email about their account, then create the user. Do not copy or send the generated password. Open the new user's profile, fill contact/billing details and save. If you leave the email checkbox ticked, WordPress sends the password-setting invitation immediately, before Folio mapping is completed."
+msgid "3. The new-account email contains a personal password-setting link. The customer sets the password themselves; the manager must not request or forward it. Registration may sign the browser in as the new customer: sign out and close the private window without ordering or changing customer data. Continue in your own manager session."
 msgstr ""
 
-msgid "4. In the EXISTING user's edit profile find Folio client near the username. Type at least two characters of the accounting name, choose the correct result and click Update User at the bottom. Selecting a search result alone does not save it. Reopen the profile to verify the saved name. This links an existing Folio customer; it does not create one in Folio. If the customer is missing, ask the accounting operator to create/check it first. Never choose a similar or generic Internet customer."
+msgid "4. In the customer profile, set ONE agreed price category: opt (Опт) or partner (Партнер). This is role-based pricing, not an individual percentage discount. Until manager permissions are implemented, ask an administrator to save the role and customer name. Never grant a customer administrator or shop-manager rights."
 msgstr ""
 
-msgid "5. Check the saved email, role and Folio identity before inviting the customer. A wrong mapping can expose another customer's financial documents. The price role and Folio mapping are separate settings: linking does not assign a price role. If the price category is unclear, ask the administrator to check the configured role-to-contract mapping."
+msgid "5. In the existing user profile find Folio client, type at least two characters of the accounting name, select the exact customer and click Update User. Reopen the profile to verify the saved link. This links an existing accounting customer; it does not create one. If none exists, contact the accounting operator. Never choose a similar or generic Internet customer."
 msgstr ""
 
-msgid "6. Administrator: in that user's profile, Password Reset → Send Reset Link sends an email to the saved profile address. The customer follows the personal link and sets their own password. Clicking the button does not itself change the current password. Do not ask the customer to send you their password or forward their personal link."
+msgid "6. Check the saved email, price category and Folio identity. The password email goes out before this setup is complete; tell the customer wholesale features appear after setup. A wrong mapping can expose someone else’s financial documents. Role and mapping are separate requirements for customer balance and documents."
 msgstr ""
 
-msgid "7. Manager: open Customer workspace, find the customer and assign the primary/additional managers if needed. Ask the customer to sign in to /my-account/ and check quick ordering, their agreed prices, help, balance and their own documents. An empty document list can simply mean there are no documents in the chosen period. Do not create a real order just to test registration."
+msgid "7. In Customer workspace assign the primary/additional managers if needed. Ask the customer to sign in and verify agreed prices, quick ordering, their own balance and documents. Do not create a real order to test registration."
 msgstr ""
 
-msgid "If the email does not arrive: verify the saved address and Spam folder. The customer can use Lost password in My Account; send a fresh reset link if the old one expired. Do not create another account or repeatedly send emails. An on-screen success message is not proof of delivery; ask the administrator to check mail delivery. If the role or mapping controls are unavailable, ask the administrator rather than expanding permissions yourself."
+msgid "If the email does not arrive, check the address and Spam. The customer can use Lost password in My Account. Do not create another account or send repeated emails: an on-screen success is not proof of delivery. Missing role/profile/Folio controls currently require an administrator; this guide does not grant permissions."
 msgstr ""
 
 msgid "? How it works"
