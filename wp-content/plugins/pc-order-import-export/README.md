@@ -346,6 +346,12 @@ colleague replies, optimistic revisions and bulk rollback).
 The runbook above covers setup, operator acceptance and rollback.
 # Manager contextual documentation
 
+Wholesale onboarding (2026-10-02): `#register-wholesale` documents the existing
+administrator-assisted workflow, separate role/Folio mapping, invitation after
+verification and password-reset email. It does not grant new capabilities or
+send email. Production Shop manager lacks create_users/edit_users/promote_users;
+customer balance/documents currently require opt or partner, not every quick-order role.
+
 Tab help is grouped in `.pcoe-help-tab` and the navigation uses scoped flex
 layout: never insert ungrouped inline help among WordPress floated `.nav-tab`
 elements. Regression tests include core `wp-admin/css/common.css` and verify

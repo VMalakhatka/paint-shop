@@ -25,7 +25,7 @@ namespace {
     $canon=file_get_contents($root.'/docs/MANAGER_CUSTOMER_GUIDE_UK.md');
     foreach (['uk','ru_RU'] as $locale) {
         $html=render_help(); $sections=\PaintCore\PCOE\ManagerHelp::sections();
-        if(count($sections)!==21) throw new \RuntimeException('Section count');
+        if(count($sections)!==22) throw new \RuntimeException('Section count');
         foreach($sections as $id=>[$title,$paragraphs]) {
             if(substr_count($html,'id="'.$id.'"')!==1 || !str_contains($canon,'id="'.$id.'"')) throw new \RuntimeException('Anchor: '.$id);
             if(preg_match('/^[A-Za-z]/u',$title)) throw new \RuntimeException('Untranslated title: '.$title);
@@ -38,5 +38,5 @@ namespace {
     if($output!=='') throw new \RuntimeException('Customer link leaked');
     try { \PaintCore\PCOE\ManagerHelp::render(); throw new \LogicException('Gate missing'); }
     catch(\RuntimeException $e) { if($e->getMessage()!=='Forbidden') throw $e; }
-    echo "PASS: 21 anchors, UK/RU rendering, canonical parity, no forms or pairing codes, capability gate\n";
+    echo "PASS: 22 anchors, UK/RU rendering, canonical parity, no forms or pairing codes, capability gate\n";
 }

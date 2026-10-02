@@ -17,6 +17,36 @@ msgstr ""
 msgid "Choose the start date or All time and generate the report. Wait until the report is ready; then use Excel export or Print. Check the selected customer and report date before sharing. These files contain customer financial data and should be sent only to the authorised recipient."
 msgstr ""
 
+msgid "Register a new wholesale customer"
+msgstr ""
+
+msgid "Before you start: the current Shop manager role cannot create users or assign wholesale roles. Ask an administrator to perform steps 2–5. Do not grant the customer administrator or shop-manager rights. Manager workspace access alone is not user-management permission."
+msgstr ""
+
+msgid "1. Collect the customer's email, contact name, company, phone and exact Folio customer name. Agree the price category with the responsible manager. Search Users by email first: if the account exists, edit it instead of creating a duplicate."
+msgstr ""
+
+msgid "2. Administrator: open Users → Add New (/wp-admin/user-new.php). Enter a unique username and the customer's own email. Select ONE agreed role: opt (Опт) or partner (Партнер) for wholesale access including balance and documents. Do not assign every role. opt_osn and schule allow quick ordering but do not currently unlock the customer balance/documents; do not promise identical access."
+msgstr ""
+
+msgid "3. To invite the customer only after setup, untick Send the new user an email about their account, then create the user. Do not copy or send the generated password. Open the new user's profile, fill contact/billing details and save. If you leave the email checkbox ticked, WordPress sends the password-setting invitation immediately, before Folio mapping is completed."
+msgstr ""
+
+msgid "4. In the EXISTING user's edit profile find Folio client near the username. Type at least two characters of the accounting name, choose the correct result and click Update User at the bottom. Selecting a search result alone does not save it. Reopen the profile to verify the saved name. This links an existing Folio customer; it does not create one in Folio. If the customer is missing, ask the accounting operator to create/check it first. Never choose a similar or generic Internet customer."
+msgstr ""
+
+msgid "5. Check the saved email, role and Folio identity before inviting the customer. A wrong mapping can expose another customer's financial documents. The price role and Folio mapping are separate settings: linking does not assign a price role. If the price category is unclear, ask the administrator to check the configured role-to-contract mapping."
+msgstr ""
+
+msgid "6. Administrator: in that user's profile, Password Reset → Send Reset Link sends an email to the saved profile address. The customer follows the personal link and sets their own password. Clicking the button does not itself change the current password. Do not ask the customer to send you their password or forward their personal link."
+msgstr ""
+
+msgid "7. Manager: open Customer workspace, find the customer and assign the primary/additional managers if needed. Ask the customer to sign in to /my-account/ and check quick ordering, their agreed prices, help, balance and their own documents. An empty document list can simply mean there are no documents in the chosen period. Do not create a real order just to test registration."
+msgstr ""
+
+msgid "If the email does not arrive: verify the saved address and Spam folder. The customer can use Lost password in My Account; send a fresh reset link if the old one expired. Do not create another account or repeatedly send emails. An on-screen success message is not proof of delivery; ask the administrator to check mail delivery. If the role or mapping controls are unavailable, ask the administrator rather than expanding permissions yourself."
+msgstr ""
+
 msgid "? How it works"
 msgstr ""
 

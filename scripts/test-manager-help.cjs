@@ -66,6 +66,8 @@ const ids=new Set([...help.matchAll(/id="([a-z-]+)"/g)].map(m=>m[1]));
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Guide overflow');
    await page.screenshot({path:`/tmp/manager-guide-${width}.png`,fullPage:false});
    await page.locator('#telegram-connect').screenshot({path:`/tmp/manager-telegram-${width}.png`});
+   await page.locator('#register-wholesale').scrollIntoViewIfNeeded();
+   await page.screenshot({path:`/tmp/manager-registration-${width}.png`,fullPage:false});
   }
   console.log('PASS: exact anchors, AJAX replacement, deduplication, preserved inputs, supporting screens, desktop/mobile layout');
  } finally { await browser.close(); }

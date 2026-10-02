@@ -2,6 +2,17 @@
 
 ## Пользователь и ФОЛИО
 
+Регистрация оптовика: инструкция `docs/MANAGER_CUSTOMER_GUIDE_UK.md`,
+`#register-wholesale` (2026-10-02). Production `shop_manager` не имеет
+create_users/edit_users/promote_users, editable_roles ограничены customer.
+Не обещать менеджеру самостоятельную выдачу оптовой роли и не расширять права
+ради документации. Quick-order allow-list шире customer balance/documents:
+последние требуют opt/partner и подтверждённую привязку. Mapping появляется
+на user-edit/profile, не user-new; выбрать результат недостаточно, нужен Update
+User. Создание профиля/письмо и привязка — разные шаги; сначала проверить точного
+контрагента, потом отправить ссылку пароля. Источник: read-only capabilities на
+production, Woo wc-user-functions, pc-folio-customer-map/balance и WordPress core.
+
 - Новая guest purchase может создать WordPress user с ролью `customer` и связать его с default Internet Client ФОЛИО.
 - При существующем email заказ связывается с найденным пользователем по правилам guest-register plugin; не создавай дубликат без проверки.
 - Связь с реальным оптовиком/дилером задаётся на user edit через partners API и user meta.
