@@ -3,18 +3,23 @@
 ## Пользователь и ФОЛИО
 
 Регистрация оптовика: инструкция `docs/MANAGER_CUSTOMER_GUIDE_UK.md`,
-`#register-wholesale` (2026-10-02). Production `shop_manager` не имеет
-create_users/edit_users/promote_users, editable_roles ограничены customer.
-Не обещать менеджеру самостоятельную выдачу оптовой роли и не расширять права
-ради документации. Quick-order allow-list шире customer balance/documents:
+`#register-wholesale` (2026-10-02). До deploy CustomerPermissions production
+editable_roles ограничены customer, promote_users отсутствует, но Woo runtime
+уже даёт edit_users: проверять current_user_can с target, не только role storage.
+Новая политика PCOE (deploy ожидается) разрешает edit/promote клиентских ролей
+customer/opt/partner/opt_osn/schule только без elevated caps; mixed staff,
+самоповышение и delete/remove заблокированы, admin не меняется. Права runtime,
+без role migration; WordPress сохраняет nonce/target/editable_roles checks.
+Quick-order allow-list шире customer balance/documents:
 последние требуют opt/partner и подтверждённую привязку. Mapping появляется
 на user-edit/profile, не user-new; выбрать результат недостаточно, нужен Update
 User. Согласованный путь: менеджер регистрирует клиента через My Account в
 отдельном приватном окне; письмо пароля отправляется до настройки роли/ФОЛИО.
 Production 2026-10-02: регистрация, генерация username/password включены;
 стандартная форма содержит email, поля имени/фамилии требуют доработки.
-Не выдавать этот путь за полностью самостоятельный: завершение профиля пока
-требует администратора. Категория цен — opt/partner, не персональная скидка.
+До deploy завершение профиля оптовика требует администратора. После deploy
+менеджер использует Edit User в карточке; mapping сохраняется штатным профилем.
+Категория цен — opt/partner, не персональная скидка.
 Источник: read-only options/capabilities на
 production, Woo wc-user-functions, pc-folio-customer-map/balance и WordPress core.
 

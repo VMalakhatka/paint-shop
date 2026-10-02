@@ -69,6 +69,9 @@ $context = function_exists('pc_folio_balance_user_context') ? pc_folio_balance_u
 ?>
 <section class="pcoe-card pcoe-customer-heading">
 <h2><?php echo esc_html($user->display_name); ?></h2>
+<?php if (current_user_can('edit_user', $user->ID)): ?>
+<p><a class="button" href="<?php echo esc_url(get_edit_user_link($user->ID)); ?>"><?php esc_html_e('Edit User'); ?></a> <?php ManagerHelp::link('register-wholesale'); ?></p>
+<?php endif; ?>
 <p><a class="button" href="<?php echo esc_url(Conversations::url(['new_customer'=>$customer_id,'new_order'=>$order?$order->get_id():0],true)); ?>"><?php esc_html_e('Write to customer', 'pc-order-import-export'); ?></a></p>
 <p><?php echo esc_html(get_user_meta($customer_id, 'billing_company', true)); ?> · <?php echo esc_html($user->user_email); ?></p>
 <p><?php esc_html_e('Folio customer:', 'pc-order-import-export'); ?> <strong><?php echo esc_html($context['name'] ?? ''); ?> <?php echo esc_html($context['short_name'] ?? ''); ?></strong></p>

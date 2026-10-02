@@ -466,3 +466,19 @@ Operator/rollback: `docs/OPERATIONS_RUNBOOK.md`, customer confirmation section.
 Local tests: PCOE `tests/approval-delivery.php`, `tests/approval-delivery-ui.cjs`,
 existing confirmation HTTP and PNPM point-directory/card regressions. HTTP/mail
 are intercepted; production verification remains pending deployment.
+# Customer profile permissions (2026-10-02)
+
+`CustomerPermissions` extends the existing manager workspace through runtime
+capability filters; no persistent role migration. Single-site shop managers with
+`manage_woocommerce` can edit/promote customer-only accounts and use core profile,
+password-reset and Folio mapping controls. Customer roles are restricted to
+customer/opt/partner/opt_osn/schule and read-only role capabilities. Mixed staff
+roles and individually elevated customers fail closed. Self-promotion, account
+deletion/removal and admin account creation are not granted. Core role allow-list,
+nonce and target checks remain responsible for writes; no direct user-meta API.
+Registration remains the My Account flow. Existing manager order/document actions
+retain their own authorization and confirmation requirements.
+
+Test: `php wp-content/plugins/pc-order-import-export/tests/customer-permissions.php`.
+Operator guide, verification and deployment/rollback scope:
+`docs/MANAGER_CUSTOMER_GUIDE_UK.md#register-wholesale`. Production deploy pending.

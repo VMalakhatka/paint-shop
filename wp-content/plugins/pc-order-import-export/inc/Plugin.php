@@ -3,6 +3,7 @@ namespace PaintCore\PCOE;
 
 class Plugin {
     public function init(){
+        CustomerPermissions::hooks();
         // Статус чернетки
         ImporterDraft::register_status();
 
