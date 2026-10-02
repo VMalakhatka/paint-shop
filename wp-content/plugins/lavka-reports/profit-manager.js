@@ -21,12 +21,12 @@
         return Number.isNaN(date.getTime())?'—':new Intl.DateTimeFormat('uk-UA',{timeZone:'Europe/Kyiv',dateStyle:'short',timeStyle:'short'}).format(date);
     }
     const hiddenOdesaPlaceholder = row => ['ODESA_SALARY_RUB','ODESA_BANK_SERVICES','ODESA_TAXES','ODESA_ACCOUNTING'].includes(row.lineId) && row.source==='NOT_APPLICABLE' && row.amount!=null && row.profitImpact!=null && Number(row.amount)===0 && Number(row.profitImpact)===0;
-    // Stable Excel row addresses match the owner's 2026-10-01 manual workbook.
+    // Stable Excel row addresses match the owner's manual workbook with the duplicate row removed on 2026-10-02.
     // H belongs to the manager. I is always the authoritative API snapshot.
     function manualTemplateSheets(data, t) {
         let sequence=0;
         return ['KYIV','ODESA'].map(city=>{
-            const kyiv=city==='KYIV', name=kyiv?t.kyiv:t.odesa, end=kyiv?40:32;
+            const kyiv=city==='KYIV', name=kyiv?t.kyiv:t.odesa, end=kyiv?39:32;
             const rows=Array.from({length:end},()=>Array(9).fill('')), headings=[1,3], merges=[], used=new Set();
             const result=(data.cities||[]).find(c=>c.city===city)||{};
             rows[0]=['№',t.fields.label,t.fields.expenseCodes,t.fields.operationTypes,t.fields.purposeCodes,t.fields.cashWarehouses,t.fields.bankWarehouses,t.manualTemplateAmount,t.siteAmount];
@@ -46,15 +46,15 @@
             };
             const layout=kyiv?[
                 [4,'RENT_SHOP'],[5,'UTILITIES'],[6,'SALARY_UAH'],[7,'SALARY_RUB'],[8,'ADDITIONAL_SALARY'],
-                [9,'HOUSEHOLD_BANK',t.householdBank],[10,'ACCOUNTING'],[11,'HOUSEHOLD'],[12,'ADVERTISING'],
-                [13,'TRANSPORT_UKRAINE'],[14,'INTERNET'],[15,'PHONE'],[16,'BANK_SERVICES'],[17,'TAXES'],
-                [18,'IRREGULAR'],[19,'RENT_WHOLESALE'],[20,'PHONE_KAL']
+                [9,'HOUSEHOLD',t.householdServices],[10,'ACCOUNTING'],[11,'ADVERTISING'],
+                [12,'TRANSPORT_UKRAINE'],[13,'INTERNET'],[14,'PHONE'],[15,'BANK_SERVICES'],[16,'TAXES'],
+                [17,'IRREGULAR'],[18,'RENT_WHOLESALE'],[19,'PHONE_KAL']
             ]:[[4,'RENT'],[5,'UTILITIES'],[6,'SALARY_DOCUMENTS'],[7,'ADDITIONAL_SALARY'],[8,'HOUSEHOLD'],
                 [9,'ADVERTISING'],[10,'TRANSPORT_UKRAINE'],[11,'INTERNET'],[12,'PHONE']];
             layout.forEach(([r,id,label])=>expense(r,city+'_'+id,label));
-            const total=kyiv?22:14, master=kyiv?26:18, base=kyiv?32:24, gross=kyiv?38:30, op=gross+1, profit=gross+2;
+            const total=kyiv?21:14, master=kyiv?25:18, base=kyiv?31:24, gross=kyiv?37:30, op=gross+1, profit=gross+2;
             put(total,t.fields.operatingExpenses,result.operatingExpenses);headings.push(total);
-            if(kyiv)expense(24,'KYIV_IMPORT_TRANSPORT');
+            if(kyiv)expense(23,'KYIV_IMPORT_TRANSPORT');
             rows[master-1][1]=t.masterTitle;headings.push(master);
             const mk=masterClasses(data)[city];
             [['income',t.masterIncome],['returns',t.masterReturns],['netContribution',t.masterNet]].forEach(([key,label],i)=>{
@@ -71,8 +71,8 @@
                 rows[base+i][2]=(line?.organizationTypes||[]).join(' / ');rows[base+i][5]=(line?.warehouseIds||[]).join(' / ');
             });
             put(gross,t.fields.grossProfit+' — '+name,result.grossProfit);put(op,t.fields.operatingExpenses+' — '+name,result.operatingExpenses);put(profit,t.fields.profit+' — '+name,result.profit);
-            // These are the exact manual formulas in the supplied workbook, not API calculations.
-            const formulas=kyiv?{22:'SUM(H4:H21)',29:'H27-H28',38:'SUM(H29:H37)',39:'H22',40:'H38-H39'}:
+            // Keep the owner's manual formulas, adjusting references for the deleted Kyiv row; never calculate API totals here.
+            const formulas=kyiv?{21:'SUM(H4:H20)',28:'H26-H27',37:'SUM(H28:H36)',38:'H21',39:'H37-H38'}:
                 {14:'SUM(H4:H13)',21:'H19-H20',30:'SUM(H21:H29)',31:'H14',32:'H30-H31'};
             Object.entries(formulas).forEach(([r,f])=>{rows[Number(r)-1][7]=formula(f,0);});
             headings.push(master+3,gross,op,profit);

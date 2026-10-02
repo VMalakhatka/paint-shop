@@ -2034,7 +2034,7 @@ msgid "Manual entry, UAH (H)"
 msgstr ""
 
 #: inc/class-profit-report.php
-msgid "Household services and expenses (bank)"
+msgid "Household services and expenses"
 msgstr ""
 
 #: inc/class-profit-report.php

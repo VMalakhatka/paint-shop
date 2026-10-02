@@ -58,7 +58,7 @@ module.exports.currentData=currentData;
 test('manual H formulas and fixed addresses match the owner workbook; API values remain independent in I',()=>{
  const d=require('./fixtures/profit-template-java.json'),[k,o]=manager.sheets(d,labels);
  for(const [s,expected,end,city]of[
-  [k,{22:'SUM(H4:H21)',29:'H27-H28',38:'SUM(H29:H37)',39:'H22',40:'H38-H39'},40,'KYIV'],
+  [k,{21:'SUM(H4:H20)',28:'H26-H27',37:'SUM(H28:H36)',38:'H21',39:'H37-H38'},39,'KYIV'],
   [o,{14:'SUM(H4:H13)',21:'H19-H20',30:'SUM(H21:H29)',31:'H14',32:'H30-H31'},32,'ODESA']]){
   assert.equal(s.rows[0][7],'manualTemplateAmount');assert.equal(s.rows[0][8],'siteAmount');
   for(const[r,f]of Object.entries(expected)){assert.equal(s.rows[r-1][7].formula,f);assert.equal(s.rows[r-1][8].type,'number');}
@@ -66,19 +66,28 @@ test('manual H formulas and fixed addresses match the owner workbook; API values
   assert.equal(s.rows[3][7],'');assert.equal(s.copyStartRow,4);assert.equal(s.copyEndRow,end);
   assert(s.bordered);assert.equal(s.freezeRows,2);
  }
- assert.equal(k.rows[8][8],'—');assert.equal(k.rows[8][2],'templateRuleUnavailable');
- assert.equal(k.rows[15][1],'Услуги банка');assert.equal(k.rows[18][1],'Аренда ОПТ');
- assert.equal(k.rows[26][5],1);assert.equal(o.rows[18][5],5);
+ assert.equal(k.rows[8][8].value,d.expenseLines.find(l=>l.lineId==='KYIV_HOUSEHOLD').amount);
+ assert.equal(k.rows.filter(r=>r[2]==='НЕРЕГУЛ').length,1);
+ assert.equal(k.rows[14][1],'Услуги банка');assert.equal(k.rows[17][1],'Аренда ОПТ');
+ assert.equal(k.rows[25][5],1);assert.equal(o.rows[18][5],5);
  const xml=new TextDecoder().decode(writer.build([k,o]));
- assert.match(xml,/<c r="H22"[^>]*><f>SUM\(H4:H21\)<\/f><v>0<\/v>/);
- assert.match(xml,/<c r="I40"[^>]*><v>90.00<\/v>/);
+ assert.match(xml,/<c r="H21"[^>]*><f>SUM\(H4:H20\)<\/f><v>0<\/v>/);
+ assert.match(xml,/<c r="I39"[^>]*><v>90.00<\/v>/);
  assert.doesNotMatch(xml,/<c r="I\d+"[^>]*><f>/);
 });
-test('new bank household amounts and filters come only from Java, with no frontend splitting',()=>{
+test('single household row uses all-source Java selection once, without frontend splitting or recalculation',()=>{
  const d=structuredClone(require('./fixtures/profit-template-java.json'));
- d.expenseLines.push({city:'KYIV',lineId:'KYIV_HOUSEHOLD_BANK',label:'Bank household',source:'FOLIO',amount:'123.45',profitImpact:'123.45',accountingTreatment:'OPERATING_EXPENSE',filters:{expenseCodes:['НЕРЕГУЛ'],operationTypes:['РАСХОДЫ КИЕВОПТ','РАСХОДЫ КИЕВА'],cashWarehouseMode:'NONE',bankWarehouseMode:'INCLUDE',bankWarehouseIds:[1,7]}});
- const k=manager.sheets(d,labels)[0];assert.equal(k.rows[8][8].value,'123.45');assert.equal(k.rows[8][5],'—');assert.equal(k.rows[8][6],'1, 7');
- assert.equal(k.rows[21][8].value,d.cities[0].operatingExpenses);
+ const line=d.expenseLines.find(l=>l.lineId==='KYIV_HOUSEHOLD');
+ Object.assign(line,{label:'Household services and expenses',amount:'123.45',profitImpact:'123.45',filters:{expenseCodes:['НЕРЕГУЛ'],operationTypes:['РАСХОДЫ КИЕВОПТ','РАСХОДЫ КИЕВА'],cashWarehouseMode:'ALL',bankWarehouseMode:'ALL'}});
+ const k=manager.sheets(d,labels)[0];assert.equal(k.rows[8][8].value,'123.45');assert.equal(k.rows[8][5],'allWarehouses');assert.equal(k.rows[8][6],'allWarehouses');
+ assert.equal(k.rows.filter(r=>r[2]==='НЕРЕГУЛ').length,1);
+ assert.equal(k.rows[8][3],'РАСХОДЫ КИЕВОПТ / РАСХОДЫ КИЕВА');
+ assert.equal(k.rows[20][8].value,d.cities[0].operatingExpenses);
+ // Historical snapshots retain their own narrower criteria and their amounts.
+ line.filters.operationTypes=['РАСХОДЫ КИЕВА'];
+ assert.equal(manager.sheets(d,labels)[0].rows[8][3],'РАСХОДЫ КИЕВА');
+ d.expenseLines=d.expenseLines.filter(l=>l.lineId!=='KYIV_HOUSEHOLD');
+ const missing=manager.sheets(d,labels)[0];assert.equal(missing.rows[8][8],'—');assert.equal(missing.rows[8][2],'templateRuleUnavailable');
 });
 test('unavailable results and unexpected nonzero rows are visible without moving the copy range',()=>{
  const d=structuredClone(require('./fixtures/profit-template-java.json'));

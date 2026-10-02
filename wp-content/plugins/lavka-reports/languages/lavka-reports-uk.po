@@ -2073,8 +2073,8 @@ msgid "Manual entry, UAH (H)"
 msgstr "Ручне введення, грн (H)"
 
 #: inc/class-profit-report.php
-msgid "Household services and expenses (bank)"
-msgstr "Господарські послуги та витрати (банк)"
+msgid "Household services and expenses"
+msgstr "Господарські послуги та витрати"
 
 #: inc/class-profit-report.php
 msgid "This saved report does not contain this selection rule."

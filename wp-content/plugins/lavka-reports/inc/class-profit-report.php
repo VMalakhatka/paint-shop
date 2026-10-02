@@ -314,7 +314,7 @@ class Lavka_Reports_Profit_Report {
             'retailShare' => __('City share of retail taxes (fraction)', 'lavka-reports'),
             'siteAmount' => __('Report, UAH', 'lavka-reports'),
             'manualTemplateAmount' => __('Manual entry, UAH (H)', 'lavka-reports'),
-            'householdBank' => __('Household services and expenses (bank)', 'lavka-reports'),
+            'householdServices' => __('Household services and expenses', 'lavka-reports'),
             'templateRuleUnavailable' => __('This saved report does not contain this selection rule.', 'lavka-reports'),
             'manualTemplateHelp' => __('Excel: H is the manual template; keep its formulas. I contains website values. Paste copied results into I4 or another comparison column starting at row 4, never over H.', 'lavka-reports'),
             'manualGrossHelp' => __('The manual gross-profit formula sums the base total and the category rows. Fill either the base or its categories, not both. Website totals include the Folio master-class adjustment and may differ from the manual formula.', 'lavka-reports'),

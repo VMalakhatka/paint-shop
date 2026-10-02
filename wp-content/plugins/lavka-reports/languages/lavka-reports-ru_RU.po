@@ -2072,8 +2072,8 @@ msgid "Manual entry, UAH (H)"
 msgstr "Ручной ввод, грн (H)"
 
 #: inc/class-profit-report.php
-msgid "Household services and expenses (bank)"
-msgstr "Хозяйственные услуги и расходы (банк)"
+msgid "Household services and expenses"
+msgstr "Хозяйственные услуги и расходы"
 
 #: inc/class-profit-report.php
 msgid "This saved report does not contain this selection rule."
