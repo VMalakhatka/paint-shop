@@ -481,4 +481,6 @@ retain their own authorization and confirmation requirements.
 
 Test: `php wp-content/plugins/pc-order-import-export/tests/customer-permissions.php`.
 Operator guide, verification and deployment/rollback scope:
-`docs/MANAGER_CUSTOMER_GUIDE_UK.md#register-wholesale`. Production deploy pending.
+`docs/MANAGER_CUSTOMER_GUIDE_UK.md#register-wholesale`. Published 2026-10-02 from
+88abdda with owner approval; six files byte-verified and runtime permissions/help
+checked read-only. No customer writes or email-delivery tests were performed.

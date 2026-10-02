@@ -6,7 +6,7 @@
 `#register-wholesale` (2026-10-02). До deploy CustomerPermissions production
 editable_roles ограничены customer, promote_users отсутствует, но Woo runtime
 уже даёт edit_users: проверять current_user_can с target, не только role storage.
-Новая политика PCOE (deploy ожидается) разрешает edit/promote клиентских ролей
+Новая политика PCOE (опубликована 2026-10-02, 88abdda) разрешает edit/promote клиентских ролей
 customer/opt/partner/opt_osn/schule только без elevated caps; mixed staff,
 самоповышение и delete/remove заблокированы, admin не меняется. Права runtime,
 без role migration; WordPress сохраняет nonce/target/editable_roles checks.
@@ -17,8 +17,9 @@ User. Согласованный путь: менеджер регистриру
 отдельном приватном окне; письмо пароля отправляется до настройки роли/ФОЛИО.
 Production 2026-10-02: регистрация, генерация username/password включены;
 стандартная форма содержит email, поля имени/фамилии требуют доработки.
-До deploy завершение профиля оптовика требует администратора. После deploy
-менеджер использует Edit User в карточке; mapping сохраняется штатным профилем.
+После deploy менеджер использует Edit User в карточке; mapping сохраняется
+штатным профилем. Production read-only role/target checks и UK/RU help render
+пройдены; реальные сохранения профиля и отправка писем не тестировались.
 Категория цен — opt/partner, не персональная скидка.
 Источник: read-only options/capabilities на
 production, Woo wc-user-functions, pc-folio-customer-map/balance и WordPress core.
