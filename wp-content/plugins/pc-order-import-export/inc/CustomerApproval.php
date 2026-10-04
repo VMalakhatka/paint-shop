@@ -395,7 +395,7 @@ class CustomerApproval {
                 echo '<p>' . esc_html(get_userdata($source['customer_id'])->display_name) . '</p>';
                 self::table($snapshot);
                 if ($post = self::find($source)) echo '<p><a href="' . esc_url(self::url(['approval_id' => $post->ID])) . '">' . esc_html__('View saved confirmation', 'pc-order-import-export') . '</a></p>';
-                echo '<p>' . esc_html__('The request appears in the customer account. On the next screen, use Email confirmation link to customer to send it to their profile email.', 'pc-order-import-export') . '</p>';
+                echo '<p>' . esc_html__('The request appears in the customer account. On the next screen, send a confirmation link or an Excel file to the customer profile email.', 'pc-order-import-export') . '</p>';
                 echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">'; wp_nonce_field('pcoe_approval_request');
                 foreach (array_merge($source, ['document_type' => $source['type'], 'action' => 'pcoe_approval_request', 'revision' => self::revision($snapshot)]) as $key => $value) self::hidden($key, $value);
                 echo '<button class="button button-primary">' . esc_html__('Send for customer confirmation', 'pc-order-import-export') . '</button></form>';

@@ -272,3 +272,7 @@ msgstr ""
 #: inc/ManagerHelp.php
 msgid "For Nova Poshta, the customer selects a city and point or courier address and calculates delivery on the confirmation page. The saved result includes the destination, parcels and estimated customer/store shares. It uses the saved document warehouses and current delivery policy. If a warehouse or product cannot be identified, correct the order or sender mapping before asking the customer to retry. The estimate does not add delivery to the order total or create a waybill."
 msgstr ""
+
+#: inc/ManagerHelp.php
+msgid "For customers who prefer a file, click Email Excel file for confirmation on the saved request. The email includes an XLSX with the reviewed products, quantities, prices and totals, separate sheets for linked Folio documents, and the same account confirmation link. It goes to the customer profile email; replies go to the sending manager. Replying by email or editing the file does not automatically confirm or change the website order. If the order changed, create an updated confirmation request before sending again."
+msgstr ""

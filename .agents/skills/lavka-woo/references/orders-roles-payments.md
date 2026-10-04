@@ -343,3 +343,15 @@ receipt в transient; `DocumentShipmentBuilder` / `ApprovalQuoteService` (PNPM) 
 ограничения существующего PNPM; финальные условия проверяет менеджер.
 Источник — локальные интеграционные/браузерные тесты с mock HTTP; детали выпуска
 двух плагинов и восстановления — `docs/OPERATIONS_RUNBOOK.md`, подтверждение клиента.
+
+### Excel-вложение подтверждения — 2026-10-04
+
+`ApprovalNotifications` отправляет по отдельной кнопке ссылку или XLSX только на
+email профиля владельца, после прежних nonce/capability/revision-проверок.
+`ApprovalWorkbook` использует сохранённый snapshot, не пересчитывает каталог или
+доставку, не создаёт платёжный счёт. Linked Folio sheets — детализация, их суммы
+не складывать с Woo total. Текстовые ячейки задаются явно как строки; приватное
+вложение удаляется после синхронной отправки и при ошибке. Один mail request key
+идемпотентен для обоих форматов, unknown блокирует повтор. Email-ответ менеджеру
+не является consent на сайте. Источник: классы PCOE и локальный `approval-excel.php`
+с перехватом mail/HTTP. Канон: manager/customer guides и OPERATIONS_RUNBOOK.md.

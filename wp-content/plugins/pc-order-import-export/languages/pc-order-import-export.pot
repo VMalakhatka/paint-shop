@@ -2416,3 +2416,55 @@ msgstr ""
 #: inc/ApprovalDelivery.php inc/CustomerApproval.php
 msgid "Delivery estimate"
 msgstr ""
+
+#: inc/ApprovalWorkbook.php inc/ApprovalNotifications.php
+msgid "Excel export is unavailable. Contact the site administrator."
+msgstr ""
+
+#: inc/ApprovalWorkbook.php inc/ApprovalNotifications.php
+msgid "Could not create the Excel file. Nothing was sent."
+msgstr ""
+
+#: inc/ApprovalWorkbook.php inc/ApprovalNotifications.php
+msgid "Order confirmation"
+msgstr ""
+
+#: inc/ApprovalWorkbook.php inc/ApprovalNotifications.php
+msgid "Confirmation request #%s"
+msgstr ""
+
+#: inc/ApprovalWorkbook.php inc/ApprovalNotifications.php
+msgid "Review the attached items and reply to your manager with agreement or corrections. To confirm on the website and choose delivery, use the link in the email."
+msgstr ""
+
+#: inc/ApprovalWorkbook.php inc/ApprovalNotifications.php
+msgid "Document total"
+msgstr ""
+
+#: inc/ApprovalWorkbook.php inc/ApprovalNotifications.php
+msgid "The document total includes any delivery charges, fees and taxes already saved in this document. Linked Folio sheets are details of the same order; do not add their totals to the order total."
+msgstr ""
+
+#: inc/ApprovalWorkbook.php inc/ApprovalNotifications.php
+msgid "A reply by email does not automatically confirm the order on the website or change its contents."
+msgstr ""
+
+#: inc/ApprovalWorkbook.php inc/ApprovalNotifications.php
+msgid "Invalid email format."
+msgstr ""
+
+#: inc/ApprovalWorkbook.php inc/ApprovalNotifications.php
+msgid "An Excel copy of the order is attached for your review."
+msgstr ""
+
+#: inc/ApprovalWorkbook.php inc/ApprovalNotifications.php
+msgid "Last email: confirmation link and Excel attachment."
+msgstr ""
+
+#: inc/ApprovalWorkbook.php inc/ApprovalNotifications.php
+msgid "Email Excel file for confirmation"
+msgstr ""
+
+#: inc/ApprovalWorkbook.php inc/ApprovalNotifications.php
+msgid "The request appears in the customer account. On the next screen, send a confirmation link or an Excel file to the customer profile email."
+msgstr ""

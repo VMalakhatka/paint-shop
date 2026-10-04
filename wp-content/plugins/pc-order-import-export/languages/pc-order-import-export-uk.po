@@ -2618,3 +2618,55 @@ msgstr "Розрахунок доставки змінився або строк
 #: inc/ApprovalDelivery.php inc/CustomerApproval.php
 msgid "Delivery estimate"
 msgstr "Попередня вартість доставки"
+
+#: inc/ApprovalWorkbook.php inc/ApprovalNotifications.php
+msgid "Excel export is unavailable. Contact the site administrator."
+msgstr "Експорт Excel недоступний. Зверніться до адміністратора сайту."
+
+#: inc/ApprovalWorkbook.php inc/ApprovalNotifications.php
+msgid "Could not create the Excel file. Nothing was sent."
+msgstr "Не вдалося створити файл Excel. Нічого не надіслано."
+
+#: inc/ApprovalWorkbook.php inc/ApprovalNotifications.php
+msgid "Order confirmation"
+msgstr "Підтвердження замовлення"
+
+#: inc/ApprovalWorkbook.php inc/ApprovalNotifications.php
+msgid "Confirmation request #%s"
+msgstr "Запит на підтвердження №%s"
+
+#: inc/ApprovalWorkbook.php inc/ApprovalNotifications.php
+msgid "Review the attached items and reply to your manager with agreement or corrections. To confirm on the website and choose delivery, use the link in the email."
+msgstr "Перевірте товари у вкладенні та надішліть менеджеру відповідь зі згодою або виправленнями. Для підтвердження на сайті та вибору доставки скористайтеся посиланням у листі."
+
+#: inc/ApprovalWorkbook.php inc/ApprovalNotifications.php
+msgid "Document total"
+msgstr "Сума документа"
+
+#: inc/ApprovalWorkbook.php inc/ApprovalNotifications.php
+msgid "The document total includes any delivery charges, fees and taxes already saved in this document. Linked Folio sheets are details of the same order; do not add their totals to the order total."
+msgstr "Сума документа включає доставку, збори й податки, уже збережені в цьому документі. Пов’язані аркуші ФОЛІО деталізують те саме замовлення; не додавайте їхні суми до суми замовлення."
+
+#: inc/ApprovalWorkbook.php inc/ApprovalNotifications.php
+msgid "A reply by email does not automatically confirm the order on the website or change its contents."
+msgstr "Відповідь на email не підтверджує замовлення на сайті автоматично й не змінює його склад."
+
+#: inc/ApprovalWorkbook.php inc/ApprovalNotifications.php
+msgid "Invalid email format."
+msgstr "Неприпустимий формат листа."
+
+#: inc/ApprovalWorkbook.php inc/ApprovalNotifications.php
+msgid "An Excel copy of the order is attached for your review."
+msgstr "До листа додано копію замовлення в Excel для перевірки."
+
+#: inc/ApprovalWorkbook.php inc/ApprovalNotifications.php
+msgid "Last email: confirmation link and Excel attachment."
+msgstr "Останній лист: посилання на підтвердження та вкладення Excel."
+
+#: inc/ApprovalWorkbook.php inc/ApprovalNotifications.php
+msgid "Email Excel file for confirmation"
+msgstr "Надіслати Excel клієнту на підтвердження"
+
+#: inc/ApprovalWorkbook.php inc/ApprovalNotifications.php
+msgid "The request appears in the customer account. On the next screen, send a confirmation link or an Excel file to the customer profile email."
+msgstr "Запит з’явиться в кабінеті клієнта. На наступному екрані надішліть посилання на підтвердження або файл Excel на email із профілю клієнта."

@@ -484,3 +484,35 @@ Operator guide, verification and deployment/rollback scope:
 `docs/MANAGER_CUSTOMER_GUIDE_UK.md#register-wholesale`. Published 2026-10-02 from
 88abdda with owner approval; six files byte-verified and runtime permissions/help
 checked read-only. No customer writes or email-delivery tests were performed.
+
+## Excel attachments for customer confirmation — 2026-10-04
+
+On a fresh pending approval, managers can choose **Email Excel file for
+confirmation** beside the existing link-only button. Both use the existing
+nonce, ownership/revision checks and durable mail-event journal. One request key
+cannot send twice, even if the posted format changes. The recipient is the owning
+WP profile email; Reply-To is the sending manager. The email retains the account
+confirmation link and explains that an email reply does not confirm the order.
+
+`ApprovalWorkbook` exports the saved approval snapshot using the site's existing
+PhpSpreadsheet dependency. The first sheet contains the order/document, with each
+linked Folio document on a separate sheet. Stored line amounts and document totals
+are preserved, with no repricing or double addition of linked document totals.
+Text is explicit string data (including formula-like product names and leading
+zero SKUs); quantities/prices/amounts are numeric. Known linked Folio numbers and
+dates come from the existing saved Woo document metadata. Missing dates are not
+inferred. This is a review copy, not a new payment invoice.
+
+The private system-temporary attachment is named for the approval and revision,
+passed synchronously to wp_mail, and deleted on success/failure/exception; shutdown
+cleanup covers interrupted execution. Generation failure sends nothing. Missing
+PhpSpreadsheet leaves link-only sending available. Unknown mail outcome still
+blocks resending until investigated. Rollback: restore these plugin/help files;
+old requests and mail journal entries remain readable. No schema/Java changes.
+
+Local check: `wp eval-file wp-content/plugins/pc-order-import-export/tests/approval-excel.php --skip-themes`
+with HTTP and email intercepted; optional `PCOE_APPROVAL_EXCEL_PREVIEW` points to
+an existing private directory for synthetic workbook/panel HTML previews.
+Regression: `tests/approval-contacts-notifications.php`, `tests/customer-approval.php`
+and `tests/manager-help.php`. Canonical manager/customer guides and their on-site
+UK/RU help were updated; deployment and production verification remain separate.
