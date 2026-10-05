@@ -206,7 +206,8 @@ The customer workflow is in
 ## Data Contract
 
 - Whole published catalogue: simple products and variations with SKUs whose
-  parent is published and visible in the catalogue. Zero-stock products remain;
+  parent is published and visible in the catalogue, within visible categories.
+  Zero-stock products in those categories remain;
   hidden/search-only products and variable parent rows are excluded.
 - One price uses the current Woo customer price pipeline (`get_price()` and
   `wc_get_price_to_display()`), the same role mapping as the storefront. No Java
@@ -227,10 +228,23 @@ The customer workflow is in
 The sheet follows the `product_cat` tree with coloured category headings and Excel
 row outlines (summary above, maximum seven nested outline levels). Categories use
 the same alphabetical ordering as storefront tiles. Each product is written once:
-assigned Yoast primary category wins, otherwise the deepest assigned category,
-with alphabetical category order as a stable tie-breaker. Unassigned products go
-under Other products. Variations use their parent's categories. Within each group,
+assigned visible Yoast primary category wins, otherwise the deepest assigned
+visible category, with alphabetical category order as a stable tie-breaker.
+Variations use their parent's categories. Within each group,
 configured supplier priority wins, then product name and ID.
+
+Category visibility comes from `PSU_Category_Menu::index()` in `paint-shop-ux`:
+excluded branches and descendants, and categories without catalogue-visible products,
+are omitted. Hidden-only/unassigned products are not moved into Other products;
+multi-category products may use a visible branch instead. Resolve the shared index
+once per download; do not maintain a second exclusion setting or cache customer data.
+Missing/unavailable visibility provider fails the download rather than exporting
+an unrestricted catalogue. Main headers use medium terracotta `AD5943`, subgroups
+use `E8BCAC`/`F5E4DD`; the order column stays yellow. No schema/import change.
+Offline check: `tests/price-list-visibility.php` (set `PCOE_AUTOLOAD` to the shared
+Composer autoloader when testing an isolated worktree). It exercises the actual
+storefront category index, visibility changes, variations and XLSX save/reload.
+Checked locally 2026-10-05; deployment needs no new plugin, activation or migration.
 
 Header row/column keys stay unchanged. Category rows have no SKU or quantity, so
 existing import skips them. Collapsed rows are still imported when filled. There

@@ -87,6 +87,12 @@
   XLSX повторяет дерево `product_cat` с outline-группами: один товар в одной
   ветке (назначенная primary либо самая глубокая категория), заголовки без SKU
   не импортируются, заполненные строки свёрнутых разделов импортируются.
+  С 2026-10-05 отбор веток использует общий `PSU_Category_Menu::index()`:
+  только visible и не blocked, включая исключение всех потомков скрытой группы.
+  Primary выбирается среди видимых назначений; hidden-only и unassigned не
+  переносятся в «Інші товари». При недоступном провайдере видимости экспорт
+  завершается ошибкой, не открывает полный каталог. Проверка: offline
+  `pc-order-import-export/tests/price-list-visibility.php`.
   Подробности и границы: `wp-content/plugins/pc-order-import-export/README.md`.
 
 - Classic cart/checkout нужны для совместимости текущего WayForPay plugin.

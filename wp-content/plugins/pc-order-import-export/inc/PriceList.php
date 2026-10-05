@@ -113,10 +113,14 @@ class PriceList
     /** Build a compact tree before writing cells; keep no WC_Product objects between batches. */
     public static function catalogue_rows(iterable $products, array $locations): \Generator
     {
+        if (!class_exists('PSU_Category_Menu')) throw new \RuntimeException('Category visibility unavailable');
+        $visibility = \PSU_Category_Menu::index();
+        if (is_wp_error($visibility)) throw new \RuntimeException('Category visibility unavailable');
         $terms = get_terms(['taxonomy'=>'product_cat', 'hide_empty'=>false, 'orderby'=>'name', 'order'=>'ASC', 'menu_order'=>false]);
         if (is_wp_error($terms)) throw new \RuntimeException('Category tree unavailable');
         $index = []; $paths = []; $children = []; $buckets = []; $used = [];
         foreach ($terms as $term) {
+            if (!isset($visibility['visible'][$term->term_id]) || isset($visibility['blocked'][$term->term_id])) continue;
             $index[$term->term_id] = $term;
             $children[(int)$term->parent][] = (int)$term->term_id;
         }
@@ -140,6 +144,9 @@ class PriceList
             $categories = get_the_terms($parent_id, 'product_cat');
             if (is_wp_error($categories)) throw new \RuntimeException('Product categories unavailable');
             $assigned = array_map('intval', wp_list_pluck($categories ?: [], 'term_id'));
+            $assigned = array_values(array_filter($assigned, static fn($id) => isset($paths[$id])));
+            // Never move products from hidden-only branches into a public fallback group.
+            if (!$assigned) continue;
             $category = (int)get_post_meta($parent_id, '_yoast_wpseo_primary_product_cat', true);
             if (!in_array($category, $assigned, true) || !isset($paths[$category])) {
                 $category = 0;
@@ -184,11 +191,6 @@ class PriceList
         foreach ($children[0] ?? [] as $root) {
             if (isset($used[$root])) yield from $walk($root, 0);
         }
-        // Unassigned products still occur once, outside the normal category roots.
-        if (!empty($buckets[0])) {
-            yield ['heading'=>__('Other products', 'pc-order-import-export'), 'depth'=>0];
-            foreach ($buckets[0] as $item) yield ['values'=>$item['values'], 'depth'=>1];
-        }
     }
 
     public static function workbook(iterable $products, array $locations): Spreadsheet
@@ -222,7 +224,7 @@ class PriceList
         $sheet->setShowSummaryBelow(false);
         $sheet->getStyle('A1:I1')->applyFromArray([
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-            'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => '27634F']],
+            'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => 'AD5943']],
             'alignment' => ['wrapText' => true, 'vertical' => 'center'],
         ]);
         $sheet->getRowDimension(1)->setRowHeight(38);
@@ -244,7 +246,7 @@ class PriceList
         foreach ($headings as $number => $depth) {
             $sheet->getStyle('A' . $number . ':I' . $number)->applyFromArray([
                 'font'=>['bold'=>true, 'size'=>$depth === 0 ? 14 : 11, 'color'=>['rgb'=>$depth === 0 ? 'FFFFFF' : '263A40']],
-                'fill'=>['fillType'=>'solid', 'startColor'=>['rgb'=>$depth === 0 ? '27634F' : ($depth === 1 ? 'F1DE97' : 'E8EFF0')]],
+                'fill'=>['fillType'=>'solid', 'startColor'=>['rgb'=>$depth === 0 ? 'AD5943' : ($depth === 1 ? 'E8BCAC' : 'F5E4DD')]],
             ]);
             $sheet->getStyle('C' . $number)->getAlignment()->setIndent(min(7, $depth));
             $sheet->getRowDimension($number)->setRowHeight($depth === 0 ? 29 : 24);

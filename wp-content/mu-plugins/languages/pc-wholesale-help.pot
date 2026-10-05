@@ -756,6 +756,9 @@ msgstr ""
 msgid "Order from the full price list"
 msgstr ""
 
+msgid "The price list includes only visible website categories. Hidden groups, their subgroups and products without a visible category are omitted. Products assigned to both hidden and visible groups appear under a visible group. Group headings are terracotta; the Order quantity column stays yellow."
+msgstr ""
+
 msgid "In My orders or the cart, download the full XLSX price list. It contains one current price for your account, combined Kyiv and Odesa stock, barcodes, supplier and category filters, and product links. Unknown prices or stock remain blank. Out-of-stock catalogue products are included."
 msgstr ""
 

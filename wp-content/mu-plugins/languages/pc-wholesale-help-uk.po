@@ -787,6 +787,9 @@ msgstr "Відкрийте рахунок або видаткову наклад
 msgid "Order from the full price list"
 msgstr "Замовлення з повного прайса"
 
+msgid "The price list includes only visible website categories. Hidden groups, their subgroups and products without a visible category are omitted. Products assigned to both hidden and visible groups appear under a visible group. Group headings are terracotta; the Order quantity column stays yellow."
+msgstr "Прайс містить лише видимі категорії сайту. Приховані групи, їхні підгрупи та товари без видимої категорії не включені. Товари, призначені одночасно до прихованих і видимих груп, наведені у видимій групі. Заголовки груп теракотові; колонка «Замовити» залишається жовтою."
+
 msgid "In My orders or the cart, download the full XLSX price list. It contains one current price for your account, combined Kyiv and Odesa stock, barcodes, supplier and category filters, and product links. Unknown prices or stock remain blank. Out-of-stock catalogue products are included."
 msgstr "У «Моїх замовленнях» або кошику завантажте повний прайс XLSX. У ньому є одна поточна ціна для вашого облікового запису, спільний залишок Києва та Одеси, штрихкоди, фільтри постачальників і категорій та посилання на товари. Невідомі ціни чи залишки залишаються порожніми. Товари каталогу без залишку також включені."
 
