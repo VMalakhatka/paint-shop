@@ -19,6 +19,7 @@
 | Расписание МК, статьи, заявки и роль мастера | `docs/WORKSHOPS_GUIDE_RU.md` |
 | Пользовательские сценарии | `docs/SITE_USER_GUIDE_UK.md` |
 | Менеджерский раздел «Робота з клієнтами» и контекстная справка | `docs/MANAGER_CUSTOMER_GUIDE_UK.md`; публикация: `pc-order-import-export/inc/ManagerHelp.php` + `pcoe-manager-help` UK/RU |
+| Учётные цены: менеджерские шаги, статусы складов, отрицательная хронология и Excel | `docs/FOLIO_ACCOUNTING_PRICES_MANAGER_UK.md`; публикация: `lavka-price-sync/inc/accounting-price-help.php` + `lps-accounting-help` UK/RU |
 | Оптовая справка на сайте, заказ, импорт/экспорт, черновики, повтор старого заказа, склады, checkout split, баланс и документы ФОЛІО | Канон: `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md`; публикация: `wp-content/mu-plugins/pc-wholesale-help.php` + assets/i18n |
 | Media workflow оператора | `docs/MEDIA_MANAGER_GUIDE_UK.md` |
 | Точный request/response/status | Java `docs/api` или contract владельца plugin |

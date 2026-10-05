@@ -89,6 +89,15 @@ Java не заявляет автоматическую сверку парти�
 
 ### Учётные цены ФОЛИО
 
+Менеджерский канон (2026-10-05): `docs/FOLIO_ACCOUNTING_PRICES_MANAGER_UK.md`.
+Контекстная read-only справка `lps-accounting-prices&view=help` принадлежит
+`inc/accounting-price-help.php` и отдельному домену `lps-accounting-help` UK/RU.
+Не запускать preview/apply ради проверки справки. Различать XLSX состояния
+склада и XLSX постоянного журнала с применёнными фильтрами: общего XLSX всех
+складов у negative-view нет. Дата фильтра журнала — created_at UTC, не дата
+документа. Trigger movement не доказывает бизнес-первопричину; пустое не ноль.
+Источник: frontend/export code; production имеет журнал и библиотеку XLSX.
+
 Основной регламент: Java `docs/api/FOLIO_ACCOUNTING_PRICE_OPERATIONS_FRONTEND.md`. UI обязан следовать текущим статусам, а не старому условию `warningCount === 0`.
 
 - Point — один SKU.

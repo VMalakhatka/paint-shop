@@ -1,0 +1,10 @@
+.lps-ap-help-link{display:inline-block;font-size:12px;font-weight:400;margin:4px 8px;vertical-align:middle;white-space:normal;max-width:100%}
+.lps-ap-help-tab{display:inline-flex;flex-direction:column;align-items:flex-start;vertical-align:top}
+.lps-ap .nav-tab-wrapper{display:flex;flex-wrap:wrap;align-items:flex-start;gap:4px}
+.lps-ap-help-tab>.nav-tab{float:none;margin:0}
+.lps-accounting-help{max-width:960px;line-height:1.65}
+.lps-accounting-help nav{display:flex;flex-wrap:wrap;gap:8px 20px;padding:16px;background:white;border:1px solid #c3c4c7}
+.lps-accounting-help section{background:white;padding:16px 24px;margin:16px 0;border-left:4px solid #2271b1;scroll-margin-top:48px}
+.lps-accounting-help p{font-size:15px;overflow-wrap:anywhere}
+.lps-accounting-help h2{line-height:1.4}
+@media(max-width:600px){.lps-accounting-help section{padding:12px}.lps-ap-help-link{margin:4px;font-size:12px}}

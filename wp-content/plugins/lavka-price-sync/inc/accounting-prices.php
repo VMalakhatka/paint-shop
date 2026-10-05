@@ -1,5 +1,6 @@
 <?php
 if (!defined('ABSPATH')) exit;
+require_once __DIR__ . '/accounting-price-help.php';
 
 const LPS_ACCOUNTING_PRICES_SINGLE_PATH = '/admin/folio/accounting-prices/recalculate';
 const LPS_ACCOUNTING_PRICES_WAREHOUSES_PATH = '/ref/warehouses';
@@ -18,6 +19,7 @@ add_action('admin_menu', function () {
 add_action('admin_enqueue_scripts', function () {
     $page = sanitize_key(wp_unslash($_GET['page'] ?? ''));
     if ($page !== 'lps-accounting-prices') return;
+    if (($_GET['view'] ?? '') === 'help') return;
 
     $css_path = dirname(__DIR__) . '/assets/accounting-prices.css';
     $js_path = dirname(__DIR__) . '/assets/accounting-prices.js';
@@ -549,6 +551,10 @@ function lps_accounting_prices_batch_details_text(array $details): string {
 
 function lps_render_accounting_prices_page(): void {
     if (!current_user_can(LPS_CAP)) return;
+    if (($_GET['view'] ?? '') === 'help') {
+        lps_accounting_help_render();
+        return;
+    }
 
     $cron_options = lps_accounting_prices_native_cron_options();
     $native_job = lps_accounting_prices_native_job_state();
