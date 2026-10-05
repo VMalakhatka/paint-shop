@@ -128,7 +128,7 @@ $GLOBALS['java_body'] = [
 ];
 lps_accounting_price_campaign_poll_range($state);
 check(!$state['active'] && $state['phase'] === 'manual_review', 'Unknown outcome must stop the campaign.');
-check(($GLOBALS['options'][LPS_ACCOUNTING_PRICES_NATIVE_CRON_OPTION]['enabled'] ?? true) === false, 'Unknown outcome must pause the schedule.');
+check(!empty($GLOBALS['options'][LPS_ACCOUNTING_PRICES_NATIVE_CRON_OPTION]['paused_reason']), 'Unknown outcome must hold automatic apply for review.');
 check($GLOBALS['ticks'] === [], 'Unknown outcome must not schedule an automatic retry.');
 
 $state = campaign_fixture();

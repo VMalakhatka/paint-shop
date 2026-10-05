@@ -569,7 +569,7 @@ function lps_render_accounting_prices_page(): void {
         'sun' => __('Sunday', 'lavka-price-sync'),
     ];
     $saved_schedule_status = !empty($cron_options['paused_reason'])
-        ? __('Paused after an error', 'lavka-price-sync')
+        ? __('Manual review required', 'lavka-price-sync')
         : (!empty($cron_options['enabled'])
             ? __('Enabled', 'lavka-price-sync')
             : __('Disabled', 'lavka-price-sync'));
@@ -889,7 +889,7 @@ function lps_render_accounting_prices_page(): void {
 
                     <?php if (!empty($cron_options['paused_reason'])): ?>
                         <div class="notice notice-error inline"><p>
-                            <strong><?php echo esc_html__('Schedule paused:', 'lavka-price-sync'); ?></strong>
+                            <strong><?php echo esc_html__('Manual review required', 'lavka-price-sync'); ?>:</strong>
                             <?php echo esc_html((string)$cron_options['paused_reason']); ?>
                         </p></div>
                     <?php endif; ?>

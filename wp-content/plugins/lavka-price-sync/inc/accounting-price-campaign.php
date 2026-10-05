@@ -993,7 +993,7 @@ function lps_accounting_price_campaign_public_state(?array $state = null): array
         'warehouseIds' => lps_accounting_prices_native_normalize_warehouse_ids($state['warehouse_ids'] ?? []),
         'warehouseIndex' => absint($state['warehouse_index'] ?? 0),
         'expectedJobId' => sanitize_text_field((string)($state['range_job_id'] ?? '')),
-        'reviewRequired' => ($state['status'] ?? '') === 'outcome_unknown',
+        'reviewRequired' => in_array($state['status'] ?? '', ['outcome_unknown', 'failed_partial'], true),
         'currentWarehouseId' => absint($state['current_warehouse_id'] ?? 0),
         'sourceDatabase' => sanitize_text_field((string)($state['source_database'] ?? '')),
         'initialMode' => !empty($state['include_unverified']),
@@ -1044,7 +1044,7 @@ function lps_accounting_price_campaign_create(array $warehouse_ids, string $sour
     if (!empty($existing['active'])) {
         return ['ok' => false, 'httpStatus' => 409, 'message' => __('An accounting-price SKU campaign is already running.', 'lavka-price-sync'), 'state' => lps_accounting_price_campaign_public_state($existing)];
     }
-    if (($existing['status'] ?? '') === 'outcome_unknown'
+    if (in_array($existing['status'] ?? '', ['outcome_unknown', 'failed_partial'], true)
         && ($source !== 'manual' || $reviewed_campaign_id === '' || $reviewed_campaign_id !== ($existing['campaign_id'] ?? ''))) {
         return ['ok' => false, 'httpStatus' => 409, 'message' => __('Review the unresolved operation before starting another campaign. A fresh snapshot alone does not prove the commit outcome.', 'lavka-price-sync')];
     }
@@ -1059,7 +1059,7 @@ function lps_accounting_price_campaign_create(array $warehouse_ids, string $sour
     $options = lps_accounting_prices_native_cron_options();
     $window_minutes = max(30, min(720, absint($options['campaign_window_minutes'] ?? 240)));
     $state = [
-        'reviewed_operation' => ($existing['status'] ?? '') === 'outcome_unknown' ? [
+        'reviewed_operation' => in_array($existing['status'] ?? '', ['outcome_unknown', 'failed_partial'], true) ? [
             'campaign_id' => $existing['campaign_id'] ?? '',
             'job_id' => $existing['range_job_id'] ?? '',
             'warehouse_id' => $existing['current_warehouse_id'] ?? 0,
@@ -1126,6 +1126,19 @@ function lps_accounting_price_campaign_create(array $warehouse_ids, string $sour
     return ['ok' => true, 'httpStatus' => 202, 'message' => __('The SKU campaign was accepted.', 'lavka-price-sync'), 'state' => lps_accounting_price_campaign_public_state($state)];
 }
 
+/** A snapshot reads Folio; its failure ends this attempt, not the calendar. */
+function lps_accounting_price_campaign_end_snapshot_attempt(array $state): void {
+    lps_accounting_price_campaign_clear_ticks();
+    if (!wp_next_scheduled(LPS_ACCOUNTING_PRICES_NATIVE_CRON_HOOK)) {
+        lps_accounting_prices_native_reschedule();
+    }
+    lps_accounting_price_campaign_log('accounting_price_snapshot_failed', [
+        'level' => 'error',
+        'message' => 'Snapshot attempt stopped; the configured calendar is unchanged.',
+        'context' => ['campaign_id' => $state['campaign_id'] ?? '', 'phase' => $state['phase'] ?? ''],
+    ]);
+}
+
 function lps_accounting_price_campaign_start_snapshot(array &$state, string $stage): void {
     if (($state['snapshot_attempt_stage'] ?? '') !== $stage) {
         $previous = lps_accounting_price_campaign_latest_generation(absint($state['current_warehouse_id'] ?? 0));
@@ -1164,7 +1177,7 @@ function lps_accounting_price_campaign_start_snapshot(array &$state, string $sta
             $state['error'] = sanitize_textarea_field((string)($body['message'] ?? __('The Folio product snapshot request was rejected. Check the Java configuration before retrying.', 'lavka-price-sync')));
             $state['completed_at'] = current_time('mysql');
             lps_accounting_price_campaign_store($state);
-            lps_accounting_prices_native_pause_schedule($state['error']);
+            lps_accounting_price_campaign_end_snapshot_attempt($state);
             return;
         }
         $body_warehouse = absint($body['warehouseId'] ?? 0);
@@ -1209,7 +1222,7 @@ function lps_accounting_price_campaign_poll_snapshot(array &$state): void {
             $state['error'] = __('The snapshot status remained unavailable for two hours. Automatic continuation was stopped.', 'lavka-price-sync');
             $state['completed_at'] = current_time('mysql');
             lps_accounting_price_campaign_store($state);
-            lps_accounting_prices_native_pause_schedule($state['error']);
+            lps_accounting_price_campaign_end_snapshot_attempt($state);
             return;
         }
         $state['message'] = __('The snapshot status is temporarily unavailable. Waiting without starting another job.', 'lavka-price-sync');
@@ -1235,8 +1248,7 @@ function lps_accounting_price_campaign_poll_snapshot(array &$state): void {
         $state['message'] = $state['error'];
         $state['completed_at'] = current_time('mysql');
         lps_accounting_price_campaign_store($state);
-        lps_accounting_price_campaign_clear_ticks();
-        lps_accounting_prices_native_pause_schedule($state['error']);
+        lps_accounting_price_campaign_end_snapshot_attempt($state);
         return;
     }
     if ($snapshot_running) {
@@ -1281,7 +1293,7 @@ function lps_accounting_price_campaign_poll_snapshot(array &$state): void {
         $state['error'] = sanitize_textarea_field((string)($body['error'] ?? __('The Folio product snapshot did not become active.', 'lavka-price-sync')));
         $state['completed_at'] = current_time('mysql');
         lps_accounting_price_campaign_store($state);
-        lps_accounting_prices_native_pause_schedule($state['error']);
+        lps_accounting_price_campaign_end_snapshot_attempt($state);
         return;
     }
 
@@ -1295,7 +1307,7 @@ function lps_accounting_price_campaign_poll_snapshot(array &$state): void {
         $state['error'] = __('The active snapshot was built, but its source database could not be resolved in WordPress.', 'lavka-price-sync');
         $state['completed_at'] = current_time('mysql');
         lps_accounting_price_campaign_store($state);
-        lps_accounting_prices_native_pause_schedule($state['error']);
+        lps_accounting_price_campaign_end_snapshot_attempt($state);
         return;
     }
 
@@ -1957,7 +1969,19 @@ function lps_accounting_price_campaign_run_scheduled(string $source = 'cron'): a
     if (empty($options['enabled']) || empty($options['automatic_apply_confirmed'])) {
         return ['ok' => false, 'httpStatus' => 400, 'message' => 'schedule_disabled'];
     }
-    return lps_accounting_price_campaign_create($options['warehouse_ids'] ?? [], $source === 'cron' ? 'cron' : 'recovery');
+    if (!empty($options['paused_reason'])) {
+        $result = ['ok' => false, 'httpStatus' => 409, 'message' => 'manual_review_required'];
+    } else {
+        $result = lps_accounting_price_campaign_create($options['warehouse_ids'] ?? [], $source === 'cron' ? 'cron' : 'recovery');
+    }
+    if (empty($result['ok'])) {
+        lps_accounting_price_campaign_log('accounting_price_schedule_skipped', [
+            'level' => 'warning',
+            'message' => sanitize_textarea_field((string)($result['message'] ?? 'Campaign not accepted.')),
+            'context' => ['http_status' => $result['httpStatus'] ?? 0],
+        ]);
+    }
+    return $result;
 }
 
 function lps_accounting_price_campaign_maybe_resume(): void {

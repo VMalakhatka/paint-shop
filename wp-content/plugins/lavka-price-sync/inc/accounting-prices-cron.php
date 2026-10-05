@@ -293,10 +293,12 @@ function lps_accounting_prices_native_schedule_batch_next(int $delay = 10): ?int
 
 function lps_accounting_prices_native_pause_schedule(string $reason): void {
     $options = lps_accounting_prices_native_cron_options();
-    $options['enabled'] = false;
+    // Keep the owner's calendar. The hold prevents apply, not future wake-ups.
     $options['paused_reason'] = sanitize_textarea_field($reason);
     update_option(LPS_ACCOUNTING_PRICES_NATIVE_CRON_OPTION, $options, false);
-    wp_clear_scheduled_hook(LPS_ACCOUNTING_PRICES_NATIVE_CRON_HOOK);
+    if (!wp_next_scheduled(LPS_ACCOUNTING_PRICES_NATIVE_CRON_HOOK)) {
+        lps_accounting_prices_native_reschedule();
+    }
     wp_clear_scheduled_hook(LPS_ACCOUNTING_PRICES_NATIVE_RETRY_HOOK);
     wp_clear_scheduled_hook(LPS_ACCOUNTING_PRICES_NATIVE_BATCH_NEXT_HOOK);
     if (function_exists('lps_accounting_price_campaign_clear_ticks')) {
@@ -1084,6 +1086,9 @@ function lps_accounting_prices_native_run_scheduled(string $source = 'cron'): ar
 
     if (empty($options['enabled']) || empty($options['automatic_apply_confirmed'])) {
         return ['ok' => false, 'httpStatus' => 400, 'body' => ['message' => 'schedule_disabled']];
+    }
+    if (!empty($options['paused_reason'])) {
+        return ['ok' => false, 'httpStatus' => 409, 'body' => ['message' => 'manual_review_required']];
     }
 
     $warehouse_ids = lps_accounting_prices_native_normalize_warehouse_ids($options['warehouse_ids'] ?? []);
