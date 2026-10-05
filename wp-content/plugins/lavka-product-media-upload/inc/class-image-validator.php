@@ -797,6 +797,10 @@ final class ImageValidator
             }
         }
 
+        // Keep compound SKU separators in the safe filename form without
+        // changing the SKU used to resolve the WooCommerce/Folio product.
+        $stem = str_replace(['/', '\\'], '_', $stem);
+
         // Store filenames in ASCII, without changing the SKU used to resolve Woo/Folio.
         // Ж -> g and Ц -> c follow the shop's agreed naming convention.
         $stem = strtr($stem, [

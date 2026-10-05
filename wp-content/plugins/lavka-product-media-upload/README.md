@@ -57,7 +57,9 @@ P-296-010 gallery 2  -> p-296-010_3.jpg
 Ukrainian/Russian Cyrillic is transliterated per character throughout the filename
 stem (including mixed-script suffixes). Ж → g and Ц → c follow the shop convention.
 The existing РСУ → rcy exception remains; the prefix-map filter can still override
-known naming conventions. Other unsupported characters remain blocking errors.
+known naming conventions. The `/` and `\` separators are converted to `_` in the
+filename only, for example `КЦМ-БК038/60` → `kcm-bk038_60.jpg`. Other unsupported
+characters remain blocking errors.
 
 ## Conflict sources
 
@@ -264,7 +266,8 @@ The `КЦМ-` → `kcm-` naming convention was confirmed against assigned produc
 media on 2026-09-22 and is covered by the character table without a separate prefix
 rule. Conversion changes the generated filename only, never the product/Folio SKU. Nonstandard existing filenames remain unchanged; normal conflict
 and content checks still apply. Cyrillic prefixes and suffixes now use the character table; other unsupported
-characters stay blocked. Different source assets resolving to the same canonical
+characters stay blocked. Slash separators in compound SKUs are converted to `_` in
+the generated filename only. Different source assets resolving to the same canonical
 name still fail the existing batch/WordPress/S3 conflict checks.
 
 Character conversion is case-insensitive and applies only to the generated filename.
