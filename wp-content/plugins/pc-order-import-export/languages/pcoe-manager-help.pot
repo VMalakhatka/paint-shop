@@ -300,3 +300,9 @@ msgstr ""
 #: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
 msgid "Accepted by the mail service is not proof of inbox delivery. Retry only failed emails repeats known failures, never accepted emails or uncertain results. If sending was interrupted, check the mail log before contacting those recipients again. A changed email, subscription or price role is skipped. If files failed to prepare, fix the cause and create a new mailing. If the queue does not progress, ask the administrator to check the site scheduler; do not start a duplicate mailing."
 msgstr ""
+
+msgid "Choose Message only, Full price list or Products from a Folio document. For a document, select its type, warehouse and date, then a receipt or invoice. Accounted receipts and both accounting and non-accounting invoices are available, including promotional invoices. The list shows the type, number, date and non-accounting flag. Reload warehouses retries a failed directory request. Only published site products from the selected document are included; missing products are listed separately. Prices use each customer’s site conditions, and Kyiv/Odesa stock comes from the site. Document prices, quantities and counterparties are not sent."
+msgstr ""
+
+msgid "Email mailings: message, price list or document products"
+msgstr ""

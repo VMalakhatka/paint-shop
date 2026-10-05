@@ -2944,3 +2944,87 @@ msgstr "Подготовка файла прервана. Создайте но�
 #: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
 msgid "Price example: %s"
 msgstr "Пример цен для: %s"
+
+msgid "Select a receipt or invoice document type."
+msgstr "Выберите тип документа: приход или счёт."
+
+msgid "The Folio document service is unavailable."
+msgstr "Сервис документов ФОЛИО недоступен."
+
+msgid "Could not connect to Folio. Try loading again."
+msgstr "Не удалось подключиться к ФОЛИО. Попробуйте загрузить ещё раз."
+
+msgid "The Folio document service needs an update, or the selected document is no longer available. Reload the document list."
+msgstr "Нужно обновить сервис документов ФОЛИО либо выбранный документ уже недоступен. Обновите список документов."
+
+msgid "Folio request failed (HTTP %s). Try loading again."
+msgstr "Ошибка запроса к ФОЛИО (HTTP %s). Попробуйте ещё раз."
+
+msgid "Folio returned an invalid document response."
+msgstr "ФОЛИО вернул некорректный ответ о документах."
+
+msgid "Folio returned an invalid warehouse list."
+msgstr "ФОЛИО вернул некорректный список складов."
+
+msgid "Update the Folio service to select invoices for mailings."
+msgstr "Обновите сервис ФОЛИО для выбора счетов в рассылках."
+
+msgid "Select warehouse, date and a receipt or invoice."
+msgstr "Выберите склад, дату и приходную накладную или счёт."
+
+msgid "Document selection: warehouse %1$s, date %2$s, document ID %3$s"
+msgstr "Выбранный документ: склад %1$s, дата %2$s, ID документа %3$s"
+
+msgid "These document SKUs are missing or not published on the site and will not be included:"
+msgstr "Эти артикулы документа отсутствуют или не опубликованы на сайте и не войдут в прайс:"
+
+msgid "Products from a Folio document"
+msgstr "Товары из документа ФОЛИО"
+
+msgid "Document type"
+msgstr "Тип документа"
+
+msgid "Receipts and invoices"
+msgstr "Приходные накладные и счета"
+
+msgid "Receipts"
+msgstr "Приходные накладные"
+
+msgid "Invoices"
+msgstr "Счета"
+
+msgid "Choose an accounted receipt or an invoice, including a non-accounting promotional invoice. Only its products are used; prices and stock come from the site."
+msgstr "Выберите учитываемую приходную накладную или счёт, в том числе неучитываемый рекламный. Из документа берётся только список товаров; цены и остатки — с сайта."
+
+msgid "Reload warehouses"
+msgstr "Обновить склады"
+
+msgid "Document date"
+msgstr "Дата документа"
+
+msgid "Receipt or invoice"
+msgstr "Приходная накладная или счёт"
+
+msgid "Loading documents…"
+msgstr "Загружаем документы…"
+
+msgid "Loading warehouses…"
+msgstr "Загружаем склады…"
+
+msgid "No matching receipts or invoices found for this warehouse and date."
+msgstr "По выбранным складу и дате подходящих приходных накладных или счетов не найдено."
+
+msgid "Folio returned no available warehouses. Reload or contact the administrator."
+msgstr "ФОЛИО не вернул доступных складов. Обновите список или обратитесь к администратору."
+
+msgid "Receipt"
+msgstr "Приходная накладная"
+
+msgid "Invoice"
+msgstr "Счёт"
+
+msgid "Non-accounting"
+msgstr "Неучитываемый"
+
+msgid "Could not load Folio documents. Try loading again."
+msgstr "Не удалось загрузить документы ФОЛИО. Попробуйте ещё раз."

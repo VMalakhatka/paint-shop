@@ -2748,3 +2748,87 @@ msgstr ""
 #: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
 msgid "Price example: %s"
 msgstr ""
+
+msgid "Select a receipt or invoice document type."
+msgstr ""
+
+msgid "The Folio document service is unavailable."
+msgstr ""
+
+msgid "Could not connect to Folio. Try loading again."
+msgstr ""
+
+msgid "The Folio document service needs an update, or the selected document is no longer available. Reload the document list."
+msgstr ""
+
+msgid "Folio request failed (HTTP %s). Try loading again."
+msgstr ""
+
+msgid "Folio returned an invalid document response."
+msgstr ""
+
+msgid "Folio returned an invalid warehouse list."
+msgstr ""
+
+msgid "Update the Folio service to select invoices for mailings."
+msgstr ""
+
+msgid "Select warehouse, date and a receipt or invoice."
+msgstr ""
+
+msgid "Document selection: warehouse %1$s, date %2$s, document ID %3$s"
+msgstr ""
+
+msgid "These document SKUs are missing or not published on the site and will not be included:"
+msgstr ""
+
+msgid "Products from a Folio document"
+msgstr ""
+
+msgid "Document type"
+msgstr ""
+
+msgid "Receipts and invoices"
+msgstr ""
+
+msgid "Receipts"
+msgstr ""
+
+msgid "Invoices"
+msgstr ""
+
+msgid "Choose an accounted receipt or an invoice, including a non-accounting promotional invoice. Only its products are used; prices and stock come from the site."
+msgstr ""
+
+msgid "Reload warehouses"
+msgstr ""
+
+msgid "Document date"
+msgstr ""
+
+msgid "Receipt or invoice"
+msgstr ""
+
+msgid "Loading documents…"
+msgstr ""
+
+msgid "Loading warehouses…"
+msgstr ""
+
+msgid "No matching receipts or invoices found for this warehouse and date."
+msgstr ""
+
+msgid "Folio returned no available warehouses. Reload or contact the administrator."
+msgstr ""
+
+msgid "Receipt"
+msgstr ""
+
+msgid "Invoice"
+msgstr ""
+
+msgid "Non-accounting"
+msgstr ""
+
+msgid "Could not load Folio documents. Try loading again."
+msgstr ""

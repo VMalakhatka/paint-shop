@@ -10,7 +10,7 @@ $d=BroadcastStore::get($id);$counts=array_count_values(array_column($d['recipien
 <p><strong><?php echo esc_html(BroadcastUi::label($d['status'])); ?></strong> · <?php echo esc_html(sprintf(__('Recipients: %s','pc-order-import-export'),count($d['recipients']))); ?></p>
 <?php if($d['error']): ?><p role="alert"><?php echo esc_html($d['error']); ?></p><?php endif; ?>
 <div style="white-space:pre-wrap;overflow-wrap:anywhere"><?php echo esc_html($d['message']); ?></div>
-<?php if($d['source']): ?><p><?php echo esc_html(sprintf(__('Arrival selection: warehouse %1$s, date %2$s, document ID %3$s','pc-order-import-export'),$d['source']['warehouse'],$d['source']['date'],$d['source']['document'])); ?></p><?php endif; ?>
+<?php if($d['source']): ?><p><?php echo esc_html(sprintf(__('Document selection: warehouse %1$s, date %2$s, document ID %3$s','pc-order-import-export'),$d['source']['warehouse'],$d['source']['date'],$d['source']['document'])); ?></p><?php endif; ?>
 <p><?php echo esc_html(sprintf(__('Prepared price groups: %s. Customers with the same pricing conditions share one file.','pc-order-import-export'),count($d['groups']))); ?></p>
 <?php foreach($d['groups'] as $key=>$group): ?>
 <p><?php echo esc_html($group['label'].' · '.$group['count'].' · '.sprintf(__('Price example: %s','pc-order-import-export'),get_userdata($group['user'])->display_name??'')); ?> —
@@ -18,7 +18,7 @@ $d=BroadcastStore::get($id);$counts=array_count_values(array_column($d['recipien
 <a href="<?php echo esc_url($url); ?>"><?php esc_html_e('Download price preview','pc-order-import-export'); ?></a> · <?php echo esc_html(sprintf(__('Products: %1$s. Prepared: %2$s','pc-order-import-export'),$group['products'],wp_date(get_option('date_format').' H:i',strtotime($group['at'])))); ?>
 <?php else: esc_html_e('Preparing files','pc-order-import-export'); endif; ?></p>
 <?php endforeach; ?>
-<?php if($d['missing']): ?><p role="alert"><?php esc_html_e('These receipt SKUs are missing or not published on the site and will not be included:','pc-order-import-export'); ?> <?php echo esc_html(implode(', ',$d['missing'])); ?></p><?php endif; ?>
+<?php if($d['missing']): ?><p role="alert"><?php esc_html_e('These document SKUs are missing or not published on the site and will not be included:','pc-order-import-export'); ?> <?php echo esc_html(implode(', ',$d['missing'])); ?></p><?php endif; ?>
 <?php if($d['skipped']): ?><p><?php echo esc_html(sprintf(__('Excluded before preparation (invalid/duplicate email or unsubscribed): %s','pc-order-import-export'),$d['skipped'])); ?></p><?php endif; ?>
 <p><?php esc_html_e('Each customer receives a separate email. Prices are fixed at preparation time. Accepted by the mail service does not prove inbox delivery. Unknown results are never retried automatically.','pc-order-import-export'); ?></p>
 <?php
@@ -54,11 +54,14 @@ $directory=ManagerWorkspace::directory($search,$role,$city,1,100);$roles=wp_role
 </tbody></table></div>
 <p><?php esc_html_e('The first 100 matches are shown. Use filters to select individual customers outside this list.','pc-order-import-export'); ?></p>
 <p><label><?php esc_html_e('Mailing type','pc-order-import-export'); ?><br><select name="kind" id="pcoe-broadcast-kind">
-<?php foreach(['text'=>__('Message only','pc-order-import-export'),'price'=>__('Full price list','pc-order-import-export'),'arrival'=>__('New arrival: products from a receipt','pc-order-import-export')] as $k=>$v): ?><option value="<?php echo esc_attr($k); ?>"><?php echo esc_html($v); ?></option><?php endforeach; ?></select></label></p>
+<?php foreach(['text'=>__('Message only','pc-order-import-export'),'price'=>__('Full price list','pc-order-import-export'),'arrival'=>__('Products from a Folio document','pc-order-import-export')] as $k=>$v): ?><option value="<?php echo esc_attr($k); ?>"><?php echo esc_html($v); ?></option><?php endforeach; ?></select></label></p>
 <div id="pcoe-broadcast-receipt" hidden>
-<p><label><?php esc_html_e('Warehouse','pc-order-import-export'); ?><br><select name="warehouse" id="pcoe-broadcast-warehouse"><option value="">—</option></select></label></p>
-<p><label><?php esc_html_e('Receipt date','pc-order-import-export'); ?><br><input type="date" name="date" id="pcoe-broadcast-date" value="<?php echo esc_attr(wp_date('Y-m-d')); ?>"></label></p>
-<p><label><?php esc_html_e('Receipt document','pc-order-import-export'); ?><br><select name="document" id="pcoe-broadcast-document"><option value="">—</option></select></label> <button class="button" type="button" id="pcoe-broadcast-more" hidden><?php esc_html_e('Load more documents','pc-order-import-export'); ?></button></p>
+<p><label><?php esc_html_e('Document type','pc-order-import-export'); ?><br><select name="document_type" id="pcoe-broadcast-document-type">
+<?php foreach(['all'=>__('Receipts and invoices','pc-order-import-export'),'receipt'=>__('Receipts','pc-order-import-export'),'invoice'=>__('Invoices','pc-order-import-export')] as $key=>$label): ?><option value="<?php echo esc_attr($key); ?>"><?php echo esc_html($label); ?></option><?php endforeach; ?></select></label></p>
+<p><?php esc_html_e('Choose an accounted receipt or an invoice, including a non-accounting promotional invoice. Only its products are used; prices and stock come from the site.','pc-order-import-export'); ?></p>
+<p><label><?php esc_html_e('Warehouse','pc-order-import-export'); ?><br><select name="warehouse" id="pcoe-broadcast-warehouse" style="min-width:220px;max-width:100%"><option value="">—</option></select></label> <button type="button" class="button" id="pcoe-broadcast-reload"><?php esc_html_e('Reload warehouses','pc-order-import-export'); ?></button></p>
+<p><label><?php esc_html_e('Document date','pc-order-import-export'); ?><br><input type="date" name="date" id="pcoe-broadcast-date" value="<?php echo esc_attr(wp_date('Y-m-d')); ?>"></label></p>
+<p><label><?php esc_html_e('Receipt or invoice','pc-order-import-export'); ?><br><select name="document" id="pcoe-broadcast-document" style="min-width:220px;max-width:100%"><option value="">—</option></select></label> <button class="button" type="button" id="pcoe-broadcast-more" hidden><?php esc_html_e('Load more documents','pc-order-import-export'); ?></button></p>
 <p id="pcoe-broadcast-source-status" role="status"></p></div>
 <p><label><?php esc_html_e('Email subject','pc-order-import-export'); ?><br><input type="text" name="subject" maxlength="180" class="large-text" required></label></p>
 <p><label><?php esc_html_e('Message to customers','pc-order-import-export'); ?><br><textarea name="message" rows="8" maxlength="10000" class="large-text" required></textarea></label></p>
@@ -72,5 +75,8 @@ $directory=ManagerWorkspace::directory($search,$role,$city,1,100);$roles=wp_role
 <?php
 wp_enqueue_script('pcoe-broadcast',PCOE_URL.'assets/broadcast.js',[],filemtime(PCOE_DIR.'/assets/broadcast.js'),true);
 wp_localize_script('pcoe-broadcast','pcoeBroadcast',['url'=>admin_url('admin-ajax.php'),'nonce'=>wp_create_nonce('pcoe_broadcast'),
-    'loading'=>__('Loading receipt documents…','pc-order-import-export'),'empty'=>__('No accounted receipts found for this warehouse and date.','pc-order-import-export'),
-    'error'=>__('Could not load receipts. Check that the Java receipt service is deployed.','pc-order-import-export')]);
+    'loading'=>__('Loading documents…','pc-order-import-export'),'loadingWarehouses'=>__('Loading warehouses…','pc-order-import-export'),
+    'empty'=>__('No matching receipts or invoices found for this warehouse and date.','pc-order-import-export'),
+    'emptyWarehouses'=>__('Folio returned no available warehouses. Reload or contact the administrator.','pc-order-import-export'),
+    'receipt'=>__('Receipt','pc-order-import-export'),'invoice'=>__('Invoice','pc-order-import-export'),'nonAccounting'=>__('Non-accounting','pc-order-import-export'),
+    'error'=>__('Could not load Folio documents. Try loading again.','pc-order-import-export')]);

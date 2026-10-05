@@ -42,7 +42,8 @@ final class BroadcastUi {
             $kind=sanitize_key($_POST['kind']??'');
             if($kind==='warehouses')$data=BroadcastSources::request('/warehouses');
             elseif($kind==='documents')$data=BroadcastSources::request('',[
-                'warehouseId'=>absint($_POST['warehouse']??0),'date'=>sanitize_text_field(wp_unslash($_POST['date']??'')),'afterId'=>absint($_POST['after']??0)]);
+                'warehouseId'=>absint($_POST['warehouse']??0),'date'=>sanitize_text_field(wp_unslash($_POST['date']??'')),'afterId'=>absint($_POST['after']??0),
+                'documentType'=>BroadcastSources::document_type(wp_unslash($_POST))]);
             else throw new \RuntimeException('Invalid request');
             wp_send_json_success($data);
         }catch(\Throwable $e){wp_send_json_error(['message'=>$e->getMessage()],409);}

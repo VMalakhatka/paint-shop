@@ -8,12 +8,14 @@ use PaintCore\PCOE\BroadcastUi as Ui;
 use PaintCore\PCOE\PriceList;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 if(!defined('WP_CLI') || !WP_CLI || wp_parse_url(home_url(),PHP_URL_HOST)!=='paint.local')throw new RuntimeException('Local only');
-$users=[];$products=[];$campaigns=[];$mails=[];$mode='ok';$checks=0;$original=get_current_user_id();$quota=get_option('_pcoe_broadcast_quota',null);$prefix='Mailing-test-'.wp_generate_uuid4();$skus=[];
+$users=[];$products=[];$campaigns=[];$mails=[];$mode='ok';$checks=0;$original=get_current_user_id();$quota=get_option('_pcoe_broadcast_quota',null);$prefix='Mailing-test-'.wp_generate_uuid4();$skus=[];$sourceMode='ok';
 $check=static function($ok,$message)use(&$checks){if(!$ok)throw new RuntimeException($message);$checks++;};
 $deny=static function($fn)use($check){try{$fn();}catch(Throwable $e){$check(true,'Rejected');return;}throw new RuntimeException('Expected rejection');};
 add_filter('pre_schedule_event',static fn($pre,$event)=>$event->hook===Mailings::HOOK?false:$pre,PHP_INT_MAX,2);
-add_filter('pre_http_request',static function($pre,$args,$url)use(&$skus){
-    if(str_contains($url,'/admin/folio/receipt-catalogue/9001/skus'))return ['response'=>['code'=>200],'body'=>wp_json_encode(['ok'=>true,'documentId'=>9001,'warehouseId'=>7,'date'=>'2026-10-05','skus'=>[$skus[0],$skus[0],'MISSING-TEST-SKU']])];
+add_filter('pre_http_request',static function($pre,$args,$url)use(&$skus,&$sourceMode){
+    if(str_contains($url,'/ref/warehouses'))return ['response'=>['code'=>200],'body'=>wp_json_encode([['code'=>'7','name'=>'Fixture warehouse']])];
+    parse_str((string)wp_parse_url($url,PHP_URL_QUERY),$query);
+    if(str_contains($url,'/admin/folio/receipt-catalogue/9001/skus'))return ['response'=>['code'=>200],'body'=>wp_json_encode(['ok'=>true,'documentId'=>9001,'warehouseId'=>7,'date'=>'2026-10-05','documentType'=>$sourceMode==='mismatch'?'receipt':($query['documentType']??'receipt'),'documentTypes'=>$sourceMode==='old'?['receipt']:['receipt','invoice'],'skus'=>[$skus[0],$skus[0],'MISSING-TEST-SKU']])];
     return new WP_Error('blocked','External HTTP blocked');
 },PHP_INT_MAX,3);
 add_filter('pre_wp_mail',static function($pre,$args)use(&$mails,&$mode,$check){
@@ -47,7 +49,14 @@ try{
     add_filter('woocommerce_calc_tax',$custom,1200,2);
     $check(Pricing::group($a)!==Pricing::group($b),'Unknown tax adjustment cannot share a price file');
     remove_filter('woocommerce_calc_tax',$custom,1200);
-    $base=['request_key'=>wp_generate_uuid4(),'search'=>$prefix,'role'=>'','city'=>'','users'=>[$a,$b,$partner],'kind'=>'arrival','subject'=>'Fixture arrival','message'=>"First line\nSecond line",'warehouse'=>7,'date'=>'2026-10-05','document'=>9001];
+    $check(Sources::request('/warehouses')['warehouses'][0]['code']==='7','Warehouse picker uses established reference service');
+    $deny(fn()=>Sources::document_type(['document_type'=>'payment']));
+    $invoiceInput=['warehouse'=>7,'date'=>'2026-10-05','document'=>9001,'document_type'=>'invoice'];
+    $invoice=Sources::products('arrival',$invoiceInput);
+    $check($invoice['ids']===[$products[0]->get_id()] && $invoice['source']['document_type']==='invoice','Invoice products use the same site catalogue and persist the selected type');
+    $sourceMode='old';$deny(fn()=>Sources::products('arrival',$invoiceInput));
+    $sourceMode='mismatch';$deny(fn()=>Sources::products('arrival',$invoiceInput));$sourceMode='ok';
+    $base=['request_key'=>wp_generate_uuid4(),'search'=>$prefix,'role'=>'','city'=>'','users'=>[$a,$b,$partner],'kind'=>'arrival','subject'=>'Fixture arrival','message'=>"First line\nSecond line",'warehouse'=>7,'date'=>'2026-10-05','document'=>9001,'document_type'=>'all'];
     $id=$create($base);$check(Mailings::create($base)===$id,'Repeated preparation request is idempotent');
     $data=Store::get($id);$check($data['ids']===[$products[0]->get_id()] && count($data['missing'])===1,'Only receipt SKUs selected; missing item is shown, duplicate removed');
     $check(count($data['groups'])===2 && count($mails)===0,'Two files for three recipients; preview sends no emails');

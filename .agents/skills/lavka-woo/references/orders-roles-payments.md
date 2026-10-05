@@ -366,11 +366,16 @@ email профиля владельца, после прежних nonce/capabil
   requires the manager's explicit start after reviewing recipients/text/files.
 - Same pricing context/locale shares one private XLSX. Keep conservative
   per-customer grouping for unknown price/tax filters; do not bypass it for speed.
-  Receipt SKU selection never imports purchase costs into a customer price file.
+  Document SKU selection never imports source prices, quantities or counterparties
+  into a customer price file. Accounted receipts and accounting/non-accounting
+  invoices supply products; document type/warehouse/day are revalidated on preview.
 - Recheck recipient subscription/email/group before sending. Persist a sending
   claim before SMTP; unknown outcome is never automatically retried. Do not clear
   state to restart an uncertain campaign. Snapshot prices are not a live quote.
 - Java picker is internal read-only; WordPress owns mail, no Folio writes. Deploy
-  both components for arrivals. Do not expose Java admin endpoints publicly.
+  both components for document selection. Warehouses use the existing
+  `/ref/warehouses` directory, independently of the newer catalogue route. Invoice
+  selection requires the Java `documentTypes` capability; never silently fall back
+  to receipts or the full product catalogue. Do not expose admin endpoints publicly.
 - Customer opt-out only affects marketing mailings, not order/approval emails.
   No production sending or live Folio acceptance was performed during local tests.
