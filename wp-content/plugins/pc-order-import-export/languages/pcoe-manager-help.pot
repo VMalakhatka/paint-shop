@@ -276,3 +276,27 @@ msgstr ""
 #: inc/ManagerHelp.php
 msgid "For customers who prefer a file, click Email Excel file for confirmation on the saved request. The email includes an XLSX with the reviewed products, quantities, prices and totals, separate sheets for linked Folio documents, and the same account confirmation link. It goes to the customer profile email; replies go to the sending manager. Replying by email or editing the file does not automatically confirm or change the website order. If the order changed, create an updated confirmation request before sending again."
 msgstr ""
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Email mailings: message, price list or arrival"
+msgstr ""
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Open Customer workspace → Mailings. Filter customers by name, company, email, role or billing city. Tick individual recipients or Select all matching customers (up to 2000); the table shows the first 100 matches. Invalid or duplicate email addresses and customers who declined mailings are excluded. Check the final recipient list before starting."
+msgstr ""
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Choose Message only, Full price list or New arrival. Enter the subject and your message. For an arrival, select a warehouse, receipt date and accounted receipt document. The mini price list contains only published site products found by the receipt SKUs; missing products are listed separately. Prices come from the customer price conditions on the site, never from the receipt purchase costs. Stock columns show the current site stock for Kyiv and Odesa, not the received quantity."
+msgstr ""
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Click Prepare mailing preview. This does not send emails. Wait for the files or use Continue preparing files and Refresh status. One Excel file is prepared for each group with the same pricing conditions and language; customers in that group receive identical copies. If individual pricing cannot safely be grouped, separate files are prepared. Download and check every price preview, the message and recipients. To change them, cancel this preparation and create a new mailing."
+msgstr ""
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Tick the review confirmation and click Start mailing. The queue sends at most five separate emails per minute across all mailings, as the site scheduler runs. You may close the page. Each recipient sees only their address; replies go to the manager who created the mailing. Refresh status shows each result. Pause stops the remaining queue; Cancel remaining emails is final. Start, resume or retry must happen within 24 hours after preparation; otherwise create a fresh mailing."
+msgstr ""
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Accepted by the mail service is not proof of inbox delivery. Retry only failed emails repeats known failures, never accepted emails or uncertain results. If sending was interrupted, check the mail log before contacting those recipients again. A changed email, subscription or price role is skipped. If files failed to prepare, fix the cause and create a new mailing. If the queue does not progress, ask the administrator to check the site scheduler; do not start a duplicate mailing."
+msgstr ""

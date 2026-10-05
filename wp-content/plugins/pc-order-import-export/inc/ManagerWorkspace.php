@@ -63,12 +63,12 @@ class ManagerWorkspace
     }
 
     /** Directory reads local Woo profiles and cached Folio names; no Folio request. */
-    public static function directory(string $search, string $role, string $city, int $page): array {
+    public static function directory(string $search, string $role, string $city, int $page, int $per_page=25): array {
         if (!current_user_can('manage_woocommerce')) throw new \RuntimeException('Forbidden');
         global $wpdb;
         $roles = self::customer_roles();
         $args = ['role__in' => in_array($role, $roles, true) ? [$role] : $roles,
-            'number' => 25, 'paged' => max(1, $page), 'orderby' => ['display_name' => 'ASC', 'ID' => 'ASC']];
+            'number' => max(1,min(2001,$per_page)), 'paged' => max(1, $page), 'orderby' => ['display_name' => 'ASC', 'ID' => 'ASC']];
         $query = new \WP_User_Query();
         $filter = static function ($candidate) use ($query, $search, $city, $wpdb): void {
             if ($candidate !== $query) return;

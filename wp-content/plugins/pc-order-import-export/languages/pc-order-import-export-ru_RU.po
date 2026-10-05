@@ -2664,3 +2664,283 @@ msgstr "Отправить Excel клиенту на подтверждение"
 #: inc/ApprovalWorkbook.php inc/ApprovalNotifications.php
 msgid "The request appears in the customer account. On the next screen, send a confirmation link or an Excel file to the customer profile email."
 msgstr "Запрос появится в кабинете клиента. На следующем экране отправьте ссылку на подтверждение или файл Excel на email из профиля клиента."
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Arrival selection: warehouse %1$s, date %2$s, document ID %3$s"
+msgstr "Выбранный приход: склад %1$s, дата %2$s, ID документа %3$s"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Cancel remaining emails"
+msgstr "Отменить оставшиеся письма"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Cancelled"
+msgstr "Отменено"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Confirm sending after reviewing the mailing."
+msgstr "Подтвердите отправку после проверки рассылки."
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Continue preparing files"
+msgstr "Продолжить подготовку файлов"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Could not load receipts. Check that the Java receipt service is deployed."
+msgstr "Не удалось загрузить приходы. Попросите администратора проверить обновление сервиса ФОЛИО."
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Customer mailings"
+msgstr "Рассылки клиентам"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Customer pricing conditions changed. Create a new mailing."
+msgstr "Ценовые условия клиента изменились. Создайте новую рассылку."
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Do not email me news and price lists. Order messages remain enabled."
+msgstr "Не присылать мне новости и прайсы на email. Сообщения о заказах остаются включёнными."
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Download price preview"
+msgstr "Скачать прайс для проверки"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Each customer receives a separate email. Prices are fixed at preparation time. Accepted by the mail service does not prove inbox delivery. Unknown results are never retried automatically."
+msgstr "Каждый клиент получает отдельное письмо. Цены зафиксированы на момент подготовки. Принятие почтовым сервисом не подтверждает доставку в ящик. Письма с неизвестным результатом автоматически не повторяются."
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Email subject"
+msgstr "Тема письма"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Enter a subject and message, and select the mailing type."
+msgstr "Введите тему и текст и выберите тип рассылки."
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Excluded before preparation (invalid/duplicate email or unsubscribed): %s"
+msgstr "Исключено перед подготовкой (некорректный/повторный email или отказ от рассылок): %s"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Excluded from mailings"
+msgstr "Исключён из рассылок"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Finished"
+msgstr "Завершено"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "I checked the message, recipients and price files and want to send these emails."
+msgstr "Я проверил текст, получателей и прайсы и хочу отправить эти письма."
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Load more documents"
+msgstr "Ещё документы"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Loading receipt documents…"
+msgstr "Загружаем приходы…"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Mailing not found."
+msgstr "Рассылка не найдена."
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Mailing preferences: sign in to your account to stop receiving news and price lists."
+msgstr "Настройки рассылок: войдите в свой кабинет, чтобы отказаться от новостей и прайсов."
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Mailing state could not be saved."
+msgstr "Не удалось сохранить состояние рассылки."
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Mailing type"
+msgstr "Тип рассылки"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Mailings"
+msgstr "Рассылки"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Mailings are busy. Please retry shortly."
+msgstr "Другая операция с рассылками ещё выполняется. Попробуйте немного позже."
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Message only"
+msgstr "Только сообщение"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Message to customers"
+msgstr "Текст для клиентов"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Narrow the filters to no more than 2000 customers."
+msgstr "Сузьте фильтры до не более 2000 клиентов."
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "New arrival: products from a receipt"
+msgstr "Новый приход: товары из документа"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "New mailing"
+msgstr "Новая рассылка"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "News and price lists"
+msgstr "Новости и прайсы"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "No accounted receipts found for this warehouse and date."
+msgstr "По выбранным складу и дате нет учитываемых приходных накладных."
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "No published products are available for this mailing."
+msgstr "Для этой рассылки нет опубликованных товаров."
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Pause mailing"
+msgstr "Приостановить рассылку"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Paused"
+msgstr "Приостановлено"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Preparation failed"
+msgstr "Ошибка подготовки"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Prepare a preview first. No email is sent until you review the recipients and files and explicitly start the mailing."
+msgstr "Сначала подготовьте рассылку для проверки. Письма уйдут только после проверки получателей и файлов и нажатия кнопки запуска."
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Prepare mailing preview"
+msgstr "Подготовить рассылку для проверки"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Prepared price groups: %s. Customers with the same pricing conditions share one file."
+msgstr "Ценовых групп: %s. Для клиентов с одинаковыми ценовыми условиями создаётся один файл."
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Preparing files"
+msgstr "Готовятся файлы"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Prices and stock in the attachment were captured when the mailing was prepared. Check current availability before ordering."
+msgstr "Цены и остатки во вложении зафиксированы на момент подготовки рассылки. Перед заказом проверьте текущую доступность."
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Products: %1$s. Prepared: %2$s"
+msgstr "Товаров: %1$s. Подготовлено: %2$s"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Ready for review"
+msgstr "Готово к проверке"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Receipt date"
+msgstr "Дата прихода"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Receipt document"
+msgstr "Приходная накладная"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Recent mailings"
+msgstr "Последние рассылки"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Recipients: %s"
+msgstr "Получателей: %s"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Refresh status"
+msgstr "Обновить статус"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Resume mailing"
+msgstr "Продолжить рассылку"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Retry only failed emails"
+msgstr "Повторить только письма с ошибкой отправки"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Select all matching customers (up to 2000), or tick individual recipients below."
+msgstr "Выбрать всех клиентов по фильтрам (до 2000) или отметьте отдельных получателей ниже."
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Select customers with valid email addresses who receive mailings."
+msgstr "Выберите клиентов с корректными email, которые не отказались от рассылок."
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Select warehouse, date and receipt document."
+msgstr "Выберите склад, дату и приходную накладную."
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Selling warehouses are not mapped."
+msgstr "Не настроено соответствие складов продаж."
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Sending"
+msgstr "Отправляется"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Sending; result not yet recorded"
+msgstr "Отправка; результат ещё не сохранён"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Skipped: address, subscription or pricing conditions changed"
+msgstr "Пропущено: изменились адрес, подписка или ценовые условия"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Start mailing"
+msgstr "Запустить рассылку"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "The attachment exceeds the 8 MB mailing limit."
+msgstr "Вложение превышает ограничение 8 МБ."
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "The first 100 matches are shown. Use filters to select individual customers outside this list."
+msgstr "Показаны первые 100 совпадений. Используйте фильтры, чтобы выбрать отдельных клиентов вне этого списка."
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "The prepared file is unavailable. Create a new mailing."
+msgstr "Подготовленный файл недоступен. Создайте новую рассылку."
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "The preview expired or the mailing changed. Create a new mailing."
+msgstr "Срок проверки истёк или состояние рассылки изменилось. Создайте новую рассылку."
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "The receipt service is unavailable."
+msgstr "Сервис приходных накладных недоступен."
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "The sending manager no longer has access."
+msgstr "Менеджер, создавший рассылку, больше не имеет доступа."
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "These receipt SKUs are missing or not published on the site and will not be included:"
+msgstr "Эти артикулы из прихода отсутствуют или не опубликованы на сайте и не попадут в прайс:"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "This action is unavailable for the current mailing state."
+msgstr "Это действие недоступно в текущем состоянии рассылки."
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Uncertain result; check the mail log"
+msgstr "Результат неизвестен; проверьте журнал почты"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Waiting"
+msgstr "В очереди"
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "File preparation was interrupted. Create a new mailing."
+msgstr "Подготовка файла прервана. Создайте новую рассылку."
+
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+msgid "Price example: %s"
+msgstr "Пример цен для: %s"

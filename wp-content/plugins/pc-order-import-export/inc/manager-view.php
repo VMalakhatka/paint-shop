@@ -19,13 +19,15 @@ $form_fields = static function (string $operation) use ($customer_id, $order): v
 <h1><?php esc_html_e('Customer workspace', 'pc-order-import-export'); ?></h1>
 <?php ManagerHelp::link(); ?>
 <p><?php esc_html_e('Select a customer, prepare a draft and review Folio accounts by warehouse.', 'pc-order-import-export'); ?></p>
-<?php $messages_tab = ($_GET['view'] ?? '') === 'messages'; $orders_tab = !$customer_id && ($_GET['view'] ?? '') === 'orders'; ?>
+<?php $messages_tab = ($_GET['view'] ?? '') === 'messages'; $mailings_tab = ($_GET['view'] ?? '') === 'mailings'; $orders_tab = !$customer_id && ($_GET['view'] ?? '') === 'orders'; ?>
 <nav class="nav-tab-wrapper">
-<a class="nav-tab <?php echo !$orders_tab && !$messages_tab ? 'nav-tab-active' : ''; ?>" href="<?php echo esc_url(ManagerWorkspace::url(0)); ?>"><?php esc_html_e('Customers', 'pc-order-import-export'); ?></a>
+<a class="nav-tab <?php echo !$orders_tab && !$messages_tab && !$mailings_tab ? 'nav-tab-active' : ''; ?>" href="<?php echo esc_url(ManagerWorkspace::url(0)); ?>"><?php esc_html_e('Customers', 'pc-order-import-export'); ?></a>
 <a class="nav-tab <?php echo $orders_tab ? 'nav-tab-active' : ''; ?>" href="<?php echo esc_url(add_query_arg('view', 'orders', ManagerWorkspace::url(0))); ?>"><?php esc_html_e('Orders', 'pc-order-import-export'); ?></a>
 <a class="nav-tab <?php echo $messages_tab ? 'nav-tab-active' : ''; ?>" href="<?php echo esc_url(Conversations::url([],true)); ?>"><?php esc_html_e('Conversations', 'pc-order-import-export'); ?></a>
+<a class="nav-tab <?php echo $mailings_tab ? 'nav-tab-active' : ''; ?>" href="<?php echo esc_url(BroadcastUi::url()); ?>"><?php esc_html_e('Mailings', 'pc-order-import-export'); ?></a>
 </nav>
 <p><a class="button" href="<?php echo esc_url(ManagerHelp::url()); ?>" target="_blank" rel="noopener noreferrer"><?php ManagerHelp::load(); esc_html_e('Manager guide', 'pcoe-manager-help'); ?></a></p>
+<?php if ($mailings_tab) { BroadcastUi::render(); echo '</div>'; return; } ?>
 <?php if ($messages_tab) { Conversations::render(); echo '</div>'; return; } ?>
 <?php if ($orders_tab) { require __DIR__ . '/manager-orders-view.php'; echo '</div>'; return; } ?>
 <?php if ($error): ?><div class="notice notice-error"><p><?php echo esc_html($error); ?></p></div><?php endif; ?>

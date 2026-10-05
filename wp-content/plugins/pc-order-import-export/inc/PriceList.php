@@ -195,14 +195,20 @@ class PriceList
 
     public static function workbook(iterable $products, array $locations): Spreadsheet
     {
+        return self::from_rows(self::headers(), self::catalogue_rows($products, $locations));
+    }
+
+    /** Shared renderer for the account download and frozen manager mailing files. */
+    public static function from_rows(array $headers, iterable $entries): Spreadsheet
+    {
         $book = new Spreadsheet();
         $book->getDefaultStyle()->getFont()->setName('Arial')->setSize(11);
         $book->getProperties()->setCreator(get_bloginfo('name'))->setTitle(__('Full price list', 'pc-order-import-export'));
         $sheet = $book->getActiveSheet();
         $sheet->setTitle('Lavka');
-        $sheet->fromArray(self::headers(), null, 'A1');
+        $sheet->fromArray($headers, null, 'A1');
         $row = 1; $headings = [];
-        foreach (self::catalogue_rows($products, $locations) as $entry) {
+        foreach ($entries as $entry) {
             $row++;
             $sheet->getRowDimension($row)->setOutlineLevel(min(7, $entry['depth']));
             if (isset($entry['heading'])) {

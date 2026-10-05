@@ -294,6 +294,7 @@ function pc_wholesale_help_render_endpoint(): void {
             <a href="#import"><span>5</span><?php esc_html_e('Import', 'pc-wholesale-help'); ?></a>
             <a href="#eksport"><span>6</span><?php esc_html_e('Export', 'pc-wholesale-help'); ?></a>
             <a href="#chernetky"><span>7</span><?php esc_html_e('Drafts', 'pc-wholesale-help'); ?></a>
+            <a href="#email-mailings"><?php esc_html_e('News and price lists by email', 'pc-wholesale-help'); ?></a>
             <a href="#messages"><?php esc_html_e('Messages with your manager', 'pc-wholesale-help'); ?></a>
             <a href="#order-details"><?php esc_html_e('Order details and delivery', 'pc-wholesale-help'); ?></a>
             <a href="#stari-zamovlennia"><span>8</span><?php esc_html_e('Draft processing', 'pc-wholesale-help'); ?></a>
@@ -512,6 +513,11 @@ function pc_wholesale_help_render_endpoint(): void {
                 <div class="pc-help-card"><h3><?php esc_html_e('Stock shortage', 'pc-wholesale-help'); ?></h3><p><?php esc_html_e('The available part may be processed while the missing part waits for a manager review.', 'pc-wholesale-help'); ?></p></div>
             </div>
             <div class="pc-help-note"><strong><?php esc_html_e('Do not pay linked child orders separately', 'pc-wholesale-help'); ?></strong> <?php esc_html_e('unless a manager clearly asks you to do so.', 'pc-wholesale-help'); ?></div>
+        </section>
+
+        <section class="pc-help-section" id="email-mailings">
+            <h2><?php esc_html_e('News and price lists by email', 'pc-wholesale-help'); ?></h2>
+            <p><?php esc_html_e('Your manager may email a message, a full price list or a mini price list for a new arrival. The Excel file uses your price conditions on the site. Prices and stock are captured when the mailing is prepared; check current availability before ordering. Reply to the email to contact the sending manager. In My Account → Account details → News and price lists you can decline these mailings and save changes. Order and confirmation emails remain enabled.', 'pc-wholesale-help'); ?></p>
         </section>
 
         <section class="pc-help-section" id="customer-confirmation">

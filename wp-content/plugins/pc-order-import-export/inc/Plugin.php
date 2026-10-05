@@ -38,6 +38,7 @@ class Plugin {
         TelegramBridge::hooks();
         ManagerNotifications::hooks();
         CustomerApproval::hooks();
+        Broadcasts::hooks();
 
         // Вимкнути емейли для pc-draft
         ImporterDraft::mute_emails_for_drafts();

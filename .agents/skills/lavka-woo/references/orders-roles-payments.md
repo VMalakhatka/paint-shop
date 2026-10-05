@@ -355,3 +355,22 @@ email профиля владельца, после прежних nonce/capabil
 идемпотентен для обоих форматов, unknown блокирует повтор. Email-ответ менеджеру
 не является consent на сайте. Источник: классы PCOE и локальный `approval-excel.php`
 с перехватом mail/HTTP. Канон: manager/customer guides и OPERATIONS_RUNBOOK.md.
+
+## Manager email mailings (2026-10-05)
+
+- Owner: `pc-order-import-export/inc/Broadcast*.php`, manager Mailings tab.
+  Follow WordPress `docs/OPERATIONS_RUNBOOK.md` email-mailings section and
+  `docs/MANAGER_CUSTOMER_GUIDE_UK.md#mailings`; API contract is Java
+  `docs/api/FOLIO_RECEIPT_CATALOGUE_API.md`.
+- Implementing or previewing a campaign does not authorize sending it. Real mail
+  requires the manager's explicit start after reviewing recipients/text/files.
+- Same pricing context/locale shares one private XLSX. Keep conservative
+  per-customer grouping for unknown price/tax filters; do not bypass it for speed.
+  Receipt SKU selection never imports purchase costs into a customer price file.
+- Recheck recipient subscription/email/group before sending. Persist a sending
+  claim before SMTP; unknown outcome is never automatically retried. Do not clear
+  state to restart an uncertain campaign. Snapshot prices are not a live quote.
+- Java picker is internal read-only; WordPress owns mail, no Folio writes. Deploy
+  both components for arrivals. Do not expose Java admin endpoints publicly.
+- Customer opt-out only affects marketing mailings, not order/approval emails.
+  No production sending or live Folio acceptance was performed during local tests.

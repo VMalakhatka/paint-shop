@@ -530,3 +530,63 @@ an existing private directory for synthetic workbook/panel HTML previews.
 Regression: `tests/approval-contacts-notifications.php`, `tests/customer-approval.php`
 and `tests/manager-help.php`. Canonical manager/customer guides and their on-site
 UK/RU help were updated; deployment and production verification remain separate.
+
+## Manager email mailings (2026-10-05)
+
+`BroadcastUi` / `broadcast-view.php` add the Mailings workspace tab for
+`manage_woocommerce`. The explicit preview/start flow supports plain text, a
+full site price list, or a mini price list limited to an accounted Folio receipt.
+`BroadcastSources` uses the server-side Java receipt catalogue proxy; no purchase
+prices, supplier identities or financial totals are read for the attachment.
+`PriceList::from_rows()` shares the existing taxonomy tree, safe cell types,
+customer display prices and Kyiv/Odesa stock layout with the self-service export.
+
+`BroadcastPricing` temporarily scopes the current user/customer/locale and clears
+the manager session from price calculation, restoring everything in `finally`.
+Group keys include ordered roles, locale, currency, tax settings/address/VAT.
+Reviewed role-price/WPC/core filters share a file; unknown price/tax filters add
+customer ID to the key. Never weaken this fallback merely to reduce file counts.
+Before delivery the recipient email, eligibility, opt-out and pricing group are
+checked again. Product prices/stock are the prepared snapshot, not recalculated
+per recipient. Additional price providers require review before sharing files.
+
+`BroadcastStore` owns private `pcoe-mailing` posts, meta and a MariaDB named lock.
+`Broadcasts` owns bounded WP-Cron batches, a global five-attempts/minute quota,
+durable sending claims, an explicitly reviewed start and failed-only retries.
+Request UUID prevents repeated preparation. Recovery is scheduled before work;
+a fatal sending interruption becomes unknown, an interrupted workbook becomes
+preparation error. No automatic retry of uncertain sends. Pause/cancel only affect
+remaining recipients. START/RESUME/RETRY require preparation age <=24 hours.
+CPT is non-public/non-REST; files are checksum-verified non-autoloaded private options (one per campaign/group), downloads
+require capability and nonce, email copies live outside webroot and are cleaned.
+Limits: 2000 recipients, 2000 receipt SKUs, 8 MB attachment, first 100 directory
+rows on screen. One byte-identical XLSX is reused per group. No automatic retention
+purge yet; deleting a campaign also deletes its file options. Files are stored
+separately so reading campaign state never loads every XLSX into memory. Customer opt-out is editable through Woo Account details; order emails
+and Telegram are unaffected. Each message uses one recipient and creator Reply-To.
+
+Operator steps, prerequisites, status semantics, deployment and rollback:
+[operations runbook](../../../docs/OPERATIONS_RUNBOOK.md#email-рассылки-менеджера-2026-10-05).
+[Manager guide](../../../docs/MANAGER_CUSTOMER_GUIDE_UK.md#mailings) and published
+UK/RU help are updated. Java contract lives in its repository at
+`docs/api/FOLIO_RECEIPT_CATALOGUE_API.md`; deploy Java as well for arrival selection.
+Production checks and real email delivery remain pending after deployment.
+
+Local verification (mail/HTTP/cron intercepted; disposable fixtures cleaned):
+
+```sh
+wp eval-file wp-content/plugins/pc-order-import-export/tests/broadcasts.php --skip-themes
+wp eval-file wp-content/plugins/pc-order-import-export/tests/price-list.php --skip-themes
+php wp-content/plugins/pc-order-import-export/tests/manager-help.php
+```
+
+For UI checks, set `PCOE_BROADCAST_PREVIEW` to a private temporary directory when
+running the mailing test, then run `tests/broadcast-ui.spec.cjs` with that variable
+and Playwright available. It uses rendered fixtures and mocked receipt responses,
+never a production login or a send action. These checks do not establish SMTP
+inbox delivery or live Folio query latency.
+
+Full local catalogue preparation was also measured read-only with a disposable
+wholesale account: 8421 product rows, 789222-byte XLSX, 22.8 seconds, 370.7 MiB
+peak PHP memory (2026-10-05). Plan at least 512 MiB available to this PHP task;
+actual production size/limits may differ. Cache reads are batched at 250 products.

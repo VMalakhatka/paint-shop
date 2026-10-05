@@ -490,3 +490,15 @@ audience; повышение роли не превращает клиентск
 сохраняет проверки текущей пары на ответ/доставку. Пара проверена локально с подменой
 API и ожидает WordPress deploy; изменений Java/DDL не требуется.
 [Настройка, данные, ограничения и восстановление](OPERATIONS_RUNBOOK.md#telegram-в-клиентской-переписке--этап-2-2026-09-27).
+
+## Рассылки менеджера и выбор прихода (2026-10-05)
+
+`pc-order-import-export/inc/Broadcast*.php` владеет приватной подготовкой XLSX,
+группировкой по ценам, очередью email и журналом адресатов. UI и nonce/capability
+проверяются в WordPress; отправка отдельным явным действием после предпросмотра.
+Java `FolioReceiptCatalogueController`/`FolioReceiptCatalogueDao` предоставляет
+только read-only склад → дата → документ → SKU через
+`/admin/folio/receipt-catalogue`. Закупочные цены не возвращаются; customer price
+рассчитывает существующий Woo PriceList в контексте клиента. Точный контракт —
+Java `docs/api/FOLIO_RECEIPT_CATALOGUE_API.md`. Развёртывание обеих сторон,
+ограничения и восстановление — [операционный регламент](OPERATIONS_RUNBOOK.md#email-рассылки-менеджера-2026-10-05).
