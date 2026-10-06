@@ -652,3 +652,10 @@ mail-log/profile review, without automatic repeat. Operator guide and published
 help: `docs/MANAGER_CUSTOMER_GUIDE_UK.md#register-wholesale` / `ManagerHelp`.
 Verification: local `tests/folio-customer-import.php` mocks Folio, blocks external
 HTTP/mail and removes fixtures; Java registration tests never connect to Folio.
+
+Manager import instructions expanded 2026-10-06: `ManagerHelp` /
+`#register-wholesale` now covers six numbered steps, exact UI labels, optional
+invitations, row outcomes, interrupted runs and seven-day report retention.
+Canonical text: `docs/MANAGER_CUSTOMER_GUIDE_UK.md#register-wholesale`; UK/RU
+help catalogs remain synchronized. This documentation update requires WordPress
+deployment to appear in production help; it does not change the import API.
