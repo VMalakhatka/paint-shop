@@ -92,6 +92,7 @@ $context = function_exists('pc_folio_balance_user_context') ? pc_folio_balance_u
 <a class="button" href="<?php echo esc_url(pc_folio_balance_admin_url($customer_id)); ?>"><?php esc_html_e('Customer balance', 'pc-order-import-export'); ?></a><?php endif; ?></nav>
 <?php if (!$context): ?><p class="pcoe-warning"><?php esc_html_e('Link the customer to Folio in the user profile before preparing Folio documents. Drafts are available now.', 'pc-order-import-export'); ?></p><?php endif; ?>
 </section>
+<?php CustomerInternalNotes::summary($customer_id); ?>
 <?php CustomerManagers::render($customer_id); ?>
 <?php if (!$order): ?>
 <section class="pcoe-card"><h2><?php esc_html_e('New customer draft', 'pc-order-import-export'); ?></h2>

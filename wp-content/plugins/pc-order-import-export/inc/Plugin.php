@@ -5,6 +5,7 @@ class Plugin {
     public function init(){
         CustomerPermissions::hooks();
         FolioCustomerImport::hooks();
+        CustomerInternalNotes::hooks();
         // Статус чернетки
         ImporterDraft::register_status();
 

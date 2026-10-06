@@ -622,10 +622,17 @@ protected runtime settings; never include them in Git, browser JS or URLs. Missi
 configuration disables contact reads. Keep transport private or HTTPS. This task
 adds no credentials and performs no production deployment/import/email sending.
 
-The source key is the exact `_PARTNER.N_USER`. Billing and delivery address text,
-email, phones and postcode come from confirmed source columns. First/last name,
-city/country and the agreed Woo role are reviewed explicitly; no price-contract
-field is inferred. `SKIDKAPRCNT` is informational, not a role-price override.
+The source key is the exact `_PARTNER.N_USER`. Email, phones, billing address and postcode come from confirmed source columns.
+By owner request (2026-10-06), both countries default to UA, both cities to
+`TOWNB_USER`; shipping address/postcode initially copy billing. All are editable.
+`CP_2` is displayed above the role selector as a contact/price reference, not an
+automatic price-contract mapping. `PRIMECH` and `INFORM_PAR` seed an editable
+multiline internal note (max 20000 characters). `CustomerInternalNotes` owns private
+user meta `_pcoe_customer_internal_note`, visible in the manager customer card and
+editable through the customer user profile with edit-user permission and nonce.
+It is not public biography, REST-registered metadata or email content. Existing
+prepared imports retain saved defaults; create a fresh import for new fields.
+First/last name and the agreed Woo role are reviewed explicitly. `SKIDKAPRCNT` is informational, not a role-price override.
 Addresses are plain text, not Nova Poshta branch IDs. See the Java partners API
 contract for exact field mapping and evidence. Existing customer profiles are
 never overwritten: matching email OR either Folio key is skipped. Duplicate

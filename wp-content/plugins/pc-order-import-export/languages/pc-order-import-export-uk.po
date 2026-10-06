@@ -3318,3 +3318,21 @@ msgstr "Блокування синхронізації недоступне."
 #: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
 msgid "This import has already started."
 msgstr "Цей імпорт уже розпочато."
+
+msgid "Folio contact / price type (reference):"
+msgstr "Тип контактів / цін ФОЛІО (довідково):"
+
+msgid "Internal customer note"
+msgstr "Внутрішня нотатка клієнта"
+
+msgid "Visible to managers only. Not included in customer emails."
+msgstr "Доступна лише менеджерам. Не додається до листів клієнту."
+
+msgid "Internal customer note is too long (maximum 20000 characters)."
+msgstr "Внутрішня нотатка задовга (не більше 20000 символів)."
+
+msgid "Ukraine is preset for both countries. Cities come from Folio bank city; the shipping address and postcode are copied from billing. Check and edit these values before importing."
+msgstr "Для обох країн вибрано Україну. Міста взято з поля «Город банка» ФОЛІО; адресу доставки та індекс скопійовано з платіжних даних. Перевірте й за потреби змініть їх перед імпортом."
+
+msgid "Folio note and additional information are copied here. Saved in the customer profile for managers; not included in customer emails."
+msgstr "Сюди скопійовано примітку та додаткову інформацію ФОЛІО. Зберігається у профілі клієнта для менеджерів; не додається до листів клієнту."

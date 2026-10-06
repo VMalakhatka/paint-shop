@@ -413,3 +413,11 @@ price role from organization type, personal discount, or first/last names from t
 company name. Operator steps: `docs/MANAGER_CUSTOMER_GUIDE_UK.md#register-wholesale`;
 configuration/lifecycle: plugin README. Tests: `tests/folio-customer-import.php`
 with mocked Folio and blocked external mail/HTTP. Production deployment remains separate.
+
+Owner defaults added 2026-10-06: both countries UA; bank city seeds both cities;
+shipping address/postcode initially copy billing and remain editable. CP_2 is a
+reference above the role picker, never an automatic role mapping. CustomerInternalNotes
+owns private `_pcoe_customer_internal_note`; Folio note/additional information must
+not go into public biography or customer email. Profile writes require manager,
+edit-user, customer-target and nonce checks. Source: import integration tests and
+Java partners API contract; manager guide contains the operational steps.

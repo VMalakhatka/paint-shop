@@ -324,7 +324,7 @@ msgid "Import step 1 — select customers. Open Customer workspace → Customers
 msgstr ""
 
 #: inc/ManagerHelp.php
-msgid "Import step 2 — check contacts and addresses. Verify the Folio name and short key against the intended customer. Email, the main phone, billing address, postcode and delivery address are loaded from Folio when present. Complete one valid customer email, first/last name, city and country; check billing and shipping fields separately. The alternate phone is shown for reference. An address imported as text is not a selected Nova Poshta branch or a delivery tariff."
+msgid "Import step 2 — check contacts and addresses. Verify the Folio name and short key against the intended customer. Email, the main phone, billing address and postcode are loaded from Folio when present. Complete one valid customer email, first/last name, city and country; check billing and shipping fields separately. The alternate phone is shown for reference. An address imported as text is not a selected Nova Poshta branch or a delivery tariff."
 msgstr ""
 
 #: inc/ManagerHelp.php
@@ -349,4 +349,7 @@ msgstr ""
 
 #: inc/ManagerHelp.php
 msgid "Import invitations and report retention. Accepted by the mail service does not confirm inbox delivery: check the customer email, Spam and WP Mail SMTP → Tools → Debug Events. If the invitation failed, send it manually from the profile after fixing the cause. If the outcome needs review, check the mail log before sending again; the import does not automatically resend uncertain or failed invitations. Recent import reports are kept for seven days; created accounts remain. Record unresolved row messages before the report expires."
+msgstr ""
+
+msgid "Import defaults and notes. Ukraine is preset for billing and shipping. Both cities use the Folio Bank city field; shipping address and postcode initially copy billing. Review and edit these defaults. The Folio contact / price type is shown above Price role as a reference; choose the site role yourself. Folio Note and Additional information are copied into Internal customer note, which you can edit before importing. After creation, managers see it in the customer card and can edit it in Edit User. It is separate from the public biography and is not included in customer emails. Start a new import to load the new fields; older preparations keep their saved values."
 msgstr ""

@@ -8,7 +8,7 @@
     const status = document.querySelector('[data-customer-import-status]');
     let busy = false;
     // Never apply stale saved values after the operator changes the edit form.
-    document.querySelectorAll('form input[name^="fields["], form select[name^="fields["]').forEach(input => input.addEventListener('input', () => {form.hidden = true;}));
+    document.querySelectorAll('form input[name^="fields["], form select[name^="fields["], form textarea[name^="fields["]').forEach(input => input.addEventListener('input', () => {form.hidden = true;}));
     form.addEventListener('submit', async event => {
         event.preventDefault();
         if (busy || !form.reportValidity()) return;

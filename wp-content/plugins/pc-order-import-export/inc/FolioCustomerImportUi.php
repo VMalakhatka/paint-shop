@@ -101,9 +101,12 @@ final class FolioCustomerImportUi {
                     } else echo '<input type="'.($name==='email'?'email':'text').'" maxlength="200" name="fields['.$i.']['.esc_attr($name).']" value="'.esc_attr($row['fields'][$name]).'">';
                     echo '</label>';
                 }
-                echo '<label>'.esc_html__('Price role:','pc-order-import-export').'<select name="fields['.$i.'][role]"><option value="">—</option>';
+                echo '<label><span style="display:block">'.esc_html__('Folio contact / price type (reference):', 'pc-order-import-export').' <strong>'.esc_html($row['source']['contactType'] ?? '—').'</strong></span>'.esc_html__('Price role:','pc-order-import-export').'<select name="fields['.$i.'][role]"><option value="">—</option>';
                 foreach($roles as $role=>$label)if(!empty($map[$role]))echo '<option value="'.esc_attr($role).'" '.selected($row['fields']['role'],$role,false).'>'.esc_html($label.' · '.$map[$role]).'</option>';
                 echo '</select></label></div>';
+                echo '<p>'.esc_html__('Ukraine is preset for both countries. Cities come from Folio bank city; the shipping address and postcode are copied from billing. Check and edit these values before importing.', 'pc-order-import-export').'</p>';
+                echo '<label>'.esc_html__('Internal customer note', 'pc-order-import-export').'<textarea rows="5" maxlength="20000" name="fields['.$i.'][internal_note]">'.esc_textarea($row['fields']['internal_note'] ?? '').'</textarea></label>';
+                echo '<p>'.esc_html__('Folio note and additional information are copied here. Saved in the customer profile for managers; not included in customer emails.', 'pc-order-import-export').'</p>';
             } else {
                 echo '<p>'.esc_html($row['fields']['email'].' · '.($roles[$row['fields']['role']]??$row['fields']['role'])).'</p><p>'.esc_html($invites[$row['invite']]??'').'</p>';
                 if($row['user_id'] && current_user_can('edit_user',$row['user_id']))echo '<a href="'.esc_url(get_edit_user_link($row['user_id'])).'">'.esc_html__('Edit User').'</a>';

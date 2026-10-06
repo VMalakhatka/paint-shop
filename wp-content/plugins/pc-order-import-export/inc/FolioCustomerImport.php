@@ -44,7 +44,7 @@ final class FolioCustomerImport {
             throw new \RuntimeException(__('Could not read Folio registration data. Ask the administrator to check the backend update and import access token.', 'pc-order-import-export'));
         }
         // Only the documented contact fields enter job storage.
-        return array_intersect_key($data, array_flip(['id','name','type','email','phone','alternatePhone','address','postcode','deliveryAddress','discountPercent']));
+        return array_intersect_key($data, array_flip(['id','name','type','email','phone','alternatePhone','address','postcode','deliveryAddress','discountPercent','bankCity','contactType','note','additionalInfo']));
     }
     public static function get(int $id): array {
         self::authorize(); $post = get_post($id);
@@ -68,10 +68,11 @@ final class FolioCustomerImport {
             $source = self::source($key);
             $rows[] = ['source'=>$source, 'fields'=>[
                 'email'=>$source['email'] ?? '', 'first_name'=>'', 'last_name'=>'', 'role'=>'',
-                'phone'=>$source['phone'] ?? '', 'country'=>'', 'city'=>'',
+                'phone'=>$source['phone'] ?? '', 'country'=>'UA', 'city'=>$source['bankCity'] ?? '',
                 'address'=>$source['address'] ?? '', 'postcode'=>$source['postcode'] ?? '',
-                'shipping_address'=>$source['deliveryAddress'] ?? '', 'shipping_city'=>'',
-                'shipping_country'=>'', 'shipping_postcode'=>'',
+                'shipping_address'=>$source['address'] ?? '', 'shipping_city'=>$source['bankCity'] ?? '',
+                'shipping_country'=>'UA', 'shipping_postcode'=>$source['postcode'] ?? '',
+                'internal_note'=>sanitize_textarea_field(implode("\n\n", array_filter([$source['note'] ?? '', $source['additionalInfo'] ?? ''], static fn($v)=>$v!==''))),
             ], 'status'=>'edit', 'message'=>'', 'user_id'=>0, 'invite'=>'none'];
         }
         $id = wp_insert_post(['post_type'=>self::TYPE,'post_status'=>'private','post_author'=>get_current_user_id(),
@@ -99,8 +100,13 @@ final class FolioCustomerImport {
         $roles = self::roles(); $seen = [];
         $map = function_exists('lps_get_role_contract_map') ? lps_get_role_contract_map() : [];
         foreach ($data['rows'] as $i=>&$row) {
+            $row['fields']['internal_note'] = $row['fields']['internal_note'] ?? '';
             foreach ($row['fields'] as $name=>$_) {
-                $value = trim(sanitize_text_field($input[$i][$name] ?? ''));
+                $value = trim($name==='internal_note' ? sanitize_textarea_field($input[$i][$name] ?? '') : sanitize_text_field($input[$i][$name] ?? ''));
+                if ($name==='internal_note') {
+                    if (mb_strlen($value)>20000) throw new \RuntimeException(__('Internal customer note is too long (maximum 20000 characters).', 'pc-order-import-export'));
+                    $row['fields'][$name]=$value; continue;
+                }
                 if (mb_strlen($value) > 200) throw new \RuntimeException(__('A customer field is too long (maximum 200 characters).', 'pc-order-import-export'));
                 $row['fields'][$name] = $value;
             }
@@ -156,7 +162,7 @@ final class FolioCustomerImport {
                 $row['user_id']=$uid; self::save($id,$data);
                 $meta=['_folio_partner_id'=>$source['id'],'_folio_partner_short_name'=>$source['id'],
                     '_folio_partner_name'=>$source['name'],'_folio_partner_type'=>$source['type'],
-                    '_pcoe_import_job'=>$id, 'billing_email'=>$f['email'], 'billing_first_name'=>$f['first_name'],
+                    '_pcoe_import_job'=>$id, CustomerInternalNotes::META=>$f['internal_note'] ?? '', 'billing_email'=>$f['email'], 'billing_first_name'=>$f['first_name'],
                     'billing_last_name'=>$f['last_name'],'billing_company'=>$source['name'],'billing_phone'=>$f['phone'],
                     'billing_country'=>$f['country'],'billing_city'=>$f['city'],'billing_address_1'=>$f['address'],
                     'billing_postcode'=>$f['postcode'],'shipping_first_name'=>$f['first_name'],'shipping_last_name'=>$f['last_name'],

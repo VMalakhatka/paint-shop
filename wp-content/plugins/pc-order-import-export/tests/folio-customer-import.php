@@ -20,8 +20,13 @@ $prepare=static function($id,$override=[])use($tag){$data=Import::get($id);$fiel
 try {
     $manager=$create('shop_manager','manager');$other=$create('shop_manager','other');$customer=$create('customer','customer');
     wp_set_current_user($manager);update_option('lps_role_contract_map',['partner'=>'TEST-CONTRACT','customer'=>'RETAIL']);
-    for($i=1;$i<=10;$i++)$sources['TEST'.$i]=['id'=>'TEST'.$i,'name'=>'Test company '.$i,'type'=>'H','email'=>'','phone'=>'+380000000000','alternatePhone'=>null,'address'=>'Billing address','postcode'=>'00123','deliveryAddress'=>'Delivery address','discountPercent'=>5];
+    for($i=1;$i<=10;$i++)$sources['TEST'.$i]=['id'=>'TEST'.$i,'name'=>'Test company '.$i,'type'=>'H','email'=>'','phone'=>'+380000000000','alternatePhone'=>null,'address'=>'Billing address','postcode'=>'00123','deliveryAddress'=>'Delivery address','discountPercent'=>5,'bankCity'=>'Test city','contactType'=>'TEST WHOLESALE','note'=>'Reference note','additionalInfo'=>"Contact one\nContact two"];
     $id=$job(['TEST1']);$check(Import::get($id)['phase']==='edit','Staging creates no customers');
+    $defaults=Import::get($id)['rows'][0]['fields'];
+    $check($defaults['country']==='UA' && $defaults['shipping_country']==='UA','Ukraine defaults');
+    $check($defaults['city']==='Test city' && $defaults['shipping_city']==='Test city','Bank city defaults');
+    $check($defaults['shipping_address']===$defaults['address'] && $defaults['shipping_postcode']===$defaults['postcode'],'Shipping initially copies billing');
+    $check($defaults['internal_note']==="Reference note\n\nContact one\nContact two",'Folio notes retain line breaks');
     wp_set_current_user($other);try{Import::get($id);throw new LogicException('Other manager allowed');}catch(RuntimeException $e){$check(true,'Owner isolation');}
     wp_set_current_user($customer);$check(!Import::allowed(),'Customer cannot import');wp_set_current_user($manager);
     $prepare($id);$check(Import::get($id)['rows'][0]['status']==='ready','Explicit safe price role accepted');
@@ -29,7 +34,16 @@ try {
     $check($uid>0 && $data['phase']==='complete','New customer created');
     $check(get_userdata($uid)->roles===['partner'],'Selected price role applied');
     $check(get_user_meta($uid,'_folio_partner_short_name',true)==='TEST1' && get_user_meta($uid,'_folio_partner_id',true)==='TEST1','Default Internet mapping replaced consistently');
-    $check(get_user_meta($uid,'billing_postcode',true)==='00123' && get_user_meta($uid,'shipping_address_1',true)==='Delivery address','Contact values and distinct addresses preserved');
+    $check(get_user_meta($uid,'billing_postcode',true)==='00123' && get_user_meta($uid,'shipping_address_1',true)==='Billing address','Contact values and distinct addresses preserved');
+    $check(get_user_meta($uid,\PaintCore\PCOE\CustomerInternalNotes::META,true)===$defaults['internal_note'],'Private note saved during import');
+    $_POST=['pcoe_customer_note'=>wp_slash("Manager's note\nSecond line"),'pcoe_customer_note_nonce'=>wp_create_nonce('pcoe_customer_note_'.$uid)];
+    \PaintCore\PCOE\CustomerInternalNotes::save($uid);
+    $check(get_user_meta($uid,\PaintCore\PCOE\CustomerInternalNotes::META,true)==="Manager's note\nSecond line",'Manager can edit multiline note');
+    wp_set_current_user($uid);$_POST['pcoe_customer_note']='Forbidden';\PaintCore\PCOE\CustomerInternalNotes::save($uid);
+    ob_start();\PaintCore\PCOE\CustomerInternalNotes::summary($uid);$hidden=ob_get_clean();
+    $check($hidden==='' && get_user_meta($uid,\PaintCore\PCOE\CustomerInternalNotes::META,true)==="Manager's note\nSecond line",'Customer cannot read rendered note or change it');
+    $check(get_user_meta($uid,'description',true)==='','Public biography stays empty');
+    wp_set_current_user($manager);$_POST=[];
     $check($mail===$before,'Invitations off by default');Import::step($id,true,true);$check($mail===$before,'Repeated completed request never sends invitations');
     $dup=$job(['TEST1']);$prepare($dup);$check(Import::get($dup)['rows'][0]['status']==='skipped','Existing Folio/email skipped');
     $bad=$job(['TEST2']);$prepare($bad,['role'=>'administrator']);$check(Import::get($bad)['rows'][0]['status']==='skipped','Staff role rejected');
