@@ -665,8 +665,9 @@ dedicated `#customer-import*` sections: overview, selection, fields/prices,
 preview, creation/invitations, results and recovery. Import controls link directly
 to the corresponding explanation; manual registration retains `#register-wholesale`.
 Canonical text: `docs/MANAGER_CUSTOMER_GUIDE_UK.md#customer-import`; UK/RU
-help catalogs remain synchronized. This documentation update requires WordPress
-deployment to appear in production help; it does not change the import API.
+help catalogs remain synchronized. Published 2026-10-06 from `f1d6170`; production
+browser navigation and read-only manager UK/RU rendering passed. No import API
+changes, customer creation or emails. Deployment/backup record is in the canonical guide.
 
 Imported account logins (2026-10-06): sanitized lowercase email local part,
 truncated to 55 characters, with a numeric suffix for occupied/blocked names.
