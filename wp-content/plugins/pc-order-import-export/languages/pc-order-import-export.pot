@@ -3134,3 +3134,6 @@ msgstr ""
 
 msgid "Folio note and additional information are copied here. Saved in the customer profile for managers; not included in customer emails."
 msgstr ""
+
+msgid "Could not create a unique customer login."
+msgstr ""

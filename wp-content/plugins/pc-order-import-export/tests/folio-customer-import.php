@@ -32,6 +32,13 @@ try {
     $prepare($id);$check(Import::get($id)['rows'][0]['status']==='ready','Explicit safe price role accepted');
     $before=$mail;Import::step($id,true,false);$data=Import::get($id);$uid=$data['rows'][0]['user_id'];$users[]=$uid;
     $check($uid>0 && $data['phase']==='complete','New customer created');
+    $expectedLogin=strtolower($tag.'-TEST1');
+    $check(get_userdata($uid)->user_login===$expectedLogin,'Login comes from email local part');
+    $check(Import::username($expectedLogin.'@other.invalid')===$expectedLogin.'2','Occupied local part gets numeric suffix');
+    $check(strlen(Import::username(str_repeat('a',64).'@example.invalid'))<=60,'Long email local part fits WordPress login');
+    $blockLogin=static fn($names)=>array_merge($names,[$tag.'reserved']);add_filter('illegal_user_logins',$blockLogin);
+    try{$check(Import::username($tag.'reserved@example.invalid')===$tag.'reserved2','Blocked login gets safe suffix');}finally{remove_filter('illegal_user_logins',$blockLogin);}
+
     $check(get_userdata($uid)->roles===['partner'],'Selected price role applied');
     $check(get_user_meta($uid,'_folio_partner_short_name',true)==='TEST1' && get_user_meta($uid,'_folio_partner_id',true)==='TEST1','Default Internet mapping replaced consistently');
     $check(get_user_meta($uid,'billing_postcode',true)==='00123' && get_user_meta($uid,'shipping_address_1',true)==='Billing address','Contact values and distinct addresses preserved');

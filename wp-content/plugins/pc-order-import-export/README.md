@@ -666,3 +666,9 @@ invitations, row outcomes, interrupted runs and seven-day report retention.
 Canonical text: `docs/MANAGER_CUSTOMER_GUIDE_UK.md#register-wholesale`; UK/RU
 help catalogs remain synchronized. This documentation update requires WordPress
 deployment to appear in production help; it does not change the import API.
+
+Imported account logins (2026-10-06): sanitized lowercase email local part,
+truncated to 55 characters, with a numeric suffix for occupied/blocked names.
+WordPress username validation and blocked-login filters apply. Existing accounts
+are not renamed. The chosen login is persisted with the creating marker and
+used for the optional password-setting email; interrupted creation remains review-only.

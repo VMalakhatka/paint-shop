@@ -421,3 +421,8 @@ owns private `_pcoe_customer_internal_note`; Folio note/additional information m
 not go into public biography or customer email. Profile writes require manager,
 edit-user, customer-target and nonce checks. Source: import integration tests and
 Java partners API contract; manager guide contains the operational steps.
+
+Imported login policy (2026-10-06): derive new-account logins from sanitized email
+local parts, with numeric collision suffixes and WordPress blocked-name checks.
+Persist the chosen login with the creating state; do not rename existing users.
+Source: `FolioCustomerImport::username()` and import integration tests.

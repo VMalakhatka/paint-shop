@@ -3336,3 +3336,6 @@ msgstr "Для обох країн вибрано Україну. Міста в�
 
 msgid "Folio note and additional information are copied here. Saved in the customer profile for managers; not included in customer emails."
 msgstr "Сюди скопійовано примітку та додаткову інформацію ФОЛІО. Зберігається у профілі клієнта для менеджерів; не додається до листів клієнту."
+
+msgid "Could not create a unique customer login."
+msgstr "Не вдалося створити унікальний логін клієнта."

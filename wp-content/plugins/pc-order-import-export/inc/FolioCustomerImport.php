@@ -151,7 +151,7 @@ final class FolioCustomerImport {
                 $source=self::source($row['source']['id']);
                 if ($source!==$row['source']) {$row['status']='skipped';$row['message']=__('Folio details changed. Prepare a new import.', 'pc-order-import-export');break;}
                 $f=$row['fields'];
-                $row['login']='folio-'.substr(hash('sha256', $id.':'.$i.':'.wp_salt()),0,24);
+                $row['login']=self::username($f['email']);
                 $row['status']='creating'; self::save($id,$data);
                 $mute=static fn()=>true; add_filter('pre_wp_mail',$mute,PHP_INT_MAX);
                 try { $uid=wp_insert_user(['user_login'=>$row['login'],'user_pass'=>wp_generate_password(40,true,true),
@@ -189,6 +189,17 @@ final class FolioCustomerImport {
             self::save($id,$data);
             return ['complete'=>$data['phase']==='complete','processed'=>count(array_filter($data['rows'], static fn($r)=>$r['status']!=='ready')),'total'=>count($data['rows'])];
         });
+    }
+    /** Email local part, with a numeric suffix when occupied or disallowed. */
+    public static function username(string $email): string {
+        $base=substr(strtolower(sanitize_user(explode('@',$email,2)[0],true)),0,55);
+        if ($base==='') $base='customer';
+        $blocked=array_map('strtolower',(array)apply_filters('illegal_user_logins',[]));
+        for ($n=1;$n<=10000;$n++) {
+            $login=$base.($n===1?'':(string)$n);
+            if (validate_username($login) && !in_array($login,$blocked,true) && !username_exists($login)) return $login;
+        }
+        throw new \RuntimeException(__('Could not create a unique customer login.', 'pc-order-import-export'));
     }
     private static function locked(callable $work) {
         if (!function_exists('lavka_ecosystem_lock_acquire')) throw new \RuntimeException(__('The synchronization lock is unavailable.', 'pc-order-import-export'));
