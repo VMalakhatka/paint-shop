@@ -385,3 +385,6 @@ msgstr "Шаг 6. Проверьте учётные записи и письма
 #: inc/ManagerHelp.php
 msgid "Interrupted imports, invitations and report retention"
 msgstr "Прерванный импорт, приглашения и хранение отчётов"
+
+msgid "Before selecting, check Folio email / WooCommerce account and Folio link in WooCommerce. These are separate checks: the same email and Folio organization may point to different accounts. Existing accounts show their name and login; an available profile link opens in a new tab. No email in Folio differs from Email check unavailable. These hints do not update existing accounts; the import preview checks duplicates again after you edit the details."
+msgstr "Перед выбором проверьте колонки «Email ФОЛИО / аккаунт WooCommerce» и «Привязка ФОЛИО в WooCommerce». Это отдельные проверки: email и организация ФОЛИО могут вести к разным аккаунтам. Для существующих аккаунтов показаны имя и логин; доступная ссылка на профиль открывается в новой вкладке. «Email в ФОЛИО не указан» отличается от «Проверка email недоступна». Эти подсказки не изменяют существующие аккаунты; предварительная проверка импорта снова проверяет дубликаты после редактирования данных."

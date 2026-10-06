@@ -57,11 +57,14 @@ final class FolioCustomerImportUi {
         $response=lps_java_get(add_query_arg(['q'=>$q,'types'=>$type?:'П,Д,К,H','limit'=>25,'offset'=>($page-1)*25],'/admin/folio/partners'),['timeout'=>20]);
         $data=is_wp_error($response)?null:json_decode(wp_remote_retrieve_body($response),true);
         if(is_wp_error($response)||wp_remote_retrieve_response_code($response)!==200||empty($data['ok'])||!isset($data['items']))throw new \RuntimeException(__('Folio service is unavailable.','pc-order-import-export'));
+        $statuses=FolioCustomerDirectory::inspect($data['items']);
+        if(array_filter($statuses,static fn($s)=>!$s['known'])) echo '<p role="status">'.esc_html__('Email checks are unavailable for some customers. Ask the administrator to check the Java update and import access. Folio links are checked separately.', 'pc-order-import-export').'</p>';
         echo '<form method="post" action="'.esc_url(admin_url('admin-post.php')).'">';self::fields('select');
-        echo '<p><label><input type="checkbox" data-import-select-all> '.esc_html__('Select this page','pc-order-import-export').'</label></p><div class="pcoe-scroll"><table class="widefat striped"><thead><tr><th>'.esc_html__('Select','pc-order-import-export').'</th><th>'.esc_html__('Folio customer:','pc-order-import-export').'</th><th>'.esc_html__('Folio organization type','pc-order-import-export').'</th></tr></thead><tbody>';
+        echo '<p><label><input type="checkbox" data-import-select-all> '.esc_html__('Select this page','pc-order-import-export').'</label></p><div class="pcoe-scroll"><table class="widefat striped"><thead><tr><th>'.esc_html__('Select','pc-order-import-export').'</th><th>'.esc_html__('Folio customer:','pc-order-import-export').'</th><th>'.esc_html__('Folio organization type','pc-order-import-export').'</th><th>'.esc_html__('Folio email / WooCommerce account','pc-order-import-export').'</th><th>'.esc_html__('Folio link in WooCommerce','pc-order-import-export').'</th></tr></thead><tbody>';
         foreach ($data['items'] as $row) {
             if(!in_array($row['type']??'',array_keys($types),true))continue;
-            echo '<tr><td><input type="checkbox" name="clients[]" value="'.esc_attr($row['id']).'" aria-label="'.esc_attr($row['name']??$row['id']).'"></td><td>'.esc_html($row['name']??'').'<br><code>'.esc_html($row['id']).'</code></td><td>'.esc_html($types[$row['type']]).'</td></tr>';
+            echo '<tr><td><input type="checkbox" name="clients[]" value="'.esc_attr($row['id']).'" aria-label="'.esc_attr($row['name']??$row['id']).'"></td><td>'.esc_html($row['name']??'').'<br><code>'.esc_html($row['id']).'</code></td><td>'.esc_html($types[$row['type']]).'</td>';
+            FolioCustomerDirectory::cells($statuses[$row['id']] ?? ['known'=>false,'folio_users'=>[]]);echo '</tr>';
         }
         echo '</tbody></table></div><button class="button button-primary">'.esc_html__('Load selected customer details','pc-order-import-export').'</button></form><p class="pcoe-actions">';
         $url=add_query_arg(['folio_search'=>$q,'folio_type'=>$type],self::url());

@@ -3339,3 +3339,39 @@ msgstr "Сюди скопійовано примітку та додаткову
 
 msgid "Could not create a unique customer login."
 msgstr "Не вдалося створити унікальний логін клієнта."
+
+msgid "Existing account"
+msgstr "Наявний обліковий запис"
+
+msgid "Email check unavailable"
+msgstr "Перевірка email недоступна"
+
+msgid "No email in Folio"
+msgstr "Email у ФОЛІО не вказано"
+
+msgid "Email already registered"
+msgstr "Email уже зареєстровано"
+
+msgid "Email not registered"
+msgstr "Email не зареєстровано"
+
+msgid "Check email"
+msgstr "Перевірте email"
+
+msgid "Folio customer already linked"
+msgstr "Клієнт ФОЛІО вже прив’язаний"
+
+msgid "No Folio link found"
+msgstr "Прив’язку ФОЛІО не знайдено"
+
+msgid "Folio email / WooCommerce account"
+msgstr "Email ФОЛІО / акаунт WooCommerce"
+
+msgid "Folio link in WooCommerce"
+msgstr "Прив’язка ФОЛІО у WooCommerce"
+
+msgid "Email checks are unavailable for some customers. Ask the administrator to check the Java update and import access. Folio links are checked separately."
+msgstr "Для частини клієнтів перевірка email недоступна. Попросіть адміністратора перевірити оновлення Java та доступ до імпорту. Прив’язки ФОЛІО перевіряються окремо."
+
+msgid "Customer account check unavailable."
+msgstr "Перевірка облікових записів недоступна."

@@ -384,3 +384,6 @@ msgstr ""
 #: inc/ManagerHelp.php
 msgid "Interrupted imports, invitations and report retention"
 msgstr ""
+
+msgid "Before selecting, check Folio email / WooCommerce account and Folio link in WooCommerce. These are separate checks: the same email and Folio organization may point to different accounts. Existing accounts show their name and login; an available profile link opens in a new tab. No email in Folio differs from Email check unavailable. These hints do not update existing accounts; the import preview checks duplicates again after you edit the details."
+msgstr ""

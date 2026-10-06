@@ -426,3 +426,11 @@ Imported login policy (2026-10-06): derive new-account logins from sanitized ema
 local parts, with numeric collision suffixes and WordPress blocked-name checks.
 Persist the chosen login with the creating state; do not rename existing users.
 Source: `FolioCustomerImport::username()` and import integration tests.
+
+Import selection registration hints (2026-10-06): `FolioCustomerDirectory` checks
+email and Folio short-name links independently, using one protected Java
+`POST /admin/folio/partners/registration-emails` batch (up to 25) and two local
+account queries. Unknown email checks must not be presented as unregistered;
+missing email and unavailable service are distinct. Profile links require edit-user
+permission; preview/apply still recheck duplicates. Deploy Java and WordPress.
+Source: import integration tests and `customer-import-select` in the manager guide.

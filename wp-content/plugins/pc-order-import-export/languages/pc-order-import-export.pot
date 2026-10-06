@@ -3137,3 +3137,39 @@ msgstr ""
 
 msgid "Could not create a unique customer login."
 msgstr ""
+
+msgid "Existing account"
+msgstr ""
+
+msgid "Email check unavailable"
+msgstr ""
+
+msgid "No email in Folio"
+msgstr ""
+
+msgid "Email already registered"
+msgstr ""
+
+msgid "Email not registered"
+msgstr ""
+
+msgid "Check email"
+msgstr ""
+
+msgid "Folio customer already linked"
+msgstr ""
+
+msgid "No Folio link found"
+msgstr ""
+
+msgid "Folio email / WooCommerce account"
+msgstr ""
+
+msgid "Folio link in WooCommerce"
+msgstr ""
+
+msgid "Email checks are unavailable for some customers. Ask the administrator to check the Java update and import access. Folio links are checked separately."
+msgstr ""
+
+msgid "Customer account check unavailable."
+msgstr ""

@@ -3333,3 +3333,39 @@ msgstr "Сюда скопированы примечание и дополнит
 
 msgid "Could not create a unique customer login."
 msgstr "Не удалось создать уникальный логин клиента."
+
+msgid "Existing account"
+msgstr "Существующий аккаунт"
+
+msgid "Email check unavailable"
+msgstr "Проверка email недоступна"
+
+msgid "No email in Folio"
+msgstr "Email в ФОЛИО не указан"
+
+msgid "Email already registered"
+msgstr "Email уже зарегистрирован"
+
+msgid "Email not registered"
+msgstr "Email не зарегистрирован"
+
+msgid "Check email"
+msgstr "Проверьте email"
+
+msgid "Folio customer already linked"
+msgstr "Клиент ФОЛИО уже привязан"
+
+msgid "No Folio link found"
+msgstr "Привязка ФОЛИО не найдена"
+
+msgid "Folio email / WooCommerce account"
+msgstr "Email ФОЛИО / аккаунт WooCommerce"
+
+msgid "Folio link in WooCommerce"
+msgstr "Привязка ФОЛИО в WooCommerce"
+
+msgid "Email checks are unavailable for some customers. Ask the administrator to check the Java update and import access. Folio links are checked separately."
+msgstr "Для части клиентов проверка email недоступна. Попросите администратора проверить обновление Java и доступ к импорту. Привязки ФОЛИО проверяются отдельно."
+
+msgid "Customer account check unavailable."
+msgstr "Проверка аккаунтов недоступна."

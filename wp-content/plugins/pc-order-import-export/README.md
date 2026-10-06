@@ -674,3 +674,12 @@ truncated to 55 characters, with a numeric suffix for occupied/blocked names.
 WordPress username validation and blocked-login filters apply. Existing accounts
 are not renamed. The chosen login is persisted with the creating marker and
 used for the optional password-setting email; interrupted creation remains review-only.
+
+Registration directory checks (2026-10-06): `FolioCustomerDirectory` calls the
+authenticated read-only POST `/admin/folio/partners/registration-emails` once for
+the 25-row page. Two batched WordPress reads compare email and both Folio meta
+keys separately. Conflicting account matches are shown separately, duplicate meta
+links are deduplicated, profile links respect edit-user permissions. Missing or
+failed backend checks stay unknown, not unregistered. These are read-only hints;
+preview and apply still enforce existing duplicate checks. Deploy Java first;
+older Java leaves email hints unavailable while Folio links still work.

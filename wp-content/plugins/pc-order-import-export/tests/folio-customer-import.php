@@ -3,13 +3,18 @@
 use PaintCore\PCOE\FolioCustomerImport as Import;
 if (!defined('WP_CLI') || !WP_CLI || wp_parse_url(home_url(),PHP_URL_HOST)!=='paint.local') throw new RuntimeException('Local paint test only');
 require_once ABSPATH.'wp-admin/includes/user.php';
-$actor=get_current_user_id();$users=[];$jobs=[];$checks=0;$mail=0;$failMail=false;$sources=[];
+$actor=get_current_user_id();$users=[];$jobs=[];$checks=0;$mail=0;$failMail=false;$sources=[];$batchDown=false;
 $oldmap=get_option('lps_role_contract_map');
 $tag='import-'.strtolower(wp_generate_password(8,false));
 $check=static function($ok,$why)use(&$checks){if(!$ok)throw new RuntimeException($why);$checks++;};
 $mailFilter=static function()use(&$mail,&$failMail){$mail++;return !$failMail;};add_filter('pre_wp_mail',$mailFilter,PHP_INT_MAX);
-$http=static function($pre,$args,$url)use(&$sources){
+$http=static function($pre,$args,$url)use(&$sources,&$batchDown){
     $q=[];parse_str(wp_parse_url($url,PHP_URL_QUERY)??'',$q);
+    if(str_contains($url,'/partners/registration-emails')) {
+        if($batchDown)return new WP_Error('test_batch_down','Batch unavailable');
+        $emails=[];foreach(json_decode($args['body'],true) as $key)if(isset($sources[$key]))$emails[$key]=$sources[$key]['email'];
+        return ['headers'=>[],'body'=>wp_json_encode($emails),'response'=>['code'=>200,'message'=>'OK'],'cookies'=>[]];
+    }
     if(str_contains($url,'/partners/registration') && isset($sources[$q['id']??'']))return ['headers'=>[],'body'=>wp_json_encode($sources[$q['id']]),'response'=>['code'=>200,'message'=>'OK'],'cookies'=>[]];
     if(str_ends_with(wp_parse_url($url,PHP_URL_PATH)??'', '/partners'))return ['headers'=>[],'body'=>wp_json_encode(['ok'=>true,'items'=>array_values($sources),'total'=>count($sources)]),'response'=>['code'=>200,'message'=>'OK'],'cookies'=>[]];
     return new WP_Error('test_http_block','External HTTP blocked');
@@ -73,6 +78,18 @@ try {
     $emailDup=$job(['TEST10']);$prepare($emailDup,['email'=>get_userdata($uid)->user_email]);$check(Import::get($emailDup)['rows'][0]['status']==='skipped','Existing email cannot be rebound to another Folio customer');
     $data=Import::get($inv);$data['phase']='running';$data['rows'][0]['invite']='sending';Import::save($inv,$data);$before=$mail;Import::step($inv,false,true);
     $check(Import::get($inv)['rows'][0]['invite']==='review' && $mail===$before,'Unknown email outcome is not resent');
+    $sources['TEST1']['email']=strtoupper(get_userdata($uid)->user_email);
+    $sources['TEST2']['email']=get_userdata($uid)->user_email;
+    update_user_meta($customer,'_folio_partner_id','TEST3');
+    update_user_meta($other,'_folio_partner_short_name','TEST2');
+    $directory=\PaintCore\PCOE\FolioCustomerDirectory::inspect(array_values($sources));
+    $check(isset($directory['TEST1']['email_users'][$uid],$directory['TEST1']['folio_users'][$uid]),'Directory finds email case-insensitively and deduplicates Folio meta matches');
+    $check(count($directory['TEST1']['folio_users'])===1,'Both Folio meta keys show one account');
+    $check(isset($directory['TEST2']['email_users'][$uid],$directory['TEST2']['folio_users'][$other]),'Directory keeps conflicting email and Folio accounts separate');
+    $check(isset($directory['TEST3']['folio_users'][$customer]) && $directory['TEST3']['known'] && $directory['TEST3']['email']==='','Missing Folio email differs from unavailable check');
+    $batchDown=true;$unavailable=\PaintCore\PCOE\FolioCustomerDirectory::inspect(array_values($sources));$batchDown=false;
+    $check(!$unavailable['TEST1']['known'] && isset($unavailable['TEST1']['folio_users'][$uid]),'Email outage still reports existing Folio link');
+    wp_set_current_user($customer);try{\PaintCore\PCOE\FolioCustomerDirectory::inspect(array_values($sources));throw new LogicException('Customer directory allowed');}catch(RuntimeException $e){$check(true,'Customer cannot inspect registration directory');}wp_set_current_user($manager);
     if($qa=getenv('PCOE_IMPORT_QA_DIR')){
         update_option('lps_role_contract_map',['partner'=>'TEST-CONTRACT','customer'=>'RETAIL']);
         $qaJob=$job(['TEST2','TEST3']);
