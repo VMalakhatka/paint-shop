@@ -28,6 +28,7 @@ $form_fields = static function (string $operation) use ($customer_id, $order): v
 </nav>
 <p><a class="button" href="<?php echo esc_url(ManagerHelp::url()); ?>" target="_blank" rel="noopener noreferrer"><?php ManagerHelp::load(); esc_html_e('Manager guide', 'pcoe-manager-help'); ?></a></p>
 <?php if ($mailings_tab) { BroadcastUi::render(); echo '</div>'; return; } ?>
+<?php if (($_GET['view'] ?? '') === 'customer-import') { FolioCustomerImportUi::render(); echo '</div>'; return; } ?>
 <?php if ($messages_tab) { Conversations::render(); echo '</div>'; return; } ?>
 <?php if ($orders_tab) { require __DIR__ . '/manager-orders-view.php'; echo '</div>'; return; } ?>
 <?php if ($error): ?><div class="notice notice-error"><p><?php echo esc_html($error); ?></p></div><?php endif; ?>
@@ -44,6 +45,7 @@ $role_names = wp_roles()->get_names();
 $directory_url = add_query_arg(['page' => ManagerWorkspace::PAGE, 'customer_search' => $search, 'customer_role' => $role, 'customer_city' => $city, 'customer_folio_type' => $folio_type], admin_url('admin.php'));
 ?>
 <section class="pcoe-card">
+<?php if (FolioCustomerImport::allowed()): ?><p><a class="button" href="<?php echo esc_url(FolioCustomerImportUi::url()); ?>"><?php esc_html_e('Import customers from Folio', 'pc-order-import-export'); ?></a></p><?php endif; ?>
 <form method="get" class="pcoe-directory-filters">
 <input type="hidden" name="page" value="<?php echo esc_attr(ManagerWorkspace::PAGE); ?>">
 <label for="pcoe-search"><?php esc_html_e('Find customer by name, company or email', 'pc-order-import-export'); ?><input id="pcoe-search" name="customer_search" type="search" value="<?php echo esc_attr($search); ?>"></label>

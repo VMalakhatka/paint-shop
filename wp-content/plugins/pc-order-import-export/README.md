@@ -606,3 +606,49 @@ Operator steps and published help: [manager guide](../../../docs/MANAGER_CUSTOME
 deployment; no Java update or database migration. Rollback restores the plugin
 files and catalogs; customer data is unchanged. Local verification is covered by
 `tests/customer-directory.php` with disposable users and blocked mail/HTTP.
+
+## Manager import of Folio customers (2026-10-06)
+
+Owner: `FolioCustomerImport` / `FolioCustomerImportUi`; Customers → Import customers
+from Folio. Shop managers with customer promotion permissions and administrators
+can select up to 25 П/Д/К/H organizations per batch. Ordinary customers and other
+staff without these permissions cannot import or access job contacts.
+
+Java must first expose authenticated `GET /admin/folio/partners/registration`.
+Set Java property `folio.customer-import.token` (environment
+`FOLIO_CUSTOMER_IMPORT_TOKEN`) to a random secret of at least 32 characters matching
+WordPress Lavka price sync's existing API token. Configure values only through
+protected runtime settings; never include them in Git, browser JS or URLs. Missing
+configuration disables contact reads. Keep transport private or HTTPS. This task
+adds no credentials and performs no production deployment/import/email sending.
+
+The source key is the exact `_PARTNER.N_USER`. Billing and delivery address text,
+email, phones and postcode come from confirmed source columns. First/last name,
+city/country and the agreed Woo role are reviewed explicitly; no price-contract
+field is inferred. `SKIDKAPRCNT` is informational, not a role-price override.
+Addresses are plain text, not Nova Poshta branch IDs. See the Java partners API
+contract for exact field mapping and evidence. Existing customer profiles are
+never overwritten: matching email OR either Folio key is skipped. Duplicate
+emails inside a batch skip both rows. Unknown/elevated roles and missing role
+contracts are rejected; source and price mapping are rechecked before creation.
+
+Preview lasts 30 minutes and changes no customer. Private owner-scoped CPT
+`pcoe-client-import`, meta `_pcoe_client_import`, records staged contacts and row
+outcomes; admin may inspect any job. Reports expire via a single scheduled cleanup
+after seven days (actual cleanup requires WP cron); accounts are retained.
+`_pcoe_import_job` links created users to the audit batch. No schema migration.
+Preview/apply state changes use the shared ecosystem lock. Apply processes one
+customer per AJAX request. Browser retries are never automatic after errors;
+reload reveals durable progress. `creating` and `sending` markers become review
+outcomes, never blind repeat commands. Closing the page pauses remaining rows.
+Accounts start as retail, receive verified Folio/address metadata, then the chosen
+safe role. Partial results require profile review; rollback of code does not
+remove created accounts. Do not delete customers with orders as a rollback.
+
+Invitation checkbox defaults off. When selected, `retrieve_password` runs only
+for a newly created, verified profile, after a durable sending marker. Stored
+passwords/tokens are never exposed. Mail failure or uncertain send requires manual
+mail-log/profile review, without automatic repeat. Operator guide and published
+help: `docs/MANAGER_CUSTOMER_GUIDE_UK.md#register-wholesale` / `ManagerHelp`.
+Verification: local `tests/folio-customer-import.php` mocks Folio, blocks external
+HTTP/mail and removes fixtures; Java registration tests never connect to Folio.

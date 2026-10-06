@@ -20,7 +20,7 @@ msgstr ""
 msgid "Register a new wholesale customer"
 msgstr ""
 
-msgid "Before you start: register the customer through My Account in a separate private window. After the customer-permissions update is deployed, Shop manager can edit customer profiles, assign customer price roles and save Folio mapping. Staff accounts, elevated users and account deletion are protected. First/last-name fields in the registration form still require a separate improvement."
+msgid "Alternative: manual registration. Register the customer through My Account in a separate private window. After the customer-permissions update is deployed, Shop manager can edit customer profiles, assign customer price roles and save Folio mapping. Staff accounts, elevated users and account deletion are protected. First/last-name fields in the registration form still require a separate improvement."
 msgstr ""
 
 msgid "1. Prepare the customer’s first name, last name and own email. Search Users by email first. If the account already exists, use that account; do not register a duplicate."
@@ -309,4 +309,12 @@ msgstr ""
 
 #: inc/ManagerHelp.php
 msgid "Folio organization type is a separate filter from the site price role. Choose Art salons to find linked salons with any customer price role; combine it with role and city if needed. The type comes from the saved Folio link and is shown beside the Folio customer name. This list contains site customers only: a Folio organization must have a linked WordPress account to appear. Reset filters clears all selections."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "For customers already in Folio, use Customer workspace → Import customers from Folio. Select up to 25 clients, load their details, check emails and addresses, choose agreed price roles, then check the import preview. Accounts with an existing email or Folio link are skipped. Missing emails must be completed; organization type does not determine prices. Imported address text is not a Nova Poshta branch selection."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Confirm the ready customers and click Create selected customers. Password-setting emails are optional and off by default; they go only to newly created customers after their profiles are saved. Keep the page open. After interruption, reload and use Continue import; rows needing review are not created again. Check each result and any uncertain email in the mail log. Recent imports remain available for seven days; customer accounts remain after reports expire."
 msgstr ""

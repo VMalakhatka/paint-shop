@@ -151,3 +151,20 @@ post meta и закрытыми заявками. Это отдельный ко
 платежей и записей ФОЛИО не создаёт. Роль `lavka_instructor` управляет этим контуром
 без доступа к настройкам магазина. Проверено локально 2026-09-25; production
 не развёрнут. [Инструкция мастера, установка и откат](WORKSHOPS_GUIDE_RU.md).
+
+### Імпорт клієнтів із ФОЛІО (2026-10-06, локально)
+
+`pc-order-import-export` (`FolioCustomerImport` / `FolioCustomerImportUi`) володіє
+відбором організацій, приватним попереднім переглядом, створенням нових Woo-клієнтів
+та необов’язковими запрошеннями. Java `FolioPartnerController` / `FolioPartnerDao`
+лише читає контакти через захищений токеном `/admin/folio/partners/registration`;
+ФОЛІО залишається джерелом облікової ідентичності. Операції запису виконуються
+лише у WordPress, під загальним ecosystem lock, по одному клієнту за запит.
+Тип організації не визначає цінову роль: менеджер вибирає погоджену роль, пов’язану
+з договором у налаштуваннях сайту. Наявні профілі не перезаписуються.
+
+Основна інструкція: [реєстрація клієнтів](MANAGER_CUSTOMER_GUIDE_UK.md#register-wholesale).
+Конфігурація доступу, сім днів зберігання приватних звітів, відновлення та порядок
+Java → WordPress deploy описані в [README плагіна](../wp-content/plugins/pc-order-import-export/README.md#manager-import-of-folio-customers-2026-10-06).
+Java API-контракт: `kreul_com_ua/docs/api/FOLIO_PARTNERS_ENDPOINT_TASK.md`.
+Production deploy та імпорт реальних клієнтів у цій задачі не виконувалися.

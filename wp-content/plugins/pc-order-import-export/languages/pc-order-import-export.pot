@@ -2872,3 +2872,247 @@ msgstr ""
 #: inc/ManagerWorkspace.php inc/manager-view.php
 msgid "Folio organization type comes from the saved customer link. This list includes site customers; a Folio organization needs a linked WordPress account to appear here."
 msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "A customer field is too long (maximum 200 characters)."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Alternate phone:"
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "An account already uses this email or Folio link. Skipped; review the existing customer separately."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Another synchronization is running. Retry when it finishes."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Billing address"
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Billing country"
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Check details"
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Check import preview"
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Choose a customer price role with a configured Folio contract."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Choose a valid country."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Confirm a fresh import preview before starting."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Continue import"
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Could not create the import."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Could not read Folio registration data. Ask the administrator to check the backend update and import access token."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Could not save import progress. Reload the page before continuing."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Create selected customers"
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Creating customers… Keep this page open."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Creation was interrupted. Check Users before creating this customer again."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Customer created."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Customer creation needs review. Check the profile before sending an invitation."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Duplicate email in this import. Check both customers."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Email"
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Email password-setting links to newly created customers"
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Enter one valid customer email."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Failed"
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "First name"
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Folio customer import"
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Folio details changed. Prepare a new import."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Folio discount, %:"
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Folio price contracts are not supplied by this customer directory. Choose the agreed site price role for each customer. Personal Folio discounts are shown for review and are not applied automatically."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Folio service is unavailable."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "I checked emails, Folio links, addresses and agreed price roles. Create the ready customers."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Import customers from Folio"
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Import not found or access denied."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Import reports are kept for seven days. Invitations can also be sent manually from the customer profile. Mail service acceptance does not confirm inbox delivery."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Invitation failed; send it manually from the customer profile."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Invitation not sent"
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Invitation outcome needs review; check the mail log."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Last name"
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Load selected customer details"
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Needs review"
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Postcode"
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Prepare the import preview first."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Price settings changed. Prepare a new import."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Ready to create"
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Ready to create: %d. Other rows will be skipped."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Recent imports"
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Select"
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Select other Folio customers"
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Select this page"
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Select up to 25 Folio customers."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Select up to 25 customers per import. Existing accounts are skipped. Contact details and price roles must be checked before creating accounts."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Shipping address"
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Shipping city"
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Shipping country"
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Shipping postcode"
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Show Folio customers"
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "The preview contains the last saved details. After editing any field, check the preview again."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "The request was interrupted. Reload this page to check progress before continuing."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "The synchronization lock is unavailable."
+msgstr ""
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "This import has already started."
+msgstr ""

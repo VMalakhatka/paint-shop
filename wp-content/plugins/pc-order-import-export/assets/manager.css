@@ -2,3 +2,4 @@
 
 .pcoe-directory-filters{display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px}.pcoe-directory-filters label{flex:1;min-width:180px}.pcoe-directory-filters select{width:100%}.pcoe-directory-filters .pcoe-actions{margin-bottom:12px}
 .pcoe-manager #pcoe-place-order{scroll-margin-top:80px;border-left:4px solid #2271b1}.pcoe-manager .pcoe-non-accounting{margin:24px 0;padding:16px;background:#f6f7f7;border:1px solid #dcdcde;border-radius:6px}.pcoe-manager .pcoe-non-accounting summary{cursor:pointer;font-weight:600}.pcoe-manager [data-preview-result] h3{font-size:18px}.pcoe-manager [data-apply-form]{margin-top:16px}
+.pcoe-manager input[type=email]{display:block;width:min(100%,600px);margin-top:6px}

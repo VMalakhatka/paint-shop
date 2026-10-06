@@ -3068,3 +3068,247 @@ msgstr "Все типы организаций"
 #: inc/ManagerWorkspace.php inc/manager-view.php
 msgid "Folio organization type comes from the saved customer link. This list includes site customers; a Folio organization needs a linked WordPress account to appear here."
 msgstr "Тип организации ФОЛИО берётся из сохранённой привязки клиента. Этот список содержит клиентов сайта; организация ФОЛИО появится здесь, если у неё есть связанная учётная запись WordPress."
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "A customer field is too long (maximum 200 characters)."
+msgstr "Поле клиента слишком длинное (не более 200 символов)."
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Alternate phone:"
+msgstr "Дополнительный телефон:"
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "An account already uses this email or Folio link. Skipped; review the existing customer separately."
+msgstr "Учётная запись с этим email или привязкой ФОЛИО уже существует. Пропущено; проверьте существующего клиента отдельно."
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Another synchronization is running. Retry when it finishes."
+msgstr "Выполняется другая синхронизация. Повторите после её завершения."
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Billing address"
+msgstr "Платёжный адрес"
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Billing country"
+msgstr "Страна платёжного адреса"
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Check details"
+msgstr "Проверьте данные"
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Check import preview"
+msgstr "Проверить импорт"
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Choose a customer price role with a configured Folio contract."
+msgstr "Выберите ценовую роль клиента с настроенным договором ФОЛИО."
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Choose a valid country."
+msgstr "Выберите страну из списка."
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Confirm a fresh import preview before starting."
+msgstr "Перед началом подтвердите актуальный предварительный просмотр импорта."
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Continue import"
+msgstr "Продолжить импорт"
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Could not create the import."
+msgstr "Не удалось создать импорт."
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Could not read Folio registration data. Ask the administrator to check the backend update and import access token."
+msgstr "Не удалось получить данные для регистрации из ФОЛИО. Попросите администратора проверить обновление сервиса и доступ к импорту."
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Could not save import progress. Reload the page before continuing."
+msgstr "Не удалось сохранить состояние импорта. Обновите страницу перед продолжением."
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Create selected customers"
+msgstr "Создать выбранных клиентов"
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Creating customers… Keep this page open."
+msgstr "Создаём клиентов… Оставьте страницу открытой."
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Creation was interrupted. Check Users before creating this customer again."
+msgstr "Создание прервано. Перед повторной регистрацией проверьте раздел «Пользователи»."
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Customer created."
+msgstr "Клиент создан."
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Customer creation needs review. Check the profile before sending an invitation."
+msgstr "Создание клиента требует проверки. Проверьте профиль перед отправкой приглашения."
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Duplicate email in this import. Check both customers."
+msgstr "Одинаковый email в этом импорте. Проверьте обоих клиентов."
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Email"
+msgstr "Email"
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Email password-setting links to newly created customers"
+msgstr "Отправить новым клиентам ссылки для установки пароля на email"
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Enter one valid customer email."
+msgstr "Укажите один корректный email клиента."
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Failed"
+msgstr "Ошибка"
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "First name"
+msgstr "Имя"
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Folio customer import"
+msgstr "Импорт клиентов ФОЛИО"
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Folio details changed. Prepare a new import."
+msgstr "Данные ФОЛИО изменились. Подготовьте новый импорт."
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Folio discount, %:"
+msgstr "Скидка ФОЛИО, %:"
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Folio price contracts are not supplied by this customer directory. Choose the agreed site price role for each customer. Personal Folio discounts are shown for review and are not applied automatically."
+msgstr "Этот справочник клиентов не передаёт ценовые договоры ФОЛИО. Выберите согласованную ценовую роль сайта для каждого клиента. Личные скидки ФОЛИО показаны для проверки и не применяются автоматически."
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Folio service is unavailable."
+msgstr "Сервис ФОЛИО недоступен."
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "I checked emails, Folio links, addresses and agreed price roles. Create the ready customers."
+msgstr "Я проверил email, привязки ФОЛИО, адреса и согласованные ценовые роли. Создать подготовленных клиентов."
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Import customers from Folio"
+msgstr "Импорт клиентов из ФОЛИО"
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Import not found or access denied."
+msgstr "Импорт не найден или нет доступа."
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Import reports are kept for seven days. Invitations can also be sent manually from the customer profile. Mail service acceptance does not confirm inbox delivery."
+msgstr "Отчёты импорта хранятся семь дней. Приглашение также можно отправить вручную из профиля клиента. Принятие почтовой службой не подтверждает доставку в ящик."
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Invitation failed; send it manually from the customer profile."
+msgstr "Ошибка приглашения; отправьте его вручную из профиля клиента."
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Invitation not sent"
+msgstr "Приглашение не отправлено"
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Invitation outcome needs review; check the mail log."
+msgstr "Результат отправки приглашения неизвестен; проверьте журнал почты."
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Last name"
+msgstr "Фамилия"
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Load selected customer details"
+msgstr "Загрузить данные выбранных клиентов"
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Needs review"
+msgstr "Требует проверки"
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Postcode"
+msgstr "Почтовый индекс"
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Prepare the import preview first."
+msgstr "Сначала проверьте предварительный просмотр импорта."
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Price settings changed. Prepare a new import."
+msgstr "Настройки цен изменились. Подготовьте новый импорт."
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Ready to create"
+msgstr "Готов к созданию"
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Ready to create: %d. Other rows will be skipped."
+msgstr "Готовы к созданию: %d. Остальные строки будут пропущены."
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Recent imports"
+msgstr "Последние импорты"
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Select"
+msgstr "Выбрать"
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Select other Folio customers"
+msgstr "Выбрать других клиентов ФОЛИО"
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Select this page"
+msgstr "Выбрать эту страницу"
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Select up to 25 Folio customers."
+msgstr "Выберите до 25 клиентов ФОЛИО."
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Select up to 25 customers per import. Existing accounts are skipped. Contact details and price roles must be checked before creating accounts."
+msgstr "Выберите до 25 клиентов за один импорт. Существующие учётные записи пропускаются. Перед созданием проверьте контакты и ценовые роли."
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Shipping address"
+msgstr "Адрес доставки"
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Shipping city"
+msgstr "Город доставки"
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Shipping country"
+msgstr "Страна доставки"
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Shipping postcode"
+msgstr "Индекс доставки"
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "Show Folio customers"
+msgstr "Показать клиентов ФОЛИО"
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "The preview contains the last saved details. After editing any field, check the preview again."
+msgstr "Предварительный просмотр содержит последние сохранённые данные. После изменения любого поля проверьте импорт снова."
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "The request was interrupted. Reload this page to check progress before continuing."
+msgstr "Запрос прерван. Обновите страницу и проверьте состояние перед продолжением."
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "The synchronization lock is unavailable."
+msgstr "Блокировка синхронизации недоступна."
+
+#: inc/FolioCustomerImport.php inc/FolioCustomerImportUi.php
+msgid "This import has already started."
+msgstr "Этот импорт уже начат."

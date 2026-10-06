@@ -399,3 +399,17 @@ Keep the WordPress customer-account scope and pagination/reset behavior. Existin
 mailing calls omit the new optional argument and retain their original scope.
 Source: local `tests/customer-directory.php`; operator/help canon is
 `docs/MANAGER_CUSTOMER_GUIDE_UK.md#customers`. Deployment is WordPress-only.
+
+### Folio customer registration import (2026-10-06, local)
+
+PCOE `FolioCustomerImport` owns selected new-account creation, owner-scoped private
+seven-day jobs, a 30-minute preview, per-row durable outcomes and optional password
+emails. No existing profiles are overwritten. Shared ecosystem lock serializes
+preview/apply; interrupted creating/sending rows require review, never automatic
+retry. Roles must remain customer-only and match current configured price contracts.
+Source identity is refetched before creation. Java registration contacts require a
+configured server token; ordinary partner search remains unchanged. Do not infer
+price role from organization type, personal discount, or first/last names from the
+company name. Operator steps: `docs/MANAGER_CUSTOMER_GUIDE_UK.md#register-wholesale`;
+configuration/lifecycle: plugin README. Tests: `tests/folio-customer-import.php`
+with mocked Folio and blocked external mail/HTTP. Production deployment remains separate.
