@@ -356,3 +356,31 @@ msgstr ""
 
 msgid "New imported accounts use the email part before @ as the login. Unsupported characters are removed; an occupied or blocked login receives a number. Existing account logins stay unchanged. Customers can also sign in with their email."
 msgstr ""
+
+#: inc/ManagerHelp.php
+msgid "Import customers from Folio: before you start"
+msgstr ""
+
+#: inc/ManagerHelp.php
+msgid "Step 1. Select Folio customers"
+msgstr ""
+
+#: inc/ManagerHelp.php
+msgid "Steps 2–3. Contacts, addresses and price role"
+msgstr ""
+
+#: inc/ManagerHelp.php
+msgid "Step 4. Preview and skipped customers"
+msgstr ""
+
+#: inc/ManagerHelp.php
+msgid "Step 5. Create accounts and invite customers"
+msgstr ""
+
+#: inc/ManagerHelp.php
+msgid "Step 6. Check accounts and email results"
+msgstr ""
+
+#: inc/ManagerHelp.php
+msgid "Interrupted imports, invitations and report retention"
+msgstr ""

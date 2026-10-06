@@ -25,7 +25,7 @@ namespace {
     $canon=file_get_contents($root.'/docs/MANAGER_CUSTOMER_GUIDE_UK.md');
     foreach (['uk','ru_RU'] as $locale) {
         $html=render_help(); $sections=\PaintCore\PCOE\ManagerHelp::sections();
-        if(count($sections)!==23) throw new \RuntimeException('Section count');
+        if(count($sections)!==30) throw new \RuntimeException('Section count');
         foreach($sections as $id=>[$title,$paragraphs]) {
             if(substr_count($html,'id="'.$id.'"')!==1 || !str_contains($canon,'id="'.$id.'"')) throw new \RuntimeException('Anchor: '.$id);
             if(preg_match('/^[A-Za-z]/u',$title) && !preg_match('/\p{Cyrillic}/u',$title)) throw new \RuntimeException('Untranslated title: '.$title);
@@ -38,5 +38,9 @@ namespace {
     if($output!=='') throw new \RuntimeException('Customer link leaked');
     try { \PaintCore\PCOE\ManagerHelp::render(); throw new \LogicException('Gate missing'); }
     catch(\RuntimeException $e) { if($e->getMessage()!=='Forbidden') throw $e; }
-    echo "PASS: 23 anchors, UK/RU rendering, canonical parity, no forms or pairing codes, capability gate\n";
+    $importUi=file_get_contents(PCOE_DIR.'/inc/FolioCustomerImportUi.php');
+    foreach (['customer-import','customer-import-select','customer-import-fields','customer-import-preview','customer-import-apply','customer-import-results','customer-import-recovery'] as $anchor) {
+        if (!isset($sections[$anchor]) || !str_contains($importUi,"'".$anchor."'")) throw new \RuntimeException('Import context link: '.$anchor);
+    }
+    echo "PASS: 30 anchors, import context links, UK/RU rendering, canonical parity, no forms or pairing codes, capability gate\n";
 }

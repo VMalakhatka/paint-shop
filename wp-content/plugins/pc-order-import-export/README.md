@@ -656,14 +656,15 @@ Invitation checkbox defaults off. When selected, `retrieve_password` runs only
 for a newly created, verified profile, after a durable sending marker. Stored
 passwords/tokens are never exposed. Mail failure or uncertain send requires manual
 mail-log/profile review, without automatic repeat. Operator guide and published
-help: `docs/MANAGER_CUSTOMER_GUIDE_UK.md#register-wholesale` / `ManagerHelp`.
+help: `docs/MANAGER_CUSTOMER_GUIDE_UK.md#customer-import` / `ManagerHelp`.
 Verification: local `tests/folio-customer-import.php` mocks Folio, blocks external
 HTTP/mail and removes fixtures; Java registration tests never connect to Folio.
 
-Manager import instructions expanded 2026-10-06: `ManagerHelp` /
-`#register-wholesale` now covers six numbered steps, exact UI labels, optional
-invitations, row outcomes, interrupted runs and seven-day report retention.
-Canonical text: `docs/MANAGER_CUSTOMER_GUIDE_UK.md#register-wholesale`; UK/RU
+Manager import instructions reorganized 2026-10-06: `ManagerHelp` now has seven
+dedicated `#customer-import*` sections: overview, selection, fields/prices,
+preview, creation/invitations, results and recovery. Import controls link directly
+to the corresponding explanation; manual registration retains `#register-wholesale`.
+Canonical text: `docs/MANAGER_CUSTOMER_GUIDE_UK.md#customer-import`; UK/RU
 help catalogs remain synchronized. This documentation update requires WordPress
 deployment to appear in production help; it does not change the import API.
 

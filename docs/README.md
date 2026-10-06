@@ -41,6 +41,7 @@
 | Мастеру: вести расписание МК, статьи и заявки | [WORKSHOPS_GUIDE_RU.md](WORKSHOPS_GUIDE_RU.md) |
 | Пользоваться сайтом и кабинетом | [SITE_USER_GUIDE_UK.md](SITE_USER_GUIDE_UK.md) |
 | Менеджеру: весь раздел «Робота з клієнтами», черновики, документы, баланс, сообщения и Telegram | [MANAGER_CUSTOMER_GUIDE_UK.md](MANAGER_CUSTOMER_GUIDE_UK.md) |
+| Менеджеру: импорт клиентов из ФОЛІО в Woo, цены, приглашения и восстановление | [Пошаговый импорт](MANAGER_CUSTOMER_GUIDE_UK.md#customer-import) |
 | Менеджеру: облікові ціни ФОЛІО, один товар / весь склад, стан складів, від’ємний залишок та Excel | [Покрокова інструкція](FOLIO_ACCOUNTING_PRICES_MANAGER_UK.md) |
 | Развивать список ожидания и рекомендации клиентам | [план и этапы](CUSTOMER_RECOMMENDATIONS_PLAN.md) |
 | Оформить оптовый заказ, импортировать/экспортировать список, сохранить черновик, повторить старый заказ, увидеть разделение, баланс и документы | [WHOLESALE_CUSTOMER_GUIDE_UK.md](WHOLESALE_CUSTOMER_GUIDE_UK.md) |

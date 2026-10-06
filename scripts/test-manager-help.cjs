@@ -61,6 +61,10 @@ const ids=new Set([...help.matchAll(/id="([a-z-]+)"/g)].map(m=>m[1]));
   }
   await setup(help);
   assert.equal(await page.locator('.pcoe-help-link').count(),0,'No recursive help links');
+  for (const id of ['customer-import','customer-import-select','customer-import-fields','customer-import-preview','customer-import-apply','customer-import-results','customer-import-recovery']) {
+   assert.equal(await page.locator('#'+id).count(),1,'Import section '+id);
+   assert.equal(await page.locator('a[href="#'+id+'"]').count(),1,'Import contents link '+id);
+  }
   for(const width of [1100,390]) {
    await page.setViewportSize({width,height:900});
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Guide overflow');
@@ -68,6 +72,8 @@ const ids=new Set([...help.matchAll(/id="([a-z-]+)"/g)].map(m=>m[1]));
    await page.locator('#telegram-connect').screenshot({path:`/tmp/manager-telegram-${width}.png`});
    await page.locator('#register-wholesale').scrollIntoViewIfNeeded();
    await page.screenshot({path:`/tmp/manager-registration-${width}.png`,fullPage:false});
+   await page.locator('#customer-import-preview').scrollIntoViewIfNeeded();
+   await page.screenshot({path:`/tmp/manager-customer-import-${width}.png`,fullPage:false});
   }
   console.log('PASS: exact anchors, AJAX replacement, deduplication, preserved inputs, supporting screens, desktop/mobile layout');
  } finally { await browser.close(); }

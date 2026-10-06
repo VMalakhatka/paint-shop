@@ -357,3 +357,31 @@ msgstr "Подстановка данных и заметки импорта. Д
 
 msgid "New imported accounts use the email part before @ as the login. Unsupported characters are removed; an occupied or blocked login receives a number. Existing account logins stay unchanged. Customers can also sign in with their email."
 msgstr "Для новых импортированных аккаунтов логин формируется из части email до @. Недопустимые символы удаляются; к занятому или запрещённому логину добавляется число. Логины существующих аккаунтов остаются без изменений. Клиенты также могут входить по email."
+
+#: inc/ManagerHelp.php
+msgid "Import customers from Folio: before you start"
+msgstr "Импорт клиентов из ФОЛИО: перед началом"
+
+#: inc/ManagerHelp.php
+msgid "Step 1. Select Folio customers"
+msgstr "Шаг 1. Выберите клиентов ФОЛИО"
+
+#: inc/ManagerHelp.php
+msgid "Steps 2–3. Contacts, addresses and price role"
+msgstr "Шаги 2–3. Контакты, адреса и ценовая роль"
+
+#: inc/ManagerHelp.php
+msgid "Step 4. Preview and skipped customers"
+msgstr "Шаг 4. Проверка и пропущенные клиенты"
+
+#: inc/ManagerHelp.php
+msgid "Step 5. Create accounts and invite customers"
+msgstr "Шаг 5. Создайте учётные записи и пригласите клиентов"
+
+#: inc/ManagerHelp.php
+msgid "Step 6. Check accounts and email results"
+msgstr "Шаг 6. Проверьте учётные записи и письма"
+
+#: inc/ManagerHelp.php
+msgid "Interrupted imports, invitations and report retention"
+msgstr "Прерванный импорт, приглашения и хранение отчётов"

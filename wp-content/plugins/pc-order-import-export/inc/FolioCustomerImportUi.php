@@ -33,7 +33,7 @@ final class FolioCustomerImportUi {
             'busy'=>__('Creating customers… Keep this page open.','pc-order-import-export'),
             'error'=>__('The request was interrupted. Reload this page to check progress before continuing.','pc-order-import-export')]);
         echo '<section class="pcoe-card"><h2>'.esc_html__('Import customers from Folio','pc-order-import-export').'</h2>';
-        ManagerHelp::link('register-wholesale');
+        ManagerHelp::link('customer-import');
         echo '<p>'.esc_html__('Select up to 25 customers per import. Existing accounts are skipped. Contact details and price roles must be checked before creating accounts.','pc-order-import-export').'</p>';
         $error=get_transient('pcoe_import_error_'.get_current_user_id());
         if ($error) {delete_transient('pcoe_import_error_'.get_current_user_id());echo '<p role="alert">'.esc_html($error).'</p>';}
@@ -44,6 +44,7 @@ final class FolioCustomerImportUi {
         echo '</section>';
     }
     private static function search(): void {
+        ManagerHelp::link('customer-import-select');
         $q=sanitize_text_field(wp_unslash($_GET['folio_search']??''));$type=sanitize_text_field(wp_unslash($_GET['folio_type']??''));
         $types=array_intersect_key(ManagerWorkspace::folio_organization_types(),array_flip(['П','Д','К','H']));
         if (!isset($types[$type])) $type='';
@@ -72,6 +73,7 @@ final class FolioCustomerImportUi {
     }
     private static function job(int $id,array $data): void {
         $editable=in_array($data['phase'],['edit','preview'],true);
+        ManagerHelp::link($editable ? 'customer-import-fields' : 'customer-import-results');
         echo '<p><a href="'.esc_url(self::url()).'">'.esc_html__('Select other Folio customers','pc-order-import-export').'</a></p>';
         if($editable){
             echo '<p>'.esc_html__('Folio price contracts are not supplied by this customer directory. Choose the agreed site price role for each customer. Personal Folio discounts are shown for review and are not applied automatically.','pc-order-import-export').'</p>';
@@ -114,17 +116,23 @@ final class FolioCustomerImportUi {
             }
             echo '</fieldset>';
         }
-        if($editable)echo '<button class="button">'.esc_html__('Check import preview','pc-order-import-export').'</button></form>';
+        if($editable){
+            echo '<button class="button">'.esc_html__('Check import preview','pc-order-import-export').'</button>';
+            ManagerHelp::link('customer-import-preview');
+            echo '</form>';
+        }
         $ready=count(array_filter($data['rows'],static fn($r)=>$r['status']==='ready'));
         if($data['phase']==='preview' && $ready){
             echo '<p>'.esc_html(sprintf(__('Ready to create: %d. Other rows will be skipped.','pc-order-import-export'),$ready)).'</p>';
             echo '<p>'.esc_html__('The preview contains the last saved details. After editing any field, check the preview again.','pc-order-import-export').'</p>';
         }
         if(($data['phase']==='preview' && $ready)||$data['phase']==='running'){
+            ManagerHelp::link('customer-import-apply');
             echo '<form data-customer-import-run data-import-id="'.esc_attr($id).'">';
             if($data['phase']==='preview')echo '<label><input type="checkbox" name="confirm" value="1" required> '.esc_html__('I checked emails, Folio links, addresses and agreed price roles. Create the ready customers.','pc-order-import-export').'</label><label><input type="checkbox" name="send" value="1"> '.esc_html__('Email password-setting links to newly created customers','pc-order-import-export').'</label>';
             echo '<button class="button button-primary">'.esc_html($data['phase']==='preview'?__('Create selected customers','pc-order-import-export'):__('Continue import','pc-order-import-export')).'</button></form>';
         }
         echo '<p data-customer-import-status role="status" aria-live="polite"></p><p>'.esc_html__('Import reports are kept for seven days. Invitations can also be sent manually from the customer profile. Mail service acceptance does not confirm inbox delivery.','pc-order-import-export').'</p>';
+        ManagerHelp::link('customer-import-recovery');
     }
 }
