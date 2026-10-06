@@ -12,6 +12,7 @@ const PC_FOLIO_PARTNER_META_ID         = '_folio_partner_id';
 const PC_FOLIO_PARTNER_META_SHORT_NAME = '_folio_partner_short_name';
 const PC_FOLIO_PARTNER_META_NAME       = '_folio_partner_name';
 const PC_FOLIO_PARTNER_META_TYPE       = '_folio_partner_type';
+const PC_FOLIO_PARTNER_CLIENT_TYPES    = 'П,Д,К,H';
 
 function pc_folio_customer_map_can_manage(): bool {
     return current_user_can('edit_users') || current_user_can('manage_woocommerce');
@@ -34,6 +35,7 @@ function pc_folio_customer_map_get_value(int $user_id): array {
 }
 
 function pc_folio_customer_map_type_label(string $type): string {
+    if ($type === 'H') return __('Art salons', 'pc-folio-customer-map');
     $labels = [
         'Я' => 'Own organization',
         'П' => 'Partner',
@@ -125,7 +127,7 @@ function pc_folio_customer_map_admin_footer(): void {
 
         function selectedTypes() {
             var select = document.getElementById('pc-folio-partner-types');
-            return select ? select.value : 'П,Д,К';
+            return select ? select.value : <?php echo wp_json_encode(PC_FOLIO_PARTNER_CLIENT_TYPES); ?>;
         }
 
         function searchPartners(query) {
@@ -182,16 +184,17 @@ function pc_folio_customer_map_admin_footer(): void {
                     '<p id="pc-folio-partner-current" style="margin:0 0 8px"></p>' +
                     '<input type="search" id="pc-folio-partner-search" class="regular-text" autocomplete="off" placeholder="<?php echo esc_attr__('Search Folio client...', 'pc-folio-customer-map'); ?>">' +
                     ' <select id="pc-folio-partner-types">' +
-                        '<option value="П,Д,К"><?php echo esc_js(__('Clients (partners, dealers, customers)', 'pc-folio-customer-map')); ?></option>' +
+                        '<option value="<?php echo esc_attr(PC_FOLIO_PARTNER_CLIENT_TYPES); ?>"><?php echo esc_js(__('Clients (partners, dealers, customers, art salons)', 'pc-folio-customer-map')); ?></option>' +
                         '<option value="all"><?php echo esc_js(__('All', 'pc-folio-customer-map')); ?></option>' +
                         '<option value="П"><?php echo esc_js(__('Partners', 'pc-folio-customer-map')); ?></option>' +
                         '<option value="Д"><?php echo esc_js(__('Dealers', 'pc-folio-customer-map')); ?></option>' +
                         '<option value="К"><?php echo esc_js(__('Customers', 'pc-folio-customer-map')); ?></option>' +
+                        '<option value="H"><?php echo esc_js(__('Art salons', 'pc-folio-customer-map')); ?></option>' +
                     '</select>' +
                     ' <button type="button" class="button" id="pc-folio-partner-clear"><?php echo esc_js(__('Clear', 'pc-folio-customer-map')); ?></button>' +
                     <?php echo wp_json_encode($balance_button); ?> +
                     '<div id="pc-folio-partner-results" style="margin-top:8px"></div>' +
-                    '<p class="description"><?php echo esc_js(__('Searches Folio partners, dealers, and customers. The selected client will be used for Folio account preview.', 'pc-folio-customer-map')); ?></p>' +
+                    '<p class="description"><?php echo esc_js(__('Searches Folio partners, dealers, customers and art salons. The selected client will be used for Folio account preview.', 'pc-folio-customer-map')); ?></p>' +
                 '</td>';
 
             anchor.parentNode.insertBefore(row, anchor.nextSibling);
@@ -270,7 +273,7 @@ function pc_folio_customer_map_ajax_search(): void {
     }
 
     $q = isset($_POST['q']) ? sanitize_text_field(wp_unslash($_POST['q'])) : '';
-    $types = isset($_POST['types']) ? sanitize_text_field(wp_unslash($_POST['types'])) : 'П,Д,К';
+    $types = isset($_POST['types']) ? sanitize_text_field(wp_unslash($_POST['types'])) : PC_FOLIO_PARTNER_CLIENT_TYPES;
     $limit = isset($_POST['limit']) ? max(1, min(20, (int) $_POST['limit'])) : 20;
 
     $path = add_query_arg([
@@ -308,7 +311,8 @@ function pc_folio_customer_map_ajax_search(): void {
             'shortName' => (string) ($item['shortName'] ?? ''),
             'name'      => (string) ($item['name'] ?? ''),
             'type'      => $type,
-            'typeLabel' => (string) ($item['typeLabel'] ?? pc_folio_customer_map_type_label($type)),
+            'typeLabel' => $type === 'H' || empty($item['typeLabel'])
+                ? pc_folio_customer_map_type_label($type) : (string) $item['typeLabel'],
         ];
     }
 

@@ -379,3 +379,12 @@ email профиля владельца, после прежних nonce/capabil
   to receipts or the full product catalogue. Do not expose admin endpoints publicly.
 - Customer opt-out only affects marketing mailings, not order/approval emails.
   No production sending or live Folio acceptance was performed during local tests.
+
+### Folio profile partner search
+
+Confirmed in source 2026-10-06: art salons use Latin `H` in `_PARTNER.MY_ORGANIZ`
+(`FolioProfitGrossLines`), not Cyrillic `Н`. The profile MU-plugin
+`pc-folio-customer-map.php` defaults to `П,Д,К,H`; `types=all` removes the filter.
+Java partner search accepts supplied codes without an allow-list. Keep the visible
+default, JS fallback and AJAX fallback aligned. Operator steps and deployment:
+`docs/OPERATIONS_RUNBOOK.md`, «Типы организаций в поиске клиента».

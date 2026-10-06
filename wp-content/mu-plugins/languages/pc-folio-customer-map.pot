@@ -77,3 +77,15 @@ msgstr ""
 #: pc-folio-customer-map.php:288
 msgid "Invalid Folio partners response."
 msgstr ""
+
+#: pc-folio-customer-map.php
+msgid "Art salons"
+msgstr ""
+
+#: pc-folio-customer-map.php
+msgid "Clients (partners, dealers, customers, art salons)"
+msgstr ""
+
+#: pc-folio-customer-map.php
+msgid "Searches Folio partners, dealers, customers and art salons. The selected client will be used for Folio account preview."
+msgstr ""

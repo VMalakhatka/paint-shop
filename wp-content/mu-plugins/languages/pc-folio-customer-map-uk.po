@@ -85,3 +85,15 @@ msgstr "Помічник підключення до Java недоступний
 #: pc-folio-customer-map.php:288
 msgid "Invalid Folio partners response."
 msgstr "Некоректна відповідь клієнтів ФОЛІО."
+
+#: pc-folio-customer-map.php
+msgid "Art salons"
+msgstr "Художні салони"
+
+#: pc-folio-customer-map.php
+msgid "Clients (partners, dealers, customers, art salons)"
+msgstr "Клієнти (партнери, дилери, покупці, художні салони)"
+
+#: pc-folio-customer-map.php
+msgid "Searches Folio partners, dealers, customers and art salons. The selected client will be used for Folio account preview."
+msgstr "Шукає партнерів, дилерів, покупців і художні салони ФОЛІО. Обраного клієнта буде використано для попереднього перегляду рахунку ФОЛІО."
