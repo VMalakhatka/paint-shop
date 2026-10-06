@@ -62,21 +62,38 @@ class ManagerWorkspace
         } catch (\Throwable $e) { /* Customer has not been selected yet. */ }
     }
 
-    /** Directory reads local Woo profiles and cached Folio names; no Folio request. */
-    public static function directory(string $search, string $role, string $city, int $page, int $per_page=25): array {
+    public static function folio_organization_types(): array {
+        return [
+            'П' => __('Partners', 'pc-order-import-export'),
+            'Д' => __('Dealers', 'pc-order-import-export'),
+            'К' => __('Buyers', 'pc-order-import-export'),
+            'H' => __('Art salons', 'pc-order-import-export'),
+            'Я' => __('Own organization', 'pc-order-import-export'),
+            'Т' => __('Suppliers', 'pc-order-import-export'),
+            'I' => __('Foreign suppliers', 'pc-order-import-export'),
+        ];
+    }
+
+    /** Directory reads local Woo profiles and saved Folio mapping; no Folio request. */
+    public static function directory(string $search, string $role, string $city, int $page, int $per_page=25, string $folio_type=''): array {
         if (!current_user_can('manage_woocommerce')) throw new \RuntimeException('Forbidden');
         global $wpdb;
         $roles = self::customer_roles();
+        $folio_type = isset(self::folio_organization_types()[$folio_type]) ? $folio_type : '';
         $args = ['role__in' => in_array($role, $roles, true) ? [$role] : $roles,
             'number' => max(1,min(2001,$per_page)), 'paged' => max(1, $page), 'orderby' => ['display_name' => 'ASC', 'ID' => 'ASC']];
         $query = new \WP_User_Query();
-        $filter = static function ($candidate) use ($query, $search, $city, $wpdb): void {
+        $filter = static function ($candidate) use ($query, $search, $city, $folio_type, $wpdb): void {
             if ($candidate !== $query) return;
             if ($search !== '') {
                 $like = '%' . $wpdb->esc_like($search) . '%';
                 $candidate->query_where .= $wpdb->prepare(" AND ({$wpdb->users}.display_name LIKE %s OR {$wpdb->users}.user_email LIKE %s OR {$wpdb->users}.user_login LIKE %s OR EXISTS (SELECT 1 FROM {$wpdb->usermeta} directory_search WHERE directory_search.user_id = {$wpdb->users}.ID AND directory_search.meta_key IN ('billing_company','first_name','last_name','_folio_partner_name','_folio_partner_short_name') AND directory_search.meta_value LIKE %s))", $like, $like, $like, $like);
             }
             if ($city !== '') $candidate->query_where .= $wpdb->prepare(" AND EXISTS (SELECT 1 FROM {$wpdb->usermeta} directory_city WHERE directory_city.user_id = {$wpdb->users}.ID AND directory_city.meta_key = 'billing_city' AND TRIM(directory_city.meta_value) = %s)", $city);
+            if ($folio_type !== '') {
+                // Folio codes distinguish Latin H/I from visually similar Cyrillic letters.
+                $candidate->query_where .= $wpdb->prepare(" AND EXISTS (SELECT 1 FROM {$wpdb->usermeta} directory_folio_type WHERE directory_folio_type.user_id = {$wpdb->users}.ID AND directory_folio_type.meta_key = '_folio_partner_type' AND CAST(TRIM(directory_folio_type.meta_value) AS BINARY) = %s) AND EXISTS (SELECT 1 FROM {$wpdb->usermeta} directory_folio_link WHERE directory_folio_link.user_id = {$wpdb->users}.ID AND directory_folio_link.meta_key = '_folio_partner_short_name' AND TRIM(directory_folio_link.meta_value) <> '')", $folio_type);
+            }
         };
         add_action('pre_user_query', $filter);
         try { $query->prepare_query($args); $query->query(); }

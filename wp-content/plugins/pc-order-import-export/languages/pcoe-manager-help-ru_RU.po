@@ -307,3 +307,7 @@ msgstr "Выберите «Только сообщение», «Полный п�
 
 msgid "Email mailings: message, price list or document products"
 msgstr "Email-рассылки: сообщение, прайс или товары из документа"
+
+#: inc/ManagerHelp.php
+msgid "Folio organization type is a separate filter from the site price role. Choose Art salons to find linked salons with any customer price role; combine it with role and city if needed. The type comes from the saved Folio link and is shown beside the Folio customer name. This list contains site customers only: a Folio organization must have a linked WordPress account to appear. Reset filters clears all selections."
+msgstr "«Тип организации ФОЛИО» — отдельный фильтр, независимый от ценовой роли на сайте. Выберите «Художественные салоны», чтобы найти привязанные салоны с любой клиентской ценовой ролью; при необходимости сочетайте с ролью и городом. Тип берётся из сохранённой привязки ФОЛИО и показан рядом с учётным названием клиента. Список содержит только клиентов сайта: организация ФОЛИО появится, если у неё есть связанная учётная запись WordPress. «Сбросить фильтры» очищает все выбранные условия."

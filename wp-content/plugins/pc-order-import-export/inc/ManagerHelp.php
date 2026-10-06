@@ -55,6 +55,7 @@ final class ManagerHelp {
             ]],
             'customers' => [__('Find and check a customer', 'pcoe-manager-help'), [
                 __('Search by name, company or email, optionally select a role and city, then apply the filter. Clear filters if the customer is missing. City is taken from the billing address on the website.', 'pcoe-manager-help'),
+                __('Folio organization type is a separate filter from the site price role. Choose Art salons to find linked salons with any customer price role; combine it with role and city if needed. The type comes from the saved Folio link and is shown beside the Folio customer name. This list contains site customers only: a Folio organization must have a linked WordPress account to appear. Reset filters clears all selections.', 'pcoe-manager-help'),
                 __('Open the customer name. Check the email, price role and linked Folio customer (our accounting database). Without this link you can prepare drafts, but cannot prepare accounting documents; ask an administrator to check the user profile.', 'pcoe-manager-help'),
             ]],
             'team' => [__('Primary and additional managers', 'pcoe-manager-help'), [

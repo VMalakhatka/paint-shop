@@ -590,3 +590,19 @@ Full local catalogue preparation was also measured read-only with a disposable
 wholesale account: 8421 product rows, 789222-byte XLSX, 22.8 seconds, 370.7 MiB
 peak PHP memory (2026-10-05). Plan at least 512 MiB available to this PHP task;
 actual production size/limits may differ. Cache reads are batched at 250 products.
+
+## Customer directory: Folio organization type (2026-10-06)
+
+The Customers tab filters by saved `_folio_partner_type` independently of site
+price roles. Art salons use Latin `H`; the filter also requires a non-empty saved
+`_folio_partner_short_name`. The list remains limited to WordPress customer
+accounts. No live Folio request, role change, price update or mapping write occurs.
+`customer_folio_type` persists in pagination and clears with Reset filters.
+Unknown filter values fall back to all types. Existing directory callers,
+including mailing recipient selection, keep their previous behavior.
+
+Operator steps and published help: [manager guide](../../../docs/MANAGER_CUSTOMER_GUIDE_UK.md#customers),
+`ManagerHelp.php` customers section and UK/RU catalogs. Requires WordPress plugin
+deployment; no Java update or database migration. Rollback restores the plugin
+files and catalogs; customer data is unchanged. Local verification is covered by
+`tests/customer-directory.php` with disposable users and blocked mail/HTTP.

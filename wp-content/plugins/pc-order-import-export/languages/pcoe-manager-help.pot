@@ -306,3 +306,7 @@ msgstr ""
 
 msgid "Email mailings: message, price list or document products"
 msgstr ""
+
+#: inc/ManagerHelp.php
+msgid "Folio organization type is a separate filter from the site price role. Choose Art salons to find linked salons with any customer price role; combine it with role and city if needed. The type comes from the saved Folio link and is shown beside the Folio customer name. This list contains site customers only: a Folio organization must have a linked WordPress account to appear. Reset filters clears all selections."
+msgstr ""

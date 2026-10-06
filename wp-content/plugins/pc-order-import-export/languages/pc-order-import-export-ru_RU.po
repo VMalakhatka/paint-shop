@@ -3028,3 +3028,43 @@ msgstr "Неучитываемый"
 
 msgid "Could not load Folio documents. Try loading again."
 msgstr "Не удалось загрузить документы ФОЛИО. Попробуйте ещё раз."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Partners"
+msgstr "Партнёры"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Dealers"
+msgstr "Дилеры"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Buyers"
+msgstr "Покупатели"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Art salons"
+msgstr "Художественные салоны"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Own organization"
+msgstr "Собственная организация"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Suppliers"
+msgstr "Поставщики"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Foreign suppliers"
+msgstr "Иностранные поставщики"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Folio organization type"
+msgstr "Тип организации ФОЛИО"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "All organization types"
+msgstr "Все типы организаций"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Folio organization type comes from the saved customer link. This list includes site customers; a Folio organization needs a linked WordPress account to appear here."
+msgstr "Тип организации ФОЛИО берётся из сохранённой привязки клиента. Этот список содержит клиентов сайта; организация ФОЛИО появится здесь, если у неё есть связанная учётная запись WordPress."

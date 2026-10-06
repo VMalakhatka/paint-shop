@@ -3034,3 +3034,43 @@ msgstr "Неураховуваний"
 
 msgid "Could not load Folio documents. Try loading again."
 msgstr "Не вдалося завантажити документи ФОЛІО. Спробуйте ще раз."
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Partners"
+msgstr "Партнери"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Dealers"
+msgstr "Дилери"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Buyers"
+msgstr "Покупці"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Art salons"
+msgstr "Художні салони"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Own organization"
+msgstr "Власна організація"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Suppliers"
+msgstr "Постачальники"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Foreign suppliers"
+msgstr "Іноземні постачальники"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Folio organization type"
+msgstr "Тип організації ФОЛІО"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "All organization types"
+msgstr "Усі типи організацій"
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Folio organization type comes from the saved customer link. This list includes site customers; a Folio organization needs a linked WordPress account to appear here."
+msgstr "Тип організації ФОЛІО береться зі збереженої прив’язки клієнта. Цей список містить клієнтів сайту; організація ФОЛІО з’явиться тут, якщо має прив’язаний обліковий запис WordPress."

@@ -388,3 +388,14 @@ Confirmed in source 2026-10-06: art salons use Latin `H` in `_PARTNER.MY_ORGANIZ
 Java partner search accepts supplied codes without an allow-list. Keep the visible
 default, JS fallback and AJAX fallback aligned. Operator steps and deployment:
 `docs/OPERATIONS_RUNBOOK.md`, «Типы организаций в поиске клиента».
+
+### Customer directory organization filter (2026-10-06)
+
+Owner: PCOE `ManagerWorkspace::directory()` and `manager-view.php`.
+`customer_folio_type` reads saved `_folio_partner_type` and requires a non-empty
+Folio short name when a type is selected; Latin `H` means art salon. It intersects
+site price role, search and billing city without querying Folio or changing roles.
+Keep the WordPress customer-account scope and pagination/reset behavior. Existing
+mailing calls omit the new optional argument and retain their original scope.
+Source: local `tests/customer-directory.php`; operator/help canon is
+`docs/MANAGER_CUSTOMER_GUIDE_UK.md#customers`. Deployment is WordPress-only.

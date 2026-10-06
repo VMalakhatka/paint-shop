@@ -2832,3 +2832,43 @@ msgstr ""
 
 msgid "Could not load Folio documents. Try loading again."
 msgstr ""
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Partners"
+msgstr ""
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Dealers"
+msgstr ""
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Buyers"
+msgstr ""
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Art salons"
+msgstr ""
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Own organization"
+msgstr ""
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Suppliers"
+msgstr ""
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Foreign suppliers"
+msgstr ""
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Folio organization type"
+msgstr ""
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "All organization types"
+msgstr ""
+
+#: inc/ManagerWorkspace.php inc/manager-view.php
+msgid "Folio organization type comes from the saved customer link. This list includes site customers; a Folio organization needs a linked WordPress account to appear here."
+msgstr ""
