@@ -128,7 +128,7 @@ $GLOBALS['java_body'] = [
 ];
 lps_accounting_price_campaign_poll_range($state);
 check(!$state['active'] && $state['phase'] === 'manual_review', 'Unknown outcome must stop the campaign.');
-check(!empty($GLOBALS['options'][LPS_ACCOUNTING_PRICES_NATIVE_CRON_OPTION]['paused_reason']), 'Unknown outcome must hold automatic apply for review.');
+check(!empty(lps_accounting_price_campaign_pending_reviews($state)), 'Unknown outcome must retain warehouse-specific review.');
 check($GLOBALS['ticks'] === [], 'Unknown outcome must not schedule an automatic retry.');
 
 $state = campaign_fixture();
@@ -158,7 +158,7 @@ check($state['active'] && $state['status'] === 'waiting_retry', 'A proven retrya
 check($state['phase'] === 'waiting_lock_retry', 'A proven retryable lock must enter the delayed retry phase.');
 check($state['processed_skus'] === 2 && $state['committed_skus'] === 2, 'Verified partial progress must be retained before retry.');
 check($state['lock_retry_count'] === 1, 'The automatic lock retry must be counted.');
-check($state['retry_at'] >= time() + 599, 'The retry must be delayed by ten minutes.');
+check($state['retry_at'] >= time() + 119 && $state['retry_at'] <= time() + 120, 'The retry must be delayed by two minutes.');
 check(($state['reports'][0]['status'] ?? '') === 'LOCK_RETRY_SCHEDULED', 'The report must distinguish a scheduled retry from a fatal partial failure.');
 check(($GLOBALS['options'][LPS_ACCOUNTING_PRICES_NATIVE_CRON_OPTION]['enabled'] ?? true) === true, 'A retryable lock must not pause the weekly schedule.');
 

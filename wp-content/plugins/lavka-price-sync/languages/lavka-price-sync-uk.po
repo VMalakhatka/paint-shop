@@ -6417,3 +6417,24 @@ msgstr "Я перевірив дати й отримувачів надходж�
 #: inc/purchase-planning.php
 msgid "Internal transfer reserves are added back at the account warehouse, regardless of recipient. Customer reserves stay deducted. Do not add these accounts again as incoming stock."
 msgstr "Резерви внутрішніх переміщень додаються до запасу складу, де знаходиться рахунок, незалежно від отримувача. Клієнтські резерви залишаються віднятими. Не додавайте ці рахунки повторно як надходження."
+
+#: inc/accounting-price-campaign.php inc/accounting-prices.php
+#, php-format
+msgid "Warehouse %d requires review of a previous write. Other warehouses continue on schedule."
+msgstr "Склад %d потребує перевірки попереднього запису. Інші склади працюють за розкладом."
+
+#: inc/accounting-price-campaign.php inc/accounting-prices.php
+msgid "All selected warehouses require review of previous writes. The next scheduled run is retained."
+msgstr "Усі обрані склади потребують перевірки попередніх записів. Наступний запуск за розкладом збережено."
+
+#: inc/accounting-price-campaign.php inc/accounting-prices.php
+msgid "The snapshot failed. A fresh snapshot will be retried in two minutes; the schedule remains enabled."
+msgstr "Помилка знімка. Через дві хвилини буде повторна спроба створити свіжий знімок; розклад залишається увімкненим."
+
+#: inc/accounting-price-campaign.php inc/accounting-prices.php
+msgid "The Folio lock is busy. The current SKU transaction was rolled back and earlier commits were verified. A fresh snapshot will be started automatically in 2 minutes."
+msgstr "Блокування ФОЛІО зайняте. Транзакцію поточного SKU відкочено, а попередні записи перевірено. Свіжий знімок буде автоматично запущено через 2 хвилини."
+
+#: inc/accounting-price-campaign.php inc/accounting-prices.php
+msgid "Waiting before snapshot retry"
+msgstr "Очікування повторного знімка"

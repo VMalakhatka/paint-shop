@@ -980,6 +980,7 @@
     if (state.message || state.error) {
       const message = node('div', `lps-ap-result-notice is-${state.error ? 'error' : 'info'}`);
       message.append(node('p', '', state.error || state.message));
+      if (state.snapshotRetryError) message.append(node('p', '', state.snapshotRetryError));
       elements.dashboard.append(message);
     }
 
