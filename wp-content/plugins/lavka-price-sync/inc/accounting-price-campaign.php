@@ -569,8 +569,8 @@ function lps_accounting_price_campaign_select_skus(
     global $wpdb;
     $tables = lps_accounting_price_campaign_snapshot_tables();
     $states = $include_unverified
-        ? "'UNVERIFIED','NEW','DIRTY'"
-        : "'NEW','DIRTY'";
+        ? "'UNVERIFIED','NEW','DIRTY','FAILED'"
+        : "'NEW','DIRTY','FAILED'";
     $limit = max(1, min(500, $limit));
 
     $sql = "SELECT sku

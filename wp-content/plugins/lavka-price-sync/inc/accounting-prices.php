@@ -748,7 +748,7 @@ function lps_render_accounting_prices_page(): void {
         <section class="lps-ap-panel lps-ap-campaign-panel" data-lps-ap-panel="campaign" hidden>
             <h2><?php echo esc_html__('Accounting-price SKU campaign', 'lavka-price-sync'); ?></h2>
             <p class="description lps-ap-native-description">
-                <?php echo esc_html__('The campaign builds a fresh snapshot, selects only UNVERIFIED, NEW and DIRTY products, recalculates them in sequential native-range batches, and finishes with a mandatory verification snapshot. FAILED and VERIFIED products are never selected automatically.', 'lavka-price-sync'); ?>
+                <?php echo esc_html__('The campaign builds a fresh snapshot and recalculates NEW, DIRTY and FAILED products in sequential batches, including UNVERIFIED products when needed. FAILED products are checked again because their data may have been corrected. VERIFIED and REMOVED products are not selected.', 'lavka-price-sync'); ?>
             </p>
             <div class="lps-ap-campaign-actions">
                 <label>
@@ -820,7 +820,7 @@ function lps_render_accounting_prices_page(): void {
                     </fieldset>
 
                     <h4 class="lps-ap-schedule-parameters-heading"><?php echo esc_html__('Automatic SKU campaign', 'lavka-price-sync'); ?></h4>
-                    <p><?php echo esc_html__('The schedule is disabled by default. Warehouses run sequentially. The first campaign also includes UNVERIFIED products; regular runs select only NEW and DIRTY states.', 'lavka-price-sync'); ?></p>
+                    <p><?php echo esc_html__('The schedule is disabled by default. Warehouses run sequentially. Regular runs select NEW, DIRTY and FAILED products; UNVERIFIED products are included when needed.', 'lavka-price-sync'); ?></p>
 
                     <section class="lps-ap-saved-schedule" aria-labelledby="lps-ap-saved-schedule-heading">
                         <h4 id="lps-ap-saved-schedule-heading"><?php echo esc_html__('Saved schedule', 'lavka-price-sync'); ?></h4>

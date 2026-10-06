@@ -110,7 +110,7 @@ Java не заявляет автоматическую сверку парти�
 - При `FAILED` показывай `failedChunk`: `inputArt`, `outputArt`, `nextArt`, `returnCode`, `currentUnits`, `totalUnits`, `problemDate`, `validationError`.
 - Не предлагай auto-retry. При `committedChunks=0` сообщи, что изменения откатились.
 - Склады обрабатываются последовательно. Следующий стартует только после `running=false` предыдущего.
-- Cron после baseline выбирает server-side только `NEW/DIRTY`; `FAILED` — после ручного исправления, `VERIFIED` — не повторять.
+- Cron после baseline выбирает server-side `NEW/DIRTY/FAILED`: ошибка могла быть исправлена менеджером без смены FAILED в снимке. `VERIFIED` и `REMOVED` не повторять; изоляцию неизвестного результата записи не обходить.
 
 Ошибки отдельных SKU должны сохраняться подробно и не блокировать безопасные товары, если Java вернула supported warning/skipped contract. Системный неизвестный итог и ошибку rejected chunk не маскируй как предупреждение.
 
@@ -119,7 +119,7 @@ Java не заявляет автоматическую сверку парти�
 Владелец WordPress-оркестрации: `lavka-price-sync/inc/accounting-price-campaign.php`; UI находится на странице «Облікові ціни ФОЛІО» во вкладке «Кампанія SKU та розклад». Кампания выполняет для каждого выбранного склада строгую последовательность:
 
 1. `POST /snapshot/refresh` и polling `/snapshot/status` до нового `ACTIVE`.
-2. Server-side выбор SKU из `folio_product_snapshot_item`: baseline — `UNVERIFIED`, `NEW`, `DIRTY`; регулярный запуск — только `NEW`, `DIRTY`.
+2. Server-side выбор SKU из `folio_product_snapshot_item`: baseline — `UNVERIFIED`, `NEW`, `DIRTY`, `FAILED`; регулярный запуск — `NEW`, `DIRTY`, `FAILED`. Подтверждено кодом отбора и offline test 2026-10-06.
 3. Последовательные apply-пакеты `POST /recalculate/native-range` с `skus[]`, не более 500 SKU, с polling status до terminal state.
 4. Обязательный новый snapshot после последнего пакета или безопасной остановки.
 5. Только затем переход к следующему складу.

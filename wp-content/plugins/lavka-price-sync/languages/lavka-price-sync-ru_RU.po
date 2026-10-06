@@ -6454,3 +6454,11 @@ msgstr "Блокировка ФОЛИО занята. Транзакция те�
 #: inc/accounting-price-campaign.php inc/accounting-prices.php
 msgid "Waiting before snapshot retry"
 msgstr "Ожидание повторного снимка"
+
+#: inc/accounting-prices.php
+msgid "The campaign builds a fresh snapshot and recalculates NEW, DIRTY and FAILED products in sequential batches, including UNVERIFIED products when needed. FAILED products are checked again because their data may have been corrected. VERIFIED and REMOVED products are not selected."
+msgstr "Кампания создаёт свежий снимок и последовательно пересчитывает товары NEW, DIRTY и FAILED, при необходимости включая UNVERIFIED. Товары FAILED проверяются снова, поскольку их данные могли быть исправлены. VERIFIED и REMOVED не отбираются."
+
+#: inc/accounting-prices.php
+msgid "The schedule is disabled by default. Warehouses run sequentially. Regular runs select NEW, DIRTY and FAILED products; UNVERIFIED products are included when needed."
+msgstr "Расписание по умолчанию выключено. Склады обрабатываются последовательно. Регулярные запуски выбирают NEW, DIRTY и FAILED; при необходимости включаются UNVERIFIED."
