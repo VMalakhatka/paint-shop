@@ -23,6 +23,12 @@ const guide=execFileSync('php',[path.join(__dirname,'accounting-price-help.php')
     assert((await page.locator('#dynamic h3 + a').getAttribute('href')).endsWith('#excel'));
    }
    assert.equal(await page.locator('#lps-ap-sku').inputValue(),'EXAMPLE');
+   await page.locator('#dynamic').evaluate(n=>{n.innerHTML='<details class="lps-ap-state-section lps-ap-collapsible-report"><summary>Пропущені товари та діагностика (2)</summary><p>Rows</p></details><details class="lps-ap-snapshot-report lps-ap-collapsible-report"><summary>Звіт станів знімка</summary><p>Products</p></details>';});
+   await page.waitForFunction(()=>document.querySelectorAll('#dynamic summary .lps-ap-help-link').length===2);
+   assert.equal(await page.locator('#dynamic details[open]').count(),0,'Help does not open collapsed tables');
+   assert((await page.locator('#dynamic summary a').first().getAttribute('href')).endsWith('#negative'));
+   assert((await page.locator('#dynamic summary a').last().getAttribute('href')).endsWith('#excel'));
+   assert(await page.locator('#dynamic summary a').first().isVisible(),'Help is visible while table is collapsed');
    await page.screenshot({path:`/tmp/accounting-help-context-${width}.png`,fullPage:true});
    await page.setContent(`<meta charset="utf-8"><style>body{background:#f0f0f1;font-family:sans-serif}${css}</style>${guide}`);
    assert.equal(await page.locator('section').count(),10);

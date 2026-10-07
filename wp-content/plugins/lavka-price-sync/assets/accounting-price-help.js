@@ -10,6 +10,9 @@
     ['[data-lps-ap-tab="campaign"], [data-lps-ap-panel="campaign"]>h2, #lps-ap-campaign-start, #lps-ap-campaign-stop, #lps-ap-cron-heading, .lps-ap-cron-form button[type="submit"]', 'campaign'],
     ['#lps-ap-warehouse-overview-heading, #lps-ap-warehouse-overview-refresh', 'overview'],
     ['.lps-ap-state-section>h3, .lps-ap-count-link', 'states'],
+    ['.lps-ap-snapshot-report>summary', 'excel'],
+    ['.lps-ap-collapsible-report:not(.lps-ap-snapshot-report)>summary', 'campaign'],
+    ['.lps-ap-collapsible-report:not(.lps-ap-snapshot-report):not(:has(>.lps-ap-collapsible-report-content))>summary', 'negative'],
     ['.lps-ap-negative-explanation, .lps-ap-warehouse-diagnostics>h3, .lps-ap-warehouse-overview-actions, .lps-ap-row-actions', 'negative'],
     ['.lps-ap-persistent-diagnostics>h3, .lps-ap-diagnostic-filters button[type="submit"], a[href*="accounting_price_diagnostic_export"], a[href*="accounting_price_snapshot_report_export"], a[href*="accounting_price_campaign_export"]', 'excel'],
     ['.lps-ap-diagnostic-table th:last-child', 'columns'],
@@ -28,7 +31,7 @@
         if (element.matches('[data-lps-ap-tab]')) {
           const group = document.createElement('span'); group.className = 'lps-ap-help-tab';
           element.before(group); group.append(element, link);
-        } else if (element.matches('th, .lps-ap-row-actions, .lps-ap-warehouse-overview-actions, .lps-ap-result-notice')) {
+        } else if (element.matches('summary, th, .lps-ap-row-actions, .lps-ap-warehouse-overview-actions, .lps-ap-result-notice')) {
           element.append(link);
         } else element.after(link);
         anchors.set(element, link);

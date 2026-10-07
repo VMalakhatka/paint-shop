@@ -45,7 +45,7 @@ msgstr ""
 msgid "SKU campaign, stop and schedule"
 msgstr ""
 
-msgid "SKU campaign and schedule is a different workflow from Entire warehouse. It builds a fresh snapshot, selects UNVERIFIED, NEW and DIRTY, processes sequential batches and ends with a verification snapshot. FAILED and VERIFIED are not automatically selected. Confirm the maintenance window before starting. Stop safely finishes the current operation and builds the final snapshot; closing the browser does not cancel server work."
+msgid "SKU campaign and schedule is a different workflow from Entire warehouse. It builds a fresh snapshot, selects UNVERIFIED, NEW and DIRTY, processes sequential batches and ends with a verification snapshot. FAILED is also selected for a fresh check because its data may have been corrected; VERIFIED and REMOVED are not selected. Confirm the maintenance window before starting. Stop safely finishes the current operation and builds the final snapshot; closing the browser does not cancel server work."
 msgstr ""
 
 msgid "The schedule can perform real recalculation without an open browser. Check selected warehouses, their order, days, time and limits before saving. Do not enable it just to view the overview. A request timeout is not proof of rollback; preserve the job ID and do not start a duplicate campaign."
@@ -78,7 +78,7 @@ msgstr ""
 msgid "On screen inspect SKU, warehouse, document type/number/date, movement record, initial quantity, before/operation/after quantities and shortage. Current physical and accounting quantities are separate values captured with the diagnostic, not necessarily live stock now. A blank or dash means unavailable, not zero. Details may be missing in older records."
 msgstr ""
 
-msgid "The displayed document identifies where the problem first became visible, not necessarily the document that must be corrected. Check earlier receipts, dates, warehouse, quantities and movement order with the Folio operator. Do not add a fictitious receipt or edit a document solely to make the warning disappear. After an authorised correction, preview that SKU again before apply; FAILED products are not automatically retried by the campaign."
+msgid "The displayed document identifies where the problem first became visible, not necessarily the document that must be corrected. Check earlier receipts, dates, warehouse, quantities and movement order with the Folio operator. Do not add a fictitious receipt or edit a document solely to make the warning disappear. After an authorised correction, preview that SKU again before apply; the campaign also checks FAILED products again, but this does not mean that the underlying error has been corrected."
 msgstr ""
 
 msgid "Download Excel: choose the right report"
@@ -112,4 +112,13 @@ msgid "No journal records may mean a filter mismatch, old diagnostics not saved 
 msgstr ""
 
 msgid "For an unknown result or lost connection, preserve warehouse, SKU, job ID, time and message, refresh status and contact the responsible operator. Do not repeat apply or unlock a job blindly. A fresh snapshot alone does not prove whether the previous operation committed. Spreadsheet download does not recalculate or repair anything."
+msgstr ""
+
+msgid "Where the tables are now. In SKU campaign and schedule, the current campaign result comes first, then Processing state for all Folio warehouses, then Campaign parameters and schedule. Details selected in the warehouse table appear BELOW that table, before the schedule. A new selection replaces those details. Scroll down if clicking a count or diagnostics button seems to do nothing."
+msgstr ""
+
+msgid "To see the negative-stock rows: open the all-warehouse negative-stock view or a warehouse negative-stock button, scroll below the warehouse table to Latest warehouse diagnostics, then click the collapsed Skipped products and diagnostics (N) heading. The table is hidden until expanded. N counts entries in the displayed response, not necessarily unique products or all records. Use Previous/Next for other pages; expand Technical details only when needed. Collapsing this table does not remove diagnostics."
+msgstr ""
+
+msgid "If the state table or Excel button is hidden, expand the snapshot-state report below the warehouse overview, select the required state and wait for its table. Export selected state XLSX belongs to that state report. For negative-stock evidence use the separate permanent diagnostic log: select the warehouse, apply the required filters there, then export diagnostic XLSX. Do not look for this button inside the collapsed campaign warning table. To export only negative cases, open the downloaded workbook, enable the Reason column filter and select NEGATIVE_CHRONOLOGICAL_STOCK. Keep the original workbook unchanged for the operator."
 msgstr ""
