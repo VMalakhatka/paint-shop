@@ -1026,3 +1026,7 @@ msgstr ""
 #: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
 msgid "Your manager may email a message, a full price list or a mini price list for a new arrival. The Excel file uses your price conditions on the site. Prices and stock are captured when the mailing is prepared; check current availability before ordering. Reply to the email to contact the sending manager. In My Account → Account details → News and price lists you can decline these mailings and save changes. Order and confirmation emails remain enabled."
 msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Catalogue titles occupy three lines; longer names end with an ellipsis. SKUs remain visible on phones, with three products per row. Short names are used only in the final category and its direct parent when all visible children are final categories; search and broader sections use complete names. Open a product to read its full name. Warehouse names are uppercase: the warehouse selected or used first is bold green, and other stock is lighter. Labels and the total are omitted; both warehouses and their quantities share one line."
+msgstr ""

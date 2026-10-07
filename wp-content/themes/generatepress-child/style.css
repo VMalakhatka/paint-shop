@@ -185,19 +185,6 @@ Version: 1.0
   hyphens: auto;
 }
 
-.woocommerce ul.products li.product .woocommerce-loop-product__title.compact-title{
-  --lines:2;
-  display:-webkit-box;
-  -webkit-box-orient:vertical;
-  -webkit-line-clamp:var(--lines);
-  line-clamp:var(--lines); /* стандарт */
-  overflow:hidden;
-  line-height:1.2;
-  min-height:calc(1.2em * var(--lines));
-  margin:0.4rem 0 0.6rem !important;
-  font-size: clamp(0.85rem, 2.5vw, 1rem);
-}
-
 /* ── Страница товара: меньший H1 на мобильных ───────────────────────────── */
 @media (max-width:480px){
   .single-product .product_title{ font-size:18px; line-height:1.3; }

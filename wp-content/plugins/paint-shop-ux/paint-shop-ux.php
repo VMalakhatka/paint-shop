@@ -17,6 +17,7 @@ require_once __DIR__ . '/inc/category-menu-migration.php';
 require_once __DIR__ . '/inc/slw-assets.php';
 require_once __DIR__ . '/inc/social-assets.php';
 require_once __DIR__ . '/inc/cart-layout.php';
+require_once __DIR__ . '/inc/catalog-cards.php';
 
 /** =======================
  *  i18n
@@ -59,7 +60,7 @@ function psu_loop_title() {
 
     $raw = get_the_title();
     $product = wc_get_product(get_the_ID());
-    $display = psu_get_compact_title($raw, $product ? $product->get_id() : 0);
+    $display = psu_get_catalog_title($raw, $product ? $product->get_id() : 0);
 
     echo '<h2 class="woocommerce-loop-product__title compact-title" title="' . esc_attr($raw) . '">' . esc_html($display) . '</h2>';
 }
@@ -71,8 +72,6 @@ function psu_loop_sku() {
     if (!($product instanceof WC_Product)) return;
 
     $sku = (string) $product->get_sku();
-    if ($sku === '') return;
-
     echo '<div class="psu-loop-sku">' . esc_html($sku) . '</div>';
 }
 
@@ -263,7 +262,7 @@ function psu_loop_product_thumbnail() {
         return;
     }
 
-    $title = psu_get_compact_title(get_the_title(), $product ? $product->get_id() : 0);
+    $title = psu_get_catalog_title(get_the_title(), $product ? $product->get_id() : 0);
     echo '<div class="psu-prod-faux-thumb" role="img"><span class="psu-prod-faux-title">' . esc_html($title) . '</span></div>';
 }
 
@@ -349,29 +348,6 @@ $css = <<<CSS
   -webkit-box-orient:vertical;
   -webkit-line-clamp:3;
   overflow:hidden;
-}
-
-/* Compact title */
-.woocommerce-loop-product__title.compact-title{
-  --lines:3;
-  display:-webkit-box;
-  -webkit-line-clamp:var(--lines);
-  -webkit-box-orient:vertical;
-  overflow:hidden;
-  min-height:calc(1.3em * var(--lines));
-}
-
-.psu-loop-sku{
-  display:none;
-  margin:-.15rem 0 .25rem;
-  font-size:11px;
-  line-height:1.15;
-  color:#333;
-  white-space:nowrap;
-}
-
-@media (min-width:769px){
-  .psu-loop-sku{display:block}
 }
 
 /* Single product desktop search */

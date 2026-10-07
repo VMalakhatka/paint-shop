@@ -402,6 +402,34 @@ if (!function_exists('slu_render_allocation_line')) {
 
 /** =================== STOCK PANEL (UI) =================== */
 
+/** Catalogue-only presentation: one unbroken name/quantity per warehouse. */
+function slu_render_catalog_stock(WC_Product $product, array $view, array $opts): string {
+    $all = slu_collect_location_stocks_for_product($product);
+    $selected_only = function_exists('pc_alloc_allows_multiple_locations') && !pc_alloc_allows_multiple_locations();
+    $selected = $selected_only
+        ? (int) ($opts['retail_location_id'] ?? pc_get_alloc_pref()['term_id'])
+        : ($view['mode'] === 'single' ? (int) $view['preferred'] : (int) array_key_first($view['ordered']));
+    if ($selected && !isset($all[$selected])) {
+        $term = get_term($selected, 'location');
+        if ($term && !is_wp_error($term)) $all[$selected] = ['name' => $term->name, 'qty' => 0];
+    }
+    $total = array_sum(array_map(static function ($row) { return max(0, (int) $row['qty']); }, $all));
+    if ($opts['hide_when_zero'] && $total === 0) return '';
+    $ordered = $selected && isset($all[$selected]) ? [$selected => $all[$selected]] : [];
+    $ordered += slu_order_location_stocks_by_global_priority($all);
+    $labels = slu_labels();
+    $html = '<div class="slu-stock-box slu-stock-mini slu-stock-catalog">';
+    foreach ($ordered as $tid => $row) {
+        $preferred = (int) $tid === $selected;
+        if (($preferred && !$opts['show_primary']) || (!$preferred && !$opts['show_others'])) continue;
+        $quantity = max(0, (int) $row['qty']);
+        $line = esc_html($row['name']) . '–' . $quantity;
+        $html .= '<span class="slu-stock-location' . ($preferred ? ' is-preferred' : '') . '"'
+            . ' aria-label="' . esc_attr(($preferred ? $labels['from'] : $labels['others']) . ': ' . $row['name'] . ' — ' . $quantity) . '">' . $line . '</span>';
+    }
+    return $html . '</div>';
+}
+
 if (!function_exists('slu_render_stock_panel')) {
     function slu_render_stock_panel( WC_Product $product, array $opts = [] ): string {
         $o = array_merge([
@@ -416,6 +444,10 @@ if (!function_exists('slu_render_stock_panel')) {
 
         $v = pc_build_stock_view($product);
         $L = slu_labels();
+
+        if (strpos($o['wrap_class'], 'slu-stock-mini') !== false) {
+            return apply_filters('slu_stock_panel_html', slu_render_catalog_stock($product, $v, $o), $product, $v, $o);
+        }
 
         if (function_exists('pc_alloc_allows_multiple_locations') && !pc_alloc_allows_multiple_locations()) {
             $selected = (int) ($opts['retail_location_id'] ?? pc_get_alloc_pref()['term_id']);
@@ -523,7 +555,7 @@ add_action('woocommerce_after_shop_loop_item_title', function(){
     echo slu_render_stock_panel($product, [
         'show_primary'     => true,
         'show_others'      => true,
-        'show_total'       => true,
+        'show_total'       => false,
         'show_incart'      => false,
         'show_incart_plan' => false,
         'hide_when_zero'   => true,
@@ -592,11 +624,19 @@ add_action('wp_head', function(){
     .slu-nb{display:inline-flex;align-items:baseline;gap:.25em;white-space:nowrap}
     .slu-nb strong{display:inline;}
     .slu-nb .slu-stock-total{display:inline !important;}
+    .products .slu-stock-mini.slu-stock-catalog{display:flex;flex-wrap:nowrap;gap:6px;min-height:1.25em;margin:2px 0 0;font-size:11px;align-items:baseline}
+    .products .slu-stock-catalog .slu-stock-location{display:inline-block;white-space:nowrap;text-transform:uppercase;color:#738378;font-weight:400}
+    .products .slu-stock-catalog .slu-stock-location.is-preferred{color:#167332;font-weight:700}
+    @supports (container-type:inline-size){
+      .products li.product:not(.product-category){container-type:inline-size}
+      .products .slu-stock-mini.slu-stock-catalog{font-size:clamp(8px,8.5cqi,12px)}
+    }
     </style>';
 });
 
 /** =================== MINI PANEL COMPACTOR =================== */
 add_filter('slu_stock_panel_html', function($html, $product, $view, $opts){
+    if ($html === '' || strpos($html, 'slu-stock-catalog') !== false) return $html;
     if (!isset($opts['wrap_class']) || strpos($opts['wrap_class'],'slu-stock-mini') === false) return $html;
 
     $L = function_exists('slu_labels') ? slu_labels() : ['others'=>__('Other loc.', 'stock-locations-ui')];

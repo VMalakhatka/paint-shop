@@ -1,0 +1,75 @@
+/* One owner for catalogue cards, including the fixed three-line title. */
+.woocommerce ul.products li.product:not(.product-category) {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+.woocommerce ul.products li.product:not(.product-category) > .woocommerce-loop-product__link {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+.woocommerce ul.products li.product:not(.product-category) a img,
+.woocommerce ul.products li.product .psu-prod-faux-thumb {
+    width: 100%;
+    aspect-ratio: 1;
+    height: auto;
+    object-fit: contain;
+    box-sizing: border-box;
+    margin: 0 0 6px;
+}
+.woocommerce ul.products li.product .woocommerce-loop-product__title.compact-title {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+    font-size: 16px;
+    line-height: 1.25;
+    height: 3.75em;
+    min-height: 3.75em;
+    max-height: 3.75em;
+    padding: 0;
+    margin: 6px 0 !important;
+}
+.woocommerce ul.products li.product .psu-loop-sku {
+    display: block;
+    height: 2.3em;
+    margin: 0 0 3px;
+    font-size: 11px;
+    line-height: 1.15;
+    color: #444;
+    overflow-wrap: anywhere;
+}
+.woocommerce ul.products li.product .price {
+    min-height: 1.5em;
+    margin-bottom: 4px;
+}
+.woocommerce ul.products li.product .loop-buy-row {
+    margin-top: 8px;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+.woocommerce ul.products li.product .loop-buy-row .loop-qty-wrap { gap: 2px; margin: 0; }
+.woocommerce ul.products li.product .loop-buy-row .loop-qty { width: 40px; }
+.woocommerce ul.products li.product .loop-buy-row .button { margin: 0; padding: 0 6px !important; }
+.psu-catalog .site-main .inside-article {
+    padding: 13.333px;
+}
+.psu-catalog.woocommerce ul.products {
+    gap: 16px 7px;
+}
+@media (max-width: 768px) {
+    .psu-catalog .site-main .inside-article { padding: 10px; }
+    .psu-catalog.woocommerce ul.products { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .woocommerce ul.products li.product .woocommerce-loop-product__title.compact-title { font-size: 13px; }
+    .woocommerce ul.products li.product .psu-loop-sku { font-size: 10px; }
+    /* Three columns reduce the old two-column image by about 30%. */
+    .woocommerce ul.products li.product:not(.product-category) a img,
+    .woocommerce ul.products li.product .psu-prod-faux-thumb { width: 92%; margin: 0 auto 4px; }
+    .woocommerce ul.products li.product .loop-buy-row { gap: 3px; }
+    .woocommerce ul.products li.product .loop-buy-row .loop-qty-wrap { gap: 1px; }
+    .woocommerce ul.products li.product .loop-buy-row .button { padding: 0 5px !important; }
+}
