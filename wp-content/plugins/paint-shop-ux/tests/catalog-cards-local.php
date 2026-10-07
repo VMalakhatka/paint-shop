@@ -10,7 +10,7 @@ $check = static function ($ok, $label) use (&$checks) {
 $query = $GLOBALS['wp_query']; $user = get_current_user_id(); $cookie = $_COOKIE['pc_alloc_pref'] ?? null;
 $session = WC()->session; $stock_cache = $GLOBALS['slu_location_stock_request_cache'] ?? [];
 try {
-    $contexts = ['polimernij-modelin-cernit-number-one-56gr' => true, '56gr' => true, 'cernit-2' => false, 'skul-ptura-3' => false];
+    $contexts = ['polimernij-modelin-cernit-number-one-56gr' => true, '56gr' => false, 'cernit-2' => false, 'skul-ptura-3' => false];
     foreach ($contexts as $slug => $expected) {
         $term = get_term_by('slug', $slug, 'product_cat');
         $check($term instanceof WP_Term, 'Existing category: ' . $slug);
@@ -18,6 +18,7 @@ try {
         $GLOBALS['wp_query'] = $q;
         $check(psu_catalog_uses_compact_titles() === $expected, 'Title context: ' . $slug);
         $check(psu_get_catalog_title('CERNIT 56 г | White | Extra') === ($expected ? 'White' : 'CERNIT 56 г White Extra'), 'Visible title: ' . $slug);
+        $check(psu_get_catalog_title('Acrylic varnish 50 ml') === 'Acrylic varnish 50 ml', 'Name without separators: ' . $slug);
         $q->is_search = true;
         $check(!psu_catalog_uses_compact_titles(), 'Search uses complete title: ' . $slug);
     }

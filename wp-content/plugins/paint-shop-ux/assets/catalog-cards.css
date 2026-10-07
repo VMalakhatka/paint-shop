@@ -62,8 +62,8 @@
     gap: 16px 7px;
 }
 @media (max-width: 768px) {
-    .psu-catalog .site-main .inside-article { padding: 10px; }
-    .psu-catalog.woocommerce ul.products { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .psu-catalog .site-main .inside-article { padding: 5px; }
+    .psu-catalog.woocommerce ul.products { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 3.5px; }
     .woocommerce ul.products li.product .woocommerce-loop-product__title.compact-title { font-size: 13px; }
     .woocommerce ul.products li.product .psu-loop-sku { font-size: 10px; }
     /* Three columns reduce the old two-column image by about 30%. */

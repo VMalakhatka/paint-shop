@@ -15,12 +15,9 @@ function psu_catalog_uses_compact_titles(): bool {
     $visible = static function ($child) use ($index): bool {
         return isset($index['visible'][$child]) && !isset($index['blocked'][$child]);
     };
-    // A leaf and a parent containing only leaves are the final two levels.
+    // Only a final subgroup supplies enough context to omit the shared name.
     foreach ($index['children'][$id] ?? [] as $child) {
-        if (!$visible($child)) continue;
-        foreach ($index['children'][$child] ?? [] as $grandchild) {
-            if ($visible($grandchild)) return $results[$id] = false;
-        }
+        if ($visible($child)) return $results[$id] = false;
     }
     return $results[$id] = true;
 }
