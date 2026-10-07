@@ -32,6 +32,7 @@
   let snapshotReportRequest = 0;
   const openSnapshotReports = new Set();
   let batchReportOpen = false;
+  let warningReportOpen = false;
   const persistentDiagnostics = { scope: null, filters: {}, cursors: [0], page: 0 };
 
   function node(tag, className, value) {
@@ -477,8 +478,10 @@
   }
 
   function renderWarnings(warnings, truncated, showWarehouse) {
-    const section = node('section', 'lps-ap-state-section');
-    section.append(node('h3', '', t.warningReport || 'Warnings'));
+    const section = node('details', 'lps-ap-state-section lps-ap-collapsible-report');
+    section.append(node('summary', '', `${t.warningReport || 'Warnings'} (${Array.isArray(warnings) ? warnings.length : 0})`));
+    section.open = warningReportOpen;
+    section.addEventListener('toggle', () => { warningReportOpen = section.open; });
     if (!Array.isArray(warnings) || !warnings.length) {
       section.append(node('p', 'description', t.noWarnings || 'No warnings'));
       return section;
@@ -508,6 +511,10 @@
       const messageCell = node('td');
       messageCell.append(node('p', '', warning?.message || '—'));
       const warningCode = String(warning?.code || '').toUpperCase();
+      if (warningCode === 'PREVIOUS_WRITE_REQUIRES_REVIEW') {
+        if (details.previousError) messageCell.append(node('p', '', details.previousError));
+        messageCell.append(node('p', 'description', t.reviewHelp));
+      }
       if (warningCode === 'NEGATIVE_CHRONOLOGICAL_STOCK') {
         appendNegativeStockDiagnostic(messageCell, details);
       } else if (['ZERO_ACCOUNTING_DENOMINATOR', 'ZERO_ACCOUNTING_QUANTITY_DENOMINATOR'].includes(warningCode)) {

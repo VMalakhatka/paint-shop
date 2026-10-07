@@ -137,3 +137,13 @@ $state=reset_case(); $options[LPS_ACCOUNTING_PRICES_NATIVE_CRON_OPTION]['enabled
 lps_accounting_price_campaign_end_snapshot_attempt($state);
 check(!$events && !$options[LPS_ACCOUNTING_PRICES_NATIVE_CRON_OPTION]['enabled'], 'Operator-disabled schedule is never reenabled');
 echo "Failure schedule regression passed\n";
+$safe = ['status'=>'FAILED_PARTIAL','running'=>false,
+    'errorCode'=>'FOLIO_LOCK_BUSY_RETRYABLE_AFTER_SNAPSHOT',
+    'processedSku'=>363,'committedChunks'=>363,
+    'request'=>['applyMode'=>'SAFE_APPLY_ONLY','previewOnly'=>false,'confirmApply'=>true]];
+$state=['pending_reviews'=>[12=>['last_progress'=>$safe]]];
+check(!lps_accounting_price_campaign_pending_reviews($state), 'Proven rollback and verified commits release historical hold');
+unset($safe['errorCode']);
+$safe['error']='Folio lock conflict; current transaction rolled back before commit';
+$state['pending_reviews'][12]['last_progress']=$safe;
+check(isset(lps_accounting_price_campaign_pending_reviews($state)[12]), 'Rollback message alone cannot prove earlier commits verified');

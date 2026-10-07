@@ -986,6 +986,12 @@ function lps_accounting_price_campaign_pending_reviews(array $state): array {
             ];
         }
     }
+    // A structured rollback + verified-commit contract is not an unresolved write.
+    foreach ($reviews as $warehouse_id => $review) {
+        if (lps_accounting_price_campaign_retryable_lock_failure((array)($review['last_progress'] ?? []))) {
+            unset($reviews[$warehouse_id]);
+        }
+    }
     return $reviews;
 }
 
@@ -1154,7 +1160,13 @@ function lps_accounting_price_campaign_create(array $warehouse_ids, string $sour
             'code' => 'PREVIOUS_WRITE_REQUIRES_REVIEW',
             'message' => sprintf(__('Warehouse %d requires review of a previous write. Other warehouses continue on schedule.', 'lavka-price-sync'), $warehouse_id),
             'details' => ['campaignId' => $pending_reviews[$warehouse_id]['campaign_id'] ?? '',
-                'jobId' => $pending_reviews[$warehouse_id]['job_id'] ?? ''],
+                'jobId' => $pending_reviews[$warehouse_id]['job_id'] ?? '',
+                'warehouseId' => $warehouse_id,
+                'previousError' => sanitize_textarea_field((string)($pending_reviews[$warehouse_id]['last_progress']['error'] ?? '')),
+                'previousStatus' => $pending_reviews[$warehouse_id]['last_progress']['status'] ?? '',
+                'errorCode' => $pending_reviews[$warehouse_id]['last_progress']['errorCode'] ?? '',
+                'committedSku' => absint($pending_reviews[$warehouse_id]['last_progress']['committedChunks'] ?? 0),
+                'currentSku' => sanitize_text_field((string)($pending_reviews[$warehouse_id]['last_progress']['currentArt'] ?? ''))],
         ];
     }
     $state['warning_count'] = count($held_warehouses);

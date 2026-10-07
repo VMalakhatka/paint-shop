@@ -6462,3 +6462,7 @@ msgstr "Кампания создаёт свежий снимок и после�
 #: inc/accounting-prices.php
 msgid "The schedule is disabled by default. Warehouses run sequentially. Regular runs select NEW, DIRTY and FAILED products; UNVERIFIED products are included when needed."
 msgstr "Расписание по умолчанию выключено. Склады обрабатываются последовательно. Регулярные запуски выбирают NEW, DIRTY и FAILED; при необходимости включаются UNVERIFIED."
+
+#: inc/accounting-prices.php
+msgid "Check the original job in Java: confirm rollback of the failed transaction and verification of earlier commits. After this check, wait for the campaign to finish, select the affected warehouse, confirm recalculation and start its SKU campaign manually. Accept the review confirmation to release only that warehouse. A fresh snapshot or corrected product data alone does not prove the earlier write outcome."
+msgstr "Проверьте исходное задание Java: подтвердите откат неудачной транзакции и проверку предыдущих записей. После этого дождитесь завершения кампании, выберите нужный склад, подтвердите перерасчёт и запустите его кампанию SKU вручную. Подтвердите выполненную проверку, чтобы снять ограничение только этого склада. Свежий снимок или исправление данных товара сами по себе не подтверждают результат предыдущей записи."

@@ -218,7 +218,7 @@ add_action('admin_enqueue_scripts', function () {
         'pollInterval' => 5000,
         'i18n' => [
             'reviewConfirm' => __('Have you checked the unresolved operation in Folio, including the possible commit? A fresh snapshot alone is not proof. Continue only after this review; the campaign will rebuild the snapshot before selecting SKU.', 'lavka-price-sync'),
-            'reviewHelp' => __('Keep the old job ID, warehouse, SKU and last known progress. Check the unresolved operation in Folio before continuing. The next manual start rebuilds the snapshot; no apply is retried automatically.', 'lavka-price-sync'),
+            'reviewHelp' => __('Check the original job in Java: confirm rollback of the failed transaction and verification of earlier commits. After this check, wait for the campaign to finish, select the affected warehouse, confirm recalculation and start its SKU campaign manually. Accept the review confirmation to release only that warehouse. A fresh snapshot or corrected product data alone does not prove the earlier write outcome.', 'lavka-price-sync'),
             'expectedJob' => __('Last expected job ID', 'lavka-price-sync'),
             'startConfirm' => __('Start the accounting-price SKU campaign for the selected warehouse?', 'lavka-price-sync'),
             'stopConfirm' => __('Stop accepting new batches after the current operation and build the final snapshot?', 'lavka-price-sync'),
