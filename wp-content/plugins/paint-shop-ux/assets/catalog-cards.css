@@ -48,15 +48,17 @@
     margin-bottom: 4px;
 }
 .woocommerce ul.products li.product .loop-buy-row {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
     align-items: center;
     margin-top: 8px;
     gap: 4px;
 }
-.woocommerce ul.products li.product .loop-buy-row .loop-qty-wrap { gap: 2px; margin: 0; min-width: 0; }
-.woocommerce ul.products li.product .loop-buy-row .loop-qty { flex: 1 1 40px; min-width: 0; max-width: 40px; }
-.woocommerce ul.products li.product .loop-buy-row .button { margin: 0; padding: 0 6px !important; }
+.woocommerce ul.products li.product .loop-buy-row .loop-qty-wrap { flex: 0 1 auto; gap: 2px; margin: 0; min-width: 0; }
+.woocommerce ul.products li.product .loop-buy-row .loop-qty { flex: 1 1 40px; min-width: 0; max-width: 40px; padding: 0; }
+.woocommerce ul.products li.product .loop-buy-row .button { flex: 0 0 auto; margin: 0; padding: 0 6px !important; font-size: 14px; gap: 4px; }
+.woocommerce ul.products li.product .loop-buy-row .button::before { width: 18px; height: 18px; flex-shrink: 0; }
 .psu-catalog .site-main .inside-article {
     padding: 13.333px;
 }
@@ -72,6 +74,37 @@
     .woocommerce ul.products li.product:not(.product-category) a img,
     .woocommerce ul.products li.product .psu-prod-faux-thumb { width: 92%; margin: 0 auto 4px; }
     .woocommerce ul.products li.product .loop-buy-row { gap: 3px; }
-    .woocommerce ul.products li.product .loop-buy-row .loop-qty-wrap { gap: 1px; }
-    .woocommerce ul.products li.product .loop-buy-row .button { padding: 0 5px !important; }
+    .woocommerce ul.products li.product .loop-buy-row .loop-qty-wrap { flex-shrink: 0; gap: 1px; }
+    .woocommerce ul.products li.product .loop-buy-row .loop-qty-btn {
+        width: clamp(17px, 17cqi, 24px);
+        height: 32px;
+        padding: 0;
+        flex-shrink: 0;
+        font-size: 18px;
+    }
+    .woocommerce ul.products li.product .loop-buy-row .loop-qty {
+        flex-basis: 32px;
+        max-width: 32px;
+        height: 28px;
+        line-height: 28px;
+        font-size: 14px;
+    }
+    .woocommerce ul.products li.product .loop-buy-row .loop-qty-view {
+        box-sizing: border-box;
+        min-width: 16px;
+        height: 28px;
+        line-height: 26px;
+        font-size: 14px;
+    }
+    .woocommerce ul.products li.product .loop-buy-row .button {
+        /* Long counts can sit below the icon inside the button, never over +. */
+        flex: 0 1 auto;
+        flex-wrap: wrap;
+        min-width: 30px;
+        min-height: 32px;
+        height: auto !important;
+        padding: 0 2px !important;
+        gap: 2px;
+        font-size: clamp(10px, 11cqi, 14px);
+    }
 }

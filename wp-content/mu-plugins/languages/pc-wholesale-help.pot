@@ -1032,5 +1032,5 @@ msgid "Catalogue titles occupy three lines; longer names end with an ellipsis. S
 msgstr ""
 
 #: wp-content/mu-plugins/pc-wholesale-help.php
-msgid "The gap between SKU and price is halved. Quantity controls and the cart button stay on one line, including the count already in your cart. A category without its own photo uses a product photo from its branch, following the shop supplier order. Products without photos are skipped; if none have photos, the category name appears instead."
+msgid "The gap between SKU and price is halved. Quantity controls and the cart button stay together, with the cart immediately after +, including the count already in your cart. On phones, minus, plus and cart buttons have larger tap areas at least 32 px high. A category without its own photo uses a product photo from its branch, following the shop supplier order. Products without photos are skipped; if none have photos, the category name appears instead."
 msgstr ""
