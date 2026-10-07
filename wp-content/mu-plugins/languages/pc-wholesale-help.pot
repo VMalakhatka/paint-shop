@@ -1030,3 +1030,7 @@ msgstr ""
 #: pc-wholesale-help.php
 msgid "Catalogue titles occupy three lines; longer names end with an ellipsis. SKUs remain visible on phones, with three products per row. Short names are used only in the final subgroup with no visible child categories; search and broader sections use complete names. Open a product to read its full name. Warehouse names are uppercase: the warehouse selected or used first is bold green, and other stock is lighter. Labels and the total are omitted; both warehouses and their quantities share one line."
 msgstr ""
+
+#: wp-content/mu-plugins/pc-wholesale-help.php
+msgid "The gap between SKU and price is halved. Quantity controls and the cart button stay on one line, including the count already in your cart. A category without its own photo uses a product photo from its branch, following the shop supplier order. Products without photos are skipped; if none have photos, the category name appears instead."
+msgstr ""

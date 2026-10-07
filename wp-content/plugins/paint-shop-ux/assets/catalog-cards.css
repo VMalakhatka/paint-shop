@@ -36,8 +36,8 @@
 }
 .woocommerce ul.products li.product .psu-loop-sku {
     display: block;
-    height: 2.3em;
-    margin: 0 0 3px;
+    min-height: 1.725em;
+    margin: 0 0 1.5px;
     font-size: 11px;
     line-height: 1.15;
     color: #444;
@@ -48,12 +48,14 @@
     margin-bottom: 4px;
 }
 .woocommerce ul.products li.product .loop-buy-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
     margin-top: 8px;
     gap: 4px;
-    flex-wrap: wrap;
 }
-.woocommerce ul.products li.product .loop-buy-row .loop-qty-wrap { gap: 2px; margin: 0; }
-.woocommerce ul.products li.product .loop-buy-row .loop-qty { width: 40px; }
+.woocommerce ul.products li.product .loop-buy-row .loop-qty-wrap { gap: 2px; margin: 0; min-width: 0; }
+.woocommerce ul.products li.product .loop-buy-row .loop-qty { flex: 1 1 40px; min-width: 0; max-width: 40px; }
 .woocommerce ul.products li.product .loop-buy-row .button { margin: 0; padding: 0 6px !important; }
 .psu-catalog .site-main .inside-article {
     padding: 13.333px;

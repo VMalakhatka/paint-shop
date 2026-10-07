@@ -32,7 +32,9 @@ function psu_catalog_use_supplier_order(WP_Query $query): bool {
 }
 
 add_filter('posts_clauses', function (array $clauses, WP_Query $query): array {
-    if (!psu_catalog_use_supplier_order($query) || $query->is_search()) return $clauses;
+    // Category image selection shares the catalogue ranking, independently of
+    // the current page's search or customer-selected sort order.
+    if ((!$query->get('_psu_category_thumbnail') && !psu_catalog_use_supplier_order($query)) || $query->is_search()) return $clauses;
     global $wpdb;
     $terms = psu_catalog_supplier_terms();
     if (!$terms) return $clauses;

@@ -18,6 +18,7 @@ require_once __DIR__ . '/inc/slw-assets.php';
 require_once __DIR__ . '/inc/social-assets.php';
 require_once __DIR__ . '/inc/cart-layout.php';
 require_once __DIR__ . '/inc/catalog-cards.php';
+require_once __DIR__ . '/inc/category-thumbnails.php';
 
 /** =======================
  *  i18n
@@ -134,38 +135,8 @@ function psu_subcategory_thumbnail( $category ) {
         return;
     }
 
-    /** =========================
-     *  2) Пробуем взять картинку любого товара
-     *     в этой категории ИЛИ в дочерних
-     *  ========================= */
-    $cache_key = 'psu_cat_thumb_v1_' . (int) $category->term_id;
-    $cached = get_transient($cache_key);
-
-    if (!is_array($cached)) {
-        $q = new WC_Product_Query([
-            'status'    => 'publish',
-            'limit'     => 20,
-            'orderby'   => 'date',
-            'order'     => 'DESC',
-            'return'    => 'ids',
-            'tax_query' => [[
-                'taxonomy'         => 'product_cat',
-                'field'            => 'term_id',
-                'terms'            => [(int) $category->term_id],
-                'include_children' => true,
-            ]],
-        ]);
-
-        $fallback_id = 0;
-        foreach ($q->get_products() as $product_id) {
-            $fallback_id = (int) get_post_thumbnail_id((int) $product_id);
-            if ($fallback_id > 0) break;
-        }
-        $cached = ['attachment_id' => $fallback_id];
-        set_transient($cache_key, $cached, DAY_IN_SECONDS);
-    }
-
-    $fallback_id = (int) ($cached['attachment_id'] ?? 0);
+    // Prefer the first product image in the branch by configured supplier order.
+    $fallback_id = psu_category_fallback_thumbnail_id((int) $category->term_id);
     if ($fallback_id > 0) {
         echo wp_get_attachment_image($fallback_id, $size, false, ['loading' => 'lazy']);
         return;
