@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cart layout regression fixture</title>
+<link rel="stylesheet" href="/wp-content/plugins/woocommerce/assets/css/woocommerce-layout.css">
+<link rel="stylesheet" href="/wp-content/plugins/woocommerce/assets/css/woocommerce-smallscreen.css" media="(max-width:768px)">
+<link rel="stylesheet" href="/wp-content/plugins/woocommerce/assets/css/woocommerce.css">
+<link rel="stylesheet" href="/wp-content/themes/generatepress-child/style.css">
+<link id="cart-fix" rel="stylesheet" href="../assets/cart-layout.css">
+<style>
+body{margin:16px;font:16px sans-serif}main{max-width:1050px;margin:auto}
+/* Smush's placeholder rule, including an oversized source image. */
+.lazyload,.lazyloading{width:var(--smush-image-width,var(--smush-placeholder-width))!important;aspect-ratio:var(--smush-image-aspect-ratio,var(--smush-placeholder-aspect-ratio))!important}
+</style>
+<body class="woocommerce-cart woocommerce-page">
+<button id="toggle">Toggle fix</button>
+<button id="load">Finish lazy loading</button>
+<main id="content" class="woocommerce">
+<form class="woocommerce-cart-form">
+<table class="shop_table shop_table_responsive cart">
+<thead><tr><th class="product-remove"></th><th class="product-thumbnail"></th><th class="product-name">Product</th><th class="product-price">Price</th><th class="product-quantity">Quantity</th><th class="product-subtotal">Subtotal</th></tr></thead>
+<tbody><tr class="cart_item">
+<td class="product-remove"><a href="#" class="remove" aria-label="Remove fixture">&times;</a></td>
+<td class="product-thumbnail"><img class="lazyload" width="3000" height="3000" sizes="auto, 3000px" style="--smush-placeholder-width:3000px;--smush-placeholder-aspect-ratio:1" src="https://kreul-media.s3.gra.io.cloud.ovh.net/wp-content/uploads/2025/06/kr-79406.jpg" alt="Fixture product"></td>
+<th scope="row" class="product-name" data-title="Product"><a href="#">Long product name with an unbroken SKU ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789</a><div>Kyiv: 12 / Odesa: 1</div></th>
+<td class="product-price" data-title="Price"><span class="amount">1 234,56 UAH</span></td>
+<td class="product-quantity" data-title="Quantity"><div class="quantity"><input class="qty" type="number" value="12" aria-label="Quantity"></div></td>
+<td class="product-subtotal" data-title="Subtotal"><span class="amount">14 814,72 UAH</span></td>
+</tr></tbody></table></form></main>
+<script>
+const row = document.querySelector('.cart_item');
+for (let i = 0; i < 19; i++) row.parentNode.append(row.cloneNode(true));
+document.querySelector('#toggle').onclick = () => { const link = document.querySelector('#cart-fix'); link.disabled = !link.disabled; };
+document.querySelector('#load').onclick = () => document.querySelectorAll('.lazyload').forEach(img => img.classList.remove('lazyload'));
+</script>
+</body></html>
