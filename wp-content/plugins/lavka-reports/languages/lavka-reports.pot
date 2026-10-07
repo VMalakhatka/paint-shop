@@ -2046,7 +2046,7 @@ msgid "Excel: H is the manual template; keep its formulas. I contains website va
 msgstr ""
 
 #: inc/class-profit-report.php
-msgid "The manual gross-profit formula sums the base total and the category rows. Fill either the base or its categories, not both. Website totals include the Folio master-class adjustment and may differ from the manual formula."
+msgid "Enter manual gross profit in the five category rows. The base subtotal sums them once; gross profit with master classes adds the net master-class contribution to that subtotal. Website totals also account for master-class profit already included in Folio and may differ from the manual formula."
 msgstr ""
 
 #: inc/class-profit-report.php
@@ -2091,4 +2091,16 @@ msgstr ""
 
 #: inc/class-profit-report.php
 msgid "Click Export report to Excel for the open month, or Export saved period to Excel for all selected months. On the new Kyiv and Odesa sheets, H is for manual entry with formulas and I contains website values."
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Kyiv and wholesale"
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Gross profit with master classes"
+msgstr ""
+
+#: inc/class-profit-report.php
+msgid "Net profit"
 msgstr ""

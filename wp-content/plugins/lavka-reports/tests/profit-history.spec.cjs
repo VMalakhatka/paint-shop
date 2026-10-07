@@ -117,6 +117,8 @@ test('current Java template renders mirrored city sheets and exports both master
  const tables=page.locator('#lavr-profit-manager-template table');assert.equal(await tables.count(),2);
  assert.equal(await tables.first().locator('tr').nth(20).locator('th').nth(7).innerText(),'=SUM(H4:H20)');
  assert.equal(await tables.nth(1).locator('tr').nth(13).locator('th').nth(7).innerText(),'=SUM(H4:H13)');
+ assert.equal(await tables.first().locator('tr').nth(29).locator('th').nth(7).innerText(),'=SUM(H31:H35)');
+ assert.equal(await tables.nth(1).locator('tr').nth(22).locator('th').nth(7).innerText(),'=SUM(H24:H28)');
  await page.locator('#lavr-profit-copy-KYIV').click();
  const copyTools=page.locator('.lavr-profit-template-tools').first();
  assert.match(await copyTools.innerText(),/Copied|Copy the selected values/);

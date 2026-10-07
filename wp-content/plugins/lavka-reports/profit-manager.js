@@ -21,12 +21,12 @@
         return Number.isNaN(date.getTime())?'—':new Intl.DateTimeFormat('uk-UA',{timeZone:'Europe/Kyiv',dateStyle:'short',timeStyle:'short'}).format(date);
     }
     const hiddenOdesaPlaceholder = row => ['ODESA_SALARY_RUB','ODESA_BANK_SERVICES','ODESA_TAXES','ODESA_ACCOUNTING'].includes(row.lineId) && row.source==='NOT_APPLICABLE' && row.amount!=null && row.profitImpact!=null && Number(row.amount)===0 && Number(row.profitImpact)===0;
-    // Stable Excel row addresses match the owner's manual workbook with the duplicate row removed on 2026-10-02.
+    // Stable Excel row addresses match the owner's 2026-10-07 workbook with category subtotals.
     // H belongs to the manager. I is always the authoritative API snapshot.
     function manualTemplateSheets(data, t) {
         let sequence=0;
         return ['KYIV','ODESA'].map(city=>{
-            const kyiv=city==='KYIV', name=kyiv?t.kyiv:t.odesa, end=kyiv?39:32;
+            const kyiv=city==='KYIV', name=kyiv?t.kyiv:t.odesa, end=kyiv?38:31;
             const rows=Array.from({length:end},()=>Array(9).fill('')), headings=[1,3], merges=[], used=new Set();
             const result=(data.cities||[]).find(c=>c.city===city)||{};
             rows[0]=['№',t.fields.label,t.fields.expenseCodes,t.fields.operationTypes,t.fields.purposeCodes,t.fields.cashWarehouses,t.fields.bankWarehouses,t.manualTemplateAmount,t.siteAmount];
@@ -52,7 +52,7 @@
             ]:[[4,'RENT'],[5,'UTILITIES'],[6,'SALARY_DOCUMENTS'],[7,'ADDITIONAL_SALARY'],[8,'HOUSEHOLD'],
                 [9,'ADVERTISING'],[10,'TRANSPORT_UKRAINE'],[11,'INTERNET'],[12,'PHONE']];
             layout.forEach(([r,id,label])=>expense(r,city+'_'+id,label));
-            const total=kyiv?21:14, master=kyiv?25:18, base=kyiv?31:24, gross=kyiv?37:30, op=gross+1, profit=gross+2;
+            const total=kyiv?21:14, master=kyiv?25:18, base=kyiv?30:23, gross=kyiv?36:29, op=gross+1, profit=gross+2;
             put(total,t.fields.operatingExpenses,result.operatingExpenses);headings.push(total);
             if(kyiv)expense(23,'KYIV_IMPORT_TRANSPORT');
             rows[master-1][1]=t.masterTitle;headings.push(master);
@@ -61,19 +61,19 @@
                 put(master+i+1,label,mk?.[key]);
                 if(i<2){const row=rows[master+i];row[2]=mk?.sku||'—';row[3]=i?t.returnInvoice:t.outgoingInvoice;row[4]='—';row[5]=mk?.warehouseId??'—';row[6]='—';}
             });
-            rows[base-2][1]=t.profitTotals;headings.push(base-1);
-            put(base,t.fields.baseGrossProfit+' — '+name,result.baseGrossProfit);
+            headings.push(base);
+            put(base,t.fields.baseGrossProfit+' — '+(kyiv?t.kyivAndWholesale:name),result.baseGrossProfit);
             const grossLines=(data.grossProfitLines||[]).filter(l=>l.city===city);
             rows[base-1][5]=(grossLines[0]?.warehouseIds||[]).join(' / ');
             ['OWN_SHOPS','PARTNERS','DEALERS','CUSTOMERS','ART_SALONS'].forEach((key,i)=>{
                 const id=city+'_GROSS_'+key,line=grossLines.find(l=>l.lineId===id);used.add(id);
-                put(base+i+1,t.fields.baseGrossProfit+' — '+(line?.label||t.grossCategoryLabels?.[key]||key),line?.amount);
+                put(base+i+1,t.fields.grossProfit+' — '+(line?.label||t.grossCategoryLabels?.[key]||key),line?.amount);
                 rows[base+i][2]=(line?.organizationTypes||[]).join(' / ');rows[base+i][5]=(line?.warehouseIds||[]).join(' / ');
             });
-            put(gross,t.fields.grossProfit+' — '+name,result.grossProfit);put(op,t.fields.operatingExpenses+' — '+name,result.operatingExpenses);put(profit,t.fields.profit+' — '+name,result.profit);
-            // Keep the owner's manual formulas, adjusting references for the deleted Kyiv row; never calculate API totals here.
-            const formulas=kyiv?{21:'SUM(H4:H20)',28:'H26-H27',37:'SUM(H28:H36)',38:'H21',39:'H37-H38'}:
-                {14:'SUM(H4:H13)',21:'H19-H20',30:'SUM(H21:H29)',31:'H14',32:'H30-H31'};
+            put(gross,t.grossWithMaster+' — '+name,result.grossProfit);put(op,t.fields.operatingExpenses+' — '+name,result.operatingExpenses);put(profit,t.netProfit+' — '+name,result.profit);
+            // Manual subtotals count category rows once; authoritative API totals stay independent.
+            const formulas=kyiv?{21:'SUM(H4:H20)',28:'H26-H27',30:'SUM(H31:H35)',36:'H30+H28',37:'H21',38:'H36-H37'}:
+                {14:'SUM(H4:H13)',21:'H19-H20',23:'SUM(H24:H28)',29:'H23+H21',30:'H14',31:'H29-H30'};
             Object.entries(formulas).forEach(([r,f])=>{rows[Number(r)-1][7]=formula(f,0);});
             headings.push(master+3,gross,op,profit);
             // Do not discard an unexpected/historical nonzero line just to fit the manual template.

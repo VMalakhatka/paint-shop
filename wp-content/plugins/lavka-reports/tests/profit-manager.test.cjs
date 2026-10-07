@@ -58,13 +58,14 @@ module.exports.currentData=currentData;
 test('manual H formulas and fixed addresses match the owner workbook; API values remain independent in I',()=>{
  const d=require('./fixtures/profit-template-java.json'),[k,o]=manager.sheets(d,labels);
  for(const [s,expected,end,city]of[
-  [k,{21:'SUM(H4:H20)',28:'H26-H27',37:'SUM(H28:H36)',38:'H21',39:'H37-H38'},39,'KYIV'],
-  [o,{14:'SUM(H4:H13)',21:'H19-H20',30:'SUM(H21:H29)',31:'H14',32:'H30-H31'},32,'ODESA']]){
+  [k,{21:'SUM(H4:H20)',28:'H26-H27',30:'SUM(H31:H35)',36:'H30+H28',37:'H21',38:'H36-H37'},38,'KYIV'],
+  [o,{14:'SUM(H4:H13)',21:'H19-H20',23:'SUM(H24:H28)',29:'H23+H21',30:'H14',31:'H29-H30'},31,'ODESA']]){
   assert.equal(s.rows[0][7],'manualTemplateAmount');assert.equal(s.rows[0][8],'siteAmount');
   for(const[r,f]of Object.entries(expected)){assert.equal(s.rows[r-1][7].formula,f);assert.equal(s.rows[r-1][8].type,'number');}
   assert.equal(s.rows[end-1][8].value,d.cities.find(c=>c.city===city).profit);
   assert.equal(s.rows[3][7],'');assert.equal(s.copyStartRow,4);assert.equal(s.copyEndRow,end);
   assert(s.bordered);assert.equal(s.freezeRows,2);
+  assert(s.headerRows.includes(city==='KYIV'?30:23));
  }
  assert.equal(k.rows[8][8].value,d.expenseLines.find(l=>l.lineId==='KYIV_HOUSEHOLD').amount);
  assert.equal(k.rows.filter(r=>r[2]==='НЕРЕГУЛ').length,1);
@@ -72,7 +73,7 @@ test('manual H formulas and fixed addresses match the owner workbook; API values
  assert.equal(k.rows[25][5],1);assert.equal(o.rows[18][5],5);
  const xml=new TextDecoder().decode(writer.build([k,o]));
  assert.match(xml,/<c r="H21"[^>]*><f>SUM\(H4:H20\)<\/f><v>0<\/v>/);
- assert.match(xml,/<c r="I39"[^>]*><v>90.00<\/v>/);
+ assert.match(xml,/<c r="I38"[^>]*><v>90.00<\/v>/);
  assert.doesNotMatch(xml,/<c r="I\d+"[^>]*><f>/);
 });
 test('single household row uses all-source Java selection once, without frontend splitting or recalculation',()=>{
@@ -92,7 +93,7 @@ test('single household row uses all-source Java selection once, without frontend
 test('unavailable results and unexpected nonzero rows are visible without moving the copy range',()=>{
  const d=structuredClone(require('./fixtures/profit-template-java.json'));
  d.cities[1].profit=null;d.expenseLines.find(r=>r.lineId==='ODESA_BANK_SERVICES').amount='10';
- const o=manager.sheets(d,labels)[1];assert.equal(o.rows[31][8],'—');assert.equal(o.copyEndRow,32);
- assert(o.rows.slice(32).some(r=>r[8]?.value==='10'));assert(o.rows.some(r=>r[0]==='templateExtraHelp'));
+ const o=manager.sheets(d,labels)[1];assert.equal(o.rows[30][8],'—');assert.equal(o.copyEndRow,31);
+ assert(o.rows.slice(31).some(r=>r[8]?.value==='10'));assert(o.rows.some(r=>r[0]==='templateExtraHelp'));
  assert.equal(manager.masterDocuments(d).length,4);
 });

@@ -2085,8 +2085,8 @@ msgid "Excel: H is the manual template; keep its formulas. I contains website va
 msgstr "Excel: H — ручний шаблон, зберігайте його формули. I — дані сайту. Вставляйте скопійовані результати в I4 або іншу колонку порівняння з 4-го рядка, не поверх H."
 
 #: inc/class-profit-report.php
-msgid "The manual gross-profit formula sums the base total and the category rows. Fill either the base or its categories, not both. Website totals include the Folio master-class adjustment and may differ from the manual formula."
-msgstr "Ручна формула валового прибутку підсумовує базовий підсумок і рядки категорій. Заповнюйте або базу, або її категорії. Підсумки сайту враховують коригування МК ФОЛІО та можуть відрізнятися від ручної формули."
+msgid "Enter manual gross profit in the five category rows. The base subtotal sums them once; gross profit with master classes adds the net master-class contribution to that subtotal. Website totals also account for master-class profit already included in Folio and may differ from the manual formula."
+msgstr "Вводьте ручний валовий прибуток у п’ять рядків категорій. Базовий підсумок сумує їх один раз; прибуток із МК додає до нього чистий внесок МК. Підсумки сайту також враховують прибуток МК, уже включений у ФОЛІО, і можуть відрізнятися від ручної формули."
 
 #: inc/class-profit-report.php
 msgid "Additional amounts outside the manual template"
@@ -2131,3 +2131,15 @@ msgstr "Художні салони"
 #: inc/class-profit-report.php
 msgid "Click Export report to Excel for the open month, or Export saved period to Excel for all selected months. On the new Kyiv and Odesa sheets, H is for manual entry with formulas and I contains website values."
 msgstr "Натисніть «Експорт звіту в Excel» для відкритого місяця або «Збережений період в Excel» для всіх вибраних місяців. На нових аркушах Києва й Одеси H — ручне введення з формулами, I — дані сайту."
+
+#: inc/class-profit-report.php
+msgid "Kyiv and wholesale"
+msgstr "Київ та опт"
+
+#: inc/class-profit-report.php
+msgid "Gross profit with master classes"
+msgstr "Валовий прибуток з МК"
+
+#: inc/class-profit-report.php
+msgid "Net profit"
+msgstr "Чистий прибуток"
