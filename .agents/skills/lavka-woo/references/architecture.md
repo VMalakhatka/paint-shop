@@ -58,6 +58,13 @@ XML sitemap категорий (2026-10-08): `paint-shop-ux/inc/category-sitemap
 число терминов. После разрешённого деплоя нужен сброс sitemap-кэша; регламент
 и read-only интеграционный тест: `docs/SYSTEM_OVERVIEW.md`, раздел XML sitemap.
 
+Production SEO (2026-10-08): служебные страницы закрыты через штатный
+`rank_math_robots`, taxonomy `location` через custom robots Rank Math. Это
+production options/meta, не code-defaults; не переносить локальную БД ради их
+сохранения. Список, проверка и точечный rollback: `docs/SYSTEM_OVERVIEW.md`,
+раздел «Служебные страницы: индексация production». Не путать складские архивы
+с полезными страницами контактов/магазинов и не считать noindex защитой данных.
+
 - Локальный сайт используется для разработки и безопасной визуальной проверки.
 - ID страниц, пользователей, заказов, media attachment и location terms между окружениями различаются.
 - Конфигурация API, payment gateway и storage может различаться; проверяй settings, а не переносимые ID.
