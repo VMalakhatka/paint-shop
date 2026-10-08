@@ -51,6 +51,13 @@ MariaDB хранит состояние сайта и проекции ФОЛИ�
 
 ## Локальное и production
 
+XML sitemap категорий (2026-10-08): `paint-shop-ux/inc/category-sitemap.php`
+ограничивает `rank_math/sitemap/index/entry` плоской нативной выборкой Rank Math.
+Не хардкодить последнюю страницу и не исправлять vendor. Сохранять параметры
+выборки, включая `orderby=term_order`, иначе Woo menu-order meta join меняет
+число терминов. После разрешённого деплоя нужен сброс sitemap-кэша; регламент
+и read-only интеграционный тест: `docs/SYSTEM_OVERVIEW.md`, раздел XML sitemap.
+
 - Локальный сайт используется для разработки и безопасной визуальной проверки.
 - ID страниц, пользователей, заказов, media attachment и location terms между окружениями различаются.
 - Конфигурация API, payment gateway и storage может различаться; проверяй settings, а не переносимые ID.

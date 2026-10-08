@@ -19,6 +19,7 @@ require_once __DIR__ . '/inc/social-assets.php';
 require_once __DIR__ . '/inc/cart-layout.php';
 require_once __DIR__ . '/inc/catalog-cards.php';
 require_once __DIR__ . '/inc/category-thumbnails.php';
+require_once __DIR__ . '/inc/category-sitemap.php';
 
 /** =======================
  *  i18n

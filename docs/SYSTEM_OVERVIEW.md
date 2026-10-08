@@ -176,3 +176,38 @@ post meta и закрытыми заявками. Это отдельный ко
 Java → WordPress deploy описані в [README плагіна](../wp-content/plugins/pc-order-import-export/README.md#manager-import-of-folio-customers-2026-10-06).
 Java API-контракт: `kreul_com_ua/docs/api/FOLIO_PARTNERS_ENDPOINT_TASK.md`.
 Production deploy та імпорт реальних клієнтів у цій задачі не виконувалися.
+
+## XML sitemap категорий: границы страниц
+
+Проверено 2026-10-08: production `sitemap_index.xml` Rank Math ссылался на
+`product_cat-sitemap14.xml`–`product_cat-sitemap17.xml`, отвечавшие HTTP 404.
+Локально воспроизведено расхождение: индекс учитывает иерархических родителей,
+а страницы sitemap используют плоскую выборку категорий. После исправления
+локально осталось 7 заполненных страниц вместо 10 (1 393 ссылки, размер 200).
+Эти числа зависят от окружения и не являются настройками.
+
+Владелец адаптера: `paint-shop-ux/inc/category-sitemap.php`, фильтр
+`rank_math/sitemap/index/entry`. Он убирает только страницы `product_cat` за
+границей нативной выборки Rank Math: учитывает include-empty, exclude-terms,
+noindex и размер страницы. Важно сохранять `orderby=term_order`: иначе Woo
+подключает сортировку по meta `order`, меняющую выборку при наличии meta-query.
+Используются уникальные ID и кэш WP term-query, без HTTP-запросов и запросов
+товаров по каждой категории. При ошибке чтения исходная запись сохраняется.
+Сами категории, видимость меню, sitemap товаров и прочие taxonomy не меняются.
+Отдельные исключения ссылок через canonical или сторонние sitemap-фильтры
+остаются ответственностью Rank Math; адаптер не заменяет его генератор.
+
+Приёмка: standalone `php wp-content/plugins/paint-shop-ux/tests/category-sitemap.php`
+и локально `wp eval-file wp-content/plugins/paint-shop-ux/tests/category-sitemap-integration.php`.
+Вторая проверка читает текущую базу и вызывает реальный провайдер Rank Math,
+сверяет количество страниц, непустоту каждой и отсутствие следующей страницы.
+
+Для production нужен разрешённый деплой существующего `paint-shop-ux`, без Java
+и новых плагинов. После него очистить sitemap-кэш Rank Math (штатный
+`RankMath\Sitemap\Cache::invalidate_storage()` в загруженном WordPress), а также
+внешний page/CDN cache XML, если он используется. Открыть свежий индекс и
+проверить HTTP 200 и непустой XML каждой ссылки категорий. Старые адреса сверх
+границы могут по-прежнему отвечать 404, но не должны рекламироваться индексом.
+Откат: вернуть прежний код плагина и снова очистить sitemap-кэш. Данные товаров
+и категорий для этого не изменять. Production-деплой и очистка кэша в этой задаче
+не выполнялись.
