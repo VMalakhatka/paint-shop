@@ -146,4 +146,31 @@ check(!lps_accounting_price_campaign_pending_reviews($state), 'Proven rollback a
 unset($safe['errorCode']);
 $safe['error']='Folio lock conflict; current transaction rolled back before commit';
 $state['pending_reviews'][12]['last_progress']=$safe;
-check(isset(lps_accounting_price_campaign_pending_reviews($state)[12]), 'Rollback message alone cannot prove earlier commits verified');
+check(!lps_accounting_price_campaign_pending_reviews($state), 'Completed partial failure does not permanently exclude a warehouse');
+check(!lps_accounting_price_campaign_retryable_lock_failure($safe), 'A fresh campaign is distinct from an immediate safe lock retry');
+foreach (['FAILED','FAILED_PARTIAL','INTERRUPTED'] as $status) {
+    $state=reset_case();
+    $state['active']=false; $state['status']='completed_with_warnings';
+    $state['pending_reviews']=[12=>['campaign_id'=>'previous-12','job_id'=>'job-12','warehouse_id'=>12,
+        'last_progress'=>['status'=>$status,'running'=>false,'committedChunks'=>363,'error'=>'Repeated SQL lock']]];
+    $options[LPS_ACCOUNTING_PRICE_CAMPAIGN_OPTION]=$state;
+    $options[LPS_ACCOUNTING_PRICES_NATIVE_CRON_OPTION]['warehouse_ids']=[12,1,5];
+    check(lps_accounting_price_campaign_run_scheduled()['ok'], "$status starts a new scheduled campaign");
+    $next=lps_accounting_price_campaign_state();
+    check($next['warehouse_ids']===[12,1,5] && $next['current_warehouse_id']===12, 'Warehouse 12 keeps its configured priority');
+    check($next['phase']==='snapshot_before_start' && !$next['current_skus'], 'New attempt starts from a fresh snapshot, not old apply');
+    check(!$next['pending_reviews'] && !$next['skipped_warehouses'], 'Completed error does not skip the warehouse');
+    check($next['warnings'][0]['code']==='PREVIOUS_FAILURE_RETRYING'
+        && $next['warnings'][0]['details']['previousError']==='Repeated SQL lock', 'Original error remains in diagnostics');
+    check(in_array('accounting_price_previous_failure_retrying',$logs,true), 'Retry records previous failure in persistent event journal');
+    $next['active']=false; $next['status']='failed_partial'; $next['range_job_id']='job-12-again';
+    $next['range_status']=['status'=>'FAILED_PARTIAL','running'=>false,'error'=>'Repeated SQL lock'];
+    $options[LPS_ACCOUNTING_PRICE_CAMPAIGN_OPTION]=$next;
+    check(lps_accounting_price_campaign_run_scheduled()['ok'], 'Repeated failure cannot veto the following campaign');
+    check(lps_accounting_price_campaign_state()['warehouse_ids']===[12,1,5], 'Following campaign still includes warehouse 12');
+}
+foreach ([['status'=>'FAILED_PARTIAL'],['status'=>'FAILED_PARTIAL','running'=>true],
+    ['status'=>'OUTCOME_UNKNOWN','running'=>false],['status'=>'RUNNING','running'=>false]] as $progress) {
+    check(!lps_accounting_price_campaign_finished_failure(['last_progress'=>$progress]), 'Unconfirmed/active operation is not a completed failure');
+}
+check(!lps_accounting_price_campaign_finished_failure(['outcome_status'=>'outcome_unknown','last_progress'=>$safe]), 'Unknown outcome cannot be cleared by stale terminal progress');

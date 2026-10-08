@@ -968,8 +968,16 @@ function lps_accounting_price_campaign_normalize_skus(array $skus): array {
     return array_values($normalized);
 }
 
-/** Carry unresolved writes across campaigns without holding the entire calendar. */
-function lps_accounting_price_campaign_pending_reviews(array $state): array {
+/** A terminal failure is history, not a permanent veto on a new campaign. */
+function lps_accounting_price_campaign_finished_failure(array $review): bool {
+    $progress = (array)($review['last_progress'] ?? []);
+    return ($review['outcome_status'] ?? '') !== 'outcome_unknown'
+        && array_key_exists('running', $progress) && $progress['running'] === false
+        && in_array(strtoupper((string)($progress['status'] ?? '')), ['FAILED', 'FAILED_PARTIAL', 'INTERRUPTED'], true);
+}
+
+/** Keep unknown writes separate from completed attempts eligible for a fresh run. */
+function lps_accounting_price_campaign_pending_reviews(array $state, bool $include_finished = false): array {
     $reviews = is_array($state['pending_reviews'] ?? null) ? $state['pending_reviews'] : [];
     if (in_array($state['status'] ?? '', ['outcome_unknown', 'failed_partial'], true)
         || (($state['phase'] ?? '') === 'unknown_phase' && !empty($state['current_skus']))) {
@@ -983,12 +991,14 @@ function lps_accounting_price_campaign_pending_reviews(array $state): array {
                 'warehouse_id' => $warehouse_id,
                 'skus' => $state['current_skus'] ?? [],
                 'last_progress' => $state['range_status'] ?? [],
+                'outcome_status' => $state['status'] ?? '',
             ];
         }
     }
     // A structured rollback + verified-commit contract is not an unresolved write.
     foreach ($reviews as $warehouse_id => $review) {
-        if (lps_accounting_price_campaign_retryable_lock_failure((array)($review['last_progress'] ?? []))) {
+        if (!$include_finished && (lps_accounting_price_campaign_finished_failure($review)
+            || lps_accounting_price_campaign_retryable_lock_failure((array)($review['last_progress'] ?? [])))) {
             unset($reviews[$warehouse_id]);
         }
     }
@@ -1075,6 +1085,10 @@ function lps_accounting_price_campaign_create(array $warehouse_ids, string $sour
         return ['ok' => false, 'httpStatus' => 409, 'message' => __('An accounting-price SKU campaign is already running.', 'lavka-price-sync'), 'state' => lps_accounting_price_campaign_public_state($existing)];
     }
     $pending_reviews = lps_accounting_price_campaign_pending_reviews($existing);
+    $previous_failures = array_intersect_key(
+        array_diff_key(lps_accounting_price_campaign_pending_reviews($existing, true), $pending_reviews),
+        array_flip($warehouse_ids)
+    );
     $selected_reviews = array_intersect_key($pending_reviews, array_flip($warehouse_ids));
     if ($source === 'manual' && $selected_reviews
         && ($reviewed_campaign_id === '' || $reviewed_campaign_id !== ($existing['campaign_id'] ?? ''))) {
@@ -1154,22 +1168,33 @@ function lps_accounting_price_campaign_create(array $warehouse_ids, string $sour
         'error' => '',
         'message' => __('Preparing the first Folio product snapshot.', 'lavka-price-sync'),
     ];
-    foreach ($held_warehouses as $warehouse_id) {
+    foreach (array_unique(array_merge($held_warehouses, array_keys($previous_failures))) as $warehouse_id) {
+        $retrying = isset($previous_failures[$warehouse_id]);
+        $review = $previous_failures[$warehouse_id] ?? $pending_reviews[$warehouse_id];
         $state['warnings'][] = [
             'warehouseId' => $warehouse_id, 'sku' => '',
-            'code' => 'PREVIOUS_WRITE_REQUIRES_REVIEW',
-            'message' => sprintf(__('Warehouse %d requires review of a previous write. Other warehouses continue on schedule.', 'lavka-price-sync'), $warehouse_id),
-            'details' => ['campaignId' => $pending_reviews[$warehouse_id]['campaign_id'] ?? '',
-                'jobId' => $pending_reviews[$warehouse_id]['job_id'] ?? '',
+            'code' => $retrying ? 'PREVIOUS_FAILURE_RETRYING' : 'PREVIOUS_WRITE_REQUIRES_REVIEW',
+            'message' => sprintf($retrying
+                ? __('Warehouse %d is included again after a completed attempt failed. A fresh snapshot will be built; the previous error is retained in diagnostics.', 'lavka-price-sync')
+                : __('Warehouse %d requires review of a previous write. Other warehouses continue on schedule.', 'lavka-price-sync'), $warehouse_id),
+            'details' => ['campaignId' => $review['campaign_id'] ?? '',
+                'jobId' => $review['job_id'] ?? '',
                 'warehouseId' => $warehouse_id,
-                'previousError' => sanitize_textarea_field((string)($pending_reviews[$warehouse_id]['last_progress']['error'] ?? '')),
-                'previousStatus' => $pending_reviews[$warehouse_id]['last_progress']['status'] ?? '',
-                'errorCode' => $pending_reviews[$warehouse_id]['last_progress']['errorCode'] ?? '',
-                'committedSku' => absint($pending_reviews[$warehouse_id]['last_progress']['committedChunks'] ?? 0),
-                'currentSku' => sanitize_text_field((string)($pending_reviews[$warehouse_id]['last_progress']['currentArt'] ?? ''))],
+                'previousError' => sanitize_textarea_field((string)($review['last_progress']['error'] ?? '')),
+                'previousStatus' => $review['last_progress']['status'] ?? '',
+                'errorCode' => $review['last_progress']['errorCode'] ?? '',
+                'committedSku' => absint($review['last_progress']['committedChunks'] ?? 0),
+                'currentSku' => sanitize_text_field((string)($review['last_progress']['currentArt'] ?? ''))],
         ];
+        if ($retrying) {
+            lps_accounting_price_campaign_log('accounting_price_previous_failure_retrying', [
+                'source' => $state['source'],
+                'message' => 'A completed failed attempt does not exclude the warehouse from a new campaign.',
+                'context' => array_merge(end($state['warnings'])['details'], ['nextCampaignId' => $state['campaign_id']]),
+            ]);
+        }
     }
-    $state['warning_count'] = count($held_warehouses);
+    $state['warning_count'] = count($state['warnings']);
     $state['skipped_warehouses'] = count($held_warehouses);
     if (!$warehouse_ids) {
         $state['active'] = false;

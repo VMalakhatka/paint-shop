@@ -6466,3 +6466,6 @@ msgstr "Расписание по умолчанию выключено. Скл�
 #: inc/accounting-prices.php
 msgid "Check the original job in Java: confirm rollback of the failed transaction and verification of earlier commits. After this check, wait for the campaign to finish, select the affected warehouse, confirm recalculation and start its SKU campaign manually. Accept the review confirmation to release only that warehouse. A fresh snapshot or corrected product data alone does not prove the earlier write outcome."
 msgstr "Проверьте исходное задание Java: подтвердите откат неудачной транзакции и проверку предыдущих записей. После этого дождитесь завершения кампании, выберите нужный склад, подтвердите перерасчёт и запустите его кампанию SKU вручную. Подтвердите выполненную проверку, чтобы снять ограничение только этого склада. Свежий снимок или исправление данных товара сами по себе не подтверждают результат предыдущей записи."
+
+msgid "Warehouse %d is included again after a completed attempt failed. A fresh snapshot will be built; the previous error is retained in diagnostics."
+msgstr "Склад %d снова включён после завершённой неудачной попытки. Будет создан свежий снимок; предыдущая ошибка сохранена в диагностике."

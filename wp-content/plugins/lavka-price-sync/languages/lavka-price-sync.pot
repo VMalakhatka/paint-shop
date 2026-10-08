@@ -6247,3 +6247,6 @@ msgstr ""
 #: inc/accounting-prices.php
 msgid "Check the original job in Java: confirm rollback of the failed transaction and verification of earlier commits. After this check, wait for the campaign to finish, select the affected warehouse, confirm recalculation and start its SKU campaign manually. Accept the review confirmation to release only that warehouse. A fresh snapshot or corrected product data alone does not prove the earlier write outcome."
 msgstr ""
+
+msgid "Warehouse %d is included again after a completed attempt failed. A fresh snapshot will be built; the previous error is retained in diagnostics."
+msgstr ""
