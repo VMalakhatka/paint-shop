@@ -477,11 +477,19 @@
     return section;
   }
 
-  function renderWarnings(warnings, truncated, showWarehouse) {
+  function negativeMovementDate(details) {
+    const value = details?.operation?.documentDate || details?.problemDate || details?.operationDate;
+    if (!value) return '—';
+    // Folio movement dates are calendar dates, not browser-local timestamps.
+    const match = String(value).match(/^(\d{4})-(\d{2})-(\d{2})(?:$|[T ])/);
+    return match ? `${match[3]}.${match[2]}.${match[1]}` : String(value);
+  }
+
+  function renderWarnings(warnings, truncated, showWarehouse, compactNegative = false) {
     const section = node('details', 'lps-ap-state-section lps-ap-collapsible-report');
     section.append(node('summary', '', `${t.warningReport || 'Warnings'} (${Array.isArray(warnings) ? warnings.length : 0})`));
-    section.open = warningReportOpen;
-    section.addEventListener('toggle', () => { warningReportOpen = section.open; });
+    section.open = compactNegative || warningReportOpen;
+    section.addEventListener('toggle', () => { if (!compactNegative) warningReportOpen = section.open; });
     if (!Array.isArray(warnings) || !warnings.length) {
       section.append(node('p', 'description', t.noWarnings || 'No warnings'));
       return section;
@@ -492,7 +500,7 @@
     const table = node('table', 'widefat striped');
     const head = node('thead');
     const header = node('tr');
-    const headings = showWarehouse
+    const headings = compactNegative ? [t.sku, t.problemDate, t.warehouse] : showWarehouse
       ? [t.warehouse, t.sku, t.reason, t.message, t.recordedAt, t.details]
       : [t.sku, t.reason, t.message, t.details];
     headings.forEach((label) => header.append(node('th', '', label)));
@@ -501,14 +509,14 @@
     warnings.forEach((warning) => {
       const details = warning?.details && typeof warning.details === 'object' ? warning.details : {};
       const sku = warning?.sku || details.sku || details.art || details.inputArt || '';
-      const detailCell = node('td');
+      const detailCell = node(compactNegative ? 'div' : 'td');
       const disclosure = node('details');
       disclosure.append(node('summary', '', t.details || 'Details'), node('pre', '', JSON.stringify(details, null, 2)));
       detailCell.append(disclosure);
       const severity = String(warning?.severity || '').toLowerCase();
       const rowClass = severity === 'error' ? 'is-error' : (details.skipped ? 'is-warning' : '');
       const row = node('tr', rowClass ? `lps-ap-batch-row ${rowClass}` : '');
-      const messageCell = node('td');
+      const messageCell = node(compactNegative ? 'div' : 'td');
       messageCell.append(node('p', '', warning?.message || '—'));
       const warningCode = String(warning?.code || '').toUpperCase();
       if (warningCode === 'PREVIOUS_WRITE_REQUIRES_REVIEW') {
@@ -560,6 +568,18 @@
         );
         messageCell.append(explanation);
       }
+      if (compactNegative) {
+        const cell = node('td');
+        const item = node('details');
+        item.append(node('summary', '', sku || '—'));
+        item.append(node('p', '', warning?.code || '—'), messageCell, detailCell);
+        if (warning?.recordedAt) item.append(node('p', '', `${t.recordedAt}: ${formatDateTime(warning.recordedAt)}`));
+        cell.append(item);
+        row.append(cell, node('td', '', negativeMovementDate(details)),
+          node('td', '', warning?.warehouseName || warning?.warehouseId || details.operation?.warehouseId || details.warehouseId || '—'));
+        body.append(row);
+        return;
+      }
       if (showWarehouse) {
         row.append(node('td', '', warning?.warehouseName || warning?.warehouseId || '—'));
       }
@@ -594,7 +614,7 @@
     } else if (!Array.isArray(report.items) || !report.items.length) {
       section.append(node('p', 'description', t.noWarehouseDiagnostics || 'No diagnostics were recorded.'));
     } else {
-      section.append(renderWarnings(report.items, Boolean(report.truncated), true));
+      section.append(renderWarnings(report.items, Boolean(report.truncated), true, report.kind === 'negative'));
       const pagination = node('div', 'tablenav bottom lps-ap-snapshot-pagination');
       const previous = node('button', 'button', t.previousPage || 'Previous');
       previous.type = 'button';
