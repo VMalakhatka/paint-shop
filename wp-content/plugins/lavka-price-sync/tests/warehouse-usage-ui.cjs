@@ -25,6 +25,10 @@ const html=execFileSync(process.env.PHP_BINARY||'php',[require('path').join(__di
   await page.waitForFunction(()=>document.querySelector('[data-warehouse-usage="15"]')?.value==='STOCK_ONLY'&&!document.querySelector('#lps-as-save').disabled);
   assert.equal(await page.locator('[data-warehouse-usage="5"]').inputValue(),'FULL');
   await page.locator('#lps-as-purchase-groups').evaluate(el=>{el.closest('details').open=true;});
+  assert.equal(await page.locator('#lps-as-purchase-freezing-days').inputValue(),'210');
+  assert.equal(await page.locator('#lps-as-purchase-nonfreezing-days').inputValue(),'150');
+  await page.locator('#lps-as-purchase-cold').check();
+  await page.locator('#lps-as-purchase-freezing-days').fill('211');
   assert.equal(await page.locator('[data-field="minimumWarehouseId"]').inputValue(),'5');
   await page.screenshot({path:require('path').join(require('os').tmpdir(),`warehouse-usage-${width}.png`),fullPage:true});
   await storage.selectOption('FULL');
@@ -33,6 +37,10 @@ const html=execFileSync(process.env.PHP_BINARY||'php',[require('path').join(__di
   await page.waitForFunction(()=>!document.querySelector('#lps-as-save').disabled);
   assert.deepEqual(saved.calculation.stockOnlyWarehouseIds,[]);
   assert.equal(saved.purchasePlanning.groups[0].minimumWarehouseId,15);
+  assert.equal(saved.purchasePlanning.coldCoverageEnabled,true);
+  assert.equal(saved.purchasePlanning.freezingTargetDays,211);
+  assert.equal(saved.purchasePlanning.nonFreezingTargetDays,150);
+  assert.equal(await page.locator('#lps-as-purchase-freezing-days').inputValue(),'211');
   assert.equal(await page.locator('[data-field="minimumWarehouseId"]').inputValue(),'15');
   await page.locator('[data-field="minimumWarehouseId"]').selectOption('5');
   await storage.selectOption('STOCK_ONLY');await page.locator('#lps-as-save').click();
@@ -41,6 +49,8 @@ const html=execFileSync(process.env.PHP_BINARY||'php',[require('path').join(__di
   await page.locator('#lps-as-new').click();assert.equal(await page.locator('[data-warehouse-usage]').count(),0);
   await page.locator('[data-scenario-id="4"]').click();
   await page.waitForFunction(()=>document.querySelector('[data-warehouse-usage="15"]')?.value==='STOCK_ONLY'&&!document.querySelector('#lps-as-save').disabled);
+  assert(await page.locator('#lps-as-purchase-cold').isChecked());
+  assert.equal(await page.locator('#lps-as-purchase-freezing-days').inputValue(),'211');
   await page.locator('#lps-as-warehouses').selectOption(['5']);
   await page.waitForFunction(()=>!document.querySelector('#lps-as-save').disabled);
   assert.equal(await page.locator('[data-warehouse-usage="15"]').count(),0);

@@ -24,6 +24,14 @@ Java API `kreul_com_ua`. Он дополняет общий
 
 ## Подтверждённая платформа
 
+Проверено 2026-10-09: endpoint рецептов требует runtime `LAVKA_TOKEN`, который
+Spring связывает с `lavka.token`; значение должно совпадать с существующим
+`api_token` Java-интеграции WordPress. Без ключа endpoint отвечает503 даже при
+успешном `/healthz`. Ключ хранится только в ignored `.env.prod`, не в Git/образе;
+`deploy.sh` переносит этот файл при следующем deploy и перезапускает контейнер.
+Достаточность deploy проверять отдельным авторизованным `assembly-graph` вызовом:
+HTTP200 и `ok:true`, `version:2`. Не выводить ключ в командах или логах.
+
 - Spring Boot `3.2.3`, Java `17`, Maven;
 - multi-stage `Dockerfile`: Maven/Temurin 17 для сборки и Temurin 17 для runtime;
 - image и container: `kreul-api`, application port `8080`;

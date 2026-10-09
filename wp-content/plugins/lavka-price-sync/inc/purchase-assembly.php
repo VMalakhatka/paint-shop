@@ -52,6 +52,18 @@ function lps_purchase_calculate_network(array $state): array {
         $node = $nodes[$key];
         $row = $raw[$key] ?? ['sku' => $node['sku'], 'productName' => $node['sku']];
         $issues = $node['issues'];
+        $groups = $state['groups'];
+        $cold_status = $node['coldStatus'] ?? 'UNKNOWN';
+        $coverage = $state['coldCoverage'] ?? [];
+        $target_days = null;
+        if (!empty($coverage['enabled'])) {
+            $target_days = $cold_status === 'FREEZES' ? ($coverage['freezingTargetDays'] ?? null)
+                : ($cold_status === 'NON_FREEZING' ? ($coverage['nonFreezingTargetDays'] ?? null) : null);
+            $target_days = lps_purchase_number($target_days, 1, 730);
+            if ($target_days === null) $issues[] = 'COLD_CLASSIFICATION_REQUIRED';
+            else foreach ($groups as &$group) $group['targetDays'] = $target_days;
+            unset($group);
+        }
         if ($cycle) $issues[] = 'ASSEMBLY_CYCLE';
         if (!isset($raw[$key])) $issues[] = 'ASSEMBLY_CHILD_DATA_REQUIRED';
         $supplier = $row['dimensions']['currentSuppliers'] ?? [];
@@ -59,7 +71,7 @@ function lps_purchase_calculate_network(array $state): array {
             && lps_assembly_key((string)$supplier[0]) === lps_assembly_key($state['orderSupplier']);
         if (isset($roots[$key]) && !$node['manufactured'] && !$purchasable) $issues[] = 'SUPPLIER_NOT_CONFIRMED';
         $assembly = ['manufactured' => $node['manufactured'], 'consumption' => [], 'contributions' => [], 'issues' => []];
-        foreach ($state['groups'] as $group) {
+        foreach ($groups as $group) {
             $code = $group['code']; $assembly['issues'][$code] = $issues;
             $known = true; $total = 0.0;
             foreach ($children[$key] ?? [] as $edge) {
@@ -80,8 +92,9 @@ function lps_purchase_calculate_network(array $state): array {
             if (!is_finite($total) || $total > 1000000000) { $known = false; $assembly['issues'][$code][] = 'ASSEMBLY_INVALID_RECIPE'; }
             $assembly['consumption'][$code] = $known ? $total : null;
         }
-        $result = lps_purchase_calculate($row, $state['groups'], $state['periodDays'], $state['allowTransfers'],
+        $result = lps_purchase_calculate($row, $groups, $state['periodDays'], $state['allowTransfers'],
             $state['edits'][$row['sku']] ?? [], $state['transitWarehouseIds'], $assembly);
+        $result['coldCoverage'] = ['enabled' => !empty($coverage['enabled']), 'status' => $cold_status, 'targetDays' => $target_days];
         $result['assembly'] = ['manufactured' => $node['manufactured'], 'selected' => isset($roots[$key]), 'purchasable' => $purchasable,
             'components' => $components[$key] ?? []];
         return $result;

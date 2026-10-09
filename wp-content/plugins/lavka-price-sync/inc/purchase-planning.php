@@ -36,6 +36,8 @@ function lps_purchase_i18n(): array {
         'minimumSourceHelp' => __('Only the selected warehouse contributes minimum stock above the forecast. Other group warehouses still contribute stock and demand according to their usage settings. Existing scenarios use the receiving warehouse by default.', 'lavka-price-sync'),
         'leadTimeDays' => __('Lead time, days', 'lavka-price-sync'),
         'targetDays' => __('Stock after arrival, days', 'lavka-price-sync'),
+        'coldCoverage' => __('Use cold-sensitive stock coverage', 'lavka-price-sync'),
+        'coldStatuses' => ['FREEZES' => __('Freezes', 'lavka-price-sync'), 'NON_FREEZING' => __('Does not freeze', 'lavka-price-sync'), 'UNKNOWN' => __('Cold sensitivity unknown', 'lavka-price-sync')],
         'safetyDays' => __('Safety stock, days', 'lavka-price-sync'),
         'loading' => __('Building purchase preview...', 'lavka-price-sync'),
         'loaded' => __('SKU loaded', 'lavka-price-sync'),
@@ -117,6 +119,7 @@ function lps_purchase_i18n(): array {
         'filterHelp' => __('Filters change only the on-screen view. Preliminary need is calculated before expected receipts; a ready recommendation appears only after all supply checks.', 'lavka-price-sync'),
         'minimumStock' => __('Minimum stock', 'lavka-price-sync'),
         'issues' => [
+            'COLD_CLASSIFICATION_REQUIRED' => __('Cold sensitivity is missing or differs between warehouses. Check BALL2 before ordering.', 'lavka-price-sync'),
             'ASSEMBLY_ROLE_REQUIRED' => __('The Folio assembly role is missing or differs between warehouses. Check BALL4.', 'lavka-price-sync'),
             'ASSEMBLY_RECIPE_REQUIRED' => __('This is a child product, but its recipe is missing. Check the Folio assembly tables.', 'lavka-price-sync'),
             'ASSEMBLY_INVALID_RECIPE' => __('The recipe contains an empty SKU, a non-positive coefficient or a self-reference. Correct it in Folio.', 'lavka-price-sync'),
@@ -158,6 +161,10 @@ function lps_purchase_scenario_fields(): void {
         <summary><h2><?php echo esc_html__('Purchase planning', 'lavka-price-sync'); ?></h2></summary>
         <div class="lps-as-purchase-body">
             <p><label><input type="checkbox" id="lps-as-purchase-enabled"> <?php echo esc_html__('Enable supplier order preview', 'lavka-price-sync'); ?></label></p>
+            <p><label><input type="checkbox" id="lps-as-purchase-cold"> <?php echo esc_html__('Use cold-sensitive stock coverage', 'lavka-price-sync'); ?></label></p>
+            <p><label><?php echo esc_html__('Stock for freezing products, days', 'lavka-price-sync'); ?> <input type="number" id="lps-as-purchase-freezing-days" min="1" max="730" value="210"></label>
+            <label><?php echo esc_html__('Stock for non-freezing products, days', 'lavka-price-sync'); ?> <input type="number" id="lps-as-purchase-nonfreezing-days" min="1" max="730" value="150"></label></p>
+            <p class="description"><?php echo esc_html__('When enabled, these periods replace group stock days for each product, including children. Lead time and safety days still apply. Unknown cold sensitivity requires review.', 'lavka-price-sync'); ?></p>
             <p><label><input type="checkbox" id="lps-as-purchase-transfers"> <?php echo esc_html__('Suggest transfers from surplus destination groups first', 'lavka-price-sync'); ?></label></p>
             <p><label><?php echo esc_html__('Pack rounding', 'lavka-price-sync'); ?>
                 <select id="lps-as-purchase-pack"><?php foreach (lps_purchase_i18n()['packModes'] as $value => $label): ?><option value="<?php echo esc_attr($value); ?>" <?php selected($value, 'UP'); ?>><?php echo esc_html($label); ?></option><?php endforeach; ?></select>
@@ -231,6 +238,9 @@ function lps_purchase_start(int $id, int $version): array {
         'query' => $query, 'groups' => $groups, 'groupsRevision' => lavka_get_global_warehouse_groups_revision(),
         'transitWarehouseIds' => $transit_ids, 'transitGenerationId' => null, 'transitContractVersion' => 3,
         'periodDays' => $days, 'allowTransfers' => $profile['purchasePlanning']['allowTransfers'],
+        'coldCoverage' => ['enabled' => !empty($profile['purchasePlanning']['coldCoverageEnabled']),
+            'freezingTargetDays' => $profile['purchasePlanning']['freezingTargetDays'] ?? 210,
+            'nonFreezingTargetDays' => $profile['purchasePlanning']['nonFreezingTargetDays'] ?? 150],
         'rows' => [], 'edits' => [], 'page' => 0, 'cursor' => null, 'seenCursors' => [], 'complete' => false,
         'context' => null, 'createdAt' => wp_date('Y-m-d H:i:s')];
     set_transient(lps_purchase_session_key($token), $state, 2 * HOUR_IN_SECONDS);
@@ -450,6 +460,7 @@ add_action('admin_post_lps_purchase_export', static function (): void {
         $columns[] = ['key' => 'childCoverageWarning', 'label' => __('Child demand coverage warning', 'lavka-price-sync')];
         $columns[] = ['key' => 'supplierPrices', 'label' => $t['supplierPrices']];
         $columns[] = ['key' => 'status', 'label' => __('Status', 'lavka-price-sync')];
+        $columns[] = ['key' => 'coldStatus', 'label' => $t['coldCoverage']];
         $columns[] = ['key' => 'transitWarehouses', 'label' => $t['transitWarehouses']];
         $columns[] = ['key' => 'transitStatus', 'label' => $t['transitStatus']];
         $columns[] = ['key' => 'transitPool', 'label' => $t['transitPool']];
@@ -467,6 +478,7 @@ add_action('admin_post_lps_purchase_export', static function (): void {
             foreach ($calculated['groups'] as $group) {
                 $stock_report = $calculated['stockReport']['groups'][$group['groupCode']];
                 $record = ['sku' => (string)$sku, 'product' => $calculated['productName'], 'group' => $group['groupName'],
+                    'coldStatus' => $t['coldStatuses'][$calculated['coldCoverage']['status']] ?? $t['coldStatuses']['UNKNOWN'],
                     'receivingWarehouse' => $group['receivingWarehouseId'], 'available' => $group['available'], 'sales' => $stock_report['regularSales'],
                     'internalReserved' => $group['internalReserved'],
                     'physical' => $stock_report['physical'], 'ownTarget' => $group['ownTarget'], 'componentDemand' => $group['componentDemand'],
@@ -495,7 +507,7 @@ add_action('admin_post_lps_purchase_export', static function (): void {
                 $settings = array_values(array_filter($state['groups'], static fn($settings) => $settings['code'] === $group['groupCode']))[0];
                 $record += ['supplier' => implode(', ', $calculated['supplier']), 'scenario' => $state['scenario']['name'] . ' v' . $state['scenario']['version'],
                     'period' => $state['query']['period']['from'] . ' - ' . $state['query']['period']['to'],
-                    'leadTimeDays' => $settings['leadTimeDays'], 'targetDays' => $settings['targetDays'], 'safetyDays' => $settings['safetyDays'],
+                    'leadTimeDays' => $settings['leadTimeDays'], 'targetDays' => !empty($calculated['coldCoverage']['enabled']) ? $calculated['coldCoverage']['targetDays'] : $settings['targetDays'], 'safetyDays' => $settings['safetyDays'],
                     'groupsRevision' => $state['groupsRevision'], 'transitWarehouses' => implode(', ', $state['transitWarehouseIds']),
                     'transitStatus' => $calculated['transitStatus'], 'transitPool' => $calculated['transitPool'], 'receiptsReviewed' => $group['receiptsReviewed'] ? 'YES' : 'NO',
                     'transitSource' => wp_json_encode($raw['inTransitStock'] ?? null, JSON_UNESCAPED_UNICODE)];

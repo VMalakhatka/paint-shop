@@ -99,6 +99,7 @@
             const group = filterData.group || {};
             const subgroup = (filterData.subgroups || []).length ? filterData.subgroups[filterData.subgroups.length - 1].label : '—';
             return '<section class="lps-purchase-sku"><h2>' + escape(row.sku) + ' · ' + escape(row.productName) + '</h2>' +
+                (row.coldCoverage && row.coldCoverage.enabled ? '<p>' + escape((t.coldStatuses || {})[row.coldCoverage.status] || row.coldCoverage.status) + ' · ' + escape(t.targetDays) + ': ' + display(row.coldCoverage.targetDays) + '</p>' : '') +
                 (row.stockReport ? '<div class="lps-purchase-scroll"><table class="widefat striped lps-purchase-stock"><thead><tr>' + ['group','periodExpense','physical','componentDemand','excessStock','stockMonths'].map((key) => '<th>' + escape(t[key]) + '</th>').join('') + '</tr></thead><tbody>' +
                     [{name:t.allWarehouses, ...row.stockReport.total}, ...row.groups.map((g) => ({name:g.groupName, ...row.stockReport.groups[g.groupCode]}))].map((r) => '<tr><th>' + escape(r.name) + '</th>' + ['periodExpense','physical','componentDemand','excessStock','stockMonths'].map((key) => '<td data-stock-field="' + key + '">' + (key === 'stockMonths' && r[key] === 9999 ? '9999' : display(r[key])) + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>' : '') +
                 '<p><strong>' + escape(row.assembly ? (row.assembly.manufactured ? t.assemblyOnly : (row.assembly.purchasable ? t.supplierOrder : t.review)) : t.assemblyPending) + '</strong></p>' +

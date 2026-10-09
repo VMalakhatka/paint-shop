@@ -6378,3 +6378,30 @@ msgstr ""
 #: inc/purchase-planning.php
 msgid "Child demand coverage warning"
 msgstr ""
+
+msgid "Use cold-sensitive stock coverage"
+msgstr ""
+
+msgid "Freezes"
+msgstr ""
+
+msgid "Does not freeze"
+msgstr ""
+
+msgid "Cold sensitivity unknown"
+msgstr ""
+
+msgid "Stock for freezing products, days"
+msgstr ""
+
+msgid "Stock for non-freezing products, days"
+msgstr ""
+
+msgid "When enabled, these periods replace group stock days for each product, including children. Lead time and safety days still apply. Unknown cold sensitivity requires review."
+msgstr ""
+
+msgid "Cold sensitivity is missing or differs between warehouses. Check BALL2 before ordering."
+msgstr ""
+
+msgid "Set both cold-sensitive coverage periods between 1 and 730 days."
+msgstr ""

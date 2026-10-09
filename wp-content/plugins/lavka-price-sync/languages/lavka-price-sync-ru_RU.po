@@ -6597,3 +6597,30 @@ msgstr "Расход на сборку исключён из спроса и о�
 #: inc/purchase-planning.php
 msgid "Child demand coverage warning"
 msgstr "Предупреждение о покрытии потребности детей"
+
+msgid "Use cold-sensitive stock coverage"
+msgstr "Запас в зависимости от морозостойкости"
+
+msgid "Freezes"
+msgstr "Мёрзнет"
+
+msgid "Does not freeze"
+msgstr "Не мёрзнет"
+
+msgid "Cold sensitivity unknown"
+msgstr "Морозостойкость неизвестна"
+
+msgid "Stock for freezing products, days"
+msgstr "Запас для мерзнущих товаров, дней"
+
+msgid "Stock for non-freezing products, days"
+msgstr "Запас для немерзнущих товаров, дней"
+
+msgid "When enabled, these periods replace group stock days for each product, including children. Lead time and safety days still apply. Unknown cold sensitivity requires review."
+msgstr "Эти сроки заменяют срок запаса группы для каждого товара, включая детей. Срок поставки и страховой запас добавляются. Неизвестную морозостойкость нужно проверить."
+
+msgid "Cold sensitivity is missing or differs between warehouses. Check BALL2 before ordering."
+msgstr "Морозостойкость не указана или отличается между складами. Проверьте BALL2 перед заказом."
+
+msgid "Set both cold-sensitive coverage periods between 1 and 730 days."
+msgstr "Укажите оба срока запаса от 1 до 730 дней."

@@ -283,11 +283,14 @@
             group.supplyFromGroupCode = row.querySelector('[data-field="supplyFromGroupCode"]').value;
             groups.push(group);
         });
-        return { version: 2, packRounding: el('lps-as-purchase-pack').value, stockoutCorrectionEnabled: el('lps-as-purchase-stockout').checked, maxDemandMultiplier: Number(el('lps-as-purchase-demand-cap').value), enabled: el('lps-as-purchase-enabled').checked, allowTransfers: el('lps-as-purchase-transfers').checked, groups: groups };
+        return { version: 2, coldCoverageEnabled: el('lps-as-purchase-cold').checked, freezingTargetDays: Number(el('lps-as-purchase-freezing-days').value), nonFreezingTargetDays: Number(el('lps-as-purchase-nonfreezing-days').value), packRounding: el('lps-as-purchase-pack').value, stockoutCorrectionEnabled: el('lps-as-purchase-stockout').checked, maxDemandMultiplier: Number(el('lps-as-purchase-demand-cap').value), enabled: el('lps-as-purchase-enabled').checked, allowTransfers: el('lps-as-purchase-transfers').checked, groups: groups };
     }
 
     function applyPurchasePlanning(plan) {
         plan = plan || {};
+        el('lps-as-purchase-cold').checked = plan.coldCoverageEnabled === true;
+        el('lps-as-purchase-freezing-days').value = plan.freezingTargetDays == null ? 210 : plan.freezingTargetDays;
+        el('lps-as-purchase-nonfreezing-days').value = plan.nonFreezingTargetDays == null ? 150 : plan.nonFreezingTargetDays;
         el('lps-as-purchase-pack').value = plan.packRounding || (plan.respectPack === false ? 'NONE' : 'UP');
         el('lps-as-purchase-stockout').checked = plan.stockoutCorrectionEnabled === true;
         el('lps-as-purchase-demand-cap').value = plan.maxDemandMultiplier == null ? 1.1 : plan.maxDemandMultiplier;

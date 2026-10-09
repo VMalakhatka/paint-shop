@@ -91,3 +91,22 @@ $s['edits']['G']=['group'=>['openOrders'=>0]];
 $s['assemblyGraph']=['nodes'=>[node('P',false),node('C',true),node('G',true)],'edges'=>[edge('P','C',0.1),edge('C','G',0.25)]];
 check(abs(calculate($s)['P']['groups'][0]['childCoverageShortfall']-0.1)<1e-12,'Four grandchildren require one sheet and 0.1 parent pack, not an invisible zero');
 echo "PASS: visible child shortages after rounding, manual choices, stock/receipts, unknown inputs and grandchild chain\n";
+
+// A non-freezing component can supply a freezing child: use each node's own period.
+$s=['rootSkus'=>['P'],'orderSupplier'=>'Supplier','periodDays'=>30,'allowTransfers'=>false,'transitWarehouseIds'=>[],
+ 'groups'=>[['code'=>'group','name'=>'Group','warehouseIds'=>[1],'receivingWarehouseId'=>1,'leadTimeDays'=>0,'targetDays'=>30,'safetyDays'=>0,'packRounding'=>'NONE']],
+ 'rows'=>['P'=>product('P',2,3),'C'=>product('C',4,6)],
+ 'edits'=>['P'=>['group'=>['openOrders'=>0]],'C'=>['group'=>['openOrders'=>0]]],
+ 'coldCoverage'=>['enabled'=>true,'freezingTargetDays'=>210,'nonFreezingTargetDays'=>150],
+ 'assemblyGraph'=>['nodes'=>[node('P',false)+['coldStatus'=>'NON_FREEZING'],node('C',true)+['coldStatus'=>'FREEZES']],'edges'=>[edge('P','C',0.5)]]];
+$a=calculate($s);
+check($a['P']['groups'][0]['ownTarget']===15.0,'Non-freezing parent uses 150 days');
+check($a['C']['groups'][0]['ownTarget']===42.0 && $a['C']['groups'][0]['manufacturingNeed']===38.0,'Freezing child uses 210 days and nets its stock once');
+check($a['P']['groups'][0]['componentDemand']===19.0 && $a['P']['groups'][0]['finalQuantity']===32.0,'Correct child horizon propagates fractional component shortage into parent');
+check($a['P']['coldCoverage']['targetDays']===150.0,'Report retains the applied per-product horizon');
+$s['assemblyGraph']['nodes'][1]['coldStatus']='UNKNOWN';
+check(in_array('COLD_CLASSIFICATION_REQUIRED',calculate($s)['C']['groups'][0]['issues'],true),'Unknown cold class blocks cold-sensitive forecasts');
+check(calculate($s)['P']['groups'][0]['finalQuantity']===null,'Unknown child class blocks its parent');
+$s['coldCoverage']['enabled']=false;
+check(calculate($s)['P']['groups'][0]['finalQuantity']===2.0,'Existing fixed group horizons remain unchanged');
+echo "PASS: cold-sensitive parent/child horizons and unknown classification\n";

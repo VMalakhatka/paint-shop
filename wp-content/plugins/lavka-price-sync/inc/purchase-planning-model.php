@@ -198,7 +198,13 @@ function lps_purchase_profile(array $input): array {
     $mode = lps_purchase_pack_mode($input);
     $multiplier = lps_purchase_number($input['maxDemandMultiplier'] ?? 1.1, 1, 100);
     if ($multiplier === null) throw new InvalidArgumentException(__('Set the demand multiplier between 1 and 100.', 'lavka-price-sync'));
+    $cold_enabled = !empty($input['coldCoverageEnabled']);
+    $freezing_days = lps_purchase_number($input['freezingTargetDays'] ?? 210, 1, 730);
+    $non_freezing_days = lps_purchase_number($input['nonFreezingTargetDays'] ?? 150, 1, 730);
+    if ($cold_enabled && ($freezing_days === null || $non_freezing_days === null))
+        throw new InvalidArgumentException(__('Set both cold-sensitive coverage periods between 1 and 730 days.', 'lavka-price-sync'));
     return ['version' => 2, 'enabled' => !empty($input['enabled']),
+        'coldCoverageEnabled' => $cold_enabled, 'freezingTargetDays' => $freezing_days, 'nonFreezingTargetDays' => $non_freezing_days,
         'packRounding' => $mode, 'respectPack' => $mode !== 'NONE',
         'stockoutCorrectionEnabled' => !empty($input['stockoutCorrectionEnabled']), 'maxDemandMultiplier' => $multiplier,
         'allowTransfers' => !empty($input['allowTransfers']), 'groups' => $groups];
