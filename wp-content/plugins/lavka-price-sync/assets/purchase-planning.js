@@ -58,6 +58,7 @@
         state.filters.productSubgroup = options(el('product-subgroup'), subgroupItems, state.filters.productSubgroup);
     }
     function hasSales(row) {
+        if (row.groups.some((group) => Number(group.componentDemand) > 0 || (group.childContributions || []).length > 0)) return true;
         const values = row.groups.map((group) => group.regularSales);
         if (values.some((value) => value != null && Number(value) > 0)) return true;
         return values.some((value) => value == null);
@@ -90,13 +91,16 @@
         el('next').disabled = rows.length === 0 || state.page >= pages - 1;
         el('filters').disabled = state.rows.length === 0;
         el('filter-count').textContent = String(t.filterCount || '%1$s / %2$s').replace('%1$s', number.format(rows.length)).replace('%2$s', number.format(state.rows.length));
-        const headings = ['group', 'purchase', 'final', 'physical', 'available', 'internalReserved', 'planningAvailable', 'sales', 'availableDays', 'stockoutDays', 'estimatedLostSales', 'appliedLostSales', 'adjustedSales', 'minimumWarehouse', 'minimumReserve', 'returns', 'coverage', 'target', 'need', 'plannedTransferIn', 'plannedTransferOut', 'transfer'];
+        const headings = ['group', 'purchase', 'final', 'physical', 'available', 'internalReserved', 'planningAvailable', 'sales', 'availableDays', 'stockoutDays', 'estimatedLostSales', 'appliedLostSales', 'adjustedSales', 'minimumWarehouse', 'minimumReserve', 'returns', 'coverage', 'ownTarget', 'componentDemand', 'manufacturingNeed', 'target', 'need', 'plannedTransferIn', 'plannedTransferOut', 'transfer'];
         el('results').innerHTML = rows.length ? rows.slice(state.page * 25, state.page * 25 + 25).map((row) => {
             const index = state.rows.indexOf(row);
             const filterData = row.filterData || {};
             const group = filterData.group || {};
             const subgroup = (filterData.subgroups || []).length ? filterData.subgroups[filterData.subgroups.length - 1].label : '—';
             return '<section class="lps-purchase-sku"><h2>' + escape(row.sku) + ' · ' + escape(row.productName) + '</h2>' +
+                '<p><strong>' + escape(row.assembly ? (row.assembly.manufactured ? t.assemblyOnly : (row.assembly.purchasable ? t.supplierOrder : t.review)) : t.assemblyPending) + '</strong></p>' +
+                (row.assembly && row.assembly.components.length ? '<details><summary>' + escape(t.components) + '</summary>' + row.assembly.components.map((c) => '<p>' + escape(c.parent) + ': ' + display(c.factor) + '</p>').join('') + '</details>' : '') +
+                (row.groups.some((g) => (g.childContributions || []).length) ? '<details><summary>' + escape(t.childContributions) + '</summary>' + row.groups.map((g) => (g.childContributions || []).map((c) => '<p><strong>' + escape(g.groupName) + ' · <button type="button" class="button-link" data-child-sku="' + escape(c.sku) + '">' + escape(c.sku) + '</button></strong>: ' + escape(t.manufacturingNeed) + ' ' + display(c.manufacturingNeed) + ' × ' + escape(t.factor) + ' ' + display(c.factor) + ' = ' + display(c.consumption) + '</p>').join('')).join('') + '</details>' : '') +
                 '<p class="lps-purchase-filter-meta">' + escape(t.productGroup) + ': ' + escape(group.label || '—') + ' · ' + escape(t.productSubgroup) + ': ' + escape(subgroup) + ' · ' + escape(t.minimumStock) + ': ' + display(filterData.minimumStock) + '</p>' +
                 '<p>' + escape(row.supplier.join(', ')) + ' · ' + escape(t.transitPool) + ': ' + display(row.transitPool) + '</p>' +
                 (row.supplierPrices || []).map((price) => '<details><summary>' + escape(t.supplierPrices) + ' · ' + escape(price.supplier) + ' #' + price.versionId + ' · ' + escape((t.supplierPriceLabels || {})[price.status] || price.status) + '</summary>' +
@@ -116,14 +120,14 @@
                     '<td>' + display(group.demand.estimatedLostSales) + '</td>' +
                     '<td>' + display(group.demand.appliedLostSales) + '</td><td>' + display(group.demand.adjustedSales) + '</td>' +
                     '<td>' + escape(group.minimumWarehouseName || group.minimumWarehouseId || '—') + '</td><td>' + display(group.minimumReserve) + '</td>' +
-                    ['returns', 'coverageDays', 'target', 'needBeforeReceipts'].map((key) => '<td>' + display(group[key]) + '</td>').join('') +
+                    ['returns', 'coverageDays', 'ownTarget', 'componentDemand', 'manufacturingNeed', 'target', 'needBeforeReceipts'].map((key) => '<td>' + display(group[key]) + '</td>').join('') +
                     '<td>' + display(group.plannedTransferIn) + '</td><td>' + display(group.plannedTransferOut) + '</td>' +
                     '<td>' + group.transfers.map((transfer) => escape(transfer.fromName) + ': ' + display(transfer.quantity)).join('<br>') + (group.transferOut > 0 ? '<br>−' + display(group.transferOut) : '') + '</td></tr>').join('') +
                 '</tbody></table></div><details><summary>' + escape(t.details) + '</summary><form data-edit-form="' + index + '">' + row.groups.map((group) =>
                     '<fieldset data-group="' + escape(group.groupCode) + '"><legend>' + escape(group.groupName) + '</legend><p>' + escape(t.supplyFromGroupCode) + ': ' + escape(group.supplyFromGroupCode ? (row.groups.find((item) => item.groupCode === group.supplyFromGroupCode) || {}).groupName || group.supplyFromGroupCode : t.directSupplier) + '</p><div class="lps-purchase-inputs">' +
-                    ['inTransit', 'openOrders', 'pack', 'moq'].map((key) => input(key, group.inputs[key], t[key])).join('') +
-                    '<label><span>' + escape(t.packRounding) + '</span><select data-field="packRounding">' + Object.entries(t.packModes).map(([key, label]) => '<option value="' + key + '"' + (group.packRounding === key ? ' selected' : '') + '>' + escape(label) + '</option>').join('') + '</select></label>' +
-                    (group.supplyFromGroupCode ? input('requiredTransfer', group.requiredTransferOverride, t.requiredTransfer) : input('quantity', group.managerQuantity, t.quantity)) + input('reason', group.managerReason, t.reason, 'text') + '</div><p>' + escape(t.demandStatus) + ': ' + escape(t.demandStatuses[group.demand.status]) + ' · ' + escape(t.estimatedLostSales) + ': ' + display(group.demand.estimatedLostSales) + ' · ' + escape(t.maxDemandMultiplier) + ': ' + display(group.demand.maxDemandMultiplier) + '</p><p>' + escape(t.packHelp) + '</p><label><input type="checkbox" data-field="receiptsReviewed"' + (group.receiptsReviewed ? ' checked' : '') + '> ' + escape(t.receiptsReviewed) + '</label><ul class="lps-purchase-review">' +
+                    (row.assembly && row.assembly.manufactured ? ['inTransit', 'openOrders'] : ['inTransit', 'openOrders', 'pack', 'moq']).map((key) => input(key, group.inputs[key], t[key])).join('') +
+                    (row.assembly && row.assembly.manufactured ? '' : '<label><span>' + escape(t.packRounding) + '</span><select data-field="packRounding">' + Object.entries(t.packModes).map(([key, label]) => '<option value="' + key + '"' + (group.packRounding === key ? ' selected' : '') + '>' + escape(label) + '</option>').join('') + '</select></label>') +
+                    (group.supplyFromGroupCode ? input('requiredTransfer', group.requiredTransferOverride, t.requiredTransfer) : (row.assembly && row.assembly.manufactured ? '' : input('quantity', group.managerQuantity, t.quantity))) + input('reason', group.managerReason, t.reason, 'text') + '</div><p>' + escape(t.demandStatus) + ': ' + escape(t.demandStatuses[group.demand.status]) + ' · ' + escape(t.estimatedLostSales) + ': ' + display(group.demand.estimatedLostSales) + ' · ' + escape(t.maxDemandMultiplier) + ': ' + display(group.demand.maxDemandMultiplier) + '</p><p>' + escape(row.assembly && row.assembly.manufactured ? t.assemblyOnly : t.packHelp) + '</p><label><input type="checkbox" data-field="receiptsReviewed"' + (group.receiptsReviewed ? ' checked' : '') + '> ' + escape(t.receiptsReviewed) + '</label><ul class="lps-purchase-review">' +
                     group.issues.map((issue) => '<li>' + escape(t.issues[issue] || issue) + '</li>').join('') + '</ul></fieldset>').join('') +
                 '<button class="button" type="submit"' + (!state.complete || state.busy ? ' disabled' : '') + '>' + escape(t.apply) + '</button></form></details></section>';
         }).join('') : (state.rows.length ? '<p class="notice notice-info inline">' + escape(t.noFilterResults) + '</p>' : '');
@@ -141,7 +145,7 @@
             state.controller = new AbortController();
             try {
                 const data = await api('adjust', { token: state.token, sku: row.sku, groups: groups });
-                state.rows[Number(form.dataset.editForm)] = data.item;
+                state.rows = data.items;
                 render();
                 message(t.complete);
             } catch (error) {
@@ -174,7 +178,9 @@
             do {
                 const data = await api('page', { token: state.token, page: page });
                 if (requestId !== state.requestId) return;
-                state.rows.push(...data.items); state.complete = data.complete; page = data.page;
+                if (data.replaceItems) state.rows = data.items;
+                else state.rows.push(...data.items);
+                state.complete = data.complete; page = data.page;
                 parameters.snapshotContext = data.context;
                 el('parameters').textContent = JSON.stringify(parameters, null, 2);
                 message(t.loading + ' ' + t.loaded + ': ' + data.loaded + ' / ' + data.total);
@@ -191,6 +197,14 @@
         } finally { if (requestId === state.requestId) busy(false); }
     });
     el('cancel').addEventListener('click', () => { if (state.controller) state.controller.abort(); });
+    root.addEventListener('click', (event) => {
+        const link = event.target.closest('[data-child-sku]');
+        if (!link) return;
+        const index = state.rows.findIndex((row) => row.sku.trim().toUpperCase() === link.dataset.childSku.trim().toUpperCase());
+        if (index < 0) return;
+        resetFilters(); state.page = Math.floor(index / 25); render();
+        root.querySelector('[data-edit-form="' + index + '"]').closest('section').scrollIntoView({ block: 'start' });
+    });
     el('prev').addEventListener('click', () => { if (state.page > 0) { state.page--; render(); } });
     el('next').addEventListener('click', () => { state.page++; render(); });
     el('scenario').addEventListener('change', () => {

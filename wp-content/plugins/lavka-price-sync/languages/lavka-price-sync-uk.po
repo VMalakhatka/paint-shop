@@ -6453,3 +6453,91 @@ msgstr "Перевірте початкове завдання Java: підтв�
 
 msgid "Warehouse %d is included again after a completed attempt failed. A fresh snapshot will be built; the previous error is retained in diagnostics."
 msgstr "Склад %d знову включено після завершеної невдалої спроби. Буде створено свіжий знімок; попередню помилку збережено в діагностиці."
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Select one supplier. Children and grandchildren are found automatically, including our own products and products outside the supplier filter. Review their stock and incoming quantities. Only their shortages consume components. The export contains purchasing products of the selected supplier; assembly documents are not created."
+msgstr "Оберіть одного постачальника. Система автоматично знайде дітей та онуків, зокрема власні товари й товари поза відбором постачальника. Перевірте їхні залишки та очікувані надходження. Складові потрібні лише для покриття дефіциту. У файл замовлення потрапляють тільки закуповувані товари обраного постачальника. Накладні складання не створюються."
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Own sales forecast with minimum stock"
+msgstr "Власний прогноз із мінімальним запасом"
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Component demand from children"
+msgstr "Потреба для виготовлення дітей"
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Quantity to manufacture"
+msgstr "Кількість для виготовлення"
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Child shortage breakdown"
+msgstr "Розшифрування дефіциту дітей"
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Components per unit"
+msgstr "Складові на одиницю товару"
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Manufactured product: calculation only, excluded from supplier order"
+msgstr "Товар виготовляється: лише для розрахунку, до замовлення постачальнику не входить"
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Purchasing product of the selected supplier"
+msgstr "Закуповуваний товар обраного постачальника"
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Checking recipes and dependent products"
+msgstr "Перевіряємо складові та пов’язані товари"
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Component units per child"
+msgstr "Одиниць складової на дитину"
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Recalculate this product and its parents"
+msgstr "Перерахувати товар і його батьків"
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "The Folio assembly role is missing or differs between warehouses. Check BALL4."
+msgstr "Ознака складання у ФОЛІО відсутня або різниться між складами. Перевірте BALL4."
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "This is a child product, but its recipe is missing. Check the Folio assembly tables."
+msgstr "Це товар-дитина, але його складові не знайдено. Перевірте таблиці складання у ФОЛІО."
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "The recipe contains an empty SKU, a non-positive coefficient or a self-reference. Correct it in Folio."
+msgstr "У складі є порожній артикул, нульовий або від’ємний коефіцієнт чи посилання товару на себе. Виправте у ФОЛІО."
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "The recipe repeats a component or has ambiguous simple parents. Check the source rows in Folio."
+msgstr "Складова повторюється або для простої розборки вказано неоднозначних батьків. Перевірте рядки у ФОЛІО."
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "The assembly chain contains a cycle. This product or one of its children requires recipe correction."
+msgstr "Ланцюжок складання містить цикл. Потрібно виправити склад цього товару або його дітей."
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Child analytics are missing for the selected warehouses. Refresh the snapshots and start a new preview."
+msgstr "Аналітика дитини для обраних складів відсутня. Оновіть знімки та почніть новий розрахунок."
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Review the child shortage breakdown and complete the child supply inputs. Its unknown shortage is not treated as zero."
+msgstr "Перегляньте розшифрування дефіциту дітей і заповніть їхні очікувані надходження. Невідомий дефіцит не вважається нульовим."
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Remove assembly consumption from the sales selection: child forecasts already calculate component consumption."
+msgstr "Приберіть витрати на складання з відбору продажів: прогноз дітей уже враховує витрати складових."
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Select exactly one supplier for the purchase preview."
+msgstr "Для попереднього розрахунку замовлення оберіть одного постачальника."
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Assembly recipes changed. Start a new preview before exporting."
+msgstr "Складові товарів змінилися. Перед експортом почніть новий розрахунок."
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Assembly recipes are unavailable or incomplete. Update Java and start a new preview."
+msgstr "Дані про склад товарів недоступні або неповні. Оновіть Java та почніть новий розрахунок."

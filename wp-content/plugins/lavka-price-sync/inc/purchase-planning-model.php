@@ -288,7 +288,8 @@ function lps_purchase_filter_data(array $dimensions): array {
 }
 
 // Operates on Java's confirmed metrics; never reconstructs Folio movements.
-function lps_purchase_calculate(array $row, array $groups, int $period_days, bool $allow_transfers, array $edits = [], ?array $transit_ids = null): array {
+function lps_purchase_calculate(array $row, array $groups, int $period_days, bool $allow_transfers, array $edits = [], ?array $transit_ids = null, array $assembly = []): array {
+    $manufactured = !empty($assembly['manufactured']);
     $members = array_column((array)($row['warehouseBreakdown'] ?? []), null, 'warehouseId');
     $transit = $row['inTransitStock'] ?? [];
     $transit_ids = $transit_ids ?? lps_purchase_transit_warehouses();
@@ -301,14 +302,14 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
     foreach ($groups as $group) {
         $edit = $edits[$group['code']] ?? [];
         $minimum_id = (int)($group['minimumWarehouseId'] ?? $group['receivingWarehouseId']);
-        $pack_mode = lps_purchase_pack_mode($edit, lps_purchase_pack_mode($group));
+        $pack_mode = $manufactured ? 'NONE' : lps_purchase_pack_mode($edit, lps_purchase_pack_mode($group));
         $respect_pack = $pack_mode !== 'NONE';
-        $issues = $internal['issues'];
+        $issues = array_merge($internal['issues'], $assembly['issues'][$group['code']] ?? []);
         $internal_group = $internal['groups'][$group['code']];
         if ($confirmed_transit['issue']) $issues[] = $confirmed_transit['issue'];
         if ($transit_ids && ($edit['receiptsReviewed'] ?? false) !== true) $issues[] = 'RECEIPTS_REVIEW_REQUIRED';
         if (array_intersect($group['warehouseIds'], $transit_ids)) $issues[] = 'TRANSIT_DESTINATION_OVERLAP';
-        if (count((array)($row['dimensions']['currentSuppliers'] ?? [])) !== 1) $issues[] = 'SUPPLIER_NOT_CONFIRMED';
+        if (!$manufactured && count((array)($row['dimensions']['currentSuppliers'] ?? [])) !== 1) $issues[] = 'SUPPLIER_NOT_CONFIRMED';
         $physical = $available = $sales = $returns = $reserve = 0.0;
         $cap = 0.0;
         $unlimited = false;
@@ -328,6 +329,8 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
             $sales += (float)($metrics['regularSoldUnits'] ?? 0);
             $returns += (float)($metrics['returnQuantity'] ?? 0);
             $policy = $member['orderPolicy'] ?? [];
+            // A ban on buying a child is not a ban on manufacturing it.
+            if ($manufactured) { $eligible = true; $unlimited = true; continue; }
             if (($policy['orderAllowed'] ?? null) === false) continue;
             if (($policy['orderAllowed'] ?? null) !== true) {
                 $valid = false;
@@ -345,13 +348,13 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
         $reserve = lps_purchase_number($minimum_policy['reserveAboveForecast'] ?? null);
         if (!in_array($minimum_id, $group['demandWarehouseIds'] ?? $group['warehouseIds'], true)
             || in_array($minimum_id, $group['stockOnlyWarehouseIds'] ?? [], true)
-            || ($minimum_policy['orderAllowed'] ?? null) !== true || $reserve === null) {
+            || (!$manufactured && ($minimum_policy['orderAllowed'] ?? null) !== true) || $reserve === null) {
             $valid = false;
             $issues[] = 'MINIMUM_SOURCE_NOT_READY';
         }
         if (!$valid) $issues[] = 'INCOMPLETE_WAREHOUSE_DATA';
-        if (!$eligible || ($destination_policy['orderAllowed'] ?? null) !== true) $issues[] = 'DESTINATION_POLICY_BLOCKED';
-        if (($network['orderAllowed'] ?? null) !== true || ($network['status'] ?? '') !== 'ALLOWED') $issues[] = 'NETWORK_POLICY_NOT_CONFIRMED';
+        if (!$eligible || (!$manufactured && ($destination_policy['orderAllowed'] ?? null) !== true)) $issues[] = 'DESTINATION_POLICY_BLOCKED';
+        if (!$manufactured && (($network['orderAllowed'] ?? null) !== true || ($network['status'] ?? '') !== 'ALLOWED')) $issues[] = 'NETWORK_POLICY_NOT_CONFIRMED';
         $profit = lps_purchase_number($row['metrics']['grossProfit'] ?? null, -1000000000);
         if ($profit === null || $profit < 0) $issues[] = 'PROFIT_REVIEW_REQUIRED';
         $demand = lps_purchase_demand($sales, $group, $row);
@@ -359,10 +362,13 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
         $daily = $valid && $demand['adjustedSales'] !== null ? $demand['adjustedSales'] / $period_days : null;
         $target = $valid && $eligible && $daily !== null ? $daily * ($group['leadTimeDays'] + $group['targetDays'] + $group['safetyDays']) + $reserve : null;
         if ($target !== null && !$unlimited) $target = min($target, $cap);
+        $own_target = $target;
+        $component_demand = array_key_exists($group['code'], $assembly['consumption'] ?? []) ? $assembly['consumption'][$group['code']] : 0.0;
+        $target = $target !== null && $component_demand !== null ? $target + $component_demand : null;
         $incoming = lps_purchase_number($edit['inTransit'] ?? ((count($groups) === 1 || $transit_pool === 0.0) ? $transit_pool : null));
         $open_orders = lps_purchase_number($edit['openOrders'] ?? null);
-        $pack = lps_purchase_number($edit['pack'] ?? ($row['dimensions']['packageQuantity'] ?? null), 0.000001);
-        $moq = lps_purchase_number($edit['moq'] ?? ($row['dimensions']['minimumOrderQuantity'] ?? null));
+        $pack = $manufactured ? 1.0 : lps_purchase_number($edit['pack'] ?? ($row['dimensions']['packageQuantity'] ?? null), 0.000001);
+        $moq = $manufactured ? 0.0 : lps_purchase_number($edit['moq'] ?? ($row['dimensions']['minimumOrderQuantity'] ?? null));
         $allocated_transit += $incoming ?? 0;
         $ready = !$issues && $incoming !== null && $open_orders !== null && (!empty($group['supplyFromGroupCode']) || ((!$respect_pack || $pack !== null) && $moq !== null));
         $planning_available = $available + $internal_group['internalRestored'];
@@ -386,12 +392,15 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
             'availability' => lps_purchase_availability($group, $row),
             'returns' => $valid ? $returns : null, 'coverageDays' => $daily > 0 ? max(0, $planning_available) / $daily : null,
             'target' => $target, 'needBeforeReceipts' => $target === null ? null : max(0, $target - $planning_available),
+            'ownTarget' => $own_target, 'componentDemand' => $component_demand,
+            'childContributions' => $assembly['contributions'][$group['code']] ?? [],
+            'manufacturingNeed' => null,
             'inputs' => ['inTransit' => $incoming, 'openOrders' => $open_orders, 'pack' => $pack, 'moq' => $moq],
             'respectPack' => $respect_pack, 'packRounding' => $pack_mode, 'demand' => $demand,
             'receiptsReviewed' => ($edit['receiptsReviewed'] ?? false) === true,
             'position' => $position, 'ready' => $ready, 'issues' => $issues,
             'transferIn' => 0, 'transferOut' => 0, 'transfers' => [],
-            'recommendedQuantity' => null, 'managerQuantity' => lps_purchase_number($edit['quantity'] ?? null),
+            'recommendedQuantity' => null, 'managerQuantity' => $manufactured ? null : lps_purchase_number($edit['quantity'] ?? null),
             'managerReason' => sanitize_text_field((string)($edit['reason'] ?? '')),
         ];
     }
@@ -421,9 +430,9 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
             $donor['issues'][] = 'REPLENISHMENT_DEPENDENCY_REQUIRED';
             unset($donor); continue;
         }
-        $quantity = $override ?? round(max(0, $receiver['target'] - $receiver['position']), 0, PHP_ROUND_HALF_DOWN);
+        $quantity = $override ?? ($manufactured ? max(0, $receiver['target'] - $receiver['position']) : round(max(0, $receiver['target'] - $receiver['position']), 0, PHP_ROUND_HALF_DOWN));
         $destination = $members[$receiver['receivingWarehouseId']];
-        if (($destination['orderPolicy']['maximumStockLimited'] ?? null) === true
+        if (!$manufactured && ($destination['orderPolicy']['maximumStockLimited'] ?? null) === true
             && $quantity + $receiver['inputs']['inTransit'] + $receiver['inputs']['openOrders']
                 + $receiver['internalAtReceivingWarehouse'] + (float)$destination['metrics']['availableQuantity'] > (float)$destination['orderPolicy']['maximumStockLimit'] + 0.000001) {
             $receiver['ready'] = $donor['ready'] = false;
@@ -451,7 +460,7 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
             if (!$receiver['ready'] || $receiver['supplyFromGroupCode'] !== '') continue;
             $need = max(0, $receiver['target'] - $receiver['position'] + $receiver['plannedTransferOut']);
             $destination = $members[$receiver['receivingWarehouseId']];
-            if (($destination['orderPolicy']['maximumStockLimited'] ?? null) === true) {
+            if (!$manufactured && ($destination['orderPolicy']['maximumStockLimited'] ?? null) === true) {
                 $headroom = max(0, (float)$destination['orderPolicy']['maximumStockLimit']
                     - (float)$destination['metrics']['availableQuantity'] - $receiver['inputs']['inTransit'] - $receiver['inputs']['openOrders'] - $receiver['internalAtReceivingWarehouse']);
                 $need = min($need, $headroom);
@@ -473,11 +482,12 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
     foreach ($result as $code => &$item) {
         if ($item['ready']) {
             $need = max(0, $item['target'] - $item['position'] - $item['transferIn'] + $item['transferOut'] - $item['plannedTransferIn'] + $item['plannedTransferOut']);
-            $item['recommendedQuantity'] = $item['supplyFromGroupCode'] !== '' ? 0.0 : lps_purchase_rounded_quantity($need, $item['inputs']['moq'], $item['inputs']['pack'], $item['packRounding']);
+            $item['manufacturingNeed'] = $manufactured ? $need : null;
+            $item['recommendedQuantity'] = $manufactured || $item['supplyFromGroupCode'] !== '' ? 0.0 : lps_purchase_rounded_quantity($need, $item['inputs']['moq'], $item['inputs']['pack'], $item['packRounding']);
             $destination = $members[$item['receivingWarehouseId']];
             $policy = $destination['orderPolicy'];
             $quantity = $item['managerQuantity'] ?? $item['recommendedQuantity'];
-            if (($policy['maximumStockLimited'] ?? null) === true && $quantity + $item['inputs']['inTransit'] + $item['inputs']['openOrders'] + $item['transferIn'] + $item['internalAtReceivingWarehouse'] + (float)$destination['metrics']['availableQuantity'] > (float)$policy['maximumStockLimit'] + 0.000001) {
+            if (!$manufactured && ($policy['maximumStockLimited'] ?? null) === true && $quantity + $item['inputs']['inTransit'] + $item['inputs']['openOrders'] + $item['transferIn'] + $item['internalAtReceivingWarehouse'] + (float)$destination['metrics']['availableQuantity'] > (float)$policy['maximumStockLimit'] + 0.000001) {
                 $item['issues'][] = 'DESTINATION_MAXIMUM_EXCEEDED';
                 $item['recommendedQuantity'] = null;
             }
@@ -485,11 +495,12 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
         } else $item['issues'][] = 'SUPPLY_INPUTS_REQUIRED';
         if ($item['managerQuantity'] !== null && $item['managerReason'] === '') $item['issues'][] = 'MANAGER_REASON_REQUIRED';
         $chosen = $item['managerQuantity'] ?? $item['recommendedQuantity'];
-        if ($item['plannedTransferOut'] > 0 && $chosen !== null
+        if (!$manufactured && $item['plannedTransferOut'] > 0 && $chosen !== null
             && $item['position'] + $chosen + $item['transferIn'] - $item['transferOut'] + 0.000001 < $item['plannedTransferOut']) {
             $item['issues'][] = 'PLANNED_REPLENISHMENT_UNCOVERED';
         }
         $item['finalQuantity'] = !$item['issues'] ? ($item['managerQuantity'] ?? $item['recommendedQuantity']) : null;
+        if ($item['issues']) $item['manufacturingNeed'] = null;
         $item['status'] = $item['finalQuantity'] === null ? 'REVIEW_REQUIRED' : 'PREVIEW_READY';
         unset($item['position'], $item['ready']);
     }

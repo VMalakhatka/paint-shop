@@ -6250,3 +6250,91 @@ msgstr ""
 
 msgid "Warehouse %d is included again after a completed attempt failed. A fresh snapshot will be built; the previous error is retained in diagnostics."
 msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Select one supplier. Children and grandchildren are found automatically, including our own products and products outside the supplier filter. Review their stock and incoming quantities. Only their shortages consume components. The export contains purchasing products of the selected supplier; assembly documents are not created."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Own sales forecast with minimum stock"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Component demand from children"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Quantity to manufacture"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Child shortage breakdown"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Components per unit"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Manufactured product: calculation only, excluded from supplier order"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Purchasing product of the selected supplier"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Checking recipes and dependent products"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Component units per child"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Recalculate this product and its parents"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "The Folio assembly role is missing or differs between warehouses. Check BALL4."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "This is a child product, but its recipe is missing. Check the Folio assembly tables."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "The recipe contains an empty SKU, a non-positive coefficient or a self-reference. Correct it in Folio."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "The recipe repeats a component or has ambiguous simple parents. Check the source rows in Folio."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "The assembly chain contains a cycle. This product or one of its children requires recipe correction."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Child analytics are missing for the selected warehouses. Refresh the snapshots and start a new preview."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Review the child shortage breakdown and complete the child supply inputs. Its unknown shortage is not treated as zero."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Remove assembly consumption from the sales selection: child forecasts already calculate component consumption."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Select exactly one supplier for the purchase preview."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Assembly recipes changed. Start a new preview before exporting."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Assembly recipes are unavailable or incomplete. Update Java and start a new preview."
+msgstr ""

@@ -22,6 +22,16 @@ $row = ['internalTransferReservations'=>['calculationVersion'=>1,'status'=>'CAPT
     'warehouseGroupBreakdown'=>[['code'=>'kyiv','warehouseIds'=>[1], 'availability'=>['status'=>'MEASURED','availableDays'=>12,'stockoutDays'=>18]]],
     'warehouseBreakdown'=>[['warehouseId'=>1,'metrics'=>['physicalQuantity'=>6,'availableQuantity'=>6,'regularSoldUnits'=>11,'returnQuantity'=>0],
         'orderPolicy'=>['orderAllowed'=>true,'reserveAboveForecast'=>0,'maximumStockLimited'=>false]]]];
+if (($argv[1] ?? '') === 'calculate-assembly') {
+    $child=$row; $child['sku']='OUR-CHILD'; $child['productName']='Our assembled product'; $child['dimensions']['currentSuppliers']=['Our company'];
+    $child['warehouseBreakdown'][0]['metrics']['physicalQuantity']=0; $child['warehouseBreakdown'][0]['metrics']['availableQuantity']=0;
+    $child['warehouseBreakdown'][0]['metrics']['regularSoldUnits']=8;
+    $state=['rootSkus'=>['KR-17817'],'orderSupplier'=>'Kreul','periodDays'=>30,'groups'=>$groups,'allowTransfers'=>false,'transitWarehouseIds'=>[],
+        'rows'=>['KR-17817'=>$row,'OUR-CHILD'=>$child], 'edits'=>['KR-17817'=>['kyiv'=>['openOrders'=>0]],'OUR-CHILD'=>json_decode($argv[2]??'{}',true) ?: ['kyiv'=>['openOrders'=>0]]],
+        'assemblyGraph'=>['nodes'=>[['sku'=>'KR-17817','manufactured'=>false,'issues'=>[]],['sku'=>'OUR-CHILD','manufactured'=>true,'issues'=>[]]],
+            'edges'=>[['parent'=>'KR-17817','child'=>'OUR-CHILD','factor'=>0.5,'source'=>'ALL_RAZBORKA_SLOJ','rowId'=>'1']]]];
+    echo json_encode(lps_purchase_calculate_network($state)); exit;
+}
 if (($argv[1] ?? '') === 'calculate-route') {
     $groups[] = ['code'=>'odesa','name'=>'Odesa','warehouseIds'=>[5],'receivingWarehouseId'=>5,
         'leadTimeDays'=>0,'targetDays'=>30,'safetyDays'=>0,'supplyFromGroupCode'=>'kyiv'];

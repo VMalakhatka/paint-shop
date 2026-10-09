@@ -1,5 +1,6 @@
 <?php
 if (!defined('ABSPATH')) exit;
+require_once __DIR__ . '/purchase-assembly.php';
 
 const LPS_PURCHASE_PAGE = 'lps-purchase-planning';
 const LPS_PURCHASE_NONCE = 'lps_purchase_planning';
@@ -7,6 +8,16 @@ const LPS_PURCHASE_MAX_SKUS = 10000;
 
 function lps_purchase_i18n(): array {
     return [
+        'assemblyHelp' => __('Select one supplier. Children and grandchildren are found automatically, including our own products and products outside the supplier filter. Review their stock and incoming quantities. Only their shortages consume components. The export contains purchasing products of the selected supplier; assembly documents are not created.', 'lavka-price-sync'),
+        'ownTarget' => __('Own sales forecast with minimum stock', 'lavka-price-sync'),
+        'componentDemand' => __('Component demand from children', 'lavka-price-sync'),
+        'manufacturingNeed' => __('Quantity to manufacture', 'lavka-price-sync'),
+        'childContributions' => __('Child shortage breakdown', 'lavka-price-sync'),
+        'components' => __('Components per unit', 'lavka-price-sync'),
+        'assemblyOnly' => __('Manufactured product: calculation only, excluded from supplier order', 'lavka-price-sync'),
+        'supplierOrder' => __('Purchasing product of the selected supplier', 'lavka-price-sync'),
+        'assemblyPending' => __('Checking recipes and dependent products', 'lavka-price-sync'),
+        'factor' => __('Component units per child', 'lavka-price-sync'),
         'supplierPrices' => __('Supplier price list information', 'lavka-price-sync'),
         'supplierPriceLabels' => function_exists('lps_sp_labels') ? lps_sp_labels() : [],
         'title' => __('Supplier order preview', 'lavka-price-sync'),
@@ -79,7 +90,7 @@ function lps_purchase_i18n(): array {
             'TRANSIT_DISABLED' => __('Disabled', 'lavka-price-sync'),
             'TRANSIT_SOURCE_MISMATCH' => __('Review required', 'lavka-price-sync'),
         ],
-        'apply' => __('Recalculate this SKU preview', 'lavka-price-sync'),
+        'apply' => __('Recalculate this product and its parents', 'lavka-price-sync'),
         'previous' => __('Previous', 'lavka-price-sync'), 'next' => __('Next', 'lavka-price-sync'),
         'filters' => __('Result filters', 'lavka-price-sync'),
         'hideMinimumZero' => __('Hide products with minimum stock 0', 'lavka-price-sync'),
@@ -97,6 +108,13 @@ function lps_purchase_i18n(): array {
         'filterHelp' => __('Filters change only the on-screen view. Preliminary need is calculated before expected receipts; a ready recommendation appears only after all supply checks.', 'lavka-price-sync'),
         'minimumStock' => __('Minimum stock', 'lavka-price-sync'),
         'issues' => [
+            'ASSEMBLY_ROLE_REQUIRED' => __('The Folio assembly role is missing or differs between warehouses. Check BALL4.', 'lavka-price-sync'),
+            'ASSEMBLY_RECIPE_REQUIRED' => __('This is a child product, but its recipe is missing. Check the Folio assembly tables.', 'lavka-price-sync'),
+            'ASSEMBLY_INVALID_RECIPE' => __('The recipe contains an empty SKU, a non-positive coefficient or a self-reference. Correct it in Folio.', 'lavka-price-sync'),
+            'ASSEMBLY_DUPLICATE_COMPONENT' => __('The recipe repeats a component or has ambiguous simple parents. Check the source rows in Folio.', 'lavka-price-sync'),
+            'ASSEMBLY_CYCLE' => __('The assembly chain contains a cycle. This product or one of its children requires recipe correction.', 'lavka-price-sync'),
+            'ASSEMBLY_CHILD_DATA_REQUIRED' => __('Child analytics are missing for the selected warehouses. Refresh the snapshots and start a new preview.', 'lavka-price-sync'),
+            'ASSEMBLY_DEPENDENCY_REQUIRED' => __('Review the child shortage breakdown and complete the child supply inputs. Its unknown shortage is not treated as zero.', 'lavka-price-sync'),
             'INTERNAL_TRANSFER_DATA_REQUIRED' => __('Rebuild warehouse snapshots with the updated Java backend to capture internal reservations.', 'lavka-price-sync'),
             'INTERNAL_TRANSFER_RESERVE_MISMATCH' => __('Internal reservations exceed the reserved stock. Check the source snapshot before ordering.', 'lavka-price-sync'),
             'PLANNED_REPLENISHMENT_UNCOVERED' => __('The source stock and selected purchase do not cover the planned replenishment. Review rounding or the manual quantities.', 'lavka-price-sync'),
@@ -154,7 +172,7 @@ function lps_purchase_session_key(string $token): string {
 function lps_purchase_session(string $token): array {
     $state = get_transient(lps_purchase_session_key($token));
     if (!is_array($state)) throw new InvalidArgumentException(__('The preview has expired. Start a new calculation.', 'lavka-price-sync'));
-    if (($state['previewVersion'] ?? 0) !== 6) throw new InvalidArgumentException(__('Start a new preview to apply the current rounding and demand settings.', 'lavka-price-sync'));
+    if (($state['previewVersion'] ?? 0) !== 7) throw new InvalidArgumentException(__('Start a new preview to apply the current rounding and demand settings.', 'lavka-price-sync'));
     if (($state['transitContractVersion'] ?? 0) !== 3 || ($state['transitWarehouseIds'] ?? null) !== lps_purchase_transit_warehouses()) {
         throw new InvalidArgumentException(__('Transport warehouse settings changed. Start a new preview.', 'lavka-price-sync'));
     }
@@ -174,6 +192,14 @@ function lps_purchase_start(int $id, int $version): array {
         throw new InvalidArgumentException(__('The scenario changed or is not active. Reload the page.', 'lavka-price-sync'));
     }
     $profile = $scenario['profile'];
+    $operations = $profile['movementFilters']['operationKinds'] ?? [];
+    if (($operations['mode'] ?? '') === 'INCLUDE' && in_array('МУЛЬТИСБОРКА', $operations['values'] ?? [], true)) {
+        throw new InvalidArgumentException(__('Remove assembly consumption from the sales selection: child forecasts already calculate component consumption.', 'lavka-price-sync'));
+    }
+    $suppliers = $profile['productFilters']['currentSuppliers'] ?? [];
+    if (($suppliers['mode'] ?? '') !== 'INCLUDE' || count($suppliers['values'] ?? []) !== 1) {
+        throw new InvalidArgumentException(__('Select exactly one supplier for the purchase preview.', 'lavka-price-sync'));
+    }
     if (empty($profile['calculation']['includeReturns'])) throw new InvalidArgumentException(__('Enable returns in the analytics scenario before building a purchase preview.', 'lavka-price-sync'));
     $groups = lps_purchase_resolve_groups($profile, function_exists('lavka_get_global_warehouse_groups') ? lavka_get_global_warehouse_groups() : []);
     $transit_ids = lps_purchase_transit_warehouses();
@@ -194,7 +220,8 @@ function lps_purchase_start(int $id, int $version): array {
         'calculation' => $profile['calculation'], 'sort' => [['field' => 'sku', 'direction' => 'ASC']], 'page' => ['size' => 100],
     ]);
     $token = bin2hex(random_bytes(16));
-    $state = ['previewVersion' => 6, 'scenario' => ['id' => $scenario['id'], 'uuid' => $scenario['uuid'], 'name' => $scenario['name'], 'version' => $scenario['version']],
+    $state = ['previewVersion' => 7, 'orderSupplier' => $suppliers['values'][0], 'phase' => 'roots', 'rootSkus' => [], 'pendingChildren' => [], 'phaseCount' => 0,
+        'scenario' => ['id' => $scenario['id'], 'uuid' => $scenario['uuid'], 'name' => $scenario['name'], 'version' => $scenario['version']],
         'supplierPriceVersions' => function_exists('lps_sp_active_versions') ? lps_sp_active_versions($profile['context']['sourceDatabase']) : [],
         'query' => $query, 'groups' => $groups, 'groupsRevision' => lavka_get_global_warehouse_groups_revision(),
         'transitWarehouseIds' => $transit_ids, 'transitGenerationId' => null, 'transitContractVersion' => 3,
@@ -210,6 +237,11 @@ function lps_purchase_page(string $token, int $page): array {
     $state = lps_purchase_session($token);
     if ($state['complete'] || $state['page'] !== $page) throw new InvalidArgumentException(__('The preview page changed. Start a new calculation.', 'lavka-price-sync'));
     $query = $state['query'];
+    if ($state['phase'] === 'children') {
+        // Children keep the period and warehouse scope, but none of the parent's product filters.
+        $query['productFilters'] = ['skus' => ['mode' => 'INCLUDE', 'values' => $state['pendingChildren'][0]]];
+        unset($query['calculation']['availability']['filter']);
+    }
     $query['page']['cursor'] = $state['cursor'];
     $body = lps_product_analytics_v4_request_java(LPS_PRODUCT_ANALYTICS_QUERY_PATH, $query);
     if (is_wp_error($body)) throw new RuntimeException($body->get_error_message());
@@ -237,7 +269,13 @@ function lps_purchase_page(string $token, int $page): array {
     $results = [];
     foreach ($body['rows'] as $row) {
         $sku = (string)($row['sku'] ?? '');
-        if ($sku === '' || isset($state['rows'][$sku])) throw new RuntimeException(__('The analytics response contains missing or repeated SKU.', 'lavka-price-sync'));
+        $canonical = lps_assembly_key($sku);
+        if ($sku === '' || isset($state['seenSkus'][$canonical])) throw new RuntimeException(__('The analytics response contains missing or repeated SKU.', 'lavka-price-sync'));
+        if ($state['phase'] === 'children' && !in_array($canonical, array_map('lps_assembly_key', $state['pendingChildren'][0]), true))
+            throw new RuntimeException(__('The analytics response contains missing or repeated SKU.', 'lavka-price-sync'));
+        $state['seenSkus'][$canonical] = true;
+        $state['phaseCount']++;
+        if ($state['phase'] === 'roots') $state['rootSkus'][] = $sku;
         $generation_by_warehouse = array_column($context['warehouses'], 'generationId', 'id');
         foreach (($row['internalTransferReservations']['accounts'] ?? []) as $account) {
             if ((int)($generation_by_warehouse[$account['sourceWarehouseId']] ?? 0) !== (int)($account['generationId'] ?? -1)) {
@@ -262,11 +300,22 @@ function lps_purchase_page(string $token, int $page): array {
     if (count($state['rows']) > LPS_PURCHASE_MAX_SKUS) throw new RuntimeException(__('The preview exceeds 10000 SKU. Narrow the scenario filters.', 'lavka-price-sync'));
     $state['seenCursors'][$next] = true;
     $state['cursor'] = $next;
-    $state['complete'] = $next === '';
-    if ($state['complete'] && count($state['rows']) !== (int)$body['totals']['productCount']) throw new RuntimeException(__('The analytics response is incomplete. No purchase preview was accepted.', 'lavka-price-sync'));
+    if ($next === '') {
+        if ($state['phaseCount'] !== (int)$body['totals']['productCount']) throw new RuntimeException(__('The analytics response is incomplete. No purchase preview was accepted.', 'lavka-price-sync'));
+        if ($state['phase'] === 'roots') {
+            $state['assemblyGraph'] = lps_purchase_assembly_graph($state);
+            $missing = [];
+            foreach ($state['assemblyGraph']['nodes'] as $node) if (!isset($state['seenSkus'][lps_assembly_key($node['sku'])])) $missing[] = $node['sku'];
+            $state['pendingChildren'] = array_chunk($missing, 100);
+            $state['phase'] = 'children';
+        } else array_shift($state['pendingChildren']);
+        $state['seenCursors'] = []; $state['phaseCount'] = 0;
+        $state['complete'] = !$state['pendingChildren'];
+    }
+    if ($state['complete']) $results = lps_purchase_calculate_network($state);
     $state['page']++;
     set_transient(lps_purchase_session_key($token), $state, 2 * HOUR_IN_SECONDS);
-    return ['items' => $results, 'loaded' => count($state['rows']), 'total' => (int)$body['totals']['productCount'],
+    return ['items' => $results, 'replaceItems' => $state['complete'], 'loaded' => count($state['rows']), 'total' => isset($state['assemblyGraph']) ? count($state['assemblyGraph']['nodes']) : (int)$body['totals']['productCount'],
         'page' => $state['page'], 'complete' => $state['complete'], 'warnings' => $body['warnings'] ?? [], 'context' => $state['context']];
 }
 
@@ -287,9 +336,9 @@ function lps_purchase_adjust(string $token, string $sku, array $input): array {
         $edits[$group['code']]['receiptsReviewed'] = ($source['receiptsReviewed'] ?? false) === true;
     }
     $state['edits'][$sku] = $edits;
-    $result = lps_purchase_calculate($state['rows'][$sku], $state['groups'], $state['periodDays'], $state['allowTransfers'], $edits, $state['transitWarehouseIds']);
+    $results = lps_purchase_calculate_network($state);
     set_transient(lps_purchase_session_key($token), $state, 2 * HOUR_IN_SECONDS);
-    return ['item' => $result];
+    return ['items' => $results];
 }
 
 add_action('wp_ajax_lps_purchase_planning', static function (): void {
@@ -331,6 +380,7 @@ function lps_purchase_render(): void {
     ?>
     <div class="wrap lps-purchase" id="lps-purchase">
         <h1><?php echo esc_html__('Supplier order preview', 'lavka-price-sync'); ?></h1>
+        <p class="notice notice-info inline"><?php echo esc_html(lps_purchase_i18n()['assemblyHelp']); ?></p>
         <p class="notice notice-info inline"><?php echo esc_html__('Preview only. Demand uses regular sales and, when enabled in the scenario, capped estimated lost sales from measured availability history. Returns are shown separately. No Folio documents, WooCommerce orders or stock reservations are created.', 'lavka-price-sync'); ?></p>
         <form id="lps-purchase-form" class="lps-purchase-toolbar">
             <label><?php echo esc_html__('Analytics scenario', 'lavka-price-sync'); ?> <select id="lps-purchase-scenario" required><option value="">—</option>
@@ -380,8 +430,10 @@ add_action('admin_post_lps_purchase_export', static function (): void {
     try {
         $state = lps_purchase_session((string)wp_unslash($_POST['token'] ?? ''));
         if (!$state['complete']) throw new InvalidArgumentException(__('Complete the preview before exporting.', 'lavka-price-sync'));
+        $fresh_graph = lps_purchase_assembly_graph($state);
+        if ($fresh_graph['revision'] !== $state['assemblyGraph']['revision']) throw new InvalidArgumentException(__('Assembly recipes changed. Start a new preview before exporting.', 'lavka-price-sync'));
         $t = lps_purchase_i18n();
-        $keys = ['sku', 'product', 'group', 'receivingWarehouse', 'minimumWarehouse', 'minimumReserve', 'available', 'internalReserved', 'planningAvailable', 'internalTransferAccounts', 'sales', 'availableDays', 'stockoutDays', 'availabilityStatus', 'estimatedLostSales', 'appliedLostSales', 'adjustedSales', 'maxDemandMultiplier', 'demandStatus', 'returns', 'coverage', 'target', 'need', 'transfer', 'supplyFromGroupCode', 'plannedTransferIn', 'plannedTransferOut', 'inTransit', 'openOrders', 'pack', 'packRounding', 'moq', 'purchase', 'quantity', 'final', 'reason'];
+        $keys = ['sku', 'product', 'group', 'receivingWarehouse', 'minimumWarehouse', 'minimumReserve', 'physical', 'available', 'internalReserved', 'planningAvailable', 'internalTransferAccounts', 'sales', 'availableDays', 'stockoutDays', 'availabilityStatus', 'estimatedLostSales', 'appliedLostSales', 'adjustedSales', 'maxDemandMultiplier', 'demandStatus', 'returns', 'coverage', 'ownTarget', 'componentDemand', 'childContributions', 'target', 'need', 'transfer', 'supplyFromGroupCode', 'plannedTransferIn', 'plannedTransferOut', 'inTransit', 'openOrders', 'pack', 'packRounding', 'moq', 'purchase', 'quantity', 'final', 'reason'];
         $columns = array_map(static fn($key) => ['key' => $key, 'label' => $t[$key]], $keys);
         $columns[] = ['key' => 'supplierPrices', 'label' => $t['supplierPrices']];
         $columns[] = ['key' => 'status', 'label' => __('Status', 'lavka-price-sync')];
@@ -396,12 +448,15 @@ add_action('admin_post_lps_purchase_export', static function (): void {
             $columns[] = ['key' => $key, 'label' => $label];
         }
         $rows = [];
-        foreach ($state['rows'] as $sku => $raw) {
-            $calculated = lps_purchase_calculate($raw, $state['groups'], $state['periodDays'], $state['allowTransfers'], $state['edits'][$sku] ?? [], $state['transitWarehouseIds']);
+        foreach (lps_purchase_calculate_network($state) as $calculated) {
+            if (empty($calculated['assembly']['purchasable'])) continue;
+            $sku = $calculated['sku']; $raw = $state['rows'][$sku];
             foreach ($calculated['groups'] as $group) {
                 $record = ['sku' => (string)$sku, 'product' => $calculated['productName'], 'group' => $group['groupName'],
                     'receivingWarehouse' => $group['receivingWarehouseId'], 'available' => $group['available'], 'sales' => $group['regularSales'],
                     'internalReserved' => $group['internalReserved'],
+                    'physical' => $group['physical'], 'ownTarget' => $group['ownTarget'], 'componentDemand' => $group['componentDemand'],
+                    'childContributions' => wp_json_encode($group['childContributions'], JSON_UNESCAPED_UNICODE),
                     'planningAvailable' => $group['planningAvailable'],
                     'internalTransferAccounts' => wp_json_encode($calculated['internalTransferAccounts'], JSON_UNESCAPED_UNICODE),
                     'minimumWarehouse' => $group['minimumWarehouseName'] . ' (#' . $group['minimumWarehouseId'] . ')', 'minimumReserve' => $group['minimumReserve'],
@@ -434,6 +489,7 @@ add_action('admin_post_lps_purchase_export', static function (): void {
         $metadata['scenario'] = $state['scenario']['name'] . ' v' . $state['scenario']['version'];
         if (preg_match('/^[\s]*[=+@\-]/u', $metadata['scenario'])) $metadata['scenario'] = "'" . $metadata['scenario'];
         $metadata['warehouseGroupsRevision'] = $state['groupsRevision'];
+        $metadata['assemblyRecipeRevision'] = $state['assemblyGraph']['revision'];
         $metadata['transitWarehouseIds'] = wp_json_encode($state['transitWarehouseIds']);
         $metadata['transitGenerationId'] = $state['transitGenerationId'];
         $metadata['warehouseGroups'] = wp_json_encode($state['groups'], JSON_UNESCAPED_UNICODE);
@@ -441,5 +497,5 @@ add_action('admin_post_lps_purchase_export', static function (): void {
         $filename = 'purchase-preview-' . gmdate('Ymd-His');
         if (($_POST['format'] ?? '') === 'xlsx') lps_product_analytics_export_xlsx($columns, $rows, $metadata, $filename . '.xlsx');
         lps_product_analytics_export_csv($columns, $rows, $filename . '.csv');
-    } catch (InvalidArgumentException $error) { wp_die(esc_html($error->getMessage())); }
+    } catch (InvalidArgumentException | RuntimeException $error) { wp_die(esc_html($error->getMessage())); }
 });

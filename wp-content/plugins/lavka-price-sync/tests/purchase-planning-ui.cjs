@@ -4,7 +4,8 @@ const assert=require('assert');
 const php=process.env.PHP_BINARY || 'php';
 const fixture=require('path').join(__dirname,'purchase-planning-ui.php');
 const output=process.env.UI_OUTPUT_DIR || require('os').tmpdir();
- let routed=false, internal=false;
+ let routed=false, internal=false, assembly=false;
+ const calculateAssembly=(edits)=>JSON.parse(execFileSync(php,[fixture,'calculate-assembly',JSON.stringify(edits||{})],{encoding:'utf8'}));
  const calculate=(edits)=>JSON.parse(execFileSync(php,[fixture,internal?'calculate-internal':routed?'calculate-route':'calculate',JSON.stringify(edits||{})],{encoding:'utf8'}));
  const calculateZero=()=>JSON.parse(execFileSync(php,[fixture,'calculate-zero'],{encoding:'utf8'}));
 (async()=>{
@@ -13,7 +14,8 @@ const output=process.env.UI_OUTPUT_DIR || require('os').tmpdir();
  let fail=false;
  await page.route('https://fixture.local/api',async route=>{
   const request=new URLSearchParams(route.request().postData()); const op=request.get('operation');const payload=JSON.parse(request.get('payload'));
-  const data=op==='start'?{token:'fixture',scenario:{name:'Kreul',version:2},groups:[{name:'Kyiv',warehouseIds:[1]}],query:{period:{from:'2026-08-01',to:'2026-08-30'}}}:op==='page'?{items:[calculate(),calculateZero()],complete:true,page:1,loaded:2,total:2,warnings:[],context:{analyticsSchemaVersion:7}}:{item:calculate(payload.groups)};
+  const items=assembly?calculateAssembly(op==='adjust'?payload.groups:null):[calculate(op==='adjust'?payload.groups:null),calculateZero()];
+  const data=op==='start'?{token:'fixture',scenario:{name:'Kreul',version:2},groups:[{name:'Kyiv',warehouseIds:[1]}],query:{period:{from:'2026-08-01',to:'2026-08-30'}}}:op==='page'?{items,replaceItems:true,complete:true,page:1,loaded:2,total:2,warnings:[],context:{analyticsSchemaVersion:7}}:{items};
   await route.fulfill({status:fail?400:200,contentType:'application/json',body:JSON.stringify(fail?{success:false,data:{message:'Fixture validation error'}}:{success:true,data})});
  });
  for(const width of [1440,390]){
@@ -75,5 +77,28 @@ const output=process.env.UI_OUTPUT_DIR || require('os').tmpdir();
  assert(await page.locator('.lps-purchase-sku').first().innerText().then(text=>text.includes('#555279')));
  assert.deepEqual(errors,[]);
  await page.screenshot({path:`${output}/purchase-internal-source-stock.png`,fullPage:true});
- await browser.close();console.log('PASS: desktop/mobile, pack toggle, manual quantity, error state, no page overflow');
+ assembly=true; internal=false;
+ for (const width of [1440,390]) {
+  await page.setViewportSize({width,height:1000}); await page.setContent(execFileSync(php,[fixture],{encoding:'utf8'}));
+  await page.locator('#lps-purchase-scenario').selectOption('1'); await page.locator('#lps-purchase-start').click();
+  await page.locator('[data-edit-form="1"]').waitFor({state:'attached'});
+  const parent=page.locator('.lps-purchase-sku').first();
+  assert.equal(await parent.locator('tbody tr td').nth(1).innerText(),'12');
+  const child=page.locator('.lps-purchase-sku').nth(1);
+  assert((await child.innerText()).includes('excluded from supplier order'));
+  assert.equal(await child.locator('[data-field="quantity"]').count(),0);
+  assert.equal(await child.locator('[data-field="pack"]').count(),0);
+  await child.locator('[data-edit-form]').locator('..').locator('summary').click();
+  await child.locator('[data-field="openOrders"]').fill('8'); await child.locator('button').click();
+  await page.waitForFunction(()=>!document.querySelector('#lps-purchase-start').disabled);
+  assert.equal(await parent.locator('tbody tr td').nth(1).innerText(),'6');
+  await parent.getByText('Child shortage breakdown',{exact:true}).click();
+  assert((await parent.innerText()).includes('OUR-CHILD'));
+  await parent.locator('[data-child-sku="OUR-CHILD"]').click();
+  assert.equal(await page.locator('.lps-purchase-sku').count(),2);
+  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth));
+  assert.deepEqual(errors,[]);
+  await page.screenshot({path:`${output}/purchase-assembly-${width}.png`,fullPage:true});
+ }
+ await browser.close();console.log('PASS: desktop/mobile, pack toggle, manual quantity, error state, child navigation and parent recalculation, no page overflow');
 })().catch(e=>{console.error(e);process.exit(1)});
