@@ -112,6 +112,7 @@
             const link = element('a', s.openVideo, 'button'); link.href = item.link; link.target = '_blank'; link.rel = 'noopener noreferrer'; supplied.append(link);
         }
         const photos = element('div', undefined, 'lsc-photos');
+        const galleryControls = [];
         item.images.forEach(photo => {
             const key = item.id + ':' + photo.index, remembered = selected.get(key);
             const tile = element('div', undefined, 'lsc-photo'), check = element('input'); check.type = 'checkbox'; check.checked = !!remembered;
@@ -122,7 +123,8 @@
             role.append(option('', s.chooseRole), option('main', s.main));
             if (!item.product || item.product.type !== 'variation') role.append(option('gallery', s.gallery));
             role.value = remembered ? remembered.role : '';
-            const pos = element('input'); pos.type = 'number'; pos.min = 1; pos.max = 999; pos.value = remembered ? remembered.position : photo.index + 1; pos.setAttribute('aria-label', s.position);
+            const pos = element('input'); pos.type = 'number'; pos.min = 1; pos.max = 999; pos.value = remembered ? remembered.position : 1; pos.setAttribute('aria-label', s.position);
+            galleryControls.push({role, pos});
             pos.hidden = role.value !== 'gallery';
             function changed() {
                 $('lsc-uploader').hidden = true;
@@ -132,7 +134,16 @@
                 else selected.delete(key);
                 updateSelection();
             }
-            [check, role, pos].forEach(n => n.addEventListener('change', changed));
+            role.addEventListener('change', () => {
+                if (role.value === 'gallery') {
+                    const used = new Set(galleryControls.filter(c => c.pos !== pos && c.role.value === 'gallery').map(c => Number(c.pos.value)));
+                    let next = 1;
+                    while (used.has(next)) next++;
+                    pos.value = next;
+                }
+                changed();
+            });
+            [check, pos].forEach(n => n.addEventListener('change', changed));
             tile.append(zoom, label, role, pos); photos.append(tile);
         });
         supplied.append(photos); comparison.append(supplied); card.append(comparison);
