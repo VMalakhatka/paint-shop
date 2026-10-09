@@ -2,6 +2,7 @@
 namespace PaintCore\PCOE;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class Exporter {
@@ -212,14 +213,14 @@ class Exporter {
 
         $c = 1;
         foreach ($header as $h) {
-            $sh->setCellValueByColumnAndRow($c++, 1, $h);
+            $sh->setCellValue(Coordinate::stringFromColumnIndex($c++) . '1', $h);
         }
 
         $rnum = 2;
         foreach ($rows as $row) {
             $c = 1;
             foreach ($row as $v) {
-                $sh->setCellValueByColumnAndRow($c++, $rnum, $v);
+                $sh->setCellValue(Coordinate::stringFromColumnIndex($c++) . $rnum, $v);
             }
             $rnum++;
         }

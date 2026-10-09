@@ -1,5 +1,25 @@
 # Wholesale Price List
 
+## XLSX download compatibility (2026-10-09)
+
+`Exporter::send_xlsx()` uses `setCellValue()` with A1 coordinates, compatible
+with the installed PhpSpreadsheet 5.1.0. The removed
+`setCellValueByColumnAndRow()` caused a fatal error on production order/cart
+XLSX downloads. Header/row order, quantities, prices, allocation modes,
+authorization and CSV fallback are unchanged. No dependency update is needed.
+
+Run `php wp-content/plugins/pc-order-import-export/tests/exporter-xlsx.php`.
+The test invokes the actual terminating download handler in child processes and
+reads its XLSX output back: Unicode, leading-zero barcode, numeric values, empty
+rows and columns beyond Z. It also tests CSV fallback without the XLSX library.
+Only synthetic data and temporary files are used; no orders or database writes.
+
+Deploy the existing `pc-order-import-export` plugin, then check an authorized
+order download and cart download in both allocation modes. No Java changes,
+activation or DB migration. Production deployment is left to the owner;
+rollback is restoring the previous plugin files (which restores the known XLSX
+compatibility bug). Customer-facing instructions/buttons are unchanged.
+
 ## Mobile export layout (2026-09-27)
 
 The export warehouse selector in `Ui.php` uses a bounded, wrapping label; at
