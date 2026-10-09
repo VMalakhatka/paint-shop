@@ -5,6 +5,39 @@ const LPS_ASSEMBLY_PATH = '/admin/folio/product-analytics/assembly-graph';
 
 function lps_assembly_key(string $sku): string { return mb_strtoupper(trim($sku), 'UTF-8'); }
 
+/** Only the backend's exact missing-SKU rejection may skip an unavailable child. */
+function lps_purchase_missing_child_skus($error, array $requested): array {
+    if (!is_wp_error($error)) return [];
+    $data = (array)$error->get_error_data();
+    $details = $data['body']['details'] ?? [];
+    if (($data['httpStatus'] ?? null) !== 400 || ($data['code'] ?? '') !== 'UNSUPPORTED_FILTER_VALUE'
+        || ($details['filter'] ?? '') !== 'skus' || !is_array($details['values'] ?? null)
+        || !$details['values']) return [];
+    $missing = $details['values'];
+    foreach ($missing as $sku) if (!is_string($sku) || !in_array($sku, $requested, true)) return [];
+    if (count(array_unique($missing)) !== count($missing)) return [];
+    return $missing;
+}
+
+/** An empty child batch still has to prove that sales/transit generations did not drift. */
+function lps_purchase_empty_child_response(array $state): array {
+    $cap = lps_product_analytics_v4_request_java(LPS_PRODUCT_ANALYTICS_CAPABILITIES_PATH, [
+        'sourceDatabase' => $state['query']['sourceDatabase'], 'warehouseIds' => $state['query']['warehouseIds'],
+    ]);
+    if (is_wp_error($cap)) throw new RuntimeException($cap->get_error_message());
+    $map = static function (array $rows, string $id): array {
+        $result = array_column($rows, 'generationId', $id); ksort($result, SORT_NUMERIC); return $result;
+    };
+    $transit_sources = $map($state['context']['transit']['sources'] ?? [], 'warehouseId');
+    if (empty($cap['compatibleGeneration']) || ($cap['analyticsSchemaVersion'] ?? 0) < 7
+        || $map($cap['warehouses'] ?? [], 'id') !== $map($state['context']['warehouses'] ?? [], 'id')
+        || array_keys($transit_sources) !== $state['transitWarehouseIds']
+        || $map($cap['transit']['sources'] ?? [], 'warehouseId') !== $transit_sources) {
+        throw new RuntimeException(__('Snapshot generations changed while loading. Start a new preview.', 'lavka-price-sync'));
+    }
+    return ['rows' => [], 'context' => $state['context'], 'totals' => ['productCount' => 0], 'errors' => [], 'nextCursor' => null];
+}
+
 function lps_purchase_assembly_graph(array $state): array {
     if (!$state['rootSkus']) return ['version' => 2, 'revision' => 'empty', 'nodes' => [], 'edges' => []];
     $graph = lps_product_analytics_v4_request_java(LPS_ASSEMBLY_PATH, [

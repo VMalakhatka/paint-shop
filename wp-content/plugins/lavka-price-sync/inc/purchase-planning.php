@@ -259,6 +259,18 @@ function lps_purchase_page(string $token, int $page): array {
     }
     $query['page']['cursor'] = $state['cursor'];
     $body = lps_product_analytics_v4_request_java(LPS_PRODUCT_ANALYTICS_QUERY_PATH, $query);
+    if (is_wp_error($body) && $state['phase'] === 'children' && !$state['cursor']) {
+        $missing = lps_purchase_missing_child_skus($body, $state['pendingChildren'][0]);
+        if ($missing) {
+            $remaining = array_values(array_diff($state['pendingChildren'][0], $missing));
+            $state['missingChildren'] = array_values(array_unique(array_merge($state['missingChildren'] ?? [], $missing)));
+            if ($remaining) {
+                $query['productFilters']['skus']['values'] = $remaining;
+                $body = lps_product_analytics_v4_request_java(LPS_PRODUCT_ANALYTICS_QUERY_PATH, $query);
+            } else $body = lps_purchase_empty_child_response($state);
+            if (!is_wp_error($body)) $body['warnings'][] = ['code' => 'ASSEMBLY_CHILD_DATA_REQUIRED', 'skus' => $missing];
+        }
+    }
     if (is_wp_error($body)) throw new RuntimeException($body->get_error_message());
     if (!isset($body['rows'], $body['context'], $body['totals']['productCount']) || !is_array($body['rows']) || !empty($body['errors'])) {
         throw new RuntimeException(__('The analytics response is incomplete. No purchase preview was accepted.', 'lavka-price-sync'));

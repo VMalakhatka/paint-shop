@@ -266,6 +266,13 @@ Java не заявляет автоматическую сверку парти�
 
 ## Для менеджера
 
+- Assembly preview (production evidence + session tests, 2026-10-09): recipes can
+  reference children absent from every selected active snapshot. Handle only the
+  exact Java missing-SKU rejection in child loading; retain unknown child stock
+  and block ancestors. Never send an empty INCLUDE or suppress root/transport
+  errors. An empty batch must verify both sales and transit generations through
+  capabilities. Contract: `docs/api/FOLIO_ASSEMBLY_PURCHASE.md`.
+
 - Проверяй бизнес-результат, а не только зелёный HTTP: суммы, склад, роль/контракт, количество документов, missing stock и видимость товара.
 - Перед массовой коррекцией экспортируй отчёт до изменений.
 - Для ошибки сохраняй SKU, понятную причину, документ/дату/склад и reqId; не пересылай секретную конфигурацию.

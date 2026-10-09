@@ -2,6 +2,12 @@
 if (PHP_SAPI !== 'cli') exit;
 define('ABSPATH', __DIR__); define('HOUR_IN_SECONDS', 3600); define('LPS_CAP', 'manage_options');
 define('LPS_PRODUCT_ANALYTICS_QUERY_PATH', '/analytics/query');
+define('LPS_PRODUCT_ANALYTICS_CAPABILITIES_PATH', '/analytics/capabilities');
+class WP_Error {
+    public function __construct(private string $code, private string $message, private array $data) {}
+    public function get_error_data() { return $this->data; }
+    public function get_error_message() { return $this->message; }
+}
 function add_action($name, $callback, ...$args) { $GLOBALS['actions'][$name] = $callback; }
 function __($s, $d = '') { return $s; }
 function sanitize_key($s) { return strtolower((string)$s); }
@@ -20,9 +26,10 @@ function lavka_get_global_warehouse_groups() { return [['code' => 'group', 'name
 function lps_product_analytics_v4_sanitize_query($query) { return $query; }
 function lps_product_analytics_v4_request_java($path, $query) {
     if ($path === LPS_ASSEMBLY_PATH) return $GLOBALS['graph'] ?? ['version'=>2,'revision'=>'fixture','nodes'=>array_map(static fn($sku)=>['sku'=>$sku,'manufactured'=>false,'issues'=>[]],$query['rootSkus']),'edges'=>[]];
-    $GLOBALS['queries'][] = $query; return $GLOBALS['response'];
+    if ($path === LPS_PRODUCT_ANALYTICS_CAPABILITIES_PATH) return $GLOBALS['capabilities'];
+    $GLOBALS['queries'][] = $query; return !empty($GLOBALS['responseQueue']) ? array_shift($GLOBALS['responseQueue']) : $GLOBALS['response'];
 }
-function is_wp_error($value) { return false; }
+function is_wp_error($value) { return $value instanceof WP_Error; }
 require __DIR__ . '/../inc/purchase-planning-model.php';
 require __DIR__ . '/../inc/purchase-planning.php';
 function check($condition, $message) { if (!$condition) throw new RuntimeException($message); }
@@ -153,3 +160,41 @@ $graph['version']=1;
 rejected(fn()=>lps_purchase_assembly_graph(['rootSkus'=>['PARENT'],'query'=>$start['query']]),'Old Java demand semantics cannot be used with the new planner');
 check(array_key_exists('childCoverageShortfall',$exported[0]) && array_key_exists('childCoverageWarning',$exported[0]),'Export includes explicit child coverage columns');
 echo "PASS: legacy assembly selection, old-backend guard and coverage export fields\n";
+
+$graph=['version'=>2,'revision'=>'missing-child','nodes'=>[
+    ['sku'=>'PARENT','manufactured'=>false,'issues'=>[]],
+    ['sku'=>'CHILD','manufactured'=>true,'issues'=>[]],
+    ['sku'=>'MISSING','manufactured'=>true,'issues'=>['ASSEMBLY_ROLE_REQUIRED']]],
+    'edges'=>[['parent'=>'PARENT','child'=>'CHILD','factor'=>1,'source'=>'ALL_RAZBORKA','rowId'=>'1'],
+        ['parent'=>'PARENT','child'=>'MISSING','factor'=>1,'source'=>'ALL_RAZBORKA','rowId'=>'2']]];
+$error=new WP_Error('java_request_failed','Unknown SKU', ['httpStatus'=>400,'code'=>'UNSUPPORTED_FILTER_VALUE',
+    'body'=>['details'=>['filter'=>'skus','values'=>['MISSING']]]]);
+$response['rows']=[['sku'=>'PARENT','inTransitStock'=>$transit]];$response['totals']['productCount']=1;
+$token=lps_purchase_start(1,$scenario['version'])['token'];lps_purchase_page($token,0);
+$response['rows']=[['sku'=>'CHILD','inTransitStock'=>$transit]];
+$responseQueue=[$error,$response];$page=lps_purchase_page($token,1);
+check($page['complete'] && $page['loaded']===2 && $page['total']===3,'Missing child does not abort known descendants');
+check(end($queries)['productFilters']['skus']['values']===['CHILD'],'Retry requests only known children');
+check(lps_purchase_session($token)['missingChildren']===['MISSING'],'Missing child is retained explicitly');
+$items=array_column($page['items'],null,'sku');
+check(in_array('ASSEMBLY_CHILD_DATA_REQUIRED',$items['MISSING']['groups'][0]['issues'],true),'Missing child data is unknown');
+check(in_array('ASSEMBLY_DEPENDENCY_REQUIRED',$items['PARENT']['groups'][0]['issues'],true),'Missing child blocks parent');
+check($items['MISSING']['stockReport']['total']['physical']===null,'Missing child stock is not fabricated as zero');
+check($items['PARENT']['groups'][0]['recommendedQuantity']===null,'No supplier order from unknown child');
+
+$graph['nodes']=[$graph['nodes'][0],$graph['nodes'][2]];$graph['edges']=[$graph['edges'][1]];
+$response['rows']=[['sku'=>'PARENT','inTransitStock'=>$transit]];
+$response['context']['transit']['sources']=[['warehouseId'=>9,'generationId'=>99]];
+$token=lps_purchase_start(1,$scenario['version'])['token'];lps_purchase_page($token,0);
+$capabilities=['compatibleGeneration'=>true,'analyticsSchemaVersion'=>7,'warehouses'=>$response['context']['warehouses'],'transit'=>['sources'=>[['warehouseId'=>9,'generationId'=>99]]]];
+$capabilities['warehouses'][0]['generationId']=99;$responseQueue=[$error];
+rejected(fn()=>lps_purchase_page($token,1),'Empty child batch still rejects snapshot drift');
+$capabilities['warehouses'][0]['generationId']=10;$capabilities['transit']['sources'][0]['generationId']=100;$responseQueue=[$error];
+rejected(fn()=>lps_purchase_page($token,1),'Empty child batch still rejects transit generation drift');
+$capabilities['transit']['sources'][0]['generationId']=99;$responseQueue=[$error];$page=lps_purchase_page($token,1);
+check($page['complete'] && $page['loaded']===1 && $page['total']===2,'All missing children complete as unknown without querying all products');
+$bad=new WP_Error('java_request_failed','Unknown SKU',['httpStatus'=>400,'code'=>'UNSUPPORTED_FILTER_VALUE','body'=>['details'=>['filter'=>'skus','values'=>['UNREQUESTED']]]]);
+check(lps_purchase_missing_child_skus($bad,['MISSING'])===[],'Unrequested SKU cannot be removed');
+$bad=new WP_Error('java_transport_error','Timeout',['httpStatus'=>0]);
+check(lps_purchase_missing_child_skus($bad,['MISSING'])===[],'Transport failure must not be accepted as missing data');
+echo "PASS: missing descendants, exact backend errors, bounded retry, empty-batch generation guard and unknown stock\n";
