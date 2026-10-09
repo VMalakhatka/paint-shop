@@ -920,6 +920,9 @@ final class ImageValidator
     private function validate_container(string $path, string $format): array
     {
         $bytes = (string) file_get_contents($path);
+        if ($format === 'png') {
+            return $this->validate_png($bytes);
+        }
         if ($this->contains_suspicious_payload($bytes)) {
             return [
                 'ok' => false,
@@ -935,9 +938,6 @@ final class ImageValidator
             }
             return ['ok' => true, 'warnings' => []];
         }
-        if ($format === 'png') {
-            return $this->validate_png($bytes);
-        }
         if ($format === 'webp') {
             return $this->validate_webp($bytes);
         }
@@ -947,6 +947,9 @@ final class ImageValidator
 
     private function validate_png(string $bytes): array
     {
+        if (!str_starts_with($bytes, "\x89PNG\r\n\x1A\n")) {
+            return ['ok' => false, 'message' => __('The PNG chunk structure is invalid.', 'lavka-product-media-upload')];
+        }
         $length = strlen($bytes);
         $offset = 8;
         $found_iend = false;
@@ -963,6 +966,16 @@ final class ImageValidator
             $calculated_crc = pack('H*', hash('crc32b', $type . $data));
             if (!hash_equals($stored_crc, $calculated_crc)) {
                 return ['ok' => false, 'message' => __('A PNG chunk CRC check failed.', 'lavka-product-media-upload'), 'technical' => $type];
+            }
+            // IDAT contains compressed pixels, where short script tokens can occur
+            // by chance. CRC checks and the subsequent full decode still apply.
+            // Keep the signature check for metadata and all other chunk payloads.
+            if ($type !== 'IDAT' && $this->contains_suspicious_payload($data)) {
+                return [
+                    'ok' => false,
+                    'message' => __('The file contains a suspicious executable or script signature.', 'lavka-product-media-upload'),
+                    'technical' => 'polyglot_signature',
+                ];
             }
             if ($type === 'acTL') {
                 $animated = true;

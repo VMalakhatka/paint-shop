@@ -61,6 +61,25 @@ known naming conventions. The `/` and `\` separators are converted to `_` in the
 filename only, for example `КЦМ-БК038/60` → `kcm-bk038_60.jpg`. Other unsupported
 characters remain blocking errors.
 
+## Image container checks
+
+PNG validation checks the magic bytes, chunk boundaries and CRCs, rejects animation
+and data after IEND, and requires a successful full image decode. Script-signature
+heuristics inspect non-IDAT chunk payloads, including metadata. Compressed IDAT pixel
+bytes are excluded from text-pattern matching: valid image data can contain short
+sequences such as `<?=` by chance. This does not bypass decoding, size limits or the
+optional malware-scanner hook. It is a heuristic, not an antivirus guarantee. JPEG
+and WebP signature checks are unchanged.
+
+Run the regression check with PHP/GD:
+
+```sh
+php wp-content/plugins/lavka-product-media-upload/tests/image-container-test.php
+```
+
+An optional PNG path as the last argument also checks that original file without
+modifying it.
+
 ## Conflict sources
 
 The check looks for canonical filenames in:
