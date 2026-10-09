@@ -6581,3 +6581,19 @@ msgstr "Запас в месяцах"
 #: inc/purchase-planning.php
 msgid "Outgoing quantity follows the selected movement filters. Stock includes all analysed warehouses; stock-only warehouses contribute no movements. Surplus is current stock available for planning minus forecast, minimum stock and child needs; expected receipts are excluded. Months use actual regular demand and a 30-day month; 9999 means positive stock with no regular demand. Child needs are shown separately. A dash means missing data."
 msgstr "Расход соответствует выбранным фильтрам движения. Остаток охватывает все анализируемые склады; склады «Только текущий остаток» не добавляют движений. Избыток — текущий остаток для планирования минус прогноз, минимальный запас и потребность детей; ожидаемые поступления не учитываются. Запас в месяцах рассчитывается по фактическому регулярному спросу, месяц — 30 дней; 9999 означает положительный остаток без регулярного спроса. Потребность детей показана отдельно. Прочерк означает отсутствующие данные."
+
+#: inc/purchase-planning.php
+msgid "Uncovered child demand, component units"
+msgstr "Непокрытая потребность детей, ед. родителя"
+
+#: inc/purchase-planning.php
+msgid "The selected order leaves child demand uncovered after reserving the own forecast and planned replenishments. Increase the quantity or review the plan."
+msgstr "Выбранное количество заказа не покрывает потребность детей после обеспечения собственного прогноза и плановых пополнений. Увеличьте количество или пересмотрите план."
+
+#: inc/purchase-planning.php
+msgid "Assembly consumption is excluded from demand and lost-sales estimates, even when selected in the scenario. Actual outgoing quantities still follow the selected operations. Child shortages are calculated from recipes."
+msgstr "Расход на сборку исключён из спроса и оценки упущенных продаж, даже если выбран в сценарии. Фактический расход соответствует выбранным операциям. Дефицит детей рассчитывается по рецептам."
+
+#: inc/purchase-planning.php
+msgid "Child demand coverage warning"
+msgstr "Предупреждение о покрытии потребности детей"

@@ -19,7 +19,7 @@ function lavka_get_transit_warehouse_ids() { return $GLOBALS['transitIds'] ?? [9
 function lavka_get_global_warehouse_groups() { return [['code' => 'group', 'name' => 'Group', 'warehouseIds' => [1, 7]]]; }
 function lps_product_analytics_v4_sanitize_query($query) { return $query; }
 function lps_product_analytics_v4_request_java($path, $query) {
-    if ($path === LPS_ASSEMBLY_PATH) return $GLOBALS['graph'] ?? ['version'=>1,'revision'=>'fixture','nodes'=>array_map(static fn($sku)=>['sku'=>$sku,'manufactured'=>false,'issues'=>[]],$query['rootSkus']),'edges'=>[]];
+    if ($path === LPS_ASSEMBLY_PATH) return $GLOBALS['graph'] ?? ['version'=>2,'revision'=>'fixture','nodes'=>array_map(static fn($sku)=>['sku'=>$sku,'manufactured'=>false,'issues'=>[]],$query['rootSkus']),'edges'=>[]];
     $GLOBALS['queries'][] = $query; return $GLOBALS['response'];
 }
 function is_wp_error($value) { return false; }
@@ -95,7 +95,7 @@ $sessions[$key]['previewVersion'] = 5;
 rejected(fn() => lps_purchase_session($start['token']), 'Old calculation version requires a fresh preview');
 echo "PASS: scenario demand/rounding snapshot, history request and old-preview invalidation\n";
 
-$graph = ['version'=>1,'revision'=>'fixture-with-child','nodes'=>[
+$graph = ['version'=>2,'revision'=>'fixture-with-child','nodes'=>[
     ['sku'=>'PARENT','manufactured'=>false,'issues'=>[]], ['sku'=>'CHILD','manufactured'=>true,'issues'=>[]]],
     'edges'=>[['parent'=>'PARENT','child'=>'CHILD','factor'=>0.25,'source'=>'ALL_RAZBORKA_SLOJ','rowId'=>'1']]];
 $token = lps_purchase_start(1, $scenario['version'])['token'];
@@ -145,3 +145,11 @@ check($exported[0]['periodExpense']===20.0 && $exported[0]['allWarehousesPhysica
 $graph['revision']='changed';
 rejected(fn()=>$actions['admin_post_lps_purchase_export'](),'Changed recipes block actual export until recalculation');
 echo "PASS: actual CSV export supplier isolation and recipe revision guard\n";
+
+$scenario['profile']['movementFilters']['operationKinds']=['mode'=>'INCLUDE','values'=>['*РОЗНИЦА','МУЛЬТИСБОРКА','РАСХОДНИКИ']];
+$start=lps_purchase_start(1,$scenario['version']);
+check($start['query']['movementFilters']===$scenario['profile']['movementFilters'],'Legacy scenario starts and preserves actual outgoing filters; Java v2 excludes assembly from demand');
+$graph['version']=1;
+rejected(fn()=>lps_purchase_assembly_graph(['rootSkus'=>['PARENT'],'query'=>$start['query']]),'Old Java demand semantics cannot be used with the new planner');
+check(array_key_exists('childCoverageShortfall',$exported[0]) && array_key_exists('childCoverageWarning',$exported[0]),'Export includes explicit child coverage columns');
+echo "PASS: legacy assembly selection, old-backend guard and coverage export fields\n";

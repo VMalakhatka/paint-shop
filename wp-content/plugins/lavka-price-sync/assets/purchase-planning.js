@@ -9,6 +9,7 @@
     const state = { token: '', rows: [], page: 0, busy: false, complete: false, controller: null, requestId: 0,
         filters: { hideMinimumZero: false, hideNoSales: false, productGroup: '', productSubgroup: '', order: 'all' } };
     const escape = (value) => String(value == null ? '' : value).replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
+    const componentNumber = new Intl.NumberFormat(config.locale || 'uk', { maximumFractionDigits: 12 });
     const display = (value) => value == null ? '—' : number.format(value);
     function message(text, error) {
         el('message').textContent = text;
@@ -101,6 +102,7 @@
                 (row.stockReport ? '<div class="lps-purchase-scroll"><table class="widefat striped lps-purchase-stock"><thead><tr>' + ['group','periodExpense','physical','componentDemand','excessStock','stockMonths'].map((key) => '<th>' + escape(t[key]) + '</th>').join('') + '</tr></thead><tbody>' +
                     [{name:t.allWarehouses, ...row.stockReport.total}, ...row.groups.map((g) => ({name:g.groupName, ...row.stockReport.groups[g.groupCode]}))].map((r) => '<tr><th>' + escape(r.name) + '</th>' + ['periodExpense','physical','componentDemand','excessStock','stockMonths'].map((key) => '<td data-stock-field="' + key + '">' + (key === 'stockMonths' && r[key] === 9999 ? '9999' : display(r[key])) + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>' : '') +
                 '<p><strong>' + escape(row.assembly ? (row.assembly.manufactured ? t.assemblyOnly : (row.assembly.purchasable ? t.supplierOrder : t.review)) : t.assemblyPending) + '</strong></p>' +
+                row.groups.filter((g) => g.childCoverageShortfall > 0).map((g) => '<p class="notice notice-warning inline" data-child-coverage-warning><strong>' + escape(g.groupName) + ': ' + escape(t.childCoverageShortfall) + ' — ' + escape(componentNumber.format(g.childCoverageShortfall)) + '</strong><br>' + escape(t.childCoverageWarning) + '</p>').join('') +
                 (row.assembly && row.assembly.components.length ? '<details><summary>' + escape(t.components) + '</summary>' + row.assembly.components.map((c) => '<p>' + escape(c.parent) + ': ' + display(c.factor) + '</p>').join('') + '</details>' : '') +
                 (row.groups.some((g) => (g.childContributions || []).length) ? '<details><summary>' + escape(t.childContributions) + '</summary>' + row.groups.map((g) => (g.childContributions || []).map((c) => '<p><strong>' + escape(g.groupName) + ' · <button type="button" class="button-link" data-child-sku="' + escape(c.sku) + '">' + escape(c.sku) + '</button></strong>: ' + escape(t.manufacturingNeed) + ' ' + display(c.manufacturingNeed) + ' × ' + escape(t.factor) + ' ' + display(c.factor) + ' = ' + display(c.consumption) + '</p>').join('')).join('') + '</details>' : '') +
                 '<p class="lps-purchase-filter-meta">' + escape(t.productGroup) + ': ' + escape(group.label || '—') + ' · ' + escape(t.productSubgroup) + ': ' + escape(subgroup) + ' · ' + escape(t.minimumStock) + ': ' + display(filterData.minimumStock) + '</p>' +

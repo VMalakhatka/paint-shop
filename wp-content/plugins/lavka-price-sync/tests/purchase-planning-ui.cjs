@@ -4,8 +4,8 @@ const assert=require('assert');
 const php=process.env.PHP_BINARY || 'php';
 const fixture=require('path').join(__dirname,'purchase-planning-ui.php');
 const output=process.env.UI_OUTPUT_DIR || require('os').tmpdir();
- let routed=false, internal=false, assembly=false;
- const calculateAssembly=(edits)=>JSON.parse(execFileSync(php,[fixture,'calculate-assembly',JSON.stringify(edits||{})],{encoding:'utf8'}));
+ let routed=false, internal=false, assembly=false, shortfall=false;
+ const calculateAssembly=(edits)=>JSON.parse(execFileSync(php,[fixture,shortfall?'calculate-shortfall':'calculate-assembly',JSON.stringify(edits||{})],{encoding:'utf8'}));
  const calculate=(edits)=>JSON.parse(execFileSync(php,[fixture,internal?'calculate-internal':routed?'calculate-route':'calculate',JSON.stringify(edits||{})],{encoding:'utf8'}));
  const calculateZero=()=>JSON.parse(execFileSync(php,[fixture,'calculate-zero'],{encoding:'utf8'}));
 (async()=>{
@@ -103,6 +103,24 @@ const output=process.env.UI_OUTPUT_DIR || require('os').tmpdir();
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth));
   assert.deepEqual(errors,[]);
   await page.screenshot({path:`${output}/purchase-assembly-${width}.png`,fullPage:true});
+ }
+ shortfall=true;
+ for (const width of [1440,390]) {
+  await page.setViewportSize({width,height:1000}); await page.setContent(execFileSync(php,[fixture],{encoding:'utf8'}));
+  await page.locator('#lps-purchase-scenario').selectOption('1'); await page.locator('#lps-purchase-start').click();
+  const warning=page.locator('[data-child-coverage-warning]');
+  await warning.waitFor({state:'visible'});
+  assert((await warning.innerText()).includes('0.25'));
+  assert.equal(await page.locator('.lps-purchase-calculation tbody tr td').nth(1).innerText(),'0');
+  assert((await page.locator('#lps-purchase').innerText()).includes('Assembly consumption is excluded from demand'));
+  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth));
+  await page.screenshot({path:`${output}/purchase-child-shortfall-${width}.png`,fullPage:true});
+  const child=page.locator('.lps-purchase-sku').nth(1);
+  await child.locator('[data-edit-form]').locator('..').locator('summary').click();
+  await child.locator('[data-field="openOrders"]').fill('1'); await child.locator('button').click();
+  await page.waitForFunction(()=>!document.querySelector('#lps-purchase-start').disabled);
+  assert.equal(await page.locator('[data-child-coverage-warning]').count(),0);
+  assert.deepEqual(errors,[]);
  }
  await browser.close();console.log('PASS: desktop/mobile, pack toggle, manual quantity, error state, child navigation and parent recalculation, no page overflow');
 })().catch(e=>{console.error(e);process.exit(1)});

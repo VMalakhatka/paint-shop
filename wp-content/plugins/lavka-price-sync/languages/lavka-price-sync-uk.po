@@ -6565,3 +6565,19 @@ msgstr "Запас у місяцях"
 #: inc/purchase-planning.php
 msgid "Outgoing quantity follows the selected movement filters. Stock includes all analysed warehouses; stock-only warehouses contribute no movements. Surplus is current stock available for planning minus forecast, minimum stock and child needs; expected receipts are excluded. Months use actual regular demand and a 30-day month; 9999 means positive stock with no regular demand. Child needs are shown separately. A dash means missing data."
 msgstr "Витрати відповідають обраним фільтрам руху. Залишок охоплює всі аналізовані склади; склади «Лише поточний залишок» не додають рухів. Надлишок — поточний залишок для планування мінус прогноз, мінімальний запас і потреба дітей; очікувані надходження не враховуються. Запас у місяцях розраховується за фактичним регулярним попитом, місяць — 30 днів; 9999 означає додатний залишок без регулярного попиту. Потреба дітей показана окремо. Прочерк означає відсутні дані."
+
+#: inc/purchase-planning.php
+msgid "Uncovered child demand, component units"
+msgstr "Непокрита потреба дітей, од. батьківського товару"
+
+#: inc/purchase-planning.php
+msgid "The selected order leaves child demand uncovered after reserving the own forecast and planned replenishments. Increase the quantity or review the plan."
+msgstr "Обраний обсяг замовлення не покриває потребу дітей після забезпечення власного прогнозу та планових поповнень. Збільште кількість або перегляньте план."
+
+#: inc/purchase-planning.php
+msgid "Assembly consumption is excluded from demand and lost-sales estimates, even when selected in the scenario. Actual outgoing quantities still follow the selected operations. Child shortages are calculated from recipes."
+msgstr "Витрати на складання виключено з попиту та оцінки втрачених продажів, навіть якщо вони обрані у сценарії. Фактичні витрати відповідають обраним операціям. Дефіцит дітей розраховується за рецептами."
+
+#: inc/purchase-planning.php
+msgid "Child demand coverage warning"
+msgstr "Попередження про покриття потреби дітей"

@@ -58,3 +58,36 @@ array_pop($s['assemblyGraph']['edges']);
 $s['assemblyGraph']['nodes'][3]['issues']=['ASSEMBLY_INVALID_RECIPE'];
 check(calculate($s)['A']['groups'][0]['finalQuantity']===null,'Invalid grandchild recipe blocks ancestor');
 echo "PASS: supplier isolation, shared children, incoming stock, purchase bans, diamond chain, fractional factors, incomplete data and cycles\n";
+
+// Rounding/manual choices remain available, but uncovered manufacturing demand is visible.
+$s=['rootSkus'=>['P'],'orderSupplier'=>'Supplier','periodDays'=>30,'allowTransfers'=>false,'transitWarehouseIds'=>[],
+ 'groups'=>[['code'=>'group','name'=>'Group','warehouseIds'=>[1],'receivingWarehouseId'=>1,'leadTimeDays'=>0,'targetDays'=>30,'safetyDays'=>0,'packRounding'=>'UP']],
+ 'rows'=>['P'=>product('P',0,0),'C'=>product('C',0,1)],
+ 'edits'=>['P'=>['group'=>['openOrders'=>0]],'C'=>['group'=>['openOrders'=>0]]],
+ 'assemblyGraph'=>['nodes'=>[node('P',false),node('C',true)],'edges'=>[edge('P','C',0.25)]]];
+foreach (['UP','DOWN','NONE'] as $mode) {
+ $s['groups'][0]['packRounding']=$mode; $a=calculate($s);
+ check($a['P']['groups'][0]['finalQuantity']===0.0 && $a['P']['groups'][0]['childCoverageShortfall']===0.25,'Small component shortage survives every rounding mode as a warning');
+}
+$s['edits']['P']['group']['quantity']=1; $s['edits']['P']['group']['reason']='Cover child production';
+check(calculate($s)['P']['groups'][0]['childCoverageShortfall']===0.0,'Manual quantity covering children clears warning');
+$s['edits']['P']['group']['quantity']=0;
+check(calculate($s)['P']['groups'][0]['childCoverageShortfall']===0.25,'Manual zero keeps warning without silently changing quantity');
+unset($s['edits']['P']['group']['quantity']);
+$s['edits']['C']['group']['openOrders']=1;
+check(calculate($s)['P']['groups'][0]['childCoverageShortfall']===0.0,'Child receipts remove manufacturing deficit and warning');
+$s['edits']['C']['group']['openOrders']=0;
+$s['rows']['P']=product('P',10.25,10);
+check(calculate($s)['P']['groups'][0]['childCoverageShortfall']===0.0,'Stock covers own demand and child demand exactly');
+$s['rows']['P']=product('P',10,10);
+check(calculate($s)['P']['groups'][0]['childCoverageShortfall']===0.25,'Own forecast remains reserved before child coverage');
+unset($s['edits']['P']);
+check(calculate($s)['P']['groups'][0]['childCoverageShortfall']===null,'Unknown supply cannot claim zero uncovered demand');
+$s['edits']['P']=['group'=>['openOrders'=>0]];
+$s['rows']['P']=product('P',0,0.25); $s['rows']['C']=product('C',0,0);
+check(calculate($s)['P']['groups'][0]['childCoverageShortfall']===0.0,'Own forecast rounding without children does not generate a child warning');
+$s['rows']['P']=product('P',0,0); $s['rows']['C']=product('C',0,0); $s['rows']['G']=product('G',0,4);
+$s['edits']['G']=['group'=>['openOrders'=>0]];
+$s['assemblyGraph']=['nodes'=>[node('P',false),node('C',true),node('G',true)],'edges'=>[edge('P','C',0.1),edge('C','G',0.25)]];
+check(abs(calculate($s)['P']['groups'][0]['childCoverageShortfall']-0.1)<1e-12,'Four grandchildren require one sheet and 0.1 parent pack, not an invisible zero');
+echo "PASS: visible child shortages after rounding, manual choices, stock/receipts, unknown inputs and grandchild chain\n";

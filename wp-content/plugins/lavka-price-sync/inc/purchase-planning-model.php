@@ -481,6 +481,7 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
         unset($receiver);
     }
     foreach ($result as $code => &$item) {
+        $item['childCoverageShortfall'] = null;
         if ($item['ready']) {
             $need = max(0, $item['target'] - $item['position'] - $item['transferIn'] + $item['transferOut'] - $item['plannedTransferIn'] + $item['plannedTransferOut']);
             $item['manufacturingNeed'] = $manufactured ? $need : null;
@@ -501,6 +502,18 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
             $item['issues'][] = 'PLANNED_REPLENISHMENT_UNCOVERED';
         }
         $item['finalQuantity'] = !$item['issues'] ? ($item['managerQuantity'] ?? $item['recommendedQuantity']) : null;
+        // Keep the chosen rounding/manual order. Warn when it cannot cover child demand.
+        // The own target and routed replenishments retain their existing priority.
+        if (!$manufactured && $item['finalQuantity'] !== null) {
+            $child_demand = $item['componentDemand'];
+            foreach ($result as $receiver) {
+                if ($receiver['supplyFromGroupCode'] === $code) {
+                    $child_demand += min($receiver['componentDemand'] ?? 0, $receiver['plannedTransferIn']);
+                }
+            }
+            $shortfall = min($child_demand, max(0, $need - $item['finalQuantity']));
+            $item['childCoverageShortfall'] = $shortfall > 0.000000001 ? $shortfall : 0.0;
+        }
         if ($item['issues']) $item['manufacturingNeed'] = null;
         $item['status'] = $item['finalQuantity'] === null ? 'REVIEW_REQUIRED' : 'PREVIEW_READY';
         unset($item['position'], $item['ready']);
@@ -510,7 +523,7 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
         $source = $item['supplyFromGroupCode'];
         if ($source !== '' && isset($result[$source]) && $result[$source]['finalQuantity'] === null) {
             $item['issues'][] = 'REPLENISHMENT_DEPENDENCY_REQUIRED';
-            $item['finalQuantity'] = null; $item['status'] = 'REVIEW_REQUIRED';
+            $item['finalQuantity'] = null; $item['childCoverageShortfall'] = null; $item['status'] = 'REVIEW_REQUIRED';
         }
         $item['issues'] = array_values(array_unique($item['issues']));
     }

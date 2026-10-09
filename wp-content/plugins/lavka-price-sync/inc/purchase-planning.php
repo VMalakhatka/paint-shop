@@ -17,6 +17,9 @@ function lps_purchase_i18n(): array {
         'assemblyHelp' => __('Select one supplier. Children and grandchildren are found automatically, including our own products and products outside the supplier filter. Review their stock and incoming quantities. Only their shortages consume components. The export contains purchasing products of the selected supplier; assembly documents are not created.', 'lavka-price-sync'),
         'ownTarget' => __('Own sales forecast with minimum stock', 'lavka-price-sync'),
         'componentDemand' => __('Component demand from children', 'lavka-price-sync'),
+        'childCoverageShortfall' => __('Uncovered child demand, component units', 'lavka-price-sync'),
+        'childCoverageWarning' => __('The selected order leaves child demand uncovered after reserving the own forecast and planned replenishments. Increase the quantity or review the plan.', 'lavka-price-sync'),
+        'assemblyDemandHelp' => __('Assembly consumption is excluded from demand and lost-sales estimates, even when selected in the scenario. Actual outgoing quantities still follow the selected operations. Child shortages are calculated from recipes.', 'lavka-price-sync'),
         'manufacturingNeed' => __('Quantity to manufacture', 'lavka-price-sync'),
         'childContributions' => __('Child shortage breakdown', 'lavka-price-sync'),
         'components' => __('Components per unit', 'lavka-price-sync'),
@@ -178,7 +181,7 @@ function lps_purchase_session_key(string $token): string {
 function lps_purchase_session(string $token): array {
     $state = get_transient(lps_purchase_session_key($token));
     if (!is_array($state)) throw new InvalidArgumentException(__('The preview has expired. Start a new calculation.', 'lavka-price-sync'));
-    if (($state['previewVersion'] ?? 0) !== 8) throw new InvalidArgumentException(__('Start a new preview to apply the current rounding and demand settings.', 'lavka-price-sync'));
+    if (($state['previewVersion'] ?? 0) !== 9) throw new InvalidArgumentException(__('Start a new preview to apply the current rounding and demand settings.', 'lavka-price-sync'));
     if (($state['transitContractVersion'] ?? 0) !== 3 || ($state['transitWarehouseIds'] ?? null) !== lps_purchase_transit_warehouses()) {
         throw new InvalidArgumentException(__('Transport warehouse settings changed. Start a new preview.', 'lavka-price-sync'));
     }
@@ -198,10 +201,6 @@ function lps_purchase_start(int $id, int $version): array {
         throw new InvalidArgumentException(__('The scenario changed or is not active. Reload the page.', 'lavka-price-sync'));
     }
     $profile = $scenario['profile'];
-    $operations = $profile['movementFilters']['operationKinds'] ?? [];
-    if (($operations['mode'] ?? '') === 'INCLUDE' && in_array('МУЛЬТИСБОРКА', $operations['values'] ?? [], true)) {
-        throw new InvalidArgumentException(__('Remove assembly consumption from the sales selection: child forecasts already calculate component consumption.', 'lavka-price-sync'));
-    }
     $suppliers = $profile['productFilters']['currentSuppliers'] ?? [];
     if (($suppliers['mode'] ?? '') !== 'INCLUDE' || count($suppliers['values'] ?? []) !== 1) {
         throw new InvalidArgumentException(__('Select exactly one supplier for the purchase preview.', 'lavka-price-sync'));
@@ -226,7 +225,7 @@ function lps_purchase_start(int $id, int $version): array {
         'calculation' => $profile['calculation'], 'sort' => [['field' => 'sku', 'direction' => 'ASC']], 'page' => ['size' => 100],
     ]);
     $token = bin2hex(random_bytes(16));
-    $state = ['previewVersion' => 8, 'orderSupplier' => $suppliers['values'][0], 'phase' => 'roots', 'rootSkus' => [], 'pendingChildren' => [], 'phaseCount' => 0,
+    $state = ['previewVersion' => 9, 'orderSupplier' => $suppliers['values'][0], 'phase' => 'roots', 'rootSkus' => [], 'pendingChildren' => [], 'phaseCount' => 0,
         'scenario' => ['id' => $scenario['id'], 'uuid' => $scenario['uuid'], 'name' => $scenario['name'], 'version' => $scenario['version']],
         'supplierPriceVersions' => function_exists('lps_sp_active_versions') ? lps_sp_active_versions($profile['context']['sourceDatabase']) : [],
         'query' => $query, 'groups' => $groups, 'groupsRevision' => lavka_get_global_warehouse_groups_revision(),
@@ -388,6 +387,7 @@ function lps_purchase_render(): void {
         <h1><?php echo esc_html__('Supplier order preview', 'lavka-price-sync'); ?></h1>
         <p class="notice notice-info inline"><?php echo esc_html(lps_purchase_i18n()['assemblyHelp']); ?></p>
         <p class="description"><?php echo esc_html(lps_purchase_i18n()['stockReportHelp']); ?></p>
+        <p class="description"><?php echo esc_html(lps_purchase_i18n()['assemblyDemandHelp']); ?></p>
         <p class="notice notice-info inline"><?php echo esc_html__('Preview only. Demand uses regular sales and, when enabled in the scenario, capped estimated lost sales from measured availability history. Returns are shown separately. No Folio documents, WooCommerce orders or stock reservations are created.', 'lavka-price-sync'); ?></p>
         <form id="lps-purchase-form" class="lps-purchase-toolbar">
             <label><?php echo esc_html__('Analytics scenario', 'lavka-price-sync'); ?> <select id="lps-purchase-scenario" required><option value="">—</option>
@@ -446,6 +446,8 @@ add_action('admin_post_lps_purchase_export', static function (): void {
         foreach (['allWarehousesPhysical','periodExpense','excessStock','stockMonths'] as $key) $stock_columns[] = ['key' => $key, 'label' => $t[$key]];
         foreach (['periodExpense','componentDemand','excessStock','stockMonths'] as $key) $stock_columns[] = ['key' => 'all_' . $key, 'label' => $t['allWarehouses'] . ': ' . $t[$key]];
         array_splice($columns, 3, 0, $stock_columns);
+        $columns[] = ['key' => 'childCoverageShortfall', 'label' => $t['childCoverageShortfall']];
+        $columns[] = ['key' => 'childCoverageWarning', 'label' => __('Child demand coverage warning', 'lavka-price-sync')];
         $columns[] = ['key' => 'supplierPrices', 'label' => $t['supplierPrices']];
         $columns[] = ['key' => 'status', 'label' => __('Status', 'lavka-price-sync')];
         $columns[] = ['key' => 'transitWarehouses', 'label' => $t['transitWarehouses']];
@@ -470,6 +472,8 @@ add_action('admin_post_lps_purchase_export', static function (): void {
                     'physical' => $stock_report['physical'], 'ownTarget' => $group['ownTarget'], 'componentDemand' => $group['componentDemand'],
                     'allWarehousesPhysical' => $calculated['stockReport']['total']['physical'],
                     'periodExpense' => $stock_report['periodExpense'], 'excessStock' => $stock_report['excessStock'], 'stockMonths' => $stock_report['stockMonths'],
+                    'childCoverageShortfall' => $group['childCoverageShortfall'],
+                    'childCoverageWarning' => ($group['childCoverageShortfall'] ?? 0) > 0 ? $t['childCoverageWarning'] : '',
                     'childContributions' => wp_json_encode($group['childContributions'], JSON_UNESCAPED_UNICODE),
                     'planningAvailable' => $group['planningAvailable'],
                     'internalTransferAccounts' => wp_json_encode($calculated['internalTransferAccounts'], JSON_UNESCAPED_UNICODE),

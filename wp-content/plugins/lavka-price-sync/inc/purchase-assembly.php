@@ -6,13 +6,13 @@ const LPS_ASSEMBLY_PATH = '/admin/folio/product-analytics/assembly-graph';
 function lps_assembly_key(string $sku): string { return mb_strtoupper(trim($sku), 'UTF-8'); }
 
 function lps_purchase_assembly_graph(array $state): array {
-    if (!$state['rootSkus']) return ['version' => 1, 'revision' => 'empty', 'nodes' => [], 'edges' => []];
+    if (!$state['rootSkus']) return ['version' => 2, 'revision' => 'empty', 'nodes' => [], 'edges' => []];
     $graph = lps_product_analytics_v4_request_java(LPS_ASSEMBLY_PATH, [
         'sourceDatabase' => $state['query']['sourceDatabase'], 'warehouseIds' => $state['query']['warehouseIds'],
         'rootSkus' => $state['rootSkus'],
     ]);
     if (is_wp_error($graph)) throw new RuntimeException($graph->get_error_message());
-    if (($graph['version'] ?? 0) !== 1 || empty($graph['revision']) || !is_array($graph['nodes'] ?? null)
+    if (($graph['version'] ?? 0) !== 2 || empty($graph['revision']) || !is_array($graph['nodes'] ?? null)
         || !is_array($graph['edges'] ?? null) || count($graph['nodes']) > LPS_PURCHASE_MAX_SKUS) {
         throw new RuntimeException(__('Assembly recipes are unavailable or incomplete. Update Java and start a new preview.', 'lavka-price-sync'));
     }
