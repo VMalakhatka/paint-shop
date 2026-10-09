@@ -1,5 +1,6 @@
 <?php
 if (!defined('ABSPATH')) exit;
+require_once __DIR__ . '/purchase-stock-report.php';
 
 function lps_purchase_number($value, float $min = 0, float $max = 1000000000): ?float {
     if ($value === null || $value === '' || !is_numeric($value)) return null;
@@ -515,6 +516,7 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
     }
     unset($item);
     return ['sku' => $row['sku'] ?? '', 'productName' => $row['productName'] ?? '',
+        'stockReport' => lps_purchase_stock_report($row, $groups, array_values($result), $period_days),
         'filterData' => lps_purchase_filter_data((array)($row['dimensions'] ?? [])),
         'supplierPrices' => $row['supplierPrices'] ?? [],
         'internalTransferAccounts' => $internal['accounts'],

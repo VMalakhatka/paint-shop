@@ -8,6 +8,12 @@ const LPS_PURCHASE_MAX_SKUS = 10000;
 
 function lps_purchase_i18n(): array {
     return [
+        'allWarehouses' => __('All analysed warehouses', 'lavka-price-sync'),
+        'allWarehousesPhysical' => __('Physical stock across all analysed warehouses', 'lavka-price-sync'),
+        'periodExpense' => __('Outgoing quantity in selected period', 'lavka-price-sync'),
+        'excessStock' => __('Surplus stock', 'lavka-price-sync'),
+        'stockMonths' => __('Stock coverage, months', 'lavka-price-sync'),
+        'stockReportHelp' => __('Outgoing quantity follows the selected movement filters. Stock includes all analysed warehouses; stock-only warehouses contribute no movements. Surplus is current stock available for planning minus forecast, minimum stock and child needs; expected receipts are excluded. Months use actual regular demand and a 30-day month; 9999 means positive stock with no regular demand. Child needs are shown separately. A dash means missing data.', 'lavka-price-sync'),
         'assemblyHelp' => __('Select one supplier. Children and grandchildren are found automatically, including our own products and products outside the supplier filter. Review their stock and incoming quantities. Only their shortages consume components. The export contains purchasing products of the selected supplier; assembly documents are not created.', 'lavka-price-sync'),
         'ownTarget' => __('Own sales forecast with minimum stock', 'lavka-price-sync'),
         'componentDemand' => __('Component demand from children', 'lavka-price-sync'),
@@ -172,7 +178,7 @@ function lps_purchase_session_key(string $token): string {
 function lps_purchase_session(string $token): array {
     $state = get_transient(lps_purchase_session_key($token));
     if (!is_array($state)) throw new InvalidArgumentException(__('The preview has expired. Start a new calculation.', 'lavka-price-sync'));
-    if (($state['previewVersion'] ?? 0) !== 7) throw new InvalidArgumentException(__('Start a new preview to apply the current rounding and demand settings.', 'lavka-price-sync'));
+    if (($state['previewVersion'] ?? 0) !== 8) throw new InvalidArgumentException(__('Start a new preview to apply the current rounding and demand settings.', 'lavka-price-sync'));
     if (($state['transitContractVersion'] ?? 0) !== 3 || ($state['transitWarehouseIds'] ?? null) !== lps_purchase_transit_warehouses()) {
         throw new InvalidArgumentException(__('Transport warehouse settings changed. Start a new preview.', 'lavka-price-sync'));
     }
@@ -220,7 +226,7 @@ function lps_purchase_start(int $id, int $version): array {
         'calculation' => $profile['calculation'], 'sort' => [['field' => 'sku', 'direction' => 'ASC']], 'page' => ['size' => 100],
     ]);
     $token = bin2hex(random_bytes(16));
-    $state = ['previewVersion' => 7, 'orderSupplier' => $suppliers['values'][0], 'phase' => 'roots', 'rootSkus' => [], 'pendingChildren' => [], 'phaseCount' => 0,
+    $state = ['previewVersion' => 8, 'orderSupplier' => $suppliers['values'][0], 'phase' => 'roots', 'rootSkus' => [], 'pendingChildren' => [], 'phaseCount' => 0,
         'scenario' => ['id' => $scenario['id'], 'uuid' => $scenario['uuid'], 'name' => $scenario['name'], 'version' => $scenario['version']],
         'supplierPriceVersions' => function_exists('lps_sp_active_versions') ? lps_sp_active_versions($profile['context']['sourceDatabase']) : [],
         'query' => $query, 'groups' => $groups, 'groupsRevision' => lavka_get_global_warehouse_groups_revision(),
@@ -381,6 +387,7 @@ function lps_purchase_render(): void {
     <div class="wrap lps-purchase" id="lps-purchase">
         <h1><?php echo esc_html__('Supplier order preview', 'lavka-price-sync'); ?></h1>
         <p class="notice notice-info inline"><?php echo esc_html(lps_purchase_i18n()['assemblyHelp']); ?></p>
+        <p class="description"><?php echo esc_html(lps_purchase_i18n()['stockReportHelp']); ?></p>
         <p class="notice notice-info inline"><?php echo esc_html__('Preview only. Demand uses regular sales and, when enabled in the scenario, capped estimated lost sales from measured availability history. Returns are shown separately. No Folio documents, WooCommerce orders or stock reservations are created.', 'lavka-price-sync'); ?></p>
         <form id="lps-purchase-form" class="lps-purchase-toolbar">
             <label><?php echo esc_html__('Analytics scenario', 'lavka-price-sync'); ?> <select id="lps-purchase-scenario" required><option value="">—</option>
@@ -435,6 +442,10 @@ add_action('admin_post_lps_purchase_export', static function (): void {
         $t = lps_purchase_i18n();
         $keys = ['sku', 'product', 'group', 'receivingWarehouse', 'minimumWarehouse', 'minimumReserve', 'physical', 'available', 'internalReserved', 'planningAvailable', 'internalTransferAccounts', 'sales', 'availableDays', 'stockoutDays', 'availabilityStatus', 'estimatedLostSales', 'appliedLostSales', 'adjustedSales', 'maxDemandMultiplier', 'demandStatus', 'returns', 'coverage', 'ownTarget', 'componentDemand', 'childContributions', 'target', 'need', 'transfer', 'supplyFromGroupCode', 'plannedTransferIn', 'plannedTransferOut', 'inTransit', 'openOrders', 'pack', 'packRounding', 'moq', 'purchase', 'quantity', 'final', 'reason'];
         $columns = array_map(static fn($key) => ['key' => $key, 'label' => $t[$key]], $keys);
+        $stock_columns = [];
+        foreach (['allWarehousesPhysical','periodExpense','excessStock','stockMonths'] as $key) $stock_columns[] = ['key' => $key, 'label' => $t[$key]];
+        foreach (['periodExpense','componentDemand','excessStock','stockMonths'] as $key) $stock_columns[] = ['key' => 'all_' . $key, 'label' => $t['allWarehouses'] . ': ' . $t[$key]];
+        array_splice($columns, 3, 0, $stock_columns);
         $columns[] = ['key' => 'supplierPrices', 'label' => $t['supplierPrices']];
         $columns[] = ['key' => 'status', 'label' => __('Status', 'lavka-price-sync')];
         $columns[] = ['key' => 'transitWarehouses', 'label' => $t['transitWarehouses']];
@@ -452,10 +463,13 @@ add_action('admin_post_lps_purchase_export', static function (): void {
             if (empty($calculated['assembly']['purchasable'])) continue;
             $sku = $calculated['sku']; $raw = $state['rows'][$sku];
             foreach ($calculated['groups'] as $group) {
+                $stock_report = $calculated['stockReport']['groups'][$group['groupCode']];
                 $record = ['sku' => (string)$sku, 'product' => $calculated['productName'], 'group' => $group['groupName'],
-                    'receivingWarehouse' => $group['receivingWarehouseId'], 'available' => $group['available'], 'sales' => $group['regularSales'],
+                    'receivingWarehouse' => $group['receivingWarehouseId'], 'available' => $group['available'], 'sales' => $stock_report['regularSales'],
                     'internalReserved' => $group['internalReserved'],
-                    'physical' => $group['physical'], 'ownTarget' => $group['ownTarget'], 'componentDemand' => $group['componentDemand'],
+                    'physical' => $stock_report['physical'], 'ownTarget' => $group['ownTarget'], 'componentDemand' => $group['componentDemand'],
+                    'allWarehousesPhysical' => $calculated['stockReport']['total']['physical'],
+                    'periodExpense' => $stock_report['periodExpense'], 'excessStock' => $stock_report['excessStock'], 'stockMonths' => $stock_report['stockMonths'],
                     'childContributions' => wp_json_encode($group['childContributions'], JSON_UNESCAPED_UNICODE),
                     'planningAvailable' => $group['planningAvailable'],
                     'internalTransferAccounts' => wp_json_encode($calculated['internalTransferAccounts'], JSON_UNESCAPED_UNICODE),
@@ -473,6 +487,7 @@ add_action('admin_post_lps_purchase_export', static function (): void {
                     'purchase' => $group['recommendedQuantity'], 'quantity' => $group['managerQuantity'], 'final' => $group['finalQuantity'], 'reason' => $group['managerReason'],
                     'status' => $group['status'] . ($group['issues'] ? ': ' . implode(', ', $group['issues']) : '')];
                 $record += $group['inputs'];
+                foreach (['periodExpense','componentDemand','excessStock','stockMonths'] as $key) $record['all_' . $key] = $calculated['stockReport']['total'][$key];
                 $settings = array_values(array_filter($state['groups'], static fn($settings) => $settings['code'] === $group['groupCode']))[0];
                 $record += ['supplier' => implode(', ', $calculated['supplier']), 'scenario' => $state['scenario']['name'] . ' v' . $state['scenario']['version'],
                     'period' => $state['query']['period']['from'] . ' - ' . $state['query']['period']['to'],

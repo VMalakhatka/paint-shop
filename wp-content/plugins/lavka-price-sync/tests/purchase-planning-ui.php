@@ -20,7 +20,7 @@ $row = ['internalTransferReservations'=>['calculationVersion'=>1,'status'=>'CAPT
     'minimumStock'=>1,'groupLevel1Code'=>'ART','groupLevel1Name'=>'Art materials','groupLevel3Code'=>'GLUE','groupLevel3Name'=>'Glue'],
     'metrics'=>['grossProfit'=>100],'networkOrderPolicy'=>['orderAllowed'=>true,'status'=>'ALLOWED'],
     'warehouseGroupBreakdown'=>[['code'=>'kyiv','warehouseIds'=>[1], 'availability'=>['status'=>'MEASURED','availableDays'=>12,'stockoutDays'=>18]]],
-    'warehouseBreakdown'=>[['warehouseId'=>1,'metrics'=>['physicalQuantity'=>6,'availableQuantity'=>6,'regularSoldUnits'=>11,'returnQuantity'=>0],
+    'warehouseBreakdown'=>[['warehouseId'=>1,'metrics'=>['physicalQuantity'=>6,'availableQuantity'=>6,'regularSoldUnits'=>11,'expenseQuantity'=>14,'returnQuantity'=>0],
         'orderPolicy'=>['orderAllowed'=>true,'reserveAboveForecast'=>0,'maximumStockLimited'=>false]]]];
 if (($argv[1] ?? '') === 'calculate-assembly') {
     $child=$row; $child['sku']='OUR-CHILD'; $child['productName']='Our assembled product'; $child['dimensions']['currentSuppliers']=['Our company'];
@@ -56,6 +56,7 @@ if (($argv[1] ?? '') === 'calculate-zero') {
     $row['dimensions']['groupLevel1Name'] = 'Paper'; $row['dimensions']['groupLevel3Code'] = 'CANVAS';
     $row['dimensions']['groupLevel3Name'] = 'Canvas';
     $row['warehouseBreakdown'][0]['metrics']['regularSoldUnits'] = 0;
+    $row['warehouseBreakdown'][0]['metrics']['expenseQuantity'] = 0;
     echo json_encode(lps_purchase_calculate($row, $groups, 30, false, ['kyiv'=>['openOrders'=>0]], [])); exit;
 }
 echo '<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font:14px system-ui;background:#f0f0f1;color:#1d2327;margin:20px}input,select,button{font:inherit;padding:6px}table{background:white;border-collapse:collapse}td,th{padding:10px;text-align:left}details{background:white;margin:8px 0;padding:8px}button{cursor:pointer}';

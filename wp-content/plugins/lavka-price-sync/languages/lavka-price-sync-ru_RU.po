@@ -6557,3 +6557,27 @@ msgstr "Составляющие товаров изменились. Перед
 #: inc/purchase-planning.php inc/purchase-assembly.php
 msgid "Assembly recipes are unavailable or incomplete. Update Java and start a new preview."
 msgstr "Данные о составе товаров недоступны или неполны. Обновите Java и начните новый расчёт."
+
+#: inc/purchase-planning.php
+msgid "All analysed warehouses"
+msgstr "Все анализируемые склады"
+
+#: inc/purchase-planning.php
+msgid "Physical stock across all analysed warehouses"
+msgstr "Физический остаток на всех анализируемых складах"
+
+#: inc/purchase-planning.php
+msgid "Outgoing quantity in selected period"
+msgstr "Израсходовано за выбранный период"
+
+#: inc/purchase-planning.php
+msgid "Surplus stock"
+msgstr "Избыток на складах"
+
+#: inc/purchase-planning.php
+msgid "Stock coverage, months"
+msgstr "Запас в месяцах"
+
+#: inc/purchase-planning.php
+msgid "Outgoing quantity follows the selected movement filters. Stock includes all analysed warehouses; stock-only warehouses contribute no movements. Surplus is current stock available for planning minus forecast, minimum stock and child needs; expected receipts are excluded. Months use actual regular demand and a 30-day month; 9999 means positive stock with no regular demand. Child needs are shown separately. A dash means missing data."
+msgstr "Расход соответствует выбранным фильтрам движения. Остаток охватывает все анализируемые склады; склады «Только текущий остаток» не добавляют движений. Избыток — текущий остаток для планирования минус прогноз, минимальный запас и потребность детей; ожидаемые поступления не учитываются. Запас в месяцах рассчитывается по фактическому регулярному спросу, месяц — 30 дней; 9999 означает положительный остаток без регулярного спроса. Потребность детей показана отдельно. Прочерк означает отсутствующие данные."

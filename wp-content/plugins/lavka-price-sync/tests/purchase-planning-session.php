@@ -133,10 +133,15 @@ $token=lps_purchase_start(1,$scenario['version'])['token'];
 $response['rows']=[['sku'=>'PARENT','dimensions'=>['currentSuppliers'=>['Kreul']]],
     ['sku'=>'CHILD','dimensions'=>['currentSuppliers'=>['Kreul']]], ['sku'=>'FOREIGN','dimensions'=>['currentSuppliers'=>['Other']]]];
 $response['totals']['productCount']=3;
+$response['rows'][0]['internalTransferReservations']=['calculationVersion'=>1,'status'=>'CAPTURED','accounts'=>[]];
+$response['rows'][0]['warehouseBreakdown']=array_map(static fn($id)=>['warehouseId'=>$id,
+    'metrics'=>['physicalQuantity'=>20,'availableQuantity'=>20,'regularSoldUnits'=>5,'expenseQuantity'=>10,'returnQuantity'=>0],
+    'orderPolicy'=>['orderAllowed'=>true,'reserveAboveForecast'=>0,'maximumStockLimited'=>false]], [1,7]);
 lps_purchase_page($token,0);
 $_POST=['token'=>$token,'format'=>'csv'];
 $actions['admin_post_lps_purchase_export']();
 check(array_column($exported,'sku')===['PARENT'],'Actual export excludes selected children and foreign-supplier roots');
+check($exported[0]['periodExpense']===20.0 && $exported[0]['allWarehousesPhysical']===40.0 && $exported[0]['all_stockMonths']===4.0,'Export contains actual period expense, combined stock and months');
 $graph['revision']='changed';
 rejected(fn()=>$actions['admin_post_lps_purchase_export'](),'Changed recipes block actual export until recalculation');
 echo "PASS: actual CSV export supplier isolation and recipe revision guard\n";
