@@ -238,7 +238,7 @@ msgid "Save the draft and open Place customer order from this draft. Automatic a
 msgstr ""
 
 #: inc/ManagerHelp.php
-msgid "Click Preview customer order and available stock. Check each SKU, quantity, customer price, warehouse and document type. Preview creates no documents or reservations and expires after 15 minutes. If nothing can be reserved, order creation is unavailable. Shortages stay in separate non-accounting documents without reservation or stock movement. Creating accounts does not create an expense invoice."
+msgid "Click Preview customer order and available stock. Check each SKU, quantity, customer price, warehouse and document type. Preview creates no documents or reservations and expires after 15 minutes. If nothing can be reserved, order creation is unavailable. Shortages stay in separate non-accounting documents without reservation or stock movement, on the non-accounting warehouse configured in Lavka settings in every allocation mode. Configure this warehouse before previewing an order. Creating accounts does not create an expense invoice."
 msgstr ""
 
 #: inc/ManagerHelp.php

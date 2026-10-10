@@ -9,6 +9,9 @@ $expect_error(fn()=>Workspace::payload($non_order,$user,'non_accounting',['mode'
 // One website group can contain several real Folio warehouses; preserve the entire group.
 update_term_meta($terms[0],'lavka_folio_warehouses',[['id'=>'901','priority'=>1],['id'=>'903','priority'=>2]]);
 $group=Workspace::payload($non_order,$user,'accounts',['mode'=>'single','term_id'=>$terms[0]],wp_generate_uuid4());
+$check($group['folio_account_header']['warehouseId']===904,'Single group leaves shortages on the configured warehouse');
+$preferred=Workspace::payload($non_order,$user,'accounts',['mode'=>'manual','term_id'=>$terms[0]],wp_generate_uuid4());
+$check($preferred['folio_account_header']['warehouseId']===904,'Preferred group leaves shortages on the configured warehouse');
 $check($group['folio_account_header']['accountingEnabled']===true && $group['woo_order']['status']==='on-hold','Order action sends accounting status independently of draft status');
 foreach($group['items'] as $line)foreach($line['allocations'] as $allocation)$check($allocation['woo_location_id']===$terms[0] && array_column($allocation['folio_warehouses'],'id')===['901','903'],'Selected group retains both Folio warehouse candidates');
 update_term_meta($terms[0],'lavka_folio_warehouses',[['id'=>'901','priority'=>1]]);
@@ -22,6 +25,13 @@ $flow_preview=$invoke('preview',$flow_order,$user);
 $check($flow_preview['can_apply'] && $flow_preview['mode']==='accounts','Stock order has its own apply action');
 $token=$flow_preview['token'];$flow_saved=get_transient('pcoe_manager_preview_'.$token);
 $check(count($flow_saved['response']['documents'])===3,'Preview separates two reserved orders and shortage');
+$check($flow_saved['payload']['folio_account_header']['warehouseId']===904,'Automatic distribution sends configured shortage warehouse outside stock candidates');
+foreach($flow_saved['response']['documents'] as $doc)if(!$doc['accounting_enabled'])$check($doc['folio_warehouse_id']===904,'Shortage goes to configured warehouse, not the last allocation');
+$wrong=$flow_saved['response'];foreach($wrong['documents'] as &$doc)if(!$doc['accounting_enabled'])$doc['folio_warehouse_id']=902;unset($doc);
+$expect_error(fn()=>Workspace::validate_response($wrong,$flow_saved['payload'],true));
+$missing_config=static fn()=>0;add_filter('pcoe_folio_non_accounting_warehouse_id',$missing_config,99);
+try{$expect_error(fn()=>Workspace::payload($flow_order,$user,'accounts',['mode'=>'auto','term_id'=>0],wp_generate_uuid4()));}finally{remove_filter('pcoe_folio_non_accounting_warehouse_id',$missing_config,99);}
+
 // No-stock previews may be viewed, but cannot be submitted as a reserved customer order.
 $zero=$flow_saved;foreach($zero['response']['documents'] as &$doc)$doc['accounting_enabled']=false;unset($doc);
 set_transient('pcoe_manager_preview_'.$token,$zero,15*MINUTE_IN_SECONDS);

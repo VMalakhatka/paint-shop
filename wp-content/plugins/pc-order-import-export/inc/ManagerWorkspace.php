@@ -389,10 +389,11 @@ class ManagerWorkspace
         $payload['woo_order']['total'] = 0;
         $used = []; $requested = [];
         $warehouse = DraftFolioWorkflow::default_warehouse_id();
+        if (!$warehouse) throw new \RuntimeException(__('Select the non-accounting Folio warehouse in Lavka settings.', 'pc-order-import-export'));
+        // Java uses this header for shortages, while reserving stock via item allocations.
+        $payload['folio_account_header']['warehouseId'] = $warehouse;
         if ($mode === 'non_accounting') {
-            if (!$warehouse) throw new \RuntimeException(__('Select the non-accounting Folio warehouse in Lavka settings.', 'pc-order-import-export'));
             $payload['split_strategy'] = 'single_non_accounting_warehouse';
-            $payload['folio_account_header']['warehouseId'] = $warehouse;
             $payload['folio_account_header']['sourceInfo'] = 'нет на складе';
         }
         foreach ($payload['items'] as &$line) {
@@ -453,6 +454,7 @@ class ManagerWorkspace
             if (empty($doc['items']) || empty($doc['folio_warehouse_id']) || !is_bool($doc['accounting_enabled'] ?? null)
                 || (!$preview && (empty($doc['document_id']) || empty($doc['document_number'])))) throw new \RuntimeException($error);
             if (!$payload['folio_account_header']['accountingEnabled'] && ($doc['accounting_enabled'] || (int) $doc['folio_warehouse_id'] !== (int) $payload['folio_account_header']['warehouseId'])) throw new \RuntimeException($error);
+            if (!$doc['accounting_enabled'] && (int) $doc['folio_warehouse_id'] !== (int) $payload['folio_account_header']['warehouseId']) throw new \RuntimeException($error);
             foreach ($doc['items'] as $line) {
                 $qty = (float) ($line['quantity'] ?? 0); $price = (float) ($line['price'] ?? -1);
                 if ($qty <= 0 || $price < 0 || abs((float) ($line['amount'] ?? -1) - $qty * $price) > 0.02) throw new \RuntimeException($error);

@@ -445,3 +445,12 @@ or quantities. Shared price groups stay private and generation never sends email
 Keep row-1 SKU/Order quantity headers for re-import and ask clients to fill the blank order
 quantities. Photo limits/fallback and verification: PCOE README; operator steps:
 `docs/MANAGER_CUSTOMER_GUIDE_UK.md#mailings`. Deploy Java packaging endpoint before WordPress; no media writes.
+
+Manager draft shortage routing (2026-10-10, code + local regression): always pass
+`DraftFolioWorkflow::default_warehouse_id()` as `folio_account_header.warehouseId`,
+also for accounting/auto or single-group workflows. Java `selectMissingWarehouse`
+already prioritizes this field; reservations remain governed by item allocations.
+Reject unset configuration and non-accounting responses on another warehouse.
+Do not route shortages via the last allocation or change existing documents.
+Operator instructions: `docs/MANAGER_CUSTOMER_GUIDE_UK.md`; regression: PCOE
+`tests/manager-workspace.php`. WordPress-only fix.

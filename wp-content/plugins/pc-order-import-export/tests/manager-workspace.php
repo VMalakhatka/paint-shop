@@ -29,13 +29,14 @@ add_filter('pre_http_request', static function ($pre, $args, $url) use (&$writes
         $documents[$wid]['items'][0]['quantity']-=1;
         $documents[$wid]['items'][0]['amount']=$documents[$wid]['items'][0]['quantity']*$missing['price'];
         $missing['quantity']=1;$missing['amount']=$missing['price'];$missing['allocation_status']='missing_stock';
-        $documents['missing']=['document_id'=>999999,'document_number'=>'999999','folio_warehouse_id'=>$wid,
+        $documents['missing']=['document_id'=>999999,'document_number'=>'999999','folio_warehouse_id'=>(int)$payload['folio_account_header']['warehouseId'],
             'document_type'=>'missing_stock_account','accounting_enabled'=>false,'source_external_request_id'=>$payload['folio_account_header']['externalRequestId'].':missing','items'=>[$missing]];
     }
     return ['response' => ['code' => $payload['preview_only'] ? 200 : 201], 'headers' => [], 'body' => wp_json_encode([
         'ok' => true, 'preview_only' => $payload['preview_only'], 'woo_order_id' => $payload['woo_order']['id'], 'documents' => array_values($documents), 'errors' => [], 'warnings' => []])];
 }, PHP_INT_MAX, 3);
 $original = get_current_user_id();
+$shortage_warehouse=static fn()=>904;add_filter('pcoe_folio_non_accounting_warehouse_id',$shortage_warehouse,1);
 try {
     $tag = strtolower(wp_generate_password(9, false));
     $managers = get_users(['role__in' => ['administrator', 'shop_manager'], 'number' => 1]);
@@ -157,6 +158,7 @@ try {
     $check(!$err && count($rows) === 2, 'Excel parser');
     echo 'PASS: ' . $checks . " manager workflow assertions; external HTTP and email mocked.\n";
 } finally {
+    remove_filter('pcoe_folio_non_accounting_warehouse_id',$shortage_warehouse,1);
     wp_set_current_user($manager_id ?? $original);
     foreach (array_reverse(array_unique($orders)) as $id) { $order = wc_get_order($id); if ($order) $order->delete(true); }
     foreach ($products as $id) wp_delete_post($id, true);
