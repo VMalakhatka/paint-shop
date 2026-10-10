@@ -706,11 +706,11 @@ older Java leaves email hints unavailable while Folio links still work.
 
 ### Commercial offers in mailings (2026-10-10)
 
-`CommercialOffer` renders the optional flat XLSX; `PriceList::catalogue_rows` still
+`CommercialOffer` renders the optional grouped XLSX; `PriceList::catalogue_rows` still
 owns product visibility, customer prices and selling-warehouse stock. A mailing
 persists `format=price|offer`. Legacy `quantity=one|stock` remains accepted but never pre-fills new offers. Old campaigns default to
 standard price lists. Both catalogue and document selections support either format.
-No category headings/outlines are emitted for offers; SKU/barcode/text stay strings,
+Offers reuse visible catalogue category headings/outlines; SKU/barcode/text stay strings,
 prices and quantities are numeric. Header row 1 retains the existing import contract.
 Short description falls back to full/parent description, with HTML/shortcodes removed.
 Unknown stock stays blank; zero stays zero. Quantities never come from Folio documents.
@@ -748,3 +748,5 @@ seconds between work units per tick, persists each unit and never sends email.
 Verification: broadcasts.php tests equal unknown hooks for both formats, single offer
 packaging read, identical delivered bytes and different individual-price isolation.
 WordPress-only deployment; explicit start and delivery quotas are unchanged.
+
+Commercial offer hierarchy/footer (2026-10-10): preserve `PriceList::catalogue_rows` group/subgroup order and visibility. Headings use the same burgundy hierarchy as the standard price list. The final localized note offers additional product data, XML/other formats and higher-resolution photo links on request, without claiming those exports already exist. Headings and footer have no SKU, so they cannot become imported order lines; the footer is outside the auto-filter range. Existing snapshots are unchanged; prepare a new mailing after WordPress deployment.

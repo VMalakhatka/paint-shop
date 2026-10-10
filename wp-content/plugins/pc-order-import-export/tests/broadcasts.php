@@ -132,16 +132,18 @@ try{
         $check($d['status']==='ready' && $d['quantity']===$quantity && count($d['groups'])===2,'Offer format/options persisted and same-price customers share files');
         foreach($d['groups'] as $key=>$g){
             $path=Store::temporary_file();file_put_contents($path,Store::bytes(Store::file($offer,$key)));$book=IOFactory::load($path);$sheet=$book->getActiveSheet();
-            $check($sheet->getHighestRow()===2 && $sheet->getCell('A2')->getValue()===$skus[0],'Flat offer contains one product, no category rows');
-            $check($sheet->getCell('C2')->getDataType()==='s' && str_starts_with($sheet->getCell('C2')->getValue(),'=TEST'),'Product text cannot become a formula');
-            $check($sheet->getCell('B2')->getValue()==='012345678905' && $sheet->getCell('B2')->getDataType()==='s','Barcode leading zero preserved as text');
+            $productRow=0;for($n=2;$n<=$sheet->getHighestRow();$n++)if($sheet->getCell('A'.$n)->getValue()===$skus[0])$productRow=$n;
+            $check($productRow>2 && $sheet->getHighestRow()===$productRow+2,'Offer includes category headings and footer after product');
+            $check($sheet->getCell('A2')->getValue()===null && $sheet->getCell('A'.$sheet->getHighestRow())->getValue()===null,'Headings and footer have no importable SKU');
+            $check($sheet->getCell('C'.$productRow)->getDataType()==='s' && str_starts_with($sheet->getCell('C'.$productRow)->getValue(),'=TEST'),'Product text cannot become a formula');
+            $check($sheet->getCell('B'.$productRow)->getValue()==='012345678905' && $sheet->getCell('B'.$productRow)->getDataType()==='s','Barcode leading zero preserved as text');
             [$map,$start]=\PaintCore\PCOE\Helpers::detect_colmap_and_start($sheet->toArray());
             $check($start===1 && $map['sku']===0 && $map['qty']===5 && $map['price']===null && $map['price_list'],'Offer re-import uses quantities and site prices, not attachment prices');
-            $check(str_contains($sheet->getCell('D2')->getValue(),'Product description') && !str_contains($sheet->getCell('D2')->getValue(),'<p>'),'Plain description included');
+            $check(str_contains($sheet->getCell('D'.$productRow)->getValue(),'Product description') && !str_contains($sheet->getCell('D'.$productRow)->getValue(),'<p>'),'Plain description included');
             $expected=Pricing::scope($g['user'],fn()=>wc_get_price_to_display(wc_get_product($p->get_id())));
-            $check((float)$sheet->getCell('E2')->getValue()===(float)$expected && $sheet->getCell('F2')->getValue()===null && (float)$sheet->getCell('K2')->getValue()===8.0 && (float)$sheet->getCell('H2')->getValue()===100.0 && $sheet->getCell('I2')->getValue()==='50 мл' && (float)$sheet->getCell('J2')->getValue()===5.0,'Offer separates retail/customer prices, units, stock and blank order quantity');
+            $check((float)$sheet->getCell('E'.$productRow)->getValue()===(float)$expected && $sheet->getCell('F'.$productRow)->getValue()===null && (float)$sheet->getCell('K'.$productRow)->getValue()===8.0 && (float)$sheet->getCell('H'.$productRow)->getValue()===100.0 && $sheet->getCell('I'.$productRow)->getValue()==='50 мл' && (float)$sheet->getCell('J'.$productRow)->getValue()===5.0,'Offer separates retail/customer prices, units, stock and blank order quantity');
             $check(count($sheet->getDrawingCollection())===1 && $g['photos']===1,'Photo embedded in XLSX and counted in preview');
-            $check($sheet->getRowDimension(2)->getOutlineLevel()===0 && $sheet->getAutoFilter()->getRange()==='A1:K2','Offer has filters without row grouping');
+            $check($sheet->getRowDimension($productRow)->getOutlineLevel()>0 && $sheet->getAutoFilter()->getRange()==='A1:K'.$productRow,'Offer retains hierarchy and excludes footer from filters');
             if($dir=getenv('PCOE_BROADCAST_PREVIEW'))copy($path,$dir.'/offer-'.$quantity.'.xlsx');
             $book->disconnectWorksheets();unlink($path);
         }
@@ -152,10 +154,23 @@ try{
     remove_filter('wp_get_attachment_image_src',$photoFilter,10);
     remove_filter('woocommerce_product_get_image_id',$imageIdFilter,10);
     $p->set_image_id(0);$p->update_meta_data('_razm_izmer','=20 x 30 см');$p->save();foreach($locations as $loc)delete_post_meta($p->get_id(),'_stock_at_'.$loc);
-    $fallback=Pricing::file($a,[$p->get_id()],['format'=>'offer','quantity'=>'stock']);$path=Store::temporary_file();file_put_contents($path,Store::bytes($fallback));$book=IOFactory::load($path);$sheet=$book->getActiveSheet();
-    $check($sheet->getCell('K2')->getValue()===null && $sheet->getCell('F2')->getValue()===null && $sheet->getCell('G2')->getHyperlink()->getUrl()!=='','Unknown stock remains blank and missing photo links to product');
-    $check((float)$sheet->getCell('J2')->getValue()===5.0,'Pack quantity is independent of dimensions and unit volume');
+    $fallback=Pricing::file($a,[$p->get_id()],['format'=>'offer','quantity'=>'stock']);$path=Store::temporary_file();file_put_contents($path,Store::bytes($fallback));$book=IOFactory::load($path);$sheet=$book->getActiveSheet();$productRow=0;for($n=2;$n<=$sheet->getHighestRow();$n++)if($sheet->getCell('A'.$n)->getValue()===$skus[0])$productRow=$n;
+    $check($sheet->getCell('K'.$productRow)->getValue()===null && $sheet->getCell('F'.$productRow)->getValue()===null && $sheet->getCell('G'.$productRow)->getHyperlink()->getUrl()!=='','Unknown stock remains blank and missing photo links to product');
+    $check((float)$sheet->getCell('J'.$productRow)->getValue()===5.0,'Pack quantity is independent of dimensions and unit volume');
     $book->disconnectWorksheets();unlink($path);
+    Pricing::scope($a,static function()use($p,$locations,$check){
+        $entries=iterator_to_array(PriceList::catalogue_rows([$p],$locations),false);
+        $product=array_values(array_filter($entries,static fn($e)=>isset($e['values'])))[0];$product['depth']=2;
+        $offer=CommercialOffer::workbook([['heading'=>'Group','depth'=>0],['heading'=>'Subgroup','depth'=>1],$product],'one');
+        $book=$offer['book'];$sheet=$book->getActiveSheet();
+        $check($sheet->getCell('C2')->getValue()==='Group' && $sheet->getCell('C3')->getValue()==='Subgroup' && $sheet->getRowDimension(4)->getOutlineLevel()===2,'Offer preserves parent and subgroup hierarchy');
+        $check(str_contains($sheet->getCell('C6')->getValue(),'XML') && $sheet->getCell('A6')->getValue()===null,'Localized footer offers XML and cannot become an order line');
+        $sheet->setCellValue('F4',2);[$map,$start]=\PaintCore\PCOE\Helpers::detect_colmap_and_start($sheet->toArray());
+        $lines=array_filter(array_slice($sheet->toArray(),$start),static fn($r)=>!empty($r[$map['sku']]) && ($r[$map['qty']]??0)>0);
+        $check(count($lines)===1,'Only the filled product row is importable, not headings or footer');
+        if($dir=getenv('PCOE_BROADCAST_PREVIEW'))(new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($book))->save($dir.'/offer-grouped.xlsx');
+        $book->disconnectWorksheets();
+    });
     $sourceMode='packing-failed';$deny(fn()=>Pricing::file($a,[$p->get_id()],['format'=>'offer']));$sourceMode='ok';
     // An unknown extension with equal effective prices must not generate one workbook per user.
     $neutral=static fn($price,$product)=>$price;add_filter('woocommerce_product_get_price',$neutral,1200,2);

@@ -3207,7 +3207,7 @@ msgstr ""
 msgid "Quantity in the offer"
 msgstr ""
 
-msgid "One flat table: SKU, barcode, name, description, customer and retail prices, unit, pack size, stock, a blank order column and photo. Missing photos are replaced with product links. Stock quantities use Kyiv + Odesa, not the quantities in the source document."
+msgid "A table with category groups and subgroups: SKU, barcode, name, description, customer and retail prices, unit, pack size, stock, a blank order column and photo. Missing photos are replaced with product links. Stock quantities use Kyiv + Odesa, not the quantities in the source document."
 msgstr ""
 
 msgid "Retail price, %s"
@@ -3223,4 +3223,7 @@ msgid "Could not load pack quantities from Folio. Check the Java service update 
 msgstr ""
 
 msgid "During preparation, groups with identical file contents are merged. The group count may decrease; each recipient still receives a separate email."
+msgstr ""
+
+msgid "Need additional product information, another data format (XML or another format), or direct links to higher-resolution photos for your website? Contact us with your request and we will discuss what we can provide."
 msgstr ""

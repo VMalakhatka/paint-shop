@@ -3403,8 +3403,8 @@ msgstr "Формат Excel"
 msgid "Quantity in the offer"
 msgstr "Количество в предложении"
 
-msgid "One flat table: SKU, barcode, name, description, customer and retail prices, unit, pack size, stock, a blank order column and photo. Missing photos are replaced with product links. Stock quantities use Kyiv + Odesa, not the quantities in the source document."
-msgstr "Одна таблица без групп: артикул, штрихкод, название, описание, цена клиента и розничная цена, единица измерения, фасовка, остаток, пустая колонка заказа и фото. Вместо недоступных фото — ссылки на товары. Остатки берутся по Киеву и Одессе, а не из количеств документа."
+msgid "A table with category groups and subgroups: SKU, barcode, name, description, customer and retail prices, unit, pack size, stock, a blank order column and photo. Missing photos are replaced with product links. Stock quantities use Kyiv + Odesa, not the quantities in the source document."
+msgstr "Таблица с группами и подгруппами категорий: артикул, штрихкод, название, описание, цена клиента и розничная цена, единица измерения, фасовка, остаток, пустая колонка заказа и фото. Вместо недоступных фото — ссылки на товары. Остатки берутся по Киеву и Одессе, а не из количеств документа."
 
 msgid "Retail price, %s"
 msgstr "Розничная цена, %s"
@@ -3420,3 +3420,6 @@ msgstr "Не удалось загрузить количество в упак�
 
 msgid "During preparation, groups with identical file contents are merged. The group count may decrease; each recipient still receives a separate email."
 msgstr "Во время подготовки группы с одинаковым содержимым файла объединяются. Количество групп может уменьшаться; каждый получатель получает отдельное письмо."
+
+msgid "Need additional product information, another data format (XML or another format), or direct links to higher-resolution photos for your website? Contact us with your request and we will discuss what we can provide."
+msgstr "Если для вашего сайта нужна дополнительная информация о товарах, другой формат данных (XML и др.) или прямые ссылки на фото лучшего качества, напишите нам. Согласуем, какие материалы и в каком формате можем предоставить."

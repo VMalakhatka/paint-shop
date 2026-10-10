@@ -85,7 +85,7 @@ final class BroadcastPricing {
                         $regular===''?null:wc_get_price_to_display($p,['price'=>(float)$regular])];
                 }
             }
-            $inputs=wp_json_encode([$rows,$extra,PriceList::headers(),get_locale(),get_woocommerce_currency(),$options['format']]);
+            $inputs=wp_json_encode(['grouped-offer-v2',$rows,$extra,PriceList::headers(),get_locale(),get_woocommerce_currency(),$options['format']]);
             if($inputs===false)throw new \RuntimeException('File comparison failed');
             $signature=hash('sha256',$inputs);
             if(isset($prepared[$signature]))return ['reuse'=>$prepared[$signature]];

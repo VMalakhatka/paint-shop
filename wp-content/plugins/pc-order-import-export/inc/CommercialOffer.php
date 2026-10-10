@@ -7,7 +7,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\MemoryDrawing;
 
 defined('ABSPATH') || exit;
 
-/** Flat mailing workbook; receives the same visible products and customer prices as PriceList. */
+/** Grouped mailing workbook; receives the same visible products and customer prices as PriceList. */
 final class CommercialOffer {
     public static function options(array $input): array {
         $format=(string)($input['format']??'price');
@@ -77,11 +77,19 @@ final class CommercialOffer {
         $sheet->getStyle('A'.$header.':K'.$header)->applyFromArray(['font'=>['bold'=>true,'color'=>['rgb'=>'FFFFFF']],'fill'=>['fillType'=>'solid','startColor'=>['rgb'=>'800000']],'alignment'=>['wrapText'=>true,'vertical'=>'center']]);
         $sheet->getRowDimension($header)->setRowHeight(48);
         $rows=array_values(array_filter($entries,static fn($e)=>isset($e['values'])));
-        usort($rows,static fn($a,$b)=>strnatcasecmp($a['values'][0],$b['values'][0]));
         $packing=self::packaging(array_column(array_column($rows,'values'),0));
         $row=$header;$photos=0;$bytes=0;$deadline=microtime(true)+25;
-        foreach($rows as $entry){
+        $headings=[];
+        foreach($entries as $entry){
+            if(isset($entry['heading'])){
+                $row++;$headings[$row]=(int)$entry['depth'];
+                $sheet->mergeCells('C'.$row.':K'.$row);
+                $sheet->setCellValueExplicit('C'.$row,$entry['heading'],DataType::TYPE_STRING);
+                $sheet->getRowDimension($row)->setOutlineLevel(min(7,(int)$entry['depth']));
+                continue;
+            }
             $v=$entry['values'];$product=wc_get_product($entry['product_id']);$row++;
+            $sheet->getRowDimension($row)->setOutlineLevel(min(7,(int)$entry['depth']));
             $description=$product?($product->get_short_description()?:$product->get_description()):'';
             if(!$description && $product && $product->get_parent_id()){
                 $parent=wc_get_product($product->get_parent_id());$description=$parent?($parent->get_short_description()?:$parent->get_description()):'';
@@ -124,7 +132,23 @@ final class CommercialOffer {
             $sheet->getStyle('F'.$start.':F'.$row)->getFill()->setFillType('solid')->getStartColor()->setRGB('FFF2B3');
             $validation=$sheet->getCell('F'.$start)->getDataValidation();$validation->setType('decimal')->setOperator('greaterThanOrEqual')->setFormula1('0')->setAllowBlank(true)->setShowErrorMessage(true)->setErrorStyle('stop')->setError(__('Enter a quantity of zero or more.','pc-order-import-export'))->setSqref('F'.$start.':F'.$row);
         }
+        foreach($headings as $number=>$depth){
+            $sheet->getStyle('A'.$number.':K'.$number)->applyFromArray([
+                'font'=>['bold'=>true,'size'=>$depth===0?14:11,'color'=>['rgb'=>$depth===0?'FFFFFF':'263A40']],
+                'fill'=>['fillType'=>'solid','startColor'=>['rgb'=>$depth===0?'800000':($depth===1?'D9B3B3':'F2E6E6')]],
+            ]);
+            $sheet->getStyle('C'.$number)->getAlignment()->setIndent(min(7,$depth));
+            $sheet->getRowDimension($number)->setRowHeight($depth===0?29:24);
+        }
         $sheet->setAutoFilter('A'.$header.':K'.$row);$sheet->freezePane('D'.($header+1));
+        $sheet->setShowSummaryBelow(false);
+        // Leave SKU and order quantity empty so the footer cannot become an imported order line.
+        $footer=$row+2;$sheet->mergeCells('C'.$footer.':K'.$footer);
+        $sheet->setCellValueExplicit('C'.$footer,__('Need additional product information, another data format (XML or another format), or direct links to higher-resolution photos for your website? Contact us with your request and we will discuss what we can provide.','pc-order-import-export'),DataType::TYPE_STRING);
+        $sheet->getStyle('C'.$footer.':K'.$footer)->applyFromArray(['font'=>['color'=>['rgb'=>'263A40']],
+            'fill'=>['fillType'=>'solid','startColor'=>['rgb'=>'F2E6E6']],
+            'alignment'=>['wrapText'=>true,'vertical'=>'center']]);
+        $sheet->getRowDimension($footer)->setRowHeight(55);
         $sheet->getPageSetup()->setOrientation('landscape')->setFitToWidth(1)->setFitToHeight(0)->setRowsToRepeatAtTopByStartAndEnd($header,$header);
         return ['book'=>$book,'photos'=>$photos];
     }

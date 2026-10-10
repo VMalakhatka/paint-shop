@@ -3409,8 +3409,8 @@ msgstr "Формат Excel"
 msgid "Quantity in the offer"
 msgstr "Кількість у пропозиції"
 
-msgid "One flat table: SKU, barcode, name, description, customer and retail prices, unit, pack size, stock, a blank order column and photo. Missing photos are replaced with product links. Stock quantities use Kyiv + Odesa, not the quantities in the source document."
-msgstr "Одна таблиця без груп: артикул, штрихкод, назва, опис, ціна клієнта та роздрібна ціна, одиниця виміру, фасування, залишок, порожня колонка замовлення та фото. Замість недоступних фото — посилання на товари. Залишки беруться по Києву та Одесі, а не з кількостей документа."
+msgid "A table with category groups and subgroups: SKU, barcode, name, description, customer and retail prices, unit, pack size, stock, a blank order column and photo. Missing photos are replaced with product links. Stock quantities use Kyiv + Odesa, not the quantities in the source document."
+msgstr "Таблиця з групами та підгрупами категорій: артикул, штрихкод, назва, опис, ціна клієнта та роздрібна ціна, одиниця виміру, фасування, залишок, порожня колонка замовлення та фото. Замість недоступних фото — посилання на товари. Залишки беруться по Києву та Одесі, а не з кількостей документа."
 
 msgid "Retail price, %s"
 msgstr "Роздрібна ціна, %s"
@@ -3426,3 +3426,6 @@ msgstr "Не вдалося завантажити кількість в упа�
 
 msgid "During preparation, groups with identical file contents are merged. The group count may decrease; each recipient still receives a separate email."
 msgstr "Під час підготовки групи з однаковим вмістом файлу об’єднуються. Кількість груп може зменшуватися; кожний одержувач отримує окремий лист."
+
+msgid "Need additional product information, another data format (XML or another format), or direct links to higher-resolution photos for your website? Contact us with your request and we will discuss what we can provide."
+msgstr "Якщо для вашого сайту потрібна додаткова інформація про товари, інший формат даних (XML тощо) або прямі посилання на фото кращої якості, напишіть нам. Узгодимо, які матеріали та в якому форматі можемо надати."

@@ -439,7 +439,7 @@ permission; preview/apply still recheck duplicates. Deploy Java and WordPress.
 Source: import integration tests and `customer-import-select` in the manager guide.
 
 Commercial offer mailing format (2026-10-10): `CommercialOffer` consumes the same
-`PriceList::catalogue_rows` eligibility/prices as ordinary mailings, but emits a flat
+`PriceList::catalogue_rows` eligibility/prices as ordinary mailings, and preserves its visible group/subgroup hierarchy in
 XLSX with descriptions and best-effort embedded Woo thumbnails. Persist format; new offers always separate stock from blank order quantities.
 Retail uses raw regular price; packaging reads EDN_V_UPAK through the protected
 Java product-packaging endpoint, never volume/dimensions.
@@ -457,3 +457,7 @@ Reject unset configuration and non-accounting responses on another warehouse.
 Do not route shortages via the last allocation or change existing documents.
 Operator instructions: `docs/MANAGER_CUSTOMER_GUIDE_UK.md`; regression: PCOE
 `tests/manager-workspace.php`. WordPress-only fix.
+
+Offer footer (2026-10-10): localized invitation to request additional data, XML/other
+formats or high-resolution photo links. Keep category headings/footer SKU-empty and
+footer outside filters. Workbook layout version participates in deduplication signatures.

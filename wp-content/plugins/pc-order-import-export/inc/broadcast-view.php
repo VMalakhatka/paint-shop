@@ -61,7 +61,7 @@ $directory=ManagerWorkspace::directory($search,$role,$city,1,100);$roles=wp_role
 <div id="pcoe-broadcast-file-options" hidden>
 <p><label><?php esc_html_e('Excel format','pc-order-import-export'); ?><br><select name="format" id="pcoe-broadcast-format"><?php foreach(['price','offer'] as $format): ?><option value="<?php echo esc_attr($format); ?>"><?php echo esc_html(CommercialOffer::format_label($format)); ?></option><?php endforeach; ?></select></label></p>
 <div id="pcoe-broadcast-offer-options" hidden>
-<p><?php esc_html_e('One flat table: SKU, barcode, name, description, customer and retail prices, unit, pack size, stock, a blank order column and photo. Missing photos are replaced with product links. Stock quantities use Kyiv + Odesa, not the quantities in the source document.','pc-order-import-export'); ?></p>
+<p><?php esc_html_e('A table with category groups and subgroups: SKU, barcode, name, description, customer and retail prices, unit, pack size, stock, a blank order column and photo. Missing photos are replaced with product links. Stock quantities use Kyiv + Odesa, not the quantities in the source document.','pc-order-import-export'); ?></p>
 </div></div>
 <div id="pcoe-broadcast-receipt" hidden>
 <p><label><?php esc_html_e('Document type','pc-order-import-export'); ?><br><select name="document_type" id="pcoe-broadcast-document-type">
