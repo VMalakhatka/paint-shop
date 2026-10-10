@@ -31,6 +31,7 @@ MariaDB хранит состояние сайта и проекции ФОЛИ�
 
 - Тема `generatepress-child`: компоновка и стили, которые действительно принадлежат теме.
 - `paint-core`: общие stock/allocation/cart helpers.
+- `lavka-customer-analytics`: consent-gated GA4 витрины и checkout snapshots, не аналитика ФОЛИО. Подготовлено локально 2026-10-10; production не включён. Не считать processing/date_paid оплатой и не складывать parent/children. Канон выпуска и read-only отчёта: [CUSTOMER_ANALYTICS.md](../../../../docs/CUSTOMER_ANALYTICS.md).
 - `paint-shop-ux`: каталог, карточка товара, поиск и UX витрины.
 - `lavka-total-sync`: полная синхронизация карточек/категорий/медиа без цен и остатков.
 - `lavka-sync`: обмен остатками и mapping складов.

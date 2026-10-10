@@ -1,0 +1,4 @@
+.lca-consent{position:fixed;bottom:12px;left:12px;right:12px;max-width:650px;padding:16px;background:#fff;color:#222;border:1px solid #bbb;border-radius:8px;box-shadow:0 3px 20px #0003;z-index:100000;font:15px/1.5 system-ui,sans-serif}
+.lca-consent p{margin:0 0 12px}.lca-consent button,.lca-consent a{margin:4px 8px 4px 0}.lca-consent button{padding:9px 12px;border:1px solid #555;background:#fff;color:#222;border-radius:4px;cursor:pointer}
+.lca-preferences{position:fixed;bottom:5px;right:5px;font:12px system-ui;z-index:99999;padding:6px;background:#fff;color:#222;border:1px solid #777;border-radius:4px}
+@media(max-width:420px){.lca-consent{bottom:38px;padding:12px}.lca-consent button{display:inline-block;max-width:100%}}

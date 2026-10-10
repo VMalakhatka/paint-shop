@@ -29,6 +29,7 @@ REQUIRED = (
     "docs/WORKSHOPS_GUIDE_RU.md",
     "docs/MANAGER_CUSTOMER_GUIDE_UK.md",
     "docs/FOLIO_ACCOUNTING_PRICES_MANAGER_UK.md",
+    "docs/CUSTOMER_ANALYTICS.md",
 )
 
 
@@ -40,6 +41,11 @@ class ImpactRule:
 
 
 IMPACT_RULES = (
+    ImpactRule(
+        "customer storefront analytics and anonymous sales reports",
+        ("wp-content/plugins/lavka-customer-analytics/**", "scripts/audit-customer-analytics.php", "scripts/analyze-customer-sales.php"),
+        ("docs/CUSTOMER_ANALYTICS.md", "wp-content/plugins/lavka-customer-analytics/README.md"),
+    ),
     ImpactRule(
         "manager workspace contextual guide",
         ("wp-content/plugins/pc-order-import-export/inc/ManagerHelp.php", "wp-content/plugins/pc-order-import-export/assets/manager-help.*", "wp-content/plugins/pc-order-import-export/languages/pcoe-manager-help*"),

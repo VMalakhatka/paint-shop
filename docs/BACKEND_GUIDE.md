@@ -33,6 +33,11 @@ runbook: 2026-08-29.
 
 ## Что в проекте считается бэкендом
 
+Аналитика покупателей сайта: consent-gated browser GA4 и Woo checkout/order metadata
+принадлежат `lavka-customer-analytics`; это не товарная аналитика ФОЛИО.
+Конфигурация, события, split/payment semantics, анонимный read-only отчёт и незавершённый
+production выпуск: [CUSTOMER_ANALYTICS.md](CUSTOMER_ANALYTICS.md).
+
 ```text
 Browser / Woo admin
         |

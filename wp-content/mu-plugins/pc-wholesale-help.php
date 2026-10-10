@@ -566,6 +566,7 @@ function pc_wholesale_help_render_endpoint(): void {
             <div><strong><?php esc_html_e('Need help?', 'pc-wholesale-help'); ?></strong><p><?php esc_html_e('Tell the wholesale manager your WooCommerce order number and what you expected to see. Never send your password or bank card details.', 'pc-wholesale-help'); ?></p></div>
             <a href="#pochatok"><?php esc_html_e('Back to top', 'pc-wholesale-help'); ?> ↑</a>
         </footer>
+        <?php do_action('pc_wholesale_help_after_sections'); ?>
     </article>
     <?php
 }
