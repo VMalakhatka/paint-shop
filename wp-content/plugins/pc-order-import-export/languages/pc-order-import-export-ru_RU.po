@@ -3403,5 +3403,17 @@ msgstr "Формат Excel"
 msgid "Quantity in the offer"
 msgstr "Количество в предложении"
 
-msgid "One flat table: SKU, barcode, name, description, customer price, quantity and photo. Missing photos are replaced with product links. Stock quantities use Kyiv + Odesa, not the quantities in the source document."
-msgstr "Одна таблица без групп: артикул, штрихкод, название, описание, цена клиента, количество и фото. Вместо недоступных фото — ссылки на товары. Остатки берутся по Киеву и Одессе, а не из количеств документа."
+msgid "One flat table: SKU, barcode, name, description, customer and retail prices, unit, pack size, stock, a blank order column and photo. Missing photos are replaced with product links. Stock quantities use Kyiv + Odesa, not the quantities in the source document."
+msgstr "Одна таблица без групп: артикул, штрихкод, название, описание, цена клиента и розничная цена, единица измерения, фасовка, остаток, пустая колонка заказа и фото. Вместо недоступных фото — ссылки на товары. Остатки берутся по Киеву и Одессе, а не из количеств документа."
+
+msgid "Retail price, %s"
+msgstr "Розничная цена, %s"
+
+msgid "Unit of measure"
+msgstr "Единица измерения"
+
+msgid "Units per pack"
+msgstr "Фасовка (ед. в упаковке)"
+
+msgid "Could not load pack quantities from Folio. Check the Java service update and API token, then prepare the mailing again."
+msgstr "Не удалось загрузить количество в упаковке из ФОЛИО. Проверьте обновление Java-сервиса и API-токен, затем подготовьте рассылку ещё раз."

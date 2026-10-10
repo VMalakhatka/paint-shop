@@ -45,17 +45,40 @@ final class CommercialOffer {
         return $image;
     }
 
+    /** Read packaging in bounded batches; never substitute volume, dimensions or stock. */
+    private static function packaging(array $skus): array {
+        $error=__('Could not load pack quantities from Folio. Check the Java service update and API token, then prepare the mailing again.','pc-order-import-export');
+        if(!function_exists('lps_java_post'))throw new \RuntimeException($error);
+        $packing=[];
+        foreach(array_chunk(array_values(array_unique($skus)),500) as $batch){
+            $response=lps_java_post('/admin/folio/product-packaging',['skus'=>$batch],['timeout'=>25]);
+            if(is_wp_error($response) || wp_remote_retrieve_response_code($response)!==200)throw new \RuntimeException($error);
+            $items=json_decode(wp_remote_retrieve_body($response),true);
+            if(!is_array($items) || !array_is_list($items) || count($items)>count($batch))throw new \RuntimeException($error);
+            $seen=[];
+            foreach($items as $item){
+                if(!is_array($item) || !isset($item['sku']) || !in_array($item['sku'],$batch,true) || isset($seen[$item['sku']]) || !array_key_exists('unitsPerPack',$item))throw new \RuntimeException($error);
+                $seen[$item['sku']]=true;$value=$item['unitsPerPack'];
+                if($value===null)continue;
+                if(!is_numeric($value) || !is_finite((float)$value))throw new \RuntimeException($error);
+                if((float)$value>0)$packing[$item['sku']]=(float)$value;
+            }
+        }
+        return $packing;
+    }
+
     public static function workbook(array $entries, string $quantity): array {
         $book=new Spreadsheet();$book->getDefaultStyle()->getFont()->setName('Arial')->setSize(11);
         $book->getProperties()->setCreator(get_bloginfo('name'))->setTitle(self::format_label('offer'));
         $sheet=$book->getActiveSheet();$sheet->setTitle('Lavka');
         $header=1;
         $sheet->getHeaderFooter()->setOddHeader('&L'.self::format_label('offer').'&R'.wp_date('Y-m-d H:i'));
-        $sheet->fromArray([__('SKU','pc-order-import-export'),__('GTIN','pc-order-import-export'),__('Name','pc-order-import-export'),__('Description','pc-order-import-export'),sprintf(__('Your price, %s','pc-order-import-export'),get_woocommerce_currency()),__('Order quantity','pc-order-import-export'),__('Photo','pc-order-import-export')],null,'A'.$header);
-        $sheet->getStyle('A'.$header.':G'.$header)->applyFromArray(['font'=>['bold'=>true,'color'=>['rgb'=>'FFFFFF']],'fill'=>['fillType'=>'solid','startColor'=>['rgb'=>'AD5943']],'alignment'=>['wrapText'=>true,'vertical'=>'center']]);
-        $sheet->getRowDimension($header)->setRowHeight(32);
+        $sheet->fromArray([__('SKU','pc-order-import-export'),__('GTIN','pc-order-import-export'),__('Name','pc-order-import-export'),__('Description','pc-order-import-export'),sprintf(__('Your price, %s','pc-order-import-export'),get_woocommerce_currency()),__('Order quantity','pc-order-import-export'),__('Photo','pc-order-import-export'),sprintf(__('Retail price, %s','pc-order-import-export'),get_woocommerce_currency()),__('Unit of measure','pc-order-import-export'),__('Units per pack','pc-order-import-export'),__('Available stock: Kyiv + Odesa','pc-order-import-export')],null,'A'.$header);
+        $sheet->getStyle('A'.$header.':K'.$header)->applyFromArray(['font'=>['bold'=>true,'color'=>['rgb'=>'FFFFFF']],'fill'=>['fillType'=>'solid','startColor'=>['rgb'=>'800000']],'alignment'=>['wrapText'=>true,'vertical'=>'center']]);
+        $sheet->getRowDimension($header)->setRowHeight(48);
         $rows=array_values(array_filter($entries,static fn($e)=>isset($e['values'])));
         usort($rows,static fn($a,$b)=>strnatcasecmp($a['values'][0],$b['values'][0]));
+        $packing=self::packaging(array_column(array_column($rows,'values'),0));
         $row=$header;$photos=0;$bytes=0;$deadline=microtime(true)+25;
         foreach($rows as $entry){
             $v=$entry['values'];$product=wc_get_product($entry['product_id']);$row++;
@@ -67,7 +90,20 @@ final class CommercialOffer {
             $description=mb_substr(trim($description),0,32767);
             foreach([$v[0],$v[1],$v[2],$description] as $col=>$value)$sheet->setCellValueExplicit([$col+1,$row],$value,DataType::TYPE_STRING);
             if($v[5]!==null)$sheet->setCellValue('E'.$row,$v[5]);
-            if($quantity==='one' || $v[6]!==null)$sheet->setCellValue('F'.$row,$quantity==='one'?1:$v[6]);
+            // Order quantity F is intentionally blank, including legacy quantity presets.
+            if($v[6]!==null)$sheet->setCellValue('K'.$row,$v[6]);
+            if($product){
+                $retail=$product->get_regular_price('edit');
+                if($retail!=='')$sheet->setCellValue('H'.$row,wc_get_price_to_display($product,['price'=>(float)$retail]));
+                $unit=trim((string)$product->get_meta('_edin_izmer'));
+                if($unit==='')$unit=$product->get_attribute('pa_edin_izmer');
+                if($unit==='' && $product->get_parent_id()){
+                    $parent=wc_get_product($product->get_parent_id());
+                    if($parent)$unit=trim((string)$parent->get_meta('_edin_izmer'))?:$parent->get_attribute('pa_edin_izmer');
+                }
+                $sheet->setCellValueExplicit('I'.$row,$unit,DataType::TYPE_STRING);
+                if(isset($packing[$v[0]]))$sheet->setCellValue('J'.$row,$packing[$v[0]]);
+            }
             $sheet->getCell('C'.$row)->getHyperlink()->setUrl($v[8]);
             $sheet->getRowDimension($row)->setRowHeight(min(409,max(84,(ceil(mb_strlen($description)/60)+substr_count($description,"\n"))*14)));
             $image=$product?self::photo($product,$deadline,$bytes):null;
@@ -77,15 +113,18 @@ final class CommercialOffer {
                 $sheet->setCellValueExplicit('G'.$row,__('View product','pc-order-import-export'),DataType::TYPE_STRING);$sheet->getCell('G'.$row)->getHyperlink()->setUrl($v[8]);
             }
         }
-        foreach(['A'=>23,'B'=>20,'C'=>44,'D'=>64,'E'=>19,'F'=>18,'G'=>25] as $col=>$width)$sheet->getColumnDimension($col)->setWidth($width);
+        foreach(['A'=>23,'B'=>20,'C'=>44,'D'=>64,'E'=>19,'F'=>18,'G'=>25,'H'=>19,'I'=>18,'J'=>18,'K'=>23] as $col=>$width)$sheet->getColumnDimension($col)->setWidth($width);
         if($row>$header){
-            $start=$header+1;$sheet->getStyle('A'.$start.':G'.$row)->getAlignment()->setVertical('center')->setWrapText(true);
+            $start=$header+1;$sheet->getStyle('A'.$start.':K'.$row)->getAlignment()->setVertical('center')->setWrapText(true);
             $sheet->getStyle('E'.$start.':E'.$row)->getNumberFormat()->setFormatCode('0.00');
+            $sheet->getStyle('H'.$start.':H'.$row)->getNumberFormat()->setFormatCode('0.00');
+            $sheet->getStyle('J'.$start.':J'.$row)->getNumberFormat()->setFormatCode('0.###');
+            $sheet->getStyle('K'.$start.':K'.$row)->getNumberFormat()->setFormatCode('0.###');
             $sheet->getStyle('F'.$start.':F'.$row)->getNumberFormat()->setFormatCode('0.###');
             $sheet->getStyle('F'.$start.':F'.$row)->getFill()->setFillType('solid')->getStartColor()->setRGB('FFF2B3');
             $validation=$sheet->getCell('F'.$start)->getDataValidation();$validation->setType('decimal')->setOperator('greaterThanOrEqual')->setFormula1('0')->setAllowBlank(true)->setShowErrorMessage(true)->setErrorStyle('stop')->setError(__('Enter a quantity of zero or more.','pc-order-import-export'))->setSqref('F'.$start.':F'.$row);
         }
-        $sheet->setAutoFilter('A'.$header.':G'.$row);$sheet->freezePane('D'.($header+1));
+        $sheet->setAutoFilter('A'.$header.':K'.$row);$sheet->freezePane('D'.($header+1));
         $sheet->getPageSetup()->setOrientation('landscape')->setFitToWidth(1)->setFitToHeight(0)->setRowsToRepeatAtTopByStartAndEnd($header,$header);
         return ['book'=>$book,'photos'=>$photos];
     }

@@ -259,8 +259,8 @@ are omitted. Hidden-only/unassigned products are not moved into Other products;
 multi-category products may use a visible branch instead. Resolve the shared index
 once per download; do not maintain a second exclusion setting or cache customer data.
 Missing/unavailable visibility provider fails the download rather than exporting
-an unrestricted catalogue. Main headers use medium terracotta `AD5943`, subgroups
-use `E8BCAC`/`F5E4DD`; the order column stays yellow. No schema/import change.
+an unrestricted catalogue. Main headers use dark burgundy `800000`, subgroups
+use `D9B3B3`/`F2E6E6`; the order column stays yellow. No schema/import change.
 Offline check: `tests/price-list-visibility.php` (set `PCOE_AUTOLOAD` to the shared
 Composer autoloader when testing an isolated worktree). It exercises the actual
 storefront category index, visibility changes, variations and XLSX save/reload.
@@ -708,7 +708,7 @@ older Java leaves email hints unavailable while Folio links still work.
 
 `CommercialOffer` renders the optional flat XLSX; `PriceList::catalogue_rows` still
 owns product visibility, customer prices and selling-warehouse stock. A mailing
-persists `format=price|offer` and `quantity=one|stock`. Old campaigns default to
+persists `format=price|offer`. Legacy `quantity=one|stock` remains accepted but never pre-fills new offers. Old campaigns default to
 standard price lists. Both catalogue and document selections support either format.
 No category headings/outlines are emitted for offers; SKU/barcode/text stay strings,
 prices and quantities are numeric. Header row 1 retains the existing import contract.
@@ -719,12 +719,13 @@ Photos use the assigned Woo thumbnail (variation falls back to parent), with saf
 HTTP redirects, 3-second request timeout, 512 KiB input and 4-million-pixel limits.
 JPEG/PNG/GIF/WebP are resized to at most 160×100 and embedded. GD absence, failures,
 25-second image budget or 3 MiB total compressed image budget leave a product link.
-The review reports embedded photo count. No media writes, public price files, new
-Java API or additional automatic email are introduced; the existing 8 MiB final
+The review reports embedded photo count. No media writes, public price files, additional automatic email are introduced; the existing 8 MiB final
 attachment limit and explicit review/start remain. Pricing groups reuse the same
 private file; the email attachment is named `commercial-offer-YYYY-MM-DD.xlsx`.
 
 Manager steps: `docs/MANAGER_CUSTOMER_GUIDE_UK.md#mailings`. Customer quantities must
 be reviewed before re-import; customer guide and published help source explain this.
 Verification: local `tests/broadcasts.php` with intercepted mail/HTTP and disposable
-fixtures; browser composer checks and XLSX inspection. Deployment: WordPress only.
+fixtures; browser composer checks and XLSX inspection. Deployment: Java packaging endpoint, then WordPress.
+
+Offer refinement (2026-10-10): headers use burgundy `800000`. Retail price uses the raw Woo regular price (synced retail), with display tax handling; customer price retains its role context. Unit uses `_edin_izmer`, then `pa_edin_izmer`, with parent fallback. Pack size means units per package: protected Java `/admin/folio/product-packaging` reads `SCL_ARTC.EDN_V_UPAK` at catalogue source warehouse 7 in batches of 500. Zero/unknown stays blank, never inferred from volume, dimensions or stock. API failure blocks preparation with an actionable message. Reuses the configured import token. Deploy Java before WordPress; no catalogue sync or migration needed. Stock is column K; yellow order column F is always blank. Existing prepared attachments remain snapshots; prepare a new mailing for the new layout.

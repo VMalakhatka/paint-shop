@@ -437,9 +437,11 @@ Source: import integration tests and `customer-import-select` in the manager gui
 
 Commercial offer mailing format (2026-10-10): `CommercialOffer` consumes the same
 `PriceList::catalogue_rows` eligibility/prices as ordinary mailings, but emits a flat
-XLSX with descriptions and best-effort embedded Woo thumbnails. Persist format and
-one-unit/site-stock quantity choice per campaign; never reuse source document prices
+XLSX with descriptions and best-effort embedded Woo thumbnails. Persist format; new offers always separate stock from blank order quantities.
+Retail uses raw regular price; packaging reads EDN_V_UPAK through the protected
+Java product-packaging endpoint, never volume/dimensions.
+Never reuse source document prices
 or quantities. Shared price groups stay private and generation never sends email.
-Keep row-1 SKU/Order quantity headers for re-import and warn clients to review prefilled
+Keep row-1 SKU/Order quantity headers for re-import and ask clients to fill the blank order
 quantities. Photo limits/fallback and verification: PCOE README; operator steps:
-`docs/MANAGER_CUSTOMER_GUIDE_UK.md#mailings`. WordPress-only deploy, no media writes.
+`docs/MANAGER_CUSTOMER_GUIDE_UK.md#mailings`. Deploy Java packaging endpoint before WordPress; no media writes.

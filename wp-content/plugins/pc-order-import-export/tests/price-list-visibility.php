@@ -78,9 +78,9 @@ try {
     (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($book))->save($path);
     $saved = \PhpOffice\PhpSpreadsheet\IOFactory::load($path);
     $sheet = $saved->getActiveSheet();
-    check($sheet->getStyle('A1')->getFill()->getStartColor()->getRGB() === 'AD5943', 'Terracotta table header');
-    check($sheet->getStyle('C2')->getFill()->getStartColor()->getRGB() === 'AD5943', 'Terracotta root heading');
-    check($sheet->getStyle('C3')->getFill()->getStartColor()->getRGB() === 'E8BCAC', 'Light terracotta subgroup');
+    check($sheet->getStyle('A1')->getFill()->getStartColor()->getRGB() === '800000', 'Burgundy table header');
+    check($sheet->getStyle('C2')->getFill()->getStartColor()->getRGB() === '800000', 'Burgundy root heading');
+    check($sheet->getStyle('C3')->getFill()->getStartColor()->getRGB() === 'D9B3B3', 'Muted burgundy subgroup');
     $found = 0;
     for ($row=2; $row<=$sheet->getHighestRow(); $row++) {
         if (!$sheet->getCell('A'.$row)->getValue()) continue;
@@ -100,4 +100,4 @@ $wpdb->last_error = 'fixture failure';
 $failed = false;
 try { iterator_to_array(PriceList::catalogue_rows($products, [])); } catch (RuntimeException $e) { $failed = $e->getMessage() === 'Category visibility unavailable'; }
 check($failed, 'Visibility failure must not expose the unrestricted catalogue');
-echo "PASS: storefront visibility, excluded descendants, primary fallback, variations, fresh settings, XLSX roundtrip and terracotta styling\n";
+echo "PASS: storefront visibility, excluded descendants, primary fallback, variations, fresh settings, XLSX roundtrip and burgundy styling\n";

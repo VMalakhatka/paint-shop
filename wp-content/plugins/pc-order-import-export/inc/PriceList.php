@@ -230,7 +230,7 @@ class PriceList
         $sheet->setShowSummaryBelow(false);
         $sheet->getStyle('A1:I1')->applyFromArray([
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-            'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => 'AD5943']],
+            'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => '800000']],
             'alignment' => ['wrapText' => true, 'vertical' => 'center'],
         ]);
         $sheet->getRowDimension(1)->setRowHeight(38);
@@ -252,7 +252,7 @@ class PriceList
         foreach ($headings as $number => $depth) {
             $sheet->getStyle('A' . $number . ':I' . $number)->applyFromArray([
                 'font'=>['bold'=>true, 'size'=>$depth === 0 ? 14 : 11, 'color'=>['rgb'=>$depth === 0 ? 'FFFFFF' : '263A40']],
-                'fill'=>['fillType'=>'solid', 'startColor'=>['rgb'=>$depth === 0 ? 'AD5943' : ($depth === 1 ? 'E8BCAC' : 'F5E4DD')]],
+                'fill'=>['fillType'=>'solid', 'startColor'=>['rgb'=>$depth === 0 ? '800000' : ($depth === 1 ? 'D9B3B3' : 'F2E6E6')]],
             ]);
             $sheet->getStyle('C' . $number)->getAlignment()->setIndent(min(7, $depth));
             $sheet->getRowDimension($number)->setRowHeight($depth === 0 ? 29 : 24);

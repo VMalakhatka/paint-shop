@@ -3207,5 +3207,17 @@ msgstr ""
 msgid "Quantity in the offer"
 msgstr ""
 
-msgid "One flat table: SKU, barcode, name, description, customer price, quantity and photo. Missing photos are replaced with product links. Stock quantities use Kyiv + Odesa, not the quantities in the source document."
+msgid "One flat table: SKU, barcode, name, description, customer and retail prices, unit, pack size, stock, a blank order column and photo. Missing photos are replaced with product links. Stock quantities use Kyiv + Odesa, not the quantities in the source document."
+msgstr ""
+
+msgid "Retail price, %s"
+msgstr ""
+
+msgid "Unit of measure"
+msgstr ""
+
+msgid "Units per pack"
+msgstr ""
+
+msgid "Could not load pack quantities from Folio. Check the Java service update and API token, then prepare the mailing again."
 msgstr ""

@@ -10,7 +10,7 @@ $d=BroadcastStore::get($id);$counts=array_count_values(array_column($d['recipien
 <p><strong><?php echo esc_html(BroadcastUi::label($d['status'])); ?></strong> · <?php echo esc_html(sprintf(__('Recipients: %s','pc-order-import-export'),count($d['recipients']))); ?></p>
 <?php if($d['error']): ?><p role="alert"><?php echo esc_html($d['error']); ?></p><?php endif; ?>
 <div style="white-space:pre-wrap;overflow-wrap:anywhere"><?php echo esc_html($d['message']); ?></div>
-<?php if($d['kind']!=='text'): ?><p><?php echo esc_html(CommercialOffer::format_label($d['format']??'price')); ?><?php if(($d['format']??'price')==='offer')echo ' · '.esc_html(CommercialOffer::quantity_label($d['quantity']??'one')); ?></p><?php endif; ?>
+<?php if($d['kind']!=='text'): ?><p><?php echo esc_html(CommercialOffer::format_label($d['format']??'price')); ?></p><?php endif; ?>
 <?php if($d['source']): ?><p><?php echo esc_html(sprintf(__('Document selection: warehouse %1$s, date %2$s, document ID %3$s','pc-order-import-export'),$d['source']['warehouse'],$d['source']['date'],$d['source']['document'])); ?></p><?php endif; ?>
 <p><?php echo esc_html(sprintf(__('Prepared price groups: %s. Customers with the same pricing conditions share one file.','pc-order-import-export'),count($d['groups']))); ?></p>
 <?php foreach($d['groups'] as $key=>$group): ?>
@@ -60,8 +60,7 @@ $directory=ManagerWorkspace::directory($search,$role,$city,1,100);$roles=wp_role
 <div id="pcoe-broadcast-file-options" hidden>
 <p><label><?php esc_html_e('Excel format','pc-order-import-export'); ?><br><select name="format" id="pcoe-broadcast-format"><?php foreach(['price','offer'] as $format): ?><option value="<?php echo esc_attr($format); ?>"><?php echo esc_html(CommercialOffer::format_label($format)); ?></option><?php endforeach; ?></select></label></p>
 <div id="pcoe-broadcast-offer-options" hidden>
-<p><label><?php esc_html_e('Quantity in the offer','pc-order-import-export'); ?><br><select name="quantity"><?php foreach(['one','stock'] as $quantity): ?><option value="<?php echo esc_attr($quantity); ?>"><?php echo esc_html(CommercialOffer::quantity_label($quantity)); ?></option><?php endforeach; ?></select></label></p>
-<p><?php esc_html_e('One flat table: SKU, barcode, name, description, customer price, quantity and photo. Missing photos are replaced with product links. Stock quantities use Kyiv + Odesa, not the quantities in the source document.','pc-order-import-export'); ?></p>
+<p><?php esc_html_e('One flat table: SKU, barcode, name, description, customer and retail prices, unit, pack size, stock, a blank order column and photo. Missing photos are replaced with product links. Stock quantities use Kyiv + Odesa, not the quantities in the source document.','pc-order-import-export'); ?></p>
 </div></div>
 <div id="pcoe-broadcast-receipt" hidden>
 <p><label><?php esc_html_e('Document type','pc-order-import-export'); ?><br><select name="document_type" id="pcoe-broadcast-document-type">

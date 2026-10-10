@@ -28,7 +28,7 @@ const assert=require('node:assert/strict');
         assert(!await fileOptions.isVisible());
         await page.locator('#pcoe-broadcast-kind').selectOption('price');assert(await fileOptions.isVisible());assert(!await offerOptions.isVisible());
         await format.selectOption('offer');assert(await offerOptions.isVisible());
-        await page.locator('select[name="quantity"]').selectOption('stock');
+        assert.equal(await page.locator('select[name="quantity"]').count(),0);
         const receipt=page.locator('#pcoe-broadcast-receipt'),kind=page.locator('#pcoe-broadcast-kind'),warehouse=page.locator('#pcoe-broadcast-warehouse'),date=page.locator('#pcoe-broadcast-date'),doc=page.locator('#pcoe-broadcast-document');
         assert(!await receipt.isVisible());await kind.selectOption('arrival');await warehouse.locator('option[value="7"]').waitFor({state:'attached'});
         await date.fill('2026-10-05');await warehouse.selectOption('7');await doc.locator('option[value="9001"]').waitFor({state:'attached'});await doc.selectOption('9001');

@@ -17,6 +17,8 @@ add_filter('pre_http_request',static function($pre,$args,$url)use(&$skus,&$sourc
     if($url==='https://example.invalid/offer-test.png'){
         $image=imagecreatetruecolor(120,80);imagefill($image,0,0,imagecolorallocate($image,173,89,67));ob_start();imagepng($image);$body=ob_get_clean();imagedestroy($image);return ['response'=>['code'=>200],'body'=>$body];
     }
+    if(str_contains($url,'/admin/folio/product-packaging') && $sourceMode==='packing-failed')return new WP_Error('fixture','Unavailable');
+    if(str_contains($url,'/admin/folio/product-packaging'))return ['response'=>['code'=>200],'body'=>wp_json_encode(array_map(static fn($sku)=>['sku'=>$sku,'unitsPerPack'=>5],json_decode($args['body'],true)['skus']))];
     if(str_contains($url,'/ref/warehouses'))return ['response'=>['code'=>200],'body'=>wp_json_encode([['code'=>'7','name'=>'Fixture warehouse']])];
     parse_str((string)wp_parse_url($url,PHP_URL_QUERY),$query);
     if(str_contains($url,'/admin/folio/receipt-catalogue/9001/skus'))return ['response'=>['code'=>200],'body'=>wp_json_encode(['ok'=>true,'documentId'=>9001,'warehouseId'=>7,'date'=>'2026-10-05','documentType'=>$sourceMode==='mismatch'?'receipt':($query['documentType']??'receipt'),'documentTypes'=>$sourceMode==='old'?['receipt']:['receipt','invoice'],'skus'=>[$skus[0],$skus[0],'MISSING-TEST-SKU']])];
@@ -118,7 +120,7 @@ try{
     $check(count($mails)===$count,'Cancelled mailing cannot send');
     $deny(fn()=>CommercialOffer::options(['format'=>'bad']));$deny(fn()=>CommercialOffer::options(['quantity'=>'document']));
     $check(CommercialOffer::options([])===['format'=>'price','quantity'=>'one'],'Old campaigns retain standard price format');
-    $p=$products[0];$p->set_description('<p>Product description</p><p>Second line</p>');$p->update_meta_data('_wc_gtin_code','012345678905');$p->save();
+    $p=$products[0];$p->update_meta_data('_edin_izmer','50 мл');$p->set_description('<p>Product description</p><p>Second line</p>');$p->update_meta_data('_wc_gtin_code','012345678905');$p->save();
     $photoFilter=static fn($image,$attachment)=>$attachment===$products[1]->get_id()?['https://example.invalid/offer-test.png',1,1,false]:$image;
     add_filter('wp_get_attachment_image_src',$photoFilter,10,2);
     $imageIdFilter=static fn($image,$product)=>$product->get_id()===$products[0]->get_id()?$products[1]->get_id():$image;
@@ -136,9 +138,9 @@ try{
             $check($start===1 && $map['sku']===0 && $map['qty']===5 && $map['price']===null && $map['price_list'],'Offer re-import uses quantities and site prices, not attachment prices');
             $check(str_contains($sheet->getCell('D2')->getValue(),'Product description') && !str_contains($sheet->getCell('D2')->getValue(),'<p>'),'Plain description included');
             $expected=Pricing::scope($g['user'],fn()=>wc_get_price_to_display(wc_get_product($p->get_id())));
-            $check((float)$sheet->getCell('E2')->getValue()===(float)$expected && (float)$sheet->getCell('F2')->getValue()===(float)$expectedQuantity,'Offer uses recipient price and selected quantity');
+            $check((float)$sheet->getCell('E2')->getValue()===(float)$expected && $sheet->getCell('F2')->getValue()===null && (float)$sheet->getCell('K2')->getValue()===8.0 && (float)$sheet->getCell('H2')->getValue()===100.0 && $sheet->getCell('I2')->getValue()==='50 мл' && (float)$sheet->getCell('J2')->getValue()===5.0,'Offer separates retail/customer prices, units, stock and blank order quantity');
             $check(count($sheet->getDrawingCollection())===1 && $g['photos']===1,'Photo embedded in XLSX and counted in preview');
-            $check($sheet->getRowDimension(2)->getOutlineLevel()===0 && $sheet->getAutoFilter()->getRange()==='A1:G2','Offer has filters without row grouping');
+            $check($sheet->getRowDimension(2)->getOutlineLevel()===0 && $sheet->getAutoFilter()->getRange()==='A1:K2','Offer has filters without row grouping');
             if($dir=getenv('PCOE_BROADCAST_PREVIEW'))copy($path,$dir.'/offer-'.$quantity.'.xlsx');
             $book->disconnectWorksheets();unlink($path);
         }
@@ -148,10 +150,12 @@ try{
     }
     remove_filter('wp_get_attachment_image_src',$photoFilter,10);
     remove_filter('woocommerce_product_get_image_id',$imageIdFilter,10);
-    $p->set_image_id(0);$p->save();foreach($locations as $loc)delete_post_meta($p->get_id(),'_stock_at_'.$loc);
+    $p->set_image_id(0);$p->update_meta_data('_razm_izmer','=20 x 30 см');$p->save();foreach($locations as $loc)delete_post_meta($p->get_id(),'_stock_at_'.$loc);
     $fallback=Pricing::file($a,[$p->get_id()],['format'=>'offer','quantity'=>'stock']);$path=Store::temporary_file();file_put_contents($path,Store::bytes($fallback));$book=IOFactory::load($path);$sheet=$book->getActiveSheet();
-    $check($sheet->getCell('F2')->getValue()===null && $sheet->getCell('G2')->getHyperlink()->getUrl()!=='','Unknown stock remains blank and missing photo links to product');
+    $check($sheet->getCell('K2')->getValue()===null && $sheet->getCell('F2')->getValue()===null && $sheet->getCell('G2')->getHyperlink()->getUrl()!=='','Unknown stock remains blank and missing photo links to product');
+    $check((float)$sheet->getCell('J2')->getValue()===5.0,'Pack quantity is independent of dimensions and unit volume');
     $book->disconnectWorksheets();unlink($path);
+    $sourceMode='packing-failed';$deny(fn()=>Pricing::file($a,[$p->get_id()],['format'=>'offer']));$sourceMode='ok';
     wp_set_current_user($a);$deny(fn()=>Mailings::create($base));$deny(fn()=>Mailings::control($id,'retry'));$deny(fn()=>Sources::request('/warehouses'));wp_set_current_user($manager);
     $check(!wp_next_scheduled(Mailings::HOOK,[$id]),'Test fixtures never schedule a real delivery');
     echo "PASS: $checks mailing checks; separate role prices, grouped files, receipt SKU isolation, queue/idempotence/privacy, HTTP and mail mocked.\n";
