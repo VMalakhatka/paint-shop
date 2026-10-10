@@ -61,9 +61,9 @@ final class BroadcastPricing {
     }
 
     /** Persist XLSX bytes privately in WordPress; no public media/upload URL. */
-    public static function file(int $user,array $ids,array $options=[]): array {
+    public static function file(int $user,array $ids,array $options=[], array $prepared=[]): array {
         $options=CommercialOffer::options($options);
-        return self::scope($user,static function()use($ids,$options){
+        return self::scope($user,static function()use($ids,$options,$prepared){
             if(!ApprovalWorkbook::available())throw new \RuntimeException(__('Excel export is unavailable. Contact the site administrator.','pc-order-import-export'));
             $locations=PriceList::location_ids();
             if(!$locations)throw new \RuntimeException(__('Selling warehouses are not mapped.','pc-order-import-export'));
@@ -71,6 +71,24 @@ final class BroadcastPricing {
             $rows=iterator_to_array(PriceList::catalogue_rows(self::products($ids),$locations),false);
             $count=count(array_filter($rows,static fn($row)=>isset($row['values'])));
             if(!$count)throw new \RuntimeException(__('No published products are available for this mailing.','pc-order-import-export'));
+            // Compare actual output inputs in the customer's price/locale/tax scope.
+            // Unknown price hooks still isolate the initial context; equal results can share a file.
+            $extra=[];
+            if($options['format']==='offer')foreach($rows as $row){
+                if(!isset($row['product_id']))continue;
+                $product=wc_get_product($row['product_id']);
+                foreach([$product,$product && $product->get_parent_id()?wc_get_product($product->get_parent_id()):null] as $p){
+                    if(!$p){$extra[]=null;continue;}
+                    $regular=$p->get_regular_price('edit');
+                    $extra[]=[$p->get_id(),$p->get_short_description(),$p->get_description(),$p->get_image_id(),
+                        $p->get_meta('_edin_izmer'),$p->get_attribute('pa_edin_izmer'),
+                        $regular===''?null:wc_get_price_to_display($p,['price'=>(float)$regular])];
+                }
+            }
+            $inputs=wp_json_encode([$rows,$extra,PriceList::headers(),get_locale(),get_woocommerce_currency(),$options['format']]);
+            if($inputs===false)throw new \RuntimeException('File comparison failed');
+            $signature=hash('sha256',$inputs);
+            if(isset($prepared[$signature]))return ['reuse'=>$prepared[$signature]];
             $offer=$options['format']==='offer'?CommercialOffer::workbook($rows,$options['quantity']):null;
             $book=$offer?$offer['book']:PriceList::from_rows(PriceList::headers(),$rows);
             $path=BroadcastStore::temporary_file();
@@ -78,7 +96,7 @@ final class BroadcastPricing {
                 $writer=new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($book);$writer->setPreCalculateFormulas(false);$writer->save($path);
                 $bytes=file_get_contents($path);
                 if(!$bytes || strlen($bytes)>8*1024*1024)throw new \RuntimeException(__('The attachment exceeds the 8 MB mailing limit.','pc-order-import-export'));
-                return ['content'=>base64_encode($bytes),'sha256'=>hash('sha256',$bytes),'count'=>$count,'photos'=>$offer['photos']??0,'at'=>gmdate('c')];
+                return ['signature'=>$signature,'content'=>base64_encode($bytes),'sha256'=>hash('sha256',$bytes),'count'=>$count,'photos'=>$offer['photos']??0,'at'=>gmdate('c')];
             } finally {if(is_file($path))unlink($path);$book->disconnectWorksheets();}
         });
     }

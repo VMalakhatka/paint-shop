@@ -13,6 +13,7 @@ $d=BroadcastStore::get($id);$counts=array_count_values(array_column($d['recipien
 <?php if($d['kind']!=='text'): ?><p><?php echo esc_html(CommercialOffer::format_label($d['format']??'price')); ?></p><?php endif; ?>
 <?php if($d['source']): ?><p><?php echo esc_html(sprintf(__('Document selection: warehouse %1$s, date %2$s, document ID %3$s','pc-order-import-export'),$d['source']['warehouse'],$d['source']['date'],$d['source']['document'])); ?></p><?php endif; ?>
 <p><?php echo esc_html(sprintf(__('Prepared price groups: %s. Customers with the same pricing conditions share one file.','pc-order-import-export'),count($d['groups']))); ?></p>
+<?php if($d['status']==='preparing'): ?><p><?php esc_html_e('During preparation, groups with identical file contents are merged. The group count may decrease; each recipient still receives a separate email.','pc-order-import-export'); ?></p><?php endif; ?>
 <?php foreach($d['groups'] as $key=>$group): ?>
 <p><?php echo esc_html($group['label'].' · '.$group['count'].' · '.sprintf(__('Price example: %s','pc-order-import-export'),get_userdata($group['user'])->display_name??'')); ?> —
 <?php if($group['ready']): $url=wp_nonce_url(add_query_arg(['action'=>'pcoe_broadcast_file','mailing'=>$id,'group'=>$key],admin_url('admin-post.php')),'pcoe_broadcast_file_'.$id); ?>

@@ -9,15 +9,16 @@ use PaintCore\PCOE\PriceList;
 use PaintCore\PCOE\CommercialOffer;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 if(!defined('WP_CLI') || !WP_CLI || wp_parse_url(home_url(),PHP_URL_HOST)!=='paint.local')throw new RuntimeException('Local only');
-$users=[];$products=[];$campaigns=[];$mails=[];$mode='ok';$checks=0;$original=get_current_user_id();$quota=get_option('_pcoe_broadcast_quota',null);$prefix='Mailing-test-'.wp_generate_uuid4();$skus=[];$sourceMode='ok';
+$users=[];$products=[];$campaigns=[];$mails=[];$mode='ok';$checks=0;$original=get_current_user_id();$quota=get_option('_pcoe_broadcast_quota',null);$prefix='Mailing-test-'.wp_generate_uuid4();$skus=[];$sourceMode='ok';$packReads=0;
 $check=static function($ok,$message)use(&$checks){if(!$ok)throw new RuntimeException($message);$checks++;};
 $deny=static function($fn)use($check){try{$fn();}catch(Throwable $e){$check(true,'Rejected');return;}throw new RuntimeException('Expected rejection');};
 add_filter('pre_schedule_event',static fn($pre,$event)=>$event->hook===Mailings::HOOK?false:$pre,PHP_INT_MAX,2);
-add_filter('pre_http_request',static function($pre,$args,$url)use(&$skus,&$sourceMode){
+add_filter('pre_http_request',static function($pre,$args,$url)use(&$skus,&$sourceMode,&$packReads){
     if($url==='https://example.invalid/offer-test.png'){
         $image=imagecreatetruecolor(120,80);imagefill($image,0,0,imagecolorallocate($image,173,89,67));ob_start();imagepng($image);$body=ob_get_clean();imagedestroy($image);return ['response'=>['code'=>200],'body'=>$body];
     }
     if(str_contains($url,'/admin/folio/product-packaging') && $sourceMode==='packing-failed')return new WP_Error('fixture','Unavailable');
+    if(str_contains($url,'/admin/folio/product-packaging'))$packReads++;
     if(str_contains($url,'/admin/folio/product-packaging'))return ['response'=>['code'=>200],'body'=>wp_json_encode(array_map(static fn($sku)=>['sku'=>$sku,'unitsPerPack'=>5],json_decode($args['body'],true)['skus']))];
     if(str_contains($url,'/ref/warehouses'))return ['response'=>['code'=>200],'body'=>wp_json_encode([['code'=>'7','name'=>'Fixture warehouse']])];
     parse_str((string)wp_parse_url($url,PHP_URL_QUERY),$query);
@@ -111,7 +112,7 @@ try{
     }finally{$otherDb->get_var($otherDb->prepare('SELECT RELEASE_LOCK(%s)',$lock));$otherDb->close();}
     Mailings::control($busy,'cancel');
     $base['request_key']=wp_generate_uuid4();$expired=$create($base);$d=Store::get($expired);$d['ready_at']=time()-DAY_IN_SECONDS-1;Store::save($expired,$d);$deny(fn()=>Mailings::control($expired,'start'));
-    $base['request_key']=wp_generate_uuid4();$changed=$create($base);$d=Store::get($changed);$d['kind']='price';$d['recipients'][$a]['group']=Pricing::group($a);Store::save($changed,$d);Mailings::control($changed,'start');
+    $base['request_key']=wp_generate_uuid4();$changed=$create($base);$d=Store::get($changed);$d['kind']='price';$d['recipients'][$a]['group']=Pricing::group($a);unset($d['recipients'][$a]['pricing_context']);Store::save($changed,$d);Mailings::control($changed,'start');
     $customer=new WP_User($a);$customer->set_role('partner');$count=count($mails);delete_option('_pcoe_broadcast_quota');Mailings::tick($changed);
     $check(Store::get($changed)['recipients'][$a]['status']==='skipped' && count($mails)===$count,'Changed price role is skipped before attachment access');$customer->set_role('opt');
     $base['kind']='arrival';$base['request_key']=wp_generate_uuid4();$broken=$create($base);$d=Store::get($broken);$key=array_key_first($d['groups']);$d['groups'][$key]['building']=true;Store::save($broken,$d);Mailings::tick($broken);
@@ -156,6 +157,29 @@ try{
     $check((float)$sheet->getCell('J2')->getValue()===5.0,'Pack quantity is independent of dimensions and unit volume');
     $book->disconnectWorksheets();unlink($path);
     $sourceMode='packing-failed';$deny(fn()=>Pricing::file($a,[$p->get_id()],['format'=>'offer']));$sourceMode='ok';
+    // An unknown extension with equal effective prices must not generate one workbook per user.
+    $neutral=static fn($price,$product)=>$price;add_filter('woocommerce_product_get_price',$neutral,1200,2);
+    foreach(['price','offer'] as $format){
+        $same=$base;$same['format']=$format;$same['users']=[$a,$b];$same['request_key']=wp_generate_uuid4();
+        $shared=$create($same);$check(count(Store::get($shared)['groups'])===2,'Unknown hooks initially retain separate customer contexts');
+        $before=$packReads;Mailings::tick($shared);$sharedData=Store::get($shared);
+        $check($sharedData['status']==='ready' && count($sharedData['groups'])===1 && reset($sharedData['groups'])['count']===2,'Equal actual output merges into one prepared group');
+        $check($sharedData['recipients'][$a]['group']===$sharedData['recipients'][$b]['group'] && $sharedData['recipients'][$a]['pricing_context']!==$sharedData['recipients'][$b]['pricing_context'],'Shared file retains separate pre-send customer contexts');
+        if($format==='offer')$check($packReads===$before+1,'Duplicate offer is not rendered or fetched from Folio twice');
+        delete_option('_pcoe_broadcast_quota');$before=count($mails);Mailings::control($shared,'start');Mailings::tick($shared);
+        $check(count($mails)===$before+2 && $mails[$before]['file']['sha']===$mails[$before+1]['file']['sha'],'Both recipients receive byte-identical shared attachment');
+    }
+    $same['request_key']=wp_generate_uuid4();$guarded=$create($same);Mailings::tick($guarded);
+    $customer=new WP_User($b);$customer->set_role('partner');
+    delete_option('_pcoe_broadcast_quota');$before=count($mails);Mailings::control($guarded,'start');Mailings::tick($guarded);
+    $check(count($mails)===$before+1 && Store::get($guarded)['recipients'][$b]['status']==='skipped','Merged recipient with changed pricing context is skipped independently');
+    $customer->set_role('opt');
+    remove_filter('woocommerce_product_get_price',$neutral,1200);
+    add_filter('woocommerce_product_get_price',$custom,1200,2);
+    $different=$base;$different['users']=[$a,$b];$different['request_key']=wp_generate_uuid4();
+    $split=$create($different);Mailings::tick($split);$splitData=Store::get($split);
+    $check($splitData['status']==='ready' && count($splitData['groups'])===2,'Different individual prices cannot merge despite identical roles');
+    remove_filter('woocommerce_product_get_price',$custom,1200);
     wp_set_current_user($a);$deny(fn()=>Mailings::create($base));$deny(fn()=>Mailings::control($id,'retry'));$deny(fn()=>Sources::request('/warehouses'));wp_set_current_user($manager);
     $check(!wp_next_scheduled(Mailings::HOOK,[$id]),'Test fixtures never schedule a real delivery');
     echo "PASS: $checks mailing checks; separate role prices, grouped files, receipt SKU isolation, queue/idempotence/privacy, HTTP and mail mocked.\n";

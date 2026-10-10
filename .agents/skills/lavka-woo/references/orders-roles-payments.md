@@ -365,7 +365,10 @@ email профиля владельца, после прежних nonce/capabil
 - Implementing or previewing a campaign does not authorize sending it. Real mail
   requires the manager's explicit start after reviewing recipients/text/files.
 - Same pricing context/locale shares one private XLSX. Keep conservative
-  per-customer grouping for unknown price/tax filters; do not bypass it for speed.
+  per-customer initial contexts for unknown price/tax filters. Equal effective file
+  signatures may merge during preparation before XLSX/photo/packaging work (2026-10-10).
+  Retain each recipient pricing_context for pre-send checks; do not equate role alone
+  with equal prices. Existing files without signatures remain unchanged.
   Document SKU selection never imports source prices, quantities or counterparties
   into a customer price file. Accounted receipts and accounting/non-accounting
   invoices supply products; document type/warehouse/day are revalidated on preview.

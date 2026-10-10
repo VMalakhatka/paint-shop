@@ -565,10 +565,10 @@ customer display prices and Kyiv/Odesa stock layout with the self-service export
 the manager session from price calculation, restoring everything in `finally`.
 Group keys include ordered roles, locale, currency, tax settings/address/VAT.
 Reviewed role-price/WPC/core filters share a file; unknown price/tax filters add
-customer ID to the key. Never weaken this fallback merely to reduce file counts.
+customer ID to the initial key. Equal effective file signatures can then merge during preparation.
 Before delivery the recipient email, eligibility, opt-out and pricing group are
 checked again. Product prices/stock are the prepared snapshot, not recalculated
-per recipient. Additional price providers require review before sharing files.
+per recipient. Unknown price providers require matching effective file inputs before sharing.
 
 `BroadcastStore` owns private `pcoe-mailing` posts, meta and a MariaDB named lock.
 `Broadcasts` owns bounded WP-Cron batches, a global five-attempts/minute quota,
@@ -731,3 +731,20 @@ fixtures; browser composer checks and XLSX inspection. Deployment: Java packagin
 Offer refinement (2026-10-10): headers use burgundy `800000`. Retail price uses the raw Woo regular price (synced retail), with display tax handling; customer price retains its role context. Unit uses `_edin_izmer`, then `pa_edin_izmer`, with parent fallback. Pack size means units per package: protected Java `/admin/folio/product-packaging` reads `SCL_ARTC.EDN_V_UPAK` at catalogue source warehouse 7 in batches of 500. Zero/unknown stays blank, never inferred from volume, dimensions or stock. API failure blocks preparation with an actionable message. Reuses the configured import token. Deploy Java before WordPress; no catalogue sync or migration needed. Stock is column K; yellow order column F is always blank. Existing prepared attachments remain snapshots; prepare a new mailing for the new layout.
 
 Manager shortage warehouse (2026-10-10): `ManagerWorkspace::payload` always sends the configured `DraftFolioWorkflow::default_warehouse_id()` in `folio_account_header.warehouseId`, including accounts/auto, preferred and single-group allocation. Java already uses that header only for the missing-stock document; accounting groups still come from item allocations. Missing configuration blocks preview, mismatched non-accounting response warehouses are rejected, and changed settings invalidate preview through the existing payload fingerprint. Regression: `tests/manager-workspace.php` / `manager-order-flow.php` with mocked HTTP/mail. WordPress-only deployment; existing documents are not moved.
+
+### Effective mailing file deduplication (2026-10-10)
+
+Unknown price/tax providers still isolate initial pricing contexts. During preparation,
+`BroadcastPricing::file` hashes customer-scoped catalogue rows, header/locale/currency,
+format and offer-specific description, image ID, unit and displayed retail-price inputs.
+Equal signatures reuse an already prepared private attachment before photo/packaging
+requests or XLSX generation. Different prices/visibility/locale keep separate files.
+The worker merges recipients and group counts, retaining `pricing_context` for each
+recipient's existing eligibility/price-context check before sending. Older campaigns
+without that field keep the original check; old prepared files without a signature
+are not retroactively compared or overwritten. Create a new mailing to regroup an
+already prepared campaign completely. Preparation checks at most ten groups or twenty
+seconds between work units per tick, persists each unit and never sends email.
+Verification: broadcasts.php tests equal unknown hooks for both formats, single offer
+packaging read, identical delivered bytes and different individual-price isolation.
+WordPress-only deployment; explicit start and delivery quotas are unchanged.

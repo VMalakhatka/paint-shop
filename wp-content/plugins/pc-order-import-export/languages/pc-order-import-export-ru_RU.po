@@ -3417,3 +3417,6 @@ msgstr "Фасовка (ед. в упаковке)"
 
 msgid "Could not load pack quantities from Folio. Check the Java service update and API token, then prepare the mailing again."
 msgstr "Не удалось загрузить количество в упаковке из ФОЛИО. Проверьте обновление Java-сервиса и API-токен, затем подготовьте рассылку ещё раз."
+
+msgid "During preparation, groups with identical file contents are merged. The group count may decrease; each recipient still receives a separate email."
+msgstr "Во время подготовки группы с одинаковым содержимым файла объединяются. Количество групп может уменьшаться; каждый получатель получает отдельное письмо."

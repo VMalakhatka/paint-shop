@@ -53,7 +53,7 @@ final class Broadcasts {
             $recipients=self::recipients($input);$catalogue=BroadcastSources::products($kind,$input);$groups=[];
             if($kind!=='text' && !$catalogue['ids'])throw new \RuntimeException(__('No published products are available for this mailing.','pc-order-import-export'));
             foreach($recipients['rows'] as $user=>&$recipient){
-                $keyGroup=$kind==='text'?'':BroadcastPricing::group($user);$recipient['group']=$keyGroup;
+                $keyGroup=$kind==='text'?'':BroadcastPricing::group($user);$recipient['group']=$keyGroup;$recipient['pricing_context']=$keyGroup;
                 if($keyGroup && !isset($groups[$keyGroup]))$groups[$keyGroup]=['user'=>$user,'count'=>0,'ready'=>false,
                     'label'=>implode(', ',get_userdata($user)->roles).' / '.get_user_locale($user)];
                 if($keyGroup)$groups[$keyGroup]['count']++;
@@ -95,16 +95,31 @@ final class Broadcasts {
             self::schedule($id,60);
             if(!user_can($d['actor'],'manage_woocommerce')){$d['status']='paused';$d['error']=__('The sending manager no longer has access.','pc-order-import-export');BroadcastStore::save($id,$d);return;}
             if($d['status']==='preparing'){
-                foreach($d['groups'] as $key=>&$group){
+                $started=microtime(true);$checked=0;$prepared=[];
+                foreach($d['groups'] as $key=>$group)if($group['ready'] && !empty($group['signature']))$prepared[$group['signature']]=$key;
+                foreach(array_keys($d['groups']) as $key){
+                    $group=$d['groups'][$key];
                     if($group['ready'])continue;
                     if(!empty($group['building']))throw new \RuntimeException(__('File preparation was interrupted. Create a new mailing.','pc-order-import-export'));
-                    $group['building']=true;BroadcastStore::save($id,$d);
+                    $d['groups'][$key]['building']=true;BroadcastStore::save($id,$d);
                     if(!self::allowed($group['user']) || BroadcastPricing::group($group['user'])!==$key)throw new \RuntimeException(__('Customer pricing conditions changed. Create a new mailing.','pc-order-import-export'));
-                    $file=BroadcastPricing::file($group['user'],$d['ids'],$d);
-                    BroadcastStore::put_file($id,$key,$file);
-                    $group['building']=false;$group['ready']=true;$group['products']=$file['count'];$group['photos']=$file['photos'];$group['at']=$file['at'];
-                    break;
-                }unset($group);
+                    $file=BroadcastPricing::file($group['user'],$d['ids'],$d,$prepared);
+                    if(isset($file['reuse'])){
+                        $target=$file['reuse'];
+                        // Preserve each recipient's context for the independent pre-send check.
+                        foreach($d['recipients'] as &$recipient)if($recipient['group']===$key){
+                            $recipient['pricing_context']=$recipient['pricing_context']??$key;$recipient['group']=$target;
+                        }unset($recipient);
+                        $d['groups'][$target]['count']+=$group['count'];unset($d['groups'][$key]);
+                    }else{
+                        BroadcastStore::put_file($id,$key,$file);
+                        $d['groups'][$key]=array_merge($group,['building'=>false,'ready'=>true,'products'=>$file['count'],
+                            'photos'=>$file['photos'],'at'=>$file['at'],'signature'=>$file['signature']]);
+                        $prepared[$file['signature']]=$key;
+                    }
+                    BroadcastStore::save($id,$d);
+                    if(++$checked>=10 || microtime(true)-$started>=20)break;
+                }
                 if(!array_filter($d['groups'],static fn($g)=>!$g['ready'])){$d['status']='ready';$d['ready_at']=time();}
                 BroadcastStore::save($id,$d);
                 if($d['status']==='preparing')self::schedule($id);
@@ -132,7 +147,7 @@ final class Broadcasts {
                 if($recipient['status']!=='pending')continue;
                 if($quota['used']>=5)break;
                 $u=get_userdata($user);
-                if(!self::allowed($user) || !$u || $u->user_email!==$recipient['email'] || ($recipient['group'] && BroadcastPricing::group($user)!==$recipient['group'])){
+                if(!self::allowed($user) || !$u || $u->user_email!==$recipient['email'] || ($recipient['group'] && BroadcastPricing::group($user)!==($recipient['pricing_context']??$recipient['group']))){
                     $recipient['status']='skipped';continue;
                 }
                 $attachments=[];

@@ -3221,3 +3221,6 @@ msgstr ""
 
 msgid "Could not load pack quantities from Folio. Check the Java service update and API token, then prepare the mailing again."
 msgstr ""
+
+msgid "During preparation, groups with identical file contents are merged. The group count may decrease; each recipient still receives a separate email."
+msgstr ""
