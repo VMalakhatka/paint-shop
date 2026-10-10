@@ -461,3 +461,7 @@ Operator instructions: `docs/MANAGER_CUSTOMER_GUIDE_UK.md`; regression: PCOE
 Offer footer (2026-10-10): localized invitation to request additional data, XML/other
 formats or high-resolution photo links. Keep category headings/footer SKU-empty and
 footer outside filters. Workbook layout version participates in deduplication signatures.
+
+Offer category columns (2026-10-10): each SKU row repeats L=visible root Group and
+M=remaining Subgroup path. Build from heading/depth entries, not string splitting;
+clear lower levels on a new branch. Preserve text typing and blank root-only subgroup.

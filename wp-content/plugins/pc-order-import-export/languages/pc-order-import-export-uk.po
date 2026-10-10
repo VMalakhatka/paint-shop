@@ -3429,3 +3429,9 @@ msgstr "Під час підготовки групи з однаковим вм
 
 msgid "Need additional product information, another data format (XML or another format), or direct links to higher-resolution photos for your website? Contact us with your request and we will discuss what we can provide."
 msgstr "Якщо для вашого сайту потрібна додаткова інформація про товари, інший формат даних (XML тощо) або прямі посилання на фото кращої якості, напишіть нам. Узгодимо, які матеріали та в якому форматі можемо надати."
+
+msgid "Group"
+msgstr "Група"
+
+msgid "Subgroup"
+msgstr "Підгрупа"

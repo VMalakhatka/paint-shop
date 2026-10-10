@@ -73,23 +73,27 @@ final class CommercialOffer {
         $sheet=$book->getActiveSheet();$sheet->setTitle('Lavka');
         $header=1;
         $sheet->getHeaderFooter()->setOddHeader('&L'.self::format_label('offer').'&R'.wp_date('Y-m-d H:i'));
-        $sheet->fromArray([__('SKU','pc-order-import-export'),__('GTIN','pc-order-import-export'),__('Name','pc-order-import-export'),__('Description','pc-order-import-export'),sprintf(__('Your price, %s','pc-order-import-export'),get_woocommerce_currency()),__('Order quantity','pc-order-import-export'),__('Photo','pc-order-import-export'),sprintf(__('Retail price, %s','pc-order-import-export'),get_woocommerce_currency()),__('Unit of measure','pc-order-import-export'),__('Units per pack','pc-order-import-export'),__('Available stock: Kyiv + Odesa','pc-order-import-export')],null,'A'.$header);
-        $sheet->getStyle('A'.$header.':K'.$header)->applyFromArray(['font'=>['bold'=>true,'color'=>['rgb'=>'FFFFFF']],'fill'=>['fillType'=>'solid','startColor'=>['rgb'=>'800000']],'alignment'=>['wrapText'=>true,'vertical'=>'center']]);
+        $sheet->fromArray([__('SKU','pc-order-import-export'),__('GTIN','pc-order-import-export'),__('Name','pc-order-import-export'),__('Description','pc-order-import-export'),sprintf(__('Your price, %s','pc-order-import-export'),get_woocommerce_currency()),__('Order quantity','pc-order-import-export'),__('Photo','pc-order-import-export'),sprintf(__('Retail price, %s','pc-order-import-export'),get_woocommerce_currency()),__('Unit of measure','pc-order-import-export'),__('Units per pack','pc-order-import-export'),__('Available stock: Kyiv + Odesa','pc-order-import-export'),__('Group','pc-order-import-export'),__('Subgroup','pc-order-import-export')],null,'A'.$header);
+        $sheet->getStyle('A'.$header.':M'.$header)->applyFromArray(['font'=>['bold'=>true,'color'=>['rgb'=>'FFFFFF']],'fill'=>['fillType'=>'solid','startColor'=>['rgb'=>'800000']],'alignment'=>['wrapText'=>true,'vertical'=>'center']]);
         $sheet->getRowDimension($header)->setRowHeight(48);
         $rows=array_values(array_filter($entries,static fn($e)=>isset($e['values'])));
         $packing=self::packaging(array_column(array_column($rows,'values'),0));
         $row=$header;$photos=0;$bytes=0;$deadline=microtime(true)+25;
-        $headings=[];
+        $headings=[];$categoryPath=[];
         foreach($entries as $entry){
             if(isset($entry['heading'])){
                 $row++;$headings[$row]=(int)$entry['depth'];
-                $sheet->mergeCells('C'.$row.':K'.$row);
+                $categoryPath=array_slice($categoryPath,0,(int)$entry['depth']);
+                $categoryPath[]=(string)$entry['heading'];
+                $sheet->mergeCells('C'.$row.':M'.$row);
                 $sheet->setCellValueExplicit('C'.$row,$entry['heading'],DataType::TYPE_STRING);
                 $sheet->getRowDimension($row)->setOutlineLevel(min(7,(int)$entry['depth']));
                 continue;
             }
             $v=$entry['values'];$product=wc_get_product($entry['product_id']);$row++;
             $sheet->getRowDimension($row)->setOutlineLevel(min(7,(int)$entry['depth']));
+            $sheet->setCellValueExplicit('L'.$row,$categoryPath[0]??'',DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit('M'.$row,implode(' / ',array_slice($categoryPath,1)),DataType::TYPE_STRING);
             $description=$product?($product->get_short_description()?:$product->get_description()):'';
             if(!$description && $product && $product->get_parent_id()){
                 $parent=wc_get_product($product->get_parent_id());$description=$parent?($parent->get_short_description()?:$parent->get_description()):'';
@@ -121,9 +125,9 @@ final class CommercialOffer {
                 $sheet->setCellValueExplicit('G'.$row,__('View product','pc-order-import-export'),DataType::TYPE_STRING);$sheet->getCell('G'.$row)->getHyperlink()->setUrl($v[8]);
             }
         }
-        foreach(['A'=>23,'B'=>20,'C'=>44,'D'=>64,'E'=>19,'F'=>18,'G'=>25,'H'=>19,'I'=>18,'J'=>18,'K'=>23] as $col=>$width)$sheet->getColumnDimension($col)->setWidth($width);
+        foreach(['A'=>23,'B'=>20,'C'=>44,'D'=>64,'E'=>19,'F'=>18,'G'=>25,'H'=>19,'I'=>18,'J'=>18,'K'=>23,'L'=>28,'M'=>42] as $col=>$width)$sheet->getColumnDimension($col)->setWidth($width);
         if($row>$header){
-            $start=$header+1;$sheet->getStyle('A'.$start.':K'.$row)->getAlignment()->setVertical('center')->setWrapText(true);
+            $start=$header+1;$sheet->getStyle('A'.$start.':M'.$row)->getAlignment()->setVertical('center')->setWrapText(true);
             $sheet->getStyle('E'.$start.':E'.$row)->getNumberFormat()->setFormatCode('0.00');
             $sheet->getStyle('H'.$start.':H'.$row)->getNumberFormat()->setFormatCode('0.00');
             $sheet->getStyle('J'.$start.':J'.$row)->getNumberFormat()->setFormatCode('0.###');
@@ -133,19 +137,19 @@ final class CommercialOffer {
             $validation=$sheet->getCell('F'.$start)->getDataValidation();$validation->setType('decimal')->setOperator('greaterThanOrEqual')->setFormula1('0')->setAllowBlank(true)->setShowErrorMessage(true)->setErrorStyle('stop')->setError(__('Enter a quantity of zero or more.','pc-order-import-export'))->setSqref('F'.$start.':F'.$row);
         }
         foreach($headings as $number=>$depth){
-            $sheet->getStyle('A'.$number.':K'.$number)->applyFromArray([
+            $sheet->getStyle('A'.$number.':M'.$number)->applyFromArray([
                 'font'=>['bold'=>true,'size'=>$depth===0?14:11,'color'=>['rgb'=>$depth===0?'FFFFFF':'263A40']],
                 'fill'=>['fillType'=>'solid','startColor'=>['rgb'=>$depth===0?'800000':($depth===1?'D9B3B3':'F2E6E6')]],
             ]);
             $sheet->getStyle('C'.$number)->getAlignment()->setIndent(min(7,$depth));
             $sheet->getRowDimension($number)->setRowHeight($depth===0?29:24);
         }
-        $sheet->setAutoFilter('A'.$header.':K'.$row);$sheet->freezePane('D'.($header+1));
+        $sheet->setAutoFilter('A'.$header.':M'.$row);$sheet->freezePane('D'.($header+1));
         $sheet->setShowSummaryBelow(false);
         // Leave SKU and order quantity empty so the footer cannot become an imported order line.
-        $footer=$row+2;$sheet->mergeCells('C'.$footer.':K'.$footer);
+        $footer=$row+2;$sheet->mergeCells('C'.$footer.':M'.$footer);
         $sheet->setCellValueExplicit('C'.$footer,__('Need additional product information, another data format (XML or another format), or direct links to higher-resolution photos for your website? Contact us with your request and we will discuss what we can provide.','pc-order-import-export'),DataType::TYPE_STRING);
-        $sheet->getStyle('C'.$footer.':K'.$footer)->applyFromArray(['font'=>['color'=>['rgb'=>'263A40']],
+        $sheet->getStyle('C'.$footer.':M'.$footer)->applyFromArray(['font'=>['color'=>['rgb'=>'263A40']],
             'fill'=>['fillType'=>'solid','startColor'=>['rgb'=>'F2E6E6']],
             'alignment'=>['wrapText'=>true,'vertical'=>'center']]);
         $sheet->getRowDimension($footer)->setRowHeight(55);

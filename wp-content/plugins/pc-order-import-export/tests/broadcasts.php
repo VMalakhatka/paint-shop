@@ -143,7 +143,7 @@ try{
             $expected=Pricing::scope($g['user'],fn()=>wc_get_price_to_display(wc_get_product($p->get_id())));
             $check((float)$sheet->getCell('E'.$productRow)->getValue()===(float)$expected && $sheet->getCell('F'.$productRow)->getValue()===null && (float)$sheet->getCell('K'.$productRow)->getValue()===8.0 && (float)$sheet->getCell('H'.$productRow)->getValue()===100.0 && $sheet->getCell('I'.$productRow)->getValue()==='50 мл' && (float)$sheet->getCell('J'.$productRow)->getValue()===5.0,'Offer separates retail/customer prices, units, stock and blank order quantity');
             $check(count($sheet->getDrawingCollection())===1 && $g['photos']===1,'Photo embedded in XLSX and counted in preview');
-            $check($sheet->getRowDimension($productRow)->getOutlineLevel()>0 && $sheet->getAutoFilter()->getRange()==='A1:K'.$productRow,'Offer retains hierarchy and excludes footer from filters');
+            $check($sheet->getRowDimension($productRow)->getOutlineLevel()>0 && $sheet->getAutoFilter()->getRange()==='A1:M'.$productRow,'Offer retains hierarchy and excludes footer from filters');
             if($dir=getenv('PCOE_BROADCAST_PREVIEW'))copy($path,$dir.'/offer-'.$quantity.'.xlsx');
             $book->disconnectWorksheets();unlink($path);
         }
@@ -163,6 +163,7 @@ try{
         $product=array_values(array_filter($entries,static fn($e)=>isset($e['values'])))[0];$product['depth']=2;
         $offer=CommercialOffer::workbook([['heading'=>'Group','depth'=>0],['heading'=>'Subgroup','depth'=>1],$product],'one');
         $book=$offer['book'];$sheet=$book->getActiveSheet();
+        $check($sheet->getCell('L4')->getValue()==='Group' && $sheet->getCell('M4')->getValue()==='Subgroup' && $sheet->getCell('M4')->getDataType()==='s','Group and subgroup repeat as text in product columns');
         $check($sheet->getCell('C2')->getValue()==='Group' && $sheet->getCell('C3')->getValue()==='Subgroup' && $sheet->getRowDimension(4)->getOutlineLevel()===2,'Offer preserves parent and subgroup hierarchy');
         $check(str_contains($sheet->getCell('C6')->getValue(),'XML') && $sheet->getCell('A6')->getValue()===null,'Localized footer offers XML and cannot become an order line');
         $sheet->setCellValue('F4',2);[$map,$start]=\PaintCore\PCOE\Helpers::detect_colmap_and_start($sheet->toArray());
@@ -170,6 +171,11 @@ try{
         $check(count($lines)===1,'Only the filled product row is importable, not headings or footer');
         if($dir=getenv('PCOE_BROADCAST_PREVIEW'))(new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($book))->save($dir.'/offer-grouped.xlsx');
         $book->disconnectWorksheets();
+        $offer=CommercialOffer::workbook([['heading'=>'Root / name','depth'=>0],['heading'=>'Child','depth'=>1],['heading'=>'=Leaf','depth'=>2],$product,['heading'=>'Other root','depth'=>0],$product],'one');
+        $sheet=$offer['book']->getActiveSheet();
+        $check($sheet->getCell('L5')->getValue()==='Root / name' && $sheet->getCell('M5')->getValue()==='Child / =Leaf','Nested subgroup path preserved without splitting category names');
+        $check($sheet->getCell('L7')->getValue()==='Other root' && $sheet->getCell('M7')->getValue()==='' && $sheet->getCell('M5')->getDataType()==='s','Root changes clear subgroup and category data remains formula-safe');
+        $offer['book']->disconnectWorksheets();
     });
     $sourceMode='packing-failed';$deny(fn()=>Pricing::file($a,[$p->get_id()],['format'=>'offer']));$sourceMode='ok';
     // An unknown extension with equal effective prices must not generate one workbook per user.

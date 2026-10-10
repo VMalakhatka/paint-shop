@@ -3227,3 +3227,9 @@ msgstr ""
 
 msgid "Need additional product information, another data format (XML or another format), or direct links to higher-resolution photos for your website? Contact us with your request and we will discuss what we can provide."
 msgstr ""
+
+msgid "Group"
+msgstr ""
+
+msgid "Subgroup"
+msgstr ""
