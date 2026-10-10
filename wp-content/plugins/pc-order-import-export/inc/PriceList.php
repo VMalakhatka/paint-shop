@@ -183,7 +183,7 @@ class PriceList
         unset($items);
         $walk = static function (int $id, int $depth) use (&$walk, $index, $children, $used, $buckets): \Generator {
             yield ['heading'=>$id ? $index[$id]->name : __('Other products', 'pc-order-import-export'), 'depth'=>$depth];
-            foreach ($buckets[$id] ?? [] as $item) yield ['values'=>$item['values'], 'depth'=>$depth + 1];
+            foreach ($buckets[$id] ?? [] as $item) yield ['values'=>$item['values'], 'depth'=>$depth + 1, 'product_id'=>$item['id']];
             foreach ($children[$id] ?? [] as $child) {
                 if (isset($used[$child])) yield from $walk($child, $depth + 1);
             }

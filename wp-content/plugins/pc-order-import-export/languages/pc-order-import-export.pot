@@ -3173,3 +3173,39 @@ msgstr ""
 
 msgid "Customer account check unavailable."
 msgstr ""
+
+msgid "Select a file format and quantity option."
+msgstr ""
+
+msgid "Commercial offer"
+msgstr ""
+
+msgid "Standard price list"
+msgstr ""
+
+msgid "Available stock: Kyiv + Odesa"
+msgstr ""
+
+msgid "One unit per product"
+msgstr ""
+
+msgid "Description"
+msgstr ""
+
+msgid "Your price, %s"
+msgstr ""
+
+msgid "Photo"
+msgstr ""
+
+msgid "Embedded photos: %1$s of %2$s. Other rows contain product links."
+msgstr ""
+
+msgid "Excel format"
+msgstr ""
+
+msgid "Quantity in the offer"
+msgstr ""
+
+msgid "One flat table: SKU, barcode, name, description, customer price, quantity and photo. Missing photos are replaced with product links. Stock quantities use Kyiv + Odesa, not the quantities in the source document."
+msgstr ""

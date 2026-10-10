@@ -56,7 +56,7 @@ final class BroadcastUi {
             if(empty($d['groups'][$group]['ready']))throw new \RuntimeException('Invalid group');
             $bytes=BroadcastStore::bytes(BroadcastStore::file($id,$group));
             nocache_headers();header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            header('X-Content-Type-Options: nosniff');header('Content-Disposition: attachment; filename="price-preview-'.$id.'.xlsx"');echo $bytes;exit;
+            header('X-Content-Type-Options: nosniff');header('Content-Disposition: attachment; filename="'.(($d['format']??'price')==='offer'?'offer-preview':'price-preview').'-'.$id.'.xlsx"');echo $bytes;exit;
         }catch(\Throwable $e){wp_die(esc_html($e->getMessage()),'',['response'=>409]);}
     }
     public static function render(): void {

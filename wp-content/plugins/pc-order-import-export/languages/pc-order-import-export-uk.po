@@ -3375,3 +3375,39 @@ msgstr "Для частини клієнтів перевірка email недо
 
 msgid "Customer account check unavailable."
 msgstr "Перевірка облікових записів недоступна."
+
+msgid "Select a file format and quantity option."
+msgstr "Виберіть формат файлу та варіант кількості."
+
+msgid "Commercial offer"
+msgstr "Комерційна пропозиція"
+
+msgid "Standard price list"
+msgstr "Стандартний прайс"
+
+msgid "Available stock: Kyiv + Odesa"
+msgstr "Наявні залишки: Київ + Одеса"
+
+msgid "One unit per product"
+msgstr "По 1 одиниці кожного товару"
+
+msgid "Description"
+msgstr "Опис"
+
+msgid "Your price, %s"
+msgstr "Ваша ціна, %s"
+
+msgid "Photo"
+msgstr "Фото"
+
+msgid "Embedded photos: %1$s of %2$s. Other rows contain product links."
+msgstr "Вставлено фото: %1$s із %2$s. В інших рядках — посилання на товари."
+
+msgid "Excel format"
+msgstr "Формат Excel"
+
+msgid "Quantity in the offer"
+msgstr "Кількість у пропозиції"
+
+msgid "One flat table: SKU, barcode, name, description, customer price, quantity and photo. Missing photos are replaced with product links. Stock quantities use Kyiv + Odesa, not the quantities in the source document."
+msgstr "Одна таблиця без груп: артикул, штрихкод, назва, опис, ціна клієнта, кількість і фото. Замість недоступних фото — посилання на товари. Залишки беруться по Києву та Одесі, а не з кількостей документа."

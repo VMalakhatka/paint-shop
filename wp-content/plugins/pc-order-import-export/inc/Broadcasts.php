@@ -49,6 +49,7 @@ final class Broadcasts {
             if($old)return $old[0]->ID;
             $kind=(string)($input['kind']??'');$subject=trim(sanitize_text_field($input['subject']??''));$text=trim(sanitize_textarea_field($input['message']??''));
             if(!in_array($kind,['text','price','arrival'],true) || !$subject || !$text || mb_strlen($subject)>180 || mb_strlen($text)>10000)throw new \RuntimeException(__('Enter a subject and message, and select the mailing type.','pc-order-import-export'));
+            $options=CommercialOffer::options($kind==='text'?[]:$input);
             $recipients=self::recipients($input);$catalogue=BroadcastSources::products($kind,$input);$groups=[];
             if($kind!=='text' && !$catalogue['ids'])throw new \RuntimeException(__('No published products are available for this mailing.','pc-order-import-export'));
             foreach($recipients['rows'] as $user=>&$recipient){
@@ -57,7 +58,7 @@ final class Broadcasts {
                     'label'=>implode(', ',get_userdata($user)->roles).' / '.get_user_locale($user)];
                 if($keyGroup)$groups[$keyGroup]['count']++;
             }unset($recipient);
-            $data=array_merge($catalogue,['status'=>$groups?'preparing':'ready','subject'=>$subject,'message'=>$text,'kind'=>$kind,
+            $data=array_merge($catalogue,$options,['status'=>$groups?'preparing':'ready','subject'=>$subject,'message'=>$text,'kind'=>$kind,
                 'actor'=>get_current_user_id(),'created_at'=>time(),'ready_at'=>$groups?0:time(),'recipients'=>$recipients['rows'],'skipped'=>$recipients['skipped'],'groups'=>$groups,'error'=>'']);
             $id=wp_insert_post(['post_type'=>BroadcastStore::TYPE,'post_status'=>'private','post_author'=>get_current_user_id(),'post_title'=>wp_slash($subject)],true);
             if(is_wp_error($id))throw new \RuntimeException(__('Mailing state could not be saved.','pc-order-import-export'));
@@ -99,9 +100,9 @@ final class Broadcasts {
                     if(!empty($group['building']))throw new \RuntimeException(__('File preparation was interrupted. Create a new mailing.','pc-order-import-export'));
                     $group['building']=true;BroadcastStore::save($id,$d);
                     if(!self::allowed($group['user']) || BroadcastPricing::group($group['user'])!==$key)throw new \RuntimeException(__('Customer pricing conditions changed. Create a new mailing.','pc-order-import-export'));
-                    $file=BroadcastPricing::file($group['user'],$d['ids']);
+                    $file=BroadcastPricing::file($group['user'],$d['ids'],$d);
                     BroadcastStore::put_file($id,$key,$file);
-                    $group['building']=false;$group['ready']=true;$group['products']=$file['count'];$group['at']=$file['at'];
+                    $group['building']=false;$group['ready']=true;$group['products']=$file['count'];$group['photos']=$file['photos'];$group['at']=$file['at'];
                     break;
                 }unset($group);
                 if(!array_filter($d['groups'],static fn($g)=>!$g['ready'])){$d['status']='ready';$d['ready_at']=time();}
@@ -143,7 +144,7 @@ final class Broadcasts {
                         $paths[$group]=$path;
                         if(file_put_contents($path,$bytes)!==strlen($bytes))throw new \RuntimeException('Temporary file unavailable');
                     }
-                    $attachments[($d['kind']==='arrival'?'arrival':'price-list').'-'.gmdate('Y-m-d',$d['ready_at']).'.xlsx']=$paths[$group];
+                    $attachments[(($d['format']??'price')==='offer'?'commercial-offer':($d['kind']==='arrival'?'arrival':'price-list')).'-'.gmdate('Y-m-d',$d['ready_at']).'.xlsx']=$paths[$group];
                 }
                 $headers=['Content-Type: text/plain; charset=UTF-8'];$manager=get_userdata($d['actor']);
                 if($manager && self::email($manager->user_email))$headers[]='Reply-To: '.$manager->user_email;

@@ -434,3 +434,12 @@ account queries. Unknown email checks must not be presented as unregistered;
 missing email and unavailable service are distinct. Profile links require edit-user
 permission; preview/apply still recheck duplicates. Deploy Java and WordPress.
 Source: import integration tests and `customer-import-select` in the manager guide.
+
+Commercial offer mailing format (2026-10-10): `CommercialOffer` consumes the same
+`PriceList::catalogue_rows` eligibility/prices as ordinary mailings, but emits a flat
+XLSX with descriptions and best-effort embedded Woo thumbnails. Persist format and
+one-unit/site-stock quantity choice per campaign; never reuse source document prices
+or quantities. Shared price groups stay private and generation never sends email.
+Keep row-1 SKU/Order quantity headers for re-import and warn clients to review prefilled
+quantities. Photo limits/fallback and verification: PCOE README; operator steps:
+`docs/MANAGER_CUSTOMER_GUIDE_UK.md#mailings`. WordPress-only deploy, no media writes.

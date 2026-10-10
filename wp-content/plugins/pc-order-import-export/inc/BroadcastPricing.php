@@ -61,8 +61,9 @@ final class BroadcastPricing {
     }
 
     /** Persist XLSX bytes privately in WordPress; no public media/upload URL. */
-    public static function file(int $user,array $ids): array {
-        return self::scope($user,static function()use($ids){
+    public static function file(int $user,array $ids,array $options=[]): array {
+        $options=CommercialOffer::options($options);
+        return self::scope($user,static function()use($ids,$options){
             if(!ApprovalWorkbook::available())throw new \RuntimeException(__('Excel export is unavailable. Contact the site administrator.','pc-order-import-export'));
             $locations=PriceList::location_ids();
             if(!$locations)throw new \RuntimeException(__('Selling warehouses are not mapped.','pc-order-import-export'));
@@ -70,13 +71,14 @@ final class BroadcastPricing {
             $rows=iterator_to_array(PriceList::catalogue_rows(self::products($ids),$locations),false);
             $count=count(array_filter($rows,static fn($row)=>isset($row['values'])));
             if(!$count)throw new \RuntimeException(__('No published products are available for this mailing.','pc-order-import-export'));
-            $book=PriceList::from_rows(PriceList::headers(),$rows);
+            $offer=$options['format']==='offer'?CommercialOffer::workbook($rows,$options['quantity']):null;
+            $book=$offer?$offer['book']:PriceList::from_rows(PriceList::headers(),$rows);
             $path=BroadcastStore::temporary_file();
             try {
                 $writer=new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($book);$writer->setPreCalculateFormulas(false);$writer->save($path);
                 $bytes=file_get_contents($path);
                 if(!$bytes || strlen($bytes)>8*1024*1024)throw new \RuntimeException(__('The attachment exceeds the 8 MB mailing limit.','pc-order-import-export'));
-                return ['content'=>base64_encode($bytes),'sha256'=>hash('sha256',$bytes),'count'=>$count,'at'=>gmdate('c')];
+                return ['content'=>base64_encode($bytes),'sha256'=>hash('sha256',$bytes),'count'=>$count,'photos'=>$offer['photos']??0,'at'=>gmdate('c')];
             } finally {if(is_file($path))unlink($path);$book->disconnectWorksheets();}
         });
     }

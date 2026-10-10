@@ -703,3 +703,28 @@ links are deduplicated, profile links respect edit-user permissions. Missing or
 failed backend checks stay unknown, not unregistered. These are read-only hints;
 preview and apply still enforce existing duplicate checks. Deploy Java first;
 older Java leaves email hints unavailable while Folio links still work.
+
+### Commercial offers in mailings (2026-10-10)
+
+`CommercialOffer` renders the optional flat XLSX; `PriceList::catalogue_rows` still
+owns product visibility, customer prices and selling-warehouse stock. A mailing
+persists `format=price|offer` and `quantity=one|stock`. Old campaigns default to
+standard price lists. Both catalogue and document selections support either format.
+No category headings/outlines are emitted for offers; SKU/barcode/text stay strings,
+prices and quantities are numeric. Header row 1 retains the existing import contract.
+Short description falls back to full/parent description, with HTML/shortcodes removed.
+Unknown stock stays blank; zero stays zero. Quantities never come from Folio documents.
+
+Photos use the assigned Woo thumbnail (variation falls back to parent), with safe
+HTTP redirects, 3-second request timeout, 512 KiB input and 4-million-pixel limits.
+JPEG/PNG/GIF/WebP are resized to at most 160×100 and embedded. GD absence, failures,
+25-second image budget or 3 MiB total compressed image budget leave a product link.
+The review reports embedded photo count. No media writes, public price files, new
+Java API or additional automatic email are introduced; the existing 8 MiB final
+attachment limit and explicit review/start remain. Pricing groups reuse the same
+private file; the email attachment is named `commercial-offer-YYYY-MM-DD.xlsx`.
+
+Manager steps: `docs/MANAGER_CUSTOMER_GUIDE_UK.md#mailings`. Customer quantities must
+be reviewed before re-import; customer guide and published help source explain this.
+Verification: local `tests/broadcasts.php` with intercepted mail/HTTP and disposable
+fixtures; browser composer checks and XLSX inspection. Deployment: WordPress only.
