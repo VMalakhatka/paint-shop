@@ -69,7 +69,12 @@ Google analytics (production 2026-10-11): OAuth grant и Search Console site own
 [CUSTOMER_ANALYTICS.md](../../../../docs/CUSTOMER_ANALYTICS.md).
 Верификация Search Console через GA4 зависит от сохранения gtag.js: перед подавлением
 Rank Math snippet при consent rollout согласовать и проверить независимый способ
-владения. Подтверждение доступа не означает готовность поисковых данных/cache import.
+владения. Production 11.10: дополнительный HTML tag подтверждён для того же owner
+через штатный `google_verify` в option `rank-math-options-general` (дефисы).
+Consent rollout сохраняет это поле и Rank Math head; verification value/email не
+экспортировать. Проект privacy — локальный DOCX на утверждение, не опубликован;
+analytics module остаётся off. Точный scoped rollback и источник проекта — в каноне.
+Подтверждение доступа не означает готовность поисковых данных/cache import.
 Read-only preflight `scripts/audit-analytics-release.php` читает выбранный поток
 Rank Math через `stream_id` либо legacy `view_id`, не экспортирует OAuth/customer rows.
 GA4 site search parameters и `catalog_search` витрины сверять отдельно; готовность
