@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Lavka Customer Analytics
  * Description: Consent-gated storefront events and anonymous Woo order segmentation.
- * Version: 0.1.0
+ * Version: 0.2.0
  * Requires PHP: 8.0
  * Requires Plugins: woocommerce
  * Text Domain: lavka-customer-analytics
@@ -17,14 +17,14 @@ add_action('before_woocommerce_init', static function () {
 });
 
 final class Lavka_Customer_Analytics {
-    const VERSION = '0.1.0';
+    const VERSION = '0.2.0';
     const QUEUE = 'lca_event_queue';
 
     public static function settings(): array {
         $raw = (array) get_option('lca_settings', []);
         $id = (string) ($raw['measurement_id'] ?? '');
         return ['enabled' => in_array($raw['enabled'] ?? false, [true, 1, '1'], true) && preg_match('/^G-[A-Z0-9]{6,20}$/', $id),
-            'measurement_id' => $id, 'debug' => !empty($raw['debug'])];
+            'measurement_id' => $id, 'debug' => !empty($raw['debug']), 'notice_page_id' => absint($raw['notice_page_id'] ?? 0)];
     }
 
     public static function enabled(): bool { return (bool) self::settings()['enabled']; }
@@ -250,7 +250,8 @@ final class Lavka_Customer_Analytics {
             'url' => admin_url('admin-ajax.php'), 'nonce' => wp_create_nonce('lca_events'), 'receipt' => $receipt,
             'page' => $receipt ? home_url('/analytics/order-receipt/') : home_url(self::public_path((string) ($_SERVER['REQUEST_URI'] ?? '/'))),
             'events' => $events, 'cart' => self::ecommerce(self::cart_items()), 'currency' => get_woocommerce_currency(),
-            'privacy' => get_privacy_policy_url(), 'labels' => [
+            'privacy' => $settings['notice_page_id'] && get_post_status($settings['notice_page_id']) === 'publish'
+                ? get_permalink($settings['notice_page_id']) : get_privacy_policy_url(), 'labels' => [
                 'message' => __('Allow usage analytics to help improve product selection and checkout? You can refuse without affecting your order.', 'lavka-customer-analytics'),
                 'allow' => __('Allow analytics', 'lavka-customer-analytics'), 'deny' => __('Refuse analytics', 'lavka-customer-analytics'),
                 'settings' => __('Analytics preferences', 'lavka-customer-analytics'), 'privacy' => __('Privacy policy', 'lavka-customer-analytics')]];

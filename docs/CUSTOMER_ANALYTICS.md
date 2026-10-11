@@ -206,7 +206,32 @@ network и DebugView tests, custom dimensions, точечное включени
 Тестовый реальный платёж не разрешён этой подготовкой. Разграничивать `purchase`
 (оформление) и `payment_confirmed` (маркер оплаты, с ограничениями browser delivery).
 
-### Скрипт предпусковой проверки
+### Подготовка разрешённого запуска 0.2 — 11.10.2026
+
+Владелец явно поручил «сделай все для запуска и запусти». Это разрешает точечный
+rollout analytics, но не реальные платежи, email campaigns или удаление заказов.
+Полная финансовая privacy policy остаётся draft по решению владельца. Для отдельной
+аналитической цели подготовлено самостоятельное публичное уведомление, без
+непроверенных обещаний финансового/log/backup retention. Собственный consent link
+использует environment-specific `lca_settings.notice_page_id`, не заменяет Woo
+`wp_page_for_privacy_policy`. Полный магазинный документ всё ещё требует завершения.
+Новый модуль 0.2 задаёт GA cookies 180 дней без rolling update и учитывает PUMB/NovaPay
+при сохранении источника. До rollout пройдены 34 model, 12 report, 26 synthetic
+desktop/mobile assertions; synthetic Google requests intercepted, не реальная доставка.
+Scoped dry-run показал только основной PHP и `assets/storefront.js`; общий deploy
+не нужен, поскольку остальные assets/translations и help hook уже есть на сервере.
+Оператор [`launch-customer-analytics.php`](../scripts/launch-customer-analytics.php)
+сначала preview с `LCA_EXPECTED_MEASUREMENT_ID` и `LCA_NOTICE_FILE` вне webroot/Git;
+apply только `LCA_LAUNCH_APPLY=1` после gate/snapshot и явного решения пользователя.
+Он проверяет stream, семь enhanced flags, независимый verification и reviewed version,
+не перезаписывает отличающееся уведомление. При launch сохраняет прежние finite
+settings в closed snapshot, persistently отключает только Rank Math install flag,
+публикует notice, активирует plugin и включает его. `configured_pending_acceptance`
+не означает принятую доставку событий. При неизвестном итоге перечитать настройки
+и notice, не повторять вслепую. Деактивация безопасно оставляет старый snippet OFF;
+не восстанавливать его автоматически. Остальные Rank Math settings сохраняются.
+
+### Скрипт предпусковой проверки (read-only)
 
 Скрипт проверки читает последние семь полных календарных дат, рассчитанных по UTC
 (отчёт GA4 использует timezone ресурса); выводит только флаги, checksum и агрегаты

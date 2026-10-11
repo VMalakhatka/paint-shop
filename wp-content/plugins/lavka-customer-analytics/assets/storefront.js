@@ -27,7 +27,7 @@
         } else if (!data.source) {
             try {
                 var host = new URL(document.referrer).hostname;
-                if (host !== location.hostname && !/(?:wayforpay|paypal|liqpay|googlepay|privat24)/i.test(host)) {
+                if (host !== location.hostname && !/(?:wayforpay|paypal|liqpay|googlepay|privat24|novapay|pumb)/i.test(host)) {
                     data = {source:valid(host), medium:/google|bing|duckduckgo/.test(host) ? 'organic' : 'referral', campaign:''};
                 }
             } catch (_) {}
@@ -44,7 +44,7 @@
         return data;
     }
     function send(name, params, key) {
-        if (!granted || !started) return;
+        if (!granted || !started || cookie() !== 'granted') return;
         if (key && (emitted.has(key) || storage.get('lca_seen_' + key))) return;
         var p = Object.assign({}, params, {send_to:c.id, customer_segment:c.segment, page_location:c.page, page_referrer:referrer(), page_title:'Storefront'});
         if (c.debug) p.debug_mode = true;
@@ -90,6 +90,7 @@
             window.gtag('consent', 'update', {analytics_storage:'granted'});
             window.gtag('js', new Date());
             window.gtag('config', c.id, {send_page_view:false, allow_google_signals:false, allow_ad_personalization_signals:false,
+                cookie_expires:15552000, cookie_update:false,
                 page_location:c.page, page_referrer:referrer(), page_title:'Storefront',
                 campaign_source:source.source, campaign_medium:source.medium, campaign_name:source.campaign});
             var script = document.createElement('script'); script.async = true;

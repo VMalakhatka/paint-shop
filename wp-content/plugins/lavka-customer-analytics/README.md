@@ -1,6 +1,6 @@
 # Lavka Customer Analytics
 
-Version 0.1.0. Prepared and locally tested 2026-10-10. Production read-only check
+Version 0.2.0. Prepared and locally tested 2026-10-11. Production read-only check
 2026-10-11: PHP/JS/CSS files are present and match the local SHA-256 checksums,
 but the plugin is **inactive and collection disabled**. This task did not deploy it.
 
@@ -14,7 +14,9 @@ Canonical operator procedure and release gates:
 ## Configuration and lifecycle
 
 `lca_settings` option: `enabled` (strict true/1, default false), `measurement_id`
-(valid GA4 stream ID, default empty), `debug` (default false). No API secret needed
+(valid GA4 stream ID, default empty), `debug` (default false), `notice_page_id`
+(environment-specific published analytics notice; otherwise existing privacy URL).
+No API secret needed
 for browser events. No database migration or scheduled job. Activation alone is inert.
 Deploy manifest policy `manual`: uploading files does not activate or enable collection.
 
@@ -28,7 +30,18 @@ Choice expires after 180 days. Preferences can change it; withdrawal stops event
 clears source/seen session storage and the module's first-party GA cookies.
 The six-month cookie contains only the choice, not an identity. GA4 identifiers remain
 pseudonymous, not proof of full anonymization. Owner review of the privacy policy and
-Google stream enhanced measurement is a mandatory production gate.
+Google stream enhanced measurement is a mandatory production gate. An independently
+published analytics-specific notice can explain this collection while the full store
+policy remains a draft; it must not claim unverified financial/log/backup retention.
+Version 0.2 sets GA cookies to 180 days with `cookie_update=false`, checks consent
+cookie before each own event, and excludes PUMB/NovaPay payment returns as attribution
+sources. GA4 data retention and cookie expiry are distinct settings.
+Scoped launch: `scripts/launch-customer-analytics.php`, preview by default; public notice
+content is supplied privately outside Git. With explicit production approval the
+operator snapshots finite prior settings, publishes only the analytics notice,
+persists Rank Math `install_code=false`, activates the plugin and enables its stream.
+That persisted flag prevents deactivation from reviving uncontrolled tracking.
+Full WordPress privacy page, orders, payments and financial retention remain unchanged.
 
 ## Event contract
 
@@ -104,3 +117,5 @@ frontmatter itself was not changed. Production release gates remain open.
 Read-only release preflight: `scripts/audit-analytics-release.php` (from repository
 root). Latest gate status and the required independent Search Console ownership
 proof before replacing Rank Math's snippet are in the canonical operator document.
+0.2 regression 11.10: 34 model, 12 report, 26 synthetic desktop/mobile assertions
+passed. Real guest/network acceptance is still a separate production step.

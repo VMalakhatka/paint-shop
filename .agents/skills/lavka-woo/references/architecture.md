@@ -92,6 +92,10 @@ apply требует явного разрешения, сверки measurement
 не очищать чужой ecosystem lock. Одобренный срок не означает внедрение Woo удаления.
 Разрешённые retention/enhanced изменения не включают analytics plugin и не заменяют
 network consent приёмку. Результаты/rollback — в том же каноне.
+Analytics-specific notice может быть отдельно опубликован и назначен через
+`lca_settings.notice_page_id`; он не заменяет полную Woo privacy policy и не обещает
+непроверенные финансовые/log/backup сроки. Scoped launch сохраняет persisted
+Rank Math install flag OFF, чтобы деактивация не возобновляла неконтролируемый сбор.
 
 XML sitemap категорий (2026-10-08): `paint-shop-ux/inc/category-sitemap.php`
 ограничивает `rank_math/sitemap/index/entry` плоской нативной выборкой Rank Math.
