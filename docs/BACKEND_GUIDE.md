@@ -152,14 +152,14 @@ layer для frontend URL Stock Locations. Версия ресурса зави�
 | Наличие и группы | `lavka-price-sync/inc/product-availability.php`; Java `FolioAvailabilityOptions`, `FolioProductAvailabilityHistory`, analytics service/DAO | Дни и проценты отсутствия, MIN=0, статусы качества; объединение по дням рассчитывает Java |
 | Глобальные группы и транспорт | `lavka-sync/inc/warehouse-map.php` | Состав групп, ревизия, список транспортных складов; сценарий хранит коды групп |
 | Учётные факты и метрики | Java `FolioProductSnapshotService`, source/snapshot DAO, `FolioProductAnalyticsService` и `FolioProductAnalyticsDao` | Движения, продажи, возвраты, остатки, себестоимость, валовая прибыль, GMROI, coverage; query читает MariaDB, снимок извлекается из ФОЛІО |
-| Транспортный остаток | Java `FolioTransitAnalytics`; WordPress transit consumer и purchase model | calculationVersion=3 разделяет физический и поставщицкий остаток; неподтверждённая согласованность сети блокирует закупку |
+| Транспортный остаток | Java `FolioTransitAnalytics` для снимков; `FolioCurrentNetworkStockDao/Controller` для заказа; WordPress `purchase-current-stock.php` | queryv3 не объявляет независимые снимки согласованными; previewVersion10 получает единый текущий срез и привязывает транзитv4 к captureId. [Действия и подтверждения](OPERATIONS_RUNBOOK.md#единый-текущий-срез-и-подтверждения-сценария-2026-10-11) |
 | Формування замовлення постачальнику — попередній розрахунок | `lavka-price-sync/inc/purchase-planning.php`, `purchase-planning-model.php`, `assets/purchase-planning.js` | Групповая потребность, lead time/целевые/страховые дни, MOQ/упаковка, перемещения между группами, корректировка с причиной; только временный preview |
 | Экспорт | `lavka-price-sync/inc/product-analytics-export.php`, purchase export | CSV/XLSX, контроль полноты и поколений; параметры и объяснение расчёта сохраняются в выгрузке |
 | Обновление снимков | `lavka-price-sync/inc/analytics-snapshot-queue.php` | Последовательная очередь под общим lock, без перерасчёта цен; потерянный POST не повторяется автоматически |
 
 Подготовлено 2026-10-09: [прогноз компонентов](api/FOLIO_ASSEMBLY_PURCHASE.md).
-Java read-only endpoint читает рецепты и BALL4 из ФОЛИО; PHP строит previewVersion=8
-по аналитическим метрикам schema 7. Потомки выбираются независимо от поставщика;
+Java read-only endpoint читает рецепты и BALL4 из ФОЛИО; PHP строит расчёт
+по аналитическим метрикам schema7; previewVersion10 добавляет один текущий source cut. Потомки выбираются независимо от поставщика;
 заказ ограничен исходными закупаемыми SKU выбранного поставщика. Java также отдаёт
 `expenseQuantity` по учтённым движениям OUT; PHP `purchase-stock-report.php`
 показывает расход, общий остаток, избыток и запас в месяцах. Формулы и границы —

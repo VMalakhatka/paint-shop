@@ -102,6 +102,7 @@
                 (row.coldCoverage && row.coldCoverage.enabled ? '<p>' + escape((t.coldStatuses || {})[row.coldCoverage.status] || row.coldCoverage.status) + ' · ' + escape(t.targetDays) + ': ' + display(row.coldCoverage.targetDays) + '</p>' : '') +
                 (row.stockReport ? '<div class="lps-purchase-scroll"><table class="widefat striped lps-purchase-stock"><thead><tr>' + ['group','periodExpense','physical','componentDemand','excessStock','stockMonths'].map((key) => '<th>' + escape(t[key]) + '</th>').join('') + '</tr></thead><tbody>' +
                     [{name:t.allWarehouses, ...row.stockReport.total}, ...row.groups.map((g) => ({name:g.groupName, ...row.stockReport.groups[g.groupCode]}))].map((r) => '<tr><th>' + escape(r.name) + '</th>' + ['periodExpense','physical','componentDemand','excessStock','stockMonths'].map((key) => '<td data-stock-field="' + key + '">' + (key === 'stockMonths' && r[key] === 9999 ? '9999' : display(r[key])) + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>' : '') +
+                row.groups.map((g) => (g.notes || []).map((note) => '<p class="notice notice-warning inline">' + escape(g.groupName) + ': ' + escape((t.notes || {})[note] || note) + '</p>').join('')).join('') +
                 '<p><strong>' + escape(row.assembly ? (row.assembly.manufactured ? t.assemblyOnly : (row.assembly.purchasable ? t.supplierOrder : t.review)) : t.assemblyPending) + '</strong></p>' +
                 row.groups.filter((g) => g.childCoverageShortfall > 0).map((g) => '<p class="notice notice-warning inline" data-child-coverage-warning><strong>' + escape(g.groupName) + ': ' + escape(t.childCoverageShortfall) + ' — ' + escape(componentNumber.format(g.childCoverageShortfall)) + '</strong><br>' + escape(t.childCoverageWarning) + '</p>').join('') +
                 (row.assembly && row.assembly.components.length ? '<details><summary>' + escape(t.components) + '</summary>' + row.assembly.components.map((c) => '<p>' + escape(c.parent) + ': ' + display(c.factor) + '</p>').join('') + '</details>' : '') +
@@ -116,7 +117,7 @@
                 '<p>' + escape(t.supplierTransit) + ': ' + display(row.supplierTransitQuantity) + '</p>' +
                 (row.transitSources || []).map((source) => '<p><strong>' + escape(source.warehouseId) + ' · ' + escape(source.warehouseName || '') + '</strong>: ' + display(source.availableForNetworkPlanningQuantity) + ' · ' + escape((t.transitLabels || {})[source.status] || source.status) + ' · ' + escape(source.completedAt || source.asOf || '') + '</p><p>' + escape(t.supplierTransit) + ': ' + display(source.supplierInTransitAvailableQuantity) + '</p><pre>' + escape(JSON.stringify(source, null, 2)) + '</pre>').join('') +
                 '<ul>' + (row.transitWarnings || []).map((warning) => '<li>' + escape(typeof warning === 'string' ? warning : (warning.message || warning.code || '')) + '</li>').join('') + '</ul></details>' +
-                '<details><summary>' + escape(t.internalTransferAccounts) + '</summary><p>' + escape(t.internalTransferHelp) + '</p>' + (row.internalTransferAccounts || []).map((account) => '<p>#' + escape(account.documentNumber) + ' · ' + escape(account.sourceInfo || '—') + ' · ' + escape(account.sourceWarehouseId) + ': ' + display(account.quantity) + '</p>').join('') + '</details>' +
+                '<details><summary>' + escape(t.internalTransferAccounts) + '</summary><p>' + escape(t.internalTransferHelp) + '</p>' + (row.internalTransferAccounts || []).map((account) => '<p>#' + escape(account.documentNumber || account.documentId) + ' · ' + escape(account.sourceInfo || '—') + ' · ' + escape(account.sourceWarehouseId) + ': ' + display(account.quantity) + '</p>').join('') + '</details>' +
                 '<p>' + escape(t.availabilityHelp) + '</p><div class="lps-purchase-scroll"><table class="widefat striped lps-purchase-calculation"><thead><tr>' + headings.map((key) => '<th>' + escape(t[key]) + '</th>').join('') + '</tr></thead><tbody>' +
                 row.groups.map((group) => '<tr><th>' + escape(group.groupName) + '<small>' + escape(t.receivingWarehouse) + ': ' + group.receivingWarehouseId + '</small></th>' +
                     '<td>' + display(group.recommendedQuantity) + '</td><td>' + (group.finalQuantity == null ? '<span class="lps-purchase-review">' + escape(t.review) + '</span>' : display(group.finalQuantity)) + '</td>' +
@@ -187,6 +188,8 @@
                 else state.rows.push(...data.items);
                 state.complete = data.complete; page = data.page;
                 parameters.snapshotContext = data.context;
+                parameters.currentStockCapture = data.currentStockCapture;
+                if (data.currentStockCapture) el('context').textContent += ' · ' + t.currentStockCapture + ': ' + data.currentStockCapture.capturedAt;
                 el('parameters').textContent = JSON.stringify(parameters, null, 2);
                 message(t.loading + ' ' + t.loaded + ': ' + data.loaded + ' / ' + data.total);
                 if (data.warnings.length) {

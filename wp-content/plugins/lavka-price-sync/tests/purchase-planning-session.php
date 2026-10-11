@@ -24,7 +24,9 @@ function lavka_get_global_warehouse_groups_revision() { return $GLOBALS['revisio
 function lavka_get_transit_warehouse_ids() { return $GLOBALS['transitIds'] ?? [9]; }
 function lavka_get_global_warehouse_groups() { return [['code' => 'group', 'name' => 'Group', 'warehouseIds' => [1, 7]]]; }
 function lps_product_analytics_v4_sanitize_query($query) { return $query; }
+require __DIR__ . '/fixtures/current-network-stock.php';
 function lps_product_analytics_v4_request_java($path, $query) {
+    if ($path === LPS_CURRENT_NETWORK_STOCK_PATH) return current_stock_fixture($query, lps_product_analytics_v4_request_java(LPS_ASSEMBLY_PATH, $query));
     if ($path === LPS_ASSEMBLY_PATH) return $GLOBALS['graph'] ?? ['version'=>2,'revision'=>'fixture','nodes'=>array_map(static fn($sku)=>['sku'=>$sku,'manufactured'=>false,'issues'=>[]],$query['rootSkus']),'edges'=>[]];
     if ($path === LPS_PRODUCT_ANALYTICS_CAPABILITIES_PATH) return $GLOBALS['capabilities'];
     $GLOBALS['queries'][] = $query; return !empty($GLOBALS['responseQueue']) ? array_shift($GLOBALS['responseQueue']) : $GLOBALS['response'];
@@ -148,7 +150,7 @@ lps_purchase_page($token,0);
 $_POST=['token'=>$token,'format'=>'csv'];
 $actions['admin_post_lps_purchase_export']();
 check(array_column($exported,'sku')===['PARENT'],'Actual export excludes selected children and foreign-supplier roots');
-check($exported[0]['periodExpense']===20.0 && $exported[0]['allWarehousesPhysical']===40.0 && $exported[0]['all_stockMonths']===4.0,'Export contains actual period expense, combined stock and months');
+check($exported[0]['periodExpense']===20.0 && $exported[0]['allWarehousesPhysical']===20.0 && $exported[0]['all_stockMonths']===1.2,'Export contains historical expense and current captured stock/months');
 $graph['revision']='changed';
 rejected(fn()=>$actions['admin_post_lps_purchase_export'](),'Changed recipes block actual export until recalculation');
 echo "PASS: actual CSV export supplier isolation and recipe revision guard\n";

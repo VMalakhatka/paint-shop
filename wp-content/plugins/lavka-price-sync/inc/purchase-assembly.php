@@ -125,8 +125,24 @@ function lps_purchase_calculate_network(array $state): array {
             if (!is_finite($total) || $total > 1000000000) { $known = false; $assembly['issues'][$code][] = 'ASSEMBLY_INVALID_RECIPE'; }
             $assembly['consumption'][$code] = $known ? $total : null;
         }
-        $result = lps_purchase_calculate($row, $groups, $state['periodDays'], $state['allowTransfers'],
-            $state['edits'][$row['sku']] ?? [], $state['transitWarehouseIds'], $assembly);
+        $edits = $state['edits'][$row['sku']] ?? [];
+        $confirmation = $state['supplyConfirmation'] ?? [];
+        $transit = lps_purchase_transit($row['inTransitStock'] ?? [], $state['transitWarehouseIds'], $row['currentStockCapture'] ?? []);
+        // One procurement group receives the pool once; routed groups are supplied internally.
+        // Independent procurement groups require explicit allocations.
+        $procurement = array_values(array_filter($groups, static fn($g) => empty($g['supplyFromGroupCode'])));
+        foreach ($groups as $group) {
+            $code = $group['code']; $default = [];
+            if (!empty($confirmation['noOtherIncomingOrders'])) $default['openOrders'] = 0.0;
+            if (!empty($confirmation['noSupplierMinimumOrder'])) $default['moq'] = 0.0;
+            if (!empty($row['currentStockCapture']) && count($procurement) === 1 && $transit['quantity'] !== null) {
+                $default['inTransit'] = $code === $procurement[0]['code'] ? $transit['quantity'] : 0.0;
+                if (!empty($confirmation['noOtherIncomingOrders']) && !empty($confirmation['currentReceiptsWithinLeadTime'])) $default['receiptsReviewed'] = true;
+            }
+            // Explicit item edits override scenario confirmations, including manual non-zero receipts.
+            $edits[$code] = array_replace($default, $edits[$code] ?? []);
+        }
+        $result = lps_purchase_calculate($row, $groups, $state['periodDays'], $state['allowTransfers'], $edits, $state['transitWarehouseIds'], $assembly);
         $result['coldCoverage'] = ['enabled' => !empty($coverage['enabled']), 'status' => $cold_status, 'targetDays' => $target_days];
         $result['assembly'] = ['manufactured' => $node['manufactured'], 'selected' => isset($roots[$key]), 'purchasable' => $purchasable,
             'components' => $components[$key] ?? []];

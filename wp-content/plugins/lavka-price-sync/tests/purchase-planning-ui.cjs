@@ -15,7 +15,7 @@ const output=process.env.UI_OUTPUT_DIR || require('os').tmpdir();
  await page.route('https://fixture.local/api',async route=>{
   const request=new URLSearchParams(route.request().postData()); const op=request.get('operation');const payload=JSON.parse(request.get('payload'));
   const items=assembly?calculateAssembly(op==='adjust'?payload.groups:null):[calculate(op==='adjust'?payload.groups:null),calculateZero()];
-  const data=op==='start'?{token:'fixture',scenario:{name:'Kreul',version:2},groups:[{name:'Kyiv',warehouseIds:[1]}],query:{period:{from:'2026-08-01',to:'2026-08-30'}}}:op==='page'?{items,replaceItems:true,complete:true,page:1,loaded:2,total:2,warnings:[],context:{analyticsSchemaVersion:7}}:{items};
+  const data=op==='start'?{token:'fixture',scenario:{name:'Kreul',version:2},groups:[{name:'Kyiv',warehouseIds:[1]}],query:{period:{from:'2026-08-01',to:'2026-08-30'}}}:op==='page'?{items,replaceItems:true,complete:true,page:1,loaded:2,total:2,warnings:[],context:{analyticsSchemaVersion:7},currentStockCapture:{captureId:'fixture',capturedAt:'2026-10-11T12:00:00Z'}}:{items};
   await route.fulfill({status:fail?400:200,contentType:'application/json',body:JSON.stringify(fail?{success:false,data:{message:'Fixture validation error'}}:{success:true,data})});
  });
  for(const width of [1440,390]){
@@ -23,6 +23,7 @@ const output=process.env.UI_OUTPUT_DIR || require('os').tmpdir();
   await page.locator('#lps-purchase-scenario').selectOption('1');await page.locator('#lps-purchase-start').click();
   await page.locator('[data-edit-form]').first().waitFor({state:'attached'});
   assert.equal(await page.locator('.lps-purchase-sku').count(),2);
+  assert((await page.locator('#lps-purchase-context').innerText()).includes('2026-10-11T12:00:00Z'),'Current source cut time is visible');
   const historyRow = page.locator('.lps-purchase-sku').first().locator('.lps-purchase-calculation tbody tr').first();
   assert.equal(await page.locator('.lps-purchase-stock').first().locator('[data-stock-field="periodExpense"]').first().innerText(),'14');
   assert.equal(await page.locator('.lps-purchase-stock').nth(1).locator('[data-stock-field="stockMonths"]').first().innerText(),'9999');
@@ -100,6 +101,7 @@ const output=process.env.UI_OUTPUT_DIR || require('os').tmpdir();
   assert((await parent.innerText()).includes('OUR-CHILD'));
   await parent.locator('[data-child-sku="OUR-CHILD"]').click();
   assert.equal(await page.locator('.lps-purchase-sku').count(),2);
+  assert((await page.locator('#lps-purchase-context').innerText()).includes('2026-10-11T12:00:00Z'),'Current source cut time is visible');
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth));
   assert.deepEqual(errors,[]);
   await page.screenshot({path:`${output}/purchase-assembly-${width}.png`,fullPage:true});

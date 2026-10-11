@@ -6405,3 +6405,51 @@ msgstr ""
 
 msgid "Set both cold-sensitive coverage periods between 1 and 730 days."
 msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "Current stock read from Folio"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "The current network stock read is incomplete or changed its scope. Start a new preview."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "No other incoming orders besides current Transport and Receiving stock"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "No supplier minimum order quantity separate from pack size"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "Current Transport and Receiving stock will arrive within the lead time"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "These confirmations apply only to this scenario. Current stock is read together from Folio after loading sales history. Transit is allocated once to the single procurement group; item edits take precedence."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "Use actual sales when stockout history is unavailable, with a warning"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "Stockout correction was not calculated; the forecast uses actual sales only."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "Group replenishment is disabled because its selected minimum-stock source has MIN=0."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "Calculation notes"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "Current network stock captured"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "Current stock captured"
+msgstr ""

@@ -6624,3 +6624,51 @@ msgstr "Морозостойкость не указана или отличае
 
 msgid "Set both cold-sensitive coverage periods between 1 and 730 days."
 msgstr "Укажите оба срока запаса от 1 до 730 дней."
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "Current stock read from Folio"
+msgstr "Текущий срез остатков из ФОЛИО"
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "The current network stock read is incomplete or changed its scope. Start a new preview."
+msgstr "Текущий срез сети неполный или его состав изменился. Начните новый расчёт."
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "No other incoming orders besides current Transport and Receiving stock"
+msgstr "Других ожидаемых заказов, кроме текущих остатков Транспорта и Приёмки, нет"
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "No supplier minimum order quantity separate from pack size"
+msgstr "Нет отдельного минимума закупки поставщика, кроме упаковки"
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "Current Transport and Receiving stock will arrive within the lead time"
+msgstr "Текущий товар Транспорта и Приёмки поступит в течение срока ожидания заказа"
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "These confirmations apply only to this scenario. Current stock is read together from Folio after loading sales history. Transit is allocated once to the single procurement group; item edits take precedence."
+msgstr "Подтверждения действуют только в этом сценарии. После загрузки истории продаж текущие остатки читаются вместе из ФОЛИО. Транзит один раз назначается единственной группе закупки; ручные правки товара имеют приоритет."
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "Use actual sales when stockout history is unavailable, with a warning"
+msgstr "Без истории отсутствия использовать фактические продажи с предупреждением"
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "Stockout correction was not calculated; the forecast uses actual sales only."
+msgstr "Поправка на отсутствие не рассчитана; прогноз использует только фактические продажи."
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "Group replenishment is disabled because its selected minimum-stock source has MIN=0."
+msgstr "Пополнение группы отключено: выбранный источник минимального запаса имеет MIN=0."
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "Calculation notes"
+msgstr "Примечания к расчёту"
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "Current network stock captured"
+msgstr "Текущие остатки сети получены"
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "Current stock captured"
+msgstr "Текущий остаток получен"
