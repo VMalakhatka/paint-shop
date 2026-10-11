@@ -59,6 +59,15 @@ MariaDB хранит состояние сайта и проекции ФОЛИ�
 
 ## Локальное и production
 
+Google analytics (production 2026-10-11): OAuth grant и Search Console site ownership
+различаются. При 403 на site query сверять кабинет Google, а не повторять OAuth
+вслепую. Reconnect Rank Math может очистить selections/options; совпадающие имена
+ресурсов не позволяют выбрать поток — сверять measurement ID/URI. Сохранять прежнюю
+политику исключения пользователей; новый analytics plugin не активировать ради
+исправления авторизации. Источник: UI/API Google, Rank Math `class-ajax.php` и
+`google/class-request.php`; подтверждённое состояние и регламент восстановления:
+[CUSTOMER_ANALYTICS.md](../../../../docs/CUSTOMER_ANALYTICS.md).
+
 XML sitemap категорий (2026-10-08): `paint-shop-ux/inc/category-sitemap.php`
 ограничивает `rank_math/sitemap/index/entry` плоской нативной выборкой Rank Math.
 Не хардкодить последнюю страницу и не исправлять vendor. Сохранять параметры
