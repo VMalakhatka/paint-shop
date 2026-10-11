@@ -1,6 +1,8 @@
 # Lavka Customer Analytics
 
-Version 0.1.0. Prepared and locally tested 2026-10-10. **Not deployed or enabled on production.**
+Version 0.1.0. Prepared and locally tested 2026-10-10. Production read-only check
+2026-10-11: PHP/JS/CSS files are present and match the local SHA-256 checksums,
+but the plugin is **inactive and collection disabled**. This task did not deploy it.
 
 Owns consent-gated storefront GA4 events, checkout attribution snapshots and anonymous
 Woo order analysis. Does not modify prices, stock, allocation, checkout validation,
@@ -99,3 +101,6 @@ runtime assertions and 22 synthetic desktop/mobile assertions; PHP/JS syntax and
 documentation structure/impact checks passed. The generic skill-frontmatter validator
 could not run because PyYAML is absent in the available Python runtimes; SKILL.md
 frontmatter itself was not changed. Production release gates remain open.
+Read-only release preflight: `scripts/audit-analytics-release.php` (from repository
+root). Latest gate status and the required independent Search Console ownership
+proof before replacing Rank Math's snippet are in the canonical operator document.

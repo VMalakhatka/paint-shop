@@ -31,7 +31,7 @@ MariaDB хранит состояние сайта и проекции ФОЛИ�
 
 - Тема `generatepress-child`: компоновка и стили, которые действительно принадлежат теме.
 - `paint-core`: общие stock/allocation/cart helpers.
-- `lavka-customer-analytics`: consent-gated GA4 витрины и checkout snapshots, не аналитика ФОЛИО. Подготовлено локально 2026-10-10; production не включён. Не считать processing/date_paid оплатой и не складывать parent/children. Канон выпуска и read-only отчёта: [CUSTOMER_ANALYTICS.md](../../../../docs/CUSTOMER_ANALYTICS.md).
+- `lavka-customer-analytics`: consent-gated GA4 витрины и checkout snapshots, не аналитика ФОЛИО. Подготовлено локально 2026-10-10; production 11.10: файлы есть, но inactive/enabled=false. Не считать processing/date_paid оплатой и не складывать parent/children. Канон выпуска и read-only отчёта: [CUSTOMER_ANALYTICS.md](../../../../docs/CUSTOMER_ANALYTICS.md).
 - `paint-shop-ux`: каталог, карточка товара, поиск и UX витрины.
 - `lavka-total-sync`: полная синхронизация карточек/категорий/медиа без цен и остатков.
 - `lavka-sync`: обмен остатками и mapping складов.
@@ -70,6 +70,11 @@ Google analytics (production 2026-10-11): OAuth grant и Search Console site own
 Верификация Search Console через GA4 зависит от сохранения gtag.js: перед подавлением
 Rank Math snippet при consent rollout согласовать и проверить независимый способ
 владения. Подтверждение доступа не означает готовность поисковых данных/cache import.
+Read-only preflight `scripts/audit-analytics-release.php` читает выбранный поток
+Rank Math через `stream_id` либо legacy `view_id`, не экспортирует OAuth/customer rows.
+GA4 site search parameters и `catalog_search` витрины сверять отдельно; готовность
+счётчика не доказывает событий товаров/корзины. Published privacy и network consent
+test — обязательные ворота; фактический результат 11.10.2026 в каноне выше.
 
 XML sitemap категорий (2026-10-08): `paint-shop-ux/inc/category-sitemap.php`
 ограничивает `rank_math/sitemap/index/entry` плоской нативной выборкой Rank Math.
