@@ -13,6 +13,7 @@ class CustomerApproval {
         add_action('admin_menu', [self::class, 'menu'], 41);
         add_action('admin_post_pcoe_approval_request', [self::class, 'request']);
         add_action('admin_post_pcoe_approval_confirm', [self::class, 'confirm']);
+        add_action('admin_post_pcoe_approval_download', [ApprovalWorkbook::class, 'download']);
         add_action('admin_post_pcoe_approval_email', [ApprovalNotifications::class, 'post_email']);
         add_action('wp_ajax_pcoe_approval_quote', [ApprovalDelivery::class, 'ajax']);
         add_action('wp_enqueue_scripts', [ApprovalContacts::class, 'assets']);
@@ -60,6 +61,7 @@ class CustomerApproval {
     }
 
     public static function key(array $source): string {
+        if (!empty($source['document_ids'])) return hash('sha256', wp_json_encode([(int)$source['customer_id'], 'bundle', ApprovalBundle::ids($source['document_ids'])]));
         return hash('sha256', wp_json_encode([(int) $source['customer_id'], !empty($source['order_id'])
             ? ['order', (int) $source['order_id']] : ['folio', $source['type'], (int) $source['document_id']]]));
     }
@@ -67,6 +69,10 @@ class CustomerApproval {
     public static function revision(array $snapshot): string {
         // Presentation language must not change the business revision.
         unset($snapshot['title'], $snapshot['warehouse']);
+        if (!empty($snapshot['bundle'])) {
+            foreach ($snapshot['items'] as &$item) unset($item['warehouse']);
+            unset($item);
+        }
         if (isset($snapshot['documents'])) {
             $snapshot['documents'] = array_map([self::class, 'revision'], $snapshot['documents']);
         }
@@ -111,6 +117,7 @@ class CustomerApproval {
     private static function source_from_request(): array {
         $source = ['order_id' => absint($_REQUEST['order_id'] ?? 0), 'customer_id' => absint($_REQUEST['customer_id'] ?? 0),
             'type' => sanitize_key($_REQUEST['document_type'] ?? $_REQUEST['type'] ?? ''), 'document_id' => absint($_REQUEST['document_id'] ?? 0)];
+        if (isset($_REQUEST['document_ids'])) return ApprovalBundle::source(wp_unslash($_REQUEST));
         $source['type'] = strtoupper($source['type']);
         if ($source['order_id']) {
             $order = wc_get_order($source['order_id']);
@@ -129,7 +136,7 @@ class CustomerApproval {
         return $source;
     }
 
-    private static function folio(array $source, int $id): array {
+    public static function folio(array $source, int $id, bool $bundle = false): array {
         if (!function_exists('pc_folio_documents_fetch_detail')) self::unavailable();
         $context = pc_folio_balance_user_context($source['customer_id'], false);
         if (!$context) self::unavailable();
@@ -138,21 +145,29 @@ class CustomerApproval {
         $doc = $response['document'];
         if (($doc['documentType'] ?? '') !== 'ACCOUNT' || !empty($doc['returnDocument']) || empty($doc['items'])
             || (int) ($doc['documentId'] ?? 0) !== $id || !is_numeric($doc['totalAmount'] ?? null)) self::unavailable();
+        if ($bundle && (($doc['accounted'] ?? null) !== true || (float)$doc['totalAmount'] <= 0)) self::unavailable();
         $items = [];
         foreach ($doc['items'] as $item) {
             foreach (['quantity', 'price', 'amount'] as $field) if (!is_numeric($item[$field] ?? null)) self::unavailable();
             $items[] = ['sku' => (string) ($item['sku'] ?? ''), 'name' => (string) ($item['name'] ?? ''),
                 'quantity' => (string) $item['quantity'], 'price' => (string) $item['price'], 'amount' => (string) $item['amount']];
         }
-        return ['title' => __('Folio account', 'pc-order-import-export') . ' ' . ($doc['documentNumber'] ?? $id),
+        $snapshot = ['title' => __('Folio account', 'pc-order-import-export') . ' ' . ($doc['documentNumber'] ?? $id),
             'id' => $id, 'partner' => $context['short_name'], 'warehouseId' => (string) ($doc['warehouseId'] ?? ''), 'warehouse' => $doc['warehouseLabel'] ?? '',
             'total' => (string) $doc['totalAmount'], 'currency' => 'UAH', 'items' => $items,
             'information' => pc_folio_documents_information($doc)];
+        if ($bundle) {
+            $snapshot['number'] = (string)($doc['documentNumber'] ?? $id);
+            $date = $doc['documentDate'] ?? '';
+            $snapshot['date'] = is_array($date) ? sprintf('%04d-%02d-%02d', ...array_slice($date, 0, 3)) : substr((string)$date, 0, 10);
+        }
+        return $snapshot;
     }
 
     public static function snapshot(array $source): array {
         $customer = get_userdata((int) $source['customer_id']);
         if (!$customer || !pc_wholesale_customer_can_access($customer)) self::unavailable();
+        if (!empty($source['document_ids'])) return ApprovalBundle::snapshot($source);
         if (empty($source['order_id'])) return self::folio($source, (int) $source['document_id']);
         $order = wc_get_order($source['order_id']);
         if (!$order || (int) $order->get_customer_id() !== (int) $source['customer_id']
@@ -294,16 +309,21 @@ class CustomerApproval {
 
     private static function table(array $snapshot): void {
         echo '<h3>' . esc_html($snapshot['title']) . '</h3><div style="overflow-x:auto"><table class="shop_table widefat"><thead><tr>';
-        foreach (['SKU', 'Product', 'Quantity', 'Price', 'Amount'] as $label) echo '<th>' . esc_html__($label, 'pc-order-import-export') . '</th>';
+        $columns = ['SKU', 'Product', 'Quantity', 'Price', 'Amount'];
+        if (!empty($snapshot['bundle'])) $columns = array_merge($columns, ['Folio account', 'Warehouse']);
+        foreach ($columns as $label) echo '<th>' . esc_html__($label, 'pc-order-import-export') . '</th>';
         echo '</tr></thead><tbody>';
         foreach ($snapshot['items'] as $item) {
-            echo '<tr>'; foreach (['sku', 'name', 'quantity', 'price', 'amount'] as $field) echo '<td>' . esc_html($item[$field]) . '</td>'; echo '</tr>';
+            $fields = ['sku', 'name', 'quantity', 'price', 'amount'];
+            if (!empty($snapshot['bundle'])) $fields = array_merge($fields, ['document', 'warehouse']);
+            echo '<tr>'; foreach ($fields as $field) echo '<td>' . esc_html($item[$field]) . '</td>'; echo '</tr>';
         }
         echo '</tbody></table></div><p><strong>' . esc_html__('Total', 'pc-order-import-export') . ': ' . esc_html($snapshot['total'] . ' ' . $snapshot['currency']) . '</strong></p>';
         if (!empty($snapshot['warehouse'])) echo '<p>' . esc_html($snapshot['warehouse']) . '</p>';
         if (!empty($snapshot['information'])) echo '<p>' . esc_html($snapshot['information']) . '</p>';
         if (!empty($snapshot['note'])) echo '<p>' . esc_html($snapshot['note']) . '</p>';
-        foreach ($snapshot['documents'] ?? [] as $document) self::table($document);
+        if (!empty($snapshot['bundle'])) ApprovalBundle::payment_panel($snapshot);
+        else foreach ($snapshot['documents'] ?? [] as $document) self::table($document);
     }
 
     private static function details($post, bool $manager): void {
@@ -390,14 +410,16 @@ class CustomerApproval {
         echo '<div class="wrap"><h1>' . esc_html__('Customer confirmations', 'pc-order-import-export') . '</h1>';
         try {
             if (!empty($_GET['approval_id'])) self::details(self::read(absint($_GET['approval_id'])), true);
-            elseif (!empty($_GET['order_id']) || !empty($_GET['document_id'])) {
-                $source = self::source_from_request(); $snapshot = self::snapshot($source);
+            elseif (!empty($_GET['order_id']) || !empty($_GET['document_id']) || isset($_GET['document_ids'])) {
+                $source = self::source_from_request();
+                if (!empty($source['document_ids'])) ApprovalBundle::options($source);
+                $snapshot = self::snapshot($source);
                 echo '<p>' . esc_html(get_userdata($source['customer_id'])->display_name) . '</p>';
                 self::table($snapshot);
                 if ($post = self::find($source)) echo '<p><a href="' . esc_url(self::url(['approval_id' => $post->ID])) . '">' . esc_html__('View saved confirmation', 'pc-order-import-export') . '</a></p>';
                 echo '<p>' . esc_html__('The request appears in the customer account. On the next screen, send a confirmation link or an Excel file to the customer profile email.', 'pc-order-import-export') . '</p>';
                 echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">'; wp_nonce_field('pcoe_approval_request');
-                foreach (array_merge($source, ['document_type' => $source['type'], 'action' => 'pcoe_approval_request', 'revision' => self::revision($snapshot)]) as $key => $value) self::hidden($key, $value);
+                foreach (array_merge($source, ['document_type' => $source['type'] ?? 'ACCOUNT', 'action' => 'pcoe_approval_request', 'revision' => self::revision($snapshot)]) as $key => $value) self::hidden($key, $value);
                 echo '<button class="button button-primary">' . esc_html__('Send for customer confirmation', 'pc-order-import-export') . '</button></form>';
             } else self::listing(true);
         } catch (\Throwable $e) { echo '<p role="alert">' . esc_html($e->getMessage()) . '</p>'; }

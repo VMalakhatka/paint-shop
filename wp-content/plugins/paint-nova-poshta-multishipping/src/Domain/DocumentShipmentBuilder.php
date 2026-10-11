@@ -22,14 +22,17 @@ final class DocumentShipmentBuilder {
                 $contents[$id] = ['data'=>$product, 'quantity'=>$quantity, 'line_total'=>(float)$item->get_total(), 'pc_alloc_plan'=>$plan];
             }
         } else {
-            $location = $this->location((string)($snapshot['warehouseId'] ?? ''));
-            foreach ($snapshot['items'] as $id => $item) {
-                $sku = (string)($item['sku'] ?? '');
-                $product = $sku !== '' ? wc_get_product(wc_get_product_id_by_sku($sku)) : false;
-                if (!$product) $this->fail();
-                if (!$product->needs_shipping()) continue;
-                $quantity = (float)$item['quantity'];
-                $contents[$id] = ['data'=>$product, 'quantity'=>$quantity, 'line_total'=>(float)$item['amount'], 'pc_alloc_plan'=>[$location=>$quantity]];
+            $documents = !empty($snapshot['bundle']) ? ($snapshot['documents'] ?? []) : [$snapshot];
+            foreach ($documents as $documentIndex => $document) {
+                $location = $this->location((string)($document['warehouseId'] ?? ''));
+                foreach ($document['items'] as $id => $item) {
+                    $sku = (string)($item['sku'] ?? '');
+                    $product = $sku !== '' ? wc_get_product(wc_get_product_id_by_sku($sku)) : false;
+                    if (!$product) $this->fail();
+                    if (!$product->needs_shipping()) continue;
+                    $quantity = (float)$item['quantity'];
+                    $contents[$documentIndex.':'.$id] = ['data'=>$product, 'quantity'=>$quantity, 'line_total'=>(float)$item['amount'], 'pc_alloc_plan'=>[$location=>$quantity]];
+                }
             }
         }
         // Explicit nonempty plans prevent CartShipmentBuilder's live-stock fallback.

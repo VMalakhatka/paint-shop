@@ -187,3 +187,10 @@ Operator/rollback: `docs/OPERATIONS_RUNBOOK.md`, customer confirmation section.
 Local tests: PCOE `tests/approval-delivery.php`, `tests/approval-delivery-ui.cjs`,
 existing confirmation HTTP and PNPM point-directory/card regressions. HTTP/mail
 are intercepted; production verification remains pending deployment.
+
+Combined confirmation integration (2026-10-11): `DocumentShipmentBuilder` reads
+`bundle.documents` as independent saved Folio account snapshots when no Woo order is
+supplied. It maps each document warehouse to a sender, gives rows distinct composite
+keys, and counts merchandise once. Accounts at the same physical location share the
+existing shipment grouping. No live-stock allocation, carrier API contract or waybill
+creation changes. Covered by PCOE `tests/approval-delivery.php`.

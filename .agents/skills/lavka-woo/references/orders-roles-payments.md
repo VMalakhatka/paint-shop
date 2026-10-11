@@ -465,3 +465,12 @@ footer outside filters. Workbook layout version participates in deduplication si
 Offer category columns (2026-10-10): each SKU row repeats L=visible root Group and
 M=remaining Subgroup path. Build from heading/depth entries, not string splitting;
 clear lower levels on a new branch. Preserve text typing and blank root-only subgroup.
+
+Combined confirmations (2026-10-11; `ApprovalBundle`, `CustomerApproval`, `ApprovalWorkbook`):
+use sorted unique Folio ACCOUNT IDs (1–20), same validated customer, accounted positive
+invoices only. Aggregate Folio snapshots once, not their linked Woo totals. Optional
+confirmed invoice settings are snapshot/revision data. One XLSX sheet retains each
+source number/date/warehouse; no accounting merge, payment or stock writes. New sends,
+downloads and confirmation revalidate all documents/settings. NP planning uses each
+bundle document warehouse; no top-level single-warehouse assumption. Manager workflow:
+`docs/MANAGER_CUSTOMER_GUIDE_UK.md#approval`.

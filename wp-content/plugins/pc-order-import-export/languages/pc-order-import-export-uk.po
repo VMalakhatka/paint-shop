@@ -3435,3 +3435,60 @@ msgstr "Група"
 
 msgid "Subgroup"
 msgstr "Підгрупа"
+
+msgid "Select between 1 and 20 Folio accounts for one customer."
+msgstr "Виберіть від 1 до 20 рахунків ФОЛІО одного клієнта."
+
+msgid "Duplicate or invalid accounts selected."
+msgstr "Вибрано повторні або некоректні рахунки."
+
+msgid "Combined account confirmation"
+msgstr "Зведений рахунок на підтвердження"
+
+msgid "Payment details are unavailable."
+msgstr "Реквізити для оплати недоступні."
+
+msgid "Payment recipient"
+msgstr "Отримувач оплати"
+
+msgid "Tax ID"
+msgstr "Податковий номер"
+
+msgid "IBAN"
+msgstr "IBAN"
+
+msgid "Bank"
+msgstr "Банк"
+
+msgid "Bank code"
+msgstr "МФО"
+
+msgid "Payment details"
+msgstr "Реквізити для оплати"
+
+msgid "Selected account totals are combined once. Original Folio accounts and Woo orders remain separate. This is not a calculation of unpaid debt."
+msgstr "Суми вибраних рахунків підсумовано один раз. Вихідні рахунки ФОЛІО та замовлення Woo залишаються окремими. Це не розрахунок неоплаченого боргу."
+
+msgid "Before payment, agree the amount with your manager, including any payments already made."
+msgstr "Перед оплатою погодьте суму з менеджером з урахуванням уже здійснених оплат."
+
+msgid "Include configured payment details"
+msgstr "Додати налаштовані реквізити для оплати"
+
+msgid "Update preview"
+msgstr "Оновити попередній перегляд"
+
+msgid "Download confirmation Excel"
+msgstr "Завантажити Excel на підтвердження"
+
+msgid "Combine selected accounts for confirmation"
+msgstr "Об’єднати вибрані рахунки на підтвердження"
+
+msgid "Select account for combined confirmation"
+msgstr "До зведеного підтвердження"
+
+msgid "Select up to 20 accounted invoices for this customer. Selection is kept when changing document pages."
+msgstr "Виберіть до 20 ураховуваних рахунків цього клієнта. Вибір зберігається під час переходу між сторінками документів."
+
+msgid "Clear selection"
+msgstr "Очистити вибір"

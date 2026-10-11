@@ -46,6 +46,9 @@ try {
     $check(count($plan['shipments'])===1 && $plan['shipments'][0]['location_id']===$terms[0] && $plan['shipments'][0]['weight_kg']===2.0,'Folio child warehouse maps to its physical sender and saved quantities');
     $folio=['currency'=>'UAH','warehouseId'=>'test-folio-'.$uuid,'items'=>[['sku'=>$product->get_sku(),'quantity'=>2,'amount'=>200]]];
     $check((new DocumentShipmentBuilder())->build(null,$folio)['shipments'][0]['declared_cost']===200.0,'Folio-only document quotes its own quantities and amounts');
+    update_term_meta($terms[1],'lavka_folio_warehouses',[['id'=>'test-second-'.$uuid,'priority'=>10]]);
+    $bundlePlan=(new DocumentShipmentBuilder())->build(null,['bundle'=>true,'documents'=>[$folio,array_replace($folio,['warehouseId'=>'test-second-'.$uuid])]]);
+    $check(count($bundlePlan['shipments'])===2 && $bundlePlan['merchandise_total']===400.0,'Combined confirmation preserves two senders and counts each account once');
     $directory=new RecipientDirectory(new ApiClient());$directory->searchCities('test-'.$uuid);$cache[]='pnpm_recipient_cities_'.md5('test-'.$uuid);$cache[]='pnpm_city_'.md5($city);
     $input=['delivery'=>$method,'pnpm_city_ref'=>$city,'pnpm_point_ref'=>$point,'pnpm_delivery_type'=>'branch','pnpm_city_label'=>'FORGED','pnpm_point_label'=>'FORGED','payment'=>'bacs'];
     $quote=Delivery::quote($id,$revision,$input);$tokens[]=$quote['token'];

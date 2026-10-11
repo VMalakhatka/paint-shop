@@ -752,3 +752,21 @@ WordPress-only deployment; explicit start and delivery quotas are unchanged.
 Commercial offer hierarchy/footer (2026-10-10): preserve `PriceList::catalogue_rows` group/subgroup order and visibility. Headings use the same burgundy hierarchy as the standard price list. The final localized note offers additional product data, XML/other formats and higher-resolution photo links on request, without claiming those exports already exist. Headings and footer have no SKU, so they cannot become imported order lines; the footer is outside the auto-filter range. Existing snapshots are unchanged; prepare a new mailing after WordPress deployment.
 
 Offer category data columns (2026-10-10): append L=Group and M=Subgroup to every product row. Group is the visible root category; Subgroup contains the remaining hierarchy joined with ` / `, blank for root-only products. Derive the path from the existing heading/depth stream, never split names on punctuation. Reset the path when changing branches; write explicit text cells. Visual category headings remain. Layout signature v3 prevents reuse of older files without these columns.
+
+### Combined account confirmations (2026-10-11)
+
+`ApprovalBundle` accepts 1–20 unique ACCOUNT IDs, sorted into a customer-scoped key.
+The manager selects accounted, positive invoices across document pages. Preview and
+request reload each selected document through the existing partner-validated Java GET.
+No Woo/Folio records are merged or written. Selected Folio totals are summed in kopecks;
+linked Woo totals are never added. Duplicate SKU rows remain separate with source
+number/date/warehouse. Optional confirmed `pc_folio_invoice_settings` are part of the
+reviewed revision; changed/missing settings or changed accounts block stale sends and
+confirmation. File totals describe accounts, not unpaid debt.
+
+The combined XLSX has one sheet, no photos, and explicit-text identity/bank fields.
+Download is manager-capability + nonce + fresh-revision protected; email reuses the
+existing explicit, idempotent mail action. Files stay outside public uploads and are
+deleted after use. Existing single-order confirmation behavior remains unchanged.
+`tests/approval-bundle.php` covers owner mismatch, stale accounts/settings, duplicates,
+combined sums, private XLSX, intercepted email and no order mutation.

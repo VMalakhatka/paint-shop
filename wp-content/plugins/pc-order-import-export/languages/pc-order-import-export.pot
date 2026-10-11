@@ -3233,3 +3233,60 @@ msgstr ""
 
 msgid "Subgroup"
 msgstr ""
+
+msgid "Select between 1 and 20 Folio accounts for one customer."
+msgstr ""
+
+msgid "Duplicate or invalid accounts selected."
+msgstr ""
+
+msgid "Combined account confirmation"
+msgstr ""
+
+msgid "Payment details are unavailable."
+msgstr ""
+
+msgid "Payment recipient"
+msgstr ""
+
+msgid "Tax ID"
+msgstr ""
+
+msgid "IBAN"
+msgstr ""
+
+msgid "Bank"
+msgstr ""
+
+msgid "Bank code"
+msgstr ""
+
+msgid "Payment details"
+msgstr ""
+
+msgid "Selected account totals are combined once. Original Folio accounts and Woo orders remain separate. This is not a calculation of unpaid debt."
+msgstr ""
+
+msgid "Before payment, agree the amount with your manager, including any payments already made."
+msgstr ""
+
+msgid "Include configured payment details"
+msgstr ""
+
+msgid "Update preview"
+msgstr ""
+
+msgid "Download confirmation Excel"
+msgstr ""
+
+msgid "Combine selected accounts for confirmation"
+msgstr ""
+
+msgid "Select account for combined confirmation"
+msgstr ""
+
+msgid "Select up to 20 accounted invoices for this customer. Selection is kept when changing document pages."
+msgstr ""
+
+msgid "Clear selection"
+msgstr ""

@@ -56,6 +56,10 @@ function pc_folio_documents_enqueue_assets(int $manager_customer_id = 0): void {
         'invoiceEmail' => (string) (get_userdata((int) $context['user_id'])->user_email ?? ''),
         'managerCustomerId' => $manager_customer_id,
         'approvalUrl' => $manager_customer_id > 0 && class_exists('PaintCore\\PCOE\\CustomerApproval') ? \PaintCore\PCOE\CustomerApproval::url(['customer_id' => $manager_customer_id]) : '',
+        'bundleLabel' => __('Combine selected accounts for confirmation', 'pc-order-import-export'),
+        'bundleSelect' => __('Select account for combined confirmation', 'pc-order-import-export'),
+        'bundleHint' => __('Select up to 20 accounted invoices for this customer. Selection is kept when changing document pages.', 'pc-order-import-export'),
+        'bundleClear' => __('Clear selection', 'pc-order-import-export'),
         'approvalLabel' => __('Customer confirmation', 'pc-folio-customer-balance'),
         'managerNonce' => $manager_customer_id > 0 ? wp_create_nonce('pcoe_manager') : '',
         'labels'  => [
