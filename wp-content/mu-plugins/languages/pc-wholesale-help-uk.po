@@ -778,6 +778,9 @@ msgstr "Над товарами та під ними показано поточ
 msgid "Combine supplier, warehouse, stock availability and price within the current category and its subcategories. Reset returns to this category. Products follow the supplier order set by the shop; full descriptions are available on product pages."
 msgstr "Поєднуйте постачальника, склад, наявність і ціну в межах поточної категорії та її підкатегорій. «Скинути» повертає до цієї категорії. Товари показуються за порядком постачальників, заданим магазином; повні описи доступні у картках товарів."
 
+msgid "The allocation row also updates for the confirmed quantity, including products split between Kyiv and Odesa."
+msgstr "Рядок «Списання» також оновлюється для підтвердженої кількості, зокрема коли товар розподіляється між Києвом та Одесою."
+
 msgid "Changing a quantity or removing an item updates only that row and the cart totals. While the request is running, the cart shows “Updating cart…”; wait for it to finish instead of repeating the action."
 msgstr "Зміна кількості або видалення товару оновлює лише потрібний рядок і підсумки кошика. Поки триває запит, кошик показує «Оновлення кошика…»; дочекайтеся завершення і не повторюйте дію."
 

@@ -747,6 +747,9 @@ msgstr ""
 msgid "Combine supplier, warehouse, stock availability and price within the current category and its subcategories. Reset returns to this category. Products follow the supplier order set by the shop; full descriptions are available on product pages."
 msgstr ""
 
+msgid "The allocation row also updates for the confirmed quantity, including products split between Kyiv and Odesa."
+msgstr ""
+
 msgid "Changing a quantity or removing an item updates only that row and the cart totals. While the request is running, the cart shows “Updating cart…”; wait for it to finish instead of repeating the action."
 msgstr ""
 

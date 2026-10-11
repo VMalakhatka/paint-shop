@@ -59,6 +59,12 @@ MariaDB хранит состояние сайта и проекции ФОЛИ�
 
 ## Локальное и production
 
+Classic-cart AJAX metadata (2026-10-11): `pc-cart-guard.php` returns
+`item_data_html` from the updated cart item through Woo's standard formatter.
+The allocation hook in `stock-locations-ui.php` needs cart context during AJAX;
+use the scoped `woocommerce_is_cart` filter, not a duplicate client allocator.
+Tests and deploy scope: `docs/CART_LAYOUT_QA.md`, Allocation Metadata Refresh.
+
 Google analytics (production 2026-10-11): OAuth grant и Search Console site ownership
 различаются. При 403 на site query сверять кабинет Google, а не повторять OAuth
 вслепую. Reconnect Rank Math может очистить selections/options; совпадающие имена

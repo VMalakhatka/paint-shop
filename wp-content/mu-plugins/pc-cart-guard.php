@@ -266,7 +266,19 @@ add_action('wp_ajax_nopriv_pc_cart_adjust', 'pc_cart_adjust_qty');
 add_action('wp_ajax_pc_cart_update_item',        'pc_cartguard_update_item');
 add_action('wp_ajax_nopriv_pc_cart_update_item', 'pc_cartguard_update_item');
 
-/** Update one classic-cart row and return only the changed subtotal and totals. */
+/** Render the same item metadata as the cart page, including its allocation row. */
+function pc_cartguard_item_data_html(array $item): string {
+    if (empty($item['quantity'])) return '';
+    $cart_context = static function () { return true; };
+    add_filter('woocommerce_is_cart', $cart_context);
+    try {
+        return wc_get_formatted_cart_item_data($item);
+    } finally {
+        remove_filter('woocommerce_is_cart', $cart_context);
+    }
+}
+
+/** Update one classic-cart row and return changed metadata, subtotal and totals. */
 function pc_cartguard_update_item() {
     check_ajax_referer('pc_cart_update_item', 'nonce');
 
@@ -318,6 +330,9 @@ function pc_cartguard_update_item() {
 
     $cart->set_session();
 
+    $updated_item = $cart->get_cart_item($cart_item_key);
+    $item_data_html = $updated_item ? pc_cartguard_item_data_html($updated_item) : '';
+
     ob_start();
     woocommerce_cart_totals();
     $totals_html = ob_get_clean();
@@ -335,6 +350,7 @@ function pc_cartguard_update_item() {
         'quantity'      => $target_qty,
         'allowed_max'   => $allowed_max,
         'subtotal_html' => $subtotal_html,
+        'item_data_html' => $item_data_html,
         'totals_html'   => $totals_html,
         'notices_html'  => $notices_html,
         'cart_count'    => $cart->get_cart_contents_count(),
@@ -553,6 +569,11 @@ jQuery(function($){
           .attr('max', data.allowed_max)
           .attr('data-current-qty', data.quantity);
         $row.find('.product-subtotal').html(data.subtotal_html);
+        if (typeof data.item_data_html === 'string') {
+          var $name = $row.find('.product-name');
+          $name.children('dl.variation').remove();
+          $name.append(data.item_data_html);
+        }
         $row.removeClass('pc-cart-item-updating').removeAttr('aria-busy');
       }
 
