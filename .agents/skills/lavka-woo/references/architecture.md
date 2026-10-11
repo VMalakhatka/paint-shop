@@ -67,6 +67,9 @@ Google analytics (production 2026-10-11): OAuth grant и Search Console site own
 исправления авторизации. Источник: UI/API Google, Rank Math `class-ajax.php` и
 `google/class-request.php`; подтверждённое состояние и регламент восстановления:
 [CUSTOMER_ANALYTICS.md](../../../../docs/CUSTOMER_ANALYTICS.md).
+Верификация Search Console через GA4 зависит от сохранения gtag.js: перед подавлением
+Rank Math snippet при consent rollout согласовать и проверить независимый способ
+владения. Подтверждение доступа не означает готовность поисковых данных/cache import.
 
 XML sitemap категорий (2026-10-08): `paint-shop-ux/inc/category-sitemap.php`
 ограничивает `rank_math/sitemap/index/entry` плоской нативной выборкой Rank Math.
