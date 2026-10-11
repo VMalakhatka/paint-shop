@@ -7,6 +7,8 @@ $lca = (array) get_option('lca_settings', []);
 $active = (array) get_option('active_plugins', []);
 $privacy_id = (int) get_option('wp_page_for_privacy_policy', 0);
 $privacy = $privacy_id ? get_post($privacy_id) : null;
+$notice_id = absint($lca['notice_page_id'] ?? 0);
+$notice = $notice_id ? get_post($notice_id) : null;
 $result = [
     'checked_at_utc' => gmdate('c'),
     'environment' => wp_get_environment_type(),
@@ -14,8 +16,16 @@ $result = [
         'files_present' => is_file(WP_PLUGIN_DIR . '/lavka-customer-analytics/lavka-customer-analytics.php'),
         'active' => in_array('lavka-customer-analytics/lavka-customer-analytics.php', $active, true),
         'enabled_option' => in_array($lca['enabled'] ?? false, [true, 1, '1'], true),
+        'debug' => !empty($lca['debug']),
         'file_sha256' => [],
     ],
+    'analytics_notice' => [
+        'assigned' => $notice_id > 0,
+        'published' => $notice && $notice->post_status === 'publish',
+        'url' => $notice && $notice->post_status === 'publish' ? get_permalink($notice) : null,
+        'full_store_policy_replaced' => $notice_id > 0 && $notice_id === $privacy_id,
+    ],
+    'rank_math_install_code' => !empty($ga['install_code']),
     'privacy_page' => [
         'assigned' => $privacy_id > 0,
         'published' => $privacy && $privacy->post_status === 'publish',

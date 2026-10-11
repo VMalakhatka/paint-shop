@@ -31,7 +31,7 @@ MariaDB хранит состояние сайта и проекции ФОЛИ�
 
 - Тема `generatepress-child`: компоновка и стили, которые действительно принадлежат теме.
 - `paint-core`: общие stock/allocation/cart helpers.
-- `lavka-customer-analytics`: consent-gated GA4 витрины и checkout snapshots, не аналитика ФОЛИО. Подготовлено локально 2026-10-10; production 11.10: файлы есть, но inactive/enabled=false. Не считать processing/date_paid оплатой и не складывать parent/children. Канон выпуска и read-only отчёта: [CUSTOMER_ANALYTICS.md](../../../../docs/CUSTOMER_ANALYTICS.md).
+- `lavka-customer-analytics`: consent-gated GA4 витрины и checkout snapshots, не аналитика ФОЛИО. Production 11.10: 0.2 active/enabled, debug OFF после guest/network/Realtime приёмки; полный платёжный и wholesale browser путь не принят. Не считать processing/date_paid оплатой и не складывать parent/children. Канон выпуска и read-only отчёта: [CUSTOMER_ANALYTICS.md](../../../../docs/CUSTOMER_ANALYTICS.md).
 - `paint-shop-ux`: каталог, карточка товара, поиск и UX витрины.
 - `lavka-total-sync`: полная синхронизация карточек/категорий/медиа без цен и остатков.
 - `lavka-sync`: обмен остатками и mapping складов.
@@ -78,8 +78,9 @@ Rank Math snippet при consent rollout согласовать и провер�
 владения. Production 11.10: дополнительный HTML tag подтверждён для того же owner
 через штатный `google_verify` в option `rank-math-options-general` (дефисы).
 Consent rollout сохраняет это поле и Rank Math head; verification value/email не
-экспортировать. Проект privacy — локальный DOCX на утверждение, не опубликован;
-analytics module остаётся off. Точный scoped rollback и источник проекта — в каноне.
+экспортировать. Полный privacy проект — локальный DOCX на утверждение, не опубликован;
+analytics-specific notice опубликован отдельно, module 0.2 active/enabled.
+Точный scoped rollback и источник проекта — в каноне.
 Подтверждение доступа не означает готовность поисковых данных/cache import.
 Read-only preflight `scripts/audit-analytics-release.php` читает выбранный поток
 Rank Math через `stream_id` либо legacy `view_id`, не экспортирует OAuth/customer rows.

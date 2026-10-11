@@ -3,12 +3,14 @@
 Проверено: 2026-10-11. Владелец WordPress-кода: `lavka-customer-analytics`.
 Владелец кабинета GA4 и политики обработки данных должен быть подтверждён владельцем
 магазина. Источники: настройки production, разрешённые scoped изменения Google,
-Woo CRUD-агрегаты, собственный код и локальные тесты. **Файлы нового модуля есть на рабочем сайте, но модуль
-не активирован и сбор через него не включён.**
+Woo CRUD-агрегаты, собственный код и локальные тесты. **Production 0.2 активирован,
+сбор после согласия включён, debug выключен; доставка товарных/корзинных/checkout
+событий подтверждена Google Realtime.** Это не полный запуск оплаты/фискализации
+и не юридическое утверждение всей политики магазина.
 
 ## Что есть и что подготовлено
 
-Подтверждено на production 2026-10-11: после пользовательского подтверждения OAuth
+Историческое состояние до consent rollout 2026-10-11: после пользовательского подтверждения OAuth
 в Rank Math восстановлены существующие account/property/stream, а не создан новый
 ресурс. GA4 `G-2CCYP21JKC` — ресурс `510945322`, поток Website `12366203570`.
 Это наблюдаемые идентификаторы production, не переносимые defaults. Счётчик
@@ -39,7 +41,7 @@ Google Search Console. Google подтвердил оба способа; нов
 без OAuth tokens, API Google Analytics Admin/Data и Search Console, публичный HTML.
 Проверка одного счётчика на главной не заменяет аудит всех страниц и рекламных тегов.
 
-Подготовлен отдельный модуль с согласием и событиями витрины. Точный event contract,
+Запущен отдельный модуль с согласием и событиями витрины. Точный event contract,
 storage, queue limits и rollback:
 [README владельца](../wp-content/plugins/lavka-customer-analytics/README.md).
 События Google отправляются только браузером после согласия. Серверный платёжный
@@ -231,7 +233,86 @@ settings в closed snapshot, persistently отключает только Rank M
 и notice, не повторять вслепую. Деактивация безопасно оставляет старый snippet OFF;
 не восстанавливать его автоматически. Остальные Rank Math settings сохраняются.
 
-### Скрипт предпусковой проверки (read-only)
+### Результат разрешённого запуска 0.2 — 11.10.2026
+
+Проверен точечный rollout двух application files (основной PHP и storefront JS),
+без общего deploy/Git pull на сервере, переноса БД или изменения других плагинов.
+Закрытые temporary snapshots кода и finite launch settings созданы до записи;
+это не долговечный backup. Plugin active=true, enabled=true, debug=false после QA.
+Rank Math `install_code=false` сохранён постоянно; Google selections и независимый
+Search Console meta сохранены. Полная Woo privacy page остаётся draft и не заменена.
+Отдельно опубликовано [«Аналітика та cookies»](https://kreul.com.ua/analytics-cookies/),
+назначено через `lca_settings.notice_page_id`. Его текст не обещает финансового,
+log/backup удаления или анонимности; private source не включён в Git.
+
+Живая приёмка в чистой гостевой Chrome incognito-сессии:
+
+- Отказ → следующая публичная страница без Google assets/collect; повторено после
+  согласия и отзыва. До положительного выбора Google library не обнаружена.
+- Согласие → одна Google library; наблюдаемые collect URL имеют публичный pathname,
+  без поискового текста, billing fields или order key. Это проверка URL, не полный
+  packet capture POST bodies. Браузерный Google tag может отправлять события пачкой.
+- Публичная категория → товар → успешное добавление одной единицы → корзина →
+  checkout с пустыми контактными полями. Заказ не отправлялся, платёж не выполнялся.
+  Тестовый товар удалён из собственной гостевой корзины; подтверждено «кошик порожній».
+- Поиск с безопасной тестовой строкой дал нулевую выдачу; Google page_location содержит
+  только главную, без запроса. Событие `view_search_results` видно в агрегатах Google.
+- Гостевой `/my-account/` не содержит Google assets. Проверка реального приватного
+  документа/авторизованной wholesale-сессии в браузере не выполнялась.
+- При ширине 390 px выбор согласия и ссылка на notice читаются и доступны. Временное
+  viewport override снято. Proof screenshot хранится только в игнорируемом outputs.
+
+Google Data API `runRealtimeReport` вернул success и новые event types:
+`view_item_list`, `view_item`, `select_item`, `view_search_results`, `add_to_cart`,
+`view_cart`, `begin_checkout` (также `page_view`/служебные события). Это агрегат всех
+посетителей за Realtime окно, не персональные строки и не доказательство точного
+числа тестовых действий. В контрольном чтении `add_to_cart=1`, `view_cart=2`,
+`begin_checkout=1`; значения меняются с трафиком и не служат постоянными defaults.
+Debug после приёмки снят и persisted state перечитан.
+Итоговый read-only preflight 15:29:58 UTC: active/enabled=true, debug=false,
+notice published=true, full privacy published=false, Rank Math install=false;
+три application SHA-256 совпадают с локальными. В пяти публичных HTML samples нет
+безусловной gtag library, GTM/Pinterest/TikTok references не обнаружены. На главной
+и магазине независимый verification meta сохранён. Это samples, не доказательство
+отсутствия всех динамических/серверных тегов во всех сценариях.
+
+Созданы и свежим GET подтверждены шесть EVENT custom dimensions:
+`customer_segment`, `filter_set`, `payment_state`, `search_empty`, `result_count`,
+`error_type`; `disallowAdsPersonalization=true`. Не созданы рекламные аудитории,
+Ads links, рассылки или высококардинальный transaction_id dimension.
+Оператор [`configure-analytics-dimensions.php`](../scripts/configure-analytics-dimensions.php):
+preview по умолчанию; `LCA_EXPECTED_MEASUREMENT_ID` обязательно, запись только
+`LCA_DIMENSIONS_APPLY=1` после разрешения. Добавляет только отсутствующие EVENT поля,
+отказывается от неполного inventory/lock/неверного потока; после POST перечитывает,
+не повторяет неизвестный исход. Archive/remove dimensions — отдельное решение,
+автоматического удаления/отката нет. Existing dimension definitions не переписывает.
+
+Незавершённые этапы **не выдавать за принятые**: wholesale quick-order/import/repeat,
+изменение количества, checkout error и защищённые split/unsplit receipts проверены
+локальными fixtures, но не живым заказом; `purchase` и `payment_confirmed` не
+подтверждены реальной оплатой. Поздние/offline банк/COD подтверждения без возврата
+покупателя на receipt не доставляются гарантированно; refund/server-side delivery
+ещё не реализованы. Сохранённая пользовательская воронка Exploration не создавалась;
+event contract позволяет её анализировать после накопления выбранной популяции.
+Полная privacy policy/финансовые сроки/реальное соблюдение log и backup retention
+ещё требуют завершения. Checkout/регистрация ссылаются на прежнюю draft privacy page;
+analytics notice не заменяет этот документ. В отдельном правовом footer найден адрес,
+отличающийся от сообщённого пользователем; чужая правовая конфигурация не переписана.
+Перед финальной публикацией полной политики сверить реквизиты с владельцем.
+
+Приёмка кода: 34 model, 12 sales fixtures, 15 local Woo runtime и 26 synthetic
+desktop/mobile assertions passed; PHP/JS syntax и documentation checks passed.
+Synthetic Google intercept не считается живой доставкой, последняя подтверждена
+отдельно выше. Канон оптовой справки актуализирован; production help hook уже имеется,
+секция активируется модулем. Browser acceptance под реальной wholesale ролью открыта.
+Production rendering дополнительно проверен с только in-memory ролями partner/opt/
+opt_osn/schule: gate allowed, segment wholesale и analytics help присутствует;
+customer: gate denied, segment retail, help отсутствует. Реальные пользователи,
+логины, права и клиентские данные не менялись/не читались; такой process-only тест
+не подменяет живую проверку покупок оптовиком. Повторный dimensions preview показал
+missing=[], write_requested=false: все шесть уже зарегистрированы.
+
+### Оператор read-only preflight
 
 Скрипт проверки читает последние семь полных календарных дат, рассчитанных по UTC
 (отчёт GA4 использует timezone ресурса); выводит только флаги, checksum и агрегаты
@@ -291,7 +372,7 @@ eventName/eventCount. Не выводит tokens, customer rows или текс�
 заказы или OAuth tokens. Откат Git не отменяет WordPress options. При ошибке после
 сохранения сначала перечитать значения, а не автоматически повторять submit.
 
-Ограничение текущей установки: Rank Math с `exclude_loggedin=true` по умолчанию
+Ограничение прежней установки: Rank Math с `exclude_loggedin=true` по умолчанию
 исключает все вошедшие роли, включая клиентов. Не выключать это вслепую: нужно
 отдельно исключить сотрудников, проверить приватные кабинетные URL и согласие.
 Собственный модуль уже предусматривает такой отбор, но его release gates остаются
@@ -306,7 +387,7 @@ eventName/eventCount. Не выводит tokens, customer rows или текс�
    До подавления этого snippet обеспечить независимое подтверждение Search Console
    согласно регламенту выше; на production дополнительный HTML способ уже проверен,
    его meta должен сохраняться независимо от Analytics tag.
-2. Опубликовать/проверить privacy policy и согласовать конкретный состав данных,
+2. Опубликовать/проверить применимое уведомление privacy и согласовать конкретный состав данных,
    срок хранения и права оператора. Модуль использует псевдонимные cookies GA4,
    не обещать полную анонимность. Отказ не блокирует покупки.
 3. В потоке GA4 проверить enhanced measurement. Автоматические page views, search
@@ -328,7 +409,9 @@ eventName/eventCount. Не выводит tokens, customer rows или текс�
 
    `G-EXAMPLE123` — placeholder, заменить подтверждённым потоком. Только после пунктов
    1–4 и проверки конфигурации отдельно изменить `enabled` на `true`. Debug использовать
-   для контролируемого теста, затем выключить. Новый production option не создавался.
+   для контролируемого теста, затем выключить. При production 0.2 запуске применён
+   scoped оператор выше, без замены всей option group. Не копировать пример поверх
+   действующих settings: потеряется `notice_page_id` и прочие сохранённые поля.
 6. Под клиентской, не административной сессией пройти сценарии в DebugView и Network:
    отказ → ни одного Google запроса от модуля; согласие → один tag; отзыв → события
    остановлены; посетитель без доступа не получает данные чужого заказа.
@@ -415,17 +498,18 @@ callback coverage и расхождения GA4/Woo. Для каждого ра�
 
 Выключить `lca_settings.enabled` через option API или деактивировать только этот
 plugin. Другие настройки и заказы не откатывать. Runtime Rank Math override прекращается:
-его старый persisted snippet снова станет действовать, поэтому решение об этом
-счётчике/согласии принимать явно. Cookies покупателей не очистятся одним server deploy;
+его persisted snippet setting снова станет действовать. На production после launch
+он OFF: оставить таким, не возобновлять старый сбор автоматически. Cookies покупателей не очистятся одним server deploy;
 очистка выполняется браузером при отзыве. Order metadata не удаляется.
 
 Локальная активация с реальным enabled=false выполнена. HPOS hooks, in-memory
 checkout metadata, UK/RU и синтетический consent/desktop/mobile проверены.
 Канон оптовой инструкции обновлён, опубликованная справка обновлена **в коде**.
-Production-страница после deploy не проверялась. Чтение GA4 отчётов подтверждено
+Help hook присутствует на production; browser-проверка под оптовой ролью не выполнена.
+Живая guest приёмка 0.2 и Google Realtime выполнены выше. Чтение GA4 отчётов подтверждено
 11.10.2026; Search Console site ownership подтверждено в тот же день через GA4,
 чтение API доступно. Готовность отчётов Search Console и завершение cache import
 Rank Math ещё не подтверждены. Независимый HTML способ подтверждения уже проверен
-и должен сохраняться при consent rollout. DebugView, privacy approval, tag inventory,
-организационное соблюдение сроков, deploy dry-run, production
-enablement и живые сценарии остаются открытыми.
+и должен сохраняться при consent rollout. Полная privacy approval, организационное
+соблюдение сроков, полный tag inventory и расширенные живые payment/wholesale сценарии
+остаются открытыми. Состояние enabled=true не снимает перечисленные ограничения.

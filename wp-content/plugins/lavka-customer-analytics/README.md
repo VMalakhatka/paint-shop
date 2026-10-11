@@ -1,8 +1,11 @@
 # Lavka Customer Analytics
 
-Version 0.2.0. Prepared and locally tested 2026-10-11. Production read-only check
-2026-10-11: PHP/JS/CSS files are present and match the local SHA-256 checksums,
-but the plugin is **inactive and collection disabled**. This task did not deploy it.
+Version 0.2.0. Scoped production launch 2026-10-11: plugin active, collection enabled,
+debug disabled after acceptance. Analytics notice published independently of the
+full store privacy draft. Guest consent/refusal, mobile UI, product/cart/checkout
+network checks and aggregate Google Realtime receipt verified; no real order/payment
+was submitted. Late/offline payment delivery and wholesale browser acceptance remain
+outside this verified launch. Exact evidence/limits are in the canonical document.
 
 Owns consent-gated storefront GA4 events, checkout attribution snapshots and anonymous
 Woo order analysis. Does not modify prices, stock, allocation, checkout validation,
@@ -21,7 +24,8 @@ for browser events. No database migration or scheduled job. Activation alone is 
 Deploy manifest policy `manual`: uploading files does not activate or enable collection.
 
 With explicit enablement, a runtime option filter disables **only Rank Math's GA
-snippet**, without changing its persisted settings. This plugin loads the Google tag
+snippet**. The production launch also persists its install flag OFF for safe rollback.
+This plugin loads the Google tag
 only after `lca_consent=granted`. No consent means no Google request from this module.
 Other advertising plugins/tags are outside this control and must be audited before release.
 
@@ -93,7 +97,8 @@ not an accounting ledger. GA4 events may also be lost to blockers or rejected co
   Large wholesale baskets cannot be treated as complete item-level GA4 accounting.
 - No destructive uninstall. Disabling/deactivating stops hooks/collection but retains
   audit metadata in orders. Restore previous tracking deliberately; deactivation makes
-  Rank Math's persisted snippet setting effective again.
+  Rank Math's persisted snippet setting effective again; production launch leaves
+  that setting OFF. Never restore it automatically on rollback.
 
 ## Verification
 
@@ -113,9 +118,12 @@ Local verification 2026-10-10: 32 model assertions, 12 report fixtures, 15 WordP
 runtime assertions and 22 synthetic desktop/mobile assertions; PHP/JS syntax and
 documentation structure/impact checks passed. The generic skill-frontmatter validator
 could not run because PyYAML is absent in the available Python runtimes; SKILL.md
-frontmatter itself was not changed. Production release gates remain open.
+frontmatter itself was not changed. Those results preceded the live launch.
 Read-only release preflight: `scripts/audit-analytics-release.php` (from repository
 root). Latest gate status and the required independent Search Console ownership
 proof before replacing Rank Math's snippet are in the canonical operator document.
 0.2 regression 11.10: 34 model, 12 report, 26 synthetic desktop/mobile assertions
-passed. Real guest/network acceptance is still a separate production step.
+passed, together with 15 local Woo runtime assertions. Live acceptance followed:
+Google Realtime contains `view_item_list`, `view_item`, `select_item`,
+`view_search_results`, `add_to_cart`, `view_cart`, `begin_checkout`.
+This is an aggregate inventory, not a count of this tester's actions or all customers.
