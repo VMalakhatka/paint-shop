@@ -86,6 +86,12 @@ Rank Math через `stream_id` либо legacy `view_id`, не экспорт�
 GA4 site search parameters и `catalog_search` витрины сверять отдельно; готовность
 счётчика не доказывает событий товаров/корзины. Published privacy и network consent
 test — обязательные ворота; фактический результат 11.10.2026 в каноне выше.
+Google config operator `scripts/configure-analytics-google.php` по умолчанию preview;
+apply требует явного разрешения, сверки measurement ID/resource name, closed snapshot
+и конечного updateMask. При timeout перечитать, не повторять PATCH автоматически;
+не очищать чужой ecosystem lock. Одобренный срок не означает внедрение Woo удаления.
+Разрешённые retention/enhanced изменения не включают analytics plugin и не заменяют
+network consent приёмку. Результаты/rollback — в том же каноне.
 
 XML sitemap категорий (2026-10-08): `paint-shop-ux/inc/category-sitemap.php`
 ограничивает `rank_math/sitemap/index/entry` плоской нативной выборкой Rank Math.
