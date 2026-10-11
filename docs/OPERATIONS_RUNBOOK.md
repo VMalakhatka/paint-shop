@@ -1259,7 +1259,30 @@ appliedLostSales неизвестны, показана пометка «Поп�
 при отсутствии истории разрешён прогноз по фактическим продажам с пометкой.
 Подтверждения нужно сохранить именно в сценарии Pebeo после обоих deploy,
 не применять автоматически к другим поставщикам. Отгрузка2614031 уже на Транспорте,
-повторно в openOrders её не вносить. Production-сверка и новый Excel ещё требуются.
+повторно в openOrders её не вносить.
+
+2026-10-11 обе версии установлены, Pebeo scenario6 сохранён какversion3 с четырьмя
+подтверждениями. Native HTTP preview загрузил1046корней, но final source read
+отклонён по timeout: jTDS Unicode параметры мешали varchar-индексу SCL_MOVE.
+Частичный остаток/готовый0 не принят. История и незавершённый preview сохранены.
+
+Исправленный Java DAO с CAST varchar проверен отдельным минимальным Spring context
+в production контейнере, без web/schedulers:1052вершины×6складов,6312карточек за14,9с;
+6276 CAPTURED и36 SKU_NOT_PRESENT. Это настоящая read-only SERIALIZABLE transaction,
+не модель остатков; источник БД проверен. Рабочий HTTP endpoint остаётся прежним
+до повторного Java deploy. Код не меняет индексы, бизнес-фильтры или исходные данные.
+Полный SQL без hints:355строк внутренних счетов за9,8с, четыре пакета.
+
+Для отдельного trial report можно передать этот реальный Capture через существующий
+lps_purchase_apply_current_stock и штатную lps_purchase_calculate_network после
+native child reject/empty response, generation/revision/price guards. Метка
+NATIVE_DAO_PRODUCTION_DATA_READ_ONLY отличает такую интеграционную проверку от
+успешного HTTP preview; последний не помечается complete и не получает поддельных
+ответов. После нового Java deploy обязательно повторить штатную последнюю страницу
+или создать новый preview с новым текущим срезом.
+
+WordPress дополняет demandStatuses для ACTUAL_SALES_ONLY существующим переводом:
+это устраняет undefined-key warning стандартного экспорта, не меняя количества.
 
 Проверки: purchase-current-stock.php, purchase-planning.php, purchase-assembly.php,
 purchase-planning-session.php, purchase-stock-report.php и desktop/mobile UI tests.

@@ -8,8 +8,12 @@ WordPress `lavka-price-sync/inc/purchase-assembly.php` — распростра�
 в сценарии. Подробные действия и production acceptance:
 [операционный регламент](../OPERATIONS_RUNBOOK.md#единый-текущий-срез-и-подтверждения-сценария-2026-10-11).
 Последний production previewVersion9 был диагностическим: неполные дети и
-независимый transit v3 блокировали связанные количества. Новую готовую заявку
-нельзя считать проверенной до Java/WordPress deploy и полного native preview.
+независимый transit v3 блокировали связанные количества. Новая Java/WP версия установлена 2026-10-11, scenario6/version3 сохраняет
+согласованные подтверждения. Native HTTP preview загрузил1046корней и остановился
+на timeout current stock; новый готовый0 не принят. Исправление Java varchar binds
+проверено настоящим полным DAO чтением1052SKU/6складов за14,9с. Его повторный
+Java deploy и HTTP acceptance ещё нужны; интеграционный trial report на этом
+реальном срезе обозначается NATIVE_DAO_PRODUCTION_DATA_READ_ONLY.
 
 ## Срок запаса по морозоустойчивости
 
@@ -121,7 +125,9 @@ SKU из текущего child batch разрешают исключить эт
 нет подставленных нулевых метрик, модель возвращает `ASSEMBLY_CHILD_DATA_REQUIRED`,
 предки — `ASSEMBLY_DEPENDENCY_REQUIRED` и неизвестную потребность. Финальная
 загрузка может завершиться с такими предупреждениями, но заказ ветви не разрешён.
-Проверено session/model tests; требуется deploy WordPress и production acceptance.
+Проверено session/model tests; WordPress deploy подтверждён. HTTP acceptance требует
+повторного Java deploy исправления параметров current stock; отсутствующие дети
+по-прежнему сохраняются как неизвестные.
 
 ## Расход, избыток и запас в месяцах
 
