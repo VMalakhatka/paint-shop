@@ -6672,3 +6672,91 @@ msgstr "Текущие остатки сети получены"
 #: inc/purchase-planning.php inc/purchase-current-stock.php
 msgid "Current stock captured"
 msgstr "Текущий остаток получен"
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Select a supplier price variant."
+msgstr "Выберите вариант прайса поставщика."
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "No confirmed supplier price."
+msgstr "Нет подтверждённой цены поставщика."
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Confirm supplier availability: while stocks last."
+msgstr "Подтвердите наличие у поставщика: только пока есть остатки."
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Total supplier order quantity"
+msgstr "Общий заказ поставщику, шт."
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Supplier unit price"
+msgstr "Цена поставщика за единицу"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Supplier currency"
+msgstr "Валюта поставщика"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Supplier order amount"
+msgstr "Сумма заказа поставщику"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Supplier price review"
+msgstr "Проверка цены поставщика"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Physical stock in warehouse groups, excluding Transport and Receiving"
+msgstr "Физический остаток групп без Транспорта и Приёмки"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Physical stock on Transport and Receiving"
+msgstr "Физический остаток Транспорта и Приёмки"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Physical stock including Transport and Receiving"
+msgstr "Физический остаток вместе с Транспортом и Приёмкой"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Stock available for planning including Transport and Receiving"
+msgstr "Запас для заказа вместе с Транспортом и Приёмкой"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Warehouse group detail"
+msgstr "Расчёт по группам"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Supplier order summary"
+msgstr "Заказ поставщику"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Assembly recipe revision"
+msgstr "Ревизия рецептов сборки"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Supply confirmations"
+msgstr "Подтверждения поступлений"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "The export has one supplier-order row per SKU. XLSX also includes warehouse group detail. Stock totals distinguish warehouse groups from Transport and Receiving; individual warehouse stock is shown separately."
+msgstr "Экспорт содержит одну строку заказа поставщику на артикул. В XLSX также есть расчёт по группам. Остатки групп отделены от Транспорта и Приёмки; остатки отдельных складов показаны отдельно."
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Cold sensitivity"
+msgstr "Морозостойкость"

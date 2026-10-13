@@ -150,7 +150,7 @@ lps_purchase_page($token,0);
 $_POST=['token'=>$token,'format'=>'csv'];
 $actions['admin_post_lps_purchase_export']();
 check(array_column($exported,'sku')===['PARENT'],'Actual export excludes selected children and foreign-supplier roots');
-check($exported[0]['periodExpense']===20.0 && $exported[0]['allWarehousesPhysical']===20.0 && $exported[0]['all_stockMonths']===1.2,'Export contains historical expense and current captured stock/months');
+check($exported[0]['periodExpense']===20.0 && $exported[0]['analysisPhysical']===20.0 && $exported[0]['stockMonths']===1.2,'Summary export contains historical expense and current captured stock/months');
 $graph['revision']='changed';
 rejected(fn()=>$actions['admin_post_lps_purchase_export'](),'Changed recipes block actual export until recalculation');
 echo "PASS: actual CSV export supplier isolation and recipe revision guard\n";

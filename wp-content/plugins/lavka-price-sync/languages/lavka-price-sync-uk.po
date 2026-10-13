@@ -6656,3 +6656,91 @@ msgstr "Поточні залишки мережі отримано"
 #: inc/purchase-planning.php inc/purchase-current-stock.php
 msgid "Current stock captured"
 msgstr "Поточний залишок отримано"
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Select a supplier price variant."
+msgstr "Оберіть варіант прайсу постачальника."
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "No confirmed supplier price."
+msgstr "Немає підтвердженої ціни постачальника."
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Confirm supplier availability: while stocks last."
+msgstr "Підтвердьте наявність у постачальника: лише до вичерпання залишків."
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Total supplier order quantity"
+msgstr "Загальне замовлення постачальнику, шт."
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Supplier unit price"
+msgstr "Ціна постачальника за одиницю"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Supplier currency"
+msgstr "Валюта постачальника"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Supplier order amount"
+msgstr "Сума замовлення постачальнику"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Supplier price review"
+msgstr "Перевірка ціни постачальника"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Physical stock in warehouse groups, excluding Transport and Receiving"
+msgstr "Фізичний залишок груп без Транспорту й Приймання"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Physical stock on Transport and Receiving"
+msgstr "Фізичний залишок Транспорту й Приймання"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Physical stock including Transport and Receiving"
+msgstr "Фізичний залишок разом із Транспортом і Прийманням"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Stock available for planning including Transport and Receiving"
+msgstr "Запас для замовлення разом із Транспортом і Прийманням"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Warehouse group detail"
+msgstr "Розрахунок за групами"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Supplier order summary"
+msgstr "Замовлення постачальнику"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Assembly recipe revision"
+msgstr "Ревізія рецептів складання"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Supply confirmations"
+msgstr "Підтвердження надходжень"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "The export has one supplier-order row per SKU. XLSX also includes warehouse group detail. Stock totals distinguish warehouse groups from Transport and Receiving; individual warehouse stock is shown separately."
+msgstr "Експорт містить один рядок замовлення постачальнику на артикул. XLSX також містить розрахунок за групами. Залишки груп відокремлено від Транспорту й Приймання; залишки окремих складів наведено окремо."
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Cold sensitivity"
+msgstr "Морозостійкість"

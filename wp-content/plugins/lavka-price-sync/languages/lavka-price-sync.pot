@@ -6453,3 +6453,91 @@ msgstr ""
 #: inc/purchase-planning.php inc/purchase-current-stock.php
 msgid "Current stock captured"
 msgstr ""
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Select a supplier price variant."
+msgstr ""
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "No confirmed supplier price."
+msgstr ""
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Confirm supplier availability: while stocks last."
+msgstr ""
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Total supplier order quantity"
+msgstr ""
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Supplier unit price"
+msgstr ""
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Supplier currency"
+msgstr ""
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Supplier order amount"
+msgstr ""
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Supplier price review"
+msgstr ""
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Physical stock in warehouse groups, excluding Transport and Receiving"
+msgstr ""
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Physical stock on Transport and Receiving"
+msgstr ""
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Physical stock including Transport and Receiving"
+msgstr ""
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Stock available for planning including Transport and Receiving"
+msgstr ""
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Warehouse group detail"
+msgstr ""
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Supplier order summary"
+msgstr ""
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Assembly recipe revision"
+msgstr ""
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Supply confirmations"
+msgstr ""
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "The export has one supplier-order row per SKU. XLSX also includes warehouse group detail. Stock totals distinguish warehouse groups from Transport and Receiving; individual warehouse stock is shown separately."
+msgstr ""
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Cold sensitivity"
+msgstr ""

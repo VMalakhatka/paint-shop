@@ -2,6 +2,7 @@
 if (!defined('ABSPATH')) exit;
 require_once __DIR__ . '/purchase-assembly.php';
 require_once __DIR__ . '/purchase-current-stock.php';
+require_once __DIR__ . '/purchase-export.php';
 
 const LPS_PURCHASE_PAGE = 'lps-purchase-planning';
 const LPS_PURCHASE_NONCE = 'lps_purchase_planning';
@@ -467,6 +468,7 @@ function lps_purchase_render(): void {
             <span id="lps-purchase-page"></span>
             <button class="button" id="lps-purchase-next" disabled type="button"><?php echo esc_html__('Next', 'lavka-price-sync'); ?></button>
         </div>
+        <p class="description"><?php echo esc_html__('The export has one supplier-order row per SKU. XLSX also includes warehouse group detail. Stock totals distinguish warehouse groups from Transport and Receiving; individual warehouse stock is shown separately.', 'lavka-price-sync'); ?></p>
         <div id="lps-purchase-results"></div>
     </div>
     <?php
@@ -481,6 +483,8 @@ add_action('admin_post_lps_purchase_export', static function (): void {
         $fresh_graph = lps_purchase_assembly_graph($state);
         if ($fresh_graph['revision'] !== $state['assemblyGraph']['revision']) throw new InvalidArgumentException(__('Assembly recipes changed. Start a new preview before exporting.', 'lavka-price-sync'));
         $t = lps_purchase_i18n();
+        $results = lps_purchase_calculate_network($state);
+        $summary = lps_purchase_export_summary($state, $results);
         $keys = ['sku', 'product', 'group', 'receivingWarehouse', 'minimumWarehouse', 'minimumReserve', 'physical', 'available', 'internalReserved', 'planningAvailable', 'internalTransferAccounts', 'sales', 'availableDays', 'stockoutDays', 'availabilityStatus', 'estimatedLostSales', 'appliedLostSales', 'adjustedSales', 'maxDemandMultiplier', 'demandStatus', 'returns', 'coverage', 'ownTarget', 'componentDemand', 'childContributions', 'target', 'need', 'transfer', 'supplyFromGroupCode', 'plannedTransferIn', 'plannedTransferOut', 'inTransit', 'openOrders', 'pack', 'packRounding', 'moq', 'purchase', 'quantity', 'final', 'reason'];
         $columns = array_map(static fn($key) => ['key' => $key, 'label' => $t[$key]], $keys);
         $stock_columns = [];
@@ -505,7 +509,7 @@ add_action('admin_post_lps_purchase_export', static function (): void {
             $columns[] = ['key' => $key, 'label' => $label];
         }
         $rows = [];
-        foreach (lps_purchase_calculate_network($state) as $calculated) {
+        foreach ($results as $calculated) {
             if (empty($calculated['assembly']['purchasable'])) continue;
             $sku = $calculated['sku']; $raw = $state['rows'][$sku];
             foreach ($calculated['groups'] as $group) {
@@ -563,7 +567,9 @@ add_action('admin_post_lps_purchase_export', static function (): void {
         $metadata['warehouseGroups'] = wp_json_encode($state['groups'], JSON_UNESCAPED_UNICODE);
         $metadata['generationId'] = wp_json_encode($state['context'], JSON_UNESCAPED_UNICODE);
         $filename = 'purchase-preview-' . gmdate('Ymd-His');
-        if (($_POST['format'] ?? '') === 'xlsx') lps_product_analytics_export_xlsx($columns, $rows, $metadata, $filename . '.xlsx');
-        lps_product_analytics_export_csv($columns, $rows, $filename . '.csv');
+        usort($rows, static fn($a, $b) => strcmp($a['sku'], $b['sku']));
+        if (($_POST['format'] ?? '') === 'xlsx') lps_product_analytics_export_xlsx($summary['columns'], $summary['rows'], $metadata, $filename . '.xlsx',
+            [['title' => __('Warehouse group detail', 'lavka-price-sync'), 'columns' => $columns, 'rows' => $rows]], __('Supplier order summary', 'lavka-price-sync'));
+        lps_product_analytics_export_csv($summary['columns'], $summary['rows'], $filename . '.csv');
     } catch (InvalidArgumentException | RuntimeException $error) { wp_die(esc_html($error->getMessage())); }
 });
