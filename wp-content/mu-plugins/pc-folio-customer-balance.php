@@ -161,11 +161,11 @@ function pc_folio_balance_enqueue_assets_for_context(array $context, int $target
                 'receiptTotal'          => __('Receipt invoice total', 'pc-folio-customer-balance'),
                 'bankPaymentTotal'      => __('Bank payments', 'pc-folio-customer-balance'),
                 'cashPaymentTotal'      => __('Cash payments', 'pc-folio-customer-balance'),
-                'commonDebt'            => __('Total debt', 'pc-folio-customer-balance'),
+                'commonDebt'            => __('Accounting balance', 'pc-folio-customer-balance'),
                 'deferredAmount'        => __('Deferred / on sale', 'pc-folio-customer-balance'),
                 'overdueDeferredAmount' => __('Overdue deferred / on sale', 'pc-folio-customer-balance'),
-                'prepaymentAmount'      => __('Payments marked PRD', 'pc-folio-customer-balance'),
-                'payableNow'            => __('Payable now', 'pc-folio-customer-balance'),
+                'prepaymentAmount'      => __('Preorder invoices', 'pc-folio-customer-balance'),
+                'payableNow'            => __('Payable including preorders', 'pc-folio-customer-balance'),
             ],
             'currency'      => __('UAH', 'pc-folio-customer-balance'),
         ],
@@ -217,6 +217,19 @@ function pc_folio_balance_render_report(array $context, bool $admin = false): vo
         <div class="pc-folio-balance__report-meta" data-pc-folio-report-meta hidden></div>
         <div class="pc-folio-balance__summary" data-pc-folio-summary hidden></div>
         <div class="pc-folio-balance__notice" data-pc-folio-notice hidden></div>
+        <section data-pc-folio-preorders hidden>
+            <h3><?php esc_html_e('Preorder invoices', 'pc-folio-customer-balance'); ?></h3>
+            <p><?php esc_html_e('Payable = accounting balance - deferred amount + outstanding preorder invoices. PRD payment markers do not affect the reserve. Only invoices from the last six calendar months through the report date are included. Older preorders must be recreated by the manager.', 'pc-folio-customer-balance'); ?></p>
+            <div class="pc-folio-balance__table-wrap"><table class="pc-folio-balance__table">
+                <thead><tr>
+                    <th><?php esc_html_e('Document No.', 'pc-folio-customer-balance'); ?></th>
+                    <th><?php esc_html_e('Date', 'pc-folio-customer-balance'); ?></th>
+                    <th><?php esc_html_e('Warehouse', 'pc-folio-customer-balance'); ?></th>
+                    <th><?php esc_html_e('Amount', 'pc-folio-customer-balance'); ?></th>
+                    <th><?php esc_html_e('Information', 'pc-folio-customer-balance'); ?></th>
+                </tr></thead><tbody data-pc-folio-preorder-rows></tbody>
+            </table></div>
+        </section>
 
         <div class="pc-folio-balance__table-wrap" data-pc-folio-table-wrap hidden>
             <table class="pc-folio-balance__table">
@@ -362,6 +375,12 @@ function pc_folio_balance_fetch_report(array $context, string $date_from = '') {
     if (isset($data['ok']) && $data['ok'] !== true) {
         return new WP_Error('folio_report_failed', __('The report could not be generated. Please try again later.', 'pc-folio-customer-balance'), ['status' => 502]);
     }
+    if ((int) ($data['calculationVersion'] ?? 0) < 2) {
+        return new WP_Error('folio_balance_version', __('Update the Folio service and rebuild the debtors snapshot to use preorder balances.', 'pc-folio-customer-balance'), ['status' => 503]);
+    }
+    foreach (($data['preorders'] ?? []) as $index => $preorder) {
+        $data['preorders'][$index]['warehouseLabel'] = pc_folio_documents_warehouse_label($preorder['warehouseId'] ?? '');
+    }
     $response_short_name = trim((string) ($data['partner']['shortName'] ?? ''));
     if ($response_short_name === '' || $response_short_name !== $context['short_name']) {
         return new WP_Error('folio_customer_mismatch', __('Folio returned a report for a different customer.', 'pc-folio-customer-balance'), ['status' => 502]);
@@ -485,11 +504,11 @@ function pc_folio_balance_export_xlsx(): void {
         'receiptTotal'          => __('Receipt invoice total', 'pc-folio-customer-balance'),
         'bankPaymentTotal'      => __('Bank payments', 'pc-folio-customer-balance'),
         'cashPaymentTotal'      => __('Cash payments', 'pc-folio-customer-balance'),
-        'commonDebt'            => __('Total debt', 'pc-folio-customer-balance'),
+        'commonDebt'            => __('Accounting balance', 'pc-folio-customer-balance'),
         'deferredAmount'        => __('Deferred / on sale', 'pc-folio-customer-balance'),
         'overdueDeferredAmount' => __('Overdue deferred / on sale', 'pc-folio-customer-balance'),
-        'prepaymentAmount'      => __('Payments marked PRD', 'pc-folio-customer-balance'),
-        'payableNow'            => __('Payable now', 'pc-folio-customer-balance'),
+        'prepaymentAmount'      => __('Preorder invoices', 'pc-folio-customer-balance'),
+        'payableNow'            => __('Payable including preorders', 'pc-folio-customer-balance'),
     ];
     $summary = is_array($report['summary'] ?? null) ? $report['summary'] : [];
     $column = 1;
@@ -562,8 +581,6 @@ function pc_folio_balance_export_xlsx(): void {
             $fill = 'FFC7CE';
         } elseif (!empty($row['deferred'])) {
             $fill = 'FFFFCC';
-        } elseif (!empty($row['prepayment'])) {
-            $fill = 'D7F0E4';
         }
         if ($fill !== null) {
             $sheet->getStyle('A' . $row_number . ':N' . $row_number)->getFill()
@@ -604,6 +621,8 @@ function pc_folio_balance_export_xlsx(): void {
         $sheet->getColumnDimensionByColumn($index + 1)->setWidth($width);
     }
 
+    pc_folio_balance_add_preorders_sheet($spreadsheet, $report);
+
     $filename = 'folio-balance-' . (int) $context['user_id'] . '-' . wp_date('Ymd-His') . '.xlsx';
     while (ob_get_level() > 0) {
         ob_end_clean();
@@ -618,5 +637,6 @@ function pc_folio_balance_export_xlsx(): void {
 }
 add_action('admin_post_pc_folio_customer_balance_export', 'pc_folio_balance_export_xlsx');
 
+require_once __DIR__ . '/pc-folio-customer-balance/inc/preorders-export.php';
 require_once __DIR__ . '/pc-folio-customer-balance/inc/customer-debtors.php';
 require_once __DIR__ . '/pc-folio-customer-balance/inc/customer-documents.php';

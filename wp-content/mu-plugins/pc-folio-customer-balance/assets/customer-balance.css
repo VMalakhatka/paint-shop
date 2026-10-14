@@ -230,3 +230,7 @@
     .pc-folio-balance__table th,
     .pc-folio-balance__table td { padding: 3px; }
 }
+
+.pc-folio-balance [data-pc-folio-preorders] table { min-width: 600px; }
+.pc-folio-balance [data-pc-folio-preorders] td:nth-child(4) { text-align: right; white-space: nowrap; }
+@media print { .pc-folio-balance [data-pc-folio-preorders] table { min-width: 0; } }

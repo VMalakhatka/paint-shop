@@ -1043,3 +1043,6 @@ msgstr ""
 
 msgid "The manager can combine selected accounts from different warehouses into one confirmation. Its Excel file has one worksheet without photos, with source account numbers, dates, warehouses and a common total. Payment details may be included. Agree the payable amount with the manager, taking previous payments into account. Original accounts remain separate; an email reply does not automatically confirm the request on the website."
 msgstr ""
+
+msgid "Preorder invoices reserve the outstanding amount of active, non-accounted PRD invoices with operation *РАЗОВАЯ from the last six calendar months. The balance lists these invoices separately and includes them in the amount payable. Payment markers do not change this reserve. Older preorders must be recreated by the manager. In Folio documents, select Preorder invoices to view them."
+msgstr ""

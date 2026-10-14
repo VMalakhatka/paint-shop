@@ -257,3 +257,7 @@ keep `manage_options` for payee editing. Runtime defaults survive code deploys.
 отмечены счётчиком. Без JS поля открыты. Переключение ширины не отправляет форму.
 Шапкой и размером контактов владеет generatepress-child; выбор склада сохраняется.
 Инструкция и снимок — `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md` и pc-wholesale-help.
+
+### Preorder balance v2 (2026-10-14)
+
+`pc-folio-customer-balance` requires Java `calculationVersion >= 2` for individual/debtors responses. `prepaymentAmount` is now the reserve from active non-accounted ПРД/*РАЗОВАЯ invoices no older than six calendar months (inclusive), not payments. Older orders must be recreated by the manager. The ledger balance is separate; payable adds reserve and subtracts deferral. Individual balance renders `preorders[]` and exports a separate XLSX sheet. Customer/manager documents have `preordersOnly` server-side filtering over the same six-month window before pagination. Java V18 separates old snapshot generations and live overrides; rebuild debtors after deploying Java + WP. Never relabel a v1 cached payment amount as an invoice reserve. Current outstanding invoice amount already excludes fulfilled goods (owner confirmation).

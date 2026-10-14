@@ -221,7 +221,8 @@
     }
 
     function loadList(reset) {
-        var types = selectedTypes();
+        var preordersOnly = form.elements.preorders_only && form.elements.preorders_only.checked;
+        var types = preordersOnly ? ['ACCOUNT'] : selectedTypes();
         if (!types.length) {
             setStatus(root.dataset.typesRequired, 'error');
             return;
@@ -241,6 +242,7 @@
             date_from: form.elements.date_from.value,
             date_to: form.elements.date_to.value,
             types: types.join(','),
+            preorders_only: preordersOnly ? '1' : '',
             limit: form.elements.limit.value,
             cursor: cursors[pageIndex] || ''
         }, listController.signal)

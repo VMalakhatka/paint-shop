@@ -1415,3 +1415,21 @@ msgstr "Звіт змінився під час експорту. Спробуй
 
 msgid "Customer confirmation"
 msgstr "Підтвердження клієнта"
+
+msgid "Preorder invoices"
+msgstr "Рахунки на передзамовлення"
+
+msgid "Accounting balance"
+msgstr "Баланс за документами та оплатами"
+
+msgid "Payable including preorders"
+msgstr "До сплати з урахуванням передзамовлень"
+
+msgid "Update the Folio service and rebuild the debtors snapshot to use preorder balances."
+msgstr "Оновіть сервіс ФОЛІО та перерахуйте знімок боржників для балансу з передзамовленнями."
+
+msgid "Payable = accounting balance - deferred amount + outstanding preorder invoices. PRD payment markers do not affect the reserve. Only invoices from the last six calendar months through the report date are included. Older preorders must be recreated by the manager."
+msgstr "До сплати = баланс за документами та оплатами − сума на відстрочці + рахунки на передзамовлення. Позначка ПРД у платежах не впливає на резерв. Враховано рахунки за останні шість календарних місяців до дати звіту. Старіші передзамовлення менеджер повинен створити заново."
+
+msgid "Preorder invoices from the last six calendar months through period end; period start and document types are ignored."
+msgstr "Рахунки на передзамовлення за останні шість календарних місяців до кінця періоду; початок періоду та типи документів не обмежують список."
