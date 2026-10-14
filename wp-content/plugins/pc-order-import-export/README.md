@@ -770,3 +770,5 @@ existing explicit, idempotent mail action. Files stay outside public uploads and
 deleted after use. Existing single-order confirmation behavior remains unchanged.
 `tests/approval-bundle.php` covers owner mismatch, stale accounts/settings, duplicates,
 combined sums, private XLSX, intercepted email and no order mutation.
+
+Scoped import access (2026-10-14): `manage_woocommerce` plus explicit `pcoe_import_customers` permits Folio customer import for custom manager roles. Existing administrator/shop_manager paths remain valid. Grant per user when requested; this does not grant general create/promote/delete-users capabilities. All import role allowlists and preview/apply checks remain in force.

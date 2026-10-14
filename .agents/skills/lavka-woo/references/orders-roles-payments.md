@@ -474,3 +474,9 @@ source number/date/warehouse; no accounting merge, payment or stock writes. New 
 downloads and confirmation revalidate all documents/settings. NP planning uses each
 bundle document warehouse; no top-level single-warehouse assumption. Manager workflow:
 `docs/MANAGER_CUSTOMER_GUIDE_UK.md#approval`.
+
+Import access (2026-10-14, FolioCustomerImport::allowed): custom manager accounts
+can receive explicit `pcoe_import_customers` together with existing
+`manage_woocommerce`; do not grant create_users or change staff roles just to expose
+Folio import. Grant/revoke per user only with owner authorization. Existing customer
+role allowlist, actor-owned jobs and preview/apply are unchanged.

@@ -24,6 +24,12 @@ $job=static function($ids)use(&$jobs){$id=Import::create($ids);$jobs[]=$id;retur
 $prepare=static function($id,$override=[])use($tag){$data=Import::get($id);$fields=[];foreach($data['rows'] as $i=>$row)$fields[$i]=array_merge($row['fields'],['email'=>$tag.'-'.$row['source']['id'].'@example.invalid','role'=>'partner','first_name'=>'Test','last_name'=>'Customer','city'=>'Kyiv','country'=>'UA'],$override);Import::preview($id,$fields);};
 try {
     $manager=$create('shop_manager','manager');$other=$create('shop_manager','other');$customer=$create('customer','customer');
+    $limited=$create('subscriber','limited');$u=get_userdata($limited);$u->add_cap('manage_woocommerce');wp_set_current_user($limited);
+    $check(!Import::allowed(),'Custom manager without import grant is denied');
+    $u->add_cap('pcoe_import_customers');wp_set_current_user(0);wp_set_current_user($limited);
+    $check(Import::allowed() && !current_user_can('create_users') && !current_user_can('promote_users'),'Explicit import grant does not grant general user administration');
+    $u->remove_cap('manage_woocommerce');wp_set_current_user(0);wp_set_current_user($limited);
+    $check(!Import::allowed(),'Import grant alone cannot bypass manager access');
     wp_set_current_user($manager);update_option('lps_role_contract_map',['partner'=>'TEST-CONTRACT','customer'=>'RETAIL']);
     for($i=1;$i<=10;$i++)$sources['TEST'.$i]=['id'=>'TEST'.$i,'name'=>'Test company '.$i,'type'=>'H','email'=>'','phone'=>'+380000000000','alternatePhone'=>null,'address'=>'Billing address','postcode'=>'00123','deliveryAddress'=>'Delivery address','discountPercent'=>5,'bankCity'=>'Test city','contactType'=>'TEST WHOLESALE','note'=>'Reference note','additionalInfo'=>"Contact one\nContact two"];
     $id=$job(['TEST1']);$check(Import::get($id)['phase']==='edit','Staging creates no customers');
