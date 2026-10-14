@@ -27,6 +27,7 @@ foreach ($capture['cards'] as &$card) {
 unset($card); $state=lps_purchase_apply_current_stock($state,$capture);
 $results=lps_purchase_calculate_network($state); $summary=lps_purchase_export_summary($state,$results); $row=$summary['rows'][0];
 check(count($summary['rows'])===1,'Two destinations produce one supplier-order row');
+check(!in_array('preordersCoveredByCurrentReserve',array_column($summary['columns'],'key'),true),'Non-accounted preorders have no misleading current-reserve coverage column');
 check($row['periodExpense']===183.0 && $row['sales']===183.0,'Outgoing/sales total is 169+14; storage-only movements excluded');
 check($row['analysisPhysical']===100.0 && $row['transitPhysical']===45.0 && $row['networkPhysical']===145.0,'Physical groups and transit are separate and totalled once');
 check($row['planningAvailable']===135.0,'Client reserve of ten remains deducted from planning stock');

@@ -6750,10 +6750,6 @@ msgid "Remaining customer preorders"
 msgstr "Залишок клієнтських передзамовлень"
 
 #: inc/purchase-export.php inc/purchase-planning.php
-msgid "Preorders already covered by current Folio reserve"
-msgstr "Передзамовлення, уже покриті поточним резервом ФОЛІО"
-
-#: inc/purchase-export.php inc/purchase-planning.php
 msgid "Additional preorder demand"
 msgstr "Додаткова потреба за передзамовленнями"
 

@@ -55,7 +55,6 @@ function lps_purchase_i18n(): array {
         'planningAvailable' => __('Stock for purchase planning', 'lavka-price-sync'),
         'internalReserved' => __('Reserved for internal transfers', 'lavka-price-sync'),
         'customerPreorders' => __('Remaining customer preorders', 'lavka-price-sync'),
-        'preordersCoveredByCurrentReserve' => __('Preorders already covered by current Folio reserve', 'lavka-price-sync'),
         'preorderAdditionalDemand' => __('Additional preorder demand', 'lavka-price-sync'),
         'expectedFreeAfterPreorders' => __('Expected free stock after customer preorders', 'lavka-price-sync'),
         'preorderUncoveredAfterReceipts' => __('Customer preorders not covered by current stock and expected receipts', 'lavka-price-sync'),
@@ -209,7 +208,7 @@ function lps_purchase_session_key(string $token): string {
 function lps_purchase_session(string $token): array {
     $state = get_transient(lps_purchase_session_key($token));
     if (!is_array($state)) throw new InvalidArgumentException(__('The preview has expired. Start a new calculation.', 'lavka-price-sync'));
-    if (($state['previewVersion'] ?? 0) !== 11) throw new InvalidArgumentException(__('Start a new preview to apply the current rounding and demand settings.', 'lavka-price-sync'));
+    if (($state['previewVersion'] ?? 0) !== 12) throw new InvalidArgumentException(__('Start a new preview to apply the current rounding and demand settings.', 'lavka-price-sync'));
     if (($state['transitContractVersion'] ?? 0) !== 3 || ($state['transitWarehouseIds'] ?? null) !== lps_purchase_transit_warehouses()) {
         throw new InvalidArgumentException(__('Transport warehouse settings changed. Start a new preview.', 'lavka-price-sync'));
     }
@@ -253,7 +252,7 @@ function lps_purchase_start(int $id, int $version): array {
         'calculation' => $profile['calculation'], 'sort' => [['field' => 'sku', 'direction' => 'ASC']], 'page' => ['size' => 100],
     ]);
     $token = bin2hex(random_bytes(16));
-    $state = ['previewVersion' => 11, 'orderSupplier' => $suppliers['values'][0], 'phase' => 'roots', 'rootSkus' => [], 'pendingChildren' => [], 'phaseCount' => 0,
+    $state = ['previewVersion' => 12, 'orderSupplier' => $suppliers['values'][0], 'phase' => 'roots', 'rootSkus' => [], 'pendingChildren' => [], 'phaseCount' => 0,
         'scenario' => ['id' => $scenario['id'], 'uuid' => $scenario['uuid'], 'name' => $scenario['name'], 'version' => $scenario['version']],
         'supplierPriceVersions' => function_exists('lps_sp_active_versions') ? lps_sp_active_versions($profile['context']['sourceDatabase']) : [],
         'query' => $query, 'groups' => $groups, 'groupsRevision' => lavka_get_global_warehouse_groups_revision(),
@@ -492,7 +491,7 @@ add_action('admin_post_lps_purchase_export', static function (): void {
         $t = lps_purchase_i18n();
         $results = lps_purchase_calculate_network($state);
         $summary = lps_purchase_export_summary($state, $results);
-        $keys = ['sku', 'product', 'group', 'receivingWarehouse', 'minimumWarehouse', 'minimumReserve', 'physical', 'available', 'internalReserved', 'planningAvailable', 'internalTransferAccounts', 'sales', 'availableDays', 'stockoutDays', 'availabilityStatus', 'estimatedLostSales', 'appliedLostSales', 'adjustedSales', 'maxDemandMultiplier', 'demandStatus', 'returns', 'coverage', 'ownTarget', 'customerPreorders', 'preordersCoveredByCurrentReserve', 'preorderAdditionalDemand', 'expectedFreeAfterPreorders', 'preorderUncoveredAfterReceipts', 'preorderLines', 'componentDemand', 'childContributions', 'target', 'need', 'transfer', 'supplyFromGroupCode', 'plannedTransferIn', 'plannedTransferOut', 'inTransit', 'openOrders', 'pack', 'packRounding', 'moq', 'purchase', 'quantity', 'final', 'reason'];
+        $keys = ['sku', 'product', 'group', 'receivingWarehouse', 'minimumWarehouse', 'minimumReserve', 'physical', 'available', 'internalReserved', 'planningAvailable', 'internalTransferAccounts', 'sales', 'availableDays', 'stockoutDays', 'availabilityStatus', 'estimatedLostSales', 'appliedLostSales', 'adjustedSales', 'maxDemandMultiplier', 'demandStatus', 'returns', 'coverage', 'ownTarget', 'customerPreorders', 'preorderAdditionalDemand', 'expectedFreeAfterPreorders', 'preorderUncoveredAfterReceipts', 'preorderLines', 'componentDemand', 'childContributions', 'target', 'need', 'transfer', 'supplyFromGroupCode', 'plannedTransferIn', 'plannedTransferOut', 'inTransit', 'openOrders', 'pack', 'packRounding', 'moq', 'purchase', 'quantity', 'final', 'reason'];
         $columns = array_map(static fn($key) => ['key' => $key, 'label' => $t[$key]], $keys);
         $stock_columns = [];
         foreach (['allWarehousesPhysical','periodExpense','excessStock','stockMonths'] as $key) $stock_columns[] = ['key' => $key, 'label' => $t[$key]];
@@ -525,7 +524,7 @@ add_action('admin_post_lps_purchase_export', static function (): void {
                     'coldStatus' => $t['coldStatuses'][$calculated['coldCoverage']['status']] ?? $t['coldStatuses']['UNKNOWN'],
                     'receivingWarehouse' => $group['receivingWarehouseId'], 'available' => $group['available'], 'sales' => $stock_report['regularSales'],
                     'internalReserved' => $group['internalReserved'], 'customerPreorders' => $group['customerPreorders'],
-                    'preordersCoveredByCurrentReserve' => $group['preordersCoveredByCurrentReserve'], 'preorderAdditionalDemand' => $group['preorderAdditionalDemand'],
+                    'preorderAdditionalDemand' => $group['preorderAdditionalDemand'],
                     'expectedFreeAfterPreorders' => $group['expectedFreeAfterPreorders'], 'preorderUncoveredAfterReceipts' => $group['preorderUncoveredAfterReceipts'],
                     'preorderLines' => wp_json_encode($group['preorderLines'], JSON_UNESCAPED_UNICODE),
                     'physical' => $stock_report['physical'], 'ownTarget' => $group['ownTarget'], 'componentDemand' => $group['componentDemand'],

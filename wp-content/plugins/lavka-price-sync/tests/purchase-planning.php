@@ -339,7 +339,7 @@ $ir=lps_purchase_calculate($surplus,$surplusGroups,30,true,$internalInputs,[]);
 check($ir['groups'][0]['transferOut']===10.0 && $ir['groups'][1]['transferIn']===10.0, 'Surplus calculation uses the same corrected source stock');
 echo "PASS: source-only internal reserve correction, client reserves, recipient independence, replenishment and surplus transfers\n";
 
-// A preorder already reserved in Folio is represented by free stock. Only the remainder consumes future receipts.
+// Non-accounted preorders are independent demand; unrelated Folio reserves never cover them.
 $preorderGroups = [['code'=>'one','name'=>'One','warehouseIds'=>[1],'receivingWarehouseId'=>1,'minimumWarehouseId'=>1,
     'leadTimeDays'=>0,'targetDays'=>30,'safetyDays'=>0,'packRounding'=>'NONE','stockOnlyWarehouseIds'=>[],'demandWarehouseIds'=>[1]]];
 $preorderRow = ['sku'=>'PREORDER', 'dimensions'=>['currentSuppliers'=>['Kreul'],'packageQuantity'=>1,'minimumOrderQuantity'=>0],
@@ -358,7 +358,10 @@ $preorderTransit=lps_purchase_calculate($preorderRow,$preorderGroups,30,false,['
 check($preorderTransit['expectedFreeAfterPreorders']==0.0 && $preorderTransit['preorderUncoveredAfterReceipts']==0.0 && $preorderTransit['finalQuantity']==20.0,
     'Transit is reserved for the preorder before the statistical forecast');
 $preorderReserved=$preorderRow; $preorderReserved['warehouseBreakdown'][0]['metrics']['physicalQuantity']=10; $preorderReserved['warehouseBreakdown'][0]['metrics']['availableQuantity']=0; $preorderReserved['warehouseBreakdown'][0]['metrics']['reservedQuantity']=10;
+$preorderReservedTransit=lps_purchase_calculate($preorderReserved,$preorderGroups,30,false,['one'=>['openOrders'=>0,'inTransit'=>10,'packRounding'=>'NONE','receiptsReviewed'=>true]],[9],[] )['groups'][0];
+check($preorderReservedTransit['preorderAdditionalDemand']==10.0 && $preorderReservedTransit['expectedFreeAfterPreorders']==0.0 && $preorderReservedTransit['finalQuantity']==20.0,
+    'Transit covers the whole non-accounted preorder even when other accounts already reserve physical stock');
 $preorderReserved=lps_purchase_calculate($preorderReserved,$preorderGroups,30,false,['one'=>['openOrders'=>0,'inTransit'=>0,'packRounding'=>'NONE','receiptsReviewed'=>true]],[9],[] )['groups'][0];
-check($preorderReserved['preordersCoveredByCurrentReserve']==10.0 && $preorderReserved['preorderAdditionalDemand']==0.0 && $preorderReserved['finalQuantity']==20.0,
-    'A current Folio reserve is not subtracted from planning stock twice');
-echo "PASS: customer preorder demand, transit allocation and existing reserve de-duplication\n";
+check($preorderReserved['preorderAdditionalDemand']==10.0 && $preorderReserved['finalQuantity']==30.0,
+    'An unrelated current Folio reserve cannot cover a non-accounted preorder');
+echo "PASS: non-accounted customer preorder demand, transit allocation and independent client reserves\n";

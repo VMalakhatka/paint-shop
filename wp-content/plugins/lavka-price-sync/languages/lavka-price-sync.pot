@@ -6547,10 +6547,6 @@ msgid "Remaining customer preorders"
 msgstr ""
 
 #: inc/purchase-export.php inc/purchase-planning.php
-msgid "Preorders already covered by current Folio reserve"
-msgstr ""
-
-#: inc/purchase-export.php inc/purchase-planning.php
 msgid "Additional preorder demand"
 msgstr ""
 

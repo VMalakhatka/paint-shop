@@ -44,7 +44,7 @@ function lps_purchase_export_summary(array $state, array $results): array {
         'transitPhysical' => __('Physical stock on Transport and Receiving', 'lavka-price-sync'),
         'networkPhysical' => __('Physical stock including Transport and Receiving', 'lavka-price-sync'),
         'planningAvailable' => __('Stock available for planning including Transport and Receiving', 'lavka-price-sync'),
-        'transitPool' => $t['transitPool'], 'customerPreorders' => $t['customerPreorders'], 'preordersCoveredByCurrentReserve' => $t['preordersCoveredByCurrentReserve'],
+        'transitPool' => $t['transitPool'], 'customerPreorders' => $t['customerPreorders'],
         'preorderAdditionalDemand' => $t['preorderAdditionalDemand'], 'expectedFreeAfterPreorders' => $t['expectedFreeAfterPreorders'],
         'preorderUncoveredAfterReceipts' => $t['preorderUncoveredAfterReceipts'], 'componentDemand' => $t['componentDemand'],
         'childCoverageShortfall' => $t['childCoverageShortfall'], 'childCoverageWarning' => __('Child demand coverage warning', 'lavka-price-sync'),
@@ -53,10 +53,10 @@ function lps_purchase_export_summary(array $state, array $results): array {
         'currentStockCapturedAt' => $t['currentStockCapture'], 'period' => __('Report period', 'lavka-price-sync'),
     ];
     $columns = [];
-    $numeric = ['final','supplierUnitPrice','supplierAmount','periodExpense','sales','analysisPhysical','transitPhysical','networkPhysical','planningAvailable','transitPool','customerPreorders','preordersCoveredByCurrentReserve','preorderAdditionalDemand','expectedFreeAfterPreorders','preorderUncoveredAfterReceipts','componentDemand','childCoverageShortfall','stockMonths','excessStock'];
+    $numeric = ['final','supplierUnitPrice','supplierAmount','periodExpense','sales','analysisPhysical','transitPhysical','networkPhysical','planningAvailable','transitPool','customerPreorders','preorderAdditionalDemand','expectedFreeAfterPreorders','preorderUncoveredAfterReceipts','componentDemand','childCoverageShortfall','stockMonths','excessStock'];
     foreach ($labels as $key => $label) $columns[] = ['key' => $key, 'label' => $label,
         'numberFormat' => $key === 'supplierUnitPrice' ? '0.0000' : ($key === 'supplierAmount' ? '0.00' : (in_array($key, $numeric, true) ? '#,##0.###' : ''))];
-    foreach ($state['groups'] as $group) foreach (['physical', 'sales', 'periodExpense', 'stockoutDays', 'minimumReserve', 'ownTarget', 'customerPreorders', 'preordersCoveredByCurrentReserve', 'preorderAdditionalDemand', 'expectedFreeAfterPreorders', 'preorderUncoveredAfterReceipts', 'componentDemand', 'plannedTransferIn', 'plannedTransferOut', 'final'] as $key) {
+    foreach ($state['groups'] as $group) foreach (['physical', 'sales', 'periodExpense', 'stockoutDays', 'minimumReserve', 'ownTarget', 'customerPreorders', 'preorderAdditionalDemand', 'expectedFreeAfterPreorders', 'preorderUncoveredAfterReceipts', 'componentDemand', 'plannedTransferIn', 'plannedTransferOut', 'final'] as $key) {
         $columns[] = ['key' => 'group_' . $group['code'] . '_' . $key, 'label' => $group['name'] . ': ' . $t[$key], 'numberFormat' => '#,##0.###'];
     }
     $warehouse_ids = array_values(array_unique(array_merge(...array_merge(array_column($state['groups'], 'warehouseIds'), [$state['transitWarehouseIds']]))));
@@ -84,7 +84,6 @@ function lps_purchase_export_summary(array $state, array $results): array {
             'planningAvailable' => lps_purchase_export_sum([$total['planningAvailable'], $item['transitPool']]),
             'transitPool' => $item['transitPool'],
             'customerPreorders' => lps_purchase_export_sum(array_column($item['groups'], 'customerPreorders')),
-            'preordersCoveredByCurrentReserve' => lps_purchase_export_sum(array_column($item['groups'], 'preordersCoveredByCurrentReserve')),
             'preorderAdditionalDemand' => lps_purchase_export_sum(array_column($item['groups'], 'preorderAdditionalDemand')),
             'expectedFreeAfterPreorders' => lps_purchase_export_sum(array_column($item['groups'], 'expectedFreeAfterPreorders')),
             'preorderUncoveredAfterReceipts' => lps_purchase_export_sum(array_column($item['groups'], 'preorderUncoveredAfterReceipts')),
@@ -97,7 +96,7 @@ function lps_purchase_export_summary(array $state, array $results): array {
             'period' => $state['query']['period']['from'] . ' - ' . $state['query']['period']['to']] + $price;
         $notes = [];
         foreach ($item['groups'] as $group) {
-            foreach (['physical', 'regularSales', 'plannedTransferIn', 'plannedTransferOut', 'minimumReserve', 'ownTarget', 'customerPreorders', 'preordersCoveredByCurrentReserve', 'preorderAdditionalDemand', 'expectedFreeAfterPreorders', 'preorderUncoveredAfterReceipts', 'componentDemand', 'finalQuantity'] as $key) {
+            foreach (['physical', 'regularSales', 'plannedTransferIn', 'plannedTransferOut', 'minimumReserve', 'ownTarget', 'customerPreorders', 'preorderAdditionalDemand', 'expectedFreeAfterPreorders', 'preorderUncoveredAfterReceipts', 'componentDemand', 'finalQuantity'] as $key) {
                 $mapped = ['regularSales' => 'sales', 'finalQuantity' => 'final'][$key] ?? $key;
                 $record['group_' . $group['groupCode'] . '_' . $mapped] = $group[$key];
             }
