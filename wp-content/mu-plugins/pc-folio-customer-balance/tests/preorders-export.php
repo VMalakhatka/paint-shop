@@ -22,4 +22,10 @@ check($sheet->getCell('A2')->getValue() === '555265', 'Invoice identity exported
 check($sheet->getCell('E2')->getDataType() === 's', 'Folio text cannot become an Excel formula');
 check($sheet->getCell('D2')->getDataType() === 'n', 'Amounts are numeric');
 check(abs($sheet->getCell('D4')->getValue() - 181000) < 0.001, 'Reserve total exported');
-echo "Preorder XLSX round-trip passed\n";
+$main = $read->getSheet(0);
+check($main->getCell('A4')->getValue() === 'Preorder invoices', 'Preorders visible on the first sheet');
+check($main->getCell('A6')->getValue() === '555265', 'First-sheet invoice identity');
+check($main->getCell('I6')->getDataType() === 's', 'First-sheet information is not a formula');
+check($main->getCell('G6')->getDataType() === 'n', 'First-sheet amount numeric');
+check(abs($main->getCell('G8')->getValue() - 181000) < 0.001, 'First-sheet reserve total');
+echo "Preorder XLSX round-trip passed (main and detail sheets)\n";

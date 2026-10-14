@@ -542,6 +542,7 @@ function pc_wholesale_help_render_endpoint(): void {
             <div class="pc-help-section__heading"><span>11</span><div><h2><?php esc_html_e('View the customer balance', 'pc-wholesale-help'); ?></h2><p><?php esc_html_e('Choose a start date or all time, generate the report, then export XLSX or print it if needed.', 'pc-wholesale-help'); ?></p></div></div>
             <p><?php esc_html_e('The report may show opening balance, invoices, payments, total debt, overdue amount, prepayment and the amount due now. The table below explains each operation and the balance before and after it.', 'pc-wholesale-help'); ?></p>
             <p><?php esc_html_e('Preorder invoices reserve the outstanding amount of active, non-accounted PRD invoices with operation *РАЗОВАЯ from the last six calendar months. The balance lists these invoices separately and includes them in the amount payable. Payment markers do not change this reserve. Older preorders must be recreated by the manager. In Folio documents, select Preorder invoices to view them.', 'pc-wholesale-help'); ?></p>
+            <p><?php esc_html_e('In the XLSX export, preorder invoices and their total also appear below the movements on the main sheet. A separate invoice sheet is included for working with the data.', 'pc-wholesale-help'); ?></p>
             <?php if ($folio_available): ?>
                 <a class="pc-help-inline-action" href="<?php echo esc_url($balance_url); ?>"><?php esc_html_e('Open customer balance', 'pc-wholesale-help'); ?> →</a>
             <?php endif; ?>

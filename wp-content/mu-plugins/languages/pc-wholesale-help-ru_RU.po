@@ -1089,3 +1089,6 @@ msgstr "Менеджер может объединить выбранные сч
 
 msgid "Preorder invoices reserve the outstanding amount of active, non-accounted PRD invoices with operation *РАЗОВАЯ from the last six calendar months. The balance lists these invoices separately and includes them in the amount payable. Payment markers do not change this reserve. Older preorders must be recreated by the manager. In Folio documents, select Preorder invoices to view them."
 msgstr "Счета на предзаказ резервируют остаток активных неучитываемых счетов ПРД с операцией *РАЗОВАЯ за последние шесть календарных месяцев. В балансе приведён отдельный список этих счетов, а их сумма учтена в сумме к оплате. Отметки платежей не меняют этот резерв. Более старые предзаказы менеджер должен создать заново. В документах ФОЛИО выберите «Счета на предзаказ» для просмотра."
+
+msgid "In the XLSX export, preorder invoices and their total also appear below the movements on the main sheet. A separate invoice sheet is included for working with the data."
+msgstr "В экспорте XLSX счета на предзаказ и их общая сумма также расположены под движениями на основном листе. Для работы с данными добавлен отдельный лист счетов."
