@@ -1,5 +1,6 @@
 <?php
 if (!defined('ABSPATH')) exit;
+require_once __DIR__ . '/analytics-period.php';
 
 const LPS_PRODUCT_ANALYTICS_PAGE = 'lps-product-analytics';
 const LPS_PRODUCT_ANALYTICS_NONCE = 'lps_product_analytics';
@@ -1781,7 +1782,11 @@ function lps_product_analytics_v4_sanitize_query(array $payload): array {
         wp_send_json_error(['message' => __('Select one or more Folio warehouses.', 'lavka-price-sync')], 400);
     }
 
-    $period = is_array($payload['period'] ?? null) ? $payload['period'] : [];
+    try {
+        $period = lps_analytics_period_resolve(is_array($payload['period'] ?? null) ? $payload['period'] : []);
+    } catch (InvalidArgumentException $e) {
+        wp_send_json_error(['message' => $e->getMessage()], 400);
+    }
     $from = sanitize_text_field((string)($period['from'] ?? ''));
     $to = sanitize_text_field((string)($period['to'] ?? ''));
     if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $from) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $to)) {
@@ -1921,7 +1926,7 @@ function lps_product_analytics_v4_scenario_context(array $payload, array $query)
         $saved_query = [
             'sourceDatabase' => (string)($profile_context['sourceDatabase'] ?? ''),
             'warehouseIds' => array_values((array)($profile_context['warehouseIds'] ?? [])),
-            'period' => (array)($profile['period'] ?? []),
+            'period' => lps_analytics_period_resolve((array)($profile['period'] ?? []), $query['period']['to'] ?? null),
             'productFilters' => !empty($profile['productFilters']) ? (array)$profile['productFilters'] : new stdClass(),
             'movementFilters' => !empty($profile['movementFilters']) ? (array)$profile['movementFilters'] : new stdClass(),
             'calculation' => (array)($profile['calculation'] ?? []),
@@ -2051,6 +2056,7 @@ function lps_product_analytics_v4_send_java(string $path, array $payload, ?array
     }
     if ($path === LPS_PRODUCT_ANALYTICS_QUERY_PATH) {
         $body['scenarioContext'] = $scenario_context;
+        $body['resolvedPeriod'] = $payload['period'];
     }
     wp_send_json_success($body);
 }
@@ -2061,6 +2067,7 @@ function lps_product_analytics_v4_bootstrap(): array {
         : ['ok' => false, 'items' => [], 'message' => __('The warehouse directory is unavailable.', 'lavka-price-sync')];
     return [
         'sourceDatabase' => lps_product_analytics_v4_source_database(),
+        'serverDate' => wp_date('Y-m-d'),
         'warehouses' => array_values((array)($directory['items'] ?? [])),
         'warehouseDirectoryReady' => !empty($directory['ok']),
         'warehouseDirectoryMessage' => sanitize_text_field((string)($directory['message'] ?? '')),

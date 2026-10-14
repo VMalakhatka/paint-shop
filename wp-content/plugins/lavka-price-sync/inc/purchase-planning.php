@@ -1,5 +1,6 @@
 <?php
 if (!defined('ABSPATH')) exit;
+require_once __DIR__ . '/analytics-period.php';
 require_once __DIR__ . '/purchase-assembly.php';
 require_once __DIR__ . '/purchase-current-stock.php';
 require_once __DIR__ . '/purchase-export.php';
@@ -54,6 +55,11 @@ function lps_purchase_i18n(): array {
         'physical' => __('Physical quantity', 'lavka-price-sync'),
         'planningAvailable' => __('Stock for purchase planning', 'lavka-price-sync'),
         'internalReserved' => __('Reserved for internal transfers', 'lavka-price-sync'),
+        'customerPreorders' => __('Remaining customer preorders', 'lavka-price-sync'),
+        'preorderAdditionalDemand' => __('Additional preorder demand', 'lavka-price-sync'),
+        'expectedFreeAfterPreorders' => __('Expected free stock after customer preorders', 'lavka-price-sync'),
+        'preorderUncoveredAfterReceipts' => __('Customer preorders not covered by current stock and expected receipts', 'lavka-price-sync'),
+        'preorderLines' => __('Customer preorder source lines (JSON)', 'lavka-price-sync'),
         'internalTransferAccounts' => __('Internal transfer accounts', 'lavka-price-sync'),
         'internalTransferHelp' => __('Internal transfer reserves are added back at the account warehouse, regardless of recipient. Customer reserves stay deducted. Do not add these accounts again as incoming stock.', 'lavka-price-sync'),
         'sales' => __('Regular sales quantity', 'lavka-price-sync'),
@@ -137,6 +143,7 @@ function lps_purchase_i18n(): array {
             'ASSEMBLY_CHILD_DATA_REQUIRED' => __('Child analytics are missing for the selected warehouses. Refresh the snapshots and start a new preview.', 'lavka-price-sync'),
             'ASSEMBLY_DEPENDENCY_REQUIRED' => __('Review the child shortage breakdown and complete the child supply inputs. Its unknown shortage is not treated as zero.', 'lavka-price-sync'),
             'INTERNAL_TRANSFER_DATA_REQUIRED' => __('Rebuild warehouse snapshots with the updated Java backend to capture internal reservations.', 'lavka-price-sync'),
+            'CUSTOMER_PREORDER_DATA_REQUIRED' => __('Current customer preorder data is required before ordering.', 'lavka-price-sync'),
             'INTERNAL_TRANSFER_RESERVE_MISMATCH' => __('Internal reservations exceed the reserved stock. Check the source snapshot before ordering.', 'lavka-price-sync'),
             'PLANNED_REPLENISHMENT_UNCOVERED' => __('The source stock and selected purchase do not cover the planned replenishment. Review rounding or the manual quantities.', 'lavka-price-sync'),
             'REPLENISHMENT_DEPENDENCY_REQUIRED' => __('Review the destination and source inputs before calculating the linked replenishment and supplier order.', 'lavka-price-sync'),
@@ -202,7 +209,7 @@ function lps_purchase_session_key(string $token): string {
 function lps_purchase_session(string $token): array {
     $state = get_transient(lps_purchase_session_key($token));
     if (!is_array($state)) throw new InvalidArgumentException(__('The preview has expired. Start a new calculation.', 'lavka-price-sync'));
-    if (($state['previewVersion'] ?? 0) !== 10) throw new InvalidArgumentException(__('Start a new preview to apply the current rounding and demand settings.', 'lavka-price-sync'));
+    if (($state['previewVersion'] ?? 0) !== 12) throw new InvalidArgumentException(__('Start a new preview to apply the current rounding and demand settings.', 'lavka-price-sync'));
     if (($state['transitContractVersion'] ?? 0) !== 3 || ($state['transitWarehouseIds'] ?? null) !== lps_purchase_transit_warehouses()) {
         throw new InvalidArgumentException(__('Transport warehouse settings changed. Start a new preview.', 'lavka-price-sync'));
     }
@@ -222,6 +229,8 @@ function lps_purchase_start(int $id, int $version): array {
         throw new InvalidArgumentException(__('The scenario changed or is not active. Reload the page.', 'lavka-price-sync'));
     }
     $profile = $scenario['profile'];
+    $created_at = wp_date('Y-m-d H:i:s');
+    $profile['period'] = lps_analytics_period_resolve($profile['period'], substr($created_at, 0, 10));
     $suppliers = $profile['productFilters']['currentSuppliers'] ?? [];
     if (($suppliers['mode'] ?? '') !== 'INCLUDE' || count($suppliers['values'] ?? []) !== 1) {
         throw new InvalidArgumentException(__('Select exactly one supplier for the purchase preview.', 'lavka-price-sync'));
@@ -246,7 +255,7 @@ function lps_purchase_start(int $id, int $version): array {
         'calculation' => $profile['calculation'], 'sort' => [['field' => 'sku', 'direction' => 'ASC']], 'page' => ['size' => 100],
     ]);
     $token = bin2hex(random_bytes(16));
-    $state = ['previewVersion' => 10, 'orderSupplier' => $suppliers['values'][0], 'phase' => 'roots', 'rootSkus' => [], 'pendingChildren' => [], 'phaseCount' => 0,
+    $state = ['previewVersion' => 12, 'orderSupplier' => $suppliers['values'][0], 'phase' => 'roots', 'rootSkus' => [], 'pendingChildren' => [], 'phaseCount' => 0,
         'scenario' => ['id' => $scenario['id'], 'uuid' => $scenario['uuid'], 'name' => $scenario['name'], 'version' => $scenario['version']],
         'supplierPriceVersions' => function_exists('lps_sp_active_versions') ? lps_sp_active_versions($profile['context']['sourceDatabase']) : [],
         'query' => $query, 'groups' => $groups, 'groupsRevision' => lavka_get_global_warehouse_groups_revision(),
@@ -259,7 +268,7 @@ function lps_purchase_start(int $id, int $version): array {
             'freezingTargetDays' => $profile['purchasePlanning']['freezingTargetDays'] ?? 210,
             'nonFreezingTargetDays' => $profile['purchasePlanning']['nonFreezingTargetDays'] ?? 150],
         'rows' => [], 'edits' => [], 'page' => 0, 'cursor' => null, 'seenCursors' => [], 'complete' => false,
-        'context' => null, 'createdAt' => wp_date('Y-m-d H:i:s')];
+        'context' => null, 'createdAt' => $created_at];
     set_transient(lps_purchase_session_key($token), $state, 2 * HOUR_IN_SECONDS);
     return ['token' => $token, 'scenario' => $state['scenario'], 'groups' => $groups, 'query' => $query, 'groupsRevision' => $state['groupsRevision'],
         'transitWarehouseIds' => $transit_ids];
@@ -485,7 +494,7 @@ add_action('admin_post_lps_purchase_export', static function (): void {
         $t = lps_purchase_i18n();
         $results = lps_purchase_calculate_network($state);
         $summary = lps_purchase_export_summary($state, $results);
-        $keys = ['sku', 'product', 'group', 'receivingWarehouse', 'minimumWarehouse', 'minimumReserve', 'physical', 'available', 'internalReserved', 'planningAvailable', 'internalTransferAccounts', 'sales', 'availableDays', 'stockoutDays', 'availabilityStatus', 'estimatedLostSales', 'appliedLostSales', 'adjustedSales', 'maxDemandMultiplier', 'demandStatus', 'returns', 'coverage', 'ownTarget', 'componentDemand', 'childContributions', 'target', 'need', 'transfer', 'supplyFromGroupCode', 'plannedTransferIn', 'plannedTransferOut', 'inTransit', 'openOrders', 'pack', 'packRounding', 'moq', 'purchase', 'quantity', 'final', 'reason'];
+        $keys = ['sku', 'product', 'group', 'receivingWarehouse', 'minimumWarehouse', 'minimumReserve', 'physical', 'available', 'internalReserved', 'planningAvailable', 'internalTransferAccounts', 'sales', 'availableDays', 'stockoutDays', 'availabilityStatus', 'estimatedLostSales', 'appliedLostSales', 'adjustedSales', 'maxDemandMultiplier', 'demandStatus', 'returns', 'coverage', 'ownTarget', 'customerPreorders', 'preorderAdditionalDemand', 'expectedFreeAfterPreorders', 'preorderUncoveredAfterReceipts', 'preorderLines', 'componentDemand', 'childContributions', 'target', 'need', 'transfer', 'supplyFromGroupCode', 'plannedTransferIn', 'plannedTransferOut', 'inTransit', 'openOrders', 'pack', 'packRounding', 'moq', 'purchase', 'quantity', 'final', 'reason'];
         $columns = array_map(static fn($key) => ['key' => $key, 'label' => $t[$key]], $keys);
         $stock_columns = [];
         foreach (['allWarehousesPhysical','periodExpense','excessStock','stockMonths'] as $key) $stock_columns[] = ['key' => $key, 'label' => $t[$key]];
@@ -517,7 +526,10 @@ add_action('admin_post_lps_purchase_export', static function (): void {
                 $record = ['sku' => (string)$sku, 'product' => $calculated['productName'], 'group' => $group['groupName'],
                     'coldStatus' => $t['coldStatuses'][$calculated['coldCoverage']['status']] ?? $t['coldStatuses']['UNKNOWN'],
                     'receivingWarehouse' => $group['receivingWarehouseId'], 'available' => $group['available'], 'sales' => $stock_report['regularSales'],
-                    'internalReserved' => $group['internalReserved'],
+                    'internalReserved' => $group['internalReserved'], 'customerPreorders' => $group['customerPreorders'],
+                    'preorderAdditionalDemand' => $group['preorderAdditionalDemand'],
+                    'expectedFreeAfterPreorders' => $group['expectedFreeAfterPreorders'], 'preorderUncoveredAfterReceipts' => $group['preorderUncoveredAfterReceipts'],
+                    'preorderLines' => wp_json_encode($group['preorderLines'], JSON_UNESCAPED_UNICODE),
                     'physical' => $stock_report['physical'], 'ownTarget' => $group['ownTarget'], 'componentDemand' => $group['componentDemand'],
                     'allWarehousesPhysical' => $calculated['stockReport']['total']['physical'],
                     'periodExpense' => $stock_report['periodExpense'], 'excessStock' => $stock_report['excessStock'], 'stockMonths' => $stock_report['stockMonths'],

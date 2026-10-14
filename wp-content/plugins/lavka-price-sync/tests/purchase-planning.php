@@ -29,6 +29,17 @@ $profile['purchasePlanning'] = ['version' => 1, 'enabled' => true, 'allowTransfe
 ]];
 $saved = lps_analytics_scenario_sanitize_profile($profile);
 check($saved === lps_analytics_scenario_sanitize_profile($saved), 'Scenario survives repeated sanitization');
+check($saved['period'] === ['mode'=>'ROLLING_DAYS','days'=>190], 'New scenarios store a relative duration without stale dates');
+check(lps_analytics_period_resolve(['mode'=>'ROLLING_DAYS','days'=>2], '2024-03-01') === ['from'=>'2024-02-29','to'=>'2024-03-01'], 'Relative period crosses leap day');
+check(lps_analytics_period_resolve(['mode'=>'ROLLING_DAYS','days'=>1], '2026-01-01') === ['from'=>'2026-01-01','to'=>'2026-01-01'], 'One day includes today exactly once');
+check(lps_analytics_period_resolve(['mode'=>'ROLLING_DAYS','days'=>3], '2026-01-01') === ['from'=>'2025-12-30','to'=>'2026-01-01'], 'Relative period crosses the year boundary');
+check(lps_analytics_period_resolve(['from'=>'2026-08-01','to'=>'2026-08-30'],'2026-10-14') === ['from'=>'2026-08-01','to'=>'2026-08-30'], 'Historical fixed scenarios keep their dates');
+foreach ([0,-1,1.5,3651,'bad'] as $invalidDays) {
+    $rejectedDays = false;
+    try { lps_analytics_period_profile(['mode'=>'ROLLING_DAYS','days'=>$invalidDays]); }
+    catch (InvalidArgumentException $e) { $rejectedDays = true; }
+    check($rejectedDays,'Reject invalid relative day count');
+}
 check($saved['productFilters'] === $profile['productFilters'] && $saved['movementFilters'] === $profile['movementFilters'], 'Purchase settings do not erase analytics filters');
 check($saved['purchasePlanning']['groups'][0]['code'] === 'kyiv', 'Keep stable group identity');
 check(!isset($saved['purchasePlanning']['groups'][0]['warehouseIds']), 'Do not copy mutable global composition into scenario');
@@ -338,3 +349,30 @@ $surplus['warehouseBreakdown'][1]['metrics']['regularSoldUnits']=0;
 $ir=lps_purchase_calculate($surplus,$surplusGroups,30,true,$internalInputs,[]);
 check($ir['groups'][0]['transferOut']===10.0 && $ir['groups'][1]['transferIn']===10.0, 'Surplus calculation uses the same corrected source stock');
 echo "PASS: source-only internal reserve correction, client reserves, recipient independence, replenishment and surplus transfers\n";
+
+// Non-accounted preorders are independent demand; unrelated Folio reserves never cover them.
+$preorderGroups = [['code'=>'one','name'=>'One','warehouseIds'=>[1],'receivingWarehouseId'=>1,'minimumWarehouseId'=>1,
+    'leadTimeDays'=>0,'targetDays'=>30,'safetyDays'=>0,'packRounding'=>'NONE','stockOnlyWarehouseIds'=>[],'demandWarehouseIds'=>[1]]];
+$preorderRow = ['sku'=>'PREORDER', 'dimensions'=>['currentSuppliers'=>['Kreul'],'packageQuantity'=>1,'minimumOrderQuantity'=>0],
+    'metrics'=>['grossProfit'=>1], 'networkOrderPolicy'=>['orderAllowed'=>true,'status'=>'ALLOWED'],
+    'currentStockCapture'=>['captureId'=>'cut','method'=>'FOLIO_SERIALIZABLE_READ'], 'internalTransferReservations'=>['calculationVersion'=>2,'status'=>'CAPTURED','captureId'=>'cut','accounts'=>[]],
+    'inTransitStock'=>['calculationVersion'=>4,'warehouseIds'=>[9],'configurationRevision'=>hash('sha256',json_encode([9])),'captureId'=>'cut','networkPlanningReady'=>true,
+        'availableForNetworkPlanningQuantity'=>10,'networkSnapshotConsistency'=>['captureId'=>'cut','confirmed'=>true],
+        'sources'=>[['warehouseId'=>9,'captureId'=>'cut','status'=>'CAPTURED','availableForNetworkPlanningQuantity'=>10]]],
+    'customerPreorders'=>['calculationVersion'=>1,'status'=>'CAPTURED','captureId'=>'cut','asOfDate'=>'2026-10-14','lines'=>[['warehouseId'=>1,'documentId'=>1,'lineId'=>2,'quantity'=>10]]],
+    'warehouseBreakdown'=>[['warehouseId'=>1,'metrics'=>['physicalQuantity'=>0,'availableQuantity'=>0,'reservedQuantity'=>0,'regularSoldUnits'=>20,'returnQuantity'=>0],
+        'orderPolicy'=>['orderAllowed'=>true,'maximumStockLimited'=>false,'reserveAboveForecast'=>0]]]];
+$preorderNoTransit=lps_purchase_calculate($preorderRow,$preorderGroups,30,false,['one'=>['openOrders'=>0,'inTransit'=>0,'packRounding'=>'NONE','receiptsReviewed'=>true]],[9],[] )['groups'][0];
+check($preorderNoTransit['customerPreorders']==10.0 && $preorderNoTransit['preorderAdditionalDemand']==10.0 && $preorderNoTransit['finalQuantity']==30.0,
+    'An uncovered preorder is added once to the supplier need');
+$preorderTransit=lps_purchase_calculate($preorderRow,$preorderGroups,30,false,['one'=>['openOrders'=>0,'inTransit'=>10,'packRounding'=>'NONE','receiptsReviewed'=>true]], [9],[] )['groups'][0];
+check($preorderTransit['expectedFreeAfterPreorders']==0.0 && $preorderTransit['preorderUncoveredAfterReceipts']==0.0 && $preorderTransit['finalQuantity']==20.0,
+    'Transit is reserved for the preorder before the statistical forecast');
+$preorderReserved=$preorderRow; $preorderReserved['warehouseBreakdown'][0]['metrics']['physicalQuantity']=10; $preorderReserved['warehouseBreakdown'][0]['metrics']['availableQuantity']=0; $preorderReserved['warehouseBreakdown'][0]['metrics']['reservedQuantity']=10;
+$preorderReservedTransit=lps_purchase_calculate($preorderReserved,$preorderGroups,30,false,['one'=>['openOrders'=>0,'inTransit'=>10,'packRounding'=>'NONE','receiptsReviewed'=>true]],[9],[] )['groups'][0];
+check($preorderReservedTransit['preorderAdditionalDemand']==10.0 && $preorderReservedTransit['expectedFreeAfterPreorders']==0.0 && $preorderReservedTransit['finalQuantity']==20.0,
+    'Transit covers the whole non-accounted preorder even when other accounts already reserve physical stock');
+$preorderReserved=lps_purchase_calculate($preorderReserved,$preorderGroups,30,false,['one'=>['openOrders'=>0,'inTransit'=>0,'packRounding'=>'NONE','receiptsReviewed'=>true]],[9],[] )['groups'][0];
+check($preorderReserved['preorderAdditionalDemand']==10.0 && $preorderReserved['finalQuantity']==30.0,
+    'An unrelated current Folio reserve cannot cover a non-accounted preorder');
+echo "PASS: non-accounted customer preorder demand, transit allocation and independent client reserves\n";

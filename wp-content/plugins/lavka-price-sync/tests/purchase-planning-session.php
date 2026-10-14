@@ -17,7 +17,7 @@ function get_current_user_id() { return $GLOBALS['user'] ?? 1; }
 function get_transient($key) { return $GLOBALS['sessions'][$key] ?? false; }
 function set_transient($key, $value, $ttl) { $GLOBALS['sessions'][$key] = $value; }
 function wp_json_encode($value, $flags = 0) { return json_encode($value, $flags); }
-function wp_date($format) { return date($format); }
+function wp_date($format) { return isset($GLOBALS['testClock']) ? (new DateTimeImmutable($GLOBALS['testClock']))->format($format) : date($format); }
 function lps_analytics_scenario_row($id) { return $id === 1 ? $GLOBALS['scenario'] : null; }
 function lps_analytics_scenario_decode_row($row) { return $row; }
 function lavka_get_global_warehouse_groups_revision() { return $GLOBALS['revision'] ?? 'revision-1'; }
@@ -100,7 +100,7 @@ check($start['query']['calculation']['availability']['enabled'] === true
     && $start['query']['calculation']['availability']['groupCode'] === 'group'
     && $start['query']['calculation']['availability']['filter'] === ['availabilityStatus' => ['MEASURED']], 'Correction enables history without erasing availability filters');
 $key = lps_purchase_session_key($start['token']);
-$sessions[$key]['previewVersion'] = 5;
+$sessions[$key]['previewVersion'] = 11;
 rejected(fn() => lps_purchase_session($start['token']), 'Old calculation version requires a fresh preview');
 echo "PASS: scenario demand/rounding snapshot, history request and old-preview invalidation\n";
 
@@ -200,3 +200,18 @@ check(lps_purchase_missing_child_skus($bad,['MISSING'])===[],'Unrequested SKU ca
 $bad=new WP_Error('java_transport_error','Timeout',['httpStatus'=>0]);
 check(lps_purchase_missing_child_skus($bad,['MISSING'])===[],'Transport failure must not be accepted as missing data');
 echo "PASS: missing descendants, exact backend errors, bounded retry, empty-batch generation guard and unknown stock\n";
+
+$scenario['profile']['period'] = ['mode'=>'ROLLING_DAYS','days'=>190];
+$testClock = '2026-10-14 23:59:59';
+$relative = lps_purchase_start(1,$scenario['version']);
+$relativeState = lps_purchase_session($relative['token']);
+check($relative['query']['period'] === ['from'=>'2026-04-08','to'=>'2026-10-14'] && $relativeState['periodDays']===190,
+    'A new forecast resolves exactly 190 inclusive days from the site date');
+$testClock = '2026-10-15 00:00:01';
+check(lps_purchase_session($relative['token'])['query']['period'] === $relative['query']['period'],
+    'A running forecast keeps its dates across midnight');
+$next = lps_purchase_start(1,$scenario['version']);
+check($next['query']['period'] === ['from'=>'2026-04-09','to'=>'2026-10-15'], 'The next forecast advances both dates');
+check($scenario['profile']['period'] === ['mode'=>'ROLLING_DAYS','days'=>190], 'Calculated dates never replace the saved duration');
+unset($testClock);
+echo "PASS: relative forecast dates, inclusive day count, midnight stability and next-run refresh\n";
