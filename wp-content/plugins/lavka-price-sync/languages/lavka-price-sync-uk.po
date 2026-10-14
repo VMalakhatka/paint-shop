@@ -6768,3 +6768,31 @@ msgstr "Рядки-джерела клієнтських передзамовл�
 #: inc/purchase-planning.php
 msgid "Current customer preorder data is required before ordering."
 msgstr "Перед замовленням потрібні поточні дані про клієнтські передзамовлення."
+
+#: inc/analytics-period.php
+msgid "Set the analysis period between 1 and 3650 whole days."
+msgstr "Вкажіть період аналізу від 1 до 3650 цілих днів."
+
+#: inc/analytics-period.php
+msgid "Select a valid analysis period mode."
+msgstr "Виберіть коректний режим періоду аналізу."
+
+#: inc/analytics-scenarios.php
+msgid "Analysis period mode"
+msgstr "Режим періоду аналізу"
+
+#: inc/analytics-scenarios.php
+msgid "Last N days through today"
+msgstr "Останні N днів до сьогодні"
+
+#: inc/analytics-scenarios.php
+msgid "Fixed dates"
+msgstr "Фіксовані дати"
+
+#: inc/analytics-scenarios.php
+msgid "Analysis period, days"
+msgstr "Період аналізу, днів"
+
+#: inc/analytics-scenarios.php
+msgid "Relative dates are recalculated at each new report or forecast. Today is included in the number of days. The completed calculation and Excel keep their actual dates."
+msgstr "Відносні дати перераховуються для кожного нового звіту або прогнозу. Сьогодні входить до кількості днів. Завершений розрахунок та Excel зберігають фактичні дати."

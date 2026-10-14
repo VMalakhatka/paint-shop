@@ -29,6 +29,17 @@ $profile['purchasePlanning'] = ['version' => 1, 'enabled' => true, 'allowTransfe
 ]];
 $saved = lps_analytics_scenario_sanitize_profile($profile);
 check($saved === lps_analytics_scenario_sanitize_profile($saved), 'Scenario survives repeated sanitization');
+check($saved['period'] === ['mode'=>'ROLLING_DAYS','days'=>190], 'New scenarios store a relative duration without stale dates');
+check(lps_analytics_period_resolve(['mode'=>'ROLLING_DAYS','days'=>2], '2024-03-01') === ['from'=>'2024-02-29','to'=>'2024-03-01'], 'Relative period crosses leap day');
+check(lps_analytics_period_resolve(['mode'=>'ROLLING_DAYS','days'=>1], '2026-01-01') === ['from'=>'2026-01-01','to'=>'2026-01-01'], 'One day includes today exactly once');
+check(lps_analytics_period_resolve(['mode'=>'ROLLING_DAYS','days'=>3], '2026-01-01') === ['from'=>'2025-12-30','to'=>'2026-01-01'], 'Relative period crosses the year boundary');
+check(lps_analytics_period_resolve(['from'=>'2026-08-01','to'=>'2026-08-30'],'2026-10-14') === ['from'=>'2026-08-01','to'=>'2026-08-30'], 'Historical fixed scenarios keep their dates');
+foreach ([0,-1,1.5,3651,'bad'] as $invalidDays) {
+    $rejectedDays = false;
+    try { lps_analytics_period_profile(['mode'=>'ROLLING_DAYS','days'=>$invalidDays]); }
+    catch (InvalidArgumentException $e) { $rejectedDays = true; }
+    check($rejectedDays,'Reject invalid relative day count');
+}
 check($saved['productFilters'] === $profile['productFilters'] && $saved['movementFilters'] === $profile['movementFilters'], 'Purchase settings do not erase analytics filters');
 check($saved['purchasePlanning']['groups'][0]['code'] === 'kyiv', 'Keep stable group identity');
 check(!isset($saved['purchasePlanning']['groups'][0]['warehouseIds']), 'Do not copy mutable global composition into scenario');

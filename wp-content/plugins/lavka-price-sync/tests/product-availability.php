@@ -41,6 +41,16 @@ $saved = lps_analytics_scenario_sanitize_profile_v4($profile);
 check($saved['calculation']['availability']['filter']['stockoutPercentFrom'] === 10.0, 'Saved filter lost');
 check(!isset($saved['calculation']['availability']['warehouseGroups']), 'Scenario copied group membership');
 check($saved === lps_analytics_scenario_sanitize_profile_v4($saved), 'Scenario roundtrip changed');
+$relativeQuery = lps_product_analytics_v4_sanitize_query(['sourceDatabase'=>'Paint_Ua','warehouseIds'=>[1,7],'period'=>['mode'=>'ROLLING_DAYS','days'=>190]]);
+check($relativeQuery['period'] === lps_analytics_period_resolve(['mode'=>'ROLLING_DAYS','days'=>190]), 'Analytics resolves the relative scenario to concrete Java request dates');
+check(!isset($relativeQuery['period']['mode']), 'Java receives only concrete period boundaries');
+class FixtureJsonSuccess extends RuntimeException {}
+function wp_send_json_success($payload) { $GLOBALS['jsonSuccess'] = $payload; throw new FixtureJsonSuccess(); }
+$responses = [['ok'=>true,'rows'=>[]]];
+try { lps_product_analytics_v4_send_java(LPS_PRODUCT_ANALYTICS_QUERY_PATH, $relativeQuery); }
+catch (FixtureJsonSuccess $e) {}
+check($jsonSuccess['resolvedPeriod'] === $relativeQuery['period'], 'The report returns the exact resolved period for pagination and Excel');
+$queries = [];
 $resolved = lps_product_analytics_v4_sanitize_availability($availability, [1, 7]);
 check($resolved['warehouseGroups'][0]['warehouseIds'] === [1, 7], 'Must use current server group');
 check($resolved['groupCode'] === 'kyiv', 'Group context lost');

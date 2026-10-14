@@ -1,5 +1,6 @@
 <?php
 if (!defined('ABSPATH')) exit;
+require_once __DIR__ . '/analytics-period.php';
 require_once __DIR__ . '/purchase-assembly.php';
 require_once __DIR__ . '/purchase-current-stock.php';
 require_once __DIR__ . '/purchase-export.php';
@@ -228,6 +229,8 @@ function lps_purchase_start(int $id, int $version): array {
         throw new InvalidArgumentException(__('The scenario changed or is not active. Reload the page.', 'lavka-price-sync'));
     }
     $profile = $scenario['profile'];
+    $created_at = wp_date('Y-m-d H:i:s');
+    $profile['period'] = lps_analytics_period_resolve($profile['period'], substr($created_at, 0, 10));
     $suppliers = $profile['productFilters']['currentSuppliers'] ?? [];
     if (($suppliers['mode'] ?? '') !== 'INCLUDE' || count($suppliers['values'] ?? []) !== 1) {
         throw new InvalidArgumentException(__('Select exactly one supplier for the purchase preview.', 'lavka-price-sync'));
@@ -265,7 +268,7 @@ function lps_purchase_start(int $id, int $version): array {
             'freezingTargetDays' => $profile['purchasePlanning']['freezingTargetDays'] ?? 210,
             'nonFreezingTargetDays' => $profile['purchasePlanning']['nonFreezingTargetDays'] ?? 150],
         'rows' => [], 'edits' => [], 'page' => 0, 'cursor' => null, 'seenCursors' => [], 'complete' => false,
-        'context' => null, 'createdAt' => wp_date('Y-m-d H:i:s')];
+        'context' => null, 'createdAt' => $created_at];
     set_transient(lps_purchase_session_key($token), $state, 2 * HOUR_IN_SECONDS);
     return ['token' => $token, 'scenario' => $state['scenario'], 'groups' => $groups, 'query' => $query, 'groupsRevision' => $state['groupsRevision'],
         'transitWarehouseIds' => $transit_ids];

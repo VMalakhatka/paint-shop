@@ -6565,3 +6565,31 @@ msgstr ""
 #: inc/purchase-planning.php
 msgid "Current customer preorder data is required before ordering."
 msgstr ""
+
+#: inc/analytics-period.php
+msgid "Set the analysis period between 1 and 3650 whole days."
+msgstr ""
+
+#: inc/analytics-period.php
+msgid "Select a valid analysis period mode."
+msgstr ""
+
+#: inc/analytics-scenarios.php
+msgid "Analysis period mode"
+msgstr ""
+
+#: inc/analytics-scenarios.php
+msgid "Last N days through today"
+msgstr ""
+
+#: inc/analytics-scenarios.php
+msgid "Fixed dates"
+msgstr ""
+
+#: inc/analytics-scenarios.php
+msgid "Analysis period, days"
+msgstr ""
+
+#: inc/analytics-scenarios.php
+msgid "Relative dates are recalculated at each new report or forecast. Today is included in the number of days. The completed calculation and Excel keep their actual dates."
+msgstr ""
