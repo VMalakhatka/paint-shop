@@ -453,3 +453,47 @@ and cron disabled), `tests/conditional-assets.spec.cjs` (Playwright). The browse
 test requires the existing `catalog-search-session-local.php` temporary wholesale
 session; always run its `cleanup` afterwards. Import POSTs are intercepted, not
 sent to WordPress. See the performance audit for measured scope and deploy checks.
+
+## Собственная страница товара (2026-10-14)
+
+С версии 1.4.0 `inc/single-product.php` выбирает собственный `templates/content-single-product.php`
+только на single product и заменяет стандартные/GeneratePress Woo wrappers.
+`assets/single-product.css` задаёт двухколоночный верх, мобильную колонку и подробности
+ниже. Каталог, кабинет, cart и checkout этим адаптером не меняются.
+Шапка/футер и их CSS пока остаются у активной темы; это этап миграции, а не
+самостоятельная тема. Слоты галереи/summary/details сохраняют все пять Woo hooks
+и их порядок; формы типов товара, notices, reviews и structured data остаются Woo.
+Цены читаются через Woo getters/role-price, склады — через stock-locations-ui/paint-core.
+
+Названия и SKU теперь доступны также в related/upsell loops. Paint Core получает
+`pcux_catalog_assets_required=true` для этих списков, чтобы работали прежние
+кнопки количества и добавления. На остальных страницах значение фильтра сохраняется.
+
+`assets/single-product.js` заменяет legacy single AJAX только на новой странице:
+один запрос к Woo add_to_cart для simple, pending state, успешное обновление
+quantity cap и счётчика. Отказ не уменьшает остаток. При неизвестном результате
+показывает ссылку на корзину и не повторяет POST автоматически. Остальные типы и
+отключённый JavaScript используют native Woo forms. UK/RU строки входят в plugin i18n.
+
+Проверено локально 2026-10-14: `tests/single-product-local.php` — 34 проверки;
+`tests/single-product.spec.cjs` — гость, оптовая роль и customer на 1440/768/390/320,
+галерея/lightbox, tabs, related controls, совпадение role prices, справка,
+удаление parent CSS, non-simple native submit и просмотр без JS. Пять ответов
+покупки перехвачены: success/pending, rejection, HTTP failure, invalid JSON и
+исчерпание лимита. Реальных изменений корзин, заказов, ФОЛИО и production нет.
+Это не проверка реальной покупки, доставки/оплаты либо выбора вариантов товара.
+
+До browser test подготовить `tests/single-product-browser-session-local.php` через
+WP-CLI с `DISABLE_WP_CRON`/`WP_HTTP_BLOCK_EXTERNAL`. Это создаёт короткие локальные
+токены существующих ролей без правки профилей; в любом исходе выполнить тот же
+файл с аргументом `cleanup`. Секретный fixture остаётся в `/tmp`, не выводится и
+не коммитится. `PSU_PRODUCT_BASE` задаёт локальный тестовый origin, по умолчанию
+`http://127.0.0.1:8088`; при тестовом переносе origin сохранять native COOKIEHASH
+локального `paint.local`. Только runtime-константы, без записи options.
+`PSU_PRODUCT_OUTPUT` меняет временный каталог отчёта/снимков.
+Фильтр `psu_single_product_enabled=false` до `wp` возвращает стандартный шаблон,
+wrappers и legacy scripts. Новые options, migration, activation и rebuild индекса
+не нужны: Paint Shop UX уже активирован и входит в deploy manifest. Для выпуска
+нужны обычный согласованный deploy plugin/paint-core и MU help/languages/image,
+проверка страницы под гостем/оптовой ролью и шапки/футера. Канон и код справки
+обновлены; production-публикация в этой задаче не выполнялась.

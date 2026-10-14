@@ -228,7 +228,8 @@ add_action('wp_enqueue_scripts', function () {
         (function_exists('is_product_category') && is_product_category()) ||
         (function_exists('is_product_tag') && is_product_tag())
     );
-    if ( ! $is_wc_catalog ) return;
+    // Other product listings (e.g. related products) may request the same controls.
+    if ( ! apply_filters('pcux_catalog_assets_required', $is_wc_catalog) ) return;
 
     $css_rel = 'assets/css/catalog-qty.css';
     $js_rel  = 'assets/js/catalog-qty.js';

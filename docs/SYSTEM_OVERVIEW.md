@@ -52,7 +52,8 @@ OVH service -> physical host -> hypervisor -> Windows VM
 | Область | Владелец | Источник истины |
 |---|---|---|
 | Каталог, корзина, checkout, кабинет, HPOS-заказы | WooCommerce + собственные PHP-плагины | текущий Woo runtime и PHP-код |
-| Компоновка и стили | `generatepress-child` | код child theme и визуальная проверка |
+| Шапка, меню, футер и общая оболочка | GeneratePress + `generatepress-child` | код theme и визуальная проверка |
+| Каталог и содержимое страницы товара | `paint-shop-ux` | собственные modules/templates/assets; Woo hooks сохраняют цены, склады и покупку |
 | Общие остатки и allocation | `paint-core` | код, Woo product/order state |
 | Полная синхронизация карточек и категорий | `lavka-total-sync` + Java `/sync/run` | код обоих владельцев и run status |
 | Остатки, названия и глобальные группы складов | `lavka-sync` | стабильные location term ID/slug, `lavka_folio_warehouses`, Folio warehouse ID и Woo stock |

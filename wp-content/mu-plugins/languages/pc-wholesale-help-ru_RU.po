@@ -1092,3 +1092,11 @@ msgstr "Счета на предзаказ резервируют остаток
 
 msgid "In the XLSX export, preorder invoices and their total also appear below the movements on the main sheet. A separate invoice sheet is included for working with the data."
 msgstr "В экспорте XLSX счета на предзаказ и их общая сумма также расположены под движениями на основном листе. Для работы с данными добавлен отдельный лист счетов."
+
+#: pc-wholesale-help.php
+msgid "On a product page, photos appear beside the full name, your price, warehouse stock and purchase controls; on a phone these blocks are stacked. SKU and the available barcode are below the purchase controls, followed by description, attributes, reviews and related products. For a simple product, wait for the result after adding it. If the site cannot confirm the result, check your cart before trying again; the request is not retried automatically."
+msgstr "На странице товара фото расположено рядом с полным названием, вашей ценой, наличием по складам и покупкой; на телефоне эти блоки идут друг под другом. Артикул и доступный штрихкод находятся под блоком покупки, а ниже — описание, характеристики, отзывы и похожие товары. Для обычного товара дождитесь результата добавления. Если сайт не смог подтвердить результат, проверьте корзину перед повторной попыткой; автоматического повтора нет."
+
+#: pc-wholesale-help.php
+msgid "Product page on a phone"
+msgstr "Страница товара на телефоне"
