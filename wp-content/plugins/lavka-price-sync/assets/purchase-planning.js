@@ -92,7 +92,7 @@
         el('next').disabled = rows.length === 0 || state.page >= pages - 1;
         el('filters').disabled = state.rows.length === 0;
         el('filter-count').textContent = String(t.filterCount || '%1$s / %2$s').replace('%1$s', number.format(rows.length)).replace('%2$s', number.format(state.rows.length));
-        const headings = ['group', 'purchase', 'final', 'physical', 'available', 'internalReserved', 'planningAvailable', 'sales', 'availableDays', 'stockoutDays', 'estimatedLostSales', 'appliedLostSales', 'adjustedSales', 'minimumWarehouse', 'minimumReserve', 'returns', 'coverage', 'ownTarget', 'componentDemand', 'manufacturingNeed', 'target', 'need', 'plannedTransferIn', 'plannedTransferOut', 'transfer'];
+        const headings = ['group', 'purchase', 'final', 'physical', 'available', 'internalReserved', 'planningAvailable', 'sales', 'availableDays', 'stockoutDays', 'estimatedLostSales', 'appliedLostSales', 'adjustedSales', 'minimumWarehouse', 'minimumReserve', 'returns', 'coverage', 'ownTarget', 'customerPreorders', 'preordersCoveredByCurrentReserve', 'preorderAdditionalDemand', 'expectedFreeAfterPreorders', 'preorderUncoveredAfterReceipts', 'componentDemand', 'manufacturingNeed', 'target', 'need', 'plannedTransferIn', 'plannedTransferOut', 'transfer'];
         el('results').innerHTML = rows.length ? rows.slice(state.page * 25, state.page * 25 + 25).map((row) => {
             const index = state.rows.indexOf(row);
             const filterData = row.filterData || {};
@@ -126,7 +126,7 @@
                     '<td>' + display(group.demand.estimatedLostSales) + '</td>' +
                     '<td>' + display(group.demand.appliedLostSales) + '</td><td>' + display(group.demand.adjustedSales) + '</td>' +
                     '<td>' + escape(group.minimumWarehouseName || group.minimumWarehouseId || '—') + '</td><td>' + display(group.minimumReserve) + '</td>' +
-                    ['returns', 'coverageDays', 'ownTarget', 'componentDemand', 'manufacturingNeed', 'target', 'needBeforeReceipts'].map((key) => '<td>' + display(group[key]) + '</td>').join('') +
+                    ['returns', 'coverageDays', 'ownTarget', 'customerPreorders', 'preordersCoveredByCurrentReserve', 'preorderAdditionalDemand', 'expectedFreeAfterPreorders', 'preorderUncoveredAfterReceipts', 'componentDemand', 'manufacturingNeed', 'target', 'needBeforeReceipts'].map((key) => '<td>' + display(group[key]) + '</td>').join('') +
                     '<td>' + display(group.plannedTransferIn) + '</td><td>' + display(group.plannedTransferOut) + '</td>' +
                     '<td>' + group.transfers.map((transfer) => escape(transfer.fromName) + ': ' + display(transfer.quantity)).join('<br>') + (group.transferOut > 0 ? '<br>−' + display(group.transferOut) : '') + '</td></tr>').join('') +
                 '</tbody></table></div><details><summary>' + escape(t.details) + '</summary><form data-edit-form="' + index + '">' + row.groups.map((group) =>

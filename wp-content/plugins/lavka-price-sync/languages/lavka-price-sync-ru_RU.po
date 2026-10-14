@@ -6760,3 +6760,31 @@ msgstr "Экспорт содержит одну строку заказа по�
 #: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
 msgid "Cold sensitivity"
 msgstr "Морозостойкость"
+
+#: inc/purchase-export.php inc/purchase-planning.php
+msgid "Remaining customer preorders"
+msgstr "Остаток клиентских предзаказов"
+
+#: inc/purchase-export.php inc/purchase-planning.php
+msgid "Preorders already covered by current Folio reserve"
+msgstr "Предзаказы, уже покрытые текущим резервом ФОЛИО"
+
+#: inc/purchase-export.php inc/purchase-planning.php
+msgid "Additional preorder demand"
+msgstr "Дополнительная потребность по предзаказам"
+
+#: inc/purchase-export.php inc/purchase-planning.php
+msgid "Expected free stock after customer preorders"
+msgstr "Ожидаемый свободный остаток после клиентских предзаказов"
+
+#: inc/purchase-export.php inc/purchase-planning.php
+msgid "Customer preorders not covered by current stock and expected receipts"
+msgstr "Клиентские предзаказы, не покрытые текущим остатком и ожидаемыми поступлениями"
+
+#: inc/purchase-planning.php
+msgid "Customer preorder source lines (JSON)"
+msgstr "Строки-источники клиентских предзаказов (JSON)"
+
+#: inc/purchase-planning.php
+msgid "Current customer preorder data is required before ordering."
+msgstr "Перед заказом нужны текущие данные о клиентских предзаказах."

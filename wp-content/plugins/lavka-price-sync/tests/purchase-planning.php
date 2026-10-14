@@ -338,3 +338,27 @@ $surplus['warehouseBreakdown'][1]['metrics']['regularSoldUnits']=0;
 $ir=lps_purchase_calculate($surplus,$surplusGroups,30,true,$internalInputs,[]);
 check($ir['groups'][0]['transferOut']===10.0 && $ir['groups'][1]['transferIn']===10.0, 'Surplus calculation uses the same corrected source stock');
 echo "PASS: source-only internal reserve correction, client reserves, recipient independence, replenishment and surplus transfers\n";
+
+// A preorder already reserved in Folio is represented by free stock. Only the remainder consumes future receipts.
+$preorderGroups = [['code'=>'one','name'=>'One','warehouseIds'=>[1],'receivingWarehouseId'=>1,'minimumWarehouseId'=>1,
+    'leadTimeDays'=>0,'targetDays'=>30,'safetyDays'=>0,'packRounding'=>'NONE','stockOnlyWarehouseIds'=>[],'demandWarehouseIds'=>[1]]];
+$preorderRow = ['sku'=>'PREORDER', 'dimensions'=>['currentSuppliers'=>['Kreul'],'packageQuantity'=>1,'minimumOrderQuantity'=>0],
+    'metrics'=>['grossProfit'=>1], 'networkOrderPolicy'=>['orderAllowed'=>true,'status'=>'ALLOWED'],
+    'currentStockCapture'=>['captureId'=>'cut','method'=>'FOLIO_SERIALIZABLE_READ'], 'internalTransferReservations'=>['calculationVersion'=>2,'status'=>'CAPTURED','captureId'=>'cut','accounts'=>[]],
+    'inTransitStock'=>['calculationVersion'=>4,'warehouseIds'=>[9],'configurationRevision'=>hash('sha256',json_encode([9])),'captureId'=>'cut','networkPlanningReady'=>true,
+        'availableForNetworkPlanningQuantity'=>10,'networkSnapshotConsistency'=>['captureId'=>'cut','confirmed'=>true],
+        'sources'=>[['warehouseId'=>9,'captureId'=>'cut','status'=>'CAPTURED','availableForNetworkPlanningQuantity'=>10]]],
+    'customerPreorders'=>['calculationVersion'=>1,'status'=>'CAPTURED','captureId'=>'cut','asOfDate'=>'2026-10-14','lines'=>[['warehouseId'=>1,'documentId'=>1,'lineId'=>2,'quantity'=>10]]],
+    'warehouseBreakdown'=>[['warehouseId'=>1,'metrics'=>['physicalQuantity'=>0,'availableQuantity'=>0,'reservedQuantity'=>0,'regularSoldUnits'=>20,'returnQuantity'=>0],
+        'orderPolicy'=>['orderAllowed'=>true,'maximumStockLimited'=>false,'reserveAboveForecast'=>0]]]];
+$preorderNoTransit=lps_purchase_calculate($preorderRow,$preorderGroups,30,false,['one'=>['openOrders'=>0,'inTransit'=>0,'packRounding'=>'NONE','receiptsReviewed'=>true]],[9],[] )['groups'][0];
+check($preorderNoTransit['customerPreorders']==10.0 && $preorderNoTransit['preorderAdditionalDemand']==10.0 && $preorderNoTransit['finalQuantity']==30.0,
+    'An uncovered preorder is added once to the supplier need');
+$preorderTransit=lps_purchase_calculate($preorderRow,$preorderGroups,30,false,['one'=>['openOrders'=>0,'inTransit'=>10,'packRounding'=>'NONE','receiptsReviewed'=>true]], [9],[] )['groups'][0];
+check($preorderTransit['expectedFreeAfterPreorders']==0.0 && $preorderTransit['preorderUncoveredAfterReceipts']==0.0 && $preorderTransit['finalQuantity']==20.0,
+    'Transit is reserved for the preorder before the statistical forecast');
+$preorderReserved=$preorderRow; $preorderReserved['warehouseBreakdown'][0]['metrics']['physicalQuantity']=10; $preorderReserved['warehouseBreakdown'][0]['metrics']['availableQuantity']=0; $preorderReserved['warehouseBreakdown'][0]['metrics']['reservedQuantity']=10;
+$preorderReserved=lps_purchase_calculate($preorderReserved,$preorderGroups,30,false,['one'=>['openOrders'=>0,'inTransit'=>0,'packRounding'=>'NONE','receiptsReviewed'=>true]],[9],[] )['groups'][0];
+check($preorderReserved['preordersCoveredByCurrentReserve']==10.0 && $preorderReserved['preorderAdditionalDemand']==0.0 && $preorderReserved['finalQuantity']==20.0,
+    'A current Folio reserve is not subtracted from planning stock twice');
+echo "PASS: customer preorder demand, transit allocation and existing reserve de-duplication\n";

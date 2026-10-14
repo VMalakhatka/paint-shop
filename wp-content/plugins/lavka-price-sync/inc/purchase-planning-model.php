@@ -204,6 +204,39 @@ function lps_purchase_internal_stock(array $row, array $groups): array {
     return $out;
 }
 
+/**
+ * Customer preorder lines are a separate confirmed demand. Existing Folio reserves are already
+ * deducted from free stock, so only the part not represented by that reserve consumes future stock.
+ */
+function lps_purchase_customer_preorders(array $row, array $group, array $members, array $internal): array {
+    $empty = ['demand' => 0.0, 'coveredByCurrentReserve' => 0.0, 'additionalDemand' => 0.0, 'lines' => [], 'issue' => null];
+    if (empty($row['currentStockCapture']['captureId'])) return $empty; // direct model fixtures and historical previews
+    $source = $row['customerPreorders'] ?? [];
+    if (($source['calculationVersion'] ?? 0) !== 1 || ($source['status'] ?? '') !== 'CAPTURED'
+        || ($source['captureId'] ?? null) !== $row['currentStockCapture']['captureId'] || !is_array($source['lines'] ?? null)) {
+        return array_merge($empty, ['issue' => 'CUSTOMER_PREORDER_DATA_REQUIRED']);
+    }
+    $by_warehouse = []; $seen = [];
+    foreach ($source['lines'] as $line) {
+        $id = (int)($line['warehouseId'] ?? 0); if (!in_array($id, $group['warehouseIds'], true)) continue;
+        $qty = lps_purchase_number($line['quantity'] ?? null, 0.000001); $line_id = $line['lineId'] ?? null;
+        if ($qty === null || !is_int($line_id) || $line_id <= 0 || isset($seen[$line_id])) return array_merge($empty, ['issue' => 'CUSTOMER_PREORDER_DATA_REQUIRED']);
+        $seen[$line_id] = true; $by_warehouse[$id][] = $line;
+    }
+    $out = $empty;
+    foreach ($by_warehouse as $id => $lines) {
+        $reserved = lps_purchase_number($members[$id]['metrics']['reservedQuantity'] ?? null, -1000000000);
+        if ($reserved === null) return array_merge($empty, ['issue' => 'CUSTOMER_PREORDER_DATA_REQUIRED']);
+        $demand = array_sum(array_map(static fn($line) => (float)$line['quantity'], $lines));
+        // Transfer accounts are restored separately and must never be mistaken for a client reservation.
+        $customer_capacity = max(0.0, $reserved - (float)($internal['restoredByWarehouse'][$id] ?? 0.0));
+        $covered = min($demand, $customer_capacity);
+        $out['demand'] += $demand; $out['coveredByCurrentReserve'] += $covered; $out['additionalDemand'] += $demand - $covered;
+        $out['lines'] = array_merge($out['lines'], $lines);
+    }
+    return $out;
+}
+
 function lps_purchase_profile(array $input): array {
     $groups = [];
     foreach (array_slice((array)($input['groups'] ?? []), 0, 50) as $group) {
@@ -408,6 +441,13 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
         $ready = !$issues && $incoming !== null && $open_orders !== null && (!empty($group['supplyFromGroupCode']) || ((!$respect_pack || $pack !== null) && $moq !== null));
         $planning_available = $available + $internal_group['internalRestored'];
         $position = $planning_available + ($incoming ?? 0) + ($open_orders ?? 0);
+        $preorders = lps_purchase_customer_preorders($row, $group, $members, $internal);
+        if ($preorders['issue']) $issues[] = $preorders['issue'];
+        $ready = $ready && !$preorders['issue'];
+        $statistical_target = $target;
+        $target = $target !== null ? $target + $preorders['additionalDemand'] : null;
+        $expected_free_after_preorders = max(0, $position - $preorders['additionalDemand']);
+        $preorder_uncovered_after_receipts = max(0, $preorders['additionalDemand'] - $position);
         $result[$group['code']] = [
             'policyExcluded' => false,
             'notes' => $demand['status'] === 'ACTUAL_SALES_ONLY' ? ['STOCKOUT_CORRECTION_NOT_CALCULATED'] : [],
@@ -428,7 +468,10 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
             'regularSales' => $valid ? $sales : null,
             'availability' => lps_purchase_availability($group, $row),
             'returns' => $valid ? $returns : null, 'coverageDays' => $daily > 0 ? max(0, $planning_available) / $daily : null,
-            'target' => $target, 'needBeforeReceipts' => $target === null ? null : max(0, $target - $planning_available),
+            'statisticalTarget' => $statistical_target, 'target' => $target, 'needBeforeReceipts' => $target === null ? null : max(0, $target - $planning_available),
+            'customerPreorders' => $preorders['demand'], 'preordersCoveredByCurrentReserve' => $preorders['coveredByCurrentReserve'],
+            'preorderAdditionalDemand' => $preorders['additionalDemand'], 'expectedFreeAfterPreorders' => $expected_free_after_preorders,
+            'preorderUncoveredAfterReceipts' => $preorder_uncovered_after_receipts, 'preorderLines' => $preorders['lines'],
             'ownTarget' => $own_target, 'componentDemand' => $component_demand,
             'childContributions' => $assembly['contributions'][$group['code']] ?? [],
             'manufacturingNeed' => null,

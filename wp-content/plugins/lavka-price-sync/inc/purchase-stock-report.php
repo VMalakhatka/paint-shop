@@ -36,6 +36,7 @@ function lps_purchase_stock_report(array $row, array $settings, array $calculate
         $component = $item['componentDemand'];
         $target = $adjusted !== null && $item['minimumReserve'] !== null && $component !== null
             ? $adjusted / $days * ($group['leadTimeDays'] + $group['targetDays'] + $group['safetyDays']) + $item['minimumReserve'] + $component : null;
+        if ($target !== null) $target += $item['preorderAdditionalDemand'] ?? 0.0;
         // Do not mark a broken recipe's required components as surplus.
         foreach ($item['issues'] as $issue) if (str_starts_with($issue, 'ASSEMBLY_')) $target = null;
         $excess = $stock !== null && $target !== null ? max(0, $stock - $target - $item['plannedTransferOut']) : null;

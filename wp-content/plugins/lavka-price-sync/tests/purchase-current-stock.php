@@ -24,7 +24,7 @@ foreach (['kyiv'=>[1,7], 'odessa'=>[5,15]] as $code=>$ids) $groups[]=['code'=>$c
     'demandWarehouseIds'=>$code==='odessa'?[5]:$ids, 'stockOnlyWarehouseIds'=>$code==='odessa'?[15]:[],
     'receivingWarehouseId'=>$code==='kyiv'?7:5,'minimumWarehouseId'=>$code==='kyiv'?7:5,
     'supplyFromGroupCode'=>$code==='odessa'?'kyiv':'','leadTimeDays'=>45,'targetDays'=>150,'safetyDays'=>0,'packRounding'=>'UP'];
-$state=['query'=>['sourceDatabase'=>'Paint_Ua','warehouseIds'=>[1,5,7,15]], 'transitWarehouseIds'=>[9,10], 'assemblyGraph'=>$graph,
+$state=['query'=>['sourceDatabase'=>'Paint_Ua','warehouseIds'=>[1,5,7,15]], 'createdAt'=>'2026-10-11 12:00:00', 'transitWarehouseIds'=>[9,10], 'assemblyGraph'=>$graph,
     'rows'=>['P'=>$history],'groups'=>$groups,'rootSkus'=>['P'],'orderSupplier'=>'Supplier','periodDays'=>240,'allowTransfers'=>false,
     'supplyConfirmation'=>['noOtherIncomingOrders'=>true,'noSupplierMinimumOrder'=>true,'currentReceiptsWithinLeadTime'=>true]];
 $capture=current_stock_fixture(['sourceDatabase'=>'Paint_Ua','warehouseIds'=>[1,5,7,9,10,15],'analysisWarehouseIds'=>[1,5,7,15]], $graph);

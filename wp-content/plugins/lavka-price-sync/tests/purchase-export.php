@@ -9,6 +9,7 @@ $offer=['article'=>'0010','offerStatus'=>'PRESENT','price'=>1.07,'currency'=>'EU
 $raw['supplierPrices']=[['supplier'=>'Supplier','offers'=>[$offer]]];
 $scope=[1,5,7,9,10,15]; $recipe=['version'=>2,'revision'=>'export-fixture','nodes'=>[['sku'=>'TEST-010','manufactured'=>false,'issues'=>[]]],'edges'=>[]];
 $state=['rootSkus'=>['TEST-010'],'orderSupplier'=>'Supplier','periodDays'=>246,'allowTransfers'=>false,'transitWarehouseIds'=>[9,10],
+    'createdAt'=>'2026-10-11 12:00:00',
     'query'=>['sourceDatabase'=>'Paint_Ua','warehouseIds'=>[1,5,7,15],'period'=>['from'=>'2026-02-09','to'=>'2026-10-12']],
     'groups'=>[
         ['code'=>'kyiv','name'=>'Kyiv','warehouseIds'=>[1,7],'receivingWarehouseId'=>7,'minimumWarehouseId'=>7,'supplyFromGroupCode'=>'','targetDays'=>150,'leadTimeDays'=>45,'safetyDays'=>0,'packRounding'=>'UP'],
