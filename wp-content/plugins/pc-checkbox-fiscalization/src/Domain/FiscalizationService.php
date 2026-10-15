@@ -21,6 +21,21 @@ final class FiscalizationService
     /** @return array<string,mixed>|\WP_Error */
     public function execute(array $input, string $mode = 'preview'): array|\WP_Error
     {
+        $key = is_scalar($input['operation_key'] ?? null) ? trim((string) $input['operation_key']) : '';
+        if (!$this->operations->lock($key)) {
+            return new \WP_Error('operation_busy', 'The operation is already being processed.', ['status' => 409]);
+        }
+        try {
+            return $this->executeLocked($input, $mode);
+        } catch (\Throwable) {
+            return new \WP_Error('operation_processing_failed', 'The operation was interrupted. Check its saved state before retrying.', ['status' => 500]);
+        } finally {
+            $this->operations->unlock($key);
+        }
+    }
+
+    private function executeLocked(array $input, string $mode): array|\WP_Error
+    {
         $mode = strtolower(trim($mode));
         if (!in_array($mode, ['preview', 'validate', 'fiscalize'], true)) {
             return new \WP_Error('invalid_mode', 'mode must be preview, validate, or fiscalize.', ['status' => 400]);
@@ -136,6 +151,20 @@ final class FiscalizationService
 
     /** @return array<string,mixed>|\WP_Error */
     public function reconcile(string $operation_key): array|\WP_Error
+    {
+        if (!$this->operations->lock($operation_key)) {
+            return new \WP_Error('operation_busy', 'The operation is already being processed.', ['status' => 409]);
+        }
+        try {
+            return $this->reconcileLocked($operation_key);
+        } catch (\Throwable) {
+            return new \WP_Error('operation_processing_failed', 'The operation was interrupted. Check its saved state before retrying.', ['status' => 500]);
+        } finally {
+            $this->operations->unlock($operation_key);
+        }
+    }
+
+    private function reconcileLocked(string $operation_key): array|\WP_Error
     {
         $operation = $this->operations->find($operation_key);
         if (!$operation) {

@@ -15,6 +15,7 @@ The plugin does not inspect WooCommerce, WayForPay, Folio, or any other source t
 - A register that cannot be proven to be a test register is locked unless `PC_CHECKBOX_ALLOW_LIVE` is exactly `true`.
 - The default shift policy requires an already-opened shift. The plugin never closes shifts.
 - Ambiguous network/5xx results become `UNCERTAIN` and must be reconciled; they are never blindly resent.
+- Execute/reconcile hold a MySQL connection-scoped lock per operation. A competing request receives `operation_busy`; failure to persist PROCESSING prevents sending. Do not remove operation records to retry.
 - Secrets and complete fiscal payloads are not stored in WordPress options or in the operation journal.
 
 ## Secret configuration
@@ -73,6 +74,12 @@ $result = pc_checkbox_fiscalize($command, 'preview');
 Callers should first use `preview`, then `validate`, and only then request `fiscalize` after the test register and shift are confirmed.
 
 See [docs/JAVA_ENDPOINT_CONTRACT.md](docs/JAVA_ENDPOINT_CONTRACT.md) for the complete v1 contract.
+
+The separate [WayForPay adapter](../pc-wayforpay-checkbox/README.md) supplies explicit
+commands after a verified payment; it does not move payment policy into this executor.
+Local regression checks: `php tests/executor-safety.php` and
+`php -d zend.assertions=1 -d assert.exception=1 tests/command-validator-smoke.php`
+from this plugin directory. The first uses offline API/SQL boundaries.
 
 ## Admin navigation
 

@@ -155,6 +155,16 @@ Java отвечает за складское распределение вну�
 
 ## WayForPay
 
+2026-10-15: локально реализован `pc-wayforpay-checkbox`, manual deploy, default off.
+Канон подключения/приёмки: `wp-content/plugins/pc-wayforpay-checkbox/README.md`;
+точка входа оператора — `docs/WAYFORPAY_TEST_ACCESS.md`. Не считать это production rollout.
+Адаптер перехватывает legacy callback до vendor, проверяет signature/merchant/сумму/
+валюту/Approved; фиксирует snapshot до payment_complete и Folio split. Не строить
+чек по processing или текущим изменённым parent lines. Queue retries не вызывают
+Folio create. Таймаут чека → reconcile UUID, не повторный sell. Refund → review,
+автовозвраты не реализованы. Allowlist пользователей не доказывает sandbox merchant.
+Аварийно использовать PC_WFP_CHECKBOX_PAUSED: off возвращает legacy callback.
+
 - Текущий gateway поддерживает classic checkout, а не Checkout Blocks.
 - Основные Woo cart/checkout должны быть shortcode-страницами для текущей интеграции.
 - Пока магазин WayForPay в test mode, gateway можно показывать только пользователям из собственного test-access списка.
