@@ -11,7 +11,7 @@ $check = static function ($condition, string $label) use (&$checks): void {
 $id = wc_get_product_id_by_sku('KR-79406');
 $terms = array_slice(array_values(array_filter(psu_catalog_supplier_terms(), static fn($term): bool => $term->count > 0)), 0, 2);
 $check($id && !is_wp_error($terms) && count($terms) === 2, 'Existing product and two populated brands available');
-$saved = ['query' => $GLOBALS['wp_query'], 'post' => $GLOBALS['post'] ?? null];
+$saved = ['query' => $GLOBALS['wp_query'], 'post' => $GLOBALS['post'] ?? null, 'user' => get_current_user_id()];
 $original_ids = wp_get_post_terms($id, 'product_brand', ['fields' => 'ids']);
 $settings = [];
 $fixture = $terms;
@@ -31,9 +31,23 @@ try {
     add_filter('pre_option_psu_catalog_suppliers', $options);
     add_filter('get_the_terms', $assignments, 99, 3);
     $urls = array_map(static fn($term) => esc_url(get_term_link($term)), $terms);
+    $check(!str_contains($render(), 'class="posted_in"'), 'Unconfigured brands are hidden from the product row');
+    $check(psu_catalog_supplier_terms(true) === [], 'Unconfigured brands are hidden from filter choices');
+    $admin_ids = get_users(['role' => 'administrator', 'number' => 1, 'fields' => 'ID']);
+    $check((bool) $admin_ids, 'Existing administrator available for read-only form rendering');
+    wp_set_current_user((int) $admin_ids[0]);
+    ob_start(); psu_render_catalog_suppliers_admin(); $admin_html = ob_get_clean();
+    $check(!preg_match('/<input[^>]+name="suppliers\[\d+\]\[visible\]"[^>]+checked=/', $admin_html), 'Unconfigured suppliers are unchecked in the admin form');
+    wp_set_current_user($saved['user']);
+    $settings = [$terms[0]->term_id => ['order' => 0]];
+    $check(!str_contains($render(), 'class="posted_in"'), 'A saved order without an explicit visibility flag does not allow the brand');
+    $settings = [$terms[1]->term_id => ['visible' => true]];
+    $html = $render();
+    $check(!str_contains($html, $urls[0]) && str_contains($html, $urls[1]), 'Unconfigured brand stays hidden beside an explicitly allowed brand');
+    $settings[$terms[0]->term_id] = ['visible' => true];
     $baseline = $render();
-    $check(str_contains($baseline, $urls[0]) && str_contains($baseline, $urls[1]), 'Unset settings keep both brands visible, like the filter');
-    $settings = [$terms[0]->term_id => ['visible' => false]];
+    $check(str_contains($baseline, $urls[0]) && str_contains($baseline, $urls[1]), 'Explicit approval shows both brands');
+    $settings[$terms[0]->term_id] = ['visible' => false];
     $html = $render();
     $check(!str_contains($html, $urls[0]) && str_contains($html, $urls[1]), 'Mixed assignment renders only the enabled brand');
     $check(str_contains($html, esc_html(get_taxonomy('product_brand')->labels->singular_name) . ': '), 'Single remaining brand uses singular label');
@@ -56,7 +70,7 @@ try {
     foreach (['uk', 'ru_RU'] as $locale) {
         $switched = switch_to_locale($locale);
         try {
-            $help = __('Product pages show only brands enabled in the catalogue supplier filter. If none are enabled for a product, the brand row is omitted.', 'pc-wholesale-help');
+            $help = __('Product pages show only brands explicitly enabled in the catalogue supplier filter. Unconfigured brands stay hidden. If none are enabled for a product, the brand row is omitted.', 'pc-wholesale-help');
             $check(str_contains($help, $locale === 'uk' ? 'лише бренди' : 'только бренды'), 'Brand help translated: ' . $locale);
         } finally { if ($switched) restore_previous_locale(); }
     }
@@ -66,6 +80,7 @@ try {
     remove_filter('get_the_terms', $assignments, 99);
     $GLOBALS['wp_query'] = $saved['query'];
     $GLOBALS['post'] = $saved['post'];
+    wp_set_current_user($saved['user']);
 }
 $check(wp_get_post_terms($id, 'product_brand', ['fields' => 'ids']) === $original_ids, 'Stored brand assignments unchanged');
 echo wp_json_encode(['passed' => $checks]), "\n";
