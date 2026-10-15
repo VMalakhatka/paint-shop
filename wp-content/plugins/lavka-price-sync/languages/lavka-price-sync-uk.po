@@ -6796,3 +6796,31 @@ msgstr "Період аналізу, днів"
 #: inc/analytics-scenarios.php
 msgid "Relative dates are recalculated at each new report or forecast. Today is included in the number of days. The completed calculation and Excel keep their actual dates."
 msgstr "Відносні дати перераховуються для кожного нового звіту або прогнозу. Сьогодні входить до кількості днів. Завершений розрахунок та Excel зберігають фактичні дати."
+
+#: inc/purchase-planning.php
+msgid "Assembly role"
+msgstr "Роль у складанні"
+
+#: inc/purchase-planning.php
+msgid "Parent products"
+msgstr "Батьківські товари"
+
+#: inc/purchase-planning.php
+msgid "Child products"
+msgstr "Дочірні товари"
+
+#: inc/purchase-planning.php
+msgid "Child product"
+msgstr "Дочірній товар"
+
+#: inc/purchase-planning.php
+msgid "Parent product"
+msgstr "Батьківський товар"
+
+#: inc/purchase-planning.php
+msgid "The export has one row per SKU, including children with zero supplier order. Parent and child lists show the assembly links. XLSX also includes warehouse group detail and individual warehouse stock."
+msgstr "Експорт містить один рядок на артикул, включно з дочірніми товарами з нульовим замовленням постачальнику. Списки батьків і дітей показують зв’язки складання. XLSX також містить розрахунок за групами та залишки окремих складів."
+
+#: inc/purchase-planning.php
+msgid "Select one supplier. Children and grandchildren are found automatically, including products outside the supplier filter. Their shortages consume components. The report includes their statistics and assembly links, with zero supplier order for every child. Review the quantity to manufacture."
+msgstr "Виберіть одного постачальника. Діти та онуки знаходяться автоматично, включно з товарами поза фільтром постачальника. Їхні дефіцити формують потребу в складових. Звіт містить їхню статистику та зв’язки складання; замовлення постачальнику для кожного дочірнього товару дорівнює нулю. Перевірте кількість до виготовлення."

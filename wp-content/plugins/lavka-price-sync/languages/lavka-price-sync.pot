@@ -6593,3 +6593,31 @@ msgstr ""
 #: inc/analytics-scenarios.php
 msgid "Relative dates are recalculated at each new report or forecast. Today is included in the number of days. The completed calculation and Excel keep their actual dates."
 msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Assembly role"
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Parent products"
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Child products"
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Child product"
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Parent product"
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "The export has one row per SKU, including children with zero supplier order. Parent and child lists show the assembly links. XLSX also includes warehouse group detail and individual warehouse stock."
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Select one supplier. Children and grandchildren are found automatically, including products outside the supplier filter. Their shortages consume components. The report includes their statistics and assembly links, with zero supplier order for every child. Review the quantity to manufacture."
+msgstr ""

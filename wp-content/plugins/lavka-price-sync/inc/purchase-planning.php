@@ -17,13 +17,18 @@ function lps_purchase_i18n(): array {
         'excessStock' => __('Surplus stock', 'lavka-price-sync'),
         'stockMonths' => __('Stock coverage, months', 'lavka-price-sync'),
         'stockReportHelp' => __('Outgoing quantity follows the selected movement filters. Stock includes all analysed warehouses; stock-only warehouses contribute no movements. Surplus is current stock available for planning minus forecast, minimum stock and child needs; expected receipts are excluded. Months use actual regular demand and a 30-day month; 9999 means positive stock with no regular demand. Child needs are shown separately. A dash means missing data.', 'lavka-price-sync'),
-        'assemblyHelp' => __('Select one supplier. Children and grandchildren are found automatically, including our own products and products outside the supplier filter. Review their stock and incoming quantities. Only their shortages consume components. The export contains purchasing products of the selected supplier; assembly documents are not created.', 'lavka-price-sync'),
+        'assemblyHelp' => __('Select one supplier. Children and grandchildren are found automatically, including products outside the supplier filter. Their shortages consume components. The report includes their statistics and assembly links, with zero supplier order for every child. Review the quantity to manufacture.', 'lavka-price-sync'),
         'ownTarget' => __('Own sales forecast with minimum stock', 'lavka-price-sync'),
         'componentDemand' => __('Component demand from children', 'lavka-price-sync'),
         'childCoverageShortfall' => __('Uncovered child demand, component units', 'lavka-price-sync'),
         'childCoverageWarning' => __('The selected order leaves child demand uncovered after reserving the own forecast and planned replenishments. Increase the quantity or review the plan.', 'lavka-price-sync'),
         'assemblyDemandHelp' => __('Assembly consumption is excluded from demand and lost-sales estimates, even when selected in the scenario. Actual outgoing quantities still follow the selected operations. Child shortages are calculated from recipes.', 'lavka-price-sync'),
         'manufacturingNeed' => __('Quantity to manufacture', 'lavka-price-sync'),
+        'assemblyRole' => __('Assembly role', 'lavka-price-sync'),
+        'parents' => __('Parent products', 'lavka-price-sync'),
+        'children' => __('Child products', 'lavka-price-sync'),
+        'childProduct' => __('Child product', 'lavka-price-sync'),
+        'parentProduct' => __('Parent product', 'lavka-price-sync'),
         'childContributions' => __('Child shortage breakdown', 'lavka-price-sync'),
         'components' => __('Components per unit', 'lavka-price-sync'),
         'assemblyOnly' => __('Manufactured product: calculation only, excluded from supplier order', 'lavka-price-sync'),
@@ -477,7 +482,7 @@ function lps_purchase_render(): void {
             <span id="lps-purchase-page"></span>
             <button class="button" id="lps-purchase-next" disabled type="button"><?php echo esc_html__('Next', 'lavka-price-sync'); ?></button>
         </div>
-        <p class="description"><?php echo esc_html__('The export has one supplier-order row per SKU. XLSX also includes warehouse group detail. Stock totals distinguish warehouse groups from Transport and Receiving; individual warehouse stock is shown separately.', 'lavka-price-sync'); ?></p>
+        <p class="description"><?php echo esc_html__('The export has one row per SKU, including children with zero supplier order. Parent and child lists show the assembly links. XLSX also includes warehouse group detail and individual warehouse stock.', 'lavka-price-sync'); ?></p>
         <div id="lps-purchase-results"></div>
     </div>
     <?php
@@ -494,7 +499,7 @@ add_action('admin_post_lps_purchase_export', static function (): void {
         $t = lps_purchase_i18n();
         $results = lps_purchase_calculate_network($state);
         $summary = lps_purchase_export_summary($state, $results);
-        $keys = ['sku', 'product', 'group', 'receivingWarehouse', 'minimumWarehouse', 'minimumReserve', 'physical', 'available', 'internalReserved', 'planningAvailable', 'internalTransferAccounts', 'sales', 'availableDays', 'stockoutDays', 'availabilityStatus', 'estimatedLostSales', 'appliedLostSales', 'adjustedSales', 'maxDemandMultiplier', 'demandStatus', 'returns', 'coverage', 'ownTarget', 'customerPreorders', 'preorderAdditionalDemand', 'expectedFreeAfterPreorders', 'preorderUncoveredAfterReceipts', 'preorderLines', 'componentDemand', 'childContributions', 'target', 'need', 'transfer', 'supplyFromGroupCode', 'plannedTransferIn', 'plannedTransferOut', 'inTransit', 'openOrders', 'pack', 'packRounding', 'moq', 'purchase', 'quantity', 'final', 'reason'];
+        $keys = ['sku', 'product', 'group', 'assemblyRole', 'parents', 'children', 'manufacturingNeed', 'receivingWarehouse', 'minimumWarehouse', 'minimumReserve', 'physical', 'available', 'internalReserved', 'planningAvailable', 'internalTransferAccounts', 'sales', 'availableDays', 'stockoutDays', 'availabilityStatus', 'estimatedLostSales', 'appliedLostSales', 'adjustedSales', 'maxDemandMultiplier', 'demandStatus', 'returns', 'coverage', 'ownTarget', 'customerPreorders', 'preorderAdditionalDemand', 'expectedFreeAfterPreorders', 'preorderUncoveredAfterReceipts', 'preorderLines', 'componentDemand', 'childContributions', 'target', 'need', 'transfer', 'supplyFromGroupCode', 'plannedTransferIn', 'plannedTransferOut', 'inTransit', 'openOrders', 'pack', 'packRounding', 'moq', 'purchase', 'quantity', 'final', 'reason'];
         $columns = array_map(static fn($key) => ['key' => $key, 'label' => $t[$key]], $keys);
         $stock_columns = [];
         foreach (['allWarehousesPhysical','periodExpense','excessStock','stockMonths'] as $key) $stock_columns[] = ['key' => $key, 'label' => $t[$key]];
@@ -518,12 +523,18 @@ add_action('admin_post_lps_purchase_export', static function (): void {
             $columns[] = ['key' => $key, 'label' => $label];
         }
         $rows = [];
+        $relations = lps_purchase_report_relations($state);
         foreach ($results as $calculated) {
-            if (empty($calculated['assembly']['purchasable'])) continue;
-            $sku = $calculated['sku']; $raw = $state['rows'][$sku];
+            if (!lps_purchase_report_includes($calculated)) continue;
+            $is_child = lps_purchase_report_is_child($calculated);
+            $sku = $calculated['sku']; $raw = $state['rows'][$sku] ?? [];
+            $links = $relations[lps_assembly_key($sku)] ?? [];
             foreach ($calculated['groups'] as $group) {
                 $stock_report = $calculated['stockReport']['groups'][$group['groupCode']];
                 $record = ['sku' => (string)$sku, 'product' => $calculated['productName'], 'group' => $group['groupName'],
+                    'assemblyRole' => $is_child ? $t['childProduct'] : (!empty($links['children']) ? $t['parentProduct'] : $t['supplierOrder']),
+                    'parents' => $links['parents'] ?? '', 'children' => $links['children'] ?? '',
+                    'manufacturingNeed' => $group['manufacturingNeed'],
                     'coldStatus' => $t['coldStatuses'][$calculated['coldCoverage']['status']] ?? $t['coldStatuses']['UNKNOWN'],
                     'receivingWarehouse' => $group['receivingWarehouseId'], 'available' => $group['available'], 'sales' => $stock_report['regularSales'],
                     'internalReserved' => $group['internalReserved'], 'customerPreorders' => $group['customerPreorders'],
@@ -549,7 +560,7 @@ add_action('admin_post_lps_purchase_export', static function (): void {
                     'availabilityStatus' => $t['availabilityStatuses'][$group['availability']['status']],
                     'adjustedSales' => $group['demand']['adjustedSales'], 'maxDemandMultiplier' => $group['demand']['maxDemandMultiplier'],
                     'demandStatus' => $t['demandStatuses'][$group['demand']['status']],
-                    'purchase' => $group['recommendedQuantity'], 'quantity' => $group['managerQuantity'], 'final' => $group['finalQuantity'], 'reason' => $group['managerReason'],
+                    'purchase' => $is_child ? 0.0 : $group['recommendedQuantity'], 'quantity' => $group['managerQuantity'], 'final' => $is_child ? 0.0 : $group['finalQuantity'], 'reason' => $group['managerReason'],
                     'status' => $group['status'] . ($group['issues'] ? ': ' . implode(', ', $group['issues']) : '')];
                 $record += $group['inputs'];
                 foreach (['periodExpense','componentDemand','excessStock','stockMonths'] as $key) $record['all_' . $key] = $calculated['stockReport']['total'][$key];

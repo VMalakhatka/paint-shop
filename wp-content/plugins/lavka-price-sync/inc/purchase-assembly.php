@@ -145,7 +145,7 @@ function lps_purchase_calculate_network(array $state): array {
         $result = lps_purchase_calculate($row, $groups, $state['periodDays'], $state['allowTransfers'], $edits, $state['transitWarehouseIds'], $assembly);
         $result['coldCoverage'] = ['enabled' => !empty($coverage['enabled']), 'status' => $cold_status, 'targetDays' => $target_days];
         $result['assembly'] = ['manufactured' => $node['manufactured'], 'selected' => isset($roots[$key]), 'purchasable' => $purchasable,
-            'components' => $components[$key] ?? []];
+            'components' => $components[$key] ?? [], 'children' => $children[$key] ?? []];
         return $result;
     };
     for ($i = 0; $i < count($queue); $i++) {

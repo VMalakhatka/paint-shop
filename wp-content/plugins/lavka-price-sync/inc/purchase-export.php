@@ -30,11 +30,35 @@ function lps_purchase_export_price(array $prices): array {
     return reset($variants) + ['supplierPriceNote' => $limited ? __('Confirm supplier availability: while stocks last.', 'lavka-price-sync') : ''];
 }
 
-/** One immutable calculated row per purchasing SKU; no second demand algorithm. */
+function lps_purchase_report_is_child(array $item): bool {
+    return !empty($item['assembly']['manufactured']) || !empty($item['assembly']['components']);
+}
+
+function lps_purchase_report_includes(array $item): bool {
+    return !empty($item['assembly']['purchasable']) || lps_purchase_report_is_child($item);
+}
+
+/** Relations come from the full recipe, including children with zero current shortage. */
+function lps_purchase_report_relations(array $state): array {
+    $relations = [];
+    foreach ($state['assemblyGraph']['edges'] ?? [] as $edge) {
+        $parent = lps_assembly_key($edge['parent']); $child = lps_assembly_key($edge['child']);
+        $relations[$parent]['children'][$child] = (string)$edge['child'];
+        $relations[$child]['parents'][$parent] = (string)$edge['parent'];
+    }
+    foreach ($relations as &$entry) foreach ($entry as &$list) { ksort($list, SORT_STRING); $list = implode(', ', $list); }
+    unset($entry, $list);
+    return $relations;
+}
+
+/** One immutable row per SKU, including analytical child rows with zero supplier purchase. */
 function lps_purchase_export_summary(array $state, array $results): array {
     $t = lps_purchase_i18n();
+    $relations = lps_purchase_report_relations($state);
     $labels = [
         'sku' => $t['sku'], 'supplierArticle' => __('Supplier article', 'lavka-price-sync'), 'product' => $t['product'],
+        'assemblyRole' => $t['assemblyRole'], 'parents' => $t['parents'], 'children' => $t['children'],
+        'manufacturingNeed' => $t['manufacturingNeed'],
         'gtin' => __('GTIN', 'lavka-price-sync'), 'coldStatus' => __('Cold sensitivity', 'lavka-price-sync'),
         'final' => __('Total supplier order quantity', 'lavka-price-sync'),
         'supplierUnitPrice' => __('Supplier unit price', 'lavka-price-sync'), 'supplierCurrency' => __('Supplier currency', 'lavka-price-sync'),
@@ -53,7 +77,7 @@ function lps_purchase_export_summary(array $state, array $results): array {
         'currentStockCapturedAt' => $t['currentStockCapture'], 'period' => __('Report period', 'lavka-price-sync'),
     ];
     $columns = [];
-    $numeric = ['final','supplierUnitPrice','supplierAmount','periodExpense','sales','analysisPhysical','transitPhysical','networkPhysical','planningAvailable','transitPool','customerPreorders','preorderAdditionalDemand','expectedFreeAfterPreorders','preorderUncoveredAfterReceipts','componentDemand','childCoverageShortfall','stockMonths','excessStock'];
+    $numeric = ['final','manufacturingNeed','supplierUnitPrice','supplierAmount','periodExpense','sales','analysisPhysical','transitPhysical','networkPhysical','planningAvailable','transitPool','customerPreorders','preorderAdditionalDemand','expectedFreeAfterPreorders','preorderUncoveredAfterReceipts','componentDemand','childCoverageShortfall','stockMonths','excessStock'];
     foreach ($labels as $key => $label) $columns[] = ['key' => $key, 'label' => $label,
         'numberFormat' => $key === 'supplierUnitPrice' ? '0.0000' : ($key === 'supplierAmount' ? '0.00' : (in_array($key, $numeric, true) ? '#,##0.###' : ''))];
     foreach ($state['groups'] as $group) foreach (['physical', 'sales', 'periodExpense', 'stockoutDays', 'minimumReserve', 'ownTarget', 'customerPreorders', 'preorderAdditionalDemand', 'expectedFreeAfterPreorders', 'preorderUncoveredAfterReceipts', 'componentDemand', 'plannedTransferIn', 'plannedTransferOut', 'final'] as $key) {
@@ -68,17 +92,23 @@ function lps_purchase_export_summary(array $state, array $results): array {
     }
     $rows = [];
     foreach ($results as $item) {
-        if (empty($item['assembly']['purchasable'])) continue;
-        $raw = $state['rows'][$item['sku']]; $total = $item['stockReport']['total'];
+        if (!lps_purchase_report_includes($item)) continue;
+        $is_child = lps_purchase_report_is_child($item);
+        $links = $relations[lps_assembly_key($item['sku'])] ?? [];
+        $raw = $state['rows'][$item['sku']] ?? []; $total = $item['stockReport']['total'];
         $procurement = array_values(array_filter($item['groups'], static fn($group) => ($group['supplyFromGroupCode'] ?? '') === ''));
-        $quantity = $procurement ? lps_purchase_export_sum(array_map(static fn($group) => $group['finalQuantity'] ?? null, $procurement)) : null;
+        $quantity = $is_child ? 0.0 : ($procurement ? lps_purchase_export_sum(array_map(static fn($group) => $group['finalQuantity'] ?? null, $procurement)) : null);
         $sources = array_column($item['transitSources'] ?? [], null, 'warehouseId'); $transit_physical = [];
         foreach ($state['transitWarehouseIds'] as $id) $transit_physical[] = ($sources[$id]['status'] ?? '') === 'CAPTURED' ? ($sources[$id]['physicalQuantity'] ?? null) : null;
         $transit_physical = lps_purchase_export_sum($transit_physical);
         $price = lps_purchase_export_price($raw['supplierPrices'] ?? []);
+        if ($is_child) $price['supplierPriceNote'] = '';
         $record = ['sku' => (string)$item['sku'], 'product' => $item['productName'], 'gtin' => (string)($raw['dimensions']['primaryBarcode'] ?? ''),
+            'assemblyRole' => $is_child ? $t['childProduct'] : (!empty($links['children']) ? $t['parentProduct'] : $t['supplierOrder']),
+            'parents' => $links['parents'] ?? '', 'children' => $links['children'] ?? '',
+            'manufacturingNeed' => $is_child ? lps_purchase_export_sum(array_map(static fn($group) => $group['manufacturingNeed'] ?? null, $item['groups'])) : null,
             'coldStatus' => $t['coldStatuses'][$item['coldCoverage']['status']] ?? $t['coldStatuses']['UNKNOWN'],
-            'final' => $quantity, 'supplierAmount' => $quantity !== null && $price['supplierUnitPrice'] !== null ? $quantity * $price['supplierUnitPrice'] : null,
+            'final' => $quantity, 'supplierAmount' => $is_child ? 0.0 : ($quantity !== null && $price['supplierUnitPrice'] !== null ? $quantity * $price['supplierUnitPrice'] : null),
             'periodExpense' => $total['periodExpense'], 'sales' => $total['regularSales'], 'analysisPhysical' => $total['physical'],
             'transitPhysical' => $transit_physical, 'networkPhysical' => lps_purchase_export_sum([$total['physical'], $transit_physical]),
             'planningAvailable' => lps_purchase_export_sum([$total['planningAvailable'], $item['transitPool']]),
@@ -91,7 +121,7 @@ function lps_purchase_export_summary(array $state, array $results): array {
             'childCoverageShortfall' => lps_purchase_export_sum(array_map(static fn($group) => $group['childCoverageShortfall'] ?? null, $item['groups'])),
             'childCoverageWarning' => '',
             'stockMonths' => $total['stockMonths'], 'excessStock' => $total['excessStock'],
-            'status' => $quantity === null ? $t['review'] : $t['ready'], 'planningNotes' => '',
+            'status' => $quantity === null || ($is_child && array_filter($item['groups'], static fn($group) => !empty($group['issues']) || ($group['manufacturingNeed'] ?? null) === null)) ? $t['review'] : $t['ready'], 'planningNotes' => '',
             'currentStockCapturedAt' => $state['currentStockCapture']['capturedAt'] ?? '',
             'period' => $state['query']['period']['from'] . ' - ' . $state['query']['period']['to']] + $price;
         $notes = [];
@@ -100,6 +130,7 @@ function lps_purchase_export_summary(array $state, array $results): array {
                 $mapped = ['regularSales' => 'sales', 'finalQuantity' => 'final'][$key] ?? $key;
                 $record['group_' . $group['groupCode'] . '_' . $mapped] = $group[$key];
             }
+            if ($is_child) $record['group_' . $group['groupCode'] . '_final'] = 0.0;
             $record['group_' . $group['groupCode'] . '_periodExpense'] = $item['stockReport']['groups'][$group['groupCode']]['periodExpense'];
             $record['group_' . $group['groupCode'] . '_stockoutDays'] = $group['availability']['stockoutDays'];
             foreach ($group['issues'] as $code) $notes[] = $group['groupName'] . ': ' . ($t['issues'][$code] ?? $code);

@@ -136,6 +136,7 @@ function esc_html($value) { return $value; }
 function wp_die($message) { throw new RuntimeException($message); }
 function lps_product_analytics_export_metadata($query,$extra) { return []; }
 function lps_product_analytics_export_csv($columns,$rows,$filename) { $GLOBALS['exported']=$rows; }
+function lps_product_analytics_export_xlsx($columns,$rows,$metadata,$filename,$details=[],$title='') { $GLOBALS['xlsxDetails']=$details; }
 array_pop($scenario['profile']['productFilters']['currentSuppliers']['values']);
 $graph['nodes'][]=['sku'=>'FOREIGN','manufactured'=>false,'issues'=>[]];
 $token=lps_purchase_start(1,$scenario['version'])['token'];
@@ -149,8 +150,16 @@ $response['rows'][0]['warehouseBreakdown']=array_map(static fn($id)=>['warehouse
 lps_purchase_page($token,0);
 $_POST=['token'=>$token,'format'=>'csv'];
 $actions['admin_post_lps_purchase_export']();
-check(array_column($exported,'sku')===['PARENT'],'Actual export excludes selected children and foreign-supplier roots');
-check($exported[0]['periodExpense']===20.0 && $exported[0]['analysisPhysical']===20.0 && $exported[0]['stockMonths']===1.2,'Summary export contains historical expense and current captured stock/months');
+check(array_column($exported,'sku')===['CHILD','PARENT'],'Actual export includes analytical children and excludes foreign-supplier roots');
+$exportBySku=array_column($exported,null,'sku');
+check($exportBySku['CHILD']['final']===0.0 && $exportBySku['CHILD']['supplierAmount']===0.0,'A child with incomplete analytics still has zero supplier order and amount');
+check($exportBySku['CHILD']['status']==='Review required','A zero child order does not conceal incomplete manufacturing data');
+check($exportBySku['PARENT']['children']==='CHILD' && $exportBySku['CHILD']['parents']==='PARENT','Report exposes both sides of the recipe');
+check($exportBySku['PARENT']['periodExpense']===20.0 && $exportBySku['PARENT']['analysisPhysical']===20.0 && $exportBySku['PARENT']['stockMonths']===1.2,'Summary export contains historical expense and current captured stock/months');
+$_POST['format']='xlsx'; $actions['admin_post_lps_purchase_export']();
+$detailChildren=array_values(array_filter($xlsxDetails[0]['rows'],static fn($row)=>$row['sku']==='CHILD'));
+check(count($detailChildren)===1 && $detailChildren[0]['purchase']===0.0 && $detailChildren[0]['final']===0.0 && $detailChildren[0]['parents']==='PARENT',
+    'The real XLSX action also includes child group detail with zero supplier order');
 $graph['revision']='changed';
 rejected(fn()=>$actions['admin_post_lps_purchase_export'](),'Changed recipes block actual export until recalculation');
 echo "PASS: actual CSV export supplier isolation and recipe revision guard\n";
