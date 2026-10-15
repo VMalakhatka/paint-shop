@@ -78,6 +78,7 @@ try {
     (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($book))->save($path);
     $saved = \PhpOffice\PhpSpreadsheet\IOFactory::load($path);
     $sheet = $saved->getActiveSheet();
+    check($sheet->getHighestDataColumn() === 'H' && !in_array('Supplier', $sheet->rangeToArray('A1:H1')[0], true), 'Supplier column removed, not hidden');
     check($sheet->getStyle('A1')->getFill()->getStartColor()->getRGB() === '800000', 'Burgundy table header');
     check($sheet->getStyle('C2')->getFill()->getStartColor()->getRGB() === '800000', 'Burgundy root heading');
     check($sheet->getStyle('C3')->getFill()->getStartColor()->getRGB() === 'D9B3B3', 'Muted burgundy subgroup');
@@ -86,11 +87,11 @@ try {
         if (!$sheet->getCell('A'.$row)->getValue()) continue;
         $found++;
         check($sheet->getCell('B'.$row)->getValue() === '012345678905', 'Barcode leading zero');
-        check($sheet->getCell('F'.$row)->getValue() === 73.12, 'Customer price unchanged');
-        check($sheet->getCell('G'.$row)->getValue() == 8, 'Combined stock unchanged');
-        check($sheet->getStyle('H'.$row)->getFill()->getStartColor()->getRGB() === 'FFF2B3', 'Order column stays yellow');
-        check($sheet->getCell('H'.$row)->getValue() === null, 'Order quantity remains blank');
-        check(str_starts_with($sheet->getCell('I'.$row)->getHyperlink()->getUrl(), home_url('/product/')), 'Product link preserved');
+        check($sheet->getCell('E'.$row)->getValue() === 73.12, 'Customer price unchanged');
+        check($sheet->getCell('F'.$row)->getValue() == 8, 'Combined stock unchanged');
+        check($sheet->getStyle('G'.$row)->getFill()->getStartColor()->getRGB() === 'FFF2B3', 'Order column stays yellow');
+        check($sheet->getCell('G'.$row)->getValue() === null, 'Order quantity remains blank');
+        check(str_starts_with($sheet->getCell('H'.$row)->getHyperlink()->getUrl(), home_url('/product/')), 'Product link preserved');
     }
     check($found === 4 && !$sheet->getShowSummaryBelow() && $sheet->getFreezePane() === 'D2', 'XLSX rows, grouping and freeze pane preserved');
     if ($preview = getenv('PCOE_TEST_PREVIEW')) (new \PhpOffice\PhpSpreadsheet\Writer\Html($saved))->save($preview);
