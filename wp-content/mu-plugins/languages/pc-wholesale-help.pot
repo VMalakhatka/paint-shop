@@ -1057,3 +1057,7 @@ msgstr ""
 #: pc-wholesale-help.php
 msgid "Product page on a phone"
 msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Select any thumbnail below the product photo to switch images, or use the magnifying glass to enlarge the current photo. All images assigned to this product remain available; thumbnails fill the gallery width."
+msgstr ""
