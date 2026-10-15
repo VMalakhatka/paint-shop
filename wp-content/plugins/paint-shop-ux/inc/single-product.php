@@ -7,6 +7,30 @@ function psu_single_product_enabled(): bool {
         && (bool) apply_filters('psu_single_product_enabled', true);
 }
 
+/** Keep product metadata aligned with the suppliers enabled in the catalogue filter. */
+function psu_single_product_brands_output($output, $terms) {
+    if (is_admin() || !is_product() || !function_exists('psu_catalog_supplier_terms')) return $output;
+    if (!is_array($terms) || !$terms) return '';
+
+    $allowed = array_fill_keys(wp_list_pluck(psu_catalog_supplier_terms(true), 'term_id'), true);
+    $visible = array_values(array_filter($terms, static fn($term): bool => isset($allowed[$term->term_id])));
+    if (!$visible) return '';
+    if (count($visible) === count($terms)) return $output;
+
+    $links = [];
+    foreach ($visible as $term) {
+        $url = get_term_link($term, 'product_brand');
+        if (!is_wp_error($url)) {
+            $links[] = '<a href="' . esc_url($url) . '" rel="tag">' . esc_html($term->name) . '</a>';
+        }
+    }
+    if (!$links) return '';
+    $labels = get_taxonomy('product_brand')->labels;
+    $label = count($links) === 1 ? $labels->singular_name : $labels->name;
+    return ' <span class="posted_in">' . esc_html($label) . ': ' . implode(', ', $links) . '</span>';
+}
+add_filter('woocommerce_product_brands_output', 'psu_single_product_brands_output', 20, 2);
+
 add_filter('wc_get_template_part', function ($template, $slug, $name) {
     if ($slug !== 'content' || $name !== 'single-product' || !psu_single_product_enabled()) return $template;
     return dirname(__DIR__) . '/templates/content-single-product.php';
