@@ -4,6 +4,9 @@ const LPS_CURRENT_NETWORK_STOCK_PATH = '/admin/folio/product-analytics/current-n
 
 /** Accept the whole source cut before changing any rows; history stays immutable. */
 function lps_purchase_apply_current_stock(array $state, array $capture): array {
+    if (($capture['ok'] ?? null) === true && ($capture['version'] ?? null) === 1) {
+        throw new RuntimeException(__('Java returned an outdated current stock format without customer preorders. Update and deploy the Java backend, then start a new calculation.', 'lavka-price-sync'));
+    }
     $ids = array_values(array_unique(array_merge($state['query']['warehouseIds'], $state['transitWarehouseIds'], [7]))); sort($ids, SORT_NUMERIC);
     $analysis_ids = $state['query']['warehouseIds']; sort($analysis_ids, SORT_NUMERIC);
     $failure = static function (): void { throw new RuntimeException(__('The current network stock read is incomplete or changed its scope. Start a new preview.', 'lavka-price-sync')); };

@@ -6824,3 +6824,7 @@ msgstr "Експорт містить один рядок на артикул, �
 #: inc/purchase-planning.php
 msgid "Select one supplier. Children and grandchildren are found automatically, including products outside the supplier filter. Their shortages consume components. The report includes their statistics and assembly links, with zero supplier order for every child. Review the quantity to manufacture."
 msgstr "Виберіть одного постачальника. Діти та онуки знаходяться автоматично, включно з товарами поза фільтром постачальника. Їхні дефіцити формують потребу в складових. Звіт містить їхню статистику та зв’язки складання; замовлення постачальнику для кожного дочірнього товару дорівнює нулю. Перевірте кількість до виготовлення."
+
+#: inc/purchase-current-stock.php
+msgid "Java returned an outdated current stock format without customer preorders. Update and deploy the Java backend, then start a new calculation."
+msgstr "Java повернула застарілий формат поточного залишку без клієнтських передзамовлень. Оновіть код і виконайте деплой Java, потім почніть новий розрахунок."

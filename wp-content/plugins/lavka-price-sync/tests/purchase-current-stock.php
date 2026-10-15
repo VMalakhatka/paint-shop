@@ -28,6 +28,11 @@ $state=['query'=>['sourceDatabase'=>'Paint_Ua','warehouseIds'=>[1,5,7,15]], 'cre
     'rows'=>['P'=>$history],'groups'=>$groups,'rootSkus'=>['P'],'orderSupplier'=>'Supplier','periodDays'=>240,'allowTransfers'=>false,
     'supplyConfirmation'=>['noOtherIncomingOrders'=>true,'noSupplierMinimumOrder'=>true,'currentReceiptsWithinLeadTime'=>true]];
 $capture=current_stock_fixture(['sourceDatabase'=>'Paint_Ua','warehouseIds'=>[1,5,7,9,10,15],'analysisWarehouseIds'=>[1,5,7,15]], $graph);
+$legacy=$capture; $legacy['version']=1; unset($legacy['preorderReservations'],$legacy['preorderAsOfDate']);
+$legacyRejected=false;
+try { lps_purchase_apply_current_stock($state,$legacy); }
+catch (RuntimeException $e) { $legacyRejected=str_contains($e->getMessage(),'Update and deploy the Java backend'); }
+check($legacyRejected,'Legacy Java stock format instructs a backend update instead of restarting the same failing calculation');
 foreach ($capture['cards'] as &$card) $card['internalTransferAccounts']=[['sourceWarehouseId'=>$card['warehouseId'],'documentId'=>123,'quantity'=>2]];
 unset($card);
 $fresh=lps_purchase_apply_current_stock($state,$capture); $row=$fresh['rows']['P'];
