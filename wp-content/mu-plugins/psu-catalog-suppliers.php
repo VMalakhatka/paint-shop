@@ -17,7 +17,7 @@ function psu_catalog_supplier_terms(bool $visible_only = false): array {
     });
     if ($visible_only) {
         $terms = array_values(array_filter($terms, static function ($term) use ($settings): bool {
-            return $term->count > 0 && ($settings[$term->term_id]['visible'] ?? true);
+            return $term->count > 0 && ($settings[$term->term_id]['visible'] ?? false);
         }));
     }
     return $terms;
@@ -137,7 +137,7 @@ function psu_render_catalog_suppliers_admin(): void {
                 </tr></thead>
                 <tbody><?php foreach ($terms as $term): ?>
                     <tr><th scope="row"><?php echo esc_html($term->name); ?></th>
-                    <td><input type="checkbox" name="suppliers[<?php echo (int) $term->term_id; ?>][visible]" value="1" aria-label="<?php echo esc_attr(sprintf(__('Show %s in filter', 'psu-search-filters'), $term->name)); ?>" <?php checked($settings[$term->term_id]['visible'] ?? true); ?>></td>
+                    <td><input type="checkbox" name="suppliers[<?php echo (int) $term->term_id; ?>][visible]" value="1" aria-label="<?php echo esc_attr(sprintf(__('Show %s in filter', 'psu-search-filters'), $term->name)); ?>" <?php checked($settings[$term->term_id]['visible'] ?? false); ?>></td>
                     <td><input type="number" min="0" max="99999" step="1" class="small-text" name="suppliers[<?php echo (int) $term->term_id; ?>][order]" value="<?php echo esc_attr($settings[$term->term_id]['order'] ?? 1000); ?>" aria-label="<?php echo esc_attr(sprintf(__('Display order: %s', 'psu-search-filters'), $term->name)); ?>"></td>
                     <td><?php echo (int) $term->count; ?></td></tr>
                 <?php endforeach; ?></tbody>

@@ -1106,5 +1106,5 @@ msgid "Select any thumbnail below the product photo to switch images, or use the
 msgstr "Натисніть будь-яку мініатюру під фото товару, щоб перемкнути зображення, або лупу, щоб збільшити поточне фото. Усі призначені товару зображення залишаються доступними; мініатюри займають усю ширину галереї."
 
 #: pc-wholesale-help.php
-msgid "Product pages show only brands enabled in the catalogue supplier filter. If none are enabled for a product, the brand row is omitted."
-msgstr "На сторінці товару показуються лише бренди, увімкнені для фільтра постачальників каталогу. Якщо таких брендів у товару немає, рядок бренду не показується."
+msgid "Product pages show only brands explicitly enabled in the catalogue supplier filter. Unconfigured brands stay hidden. If none are enabled for a product, the brand row is omitted."
+msgstr "На сторінці товару показуються лише бренди, явно увімкнені для фільтра постачальників каталогу. Бренди без збереженого дозволу приховані. Якщо таких брендів у товару немає, рядок бренду не показується."
