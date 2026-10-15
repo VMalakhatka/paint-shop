@@ -172,3 +172,15 @@ msgstr "В наличии"
 
 msgid "Out of stock"
 msgstr "Нет в наличии"
+
+#: inc/single-product.php
+msgid "Product added to cart."
+msgstr "Товар добавлен в корзину."
+
+#: inc/single-product.php
+msgid "This quantity could not be added. Check availability or choose a smaller quantity."
+msgstr "Не удалось добавить это количество. Проверьте наличие или выберите меньшее количество."
+
+#: inc/single-product.php
+msgid "Could not confirm whether the product was added. Check your cart before trying again."
+msgstr "Не удалось подтвердить, добавлен ли товар. Проверьте корзину перед повторной попыткой."

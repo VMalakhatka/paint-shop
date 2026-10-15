@@ -341,6 +341,9 @@ function pc_wholesale_help_render_endpoint(): void {
                 <?php pc_wholesale_help_step('4', __('Enter the quantity', 'pc-wholesale-help'), __('Use the minus, plus or quantity field, then press the cart button.', 'pc-wholesale-help')); ?>
                 <?php pc_wholesale_help_step('5', __('Review the cart', 'pc-wholesale-help'), __('Check every item and its warehouse allocation before checkout.', 'pc-wholesale-help')); ?>
             </ol>
+            <p><?php esc_html_e('On a product page, photos appear beside the full name, your price, warehouse stock and purchase controls; on a phone these blocks are stacked. SKU and the available barcode are below the purchase controls, followed by description, attributes, reviews and related products. For a simple product, wait for the result after adding it. If the site cannot confirm the result, check your cart before trying again; the request is not retried automatically.', 'pc-wholesale-help'); ?></p>
+            <p><?php esc_html_e('Select any thumbnail below the product photo to switch images, or use the magnifying glass to enlarge the current photo. All images assigned to this product remain available; thumbnails fill the gallery width.', 'pc-wholesale-help'); ?></p>
+            <a class="pc-help-inline-action" href="<?php echo esc_url(pc_wholesale_help_asset_url('images/product-page-mobile-2026-10-15.jpg')); ?>" target="_blank" rel="noopener"><?php esc_html_e('Product page on a phone', 'pc-wholesale-help'); ?></a>
             <a class="pc-help-inline-action" href="<?php echo esc_url($shop_url); ?>"><?php esc_html_e('Go to catalogue', 'pc-wholesale-help'); ?> →</a>
             <?php pc_wholesale_help_image('catalog-product-cards.jpg', __('Catalogue cards with quantity and stock by warehouse', 'pc-wholesale-help'), __('Click the image to enlarge it.', 'pc-wholesale-help')); ?>
         </section>

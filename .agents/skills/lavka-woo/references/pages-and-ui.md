@@ -87,6 +87,23 @@
   meta keys, а `psu-search-filters` добавляет их в custom fields Relevanssi через
   `relevanssi_index_custom_fields` независимо от выбранного режима полей. После
   первого деплоя этой настройки нужен полный rebuild индекса.
+- Собственная страница товара (локальный код 2026-10-14) принадлежит
+  `paint-shop-ux/inc/single-product.php`, `templates/content-single-product.php` и
+  `assets/single-product.*`. Сохранять пять Woo single-product hooks, порядок,
+  password gate, native gallery/type forms/notices/schema и существующие price/stock
+  owners. Scoped adapter заменяет Woo/GeneratePress wrappers только на single product;
+  шапка/футер остаются у активной темы. Simple AJAX выполняет один Woo POST и при
+  неизвестном результате направляет к корзине без auto-retry; остальные типы — native.
+  `pcux_catalog_assets_required` подключает общие controls для related/upsell loops;
+  не связывать Paint Core напрямую с GeneratePress. Откат до `wp` —
+  `psu_single_product_enabled=false`. Проверки и deployment boundaries — README
+  `paint-shop-ux`; пользовательский канон — `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md`.
+  Проверять не только SKU с одним фото, но и многофотографическую галерею:
+  ширину native gallery и всех миниатюр, каждый слайд/lightbox, main/gallery IDs
+  и порядок. Не путать разный состав media на local/production с потерей фото
+  шаблоном; CSS и PDP template не меняют привязки. Регрессия 1.4.1 от 2026-10-15
+  сохраняет normal/400 title и ограниченное фото, перекрывает inherited Woo 48%.
+  Production-публикация и проверка в этой задаче не выполнялись.
 - Карточка товара показывает SKU, категории/бренд, stock/allocation и
   desktop-поиск под артикулом. На single product после meta выводится
   подтверждённый GTIN из `_wc_gtin_code` или совместимых barcode keys; значения

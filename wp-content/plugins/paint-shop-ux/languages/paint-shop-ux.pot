@@ -257,3 +257,15 @@ msgstr ""
 
 msgid "Out of stock"
 msgstr ""
+
+#: inc/single-product.php
+msgid "Product added to cart."
+msgstr ""
+
+#: inc/single-product.php
+msgid "This quantity could not be added. Check availability or choose a smaller quantity."
+msgstr ""
+
+#: inc/single-product.php
+msgid "Could not confirm whether the product was added. Check your cart before trying again."
+msgstr ""

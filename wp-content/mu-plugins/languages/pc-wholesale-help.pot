@@ -1049,3 +1049,15 @@ msgstr ""
 
 msgid "In the XLSX export, preorder invoices and their total also appear below the movements on the main sheet. A separate invoice sheet is included for working with the data."
 msgstr ""
+
+#: pc-wholesale-help.php
+msgid "On a product page, photos appear beside the full name, your price, warehouse stock and purchase controls; on a phone these blocks are stacked. SKU and the available barcode are below the purchase controls, followed by description, attributes, reviews and related products. For a simple product, wait for the result after adding it. If the site cannot confirm the result, check your cart before trying again; the request is not retried automatically."
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Product page on a phone"
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Select any thumbnail below the product photo to switch images, or use the magnifying glass to enlarge the current photo. All images assigned to this product remain available; thumbnails fill the gallery width."
+msgstr ""
