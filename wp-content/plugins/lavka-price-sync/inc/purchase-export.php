@@ -90,6 +90,17 @@ function lps_purchase_export_summary(array $state, array $results): array {
     foreach ($warehouse_ids as $id) foreach (['physical' => $t['physical'], 'available' => $t['available']] as $key => $label) {
         $columns[] = ['key' => 'warehouse_' . $id . '_' . $key, 'label' => ($warehouse_names[$id] ?? '#' . $id) . ' (#' . $id . '): ' . $label, 'numberFormat' => '#,##0.###'];
     }
+    // Owner's worksheet layout: first 13 fields plus children in column N.
+    $primary = array_values(array_filter($state['groups'], static fn($g) => empty($g['supplyFromGroupCode'])))[0] ?? $state['groups'][0] ?? null;
+    $minimumKey = $primary ? 'group_' . $primary['code'] . '_minimumReserve' : 'minimumReserve';
+    $indexed = array_column($columns, null, 'key');
+    $indexed['minNew'] = ['key' => 'minNew', 'label' => 'min new', 'numberFormat' => '#,##0.###'];
+    if (!isset($indexed[$minimumKey])) $indexed[$minimumKey] = ['key'=>$minimumKey,'label'=>$t['minimumReserve'],'numberFormat'=>'#,##0.###'];
+    $first = ['sku','supplierArticle','product','final','periodExpense','sales','analysisPhysical','stockMonths','coldStatus',
+        $minimumKey,'minNew','supplierUnitPrice','supplierCurrency','children'];
+    $columns = [];
+    foreach ($first as $key) { $columns[] = $indexed[$key]; unset($indexed[$key]); }
+    $columns = array_merge($columns, array_values($indexed));
     $rows = [];
     foreach ($results as $item) {
         if (!lps_purchase_report_includes($item)) continue;
@@ -108,7 +119,7 @@ function lps_purchase_export_summary(array $state, array $results): array {
             'parents' => $links['parents'] ?? '', 'children' => $links['children'] ?? '',
             'manufacturingNeed' => $is_child ? lps_purchase_export_sum(array_map(static fn($group) => $group['manufacturingNeed'] ?? null, $item['groups'])) : null,
             'coldStatus' => $t['coldStatuses'][$item['coldCoverage']['status']] ?? $t['coldStatuses']['UNKNOWN'],
-            'final' => $quantity, 'supplierAmount' => $is_child ? 0.0 : ($quantity !== null && $price['supplierUnitPrice'] !== null ? $quantity * $price['supplierUnitPrice'] : null),
+            'minNew' => null, 'final' => $quantity, 'supplierAmount' => $is_child ? 0.0 : ($quantity !== null && $price['supplierUnitPrice'] !== null ? $quantity * $price['supplierUnitPrice'] : null),
             'periodExpense' => $total['periodExpense'], 'sales' => $total['regularSales'], 'analysisPhysical' => $total['physical'],
             'transitPhysical' => $transit_physical, 'networkPhysical' => lps_purchase_export_sum([$total['physical'], $transit_physical]),
             'planningAvailable' => lps_purchase_export_sum([$total['planningAvailable'], $item['transitPool']]),

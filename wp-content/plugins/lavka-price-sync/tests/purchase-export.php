@@ -27,6 +27,8 @@ foreach ($capture['cards'] as &$card) {
 unset($card); $state=lps_purchase_apply_current_stock($state,$capture);
 $results=lps_purchase_calculate_network($state); $summary=lps_purchase_export_summary($state,$results); $row=$summary['rows'][0];
 $familyTemplate=$state;
+check(array_slice(array_column($summary['columns'],'key'),0,14) === ['sku','supplierArticle','product','final','periodExpense','sales','analysisPhysical','stockMonths','coldStatus','group_kyiv_minimumReserve','minNew','supplierUnitPrice','supplierCurrency','children'], 'Owner template first thirteen columns and child list in N');
+check($row['minNew'] === null, 'Manual min new stays blank and does not change source minimum');
 check(count($summary['rows'])===1,'Two destinations produce one supplier-order row');
 check(!in_array('preordersCoveredByCurrentReserve',array_column($summary['columns'],'key'),true),'Non-accounted preorders have no misleading current-reserve coverage column');
 check($row['periodExpense']===183.0 && $row['sales']===183.0,'Outgoing/sales total is 169+14; storage-only movements excluded');

@@ -203,3 +203,17 @@ Java graph version2 подтверждает новую семантику сп�
 старые preview требуют нового расчёта. Сценарии в БД автоматически не переписываются.
 Проверки: purchase-assembly.php, purchase-planning-session.php, UI fixture;
 Java FolioAvailabilityMariaDbTest сверяет спрос, расход и дни наличия на временной БД.
+
+## Owner report layout and zero-receipt maximum check (2026-10-15)
+
+Supplier summary exports (XLSX and CSV) start with SKU, supplier article, product,
+supplier quantity, period expense, regular sales, analysis physical stock, stock
+months, cold status, primary procurement group MIN, blank `min new`, supplier
+unit price, currency. Column 14 lists children. Other diagnostics, parents and
+warehouse details follow. `min new` is an offline annotation column only; it does
+not update Folio policy. The MIN group is resolved from the scenario, not an ID.
+
+An existing destination stock above MAX does not block zero proposed receipt or
+its supplying group. Positive proposed replenishments and purchases still pass
+the existing maximum-stock checks. Regression covers a routed destination above
+MAX with zero need and a positive supplier order for its source group.

@@ -418,3 +418,7 @@ BALL2=1/2 на каждом узле сборки, включая детей, д
 могут иметь разные классы. UNKNOWN требует проверки, если включены разные сроки.
 Java graph требует envelope `ok:true` и runtime `LAVKA_TOKEN`; успешный health
 не доказывает готовность рецептов. Контракт и acceptance: `docs/api/FOLIO_ASSEMBLY_PURCHASE.md`.
+
+Purchase reporting (2026-10-15): owner column order and zero-receipt MAX semantics
+are documented in `docs/api/FOLIO_ASSEMBLY_PURCHASE.md`. An already overstocked
+recipient with zero replenishment must not block its procurement source.

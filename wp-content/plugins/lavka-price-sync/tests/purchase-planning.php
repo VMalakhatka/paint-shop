@@ -119,6 +119,14 @@ $bad['warehouseBreakdown'][1]['orderPolicy']['maximumStockLimited'] = true;
 $bad['warehouseBreakdown'][1]['orderPolicy']['maximumStockLimit'] = 25;
 $a = lps_purchase_calculate($bad, $groups, 30, true, $inputs);
 check($a['groups'][0]['transferIn'] <= 5 && $a['groups'][0]['finalQuantity'] === null, 'Respect destination cap including transfers and pack rounding');
+// Existing excess stock at a routed destination must not block zero replenishment or its donor.
+$overCap = $row;
+$overCap['warehouseBreakdown'][2]['orderPolicy']['maximumStockLimited'] = true;
+$overCap['warehouseBreakdown'][2]['orderPolicy']['maximumStockLimit'] = 6;
+$routed = $groups; $routed[1]['supplyFromGroupCode'] = 'kyiv';
+$a = lps_purchase_calculate($overCap, $routed, 30, false, $inputs);
+check($a['groups'][1]['plannedTransferIn'] === 0.0 && $a['groups'][1]['finalQuantity'] === 0.0, 'Existing over-cap stock permits zero receipt');
+check($a['groups'][0]['finalQuantity'] === 60.0, 'Zero receipt into over-cap Odessa does not block Kyiv purchase');
 $overlapping = $configured;
 $overlapping[1]['warehouseIds'][] = 7;
 try { lps_purchase_resolve_groups($saved, $overlapping); throw new RuntimeException('Accepted overlapping groups'); }

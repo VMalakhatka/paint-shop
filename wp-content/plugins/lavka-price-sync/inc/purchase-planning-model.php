@@ -521,7 +521,7 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
         }
         $quantity = $override ?? ($manufactured ? max(0, $receiver['target'] - $receiver['position']) : round(max(0, $receiver['target'] - $receiver['position']), 0, PHP_ROUND_HALF_DOWN));
         $destination = $members[$receiver['receivingWarehouseId']];
-        if (!$manufactured && ($destination['orderPolicy']['maximumStockLimited'] ?? null) === true
+        if (!$manufactured && $quantity > 0 && ($destination['orderPolicy']['maximumStockLimited'] ?? null) === true
             && $quantity + $receiver['inputs']['inTransit'] + $receiver['inputs']['openOrders']
                 + $receiver['internalAtReceivingWarehouse'] + (float)$destination['metrics']['availableQuantity'] > (float)$destination['orderPolicy']['maximumStockLimit'] + 0.000001) {
             $receiver['ready'] = $donor['ready'] = false;
@@ -586,7 +586,8 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
             $destination = $members[$item['receivingWarehouseId']];
             $policy = $destination['orderPolicy'];
             $quantity = $item['managerQuantity'] ?? $item['recommendedQuantity'];
-            if (!$manufactured && ($policy['maximumStockLimited'] ?? null) === true && $quantity + $item['inputs']['inTransit'] + $item['inputs']['openOrders'] + $item['transferIn'] + $item['internalAtReceivingWarehouse'] + (float)$destination['metrics']['availableQuantity'] > (float)$policy['maximumStockLimit'] + 0.000001) {
+            if (!$manufactured && $quantity + $item['transferIn'] + $item['plannedTransferIn'] > 0
+                && ($policy['maximumStockLimited'] ?? null) === true && $quantity + $item['inputs']['inTransit'] + $item['inputs']['openOrders'] + $item['transferIn'] + $item['internalAtReceivingWarehouse'] + (float)$destination['metrics']['availableQuantity'] > (float)$policy['maximumStockLimit'] + 0.000001) {
                 $item['issues'][] = 'DESTINATION_MAXIMUM_EXCEEDED';
                 $item['recommendedQuantity'] = null;
             }
