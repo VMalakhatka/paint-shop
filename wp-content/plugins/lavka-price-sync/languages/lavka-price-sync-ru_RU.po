@@ -6844,3 +6844,33 @@ msgstr "Выберите одного поставщика. Дети и внук
 #: inc/purchase-current-stock.php
 msgid "Java returned an outdated current stock format without customer preorders. Update and deploy the Java backend, then start a new calculation."
 msgstr "Java вернула устаревший формат текущего остатка без клиентских предзаказов. Обновите код и выполните деплой Java, затем начните новый расчёт."
+
+msgid "Draft saved. Confirmed edits are saved automatically."
+msgstr "Черновик сохранён. Подтверждённые изменения сохраняются автоматически."
+
+msgid "Saved draft opened. Stock and forecast are from the original calculation date."
+msgstr "Сохранённый черновик открыт. Остатки и прогноз соответствуют дате исходного расчёта."
+
+msgid "Completed calculations are saved as separate drafts. Use Apply for each edited product before leaving. A new calculation creates a new draft."
+msgstr "Завершённые расчёты сохраняются отдельными черновиками. Перед выходом примените изменения каждого отредактированного товара. Новый расчёт создаёт новый черновик."
+
+msgid "Saved order drafts"
+msgstr "Сохранённые черновики заказов"
+
+msgid "Open draft"
+msgstr "Открыть черновик"
+
+msgid "Could not save the order draft. Please try again."
+msgstr "Не удалось сохранить черновик заказа. Повторите попытку."
+
+msgid "The saved draft is incomplete. Start a new calculation."
+msgstr "Сохранённый черновик неполный. Начните новый расчёт."
+
+msgid "Complete the preview before saving a draft."
+msgstr "Завершите расчёт перед сохранением черновика."
+
+msgid "This draft changed in another tab. Reopen it before saving."
+msgstr "Этот черновик изменён в другой вкладке. Откройте его заново перед сохранением."
+
+msgid "Saved order draft not found."
+msgstr "Сохранённый черновик заказа не найден."

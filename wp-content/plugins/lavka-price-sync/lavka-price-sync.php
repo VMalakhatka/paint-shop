@@ -50,6 +50,7 @@ require_once __DIR__.'/inc/accounting-prices.php';
 require_once __DIR__.'/inc/product-analytics.php';
 require_once __DIR__.'/inc/analytics-snapshot-queue.php';
 require_once __DIR__.'/inc/product-analytics-export.php';
+require_once __DIR__.'/inc/purchase-drafts.php';
 require_once __DIR__.'/inc/purchase-planning.php';
 require_once __DIR__.'/inc/supplier-prices.php';
 

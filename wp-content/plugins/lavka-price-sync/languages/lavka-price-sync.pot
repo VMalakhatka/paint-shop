@@ -6625,3 +6625,33 @@ msgstr ""
 #: inc/purchase-current-stock.php
 msgid "Java returned an outdated current stock format without customer preorders. Update and deploy the Java backend, then start a new calculation."
 msgstr ""
+
+msgid "Draft saved. Confirmed edits are saved automatically."
+msgstr ""
+
+msgid "Saved draft opened. Stock and forecast are from the original calculation date."
+msgstr ""
+
+msgid "Completed calculations are saved as separate drafts. Use Apply for each edited product before leaving. A new calculation creates a new draft."
+msgstr ""
+
+msgid "Saved order drafts"
+msgstr ""
+
+msgid "Open draft"
+msgstr ""
+
+msgid "Could not save the order draft. Please try again."
+msgstr ""
+
+msgid "The saved draft is incomplete. Start a new calculation."
+msgstr ""
+
+msgid "Complete the preview before saving a draft."
+msgstr ""
+
+msgid "This draft changed in another tab. Reopen it before saving."
+msgstr ""
+
+msgid "Saved order draft not found."
+msgstr ""

@@ -6,7 +6,7 @@
     const t = config.i18n || {};
     const el = (name) => document.getElementById('lps-purchase-' + name);
     const number = new Intl.NumberFormat(config.locale || 'uk', { maximumFractionDigits: 3 });
-    const state = { token: '', rows: [], page: 0, busy: false, complete: false, controller: null, requestId: 0,
+    const state = { revision: 0, token: '', rows: [], page: 0, busy: false, complete: false, controller: null, requestId: 0,
         filters: { hideMinimumZero: false, hideNoSales: false, productGroup: '', productSubgroup: '', order: 'all' } };
     const escape = (value) => String(value == null ? '' : value).replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
     const componentNumber = new Intl.NumberFormat(config.locale || 'uk', { maximumFractionDigits: 12 });
@@ -20,6 +20,8 @@
         root.setAttribute('aria-busy', String(value));
         el('spinner').classList.toggle('is-active', value);
         el('start').disabled = value;
+        if (el('open')) el('open').disabled = value;
+        if (el('drafts')) el('drafts').disabled = value;
         el('scenario').disabled = value;
         el('cancel').disabled = !value;
         root.querySelectorAll('[data-export]').forEach((button) => { button.disabled = value || !state.complete; });
@@ -151,10 +153,10 @@
             busy(true);
             state.controller = new AbortController();
             try {
-                const data = await api('adjust', { token: state.token, sku: row.sku, groups: groups });
-                state.rows = data.items;
+                const data = await api('adjust', { token: state.token, sku: row.sku, groups: groups, revision: state.revision });
+                state.rows = data.items; state.revision = data.draftRevision || 0;
                 render();
-                message(t.complete);
+                message(state.revision ? t.draftSaved : t.complete);
             } catch (error) {
                 state.complete = false;
                 message((error.name === 'AbortError' ? '' : (error.message || t.error) + ' ') + t.incomplete, true);
@@ -168,6 +170,7 @@
         const option = el('scenario').selectedOptions[0];
         if (!option || !option.value) return;
         const requestId = ++state.requestId;
+        state.revision = 0;
         state.rows = []; state.page = 0; state.complete = false; state.token = '';
         resetFilters();
         state.controller = new AbortController();
@@ -187,7 +190,7 @@
                 if (requestId !== state.requestId) return;
                 if (data.replaceItems) state.rows = data.items;
                 else state.rows.push(...data.items);
-                state.complete = data.complete; page = data.page;
+                state.complete = data.complete; page = data.page; state.revision = data.draftRevision || 0;
                 parameters.snapshotContext = data.context;
                 parameters.currentStockCapture = data.currentStockCapture;
                 if (data.currentStockCapture) el('context').textContent += ' · ' + t.currentStockCapture + ': ' + data.currentStockCapture.capturedAt;
@@ -199,7 +202,8 @@
                 }
                 render();
             } while (!state.complete);
-            message(t.complete);
+            if (state.revision) { rememberDraft(state.token); await refreshDrafts().catch(() => {}); }
+            message(state.revision ? t.draftSaved : t.complete);
         } catch (error) {
             state.complete = false;
             message((error.name === 'AbortError' ? '' : error.message + ' ') + t.incomplete, true);
@@ -238,9 +242,48 @@
         if (!state.complete || state.busy) return;
         const form = document.createElement('form');
         form.method = 'POST'; form.action = config.exportUrl; form.hidden = true;
-        Object.entries({ action: 'lps_purchase_export', _wpnonce: config.nonce, token: state.token, format: button.dataset.export }).forEach(([name, value]) => {
+        Object.entries({ action: 'lps_purchase_export', _wpnonce: config.nonce, token: state.token, revision: state.revision, format: button.dataset.export }).forEach(([name, value]) => {
             const field = document.createElement('input'); field.name = name; field.value = value; form.appendChild(field);
         });
         document.body.appendChild(form); form.submit(); form.remove();
     }));
+    function rememberDraft(token) {
+        try {
+            const url = new URL(window.location.href);
+            url.searchParams.set('purchase_draft', token);
+            window.history.replaceState(null, '', url);
+        } catch (_) { /* Embedded fixture or restricted history does not affect saving. */ }
+    }
+    async function refreshDrafts() {
+        if (!el('drafts')) return;
+        const data = await api('drafts', {});
+        el('drafts').innerHTML = '<option value="">—</option>' + (data.items || []).map(d =>
+            '<option value="' + escape(d.token) + '">' + escape(d.title + ' · ' + d.created_at + ' UTC') + '</option>').join('');
+        el('drafts').value = state.token;
+    }
+    async function openDraft(token) {
+        if (!token || state.busy) return;
+        const requestId = ++state.requestId;
+        state.controller = new AbortController(); busy(true); message(t.loading);
+        try {
+            const data = await api('open', {token});
+            if (requestId !== state.requestId) return;
+            state.token = data.token; state.revision = data.revision;
+            state.rows = data.items; state.complete = true; state.page = 0;
+            resetFilters();
+            el('parameters').textContent = JSON.stringify(data, (key,value) => key === 'items' ? undefined : value, 2);
+            el('context').textContent = data.scenario.name + ' · v' + data.scenario.version + ' · ' + data.query.period.from + ' — ' + data.query.period.to
+                + ' · ' + t.currentStockCapture + ': ' + ((data.currentStockCapture || {}).capturedAt || data.createdAt);
+            el('warnings').hidden = true;
+            if (!Array.from(el('drafts').options).some(option => option.value === token)) {
+                el('drafts').add(new Option(data.scenario.name + ' · ' + data.createdAt, token));
+            }
+            el('drafts').value = token;
+            rememberDraft(token); render(); message(t.draftOpened);
+        } catch(error) { state.complete = false; message(error.message || t.error, true); }
+        finally { if (requestId === state.requestId) busy(false); }
+    }
+    if (el('open')) el('open').addEventListener('click', () => openDraft(el('drafts').value));
+    const resume = new URLSearchParams(window.location.search).get('purchase_draft');
+    if (resume && /^[a-f0-9]{32}$/.test(resume)) openDraft(resume);
 }());

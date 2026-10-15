@@ -6828,3 +6828,33 @@ msgstr "Виберіть одного постачальника. Діти та 
 #: inc/purchase-current-stock.php
 msgid "Java returned an outdated current stock format without customer preorders. Update and deploy the Java backend, then start a new calculation."
 msgstr "Java повернула застарілий формат поточного залишку без клієнтських передзамовлень. Оновіть код і виконайте деплой Java, потім почніть новий розрахунок."
+
+msgid "Draft saved. Confirmed edits are saved automatically."
+msgstr "Чернетку збережено. Підтверджені зміни зберігаються автоматично."
+
+msgid "Saved draft opened. Stock and forecast are from the original calculation date."
+msgstr "Збережену чернетку відкрито. Залишки й прогноз відповідають даті початкового розрахунку."
+
+msgid "Completed calculations are saved as separate drafts. Use Apply for each edited product before leaving. A new calculation creates a new draft."
+msgstr "Завершені розрахунки зберігаються окремими чернетками. Перед виходом застосуйте зміни кожного відредагованого товару. Новий розрахунок створює нову чернетку."
+
+msgid "Saved order drafts"
+msgstr "Збережені чернетки замовлень"
+
+msgid "Open draft"
+msgstr "Відкрити чернетку"
+
+msgid "Could not save the order draft. Please try again."
+msgstr "Не вдалося зберегти чернетку замовлення. Повторіть спробу."
+
+msgid "The saved draft is incomplete. Start a new calculation."
+msgstr "Збережена чернетка неповна. Почніть новий розрахунок."
+
+msgid "Complete the preview before saving a draft."
+msgstr "Завершіть розрахунок перед збереженням чернетки."
+
+msgid "This draft changed in another tab. Reopen it before saving."
+msgstr "Цю чернетку змінено в іншій вкладці. Відкрийте її повторно перед збереженням."
+
+msgid "Saved order draft not found."
+msgstr "Збережену чернетку замовлення не знайдено."

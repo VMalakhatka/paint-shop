@@ -422,3 +422,8 @@ Java graph требует envelope `ok:true` и runtime `LAVKA_TOKEN`; успе�
 Purchase reporting (2026-10-15): owner column order and zero-receipt MAX semantics
 are documented in `docs/api/FOLIO_ASSEMBLY_PURCHASE.md`. An already overstocked
 recipient with zero replenishment must not block its procurement source.
+
+Confirmed 2026-10-15: purchase drafts are persistent WordPress records owned by
+the creating user. Open/export uses the pinned calculation, not fresh Folio reads;
+only explicit new calculation refreshes source data. Accepted edits and exports
+require current draft revision. See OPERATIONS_RUNBOOK saved purchase drafts.

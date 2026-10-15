@@ -515,3 +515,14 @@ Java `FolioReceiptCatalogueController`/`FolioReceiptCatalogueDao` предост
 рассчитывает существующий Woo PriceList в контексте клиента. Точный контракт —
 Java `docs/api/FOLIO_RECEIPT_CATALOGUE_API.md`. Развёртывание обеих сторон,
 ограничения и восстановление — [операционный регламент](OPERATIONS_RUNBOOK.md#email-рассылки-менеджера-2026-10-05).
+
+### Persistent supplier-order drafts
+
+`lavka-price-sync/inc/purchase-drafts.php` owns the WordPress-only
+`{prefix}lps_purchase_drafts` table (schema option `lps_purchase_drafts_schema`).
+Completed calculation states and results are stored as JSON, without autoloaded
+options or expiry. Partial previews retain the transient lifecycle. Owner-scoped
+reads and atomic revision-checked updates prevent cross-user access and lost
+updates. AJAX uses the existing purchase capability and nonce gates. No browser
+storage contains business snapshots. Operational lifecycle and backup requirements:
+[Saved purchase drafts](OPERATIONS_RUNBOOK.md#сохранённые-черновики-закупки-2026-10-15).
