@@ -40,8 +40,14 @@ Java возвращает `coldStatus` из BALL2 всех выбранных к
 
 У ребёнка также виден полный список составляющих. Родители других поставщиков
 не становятся дополнительными корнями, не получают самостоятельный прогноз и
-не попадают в заказ. CSV/XLSX допускает только исходные закупаемые SKU выбранного
-поставщика. Дети с BALL4 3/9/11/12 и любые товары с рецептом не закупаются.
+не попадают в заказ. С 15.10.2026 CSV/XLSX включает исходные закупаемые SKU
+выбранного поставщика и аналитические строки детей/внуков независимо от их
+поставщика. У детей количество заказа поставщику и сумма всегда 0; их собственные
+продажи, остатки, прогноз и количество к изготовлению сохраняются. Колонки
+«Родители»/«Дети» показывают прямые связи рецепта, в том числе при нулевом дефиците.
+Промежуточный ребёнок-родитель содержит оба списка. Неизвестные показатели остаются
+пустыми и требуют проверки; ноль заказа ребёнка не подтверждает готовность его
+изготовления. Дети с BALL4 3/9/11/12 и любые товары с рецептом не закупаются.
 
 ## Рецепты и формула
 
@@ -197,3 +203,17 @@ Java graph version2 подтверждает новую семантику сп�
 старые preview требуют нового расчёта. Сценарии в БД автоматически не переписываются.
 Проверки: purchase-assembly.php, purchase-planning-session.php, UI fixture;
 Java FolioAvailabilityMariaDbTest сверяет спрос, расход и дни наличия на временной БД.
+
+## Owner report layout and zero-receipt maximum check (2026-10-15)
+
+Supplier summary exports (XLSX and CSV) start with SKU, supplier article, product,
+supplier quantity, period expense, regular sales, analysis physical stock, stock
+months, cold status, primary procurement group MIN, blank `min new`, supplier
+unit price, currency. Column 14 lists children. Other diagnostics, parents and
+warehouse details follow. `min new` is an offline annotation column only; it does
+not update Folio policy. The MIN group is resolved from the scenario, not an ID.
+
+An existing destination stock above MAX does not block zero proposed receipt or
+its supplying group. Positive proposed replenishments and purchases still pass
+the existing maximum-stock checks. Regression covers a routed destination above
+MAX with zero need and a positive supplier order for its source group.

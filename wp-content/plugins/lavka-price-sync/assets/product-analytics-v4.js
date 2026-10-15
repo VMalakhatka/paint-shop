@@ -24,6 +24,8 @@
         capabilities: null,
         rows: [],
         response: null,
+        reportPeriod: null,
+        serverDate: null,
         scenarios: [],
         activeTab: 'products',
         currentCursor: null,
@@ -207,6 +209,7 @@
         try {
             const data = await api('v4_bootstrap');
             state.sourceDatabase = data.sourceDatabase || 'Paint_Ua';
+            state.serverDate = data.serverDate;
             sourceInput.value = state.sourceDatabase;
             populateWarehouses(data.warehouses || []);
             populateScenarios(data.scenarios || []);
@@ -447,6 +450,7 @@
         exportForm.target = '_blank';
         exportForm.hidden = true;
         const request = currentRequest(null);
+        if (state.reportPeriod) request.period = Object.assign({}, state.reportPeriod);
         if (state.response && state.response.context && state.response.context.transit) request.transitConfigurationRevision = state.response.context.transit.configurationRevision;
         const fields = {
             action: 'lps_product_analytics_export',
@@ -483,9 +487,15 @@
         setBusy(true, label('queryRunning', 'Building report...'), 'query');
         try {
             const request = currentRequest(cursor);
+            if ((cursor || fromHistory) && state.reportPeriod) request.period = Object.assign({}, state.reportPeriod);
             if (cursor && state.response && state.response.context && state.response.context.transit) request.transitConfigurationRevision = state.response.context.transit.configurationRevision;
             const data = await api('v4_query', request);
             state.response = data;
+            state.reportPeriod = data.resolvedPeriod || null;
+            if (state.reportPeriod) {
+                el('lps-pa-period-from').value = state.reportPeriod.from;
+                el('lps-pa-period-to').value = state.reportPeriod.to;
+            }
             state.rows = Array.isArray(data.rows) ? data.rows : [];
             state.currentCursor = cursor || null;
             state.nextCursor = data.nextCursor || null;
@@ -789,6 +799,7 @@
     }
 
     function resetSelections(preserveScenario) {
+        state.reportPeriod = null;
         el('lps-pa-search').value = '';
         root.querySelectorAll('.lps-pa-mode').forEach((node) => { node.value = 'ANY'; node.dispatchEvent(new Event('change')); });
         root.querySelectorAll('.lps-pa-values').forEach((node) => Array.from(node.options).forEach((option) => { option.selected = false; }));
@@ -870,6 +881,12 @@
         Object.entries(productFilters).forEach((entry) => { if (entry[0] !== 'search') setSelection('product', entry[0], entry[1]); });
         Object.entries(movementFilters).forEach((entry) => setSelection('movement', entry[0], entry[1]));
         if (profile.period) {
+            if (profile.period.mode === 'ROLLING_DAYS' && state.serverDate) {
+                const start = new Date(state.serverDate + 'T00:00:00Z');
+                start.setUTCDate(start.getUTCDate() - Number(profile.period.days) + 1);
+                el('lps-pa-period-from').value = start.toISOString().slice(0, 10);
+                el('lps-pa-period-to').value = state.serverDate;
+            }
             if (profile.period.from) el('lps-pa-period-from').value = profile.period.from;
             if (profile.period.to) el('lps-pa-period-to').value = profile.period.to;
         }
@@ -892,6 +909,7 @@
     }
 
     function markScenarioModified() {
+        if (!state.applyingScenario) state.reportPeriod = null;
         if (state.applyingScenario || !scenarioSelect.value) return;
         state.scenarioModified = true;
         const node = el('lps-pa-scenario-status');

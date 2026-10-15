@@ -50,6 +50,12 @@ previewVersion10 после загрузки истории принимает �
 транзита; частичный ответ или timeout не заменяется ручным числом либо нулём.
 Источник: purchase-current-stock.php и docs/OPERATIONS_RUNBOOK.md,
 раздел «Единый текущий срез и подтверждения сценария».
+С 15.10.2026 проверять фактическую версию current-network-stock: для предзаказов
+нужна v2 с `preorderReservations`/`preorderAsOfDate` (Java `c5659f7` или новее).
+Production-проба выявила v1 при полном наборе карточек; перезапуск preview или
+повторный deploy старого локального checkout это не исправляет. Сверять рабочую
+копию сборки с нужным коммитом, не сбрасывая чужие правки. Точный регламент и
+доказательство причины — в разделе предзаказов `docs/OPERATIONS_RUNBOOK.md`.
 Смена настройки инвалидирует preview/export; пересечение транспорта с получателем
 запрещено. Транзит уменьшает закупку, но не спрос. ETA/назначение и отсутствие дублей
 в других поступлениях подтверждает менеджер (`receiptsReviewed` по каждой группе).
@@ -412,3 +418,7 @@ BALL2=1/2 на каждом узле сборки, включая детей, д
 могут иметь разные классы. UNKNOWN требует проверки, если включены разные сроки.
 Java graph требует envelope `ok:true` и runtime `LAVKA_TOKEN`; успешный health
 не доказывает готовность рецептов. Контракт и acceptance: `docs/api/FOLIO_ASSEMBLY_PURCHASE.md`.
+
+Purchase reporting (2026-10-15): owner column order and zero-receipt MAX semantics
+are documented in `docs/api/FOLIO_ASSEMBLY_PURCHASE.md`. An already overstocked
+recipient with zero replenishment must not block its procurement source.

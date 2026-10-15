@@ -253,6 +253,25 @@
         return result;
     }
 
+    function updatePeriodFields() {
+        const rolling = el('lps-as-period-mode').value === 'ROLLING_DAYS';
+        const days = el('lps-as-period-days');
+        el('lps-as-period-days-field').hidden = !rolling;
+        days.disabled = !rolling;
+        days.required = rolling;
+        ['from', 'to'].forEach((key) => {
+            el('lps-as-period-' + key).readOnly = rolling;
+            el('lps-as-period-' + key).required = !rolling;
+        });
+        const count = Number(days.value);
+        if (!rolling || !Number.isInteger(count) || count < 1 || count > 3650) return;
+        const today = config.serverDate || el('lps-as-period-to').defaultValue;
+        const start = new Date(today + 'T00:00:00Z');
+        start.setUTCDate(start.getUTCDate() - count + 1);
+        el('lps-as-period-from').value = start.toISOString().slice(0, 10);
+        el('lps-as-period-to').value = today;
+    }
+
     function buildProfile() {
         const productFilters = collectFilters('product');
         const search = el('lps-as-search').value.trim();
@@ -260,7 +279,9 @@
         return {
             schemaVersion: 4,
             context: { sourceDatabase: el('lps-as-source').value || 'Paint_Ua', warehouseIds: selectedWarehouseIds() },
-            period: { from: el('lps-as-period-from').value, to: el('lps-as-period-to').value },
+            period: el('lps-as-period-mode').value === 'ROLLING_DAYS'
+                ? { mode: 'ROLLING_DAYS', days: Number(el('lps-as-period-days').value) }
+                : { mode: 'FIXED', from: el('lps-as-period-from').value, to: el('lps-as-period-to').value },
             productFilters: productFilters,
             movementFilters: collectFilters('movement'),
             calculation: { abcBasis: el('lps-as-abc-basis').value, includeReturns: el('lps-as-include-returns').checked, availability: availabilityEditor.read(), stockOnlyWarehouseIds: state.stockOnlyWarehouseIds.filter((id) => selectedWarehouseIds().includes(id)) },
@@ -373,9 +394,12 @@
         Object.entries(productFilters).forEach((entry) => { if (entry[0] !== 'search') setSelection('product', entry[0], entry[1]); });
         Object.entries(normalized.movementFilters || {}).forEach((entry) => setSelection('movement', entry[0], entry[1]));
         if (normalized.period) {
+            el('lps-as-period-mode').value = normalized.period.mode === 'ROLLING_DAYS' ? 'ROLLING_DAYS' : 'FIXED';
+            el('lps-as-period-days').value = String(normalized.period.days || 190);
             if (normalized.period.from) el('lps-as-period-from').value = normalized.period.from;
             if (normalized.period.to) el('lps-as-period-to').value = normalized.period.to;
         }
+        updatePeriodFields();
         const calculation = normalized.calculation || {};
         state.stockOnlyWarehouseIds = (calculation.stockOnlyWarehouseIds || []).map(Number);
         renderWarehouseUsage();
@@ -414,6 +438,9 @@
         el('lps-as-visibility').value = 'shared';
         el('lps-as-status').value = 'active';
         el('lps-as-active-tab').value = 'products';
+        el('lps-as-period-mode').value = 'ROLLING_DAYS';
+        el('lps-as-period-days').value = '190';
+        updatePeriodFields();
         el('lps-as-editor-meta').textContent = i18n.newScenario || 'New scenario';
         el('lps-as-revisions').hidden = true;
         clearSelections();
@@ -513,6 +540,8 @@
     }
 
     warehouses.addEventListener('change', () => { state.pendingProfile = null; renderWarehouseUsage(); loadCapabilities(); });
+    el('lps-as-period-mode').addEventListener('change', updatePeriodFields);
+    el('lps-as-period-days').addEventListener('input', updatePeriodFields);
     form.addEventListener('submit', saveScenario);
     el('lps-as-new').addEventListener('click', resetEditor);
     el('lps-as-duplicate').addEventListener('click', duplicateScenario);

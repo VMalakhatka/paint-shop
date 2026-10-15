@@ -28,6 +28,21 @@ check(count($normal->getAllSheets())===2 && $normal->getSheet(1)->getHighestRow(
 $normal->disconnectWorksheets();
 $literal=lps_product_analytics_export_xlsx_workbook([['key'=>'sku','label'=>'=1+1']],[] ,[]);
 check($literal->getSheet(0)->getCell('A1')->getDataType()==='s','Source-derived column labels cannot become formulas');$literal->disconnectWorksheets();
+if ($familyPath=getenv('LPS_EXPORT_FAMILY_QA_DATA')) {
+    $family=json_decode(file_get_contents($familyPath),true);
+    $familyBook=lps_product_analytics_export_xlsx_workbook($family['columns'],$family['rows'],[]);
+    $path=tempnam(sys_get_temp_dir(),'purchase-family-');
+    (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($familyBook))->save($path);
+    $familySaved=\PhpOffice\PhpSpreadsheet\IOFactory::load($path); unlink($path);
+    $keys=array_column($family['columns'],'key'); $skus=array_column($family['rows'],'sku');
+    $cell=static fn($key,$sku) => \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(array_search($key,$keys,true)+1) . (array_search($sku,$skus,true)+2);
+    $sheet=$familySaved->getSheet(0);
+    check($sheet->getHighestDataRow()===4,'Native report retains parent, child and grandchild');
+    check((float)$sheet->getCell($cell('final','P-520560-20R'))->getValue()===0.0,'Saved XLSX child supplier order is numeric zero');
+    check((float)$sheet->getCell($cell('sales','P-520560-20R'))->getValue()===10.0,'Saved XLSX retains the child sales');
+    check($sheet->getCell($cell('children','P-520500'))->getValue()==='P-520560-20R','Saved XLSX parent lists its child');
+    $familyBook->disconnectWorksheets();$familySaved->disconnectWorksheets();
+}
 if (($qa=getenv('LPS_EXPORT_QA_DATA')) && ($output=getenv('LPS_EXPORT_QA_XLSX'))) {
     $data=json_decode(file_get_contents($qa),true);
     $book=lps_product_analytics_export_xlsx_workbook($data['columns'],$data['rows'],['currentStockCapture'=>'Test fixture'],

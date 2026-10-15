@@ -204,6 +204,34 @@ function lps_purchase_internal_stock(array $row, array $groups): array {
     return $out;
 }
 
+/**
+ * Non-accounted customer preorder invoices do not reduce Folio free stock.
+ * Their entire outstanding quantity is additional demand, independent of other current reserves.
+ */
+function lps_purchase_customer_preorders(array $row, array $group): array {
+    $empty = ['demand' => 0.0, 'additionalDemand' => 0.0, 'lines' => [], 'issue' => null];
+    if (empty($row['currentStockCapture']['captureId'])) return $empty; // direct model fixtures and historical previews
+    $source = $row['customerPreorders'] ?? [];
+    if (($source['calculationVersion'] ?? 0) !== 1 || ($source['status'] ?? '') !== 'CAPTURED'
+        || ($source['captureId'] ?? null) !== $row['currentStockCapture']['captureId'] || !is_array($source['lines'] ?? null)) {
+        return array_merge($empty, ['issue' => 'CUSTOMER_PREORDER_DATA_REQUIRED']);
+    }
+    $by_warehouse = []; $seen = [];
+    foreach ($source['lines'] as $line) {
+        $id = (int)($line['warehouseId'] ?? 0); if (!in_array($id, $group['warehouseIds'], true)) continue;
+        $qty = lps_purchase_number($line['quantity'] ?? null, 0.000001); $line_id = $line['lineId'] ?? null;
+        if ($qty === null || !is_int($line_id) || $line_id <= 0 || isset($seen[$line_id])) return array_merge($empty, ['issue' => 'CUSTOMER_PREORDER_DATA_REQUIRED']);
+        $seen[$line_id] = true; $by_warehouse[$id][] = $line;
+    }
+    $out = $empty;
+    foreach ($by_warehouse as $id => $lines) {
+        $demand = array_sum(array_map(static fn($line) => (float)$line['quantity'], $lines));
+        $out['demand'] += $demand; $out['additionalDemand'] += $demand;
+        $out['lines'] = array_merge($out['lines'], $lines);
+    }
+    return $out;
+}
+
 function lps_purchase_profile(array $input): array {
     $groups = [];
     foreach (array_slice((array)($input['groups'] ?? []), 0, 50) as $group) {
@@ -408,6 +436,13 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
         $ready = !$issues && $incoming !== null && $open_orders !== null && (!empty($group['supplyFromGroupCode']) || ((!$respect_pack || $pack !== null) && $moq !== null));
         $planning_available = $available + $internal_group['internalRestored'];
         $position = $planning_available + ($incoming ?? 0) + ($open_orders ?? 0);
+        $preorders = lps_purchase_customer_preorders($row, $group);
+        if ($preorders['issue']) $issues[] = $preorders['issue'];
+        $ready = $ready && !$preorders['issue'];
+        $statistical_target = $target;
+        $target = $target !== null ? $target + $preorders['additionalDemand'] : null;
+        $expected_free_after_preorders = max(0, $position - $preorders['additionalDemand']);
+        $preorder_uncovered_after_receipts = max(0, $preorders['additionalDemand'] - $position);
         $result[$group['code']] = [
             'policyExcluded' => false,
             'notes' => $demand['status'] === 'ACTUAL_SALES_ONLY' ? ['STOCKOUT_CORRECTION_NOT_CALCULATED'] : [],
@@ -428,7 +463,10 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
             'regularSales' => $valid ? $sales : null,
             'availability' => lps_purchase_availability($group, $row),
             'returns' => $valid ? $returns : null, 'coverageDays' => $daily > 0 ? max(0, $planning_available) / $daily : null,
-            'target' => $target, 'needBeforeReceipts' => $target === null ? null : max(0, $target - $planning_available),
+            'statisticalTarget' => $statistical_target, 'target' => $target, 'needBeforeReceipts' => $target === null ? null : max(0, $target - $planning_available),
+            'customerPreorders' => $preorders['demand'],
+            'preorderAdditionalDemand' => $preorders['additionalDemand'], 'expectedFreeAfterPreorders' => $expected_free_after_preorders,
+            'preorderUncoveredAfterReceipts' => $preorder_uncovered_after_receipts, 'preorderLines' => $preorders['lines'],
             'ownTarget' => $own_target, 'componentDemand' => $component_demand,
             'childContributions' => $assembly['contributions'][$group['code']] ?? [],
             'manufacturingNeed' => null,
@@ -483,7 +521,7 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
         }
         $quantity = $override ?? ($manufactured ? max(0, $receiver['target'] - $receiver['position']) : round(max(0, $receiver['target'] - $receiver['position']), 0, PHP_ROUND_HALF_DOWN));
         $destination = $members[$receiver['receivingWarehouseId']];
-        if (!$manufactured && ($destination['orderPolicy']['maximumStockLimited'] ?? null) === true
+        if (!$manufactured && $quantity > 0 && ($destination['orderPolicy']['maximumStockLimited'] ?? null) === true
             && $quantity + $receiver['inputs']['inTransit'] + $receiver['inputs']['openOrders']
                 + $receiver['internalAtReceivingWarehouse'] + (float)$destination['metrics']['availableQuantity'] > (float)$destination['orderPolicy']['maximumStockLimit'] + 0.000001) {
             $receiver['ready'] = $donor['ready'] = false;
@@ -548,7 +586,8 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
             $destination = $members[$item['receivingWarehouseId']];
             $policy = $destination['orderPolicy'];
             $quantity = $item['managerQuantity'] ?? $item['recommendedQuantity'];
-            if (!$manufactured && ($policy['maximumStockLimited'] ?? null) === true && $quantity + $item['inputs']['inTransit'] + $item['inputs']['openOrders'] + $item['transferIn'] + $item['internalAtReceivingWarehouse'] + (float)$destination['metrics']['availableQuantity'] > (float)$policy['maximumStockLimit'] + 0.000001) {
+            if (!$manufactured && $quantity + $item['transferIn'] + $item['plannedTransferIn'] > 0
+                && ($policy['maximumStockLimited'] ?? null) === true && $quantity + $item['inputs']['inTransit'] + $item['inputs']['openOrders'] + $item['transferIn'] + $item['internalAtReceivingWarehouse'] + (float)$destination['metrics']['availableQuantity'] > (float)$policy['maximumStockLimit'] + 0.000001) {
                 $item['issues'][] = 'DESTINATION_MAXIMUM_EXCEEDED';
                 $item['recommendedQuantity'] = null;
             }
