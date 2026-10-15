@@ -217,3 +217,13 @@ An existing destination stock above MAX does not block zero proposed receipt or
 its supplying group. Positive proposed replenishments and purchases still pass
 the existing maximum-stock checks. Regression covers a routed destination above
 MAX with zero need and a positive supplier order for its source group.
+
+### Legacy supplier-price export compatibility (2026-10-15)
+
+Early active Kreul imports contain product-level `status=PRESENT` and GTIN-matched
+offers without `offerStatus`. The export falls back to the product status only
+when the per-offer status is absent. Explicit offer status and validation issues
+remain authoritative. Equal-price 2/6-unit variants may resolve to one supplier
+article/unit price; distinct prices still require variant selection. Order amount
+is final supplier quantity times unit price in supplier currency. No reimport,
+reactivation, catalog-price update or Java deployment is required.

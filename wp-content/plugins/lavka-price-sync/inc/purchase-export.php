@@ -14,7 +14,9 @@ function lps_purchase_export_sum(array $values): ?float {
 function lps_purchase_export_price(array $prices): array {
     $variants = []; $limited = false;
     foreach ($prices as $price) foreach ($price['offers'] ?? [] as $offer) {
-        if (!in_array($offer['offerStatus'] ?? '', ['PRESENT', 'WHILE_STOCK_LASTS'], true) || !empty($offer['issues'])) continue;
+        // Early active imports stored status at product level, before per-offer statuses existed.
+        $offer_status = $offer['offerStatus'] ?? ($price['status'] ?? '');
+        if (!in_array($offer_status, ['PRESENT', 'WHILE_STOCK_LASTS'], true) || !empty($offer['issues'])) continue;
         $amount = lps_purchase_number($offer['price'] ?? null);
         $pack = lps_purchase_number($offer['pack'] ?? null, 0.000001);
         $basis = $offer['priceBasis'] ?? '';
@@ -23,7 +25,7 @@ function lps_purchase_export_price(array $prices): array {
         if ($currency === '' || $article === '') continue;
         $unit = $basis === 'PACK' ? $amount / $pack : $amount;
         $variants[wp_json_encode([$article, $currency, round($unit, 12)])] = ['supplierArticle' => $article, 'supplierUnitPrice' => $unit, 'supplierCurrency' => $currency];
-        $limited = $limited || ($offer['offerStatus'] === 'WHILE_STOCK_LASTS');
+        $limited = $limited || ($offer_status === 'WHILE_STOCK_LASTS');
     }
     if (count($variants) !== 1) return ['supplierArticle' => '', 'supplierUnitPrice' => null, 'supplierCurrency' => '',
         'supplierPriceNote' => count($variants) ? __('Select a supplier price variant.', 'lavka-price-sync') : __('No confirmed supplier price.', 'lavka-price-sync')];

@@ -98,3 +98,22 @@ check($unknownBySku[$grandchild]['final']===0.0 && $unknownBySku[$grandchild]['s
     'A missing child stays visible with zero supplier order, unknown statistics and review status');
 echo "PASS: unique SKU summary, warehouse stock, transit, routing, unknown quantities and supplier variants\n";
 echo "PASS: parent/child report links, child statistics, zero supplier purchases, grandchild discovery and missing data\n";
+
+// Kreul v1 has a product-level PRESENT status but no offerStatus in its saved variants.
+$legacy = $offer; unset($legacy['offerStatus']);
+$legacy['article']='17003'; $legacy['price']=4.3485; $legacy['pack']=2;
+$legacySix=$legacy; $legacySix['pack']=6;
+$legacyPrice=lps_purchase_export_price([['status'=>'PRESENT','offers'=>[$legacy,$legacySix]]]);
+check($legacyPrice['supplierArticle']==='17003' && $legacyPrice['supplierUnitPrice']===4.3485 && $legacyPrice['supplierCurrency']==='EUR', 'Legacy GTIN-matched equal-price pack variants retain article and EUR price');
+$legacyState=$familyTemplate;
+$legacyState['rows']['TEST-010']['supplierPrices']=[['status'=>'PRESENT','offers'=>[$legacy]]];
+$legacyResults=lps_purchase_calculate_network($legacyState);
+$legacyResults[0]['groups'][0]['finalQuantity']=6.0;
+$legacyRow=lps_purchase_export_summary($legacyState,$legacyResults)['rows'][0];
+check(abs($legacyRow['supplierAmount']-26.091)<1e-9,'Legacy supplier amount equals final quantity times EUR unit price');
+$blocked=$legacy; $blocked['offerStatus']='DISCONTINUED';
+check(lps_purchase_export_price([['status'=>'PRESENT','offers'=>[$blocked]]])['supplierUnitPrice']===null,'Explicit discontinued offer cannot inherit product PRESENT');
+check(lps_purchase_export_price([['status'=>'REVIEW','offers'=>[$legacy]]])['supplierUnitPrice']===null,'Unknown legacy product status does not invent a confirmed price');
+$invalid=$legacy; $invalid['issues']=['INVALID_PRICE'];
+check(lps_purchase_export_price([['status'=>'PRESENT','offers'=>[$invalid]]])['supplierUnitPrice']===null,'Legacy validation issues still block price');
+echo "PASS: legacy Kreul article, pack variants, EUR order amount and explicit status precedence\n";
