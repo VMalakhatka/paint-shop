@@ -81,6 +81,10 @@ OVH service -> physical host -> hypervisor -> Windows VM
 - `lavka-product-media-upload` — пакетный media workflow;
 - `paint-nova-poshta-multishipping` — многоскладская доставка Новой почтой;
 - `pc-checkbox-fiscalization` — универсальный исполнитель Checkbox.
+- `pc-wayforpay-checkbox` — проверка callback WayForPay и очередь команд чека;
+  сохраняет snapshot до Folio split, не выбирает накладные и не выполняет возвраты.
+  Локальная реализация 2026-10-15, по умолчанию off; production rollout отдельно.
+  [Подключение и приёмка](../wp-content/plugins/pc-wayforpay-checkbox/README.md).
 
 MU-плагины загружаются автоматически. Критические группы: ecosystem lock/events,
 Folio customer/order integration, checkout compliance, stock staging/sync,

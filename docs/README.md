@@ -54,7 +54,7 @@
 | Загружать и исправлять изображения | [MEDIA_MANAGER_GUIDE_UK.md](MEDIA_MANAGER_GUIDE_UK.md) |
 | Проверить Woo → Java/Folio заказ | [FOLIO_ORDER_JSON_CONTRACT.md](FOLIO_ORDER_JSON_CONTRACT.md) |
 | Пользоваться и развивать многоскладскую товарную аналитику | [Карта владельцев и реализации](BACKEND_GUIDE.md#товарная-аналитика-карта-реализации), [WordPress v4 / Java v6](api/FOLIO_PRODUCT_ANALYTICS_FRONTEND_V4.md), [операторский регламент](OPERATIONS_RUNBOOK.md#наличие-товара-и-объединённые-склады-schema-v5), [план фильтров](FOLIO_PRODUCT_ANALYTICS_FILTERS_PLAN.md) и [историческое задание Java](api/FOLIO_PRODUCT_ANALYTICS_SCENARIOS_BACKEND_TASK.md) |
-| Ограничить тестовый WayForPay | [WAYFORPAY_TEST_ACCESS.md](WAYFORPAY_TEST_ACCESS.md) |
+| Ограничить WayForPay и подключить оплату → чек Checkbox | [WAYFORPAY_TEST_ACCESS.md](WAYFORPAY_TEST_ACCESS.md) |
 
 ## Аудитории
 

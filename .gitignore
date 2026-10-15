@@ -158,3 +158,6 @@ wp-content/languages/loco/**/backup-*.po~
 
 !wp-content/plugins/lavka-workshops/
 !wp-content/plugins/lavka-workshops/**
+
+!wp-content/plugins/pc-wayforpay-checkbox/
+!wp-content/plugins/pc-wayforpay-checkbox/**
