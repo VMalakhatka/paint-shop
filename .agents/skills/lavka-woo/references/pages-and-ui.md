@@ -77,7 +77,9 @@
   в option `psu_catalog_suppliers`. Видимость скрывает пункт фильтра и бренд в
   product metadata: `paint-shop-ux/inc/single-product.php` через Woo
   `woocommerce_product_brands_output` использует тот же `psu_catalog_supplier_terms(true)`.
-  Если разрешённых брендов нет, строка отсутствует; назначения, schema и товары
+  Разрешены только явно включённые `visible`: отсутствие настройки/флага означает
+  запрет, включая checkbox админки. Если разрешённых брендов нет, строка отсутствует;
+  назначения, schema и товары
   остаются прежними. Источник: `tests/single-product-brands-local.php` (2026-10-15).
   Порядок группирует товары без текстового поиска до пагинации; keyword search
   сохраняет релевантность Relevanssi. См. раздел

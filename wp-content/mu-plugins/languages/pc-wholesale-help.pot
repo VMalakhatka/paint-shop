@@ -1063,5 +1063,5 @@ msgid "Select any thumbnail below the product photo to switch images, or use the
 msgstr ""
 
 #: pc-wholesale-help.php
-msgid "Product pages show only brands enabled in the catalogue supplier filter. If none are enabled for a product, the brand row is omitted."
+msgid "Product pages show only brands explicitly enabled in the catalogue supplier filter. Unconfigured brands stay hidden. If none are enabled for a product, the brand row is omitted."
 msgstr ""
