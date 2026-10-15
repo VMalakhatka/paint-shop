@@ -98,6 +98,11 @@
   не связывать Paint Core напрямую с GeneratePress. Откат до `wp` —
   `psu_single_product_enabled=false`. Проверки и deployment boundaries — README
   `paint-shop-ux`; пользовательский канон — `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md`.
+  Проверять не только SKU с одним фото, но и многофотографическую галерею:
+  ширину native gallery и всех миниатюр, каждый слайд/lightbox, main/gallery IDs
+  и порядок. Не путать разный состав media на local/production с потерей фото
+  шаблоном; CSS и PDP template не меняют привязки. Регрессия 1.4.1 от 2026-10-15
+  сохраняет normal/400 title и ограниченное фото, перекрывает inherited Woo 48%.
   Production-публикация и проверка в этой задаче не выполнялись.
 - Карточка товара показывает SKU, категории/бренд, stock/allocation и
   desktop-поиск под артикулом. На single product после meta выводится

@@ -80,6 +80,8 @@ try {
         $switched = switch_to_locale($locale);
         try {
             $check(__('Product added to cart.', 'paint-shop-ux') === $translation, 'Product feedback translated: ' . $locale);
+            $gallery_help = __('Select any thumbnail below the product photo to switch images, or use the magnifying glass to enlarge the current photo. All images assigned to this product remain available; thumbnails fill the gallery width.', 'pc-wholesale-help');
+            $check(str_contains($gallery_help, $locale === 'uk' ? 'Натисніть будь-яку мініатюру' : 'Нажмите любую миниатюру'), 'Gallery help translated: ' . $locale);
         } finally { if ($switched) restore_previous_locale(); }
     }
 

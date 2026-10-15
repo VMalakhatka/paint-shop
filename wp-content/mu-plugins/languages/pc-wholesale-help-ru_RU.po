@@ -1100,3 +1100,7 @@ msgstr "На странице товара фото расположено ря�
 #: pc-wholesale-help.php
 msgid "Product page on a phone"
 msgstr "Страница товара на телефоне"
+
+#: pc-wholesale-help.php
+msgid "Select any thumbnail below the product photo to switch images, or use the magnifying glass to enlarge the current photo. All images assigned to this product remain available; thumbnails fill the gallery width."
+msgstr "Нажмите любую миниатюру под фото товара, чтобы переключить изображение, или лупу, чтобы увеличить текущее фото. Все назначенные товару изображения остаются доступными; миниатюры занимают всю ширину галереи."
