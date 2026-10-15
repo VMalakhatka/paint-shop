@@ -74,8 +74,12 @@
   Applied chips строятся из URL, сохраняют контекст категории и сбрасывают страницу
   при удалении условия. Проверки/контракт: README `paint-shop-ux`, `clean-filters-*`.
   `psu-catalog-suppliers.php` хранит видимость и порядок taxonomy `product_brand`
-  в option `psu_catalog_suppliers`. Видимость скрывает только пункт фильтра,
-  порядок группирует товары без текстового поиска до пагинации; keyword search
+  в option `psu_catalog_suppliers`. Видимость скрывает пункт фильтра и бренд в
+  product metadata: `paint-shop-ux/inc/single-product.php` через Woo
+  `woocommerce_product_brands_output` использует тот же `psu_catalog_supplier_terms(true)`.
+  Если разрешённых брендов нет, строка отсутствует; назначения, schema и товары
+  остаются прежними. Источник: `tests/single-product-brands-local.php` (2026-10-15).
+  Порядок группирует товары без текстового поиска до пагинации; keyword search
   сохраняет релевантность Relevanssi. См. раздел
   «Поставщики в каталоге» в `docs/OPERATIONS_RUNBOOK.md`.
   Woo хранит артикул в `_sku`; подтверждённые исторические штрихкоды Lavka
@@ -120,6 +124,7 @@
 
 ## Корзина и checkout
 
+- С 2026-10-15 стандартный XLSX-прайс удаляет колонку поставщика перед выдачей; внутренний row schema сохранён для CommercialOffer. Новые рассылки используют новую версию fingerprint; уже готовые вложения нужно пересоздать.
 - Полный клиентский XLSX-прайс принадлежит `pc-order-import-export/PriceList` и
   доступен оптовым ролям в Orders и корзине. Цена одна, из текущего customer price
   pipeline; остаток только по mapped selling locations Киева и Одессы. Импорт

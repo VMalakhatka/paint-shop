@@ -260,6 +260,10 @@ class PriceList
         $sheet->getHeaderFooter()->setOddHeader('&L' . get_bloginfo('name') . '&R' . wp_date('Y-m-d H:i'));
         $sheet->getPageSetup()->setOrientation('landscape')->setFitToWidth(1)->setFitToHeight(0);
         $sheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd(1, 1);
+        // Supplier is internal sorting data, not a customer-facing export column.
+        // Preserve the shared row schema used by commercial offers and frozen mailings.
+        $sheet->removeColumn('D');
+        $sheet->freezePane('D2');
         return $book;
     }
 

@@ -802,8 +802,8 @@ msgstr "Заполните жёлтую колонку «Заказать» и �
 msgid "Customer draft imports also use current account prices. After cart import, review the report, then refresh the list. Do not import again if the products were already added."
 msgstr "Клиентский импорт в черновик также использует текущие цены учётной записи. После импорта в корзину просмотрите отчёт, затем обновите список. Не импортируйте повторно, если товары уже добавлены."
 
-msgid "Download the full XLSX price list in My orders or the cart. It follows the category tree of the website: expand and collapse groups using the outline buttons on the left in Excel. Each product appears once, with its barcode, your current price, combined Kyiv and Odesa stock, supplier, category path and product link. Unknown prices or stock remain blank. Out-of-stock products are included."
-msgstr "Скачайте полный прайс XLSX в «Моих заказах» или корзине. Он повторяет дерево категорий сайта: разворачивайте и сворачивайте группы кнопками структуры слева в Excel. Каждый товар указан один раз со штрихкодом, вашей текущей ценой, общим остатком Киева и Одессы, поставщиком, путём категории и ссылкой на товар. Неизвестные цены или остатки остаются пустыми. Товары без остатка также включены."
+msgid "Download the full XLSX price list in My orders or the cart. It follows the category tree of the website: expand and collapse groups using the outline buttons on the left in Excel. Each product appears once, with its barcode, your current price, combined Kyiv and Odesa stock, category path and product link. Unknown prices or stock remain blank. Out-of-stock products are included."
+msgstr "Скачайте полный прайс XLSX в «Моих заказах» или корзине. Он повторяет дерево категорий сайта: разворачивайте и сворачивайте группы кнопками структуры слева в Excel. Каждый товар указан один раз со штрихкодом, вашей текущей ценой, общим остатком Киева и Одессы, путём категории и ссылкой на товар. Неизвестные цены или остатки остаются пустыми. Товары без остатка также включены."
 
 msgid "Category headings are not order lines. Filled quantities in collapsed groups are still imported. Do not sort the entire sheet as a flat table: this would mix category headings with products."
 msgstr "Заголовки категорий не являются позициями заказа. Заполненные количества в свёрнутых группах также импортируются. Не сортируйте весь лист как плоскую таблицу: это смешает заголовки категорий с товарами."
@@ -1104,3 +1104,7 @@ msgstr "Страница товара на телефоне"
 #: pc-wholesale-help.php
 msgid "Select any thumbnail below the product photo to switch images, or use the magnifying glass to enlarge the current photo. All images assigned to this product remain available; thumbnails fill the gallery width."
 msgstr "Нажмите любую миниатюру под фото товара, чтобы переключить изображение, или лупу, чтобы увеличить текущее фото. Все назначенные товару изображения остаются доступными; миниатюры занимают всю ширину галереи."
+
+#: pc-wholesale-help.php
+msgid "Product pages show only brands enabled in the catalogue supplier filter. If none are enabled for a product, the brand row is omitted."
+msgstr "На странице товара показываются только бренды, включённые для фильтра поставщиков каталога. Если таких брендов у товара нет, строка бренда не показывается."
