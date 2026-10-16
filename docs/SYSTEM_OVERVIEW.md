@@ -63,6 +63,7 @@ OVH service -> physical host -> hypervisor -> Windows VM
 | Статистика товара | Java projection + `lavka-price-sync` | активное поколение `folio_product_*` |
 | Отчёты | `lavka-reports` и профильные MU-плагины | Java response + параметры и контрольные суммы |
 | Заказ Woo → документы ФОЛИО | `pc-folio-order-link` + Java | стабильный request ID и `documents[]` |
+| WayForPay → независимый банковский приход ФОЛИО | `pc-wayforpay-checkbox/FolioPayments` + Java `folio.payment` | verified Approved, снимок плательщика, отдельный outbox и атомарный MSSQL-журнал; [запуск](FOLIO_WFP_PAYMENTS.md) |
 | Изображения Woo | `$image-in-woo`: Media Library + Media Cloud + Java media API | attachment ID, exact S3 HEAD proof и ФОЛИО reference |
 | OVH contract/DNS/compute/S3 policy | `$manage-ovh-infrastructure` | текущий OVH Manager/API и фактический resource state |
 | Java image/container/env/health | `$build-java-docker-runtime` | текущий Docker/deploy code и runtime state |
@@ -83,7 +84,10 @@ OVH service -> physical host -> hypervisor -> Windows VM
 - `pc-checkbox-fiscalization` — универсальный исполнитель Checkbox.
 - `pc-wayforpay-checkbox` — проверка callback WayForPay и очередь команд чека;
   сохраняет snapshot до Folio split, не выбирает накладные и не выполняет возвраты.
-  Локальная реализация 2026-10-15, по умолчанию off; production rollout отдельно.
+  С версии 0.2.0 также владеет независимой очередью банковских приходов: склад5,
+  плательщик на момент Approved, без ожидания/распределения счетов. Java сохраняет
+  native приход и idempotency ledger одной транзакцией. Этот новый поток default-off;
+  production rollout отдельно, инструкция — [банковские приходы](FOLIO_WFP_PAYMENTS.md).
   [Подключение и приёмка](../wp-content/plugins/pc-wayforpay-checkbox/README.md).
 
 MU-плагины загружаются автоматически. Критические группы: ecosystem lock/events,

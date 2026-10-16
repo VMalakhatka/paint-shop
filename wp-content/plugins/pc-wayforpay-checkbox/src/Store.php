@@ -30,6 +30,8 @@ final class Store
             next_run bigint(20) unsigned NOT NULL DEFAULT 0,
             payment_applied tinyint NOT NULL DEFAULT 0,
             refunded tinyint NOT NULL DEFAULT 0,
+            folio_payer_key varchar(32) NOT NULL DEFAULT '',
+            approved_at datetime NULL,
             created_at datetime NOT NULL,
             updated_at datetime NOT NULL,
             PRIMARY KEY  (order_id),
