@@ -27,3 +27,21 @@ msgstr "Переглянути чек"
 
 msgid "Reconcile / resume Checkbox receipt"
 msgstr "Звірити / відновити чек Checkbox"
+
+msgid "This order is cancelled, failed or refunded. Check its details or contact the manager before making another payment."
+msgstr "Це замовлення скасовано, оплата не вдалася або кошти повернено. Перевірте деталі чи зверніться до менеджера перед повторною оплатою."
+
+msgid "Your order has been paid successfully. You can view it in your account. The manager will notify you about shipment."
+msgstr "Ваше замовлення успішно оплачено. Переглянути його можна в кабінеті. Менеджер повідомить вам про відправлення."
+
+msgid "Your order has been received. We are waiting for payment confirmation from WayForPay. Refresh this page shortly; do not pay again if money has already been charged."
+msgstr "Ваше замовлення отримано. Очікуємо підтвердження оплати від WayForPay. Оновіть сторінку трохи пізніше; не сплачуйте повторно, якщо гроші вже списано."
+
+msgid "View my orders"
+msgstr "Мої замовлення"
+
+msgid "Checkbox diagnostic"
+msgstr "Діагностика Checkbox"
+
+msgid "Shift ID"
+msgstr "ID зміни"

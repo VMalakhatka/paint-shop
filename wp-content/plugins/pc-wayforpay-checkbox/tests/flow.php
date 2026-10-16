@@ -90,6 +90,7 @@ class FakeService {
             return new WP_Error('reconciliation_required','',['status'=>409]);
         }
         if ($this->outcome==='invalid') return new WP_Error('invalid_tax','',['status'=>422]);
+        if (in_array($this->outcome,['shift_open_pending','shift_open_failed'],true)) return new WP_Error($this->outcome,'',['status'=>409]);
         return $this->states[$key]=$r;
     }
     public function reconcile($key) {
@@ -178,6 +179,12 @@ $o=fixture(17); $o->items=[new Item('9.99')]; $bridge->accept(signed(17));
 check($GLOBALS['wpdb']->rows[17]['status']==='BLOCKED' && $o->is_paid(),'line sum mismatch blocks receipt not verified payment');
 $o=fixture(18); $o->items=[new Item('12.00'),new Item('-2.00',1,'fee')]; $bridge->accept(signed(18));
 check($GLOBALS['wpdb']->rows[18]['status']==='BLOCKED','negative fees require explicit mapping');
+fixture(19); $bridge->accept(signed(19)); $GLOBALS['service']->outcome='shift_open_pending'; $bridge->work(19);
+check($GLOBALS['wpdb']->rows[19]['status']==='QUEUED','pending opening schedules safe executor lookup, not receipt reconciliation');
+$GLOBALS['service']->outcome='success'; ready(19); $bridge->work(19);
+check($GLOBALS['wpdb']->rows[19]['status']==='SUCCEEDED' && $GLOBALS['orders'][19]->paidCalls===1,'after opening resumes original sale without repeating payment transition');
+fixture(20); $bridge->accept(signed(20)); $GLOBALS['service']->outcome='shift_open_failed'; $bridge->work(20);
+check($GLOBALS['wpdb']->rows[20]['status']==='BLOCKED','terminal opening failure needs operator review');
 fixture(15); $bridge->accept(signed(15)); $before=count($GLOBALS['service']->sent); define('PC_WFP_CHECKBOX_PAUSED',true); $bridge->work(15);
 check(count($GLOBALS['service']->sent)===$before && $GLOBALS['wpdb']->rows[15]['attempts']===0 && $GLOBALS['orders'][15]->is_paid(),'pause preserves validated payments without fiscal calls or spending attempts');
 $ack=Protocol::acknowledgement('fixture_ref','fixture-secret',123);

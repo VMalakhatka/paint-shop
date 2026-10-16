@@ -1109,6 +1109,10 @@ msgstr "Нажмите любую миниатюру под фото товар�
 msgid "Product pages show only brands explicitly enabled in the catalogue supplier filter. Unconfigured brands stay hidden. If none are enabled for a product, the brand row is omitted."
 msgstr "На странице товара показываются только бренды, явно включённые для фильтра поставщиков каталога. Бренды без сохранённого разрешения скрыты. Если таких брендов у товара нет, строка бренда не показывается."
 
+
+msgid "After WayForPay, the website shows payment confirmation or a waiting message. If money was charged but confirmation is pending, refresh the page later and check My orders. Do not pay again; contact the manager if the status does not update."
+msgstr "После WayForPay сайт показывает подтверждение оплаты или сообщение об ожидании. Если деньги списаны, но подтверждения ещё нет, обновите страницу позже и проверьте «Мои заказы». Не платите повторно; если статус не меняется, обратитесь к менеджеру."
+
 msgid "WFP at the start of a new Folio invoice information field means the website verified its WayForPay payment. This marker is not a separate Folio payment document and does not itself change the accounting balance. Existing invoices are not relabelled automatically."
 msgstr "Метка WFP в начале поля информации нового счёта ФОЛИО означает, что сайт проверил оплату через WayForPay. Это не отдельный платёжный документ ФОЛИО; метка сама по себе не меняет учётный баланс. Существующие счета автоматически не перемаркируются."
 

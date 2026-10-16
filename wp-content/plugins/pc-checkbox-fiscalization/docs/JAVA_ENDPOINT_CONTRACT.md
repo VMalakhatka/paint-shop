@@ -1,5 +1,32 @@
 # Java fiscalization command contract v1
 
+## Implementation status and Folio-only recovery
+
+This is a producer contract, not evidence that the default Java endpoint exists.
+Code audit 2026-10-16 found no implemented fiscalization command controller in the
+current Java module. The executor and WayForPay adapter exist; Folio-only manager
+preview/apply remains unimplemented and must fail closed until the producer exists.
+
+Owner decision 2026-10-16: **only a posted payment linked to the Folio invoice is
+an acceptable paid source**, not a cashier checkbox or an invoice status. Before
+implementing that producer, verify `linkedPayments`/`SCL_PMOV` semantics, posting,
+allocation amount/currency, reversals and payment method against the actual Java
+DAO/Folio records. A zero customer balance or invoice `WFP` text is insufficient.
+
+Required recovery contract (planned): stable organization/document/payment identity,
+payment allocation proof and revision, final lines/taxes/discounts, exact paid total,
+payment method, existing fiscal links and immutable command UUID. Partial payments,
+multiple payments, prepayments and returns require explicit rules; do not silently
+treat them as full paid sales. Invoice edits after preview invalidate confirmation.
+
+For a Woo-linked invoice, resolve the original verified WayForPay operation and
+resume/reconcile it; never fiscalize the same payment under a new Folio key. For
+Folio-only sales, establish existing receipt evidence across the relevant registers
+before enabling apply. A missing local journal entry does not prove no receipt was
+issued by a cashier elsewhere. The frontend selects and previews; the trusted
+server validates payment and deduplication again at apply. Preserve the executor's
+caller-agnostic boundary; it must not decide who/what should be fiscalized.
+
 ## Responsibility boundary
 
 The Java/Folio side decides **whether** a source document needs a receipt and prepares the final fiscal meaning:

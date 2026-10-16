@@ -498,6 +498,16 @@ can receive explicit `pcoe_import_customers` together with existing
 Folio import. Grant/revoke per user only with owner authorization. Existing customer
 role allowlist, actor-owned jobs and preview/apply are unchanged.
 
+WayForPay/Checkbox recovery (2026-10-16, 0.1.1 code and offline tests): browser
+return with valid order/key goes to Woo order-received, never confirms payment.
+ShiftManager shares a per-register persisted UUID/lock across manual and automatic
+opening; unknown outcomes are GET-only. Receipt preflight errors retain sanitized
+stage/message/HTTP and shift ID. Do not diagnose opening rejection from the generic
+basebad_request code alone. Folio-only receipts still need an authoritative paid
+command producer and cross-source duplicate checks; never create a second operation
+for a Woo-linked invoice. Human runbook: `docs/WAYFORPAY_TEST_ACCESS.md` and linked
+plugin READMEs. Live opening/replay remains separately authorized.
+
 Manual draft purpose (2026-10-16; `PCOE DraftPurpose`, `DraftFolioWorkflow`,
 `ManagerWorkspace`, Java `FolioOrderAccountService`): `_pcoe_draft_purpose`
 selects ordinary draft vs preorder. Manual non-accounting does not imply shortage.
