@@ -155,6 +155,17 @@ Java отвечает за складское распределение вну�
 
 ## WayForPay
 
+Owner decision 2026-10-16: all WayForPay receipts of funds for FOP Malakhatka
+belong to payment warehouse 5, even when the invoice uses another warehouse.
+Link the payment to the source Folio invoice and retain that invoice's payer;
+later user-profile remapping must not move historical money. This is a business
+configuration, not a shipping-location rule. Bank-income creation is NOT yet
+implemented. Native payment allocation requires a guarded Paint_Rus golden-master
+before implementation/apply; do not substitute a bare SCL_PLAT insert or the
+invoice number allocator. Agreed task and gates:
+`docs/api/FOLIO_WFP_PAYMENT_BACKEND_TASK.md`; operator entry:
+`docs/WAYFORPAY_TEST_ACCESS.md`.
+
 2026-10-16: `pc-folio-order-link.php` replaces the `Int` prefix in
 `additionalInfo` with `WFP` only for server-verified WayForPay evidence matching
 the paid Woo transaction. This is informational, not a Folio payment write.
