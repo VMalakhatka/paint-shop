@@ -365,6 +365,8 @@ function pc_wholesale_help_render_endpoint(): void {
         </section>
 
         <section class="pc-help-section" id="koshyk">
+            <p><?php esc_html_e('On a phone, after adding a product, the bottom bar shows the number of units, the product subtotal and Go to cart. It stays while browsing categories. Product added confirms a successful addition. Delivery, discounts and the final total are checked in the cart. The bar is hidden for an empty cart, in Draft mode, My account, the cart and checkout, and temporarily while typing.', 'pc-wholesale-help'); ?></p>
+            <?php pc_wholesale_help_image('mobile-cart-bar.jpg', __('Cart', 'pc-wholesale-help'), __('Go to the cart from the bottom bar on your phone.', 'pc-wholesale-help')); ?>
             <div class="pc-help-section__heading"><span>04</span><div><h2><?php esc_html_e('Check the cart', 'pc-wholesale-help'); ?></h2><p><?php esc_html_e('For every item, check the product, SKU, price, quantity, subtotal and the “Allocation” line.', 'pc-wholesale-help'); ?></p></div></div>
             <p><?php esc_html_e('The cart uses the full page width. On a phone, each item shows its photo and full name, with price, quantity and subtotal underneath. Change the quantity in its field or use the cross to remove an item.', 'pc-wholesale-help'); ?></p>
             <p><?php esc_html_e('Changing a quantity or removing an item updates only that row and the cart totals. While the request is running, the cart shows “Updating cart…”; wait for it to finish instead of repeating the action.', 'pc-wholesale-help'); ?></p>

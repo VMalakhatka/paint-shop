@@ -1134,5 +1134,11 @@ msgstr "Документ створюється на налаштованому 
 msgid "If Folio returns an error or the result is unknown, do not create a copy or repeat confirmation blindly. Ask the manager to check existing documents using the draft number and error message. If draft lines or availability changed, a new preview is required."
 msgstr "Якщо ФОЛІО повертає помилку або результат невідомий, не створюйте копію й не повторюйте підтвердження навмання. Попросіть менеджера перевірити наявні документи за номером чернетки та повідомленням помилки. Якщо змінилися рядки або наявність, потрібен новий перегляд."
 
+msgid "On a phone, after adding a product, the bottom bar shows the number of units, the product subtotal and Go to cart. It stays while browsing categories. Product added confirms a successful addition. Delivery, discounts and the final total are checked in the cart. The bar is hidden for an empty cart, in Draft mode, My account, the cart and checkout, and temporarily while typing."
+msgstr "На телефоні після додавання товару нижня панель показує кількість одиниць, проміжну суму товарів і кнопку «Перейти до кошика». Вона залишається під час переходів між категоріями. «Товар додано» підтверджує успішне додавання. Доставку, знижки й остаточну суму перевірте в кошику. Панель прихована для порожнього кошика, у режимі чернетки, кабінеті, кошику й оформленні, а також тимчасово під час введення."
+
+msgid "Go to the cart from the bottom bar on your phone."
+msgstr "Перейдіть до кошика з нижньої панелі на телефоні."
+
 msgid "Nova Poshta delivery is paid separately to the carrier, not with the goods. Free delivery covers only the base tariff under your delivery policy; insurance and extras remain payable. Free store pickup is offered for goods allocated to one warehouse. Wait for confirmation before visiting."
 msgstr "Доставка Новою поштою оплачується окремо перевізнику, а не разом із товарами. Безкоштовна доставка покриває лише базовий тариф за вашою політикою доставки; страхування та допослуги залишаються платними. Безкоштовний самовивіз доступний для товарів одного складу. Перед поїздкою дочекайтеся підтвердження."

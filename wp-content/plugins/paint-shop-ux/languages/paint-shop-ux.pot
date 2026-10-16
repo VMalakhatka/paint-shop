@@ -269,3 +269,19 @@ msgstr ""
 #: inc/single-product.php
 msgid "Could not confirm whether the product was added. Check your cart before trying again."
 msgstr ""
+
+#: inc/mobile-cart.php
+msgid "In cart: %s"
+msgstr ""
+
+#: inc/mobile-cart.php
+msgid "Products:"
+msgstr ""
+
+#: inc/mobile-cart.php
+msgid "Go to cart"
+msgstr ""
+
+#: inc/mobile-cart.php
+msgid "Product added"
+msgstr ""
