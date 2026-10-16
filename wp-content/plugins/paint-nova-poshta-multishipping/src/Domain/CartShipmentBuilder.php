@@ -76,6 +76,7 @@ final class CartShipmentBuilder
                         'items' => [],
                         'quantity' => 0.0,
                         'weight_kg' => 0.0,
+                        'weight_known' => true,
                         'declared_cost' => 0.0,
                     ];
                 }
@@ -83,6 +84,7 @@ final class CartShipmentBuilder
                 $ratio = $quantity > 0 ? $allocated_quantity / $quantity : 0.0;
                 $line_total = round((float) ($item['line_total'] ?? 0) * $ratio, wc_get_price_decimals());
                 $unit_weight = $this->unitWeight($product, $settings, $warnings);
+                if ((float) $product->get_weight() <= 0) $shipments[$location_id]['weight_known'] = false;
                 $shipments[$location_id]['items'][] = [
                     'cart_item_key' => (string) $cart_key,
                     'product_id' => (int) $product->get_id(),

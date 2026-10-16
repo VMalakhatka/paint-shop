@@ -272,3 +272,30 @@ msgstr "Выберите город и доступную точку из спи
 #: src/Infrastructure/ApprovalQuoteService.php src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
 msgid "Courier street and building"
 msgstr "Улица и дом для курьера"
+
+msgid "Nova Poshta — free delivery (base tariff); insurance and extras paid by recipient"
+msgstr "Новая почта — доставка бесплатно (базовый тариф); страхование и допуслуги за счёт получателя"
+
+msgid "Nova Poshta — carrier tariff, paid separately by recipient"
+msgstr "Новая почта — по тарифам перевозчика, оплата получателем отдельно"
+
+msgid "Store pickup — %s, free (wait for confirmation)"
+msgstr "Самовывоз — %s, бесплатно (дождитесь подтверждения)"
+
+msgid "Choose the destination. Delivery is paid separately to Nova Poshta, not with the goods. The estimate and any store contribution are shown below."
+msgstr "Выберите место получения. Доставка оплачивается отдельно Новой почте, а не вместе с товарами. Ориентировочный тариф и вклад магазина показаны ниже."
+
+msgid "The delivery price will be determined by Nova Poshta. No delivery fee is included in the payment for goods."
+msgstr "Стоимость доставки определит Новая почта. Доставка не включена в оплату товаров."
+
+msgid "Estimated payment to Nova Poshta: %s. Final packaging and charges are confirmed by the carrier."
+msgstr "Ориентировочно к оплате Новой почте: %s. Упаковку и окончательную стоимость подтверждает перевозчик."
+
+msgid "Free delivery covers the base tariff only. Insurance and additional services are paid by the recipient."
+msgstr "Бесплатная доставка покрывает только базовый тариф. Страхование и дополнительные услуги оплачивает получатель."
+
+msgid "At or below the threshold"
+msgstr "До порога включительно"
+
+msgid "Above the threshold"
+msgstr "Свыше порога"

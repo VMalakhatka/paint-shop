@@ -16,7 +16,7 @@ final class PolicyCalculator
         $profile = is_array($policy['profiles'][$profile_key] ?? null)
             ? $policy['profiles'][$profile_key]
             : DeliveryPolicy::defaults()['profiles']['retail'];
-        $tier = $merchandise_total < (float) ($profile['threshold'] ?? 0)
+        $tier = $merchandise_total <= (float) ($profile['threshold'] ?? 0)
             ? (array) ($profile['below'] ?? [])
             : (array) ($profile['above'] ?? []);
         $allowance = $this->allowance($tier, $components, $merchandise_total);
@@ -62,6 +62,20 @@ final class PolicyCalculator
             'cod_allowed' => $cod_allowed,
             'cod_fee_payer' => (string) ($cod['fee_payer'] ?? 'customer'),
         ];
+    }
+
+    /** Coverage must be known even when the carrier cannot provide an estimate. */
+    public function baseTransportCovered(float $merchandise_total): bool
+    {
+        $policy = DeliveryPolicy::load();
+        $profile = $policy['profiles'][$this->profileKey($policy)];
+        $tier = $profile[$merchandise_total <= (float) $profile['threshold'] ? 'below' : 'above'];
+        foreach (['base_transport', 'extra_shipments'] as $component) {
+            $rule = $profile['components'][$component];
+            if ($rule === 'store') continue;
+            if ($rule !== 'budget' || $tier['mode'] !== 'store' || (float) $tier['cap'] > 0) return false;
+        }
+        return true;
     }
 
     /** @param array<string,mixed> $policy */

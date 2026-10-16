@@ -47,28 +47,50 @@ final class NovaPoshtaShippingMethod extends \WC_Shipping_Method
             return;
         }
         $recipient = (array) WC()->session->get('pnpm_recipient', []);
+        $package = is_array($package) ? $package : [];
+        if (($package['destination']['country'] ?? '') !== 'UA') return;
+        $calculator = new PolicyCalculator();
+        $merchandise_total = max(0.0, (float) ($package['contents_cost'] ?? 0));
+        $base_free = $calculator->baseTransportCovered($merchandise_total);
+        $summary = [
+            'recipient' => $recipient, 'shipments' => [], 'quotes' => [], 'errors' => [], 'warnings' => [],
+            'estimate_available' => false, 'payment_collection' => 'carrier', 'base_transport_free' => $base_free,
+        ];
+        // A zero Woo charge means payment to the carrier, not free carrier service.
+        $this->add_rate([
+            'id' => $this->get_rate_id(),
+            'label' => $base_free
+                ? __('Nova Poshta — free delivery (base tariff); insurance and extras paid by recipient', 'paint-nova-poshta-multishipping')
+                : __('Nova Poshta — carrier tariff, paid separately by recipient', 'paint-nova-poshta-multishipping'),
+            'cost' => 0, 'taxes' => false, 'package' => $package,
+            'meta_data' => ['pnpm_payment_collection' => 'carrier', 'pnpm_base_transport_free' => $base_free ? 'yes' : 'no'],
+        ]);
+        WC()->session->set('pnpm_quote', $summary);
         $city_ref = sanitize_text_field((string) ($recipient['city_ref'] ?? ''));
         $delivery_type = sanitize_key((string) ($recipient['delivery_type'] ?? 'branch'));
         if ($city_ref === '' || !in_array($delivery_type, ['branch', 'parcel_locker', 'address'], true)) {
-            WC()->session->set('pnpm_quote', []);
             return;
         }
 
         $plan = (new CartShipmentBuilder())->build(is_array($package) ? $package : []);
+        $summary['shipments'] = $plan['shipments'];
+        $summary['warnings'] = $plan['warnings'];
+        $summary['policy'] = $calculator->calculate([], $merchandise_total, count($plan['shipments']));
+        WC()->session->set('pnpm_quote', $summary);
         if ($plan['errors'] !== [] || $plan['shipments'] === []) {
-            WC()->session->set('pnpm_quote', [
-                'errors' => $plan['errors'] ?: [__('No Nova Poshta shipments could be prepared.', 'paint-nova-poshta-multishipping')],
-                'warnings' => $plan['warnings'],
-            ]);
+            $summary['errors'] = $plan['errors'] ?: [__('No Nova Poshta shipments could be prepared.', 'paint-nova-poshta-multishipping')];
+            WC()->session->set('pnpm_quote', $summary);
             return;
+        }
+
+        foreach ($plan['shipments'] as $shipment) {
+            if (empty($shipment['weight_known'])) return;
         }
 
         $quoted = (new TariffQuoteService(new ApiClient()))->quote($plan['shipments'], $city_ref, $delivery_type);
         if ($quoted['errors'] !== []) {
-            WC()->session->set('pnpm_quote', [
-                'errors' => $quoted['errors'],
-                'warnings' => array_merge($plan['warnings'], $quoted['warnings']),
-            ]);
+            $summary['warnings'] = array_merge($plan['warnings'], $quoted['warnings']);
+            WC()->session->set('pnpm_quote', $summary);
             return;
         }
 
@@ -78,34 +100,16 @@ final class NovaPoshtaShippingMethod extends \WC_Shipping_Method
             $merchandise_total,
             count($plan['shipments'])
         );
-        $summary = [
+        $summary = array_merge($summary, [
             'recipient' => $recipient,
             'shipments' => $plan['shipments'],
             'quotes' => $quoted['quotes'],
             'policy' => $policy,
             'warnings' => array_values(array_unique(array_merge($plan['warnings'], $quoted['warnings']))),
             'errors' => [],
-        ];
-        WC()->session->set('pnpm_quote', $summary);
-
-        $label = sprintf(
-            /* translators: 1: shipping method title, 2: parcel count. */
-            _n('%1$s — %2$d parcel', '%1$s — %2$d parcels', count($plan['shipments']), 'paint-nova-poshta-multishipping'),
-            $this->title,
-            count($plan['shipments'])
-        );
-        $this->add_rate([
-            'id' => $this->get_rate_id(),
-            'label' => $label,
-            'cost' => (float) $policy['customer_total'],
-            'taxes' => false,
-            'package' => $package,
-            'meta_data' => [
-                'pnpm_shipment_count' => count($plan['shipments']),
-                'pnpm_carrier_total' => (float) $policy['total'],
-                'pnpm_store_contribution' => (float) $policy['store_total'],
-            ],
+            'estimate_available' => true,
         ]);
+        WC()->session->set('pnpm_quote', $summary);
     }
 
     private function checkoutEnabled(): bool

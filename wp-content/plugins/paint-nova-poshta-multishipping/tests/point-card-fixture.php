@@ -23,7 +23,7 @@ try {
     $html = '<!doctype html><html lang="uk"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
         . '<title>НП — тестова картка точки</title><style>body{font:16px/1.5 system-ui;margin:0;background:#f0f2f4;color:#20252b}main{max-width:720px;margin:auto;padding:12px}*{box-sizing:border-box}input,select{width:100%;padding:12px;font:inherit}label{display:block}button{cursor:pointer;font:inherit}a{color:#9d201a}h1{font-size:24px}</style>'
         . '<style>' . file_get_contents(PNPM_DIR . 'assets/checkout.css') . '</style><main><h1>Доставка Новою поштою</h1><p>Тестові дані — замовлення не створюється</p>'
-        . '<select name="shipping_method[0]"><option value="pnpm_nova_poshta:1">Нова пошта</option><option value="pnpm_customer_ttn">Своя ТТН</option></select>'
+        . '<select name="shipping_method[0]"><option value="pnpm_nova_poshta:1">Нова пошта</option><option value="pnpm_customer_ttn">Своя ТТН</option><option value="pnpm_pickup:1">Самовивіз безкоштовно</option></select>'
         . $fields . '</main><script>' . file_get_contents(ABSPATH . 'wp-includes/js/jquery/jquery.min.js') . '</script>'
         . '<script>var pnpmCheckout=' . wp_json_encode($config, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ';</script>'
         . '<script>' . file_get_contents(PNPM_DIR . 'assets/checkout.js') . '</script></html>';

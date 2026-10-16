@@ -59,6 +59,15 @@ MariaDB хранит состояние сайта и проекции ФОЛИ�
 
 ## Локальное и production
 
+NP checkout 0.8 (2026-10-16, local): `paint-nova-poshta-multishipping` owns
+carrier-paid shipping and single-location pickup. Zero Woo shipping cost is not
+free carrier service; retain payment-collection and base-coverage shipping meta.
+Unknown weight/API quote failure must not invent a charge, while allocation and
+destination errors still block submission. Default base subsidy is strictly over
+1200; persisted policies take precedence. Do not silently overwrite production
+shipping options or transfer stock for pickup. Deployment prerequisites and tests:
+plugin README, section «Класичне оформлення замовлення».
+
 Classic-cart AJAX metadata (2026-10-11): `pc-cart-guard.php` returns
 `item_data_html` from the updated cart item through Woo's standard formatter.
 The allocation hook in `stock-locations-ui.php` needs cart context during AJAX;
