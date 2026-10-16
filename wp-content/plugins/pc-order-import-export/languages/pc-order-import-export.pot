@@ -3368,3 +3368,66 @@ msgstr ""
 
 msgid "Invalid draft request."
 msgstr ""
+
+msgid "How to work with a draft?"
+msgstr ""
+
+msgid "Illustrated instructions (PDF, Ukrainian; new tab)"
+msgstr ""
+
+msgid "Training example; enlarge in a new tab"
+msgstr ""
+
+msgid "Build a draft"
+msgstr ""
+
+msgid "Sign in, open the catalogue and switch Purchase to Draft. Choose a saved draft or open New draft, enter a title and press Create draft."
+msgstr ""
+
+msgid "Enter a positive whole quantity and press Add to draft. Stock does not limit the quantity. For a variable product, choose every option first. Adding the same variant again increases its quantity."
+msgstr ""
+
+msgid "The list is saved directly to the selected draft, not to the cart. It does not reserve stock, create a Folio document or confirm payment."
+msgstr ""
+
+msgid "Review and edit"
+msgstr ""
+
+msgid "Press Open draft, or find it in My account > My orders. Open Edit draft quantities, change the numbers and press Save quantities. Zero removes a line."
+msgstr ""
+
+msgid "Prices in the draft are provisional. An already submitted draft is not editable here. If a save is not confirmed, reopen the draft and check it before repeating the action."
+msgstr ""
+
+msgid "Order the available goods"
+msgstr ""
+
+msgid "In Draft processing, choose Load available quantities into the cart. Review the requested quantity, the quantity going to the cart and the remainder going to Folio."
+msgstr ""
+
+msgid "After confirmation, available goods REPLACE the current cart at current prices. Save your current cart separately first if needed. The unavailable remainder stays in the draft and is recorded as a non-accounting Folio document."
+msgstr ""
+
+msgid "Open the cart, check warehouses and totals, then complete checkout. Moving goods to the cart is not placing an order. If everything is available, no Folio remainder document is needed."
+msgstr ""
+
+msgid "Save to Folio / preorder"
+msgstr ""
+
+msgid "To send the entire list, open Draft processing and select Ordinary draft or Preorder invoice in Save as. Then press Send the entire draft to a non-accounting Folio document."
+msgstr ""
+
+msgid "Review Preview without recording. Only Confirm non-accounting Folio document records it. Cancel leaves the Folio document uncreated. The current cart does not change."
+msgstr ""
+
+msgid "Ordinary draft keeps the list for coordination. Preorder invoice is marked PRD in Folio and is included in the preorder reserve for six months. Neither option reserves or writes off current warehouse stock, confirms payment or guarantees delivery."
+msgstr ""
+
+msgid "Agree payment and delivery dates with the manager. The automatic out-of-stock remainder is not the same as a manually selected preorder."
+msgstr ""
+
+msgid "If something went wrong"
+msgstr ""
+
+msgid "If the Folio warehouse is not configured, ask the manager. If the document is already linked, do not create another copy. For an error or unknown result, send the manager the draft number and message; check existing documents before repeating confirmation."
+msgstr ""

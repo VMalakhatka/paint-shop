@@ -3570,3 +3570,66 @@ msgstr "Чернетку змінено. Оновіть сторінку пер�
 
 msgid "Invalid draft request."
 msgstr "Некоректний запит чернетки."
+
+msgid "How to work with a draft?"
+msgstr "Як працювати з чернеткою?"
+
+msgid "Illustrated instructions (PDF, Ukrainian; new tab)"
+msgstr "Інструкція з картинками (PDF, українською; нова вкладка)"
+
+msgid "Training example; enlarge in a new tab"
+msgstr "Навчальний приклад; збільшити в новій вкладці"
+
+msgid "Build a draft"
+msgstr "Зібрати чернетку"
+
+msgid "Sign in, open the catalogue and switch Purchase to Draft. Choose a saved draft or open New draft, enter a title and press Create draft."
+msgstr "Увійдіть, відкрийте каталог і перемкніть «Покупка» на «Чернетка». Виберіть збережену чернетку або відкрийте «Нова чернетка», введіть назву й натисніть «Створити чернетку»."
+
+msgid "Enter a positive whole quantity and press Add to draft. Stock does not limit the quantity. For a variable product, choose every option first. Adding the same variant again increases its quantity."
+msgstr "Введіть потрібну цілу кількість і натисніть «У чернетку». Залишок не обмежує кількість. Для варіативного товару спочатку виберіть усі параметри. Повторне додавання того самого варіанта збільшує його кількість."
+
+msgid "The list is saved directly to the selected draft, not to the cart. It does not reserve stock, create a Folio document or confirm payment."
+msgstr "Список зберігається одразу у вибраній чернетці, не в кошику. Він не резервує товар, не створює документ ФОЛІО й не підтверджує оплату."
+
+msgid "Review and edit"
+msgstr "Перевірити та змінити"
+
+msgid "Press Open draft, or find it in My account > My orders. Open Edit draft quantities, change the numbers and press Save quantities. Zero removes a line."
+msgstr "Натисніть «Відкрити чернетку» або знайдіть її в «Кабінет → Мої замовлення». Розгорніть «Змінити кількості в чернетці», змініть числа й натисніть «Зберегти кількості». Нуль видаляє рядок."
+
+msgid "Prices in the draft are provisional. An already submitted draft is not editable here. If a save is not confirmed, reopen the draft and check it before repeating the action."
+msgstr "Ціни в чернетці попередні. Уже передану чернетку тут не можна редагувати. Якщо збереження не підтверджено, відкрийте чернетку й перевірте її перед повторною дією."
+
+msgid "Order the available goods"
+msgstr "Замовити наявні товари"
+
+msgid "In Draft processing, choose Load available quantities into the cart. Review the requested quantity, the quantity going to the cart and the remainder going to Folio."
+msgstr "У блоці «Обробка чернетки» виберіть «Завантажити доступну кількість у кошик». Перевірте запитану кількість, частину для кошика та залишок для ФОЛІО."
+
+msgid "After confirmation, available goods REPLACE the current cart at current prices. Save your current cart separately first if needed. The unavailable remainder stays in the draft and is recorded as a non-accounting Folio document."
+msgstr "Після підтвердження наявні товари ЗАМІНЮЮТЬ поточний кошик за актуальними цінами. Якщо він потрібен, спочатку збережіть його окремо. Недоступна частина залишається в чернетці й записується як необліковий документ ФОЛІО."
+
+msgid "Open the cart, check warehouses and totals, then complete checkout. Moving goods to the cart is not placing an order. If everything is available, no Folio remainder document is needed."
+msgstr "Відкрийте кошик, перевірте склади й суму, потім оформіть замовлення. Перенесення в кошик ще не є замовленням. Якщо доступні всі товари, документ залишку у ФОЛІО не потрібен."
+
+msgid "Save to Folio / preorder"
+msgstr "Зберегти у ФОЛІО / передзамовлення"
+
+msgid "To send the entire list, open Draft processing and select Ordinary draft or Preorder invoice in Save as. Then press Send the entire draft to a non-accounting Folio document."
+msgstr "Щоб передати весь список, у блоці «Обробка чернетки» виберіть у полі «Зберегти як» варіант «Звичайна чернетка» або «Рахунок передзамовлення». Далі натисніть «Передати всю чернетку в необліковий документ ФОЛІО»."
+
+msgid "Review Preview without recording. Only Confirm non-accounting Folio document records it. Cancel leaves the Folio document uncreated. The current cart does not change."
+msgstr "Перевірте «Попередній перегляд без запису». Лише кнопка «Підтвердити необліковий документ ФОЛІО» записує документ. «Скасувати» залишає його нествореним. Поточний кошик не змінюється."
+
+msgid "Ordinary draft keeps the list for coordination. Preorder invoice is marked PRD in Folio and is included in the preorder reserve for six months. Neither option reserves or writes off current warehouse stock, confirms payment or guarantees delivery."
+msgstr "Звичайна чернетка зберігає список для узгодження. Рахунок передзамовлення має позначку «ПРД» у ФОЛІО та враховується в резерві передзамовлень протягом шести місяців. Жоден варіант не резервує й не списує поточний складський залишок, не підтверджує оплату та не гарантує постачання."
+
+msgid "Agree payment and delivery dates with the manager. The automatic out-of-stock remainder is not the same as a manually selected preorder."
+msgstr "Оплату й строки постачання узгодьте з менеджером. Автоматичний залишок «немає на складі» не є тим самим, що передзамовлення, вибране вручну."
+
+msgid "If something went wrong"
+msgstr "Якщо виникла проблема"
+
+msgid "If the Folio warehouse is not configured, ask the manager. If the document is already linked, do not create another copy. For an error or unknown result, send the manager the draft number and message; check existing documents before repeating confirmation."
+msgstr "Якщо склад ФОЛІО не налаштований, зверніться до менеджера. Якщо документ уже пов’язаний, не створюйте копію. У разі помилки або невідомого результату надішліть менеджеру номер чернетки й повідомлення; перед повторним підтвердженням перевірте наявні документи."

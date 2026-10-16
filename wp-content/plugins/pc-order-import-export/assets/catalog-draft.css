@@ -12,6 +12,17 @@
 .pcoe-draft-notice { flex-basis:100%; margin:0; color:#555; font-size:14px; }
 .pcoe-draft-status { display:block; margin:0; font-size:14px; overflow-wrap:anywhere; }
 .pcoe-draft-status:empty { display:none; }
+.pcoe-draft-help { flex-basis:100%; width:100%; min-width:0; margin:10px 0; font-size:15px; color:#303735; }
+.pcoe-draft-help summary { cursor:pointer; padding:10px 0; color:#275a49; font-weight:600; overflow-wrap:anywhere; }
+.pcoe-draft-help summary:focus-visible, .pcoe-draft-help a:focus-visible { outline:2px solid #a64e38; outline-offset:3px; }
+.pcoe-draft-help__body { border-block:1px solid #d6dada; padding:10px 0; }
+.pcoe-draft-help__body p { margin:0 0 10px; }
+.pcoe-draft-help__topic { border-top:1px solid #e2e5e3; }
+.pcoe-draft-help__topic ol { margin:8px 0 16px; padding-left:25px; }
+.pcoe-draft-help__topic li { padding:0 8px 10px 0; line-height:1.6; }
+.pcoe-draft-help__topic img { display:block; width:100%; max-width:760px; height:auto; margin:0 0 8px; border:1px solid #d6dada; }
+.pcoe-draft-help__topic > a { display:block; margin-bottom:14px; font-size:13px; }
+.pcoe-draft-help__pdf { color:#984530; text-decoration:underline; }
 .pcoe-product-draft { display:flex; flex-wrap:wrap; align-items:end; gap:8px; margin:12px 0; width:100%; }
 .pcoe-product-draft label { flex:1 1 88px; }
 .pcoe-product-draft label:has(select) { flex-basis:100%; }

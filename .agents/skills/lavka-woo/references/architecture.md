@@ -80,6 +80,11 @@ cart stock validation. Reuse `pc-draft`, ownership/editability and the manager's
 per-order named lock. Catalogue filtering adapters ignore stock only in planning
 mode; explicit draft processing remains a separate preview/apply. Configuration,
 metadata, tests and rollback: the PCOE README, Catalogue draft mode.
+Draft guidance is owned by PCOE `DraftHelp`: inline native disclosure menus for
+all signed-in roles, reused inside the wholesale guide without widening its role
+gate. The shipped PDF and synthetic screenshots live in PCOE assets/draft-guide;
+regenerate them when changing the draft/purpose/preview flow. No Folio write is
+needed to capture documentation examples (README: Illustrated draft help).
 
 NP checkout 0.8 (2026-10-16, local): `paint-nova-poshta-multishipping` owns
 carrier-paid shipping and single-location pickup. Zero Woo shipping cost is not
