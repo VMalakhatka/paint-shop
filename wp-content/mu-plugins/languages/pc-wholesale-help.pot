@@ -1065,3 +1065,6 @@ msgstr ""
 #: pc-wholesale-help.php
 msgid "Product pages show only brands explicitly enabled in the catalogue supplier filter. Unconfigured brands stay hidden. If none are enabled for a product, the brand row is omitted."
 msgstr ""
+
+msgid "Choose Ordinary draft or Preorder invoice before saving. Saving keeps the choice in the draft; a Folio document is created only after preview and confirmation. A preorder is a non-accounting invoice marked PRD and counts towards the preorder reserve for six months. Only automatically saved unavailable quantities receive the out-of-stock marker."
+msgstr ""

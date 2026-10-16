@@ -3290,3 +3290,12 @@ msgstr ""
 
 msgid "Clear selection"
 msgstr ""
+
+msgid "Save as"
+msgstr ""
+
+msgid "Ordinary draft"
+msgstr ""
+
+msgid "Preorder invoice"
+msgstr ""

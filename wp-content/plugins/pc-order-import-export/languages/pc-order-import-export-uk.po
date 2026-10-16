@@ -3492,3 +3492,12 @@ msgstr "Виберіть до 20 ураховуваних рахунків ць�
 
 msgid "Clear selection"
 msgstr "Очистити вибір"
+
+msgid "Save as"
+msgstr "Зберегти як"
+
+msgid "Ordinary draft"
+msgstr "Звичайна чернетка"
+
+msgid "Preorder invoice"
+msgstr "Рахунок передзамовлення"

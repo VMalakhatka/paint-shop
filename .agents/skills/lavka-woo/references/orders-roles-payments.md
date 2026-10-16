@@ -490,3 +490,13 @@ can receive explicit `pcoe_import_customers` together with existing
 `manage_woocommerce`; do not grant create_users or change staff roles just to expose
 Folio import. Grant/revoke per user only with owner authorization. Existing customer
 role allowlist, actor-owned jobs and preview/apply are unchanged.
+
+Manual draft purpose (2026-10-16; `PCOE DraftPurpose`, `DraftFolioWorkflow`,
+`ManagerWorkspace`, Java `FolioOrderAccountService`): `_pcoe_draft_purpose`
+selects ordinary draft vs preorder. Manual non-accounting does not imply shortage.
+Only preorder sends `ПРД` at the start of `additionalInfo` / `L_CP2_PLAT` and
+`folioOperationKind=*РАЗОВАЯ`. Actual shortage remains a separate document intent;
+Java must not append its marker to every non-accounting document. Purpose belongs
+in preview/revision guards. Save remains local; financial creation still requires
+preview + apply. Human instructions: `docs/MANAGER_CUSTOMER_GUIDE_UK.md` and
+`docs/WHOLESALE_CUSTOMER_GUIDE_UK.md`. Deploy Java before WP; no retroactive changes.

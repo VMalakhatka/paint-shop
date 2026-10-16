@@ -393,3 +393,6 @@ msgstr ""
 
 msgid "To combine accounts from different warehouses, open the customer Folio documents, select up to 20 accounted invoices and click Combine selected accounts for confirmation. Review the common product list, source accounts, warehouses and total. Optionally include the configured and verified payment details, then update the preview. Send the reviewed version for confirmation. On the saved request, download the Excel or email it to the customer. The combined Excel has one worksheet without photos; original accounts and Woo orders remain separate. The total is not unpaid debt: agree any previous payments before paying. Changes to an account or the payment details require a new review."
 msgstr ""
+
+msgid "Choose Ordinary draft or Preorder invoice before saving. Saving keeps the choice in the draft; a Folio document is created only after preview and confirmation. A preorder is a non-accounting invoice marked PRD and counts towards the preorder reserve for six months. Only automatically saved unavailable quantities receive the out-of-stock marker."
+msgstr ""

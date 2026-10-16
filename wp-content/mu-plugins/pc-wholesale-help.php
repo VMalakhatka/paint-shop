@@ -433,6 +433,7 @@ function pc_wholesale_help_render_endpoint(): void {
         </section>
 
         <section class="pc-help-section" id="chernetky">
+            <p><?php esc_html_e('Choose Ordinary draft or Preorder invoice before saving. Saving keeps the choice in the draft; a Folio document is created only after preview and confirmation. A preorder is a non-accounting invoice marked PRD and counts towards the preorder reserve for six months. Only automatically saved unavailable quantities receive the out-of-stock marker.', 'pc-wholesale-help'); ?></p>
             <div class="pc-help-section__heading"><span>07</span><div><h2><?php esc_html_e('Save the cart as a draft', 'pc-wholesale-help'); ?></h2><p><?php esc_html_e('Enter an optional title in the cart and press “Save as draft”. The draft will appear in “My orders”.', 'pc-wholesale-help'); ?></p></div></div>
             <div class="pc-help-warning"><strong><?php esc_html_e('Important:', 'pc-wholesale-help'); ?></strong> <?php esc_html_e('After a successful save, the current cart is cleared. A draft does not reserve stock.', 'pc-wholesale-help'); ?></div>
             <a class="pc-help-inline-action" href="<?php echo esc_url($orders_url); ?>"><?php esc_html_e('Open my orders', 'pc-wholesale-help'); ?> →</a>
