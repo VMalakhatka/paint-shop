@@ -657,10 +657,17 @@ class DraftFolioWorkflow
                 continue;
             }
 
-            $group_key = (string) $product->get_id();
+            $variation = $product->is_type('variation') ? $product->get_variation_attributes() : [];
+            foreach ($variation as $attribute => $value) {
+                $chosen = (string) $item->get_meta(substr($attribute, 10));
+                if ($chosen !== '') $variation[$attribute] = $chosen;
+            }
+            // One wildcard variation can represent different customer selections.
+            $group_key = $product->get_id() . ':' . md5(wp_json_encode($variation));
             if (!isset($groups[$group_key])) {
                 $groups[$group_key] = [
                     'product'  => $product,
+                    'variation' => $variation,
                     'quantity' => 0.0,
                     'plan'     => [],
                     'item_ids' => [],
@@ -683,7 +690,7 @@ class DraftFolioWorkflow
             }
             $product_id = $product->is_type('variation') ? (int) $product->get_parent_id() : (int) $product->get_id();
             $variation_id = $product->is_type('variation') ? (int) $product->get_id() : 0;
-            $variation = $product->is_type('variation') ? $product->get_variation_attributes() : [];
+            $variation = $group['variation'];
             $plan = self::normalise_plan((array) ($group['plan'] ?? []));
             if ($waitlist_pilot && !apply_filters('woocommerce_add_to_cart_validation', true, $product_id, (float) ($group['quantity'] ?? 0), $variation_id, $variation, ['pc_alloc_plan' => $plan])) {
                 continue;

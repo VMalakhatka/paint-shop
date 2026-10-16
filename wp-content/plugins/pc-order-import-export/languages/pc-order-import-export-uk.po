@@ -3501,3 +3501,72 @@ msgstr "Звичайна чернетка"
 
 msgid "Preorder invoice"
 msgstr "Рахунок передзамовлення"
+
+msgid "Shopping mode"
+msgstr "Режим замовлення"
+
+msgid "Purchase"
+msgstr "Покупка"
+
+msgid "Draft"
+msgstr "Чернетка"
+
+msgid "Selected draft"
+msgstr "Вибрана чернетка"
+
+msgid "Select a draft"
+msgstr "Виберіть чернетку"
+
+msgid "Open draft"
+msgstr "Відкрити чернетку"
+
+msgid "New draft"
+msgstr "Нова чернетка"
+
+msgid "Create draft"
+msgstr "Створити чернетку"
+
+msgid "Draft: no stock reservation. Prices and availability are checked when ordering."
+msgstr "Чернетка не резервує товар. Ціни та наявність перевіряються під час оформлення."
+
+msgid "Choose a variant"
+msgstr "Оберіть варіант"
+
+msgid "Edit draft quantities"
+msgstr "Змінити кількості в чернетці"
+
+msgid "Set quantity to zero to remove an item."
+msgstr "Щоб видалити товар, установіть кількість 0."
+
+msgid "Save quantities"
+msgstr "Зберегти кількості"
+
+msgid "Select or create a draft first."
+msgstr "Спочатку виберіть або створіть чернетку."
+
+msgid "Saved to draft."
+msgstr "Збережено в чернетці."
+
+msgid "Could not confirm the save. Open the draft and check it before trying again."
+msgstr "Не вдалося підтвердити збереження. Відкрийте чернетку та перевірте її перед повторною спробою."
+
+msgid "Enter a positive whole quantity."
+msgstr "Введіть додатну цілу кількість."
+
+msgid "Select an editable draft belonging to your account."
+msgstr "Виберіть власну чернетку, доступну для редагування."
+
+msgid "Enter a draft title (up to 120 characters)."
+msgstr "Введіть назву чернетки (до 120 символів)."
+
+msgid "Could not save the draft."
+msgstr "Не вдалося зберегти чернетку."
+
+msgid "This product is not available in the catalogue."
+msgstr "Цей товар недоступний у каталозі."
+
+msgid "The draft changed. Reload it before editing quantities."
+msgstr "Чернетку змінено. Оновіть сторінку перед редагуванням кількостей."
+
+msgid "Invalid draft request."
+msgstr "Некоректний запит чернетки."

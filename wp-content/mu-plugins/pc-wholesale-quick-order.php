@@ -104,6 +104,8 @@ add_shortcode('pc_quick_order', function($atts){
         'order'      => 'ASC',
     ], $atts, 'pc_quick_order');
     $a['show_stock'] = (int) $a['show_stock'];
+    $draft_mode = (bool) apply_filters('pcoe_catalog_draft_mode', false);
+    if ($draft_mode) $a['show_stock'] = 0;
 
     if (isset($_GET['orderby'])) {
         $g = strtolower(sanitize_text_field($_GET['orderby']));
@@ -207,7 +209,7 @@ add_shortcode('pc_quick_order', function($atts){
 };
 /* ==== /Breadcrumbs ==== */
 
-$hz_on = ( isset($_GET['hide_zero']) && $_GET['hide_zero'] === '1' );
+$hz_on = !$draft_mode && ( isset($_GET['hide_zero']) && $_GET['hide_zero'] === '1' );
 $nonce = wp_create_nonce('pc_bulk_add');
 
 ob_start(); ?>
@@ -223,6 +225,7 @@ ob_start(); ?>
 
     // Крихти (Breadcrumbs)
     $pcqo_render_breadcrumbs($cat_slugs);
+    do_action('pcoe_catalog_toolbar');
 
     if (function_exists('pc_wholesale_help_render_context_link')) {
         pc_wholesale_help_render_context_link(
@@ -241,9 +244,9 @@ ob_start(); ?>
     ?>
 
     <div class="pc-qo-toolbar" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <button type="button" class="button button-primary pc-qo-addall" data-nonce="<?php echo esc_attr($nonce); ?>">
+        <?php if (!$draft_mode): ?><button type="button" class="button button-primary pc-qo-addall" data-nonce="<?php echo esc_attr($nonce); ?>">
             <?php echo esc_html($L['add_all']); ?>
-        </button>
+        </button><?php endif; ?>
         <?php
         $base = remove_query_arg(['qo_page']);
         $mk = function($key, $order = null) use ($base, $a) {
@@ -267,7 +270,7 @@ ob_start(); ?>
         <?= $bold('sku',   esc_html($L['by_sku']));   ?> ·
         <?= $bold('price', esc_html($L['by_price'])); ?>
         <a href="<?= $toggleUrl; ?>" style="margin-left:8px"><?= esc_html($toggleLbl); ?></a>
-        <a href="<?= $hz_url; ?>" class="pc-qo-hz-link" style="margin-left:14px"><?= esc_html($hz_text); ?></a>
+        <?php if (!$draft_mode): ?><a href="<?= $hz_url; ?>" class="pc-qo-hz-link" style="margin-left:14px"><?= esc_html($hz_text); ?></a><?php endif; ?>
         <span class="pc-qo-message" style="margin-left:auto;"></span>
     </div>
 
@@ -296,6 +299,7 @@ ob_start(); ?>
             while ( $q->have_posts() ) : $q->the_post();
                 $product = wc_get_product( get_the_ID() );
                 if ( ! $product ) continue;
+                if ($draft_mode && !\PaintCore\PCOE\CatalogDraft::eligible($product)) continue;
 
                 $pid        = $product->get_id();
                 $price_html = $product->get_price_html();
@@ -355,6 +359,9 @@ ob_start(); ?>
                         </td>
                     <?php endif; ?>
                     <td class="pc-qo-qty">
+                        <?php if ($draft_mode): ?>
+                            <?php echo \PaintCore\PCOE\CatalogDraft::product_form($product); ?>
+                        <?php else: ?>
                         <input type="number"
                             min="<?php echo - (int) $in_cart_qty; ?>"
                             step="<?php echo esc_attr($step); ?>"
@@ -362,6 +369,7 @@ ob_start(); ?>
                             class="pc-qo-input"
                             <?php echo ($available_for_add<=0 && $in_cart_qty<=0) ? 'disabled' : ''; ?>
                             placeholder="0">
+                        <?php endif; ?>
                     </td>
                 </tr>
             <?php endwhile; wp_reset_postdata(); ?>

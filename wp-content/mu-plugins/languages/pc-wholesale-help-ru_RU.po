@@ -1119,5 +1119,14 @@ msgstr "Метка WFP в начале поля информации новог�
 msgid "Choose Ordinary draft or Preorder invoice before saving. Saving keeps the choice in the draft; a Folio document is created only after preview and confirmation. A preorder is a non-accounting invoice marked PRD and counts towards the preorder reserve for six months. Only automatically saved unavailable quantities receive the out-of-stock marker."
 msgstr "Перед сохранением выберите «Обычный черновик» или «Счёт предзаказа». Выбор сохраняется в черновике; документ ФОЛИО создаётся только после просмотра и подтверждения. Предзаказ — неучитываемый счёт с пометкой ПРД, который входит в резерв предзаказов в течение шести месяцев. Пометку «нет на складе» получает только автоматически сохранённое недоступное количество."
 
+msgid "Build a draft from the catalogue"
+msgstr "Наполняйте черновик из каталога"
+
+msgid "After signing in, switch Purchase to Draft, select your editable draft or create a new one. Add visible catalogue products in any positive whole quantity, including out-of-stock products. Select all attributes for a variable product. Adding the same variant again increases its quantity."
+msgstr "После входа переключите «Покупка» на «Черновик», выберите свой редактируемый черновик или создайте новый. Добавляйте видимые товары каталога в любом положительном целом количестве, даже без остатка. Для вариативного товара выберите все параметры. Повторное добавление того же варианта увеличивает его количество."
+
+msgid "Draft mode hides warehouse stock and ignores stock and warehouse filters. Open draft to edit quantities; zero removes a line. The cart is unchanged, stock is not reserved and no Folio document is created. Prices are provisional. Drafts already submitted to Folio cannot be edited here. If a save is not confirmed, check the draft before trying again."
+msgstr "Режим черновика скрывает остатки и не применяет фильтры наличия и складов. Откройте черновик для изменения количеств; 0 удаляет строку. Корзина не меняется, товар не резервируется, документ ФОЛИО не создаётся. Цены предварительные. Переданные в ФОЛИО черновики здесь не редактируются. Если сохранение не подтверждено, проверьте черновик перед повторной попыткой."
+
 msgid "Nova Poshta delivery is paid separately to the carrier, not with the goods. Free delivery covers only the base tariff under your delivery policy; insurance and extras remain payable. Free store pickup is offered for goods allocated to one warehouse. Wait for confirmation before visiting."
 msgstr "Доставка Новой почтой оплачивается отдельно перевозчику, а не вместе с товарами. Бесплатная доставка покрывает только базовый тариф по вашей политике доставки; страхование и допуслуги остаются платными. Бесплатный самовывоз доступен для товаров одного склада. Перед поездкой дождитесь подтверждения."

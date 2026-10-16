@@ -11,6 +11,7 @@ class Plugin {
 
         // UI (кнопки експорту, імпорту в кошик і в чернетку)
         Ui::init();
+        CatalogDraft::hooks();
         Waitlist::hooks();
         add_action('wp_ajax_pcoe_price_list', [PriceList::class, 'handle']);
 

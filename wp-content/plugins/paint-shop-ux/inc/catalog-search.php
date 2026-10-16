@@ -39,6 +39,7 @@ final class PSU_Catalog_Search {
     }
 
     public static function query_args(array $input) {
+        if (apply_filters('pcoe_catalog_draft_mode', false)) unset($input['location'], $input['in_stock']);
         $args = ['post_type'=>'product', 'post_status'=>'publish', 'has_password'=>false,
             'posts_per_page'=>self::LIMIT, 'no_found_rows'=>true, 'ignore_sticky_posts'=>true,
             '_psu_suggest'=>true, '_psu_unit_filter'=>self::text($input, 'unit')];
@@ -117,7 +118,7 @@ final class PSU_Catalog_Search {
             $result[] = ['id'=>$id, 'name'=>$product->get_name(), 'sku'=>$product->get_sku(),
                 'url'=>get_permalink($id), 'image'=>wp_get_attachment_image_url($product->get_image_id(), 'woocommerce_thumbnail') ?: wc_placeholder_img_src(),
                 'price'=>wp_kses_post($product->get_price_html()),
-                'stock'=>$stocks ? implode(' · ', $stocks) : ($product->is_in_stock() ? __('In stock', 'paint-shop-ux') : __('Out of stock', 'paint-shop-ux'))];
+                'stock'=>apply_filters('pcoe_catalog_draft_mode', false) ? '' : ($stocks ? implode(' · ', $stocks) : ($product->is_in_stock() ? __('In stock', 'paint-shop-ux') : __('Out of stock', 'paint-shop-ux')))];
             if (count($result) === self::LIMIT) break;
         }
         return $result;
