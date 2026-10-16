@@ -3564,3 +3564,66 @@ msgstr "Черновик изменён. Обновите страницу пе�
 
 msgid "Invalid draft request."
 msgstr "Некорректный запрос черновика."
+
+msgid "How to work with a draft?"
+msgstr "Как работать с черновиком?"
+
+msgid "Illustrated instructions (PDF, Ukrainian; new tab)"
+msgstr "Инструкция с картинками (PDF, на украинском; новая вкладка)"
+
+msgid "Training example; enlarge in a new tab"
+msgstr "Учебный пример; увеличить в новой вкладке"
+
+msgid "Build a draft"
+msgstr "Собрать черновик"
+
+msgid "Sign in, open the catalogue and switch Purchase to Draft. Choose a saved draft or open New draft, enter a title and press Create draft."
+msgstr "Войдите, откройте каталог и переключите «Покупка» на «Черновик». Выберите сохранённый черновик или откройте «Новый черновик», введите название и нажмите «Создать черновик»."
+
+msgid "Enter a positive whole quantity and press Add to draft. Stock does not limit the quantity. For a variable product, choose every option first. Adding the same variant again increases its quantity."
+msgstr "Введите нужное целое количество и нажмите «В черновик». Остаток не ограничивает количество. Для вариативного товара сначала выберите все параметры. Повторное добавление того же варианта увеличивает его количество."
+
+msgid "The list is saved directly to the selected draft, not to the cart. It does not reserve stock, create a Folio document or confirm payment."
+msgstr "Список сохраняется сразу в выбранном черновике, не в корзине. Он не резервирует товар, не создаёт документ ФОЛИО и не подтверждает оплату."
+
+msgid "Review and edit"
+msgstr "Проверить и изменить"
+
+msgid "Press Open draft, or find it in My account > My orders. Open Edit draft quantities, change the numbers and press Save quantities. Zero removes a line."
+msgstr "Нажмите «Открыть черновик» или найдите его в «Кабинет → Мои заказы». Раскройте «Изменить количества в черновике», измените числа и нажмите «Сохранить количества». Ноль удаляет строку."
+
+msgid "Prices in the draft are provisional. An already submitted draft is not editable here. If a save is not confirmed, reopen the draft and check it before repeating the action."
+msgstr "Цены в черновике предварительные. Уже переданный черновик здесь нельзя редактировать. Если сохранение не подтверждено, откройте черновик и проверьте его перед повторным действием."
+
+msgid "Order the available goods"
+msgstr "Заказать доступные товары"
+
+msgid "In Draft processing, choose Load available quantities into the cart. Review the requested quantity, the quantity going to the cart and the remainder going to Folio."
+msgstr "В блоке «Обработка черновика» выберите «Загрузить доступное количество в корзину». Проверьте запрошенное количество, часть для корзины и остаток для ФОЛИО."
+
+msgid "After confirmation, available goods REPLACE the current cart at current prices. Save your current cart separately first if needed. The unavailable remainder stays in the draft and is recorded as a non-accounting Folio document."
+msgstr "После подтверждения доступные товары ЗАМЕНЯЮТ текущую корзину по актуальным ценам. Если она нужна, сначала сохраните её отдельно. Недоступная часть остаётся в черновике и записывается как неучитываемый документ ФОЛИО."
+
+msgid "Open the cart, check warehouses and totals, then complete checkout. Moving goods to the cart is not placing an order. If everything is available, no Folio remainder document is needed."
+msgstr "Откройте корзину, проверьте склады и сумму, затем оформите заказ. Перенос в корзину ещё не является заказом. Если доступны все товары, документ остатка в ФОЛИО не нужен."
+
+msgid "Save to Folio / preorder"
+msgstr "Сохранить в ФОЛИО / предзаказ"
+
+msgid "To send the entire list, open Draft processing and select Ordinary draft or Preorder invoice in Save as. Then press Send the entire draft to a non-accounting Folio document."
+msgstr "Чтобы передать весь список, в блоке «Обработка черновика» выберите в поле «Сохранить как» вариант «Обычный черновик» или «Счёт предзаказа». Затем нажмите «Передать весь черновик в неучитываемый документ ФОЛИО»."
+
+msgid "Review Preview without recording. Only Confirm non-accounting Folio document records it. Cancel leaves the Folio document uncreated. The current cart does not change."
+msgstr "Проверьте «Предварительный просмотр без записи». Только кнопка «Подтвердить неучитываемый документ ФОЛИО» записывает документ. «Отмена» оставляет его несозданным. Текущая корзина не меняется."
+
+msgid "Ordinary draft keeps the list for coordination. Preorder invoice is marked PRD in Folio and is included in the preorder reserve for six months. Neither option reserves or writes off current warehouse stock, confirms payment or guarantees delivery."
+msgstr "Обычный черновик сохраняет список для согласования. Счёт предзаказа отмечен «ПРД» в ФОЛИО и учитывается в резерве предзаказов в течение шести месяцев. Ни один вариант не резервирует и не списывает текущий складской остаток, не подтверждает оплату и не гарантирует поставку."
+
+msgid "Agree payment and delivery dates with the manager. The automatic out-of-stock remainder is not the same as a manually selected preorder."
+msgstr "Оплату и сроки поставки согласуйте с менеджером. Автоматический остаток «нет на складе» не равнозначен выбранному вручную предзаказу."
+
+msgid "If something went wrong"
+msgstr "Если возникла проблема"
+
+msgid "If the Folio warehouse is not configured, ask the manager. If the document is already linked, do not create another copy. For an error or unknown result, send the manager the draft number and message; check existing documents before repeating confirmation."
+msgstr "Если склад ФОЛИО не настроен, обратитесь к менеджеру. Если документ уже связан, не создавайте копию. При ошибке или неизвестном результате отправьте менеджеру номер черновика и сообщение; перед повторным подтверждением проверьте существующие документы."

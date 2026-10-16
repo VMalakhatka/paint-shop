@@ -1085,5 +1085,11 @@ msgstr ""
 msgid "Draft mode hides warehouse stock and ignores stock and warehouse filters. Open draft to edit quantities; zero removes a line. The cart is unchanged, stock is not reserved and no Folio document is created. Prices are provisional. Drafts already submitted to Folio cannot be edited here. If a save is not confirmed, check the draft before trying again."
 msgstr ""
 
+msgid "The document uses the configured non-accounting Folio warehouse. Its marker follows the chosen purpose: ordinary draft, preorder, or automatic out-of-stock remainder. It does not write off or reserve current warehouse stock."
+msgstr ""
+
+msgid "If Folio returns an error or the result is unknown, do not create a copy or repeat confirmation blindly. Ask the manager to check existing documents using the draft number and error message. If draft lines or availability changed, a new preview is required."
+msgstr ""
+
 msgid "Nova Poshta delivery is paid separately to the carrier, not with the goods. Free delivery covers only the base tariff under your delivery policy; insurance and extras remain payable. Free store pickup is offered for goods allocated to one warehouse. Wait for confirmation before visiting."
 msgstr ""

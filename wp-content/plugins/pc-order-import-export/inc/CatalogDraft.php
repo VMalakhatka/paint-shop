@@ -114,6 +114,7 @@ final class CatalogDraft
             echo '<details class="pcoe-new-draft"><summary>' . esc_html__('New draft', 'pc-order-import-export') . '</summary><form data-pcoe-create><label>' . esc_html__('Draft title', 'pc-order-import-export') . '<input name="title" maxlength="120" required></label><button type="submit">' . esc_html__('Create draft', 'pc-order-import-export') . '</button></form></details>';
             echo '<p class="pcoe-draft-notice">' . esc_html__('Draft: no stock reservation. Prices and availability are checked when ordering.', 'pc-order-import-export') . '</p>';
         }
+        DraftHelp::render();
         echo '<p class="pcoe-draft-status" role="status" aria-live="polite"></p></section>';
     }
 

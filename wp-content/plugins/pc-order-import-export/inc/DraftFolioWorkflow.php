@@ -40,6 +40,7 @@ class DraftFolioWorkflow
 
         echo '<section id="pcoe-draft-folio" class="pcoe-draft-folio">';
         echo '<h2>' . esc_html__('Draft processing', 'pc-order-import-export') . '</h2>';
+        DraftHelp::render('processing');
 
         if ($warehouse_id <= 0) {
             echo '<div class="woocommerce-error" role="alert">'

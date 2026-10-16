@@ -450,6 +450,7 @@ function pc_wholesale_help_render_endpoint(): void {
             <p><?php esc_html_e('For warehouse invoices and document lines, open Folio documents in My account. If an order was split, check each linked child order. Ask the manager if a document or shipment is not yet available.', 'pc-wholesale-help'); ?></p>
         </section>
         <section class="pc-help-section" id="stari-zamovlennia">
+            <?php if (class_exists('\\PaintCore\\PCOE\\DraftHelp')) \PaintCore\PCOE\DraftHelp::render('processing'); ?>
             <h2><?php esc_html_e('Build a draft from the catalogue', 'pc-wholesale-help'); ?></h2>
             <p><?php esc_html_e('After signing in, switch Purchase to Draft, select your editable draft or create a new one. Add visible catalogue products in any positive whole quantity, including out-of-stock products. Select all attributes for a variable product. Adding the same variant again increases its quantity.', 'pc-wholesale-help'); ?></p>
             <p><?php esc_html_e('Draft mode hides warehouse stock and ignores stock and warehouse filters. Open draft to edit quantities; zero removes a line. The cart is unchanged, stock is not reserved and no Folio document is created. Prices are provisional. Drafts already submitted to Folio cannot be edited here. If a save is not confirmed, check the draft before trying again.', 'pc-wholesale-help'); ?></p>
@@ -478,11 +479,8 @@ function pc_wholesale_help_render_endpoint(): void {
                 </div>
             </div>
             <div class="pc-help-warning"><strong><?php esc_html_e('Protect the current cart.', 'pc-wholesale-help'); ?></strong> <?php esc_html_e('Only the first scenario clears and replaces the current cart. Save the cart as a separate draft or export it before apply if you need its current contents.', 'pc-wholesale-help'); ?></div>
-            <div class="pc-help-note"><strong><?php esc_html_e('No warehouse movement.', 'pc-wholesale-help'); ?></strong> <?php
-                /* translators: %s is the exact note stored in the Folio document. */
-                printf(esc_html__('The non-accounting document is created on Folio warehouse 7 with the note %s. It does not write off, reserve, or otherwise move warehouse stock.', 'pc-wholesale-help'), '<code>нет на складе</code>');
-            ?></div>
-            <p><?php esc_html_e('If Folio returns an error or the result is unknown, the site keeps the draft and does not retry automatically. Review the message and deliberately repeat apply using the same preview. If draft lines or availability changed, run a new preview.', 'pc-wholesale-help'); ?></p>
+            <div class="pc-help-note"><strong><?php esc_html_e('No warehouse movement.', 'pc-wholesale-help'); ?></strong> <?php esc_html_e('The document uses the configured non-accounting Folio warehouse. Its marker follows the chosen purpose: ordinary draft, preorder, or automatic out-of-stock remainder. It does not write off or reserve current warehouse stock.', 'pc-wholesale-help'); ?></div>
+            <p><?php esc_html_e('If Folio returns an error or the result is unknown, do not create a copy or repeat confirmation blindly. Ask the manager to check existing documents using the draft number and error message. If draft lines or availability changed, a new preview is required.', 'pc-wholesale-help'); ?></p>
             <?php if (class_exists('\\PaintCore\\PCOE\\Waitlist') && \PaintCore\PCOE\Waitlist::allowed()): ?>
             <div id="waiting-list" class="pc-help-card">
                 <h3><?php esc_html_e('Waiting list and draft tracking', 'pc-wholesale-help'); ?></h3>

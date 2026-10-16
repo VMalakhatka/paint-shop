@@ -823,3 +823,42 @@ deleted after use. Existing single-order confirmation behavior remains unchanged
 combined sums, private XLSX, intercepted email and no order mutation.
 
 Scoped import access (2026-10-14): `manage_woocommerce` plus explicit `pcoe_import_customers` permits Folio customer import for custom manager roles. Existing administrator/shop_manager paths remain valid. Grant per user when requested; this does not grant general create/promote/delete-users capabilities. All import role allowlists and preview/apply checks remain in force.
+
+### Illustrated draft help (2026-10-16)
+
+`DraftHelp` renders read-only native details/summary menus inside the catalogue
+toolbar and draft-processing block (including missing-configuration errors).
+Every signed-in customer can read it; guests get no menu. The existing wholesale
+guide embeds the same renderer without changing its wholesale role gate.
+No AJAX, endpoint, new plugin, migration or business-state change is introduced.
+The existing catalogue stylesheet covers account/help pages too.
+
+Five topics cover collecting, editing, available goods to cart, whole draft to
+Folio/preorder, and unknown outcomes. English msgids have Ukrainian/Russian
+translations; the downloadable five-page PDF is explicitly labelled Ukrainian.
+Static PDF/images contain only synthetic examples and are intentionally public.
+Canon: `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md`, sections 8-9.
+The earlier fixed warehouse-7/shortage-only explanation was corrected: warehouse
+is configured, and whole-draft markers follow DraftPurpose.
+
+Assets: `assets/draft-guide/`. Rebuild PDF with
+`scripts/build-draft-guide.py` (ReportLab, Arial regular/bold via GUIDE_FONT_DIR);
+it writes `output/pdf/` and copies the deliverable into the shipped assets.
+Inspect all rendered pages after rebuilding. Do not commit runtime cookies,
+offline HTML or customer examples.
+
+Local verification workflow: create the disposable fixture using
+`PCOE_CATALOG_FIXTURE=/tmp/pcoe-guide-fixture.json` with
+`tests/catalog-draft-local.php`; run `tests/draft-help-local.php` with the same
+variable and `PCOE_GUIDE_CAPTURE=1` for inert, non-submittable HTML captures.
+That path blocks HTTP/mail, modifies only the verified synthetic draft, and
+supplies preview data in memory without a database transient or Folio payload.
+`tests/draft-help-ui.cjs /tmp/pcoe-guide-fixture.json` uses Playwright/Chrome for
+390/1280px keyboard/layout checks and captures. Use CHROME_PATH and
+PLAYWRIGHT_MODULE for an external runtime. Finally run the fixture cleanup using
+`PCOE_CATALOG_CLEANUP` and the original local test.
+
+Deploy PCOE (including assets/MO files) and the updated existing MU help file/
+translations together. No Java deployment or Folio write is needed. Production
+has not been changed or verified in this task. Rollback restores these help assets
+and render calls; it does not affect drafts, carts or Folio documents.
