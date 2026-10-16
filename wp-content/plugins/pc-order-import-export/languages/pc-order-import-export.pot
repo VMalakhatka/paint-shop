@@ -3299,3 +3299,72 @@ msgstr ""
 
 msgid "Preorder invoice"
 msgstr ""
+
+msgid "Shopping mode"
+msgstr ""
+
+msgid "Purchase"
+msgstr ""
+
+msgid "Draft"
+msgstr ""
+
+msgid "Selected draft"
+msgstr ""
+
+msgid "Select a draft"
+msgstr ""
+
+msgid "Open draft"
+msgstr ""
+
+msgid "New draft"
+msgstr ""
+
+msgid "Create draft"
+msgstr ""
+
+msgid "Draft: no stock reservation. Prices and availability are checked when ordering."
+msgstr ""
+
+msgid "Choose a variant"
+msgstr ""
+
+msgid "Edit draft quantities"
+msgstr ""
+
+msgid "Set quantity to zero to remove an item."
+msgstr ""
+
+msgid "Save quantities"
+msgstr ""
+
+msgid "Select or create a draft first."
+msgstr ""
+
+msgid "Saved to draft."
+msgstr ""
+
+msgid "Could not confirm the save. Open the draft and check it before trying again."
+msgstr ""
+
+msgid "Enter a positive whole quantity."
+msgstr ""
+
+msgid "Select an editable draft belonging to your account."
+msgstr ""
+
+msgid "Enter a draft title (up to 120 characters)."
+msgstr ""
+
+msgid "Could not save the draft."
+msgstr ""
+
+msgid "This product is not available in the catalogue."
+msgstr ""
+
+msgid "The draft changed. Reload it before editing quantities."
+msgstr ""
+
+msgid "Invalid draft request."
+msgstr ""

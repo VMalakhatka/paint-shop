@@ -1,0 +1,35 @@
+.pcoe-catalog-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:12px; padding:14px 0; margin:0 0 20px; border-bottom:1px solid #d6dada; clear:both; }
+.pcoe-catalog-toolbar *, .pcoe-product-draft *, .pcoe-draft-editor * { box-sizing:border-box; min-width:0; letter-spacing:0; }
+.pcoe-mode-switch { display:inline-flex; border:1px solid #49675b; border-radius:4px; overflow:hidden; }
+.pcoe-mode-switch button { background:#fff; color:#263b32; border:0; border-radius:0; margin:0; padding:9px 14px; font-size:15px; }
+.pcoe-mode-switch button[aria-pressed="true"] { background:#28634c; color:#fff; }
+.pcoe-catalog-toolbar label, .pcoe-product-draft label { display:flex; flex-direction:column; gap:4px; font-size:14px; }
+.pcoe-draft-picker { flex:1 1 240px; max-width:450px; }
+.pcoe-catalog-toolbar select, .pcoe-catalog-toolbar input, .pcoe-product-draft select { width:100%; max-width:100%; font-size:16px; }
+.pcoe-new-draft { flex:0 1 260px; }
+.pcoe-new-draft summary, .pcoe-draft-editor summary { cursor:pointer; }
+.pcoe-new-draft form { display:grid; gap:8px; padding-top:8px; }
+.pcoe-draft-notice { flex-basis:100%; margin:0; color:#555; font-size:14px; }
+.pcoe-draft-status { display:block; margin:0; font-size:14px; overflow-wrap:anywhere; }
+.pcoe-draft-status:empty { display:none; }
+.pcoe-product-draft { display:flex; flex-wrap:wrap; align-items:end; gap:8px; margin:12px 0; width:100%; }
+.pcoe-product-draft label { flex:1 1 88px; }
+.pcoe-product-draft label:has(select) { flex-basis:100%; }
+.pcoe-product-draft input { width:100%; min-height:40px; padding:8px; font-size:16px; }
+.pcoe-product-draft button { flex:1 1 135px; min-height:40px; padding:9px; font-size:14px; white-space:normal; }
+.pcoe-product-draft .pcoe-draft-status { flex-basis:100%; }
+.pcoe-draft-editor { margin:16px 0; padding:12px 0; border-block:1px solid #d6dada; }
+.pcoe-draft-editor label { display:grid; grid-template-columns:minmax(0,1fr) 100px; align-items:center; gap:16px; padding:8px 0; border-bottom:1px solid #eee; }
+.pcoe-draft-editor input { width:100%; }
+.pcoe-draft-mode .pc-qo-table td.pc-qo-qty, .pcoe-draft-mode .pc-qo-table th.pc-qo-qty { width:220px; max-width:none; white-space:normal; }
+.pcoe-draft-mode .pc-qo-qty .pcoe-product-draft { min-width:150px; }
+.pcoe-draft-mode .loop-qty-wrap, .pcoe-draft-mode .loop-stock-top,
+.pcoe-draft-mode .slu-stock-box, .pcoe-draft-mode .pc-alloc,
+.pcoe-draft-mode .summary .stock, .pcoe-draft-mode .psu-catalog-filters__stock,
+.pcoe-draft-mode .psu-catalog-filters__locations, .pcoe-draft-mode .psu-suggest-stock,
+.pcoe-draft-mode .pc-qo-incart { display:none !important; }
+@media(max-width:600px) {
+    .pcoe-catalog-toolbar { gap:10px; }
+    .pcoe-draft-picker, .pcoe-new-draft { flex-basis:100%; max-width:none; }
+    .pcoe-product-draft { align-items:stretch; }
+}

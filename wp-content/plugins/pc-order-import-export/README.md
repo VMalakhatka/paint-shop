@@ -1,5 +1,56 @@
 # Wholesale Price List
 
+## Catalogue draft mode (2026-10-16)
+
+`CatalogDraft` owns a separate customer planning path for every signed-in role.
+It does not bypass any Woo purchase/checkout stock validator. The catalogue and
+product page expose Purchase/Draft, an owned editable-draft selector and creation;
+the wholesale table uses the same per-product form. Guests keep the old UI.
+Stock and warehouse filters are ignored only for draft browsing; private, hidden,
+password-protected and hidden-category-only products are not accepted. Simple
+products and explicit variable attributes (including wildcard variations) are
+supported. Non-inventory technical quantity bound: positive integer <=999999999.
+Role pricing is read through `ManagerWorkspace::customer_price`; browser prices
+are never accepted. Missing/invalid prices are rejected, not saved as free goods.
+
+State: `_pcoe_catalog_mode` and `_pcoe_catalog_draft` in user meta. Data remains
+ordinary HPOS-compatible `pc-draft` orders, no separate tables/migration. Selection
+requires ownership and `ManagerWorkspace::editable`, including the Folio document
+and manager-command guards. Writes use the same per-order named DB lock as manager
+and legacy Folio commands, Woo transactions and persistent request receipts
+(`_pcoe_catalog_request_<sha256>` in order meta; creation receipts in user meta).
+Repeated identical request keys return the prior result; a different payload with
+the same key fails. The UI never automatically retries an uncertain write. Editor
+revisions reject stale replacements; add operations accumulate quantities under
+the lock. Old allocation stamps are removed from edited lines, not recalculated.
+
+No cart, stock, reservation, paid status, invoice, Folio request or customer email
+is created by this path. Existing explicit draft processing remains responsible
+for checking current availability/prices and preview/apply. It is not silently
+invoked by adding a product. Existing manager-supplied prices on untouched rows
+remain unchanged; a new addition to a matching row uses the current customer price.
+
+Local regression: `tests/catalog-draft-local.php` via WP CLI, synthetic user and
+products with cleanup and blocked outbound HTTP/mail. Browser test:
+`tests/catalog-draft-ui.cjs` uses an opt-in local fixture produced by
+`PCOE_CATALOG_FIXTURE=/tmp/pcoe-catalog-fixture.json`; remove it afterwards with
+`PCOE_CATALOG_CLEANUP` pointing to that file and the same PHP test. Never run these
+tests on production. Fixture contains a temporary synthetic login cookie and must
+not be committed or shared.
+
+Verified locally: 38 persistence/security/role-price/variation-transfer checks;
+real HTTP browser scenarios at 390 and 1280 px (guest denial, mode switching,
+creation, selection, zero-stock addition, variant selection and quantity edits).
+Existing allocation-policy and draft-purpose regressions also pass. No live
+checkout, payment or Folio document was created. Synthetic records were removed.
+
+Deploy existing `pc-order-import-export`, `paint-shop-ux` and changed MU files
+(`psu-search-filters.php`, `pc-wholesale-quick-order.php`, `pc-wholesale-help.php`
+and help translations). No new plugin or Java change. Public help code and
+`docs/WHOLESALE_CUSTOMER_GUIDE_UK.md` are updated; production validation pending.
+Rollback restores these files; existing drafts remain ordinary `pc-draft` orders.
+Logged-in pages must stay outside shared page caches, as with account/cart pages.
+
 ## XLSX download compatibility (2026-10-09)
 
 `Exporter::send_xlsx()` uses `setCellValue()` with A1 coordinates, compatible

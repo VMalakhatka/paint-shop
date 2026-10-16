@@ -3495,3 +3495,72 @@ msgstr "Обычный черновик"
 
 msgid "Preorder invoice"
 msgstr "Счёт предзаказа"
+
+msgid "Shopping mode"
+msgstr "Режим заказа"
+
+msgid "Purchase"
+msgstr "Покупка"
+
+msgid "Draft"
+msgstr "Черновик"
+
+msgid "Selected draft"
+msgstr "Выбранный черновик"
+
+msgid "Select a draft"
+msgstr "Выберите черновик"
+
+msgid "Open draft"
+msgstr "Открыть черновик"
+
+msgid "New draft"
+msgstr "Новый черновик"
+
+msgid "Create draft"
+msgstr "Создать черновик"
+
+msgid "Draft: no stock reservation. Prices and availability are checked when ordering."
+msgstr "Черновик не резервирует товар. Цены и наличие проверяются при оформлении."
+
+msgid "Choose a variant"
+msgstr "Выберите вариант"
+
+msgid "Edit draft quantities"
+msgstr "Изменить количества в черновике"
+
+msgid "Set quantity to zero to remove an item."
+msgstr "Чтобы удалить товар, установите количество 0."
+
+msgid "Save quantities"
+msgstr "Сохранить количества"
+
+msgid "Select or create a draft first."
+msgstr "Сначала выберите или создайте черновик."
+
+msgid "Saved to draft."
+msgstr "Сохранено в черновике."
+
+msgid "Could not confirm the save. Open the draft and check it before trying again."
+msgstr "Не удалось подтвердить сохранение. Откройте черновик и проверьте его перед повторной попыткой."
+
+msgid "Enter a positive whole quantity."
+msgstr "Введите положительное целое количество."
+
+msgid "Select an editable draft belonging to your account."
+msgstr "Выберите свой черновик, доступный для редактирования."
+
+msgid "Enter a draft title (up to 120 characters)."
+msgstr "Введите название черновика (до 120 символов)."
+
+msgid "Could not save the draft."
+msgstr "Не удалось сохранить черновик."
+
+msgid "This product is not available in the catalogue."
+msgstr "Этот товар недоступен в каталоге."
+
+msgid "The draft changed. Reload it before editing quantities."
+msgstr "Черновик изменён. Обновите страницу перед редактированием количеств."
+
+msgid "Invalid draft request."
+msgstr "Некорректный запрос черновика."

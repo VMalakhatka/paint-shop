@@ -74,6 +74,13 @@ Java `FolioPreorderRule` отбирает неучитываемые ПРД-сч
 
 ## Локальное и production
 
+Catalogue draft planning (2026-10-16, local): `pc-order-import-export/CatalogDraft`
+owns the authenticated direct-to-draft path. Never implement this by relaxing Woo
+cart stock validation. Reuse `pc-draft`, ownership/editability and the manager's
+per-order named lock. Catalogue filtering adapters ignore stock only in planning
+mode; explicit draft processing remains a separate preview/apply. Configuration,
+metadata, tests and rollback: the PCOE README, Catalogue draft mode.
+
 NP checkout 0.8 (2026-10-16, local): `paint-nova-poshta-multishipping` owns
 carrier-paid shipping and single-location pickup. Zero Woo shipping cost is not
 free carrier service; retain payment-collection and base-coverage shipping meta.
