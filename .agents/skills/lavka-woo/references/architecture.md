@@ -126,6 +126,14 @@ XML sitemap категорий (2026-10-08): `paint-shop-ux/inc/category-sitemap
 число терминов. После разрешённого деплоя нужен сброс sitemap-кэша; регламент
 и read-only интеграционный тест: `docs/SYSTEM_OVERVIEW.md`, раздел XML sitemap.
 
+Product sitemap cache (production 2026-10-16): отсутствие URL в XML не означает
+noindex или явное исключение. Сначала сверять нативный провайдер Rank Math,
+robots/canonical и текущую страницу выборки с кэшем. Для двух разрешённых карточек
+хватило штатной очистки только `product`; Woo catalog visibility `hidden` сохранена.
+Не менять видимость, остатки, даты карточек или vendor ради включения в sitemap.
+Preview, backup/lock, публичная проверка и границы результата:
+`docs/SYSTEM_OVERVIEW.md`, раздел «XML sitemap товаров: обновление кэша».
+
 Production SEO (2026-10-08): служебные страницы закрыты через штатный
 `rank_math_robots`, taxonomy `location` через custom robots Rank Math. Это
 production options/meta, не code-defaults; не переносить локальную БД ради их
