@@ -155,6 +155,13 @@ Java отвечает за складское распределение вну�
 
 ## WayForPay
 
+2026-10-16: `pc-folio-order-link.php` replaces the `Int` prefix in
+`additionalInfo` with `WFP` only for server-verified WayForPay evidence matching
+the paid Woo transaction. This is informational, not a Folio payment write.
+Keep the 30-character limit, preserve other gateways and do not backfill old
+documents. Contract and offline regression: `docs/FOLIO_ORDER_JSON_CONTRACT.md`,
+`scripts/tests/folio-wayforpay-info.php`; production verification is separate.
+
 2026-10-15: локально реализован `pc-wayforpay-checkbox`, manual deploy, default off.
 Канон подключения/приёмки: `wp-content/plugins/pc-wayforpay-checkbox/README.md`;
 точка входа оператора — `docs/WAYFORPAY_TEST_ACCESS.md`. Не считать это production rollout.
