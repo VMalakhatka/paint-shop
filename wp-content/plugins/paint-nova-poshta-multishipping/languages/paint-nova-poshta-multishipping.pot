@@ -1121,3 +1121,30 @@ msgstr ""
 #: src/Infrastructure/ApprovalQuoteService.php src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
 msgid "Courier street and building"
 msgstr ""
+
+msgid "Nova Poshta — free delivery (base tariff); insurance and extras paid by recipient"
+msgstr ""
+
+msgid "Nova Poshta — carrier tariff, paid separately by recipient"
+msgstr ""
+
+msgid "Store pickup — %s, free (wait for confirmation)"
+msgstr ""
+
+msgid "Choose the destination. Delivery is paid separately to Nova Poshta, not with the goods. The estimate and any store contribution are shown below."
+msgstr ""
+
+msgid "The delivery price will be determined by Nova Poshta. No delivery fee is included in the payment for goods."
+msgstr ""
+
+msgid "Estimated payment to Nova Poshta: %s. Final packaging and charges are confirmed by the carrier."
+msgstr ""
+
+msgid "Free delivery covers the base tariff only. Insurance and additional services are paid by the recipient."
+msgstr ""
+
+msgid "At or below the threshold"
+msgstr ""
+
+msgid "Above the threshold"
+msgstr ""
