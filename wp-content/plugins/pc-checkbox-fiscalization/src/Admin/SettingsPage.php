@@ -4,6 +4,7 @@ namespace Paint\CheckboxFiscalization\Admin;
 
 use Paint\CheckboxFiscalization\Config;
 use Paint\CheckboxFiscalization\Domain\FiscalizationService;
+use Paint\CheckboxFiscalization\Domain\ShiftManager;
 use Paint\CheckboxFiscalization\Infrastructure\OperationRepository;
 
 defined('ABSPATH') || exit;
@@ -15,7 +16,8 @@ final class SettingsPage
     public function __construct(
         private Config $config,
         private FiscalizationService $service,
-        private OperationRepository $operations
+        private OperationRepository $operations,
+        private ShiftManager $shifts
     ) {
     }
 
@@ -24,6 +26,8 @@ final class SettingsPage
         add_action('admin_menu', [$this, 'menu']);
         add_action('admin_init', [$this, 'settings']);
         add_action('wp_ajax_pccf_connection_test', [$this, 'connectionTest']);
+        add_action('wp_ajax_pccf_shift_preview', [$this, 'shiftPreview']);
+        add_action('wp_ajax_pccf_shift_open', [$this, 'shiftOpen']);
     }
 
     public function menu(): void
@@ -104,6 +108,12 @@ final class SettingsPage
             </p>
             <pre id="pccf-test-result" style="display:none;max-width:900px;background:#fff;padding:12px;border:1px solid #ccd0d4"></pre>
 
+            <h2><?php echo esc_html__('Open shift', 'pc-checkbox-fiscalization'); ?></h2>
+            <p><?php echo esc_html__('Preview the configured register and cashier first. Opening a live shift is a fiscal action, not a connection test. This does not create a receipt or close a shift.', 'pc-checkbox-fiscalization'); ?></p>
+            <p><button type="button" class="button" id="pccf-shift-preview"><?php echo esc_html__('Preview shift opening', 'pc-checkbox-fiscalization'); ?></button>
+            <button type="button" class="button button-primary" id="pccf-shift-open" disabled><?php echo esc_html__('Confirm opening / check saved attempt', 'pc-checkbox-fiscalization'); ?></button></p>
+            <pre id="pccf-shift-result" style="white-space:pre-wrap;max-width:900px"></pre>
+
             <form method="post" action="options.php">
                 <?php settings_fields('pccf'); ?>
                 <h2><?php echo esc_html__('Checkbox API client', 'pc-checkbox-fiscalization'); ?></h2>
@@ -155,7 +165,11 @@ final class SettingsPage
                     <td><?php echo esc_html((string) $row['status']); ?></td>
                     <td><?php echo esc_html(number_format_i18n(((int) $row['total_cents']) / 100, 2)); ?> UAH</td>
                     <td><?php echo esc_html((string) $row['attempts']); ?></td>
-                    <td><?php echo esc_html((string) $row['error_code']); ?></td>
+                    <td><?php echo esc_html((string) $row['error_code']); ?>
+                        <?php if (!empty($row['error_message'])) : ?>
+                            <br><?php echo esc_html('HTTP ' . (int) $row['http_code'] . ' / ' . (string) $row['error_message']); ?>
+                        <?php endif; ?>
+                    </td>
                 </tr>
             <?php endforeach; endif; ?>
             </tbody></table>
@@ -174,6 +188,33 @@ final class SettingsPage
                 .finally(() => { button.disabled = false; spinner.classList.remove('is-active'); });
         });
         </script>
+        <script>
+        (() => {
+            const preview = document.getElementById('pccf-shift-preview');
+            const open = document.getElementById('pccf-shift-open');
+            const output = document.getElementById('pccf-shift-result');
+            let ticket = '';
+            async function request(action) {
+                preview.disabled = true; open.disabled = true;
+                try {
+                    const body = new URLSearchParams({action, ticket, nonce: <?php echo wp_json_encode(wp_create_nonce('pccf_shift')); ?>});
+                    const response = await fetch(ajaxurl, {method:'POST', credentials:'same-origin', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body});
+                    const result = await response.json();
+                    const data = result.data || {};
+                    ticket = action === 'pccf_shift_preview' && result.success ? data.ticket : '';
+                    delete data.ticket; delete data.fingerprint;
+                    output.textContent = JSON.stringify(data, null, 2);
+                } catch (_) {
+                    ticket = '';
+                    output.textContent = <?php echo wp_json_encode(__('Result unknown. Preview again to check the saved attempt; do not open a shift elsewhere until it is reconciled.', 'pc-checkbox-fiscalization')); ?>;
+                } finally { preview.disabled = false; open.disabled = !ticket; }
+            }
+            preview.addEventListener('click', () => request('pccf_shift_preview'));
+            open.addEventListener('click', () => {
+                if (ticket && window.confirm(<?php echo wp_json_encode(__('Open a shift for the cashier and register shown above? LIVE mode creates a real fiscal shift. An unresolved attempt will only be checked.', 'pc-checkbox-fiscalization')); ?>)) request('pccf_shift_open');
+            });
+        })();
+        </script>
         <?php
     }
 
@@ -188,6 +229,40 @@ final class SettingsPage
             wp_send_json_error(['code' => $result->get_error_code(), 'message' => $result->get_error_message()], 502);
         }
         wp_send_json_success($result);
+    }
+
+    public function shiftPreview(): void
+    {
+        $this->shiftPermission();
+        $result = $this->shifts->preview();
+        if (is_wp_error($result)) $this->shiftError($result);
+        $ticket = wp_generate_uuid4();
+        set_transient('pccf_shift_preview_' . get_current_user_id(), ['ticket'=>$ticket,'fingerprint'=>$result['fingerprint']], 300);
+        unset($result['fingerprint']);
+        wp_send_json_success($result + ['ticket'=>$ticket]);
+    }
+
+    public function shiftOpen(): void
+    {
+        $this->shiftPermission();
+        $saved = get_transient('pccf_shift_preview_' . get_current_user_id());
+        $ticket = isset($_POST['ticket']) && is_string($_POST['ticket']) ? wp_unslash($_POST['ticket']) : '';
+        if (!is_array($saved) || !hash_equals($saved['ticket'], $ticket)) wp_send_json_error(['message'=>__('Preview expired. Preview again before confirming.', 'pc-checkbox-fiscalization')], 409);
+        delete_transient('pccf_shift_preview_' . get_current_user_id());
+        $result = $this->shifts->openConfirmed($saved['fingerprint']);
+        if (is_wp_error($result)) $this->shiftError($result);
+        wp_send_json_success($result);
+    }
+
+    private function shiftPermission(): void
+    {
+        check_ajax_referer('pccf_shift', 'nonce');
+        if (!current_user_can('manage_pc_checkbox_fiscalization')) wp_send_json_error(['message'=>'Forbidden.'], 403);
+    }
+
+    private function shiftError(\WP_Error $error): void
+    {
+        wp_send_json_error(['code'=>$error->get_error_code(), 'message'=>$error->get_error_message(), 'details'=>$error->get_error_data()], 502);
     }
 
     private function statusRow(string $name, bool $configured, bool $optional = false): void

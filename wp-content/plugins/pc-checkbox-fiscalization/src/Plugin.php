@@ -5,6 +5,7 @@ namespace Paint\CheckboxFiscalization;
 use Paint\CheckboxFiscalization\Admin\SettingsPage;
 use Paint\CheckboxFiscalization\Domain\CommandValidator;
 use Paint\CheckboxFiscalization\Domain\FiscalizationService;
+use Paint\CheckboxFiscalization\Domain\ShiftManager;
 use Paint\CheckboxFiscalization\Http\RestController;
 use Paint\CheckboxFiscalization\Infrastructure\ApiClient;
 use Paint\CheckboxFiscalization\Infrastructure\OperationRepository;
@@ -38,7 +39,7 @@ final class Plugin
         add_action('rest_api_init', [$rest, 'register']);
 
         if (is_admin()) {
-            (new SettingsPage($config, $this->service, $operations))->register();
+            (new SettingsPage($config, $this->service, $operations, new ShiftManager($config, $api, $operations)))->register();
         }
     }
 

@@ -122,7 +122,7 @@ final class OperationRepository
         $rows = $wpdb->get_results(
             "SELECT operation_key, receipt_uuid, source_system, source_type, source_id,
                     operation_type, status, mode, total_cents, attempts, http_code,
-                    error_code, created_at, updated_at
+                    error_code, error_message, shift_id, created_at, updated_at
                FROM {$this->table}
               ORDER BY id DESC LIMIT {$limit}",
             ARRAY_A

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: PC WayForPay Checkbox
  * Description: Verifies WayForPay callbacks and queues explicit Checkbox sale commands.
- * Version: 0.1.0
+ * Version: 0.1.1
  * Requires PHP: 8.1
  * Requires Plugins: woocommerce, pc-checkbox-fiscalization
  * Text Domain: pc-wayforpay-checkbox
@@ -28,5 +28,6 @@ add_action('plugins_loaded', static function (): void {
     load_plugin_textdomain('pc-wayforpay-checkbox', false, dirname(plugin_basename(__FILE__)) . '/languages');
     if (class_exists('WooCommerce')) {
         (new Paint\WayForPayCheckbox\Bridge())->boot();
+        (new Paint\WayForPayCheckbox\ReturnPage())->boot();
     }
 }, 30);

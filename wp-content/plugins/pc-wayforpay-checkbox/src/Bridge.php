@@ -286,7 +286,8 @@ final class Bridge
         $code = $error->get_error_code();
         $http = (int) ($error->get_error_data()['status'] ?? 0);
         $uncertain = $reconciling || in_array($code, ['reconciliation_required', 'receipt_not_confirmed'], true);
-        $retry = $uncertain || $code === 'operation_busy' || $http === 429 || $http >= 500;
+        // Pending opening is resolved by the executor's saved shift UUID, not a new POST.
+        $retry = $uncertain || in_array($code, ['operation_busy', 'shift_busy', 'shift_open_pending', 'shift_transition_pending'], true) || $http === 429 || $http >= 500;
         $delay = min(3600, 30 * (2 ** $attempt));
         $this->store->update($id, ['status' => $retry ? ($uncertain ? 'RECONCILE' : 'QUEUED') : 'BLOCKED', 'error_code' => substr(sanitize_key($code), 0, 96), 'next_run' => time() + $delay]);
         if ($retry && $attempt < 8) {
@@ -307,6 +308,17 @@ final class Bridge
         echo '<p><strong>' . esc_html__('Checkbox receipt', 'pc-wayforpay-checkbox') . '</strong><br>';
         echo esc_html($row['status'] . ' / ' . $row['mode'] . ' / ' . $row['error_code']);
         echo '<br>' . esc_html__('Attempts', 'pc-wayforpay-checkbox') . ': ' . (int) $row['attempts'];
+        $command = json_decode($row['command'], true);
+        if (is_array($command) && !empty($command['operation_key'])) {
+            $operation = \Paint\CheckboxFiscalization\Plugin::instance()->service()->operation($command['operation_key']);
+            if ($operation && !empty($operation['error_message'])) {
+                echo '<br>' . esc_html__('Checkbox diagnostic', 'pc-wayforpay-checkbox') . ': '
+                    . esc_html($operation['status'] . ' / HTTP ' . $operation['http_code'] . ' / ' . $operation['error_message']);
+                if (!empty($operation['shift_id'])) {
+                    echo '<br>' . esc_html__('Shift ID', 'pc-wayforpay-checkbox') . ': ' . esc_html($operation['shift_id']);
+                }
+            }
+        }
         if (is_array($receipt) && !empty($receipt['fiscal_code'])) {
             echo '<br>' . esc_html($receipt['fiscal_code']);
             echo '<br>' . esc_html__('Receipt ID', 'pc-wayforpay-checkbox') . ': ' . esc_html($receipt['id']);

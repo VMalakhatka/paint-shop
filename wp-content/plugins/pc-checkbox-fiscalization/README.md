@@ -1,5 +1,40 @@
 # PC Checkbox Fiscalization
 
+## Manual shift opening and diagnostics (0.1.1)
+
+In settings, **Preview shift opening** reads the configured cashier, organization,
+register, test/live mode, current shift and last attempt. **Confirm opening / check
+saved attempt** requires a fresh five-minute preview, the same logged-in manager,
+nonce and `manage_pc_checkbox_fiscalization`. Recheck the displayed identity before
+confirming: live opening is a real fiscal action. Both fiscalization/live safety
+constants apply. Preview and connection test never open shifts. No sale or closing
+is performed by this button.
+
+Manual and automatic (`open_if_missing`) opening share a per-register DB lock and
+durable `pccf_shift_<license-hash>` option journal (no secret/payload). UUID is saved
+before POST. Timeout, crash or pending response is resolved only by GET of that UUID,
+including from another order. HTTP 404 does not authorize another opening. OPENED
+and register identity must be confirmed. A shift on another register blocks execution.
+Definite rejection may be retried after correcting the cause; a pending attempt
+ending CLOSED requires support review, not journal deletion or blind reopening.
+
+Diagnostics show safe stage, HTTP, code, message and shift ID. For support collect
+these values and UTC time, never keys/raw responses. A CLOSED attempt includes the
+opening transaction's `response_error_message` when provided. Pre-receipt errors
+are also saved in recent operations and the WayForPay order panel. Old errors
+cannot be expanded retroactively if the original message was not stored.
+
+Deploy both 0.1.1 plugins and translations together, then preview only. Live opening
+and resuming a paid sale require separate operator confirmation. Do not replay
+historical orders or issue a new sale to test diagnostics. After OPENED, resume the
+existing Woo operation; verify unchanged UUID, fiscal status and email separately.
+For rollback pause the adapter, reconcile pending openings/receipts and preserve
+journals; do not downgrade with unknown opening outcomes.
+
+Offline checks: `tests/executor-safety.php` covers shared/manual opening, persistence,
+wrong register, locks and unknown outcomes; `tests/api-diagnostics.php` covers safe
+error parsing. Real opening, browser UI and email delivery remain acceptance checks.
+
 Universal, caller-agnostic Checkbox.ua fiscalization executor for WordPress.
 
 The plugin does not inspect WooCommerce, WayForPay, Folio, or any other source to decide what must be fiscalized. A trusted caller supplies either:

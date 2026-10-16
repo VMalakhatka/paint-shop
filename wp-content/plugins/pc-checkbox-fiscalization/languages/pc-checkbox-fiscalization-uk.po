@@ -1,0 +1,31 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: PC Checkbox Fiscalization 0.1.1\n"
+"Language: uk\n"
+"PO-Revision-Date: 2026-10-16 00:00+0000\n"
+"Last-Translator: Lavka\n"
+"Language-Team: Ukrainian\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Open shift"
+msgstr "Відкрити зміну"
+
+msgid "Preview the configured register and cashier first. Opening a live shift is a fiscal action, not a connection test. This does not create a receipt or close a shift."
+msgstr "Спочатку перевірте касу й касира. Відкриття робочої зміни — фіскальна дія, а не тест з’єднання. Чек не створюється, зміна не закривається."
+
+msgid "Preview shift opening"
+msgstr "Перевірити перед відкриттям"
+
+msgid "Confirm opening / check saved attempt"
+msgstr "Підтвердити відкриття / перевірити спробу"
+
+msgid "Result unknown. Preview again to check the saved attempt; do not open a shift elsewhere until it is reconciled."
+msgstr "Результат невідомий. Повторіть перевірку збереженої спроби; не відкривайте зміну іншим способом до звірки."
+
+msgid "Open a shift for the cashier and register shown above? LIVE mode creates a real fiscal shift. An unresolved attempt will only be checked."
+msgstr "Відкрити зміну для показаних касира й каси? Режим LIVE створює справжню фіскальну зміну. Незавершену спробу буде лише перевірено."
+
+msgid "Preview expired. Preview again before confirming."
+msgstr "Перегляд застарів. Перевірте дані ще раз перед підтвердженням."

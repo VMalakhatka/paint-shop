@@ -66,3 +66,24 @@ msgstr ""
 #: src/Admin/SettingsPage.php:140
 msgid "Recent operations"
 msgstr ""
+
+msgid "Open shift"
+msgstr ""
+
+msgid "Preview the configured register and cashier first. Opening a live shift is a fiscal action, not a connection test. This does not create a receipt or close a shift."
+msgstr ""
+
+msgid "Preview shift opening"
+msgstr ""
+
+msgid "Confirm opening / check saved attempt"
+msgstr ""
+
+msgid "Result unknown. Preview again to check the saved attempt; do not open a shift elsewhere until it is reconciled."
+msgstr ""
+
+msgid "Open a shift for the cashier and register shown above? LIVE mode creates a real fiscal shift. An unresolved attempt will only be checked."
+msgstr ""
+
+msgid "Preview expired. Preview again before confirming."
+msgstr ""

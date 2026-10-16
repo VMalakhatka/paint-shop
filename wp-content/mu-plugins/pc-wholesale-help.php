@@ -502,6 +502,7 @@ function pc_wholesale_help_render_endpoint(): void {
                 <?php pc_wholesale_help_step('4', __('Choose payment', 'pc-wholesale-help'), __('Select one of the methods available for your account.', 'pc-wholesale-help')); ?>
                 <?php pc_wholesale_help_step('5', __('Confirm once', 'pc-wholesale-help'), __('Wait for Folio processing to finish; do not submit a duplicate order.', 'pc-wholesale-help')); ?>
             </ol>
+            <p><?php esc_html_e('After WayForPay, the website shows payment confirmation or a waiting message. If money was charged but confirmation is pending, refresh the page later and check My orders. Do not pay again; contact the manager if the status does not update.', 'pc-wholesale-help'); ?></p>
             <div class="pc-help-card" id="np-point-limits">
                 <h3><?php esc_html_e('Nova Poshta point restrictions', 'pc-wholesale-help'); ?></h3>
                 <p><?php esc_html_e('Choose a city and delivery type, then search by point number or address. Use Load more points to continue beyond the first results, even if the current page has no points of your chosen type.', 'pc-wholesale-help'); ?></p>
