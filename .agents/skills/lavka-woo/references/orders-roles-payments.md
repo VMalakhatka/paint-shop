@@ -528,3 +528,17 @@ Java must not append its marker to every non-accounting document. Purpose belong
 in preview/revision guards. Save remains local; financial creation still requires
 preview + apply. Human instructions: `docs/MANAGER_CUSTOMER_GUIDE_UK.md` and
 `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md`. Deploy Java before WP; no retroactive changes.
+
+WayForPay bank income (owner revision 2026-10-16; adapter 0.2.0): a verified
+Approved payment creates an independent Folio bank income on warehouse 5, not an
+invoice-dependent allocation. Missing/split/changed/archived invoices do not block
+income. Snapshot the customer's Folio payer key at first verified Approved;
+later user reassignment must not move the payment. Initial NOTOVAROST equals the
+gross payment, NACLAD_POR is 0 (not NULL), no SCL_PMOV allocations. Confirmed by a
+Paint_Rus native rollback probe and independent no-remains check; production
+API acceptance is still pending. Java `folio.payment` owns native insert + durable
+ledger in one transaction; WP FolioPayments owns a separate outbox and GET-only
+reconciliation after attempted apply. Refund retains income and flags a separate
+expense review. Never promote preview queues or backfill earlier manual payments.
+Runbook: `docs/FOLIO_WFP_PAYMENTS.md`; Java API contract of the same domain.
+Defaults off; schema migration/deployment/live enablement require separate approval.

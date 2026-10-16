@@ -102,6 +102,7 @@ final class Bridge
                     $this->store->update($p['order_id'], ['refunded' => 1, 'status' => 'REFUND_REVIEW', 'error_code' => 'refund_requires_item_mapping']);
                     $order->add_order_note(__('WayForPay refund confirmed. Review the Checkbox sale and prepare an itemized return.', 'pc-wayforpay-checkbox'));
                 }
+                do_action('pc_wfp_verified_refund_saved', $p['order_id']);
                 return $ack;
             }
             if ($p['status'] !== 'Approved' || $p['reason'] !== '1100') {
@@ -131,9 +132,20 @@ final class Bridge
                 $this->store->insert(['order_id' => $p['order_id'], 'reference' => $p['reference'],
                     'merchant_hash' => $p['merchant_hash'], 'amount' => $p['amount'], 'currency' => $p['currency'],
                     'command' => wp_json_encode($command), 'mode' => self::mode(),
+                    'folio_payer_key' => (string) apply_filters('pc_wfp_folio_payer_snapshot', '', $order),
+                    'approved_at' => gmdate('Y-m-d H:i:s'),
                     'status' => $error ? 'BLOCKED' : 'QUEUED', 'error_code' => $error]);
                 $row = $this->store->get($p['order_id']);
             }
+            // A refund-first tombstone has no Approved-time payer yet. Capture it exactly once.
+            if ((int) $row['refunded'] && empty($row['approved_at'])) {
+                $payer = (string) apply_filters('pc_wfp_folio_payer_snapshot', '', $order);
+                $approvedAt = gmdate('Y-m-d H:i:s');
+                $this->store->update($p['order_id'], ['folio_payer_key' => $payer, 'approved_at' => $approvedAt]);
+                $row['folio_payer_key'] = $payer;
+                $row['approved_at'] = $approvedAt;
+            }
+            do_action('pc_wfp_verified_payment_saved', $order, $row);
             if ((int) $row['refunded']) {
                 return $ack; // Late Approved cannot resurrect a refunded payment.
             }
@@ -151,6 +163,8 @@ final class Bridge
 
     private function applyPayment(\WC_Order $order, array $row): void
     {
+        // Also capture during recovery after a crash between verified-row persistence and payment_complete.
+        do_action('pc_wfp_verified_payment_saved', $order, $row);
         if ((int) $row['payment_applied']) {
             return;
         }

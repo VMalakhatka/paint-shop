@@ -45,3 +45,18 @@ msgstr "Диагностика Checkbox"
 
 msgid "Shift ID"
 msgstr "ID смены"
+
+msgid "Folio bank income"
+msgstr "Банковский приход ФОЛИО"
+
+msgid "Reconcile / resume Folio bank income"
+msgstr "Сверить / возобновить банковский приход ФОЛИО"
+
+msgid "Folio bank income #%s recorded on warehouse 5. Invoice allocation is separate."
+msgstr "Банковский приход ФОЛИО №%s записан на складе 5. Распределение по счетам выполняется отдельно."
+
+msgid "Check the payment in Folio before any manual entry. Reconciliation does not send the payment again."
+msgstr "Перед ручным внесением проверьте оплату в ФОЛИО. Сверка не отправляет платёж повторно."
+
+msgid "WayForPay refund received. Income is retained; a separate bank expense requires review."
+msgstr "Получено уведомление о возврате WayForPay. Приход сохранён; отдельный банковский расход требует проверки."

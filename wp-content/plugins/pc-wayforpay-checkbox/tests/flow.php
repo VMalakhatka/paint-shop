@@ -26,6 +26,8 @@ function is_email($v) { return filter_var($v, FILTER_VALIDATE_EMAIL); }
 function sanitize_key($v) { return preg_replace('/[^a-z0-9_-]/', '', strtolower($v)); }
 function wp_salt($v) { return 'offline-only'; }
 function __($v, $domain = '') { return $v; }
+function do_action($hook, ...$args) {}
+function apply_filters($hook, $value, ...$args) { return $value; }
 function get_option($key, $default = false) { return $key === 'woocommerce_wayforpay_settings' ? ['merchant_account'=>'fixture','secret_key'=>'fixture-secret'] : $default; }
 function current_user_can($cap) { return $GLOBALS['can_manage']; }
 function wp_generate_uuid4() { return sprintf('12345678-1234-4234-8234-%012d', ++$GLOBALS['uuid']); }
