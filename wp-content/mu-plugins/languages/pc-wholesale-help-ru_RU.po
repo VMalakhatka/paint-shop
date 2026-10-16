@@ -1109,5 +1109,8 @@ msgstr "Нажмите любую миниатюру под фото товар�
 msgid "Product pages show only brands explicitly enabled in the catalogue supplier filter. Unconfigured brands stay hidden. If none are enabled for a product, the brand row is omitted."
 msgstr "На странице товара показываются только бренды, явно включённые для фильтра поставщиков каталога. Бренды без сохранённого разрешения скрыты. Если таких брендов у товара нет, строка бренда не показывается."
 
+msgid "WFP at the start of a new Folio invoice information field means the website verified its WayForPay payment. This marker is not a separate Folio payment document and does not itself change the accounting balance. Existing invoices are not relabelled automatically."
+msgstr "Метка WFP в начале поля информации нового счёта ФОЛИО означает, что сайт проверил оплату через WayForPay. Это не отдельный платёжный документ ФОЛИО; метка сама по себе не меняет учётный баланс. Существующие счета автоматически не перемаркируются."
+
 msgid "Choose Ordinary draft or Preorder invoice before saving. Saving keeps the choice in the draft; a Folio document is created only after preview and confirmation. A preorder is a non-accounting invoice marked PRD and counts towards the preorder reserve for six months. Only automatically saved unavailable quantities receive the out-of-stock marker."
 msgstr "Перед сохранением выберите «Обычный черновик» или «Счёт предзаказа». Выбор сохраняется в черновике; документ ФОЛИО создаётся только после просмотра и подтверждения. Предзаказ — неучитываемый счёт с пометкой ПРД, который входит в резерв предзаказов в течение шести месяцев. Пометку «нет на складе» получает только автоматически сохранённое недоступное количество."
