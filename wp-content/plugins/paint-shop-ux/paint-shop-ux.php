@@ -17,6 +17,7 @@ require_once __DIR__ . '/inc/category-menu-migration.php';
 require_once __DIR__ . '/inc/slw-assets.php';
 require_once __DIR__ . '/inc/social-assets.php';
 require_once __DIR__ . '/inc/cart-layout.php';
+require_once __DIR__ . '/inc/mobile-cart.php';
 require_once __DIR__ . '/inc/catalog-cards.php';
 require_once __DIR__ . '/inc/single-product.php';
 require_once __DIR__ . '/inc/category-thumbnails.php';

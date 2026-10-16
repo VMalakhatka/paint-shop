@@ -1134,5 +1134,11 @@ msgstr "Документ создаётся на настроенном скла
 msgid "If Folio returns an error or the result is unknown, do not create a copy or repeat confirmation blindly. Ask the manager to check existing documents using the draft number and error message. If draft lines or availability changed, a new preview is required."
 msgstr "Если ФОЛИО возвращает ошибку или результат неизвестен, не создавайте копию и не повторяйте подтверждение вслепую. Попросите менеджера проверить существующие документы по номеру черновика и сообщению ошибки. Если изменились строки или наличие, нужен новый просмотр."
 
+msgid "On a phone, after adding a product, the bottom bar shows the number of units, the product subtotal and Go to cart. It stays while browsing categories. Product added confirms a successful addition. Delivery, discounts and the final total are checked in the cart. The bar is hidden for an empty cart, in Draft mode, My account, the cart and checkout, and temporarily while typing."
+msgstr "На телефоне после добавления товара нижняя панель показывает количество единиц, промежуточную сумму товаров и кнопку «Перейти в корзину». Она остаётся при переходах между категориями. «Товар добавлен» подтверждает успешное добавление. Доставку, скидки и окончательную сумму проверьте в корзине. Панель скрыта для пустой корзины, в режиме черновика, кабинете, корзине и оформлении, а также временно во время ввода."
+
+msgid "Go to the cart from the bottom bar on your phone."
+msgstr "Перейдите в корзину с нижней панели на телефоне."
+
 msgid "Nova Poshta delivery is paid separately to the carrier, not with the goods. Free delivery covers only the base tariff under your delivery policy; insurance and extras remain payable. Free store pickup is offered for goods allocated to one warehouse. Wait for confirmation before visiting."
 msgstr "Доставка Новой почтой оплачивается отдельно перевозчику, а не вместе с товарами. Бесплатная доставка покрывает только базовый тариф по вашей политике доставки; страхование и допуслуги остаются платными. Бесплатный самовывоз доступен для товаров одного склада. Перед поездкой дождитесь подтверждения."
