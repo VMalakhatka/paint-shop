@@ -3486,3 +3486,12 @@ msgstr "Выберите до 20 учитываемых счетов этого 
 
 msgid "Clear selection"
 msgstr "Очистить выбор"
+
+msgid "Save as"
+msgstr "Сохранить как"
+
+msgid "Ordinary draft"
+msgstr "Обычный черновик"
+
+msgid "Preorder invoice"
+msgstr "Счёт предзаказа"

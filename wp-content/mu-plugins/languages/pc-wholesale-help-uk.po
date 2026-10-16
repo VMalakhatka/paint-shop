@@ -1108,3 +1108,6 @@ msgstr "Натисніть будь-яку мініатюру під фото т
 #: pc-wholesale-help.php
 msgid "Product pages show only brands explicitly enabled in the catalogue supplier filter. Unconfigured brands stay hidden. If none are enabled for a product, the brand row is omitted."
 msgstr "На сторінці товару показуються лише бренди, явно увімкнені для фільтра постачальників каталогу. Бренди без збереженого дозволу приховані. Якщо таких брендів у товару немає, рядок бренду не показується."
+
+msgid "Choose Ordinary draft or Preorder invoice before saving. Saving keeps the choice in the draft; a Folio document is created only after preview and confirmation. A preorder is a non-accounting invoice marked PRD and counts towards the preorder reserve for six months. Only automatically saved unavailable quantities receive the out-of-stock marker."
+msgstr "Перед збереженням виберіть «Звичайна чернетка» або «Рахунок передзамовлення». Вибір зберігається в чернетці; документ ФОЛІО створюється лише після перегляду й підтвердження. Передзамовлення — неураховуваний рахунок із позначкою ПРД, який входить до резерву передзамовлень протягом шести місяців. Позначку «немає на складі» отримує лише автоматично збережена недоступна кількість."

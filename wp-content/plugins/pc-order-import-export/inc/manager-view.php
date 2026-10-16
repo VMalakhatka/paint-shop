@@ -98,11 +98,13 @@ $context = function_exists('pc_folio_balance_user_context') ? pc_folio_balance_u
 <section class="pcoe-card"><h2><?php esc_html_e('New customer draft', 'pc-order-import-export'); ?></h2>
 <form data-pcoe-manager><?php $form_fields('new'); ?>
 <label><?php esc_html_e('Draft title', 'pc-order-import-export'); ?><input name="title" type="text" maxlength="200"></label>
+<?php DraftPurpose::field(); ?>
 <button class="button button-primary"><?php esc_html_e('Create empty draft', 'pc-order-import-export'); ?></button></form>
 <hr>
 <form data-pcoe-manager enctype="multipart/form-data"><?php $form_fields('import'); ?>
 <label><?php esc_html_e('Import Excel or CSV', 'pc-order-import-export'); ?><input type="file" name="file" accept=".csv,.xls,.xlsx" required></label>
 <label><?php esc_html_e('Draft title', 'pc-order-import-export'); ?><input name="title" type="text" maxlength="200"></label>
+<?php DraftPurpose::field(); ?>
 <p class="description"><?php esc_html_e('Up to 10 MB and 2000 rows. File prices are kept for reference; Folio preparation uses current customer prices.', 'pc-order-import-export'); ?></p>
 <button class="button"><?php esc_html_e('Import into customer draft', 'pc-order-import-export'); ?></button>
 <a href="<?php echo esc_url(content_url('/mu-plugins/pc-wholesale-help/assets/wholesale-order-template.xlsx')); ?>"><?php esc_html_e('Download Excel template', 'pc-order-import-export'); ?></a>
@@ -133,6 +135,7 @@ $non_accounting_only = ManagerOrderFlow::non_accounting_only($order);
 <?php if ($command): ?><p class="pcoe-warning"><?php echo esc_html(($command['status'] ?? '') === 'complete' ? __('Folio documents were created. This draft is locked against duplicate creation.', 'pc-order-import-export') : __('Operation needs review. Do not submit it again or create a replacement until its Folio result is checked.', 'pc-order-import-export')); ?></p>
 <p><?php esc_html_e('Operation ID:', 'pc-order-import-export'); ?> <code><?php echo esc_html($command['token'] ?? ''); ?></code></p><?php endif; ?>
 <form data-pcoe-manager><?php $form_fields('save'); ?>
+<?php DraftPurpose::field(DraftPurpose::current($order), !$editable); ?>
 <label><?php esc_html_e('Draft title', 'pc-order-import-export'); ?><input type="text" name="title" value="<?php echo esc_attr($order->get_meta('_pc_draft_title')); ?>" <?php disabled(!$editable); ?>></label>
 <div class="pcoe-scroll"><table class="widefat striped"><thead><tr><th><?php esc_html_e('SKU / product', 'pc-order-import-export'); ?></th><th><?php esc_html_e('Quantity', 'pc-order-import-export'); ?></th><th><?php esc_html_e('Saved unit price', 'pc-order-import-export'); ?></th><th><?php esc_html_e('Amount', 'pc-order-import-export'); ?></th></tr></thead><tbody>
 <?php foreach ($order->get_items() as $item_id => $item): $product = $item->get_product(); ?><tr><td><?php echo esc_html($product ? $product->get_sku() : ''); ?><br><?php echo esc_html($item->get_name()); ?></td><td><input aria-label="<?php echo esc_attr($item->get_name()); ?>" type="number" name="quantity[<?php echo esc_attr($item_id); ?>]" value="<?php echo esc_attr($item->get_quantity()); ?>" min="0" max="1000000" step="1" required <?php disabled(!$editable); ?>></td><td><?php echo wp_kses_post(wc_price($item->get_quantity() > 0 ? $item->get_total() / $item->get_quantity() : 0)); ?></td><td><?php echo wp_kses_post(wc_price($item->get_total())); ?></td></tr><?php endforeach; ?>
