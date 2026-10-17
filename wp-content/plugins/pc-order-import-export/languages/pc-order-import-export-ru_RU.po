@@ -3720,3 +3720,8 @@ msgstr "Ни один из выбранных клиентов не подпис
 
 msgid "Unavailable selection — choose again"
 msgstr "Выбор недоступен — выберите заново"
+
+#: inc/broadcast-view.php
+#, php-format
+msgid "Photos checked: %1$s of %2$s. Unavailable after retry: %3$s."
+msgstr "Проверено фото: %1$s из %2$s. Недоступны после повторной попытки: %3$s."

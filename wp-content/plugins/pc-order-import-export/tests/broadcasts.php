@@ -183,14 +183,14 @@ try{
     foreach(['price','offer'] as $format){
         $same=$base;$same['format']=$format;$same['users']=[$a,$b];$same['request_key']=wp_generate_uuid4();
         $shared=$create($same);$check(count(Store::get($shared)['groups'])===2,'Unknown hooks initially retain separate customer contexts');
-        $before=$packReads;Mailings::tick($shared);$sharedData=Store::get($shared);
+        $before=$packReads;Mailings::tick($shared);Mailings::tick($shared);$sharedData=Store::get($shared);
         $check($sharedData['status']==='ready' && count($sharedData['groups'])===1 && reset($sharedData['groups'])['count']===2,'Equal actual output merges into one prepared group');
         $check($sharedData['recipients'][$a]['group']===$sharedData['recipients'][$b]['group'] && $sharedData['recipients'][$a]['pricing_context']!==$sharedData['recipients'][$b]['pricing_context'],'Shared file retains separate pre-send customer contexts');
         if($format==='offer')$check($packReads===$before+1,'Duplicate offer is not rendered or fetched from Folio twice');
         delete_option('_pcoe_broadcast_quota');$before=count($mails);Mailings::control($shared,'start');Mailings::tick($shared);
         $check(count($mails)===$before+2 && $mails[$before]['file']['sha']===$mails[$before+1]['file']['sha'],'Both recipients receive byte-identical shared attachment');
     }
-    $same['request_key']=wp_generate_uuid4();$guarded=$create($same);Mailings::tick($guarded);
+    $same['request_key']=wp_generate_uuid4();$guarded=$create($same);Mailings::tick($guarded);Mailings::tick($guarded);
     $customer=new WP_User($b);$customer->set_role('partner');
     delete_option('_pcoe_broadcast_quota');$before=count($mails);Mailings::control($guarded,'start');Mailings::tick($guarded);
     $check(count($mails)===$before+1 && Store::get($guarded)['recipients'][$b]['status']==='skipped','Merged recipient with changed pricing context is skipped independently');
@@ -198,7 +198,7 @@ try{
     remove_filter('woocommerce_product_get_price',$neutral,1200);
     add_filter('woocommerce_product_get_price',$custom,1200,2);
     $different=$base;$different['users']=[$a,$b];$different['request_key']=wp_generate_uuid4();
-    $split=$create($different);Mailings::tick($split);$splitData=Store::get($split);
+    $split=$create($different);Mailings::tick($split);Mailings::tick($split);$splitData=Store::get($split);
     $check($splitData['status']==='ready' && count($splitData['groups'])===2,'Different individual prices cannot merge despite identical roles');
     remove_filter('woocommerce_product_get_price',$custom,1200);
     wp_set_current_user($a);$deny(fn()=>Mailings::create($base));$deny(fn()=>Mailings::control($id,'retry'));$deny(fn()=>Sources::request('/warehouses'));wp_set_current_user($manager);

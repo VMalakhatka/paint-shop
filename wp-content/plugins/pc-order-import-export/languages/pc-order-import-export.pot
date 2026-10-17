@@ -3524,3 +3524,8 @@ msgstr ""
 
 msgid "Unavailable selection — choose again"
 msgstr ""
+
+#: inc/broadcast-view.php
+#, php-format
+msgid "Photos checked: %1$s of %2$s. Unavailable after retry: %3$s."
+msgstr ""

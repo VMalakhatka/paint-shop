@@ -34,6 +34,7 @@ final class BroadcastStore {
     public static function delete_files(int $id): void {
         if(get_post_type($id)!==self::TYPE)return;
         $data=get_post_meta($id,'_pcoe_mailing',true);
+        BroadcastPhotos::delete($id,is_array($data)?$data:[]);
         foreach(array_keys(is_array($data['groups']??null)?$data['groups']:[]) as $group)delete_option(self::file_key($id,$group));
     }
     public static function file(int $id,string $group): array {
