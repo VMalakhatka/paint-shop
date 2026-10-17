@@ -529,8 +529,11 @@ Java `docs/api/FOLIO_RECEIPT_CATALOGUE_API.md`. Развёртывание об�
 
 `lavka-price-sync/inc/purchase-drafts.php` owns the WordPress-only
 `{prefix}lps_purchase_drafts` table (schema option `lps_purchase_drafts_schema`).
-Completed calculation states and results are stored as JSON, without autoloaded
-options or expiry. Partial previews retain the transient lifecycle. Owner-scoped
+Completed calculation states and results are stored without autoloaded options or
+expiry. Since 2026-10-17, snapshots of at least 1 MiB use a versioned gzip/base64
+JSON envelope with length and SHA-256 validation to avoid oversized SQL packets;
+legacy plain JSON remains readable. Decoding is bounded to 256 MiB and fails
+closed on corruption. Partial previews retain the transient lifecycle. Owner-scoped
 reads and atomic revision-checked updates prevent cross-user access and lost
 updates. AJAX uses the existing purchase capability and nonce gates. No browser
 storage contains business snapshots. Operational lifecycle and backup requirements:

@@ -2,6 +2,39 @@
 if (!defined('ABSPATH')) exit;
 
 function lps_purchase_draft_table(): string { global $wpdb; return $wpdb->prefix . 'lps_purchase_drafts'; }
+
+/** Keep large immutable snapshots below the database packet limit without dropping fields. */
+function lps_purchase_draft_encode(array $state): string {
+    $json = wp_json_encode($state, JSON_PRESERVE_ZERO_FRACTION);
+    if ($json === false) throw new RuntimeException(__('Could not save the order draft. Please try again.', 'lavka-price-sync'));
+    if (strlen($json) < 1048576) return $json;
+    // Bound decompression on read; reject oversized states rather than truncate them.
+    if (strlen($json) > 268435456 || !function_exists('gzencode'))
+        throw new RuntimeException(__('Could not save the order draft. Please try again.', 'lavka-price-sync'));
+    $compressed = gzencode($json, 6);
+    if ($compressed === false) throw new RuntimeException(__('Could not save the order draft. Please try again.', 'lavka-price-sync'));
+    $encoded = wp_json_encode(['draftStorageVersion'=>1,'encoding'=>'gzip-base64',
+        'bytes'=>strlen($json),'sha256'=>hash('sha256', $json),'payload'=>base64_encode($compressed)]);
+    if ($encoded === false) throw new RuntimeException(__('Could not save the order draft. Please try again.', 'lavka-price-sync'));
+    return $encoded;
+}
+
+function lps_purchase_draft_decode(string $stored): ?array {
+    $state = json_decode($stored, true);
+    if (!is_array($state)) return null;
+    if (!array_key_exists('draftStorageVersion', $state)) return $state; // Legacy plain JSON.
+    if ($state['draftStorageVersion'] !== 1 || ($state['encoding'] ?? '') !== 'gzip-base64'
+        || !is_int($state['bytes'] ?? null) || $state['bytes'] < 1 || $state['bytes'] > 268435456
+        || !is_string($state['sha256'] ?? null) || !is_string($state['payload'] ?? null)
+        || !function_exists('gzdecode')) return null;
+    $compressed = base64_decode($state['payload'], true);
+    if ($compressed === false) return null;
+    $json = @gzdecode($compressed, $state['bytes']);
+    if ($json === false || strlen($json) !== $state['bytes'] || !hash_equals($state['sha256'], hash('sha256', $json))) return null;
+    $decoded = json_decode($json, true);
+    return is_array($decoded) ? $decoded : null;
+}
+
 function lps_purchase_draft_schema(): void {
     if (get_option('lps_purchase_drafts_schema') === '1') return;
     global $wpdb;
@@ -28,7 +61,7 @@ function lps_purchase_draft_load(string $token): ?array {
     global $wpdb;
     $row = $wpdb->get_row($wpdb->prepare('SELECT state_json,revision,updated_at FROM ' . lps_purchase_draft_table() . ' WHERE token=%s AND owner_id=%d', $token, get_current_user_id()), ARRAY_A);
     if (!$row) return null;
-    $state = json_decode($row['state_json'], true);
+    $state = lps_purchase_draft_decode($row['state_json']);
     if (!is_array($state) || empty($state['complete']) || !is_array($state['draftResults'] ?? null))
         throw new RuntimeException(__('The saved draft is incomplete. Start a new calculation.', 'lavka-price-sync'));
     $state['draftRevision'] = (int)$row['revision']; $state['draftUpdatedAt'] = $row['updated_at'];
@@ -41,8 +74,7 @@ function lps_purchase_draft_save(string $token, array $state, array $results, in
     global $wpdb;
     $state['draftResults'] = $results;
     unset($state['draftRevision'], $state['draftUpdatedAt']);
-    $json = wp_json_encode($state, JSON_PRESERVE_ZERO_FRACTION);
-    if ($json === false) throw new RuntimeException(__('Could not save the order draft. Please try again.', 'lavka-price-sync'));
+    $json = lps_purchase_draft_encode($state);
     $now = current_time('mysql', true); $table = lps_purchase_draft_table();
     if ($revision === 0) {
         $ok = $wpdb->insert($table, ['token'=>$token,'owner_id'=>get_current_user_id(),'revision'=>1,

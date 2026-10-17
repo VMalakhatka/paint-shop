@@ -15,6 +15,8 @@ class DraftTestDatabase {
         $i=0; return preg_replace_callback('/%[sd]/', function($m) use (&$i,$args) { $v=$args[$i++]; return $m[0]==='%d'?(string)(int)$v:$this->db->quote($v); },$sql);
     }
     function insert($table,$data) {
+        // Production uses a 16 MiB packet limit; oversized inserts must fail here too.
+        if (strlen($data['state_json']) > 16777216) return false;
         $st=$this->db->prepare('INSERT INTO '.$table.' ('.implode(',',array_keys($data)).') VALUES ('.implode(',',array_fill(0,count($data),'?')).')');
         $st->execute(array_values($data)); return $st->rowCount();
     }
@@ -60,3 +62,36 @@ rejected(fn()=>lps_purchase_draft_save(str_repeat('b',32),$partial,[],0),'Incomp
 $new=str_repeat('c',32); lps_purchase_draft_save($new,$draft,$items,0);
 check(count(lps_purchase_drafts_list())===2 && lps_purchase_draft_load($token)['draftRevision']===3,'New calculation creates a separate draft');
 echo "PASS: durable drafts, cache expiry, frozen snapshots, owner isolation, atomic revision conflicts and saved adjustments\n";
+
+// Full-size history and results previously exceeded the production packet limit.
+$large=$draft;
+$large['history']=array_fill(0,1800,['description'=>str_repeat('Товар Kreul / snapshot ',350),'quantity'=>1.0,'nullable'=>null,'sku'=>'KR-001']);
+$large['draftResults']=$items;
+$raw=wp_json_encode($large,JSON_PRESERVE_ZERO_FRACTION);
+check(strlen($raw)>20000000,'Regression fixture exceeds the failed production payload');
+check($wpdb->insert('wp_lps_purchase_drafts',['state_json'=>$raw])===false,'Old uncompressed write fails the packet regression');
+$largeToken=str_repeat('d',32);
+check(lps_purchase_draft_save($largeToken,$large,$items,0)===1,'Large draft saved under 16 MiB packet limit');
+$stored=$wpdb->get_row($wpdb->prepare('SELECT state_json FROM wp_lps_purchase_drafts WHERE token=%s',$largeToken),ARRAY_A)['state_json'];
+check(strlen($stored)<1048576,'Large snapshot compressed before database insert');
+check(lps_purchase_draft_decode($stored)===$large,'Every field, Unicode, numeric type and null preserved');
+$GLOBALS['sessions']=[];
+check(lps_purchase_draft_open($largeToken)['items']===$items,'Large draft reopens after cache expiry');
+$savedLarge=lps_purchase_draft_load($largeToken);
+check(lps_purchase_draft_save($largeToken,$savedLarge,$items,1)===2,'Large draft revision update succeeds');
+rejected(fn()=>lps_purchase_draft_save($largeToken,$savedLarge,$items,1),'Large draft stale revision rejected');
+check(lps_purchase_draft_decode($raw)===$large,'Legacy uncompressed large snapshots remain readable');
+$envelope=json_decode($stored,true);
+$bad=$envelope;$bad['sha256']=str_repeat('0',64);
+check(lps_purchase_draft_decode(json_encode($bad))===null,'Corrupt checksum cannot become a usable order');
+$bad=$envelope;$bad['bytes']--;
+check(lps_purchase_draft_decode(json_encode($bad))===null,'Truncated decompression rejected');
+$bad=$envelope;$bad['bytes']=268435457;
+check(lps_purchase_draft_decode(json_encode($bad))===null,'Decompression size bound enforced');
+$bad=$envelope;$bad['payload']='not base64!';
+check(lps_purchase_draft_decode(json_encode($bad))===null,'Corrupt encoding rejected');
+$bad=$envelope;$bad['draftStorageVersion']=2;
+check(lps_purchase_draft_decode(json_encode($bad))===null,'Unknown storage version rejected');
+$wpdb->query($wpdb->prepare('UPDATE wp_lps_purchase_drafts SET state_json=%s WHERE token=%s',json_encode($bad),$largeToken));
+rejected(fn()=>lps_purchase_draft_open($largeToken),'Corrupt stored draft cannot open or export');
+echo "PASS: large drafts below packet limit, exact compression roundtrip, legacy JSON, CAS and corruption checks\n";
