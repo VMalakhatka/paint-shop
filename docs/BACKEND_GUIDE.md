@@ -538,3 +538,10 @@ reads and atomic revision-checked updates prevent cross-user access and lost
 updates. AJAX uses the existing purchase capability and nonce gates. No browser
 storage contains business snapshots. Operational lifecycle and backup requirements:
 [Saved purchase drafts](OPERATIONS_RUNBOOK.md#сохранённые-черновики-закупки-2026-10-15).
+
+Purchase groups also freeze `respectMaximumStock` (default `true`). PHP applies
+this per-group scenario policy to a copy of Java warehouse policies; disabling
+it removes MAX caps from procurement and period replenishment planning without
+changing Folio cards. Only MAX-specific validation failures may be ignored;
+MIN and unrelated readiness checks remain mandatory. See the MAX section of
+the operations runbook for rollout and the Kreul regression example.

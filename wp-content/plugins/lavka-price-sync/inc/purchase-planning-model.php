@@ -240,6 +240,7 @@ function lps_purchase_profile(array $input): array {
             'code' => sanitize_key((string)($group['code'] ?? '')),
             'receivingWarehouseId' => absint($group['receivingWarehouseId'] ?? 0),
             'minimumWarehouseId' => absint($group['minimumWarehouseId'] ?? $group['receivingWarehouseId'] ?? 0),
+            'respectMaximumStock' => !array_key_exists('respectMaximumStock', $group) || !empty($group['respectMaximumStock']),
             'supplyFromGroupCode' => sanitize_key((string)($group['supplyFromGroupCode'] ?? '')),
             'leadTimeDays' => lps_purchase_number($group['leadTimeDays'] ?? null, 0, 730),
             'targetDays' => lps_purchase_number($group['targetDays'] ?? null, 1, 730),
@@ -295,7 +296,8 @@ function lps_purchase_resolve_groups(array $profile, array $configured): array {
         if (!in_array($minimum_id, $current['warehouseIds'], true) || in_array($minimum_id, $stock_only, true)) {
             throw new InvalidArgumentException(__('Select a minimum-stock source from this group with full analytics.', 'lavka-price-sync'));
         }
-        $resolved[] = array_merge($group, ['minimumWarehouseId' => $minimum_id, 'packRounding' => lps_purchase_pack_mode($plan),
+        $resolved[] = array_merge($group, ['minimumWarehouseId' => $minimum_id,
+            'respectMaximumStock' => ($group['respectMaximumStock'] ?? true) !== false, 'packRounding' => lps_purchase_pack_mode($plan),
             'respectPack' => lps_purchase_pack_mode($plan) !== 'NONE',
             'stockoutCorrectionEnabled' => !empty($plan['stockoutCorrectionEnabled']),
             'maxDemandMultiplier' => lps_purchase_number($plan['maxDemandMultiplier'] ?? 1.1, 1, 100) ?? 1.1,
@@ -350,6 +352,22 @@ function lps_purchase_filter_data(array $dimensions): array {
     ];
 }
 
+/** Scenario-only policy view. Never change Folio cards or relax missing/invalid MIN. */
+function lps_purchase_without_maximum(array $policy): array {
+    $policy['maximumStockLimited'] = false;
+    $policy['maximumStockLimit'] = null;
+    if (in_array($policy['validationState'] ?? '', ['MAXIMUM_STOCK_NOT_SET', 'INVALID_NEGATIVE_MAXIMUM', 'MINIMUM_EXCEEDS_MAXIMUM'], true)) {
+        $minimum = lps_purchase_number($policy['minimumStock'] ?? null);
+        $reserve = lps_purchase_number($policy['reserveAboveForecast'] ?? null);
+        if ($minimum !== null && $reserve !== null && $minimum === $reserve
+            && ($policy['replenishmentMode'] ?? '') === ($minimum > 0 ? 'FORECAST_PLUS_MINIMUM_STOCK' : 'DO_NOT_ORDER')) {
+            $policy['orderAllowed'] = $minimum > 0;
+            $policy['validationState'] = 'VALID';
+        }
+    }
+    return $policy;
+}
+
 // Operates on Java's confirmed metrics; never reconstructs Folio movements.
 function lps_purchase_calculate(array $row, array $groups, int $period_days, bool $allow_transfers, array $edits = [], ?array $transit_ids = null, array $assembly = []): array {
     $manufactured = !empty($assembly['manufactured']);
@@ -359,6 +377,20 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
     $confirmed_transit = lps_purchase_transit($transit, $transit_ids, $row['currentStockCapture'] ?? []);
     $transit_pool = $confirmed_transit['quantity'];
     $network = $row['networkOrderPolicy'] ?? [];
+    foreach ($groups as $group) {
+        if (($group['respectMaximumStock'] ?? true) !== false) continue;
+        foreach ($group['warehouseIds'] as $id) {
+            if (isset($members[$id])) $members[$id]['orderPolicy'] = lps_purchase_without_maximum($members[$id]['orderPolicy'] ?? []);
+        }
+        if (in_array($network['policyWarehouseId'] ?? 7, $group['warehouseIds'], true) && isset($network['policy'])) {
+            $validation = $network['policy']['validationState'] ?? '';
+            $network['policy'] = lps_purchase_without_maximum($network['policy']);
+            if ($validation !== 'VALID' && ($network['policy']['validationState'] ?? '') === 'VALID') {
+                $network['orderAllowed'] = $network['policy']['orderAllowed'] ?? null;
+                if ($network['orderAllowed'] === true) $network['status'] = 'ALLOWED';
+            }
+        }
+    }
     $result = [];
     $allocated_transit = 0;
     $internal = lps_purchase_internal_stock($row, $groups);
@@ -451,6 +483,7 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
             'demandWarehouseIds' => $group['demandWarehouseIds'] ?? $group['warehouseIds'],
             'receivingWarehouseId' => $group['receivingWarehouseId'],
             'minimumWarehouseId' => $minimum_id,
+            'respectMaximumStock' => ($group['respectMaximumStock'] ?? true) !== false,
             'minimumWarehouseName' => (string)($minimum_source['warehouseName'] ?? $minimum_id),
             'minimumReserve' => $reserve,
             'supplyFromGroupCode' => $group['supplyFromGroupCode'] ?? '',

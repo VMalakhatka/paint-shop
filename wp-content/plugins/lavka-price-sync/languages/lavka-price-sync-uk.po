@@ -7033,3 +7033,13 @@ msgstr "Включено"
 #: inc/analytics-conditions.php
 msgid "Excluded condition"
 msgstr "Виключено"
+
+
+#: inc/purchase-planning.php
+msgid "Respect MAX in purchase planning"
+msgstr "Враховувати MAX у розрахунку закупівлі"
+
+
+#: inc/purchase-planning.php
+msgid "When disabled, this group keeps its full forecast for the supplier order, including future replenishments from the source warehouse. Folio MAX values and actual transfer limits are not changed."
+msgstr "Якщо вимкнено, у замовлення постачальнику входить повний прогноз групи, включно з майбутніми поповненнями зі складу-джерела. Значення MAX у ФОЛІО та обмеження фактичних переміщень не змінюються."

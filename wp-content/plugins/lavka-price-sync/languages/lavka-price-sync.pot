@@ -6830,3 +6830,13 @@ msgstr ""
 #: inc/analytics-conditions.php
 msgid "Excluded condition"
 msgstr ""
+
+
+#: inc/purchase-planning.php
+msgid "Respect MAX in purchase planning"
+msgstr ""
+
+
+#: inc/purchase-planning.php
+msgid "When disabled, this group keeps its full forecast for the supplier order, including future replenishments from the source warehouse. Folio MAX values and actual transfer limits are not changed."
+msgstr ""

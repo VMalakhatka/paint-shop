@@ -36,6 +36,9 @@ const html=execFileSync(process.env.PHP_BINARY||'php',[require('path').join(__di
   await page.locator('#lps-as-purchase-cold').check();
   await page.locator('#lps-as-purchase-freezing-days').fill('211');
   assert.equal(await page.locator('[data-field="minimumWarehouseId"]').inputValue(),'5');
+  assert(await page.locator('[data-field="respectMaximumStock"]').isChecked(),'Legacy scenarios respect MAX');
+  await page.locator('[data-field="respectMaximumStock"]').uncheck();
+  await page.locator('#lps-as-purchase-groups').screenshot({path:require('path').join(require('os').tmpdir(),`purchase-max-setting-${width}.png`)});
   await page.screenshot({path:require('path').join(require('os').tmpdir(),`warehouse-usage-${width}.png`),fullPage:true});
   await storage.selectOption('FULL');
   await page.locator('[data-field="minimumWarehouseId"]').selectOption('15');
@@ -44,6 +47,7 @@ const html=execFileSync(process.env.PHP_BINARY||'php',[require('path').join(__di
   assert.deepEqual(saved.calculation.stockOnlyWarehouseIds,[]);
   assert.deepEqual(saved.period,{mode:'ROLLING_DAYS',days:190});
   assert.equal(saved.purchasePlanning.groups[0].minimumWarehouseId,15);
+  assert.equal(saved.purchasePlanning.groups[0].respectMaximumStock,false);
   assert.equal(saved.purchasePlanning.coldCoverageEnabled,true);
   assert.equal(saved.purchasePlanning.freezingTargetDays,211);
   assert.equal(saved.purchasePlanning.nonFreezingTargetDays,150);
@@ -58,6 +62,7 @@ const html=execFileSync(process.env.PHP_BINARY||'php',[require('path').join(__di
   await page.locator('[data-scenario-id="4"]').click();
   await page.waitForFunction(()=>document.querySelector('[data-warehouse-usage="15"]')?.value==='STOCK_ONLY'&&!document.querySelector('#lps-as-save').disabled);
   assert(await page.locator('#lps-as-purchase-cold').isChecked());
+  assert.equal(await page.locator('[data-field="respectMaximumStock"]').isChecked(),false,'Disabled MAX survives save and reopen');
   assert.equal(await page.locator('#lps-as-period-days').inputValue(),'190');
   assert.equal(await page.locator('#lps-as-purchase-freezing-days').inputValue(),'211');
   await page.locator('#lps-as-warehouses').selectOption(['5']);

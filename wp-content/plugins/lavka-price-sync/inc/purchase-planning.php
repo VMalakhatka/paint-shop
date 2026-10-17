@@ -103,6 +103,8 @@ function lps_purchase_i18n(): array {
         'demandStatus' => __('Stockout correction', 'lavka-price-sync'),
         'demandStatuses' => ['ACTUAL_SALES_ONLY' => __('Stockout correction was not calculated; the forecast uses actual sales only.', 'lavka-price-sync'), 'DISABLED' => __('Disabled', 'lavka-price-sync'), 'CAP_ZERO' => __('No uplift allowed by cap', 'lavka-price-sync'), 'APPLIED' => __('Applied', 'lavka-price-sync'), 'HISTORY_NOT_READY' => __('Stockout history is insufficient', 'lavka-price-sync')],
         'respectPack' => __('Respect pack quantity', 'lavka-price-sync'),
+        'respectMaximumStock' => __('Respect MAX in purchase planning', 'lavka-price-sync'),
+        'maximumStockHelp' => __('When disabled, this group keeps its full forecast for the supplier order, including future replenishments from the source warehouse. Folio MAX values and actual transfer limits are not changed.', 'lavka-price-sync'),
         'packHelp' => __('First round to whole units, with halves down (6.5 → 6; 6.5001 → 7), then apply the selected pack mode. Supplier minimum order still applies. Pack discounts are not calculated.', 'lavka-price-sync'),
         'pack' => __('Supplier pack quantity', 'lavka-price-sync'),
         'moq' => __('Supplier minimum order quantity', 'lavka-price-sync'),
