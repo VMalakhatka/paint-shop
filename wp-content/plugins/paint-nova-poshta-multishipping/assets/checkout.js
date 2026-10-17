@@ -163,7 +163,8 @@
         if (pnpmCheckout.approval) { method = $('.pcoe-approval-form [name=delivery]').val() || ''; }
         var external = method === 'pnpm_customer_ttn';
         $('#pnpm-external-fields').prop('hidden', !external);
-        $('#pnpm-checkout-fields').toggle(pnpmCheckout.approval ? method.indexOf('pnpm_nova_poshta:') === 0 : !external);
+        var nova = method.indexOf('pnpm_nova_poshta') === 0;
+        $('#pnpm-checkout-fields').toggle(nova);
         $('#pnpm-external-fields textarea').each(function () {
             if (Object.prototype.hasOwnProperty.call(externalDraft, this.id)) {
                 $(this).val(externalDraft[this.id]);
@@ -177,7 +178,7 @@
         $('#pnpm-address-help').toggle(address);
         var label = type === 'parcel_locker' ? pnpmCheckout.parcelLockerLabel : pnpmCheckout.branchLabel;
         $('label[for="pnpm_point_label"]').text(label);
-        if (!external && !address && (!pnpmCheckout.approval || method.indexOf('pnpm_nova_poshta:') === 0)) { restoreCard(); }
+        if (nova && !address) { restoreCard(); }
     }
 
     $(document.body).on('input', '#pnpm_city_label', function () {

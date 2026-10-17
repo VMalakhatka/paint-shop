@@ -46,6 +46,7 @@ final class Plugin
         $order_panel->hooks();
 
         CheckoutIntegration::create()->hooks();
+        (new \Paint\NovaPoshta\Shipping\CheckoutRates())->hooks();
         (new \Paint\NovaPoshta\Checkout\ExternalTtnCheckout())->hooks();
         (new \Paint\NovaPoshta\Admin\ExternalTtnPanel())->hooks();
         (new \Paint\NovaPoshta\Email\DeliverySummary())->hooks();

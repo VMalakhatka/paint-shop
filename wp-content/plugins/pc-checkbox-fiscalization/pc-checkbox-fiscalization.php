@@ -2,7 +2,7 @@
 /**
  * Plugin Name: PC Checkbox Fiscalization
  * Description: Executes explicit, caller-supplied fiscalization commands through the Checkbox.ua API.
- * Version: 0.1.0
+ * Version: 0.1.1
  * Author: Paint / Lavka
  * Text Domain: pc-checkbox-fiscalization
  * Domain Path: /languages
@@ -11,7 +11,7 @@
 
 defined('ABSPATH') || exit;
 
-define('PCCF_VERSION', '0.1.0');
+define('PCCF_VERSION', '0.1.1');
 define('PCCF_DB_VERSION', '1');
 define('PCCF_FILE', __FILE__);
 define('PCCF_DIR', plugin_dir_path(__FILE__));

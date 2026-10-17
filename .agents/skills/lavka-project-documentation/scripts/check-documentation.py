@@ -115,6 +115,7 @@ IMPACT_RULES = (
             "wp-content/plugins/pc-order-import-export/**",
             "wp-content/plugins/paint-nova-poshta-multishipping/**",
             "wp-content/plugins/pc-checkbox-fiscalization/**",
+            "wp-content/plugins/pc-wayforpay-checkbox/**",
             "wp-content/mu-plugins/*order*.php",
             "wp-content/mu-plugins/*checkbox*.php",
             "wp-content/mu-plugins/*wayforpay*.php",
@@ -141,6 +142,7 @@ IMPACT_RULES = (
         ),
         (
             "docs/BOOTSTRAP_AND_RECOVERY.md",
+            "docs/WAYFORPAY_TEST_ACCESS.md",
             "docs/WORKSHOPS_GUIDE_RU.md",
             "docs/BACKEND_GUIDE.md",
             "docs/JAVA_DOCKER_RUNTIME.md",

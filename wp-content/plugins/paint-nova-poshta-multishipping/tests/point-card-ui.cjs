@@ -18,6 +18,12 @@ const point = {
  try {
   for (const width of [1280, 390]) {
    const page = await browser.newPage({ viewport: { width, height: 1000 } });
+   if (require('node:fs').existsSync(path.join(dir, 'shipping-labels.html'))) {
+    await page.goto(pathToFileURL(path.resolve(dir, 'shipping-labels.html')).href);
+    assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)); checks++;
+    assert.equal(await page.locator('tr').count(), 4); checks++;
+    await page.screenshot({ path: path.join(dir, `shipping-labels-${width}.png`), fullPage: true });
+   }
    const errors = []; page.on('pageerror', e => errors.push(e.message));
    let fail = true; const calls = [];
    await page.route('https://pnpm-test.invalid/**', async route => {
@@ -39,6 +45,10 @@ const point = {
     return send({ items: [item], nextPage: null });
    });
    await page.goto(pathToFileURL(path.resolve(dir, 'point-card.html')).href);
+   await page.locator('[name="shipping_method[0]"]').selectOption('pnpm_pickup:1');
+   assert(!(await page.locator('#pnpm-checkout-fields').isVisible())); checks++;
+   await page.locator('[name="shipping_method[0]"]').selectOption('pnpm_nova_poshta:1');
+   assert(await page.locator('#pnpm-checkout-fields').isVisible()); checks++;
    await page.locator('#pnpm_city_label').fill('Ки');
    await page.locator('#pnpm-city-results button').click();
    assert.equal(await page.locator('#pnpm_city_ref').inputValue(), 'city'); checks++;

@@ -1108,3 +1108,43 @@ msgstr "Натисніть будь-яку мініатюру під фото т
 #: pc-wholesale-help.php
 msgid "Product pages show only brands explicitly enabled in the catalogue supplier filter. Unconfigured brands stay hidden. If none are enabled for a product, the brand row is omitted."
 msgstr "На сторінці товару показуються лише бренди, явно увімкнені для фільтра постачальників каталогу. Бренди без збереженого дозволу приховані. Якщо таких брендів у товару немає, рядок бренду не показується."
+
+
+msgid "After WayForPay, the website shows payment confirmation or a waiting message. If money was charged but confirmation is pending, refresh the page later and check My orders. Do not pay again; contact the manager if the status does not update."
+msgstr "Після WayForPay сайт показує підтвердження оплати або повідомлення про очікування. Якщо гроші списано, але підтвердження ще немає, оновіть сторінку пізніше та перевірте «Мої замовлення». Не сплачуйте повторно; якщо статус не змінюється, зверніться до менеджера."
+
+msgid "WFP at the start of a new Folio invoice information field means the website verified its WayForPay payment. This marker is not a separate Folio payment document and does not itself change the accounting balance. Existing invoices are not relabelled automatically."
+msgstr "Позначка WFP на початку поля інформації нового рахунку ФОЛІО означає, що сайт перевірив оплату через WayForPay. Це не окремий платіжний документ ФОЛІО; позначка сама по собі не змінює обліковий баланс. Наявні рахунки автоматично не перемарковуються."
+
+msgid "Choose Ordinary draft or Preorder invoice before saving. Saving keeps the choice in the draft; a Folio document is created only after preview and confirmation. A preorder is a non-accounting invoice marked PRD and counts towards the preorder reserve for six months. Only automatically saved unavailable quantities receive the out-of-stock marker."
+msgstr "Перед збереженням виберіть «Звичайна чернетка» або «Рахунок передзамовлення». Вибір зберігається в чернетці; документ ФОЛІО створюється лише після перегляду й підтвердження. Передзамовлення — неураховуваний рахунок із позначкою ПРД, який входить до резерву передзамовлень протягом шести місяців. Позначку «немає на складі» отримує лише автоматично збережена недоступна кількість."
+
+msgid "Build a draft from the catalogue"
+msgstr "Наповнюйте чернетку з каталогу"
+
+msgid "After signing in, switch Purchase to Draft, select your editable draft or create a new one. Add visible catalogue products in any positive whole quantity, including out-of-stock products. Select all attributes for a variable product. Adding the same variant again increases its quantity."
+msgstr "Після входу перемкніть «Покупка» на «Чернетка», виберіть власну редаговану чернетку або створіть нову. Додавайте видимі товари каталогу в будь-якій додатній цілій кількості, навіть без залишку. Для варіативного товару виберіть усі параметри. Повторне додавання того самого варіанта збільшує його кількість."
+
+msgid "Draft mode hides warehouse stock and ignores stock and warehouse filters. Open draft to edit quantities; zero removes a line. The cart is unchanged, stock is not reserved and no Folio document is created. Prices are provisional. Drafts already submitted to Folio cannot be edited here. If a save is not confirmed, check the draft before trying again."
+msgstr "Режим чернетки приховує залишки й не застосовує фільтри наявності та складів. Відкрийте чернетку для зміни кількостей; 0 видаляє рядок. Кошик не змінюється, товар не резервується, документ ФОЛІО не створюється. Ціни попередні. Передані до ФОЛІО чернетки тут не редагуються. Якщо збереження не підтверджено, перевірте чернетку перед повторною спробою."
+
+msgid "The document uses the configured non-accounting Folio warehouse. Its marker follows the chosen purpose: ordinary draft, preorder, or automatic out-of-stock remainder. It does not write off or reserve current warehouse stock."
+msgstr "Документ створюється на налаштованому складі необлікових документів ФОЛІО. Позначка відповідає вибраному призначенню: звичайна чернетка, передзамовлення або автоматичний недоступний залишок. Документ не списує й не резервує поточний складський залишок."
+
+msgid "If Folio returns an error or the result is unknown, do not create a copy or repeat confirmation blindly. Ask the manager to check existing documents using the draft number and error message. If draft lines or availability changed, a new preview is required."
+msgstr "Якщо ФОЛІО повертає помилку або результат невідомий, не створюйте копію й не повторюйте підтвердження навмання. Попросіть менеджера перевірити наявні документи за номером чернетки та повідомленням помилки. Якщо змінилися рядки або наявність, потрібен новий перегляд."
+
+msgid "On a phone, after adding a product, the bottom bar shows the number of units, the product subtotal and Go to cart. It stays while browsing categories. Product added confirms a successful addition. Delivery, discounts and the final total are checked in the cart. The bar is hidden for an empty cart, in Draft mode, My account, the cart and checkout, and temporarily while typing."
+msgstr "На телефоні після додавання товару нижня панель показує кількість одиниць, проміжну суму товарів і кнопку «Перейти до кошика». Вона залишається під час переходів між категоріями. «Товар додано» підтверджує успішне додавання. Доставку, знижки й остаточну суму перевірте в кошику. Панель прихована для порожнього кошика, у режимі чернетки, кабінеті, кошику й оформленні, а також тимчасово під час введення."
+
+msgid "Go to the cart from the bottom bar on your phone."
+msgstr "Перейдіть до кошика з нижньої панелі на телефоні."
+
+msgid "Nova Poshta delivery is paid separately to the carrier, not with the goods. Free delivery covers only the base tariff under your delivery policy; insurance and extras remain payable. Free store pickup is offered for goods allocated to one warehouse. Wait for confirmation before visiting."
+msgstr "Доставка Новою поштою оплачується окремо перевізнику, а не разом із товарами. Безкоштовна доставка покриває лише базовий тариф за вашою політикою доставки; страхування та допослуги залишаються платними. Безкоштовний самовивіз доступний для товарів одного складу. Перед поїздкою дочекайтеся підтвердження."
+
+msgid "In account details, choose mailing topics and product interests. A rule combines a catalogue brand with a category including subcategories. For example, select Cernit with polymer clay and add another rule for all Darwi products. You can keep news and promotions unrestricted using separate rules. Save account changes. Managers see the preferences in the customer card. Files contain only matching products; changing preferences after preparation excludes that recipient until a new mailing is prepared. Waiting-list notices and order messages are separate. Personal delivery schedules are not enabled yet."
+msgstr "В особистих даних кабінету виберіть теми розсилок і товарні інтереси. Правило поєднує бренд каталогу з категорією та її підкатегоріями. Наприклад, виберіть Cernit і полімерну глину та додайте інше правило для всіх товарів Darwi. Для новин і акцій можна залишити всі товари окремими правилами. Збережіть зміни. Менеджер бачить підписки в картці клієнта. Файли містять лише відповідні товари; зміна налаштувань після підготовки виключає одержувача до створення нової розсилки. Сповіщення списку очікування й повідомлення про замовлення — окремі. Персональні розклади надсилання ще не ввімкнені."
+
+msgid "Commercial offer photos are prepared in background batches with saved progress. Unavailable images retain product links after a retry. Existing prepared files do not change; ask the manager for a newly prepared offer."
+msgstr "Фото комерційної пропозиції готуються порціями у фоні зі збереженням прогресу. Для недоступних фото після повторної спроби залишаються посилання на товари. Готові файли не змінюються; попросіть менеджера підготувати нову пропозицію."

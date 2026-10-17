@@ -184,3 +184,19 @@ msgstr "Не вдалося додати цю кількість. Перевір
 #: inc/single-product.php
 msgid "Could not confirm whether the product was added. Check your cart before trying again."
 msgstr "Не вдалося підтвердити, чи додано товар. Перевірте кошик перед повторною спробою."
+
+#: inc/mobile-cart.php
+msgid "In cart: %s"
+msgstr "У кошику: %s"
+
+#: inc/mobile-cart.php
+msgid "Products:"
+msgstr "Товари:"
+
+#: inc/mobile-cart.php
+msgid "Go to cart"
+msgstr "Перейти до кошика"
+
+#: inc/mobile-cart.php
+msgid "Product added"
+msgstr "Товар додано"

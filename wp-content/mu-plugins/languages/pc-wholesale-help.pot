@@ -1065,3 +1065,43 @@ msgstr ""
 #: pc-wholesale-help.php
 msgid "Product pages show only brands explicitly enabled in the catalogue supplier filter. Unconfigured brands stay hidden. If none are enabled for a product, the brand row is omitted."
 msgstr ""
+
+
+msgid "After WayForPay, the website shows payment confirmation or a waiting message. If money was charged but confirmation is pending, refresh the page later and check My orders. Do not pay again; contact the manager if the status does not update."
+msgstr ""
+
+msgid "WFP at the start of a new Folio invoice information field means the website verified its WayForPay payment. This marker is not a separate Folio payment document and does not itself change the accounting balance. Existing invoices are not relabelled automatically."
+msgstr ""
+
+msgid "Choose Ordinary draft or Preorder invoice before saving. Saving keeps the choice in the draft; a Folio document is created only after preview and confirmation. A preorder is a non-accounting invoice marked PRD and counts towards the preorder reserve for six months. Only automatically saved unavailable quantities receive the out-of-stock marker."
+msgstr ""
+
+msgid "Build a draft from the catalogue"
+msgstr ""
+
+msgid "After signing in, switch Purchase to Draft, select your editable draft or create a new one. Add visible catalogue products in any positive whole quantity, including out-of-stock products. Select all attributes for a variable product. Adding the same variant again increases its quantity."
+msgstr ""
+
+msgid "Draft mode hides warehouse stock and ignores stock and warehouse filters. Open draft to edit quantities; zero removes a line. The cart is unchanged, stock is not reserved and no Folio document is created. Prices are provisional. Drafts already submitted to Folio cannot be edited here. If a save is not confirmed, check the draft before trying again."
+msgstr ""
+
+msgid "The document uses the configured non-accounting Folio warehouse. Its marker follows the chosen purpose: ordinary draft, preorder, or automatic out-of-stock remainder. It does not write off or reserve current warehouse stock."
+msgstr ""
+
+msgid "If Folio returns an error or the result is unknown, do not create a copy or repeat confirmation blindly. Ask the manager to check existing documents using the draft number and error message. If draft lines or availability changed, a new preview is required."
+msgstr ""
+
+msgid "On a phone, after adding a product, the bottom bar shows the number of units, the product subtotal and Go to cart. It stays while browsing categories. Product added confirms a successful addition. Delivery, discounts and the final total are checked in the cart. The bar is hidden for an empty cart, in Draft mode, My account, the cart and checkout, and temporarily while typing."
+msgstr ""
+
+msgid "Go to the cart from the bottom bar on your phone."
+msgstr ""
+
+msgid "Nova Poshta delivery is paid separately to the carrier, not with the goods. Free delivery covers only the base tariff under your delivery policy; insurance and extras remain payable. Free store pickup is offered for goods allocated to one warehouse. Wait for confirmation before visiting."
+msgstr ""
+
+msgid "In account details, choose mailing topics and product interests. A rule combines a catalogue brand with a category including subcategories. For example, select Cernit with polymer clay and add another rule for all Darwi products. You can keep news and promotions unrestricted using separate rules. Save account changes. Managers see the preferences in the customer card. Files contain only matching products; changing preferences after preparation excludes that recipient until a new mailing is prepared. Waiting-list notices and order messages are separate. Personal delivery schedules are not enabled yet."
+msgstr ""
+
+msgid "Commercial offer photos are prepared in background batches with saved progress. Unavailable images retain product links after a retry. Existing prepared files do not change; ask the manager for a newly prepared offer."
+msgstr ""

@@ -185,10 +185,11 @@ class ImporterDraft
         if ($title === '' && $name !== '') {
             $title = preg_replace('~\.(csv|xlsx?|xls)$~i', '', basename($name));
         }
+        DraftPurpose::store($order, $_POST);
         if ($title !== '') {
             $order->update_meta_data('_pc_draft_title', $title);
-            $order->save();
         }
+        $order->save();
 
         Waitlist::track_created($order);
         $report_html = Helpers::render_report($res['report']);

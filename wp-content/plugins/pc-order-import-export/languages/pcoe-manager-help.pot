@@ -393,3 +393,12 @@ msgstr ""
 
 msgid "To combine accounts from different warehouses, open the customer Folio documents, select up to 20 accounted invoices and click Combine selected accounts for confirmation. Review the common product list, source accounts, warehouses and total. Optionally include the configured and verified payment details, then update the preview. Send the reviewed version for confirmation. On the saved request, download the Excel or email it to the customer. The combined Excel has one worksheet without photos; original accounts and Woo orders remain separate. The total is not unpaid debt: agree any previous payments before paying. Changes to an account or the payment details require a new review."
 msgstr ""
+
+msgid "Choose Ordinary draft or Preorder invoice before saving. Saving keeps the choice in the draft; a Folio document is created only after preview and confirmation. A preorder is a non-accounting invoice marked PRD and counts towards the preorder reserve for six months. Only automatically saved unavailable quantities receive the out-of-stock marker."
+msgstr ""
+
+msgid "In account details, choose mailing topics and product interests. A rule combines a catalogue brand with a category including subcategories. For example, select Cernit with polymer clay and add another rule for all Darwi products. You can keep news and promotions unrestricted using separate rules. Save account changes. Managers see the preferences in the customer card. Files contain only matching products; changing preferences after preparation excludes that recipient until a new mailing is prepared. Waiting-list notices and order messages are separate. Personal delivery schedules are not enabled yet."
+msgstr ""
+
+msgid "Commercial offer photos are prepared in background batches with saved progress. Unavailable images retain product links after a retry. Existing prepared files do not change; ask the manager for a newly prepared offer."
+msgstr ""

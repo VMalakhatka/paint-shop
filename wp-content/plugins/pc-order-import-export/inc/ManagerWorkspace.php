@@ -156,7 +156,7 @@ class ManagerWorkspace
         $lines = [];
         foreach ($order->get_items() as $id => $item) $lines[$id] = [$item->get_product_id(), $item->get_variation_id(), $item->get_quantity(), $item->get_total(), $item->get_subtotal()];
         return hash('sha256', wp_json_encode([$order->get_customer_id(), $order->get_status(), $order->get_address('billing'),
-            $order->get_address('shipping'), $order->get_customer_note(), $order->get_meta('_pc_draft_title'), $lines]));
+            $order->get_address('shipping'), $order->get_customer_note(), $order->get_meta('_pc_draft_title'), DraftPurpose::current($order), $lines]));
     }
 
     public static function audit(\WC_Order $order, string $action): void {
@@ -307,6 +307,7 @@ class ManagerWorkspace
         }
         $order = self::new_draft($user);
         foreach ($prepared as [$product, $qty, $price]) $order->add_product($product, $qty, ['subtotal' => $qty * $price, 'total' => $qty * $price]);
+        DraftPurpose::store($order, $_POST);
         $order->update_meta_data('_pc_draft_title', sanitize_text_field(wp_unslash($_POST['title'] ?? '')));
         $order->calculate_totals(false);
         self::audit($order, __('Manager created a customer draft.', 'pc-order-import-export'));
@@ -327,6 +328,7 @@ class ManagerWorkspace
         }
         $order = self::new_draft($user);
         foreach ($rows as [$product, $qty, $price]) $order->add_product($product, $qty, ['subtotal' => $qty * (float) $price, 'total' => $qty * (float) $price]);
+        $order->update_meta_data(DraftPurpose::META, DraftPurpose::current($source));
         $order->update_meta_data('_pcoe_source_order_id', $source->get_id());
         $order->update_meta_data('_pc_draft_title', $source->get_meta('_pc_draft_title'));
         $order->calculate_totals(false);
@@ -360,6 +362,7 @@ class ManagerWorkspace
             $item->delete_meta_data('_pc_alloc_plan'); $item->save();
         }
         if ($product) $order->add_product($product, $add_qty, ['subtotal' => $add_qty * (float) $price, 'total' => $add_qty * (float) $price]);
+        DraftPurpose::store($order, $_POST);
         $order->update_meta_data('_pc_draft_title', sanitize_text_field(wp_unslash($_POST['title'] ?? '')));
         $order->set_customer_note(sanitize_textarea_field(wp_unslash($_POST['note'] ?? '')));
         $order->calculate_totals(false);
@@ -394,7 +397,7 @@ class ManagerWorkspace
         $payload['folio_account_header']['warehouseId'] = $warehouse;
         if ($mode === 'non_accounting') {
             $payload['split_strategy'] = 'single_non_accounting_warehouse';
-            $payload['folio_account_header']['sourceInfo'] = 'нет на складе';
+            $payload['folio_account_header'] = DraftPurpose::header($payload['folio_account_header'], $order);
         }
         foreach ($payload['items'] as &$line) {
             $product = wc_get_product($line['product_id']);
@@ -491,7 +494,7 @@ class ManagerWorkspace
             'payload' => $payload, 'response' => $response], 15 * MINUTE_IN_SECONDS);
         ob_start(); ManagerOrderFlow::summary($response,$mode,$preference); $html = ob_get_clean();
         [$button,$confirmation]=ManagerOrderFlow::labels($mode);
-        return ['preview_html' => $html, 'token' => $token, 'mode'=>$mode, 'can_apply'=>ManagerOrderFlow::can_apply($response,$mode), 'apply_label'=>$button, 'confirmation_label'=>$confirmation, 'message' => __('Preview only. No Folio documents have been created. Confirm after checking quantities, prices and warehouses.', 'pc-order-import-export')];
+        return ['preview_html' => ($mode === 'non_accounting' ? '<p><strong>' . esc_html(DraftPurpose::label(DraftPurpose::current($order))) . '</strong></p>' : '') . $html, 'token' => $token, 'mode'=>$mode, 'can_apply'=>ManagerOrderFlow::can_apply($response,$mode), 'apply_label'=>$button, 'confirmation_label'=>$confirmation, 'message' => __('Preview only. No Folio documents have been created. Confirm after checking quantities, prices and warehouses.', 'pc-order-import-export')];
     }
 
     private static function apply(\WC_Order $order, \WP_User $user): array {

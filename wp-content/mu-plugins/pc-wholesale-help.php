@@ -365,6 +365,8 @@ function pc_wholesale_help_render_endpoint(): void {
         </section>
 
         <section class="pc-help-section" id="koshyk">
+            <p><?php esc_html_e('On a phone, after adding a product, the bottom bar shows the number of units, the product subtotal and Go to cart. It stays while browsing categories. Product added confirms a successful addition. Delivery, discounts and the final total are checked in the cart. The bar is hidden for an empty cart, in Draft mode, My account, the cart and checkout, and temporarily while typing.', 'pc-wholesale-help'); ?></p>
+            <?php pc_wholesale_help_image('mobile-cart-bar.jpg', __('Cart', 'pc-wholesale-help'), __('Go to the cart from the bottom bar on your phone.', 'pc-wholesale-help')); ?>
             <div class="pc-help-section__heading"><span>04</span><div><h2><?php esc_html_e('Check the cart', 'pc-wholesale-help'); ?></h2><p><?php esc_html_e('For every item, check the product, SKU, price, quantity, subtotal and the “Allocation” line.', 'pc-wholesale-help'); ?></p></div></div>
             <p><?php esc_html_e('The cart uses the full page width. On a phone, each item shows its photo and full name, with price, quantity and subtotal underneath. Change the quantity in its field or use the cross to remove an item.', 'pc-wholesale-help'); ?></p>
             <p><?php esc_html_e('Changing a quantity or removing an item updates only that row and the cart totals. While the request is running, the cart shows “Updating cart…”; wait for it to finish instead of repeating the action.', 'pc-wholesale-help'); ?></p>
@@ -378,6 +380,7 @@ function pc_wholesale_help_render_endpoint(): void {
             <h2><?php esc_html_e('Order from the full price list', 'pc-wholesale-help'); ?></h2>
             <p><?php esc_html_e('The price list includes only visible website categories. Hidden groups, their subgroups and products without a visible category are omitted. Products assigned to both hidden and visible groups appear under a visible group. Group headings are dark burgundy; the Order quantity column stays yellow.', 'pc-wholesale-help'); ?></p>
             <p><?php esc_html_e('Download the full XLSX price list in My orders or the cart. It follows the category tree of the website: expand and collapse groups using the outline buttons on the left in Excel. Each product appears once, with its barcode, your current price, combined Kyiv and Odesa stock, category path and product link. Unknown prices or stock remain blank. Out-of-stock products are included.', 'pc-wholesale-help'); ?></p>
+            <p><?php esc_html_e('Commercial offer photos are prepared in background batches with saved progress. Unavailable images retain product links after a retry. Existing prepared files do not change; ask the manager for a newly prepared offer.', 'pc-wholesale-help'); ?></p>
             <p><?php esc_html_e('A manager may email you a commercial offer in Excel: a table with category headings and separate Group and Subgroup columns on every product row, with your prices, descriptions and available photos. The yellow Order quantity column is blank; available stock is shown separately. Enter quantities before importing the file: leave only what you want to order, and clear or set other rows to zero. Prices and stock are captured when the mailing is prepared; the site checks current prices and availability when you order.', 'pc-wholesale-help'); ?></p>
             <p><?php esc_html_e('Category headings are not order lines. Filled quantities in collapsed groups are still imported. Do not sort the entire sheet as a flat table: this would mix category headings with products.', 'pc-wholesale-help'); ?></p>
             <p><?php esc_html_e('Fill in the yellow Order quantity column and upload the saved file into a draft or cart. Keep the column names and SKUs. Blank quantities and zeros are ignored; negative values, text and formulas are rejected. All filled rows are imported, including rows hidden by Excel filters. Products in this price list are matched by SKU, and current account prices replace the file prices. A draft does not reserve stock; the cart checks current availability.', 'pc-wholesale-help'); ?></p>
@@ -433,11 +436,13 @@ function pc_wholesale_help_render_endpoint(): void {
         </section>
 
         <section class="pc-help-section" id="chernetky">
+            <p><?php esc_html_e('Choose Ordinary draft or Preorder invoice before saving. Saving keeps the choice in the draft; a Folio document is created only after preview and confirmation. A preorder is a non-accounting invoice marked PRD and counts towards the preorder reserve for six months. Only automatically saved unavailable quantities receive the out-of-stock marker.', 'pc-wholesale-help'); ?></p>
             <div class="pc-help-section__heading"><span>07</span><div><h2><?php esc_html_e('Save the cart as a draft', 'pc-wholesale-help'); ?></h2><p><?php esc_html_e('Enter an optional title in the cart and press “Save as draft”. The draft will appear in “My orders”.', 'pc-wholesale-help'); ?></p></div></div>
             <div class="pc-help-warning"><strong><?php esc_html_e('Important:', 'pc-wholesale-help'); ?></strong> <?php esc_html_e('After a successful save, the current cart is cleared. A draft does not reserve stock.', 'pc-wholesale-help'); ?></div>
             <a class="pc-help-inline-action" href="<?php echo esc_url($orders_url); ?>"><?php esc_html_e('Open my orders', 'pc-wholesale-help'); ?> →</a>
         </section>
 
+        <section class="pc-help-section" id="subscriptions"><h2><?php esc_html_e('My subscriptions and notifications', 'pc-order-import-export'); ?></h2><p><?php esc_html_e('In account details, choose mailing topics and product interests. A rule combines a catalogue brand with a category including subcategories. For example, select Cernit with polymer clay and add another rule for all Darwi products. You can keep news and promotions unrestricted using separate rules. Save account changes. Managers see the preferences in the customer card. Files contain only matching products; changing preferences after preparation excludes that recipient until a new mailing is prepared. Waiting-list notices and order messages are separate. Personal delivery schedules are not enabled yet.', 'pc-wholesale-help'); ?></p></section>
         <section class="pc-help-section" id="messages">
             <h2><?php esc_html_e('Messages with your manager', 'pc-wholesale-help'); ?></h2>
             <?php include __DIR__ . '/pc-wholesale-help/messages-guide.php'; ?>
@@ -449,6 +454,10 @@ function pc_wholesale_help_render_endpoint(): void {
             <p><?php esc_html_e('For warehouse invoices and document lines, open Folio documents in My account. If an order was split, check each linked child order. Ask the manager if a document or shipment is not yet available.', 'pc-wholesale-help'); ?></p>
         </section>
         <section class="pc-help-section" id="stari-zamovlennia">
+            <?php if (class_exists('\\PaintCore\\PCOE\\DraftHelp')) \PaintCore\PCOE\DraftHelp::render('processing'); ?>
+            <h2><?php esc_html_e('Build a draft from the catalogue', 'pc-wholesale-help'); ?></h2>
+            <p><?php esc_html_e('After signing in, switch Purchase to Draft, select your editable draft or create a new one. Add visible catalogue products in any positive whole quantity, including out-of-stock products. Select all attributes for a variable product. Adding the same variant again increases its quantity.', 'pc-wholesale-help'); ?></p>
+            <p><?php esc_html_e('Draft mode hides warehouse stock and ignores stock and warehouse filters. Open draft to edit quantities; zero removes a line. The cart is unchanged, stock is not reserved and no Folio document is created. Prices are provisional. Drafts already submitted to Folio cannot be edited here. If a save is not confirmed, check the draft before trying again.', 'pc-wholesale-help'); ?></p>
             <div class="pc-help-section__heading"><span>08</span><div><h2><?php esc_html_e('How to process a draft', 'pc-wholesale-help'); ?></h2><p><?php esc_html_e('Open “My orders”, press “Process draft” next to the required draft, and choose one of two scenarios.', 'pc-wholesale-help'); ?></p></div></div>
             <div class="pc-help-note"><strong><?php esc_html_e('Preview first, apply second.', 'pc-wholesale-help'); ?></strong> <?php esc_html_e('The preview shows the result without changing the cart or recording a Folio document. The operation runs only after a separate confirmation (apply).', 'pc-wholesale-help'); ?></div>
             <p><?php esc_html_e('A manager can prepare a draft for you. It appears in My orders without changing your current cart. If the manager has already submitted it to Folio, check the result with the manager before placing another order.', 'pc-wholesale-help'); ?></p>
@@ -474,11 +483,8 @@ function pc_wholesale_help_render_endpoint(): void {
                 </div>
             </div>
             <div class="pc-help-warning"><strong><?php esc_html_e('Protect the current cart.', 'pc-wholesale-help'); ?></strong> <?php esc_html_e('Only the first scenario clears and replaces the current cart. Save the cart as a separate draft or export it before apply if you need its current contents.', 'pc-wholesale-help'); ?></div>
-            <div class="pc-help-note"><strong><?php esc_html_e('No warehouse movement.', 'pc-wholesale-help'); ?></strong> <?php
-                /* translators: %s is the exact note stored in the Folio document. */
-                printf(esc_html__('The non-accounting document is created on Folio warehouse 7 with the note %s. It does not write off, reserve, or otherwise move warehouse stock.', 'pc-wholesale-help'), '<code>нет на складе</code>');
-            ?></div>
-            <p><?php esc_html_e('If Folio returns an error or the result is unknown, the site keeps the draft and does not retry automatically. Review the message and deliberately repeat apply using the same preview. If draft lines or availability changed, run a new preview.', 'pc-wholesale-help'); ?></p>
+            <div class="pc-help-note"><strong><?php esc_html_e('No warehouse movement.', 'pc-wholesale-help'); ?></strong> <?php esc_html_e('The document uses the configured non-accounting Folio warehouse. Its marker follows the chosen purpose: ordinary draft, preorder, or automatic out-of-stock remainder. It does not write off or reserve current warehouse stock.', 'pc-wholesale-help'); ?></div>
+            <p><?php esc_html_e('If Folio returns an error or the result is unknown, do not create a copy or repeat confirmation blindly. Ask the manager to check existing documents using the draft number and error message. If draft lines or availability changed, a new preview is required.', 'pc-wholesale-help'); ?></p>
             <?php if (class_exists('\\PaintCore\\PCOE\\Waitlist') && \PaintCore\PCOE\Waitlist::allowed()): ?>
             <div id="waiting-list" class="pc-help-card">
                 <h3><?php esc_html_e('Waiting list and draft tracking', 'pc-wholesale-help'); ?></h3>
@@ -496,10 +502,12 @@ function pc_wholesale_help_render_endpoint(): void {
             <ol class="pc-help-steps">
                 <?php pc_wholesale_help_step('1', __('Open checkout', 'pc-wholesale-help'), __('Go from the reviewed cart to checkout.', 'pc-wholesale-help')); ?>
                 <?php pc_wholesale_help_step('2', __('Complete delivery', 'pc-wholesale-help'), __('For Nova Poshta, choose the displayed branch, parcel locker or address fields.', 'pc-wholesale-help')); ?>
+                <p><?php esc_html_e('Nova Poshta delivery is paid separately to the carrier, not with the goods. Free delivery covers only the base tariff under your delivery policy; insurance and extras remain payable. Free store pickup is offered for goods allocated to one warehouse. Wait for confirmation before visiting.', 'pc-wholesale-help'); ?></p>
                 <?php pc_wholesale_help_step('3', __('Add a note for the manager', 'pc-wholesale-help'), __('If needed, enter an order note. Its first 30 characters are also passed to the Folio document; the complete note remains in the site order.', 'pc-wholesale-help')); ?>
                 <?php pc_wholesale_help_step('4', __('Choose payment', 'pc-wholesale-help'), __('Select one of the methods available for your account.', 'pc-wholesale-help')); ?>
                 <?php pc_wholesale_help_step('5', __('Confirm once', 'pc-wholesale-help'), __('Wait for Folio processing to finish; do not submit a duplicate order.', 'pc-wholesale-help')); ?>
             </ol>
+            <p><?php esc_html_e('After WayForPay, the website shows payment confirmation or a waiting message. If money was charged but confirmation is pending, refresh the page later and check My orders. Do not pay again; contact the manager if the status does not update.', 'pc-wholesale-help'); ?></p>
             <div class="pc-help-card" id="np-point-limits">
                 <h3><?php esc_html_e('Nova Poshta point restrictions', 'pc-wholesale-help'); ?></h3>
                 <p><?php esc_html_e('Choose a city and delivery type, then search by point number or address. Use Load more points to continue beyond the first results, even if the current page has no points of your chosen type.', 'pc-wholesale-help'); ?></p>
@@ -558,6 +566,7 @@ function pc_wholesale_help_render_endpoint(): void {
             <p><?php esc_html_e('Choose the dates and document types, then select Show documents. Match the number, date, amount and warehouse, and select View. Scroll the table sideways if the action is not visible. Expand the period if the list is empty.', 'pc-wholesale-help'); ?></p>
             <h3 id="folio-repeat"><?php esc_html_e('Repeat selected products', 'pc-wholesale-help'); ?></h3>
             <p><?php esc_html_e('From an invoice or expense invoice, select the products you need and add them to the current cart or save them as a new draft. The current cart is not cleared in this workflow.', 'pc-wholesale-help'); ?></p>
+            <p><?php esc_html_e('WFP at the start of a new Folio invoice information field means the website verified its WayForPay payment. This marker is not a separate Folio payment document and does not itself change the accounting balance. Existing invoices are not relabelled automatically.', 'pc-wholesale-help'); ?></p>
             <h3 id="folio-invoice"><?php esc_html_e('Download a payment invoice', 'pc-wholesale-help'); ?></h3>
             <p><?php esc_html_e('Open an invoice or expense invoice and choose Invoice XLSX to download a payment invoice with barcodes and historical prices. Send by email uses your account email, which you can replace with another address. The file contains the full document amount, not the outstanding balance; the original Folio document is not changed. Missing verified barcodes remain blank. Mail service acceptance does not confirm delivery.', 'pc-wholesale-help'); ?></p>
             <h3 id="folio-invoice-email"><?php esc_html_e('Email a payment invoice', 'pc-wholesale-help'); ?></h3>

@@ -155,6 +155,34 @@ Java отвечает за складское распределение вну�
 
 ## WayForPay
 
+Owner decision 2026-10-16: all WayForPay receipts of funds for FOP Malakhatka
+belong to payment warehouse 5, even when the invoice uses another warehouse.
+Link the payment to the source Folio invoice and retain that invoice's payer;
+later user-profile remapping must not move historical money. This is a business
+configuration, not a shipping-location rule. Bank-income creation is NOT yet
+implemented. Native payment allocation requires a guarded Paint_Rus golden-master
+before implementation/apply; do not substitute a bare SCL_PLAT insert or the
+invoice number allocator. Agreed task and gates:
+`docs/api/FOLIO_WFP_PAYMENT_BACKEND_TASK.md`; operator entry:
+`docs/WAYFORPAY_TEST_ACCESS.md`.
+
+2026-10-16: `pc-folio-order-link.php` replaces the `Int` prefix in
+`additionalInfo` with `WFP` only for server-verified WayForPay evidence matching
+the paid Woo transaction. This is informational, not a Folio payment write.
+Keep the 30-character limit, preserve other gateways and do not backfill old
+documents. Contract and offline regression: `docs/FOLIO_ORDER_JSON_CONTRACT.md`,
+`scripts/tests/folio-wayforpay-info.php`; production verification is separate.
+
+2026-10-15: локально реализован `pc-wayforpay-checkbox`, manual deploy, default off.
+Канон подключения/приёмки: `wp-content/plugins/pc-wayforpay-checkbox/README.md`;
+точка входа оператора — `docs/WAYFORPAY_TEST_ACCESS.md`. Не считать это production rollout.
+Адаптер перехватывает legacy callback до vendor, проверяет signature/merchant/сумму/
+валюту/Approved; фиксирует snapshot до payment_complete и Folio split. Не строить
+чек по processing или текущим изменённым parent lines. Queue retries не вызывают
+Folio create. Таймаут чека → reconcile UUID, не повторный sell. Refund → review,
+автовозвраты не реализованы. Allowlist пользователей не доказывает sandbox merchant.
+Аварийно использовать PC_WFP_CHECKBOX_PAUSED: off возвращает legacy callback.
+
 - Текущий gateway поддерживает classic checkout, а не Checkout Blocks.
 - Основные Woo cart/checkout должны быть shortcode-страницами для текущей интеграции.
 - Пока магазин WayForPay в test mode, gateway можно показывать только пользователям из собственного test-access списка.
@@ -480,3 +508,56 @@ can receive explicit `pcoe_import_customers` together with existing
 `manage_woocommerce`; do not grant create_users or change staff roles just to expose
 Folio import. Grant/revoke per user only with owner authorization. Existing customer
 role allowlist, actor-owned jobs and preview/apply are unchanged.
+
+WayForPay/Checkbox recovery (2026-10-16, 0.1.1 code and offline tests): browser
+return with valid order/key goes to Woo order-received, never confirms payment.
+ShiftManager shares a per-register persisted UUID/lock across manual and automatic
+opening; unknown outcomes are GET-only. Receipt preflight errors retain sanitized
+stage/message/HTTP and shift ID. Do not diagnose opening rejection from the generic
+basebad_request code alone. Folio-only receipts still need an authoritative paid
+command producer and cross-source duplicate checks; never create a second operation
+for a Woo-linked invoice. Human runbook: `docs/WAYFORPAY_TEST_ACCESS.md` and linked
+plugin READMEs. Live opening/replay remains separately authorized.
+
+Manual draft purpose (2026-10-16; `PCOE DraftPurpose`, `DraftFolioWorkflow`,
+`ManagerWorkspace`, Java `FolioOrderAccountService`): `_pcoe_draft_purpose`
+selects ordinary draft vs preorder. Manual non-accounting does not imply shortage.
+Only preorder sends `ПРД` at the start of `additionalInfo` / `L_CP2_PLAT` and
+`folioOperationKind=*РАЗОВАЯ`. Actual shortage remains a separate document intent;
+Java must not append its marker to every non-accounting document. Purpose belongs
+in preview/revision guards. Save remains local; financial creation still requires
+preview + apply. Human instructions: `docs/MANAGER_CUSTOMER_GUIDE_UK.md` and
+`docs/WHOLESALE_CUSTOMER_GUIDE_UK.md`. Deploy Java before WP; no retroactive changes.
+
+WayForPay bank income (owner revision 2026-10-16; adapter 0.2.0): a verified
+Approved payment creates an independent Folio bank income on warehouse 5, not an
+invoice-dependent allocation. Missing/split/changed/archived invoices do not block
+income. Snapshot the customer's Folio payer key at first verified Approved;
+later user reassignment must not move the payment. Initial NOTOVAROST equals the
+gross payment, NACLAD_POR is 0 (not NULL), no SCL_PMOV allocations. Confirmed by a
+Paint_Rus native rollback probe and independent no-remains check; production
+API acceptance is still pending. Java `folio.payment` owns native insert + durable
+ledger in one transaction; WP FolioPayments owns a separate outbox and GET-only
+reconciliation after attempted apply. Refund retains income and flags a separate
+expense review. Never promote preview queues or backfill earlier manual payments.
+Runbook: `docs/FOLIO_WFP_PAYMENTS.md`; Java API contract of the same domain.
+Defaults off; schema migration/deployment/live enablement require separate approval.
+
+Customer marketing subscriptions (2026-10-17, source PCOE CustomerSubscriptions +
+Broadcasts): one user profile `_pcoe_subscriptions_v1`; AND brand/category inside
+rules, OR across rules, topic-specific scopes. Reuse public catalogue visibility,
+never expose hidden suppliers. Filter attachment products before grouping; retain
+pricing context independently of subset/file grouping. Recheck profile fingerprint
+before delivery. Waitlist consent/pilot is independent and must not be inferred
+from marketing arrival subscription. No personal schedule yet. Contract, rollback
+and acceptance limits: PCOE README, Customer subscriptions first stage; user and
+manager instructions in their canonical guides.
+
+
+Commercial-offer photos (2026-10-17, code/offline verification): PCOE
+`BroadcastPhotos` prepares campaign thumbnails before price-group XLSX assembly,
+under the existing mailing lock. Preserve per-product persisted progress and
+private non-autoloaded blobs; do not restore a single global photo time budget.
+A yielded batch is incomplete, not a missing image. Final attachment size limits
+and explicit send approval remain. Recovery/cleanup and regression details:
+`wp-content/plugins/pc-order-import-export/README.md`, Commercial offers in mailings.

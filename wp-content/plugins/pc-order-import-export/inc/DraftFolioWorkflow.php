@@ -40,6 +40,7 @@ class DraftFolioWorkflow
 
         echo '<section id="pcoe-draft-folio" class="pcoe-draft-folio">';
         echo '<h2>' . esc_html__('Draft processing', 'pc-order-import-export') . '</h2>';
+        DraftHelp::render('processing');
 
         if ($warehouse_id <= 0) {
             echo '<div class="woocommerce-error" role="alert">'
@@ -105,6 +106,7 @@ class DraftFolioWorkflow
         echo '<input type="hidden" name="order_id" value="' . esc_attr((string) $order_id) . '">';
         echo '<input type="hidden" name="mode" value="' . esc_attr($mode) . '">';
         echo '<input type="hidden" name="_wpnonce" value="' . esc_attr($nonce) . '">';
+        if ($mode === 'whole_draft') DraftPurpose::field(DraftPurpose::current(wc_get_order($order_id)));
         echo '<p>' . esc_html($description) . '</p>';
         echo '<button type="submit" class="button">' . esc_html($button) . '</button>';
         echo '</form>';
@@ -126,6 +128,7 @@ class DraftFolioWorkflow
 
         echo '<div class="pcoe-draft-folio__preview">';
         echo '<h3>' . esc_html__('Preview without recording', 'pc-order-import-export') . '</h3>';
+        if ($mode === 'whole_draft') echo '<p><strong>' . esc_html(DraftPurpose::label((string) ($preview['purpose'] ?? 'draft'))) . '</strong></p>';
 
         if ($last_error !== '') {
             echo '<div class="woocommerce-error" role="alert">' . esc_html($last_error) . '</div>';
@@ -212,6 +215,7 @@ class DraftFolioWorkflow
             self::redirect_notice($order, __('The Folio warehouse for non-accounting drafts is not configured.', 'pc-order-import-export'), 'error');
         }
 
+        if ($mode === 'whole_draft') { DraftPurpose::store($order, $_POST); $order->save(); }
         try {
             $analysis = self::analyse($order, $mode);
             if (empty($analysis['rows'])) {
@@ -240,6 +244,7 @@ class DraftFolioWorkflow
         $token = strtolower(wp_generate_password(32, false, false));
         $preview = [
             'owner_id'      => get_current_user_id(),
+            'purpose'       => DraftPurpose::current($order),
             'order_id'      => (int) $order->get_id(),
             'mode'          => $mode,
             'warehouse_id'  => $warehouse_id,
@@ -464,6 +469,7 @@ class DraftFolioWorkflow
 
         return [
             'rows'              => $rows,
+            'mode'              => $mode,
             'loadable_total'    => $loadable_total,
             'unavailable_total' => $unavailable_total,
         ];
@@ -532,7 +538,7 @@ class DraftFolioWorkflow
             : md5(uniqid('', true));
         $payload['folio_account_header']['warehouseId'] = $warehouse_id;
         $payload['folio_account_header']['accountingEnabled'] = false;
-        $payload['folio_account_header']['sourceInfo'] = 'нет на складе';
+        $payload['folio_account_header'] = DraftPurpose::header($payload['folio_account_header'], $order, ($analysis['mode'] ?? '') === 'partial_to_cart');
 
         return $payload;
     }
@@ -652,10 +658,17 @@ class DraftFolioWorkflow
                 continue;
             }
 
-            $group_key = (string) $product->get_id();
+            $variation = $product->is_type('variation') ? $product->get_variation_attributes() : [];
+            foreach ($variation as $attribute => $value) {
+                $chosen = (string) $item->get_meta(substr($attribute, 10));
+                if ($chosen !== '') $variation[$attribute] = $chosen;
+            }
+            // One wildcard variation can represent different customer selections.
+            $group_key = $product->get_id() . ':' . md5(wp_json_encode($variation));
             if (!isset($groups[$group_key])) {
                 $groups[$group_key] = [
                     'product'  => $product,
+                    'variation' => $variation,
                     'quantity' => 0.0,
                     'plan'     => [],
                     'item_ids' => [],
@@ -678,7 +691,7 @@ class DraftFolioWorkflow
             }
             $product_id = $product->is_type('variation') ? (int) $product->get_parent_id() : (int) $product->get_id();
             $variation_id = $product->is_type('variation') ? (int) $product->get_id() : 0;
-            $variation = $product->is_type('variation') ? $product->get_variation_attributes() : [];
+            $variation = $group['variation'];
             $plan = self::normalise_plan((array) ($group['plan'] ?? []));
             if ($waitlist_pilot && !apply_filters('woocommerce_add_to_cart_validation', true, $product_id, (float) ($group['quantity'] ?? 0), $variation_id, $variation, ['pc_alloc_plan' => $plan])) {
                 continue;
@@ -909,6 +922,7 @@ class DraftFolioWorkflow
         return hash('sha256', (string) wp_json_encode([
             'order_id'     => (int) $order->get_id(),
             'order_status' => (string) $order->get_status(),
+            'purpose' => DraftPurpose::current($order),
             'warehouse_id' => $warehouse_id,
             'rows'         => $rows,
         ]));
@@ -931,7 +945,7 @@ class DraftFolioWorkflow
         }
         ksort($rows, SORT_NUMERIC);
 
-        return hash('sha256', (string) wp_json_encode($rows));
+        return hash('sha256', (string) wp_json_encode([DraftPurpose::current($order), $rows]));
     }
 
     private static function get_preview(string $token): array

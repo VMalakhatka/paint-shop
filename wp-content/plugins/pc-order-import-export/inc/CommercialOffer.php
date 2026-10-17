@@ -25,7 +25,7 @@ final class CommercialOffer {
     }
 
     /** Best-effort thumbnail, with bounded network, image size and memory. Never changes media. */
-    private static function photo(\WC_Product $product, float $deadline, int &$bytes) {
+    public static function photo(\WC_Product $product, float $deadline, int &$bytes) {
         if(microtime(true)>=$deadline || $bytes>=3*1024*1024 || !function_exists('imagecreatefromstring'))return null;
         $id=$product->get_image_id();
         if(!$id && $product->get_parent_id()){
@@ -67,7 +67,7 @@ final class CommercialOffer {
         return $packing;
     }
 
-    public static function workbook(array $entries, string $quantity): array {
+    public static function workbook(array $entries, string $quantity, ?callable $cachedPhoto=null): array {
         $book=new Spreadsheet();$book->getDefaultStyle()->getFont()->setName('Arial')->setSize(11);
         $book->getProperties()->setCreator(get_bloginfo('name'))->setTitle(self::format_label('offer'));
         $sheet=$book->getActiveSheet();$sheet->setTitle('Lavka');
@@ -118,8 +118,15 @@ final class CommercialOffer {
             }
             $sheet->getCell('C'.$row)->getHyperlink()->setUrl($v[8]);
             $sheet->getRowDimension($row)->setRowHeight(min(409,max(84,(ceil(mb_strlen($description)/60)+substr_count($description,"\n"))*14)));
-            $image=$product?self::photo($product,$deadline,$bytes):null;
-            if($image){
+            $cached=$cachedPhoto?$cachedPhoto((int)$entry['product_id']):null;
+            $image=(!$cachedPhoto && $product)?self::photo($product,$deadline,$bytes):null;
+            if($cached){
+                // File-backed drawings avoid retaining hundreds of decoded GD images.
+                $path=BroadcastStore::temporary_file();
+                if(file_put_contents($path,$cached)!==strlen($cached))throw new \RuntimeException('Photo temporary file could not be written');
+                $drawing=new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+                $drawing->setPath($path)->setCoordinates('G'.$row)->setOffsetX(5)->setOffsetY(5)->setWorksheet($sheet);$photos++;
+            }elseif($image){
                 $drawing=new MemoryDrawing();$drawing->setImageResource($image)->setRenderingFunction(MemoryDrawing::RENDERING_JPEG)->setMimeType(MemoryDrawing::MIMETYPE_JPEG)->setCoordinates('G'.$row)->setOffsetX(5)->setOffsetY(5)->setWorksheet($sheet);$photos++;
             }else{
                 $sheet->setCellValueExplicit('G'.$row,__('View product','pc-order-import-export'),DataType::TYPE_STRING);$sheet->getCell('G'.$row)->getHyperlink()->setUrl($v[8]);

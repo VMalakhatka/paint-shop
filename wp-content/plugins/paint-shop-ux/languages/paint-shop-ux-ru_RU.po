@@ -184,3 +184,19 @@ msgstr "Не удалось добавить это количество. Про
 #: inc/single-product.php
 msgid "Could not confirm whether the product was added. Check your cart before trying again."
 msgstr "Не удалось подтвердить, добавлен ли товар. Проверьте корзину перед повторной попыткой."
+
+#: inc/mobile-cart.php
+msgid "In cart: %s"
+msgstr "В корзине: %s"
+
+#: inc/mobile-cart.php
+msgid "Products:"
+msgstr "Товары:"
+
+#: inc/mobile-cart.php
+msgid "Go to cart"
+msgstr "Перейти в корзину"
+
+#: inc/mobile-cart.php
+msgid "Product added"
+msgstr "Товар добавлен"

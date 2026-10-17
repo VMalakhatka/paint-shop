@@ -232,6 +232,23 @@ Current format:
 Int 116906 2026-07-25 16:20
 ```
 
+For a payment confirmed by the signature-verifying WayForPay adapter, the prefix
+is `WFP` instead of `Int`: `WFP 116906 2026-07-25 16:20`. This is the Folio
+**«Информация»** field, not a Folio payment document or a debt-settlement command.
+The server-side `_pc_wfp_verified` reference must match the Woo transaction ID,
+with a paid date, positive integer captured amount and matching UAH currency.
+Choosing WayForPay or manually marking an order paid is insufficient. Other
+payments retain `Int`; the same header is used for each Java warehouse document.
+The existing 30-character limit remains. Existing documents are not rewritten.
+
+Verified in local code/offline tests: 2026-10-16. The existing automatic checkout
+pipeline runs on payment completion/processing unless `PC_FOLIO_AUTO_CHECKOUT`
+or its filter disables it. Successful Java response and saved document links,
+not payment success alone, prove creation. Deploy the WordPress MU-plugin; no
+Java change or Folio migration is required. Verify a new authorized paid order's
+Folio number and information field after deployment; no live writes were tested.
+Offline regression: `php scripts/tests/folio-wayforpay-info.php`.
+
 `folio_account_header.priceContractType`
 
 Resolved from the Woo user role -> Folio contract mapping used by `lavka-price-sync`. If no mapped contract exists, Woo falls back to the first Woo role slug for visibility in preview.

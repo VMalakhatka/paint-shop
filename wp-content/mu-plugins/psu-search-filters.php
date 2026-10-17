@@ -349,7 +349,7 @@ add_action('pre_get_posts', function(WP_Query $q){
     }
 
     // Фильтр по складам: ?location[]=odesa&location[]=kiev1
-    if (!empty($_GET['location'])) {
+    if (!apply_filters('pcoe_catalog_draft_mode', false) && !empty($_GET['location'])) {
         $raw_locations = is_array($_GET['location'])
             ? wp_unslash($_GET['location'])
             : explode(',', (string) wp_unslash($_GET['location']));
@@ -380,7 +380,7 @@ add_action('pre_get_posts', function(WP_Query $q){
     }
 
     // Только в наличии: ?in_stock=1
-    if (!empty($_GET['in_stock'])) {
+    if (!apply_filters('pcoe_catalog_draft_mode', false) && !empty($_GET['in_stock'])) {
         $meta_query = (array) $q->get('meta_query');
         $meta_query[] = [
             'key'     => '_stock_status',
@@ -461,7 +461,7 @@ function psu_render_catalog_filters(): void {
     $min_price = isset($_GET['min_price']) ? wc_format_decimal(wp_unslash($_GET['min_price'])) : '';
     $max_price = isset($_GET['max_price']) ? wc_format_decimal(wp_unslash($_GET['max_price'])) : '';
     $active_filters = (int) ($brand !== '') + (int) ($unit !== '')
-        + (int) !empty($selected_locations) + (int) !empty($_GET['in_stock'])
+        + (apply_filters('pcoe_catalog_draft_mode', false) ? 0 : (int) !empty($selected_locations) + (int) !empty($_GET['in_stock']))
         + (int) ($min_price !== '' || $max_price !== '');
     ?>
     <form class="psu-catalog-filters" method="get" action="<?php echo esc_url(psu_catalog_filter_url()); ?>">
@@ -550,8 +550,8 @@ function psu_catalog_filter_state(): array {
     }
     $search = psu_catalog_search_text();
     if ($search !== '') $state['catalog_search'] = $search;
-    if (!empty($_GET['in_stock'])) $state['in_stock'] = '1';
-    $locations = $_GET['location'] ?? [];
+    if (!apply_filters('pcoe_catalog_draft_mode', false) && !empty($_GET['in_stock'])) $state['in_stock'] = '1';
+    $locations = apply_filters('pcoe_catalog_draft_mode', false) ? [] : ($_GET['location'] ?? []);
     if (is_string($locations)) $locations = explode(',', $locations);
     if (is_array($locations)) {
         $locations = array_values(array_unique(array_filter(array_map('sanitize_title', wp_unslash(array_filter($locations, 'is_scalar'))))));

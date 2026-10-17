@@ -1,5 +1,56 @@
 # Wholesale Price List
 
+## Catalogue draft mode (2026-10-16)
+
+`CatalogDraft` owns a separate customer planning path for every signed-in role.
+It does not bypass any Woo purchase/checkout stock validator. The catalogue and
+product page expose Purchase/Draft, an owned editable-draft selector and creation;
+the wholesale table uses the same per-product form. Guests keep the old UI.
+Stock and warehouse filters are ignored only for draft browsing; private, hidden,
+password-protected and hidden-category-only products are not accepted. Simple
+products and explicit variable attributes (including wildcard variations) are
+supported. Non-inventory technical quantity bound: positive integer <=999999999.
+Role pricing is read through `ManagerWorkspace::customer_price`; browser prices
+are never accepted. Missing/invalid prices are rejected, not saved as free goods.
+
+State: `_pcoe_catalog_mode` and `_pcoe_catalog_draft` in user meta. Data remains
+ordinary HPOS-compatible `pc-draft` orders, no separate tables/migration. Selection
+requires ownership and `ManagerWorkspace::editable`, including the Folio document
+and manager-command guards. Writes use the same per-order named DB lock as manager
+and legacy Folio commands, Woo transactions and persistent request receipts
+(`_pcoe_catalog_request_<sha256>` in order meta; creation receipts in user meta).
+Repeated identical request keys return the prior result; a different payload with
+the same key fails. The UI never automatically retries an uncertain write. Editor
+revisions reject stale replacements; add operations accumulate quantities under
+the lock. Old allocation stamps are removed from edited lines, not recalculated.
+
+No cart, stock, reservation, paid status, invoice, Folio request or customer email
+is created by this path. Existing explicit draft processing remains responsible
+for checking current availability/prices and preview/apply. It is not silently
+invoked by adding a product. Existing manager-supplied prices on untouched rows
+remain unchanged; a new addition to a matching row uses the current customer price.
+
+Local regression: `tests/catalog-draft-local.php` via WP CLI, synthetic user and
+products with cleanup and blocked outbound HTTP/mail. Browser test:
+`tests/catalog-draft-ui.cjs` uses an opt-in local fixture produced by
+`PCOE_CATALOG_FIXTURE=/tmp/pcoe-catalog-fixture.json`; remove it afterwards with
+`PCOE_CATALOG_CLEANUP` pointing to that file and the same PHP test. Never run these
+tests on production. Fixture contains a temporary synthetic login cookie and must
+not be committed or shared.
+
+Verified locally: 38 persistence/security/role-price/variation-transfer checks;
+real HTTP browser scenarios at 390 and 1280 px (guest denial, mode switching,
+creation, selection, zero-stock addition, variant selection and quantity edits).
+Existing allocation-policy and draft-purpose regressions also pass. No live
+checkout, payment or Folio document was created. Synthetic records were removed.
+
+Deploy existing `pc-order-import-export`, `paint-shop-ux` and changed MU files
+(`psu-search-filters.php`, `pc-wholesale-quick-order.php`, `pc-wholesale-help.php`
+and help translations). No new plugin or Java change. Public help code and
+`docs/WHOLESALE_CUSTOMER_GUIDE_UK.md` are updated; production validation pending.
+Rollback restores these files; existing drafts remain ordinary `pc-draft` orders.
+Logged-in pages must stay outside shared page caches, as with account/cart pages.
+
 ## XLSX download compatibility (2026-10-09)
 
 `Exporter::send_xlsx()` uses `setCellValue()` with A1 coordinates, compatible
@@ -717,8 +768,22 @@ Unknown stock stays blank; zero stays zero. Quantities never come from Folio doc
 
 Photos use the assigned Woo thumbnail (variation falls back to parent), with safe
 HTTP redirects, 3-second request timeout, 512 KiB input and 4-million-pixel limits.
-JPEG/PNG/GIF/WebP are resized to at most 160×100 and embedded. GD absence, failures,
-25-second image budget or 3 MiB total compressed image budget leave a product link.
+JPEG/PNG/GIF/WebP are resized to at most 160×100 and embedded. Mailing preparation
+now uses `BroadcastPhotos`: at most 40 products / 15 seconds per cron invocation
+(one in-flight request may add up to 3 seconds). Each completed thumbnail is a
+checksum-protected non-autoloaded option using the existing private file store;
+progress is saved per product under the mailing lock. All price groups share these
+thumbnails. A failed download gets one retry on a later invocation, then a product
+link. GD absence or invalid/oversized source images also produce links. No global
+25-second / 3 MiB truncation applies to campaign images. File-backed XLSX drawings
+avoid keeping all decoded GD resources in memory. Photo options are deleted after
+all groups become ready, on cancellation, or mailing deletion. File assembly retains
+the existing interrupted-build error; only thumbnail preparation is resumable.
+Manager progress counts processed products (including unavailable photos). Existing
+ready attachments are immutable: create a new mailing after the WordPress deploy.
+No Java update is needed for this photo change. Offline regression:
+`tests/broadcast-photos-offline.php` generates a 350-product workbook, checks images
+beyond row 221, restart from persisted progress, retry, sharing and cleanup.
 The review reports embedded photo count. No media writes, public price files, additional automatic email are introduced; the existing 8 MiB final
 attachment limit and explicit review/start remain. Pricing groups reuse the same
 private file; the email attachment is named `commercial-offer-YYYY-MM-DD.xlsx`.
@@ -772,3 +837,89 @@ deleted after use. Existing single-order confirmation behavior remains unchanged
 combined sums, private XLSX, intercepted email and no order mutation.
 
 Scoped import access (2026-10-14): `manage_woocommerce` plus explicit `pcoe_import_customers` permits Folio customer import for custom manager roles. Existing administrator/shop_manager paths remain valid. Grant per user when requested; this does not grant general create/promote/delete-users capabilities. All import role allowlists and preview/apply checks remain in force.
+
+### Illustrated draft help (2026-10-16)
+
+`DraftHelp` renders read-only native details/summary menus inside the catalogue
+toolbar and draft-processing block (including missing-configuration errors).
+Every signed-in customer can read it; guests get no menu. The existing wholesale
+guide embeds the same renderer without changing its wholesale role gate.
+No AJAX, endpoint, new plugin, migration or business-state change is introduced.
+The existing catalogue stylesheet covers account/help pages too.
+
+Five topics cover collecting, editing, available goods to cart, whole draft to
+Folio/preorder, and unknown outcomes. English msgids have Ukrainian/Russian
+translations; the downloadable five-page PDF is explicitly labelled Ukrainian.
+Static PDF/images contain only synthetic examples and are intentionally public.
+Canon: `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md`, sections 8-9.
+The earlier fixed warehouse-7/shortage-only explanation was corrected: warehouse
+is configured, and whole-draft markers follow DraftPurpose.
+
+Assets: `assets/draft-guide/`. Rebuild PDF with
+`scripts/build-draft-guide.py` (ReportLab, Arial regular/bold via GUIDE_FONT_DIR);
+it writes `output/pdf/` and copies the deliverable into the shipped assets.
+Inspect all rendered pages after rebuilding. Do not commit runtime cookies,
+offline HTML or customer examples.
+
+Local verification workflow: create the disposable fixture using
+`PCOE_CATALOG_FIXTURE=/tmp/pcoe-guide-fixture.json` with
+`tests/catalog-draft-local.php`; run `tests/draft-help-local.php` with the same
+variable and `PCOE_GUIDE_CAPTURE=1` for inert, non-submittable HTML captures.
+That path blocks HTTP/mail, modifies only the verified synthetic draft, and
+supplies preview data in memory without a database transient or Folio payload.
+`tests/draft-help-ui.cjs /tmp/pcoe-guide-fixture.json` uses Playwright/Chrome for
+390/1280px keyboard/layout checks and captures. Use CHROME_PATH and
+PLAYWRIGHT_MODULE for an external runtime. Finally run the fixture cleanup using
+`PCOE_CATALOG_CLEANUP` and the original local test.
+
+Deploy PCOE (including assets/MO files) and the updated existing MU help file/
+translations together. No Java deployment or Folio write is needed. Production
+has not been changed or verified in this task. Rollback restores these help assets
+and render calls; it does not affect drafts, carts or Folio documents.
+
+### Customer subscriptions — first stage (2026-10-17)
+
+`CustomerSubscriptions` owns marketing interests in user meta
+`_pcoe_subscriptions_v1`: `version`, `topics` (`price`, `arrival`, `news`,
+`promotion`), `scope` (`all` or `selected`), `rules` (`topic`, `brand`, `category`),
+`updated_at`. Zero brand/category means unrestricted **within an enabled rule**;
+`*` applies to selected topics. AND inside a rule, OR between rules; category
+matching includes ancestors of the product's assigned categories. Variations
+inherit parent taxonomy. Only publicly allowed catalogue supplier/brand terms and
+visible categories are offered. This does not introduce a separate true-manufacturer
+mapping; absent Cernit/Darwi terms must be addressed in catalogue ownership, not
+inferred from product names here.
+
+Customer account details is the only write surface (Woo account validation plus
+own nonce/user check); manager customer cards are read-only. Saving no topics stops
+all marketing topics. Existing accounts without this meta retain prior behavior;
+`Broadcasts::OPT_OUT` still overrides every marketing topic. Waitlist's explicit
+`email_enabled`, pilot gate, transactional order messages and chat are untouched.
+No personal scheduler or new marketing channel is enabled in this stage.
+
+Broadcast creation classifies the topic (default by kind, explicit override for
+promotional invoices). Text-only messages use the declared brand/category;
+untagged text does not satisfy restricted interests. Product files are filtered
+per profile. Preliminary grouping uses pricing context **and matching product IDs**;
+existing content-signature deduplication may then reuse identical files. Original
+pricing context remains on recipients, independent of the file group key.
+Preferences are fingerprinted and checked immediately before mail transport. A
+changed profile is skipped and needs a new preview; old prepared campaigns also
+skip customers who subsequently saved a profile. No automatic sends on save.
+
+Checks: `tests/subscriptions-offline.php` uses fictional taxonomy/user fixtures,
+no database, HTTP or email; it tests audience intersection, descendants, per-topic
+rules, file subsets/grouping, stale preparation, nonce/ownership and zero topics.
+The rendered fixture was inspected at desktop and mobile widths; live Woo/theme
+save and real catalogue labels remain deployment acceptance checks. Existing
+`tests/broadcasts.php` is the disposable full Woo integration regression.
+
+Deploy only the existing PCOE plugin and changed wholesale help/catalogues; no
+Java or schema migration is needed. Review recipient counts and file previews,
+then explicitly start a mailing. For rollback pause prepared/running campaigns
+first: old code does not enforce the new interests. Keep the profile meta and
+opt-out flags; do not resume campaigns with the old code.
+
+Removed or newly hidden taxonomy selections remain explicit unavailable options in
+the form. Saving requires choosing a valid replacement or disabling that rule;
+they must never silently turn into unrestricted brands/categories.

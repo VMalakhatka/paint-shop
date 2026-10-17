@@ -1,0 +1,62 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: PC WayForPay Checkbox 0.1.0\n"
+"PO-Revision-Date: 2026-10-15 00:00+0000\n"
+"Last-Translator: Lavka\n"
+"Language-Team: Ukrainian\n"
+"Language: uk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+msgid "WayForPay refund confirmed. Review the Checkbox sale and prepare an itemized return."
+msgstr "Повернення WayForPay підтверджено. Перевірте чек продажу Checkbox і підготуйте построкове повернення."
+
+msgid "Checkbox receipt"
+msgstr "Чек Checkbox"
+
+msgid "Attempts"
+msgstr "Спроби"
+
+msgid "Receipt ID"
+msgstr "ID чека"
+
+msgid "View receipt"
+msgstr "Переглянути чек"
+
+msgid "Reconcile / resume Checkbox receipt"
+msgstr "Звірити / відновити чек Checkbox"
+
+msgid "This order is cancelled, failed or refunded. Check its details or contact the manager before making another payment."
+msgstr "Це замовлення скасовано, оплата не вдалася або кошти повернено. Перевірте деталі чи зверніться до менеджера перед повторною оплатою."
+
+msgid "Your order has been paid successfully. You can view it in your account. The manager will notify you about shipment."
+msgstr "Ваше замовлення успішно оплачено. Переглянути його можна в кабінеті. Менеджер повідомить вам про відправлення."
+
+msgid "Your order has been received. We are waiting for payment confirmation from WayForPay. Refresh this page shortly; do not pay again if money has already been charged."
+msgstr "Ваше замовлення отримано. Очікуємо підтвердження оплати від WayForPay. Оновіть сторінку трохи пізніше; не сплачуйте повторно, якщо гроші вже списано."
+
+msgid "View my orders"
+msgstr "Мої замовлення"
+
+msgid "Checkbox diagnostic"
+msgstr "Діагностика Checkbox"
+
+msgid "Shift ID"
+msgstr "ID зміни"
+
+msgid "Folio bank income"
+msgstr "Банківський прихід ФОЛІО"
+
+msgid "Reconcile / resume Folio bank income"
+msgstr "Звірити / відновити банківський прихід ФОЛІО"
+
+msgid "Folio bank income #%s recorded on warehouse 5. Invoice allocation is separate."
+msgstr "Банківський прихід ФОЛІО №%s записано на складі 5. Розподіл за рахунками виконується окремо."
+
+msgid "Check the payment in Folio before any manual entry. Reconciliation does not send the payment again."
+msgstr "Перед ручним внесенням перевірте оплату у ФОЛІО. Звірка не надсилає платіж повторно."
+
+msgid "WayForPay refund received. Income is retained; a separate bank expense requires review."
+msgstr "Отримано повернення WayForPay. Прихід збережено; окремий банківський видаток потребує перевірки."
