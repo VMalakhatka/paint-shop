@@ -3723,3 +3723,6 @@ msgstr "Аудиторія за підписками"
 
 msgid "No selected customer subscribes to this topic and product selection."
 msgstr "Жоден із вибраних клієнтів не підписаний на цю тему та набір товарів."
+
+msgid "Unavailable selection — choose again"
+msgstr "Вибір недоступний — виберіть знову"

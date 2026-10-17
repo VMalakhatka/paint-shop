@@ -85,6 +85,7 @@ final class CustomerSubscriptions {
     }
     public static function select(string $name,array $terms,int $value,string $all): void {
         echo '<select style="max-width:100%" name="'.esc_attr($name).'"><option value="0">'.esc_html($all).'</option>';
+        if($value && !in_array($value,array_map('intval',wp_list_pluck($terms,'term_id')),true))echo '<option value="'.esc_attr($value).'" selected>'.esc_html__('Unavailable selection — choose again','pc-order-import-export').'</option>';
         foreach($terms as $term){
             $label=$term->name;
             if($term->taxonomy==='product_cat'){

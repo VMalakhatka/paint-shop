@@ -3521,3 +3521,6 @@ msgstr ""
 
 msgid "No selected customer subscribes to this topic and product selection."
 msgstr ""
+
+msgid "Unavailable selection — choose again"
+msgstr ""
