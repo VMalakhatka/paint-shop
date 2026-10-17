@@ -21,4 +21,5 @@ echo '<!doctype html><html><meta charset="utf-8"><meta name="viewport" content="
 echo file_get_contents($base . '/assets/product-analytics.css'); echo '</style>';
 lps_render_product_analytics_v4_page();
 echo '<script>window.LPS_PRODUCT_ANALYTICS=' . json_encode(['ajaxUrl'=>'https://fixture.local/api','locale'=>'en-US','currency'=>'UAH','i18n'=>lps_product_analytics_i18n()]) . ';window.LPS_AVAILABILITY=()=>({refresh(){},read(){return {}},apply(){}});</script><script>';
+echo file_get_contents($base . '/assets/analytics-conditions.js');
 echo file_get_contents($base . '/assets/product-analytics-v4.js'); echo '</script></html>';

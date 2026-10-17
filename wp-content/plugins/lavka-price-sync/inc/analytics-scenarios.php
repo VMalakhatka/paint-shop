@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/analytics-conditions.php';
 if (!defined('ABSPATH')) exit;
 require_once __DIR__ . '/analytics-period.php';
 
@@ -193,6 +194,7 @@ function lps_analytics_scenario_sanitize_profile_v4(array $profile): array {
         if ($selection['mode'] !== 'ANY') $product[$key] = $selection;
     }
     $movements = [];
+    if (isset($product_in['groupBranches'])) $product['groupBranches'] = lps_analytics_group_branches($product_in['groupBranches']);
     foreach ([
         'operationKinds', 'movementClasses', 'demandModes', 'documentTypes',
         'stockDirections', 'paymentTerms', 'customerSegments', 'counterparties',
@@ -705,10 +707,11 @@ add_action('admin_enqueue_scripts', static function (): void {
         @filemtime($css_path) ?: '1.0'
     );
     lps_availability_enqueue();
+    lps_analytics_conditions_enqueue();
     wp_enqueue_script(
         'lps-analytics-scenarios',
         plugins_url('assets/analytics-scenarios-v4.js', $plugin_file),
-        ['lps-product-availability'],
+        ['lps-product-availability', 'lps-analytics-conditions'],
         @filemtime($js_path) ?: '1.0',
         true
     );

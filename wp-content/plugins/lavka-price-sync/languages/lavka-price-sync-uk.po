@@ -6933,3 +6933,103 @@ msgstr "Завантажити порівняння CSV"
 #: inc/product-analytics.php
 msgid "Comparison rows keep their original filters and snapshot dates. They remain in this page until reload; download the comparison to keep it. Maximum 50 rows. Rows may overlap and are not summed."
 msgstr "Рядки зберігають початкові фільтри та дати знімків. Вони залишаються на сторінці до її оновлення; завантажте порівняння, щоб зберегти його. Не більше 50 рядків. Вибірки можуть перетинатися, тому не підсумовуються."
+
+
+#: inc/analytics-conditions.php
+msgid "Selected conditions"
+msgstr "Вибрані умови"
+
+
+#: inc/analytics-conditions.php
+msgid "No conditions added."
+msgstr "Умови ще не додано."
+
+
+#: inc/analytics-conditions.php
+msgid "Product group tree"
+msgstr "Дерево груп товарів"
+
+
+#: inc/analytics-conditions.php
+msgid "Find a group or subgroup"
+msgstr "Знайти групу або підгрупу"
+
+
+#: inc/analytics-conditions.php
+msgid "Include branch"
+msgstr "Включити гілку"
+
+
+#: inc/analytics-conditions.php
+msgid "Exclude branch"
+msgstr "Виключити гілку"
+
+
+#: inc/analytics-conditions.php
+msgid "Add condition"
+msgstr "Додати умову"
+
+
+#: inc/analytics-conditions.php
+msgid "Edit condition"
+msgstr "Редагувати умову"
+
+
+#: inc/analytics-conditions.php
+msgid "Remove condition"
+msgstr "Видалити умову"
+
+
+#: inc/analytics-conditions.php
+msgid "Switch include / exclude"
+msgstr "Змінити включення / виключення"
+
+
+#: inc/analytics-conditions.php
+msgid "No group at this level"
+msgstr "Без групи на цьому рівні"
+
+
+#: inc/analytics-conditions.php
+msgid "Included branches are combined. Excluded branches are removed from the result. Other conditions apply together."
+msgstr "Включені гілки об’єднуються. Виключені гілки віднімаються від результату. Інші умови застосовуються разом."
+
+
+#: inc/analytics-conditions.php
+msgid "Group tree requires the updated Java service. Existing conditions are preserved."
+msgstr "Для дерева груп потрібне оновлення Java. Наявні умови збережено."
+
+
+#: inc/analytics-conditions.php
+msgid "Saved level condition"
+msgstr "Збережена умова рівня"
+
+
+#: inc/analytics-conditions.php
+msgid "Press Add condition to apply your selection."
+msgstr "Натисніть «Додати умову», щоб застосувати вибір."
+
+
+#: inc/analytics-conditions.php
+msgid "Use at most 100 valid group branches."
+msgstr "Дозволено не більше 100 коректних гілок груп."
+
+
+#: inc/analytics-conditions.php
+msgid "Invalid group branch path."
+msgstr "Некоректний шлях гілки групи."
+
+
+#: inc/analytics-conditions.php
+msgid "The analytics response did not apply the selected group branches."
+msgstr "Відповідь аналітики не застосувала вибрані гілки груп."
+
+
+#: inc/analytics-conditions.php
+msgid "Included condition"
+msgstr "Включено"
+
+
+#: inc/analytics-conditions.php
+msgid "Excluded condition"
+msgstr "Виключено"

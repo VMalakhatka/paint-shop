@@ -6949,3 +6949,103 @@ msgstr "Скачать сравнение CSV"
 #: inc/product-analytics.php
 msgid "Comparison rows keep their original filters and snapshot dates. They remain in this page until reload; download the comparison to keep it. Maximum 50 rows. Rows may overlap and are not summed."
 msgstr "Строки сохраняют исходные фильтры и даты снимков. Они остаются на странице до её обновления; скачайте сравнение, чтобы сохранить его. Не более 50 строк. Выборки могут пересекаться, поэтому не суммируются."
+
+
+#: inc/analytics-conditions.php
+msgid "Selected conditions"
+msgstr "Выбранные условия"
+
+
+#: inc/analytics-conditions.php
+msgid "No conditions added."
+msgstr "Условия ещё не добавлены."
+
+
+#: inc/analytics-conditions.php
+msgid "Product group tree"
+msgstr "Дерево групп товаров"
+
+
+#: inc/analytics-conditions.php
+msgid "Find a group or subgroup"
+msgstr "Найти группу или подгруппу"
+
+
+#: inc/analytics-conditions.php
+msgid "Include branch"
+msgstr "Включить ветку"
+
+
+#: inc/analytics-conditions.php
+msgid "Exclude branch"
+msgstr "Исключить ветку"
+
+
+#: inc/analytics-conditions.php
+msgid "Add condition"
+msgstr "Добавить условие"
+
+
+#: inc/analytics-conditions.php
+msgid "Edit condition"
+msgstr "Изменить условие"
+
+
+#: inc/analytics-conditions.php
+msgid "Remove condition"
+msgstr "Удалить условие"
+
+
+#: inc/analytics-conditions.php
+msgid "Switch include / exclude"
+msgstr "Изменить включение / исключение"
+
+
+#: inc/analytics-conditions.php
+msgid "No group at this level"
+msgstr "Без группы на этом уровне"
+
+
+#: inc/analytics-conditions.php
+msgid "Included branches are combined. Excluded branches are removed from the result. Other conditions apply together."
+msgstr "Включённые ветки объединяются. Исключённые ветки вычитаются из результата. Остальные условия применяются вместе."
+
+
+#: inc/analytics-conditions.php
+msgid "Group tree requires the updated Java service. Existing conditions are preserved."
+msgstr "Для дерева групп нужно обновление Java. Существующие условия сохранены."
+
+
+#: inc/analytics-conditions.php
+msgid "Saved level condition"
+msgstr "Сохранённое условие уровня"
+
+
+#: inc/analytics-conditions.php
+msgid "Press Add condition to apply your selection."
+msgstr "Нажмите «Добавить условие», чтобы применить выбор."
+
+
+#: inc/analytics-conditions.php
+msgid "Use at most 100 valid group branches."
+msgstr "Допускается не более 100 корректных веток групп."
+
+
+#: inc/analytics-conditions.php
+msgid "Invalid group branch path."
+msgstr "Некорректный путь ветки группы."
+
+
+#: inc/analytics-conditions.php
+msgid "The analytics response did not apply the selected group branches."
+msgstr "Ответ аналитики не применил выбранные ветки групп."
+
+
+#: inc/analytics-conditions.php
+msgid "Included condition"
+msgstr "Включено"
+
+
+#: inc/analytics-conditions.php
+msgid "Excluded condition"
+msgstr "Исключено"

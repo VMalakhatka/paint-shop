@@ -1,5 +1,14 @@
 # Backend Lavka / KREUL
 
+## Ветки групп в аналитике
+
+С 2026-10-17 `lavka-price-sync/inc/analytics-conditions.php` сохраняет и проверяет
+`productFilters.groupBranches`; общий UI `assets/analytics-conditions.js`
+используется аналитикой и редактором сценариев. Java владеет деревом реальных
+путей и SQL-предикатом, PHP проверяет feature version и echo применённых веток.
+Пересчёт snapshot schema v7 не требуется. UI, совместимость старых сценариев,
+порядок деплоя и проверки: [операционный регламент](OPERATIONS_RUNBOOK.md#дерево-товарных-групп-и-набор-условий).
+
 ## Список ожидания клиентов — первый этап
 
 Список включён как production-пилот 2026-09-12. Фоновый email включён

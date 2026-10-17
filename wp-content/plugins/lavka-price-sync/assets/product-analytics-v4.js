@@ -49,6 +49,7 @@
     const productFilterGrid = el('lps-pa-product-filter-grid');
     const movementFilterGrid = el('lps-pa-movement-filter-grid');
     const scenarioSelect = el('lps-pa-scenario-select');
+    const conditions = window.LPS_CONDITIONS?.(root, 'lps-pa', i18n.filterLabels || {});
     const numberFormat = new Intl.NumberFormat(config.locale || undefined, { maximumFractionDigits: 2 });
     const moneyFormat = new Intl.NumberFormat(config.locale || undefined, {
         style: 'currency', currency: config.currency || 'UAH', maximumFractionDigits: 2
@@ -282,6 +283,7 @@
             if (mode) mode.addEventListener('change', sync);
             sync();
         });
+        conditions?.refresh(state.capabilities);
     }
 
     function renderSnapshotContext() {
@@ -348,6 +350,7 @@
     }
 
     function collectFilters(section) {
+        if (conditions) return conditions.read(section);
         const output = {};
         root.querySelectorAll('[data-lps-section="' + section + '"]').forEach((container) => {
             const name = container.dataset.lpsSelection;
@@ -550,6 +553,7 @@
         const filters = request.productFilters || {};
         const selectionText = selection => label(selection.mode === 'EXCLUDE' ? 'exclude' : 'include', selection.mode) + ': ' + (selection.values || []).join(', ');
         const names = [1, 2, 3, 4, 5, 6].map(level => filters['groupLevel' + level]).filter(Boolean).map(selectionText);
+        (filters.groupBranches || []).forEach(branch => names.push(selectionText({mode:branch.mode, values:[branch.path.join(' → ')]})));
         const conditions = [];
         if (filters.currentSuppliers) conditions.push(label('supplier') + ': ' + selectionText(filters.currentSuppliers));
         Object.entries(request.movementFilters || {}).forEach(([key, selection]) => {
@@ -889,6 +893,7 @@
     }
 
     function resetSelections(preserveScenario) {
+        conditions?.clear();
         state.reportPeriod = null;
         el('lps-pa-search').value = '';
         root.querySelectorAll('.lps-pa-mode').forEach((node) => { node.value = 'ANY'; node.dispatchEvent(new Event('change')); });
@@ -970,6 +975,7 @@
         el('lps-pa-search').value = productFilters.search || '';
         Object.entries(productFilters).forEach((entry) => { if (entry[0] !== 'search') setSelection('product', entry[0], entry[1]); });
         Object.entries(movementFilters).forEach((entry) => setSelection('movement', entry[0], entry[1]));
+        conditions?.apply(productFilters, movementFilters);
         if (profile.period) {
             if (profile.period.mode === 'ROLLING_DAYS' && state.serverDate) {
                 const start = new Date(state.serverDate + 'T00:00:00Z');
@@ -1032,6 +1038,7 @@
     el('lps-pa-compare-export')?.addEventListener('click', exportComparison);
     el('lps-pa-exclude-one-off')?.addEventListener('click', () => {
         setSelection('movement', 'demandModes', { mode: 'EXCLUDE', values: ['ONE_OFF_ORDER'] });
+        conditions?.set('movement', 'demandModes', { mode: 'EXCLUDE', values: ['ONE_OFF_ORDER'] });
         markScenarioModified();
         setMessage(label('rebuildForProfit'), 'info');
     });

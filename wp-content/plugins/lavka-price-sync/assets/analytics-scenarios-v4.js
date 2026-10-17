@@ -32,6 +32,7 @@
     const el = (id) => document.getElementById(id);
     const warehouses = el('lps-as-warehouses');
     const form = el('lps-as-form');
+    const conditions = window.LPS_CONDITIONS?.(root, 'lps-as', analyticsI18n.filterLabels || {});
     const availabilityEditor = window.LPS_AVAILABILITY(root, config.warehouseGroups || [], warehouses);
     ['availabilityPercent', 'stockoutPercent', 'availabilityStatus'].forEach((key) => {
         el('lps-as-sort-field').add(new Option(analyticsI18n[key] || key, key));
@@ -184,6 +185,7 @@
         productSelections.forEach((name) => productGrid.insertAdjacentHTML('beforeend', renderDictionaryFilter(name, 'product')));
         movementSelections.forEach((name) => movementGrid.insertAdjacentHTML('beforeend', renderDictionaryFilter(name, 'movement')));
         bindSelectionModes();
+        conditions?.refresh(state.capabilities);
     }
 
     async function loadCapabilities() {
@@ -242,6 +244,7 @@
     }
 
     function collectFilters(section) {
+        if (conditions) return conditions.read(section);
         const result = {};
         root.querySelectorAll('[data-lps-as-section="' + section + '"]').forEach((container) => {
             const name = container.dataset.lpsAsSelection;
@@ -340,6 +343,7 @@
     }
 
     function clearSelections() {
+        conditions?.clear();
         el('lps-as-search').value = '';
         root.querySelectorAll('.lps-as-mode').forEach((node) => { node.value = 'ANY'; node.dispatchEvent(new Event('change')); });
         root.querySelectorAll('.lps-as-values').forEach((node) => Array.from(node.options).forEach((option) => { option.selected = false; }));
@@ -393,6 +397,7 @@
         el('lps-as-search').value = productFilters.search || '';
         Object.entries(productFilters).forEach((entry) => { if (entry[0] !== 'search') setSelection('product', entry[0], entry[1]); });
         Object.entries(normalized.movementFilters || {}).forEach((entry) => setSelection('movement', entry[0], entry[1]));
+        conditions?.apply(productFilters, normalized.movementFilters || {});
         if (normalized.period) {
             el('lps-as-period-mode').value = normalized.period.mode === 'ROLLING_DAYS' ? 'ROLLING_DAYS' : 'FIXED';
             el('lps-as-period-days').value = String(normalized.period.days || 190);

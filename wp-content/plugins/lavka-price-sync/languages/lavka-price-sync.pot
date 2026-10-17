@@ -6730,3 +6730,103 @@ msgstr ""
 #: inc/product-analytics.php
 msgid "Comparison rows keep their original filters and snapshot dates. They remain in this page until reload; download the comparison to keep it. Maximum 50 rows. Rows may overlap and are not summed."
 msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Selected conditions"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "No conditions added."
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Product group tree"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Find a group or subgroup"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Include branch"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Exclude branch"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Add condition"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Edit condition"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Remove condition"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Switch include / exclude"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "No group at this level"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Included branches are combined. Excluded branches are removed from the result. Other conditions apply together."
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Group tree requires the updated Java service. Existing conditions are preserved."
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Saved level condition"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Press Add condition to apply your selection."
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Use at most 100 valid group branches."
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Invalid group branch path."
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "The analytics response did not apply the selected group branches."
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Included condition"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Excluded condition"
+msgstr ""
