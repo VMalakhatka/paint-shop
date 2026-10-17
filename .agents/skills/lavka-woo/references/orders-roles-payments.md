@@ -542,3 +542,13 @@ reconciliation after attempted apply. Refund retains income and flags a separate
 expense review. Never promote preview queues or backfill earlier manual payments.
 Runbook: `docs/FOLIO_WFP_PAYMENTS.md`; Java API contract of the same domain.
 Defaults off; schema migration/deployment/live enablement require separate approval.
+
+Customer marketing subscriptions (2026-10-17, source PCOE CustomerSubscriptions +
+Broadcasts): one user profile `_pcoe_subscriptions_v1`; AND brand/category inside
+rules, OR across rules, topic-specific scopes. Reuse public catalogue visibility,
+never expose hidden suppliers. Filter attachment products before grouping; retain
+pricing context independently of subset/file grouping. Recheck profile fingerprint
+before delivery. Waitlist consent/pilot is independent and must not be inferred
+from marketing arrival subscription. No personal schedule yet. Contract, rollback
+and acceptance limits: PCOE README, Customer subscriptions first stage; user and
+manager instructions in their canonical guides.

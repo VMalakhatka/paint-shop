@@ -1099,3 +1099,6 @@ msgstr ""
 
 msgid "Nova Poshta delivery is paid separately to the carrier, not with the goods. Free delivery covers only the base tariff under your delivery policy; insurance and extras remain payable. Free store pickup is offered for goods allocated to one warehouse. Wait for confirmation before visiting."
 msgstr ""
+
+msgid "In account details, choose mailing topics and product interests. A rule combines a catalogue brand with a category including subcategories. For example, select Cernit with polymer clay and add another rule for all Darwi products. You can keep news and promotions unrestricted using separate rules. Save account changes. Managers see the preferences in the customer card. Files contain only matching products; changing preferences after preparation excludes that recipient until a new mailing is prepared. Waiting-list notices and order messages are separate. Personal delivery schedules are not enabled yet."
+msgstr ""

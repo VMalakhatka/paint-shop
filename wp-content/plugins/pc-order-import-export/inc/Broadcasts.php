@@ -51,15 +51,26 @@ final class Broadcasts {
             if(!in_array($kind,['text','price','arrival'],true) || !$subject || !$text || mb_strlen($subject)>180 || mb_strlen($text)>10000)throw new \RuntimeException(__('Enter a subject and message, and select the mailing type.','pc-order-import-export'));
             $options=CommercialOffer::options($kind==='text'?[]:$input);
             $recipients=self::recipients($input);$catalogue=BroadcastSources::products($kind,$input);$groups=[];
+            $audience=CustomerSubscriptions::campaign($input,$kind);
             if($kind!=='text' && !$catalogue['ids'])throw new \RuntimeException(__('No published products are available for this mailing.','pc-order-import-export'));
-            foreach($recipients['rows'] as $user=>&$recipient){
-                $keyGroup=$kind==='text'?'':BroadcastPricing::group($user);$recipient['group']=$keyGroup;$recipient['pricing_context']=$keyGroup;
+            foreach(array_keys($recipients['rows']) as $user){
+                $profile=CustomerSubscriptions::profile($user);
+                $ids=$kind==='text'?[]:CustomerSubscriptions::products($profile,$audience['topic'],$catalogue['ids']);
+                $matches=$kind==='text'?CustomerSubscriptions::matches($profile,$audience['topic'],$audience['brands'],$audience['categories']):(bool)$ids;
+                if(!$matches){unset($recipients['rows'][$user]);$recipients['skipped']++;continue;}
+                $context=$kind==='text'?'':BroadcastPricing::group($user);
+                $keyGroup=$context?hash('sha256',$context.':'.wp_json_encode($ids)):'';
+                $recipients['rows'][$user]['group']=$keyGroup;
+                $recipients['rows'][$user]['pricing_context']=$context;
+                // Bind the audience to the same profile snapshot used to filter products.
+                $recipients['rows'][$user]['subscription_fingerprint']=hash('sha256',wp_json_encode($profile));
                 if($keyGroup && !isset($groups[$keyGroup]))$groups[$keyGroup]=['user'=>$user,'count'=>0,'ready'=>false,
-                    'label'=>implode(', ',get_userdata($user)->roles).' / '.get_user_locale($user)];
+                    'pricing_context'=>$context,'ids'=>$ids,'label'=>implode(', ',get_userdata($user)->roles).' / '.get_user_locale($user)];
                 if($keyGroup)$groups[$keyGroup]['count']++;
-            }unset($recipient);
+            }
+            if(!$recipients['rows'])throw new \RuntimeException(__('No selected customer subscribes to this topic and product selection.','pc-order-import-export'));
             $data=array_merge($catalogue,$options,['status'=>$groups?'preparing':'ready','subject'=>$subject,'message'=>$text,'kind'=>$kind,
-                'actor'=>get_current_user_id(),'created_at'=>time(),'ready_at'=>$groups?0:time(),'recipients'=>$recipients['rows'],'skipped'=>$recipients['skipped'],'groups'=>$groups,'error'=>'']);
+                'subscription_audience'=>$audience,'actor'=>get_current_user_id(),'created_at'=>time(),'ready_at'=>$groups?0:time(),'recipients'=>$recipients['rows'],'skipped'=>$recipients['skipped'],'groups'=>$groups,'error'=>'']);
             $id=wp_insert_post(['post_type'=>BroadcastStore::TYPE,'post_status'=>'private','post_author'=>get_current_user_id(),'post_title'=>wp_slash($subject)],true);
             if(is_wp_error($id))throw new \RuntimeException(__('Mailing state could not be saved.','pc-order-import-export'));
             BroadcastStore::save($id,$data);update_post_meta($id,'_pcoe_broadcast_request',$key);
@@ -102,8 +113,8 @@ final class Broadcasts {
                     if($group['ready'])continue;
                     if(!empty($group['building']))throw new \RuntimeException(__('File preparation was interrupted. Create a new mailing.','pc-order-import-export'));
                     $d['groups'][$key]['building']=true;BroadcastStore::save($id,$d);
-                    if(!self::allowed($group['user']) || BroadcastPricing::group($group['user'])!==$key)throw new \RuntimeException(__('Customer pricing conditions changed. Create a new mailing.','pc-order-import-export'));
-                    $file=BroadcastPricing::file($group['user'],$d['ids'],$d,$prepared);
+                    if(!self::allowed($group['user']) || BroadcastPricing::group($group['user'])!==($group['pricing_context']??$key))throw new \RuntimeException(__('Customer pricing conditions changed. Create a new mailing.','pc-order-import-export'));
+                    $file=BroadcastPricing::file($group['user'],$group['ids']??$d['ids'],$d,$prepared);
                     if(isset($file['reuse'])){
                         $target=$file['reuse'];
                         // Preserve each recipient's context for the independent pre-send check.
@@ -147,7 +158,7 @@ final class Broadcasts {
                 if($recipient['status']!=='pending')continue;
                 if($quota['used']>=5)break;
                 $u=get_userdata($user);
-                if(!self::allowed($user) || !$u || $u->user_email!==$recipient['email'] || ($recipient['group'] && BroadcastPricing::group($user)!==($recipient['pricing_context']??$recipient['group']))){
+                if(!self::allowed($user) || !self::subscription_current($user,$recipient) || !$u || $u->user_email!==$recipient['email'] || ($recipient['group'] && BroadcastPricing::group($user)!==($recipient['pricing_context']??$recipient['group']))){
                     $recipient['status']='skipped';continue;
                 }
                 $attachments=[];
@@ -168,6 +179,7 @@ final class Broadcasts {
                     $body=$d['message'];
                     if($attachments)$body.="\n\n".__('Prices and stock in the attachment were captured when the mailing was prepared. Check current availability before ordering.','pc-order-import-export');
                     $body.="\n\n".__('Mailing preferences: sign in to your account to stop receiving news and price lists.','pc-order-import-export')."\n".wc_get_account_endpoint_url('edit-account').'#pcoe-mail-preferences';
+                    if(!self::allowed($user) || !self::subscription_current($user,$recipient)){$recipient['status']='skipped';continue;}
                     $recipient['status']='sending';$recipient['at']=gmdate('c');BroadcastStore::save($id,$d);
                     $quota['used']++;update_option('_pcoe_broadcast_quota',$quota,false);
                     try{$recipient['status']=wp_mail($recipient['email'],$d['subject'],$body,$headers,$attachments)?'accepted':'failed';}
@@ -179,10 +191,17 @@ final class Broadcasts {
             BroadcastStore::save($id,$d);if($d['status']==='running')self::schedule($id,60);
         }finally{foreach($paths as $path)if(is_file($path))unlink($path);}
     }
+    public static function subscription_current(int $user,array $recipient): bool {
+        if(isset($recipient['subscription_fingerprint']))return hash_equals($recipient['subscription_fingerprint'],CustomerSubscriptions::fingerprint($user));
+        // Old prepared campaigns cannot bypass newly saved interests.
+        return !is_array(get_user_meta($user,CustomerSubscriptions::META,true));
+    }
     public static function preferences(): void {
         echo '<fieldset id="pcoe-mail-preferences"><legend>'.esc_html__('News and price lists','pc-order-import-export').'</legend><input type="hidden" name="pcoe_mail_preferences" value="1"><label><input type="checkbox" name="pcoe_mail_opt_out" value="1" '.checked((bool)get_user_meta(get_current_user_id(),self::OPT_OUT,true),true,false).'> '.esc_html__('Do not email me news and price lists. Order messages remain enabled.','pc-order-import-export').'</label></fieldset>';
+        CustomerSubscriptions::fields(get_current_user_id());
     }
     public static function save_preferences(int $user): void {
+        CustomerSubscriptions::save($user,wp_unslash($_POST));
         if($user===get_current_user_id() && isset($_POST['pcoe_mail_preferences']))update_user_meta($user,self::OPT_OUT,isset($_POST['pcoe_mail_opt_out'])?'1':'');
     }
 }

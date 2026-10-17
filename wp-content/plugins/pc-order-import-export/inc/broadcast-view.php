@@ -7,6 +7,7 @@ $d=BroadcastStore::get($id);$counts=array_count_values(array_column($d['recipien
 ?>
 <section class="pcoe-card">
 <h3><?php echo esc_html($d['subject']); ?></h3>
+<?php if(isset($d['subscription_audience'])): ?><p><?php echo esc_html(CustomerSubscriptions::topics()[$d['subscription_audience']['topic']]); ?></p><?php endif; ?>
 <p><strong><?php echo esc_html(BroadcastUi::label($d['status'])); ?></strong> · <?php echo esc_html(sprintf(__('Recipients: %s','pc-order-import-export'),count($d['recipients']))); ?></p>
 <?php if($d['error']): ?><p role="alert"><?php echo esc_html($d['error']); ?></p><?php endif; ?>
 <div style="white-space:pre-wrap;overflow-wrap:anywhere"><?php echo esc_html($d['message']); ?></div>
@@ -22,7 +23,7 @@ $d=BroadcastStore::get($id);$counts=array_count_values(array_column($d['recipien
 <?php else: esc_html_e('Preparing files','pc-order-import-export'); endif; ?></p>
 <?php endforeach; ?>
 <?php if($d['missing']): ?><p role="alert"><?php esc_html_e('These document SKUs are missing or not published on the site and will not be included:','pc-order-import-export'); ?> <?php echo esc_html(implode(', ',$d['missing'])); ?></p><?php endif; ?>
-<?php if($d['skipped']): ?><p><?php echo esc_html(sprintf(__('Excluded before preparation (invalid/duplicate email or unsubscribed): %s','pc-order-import-export'),$d['skipped'])); ?></p><?php endif; ?>
+<?php if($d['skipped']): ?><p><?php echo esc_html(sprintf(__('Excluded before preparation (email, unsubscribe or interests): %s','pc-order-import-export'),$d['skipped'])); ?></p><?php endif; ?>
 <p><?php esc_html_e('Each customer receives a separate email. Prices are fixed at preparation time. Accepted by the mail service does not prove inbox delivery. Unknown results are never retried automatically.','pc-order-import-export'); ?></p>
 <?php
 if($d['status']==='preparing')BroadcastUi::action($id,'prepare',__('Continue preparing files','pc-order-import-export'));
@@ -58,6 +59,13 @@ $directory=ManagerWorkspace::directory($search,$role,$city,1,100);$roles=wp_role
 <p><?php esc_html_e('The first 100 matches are shown. Use filters to select individual customers outside this list.','pc-order-import-export'); ?></p>
 <p><label><?php esc_html_e('Mailing type','pc-order-import-export'); ?><br><select name="kind" id="pcoe-broadcast-kind">
 <?php foreach(['text'=>__('Message only','pc-order-import-export'),'price'=>__('Full price list','pc-order-import-export'),'arrival'=>__('Products from a Folio document','pc-order-import-export')] as $k=>$v): ?><option value="<?php echo esc_attr($k); ?>"><?php echo esc_html($v); ?></option><?php endforeach; ?></select></label></p>
+<fieldset style="padding:12px;border:1px solid #ddd"><legend><?php esc_html_e('Subscription audience','pc-order-import-export'); ?></legend>
+<p><label><?php esc_html_e('Topic','pc-order-import-export'); ?> <select name="mail_topic"><option value=""><?php esc_html_e('Automatic: news, price list or arrivals by mailing type','pc-order-import-export'); ?></option><?php foreach(CustomerSubscriptions::topics() as $key=>$label): ?><option value="<?php echo esc_attr($key); ?>"><?php echo esc_html($label); ?></option><?php endforeach; ?></select></label></p>
+<p><?php esc_html_e('For messages without a file, specify the brand and category discussed. For files, interests are checked against each product and the attachment contains only matching products.','pc-order-import-export'); ?></p>
+<p><label><?php esc_html_e('Catalogue brand','pc-order-import-export'); ?> <?php CustomerSubscriptions::select('mail_brand',CustomerSubscriptions::brands(),0,__('No brand specified','pc-order-import-export')); ?></label></p>
+<p><label><?php esc_html_e('Category','pc-order-import-export'); ?> <?php CustomerSubscriptions::select('mail_category',CustomerSubscriptions::categories(),0,__('No category specified','pc-order-import-export')); ?></label></p>
+<p><?php esc_html_e('Customers who do not match are excluded before preparation. Changed preferences are checked again before sending. Review the recipient count and file previews before starting.','pc-order-import-export'); ?></p>
+</fieldset>
 <div id="pcoe-broadcast-file-options" hidden>
 <p><label><?php esc_html_e('Excel format','pc-order-import-export'); ?><br><select name="format" id="pcoe-broadcast-format"><?php foreach(['price','offer'] as $format): ?><option value="<?php echo esc_attr($format); ?>"><?php echo esc_html(CommercialOffer::format_label($format)); ?></option><?php endforeach; ?></select></label></p>
 <div id="pcoe-broadcast-offer-options" hidden>

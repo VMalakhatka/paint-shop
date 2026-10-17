@@ -3633,3 +3633,93 @@ msgstr "Якщо виникла проблема"
 
 msgid "If the Folio warehouse is not configured, ask the manager. If the document is already linked, do not create another copy. For an error or unknown result, send the manager the draft number and message; check existing documents before repeating confirmation."
 msgstr "Якщо склад ФОЛІО не налаштований, зверніться до менеджера. Якщо документ уже пов’язаний, не створюйте копію. У разі помилки або невідомого результату надішліть менеджеру номер чернетки й повідомлення; перед повторним підтвердженням перевірте наявні документи."
+
+msgid "All brands"
+msgstr "Усі бренди"
+
+msgid "All categories"
+msgstr "Усі категорії"
+
+msgid "All products"
+msgstr "Усі товари"
+
+msgid "All selected topics"
+msgstr "Усі вибрані теми"
+
+msgid "An interest is no longer available. Review your selections."
+msgstr "Один з інтересів більше недоступний. Перевірте вибір."
+
+msgid "Catalogue brand"
+msgstr "Бренд каталогу"
+
+msgid "Choose topics and products for email mailings. Save using the account Save changes button. Waiting-list notices are configured separately in Waiting list."
+msgstr "Виберіть теми й товари для email-розсилок. Натисніть «Зберегти зміни» внизу сторінки. Сповіщення про очікувані товари налаштовуються окремо у списку очікування."
+
+msgid "Customer subscriptions"
+msgstr "Підписки клієнта"
+
+msgid "Enable at least one interest rule, or choose all products."
+msgstr "Увімкніть хоча б одне правило інтересів або виберіть усі товари."
+
+msgid "Interest %s"
+msgstr "Інтерес %s"
+
+msgid "My subscriptions and notifications"
+msgstr "Мої підписки та сповіщення"
+
+msgid "New products and news"
+msgstr "Новинки та новини"
+
+msgid "Only the interests below"
+msgstr "Лише наведені нижче інтереси"
+
+msgid "Price lists"
+msgstr "Прайси"
+
+msgid "Product interests"
+msgstr "Товарні інтереси"
+
+msgid "Product interests could not be checked. Try again."
+msgstr "Не вдалося перевірити товарні інтереси. Спробуйте ще раз."
+
+msgid "Promotions and special offers"
+msgstr "Акції та спеціальні пропозиції"
+
+msgid "Stock arrivals"
+msgstr "Надходження товарів"
+
+msgid "The customer controls these preferences in account details. Waiting-list consent is separate."
+msgstr "Клієнт керує цими налаштуваннями в особистих даних кабінету. Згода на сповіщення списку очікування — окрема."
+
+msgid "Topic"
+msgstr "Тема"
+
+msgid "Use this rule"
+msgstr "Використовувати це правило"
+
+msgid "Within a rule, both brand and category must match. Rules are combined. Categories include subcategories. Enable a rule with All brands and All categories for unrestricted news or promotions."
+msgstr "У межах правила мають збігатися і бренд, і категорія. Достатньо збігу з будь-яким правилом. Категорії охоплюють підкатегорії. Для новин або акцій без обмежень увімкніть окреме правило «Усі бренди» та «Усі категорії»."
+
+msgid "Automatic: news, price list or arrivals by mailing type"
+msgstr "Автоматично: новини, прайс або надходження за типом розсилки"
+
+msgid "Customers who do not match are excluded before preparation. Changed preferences are checked again before sending. Review the recipient count and file previews before starting."
+msgstr "Клієнти, чиї підписки не відповідають розсилці, виключаються до підготовки. Перед надсиланням налаштування перевіряються повторно. Перегляньте кількість одержувачів і файли перед запуском."
+
+msgid "Excluded before preparation (email, unsubscribe or interests): %s"
+msgstr "Виключено до підготовки (email, відписка або інтереси): %s"
+
+msgid "For messages without a file, specify the brand and category discussed. For files, interests are checked against each product and the attachment contains only matching products."
+msgstr "Для повідомлення без файлу вкажіть бренд і категорію, про які йдеться. Для файлів інтереси перевіряються за кожним товаром, а вкладення містить лише відповідні товари."
+
+msgid "No brand specified"
+msgstr "Бренд не вказано"
+
+msgid "No category specified"
+msgstr "Категорію не вказано"
+
+msgid "Subscription audience"
+msgstr "Аудиторія за підписками"
+
+msgid "No selected customer subscribes to this topic and product selection."
+msgstr "Жоден із вибраних клієнтів не підписаний на цю тему та набір товарів."

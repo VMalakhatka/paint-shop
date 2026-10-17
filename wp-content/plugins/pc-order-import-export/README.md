@@ -862,3 +862,46 @@ Deploy PCOE (including assets/MO files) and the updated existing MU help file/
 translations together. No Java deployment or Folio write is needed. Production
 has not been changed or verified in this task. Rollback restores these help assets
 and render calls; it does not affect drafts, carts or Folio documents.
+
+### Customer subscriptions — first stage (2026-10-17)
+
+`CustomerSubscriptions` owns marketing interests in user meta
+`_pcoe_subscriptions_v1`: `version`, `topics` (`price`, `arrival`, `news`,
+`promotion`), `scope` (`all` or `selected`), `rules` (`topic`, `brand`, `category`),
+`updated_at`. Zero brand/category means unrestricted **within an enabled rule**;
+`*` applies to selected topics. AND inside a rule, OR between rules; category
+matching includes ancestors of the product's assigned categories. Variations
+inherit parent taxonomy. Only publicly allowed catalogue supplier/brand terms and
+visible categories are offered. This does not introduce a separate true-manufacturer
+mapping; absent Cernit/Darwi terms must be addressed in catalogue ownership, not
+inferred from product names here.
+
+Customer account details is the only write surface (Woo account validation plus
+own nonce/user check); manager customer cards are read-only. Saving no topics stops
+all marketing topics. Existing accounts without this meta retain prior behavior;
+`Broadcasts::OPT_OUT` still overrides every marketing topic. Waitlist's explicit
+`email_enabled`, pilot gate, transactional order messages and chat are untouched.
+No personal scheduler or new marketing channel is enabled in this stage.
+
+Broadcast creation classifies the topic (default by kind, explicit override for
+promotional invoices). Text-only messages use the declared brand/category;
+untagged text does not satisfy restricted interests. Product files are filtered
+per profile. Preliminary grouping uses pricing context **and matching product IDs**;
+existing content-signature deduplication may then reuse identical files. Original
+pricing context remains on recipients, independent of the file group key.
+Preferences are fingerprinted and checked immediately before mail transport. A
+changed profile is skipped and needs a new preview; old prepared campaigns also
+skip customers who subsequently saved a profile. No automatic sends on save.
+
+Checks: `tests/subscriptions-offline.php` uses fictional taxonomy/user fixtures,
+no database, HTTP or email; it tests audience intersection, descendants, per-topic
+rules, file subsets/grouping, stale preparation, nonce/ownership and zero topics.
+The rendered fixture was inspected at desktop and mobile widths; live Woo/theme
+save and real catalogue labels remain deployment acceptance checks. Existing
+`tests/broadcasts.php` is the disposable full Woo integration regression.
+
+Deploy only the existing PCOE plugin and changed wholesale help/catalogues; no
+Java or schema migration is needed. Review recipient counts and file previews,
+then explicitly start a mailing. For rollback pause prepared/running campaigns
+first: old code does not enforce the new interests. Keep the profile meta and
+opt-out flags; do not resume campaigns with the old code.
