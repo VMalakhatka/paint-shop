@@ -552,3 +552,12 @@ before delivery. Waitlist consent/pilot is independent and must not be inferred
 from marketing arrival subscription. No personal schedule yet. Contract, rollback
 and acceptance limits: PCOE README, Customer subscriptions first stage; user and
 manager instructions in their canonical guides.
+
+
+Commercial-offer photos (2026-10-17, code/offline verification): PCOE
+`BroadcastPhotos` prepares campaign thumbnails before price-group XLSX assembly,
+under the existing mailing lock. Preserve per-product persisted progress and
+private non-autoloaded blobs; do not restore a single global photo time budget.
+A yielded batch is incomplete, not a missing image. Final attachment size limits
+and explicit send approval remain. Recovery/cleanup and regression details:
+`wp-content/plugins/pc-order-import-export/README.md`, Commercial offers in mailings.

@@ -61,9 +61,9 @@ final class BroadcastPricing {
     }
 
     /** Persist XLSX bytes privately in WordPress; no public media/upload URL. */
-    public static function file(int $user,array $ids,array $options=[], array $prepared=[]): array {
+    public static function file(int $user,array $ids,array $options=[], array $prepared=[], ?callable $photos=null): array {
         $options=CommercialOffer::options($options);
-        return self::scope($user,static function()use($ids,$options,$prepared){
+        return self::scope($user,static function()use($ids,$options,$prepared,$photos){
             if(!ApprovalWorkbook::available())throw new \RuntimeException(__('Excel export is unavailable. Contact the site administrator.','pc-order-import-export'));
             $locations=PriceList::location_ids();
             if(!$locations)throw new \RuntimeException(__('Selling warehouses are not mapped.','pc-order-import-export'));
@@ -85,11 +85,11 @@ final class BroadcastPricing {
                         $regular===''?null:wc_get_price_to_display($p,['price'=>(float)$regular])];
                 }
             }
-            $inputs=wp_json_encode(['grouped-offer-columns-v4-no-price-supplier',$rows,$extra,PriceList::headers(),get_locale(),get_woocommerce_currency(),$options['format']]);
+            $inputs=wp_json_encode(['grouped-offer-v5-batched-photos',$rows,$extra,PriceList::headers(),get_locale(),get_woocommerce_currency(),$options['format']]);
             if($inputs===false)throw new \RuntimeException('File comparison failed');
             $signature=hash('sha256',$inputs);
             if(isset($prepared[$signature]))return ['reuse'=>$prepared[$signature]];
-            $offer=$options['format']==='offer'?CommercialOffer::workbook($rows,$options['quantity']):null;
+            $offer=$options['format']==='offer'?CommercialOffer::workbook($rows,$options['quantity'],$photos):null;
             $book=$offer?$offer['book']:PriceList::from_rows(PriceList::headers(),$rows);
             $path=BroadcastStore::temporary_file();
             try {
@@ -97,7 +97,13 @@ final class BroadcastPricing {
                 $bytes=file_get_contents($path);
                 if(!$bytes || strlen($bytes)>8*1024*1024)throw new \RuntimeException(__('The attachment exceeds the 8 MB mailing limit.','pc-order-import-export'));
                 return ['signature'=>$signature,'content'=>base64_encode($bytes),'sha256'=>hash('sha256',$bytes),'count'=>$count,'photos'=>$offer['photos']??0,'at'=>gmdate('c')];
-            } finally {if(is_file($path))unlink($path);$book->disconnectWorksheets();}
+            } finally {
+                if(is_file($path))unlink($path);
+                if($photos)foreach($book->getAllSheets() as $sheet)foreach($sheet->getDrawingCollection() as $drawing){
+                    if($drawing instanceof \PhpOffice\PhpSpreadsheet\Worksheet\Drawing && is_file($drawing->getPath()))unlink($drawing->getPath());
+                }
+                $book->disconnectWorksheets();
+            }
         });
     }
 }

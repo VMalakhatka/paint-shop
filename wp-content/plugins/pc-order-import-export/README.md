@@ -768,8 +768,22 @@ Unknown stock stays blank; zero stays zero. Quantities never come from Folio doc
 
 Photos use the assigned Woo thumbnail (variation falls back to parent), with safe
 HTTP redirects, 3-second request timeout, 512 KiB input and 4-million-pixel limits.
-JPEG/PNG/GIF/WebP are resized to at most 160×100 and embedded. GD absence, failures,
-25-second image budget or 3 MiB total compressed image budget leave a product link.
+JPEG/PNG/GIF/WebP are resized to at most 160×100 and embedded. Mailing preparation
+now uses `BroadcastPhotos`: at most 40 products / 15 seconds per cron invocation
+(one in-flight request may add up to 3 seconds). Each completed thumbnail is a
+checksum-protected non-autoloaded option using the existing private file store;
+progress is saved per product under the mailing lock. All price groups share these
+thumbnails. A failed download gets one retry on a later invocation, then a product
+link. GD absence or invalid/oversized source images also produce links. No global
+25-second / 3 MiB truncation applies to campaign images. File-backed XLSX drawings
+avoid keeping all decoded GD resources in memory. Photo options are deleted after
+all groups become ready, on cancellation, or mailing deletion. File assembly retains
+the existing interrupted-build error; only thumbnail preparation is resumable.
+Manager progress counts processed products (including unavailable photos). Existing
+ready attachments are immutable: create a new mailing after the WordPress deploy.
+No Java update is needed for this photo change. Offline regression:
+`tests/broadcast-photos-offline.php` generates a 350-product workbook, checks images
+beyond row 221, restart from persisted progress, retry, sharing and cleanup.
 The review reports embedded photo count. No media writes, public price files, additional automatic email are introduced; the existing 8 MiB final
 attachment limit and explicit review/start remain. Pricing groups reuse the same
 private file; the email attachment is named `commercial-offer-YYYY-MM-DD.xlsx`.

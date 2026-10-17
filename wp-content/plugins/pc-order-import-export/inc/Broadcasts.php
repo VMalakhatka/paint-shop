@@ -95,7 +95,7 @@ final class Broadcasts {
                 }
                 $d['status']='running';
             }else throw new \RuntimeException(__('This action is unavailable for the current mailing state.','pc-order-import-export'));
-            BroadcastStore::save($id,$d);if($d['status']==='running')self::schedule($id);
+            BroadcastStore::save($id,$d);if($d['status']==='cancelled')BroadcastPhotos::delete($id,$d);if($d['status']==='running')self::schedule($id);
         });
     }
     public static function tick(int $id): void {
@@ -106,6 +106,7 @@ final class Broadcasts {
             self::schedule($id,60);
             if(!user_can($d['actor'],'manage_woocommerce')){$d['status']='paused';$d['error']=__('The sending manager no longer has access.','pc-order-import-export');BroadcastStore::save($id,$d);return;}
             if($d['status']==='preparing'){
+                if(($d['format']??'price')==='offer' && !BroadcastPhotos::prepare($id,$d))return;
                 $started=microtime(true);$checked=0;$prepared=[];
                 foreach($d['groups'] as $key=>$group)if($group['ready'] && !empty($group['signature']))$prepared[$group['signature']]=$key;
                 foreach(array_keys($d['groups']) as $key){
@@ -114,7 +115,7 @@ final class Broadcasts {
                     if(!empty($group['building']))throw new \RuntimeException(__('File preparation was interrupted. Create a new mailing.','pc-order-import-export'));
                     $d['groups'][$key]['building']=true;BroadcastStore::save($id,$d);
                     if(!self::allowed($group['user']) || BroadcastPricing::group($group['user'])!==($group['pricing_context']??$key))throw new \RuntimeException(__('Customer pricing conditions changed. Create a new mailing.','pc-order-import-export'));
-                    $file=BroadcastPricing::file($group['user'],$group['ids']??$d['ids'],$d,$prepared);
+                    $file=BroadcastPricing::file($group['user'],$group['ids']??$d['ids'],$d,$prepared,($d['format']??'price')==='offer'?static fn($product)=>BroadcastPhotos::bytes($id,$product,$d):null);
                     if(isset($file['reuse'])){
                         $target=$file['reuse'];
                         // Preserve each recipient's context for the independent pre-send check.
@@ -133,6 +134,7 @@ final class Broadcasts {
                 }
                 if(!array_filter($d['groups'],static fn($g)=>!$g['ready'])){$d['status']='ready';$d['ready_at']=time();}
                 BroadcastStore::save($id,$d);
+                if($d['status']==='ready')BroadcastPhotos::delete($id,$d);
                 if($d['status']==='preparing')self::schedule($id);
                 return;
             }
