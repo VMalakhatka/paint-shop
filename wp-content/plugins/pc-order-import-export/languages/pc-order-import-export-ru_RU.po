@@ -3717,3 +3717,6 @@ msgstr "Аудитория по подпискам"
 
 msgid "No selected customer subscribes to this topic and product selection."
 msgstr "Ни один из выбранных клиентов не подписан на эту тему и набор товаров."
+
+msgid "Unavailable selection — choose again"
+msgstr "Выбор недоступен — выберите заново"

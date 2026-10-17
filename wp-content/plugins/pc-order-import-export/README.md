@@ -905,3 +905,7 @@ Java or schema migration is needed. Review recipient counts and file previews,
 then explicitly start a mailing. For rollback pause prepared/running campaigns
 first: old code does not enforce the new interests. Keep the profile meta and
 opt-out flags; do not resume campaigns with the old code.
+
+Removed or newly hidden taxonomy selections remain explicit unavailable options in
+the form. Saving requires choosing a valid replacement or disabling that rule;
+they must never silently turn into unrestricted brands/categories.

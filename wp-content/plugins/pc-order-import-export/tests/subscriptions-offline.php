@@ -97,6 +97,8 @@ namespace {
     S::save(99,['pcoe_subscriptions_nonce'=>'invalid','subscriptions'=>[]]);check(S::profile(99)===$p,'Invalid nonce cannot erase subscriptions');
     S::save(2,['pcoe_subscriptions_nonce'=>'valid','subscriptions'=>[]]);check(S::profile(2)===$p,'Customer cannot update another customer');
     S::save(99,['pcoe_subscriptions_nonce'=>'valid','subscriptions'=>['topics'=>[],'scope'=>'all']]);check(S::profile(99)['topics']===[],'Saving zero topics opts out of all marketing topics');
+    ob_start();S::select('fixture',psu_catalog_supplier_terms(true),999,'All brands');$unavailable=ob_get_clean();
+    check(str_contains($unavailable,'value="999" selected'), 'Removed or hidden interest cannot silently become All brands on account save');
     if(in_array('--html',$argv,true)){
         $GLOBALS['meta'][99][S::META]=$p;
         echo '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font:16px sans-serif;max-width:900px;margin:20px auto;padding:12px}select{font-size:16px}label{line-height:2}</style></head><body><form>';S::fields(99);echo '<button>Save changes</button></form></body></html>';
