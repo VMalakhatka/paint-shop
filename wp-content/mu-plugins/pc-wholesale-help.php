@@ -441,6 +441,7 @@ function pc_wholesale_help_render_endpoint(): void {
             <a class="pc-help-inline-action" href="<?php echo esc_url($orders_url); ?>"><?php esc_html_e('Open my orders', 'pc-wholesale-help'); ?> →</a>
         </section>
 
+        <section class="pc-help-section" id="subscriptions"><h2><?php esc_html_e('My subscriptions and notifications', 'pc-order-import-export'); ?></h2><p><?php esc_html_e('In account details, choose mailing topics and product interests. A rule combines a catalogue brand with a category including subcategories. For example, select Cernit with polymer clay and add another rule for all Darwi products. You can keep news and promotions unrestricted using separate rules. Save account changes. Managers see the preferences in the customer card. Files contain only matching products; changing preferences after preparation excludes that recipient until a new mailing is prepared. Waiting-list notices and order messages are separate. Personal delivery schedules are not enabled yet.', 'pc-wholesale-help'); ?></p></section>
         <section class="pc-help-section" id="messages">
             <h2><?php esc_html_e('Messages with your manager', 'pc-wholesale-help'); ?></h2>
             <?php include __DIR__ . '/pc-wholesale-help/messages-guide.php'; ?>

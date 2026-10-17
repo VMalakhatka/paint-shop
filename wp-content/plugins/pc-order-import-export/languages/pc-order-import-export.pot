@@ -3431,3 +3431,93 @@ msgstr ""
 
 msgid "If the Folio warehouse is not configured, ask the manager. If the document is already linked, do not create another copy. For an error or unknown result, send the manager the draft number and message; check existing documents before repeating confirmation."
 msgstr ""
+
+msgid "All brands"
+msgstr ""
+
+msgid "All categories"
+msgstr ""
+
+msgid "All products"
+msgstr ""
+
+msgid "All selected topics"
+msgstr ""
+
+msgid "An interest is no longer available. Review your selections."
+msgstr ""
+
+msgid "Catalogue brand"
+msgstr ""
+
+msgid "Choose topics and products for email mailings. Save using the account Save changes button. Waiting-list notices are configured separately in Waiting list."
+msgstr ""
+
+msgid "Customer subscriptions"
+msgstr ""
+
+msgid "Enable at least one interest rule, or choose all products."
+msgstr ""
+
+msgid "Interest %s"
+msgstr ""
+
+msgid "My subscriptions and notifications"
+msgstr ""
+
+msgid "New products and news"
+msgstr ""
+
+msgid "Only the interests below"
+msgstr ""
+
+msgid "Price lists"
+msgstr ""
+
+msgid "Product interests"
+msgstr ""
+
+msgid "Product interests could not be checked. Try again."
+msgstr ""
+
+msgid "Promotions and special offers"
+msgstr ""
+
+msgid "Stock arrivals"
+msgstr ""
+
+msgid "The customer controls these preferences in account details. Waiting-list consent is separate."
+msgstr ""
+
+msgid "Topic"
+msgstr ""
+
+msgid "Use this rule"
+msgstr ""
+
+msgid "Within a rule, both brand and category must match. Rules are combined. Categories include subcategories. Enable a rule with All brands and All categories for unrestricted news or promotions."
+msgstr ""
+
+msgid "Automatic: news, price list or arrivals by mailing type"
+msgstr ""
+
+msgid "Customers who do not match are excluded before preparation. Changed preferences are checked again before sending. Review the recipient count and file previews before starting."
+msgstr ""
+
+msgid "Excluded before preparation (email, unsubscribe or interests): %s"
+msgstr ""
+
+msgid "For messages without a file, specify the brand and category discussed. For files, interests are checked against each product and the attachment contains only matching products."
+msgstr ""
+
+msgid "No brand specified"
+msgstr ""
+
+msgid "No category specified"
+msgstr ""
+
+msgid "Subscription audience"
+msgstr ""
+
+msgid "No selected customer subscribes to this topic and product selection."
+msgstr ""
