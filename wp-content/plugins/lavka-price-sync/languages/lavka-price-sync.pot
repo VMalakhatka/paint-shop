@@ -6655,3 +6655,78 @@ msgstr ""
 
 msgid "Saved order draft not found."
 msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Profit / average inventory for the period, %"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Selection"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Groups, period and warehouses"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "All selected products"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Remove from comparison"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "One-off sales are excluded. Build the report to apply this condition."
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Group profitability comparison"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Choose product group levels, dates and warehouses above, then build the report. Add each completed selection to compare groups or periods."
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Exclude one-off sales (*РАЗОВАЯ)"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Last completed report: whole selection"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Amounts are in the report currency. Average inventory is a monthly approximation. Gross profit excludes overhead expenses. Return on inventory is for the selected period, not annualized. Movement filters do not remove capital from inventory."
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Comparison row name (optional)"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Add completed report to comparison"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Download comparison CSV"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Comparison rows keep their original filters and snapshot dates. They remain in this page until reload; download the comparison to keep it. Maximum 50 rows. Rows may overlap and are not summed."
+msgstr ""

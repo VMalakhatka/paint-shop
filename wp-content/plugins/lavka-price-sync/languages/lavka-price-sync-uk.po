@@ -6858,3 +6858,78 @@ msgstr "Цю чернетку змінено в іншій вкладці. Ві�
 
 msgid "Saved order draft not found."
 msgstr "Збережену чернетку замовлення не знайдено."
+
+
+#: inc/product-analytics.php
+msgid "Profit / average inventory for the period, %"
+msgstr "Прибуток / середній запас за період, %"
+
+
+#: inc/product-analytics.php
+msgid "Selection"
+msgstr "Вибірка"
+
+
+#: inc/product-analytics.php
+msgid "Groups, period and warehouses"
+msgstr "Групи, період і склади"
+
+
+#: inc/product-analytics.php
+msgid "All selected products"
+msgstr "Усі вибрані товари"
+
+
+#: inc/product-analytics.php
+msgid "Remove from comparison"
+msgstr "Прибрати з порівняння"
+
+
+#: inc/product-analytics.php
+msgid "One-off sales are excluded. Build the report to apply this condition."
+msgstr "Разові продажі виключено. Сформуйте звіт, щоб застосувати цю умову."
+
+
+#: inc/product-analytics.php
+msgid "Group profitability comparison"
+msgstr "Порівняння рентабельності груп"
+
+
+#: inc/product-analytics.php
+msgid "Choose product group levels, dates and warehouses above, then build the report. Add each completed selection to compare groups or periods."
+msgstr "Виберіть вище рівні груп товарів, дати та склади, потім сформуйте звіт. Додавайте готові вибірки для порівняння груп або періодів."
+
+
+#: inc/product-analytics.php
+msgid "Exclude one-off sales (*РАЗОВАЯ)"
+msgstr "Виключити разові продажі (*РАЗОВАЯ)"
+
+
+#: inc/product-analytics.php
+msgid "Last completed report: whole selection"
+msgstr "Останній готовий звіт: уся вибірка"
+
+
+#: inc/product-analytics.php
+msgid "Amounts are in the report currency. Average inventory is a monthly approximation. Gross profit excludes overhead expenses. Return on inventory is for the selected period, not annualized. Movement filters do not remove capital from inventory."
+msgstr "Суми у валюті звіту. Середній запас — місячне наближення. Валовий прибуток не враховує загальні витрати. Дохідність запасу наведено за вибраний період, без перерахунку на рік. Фільтри руху не вилучають капітал із запасу."
+
+
+#: inc/product-analytics.php
+msgid "Comparison row name (optional)"
+msgstr "Назва рядка порівняння (необов’язково)"
+
+
+#: inc/product-analytics.php
+msgid "Add completed report to comparison"
+msgstr "Додати готовий звіт до порівняння"
+
+
+#: inc/product-analytics.php
+msgid "Download comparison CSV"
+msgstr "Завантажити порівняння CSV"
+
+
+#: inc/product-analytics.php
+msgid "Comparison rows keep their original filters and snapshot dates. They remain in this page until reload; download the comparison to keep it. Maximum 50 rows. Rows may overlap and are not summed."
+msgstr "Рядки зберігають початкові фільтри та дати знімків. Вони залишаються на сторінці до її оновлення; завантажте порівняння, щоб зберегти його. Не більше 50 рядків. Вибірки можуть перетинатися, тому не підсумовуються."

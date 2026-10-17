@@ -6874,3 +6874,78 @@ msgstr "Этот черновик изменён в другой вкладке.
 
 msgid "Saved order draft not found."
 msgstr "Сохранённый черновик заказа не найден."
+
+
+#: inc/product-analytics.php
+msgid "Profit / average inventory for the period, %"
+msgstr "Прибыль / средний запас за период, %"
+
+
+#: inc/product-analytics.php
+msgid "Selection"
+msgstr "Выборка"
+
+
+#: inc/product-analytics.php
+msgid "Groups, period and warehouses"
+msgstr "Группы, период и склады"
+
+
+#: inc/product-analytics.php
+msgid "All selected products"
+msgstr "Все выбранные товары"
+
+
+#: inc/product-analytics.php
+msgid "Remove from comparison"
+msgstr "Убрать из сравнения"
+
+
+#: inc/product-analytics.php
+msgid "One-off sales are excluded. Build the report to apply this condition."
+msgstr "Разовые продажи исключены. Сформируйте отчёт, чтобы применить это условие."
+
+
+#: inc/product-analytics.php
+msgid "Group profitability comparison"
+msgstr "Сравнение рентабельности групп"
+
+
+#: inc/product-analytics.php
+msgid "Choose product group levels, dates and warehouses above, then build the report. Add each completed selection to compare groups or periods."
+msgstr "Выберите выше уровни групп товаров, даты и склады, затем сформируйте отчёт. Добавляйте готовые выборки для сравнения групп или периодов."
+
+
+#: inc/product-analytics.php
+msgid "Exclude one-off sales (*РАЗОВАЯ)"
+msgstr "Исключить разовые продажи (*РАЗОВАЯ)"
+
+
+#: inc/product-analytics.php
+msgid "Last completed report: whole selection"
+msgstr "Последний готовый отчёт: вся выборка"
+
+
+#: inc/product-analytics.php
+msgid "Amounts are in the report currency. Average inventory is a monthly approximation. Gross profit excludes overhead expenses. Return on inventory is for the selected period, not annualized. Movement filters do not remove capital from inventory."
+msgstr "Суммы в валюте отчёта. Средний запас — месячное приближение. Валовая прибыль не учитывает общие расходы. Доходность запаса приведена за выбранный период, без пересчёта на год. Фильтры движения не исключают капитал из запаса."
+
+
+#: inc/product-analytics.php
+msgid "Comparison row name (optional)"
+msgstr "Название строки сравнения (необязательно)"
+
+
+#: inc/product-analytics.php
+msgid "Add completed report to comparison"
+msgstr "Добавить готовый отчёт в сравнение"
+
+
+#: inc/product-analytics.php
+msgid "Download comparison CSV"
+msgstr "Скачать сравнение CSV"
+
+
+#: inc/product-analytics.php
+msgid "Comparison rows keep their original filters and snapshot dates. They remain in this page until reload; download the comparison to keep it. Maximum 50 rows. Rows may overlap and are not summed."
+msgstr "Строки сохраняют исходные фильтры и даты снимков. Они остаются на странице до её обновления; скачайте сравнение, чтобы сохранить его. Не более 50 строк. Выборки могут пересекаться, поэтому не суммируются."

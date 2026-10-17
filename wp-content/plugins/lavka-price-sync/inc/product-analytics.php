@@ -63,6 +63,12 @@ add_action('admin_enqueue_scripts', function (): void {
  */
 function lps_product_analytics_i18n(): array {
     return [
+        'periodReturn' => __('Profit / average inventory for the period, %', 'lavka-price-sync'),
+        'comparisonSelection' => __('Selection', 'lavka-price-sync'),
+        'comparisonScope' => __('Groups, period and warehouses', 'lavka-price-sync'),
+        'allSelectedProducts' => __('All selected products', 'lavka-price-sync'),
+        'removeComparison' => __('Remove from comparison', 'lavka-price-sync'),
+        'rebuildForProfit' => __('One-off sales are excluded. Build the report to apply this condition.', 'lavka-price-sync'),
         'loading' => __('Loading product analytics...', 'lavka-price-sync'),
         'loadFailed' => __('Product analytics could not be loaded.', 'lavka-price-sync'),
         'noSnapshots' => __('No active Folio product snapshots are available yet.', 'lavka-price-sync'),
@@ -473,7 +479,7 @@ function lps_render_product_analytics_v4_page(): void {
                 </div>
             </details>
 
-            <details class="lps-pa-filter-editor">
+            <details class="lps-pa-filter-editor" open>
                 <summary><?php echo esc_html__('Movement conditions', 'lavka-price-sync'); ?></summary>
                 <p class="description lps-pa-filter-note"><?php echo esc_html__('These conditions change period sales and profitability metrics only. They do not change current stock.', 'lavka-price-sync'); ?></p>
                 <div class="lps-pa-v4-filter-grid" id="lps-pa-movement-filter-grid"></div>
@@ -494,6 +500,23 @@ function lps_render_product_analytics_v4_page(): void {
 
         <section id="lps-pa-summary" class="lps-pa-summary" aria-label="<?php echo esc_attr__('Totals for the whole filtered selection', 'lavka-price-sync'); ?>"></section>
         <div id="lps-pa-query-warnings" class="lps-pa-warning-list" hidden></div>
+
+        <section class="lps-pa-profitability">
+            <h2><?php echo esc_html__('Group profitability comparison', 'lavka-price-sync'); ?></h2>
+            <p><?php echo esc_html__('Choose product group levels, dates and warehouses above, then build the report. Add each completed selection to compare groups or periods.', 'lavka-price-sync'); ?></p>
+            <button type="button" class="button" id="lps-pa-exclude-one-off"><?php echo esc_html__('Exclude one-off sales (*РАЗОВАЯ)', 'lavka-price-sync'); ?></button>
+            <h3><?php echo esc_html__('Last completed report: whole selection', 'lavka-price-sync'); ?></h3>
+            <div id="lps-pa-profit-result" class="lps-pa-table-scroll" aria-live="polite"></div>
+            <p class="description"><?php echo esc_html__('Amounts are in the report currency. Average inventory is a monthly approximation. Gross profit excludes overhead expenses. Return on inventory is for the selected period, not annualized. Movement filters do not remove capital from inventory.', 'lavka-price-sync'); ?></p>
+            <div class="lps-pa-toolbar">
+                <label for="lps-pa-compare-name"><?php echo esc_html__('Comparison row name (optional)', 'lavka-price-sync'); ?></label>
+                <input type="text" id="lps-pa-compare-name" maxlength="200">
+                <button type="button" class="button" id="lps-pa-compare-add" disabled><?php echo esc_html__('Add completed report to comparison', 'lavka-price-sync'); ?></button>
+                <button type="button" class="button" id="lps-pa-compare-export" disabled><?php echo esc_html__('Download comparison CSV', 'lavka-price-sync'); ?></button>
+            </div>
+            <p class="description"><?php echo esc_html__('Comparison rows keep their original filters and snapshot dates. They remain in this page until reload; download the comparison to keep it. Maximum 50 rows. Rows may overlap and are not summed.', 'lavka-price-sync'); ?></p>
+            <div class="lps-pa-table-scroll"><table class="widefat striped" id="lps-pa-comparison-table"></table></div>
+        </section>
 
         <section class="lps-pa-registry" data-lps-pa-panel="products">
             <div class="lps-pa-table-meta" id="lps-pa-table-meta"></div>
