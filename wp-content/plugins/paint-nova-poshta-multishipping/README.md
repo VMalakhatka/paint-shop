@@ -1,6 +1,14 @@
 # Paint Nova Poshta Multishipping
 
-## Manager lifecycle 0.9.1 — local 2026-10-18, not deployed
+## Manager lifecycle 0.9.1 — production gates enabled 2026-10-18
+
+Production runtime checked on 2026-10-18: active 0.9.1, API key configured, both
+write gates enabled by explicit owner approval. Fresh PHP process confirmed
+`writesEnabled() === true`; unrelated option values stayed unchanged. Configuration
+and options were privately backed up outside web-root. This was a configuration
+operation, not a code deploy, real TTN, PDF or email pilot. Local gates remain off.
+Reload the order and run a fresh preflight before confirming creation. Operator
+instructions and narrow disable/rollback: manager guide `#np-preparation`.
 
 The existing-order PCOE workspace supports saved preparation → carrier preflight →
 explicit per-warehouse TTN creation → private PDF (document, A4 or Zebra marking) →
@@ -29,7 +37,8 @@ verify them, payer and subsidy. The estimate is not the final carrier invoice.
 `ShipmentLifecycle` uses the same PCOE named order lock as preparation. A 5-minute,
 manager-bound preview token binds the row and whole-order fingerprint. Both write
 gates remain required: `PNPM_ALLOW_REAL_TTN === true` and settings writes_enabled=yes.
-This change does not enable them. A committed `np_creating` claim and audit precede
+Code defaults do not enable them; the production enablement is recorded above.
+A committed `np_creating` claim and audit precede
 CounterpartyGeneral.save and InternetDocumentGeneral.save. Exact final payload is
 stored without the API key before the second write. Validate success plus Ref/TTN;
 warnings with a valid success do not trigger another save. `np_created` repeats

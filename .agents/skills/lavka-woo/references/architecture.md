@@ -25,6 +25,11 @@ overwrite dropship recipients or parse free-text name order. Validate returned
 carrier contact before document save; missing/mismatched details lock for manual
 review, not retry. This is not global phone-owner identification. See the contract
 review for live-vs-mocked evidence; no real TTN was used for this check.
+Production gate enablement (2026-10-18, owner-approved): active NP 0.9.1 with both
+write gates true, confirmed by a fresh server PHP process. Local defaults remain
+off. This enables explicit manager creation, not automated writes or acceptance
+of a real shipment pilot. Private backups, re-preview and narrow disable procedure:
+manager guide `#np-preparation`. Never copy enabled production gates into fixtures.
 
 ## Поток данных
 
