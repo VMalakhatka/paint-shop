@@ -46,6 +46,20 @@ Local acceptance: 195 lifecycle checks, 40 preparation checks, 22 pacing checks,
 30 point-directory checks and 41 checkout checks passed. Recovered-state UI uses
 read-only names and does not show the draft-only instruction to enter another person.
 
+Production, 2026-10-18: owner-approved plugin-only deploy (code `f50f3ee`, UI
+clarification `617f02c`) from a clean server checkout, after scoped dry-run and a
+verified private plugin archive. Fresh runtime reports 0.9.3. One exact intended
+contact matched by name and phone in the account directory. After a private row/
+audit backup, recovery preview passed six read-only requests without changing the
+row. Separate authorized apply repeated the checks, recorded one audit event and
+set `np_recipient_ready`; settings and sender mappings stayed unchanged. Carrier
+writes and mail were blocked in both operator commands. No real TTN was created.
+Comparison with the private backup confirmed only status, response snapshot and
+updated timestamp changed, with exactly one audit event added. Browser reload
+showed the recovered notice and frozen names; live preview succeeded and enabled
+the unchecked consent control. Desktop and synthetic 390px layout were inspected;
+the synthetic checkbox enabled creation. Production consent/create was not clicked.
+
 ## Request pacing 0.9.2 — 2026-10-18
 
 Confirmed production failure: HTTP 200 / success=false / errorCodes 20000401501,
