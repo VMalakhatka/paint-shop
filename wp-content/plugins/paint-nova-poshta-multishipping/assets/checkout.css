@@ -7,6 +7,12 @@
     background: #fff;
 }
 
+/* The Woo destination is the recipient's address, not the pickup warehouse. */
+.woocommerce-shipping-totals:has(input[value^="pnpm_pickup:"]:checked) .woocommerce-shipping-destination,
+.woocommerce-shipping-totals:has(input[value^="pnpm_pickup:"]:checked) .woocommerce-shipping-calculator {
+    display: none;
+}
+
 .pnpm-checkout-fields h3 {
     margin: 0 0 8px;
     font-size: 1.25rem;

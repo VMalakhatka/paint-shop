@@ -1105,3 +1105,9 @@ msgstr ""
 
 msgid "Commercial offer photos are prepared in background batches with saved progress. Unavailable images retain product links after a retry. Existing prepared files do not change; ask the manager for a newly prepared offer."
 msgstr ""
+
+msgid "The Nova Poshta label shows your customer profile threshold. Above that goods total, the store covers the base tariff. Pickup names the warehouse holding your goods, not your address city. Address delivery costs more than branch delivery; choose a branch in the delivery type selector to avoid the courier surcharge."
+msgstr ""
+
+msgid "Regular checkout offers Nova Poshta and available store pickup only. To use your own TTN, contact the manager. Previously saved TTNs and their review status remain in your orders."
+msgstr ""

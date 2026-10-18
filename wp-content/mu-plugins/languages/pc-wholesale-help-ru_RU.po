@@ -1148,3 +1148,9 @@ msgstr "В личных данных кабинета выберите темы 
 
 msgid "Commercial offer photos are prepared in background batches with saved progress. Unavailable images retain product links after a retry. Existing prepared files do not change; ask the manager for a newly prepared offer."
 msgstr "Фото коммерческого предложения готовятся порциями в фоне с сохранением прогресса. Для недоступных фото после повторной попытки остаются ссылки на товары. Готовые файлы не меняются; попросите менеджера подготовить новое предложение."
+
+msgid "The Nova Poshta label shows your customer profile threshold. Above that goods total, the store covers the base tariff. Pickup names the warehouse holding your goods, not your address city. Address delivery costs more than branch delivery; choose a branch in the delivery type selector to avoid the courier surcharge."
+msgstr "В подписи Новой почты указан порог для вашего статуса клиента. Свыше этой суммы товаров базовый тариф покрывает магазин. Самовывоз указывает склад товаров, а не город из вашего адреса. Адресная доставка дороже доставки в отделение; выберите отделение в способе получения, чтобы избежать доплаты за курьера."
+
+msgid "Regular checkout offers Nova Poshta and available store pickup only. To use your own TTN, contact the manager. Previously saved TTNs and their review status remain in your orders."
+msgstr "В обычном оформлении доступны только Новая почта и самовывоз, если он возможен. Для отправки по своей ТТН обратитесь к менеджеру. Ранее сохранённые ТТН и их статус проверки остаются в ваших заказах."

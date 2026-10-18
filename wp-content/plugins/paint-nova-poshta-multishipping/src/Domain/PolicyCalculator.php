@@ -70,6 +70,19 @@ final class PolicyCalculator
         $policy = DeliveryPolicy::load();
         $profile = $policy['profiles'][$this->profileKey($policy)];
         $tier = $profile[$merchandise_total <= (float) $profile['threshold'] ? 'below' : 'above'];
+        return $this->coversBase($profile, $tier);
+    }
+
+    /** Do not promise free base transport for capped or partial contributions. */
+    public function baseTransportThreshold(): ?float
+    {
+        $policy = DeliveryPolicy::load();
+        $profile = $policy['profiles'][$this->profileKey($policy)];
+        return $this->coversBase($profile, $profile['above']) ? (float) $profile['threshold'] : null;
+    }
+
+    private function coversBase(array $profile, array $tier): bool
+    {
         foreach (['base_transport', 'extra_shipments'] as $component) {
             $rule = $profile['components'][$component];
             if ($rule === 'store') continue;

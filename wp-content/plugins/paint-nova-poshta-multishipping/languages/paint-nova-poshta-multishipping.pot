@@ -1148,3 +1148,13 @@ msgstr ""
 
 msgid "Above the threshold"
 msgstr ""
+
+msgid "Nova Poshta — base tariff covered by us; insurance and extras paid by recipient"
+msgstr ""
+
+#, php-format
+msgid "For goods over %s, we cover the base tariff; insurance and extras remain payable separately."
+msgstr ""
+
+msgid "Address delivery costs more than delivery to a branch. You can choose a Nova Poshta branch in the delivery type above."
+msgstr ""

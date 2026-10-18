@@ -3,7 +3,7 @@
 if (!defined('WP_CLI') || !WP_CLI || wp_get_environment_type() !== 'local') throw new RuntimeException('Local CLI only');
 add_filter('pre_http_request', static fn() => new WP_Error('test_offline', 'HTTP blocked'), PHP_INT_MAX);
 add_filter('pre_wp_mail', '__return_true', PHP_INT_MAX);
-$terms = get_terms(['taxonomy' => 'location', 'hide_empty' => false, 'number' => 1]);
+$terms = get_terms(['taxonomy' => 'location', 'hide_empty' => false]);
 if (is_wp_error($terms) || !$terms) throw new RuntimeException('Need a local stock location');
 $location = (int) $terms[0]->term_id;
 add_filter('pre_option_pnpm_location_mappings', static fn() => [$location => ['enabled' => 'yes', 'city_ref' => 'synthetic-sender']]);
@@ -29,6 +29,8 @@ try {
     $rates = $method->rates;
     $check(count($rates) === 1 && (float) reset($rates)->get_cost() === 0.0, 'Real Woo shipping rate does not add fee');
     $rates['novaposhta'] = new WC_Shipping_Rate('novaposhta', 'Old rate', 80, [], 'novaposhta');
+    $rates['flat_rate:9'] = new WC_Shipping_Rate('flat_rate:9', 'Old NP', 80, [], 'flat_rate');
+    $rates['pnpm_customer_ttn'] = new WC_Shipping_Rate('pnpm_customer_ttn', 'Own TTN', 0, [], 'pnpm_customer_ttn');
     $rates = (new Paint\NovaPoshta\Shipping\CheckoutRates())->filter($rates, $package);
     $check(count($rates) === 2 && !isset($rates['novaposhta']), 'Real Woo rates replaced with NP and pickup');
     $pickup = $rates['pnpm_pickup:' . $location];
@@ -46,6 +48,14 @@ try {
     $check(!$errors->has_errors(), 'Pickup requires no NP destination');
     $f = new Paint\NovaPoshta\Shipping\CheckoutRates();
     $check(!$f->freeShippingAvailable(true, $package), 'Configured NP prevents Woo free-shipping hiding NP selector');
+    foreach ($terms as $term) {
+        $sample = $package;
+        $sample['contents']['synthetic']['pc_alloc_plan'] = [(int) $term->term_id => 1];
+        $options = $f->filter($method->rates, $sample);
+        $origin = $options['pnpm_pickup:' . $term->term_id];
+        $check(str_contains($origin->get_label(), $term->name), 'Pickup label follows ' . $term->name);
+        $check((int) $origin->get_meta_data()['pnpm_pickup_location_id'] === (int) $term->term_id, 'Pickup metadata follows origin');
+    }
     if ($dir = getenv('PNPM_POINT_FIXTURE_DIR')) {
         switch_to_locale('uk');
         $labels = [];
@@ -58,6 +68,24 @@ try {
         }
         $labels[] = '<tr><th>Самовивіз</th><td>' . wc_cart_totals_shipping_method_label($pickup) . '</td></tr>';
         file_put_contents($dir . '/shipping-labels.html', '<!doctype html><html lang="uk"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font:16px/1.5 Arial;margin:16px;color:#303a40}main{max-width:720px;margin:auto}table{width:100%;table-layout:fixed;border-collapse:collapse}th,td{text-align:left;vertical-align:top;padding:12px;border-bottom:1px solid #ddd;overflow-wrap:anywhere}th{width:90px}h1{font-size:24px}</style><main><h1>Доставка: тестові суми товарів</h1><table>' . implode('', $labels) . '</table></main></html>');
+        add_filter('woocommerce_is_cart', '__return_true');
+        ob_start();
+        foreach ($terms as $index => $term) {
+            $sample = $package; $sample['contents_cost'] = 4;
+            $sample['contents']['synthetic']['pc_alloc_plan'] = [(int) $term->term_id => 1];
+            $shipping = new Paint\NovaPoshta\Shipping\NovaPoshtaShippingMethod(2);
+            $shipping->calculate_shipping($sample);
+            wc_get_template('cart/cart-shipping.php', [
+                'package' => $sample, 'package_name' => $term->name, 'index' => $index,
+                'available_methods' => $f->filter($shipping->rates, $sample),
+                'chosen_method' => 'pnpm_nova_poshta:2', 'formatted_destination' => 'Київ',
+                'has_calculated_shipping' => true, 'show_shipping_calculator' => true,
+                'show_package_details' => false,
+            ]);
+        }
+        $rows = ob_get_clean();
+        remove_filter('woocommerce_is_cart', '__return_true');
+        file_put_contents($dir . '/shipping-options.html', '<!doctype html><html lang="uk"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font:16px/1.5 Arial;margin:16px;color:#303a40}table{max-width:720px;margin:auto;width:100%;table-layout:fixed}th,td{padding:8px;vertical-align:top;overflow-wrap:anywhere}th{width:60px}li{margin-bottom:16px}ul{padding:0;list-style:none}input[type=radio]{margin-right:8px}</style><style>' . file_get_contents(PNPM_DIR . 'assets/checkout.css') . '</style><table>' . $rows . '</table></html>');
         restore_previous_locale();
     }
     echo "Local checkout delivery: {$checks} checks passed; no orders or external requests.\n";

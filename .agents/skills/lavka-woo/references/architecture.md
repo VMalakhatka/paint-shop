@@ -93,12 +93,17 @@ add/remove fragments; do not re-enable the globally disabled wc-cart-fragments
 script or cache personalized totals in public page HTML/localStorage. No cart,
 stock, checkout or consent-policy mutation belongs in this UI. See PSU README.
 
-NP checkout 0.8 (2026-10-16, local): `paint-nova-poshta-multishipping` owns
+NP checkout 0.8.1 (2026-10-18, local): `paint-nova-poshta-multishipping` owns
 carrier-paid shipping and single-location pickup. Zero Woo shipping cost is not
 free carrier service; retain payment-collection and base-coverage shipping meta.
 Unknown weight/API quote failure must not invent a charge, while allocation and
 destination errors still block submission. Default base subsidy is strictly over
-1200; persisted policies take precedence. Do not silently overwrite production
+1200; persisted policies take precedence. When its NP rate is available, the
+customer selector permits NP and allocation-backed pickup only, including for
+wholesale roles. Legacy rate IDs are not reliable; use the positive method list.
+Existing external TTNs/manager operations remain unchanged. Display thresholds
+from the same policy calculator; never promise full coverage for capped subsidies.
+Do not silently overwrite production
 shipping options or transfer stock for pickup. Deployment prerequisites and tests:
 plugin README, section «Класичне оформлення замовлення».
 
