@@ -51,6 +51,7 @@ final class Plugin
         (new \Paint\NovaPoshta\Admin\ExternalTtnPanel())->hooks();
         (new \Paint\NovaPoshta\Email\DeliverySummary())->hooks();
         (new \Paint\NovaPoshta\Admin\ManagerPreparationPanel())->hooks();
+        (new \Paint\NovaPoshta\Admin\ShipmentLifecyclePanel())->hooks();
     }
 
     /** @param array<string,class-string> $methods @return array<string,class-string> */

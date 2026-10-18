@@ -24,7 +24,7 @@ final class ManagerPreparation
         return $order;
     }
 
-    public function context(\WC_Order $order): array
+    public function context(\WC_Order $order, bool $lifecycle = false): array
     {
         if (!self::allowed()) $this->fail(__('Shipment access denied.', 'paint-nova-poshta-multishipping'));
         // Children must never create a second plan for the same physical goods.
@@ -40,7 +40,8 @@ final class ManagerPreparation
         $rows = (new ShipmentRepository())->findByOrder($order->get_id());
         $saved = [];
         foreach ($rows as $row) {
-            if ($row['source'] !== 'store_api' || $row['status'] !== self::STATUS || $row['ttn_number'] || $row['np_ref']) {
+            $locked = $row['status'] !== self::STATUS || $row['ttn_number'] || $row['np_ref'];
+            if ($row['source'] !== 'store_api' || ($locked && (!$lifecycle || !in_array($row['status'], ['np_creating','np_unknown','np_created','np_rejected'], true)))) {
                 $this->fail(__('This order already has external or locked shipments. Preparation cannot replace them.', 'paint-nova-poshta-multishipping'));
             }
             $location = (int)$row['location_id'];
@@ -80,9 +81,14 @@ final class ManagerPreparation
             'payment'=>$order->get_payment_method(), 'total'=>(float)$order->get_total(),
             'paid'=>(bool)$order->get_date_paid(), 'profile'=>$policy['profiles'][$profile],
             'quote'=>(array)$order->get_meta('_pnpm_checkout_quote')];
+        if ($saved) $context['recipient'] = json_decode((string)reset($saved)['recipient_snapshot'], true) ?: $recipient;
+        $shipping = [];
+        foreach ($order->get_items('shipping') as $item) $shipping[] = [$item->get_id(),$item->get_method_id(),$item->get_instance_id(),$item->get_total()];
+        $context['order_fingerprint'] = hash('sha256', wp_json_encode([$context, $order->get_status(),
+            $order->get_customer_id(), $order->get_address('billing'), $order->get_address('shipping'),
+            $shipping,$order->get_customer_note(),$order->get_date_modified()?->format(DATE_ATOM)]));
         $context['revision'] = hash('sha256', wp_json_encode([$context, $rows, $order->get_status(),
             $order->get_customer_id(), $order->get_address('billing'), $order->get_address('shipping')]));
-        if ($saved) $context['recipient'] = json_decode((string)reset($saved)['recipient_snapshot'], true) ?: $recipient;
         return $context;
     }
 
@@ -158,7 +164,7 @@ final class ManagerPreparation
             elseif (($context['profile']['cod']['single_shipment'] ?? 'no') !== 'yes') $issues[] = __('COD is disabled by the customer delivery policy.', 'paint-nova-poshta-multishipping');
         }
         $issues[] = __('Delivery payer and store subsidy still require carrier-contract verification; this preview does not calculate the final tariff.', 'paint-nova-poshta-multishipping');
-        $issues[] = __('TTN creation and label printing are blocked pending verification of the official carrier API contract. No shipment or notification has been sent.', 'paint-nova-poshta-multishipping');
+        $issues[] = __('Save preparation and reload this page before creating a TTN.', 'paint-nova-poshta-multishipping');
         return array_values(array_unique($issues));
     }
 

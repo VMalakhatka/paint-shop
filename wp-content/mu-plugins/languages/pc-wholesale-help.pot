@@ -1140,3 +1140,6 @@ msgstr ""
 #: wp-content/mu-plugins/pc-wholesale-help.php:552
 msgid "Open my account"
 msgstr ""
+
+msgid "The manager can prepare delivery for your order without changing your profile. After separately creating a Nova Poshta waybill, the manager can email its number and tracking link to the email on your order. Different warehouses may have different waybills. A created waybill does not yet confirm physical dispatch. Automatic Telegram delivery notices are not enabled."
+msgstr ""

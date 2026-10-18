@@ -44,7 +44,7 @@ try {
     $prepared = $service->prepare($context, $input);
     $check($prepared['recipient']['phone'] === '380000000000', 'Phone normalization');
     $check(array_sum(array_column($prepared['groups'],'cod')) === 0.0, 'Prepayment has no COD');
-    $check(count($service->blockers($context,$prepared)) >= 2, 'Unverified carrier contract always blocks create');
+    $check(count($service->blockers($context,$prepared)) >= 2, 'Preparation preview is not permission to create');
     $check((new ShipmentRepository())->findByOrder($order->get_id()) === [], 'Preview does not persist');
     $context = $service->save($order->get_id(),$input);
     $rows = (new ShipmentRepository())->findByOrder($order->get_id());
@@ -111,7 +111,7 @@ try {
     $manager->allcaps=['manage_woocommerce'=>true,'manage_pnpm_shipments'=>true];
     ob_start(); (new Paint\NovaPoshta\Admin\ManagerPreparationPanel())->render($order); $html=ob_get_clean();
     $check(str_contains($html,'pnpm-manager-form') && str_contains($html,'data-pnpm-command="preview"'),'Manager panel renders');
-    $check(str_contains($html,'disabled>Create TTN') || str_contains($html,'disabled>'),'No active create action');
+    $check(!str_contains($html,'data-shipment-command="create"'),'Preparation form has no carrier create action');
     if ($dir=getenv('PNPM_MANAGER_FIXTURE_DIR')) {
         switch_to_locale('uk');
         ob_start(); (new Paint\NovaPoshta\Admin\ManagerPreparationPanel())->render($order); $html=ob_get_clean();

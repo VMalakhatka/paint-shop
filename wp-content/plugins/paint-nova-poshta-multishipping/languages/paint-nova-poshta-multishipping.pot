@@ -1379,3 +1379,102 @@ msgstr ""
 #: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:127
 msgid "Preview only; changes are not saved."
 msgstr ""
+
+msgid "Label printing is unavailable."
+msgstr ""
+
+msgid "Nova Poshta did not return a valid PDF. No file was downloaded."
+msgstr ""
+
+msgid "Shipment data could not be verified. Check the saved preparation and sender settings; no automatic retry is allowed."
+msgstr ""
+
+msgid "COD creation is not supported in this release. Do not change the payment method just to bypass this check."
+msgstr ""
+
+msgid "This release supports drop-off at a branch and delivery to a branch or parcel locker only."
+msgstr ""
+
+msgid "Enter the recipient first name, last name and patronymic separately in Ukrainian as required by Nova Poshta."
+msgstr ""
+
+msgid "Nova Poshta TTN for order #%s"
+msgstr ""
+
+msgid "TTN %s has been created for your order. This does not yet confirm handover to Nova Poshta."
+msgstr ""
+
+msgid "Checking shipment…"
+msgstr ""
+
+msgid "Result not confirmed. Reload the page; do not repeat creation or email."
+msgstr ""
+
+msgid "Save preparation and reload this page before creating a TTN."
+msgstr ""
+
+msgid "Declared value / estimated delivery, UAH"
+msgstr ""
+
+msgid "Weight, kg / dimensions, cm"
+msgstr ""
+
+msgid "TTN, PDF and customer email"
+msgstr ""
+
+msgid "Only saved preparation is used. Save and reload after editing. Create each warehouse TTN separately; printing and customer email are separate actions."
+msgstr ""
+
+msgid "How this works and current limits"
+msgstr ""
+
+msgid "Supported: drop-off at a branch, delivery to a branch or parcel locker, no COD, cash payment for carrier services. Enter the legal recipient name in Ukrainian; it will be recorded in the Nova Poshta recipient directory, not in the store customer profile."
+msgstr ""
+
+msgid "The estimate is not a final invoice. Unknown point limits must be checked with Nova Poshta. Confirm payer and any store subsidy manually. A created TTN does not mean that goods have been handed over."
+msgstr ""
+
+msgid "After a timeout or rejection, do not create another TTN: reconcile the result in the Nova Poshta business account with an administrator. Automatic retries and automatic Telegram messages are not enabled."
+msgstr ""
+
+msgid "First name"
+msgstr ""
+
+msgid "Last name"
+msgstr ""
+
+msgid "Patronymic"
+msgstr ""
+
+msgid "Check saved shipment with Nova Poshta"
+msgstr ""
+
+msgid "I checked the recipient, boxes, declared value, delivery payer, cash payment and store subsidy. Create this real TTN."
+msgstr ""
+
+msgid "TTN created; handover is not confirmed."
+msgstr ""
+
+msgid "Download TTN PDF"
+msgstr ""
+
+msgid "Download A4 label PDF"
+msgstr ""
+
+msgid "Download Zebra label PDF"
+msgstr ""
+
+msgid "Email goes to the order customer, not to the parcel recipient:"
+msgstr ""
+
+msgid "Send TTN to customer by email"
+msgstr ""
+
+msgid "Email accepted by the mail transport; delivery is not confirmed."
+msgstr ""
+
+msgid "Email failed or its result is unknown. Check mail logs before any manual resend."
+msgstr ""
+
+msgid "Creation is locked: the result needs manual review in the Nova Poshta business account. Do not repeat the shipment."
+msgstr ""

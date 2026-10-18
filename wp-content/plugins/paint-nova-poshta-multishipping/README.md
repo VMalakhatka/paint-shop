@@ -1,6 +1,64 @@
 # Paint Nova Poshta Multishipping
 
-## Manager preparation 0.8.2 — partial stage, local 2026-10-18
+## Manager lifecycle 0.9.0 — local 2026-10-18, not deployed
+
+The existing-order PCOE workspace supports saved preparation → carrier preflight →
+explicit per-warehouse TTN creation → private PDF (document, A4 or Zebra marking) →
+explicit service email to the **order billing email**, not the dropship recipient.
+No automatic email on save/create, no stock/payment/profile updates and no automatic
+Woo status transitions. Created means prepared, not physically handed over.
+
+Scope: private-person recipient with separately confirmed Ukrainian first/last/
+patronymic names, branch drop-off to branch/locker, Cash carrier payment, no COD.
+Missing patronymic, courier addresses, origin lockers, NonCash and COD fail closed.
+One TTN per saved physical warehouse; multiple boxes at branches, one at lockers.
+Preview refreshes sender ownership/contact/phone and exact point directories, checks
+known bounds plus stricter locker limits, computes declared goods value after
+discounts with proportional item tax (ceil UAH, minimum 1), and requests a boxed
+carrier estimate. Missing bounds are unknown, never unlimited; the manager must
+verify them, payer and subsidy. The estimate is not the final carrier invoice.
+
+`ShipmentLifecycle` uses the same PCOE named order lock as preparation. A 5-minute,
+manager-bound preview token binds the row and whole-order fingerprint. Both write
+gates remain required: `PNPM_ALLOW_REAL_TTN === true` and settings writes_enabled=yes.
+This change does not enable them. A committed `np_creating` claim and audit precede
+CounterpartyGeneral.save and InternetDocumentGeneral.save. Exact final payload is
+stored without the API key before the second write. Validate success plus Ref/TTN;
+warnings with a valid success do not trigger another save. `np_created` repeats
+return the existing TTN. Unknown transport/result/storage failure and rejected
+documents stay locked (`np_creating`, `np_unknown`, `np_rejected`): no automatic
+retry or status reset. An administrator must reconcile the carrier account manually;
+there is no recovery UI yet. The first attempt freezes preparation, including after
+failure; subsequent warehouses require the unchanged plan.
+
+PDF uses a POST nonce, both manager capabilities and exact order/owned shipment,
+fixed carrier host/path, no redirects, timeout, 10 MiB cap, PDF MIME/signature and
+private no-store response. External customer TTNs never use this print transport.
+Secret-bearing carrier URLs never appear in HTML, JSON, emails or our logs.
+Email persists a claim before transport under the order lock; all accepted/failed/
+unknown outcomes prevent automatic resend. Accepted is **not delivered**. Service
+mail is independent of advertising opt-outs. Telegram, new tracking polling,
+customer shipment dashboard, cancellation and automatic reconciliation remain open.
+
+Tests: `tests/shipment-lifecycle-local.php`, run using its narrowly scoped
+`--require=.../tests/shipment-lifecycle-bootstrap.php` CLI bootstrap. Only that local
+fixture process has fake credentials/write flags; every HTTP/mail is intercepted,
+synthetic rows cleaned in finally. Preparation and existing checkout tests remain
+separate. See the final verification below and the [contract review](../../../docs/api/NOVA_POSHTA_SHIPMENT_CONTRACT.md).
+Help canonical/operator recovery: [manager guide](../../../docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-preparation).
+Code, UK/RU UI/help and skill invariants are updated together. No migration/options,
+real carrier write, customer notice or deployment was performed. Roll back code
+only; never remove shipment/audit records to permit another carrier save.
+
+Verified locally on 2026-10-18: 41 lifecycle fixture checks, 40 preparation checks,
+30 point-directory checks, 41 delivery checks and TTN normalizer passed. All NP
+PHP files and changed JavaScript pass syntax checks; scoped manager-help UK/RU
+canonical parity, skill validation and documentation-impact checks pass. Browser
+fixture inspection confirmed translated controls, separate confirmation before
+creation, invalidation after name edits, three print formats and per-warehouse
+email state. This is mocked/local verification, **not carrier or production acceptance**.
+
+## Historical preparation-only stage 0.8.2 (superseded by 0.9.0 above)
 
 The existing-order PCOE workspace now has an order-only recipient/packaging panel,
 explicit fresh confirmation import, save and preview. This is **not the complete
@@ -58,7 +116,7 @@ without weakening the default full check. No production acceptance claimed.
 
 Окремий WooCommerce-плагін прямої інтеграції з офіційним API Нової пошти для багатоскладських замовлень Paint/Lavka.
 
-## Поточний безпечний етап
+## Попередній checkout-етап 0.8.1 (історія)
 
 Версія `0.8.1` залишає в налаштованому checkout НП та безкоштовний самовивіз для одного складу; доставку перевізнику не додає до оплати товарів. Показує поріг покриття базового тарифу з політики ролі клієнта. Збережені клієнтські ТТН, менеджерська обробка та доставка в листах залишаються доступними. Створення реальних ТТН нашим API залишається вимкненим.
 

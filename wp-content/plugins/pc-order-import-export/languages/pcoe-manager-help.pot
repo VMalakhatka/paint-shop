@@ -423,3 +423,9 @@ msgstr ""
 
 msgid "The delivery block separately shows the Nova Poshta branch or parcel locker selected at checkout and the address saved in WooCommerce. A home address is not the selected pickup point. Later agreed changes belong to shipment preparation; check them before creating a waybill."
 msgstr ""
+
+msgid "Save preparation and reload the order. In TTN, PDF and customer email, enter the legal recipient name in Ukrainian and check the saved shipment with Nova Poshta. Review boxes, declared value, delivery estimate, payer and subsidy, then confirm creation separately for each warehouse. Real creation requires administrator-enabled write gates. Supported: branch drop-off to a branch or parcel locker, cash payment for carrier services, no COD. The recipient is recorded in the Nova Poshta directory; the store profile stays unchanged."
+msgstr ""
+
+msgid "After creation, download the TTN PDF or A4/Zebra label. Send TTN to customer by email is a separate action to the order email, not the parcel recipient. Mail acceptance is not proof of delivery. Created means prepared, not dispatched. After an unknown result, do not repeat creation or email: reload and ask an administrator to reconcile the Nova Poshta account or mail logs. Automatic tracking, Telegram, cancellation and recovery retries are not enabled."
+msgstr ""

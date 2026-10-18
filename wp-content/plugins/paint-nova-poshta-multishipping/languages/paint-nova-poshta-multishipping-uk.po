@@ -1215,3 +1215,102 @@ msgstr "Підготовку збережено. ТТН і повідомлен�
 
 msgid "Preview only; changes are not saved."
 msgstr "Лише попередній перегляд; зміни не збережено."
+
+msgid "Label printing is unavailable."
+msgstr "Друк недоступний."
+
+msgid "Nova Poshta did not return a valid PDF. No file was downloaded."
+msgstr "Нова пошта не повернула коректний PDF. Файл не завантажено."
+
+msgid "Shipment data could not be verified. Check the saved preparation and sender settings; no automatic retry is allowed."
+msgstr "Не вдалося перевірити відправлення. Звірте збережену підготовку й налаштування відправника; автоматичний повтор заборонено."
+
+msgid "COD creation is not supported in this release. Do not change the payment method just to bypass this check."
+msgstr "Створення з післяплатою в цьому релізі не підтримано. Не змінюйте спосіб оплати лише для обходу перевірки."
+
+msgid "This release supports drop-off at a branch and delivery to a branch or parcel locker only."
+msgstr "Цей реліз підтримує лише передачу у відділенні з доставкою до відділення або поштомата."
+
+msgid "Enter the recipient first name, last name and patronymic separately in Ukrainian as required by Nova Poshta."
+msgstr "Введіть окремо ім’я, прізвище та по батькові одержувача українською відповідно до вимог Нової пошти."
+
+msgid "Nova Poshta TTN for order #%s"
+msgstr "ТТН Нової пошти для замовлення №%s"
+
+msgid "TTN %s has been created for your order. This does not yet confirm handover to Nova Poshta."
+msgstr "Для вашого замовлення створено ТТН %s. Це ще не підтверджує передачу вантажу Новій пошті."
+
+msgid "Checking shipment…"
+msgstr "Перевіряємо відправлення…"
+
+msgid "Result not confirmed. Reload the page; do not repeat creation or email."
+msgstr "Результат не підтверджено. Перезавантажте сторінку; не повторюйте створення чи лист."
+
+msgid "Save preparation and reload this page before creating a TTN."
+msgstr "Збережіть підготовку та перезавантажте сторінку перед створенням ТТН."
+
+msgid "Declared value / estimated delivery, UAH"
+msgstr "Оголошена вартість / орієнтовна доставка, грн"
+
+msgid "Weight, kg / dimensions, cm"
+msgstr "Вага, кг / розміри, см"
+
+msgid "TTN, PDF and customer email"
+msgstr "ТТН, PDF та email клієнту"
+
+msgid "Only saved preparation is used. Save and reload after editing. Create each warehouse TTN separately; printing and customer email are separate actions."
+msgstr "Використовується лише збережена підготовка. Після правок збережіть її та перезавантажте сторінку. Створюйте ТТН кожного складу окремо; друк і лист клієнту — окремі дії."
+
+msgid "How this works and current limits"
+msgstr "Як це працює та поточні обмеження"
+
+msgid "Supported: drop-off at a branch, delivery to a branch or parcel locker, no COD, cash payment for carrier services. Enter the legal recipient name in Ukrainian; it will be recorded in the Nova Poshta recipient directory, not in the store customer profile."
+msgstr "Підтримано: передача у відділенні, доставка до відділення або поштомата, без післяплати, готівкова оплата послуг перевізника. Введіть ПІБ одержувача українською; його буде записано до довідника одержувачів Нової пошти, а не до профілю клієнта магазину."
+
+msgid "The estimate is not a final invoice. Unknown point limits must be checked with Nova Poshta. Confirm payer and any store subsidy manually. A created TTN does not mean that goods have been handed over."
+msgstr "Розрахунок не є остаточним рахунком. Невідомі обмеження точки уточніть у Новій пошті. Вручну підтвердьте платника й компенсацію магазину. Створена ТТН не означає передачу товару перевізнику."
+
+msgid "After a timeout or rejection, do not create another TTN: reconcile the result in the Nova Poshta business account with an administrator. Automatic retries and automatic Telegram messages are not enabled."
+msgstr "Після тайм-ауту чи відмови не створюйте іншу ТТН: разом з адміністратором звірте результат у бізнес-кабінеті Нової пошти. Автоматичні повтори й Telegram-повідомлення не ввімкнені."
+
+msgid "First name"
+msgstr "Ім’я"
+
+msgid "Last name"
+msgstr "Прізвище"
+
+msgid "Patronymic"
+msgstr "По батькові"
+
+msgid "Check saved shipment with Nova Poshta"
+msgstr "Перевірити збережене відправлення в НП"
+
+msgid "I checked the recipient, boxes, declared value, delivery payer, cash payment and store subsidy. Create this real TTN."
+msgstr "Я перевірив(-ла) одержувача, коробки, оголошену вартість, платника доставки, готівкову оплату й компенсацію магазину. Створити цю реальну ТТН."
+
+msgid "TTN created; handover is not confirmed."
+msgstr "ТТН створено; передачу перевізнику не підтверджено."
+
+msgid "Download TTN PDF"
+msgstr "Завантажити PDF ТТН"
+
+msgid "Download A4 label PDF"
+msgstr "Завантажити маркування A4 PDF"
+
+msgid "Download Zebra label PDF"
+msgstr "Завантажити маркування Zebra PDF"
+
+msgid "Email goes to the order customer, not to the parcel recipient:"
+msgstr "Лист надсилається клієнту замовлення, а не одержувачу посилки:"
+
+msgid "Send TTN to customer by email"
+msgstr "Надіслати ТТН клієнту на email"
+
+msgid "Email accepted by the mail transport; delivery is not confirmed."
+msgstr "Лист прийнято поштовим транспортом; доставку не підтверджено."
+
+msgid "Email failed or its result is unknown. Check mail logs before any manual resend."
+msgstr "Лист не надіслано або результат невідомий. Перед ручним повтором перевірте поштові журнали."
+
+msgid "Creation is locked: the result needs manual review in the Nova Poshta business account. Do not repeat the shipment."
+msgstr "Створення заблоковано: результат потребує ручної звірки в бізнес-кабінеті Нової пошти. Не повторюйте відправлення."

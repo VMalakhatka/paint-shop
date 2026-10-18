@@ -42,6 +42,7 @@
                 if (!response || !response.success) { $('#pnpm-manager-status').text(response && response.data && response.data.message || pnpmManager.failure); return; }
                 var data = response.data;
                 if (data.revision) $form.attr('data-revision', data.revision);
+                if (command === 'save') $(document.body).trigger('pnpm_preparation_saved');
                 if (data.recipient) {
                     ['name','phone'].forEach(function (key) { $form.find('[name=' + key + ']').val(data.recipient[key] || ''); });
                     $('#pnpm_city_label').trigger('input'); // Cancel stale directory responses before replacing values.

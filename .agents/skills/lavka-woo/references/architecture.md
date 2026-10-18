@@ -7,8 +7,12 @@ lock name. `manager_draft` is NOT a carrier-created TTN or a notification event.
 Never turn preparation save into a carrier call or update the customer profile.
 Import confirmation explicitly and verify the current source revision. Child
 orders, external/locked shipments and multi-warehouse COD remain fail-closed.
-Carrier creation, printing, reconciliation and service notifications remain
-unimplemented. The official docs were accessible in Chrome on 2026-10-18;
+Lifecycle 0.9.0 adds explicit preview/create, private PDF and at-most-once order-customer
+email. Keep the same PCOE lock; commit the create claim BEFORE either recipient or
+document save. Unknown/rejected/creating states never auto-retry. The first attempt
+freezes preparation; remaining warehouses require the same order fingerprint.
+External TTNs cannot use store-key printing. No COD, courier address, non-cash carrier
+payment, polling, Telegram or automated reconciliation yet. The official docs were accessible in Chrome on 2026-10-18;
 do not repeat the earlier 403 as a current access blocker. Read
 [the contract review](../../../../docs/api/NOVA_POSHTA_SHIPMENT_CONTRACT.md)
 before extending the lifecycle: official examples have contradictions, status 1

@@ -76,7 +76,7 @@ final class ManagerPreparationPanel
         echo '<p><label><input type="checkbox" name="agreed" value="1"> ' . esc_html__('Recipient details were agreed; warehouse contents, packed box weights, dimensions and payer were checked.', 'paint-nova-poshta-multishipping') . '</label></p>';
         echo '<p><button type="button" class="button" data-pnpm-command="save">' . esc_html__('Save preparation', 'paint-nova-poshta-multishipping') . '</button> <button type="button" class="button button-primary" data-pnpm-command="preview">' . esc_html__('Check preview', 'paint-nova-poshta-multishipping') . '</button></p>';
         echo '<div id="pnpm-manager-status" role="status" aria-live="polite"></div><div id="pnpm-manager-preview"></div>';
-        echo '<p><button type="button" class="button" disabled>' . esc_html__('Create TTN', 'paint-nova-poshta-multishipping') . '</button></p><p>' . esc_html__('TTN creation and label printing are blocked pending verification of the official carrier API contract. No shipment or notification has been sent.', 'paint-nova-poshta-multishipping') . '</p></form>';
+        echo '<p>' . esc_html__('Save preparation and reload this page before creating a TTN.', 'paint-nova-poshta-multishipping') . '</p></form>';
         self::audit($order->get_id());
         echo '</section>';
     }
