@@ -6917,9 +6917,6 @@ msgstr ""
 msgid "SQL Server denied read access to this query. Use 1212 all fields, or ask the database administrator to allow reading card_tov."
 msgstr ""
 
-#: inc/folio-product-cards.php
-msgid "Selection"
-msgstr ""
 
 #: inc/folio-product-cards.php
 msgid "Listed SKUs"

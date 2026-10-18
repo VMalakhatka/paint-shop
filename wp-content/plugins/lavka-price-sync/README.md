@@ -76,3 +76,6 @@ selection prevents an empty list from requesting all cards. XLSX retains all 57
 template headings; the three unsupported assembly columns stay empty. Operator
 steps and limits: `docs/api/FOLIO_PRODUCT_CARDS.md`. Tests: product-cards,
 product-cards-import and product-cards-auth under tests/. No migration required.
+
+Translation integration reuses the existing Selection message; Ukrainian and Russian
+MO catalogues are rebuilt from the merged PO sources and checked with msgfmt.
