@@ -18,6 +18,13 @@ do not repeat the earlier 403 as a current access blocker. Read
 before extending the lifecycle: official examples have contradictions, status 1
 is not dispatch, and print URLs contain the secret and must never reach browsers.
 See NP README and the manager guide `#np-preparation` for release boundaries.
+Recipient identity 0.9.1 (2026-10-18): an authorized live recipient-only save
+accepted empty MiddleName; never invent patronymics. Prefill structured names only
+when saved recipient name and phone match the order/customer candidate; never
+overwrite dropship recipients or parse free-text name order. Validate returned
+carrier contact before document save; missing/mismatched details lock for manual
+review, not retry. This is not global phone-owner identification. See the contract
+review for live-vs-mocked evidence; no real TTN was used for this check.
 
 ## Поток данных
 

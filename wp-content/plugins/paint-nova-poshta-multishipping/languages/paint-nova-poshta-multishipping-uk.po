@@ -1314,3 +1314,21 @@ msgstr "Лист не надіслано або результат невідо�
 
 msgid "Creation is locked: the result needs manual review in the Nova Poshta business account. Do not repeat the shipment."
 msgstr "Створення заблоковано: результат потребує ручної звірки в бізнес-кабінеті Нової пошти. Не повторюйте відправлення."
+
+msgid "Enter the recipient first and last name in Ukrainian. Patronymic is optional; each name must be at most 36 characters."
+msgstr "Вкажіть ім’я та прізвище одержувача українською. По батькові необов’язкове; кожне поле — до 36 символів."
+
+msgid "Names are suggested from the order, then the customer card, only when the saved recipient name and phone match. Review them; patronymic is optional. A different recipient must be entered manually."
+msgstr "Ім’я та прізвище підставляються із замовлення, потім із картки клієнта, лише за збігу збереженого імені та телефону одержувача. Перевірте їх; по батькові необов’язкове. Іншого одержувача введіть вручну."
+
+msgid "Saved recipient phone:"
+msgstr "Збережений телефон одержувача:"
+
+msgid "Patronymic (optional)"
+msgstr "По батькові (необов’язково)"
+
+msgid "This preview does not identify a person by phone. On creation, returned Nova Poshta contact details must match before a TTN is requested. Missing or different details stop creation for manual review."
+msgstr "Цей перегляд не визначає особу за телефоном. Під час створення дані контакту у відповіді Нової пошти мають збігтися перед запитом ТТН. Відсутні або інші дані зупиняють створення для ручної звірки."
+
+msgid "Nova Poshta returned different or incomplete recipient details. No TTN was requested. The recipient may have been saved in Nova Poshta; ask an administrator to reconcile it. Do not repeat creation."
+msgstr "Нова пошта повернула інші або неповні дані одержувача. Запит ТТН не надсилався. Одержувач міг зберегтися в Новій пошті; зверніться до адміністратора для звірки. Не повторюйте створення."

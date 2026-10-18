@@ -106,14 +106,7 @@ final class ShipmentLifecycle
         if (!self::ref($recipient['city_ref'] ?? null) || !self::ref($recipient['point_ref'] ?? null)
             || !preg_match('/^380\d{9}$/D', (string)($recipient['phone'] ?? ''))
             || !preg_match('/^\+?380\d{9}$/D', (string)($sender['phone'] ?? ''))) self::fail();
-        $person = [];
-        foreach (['FirstName','LastName','MiddleName'] as $key) {
-            $name = $names[$key] ?? null;
-            if (!is_string($name) || !preg_match('/^[А-ЩЬЮЯЄІЇҐа-щьюяєіїґ\x{2019}\x{0027} -]{1,36}$/uD', $name) || trim($name) === '') {
-                throw new \RuntimeException(__('Enter the recipient first name, last name and patronymic separately in Ukrainian as required by Nova Poshta.', 'paint-nova-poshta-multishipping'));
-            }
-            $person[$key] = trim($name);
-        }
+        $person = RecipientIdentity::names($names);
         $person += ['Phone'=>$recipient['phone'],'CounterpartyType'=>'PrivatePerson','CounterpartyProperty'=>'Recipient'];
         $directory = (new SenderDirectory($this->api))->load(true);
         if (is_wp_error($directory)) self::fail();
@@ -207,6 +200,10 @@ final class ShipmentLifecycle
                 if (!$recipient) {
                     $this->transition($row,'np_unknown',[],['phase'=>'recipient']);
                     return ['unknown'=>true];
+                }
+                if (!RecipientIdentity::matches($party, $plan['person'])) {
+                    $this->transition($row,'np_recipient_mismatch',[],['phase'=>'recipient_identity']);
+                    return ['recipient_mismatch'=>true];
                 }
                 $payload = $plan['payload'] + $recipient;
                 // Persist the exact final payload before the document write; failed persistence stops here.

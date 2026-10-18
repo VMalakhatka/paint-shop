@@ -4,6 +4,7 @@ if (!defined('WP_CLI') || !WP_CLI || wp_get_environment_type()!=='local') throw 
 use Paint\NovaPoshta\Infrastructure\ManagerPreparation;
 use Paint\NovaPoshta\Infrastructure\ShipmentLifecycle;
 use Paint\NovaPoshta\Infrastructure\ShipmentRepository;
+use Paint\NovaPoshta\Infrastructure\RecipientIdentity;
 $checks=0;
 $check=static function ($ok,$name) use (&$checks) { if (!$ok) throw new RuntimeException($name); $checks++; };
 $reject=static function ($work,$name) use ($check) { try {$work();} catch (RuntimeException $e) {$check(true,$name);return;} throw new RuntimeException('Expected rejection: '.$name); };
@@ -39,7 +40,13 @@ add_filter('pre_http_request',static function ($pre,$args,$url) use (&$writes,&$
     } elseif ($m==='getDocumentPrice') $data=[['Cost'=>'80.00']];
     elseif ($m==='save') {
         $writes++;
-        if ($p['modelName']==='CounterpartyGeneral') $data=[['Ref'=>$refs[6],'ContactPerson'=>['success'=>true,'data'=>[['Ref'=>$refs[7]]]]]];
+        if ($p['modelName']==='CounterpartyGeneral') {
+            $person=$p['methodProperties'];
+            $person['Phones']=$person['Phone'];unset($person['Phone']);
+            if ($mode==='identity_mismatch') $person['LastName']='Інший';
+            if ($mode==='identity_missing') unset($person['Phones']);
+            $data=[['Ref'=>$refs[6],'ContactPerson'=>['success'=>true,'data'=>[['Ref'=>$refs[7]]+$person]]]];
+        }
         elseif ($mode==='timeout') return new WP_Error('timeout','Synthetic timeout');
         elseif ($mode==='rejected') return ['response'=>['code'=>200],'body'=>json_encode(['success'=>false,'data'=>[],'errors'=>['test rejection']])];
         else $data=[['Ref'=>sprintf('00000000-0000-0000-0000-%012d',100+$writes),'IntDocNumber'=>str_pad((string)(100+$writes),14,'2',STR_PAD_LEFT),'CostOnSite'=>'80','EstimatedDeliveryDate'=>'20.10.2026']];
@@ -47,7 +54,7 @@ add_filter('pre_http_request',static function ($pre,$args,$url) use (&$writes,&$
     return ['response'=>['code'=>200],'body'=>json_encode(['success'=>true,'data'=>$data,'errors'=>[],'warnings'=>$m==='save'?['synthetic warning']:[]])];
 },PHP_INT_MAX,3);
 $old=$GLOBALS['current_user']; $manager=new WP_User();$manager->ID=PHP_INT_MAX;$manager->allcaps=['manage_woocommerce'=>true,'manage_pnpm_shipments'=>true];$GLOBALS['current_user']=$manager;
-$orders=[]; $tokens=[]; $service=new ShipmentLifecycle(); $prep=new ManagerPreparation();
+$orders=[]; $tokens=[]; $customerId=0; $service=new ShipmentLifecycle(); $prep=new ManagerPreparation();
 $names=['FirstName'=>'Тест','LastName'=>'Приклад','MiddleName'=>'Тестович'];
 $make=static function ($two=false) use (&$orders,$locations,$refs,$prep) {
     $order=new WC_Order();$order->set_currency('UAH');$order->set_payment_method('bacs');$order->set_billing_email('np-fixture@example.invalid');
@@ -61,16 +68,43 @@ $make=static function ($two=false) use (&$orders,$locations,$refs,$prep) {
     return $order;
 };
 try {
+    $withoutMiddle=['FirstName'=>'Тест','LastName'=>'Приклад','MiddleName'=>''];
+    $check(RecipientIdentity::names($withoutMiddle)===$withoutMiddle,'Empty patronymic accepted');
+    $check(RecipientIdentity::names(['FirstName'=>'Тест','LastName'=>'Приклад'])===$withoutMiddle,'Absent patronymic serialized empty');
+    foreach (['', '   ', str_repeat('А',37), '<script>', []] as $bad) {
+        $reject(fn()=>RecipientIdentity::names(['FirstName'=>$bad,'LastName'=>'Приклад']),'Invalid mandatory name');
+    }
+    $reject(fn()=>RecipientIdentity::names(['FirstName'=>'Тест','LastName'=>'Приклад','MiddleName'=>[]]),'Invalid optional value');
+    $suggest=new WC_Order();$suggest->set_shipping_first_name('Тест');$suggest->set_shipping_last_name('Приклад');$suggest->set_shipping_phone('+38 (000) 000-00-00');
+    $saved=['name'=>'Приклад Тест','phone'=>'380000000000'];
+    $check(RecipientIdentity::defaults($suggest,$saved)===$withoutMiddle,'Structured order names with normalized phone, surname-first snapshot');
+    $empty=['FirstName'=>'','LastName'=>'','MiddleName'=>''];
+    $check(RecipientIdentity::defaults($suggest,['name'=>'Інший Тест','phone'=>$saved['phone']])===$empty,'Never replace different recipient');
+    $check(RecipientIdentity::defaults($suggest,['name'=>$saved['name'],'phone'=>'380000000001'])===$empty,'Never fill on mismatched phone');
+    $suggest->set_shipping_first_name('');$suggest->set_shipping_last_name('');
+    $suggest->set_billing_first_name('Тест');$suggest->set_billing_last_name('Приклад');$suggest->set_billing_phone('0000000000');
+    $check(RecipientIdentity::defaults($suggest,$saved)===$withoutMiddle,'Billing fallback with matching identity');
+    $customer=new WC_Customer();$customer->set_username('np-identity-fixture-'.wp_generate_uuid4());
+    $customer->set_email('np-identity-'.wp_generate_uuid4().'@example.invalid');
+    $customer->set_billing_first_name('Тест');$customer->set_billing_last_name('Приклад');$customer->set_billing_phone($saved['phone']);
+    $customerId=$customer->save();$suggest=new WC_Order();$suggest->set_customer_id($customerId);
+    $check(RecipientIdentity::defaults($suggest,$saved)===$withoutMiddle,'Customer-card fallback');
+    $check(RecipientIdentity::defaults($suggest,['name'=>'Інший Тест','phone'=>$saved['phone']])===$empty,'Customer card cannot override another recipient');
+    $check((new WC_Customer($customerId))->get_billing_last_name()==='Приклад','Suggestions do not modify customer card');
     $order=$make(true);$rows=(new ShipmentRepository())->findByOrder($order->get_id());$id=(int)$rows[0]['id'];$oid=$order->get_id();
+    ob_start();(new Paint\NovaPoshta\Admin\ShipmentLifecyclePanel())->render($order);$draftPanel=ob_get_clean();
+    $check(str_contains($draftPanel,'data-person="FirstName" value="Тест"') && str_contains($draftPanel,'data-person="LastName" value="Приклад"'),'Rendered automatic suggestions');
     $reject(fn()=>$service->row($oid+100000,$id),'Cross-order access');
     $manager->allcaps=[];$reject(fn()=>$service->row($oid,$id),'Permission denied');$manager->allcaps=['manage_woocommerce'=>true,'manage_pnpm_shipments'=>true];
-    $preview=$service->preview($oid,$id,$names);$tokens[]=$preview['token'];
+    $preview=$service->preview($oid,$id,$withoutMiddle);$tokens[]=$preview['token'];
     $check($writes===0,'Preview never mutates carrier');
     $check($preview['payload']['Cost']===100 && $preview['payload']['OptionsSeat'][0]['volumetricVolume']===0.000108,'Per-warehouse goods and cubic metres');
     $check($preview['estimate']===80.0,'Live estimate returned');
     $enabled=false;$reject(fn()=>$service->create($oid,$id,$preview['token']),'Write gate');$enabled=true;
     $beforeMail=count($mails);$result=$service->create($oid,$id,$preview['token']);
     $check(!empty($result['ttn']) && $writes===2,'One recipient write and one TTN write');
+    $sentPerson=array_values(array_filter($requests,static fn($p)=>$p['modelName']==='CounterpartyGeneral' && $p['calledMethod']==='save'))[0]['methodProperties'];
+    $check($sentPerson['MiddleName']==='','Blank patronymic reaches carrier unchanged');
     $check(count($mails)===$beforeMail,'Create does not notify');
     $check($service->create($oid,$id,$preview['token'])===$result && $writes===2,'Duplicate create returns saved result');
     $reject(fn()=>$prep->context(wc_get_order($oid)),'Preparation freezes after create');
@@ -100,6 +134,13 @@ try {
         $check($service->create($o->get_id(),$sid,$p['token'])===['unknown'=>true],$next.' fail closed');$n=$writes;
         $reject(fn()=>$service->create($o->get_id(),$sid,$p['token']),$next.' replay denied');
         $check($writes===$n,$next.' no retry');$mode='success';
+    }
+    foreach (['identity_mismatch','identity_missing'] as $next) {
+        $o=$make();$sid=(int)(new ShipmentRepository())->findByOrder($o->get_id())[0]['id'];
+        $p=$service->preview($o->get_id(),$sid,$names);$tokens[]=$p['token'];$mode=$next;$before=$writes;
+        $check($service->create($o->get_id(),$sid,$p['token'])===['recipient_mismatch'=>true],$next.' reported');
+        $check($writes===$before+1 && $service->row($o->get_id(),$sid)['status']==='np_recipient_mismatch',$next.' no TTN write');
+        $reject(fn()=>$service->create($o->get_id(),$sid,$p['token']),$next.' no automatic retry');$mode='success';
     }
     $o=$make();$row=(new ShipmentRepository())->findByOrder($o->get_id())[0];$sid=(int)$row['id'];$p=$service->preview($o->get_id(),$sid,$names);$tokens[]=$p['token'];
     $o->set_total(101);$o->save();$n=$writes;$reject(fn()=>$service->create($o->get_id(),$sid,$p['token']),'Stale order');$check($writes===$n,'Stale order no writes');
@@ -150,5 +191,6 @@ try {
     }
     foreach($tokens as $token)delete_transient('pnpm_create_'.$token);
     delete_transient('pnpm_sender_directory_v1');
+    if ($customerId) { require_once ABSPATH.'wp-admin/includes/user.php'; wp_delete_user($customerId); }
     $GLOBALS['current_user']=$old;
 }

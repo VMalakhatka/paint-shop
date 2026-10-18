@@ -4,6 +4,7 @@ namespace Paint\NovaPoshta\Admin;
 use Paint\NovaPoshta\Infrastructure\ManagerPreparation;
 use Paint\NovaPoshta\Infrastructure\ShipmentRepository;
 use Paint\NovaPoshta\Infrastructure\ShipmentLifecycle;
+use Paint\NovaPoshta\Infrastructure\RecipientIdentity;
 
 defined('ABSPATH') || exit;
 
@@ -46,11 +47,16 @@ final class ShipmentLifecyclePanel
             $location=get_term((int)$row['location_id'],'location');
             echo '<article class="pnpm-shipment" data-order="'.esc_attr($order->get_id()).'" data-id="'.esc_attr($row['id']).'"><h3>'.esc_html($location && !is_wp_error($location) ? $location->name : '#'.$row['location_id']).'</h3>';
             if ($row['status']==='manager_draft') {
+                $recipient = json_decode($row['recipient_snapshot'], true) ?: [];
+                $defaults = RecipientIdentity::defaults($order, $recipient);
+                echo '<p>'.esc_html__('Names are suggested from the order, then the customer card, only when the saved recipient name and phone match. Review them; patronymic is optional. A different recipient must be entered manually.','paint-nova-poshta-multishipping').'</p>';
+                echo '<p>'.esc_html__('Saved recipient phone:','paint-nova-poshta-multishipping').' <strong>'.esc_html($recipient['phone'] ?? '').'</strong></p>';
                 echo '<div class="pnpm-legal-name">';
-                foreach (['FirstName'=>__('First name','paint-nova-poshta-multishipping'),'LastName'=>__('Last name','paint-nova-poshta-multishipping'),'MiddleName'=>__('Patronymic','paint-nova-poshta-multishipping')] as $key=>$label) {
-                    echo '<label>'.esc_html($label).' <input data-person="'.esc_attr($key).'" maxlength="36" autocomplete="off"></label> ';
+                foreach (['FirstName'=>__('First name','paint-nova-poshta-multishipping'),'LastName'=>__('Last name','paint-nova-poshta-multishipping'),'MiddleName'=>__('Patronymic (optional)','paint-nova-poshta-multishipping')] as $key=>$label) {
+                    echo '<label>'.esc_html($label).' <input data-person="'.esc_attr($key).'" value="'.esc_attr($defaults[$key]).'" maxlength="36" autocomplete="off"></label> ';
                 }
                 echo '</div><p><button type="button" class="button" data-shipment-command="preview">'.esc_html__('Check saved shipment with Nova Poshta','paint-nova-poshta-multishipping').'</button></p><div class="pnpm-carrier-preview"></div>';
+                echo '<p>'.esc_html__('This preview does not identify a person by phone. On creation, returned Nova Poshta contact details must match before a TTN is requested. Missing or different details stop creation for manual review.','paint-nova-poshta-multishipping').'</p>';
                 echo '<p><label><input type="checkbox" class="pnpm-create-agreed" disabled> '.esc_html__('I checked the recipient, boxes, declared value, delivery payer, cash payment and store subsidy. Create this real TTN.','paint-nova-poshta-multishipping').'</label></p><button type="button" class="button button-primary" data-shipment-command="create" disabled>'.esc_html__('Create TTN','paint-nova-poshta-multishipping').'</button>';
             } elseif ($row['status']==='np_created') {
                 echo '<p>'.esc_html__('TTN created; handover is not confirmed.','paint-nova-poshta-multishipping').' <strong>'.esc_html($row['ttn_number']).'</strong></p>';
@@ -66,6 +72,8 @@ final class ShipmentLifecyclePanel
                 if ($status) echo '<p>'.esc_html($status==='np_email_accepted'
                     ? __('Email accepted by the mail transport; delivery is not confirmed.','paint-nova-poshta-multishipping')
                     : __('Email failed or its result is unknown. Check mail logs before any manual resend.','paint-nova-poshta-multishipping')).'</p>';
+            } elseif ($row['status']==='np_recipient_mismatch') {
+                echo '<p role="alert">'.esc_html__('Nova Poshta returned different or incomplete recipient details. No TTN was requested. The recipient may have been saved in Nova Poshta; ask an administrator to reconcile it. Do not repeat creation.','paint-nova-poshta-multishipping').'</p>';
             } else {
                 echo '<p role="alert">'.esc_html__('Creation is locked: the result needs manual review in the Nova Poshta business account. Do not repeat the shipment.','paint-nova-poshta-multishipping').'</p>';
             }

@@ -407,6 +407,9 @@ msgstr "В особистих даних кабінету виберіть те�
 msgid "Commercial offer photos are prepared in background batches with saved progress. Unavailable images retain product links after a retry. Existing prepared files do not change; ask the manager for a newly prepared offer."
 msgstr "Фото комерційної пропозиції готуються порціями у фоні зі збереженням прогресу. Для недоступних фото після повторної спроби залишаються посилання на товари. Готові файли не змінюються; попросіть менеджера підготувати нову пропозицію."
 
+msgid "First and last name are suggested from matching order/customer details; patronymic is optional. Review the saved recipient phone. A different recipient is never replaced with the buyer. Preview does not identify the phone owner; creation stops before the TTN request if the returned carrier contact is incomplete or differs. Ask an administrator to reconcile the recipient; do not retry."
+msgstr "Ім’я та прізвище підставляються за збігом даних замовлення/клієнта; по батькові необов’язкове. Перевірте збережений телефон одержувача. Іншого одержувача не замінюємо покупцем. Перегляд не визначає власника телефону; створення зупиняється до запиту ТТН, якщо повернутий контакт перевізника неповний або відрізняється. Попросіть адміністратора звірити одержувача; не повторюйте запит."
+
 msgid "Prepare Nova Poshta shipment in an existing order"
 msgstr "Підготовка НП у наявному замовленні"
 

@@ -1,6 +1,6 @@
 # Paint Nova Poshta Multishipping
 
-## Manager lifecycle 0.9.0 — local 2026-10-18, not deployed
+## Manager lifecycle 0.9.1 — local 2026-10-18, not deployed
 
 The existing-order PCOE workspace supports saved preparation → carrier preflight →
 explicit per-warehouse TTN creation → private PDF (document, A4 or Zebra marking) →
@@ -8,9 +8,17 @@ explicit service email to the **order billing email**, not the dropship recipien
 No automatic email on save/create, no stock/payment/profile updates and no automatic
 Woo status transitions. Created means prepared, not physically handed over.
 
-Scope: private-person recipient with separately confirmed Ukrainian first/last/
-patronymic names, branch drop-off to branch/locker, Cash carrier payment, no COD.
-Missing patronymic, courier addresses, origin lockers, NonCash and COD fail closed.
+Scope: private-person recipient with confirmed Ukrainian first/last names and
+optional patronymic, branch drop-off to branch/locker, Cash carrier payment, no COD.
+Courier addresses, origin lockers, NonCash and COD fail closed.
+`RecipientIdentity` suggests structured order shipping/billing names, then customer
+card names, only when the saved recipient name and normalized phone match. Never
+split a free-text full name, overwrite a dropship recipient, or update a profile.
+The saved recipient phone is visible beside the editable suggested names.
+Before document save, returned contact FirstName/LastName/Phones and any supplied
+MiddleName must match. Missing/different fields lock as `np_recipient_mismatch`:
+the recipient may exist, but no TTN is requested. No retry/reset UI. This compares
+the specific response, not ownership in a global phone registry.
 One TTN per saved physical warehouse; multiple boxes at branches, one at lockers.
 Preview refreshes sender ownership/contact/phone and exact point directories, checks
 known bounds plus stricter locker limits, computes declared goods value after
@@ -47,14 +55,19 @@ synthetic rows cleaned in finally. Preparation and existing checkout tests remai
 separate. See the final verification below and the [contract review](../../../docs/api/NOVA_POSHTA_SHIPMENT_CONTRACT.md).
 Help canonical/operator recovery: [manager guide](../../../docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-preparation).
 Code, UK/RU UI/help and skill invariants are updated together. No migration/options,
-real carrier write, customer notice or deployment was performed. Roll back code
+customer notice or deployment was performed. One separately authorized live
+recipient-only save on 2026-10-18 accepted empty MiddleName and returned both Refs;
+no real TTN was created. Roll back code
 only; never remove shipment/audit records to permit another carrier save.
 
-Verified locally on 2026-10-18: 41 lifecycle fixture checks, 40 preparation checks,
+Verified locally on 2026-10-18: 64 lifecycle fixture checks, 40 preparation checks,
 30 point-directory checks, 41 delivery checks and TTN normalizer passed. All NP
 PHP files and changed JavaScript pass syntax checks; scoped manager-help UK/RU
-canonical parity, skill validation and documentation-impact checks pass. Browser
-fixture inspection confirmed translated controls, separate confirmation before
+canonical parity and documentation-impact checks pass. Standalone skill validation
+could not run for 0.9.1 because the local Python runtimes lack PyYAML; reference
+links were checked by the documentation validator. Browser fixture inspection
+(desktop and 390 px iframe) confirmed translated autofilled fields and optional
+patronymic; lifecycle checks cover separate confirmation before
 creation, invalidation after name edits, three print formats and per-warehouse
 email state. This is mocked/local verification, **not carrier or production acceptance**.
 

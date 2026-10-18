@@ -1478,3 +1478,21 @@ msgstr ""
 
 msgid "Creation is locked: the result needs manual review in the Nova Poshta business account. Do not repeat the shipment."
 msgstr ""
+
+msgid "Enter the recipient first and last name in Ukrainian. Patronymic is optional; each name must be at most 36 characters."
+msgstr ""
+
+msgid "Names are suggested from the order, then the customer card, only when the saved recipient name and phone match. Review them; patronymic is optional. A different recipient must be entered manually."
+msgstr ""
+
+msgid "Saved recipient phone:"
+msgstr ""
+
+msgid "Patronymic (optional)"
+msgstr ""
+
+msgid "This preview does not identify a person by phone. On creation, returned Nova Poshta contact details must match before a TTN is requested. Missing or different details stop creation for manual review."
+msgstr ""
+
+msgid "Nova Poshta returned different or incomplete recipient details. No TTN was requested. The recipient may have been saved in Nova Poshta; ask an administrator to reconcile it. Do not repeat creation."
+msgstr ""

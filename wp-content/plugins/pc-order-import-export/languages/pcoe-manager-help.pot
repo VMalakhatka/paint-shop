@@ -406,6 +406,9 @@ msgid "Commercial offer photos are prepared in background batches with saved pro
 msgstr ""
 
 #: wp-content/plugins/pc-order-import-export/inc/ManagerHelp.php:106
+msgid "First and last name are suggested from matching order/customer details; patronymic is optional. Review the saved recipient phone. A different recipient is never replaced with the buyer. Preview does not identify the phone owner; creation stops before the TTN request if the returned carrier contact is incomplete or differs. Ask an administrator to reconcile the recipient; do not retry."
+msgstr ""
+
 msgid "Prepare Nova Poshta shipment in an existing order"
 msgstr ""
 

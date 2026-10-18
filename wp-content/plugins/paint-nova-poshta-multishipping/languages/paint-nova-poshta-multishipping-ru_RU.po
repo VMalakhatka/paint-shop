@@ -577,3 +577,21 @@ msgstr "Письмо не отправлено или результат неи�
 
 msgid "Creation is locked: the result needs manual review in the Nova Poshta business account. Do not repeat the shipment."
 msgstr "Создание заблокировано: результат требует ручной сверки в бизнес-кабинете Новой почты. Не повторяйте отправление."
+
+msgid "Enter the recipient first and last name in Ukrainian. Patronymic is optional; each name must be at most 36 characters."
+msgstr "Укажите имя и фамилию получателя на украинском. Отчество необязательно; каждое поле — до 36 символов."
+
+msgid "Names are suggested from the order, then the customer card, only when the saved recipient name and phone match. Review them; patronymic is optional. A different recipient must be entered manually."
+msgstr "Имя и фамилия подставляются из заказа, затем из карточки клиента, только при совпадении сохранённого имени и телефона получателя. Проверьте их; отчество необязательно. Другого получателя введите вручную."
+
+msgid "Saved recipient phone:"
+msgstr "Сохранённый телефон получателя:"
+
+msgid "Patronymic (optional)"
+msgstr "Отчество (необязательно)"
+
+msgid "This preview does not identify a person by phone. On creation, returned Nova Poshta contact details must match before a TTN is requested. Missing or different details stop creation for manual review."
+msgstr "Этот просмотр не определяет личность по телефону. При создании данные контакта в ответе Новой почты должны совпасть до запроса ТТН. Отсутствующие или другие данные останавливают создание для ручной сверки."
+
+msgid "Nova Poshta returned different or incomplete recipient details. No TTN was requested. The recipient may have been saved in Nova Poshta; ask an administrator to reconcile it. Do not repeat creation."
+msgstr "Новая почта вернула другие или неполные данные получателя. Запрос ТТН не отправлялся. Получатель мог сохраниться в Новой почте; обратитесь к администратору для сверки. Не повторяйте создание."
