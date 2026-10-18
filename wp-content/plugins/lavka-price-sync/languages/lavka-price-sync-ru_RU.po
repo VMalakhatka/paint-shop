@@ -7059,3 +7059,75 @@ msgstr "Учитывать MAX при расчёте закупки"
 #: inc/purchase-planning.php
 msgid "When disabled, this group keeps its full forecast for the supplier order, including future replenishments from the source warehouse. Folio MAX values and actual transfer limits are not changed."
 msgstr "Если отключено, в заказ поставщику входит полный прогноз группы, включая будущие пополнения со склада-источника. Значения MAX в ФОЛИО и ограничения фактических перемещений не изменяются."
+
+#: inc/folio-product-cards.php
+msgid "Enter up to 500 exact SKUs, one per line, with at most 100 characters each."
+msgstr "Введите до 500 точных артикулов, по одному в строке, не более 100 символов каждый."
+
+#: inc/folio-product-cards.php
+msgid "The queries returned different results. Export each query separately for review."
+msgstr "Запросы вернули разные результаты. Экспортируйте каждый отдельно для проверки."
+
+#: inc/folio-product-cards.php
+msgid "Product cards could not be read. Check the Java service, API token, Paint_Ua source and 50,000-row limit, then try again."
+msgstr "Не удалось прочитать карточки. Проверьте Java-сервис, API-токен, источник Paint_Ua и лимит 50 000 строк, затем повторите."
+
+#: inc/folio-product-cards.php
+msgid "Lavka Folio"
+msgstr "Лавка ФОЛИО"
+
+#: inc/folio-product-cards.php
+msgid "Product cards"
+msgstr "Карточки товаров"
+
+#: inc/folio-product-cards.php
+msgid "Read product cards from Paint_Ua and export 54 fields in the supplied Excel column order. No Folio data is changed."
+msgstr "Чтение карточек из Paint_Ua и экспорт 54 полей в порядке колонок предоставленного Excel. Данные ФОЛИО не изменяются."
+
+#: inc/folio-product-cards.php
+msgid "Both queries require the legacy warehouse and markup records. Requested SKUs excluded by those conditions are listed separately. Assembly columns 55–57 are not returned by these queries."
+msgstr "Оба запроса требуют складских записей и наценок по старым правилам. Артикулы, исключённые этими условиями, показаны отдельно. Колонки сборки 55–57 эти запросы не возвращают."
+
+#: inc/folio-product-cards.php
+msgid "Query"
+msgstr "Запрос"
+
+#: inc/folio-product-cards.php
+msgid "Compare both queries"
+msgstr "Сравнить оба запроса"
+
+#: inc/folio-product-cards.php
+msgid "Exact SKUs, one per line. Leave empty for all eligible cards."
+msgstr "Точные артикулы, по одному в строке. Оставьте пустым для всех карточек, отвечающих условиям."
+
+#: inc/folio-product-cards.php
+msgid "Read and check"
+msgstr "Прочитать и проверить"
+
+#: inc/folio-product-cards.php
+msgid "Export product cards XLSX"
+msgstr "Экспорт карточек XLSX"
+
+#: inc/folio-product-cards.php
+msgid "Reading product cards…"
+msgstr "Чтение карточек товаров…"
+
+#: inc/folio-product-cards.php
+msgid "Both queries match."
+msgstr "Результаты обоих запросов совпадают."
+
+#: inc/folio-product-cards.php
+msgid "Rows returned:"
+msgstr "Получено строк:"
+
+#: inc/folio-product-cards.php
+msgid "Requested SKUs not returned:"
+msgstr "Запрошенные артикулы, которые не возвращены:"
+
+#: inc/folio-product-cards.php
+msgid "Preview: first 50 rows. The Excel export contains all returned rows."
+msgstr "Просмотр: первые 50 строк. Экспорт Excel содержит все полученные строки."
+
+#: inc/folio-product-cards.php
+msgid "Preparing the Excel download…"
+msgstr "Подготовка загрузки Excel…"

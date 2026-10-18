@@ -188,3 +188,11 @@ admin-post проверяют те же capabilities. Опубликованны
 исключает МУЛЬТИСБОРКА из demand/lost demand, сохраняя фактический расход.
 PHP preview v9 показывает childCoverageShortfall после округления/ручной правки,
 не меняя выбранное количество. Формулы и проверка: docs/api/FOLIO_ASSEMBLY_PURCHASE.md.
+
+Product-card reads (2026-10-18): `lavka-price-sync/inc/folio-product-cards.php`
+owns the separate Lavka Folio manager menu; Java `FolioProductCardDao/Controller`
+owns the two Access-compatible SELECTs and all-field multiset comparison. Preserve
+54 template positions, literal SKU/barcode strings, legacy warehouse/markup filters
+and optional ALL_ARTC/ALL_CENA rows. Do not substitute card_tov_export or treat the
+missing assembly columns as fetched data. Full contract and operator boundaries:
+[product-card read/export](../../../../docs/api/FOLIO_PRODUCT_CARDS.md).

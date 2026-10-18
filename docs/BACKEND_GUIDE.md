@@ -545,3 +545,10 @@ it removes MAX caps from procurement and period replenishment planning without
 changing Folio cards. Only MAX-specific validation failures may be ignored;
 MIN and unrelated readiness checks remain mandatory. See the MAX section of
 the operations runbook for rollout and the Kreul regression example.
+
+### Карточки товаров: отдельное меню «Лавка ФОЛИО»
+
+`lavka-price-sync` владеет менеджерским чтением и потоковой XLSX-выгрузкой 54 полей;
+Java `FolioProductCardDao/Controller` владеет SELECT по исходным Access-запросам и
+их сравнением. Это прямое чтение Paint_Ua, без проекций, импорта и записи в ФОЛИО.
+Контракт, ограничения и проверка: [карточки товаров](api/FOLIO_PRODUCT_CARDS.md).
