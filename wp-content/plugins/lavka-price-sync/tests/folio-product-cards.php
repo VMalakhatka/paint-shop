@@ -21,7 +21,7 @@ $columns=array_map(fn($k)=>['key'=>$k,'type'=>'text'],lps_card_keys());$columns[
 $GLOBALS['response']=['ok'=>true,'sourceDatabase'=>'Paint_Ua','mode'=>'compare','data'=>['columns'=>$columns,'rows'=>[$row]],'identical'=>true,'directRows'=>1,'viewRows'=>1,'missingSkus'=>['no-such-sku']];
 $d=lps_card_read(['mode'=>'compare','skus'=>[]]);
 ok($d['data']['rows'][0][1]==='00123');ok(count(lps_card_headers())===54);
-$GLOBALS['http']=503;rejected(fn()=>lps_card_read(['mode'=>'compare','skus'=>[]]));$GLOBALS['http']=200;
+$GLOBALS['http']=503;$saved=$GLOBALS['response'];$GLOBALS['response']=['error'=>'CARD_QUERY_ACCESS_DENIED'];try{lps_card_read(['mode'=>'compare','skus'=>[]]);throw new LogicException('Expected denial');}catch(RuntimeException $e){ok($e->getMessage()==='CARD_QUERY_ACCESS_DENIED');}$GLOBALS['response']=$saved;rejected(fn()=>lps_card_read(['mode'=>'compare','skus'=>[]]));$GLOBALS['http']=200;
 $GLOBALS['response']['data']['columns'][1]['key']='wrong';rejected(fn()=>lps_card_read(['mode'=>'compare','skus'=>[]]));
 $path=lps_card_xlsx($d);$z=new ZipArchive();ok($z->open($path)===true);
 foreach (range(0,$z->numFiles-1) as $i){$xml=$z->getFromIndex($i);ok(simplexml_load_string($xml)!==false);}

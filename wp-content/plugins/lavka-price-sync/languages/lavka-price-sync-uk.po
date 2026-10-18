@@ -6816,3 +6816,7 @@ msgstr "Перегляд: перші 50 рядків. Експорт Excel мі�
 #: inc/folio-product-cards.php
 msgid "Preparing the Excel download…"
 msgstr "Підготовка завантаження Excel…"
+
+#: inc/folio-product-cards.php
+msgid "SQL Server denied read access to this query. Use 1212 all fields, or ask the database administrator to allow reading card_tov."
+msgstr "SQL Server відхилив читання цього запиту. Використайте «1212 все поля» або зверніться до адміністратора бази для надання права читання card_tov."

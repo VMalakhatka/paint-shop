@@ -4,7 +4,7 @@ if (!defined('ABSPATH')) exit;
 const LPS_CARD_NONCE = 'lps_folio_product_cards';
 
 function lps_card_selection(array $input): array {
-    $mode = $input['mode'] ?? 'compare';
+    $mode = $input['mode'] ?? 'direct';
     $text = $input['skus'] ?? '';
     if (!is_string($mode) || !in_array($mode, ['direct','view','compare'], true) || !is_string($text) || strlen($text) > 60000) {
         throw new RuntimeException('INVALID_SELECTION');
@@ -19,8 +19,11 @@ function lps_card_read(array $selection): array {
     $options = lps_get_options();
     if (empty($options['java_base_url']) || empty($options['api_token'])) throw new RuntimeException('CARD_READ_FAILED');
     $response = lps_java_post('/admin/folio/product-cards/read', $selection, ['timeout'=>70]);
-    if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) throw new RuntimeException('CARD_READ_FAILED');
+    if (is_wp_error($response)) throw new RuntimeException('CARD_READ_FAILED');
     $data = json_decode(wp_remote_retrieve_body($response), true);
+    if (wp_remote_retrieve_response_code($response) !== 200) {
+        throw new RuntimeException(is_array($data) && ($data['error'] ?? '') === 'CARD_QUERY_ACCESS_DENIED' ? 'CARD_QUERY_ACCESS_DENIED' : 'CARD_READ_FAILED');
+    }
     $expected = lps_card_keys();
     if (!is_array($data) || ($data['ok'] ?? null) !== true || ($data['sourceDatabase'] ?? '') !== 'Paint_Ua'
         || ($data['mode'] ?? '') !== $selection['mode'] || !is_array($data['data']['rows'] ?? null)
@@ -39,6 +42,7 @@ function lps_card_read(array $selection): array {
 }
 
 function lps_card_error(string $code): string {
+    if ($code === 'CARD_QUERY_ACCESS_DENIED') return __('SQL Server denied read access to this query. Use 1212 all fields, or ask the database administrator to allow reading card_tov.', 'lavka-price-sync');
     if ($code === 'INVALID_SELECTION') return __('Enter up to 500 exact SKUs, one per line, with at most 100 characters each.', 'lavka-price-sync');
     if ($code === 'CARD_DIFFERENCE') return __('The queries returned different results. Export each query separately for review.', 'lavka-price-sync');
     return __('Product cards could not be read. Check the Java service, API token, Paint_Ua source and 50,000-row limit, then try again.', 'lavka-price-sync');
@@ -59,7 +63,7 @@ function lps_card_render(): void {
     echo '<form method="post" id="lps-card-form" action="'.esc_url(admin_url('admin-post.php')).'">';
     wp_nonce_field(LPS_CARD_NONCE);
     echo '<input type="hidden" name="action" value="lps_folio_product_cards"><p><label>'.esc_html__('Query', 'lavka-price-sync').' <select name="mode">';
-    foreach (['compare'=>__('Compare both queries', 'lavka-price-sync'),'direct'=>'1212 все поля','view'=>'_dbo_Все поля по Artic'] as $key=>$label) echo '<option value="'.esc_attr($key).'">'.esc_html($label).'</option>';
+    foreach (['direct'=>'1212 все поля','view'=>'_dbo_Все поля по Artic','compare'=>__('Compare both queries', 'lavka-price-sync')] as $key=>$label) echo '<option value="'.esc_attr($key).'">'.esc_html($label).'</option>';
     echo '</select></label></p><p><label for="lps-card-skus">'.esc_html__('Exact SKUs, one per line. Leave empty for all eligible cards.', 'lavka-price-sync').'</label></p>';
     echo '<textarea id="lps-card-skus" name="skus" rows="7" maxlength="60000" style="width:100%;max-width:600px"></textarea>';
     echo '<p><button type="button" class="button button-secondary" id="lps-card-preview">'.esc_html__('Read and check', 'lavka-price-sync').'</button> ';
