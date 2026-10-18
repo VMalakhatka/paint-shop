@@ -1,5 +1,58 @@
 # Paint Nova Poshta Multishipping
 
+## Manager preparation 0.8.2 — partial stage, local 2026-10-18
+
+The existing-order PCOE workspace now has an order-only recipient/packaging panel,
+explicit fresh confirmation import, save and preview. This is **not the complete
+create/print/track/notify release**. `Create TTN` is disabled, regardless of write
+flags; there is no new carrier mutation route, scheduler or notification hook.
+
+`ManagerPreparation` persists `source=store_api,status=manager_draft` in the existing
+shipment tables with the stable order/location idempotency key. The request snapshot
+is a typed `manager-preparation-v1` draft, **not an InternetDocument payload**.
+All warehouse rows, item allocations and private audit events commit in one InnoDB
+transaction, under the same per-order named lock as PCOE. Failure rolls back; stale
+revisions reject repeat writes. No profile/address/stock/payment changes. Existing
+external or non-draft shipments block preparation, including mixed-source orders.
+Child orders must use the original; missing allocations and refunds fail closed.
+The manager's profile never determines the customer's COD policy. Multi-origin COD
+remains blocked; no duplicated full-order COD is stored. A single-origin COD amount
+is a preview from the saved order, not permission to collect it.
+
+The preview validates local typed fields and mapping completeness, but does not
+approve packed-point compatibility, final tariff, sender ownership or subsidy/payer
+settlement. These remain mandatory preflight checks before real creation. No draft
+is exposed as a created TTN in the customer account; existing external TTN display
+is unchanged. Audit records actor/time, reviewed fields and snapshot hashes, not
+recipient values in logs. Access requires manage_woocommerce and
+manage_pnpm_shipments. No migration, option changes or deployment performed.
+
+**External blocker:** on 2026-10-18 the [official developer portal](https://developers.novaposhta.ua/)
+returned HTTP 403. The [official integration page](https://novaposhta.ua/for-business/cooperation/integration/)
+does not supply detailed save/print/reconciliation/tracking contracts. Do not
+substitute unverified third-party examples or enable real writes. Remaining work:
+verified payload/compiler and sender/recipient preflight, durable create claim plus
+unknown-outcome reconciliation, authenticated PDF proxy, shipment tracking/customer
+view and idempotent email/linked-Telegram outbox. Creation means prepared; only
+carrier-confirmed physical acceptance means dispatched. Service-channel settings
+apply, advertising opt-outs must not. None of these notifications are implemented
+by saving a manager draft.
+
+Local check: `tests/manager-preparation-local.php` via WP CLI, HTTP/mail intercepted,
+synthetic order/customer/approval rows deleted in finally. Covers two origins/split
+line, multiple boxes, stale revision, atomic rollback, external/locked protections,
+capabilities, unchanged profile, COD and fresh/stale confirmation. Workflow and
+safe recovery: `docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-preparation`. UK/RU help updated;
+publication awaits deployment. Roll back code only; preserve saved drafts/audit.
+
+Verification: 40 local DB checks, 40 desktop/mobile manager fixture checks, 54
+shared checkout UI checks, 30 directory checks, 41 delivery checks, TTN normalizer,
+20 approval checks and the scoped manager-help UK/RU canonical-parity check passed.
+PHP/JS syntax, skill validator and documentation-impact checks passed. Full manager
+help test still finds two pre-existing `mailings` canonical-text mismatches,
+confirmed unchanged from HEAD; the new `--np-preparation` mode checks this section
+without weakening the default full check. No production acceptance claimed.
+
 Окремий WooCommerce-плагін прямої інтеграції з офіційним API Нової пошти для багатоскладських замовлень Paint/Lavka.
 
 ## Поточний безпечний етап

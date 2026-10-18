@@ -52,12 +52,13 @@ final class CheckoutIntegration
         $this->enqueueAssets();
     }
 
-    public function enqueueAssets(bool $approval = false): void
+    public function enqueueAssets(bool $approval = false, bool $manager = false): void
     {
         wp_enqueue_style('pnpm-checkout', PNPM_URL . 'assets/checkout.css', [], PNPM_VERSION);
-        wp_enqueue_script('pnpm-checkout', PNPM_URL . 'assets/checkout.js', $approval ? ['jquery'] : ['jquery', 'wc-checkout'], filemtime(PNPM_DIR . 'assets/checkout.js'), true);
+        wp_enqueue_script('pnpm-checkout', PNPM_URL . 'assets/checkout.js', ($approval || $manager) ? ['jquery'] : ['jquery', 'wc-checkout'], filemtime(PNPM_DIR . 'assets/checkout.js'), true);
         wp_localize_script('pnpm-checkout', 'pnpmCheckout', [
             'approval' => $approval,
+            'manager' => $manager,
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('pnpm_checkout_directory'),
             'searching' => __('Searching Nova Poshta...', 'paint-nova-poshta-multishipping'),
@@ -123,7 +124,7 @@ final class CheckoutIntegration
         echo '<p class="pnpm-point-warning" role="status">' . esc_html__('Address delivery costs more than delivery to a branch. You can choose a Nova Poshta branch in the delivery type above.', 'paint-nova-poshta-multishipping') . '</p>';
         if ($approval) woocommerce_form_field('pnpm_address', ['type'=>'text', 'class'=>['form-row-wide'],
             'label'=>__('Courier street and building', 'paint-nova-poshta-multishipping'),
-            'autocomplete'=>'shipping street-address', 'custom_attributes'=>['maxlength'=>'300']], '');
+            'autocomplete'=>'shipping street-address', 'custom_attributes'=>['maxlength'=>'300']], (string)($state['address'] ?? ''));
         else echo '<p>' . esc_html__('For courier delivery, fill in the shipping street and building in the standard address fields above.', 'paint-nova-poshta-multishipping') . '</p>';
         echo '</div>';
         echo '</section>';

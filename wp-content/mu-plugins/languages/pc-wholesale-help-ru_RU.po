@@ -905,6 +905,7 @@ msgstr "После выбора открывается карточка точк
 
 msgid "Directory data may be up to 15 minutes old. The card does not check whether your packed order fits. Confirm boxes, actual and volumetric weight, access and goods restrictions with the manager. If loading fails, retry; do not treat the missing card as permission to ship."
 msgstr "Данные справочника могут быть давностью до 15 минут. Карточка не проверяет пригодность упакованного заказа. Согласуйте коробки, фактический и объёмный вес, доступ и ограничения товаров с менеджером. Если загрузка не удалась, повторите её; отсутствие карточки не является разрешением на отправку."
+
 msgid "Where to find order details and delivery"
 msgstr "Где найти подробности заказа и доставки"
 
@@ -919,6 +920,7 @@ msgstr "На странице заказа показаны обновления
 
 msgid "For warehouse invoices and document lines, open Folio documents in My account. If an order was split, check each linked child order. Ask the manager if a document or shipment is not yet available."
 msgstr "Счета по складам и их состав смотрите в разделе «Документы ФОЛИО» в кабинете. Если заказ разделён, проверьте каждый связанный дочерний заказ. Если документа или отправления ещё нет, обратитесь к менеджеру."
+
 msgid "? How does this work?"
 msgstr "? Как это работает"
 
@@ -966,6 +968,7 @@ msgstr "Новые ответы менеджера для вас приходя�
 
 msgid "To disconnect, use Disconnect Telegram in Messages or send /stop to the bot. Website history remains available. Delivery can take about a minute; Telegram acceptance does not mean the customer has read the message. Files, voice messages and order confirmation through the bot are not supported."
 msgstr "Для отключения нажмите «Отключить Telegram» в «Сообщения» или отправьте /stop боту. История на сайте остаётся доступной. Доставка может занимать около минуты; принятие Telegram не означает прочтение клиентом. Файлы, голосовые сообщения и подтверждение заказа через бота не поддерживаются."
+
 msgid "Write to the manager on the website"
 msgstr "Написать менеджеру на сайте"
 
@@ -1031,6 +1034,7 @@ msgstr "В «Сообщениях» нажмите «Отключить Telegram
 
 msgid "Only text is supported, up to 5000 characters. Files, photos, voice messages and email chat are not supported yet. A chat message does not confirm an order, reserve goods, make a payment or start shipment. Use the separate order confirmation page when requested."
 msgstr "Поддерживается только текст до 5000 символов. Файлы, фото, голосовые сообщения и чат через email пока не поддерживаются. Сообщение не подтверждает заказ, не резервирует товар, не проводит оплату и не запускает отправку. По запросу менеджера используйте отдельную страницу подтверждения заказа."
+
 msgid "Open Messages"
 msgstr "Открыть сообщения"
 
@@ -1065,11 +1069,13 @@ msgstr "Менеджер может отправить на email копию в 
 msgid "The cart uses the full page width. On a phone, each item shows its photo and full name, with price, quantity and subtotal underneath. Change the quantity in its field or use the cross to remove an item."
 msgstr "Корзина занимает всю ширину страницы. На телефоне каждая позиция содержит фото и полное название, а ниже — цену, количество и итог. Измените количество в поле или нажмите крестик, чтобы убрать позицию."
 
-#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php
+#: inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
 msgid "News and price lists by email"
 msgstr "Новости и прайсы на email"
 
-#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php
+#: inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
 msgid "Your manager may email a message, a full price list or a mini price list for a new arrival. The Excel file uses your price conditions on the site. Prices and stock are captured when the mailing is prepared; check current availability before ordering. Reply to the email to contact the sending manager. In My Account → Account details → News and price lists you can decline these mailings and save changes. Order and confirmation emails remain enabled."
 msgstr "Менеджер может отправить сообщение, полный прайс или мини-прайс нового прихода на email. Файл Excel использует ваши ценовые условия на сайте. Цены и остатки зафиксированы на момент подготовки рассылки; перед заказом проверьте текущую доступность. Ответ на письмо поступает отправившему его менеджеру. В «Мой аккаунт» → «Данные аккаунта» → «Новости и прайсы» можно отказаться от этих рассылок и сохранить изменения. Письма о заказах и подтверждениях остаются включёнными."
 
@@ -1108,7 +1114,6 @@ msgstr "Нажмите любую миниатюру под фото товар�
 #: pc-wholesale-help.php
 msgid "Product pages show only brands explicitly enabled in the catalogue supplier filter. Unconfigured brands stay hidden. If none are enabled for a product, the brand row is omitted."
 msgstr "На странице товара показываются только бренды, явно включённые для фильтра поставщиков каталога. Бренды без сохранённого разрешения скрыты. Если таких брендов у товара нет, строка бренда не показывается."
-
 
 msgid "After WayForPay, the website shows payment confirmation or a waiting message. If money was charged but confirmation is pending, refresh the page later and check My orders. Do not pay again; contact the manager if the status does not update."
 msgstr "После WayForPay сайт показывает подтверждение оплаты или сообщение об ожидании. Если деньги списаны, но подтверждения ещё нет, обновите страницу позже и проверьте «Мои заказы». Не платите повторно; если статус не меняется, обратитесь к менеджеру."
@@ -1154,3 +1159,6 @@ msgstr "В подписи Новой почты указан порог для �
 
 msgid "Regular checkout offers Nova Poshta and available store pickup only. To use your own TTN, contact the manager. Previously saved TTNs and their review status remain in your orders."
 msgstr "В обычном оформлении доступны только Новая почта и самовывоз, если он возможен. Для отправки по своей ТТН обратитесь к менеджеру. Ранее сохранённые ТТН и их статус проверки остаются в ваших заказах."
+
+msgid "After agreeing delivery details, the manager can save shipment preparation for your existing order: recipient, warehouse and packed boxes. This does not change your profile, create a Nova Poshta waybill or confirm dispatch. Creating the waybill, printing and automatic dispatch notices are not enabled in this preparation stage."
+msgstr "После согласования доставки менеджер может сохранить подготовку отправления для вашего заказа: получателя, склад и упакованные коробки. Это не меняет ваш профиль, не создаёт ТТН НП и не подтверждает отправку. Создание ТТН, печать и автоматические уведомления об отправке на этом этапе подготовки не включены."

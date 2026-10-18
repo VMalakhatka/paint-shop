@@ -862,6 +862,7 @@ msgstr ""
 
 msgid "Directory data may be up to 15 minutes old. The card does not check whether your packed order fits. Confirm boxes, actual and volumetric weight, access and goods restrictions with the manager. If loading fails, retry; do not treat the missing card as permission to ship."
 msgstr ""
+
 msgid "Where to find order details and delivery"
 msgstr ""
 
@@ -876,6 +877,7 @@ msgstr ""
 
 msgid "For warehouse invoices and document lines, open Folio documents in My account. If an order was split, check each linked child order. Ask the manager if a document or shipment is not yet available."
 msgstr ""
+
 msgid "? How does this work?"
 msgstr ""
 
@@ -923,6 +925,7 @@ msgstr ""
 
 msgid "To disconnect, use Disconnect Telegram in Messages or send /stop to the bot. Website history remains available. Delivery can take about a minute; Telegram acceptance does not mean the customer has read the message. Files, voice messages and order confirmation through the bot are not supported."
 msgstr ""
+
 msgid "Write to the manager on the website"
 msgstr ""
 
@@ -988,6 +991,7 @@ msgstr ""
 
 msgid "Only text is supported, up to 5000 characters. Files, photos, voice messages and email chat are not supported yet. A chat message does not confirm an order, reserve goods, make a payment or start shipment. Use the separate order confirmation page when requested."
 msgstr ""
+
 msgid "Open Messages"
 msgstr ""
 
@@ -1022,11 +1026,13 @@ msgstr ""
 msgid "The cart uses the full page width. On a phone, each item shows its photo and full name, with price, quantity and subtotal underneath. Change the quantity in its field or use the cross to remove an item."
 msgstr ""
 
-#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php
+#: inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
 msgid "News and price lists by email"
 msgstr ""
 
-#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
+#: inc/Broadcasts.php inc/BroadcastUi.php inc/BroadcastPricing.php
+#: inc/BroadcastSources.php inc/BroadcastStore.php inc/broadcast-view.php
 msgid "Your manager may email a message, a full price list or a mini price list for a new arrival. The Excel file uses your price conditions on the site. Prices and stock are captured when the mailing is prepared; check current availability before ordering. Reply to the email to contact the sending manager. In My Account → Account details → News and price lists you can decline these mailings and save changes. Order and confirmation emails remain enabled."
 msgstr ""
 
@@ -1065,7 +1071,6 @@ msgstr ""
 #: pc-wholesale-help.php
 msgid "Product pages show only brands explicitly enabled in the catalogue supplier filter. Unconfigured brands stay hidden. If none are enabled for a product, the brand row is omitted."
 msgstr ""
-
 
 msgid "After WayForPay, the website shows payment confirmation or a waiting message. If money was charged but confirmation is pending, refresh the page later and check My orders. Do not pay again; contact the manager if the status does not update."
 msgstr ""
@@ -1110,4 +1115,28 @@ msgid "The Nova Poshta label shows your customer profile threshold. Above that g
 msgstr ""
 
 msgid "Regular checkout offers Nova Poshta and available store pickup only. To use your own TTN, contact the manager. Previously saved TTNs and their review status remain in your orders."
+msgstr ""
+
+#: wp-content/mu-plugins/pc-wholesale-help.php:308
+msgid "Automatic distribution may split your order between Kyiv and Odesa into separate shipments. Choose one warehouse if you need a single shipment."
+msgstr ""
+
+#: wp-content/mu-plugins/pc-wholesale-help.php:445
+msgid "My subscriptions and notifications"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-wholesale-help.php:543
+msgid "Confirm an order prepared by a manager"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-wholesale-help.php:544
+msgid "After agreeing delivery details, the manager can save shipment preparation for your existing order: recipient, warehouse and packed boxes. This does not change your profile, create a Nova Poshta waybill or confirm dispatch. Creating the waybill, printing and automatic dispatch notices are not enabled in this preparation stage."
+msgstr ""
+
+#: wp-content/mu-plugins/pc-wholesale-help.php:551
+msgid "Your choices are saved for the manager. This confirmation does not charge you, change Folio documents or start shipment. Delivery availability and cost are agreed separately. If the order changes, ask the manager to send its updated version for confirmation."
+msgstr ""
+
+#: wp-content/mu-plugins/pc-wholesale-help.php:552
+msgid "Open my account"
 msgstr ""

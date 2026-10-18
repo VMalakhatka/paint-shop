@@ -1,5 +1,15 @@
 # Wholesale Price List
 
+## NP order preparation adapter (2026-10-18, local)
+
+`ManagerOrderDetails` emits `pcoe_manager_order_shipments` for the displayed saved
+order. NP owns rendering, authorization, custom shipment tables and all commands.
+`CustomerApproval::shipment_preferences` serves explicit manager import only:
+exact owner/order, confirmed status and full current snapshot revision are required.
+It does not save, overwrite the profile, or treat a Folio bundle as a Woo approval.
+No TTN creation or service notifications are enabled in this preparation release.
+Manager workflow and remaining gates: `docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-preparation`.
+
 ## Catalogue draft mode (2026-10-16)
 
 `CatalogDraft` owns a separate customer planning path for every signed-in role.

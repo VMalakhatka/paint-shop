@@ -9,6 +9,7 @@ class CustomerApproval {
     const PAGE = 'pcoe-approvals';
 
     public static function hooks(): void {
+        add_filter('pnpm_manager_confirmed_recipient', [self::class, 'shipment_preferences'], 10, 2);
         add_action('init', [self::class, 'register']);
         add_action('admin_menu', [self::class, 'menu'], 41);
         add_action('admin_post_pcoe_approval_request', [self::class, 'request']);
@@ -82,6 +83,25 @@ class CustomerApproval {
     private static function find(array $source) {
         $posts = get_posts(['post_type' => self::TYPE, 'post_status' => 'private', 'name' => self::key($source), 'numberposts' => 1]);
         return $posts[0] ?? null;
+    }
+
+    /** Explicit manager import only. Recheck ownership and the full current revision. */
+    public static function shipment_preferences($unused, \WC_Order $order): array {
+        if (!current_user_can('manage_woocommerce')) self::unavailable();
+        $post = self::find(['customer_id' => (int)$order->get_customer_id(), 'order_id' => $order->get_id()]);
+        if (!$post) self::unavailable();
+        $data = self::data($post);
+        if ((int)$post->post_author !== (int)$order->get_customer_id()
+            || (int)($data['source']['order_id'] ?? 0) !== (int)$order->get_id()
+            || (int)($data['source']['customer_id'] ?? 0) !== (int)$order->get_customer_id()
+            || $data['status'] !== 'confirmed'
+            || !hash_equals($data['revision'], self::revision(self::snapshot($data['source'])))
+            || !ApprovalDelivery::selected((string)($data['preferences']['delivery']['id'] ?? ''))
+            || empty($data['nova_poshta']['recipient'])) self::unavailable();
+        return array_merge($data['nova_poshta']['recipient'], [
+            'name' => (string)$data['preferences']['recipient'],
+            'phone' => (string)$data['preferences']['phone'],
+        ]);
     }
 
     private static function data($post): array {

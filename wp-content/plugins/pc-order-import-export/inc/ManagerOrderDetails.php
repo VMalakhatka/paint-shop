@@ -51,5 +51,7 @@ final class ManagerOrderDetails {
         if ($page>1) echo '<a class="button" href="' . esc_url(add_query_arg('notes_page',$page-1,$url)) . '">' . esc_html__('Previous page','pc-order-import-export') . '</a>';
         if (count($notes)>20) echo '<a class="button" href="' . esc_url(add_query_arg('notes_page',$page+1,$url)) . '">' . esc_html__('Next page','pc-order-import-export') . '</a>';
         echo '</nav></section>';
+        // Shipment commands belong to the NP plugin, not to checkout or PCOE.
+        do_action('pcoe_manager_order_shipments', $order);
     }
 }

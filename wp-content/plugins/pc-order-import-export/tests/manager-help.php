@@ -23,10 +23,12 @@ namespace {
     function render_help() { ob_start(); \PaintCore\PCOE\ManagerHelp::render(); return ob_get_clean(); }
     if (($argv[1]??'')==='--render') { $locale=$argv[2]??'uk'; echo render_help(); exit; }
     $canon=file_get_contents($root.'/docs/MANAGER_CUSTOMER_GUIDE_UK.md');
+    $npOnly=($argv[1]??'')==='--np-preparation';
     foreach (['uk','ru_RU'] as $locale) {
         $html=render_help(); $sections=\PaintCore\PCOE\ManagerHelp::sections();
-        if(count($sections)!==30) throw new \RuntimeException('Section count');
+        if(count($sections)!==31) throw new \RuntimeException('Section count');
         foreach($sections as $id=>[$title,$paragraphs]) {
+            if($npOnly && $id!=='np-preparation') continue;
             if(substr_count($html,'id="'.$id.'"')!==1 || !str_contains($canon,'id="'.$id.'"')) throw new \RuntimeException('Anchor: '.$id);
             if(preg_match('/^[A-Za-z]/u',$title) && !preg_match('/\p{Cyrillic}/u',$title)) throw new \RuntimeException('Untranslated title: '.$title);
             foreach($paragraphs as $p) if($locale==='uk' && !str_contains($canon,$p)) throw new \RuntimeException('Canon drift: '.$id);
@@ -42,5 +44,5 @@ namespace {
     foreach (['customer-import','customer-import-select','customer-import-fields','customer-import-preview','customer-import-apply','customer-import-results','customer-import-recovery'] as $anchor) {
         if (!isset($sections[$anchor]) || !str_contains($importUi,"'".$anchor."'")) throw new \RuntimeException('Import context link: '.$anchor);
     }
-    echo "PASS: 30 anchors, import context links, UK/RU rendering, canonical parity, no forms or pairing codes, capability gate\n";
+    echo $npOnly ? "PASS: NP preparation UK/RU, anchor, canonical parity and capability gate\n" : "PASS: 31 anchors, import context links, UK/RU rendering, canonical parity, no forms or pairing codes, capability gate\n";
 }

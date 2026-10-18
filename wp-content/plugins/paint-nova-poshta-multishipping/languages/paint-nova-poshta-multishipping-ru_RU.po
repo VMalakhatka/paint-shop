@@ -249,27 +249,34 @@ msgstr "Как выбрать точку получения"
 
 msgid "The selected point could not be verified. Search and select it again."
 msgstr "Выбранную точку не удалось проверить. Найдите и выберите её ещё раз."
-#: src/Infrastructure/ApprovalQuoteService.php src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
+
+#: src/Infrastructure/ApprovalQuoteService.php
+#: src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
 msgid "Delivery cannot be calculated from the saved order warehouses. Ask the manager to check the products and sender settings."
 msgstr "Не удалось рассчитать доставку по сохранённым складам заказа. Попросите менеджера проверить товары и настройки отправителей."
 
-#: src/Infrastructure/ApprovalQuoteService.php src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
+#: src/Infrastructure/ApprovalQuoteService.php
+#: src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
 msgid "Nova Poshta estimates require an order in UAH."
 msgstr "Расчёт Новой почты доступен для заказов в гривнах."
 
-#: src/Infrastructure/ApprovalQuoteService.php src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
+#: src/Infrastructure/ApprovalQuoteService.php
+#: src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
 msgid "Nova Poshta delivery is currently unavailable."
 msgstr "Доставка Новой почтой сейчас недоступна."
 
-#: src/Infrastructure/ApprovalQuoteService.php src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
+#: src/Infrastructure/ApprovalQuoteService.php
+#: src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
 msgid "The selected point cannot accept this parcel weight or declared value. Choose another point or courier delivery."
 msgstr "Вес или объявленная стоимость посылки превышает лимит выбранной точки. Выберите другую точку или курьерскую доставку."
 
-#: src/Infrastructure/ApprovalQuoteService.php src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
+#: src/Infrastructure/ApprovalQuoteService.php
+#: src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
 msgid "Choose the city and an available point from the Nova Poshta list, or enter a courier address."
 msgstr "Выберите город и доступную точку из списка Новой почты или введите адрес курьерской доставки."
 
-#: src/Infrastructure/ApprovalQuoteService.php src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
+#: src/Infrastructure/ApprovalQuoteService.php
+#: src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
 msgid "Courier street and building"
 msgstr "Улица и дом для курьера"
 
@@ -309,3 +316,165 @@ msgstr "При сумме товаров свыше %s базовый тариф
 
 msgid "Address delivery costs more than delivery to a branch. You can choose a Nova Poshta branch in the delivery type above."
 msgstr "Адресная доставка дороже доставки в отделение. Вы можете выбрать отделение Новой почты в способе получения выше."
+
+msgid "Shipment access denied."
+msgstr "Нет доступа к отправлениям."
+
+msgid "Order unavailable."
+msgstr "Заказ недоступен."
+
+msgid "Open the original order to prepare shipments for all warehouses."
+msgstr "Откройте исходный заказ для подготовки отправлений со всех складов."
+
+msgid "Shipment preparation requires an active UAH order without refunds."
+msgstr "Для подготовки нужен активный заказ в гривнах без возвратов."
+
+msgid "Check the saved warehouse allocation before preparing shipments."
+msgstr "Перед подготовкой проверьте сохранённое распределение товаров по складам."
+
+msgid "This order already has external or locked shipments. Preparation cannot replace them."
+msgstr "В заказе уже есть внешние или заблокированные отправления. Подготовка не может их заменить."
+
+msgid "Saved shipment warehouses changed. Administrator review is required."
+msgstr "Склады сохранённых отправлений изменились. Нужна проверка администратора."
+
+msgid "The order or preparation changed. Reload and review it again."
+msgstr "Заказ или подготовка изменились. Обновите страницу и проверьте ещё раз."
+
+msgid "Confirm that recipient details and packaging were agreed and checked."
+msgstr "Подтвердите, что данные получателя и упаковка согласованы и проверены."
+
+msgid "Check recipient details and phone number."
+msgstr "Проверьте данные получателя и номер телефона."
+
+msgid "Check all warehouse parcels."
+msgstr "Проверьте посылки со всех складов."
+
+msgid "Choose the delivery payer for each warehouse."
+msgstr "Выберите плательщика доставки для каждого склада."
+
+msgid "Enter between 1 and 20 packed boxes for each warehouse."
+msgstr "Укажите от 1 до 20 упакованных коробок для каждого склада."
+
+msgid "Enter positive box weights in kg and dimensions in cm."
+msgstr "Укажите положительный вес коробок в кг и размеры в см."
+
+msgid "Check the warehouse sender mapping and phone in Nova Poshta settings."
+msgstr "Проверьте привязку отправителя склада и телефон в настройках НП."
+
+msgid "Multi-warehouse COD requires an approved allocation rule; no COD will be created."
+msgstr "Наложенный платёж с нескольких складов требует утверждённого правила распределения; платёж не будет создан."
+
+msgid "COD is disabled by the customer delivery policy."
+msgstr "Наложенный платёж отключён политикой доставки клиента."
+
+msgid "Delivery payer and store subsidy still require carrier-contract verification; this preview does not calculate the final tariff."
+msgstr "Плательщик и компенсация магазина ещё требуют проверки по договору перевозчика; этот просмотр не рассчитывает окончательный тариф."
+
+msgid "TTN creation and label printing are blocked pending verification of the official carrier API contract. No shipment or notification has been sent."
+msgstr "Создание ТТН и печать маркировки заблокированы до проверки официального контракта API перевозчика. Отправления и уведомления не отправлялись."
+
+msgid "Another order operation is running. Try again after it finishes."
+msgstr "Выполняется другое действие с заказом. Повторите после его завершения."
+
+msgid "Transactional shipment storage is unavailable. Nothing was saved."
+msgstr "Транзакционное хранилище отправлений недоступно. Ничего не сохранено."
+
+msgid "Shipment preparation could not be saved."
+msgstr "Не удалось сохранить подготовку отправления."
+
+msgid "Checking preparation…"
+msgstr "Проверяем подготовку…"
+
+msgid "The operation could not be confirmed. Reload before trying again."
+msgstr "Результат действия не подтверждён. Перед повтором обновите страницу."
+
+msgid "Unsaved changes. Save and check the preparation again."
+msgstr "Есть несохранённые изменения. Сохраните и проверьте подготовку ещё раз."
+
+msgid "Prepare Nova Poshta shipment"
+msgstr "Подготовить отправление НП"
+
+msgid "Preparation is saved for this order only. It does not change the customer profile, create a TTN or send notifications."
+msgstr "Подготовка сохраняется только для этого заказа. Она не меняет профиль клиента, не создаёт ТТН и не отправляет уведомления."
+
+msgid "Use current customer confirmation"
+msgstr "Использовать актуальное подтверждение клиента"
+
+msgid "Import checks the current order version. Review imported details and save separately; your saved preparation is not overwritten automatically."
+msgstr "Импорт проверяет текущую версию заказа. Просмотрите данные и сохраните отдельно; сохранённая подготовка не перезаписывается автоматически."
+
+msgid "Recipient name"
+msgstr "Имя получателя"
+
+msgid "Recipient phone"
+msgstr "Телефон получателя"
+
+msgid "Payment method and order total"
+msgstr "Способ оплаты и сумма заказа"
+
+msgid "Warehouse sender"
+msgstr "Отправитель склада"
+
+msgid "Check sender settings"
+msgstr "Проверить настройки отправителя"
+
+msgid "Delivery payer"
+msgstr "Плательщик доставки"
+
+msgid "Recipient"
+msgstr "Получатель"
+
+msgid "Sender"
+msgstr "Отправитель"
+
+msgid "Cash on delivery"
+msgstr "Наложенный платёж"
+
+msgid "Add packed box"
+msgstr "Добавить упакованную коробку"
+
+msgid "Recipient details were agreed; warehouse contents, packed box weights, dimensions and payer were checked."
+msgstr "Данные получателя согласованы; товары по складам, вес и размеры коробок и плательщик проверены."
+
+msgid "Save preparation"
+msgstr "Сохранить подготовку"
+
+msgid "Check preview"
+msgstr "Проверить предпросмотр"
+
+msgid "Create TTN"
+msgstr "Создать ТТН"
+
+msgid "Weight, kg"
+msgstr "Вес, кг"
+
+msgid "Length, cm"
+msgstr "Длина, см"
+
+msgid "Width, cm"
+msgstr "Ширина, см"
+
+msgid "Height, cm"
+msgstr "Высота, см"
+
+msgid "Remove box"
+msgstr "Убрать коробку"
+
+msgid "Preparation audit (last 10 saves)"
+msgstr "Аудит подготовки (последние 10 сохранений)"
+
+msgid "Invalid preparation request."
+msgstr "Некорректный запрос подготовки."
+
+msgid "No current confirmed delivery details are available for this order."
+msgstr "Для этого заказа нет актуальных подтверждённых данных доставки."
+
+msgid "Imported for review only. Save the preparation separately."
+msgstr "Импортировано только для проверки. Сохраните подготовку отдельно."
+
+msgid "Preparation saved. No TTN or notification was sent."
+msgstr "Подготовка сохранена. ТТН и уведомления не отправлялись."
+
+msgid "Preview only; changes are not saved."
+msgstr "Только предпросмотр; изменения не сохранены."

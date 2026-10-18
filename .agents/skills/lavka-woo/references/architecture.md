@@ -1,5 +1,15 @@
 # Архитектура и границы ответственности
 
+NP manager preparation (2026-10-18, local): PCOE's existing-order hook
+`pcoe_manager_order_shipments` delegates to NP `ManagerPreparationPanel` and
+`ManagerPreparation`. Reuse `pnpm_shipments/items/events` and PCOE's exact order
+lock name. `manager_draft` is NOT a carrier-created TTN or a notification event.
+Never turn preparation save into a carrier call or update the customer profile.
+Import confirmation explicitly and verify the current source revision. Child
+orders, external/locked shipments and multi-warehouse COD remain fail-closed.
+Carrier create/print/reconciliation/status contracts and service notifications
+are still blocked; see NP README and the manager guide `#np-preparation`.
+
 ## Поток данных
 
 ```text

@@ -1,7 +1,7 @@
 (function ($) {
     'use strict';
     var externalDraft = {};
-    function deliveryChanged() { $(document.body).trigger(pnpmCheckout.approval ? 'pnpm_destination_changed' : 'update_checkout'); }
+    function deliveryChanged() { $(document.body).trigger((pnpmCheckout.approval || pnpmCheckout.manager) ? 'pnpm_destination_changed' : 'update_checkout'); }
 
     var cityTimer = null;
     var pointTimer = null;
@@ -161,6 +161,7 @@
     function updateFieldVisibility() {
         var method = $('input[name^="shipping_method"]:checked, input[type="hidden"][name^="shipping_method"], select[name^="shipping_method"]').first().val() || '';
         if (pnpmCheckout.approval) { method = $('.pcoe-approval-form [name=delivery]').val() || ''; }
+        if (pnpmCheckout.manager) { method = 'pnpm_nova_poshta'; }
         var external = method === 'pnpm_customer_ttn';
         $('#pnpm-external-fields').prop('hidden', !external);
         var nova = method.indexOf('pnpm_nova_poshta') === 0;
