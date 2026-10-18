@@ -60,3 +60,24 @@ msgstr "Перед ручным внесением проверьте оплат
 
 msgid "WayForPay refund received. Income is retained; a separate bank expense requires review."
 msgstr "Получено уведомление о возврате WayForPay. Приход сохранён; отдельный банковский расход требует проверки."
+
+msgid "Refresh receipt status"
+msgstr "Обновить статус чека"
+
+msgid "Status refresh failed. The displayed result may be outdated. Try again."
+msgstr "Не удалось обновить статус. Показанный результат может быть устаревшим. Попробуйте ещё раз."
+
+msgid "Saved status updated (UTC)"
+msgstr "Сохранённый статус обновлён (UTC)"
+
+msgid "Receipt confirmed. The site is finishing status synchronization. Do not issue another receipt."
+msgstr "Чек подтверждён. Сайт завершает синхронизацию статуса. Не создавайте другой чек."
+
+msgid "Waiting for confirmation of the existing receipt. Do not issue another receipt."
+msgstr "Ожидаем подтверждения существующего чека. Не создавайте другой чек."
+
+msgid "Queued for processing. The background worker has not finished yet. Do not repeat the action."
+msgstr "В очереди на обработку. Фоновое задание ещё не завершено. Не повторяйте действие."
+
+msgid "Previous attempt diagnostic (not the current result)"
+msgstr "Диагностика предыдущей попытки (не текущий результат)"

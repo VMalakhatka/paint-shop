@@ -311,34 +311,7 @@ final class Bridge
 
     public function orderPanel(\WC_Order $order): void
     {
-        if (!current_user_can('manage_woocommerce')) {
-            return;
-        }
-        $row = $this->store->get($order->get_id());
-        if (!$row) {
-            return;
-        }
-        $receipt = $order->get_meta('_pc_wfp_checkbox_receipt');
-        echo '<p><strong>' . esc_html__('Checkbox receipt', 'pc-wayforpay-checkbox') . '</strong><br>';
-        echo esc_html($row['status'] . ' / ' . $row['mode'] . ' / ' . $row['error_code']);
-        echo '<br>' . esc_html__('Attempts', 'pc-wayforpay-checkbox') . ': ' . (int) $row['attempts'];
-        $command = json_decode($row['command'], true);
-        if (is_array($command) && !empty($command['operation_key'])) {
-            $operation = \Paint\CheckboxFiscalization\Plugin::instance()->service()->operation($command['operation_key']);
-            if ($operation && !empty($operation['error_message'])) {
-                echo '<br>' . esc_html__('Checkbox diagnostic', 'pc-wayforpay-checkbox') . ': '
-                    . esc_html($operation['status'] . ' / HTTP ' . $operation['http_code'] . ' / ' . $operation['error_message']);
-                if (!empty($operation['shift_id'])) {
-                    echo '<br>' . esc_html__('Shift ID', 'pc-wayforpay-checkbox') . ': ' . esc_html($operation['shift_id']);
-                }
-            }
-        }
-        if (is_array($receipt) && !empty($receipt['fiscal_code'])) {
-            echo '<br>' . esc_html($receipt['fiscal_code']);
-            echo '<br>' . esc_html__('Receipt ID', 'pc-wayforpay-checkbox') . ': ' . esc_html($receipt['id']);
-            echo '<br><a target="_blank" rel="noopener noreferrer" href="' . esc_url('https://api.checkbox.ua/api/v1/receipts/' . rawurlencode($receipt['id']) . '/html') . '">' . esc_html__('View receipt', 'pc-wayforpay-checkbox') . '</a>';
-        }
-        echo '</p>';
+        (new ReceiptPanel())->display($order);
     }
 
     public function orderActions(array $actions, ?\WC_Order $order = null): array
