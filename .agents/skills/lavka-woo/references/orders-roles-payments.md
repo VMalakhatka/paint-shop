@@ -519,6 +519,15 @@ command producer and cross-source duplicate checks; never create a second operat
 for a Woo-linked invoice. Human runbook: `docs/WAYFORPAY_TEST_ACCESS.md` and linked
 plugin READMEs. Live opening/replay remains separately authorized.
 
+Receipt admin projection (2026-10-18, adapter 0.2.1 code/offline tests):
+`ReceiptPanel` and `assets/receipt-status.js` read saved state only, behind
+manage_woocommerce + order-edit capability + order-bound nonce. Polling must never
+call reconciliation, enqueue work or submit the order form. During pending states,
+retain old rejection only as labelled history; show confirmed executor result even
+before adapter metadata catches up. A stale open page is not evidence of a repeated
+Checkbox failure. Workflow/limits/deploy: `docs/WAYFORPAY_TEST_ACCESS.md` and the
+adapter README, «Обновление статуса в карточке».
+
 Manual draft purpose (2026-10-16; `PCOE DraftPurpose`, `DraftFolioWorkflow`,
 `ManagerWorkspace`, Java `FolioOrderAccountService`): `_pcoe_draft_purpose`
 selects ordinary draft vs preorder. Manual non-accounting does not imply shortage.
