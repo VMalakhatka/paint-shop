@@ -1,5 +1,33 @@
 # Paint Nova Poshta Multishipping
 
+## Request pacing 0.9.2 — 2026-10-18
+
+Confirmed production failure: HTTP 200 / success=false / errorCodes 20000401501,
+`To many requests` during the second exact point lookup. A valid preview and unchanged
+row can still fail this fresh pre-create read. This is not a contact mismatch.
+`ApiRequestThrottle` serializes JSON transport per site/API-key with a MySQL named
+lock (2-second acquisition limit) and a shared 10-second transient reservation.
+Requests start at least 1.1 seconds apart; rate limits impose a 2-second cooldown.
+These are conservative application choices, not a documented carrier quota.
+An explicit read-method allowlist permits one retry ONLY for this rate error or
+HTTP 429. Other errors and unknown methods are single-attempt. All mutations,
+including recipient save and document save, remain single-attempt; PDF transport
+is unchanged. No new automatic notification or durable create retry exists.
+
+Fresh sender/point validation is retained; the limiter does not reuse stale limits
+or weaken the row/plan fingerprint. Busy/rate errors before the claim explicitly
+say creation was not started. After a claim, existing unknown/locked recovery
+rules remain unchanged. Failure to lock or persist the reservation prevents HTTP.
+Only a hash of the site/key and a timestamp are stored, never request/recipient data.
+Other installations using the same carrier key are outside this site's limiter.
+
+Tests: standalone `tests/api-rate-limit.php` (HTTP 429 + business code, retry bound,
+no save retry, spacing/shared timestamp, lock/persistence failure and release),
+plus local intercepted lifecycle tests for pre-claim rejection and rate recovery.
+Operator instructions: [manager guide](../../../docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-preparation).
+Rollback: restore the prior plugin files from the deployment backup; do not reset
+shipment rows, change mappings or enable/disable write gates as part of rollback.
+
 ## Manager lifecycle 0.9.1 — production gates enabled 2026-10-18
 
 Production runtime checked on 2026-10-18: active 0.9.1, API key configured, both

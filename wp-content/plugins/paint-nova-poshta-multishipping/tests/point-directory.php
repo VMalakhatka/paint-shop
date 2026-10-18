@@ -1,7 +1,7 @@
 <?php
 /** Standalone deterministic test: no WordPress database or network. */
 define('ABSPATH', __DIR__); define('MINUTE_IN_SECONDS', 60); define('PNPM_NOVA_POSHTA_API_KEY', 'test-only');
-class WP_Error { public function __construct(public string $code, public string $message) {} }
+class WP_Error { public function __construct(public string $code, public string $message) {} public function get_error_code() { return $this->code; } }
 function __($text, $domain = '') { return $text; }
 function is_wp_error($value) { return $value instanceof WP_Error; }
 function sanitize_text_field($value) { return trim(strip_tags($value)); }
@@ -19,6 +19,7 @@ function wp_remote_post($url, $args) {
 }
 function wp_remote_retrieve_response_code($r) { return $r['response']['code']; }
 function wp_remote_retrieve_body($r) { return $r['body']; }
+require __DIR__ . '/noop-throttle.php';
 require __DIR__ . '/../src/Infrastructure/ApiClient.php';
 require __DIR__ . '/../src/Infrastructure/WarehouseDirectory.php';
 $directory = new Paint\NovaPoshta\Infrastructure\WarehouseDirectory(new Paint\NovaPoshta\Infrastructure\ApiClient());

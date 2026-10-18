@@ -161,6 +161,19 @@ ServiceType, CargoType, Cost, Weight, SeatsAmount і OptionsSeat, читає dat
 
 ## Невідомий результат створення
 
+### Обмеження частоти: перевірено живим читанням 18.10.2026
+
+`Address.getWarehouses` під час послідовної перевірки відділення та поштомата
+повертав HTTP 200, `success=false`, `errorCodes=["20000401501"]`,
+`errors=["To many requests"]`. Це підтверджений код конкретної відмови, не
+підтвердження універсального числового ліміту НП. 0.9.2 розпізнає також HTTP 429
+і написання `Too many requests`. Явний allowlist read-методів дозволяє лише один
+повтор після cooldown; інші бізнес-помилки й транспортні timeout не повторюються.
+`save` ніколи не повторюється, навіть за 429. Технічні інтервали, lock і тести:
+[README плагіна](../../wp-content/plugins/paint-nova-poshta-multishipping/README.md#request-pacing-092--2026-10-18).
+
+### Ручна звірка створення
+
 [getDocumentList](https://developers.novaposhta.ua/view/model/a90d323c-8512-11ec-8ced-005056b2dbe1/method/a9d22b34-8512-11ec-8ced-005056b2dbe1)
 дозволяє пошук за `DateTime` / `DateTimeFrom` + `DateTimeTo` або `IntDocNumber`.
 Без дати й номера повертає поточний день. `GetFullList=1` обмежений 100 записами;

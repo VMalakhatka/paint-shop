@@ -2,7 +2,7 @@
 /** Deterministic checkout shipping contract. No database, orders or carrier writes. */
 define('ABSPATH', __DIR__); define('MINUTE_IN_SECONDS', 60); define('PNPM_VERSION', 'test');
 define('PNPM_NOVA_POSHTA_API_KEY', 'test-only');
-class WP_Error { public function __construct(public $code, public $message) {} public function get_error_message() { return $this->message; } }
+class WP_Error { public function __construct(public $code, public $message) {} public function get_error_message() { return $this->message; } public function get_error_code() { return $this->code; } }
 class WC_Product {
     public function __construct(public float $weight = 0) {}
     public function needs_shipping() { return true; }
@@ -59,6 +59,7 @@ $wc = (object) ['session' => new class {
     public function set($k, $v) { $this->data[$k] = $v; }
 }];
 function WC() { return $GLOBALS['wc']; }
+require __DIR__ . '/noop-throttle.php';
 foreach (['Domain/DeliveryPolicy', 'Domain/PolicyCalculator', 'Domain/CartShipmentBuilder', 'Infrastructure/ApiClient', 'Infrastructure/TariffQuoteService', 'Shipping/NovaPoshtaShippingMethod', 'Shipping/CheckoutRates'] as $class) require __DIR__ . '/../src/' . $class . '.php';
 $checks = 0; $calls = 0; $api_failure = false;
 function check($ok, $label) { if (!$ok) throw new RuntimeException($label); $GLOBALS['checks']++; }

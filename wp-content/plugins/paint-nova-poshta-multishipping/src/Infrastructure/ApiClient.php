@@ -8,6 +8,15 @@ defined('ABSPATH') || exit;
 
 final class ApiClient
 {
+    public function __construct(private readonly ApiRequestThrottle $throttle = new ApiRequestThrottle()) {}
+
+    // Explicit read allowlist: unknown methods and every mutation are single-attempt.
+    private const RETRYABLE_READS = [
+        'Counterparty.getCounterparties', 'Counterparty.getCounterpartyAddresses',
+        'Counterparty.getCounterpartyContactPersons', 'Address.getWarehouses', 'Address.getCities',
+        'AddressGeneral.searchSettlements', 'InternetDocument.getDocumentPrice',
+        'InternetDocumentGeneral.getDocumentPrice', 'TrackingDocument.getStatusDocuments',
+    ];
     private const MUTATING_METHODS = [
         'save', 'update', 'delete', 'redirecting', 'return', 'create',
     ];
@@ -55,6 +64,16 @@ final class ApiClient
             'calledMethod' => $method,
             'methodProperties' => $properties,
         ];
+        $attempts = in_array($model . '.' . $method, self::RETRYABLE_READS, true) ? 2 : 1;
+        for ($attempt = 0; $attempt < $attempts; $attempt++) {
+            $result = $this->throttle->run($key, fn() => $this->request($payload));
+            if (!is_wp_error($result) || $result->get_error_code() !== 'pnpm_api_rate_limited') return $result;
+        }
+        return $result;
+    }
+
+    private function request(array $payload)
+    {
         $response = wp_remote_post($this->baseUrl(), [
             'timeout' => 15,
             'redirection' => 0,
@@ -68,6 +87,16 @@ final class ApiClient
 
         $code = wp_remote_retrieve_response_code($response);
         $decoded = json_decode(wp_remote_retrieve_body($response), true);
+        $limited = $code === 429;
+        if (is_array($decoded) && ($decoded['success'] ?? null) === false) {
+            foreach ((array)($decoded['errorCodes'] ?? []) as $error) {
+                if (is_scalar($error) && (string)$error === '20000401501') $limited = true;
+            }
+            foreach ((array)($decoded['errors'] ?? []) as $error) {
+                if (is_string($error) && in_array(strtolower(trim($error)), ['to many requests', 'too many requests'], true)) $limited = true;
+            }
+        }
+        if ($limited) return new WP_Error('pnpm_api_rate_limited', __('Nova Poshta temporarily limited requests. Wait a few seconds before checking again.', 'paint-nova-poshta-multishipping'));
         if ($code < 200 || $code >= 300 || !is_array($decoded)) {
             return new WP_Error('pnpm_api_invalid_response', __('Nova Poshta API returned an invalid response.', 'paint-nova-poshta-multishipping'));
         }

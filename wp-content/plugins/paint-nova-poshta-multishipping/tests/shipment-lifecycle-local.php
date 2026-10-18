@@ -29,6 +29,10 @@ add_filter('pre_http_request',static function ($pre,$args,$url) use (&$writes,&$
     if ($url!=='https://api.novaposhta.ua/v2.0/json/') return new WP_Error('blocked','All non-NP HTTP blocked');
     $p=json_decode($args['body'],true); unset($p['apiKey']); $requests[]=$p;
     $m=$p['calledMethod']; $data=[];
+    if ($m==='getWarehouses' && in_array($mode,['read_limited','read_limit_once'],true)) {
+        if ($mode==='read_limit_once') $mode='success';
+        return ['response'=>['code'=>200],'body'=>json_encode(['success'=>false,'errors'=>['To many requests'],'errorCodes'=>['20000401501']])];
+    }
     if ($m==='getCounterparties') $data=[['Ref'=>$refs[2],'Description'=>'Fixture sender']];
     elseif ($m==='getCounterpartyAddresses') $data=[['Ref'=>$refs[4],'CityRef'=>$refs[1]]];
     elseif ($m==='getCounterpartyContactPersons') $data=[['Ref'=>$refs[3],'Phones'=>'380000000000']];
@@ -40,6 +44,7 @@ add_filter('pre_http_request',static function ($pre,$args,$url) use (&$writes,&$
     } elseif ($m==='getDocumentPrice') $data=[['Cost'=>'80.00']];
     elseif ($m==='save') {
         $writes++;
+        if ($mode==='write_limited') return ['response'=>['code'=>429],'body'=>'{}'];
         if ($p['modelName']==='CounterpartyGeneral') {
             $person=$p['methodProperties'];
             $person['Phones']=$person['Phone'];unset($person['Phone']);
@@ -54,7 +59,10 @@ add_filter('pre_http_request',static function ($pre,$args,$url) use (&$writes,&$
     return ['response'=>['code'=>200],'body'=>json_encode(['success'=>true,'data'=>$data,'errors'=>[],'warnings'=>$m==='save'?['synthetic warning']:[]])];
 },PHP_INT_MAX,3);
 $old=$GLOBALS['current_user']; $manager=new WP_User();$manager->ID=PHP_INT_MAX;$manager->allcaps=['manage_woocommerce'=>true,'manage_pnpm_shipments'=>true];$GLOBALS['current_user']=$manager;
-$orders=[]; $tokens=[]; $customerId=0; $service=new ShipmentLifecycle(); $prep=new ManagerPreparation();
+$noWait=new class extends Paint\NovaPoshta\Infrastructure\ApiRequestThrottle {
+    public function run(string $key, callable $request) { return $request(); }
+};
+$orders=[]; $tokens=[]; $customerId=0; $service=new ShipmentLifecycle(new Paint\NovaPoshta\Infrastructure\ApiClient($noWait)); $prep=new ManagerPreparation();
 $names=['FirstName'=>'Тест','LastName'=>'Приклад','MiddleName'=>'Тестович'];
 $make=static function ($two=false) use (&$orders,$locations,$refs,$prep) {
     $order=new WC_Order();$order->set_currency('UAH');$order->set_payment_method('bacs');$order->set_billing_email('np-fixture@example.invalid');
@@ -129,12 +137,19 @@ try {
         $sent=count($mails);$service->email($mailOrder->get_id(),$mailId,hash('sha256',$mailOrder->get_billing_email()));
         $check(count($mails)===$sent,'Failed email not retried');
     } finally {remove_filter('pre_wp_mail',$failMail,PHP_INT_MAX);}
-    foreach (['timeout','rejected'] as $next) {
+    foreach (['timeout','rejected','write_limited'] as $next) {
         $o=$make();$row=(new ShipmentRepository())->findByOrder($o->get_id())[0];$sid=(int)$row['id'];$p=$service->preview($o->get_id(),$sid,$names);$tokens[]=$p['token'];$mode=$next;
         $check($service->create($o->get_id(),$sid,$p['token'])===['unknown'=>true],$next.' fail closed');$n=$writes;
         $reject(fn()=>$service->create($o->get_id(),$sid,$p['token']),$next.' replay denied');
         $check($writes===$n,$next.' no retry');$mode='success';
     }
+    $rateOrder=$make();$rateId=(int)(new ShipmentRepository())->findByOrder($rateOrder->get_id())[0]['id'];
+    $p=$service->preview($rateOrder->get_id(),$rateId,$names);$tokens[]=$p['token'];$before=$writes;$mode='read_limited';
+    try { $service->create($rateOrder->get_id(),$rateId,$p['token']); throw new LogicException('Expected rate rejection'); }
+    catch (RuntimeException $e) { $check(str_contains($e->getMessage(),'No shipment creation was started'),'Actionable pre-claim rate message'); }
+    $check($writes===$before && $service->row($rateOrder->get_id(),$rateId)['status']==='manager_draft','Rate failure leaves preparation unchanged without writes');
+    $mode='read_limit_once';$p=$service->preview($rateOrder->get_id(),$rateId,$names);$tokens[]=$p['token'];
+    $check($p['enabled'] && $writes===$before,'Single read rate retry recovers preview without writes');
     foreach (['identity_mismatch','identity_missing'] as $next) {
         $o=$make();$sid=(int)(new ShipmentRepository())->findByOrder($o->get_id())[0]['id'];
         $p=$service->preview($o->get_id(),$sid,$names);$tokens[]=$p['token'];$mode=$next;$before=$writes;

@@ -595,3 +595,18 @@ msgstr "Этот просмотр не определяет личность п�
 
 msgid "Nova Poshta returned different or incomplete recipient details. No TTN was requested. The recipient may have been saved in Nova Poshta; ask an administrator to reconcile it. Do not repeat creation."
 msgstr "Новая почта вернула другие или неполные данные получателя. Запрос ТТН не отправлялся. Получатель мог сохраниться в Новой почте; обратитесь к администратору для сверки. Не повторяйте создание."
+
+msgid "Nova Poshta requests are busy. Wait a few seconds before checking again."
+msgstr "Запросы к Новой почте заняты. Подождите несколько секунд перед новой проверкой."
+
+
+msgid "Nova Poshta temporarily limited requests. Wait a few seconds before checking again."
+msgstr "Новая почта временно ограничила запросы. Подождите несколько секунд перед новой проверкой."
+
+
+msgid "Nova Poshta is busy or has limited requests. No shipment creation was started. Wait 10 seconds, reload the order and check the saved shipment again."
+msgstr "Новая почта занята или ограничила запросы. Создание отправления не начиналось. Подождите 10 секунд, обновите заказ и проверьте сохранённое отправление ещё раз."
+
+
+msgid "Nova Poshta checks are paced and may take several seconds. Only a rate-limited read can retry once; recipient and TTN creation are never retried automatically. If the message says creation was not started, wait 10 seconds, reload and run a new check. An unknown creation result still requires administrator review."
+msgstr "Проверки Новой почты выполняются с интервалом и могут занять несколько секунд. Только чтение с ограничением частоты может повториться один раз; создание получателя и ТТН автоматически не повторяется. Если сообщение указывает, что создание не начиналось, подождите 10 секунд, обновите страницу и выполните новую проверку. Неизвестный результат создания по-прежнему требует проверки администратором."

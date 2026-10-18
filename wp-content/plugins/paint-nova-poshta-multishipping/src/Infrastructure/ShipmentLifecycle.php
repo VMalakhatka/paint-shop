@@ -28,6 +28,14 @@ final class ShipmentLifecycle
         throw new \RuntimeException(__('Shipment data could not be verified. Check the saved preparation and sender settings; no automatic retry is allowed.', 'paint-nova-poshta-multishipping'));
     }
 
+    /** Called only in preflight, before any durable create claim or carrier write. */
+    private static function checkApiAvailability($result): void
+    {
+        if (is_wp_error($result) && in_array($result->get_error_code(), ['pnpm_api_rate_limited','pnpm_api_busy'], true)) {
+            throw new \RuntimeException(__('Nova Poshta is busy or has limited requests. No shipment creation was started. Wait 10 seconds, reload the order and check the saved shipment again.', 'paint-nova-poshta-multishipping'));
+        }
+    }
+
     /** Serialize with preparation and PCOE order edits; never hold a SQL transaction over HTTP. */
     private function locked(int $order_id, callable $work)
     {
@@ -109,6 +117,7 @@ final class ShipmentLifecycle
         $person = RecipientIdentity::names($names);
         $person += ['Phone'=>$recipient['phone'],'CounterpartyType'=>'PrivatePerson','CounterpartyProperty'=>'Recipient'];
         $directory = (new SenderDirectory($this->api))->load(true);
+        self::checkApiAvailability($directory);
         if (is_wp_error($directory)) self::fail();
         $owned = false;
         foreach ($directory['counterparties'] as $party) {
@@ -140,7 +149,10 @@ final class ShipmentLifecycle
         $declared = max(1, (int)ceil(round($declared, 2)));
         $points = new WarehouseDirectory($this->api);
         $origin = $points->find($sender['city_ref'], $sender['handover_warehouse_ref']);
+        self::checkApiAvailability($origin);
+        if (is_wp_error($origin)) self::fail();
         $destination = $points->find($recipient['city_ref'], $recipient['point_ref']);
+        self::checkApiAvailability($destination);
         if (is_wp_error($origin) || is_wp_error($destination) || $origin['kind'] !== 'branch'
             || $destination['kind'] !== ($recipient['delivery_type'] === 'parcel_locker' ? 'postomat' : 'branch')) self::fail();
         self::checkPoint($origin, $boxes, $declared, 'sending');
@@ -161,6 +173,7 @@ final class ShipmentLifecycle
             $plan = $this->compile((new ManagerPreparation())->order($order_id), $row, $names);
             $quote_fields = array_intersect_key($plan['payload'], array_flip(['CitySender','CityRecipient','Weight','ServiceType','Cost','CargoType','SeatsAmount','OptionsSeat']));
             $quote = $this->api->call('InternetDocumentGeneral', 'getDocumentPrice', $quote_fields);
+            self::checkApiAvailability($quote);
             if (is_wp_error($quote) || ($quote['success'] ?? false)!==true || !is_numeric($quote['data'][0]['Cost'] ?? null)
                 || !is_finite((float)$quote['data'][0]['Cost']) || $quote['data'][0]['Cost']<0) self::fail();
             $token = bin2hex(random_bytes(24));

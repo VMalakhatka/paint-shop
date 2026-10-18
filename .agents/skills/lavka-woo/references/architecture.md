@@ -38,6 +38,14 @@ concurrency checks; never reset shipment state or write to the carrier. HTTP 200
 directory responses can still be unsuccessful. Recovery and evidence boundaries:
 manager guide `#np-preparation`.
 
+NP pacing 0.9.2 (2026-10-18): JSON transport uses a per-site/key named lock and
+shared timestamp; never clear that timestamp merely to bypass a process-local
+cache. Only allowlisted rate-limited reads retry once; mutations remain at-most-once.
+Live `getWarehouses` returned 20000401501 / To many requests with HTTP 200.
+Do not misdiagnose this as a sender mapping error or relax fresh point validation.
+Pre-claim busy messages differ from post-claim unknown outcomes; see NP README
+and manager guide `#np-preparation` before recovery or deployment.
+
 ## Поток данных
 
 ```text
