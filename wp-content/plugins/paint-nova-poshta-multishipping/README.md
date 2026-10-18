@@ -42,6 +42,9 @@ Fixtures use a save response WITHOUT Phones and cover missing/mismatched directo
 data, paging, reference persistence, read failures, admin/stale/audit gates, legacy
 reconciliation, frozen UI and document-only continuation. All fixture HTTP/mail is
 intercepted. Real TTN/PDF/email acceptance is not implied by these tests.
+Local acceptance: 195 lifecycle checks, 40 preparation checks, 22 pacing checks,
+30 point-directory checks and 41 checkout checks passed. Recovered-state UI uses
+read-only names and does not show the draft-only instruction to enter another person.
 
 ## Request pacing 0.9.2 — 2026-10-18
 

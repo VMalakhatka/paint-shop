@@ -245,7 +245,9 @@ try {
         $page=str_replace('</html>',$scripts.'</html>',$page);
         // Exercise the read-only recovered-state layout at desktop and narrow widths too.
         $page=str_replace($draftHtml.$created,$draftHtml.$recoveredHtml.$created,$page);
-        file_put_contents($dir.'/lifecycle.html',$page);restore_previous_locale();
+        file_put_contents($dir.'/lifecycle.html',$page);
+        file_put_contents($dir.'/lifecycle-mobile.html',str_replace('max-width:1050px','max-width:390px',$page));
+        restore_previous_locale();
     }
     echo "Shipment lifecycle: {$checks} checks passed. All HTTP/mail intercepted; synthetic fixtures cleaned.\n";
 } finally {

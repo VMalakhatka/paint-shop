@@ -55,7 +55,7 @@ final class ShipmentLifecyclePanel
                     $defaults = $snapshot['person'] ?? $defaults;
                     echo '<p role="status">'.esc_html__('The existing Nova Poshta contact was verified by an administrator. Preparation is frozen. Run a fresh check and confirm TTN creation; the recipient will not be created again.','paint-nova-poshta-multishipping').'</p>';
                 }
-                echo '<p>'.esc_html__('Names are suggested from the order, then the customer card, only when the saved recipient name and phone match. Review them; patronymic is optional. A different recipient must be entered manually.','paint-nova-poshta-multishipping').'</p>';
+                if (!$recovered) echo '<p>'.esc_html__('Names are suggested from the order, then the customer card, only when the saved recipient name and phone match. Review them; patronymic is optional. A different recipient must be entered manually.','paint-nova-poshta-multishipping').'</p>';
                 echo '<p>'.esc_html__('Saved recipient phone:','paint-nova-poshta-multishipping').' <strong>'.esc_html($recipient['phone'] ?? '').'</strong></p>';
                 echo '<div class="pnpm-legal-name">';
                 foreach (['FirstName'=>__('First name','paint-nova-poshta-multishipping'),'LastName'=>__('Last name','paint-nova-poshta-multishipping'),'MiddleName'=>__('Patronymic (optional)','paint-nova-poshta-multishipping')] as $key=>$label) {
