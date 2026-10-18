@@ -515,3 +515,10 @@ Java `FolioReceiptCatalogueController`/`FolioReceiptCatalogueDao` предост
 рассчитывает существующий Woo PriceList в контексте клиента. Точный контракт —
 Java `docs/api/FOLIO_RECEIPT_CATALOGUE_API.md`. Развёртывание обеих сторон,
 ограничения и восстановление — [операционный регламент](OPERATIONS_RUNBOOK.md#email-рассылки-менеджера-2026-10-05).
+
+### Карточки товаров: отдельное меню «Лавка ФОЛИО»
+
+`lavka-price-sync` владеет менеджерским чтением и потоковой XLSX-выгрузкой 54 полей;
+Java `FolioProductCardDao/Controller` владеет SELECT по исходным Access-запросам и
+их сравнением. Это прямое чтение Paint_Ua, без проекций, импорта и записи в ФОЛИО.
+Контракт, ограничения и проверка: [карточки товаров](api/FOLIO_PRODUCT_CARDS.md).

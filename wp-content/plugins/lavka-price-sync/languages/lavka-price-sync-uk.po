@@ -6744,3 +6744,75 @@ msgstr "Експорт містить один рядок замовлення �
 #: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
 msgid "Cold sensitivity"
 msgstr "Морозостійкість"
+
+#: inc/folio-product-cards.php
+msgid "Enter up to 500 exact SKUs, one per line, with at most 100 characters each."
+msgstr "Введіть до 500 точних артикулів, по одному в рядку, не більше 100 символів кожен."
+
+#: inc/folio-product-cards.php
+msgid "The queries returned different results. Export each query separately for review."
+msgstr "Запити повернули різні результати. Експортуйте кожен окремо для перевірки."
+
+#: inc/folio-product-cards.php
+msgid "Product cards could not be read. Check the Java service, API token, Paint_Ua source and 50,000-row limit, then try again."
+msgstr "Не вдалося прочитати картки. Перевірте Java-сервіс, API-токен, джерело Paint_Ua та ліміт 50 000 рядків, потім повторіть."
+
+#: inc/folio-product-cards.php
+msgid "Lavka Folio"
+msgstr "Лавка ФОЛІО"
+
+#: inc/folio-product-cards.php
+msgid "Product cards"
+msgstr "Картки товарів"
+
+#: inc/folio-product-cards.php
+msgid "Read product cards from Paint_Ua and export 54 fields in the supplied Excel column order. No Folio data is changed."
+msgstr "Читання карток із Paint_Ua та експорт 54 полів у порядку колонок наданого Excel. Дані ФОЛІО не змінюються."
+
+#: inc/folio-product-cards.php
+msgid "Both queries require the legacy warehouse and markup records. Requested SKUs excluded by those conditions are listed separately. Assembly columns 55–57 are not returned by these queries."
+msgstr "Обидва запити потребують складських записів і націнок за старими правилами. Артикули, виключені цими умовами, показано окремо. Колонки складання 55–57 ці запити не повертають."
+
+#: inc/folio-product-cards.php
+msgid "Query"
+msgstr "Запит"
+
+#: inc/folio-product-cards.php
+msgid "Compare both queries"
+msgstr "Порівняти обидва запити"
+
+#: inc/folio-product-cards.php
+msgid "Exact SKUs, one per line. Leave empty for all eligible cards."
+msgstr "Точні артикули, по одному в рядку. Залиште порожнім для всіх карток, що відповідають умовам."
+
+#: inc/folio-product-cards.php
+msgid "Read and check"
+msgstr "Прочитати й перевірити"
+
+#: inc/folio-product-cards.php
+msgid "Export product cards XLSX"
+msgstr "Експорт карток XLSX"
+
+#: inc/folio-product-cards.php
+msgid "Reading product cards…"
+msgstr "Читання карток товарів…"
+
+#: inc/folio-product-cards.php
+msgid "Both queries match."
+msgstr "Результати обох запитів збігаються."
+
+#: inc/folio-product-cards.php
+msgid "Rows returned:"
+msgstr "Отримано рядків:"
+
+#: inc/folio-product-cards.php
+msgid "Requested SKUs not returned:"
+msgstr "Запитані артикули, які не повернуто:"
+
+#: inc/folio-product-cards.php
+msgid "Preview: first 50 rows. The Excel export contains all returned rows."
+msgstr "Перегляд: перші 50 рядків. Експорт Excel містить усі отримані рядки."
+
+#: inc/folio-product-cards.php
+msgid "Preparing the Excel download…"
+msgstr "Підготовка завантаження Excel…"
