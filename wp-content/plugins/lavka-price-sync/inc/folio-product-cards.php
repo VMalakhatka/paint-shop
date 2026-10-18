@@ -12,6 +12,8 @@ function lps_card_selection(array $input): array {
     $skus = array_values(array_unique(array_filter(array_map('trim', preg_split('/\R/u', $text) ?: []), static fn($s) => $s !== '')));
     if (count($skus) > 500) throw new RuntimeException('INVALID_SELECTION');
     foreach ($skus as $sku) if (mb_strlen($sku) > 100 || preg_match('/[\x00-\x1f\x7f]/u', $sku)) throw new RuntimeException('INVALID_SELECTION');
+    if (isset($input['scope']) && (!in_array($input['scope'], ['selected','all'], true) || ($input['scope'] === 'selected' && !$skus))) throw new RuntimeException('INVALID_SELECTION');
+    if (($input['scope'] ?? '') === 'all') $skus = [];
     return ['mode'=>$mode, 'skus'=>$skus];
 }
 
@@ -58,13 +60,15 @@ add_action('admin_menu', static function (): void {
 function lps_card_render(): void {
     if (!current_user_can(LPS_CAP)) wp_die(esc_html__('Access denied.', 'lavka-price-sync'), '', ['response'=>403]);
     echo '<div class="wrap"><h1>'.esc_html__('Lavka Folio', 'lavka-price-sync').'</h1><h2>'.esc_html__('Product cards', 'lavka-price-sync').'</h2>';
-    echo '<p>'.esc_html__('Read product cards from Paint_Ua and export 54 fields in the supplied Excel column order. No Folio data is changed.', 'lavka-price-sync').'</p>';
-    echo '<p>'.esc_html__('Both queries require the legacy warehouse and markup records. Requested SKUs excluded by those conditions are listed separately. Assembly columns 55–57 are not returned by these queries.', 'lavka-price-sync').'</p>';
+    echo '<p>'.esc_html__('Read product cards from Paint_Ua and export them in the supplied Excel column order. No Folio data is changed.', 'lavka-price-sync').'</p>';
+    echo '<p>'.esc_html__('Both queries require the legacy warehouse and markup records. Requested SKUs excluded by those conditions are listed separately. Assembly columns 55–57 are exported empty because these queries do not return them.', 'lavka-price-sync').'</p>';
     echo '<form method="post" id="lps-card-form" action="'.esc_url(admin_url('admin-post.php')).'">';
     wp_nonce_field(LPS_CARD_NONCE);
     echo '<input type="hidden" name="action" value="lps_folio_product_cards"><p><label>'.esc_html__('Query', 'lavka-price-sync').' <select name="mode">';
     foreach (['direct'=>'1212 все поля','view'=>'_dbo_Все поля по Artic','compare'=>__('Compare both queries', 'lavka-price-sync')] as $key=>$label) echo '<option value="'.esc_attr($key).'">'.esc_html($label).'</option>';
-    echo '</select></label></p><p><label for="lps-card-skus">'.esc_html__('Exact SKUs, one per line. Leave empty for all eligible cards.', 'lavka-price-sync').'</label></p>';
+    echo '</select></label></p><p><label for="lps-card-skus">'.esc_html__('Paste exact SKUs, one per line (up to 500).', 'lavka-price-sync').'</label></p>';
+    echo '<p><label>'.esc_html__('Selection', 'lavka-price-sync').' <select name="scope"><option value="selected">'.esc_html__('Listed SKUs', 'lavka-price-sync').'</option><option value="all">'.esc_html__('All eligible cards', 'lavka-price-sync').'</option></select></label></p>';
+    echo '<fieldset><legend>'.esc_html__('Load SKUs from Excel', 'lavka-price-sync').'</legend><p><input type="file" id="lps-card-file" accept=".xls,.xlsx" aria-label="'.esc_attr__('Excel file', 'lavka-price-sync').'"></p><p><label>'.esc_html__('Column letter', 'lavka-price-sync').' <input id="lps-card-column" value="A" size="3" maxlength="3"></label> <label>'.esc_html__('First data row', 'lavka-price-sync').' <input id="lps-card-first-row" type="number" value="2" min="1" max="10000" style="width:80px"></label> <button type="button" class="button" id="lps-card-import">'.esc_html__('Load list', 'lavka-price-sync').'</button></p><p>'.esc_html__('XLS or XLSX, up to 5 MB. The first sheet is read. Loading replaces the list below; review it before reading cards.', 'lavka-price-sync').'</p></fieldset>';
     echo '<textarea id="lps-card-skus" name="skus" rows="7" maxlength="60000" style="width:100%;max-width:600px"></textarea>';
     echo '<p><button type="button" class="button button-secondary" id="lps-card-preview">'.esc_html__('Read and check', 'lavka-price-sync').'</button> ';
     echo '<button type="submit" class="button button-primary">'.esc_html__('Export product cards XLSX', 'lavka-price-sync').'</button></p></form>';
@@ -75,6 +79,8 @@ add_action('admin_enqueue_scripts', static function (): void {
     if (($_GET['page'] ?? '') !== 'lps-folio-cards') return;
     wp_enqueue_script('lps-folio-cards', plugins_url('../assets/folio-product-cards.js', __FILE__), [], (string)filemtime(__DIR__.'/../assets/folio-product-cards.js'), true);
     wp_localize_script('lps-folio-cards', 'lpsCards', [
+        'importing'=>__('Reading Excel…', 'lavka-price-sync'), 'imported'=>__('SKUs loaded:', 'lavka-price-sync'),
+        'importError'=>__('Could not read the list. Choose an XLS/XLSX file up to 5 MB, a valid column and first data row. Use up to 500 unique SKUs; formulas are not accepted.', 'lavka-price-sync'),
         'url'=>admin_url('admin-ajax.php'), 'reading'=>__('Reading product cards…', 'lavka-price-sync'),
         'error'=>lps_card_error('CARD_READ_FAILED'), 'match'=>__('Both queries match.', 'lavka-price-sync'),
         'difference'=>lps_card_error('CARD_DIFFERENCE'), 'rows'=>__('Rows returned:', 'lavka-price-sync'),

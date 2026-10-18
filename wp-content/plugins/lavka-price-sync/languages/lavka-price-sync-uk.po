@@ -7119,3 +7119,63 @@ msgstr "Підготовка завантаження Excel…"
 #: inc/folio-product-cards.php
 msgid "SQL Server denied read access to this query. Use 1212 all fields, or ask the database administrator to allow reading card_tov."
 msgstr "SQL Server відхилив читання цього запиту. Використайте «1212 все поля» або зверніться до адміністратора бази для надання права читання card_tov."
+
+#: inc/folio-product-cards.php
+msgid "Selection"
+msgstr "Вибір"
+
+#: inc/folio-product-cards.php
+msgid "Listed SKUs"
+msgstr "Артикули зі списку"
+
+#: inc/folio-product-cards.php
+msgid "All eligible cards"
+msgstr "Усі доступні картки"
+
+#: inc/folio-product-cards.php
+msgid "Load SKUs from Excel"
+msgstr "Завантажити артикули з Excel"
+
+#: inc/folio-product-cards.php
+msgid "Excel file"
+msgstr "Файл Excel"
+
+#: inc/folio-product-cards.php
+msgid "Column letter"
+msgstr "Літера колонки"
+
+#: inc/folio-product-cards.php
+msgid "First data row"
+msgstr "Перший рядок даних"
+
+#: inc/folio-product-cards.php
+msgid "Load list"
+msgstr "Завантажити список"
+
+#: inc/folio-product-cards.php
+msgid "XLS or XLSX, up to 5 MB. The first sheet is read. Loading replaces the list below; review it before reading cards."
+msgstr "XLS або XLSX, до 5 МБ. Читається перший аркуш. Завантаження замінює список нижче; перевірте його перед читанням карток."
+
+#: inc/folio-product-cards.php
+msgid "Paste exact SKUs, one per line (up to 500)."
+msgstr "Вставте точні артикули, по одному в рядку (до 500)."
+
+#: inc/folio-product-cards.php
+msgid "Reading Excel…"
+msgstr "Читання Excel…"
+
+#: inc/folio-product-cards.php
+msgid "SKUs loaded:"
+msgstr "Завантажено артикулів:"
+
+#: inc/folio-product-cards.php
+msgid "Could not read the list. Choose an XLS/XLSX file up to 5 MB, a valid column and first data row. Use up to 500 unique SKUs; formulas are not accepted."
+msgstr "Не вдалося прочитати список. Виберіть XLS/XLSX до 5 МБ, правильну колонку та перший рядок даних. До 500 унікальних артикулів; формули не приймаються."
+
+#: inc/folio-product-cards.php
+msgid "Read product cards from Paint_Ua and export them in the supplied Excel column order. No Folio data is changed."
+msgstr "Прочитайте картки товарів з Paint_Ua та вивантажте їх у порядку колонок наданого Excel. Дані ФОЛІО не змінюються."
+
+#: inc/folio-product-cards.php
+msgid "Both queries require the legacy warehouse and markup records. Requested SKUs excluded by those conditions are listed separately. Assembly columns 55–57 are exported empty because these queries do not return them."
+msgstr "Обидва запити потребують записів складів і націнок. Виключені цими умовами артикули показуються окремо. Колонки збірок 55–57 вивантажуються порожніми, оскільки запити їх не повертають."

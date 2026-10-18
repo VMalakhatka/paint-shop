@@ -30,9 +30,9 @@ function lps_card_xlsx(array $data): string {
             if (fwrite($stream, $s) !== strlen($s)) throw new RuntimeException('CARD_READ_FAILED');
         };
         $write('<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane xSplit="3" ySplit="1" topLeftCell="D2" activePane="bottomRight" state="frozen"/></sheetView></sheetViews><cols>');
-        for ($i=1;$i<=54;$i++) $write('<col min="'.$i.'" max="'.$i.'" width="'.(in_array($i,[4,5,54],true)?48:20).'" customWidth="1"/>');
+        for ($i=1;$i<=57;$i++) $write('<col min="'.$i.'" max="'.$i.'" width="'.(in_array($i,[4,5,54],true)?48:20).'" customWidth="1"/>');
         $write('</cols><sheetData><row r="1" ht="90" customHeight="1">');
-        foreach (lps_card_headers() as $i=>$label) $write('<c r="'.lps_card_letter($i+1).'1" s="1" t="inlineStr"><is><t xml:space="preserve">'.lps_card_xml($label).'</t></is></c>');
+        foreach (lps_card_export_headers() as $i=>$label) $write('<c r="'.lps_card_letter($i+1).'1" s="1" t="inlineStr"><is><t xml:space="preserve">'.lps_card_xml($label).'</t></is></c>');
         $write('</row>');
         foreach ($data['data']['rows'] as $n=>$row) {
             $r=$n+2; $write('<row r="'.$r.'">');
@@ -47,7 +47,7 @@ function lps_card_xlsx(array $data): string {
             }
             $write('</row>');
         }
-        $write('</sheetData><autoFilter ref="A1:BB'.(count($data['data']['rows'])+1).'"/></worksheet>');
+        $write('</sheetData><autoFilter ref="A1:BE'.(count($data['data']['rows'])+1).'"/></worksheet>');
         fclose($stream); $stream=null;
         if ($zip->open($zipPath, ZipArchive::OVERWRITE)!==true) throw new RuntimeException('CARD_READ_FAILED');
         $opened=true;
@@ -81,4 +81,9 @@ function lps_card_xlsx(array $data): string {
         unlink($xmlPath);
         if (!$done && is_file($zipPath)) unlink($zipPath);
     }
+}
+
+/** Keep all template positions; assembly values are unavailable from these queries. */
+function lps_card_export_headers(): array {
+    return array_merge(lps_card_headers(), ["Артиул\nРебенка", "Колличество\nДетей из Родителя", "Если связь неадекватная,\nперечесление всех родителей и\nколичестов их необходимое для 1-ого ребенка"]);
 }

@@ -8,7 +8,8 @@ function wp_die($s,$title='',$args=[]){throw new RuntimeException((string)($args
 function check_admin_referer($n){throw new RuntimeException('nonce-rejected');}
 function check_ajax_referer($n,$k){throw new RuntimeException('nonce-rejected');}
 require __DIR__.'/../inc/folio-product-cards.php';
-foreach(['wp_ajax_lps_folio_product_cards','admin_post_lps_folio_product_cards'] as $hook){
+require __DIR__.'/../inc/folio-product-cards-import.php';
+foreach(['wp_ajax_lps_folio_product_cards_import','wp_ajax_lps_folio_product_cards','admin_post_lps_folio_product_cards'] as $hook){
  foreach([false,true] as $allow){$GLOBALS['allowed']=$allow;
   try{($GLOBALS['hooks'][$hook])();throw new LogicException('Unauthorized call continued');}
   catch(RuntimeException $e){if($e->getMessage()!==($allow?'nonce-rejected':'403'))throw $e;}
