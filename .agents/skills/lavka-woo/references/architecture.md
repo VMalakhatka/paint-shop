@@ -30,6 +30,13 @@ write gates true, confirmed by a fresh server PHP process. Local defaults remain
 off. This enables explicit manager creation, not automated writes or acceptance
 of a real shipment pilot. Private backups, re-preview and narrow disable procedure:
 manager guide `#np-preparation`. Never copy enabled production gates into fixtures.
+Sender mapping repair (production, 2026-10-18): `ShipmentLifecycle::compile`
+requires the configured contact Ref AND phone under the current sender. A matching
+phone on another contact does not pass ownership. An owner-approved repair changes
+only the selected location's `contact_ref`, after unique-match, backup, lock and
+concurrency checks; never reset shipment state or write to the carrier. HTTP 200
+directory responses can still be unsuccessful. Recovery and evidence boundaries:
+manager guide `#np-preparation`.
 
 ## Поток данных
 
