@@ -7,8 +7,13 @@ lock name. `manager_draft` is NOT a carrier-created TTN or a notification event.
 Never turn preparation save into a carrier call or update the customer profile.
 Import confirmation explicitly and verify the current source revision. Child
 orders, external/locked shipments and multi-warehouse COD remain fail-closed.
-Carrier create/print/reconciliation/status contracts and service notifications
-are still blocked; see NP README and the manager guide `#np-preparation`.
+Carrier creation, printing, reconciliation and service notifications remain
+unimplemented. The official docs were accessible in Chrome on 2026-10-18;
+do not repeat the earlier 403 as a current access blocker. Read
+[the contract review](../../../../docs/api/NOVA_POSHTA_SHIPMENT_CONTRACT.md)
+before extending the lifecycle: official examples have contradictions, status 1
+is not dispatch, and print URLs contain the secret and must never reach browsers.
+See NP README and the manager guide `#np-preparation` for release boundaries.
 
 ## Поток данных
 

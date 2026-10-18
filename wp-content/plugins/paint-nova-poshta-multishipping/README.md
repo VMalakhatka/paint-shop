@@ -27,10 +27,13 @@ is unchanged. Audit records actor/time, reviewed fields and snapshot hashes, not
 recipient values in logs. Access requires manage_woocommerce and
 manage_pnpm_shipments. No migration, option changes or deployment performed.
 
-**External blocker:** on 2026-10-18 the [official developer portal](https://developers.novaposhta.ua/)
-returned HTTP 403. The [official integration page](https://novaposhta.ua/for-business/cooperation/integration/)
-does not supply detailed save/print/reconciliation/tracking contracts. Do not
-substitute unverified third-party examples or enable real writes. Remaining work:
+**Contract review, 2026-10-18:** the [official developer portal](https://developers.novaposhta.ua/)
+is accessible in the user's Chrome tab; the earlier HTTP 403 is no longer an access
+blocker. Save, string-recipient, locker, marking, tracking and document-list pages
+were read without executing API requests. Verified fields, conflicting official
+examples and remaining checks are recorded in the
+[shipment contract review](../../../docs/api/NOVA_POSHTA_SHIPMENT_CONTRACT.md).
+This does not enable creation or replace implementation tests. Remaining work:
 verified payload/compiler and sender/recipient preflight, durable create claim plus
 unknown-outcome reconciliation, authenticated PDF proxy, shipment tracking/customer
 view and idempotent email/linked-Telegram outbox. Creation means prepared; only
