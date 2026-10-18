@@ -28,6 +28,17 @@ Operator instructions: [manager guide](../../../docs/MANAGER_CUSTOMER_GUIDE_UK.m
 Rollback: restore the prior plugin files from the deployment backup; do not reset
 shipment rows, change mappings or enable/disable write gates as part of rollback.
 
+Production acceptance, 2026-10-18: plugin-only deployment of code commit `6f8b6a0`
+after a verified private archive outside web-root. Runtime reports 0.9.2. A guarded
+read-only preview followed immediately by the same fresh compilation used before
+creation completed 11 carrier reads, with minimum measured start spacing 1.099 s
+(measurement/rounding tolerance) and zero rate errors. Preview row hash, plan hash
+and strict payload comparison all matched. Shipment row, event count, settings
+and sender mappings remained unchanged. The browser preview also succeeded and
+enabled the unchecked confirmation box; the new inline help was visible. No
+recipient/document save, real TTN, PDF printing or email was executed in this check.
+This verifies the pre-create path, not end-to-end carrier creation acceptance.
+
 ## Manager lifecycle 0.9.1 — production gates enabled 2026-10-18
 
 Production runtime checked on 2026-10-18: active 0.9.1, API key configured, both
