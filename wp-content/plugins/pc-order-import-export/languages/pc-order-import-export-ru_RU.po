@@ -3725,3 +3725,24 @@ msgstr "Выбор недоступен — выберите заново"
 #, php-format
 msgid "Photos checked: %1$s of %2$s. Unavailable after retry: %3$s."
 msgstr "Проверено фото: %1$s из %2$s. Недоступны после повторной попытки: %3$s."
+
+msgid "Parcel locker"
+msgstr "Почтомат"
+
+msgid "Nova Poshta branch"
+msgstr "Отделение Новой почты"
+
+msgid "Courier delivery"
+msgstr "Курьерская доставка"
+
+msgid "Nova Poshta destination selected at checkout"
+msgstr "Новая почта: выбор при оформлении заказа"
+
+msgid "Pickup point is not saved. Check before creating a shipment."
+msgstr "Точка получения не сохранена. Уточните перед созданием отправления."
+
+msgid "This is the choice saved with the order. Check the shipment preparation below for any later changes agreed with the customer."
+msgstr "Это выбор, сохранённый в заказе. Более поздние изменения, согласованные с клиентом, проверьте ниже в подготовке отправления."
+
+msgid "Recipient and address saved in WooCommerce"
+msgstr "Получатель и адрес, сохранённые в WooCommerce"

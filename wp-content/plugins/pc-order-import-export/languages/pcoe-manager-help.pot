@@ -420,3 +420,6 @@ msgstr ""
 #: wp-content/plugins/pc-order-import-export/inc/ManagerHelp.php:109
 msgid "This release saves preparations only. Create TTN and label printing remain blocked until the official carrier API contract is verified. Final tariff, subsidy settlement, packed-point compatibility and multi-warehouse COD are not approved by this preview. Saving does not notify the customer. Future notices must distinguish TTN created (prepared for dispatch) from carrier-confirmed physical acceptance (dispatched)."
 msgstr ""
+
+msgid "The delivery block separately shows the Nova Poshta branch or parcel locker selected at checkout and the address saved in WooCommerce. A home address is not the selected pickup point. Later agreed changes belong to shipment preparation; check them before creating a waybill."
+msgstr ""

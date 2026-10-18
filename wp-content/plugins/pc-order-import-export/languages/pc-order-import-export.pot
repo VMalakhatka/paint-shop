@@ -3529,3 +3529,24 @@ msgstr ""
 #, php-format
 msgid "Photos checked: %1$s of %2$s. Unavailable after retry: %3$s."
 msgstr ""
+
+msgid "Parcel locker"
+msgstr ""
+
+msgid "Nova Poshta branch"
+msgstr ""
+
+msgid "Courier delivery"
+msgstr ""
+
+msgid "Nova Poshta destination selected at checkout"
+msgstr ""
+
+msgid "Pickup point is not saved. Check before creating a shipment."
+msgstr ""
+
+msgid "This is the choice saved with the order. Check the shipment preparation below for any later changes agreed with the customer."
+msgstr ""
+
+msgid "Recipient and address saved in WooCommerce"
+msgstr ""

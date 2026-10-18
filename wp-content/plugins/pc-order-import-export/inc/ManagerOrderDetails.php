@@ -13,6 +13,23 @@ final class ManagerOrderDetails {
         }
         return $order;
     }
+    /** Saved checkout destination; never substitute it for an issued shipment snapshot. */
+    public static function destination(\WC_Order $order): string {
+        $recipient = self::source($order)->get_meta('_pnpm_recipient');
+        if (!is_array($recipient)) return '';
+        $text = static fn($key) => isset($recipient[$key]) && is_scalar($recipient[$key]) ? trim((string)$recipient[$key]) : '';
+        $type = $text('delivery_type');
+        $types = ['parcel_locker'=>__('Parcel locker', 'pc-order-import-export'),
+            'branch'=>__('Nova Poshta branch', 'pc-order-import-export'),
+            'address'=>__('Courier delivery', 'pc-order-import-export')];
+        if (!$text('city_label') && !$text('point_label') && !isset($types[$type])) return '';
+        $html = '<div class="pcoe-np-destination"><h3>'.esc_html__('Nova Poshta destination selected at checkout', 'pc-order-import-export').'</h3>';
+        if (isset($types[$type])) $html .= '<p><strong>'.esc_html($types[$type]).'</strong></p>';
+        if ($text('city_label')) $html .= '<p>'.esc_html($text('city_label')).'</p>';
+        if ($type !== 'address') $html .= '<p><strong>'.esc_html($text('point_label') ?: __('Pickup point is not saved. Check before creating a shipment.', 'pc-order-import-export')).'</strong></p>';
+        $html .= '<p>'.esc_html__('This is the choice saved with the order. Check the shipment preparation below for any later changes agreed with the customer.', 'pc-order-import-export').'</p></div>';
+        return $html;
+    }
     public static function render(\WC_Order $order): void {
         if (!current_user_can('manage_woocommerce')) return;
         $source = self::source($order);
@@ -20,7 +37,9 @@ final class ManagerOrderDetails {
         if ($source->get_id() !== $order->get_id()) echo '<p>' . esc_html(sprintf(__('Delivery from original order #%s (all warehouses).', 'pc-order-import-export'), $source->get_order_number())) . '</p>';
         $summary = class_exists('Paint\\NovaPoshta\\Email\\DeliverySummary') ? (new \Paint\NovaPoshta\Email\DeliverySummary())->render($order, true, false) : '';
         echo $summary ? wp_kses_post($summary) : '<p>' . esc_html($source->get_shipping_method() ?: __('Delivery method not specified.', 'pc-order-import-export')) . '</p>';
-        echo '<p><strong>' . esc_html__('Recipient and address', 'pc-order-import-export') . '</strong><br>' . wp_kses_post($source->get_formatted_shipping_address() ?: $source->get_formatted_billing_address() ?: '—') . '</p>';
+        $destination = self::destination($order);
+        echo $destination;
+        echo '<p><strong>' . esc_html($destination ? __('Recipient and address saved in WooCommerce', 'pc-order-import-export') : __('Recipient and address', 'pc-order-import-export')) . '</strong><br>' . wp_kses_post($source->get_formatted_shipping_address() ?: $source->get_formatted_billing_address() ?: '—') . '</p>';
         echo '<p>' . esc_html($source->get_shipping_phone() ?: $source->get_billing_phone()) . '<br>' . esc_html($source->get_billing_email()) . '</p>';
         if (class_exists('Paint\\NovaPoshta\\Infrastructure\\ShipmentRepository')) {
             $rows = (new \Paint\NovaPoshta\Infrastructure\ShipmentRepository())->findByOrder($source->get_id());

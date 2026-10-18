@@ -570,3 +570,9 @@ private non-autoloaded blobs; do not restore a single global photo time budget.
 A yielded batch is incomplete, not a missing image. Final attachment size limits
 and explicit send approval remain. Recovery/cleanup and regression details:
 `wp-content/plugins/pc-order-import-export/README.md`, Commercial offers in mailings.
+
+Manager delivery display (2026-10-18): PCOE `ManagerOrderDetails` shows saved
+`_pnpm_recipient` independently of the Woo address. Reuse its ownership-checked
+split source resolver; never present checkout choice as the current issued TTN
+destination. NP preparation owns later corrections. Details: PCOE README,
+Saved Nova Poshta destination in manager orders.

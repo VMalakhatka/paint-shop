@@ -933,3 +933,8 @@ opt-out flags; do not resume campaigns with the old code.
 Removed or newly hidden taxonomy selections remain explicit unavailable options in
 the form. Saving requires choosing a valid replacement or disabling that rule;
 they must never silently turn into unrestricted brands/categories.
+
+
+### Saved Nova Poshta destination in manager orders (2026-10-18)
+
+`ManagerOrderDetails::destination` renders `_pnpm_recipient` separately from the Woo shipping address. It reuses the existing ownership-checked split-order source resolver. Labels are escaped and malformed metadata ignored. This is the checkout snapshot, not a current shipment destination; later manager corrections belong to the NP preparation panel. No shipment/API/email mutations. WordPress-only deployment, no data migration. Offline regression: `tests/manager-destination-offline.php`. Operator instructions: `docs/MANAGER_CUSTOMER_GUIDE_UK.md`.

@@ -109,6 +109,7 @@ final class ManagerHelp {
                 __('This release saves preparations only. Create TTN and label printing remain blocked until the official carrier API contract is verified. Final tariff, subsidy settlement, packed-point compatibility and multi-warehouse COD are not approved by this preview. Saving does not notify the customer. Future notices must distinguish TTN created (prepared for dispatch) from carrier-confirmed physical acceptance (dispatched).', 'pcoe-manager-help'),
             ]],
             'delivery' => [__('Delivery, comments and order history', 'pcoe-manager-help'), [
+                __('The delivery block separately shows the Nova Poshta branch or parcel locker selected at checkout and the address saved in WooCommerce. A home address is not the selected pickup point. Later agreed changes belong to shipment preparation; check them before creating a waybill.', 'pcoe-manager-help'),
                 __('Review the recipient, contacts, address, delivery method, customer comment and saved shipment numbers. For a split order, delivery may be shown from the original order; also inspect the child orders.', 'pcoe-manager-help'),
                 __('A saved shipment number does not prove dispatch. Check the displayed tracking time and carrier status. Order history is not the conversation inbox: internal order notes stay internal, while a customer order note may send an email.', 'pcoe-manager-help'),
             ]],
