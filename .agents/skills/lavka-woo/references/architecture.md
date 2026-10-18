@@ -189,3 +189,9 @@ owns the two Access-compatible SELECTs and all-field multiset comparison. Preser
 and optional ALL_ARTC/ALL_CENA rows. Do not substitute card_tov_export or treat the
 missing assembly columns as fetched data. Full contract and operator boundaries:
 [product-card read/export](../../../../docs/api/FOLIO_PRODUCT_CARDS.md).
+
+Folio card file input (2026-10-18): `folio-product-cards-import.php` uses the shared
+PhpSpreadsheet autoloader for XLS/XLSX SKU lists; it never imports card values.
+Preserve explicit selected/all scope, capability/nonce and text identifiers. Export
+has 57 template headings with the final three assembly fields empty; SQL remains
+54 fields. Operator contract: `docs/api/FOLIO_PRODUCT_CARDS.md`.

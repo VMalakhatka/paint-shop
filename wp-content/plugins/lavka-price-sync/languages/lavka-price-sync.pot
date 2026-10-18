@@ -6617,3 +6617,63 @@ msgstr ""
 #: inc/folio-product-cards.php
 msgid "SQL Server denied read access to this query. Use 1212 all fields, or ask the database administrator to allow reading card_tov."
 msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Selection"
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Listed SKUs"
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "All eligible cards"
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Load SKUs from Excel"
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Excel file"
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Column letter"
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "First data row"
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Load list"
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "XLS or XLSX, up to 5 MB. The first sheet is read. Loading replaces the list below; review it before reading cards."
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Paste exact SKUs, one per line (up to 500)."
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Reading Excel…"
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "SKUs loaded:"
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Could not read the list. Choose an XLS/XLSX file up to 5 MB, a valid column and first data row. Use up to 500 unique SKUs; formulas are not accepted."
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Read product cards from Paint_Ua and export them in the supplied Excel column order. No Folio data is changed."
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Both queries require the legacy warehouse and markup records. Requested SKUs excluded by those conditions are listed separately. Assembly columns 55–57 are exported empty because these queries do not return them."
+msgstr ""

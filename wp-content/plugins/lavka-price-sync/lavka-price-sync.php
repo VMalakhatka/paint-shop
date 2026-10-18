@@ -53,6 +53,7 @@ require_once __DIR__.'/inc/product-analytics-export.php';
 require_once __DIR__.'/inc/purchase-planning.php';
 require_once __DIR__.'/inc/supplier-prices.php';
 require_once __DIR__.'/inc/folio-product-cards.php';
+require_once __DIR__.'/inc/folio-product-cards-import.php';
 require_once __DIR__.'/inc/folio-product-cards-xlsx.php';
 
 add_action('init', function () {

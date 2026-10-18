@@ -66,3 +66,13 @@ Live read check (2026-10-18): direct SELECT succeeded, but SQL Server denied the
 card_tov view query (229/42000). Direct mode is the default. View/compare modes
 show a safe permission message until the DBA grants SELECT on that view; this
 change does not grant permissions. Live equality remains unverified.
+
+### Product-card Excel input (2026-10-18)
+
+The Folio screen accepts pasted SKUs or XLS/XLSX (5 MB, first sheet, selectable
+column and first data row) through the existing shared PhpSpreadsheet autoloader.
+Loading replaces the editable list; no Folio calls or media copies occur. Explicit
+selection prevents an empty list from requesting all cards. XLSX retains all 57
+template headings; the three unsupported assembly columns stay empty. Operator
+steps and limits: `docs/api/FOLIO_PRODUCT_CARDS.md`. Tests: product-cards,
+product-cards-import and product-cards-auth under tests/. No migration required.

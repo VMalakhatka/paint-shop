@@ -16,6 +16,8 @@ function rejected($f){try{$f();}catch(RuntimeException $e){return;}throw new Run
 ok(lps_card_selection(['mode'=>'compare','skus'=>"00123\n00123\n=x\n"])===['mode'=>'compare','skus'=>['00123','=x']]);
 rejected(fn()=>lps_card_selection(['mode'=>['view']]));rejected(fn()=>lps_card_selection(['skus'=>str_repeat('a',101)]));
 rejected(fn()=>lps_card_selection(['skus'=>implode("\n",range(1,501))]));
+rejected(fn()=>lps_card_selection(['scope'=>'selected','skus'=>'']));
+ok(lps_card_selection(['scope'=>'all','skus'=>'123'])['skus']===[]);
 $row=array_fill(0,54,null);$row[0]=$row[1]='00123';$row[3]='=HYPERLINK("bad")';$row[19]='12.3400';$row[26]='0012345678901';$row[53]='Опис & <текст>';
 $columns=array_map(fn($k)=>['key'=>$k,'type'=>'text'],lps_card_keys());$columns[19]['type']='number';
 $GLOBALS['response']=['ok'=>true,'sourceDatabase'=>'Paint_Ua','mode'=>'compare','data'=>['columns'=>$columns,'rows'=>[$row]],'identical'=>true,'directRows'=>1,'viewRows'=>1,'missingSkus'=>['no-such-sku']];
@@ -29,8 +31,8 @@ $sheet=simplexml_load_string($z->getFromName('xl/worksheets/sheet1.xml'));$sheet
 ok((string)$sheet->xpath('//x:c[@r="B2"]/x:is/x:t')[0]==='00123');
 ok((string)$sheet->xpath('//x:c[@r="AA2"]/x:is/x:t')[0]==='0012345678901');
 ok((string)$sheet->xpath('//x:c[@r="T2"]/x:v')[0]==='12.3400');
-ok(count($sheet->xpath('//x:f'))===0);ok(count($sheet->xpath('//x:row[@r="1"]/x:c'))===54);
+ok(count($sheet->xpath('//x:f'))===0);ok(count($sheet->xpath('//x:row[@r="1"]/x:c'))===57);
 ok((string)$sheet->xpath('//x:c[@r="BB2"]/x:is/x:t')[0]==='Опис & <текст>');
 ok(count($sheet->xpath('//x:c[@r="C2"]'))===0);$z->close();
 if(getenv('LPS_CARD_TEST_OUTPUT'))copy($path,getenv('LPS_CARD_TEST_OUTPUT'));unlink($path);
-echo "PASS: selection, protocol failure, schema, exact text identifiers, numbers, NULL, XML, 54 headers and formula safety\n";
+echo "PASS: selection, protocol failure, schema, exact text identifiers, numbers, NULL, XML, 57 template headers and formula safety\n";
