@@ -6542,6 +6542,305 @@ msgstr ""
 msgid "Cold sensitivity"
 msgstr ""
 
+#: inc/purchase-export.php inc/purchase-planning.php
+msgid "Remaining customer preorders"
+msgstr ""
+
+#: inc/purchase-export.php inc/purchase-planning.php
+msgid "Additional preorder demand"
+msgstr ""
+
+#: inc/purchase-export.php inc/purchase-planning.php
+msgid "Expected free stock after customer preorders"
+msgstr ""
+
+#: inc/purchase-export.php inc/purchase-planning.php
+msgid "Customer preorders not covered by current stock and expected receipts"
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Customer preorder source lines (JSON)"
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Current customer preorder data is required before ordering."
+msgstr ""
+
+#: inc/analytics-period.php
+msgid "Set the analysis period between 1 and 3650 whole days."
+msgstr ""
+
+#: inc/analytics-period.php
+msgid "Select a valid analysis period mode."
+msgstr ""
+
+#: inc/analytics-scenarios.php
+msgid "Analysis period mode"
+msgstr ""
+
+#: inc/analytics-scenarios.php
+msgid "Last N days through today"
+msgstr ""
+
+#: inc/analytics-scenarios.php
+msgid "Fixed dates"
+msgstr ""
+
+#: inc/analytics-scenarios.php
+msgid "Analysis period, days"
+msgstr ""
+
+#: inc/analytics-scenarios.php
+msgid "Relative dates are recalculated at each new report or forecast. Today is included in the number of days. The completed calculation and Excel keep their actual dates."
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Assembly role"
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Parent products"
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Child products"
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Child product"
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Parent product"
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "The export has one row per SKU, including children with zero supplier order. Parent and child lists show the assembly links. XLSX also includes warehouse group detail and individual warehouse stock."
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Select one supplier. Children and grandchildren are found automatically, including products outside the supplier filter. Their shortages consume components. The report includes their statistics and assembly links, with zero supplier order for every child. Review the quantity to manufacture."
+msgstr ""
+
+#: inc/purchase-current-stock.php
+msgid "Java returned an outdated current stock format without customer preorders. Update and deploy the Java backend, then start a new calculation."
+msgstr ""
+
+msgid "Draft saved. Confirmed edits are saved automatically."
+msgstr ""
+
+msgid "Saved draft opened. Stock and forecast are from the original calculation date."
+msgstr ""
+
+msgid "Completed calculations are saved as separate drafts. Use Apply for each edited product before leaving. A new calculation creates a new draft."
+msgstr ""
+
+msgid "Saved order drafts"
+msgstr ""
+
+msgid "Open draft"
+msgstr ""
+
+msgid "Could not save the order draft. Please try again."
+msgstr ""
+
+msgid "The saved draft is incomplete. Start a new calculation."
+msgstr ""
+
+msgid "Complete the preview before saving a draft."
+msgstr ""
+
+msgid "This draft changed in another tab. Reopen it before saving."
+msgstr ""
+
+msgid "Saved order draft not found."
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Profit / average inventory for the period, %"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Selection"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Groups, period and warehouses"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "All selected products"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Remove from comparison"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "One-off sales are excluded. Build the report to apply this condition."
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Group profitability comparison"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Choose product group levels, dates and warehouses above, then build the report. Add each completed selection to compare groups or periods."
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Exclude one-off sales (*РАЗОВАЯ)"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Last completed report: whole selection"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Amounts are in the report currency. Average inventory is a monthly approximation. Gross profit excludes overhead expenses. Return on inventory is for the selected period, not annualized. Movement filters do not remove capital from inventory."
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Comparison row name (optional)"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Add completed report to comparison"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Download comparison CSV"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Comparison rows keep their original filters and snapshot dates. They remain in this page until reload; download the comparison to keep it. Maximum 50 rows. Rows may overlap and are not summed."
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Selected conditions"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "No conditions added."
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Product group tree"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Find a group or subgroup"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Include branch"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Exclude branch"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Add condition"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Edit condition"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Remove condition"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Switch include / exclude"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "No group at this level"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Included branches are combined. Excluded branches are removed from the result. Other conditions apply together."
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Group tree requires the updated Java service. Existing conditions are preserved."
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Saved level condition"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Press Add condition to apply your selection."
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Use at most 100 valid group branches."
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Invalid group branch path."
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "The analytics response did not apply the selected group branches."
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Included condition"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Excluded condition"
+msgstr ""
+
+
+#: inc/purchase-planning.php
+msgid "Respect MAX in purchase planning"
+msgstr ""
+
+
+#: inc/purchase-planning.php
+msgid "When disabled, this group keeps its full forecast for the supplier order, including future replenishments from the source warehouse. Folio MAX values and actual transfer limits are not changed."
+msgstr ""
+
 #: inc/folio-product-cards.php
 msgid "Enter up to 500 exact SKUs, one per line, with at most 100 characters each."
 msgstr ""
@@ -6618,9 +6917,6 @@ msgstr ""
 msgid "SQL Server denied read access to this query. Use 1212 all fields, or ask the database administrator to allow reading card_tov."
 msgstr ""
 
-#: inc/folio-product-cards.php
-msgid "Selection"
-msgstr ""
 
 #: inc/folio-product-cards.php
 msgid "Listed SKUs"

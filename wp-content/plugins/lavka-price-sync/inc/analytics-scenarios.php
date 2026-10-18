@@ -1,5 +1,7 @@
 <?php
+require_once __DIR__ . '/analytics-conditions.php';
 if (!defined('ABSPATH')) exit;
+require_once __DIR__ . '/analytics-period.php';
 
 const LPS_ANALYTICS_SCENARIOS_PAGE = 'lps-analytics-scenarios';
 const LPS_ANALYTICS_SCENARIOS_NONCE = 'lps_analytics_scenarios';
@@ -146,7 +148,7 @@ function lps_analytics_scenario_default_profile_v4(): array {
     return [
         'schemaVersion' => 4,
         'context' => ['sourceDatabase' => 'Paint_Ua', 'warehouseIds' => []],
-        'period' => ['from' => '', 'to' => ''],
+        'period' => ['mode' => 'ROLLING_DAYS', 'days' => 190],
         'productFilters' => [],
         'movementFilters' => [],
         'calculation' => ['abcBasis' => 'GROSS_PROFIT', 'includeReturns' => true],
@@ -176,10 +178,7 @@ function lps_analytics_scenario_sanitize_profile_v4(array $profile): array {
     $warehouses = array_slice($warehouses, 0, 50);
 
     $period_in = is_array($profile['period'] ?? null) ? $profile['period'] : [];
-    $from = sanitize_text_field((string)($period_in['from'] ?? ''));
-    $to = sanitize_text_field((string)($period_in['to'] ?? ''));
-    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $from)) $from = '';
-    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $to)) $to = '';
+    $period = lps_analytics_period_profile($period_in);
 
     $product_in = is_array($profile['productFilters'] ?? null) ? $profile['productFilters'] : [];
     $movement_in = is_array($profile['movementFilters'] ?? null) ? $profile['movementFilters'] : [];
@@ -195,6 +194,7 @@ function lps_analytics_scenario_sanitize_profile_v4(array $profile): array {
         if ($selection['mode'] !== 'ANY') $product[$key] = $selection;
     }
     $movements = [];
+    if (isset($product_in['groupBranches'])) $product['groupBranches'] = lps_analytics_group_branches($product_in['groupBranches']);
     foreach ([
         'operationKinds', 'movementClasses', 'demandModes', 'documentTypes',
         'stockDirections', 'paymentTerms', 'customerSegments', 'counterparties',
@@ -224,7 +224,7 @@ function lps_analytics_scenario_sanitize_profile_v4(array $profile): array {
     return [
         'schemaVersion' => 4,
         'context' => ['sourceDatabase' => $source, 'warehouseIds' => $warehouses],
-        'period' => ['from' => $from, 'to' => $to],
+        'period' => $period,
         'productFilters' => $product,
         'movementFilters' => $movements,
         'calculation' => [
@@ -707,10 +707,11 @@ add_action('admin_enqueue_scripts', static function (): void {
         @filemtime($css_path) ?: '1.0'
     );
     lps_availability_enqueue();
+    lps_analytics_conditions_enqueue();
     wp_enqueue_script(
         'lps-analytics-scenarios',
         plugins_url('assets/analytics-scenarios-v4.js', $plugin_file),
-        ['lps-product-availability'],
+        ['lps-product-availability', 'lps-analytics-conditions'],
         @filemtime($js_path) ?: '1.0',
         true
     );
@@ -721,6 +722,7 @@ add_action('admin_enqueue_scripts', static function (): void {
         'warehouseGroups' => function_exists('lavka_get_global_warehouse_groups') ? lavka_get_global_warehouse_groups() : [],
         'purchaseI18n' => lps_purchase_i18n(),
         'locale' => str_replace('_', '-', determine_locale()),
+        'serverDate' => wp_date('Y-m-d'),
         'i18n' => [
             'warehouseFull' => __('Full analytics', 'lavka-price-sync'),
             'warehouseStockOnly' => __('Current stock only', 'lavka-price-sync'),
@@ -986,8 +988,11 @@ function lps_render_analytics_scenarios_v4_page(): void {
                                 <p class="description"><?php echo esc_html__('Full analytics includes stock, sales, MIN/MAX and availability history. Current stock only contributes physical, reserved and free quantities; it does not contribute demand, MIN/MAX or financial metrics. To exclude a warehouse, remove it from the selection above.', 'lavka-price-sync'); ?></p>
                                 <div id="lps-as-warehouse-usage"></div>
                             </div>
-                            <label><span><?php echo esc_html__('Period from', 'lavka-price-sync'); ?></span><input type="date" id="lps-as-period-from" value="<?php echo esc_attr($period_from); ?>" required></label>
-                            <label><span><?php echo esc_html__('Period through', 'lavka-price-sync'); ?></span><input type="date" id="lps-as-period-to" value="<?php echo esc_attr($today); ?>" required></label>
+                            <label><span><?php echo esc_html__('Analysis period mode', 'lavka-price-sync'); ?></span><select id="lps-as-period-mode"><option value="ROLLING_DAYS"><?php echo esc_html__('Last N days through today', 'lavka-price-sync'); ?></option><option value="FIXED"><?php echo esc_html__('Fixed dates', 'lavka-price-sync'); ?></option></select></label>
+                            <label id="lps-as-period-days-field"><span><?php echo esc_html__('Analysis period, days', 'lavka-price-sync'); ?></span><input type="number" id="lps-as-period-days" min="1" max="3650" step="1" value="190" required></label>
+                            <label><span><?php echo esc_html__('Period from', 'lavka-price-sync'); ?></span><input type="date" id="lps-as-period-from" value="<?php echo esc_attr($period_from); ?>"></label>
+                            <label><span><?php echo esc_html__('Period through', 'lavka-price-sync'); ?></span><input type="date" id="lps-as-period-to" value="<?php echo esc_attr($today); ?>"></label>
+                            <p class="description"><?php echo esc_html__('Relative dates are recalculated at each new report or forecast. Today is included in the number of days. The completed calculation and Excel keep their actual dates.', 'lavka-price-sync'); ?></p>
                             <label><span><?php echo esc_html__('ABC basis', 'lavka-price-sync'); ?></span><select id="lps-as-abc-basis"><option value="GROSS_PROFIT"><?php echo esc_html__('Gross profit', 'lavka-price-sync'); ?></option><option value="REVENUE"><?php echo esc_html__('Revenue', 'lavka-price-sync'); ?></option><option value="SOLD_UNITS"><?php echo esc_html__('Sold units', 'lavka-price-sync'); ?></option></select></label>
                             <label><span><?php echo esc_html__('Rows per page', 'lavka-price-sync'); ?></span><select id="lps-as-page-size"><option value="20">20</option><option value="50" selected>50</option><option value="100">100</option><option value="250">250</option></select></label>
                             <label><span><?php echo esc_html__('Sort by', 'lavka-price-sync'); ?></span><select id="lps-as-sort-field"><option value="grossProfit"><?php echo esc_html__('Gross profit', 'lavka-price-sync'); ?></option><option value="salesRevenue"><?php echo esc_html__('Sales revenue', 'lavka-price-sync'); ?></option><option value="soldUnits"><?php echo esc_html__('Sold units', 'lavka-price-sync'); ?></option><option value="inventoryValue"><?php echo esc_html__('Capital in stock', 'lavka-price-sync'); ?></option><option value="averageInventoryValue"><?php echo esc_html__('Average inventory value', 'lavka-price-sync'); ?></option><option value="physicalQuantity"><?php echo esc_html__('Physical quantity', 'lavka-price-sync'); ?></option><option value="sku"><?php echo esc_html__('SKU', 'lavka-price-sync'); ?></option><option value="productName"><?php echo esc_html__('Product', 'lavka-price-sync'); ?></option></select></label>

@@ -1,0 +1,62 @@
+const {chromium}=require('playwright');
+const {execFileSync}=require('child_process');
+const assert=require('assert');
+const path=require('path');
+(async()=>{
+ const html=execFileSync(process.env.PHP_BINARY||'php',[path.join(__dirname,'profit-comparison-ui.php')],{encoding:'utf8'});
+ const browser=await chromium.launch({headless:true,...(process.env.CHROME_BINARY?{executablePath:process.env.CHROME_BINARY}:{})});
+ for(const width of [1440,390]) {
+  const page=await browser.newPage({viewport:{width,height:1000}}),errors=[];
+  page.on('pageerror',e=>errors.push(e.message));let fail=false,requests=[];
+  const warehouses=[{id:7,name:'Kyiv wholesale',analyticsSchemaVersion:7,asOf:'2026-10-17'}];
+  await page.route('https://fixture.local/report',r=>r.fulfill({contentType:'text/html',body:html}));
+  await page.route('https://fixture.local/api',async r=>{
+   const post=new URLSearchParams(r.request().postData()),op=post.get('operation');let data;
+   if(op==='v4_bootstrap') data={warehouses,warehouseDirectoryReady:true,serverDate:'2026-10-17'};
+   else if(op==='v4_capabilities')data={warehouses,analyticsSchemaVersion:7,compatibleGeneration:true,filters:{groupLevel4:{supported:true},currentSuppliers:{supported:true},operationKinds:{supported:true},demandModes:{supported:true}},dictionaries:{currentSuppliers:[{code:'Kreul',name:'Kreul'}],operationKinds:[{code:'*РОЗНИЦА',name:'*РОЗНИЦА'},{code:'МУЛЬТИСБОРКА',name:'МУЛЬТИСБОРКА'}],groupLevel4:[{code:'Kreul',name:'Kreul'},{code:'Pebeo',name:'Pebeo'}],demandModes:[{code:'ONE_OFF_ORDER',name:'One-off'}]}};
+   else if(op==='v4_query'){
+    const q=JSON.parse(post.get('payloadJson'));requests.push(q);
+    data=fail?{ok:false,errors:['incomplete']}:{ok:true,context:{warehouses,periodFrom:q.period.from,periodTo:q.period.to},totals:{productCount:150,warehouseRowCount:150,metrics:{soldUnits:142,salesRevenue:16384.56,salesCogs:9261.836,grossProfit:7122.724,averageInventoryValue:9543.85820556,gmroi:0.74631494,grossMarginPercent:43.47217}},rows:[],nextCursor:'page-2'};
+   } else throw Error(op);
+   if(op==='v4_capabilities')data.features={groupHierarchy:{supported:true,version:1,paths:[['Kreul','Opaque'],['Pebeo','Opaque']]}};
+   await r.fulfill({contentType:'application/json',body:JSON.stringify({success:true,data})});
+  });
+  await page.goto('https://fixture.local/report');
+  await page.locator('[data-lps-selection="currentSuppliers"]').waitFor();
+  await page.locator('.lps-group-tree summary').filter({has:page.locator('span',{hasText:/^Kreul$/})}).getByRole('button',{name:'include',exact:true}).click();
+  const group=page.locator('[data-lps-selection="groupLevel4"]');
+  const supplier=page.locator('[data-lps-selection="currentSuppliers"]'),operations=page.locator('[data-lps-selection="operationKinds"]');
+  await supplier.locator('.lps-pa-mode').selectOption('INCLUDE');await supplier.locator('.lps-pa-values').selectOption('Kreul');
+  await supplier.locator('[data-add-condition]').click();
+  await operations.locator('.lps-pa-mode').selectOption('EXCLUDE');await operations.locator('.lps-pa-values').selectOption('МУЛЬТИСБОРКА');
+  await operations.locator('[data-add-condition]').click();
+  await page.locator('#lps-pa-period-from').fill('2026-01-01');await page.locator('#lps-pa-period-to').fill('2026-10-17');
+  await page.locator('#lps-pa-exclude-one-off').click();await page.locator('#lps-pa-build').click();
+  await page.waitForFunction(()=>!document.querySelector('#lps-pa-compare-add').disabled);
+  assert.deepEqual(requests[0].movementFilters.demandModes,{mode:'EXCLUDE',values:['ONE_OFF_ORDER']});
+  assert.deepEqual(requests[0].productFilters.currentSuppliers,{mode:'INCLUDE',values:['Kreul']});
+  assert.deepEqual(requests[0].productFilters.groupBranches,[{mode:'INCLUDE',path:['Kreul']}]);
+  assert.deepEqual(requests[0].movementFilters.operationKinds,{mode:'EXCLUDE',values:['МУЛЬТИСБОРКА']});
+  await page.locator('#lps-pa-compare-name').fill('Kreul');await page.locator('#lps-pa-compare-add').click();
+  const cells=page.locator('#lps-pa-comparison-table tbody tr').first().locator('td');
+  assert.equal(await cells.nth(1).textContent(),'150','whole-selection count, not zero visible page rows');
+  assert.equal(await cells.nth(7).textContent(),'74.63%');
+  assert((await cells.first().textContent()).includes('Include selected values: Kreul'),'completed request pinned');
+  assert((await cells.first().textContent()).includes('Exclude selected values: МУЛЬТИСБОРКА'),'operation filter visible');
+  await operations.locator('.lps-pa-mode').selectOption('INCLUDE');await operations.locator('.lps-pa-values').selectOption('*РОЗНИЦА');
+  await operations.locator('[data-add-condition]').click();
+  await page.locator('#lps-pa-build').click();await page.waitForFunction(()=>!document.querySelector('#lps-pa-compare-add').disabled);
+  assert.deepEqual(requests[1].movementFilters.operationKinds,{mode:'INCLUDE',values:['*РОЗНИЦА']});
+  await page.locator('#lps-pa-compare-name').fill('=HYPERLINK("x")');await page.locator('#lps-pa-compare-add').click();
+  const downloadEvent=page.waitForEvent('download');await page.locator('#lps-pa-compare-export').click();
+  const download=await downloadEvent;const csv=require('fs').readFileSync(await download.path(),'utf8');
+  assert(csv.includes("'=HYPERLINK"),'CSV formula injection escaped');assert(csv.includes('9543.85820556'));
+  await page.locator('.lps-pa-profitability').screenshot({path:path.join(require('os').tmpdir(),`profit-comparison-${width}.png`)});
+  fail=true;await page.locator('#lps-pa-build').click();await page.waitForFunction(()=>document.querySelector('#lps-pa-message').className.includes('error'));
+  assert(await page.locator('#lps-pa-compare-add').isDisabled(),'failed result cannot enter comparison');
+  assert.equal(await page.locator('#lps-pa-comparison-table tbody tr').count(),2);
+  await page.locator('[data-profit-remove="0"]').click();assert.equal(await page.locator('#lps-pa-comparison-table tbody tr').count(),1);
+  assert.deepEqual(errors,[]);await page.close();
+ }
+ await browser.close();console.log('PASS: full totals, pinned filters, exclusion, CSV and failure handling desktop/mobile');
+})().catch(e=>{console.error(e);process.exit(1)});

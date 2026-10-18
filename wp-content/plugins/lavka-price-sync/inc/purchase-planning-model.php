@@ -204,6 +204,34 @@ function lps_purchase_internal_stock(array $row, array $groups): array {
     return $out;
 }
 
+/**
+ * Non-accounted customer preorder invoices do not reduce Folio free stock.
+ * Their entire outstanding quantity is additional demand, independent of other current reserves.
+ */
+function lps_purchase_customer_preorders(array $row, array $group): array {
+    $empty = ['demand' => 0.0, 'additionalDemand' => 0.0, 'lines' => [], 'issue' => null];
+    if (empty($row['currentStockCapture']['captureId'])) return $empty; // direct model fixtures and historical previews
+    $source = $row['customerPreorders'] ?? [];
+    if (($source['calculationVersion'] ?? 0) !== 1 || ($source['status'] ?? '') !== 'CAPTURED'
+        || ($source['captureId'] ?? null) !== $row['currentStockCapture']['captureId'] || !is_array($source['lines'] ?? null)) {
+        return array_merge($empty, ['issue' => 'CUSTOMER_PREORDER_DATA_REQUIRED']);
+    }
+    $by_warehouse = []; $seen = [];
+    foreach ($source['lines'] as $line) {
+        $id = (int)($line['warehouseId'] ?? 0); if (!in_array($id, $group['warehouseIds'], true)) continue;
+        $qty = lps_purchase_number($line['quantity'] ?? null, 0.000001); $line_id = $line['lineId'] ?? null;
+        if ($qty === null || !is_int($line_id) || $line_id <= 0 || isset($seen[$line_id])) return array_merge($empty, ['issue' => 'CUSTOMER_PREORDER_DATA_REQUIRED']);
+        $seen[$line_id] = true; $by_warehouse[$id][] = $line;
+    }
+    $out = $empty;
+    foreach ($by_warehouse as $id => $lines) {
+        $demand = array_sum(array_map(static fn($line) => (float)$line['quantity'], $lines));
+        $out['demand'] += $demand; $out['additionalDemand'] += $demand;
+        $out['lines'] = array_merge($out['lines'], $lines);
+    }
+    return $out;
+}
+
 function lps_purchase_profile(array $input): array {
     $groups = [];
     foreach (array_slice((array)($input['groups'] ?? []), 0, 50) as $group) {
@@ -212,6 +240,7 @@ function lps_purchase_profile(array $input): array {
             'code' => sanitize_key((string)($group['code'] ?? '')),
             'receivingWarehouseId' => absint($group['receivingWarehouseId'] ?? 0),
             'minimumWarehouseId' => absint($group['minimumWarehouseId'] ?? $group['receivingWarehouseId'] ?? 0),
+            'respectMaximumStock' => !array_key_exists('respectMaximumStock', $group) || !empty($group['respectMaximumStock']),
             'supplyFromGroupCode' => sanitize_key((string)($group['supplyFromGroupCode'] ?? '')),
             'leadTimeDays' => lps_purchase_number($group['leadTimeDays'] ?? null, 0, 730),
             'targetDays' => lps_purchase_number($group['targetDays'] ?? null, 1, 730),
@@ -267,7 +296,8 @@ function lps_purchase_resolve_groups(array $profile, array $configured): array {
         if (!in_array($minimum_id, $current['warehouseIds'], true) || in_array($minimum_id, $stock_only, true)) {
             throw new InvalidArgumentException(__('Select a minimum-stock source from this group with full analytics.', 'lavka-price-sync'));
         }
-        $resolved[] = array_merge($group, ['minimumWarehouseId' => $minimum_id, 'packRounding' => lps_purchase_pack_mode($plan),
+        $resolved[] = array_merge($group, ['minimumWarehouseId' => $minimum_id,
+            'respectMaximumStock' => ($group['respectMaximumStock'] ?? true) !== false, 'packRounding' => lps_purchase_pack_mode($plan),
             'respectPack' => lps_purchase_pack_mode($plan) !== 'NONE',
             'stockoutCorrectionEnabled' => !empty($plan['stockoutCorrectionEnabled']),
             'maxDemandMultiplier' => lps_purchase_number($plan['maxDemandMultiplier'] ?? 1.1, 1, 100) ?? 1.1,
@@ -322,6 +352,22 @@ function lps_purchase_filter_data(array $dimensions): array {
     ];
 }
 
+/** Scenario-only policy view. Never change Folio cards or relax missing/invalid MIN. */
+function lps_purchase_without_maximum(array $policy): array {
+    $policy['maximumStockLimited'] = false;
+    $policy['maximumStockLimit'] = null;
+    if (in_array($policy['validationState'] ?? '', ['MAXIMUM_STOCK_NOT_SET', 'INVALID_NEGATIVE_MAXIMUM', 'MINIMUM_EXCEEDS_MAXIMUM'], true)) {
+        $minimum = lps_purchase_number($policy['minimumStock'] ?? null);
+        $reserve = lps_purchase_number($policy['reserveAboveForecast'] ?? null);
+        if ($minimum !== null && $reserve !== null && $minimum === $reserve
+            && ($policy['replenishmentMode'] ?? '') === ($minimum > 0 ? 'FORECAST_PLUS_MINIMUM_STOCK' : 'DO_NOT_ORDER')) {
+            $policy['orderAllowed'] = $minimum > 0;
+            $policy['validationState'] = 'VALID';
+        }
+    }
+    return $policy;
+}
+
 // Operates on Java's confirmed metrics; never reconstructs Folio movements.
 function lps_purchase_calculate(array $row, array $groups, int $period_days, bool $allow_transfers, array $edits = [], ?array $transit_ids = null, array $assembly = []): array {
     $manufactured = !empty($assembly['manufactured']);
@@ -331,6 +377,20 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
     $confirmed_transit = lps_purchase_transit($transit, $transit_ids, $row['currentStockCapture'] ?? []);
     $transit_pool = $confirmed_transit['quantity'];
     $network = $row['networkOrderPolicy'] ?? [];
+    foreach ($groups as $group) {
+        if (($group['respectMaximumStock'] ?? true) !== false) continue;
+        foreach ($group['warehouseIds'] as $id) {
+            if (isset($members[$id])) $members[$id]['orderPolicy'] = lps_purchase_without_maximum($members[$id]['orderPolicy'] ?? []);
+        }
+        if (in_array($network['policyWarehouseId'] ?? 7, $group['warehouseIds'], true) && isset($network['policy'])) {
+            $validation = $network['policy']['validationState'] ?? '';
+            $network['policy'] = lps_purchase_without_maximum($network['policy']);
+            if ($validation !== 'VALID' && ($network['policy']['validationState'] ?? '') === 'VALID') {
+                $network['orderAllowed'] = $network['policy']['orderAllowed'] ?? null;
+                if ($network['orderAllowed'] === true) $network['status'] = 'ALLOWED';
+            }
+        }
+    }
     $result = [];
     $allocated_transit = 0;
     $internal = lps_purchase_internal_stock($row, $groups);
@@ -408,6 +468,13 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
         $ready = !$issues && $incoming !== null && $open_orders !== null && (!empty($group['supplyFromGroupCode']) || ((!$respect_pack || $pack !== null) && $moq !== null));
         $planning_available = $available + $internal_group['internalRestored'];
         $position = $planning_available + ($incoming ?? 0) + ($open_orders ?? 0);
+        $preorders = lps_purchase_customer_preorders($row, $group);
+        if ($preorders['issue']) $issues[] = $preorders['issue'];
+        $ready = $ready && !$preorders['issue'];
+        $statistical_target = $target;
+        $target = $target !== null ? $target + $preorders['additionalDemand'] : null;
+        $expected_free_after_preorders = max(0, $position - $preorders['additionalDemand']);
+        $preorder_uncovered_after_receipts = max(0, $preorders['additionalDemand'] - $position);
         $result[$group['code']] = [
             'policyExcluded' => false,
             'notes' => $demand['status'] === 'ACTUAL_SALES_ONLY' ? ['STOCKOUT_CORRECTION_NOT_CALCULATED'] : [],
@@ -416,6 +483,7 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
             'demandWarehouseIds' => $group['demandWarehouseIds'] ?? $group['warehouseIds'],
             'receivingWarehouseId' => $group['receivingWarehouseId'],
             'minimumWarehouseId' => $minimum_id,
+            'respectMaximumStock' => ($group['respectMaximumStock'] ?? true) !== false,
             'minimumWarehouseName' => (string)($minimum_source['warehouseName'] ?? $minimum_id),
             'minimumReserve' => $reserve,
             'supplyFromGroupCode' => $group['supplyFromGroupCode'] ?? '',
@@ -428,7 +496,10 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
             'regularSales' => $valid ? $sales : null,
             'availability' => lps_purchase_availability($group, $row),
             'returns' => $valid ? $returns : null, 'coverageDays' => $daily > 0 ? max(0, $planning_available) / $daily : null,
-            'target' => $target, 'needBeforeReceipts' => $target === null ? null : max(0, $target - $planning_available),
+            'statisticalTarget' => $statistical_target, 'target' => $target, 'needBeforeReceipts' => $target === null ? null : max(0, $target - $planning_available),
+            'customerPreorders' => $preorders['demand'],
+            'preorderAdditionalDemand' => $preorders['additionalDemand'], 'expectedFreeAfterPreorders' => $expected_free_after_preorders,
+            'preorderUncoveredAfterReceipts' => $preorder_uncovered_after_receipts, 'preorderLines' => $preorders['lines'],
             'ownTarget' => $own_target, 'componentDemand' => $component_demand,
             'childContributions' => $assembly['contributions'][$group['code']] ?? [],
             'manufacturingNeed' => null,
@@ -483,7 +554,7 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
         }
         $quantity = $override ?? ($manufactured ? max(0, $receiver['target'] - $receiver['position']) : round(max(0, $receiver['target'] - $receiver['position']), 0, PHP_ROUND_HALF_DOWN));
         $destination = $members[$receiver['receivingWarehouseId']];
-        if (!$manufactured && ($destination['orderPolicy']['maximumStockLimited'] ?? null) === true
+        if (!$manufactured && $quantity > 0 && ($destination['orderPolicy']['maximumStockLimited'] ?? null) === true
             && $quantity + $receiver['inputs']['inTransit'] + $receiver['inputs']['openOrders']
                 + $receiver['internalAtReceivingWarehouse'] + (float)$destination['metrics']['availableQuantity'] > (float)$destination['orderPolicy']['maximumStockLimit'] + 0.000001) {
             $receiver['ready'] = $donor['ready'] = false;
@@ -548,7 +619,8 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
             $destination = $members[$item['receivingWarehouseId']];
             $policy = $destination['orderPolicy'];
             $quantity = $item['managerQuantity'] ?? $item['recommendedQuantity'];
-            if (!$manufactured && ($policy['maximumStockLimited'] ?? null) === true && $quantity + $item['inputs']['inTransit'] + $item['inputs']['openOrders'] + $item['transferIn'] + $item['internalAtReceivingWarehouse'] + (float)$destination['metrics']['availableQuantity'] > (float)$policy['maximumStockLimit'] + 0.000001) {
+            if (!$manufactured && $quantity + $item['transferIn'] + $item['plannedTransferIn'] > 0
+                && ($policy['maximumStockLimited'] ?? null) === true && $quantity + $item['inputs']['inTransit'] + $item['inputs']['openOrders'] + $item['transferIn'] + $item['internalAtReceivingWarehouse'] + (float)$destination['metrics']['availableQuantity'] > (float)$policy['maximumStockLimit'] + 0.000001) {
                 $item['issues'][] = 'DESTINATION_MAXIMUM_EXCEEDED';
                 $item['recommendedQuantity'] = null;
             }

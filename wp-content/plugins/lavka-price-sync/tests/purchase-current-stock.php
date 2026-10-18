@@ -24,10 +24,15 @@ foreach (['kyiv'=>[1,7], 'odessa'=>[5,15]] as $code=>$ids) $groups[]=['code'=>$c
     'demandWarehouseIds'=>$code==='odessa'?[5]:$ids, 'stockOnlyWarehouseIds'=>$code==='odessa'?[15]:[],
     'receivingWarehouseId'=>$code==='kyiv'?7:5,'minimumWarehouseId'=>$code==='kyiv'?7:5,
     'supplyFromGroupCode'=>$code==='odessa'?'kyiv':'','leadTimeDays'=>45,'targetDays'=>150,'safetyDays'=>0,'packRounding'=>'UP'];
-$state=['query'=>['sourceDatabase'=>'Paint_Ua','warehouseIds'=>[1,5,7,15]], 'transitWarehouseIds'=>[9,10], 'assemblyGraph'=>$graph,
+$state=['query'=>['sourceDatabase'=>'Paint_Ua','warehouseIds'=>[1,5,7,15]], 'createdAt'=>'2026-10-11 12:00:00', 'transitWarehouseIds'=>[9,10], 'assemblyGraph'=>$graph,
     'rows'=>['P'=>$history],'groups'=>$groups,'rootSkus'=>['P'],'orderSupplier'=>'Supplier','periodDays'=>240,'allowTransfers'=>false,
     'supplyConfirmation'=>['noOtherIncomingOrders'=>true,'noSupplierMinimumOrder'=>true,'currentReceiptsWithinLeadTime'=>true]];
 $capture=current_stock_fixture(['sourceDatabase'=>'Paint_Ua','warehouseIds'=>[1,5,7,9,10,15],'analysisWarehouseIds'=>[1,5,7,15]], $graph);
+$legacy=$capture; $legacy['version']=1; unset($legacy['preorderReservations'],$legacy['preorderAsOfDate']);
+$legacyRejected=false;
+try { lps_purchase_apply_current_stock($state,$legacy); }
+catch (RuntimeException $e) { $legacyRejected=str_contains($e->getMessage(),'Update and deploy the Java backend'); }
+check($legacyRejected,'Legacy Java stock format instructs a backend update instead of restarting the same failing calculation');
 foreach ($capture['cards'] as &$card) $card['internalTransferAccounts']=[['sourceWarehouseId'=>$card['warehouseId'],'documentId'=>123,'quantity'=>2]];
 unset($card);
 $fresh=lps_purchase_apply_current_stock($state,$capture); $row=$fresh['rows']['P'];

@@ -4,14 +4,19 @@ const LPS_CURRENT_NETWORK_STOCK_PATH = '/admin/folio/product-analytics/current-n
 
 /** Accept the whole source cut before changing any rows; history stays immutable. */
 function lps_purchase_apply_current_stock(array $state, array $capture): array {
+    if (($capture['ok'] ?? null) === true && ($capture['version'] ?? null) === 1) {
+        throw new RuntimeException(__('Java returned an outdated current stock format without customer preorders. Update and deploy the Java backend, then start a new calculation.', 'lavka-price-sync'));
+    }
     $ids = array_values(array_unique(array_merge($state['query']['warehouseIds'], $state['transitWarehouseIds'], [7]))); sort($ids, SORT_NUMERIC);
     $analysis_ids = $state['query']['warehouseIds']; sort($analysis_ids, SORT_NUMERIC);
     $failure = static function (): void { throw new RuntimeException(__('The current network stock read is incomplete or changed its scope. Start a new preview.', 'lavka-price-sync')); };
-    if (($capture['ok'] ?? null) !== true || ($capture['version'] ?? null) !== 1
+    $as_of = substr((string)($state['createdAt'] ?? ''), 0, 10);
+    if (($capture['ok'] ?? null) !== true || ($capture['version'] ?? null) !== 2
         || !is_string($capture['captureId'] ?? null) || !preg_match('/^[a-f0-9-]{36}$/D', $capture['captureId'])
         || ($capture['sourceDatabase'] ?? '') !== $state['query']['sourceDatabase'] || ($capture['method'] ?? '') !== 'FOLIO_SERIALIZABLE_READ'
         || ($capture['warehouseIds'] ?? null) !== $ids || ($capture['analysisWarehouseIds'] ?? null) !== $analysis_ids
-        || empty($capture['capturedAt']) || !is_array($capture['cards'] ?? null)
+        || empty($capture['capturedAt']) || !is_array($capture['cards'] ?? null) || !is_array($capture['preorderReservations'] ?? null)
+        || !preg_match('/^\d{4}-\d{2}-\d{2}$/D', $as_of) || ($capture['preorderAsOfDate'] ?? null) !== $as_of
         || ($capture['assemblyGraph']['revision'] ?? null) !== $state['assemblyGraph']['revision']) $failure();
     $nodes = array_fill_keys(array_map('lps_assembly_key', array_column($state['assemblyGraph']['nodes'], 'sku')), true);
     $cards = [];
@@ -37,7 +42,16 @@ function lps_purchase_apply_current_stock(array $state, array $capture): array {
         $cards[$sku][$id] = $card;
     }
     foreach ($nodes as $sku => $_) if (!isset($cards[$sku]) || count($cards[$sku]) !== count($ids)) $failure();
-    $proof = array_intersect_key($capture, array_flip(['version', 'captureId', 'sourceDatabase', 'method', 'startedAt', 'capturedAt', 'warehouseIds', 'analysisWarehouseIds']));
+    $preorders = []; $seen_preorder_lines = [];
+    foreach ($capture['preorderReservations'] as $entry) {
+        $sku = lps_assembly_key((string)($entry['sku'] ?? '')); $id = $entry['warehouseId'] ?? null;
+        $doc = $entry['documentId'] ?? null; $line = $entry['lineId'] ?? null; $qty = lps_purchase_number($entry['quantity'] ?? null, 0.000001);
+        if (!isset($nodes[$sku]) || !in_array($id, $analysis_ids, true) || !is_int($doc) || $doc <= 0 || !is_int($line) || $line <= 0
+            || $qty === null || isset($seen_preorder_lines[$line])) $failure();
+        $seen_preorder_lines[$line] = true;
+        $preorders[$sku][] = ['warehouseId' => $id, 'documentId' => $doc, 'lineId' => $line, 'quantity' => $qty];
+    }
+    $proof = array_intersect_key($capture, array_flip(['version', 'captureId', 'sourceDatabase', 'method', 'startedAt', 'capturedAt', 'warehouseIds', 'analysisWarehouseIds', 'preorderAsOfDate']));
     foreach ($state['rows'] as $sku => &$row) {
         $current = $cards[lps_assembly_key((string)$sku)] ?? null; if ($current === null) $failure();
         $row['currentStockCapture'] = $proof;
@@ -53,6 +67,8 @@ function lps_purchase_apply_current_stock(array $state, array $capture): array {
         }
         $row['warehouseBreakdown'] = array_values($members);
         $row['internalTransferReservations'] = ['calculationVersion' => 2, 'status' => $internal_ready ? 'CAPTURED' : 'CURRENT_STOCK_NOT_READY', 'captureId' => $capture['captureId'], 'accounts' => $accounts];
+        $row['customerPreorders'] = ['calculationVersion' => 1, 'status' => $internal_ready ? 'CAPTURED' : 'CURRENT_STOCK_NOT_READY',
+            'captureId' => $capture['captureId'], 'asOfDate' => $capture['preorderAsOfDate'], 'lines' => $preorders[lps_assembly_key((string)$sku)] ?? []];
         $policy = $current[7]['orderPolicy'];
         $row['networkOrderPolicy'] = ['policyWarehouseId' => 7, 'captureId' => $capture['captureId'], 'policy' => $policy,
             'orderAllowed' => $policy['orderAllowed'] ?? null,
@@ -82,6 +98,7 @@ function lps_purchase_capture_current_stock(array $state): array {
     $capture = lps_product_analytics_v4_request_java(LPS_CURRENT_NETWORK_STOCK_PATH, [
         'sourceDatabase' => $state['query']['sourceDatabase'], 'warehouseIds' => $ids,
         'analysisWarehouseIds' => $state['query']['warehouseIds'], 'rootSkus' => $state['rootSkus'],
+        'asOfDate' => substr((string)($state['createdAt'] ?? ''), 0, 10),
     ]);
     if (is_wp_error($capture)) throw new RuntimeException($capture->get_error_message());
     return lps_purchase_apply_current_stock($state, $capture);

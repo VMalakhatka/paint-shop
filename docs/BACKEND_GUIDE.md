@@ -1,5 +1,14 @@
 # Backend Lavka / KREUL
 
+## Ветки групп в аналитике
+
+С 2026-10-17 `lavka-price-sync/inc/analytics-conditions.php` сохраняет и проверяет
+`productFilters.groupBranches`; общий UI `assets/analytics-conditions.js`
+используется аналитикой и редактором сценариев. Java владеет деревом реальных
+путей и SQL-предикатом, PHP проверяет feature version и echo применённых веток.
+Пересчёт snapshot schema v7 не требуется. UI, совместимость старых сценариев,
+порядок деплоя и проверки: [операционный регламент](OPERATIONS_RUNBOOK.md#дерево-товарных-групп-и-набор-условий).
+
 ## Список ожидания клиентов — первый этап
 
 Список включён как production-пилот 2026-09-12. Фоновый email включён
@@ -152,9 +161,9 @@ layer для frontend URL Stock Locations. Версия ресурса зави�
 | Наличие и группы | `lavka-price-sync/inc/product-availability.php`; Java `FolioAvailabilityOptions`, `FolioProductAvailabilityHistory`, analytics service/DAO | Дни и проценты отсутствия, MIN=0, статусы качества; объединение по дням рассчитывает Java |
 | Глобальные группы и транспорт | `lavka-sync/inc/warehouse-map.php` | Состав групп, ревизия, список транспортных складов; сценарий хранит коды групп |
 | Учётные факты и метрики | Java `FolioProductSnapshotService`, source/snapshot DAO, `FolioProductAnalyticsService` и `FolioProductAnalyticsDao` | Движения, продажи, возвраты, остатки, себестоимость, валовая прибыль, GMROI, coverage; query читает MariaDB, снимок извлекается из ФОЛІО |
-| Транспортный остаток | Java `FolioTransitAnalytics` для снимков; `FolioCurrentNetworkStockDao/Controller` для заказа; WordPress `purchase-current-stock.php` | queryv3 не объявляет независимые снимки согласованными; previewVersion10 получает единый текущий срез и привязывает транзитv4 к captureId. [Действия и подтверждения](OPERATIONS_RUNBOOK.md#единый-текущий-срез-и-подтверждения-сценария-2026-10-11) |
-| Формування замовлення постачальнику — попередній розрахунок | `lavka-price-sync/inc/purchase-planning.php`, `purchase-planning-model.php`, `assets/purchase-planning.js` | Групповая потребность, lead time/целевые/страховые дни, MOQ/упаковка, перемещения между группами, корректировка с причиной; только временный preview |
-| Экспорт | `lavka-price-sync/inc/product-analytics-export.php`, purchase export | CSV/XLSX, контроль полноты и поколений; параметры и объяснение расчёта сохраняются в выгрузке |
+| Транспортный остаток и клиентские предзаказы | Java `FolioTransitAnalytics` для снимков; `FolioCurrentNetworkStockDao/Controller` для заказа; WordPress `purchase-current-stock.php` | queryv3 не объявляет независимые снимки согласованными; previewVersion12 получает единый текущий срез, привязывает транзитv4 и текущие строки ПРД-счетов к одному captureId. Неучитываемые ПРД-счета не влияют на свободный остаток ФОЛИО: их полное количество добавляется к потребности независимо от других резервов и покрывается остатком/поступлениями. [Действия и подтверждения](OPERATIONS_RUNBOOK.md#единый-текущий-срез-и-подтверждения-сценария-2026-10-11) |
+| Формування замовлення постачальнику — попередній розрахунок | `lavka-price-sync/inc/purchase-planning.php`, `purchase-planning-model.php`, `assets/purchase-planning.js` | Групповая потребность, lead time/целевые/страховые дни, MOQ/упаковка, перемещения между группами, корректировка с причиной; только временный preview. `analytics-period.php` разрешает сохранённый `ROLLING_DAYS` в конкретный диапазон один раз при запуске; даты фиксируются для расчёта и экспорта. [Относительный период](OPERATIONS_RUNBOOK.md#относительный-период-анализа-сценария-2026-10-14) |
+| Экспорт | `lavka-price-sync/inc/product-analytics-export.php`, purchase export | CSV/XLSX, контроль полноты и поколений; параметры и объяснение расчёта сохраняются в выгрузке. Закупочные SKU и аналитические дети/внуки — отдельные строки со списками связей; у детей заказ и сумма всегда 0, статистика и неизвестные значения сохраняются |
 | Обновление снимков | `lavka-price-sync/inc/analytics-snapshot-queue.php` | Последовательная очередь под общим lock, без перерасчёта цен; потерянный POST не повторяется автоматически |
 
 Подготовлено 2026-10-09: [прогноз компонентов](api/FOLIO_ASSEMBLY_PURCHASE.md).
@@ -515,6 +524,27 @@ Java `FolioReceiptCatalogueController`/`FolioReceiptCatalogueDao` предост
 рассчитывает существующий Woo PriceList в контексте клиента. Точный контракт —
 Java `docs/api/FOLIO_RECEIPT_CATALOGUE_API.md`. Развёртывание обеих сторон,
 ограничения и восстановление — [операционный регламент](OPERATIONS_RUNBOOK.md#email-рассылки-менеджера-2026-10-05).
+
+### Persistent supplier-order drafts
+
+`lavka-price-sync/inc/purchase-drafts.php` owns the WordPress-only
+`{prefix}lps_purchase_drafts` table (schema option `lps_purchase_drafts_schema`).
+Completed calculation states and results are stored without autoloaded options or
+expiry. Since 2026-10-17, snapshots of at least 1 MiB use a versioned gzip/base64
+JSON envelope with length and SHA-256 validation to avoid oversized SQL packets;
+legacy plain JSON remains readable. Decoding is bounded to 256 MiB and fails
+closed on corruption. Partial previews retain the transient lifecycle. Owner-scoped
+reads and atomic revision-checked updates prevent cross-user access and lost
+updates. AJAX uses the existing purchase capability and nonce gates. No browser
+storage contains business snapshots. Operational lifecycle and backup requirements:
+[Saved purchase drafts](OPERATIONS_RUNBOOK.md#сохранённые-черновики-закупки-2026-10-15).
+
+Purchase groups also freeze `respectMaximumStock` (default `true`). PHP applies
+this per-group scenario policy to a copy of Java warehouse policies; disabling
+it removes MAX caps from procurement and period replenishment planning without
+changing Folio cards. Only MAX-specific validation failures may be ignored;
+MIN and unrelated readiness checks remain mandatory. See the MAX section of
+the operations runbook for rollout and the Kreul regression example.
 
 ### Карточки товаров: отдельное меню «Лавка ФОЛИО»
 

@@ -62,7 +62,7 @@ Java `FolioProductCardDaoTest` covers parameter binding, source guard and multis
 comparison. Browser coverage uses synthetic responses; it does not establish live
 equivalence of the current view and direct query.
 
-Live read check (2026-10-18): direct SELECT succeeded, but SQL Server denied the
+Live read check (2026-10-18): direct SELECT returned 36,798 rows and 54 columns, but SQL Server denied the
 card_tov view query (229/42000). Direct mode is the default. View/compare modes
 show a safe permission message until the DBA grants SELECT on that view; this
 change does not grant permissions. Live equality remains unverified.
@@ -76,3 +76,6 @@ selection prevents an empty list from requesting all cards. XLSX retains all 57
 template headings; the three unsupported assembly columns stay empty. Operator
 steps and limits: `docs/api/FOLIO_PRODUCT_CARDS.md`. Tests: product-cards,
 product-cards-import and product-cards-auth under tests/. No migration required.
+
+Translation integration reuses the existing Selection message; Ukrainian and Russian
+MO catalogues are rebuilt from the merged PO sources and checked with msgfmt.

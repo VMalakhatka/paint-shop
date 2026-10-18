@@ -1,5 +1,25 @@
 # Операции и регламенты
 
+## Пути групп в условиях аналитики
+
+Проверено по коду и тестам 2026-10-17: `analytics-conditions.js` общий для
+аналитики и сценариев. `groupBranches` хранит полный путь, INCLUDE-ветки
+объединяются, EXCLUDE всегда вычитаются; Java применяет предикат ко всей выборке.
+Не заменять пути независимыми списками уровней (даёт декартовы сочетания).
+PHP требует `features.groupHierarchy.version=1` и совпадение appliedFilters.
+Изменение не требует нового snapshot schema. Инструкция и границы старых
+сценариев — «Дерево товарных групп и набор условий» в `docs/OPERATIONS_RUNBOOK.md`.
+
+## Сравнение рентабельности групп
+
+Проверено по коду и UI-тесту 2026-10-17: `product-analytics-v4.js` показывает
+сравнение завершённых выборок из Java `totals.metrics`, не складывает page rows
+и не усредняет SKU-ratios. GMROI умножается на 100 только для процентного вывода.
+Строки фиксируют request/context/warnings завершённого ответа, живут до reload,
+выгружаются в CSV. Это представление существующей аналитики без Java/Folio-write.
+Маршрут пользователя, границы оценки и деплой: раздел «Сравнение рентабельности
+групп товаров» в `docs/OPERATIONS_RUNBOOK.md`.
+
 ## Физическое наличие schema v5
 
 Независимая очередь снимков на странице аналитики принадлежит
@@ -25,6 +45,17 @@ JS/экспорт не усредняют проценты и не превра�
 существующего сценария с общей optimistic version/revision history; состав групп
 разрешается server-side из глобальной карты. Java query остаётся источником метрик,
 PHP считает только предварительную потребность/закупку по параметрам менеджера.
+Подтверждено 2026-10-17: полный черновик закупки может превышать production
+`max_allowed_packet`. `inc/purchase-drafts.php` сжимает большие снимки без потерь
+и проверяет размер/SHA-256 при чтении; не обходить ошибку сохранения разрешением
+экспорта неполного результата. Диагностика и rollback: раздел «Большой черновик
+не сохраняется» в `docs/OPERATIONS_RUNBOOK.md`.
+С 2026-10-17 `purchasePlanning.groups[].respectMaximumStock` задаёт учёт MAX
+отдельно по группе (отсутствует → true). При false полный прогноз связанного
+магазина включается в закупку группы-источника; план пополнения за период не
+равен одному фактическому перемещению. Это PHP-политика сценария, не изменение
+карточки ФОЛИО. Не отключать MIN/резервы вместе с MAX. Источник: модель закупки,
+`tests/purchase-maximum.php` и runbook раздел MAX.
 Уточнение владельца 2026-09-13: «Одесса распродажа» не участвует в пополнении
 KREUL. Не возвращай склад распродажи в группу ради устранения неполных данных.
 Изменение глобальной группы влияет также на отображение остатков и требует
@@ -50,6 +81,12 @@ previewVersion10 после загрузки истории принимает �
 транзита; частичный ответ или timeout не заменяется ручным числом либо нулём.
 Источник: purchase-current-stock.php и docs/OPERATIONS_RUNBOOK.md,
 раздел «Единый текущий срез и подтверждения сценария».
+С 15.10.2026 проверять фактическую версию current-network-stock: для предзаказов
+нужна v2 с `preorderReservations`/`preorderAsOfDate` (Java `c5659f7` или новее).
+Production-проба выявила v1 при полном наборе карточек; перезапуск preview или
+повторный deploy старого локального checkout это не исправляет. Сверять рабочую
+копию сборки с нужным коммитом, не сбрасывая чужие правки. Точный регламент и
+доказательство причины — в разделе предзаказов `docs/OPERATIONS_RUNBOOK.md`.
 Смена настройки инвалидирует preview/export; пересечение транспорта с получателем
 запрещено. Транзит уменьшает закупку, но не спрос. ETA/назначение и отсутствие дублей
 в других поступлениях подтверждает менеджер (`receiptsReviewed` по каждой группе).
@@ -412,3 +449,12 @@ BALL2=1/2 на каждом узле сборки, включая детей, д
 могут иметь разные классы. UNKNOWN требует проверки, если включены разные сроки.
 Java graph требует envelope `ok:true` и runtime `LAVKA_TOKEN`; успешный health
 не доказывает готовность рецептов. Контракт и acceptance: `docs/api/FOLIO_ASSEMBLY_PURCHASE.md`.
+
+Purchase reporting (2026-10-15): owner column order and zero-receipt MAX semantics
+are documented in `docs/api/FOLIO_ASSEMBLY_PURCHASE.md`. An already overstocked
+recipient with zero replenishment must not block its procurement source.
+
+Confirmed 2026-10-15: purchase drafts are persistent WordPress records owned by
+the creating user. Open/export uses the pinned calculation, not fresh Folio reads;
+only explicit new calculation refreshes source data. Accepted edits and exports
+require current draft revision. See OPERATIONS_RUNBOOK saved purchase drafts.

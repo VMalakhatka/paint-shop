@@ -6761,6 +6761,305 @@ msgstr "Экспорт содержит одну строку заказа по�
 msgid "Cold sensitivity"
 msgstr "Морозостойкость"
 
+#: inc/purchase-export.php inc/purchase-planning.php
+msgid "Remaining customer preorders"
+msgstr "Остаток клиентских предзаказов"
+
+#: inc/purchase-export.php inc/purchase-planning.php
+msgid "Additional preorder demand"
+msgstr "Дополнительная потребность по предзаказам"
+
+#: inc/purchase-export.php inc/purchase-planning.php
+msgid "Expected free stock after customer preorders"
+msgstr "Ожидаемый свободный остаток после клиентских предзаказов"
+
+#: inc/purchase-export.php inc/purchase-planning.php
+msgid "Customer preorders not covered by current stock and expected receipts"
+msgstr "Клиентские предзаказы, не покрытые текущим остатком и ожидаемыми поступлениями"
+
+#: inc/purchase-planning.php
+msgid "Customer preorder source lines (JSON)"
+msgstr "Строки-источники клиентских предзаказов (JSON)"
+
+#: inc/purchase-planning.php
+msgid "Current customer preorder data is required before ordering."
+msgstr "Перед заказом нужны текущие данные о клиентских предзаказах."
+
+#: inc/analytics-period.php
+msgid "Set the analysis period between 1 and 3650 whole days."
+msgstr "Укажите период анализа от 1 до 3650 целых дней."
+
+#: inc/analytics-period.php
+msgid "Select a valid analysis period mode."
+msgstr "Выберите корректный режим периода анализа."
+
+#: inc/analytics-scenarios.php
+msgid "Analysis period mode"
+msgstr "Режим периода анализа"
+
+#: inc/analytics-scenarios.php
+msgid "Last N days through today"
+msgstr "Последние N дней до сегодня"
+
+#: inc/analytics-scenarios.php
+msgid "Fixed dates"
+msgstr "Фиксированные даты"
+
+#: inc/analytics-scenarios.php
+msgid "Analysis period, days"
+msgstr "Период анализа, дней"
+
+#: inc/analytics-scenarios.php
+msgid "Relative dates are recalculated at each new report or forecast. Today is included in the number of days. The completed calculation and Excel keep their actual dates."
+msgstr "Относительные даты пересчитываются для каждого нового отчёта или прогноза. Сегодня входит в количество дней. Завершённый расчёт и Excel сохраняют фактические даты."
+
+#: inc/purchase-planning.php
+msgid "Assembly role"
+msgstr "Роль в сборке"
+
+#: inc/purchase-planning.php
+msgid "Parent products"
+msgstr "Родительские товары"
+
+#: inc/purchase-planning.php
+msgid "Child products"
+msgstr "Дочерние товары"
+
+#: inc/purchase-planning.php
+msgid "Child product"
+msgstr "Дочерний товар"
+
+#: inc/purchase-planning.php
+msgid "Parent product"
+msgstr "Родительский товар"
+
+#: inc/purchase-planning.php
+msgid "The export has one row per SKU, including children with zero supplier order. Parent and child lists show the assembly links. XLSX also includes warehouse group detail and individual warehouse stock."
+msgstr "Экспорт содержит одну строку на артикул, включая дочерние товары с нулевым заказом поставщику. Списки родителей и детей показывают связи сборки. XLSX также содержит расчёт по группам и остатки отдельных складов."
+
+#: inc/purchase-planning.php
+msgid "Select one supplier. Children and grandchildren are found automatically, including products outside the supplier filter. Their shortages consume components. The report includes their statistics and assembly links, with zero supplier order for every child. Review the quantity to manufacture."
+msgstr "Выберите одного поставщика. Дети и внуки находятся автоматически, включая товары вне фильтра поставщика. Их дефициты формируют потребность в составляющих. Отчёт содержит их статистику и связи сборки; заказ поставщику для каждого дочернего товара равен нулю. Проверьте количество к изготовлению."
+
+#: inc/purchase-current-stock.php
+msgid "Java returned an outdated current stock format without customer preorders. Update and deploy the Java backend, then start a new calculation."
+msgstr "Java вернула устаревший формат текущего остатка без клиентских предзаказов. Обновите код и выполните деплой Java, затем начните новый расчёт."
+
+msgid "Draft saved. Confirmed edits are saved automatically."
+msgstr "Черновик сохранён. Подтверждённые изменения сохраняются автоматически."
+
+msgid "Saved draft opened. Stock and forecast are from the original calculation date."
+msgstr "Сохранённый черновик открыт. Остатки и прогноз соответствуют дате исходного расчёта."
+
+msgid "Completed calculations are saved as separate drafts. Use Apply for each edited product before leaving. A new calculation creates a new draft."
+msgstr "Завершённые расчёты сохраняются отдельными черновиками. Перед выходом примените изменения каждого отредактированного товара. Новый расчёт создаёт новый черновик."
+
+msgid "Saved order drafts"
+msgstr "Сохранённые черновики заказов"
+
+msgid "Open draft"
+msgstr "Открыть черновик"
+
+msgid "Could not save the order draft. Please try again."
+msgstr "Не удалось сохранить черновик заказа. Повторите попытку."
+
+msgid "The saved draft is incomplete. Start a new calculation."
+msgstr "Сохранённый черновик неполный. Начните новый расчёт."
+
+msgid "Complete the preview before saving a draft."
+msgstr "Завершите расчёт перед сохранением черновика."
+
+msgid "This draft changed in another tab. Reopen it before saving."
+msgstr "Этот черновик изменён в другой вкладке. Откройте его заново перед сохранением."
+
+msgid "Saved order draft not found."
+msgstr "Сохранённый черновик заказа не найден."
+
+
+#: inc/product-analytics.php
+msgid "Profit / average inventory for the period, %"
+msgstr "Прибыль / средний запас за период, %"
+
+
+#: inc/product-analytics.php
+msgid "Selection"
+msgstr "Выборка"
+
+
+#: inc/product-analytics.php
+msgid "Groups, period and warehouses"
+msgstr "Группы, период и склады"
+
+
+#: inc/product-analytics.php
+msgid "All selected products"
+msgstr "Все выбранные товары"
+
+
+#: inc/product-analytics.php
+msgid "Remove from comparison"
+msgstr "Убрать из сравнения"
+
+
+#: inc/product-analytics.php
+msgid "One-off sales are excluded. Build the report to apply this condition."
+msgstr "Разовые продажи исключены. Сформируйте отчёт, чтобы применить это условие."
+
+
+#: inc/product-analytics.php
+msgid "Group profitability comparison"
+msgstr "Сравнение рентабельности групп"
+
+
+#: inc/product-analytics.php
+msgid "Choose product group levels, dates and warehouses above, then build the report. Add each completed selection to compare groups or periods."
+msgstr "Выберите выше уровни групп товаров, даты и склады, затем сформируйте отчёт. Добавляйте готовые выборки для сравнения групп или периодов."
+
+
+#: inc/product-analytics.php
+msgid "Exclude one-off sales (*РАЗОВАЯ)"
+msgstr "Исключить разовые продажи (*РАЗОВАЯ)"
+
+
+#: inc/product-analytics.php
+msgid "Last completed report: whole selection"
+msgstr "Последний готовый отчёт: вся выборка"
+
+
+#: inc/product-analytics.php
+msgid "Amounts are in the report currency. Average inventory is a monthly approximation. Gross profit excludes overhead expenses. Return on inventory is for the selected period, not annualized. Movement filters do not remove capital from inventory."
+msgstr "Суммы в валюте отчёта. Средний запас — месячное приближение. Валовая прибыль не учитывает общие расходы. Доходность запаса приведена за выбранный период, без пересчёта на год. Фильтры движения не исключают капитал из запаса."
+
+
+#: inc/product-analytics.php
+msgid "Comparison row name (optional)"
+msgstr "Название строки сравнения (необязательно)"
+
+
+#: inc/product-analytics.php
+msgid "Add completed report to comparison"
+msgstr "Добавить готовый отчёт в сравнение"
+
+
+#: inc/product-analytics.php
+msgid "Download comparison CSV"
+msgstr "Скачать сравнение CSV"
+
+
+#: inc/product-analytics.php
+msgid "Comparison rows keep their original filters and snapshot dates. They remain in this page until reload; download the comparison to keep it. Maximum 50 rows. Rows may overlap and are not summed."
+msgstr "Строки сохраняют исходные фильтры и даты снимков. Они остаются на странице до её обновления; скачайте сравнение, чтобы сохранить его. Не более 50 строк. Выборки могут пересекаться, поэтому не суммируются."
+
+
+#: inc/analytics-conditions.php
+msgid "Selected conditions"
+msgstr "Выбранные условия"
+
+
+#: inc/analytics-conditions.php
+msgid "No conditions added."
+msgstr "Условия ещё не добавлены."
+
+
+#: inc/analytics-conditions.php
+msgid "Product group tree"
+msgstr "Дерево групп товаров"
+
+
+#: inc/analytics-conditions.php
+msgid "Find a group or subgroup"
+msgstr "Найти группу или подгруппу"
+
+
+#: inc/analytics-conditions.php
+msgid "Include branch"
+msgstr "Включить ветку"
+
+
+#: inc/analytics-conditions.php
+msgid "Exclude branch"
+msgstr "Исключить ветку"
+
+
+#: inc/analytics-conditions.php
+msgid "Add condition"
+msgstr "Добавить условие"
+
+
+#: inc/analytics-conditions.php
+msgid "Edit condition"
+msgstr "Изменить условие"
+
+
+#: inc/analytics-conditions.php
+msgid "Remove condition"
+msgstr "Удалить условие"
+
+
+#: inc/analytics-conditions.php
+msgid "Switch include / exclude"
+msgstr "Изменить включение / исключение"
+
+
+#: inc/analytics-conditions.php
+msgid "No group at this level"
+msgstr "Без группы на этом уровне"
+
+
+#: inc/analytics-conditions.php
+msgid "Included branches are combined. Excluded branches are removed from the result. Other conditions apply together."
+msgstr "Включённые ветки объединяются. Исключённые ветки вычитаются из результата. Остальные условия применяются вместе."
+
+
+#: inc/analytics-conditions.php
+msgid "Group tree requires the updated Java service. Existing conditions are preserved."
+msgstr "Для дерева групп нужно обновление Java. Существующие условия сохранены."
+
+
+#: inc/analytics-conditions.php
+msgid "Saved level condition"
+msgstr "Сохранённое условие уровня"
+
+
+#: inc/analytics-conditions.php
+msgid "Press Add condition to apply your selection."
+msgstr "Нажмите «Добавить условие», чтобы применить выбор."
+
+
+#: inc/analytics-conditions.php
+msgid "Use at most 100 valid group branches."
+msgstr "Допускается не более 100 корректных веток групп."
+
+
+#: inc/analytics-conditions.php
+msgid "Invalid group branch path."
+msgstr "Некорректный путь ветки группы."
+
+
+#: inc/analytics-conditions.php
+msgid "The analytics response did not apply the selected group branches."
+msgstr "Ответ аналитики не применил выбранные ветки групп."
+
+
+#: inc/analytics-conditions.php
+msgid "Included condition"
+msgstr "Включено"
+
+
+#: inc/analytics-conditions.php
+msgid "Excluded condition"
+msgstr "Исключено"
+
+
+#: inc/purchase-planning.php
+msgid "Respect MAX in purchase planning"
+msgstr "Учитывать MAX при расчёте закупки"
+
+
+#: inc/purchase-planning.php
+msgid "When disabled, this group keeps its full forecast for the supplier order, including future replenishments from the source warehouse. Folio MAX values and actual transfer limits are not changed."
+msgstr "Если отключено, в заказ поставщику входит полный прогноз группы, включая будущие пополнения со склада-источника. Значения MAX в ФОЛИО и ограничения фактических перемещений не изменяются."
+
 #: inc/folio-product-cards.php
 msgid "Enter up to 500 exact SKUs, one per line, with at most 100 characters each."
 msgstr "Введите до 500 точных артикулов, по одному в строке, не более 100 символов каждый."
@@ -6837,9 +7136,6 @@ msgstr "Подготовка загрузки Excel…"
 msgid "SQL Server denied read access to this query. Use 1212 all fields, or ask the database administrator to allow reading card_tov."
 msgstr "SQL Server отказал в чтении этого запроса. Используйте «1212 все поля» или обратитесь к администратору базы для предоставления права чтения card_tov."
 
-#: inc/folio-product-cards.php
-msgid "Selection"
-msgstr "Выбор"
 
 #: inc/folio-product-cards.php
 msgid "Listed SKUs"
