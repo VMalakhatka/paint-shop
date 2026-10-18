@@ -94,7 +94,7 @@ final class ShipmentLifecycle
     {
         $service = new ManagerPreparation();
         $context = $service->context($order, true);
-        if ($row['status'] !== ManagerPreparation::STATUS || $row['ttn_number'] || $row['np_ref']) self::fail();
+        if (!in_array($row['status'], [ManagerPreparation::STATUS,'np_recipient_ready','np_recipient_mismatch'], true) || $row['ttn_number'] || $row['np_ref']) self::fail();
         if ($context['payment'] === 'cod' && !$context['paid']) {
             throw new \RuntimeException(__('COD creation is not supported in this release. Do not change the payment method just to bypass this check.', 'paint-nova-poshta-multishipping'));
         }
@@ -116,6 +116,10 @@ final class ShipmentLifecycle
             || !preg_match('/^\+?380\d{9}$/D', (string)($sender['phone'] ?? ''))) self::fail();
         $person = RecipientIdentity::names($names);
         $person += ['Phone'=>$recipient['phone'],'CounterpartyType'=>'PrivatePerson','CounterpartyProperty'=>'Recipient'];
+        if ($row['status'] !== ManagerPreparation::STATUS) {
+            $saved = json_decode($row['request_snapshot'], true) ?: [];
+            if (($saved['person'] ?? null) !== $person) self::fail();
+        }
         $directory = (new SenderDirectory($this->api))->load(true);
         self::checkApiAvailability($directory);
         if (is_wp_error($directory)) self::fail();
@@ -170,7 +174,12 @@ final class ShipmentLifecycle
     {
         return $this->locked($order_id, function () use ($order_id,$id,$names) {
             $row = $this->row($order_id,$id);
+            if (!in_array($row['status'], [ManagerPreparation::STATUS,'np_recipient_ready'], true)) self::fail();
             $plan = $this->compile((new ManagerPreparation())->order($order_id), $row, $names);
+            if ($row['status'] === 'np_recipient_ready') {
+                $saved = json_decode($row['response_snapshot'], true) ?: [];
+                if (RecipientIdentity::verify($this->api, $saved['recipient_refs'] ?? [], $plan['person'])) self::fail();
+            }
             $quote_fields = array_intersect_key($plan['payload'], array_flip(['CitySender','CityRecipient','Weight','ServiceType','Cost','CargoType','SeatsAmount','OptionsSeat']));
             $quote = $this->api->call('InternetDocumentGeneral', 'getDocumentPrice', $quote_fields);
             self::checkApiAvailability($quote);
@@ -192,6 +201,7 @@ final class ShipmentLifecycle
         return $this->locked($order_id, function () use ($order_id,$id,$token) {
             $row = $this->row($order_id,$id);
             if ($row['status'] === 'np_created') return ['ttn'=>$row['ttn_number']];
+            if (!in_array($row['status'], [ManagerPreparation::STATUS,'np_recipient_ready'], true)) self::fail();
             if (!$this->api->writesEnabled() || !$this->api->apiKeyConfigured()) {
                 throw new \RuntimeException(__('Real Nova Poshta write operations are disabled.', 'paint-nova-poshta-multishipping'));
             }
@@ -204,25 +214,31 @@ final class ShipmentLifecycle
             $snapshot = json_decode($row['request_snapshot'],true) ?: [];
             $snapshot += ['plan_hash'=>$cache['plan_hash'],'carrier'=>$plan['payload'],'person'=>$plan['person']];
             // A durable claim precedes BOTH writes. Process death also stays non-retryable.
-            $this->transition($row, 'np_creating', ['request_snapshot'=>wp_json_encode($snapshot)], ['phase'=>'recipient','request_hash'=>hash('sha256',wp_json_encode($snapshot))]);
+            $resume = $row['status'] === 'np_recipient_ready';
+            $saved = json_decode((string)$row['response_snapshot'], true) ?: [];
+            $this->transition($row, 'np_creating', ['request_snapshot'=>wp_json_encode($snapshot)], ['phase'=>$resume ? 'recipient_reuse' : 'recipient','request_hash'=>hash('sha256',wp_json_encode($snapshot))]);
             $row['status']='np_creating';
             delete_transient('pnpm_create_'.$token);
             try {
-                $party = $this->api->call('CounterpartyGeneral','save',$plan['person'],true);
-                $recipient = self::recipientRefs($party);
+                $recipient = $resume ? ($saved['recipient_refs'] ?? null)
+                    : self::recipientRefs($this->api->call('CounterpartyGeneral','save',$plan['person'],true));
                 if (!$recipient) {
                     $this->transition($row,'np_unknown',[],['phase'=>'recipient']);
                     return ['unknown'=>true];
                 }
-                if (!RecipientIdentity::matches($party, $plan['person'])) {
-                    $this->transition($row,'np_recipient_mismatch',[],['phase'=>'recipient_identity']);
+                // Save only the minimal references BEFORE the follow-up read, even if it fails.
+                $this->transition($row,'np_creating',['response_snapshot'=>wp_json_encode(['recipient_refs'=>$recipient])],['phase'=>'recipient_saved']);
+                $issues = RecipientIdentity::verify($this->api, $recipient, $plan['person']);
+                if ($issues) {
+                    $this->transition($row,'np_recipient_mismatch',
+                        ['response_snapshot'=>wp_json_encode(['recipient_refs'=>$recipient,'identity_issues'=>$issues])],
+                        ['phase'=>'recipient_identity','issues'=>$issues]);
                     return ['recipient_mismatch'=>true];
                 }
                 $payload = $plan['payload'] + $recipient;
                 // Persist the exact final payload before the document write; failed persistence stops here.
-                global $wpdb;
                 $snapshot['carrier']=$payload;
-                if ($wpdb->update($wpdb->prefix.'pnpm_shipments',['request_snapshot'=>wp_json_encode($snapshot)],['id'=>$id,'status'=>'np_creating'])!==1) self::fail();
+                $this->transition($row,'np_creating',['request_snapshot'=>wp_json_encode($snapshot)],['phase'=>'document']);
                 $response = $this->api->call('InternetDocumentGeneral','save',$payload,true);
                 $data = self::createdDocument($response);
                 if (!$data) {
@@ -237,6 +253,44 @@ final class ShipmentLifecycle
                 // Do not try another write, even when storing the result failed. The committed claim survives.
                 return ['unknown'=>true];
             }
+        });
+    }
+
+    /** Admin CLI only, explicit preview/apply; never calls save or resets to a draft. */
+    public function recoverRecipient(int $order_id, int $id, array $refs, string $expected_hash, bool $apply = false): array
+    {
+        if (!defined('WP_CLI') || !WP_CLI || !current_user_can('manage_options')) self::fail();
+        return $this->locked($order_id, function () use ($order_id,$id,$refs,$expected_hash,$apply) {
+            global $wpdb;
+            $row = $this->row($order_id,$id);
+            if ($row['status'] !== 'np_recipient_mismatch' || $row['ttn_number'] || $row['np_ref']
+                || !hash_equals(hash('sha256',wp_json_encode($row)), $expected_hash)) self::fail();
+            $snapshot = json_decode($row['request_snapshot'],true) ?: [];
+            $saved = json_decode((string)$row['response_snapshot'],true) ?: [];
+            if (!empty($snapshot['carrier']['Recipient']) || !empty($snapshot['carrier']['ContactRecipient'])) self::fail();
+            if (isset($saved['recipient_refs']) && $saved['recipient_refs'] !== $refs) self::fail();
+            // Only a proven recipient-only stop is recoverable, never an unknown document outcome.
+            $events = $wpdb->get_results($wpdb->prepare("SELECT event_type,safe_context FROM {$wpdb->prefix}pnpm_shipment_events WHERE shipment_id=%d ORDER BY id DESC",$id), ARRAY_A);
+            foreach ($events as $event) {
+                $ctx = json_decode($event['safe_context'],true) ?: [];
+                if (($ctx['phase'] ?? '') === 'document' || in_array($event['event_type'],['np_unknown','np_rejected','np_created'],true)
+                    || str_starts_with($event['event_type'],'np_email_')) self::fail();
+            }
+            $claim = false;
+            foreach ($events as $event) {
+                $ctx = json_decode($event['safe_context'],true) ?: [];
+                if ($event['event_type'] === 'np_creating' && in_array($ctx['phase'] ?? '', ['recipient','recipient_reuse'],true)) { $claim=true; break; }
+                if (!in_array($event['event_type'],['np_creating','np_recipient_mismatch'],true)
+                    || !in_array($ctx['phase'] ?? '', ['recipient_saved','recipient_identity'],true)) self::fail();
+            }
+            if (!$claim || !isset($snapshot['person'])) self::fail();
+            $plan = $this->compile((new ManagerPreparation())->order($order_id),$row,$snapshot['person']);
+            $issues = RecipientIdentity::verify($this->api,$refs,$plan['person']);
+            if ($issues) return ['eligible'=>false,'issues'=>$issues];
+            if ($apply) $this->transition($row,'np_recipient_ready',
+                ['response_snapshot'=>wp_json_encode(['recipient_refs'=>$refs,'identity_issues'=>[]])],
+                ['phase'=>'recipient_reconciled','previous_row_hash'=>$expected_hash]);
+            return ['eligible'=>true,'applied'=>$apply,'row_hash'=>$expected_hash];
         });
     }
 

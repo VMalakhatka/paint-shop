@@ -46,14 +46,20 @@ final class ShipmentLifecyclePanel
             if ($row['source']!=='store_api') continue;
             $location=get_term((int)$row['location_id'],'location');
             echo '<article class="pnpm-shipment" data-order="'.esc_attr($order->get_id()).'" data-id="'.esc_attr($row['id']).'"><h3>'.esc_html($location && !is_wp_error($location) ? $location->name : '#'.$row['location_id']).'</h3>';
-            if ($row['status']==='manager_draft') {
+            if (in_array($row['status'], ['manager_draft','np_recipient_ready'],true)) {
                 $recipient = json_decode($row['recipient_snapshot'], true) ?: [];
                 $defaults = RecipientIdentity::defaults($order, $recipient);
+                $recovered = $row['status']==='np_recipient_ready';
+                if ($recovered) {
+                    $snapshot = json_decode($row['request_snapshot'],true) ?: [];
+                    $defaults = $snapshot['person'] ?? $defaults;
+                    echo '<p role="status">'.esc_html__('The existing Nova Poshta contact was verified by an administrator. Preparation is frozen. Run a fresh check and confirm TTN creation; the recipient will not be created again.','paint-nova-poshta-multishipping').'</p>';
+                }
                 echo '<p>'.esc_html__('Names are suggested from the order, then the customer card, only when the saved recipient name and phone match. Review them; patronymic is optional. A different recipient must be entered manually.','paint-nova-poshta-multishipping').'</p>';
                 echo '<p>'.esc_html__('Saved recipient phone:','paint-nova-poshta-multishipping').' <strong>'.esc_html($recipient['phone'] ?? '').'</strong></p>';
                 echo '<div class="pnpm-legal-name">';
                 foreach (['FirstName'=>__('First name','paint-nova-poshta-multishipping'),'LastName'=>__('Last name','paint-nova-poshta-multishipping'),'MiddleName'=>__('Patronymic (optional)','paint-nova-poshta-multishipping')] as $key=>$label) {
-                    echo '<label>'.esc_html($label).' <input data-person="'.esc_attr($key).'" value="'.esc_attr($defaults[$key]).'" maxlength="36" autocomplete="off"></label> ';
+                    echo '<label>'.esc_html($label).' <input data-person="'.esc_attr($key).'" value="'.esc_attr($defaults[$key]).'" maxlength="36" autocomplete="off"'.($recovered ? ' readonly' : '').'></label> ';
                 }
                 echo '</div><p><button type="button" class="button" data-shipment-command="preview">'.esc_html__('Check saved shipment with Nova Poshta','paint-nova-poshta-multishipping').'</button></p><div class="pnpm-carrier-preview"></div>';
                 echo '<p>'.esc_html__('This preview does not identify a person by phone. On creation, returned Nova Poshta contact details must match before a TTN is requested. Missing or different details stop creation for manual review.','paint-nova-poshta-multishipping').'</p>';
@@ -74,6 +80,21 @@ final class ShipmentLifecyclePanel
                     : __('Email failed or its result is unknown. Check mail logs before any manual resend.','paint-nova-poshta-multishipping')).'</p>';
             } elseif ($row['status']==='np_recipient_mismatch') {
                 echo '<p role="alert">'.esc_html__('Nova Poshta returned different or incomplete recipient details. No TTN was requested. The recipient may have been saved in Nova Poshta; ask an administrator to reconcile it. Do not repeat creation.','paint-nova-poshta-multishipping').'</p>';
+                $saved = json_decode($row['response_snapshot'],true) ?: [];
+                $issues = $saved['identity_issues'] ?? [];
+                $messages = [];
+                foreach ($issues as $issue) {
+                    $messages[] = match ($issue) {
+                        'Phones_missing' => __('The contact directory did not return a phone number.','paint-nova-poshta-multishipping'),
+                        'Phones_mismatch' => __('The contact phone does not match the saved recipient phone.','paint-nova-poshta-multishipping'),
+                        'FirstName_missing','LastName_missing' => __('The contact directory did not return the first or last name.','paint-nova-poshta-multishipping'),
+                        'FirstName_mismatch','LastName_mismatch','MiddleName_mismatch' => __('The contact name does not match the confirmed recipient name.','paint-nova-poshta-multishipping'),
+                        'contact_read_unavailable','contact_read_invalid' => __('The contact directory could not be read. No TTN was requested.','paint-nova-poshta-multishipping'),
+                        default => __('The exact contact could not be uniquely verified in the recipient directory.','paint-nova-poshta-multishipping'),
+                    };
+                }
+                if (!$messages) $messages[] = __('The earlier version did not save verification details. Administrator reconciliation is required.','paint-nova-poshta-multishipping');
+                foreach (array_unique($messages) as $message) echo '<p>'.esc_html($message).'</p>';
             } else {
                 echo '<p role="alert">'.esc_html__('Creation is locked: the result needs manual review in the Nova Poshta business account. Do not repeat the shipment.','paint-nova-poshta-multishipping').'</p>';
             }

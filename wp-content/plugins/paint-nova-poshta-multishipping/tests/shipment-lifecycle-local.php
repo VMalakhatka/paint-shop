@@ -15,13 +15,13 @@ $locations=[(int)$terms[0]->term_id,(int)$terms[1]->term_id];
 $mapping=['enabled'=>'yes','sender_type'=>'warehouse','city_ref'=>$refs[1],'counterparty_ref'=>$refs[2],
     'contact_ref'=>$refs[3],'sender_address_ref'=>$refs[4],'handover_warehouse_ref'=>$refs[4],
     'phone'=>'380000000000','customer_label'=>'Fixture warehouse','handover_warehouse_label'=>'Fixture origin'];
-$enabled=true; $mode='success'; $writes=0; $mails=[]; $requests=[]; $pdfMode='pdf';
+$enabled=true; $mode='success'; $writes=0; $mails=[]; $requests=[]; $pdfMode='pdf'; $lastPerson=[];
 add_filter('pre_option_pnpm_location_mappings',static fn()=>array_fill_keys($locations,$mapping));
 add_filter('pre_option_pnpm_settings',static function () use (&$enabled) {return ['writes_enabled'=>$enabled?'yes':'no'];});
 if (!defined('PNPM_ALLOW_REAL_TTN')) define('PNPM_ALLOW_REAL_TTN',true);
 if (!defined('PNPM_NOVA_POSHTA_API_KEY')) define('PNPM_NOVA_POSHTA_API_KEY','synthetic-test-key');
 add_filter('pre_wp_mail',static function ($result,$args) use (&$mails) {$mails[]=$args;return true;},PHP_INT_MAX,2);
-add_filter('pre_http_request',static function ($pre,$args,$url) use (&$writes,&$mode,&$requests,&$pdfMode,$refs) {
+add_filter('pre_http_request',static function ($pre,$args,$url) use (&$writes,&$mode,&$requests,&$pdfMode,&$lastPerson,$refs) {
     if (str_starts_with($url,'https://my.novaposhta.ua/orders/')) {
         if (($args['redirection'] ?? null)!==0 || ($args['limit_response_size'] ?? 0)!==10485761) throw new RuntimeException('Unsafe PDF options');
         return ['response'=>['code'=>200],'headers'=>['content-type'=>$pdfMode==='pdf'?'application/pdf':'text/html'],'body'=>$pdfMode==='pdf'?"%PDF-1.4\nsynthetic fixture":'<html>invalid</html>'];
@@ -35,7 +35,22 @@ add_filter('pre_http_request',static function ($pre,$args,$url) use (&$writes,&$
     }
     if ($m==='getCounterparties') $data=[['Ref'=>$refs[2],'Description'=>'Fixture sender']];
     elseif ($m==='getCounterpartyAddresses') $data=[['Ref'=>$refs[4],'CityRef'=>$refs[1]]];
-    elseif ($m==='getCounterpartyContactPersons') $data=[['Ref'=>$refs[3],'Phones'=>'380000000000']];
+    elseif ($m==='getCounterpartyContactPersons') {
+        if ($p['methodProperties']['Ref']===$refs[2]) $data=[['Ref'=>$refs[3],'Phones'=>'380000000000']];
+        else {
+            if ($mode==='contact_unavailable') return new WP_Error('timeout','Synthetic contact timeout');
+            $person=$lastPerson;$person['Phones']=$person['Phone'];unset($person['Phone']);
+            if ($mode==='identity_mismatch') $person['LastName']='Інший';
+            if ($mode==='identity_missing') unset($person['Phones']);
+            if ($mode==='phone_mismatch') $person['Phones']='380000000001';
+            $data=[['Ref'=>$refs[7]]+$person];
+            if ($mode==='contact_duplicate') $data[]=$data[0];
+            if ($mode==='contact_absent') $data=[];
+            if (in_array($mode,['contact_page_two','contact_page_limit'],true) && ($p['methodProperties']['Page']===1 || $mode==='contact_page_limit')) {
+                $data=array_fill(0,100,['Ref'=>$refs[8]]+$person);
+            }
+        }
+    }
     elseif ($m==='getWarehouses') {
         $ref=$p['methodProperties']['Ref'];
         $data=[['Ref'=>$ref,'CityRef'=>$refs[1],'Description'=>$ref===$refs[4]?'Fixture origin':'Fixture locker','Number'=>'1',
@@ -46,10 +61,9 @@ add_filter('pre_http_request',static function ($pre,$args,$url) use (&$writes,&$
         $writes++;
         if ($mode==='write_limited') return ['response'=>['code'=>429],'body'=>'{}'];
         if ($p['modelName']==='CounterpartyGeneral') {
-            $person=$p['methodProperties'];
-            $person['Phones']=$person['Phone'];unset($person['Phone']);
-            if ($mode==='identity_mismatch') $person['LastName']='Інший';
-            if ($mode==='identity_missing') unset($person['Phones']);
+            $lastPerson=$p['methodProperties'];$person=$lastPerson;
+            // Official save shape: no Phone/Phones. Verification must use the directory.
+            unset($person['Phone']);
             $data=[['Ref'=>$refs[6],'ContactPerson'=>['success'=>true,'data'=>[['Ref'=>$refs[7]]+$person]]]];
         }
         elseif ($mode==='timeout') return new WP_Error('timeout','Synthetic timeout');
@@ -58,7 +72,7 @@ add_filter('pre_http_request',static function ($pre,$args,$url) use (&$writes,&$
     } else throw new RuntimeException('Unexpected carrier method: '.$m);
     return ['response'=>['code'=>200],'body'=>json_encode(['success'=>true,'data'=>$data,'errors'=>[],'warnings'=>$m==='save'?['synthetic warning']:[]])];
 },PHP_INT_MAX,3);
-$old=$GLOBALS['current_user']; $manager=new WP_User();$manager->ID=PHP_INT_MAX;$manager->allcaps=['manage_woocommerce'=>true,'manage_pnpm_shipments'=>true];$GLOBALS['current_user']=$manager;
+$old=$GLOBALS['current_user']; $manager=new WP_User();$manager->ID=PHP_INT_MAX;$manager->allcaps=['manage_woocommerce'=>true,'manage_pnpm_shipments'=>true,'manage_options'=>true];$GLOBALS['current_user']=$manager;
 $noWait=new class extends Paint\NovaPoshta\Infrastructure\ApiRequestThrottle {
     public function run(string $key, callable $request) { return $request(); }
 };
@@ -103,7 +117,7 @@ try {
     ob_start();(new Paint\NovaPoshta\Admin\ShipmentLifecyclePanel())->render($order);$draftPanel=ob_get_clean();
     $check(str_contains($draftPanel,'data-person="FirstName" value="Тест"') && str_contains($draftPanel,'data-person="LastName" value="Приклад"'),'Rendered automatic suggestions');
     $reject(fn()=>$service->row($oid+100000,$id),'Cross-order access');
-    $manager->allcaps=[];$reject(fn()=>$service->row($oid,$id),'Permission denied');$manager->allcaps=['manage_woocommerce'=>true,'manage_pnpm_shipments'=>true];
+    $manager->allcaps=[];$reject(fn()=>$service->row($oid,$id),'Permission denied');$manager->allcaps=['manage_woocommerce'=>true,'manage_pnpm_shipments'=>true,'manage_options'=>true];
     $preview=$service->preview($oid,$id,$withoutMiddle);$tokens[]=$preview['token'];
     $check($writes===0,'Preview never mutates carrier');
     $check($preview['payload']['Cost']===100 && $preview['payload']['OptionsSeat'][0]['volumetricVolume']===0.000108,'Per-warehouse goods and cubic metres');
@@ -142,21 +156,58 @@ try {
         $check($service->create($o->get_id(),$sid,$p['token'])===['unknown'=>true],$next.' fail closed');$n=$writes;
         $reject(fn()=>$service->create($o->get_id(),$sid,$p['token']),$next.' replay denied');
         $check($writes===$n,$next.' no retry');$mode='success';
+        $locked=$service->row($o->get_id(),$sid);
+        $reject(fn()=>$service->recoverRecipient($o->get_id(),$sid,['Recipient'=>$refs[6],'ContactRecipient'=>$refs[7]],hash('sha256',wp_json_encode($locked)),true),'Unknown/rejected cannot be reconciled as recipient-only');
     }
     $rateOrder=$make();$rateId=(int)(new ShipmentRepository())->findByOrder($rateOrder->get_id())[0]['id'];
     $p=$service->preview($rateOrder->get_id(),$rateId,$names);$tokens[]=$p['token'];$before=$writes;$mode='read_limited';
     try { $service->create($rateOrder->get_id(),$rateId,$p['token']); throw new LogicException('Expected rate rejection'); }
-    catch (RuntimeException $e) { $check(str_contains($e->getMessage(),'No shipment creation was started'),'Actionable pre-claim rate message'); }
+    catch (RuntimeException $e) { $check($e->getMessage()===__('Nova Poshta is busy or has limited requests. No shipment creation was started. Wait 10 seconds, reload the order and check the saved shipment again.','paint-nova-poshta-multishipping'),'Actionable pre-claim rate message: '.$e->getMessage()); }
     $check($writes===$before && $service->row($rateOrder->get_id(),$rateId)['status']==='manager_draft','Rate failure leaves preparation unchanged without writes');
     $mode='read_limit_once';$p=$service->preview($rateOrder->get_id(),$rateId,$names);$tokens[]=$p['token'];
     $check($p['enabled'] && $writes===$before,'Single read rate retry recovers preview without writes');
-    foreach (['identity_mismatch','identity_missing'] as $next) {
+    foreach (['identity_mismatch','identity_missing','phone_mismatch','contact_unavailable','contact_duplicate','contact_absent','contact_page_limit'] as $next) {
         $o=$make();$sid=(int)(new ShipmentRepository())->findByOrder($o->get_id())[0]['id'];
         $p=$service->preview($o->get_id(),$sid,$names);$tokens[]=$p['token'];$mode=$next;$before=$writes;
         $check($service->create($o->get_id(),$sid,$p['token'])===['recipient_mismatch'=>true],$next.' reported');
         $check($writes===$before+1 && $service->row($o->get_id(),$sid)['status']==='np_recipient_mismatch',$next.' no TTN write');
+        $stopped=$service->row($o->get_id(),$sid);$record=json_decode($stopped['response_snapshot'],true);
+        $check($record['recipient_refs']===['Recipient'=>$refs[6],'ContactRecipient'=>$refs[7]] && !empty($record['identity_issues']),$next.' refs and safe diagnostics retained');
         $reject(fn()=>$service->create($o->get_id(),$sid,$p['token']),$next.' no automatic retry');$mode='success';
+        $hash=hash('sha256',wp_json_encode($stopped));$pair=$record['recipient_refs'];
+        $mode='phone_mismatch';$check(!$service->recoverRecipient($o->get_id(),$sid,$pair,$hash,true)['eligible'],'Recovery mismatch cannot apply');$mode='success';
+        $reject(fn()=>$service->recoverRecipient($o->get_id(),$sid,['Recipient'=>$refs[6],'ContactRecipient'=>$refs[8]],$hash,true),'Cannot replace persisted contact Ref');
+        if ($next==='identity_missing') {
+            // Older releases lost the response references; the exact read-verified pair is supplied by the operator.
+            global $wpdb;
+            $wpdb->update($wpdb->prefix.'pnpm_shipments',['response_snapshot'=>null],['id'=>$sid]);
+            $stopped=$service->row($o->get_id(),$sid);$hash=hash('sha256',wp_json_encode($stopped));
+            $wpdb->insert($wpdb->prefix.'pnpm_shipment_events',['shipment_id'=>$sid,'event_type'=>'np_creating','actor_id'=>get_current_user_id(),'correlation_id'=>wp_generate_uuid4(),'safe_context'=>wp_json_encode(['phase'=>'document']),'created_at'=>current_time('mysql',true)]);
+            $testEvent=$wpdb->insert_id;
+            $reject(fn()=>$service->recoverRecipient($o->get_id(),$sid,$pair,$hash,true),'Document-phase audit prevents recovery');
+            $wpdb->delete($wpdb->prefix.'pnpm_shipment_events',['id'=>$testEvent]);
+        }
+        $reject(fn()=>$service->recoverRecipient($o->get_id(),$sid,$pair,'stale',true),'Recovery stale row rejected');
+        $proof=$service->recoverRecipient($o->get_id(),$sid,$pair,$hash);
+        $check($proof['eligible'] && !$proof['applied'] && $writes===$before+1,'Recovery preview no carrier writes');
+        $reject(fn()=>$prep->context($o),'Blocked preparation cannot be edited');
+        $manager->allcaps['manage_options']=false;
+        $reject(fn()=>$service->recoverRecipient($o->get_id(),$sid,$pair,$hash,true),'Only administrator can reconcile');
+        $manager->allcaps['manage_options']=true;
+        $check($service->recoverRecipient($o->get_id(),$sid,$pair,$hash,true)['applied'],'Recovery applied without save');
+        $check($service->row($o->get_id(),$sid)['status']==='np_recipient_ready' && $writes===$before+1,'Recovery never returns to mutable draft');
+        $reject(fn()=>$prep->context($o),'Recovered preparation remains frozen');
+        $reject(fn()=>$service->preview($o->get_id(),$sid,['FirstName'=>'Інший','LastName'=>$names['LastName'],'MiddleName'=>$names['MiddleName']]),'Recovered name cannot change');
+        ob_start();(new Paint\NovaPoshta\Admin\ShipmentLifecyclePanel())->render($o);$recoveredHtml=ob_get_clean();
+        $check(substr_count($recoveredHtml,' readonly')===3 && str_contains($recoveredHtml,'data-shipment-command="preview"'),'Recovered UI has immutable names and fresh preview');
+        $reject(fn()=>$service->recoverRecipient($o->get_id(),$sid,$pair,$hash,true),'Recovery apply replay rejected');
+        $p=$service->preview($o->get_id(),$sid,$names);$tokens[]=$p['token'];
+        $check(!empty($service->create($o->get_id(),$sid,$p['token'])['ttn']) && $writes===$before+2,'Explicit resumed create writes document only');
+        $n=$writes;$service->create($o->get_id(),$sid,$p['token']);$check($writes===$n,'Resumed TTN idempotent');
     }
+    $o=$make();$sid=(int)(new ShipmentRepository())->findByOrder($o->get_id())[0]['id'];
+    $p=$service->preview($o->get_id(),$sid,$names);$tokens[]=$p['token'];$mode='contact_page_two';
+    $check(!empty($service->create($o->get_id(),$sid,$p['token'])['ttn']),'Exact contact on second directory page');$mode='success';
     $o=$make();$row=(new ShipmentRepository())->findByOrder($o->get_id())[0];$sid=(int)$row['id'];$p=$service->preview($o->get_id(),$sid,$names);$tokens[]=$p['token'];
     $o->set_total(101);$o->save();$n=$writes;$reject(fn()=>$service->create($o->get_id(),$sid,$p['token']),'Stale order');$check($writes===$n,'Stale order no writes');
     $o->set_payment_method('cod');$o->save();$reject(fn()=>$service->preview($o->get_id(),$sid,$names),'COD gate');
@@ -192,6 +243,8 @@ try {
         $uiPreview=$preview;$uiPreview['enabled']=true;
         $scripts='<script>'.file_get_contents(ABSPATH.'wp-includes/js/jquery/jquery.min.js').'</script><script>'.$config.';jQuery.post=function(){var d=jQuery.Deferred();setTimeout(function(){d.resolve({success:true,data:{preview:'.wp_json_encode($uiPreview).'}})},50);return d.promise()};</script><script>'.file_get_contents(PNPM_DIR.'assets/shipment-lifecycle.js').'</script>';
         $page=str_replace('</html>',$scripts.'</html>',$page);
+        // Exercise the read-only recovered-state layout at desktop and narrow widths too.
+        $page=str_replace($draftHtml.$created,$draftHtml.$recoveredHtml.$created,$page);
         file_put_contents($dir.'/lifecycle.html',$page);restore_previous_locale();
     }
     echo "Shipment lifecycle: {$checks} checks passed. All HTTP/mail intercepted; synthetic fixtures cleaned.\n";

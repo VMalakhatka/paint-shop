@@ -1,5 +1,48 @@
 # Paint Nova Poshta Multishipping
 
+## Recipient directory verification 0.9.3 — 2026-10-18
+
+Official `CounterpartyGeneral.save` examples omit contact Phones. 0.9.1/0.9.2
+incorrectly required it in that response; their mocks invented it. 0.9.3 persists
+minimal recipient/contact Refs before a separate `Counterparty.getCounterpartyContactPersons`
+read. Only the exact returned contact Ref can match. First/last names and phone,
+plus supplied patronymic, must match; this is not a global phone-owner lookup.
+Read up to five documented pages (100 contacts/page); missing/ambiguous contact,
+page limit, provider failure or mismatched fields fail closed before document save.
+Audit/response store safe issue codes, not received personal data or raw errors.
+The manager panel translates the reason; legacy records disclose missing diagnostics.
+
+### Administrator recovery, never a create retry
+
+`ShipmentLifecycle::recoverRecipient(orderId, shipmentId, refs, rowHash, apply=false)`
+is CLI-only and requires `manage_options` plus both shipment capabilities. There is
+no public/AJAX recovery endpoint. Scope is ONLY `np_recipient_mismatch`, no TTN/Ref,
+and a recipient-only claim/audit without any document-phase event or payload refs.
+Unknown/creating/rejected outcomes cannot use it. Persisted contact Refs cannot be
+replaced. For legacy missing refs, an operator must supply the uniquely reconciled
+existing pair from the same account; never call save to discover them.
+
+1. Obtain separate owner authorization; back up the exact row and events privately,
+   outside web-root. Verify ecosystem/order locks, current actor capabilities and
+   row hash. Read-only reconcile the intended contact against the saved person.
+2. Run with `apply=false`: unchanged order fingerprint, current sender/points and
+   fresh exact-contact identity must pass. No carrier writes or local state change.
+3. With the same hash, run `apply=true`; checks run again under the order lock.
+   One atomic transition/audit sets `np_recipient_ready` and stores the verified pair.
+   Never reset to `manager_draft`, delete audit, overwrite preparation or change Woo.
+4. Reload the manager screen. Names are frozen. Fresh preview and explicit consent
+   are still required; the later create command reads the contact again and issues
+   only the document save, never a second recipient save. It records a durable
+   document-phase event before HTTP. Unknown document outcomes remain non-retryable.
+
+Rollback code using the scoped deployment archive; do not restore shipment rows
+after any later carrier action. Older code will lock `np_recipient_ready`, which is
+safer than a draft reset. A database rollback needs its own current-state review.
+Fixtures use a save response WITHOUT Phones and cover missing/mismatched directory
+data, paging, reference persistence, read failures, admin/stale/audit gates, legacy
+reconciliation, frozen UI and document-only continuation. All fixture HTTP/mail is
+intercepted. Real TTN/PDF/email acceptance is not implied by these tests.
+
 ## Request pacing 0.9.2 — 2026-10-18
 
 Confirmed production failure: HTTP 200 / success=false / errorCodes 20000401501,
@@ -62,9 +105,10 @@ Courier addresses, origin lockers, NonCash and COD fail closed.
 card names, only when the saved recipient name and normalized phone match. Never
 split a free-text full name, overwrite a dropship recipient, or update a profile.
 The saved recipient phone is visible beside the editable suggested names.
-Before document save, returned contact FirstName/LastName/Phones and any supplied
+Before document save, separately read contact FirstName/LastName/Phones and any supplied
 MiddleName must match. Missing/different fields lock as `np_recipient_mismatch`:
-the recipient may exist, but no TTN is requested. No retry/reset UI. This compares
+the recipient may exist, but no TTN is requested. No retry/reset UI; 0.9.3 adds the
+admin-only reconciliation above. This compares
 the specific response, not ownership in a global phone registry.
 One TTN per saved physical warehouse; multiple boxes at branches, one at lockers.
 Preview refreshes sender ownership/contact/phone and exact point directories, checks

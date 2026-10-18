@@ -63,14 +63,40 @@ final class RecipientIdentity
         if (!ShipmentLifecycle::recipientRefs($response)) return false;
         $contact = $response['data'][0]['ContactPerson'];
         if (isset($contact[0])) $contact = $contact[0];
-        $person = $contact['data'][0];
+        return self::differences($contact['data'][0], $expected) === [];
+    }
+
+    /** Safe diagnostic codes only; never return received values or raw provider errors. */
+    public static function differences(array $person, array $expected): array
+    {
+        $errors = [];
         foreach (['FirstName','LastName'] as $key) {
-            if (!is_string($person[$key] ?? null) || self::name($person[$key]) !== self::name($expected[$key])) return false;
+            if (!is_string($person[$key] ?? null) || trim($person[$key]) === '') $errors[] = $key.'_missing';
+            elseif (self::name($person[$key]) !== self::name($expected[$key])) $errors[] = $key.'_mismatch';
         }
         if (($expected['MiddleName'] ?? '') !== '' && (!is_string($person['MiddleName'] ?? null)
-            || self::name($person['MiddleName']) !== self::name($expected['MiddleName']))) return false;
-        if (!is_string($person['Phones'] ?? null)) return false;
-        $phones = array_map([self::class,'phone'], preg_split('/[,;]/', $person['Phones']));
-        return in_array(self::phone($expected['Phone']), $phones, true);
+            || self::name($person['MiddleName']) !== self::name($expected['MiddleName']))) $errors[] = 'MiddleName_mismatch';
+        if (!is_string($person['Phones'] ?? null) || trim($person['Phones']) === '') $errors[] = 'Phones_missing';
+        else {
+            $phones = array_map([self::class,'phone'], preg_split('/[,;]/', $person['Phones']));
+            if (!in_array(self::phone($expected['Phone']), $phones, true)) $errors[] = 'Phones_mismatch';
+        }
+        return $errors;
+    }
+
+    /** Read the exact contact under the returned counterparty; save does not promise Phones. */
+    public static function verify(ApiClient $api, array $refs, array $expected): array
+    {
+        if (count($refs)!==2 || !ShipmentLifecycle::ref($refs['Recipient'] ?? null) || !ShipmentLifecycle::ref($refs['ContactRecipient'] ?? null)) return ['refs_invalid'];
+        for ($page=1; $page<=5; $page++) {
+            $response = $api->call('Counterparty', 'getCounterpartyContactPersons', ['Ref'=>$refs['Recipient'], 'Page'=>$page]);
+            if (is_wp_error($response)) return ['contact_read_unavailable'];
+            if (($response['success'] ?? false) !== true || !is_array($response['data'] ?? null) || count($response['data'])>100) return ['contact_read_invalid'];
+            $matches = array_values(array_filter($response['data'], static fn($p)=>is_array($p) && ($p['Ref'] ?? null)===$refs['ContactRecipient']));
+            if (count($matches)>1) return ['contact_not_unique'];
+            if (count($matches)===1) return self::differences($matches[0], $expected);
+            if (count($response['data'])<100) return ['contact_not_found'];
+        }
+        return ['contact_page_limit'];
     }
 }

@@ -41,7 +41,7 @@ final class ManagerPreparation
         $saved = [];
         foreach ($rows as $row) {
             $locked = $row['status'] !== self::STATUS || $row['ttn_number'] || $row['np_ref'];
-            if ($row['source'] !== 'store_api' || ($locked && (!$lifecycle || !in_array($row['status'], ['np_creating','np_unknown','np_created','np_rejected'], true)))) {
+            if ($row['source'] !== 'store_api' || ($locked && (!$lifecycle || !in_array($row['status'], ['np_creating','np_unknown','np_created','np_rejected','np_recipient_mismatch','np_recipient_ready'], true)))) {
                 $this->fail(__('This order already has external or locked shipments. Preparation cannot replace them.', 'paint-nova-poshta-multishipping'));
             }
             $location = (int)$row['location_id'];

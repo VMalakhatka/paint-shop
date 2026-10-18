@@ -1511,3 +1511,27 @@ msgstr ""
 
 msgid "Nova Poshta checks are paced and may take several seconds. Only a rate-limited read can retry once; recipient and TTN creation are never retried automatically. If the message says creation was not started, wait 10 seconds, reload and run a new check. An unknown creation result still requires administrator review."
 msgstr ""
+
+msgid "The existing Nova Poshta contact was verified by an administrator. Preparation is frozen. Run a fresh check and confirm TTN creation; the recipient will not be created again."
+msgstr ""
+
+msgid "The contact directory did not return a phone number."
+msgstr ""
+
+msgid "The contact phone does not match the saved recipient phone."
+msgstr ""
+
+msgid "The contact directory did not return the first or last name."
+msgstr ""
+
+msgid "The contact name does not match the confirmed recipient name."
+msgstr ""
+
+msgid "The contact directory could not be read. No TTN was requested."
+msgstr ""
+
+msgid "The exact contact could not be uniquely verified in the recipient directory."
+msgstr ""
+
+msgid "The earlier version did not save verification details. Administrator reconciliation is required."
+msgstr ""

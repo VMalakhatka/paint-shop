@@ -1347,3 +1347,27 @@ msgstr "Нова пошта зайнята або обмежила запити.
 
 msgid "Nova Poshta checks are paced and may take several seconds. Only a rate-limited read can retry once; recipient and TTN creation are never retried automatically. If the message says creation was not started, wait 10 seconds, reload and run a new check. An unknown creation result still requires administrator review."
 msgstr "Перевірки Нової пошти виконуються з інтервалом і можуть тривати кілька секунд. Лише читання з обмеженням частоти може повторитися один раз; створення одержувача та ТТН автоматично не повторюється. Якщо повідомлення вказує, що створення не починалося, зачекайте 10 секунд, оновіть сторінку та виконайте нову перевірку. Невідомий результат створення, як і раніше, потребує перевірки адміністратором."
+
+msgid "The existing Nova Poshta contact was verified by an administrator. Preparation is frozen. Run a fresh check and confirm TTN creation; the recipient will not be created again."
+msgstr "Наявний контакт Нової пошти перевірено адміністратором. Підготовку зафіксовано. Виконайте нову перевірку та підтвердьте створення ТТН; одержувач повторно не створюватиметься."
+
+msgid "The contact directory did not return a phone number."
+msgstr "Довідник контактів не повернув номер телефону."
+
+msgid "The contact phone does not match the saved recipient phone."
+msgstr "Телефон контакту не збігається зі збереженим телефоном одержувача."
+
+msgid "The contact directory did not return the first or last name."
+msgstr "Довідник контактів не повернув ім’я або прізвище."
+
+msgid "The contact name does not match the confirmed recipient name."
+msgstr "ПІБ контакту не збігається з підтвердженими даними одержувача."
+
+msgid "The contact directory could not be read. No TTN was requested."
+msgstr "Не вдалося прочитати довідник контактів. Запит ТТН не надсилався."
+
+msgid "The exact contact could not be uniquely verified in the recipient directory."
+msgstr "Не вдалося однозначно перевірити потрібний контакт у довіднику одержувачів."
+
+msgid "The earlier version did not save verification details. Administrator reconciliation is required."
+msgstr "Попередня версія не зберегла деталі перевірки. Потрібна звірка адміністратором."

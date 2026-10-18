@@ -38,6 +38,13 @@ concurrency checks; never reset shipment state or write to the carrier. HTTP 200
 directory responses can still be unsuccessful. Recovery and evidence boundaries:
 manager guide `#np-preparation`.
 
+NP recipient verification 0.9.3 (2026-10-18): save does not promise contact Phones.
+Persist returned Refs before a separate exact-contact directory read; test with the
+documented minimal save response, not a richer invented mock. Keep safe diagnostic
+codes. Admin CLI recovery applies only to proven recipient-only stops, never unknown
+document outcomes; `np_recipient_ready` freezes preparation and reuses the existing
+contact. No reset to draft or repeated recipient save. Procedure: NP README 0.9.3.
+
 NP pacing 0.9.2 (2026-10-18): JSON transport uses a per-site/key named lock and
 shared timestamp; never clear that timestamp merely to bypass a process-local
 cache. Only allowlisted rate-limited reads retry once; mutations remain at-most-once.
