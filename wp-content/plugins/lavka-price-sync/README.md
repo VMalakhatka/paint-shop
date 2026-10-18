@@ -61,3 +61,8 @@ Regression: `php wp-content/plugins/lavka-price-sync/tests/folio-product-cards.p
 Java `FolioProductCardDaoTest` covers parameter binding, source guard and multiset
 comparison. Browser coverage uses synthetic responses; it does not establish live
 equivalence of the current view and direct query.
+
+Live read check (2026-10-18): direct SELECT succeeded, but SQL Server denied the
+card_tov view query (229/42000). Direct mode is the default. View/compare modes
+show a safe permission message until the DBA grants SELECT on that view; this
+change does not grant permissions. Live equality remains unverified.
