@@ -43,10 +43,9 @@ final class CheckoutRates
         if (($package['destination']['country'] ?? '') !== 'UA') return $rates;
         $nova = array_filter($rates, static fn($rate) => $rate->get_method_id() === 'pnpm_nova_poshta');
         if (!$nova) return $rates;
-        foreach ($rates as $id => $rate) {
-            // Free delivery is an entitlement within NP, not a destination-less alternative.
-            if (in_array($rate->get_method_id(), ['novaposhta', 'free_shipping', 'local_pickup'], true)) unset($rates[$id]);
-        }
+        // This checkout offers NP or allocation-backed pickup only. Legacy rates
+        // can have arbitrary IDs (including flat_rate and custom methods).
+        $rates = $nova;
         $locations = [];
         foreach ((array) ($package['contents'] ?? []) as $item) {
             $product = $item['data'] ?? null;

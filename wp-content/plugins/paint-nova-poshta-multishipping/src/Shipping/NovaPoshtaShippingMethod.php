@@ -52,6 +52,17 @@ final class NovaPoshtaShippingMethod extends \WC_Shipping_Method
         $calculator = new PolicyCalculator();
         $merchandise_total = max(0.0, (float) ($package['contents_cost'] ?? 0));
         $base_free = $calculator->baseTransportCovered($merchandise_total);
+        $label = $base_free
+            ? __('Nova Poshta — base tariff covered by us; insurance and extras paid by recipient', 'paint-nova-poshta-multishipping')
+            : __('Nova Poshta — carrier tariff, paid separately by recipient', 'paint-nova-poshta-multishipping');
+        $threshold = $calculator->baseTransportThreshold();
+        if (!$base_free && $threshold !== null) {
+            $label .= '. ' . sprintf(
+                /* translators: %s: order value threshold in the customer's delivery policy. */
+                __('For goods over %s, we cover the base tariff; insurance and extras remain payable separately.', 'paint-nova-poshta-multishipping'),
+                wp_strip_all_tags(wc_price($threshold))
+            );
+        }
         $summary = [
             'recipient' => $recipient, 'shipments' => [], 'quotes' => [], 'errors' => [], 'warnings' => [],
             'estimate_available' => false, 'payment_collection' => 'carrier', 'base_transport_free' => $base_free,
@@ -59,9 +70,7 @@ final class NovaPoshtaShippingMethod extends \WC_Shipping_Method
         // A zero Woo charge means payment to the carrier, not free carrier service.
         $this->add_rate([
             'id' => $this->get_rate_id(),
-            'label' => $base_free
-                ? __('Nova Poshta — free delivery (base tariff); insurance and extras paid by recipient', 'paint-nova-poshta-multishipping')
-                : __('Nova Poshta — carrier tariff, paid separately by recipient', 'paint-nova-poshta-multishipping'),
+            'label' => $label,
             'cost' => 0, 'taxes' => false, 'package' => $package,
             'meta_data' => ['pnpm_payment_collection' => 'carrier', 'pnpm_base_transport_free' => $base_free ? 'yes' : 'no'],
         ]);

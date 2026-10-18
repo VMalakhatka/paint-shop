@@ -1039,3 +1039,13 @@ msgstr "До порога включно"
 
 msgid "Above the threshold"
 msgstr "Понад поріг"
+
+msgid "Nova Poshta — base tariff covered by us; insurance and extras paid by recipient"
+msgstr "Нова пошта — базовий тариф покриваємо ми; страхування та додаткові послуги оплачує одержувач"
+
+#, php-format
+msgid "For goods over %s, we cover the base tariff; insurance and extras remain payable separately."
+msgstr "За суми товарів понад %s базовий тариф покриваємо ми; страхування та додаткові послуги оплачуються окремо."
+
+msgid "Address delivery costs more than delivery to a branch. You can choose a Nova Poshta branch in the delivery type above."
+msgstr "Адресна доставка дорожча за доставку у відділення. Ви можете вибрати відділення Нової пошти у способі отримання вище."

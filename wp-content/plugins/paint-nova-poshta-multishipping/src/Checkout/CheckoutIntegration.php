@@ -43,6 +43,9 @@ final class CheckoutIntegration
 
     public function assets(): void
     {
+        if (function_exists('is_cart') && is_cart()) {
+            wp_enqueue_style('pnpm-checkout', PNPM_URL . 'assets/checkout.css', [], PNPM_VERSION);
+        }
         if (!function_exists('is_checkout') || !is_checkout() || is_order_received_page()) {
             return;
         }
@@ -116,7 +119,8 @@ final class CheckoutIntegration
         echo '<input type="hidden" id="pnpm_point_ref" name="pnpm_point_ref" value="' . esc_attr((string) ($state['point_ref'] ?? '')) . '">';
         echo '<div class="pnpm-directory-results" id="pnpm-point-results" aria-live="polite" hidden></div>';
         echo '<div id="pnpm-point-card" class="pnpm-point-card" aria-live="polite" hidden></div></div>';
-        echo '<div class="pnpm-address-help" id="pnpm-address-help">';
+        echo '<div class="pnpm-address-help" id="pnpm-address-help"' . (($state['delivery_type'] ?? 'branch') === 'address' ? '' : ' style="display:none"') . '>';
+        echo '<p class="pnpm-point-warning" role="status">' . esc_html__('Address delivery costs more than delivery to a branch. You can choose a Nova Poshta branch in the delivery type above.', 'paint-nova-poshta-multishipping') . '</p>';
         if ($approval) woocommerce_form_field('pnpm_address', ['type'=>'text', 'class'=>['form-row-wide'],
             'label'=>__('Courier street and building', 'paint-nova-poshta-multishipping'),
             'autocomplete'=>'shipping street-address', 'custom_attributes'=>['maxlength'=>'300']], '');

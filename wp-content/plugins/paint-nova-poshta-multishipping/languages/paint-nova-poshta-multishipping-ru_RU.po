@@ -299,3 +299,13 @@ msgstr "До порога включительно"
 
 msgid "Above the threshold"
 msgstr "Свыше порога"
+
+msgid "Nova Poshta — base tariff covered by us; insurance and extras paid by recipient"
+msgstr "Новая почта — базовый тариф покрываем мы; страховку и дополнительные услуги оплачивает получатель"
+
+#, php-format
+msgid "For goods over %s, we cover the base tariff; insurance and extras remain payable separately."
+msgstr "При сумме товаров свыше %s базовый тариф покрываем мы; страховка и дополнительные услуги оплачиваются отдельно."
+
+msgid "Address delivery costs more than delivery to a branch. You can choose a Nova Poshta branch in the delivery type above."
+msgstr "Адресная доставка дороже доставки в отделение. Вы можете выбрать отделение Новой почты в способе получения выше."
