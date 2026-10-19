@@ -1,4 +1,6 @@
 .lps-conditions {background:#fff;border:1px solid #c3c4c7;padding:16px;margin:16px 0;min-width:0}
+/* Card grid styles must not override the editor's hidden state. */
+[data-lps-as-selection][hidden], [data-lps-selection][hidden] {display:none!important}
 .lps-condition-set {display:flex;flex-direction:column;gap:8px}
 .lps-condition {display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px;border-left:4px solid #2271b1;background:#f0f6fc}
 .lps-condition.exclude {border-color:#b32d2e;background:#fcf0f1}

@@ -4,9 +4,11 @@ const {chromium}=require('playwright'),fs=require('fs'),path=require('path'),ass
  for(const prefix of ['lps-pa','lps-as'])for(const width of [1440,390]){
   const page=await browser.newPage({viewport:{width,height:1000}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
   const data=prefix==='lps-as'?'data-lps-as':'data-lps';
-  const card=(key,section,values)=>`<div ${data}-selection="${key}" ${data}-section="${section}"><label>${key}<select multiple class="${prefix}-values">${values.map(v=>`<option>${v}</option>`).join('')}</select></label><select class="${prefix}-mode"><option>INCLUDE</option><option>EXCLUDE</option></select></div>`;
+  const card=(key,section,values)=>`<div class="${prefix}-selection" ${data}-selection="${key}" ${data}-section="${section}"><label>${key}<select multiple class="${prefix}-values">${values.map(v=>`<option>${v}</option>`).join('')}</select></label><select class="${prefix}-mode"><option>INCLUDE</option><option>EXCLUDE</option></select></div>`;
   await page.setContent(`<style>body{font:14px Arial}button,select,input{font:inherit}select{display:block}button{margin:5px}</style><form id="root"><details open><summary>Product conditions</summary><div id="${prefix}-product-filter-grid">${card('groupLevel1','product',['Textile','Paper'])+card('groupLevel2','product',['Opaque','Semi'])+card('currentSuppliers','product',['Kreul','Pebeo'])}</div></details><details open><summary>Movement conditions</summary>${card('operationKinds','movement',['*РОЗНИЦА','*РАЗОВАЯ'])}</details></form>`);
   await page.addStyleTag({content:fs.readFileSync(path.join(__dirname,'../assets/analytics-conditions.css'),'utf8')});
+  // Load the real page styles last: display:grid previously defeated [hidden].
+  await page.addStyleTag({content:fs.readFileSync(path.join(__dirname,'../assets/'+(prefix==='lps-as'?'analytics-scenarios.css':'product-analytics.css')),'utf8')});
   await page.addScriptTag({content:fs.readFileSync(path.join(__dirname,'../assets/analytics-conditions.js'),'utf8')});
   await page.evaluate(prefix=>{
    window.editor=LPS_CONDITIONS(document.querySelector('#root'),prefix,{currentSuppliers:'Supplier'});
@@ -15,6 +17,8 @@ const {chromium}=require('playwright'),fs=require('fs'),path=require('path'),ass
   },prefix);
   assert.deepEqual(await page.evaluate(()=>editor.read('product')),{groupBranches:[{mode:'INCLUDE',path:['Textile','Opaque']}]});
   assert(await page.locator(`[${data}-selection="groupLevel1"]`).isHidden());
+  assert(await page.locator(`[${data}-selection="groupLevel2"]`).isHidden());
+  assert(await page.locator(`[${data}-selection="currentSuppliers"]`).isVisible());
   await page.locator('.lps-tree-search').fill('Textile / Opaque');
   const branch=page.locator('.lps-group-tree summary').filter({has:page.locator('span',{hasText:/^Kreul$/})});
   await branch.getByRole('button',{name:'exclude',exact:true}).click();
@@ -34,6 +38,12 @@ const {chromium}=require('playwright'),fs=require('fs'),path=require('path'),ass
   await page.evaluate(()=>editor.refresh({}));
   assert(await page.evaluate(()=>{try{editor.read('product');return false}catch(e){return true}}),'old Java must not silently drop branches');
   await page.evaluate(()=>editor.refresh(cap));
+  await page.evaluate(()=>editor.apply({groupLevel1:{mode:'INCLUDE',values:['Textile','Paper']}},{}));
+  assert(await page.locator(`[${data}-selection="groupLevel1"]`).isHidden(),'legacy filters stay in the summary');
+  await page.locator('.lps-condition').filter({hasText:'groupLevel1: Textile'}).getByRole('button',{name:'edit',exact:true}).click();
+  assert(await page.locator(`[${data}-selection="groupLevel1"]`).isVisible(),'explicit legacy editing remains available');
+  assert.deepEqual((await page.evaluate(()=>editor.read('product'))).groupLevel1.values,['Textile','Paper']);
+  await page.evaluate(saved=>{editor.refresh(cap);editor.apply(saved.product,saved.movement)},saved);
   await page.screenshot({path:path.join(require('os').tmpdir(),`conditions-${prefix}-${width}.png`),fullPage:true});
   assert.deepEqual(errors,[]);await page.close();
  }
