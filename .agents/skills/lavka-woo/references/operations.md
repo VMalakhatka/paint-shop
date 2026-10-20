@@ -477,3 +477,15 @@ adds this view without saving or recalculating its order. Supplier `uploaded` is
 not active; export must use pinned versions, never refresh prices from today's
 active head. Updated owner layout and activation recovery are documented in
 `docs/OPERATIONS_RUNBOOK.md` under «Формат заказа и излишки по группам».
+
+
+### Large supplier preview storage, 2026-10-20
+
+`inc/supplier-prices.php`: keep `lps_sp_json` canonical for approval hashes;
+use `lps_sp_encode_preview` only at both `preview_json` write sites (build and
+activation/partial merge). All consumers use `lps_sp_decode`, which reads legacy
+JSON and bounded, checksummed gzip envelopes. Do not discard raw supplier rows
+or increase production DB limits as the default fix for packet overflow.
+Uploading XLSX does not prove parsed preview persistence or activation. The
+owner recovery flow and rollback reader requirement are in
+`docs/OPERATIONS_RUNBOOK.md`, «Большой прайс остаётся “Завантажено”».

@@ -5,7 +5,33 @@ require_once __DIR__ . '/supplier-price-model.php';
 function lps_sp_table(): string { global $wpdb; return $wpdb->prefix . 'lps_supplier_prices'; }
 function lps_sp_heads(): string { global $wpdb; return $wpdb->prefix . 'lps_supplier_price_heads'; }
 function lps_sp_json($data): string { return wp_json_encode($data, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR); }
-function lps_sp_decode($json): array { return json_decode((string)$json, true, 512, JSON_THROW_ON_ERROR); }
+// Original JSON versions stay readable; large previews use a lossless storage envelope.
+function lps_sp_decode($json): array {
+    $data = json_decode((string)$json, true, 512, JSON_THROW_ON_ERROR);
+    if (!is_array($data)) throw new RuntimeException('STORAGE_ERROR');
+    if (!array_key_exists('supplierPreviewStorageVersion', $data)) return $data;
+    if ($data['supplierPreviewStorageVersion'] !== 1 || ($data['encoding'] ?? '') !== 'gzip-base64'
+        || !is_int($data['bytes'] ?? null) || $data['bytes'] < 1 || $data['bytes'] > 268435456
+        || !is_string($data['sha256'] ?? null) || !is_string($data['payload'] ?? null)
+        || !function_exists('gzdecode')) throw new RuntimeException('STORAGE_ERROR');
+    $compressed = base64_decode($data['payload'], true);
+    $decoded = $compressed === false ? false : @gzdecode($compressed, $data['bytes']);
+    if ($decoded === false || strlen($decoded) !== $data['bytes']
+        || !hash_equals($data['sha256'], hash('sha256', $decoded))) throw new RuntimeException('STORAGE_ERROR');
+    $preview = json_decode($decoded, true, 512, JSON_THROW_ON_ERROR);
+    if (!is_array($preview)) throw new RuntimeException('STORAGE_ERROR');
+    return $preview;
+}
+
+function lps_sp_encode_preview(array $preview): string {
+    $json = lps_sp_json($preview);
+    if (strlen($json) < 1048576) return $json;
+    if (strlen($json) > 268435456 || !function_exists('gzencode')) throw new RuntimeException('STORAGE_ERROR');
+    $compressed = gzencode($json, 6);
+    if ($compressed === false) throw new RuntimeException('STORAGE_ERROR');
+    return lps_sp_json(['supplierPreviewStorageVersion'=>1, 'encoding'=>'gzip-base64',
+        'bytes'=>strlen($json), 'sha256'=>hash('sha256', $json), 'payload'=>base64_encode($compressed)]);
+}
 function lps_sp_scope(string $supplier, string $database): string { return hash('sha256', $database . "\n" . $supplier); }
 
 function lps_sp_install(): void {
@@ -109,7 +135,7 @@ function lps_sp_build(int $id, array $input): void {
     }
     $approval=hash('sha256',lps_sp_json([$v['checksum'],$config,$preview,$catalogHash,$base]));
     $ok=$wpdb->query($wpdb->prepare('UPDATE '.lps_sp_table()." SET config_json=%s,preview_json=%s,catalog_hash=%s,approval_hash=%s,base_id=%d,status='draft' WHERE id=%d AND status IN ('uploaded','draft')",
-        lps_sp_json($config),lps_sp_json($preview),$catalogHash,$approval,$base,$id));
+        lps_sp_json($config),lps_sp_encode_preview($preview),$catalogHash,$approval,$base,$id));
     if ($ok===false) throw new RuntimeException('STORAGE_ERROR');
 }
 
@@ -144,7 +170,7 @@ function lps_sp_activate(int $id, string $approval): void {
             'review'=>count(array_filter($preview['offers'],static fn($r)=>!empty($r['issues']))),
             'discontinued'=>count(array_filter($preview['statuses'],static fn($s)=>$s==='DISCONTINUED'))];
         if ($base && $wpdb->update($t,['status'=>'archived'],['id'=>$base])===false) throw new RuntimeException('STORAGE_ERROR');
-        if ($wpdb->update($t,['status'=>'active','preview_json'=>lps_sp_json($preview),'activated_by'=>get_current_user_id(),'activated_at'=>current_time('mysql',true)],['id'=>$id])===false
+        if ($wpdb->update($t,['status'=>'active','preview_json'=>lps_sp_encode_preview($preview),'activated_by'=>get_current_user_id(),'activated_at'=>current_time('mysql',true)],['id'=>$id])===false
             || $wpdb->update($h,['version_id'=>$id],['scope_key'=>$v['scope_key']])===false) throw new RuntimeException('STORAGE_ERROR');
         if ($wpdb->query('COMMIT')===false) throw new RuntimeException('STORAGE_ERROR');
     } catch (Throwable $e) { $wpdb->query('ROLLBACK'); throw $e; }
