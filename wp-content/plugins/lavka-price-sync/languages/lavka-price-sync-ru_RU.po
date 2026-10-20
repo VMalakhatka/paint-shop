@@ -7192,3 +7192,15 @@ msgstr "Прочитайте карточки товаров из Paint_Ua и в
 #: inc/folio-product-cards.php
 msgid "Both queries require the legacy warehouse and markup records. Requested SKUs excluded by those conditions are listed separately. Assembly columns 55–57 are exported empty because these queries do not return them."
 msgstr "Оба запроса требуют записей складов и наценок. Исключённые этими условиями артикулы показываются отдельно. Колонки сборок 55–57 выгружаются пустыми, поскольку запросы их не возвращают."
+
+#: inc/purchase-planning.php inc/purchase-export.php
+msgid "Surplus / shortage at forecast end, before new order"
+msgstr "Лишние / нехватка на конец прогноза, до нового заказа"
+
+#: inc/purchase-planning.php inc/purchase-export.php
+msgid "No active supplier price list was saved with this calculation. Activate the supplier price list and start a new calculation."
+msgstr "В этом расчёте не сохранён активный прайс поставщика. Активируйте прайс и начните новый расчёт."
+
+#: inc/purchase-planning.php inc/purchase-export.php
+msgid "Surplus / shortage: available stock plus confirmed receipts allocated to this group, minus forecast, minimum reserve, child demand and additional preorders. Before new purchases and proposed inter-group transfers; negative means shortage. Blank means incomplete data."
+msgstr "Лишние / нехватка: доступный запас плюс подтверждённые поступления, выделенные этой группе, минус прогноз, минимальный запас, потребность детей и дополнительные предзаказы. До новых закупок и предлагаемых перемещений между группами; минус означает нехватку. Пусто — данные неполные."

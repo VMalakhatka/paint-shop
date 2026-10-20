@@ -98,6 +98,15 @@ function lps_purchase_draft_open(string $token): array {
     if (!$state) throw new InvalidArgumentException(__('Saved order draft not found.', 'lavka-price-sync'));
     // Current calculation version is checked by the same gate as adjustment/export.
     $state = lps_purchase_session($token);
+    foreach ($state['draftResults'] as &$item) {
+        foreach ($item['groups'] as $group) {
+            $report = &$item['stockReport']['groups'][$group['groupCode']];
+            $report['forecastBalance'] = lps_purchase_forecast_balance($report, $group);
+            unset($report);
+        }
+        $item['stockReport']['total']['forecastBalance'] = lps_purchase_report_sum(array_column($item['stockReport']['groups'], 'forecastBalance'));
+    }
+    unset($item);
     return ['token'=>$token,'items'=>$state['draftResults'],'revision'=>$state['draftRevision'],
         'scenario'=>$state['scenario'],'query'=>$state['query'],'groups'=>$state['groups'],
         'createdAt'=>$state['createdAt'],'updatedAt'=>$state['draftUpdatedAt'],

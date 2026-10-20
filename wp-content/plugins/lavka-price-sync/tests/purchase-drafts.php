@@ -95,3 +95,20 @@ check(lps_purchase_draft_decode(json_encode($bad))===null,'Unknown storage versi
 $wpdb->query($wpdb->prepare('UPDATE wp_lps_purchase_drafts SET state_json=%s WHERE token=%s',json_encode($bad),$largeToken));
 rejected(fn()=>lps_purchase_draft_open($largeToken),'Corrupt stored draft cannot open or export');
 echo "PASS: large drafts below packet limit, exact compression roundtrip, legacy JSON, CAS and corruption checks\n";
+
+$user=1;
+$oldItems=$items;
+foreach ($oldItems as &$oldItem) {
+    unset($oldItem['stockReport']['total']['forecastBalance']);
+    foreach ($oldItem['stockReport']['groups'] as &$report) unset($report['forecastBalance']);
+    unset($report);
+}
+unset($oldItem);
+$oldToken='abcdef0123456789abcdef0123456789';
+lps_purchase_draft_save($oldToken,$draft,$oldItems,0);
+$before=lps_purchase_draft_load($oldToken);
+$oldOpened=lps_purchase_draft_open($oldToken);
+check(array_key_exists('forecastBalance',$oldOpened['items'][0]['stockReport']['total']),'Legacy draft receives signed balances on open');
+check($oldOpened['items'][0]['groups']===$oldItems[0]['groups'],'Opening a legacy draft does not recalculate quantities');
+check(lps_purchase_draft_load($oldToken)===$before,'View-only balance does not modify stored draft or revision');
+echo "PASS: legacy draft derived balances preserve immutable inputs and quantities\n";

@@ -82,7 +82,7 @@ function lps_purchase_export_summary(array $state, array $results): array {
     $numeric = ['final','manufacturingNeed','supplierUnitPrice','supplierAmount','periodExpense','sales','analysisPhysical','transitPhysical','networkPhysical','planningAvailable','transitPool','customerPreorders','preorderAdditionalDemand','expectedFreeAfterPreorders','preorderUncoveredAfterReceipts','componentDemand','childCoverageShortfall','stockMonths','excessStock'];
     foreach ($labels as $key => $label) $columns[] = ['key' => $key, 'label' => $label,
         'numberFormat' => $key === 'supplierUnitPrice' ? '0.0000' : ($key === 'supplierAmount' ? '0.00' : (in_array($key, $numeric, true) ? '#,##0.###' : ''))];
-    foreach ($state['groups'] as $group) foreach (['physical', 'sales', 'periodExpense', 'stockoutDays', 'minimumReserve', 'ownTarget', 'customerPreorders', 'preorderAdditionalDemand', 'expectedFreeAfterPreorders', 'preorderUncoveredAfterReceipts', 'componentDemand', 'plannedTransferIn', 'plannedTransferOut', 'final'] as $key) {
+    foreach ($state['groups'] as $group) foreach (['physical', 'sales', 'periodExpense', 'stockoutDays', 'minimumReserve', 'ownTarget', 'forecastBalance', 'customerPreorders', 'preorderAdditionalDemand', 'expectedFreeAfterPreorders', 'preorderUncoveredAfterReceipts', 'componentDemand', 'plannedTransferIn', 'plannedTransferOut', 'final'] as $key) {
         $columns[] = ['key' => 'group_' . $group['code'] . '_' . $key, 'label' => $group['name'] . ': ' . $t[$key], 'numberFormat' => '#,##0.###'];
     }
     $warehouse_ids = array_values(array_unique(array_merge(...array_merge(array_column($state['groups'], 'warehouseIds'), [$state['transitWarehouseIds']]))));
@@ -92,13 +92,13 @@ function lps_purchase_export_summary(array $state, array $results): array {
     foreach ($warehouse_ids as $id) foreach (['physical' => $t['physical'], 'available' => $t['available']] as $key => $label) {
         $columns[] = ['key' => 'warehouse_' . $id . '_' . $key, 'label' => ($warehouse_names[$id] ?? '#' . $id) . ' (#' . $id . '): ' . $label, 'numberFormat' => '#,##0.###'];
     }
-    // Owner's worksheet layout: first 13 fields plus children in column N.
+    // Owner's updated worksheet layout (2026-10-20): component demand in F, network physical in H.
     $primary = array_values(array_filter($state['groups'], static fn($g) => empty($g['supplyFromGroupCode'])))[0] ?? $state['groups'][0] ?? null;
     $minimumKey = $primary ? 'group_' . $primary['code'] . '_minimumReserve' : 'minimumReserve';
     $indexed = array_column($columns, null, 'key');
     $indexed['minNew'] = ['key' => 'minNew', 'label' => 'min new', 'numberFormat' => '#,##0.###'];
     if (!isset($indexed[$minimumKey])) $indexed[$minimumKey] = ['key'=>$minimumKey,'label'=>$t['minimumReserve'],'numberFormat'=>'#,##0.###'];
-    $first = ['sku','supplierArticle','product','final','periodExpense','sales','analysisPhysical','stockMonths','coldStatus',
+    $first = ['sku','supplierArticle','product','final','periodExpense','componentDemand','sales','networkPhysical','analysisPhysical','stockMonths','coldStatus',
         $minimumKey,'minNew','supplierUnitPrice','supplierCurrency','children'];
     $columns = [];
     foreach ($first as $key) { $columns[] = $indexed[$key]; unset($indexed[$key]); }
@@ -115,6 +115,10 @@ function lps_purchase_export_summary(array $state, array $results): array {
         foreach ($state['transitWarehouseIds'] as $id) $transit_physical[] = ($sources[$id]['status'] ?? '') === 'CAPTURED' ? ($sources[$id]['physicalQuantity'] ?? null) : null;
         $transit_physical = lps_purchase_export_sum($transit_physical);
         $price = lps_purchase_export_price($raw['supplierPrices'] ?? []);
+        if (!$is_child && empty($raw['supplierPrices']) && array_key_exists('supplierPriceVersions', $state)
+            && !isset($state['supplierPriceVersions'][$state['orderSupplier'] ?? ''])) {
+            $price['supplierPriceNote'] = __('No active supplier price list was saved with this calculation. Activate the supplier price list and start a new calculation.', 'lavka-price-sync');
+        }
         if ($is_child) $price['supplierPriceNote'] = '';
         $record = ['sku' => (string)$item['sku'], 'product' => $item['productName'], 'gtin' => (string)($raw['dimensions']['primaryBarcode'] ?? ''),
             'assemblyRole' => $is_child ? $t['childProduct'] : (!empty($links['children']) ? $t['parentProduct'] : $t['supplierOrder']),
@@ -145,6 +149,7 @@ function lps_purchase_export_summary(array $state, array $results): array {
             }
             if ($is_child) $record['group_' . $group['groupCode'] . '_final'] = 0.0;
             $record['group_' . $group['groupCode'] . '_periodExpense'] = $item['stockReport']['groups'][$group['groupCode']]['periodExpense'];
+            $record['group_' . $group['groupCode'] . '_forecastBalance'] = lps_purchase_forecast_balance($item['stockReport']['groups'][$group['groupCode']], $group);
             $record['group_' . $group['groupCode'] . '_stockoutDays'] = $group['availability']['stockoutDays'];
             foreach ($group['issues'] as $code) $notes[] = $group['groupName'] . ': ' . ($t['issues'][$code] ?? $code);
             foreach ($group['notes'] ?? [] as $code) $notes[] = $group['groupName'] . ': ' . ($t['notes'][$code] ?? $code);

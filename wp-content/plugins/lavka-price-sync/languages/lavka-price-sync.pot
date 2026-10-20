@@ -6973,3 +6973,15 @@ msgstr ""
 #: inc/folio-product-cards.php
 msgid "Both queries require the legacy warehouse and markup records. Requested SKUs excluded by those conditions are listed separately. Assembly columns 55–57 are exported empty because these queries do not return them."
 msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-export.php
+msgid "Surplus / shortage at forecast end, before new order"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-export.php
+msgid "No active supplier price list was saved with this calculation. Activate the supplier price list and start a new calculation."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-export.php
+msgid "Surplus / shortage: available stock plus confirmed receipts allocated to this group, minus forecast, minimum reserve, child demand and additional preorders. Before new purchases and proposed inter-group transfers; negative means shortage. Blank means incomplete data."
+msgstr ""

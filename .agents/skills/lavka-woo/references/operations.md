@@ -463,3 +463,17 @@ Confirmed 2026-10-15: purchase drafts are persistent WordPress records owned by
 the creating user. Open/export uses the pinned calculation, not fresh Folio reads;
 only explicit new calculation refreshes source data. Accepted edits and exports
 require current draft revision. See OPERATIONS_RUNBOOK saved purchase drafts.
+
+
+### Signed forecast balance and supplier export, 2026-10-20
+
+Owner: `lavka-price-sync/inc/purchase-stock-report.php` and `purchase-export.php`.
+`forecastBalance` is a view derived from frozen draft inputs: local planning stock
++ allocated confirmed transit/other receipts − uncapped inventory target (forecast,
+selected MIN, component demand, additional preorders). It excludes new purchases
+and proposed transfers; unknown inputs stay null. Do not substitute clipped
+`excessStock` or sum the shared transit pool into each group. Opening an old draft
+adds this view without saving or recalculating its order. Supplier `uploaded` is
+not active; export must use pinned versions, never refresh prices from today's
+active head. Updated owner layout and activation recovery are documented in
+`docs/OPERATIONS_RUNBOOK.md` under «Формат заказа и излишки по группам».

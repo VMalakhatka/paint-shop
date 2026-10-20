@@ -27,7 +27,7 @@ foreach ($capture['cards'] as &$card) {
 unset($card); $state=lps_purchase_apply_current_stock($state,$capture);
 $results=lps_purchase_calculate_network($state); $summary=lps_purchase_export_summary($state,$results); $row=$summary['rows'][0];
 $familyTemplate=$state;
-check(array_slice(array_column($summary['columns'],'key'),0,14) === ['sku','supplierArticle','product','final','periodExpense','sales','analysisPhysical','stockMonths','coldStatus','group_kyiv_minimumReserve','minNew','supplierUnitPrice','supplierCurrency','children'], 'Owner template first thirteen columns and child list in N');
+check(array_slice(array_column($summary['columns'],'key'),0,16) === ['sku','supplierArticle','product','final','periodExpense','componentDemand','sales','networkPhysical','analysisPhysical','stockMonths','coldStatus','group_kyiv_minimumReserve','minNew','supplierUnitPrice','supplierCurrency','children'], 'Updated owner template: component demand in F, network physical in H, children in P');
 check($row['minNew'] === null, 'Manual min new stays blank and does not change source minimum');
 check(count($summary['rows'])===1,'Two destinations produce one supplier-order row');
 check(!in_array('preordersCoveredByCurrentReserve',array_column($summary['columns'],'key'),true),'Non-accounted preorders have no misleading current-reserve coverage column');
@@ -117,3 +117,35 @@ check(lps_purchase_export_price([['status'=>'REVIEW','offers'=>[$legacy]]])['sup
 $invalid=$legacy; $invalid['issues']=['INVALID_PRICE'];
 check(lps_purchase_export_price([['status'=>'PRESENT','offers'=>[$invalid]]])['supplierUnitPrice']===null,'Legacy validation issues still block price');
 echo "PASS: legacy Kreul article, pack variants, EUR order amount and explicit status precedence\n";
+
+$balanceReport=['planningAvailable'=>8.0,'inventoryTarget'=>25.0];
+$balanceGroup=['inputs'=>['inTransit'=>10.0,'openOrders'=>2.0],'receiptsReviewed'=>true,'issues'=>[],
+    'plannedTransferIn'=>100.0,'plannedTransferOut'=>50.0,'finalQuantity'=>100.0];
+check(lps_purchase_forecast_balance($balanceReport,$balanceGroup)===-5.0,'Signed shortage includes assigned receipts but not proposed orders or transfers');
+$balanceReport['planningAvailable']=28.0;
+check(lps_purchase_forecast_balance($balanceReport,$balanceGroup)===15.0,'Positive surplus is retained');
+$balanceGroup['inputs']['inTransit']=null;
+check(lps_purchase_forecast_balance($balanceReport,$balanceGroup)===null,'Unknown transit allocation never becomes zero');
+$balanceGroup['inputs']['inTransit']=10.0;
+foreach (['TRANSIT_OVERALLOCATED','CUSTOMER_PREORDERS_REQUIRED','ASSEMBLY_CHILD_DATA_REQUIRED','INTERNAL_TRANSFER_RESERVE_MISMATCH'] as $issue) {
+    $balanceGroup['issues']=[$issue];
+    check(lps_purchase_forecast_balance($balanceReport,$balanceGroup)===null,'Unreliable inputs leave signed balance blank: '.$issue);
+}
+$balanceGroup['issues']=[];$balanceGroup['receiptsReviewed']=false;
+check(lps_purchase_forecast_balance($balanceReport,$balanceGroup)===null,'Unconfirmed receipts cannot reduce shortage');
+$balanceReport['inventoryTarget']=null;$balanceGroup['receiptsReviewed']=true;
+check(lps_purchase_forecast_balance($balanceReport,$balanceGroup)===null,'Missing target never becomes zero demand');
+$ready=lps_purchase_calculate_network($familyTemplate);
+$projected=lps_purchase_export_summary($familyTemplate,$ready)['rows'][0];
+foreach ($ready[0]['groups'] as $g) {
+    $r=$ready[0]['stockReport']['groups'][$g['groupCode']];
+    check(abs($projected['group_'.$g['groupCode'].'_forecastBalance']-($r['planningAvailable']+$g['inputs']['inTransit']+$g['inputs']['openOrders']-$r['inventoryTarget']))<1e-9,'Group balance uses historical target and single transit allocation');
+}
+$missing=$familyTemplate;$missing['supplierPriceVersions']=[];$missing['rows']['TEST-010']['supplierPrices']=[];
+$noPrice=lps_purchase_export_summary($missing,$ready)['rows'][0];
+check(str_contains($noPrice['supplierPriceNote'],'No active supplier price list'),'Missing pinned price list explains activation requirement');
+check($noPrice['supplierUnitPrice']===null && $noPrice['supplierAmount']===null,'An uploaded price is never silently activated or made zero');
+check($missing['supplierPriceVersions']===[],'Export does not mutate pinned versions');
+$missing['supplierPriceVersions']=['Supplier'=>123];
+check(lps_purchase_export_summary($missing,$ready)['rows'][0]['supplierPriceNote']==='No confirmed supplier price.','Active list with unmatched SKU does not incorrectly ask for activation');
+echo "PASS: signed per-group balance and pinned price diagnostics\n";

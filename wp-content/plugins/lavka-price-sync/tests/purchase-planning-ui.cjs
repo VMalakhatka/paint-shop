@@ -32,6 +32,7 @@ const output=process.env.UI_OUTPUT_DIR || require('os').tmpdir();
   assert.equal(await historyRow.locator('td').nth(7).innerText(), '12');
   assert.equal(await historyRow.locator('td').nth(8).innerText(), '18');
   assert.equal(await page.locator('.lps-purchase-sku').first().getByRole('columnheader', {name:'Days without stock in group', exact:true}).count(), 1);
+  assert(await page.locator('.lps-purchase-stock').first().locator('[data-stock-field="forecastBalance"]').count()>0,'Signed group balance is visible');
   const form=page.locator('[data-edit-form="0"]');
   await form.locator('..').locator('summary').click();
   const pack=form.locator('[data-field="packRounding"]');assert.equal(await pack.inputValue(),'UP');

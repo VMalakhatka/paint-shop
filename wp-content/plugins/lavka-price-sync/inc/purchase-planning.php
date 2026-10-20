@@ -18,6 +18,7 @@ function lps_purchase_i18n(): array {
         'allWarehousesPhysical' => __('Physical stock across all analysed warehouses', 'lavka-price-sync'),
         'periodExpense' => __('Outgoing quantity in selected period', 'lavka-price-sync'),
         'excessStock' => __('Surplus stock', 'lavka-price-sync'),
+        'forecastBalance' => __('Surplus / shortage at forecast end, before new order', 'lavka-price-sync'),
         'stockMonths' => __('Stock coverage, months', 'lavka-price-sync'),
         'stockReportHelp' => __('Outgoing quantity follows the selected movement filters. Stock includes all analysed warehouses; stock-only warehouses contribute no movements. Surplus is current stock available for planning minus forecast, minimum stock and child needs; expected receipts are excluded. Months use actual regular demand and a 30-day month; 9999 means positive stock with no regular demand. Child needs are shown separately. A dash means missing data.', 'lavka-price-sync'),
         'assemblyHelp' => __('Select one supplier. Children and grandchildren are found automatically, including products outside the supplier filter. Their shortages consume components. The report includes their statistics and assembly links, with zero supplier order for every child. Review the quantity to manufacture.', 'lavka-price-sync'),
@@ -510,6 +511,7 @@ function lps_purchase_render(): void {
             <button class="button" id="lps-purchase-next" disabled type="button"><?php echo esc_html__('Next', 'lavka-price-sync'); ?></button>
         </div>
         <p class="description"><?php echo esc_html__('The export has one row per SKU, including children with zero supplier order. Parent and child lists show the assembly links. XLSX also includes warehouse group detail and individual warehouse stock.', 'lavka-price-sync'); ?></p>
+        <p class="description"><?php echo esc_html__('Surplus / shortage: available stock plus confirmed receipts allocated to this group, minus forecast, minimum reserve, child demand and additional preorders. Before new purchases and proposed inter-group transfers; negative means shortage. Blank means incomplete data.', 'lavka-price-sync'); ?></p>
         <div id="lps-purchase-results"></div>
     </div>
     <?php
@@ -531,7 +533,7 @@ add_action('admin_post_lps_purchase_export', static function (): void {
         $keys = ['sku', 'product', 'group', 'assemblyRole', 'parents', 'children', 'manufacturingNeed', 'receivingWarehouse', 'minimumWarehouse', 'minimumReserve', 'physical', 'available', 'internalReserved', 'planningAvailable', 'internalTransferAccounts', 'sales', 'availableDays', 'stockoutDays', 'availabilityStatus', 'estimatedLostSales', 'appliedLostSales', 'adjustedSales', 'maxDemandMultiplier', 'demandStatus', 'returns', 'coverage', 'ownTarget', 'customerPreorders', 'preorderAdditionalDemand', 'expectedFreeAfterPreorders', 'preorderUncoveredAfterReceipts', 'preorderLines', 'componentDemand', 'childContributions', 'target', 'need', 'transfer', 'supplyFromGroupCode', 'plannedTransferIn', 'plannedTransferOut', 'inTransit', 'openOrders', 'pack', 'packRounding', 'moq', 'purchase', 'quantity', 'final', 'reason'];
         $columns = array_map(static fn($key) => ['key' => $key, 'label' => $t[$key]], $keys);
         $stock_columns = [];
-        foreach (['allWarehousesPhysical','periodExpense','excessStock','stockMonths'] as $key) $stock_columns[] = ['key' => $key, 'label' => $t[$key]];
+        foreach (['allWarehousesPhysical','periodExpense','forecastBalance','excessStock','stockMonths'] as $key) $stock_columns[] = ['key' => $key, 'label' => $t[$key]];
         foreach (['periodExpense','componentDemand','excessStock','stockMonths'] as $key) $stock_columns[] = ['key' => 'all_' . $key, 'label' => $t['allWarehouses'] . ': ' . $t[$key]];
         array_splice($columns, 3, 0, $stock_columns);
         $columns[] = ['key' => 'childCoverageShortfall', 'label' => $t['childCoverageShortfall']];
@@ -572,6 +574,7 @@ add_action('admin_post_lps_purchase_export', static function (): void {
                     'preorderLines' => wp_json_encode($group['preorderLines'], JSON_UNESCAPED_UNICODE),
                     'physical' => $stock_report['physical'], 'ownTarget' => $group['ownTarget'], 'componentDemand' => $group['componentDemand'],
                     'allWarehousesPhysical' => $calculated['stockReport']['total']['physical'],
+                    'forecastBalance' => lps_purchase_forecast_balance($stock_report, $group),
                     'periodExpense' => $stock_report['periodExpense'], 'excessStock' => $stock_report['excessStock'], 'stockMonths' => $stock_report['stockMonths'],
                     'childCoverageShortfall' => $group['childCoverageShortfall'],
                     'childCoverageWarning' => ($group['childCoverageShortfall'] ?? 0) > 0 ? $t['childCoverageWarning'] : '',

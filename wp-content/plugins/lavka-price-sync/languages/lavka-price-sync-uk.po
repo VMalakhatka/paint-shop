@@ -7176,3 +7176,15 @@ msgstr "Прочитайте картки товарів з Paint_Ua та вив
 #: inc/folio-product-cards.php
 msgid "Both queries require the legacy warehouse and markup records. Requested SKUs excluded by those conditions are listed separately. Assembly columns 55–57 are exported empty because these queries do not return them."
 msgstr "Обидва запити потребують записів складів і націнок. Виключені цими умовами артикули показуються окремо. Колонки збірок 55–57 вивантажуються порожніми, оскільки запити їх не повертають."
+
+#: inc/purchase-planning.php inc/purchase-export.php
+msgid "Surplus / shortage at forecast end, before new order"
+msgstr "Зайві / нестача на кінець прогнозу, до нового замовлення"
+
+#: inc/purchase-planning.php inc/purchase-export.php
+msgid "No active supplier price list was saved with this calculation. Activate the supplier price list and start a new calculation."
+msgstr "У цьому розрахунку не збережено активний прайс постачальника. Активуйте прайс і почніть новий розрахунок."
+
+#: inc/purchase-planning.php inc/purchase-export.php
+msgid "Surplus / shortage: available stock plus confirmed receipts allocated to this group, minus forecast, minimum reserve, child demand and additional preorders. Before new purchases and proposed inter-group transfers; negative means shortage. Blank means incomplete data."
+msgstr "Зайві / нестача: доступний запас плюс підтверджені надходження, розподілені цій групі, мінус прогноз, мінімальний запас, потреба дітей і додаткові передзамовлення. До нових закупівель і запропонованих переміщень між групами; мінус означає нестачу. Порожньо — дані неповні."
