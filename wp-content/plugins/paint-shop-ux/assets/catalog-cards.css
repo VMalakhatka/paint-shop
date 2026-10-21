@@ -1,4 +1,26 @@
 /* Product/category grids are owned here, independent of the active theme. */
+/* The shared part of compact names stays in its original reading order. */
+.psu-catalog #main .psu-catalog-context {
+    margin: 0 0 20px;
+    padding: 12px 0;
+    background: #fff;
+    color: var(--psu-accent, #743c2e);
+    border-bottom: 1px solid var(--psu-border, #e6dfd7);
+    font: 500 16px/1.4 var(--psu-font, system-ui, sans-serif);
+    overflow-wrap: anywhere;
+}
+.psu-catalog #main .psu-catalog-context.is-sticky {
+    position: sticky;
+    top: var(--psu-context-top, 0px);
+    z-index: 60;
+}
+.psu-catalog #main .psu-catalog-context > :first-child {
+    margin: 0 !important;
+    font: inherit !important;
+    color: inherit !important;
+    display: block !important;
+    overflow: visible !important;
+}
 /* ── База для грид-списков Woo ──────────────────────────────────────────── */
 .woocommerce ul.products::before,
 .woocommerce ul.products::after{ content:none !important; }

@@ -1209,3 +1209,11 @@ msgstr "Информационные страницы имеют удобную 
 #: pc-wholesale-help.php:590
 msgid "Information page on a phone"
 msgstr "Информационная страница на телефоне"
+
+#: pc-wholesale-help.php
+msgid "When a final subgroup has a short shared product name below its heading, that line stays at the top while you scroll through its products. It keeps the series name visible beside the shortened colour or variant names on the cards."
+msgstr "Если под заголовком конечной подгруппы есть короткая общая часть названия товаров, она остаётся вверху экрана при прокрутке товаров. Так название серии видно вместе с сокращёнными названиями цветов или вариантов в плитках."
+
+#: pc-wholesale-help.php
+msgid "Shared subgroup name while scrolling"
+msgstr "Общая часть названия подгруппы при прокрутке"

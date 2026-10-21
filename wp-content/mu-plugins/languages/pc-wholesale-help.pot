@@ -1187,3 +1187,11 @@ msgstr ""
 #: pc-wholesale-help.php:590
 msgid "Information page on a phone"
 msgstr ""
+
+#: pc-wholesale-help.php
+msgid "When a final subgroup has a short shared product name below its heading, that line stays at the top while you scroll through its products. It keeps the series name visible beside the shortened colour or variant names on the cards."
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Shared subgroup name while scrolling"
+msgstr ""
