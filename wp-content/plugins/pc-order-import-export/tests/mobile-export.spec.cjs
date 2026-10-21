@@ -18,10 +18,22 @@ const assert = require('node:assert/strict');
         await page.goto(addUrl,{waitUntil:'networkidle'});
         await page.goto(cartUrl,{waitUntil:'networkidle'});
         assert(await page.locator('.cart_item').count(),'Test product added to fresh cart');
+        assert.equal(await page.locator('body.woocommerce-cart').count(),1,'Cart-only visibility scope is present');
         const split = page.locator('.pcoe-export select.pcoe-split');
+        const panels = ['.pcoe-export','.pcoe-import','.pcoe-cart-to-draft'];
         assert.equal(await split.count(),1);
-        for (const width of process.env.PCOE_BEFORE ? [390] : [320,360,390,768,1280]) {
+        for (const selector of panels) assert.equal(await page.locator(selector).count(),1,'One filled-cart panel: '+selector);
+        for (const width of [320,360,390,767,768,1280]) {
             await page.setViewportSize({width,height:900});
+            assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth+1),'No page horizontal scroll at '+width);
+            if (width <= 767) {
+                for (const selector of panels) assert(await page.locator(selector).isHidden(),'Phone hides '+selector+' at '+width);
+                console.log(JSON.stringify({width,cartTools:'hidden'}));
+                if (width === 390) await page.screenshot({path:'/tmp/pcoe-mobile-export-after.png'});
+                // Hidden controls must not be selected, scrolled into view or clicked.
+                continue;
+            }
+            for (const selector of panels) assert(await page.locator(selector).isVisible(),'Tablet/desktop retains '+selector+' at '+width);
             for (const mode of ['agg','per_loc']) {
                 await split.selectOption(mode);
                 await split.scrollIntoViewIfNeeded();
@@ -30,25 +42,21 @@ const assert = require('node:assert/strict');
                     return {viewport:innerWidth,page:document.documentElement.scrollWidth,selectLeft:select.left,selectRight:select.right,labelRight:label.right,panelRight:panel.right,selectWidth:select.width};
                 });
                 console.log(JSON.stringify({width,mode,...bounds}));
-                if (!process.env.PCOE_BEFORE) {
-                    assert(bounds.page <= width+1,'No page horizontal scroll');
-                    assert(bounds.selectLeft >= 0 && bounds.selectRight <= bounds.panelRight+1 && bounds.labelRight <= width+1,'Selector and label fit panel');
-                    assert(bounds.selectWidth > 180,'Selector remains usable');
-                    assert.equal(await split.inputValue(),mode);
-                    assert.equal(await page.evaluate(() => localStorage.getItem('pcoeSplit')), mode === 'agg' ? '{"cart":"agg"}' : '{"cart":"per_loc"}');
-                }
-                if (width === 390 && mode === 'agg') {
-                    await page.screenshot({path:`/tmp/pcoe-mobile-export-${process.env.PCOE_BEFORE?'before':'after'}.png`});
-                    if (!process.env.PCOE_BEFORE) await page.locator('.pcoe-export').screenshot({path:'/tmp/cart-export-mobile.png'});
-                }
+                assert(bounds.page <= width+1,'No page horizontal scroll');
+                assert(bounds.selectLeft >= 0 && bounds.selectRight <= bounds.panelRight+1 && bounds.labelRight <= width+1,'Selector and label fit panel');
+                assert(bounds.selectWidth > 180,'Selector remains usable');
+                assert.equal(await split.inputValue(),mode);
+                assert.equal(await page.evaluate(() => localStorage.getItem('pcoeSplit')), mode === 'agg' ? '{"cart":"agg"}' : '{"cart":"per_loc"}');
+                if (width === 768 && mode === 'agg') await page.locator('.pcoe-export').screenshot({path:'/tmp/cart-export-tablet.png'});
             }
         }
-        if (!process.env.PCOE_BEFORE) {
-            await page.reload({waitUntil:'networkidle'});
-            assert.equal(await split.inputValue(),'per_loc','Selected export mode survives reload');
-            assert.deepEqual(errors,[],'No JS errors');
-            console.log('PASS mobile and desktop export layout and mode persistence');
-        }
+        await page.reload({waitUntil:'networkidle'});
+        assert.equal(await split.inputValue(),'per_loc','Selected export mode survives reload');
+        await page.setViewportSize({width:390,height:900});
+        for (const selector of panels) assert(await page.locator(selector).isHidden(),'Returning to phone hides '+selector);
+        assert.equal(await split.inputValue(),'per_loc','Hiding the panel preserves its selected mode');
+        assert.deepEqual(errors,[],'No JS errors');
+        console.log('PASS phone-hidden cart tools, tablet/desktop layout and mode persistence');
     } finally {
         try {
             if (cartUrl) {
@@ -58,6 +66,14 @@ const assert = require('node:assert/strict');
                     await page.goto(new URL(remove,page.url()).href,{waitUntil:'networkidle'});
                 }
                 assert.equal(await page.locator('.cart_item').count(),0,'Temporary cart emptied');
+                for (const width of [390,768]) {
+                    await page.setViewportSize({width,height:900});
+                    for (const selector of ['.pcoe-import','.pcoe-cart-to-draft']) {
+                        const panel = page.locator(selector);
+                        assert.equal(await panel.count(),1,'Empty cart retains panel markup: '+selector);
+                        assert.equal(await panel.isVisible(),width >= 768,'Empty-cart visibility follows the same breakpoint: '+selector);
+                    }
+                }
                 console.log('Temporary local cart emptied');
             }
         } finally { await browser.close(); }

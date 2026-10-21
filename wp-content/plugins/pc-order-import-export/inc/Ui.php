@@ -450,6 +450,11 @@ public static function render_account_import_block(): void
     protected static function inline_css(): string
     {
         return '
+        @media (max-width: 767px) {
+            body.woocommerce-cart .pcoe-export,
+            body.woocommerce-cart .pcoe-import,
+            body.woocommerce-cart .pcoe-cart-to-draft { display:none; }
+        }
         .pcoe-export__split { display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-left:auto; min-width:0; max-width:100%; }
         .pcoe-export__split span { min-width:0; overflow-wrap:anywhere; }
         .pcoe-export__split select { min-width:0; max-width:100%; box-sizing:border-box; }

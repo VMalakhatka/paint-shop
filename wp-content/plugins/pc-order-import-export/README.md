@@ -81,24 +81,30 @@ activation or DB migration. Production deployment is left to the owner;
 rollback is restoring the previous plugin files (which restores the known XLSX
 compatibility bug). Customer-facing instructions/buttons are unchanged.
 
-## Mobile export layout (2026-09-27)
+## Cart tools on tablets and desktop (2026-10-21)
 
-The export warehouse selector in `Ui.php` uses a bounded, wrapping label; at
-720 px and below the select occupies a separate full-width row. This is shared
-by cart and order export. Options, saved mode and export payloads are unchanged.
-No global overflow clipping, vendor changes, settings or migration are needed.
+`Ui::inline_css()` hides `.pcoe-export`, `.pcoe-import` and
+`.pcoe-cart-to-draft` only inside `body.woocommerce-cart` at widths up to 767px.
+From 768px the complete export/import/save-to-draft block remains available.
+The rule covers classic, block and empty carts; it does not hide account import,
+order export, the separate price list or checkout. There is no device detection,
+JS toggle, endpoint restriction, new setting or data migration. Resizing keeps
+form state and the existing export mode. The existing wrapping export selector
+still applies to other pages on phones.
 
-Local acceptance: `tests/mobile-export.spec.cjs`, 320/360/390/768/1280 px, both
-warehouse modes and persisted selection after reload. It adds one product to a
-fresh anonymous local cart and removes it in `finally`; no order/checkout/Folio
-operation occurs. `PCOE_BEFORE=1` records baseline geometry without fixed-layout
-assertions. At 390 px the baseline document width was 485 px; after the fix it is
-390 px and the select fits the 330 px content area. No page JS errors.
+Verified in the local browser on 2026-10-21: filled cart at 390/767/768/1024/1280px,
+empty cart at 390/768px, checkout remains visible and no horizontal overflow.
+The export mode selected on tablet survives switching to phone width. The filled
+cart fixture exists only in memory; no checkout, import, export, draft save or
+production mutation was performed. PHP lint and documentation validation passed.
+The existing `tests/mobile-export.spec.cjs` now expects hidden cart controls on
+320/360/390/767px and visible controls on 768/1280px; its syntax was checked,
+while this task's browser acceptance used CUA.
 
-Customer guide and published help include the new mobile export screenshot,
-using existing translated captions. Deploy this plugin and the help assets;
-production acceptance is still pending. Rollback restores the previous plugin
-and help files, without any data operation.
+The customer guide, help code, UK/RU translations and tablet screenshot are
+updated together. Deploy `pc-order-import-export` plus `pc-wholesale-help` and
+its assets/translations. Production deployment/acceptance is pending. Rollback
+restores those files; no database action is needed.
 
 ## Conditional frontend assets (2026-09-27)
 

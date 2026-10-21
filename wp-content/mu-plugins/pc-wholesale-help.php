@@ -421,30 +421,27 @@ function pc_wholesale_help_render_endpoint(): void {
                 <a href="<?php echo esc_url(pc_wholesale_help_asset_url('wholesale-order-template.xlsx')); ?>" download><?php esc_html_e('Download Excel example', 'pc-wholesale-help'); ?></a>
             </div>
             <div class="pc-help-grid pc-help-grid--two">
-                <div class="pc-help-card"><h3><?php esc_html_e('Import to cart', 'pc-wholesale-help'); ?></h3><p><?php esc_html_e('Open the import block in the cart, choose a file and import it. New products are added to the products already in the cart.', 'pc-wholesale-help'); ?></p></div>
+                <div class="pc-help-card"><h3><?php esc_html_e('Import to cart', 'pc-wholesale-help'); ?></h3><p><?php esc_html_e('On a computer or tablet, open the import block in the cart, choose a file and import it. New products are added to the products already in the cart.', 'pc-wholesale-help'); ?></p></div>
                 <div class="pc-help-card"><h3><?php esc_html_e('Import to draft', 'pc-wholesale-help'); ?></h3><p><?php esc_html_e('Open “My orders”, choose a file and optionally enter a draft title. The current cart is not changed.', 'pc-wholesale-help'); ?></p></div>
             </div>
             <p><?php esc_html_e('Use SKU/article or GTIN/barcode for the product and a supported quantity column such as qty, q-ty or Кількість. Empty, zero and negative quantities are skipped. Always review the row-by-row import report.', 'pc-wholesale-help'); ?></p>
             <div class="pc-help-warning"><strong><?php esc_html_e('Current data wins.', 'pc-wholesale-help'); ?></strong> <?php esc_html_e('The cart uses your current WooCommerce price, current availability and current warehouse mode, not the price from the file.', 'pc-wholesale-help'); ?></div>
             <p><?php esc_html_e('Customer draft imports also use current account prices. After cart import, review the report, then refresh the list. Do not import again if the products were already added.', 'pc-wholesale-help'); ?></p>
-            <?php pc_wholesale_help_image('import-to-cart-and-draft.jpg', __('Cart controls for export, import and saving a draft', 'pc-wholesale-help'), __('CSV/XLSX export, import and draft controls are located below the cart totals.', 'pc-wholesale-help')); ?>
+            <?php pc_wholesale_help_image('cart-tools-tablet-2026-10-21.jpg', __('Cart tools on a tablet', 'pc-wholesale-help'), __('CSV/XLSX export, export settings, import and Save as draft are below the cart totals on a computer or tablet. This block is hidden on phones.', 'pc-wholesale-help')); ?>
         </section>
 
         <section class="pc-help-section" id="eksport">
-            <div class="pc-help-section__heading"><span>06</span><div><h2><?php esc_html_e('Export the cart or an order', 'pc-wholesale-help'); ?></h2><p><?php esc_html_e('Export is available in the cart and on the details page of each previous order.', 'pc-wholesale-help'); ?></p></div></div>
+            <div class="pc-help-section__heading"><span>06</span><div><h2><?php esc_html_e('Export the cart or an order', 'pc-wholesale-help'); ?></h2><p><?php esc_html_e('Cart export is available on a computer or tablet. Export from the details of a previous order in My orders remains available on phones too.', 'pc-wholesale-help'); ?></p></div></div>
             <ol class="pc-help-steps">
                 <?php pc_wholesale_help_step('1', __('Choose columns', 'pc-wholesale-help'), __('SKU, barcode, title, quantity, price, total and notes are available.', 'pc-wholesale-help')); ?>
                 <?php pc_wholesale_help_step('2', __('Choose warehouse format', 'pc-wholesale-help'), __('Use one product row with allocation in notes, or separate rows for each warehouse.', 'pc-wholesale-help')); ?>
                 <?php pc_wholesale_help_step('3', __('Download the file', 'pc-wholesale-help'), __('Choose CSV or XLSX. Export does not change or clear the cart.', 'pc-wholesale-help')); ?>
             </ol>
-            <div style="max-width:390px">
-                <?php pc_wholesale_help_image('cart-export-mobile.png', __('Choose warehouse format', 'pc-wholesale-help'), __('Use one product row with allocation in notes, or separate rows for each warehouse.', 'pc-wholesale-help')); ?>
-            </div>
         </section>
 
         <section class="pc-help-section" id="chernetky">
             <p><?php esc_html_e('Choose Ordinary draft or Preorder invoice before saving. Saving keeps the choice in the draft; a Folio document is created only after preview and confirmation. A preorder is a non-accounting invoice marked PRD and counts towards the preorder reserve for six months. Only automatically saved unavailable quantities receive the out-of-stock marker.', 'pc-wholesale-help'); ?></p>
-            <div class="pc-help-section__heading"><span>07</span><div><h2><?php esc_html_e('Save the cart as a draft', 'pc-wholesale-help'); ?></h2><p><?php esc_html_e('Enter an optional title in the cart and press “Save as draft”. The draft will appear in “My orders”.', 'pc-wholesale-help'); ?></p></div></div>
+            <div class="pc-help-section__heading"><span>07</span><div><h2><?php esc_html_e('Save the cart as a draft', 'pc-wholesale-help'); ?></h2><p><?php esc_html_e('On a computer or tablet, enter an optional title in the cart and press “Save as draft”. The draft will appear in “My orders”.', 'pc-wholesale-help'); ?></p></div></div>
             <div class="pc-help-warning"><strong><?php esc_html_e('Important:', 'pc-wholesale-help'); ?></strong> <?php esc_html_e('After a successful save, the current cart is cleared. A draft does not reserve stock.', 'pc-wholesale-help'); ?></div>
             <a class="pc-help-inline-action" href="<?php echo esc_url($orders_url); ?>"><?php esc_html_e('Open my orders', 'pc-wholesale-help'); ?> →</a>
         </section>

@@ -403,8 +403,8 @@ msgstr ""
 msgid "Import to cart"
 msgstr ""
 
-#: pc-wholesale-help.php:371
-msgid "Open the import block in the cart, choose a file and import it. New products are added to the products already in the cart."
+#: pc-wholesale-help.php:424
+msgid "On a computer or tablet, open the import block in the cart, choose a file and import it. New products are added to the products already in the cart."
 msgstr ""
 
 #: pc-wholesale-help.php:372
@@ -427,20 +427,20 @@ msgstr ""
 msgid "The cart uses your current WooCommerce price, current availability and current warehouse mode, not the price from the file."
 msgstr ""
 
-#: pc-wholesale-help.php:376
-msgid "Cart controls for export, import and saving a draft"
+#: pc-wholesale-help.php:430
+msgid "Cart tools on a tablet"
 msgstr ""
 
-#: pc-wholesale-help.php:376
-msgid "CSV/XLSX export, import and draft controls are located below the cart totals."
+#: pc-wholesale-help.php:430
+msgid "CSV/XLSX export, export settings, import and Save as draft are below the cart totals on a computer or tablet. This block is hidden on phones."
 msgstr ""
 
 #: pc-wholesale-help.php:380
 msgid "Export the cart or an order"
 msgstr ""
 
-#: pc-wholesale-help.php:380
-msgid "Export is available in the cart and on the details page of each previous order."
+#: pc-wholesale-help.php:434
+msgid "Cart export is available on a computer or tablet. Export from the details of a previous order in My orders remains available on phones too."
 msgstr ""
 
 #: pc-wholesale-help.php:382
@@ -471,8 +471,8 @@ msgstr ""
 msgid "Save the cart as a draft"
 msgstr ""
 
-#: pc-wholesale-help.php:389
-msgid "Enter an optional title in the cart and press “Save as draft”. The draft will appear in “My orders”."
+#: pc-wholesale-help.php:444
+msgid "On a computer or tablet, enter an optional title in the cart and press “Save as draft”. The draft will appear in “My orders”."
 msgstr ""
 
 #: pc-wholesale-help.php:390

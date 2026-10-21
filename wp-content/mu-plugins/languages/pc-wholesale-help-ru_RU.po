@@ -401,9 +401,9 @@ msgstr "Завантажити приклад Excel"
 msgid "Import to cart"
 msgstr "Імпорт у кошик"
 
-#: pc-wholesale-help.php:371
-msgid "Open the import block in the cart, choose a file and import it. New products are added to the products already in the cart."
-msgstr "Відкрийте блок імпорту в кошику, виберіть файл та імпортуйте його. Нові товари додаються до тих, що вже є в кошику."
+#: pc-wholesale-help.php:424
+msgid "On a computer or tablet, open the import block in the cart, choose a file and import it. New products are added to the products already in the cart."
+msgstr "На компьютере или планшете откройте блок импорта в корзине, выберите файл и импортируйте его. Новые товары добавляются к уже имеющимся в корзине."
 
 #: pc-wholesale-help.php:372
 msgid "Import to draft"
@@ -425,21 +425,21 @@ msgstr "Застосовуються поточні дані."
 msgid "The cart uses your current WooCommerce price, current availability and current warehouse mode, not the price from the file."
 msgstr "Кошик використовує вашу поточну ціну WooCommerce, актуальну наявність і поточний режим складу, а не ціну з файлу."
 
-#: pc-wholesale-help.php:376
-msgid "Cart controls for export, import and saving a draft"
-msgstr "Керування експортом, імпортом і збереженням чернетки в кошику"
+#: pc-wholesale-help.php:430
+msgid "Cart tools on a tablet"
+msgstr "Инструменты корзины на планшете"
 
-#: pc-wholesale-help.php:376
-msgid "CSV/XLSX export, import and draft controls are located below the cart totals."
-msgstr "Експорт CSV/XLSX, імпорт і чернетки розташовані під підсумками кошика."
+#: pc-wholesale-help.php:430
+msgid "CSV/XLSX export, export settings, import and Save as draft are below the cart totals on a computer or tablet. This block is hidden on phones."
+msgstr "Экспорт CSV/XLSX, настройки экспорта, импорт и «Сохранить в черновик» расположены под итогами корзины на компьютере или планшете. На телефоне этот блок скрыт."
 
 #: pc-wholesale-help.php:380
 msgid "Export the cart or an order"
 msgstr "Вивантажте кошик або замовлення"
 
-#: pc-wholesale-help.php:380
-msgid "Export is available in the cart and on the details page of each previous order."
-msgstr "Експорт доступний у кошику та на сторінці деталей кожного попереднього замовлення."
+#: pc-wholesale-help.php:434
+msgid "Cart export is available on a computer or tablet. Export from the details of a previous order in My orders remains available on phones too."
+msgstr "Экспорт корзины доступен на компьютере или планшете. Экспорт со страницы просмотра предыдущего заказа в «Моих заказах» остаётся доступным и на телефоне."
 
 #: pc-wholesale-help.php:382
 msgid "Choose columns"
@@ -469,9 +469,9 @@ msgstr "Виберіть CSV або XLSX. Експорт не змінює і н
 msgid "Save the cart as a draft"
 msgstr "Збережіть кошик у чернетку"
 
-#: pc-wholesale-help.php:389
-msgid "Enter an optional title in the cart and press “Save as draft”. The draft will appear in “My orders”."
-msgstr "За бажанням введіть назву в кошику та натисніть «Зберегти у чернетку». Чернетка з’явиться в «Моїх замовленнях»."
+#: pc-wholesale-help.php:444
+msgid "On a computer or tablet, enter an optional title in the cart and press “Save as draft”. The draft will appear in “My orders”."
+msgstr "На компьютере или планшете при желании введите название в корзине и нажмите «Сохранить в черновик». Черновик появится в «Моих заказах»."
 
 #: pc-wholesale-help.php:390
 msgid "Important:"

@@ -128,6 +128,13 @@
 
 ## Корзина и checkout
 
+- С 2026-10-21 `pc-order-import-export/Ui::inline_css()` скрывает только на
+  `body.woocommerce-cart` блоки export/import/cart-to-draft при ширине <=767px;
+  от 768px они доступны. Это CSS presentation rule, не role/API gate: кабинет,
+  экспорт заказа, отдельный прайс-лист и checkout не скрывать. Проверять filled/empty
+  cart и границу 767/768, не вводить серверное device detection. Источник: `Ui.php`;
+  приёмка/deploy — PCOE README, пользовательский канон — wholesale guide.
+
 - С 2026-10-15 стандартный XLSX-прайс удаляет колонку поставщика перед выдачей; внутренний row schema сохранён для CommercialOffer. Новые рассылки используют новую версию fingerprint; уже готовые вложения нужно пересоздать.
 - Полный клиентский XLSX-прайс принадлежит `pc-order-import-export/PriceList` и
   доступен оптовым ролям в Orders и корзине. Цена одна, из текущего customer price
