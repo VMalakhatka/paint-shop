@@ -1,10 +1,10 @@
-/* Scoped product presentation; the header/footer remain with the active theme. */
+/* Product geometry; shared storefront tokens have fallbacks for standalone use. */
 body.psu-product-page {
-    --psu-product-ink: #302a25;
-    --psu-product-muted: #6e655e;
-    --psu-product-accent: #743c2e;
-    --psu-product-border: #e6dfd7;
-    --psu-product-surface: #f7f4ef;
+    --psu-product-ink: var(--psu-ink, #302a25);
+    --psu-product-muted: var(--psu-muted, #6e655e);
+    --psu-product-accent: var(--psu-accent, #743c2e);
+    --psu-product-border: var(--psu-border, #e6dfd7);
+    --psu-product-surface: var(--psu-surface, #f7f4ef);
     --psu-product-font: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 /* Adapter for the inherited page container, without changing other pages. */
@@ -158,8 +158,9 @@ body.psu-product-page {
 .psu-product .product_meta > span { display: block; margin-bottom: 6px; overflow-wrap: anywhere; }
 .psu-product .psu-product-barcode { margin-top: 10px; font-size: 13px; }
 .psu-product .psu-single-product-search { max-width: 100%; border-radius: 8px; overflow: hidden; }
-.psu-product .psu-single-product-search__field { min-height: 44px; }
-.psu-product .psu-single-product-search__button { min-height: 44px; }
+.psu-product .psu-single-product-search__field { min-height: 44px; padding: 0 12px; border: 0; background: #fff; color: var(--psu-product-ink); font: 14px/1.5 var(--psu-product-font); }
+.psu-product-main .psu-product .psu-single-product-search__button { min-height: 44px; padding: 0; border: 0; background: var(--psu-product-accent); color: #fff; }
+.psu-product-main .psu-product .psu-single-product-search__button:hover { background: #54291e; }
 .psu-product__details {
     margin-top: 36px;
     padding: clamp(20px, 3vw, 32px);

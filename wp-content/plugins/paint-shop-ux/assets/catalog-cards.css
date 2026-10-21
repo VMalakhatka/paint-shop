@@ -1,3 +1,75 @@
+/* Product/category grids are owned here, independent of the active theme. */
+/* ── База для грид-списков Woo ──────────────────────────────────────────── */
+.woocommerce ul.products::before,
+.woocommerce ul.products::after{ content:none !important; }
+
+.woocommerce ul.products{
+  list-style:none; margin:0; padding:0;
+  display:grid !important;
+  gap:20px;
+  grid-auto-flow:row;
+  grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));
+}
+@media (max-width:1024px){
+  .woocommerce ul.products{
+    grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));
+  }
+}
+@media (max-width:768px){
+  .woocommerce ul.products{
+    grid-template-columns:repeat(auto-fit, minmax(100px, 1fr));
+  }
+}
+
+/* Сброс ширин, которые могут ломать CSS Grid */
+.woocommerce ul.products li.product{
+  float:none !important;
+  width:auto !important;
+  margin:0 !important;
+  clear:none !important;
+}
+.woocommerce ul.products[class*="columns-"] li.product{
+  width:auto !important;
+  clear:none !important;
+  margin-right:0 !important;
+}
+/* Даже если Woo навесил columns-1 — всё равно держим grid */
+.woocommerce ul.products.columns-1{ display:grid !important; }
+
+/* ── Категории: центрирование содержимого ───────────────────────────────── */
+.woocommerce ul.products li.product-category a{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+}
+.woocommerce ul.products li.product-category a img{
+  width: clamp(72px, 16vw, 120px) !important;
+  height: clamp(72px, 16vw, 120px);
+  object-fit: contain;
+  object-position: center;
+  display:block;
+  margin:0 auto 8px;
+  background:#fff;
+  padding:6px;
+  box-sizing:border-box;
+}
+.woocommerce ul.products li.product-category .woocommerce-loop-category__title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3; /* старый префикс для Safari/Chrome */
+  line-clamp: 3;         /* стандартное свойство для новых браузеров */
+  overflow: hidden;
+  line-height: 1.25;
+  min-height: calc(1.25em * 3);
+  margin: 0;
+  text-align: center;
+  font-size: 14px;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+
 /* One owner for catalogue cards, including the fixed three-line title. */
 .woocommerce ul.products li.product:not(.product-category) {
     display: flex;
@@ -59,14 +131,10 @@
 .woocommerce ul.products li.product .loop-buy-row .loop-qty { flex: 1 1 40px; min-width: 0; max-width: 40px; padding: 0; }
 .woocommerce ul.products li.product .loop-buy-row .button { flex: 0 0 auto; margin: 0; padding: 0 6px !important; font-size: 14px; gap: 4px; }
 .woocommerce ul.products li.product .loop-buy-row .button::before { width: 18px; height: 18px; flex-shrink: 0; }
-.psu-catalog .site-main .inside-article {
-    padding: 13.333px;
-}
 .psu-catalog.woocommerce ul.products {
     gap: 16px 7px;
 }
 @media (max-width: 768px) {
-    .psu-catalog .site-main .inside-article { padding: 5px; }
     .psu-catalog.woocommerce ul.products { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 3.5px; }
     .woocommerce ul.products li.product .woocommerce-loop-product__title.compact-title { font-size: 13px; }
     .woocommerce ul.products li.product .psu-loop-sku { font-size: 10px; }
@@ -109,3 +177,25 @@
     }
 }
 .woocommerce-breadcrumb .breadcrumb-delimiter { margin: 0 .4em; color: #888; }
+
+.relevanssi-query-term { font-weight: 700; background: #fff3a6; }
+
+/* Compact controls retain their density while supplying every visual state. */
+.psu-storefront #content ul.products .loop-buy-row .button {
+    min-height: 28px;
+    border-color: var(--psu-border);
+    border-radius: 6px;
+    background: var(--psu-surface);
+    color: var(--psu-accent);
+    font-weight: 600;
+    text-decoration: none;
+}
+.psu-storefront #content ul.products .loop-buy-row .button:hover { background: #eae1d7; }
+.psu-storefront #content ul.products .loop-qty-btn { border-radius: 4px; background: transparent; color: var(--psu-ink); }
+.psu-storefront #content ul.products .loop-qty-btn:hover { background: var(--psu-surface); }
+.psu-storefront #content ul.products .loop-qty,
+.psu-storefront #content ul.products .loop-qty-view { border-color: var(--psu-border); border-radius: 4px; }
+.psu-storefront #content ul.products .woocommerce-loop-product__title { font-weight: 500; }
+@media (max-width: 768px) {
+    .psu-storefront #content ul.products .loop-buy-row .button { min-height: 32px; }
+}

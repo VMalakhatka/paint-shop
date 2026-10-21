@@ -27,6 +27,10 @@ body.woocommerce-cart .site-content .content-area { width: 100%; min-width: 0; }
     padding: 6px;
     box-sizing: border-box;
     font-size: 16px;
+    border: 1px solid var(--psu-border, #e6dfd7);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--psu-ink, #302a25);
 }
 .woocommerce-cart .cart-collaterals .cart_totals { width: 100%; max-width: 480px; }
 .woocommerce-cart .cart_totals h2 { font-size: 24px; }
@@ -80,6 +84,6 @@ body.woocommerce-cart .site-content .content-area { width: 100%; min-width: 0; }
         gap: 8px;
     }
     .woocommerce-cart table.cart td.actions .coupon { display: flex; flex-wrap: wrap; gap: 8px; }
-    .woocommerce-cart table.cart td.actions .coupon .input-text { width: 100%; }
-    .woocommerce-cart table.cart td.actions .coupon .button { width: 100%; }
+    .woocommerce-cart #content table.cart td.actions .coupon .input-text { width: 100%; margin: 0; }
+    .woocommerce-cart #content table.cart td.actions .coupon .button { width: 100%; margin: 0; }
 }

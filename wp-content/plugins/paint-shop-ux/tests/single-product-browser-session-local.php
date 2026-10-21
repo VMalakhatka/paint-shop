@@ -26,6 +26,10 @@ if (!$gallery_product || !$gallery_product->get_image_id() || count($gallery_pro
 }
 $data['gallery'] = ['url' => get_permalink($gallery_product->get_id()),
     'count' => 1 + count($gallery_product->get_gallery_image_ids())];
+$categories = $gallery_product->get_category_ids();
+usort($categories, static fn($a, $b) => count(get_ancestors($b, 'product_cat')) <=> count(get_ancestors($a, 'product_cat')));
+$data['category_url'] = $categories ? get_term_link($categories[0], 'product_cat') : $data['shop_url'];
+$data['quick_url'] = pc_wholesale_help_quick_order_url();
 $old = umask(0077);
 try {
     file_put_contents($file, wp_json_encode($data), LOCK_EX);

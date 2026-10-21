@@ -1173,3 +1173,11 @@ msgstr "В нижней части сайта есть ссылки на кат�
 #: pc-wholesale-help.php
 msgid "Footer links on a phone"
 msgstr "Ссылки внизу сайта на телефоне"
+
+#: pc-wholesale-help.php
+msgid "The catalogue, product page, cart and account share consistent fonts, fields and buttons. Your active account section and selected page size are highlighted. On a phone the catalogue keeps three columns and the account menu wraps. Keyboard focus has a visible outline."
+msgstr "Каталог, карточка товара, корзина и кабинет используют согласованные шрифты, поля и кнопки. Активный раздел кабинета и выбранное количество товаров на странице выделены цветом. На телефоне каталог сохраняет три колонки, а меню кабинета переносится на следующую строку. При навигации клавиатурой активный элемент имеет видимую рамку."
+
+#: pc-wholesale-help.php
+msgid "Catalogue filters on a phone"
+msgstr "Фильтры каталога на телефоне"

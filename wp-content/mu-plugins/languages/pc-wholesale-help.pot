@@ -1151,3 +1151,11 @@ msgstr ""
 #: pc-wholesale-help.php
 msgid "Footer links on a phone"
 msgstr ""
+
+#: pc-wholesale-help.php
+msgid "The catalogue, product page, cart and account share consistent fonts, fields and buttons. Your active account section and selected page size are highlighted. On a phone the catalogue keeps three columns and the account menu wraps. Keyboard focus has a visible outline."
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Catalogue filters on a phone"
+msgstr ""

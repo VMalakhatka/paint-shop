@@ -315,3 +315,22 @@ Breadcrumb delimiter — `paint-shop-ux/inc/store-presentation.php`; 24 това
 child theme. Семантика `current_time('timestamp')` сохранена переносом.
 Источники: названные modules, `tests/site-footer-local.php`, `tests/site-footer.spec.cjs`;
 приёмка/rollback/deploy — README Paint Shop UX. Пока локальный выпуск.
+
+## Граница самостоятельных стилей (1.6.0, 2026-10-21)
+
+`paint-shop-ux/inc/storefront-styles.php` определяет `.psu-storefront` по Woo
+conditionals и `[pc_quick_order]`, без page IDs. `assets/storefront.css` владеет
+content typography/tokens, полями/кнопками/focus, account navigation и GP content
+adapter; grid/category tiles — `catalog-cards.css`, geometry PDP — `single-product.css`,
+cart — `cart-layout.css`. Legacy width/sidebar child CSS исключает этот scope.
+Не добавляй новые content overrides в child theme и не снимай все стили GeneratePress
+на живом сайте: header/menu и PHP wrappers ещё используются. Не расширяй scope на
+reports/обычные страницы автоматически. Каталог сохраняет configured sidebar,
+на <=1024 он под контентом; task pages cart/checkout/account/quick-order без sidebar.
+Проверка CSS независимости удаляет theme links/inline style только в тестовом DOM:
+`tests/storefront-styles.spec.cjs`. Заполненный cart/checkout fixture работает через
+локальный prepend, гостевую сессию в памяти без persistent cart и carrier requests;
+блокировать POST и удалять временные user auth tokens после role checks.
+Deployment/rollback переносит plugin и child CSS вместе. Источник — модуль,
+styles и acceptance tests; human summary — `docs/SYSTEM_OVERVIEW.md`, пользовательская
+инструкция — `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md` и `pc-wholesale-help`.

@@ -52,9 +52,9 @@ OVH service -> physical host -> hypervisor -> Windows VM
 | Область | Владелец | Источник истины |
 |---|---|---|
 | Каталог, корзина, checkout, кабинет, HPOS-заказы | WooCommerce + собственные PHP-плагины | текущий Woo runtime и PHP-код |
-| Шапка, меню и общая оболочка | GeneratePress + `generatepress-child` | код theme и визуальная проверка |
+| Шапка, меню и PHP-оболочка | GeneratePress + `generatepress-child` | код theme и визуальная проверка |
 | Футер | `paint-shop-ux/inc/site-footer.php` | собственная разметка/CSS, adapter GP + однократный fallback `wp_footer`; юридические данные — `pc-wayforpay-compliance` |
-| Каталог и содержимое страницы товара | `paint-shop-ux` | собственные modules/templates/assets; Woo hooks сохраняют цены, склады и покупку |
+| Каталог, товар и стили покупательских страниц | `paint-shop-ux` | собственные modules/templates/assets, scoped storefront.css; Woo hooks сохраняют цены, склады и покупку |
 | Общие остатки и allocation | `paint-core` | код, Woo product/order state |
 | Полная синхронизация карточек и категорий | `lavka-total-sync` + Java `/sync/run` | код обоих владельцев и run status |
 | Остатки, названия и глобальные группы складов | `lavka-sync` | стабильные location term ID/slug, `lavka_folio_warehouses`, Folio warehouse ID и Woo stock |
@@ -76,7 +76,12 @@ OVH service -> physical host -> hypervisor -> Windows VM
 существующий MU `psu-force-per-page.php`, установка даты создания заказа при classic
 checkout — `paint-core/inc/checkout-created-date.php`. Семантика даты сохранена.
 Новый футер заменяет вывод GeneratePress, сохраняет юридические ссылки и активные
-footer widgets; шапка и общая оболочка ещё используют тему. Локальная приёмка
+footer widgets; шапка и PHP-оболочка ещё используют тему. В 1.6.0 базовые стили
+каталога, товара, корзины, checkout, кабинета и списка товаров перенесены в
+`paint-shop-ux/assets/storefront.css` и component CSS. Контекст определяется Woo
+conditionals/shortcode; отчёты и обычные страницы остаются у своих владельцев.
+Контейнеры, сетка, типографика и controls проверяются локально с удалённым CSS темы;
+это не проверка переключения PHP-темы. Локальная приёмка
 и откат описаны в [Paint Shop UX](../wp-content/plugins/paint-shop-ux/README.md).
 Публикация этого этапа ожидает согласованного deploy и production-проверки.
 
