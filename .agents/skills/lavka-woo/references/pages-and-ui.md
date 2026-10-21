@@ -368,3 +368,18 @@ Paint Shop UX, Paint Core, child CSS и справку/переводы/изоб
 инструкция — `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md` и `pc-wholesale-help`.
 На 2026-10-21 локальная приёмка пройдена: 518 PHP-проверок и 25 browser-сценариев;
 production-публикация ожидает deploy.
+
+### Медиа в описании категории (1.7.1, 2026-10-21)
+
+При расхождении картинки между редактором категории и витриной сначала сравнивай
+сохранённый `product_cat.description` с текущим `wp_get_attachment_image_src`
+по его `wp-image-ID`/`size-*`. Media Cloud фильтрует `the_editor_content`, а native
+Woo archive — отдельный `woocommerce_taxonomy_archive_description_raw`: редактор
+может показывать исправный файл при старом URL в БД. Не путать описание с
+`thumbnail_id` категории и fallback плиток; не перезагружать/пересвязывать товары
+ради такого симптома. Узкий adapter PSU `inc/category-description-media.php`
+разрешает адрес существующего attachment на выводе с проверкой host/имени файла;
+не вызывает editor pipeline, HTTP или DB writes. Источники: adapter, его local test,
+Media Cloud StorageContentHooks и read-only сверка production 2026-10-21.
+Приёмка/ограничения — README Paint Shop UX, действия менеджера —
+`docs/MEDIA_MANAGER_GUIDE_UK.md`. Production исправление ожидает deploy.

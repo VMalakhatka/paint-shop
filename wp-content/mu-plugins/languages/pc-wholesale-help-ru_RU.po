@@ -1193,3 +1193,7 @@ msgstr "Повторно нажмите «Меню» или клавишу Escap
 #: pc-wholesale-help.php
 msgid "Header, menu and warehouse controls on a phone"
 msgstr "Шапка, меню и выбор склада на телефоне"
+
+#: pc-wholesale-help.php
+msgid "An image in a category description illustrates the section. Open a product card to view that product's photos."
+msgstr "Изображение в описании категории иллюстрирует раздел. Фотографии конкретного товара смотрите в его карточке."

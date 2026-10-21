@@ -320,6 +320,7 @@ function pc_wholesale_help_render_endpoint(): void {
 
         <section class="pc-help-section" id="katalog">
             <div class="pc-help-section__heading"><span>02</span><div><h2><?php esc_html_e('Order from catalogue cards', 'pc-wholesale-help'); ?></h2><p><?php esc_html_e('Best when you want to browse photos, categories and product variants.', 'pc-wholesale-help'); ?></p></div></div>
+            <p><?php esc_html_e('An image in a category description illustrates the section. Open a product card to view that product\'s photos.', 'pc-wholesale-help'); ?></p>
             <div class="pc-help-note"><strong><?php esc_html_e('Fewer category transitions.', 'pc-wholesale-help'); ?></strong> <?php esc_html_e('Starting with the second category level, all products from that branch appear below the child category tiles, including products from deeper subcategories.', 'pc-wholesale-help'); ?></div>
             <p><?php esc_html_e('Page numbers above and below the products show the current and total pages. Your category and filters stay selected when changing pages.', 'pc-wholesale-help'); ?></p>
             <p><?php esc_html_e('The catalogue, product page, cart and account share consistent fonts, fields and buttons. Your active account section and selected page size are highlighted. On a phone the catalogue keeps three columns and the account menu wraps. Keyboard focus has a visible outline.', 'pc-wholesale-help'); ?></p>
