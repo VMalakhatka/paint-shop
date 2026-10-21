@@ -11,7 +11,7 @@
     const money = value => { if (value == null) return '—'; const m = String(value).match(/^(-?)(\d+)(?:\.(\d+))?$/); return m ? m[1]+m[2].replace(/\B(?=(\d{3})+(?!\d))/g,' ')+','+(m[3]||'').padEnd(2,'0')+' '+(reportLabels.uah || 'UAH') : text(value); };
     const moneyKeys = ['baseGrossProfit','manualGrossAdjustments','grossProfit','operatingExpenses','profit','openingAccountingValue','closingAccountingValue','accountingValueChange'];
     let saved = null, generation = 0, reading = false, running = false, exporting = false, stop = false, dirty = true;
-    let requestNote = '', lockedFields = [];
+    let requestNote = '', lockedFields = [], comparison = null;
     const formatTime = value => { if(value==null)return '—'; const n=Number(value), d=new Date(Number.isFinite(n)?(n<100000000000?n*1000:n):value); return Number.isNaN(d.getTime())?text(value):new Intl.DateTimeFormat('uk-UA',{timeZone:'Europe/Kyiv',dateStyle:'short',timeStyle:'short'}).format(d); };
     const activeStates = new Set(['COMPLETED','PROVISIONAL']);
     const terminalLabel = s => ({COMPLETED:t('completed'),RUNNING:t('runningStatus'),FAILED:t('failedStatus'),PROVISIONAL:t('draft'),MISSING:t('missing')})[s] || s;
@@ -26,6 +26,7 @@
     function controls() {
         const busy = reading || running || exporting;
         window.LavkaProfitTaxSettings?.setReportBusy(busy);
+        comparison?.lock(busy); $('compare-range').disabled=busy||dirty||!saved?.months.some(m=>m.revisionId);
         $('view').disabled=busy; $('calculate').disabled=busy; $('stop').disabled=!running || stop;
         $('export').disabled=busy || dirty || !saved || !saved.months.some(m=>m.revisionId);
         root.querySelectorAll('tbody button').forEach(b=>{b.disabled=busy;});
@@ -61,6 +62,8 @@
             const actions=node('div');
             if(m.revisionId) actions.append(button(t('open'),()=>openMonth(m.month,m.revisionId)));
             actions.append(button(t('revisions'),()=>loadRevisions(m.month)));
+            if(m.revisionId)actions.append(button(t('compareVersion'),()=>comparison.add([{month:m.month,revisionId:String(m.revisionId)}])));
+            if(m.latestRevisionId && String(m.latestRevisionId)!==String(m.revisionId) && activeStates.has(m.latestStatus))actions.append(button(t('compareLatest')+' #'+m.latestRevisionId,()=>comparison.add([{month:m.month,revisionId:String(m.latestRevisionId)}])));
             const city=c=>(m.cities||[]).find(row=>row.city===c);
             return [m.month,terminalLabel(m.status),m.revisionId,text(m.latestRevisionId)+' / '+terminalLabel(m.latestStatus),m.ruleVersion,formatTime(m.calculatedAt),money(city('KYIV')?.profit),money(city('ODESA')?.profit),actions];
         });
@@ -93,7 +96,7 @@
             if(data.month!==month || String(data.revisionId)!==String(revisionId))throw new Error(t('invalid'));
             $('selected').textContent=`${t('readonly')}: ${month} · ${t('revision')}: ${revisionId} · ${terminalLabel(data.status)} · ${t('published')}: ${text(data.publishedRevisionId)}`;
             if (!data.report) {viewer.clear();setError([terminalLabel(data.status),data.errorCode,data.requestId].filter(Boolean).join(' · '));return;}
-            viewer.showSaved(data);
+            viewer.showSaved(data);comparison?.observe(data);
         } catch(e){if(token===generation)setError(e.message || t('error'));}
         finally{reading=false;controls();}
     }
@@ -106,10 +109,20 @@
             const box=$('revisions');box.hidden=false;
             if(!before)box.replaceChildren(node('h3',t('revisions')+': '+month));
             box.querySelector('[data-more]')?.remove();
-            box.append(table([t('revision'),t('status'),t('savedAt'),t('requestId'),t('open')],data.revisions.map(r=>[r.revisionId,terminalLabel(r.status),r.completedAt||r.createdAt,r.requestId,button(t('open'),()=>openMonth(month,r.revisionId))])));
+            box.append(table([t('revision'),t('status'),t('savedAt'),t('requestId'),t('open')],data.revisions.map(r=>[r.revisionId,terminalLabel(r.status),r.completedAt||r.createdAt,r.requestId,revisionActions(month,r)])));
             if(data.hasMore && data.nextBeforeRevisionId){const b=button(t('more'),()=>loadRevisions(month,data.nextBeforeRevisionId));b.dataset.more='1';box.append(b);}
         }catch(e){if(token===generation)setError(e.message || t('error'));}
         finally{reading=false;controls();}
+    }
+    function revisionActions(month,r) {
+        const box=node('div');box.append(button(t('open'),()=>openMonth(month,r.revisionId)));
+        if(activeStates.has(r.status))box.append(button(t('compareVersion'),()=>comparison.add([{month,revisionId:String(r.revisionId)}])));
+        return box;
+    }
+    async function comparisonRead(task, preserveError=false) {
+        if(reading||running||exporting)return;
+        reading=true;controls();if(!preserveError)setError('');
+        try{await task();}catch(e){setError(e.message||t('error'));}finally{reading=false;controls();}
     }
     function lockInputs(lock) {
         if(lock){lockedFields=[...document.querySelectorAll('#lavr-profit-history input,#lavr-profit-month,#lavr-profit-manual input,#lavr-profit-manual select')].map(n=>[n,n.disabled]);lockedFields.forEach(([n])=>{n.disabled=true;});}
@@ -128,7 +141,7 @@
                 $('state').textContent=`${t('running')}: ${month} (${selectedMonths.indexOf(month)+1}/${selectedMonths.length}) · ${requestId}`;
                 const data=await request('calculate',{...params,month,requestId,...(taxSettingsVersion===null?{}:{taxSettingsVersion})});
                 if(data.month!==month || data.requestId!==requestId || !activeStates.has(data.status) || !data.report || !data.revisionId)throw new Error(t('uncertain')+' '+text(data.status));
-                remember(null);viewer.showSaved(data);lockedFields.forEach(([n])=>{n.disabled=true;});controls();
+                remember(null);viewer.showSaved(data);comparison?.observe(data);lockedFields.forEach(([n])=>{n.disabled=true;});controls();
                 $('selected').textContent=`${t('readonly')}: ${month} · ${t('revision')}: ${data.revisionId} · ${terminalLabel(data.status)} · ${t('published')}: ${text(data.publishedRevisionId)}`;
             }
         }catch(e){failed=true;setError((e.message||t('error'))+'\n'+requestNote);}
@@ -162,6 +175,8 @@
         }catch(e){setError(e.message||t('error'));}finally{exporting=false;controls();}
     }
     window.LavkaProfitHistory={calculateMonth(params){try{months(params.month,params.month);return calculate([params.month],params);}catch(e){setError(e.message);return false;}}};
+    comparison=window.LavkaProfitComparison.mount({target:document.getElementById('lavr-profit-comparison'),labels,reportLabels,request,runRead:comparisonRead,storageKey:cfg.comparisonStorageKey||'lavkaProfitComparison:test'});
+    $('compare-range').addEventListener('click',()=>{if(saved&&!dirty)comparison.add(saved.months.filter(m=>m.revisionId).map(m=>({month:m.month,revisionId:String(m.revisionId)})));});
     const initial=document.getElementById('lavr-profit-month').value;$('from').value=initial;$('to').value=initial;
     $('view').addEventListener('click',()=>loadRange());
     $('calculate').addEventListener('click',()=>{try{const r=currentRange();calculate(months(r.fromMonth,r.toMonth),viewer.params());}catch(e){setError(e.message);}});
@@ -170,5 +185,5 @@
     const l=labels; document.getElementById('lavr-profit-calculate').textContent=l.single;document.getElementById('lavr-profit-recalculate').textContent=l.single;document.getElementById('lavr-profit-load-audit').textContent=l.savedAudit;
     const hint=document.querySelector('#lavr-profit-result > p.description');if(hint)hint.textContent=l.savedExportHelp;
     try{const pending=JSON.parse(sessionStorage.getItem('lavkaProfitSaveAttempt'));if(pending)remember(pending);}catch(_){}
-    loadRange();
+    loadRange().then(()=>comparisonRead(()=>comparison.restore(),true));
 })();

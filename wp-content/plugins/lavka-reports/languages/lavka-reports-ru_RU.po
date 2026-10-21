@@ -2142,3 +2142,115 @@ msgstr "Валовая прибыль с МК"
 #: inc/class-profit-report.php
 msgid "Net profit"
 msgstr "Чистая прибыль"
+
+#: inc/class-profit-history.php
+msgid "Monthly comparison"
+msgstr "Сравнение месяцев"
+
+#: inc/class-profit-history.php
+msgid "Add displayed revisions to comparison"
+msgstr "Добавить показанные версии в сравнение"
+
+#: inc/class-profit-history.php
+msgid "Add this revision to comparison"
+msgstr "Добавить эту версию в сравнение"
+
+#: inc/class-profit-history.php
+msgid "Compare latest calculation"
+msgstr "Сравнить последний расчёт"
+
+#: inc/class-profit-history.php
+msgid "Add months from any saved range or revision history. One revision per month; up to 24 months. Remove months you do not need. Viewing does not read Folio."
+msgstr "Добавляйте месяцы из любого сохранённого диапазона или истории версий. Одна версия на месяц; до 24 месяцев. Удалите ненужные месяцы. Просмотр не обращается к ФОЛИО."
+
+#: inc/class-profit-history.php
+msgid "Each month has equal weight: average = sum of values / number of selected months. Percentages in this table use its displayed months."
+msgstr "У всех месяцев одинаковый вес: среднее = сумма значений / количество выбранных месяцев. Проценты в этой таблице рассчитаны по показанным месяцам."
+
+#: inc/class-profit-history.php
+msgid "The baseline stays fixed until you replace or clear it. New calculations and opened revisions are compared against it without being added to it. The selection is remembered for your account in this browser."
+msgstr "База остаётся неизменной, пока вы её не замените или не очистите. Новые расчёты и открытые версии сравниваются с ней, но не добавляются в неё. Выбор запоминается для вашей учётной записи в этом браузере."
+
+#: inc/class-profit-history.php
+msgid "Add saved months using the buttons above."
+msgstr "Добавьте сохранённые месяцы кнопками выше."
+
+#: inc/class-profit-history.php
+msgid "Use displayed months as the fixed baseline"
+msgstr "Зафиксировать показанные месяцы как базу"
+
+#: inc/class-profit-history.php
+msgid "Clear baseline"
+msgstr "Очистить базу"
+
+#: inc/class-profit-history.php
+msgid "No baseline fixed yet."
+msgstr "База ещё не зафиксирована."
+
+#: inc/class-profit-history.php
+msgid "Fixed comparison baseline"
+msgstr "Зафиксированная база сравнения"
+
+#: inc/class-profit-history.php
+msgid "Baseline average, UAH"
+msgstr "Среднее базы, грн"
+
+#: inc/class-profit-history.php
+msgid "Export comparison to Excel"
+msgstr "Скачать сравнение в Excel"
+
+#: inc/class-profit-history.php
+msgid "Review comparability: the selection contains preliminary results or different rules, parameters or tax settings. The comparison does not validate these reports."
+msgstr "Проверьте сопоставимость: выбор содержит предварительные результаты либо разные правила, параметры или настройки налогов. Сравнение не подтверждает правильность этих отчётов."
+
+#: inc/class-profit-history.php
+msgid "Missing is not zero. An average and percentage are unavailable unless every selected month has a value for that row. Coverage shows available months / selected months."
+msgstr "Отсутствующее значение — не ноль. Среднее и процент недоступны, если хотя бы в одном выбранном месяце нет значения строки. Покрытие: месяцы со значением / выбранные месяцы."
+
+#: inc/class-profit-history.php
+msgid "Deviation = (value - average) / absolute average × 100%. With a zero average, only zero against zero is 0%; otherwise the percentage is unavailable. Plus/minus means higher/lower, not better/worse."
+msgstr "Отклонение = (значение − среднее) / модуль среднего × 100%. При нулевом среднем только ноль против нуля даёт 0%; иначе процент недоступен. Плюс/минус означает больше/меньше, а не лучше/хуже."
+
+#: inc/class-profit-history.php
+msgid "Browser storage is unavailable. This selection will not survive closing the page."
+msgstr "Хранилище браузера недоступно. Выбор не сохранится после закрытия страницы."
+
+#: inc/class-profit-history.php
+msgid "Select up to 24 distinct months with valid saved revisions."
+msgstr "Выберите до 24 разных месяцев с действительными сохранёнными версиями."
+
+#: inc/class-profit-history.php
+msgid "Results against the fixed baseline"
+msgstr "Результаты относительно зафиксированной базы"
+
+#: inc/class-profit-history.php
+msgid "Average, UAH"
+msgstr "Среднее, грн"
+
+#: inc/class-profit-history.php
+msgid "Month coverage"
+msgstr "Покрытие месяцев"
+
+#: inc/class-profit-history.php
+msgid "Compared value, UAH"
+msgstr "Сравниваемое значение, грн"
+
+#: inc/class-profit-history.php
+msgid "Deviation, UAH"
+msgstr "Отклонение, грн"
+
+#: inc/class-profit-history.php
+msgid "Deviation, %"
+msgstr "Отклонение, %"
+
+#: inc/class-profit-history.php
+msgid "Remove month"
+msgstr "Удалить месяц"
+
+#: inc/class-profit-history.php
+msgid "Report item"
+msgstr "Статья отчёта"
+
+#: inc/class-profit-history.php
+msgid "Value, UAH"
+msgstr "Значение, грн"

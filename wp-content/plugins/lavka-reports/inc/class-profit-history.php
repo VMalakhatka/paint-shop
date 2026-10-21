@@ -7,8 +7,9 @@ class Lavka_Reports_Profit_History {
     const NONCE = 'lavr_profit_history_nonce';
     public function __construct() { add_action('wp_ajax_' . self::ACTION, [$this, 'ajax']); }
     public static function assets() {
-        wp_enqueue_script('lavr-profit-history', LAVR_URL . 'profit-history.js', ['lavr-profit-report'], LAVR_VER, true);
-        wp_localize_script('lavr-profit-history', 'LavkaProfitHistoryConfig', ['ajaxUrl'=>admin_url('admin-ajax.php'),'action'=>self::ACTION,'nonce'=>wp_create_nonce(self::NONCE),'i18n'=>self::translations()]);
+        wp_enqueue_script('lavr-profit-comparison', LAVR_URL . 'profit-comparison.js', ['lavr-profit-report'], LAVR_VER, true);
+        wp_enqueue_script('lavr-profit-history', LAVR_URL . 'profit-history.js', ['lavr-profit-report', 'lavr-profit-comparison'], LAVR_VER, true);
+        wp_localize_script('lavr-profit-history', 'LavkaProfitHistoryConfig', ['ajaxUrl'=>admin_url('admin-ajax.php'),'action'=>self::ACTION,'nonce'=>wp_create_nonce(self::NONCE),'comparisonStorageKey'=>'lavkaProfitComparison:' . get_current_user_id() . ':' . get_current_blog_id(),'i18n'=>self::translations()]);
     }
     public static function render_toolbar() {
         $t = self::translations(); ?>
@@ -26,9 +27,11 @@ class Lavka_Reports_Profit_History {
           <p><?php echo esc_html($t['monthlyHelp']); ?></p>
           <p id="lph-state" role="status" aria-live="polite"></p><p id="lph-error" role="alert" hidden></p>
           <div id="lph-results" hidden><p id="lph-coverage"></p><div id="lph-months" class="lavr-profit-table-wrap"></div>
+          <button id="lph-compare-range" type="button" class="button"><?php echo esc_html($t['compareRange']); ?></button>
           <h3><?php echo esc_html($t['range']); ?></h3><p><?php echo esc_html($t['inventoryHelp']); ?></p><div id="lph-totals"></div></div>
           <div id="lph-revisions" hidden></div>
         </section>
+        <section id="lavr-profit-comparison" class="lavr-profit-summary"></section>
         <h2><?php echo esc_html($t['detail']); ?></h2><p id="lph-selected"></p>
         <?php
     }
@@ -100,6 +103,35 @@ class Lavka_Reports_Profit_History {
     private function bad() { wp_send_json_error(['message'=>__('Invalid saved profit report request.', 'lavka-reports')],400); }
 
     public static function translations() { return [
+        'comparison'=>__('Monthly comparison','lavka-reports'),
+        'compareRange'=>__('Add displayed revisions to comparison','lavka-reports'),
+        'compareVersion'=>__('Add this revision to comparison','lavka-reports'),
+        'compareLatest'=>__('Compare latest calculation','lavka-reports'),
+        'comparisonHelp'=>__('Add months from any saved range or revision history. One revision per month; up to 24 months. Remove months you do not need. Viewing does not read Folio.','lavka-reports'),
+        'meanHelp'=>__('Each month has equal weight: average = sum of values / number of selected months. Percentages in this table use its displayed months.','lavka-reports'),
+        'baselineHelp'=>__('The baseline stays fixed until you replace or clear it. New calculations and opened revisions are compared against it without being added to it. The selection is remembered for your account in this browser.','lavka-reports'),
+        'chooseComparison'=>__('Add saved months using the buttons above.','lavka-reports'),
+        'freezeBaseline'=>__('Use displayed months as the fixed baseline','lavka-reports'),
+        'clearBaseline'=>__('Clear baseline','lavka-reports'),
+        'noBaseline'=>__('No baseline fixed yet.','lavka-reports'),
+        'baseline'=>__('Fixed comparison baseline','lavka-reports'),
+        'baselineMean'=>__('Baseline average, UAH','lavka-reports'),
+        'comparisonExport'=>__('Export comparison to Excel','lavka-reports'),
+        'comparisonWarning'=>__('Review comparability: the selection contains preliminary results or different rules, parameters or tax settings. The comparison does not validate these reports.','lavka-reports'),
+        'missingHelp'=>__('Missing is not zero. An average and percentage are unavailable unless every selected month has a value for that row. Coverage shows available months / selected months.','lavka-reports'),
+        'percentHelp'=>__('Deviation = (value - average) / absolute average × 100%. With a zero average, only zero against zero is 0%; otherwise the percentage is unavailable. Plus/minus means higher/lower, not better/worse.','lavka-reports'),
+        'storageWarning'=>__('Browser storage is unavailable. This selection will not survive closing the page.','lavka-reports'),
+        'comparisonLimit'=>__('Select up to 24 distinct months with valid saved revisions.','lavka-reports'),
+        'deviations'=>__('Results against the fixed baseline','lavka-reports'),
+        'mean'=>__('Average, UAH','lavka-reports'),
+        'coverage'=>__('Month coverage','lavka-reports'),
+        'newValue'=>__('Compared value, UAH','lavka-reports'),
+        'delta'=>__('Deviation, UAH','lavka-reports'),
+        'percent'=>__('Deviation, %','lavka-reports'),
+        'remove'=>__('Remove month','lavka-reports'),
+        'city'=>__('City','lavka-reports'),
+        'article'=>__('Report item','lavka-reports'),
+        'amount'=>__('Value, UAH','lavka-reports'),
         'failedStatus'=>__('Failed attempt','lavka-reports'),
         'runningStatus'=>__('Unfinished attempt','lavka-reports'),
         'calculatedAt'=>__('Calculation time','lavka-reports'),

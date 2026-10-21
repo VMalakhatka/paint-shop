@@ -533,3 +533,11 @@
 .lavr-profit-template-table .lavr-profit-number { text-align:right; white-space:nowrap; }
 #lavr-profit-manager-template details { margin:16px 0; }
 #lavr-profit-manager-template summary { cursor:pointer; font-size:17px; font-weight:600; margin-bottom:12px; }
+
+/* Comparison amounts precede the wide monthly columns; scroll stays inside each table. */
+#lavr-profit-comparison .lavr-profit-table-wrap { max-width:100%; }
+#lavr-profit-comparison th,#lavr-profit-comparison td { padding:9px; min-width:130px; }
+#lavr-profit-comparison th:nth-child(2),#lavr-profit-comparison td:nth-child(2) { min-width:220px; }
+#lavr-profit-comparison ul { list-style:disc; padding-left:20px; }
+#lavr-profit-comparison li { margin-bottom:8px; }
+#lpc-baseline { padding:12px; border-left:4px solid #2271b1; background:#f0f6fc; }

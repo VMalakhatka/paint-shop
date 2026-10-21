@@ -14,6 +14,7 @@ async function setup(mode='normal'){
  await page.route('https://profit.test/**',async route=>{
   if(route.request().url().endsWith('/history')){
    const q=Object.fromEntries(new URLSearchParams(route.request().postData()));requests.push(q);let body;
+   if(mode==='rangeError' && q.operation==='range')return route.fulfill({contentType:'application/json',body:JSON.stringify({success:false,data:{message:'Synthetic saved range unavailable'}})});
    if(q.operation==='range')body=list(q.fromMonth,q.toMonth,mode==='missing');
    else if(q.operation==='month'){body=wrapper(q.month,Number(q.revisionId));if(mode==='failedRevision')body={...body,ok:false,status:'FAILED',report:null,errorCode:'SOURCE_FAILED'};}
    else if(q.operation==='revisions')body={ok:true,month:q.month,revisions:[{...wrapper(q.month,9),status:'PROVISIONAL',report:null}],hasMore:false};
@@ -23,6 +24,8 @@ async function setup(mode='normal'){
     body=wrapper(q.month,9);body.requestId=q.requestId;
     if(q.odesaAdditionalSalary!=null){body.report.inputs.odesaAdditionalSalary=q.odesaAdditionalSalary;body.report.inputs.odesaAdditionalSalarySource='REQUEST_OVERRIDE';}
    }
+   if(mode==='comparison' && q.operation==='range')body.months.forEach(m=>{m.latestRevisionId=45;m.latestStatus='PROVISIONAL';});
+   if(mode==='comparison' && q.operation==='calculate')body.report.cities.forEach(c=>{c.profit='120';});
    if(mode==='slowOpen' && q.operation==='month')await new Promise(r=>setTimeout(r,500));
    if(mode==='java' && q.operation==='month')body=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/profit-saved-java.json'),'utf8'));
    if(mode==='headcount' && ['month','calculate'].includes(q.operation))body={...body,report:{...JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/profit-headcount-java.json'),'utf8')),month:q.month}};
@@ -33,7 +36,7 @@ async function setup(mode='normal'){
   return route.fulfill({contentType:'text/html',body:html});
  });
  await page.goto('https://profit.test/');await page.addStyleTag({content:'body{font-family:Arial;margin:20px}*{box-sizing:border-box}button{padding:7px}'});await page.addStyleTag({path:path.join(base,'profit-report.css')});
- for(const file of ['profit-xlsx.js','profit-manager.js','profit-report.js','profit-history.js'])await page.addScriptTag({path:path.join(base,file)});
+ for(const file of ['profit-xlsx.js','profit-manager.js','profit-report.js','profit-comparison.js','profit-history.js'])await page.addScriptTag({path:path.join(base,file)});
  await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);
  return {page,requests,errors};
 }
@@ -119,8 +122,10 @@ test('current Java template renders mirrored city sheets and exports both master
  assert.equal(await tables.nth(1).locator('tr').nth(13).locator('th').nth(7).innerText(),'=SUM(H4:H13)');
  assert.equal(await tables.first().locator('tr').nth(29).locator('th').nth(7).innerText(),'=SUM(H31:H35)');
  assert.equal(await tables.nth(1).locator('tr').nth(22).locator('th').nth(7).innerText(),'=SUM(H24:H28)');
+ await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{throw new Error('Synthetic clipboard denied');}}}));
  await page.locator('#lavr-profit-copy-KYIV').click();
- const copyTools=page.locator('.lavr-profit-template-tools').first();
+ await page.waitForFunction(()=>/Copied|Copy the selected values/.test(document.querySelector('#lavr-profit-manager-template .lavr-profit-template-tools [role=status]').textContent));
+ const copyTools=page.locator('#lavr-profit-manager-template .lavr-profit-template-tools').first();
  assert.match(await copyTools.innerText(),/Copied|Copy the selected values/);
  for(const city of ['KYIV','ODESA']){
   const table=tables.nth(city==='KYIV'?0:1);const text=await table.innerText();
@@ -141,5 +146,47 @@ test('current Java template renders mirrored city sheets and exports both master
  await page.setViewportSize({width:390,height:844});await page.screenshot({path:path.join(out,'manager-current-mobile.png'),fullPage:false});
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true);
  assert.doesNotMatch(await page.locator('#lavr-profit-warnings').innerText(),/CLIENT_SECTION_UNAVAILABLE/);
+ assert.deepEqual(errors,[]);await page.close();
+});
+
+
+test('arbitrary saved months, explicit latest revision, fixed baseline and new calculation deviations',async()=>{
+ const {page,requests,errors}=await setup('comparison');await range(page);
+ await page.locator('#lph-compare-range').click();await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);
+ assert.equal(await page.locator('#lavr-profit-comparison li').count(),2);
+ await page.locator('#lpc-freeze').click();
+ const pinned=await page.locator('#lpc-baseline').innerText();assert.match(pinned,/2025-07 \/ #1/);assert.match(pinned,/2025-08 \/ #2/);
+ await page.locator('#lavr-profit-comparison li button').last().click();
+ assert.equal(await page.locator('#lpc-baseline').innerText(),pinned);
+ await page.locator('#lph-from').fill('2025-10');await page.locator('#lph-to').fill('2025-10');await page.locator('#lph-view').click();await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);
+ await page.getByRole('button',{name:'Compare latest calculation #45',exact:true}).click();await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);
+ assert.match(await page.locator('#lavr-profit-comparison ul').innerText(),/2025-10 \/ #45/);
+ assert.equal(await page.locator('#lavr-profit-comparison li').count(),2);
+ assert.equal(await page.locator('#lpc-baseline').innerText(),pinned);
+ assert(requests.every(r=>['range','month'].includes(r.operation)));
+ // A successful new calculation compares against the pinned July/August snapshots.
+ await page.locator('#lph-calculate').click();await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);
+ assert.match(await page.locator('#lpc-deviations').innerText(),/\+50,00%/);
+ assert.equal(await page.locator('#lpc-baseline').innerText(),pinned);
+ const stored=await page.evaluate(()=>JSON.parse(localStorage.getItem('lavkaProfitComparison:test')));
+ assert.deepEqual(stored.baseline,[{month:'2025-07',revisionId:'1'},{month:'2025-08',revisionId:'2'}]);
+ const d=page.waitForEvent('download');await page.locator('#lpc-export').click();await(await d).saveAs(path.join(out,'comparison.xlsx'));
+ await page.locator('#lavr-profit-comparison').screenshot({path:path.join(out,'comparison-desktop.png')});
+ await page.setViewportSize({width:390,height:844});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+ await page.locator('#lavr-profit-comparison').screenshot({path:path.join(out,'comparison-mobile.png')});
+ // Reload restores explicit IDs without calculating or silently selecting published revisions.
+ const start=requests.length;await page.reload();
+ for(const file of ['profit-xlsx.js','profit-manager.js','profit-report.js','profit-comparison.js','profit-history.js'])await page.addScriptTag({path:path.join(base,file)});
+ await page.waitForFunction(()=>document.querySelectorAll('#lavr-profit-comparison li').length===2&&!document.getElementById('lph-view').disabled);
+ assert.equal(await page.locator('#lpc-baseline').innerText(),pinned);
+ assert(requests.slice(start).every(r=>['range','month'].includes(r.operation)));
+ assert.deepEqual(errors,[]);await page.close();
+});
+
+
+test('baseline restore does not hide a saved-range loading error',async()=>{
+ const {page,errors}=await setup('rangeError');
+ assert.equal(await page.locator('#lph-error').isVisible(),true);
+ assert.match(await page.locator('#lph-error').innerText(),/Synthetic saved range unavailable/);
  assert.deepEqual(errors,[]);await page.close();
 });
