@@ -48,8 +48,20 @@
     }
     const reference=w=>({month:w.month,revisionId:String(w.revisionId)});
     const validRefs=refs=>Array.isArray(refs)&&refs.length<=24&&new Set(refs.map(r=>r.month)).size===refs.length&&refs.every(r=>/^\d{4}-(0[1-9]|1[0-2])$/.test(r.month)&&/^[1-9]\d{0,14}$/.test(String(r.revisionId)));
+    function previousMonths(month) {
+        const [year,m]=month.split('-').map(Number),index=year*12+m-1;
+        return [4,3,2,1].map(offset=>{const n=index-offset;return `${String(Math.floor(n/12)).padStart(4,'0')}-${String(n%12+1).padStart(2,'0')}`;}).filter(m=>/^(?!0000)\d{4}-(0[1-9]|1[0-2])$/.test(m));
+    }
+    function rowBaseline(id,month,history,manual,labels={}) {
+        const months=previousMonths(month),values=months.map(m=>history.find(w=>w.month===m)).filter(Boolean)
+            .map(w=>rows(w.report,labels).get(id)?.value??null);
+        const mean=average(values);mean.complete=mean.count>0;mean.total=4;
+        if(Object.hasOwn(manual,id)&&decimal(manual[id])!==null)
+            return {mean:average([manual[id]]),source:'manual',count:mean.count,months};
+        return {mean,source:mean.complete?'automatic':'required',count:mean.count,months};
+    }
     function mount({target,labels,reportLabels,request,runRead,storageKey}) {
-        let selected=[],baseline=[],results=[],locked=false,storageFailed=false;
+        let selected=[],results=[],manual={},windows={},locked=false,storageFailed=false,error='';
         const t=k=>labels[k]||reportLabels[k]||k;
         const el=(tag,text)=>{const n=document.createElement(tag);if(text!=null)n.textContent=text;return n;};
         const refs=list=>list.map(reference);
@@ -59,44 +71,71 @@
         const amount=v=>{const n=decimal(v);return n===null?'—':rounded(n,SCALE).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,' ');};
         const percent=v=>v==null?'—':(Number(v)>0?'+':'')+amount(v)+'%';
         const city=c=>c==='KYIV'?t('kyiv'):c==='ODESA'?t('odesa'):c;
-        function persist(){try{localStorage.setItem(storageKey,JSON.stringify({version:1,selected:refs(selected),baseline:refs(baseline)}));storageFailed=false;}catch(_){storageFailed=true;}}
+        const allTargets=()=>[...new Map([...selected,...results].map(w=>[w.month,w])).values()];
+        function persist(){try{
+            const savedWindows=Object.fromEntries(allTargets().filter(w=>windows[w.month]).map(w=>[w.month,refs(windows[w.month])]));
+            localStorage.setItem(storageKey,JSON.stringify({version:2,selected:refs(selected),manual,windows:savedWindows}));storageFailed=false;
+        }catch(_){storageFailed=true;}}
         function action(label,fn,id){const b=el('button',t(label));b.type='button';b.className='button';b.disabled=locked;b.onclick=fn;if(id)b.id=id;return b;}
-        function grid(headers,body){const wrap=el('div');wrap.className='lavr-profit-table-wrap';const table=el('table');table.className='widefat striped';const thead=el('thead'),h=el('tr');headers.forEach(v=>{const th=el('th',v);th.scope='col';h.append(th);});thead.append(h);table.append(thead);const tbody=el('tbody');body.forEach(row=>{const tr=el('tr');row.forEach(v=>tr.append(el('td',v)));tbody.append(tr);});table.append(tbody);wrap.append(table);return wrap;}
-        function model(list){const maps=list.map(w=>rows(w.report,reportLabels)),all=new Map();maps.forEach(map=>map.forEach((row,id)=>all.set(id,row)));return [...all.values()].map(row=>{const values=maps.map(map=>map.get(row.id)?.value??null);return {...row,values,mean:average(values)};});}
-        function comparisonRows(){return model(selected).map(r=>[city(r.city),r.label,r.mean.complete?amount(rounded(r.mean.sum,SCALE*BigInt(r.mean.count))):'—',`${r.mean.count}/${r.mean.total}`,...r.values.flatMap(v=>[amount(v),percent(compare(v,r.mean).percent)])]);}
-        function comparisonHeaders(){return [t('city'),t('article'),t('mean'),t('coverage'),...selected.flatMap(w=>[stamp(w)+' · '+t('amount'),stamp(w)+' · %'])];}
-        function resultRows(){
-            const base=model(baseline),map=new Map(base.map(r=>[r.id,r]));const output=[];
-            results.forEach(w=>{const current=rows(w.report,reportLabels),all=new Map(map);current.forEach((r,id)=>{if(!all.has(id))all.set(id,{...r,mean:average(baseline.map(()=>null))});});
-                all.forEach(r=>{const v=current.get(r.id)?.value??null,c=compare(v,r.mean);output.push([stamp(w),city(r.city),r.label,c.average==null?'—':amount(c.average),amount(v),amount(c.delta),percent(c.percent),`${r.mean.count}/${r.mean.total}`]);});});return output;
+        function grid(headers,body,layout){const wrap=el('div');wrap.className='lavr-profit-table-wrap';const table=el('table');table.className='widefat striped';const thead=el('thead'),h=el('tr');headers.forEach(v=>{const th=el('th',v);th.scope='col';h.append(th);});thead.append(h);table.append(thead);const tbody=el('tbody');body.forEach((row,i)=>{const tr=el('tr');tr.dataset.rowId=layout[i].id;if(layout[i].heading)tr.className='lavr-profit-template-heading';row.forEach(v=>{const td=el('td');if(v instanceof Node)td.append(v);else td.textContent=v;tr.append(td);});tbody.append(tr);});table.append(tbody);wrap.append(table);return wrap;}
+        function layoutFor(list){
+            if(!list.length)return [];
+            const reference=list.slice().sort((a,b)=>b.month.localeCompare(a.month))[0];
+            const layout=scope.LavkaProfitManager.comparisonLayout(reference.report,reportLabels),used=new Set(layout.map(r=>r.id)),extra=new Map();
+            list.forEach(w=>rows(w.report,reportLabels).forEach((r,id)=>{
+                if(!used.has(id)&&/:(expense|legacy|gross):/.test(id)&&!id.endsWith(':impact')&&(decimal(r.value)===null||decimal(r.value)!==0n))extra.set(id,{...r,number:'—'});
+            }));
+            return ['KYIV','ODESA',...new Set([...extra.values()].map(r=>r.city).filter(c=>!['KYIV','ODESA'].includes(c)))].flatMap(c=>[...layout.filter(r=>r.city===c),...extra.values()].filter(r=>r.city===c));
         }
-        const resultHeaders=()=>[t('revision'),t('city'),t('article'),t('baselineMean'),t('newValue'),t('delta'),t('percent'),t('coverage')];
-        function exportCells(row,indices){return row.map((v,i)=>{if(!indices.includes(i)||v==='—')return v;const n=v.replace(/[\s%+]/g,'').replace(',','.');return /^-?\d+\.\d+$/.test(n)?{type:'number',value:n}:v;});}
+        function manualInput(row){const input=el('input');input.type='text';input.inputMode='decimal';input.className='lpc-manual';input.value=manual[row.id]??'';input.disabled=locked;
+            input.setAttribute('aria-label',t('manualBaseline')+' · '+city(row.city)+' · '+row.label);input.dataset.baselineId=row.id;
+            input.placeholder=t('automaticBaseline');input.addEventListener('change',()=>{
+                const value=input.value.trim().replace(/\s/g,'').replace(',','.').replace(/^\+/,'');
+                if(value!==''&&(!/^-?\d{1,18}(?:\.\d{1,8})?$/.test(value)||decimal(value)===null)){input.setCustomValidity(t('invalidBaseline'));input.reportValidity();return;}
+                input.setCustomValidity('');if(value==='')delete manual[row.id];else manual[row.id]=value;persist();render();
+            });return input;}
+        function tableHeaders(list){return ['№',t('article'),t('manualBaseline'),...list.flatMap(w=>[stamp(w)+' · '+t('amount'),stamp(w)+' · '+t('usedBaseline'),stamp(w)+' · '+t('baselineSource'),stamp(w)+' · '+t('delta'),stamp(w)+' · %'])];}
+        function tableRows(list,layout,editable=false){
+            const maps=list.map(w=>rows(w.report,reportLabels));
+            return layout.map(r=>[r.number,r.label,editable?manualInput(r):amount(manual[r.id]),...list.flatMap((w,i)=>{
+                const value=maps[i].get(r.id)?.value??null,b=rowBaseline(r.id,w.month,windows[w.month]||[],manual,reportLabels),c=compare(value,b.mean);
+                if(b.source!=='manual'&&!Object.hasOwn(windows,w.month))b.source='unavailable';
+                const source=b.source==='unavailable'?t('historyUnavailable'):b.source==='manual'?t('manualBaseline'):b.source==='required'?t('requiredBaseline'):t('automaticBaseline')+` (${b.count}/4)`;
+                return [amount(value),c.average==null?(b.source==='unavailable'?t('historyUnavailable'):t('requiredBaseline')):amount(c.average),source,amount(c.delta),percent(c.percent)];
+            })]);
+        }
+        function exportCells(row){return row.map((v,i)=>{
+            if(i===0&&typeof v==='number')return {type:'number',value:String(v)};if(i<2||v==='—')return v;const n=String(v).replace(/[\s%+]/g,'').replace(',','.');return /^-?\d+\.\d+$/.test(n)?{type:'number',value:n}:v;
+        });}
         function exportComparison(){
-            const sheets=[{name:t('comparison'),rows:[comparisonHeaders(),...comparisonRows().map(r=>exportCells(r,[2,...r.map((_,i)=>i).filter(i=>i>=4)]))],headerRows:[1],freezeRows:1},
-                {name:t('baseline'),rows:[[t('meanHelp')],[t('baselineHelp')],[t('percentHelp')],[t('missingHelp')],...[...selected.map(w=>[t('comparison'),metadata(w),w.report.calculatedAt,JSON.stringify(w.report.inputs||{})]),...baseline.map(w=>[t('baseline'),metadata(w),w.report.calculatedAt,JSON.stringify(w.report.inputs||{})]),...results.map(w=>[t('newValue'),metadata(w),w.report.calculatedAt,JSON.stringify(w.report.inputs||{})])]]}];
-            if(results.length&&baseline.length)sheets.push({name:t('deviations'),rows:[resultHeaders(),...resultRows().map(r=>exportCells(r,[3,4,5,6]))],headerRows:[1],freezeRows:1});
-            // Export displayed precision as numbers; percentage columns contain percentage points.
+            const sheets=[],add=(list,prefix)=>{const layout=layoutFor(list);['KYIV','ODESA'].forEach(c=>{const group=layout.filter(r=>r.city===c);if(group.length)sheets.push({name:city(c)+' '+prefix,rows:[tableHeaders(list),...tableRows(list,group).map(exportCells)],headerRows:[1],freezeRows:1});});};
+            if(selected.length)add(selected,t('comparison'));if(results.length)add(results,t('deviations'));
+            sheets.push({name:t('baseline'),rows:[[t('meanHelp')],[t('baselineHelp')],[t('percentHelp')],[t('missingHelp')],
+                ...selected.map(w=>[t('comparison'),metadata(w),w.report.calculatedAt,JSON.stringify(w.report.inputs||{})]),
+                ...results.map(w=>[t('newValue'),metadata(w),w.report.calculatedAt,JSON.stringify(w.report.inputs||{})]),
+                ...allTargets().flatMap(w=>[...[['target',stamp(w),'window',previousMonths(w.month).join(', ')]],...(windows[w.month]||[]).map(v=>[w.month,t('baseline'),metadata(v),v.report.calculatedAt,JSON.stringify(v.report.inputs||{})])]),
+                ...Object.entries(manual).map(([id,value])=>[t('manualBaseline'),id,{type:'number',value}]) ]});
             const url=URL.createObjectURL(new Blob([scope.LavkaProfitXlsx.build(sheets)],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
             const a=el('a');a.href=url;a.download='lavka-profit-comparison.xlsx';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
         }
+        function renderTables(list,id,editable){const box=el('div');box.id=id;const layout=layoutFor(list);
+            for(const c of new Set(layout.map(r=>r.city))){const group=layout.filter(r=>r.city===c);box.append(el('h3',city(c)),grid(tableHeaders(list),tableRows(list,group,editable),group));}target.append(box);}
         function render(){
             target.replaceChildren(el('h2',t('comparison')),el('p',t('comparisonHelp')),el('p',t('meanHelp')));
             const list=el('ul');selected.forEach(w=>{const li=el('li',metadata(w)+' ');li.append(action('remove',()=>{selected=selected.filter(x=>x.month!==w.month);persist();render();}));list.append(li);});target.append(list);
             if(!selected.length)target.append(el('p',t('chooseComparison')));
             const tools=el('div');tools.className='lavr-profit-template-tools';
-            const pin=action('freezeBaseline',()=>{baseline=selected.slice();results=[];persist();render();},'lpc-freeze');pin.disabled=locked||!selected.length;
-            const clear=action('clearBaseline',()=>{baseline=[];results=[];persist();render();},'lpc-clear');clear.disabled=locked||!baseline.length;
-            const download=action('comparisonExport',exportComparison,'lpc-export');download.disabled=locked||!selected.length;
-            tools.append(pin,clear,download);target.append(tools);
-            const base=el('div');base.id='lpc-baseline';base.append(el('h3',t('baseline')),el('p',t('baselineHelp')),el('p',baseline.length?baseline.map(metadata).join(' · '):t('noBaseline')));target.append(base);
-            const combined=[...selected,...baseline,...results];
-            if(combined.some(w=>w.status!=='COMPLETED'||!w.report.complete)||new Set(combined.map(w=>JSON.stringify([w.report.ruleVersion,w.report.inputs,w.report.taxDetails?.settings]))).size>1)
-                target.append(el('p',t('comparisonWarning')));
+            const refresh=action('refreshBaseline',()=>runRead(async()=>{const next=await fetchWindows(allTargets(),true);windows=next;error='';persist();render();}),'lpc-refresh');refresh.disabled=locked||!allTargets().length;
+            const download=action('comparisonExport',exportComparison,'lpc-export');download.disabled=locked||!allTargets().length;
+            tools.append(refresh,download);target.append(tools);
+            const base=el('details');base.id='lpc-baseline';base.append(el('summary',t('baseline')),el('p',t('baselineHelp')));
+            allTargets().forEach(w=>base.append(el('p',w.month+' ← '+previousMonths(w.month).join(', ')+' · '+((windows[w.month]||[]).map(metadata).join(' · ')||t('requiredBaseline')))));target.append(base);
+            const combined=[...selected,...Object.values(windows).flat(),...results];
+            if(combined.some(w=>w.status!=='COMPLETED'||!w.report.complete)||new Set(combined.map(w=>JSON.stringify([w.report.ruleVersion,w.report.inputs,w.report.taxDetails?.settings]))).size>1)target.append(el('p',t('comparisonWarning')));
             target.append(el('p',t('missingHelp')),el('p',t('percentHelp')));
-            if(storageFailed)target.append(el('p',t('storageWarning')));
-            if(selected.length){const box=grid(comparisonHeaders(),comparisonRows());box.id='lpc-table';target.append(box);}
-            if(baseline.length&&results.length){target.append(el('h3',t('deviations')));const box=grid(resultHeaders(),resultRows());box.id='lpc-deviations';target.append(box);}
+            if(storageFailed)target.append(el('p',t('storageWarning')));if(error){const p=el('p',t('historyUnavailable')+' '+error);p.setAttribute('role','alert');target.append(p);}
+            if(selected.length)renderTables(selected,'lpc-table',true);
+            if(results.length){target.append(el('h3',t('deviations')));renderTables(results,'lpc-deviations',true);}
         }
         async function fetchRefs(list){
             if(!validRefs(list))throw new Error(t('comparisonLimit'));
@@ -105,17 +144,40 @@
                 loaded.push(w);
             }return loaded;
         }
+        async function fetchWindows(targets,force=false){
+            const next={...windows},cache=new Map();
+            for(const w of targets){if(!force&&Object.hasOwn(next,w.month))continue;
+                const months=previousMonths(w.month);if(!months.length){next[w.month]=[];continue;}
+                const range=await request('range',{fromMonth:months[0],toMonth:months.at(-1)});
+                if(range.fromMonth!==months[0]||range.toMonth!==months.at(-1)||!Array.isArray(range.months)||range.months.length!==months.length||new Set(range.months.map(r=>r.month)).size!==months.length||!months.every(m=>range.months.some(r=>r.month===m)))throw new Error(t('invalid'));
+                const list=[];for(const m of range.months){
+                    const id=['COMPLETED','PROVISIONAL'].includes(m.latestStatus)&&m.latestRevisionId?m.latestRevisionId:m.revisionId;
+                    if(!id)continue;const ref={month:m.month,revisionId:String(id)},key=ref.month+':'+ref.revisionId;
+                    if(!cache.has(key))cache.set(key,(await fetchRefs([ref]))[0]);list.push(cache.get(key));
+                }next[w.month]=list;
+            }return next;
+        }
         function add(list){return runRead(async()=>{
             const merged=new Map(refs(selected).map(r=>[r.month,r]));list.forEach(r=>merged.set(r.month,r));const newRefs=[...merged.values()].sort((a,b)=>a.month.localeCompare(b.month));
-            const loaded=await fetchRefs(newRefs);selected=loaded;persist();render();
+            const loaded=await fetchRefs(newRefs),next=await fetchWindows(loaded);selected=loaded;windows=next;error='';persist();render();
         });}
         async function restore(){let saved;try{saved=JSON.parse(localStorage.getItem(storageKey));}catch(_){storageFailed=true;render();return;}
-            if(!saved)return;if(saved.version!==1||!validRefs(saved.selected)||!validRefs(saved.baseline))throw new Error(t('comparisonLimit'));
-            const a=await fetchRefs(saved.selected),b=await fetchRefs(saved.baseline);selected=a;baseline=b;render();
+            if(!saved)return;if(![1,2].includes(saved.version)||!validRefs(saved.selected))throw new Error(t('comparisonLimit'));
+            const loaded=await fetchRefs(saved.selected),restored={};
+            if(saved.version===2){
+                if(saved.manual&&typeof saved.manual==='object'&&!Array.isArray(saved.manual))for(const [id,value] of Object.entries(saved.manual))
+                    if(id.length<250&&typeof value==='string'&&/^-?\d{1,18}(?:\.\d{1,8})?$/.test(value))manual[id]=value;
+                for(const w of loaded){const ids=saved.windows?.[w.month];if(ids&&validRefs(ids)&&ids.every(r=>previousMonths(w.month).includes(r.month)))restored[w.month]=await fetchRefs(ids);}
+            }
+            windows=restored;windows=await fetchWindows(loaded);selected=loaded;persist();render();
         }
-        render();return {add,restore,lock(value){locked=value;target.querySelectorAll('button').forEach(b=>b.disabled=value);if(!value)render();},
-            observe(w){if(!baseline.length)return;results=results.filter(x=>x.month!==w.month);results.push(w);render();}};
+        render();return {add,restore,lock(value){locked=value;target.querySelectorAll('button,input').forEach(b=>b.disabled=value);if(!value)render();},
+            async observe(w){
+                results=results.filter(x=>x.month!==w.month);results.push(w);if(results.length>24)results.shift();
+                try{windows=await fetchWindows([w]);error='';}catch(e){error=e.message||t('error');}
+                persist();render();
+            }};
     }
-    const api={decimal,average,compare,rows,validRefs,mount};
+    const api={decimal,average,compare,rows,previousMonths,rowBaseline,validRefs,mount};
     if(typeof module!=='undefined'&&module.exports)module.exports=api;else scope.LavkaProfitComparison=api;
 })(typeof window!=='undefined'?window:globalThis);

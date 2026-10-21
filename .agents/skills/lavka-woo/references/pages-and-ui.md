@@ -287,14 +287,18 @@ keep `manage_options` for payee editing. Runtime defaults survive code deploys.
 
 `pc-folio-customer-balance` requires Java `calculationVersion >= 2` for individual/debtors responses. `prepaymentAmount` is now the reserve from active non-accounted ПРД/*РАЗОВАЯ invoices no older than six calendar months (inclusive), not payments. Older orders must be recreated by the manager. The ledger balance is separate; payable adds reserve and subtracts deferral. Individual balance renders `preorders[]`; XLSX shows the invoice list and reserve total below ledger movements on the main sheet, and retains a separate data sheet (2026-10-14 export follow-up). Customer and manager use the same exporter with existing ownership checks. Customer/manager documents have `preordersOnly` server-side filtering over the same six-month window before pagination. Java V18 separates old snapshot generations and live overrides; rebuild debtors after deploying Java + WP. Never relabel a v1 cached payment amount as an invoice reserve. Current outstanding invoice amount already excludes fulfilled goods (owner confirmation).
 
-Profit saved-month comparison (2026-10-21, local code/tests):
-`lavka-reports/profit-comparison.js` compares explicit saved revisions; Java still
-owns source amounts and selection. One revision per month, equal weights, missing
-rows stay unavailable, pinned baseline never includes a new calculation implicitly.
-Browser persistence contains only month/revision references, scoped by WP user/blog;
-reload uses authenticated history reads. No shared backend baseline or Folio writes.
-Keep comparison export separate from the manager H/I template. Workflow, decimal
-formula, zero/negative cases and deployment boundary:
+Profit saved-month comparison (2026-10-21, 0.11.0 local code/tests):
+`profit-manager.js::comparisonLayout` owns city order and numbering for both the
+manager table and comparison. `profit-comparison.js` uses explicit saved revisions
+from the four preceding calendar months, excluding the target/future. At least one
+available row value is enough; display coverage, never replace missing with zero.
+Manual per-line decimal overrides (including zero) take priority and persist with
+reference IDs per WP user/blog in this browser. Missing history requires input;
+read errors remain distinct and must not fail an already confirmed calculation.
+Refresh history explicitly replaces pinned prior revision IDs. Java amounts and
+manager H/I formulas are unchanged; no shared backend baseline or Folio writes.
+Migration from comparison storage v1 replaces the old whole-period baseline rule.
+Workflow and limitations:
 [profit manager guide](../../../../docs/PROFIT_REPORT_MANAGER_RU.md#сравнение-выбранных-месяцев-и-база-отклонений).
 
 ## Собственный футер и настройки магазина (2026-10-21)

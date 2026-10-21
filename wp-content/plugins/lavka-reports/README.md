@@ -205,25 +205,34 @@ The copy button copies I4 through the last main result, including blank separato
 
 A single household row at Kyiv row 9 consumes `KYIV_HOUSEHOLD`; the owner removed the duplicate former row 11. No `KYIV_HOUSEHOLD_BANK` slot is created. H formulas occupy Kyiv rows 21/28/30/36/37/38 and Odesa rows 14/21/23/29/30/31. Missing backend metadata is explicitly unavailable and never zero. All selection and classification changes remain Java-owned. Deploying this frontend cannot retroactively apply new filters to stored results. Manager workflow and limits: [PROFIT_REPORT_MANAGER_RU.md](../../../docs/PROFIT_REPORT_MANAGER_RU.md). Unit checks cover exact H formulas, row addresses, API total independence, absent rules and additional amounts.
 
-## Saved-month comparison (0.10.0)
+## Saved-month comparison (0.11.0)
 
-`profit-comparison.js` reads explicit saved revision IDs through the existing
-history proxy. It compares up to 24 distinct months across ranges/revisions, with
-one version per month, stable city/line keys and equal month weights. The pinned
-baseline is independent of the displayed comparison set. New successful monthly
-calculations and explicitly opened revisions are compared to it without changing
-profit or promoting a provisional revision. Missing rows prevent an average for
-that row; historical aggregate categories are not mapped speculatively to modern
-subcategories. Decimal analytics use BigInt scaled values and unrounded rational
-means; percentage = `(value - mean) / abs(mean) * 100`, with explicit zero rules.
+`profit-comparison.js` compares up to 24 explicit saved monthly revisions via the
+existing history proxy. `profit-manager.js::comparisonLayout` supplies the same
+ordered, numbered financial rows as the manager workbook (Kyiv then Odesa), using
+stable city/line IDs. Repeated operating totals share their semantic override key.
+Additional historical amounts are retained without renumbering the main layout.
 
-Only month/revision references are remembered in browser localStorage, scoped to
-WordPress user and blog; authoritative values are reloaded through access-checked
-GET proxies on page entry. No server schema or backend formula changes. This is
-browser-local persistence, not shared settings across devices/tabs. XLSX comparison
-has its own provenance sheet and does not alter the manager H/I export. See
-[manager workflow](../../../docs/PROFIT_REPORT_MANAGER_RU.md#сравнение-выбранных-месяцев-и-база-отклонений).
-Tests: `tests/profit-comparison.test.cjs` and `tests/profit-history.spec.cjs`.
-Deploy the full plugin (including the new script and translated MO files) and
-refresh the report tab. Rollback is the previous plugin release; saved revisions
-are unchanged. Production deployment is not part of the code change.
+Each target uses its preceding four calendar months, excluding itself/future months.
+History discovery is a read-only range lookup: prefer the latest COMPLETED or
+PROVISIONAL revision, otherwise the current saved revision; missing is not zero.
+Per-row equal-weight averages need at least one available value and expose 1/4–4/4
+coverage. No data requires manual input; transport/API errors are distinct. Manual
+per-row decimal values (including zero/negative) override the average, and blank
+restores automatic calculation. No manual value changes Java report totals or other
+row baselines. BigInt/rational means preserve precision for deviation percentages.
+
+Storage v2 remembers target IDs, historical revision IDs and validated manual
+values, scoped by WP user/blog in browser localStorage. Reload re-reads exact IDs;
+Refresh history explicitly rediscovers prior revisions. v1 selections migrate but
+its arbitrary pinned period is superseded by the four-month rule. New calculation
+success remains independent of history lookup failure. No schema or Folio writes.
+
+XLSX comparison has ordered city sheets, numeric manual/applied baselines, deviations
+and provenance. Manager H/I sheets/formulas remain unchanged. Operator workflow:
+[manager guide](../../../docs/PROFIT_REPORT_MANAGER_RU.md#сравнение-выбранных-месяцев-и-база-отклонений).
+Tests: `tests/profit-comparison.test.cjs`, `tests/profit-manager.test.cjs`,
+`tests/profit-history.spec.cjs`. Deploy the entire plugin including translations and
+refresh the tab. Production deployment requires separate authorization. Rollback
+restores the prior plugin; report snapshots are unchanged (browser comparison
+settings may need clearing after a downgrade from storage v2).
