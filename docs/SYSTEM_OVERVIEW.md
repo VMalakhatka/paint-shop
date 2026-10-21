@@ -53,7 +53,8 @@ OVH service -> physical host -> hypervisor -> Windows VM
 |---|---|---|
 | Каталог, корзина, checkout, кабинет, HPOS-заказы | WooCommerce + собственные PHP-плагины | текущий Woo runtime и PHP-код |
 | Шапка и основное меню | `paint-shop-ux/inc/site-header.php` | собственные разметка/CSS/JS; меню WordPress `primary` и существующие фильтры доступа; выбор склада — `paint-core` |
-| PHP-оболочка и обычные шаблоны страниц | GeneratePress + `generatepress-child` | код theme; смена PHP-темы ещё не выполнена |
+| Внешняя PHP-оболочка, специальные и ещё не перенесённые шаблоны | GeneratePress + `generatepress-child` | код theme; смена PHP-темы ещё не выполнена |
+| Обычные информационные страницы и 404 | `paint-shop-ux/inc/public-pages.php` | ограниченный выбор default templates, `templates/public-page.php` и `assets/public-pages.css`; содержимое — WordPress и прежние провайдеры |
 | Футер | `paint-shop-ux/inc/site-footer.php` | собственная разметка/CSS, adapter GP + однократный fallback `wp_footer`; юридические данные — `pc-wayforpay-compliance` |
 | Каталог, товар и стили покупательских страниц | `paint-shop-ux` | собственные modules/templates/assets, scoped storefront.css; Woo hooks сохраняют цены, склады и покупку |
 | Общие остатки и allocation | `paint-core` | код, Woo product/order state |
@@ -80,7 +81,8 @@ checkout — `paint-core/inc/checkout-created-date.php`. Семантика да
 footer widgets. В 1.6.0 базовые стили
 каталога, товара, корзины, checkout, кабинета и списка товаров перенесены в
 `paint-shop-ux/assets/storefront.css` и component CSS. Контекст определяется Woo
-conditionals/shortcode; отчёты и обычные страницы остаются у своих владельцев.
+conditionals/shortcode; отчёты остаются у своих владельцев. Обычные страницы
+с 1.8.0 обслуживает отдельный ограниченный модуль ниже.
 Контейнеры, сетка, типографика и controls проверяются локально с удалённым CSS темы;
 это не проверка переключения PHP-темы. Локальная приёмка
 и откат описаны в [Paint Shop UX](../wp-content/plugins/paint-shop-ux/README.md).
@@ -94,8 +96,18 @@ conditionals/shortcode; отчёты и обычные страницы оста
 только после фактического вывода собственной шапки. При
 `psu_site_header_enabled=false` до `wp` остаётся прежний путь темы.
 
-Оставшаяся зависимость от GP — внешняя PHP-оболочка, обычные шаблоны страниц,
-регистрация областей виджетов и возможностей темы/WooCommerce. Удаление CSS не
+В 1.8.0 информационные страницы с default template и поддерживаемым содержимым,
+404 и запасной обычный поиск получают собственную разметку контента и стили.
+WooCommerce, главная, Elementor, приложения на shortcodes, custom blocks и чужие
+шаблоны исключены. Товарный поиск остаётся у каталога; новый шаблон не меняет
+query routing. Содержимое, ссылки, парольная защита и разделение страниц сохраняют
+WordPress API. Локально 2026-10-21 пройдены 166 PHP-проверок, сравнение текста
+четырёх правовых страниц и browser-проверки 320/390/768/1280 px, в том числе без
+CSS темы. Канон и код справки обновлены; выпуск 1.8.0 на production не развёрнут.
+Приёмка и откат — [Paint Shop UX](../wp-content/plugins/paint-shop-ux/README.md).
+
+Оставшаяся зависимость от GP — внешняя PHP-оболочка, специальные и исключённые
+шаблоны страниц, регистрация областей виджетов и возможностей темы/WooCommerce. Удаление CSS не
 подтверждает готовность к смене темы. Статус шапки 1.7.0 на 2026-10-21:
 локальная приёмка пройдена (518 PHP-проверок и 25 browser-сценариев); публикация
 справки и production-проверка ожидают deploy.

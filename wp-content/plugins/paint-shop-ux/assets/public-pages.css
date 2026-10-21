@@ -1,0 +1,74 @@
+/* Ordinary content only; shop, builders and application screens keep their owners. */
+body.psu-storefront.psu-public-page #page { max-width: 1120px; }
+body.psu-storefront.psu-public-page #content { display: block; }
+.psu-public-page .psu-page-breadcrumb { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 22px; color: var(--psu-muted); font: 13px/1.6 var(--psu-font); overflow-wrap: anywhere; }
+.psu-public-page #main .psu-page-breadcrumb a { color: var(--psu-muted); }
+.psu-public-page .psu-page-card { margin: 0; padding: clamp(24px, 4vw, 56px); border: 1px solid var(--psu-border); border-radius: 16px; background: #fff; }
+.psu-public-page #main .psu-page-heading { margin: 0 0 30px; padding-bottom: 26px; border-bottom: 1px solid var(--psu-border); }
+.psu-public-page #main .psu-page-heading h1 { max-width: 24ch; margin: 0; font-size: clamp(28px, 3.2vw, 40px); font-weight: 400; line-height: 1.2; letter-spacing: -.025em; }
+.psu-public-page #main .psu-page-prose { max-width: 76ch; margin: 0; font: 16px/1.75 var(--psu-font); overflow-wrap: anywhere; }
+.psu-public-page #main .psu-page-prose :is(h2, h3, h4, h5, h6) { margin: 36px 0 14px; color: var(--psu-ink); font-family: var(--psu-font); line-height: 1.35; font-weight: 500; }
+.psu-public-page #main .psu-page-prose h2 { font-size: clamp(22px, 2.2vw, 26px); }
+.psu-public-page #main .psu-page-prose :is(h3, h4, h5, h6) { font-size: 19px; }
+.psu-public-page #main .psu-page-prose > :first-child { margin-top: 0; }
+.psu-public-page #main .psu-page-prose > :last-child { margin-bottom: 0; }
+.psu-public-page #main .psu-page-prose :is(p, ul, ol, dl, figure, table, pre, blockquote) { margin-top: 0; margin-bottom: 22px; }
+.psu-public-page #main .psu-page-prose :is(ul, ol) { padding: 0 0 0 1.4em; margin-left: 0; }
+.psu-public-page #main .psu-page-prose li { padding-left: .25em; margin-bottom: 8px; }
+.psu-public-page #main .psu-page-prose li > :is(ul, ol) { margin-top: 8px; margin-bottom: 8px; }
+.psu-public-page #main .psu-page-prose a { text-decoration: underline; text-underline-offset: 3px; }
+.psu-public-page #main .psu-page-prose :is(blockquote, .pc-policy-lead) { padding: 20px 24px; border: 0; border-left: 3px solid var(--psu-accent); border-radius: 0 10px 10px 0; background: var(--psu-surface); font-size: inherit; font-style: normal; }
+.psu-public-page #main .psu-page-prose :is(blockquote, .pc-policy-lead) > :last-child { margin-bottom: 0; }
+.psu-public-page #main .psu-page-prose cite { display: block; color: var(--psu-muted); font-size: 14px; font-style: normal; }
+.psu-public-page #main .psu-page-prose .pc-policy-updated { color: var(--psu-muted); font-size: 13px; }
+.psu-public-page #main .psu-page-prose .pc-seller-details > div { gap: 12px 24px; border-color: var(--psu-border); padding: 16px 0; }
+.psu-public-page #main .psu-page-prose dd { margin: 0; }
+.psu-public-page #main .psu-page-prose dt { font-weight: 600; }
+.psu-public-page #main .psu-page-prose :is(code, pre) { font-family: ui-monospace, monospace; font-size: .9em; background: var(--psu-surface); }
+.psu-public-page #main .psu-page-prose pre { padding: 18px; overflow: auto; border-radius: 8px; }
+.psu-public-page #main .psu-page-prose table { display: block; width: 100%; max-width: 100%; overflow: auto; border-collapse: collapse; border: 0; font-size: 15px; }
+.psu-public-page #main .psu-page-prose :is(th, td) { padding: 12px 16px; border: 1px solid var(--psu-border); text-align: start; }
+.psu-public-page #main .psu-page-prose th { background: var(--psu-surface); font-weight: 600; }
+.psu-public-page #main .psu-page-prose :is(img, iframe, video) { max-width: 100%; }
+.psu-public-page #main .psu-page-prose audio { min-width: 0; max-width: 100%; width: 100%; }
+.psu-public-page #main .psu-page-prose a.wp-block-button__link { min-height: 44px; padding: 11px 18px; border-radius: 8px; font: 600 15px/1.4 var(--psu-font); text-decoration: none; }
+.psu-public-page #main .psu-page-prose a.wp-block-button__link:not(.has-background) { background: var(--psu-accent); }
+.psu-public-page #main .psu-page-prose a.wp-block-button__link:not(.has-text-color) { color: #fff; }
+.psu-public-page #main :is(.psu-page-featured, .psu-page-prose figure) { max-width: 100%; margin-left: 0; margin-right: 0; }
+.psu-public-page #main .psu-page-featured { margin-bottom: 30px; }
+.psu-public-page #main .psu-page-featured img { display: block; width: 100%; height: auto; border-radius: 10px; }
+.psu-public-page #main .psu-page-prose figcaption { margin-top: 8px; color: var(--psu-muted); font-size: 13px; }
+.psu-public-page #main .psu-page-prose :is(.alignwide, .alignfull) { width: 100%; max-width: 100%; margin-left: 0; margin-right: 0; }
+.psu-public-page #main .psu-page-prose::after { content: ''; display: table; clear: both; }
+.psu-public-page #main .psu-page-status { margin: 0 0 20px; color: var(--psu-accent); font-size: clamp(48px, 8vw, 80px); line-height: 1; letter-spacing: -.05em; }
+body.psu-storefront.psu-public-page--not-found #page { max-width: 880px; }
+.psu-public-page #main .psu-page-empty > p:not(.psu-page-status) { max-width: 56ch; color: var(--psu-muted); }
+.psu-public-page #main .psu-page-empty .psu-page-heading { border: 0; padding: 0; margin-bottom: 18px; }
+.psu-public-page #main a.psu-page-catalog { display: inline-flex; align-items: center; margin: 0 0 28px; }
+.psu-public-page #main .psu-page-search { margin: 0; max-width: 640px; }
+.psu-public-page #main .psu-page-search label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 500; }
+.psu-public-page #main .psu-page-search__fields { display: flex; gap: 8px; }
+.psu-public-page #main .psu-page-search input { flex: 1; width: 100%; min-width: 0; }
+.psu-public-page #main .psu-page-search button { flex-shrink: 0; }
+.psu-public-page #main .psu-page-results { margin-top: 28px; }
+.psu-public-page #main .psu-page-result { padding: 24px 0; border-top: 1px solid var(--psu-border); }
+.psu-public-page #main .psu-page-result h2 { font-size: 23px; margin: 0 0 10px; }
+.psu-public-page #main .psu-page-result p { margin: 0; color: var(--psu-muted); }
+.psu-public-page #main .psu-page-no-results { margin: 28px 0 20px; }
+.psu-public-page #main :is(.psu-page-parts, .nav-links) { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 24px; }
+.psu-public-page #main :is(.psu-page-parts, .nav-links) :is(a, span) { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; padding: 8px 12px; border: 1px solid var(--psu-border); border-radius: 8px; text-decoration: none; }
+.psu-public-page #main :is(.psu-page-parts, .nav-links) .current { background: var(--psu-accent); color: #fff; }
+.psu-public-page #main #comments { margin-top: 36px; padding-top: 24px; border-top: 1px solid var(--psu-border); }
+.psu-public-page #main #comments textarea { width: 100%; }
+@media (max-width: 768px) {
+    .psu-public-page .psu-page-breadcrumb { margin-bottom: 16px; }
+    .psu-public-page .psu-page-card { padding: 24px 20px; border-radius: 12px; }
+    .psu-public-page #main .psu-page-heading { margin-bottom: 24px; padding-bottom: 20px; }
+    .psu-public-page #main .psu-page-prose :is(blockquote, .pc-policy-lead) { padding: 16px; }
+    .psu-public-page #main .psu-page-prose :is(.alignleft, .alignright) { float: none; margin-left: 0; margin-right: 0; }
+    .psu-public-page #main .psu-page-prose .pc-seller-details > div { grid-template-columns: 1fr; gap: 4px; }
+}
+@media (max-width: 360px) {
+    .psu-public-page .psu-page-card { padding: 22px 16px; }
+    .psu-public-page #main .psu-page-search__fields { flex-direction: column; }
+}

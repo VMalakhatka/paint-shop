@@ -9,6 +9,8 @@ msgstr ""
 msgid "Product categories"
 msgstr "Категории товаров"
 
+#: templates/public-page.php:33
+#: templates/public-page.php:52
 msgid "Open catalogue"
 msgstr "Открыть каталог"
 
@@ -257,3 +259,47 @@ msgstr "Главное меню"
 #, php-format
 msgid "Submenu: %s"
 msgstr "Подменю: %s"
+
+#: templates/public-page.php:9
+msgid "Breadcrumbs"
+msgstr "Навигационная цепочка"
+
+#: templates/public-page.php:10
+msgid "Home"
+msgstr "Главная"
+
+#: templates/public-page.php:12
+#: inc/public-pages.php:85
+#: inc/public-pages.php:88
+msgid "Search"
+msgstr "Поиск"
+
+#: templates/public-page.php:12
+#: templates/public-page.php:31
+msgid "Page not found"
+msgstr "Страница не найдена"
+
+#: templates/public-page.php:23
+msgid "Page sections"
+msgstr "Части страницы"
+
+#: templates/public-page.php:32
+msgid "The address may have changed. Open the catalogue or try a search."
+msgstr "Адрес страницы мог измениться. Откройте каталог или воспользуйтесь поиском."
+
+#: templates/public-page.php:38
+#, php-format
+msgid "Search results for “%s”"
+msgstr "Результаты поиска «%s»"
+
+#: templates/public-page.php:49
+msgid "Previous"
+msgstr "Предыдущая"
+
+#: templates/public-page.php:49
+msgid "Next"
+msgstr "Следующая"
+
+#: templates/public-page.php:51
+msgid "Nothing found. Try a different search or open the catalogue."
+msgstr "Ничего не найдено. Попробуйте другой запрос или откройте каталог."

@@ -9,6 +9,8 @@ msgstr ""
 msgid "Product categories"
 msgstr "Категорії товарів"
 
+#: templates/public-page.php:33
+#: templates/public-page.php:52
 msgid "Open catalogue"
 msgstr "Відкрити каталог"
 
@@ -257,3 +259,47 @@ msgstr "Головне меню"
 #, php-format
 msgid "Submenu: %s"
 msgstr "Підменю: %s"
+
+#: templates/public-page.php:9
+msgid "Breadcrumbs"
+msgstr "Навігаційний ланцюжок"
+
+#: templates/public-page.php:10
+msgid "Home"
+msgstr "Головна"
+
+#: templates/public-page.php:12
+#: inc/public-pages.php:85
+#: inc/public-pages.php:88
+msgid "Search"
+msgstr "Пошук"
+
+#: templates/public-page.php:12
+#: templates/public-page.php:31
+msgid "Page not found"
+msgstr "Сторінку не знайдено"
+
+#: templates/public-page.php:23
+msgid "Page sections"
+msgstr "Частини сторінки"
+
+#: templates/public-page.php:32
+msgid "The address may have changed. Open the catalogue or try a search."
+msgstr "Адреса сторінки могла змінитися. Відкрийте каталог або скористайтеся пошуком."
+
+#: templates/public-page.php:38
+#, php-format
+msgid "Search results for “%s”"
+msgstr "Результати пошуку «%s»"
+
+#: templates/public-page.php:49
+msgid "Previous"
+msgstr "Попередня"
+
+#: templates/public-page.php:49
+msgid "Next"
+msgstr "Наступна"
+
+#: templates/public-page.php:51
+msgid "Nothing found. Try a different search or open the catalogue."
+msgstr "Нічого не знайдено. Спробуйте інший запит або відкрийте каталог."

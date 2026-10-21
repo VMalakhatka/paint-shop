@@ -334,9 +334,9 @@ content typography/tokens, полями/кнопками/focus, account navigati
 adapter; grid/category tiles — `catalog-cards.css`, geometry PDP — `single-product.css`,
 cart — `cart-layout.css`. Legacy width/sidebar child CSS исключает этот scope.
 Не добавляй новые content overrides в child theme и не снимай все стили GeneratePress
-на живом сайте: PHP wrappers и обычные страницы ещё используют тему;
+на живом сайте: PHP wrappers и исключённые из миграции страницы ещё используют тему;
 header/menu с 1.7.0 принадлежат собственному модулю ниже. Не расширяй scope на
-reports/обычные страницы автоматически. Каталог сохраняет configured sidebar,
+reports/обычные страницы автоматически: у обычных страниц отдельный scope с 1.8.0. Каталог сохраняет configured sidebar,
 на <=1024 он под контентом; task pages cart/checkout/account/quick-order без sidebar.
 Проверка CSS независимости удаляет theme links/inline style только в тестовом DOM:
 `tests/storefront-styles.spec.cjs`. Заполненный cart/checkout fixture работает через
@@ -409,3 +409,25 @@ Per-page исключает shortcode loops и чужие страницы; со
 `psu-search-filters.php`, `paint-shop-ux.php`, `pc-wholesale-help.php`; приёмка и
 согласованный deploy/rollback — README Paint Shop UX. Пользовательский канон —
 `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md`. Проверка production нового порядка ожидает deploy.
+
+
+## Обычные информационные страницы (1.8.0, 2026-10-21)
+
+Owner — `paint-shop-ux/inc/public-pages.php`, `templates/public-page.php` и
+`assets/public-pages.css`. При активном GP выбираются только default page/search/404
+шаблоны из parent/child; чужие plugin templates и специальные page templates
+сохраняются. Scope `.psu-public-page` включается после выбора шаблона, внешний
+PHP-каркас всё ещё у GP. Новый parent theme требует отдельной интеграции.
+Не расширять выбор автоматически на главную/Woo, Elementor, приложения на
+shortcodes, custom/reusable blocks или отчёты. Товарный поиск определять также
+по array `post_type` и `_psu_catalog_query`; fallback обычного поиска не меняет query.
+На 404 форма отправляет явный `post_type=product` в существующий каталог.
+
+Сохранять `the_content`, password guard, `wp_link_pages` и comments API.
+Featured image на принятой обычной странице принадлежит этому шаблону: adapter
+снимает только `generate_featured_page_header`, остальные GP/plugin callbacks
+не удалять. Не переносить тексты юридических страниц или media в код/новые options.
+Откат — `psu_public_pages_enabled=false` до выбора template. Источник/границы:
+`tests/public-pages-local.php`; приёмка и согласованный deploy/rollback — README
+Paint Shop UX. Владельцы — `docs/SYSTEM_OVERVIEW.md`; канон и код справки обновлены,
+публикация выпуска 1.8.0 и production-проверка ожидают deploy.

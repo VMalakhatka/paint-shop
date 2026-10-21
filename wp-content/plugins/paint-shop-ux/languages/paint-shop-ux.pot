@@ -115,6 +115,8 @@ msgstr ""
 #: inc/category-menu.php:228
 #: inc/category-menu.php:241
 #: inc/category-menu.php:250
+#: templates/public-page.php:33
+#: templates/public-page.php:52
 msgid "Open catalogue"
 msgstr ""
 
@@ -341,4 +343,48 @@ msgstr ""
 #: inc/site-header.php
 #, php-format
 msgid "Submenu: %s"
+msgstr ""
+
+#: templates/public-page.php:9
+msgid "Breadcrumbs"
+msgstr ""
+
+#: templates/public-page.php:10
+msgid "Home"
+msgstr ""
+
+#: templates/public-page.php:12
+#: inc/public-pages.php:85
+#: inc/public-pages.php:88
+msgid "Search"
+msgstr ""
+
+#: templates/public-page.php:12
+#: templates/public-page.php:31
+msgid "Page not found"
+msgstr ""
+
+#: templates/public-page.php:23
+msgid "Page sections"
+msgstr ""
+
+#: templates/public-page.php:32
+msgid "The address may have changed. Open the catalogue or try a search."
+msgstr ""
+
+#: templates/public-page.php:38
+#, php-format
+msgid "Search results for “%s”"
+msgstr ""
+
+#: templates/public-page.php:49
+msgid "Previous"
+msgstr ""
+
+#: templates/public-page.php:49
+msgid "Next"
+msgstr ""
+
+#: templates/public-page.php:51
+msgid "Nothing found. Try a different search or open the catalogue."
 msgstr ""

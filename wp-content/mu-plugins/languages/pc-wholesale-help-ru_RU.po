@@ -1201,3 +1201,11 @@ msgstr "На странице категории поиск и фильтры р
 #: pc-wholesale-help.php
 msgid "Search above the category title and description"
 msgstr "Поиск над названием и описанием категории"
+
+#: pc-wholesale-help.php:589
+msgid "Information pages use a comfortable text width and clear spacing, including on a phone. If a page cannot be found, use the catalogue link to continue browsing products."
+msgstr "Информационные страницы имеют удобную для чтения ширину текста и аккуратные отступы, в том числе на телефоне. Если страница не найдена, перейдите по ссылке в каталог, чтобы продолжить выбор товаров."
+
+#: pc-wholesale-help.php:590
+msgid "Information page on a phone"
+msgstr "Информационная страница на телефоне"

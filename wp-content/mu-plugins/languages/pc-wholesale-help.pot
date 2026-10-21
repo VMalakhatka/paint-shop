@@ -1179,3 +1179,11 @@ msgstr ""
 #: pc-wholesale-help.php
 msgid "Search above the category title and description"
 msgstr ""
+
+#: pc-wholesale-help.php:589
+msgid "Information pages use a comfortable text width and clear spacing, including on a phone. If a page cannot be found, use the catalogue link to continue browsing products."
+msgstr ""
+
+#: pc-wholesale-help.php:590
+msgid "Information page on a phone"
+msgstr ""
