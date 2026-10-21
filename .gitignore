@@ -46,10 +46,12 @@ wp-content/mcloud-view-cache/
 wp-content/object-cache.php
 wp-content/advanced-cache.php
 
-# === Темы: игнорируем всё, кроме нашей child-темы ===
+# === Темы: только собственные; новый каркас пока проверяется локально ===
 wp-content/themes/*
 !wp-content/themes/generatepress-child/
 !wp-content/themes/generatepress-child/**
+!wp-content/themes/lavka-storefront/
+!wp-content/themes/lavka-storefront/**
 
 # === Плагины: игнорируем всё, кроме наших ===
 wp-content/plugins/*

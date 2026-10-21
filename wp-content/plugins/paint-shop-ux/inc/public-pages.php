@@ -17,9 +17,8 @@ function psu_public_page_blocks_supported(array $blocks): bool {
 
 function psu_public_page_context(): string {
     if (is_admin() || is_feed() || is_embed() || !apply_filters('psu_public_pages_enabled', true)) return '';
-    // Stage one keeps the GeneratePress document shell. A future independent theme
-    // will integrate these content templates explicitly, with its own containers.
-    if (get_template() !== 'generatepress') return '';
+    // Other themes must explicitly provide the content-container contract.
+    if (get_template() !== 'generatepress' && !current_theme_supports('psu-public-pages')) return '';
     if (function_exists('psu_storefront_context') && psu_storefront_context() !== '') return '';
     if (function_exists('is_woocommerce') && is_woocommerce()) return '';
     // Catalogue search may use an array post_type or an exact-SKU query with s cleared.

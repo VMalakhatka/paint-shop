@@ -440,3 +440,26 @@ Featured image на принятой обычной странице прина�
 `tests/public-pages-local.php`; приёмка и согласованный deploy/rollback — README
 Paint Shop UX. Владельцы — `docs/SYSTEM_OVERVIEW.md`; канон и код справки обновлены,
 публикация выпуска 1.8.0 и production-проверка ожидают deploy.
+
+
+## Независимый каркас: этап 2 (1.9.0, 2026-10-21)
+
+`wp-content/themes/lavka-storefront` — самостоятельная классическая тема без
+Template/GP dependency. Статус: подготовлена для локального request-only preview,
+не активирована и не добавлена в production deploy. Действующая тема остаётся
+GeneratePress Child. Не считать наличие файлов завершённым переключением.
+
+PSU public-pages принимает `current_theme_supports('psu-public-pages')` с прежними
+ограничениями default page/search/404 и исключениями приложений. Сохраняются
+`wp_head/wp_body_open/wp_footer`, #page/#content/#primary/#main и Woo gallery supports.
+PCOE использует `lavka_storefront_before_main_content` с прежним single-render guard;
+account title filter поддерживает обе темы. Меню primary берётся из сохранённых
+child theme mods только при отсутствии собственного ключа nav_menu_locations;
+явное пустое назначение не заменяется. Widget IDs прежние, sidebar читает старую
+настройку без записи. Шаблоны приложений и права остаются у плагинов.
+
+Источник и проверка — README темы и `tests/lavka-theme-{bootstrap-local,local}.php`.
+Тест выполняется в отдельном WP CLI процессе, не вызывает switch_theme и сверяет
+сохранённые options. Это не покрывает WordPress after_switch_theme/widget remapping:
+настоящую активацию, перенос папки в deploy и production acceptance выполнять лишь
+в отдельном согласованном этапе 3, с возможностью возврата прежней темы.

@@ -944,3 +944,11 @@ they must never silently turn into unrestricted brands/categories.
 ### Saved Nova Poshta destination in manager orders (2026-10-18)
 
 `ManagerOrderDetails::destination` renders `_pnpm_recipient` separately from the Woo shipping address. It reuses the existing ownership-checked split-order source resolver. Labels are escaped and malformed metadata ignored. This is the checkout snapshot, not a current shipment destination; later manager corrections belong to the NP preparation panel. No shipment/API/email mutations. WordPress-only deployment, no data migration. Offline regression: `tests/manager-destination-offline.php`. Operator instructions: `docs/MANAGER_CUSTOMER_GUIDE_UK.md`.
+
+### Independent storefront shell (local preparation, 2026-10-21)
+
+`CatalogDraft::toolbar` also listens to `lavka_storefront_before_main_content`.
+The existing GeneratePress, WooCommerce and explicit-shortcode hooks remain;
+its render guard still allows only one toolbar per request. Permissions and
+draft/cart operations are unchanged. This prepares the local `lavka-storefront`
+theme; it does not activate a theme or deploy to production.

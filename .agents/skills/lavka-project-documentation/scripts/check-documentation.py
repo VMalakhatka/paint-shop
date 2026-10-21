@@ -154,6 +154,7 @@ IMPACT_RULES = (
         "storefront and account UI",
         (
             "wp-content/themes/generatepress-child/**",
+            "wp-content/themes/lavka-storefront/**",
             "wp-content/plugins/role-price/**",
         ),
         (
@@ -225,6 +226,7 @@ def is_documentation(path: str) -> bool:
         or (path.startswith("docs/") and path.endswith(".md"))
         or (path.startswith(".agents/skills/") and path.endswith(".md"))
         or (path.startswith("wp-content/plugins/") and path.endswith("/README.md"))
+        or (path.startswith("wp-content/themes/lavka-storefront/") and path.endswith("/README.md"))
     )
 
 
@@ -233,6 +235,7 @@ def managed_source(path: str) -> bool:
         path.startswith("wp-content/plugins/")
         or path.startswith("wp-content/mu-plugins/")
         or path.startswith("wp-content/themes/generatepress-child/")
+        or path.startswith("wp-content/themes/lavka-storefront/")
         or path.startswith(".agents/skills/")
         or path.startswith("wp-content/deploy")
         or path

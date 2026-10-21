@@ -111,3 +111,12 @@ already installed; do not install the separate experimental Gutenberg plugin.
 Templately's cloud-import editor assets are dequeued only on workshop screens;
 the plugin remains available elsewhere. The existing non-admin Rank Math classic
 mount exception stays in effect. Unrelated admin/SEO tools retain their permissions.
+
+### Theme-shell compatibility (2026-10-21)
+
+The public template keeps `#primary.lw-page` as its outer container and places
+`#main` on the inner `main.lw-container`. This preserves the existing layout and
+gives the site header's skip-to-content link a valid target under both
+GeneratePress and the locally prepared independent Lavka theme. The plugin
+continues to own template selection and closed-section access. No visibility
+setting, booking behavior or production theme is changed.

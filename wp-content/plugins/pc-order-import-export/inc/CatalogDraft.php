@@ -16,6 +16,7 @@ final class CatalogDraft
         add_action('woocommerce_before_shop_loop', [self::class, 'toolbar'], 5);
         add_action('pcoe_catalog_toolbar', [self::class, 'toolbar']);
         add_action('generate_before_main_content', [self::class, 'toolbar']);
+        add_action('lavka_storefront_before_main_content', [self::class, 'toolbar']);
         add_filter('woocommerce_loop_add_to_cart_link', [self::class, 'loop_button'], 1000, 2);
         add_action('wp', [self::class, 'single_setup'], 100);
         add_action('wp_enqueue_scripts', [self::class, 'assets'], 120);
