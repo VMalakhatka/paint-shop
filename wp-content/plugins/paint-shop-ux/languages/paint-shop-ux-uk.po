@@ -224,3 +224,36 @@ msgstr "Мій кабінет"
 #: inc/site-footer.php
 msgid "How to order"
 msgstr "Як замовляти"
+
+#: inc/site-header.php
+msgid "Cart"
+msgstr "Кошик"
+
+#: inc/site-header.php
+msgid "Skip to content"
+msgstr "Перейти до вмісту"
+
+#: inc/site-header.php
+msgid "Kyiv, Olimpiiskyi shopping centre"
+msgstr "м. Київ, ТЦ «Олімпійський»"
+
+#: inc/site-header.php
+msgid "Odesa, 17 Lanzheronivska St."
+msgstr "м. Одеса, Ланжеронівська, 17"
+
+#: inc/site-header.php
+msgid "Wholesale sales"
+msgstr "Оптові продажі"
+
+#: inc/site-header.php
+msgid "Menu"
+msgstr "Меню"
+
+#: inc/site-header.php
+msgid "Main navigation"
+msgstr "Головне меню"
+
+#: inc/site-header.php
+#, php-format
+msgid "Submenu: %s"
+msgstr "Підменю: %s"

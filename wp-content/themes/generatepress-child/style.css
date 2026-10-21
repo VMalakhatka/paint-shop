@@ -65,7 +65,7 @@ Version: 1.0
 
 /* === Hide "Товар списком" on mobile === */
 @media (max-width: 768px){
-  #menu-item-102214 { display: none !important; }
+  body:not(.psu-header-page) #menu-item-102214 { display: none !important; }
 }
 
 .site-logo--svg svg {

@@ -1181,3 +1181,15 @@ msgstr "Каталог, картка товару, кошик і кабінет 
 #: pc-wholesale-help.php
 msgid "Catalogue filters on a phone"
 msgstr "Фільтри каталогу на телефоні"
+
+#: pc-wholesale-help.php
+msgid "The logo at the top opens the home page. Tap a shop or wholesale phone number to call. On a phone, Menu opens links to products, your account and cart. Product list is available after signing in with a wholesale role, including on a phone. Warehouse controls stay visible when the menu is closed."
+msgstr "Логотип угорі відкриває головну сторінку. Натисніть номер магазину або оптового відділу, щоб зателефонувати. На телефоні кнопка «Меню» відкриває посилання на товари, кабінет і кошик. «Товар списком» доступний після входу з оптовою роллю, зокрема й на телефоні. Вибір складу залишається видимим, коли меню згорнуте."
+
+#: pc-wholesale-help.php
+msgid "Select Menu again or press Escape to close it. Use Tab to move between links and controls. Without JavaScript, menu links remain expanded."
+msgstr "Повторно натисніть «Меню» або клавішу Escape, щоб закрити його. Клавішею Tab переходьте між посиланнями та елементами керування. Без JavaScript посилання меню показуються розгорнутими."
+
+#: pc-wholesale-help.php
+msgid "Header, menu and warehouse controls on a phone"
+msgstr "Шапка, меню та вибір складу на телефоні"

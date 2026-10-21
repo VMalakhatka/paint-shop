@@ -1159,3 +1159,15 @@ msgstr ""
 #: pc-wholesale-help.php
 msgid "Catalogue filters on a phone"
 msgstr ""
+
+#: pc-wholesale-help.php
+msgid "The logo at the top opens the home page. Tap a shop or wholesale phone number to call. On a phone, Menu opens links to products, your account and cart. Product list is available after signing in with a wholesale role, including on a phone. Warehouse controls stay visible when the menu is closed."
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Select Menu again or press Escape to close it. Use Tab to move between links and controls. Without JavaScript, menu links remain expanded."
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Header, menu and warehouse controls on a phone"
+msgstr ""

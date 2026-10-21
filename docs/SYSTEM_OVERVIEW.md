@@ -52,7 +52,8 @@ OVH service -> physical host -> hypervisor -> Windows VM
 | Область | Владелец | Источник истины |
 |---|---|---|
 | Каталог, корзина, checkout, кабинет, HPOS-заказы | WooCommerce + собственные PHP-плагины | текущий Woo runtime и PHP-код |
-| Шапка, меню и PHP-оболочка | GeneratePress + `generatepress-child` | код theme и визуальная проверка |
+| Шапка и основное меню | `paint-shop-ux/inc/site-header.php` | собственные разметка/CSS/JS; меню WordPress `primary` и существующие фильтры доступа; выбор склада — `paint-core` |
+| PHP-оболочка и обычные шаблоны страниц | GeneratePress + `generatepress-child` | код theme; смена PHP-темы ещё не выполнена |
 | Футер | `paint-shop-ux/inc/site-footer.php` | собственная разметка/CSS, adapter GP + однократный fallback `wp_footer`; юридические данные — `pc-wayforpay-compliance` |
 | Каталог, товар и стили покупательских страниц | `paint-shop-ux` | собственные modules/templates/assets, scoped storefront.css; Woo hooks сохраняют цены, склады и покупку |
 | Общие остатки и allocation | `paint-core` | код, Woo product/order state |
@@ -76,14 +77,28 @@ OVH service -> physical host -> hypervisor -> Windows VM
 существующий MU `psu-force-per-page.php`, установка даты создания заказа при classic
 checkout — `paint-core/inc/checkout-created-date.php`. Семантика даты сохранена.
 Новый футер заменяет вывод GeneratePress, сохраняет юридические ссылки и активные
-footer widgets; шапка и PHP-оболочка ещё используют тему. В 1.6.0 базовые стили
+footer widgets. В 1.6.0 базовые стили
 каталога, товара, корзины, checkout, кабинета и списка товаров перенесены в
 `paint-shop-ux/assets/storefront.css` и component CSS. Контекст определяется Woo
 conditionals/shortcode; отчёты и обычные страницы остаются у своих владельцев.
 Контейнеры, сетка, типографика и controls проверяются локально с удалённым CSS темы;
 это не проверка переключения PHP-темы. Локальная приёмка
 и откат описаны в [Paint Shop UX](../wp-content/plugins/paint-shop-ux/README.md).
-Публикация этого этапа ожидает согласованного deploy и production-проверки.
+
+В 1.7.0 шапка, контакты и основная навигация переходят в `inc/site-header.php`,
+`assets/site-header.css` и `assets/site-header.js`. Вывод использует стандартный
+`wp_body_open`; adapter отключает прежние callbacks шапки/меню GP. Сохранённое
+меню `primary` продолжает проходить фильтры ролей. Переключатель склада выводит
+существующий `pc_render_alloc_control()` прямо в шапке; его режимы, сохранение
+выбора и правила корзины остаются у Paint Core. Старый footer mount пропускается
+только после фактического вывода собственной шапки. При
+`psu_site_header_enabled=false` до `wp` остаётся прежний путь темы.
+
+Оставшаяся зависимость от GP — внешняя PHP-оболочка, обычные шаблоны страниц,
+регистрация областей виджетов и возможностей темы/WooCommerce. Удаление CSS не
+подтверждает готовность к смене темы. Статус шапки 1.7.0 на 2026-10-21:
+локальная приёмка пройдена (518 PHP-проверок и 25 browser-сценариев); публикация
+справки и production-проверка ожидают deploy.
 
 ## Собственные WordPress-компоненты
 

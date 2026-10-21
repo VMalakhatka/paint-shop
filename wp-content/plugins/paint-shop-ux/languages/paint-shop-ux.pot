@@ -309,3 +309,36 @@ msgstr ""
 #: inc/site-footer.php
 msgid "How to order"
 msgstr ""
+
+#: inc/site-header.php
+msgid "Cart"
+msgstr ""
+
+#: inc/site-header.php
+msgid "Skip to content"
+msgstr ""
+
+#: inc/site-header.php
+msgid "Kyiv, Olimpiiskyi shopping centre"
+msgstr ""
+
+#: inc/site-header.php
+msgid "Odesa, 17 Lanzheronivska St."
+msgstr ""
+
+#: inc/site-header.php
+msgid "Wholesale sales"
+msgstr ""
+
+#: inc/site-header.php
+msgid "Menu"
+msgstr ""
+
+#: inc/site-header.php
+msgid "Main navigation"
+msgstr ""
+
+#: inc/site-header.php
+#, php-format
+msgid "Submenu: %s"
+msgstr ""

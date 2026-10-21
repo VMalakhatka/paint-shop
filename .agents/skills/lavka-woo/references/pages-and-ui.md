@@ -98,7 +98,8 @@
   `assets/single-product.*`. Сохранять пять Woo single-product hooks, порядок,
   password gate, native gallery/type forms/notices/schema и существующие price/stock
   owners. Scoped adapter заменяет Woo/GeneratePress wrappers только на single product;
-  шапка остаётся у активной темы, footer с 1.5.0 — у собственного модуля ниже.
+  footer с 1.5.0 и шапка/меню с 1.7.0 — у собственных модулей ниже;
+  общая PHP-оболочка остаётся у активной темы.
   Simple AJAX выполняет один Woo POST и при
   неизвестном результате направляет к корзине без auto-retry; остальные типы — native.
   `pcux_catalog_assets_required` подключает общие controls для related/upsell loops;
@@ -280,7 +281,8 @@ keep `manage_options` for payee editing. Runtime defaults survive code deploys.
 Проверено локально 2026-09-22: `psu-search-filters.php` группирует дополнительные
 поля в native details; на ширине до 768 px они свёрнуты, активные группы условий
 отмечены счётчиком. Без JS поля открыты. Переключение ширины не отправляет форму.
-Шапкой и размером контактов владеет generatepress-child; выбор склада сохраняется.
+С 1.7.0 шапкой и размером контактов владеет `paint-shop-ux/inc/site-header.php`
+и его assets; выбор склада остаётся у Paint Core.
 Инструкция и снимок — `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md` и pc-wholesale-help.
 
 ### Preorder balance v2 (2026-10-14)
@@ -308,7 +310,8 @@ Workflow and limitations:
 Реквизиты/документы остаются у `pc-wayforpay-compliance`; не копировать их в тему
 или новые настройки. Ссылка на справку следует `pc_wholesale_customer_can_access`.
 Существующие footer widget areas сохраняются. `psu_site_footer_enabled=false` до
-`wp` возвращает прежний footer. Шапка и page containers ещё принадлежат GP.
+`wp` возвращает прежний footer. Page containers ещё принадлежат GP;
+шапка с 1.7.0 вынесена в собственный модуль ниже.
 Breadcrumb delimiter — `paint-shop-ux/inc/store-presentation.php`; 24 товара по
 умолчанию — существующий `psu-force-per-page.php`; дата classic checkout —
 `paint-core/inc/checkout-created-date.php`. Не возвращать дубли этих callbacks в
@@ -324,7 +327,8 @@ content typography/tokens, полями/кнопками/focus, account navigati
 adapter; grid/category tiles — `catalog-cards.css`, geometry PDP — `single-product.css`,
 cart — `cart-layout.css`. Legacy width/sidebar child CSS исключает этот scope.
 Не добавляй новые content overrides в child theme и не снимай все стили GeneratePress
-на живом сайте: header/menu и PHP wrappers ещё используются. Не расширяй scope на
+на живом сайте: PHP wrappers и обычные страницы ещё используют тему;
+header/menu с 1.7.0 принадлежат собственному модулю ниже. Не расширяй scope на
 reports/обычные страницы автоматически. Каталог сохраняет configured sidebar,
 на <=1024 он под контентом; task pages cart/checkout/account/quick-order без sidebar.
 Проверка CSS независимости удаляет theme links/inline style только в тестовом DOM:
@@ -334,3 +338,33 @@ reports/обычные страницы автоматически. Катало
 Deployment/rollback переносит plugin и child CSS вместе. Источник — модуль,
 styles и acceptance tests; human summary — `docs/SYSTEM_OVERVIEW.md`, пользовательская
 инструкция — `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md` и `pc-wholesale-help`.
+
+
+## Собственная шапка и меню (1.7.0, 2026-10-21)
+
+`paint-shop-ux/inc/site-header.php` и `assets/site-header.css/js` владеют шапкой,
+контактами и навигацией; логотип хранится в `assets/site-logo.svg`. Стандартный
+`wp_body_open` выводит шапку один раз. GP adapter снимает только известные callbacks
+старой шапки/навигации; не удалять все чужие callbacks и featured-page content.
+Меню берётся из существующего `primary` через `wp_nav_menu`: сохранять порядок,
+Woo/Relevanssi-фильтры и `pc_wholesale_help_filter_quick_order_menu`. Не переносить
+жёсткий ID старого mobile CSS: доступ к быстрому заказу определяется ролью и на
+телефоне. Без JS ссылки открыты; JS добавляет мобильное раскрытие и клавиатурное
+управление. Скрытое меню не должно оставлять доступные Tab элементы.
+
+Шапка вызывает существующий `pc_render_alloc_control()`. Его nonce, DOM IDs,
+role gate и правила сохранения/корзины принадлежат Paint Core. Фильтр
+`pc_alloc_header_rendered` отключает старый footer mount только после вывода шапки;
+при rollback исходное размещение остаётся доступным. Контекстная справка добавляется
+рядом с `.pc-alloc`; оставлять место для этой ссылки. Разметка/controls инициализируются
+однократно, без пересохранения предпочтения при открытии/изменении ширины меню.
+
+Откат: `psu_site_header_enabled=false` до `wp`. Legacy child code остаётся для этого
+пути. Никакая настройка меню/склада не мигрирует в БД. Deploy/rollback должны включать
+Paint Shop UX, Paint Core, child CSS и справку/переводы/изображение вместе. GP всё ещё
+даёт PHP-шаблоны, регистрацию widget areas и theme/Woo supports; пока не отключать
+родительскую тему. Источники — header module и `tests/site-header-local.php`;
+приёмка/rollback — README Paint Shop UX. Human ownership — `docs/SYSTEM_OVERVIEW.md`,
+инструкция — `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md` и `pc-wholesale-help`.
+На 2026-10-21 локальная приёмка пройдена: 518 PHP-проверок и 25 browser-сценариев;
+production-публикация ожидает deploy.
