@@ -580,6 +580,8 @@ function pc_wholesale_help_render_endpoint(): void {
             <?php endif; ?>
         </section>
 
+        <p><?php esc_html_e('The site footer links to the catalogue and your account, and to this guide when you are signed in as a wholesale customer. It also contains purchase terms, payment and delivery, refunds, and seller contacts.', 'pc-wholesale-help'); ?></p>
+        <?php pc_wholesale_help_image('site-footer-links-mobile-2026-10-21.png', __('Footer links on a phone', 'pc-wholesale-help'), __('Click the image to enlarge it.', 'pc-wholesale-help')); ?>
         <footer class="pc-help-footer">
             <div><strong><?php esc_html_e('Need help?', 'pc-wholesale-help'); ?></strong><p><?php esc_html_e('Tell the wholesale manager your WooCommerce order number and what you expected to see. Never send your password or bank card details.', 'pc-wholesale-help'); ?></p></div>
             <a href="#pochatok"><?php esc_html_e('Back to top', 'pc-wholesale-help'); ?> ↑</a>

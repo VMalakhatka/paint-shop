@@ -285,3 +285,27 @@ msgstr ""
 #: inc/mobile-cart.php
 msgid "Product added"
 msgstr ""
+
+#: inc/site-footer.php
+msgid "Site footer"
+msgstr ""
+
+#: inc/site-footer.php
+msgid "Lavka Khudozhnyka"
+msgstr ""
+
+#: inc/site-footer.php
+msgid "Shop links"
+msgstr ""
+
+#: inc/site-footer.php
+msgid "Catalogue"
+msgstr ""
+
+#: inc/site-footer.php
+msgid "My account"
+msgstr ""
+
+#: inc/site-footer.php
+msgid "How to order"
+msgstr ""

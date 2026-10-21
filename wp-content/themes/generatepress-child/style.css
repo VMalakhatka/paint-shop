@@ -109,12 +109,6 @@ Version: 1.0
   }
 }
 
-/* ── Хлебные крошки (Yoast) ─────────────────────────────────────────────── */
-.woocommerce-breadcrumb .breadcrumb-delimiter{
-  margin:0 .4em;
-  color:#888;
-}
-
 /* ── База для грид-списков Woo ──────────────────────────────────────────── */
 .woocommerce ul.products::before,
 .woocommerce ul.products::after{ content:none !important; }

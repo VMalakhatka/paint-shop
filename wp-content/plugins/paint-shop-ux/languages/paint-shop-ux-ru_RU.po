@@ -200,3 +200,27 @@ msgstr "Перейти в корзину"
 #: inc/mobile-cart.php
 msgid "Product added"
 msgstr "Товар добавлен"
+
+#: inc/site-footer.php
+msgid "Site footer"
+msgstr "Нижняя часть сайта"
+
+#: inc/site-footer.php
+msgid "Lavka Khudozhnyka"
+msgstr "Лавка Художника"
+
+#: inc/site-footer.php
+msgid "Shop links"
+msgstr "Ссылки магазина"
+
+#: inc/site-footer.php
+msgid "Catalogue"
+msgstr "Каталог"
+
+#: inc/site-footer.php
+msgid "My account"
+msgstr "Мой кабинет"
+
+#: inc/site-footer.php
+msgid "How to order"
+msgstr "Как заказывать"

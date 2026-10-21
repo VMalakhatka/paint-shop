@@ -98,7 +98,8 @@
   `assets/single-product.*`. Сохранять пять Woo single-product hooks, порядок,
   password gate, native gallery/type forms/notices/schema и существующие price/stock
   owners. Scoped adapter заменяет Woo/GeneratePress wrappers только на single product;
-  шапка/футер остаются у активной темы. Simple AJAX выполняет один Woo POST и при
+  шапка остаётся у активной темы, footer с 1.5.0 — у собственного модуля ниже.
+  Simple AJAX выполняет один Woo POST и при
   неизвестном результате направляет к корзине без auto-retry; остальные типы — native.
   `pcux_catalog_assets_required` подключает общие controls для related/upsell loops;
   не связывать Paint Core напрямую с GeneratePress. Откат до `wp` —
@@ -295,3 +296,18 @@ reload uses authenticated history reads. No shared backend baseline or Folio wri
 Keep comparison export separate from the manager H/I template. Workflow, decimal
 formula, zero/negative cases and deployment boundary:
 [profit manager guide](../../../../docs/PROFIT_REPORT_MANAGER_RU.md#сравнение-выбранных-месяцев-и-база-отклонений).
+
+## Собственный футер и настройки магазина (2026-10-21)
+
+`paint-shop-ux/inc/site-footer.php` владеет footer markup/CSS; GP adapter заменяет
+штатный footer и размещение legal block, `wp_footer` даёт однократный fallback.
+Реквизиты/документы остаются у `pc-wayforpay-compliance`; не копировать их в тему
+или новые настройки. Ссылка на справку следует `pc_wholesale_customer_can_access`.
+Существующие footer widget areas сохраняются. `psu_site_footer_enabled=false` до
+`wp` возвращает прежний footer. Шапка и page containers ещё принадлежат GP.
+Breadcrumb delimiter — `paint-shop-ux/inc/store-presentation.php`; 24 товара по
+умолчанию — существующий `psu-force-per-page.php`; дата classic checkout —
+`paint-core/inc/checkout-created-date.php`. Не возвращать дубли этих callbacks в
+child theme. Семантика `current_time('timestamp')` сохранена переносом.
+Источники: названные modules, `tests/site-footer-local.php`, `tests/site-footer.spec.cjs`;
+приёмка/rollback/deploy — README Paint Shop UX. Пока локальный выпуск.

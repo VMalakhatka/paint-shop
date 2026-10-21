@@ -1165,3 +1165,11 @@ msgstr "После согласования доставки менеджер м
 
 msgid "The manager can prepare delivery for your order without changing your profile. After separately creating a Nova Poshta waybill, the manager can email its number and tracking link to the email on your order. Different warehouses may have different waybills. A created waybill does not yet confirm physical dispatch. Automatic Telegram delivery notices are not enabled."
 msgstr "Менеджер может подготовить доставку вашего заказа, не меняя профиль. После отдельного создания накладной Новой почты менеджер может отправить её номер и ссылку для отслеживания на email заказа. Для разных складов могут быть разные накладные. Созданная накладная ещё не подтверждает физическую отправку. Автоматические Telegram-уведомления о доставке не включены."
+
+#: pc-wholesale-help.php
+msgid "The site footer links to the catalogue and your account, and to this guide when you are signed in as a wholesale customer. It also contains purchase terms, payment and delivery, refunds, and seller contacts."
+msgstr "В нижней части сайта есть ссылки на каталог и кабинет, а после входа с оптовой ролью — на эту инструкцию. Здесь также размещены условия покупки, оплата и доставка, возврат средств и контакты продавца."
+
+#: pc-wholesale-help.php
+msgid "Footer links on a phone"
+msgstr "Ссылки внизу сайта на телефоне"

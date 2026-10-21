@@ -108,3 +108,4 @@
         font-size: clamp(10px, 11cqi, 14px);
     }
 }
+.woocommerce-breadcrumb .breadcrumb-delimiter { margin: 0 .4em; color: #888; }

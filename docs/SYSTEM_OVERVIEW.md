@@ -52,7 +52,8 @@ OVH service -> physical host -> hypervisor -> Windows VM
 | Область | Владелец | Источник истины |
 |---|---|---|
 | Каталог, корзина, checkout, кабинет, HPOS-заказы | WooCommerce + собственные PHP-плагины | текущий Woo runtime и PHP-код |
-| Шапка, меню, футер и общая оболочка | GeneratePress + `generatepress-child` | код theme и визуальная проверка |
+| Шапка, меню и общая оболочка | GeneratePress + `generatepress-child` | код theme и визуальная проверка |
+| Футер | `paint-shop-ux/inc/site-footer.php` | собственная разметка/CSS, adapter GP + однократный fallback `wp_footer`; юридические данные — `pc-wayforpay-compliance` |
 | Каталог и содержимое страницы товара | `paint-shop-ux` | собственные modules/templates/assets; Woo hooks сохраняют цены, склады и покупку |
 | Общие остатки и allocation | `paint-core` | код, Woo product/order state |
 | Полная синхронизация карточек и категорий | `lavka-total-sync` + Java `/sync/run` | код обоих владельцев и run status |
@@ -69,6 +70,15 @@ OVH service -> physical host -> hypervisor -> Windows VM
 | Java image/container/env/health | `$build-java-docker-runtime` | текущий Docker/deploy code и runtime state |
 | ФОЛИО-документы и бизнес-данные | ФОЛИО/MS SQL | живая схема и подтверждённое поведение |
 | Сервер и MSSQL runtime | host/Windows/MSSQL operations | фактическое read-only состояние слоёв |
+
+С 2026-10-21 настройки магазина вынесены из дочерней темы: разделитель хлебных
+крошек — `paint-shop-ux/inc/store-presentation.php`, исходные 24 товара на странице —
+существующий MU `psu-force-per-page.php`, установка даты создания заказа при classic
+checkout — `paint-core/inc/checkout-created-date.php`. Семантика даты сохранена.
+Новый футер заменяет вывод GeneratePress, сохраняет юридические ссылки и активные
+footer widgets; шапка и общая оболочка ещё используют тему. Локальная приёмка
+и откат описаны в [Paint Shop UX](../wp-content/plugins/paint-shop-ux/README.md).
+Публикация этого этапа ожидает согласованного deploy и production-проверки.
 
 ## Собственные WordPress-компоненты
 

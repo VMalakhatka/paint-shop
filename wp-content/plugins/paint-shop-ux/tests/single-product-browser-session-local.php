@@ -17,7 +17,9 @@ if (!$id) throw new RuntimeException('Local representative SKU is required');
 $product = wc_get_product($id);
 $plain = static function (string $html): string { return html_entity_decode(wp_strip_all_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8'); };
 $data = ['sessions' => [], 'url' => get_permalink($id), 'title' => $product->get_name(), 'sku' => $product->get_sku(),
-    'guest_price' => $plain($product->get_price_html()), 'help_url' => pc_wholesale_help_url('katalog'), 'shop_url' => wc_get_page_permalink('shop')];
+    'guest_price' => $plain($product->get_price_html()), 'help_url' => pc_wholesale_help_url('katalog'), 'shop_url' => wc_get_page_permalink('shop'),
+    'cart_url' => wc_get_page_permalink('cart'), 'checkout_url' => wc_get_page_permalink('checkout'),
+    'account_url' => wc_get_page_permalink('myaccount')];
 $gallery_product = wc_get_product(wc_get_product_id_by_sku('CR-CE0900056620'));
 if (!$gallery_product || !$gallery_product->get_image_id() || count($gallery_product->get_gallery_image_ids()) < 2) {
     throw new RuntimeException('Representative local gallery required');

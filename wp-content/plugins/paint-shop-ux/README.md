@@ -460,8 +460,8 @@ sent to WordPress. See the performance audit for measured scope and deploy check
 только на single product и заменяет стандартные/GeneratePress Woo wrappers.
 `assets/single-product.css` задаёт двухколоночный верх, мобильную колонку и подробности
 ниже. Каталог, кабинет, cart и checkout этим адаптером не меняются.
-Шапка/футер и их CSS пока остаются у активной темы; это этап миграции, а не
-самостоятельная тема. Слоты галереи/summary/details сохраняют все пять Woo hooks
+Шапка и общая оболочка пока остаются у активной темы; это этап миграции, а не
+самостоятельная тема. С 1.5.0 футером владеет собственный модуль (см. раздел ниже). Слоты галереи/summary/details сохраняют все пять Woo hooks
 и их порядок; формы типов товара, notices, reviews и structured data остаются Woo.
 Цены читаются через Woo getters/role-price, склады — через stock-locations-ui/paint-core.
 
@@ -589,3 +589,45 @@ uncached `wc-ajax=psu_mobile_cart`. Успешное добавление/уда
 Deploy: существующий Paint Shop UX и MU-справка/assets/переводы; нового плагина,
 Java, миграции или настройки нет. Production не изменялся. Rollback: убрать
 подключение модуля и его assets/ссылки справки; данные корзин сохраняются.
+
+## Собственный футер и перенос настроек из темы (1.5.0, 2026-10-21)
+
+`inc/site-footer.php` и `assets/site-footer.css` владеют разметкой/стилями футера.
+На `wp` adapter снимает только штатные GP footer callbacks и прежнее размещение
+`pc_wayforpay_render_legal_footer`. Собственный footer выводится через `generate_footer`,
+а стандартный `wp_footer` служит fallback; защита от повторного вывода оставляет
+один footer и один юридический блок. Существующий MU остаётся источником реквизитов,
+телефона, email, платёжного знака и четырёх ссылок. Платёжное изображение
+получает native `loading="lazy"` и `data-no-lazy="1"`: Smush больше не подменяет
+его прозрачной JS-заглушкой, поэтому знак виден и без JavaScript. Активные legacy widget areas
+`footer-1`…`footer-5`/`footer-bar` выводятся через WordPress в собственной сетке.
+Шапка, навигация и закрывающие контейнеры пока принадлежат теме.
+
+Каталог/кабинет берутся из Woo page options. «Як замовляти» использует существующие
+URL и allow-list оптовых ролей. UK/RU новые строки принадлежат Paint Shop UX.
+JS для футера не нужен. Стили ограничены `.psu-site-footer`; desktop — три колонки,
+до 768 px — одна, кликабельные строки не ниже 44 px. Parent CSS не требуется.
+
+`inc/store-presentation.php` сохраняет разделитель хлебных крошек, CSS перенесён
+в `assets/catalog-cards.css`. Дублирующий theme override количества товаров удалён:
+исходные 24 и явные 12/48 уже обслуживает MU `psu-force-per-page.php`.
+Дата classic checkout перенесена в `paint-core/inc/checkout-created-date.php`
+с прежним `current_time('timestamp')`; семантика времени здесь не пересматривалась.
+Дочерняя тема больше не регистрирует эти три правила магазина.
+
+Проверки: `tests/site-footer-local.php` (read-only, несохранённый WC_Order),
+`tests/site-footer.spec.cjs` (GET/HEAD, 1440/768/390/320, guest/wholesale/customer,
+ссылки, роли, клавиатура, no-JS, без theme CSS, rollback/fallback, страницы магазина).
+Локально пройдены 21 проверка переноса/футера, 18 проверок размеров страниц
+и 12 browser-сочетаний роли/ширины с дополнительными сценариями выше.
+Browser fixture/cleanup — существующий `tests/single-product-browser-session-local.php`;
+токены временные, `/tmp`, не коммитятся. Локальный preview поддерживает
+`psu_footer_legacy=1`/`psu_footer_fallback=1` только через временный prepend,
+эти query-переключатели не входят в production-код.
+
+Откат футера: `psu_site_footer_enabled=false` до `wp` возвращает GP footer и прежний
+legal placement; настройки магазина продолжают работать из плагинов. Полный откат
+переноса требует совместно вернуть theme functions/CSS и plugin modules.
+Новые options, миграции, activation и DB writes не нужны. Deploy должен включать
+Paint Shop UX, Paint Core, child theme и обновлённую справку/UK/RU. Канон и код
+«Як замовляти» обновлены; публикация ожидает deploy и production-проверки.

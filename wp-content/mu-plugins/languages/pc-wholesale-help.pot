@@ -1143,3 +1143,11 @@ msgstr ""
 
 msgid "The manager can prepare delivery for your order without changing your profile. After separately creating a Nova Poshta waybill, the manager can email its number and tracking link to the email on your order. Different warehouses may have different waybills. A created waybill does not yet confirm physical dispatch. Automatic Telegram delivery notices are not enabled."
 msgstr ""
+
+#: pc-wholesale-help.php
+msgid "The site footer links to the catalogue and your account, and to this guide when you are signed in as a wholesale customer. It also contains purchase terms, payment and delivery, refunds, and seller contacts."
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Footer links on a phone"
+msgstr ""
