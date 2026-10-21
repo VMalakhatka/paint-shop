@@ -1173,5 +1173,9 @@ msgid "Header, menu and warehouse controls on a phone"
 msgstr ""
 
 #: pc-wholesale-help.php
-msgid "An image in a category description illustrates the section. Open a product card to view that product's photos."
+msgid "On a category page, search and filters appear above its title and description. When products are found, you can also choose 12, 24 or 48 products per page there. The illustration stays in the description, with available subcategories and products below. Open a product card to view that product's photos."
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Search above the category title and description"
 msgstr ""

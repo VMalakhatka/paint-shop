@@ -172,7 +172,7 @@ function pc_wholesale_help_render_context_link(string $anchor, string $label): v
 function pc_wholesale_help_catalog_link(): void {
     pc_wholesale_help_render_context_link('katalog', __('How to choose products in the catalogue', 'pc-wholesale-help'));
 }
-add_action('woocommerce_before_shop_loop', 'pc_wholesale_help_catalog_link', 4);
+add_action('woocommerce_shop_loop_header', 'pc_wholesale_help_catalog_link', 4);
 add_action('woocommerce_before_single_product', 'pc_wholesale_help_catalog_link', 4);
 
 function pc_wholesale_help_cart_link(): void {
@@ -320,7 +320,8 @@ function pc_wholesale_help_render_endpoint(): void {
 
         <section class="pc-help-section" id="katalog">
             <div class="pc-help-section__heading"><span>02</span><div><h2><?php esc_html_e('Order from catalogue cards', 'pc-wholesale-help'); ?></h2><p><?php esc_html_e('Best when you want to browse photos, categories and product variants.', 'pc-wholesale-help'); ?></p></div></div>
-            <p><?php esc_html_e('An image in a category description illustrates the section. Open a product card to view that product\'s photos.', 'pc-wholesale-help'); ?></p>
+            <p><?php esc_html_e('On a category page, search and filters appear above its title and description. When products are found, you can also choose 12, 24 or 48 products per page there. The illustration stays in the description, with available subcategories and products below. Open a product card to view that product\'s photos.', 'pc-wholesale-help'); ?></p>
+            <?php pc_wholesale_help_image('catalog-category-layout-2026-10-21.jpg', __('Search above the category title and description', 'pc-wholesale-help'), __('Click the image to enlarge it.', 'pc-wholesale-help')); ?>
             <div class="pc-help-note"><strong><?php esc_html_e('Fewer category transitions.', 'pc-wholesale-help'); ?></strong> <?php esc_html_e('Starting with the second category level, all products from that branch appear below the child category tiles, including products from deeper subcategories.', 'pc-wholesale-help'); ?></div>
             <p><?php esc_html_e('Page numbers above and below the products show the current and total pages. Your category and filters stay selected when changing pages.', 'pc-wholesale-help'); ?></p>
             <p><?php esc_html_e('The catalogue, product page, cart and account share consistent fonts, fields and buttons. Your active account section and selected page size are highlighted. On a phone the catalogue keeps three columns and the account menu wraps. Keyboard focus has a visible outline.', 'pc-wholesale-help'); ?></p>

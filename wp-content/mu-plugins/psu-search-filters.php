@@ -2,7 +2,7 @@
 /*
 Plugin Name: PSU Search & Filters
 Description: Базовые фильтры для витрин Woo (location / in_stock). Поиск — Relevanssi.
-Version: 1.6.0
+Version: 1.6.1
 Author: PaintCore
 Text Domain: psu-search-filters
 Domain Path: /languages
@@ -607,8 +607,8 @@ function psu_render_active_filters(): void {
     echo '</ul><a class="psu-active-filters__clear" href="' . esc_url(psu_catalog_clear_filters_url()) . '">'
         . esc_html__('Clear all', 'psu-search-filters') . '</a></nav>';
 }
-add_action('woocommerce_before_shop_loop', 'psu_render_catalog_filters', 7);
-add_action('woocommerce_no_products_found', 'psu_render_catalog_filters', 5);
+// The archive header runs even on empty results: one form before title/description.
+add_action('woocommerce_shop_loop_header', 'psu_render_catalog_filters', 5);
 
 function psu_render_catalog_pagination(): void {
     if (wc_get_loop_prop('is_shortcode') || !woocommerce_products_will_display()) return;

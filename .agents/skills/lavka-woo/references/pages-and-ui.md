@@ -382,4 +382,23 @@ Woo archive — отдельный `woocommerce_taxonomy_archive_description_raw
 не вызывает editor pipeline, HTTP или DB writes. Источники: adapter, его local test,
 Media Cloud StorageContentHooks и read-only сверка production 2026-10-21.
 Приёмка/ограничения — README Paint Shop UX, действия менеджера —
-`docs/MEDIA_MANAGER_GUIDE_UK.md`. Production исправление ожидает deploy.
+`docs/MEDIA_MANAGER_GUIDE_UK.md`. После deploy проверять публичную страницу,
+а не только редактор категории.
+
+
+### Порядок блоков архива (1.7.2, 2026-10-21)
+
+Общий owner размещения — `woocommerce_shop_loop_header`: оптовая справка
+`pc_wholesale_help_catalog_link` @4, `psu_render_catalog_filters` @5,
+PSU per-page @7, native Woo header/description @10. Не возвращать форму на
+`woocommerce_before_shop_loop` или `woocommerce_no_products_found`: archive
+header работает и при пустом поиске, где должна быть ровно одна форма.
+Per-page исключает shortcode loops и чужие страницы; сохранять его guard
+`woocommerce_product_loop()` и текущий приоритет `pp/per_page`, перенос не меняет
+расчёт размера выдачи. Пустой product search не должен показывать 12/24/48.
+Счётчик/сортировка/пагинация остаются у товарной выдачи, single-product help hook
+не переносится. Проверять порядок title/description/tiles и отсутствие дубля формы
+под гостем/оптовиком на desktop/mobile, включая zero results. Источники:
+`psu-search-filters.php`, `paint-shop-ux.php`, `pc-wholesale-help.php`; приёмка и
+согласованный deploy/rollback — README Paint Shop UX. Пользовательский канон —
+`docs/WHOLESALE_CUSTOMER_GUIDE_UK.md`. Проверка production нового порядка ожидает deploy.
