@@ -489,3 +489,15 @@ or increase production DB limits as the default fix for packet overflow.
 Uploading XLSX does not prove parsed preview persistence or activation. The
 owner recovery flow and rollback reader requirement are in
 `docs/OPERATIONS_RUNBOOK.md`, «Большой прайс остаётся “Завантажено”».
+
+
+### Main-photo replacement confirmation (2026-10-22)
+
+`lavka-product-media-upload` owns per-row keep/remove decisions after the checked
+batch. `MainImageReplacement` stores server-owned Woo snapshots; `WorkflowService`
+plans old-gallery changes and main replacement together before Woo assignment.
+Java must support optimistic `remove_gallery` before plugin 0.5.0 deployment.
+Generated replacement names preserve old objects; never bypass the operator decision,
+S3 proof, shared lock or Folio preview/apply. The manager workflow is documented in
+`docs/MEDIA_MANAGER_GUIDE_UK.md`; endpoint details in
+`docs/api/FOLIO_PRODUCT_MEDIA_API.md`. No production writes are implied by this code.

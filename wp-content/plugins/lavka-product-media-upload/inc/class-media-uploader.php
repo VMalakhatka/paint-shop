@@ -516,6 +516,17 @@ final class MediaUploader
 
         $role = (string) ($row['role'] ?? '');
         if ($role === 'main') {
+            $snapshot = $row['_main_snapshot'] ?? null;
+            if (!is_array($snapshot)
+                || (int) $product->get_image_id('edit') !== (int) $snapshot['attachment_id']
+                || ($snapshot['attachment_id'] > 0 && (string) get_post_meta($snapshot['attachment_id'], '_wp_attached_file', true) !== $snapshot['file'])) {
+                return ['ok' => false, 'message' => __('The product images changed after verification. Check the batch again and choose what to do with the current main image.', 'lavka-product-media-upload')];
+            }
+            if (!empty($snapshot['required'])) {
+                $row = MainImageReplacement::choose($row, (string) ($row['previous_main_action'] ?? ''));
+                $gallery = array_values(array_map('intval', $product->get_gallery_image_ids('edit')));
+                $product->set_gallery_image_ids(MainImageReplacement::gallery_after($row, $gallery));
+            }
             $product->set_image_id($attachment_id);
             $product->save();
             return ['ok' => true];

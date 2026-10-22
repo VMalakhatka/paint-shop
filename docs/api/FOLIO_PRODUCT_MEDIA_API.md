@@ -211,8 +211,15 @@ Content-Type: application/json
 | `set_main` | Update `ALL_ARTC.S50` for the exact SKU. This is an update of the singleton main image reference. |
 | `update_gallery` | Update one existing `img_prod` row using its stable record ID and optimistic old-value checks. |
 | `add_gallery` | Insert one `img_prod` row for the SKU's resolved `PLUS_ARTIC`. If `sortOrder` is null, Java chooses `max(sort_order) + 1`. |
+| `remove_gallery` | Remove one `img_prod` reference by `recordId`, exact SKU/PLUS_ARTIC, `expectedOldFilename` and `expectedOldSortOrder`. No file or attachment is deleted. |
 
-Removal and complete gallery replacement are outside the first version.
+`remove_gallery` was added for explicit previous-main-image decisions (2026-10-22).
+Its target `filename`, `sortOrder` and `s3Proof` are omitted: removal must also work
+for missing objects. Stable row identity and old-value checks remain mandatory.
+A missing row is blocked unless the exact successful request is replayed through
+idempotency storage. The deletion shares the SKU transaction with `set_main` and other
+gallery changes, so a blocked removal prevents main replacement. Complete gallery
+replacement remains outside this endpoint.
 
 ### 5.3 Mandatory validation
 
@@ -343,8 +350,12 @@ Do not delete duplicate WordPress attachments or S3 objects as part of this work
    for the rows still awaiting exact proof.
 5. WordPress reads the exact basename, full key, size and ETag from the refreshed index.
 6. WordPress searches the current Folio main/gallery references for the exact SKU.
+   A replacement requires the operator's explicit keep/remove decision from the checked
+   batch. Woo snapshots are rechecked before upload and before Folio; an unexpected
+   Folio main filename blocks the SKU. Keep appends/moves the old main to the end using
+   verified S3 proof; remove also removes any gallery references to that old filename.
 7. WordPress sends `set_main`, `update_gallery` or `add_gallery` with
-   `previewOnly=true`.
+   `previewOnly=true`, including any `remove_gallery` operations in the same SKU request.
 8. If every result is `ready` or `noop`, WordPress sends the identical changes with
    `previewOnly=false` and the same `externalRequestId`.
 9. Only after apply returns `applied` or `noop` does WordPress assign the attachment to

@@ -113,6 +113,15 @@ final class Plugin
                 'reportReady' => __('The operation is complete. Download the report for the full audit trail.', 'lavka-product-media-upload'),
                 'reportPartial' => __('The operation finished, but some rows require a safe retry. Review the errors and download the report.', 'lavka-product-media-upload'),
                 'confirmUpload' => __('Upload all approved images, refresh the S3 index, update Folio and assign the images in WooCommerce?', 'lavka-product-media-upload'),
+                'previousMain' => __('Current main image', 'lavka-product-media-upload'),
+                'previousMainQuestion' => __('What should happen to the current main image?', 'lavka-product-media-upload'),
+                'chooseMainAction' => __('Choose an action', 'lavka-product-media-upload'),
+                'moveToGallery' => __('Move to gallery', 'lavka-product-media-upload'),
+                'removeFromProduct' => __('Remove from this product', 'lavka-product-media-upload'),
+                'keepPreviousMain' => __('Move the previous main image to the end of the gallery', 'lavka-product-media-upload'),
+                'removePreviousMain' => __('Remove the previous main image from this product', 'lavka-product-media-upload'),
+                'previousMainHelp' => __('The file stays in the Media Library and storage. Only its display on this product changes.', 'lavka-product-media-upload'),
+                'previousMainNoGallery' => __('Keeping this image in the gallery is unavailable for this product. The file will remain in the Media Library and storage.', 'lavka-product-media-upload'),
                 's3Unavailable' => __('The S3 media index is unavailable, so remote filename conflicts were not checked.', 'lavka-product-media-upload'),
                 'extraFile' => __('Not referenced by the registry', 'lavka-product-media-upload'),
                 'row' => __('Row', 'lavka-product-media-upload'),
@@ -428,7 +437,8 @@ final class Plugin
                 $this->registry_upload(),
                 $this->image_uploads(),
                 !empty($_POST['legacy_main_confirm']),
-                !empty($_POST['generate_names'])
+                !empty($_POST['generate_names']),
+                (array) json_decode(wp_unslash($_POST['main_choices'] ?? '{}'), true)
             );
             wp_send_json_success($result);
         } catch (\Throwable $e) {

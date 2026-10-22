@@ -2389,3 +2389,66 @@ msgstr "Нажмите «Проверить без записи». Просмо�
 #: inc/supplier-page.php
 msgid "If our product was not found or the match is wrong, enter its exact SKU and click “Confirm product match” before selecting photos. This saves the link between products; it does not upload images."
 msgstr "Если наш товар не найден или сопоставлен неправильно, введите его точный артикул и нажмите «Подтвердить соответствие товара» перед выбором фото. Это сохраняет связь между товарами, а не загружает изображения."
+
+msgid "Choose an action"
+msgstr "Выберите действие"
+
+msgid "Move to gallery"
+msgstr "Переместить в галерею"
+
+msgid "Remove from this product"
+msgstr "Убрать из этого товара"
+
+msgid "Choose whether to move the current main image to the gallery or remove it from this product."
+msgstr "Выберите: переместить текущее главное фото в галерею или убрать его из этого товара."
+
+msgid "Current main image"
+msgstr "Текущее главное фото"
+
+msgid "Keeping this image in the gallery is unavailable for this product. The file will remain in the Media Library and storage."
+msgstr "Для этого товара перенос в галерею недоступен. Файл останется в медиатеке и хранилище."
+
+msgid "Move the previous main image to the end of the gallery"
+msgstr "Переместить прежнее главное фото в конец галереи"
+
+msgid "Previous main attachment ID"
+msgstr "ID прежнего главного фото"
+
+msgid "Previous main filename"
+msgstr "Файл прежнего главного фото"
+
+msgid "Previous main image action"
+msgstr "Действие с прежним главным фото"
+
+msgid "Remove the previous main image from this product"
+msgstr "Убрать прежнее главное фото из этого товара"
+
+msgid "The file stays in the Media Library and storage. Only its display on this product changes."
+msgstr "Файл остаётся в медиатеке и хранилище. Меняется только его отображение в этом товаре."
+
+msgid "The main images in Folio and WooCommerce differ. Reconcile them before replacing this image."
+msgstr "Главные фото в ФОЛИО и WooCommerce различаются. Согласуйте их перед заменой."
+
+msgid "The previous main image could not be verified in storage. It was not moved to the gallery."
+msgstr "Не удалось подтвердить прежнее главное фото в хранилище. Оно не перенесено в галерею."
+
+msgid "The previous main image is already handled by the replacement choice. Remove its separate gallery row and check the batch again."
+msgstr "Действие со старым главным фото уже определено при замене. Уберите его отдельную строку галереи и проверьте пакет заново."
+
+msgid "The product images changed after verification. Check the batch again and choose what to do with the current main image."
+msgstr "Фото товара изменились после проверки. Проверьте пакет заново и выберите действие с текущим главным фото."
+
+msgid "The replacement choices changed after an upload attempt. Check the batch again."
+msgstr "Выбор действий изменился после попытки загрузки. Проверьте пакет заново."
+
+msgid "The replacement image will use a separate filename. The previous file will be preserved."
+msgstr "Новое фото получит отдельное имя файла. Прежний файл будет сохранён."
+
+msgid "What should happen to the current main image?"
+msgstr "Что сделать с текущим главным фото?"
+
+msgid "When replacing a main image, choose what to do with the previous photo after verification: move it to the end of the gallery or remove it from this product. The file stays in the Media Library and storage."
+msgstr "После проверки замены главного фото выберите действие со старым: перенести в конец галереи или убрать из этого товара. Файл остаётся в медиатеке и хранилище."
+
+msgid "A verified identical image can be reused. When replacing an existing main image with automatic naming enabled, a different photo receives a separate filename and requires your choice about the previous photo. Other filename conflicts remain blocked. An S3-only file requires an administrator to restore its Media Library record."
+msgstr "Проверенное одинаковое фото можно использовать повторно. При замене существующего главного фото с автоматическим именованием другое фото получает отдельное имя; выберите, что сделать с прежним. Другие конфликты имён блокируются. Для файла только в S3 администратор должен восстановить запись в медиатеке."

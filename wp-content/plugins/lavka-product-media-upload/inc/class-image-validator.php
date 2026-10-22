@@ -185,6 +185,15 @@ final class ImageValidator
                 } else {
                     $row['canonical_file'] = $canonical['filename'];
                     $warnings = array_merge($warnings, $canonical['warnings']);
+                    if ($generate_names && $role === 'main'
+                        && (int) $product_result['product']->get_image_id('edit') > 0) {
+                        $conflict = $this->wordpress_name_conflict($row['canonical_file']);
+                        if ($conflict > 0 && !$this->existing_attachment_matches_source($conflict, $row)
+                            && !$this->is_matching_partial_upload($conflict, $row)) {
+                            $row['canonical_file'] = MainImageReplacement::versioned_filename($row['canonical_file'], $row['sha256']);
+                            $warnings[] = __('The replacement image will use a separate filename. The previous file will be preserved.', 'lavka-product-media-upload');
+                        }
+                    }
                 }
             }
 

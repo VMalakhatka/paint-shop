@@ -2128,3 +2128,66 @@ msgstr ""
 #: inc/supplier-page.php
 msgid "If our product was not found or the match is wrong, enter its exact SKU and click “Confirm product match” before selecting photos. This saves the link between products; it does not upload images."
 msgstr ""
+
+msgid "Choose an action"
+msgstr ""
+
+msgid "Move to gallery"
+msgstr ""
+
+msgid "Remove from this product"
+msgstr ""
+
+msgid "Choose whether to move the current main image to the gallery or remove it from this product."
+msgstr ""
+
+msgid "Current main image"
+msgstr ""
+
+msgid "Keeping this image in the gallery is unavailable for this product. The file will remain in the Media Library and storage."
+msgstr ""
+
+msgid "Move the previous main image to the end of the gallery"
+msgstr ""
+
+msgid "Previous main attachment ID"
+msgstr ""
+
+msgid "Previous main filename"
+msgstr ""
+
+msgid "Previous main image action"
+msgstr ""
+
+msgid "Remove the previous main image from this product"
+msgstr ""
+
+msgid "The file stays in the Media Library and storage. Only its display on this product changes."
+msgstr ""
+
+msgid "The main images in Folio and WooCommerce differ. Reconcile them before replacing this image."
+msgstr ""
+
+msgid "The previous main image could not be verified in storage. It was not moved to the gallery."
+msgstr ""
+
+msgid "The previous main image is already handled by the replacement choice. Remove its separate gallery row and check the batch again."
+msgstr ""
+
+msgid "The product images changed after verification. Check the batch again and choose what to do with the current main image."
+msgstr ""
+
+msgid "The replacement choices changed after an upload attempt. Check the batch again."
+msgstr ""
+
+msgid "The replacement image will use a separate filename. The previous file will be preserved."
+msgstr ""
+
+msgid "What should happen to the current main image?"
+msgstr ""
+
+msgid "When replacing a main image, choose what to do with the previous photo after verification: move it to the end of the gallery or remove it from this product. The file stays in the Media Library and storage."
+msgstr ""
+
+msgid "A verified identical image can be reused. When replacing an existing main image with automatic naming enabled, a different photo receives a separate filename and requires your choice about the previous photo. Other filename conflicts remain blocked. An S3-only file requires an administrator to restore its Media Library record."
+msgstr ""

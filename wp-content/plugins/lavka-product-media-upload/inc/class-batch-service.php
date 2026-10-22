@@ -32,8 +32,16 @@ final class BatchService
         );
         $approved = [];
 
-        foreach ($validation['rows'] as $row) {
+        foreach ($validation['rows'] as &$row) {
             if (!empty($row['valid'])) {
+                $snapshot = $row['role'] === 'main' ? MainImageReplacement::snapshot($row) : null;
+                if ($snapshot && $snapshot['required']) {
+                    $row['main_replacement'] = [
+                        'attachment_id' => $snapshot['attachment_id'],
+                        'url' => (string) wp_get_attachment_image_url($snapshot['attachment_id'], 'thumbnail'),
+                        'can_keep' => $snapshot['can_keep'],
+                    ];
+                }
                 $approved[] = [
                     'row_number' => (int) $row['row_number'],
                     'canonical_file' => (string) $row['canonical_file'],
@@ -42,9 +50,11 @@ final class BatchService
                     'role' => (string) $row['role'],
                     'position' => (int) $row['position'],
                     'attachment_id' => (int) ($row['attachment_id'] ?? 0),
+                    '_main_snapshot' => $snapshot,
                 ];
             }
         }
+        unset($row);
 
         if ($batch_token !== '') {
             set_transient($this->batch_key($batch_token), [
@@ -91,7 +101,8 @@ final class BatchService
         array $registry_upload,
         array $image_uploads,
         bool $legacy_main_confirm,
-        bool $generate_names
+        bool $generate_names,
+        array $main_choices = []
     ): array {
         if (!\lpmu_writes_enabled()) {
             throw new \RuntimeException(__('File writing is disabled for this verification stage.', 'lavka-product-media-upload'));
@@ -128,7 +139,7 @@ final class BatchService
         $validation = $validator->validate($registry, $image_uploads, $generate_names);
         $approved_map = [];
         foreach ((array) ($stored['approved'] ?? []) as $approved) {
-            $approved_map[$this->approval_key($approved)] = true;
+            $approved_map[$this->approval_key($approved)] = $approved;
         }
 
         foreach ($validation['rows'] as $row) {
@@ -148,6 +159,31 @@ final class BatchService
 
         $lock_token = isset($lock['token']) ? (string) $lock['token'] : null;
         try {
+            $decisions = [];
+            foreach ($validation['rows'] as &$row) {
+                if (empty($row['valid']) || $row['role'] !== 'main') { continue; }
+                $row['_main_snapshot'] = $approved_map[$this->approval_key($row)]['_main_snapshot'] ?? null;
+                MainImageReplacement::assert_current($row);
+                $choice = (string) ($main_choices[(string) $row['row_number']] ?? '');
+                $row = MainImageReplacement::choose($row, $choice);
+                $decisions[(int) $row['row_number']] = $row['previous_main_action'] ?? '';
+                if (!empty($row['previous_main_action'])) {
+                    foreach ($validation['rows'] as $other) {
+                        if (!empty($other['valid']) && $other['product_id'] === $row['product_id']
+                            && $other['role'] === 'gallery'
+                            && ($other['canonical_file'] === $row['previous_main_file']
+                                || (int) ($other['attachment_id'] ?? 0) === $row['previous_main_id'])) {
+                            throw new \RuntimeException(__('The previous main image is already handled by the replacement choice. Remove its separate gallery row and check the batch again.', 'lavka-product-media-upload'));
+                        }
+                    }
+                }
+            }
+            unset($row);
+            if (isset($stored['main_choices']) && $stored['main_choices'] !== $decisions) {
+                throw new \RuntimeException(__('The replacement choices changed after an upload attempt. Check the batch again.', 'lavka-product-media-upload'));
+            }
+            $stored['main_choices'] = $decisions;
+            set_transient($this->batch_key($batch_token), $stored, self::BATCH_TTL);
             $uploader = new MediaUploader();
             $completed = [];
             $completed_assets = [];
@@ -279,7 +315,9 @@ final class BatchService
                 $row['_reuse_attachment_id'],
                 $row['_asset_key'],
                 $row['_asset_owner_row'],
-                $row['_asset_owner_product_id']
+                $row['_asset_owner_product_id'],
+                $row['_main_snapshot'],
+                $row['_previous_main_proof']
             );
         }
         unset($row);

@@ -78,6 +78,7 @@
             uploadButton.disabled = active || !uploadAllowed;
         }
         spinner.classList.toggle('is-active', active);
+        results.querySelectorAll('.lpmu-main-choice').forEach(function (select) { select.disabled = active; });
         if (active && message) {
             summary.innerHTML = '<div class="notice notice-info inline"><p>' + escapeHtml(message) + '</p></div>';
         }
@@ -95,6 +96,13 @@
         });
         if (batchToken) {
             form.append('batch_token', batchToken);
+        }
+        if (action === 'lpmu_upload_batch') {
+            var choices = {};
+            results.querySelectorAll('.lpmu-main-choice').forEach(function (select) {
+                choices[select.dataset.row] = select.value;
+            });
+            form.append('main_choices', JSON.stringify(choices));
         }
         return form;
     }
@@ -251,6 +259,19 @@
             if (row.s3_key) {
                 assignment.push('<strong>' + escapeHtml(strings.s3Key) + ':</strong> <code>' + escapeHtml(row.s3_key) + '</code>');
             }
+            if (row.main_replacement && row.valid) {
+                var old = row.main_replacement;
+                assignment.push('<div class="lpmu-main-replacement">'
+                    + (old.url ? '<img src="' + escapeHtml(old.url) + '" alt="' + escapeHtml(strings.previousMain) + '" width="80" height="80">' : '')
+                    + '<label>' + escapeHtml(strings.previousMainQuestion)
+                    + '<select class="lpmu-main-choice" data-row="' + escapeHtml(row.row_number) + '" required>'
+                    + '<option value="">' + escapeHtml(strings.chooseMainAction) + '</option>'
+                    + (old.can_keep ? '<option value="gallery">' + escapeHtml(strings.moveToGallery) + '</option>' : '')
+                    + '<option value="remove">' + escapeHtml(strings.removeFromProduct) + '</option></select></label>'
+                    + '<small>' + escapeHtml(old.can_keep ? strings.previousMainHelp : strings.previousMainNoGallery) + '</small></div>');
+            } else if (row.previous_main_action) {
+                assignment.push(escapeHtml(row.previous_main_action === 'gallery' ? strings.keepPreviousMain : strings.removePreviousMain));
+            }
 
             return '<tr class="' + stateClass + '">'
                 + '<td>' + escapeHtml(row.row_number || '—') + '</td>'
@@ -385,6 +406,12 @@
 
     if (uploadButton) {
         uploadButton.addEventListener('click', function () {
+            var missingChoice = Array.prototype.find.call(results.querySelectorAll('.lpmu-main-choice'), function (select) { return !select.value; });
+            if (missingChoice) {
+                window.alert(strings.previousMainQuestion);
+                missingChoice.focus();
+                return;
+            }
             if (!batchToken) {
                 window.alert(strings.dryRunRequired);
                 return;

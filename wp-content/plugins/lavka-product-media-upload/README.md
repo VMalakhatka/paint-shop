@@ -148,9 +148,30 @@ relationship and treat only old, unobserved attachments as cleanup candidates. T
 replace the first-row fallback parent with the Folio variable-product parent when that
 relationship is exposed by the product media API.
 
-Replacing different image content under an existing canonical filename is never done
-silently. A future explicit replacement mode must create a controlled versioned name,
-preview the Folio change and retain the old object until the new assignment is verified.
+Main-image replacement requires a per-row choice after the dry run: retain the previous
+image at the end of the gallery or remove its display from this product. The server
+stores the current main attachment, file key and gallery IDs with the batch approval;
+missing choices and changed product images block writes. Variation parent images are
+not treated as the variation's own main. Standard variations offer removal only.
+The previous attachment/object and references on other products are preserved.
+
+With generated filenames enabled, a different-content main-image collision for a
+product that already has a main gets a deterministic `-r<12 hex>` filename within
+Folio's 50-byte limit. It is checked through the normal WP/S3 conflict and reuse path.
+Unchanged content is reused; explicitly supplied conflicting names remain blocked.
+
+Folio main replacement and old-gallery changes share one per-SKU preview/apply request.
+Keeping the old photo requires exact S3 index proof and HEAD size/ETag verification;
+duplicate gallery references are removed by stable ID. The Java API must support
+`remove_gallery` before this release is enabled. Deploy Java first, then this plugin.
+Woo finalizes the main last, retaining the old photo once at the gallery end or removing
+its display. CSV records the choice, old attachment ID and filename. A failed or unknown
+outcome requires checking state, then a fresh dry run; the original files remain intact.
+
+Replacement checks: `php tests/main-image-replacement-test.php` from this plugin
+directory. The offline browser test `node tests/main-image-replacement-ui.cjs` uses
+Playwright and Python gettext; set `BROWSER_CHANNEL=chrome` to use an installed Chrome
+with an isolated temporary profile. AJAX is mocked and network requests are blocked.
 
 Folder selection is a browser convenience and remains subject to PHP's
 `max_file_uploads` and request-size limits. Split a large folder into smaller batches.

@@ -289,3 +289,8 @@
         grid-template-columns: 1fr;
     }
 }
+.lpmu-main-replacement { margin-top: 12px; padding: 12px; border: 1px solid #dba617; border-radius: 6px; background: #fff8e5; max-width: 340px; }
+.lpmu-main-replacement img { display: block; object-fit: contain; margin-bottom: 8px; }
+.lpmu-main-replacement label { display: block; font-weight: 600; }
+.lpmu-main-replacement select { display: block; width: 100%; max-width: 100%; margin: 8px 0; }
+.lpmu-main-replacement small { display: block; font-weight: normal; }

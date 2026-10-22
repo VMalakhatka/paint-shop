@@ -171,7 +171,7 @@ final class WorkflowService
         }
 
         foreach ($rows as &$row) {
-            unset($row['_s3_proof']);
+            unset($row['_s3_proof'], $row['_previous_main_proof']);
         }
         unset($row);
 
@@ -185,6 +185,19 @@ final class WorkflowService
         string $manifest_hash
     ): array {
         $sku = (string) ($rows[$indexes[0]]['sku'] ?? '');
+        foreach ($indexes as $index) {
+            if (($rows[$index]['role'] ?? '') !== 'main') { continue; }
+            try {
+                MainImageReplacement::assert_current($rows[$index]);
+                if (($rows[$index]['previous_main_action'] ?? '') === 'gallery') {
+                    $old_proof = $this->previous_main_proof($rows[$index]);
+                    if (!$old_proof['ok']) { throw new \RuntimeException($old_proof['message']); }
+                    $rows[$index]['_previous_main_proof'] = $old_proof['proof'];
+                }
+            } catch (\RuntimeException $e) {
+                return $this->fail_indexes($rows, $indexes, 'FOLIO_PREVIEW_BLOCKED', $e->getMessage(), '', 'folio_prepare');
+            }
+        }
         if ($sku === '') {
             return $this->fail_indexes(
                 $rows,
@@ -289,7 +302,8 @@ final class WorkflowService
             $left_role = (string) ($rows[$left]['role'] ?? '');
             $right_role = (string) ($rows[$right]['role'] ?? '');
             if ($left_role !== $right_role) {
-                return $left_role === 'main' ? -1 : 1;
+                // Finalize main last so a retained previous image stays at the end.
+                return $left_role === 'main' ? 1 : -1;
             }
             return (int) ($rows[$left]['position'] ?? 0) <=> (int) ($rows[$right]['position'] ?? 0);
         });
@@ -323,6 +337,69 @@ final class WorkflowService
         $noop_rows = [];
         $operations = [];
         $used_record_ids = [];
+        $retained_changes = [];
+        $retained_rows = [];
+        $last_position = 0;
+        foreach ($gallery_items as $item) { $last_position = max($last_position, (int) ($item['sortOrder'] ?? 0)); }
+        foreach ($indexes as $index) { $last_position = max($last_position, (int) ($rows[$index]['position'] ?? 0)); }
+        foreach ($indexes as $index) {
+            $row = $rows[$index];
+            if (($row['role'] ?? '') !== 'main' || empty($row['_main_snapshot']['required'])) { continue; }
+            $action = (string) ($row['previous_main_action'] ?? '');
+            $old = (string) ($row['previous_main_file'] ?? '');
+            $current = (string) ($main_items[0]['filename'] ?? '');
+            if (!in_array($action, ['gallery', 'remove'], true)) {
+                return $this->build_failure(__('Choose whether to move the current main image to the gallery or remove it from this product.', 'lavka-product-media-upload'));
+            }
+            if ($current !== '' && $current !== $old && $current !== $row['canonical_file']) {
+                return $this->build_failure(__('The main images in Folio and WooCommerce differ. Reconcile them before replacing this image.', 'lavka-product-media-upload'));
+            }
+            $old_items = [];
+            foreach ($gallery_items as $key => $item) {
+                if ($old !== '' && (string) ($item['filename'] ?? '') === $old) {
+                    $old_items[] = $item;
+                    unset($gallery_items[$key]);
+                }
+            }
+            $keep = $action === 'gallery' ? array_shift($old_items) : null;
+            foreach ($old_items as $item) {
+                $id = is_array($item['recordId'] ?? null) ? ($item['recordId']['key'] ?? '') : ($item['recordId'] ?? '');
+                if ((string) $id === '') { return $this->build_failure(__('The Folio gallery row has no stable record ID.', 'lavka-product-media-upload')); }
+                $used_record_ids[(string) $id] = true;
+                $changes[] = [
+                    'operation' => 'remove_gallery', 'sku' => $row['sku'], 'recordId' => (string) $id,
+                    'expectedOldFilename' => $item['filename'], 'expectedOldSortOrder' => $item['sortOrder'] ?? null,
+                ];
+                $change_rows[] = $index;
+            }
+            if ($action === 'gallery') {
+                // Exclude the retained image itself so a retry does not keep
+                // increasing its position after Folio already applied the move.
+                $last_position = 0;
+                foreach ($gallery_items as $item) { $last_position = max($last_position, (int) ($item['sortOrder'] ?? 0)); }
+                foreach ($indexes as $other_index) { $last_position = max($last_position, (int) ($rows[$other_index]['position'] ?? 0)); }
+                $proof = (array) ($row['_previous_main_proof'] ?? []);
+                if ($old === '' || !$proof) { return $this->build_failure(__('The previous main image could not be verified in storage. It was not moved to the gallery.', 'lavka-product-media-upload')); }
+                $change = [
+                    'operation' => $keep ? 'update_gallery' : 'add_gallery', 'sku' => $row['sku'],
+                    'filename' => $old, 'sortOrder' => ++$last_position, 's3Proof' => $proof,
+                ];
+                if ($keep) {
+                    $id = is_array($keep['recordId'] ?? null) ? ($keep['recordId']['key'] ?? '') : ($keep['recordId'] ?? '');
+                    if ((string) $id === '') { return $this->build_failure(__('The Folio gallery row has no stable record ID.', 'lavka-product-media-upload')); }
+                    $used_record_ids[(string) $id] = true;
+                    $change += ['recordId' => (string) $id, 'expectedOldFilename' => $keep['filename'], 'expectedOldSortOrder' => $keep['sortOrder'] ?? null];
+                }
+                $retained_changes[] = $change;
+                $retained_rows[] = $index;
+            }
+            foreach ($indexes as $other_index) {
+                $other = $rows[$other_index];
+                if (($other['role'] ?? '') === 'gallery' && $old !== '' && $other['canonical_file'] === $old) {
+                    return $this->build_failure(__('The previous main image is already handled by the replacement choice. Remove its separate gallery row and check the batch again.', 'lavka-product-media-upload'));
+                }
+            }
+        }
         foreach ($indexes as $index) {
             $row = $rows[$index];
             $filename = (string) ($row['canonical_file'] ?? '');
@@ -423,8 +500,8 @@ final class WorkflowService
 
         return [
             'ok' => true,
-            'changes' => $changes,
-            'change_rows' => $change_rows,
+            'changes' => array_merge($changes, $retained_changes),
+            'change_rows' => array_merge($change_rows, $retained_rows),
             'noop_rows' => $noop_rows,
             'operations' => $operations,
         ];
@@ -494,6 +571,23 @@ final class WorkflowService
                 'etag' => (string) $match['etag'],
             ],
         ];
+    }
+
+    private function previous_main_proof(array $row): array
+    {
+        $snapshot = $row['_main_snapshot'];
+        $proof = $this->s3_proof(['canonical_file' => $snapshot['filename'], 's3_key' => $snapshot['file']]);
+        if (!$proof['ok']) { return $proof; }
+        $response = wp_safe_remote_head((string) wp_get_attachment_url($snapshot['attachment_id']), [
+            'timeout' => 12, 'redirection' => 3, 'sslverify' => true,
+        ]);
+        if (is_wp_error($response)
+            || (int) wp_remote_retrieve_response_code($response) !== 200
+            || (int) wp_remote_retrieve_header($response, 'content-length') !== $proof['proof']['sizeBytes']
+            || trim((string) wp_remote_retrieve_header($response, 'etag'), '"') !== trim($proof['proof']['etag'], '"')) {
+            return $this->build_failure(__('The previous main image could not be verified in storage. It was not moved to the gallery.', 'lavka-product-media-upload'));
+        }
+        return $proof;
     }
 
     private function s3_index_table(): string
