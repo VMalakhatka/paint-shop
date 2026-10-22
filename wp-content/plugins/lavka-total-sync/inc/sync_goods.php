@@ -440,6 +440,14 @@ function lts_upsert_product_from_item(array $it, array $opts): array {
     $name  = (string)($it['name'] ?? $sku);
     $pid   = lts_ensure_product($sku, $name);
 
+    // An older Java response has no supplier key: preserve existing assignments.
+    if (array_key_exists('supplier', $it)) {
+        $supplier_result = lts_apply_product_supplier($pid, $it['supplier']);
+        if (is_wp_error($supplier_result)) {
+            return ['ok' => false, 'post_id' => $pid, 'error' => $supplier_result->get_error_code()];
+        }
+    }
+
     // Обновляем базовые поля
     wp_update_post([
         'ID'           => $pid,
