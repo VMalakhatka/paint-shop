@@ -446,8 +446,9 @@ Paint Shop UX. Владельцы — `docs/SYSTEM_OVERVIEW.md`; канон и �
 
 `wp-content/themes/lavka-storefront` — самостоятельная классическая тема без
 Template/GP dependency. Подготовлена 2026-10-21, реально активирована на paint.local
-2026-10-22 с разрешения владельца. В production deploy новая папка не добавлена;
-production activation не выполнена. Не путать локальное и production состояние.
+2026-10-22 с разрешения владельца. Владелец установил ZIP 0.1.0 на production
+2026-10-22, но не активировал. В code deploy новая папка не добавлена;
+не путать установку, локальную активацию и production activation.
 
 PSU public-pages принимает `current_theme_supports('psu-public-pages')` с прежними
 ограничениями default page/search/404 и исключениями приложений. Сохраняются
@@ -470,3 +471,13 @@ Preview bootstrap не вызывает switch_theme и сверяет сохр�
 Woo image hash не изменился, regen queue осталась пустой. Backup и точечный возврат:
 `docs/BOOTSTRAP_AND_RECOVERY.md`, «Локальная активация Lavka Storefront».
 Перенос папки в deploy и production activation/acceptance — отдельное разрешение.
+
+Production preflight 2026-10-22: 20 файлов темы и 45 runtime-файлов PSU совпали
+с локальными; PSU 1.9.0 активен, WP/PHP совместимы. Saved theme остаётся GP Child;
+primary и два sidebar widgets доступны. Пустой Customizer iframe воспроизводился
+и на действующей теме; для read-only проверки с правом `switch_themes` работает
+штатный `?wp_theme_preview=lavka-storefront`, который надо сохранять на каждом URL.
+Это не проверяет production `after_switch_theme`. Закрытый локальный снимок
+86 options и `.htaccess` не заменяет полную БД: свежая полная копия в проверенных
+местах не подтверждена. Источники: защищённый SHORTINIT preflight и браузер;
+подробности — [production preflight](../../../../docs/BOOTSTRAP_AND_RECOVERY.md#production-preflight-lavka-storefront-2026-10-22).

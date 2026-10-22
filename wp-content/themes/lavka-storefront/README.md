@@ -4,8 +4,8 @@ Independent classic WordPress theme for the Lavka/KREUL storefront. It has no
 parent theme and does not load GeneratePress PHP, scripts, or styles.
 
 Status: activated on `paint.local` and verified on 2026-10-22 with the owner’s
-explicit approval. Production was not changed. Adding or deploying files alone
-does not activate a theme; production delivery and activation remain separate.
+explicit approval. The owner installed the 0.1.0 ZIP on production later that day;
+it remains inactive there. Installing files does not activate the theme.
 
 ## Ownership
 
@@ -80,8 +80,28 @@ Widths 320/390/768/1280 px passed; mobile navigation and wholesale/retail menu
 visibility were checked. No order, payment or external integration was submitted.
 
 The existing deploy script still deliberately excludes this new theme and does
-not activate themes. Production delivery, activation and real-device acceptance
-remain separate. Local backup/rollback: [Bootstrap and recovery](../../../docs/BOOTSTRAP_AND_RECOVERY.md#локальная-активация-lavka-storefront-2026-10-22).
+not activate themes. Future theme updates, production activation and real-device
+acceptance remain separate. Local backup/rollback: [Bootstrap and recovery](../../../docs/BOOTSTRAP_AND_RECOVERY.md#локальная-активация-lavka-storefront-2026-10-22).
+
+### Production preflight, 2026-10-22
+
+Read-only server checks confirmed all 20 uploaded theme files and 45 Paint Shop UX
+runtime files match the locally verified copy. Paint Shop UX 1.9.0 is active;
+WordPress 7.0 and PHP 8.3.8 meet the requirements. The saved active theme remains
+GeneratePress Child with GeneratePress as its parent. Primary menu, two sidebar
+widgets and both rollback themes are present.
+
+The Customizer iframe was blank for both themes. Authenticated native
+`?wp_theme_preview=lavka-storefront` worked without activation; keep the parameter
+on each checked URL. Browser checks covered the catalogue, oil-category image,
+sticky Number One context, Clairefontaine brand and eight-photo product gallery,
+mobile menu, empty cart, account and legal page at desktop, 390 and 768 px widths.
+Production `after_switch_theme`, real orders and payments were not exercised.
+
+A private local snapshot contains 86 option rows and `.htaccess`; it is not a
+full database backup. A fresh full DB backup was not confirmed in the checked
+server locations. Verify or create one before activation. Evidence, limitations
+and rollback scope: [production preflight](../../../docs/BOOTSTRAP_AND_RECOVERY.md#production-preflight-lavka-storefront-2026-10-22).
 
 Source messages are English; bundled `languages/uk.po` and `ru_RU.po` catalogs
 provide Ukrainian and Russian translations. Rebuild the matching `.mo` files
