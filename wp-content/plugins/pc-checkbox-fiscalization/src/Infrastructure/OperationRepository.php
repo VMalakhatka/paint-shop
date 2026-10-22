@@ -14,6 +14,24 @@ final class OperationRepository
         $this->table = $wpdb->prefix . 'pc_checkbox_operations';
     }
 
+    public function lock(string $key): bool
+    {
+        global $wpdb;
+        return (string) $wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s, 0)', $this->lockName($key))) === '1';
+    }
+
+    public function unlock(string $key): void
+    {
+        global $wpdb;
+        $wpdb->get_var($wpdb->prepare('SELECT RELEASE_LOCK(%s)', $this->lockName($key)));
+    }
+
+    private function lockName(string $key): string
+    {
+        // Validator trims ASCII keys; the default SQL collation is case-insensitive.
+        return 'pccf:' . substr(hash('sha256', $this->table . ':' . strtolower(trim($key))), 0, 56);
+    }
+
     /** @param array<string,mixed> $command @return array{created:bool,operation:array<string,mixed>} */
     public function reserve(array $command, string $hash, string $mode): array
     {
@@ -78,7 +96,9 @@ final class OperationRepository
         ];
         $data = array_intersect_key($fields, array_flip($allowed));
         $data['updated_at'] = current_time('mysql', true);
-        $wpdb->update($this->table, $data, ['operation_key' => $operation_key]);
+        if ($wpdb->update($this->table, $data, ['operation_key' => $operation_key]) === false) {
+            throw new \RuntimeException('The fiscalization operation could not be updated.');
+        }
     }
 
     public function incrementAttempt(string $operation_key, string $mode): void
@@ -102,7 +122,7 @@ final class OperationRepository
         $rows = $wpdb->get_results(
             "SELECT operation_key, receipt_uuid, source_system, source_type, source_id,
                     operation_type, status, mode, total_cents, attempts, http_code,
-                    error_code, created_at, updated_at
+                    error_code, error_message, shift_id, created_at, updated_at
                FROM {$this->table}
               ORDER BY id DESC LIMIT {$limit}",
             ARRAY_A

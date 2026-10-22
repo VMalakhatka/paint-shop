@@ -1,0 +1,31 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Lavka Customer Analytics 0.1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"MIME-Version: 1.0\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2026-10-10 00:00+0000\n"
+"Last-Translator: Project maintainers\n"
+"Language-Team: Lavka\n"
+"Language: ru_RU\n"
+
+msgid "Allow usage analytics to help improve product selection and checkout? You can refuse without affecting your order."
+msgstr "Разрешить аналитику использования для улучшения выбора товаров и оформления? Отказ не влияет на заказ."
+
+msgid "Allow analytics"
+msgstr "Разрешить аналитику"
+
+msgid "Refuse analytics"
+msgstr "Отказаться от аналитики"
+
+msgid "Analytics preferences"
+msgstr "Настройки аналитики"
+
+msgid "Privacy policy"
+msgstr "Политика конфиденциальности"
+
+msgid "When analytics is enabled, choose Allow analytics or Refuse analytics on the storefront. Refusal does not change prices, the cart or ordering access."
+msgstr "Когда аналитика включена, выберите «Разрешить аналитику» или «Отказаться от аналитики» на витрине. Отказ не меняет цены, корзину или доступ к заказам."
+
+msgid "Use Analytics preferences on the storefront to change your choice. The customer account, balances, documents and payment forms are excluded from this analytics module."
+msgstr "Чтобы изменить решение, откройте «Настройки аналитики» на витрине. Этот модуль не отслеживает личный кабинет, балансы, документы и платёжные формы."

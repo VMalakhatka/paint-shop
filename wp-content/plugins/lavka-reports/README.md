@@ -204,3 +204,35 @@ For `ALL_TAXES_KYIV` reports the main sheets use the owner's 2026-10-07 workbook
 The copy button copies I4 through the last main result, including blank separators, with decimal commas suitable for the manager's Excel. Clipboard failure exposes a selectable read-only fallback. The shared row model drives both UI and export, preserving exact alignment. Unknown nonzero or unavailable rows are retained after the main table and flagged as outside manual formulas.
 
 A single household row at Kyiv row 9 consumes `KYIV_HOUSEHOLD`; the owner removed the duplicate former row 11. No `KYIV_HOUSEHOLD_BANK` slot is created. H formulas occupy Kyiv rows 21/28/30/36/37/38 and Odesa rows 14/21/23/29/30/31. Missing backend metadata is explicitly unavailable and never zero. All selection and classification changes remain Java-owned. Deploying this frontend cannot retroactively apply new filters to stored results. Manager workflow and limits: [PROFIT_REPORT_MANAGER_RU.md](../../../docs/PROFIT_REPORT_MANAGER_RU.md). Unit checks cover exact H formulas, row addresses, API total independence, absent rules and additional amounts.
+
+## Saved-month comparison (0.11.0)
+
+`profit-comparison.js` compares up to 24 explicit saved monthly revisions via the
+existing history proxy. `profit-manager.js::comparisonLayout` supplies the same
+ordered, numbered financial rows as the manager workbook (Kyiv then Odesa), using
+stable city/line IDs. Repeated operating totals share their semantic override key.
+Additional historical amounts are retained without renumbering the main layout.
+
+Each target uses its preceding four calendar months, excluding itself/future months.
+History discovery is a read-only range lookup: prefer the latest COMPLETED or
+PROVISIONAL revision, otherwise the current saved revision; missing is not zero.
+Per-row equal-weight averages need at least one available value and expose 1/4–4/4
+coverage. No data requires manual input; transport/API errors are distinct. Manual
+per-row decimal values (including zero/negative) override the average, and blank
+restores automatic calculation. No manual value changes Java report totals or other
+row baselines. BigInt/rational means preserve precision for deviation percentages.
+
+Storage v2 remembers target IDs, historical revision IDs and validated manual
+values, scoped by WP user/blog in browser localStorage. Reload re-reads exact IDs;
+Refresh history explicitly rediscovers prior revisions. v1 selections migrate but
+its arbitrary pinned period is superseded by the four-month rule. New calculation
+success remains independent of history lookup failure. No schema or Folio writes.
+
+XLSX comparison has ordered city sheets, numeric manual/applied baselines, deviations
+and provenance. Manager H/I sheets/formulas remain unchanged. Operator workflow:
+[manager guide](../../../docs/PROFIT_REPORT_MANAGER_RU.md#сравнение-выбранных-месяцев-и-база-отклонений).
+Tests: `tests/profit-comparison.test.cjs`, `tests/profit-manager.test.cjs`,
+`tests/profit-history.spec.cjs`. Deploy the entire plugin including translations and
+refresh the tab. Production deployment requires separate authorization. Rollback
+restores the prior plugin; report snapshots are unchanged (browser comparison
+settings may need clearing after a downgrade from storage v2).

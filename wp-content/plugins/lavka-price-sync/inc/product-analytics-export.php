@@ -214,21 +214,19 @@ function lps_product_analytics_export_csv(array $columns, array $rows, string $f
     exit;
 }
 
-function lps_product_analytics_export_xlsx(array $columns, array $rows, array $metadata, string $filename): void {
-    if (!class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class)) {
-        wp_die(esc_html__('The XLSX library is unavailable.', 'lavka-price-sync'));
+function lps_product_analytics_export_xlsx_sheet($sheet, array $columns, array $rows): void {
+    foreach ($columns as $index => $column) {
+        $cell = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($index + 1) . '1';
+        $sheet->setCellValueExplicit($cell, (string)$column['label'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
     }
-    $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-    $sheet = $spreadsheet->getActiveSheet();
-    $sheet->setTitle(__('Analytics', 'lavka-price-sync'));
-    $sheet->fromArray(array_column($columns, 'label'), null, 'A1');
     foreach ($rows as $index => $row) {
         $excel_row = $index + 2;
         foreach ($columns as $column_index => $column) {
             $cell = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($column_index + 1) . $excel_row;
             $value = $row[$column['key']] ?? '';
-            if (in_array($column['key'], ['sku', 'gtin'], true)) {
+            if (in_array($column['key'], ['sku', 'gtin', 'supplierArticle'], true)) {
                 $sheet->setCellValueExplicit($cell, (string)$value, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                $sheet->getStyle($cell)->getNumberFormat()->setFormatCode('@');
             } else {
                 $sheet->setCellValue($cell, $value);
             }
@@ -238,19 +236,38 @@ function lps_product_analytics_export_xlsx(array $columns, array $rows, array $m
     $sheet->getStyle("A1:{$last_column}1")->getFont()->setBold(true);
     $sheet->getStyle("A1:{$last_column}1")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFDDEBF7');
     $sheet->freezePane('A2');
-    $sheet->setAutoFilter("A1:{$last_column}1");
+    $sheet->setAutoFilter("A1:{$last_column}" . max(1, count($rows) + 1));
     foreach (range(1, count($columns)) as $column_index) {
         $letter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($column_index);
         $key = (string)($columns[$column_index - 1]['key'] ?? '');
-        $width = in_array($key, ['product', 'supplier', 'warehouseAvailability', 'groupAvailability'], true) ? 42 : 18;
+        $width = in_array($key, ['product', 'supplier', 'warehouseAvailability', 'groupAvailability'], true) ? 42 :
+            (in_array($key, ['planningNotes', 'supplierPriceNote'], true) ? 60 : 18);
         $sheet->getColumnDimension($letter)->setWidth($width);
+        if (!empty($columns[$column_index - 1]['numberFormat'])) {
+            $sheet->getStyle($letter . '2:' . $letter . max(2, count($rows) + 1))->getNumberFormat()->setFormatCode($columns[$column_index - 1]['numberFormat']);
+        }
     }
     $sheet->getStyle("A1:{$last_column}" . max(2, count($rows) + 1))->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_TOP);
     $sheet->getStyle("A1:{$last_column}" . max(2, count($rows) + 1))->getAlignment()->setWrapText(true);
+}
+
+function lps_product_analytics_export_xlsx_workbook(array $columns, array $rows, array $metadata, array $detail_sheets = [], string $title = '') {
+    if (!class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class)) {
+        wp_die(esc_html__('The XLSX library is unavailable.', 'lavka-price-sync'));
+    }
+    $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+    $sheet->setTitle($title ?: __('Analytics', 'lavka-price-sync'));
+    lps_product_analytics_export_xlsx_sheet($sheet, $columns, $rows);
+    if ($detail_sheets) { $sheet->freezePane('C2'); $sheet->getRowDimension(1)->setRowHeight(75); }
+    foreach ($detail_sheets as $detail) {
+        $detail_sheet = $spreadsheet->createSheet(); $detail_sheet->setTitle($detail['title']);
+        lps_product_analytics_export_xlsx_sheet($detail_sheet, $detail['columns'], $detail['rows']);
+    }
 
     $metadata_sheet = $spreadsheet->createSheet();
     $metadata_sheet->setTitle(__('Report parameters', 'lavka-price-sync'));
-    $metadata_sheet->fromArray([
+    $metadata_rows = [
         [__('Parameter', 'lavka-price-sync'), __('Value', 'lavka-price-sync')],
         [__('Generated at', 'lavka-price-sync'), (string)($metadata['generatedAt'] ?? '')],
         [__('Source database', 'lavka-price-sync'), (string)($metadata['sourceDatabase'] ?? '')],
@@ -260,12 +277,23 @@ function lps_product_analytics_export_xlsx(array $columns, array $rows, array $m
         [__('Snapshot generation', 'lavka-price-sync'), (string)($metadata['generationId'] ?? '')],
         [__('Warehouse group revision', 'lavka-price-sync'), (string)($metadata['warehouseGroupsRevision'] ?? '')],
         [__('Combined warehouses', 'lavka-price-sync'), (string)($metadata['warehouseGroups'] ?? '')],
-    ], null, 'A1');
+    ];
+    foreach (['currentStockCapture' => __('Current stock read from Folio', 'lavka-price-sync'),
+        'assemblyRecipeRevision' => __('Assembly recipe revision', 'lavka-price-sync'),
+        'supplyConfirmation' => __('Supply confirmations', 'lavka-price-sync')] as $key => $label) {
+        if (isset($metadata[$key])) $metadata_rows[] = [$label, (string)$metadata[$key]];
+    }
+    $metadata_sheet->fromArray($metadata_rows, null, 'A1');
     $metadata_sheet->getStyle('A1:B1')->getFont()->setBold(true);
     $metadata_sheet->getColumnDimension('A')->setWidth(30);
     $metadata_sheet->getColumnDimension('B')->setWidth(90);
-    $metadata_sheet->getStyle('A1:B9')->getAlignment()->setWrapText(true)->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_TOP);
+    $metadata_sheet->getStyle('A1:B' . count($metadata_rows))->getAlignment()->setWrapText(true)->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_TOP);
     $spreadsheet->setActiveSheetIndex(0);
+    return $spreadsheet;
+}
+
+function lps_product_analytics_export_xlsx(array $columns, array $rows, array $metadata, string $filename, array $detail_sheets = [], string $title = ''): void {
+    $spreadsheet = lps_product_analytics_export_xlsx_workbook($columns, $rows, $metadata, $detail_sheets, $title);
     while (ob_get_level()) ob_end_clean();
     nocache_headers();
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');

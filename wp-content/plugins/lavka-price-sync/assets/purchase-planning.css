@@ -13,6 +13,8 @@
 .lps-purchase-sku h2 { font-size: 17px; line-height: 1.5; margin: 0; overflow-wrap: anywhere; }
 .lps-purchase-scroll { overflow-x: auto; max-width: 100%; }
 .lps-purchase table { min-width: 3000px; table-layout: fixed; }
+.lps-purchase table.lps-purchase-stock { min-width: 680px; width: 100%; margin: 12px 0; }
+.lps-purchase-stock tbody tr:first-child { background: #eef7f5; font-weight: 600; }
 .lps-purchase th, .lps-purchase td { overflow-wrap: anywhere; vertical-align: top; }
 .lps-purchase thead th { overflow-wrap: normal; }
 .lps-purchase th:first-child { width: 160px; }

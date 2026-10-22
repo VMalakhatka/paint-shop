@@ -144,6 +144,7 @@ class CartToDraft
 
         // 4) Optional title
         $title = isset($_REQUEST['title']) ? sanitize_text_field((string) $_REQUEST['title']) : '';
+        DraftPurpose::store($order, $_REQUEST);
         if ($title !== '') {
             $order->update_meta_data('_pc_draft_title', $title);
         }

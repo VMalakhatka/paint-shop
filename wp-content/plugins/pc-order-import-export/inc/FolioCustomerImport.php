@@ -19,7 +19,7 @@ final class FolioCustomerImport {
 
     public static function allowed(): bool {
         $actor = wp_get_current_user();
-        return current_user_can('manage_woocommerce') && (current_user_can('create_users')
+        return current_user_can('manage_woocommerce') && (current_user_can('pcoe_import_customers') || current_user_can('create_users')
             || (in_array('shop_manager', $actor->roles, true) && current_user_can('promote_users')));
     }
     public static function authorize(): void {

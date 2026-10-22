@@ -36,4 +36,7 @@ check(Approval::key($source) !== Approval::key(array_replace($source, ['customer
 check(Approval::key($source) !== Approval::key(['customer_id' => 11, 'type' => 'ACCOUNT', 'document_id' => 20]), 'Different source namespaces');
 check(Approval::revision(array_merge($snapshot, ['title' => 'Order'])) === Approval::revision(array_merge($snapshot, ['title' => 'Замовлення'])), 'Locale independent revision');
 check(Approval::revision(array_merge($snapshot, ['warehouseId' => '1'])) !== Approval::revision(array_merge($snapshot, ['warehouseId' => '5'])), 'Warehouse changes need new consent');
+$bundle = ['bundle'=>true,'items'=>[['warehouse'=>'Kyiv','quantity'=>'1']],'documents'=>[['warehouseId'=>'7','warehouse'=>'Kyiv']]];
+$translated=$bundle;$translated['items'][0]['warehouse']='Київ';$translated['documents'][0]['warehouse']='Київ';
+check(Approval::revision($bundle)===Approval::revision($translated),'Bundle warehouse labels do not invalidate another language');
 echo "$checks approval checks passed\n";

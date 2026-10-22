@@ -23,7 +23,9 @@
 | Задача | Основной документ |
 |---|---|
 | Понять устройство системы и владельца поведения | [SYSTEM_OVERVIEW.md](SYSTEM_OVERVIEW.md) |
+| Отслеживать покупателей, источники, товары и заказ без двойного счёта | [CUSTOMER_ANALYTICS.md](CUSTOMER_ANALYTICS.md) |
 | Разрабатывать и сопровождать backend PHP/Java/Folio | [BACKEND_GUIDE.md](BACKEND_GUIDE.md) |
+| Учитывать детей, внуков и состав наборов в заказе поставщику | [Прогноз компонентов](api/FOLIO_ASSEMBLY_PURCHASE.md) |
 | Ускорить сайт по результатам замеров 14.09.2026 | [Аудит скорости и порядок исправлений](SITE_PERFORMANCE_AUDIT_2026-09-14.md) |
 | Выбрать следующий шаг: поиск, фильтры, быстрый заказ, корзина | [Локальные замеры 08.10.2026 и задания](SITE_FLOW_PERFORMANCE_AUDIT_2026-10-08.md) |
 | Запустить синхронизацию, увидеть результат или разобрать ошибку | [OPERATIONS_RUNBOOK.md](OPERATIONS_RUNBOOK.md) |
@@ -42,17 +44,21 @@
 | Мастеру: вести расписание МК, статьи и заявки | [WORKSHOPS_GUIDE_RU.md](WORKSHOPS_GUIDE_RU.md) |
 | Пользоваться сайтом и кабинетом | [SITE_USER_GUIDE_UK.md](SITE_USER_GUIDE_UK.md) |
 | Менеджеру: весь раздел «Робота з клієнтами», черновики, документы, баланс, сообщения и Telegram | [MANAGER_CUSTOMER_GUIDE_UK.md](MANAGER_CUSTOMER_GUIDE_UK.md) |
+| Менеджеру: НП — порядок кнопок, неактивные состояния, несколько складов, свои/клиентские ТТН, PDF и email | [Инструкция НП 0.9.3](MANAGER_CUSTOMER_GUIDE_UK.md#np-preparation) · [предложение упрощения, не реализовано](MANAGER_CUSTOMER_GUIDE_UK.md#np-simplification-plan) |
 | Менеджеру: импорт клиентов из ФОЛІО в Woo, цены, приглашения и восстановление | [Пошаговый импорт](MANAGER_CUSTOMER_GUIDE_UK.md#customer-import) |
 | Менеджеру: облікові ціни ФОЛІО, один товар / весь склад, стан складів, від’ємний залишок та Excel | [Покрокова інструкція](FOLIO_ACCOUNTING_PRICES_MANAGER_UK.md) |
 | Развивать список ожидания и рекомендации клиентам | [план и этапы](CUSTOMER_RECOMMENDATIONS_PLAN.md) |
+| Согласовать интеграцию ожидания с единым профилем подписок | [Аудит и проект контракта](WAITLIST_SUBSCRIPTIONS_INTEGRATION_CONTRACT.md) |
 | Оформить оптовый заказ, импортировать/экспортировать список, сохранить черновик, повторить старый заказ, увидеть разделение, баланс и документы | [WHOLESALE_CUSTOMER_GUIDE_UK.md](WHOLESALE_CUSTOMER_GUIDE_UK.md) |
 | Отправить оптовому партнёру краткую наглядную памятку о возможностях сайта | [Рекламная PDF-памятка: файл, источники и обновление](WHOLESALE_PROMO_UK.md) |
 | Дилеру: пошаговые PDF об оформлении, балансе, заказе из файла и готовых документах | [PDF-инструкции: файлы, проверка и оставшиеся фото](DEALER_PDF_GUIDES_UK.md) |
 | Оптовику: доставка НП, ограничения отделений, стоимость, несколько складов и своя ТТН | [Подробная инструкция на украинском](NOVA_POSHTA_WHOLESALE_GUIDE_UK.md) · [Read-only аудит и ограничения 26.09.2026](NOVA_POSHTA_WHOLESALE_AUDIT_2026-09-26.md) |
+| Разработчику: создание ТТН, маркировка, tracking и unknown outcome НП | [Проверка официального контракта 18.10.2026](api/NOVA_POSHTA_SHIPMENT_CONTRACT.md) — не готовый create-релиз |
 | Загружать и исправлять изображения | [MEDIA_MANAGER_GUIDE_UK.md](MEDIA_MANAGER_GUIDE_UK.md) |
 | Проверить Woo → Java/Folio заказ | [FOLIO_ORDER_JSON_CONTRACT.md](FOLIO_ORDER_JSON_CONTRACT.md) |
 | Пользоваться и развивать многоскладскую товарную аналитику | [Карта владельцев и реализации](BACKEND_GUIDE.md#товарная-аналитика-карта-реализации), [WordPress v4 / Java v6](api/FOLIO_PRODUCT_ANALYTICS_FRONTEND_V4.md), [операторский регламент](OPERATIONS_RUNBOOK.md#наличие-товара-и-объединённые-склады-schema-v5), [план фильтров](FOLIO_PRODUCT_ANALYTICS_FILTERS_PLAN.md) и [историческое задание Java](api/FOLIO_PRODUCT_ANALYTICS_SCENARIOS_BACKEND_TASK.md) |
-| Ограничить тестовый WayForPay | [WAYFORPAY_TEST_ACCESS.md](WAYFORPAY_TEST_ACCESS.md) |
+| Ограничить WayForPay и подключить оплату → чек Checkbox | [WAYFORPAY_TEST_ACCESS.md](WAYFORPAY_TEST_ACCESS.md) |
+| Добавить банковский приход ФОЛИО после WayForPay | [Независимый приход: настройки, очередь и запуск](FOLIO_WFP_PAYMENTS.md) |
 
 ## Аудитории
 

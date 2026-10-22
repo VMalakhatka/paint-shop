@@ -28,6 +28,38 @@
     var managerCustomerId = Number.parseInt(pcFolioDocuments.managerCustomerId, 10);
     managerCustomerId = Number.isInteger(managerCustomerId) && managerCustomerId > 0 ? managerCustomerId : 0;
     var managerMode = managerCustomerId > 0;
+    var bundleSelection = new Set();
+    var bundleButton;
+    var bundleCount;
+    if (managerMode && pcFolioDocuments.approvalUrl) {
+        var bundlePanel = document.createElement('div');
+        var bundleHint = document.createElement('p');
+        bundleHint.textContent = pcFolioDocuments.bundleHint;
+        bundleButton = document.createElement('button');
+        bundleButton.type = 'button'; bundleButton.className = 'button';
+        bundleButton.textContent = pcFolioDocuments.bundleLabel; bundleButton.disabled = true;
+        bundleCount = document.createElement('span');
+        bundleCount.setAttribute('aria-live', 'polite');
+        var bundleClear = document.createElement('button');
+        bundleClear.type = 'button'; bundleClear.className = 'button'; bundleClear.textContent = pcFolioDocuments.bundleClear;
+        bundleClear.addEventListener('click', function () {
+            bundleSelection.clear(); updateBundle();
+            rowsBox.querySelectorAll('[data-bundle-select]').forEach(function (box) { box.checked = false; });
+        });
+        bundleButton.addEventListener('click', function () {
+            if (!bundleSelection.size || bundleSelection.size > 20) return;
+            var url = new URL(pcFolioDocuments.approvalUrl, window.location.href);
+            url.searchParams.set('document_ids', Array.from(bundleSelection).join(','));
+            window.location.assign(url.toString());
+        });
+        bundlePanel.append(bundleHint, bundleButton, bundleCount, bundleClear);
+        tableWrap.before(bundlePanel);
+    }
+    function updateBundle() {
+        if (!bundleButton) return;
+        bundleButton.disabled = !bundleSelection.size || bundleSelection.size > 20;
+        bundleCount.textContent = ' (' + bundleSelection.size + '/20) ';
+    }
     var money = new Intl.NumberFormat('uk-UA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     var dateFormatter = new Intl.DateTimeFormat('uk-UA');
 
@@ -149,6 +181,20 @@
             button.dataset.documentType = folioDocument.documentType;
             button.dataset.documentId = folioDocument.documentId;
             actions.appendChild(button);
+            if (bundleButton && folioDocument.documentType === 'ACCOUNT' && folioDocument.accounted === true && !folioDocument.returnDocument && number(folioDocument.totalAmount) > 0) {
+                var selectLabel = documentNode('label');
+                var select = documentNode('input'); select.type = 'checkbox';
+                select.setAttribute('data-bundle-select', '');
+                var selectedId = String(folioDocument.documentId);
+                select.checked = bundleSelection.has(selectedId);
+                select.addEventListener('change', function () {
+                    if (select.checked && bundleSelection.size >= 20) { select.checked = false; return; }
+                    if (select.checked) bundleSelection.add(selectedId); else bundleSelection.delete(selectedId);
+                    updateBundle();
+                });
+                selectLabel.append(select, document.createTextNode(pcFolioDocuments.bundleSelect));
+                actions.appendChild(selectLabel);
+            }
             rowsBox.appendChild(row);
         });
         tableWrap.hidden = documents.length === 0;
@@ -175,7 +221,8 @@
     }
 
     function loadList(reset) {
-        var types = selectedTypes();
+        var preordersOnly = form.elements.preorders_only && form.elements.preorders_only.checked;
+        var types = preordersOnly ? ['ACCOUNT'] : selectedTypes();
         if (!types.length) {
             setStatus(root.dataset.typesRequired, 'error');
             return;
@@ -195,6 +242,7 @@
             date_from: form.elements.date_from.value,
             date_to: form.elements.date_to.value,
             types: types.join(','),
+            preorders_only: preordersOnly ? '1' : '',
             limit: form.elements.limit.value,
             cursor: cursors[pageIndex] || ''
         }, listController.signal)

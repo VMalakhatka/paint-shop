@@ -8,6 +8,7 @@ defined('ABSPATH') || exit;
 
 final class ApiClient
 {
+    private array $requestSecrets = [];
     public function __construct(private Config $config)
     {
     }
@@ -44,6 +45,11 @@ final class ApiClient
     public function activeShift(string $token): array
     {
         return $this->request('GET', '/api/v1/cashier/shift', null, $token);
+    }
+
+    public function registerInfo(string $token): array
+    {
+        return $this->request('GET', '/api/v1/cash-registers/info', null, $token, ['X-License-Key' => $this->config->licenseKey()]);
     }
 
     /** @return array<string,mixed> */
@@ -178,6 +184,16 @@ final class ApiClient
         array $extra_headers = [],
         array $query = []
     ): array {
+        $this->requestSecrets = [$token];
+        $collect = function (array $values) use (&$collect): void {
+            foreach ($values as $key => $value) {
+                if (is_array($value)) { $collect($value); }
+                elseif (in_array($key, ['email','phone','card_mask','cardPan','owner_name','cashier_name','pin_code','auth_code','rrn'], true) && is_scalar($value)) {
+                    $this->requestSecrets[] = (string) $value;
+                }
+            }
+        };
+        $collect($body ?? []);
         $url = $this->config->apiBaseUrl() . $path;
         if ($query !== []) {
             $url = add_query_arg($query, $url);
@@ -245,8 +261,11 @@ final class ApiClient
     /** @param array<string,mixed> $body */
     private function errorCode(array $body, int $http_code): string
     {
-        foreach (['code', 'error_code', 'detail'] as $field) {
+        foreach (['code', 'error_code'] as $field) {
             if (isset($body[$field]) && is_scalar($body[$field])) {
+                if ($this->safeMessage((string) $body[$field]) !== (string) $body[$field]) {
+                    return 'checkbox_error';
+                }
                 return sanitize_key((string) $body[$field]) ?: 'checkbox_error';
             }
         }
@@ -261,17 +280,28 @@ final class ApiClient
                 return $this->safeMessage((string) $body[$field]);
             }
         }
+        if (is_array($body['detail'] ?? null)) {
+            $messages = [];
+            foreach (array_slice($body['detail'], 0, 5) as $detail) {
+                if (is_array($detail) && is_string($detail['msg'] ?? null)) {
+                    // Never store validation input/context, which can contain credentials.
+                    $messages[] = $detail['msg'];
+                }
+            }
+            if ($messages) { return $this->safeMessage(implode('; ', $messages)); }
+        }
         return 'Checkbox API returned HTTP ' . $http_code . '.';
     }
 
-    private function safeMessage(string $message): string
+    public function safeMessage(string $message): string
     {
-        foreach ([$this->config->licenseKey(), $this->config->cashierPin(), $this->config->accessKey()] as $secret) {
+        foreach (array_merge($this->requestSecrets, [$this->config->licenseKey(), $this->config->cashierPin(), $this->config->accessKey(), $this->config->inboundToken(), $this->config->javaToken()]) as $secret) {
             if ($secret !== '') {
                 $message = str_replace($secret, '[redacted]', $message);
             }
         }
         $message = wp_strip_all_tags($message);
+        $message = preg_replace(['~https?://[^\s<>]+~i', '/[A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,}/i', '/\b[A-Za-z0-9_-]{20,}(?:\.[A-Za-z0-9_-]+)*\b/', '/\+?\d[\d ()-]{7,}\d/'], '[redacted]', $message) ?? '';
         $message = preg_replace('/[\r\n\t]+/', ' ', $message) ?: '';
         return function_exists('mb_substr') ? mb_substr($message, 0, 500) : substr($message, 0, 500);
     }

@@ -52,7 +52,11 @@ OVH service -> physical host -> hypervisor -> Windows VM
 | Область | Владелец | Источник истины |
 |---|---|---|
 | Каталог, корзина, checkout, кабинет, HPOS-заказы | WooCommerce + собственные PHP-плагины | текущий Woo runtime и PHP-код |
-| Компоновка и стили | `generatepress-child` | код child theme и визуальная проверка |
+| Шапка и основное меню | `paint-shop-ux/inc/site-header.php` | собственные разметка/CSS/JS; меню WordPress `primary` и существующие фильтры доступа; выбор склада — `paint-core` |
+| Внешняя PHP-оболочка и резервные шаблоны | Действующая тема — GeneratePress + `generatepress-child`; локально подготовлена самостоятельная `lavka-storefront` | `wp-content/themes/lavka-storefront/`; второй этап — подготовка и preview, активация и production-deploy не выполнены |
+| Обычные информационные страницы и 404 | `paint-shop-ux/inc/public-pages.php` | ограниченный выбор default templates, `templates/public-page.php` и `assets/public-pages.css`; содержимое — WordPress и прежние провайдеры |
+| Футер | `paint-shop-ux/inc/site-footer.php` | собственная разметка/CSS, adapter GP + однократный fallback `wp_footer`; юридические данные — `pc-wayforpay-compliance` |
+| Каталог, товар и стили покупательских страниц | `paint-shop-ux` | собственные modules/templates/assets, scoped storefront.css; Woo hooks сохраняют цены, склады и покупку |
 | Общие остатки и allocation | `paint-core` | код, Woo product/order state |
 | Полная синхронизация карточек и категорий | `lavka-total-sync` + Java `/sync/run` | код обоих владельцев и run status |
 | Остатки, названия и глобальные группы складов | `lavka-sync` | стабильные location term ID/slug, `lavka_folio_warehouses`, Folio warehouse ID и Woo stock |
@@ -62,11 +66,66 @@ OVH service -> physical host -> hypervisor -> Windows VM
 | Статистика товара | Java projection + `lavka-price-sync` | активное поколение `folio_product_*` |
 | Отчёты | `lavka-reports` и профильные MU-плагины | Java response + параметры и контрольные суммы |
 | Заказ Woo → документы ФОЛИО | `pc-folio-order-link` + Java | стабильный request ID и `documents[]` |
+| WayForPay → независимый банковский приход ФОЛИО | `pc-wayforpay-checkbox/FolioPayments` + Java `folio.payment` | verified Approved, снимок плательщика, отдельный outbox и атомарный MSSQL-журнал; [запуск](FOLIO_WFP_PAYMENTS.md) |
 | Изображения Woo | `$image-in-woo`: Media Library + Media Cloud + Java media API | attachment ID, exact S3 HEAD proof и ФОЛИО reference |
 | OVH contract/DNS/compute/S3 policy | `$manage-ovh-infrastructure` | текущий OVH Manager/API и фактический resource state |
 | Java image/container/env/health | `$build-java-docker-runtime` | текущий Docker/deploy code и runtime state |
 | ФОЛИО-документы и бизнес-данные | ФОЛИО/MS SQL | живая схема и подтверждённое поведение |
 | Сервер и MSSQL runtime | host/Windows/MSSQL operations | фактическое read-only состояние слоёв |
+
+С 2026-10-21 настройки магазина вынесены из дочерней темы: разделитель хлебных
+крошек — `paint-shop-ux/inc/store-presentation.php`, исходные 24 товара на странице —
+существующий MU `psu-force-per-page.php`, установка даты создания заказа при classic
+checkout — `paint-core/inc/checkout-created-date.php`. Семантика даты сохранена.
+Новый футер заменяет вывод GeneratePress, сохраняет юридические ссылки и активные
+footer widgets. В 1.6.0 базовые стили
+каталога, товара, корзины, checkout, кабинета и списка товаров перенесены в
+`paint-shop-ux/assets/storefront.css` и component CSS. Контекст определяется Woo
+conditionals/shortcode; отчёты остаются у своих владельцев. Обычные страницы
+с 1.8.0 обслуживает отдельный ограниченный модуль ниже.
+Контейнеры, сетка, типографика и controls проверяются локально с удалённым CSS темы;
+это не проверка переключения PHP-темы. Локальная приёмка
+и откат описаны в [Paint Shop UX](../wp-content/plugins/paint-shop-ux/README.md).
+
+В 1.7.0 шапка, контакты и основная навигация переходят в `inc/site-header.php`,
+`assets/site-header.css` и `assets/site-header.js`. Вывод использует стандартный
+`wp_body_open`; adapter отключает прежние callbacks шапки/меню GP. Сохранённое
+меню `primary` продолжает проходить фильтры ролей. Переключатель склада выводит
+существующий `pc_render_alloc_control()` прямо в шапке; его режимы, сохранение
+выбора и правила корзины остаются у Paint Core. Старый footer mount пропускается
+только после фактического вывода собственной шапки. При
+`psu_site_header_enabled=false` до `wp` остаётся прежний путь темы.
+
+В 1.8.0 информационные страницы с default template и поддерживаемым содержимым,
+404 и запасной обычный поиск получают собственную разметку контента и стили.
+WooCommerce, главная, Elementor, приложения на shortcodes, custom blocks и чужие
+шаблоны исключены. Товарный поиск остаётся у каталога; новый шаблон не меняет
+query routing. Содержимое, ссылки, парольная защита и разделение страниц сохраняют
+WordPress API. Локально 2026-10-21 пройдены 166 PHP-проверок, сравнение текста
+четырёх правовых страниц и browser-проверки 320/390/768/1280 px, в том числе без
+CSS темы. Канон и код справки обновлены; выпуск 1.8.0 на production не развёрнут.
+Приёмка и откат — [Paint Shop UX](../wp-content/plugins/paint-shop-ux/README.md).
+
+Второй этап: локально подготовлена самостоятельная тема `lavka-storefront`, без
+родительской темы. Проверено: 2026-10-21, исходный код локального checkout. Она
+предоставляет PHP-каркас, резервные шаблоны WordPress, регистрацию меню, областей
+виджетов и возможностей WooCommerce, включая галерею товара. Шапка, футер,
+каталог, карточка товара и бизнес-правила остаются у прежних плагинов. Чужие
+шаблоны приложений и Elementor сохраняют своих владельцев.
+
+Для совместимости новая тема читает прежнее назначение меню `primary` из
+`theme_mods_generatepress-child`, только пока у неё нет собственного сохранённого
+назначения. Идентификаторы областей виджетов сохранены; расположение боковой
+колонки каталога использует прежний `generate_settings.blog_layout_setting`
+как запасное значение, если новый `catalog_sidebar` не задан. Это чтение прежних
+настроек, без копирования или изменения данных. Контракт находится в
+[functions.php новой темы](../wp-content/themes/lavka-storefront/functions.php).
+
+Подготовка и локальный preview не переключают сохранённую активную тему.
+Production продолжает работать на GeneratePress + `generatepress-child`.
+Третий этап — отдельная доставка темы, активация и production-приёмка с возможностью
+отката — ещё не выполнен. Удаление CSS темы или успешный локальный preview сами по
+себе не подтверждают production-переключение.
 
 ## Собственные WordPress-компоненты
 
@@ -80,6 +139,13 @@ OVH service -> physical host -> hypervisor -> Windows VM
 - `lavka-product-media-upload` — пакетный media workflow;
 - `paint-nova-poshta-multishipping` — многоскладская доставка Новой почтой;
 - `pc-checkbox-fiscalization` — универсальный исполнитель Checkbox.
+- `pc-wayforpay-checkbox` — проверка callback WayForPay и очередь команд чека;
+  сохраняет snapshot до Folio split, не выбирает накладные и не выполняет возвраты.
+  С версии 0.2.0 также владеет независимой очередью банковских приходов: склад5,
+  плательщик на момент Approved, без ожидания/распределения счетов. Java сохраняет
+  native приход и idempotency ledger одной транзакцией. Этот новый поток default-off;
+  production rollout отдельно, инструкция — [банковские приходы](FOLIO_WFP_PAYMENTS.md).
+  [Подключение и приёмка](../wp-content/plugins/pc-wayforpay-checkbox/README.md).
 
 MU-плагины загружаются автоматически. Критические группы: ecosystem lock/events,
 Folio customer/order integration, checkout compliance, stock staging/sync,
@@ -211,6 +277,39 @@ noindex и размер страницы. Важно сохранять `orderby
 Откат: вернуть прежний код плагина и снова очистить sitemap-кэш. Данные товаров
 и категорий для этого не изменять. Production-деплой и очистка кэша в этой задаче
 не выполнялись.
+
+## XML sitemap товаров: обновление кэша
+
+Проверено: 2026-10-16, production, WP-CLI и анонимные публичные GET. Две
+опубликованные карточки (альбом Fabriano Accademia A4 и сердечко RR 6×3 см)
+отсутствовали в сохранённых XML, хотя штатный провайдер Rank Math выдавал их URL,
+`is_object_indexable()` возвращал true, а исключений и индивидуальных canonical
+не было. Обе имели Woo catalog visibility `hidden`; это состояние сохранено,
+поскольку включение в sitemap не разрешает менять видимость или условия продажи.
+
+По разрешению владельца выполнен только штатный
+`RankMath\Sitemap\Cache::invalidate_storage('product')`. Перед операцией проверены
+целевые URL, окружение и отсутствие фонового ecosystem lock; на время операции
+взят общий lock. В закрытом каталоге вне web-root сохранены 177 файлов товарного
+кэша, mapping/transients и снимок двух карточек. Сверка после очистки подтвердила
+неизменность записей, meta и product visibility. Исходный код, товары, цены,
+остатки, SEO options и карта категорий не изменялись.
+
+Публичная приёмка: индекс карты HTTP 200 ссылается на
+`product-sitemap168.xml` и `product-sitemap126.xml`; обе карты HTTP 200 содержат
+соответствующий товарный URL, обе карточки отвечают HTTP 200 и имеют шаблон товара.
+Номера частей изменчивы: перед следующей операцией определять их по текущей
+выборке провайдера, а не использовать как постоянные настройки. При сопоставлении
+декодировать percent-encoding; регистр пути и завершающий слеш сохранять.
+
+Регламент: сначала проверить публикацию, robots/canonical, явные исключения и
+результат нативного провайдера; при устаревшем кэше сохранить snapshot и применить
+только согласованный тип очистки. После неизвестного результата перечитать
+состояние, не повторять запись вслепую. Кэш производный: при сбое повторной
+генерации остановиться и сохранить диагностический snapshot; возврат к старому
+XML не исправляет исходное рассогласование. Данные карточек не менять ради
+обновления sitemap. Эта проверка не доказывает включение в индекс Google и не
+является повторным полным аудитом всех частей sitemap.
 
 ## Служебные страницы: индексация production
 

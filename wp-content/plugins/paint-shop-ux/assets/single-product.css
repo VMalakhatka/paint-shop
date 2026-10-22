@@ -1,0 +1,208 @@
+/* Product geometry; shared storefront tokens have fallbacks for standalone use. */
+body.psu-product-page {
+    --psu-product-ink: var(--psu-ink, #302a25);
+    --psu-product-muted: var(--psu-muted, #6e655e);
+    --psu-product-accent: var(--psu-accent, #743c2e);
+    --psu-product-border: var(--psu-border, #e6dfd7);
+    --psu-product-surface: var(--psu-surface, #f7f4ef);
+    --psu-product-font: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+/* Adapter for the inherited page container, without changing other pages. */
+.psu-product-page #page,
+.psu-product-page #content {
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0;
+    padding: 0;
+}
+.psu-product-page #content { display: block; background: var(--psu-product-surface); }
+.psu-product-content {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 1360px;
+    margin: 0 auto;
+    padding: 28px clamp(16px, 3vw, 40px) 48px;
+    color: var(--psu-product-ink);
+    font: 16px/1.6 var(--psu-product-font);
+}
+.psu-product-main,
+.psu-product-main * { box-sizing: border-box; }
+.psu-product-main a { color: var(--psu-product-accent); }
+.psu-product-main a:focus-visible,
+.psu-product-main button:focus-visible,
+.psu-product-main input:focus-visible,
+.psu-product-main select:focus-visible {
+    outline: 3px solid var(--psu-product-accent);
+    outline-offset: 3px;
+}
+.psu-product-main .woocommerce-breadcrumb { margin: 0 0 20px; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+.psu-product-main .pc-wholesale-help-link { margin: 0 0 20px; }
+.woocommerce .psu-product-main div.product.psu-product { margin: 0; }
+.psu-product__hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(20px, 2.5vw, 32px);
+    align-items: start;
+}
+.psu-product__gallery {
+    position: relative;
+    min-width: 0;
+    padding: 20px;
+    border: 1px solid var(--psu-product-border);
+    border-radius: 16px;
+    background: #fff;
+}
+.woocommerce #main .psu-product .psu-product__gallery div.images {
+    float: none;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+}
+.woocommerce #main .psu-product .woocommerce-product-gallery__image > a {
+    display: flex;
+    justify-content: flex-end;
+}
+.woocommerce #main .psu-product .woocommerce-product-gallery__image > a > img {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: 560px;
+    object-fit: contain;
+}
+/* FlexSlider writes an inline height before/after resize. Keep every image inside
+   one bounded stage instead of cropping it while that cached height catches up. */
+.woocommerce #main .psu-product div.images .flex-viewport { height: 560px !important; }
+.woocommerce #main .psu-product .flex-viewport .woocommerce-product-gallery__image > a { height: 560px; align-items: center; }
+.woocommerce #main .psu-product div.images .flex-control-thumbs {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+    margin: 16px 0 0;
+    padding: 0;
+}
+.woocommerce #main .psu-product div.images .flex-control-thumbs li { float: none; width: 100%; min-width: 0; margin: 0; }
+.woocommerce #main .psu-product div.images .flex-control-thumbs img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: contain; border: 1px solid var(--psu-product-border); border-radius: 8px; }
+.woocommerce .psu-product__gallery span.onsale { top: 12px; left: 12px; margin: 0; background: var(--psu-product-accent); }
+.woocommerce #main .psu-product__hero > .summary.psu-product__purchase {
+    float: none;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: 4px 0 0;
+    color: var(--psu-product-ink);
+}
+.woocommerce .psu-product .product_title {
+    margin: 0 0 18px;
+    padding: 0;
+    color: var(--psu-product-ink);
+    font-family: var(--psu-product-font);
+    font-size: clamp(24px, 2.4vw, 34px);
+    font-weight: 400;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+.woocommerce .psu-product .summary > .price {
+    margin: 0 0 20px;
+    color: var(--psu-product-accent);
+    font-size: clamp(24px, 2.6vw, 32px);
+    line-height: 1.3;
+    font-weight: 500;
+}
+.woocommerce .psu-product .price del { color: var(--psu-product-muted); font-size: .7em; }
+.woocommerce .psu-product .price ins { background: transparent; text-decoration: none; }
+.psu-product .woocommerce-product-details__short-description { margin: 0 0 20px; color: var(--psu-product-muted); }
+.psu-product .woocommerce-product-details__short-description > :last-child { margin-bottom: 0; }
+.psu-product .summary .slu-stock-box {
+    margin: 0 0 20px;
+    padding: 16px 18px;
+    border: 1px solid var(--psu-product-border);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--psu-product-ink);
+    font-size: 14px;
+    line-height: 1.65;
+}
+.woocommerce .psu-product .summary form.cart { margin: 0 0 24px; }
+.woocommerce .psu-product .summary form.cart:not(.variations_form):not(.grouped_form),
+.woocommerce .psu-product .woocommerce-variation-add-to-cart { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.woocommerce .psu-product form.cart div.quantity { float: none; margin: 0; }
+.woocommerce .psu-product .quantity .qty {
+    width: 84px;
+    min-height: 48px;
+    padding: 10px;
+    border: 1px solid var(--psu-product-border);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--psu-product-ink);
+    font: inherit;
+    font-variant-numeric: tabular-nums;
+}
+.woocommerce .psu-product .single_add_to_cart_button.button {
+    float: none;
+    min-height: 48px;
+    padding: 12px 24px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--psu-product-accent);
+    color: #fff;
+    font: 600 16px/1.4 var(--psu-product-font);
+    text-align: center;
+    white-space: normal;
+}
+.woocommerce .psu-product .single_add_to_cart_button.button:hover { background: #54291e; color: #fff; }
+.woocommerce .psu-product .single_add_to_cart_button.button:disabled,
+.woocommerce .psu-product .single_add_to_cart_button.button.disabled { opacity: .5; }
+.psu-product .product_meta { padding-top: 20px; border-top: 1px solid var(--psu-product-border); color: var(--psu-product-muted); font-size: 13px; line-height: 1.6; }
+.psu-product .product_meta > span { display: block; margin-bottom: 6px; overflow-wrap: anywhere; }
+.psu-product .psu-product-barcode { margin-top: 10px; font-size: 13px; }
+.psu-product .psu-single-product-search { max-width: 100%; border-radius: 8px; overflow: hidden; }
+.psu-product .psu-single-product-search__field { min-height: 44px; padding: 0 12px; border: 0; background: #fff; color: var(--psu-product-ink); font: 14px/1.5 var(--psu-product-font); }
+.psu-product-main .psu-product .psu-single-product-search__button { min-height: 44px; padding: 0; border: 0; background: var(--psu-product-accent); color: #fff; }
+.psu-product-main .psu-product .psu-single-product-search__button:hover { background: #54291e; }
+.psu-product__details {
+    margin-top: 36px;
+    padding: clamp(20px, 3vw, 32px);
+    border: 1px solid var(--psu-product-border);
+    border-radius: 16px;
+    background: #fff;
+}
+.woocommerce #main .psu-product .woocommerce-tabs ul.tabs { display: flex; flex-wrap: wrap; gap: 12px; padding: 0; margin: 0 0 24px; border-bottom: 1px solid var(--psu-product-border); overflow: visible; }
+.woocommerce #main .psu-product .woocommerce-tabs ul.tabs::before,
+.woocommerce #main .psu-product .woocommerce-tabs ul.tabs li::before,
+.woocommerce #main .psu-product .woocommerce-tabs ul.tabs li::after { display: none; }
+.woocommerce #main .psu-product .woocommerce-tabs ul.tabs li { margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; }
+.woocommerce #main .psu-product .woocommerce-tabs ul.tabs li a { padding: 10px 2px; color: var(--psu-product-muted); font-size: 15px; font-weight: 600; }
+.woocommerce #main .psu-product .woocommerce-tabs ul.tabs li.active a { border-bottom: 3px solid var(--psu-product-accent); color: var(--psu-product-accent); }
+.psu-product__details h2 { font-size: 22px; line-height: 1.35; }
+.psu-product__details p,
+.psu-product__details li { overflow-wrap: anywhere; }
+.psu-product__details img,
+.psu-product__details video { max-width: 100%; height: auto; }
+.psu-product__details table { width: 100%; overflow-wrap: anywhere; }
+.woocommerce .psu-product .related,
+.woocommerce .psu-product .upsells { margin-top: 32px; }
+.woocommerce .psu-product .related ul.products,
+.woocommerce .psu-product .upsells ul.products { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.psu-product-feedback { margin: 0 0 16px; padding: 12px 16px; border: 1px solid var(--psu-product-border); border-radius: 8px; background: #fff; font-size: 14px; }
+.psu-product-feedback.is-error { border-color: #b24635; }
+.psu-product-feedback a { margin-left: 8px; text-decoration: underline; }
+.psu-product .single_add_to_cart_button[aria-busy="true"] { cursor: progress; opacity: .65; }
+@media (max-width: 768px) {
+    .psu-product-content { padding: 18px 16px 32px; }
+    .psu-product__hero { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+    .psu-product__gallery { padding: 16px; }
+    .woocommerce #main .psu-product .woocommerce-product-gallery__image > a { justify-content: center; }
+    .woocommerce #main .psu-product .woocommerce-product-gallery__image > a > img { max-height: 340px; }
+    .woocommerce #main .psu-product div.images .flex-viewport { height: 340px !important; }
+    .woocommerce #main .psu-product .flex-viewport .woocommerce-product-gallery__image > a { height: 340px; }
+    .woocommerce .psu-product .product_title { font-size: 24px; }
+    .woocommerce .psu-product .single_add_to_cart_button.button { flex: 1; padding: 12px; }
+    .psu-product__details { margin-top: 24px; padding: 18px 16px; }
+    .woocommerce .psu-product .related ul.products,
+    .woocommerce .psu-product .upsells ul.products { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .psu-product-main * { scroll-behavior: auto; }
+}

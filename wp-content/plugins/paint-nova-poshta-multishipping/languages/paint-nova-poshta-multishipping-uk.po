@@ -989,26 +989,385 @@ msgstr "Як вибрати точку отримання"
 
 msgid "The selected point could not be verified. Search and select it again."
 msgstr "Вибрану точку не вдалося перевірити. Знайдіть і виберіть її ще раз."
-#: src/Infrastructure/ApprovalQuoteService.php src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
+
+#: src/Infrastructure/ApprovalQuoteService.php
+#: src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
 msgid "Delivery cannot be calculated from the saved order warehouses. Ask the manager to check the products and sender settings."
 msgstr "Не вдалося розрахувати доставку за збереженими складами замовлення. Попросіть менеджера перевірити товари та налаштування відправників."
 
-#: src/Infrastructure/ApprovalQuoteService.php src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
+#: src/Infrastructure/ApprovalQuoteService.php
+#: src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
 msgid "Nova Poshta estimates require an order in UAH."
 msgstr "Розрахунок Нової пошти доступний для замовлень у гривнях."
 
-#: src/Infrastructure/ApprovalQuoteService.php src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
+#: src/Infrastructure/ApprovalQuoteService.php
+#: src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
 msgid "Nova Poshta delivery is currently unavailable."
 msgstr "Доставка Новою поштою зараз недоступна."
 
-#: src/Infrastructure/ApprovalQuoteService.php src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
+#: src/Infrastructure/ApprovalQuoteService.php
+#: src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
 msgid "The selected point cannot accept this parcel weight or declared value. Choose another point or courier delivery."
 msgstr "Вага або оголошена вартість посилки перевищує ліміт вибраної точки. Виберіть іншу точку або кур’єрську доставку."
 
-#: src/Infrastructure/ApprovalQuoteService.php src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
+#: src/Infrastructure/ApprovalQuoteService.php
+#: src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
 msgid "Choose the city and an available point from the Nova Poshta list, or enter a courier address."
 msgstr "Виберіть місто та доступну точку зі списку Нової пошти або введіть адресу кур’єрської доставки."
 
-#: src/Infrastructure/ApprovalQuoteService.php src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
+#: src/Infrastructure/ApprovalQuoteService.php
+#: src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
 msgid "Courier street and building"
 msgstr "Вулиця та будинок для кур’єра"
+
+msgid "Nova Poshta — free delivery (base tariff); insurance and extras paid by recipient"
+msgstr "Нова пошта — доставка безкоштовно (базовий тариф); страхування та допослуги за рахунок одержувача"
+
+msgid "Nova Poshta — carrier tariff, paid separately by recipient"
+msgstr "Нова пошта — за тарифами перевізника, оплата одержувачем окремо"
+
+msgid "Store pickup — %s, free (wait for confirmation)"
+msgstr "Самовивіз — %s, безкоштовно (дочекайтеся підтвердження)"
+
+msgid "Choose the destination. Delivery is paid separately to Nova Poshta, not with the goods. The estimate and any store contribution are shown below."
+msgstr "Оберіть місце отримання. Доставка оплачується окремо Новій пошті, а не разом із товарами. Орієнтовний тариф і внесок магазину показані нижче."
+
+msgid "The delivery price will be determined by Nova Poshta. No delivery fee is included in the payment for goods."
+msgstr "Вартість доставки визначить Нова пошта. Доставка не включена в оплату товарів."
+
+msgid "Estimated payment to Nova Poshta: %s. Final packaging and charges are confirmed by the carrier."
+msgstr "Орієнтовно до сплати Новій пошті: %s. Пакування й остаточну вартість підтверджує перевізник."
+
+msgid "Free delivery covers the base tariff only. Insurance and additional services are paid by the recipient."
+msgstr "Безкоштовна доставка покриває лише базовий тариф. Страхування та додаткові послуги оплачує одержувач."
+
+msgid "At or below the threshold"
+msgstr "До порога включно"
+
+msgid "Above the threshold"
+msgstr "Понад поріг"
+
+msgid "Nova Poshta — base tariff covered by us; insurance and extras paid by recipient"
+msgstr "Нова пошта — базовий тариф покриваємо ми; страхування та додаткові послуги оплачує одержувач"
+
+#, php-format
+msgid "For goods over %s, we cover the base tariff; insurance and extras remain payable separately."
+msgstr "За суми товарів понад %s базовий тариф покриваємо ми; страхування та додаткові послуги оплачуються окремо."
+
+msgid "Address delivery costs more than delivery to a branch. You can choose a Nova Poshta branch in the delivery type above."
+msgstr "Адресна доставка дорожча за доставку у відділення. Ви можете вибрати відділення Нової пошти у способі отримання вище."
+
+msgid "Shipment access denied."
+msgstr "Немає доступу до відправлень."
+
+msgid "Order unavailable."
+msgstr "Замовлення недоступне."
+
+msgid "Open the original order to prepare shipments for all warehouses."
+msgstr "Відкрийте оригінальне замовлення для підготовки відправлень з усіх складів."
+
+msgid "Shipment preparation requires an active UAH order without refunds."
+msgstr "Підготовка потребує активного замовлення у гривнях без повернень."
+
+msgid "Check the saved warehouse allocation before preparing shipments."
+msgstr "Перед підготовкою перевірте збережений розподіл товарів за складами."
+
+msgid "This order already has external or locked shipments. Preparation cannot replace them."
+msgstr "Замовлення вже має зовнішні або заблоковані відправлення. Підготовка не може їх замінити."
+
+msgid "Saved shipment warehouses changed. Administrator review is required."
+msgstr "Склади збережених відправлень змінилися. Потрібна перевірка адміністратора."
+
+msgid "The order or preparation changed. Reload and review it again."
+msgstr "Замовлення або підготовка змінилися. Оновіть сторінку й перевірте ще раз."
+
+msgid "Confirm that recipient details and packaging were agreed and checked."
+msgstr "Підтвердьте, що дані одержувача й пакування узгоджено та перевірено."
+
+msgid "Check recipient details and phone number."
+msgstr "Перевірте дані одержувача та номер телефону."
+
+msgid "Check all warehouse parcels."
+msgstr "Перевірте посилки з усіх складів."
+
+msgid "Choose the delivery payer for each warehouse."
+msgstr "Виберіть платника доставки для кожного складу."
+
+msgid "Enter between 1 and 20 packed boxes for each warehouse."
+msgstr "Вкажіть від 1 до 20 запакованих коробок для кожного складу."
+
+msgid "Enter positive box weights in kg and dimensions in cm."
+msgstr "Вкажіть додатну вагу коробок у кг та розміри у см."
+
+msgid "Check the warehouse sender mapping and phone in Nova Poshta settings."
+msgstr "Перевірте прив’язку відправника складу й телефон у налаштуваннях НП."
+
+msgid "Multi-warehouse COD requires an approved allocation rule; no COD will be created."
+msgstr "Післяплата з кількох складів потребує затвердженого правила розподілу; післяплату не буде створено."
+
+msgid "COD is disabled by the customer delivery policy."
+msgstr "Післяплату вимкнено політикою доставки клієнта."
+
+msgid "Delivery payer and store subsidy still require carrier-contract verification; this preview does not calculate the final tariff."
+msgstr "Платник і компенсація магазину ще потребують перевірки за договором перевізника; цей перегляд не розраховує кінцевий тариф."
+
+msgid "TTN creation and label printing are blocked pending verification of the official carrier API contract. No shipment or notification has been sent."
+msgstr "Створення ТТН і друк маркування заблоковано до перевірки офіційного контракту API перевізника. Відправлення й повідомлення не надсилалися."
+
+msgid "Another order operation is running. Try again after it finishes."
+msgstr "Виконується інша дія із замовленням. Повторіть після її завершення."
+
+msgid "Transactional shipment storage is unavailable. Nothing was saved."
+msgstr "Транзакційне сховище відправлень недоступне. Нічого не збережено."
+
+msgid "Shipment preparation could not be saved."
+msgstr "Не вдалося зберегти підготовку відправлення."
+
+msgid "Checking preparation…"
+msgstr "Перевіряємо підготовку…"
+
+msgid "The operation could not be confirmed. Reload before trying again."
+msgstr "Результат дії не підтверджено. Перед повтором оновіть сторінку."
+
+msgid "Unsaved changes. Save and check the preparation again."
+msgstr "Є незбережені зміни. Збережіть і перевірте підготовку ще раз."
+
+msgid "Prepare Nova Poshta shipment"
+msgstr "Підготувати відправлення НП"
+
+msgid "Preparation is saved for this order only. It does not change the customer profile, create a TTN or send notifications."
+msgstr "Підготовка зберігається лише для цього замовлення. Вона не змінює профіль клієнта, не створює ТТН і не надсилає повідомлення."
+
+msgid "Use current customer confirmation"
+msgstr "Використати актуальне підтвердження клієнта"
+
+msgid "Import checks the current order version. Review imported details and save separately; your saved preparation is not overwritten automatically."
+msgstr "Імпорт перевіряє поточну версію замовлення. Перегляньте дані й збережіть окремо; збережена підготовка не перезаписується автоматично."
+
+msgid "Recipient name"
+msgstr "Ім’я одержувача"
+
+msgid "Recipient phone"
+msgstr "Телефон одержувача"
+
+msgid "Payment method and order total"
+msgstr "Спосіб оплати й сума замовлення"
+
+msgid "Warehouse sender"
+msgstr "Відправник складу"
+
+msgid "Check sender settings"
+msgstr "Перевірити налаштування відправника"
+
+msgid "Delivery payer"
+msgstr "Платник доставки"
+
+msgid "Recipient"
+msgstr "Одержувач"
+
+msgid "Sender"
+msgstr "Відправник"
+
+msgid "Add packed box"
+msgstr "Додати запаковану коробку"
+
+msgid "Recipient details were agreed; warehouse contents, packed box weights, dimensions and payer were checked."
+msgstr "Дані одержувача узгоджено; товари за складами, вагу й розміри коробок та платника перевірено."
+
+msgid "Save preparation"
+msgstr "Зберегти підготовку"
+
+msgid "Check preview"
+msgstr "Перевірити попередній перегляд"
+
+msgid "Create TTN"
+msgstr "Створити ТТН"
+
+msgid "Weight, kg"
+msgstr "Вага, кг"
+
+msgid "Length, cm"
+msgstr "Довжина, см"
+
+msgid "Width, cm"
+msgstr "Ширина, см"
+
+msgid "Height, cm"
+msgstr "Висота, см"
+
+msgid "Remove box"
+msgstr "Прибрати коробку"
+
+msgid "Preparation audit (last 10 saves)"
+msgstr "Аудит підготовки (останні 10 збережень)"
+
+msgid "Invalid preparation request."
+msgstr "Некоректний запит підготовки."
+
+msgid "No current confirmed delivery details are available for this order."
+msgstr "Для цього замовлення немає актуальних підтверджених даних доставки."
+
+msgid "Imported for review only. Save the preparation separately."
+msgstr "Імпортовано лише для перевірки. Збережіть підготовку окремо."
+
+msgid "Preparation saved. No TTN or notification was sent."
+msgstr "Підготовку збережено. ТТН і повідомлення не надсилалися."
+
+msgid "Preview only; changes are not saved."
+msgstr "Лише попередній перегляд; зміни не збережено."
+
+msgid "Label printing is unavailable."
+msgstr "Друк недоступний."
+
+msgid "Nova Poshta did not return a valid PDF. No file was downloaded."
+msgstr "Нова пошта не повернула коректний PDF. Файл не завантажено."
+
+msgid "Shipment data could not be verified. Check the saved preparation and sender settings; no automatic retry is allowed."
+msgstr "Не вдалося перевірити відправлення. Звірте збережену підготовку й налаштування відправника; автоматичний повтор заборонено."
+
+msgid "COD creation is not supported in this release. Do not change the payment method just to bypass this check."
+msgstr "Створення з післяплатою в цьому релізі не підтримано. Не змінюйте спосіб оплати лише для обходу перевірки."
+
+msgid "This release supports drop-off at a branch and delivery to a branch or parcel locker only."
+msgstr "Цей реліз підтримує лише передачу у відділенні з доставкою до відділення або поштомата."
+
+msgid "Enter the recipient first name, last name and patronymic separately in Ukrainian as required by Nova Poshta."
+msgstr "Введіть окремо ім’я, прізвище та по батькові одержувача українською відповідно до вимог Нової пошти."
+
+msgid "Nova Poshta TTN for order #%s"
+msgstr "ТТН Нової пошти для замовлення №%s"
+
+msgid "TTN %s has been created for your order. This does not yet confirm handover to Nova Poshta."
+msgstr "Для вашого замовлення створено ТТН %s. Це ще не підтверджує передачу вантажу Новій пошті."
+
+msgid "Checking shipment…"
+msgstr "Перевіряємо відправлення…"
+
+msgid "Result not confirmed. Reload the page; do not repeat creation or email."
+msgstr "Результат не підтверджено. Перезавантажте сторінку; не повторюйте створення чи лист."
+
+msgid "Save preparation and reload this page before creating a TTN."
+msgstr "Збережіть підготовку та перезавантажте сторінку перед створенням ТТН."
+
+msgid "Declared value / estimated delivery, UAH"
+msgstr "Оголошена вартість / орієнтовна доставка, грн"
+
+msgid "Weight, kg / dimensions, cm"
+msgstr "Вага, кг / розміри, см"
+
+msgid "TTN, PDF and customer email"
+msgstr "ТТН, PDF та email клієнту"
+
+msgid "Only saved preparation is used. Save and reload after editing. Create each warehouse TTN separately; printing and customer email are separate actions."
+msgstr "Використовується лише збережена підготовка. Після правок збережіть її та перезавантажте сторінку. Створюйте ТТН кожного складу окремо; друк і лист клієнту — окремі дії."
+
+msgid "How this works and current limits"
+msgstr "Як це працює та поточні обмеження"
+
+msgid "Supported: drop-off at a branch, delivery to a branch or parcel locker, no COD, cash payment for carrier services. Enter the legal recipient name in Ukrainian; it will be recorded in the Nova Poshta recipient directory, not in the store customer profile."
+msgstr "Підтримано: передача у відділенні, доставка до відділення або поштомата, без післяплати, готівкова оплата послуг перевізника. Введіть ПІБ одержувача українською; його буде записано до довідника одержувачів Нової пошти, а не до профілю клієнта магазину."
+
+msgid "The estimate is not a final invoice. Unknown point limits must be checked with Nova Poshta. Confirm payer and any store subsidy manually. A created TTN does not mean that goods have been handed over."
+msgstr "Розрахунок не є остаточним рахунком. Невідомі обмеження точки уточніть у Новій пошті. Вручну підтвердьте платника й компенсацію магазину. Створена ТТН не означає передачу товару перевізнику."
+
+msgid "After a timeout or rejection, do not create another TTN: reconcile the result in the Nova Poshta business account with an administrator. Automatic retries and automatic Telegram messages are not enabled."
+msgstr "Після тайм-ауту чи відмови не створюйте іншу ТТН: разом з адміністратором звірте результат у бізнес-кабінеті Нової пошти. Автоматичні повтори й Telegram-повідомлення не ввімкнені."
+
+msgid "First name"
+msgstr "Ім’я"
+
+msgid "Last name"
+msgstr "Прізвище"
+
+msgid "Patronymic"
+msgstr "По батькові"
+
+msgid "Check saved shipment with Nova Poshta"
+msgstr "Перевірити збережене відправлення в НП"
+
+msgid "I checked the recipient, boxes, declared value, delivery payer, cash payment and store subsidy. Create this real TTN."
+msgstr "Я перевірив(-ла) одержувача, коробки, оголошену вартість, платника доставки, готівкову оплату й компенсацію магазину. Створити цю реальну ТТН."
+
+msgid "TTN created; handover is not confirmed."
+msgstr "ТТН створено; передачу перевізнику не підтверджено."
+
+msgid "Download TTN PDF"
+msgstr "Завантажити PDF ТТН"
+
+msgid "Download A4 label PDF"
+msgstr "Завантажити маркування A4 PDF"
+
+msgid "Download Zebra label PDF"
+msgstr "Завантажити маркування Zebra PDF"
+
+msgid "Email goes to the order customer, not to the parcel recipient:"
+msgstr "Лист надсилається клієнту замовлення, а не одержувачу посилки:"
+
+msgid "Send TTN to customer by email"
+msgstr "Надіслати ТТН клієнту на email"
+
+msgid "Email accepted by the mail transport; delivery is not confirmed."
+msgstr "Лист прийнято поштовим транспортом; доставку не підтверджено."
+
+msgid "Email failed or its result is unknown. Check mail logs before any manual resend."
+msgstr "Лист не надіслано або результат невідомий. Перед ручним повтором перевірте поштові журнали."
+
+msgid "Creation is locked: the result needs manual review in the Nova Poshta business account. Do not repeat the shipment."
+msgstr "Створення заблоковано: результат потребує ручної звірки в бізнес-кабінеті Нової пошти. Не повторюйте відправлення."
+
+msgid "Enter the recipient first and last name in Ukrainian. Patronymic is optional; each name must be at most 36 characters."
+msgstr "Вкажіть ім’я та прізвище одержувача українською. По батькові необов’язкове; кожне поле — до 36 символів."
+
+msgid "Names are suggested from the order, then the customer card, only when the saved recipient name and phone match. Review them; patronymic is optional. A different recipient must be entered manually."
+msgstr "Ім’я та прізвище підставляються із замовлення, потім із картки клієнта, лише за збігу збереженого імені та телефону одержувача. Перевірте їх; по батькові необов’язкове. Іншого одержувача введіть вручну."
+
+msgid "Saved recipient phone:"
+msgstr "Збережений телефон одержувача:"
+
+msgid "Patronymic (optional)"
+msgstr "По батькові (необов’язково)"
+
+msgid "This preview does not identify a person by phone. On creation, returned Nova Poshta contact details must match before a TTN is requested. Missing or different details stop creation for manual review."
+msgstr "Цей перегляд не визначає особу за телефоном. Під час створення дані контакту у відповіді Нової пошти мають збігтися перед запитом ТТН. Відсутні або інші дані зупиняють створення для ручної звірки."
+
+msgid "Nova Poshta returned different or incomplete recipient details. No TTN was requested. The recipient may have been saved in Nova Poshta; ask an administrator to reconcile it. Do not repeat creation."
+msgstr "Нова пошта повернула інші або неповні дані одержувача. Запит ТТН не надсилався. Одержувач міг зберегтися в Новій пошті; зверніться до адміністратора для звірки. Не повторюйте створення."
+
+msgid "Nova Poshta requests are busy. Wait a few seconds before checking again."
+msgstr "Запити до Нової пошти зайняті. Зачекайте кілька секунд перед новою перевіркою."
+
+
+msgid "Nova Poshta temporarily limited requests. Wait a few seconds before checking again."
+msgstr "Нова пошта тимчасово обмежила запити. Зачекайте кілька секунд перед новою перевіркою."
+
+
+msgid "Nova Poshta is busy or has limited requests. No shipment creation was started. Wait 10 seconds, reload the order and check the saved shipment again."
+msgstr "Нова пошта зайнята або обмежила запити. Створення відправлення не починалося. Зачекайте 10 секунд, оновіть замовлення та перевірте збережене відправлення ще раз."
+
+
+msgid "Nova Poshta checks are paced and may take several seconds. Only a rate-limited read can retry once; recipient and TTN creation are never retried automatically. If the message says creation was not started, wait 10 seconds, reload and run a new check. An unknown creation result still requires administrator review."
+msgstr "Перевірки Нової пошти виконуються з інтервалом і можуть тривати кілька секунд. Лише читання з обмеженням частоти може повторитися один раз; створення одержувача та ТТН автоматично не повторюється. Якщо повідомлення вказує, що створення не починалося, зачекайте 10 секунд, оновіть сторінку та виконайте нову перевірку. Невідомий результат створення, як і раніше, потребує перевірки адміністратором."
+
+msgid "The existing Nova Poshta contact was verified by an administrator. Preparation is frozen. Run a fresh check and confirm TTN creation; the recipient will not be created again."
+msgstr "Наявний контакт Нової пошти перевірено адміністратором. Підготовку зафіксовано. Виконайте нову перевірку та підтвердьте створення ТТН; одержувач повторно не створюватиметься."
+
+msgid "The contact directory did not return a phone number."
+msgstr "Довідник контактів не повернув номер телефону."
+
+msgid "The contact phone does not match the saved recipient phone."
+msgstr "Телефон контакту не збігається зі збереженим телефоном одержувача."
+
+msgid "The contact directory did not return the first or last name."
+msgstr "Довідник контактів не повернув ім’я або прізвище."
+
+msgid "The contact name does not match the confirmed recipient name."
+msgstr "ПІБ контакту не збігається з підтвердженими даними одержувача."
+
+msgid "The contact directory could not be read. No TTN was requested."
+msgstr "Не вдалося прочитати довідник контактів. Запит ТТН не надсилався."
+
+msgid "The exact contact could not be uniquely verified in the recipient directory."
+msgstr "Не вдалося однозначно перевірити потрібний контакт у довіднику одержувачів."
+
+msgid "The earlier version did not save verification details. Administrator reconciliation is required."
+msgstr "Попередня версія не зберегла деталі перевірки. Потрібна звірка адміністратором."

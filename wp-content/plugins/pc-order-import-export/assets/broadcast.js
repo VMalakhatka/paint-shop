@@ -1,5 +1,8 @@
 (() => {
     const kind=document.querySelector('#pcoe-broadcast-kind');if(!kind)return;
+    const fileOptions=document.querySelector('#pcoe-broadcast-file-options'),format=document.querySelector('#pcoe-broadcast-format'),offerOptions=document.querySelector('#pcoe-broadcast-offer-options');
+    const changeFormat=()=>{fileOptions.hidden=kind.value==='text';offerOptions.hidden=fileOptions.hidden||format.value!=='offer';};
+    format.addEventListener('change',changeFormat);
     const box=document.querySelector('#pcoe-broadcast-receipt'),warehouse=document.querySelector('#pcoe-broadcast-warehouse'),date=document.querySelector('#pcoe-broadcast-date'),type=document.querySelector('#pcoe-broadcast-document-type'),doc=document.querySelector('#pcoe-broadcast-document'),more=document.querySelector('#pcoe-broadcast-more'),status=document.querySelector('#pcoe-broadcast-source-status'),reload=document.querySelector('#pcoe-broadcast-reload');
     let cursor=0,version=0,loaded=false,loadingWarehouses=false;
     const request=async(kind,params={})=>{const r=await fetch(pcoeBroadcast.url,{method:'POST',credentials:'same-origin',body:new URLSearchParams({action:'pcoe_broadcast_receipts',nonce:pcoeBroadcast.nonce,kind,...params})});let j;try{j=await r.json();}catch(e){throw Error(pcoeBroadcast.error);}if(!r.ok||!j.success)throw Error(j.data?.message||pcoeBroadcast.error);return j.data;};
@@ -30,6 +33,7 @@
         finally{loadingWarehouses=false;warehouse.disabled=false;reload.disabled=false;doc.disabled=false;more.disabled=false;}
     };
     const changeKind=()=>{
+        changeFormat();
         box.hidden=kind.value!=='arrival';for(const el of [warehouse,date,type,doc])el.required=!box.hidden;
         ++version;doc.disabled=false;more.disabled=false;
         if(box.hidden){status.textContent='';return;}

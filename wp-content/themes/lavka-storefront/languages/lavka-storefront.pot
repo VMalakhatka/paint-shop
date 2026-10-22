@@ -1,0 +1,117 @@
+# Lavka Storefront translations.
+# Copyright (C) 2026 Lavka
+# This file is distributed under the same license as the Lavka Storefront package.
+msgid ""
+msgstr ""
+"Project-Id-Version: Lavka Storefront 0.1.0\n"
+"Report-Msgid-Bugs-To:\n"
+"POT-Creation-Date: 2026-10-21 00:00+0000\n"
+"PO-Revision-Date: 2026-10-21 00:00+0000\n"
+"Last-Translator: Lavka\n"
+"Language-Team: Lavka\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
+
+#: 404.php:6
+msgid "Page not found"
+msgstr ""
+
+#: 404.php:7
+msgid "The address may have changed. Return to the home page or try a search."
+msgstr ""
+
+#: 404.php:8
+msgid "Home"
+msgstr ""
+
+#: comments.php:7
+msgid "Comments"
+msgstr ""
+
+#: comments.php:11
+msgid "Comments are closed."
+msgstr ""
+
+#: functions.php:10
+msgid "Primary menu"
+msgstr ""
+
+#: functions.php:16
+msgid "Right sidebar"
+msgstr ""
+
+#: functions.php:17
+msgid "Left sidebar"
+msgstr ""
+
+#: functions.php:18
+msgid "Header"
+msgstr ""
+
+#: functions.php:19
+msgid "Footer widget 1"
+msgstr ""
+
+#: functions.php:20
+msgid "Footer widget 2"
+msgstr ""
+
+#: functions.php:21
+msgid "Footer widget 3"
+msgstr ""
+
+#: functions.php:22
+msgid "Footer widget 4"
+msgstr ""
+
+#: functions.php:23
+msgid "Footer widget 5"
+msgstr ""
+
+#: functions.php:24
+msgid "Footer bar"
+msgstr ""
+
+#: functions.php:25
+msgid "Top bar"
+msgstr ""
+
+#: header.php:12
+msgid "Skip to content"
+msgstr ""
+
+#: header.php:17
+msgid "Main navigation"
+msgstr ""
+
+#: index.php:8
+msgid "Latest posts"
+msgstr ""
+
+#: index.php:14
+msgid "Nothing found"
+msgstr ""
+
+#: search.php:5
+#, php-format
+msgid "Search results for “%s”"
+msgstr ""
+
+#: search.php:10
+msgid "Nothing found. Try a different search."
+msgstr ""
+
+#: searchform.php:3 searchform.php:4
+msgid "Search"
+msgstr ""
+
+#: sidebar.php:7
+msgid "Catalogue sidebar"
+msgstr ""
+
+#: template-parts/content-page.php:9
+msgid "Page sections"
+msgstr ""

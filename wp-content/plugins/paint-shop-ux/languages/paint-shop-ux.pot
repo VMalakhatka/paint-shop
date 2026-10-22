@@ -115,6 +115,8 @@ msgstr ""
 #: inc/category-menu.php:228
 #: inc/category-menu.php:241
 #: inc/category-menu.php:250
+#: templates/public-page.php:33
+#: templates/public-page.php:52
 msgid "Open catalogue"
 msgstr ""
 
@@ -256,4 +258,133 @@ msgid "In stock"
 msgstr ""
 
 msgid "Out of stock"
+msgstr ""
+
+#: inc/single-product.php
+msgid "Product added to cart."
+msgstr ""
+
+#: inc/single-product.php
+msgid "This quantity could not be added. Check availability or choose a smaller quantity."
+msgstr ""
+
+#: inc/single-product.php
+msgid "Could not confirm whether the product was added. Check your cart before trying again."
+msgstr ""
+
+#: inc/mobile-cart.php
+msgid "In cart: %s"
+msgstr ""
+
+#: inc/mobile-cart.php
+msgid "Products:"
+msgstr ""
+
+#: inc/mobile-cart.php
+msgid "Go to cart"
+msgstr ""
+
+#: inc/mobile-cart.php
+msgid "Product added"
+msgstr ""
+
+#: inc/site-footer.php
+msgid "Site footer"
+msgstr ""
+
+#: inc/site-footer.php
+msgid "Lavka Khudozhnyka"
+msgstr ""
+
+#: inc/site-footer.php
+msgid "Shop links"
+msgstr ""
+
+#: inc/site-footer.php
+msgid "Catalogue"
+msgstr ""
+
+#: inc/site-footer.php
+msgid "My account"
+msgstr ""
+
+#: inc/site-footer.php
+msgid "How to order"
+msgstr ""
+
+#: inc/site-header.php
+msgid "Cart"
+msgstr ""
+
+#: inc/site-header.php
+msgid "Skip to content"
+msgstr ""
+
+#: inc/site-header.php
+msgid "Kyiv, Olimpiiskyi shopping centre"
+msgstr ""
+
+#: inc/site-header.php
+msgid "Odesa, 17 Lanzheronivska St."
+msgstr ""
+
+#: inc/site-header.php
+msgid "Wholesale sales"
+msgstr ""
+
+#: inc/site-header.php
+msgid "Menu"
+msgstr ""
+
+#: inc/site-header.php
+msgid "Main navigation"
+msgstr ""
+
+#: inc/site-header.php
+#, php-format
+msgid "Submenu: %s"
+msgstr ""
+
+#: templates/public-page.php:9
+msgid "Breadcrumbs"
+msgstr ""
+
+#: templates/public-page.php:10
+msgid "Home"
+msgstr ""
+
+#: templates/public-page.php:12
+#: inc/public-pages.php:85
+#: inc/public-pages.php:88
+msgid "Search"
+msgstr ""
+
+#: templates/public-page.php:12
+#: templates/public-page.php:31
+msgid "Page not found"
+msgstr ""
+
+#: templates/public-page.php:23
+msgid "Page sections"
+msgstr ""
+
+#: templates/public-page.php:32
+msgid "The address may have changed. Open the catalogue or try a search."
+msgstr ""
+
+#: templates/public-page.php:38
+#, php-format
+msgid "Search results for “%s”"
+msgstr ""
+
+#: templates/public-page.php:49
+msgid "Previous"
+msgstr ""
+
+#: templates/public-page.php:49
+msgid "Next"
+msgstr ""
+
+#: templates/public-page.php:51
+msgid "Nothing found. Try a different search or open the catalogue."
 msgstr ""

@@ -6453,3 +6453,738 @@ msgstr "Перевірте початкове завдання Java: підтв�
 
 msgid "Warehouse %d is included again after a completed attempt failed. A fresh snapshot will be built; the previous error is retained in diagnostics."
 msgstr "Склад %d знову включено після завершеної невдалої спроби. Буде створено свіжий знімок; попередню помилку збережено в діагностиці."
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Select one supplier. Children and grandchildren are found automatically, including our own products and products outside the supplier filter. Review their stock and incoming quantities. Only their shortages consume components. The export contains purchasing products of the selected supplier; assembly documents are not created."
+msgstr "Оберіть одного постачальника. Система автоматично знайде дітей та онуків, зокрема власні товари й товари поза відбором постачальника. Перевірте їхні залишки та очікувані надходження. Складові потрібні лише для покриття дефіциту. У файл замовлення потрапляють тільки закуповувані товари обраного постачальника. Накладні складання не створюються."
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Own sales forecast with minimum stock"
+msgstr "Власний прогноз із мінімальним запасом"
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Component demand from children"
+msgstr "Потреба для виготовлення дітей"
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Quantity to manufacture"
+msgstr "Кількість для виготовлення"
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Child shortage breakdown"
+msgstr "Розшифрування дефіциту дітей"
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Components per unit"
+msgstr "Складові на одиницю товару"
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Manufactured product: calculation only, excluded from supplier order"
+msgstr "Товар виготовляється: лише для розрахунку, до замовлення постачальнику не входить"
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Purchasing product of the selected supplier"
+msgstr "Закуповуваний товар обраного постачальника"
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Checking recipes and dependent products"
+msgstr "Перевіряємо складові та пов’язані товари"
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Component units per child"
+msgstr "Одиниць складової на дитину"
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Recalculate this product and its parents"
+msgstr "Перерахувати товар і його батьків"
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "The Folio assembly role is missing or differs between warehouses. Check BALL4."
+msgstr "Ознака складання у ФОЛІО відсутня або різниться між складами. Перевірте BALL4."
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "This is a child product, but its recipe is missing. Check the Folio assembly tables."
+msgstr "Це товар-дитина, але його складові не знайдено. Перевірте таблиці складання у ФОЛІО."
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "The recipe contains an empty SKU, a non-positive coefficient or a self-reference. Correct it in Folio."
+msgstr "У складі є порожній артикул, нульовий або від’ємний коефіцієнт чи посилання товару на себе. Виправте у ФОЛІО."
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "The recipe repeats a component or has ambiguous simple parents. Check the source rows in Folio."
+msgstr "Складова повторюється або для простої розборки вказано неоднозначних батьків. Перевірте рядки у ФОЛІО."
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "The assembly chain contains a cycle. This product or one of its children requires recipe correction."
+msgstr "Ланцюжок складання містить цикл. Потрібно виправити склад цього товару або його дітей."
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Child analytics are missing for the selected warehouses. Refresh the snapshots and start a new preview."
+msgstr "Аналітика дитини для обраних складів відсутня. Оновіть знімки та почніть новий розрахунок."
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Review the child shortage breakdown and complete the child supply inputs. Its unknown shortage is not treated as zero."
+msgstr "Перегляньте розшифрування дефіциту дітей і заповніть їхні очікувані надходження. Невідомий дефіцит не вважається нульовим."
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Remove assembly consumption from the sales selection: child forecasts already calculate component consumption."
+msgstr "Приберіть витрати на складання з відбору продажів: прогноз дітей уже враховує витрати складових."
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Select exactly one supplier for the purchase preview."
+msgstr "Для попереднього розрахунку замовлення оберіть одного постачальника."
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Assembly recipes changed. Start a new preview before exporting."
+msgstr "Складові товарів змінилися. Перед експортом почніть новий розрахунок."
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Assembly recipes are unavailable or incomplete. Update Java and start a new preview."
+msgstr "Дані про склад товарів недоступні або неповні. Оновіть Java та почніть новий розрахунок."
+
+#: inc/purchase-planning.php
+msgid "All analysed warehouses"
+msgstr "Усі аналізовані склади"
+
+#: inc/purchase-planning.php
+msgid "Physical stock across all analysed warehouses"
+msgstr "Фізичний залишок на всіх аналізованих складах"
+
+#: inc/purchase-planning.php
+msgid "Outgoing quantity in selected period"
+msgstr "Витрачено за обраний період"
+
+#: inc/purchase-planning.php
+msgid "Surplus stock"
+msgstr "Надлишок на складах"
+
+#: inc/purchase-planning.php
+msgid "Stock coverage, months"
+msgstr "Запас у місяцях"
+
+#: inc/purchase-planning.php
+msgid "Outgoing quantity follows the selected movement filters. Stock includes all analysed warehouses; stock-only warehouses contribute no movements. Surplus is current stock available for planning minus forecast, minimum stock and child needs; expected receipts are excluded. Months use actual regular demand and a 30-day month; 9999 means positive stock with no regular demand. Child needs are shown separately. A dash means missing data."
+msgstr "Витрати відповідають обраним фільтрам руху. Залишок охоплює всі аналізовані склади; склади «Лише поточний залишок» не додають рухів. Надлишок — поточний залишок для планування мінус прогноз, мінімальний запас і потреба дітей; очікувані надходження не враховуються. Запас у місяцях розраховується за фактичним регулярним попитом, місяць — 30 днів; 9999 означає додатний залишок без регулярного попиту. Потреба дітей показана окремо. Прочерк означає відсутні дані."
+
+#: inc/purchase-planning.php
+msgid "Uncovered child demand, component units"
+msgstr "Непокрита потреба дітей, од. батьківського товару"
+
+#: inc/purchase-planning.php
+msgid "The selected order leaves child demand uncovered after reserving the own forecast and planned replenishments. Increase the quantity or review the plan."
+msgstr "Обраний обсяг замовлення не покриває потребу дітей після забезпечення власного прогнозу та планових поповнень. Збільште кількість або перегляньте план."
+
+#: inc/purchase-planning.php
+msgid "Assembly consumption is excluded from demand and lost-sales estimates, even when selected in the scenario. Actual outgoing quantities still follow the selected operations. Child shortages are calculated from recipes."
+msgstr "Витрати на складання виключено з попиту та оцінки втрачених продажів, навіть якщо вони обрані у сценарії. Фактичні витрати відповідають обраним операціям. Дефіцит дітей розраховується за рецептами."
+
+#: inc/purchase-planning.php
+msgid "Child demand coverage warning"
+msgstr "Попередження про покриття потреби дітей"
+
+msgid "Use cold-sensitive stock coverage"
+msgstr "Запас залежно від морозостійкості"
+
+msgid "Freezes"
+msgstr "Мерзне"
+
+msgid "Does not freeze"
+msgstr "Не мерзне"
+
+msgid "Cold sensitivity unknown"
+msgstr "Морозостійкість невідома"
+
+msgid "Stock for freezing products, days"
+msgstr "Запас для товарів, що мерзнуть, днів"
+
+msgid "Stock for non-freezing products, days"
+msgstr "Запас для товарів, що не мерзнуть, днів"
+
+msgid "When enabled, these periods replace group stock days for each product, including children. Lead time and safety days still apply. Unknown cold sensitivity requires review."
+msgstr "Ці строки замінюють строк запасу групи для кожного товару, включно з дітьми. Строк постачання та страховий запас додаються. Невідому морозостійкість потрібно перевірити."
+
+msgid "Cold sensitivity is missing or differs between warehouses. Check BALL2 before ordering."
+msgstr "Морозостійкість не вказана або відрізняється між складами. Перевірте BALL2 перед замовленням."
+
+msgid "Set both cold-sensitive coverage periods between 1 and 730 days."
+msgstr "Вкажіть обидва строки запасу від 1 до 730 днів."
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "Current stock read from Folio"
+msgstr "Поточний зріз залишків із ФОЛІО"
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "The current network stock read is incomplete or changed its scope. Start a new preview."
+msgstr "Поточний зріз мережі неповний або його склад змінився. Почніть новий розрахунок."
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "No other incoming orders besides current Transport and Receiving stock"
+msgstr "Інших очікуваних замовлень, крім поточних залишків Транспорту та Приймання, немає"
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "No supplier minimum order quantity separate from pack size"
+msgstr "Немає окремого мінімуму закупівлі постачальника, крім упаковки"
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "Current Transport and Receiving stock will arrive within the lead time"
+msgstr "Поточний товар Транспорту та Приймання надійде протягом строку очікування замовлення"
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "These confirmations apply only to this scenario. Current stock is read together from Folio after loading sales history. Transit is allocated once to the single procurement group; item edits take precedence."
+msgstr "Підтвердження діють лише в цьому сценарії. Після завантаження історії продажів поточні залишки читаються разом із ФОЛІО. Транзит один раз призначається єдиній групі закупівлі; ручні правки товару мають пріоритет."
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "Use actual sales when stockout history is unavailable, with a warning"
+msgstr "Без історії відсутності використовувати фактичні продажі з попередженням"
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "Stockout correction was not calculated; the forecast uses actual sales only."
+msgstr "Поправку на відсутність не розраховано; прогноз використовує лише фактичні продажі."
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "Group replenishment is disabled because its selected minimum-stock source has MIN=0."
+msgstr "Поповнення групи вимкнено: вибране джерело мінімального запасу має MIN=0."
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "Calculation notes"
+msgstr "Примітки до розрахунку"
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "Current network stock captured"
+msgstr "Поточні залишки мережі отримано"
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "Current stock captured"
+msgstr "Поточний залишок отримано"
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Select a supplier price variant."
+msgstr "Оберіть варіант прайсу постачальника."
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "No confirmed supplier price."
+msgstr "Немає підтвердженої ціни постачальника."
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Confirm supplier availability: while stocks last."
+msgstr "Підтвердьте наявність у постачальника: лише до вичерпання залишків."
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Total supplier order quantity"
+msgstr "Загальне замовлення постачальнику, шт."
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Supplier unit price"
+msgstr "Ціна постачальника за одиницю"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Supplier currency"
+msgstr "Валюта постачальника"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Supplier order amount"
+msgstr "Сума замовлення постачальнику"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Supplier price review"
+msgstr "Перевірка ціни постачальника"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Physical stock in warehouse groups, excluding Transport and Receiving"
+msgstr "Фізичний залишок груп без Транспорту й Приймання"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Physical stock on Transport and Receiving"
+msgstr "Фізичний залишок Транспорту й Приймання"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Physical stock including Transport and Receiving"
+msgstr "Фізичний залишок разом із Транспортом і Прийманням"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Stock available for planning including Transport and Receiving"
+msgstr "Запас для замовлення разом із Транспортом і Прийманням"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Warehouse group detail"
+msgstr "Розрахунок за групами"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Supplier order summary"
+msgstr "Замовлення постачальнику"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Assembly recipe revision"
+msgstr "Ревізія рецептів складання"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Supply confirmations"
+msgstr "Підтвердження надходжень"
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "The export has one supplier-order row per SKU. XLSX also includes warehouse group detail. Stock totals distinguish warehouse groups from Transport and Receiving; individual warehouse stock is shown separately."
+msgstr "Експорт містить один рядок замовлення постачальнику на артикул. XLSX також містить розрахунок за групами. Залишки груп відокремлено від Транспорту й Приймання; залишки окремих складів наведено окремо."
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Cold sensitivity"
+msgstr "Морозостійкість"
+
+#: inc/purchase-export.php inc/purchase-planning.php
+msgid "Remaining customer preorders"
+msgstr "Залишок клієнтських передзамовлень"
+
+#: inc/purchase-export.php inc/purchase-planning.php
+msgid "Additional preorder demand"
+msgstr "Додаткова потреба за передзамовленнями"
+
+#: inc/purchase-export.php inc/purchase-planning.php
+msgid "Expected free stock after customer preorders"
+msgstr "Очікуваний вільний залишок після клієнтських передзамовлень"
+
+#: inc/purchase-export.php inc/purchase-planning.php
+msgid "Customer preorders not covered by current stock and expected receipts"
+msgstr "Клієнтські передзамовлення, не покриті поточним залишком і очікуваними надходженнями"
+
+#: inc/purchase-planning.php
+msgid "Customer preorder source lines (JSON)"
+msgstr "Рядки-джерела клієнтських передзамовлень (JSON)"
+
+#: inc/purchase-planning.php
+msgid "Current customer preorder data is required before ordering."
+msgstr "Перед замовленням потрібні поточні дані про клієнтські передзамовлення."
+
+#: inc/analytics-period.php
+msgid "Set the analysis period between 1 and 3650 whole days."
+msgstr "Вкажіть період аналізу від 1 до 3650 цілих днів."
+
+#: inc/analytics-period.php
+msgid "Select a valid analysis period mode."
+msgstr "Виберіть коректний режим періоду аналізу."
+
+#: inc/analytics-scenarios.php
+msgid "Analysis period mode"
+msgstr "Режим періоду аналізу"
+
+#: inc/analytics-scenarios.php
+msgid "Last N days through today"
+msgstr "Останні N днів до сьогодні"
+
+#: inc/analytics-scenarios.php
+msgid "Fixed dates"
+msgstr "Фіксовані дати"
+
+#: inc/analytics-scenarios.php
+msgid "Analysis period, days"
+msgstr "Період аналізу, днів"
+
+#: inc/analytics-scenarios.php
+msgid "Relative dates are recalculated at each new report or forecast. Today is included in the number of days. The completed calculation and Excel keep their actual dates."
+msgstr "Відносні дати перераховуються для кожного нового звіту або прогнозу. Сьогодні входить до кількості днів. Завершений розрахунок та Excel зберігають фактичні дати."
+
+#: inc/purchase-planning.php
+msgid "Assembly role"
+msgstr "Роль у складанні"
+
+#: inc/purchase-planning.php
+msgid "Parent products"
+msgstr "Батьківські товари"
+
+#: inc/purchase-planning.php
+msgid "Child products"
+msgstr "Дочірні товари"
+
+#: inc/purchase-planning.php
+msgid "Child product"
+msgstr "Дочірній товар"
+
+#: inc/purchase-planning.php
+msgid "Parent product"
+msgstr "Батьківський товар"
+
+#: inc/purchase-planning.php
+msgid "The export has one row per SKU, including children with zero supplier order. Parent and child lists show the assembly links. XLSX also includes warehouse group detail and individual warehouse stock."
+msgstr "Експорт містить один рядок на артикул, включно з дочірніми товарами з нульовим замовленням постачальнику. Списки батьків і дітей показують зв’язки складання. XLSX також містить розрахунок за групами та залишки окремих складів."
+
+#: inc/purchase-planning.php
+msgid "Select one supplier. Children and grandchildren are found automatically, including products outside the supplier filter. Their shortages consume components. The report includes their statistics and assembly links, with zero supplier order for every child. Review the quantity to manufacture."
+msgstr "Виберіть одного постачальника. Діти та онуки знаходяться автоматично, включно з товарами поза фільтром постачальника. Їхні дефіцити формують потребу в складових. Звіт містить їхню статистику та зв’язки складання; замовлення постачальнику для кожного дочірнього товару дорівнює нулю. Перевірте кількість до виготовлення."
+
+#: inc/purchase-current-stock.php
+msgid "Java returned an outdated current stock format without customer preorders. Update and deploy the Java backend, then start a new calculation."
+msgstr "Java повернула застарілий формат поточного залишку без клієнтських передзамовлень. Оновіть код і виконайте деплой Java, потім почніть новий розрахунок."
+
+msgid "Draft saved. Confirmed edits are saved automatically."
+msgstr "Чернетку збережено. Підтверджені зміни зберігаються автоматично."
+
+msgid "Saved draft opened. Stock and forecast are from the original calculation date."
+msgstr "Збережену чернетку відкрито. Залишки й прогноз відповідають даті початкового розрахунку."
+
+msgid "Completed calculations are saved as separate drafts. Use Apply for each edited product before leaving. A new calculation creates a new draft."
+msgstr "Завершені розрахунки зберігаються окремими чернетками. Перед виходом застосуйте зміни кожного відредагованого товару. Новий розрахунок створює нову чернетку."
+
+msgid "Saved order drafts"
+msgstr "Збережені чернетки замовлень"
+
+msgid "Open draft"
+msgstr "Відкрити чернетку"
+
+msgid "Could not save the order draft. Please try again."
+msgstr "Не вдалося зберегти чернетку замовлення. Повторіть спробу."
+
+msgid "The saved draft is incomplete. Start a new calculation."
+msgstr "Збережена чернетка неповна. Почніть новий розрахунок."
+
+msgid "Complete the preview before saving a draft."
+msgstr "Завершіть розрахунок перед збереженням чернетки."
+
+msgid "This draft changed in another tab. Reopen it before saving."
+msgstr "Цю чернетку змінено в іншій вкладці. Відкрийте її повторно перед збереженням."
+
+msgid "Saved order draft not found."
+msgstr "Збережену чернетку замовлення не знайдено."
+
+
+#: inc/product-analytics.php
+msgid "Profit / average inventory for the period, %"
+msgstr "Прибуток / середній запас за період, %"
+
+
+#: inc/product-analytics.php
+msgid "Selection"
+msgstr "Вибірка"
+
+
+#: inc/product-analytics.php
+msgid "Groups, period and warehouses"
+msgstr "Групи, період і склади"
+
+
+#: inc/product-analytics.php
+msgid "All selected products"
+msgstr "Усі вибрані товари"
+
+
+#: inc/product-analytics.php
+msgid "Remove from comparison"
+msgstr "Прибрати з порівняння"
+
+
+#: inc/product-analytics.php
+msgid "One-off sales are excluded. Build the report to apply this condition."
+msgstr "Разові продажі виключено. Сформуйте звіт, щоб застосувати цю умову."
+
+
+#: inc/product-analytics.php
+msgid "Group profitability comparison"
+msgstr "Порівняння рентабельності груп"
+
+
+#: inc/product-analytics.php
+msgid "Choose product group levels, dates and warehouses above, then build the report. Add each completed selection to compare groups or periods."
+msgstr "Виберіть вище рівні груп товарів, дати та склади, потім сформуйте звіт. Додавайте готові вибірки для порівняння груп або періодів."
+
+
+#: inc/product-analytics.php
+msgid "Exclude one-off sales (*РАЗОВАЯ)"
+msgstr "Виключити разові продажі (*РАЗОВАЯ)"
+
+
+#: inc/product-analytics.php
+msgid "Last completed report: whole selection"
+msgstr "Останній готовий звіт: уся вибірка"
+
+
+#: inc/product-analytics.php
+msgid "Amounts are in the report currency. Average inventory is a monthly approximation. Gross profit excludes overhead expenses. Return on inventory is for the selected period, not annualized. Movement filters do not remove capital from inventory."
+msgstr "Суми у валюті звіту. Середній запас — місячне наближення. Валовий прибуток не враховує загальні витрати. Дохідність запасу наведено за вибраний період, без перерахунку на рік. Фільтри руху не вилучають капітал із запасу."
+
+
+#: inc/product-analytics.php
+msgid "Comparison row name (optional)"
+msgstr "Назва рядка порівняння (необов’язково)"
+
+
+#: inc/product-analytics.php
+msgid "Add completed report to comparison"
+msgstr "Додати готовий звіт до порівняння"
+
+
+#: inc/product-analytics.php
+msgid "Download comparison CSV"
+msgstr "Завантажити порівняння CSV"
+
+
+#: inc/product-analytics.php
+msgid "Comparison rows keep their original filters and snapshot dates. They remain in this page until reload; download the comparison to keep it. Maximum 50 rows. Rows may overlap and are not summed."
+msgstr "Рядки зберігають початкові фільтри та дати знімків. Вони залишаються на сторінці до її оновлення; завантажте порівняння, щоб зберегти його. Не більше 50 рядків. Вибірки можуть перетинатися, тому не підсумовуються."
+
+
+#: inc/analytics-conditions.php
+msgid "Selected conditions"
+msgstr "Вибрані умови"
+
+
+#: inc/analytics-conditions.php
+msgid "No conditions added."
+msgstr "Умови ще не додано."
+
+
+#: inc/analytics-conditions.php
+msgid "Product group tree"
+msgstr "Дерево груп товарів"
+
+
+#: inc/analytics-conditions.php
+msgid "Find a group or subgroup"
+msgstr "Знайти групу або підгрупу"
+
+
+#: inc/analytics-conditions.php
+msgid "Include branch"
+msgstr "Включити гілку"
+
+
+#: inc/analytics-conditions.php
+msgid "Exclude branch"
+msgstr "Виключити гілку"
+
+
+#: inc/analytics-conditions.php
+msgid "Add condition"
+msgstr "Додати умову"
+
+
+#: inc/analytics-conditions.php
+msgid "Edit condition"
+msgstr "Редагувати умову"
+
+
+#: inc/analytics-conditions.php
+msgid "Remove condition"
+msgstr "Видалити умову"
+
+
+#: inc/analytics-conditions.php
+msgid "Switch include / exclude"
+msgstr "Змінити включення / виключення"
+
+
+#: inc/analytics-conditions.php
+msgid "No group at this level"
+msgstr "Без групи на цьому рівні"
+
+
+#: inc/analytics-conditions.php
+msgid "Included branches are combined. Excluded branches are removed from the result. Other conditions apply together."
+msgstr "Включені гілки об’єднуються. Виключені гілки віднімаються від результату. Інші умови застосовуються разом."
+
+
+#: inc/analytics-conditions.php
+msgid "Group tree requires the updated Java service. Existing conditions are preserved."
+msgstr "Для дерева груп потрібне оновлення Java. Наявні умови збережено."
+
+
+#: inc/analytics-conditions.php
+msgid "Saved level condition"
+msgstr "Збережена умова рівня"
+
+
+#: inc/analytics-conditions.php
+msgid "Press Add condition to apply your selection."
+msgstr "Натисніть «Додати умову», щоб застосувати вибір."
+
+
+#: inc/analytics-conditions.php
+msgid "Use at most 100 valid group branches."
+msgstr "Дозволено не більше 100 коректних гілок груп."
+
+
+#: inc/analytics-conditions.php
+msgid "Invalid group branch path."
+msgstr "Некоректний шлях гілки групи."
+
+
+#: inc/analytics-conditions.php
+msgid "The analytics response did not apply the selected group branches."
+msgstr "Відповідь аналітики не застосувала вибрані гілки груп."
+
+
+#: inc/analytics-conditions.php
+msgid "Included condition"
+msgstr "Включено"
+
+
+#: inc/analytics-conditions.php
+msgid "Excluded condition"
+msgstr "Виключено"
+
+
+#: inc/purchase-planning.php
+msgid "Respect MAX in purchase planning"
+msgstr "Враховувати MAX у розрахунку закупівлі"
+
+
+#: inc/purchase-planning.php
+msgid "When disabled, this group keeps its full forecast for the supplier order, including future replenishments from the source warehouse. Folio MAX values and actual transfer limits are not changed."
+msgstr "Якщо вимкнено, у замовлення постачальнику входить повний прогноз групи, включно з майбутніми поповненнями зі складу-джерела. Значення MAX у ФОЛІО та обмеження фактичних переміщень не змінюються."
+
+#: inc/folio-product-cards.php
+msgid "Enter up to 500 exact SKUs, one per line, with at most 100 characters each."
+msgstr "Введіть до 500 точних артикулів, по одному в рядку, не більше 100 символів кожен."
+
+#: inc/folio-product-cards.php
+msgid "The queries returned different results. Export each query separately for review."
+msgstr "Запити повернули різні результати. Експортуйте кожен окремо для перевірки."
+
+#: inc/folio-product-cards.php
+msgid "Product cards could not be read. Check the Java service, API token, Paint_Ua source and 50,000-row limit, then try again."
+msgstr "Не вдалося прочитати картки. Перевірте Java-сервіс, API-токен, джерело Paint_Ua та ліміт 50 000 рядків, потім повторіть."
+
+#: inc/folio-product-cards.php
+msgid "Lavka Folio"
+msgstr "Лавка ФОЛІО"
+
+#: inc/folio-product-cards.php
+msgid "Product cards"
+msgstr "Картки товарів"
+
+#: inc/folio-product-cards.php
+msgid "Read product cards from Paint_Ua and export 54 fields in the supplied Excel column order. No Folio data is changed."
+msgstr "Читання карток із Paint_Ua та експорт 54 полів у порядку колонок наданого Excel. Дані ФОЛІО не змінюються."
+
+#: inc/folio-product-cards.php
+msgid "Both queries require the legacy warehouse and markup records. Requested SKUs excluded by those conditions are listed separately. Assembly columns 55–57 are not returned by these queries."
+msgstr "Обидва запити потребують складських записів і націнок за старими правилами. Артикули, виключені цими умовами, показано окремо. Колонки складання 55–57 ці запити не повертають."
+
+#: inc/folio-product-cards.php
+msgid "Query"
+msgstr "Запит"
+
+#: inc/folio-product-cards.php
+msgid "Compare both queries"
+msgstr "Порівняти обидва запити"
+
+#: inc/folio-product-cards.php
+msgid "Exact SKUs, one per line. Leave empty for all eligible cards."
+msgstr "Точні артикули, по одному в рядку. Залиште порожнім для всіх карток, що відповідають умовам."
+
+#: inc/folio-product-cards.php
+msgid "Read and check"
+msgstr "Прочитати й перевірити"
+
+#: inc/folio-product-cards.php
+msgid "Export product cards XLSX"
+msgstr "Експорт карток XLSX"
+
+#: inc/folio-product-cards.php
+msgid "Reading product cards…"
+msgstr "Читання карток товарів…"
+
+#: inc/folio-product-cards.php
+msgid "Both queries match."
+msgstr "Результати обох запитів збігаються."
+
+#: inc/folio-product-cards.php
+msgid "Rows returned:"
+msgstr "Отримано рядків:"
+
+#: inc/folio-product-cards.php
+msgid "Requested SKUs not returned:"
+msgstr "Запитані артикули, які не повернуто:"
+
+#: inc/folio-product-cards.php
+msgid "Preview: first 50 rows. The Excel export contains all returned rows."
+msgstr "Перегляд: перші 50 рядків. Експорт Excel містить усі отримані рядки."
+
+#: inc/folio-product-cards.php
+msgid "Preparing the Excel download…"
+msgstr "Підготовка завантаження Excel…"
+
+#: inc/folio-product-cards.php
+msgid "SQL Server denied read access to this query. Use 1212 all fields, or ask the database administrator to allow reading card_tov."
+msgstr "SQL Server відхилив читання цього запиту. Використайте «1212 все поля» або зверніться до адміністратора бази для надання права читання card_tov."
+
+
+#: inc/folio-product-cards.php
+msgid "Listed SKUs"
+msgstr "Артикули зі списку"
+
+#: inc/folio-product-cards.php
+msgid "All eligible cards"
+msgstr "Усі доступні картки"
+
+#: inc/folio-product-cards.php
+msgid "Load SKUs from Excel"
+msgstr "Завантажити артикули з Excel"
+
+#: inc/folio-product-cards.php
+msgid "Excel file"
+msgstr "Файл Excel"
+
+#: inc/folio-product-cards.php
+msgid "Column letter"
+msgstr "Літера колонки"
+
+#: inc/folio-product-cards.php
+msgid "First data row"
+msgstr "Перший рядок даних"
+
+#: inc/folio-product-cards.php
+msgid "Load list"
+msgstr "Завантажити список"
+
+#: inc/folio-product-cards.php
+msgid "XLS or XLSX, up to 5 MB. The first sheet is read. Loading replaces the list below; review it before reading cards."
+msgstr "XLS або XLSX, до 5 МБ. Читається перший аркуш. Завантаження замінює список нижче; перевірте його перед читанням карток."
+
+#: inc/folio-product-cards.php
+msgid "Paste exact SKUs, one per line (up to 500)."
+msgstr "Вставте точні артикули, по одному в рядку (до 500)."
+
+#: inc/folio-product-cards.php
+msgid "Reading Excel…"
+msgstr "Читання Excel…"
+
+#: inc/folio-product-cards.php
+msgid "SKUs loaded:"
+msgstr "Завантажено артикулів:"
+
+#: inc/folio-product-cards.php
+msgid "Could not read the list. Choose an XLS/XLSX file up to 5 MB, a valid column and first data row. Use up to 500 unique SKUs; formulas are not accepted."
+msgstr "Не вдалося прочитати список. Виберіть XLS/XLSX до 5 МБ, правильну колонку та перший рядок даних. До 500 унікальних артикулів; формули не приймаються."
+
+#: inc/folio-product-cards.php
+msgid "Read product cards from Paint_Ua and export them in the supplied Excel column order. No Folio data is changed."
+msgstr "Прочитайте картки товарів з Paint_Ua та вивантажте їх у порядку колонок наданого Excel. Дані ФОЛІО не змінюються."
+
+#: inc/folio-product-cards.php
+msgid "Both queries require the legacy warehouse and markup records. Requested SKUs excluded by those conditions are listed separately. Assembly columns 55–57 are exported empty because these queries do not return them."
+msgstr "Обидва запити потребують записів складів і націнок. Виключені цими умовами артикули показуються окремо. Колонки збірок 55–57 вивантажуються порожніми, оскільки запити їх не повертають."
+
+#: inc/purchase-planning.php inc/purchase-export.php
+msgid "Surplus / shortage at forecast end, before new order"
+msgstr "Зайві / нестача на кінець прогнозу, до нового замовлення"
+
+#: inc/purchase-planning.php inc/purchase-export.php
+msgid "No active supplier price list was saved with this calculation. Activate the supplier price list and start a new calculation."
+msgstr "У цьому розрахунку не збережено активний прайс постачальника. Активуйте прайс і почніть новий розрахунок."
+
+#: inc/purchase-planning.php inc/purchase-export.php
+msgid "Surplus / shortage: available stock plus confirmed receipts allocated to this group, minus forecast, minimum reserve, child demand and additional preorders. Before new purchases and proposed inter-group transfers; negative means shortage. Blank means incomplete data."
+msgstr "Зайві / нестача: доступний запас плюс підтверджені надходження, розподілені цій групі, мінус прогноз, мінімальний запас, потреба дітей і додаткові передзамовлення. До нових закупівель і запропонованих переміщень між групами; мінус означає нестачу. Порожньо — дані неповні."

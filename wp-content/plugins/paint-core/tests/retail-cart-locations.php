@@ -41,6 +41,20 @@ try {
     retail_expect(true, apply_filters('woocommerce_update_cart_validation', true, 'first', $item, 2), 'valid pinned quantity accepted');
     pc_recalc_alloc_plan_for_cart_item('first');
     retail_expect([$first=>2], WC()->cart->cart_contents['first']['pc_alloc_plan'], 'recalc keeps store');
+    $variant = static function ($data) { $data[] = ['key'=>'Test variant', 'value'=>'Red']; return $data; };
+    add_filter('woocommerce_get_item_data', $variant, 40);
+    try {
+        $before_context = is_cart();
+        $one = pc_cartguard_item_data_html(array_merge($item, ['quantity'=>1]));
+        $two = pc_cartguard_item_data_html($item);
+        retail_expect(true, strpos($one, esc_html($terms[0]->name) . ' — 1') !== false, 'metadata shows one unit');
+        retail_expect(true, strpos($two, esc_html($terms[0]->name) . ' — 2') !== false, 'metadata shows updated two units');
+        retail_expect(true, strpos($two, 'Test variant') !== false && strpos($two, 'Red') !== false, 'other metadata preserved');
+        retail_expect($before_context, is_cart(), 'AJAX cart context restored');
+        retail_expect('', pc_cartguard_item_data_html(array_merge($item, ['quantity'=>0])), 'removed item has no metadata');
+    } finally {
+        remove_filter('woocommerce_get_item_data', $variant, 40);
+    }
     $GLOBALS['slu_location_stock_request_cache'][$id][$first]['qty'] = 0;
     retail_expect(0, pc_cartguard_get_allowed_qty_for_cart($product, 2, $item, 'first'), 'zero stock has no fallback');
     retail_expect([], pc_cart_item_alloc_plan($item), 'zero stock cannot allocate elsewhere');
@@ -53,6 +67,11 @@ try {
     $GLOBALS['current_user'] = $user;
     retail_expect(true, pc_alloc_allows_multiple_locations(), 'wholesale retains modes');
     retail_expect([$second=>5], pc_cart_item_alloc_plan($item, 5), 'wholesale keeps automatic allocation');
+    $GLOBALS['slu_location_stock_request_cache'][$id][$first]['qty'] = 2;
+    WC()->session->set('pc_alloc_pref', ['mode'=>'auto','term_id'=>$first]);
+    $split_html = pc_cartguard_item_data_html(array_merge($item, ['quantity'=>3]));
+    retail_expect(true, strpos($split_html, esc_html($terms[0]->name) . ' — 2') !== false, 'updated wholesale first store');
+    retail_expect(true, strpos($split_html, esc_html($terms[1]->name) . ' — 1') !== false, 'updated wholesale second store');
     echo "Retail cart integration tests passed (memory-only fixtures).\n";
 } finally {
     $GLOBALS['current_user'] = $original_user;

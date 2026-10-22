@@ -18,6 +18,26 @@ const point = {
  try {
   for (const width of [1280, 390]) {
    const page = await browser.newPage({ viewport: { width, height: 1000 } });
+   if (require('node:fs').existsSync(path.join(dir, 'shipping-options.html'))) {
+    await page.goto(pathToFileURL(path.resolve(dir, 'shipping-options.html')).href);
+    for (const row of await page.locator('.woocommerce-shipping-totals').all()) {
+     assert.equal(await row.locator('input[type=radio]').count(), 2); checks++;
+     assert(await row.locator('.woocommerce-shipping-destination').isVisible()); checks++;
+     await row.locator('input[value^="pnpm_pickup:"]').check();
+     assert(!(await row.locator('.woocommerce-shipping-destination').isVisible())); checks++;
+     assert(!(await row.locator('.woocommerce-shipping-calculator').isVisible())); checks++;
+     await row.locator('input[value^="pnpm_nova_poshta:"]').check();
+     assert(await row.locator('.woocommerce-shipping-destination').isVisible()); checks++;
+    }
+    assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)); checks++;
+    await page.screenshot({ path: path.join(dir, `shipping-options-${width}.png`), fullPage: true });
+   }
+   if (require('node:fs').existsSync(path.join(dir, 'shipping-labels.html'))) {
+    await page.goto(pathToFileURL(path.resolve(dir, 'shipping-labels.html')).href);
+    assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)); checks++;
+    assert.equal(await page.locator('tr').count(), 4); checks++;
+    await page.screenshot({ path: path.join(dir, `shipping-labels-${width}.png`), fullPage: true });
+   }
    const errors = []; page.on('pageerror', e => errors.push(e.message));
    let fail = true; const calls = [];
    await page.route('https://pnpm-test.invalid/**', async route => {
@@ -39,6 +59,10 @@ const point = {
     return send({ items: [item], nextPage: null });
    });
    await page.goto(pathToFileURL(path.resolve(dir, 'point-card.html')).href);
+   await page.locator('[name="shipping_method[0]"]').selectOption('pnpm_pickup:1');
+   assert(!(await page.locator('#pnpm-checkout-fields').isVisible())); checks++;
+   await page.locator('[name="shipping_method[0]"]').selectOption('pnpm_nova_poshta:1');
+   assert(await page.locator('#pnpm-checkout-fields').isVisible()); checks++;
    await page.locator('#pnpm_city_label').fill('Ки');
    await page.locator('#pnpm-city-results button').click();
    assert.equal(await page.locator('#pnpm_city_ref').inputValue(), 'city'); checks++;
@@ -58,7 +82,16 @@ const point = {
    assert(await card.isVisible()); checks++;
    await page.locator('#pnpm_delivery_type').selectOption('address');
    assert(!(await card.isVisible())); assert.equal(await page.locator('#pnpm_point_ref').inputValue(), ''); checks++;
+   assert(await page.locator('#pnpm-address-help .pnpm-point-warning').isVisible()); checks++;
+   assert((await page.locator('#pnpm-address-help').textContent()).includes('дорожча')); checks++;
+   await page.evaluate(() => jQuery(document.body).trigger('updated_checkout'));
+   assert(await page.locator('#pnpm-address-help .pnpm-point-warning').isVisible()); checks++;
+   await page.screenshot({ path: path.join(dir, `address-warning-${width}.png`), fullPage: true });
+   await page.locator('[name="shipping_method[0]"]').selectOption('pnpm_pickup:1');
+   assert(!(await page.locator('#pnpm-address-help .pnpm-point-warning').isVisible())); checks++;
+   await page.locator('[name="shipping_method[0]"]').selectOption('pnpm_nova_poshta:1');
    await page.locator('#pnpm_delivery_type').selectOption('parcel_locker');
+   assert(!(await page.locator('#pnpm-address-help .pnpm-point-warning').isVisible())); checks++;
    await page.locator('#pnpm_point_label').fill('51');
    await page.locator('#pnpm-point-results .pnpm-directory-option').click();
    assert((await card.textContent()).includes('Поштомат')); checks++;

@@ -183,7 +183,7 @@ class PriceList
         unset($items);
         $walk = static function (int $id, int $depth) use (&$walk, $index, $children, $used, $buckets): \Generator {
             yield ['heading'=>$id ? $index[$id]->name : __('Other products', 'pc-order-import-export'), 'depth'=>$depth];
-            foreach ($buckets[$id] ?? [] as $item) yield ['values'=>$item['values'], 'depth'=>$depth + 1];
+            foreach ($buckets[$id] ?? [] as $item) yield ['values'=>$item['values'], 'depth'=>$depth + 1, 'product_id'=>$item['id']];
             foreach ($children[$id] ?? [] as $child) {
                 if (isset($used[$child])) yield from $walk($child, $depth + 1);
             }
@@ -230,7 +230,7 @@ class PriceList
         $sheet->setShowSummaryBelow(false);
         $sheet->getStyle('A1:I1')->applyFromArray([
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-            'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => 'AD5943']],
+            'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => '800000']],
             'alignment' => ['wrapText' => true, 'vertical' => 'center'],
         ]);
         $sheet->getRowDimension(1)->setRowHeight(38);
@@ -252,7 +252,7 @@ class PriceList
         foreach ($headings as $number => $depth) {
             $sheet->getStyle('A' . $number . ':I' . $number)->applyFromArray([
                 'font'=>['bold'=>true, 'size'=>$depth === 0 ? 14 : 11, 'color'=>['rgb'=>$depth === 0 ? 'FFFFFF' : '263A40']],
-                'fill'=>['fillType'=>'solid', 'startColor'=>['rgb'=>$depth === 0 ? 'AD5943' : ($depth === 1 ? 'E8BCAC' : 'F5E4DD')]],
+                'fill'=>['fillType'=>'solid', 'startColor'=>['rgb'=>$depth === 0 ? '800000' : ($depth === 1 ? 'D9B3B3' : 'F2E6E6')]],
             ]);
             $sheet->getStyle('C' . $number)->getAlignment()->setIndent(min(7, $depth));
             $sheet->getRowDimension($number)->setRowHeight($depth === 0 ? 29 : 24);
@@ -260,6 +260,10 @@ class PriceList
         $sheet->getHeaderFooter()->setOddHeader('&L' . get_bloginfo('name') . '&R' . wp_date('Y-m-d H:i'));
         $sheet->getPageSetup()->setOrientation('landscape')->setFitToWidth(1)->setFitToHeight(0);
         $sheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd(1, 1);
+        // Supplier is internal sorting data, not a customer-facing export column.
+        // Preserve the shared row schema used by commercial offers and frozen mailings.
+        $sheet->removeColumn('D');
+        $sheet->freezePane('D2');
         return $book;
     }
 

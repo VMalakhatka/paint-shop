@@ -32,6 +32,7 @@
     const el = (id) => document.getElementById(id);
     const warehouses = el('lps-as-warehouses');
     const form = el('lps-as-form');
+    const conditions = window.LPS_CONDITIONS?.(root, 'lps-as', analyticsI18n.filterLabels || {});
     const availabilityEditor = window.LPS_AVAILABILITY(root, config.warehouseGroups || [], warehouses);
     ['availabilityPercent', 'stockoutPercent', 'availabilityStatus'].forEach((key) => {
         el('lps-as-sort-field').add(new Option(analyticsI18n[key] || key, key));
@@ -184,6 +185,7 @@
         productSelections.forEach((name) => productGrid.insertAdjacentHTML('beforeend', renderDictionaryFilter(name, 'product')));
         movementSelections.forEach((name) => movementGrid.insertAdjacentHTML('beforeend', renderDictionaryFilter(name, 'movement')));
         bindSelectionModes();
+        conditions?.refresh(state.capabilities);
     }
 
     async function loadCapabilities() {
@@ -242,6 +244,7 @@
     }
 
     function collectFilters(section) {
+        if (conditions) return conditions.read(section);
         const result = {};
         root.querySelectorAll('[data-lps-as-section="' + section + '"]').forEach((container) => {
             const name = container.dataset.lpsAsSelection;
@@ -253,6 +256,25 @@
         return result;
     }
 
+    function updatePeriodFields() {
+        const rolling = el('lps-as-period-mode').value === 'ROLLING_DAYS';
+        const days = el('lps-as-period-days');
+        el('lps-as-period-days-field').hidden = !rolling;
+        days.disabled = !rolling;
+        days.required = rolling;
+        ['from', 'to'].forEach((key) => {
+            el('lps-as-period-' + key).readOnly = rolling;
+            el('lps-as-period-' + key).required = !rolling;
+        });
+        const count = Number(days.value);
+        if (!rolling || !Number.isInteger(count) || count < 1 || count > 3650) return;
+        const today = config.serverDate || el('lps-as-period-to').defaultValue;
+        const start = new Date(today + 'T00:00:00Z');
+        start.setUTCDate(start.getUTCDate() - count + 1);
+        el('lps-as-period-from').value = start.toISOString().slice(0, 10);
+        el('lps-as-period-to').value = today;
+    }
+
     function buildProfile() {
         const productFilters = collectFilters('product');
         const search = el('lps-as-search').value.trim();
@@ -260,7 +282,9 @@
         return {
             schemaVersion: 4,
             context: { sourceDatabase: el('lps-as-source').value || 'Paint_Ua', warehouseIds: selectedWarehouseIds() },
-            period: { from: el('lps-as-period-from').value, to: el('lps-as-period-to').value },
+            period: el('lps-as-period-mode').value === 'ROLLING_DAYS'
+                ? { mode: 'ROLLING_DAYS', days: Number(el('lps-as-period-days').value) }
+                : { mode: 'FIXED', from: el('lps-as-period-from').value, to: el('lps-as-period-to').value },
             productFilters: productFilters,
             movementFilters: collectFilters('movement'),
             calculation: { abcBasis: el('lps-as-abc-basis').value, includeReturns: el('lps-as-include-returns').checked, availability: availabilityEditor.read(), stockOnlyWarehouseIds: state.stockOnlyWarehouseIds.filter((id) => selectedWarehouseIds().includes(id)) },
@@ -281,13 +305,21 @@
                 group[field] = value === '' ? null : Number(value);
             });
             group.supplyFromGroupCode = row.querySelector('[data-field="supplyFromGroupCode"]').value;
+            group.respectMaximumStock = row.querySelector('[data-field="respectMaximumStock"]').checked;
             groups.push(group);
         });
-        return { version: 2, packRounding: el('lps-as-purchase-pack').value, stockoutCorrectionEnabled: el('lps-as-purchase-stockout').checked, maxDemandMultiplier: Number(el('lps-as-purchase-demand-cap').value), enabled: el('lps-as-purchase-enabled').checked, allowTransfers: el('lps-as-purchase-transfers').checked, groups: groups };
+        return { version: 2, allowActualSalesWithoutAvailability: el('lps-as-purchase-history-fallback').checked, noOtherIncomingOrders: el('lps-as-purchase-no-incoming').checked, noSupplierMinimumOrder: el('lps-as-purchase-no-moq').checked, currentReceiptsWithinLeadTime: el('lps-as-purchase-receipts-on-time').checked, coldCoverageEnabled: el('lps-as-purchase-cold').checked, freezingTargetDays: Number(el('lps-as-purchase-freezing-days').value), nonFreezingTargetDays: Number(el('lps-as-purchase-nonfreezing-days').value), packRounding: el('lps-as-purchase-pack').value, stockoutCorrectionEnabled: el('lps-as-purchase-stockout').checked, maxDemandMultiplier: Number(el('lps-as-purchase-demand-cap').value), enabled: el('lps-as-purchase-enabled').checked, allowTransfers: el('lps-as-purchase-transfers').checked, groups: groups };
     }
 
     function applyPurchasePlanning(plan) {
         plan = plan || {};
+        el('lps-as-purchase-history-fallback').checked = plan.allowActualSalesWithoutAvailability === true;
+        el('lps-as-purchase-no-incoming').checked = plan.noOtherIncomingOrders === true;
+        el('lps-as-purchase-no-moq').checked = plan.noSupplierMinimumOrder === true;
+        el('lps-as-purchase-receipts-on-time').checked = plan.currentReceiptsWithinLeadTime === true;
+        el('lps-as-purchase-cold').checked = plan.coldCoverageEnabled === true;
+        el('lps-as-purchase-freezing-days').value = plan.freezingTargetDays == null ? 210 : plan.freezingTargetDays;
+        el('lps-as-purchase-nonfreezing-days').value = plan.nonFreezingTargetDays == null ? 150 : plan.nonFreezingTargetDays;
         el('lps-as-purchase-pack').value = plan.packRounding || (plan.respectPack === false ? 'NONE' : 'UP');
         el('lps-as-purchase-stockout').checked = plan.stockoutCorrectionEnabled === true;
         el('lps-as-purchase-demand-cap').value = plan.maxDemandMultiplier == null ? 1.1 : plan.maxDemandMultiplier;
@@ -306,12 +338,14 @@
             return '<fieldset class="lps-as-purchase-group" data-purchase-group="' + escapeHtml(group.code) + '"><legend><label><input type="checkbox" data-field="selected"' + (saved.has(group.code) ? ' checked' : '') + '> ' + escapeHtml(group.name) + ' [' + group.warehouseIds.map(Number).join(', ') + ']</label></legend><div class="lps-as-grid">' +
                 '<label><span>' + escapeHtml(t.receivingWarehouse) + '</span><select data-field="receivingWarehouseId">' + options(value.receivingWarehouseId) + '</select></label>' +
                 '<label><span>' + escapeHtml(t.minimumWarehouse) + '</span><select data-field="minimumWarehouseId">' + options(value.minimumWarehouseId == null ? value.receivingWarehouseId : value.minimumWarehouseId) + '</select></label>' +
+                '<label class="lps-as-maximum"><span><input type="checkbox" data-field="respectMaximumStock"' + (value.respectMaximumStock !== false ? ' checked' : '') + '> ' + escapeHtml(t.respectMaximumStock) + '</span><small>' + escapeHtml(t.maximumStockHelp) + '</small></label>' +
                 '<label><span>' + escapeHtml(t.supplyFromGroupCode) + '</span><select data-field="supplyFromGroupCode"><option value="">' + escapeHtml(t.directSupplier) + '</option>' + groups.filter((item) => item.code !== group.code).map((item) => '<option value="' + escapeHtml(item.code) + '"' + (value.supplyFromGroupCode === item.code ? ' selected' : '') + '>' + escapeHtml(item.name) + '</option>').join('') + '</select></label>' +
                 ['leadTimeDays', 'targetDays', 'safetyDays'].map((field) => '<label><span>' + escapeHtml(t[field]) + '</span><input type="number" min="' + (field === 'targetDays' ? 1 : 0) + '" max="' + (field === 'safetyDays' ? 365 : 730) + '" step="1" data-field="' + field + '" value="' + escapeHtml(value[field] == null ? '' : value[field]) + '"></label>').join('') + '</div><p>' + escapeHtml(t.minimumSourceHelp) + '</p><p>' + escapeHtml(t.routeHelp) + '</p></fieldset>';
         }).join('');
     }
 
     function clearSelections() {
+        conditions?.clear();
         el('lps-as-search').value = '';
         root.querySelectorAll('.lps-as-mode').forEach((node) => { node.value = 'ANY'; node.dispatchEvent(new Event('change')); });
         root.querySelectorAll('.lps-as-values').forEach((node) => Array.from(node.options).forEach((option) => { option.selected = false; }));
@@ -365,10 +399,14 @@
         el('lps-as-search').value = productFilters.search || '';
         Object.entries(productFilters).forEach((entry) => { if (entry[0] !== 'search') setSelection('product', entry[0], entry[1]); });
         Object.entries(normalized.movementFilters || {}).forEach((entry) => setSelection('movement', entry[0], entry[1]));
+        conditions?.apply(productFilters, normalized.movementFilters || {});
         if (normalized.period) {
+            el('lps-as-period-mode').value = normalized.period.mode === 'ROLLING_DAYS' ? 'ROLLING_DAYS' : 'FIXED';
+            el('lps-as-period-days').value = String(normalized.period.days || 190);
             if (normalized.period.from) el('lps-as-period-from').value = normalized.period.from;
             if (normalized.period.to) el('lps-as-period-to').value = normalized.period.to;
         }
+        updatePeriodFields();
         const calculation = normalized.calculation || {};
         state.stockOnlyWarehouseIds = (calculation.stockOnlyWarehouseIds || []).map(Number);
         renderWarehouseUsage();
@@ -407,6 +445,9 @@
         el('lps-as-visibility').value = 'shared';
         el('lps-as-status').value = 'active';
         el('lps-as-active-tab').value = 'products';
+        el('lps-as-period-mode').value = 'ROLLING_DAYS';
+        el('lps-as-period-days').value = '190';
+        updatePeriodFields();
         el('lps-as-editor-meta').textContent = i18n.newScenario || 'New scenario';
         el('lps-as-revisions').hidden = true;
         clearSelections();
@@ -506,6 +547,8 @@
     }
 
     warehouses.addEventListener('change', () => { state.pendingProfile = null; renderWarehouseUsage(); loadCapabilities(); });
+    el('lps-as-period-mode').addEventListener('change', updatePeriodFields);
+    el('lps-as-period-days').addEventListener('input', updatePeriodFields);
     form.addEventListener('submit', saveScenario);
     el('lps-as-new').addEventListener('click', resetEditor);
     el('lps-as-duplicate').addEventListener('click', duplicateScenario);

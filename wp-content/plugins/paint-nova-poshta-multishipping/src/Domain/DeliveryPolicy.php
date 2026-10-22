@@ -17,6 +17,9 @@ final class DeliveryPolicy
             'cap' => 0.0,
         ];
         $components = array_fill_keys(array_keys(self::componentLabels()), 'customer');
+        $components['base_transport'] = 'budget';
+        $components['extra_shipments'] = 'budget';
+        $store_pays = ['mode' => 'store', 'value' => 0.0, 'cap' => 0.0];
 
         return [
             'schema_version' => 1,
@@ -34,7 +37,7 @@ final class DeliveryPolicy
                 'retail' => [
                     'threshold' => 1200.0,
                     'below' => $customer_pays,
-                    'above' => $customer_pays,
+                    'above' => $store_pays,
                     'components' => $components,
                     'cod' => [
                         'single_shipment' => 'yes',
@@ -45,7 +48,7 @@ final class DeliveryPolicy
                 'partner' => [
                     'threshold' => 1200.0,
                     'below' => $customer_pays,
-                    'above' => $customer_pays,
+                    'above' => $store_pays,
                     'components' => $components,
                     'cod' => [
                         'single_shipment' => 'yes',

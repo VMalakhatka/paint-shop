@@ -9,6 +9,8 @@ msgstr ""
 msgid "Product categories"
 msgstr "Категории товаров"
 
+#: templates/public-page.php:33
+#: templates/public-page.php:52
 msgid "Open catalogue"
 msgstr "Открыть каталог"
 
@@ -172,3 +174,132 @@ msgstr "В наличии"
 
 msgid "Out of stock"
 msgstr "Нет в наличии"
+
+#: inc/single-product.php
+msgid "Product added to cart."
+msgstr "Товар добавлен в корзину."
+
+#: inc/single-product.php
+msgid "This quantity could not be added. Check availability or choose a smaller quantity."
+msgstr "Не удалось добавить это количество. Проверьте наличие или выберите меньшее количество."
+
+#: inc/single-product.php
+msgid "Could not confirm whether the product was added. Check your cart before trying again."
+msgstr "Не удалось подтвердить, добавлен ли товар. Проверьте корзину перед повторной попыткой."
+
+#: inc/mobile-cart.php
+msgid "In cart: %s"
+msgstr "В корзине: %s"
+
+#: inc/mobile-cart.php
+msgid "Products:"
+msgstr "Товары:"
+
+#: inc/mobile-cart.php
+msgid "Go to cart"
+msgstr "Перейти в корзину"
+
+#: inc/mobile-cart.php
+msgid "Product added"
+msgstr "Товар добавлен"
+
+#: inc/site-footer.php
+msgid "Site footer"
+msgstr "Нижняя часть сайта"
+
+#: inc/site-footer.php
+msgid "Lavka Khudozhnyka"
+msgstr "Лавка Художника"
+
+#: inc/site-footer.php
+msgid "Shop links"
+msgstr "Ссылки магазина"
+
+#: inc/site-footer.php
+msgid "Catalogue"
+msgstr "Каталог"
+
+#: inc/site-footer.php
+msgid "My account"
+msgstr "Мой кабинет"
+
+#: inc/site-footer.php
+msgid "How to order"
+msgstr "Как заказывать"
+
+#: inc/site-header.php
+msgid "Cart"
+msgstr "Корзина"
+
+#: inc/site-header.php
+msgid "Skip to content"
+msgstr "Перейти к содержимому"
+
+#: inc/site-header.php
+msgid "Kyiv, Olimpiiskyi shopping centre"
+msgstr "г. Киев, ТЦ «Олимпийский»"
+
+#: inc/site-header.php
+msgid "Odesa, 17 Lanzheronivska St."
+msgstr "г. Одесса, Ланжероновская, 17"
+
+#: inc/site-header.php
+msgid "Wholesale sales"
+msgstr "Оптовые продажи"
+
+#: inc/site-header.php
+msgid "Menu"
+msgstr "Меню"
+
+#: inc/site-header.php
+msgid "Main navigation"
+msgstr "Главное меню"
+
+#: inc/site-header.php
+#, php-format
+msgid "Submenu: %s"
+msgstr "Подменю: %s"
+
+#: templates/public-page.php:9
+msgid "Breadcrumbs"
+msgstr "Навигационная цепочка"
+
+#: templates/public-page.php:10
+msgid "Home"
+msgstr "Главная"
+
+#: templates/public-page.php:12
+#: inc/public-pages.php:85
+#: inc/public-pages.php:88
+msgid "Search"
+msgstr "Поиск"
+
+#: templates/public-page.php:12
+#: templates/public-page.php:31
+msgid "Page not found"
+msgstr "Страница не найдена"
+
+#: templates/public-page.php:23
+msgid "Page sections"
+msgstr "Части страницы"
+
+#: templates/public-page.php:32
+msgid "The address may have changed. Open the catalogue or try a search."
+msgstr "Адрес страницы мог измениться. Откройте каталог или воспользуйтесь поиском."
+
+#: templates/public-page.php:38
+#, php-format
+msgid "Search results for “%s”"
+msgstr "Результаты поиска «%s»"
+
+#: templates/public-page.php:49
+msgid "Previous"
+msgstr "Предыдущая"
+
+#: templates/public-page.php:49
+msgid "Next"
+msgstr "Следующая"
+
+#: templates/public-page.php:51
+msgid "Nothing found. Try a different search or open the catalogue."
+msgstr "Ничего не найдено. Попробуйте другой запрос или откройте каталог."

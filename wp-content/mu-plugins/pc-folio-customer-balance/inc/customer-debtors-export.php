@@ -63,8 +63,8 @@ function pc_folio_debtors_export_workbook(array $report): \PhpOffice\PhpSpreadsh
     $text('A4', __('Customer search', 'pc-folio-customer-balance') . ': ' . ($filters['q'] ?? ''));
     $types = $filters['types'] ?? [];
     $text('A5', __('Customer type', 'pc-folio-customer-balance') . ': ' . (!$types ? __('All types', 'pc-folio-customer-balance') : (is_array($types) ? implode(', ', $types) : $types)));
-    $headers = ['Folio customer', 'Folio short name', 'Type', 'Total debt', 'Deferred / on sale',
-        'Overdue deferred / on sale', 'Payments marked PRD', 'Payable now', 'Customer on site'];
+    $headers = ['Folio customer', 'Folio short name', 'Type', 'Accounting balance', 'Deferred / on sale',
+        'Overdue deferred / on sale', 'Preorder invoices', 'Payable including preorders', 'Customer on site'];
     foreach ($headers as $index => $label) {
         $text(chr(65 + $index) . '7', __($label, 'pc-folio-customer-balance'));
     }

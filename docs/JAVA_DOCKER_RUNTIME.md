@@ -22,7 +22,50 @@ Java API `kreul_com_ua`. Он дополняет общий
 Запрос на диагностику не разрешает rebuild, restart или deploy. Production deploy
 выполняется только после отдельного решения, проверки backup и готового rollback.
 
+<a id="wayforpay-bank-runtime"></a>
+## WayForPay: разрешение банковских приходов
+
+Проверено 2026-10-17, production. Модуль `folio.payment` уже находился в образе;
+обновлена только конфигурация. Журнал MSSQL установлен администратором отдельно,
+сервису подтверждены SELECT/INSERT без широких ролей. Сквозной операторский
+регламент и остаточная приёмка: [FOLIO_WFP_PAYMENTS.md](FOLIO_WFP_PAYMENTS.md).
+
+Проверенные имена environment для `folio.wfp-payment.*`:
+
+- `FOLIO_WFPPAYMENT_APIENABLED`, `FOLIO_WFPPAYMENT_APPLYENABLED`;
+- `FOLIO_WFPPAYMENT_TOKEN`, `FOLIO_WFPPAYMENT_EXPECTEDDATABASE`;
+- `FOLIO_WFPPAYMENT_SOURCESCOPE`, `FOLIO_WFPPAYMENT_MERCHANTHASH`;
+- `FOLIO_WFPPAYMENT_STARTAT`, `FOLIO_WFPPAYMENT_BANKTEMPLATEID`.
+
+Это каноническое преобразование Spring: точки становятся подчёркиваниями,
+дефисы удаляются ([official binding rules](https://docs.spring.io/spring-boot/3.5/reference/features/external-config.html)).
+Не заменять их непроверенными `FOLIO_WFP_PAYMENT_*`. Секреты и реальные identity
+values находятся только в ignored `.env.prod`/production WP config; обе локальные
+копии настроек деплоя синхронизированы точечно, не перезаписаны целиком.
+
+Перед заменой взята штатная ecosystem-блокировка, Java job statuses не running.
+Сохранены полный runtime env/inspect и прежний контейнер. Использован прежний
+image ID, host networking, restart/ulimits/security/binds без изменения.
+Сначала включены API/preview при apply=false, затем apply=true; WP оставался
+на паузе до успешных preview/hash/status и internal/external health. Во время
+старта краткий внешний503 сменился health200; после завершения блокировка снята.
+WP канал подтверждён как loopback, синтетические проверки не выполняли apply.
+
+Для остановки финансовой отправки установить WP `PC_WFP_FOLIO_PAUSED=true`;
+Java apply выключается отдельным env update + restart. Оставлять status доступным.
+При сбое runtime вернуть конкретный сохранённый контейнер/env; не удалять ledger,
+не выполнять Flyway repair и не переотправлять неизвестный финансовый результат.
+Наличие apply=true не доказывает первый реальный приход: он ожидает приёмки.
+
 ## Подтверждённая платформа
+
+Проверено 2026-10-09: endpoint рецептов требует runtime `LAVKA_TOKEN`, который
+Spring связывает с `lavka.token`; значение должно совпадать с существующим
+`api_token` Java-интеграции WordPress. Без ключа endpoint отвечает503 даже при
+успешном `/healthz`. Ключ хранится только в ignored `.env.prod`, не в Git/образе;
+`deploy.sh` переносит этот файл при следующем deploy и перезапускает контейнер.
+Достаточность deploy проверять отдельным авторизованным `assembly-graph` вызовом:
+HTTP200 и `ok:true`, `version:2`. Не выводить ключ в командах или логах.
 
 - Spring Boot `3.2.3`, Java `17`, Maven;
 - multi-stage `Dockerfile`: Maven/Temurin 17 для сборки и Temurin 17 для runtime;

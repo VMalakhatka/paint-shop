@@ -218,3 +218,21 @@ msgstr "Покупатель"
 
 msgid "Customer confirmation"
 msgstr "Подтверждение клиента"
+
+msgid "Preorder invoices"
+msgstr "Счета на предзаказ"
+
+msgid "Accounting balance"
+msgstr "Баланс по документам и оплатам"
+
+msgid "Payable including preorders"
+msgstr "К оплате с учётом предзаказов"
+
+msgid "Update the Folio service and rebuild the debtors snapshot to use preorder balances."
+msgstr "Обновите сервис ФОЛИО и пересчитайте снимок должников для баланса с предзаказами."
+
+msgid "Payable = accounting balance - deferred amount + outstanding preorder invoices. PRD payment markers do not affect the reserve. Only invoices from the last six calendar months through the report date are included. Older preorders must be recreated by the manager."
+msgstr "К оплате = баланс по документам и оплатам − сумма отсрочки + счета на предзаказ. Отметка ПРД в платежах не влияет на резерв. Учтены счета за последние шесть календарных месяцев до даты отчёта. Более старые предзаказы менеджер должен создать заново."
+
+msgid "Preorder invoices from the last six calendar months through period end; period start and document types are ignored."
+msgstr "Счета на предзаказ за последние шесть календарных месяцев до конца периода; начало периода и типы документов не ограничивают список."

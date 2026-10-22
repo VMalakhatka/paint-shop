@@ -37,8 +37,7 @@ msgstr ""
 msgid "Checking shipment..."
 msgstr ""
 
-#: src/Admin/ExternalTtnPanel.php:30
-#: src/Admin/ExternalTtnPanel.php:188
+#: src/Admin/ExternalTtnPanel.php:30 src/Admin/ExternalTtnPanel.php:188
 #: src/Admin/ExternalTtnPanel.php:194
 msgid "The action failed. Refresh the order before retrying."
 msgstr ""
@@ -63,8 +62,7 @@ msgstr ""
 msgid "Open official tracking"
 msgstr ""
 
-#: src/Admin/ExternalTtnPanel.php:80
-#: src/Admin/ExternalTtnPanel.php:119
+#: src/Admin/ExternalTtnPanel.php:80 src/Admin/ExternalTtnPanel.php:119
 msgid "Tracking is unavailable; verify the TTN manually."
 msgstr ""
 
@@ -84,14 +82,12 @@ msgstr ""
 msgid "Approve for warehouse handoff"
 msgstr ""
 
-#: src/Admin/ExternalTtnPanel.php:95
-#: src/Admin/ExternalTtnPanel.php:129
+#: src/Admin/ExternalTtnPanel.php:95 src/Admin/ExternalTtnPanel.php:129
 #: src/Email/DeliverySummary.php:87
 msgid "Approved by the warehouse"
 msgstr ""
 
-#: src/Admin/ExternalTtnPanel.php:96
-#: src/Email/DeliverySummary.php:88
+#: src/Admin/ExternalTtnPanel.php:96 src/Email/DeliverySummary.php:88
 msgid "Submitted by customer; awaiting warehouse review"
 msgstr ""
 
@@ -99,8 +95,7 @@ msgstr ""
 msgid "Access denied."
 msgstr ""
 
-#: src/Admin/ExternalTtnPanel.php:107
-#: src/Admin/ExternalTtnPanel.php:144
+#: src/Admin/ExternalTtnPanel.php:107 src/Admin/ExternalTtnPanel.php:144
 msgid "Shipment not found."
 msgstr ""
 
@@ -126,16 +121,13 @@ msgstr ""
 msgid "This order cannot be approved for dispatch."
 msgstr ""
 
-#: src/Admin/ExternalTtnPanel.php:164
-#: src/Admin/ExternalTtnPanel.php:169
-#: src/Admin/ExternalTtnPanel.php:174
-#: src/Admin/ExternalTtnPanel.php:181
+#: src/Admin/ExternalTtnPanel.php:164 src/Admin/ExternalTtnPanel.php:169
+#: src/Admin/ExternalTtnPanel.php:174 src/Admin/ExternalTtnPanel.php:181
 #: src/Infrastructure/ExternalShipmentStore.php:102
 msgid "Warehouse allocation changed. Please review the order."
 msgstr ""
 
-#: src/Admin/OrderPanel.php:46
-#: src/Admin/SettingsPage.php:36
+#: src/Admin/OrderPanel.php:46 src/Admin/SettingsPage.php:36
 msgid "Nova Poshta shipments"
 msgstr ""
 
@@ -169,8 +161,7 @@ msgstr ""
 msgid "No shipment records have been created yet."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:35
-#: src/Admin/SettingsPage.php:94
+#: src/Admin/SettingsPage.php:35 src/Admin/SettingsPage.php:94
 #: src/Shipping/NovaPoshtaShippingMethod.php:18
 msgid "Nova Poshta multishipping"
 msgstr ""
@@ -227,18 +218,15 @@ msgstr ""
 msgid "Not required: Nova Poshta courier collects parcels from the registered address."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:66
-#: src/Admin/SettingsPage.php:242
+#: src/Admin/SettingsPage.php:66 src/Admin/SettingsPage.php:242
 msgid "Ready"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:67
-#: src/Admin/SettingsPage.php:242
+#: src/Admin/SettingsPage.php:67 src/Admin/SettingsPage.php:242
 msgid "Incomplete"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:68
-#: src/Admin/SettingsPage.php:242
+#: src/Admin/SettingsPage.php:68 src/Admin/SettingsPage.php:242
 msgid "Disabled"
 msgstr ""
 
@@ -354,8 +342,7 @@ msgstr ""
 msgid "Courier pickup from sender address"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:201
-#: src/Admin/SettingsPage.php:207
+#: src/Admin/SettingsPage.php:201 src/Admin/SettingsPage.php:207
 #: src/Admin/SettingsPage.php:236
 msgid "Load senders first"
 msgstr ""
@@ -376,10 +363,8 @@ msgstr ""
 msgid "Save Nova Poshta settings"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:262
-#: src/Admin/SettingsPage.php:324
-#: src/Admin/SettingsPage.php:345
-#: src/Admin/SettingsPage.php:368
+#: src/Admin/SettingsPage.php:262 src/Admin/SettingsPage.php:324
+#: src/Admin/SettingsPage.php:345 src/Admin/SettingsPage.php:368
 msgid "Permission denied."
 msgstr ""
 
@@ -511,18 +496,15 @@ msgstr ""
 msgid "Payment rule"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:528
-#: src/Admin/SettingsPage.php:554
+#: src/Admin/SettingsPage.php:528 src/Admin/SettingsPage.php:554
 msgid "Customer pays"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:529
-#: src/Admin/SettingsPage.php:555
+#: src/Admin/SettingsPage.php:529 src/Admin/SettingsPage.php:555
 msgid "Store pays in full"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:530
-#: src/Admin/SettingsPage.php:556
+#: src/Admin/SettingsPage.php:530 src/Admin/SettingsPage.php:556
 msgid "Use the store allowance, customer pays the remainder"
 msgstr ""
 
@@ -586,8 +568,7 @@ msgstr ""
 msgid "Declared value comparison threshold"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:603
-#: src/Domain/DeliveryPolicy.php:146
+#: src/Admin/SettingsPage.php:603 src/Domain/DeliveryPolicy.php:146
 msgid "Parcel locker surcharge"
 msgstr ""
 
@@ -999,8 +980,7 @@ msgstr ""
 msgid "From original order #%s (all warehouses)."
 msgstr ""
 
-#: src/Email/DeliverySummary.php:84
-#: src/Email/DeliverySummary.php:93
+#: src/Email/DeliverySummary.php:84 src/Email/DeliverySummary.php:93
 msgid "Customer TTN"
 msgstr ""
 
@@ -1012,8 +992,7 @@ msgstr ""
 msgid "Nova Poshta services are paid under the customer TTN. This does not confirm dispatch or payment for our goods."
 msgstr ""
 
-#: src/Email/DeliverySummary.php:104
-#: src/Email/DeliverySummary.php:111
+#: src/Email/DeliverySummary.php:104 src/Email/DeliverySummary.php:111
 msgid "Original order"
 msgstr ""
 
@@ -1098,26 +1077,461 @@ msgid_plural "%1$s — %2$d parcels"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Infrastructure/ApprovalQuoteService.php src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
+#: src/Infrastructure/ApprovalQuoteService.php
+#: src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
 msgid "Delivery cannot be calculated from the saved order warehouses. Ask the manager to check the products and sender settings."
 msgstr ""
 
-#: src/Infrastructure/ApprovalQuoteService.php src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
+#: src/Infrastructure/ApprovalQuoteService.php
+#: src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
 msgid "Nova Poshta estimates require an order in UAH."
 msgstr ""
 
-#: src/Infrastructure/ApprovalQuoteService.php src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
+#: src/Infrastructure/ApprovalQuoteService.php
+#: src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
 msgid "Nova Poshta delivery is currently unavailable."
 msgstr ""
 
-#: src/Infrastructure/ApprovalQuoteService.php src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
+#: src/Infrastructure/ApprovalQuoteService.php
+#: src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
 msgid "The selected point cannot accept this parcel weight or declared value. Choose another point or courier delivery."
 msgstr ""
 
-#: src/Infrastructure/ApprovalQuoteService.php src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
+#: src/Infrastructure/ApprovalQuoteService.php
+#: src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
 msgid "Choose the city and an available point from the Nova Poshta list, or enter a courier address."
 msgstr ""
 
-#: src/Infrastructure/ApprovalQuoteService.php src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
+#: src/Infrastructure/ApprovalQuoteService.php
+#: src/Domain/DocumentShipmentBuilder.php src/Checkout/CheckoutIntegration.php
 msgid "Courier street and building"
+msgstr ""
+
+msgid "Nova Poshta — free delivery (base tariff); insurance and extras paid by recipient"
+msgstr ""
+
+msgid "Nova Poshta — carrier tariff, paid separately by recipient"
+msgstr ""
+
+msgid "Store pickup — %s, free (wait for confirmation)"
+msgstr ""
+
+msgid "Choose the destination. Delivery is paid separately to Nova Poshta, not with the goods. The estimate and any store contribution are shown below."
+msgstr ""
+
+msgid "The delivery price will be determined by Nova Poshta. No delivery fee is included in the payment for goods."
+msgstr ""
+
+msgid "Estimated payment to Nova Poshta: %s. Final packaging and charges are confirmed by the carrier."
+msgstr ""
+
+msgid "Free delivery covers the base tariff only. Insurance and additional services are paid by the recipient."
+msgstr ""
+
+msgid "At or below the threshold"
+msgstr ""
+
+msgid "Above the threshold"
+msgstr ""
+
+msgid "Nova Poshta — base tariff covered by us; insurance and extras paid by recipient"
+msgstr ""
+
+#, php-format
+msgid "For goods over %s, we cover the base tariff; insurance and extras remain payable separately."
+msgstr ""
+
+msgid "Address delivery costs more than delivery to a branch. You can choose a Nova Poshta branch in the delivery type above."
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:21
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:29
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:103
+msgid "Shipment access denied."
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:23
+msgid "Order unavailable."
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:32
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:45
+msgid "Open the original order to prepare shipments for all warehouses."
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:36
+msgid "Shipment preparation requires an active UAH order without refunds."
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:39
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:47
+msgid "Check the saved warehouse allocation before preparing shipments."
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:44
+msgid "This order already has external or locked shipments. Preparation cannot replace them."
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:51
+msgid "Saved shipment warehouses changed. Administrator review is required."
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:92
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:114
+msgid "The order or preparation changed. Reload and review it again."
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:93
+msgid "Confirm that recipient details and packaging were agreed and checked."
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:94
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:98
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:105
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:108
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:111
+msgid "Check recipient details and phone number."
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:115
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:118
+msgid "Check all warehouse parcels."
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:119
+msgid "Choose the delivery payer for each warehouse."
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:121
+msgid "Enter between 1 and 20 packed boxes for each warehouse."
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:124
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:128
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:131
+msgid "Enter positive box weights in kg and dimensions in cm."
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:153
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:154
+msgid "Check the warehouse sender mapping and phone in Nova Poshta settings."
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:157
+msgid "Multi-warehouse COD requires an approved allocation rule; no COD will be created."
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:158
+msgid "COD is disabled by the customer delivery policy."
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:160
+msgid "Delivery payer and store subsidy still require carrier-contract verification; this preview does not calculate the final tariff."
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:161
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:77
+msgid "TTN creation and label printing are blocked pending verification of the official carrier API contract. No shipment or notification has been sent."
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:171
+msgid "Another order operation is running. Try again after it finishes."
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:179
+msgid "Transactional shipment storage is unavailable. Nothing was saved."
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:181
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:199
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:200
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:203
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:208
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Infrastructure/ManagerPreparation.php:210
+msgid "Shipment preparation could not be saved."
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:29
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:67
+msgid "Delivery payer"
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:29
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:68
+msgid "Sender"
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:30
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:68
+msgid "Recipient"
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:31
+msgid "Checking preparation…"
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:32
+msgid "The operation could not be confirmed. Reload before trying again."
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:33
+msgid "Unsaved changes. Save and check the preparation again."
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:39
+msgid "Prepare Nova Poshta shipment"
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:52
+msgid "Preparation is saved for this order only. It does not change the customer profile, create a TTN or send notifications."
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:54
+msgid "Use current customer confirmation"
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:55
+msgid "Import checks the current order version. Review imported details and save separately; your saved preparation is not overwritten automatically."
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:56
+msgid "Recipient name"
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:56
+msgid "Recipient phone"
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:60
+msgid "Payment method and order total"
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:64
+msgid "Warehouse sender"
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:66
+msgid "Check sender settings"
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:71
+msgid "Add packed box"
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:74
+msgid "Recipient details were agreed; warehouse contents, packed box weights, dimensions and payer were checked."
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:75
+msgid "Save preparation"
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:75
+msgid "Check preview"
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:77
+msgid "Create TTN"
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:85
+msgid "Weight, kg"
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:85
+msgid "Length, cm"
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:86
+msgid "Width, cm"
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:86
+msgid "Height, cm"
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:89
+msgid "Remove box"
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:96
+msgid "Preparation audit (last 10 saves)"
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:107
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:109
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:120
+msgid "Invalid preparation request."
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:117
+msgid "No current confirmed delivery details are available for this order."
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:118
+msgid "Imported for review only. Save the preparation separately."
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:123
+msgid "Preparation saved. No TTN or notification was sent."
+msgstr ""
+
+#: wp-content/plugins/paint-nova-poshta-multishipping/src/Admin/ManagerPreparationPanel.php:127
+msgid "Preview only; changes are not saved."
+msgstr ""
+
+msgid "Label printing is unavailable."
+msgstr ""
+
+msgid "Nova Poshta did not return a valid PDF. No file was downloaded."
+msgstr ""
+
+msgid "Shipment data could not be verified. Check the saved preparation and sender settings; no automatic retry is allowed."
+msgstr ""
+
+msgid "COD creation is not supported in this release. Do not change the payment method just to bypass this check."
+msgstr ""
+
+msgid "This release supports drop-off at a branch and delivery to a branch or parcel locker only."
+msgstr ""
+
+msgid "Enter the recipient first name, last name and patronymic separately in Ukrainian as required by Nova Poshta."
+msgstr ""
+
+msgid "Nova Poshta TTN for order #%s"
+msgstr ""
+
+msgid "TTN %s has been created for your order. This does not yet confirm handover to Nova Poshta."
+msgstr ""
+
+msgid "Checking shipment…"
+msgstr ""
+
+msgid "Result not confirmed. Reload the page; do not repeat creation or email."
+msgstr ""
+
+msgid "Save preparation and reload this page before creating a TTN."
+msgstr ""
+
+msgid "Declared value / estimated delivery, UAH"
+msgstr ""
+
+msgid "Weight, kg / dimensions, cm"
+msgstr ""
+
+msgid "TTN, PDF and customer email"
+msgstr ""
+
+msgid "Only saved preparation is used. Save and reload after editing. Create each warehouse TTN separately; printing and customer email are separate actions."
+msgstr ""
+
+msgid "How this works and current limits"
+msgstr ""
+
+msgid "Supported: drop-off at a branch, delivery to a branch or parcel locker, no COD, cash payment for carrier services. Enter the legal recipient name in Ukrainian; it will be recorded in the Nova Poshta recipient directory, not in the store customer profile."
+msgstr ""
+
+msgid "The estimate is not a final invoice. Unknown point limits must be checked with Nova Poshta. Confirm payer and any store subsidy manually. A created TTN does not mean that goods have been handed over."
+msgstr ""
+
+msgid "After a timeout or rejection, do not create another TTN: reconcile the result in the Nova Poshta business account with an administrator. Automatic retries and automatic Telegram messages are not enabled."
+msgstr ""
+
+msgid "First name"
+msgstr ""
+
+msgid "Last name"
+msgstr ""
+
+msgid "Patronymic"
+msgstr ""
+
+msgid "Check saved shipment with Nova Poshta"
+msgstr ""
+
+msgid "I checked the recipient, boxes, declared value, delivery payer, cash payment and store subsidy. Create this real TTN."
+msgstr ""
+
+msgid "TTN created; handover is not confirmed."
+msgstr ""
+
+msgid "Download TTN PDF"
+msgstr ""
+
+msgid "Download A4 label PDF"
+msgstr ""
+
+msgid "Download Zebra label PDF"
+msgstr ""
+
+msgid "Email goes to the order customer, not to the parcel recipient:"
+msgstr ""
+
+msgid "Send TTN to customer by email"
+msgstr ""
+
+msgid "Email accepted by the mail transport; delivery is not confirmed."
+msgstr ""
+
+msgid "Email failed or its result is unknown. Check mail logs before any manual resend."
+msgstr ""
+
+msgid "Creation is locked: the result needs manual review in the Nova Poshta business account. Do not repeat the shipment."
+msgstr ""
+
+msgid "Enter the recipient first and last name in Ukrainian. Patronymic is optional; each name must be at most 36 characters."
+msgstr ""
+
+msgid "Names are suggested from the order, then the customer card, only when the saved recipient name and phone match. Review them; patronymic is optional. A different recipient must be entered manually."
+msgstr ""
+
+msgid "Saved recipient phone:"
+msgstr ""
+
+msgid "Patronymic (optional)"
+msgstr ""
+
+msgid "This preview does not identify a person by phone. On creation, returned Nova Poshta contact details must match before a TTN is requested. Missing or different details stop creation for manual review."
+msgstr ""
+
+msgid "Nova Poshta returned different or incomplete recipient details. No TTN was requested. The recipient may have been saved in Nova Poshta; ask an administrator to reconcile it. Do not repeat creation."
+msgstr ""
+
+msgid "Nova Poshta requests are busy. Wait a few seconds before checking again."
+msgstr ""
+
+
+msgid "Nova Poshta temporarily limited requests. Wait a few seconds before checking again."
+msgstr ""
+
+
+msgid "Nova Poshta is busy or has limited requests. No shipment creation was started. Wait 10 seconds, reload the order and check the saved shipment again."
+msgstr ""
+
+
+msgid "Nova Poshta checks are paced and may take several seconds. Only a rate-limited read can retry once; recipient and TTN creation are never retried automatically. If the message says creation was not started, wait 10 seconds, reload and run a new check. An unknown creation result still requires administrator review."
+msgstr ""
+
+msgid "The existing Nova Poshta contact was verified by an administrator. Preparation is frozen. Run a fresh check and confirm TTN creation; the recipient will not be created again."
+msgstr ""
+
+msgid "The contact directory did not return a phone number."
+msgstr ""
+
+msgid "The contact phone does not match the saved recipient phone."
+msgstr ""
+
+msgid "The contact directory did not return the first or last name."
+msgstr ""
+
+msgid "The contact name does not match the confirmed recipient name."
+msgstr ""
+
+msgid "The contact directory could not be read. No TTN was requested."
+msgstr ""
+
+msgid "The exact contact could not be uniquely verified in the recipient directory."
+msgstr ""
+
+msgid "The earlier version did not save verification details. Administrator reconciliation is required."
 msgstr ""

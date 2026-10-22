@@ -3375,3 +3375,380 @@ msgstr "Для частини клієнтів перевірка email недо
 
 msgid "Customer account check unavailable."
 msgstr "Перевірка облікових записів недоступна."
+
+msgid "Select a file format and quantity option."
+msgstr "Виберіть формат файлу та варіант кількості."
+
+msgid "Commercial offer"
+msgstr "Комерційна пропозиція"
+
+msgid "Standard price list"
+msgstr "Стандартний прайс"
+
+msgid "Available stock: Kyiv + Odesa"
+msgstr "Наявні залишки: Київ + Одеса"
+
+msgid "One unit per product"
+msgstr "По 1 одиниці кожного товару"
+
+msgid "Description"
+msgstr "Опис"
+
+msgid "Your price, %s"
+msgstr "Ваша ціна, %s"
+
+msgid "Photo"
+msgstr "Фото"
+
+msgid "Embedded photos: %1$s of %2$s. Other rows contain product links."
+msgstr "Вставлено фото: %1$s із %2$s. В інших рядках — посилання на товари."
+
+msgid "Excel format"
+msgstr "Формат Excel"
+
+msgid "Quantity in the offer"
+msgstr "Кількість у пропозиції"
+
+msgid "A table with category groups and subgroups: SKU, barcode, name, description, customer and retail prices, unit, pack size, stock, a blank order column and photo. Missing photos are replaced with product links. Stock quantities use Kyiv + Odesa, not the quantities in the source document."
+msgstr "Таблиця з групами та підгрупами категорій: артикул, штрихкод, назва, опис, ціна клієнта та роздрібна ціна, одиниця виміру, фасування, залишок, порожня колонка замовлення та фото. Замість недоступних фото — посилання на товари. Залишки беруться по Києву та Одесі, а не з кількостей документа."
+
+msgid "Retail price, %s"
+msgstr "Роздрібна ціна, %s"
+
+msgid "Unit of measure"
+msgstr "Одиниця виміру"
+
+msgid "Units per pack"
+msgstr "Фасування (од. в упаковці)"
+
+msgid "Could not load pack quantities from Folio. Check the Java service update and API token, then prepare the mailing again."
+msgstr "Не вдалося завантажити кількість в упаковці з ФОЛІО. Перевірте оновлення Java-сервісу та API-токен, потім підготуйте розсилку ще раз."
+
+msgid "During preparation, groups with identical file contents are merged. The group count may decrease; each recipient still receives a separate email."
+msgstr "Під час підготовки групи з однаковим вмістом файлу об’єднуються. Кількість груп може зменшуватися; кожний одержувач отримує окремий лист."
+
+msgid "Need additional product information, another data format (XML or another format), or direct links to higher-resolution photos for your website? Contact us with your request and we will discuss what we can provide."
+msgstr "Якщо для вашого сайту потрібна додаткова інформація про товари, інший формат даних (XML тощо) або прямі посилання на фото кращої якості, напишіть нам. Узгодимо, які матеріали та в якому форматі можемо надати."
+
+msgid "Group"
+msgstr "Група"
+
+msgid "Subgroup"
+msgstr "Підгрупа"
+
+msgid "Select between 1 and 20 Folio accounts for one customer."
+msgstr "Виберіть від 1 до 20 рахунків ФОЛІО одного клієнта."
+
+msgid "Duplicate or invalid accounts selected."
+msgstr "Вибрано повторні або некоректні рахунки."
+
+msgid "Combined account confirmation"
+msgstr "Зведений рахунок на підтвердження"
+
+msgid "Payment details are unavailable."
+msgstr "Реквізити для оплати недоступні."
+
+msgid "Payment recipient"
+msgstr "Отримувач оплати"
+
+msgid "Tax ID"
+msgstr "Податковий номер"
+
+msgid "IBAN"
+msgstr "IBAN"
+
+msgid "Bank"
+msgstr "Банк"
+
+msgid "Bank code"
+msgstr "МФО"
+
+msgid "Payment details"
+msgstr "Реквізити для оплати"
+
+msgid "Selected account totals are combined once. Original Folio accounts and Woo orders remain separate. This is not a calculation of unpaid debt."
+msgstr "Суми вибраних рахунків підсумовано один раз. Вихідні рахунки ФОЛІО та замовлення Woo залишаються окремими. Це не розрахунок неоплаченого боргу."
+
+msgid "Before payment, agree the amount with your manager, including any payments already made."
+msgstr "Перед оплатою погодьте суму з менеджером з урахуванням уже здійснених оплат."
+
+msgid "Include configured payment details"
+msgstr "Додати налаштовані реквізити для оплати"
+
+msgid "Update preview"
+msgstr "Оновити попередній перегляд"
+
+msgid "Download confirmation Excel"
+msgstr "Завантажити Excel на підтвердження"
+
+msgid "Combine selected accounts for confirmation"
+msgstr "Об’єднати вибрані рахунки на підтвердження"
+
+msgid "Select account for combined confirmation"
+msgstr "До зведеного підтвердження"
+
+msgid "Select up to 20 accounted invoices for this customer. Selection is kept when changing document pages."
+msgstr "Виберіть до 20 ураховуваних рахунків цього клієнта. Вибір зберігається під час переходу між сторінками документів."
+
+msgid "Clear selection"
+msgstr "Очистити вибір"
+
+msgid "Save as"
+msgstr "Зберегти як"
+
+msgid "Ordinary draft"
+msgstr "Звичайна чернетка"
+
+msgid "Preorder invoice"
+msgstr "Рахунок передзамовлення"
+
+msgid "Shopping mode"
+msgstr "Режим замовлення"
+
+msgid "Purchase"
+msgstr "Покупка"
+
+msgid "Draft"
+msgstr "Чернетка"
+
+msgid "Selected draft"
+msgstr "Вибрана чернетка"
+
+msgid "Select a draft"
+msgstr "Виберіть чернетку"
+
+msgid "Open draft"
+msgstr "Відкрити чернетку"
+
+msgid "New draft"
+msgstr "Нова чернетка"
+
+msgid "Create draft"
+msgstr "Створити чернетку"
+
+msgid "Draft: no stock reservation. Prices and availability are checked when ordering."
+msgstr "Чернетка не резервує товар. Ціни та наявність перевіряються під час оформлення."
+
+msgid "Choose a variant"
+msgstr "Оберіть варіант"
+
+msgid "Edit draft quantities"
+msgstr "Змінити кількості в чернетці"
+
+msgid "Set quantity to zero to remove an item."
+msgstr "Щоб видалити товар, установіть кількість 0."
+
+msgid "Save quantities"
+msgstr "Зберегти кількості"
+
+msgid "Select or create a draft first."
+msgstr "Спочатку виберіть або створіть чернетку."
+
+msgid "Saved to draft."
+msgstr "Збережено в чернетці."
+
+msgid "Could not confirm the save. Open the draft and check it before trying again."
+msgstr "Не вдалося підтвердити збереження. Відкрийте чернетку та перевірте її перед повторною спробою."
+
+msgid "Enter a positive whole quantity."
+msgstr "Введіть додатну цілу кількість."
+
+msgid "Select an editable draft belonging to your account."
+msgstr "Виберіть власну чернетку, доступну для редагування."
+
+msgid "Enter a draft title (up to 120 characters)."
+msgstr "Введіть назву чернетки (до 120 символів)."
+
+msgid "Could not save the draft."
+msgstr "Не вдалося зберегти чернетку."
+
+msgid "This product is not available in the catalogue."
+msgstr "Цей товар недоступний у каталозі."
+
+msgid "The draft changed. Reload it before editing quantities."
+msgstr "Чернетку змінено. Оновіть сторінку перед редагуванням кількостей."
+
+msgid "Invalid draft request."
+msgstr "Некоректний запит чернетки."
+
+msgid "How to work with a draft?"
+msgstr "Як працювати з чернеткою?"
+
+msgid "Illustrated instructions (PDF, Ukrainian; new tab)"
+msgstr "Інструкція з картинками (PDF, українською; нова вкладка)"
+
+msgid "Training example; enlarge in a new tab"
+msgstr "Навчальний приклад; збільшити в новій вкладці"
+
+msgid "Build a draft"
+msgstr "Зібрати чернетку"
+
+msgid "Sign in, open the catalogue and switch Purchase to Draft. Choose a saved draft or open New draft, enter a title and press Create draft."
+msgstr "Увійдіть, відкрийте каталог і перемкніть «Покупка» на «Чернетка». Виберіть збережену чернетку або відкрийте «Нова чернетка», введіть назву й натисніть «Створити чернетку»."
+
+msgid "Enter a positive whole quantity and press Add to draft. Stock does not limit the quantity. For a variable product, choose every option first. Adding the same variant again increases its quantity."
+msgstr "Введіть потрібну цілу кількість і натисніть «У чернетку». Залишок не обмежує кількість. Для варіативного товару спочатку виберіть усі параметри. Повторне додавання того самого варіанта збільшує його кількість."
+
+msgid "The list is saved directly to the selected draft, not to the cart. It does not reserve stock, create a Folio document or confirm payment."
+msgstr "Список зберігається одразу у вибраній чернетці, не в кошику. Він не резервує товар, не створює документ ФОЛІО й не підтверджує оплату."
+
+msgid "Review and edit"
+msgstr "Перевірити та змінити"
+
+msgid "Press Open draft, or find it in My account > My orders. Open Edit draft quantities, change the numbers and press Save quantities. Zero removes a line."
+msgstr "Натисніть «Відкрити чернетку» або знайдіть її в «Кабінет → Мої замовлення». Розгорніть «Змінити кількості в чернетці», змініть числа й натисніть «Зберегти кількості». Нуль видаляє рядок."
+
+msgid "Prices in the draft are provisional. An already submitted draft is not editable here. If a save is not confirmed, reopen the draft and check it before repeating the action."
+msgstr "Ціни в чернетці попередні. Уже передану чернетку тут не можна редагувати. Якщо збереження не підтверджено, відкрийте чернетку й перевірте її перед повторною дією."
+
+msgid "Order the available goods"
+msgstr "Замовити наявні товари"
+
+msgid "In Draft processing, choose Load available quantities into the cart. Review the requested quantity, the quantity going to the cart and the remainder going to Folio."
+msgstr "У блоці «Обробка чернетки» виберіть «Завантажити доступну кількість у кошик». Перевірте запитану кількість, частину для кошика та залишок для ФОЛІО."
+
+msgid "After confirmation, available goods REPLACE the current cart at current prices. Save your current cart separately first if needed. The unavailable remainder stays in the draft and is recorded as a non-accounting Folio document."
+msgstr "Після підтвердження наявні товари ЗАМІНЮЮТЬ поточний кошик за актуальними цінами. Якщо він потрібен, спочатку збережіть його окремо. Недоступна частина залишається в чернетці й записується як необліковий документ ФОЛІО."
+
+msgid "Open the cart, check warehouses and totals, then complete checkout. Moving goods to the cart is not placing an order. If everything is available, no Folio remainder document is needed."
+msgstr "Відкрийте кошик, перевірте склади й суму, потім оформіть замовлення. Перенесення в кошик ще не є замовленням. Якщо доступні всі товари, документ залишку у ФОЛІО не потрібен."
+
+msgid "Save to Folio / preorder"
+msgstr "Зберегти у ФОЛІО / передзамовлення"
+
+msgid "To send the entire list, open Draft processing and select Ordinary draft or Preorder invoice in Save as. Then press Send the entire draft to a non-accounting Folio document."
+msgstr "Щоб передати весь список, у блоці «Обробка чернетки» виберіть у полі «Зберегти як» варіант «Звичайна чернетка» або «Рахунок передзамовлення». Далі натисніть «Передати всю чернетку в необліковий документ ФОЛІО»."
+
+msgid "Review Preview without recording. Only Confirm non-accounting Folio document records it. Cancel leaves the Folio document uncreated. The current cart does not change."
+msgstr "Перевірте «Попередній перегляд без запису». Лише кнопка «Підтвердити необліковий документ ФОЛІО» записує документ. «Скасувати» залишає його нествореним. Поточний кошик не змінюється."
+
+msgid "Ordinary draft keeps the list for coordination. Preorder invoice is marked PRD in Folio and is included in the preorder reserve for six months. Neither option reserves or writes off current warehouse stock, confirms payment or guarantees delivery."
+msgstr "Звичайна чернетка зберігає список для узгодження. Рахунок передзамовлення має позначку «ПРД» у ФОЛІО та враховується в резерві передзамовлень протягом шести місяців. Жоден варіант не резервує й не списує поточний складський залишок, не підтверджує оплату та не гарантує постачання."
+
+msgid "Agree payment and delivery dates with the manager. The automatic out-of-stock remainder is not the same as a manually selected preorder."
+msgstr "Оплату й строки постачання узгодьте з менеджером. Автоматичний залишок «немає на складі» не є тим самим, що передзамовлення, вибране вручну."
+
+msgid "If something went wrong"
+msgstr "Якщо виникла проблема"
+
+msgid "If the Folio warehouse is not configured, ask the manager. If the document is already linked, do not create another copy. For an error or unknown result, send the manager the draft number and message; check existing documents before repeating confirmation."
+msgstr "Якщо склад ФОЛІО не налаштований, зверніться до менеджера. Якщо документ уже пов’язаний, не створюйте копію. У разі помилки або невідомого результату надішліть менеджеру номер чернетки й повідомлення; перед повторним підтвердженням перевірте наявні документи."
+
+msgid "All brands"
+msgstr "Усі бренди"
+
+msgid "All categories"
+msgstr "Усі категорії"
+
+msgid "All products"
+msgstr "Усі товари"
+
+msgid "All selected topics"
+msgstr "Усі вибрані теми"
+
+msgid "An interest is no longer available. Review your selections."
+msgstr "Один з інтересів більше недоступний. Перевірте вибір."
+
+msgid "Catalogue brand"
+msgstr "Бренд каталогу"
+
+msgid "Choose topics and products for email mailings. Save using the account Save changes button. Waiting-list notices are configured separately in Waiting list."
+msgstr "Виберіть теми й товари для email-розсилок. Натисніть «Зберегти зміни» внизу сторінки. Сповіщення про очікувані товари налаштовуються окремо у списку очікування."
+
+msgid "Customer subscriptions"
+msgstr "Підписки клієнта"
+
+msgid "Enable at least one interest rule, or choose all products."
+msgstr "Увімкніть хоча б одне правило інтересів або виберіть усі товари."
+
+msgid "Interest %s"
+msgstr "Інтерес %s"
+
+msgid "My subscriptions and notifications"
+msgstr "Мої підписки та сповіщення"
+
+msgid "New products and news"
+msgstr "Новинки та новини"
+
+msgid "Only the interests below"
+msgstr "Лише наведені нижче інтереси"
+
+msgid "Price lists"
+msgstr "Прайси"
+
+msgid "Product interests"
+msgstr "Товарні інтереси"
+
+msgid "Product interests could not be checked. Try again."
+msgstr "Не вдалося перевірити товарні інтереси. Спробуйте ще раз."
+
+msgid "Promotions and special offers"
+msgstr "Акції та спеціальні пропозиції"
+
+msgid "Stock arrivals"
+msgstr "Надходження товарів"
+
+msgid "The customer controls these preferences in account details. Waiting-list consent is separate."
+msgstr "Клієнт керує цими налаштуваннями в особистих даних кабінету. Згода на сповіщення списку очікування — окрема."
+
+msgid "Topic"
+msgstr "Тема"
+
+msgid "Use this rule"
+msgstr "Використовувати це правило"
+
+msgid "Within a rule, both brand and category must match. Rules are combined. Categories include subcategories. Enable a rule with All brands and All categories for unrestricted news or promotions."
+msgstr "У межах правила мають збігатися і бренд, і категорія. Достатньо збігу з будь-яким правилом. Категорії охоплюють підкатегорії. Для новин або акцій без обмежень увімкніть окреме правило «Усі бренди» та «Усі категорії»."
+
+msgid "Automatic: news, price list or arrivals by mailing type"
+msgstr "Автоматично: новини, прайс або надходження за типом розсилки"
+
+msgid "Customers who do not match are excluded before preparation. Changed preferences are checked again before sending. Review the recipient count and file previews before starting."
+msgstr "Клієнти, чиї підписки не відповідають розсилці, виключаються до підготовки. Перед надсиланням налаштування перевіряються повторно. Перегляньте кількість одержувачів і файли перед запуском."
+
+msgid "Excluded before preparation (email, unsubscribe or interests): %s"
+msgstr "Виключено до підготовки (email, відписка або інтереси): %s"
+
+msgid "For messages without a file, specify the brand and category discussed. For files, interests are checked against each product and the attachment contains only matching products."
+msgstr "Для повідомлення без файлу вкажіть бренд і категорію, про які йдеться. Для файлів інтереси перевіряються за кожним товаром, а вкладення містить лише відповідні товари."
+
+msgid "No brand specified"
+msgstr "Бренд не вказано"
+
+msgid "No category specified"
+msgstr "Категорію не вказано"
+
+msgid "Subscription audience"
+msgstr "Аудиторія за підписками"
+
+msgid "No selected customer subscribes to this topic and product selection."
+msgstr "Жоден із вибраних клієнтів не підписаний на цю тему та набір товарів."
+
+msgid "Unavailable selection — choose again"
+msgstr "Вибір недоступний — виберіть знову"
+
+#: inc/broadcast-view.php
+#, php-format
+msgid "Photos checked: %1$s of %2$s. Unavailable after retry: %3$s."
+msgstr "Перевірено фото: %1$s із %2$s. Недоступні після повторної спроби: %3$s."
+
+msgid "Parcel locker"
+msgstr "Поштомат"
+
+msgid "Nova Poshta branch"
+msgstr "Відділення Нової пошти"
+
+msgid "Courier delivery"
+msgstr "Кур’єрська доставка"
+
+msgid "Nova Poshta destination selected at checkout"
+msgstr "Нова пошта: вибір під час оформлення замовлення"
+
+msgid "Pickup point is not saved. Check before creating a shipment."
+msgstr "Точку отримання не збережено. Уточніть перед створенням відправлення."
+
+msgid "This is the choice saved with the order. Check the shipment preparation below for any later changes agreed with the customer."
+msgstr "Це вибір, збережений у замовленні. Пізніші зміни, погоджені з клієнтом, перевірте нижче в підготовці відправлення."
+
+msgid "Recipient and address saved in WooCommerce"
+msgstr "Отримувач та адреса, збережені у WooCommerce"

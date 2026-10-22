@@ -112,7 +112,7 @@
         rows.forEach(function (row) {
             var tr = document.createElement('tr');
             if (row.openingBalanceRow) tr.classList.add('is-opening');
-            if (row.prepayment) tr.classList.add('is-prepayment');
+            // Payment notes do not classify preorder reserves.
             if (row.deferred) tr.classList.add('is-deferred');
             if (row.overdueDeferred) tr.classList.add('is-overdue');
 
@@ -177,6 +177,18 @@
         renderReportMeta(report.filters || {});
         renderSummary(report.summary || {});
         renderRows(rows);
+        var preorderSection = root.querySelector('[data-pc-folio-preorders]');
+        var preorderRows = root.querySelector('[data-pc-folio-preorder-rows]');
+        if (preorderSection && preorderRows) {
+            preorderRows.replaceChildren();
+            (report.preorders || []).forEach(function (invoice) {
+                var tr = document.createElement('tr');
+                tr.append(cell(invoice, 'documentNumber'), cell(invoice, 'documentDate', 'date'),
+                    cell(invoice, 'warehouseLabel'), cell(invoice, 'amount', 'money'), cell(invoice, 'information'));
+                preorderRows.appendChild(tr);
+            });
+            preorderSection.hidden = false;
+        }
         var asOfDate = report.filters && (report.filters.asOfDate || report.filters.dateTo);
         noticeBox.textContent = asOfDate
             ? pcFolioBalance.labels.asOf.replace('%s', dateText(asOfDate))

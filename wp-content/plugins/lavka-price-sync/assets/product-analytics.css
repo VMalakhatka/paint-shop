@@ -674,6 +674,11 @@
 }
 
 body.lps-pa-detail-open { overflow: hidden; }
+.lps-pa-profitability { margin: 20px 0; padding: 16px; background: #fff; border: 1px solid #dcdcde; min-width: 0; }
+.lps-pa-profitability .lps-pa-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 16px; }
+.lps-pa-profitability td { min-width: 95px; text-align: right; }
+#lps-pa-comparison-table td:first-child { text-align: left; min-width: 230px; max-width: 350px; overflow-wrap: anywhere; }
+#lps-pa-comparison-table pre { white-space: pre-wrap; max-height: 200px; overflow: auto; }
 
 @media (max-width: 1280px) {
   .lps-pa-filters { grid-template-columns: repeat(3, minmax(170px, 1fr)); }

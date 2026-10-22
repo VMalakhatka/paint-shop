@@ -6,13 +6,20 @@ use PaintCore\PCOE\BroadcastPricing as Pricing;
 use PaintCore\PCOE\BroadcastSources as Sources;
 use PaintCore\PCOE\BroadcastUi as Ui;
 use PaintCore\PCOE\PriceList;
+use PaintCore\PCOE\CommercialOffer;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 if(!defined('WP_CLI') || !WP_CLI || wp_parse_url(home_url(),PHP_URL_HOST)!=='paint.local')throw new RuntimeException('Local only');
-$users=[];$products=[];$campaigns=[];$mails=[];$mode='ok';$checks=0;$original=get_current_user_id();$quota=get_option('_pcoe_broadcast_quota',null);$prefix='Mailing-test-'.wp_generate_uuid4();$skus=[];$sourceMode='ok';
+$users=[];$products=[];$campaigns=[];$mails=[];$mode='ok';$checks=0;$original=get_current_user_id();$quota=get_option('_pcoe_broadcast_quota',null);$prefix='Mailing-test-'.wp_generate_uuid4();$skus=[];$sourceMode='ok';$packReads=0;
 $check=static function($ok,$message)use(&$checks){if(!$ok)throw new RuntimeException($message);$checks++;};
 $deny=static function($fn)use($check){try{$fn();}catch(Throwable $e){$check(true,'Rejected');return;}throw new RuntimeException('Expected rejection');};
 add_filter('pre_schedule_event',static fn($pre,$event)=>$event->hook===Mailings::HOOK?false:$pre,PHP_INT_MAX,2);
-add_filter('pre_http_request',static function($pre,$args,$url)use(&$skus,&$sourceMode){
+add_filter('pre_http_request',static function($pre,$args,$url)use(&$skus,&$sourceMode,&$packReads){
+    if($url==='https://example.invalid/offer-test.png'){
+        $image=imagecreatetruecolor(120,80);imagefill($image,0,0,imagecolorallocate($image,173,89,67));ob_start();imagepng($image);$body=ob_get_clean();imagedestroy($image);return ['response'=>['code'=>200],'body'=>$body];
+    }
+    if(str_contains($url,'/admin/folio/product-packaging') && $sourceMode==='packing-failed')return new WP_Error('fixture','Unavailable');
+    if(str_contains($url,'/admin/folio/product-packaging'))$packReads++;
+    if(str_contains($url,'/admin/folio/product-packaging'))return ['response'=>['code'=>200],'body'=>wp_json_encode(array_map(static fn($sku)=>['sku'=>$sku,'unitsPerPack'=>5],json_decode($args['body'],true)['skus']))];
     if(str_contains($url,'/ref/warehouses'))return ['response'=>['code'=>200],'body'=>wp_json_encode([['code'=>'7','name'=>'Fixture warehouse']])];
     parse_str((string)wp_parse_url($url,PHP_URL_QUERY),$query);
     if(str_contains($url,'/admin/folio/receipt-catalogue/9001/skus'))return ['response'=>['code'=>200],'body'=>wp_json_encode(['ok'=>true,'documentId'=>9001,'warehouseId'=>7,'date'=>'2026-10-05','documentType'=>$sourceMode==='mismatch'?'receipt':($query['documentType']??'receipt'),'documentTypes'=>$sourceMode==='old'?['receipt']:['receipt','invoice'],'skus'=>[$skus[0],$skus[0],'MISSING-TEST-SKU']])];
@@ -105,13 +112,95 @@ try{
     }finally{$otherDb->get_var($otherDb->prepare('SELECT RELEASE_LOCK(%s)',$lock));$otherDb->close();}
     Mailings::control($busy,'cancel');
     $base['request_key']=wp_generate_uuid4();$expired=$create($base);$d=Store::get($expired);$d['ready_at']=time()-DAY_IN_SECONDS-1;Store::save($expired,$d);$deny(fn()=>Mailings::control($expired,'start'));
-    $base['request_key']=wp_generate_uuid4();$changed=$create($base);$d=Store::get($changed);$d['kind']='price';$d['recipients'][$a]['group']=Pricing::group($a);Store::save($changed,$d);Mailings::control($changed,'start');
+    $base['request_key']=wp_generate_uuid4();$changed=$create($base);$d=Store::get($changed);$d['kind']='price';$d['recipients'][$a]['group']=Pricing::group($a);unset($d['recipients'][$a]['pricing_context']);Store::save($changed,$d);Mailings::control($changed,'start');
     $customer=new WP_User($a);$customer->set_role('partner');$count=count($mails);delete_option('_pcoe_broadcast_quota');Mailings::tick($changed);
     $check(Store::get($changed)['recipients'][$a]['status']==='skipped' && count($mails)===$count,'Changed price role is skipped before attachment access');$customer->set_role('opt');
     $base['kind']='arrival';$base['request_key']=wp_generate_uuid4();$broken=$create($base);$d=Store::get($broken);$key=array_key_first($d['groups']);$d['groups'][$key]['building']=true;Store::save($broken,$d);Mailings::tick($broken);
     $check(Store::get($broken)['status']==='error' && count($mails)===$count,'Interrupted preparation stops with a visible error and sends nothing');
     $base['kind']='text';$base['request_key']=wp_generate_uuid4();$cancelled=$create($base);Mailings::control($cancelled,'cancel');Mailings::tick($cancelled);$deny(fn()=>Mailings::control($cancelled,'start'));
     $check(count($mails)===$count,'Cancelled mailing cannot send');
+    $deny(fn()=>CommercialOffer::options(['format'=>'bad']));$deny(fn()=>CommercialOffer::options(['quantity'=>'document']));
+    $check(CommercialOffer::options([])===['format'=>'price','quantity'=>'one'],'Old campaigns retain standard price format');
+    $p=$products[0];$p->update_meta_data('_edin_izmer','50 мл');$p->set_description('<p>Product description</p><p>Second line</p>');$p->update_meta_data('_wc_gtin_code','012345678905');$p->save();
+    $photoFilter=static fn($image,$attachment)=>$attachment===$products[1]->get_id()?['https://example.invalid/offer-test.png',1,1,false]:$image;
+    add_filter('wp_get_attachment_image_src',$photoFilter,10,2);
+    $imageIdFilter=static fn($image,$product)=>$product->get_id()===$products[0]->get_id()?$products[1]->get_id():$image;
+    add_filter('woocommerce_product_get_image_id',$imageIdFilter,10,2);
+    foreach(['one'=>1,'stock'=>8] as $quantity=>$expectedQuantity){
+        $base['kind']='arrival';$base['users']=[$a,$b,$partner];$base['format']='offer';$base['quantity']=$quantity;$base['request_key']=wp_generate_uuid4();$offer=$create($base);
+        Mailings::tick($offer);Mailings::tick($offer);$d=Store::get($offer);
+        $check($d['status']==='ready' && $d['quantity']===$quantity && count($d['groups'])===2,'Offer format/options persisted and same-price customers share files');
+        foreach($d['groups'] as $key=>$g){
+            $path=Store::temporary_file();file_put_contents($path,Store::bytes(Store::file($offer,$key)));$book=IOFactory::load($path);$sheet=$book->getActiveSheet();
+            $productRow=0;for($n=2;$n<=$sheet->getHighestRow();$n++)if($sheet->getCell('A'.$n)->getValue()===$skus[0])$productRow=$n;
+            $check($productRow>2 && $sheet->getHighestRow()===$productRow+2,'Offer includes category headings and footer after product');
+            $check($sheet->getCell('A2')->getValue()===null && $sheet->getCell('A'.$sheet->getHighestRow())->getValue()===null,'Headings and footer have no importable SKU');
+            $check($sheet->getCell('C'.$productRow)->getDataType()==='s' && str_starts_with($sheet->getCell('C'.$productRow)->getValue(),'=TEST'),'Product text cannot become a formula');
+            $check($sheet->getCell('B'.$productRow)->getValue()==='012345678905' && $sheet->getCell('B'.$productRow)->getDataType()==='s','Barcode leading zero preserved as text');
+            [$map,$start]=\PaintCore\PCOE\Helpers::detect_colmap_and_start($sheet->toArray());
+            $check($start===1 && $map['sku']===0 && $map['qty']===5 && $map['price']===null && $map['price_list'],'Offer re-import uses quantities and site prices, not attachment prices');
+            $check(str_contains($sheet->getCell('D'.$productRow)->getValue(),'Product description') && !str_contains($sheet->getCell('D'.$productRow)->getValue(),'<p>'),'Plain description included');
+            $expected=Pricing::scope($g['user'],fn()=>wc_get_price_to_display(wc_get_product($p->get_id())));
+            $check((float)$sheet->getCell('E'.$productRow)->getValue()===(float)$expected && $sheet->getCell('F'.$productRow)->getValue()===null && (float)$sheet->getCell('K'.$productRow)->getValue()===8.0 && (float)$sheet->getCell('H'.$productRow)->getValue()===100.0 && $sheet->getCell('I'.$productRow)->getValue()==='50 мл' && (float)$sheet->getCell('J'.$productRow)->getValue()===5.0,'Offer separates retail/customer prices, units, stock and blank order quantity');
+            $check(count($sheet->getDrawingCollection())===1 && $g['photos']===1,'Photo embedded in XLSX and counted in preview');
+            $check($sheet->getRowDimension($productRow)->getOutlineLevel()>0 && $sheet->getAutoFilter()->getRange()==='A1:M'.$productRow,'Offer retains hierarchy and excludes footer from filters');
+            if($dir=getenv('PCOE_BROADCAST_PREVIEW'))copy($path,$dir.'/offer-'.$quantity.'.xlsx');
+            $book->disconnectWorksheets();unlink($path);
+        }
+        delete_option('_pcoe_broadcast_quota');$before=count($mails);Mailings::control($offer,'start');Mailings::tick($offer);
+        $check(count($mails)===$before+3 && str_starts_with(array_key_first(end($mails)['attachments']),'commercial-offer-'),'Offer delivered privately with correct filename');
+        $check($mails[$before]['file']['sha']===$mails[$before+1]['file']['sha'],'Same-price offer copies are byte-identical');
+    }
+    remove_filter('wp_get_attachment_image_src',$photoFilter,10);
+    remove_filter('woocommerce_product_get_image_id',$imageIdFilter,10);
+    $p->set_image_id(0);$p->update_meta_data('_razm_izmer','=20 x 30 см');$p->save();foreach($locations as $loc)delete_post_meta($p->get_id(),'_stock_at_'.$loc);
+    $fallback=Pricing::file($a,[$p->get_id()],['format'=>'offer','quantity'=>'stock']);$path=Store::temporary_file();file_put_contents($path,Store::bytes($fallback));$book=IOFactory::load($path);$sheet=$book->getActiveSheet();$productRow=0;for($n=2;$n<=$sheet->getHighestRow();$n++)if($sheet->getCell('A'.$n)->getValue()===$skus[0])$productRow=$n;
+    $check($sheet->getCell('K'.$productRow)->getValue()===null && $sheet->getCell('F'.$productRow)->getValue()===null && $sheet->getCell('G'.$productRow)->getHyperlink()->getUrl()!=='','Unknown stock remains blank and missing photo links to product');
+    $check((float)$sheet->getCell('J'.$productRow)->getValue()===5.0,'Pack quantity is independent of dimensions and unit volume');
+    $book->disconnectWorksheets();unlink($path);
+    Pricing::scope($a,static function()use($p,$locations,$check){
+        $entries=iterator_to_array(PriceList::catalogue_rows([$p],$locations),false);
+        $product=array_values(array_filter($entries,static fn($e)=>isset($e['values'])))[0];$product['depth']=2;
+        $offer=CommercialOffer::workbook([['heading'=>'Group','depth'=>0],['heading'=>'Subgroup','depth'=>1],$product],'one');
+        $book=$offer['book'];$sheet=$book->getActiveSheet();
+        $check($sheet->getCell('L4')->getValue()==='Group' && $sheet->getCell('M4')->getValue()==='Subgroup' && $sheet->getCell('M4')->getDataType()==='s','Group and subgroup repeat as text in product columns');
+        $check($sheet->getCell('C2')->getValue()==='Group' && $sheet->getCell('C3')->getValue()==='Subgroup' && $sheet->getRowDimension(4)->getOutlineLevel()===2,'Offer preserves parent and subgroup hierarchy');
+        $check(str_contains($sheet->getCell('C6')->getValue(),'XML') && $sheet->getCell('A6')->getValue()===null,'Localized footer offers XML and cannot become an order line');
+        $sheet->setCellValue('F4',2);[$map,$start]=\PaintCore\PCOE\Helpers::detect_colmap_and_start($sheet->toArray());
+        $lines=array_filter(array_slice($sheet->toArray(),$start),static fn($r)=>!empty($r[$map['sku']]) && ($r[$map['qty']]??0)>0);
+        $check(count($lines)===1,'Only the filled product row is importable, not headings or footer');
+        if($dir=getenv('PCOE_BROADCAST_PREVIEW'))(new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($book))->save($dir.'/offer-grouped.xlsx');
+        $book->disconnectWorksheets();
+        $offer=CommercialOffer::workbook([['heading'=>'Root / name','depth'=>0],['heading'=>'Child','depth'=>1],['heading'=>'=Leaf','depth'=>2],$product,['heading'=>'Other root','depth'=>0],$product],'one');
+        $sheet=$offer['book']->getActiveSheet();
+        $check($sheet->getCell('L5')->getValue()==='Root / name' && $sheet->getCell('M5')->getValue()==='Child / =Leaf','Nested subgroup path preserved without splitting category names');
+        $check($sheet->getCell('L7')->getValue()==='Other root' && $sheet->getCell('M7')->getValue()==='' && $sheet->getCell('M5')->getDataType()==='s','Root changes clear subgroup and category data remains formula-safe');
+        $offer['book']->disconnectWorksheets();
+    });
+    $sourceMode='packing-failed';$deny(fn()=>Pricing::file($a,[$p->get_id()],['format'=>'offer']));$sourceMode='ok';
+    // An unknown extension with equal effective prices must not generate one workbook per user.
+    $neutral=static fn($price,$product)=>$price;add_filter('woocommerce_product_get_price',$neutral,1200,2);
+    foreach(['price','offer'] as $format){
+        $same=$base;$same['format']=$format;$same['users']=[$a,$b];$same['request_key']=wp_generate_uuid4();
+        $shared=$create($same);$check(count(Store::get($shared)['groups'])===2,'Unknown hooks initially retain separate customer contexts');
+        $before=$packReads;Mailings::tick($shared);Mailings::tick($shared);$sharedData=Store::get($shared);
+        $check($sharedData['status']==='ready' && count($sharedData['groups'])===1 && reset($sharedData['groups'])['count']===2,'Equal actual output merges into one prepared group');
+        $check($sharedData['recipients'][$a]['group']===$sharedData['recipients'][$b]['group'] && $sharedData['recipients'][$a]['pricing_context']!==$sharedData['recipients'][$b]['pricing_context'],'Shared file retains separate pre-send customer contexts');
+        if($format==='offer')$check($packReads===$before+1,'Duplicate offer is not rendered or fetched from Folio twice');
+        delete_option('_pcoe_broadcast_quota');$before=count($mails);Mailings::control($shared,'start');Mailings::tick($shared);
+        $check(count($mails)===$before+2 && $mails[$before]['file']['sha']===$mails[$before+1]['file']['sha'],'Both recipients receive byte-identical shared attachment');
+    }
+    $same['request_key']=wp_generate_uuid4();$guarded=$create($same);Mailings::tick($guarded);Mailings::tick($guarded);
+    $customer=new WP_User($b);$customer->set_role('partner');
+    delete_option('_pcoe_broadcast_quota');$before=count($mails);Mailings::control($guarded,'start');Mailings::tick($guarded);
+    $check(count($mails)===$before+1 && Store::get($guarded)['recipients'][$b]['status']==='skipped','Merged recipient with changed pricing context is skipped independently');
+    $customer->set_role('opt');
+    remove_filter('woocommerce_product_get_price',$neutral,1200);
+    add_filter('woocommerce_product_get_price',$custom,1200,2);
+    $different=$base;$different['users']=[$a,$b];$different['request_key']=wp_generate_uuid4();
+    $split=$create($different);Mailings::tick($split);Mailings::tick($split);$splitData=Store::get($split);
+    $check($splitData['status']==='ready' && count($splitData['groups'])===2,'Different individual prices cannot merge despite identical roles');
+    remove_filter('woocommerce_product_get_price',$custom,1200);
     wp_set_current_user($a);$deny(fn()=>Mailings::create($base));$deny(fn()=>Mailings::control($id,'retry'));$deny(fn()=>Sources::request('/warehouses'));wp_set_current_user($manager);
     $check(!wp_next_scheduled(Mailings::HOOK,[$id]),'Test fixtures never schedule a real delivery');
     echo "PASS: $checks mailing checks; separate role prices, grouped files, receipt SKU isolation, queue/idempotence/privacy, HTTP and mail mocked.\n";

@@ -48,3 +48,32 @@ files/assets/translations using the normal approved deployment. Check the actual
 affected account in the customer's browser after reloading assets. If blank rows
 persist, capture the affected row's computed sizes and browser errors; do not
 clear the customer's cart or assume the account/order data is lost.
+
+## Allocation Metadata Refresh (2026-10-11)
+
+The classic-cart fast update in `pc-cart-guard.php` previously returned only
+subtotal/totals; the existing `dl.variation` retained the old allocation quantity.
+The response now includes `item_data_html`, rendered from the refreshed cart item
+after quantity validation and totals calculation. Rendering uses Woo's standard
+`wc_get_formatted_cart_item_data()` under a temporary `woocommerce_is_cart`
+filter, removed in `finally`: the allocation hook otherwise skips admin-AJAX.
+The browser replaces only the direct `dl.variation` under `.product-name`.
+Product links, stock panels and quantity controls remain intact; variation
+attributes are regenerated with the allocation row. Empty metadata removes the
+old block, and a legacy response without this field leaves the block untouched.
+
+Checks: `wp eval-file wp-content/plugins/paint-core/tests/retail-cart-locations.php
+--skip-themes` on paint.local uses in-memory stock/cart fixtures and checks retail
+quantity changes, split wholesale allocation, variation metadata and context
+cleanup. `node scripts/test-cart-allocation-update.cjs` uses Playwright, the actual
+inline JS and mocked AJAX at 390/1280px; checks 1->3->1, server-capped quantity,
+no duplicate metadata and empty-block removal. Set `CHROME_PATH` to an installed
+Chrome executable if Playwright's bundled browser is unavailable. No real orders,
+payments or inventory movements are created. Checkout deductions were not tested.
+
+Deploy the changed `pc-cart-guard.php` MU file and wholesale-help PHP/UK/RU
+translations. No new plugin, Java change or DB migration. Production not modified
+in this task. After deployment, test changing quantities in an authorized cart
+without checkout. Rollback restores the prior MU file, which also restores the
+stale-display defect. The customer guide and published-help source were updated;
+production help publication awaits deployment.

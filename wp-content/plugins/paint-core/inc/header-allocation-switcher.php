@@ -401,6 +401,9 @@ function pc_render_alloc_control() {
  * Не лезем в разметку темы: рендерим контрол в футере и переносим в .site-branding
  */
 add_action('wp_footer', function () {
+    // The storefront header can render the same control directly. Keep the
+    // legacy placement for rollback and for themes without that header.
+    if (apply_filters('pc_alloc_header_rendered', false)) return;
     echo '<div id="pc-alloc-mount" style="display:none">';
     pc_render_alloc_control();
     echo '</div>';

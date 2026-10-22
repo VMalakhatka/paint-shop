@@ -1335,3 +1335,21 @@ msgstr ""
 
 msgid "Payments marked PRD"
 msgstr ""
+
+msgid "Preorder invoices"
+msgstr ""
+
+msgid "Accounting balance"
+msgstr ""
+
+msgid "Payable including preorders"
+msgstr ""
+
+msgid "Update the Folio service and rebuild the debtors snapshot to use preorder balances."
+msgstr ""
+
+msgid "Payable = accounting balance - deferred amount + outstanding preorder invoices. PRD payment markers do not affect the reserve. Only invoices from the last six calendar months through the report date are included. Older preorders must be recreated by the manager."
+msgstr ""
+
+msgid "Preorder invoices from the last six calendar months through period end; period start and document types are ignored."
+msgstr ""

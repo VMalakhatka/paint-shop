@@ -4,27 +4,27 @@ Template: generatepress
 Version: 1.0
 */
 
-/* === 1) Общая ширина сайта на больших экранах === */
+/* Legacy pages only. Customer content is owned by Paint Shop UX storefront.css. */
 /* поменяй значение под себя: 1280px / 1400px / 1600px */
 @media (min-width: 1200px){
   :root{ --container-max: 2100px; }
 
   /* Классические темы */
-  .container,
-  .site .container,
-  .content-area,
-  .site-main,
-  .site-content,
-  .wrap,
-  .page-wrap,
-  .content-wrap,
+  body:not(.psu-storefront) .container,
+  body:not(.psu-storefront) .site .container,
+  body:not(.psu-storefront) .content-area,
+  body:not(.psu-storefront) .site-main,
+  body:not(.psu-storefront) .site-content,
+  body:not(.psu-storefront) .wrap,
+  body:not(.psu-storefront) .page-wrap,
+  body:not(.psu-storefront) .content-wrap,
   /* Storefront */
-  .col-full,
+  body:not(.psu-storefront) .col-full,
   /* Astra */
-  .ast-container,
+  body:not(.psu-storefront) .ast-container,
   /* OceanWP / GeneratePress */
-  .container.grid-container,
-  .container .grid-container{
+  body:not(.psu-storefront) .container.grid-container,
+  body:not(.psu-storefront) .container .grid-container{
     max-width: var(--container-max) !important;
     width: 95%;
     margin-left: auto;
@@ -32,8 +32,8 @@ Version: 1.0
   }
 
   /* Блочные темы (Twenty Twenty-Four и т.п.) */
-  .wp-site-blocks,
-  .is-layout-constrained{
+  body:not(.psu-storefront) .wp-site-blocks,
+  body:not(.psu-storefront) .is-layout-constrained{
     max-width: var(--container-max) !important;
     margin-left: auto;
     margin-right: auto;
@@ -42,273 +42,30 @@ Version: 1.0
 
 /* === 2) Чуть уменьшаем боковые внутренние отступы контента === */
 @media (min-width: 1200px){
-  .site-content,
-  .site-main,
-  .content-area{
+  body:not(.psu-storefront) .site-content,
+  body:not(.psu-storefront) .site-main,
+  body:not(.psu-storefront) .content-area{
     padding-left: 16px;
     padding-right: 16px;
   }
 }
 
-/* === 3) Таблица списка товаров/товары Woo === */
-.woocommerce .shop_table{
-  width: 100%;
-}
-
-/* Если у таблицы внутри стоят фиксированные max-width у колонок — снимем ограничения */
-.woocommerce table.shop_table th,
-.woocommerce table.shop_table td{
-  max-width: none;
-  white-space: normal;         /* перенос длинных значений */
-  word-break: break-word;
-}
-
-/* === 4) (Опционально) Только для страницы «Список товара» — ещё шире === */
-/* Узнай ID страницы (в админке в адресной строке page_id=XXXX) и подставь его ниже */
-/* Убираем боковые паддинги только на странице "Список товара" */
-@media (min-width: 1200px){
-  body.page-id-102209 .site-content,
-  body.page-id-102209 .content-area,
-  body.page-id-102209 .container,
-  body.page-id-102209 .col-full,
-  body.page-id-102209 .ast-container,
-  body.page-id-102209 .wp-site-blocks {
-    max-width: 2800px !important;
-    width: 99%;
-    padding-left: 0px !important;   /* уменьшаем поля */
-    padding-right: 0px !important;  /* уменьшаем поля */
-  }
-}
-
-/* Список товару: сжимаем зазор контент ↔ сайдбар */
-@media (min-width: 1200px){
-  /* убираем остаточные внешние отступы колонок */
-  body.page-id-102209 .content-area,
-  body.page-id-102209 .widget-area{
-    margin: 0 !important;
-  }
-
-  /* делим ширину плотнее: больше контент, чуть меньше сайдбар */
-  body.page-id-102209 .site-content .content-area{ width: 78% !important; }
-  body.page-id-102209 .site-content .widget-area{ width: 22% !important; }
-
-  /* уменьшаем внутренние отступы у колонок */
-  body.page-id-102209 .site-content .content-area{ padding-right: 0px !important; }
-  body.page-id-102209 .site-content .widget-area{ padding-left: 0px !important; }
-
-  /* если тема в режиме separate containers — ужмём и «карточку» */
-  body.page-id-102209.separate-containers .inside-article{
-    padding-left: 0px !important;
-    padding-right: 0px !important;
-  }
-
-  /* и у самой грид-обёртки GP, чтобы не добавляла общий gutter */
-  body.page-id-102209 .grid-container{
-    padding-left: 0px !important;
-    padding-right: 0px !important;
-  }
-}
-
-/* ── Хлебные крошки (Yoast) ─────────────────────────────────────────────── */
-.woocommerce-breadcrumb .breadcrumb-delimiter{
-  margin:0 .4em;
-  color:#888;
-}
-
-/* ── База для грид-списков Woo ──────────────────────────────────────────── */
-.woocommerce ul.products::before,
-.woocommerce ul.products::after{ content:none !important; }
-
-.woocommerce ul.products{
-  list-style:none; margin:0; padding:0;
-  display:grid !important;
-  gap:20px;
-  grid-auto-flow:row;
-  grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));
-}
-@media (max-width:1024px){
-  .woocommerce ul.products{
-    grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));
-  }
-}
-@media (max-width:768px){
-  .woocommerce ul.products{
-    grid-template-columns:repeat(auto-fit, minmax(100px, 1fr));
-  }
-}
-
-/* Сброс ширин, которые могут ломать CSS Grid */
-.woocommerce ul.products li.product{
-  float:none !important;
-  width:auto !important;
-  margin:0 !important;
-  clear:none !important;
-}
-.woocommerce ul.products[class*="columns-"] li.product{
-  width:auto !important;
-  clear:none !important;
-  margin-right:0 !important;
-}
-/* Даже если Woo навесил columns-1 — всё равно держим grid */
-.woocommerce ul.products.columns-1{ display:grid !important; }
-
-/* ── Категории: центрирование содержимого ───────────────────────────────── */
-.woocommerce ul.products li.product-category a{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  text-align:center;
-}
-.woocommerce ul.products li.product-category a img{
-  width: clamp(72px, 16vw, 120px) !important;
-  height: clamp(72px, 16vw, 120px);
-  object-fit: contain;
-  object-position: center;
-  display:block;
-  margin:0 auto 8px;
-  background:#fff;
-  padding:6px;
-  box-sizing:border-box;
-}
-.woocommerce ul.products li.product-category .woocommerce-loop-category__title {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3; /* старый префикс для Safari/Chrome */
-  line-clamp: 3;         /* стандартное свойство для новых браузеров */
-  overflow: hidden;
-  line-height: 1.25;
-  min-height: calc(1.25em * 3);
-  margin: 0;
-  text-align: center;
-  font-size: 14px;
-  word-break: break-word;
-  hyphens: auto;
-}
-
-/* ── Страница товара: меньший H1 на мобильных ───────────────────────────── */
-@media (max-width:480px){
-  .single-product .product_title{ font-size:18px; line-height:1.3; }
-}
-@media (min-width:481px) and (max-width:767px){
-  .single-product .product_title{ font-size:20px; line-height:1.3; }
-}
-
 /* ── Сайдбары GeneratePress ─────────────────────────────────────────────── */
 /* Узкий ТОЛЬКО левый сайдбар на десктопе (правый оставляем как в теме) */
 @media (min-width:1025px){
-  body.left-sidebar .content-area{ width:78%; }
-  body.left-sidebar .widget-area{ width:22%; }
+  body:not(.psu-storefront).left-sidebar .content-area{ width:78%; }
+  body:not(.psu-storefront).left-sidebar .widget-area{ width:22%; }
 }
 /* Планшеты: чуть шире контент, тот же баланс для обоих вариантов сайдбара */
 @media (min-width:769px) and (max-width:1024px){
-  .site-content .content-area{ width:70%; }
-  .site-content .widget-area{ width:30%; }
+  body:not(.psu-storefront) .site-content .content-area{ width:70%; }
+  body:not(.psu-storefront) .site-content .widget-area{ width:30%; }
 }
 
-/* === Search / Relevanssi highlights ===================================== */
-/* Подсветка совпадений Relevanssi */
-.relevanssi-query-term{
-  font-weight:700;           /* жирный */
-  background:#fff3a6;        /* мягкая жёлтая подложка */
-}
-/* === End Search ========================================================== */
-
-/* === Woo My Account: горизонтальное меню + контент на всю ширину === */
-
-/* убираем двухколоночную раскладку темы */
-.woocommerce-account .woocommerce-MyAccount-navigation,
-.woocommerce-account .woocommerce-MyAccount-content{
-  float: none !important;
-  width: 100% !important;
-}
-
-/* меню как горизонтальные табы */
-.woocommerce-account .woocommerce-MyAccount-navigation {
-  margin: 0 0 14px 0;
-}
-.woocommerce-account .woocommerce-MyAccount-navigation ul{
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 14px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  border-bottom: 1px solid #eee;
-}
-.woocommerce-account .woocommerce-MyAccount-navigation li{
-  margin: 0;
-  padding: 0;
-}
-.woocommerce-account .woocommerce-MyAccount-navigation a{
-  display: block;
-  padding: 10px 14px;
-  text-decoration: none;
-  color: #333; /* синий как в верхнем меню */
-  border-bottom: 2px solid transparent;
-  line-height: 1.2;
-  font-size: 14px; /* подогнать под верхнее меню */
-  font-weight: 500;
-}
-.woocommerce-account .woocommerce-MyAccount-navigation li.is-active a,
-.woocommerce-account .woocommerce-MyAccount-navigation a:hover,
-.woocommerce-account .woocommerce-MyAccount-navigation a:focus{
-  color: #1a73e8; /* тоже синий */
-  border-bottom-color: #1a73e8;
-}
-
-/* на очень узких экранах можно сложить в 2 строки или в столбик */
-@media (max-width: 480px){
-  .woocommerce-account .woocommerce-MyAccount-navigation ul{
-    gap: 8px 10px;
-  }
-  /* если хочется именно столбиком на мобиле — раскомментируй:
-  .woocommerce-account .woocommerce-MyAccount-navigation ul{ display:block; border:0; }
-  .woocommerce-account .woocommerce-MyAccount-navigation li{ display:block; }
-  .woocommerce-account .woocommerce-MyAccount-navigation a{ border:1px solid #eee; border-radius:6px; }
-  .woocommerce-account .woocommerce-MyAccount-navigation li.is-active a{ border-color:#d33; }
-  */
-}
-
-/* контент кабинета тянется на всю ширину контейнера */
-.woocommerce-account .woocommerce-MyAccount-content{
-  max-width: 100%;
-}
-
-/* === Woo Category/Group Title Sticky (robust) === */
-/* Делаем прилипающей ВЕСЬ .woocommerce-products-header, а не только h1 */
-.woocommerce .woocommerce-products-header{
-  position: sticky;
-  top: 0;                /* при необходимости поднимите до высоты фикс. шапки */
-  z-index: 60;           /* поверх сортировки/списка */
-  background: #fff;      /* фон, чтобы не просвечивало */
-  margin: -22px 0 8px;      /* отступ снизу */
-  padding: 10px 0;       /* немного воздуха */
-}
-/* Если включена админ-панель WP — компенсируем её высоту */
-body.admin-bar .woocommerce .woocommerce-products-header{ top: 46px; }
-@media (min-width:783px){
-  body.admin-bar .woocommerce .woocommerce-products-header{ top: 32px; }
-}
-/* Чистим внешние отступы заголовка, чтобы прилипания не сбивались из-за margin-collapse */
-.woocommerce .woocommerce-products-header .page-title,
-.woocommerce .woocommerce-products-header h1{
-  margin: 0;
-}
-/* Лёгкая тень при залипании, чтобы отделял */
-
-.woocommerce .woocommerce-products-header{
-  box-shadow: 0 2px 6px rgba(0,0,0,.06);
-}
-
-/* === Smaller Woo Category Header Title === */
-.woocommerce .woocommerce-products-header .page-title,
-.woocommerce .woocommerce-products-header h1{
-  font-size: clamp(18px, 2.2vw, 12px) !important; /* just smaller, same style */
-}
 
 /* === Hide "Товар списком" on mobile === */
 @media (max-width: 768px){
-  #menu-item-102214 { display: none !important; }
+  body:not(.psu-header-page) #menu-item-102214 { display: none !important; }
 }
 
 .site-logo--svg svg {
@@ -403,6 +160,4 @@ body.admin-bar .woocommerce .woocommerce-products-header{ top: 46px; }
     #masthead .mobile-menu-control-wrapper { margin: 0; }
     #masthead .menu-toggle { min-height: 44px; padding: 0 12px; line-height: 44px; }
     #masthead #site-navigation { flex-basis: 100%; }
-    .woocommerce .site-main { margin-top: 12px; }
-    .woocommerce .woocommerce-products-header { position: static; margin-bottom: 10px; }
 }

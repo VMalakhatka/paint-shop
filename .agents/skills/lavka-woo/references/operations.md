@@ -1,5 +1,30 @@
 # Операции и регламенты
 
+## Пути групп в условиях аналитики
+
+Проверено 2026-10-19: `analytics-conditions.css` явно скрывает карточки с
+`data-lps(-as)-selection[hidden]`, поскольку `display:grid` в стилях страницы
+перекрывает браузерное скрытие. Браузерный тест подключает реальные стили обеих
+страниц и сохраняет возможность явного редактирования старого условия уровня.
+
+Проверено по коду и тестам 2026-10-17: `analytics-conditions.js` общий для
+аналитики и сценариев. `groupBranches` хранит полный путь, INCLUDE-ветки
+объединяются, EXCLUDE всегда вычитаются; Java применяет предикат ко всей выборке.
+Не заменять пути независимыми списками уровней (даёт декартовы сочетания).
+PHP требует `features.groupHierarchy.version=1` и совпадение appliedFilters.
+Изменение не требует нового snapshot schema. Инструкция и границы старых
+сценариев — «Дерево товарных групп и набор условий» в `docs/OPERATIONS_RUNBOOK.md`.
+
+## Сравнение рентабельности групп
+
+Проверено по коду и UI-тесту 2026-10-17: `product-analytics-v4.js` показывает
+сравнение завершённых выборок из Java `totals.metrics`, не складывает page rows
+и не усредняет SKU-ratios. GMROI умножается на 100 только для процентного вывода.
+Строки фиксируют request/context/warnings завершённого ответа, живут до reload,
+выгружаются в CSV. Это представление существующей аналитики без Java/Folio-write.
+Маршрут пользователя, границы оценки и деплой: раздел «Сравнение рентабельности
+групп товаров» в `docs/OPERATIONS_RUNBOOK.md`.
+
 ## Физическое наличие schema v5
 
 Независимая очередь снимков на странице аналитики принадлежит
@@ -25,6 +50,17 @@ JS/экспорт не усредняют проценты и не превра�
 существующего сценария с общей optimistic version/revision history; состав групп
 разрешается server-side из глобальной карты. Java query остаётся источником метрик,
 PHP считает только предварительную потребность/закупку по параметрам менеджера.
+Подтверждено 2026-10-17: полный черновик закупки может превышать production
+`max_allowed_packet`. `inc/purchase-drafts.php` сжимает большие снимки без потерь
+и проверяет размер/SHA-256 при чтении; не обходить ошибку сохранения разрешением
+экспорта неполного результата. Диагностика и rollback: раздел «Большой черновик
+не сохраняется» в `docs/OPERATIONS_RUNBOOK.md`.
+С 2026-10-17 `purchasePlanning.groups[].respectMaximumStock` задаёт учёт MAX
+отдельно по группе (отсутствует → true). При false полный прогноз связанного
+магазина включается в закупку группы-источника; план пополнения за период не
+равен одному фактическому перемещению. Это PHP-политика сценария, не изменение
+карточки ФОЛИО. Не отключать MIN/резервы вместе с MAX. Источник: модель закупки,
+`tests/purchase-maximum.php` и runbook раздел MAX.
 Уточнение владельца 2026-09-13: «Одесса распродажа» не участвует в пополнении
 KREUL. Не возвращай склад распродажи в группу ради устранения неполных данных.
 Изменение глобальной группы влияет также на отображение остатков и требует
@@ -42,9 +78,20 @@ capability-gated calculation.transit (до 16 ID + SHA-256 массива) в ca
 aggregate v3 + sources, context/generation/configuration guards и оба экспорта.
 До деплоя обновлённой Java действует legacy guard, список не подменяется складом 9.
 Sources показывают физический доступный остаток независимо от происхождения и
-отдельно поставщицкую часть; это не два слагаемых. Текущая Java для непустого списка
-не подтверждает согласованность независимых snapshots, поэтому общий сетевой итог
-не вычитается из закупки. Ручное число не обходит `networkPlanningReady=false`.
+отдельно поставщицкую часть; это не два слагаемых. Независимые исторические snapshots
+не подтверждают согласованность текущего запаса. Проверено production 2026-10-11:
+previewVersion10 после загрузки истории принимает полный current-network-stock
+из одной Java read-only SERIALIZABLE transaction, а исторические snapshots сохраняет
+для продаж и дней отсутствия. Только принятый текущий срез разрешает единый вычет
+транзита; частичный ответ или timeout не заменяется ручным числом либо нулём.
+Источник: purchase-current-stock.php и docs/OPERATIONS_RUNBOOK.md,
+раздел «Единый текущий срез и подтверждения сценария».
+С 15.10.2026 проверять фактическую версию current-network-stock: для предзаказов
+нужна v2 с `preorderReservations`/`preorderAsOfDate` (Java `c5659f7` или новее).
+Production-проба выявила v1 при полном наборе карточек; перезапуск preview или
+повторный deploy старого локального checkout это не исправляет. Сверять рабочую
+копию сборки с нужным коммитом, не сбрасывая чужие правки. Точный регламент и
+доказательство причины — в разделе предзаказов `docs/OPERATIONS_RUNBOOK.md`.
 Смена настройки инвалидирует preview/export; пересечение транспорта с получателем
 запрещено. Транзит уменьшает закупку, но не спрос. ETA/назначение и отсутствие дублей
 в других поступлениях подтверждает менеджер (`receiptsReviewed` по каждой группе).
@@ -53,13 +100,20 @@ Java не заявляет автоматическую сверку парти�
 не заменяются нулём; политики Java запрещают закупку независимо от ручного ввода.
 Документы/резервы не создаются. Preview и правки пользователя временные (2 часа),
 для сохранения есть CSV/XLSX. Формулы и приёмка: `docs/OPERATIONS_RUNBOOK.md`.
+Экспорт заказа с2026-10-13: purchase-export.php строит одну сводную строку на
+закупаемыйSKU из штатных results. XLSX сохраняет групповой расчёт отдельным листом;
+CSV отдаёт сводку. Нельзя складывать конечные количества маршрутизируемых групп
+с закупкой источника или повторять общий остаток как групповой. Физические запасы
+групп и Транспорта/Приймання показываются раздельно и вместе; клиентский резерв
+остаётся вычтенным только из свободного запаса. Точные правила и deploy status:
+`docs/OPERATIONS_RUNBOOK.md`, раздел «Экспорт заказа: сводная строка и детализация».
 Экранные фильтры preview работают над уже загруженными строками: точный
 `dimensions.minimumStock=0`, подтверждённое отсутствие регулярных продаж,
 `groupLevel1`, узлы `groupLevel2..6`, предварительная потребность и готовая
 рекомендация. Неизвестные MIN/продажи не приравниваются к нулю. Фильтры не меняют
-сессию расчёта и полный CSV/XLSX export. До готовой заявки остаются согласованный
-сетевой срез либо сверка перемещений, массовое подтверждение ожидаемых поступлений
-и долговечный черновик заказа. Черновик должен переживать обновление страницы,
+сессию расчёта и полный CSV/XLSX export. Единый текущий срез реализован в
+previewVersion10. До готовой заявки остаются удобная работа с другими ожидаемыми
+поставками и долговечный черновик заказа. Черновик должен переживать обновление страницы,
 хранить сценарий/период/поколения снимков и ручные правки, а при изменении источника
 становиться явно устаревшим без автоматического затирания корректировок. Его
 сохранение не создаёт заказ, документ ФОЛІО или резерв (план уточнён 2026-09-12).
@@ -266,6 +320,13 @@ Java не заявляет автоматическую сверку парти�
 
 ## Для менеджера
 
+- Assembly preview (production evidence + session tests, 2026-10-09): recipes can
+  reference children absent from every selected active snapshot. Handle only the
+  exact Java missing-SKU rejection in child loading; retain unknown child stock
+  and block ancestors. Never send an empty INCLUDE or suppress root/transport
+  errors. An empty batch must verify both sales and transit generations through
+  capabilities. Contract: `docs/api/FOLIO_ASSEMBLY_PURCHASE.md`.
+
 - Проверяй бизнес-результат, а не только зелёный HTTP: суммы, склад, роль/контракт, количество документов, missing stock и видимость товара.
 - Перед массовой коррекцией экспортируй отчёт до изменений.
 - Для ошибки сохраняй SKU, понятную причину, документ/дату/склад и reqId; не пересылай секретную конфигурацию.
@@ -314,7 +375,8 @@ PHP только ограничивает её фактическими регу
 Не суммировать MIN участников. Источник должен входить в full-analytics часть
 группы и иметь подтверждённую разрешающую политику; состав продаж/истории и MAX
 не меняется. Preview version 4 отклоняет сессии со старым суммированием MIN; он временный,
-долговечный черновик и согласованный сетевой снимок остаются отдельными этапами.
+долговечный черновик остаётся отдельным этапом. Текущий сетевой срез реализован
+в previewVersion10; не объявлять старые независимые снимки согласованными.
 
 
 ### Warehouse usage per scenario, 2026-09-13
@@ -385,3 +447,45 @@ I остаётся авторитетным итогом Java с поправк�
 без соответствующей строки Java означает недоступность, не нулевую сумму.
 Отборы остаются в Java; обновление frontend не меняет сохранённый расчёт.
 Инструкция и ограничения ручной формулы: `docs/PROFIT_REPORT_MANAGER_RU.md`.
+
+Проверено кодом 2026-10-09: `coldCoverageEnabled` задаёт отдельные горизонты для
+BALL2=1/2 на каждом узле сборки, включая детей, до распространения дефицита.
+Не делить граф на независимые прогнозы по морозоустойчивости: компонент и ребёнок
+могут иметь разные классы. UNKNOWN требует проверки, если включены разные сроки.
+Java graph требует envelope `ok:true` и runtime `LAVKA_TOKEN`; успешный health
+не доказывает готовность рецептов. Контракт и acceptance: `docs/api/FOLIO_ASSEMBLY_PURCHASE.md`.
+
+Purchase reporting (2026-10-15): owner column order and zero-receipt MAX semantics
+are documented in `docs/api/FOLIO_ASSEMBLY_PURCHASE.md`. An already overstocked
+recipient with zero replenishment must not block its procurement source.
+
+Confirmed 2026-10-15: purchase drafts are persistent WordPress records owned by
+the creating user. Open/export uses the pinned calculation, not fresh Folio reads;
+only explicit new calculation refreshes source data. Accepted edits and exports
+require current draft revision. See OPERATIONS_RUNBOOK saved purchase drafts.
+
+
+### Signed forecast balance and supplier export, 2026-10-20
+
+Owner: `lavka-price-sync/inc/purchase-stock-report.php` and `purchase-export.php`.
+`forecastBalance` is a view derived from frozen draft inputs: local planning stock
++ allocated confirmed transit/other receipts − uncapped inventory target (forecast,
+selected MIN, component demand, additional preorders). It excludes new purchases
+and proposed transfers; unknown inputs stay null. Do not substitute clipped
+`excessStock` or sum the shared transit pool into each group. Opening an old draft
+adds this view without saving or recalculating its order. Supplier `uploaded` is
+not active; export must use pinned versions, never refresh prices from today's
+active head. Updated owner layout and activation recovery are documented in
+`docs/OPERATIONS_RUNBOOK.md` under «Формат заказа и излишки по группам».
+
+
+### Large supplier preview storage, 2026-10-20
+
+`inc/supplier-prices.php`: keep `lps_sp_json` canonical for approval hashes;
+use `lps_sp_encode_preview` only at both `preview_json` write sites (build and
+activation/partial merge). All consumers use `lps_sp_decode`, which reads legacy
+JSON and bounded, checksummed gzip envelopes. Do not discard raw supplier rows
+or increase production DB limits as the default fix for packet overflow.
+Uploading XLSX does not prove parsed preview persistence or activation. The
+owner recovery flow and rollback reader requirement are in
+`docs/OPERATIONS_RUNBOOK.md`, «Большой прайс остаётся “Завантажено”».

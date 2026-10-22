@@ -39,6 +39,15 @@
   только к конечной подгруппе без видимых дочерних категорий; её родитель
   (например, «56гр») показывает полное имя с обрезкой до трёх строк.
   Контекст берётся из индекса `PSU_Category_Menu`, а поиск всегда выводит полное имя.
+  С 1.8.1 общая текстовая часть из описания конечной подгруппы закрепляется
+  `assets/catalog-context.js`/CSS: переносится существующий узел, H1 не закрепляется.
+  Не возвращать sticky всему archive header: он может содержать иллюстрации.
+  JS принимает один простой текстовый блок, учитывает wpadminbar и высоту экрана;
+  без JS исходное описание доступно. На paged>=1 узкий archive-description callback
+  сохраняет этот контекст (Woo сам его скрывает); не распространять на rich/media
+  descriptions, поиск, родителя или shortcode loop. Парсер `|`/custom meta не менять.
+  Источник: catalog-cards.php, catalog-context.js и tests/catalog-cards-local.php;
+  приёмка/rollback — README Paint Shop UX (локально 2026-10-21, ожидает deploy).
   Отступ SKU → цена уменьшен вдвое; `.loop-buy-row` — flex без переноса
   и без растягивания: корзина сразу после «+» (3 px mobile, 4 px desktop).
   На мобильном кнопки имеют высоту минимум 32 px, значки ± — 18 px;
@@ -74,8 +83,14 @@
   Applied chips строятся из URL, сохраняют контекст категории и сбрасывают страницу
   при удалении условия. Проверки/контракт: README `paint-shop-ux`, `clean-filters-*`.
   `psu-catalog-suppliers.php` хранит видимость и порядок taxonomy `product_brand`
-  в option `psu_catalog_suppliers`. Видимость скрывает только пункт фильтра,
-  порядок группирует товары без текстового поиска до пагинации; keyword search
+  в option `psu_catalog_suppliers`. Видимость скрывает пункт фильтра и бренд в
+  product metadata: `paint-shop-ux/inc/single-product.php` через Woo
+  `woocommerce_product_brands_output` использует тот же `psu_catalog_supplier_terms(true)`.
+  Разрешены только явно включённые `visible`: отсутствие настройки/флага означает
+  запрет, включая checkbox админки. Если разрешённых брендов нет, строка отсутствует;
+  назначения, schema и товары
+  остаются прежними. Источник: `tests/single-product-brands-local.php` (2026-10-15).
+  Порядок группирует товары без текстового поиска до пагинации; keyword search
   сохраняет релевантность Relevanssi. См. раздел
   «Поставщики в каталоге» в `docs/OPERATIONS_RUNBOOK.md`.
   Woo хранит артикул в `_sku`; подтверждённые исторические штрихкоды Lavka
@@ -87,6 +102,25 @@
   meta keys, а `psu-search-filters` добавляет их в custom fields Relevanssi через
   `relevanssi_index_custom_fields` независимо от выбранного режима полей. После
   первого деплоя этой настройки нужен полный rebuild индекса.
+- Собственная страница товара (локальный код 2026-10-14) принадлежит
+  `paint-shop-ux/inc/single-product.php`, `templates/content-single-product.php` и
+  `assets/single-product.*`. Сохранять пять Woo single-product hooks, порядок,
+  password gate, native gallery/type forms/notices/schema и существующие price/stock
+  owners. Scoped adapter заменяет Woo/GeneratePress wrappers только на single product;
+  footer с 1.5.0 и шапка/меню с 1.7.0 — у собственных модулей ниже;
+  общая PHP-оболочка остаётся у активной темы.
+  Simple AJAX выполняет один Woo POST и при
+  неизвестном результате направляет к корзине без auto-retry; остальные типы — native.
+  `pcux_catalog_assets_required` подключает общие controls для related/upsell loops;
+  не связывать Paint Core напрямую с GeneratePress. Откат до `wp` —
+  `psu_single_product_enabled=false`. Проверки и deployment boundaries — README
+  `paint-shop-ux`; пользовательский канон — `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md`.
+  Проверять не только SKU с одним фото, но и многофотографическую галерею:
+  ширину native gallery и всех миниатюр, каждый слайд/lightbox, main/gallery IDs
+  и порядок. Не путать разный состав media на local/production с потерей фото
+  шаблоном; CSS и PDP template не меняют привязки. Регрессия 1.4.1 от 2026-10-15
+  сохраняет normal/400 title и ограниченное фото, перекрывает inherited Woo 48%.
+  Production-публикация и проверка в этой задаче не выполнялись.
 - Карточка товара показывает SKU, категории/бренд, stock/allocation и
   desktop-поиск под артикулом. На single product после meta выводится
   подтверждённый GTIN из `_wc_gtin_code` или совместимых barcode keys; значения
@@ -103,6 +137,14 @@
 
 ## Корзина и checkout
 
+- С 2026-10-21 `pc-order-import-export/Ui::inline_css()` скрывает только на
+  `body.woocommerce-cart` блоки export/import/cart-to-draft при ширине <=767px;
+  от 768px они доступны. Это CSS presentation rule, не role/API gate: кабинет,
+  экспорт заказа, отдельный прайс-лист и checkout не скрывать. Проверять filled/empty
+  cart и границу 767/768, не вводить серверное device detection. Источник: `Ui.php`;
+  приёмка/deploy — PCOE README, пользовательский канон — wholesale guide.
+
+- С 2026-10-15 стандартный XLSX-прайс удаляет колонку поставщика перед выдачей; внутренний row schema сохранён для CommercialOffer. Новые рассылки используют новую версию fingerprint; уже готовые вложения нужно пересоздать.
 - Полный клиентский XLSX-прайс принадлежит `pc-order-import-export/PriceList` и
   доступен оптовым ролям в Orders и корзине. Цена одна, из текущего customer price
   pipeline; остаток только по mapped selling locations Киева и Одессы. Импорт
@@ -255,5 +297,169 @@ keep `manage_options` for payee editing. Runtime defaults survive code deploys.
 Проверено локально 2026-09-22: `psu-search-filters.php` группирует дополнительные
 поля в native details; на ширине до 768 px они свёрнуты, активные группы условий
 отмечены счётчиком. Без JS поля открыты. Переключение ширины не отправляет форму.
-Шапкой и размером контактов владеет generatepress-child; выбор склада сохраняется.
+С 1.7.0 шапкой и размером контактов владеет `paint-shop-ux/inc/site-header.php`
+и его assets; выбор склада остаётся у Paint Core.
 Инструкция и снимок — `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md` и pc-wholesale-help.
+
+### Preorder balance v2 (2026-10-14)
+
+`pc-folio-customer-balance` requires Java `calculationVersion >= 2` for individual/debtors responses. `prepaymentAmount` is now the reserve from active non-accounted ПРД/*РАЗОВАЯ invoices no older than six calendar months (inclusive), not payments. Older orders must be recreated by the manager. The ledger balance is separate; payable adds reserve and subtracts deferral. Individual balance renders `preorders[]`; XLSX shows the invoice list and reserve total below ledger movements on the main sheet, and retains a separate data sheet (2026-10-14 export follow-up). Customer and manager use the same exporter with existing ownership checks. Customer/manager documents have `preordersOnly` server-side filtering over the same six-month window before pagination. Java V18 separates old snapshot generations and live overrides; rebuild debtors after deploying Java + WP. Never relabel a v1 cached payment amount as an invoice reserve. Current outstanding invoice amount already excludes fulfilled goods (owner confirmation).
+
+Profit saved-month comparison (2026-10-21, 0.11.0 local code/tests):
+`profit-manager.js::comparisonLayout` owns city order and numbering for both the
+manager table and comparison. `profit-comparison.js` uses explicit saved revisions
+from the four preceding calendar months, excluding the target/future. At least one
+available row value is enough; display coverage, never replace missing with zero.
+Manual per-line decimal overrides (including zero) take priority and persist with
+reference IDs per WP user/blog in this browser. Missing history requires input;
+read errors remain distinct and must not fail an already confirmed calculation.
+Refresh history explicitly replaces pinned prior revision IDs. Java amounts and
+manager H/I formulas are unchanged; no shared backend baseline or Folio writes.
+Migration from comparison storage v1 replaces the old whole-period baseline rule.
+Workflow and limitations:
+[profit manager guide](../../../../docs/PROFIT_REPORT_MANAGER_RU.md#сравнение-выбранных-месяцев-и-база-отклонений).
+
+## Собственный футер и настройки магазина (2026-10-21)
+
+`paint-shop-ux/inc/site-footer.php` владеет footer markup/CSS; GP adapter заменяет
+штатный footer и размещение legal block, `wp_footer` даёт однократный fallback.
+Реквизиты/документы остаются у `pc-wayforpay-compliance`; не копировать их в тему
+или новые настройки. Ссылка на справку следует `pc_wholesale_customer_can_access`.
+Существующие footer widget areas сохраняются. `psu_site_footer_enabled=false` до
+`wp` возвращает прежний footer. Page containers ещё принадлежат GP;
+шапка с 1.7.0 вынесена в собственный модуль ниже.
+Breadcrumb delimiter — `paint-shop-ux/inc/store-presentation.php`; 24 товара по
+умолчанию — существующий `psu-force-per-page.php`; дата classic checkout —
+`paint-core/inc/checkout-created-date.php`. Не возвращать дубли этих callbacks в
+child theme. Семантика `current_time('timestamp')` сохранена переносом.
+Источники: названные modules, `tests/site-footer-local.php`, `tests/site-footer.spec.cjs`;
+приёмка/rollback/deploy — README Paint Shop UX. Пока локальный выпуск.
+
+## Граница самостоятельных стилей (1.6.0, 2026-10-21)
+
+`paint-shop-ux/inc/storefront-styles.php` определяет `.psu-storefront` по Woo
+conditionals и `[pc_quick_order]`, без page IDs. `assets/storefront.css` владеет
+content typography/tokens, полями/кнопками/focus, account navigation и GP content
+adapter; grid/category tiles — `catalog-cards.css`, geometry PDP — `single-product.css`,
+cart — `cart-layout.css`. Legacy width/sidebar child CSS исключает этот scope.
+Не добавляй новые content overrides в child theme и не снимай все стили GeneratePress
+на живом сайте: PHP wrappers и исключённые из миграции страницы ещё используют тему;
+header/menu с 1.7.0 принадлежат собственному модулю ниже. Не расширяй scope на
+reports/обычные страницы автоматически: у обычных страниц отдельный scope с 1.8.0. Каталог сохраняет configured sidebar,
+на <=1024 он под контентом; task pages cart/checkout/account/quick-order без sidebar.
+Проверка CSS независимости удаляет theme links/inline style только в тестовом DOM:
+`tests/storefront-styles.spec.cjs`. Заполненный cart/checkout fixture работает через
+локальный prepend, гостевую сессию в памяти без persistent cart и carrier requests;
+блокировать POST и удалять временные user auth tokens после role checks.
+Deployment/rollback переносит plugin и child CSS вместе. Источник — модуль,
+styles и acceptance tests; human summary — `docs/SYSTEM_OVERVIEW.md`, пользовательская
+инструкция — `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md` и `pc-wholesale-help`.
+
+
+## Собственная шапка и меню (1.7.0, 2026-10-21)
+
+`paint-shop-ux/inc/site-header.php` и `assets/site-header.css/js` владеют шапкой,
+контактами и навигацией; логотип хранится в `assets/site-logo.svg`. Стандартный
+`wp_body_open` выводит шапку один раз. GP adapter снимает только известные callbacks
+старой шапки/навигации; не удалять все чужие callbacks и featured-page content.
+Меню берётся из существующего `primary` через `wp_nav_menu`: сохранять порядок,
+Woo/Relevanssi-фильтры и `pc_wholesale_help_filter_quick_order_menu`. Не переносить
+жёсткий ID старого mobile CSS: доступ к быстрому заказу определяется ролью и на
+телефоне. Без JS ссылки открыты; JS добавляет мобильное раскрытие и клавиатурное
+управление. Скрытое меню не должно оставлять доступные Tab элементы.
+
+Шапка вызывает существующий `pc_render_alloc_control()`. Его nonce, DOM IDs,
+role gate и правила сохранения/корзины принадлежат Paint Core. Фильтр
+`pc_alloc_header_rendered` отключает старый footer mount только после вывода шапки;
+при rollback исходное размещение остаётся доступным. Контекстная справка добавляется
+рядом с `.pc-alloc`; оставлять место для этой ссылки. Разметка/controls инициализируются
+однократно, без пересохранения предпочтения при открытии/изменении ширины меню.
+
+Откат: `psu_site_header_enabled=false` до `wp`. Legacy child code остаётся для этого
+пути. Никакая настройка меню/склада не мигрирует в БД. Deploy/rollback должны включать
+Paint Shop UX, Paint Core, child CSS и справку/переводы/изображение вместе. GP всё ещё
+даёт PHP-шаблоны, регистрацию widget areas и theme/Woo supports; пока не отключать
+родительскую тему. Источники — header module и `tests/site-header-local.php`;
+приёмка/rollback — README Paint Shop UX. Human ownership — `docs/SYSTEM_OVERVIEW.md`,
+инструкция — `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md` и `pc-wholesale-help`.
+На 2026-10-21 локальная приёмка пройдена: 518 PHP-проверок и 25 browser-сценариев;
+production-публикация ожидает deploy.
+
+### Медиа в описании категории (1.7.1, 2026-10-21)
+
+При расхождении картинки между редактором категории и витриной сначала сравнивай
+сохранённый `product_cat.description` с текущим `wp_get_attachment_image_src`
+по его `wp-image-ID`/`size-*`. Media Cloud фильтрует `the_editor_content`, а native
+Woo archive — отдельный `woocommerce_taxonomy_archive_description_raw`: редактор
+может показывать исправный файл при старом URL в БД. Не путать описание с
+`thumbnail_id` категории и fallback плиток; не перезагружать/пересвязывать товары
+ради такого симптома. Узкий adapter PSU `inc/category-description-media.php`
+разрешает адрес существующего attachment на выводе с проверкой host/имени файла;
+не вызывает editor pipeline, HTTP или DB writes. Источники: adapter, его local test,
+Media Cloud StorageContentHooks и read-only сверка production 2026-10-21.
+Приёмка/ограничения — README Paint Shop UX, действия менеджера —
+`docs/MEDIA_MANAGER_GUIDE_UK.md`. После deploy проверять публичную страницу,
+а не только редактор категории.
+
+
+### Порядок блоков архива (1.7.2, 2026-10-21)
+
+Общий owner размещения — `woocommerce_shop_loop_header`: оптовая справка
+`pc_wholesale_help_catalog_link` @4, `psu_render_catalog_filters` @5,
+PSU per-page @7, native Woo header/description @10. Не возвращать форму на
+`woocommerce_before_shop_loop` или `woocommerce_no_products_found`: archive
+header работает и при пустом поиске, где должна быть ровно одна форма.
+Per-page исключает shortcode loops и чужие страницы; сохранять его guard
+`woocommerce_product_loop()` и текущий приоритет `pp/per_page`, перенос не меняет
+расчёт размера выдачи. Пустой product search не должен показывать 12/24/48.
+Счётчик/сортировка/пагинация остаются у товарной выдачи, single-product help hook
+не переносится. Проверять порядок title/description/tiles и отсутствие дубля формы
+под гостем/оптовиком на desktop/mobile, включая zero results. Источники:
+`psu-search-filters.php`, `paint-shop-ux.php`, `pc-wholesale-help.php`; приёмка и
+согласованный deploy/rollback — README Paint Shop UX. Пользовательский канон —
+`docs/WHOLESALE_CUSTOMER_GUIDE_UK.md`. Проверка production нового порядка ожидает deploy.
+
+
+## Обычные информационные страницы (1.8.0, 2026-10-21)
+
+Owner — `paint-shop-ux/inc/public-pages.php`, `templates/public-page.php` и
+`assets/public-pages.css`. При активном GP выбираются только default page/search/404
+шаблоны из parent/child; чужие plugin templates и специальные page templates
+сохраняются. Scope `.psu-public-page` включается после выбора шаблона, внешний
+PHP-каркас всё ещё у GP. Новый parent theme требует отдельной интеграции.
+Не расширять выбор автоматически на главную/Woo, Elementor, приложения на
+shortcodes, custom/reusable blocks или отчёты. Товарный поиск определять также
+по array `post_type` и `_psu_catalog_query`; fallback обычного поиска не меняет query.
+На 404 форма отправляет явный `post_type=product` в существующий каталог.
+
+Сохранять `the_content`, password guard, `wp_link_pages` и comments API.
+Featured image на принятой обычной странице принадлежит этому шаблону: adapter
+снимает только `generate_featured_page_header`, остальные GP/plugin callbacks
+не удалять. Не переносить тексты юридических страниц или media в код/новые options.
+Откат — `psu_public_pages_enabled=false` до выбора template. Источник/границы:
+`tests/public-pages-local.php`; приёмка и согласованный deploy/rollback — README
+Paint Shop UX. Владельцы — `docs/SYSTEM_OVERVIEW.md`; канон и код справки обновлены,
+публикация выпуска 1.8.0 и production-проверка ожидают deploy.
+
+
+## Независимый каркас: этап 2 (1.9.0, 2026-10-21)
+
+`wp-content/themes/lavka-storefront` — самостоятельная классическая тема без
+Template/GP dependency. Статус: подготовлена для локального request-only preview,
+не активирована и не добавлена в production deploy. Действующая тема остаётся
+GeneratePress Child. Не считать наличие файлов завершённым переключением.
+
+PSU public-pages принимает `current_theme_supports('psu-public-pages')` с прежними
+ограничениями default page/search/404 и исключениями приложений. Сохраняются
+`wp_head/wp_body_open/wp_footer`, #page/#content/#primary/#main и Woo gallery supports.
+PCOE использует `lavka_storefront_before_main_content` с прежним single-render guard;
+account title filter поддерживает обе темы. Меню primary берётся из сохранённых
+child theme mods только при отсутствии собственного ключа nav_menu_locations;
+явное пустое назначение не заменяется. Widget IDs прежние, sidebar читает старую
+настройку без записи. Шаблоны приложений и права остаются у плагинов.
+
+Источник и проверка — README темы и `tests/lavka-theme-{bootstrap-local,local}.php`.
+Тест выполняется в отдельном WP CLI процессе, не вызывает switch_theme и сверяет
+сохранённые options. Это не покрывает WordPress after_switch_theme/widget remapping:
+настоящую активацию, перенос папки в deploy и production acceptance выполнять лишь
+в отдельном согласованном этапе 3, с возможностью возврата прежней темы.

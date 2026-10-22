@@ -8,9 +8,9 @@
     if (!root || root.dataset.analyticsSchema !== '4') return;
 
     const productSelections = [
-        'groups', 'groupLevel1', 'groupLevel2', 'groupLevel3', 'groupLevel4',
+        'currentSuppliers', 'groups', 'groupLevel1', 'groupLevel2', 'groupLevel3', 'groupLevel4',
         'groupLevel5', 'groupLevel6', 'departments', 'productTypes', 'units',
-        'currentSuppliers', 'supplierStates'
+        'supplierStates'
     ];
     const movementSelections = [
         'operationKinds', 'movementClasses', 'demandModes', 'documentTypes',
@@ -24,6 +24,10 @@
         capabilities: null,
         rows: [],
         response: null,
+        reportRequest: null,
+        comparison: [],
+        reportPeriod: null,
+        serverDate: null,
         scenarios: [],
         activeTab: 'products',
         currentCursor: null,
@@ -45,6 +49,7 @@
     const productFilterGrid = el('lps-pa-product-filter-grid');
     const movementFilterGrid = el('lps-pa-movement-filter-grid');
     const scenarioSelect = el('lps-pa-scenario-select');
+    const conditions = window.LPS_CONDITIONS?.(root, 'lps-pa', i18n.filterLabels || {});
     const numberFormat = new Intl.NumberFormat(config.locale || undefined, { maximumFractionDigits: 2 });
     const moneyFormat = new Intl.NumberFormat(config.locale || undefined, {
         style: 'currency', currency: config.currency || 'UAH', maximumFractionDigits: 2
@@ -81,6 +86,8 @@
 
     function setBusy(busy, message, activity) {
         state.busy = busy;
+        if (el('lps-pa-compare-add')) el('lps-pa-compare-add').disabled = busy || !state.reportRequest || state.comparison.length >= 50;
+        if (el('lps-pa-exclude-one-off')) el('lps-pa-exclude-one-off').disabled = busy || !capability('demandModes')?.supported;
         const spinner = el('lps-pa-spinner');
         if (spinner) spinner.classList.toggle('is-active', busy);
         const buildButton = el('lps-pa-build');
@@ -207,6 +214,7 @@
         try {
             const data = await api('v4_bootstrap');
             state.sourceDatabase = data.sourceDatabase || 'Paint_Ua';
+            state.serverDate = data.serverDate;
             sourceInput.value = state.sourceDatabase;
             populateWarehouses(data.warehouses || []);
             populateScenarios(data.scenarios || []);
@@ -275,6 +283,7 @@
             if (mode) mode.addEventListener('change', sync);
             sync();
         });
+        conditions?.refresh(state.capabilities);
     }
 
     function renderSnapshotContext() {
@@ -341,6 +350,7 @@
     }
 
     function collectFilters(section) {
+        if (conditions) return conditions.read(section);
         const output = {};
         root.querySelectorAll('[data-lps-section="' + section + '"]').forEach((container) => {
             const name = container.dataset.lpsSelection;
@@ -447,6 +457,7 @@
         exportForm.target = '_blank';
         exportForm.hidden = true;
         const request = currentRequest(null);
+        if (state.reportPeriod) request.period = Object.assign({}, state.reportPeriod);
         if (state.response && state.response.context && state.response.context.transit) request.transitConfigurationRevision = state.response.context.transit.configurationRevision;
         const fields = {
             action: 'lps_product_analytics_export',
@@ -481,22 +492,115 @@
             return;
         }
         setBusy(true, label('queryRunning', 'Building report...'), 'query');
+        state.reportRequest = null;
         try {
             const request = currentRequest(cursor);
+            if ((cursor || fromHistory) && state.reportPeriod) request.period = Object.assign({}, state.reportPeriod);
             if (cursor && state.response && state.response.context && state.response.context.transit) request.transitConfigurationRevision = state.response.context.transit.configurationRevision;
             const data = await api('v4_query', request);
+            if (data.ok === false || (data.errors || []).length || !data.totals?.metrics) throw new Error(label('loadFailed'));
             state.response = data;
+            state.reportRequest = JSON.parse(JSON.stringify(request));
+            state.reportPeriod = data.resolvedPeriod || null;
+            if (state.reportPeriod) {
+                el('lps-pa-period-from').value = state.reportPeriod.from;
+                el('lps-pa-period-to').value = state.reportPeriod.to;
+            }
             state.rows = Array.isArray(data.rows) ? data.rows : [];
             state.currentCursor = cursor || null;
             state.nextCursor = data.nextCursor || null;
             if (!fromHistory && cursor == null) state.cursorHistory = [];
             renderQuery(data);
+            renderProfitResult();
             setMessage('', '');
         } catch (error) {
             setMessage(errorMessage(error), 'error');
         } finally {
             setBusy(false);
         }
+    }
+
+    // Use backend totals for the complete selection, never page rows or averages of SKU ratios.
+    function profitColumns() {
+        return [
+            ['productCount', label('productCount')], ['soldUnits', label('soldUnits')],
+            ['salesRevenue', label('salesRevenue')], ['salesCogs', label('salesCogs')],
+            ['averageInventoryValue', label('averageInventoryValue')], ['grossProfit', label('grossProfit')],
+            ['gmroi', label('periodReturn')], ['grossMarginPercent', label('grossMarginPercent')]
+        ];
+    }
+
+    function profitValues(data) {
+        const m = data.totals.metrics;
+        return profitColumns().map(([key]) => key === 'productCount' ? data.totals.productCount :
+            (key === 'gmroi' && m[key] != null ? m[key] * 100 : m[key]));
+    }
+
+    function profitCells(values) {
+        return values.map((value, i) => '<td>' + escapeHtml(i >= 2 && i <= 5 ? money(value) :
+            number(value) + (i >= 6 && value != null ? '%' : '')) + '</td>').join('');
+    }
+
+    function renderProfitResult() {
+        const node = el('lps-pa-profit-result');
+        if (!node) return;
+        node.innerHTML = '<table class="widefat striped"><thead><tr>' + profitColumns().map(([, caption]) =>
+            '<th>' + escapeHtml(caption) + '</th>').join('') + '</tr></thead><tbody><tr>' +
+            profitCells(profitValues(state.response)) + '</tr></tbody></table>';
+    }
+
+    function comparisonScope(request, data) {
+        const filters = request.productFilters || {};
+        const selectionText = selection => label(selection.mode === 'EXCLUDE' ? 'exclude' : 'include', selection.mode) + ': ' + (selection.values || []).join(', ');
+        const names = [1, 2, 3, 4, 5, 6].map(level => filters['groupLevel' + level]).filter(Boolean).map(selectionText);
+        (filters.groupBranches || []).forEach(branch => names.push(selectionText({mode:branch.mode, values:[branch.path.join(' → ')]})));
+        const conditions = [];
+        if (filters.currentSuppliers) conditions.push(label('supplier') + ': ' + selectionText(filters.currentSuppliers));
+        Object.entries(request.movementFilters || {}).forEach(([key, selection]) => {
+            if (selection?.values?.length) conditions.push((i18n.filterLabels?.[key] || key) + ': ' + selectionText(selection));
+        });
+        const context = data.context || {};
+        return [names.join(' / ') || label('allSelectedProducts'),
+            (context.periodFrom || request.period.from) + ' — ' + (context.periodTo || request.period.to),
+            (context.warehouses || []).map(w => w.name || w.id).join(', '), ...conditions].join(' | ');
+    }
+
+    function addComparison() {
+        if (state.busy || !state.reportRequest || state.comparison.length >= 50) return;
+        const request = state.reportRequest, data = state.response;
+        const name = el('lps-pa-compare-name').value.trim();
+        state.comparison.push({ name, scope: comparisonScope(request, data), values: profitValues(data),
+            parameters: JSON.stringify({ request, context: data.context, warnings: data.warnings }) });
+        renderComparison();
+    }
+
+    function renderComparison() {
+        const node = el('lps-pa-comparison-table');
+        if (!node) return;
+        node.innerHTML = '<thead><tr><th>' + escapeHtml(label('comparisonSelection')) + '</th>' +
+            profitColumns().map(([, caption]) => '<th>' + escapeHtml(caption) + '</th>').join('') + '<th></th></tr></thead><tbody>' +
+            state.comparison.map((row, i) => '<tr><td><strong>' + escapeHtml(row.name) + '</strong><div>' + escapeHtml(row.scope) +
+            '</div><details><summary>' + escapeHtml(label('technicalDetails')) + '</summary><pre>' + escapeHtml(row.parameters) +
+            '</pre></details></td>' + profitCells(row.values) + '<td><button type="button" class="button" data-profit-remove="' + i + '">' +
+            escapeHtml(label('removeComparison')) + '</button></td></tr>').join('') + '</tbody>';
+        el('lps-pa-compare-export').disabled = !state.comparison.length;
+        el('lps-pa-compare-add').disabled = state.busy || !state.reportRequest || state.comparison.length >= 50;
+    }
+
+    function exportComparison() {
+        if (!state.comparison.length) return;
+        const csvCell = value => {
+            // Keep text labels from becoming Excel formulas; numeric cells stay numeric.
+            let text = value == null ? '' : String(value);
+            if (typeof value === 'string' && /^[\s]*[=+@-]/.test(text)) text = "'" + text;
+            return '"' + text.replace(/"/g, '""') + '"';
+        };
+        const rows = [[label('comparisonSelection'), label('comparisonScope'), ...profitColumns().map(([, caption]) => caption), label('technicalDetails')],
+            ...state.comparison.map(row => [row.name, row.scope, ...row.values, row.parameters])];
+        const blob = new Blob(['\uFEFF' + rows.map(row => row.map(csvCell).join(';')).join('\r\n')], { type: 'text/csv;charset=utf-8' });
+        const url = URL.createObjectURL(blob), link = document.createElement('a');
+        link.href = url; link.download = 'profitability-comparison.csv'; link.click();
+        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
     function metricCards(metrics, totals) {
@@ -789,6 +893,8 @@
     }
 
     function resetSelections(preserveScenario) {
+        conditions?.clear();
+        state.reportPeriod = null;
         el('lps-pa-search').value = '';
         root.querySelectorAll('.lps-pa-mode').forEach((node) => { node.value = 'ANY'; node.dispatchEvent(new Event('change')); });
         root.querySelectorAll('.lps-pa-values').forEach((node) => Array.from(node.options).forEach((option) => { option.selected = false; }));
@@ -869,7 +975,14 @@
         el('lps-pa-search').value = productFilters.search || '';
         Object.entries(productFilters).forEach((entry) => { if (entry[0] !== 'search') setSelection('product', entry[0], entry[1]); });
         Object.entries(movementFilters).forEach((entry) => setSelection('movement', entry[0], entry[1]));
+        conditions?.apply(productFilters, movementFilters);
         if (profile.period) {
+            if (profile.period.mode === 'ROLLING_DAYS' && state.serverDate) {
+                const start = new Date(state.serverDate + 'T00:00:00Z');
+                start.setUTCDate(start.getUTCDate() - Number(profile.period.days) + 1);
+                el('lps-pa-period-from').value = start.toISOString().slice(0, 10);
+                el('lps-pa-period-to').value = state.serverDate;
+            }
             if (profile.period.from) el('lps-pa-period-from').value = profile.period.from;
             if (profile.period.to) el('lps-pa-period-to').value = profile.period.to;
         }
@@ -892,6 +1005,7 @@
     }
 
     function markScenarioModified() {
+        if (!state.applyingScenario) state.reportPeriod = null;
         if (state.applyingScenario || !scenarioSelect.value) return;
         state.scenarioModified = true;
         const node = el('lps-pa-scenario-status');
@@ -920,6 +1034,18 @@
     }
 
     warehouseSelect.addEventListener('change', () => { markScenarioModified(); state.pendingScenario = null; loadCapabilities(); });
+    el('lps-pa-compare-add')?.addEventListener('click', addComparison);
+    el('lps-pa-compare-export')?.addEventListener('click', exportComparison);
+    el('lps-pa-exclude-one-off')?.addEventListener('click', () => {
+        setSelection('movement', 'demandModes', { mode: 'EXCLUDE', values: ['ONE_OFF_ORDER'] });
+        conditions?.set('movement', 'demandModes', { mode: 'EXCLUDE', values: ['ONE_OFF_ORDER'] });
+        markScenarioModified();
+        setMessage(label('rebuildForProfit'), 'info');
+    });
+    el('lps-pa-comparison-table')?.addEventListener('click', event => {
+        const button = event.target.closest('[data-profit-remove]');
+        if (button) { state.comparison.splice(Number(button.dataset.profitRemove), 1); renderComparison(); }
+    });
     el('lps-pa-reload').addEventListener('click', loadCapabilities);
     form.addEventListener('submit', (event) => { event.preventDefault(); state.currentCursor = null; state.cursorHistory = []; runQuery(null, false); });
     form.addEventListener('input', markScenarioModified);

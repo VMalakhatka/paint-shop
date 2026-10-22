@@ -44,6 +44,7 @@ final class ApprovalNotifications {
         $order=!empty($data['source']['order_id'])?wc_get_order($data['source']['order_id']):false;
         if($order)foreach(ManagerNotifications::documents($order) as $doc)$lines[]=__('Folio account','pc-order-import-export').' #'.$doc['number'].' · '.($doc['date']?:__('Document date unavailable','pc-order-import-export'));
         else if(!empty($s['warehouse']))$lines[]=$s['warehouse'];
+        if (!empty($s['bundle'])) foreach ($s['documents'] as $doc) $lines[] = $doc['number'].' · '.$doc['date'].' · '.$doc['warehouse'];
         return implode("\n",$lines);
     }
 
@@ -139,6 +140,11 @@ final class ApprovalNotifications {
             if(ApprovalWorkbook::available())echo '<button class="button" name="email_format" value="xlsx">'.esc_html__('Email Excel file for confirmation','pc-order-import-export').'</button>';
             else echo '<p>'.esc_html__('Excel export is unavailable. Contact the site administrator.','pc-order-import-export').'</p>';
             echo '</form>';
+        }
+        if ($fresh && ApprovalWorkbook::available()) {
+            echo '<form method="post" action="'.esc_url(admin_url('admin-post.php')).'">'; wp_nonce_field('pcoe_approval_download');
+            foreach (['action'=>'pcoe_approval_download','approval_id'=>$id,'revision'=>$data['revision']] as $key=>$value) echo '<input type="hidden" name="'.esc_attr($key).'" value="'.esc_attr($value).'">';
+            echo '<button class="button">'.esc_html__('Download confirmation Excel', 'pc-order-import-export').'</button></form>';
         }
         if($data['status']==='confirmed'){
             foreach(self::managers($data) as $user){$record=get_post_meta($id,self::meta(self::event($data,$user)),true);$manager=get_userdata($user);

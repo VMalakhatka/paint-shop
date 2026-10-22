@@ -48,13 +48,15 @@ add_filter('woocommerce_account_menu_items', function ($items) {
 // === Account page: custom headings & hide theme H1 ===
 add_action('plugins_loaded', function () {
 
-    // 0) Remove theme H1 (GeneratePress) on account page
-    add_filter('generate_show_title', function ($show) {
+    // 0) The account module owns its H1 in either supported shell.
+    $show_title = function ($show) {
         if (function_exists('is_account_page') && is_account_page()) {
             return false;
         }
         return $show;
-    });
+    };
+    add_filter('generate_show_title', $show_title);
+    add_filter('lavka_storefront_show_title', $show_title);
 
     // Fallback: if entry-header still appears — hide with CSS
     add_action('wp_enqueue_scripts', function () {

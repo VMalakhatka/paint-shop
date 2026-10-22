@@ -6,9 +6,10 @@
     const t = config.i18n || {};
     const el = (name) => document.getElementById('lps-purchase-' + name);
     const number = new Intl.NumberFormat(config.locale || 'uk', { maximumFractionDigits: 3 });
-    const state = { token: '', rows: [], page: 0, busy: false, complete: false, controller: null, requestId: 0,
+    const state = { revision: 0, token: '', rows: [], page: 0, busy: false, complete: false, controller: null, requestId: 0,
         filters: { hideMinimumZero: false, hideNoSales: false, productGroup: '', productSubgroup: '', order: 'all' } };
     const escape = (value) => String(value == null ? '' : value).replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
+    const componentNumber = new Intl.NumberFormat(config.locale || 'uk', { maximumFractionDigits: 12 });
     const display = (value) => value == null ? '—' : number.format(value);
     function message(text, error) {
         el('message').textContent = text;
@@ -19,6 +20,8 @@
         root.setAttribute('aria-busy', String(value));
         el('spinner').classList.toggle('is-active', value);
         el('start').disabled = value;
+        if (el('open')) el('open').disabled = value;
+        if (el('drafts')) el('drafts').disabled = value;
         el('scenario').disabled = value;
         el('cancel').disabled = !value;
         root.querySelectorAll('[data-export]').forEach((button) => { button.disabled = value || !state.complete; });
@@ -58,6 +61,7 @@
         state.filters.productSubgroup = options(el('product-subgroup'), subgroupItems, state.filters.productSubgroup);
     }
     function hasSales(row) {
+        if (row.groups.some((group) => Number(group.componentDemand) > 0 || (group.childContributions || []).length > 0)) return true;
         const values = row.groups.map((group) => group.regularSales);
         if (values.some((value) => value != null && Number(value) > 0)) return true;
         return values.some((value) => value == null);
@@ -90,13 +94,22 @@
         el('next').disabled = rows.length === 0 || state.page >= pages - 1;
         el('filters').disabled = state.rows.length === 0;
         el('filter-count').textContent = String(t.filterCount || '%1$s / %2$s').replace('%1$s', number.format(rows.length)).replace('%2$s', number.format(state.rows.length));
-        const headings = ['group', 'purchase', 'final', 'physical', 'available', 'internalReserved', 'planningAvailable', 'sales', 'availableDays', 'stockoutDays', 'estimatedLostSales', 'appliedLostSales', 'adjustedSales', 'minimumWarehouse', 'minimumReserve', 'returns', 'coverage', 'target', 'need', 'plannedTransferIn', 'plannedTransferOut', 'transfer'];
+        const headings = ['group', 'purchase', 'final', 'physical', 'available', 'internalReserved', 'planningAvailable', 'sales', 'availableDays', 'stockoutDays', 'estimatedLostSales', 'appliedLostSales', 'adjustedSales', 'minimumWarehouse', 'minimumReserve', 'returns', 'coverage', 'ownTarget', 'customerPreorders', 'preorderAdditionalDemand', 'expectedFreeAfterPreorders', 'preorderUncoveredAfterReceipts', 'componentDemand', 'manufacturingNeed', 'target', 'need', 'plannedTransferIn', 'plannedTransferOut', 'transfer'];
         el('results').innerHTML = rows.length ? rows.slice(state.page * 25, state.page * 25 + 25).map((row) => {
             const index = state.rows.indexOf(row);
             const filterData = row.filterData || {};
             const group = filterData.group || {};
             const subgroup = (filterData.subgroups || []).length ? filterData.subgroups[filterData.subgroups.length - 1].label : '—';
             return '<section class="lps-purchase-sku"><h2>' + escape(row.sku) + ' · ' + escape(row.productName) + '</h2>' +
+                (row.coldCoverage && row.coldCoverage.enabled ? '<p>' + escape((t.coldStatuses || {})[row.coldCoverage.status] || row.coldCoverage.status) + ' · ' + escape(t.targetDays) + ': ' + display(row.coldCoverage.targetDays) + '</p>' : '') +
+                (row.stockReport ? '<div class="lps-purchase-scroll"><table class="widefat striped lps-purchase-stock"><thead><tr>' + ['group','periodExpense','physical','componentDemand','forecastBalance','excessStock','stockMonths'].map((key) => '<th>' + escape(t[key]) + '</th>').join('') + '</tr></thead><tbody>' +
+                    [{name:t.allWarehouses, ...row.stockReport.total}, ...row.groups.map((g) => ({name:g.groupName, ...row.stockReport.groups[g.groupCode]}))].map((r) => '<tr><th>' + escape(r.name) + '</th>' + ['periodExpense','physical','componentDemand','forecastBalance','excessStock','stockMonths'].map((key) => '<td data-stock-field="' + key + '">' + (key === 'stockMonths' && r[key] === 9999 ? '9999' : display(r[key])) + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>' : '') +
+                row.groups.map((g) => (g.notes || []).map((note) => '<p class="notice notice-warning inline">' + escape(g.groupName) + ': ' + escape((t.notes || {})[note] || note) + '</p>').join('')).join('') +
+                '<p><strong>' + escape(row.assembly ? (row.assembly.manufactured ? t.assemblyOnly : (row.assembly.purchasable ? t.supplierOrder : t.review)) : t.assemblyPending) + '</strong></p>' +
+                (row.assembly && (row.assembly.children || []).length ? '<p data-child-products><strong>' + escape(t.children) + ':</strong> ' + [...new Set(row.assembly.children.map((edge) => edge.child))].map((sku) => '<button type="button" class="button-link" data-child-sku="' + escape(sku) + '">' + escape(sku) + '</button>').join(', ') + '</p>' : '') +
+                row.groups.filter((g) => g.childCoverageShortfall > 0).map((g) => '<p class="notice notice-warning inline" data-child-coverage-warning><strong>' + escape(g.groupName) + ': ' + escape(t.childCoverageShortfall) + ' — ' + escape(componentNumber.format(g.childCoverageShortfall)) + '</strong><br>' + escape(t.childCoverageWarning) + '</p>').join('') +
+                (row.assembly && row.assembly.components.length ? '<details><summary>' + escape(t.components) + '</summary>' + row.assembly.components.map((c) => '<p>' + escape(c.parent) + ': ' + display(c.factor) + '</p>').join('') + '</details>' : '') +
+                (row.groups.some((g) => (g.childContributions || []).length) ? '<details><summary>' + escape(t.childContributions) + '</summary>' + row.groups.map((g) => (g.childContributions || []).map((c) => '<p><strong>' + escape(g.groupName) + ' · <button type="button" class="button-link" data-child-sku="' + escape(c.sku) + '">' + escape(c.sku) + '</button></strong>: ' + escape(t.manufacturingNeed) + ' ' + display(c.manufacturingNeed) + ' × ' + escape(t.factor) + ' ' + display(c.factor) + ' = ' + display(c.consumption) + '</p>').join('')).join('') + '</details>' : '') +
                 '<p class="lps-purchase-filter-meta">' + escape(t.productGroup) + ': ' + escape(group.label || '—') + ' · ' + escape(t.productSubgroup) + ': ' + escape(subgroup) + ' · ' + escape(t.minimumStock) + ': ' + display(filterData.minimumStock) + '</p>' +
                 '<p>' + escape(row.supplier.join(', ')) + ' · ' + escape(t.transitPool) + ': ' + display(row.transitPool) + '</p>' +
                 (row.supplierPrices || []).map((price) => '<details><summary>' + escape(t.supplierPrices) + ' · ' + escape(price.supplier) + ' #' + price.versionId + ' · ' + escape((t.supplierPriceLabels || {})[price.status] || price.status) + '</summary>' +
@@ -107,23 +120,23 @@
                 '<p>' + escape(t.supplierTransit) + ': ' + display(row.supplierTransitQuantity) + '</p>' +
                 (row.transitSources || []).map((source) => '<p><strong>' + escape(source.warehouseId) + ' · ' + escape(source.warehouseName || '') + '</strong>: ' + display(source.availableForNetworkPlanningQuantity) + ' · ' + escape((t.transitLabels || {})[source.status] || source.status) + ' · ' + escape(source.completedAt || source.asOf || '') + '</p><p>' + escape(t.supplierTransit) + ': ' + display(source.supplierInTransitAvailableQuantity) + '</p><pre>' + escape(JSON.stringify(source, null, 2)) + '</pre>').join('') +
                 '<ul>' + (row.transitWarnings || []).map((warning) => '<li>' + escape(typeof warning === 'string' ? warning : (warning.message || warning.code || '')) + '</li>').join('') + '</ul></details>' +
-                '<details><summary>' + escape(t.internalTransferAccounts) + '</summary><p>' + escape(t.internalTransferHelp) + '</p>' + (row.internalTransferAccounts || []).map((account) => '<p>#' + escape(account.documentNumber) + ' · ' + escape(account.sourceInfo || '—') + ' · ' + escape(account.sourceWarehouseId) + ': ' + display(account.quantity) + '</p>').join('') + '</details>' +
-                '<p>' + escape(t.availabilityHelp) + '</p><div class="lps-purchase-scroll"><table class="widefat striped"><thead><tr>' + headings.map((key) => '<th>' + escape(t[key]) + '</th>').join('') + '</tr></thead><tbody>' +
+                '<details><summary>' + escape(t.internalTransferAccounts) + '</summary><p>' + escape(t.internalTransferHelp) + '</p>' + (row.internalTransferAccounts || []).map((account) => '<p>#' + escape(account.documentNumber || account.documentId) + ' · ' + escape(account.sourceInfo || '—') + ' · ' + escape(account.sourceWarehouseId) + ': ' + display(account.quantity) + '</p>').join('') + '</details>' +
+                '<p>' + escape(t.availabilityHelp) + '</p><div class="lps-purchase-scroll"><table class="widefat striped lps-purchase-calculation"><thead><tr>' + headings.map((key) => '<th>' + escape(t[key]) + '</th>').join('') + '</tr></thead><tbody>' +
                 row.groups.map((group) => '<tr><th>' + escape(group.groupName) + '<small>' + escape(t.receivingWarehouse) + ': ' + group.receivingWarehouseId + '</small></th>' +
-                    '<td>' + display(group.recommendedQuantity) + '</td><td>' + (group.finalQuantity == null ? '<span class="lps-purchase-review">' + escape(t.review) + '</span>' : display(group.finalQuantity)) + '</td>' +
+                    '<td>' + display(row.assembly && row.assembly.manufactured ? 0 : group.recommendedQuantity) + '</td><td>' + (row.assembly && row.assembly.manufactured ? display(0) : (group.finalQuantity == null ? '<span class="lps-purchase-review">' + escape(t.review) + '</span>' : display(group.finalQuantity))) + '</td>' +
                     ['physical', 'available', 'internalReserved', 'planningAvailable', 'regularSales'].map((key) => '<td>' + display(group[key]) + '</td>').join('') +
                     ['availableDays', 'stockoutDays'].map((key) => '<td>' + display((group.availability || {})[key]) + '</td>').join('') +
                     '<td>' + display(group.demand.estimatedLostSales) + '</td>' +
                     '<td>' + display(group.demand.appliedLostSales) + '</td><td>' + display(group.demand.adjustedSales) + '</td>' +
                     '<td>' + escape(group.minimumWarehouseName || group.minimumWarehouseId || '—') + '</td><td>' + display(group.minimumReserve) + '</td>' +
-                    ['returns', 'coverageDays', 'target', 'needBeforeReceipts'].map((key) => '<td>' + display(group[key]) + '</td>').join('') +
+                    ['returns', 'coverageDays', 'ownTarget', 'customerPreorders', 'preorderAdditionalDemand', 'expectedFreeAfterPreorders', 'preorderUncoveredAfterReceipts', 'componentDemand', 'manufacturingNeed', 'target', 'needBeforeReceipts'].map((key) => '<td>' + display(group[key]) + '</td>').join('') +
                     '<td>' + display(group.plannedTransferIn) + '</td><td>' + display(group.plannedTransferOut) + '</td>' +
                     '<td>' + group.transfers.map((transfer) => escape(transfer.fromName) + ': ' + display(transfer.quantity)).join('<br>') + (group.transferOut > 0 ? '<br>−' + display(group.transferOut) : '') + '</td></tr>').join('') +
                 '</tbody></table></div><details><summary>' + escape(t.details) + '</summary><form data-edit-form="' + index + '">' + row.groups.map((group) =>
                     '<fieldset data-group="' + escape(group.groupCode) + '"><legend>' + escape(group.groupName) + '</legend><p>' + escape(t.supplyFromGroupCode) + ': ' + escape(group.supplyFromGroupCode ? (row.groups.find((item) => item.groupCode === group.supplyFromGroupCode) || {}).groupName || group.supplyFromGroupCode : t.directSupplier) + '</p><div class="lps-purchase-inputs">' +
-                    ['inTransit', 'openOrders', 'pack', 'moq'].map((key) => input(key, group.inputs[key], t[key])).join('') +
-                    '<label><span>' + escape(t.packRounding) + '</span><select data-field="packRounding">' + Object.entries(t.packModes).map(([key, label]) => '<option value="' + key + '"' + (group.packRounding === key ? ' selected' : '') + '>' + escape(label) + '</option>').join('') + '</select></label>' +
-                    (group.supplyFromGroupCode ? input('requiredTransfer', group.requiredTransferOverride, t.requiredTransfer) : input('quantity', group.managerQuantity, t.quantity)) + input('reason', group.managerReason, t.reason, 'text') + '</div><p>' + escape(t.demandStatus) + ': ' + escape(t.demandStatuses[group.demand.status]) + ' · ' + escape(t.estimatedLostSales) + ': ' + display(group.demand.estimatedLostSales) + ' · ' + escape(t.maxDemandMultiplier) + ': ' + display(group.demand.maxDemandMultiplier) + '</p><p>' + escape(t.packHelp) + '</p><label><input type="checkbox" data-field="receiptsReviewed"' + (group.receiptsReviewed ? ' checked' : '') + '> ' + escape(t.receiptsReviewed) + '</label><ul class="lps-purchase-review">' +
+                    (row.assembly && row.assembly.manufactured ? ['inTransit', 'openOrders'] : ['inTransit', 'openOrders', 'pack', 'moq']).map((key) => input(key, group.inputs[key], t[key])).join('') +
+                    (row.assembly && row.assembly.manufactured ? '' : '<label><span>' + escape(t.packRounding) + '</span><select data-field="packRounding">' + Object.entries(t.packModes).map(([key, label]) => '<option value="' + key + '"' + (group.packRounding === key ? ' selected' : '') + '>' + escape(label) + '</option>').join('') + '</select></label>') +
+                    (group.supplyFromGroupCode ? input('requiredTransfer', group.requiredTransferOverride, t.requiredTransfer) : (row.assembly && row.assembly.manufactured ? '' : input('quantity', group.managerQuantity, t.quantity))) + input('reason', group.managerReason, t.reason, 'text') + '</div><p>' + escape(t.demandStatus) + ': ' + escape(t.demandStatuses[group.demand.status]) + ' · ' + escape(t.estimatedLostSales) + ': ' + display(group.demand.estimatedLostSales) + ' · ' + escape(t.maxDemandMultiplier) + ': ' + display(group.demand.maxDemandMultiplier) + '</p><p>' + escape(row.assembly && row.assembly.manufactured ? t.assemblyOnly : t.packHelp) + '</p><label><input type="checkbox" data-field="receiptsReviewed"' + (group.receiptsReviewed ? ' checked' : '') + '> ' + escape(t.receiptsReviewed) + '</label><ul class="lps-purchase-review">' +
                     group.issues.map((issue) => '<li>' + escape(t.issues[issue] || issue) + '</li>').join('') + '</ul></fieldset>').join('') +
                 '<button class="button" type="submit"' + (!state.complete || state.busy ? ' disabled' : '') + '>' + escape(t.apply) + '</button></form></details></section>';
         }).join('') : (state.rows.length ? '<p class="notice notice-info inline">' + escape(t.noFilterResults) + '</p>' : '');
@@ -140,10 +153,10 @@
             busy(true);
             state.controller = new AbortController();
             try {
-                const data = await api('adjust', { token: state.token, sku: row.sku, groups: groups });
-                state.rows[Number(form.dataset.editForm)] = data.item;
+                const data = await api('adjust', { token: state.token, sku: row.sku, groups: groups, revision: state.revision });
+                state.rows = data.items; state.revision = data.draftRevision || 0;
                 render();
-                message(t.complete);
+                message(state.revision ? t.draftSaved : t.complete);
             } catch (error) {
                 state.complete = false;
                 message((error.name === 'AbortError' ? '' : (error.message || t.error) + ' ') + t.incomplete, true);
@@ -157,6 +170,7 @@
         const option = el('scenario').selectedOptions[0];
         if (!option || !option.value) return;
         const requestId = ++state.requestId;
+        state.revision = 0;
         state.rows = []; state.page = 0; state.complete = false; state.token = '';
         resetFilters();
         state.controller = new AbortController();
@@ -174,8 +188,12 @@
             do {
                 const data = await api('page', { token: state.token, page: page });
                 if (requestId !== state.requestId) return;
-                state.rows.push(...data.items); state.complete = data.complete; page = data.page;
+                if (data.replaceItems) state.rows = data.items;
+                else state.rows.push(...data.items);
+                state.complete = data.complete; page = data.page; state.revision = data.draftRevision || 0;
                 parameters.snapshotContext = data.context;
+                parameters.currentStockCapture = data.currentStockCapture;
+                if (data.currentStockCapture) el('context').textContent += ' · ' + t.currentStockCapture + ': ' + data.currentStockCapture.capturedAt;
                 el('parameters').textContent = JSON.stringify(parameters, null, 2);
                 message(t.loading + ' ' + t.loaded + ': ' + data.loaded + ' / ' + data.total);
                 if (data.warnings.length) {
@@ -184,13 +202,22 @@
                 }
                 render();
             } while (!state.complete);
-            message(t.complete);
+            if (state.revision) { rememberDraft(state.token); await refreshDrafts().catch(() => {}); }
+            message(state.revision ? t.draftSaved : t.complete);
         } catch (error) {
             state.complete = false;
             message((error.name === 'AbortError' ? '' : error.message + ' ') + t.incomplete, true);
         } finally { if (requestId === state.requestId) busy(false); }
     });
     el('cancel').addEventListener('click', () => { if (state.controller) state.controller.abort(); });
+    root.addEventListener('click', (event) => {
+        const link = event.target.closest('[data-child-sku]');
+        if (!link) return;
+        const index = state.rows.findIndex((row) => row.sku.trim().toUpperCase() === link.dataset.childSku.trim().toUpperCase());
+        if (index < 0) return;
+        resetFilters(); state.page = Math.floor(index / 25); render();
+        root.querySelector('[data-edit-form="' + index + '"]').closest('section').scrollIntoView({ block: 'start' });
+    });
     el('prev').addEventListener('click', () => { if (state.page > 0) { state.page--; render(); } });
     el('next').addEventListener('click', () => { state.page++; render(); });
     el('scenario').addEventListener('change', () => {
@@ -215,9 +242,48 @@
         if (!state.complete || state.busy) return;
         const form = document.createElement('form');
         form.method = 'POST'; form.action = config.exportUrl; form.hidden = true;
-        Object.entries({ action: 'lps_purchase_export', _wpnonce: config.nonce, token: state.token, format: button.dataset.export }).forEach(([name, value]) => {
+        Object.entries({ action: 'lps_purchase_export', _wpnonce: config.nonce, token: state.token, revision: state.revision, format: button.dataset.export }).forEach(([name, value]) => {
             const field = document.createElement('input'); field.name = name; field.value = value; form.appendChild(field);
         });
         document.body.appendChild(form); form.submit(); form.remove();
     }));
+    function rememberDraft(token) {
+        try {
+            const url = new URL(window.location.href);
+            url.searchParams.set('purchase_draft', token);
+            window.history.replaceState(null, '', url);
+        } catch (_) { /* Embedded fixture or restricted history does not affect saving. */ }
+    }
+    async function refreshDrafts() {
+        if (!el('drafts')) return;
+        const data = await api('drafts', {});
+        el('drafts').innerHTML = '<option value="">—</option>' + (data.items || []).map(d =>
+            '<option value="' + escape(d.token) + '">' + escape(d.title + ' · ' + d.created_at + ' UTC') + '</option>').join('');
+        el('drafts').value = state.token;
+    }
+    async function openDraft(token) {
+        if (!token || state.busy) return;
+        const requestId = ++state.requestId;
+        state.controller = new AbortController(); busy(true); message(t.loading);
+        try {
+            const data = await api('open', {token});
+            if (requestId !== state.requestId) return;
+            state.token = data.token; state.revision = data.revision;
+            state.rows = data.items; state.complete = true; state.page = 0;
+            resetFilters();
+            el('parameters').textContent = JSON.stringify(data, (key,value) => key === 'items' ? undefined : value, 2);
+            el('context').textContent = data.scenario.name + ' · v' + data.scenario.version + ' · ' + data.query.period.from + ' — ' + data.query.period.to
+                + ' · ' + t.currentStockCapture + ': ' + ((data.currentStockCapture || {}).capturedAt || data.createdAt);
+            el('warnings').hidden = true;
+            if (!Array.from(el('drafts').options).some(option => option.value === token)) {
+                el('drafts').add(new Option(data.scenario.name + ' · ' + data.createdAt, token));
+            }
+            el('drafts').value = token;
+            rememberDraft(token); render(); message(t.draftOpened);
+        } catch(error) { state.complete = false; message(error.message || t.error, true); }
+        finally { if (requestId === state.requestId) busy(false); }
+    }
+    if (el('open')) el('open').addEventListener('click', () => openDraft(el('drafts').value));
+    const resume = new URLSearchParams(window.location.search).get('purchase_draft');
+    if (resume && /^[a-f0-9]{32}$/.test(resume)) openDraft(resume);
 }());

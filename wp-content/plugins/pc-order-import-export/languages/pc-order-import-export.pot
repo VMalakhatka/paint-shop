@@ -3173,3 +3173,380 @@ msgstr ""
 
 msgid "Customer account check unavailable."
 msgstr ""
+
+msgid "Select a file format and quantity option."
+msgstr ""
+
+msgid "Commercial offer"
+msgstr ""
+
+msgid "Standard price list"
+msgstr ""
+
+msgid "Available stock: Kyiv + Odesa"
+msgstr ""
+
+msgid "One unit per product"
+msgstr ""
+
+msgid "Description"
+msgstr ""
+
+msgid "Your price, %s"
+msgstr ""
+
+msgid "Photo"
+msgstr ""
+
+msgid "Embedded photos: %1$s of %2$s. Other rows contain product links."
+msgstr ""
+
+msgid "Excel format"
+msgstr ""
+
+msgid "Quantity in the offer"
+msgstr ""
+
+msgid "A table with category groups and subgroups: SKU, barcode, name, description, customer and retail prices, unit, pack size, stock, a blank order column and photo. Missing photos are replaced with product links. Stock quantities use Kyiv + Odesa, not the quantities in the source document."
+msgstr ""
+
+msgid "Retail price, %s"
+msgstr ""
+
+msgid "Unit of measure"
+msgstr ""
+
+msgid "Units per pack"
+msgstr ""
+
+msgid "Could not load pack quantities from Folio. Check the Java service update and API token, then prepare the mailing again."
+msgstr ""
+
+msgid "During preparation, groups with identical file contents are merged. The group count may decrease; each recipient still receives a separate email."
+msgstr ""
+
+msgid "Need additional product information, another data format (XML or another format), or direct links to higher-resolution photos for your website? Contact us with your request and we will discuss what we can provide."
+msgstr ""
+
+msgid "Group"
+msgstr ""
+
+msgid "Subgroup"
+msgstr ""
+
+msgid "Select between 1 and 20 Folio accounts for one customer."
+msgstr ""
+
+msgid "Duplicate or invalid accounts selected."
+msgstr ""
+
+msgid "Combined account confirmation"
+msgstr ""
+
+msgid "Payment details are unavailable."
+msgstr ""
+
+msgid "Payment recipient"
+msgstr ""
+
+msgid "Tax ID"
+msgstr ""
+
+msgid "IBAN"
+msgstr ""
+
+msgid "Bank"
+msgstr ""
+
+msgid "Bank code"
+msgstr ""
+
+msgid "Payment details"
+msgstr ""
+
+msgid "Selected account totals are combined once. Original Folio accounts and Woo orders remain separate. This is not a calculation of unpaid debt."
+msgstr ""
+
+msgid "Before payment, agree the amount with your manager, including any payments already made."
+msgstr ""
+
+msgid "Include configured payment details"
+msgstr ""
+
+msgid "Update preview"
+msgstr ""
+
+msgid "Download confirmation Excel"
+msgstr ""
+
+msgid "Combine selected accounts for confirmation"
+msgstr ""
+
+msgid "Select account for combined confirmation"
+msgstr ""
+
+msgid "Select up to 20 accounted invoices for this customer. Selection is kept when changing document pages."
+msgstr ""
+
+msgid "Clear selection"
+msgstr ""
+
+msgid "Save as"
+msgstr ""
+
+msgid "Ordinary draft"
+msgstr ""
+
+msgid "Preorder invoice"
+msgstr ""
+
+msgid "Shopping mode"
+msgstr ""
+
+msgid "Purchase"
+msgstr ""
+
+msgid "Draft"
+msgstr ""
+
+msgid "Selected draft"
+msgstr ""
+
+msgid "Select a draft"
+msgstr ""
+
+msgid "Open draft"
+msgstr ""
+
+msgid "New draft"
+msgstr ""
+
+msgid "Create draft"
+msgstr ""
+
+msgid "Draft: no stock reservation. Prices and availability are checked when ordering."
+msgstr ""
+
+msgid "Choose a variant"
+msgstr ""
+
+msgid "Edit draft quantities"
+msgstr ""
+
+msgid "Set quantity to zero to remove an item."
+msgstr ""
+
+msgid "Save quantities"
+msgstr ""
+
+msgid "Select or create a draft first."
+msgstr ""
+
+msgid "Saved to draft."
+msgstr ""
+
+msgid "Could not confirm the save. Open the draft and check it before trying again."
+msgstr ""
+
+msgid "Enter a positive whole quantity."
+msgstr ""
+
+msgid "Select an editable draft belonging to your account."
+msgstr ""
+
+msgid "Enter a draft title (up to 120 characters)."
+msgstr ""
+
+msgid "Could not save the draft."
+msgstr ""
+
+msgid "This product is not available in the catalogue."
+msgstr ""
+
+msgid "The draft changed. Reload it before editing quantities."
+msgstr ""
+
+msgid "Invalid draft request."
+msgstr ""
+
+msgid "How to work with a draft?"
+msgstr ""
+
+msgid "Illustrated instructions (PDF, Ukrainian; new tab)"
+msgstr ""
+
+msgid "Training example; enlarge in a new tab"
+msgstr ""
+
+msgid "Build a draft"
+msgstr ""
+
+msgid "Sign in, open the catalogue and switch Purchase to Draft. Choose a saved draft or open New draft, enter a title and press Create draft."
+msgstr ""
+
+msgid "Enter a positive whole quantity and press Add to draft. Stock does not limit the quantity. For a variable product, choose every option first. Adding the same variant again increases its quantity."
+msgstr ""
+
+msgid "The list is saved directly to the selected draft, not to the cart. It does not reserve stock, create a Folio document or confirm payment."
+msgstr ""
+
+msgid "Review and edit"
+msgstr ""
+
+msgid "Press Open draft, or find it in My account > My orders. Open Edit draft quantities, change the numbers and press Save quantities. Zero removes a line."
+msgstr ""
+
+msgid "Prices in the draft are provisional. An already submitted draft is not editable here. If a save is not confirmed, reopen the draft and check it before repeating the action."
+msgstr ""
+
+msgid "Order the available goods"
+msgstr ""
+
+msgid "In Draft processing, choose Load available quantities into the cart. Review the requested quantity, the quantity going to the cart and the remainder going to Folio."
+msgstr ""
+
+msgid "After confirmation, available goods REPLACE the current cart at current prices. Save your current cart separately first if needed. The unavailable remainder stays in the draft and is recorded as a non-accounting Folio document."
+msgstr ""
+
+msgid "Open the cart, check warehouses and totals, then complete checkout. Moving goods to the cart is not placing an order. If everything is available, no Folio remainder document is needed."
+msgstr ""
+
+msgid "Save to Folio / preorder"
+msgstr ""
+
+msgid "To send the entire list, open Draft processing and select Ordinary draft or Preorder invoice in Save as. Then press Send the entire draft to a non-accounting Folio document."
+msgstr ""
+
+msgid "Review Preview without recording. Only Confirm non-accounting Folio document records it. Cancel leaves the Folio document uncreated. The current cart does not change."
+msgstr ""
+
+msgid "Ordinary draft keeps the list for coordination. Preorder invoice is marked PRD in Folio and is included in the preorder reserve for six months. Neither option reserves or writes off current warehouse stock, confirms payment or guarantees delivery."
+msgstr ""
+
+msgid "Agree payment and delivery dates with the manager. The automatic out-of-stock remainder is not the same as a manually selected preorder."
+msgstr ""
+
+msgid "If something went wrong"
+msgstr ""
+
+msgid "If the Folio warehouse is not configured, ask the manager. If the document is already linked, do not create another copy. For an error or unknown result, send the manager the draft number and message; check existing documents before repeating confirmation."
+msgstr ""
+
+msgid "All brands"
+msgstr ""
+
+msgid "All categories"
+msgstr ""
+
+msgid "All products"
+msgstr ""
+
+msgid "All selected topics"
+msgstr ""
+
+msgid "An interest is no longer available. Review your selections."
+msgstr ""
+
+msgid "Catalogue brand"
+msgstr ""
+
+msgid "Choose topics and products for email mailings. Save using the account Save changes button. Waiting-list notices are configured separately in Waiting list."
+msgstr ""
+
+msgid "Customer subscriptions"
+msgstr ""
+
+msgid "Enable at least one interest rule, or choose all products."
+msgstr ""
+
+msgid "Interest %s"
+msgstr ""
+
+msgid "My subscriptions and notifications"
+msgstr ""
+
+msgid "New products and news"
+msgstr ""
+
+msgid "Only the interests below"
+msgstr ""
+
+msgid "Price lists"
+msgstr ""
+
+msgid "Product interests"
+msgstr ""
+
+msgid "Product interests could not be checked. Try again."
+msgstr ""
+
+msgid "Promotions and special offers"
+msgstr ""
+
+msgid "Stock arrivals"
+msgstr ""
+
+msgid "The customer controls these preferences in account details. Waiting-list consent is separate."
+msgstr ""
+
+msgid "Topic"
+msgstr ""
+
+msgid "Use this rule"
+msgstr ""
+
+msgid "Within a rule, both brand and category must match. Rules are combined. Categories include subcategories. Enable a rule with All brands and All categories for unrestricted news or promotions."
+msgstr ""
+
+msgid "Automatic: news, price list or arrivals by mailing type"
+msgstr ""
+
+msgid "Customers who do not match are excluded before preparation. Changed preferences are checked again before sending. Review the recipient count and file previews before starting."
+msgstr ""
+
+msgid "Excluded before preparation (email, unsubscribe or interests): %s"
+msgstr ""
+
+msgid "For messages without a file, specify the brand and category discussed. For files, interests are checked against each product and the attachment contains only matching products."
+msgstr ""
+
+msgid "No brand specified"
+msgstr ""
+
+msgid "No category specified"
+msgstr ""
+
+msgid "Subscription audience"
+msgstr ""
+
+msgid "No selected customer subscribes to this topic and product selection."
+msgstr ""
+
+msgid "Unavailable selection — choose again"
+msgstr ""
+
+#: inc/broadcast-view.php
+#, php-format
+msgid "Photos checked: %1$s of %2$s. Unavailable after retry: %3$s."
+msgstr ""
+
+msgid "Parcel locker"
+msgstr ""
+
+msgid "Nova Poshta branch"
+msgstr ""
+
+msgid "Courier delivery"
+msgstr ""
+
+msgid "Nova Poshta destination selected at checkout"
+msgstr ""
+
+msgid "Pickup point is not saved. Check before creating a shipment."
+msgstr ""
+
+msgid "This is the choice saved with the order. Check the shipment preparation below for any later changes agreed with the customer."
+msgstr ""
+
+msgid "Recipient and address saved in WooCommerce"
+msgstr ""

@@ -56,6 +56,10 @@ function pc_folio_documents_enqueue_assets(int $manager_customer_id = 0): void {
         'invoiceEmail' => (string) (get_userdata((int) $context['user_id'])->user_email ?? ''),
         'managerCustomerId' => $manager_customer_id,
         'approvalUrl' => $manager_customer_id > 0 && class_exists('PaintCore\\PCOE\\CustomerApproval') ? \PaintCore\PCOE\CustomerApproval::url(['customer_id' => $manager_customer_id]) : '',
+        'bundleLabel' => __('Combine selected accounts for confirmation', 'pc-order-import-export'),
+        'bundleSelect' => __('Select account for combined confirmation', 'pc-order-import-export'),
+        'bundleHint' => __('Select up to 20 accounted invoices for this customer. Selection is kept when changing document pages.', 'pc-order-import-export'),
+        'bundleClear' => __('Clear selection', 'pc-order-import-export'),
         'approvalLabel' => __('Customer confirmation', 'pc-folio-customer-balance'),
         'managerNonce' => $manager_customer_id > 0 ? wp_create_nonce('pcoe_manager') : '',
         'labels'  => [
@@ -178,6 +182,7 @@ function pc_folio_documents_render_endpoint(int $manager_customer_id = 0): void 
         </header>
 
         <form class="pc-folio-documents__filters" data-pc-documents-form>
+            <label><span><?php esc_html_e('Preorder invoices', 'pc-folio-customer-balance'); ?></span><input type="checkbox" name="preorders_only" value="1"> <?php esc_html_e('Preorder invoices from the last six calendar months through period end; period start and document types are ignored.', 'pc-folio-customer-balance'); ?></label>
             <label><span><?php esc_html_e('Period start', 'pc-folio-customer-balance'); ?></span><input type="date" name="date_from" value="<?php echo esc_attr($date_from); ?>" max="<?php echo esc_attr($date_to); ?>" required></label>
             <label><span><?php esc_html_e('Period end', 'pc-folio-customer-balance'); ?></span><input type="date" name="date_to" value="<?php echo esc_attr($date_to); ?>" max="<?php echo esc_attr($date_to); ?>" required></label>
             <fieldset>
@@ -428,8 +433,10 @@ function pc_folio_documents_ajax_list(): void {
         pc_folio_documents_send_error($context);
     }
 
+    $preorders_only = !empty($_POST['preorders_only']);
     $date_from = isset($_POST['date_from']) ? sanitize_text_field(wp_unslash($_POST['date_from'])) : '';
     $date_to = isset($_POST['date_to']) ? sanitize_text_field(wp_unslash($_POST['date_to'])) : '';
+    if ($preorders_only) $date_from = $date_to;
     if (!pc_folio_balance_valid_date($date_from)
         || !pc_folio_balance_valid_date($date_to)
         || $date_from > $date_to
@@ -438,12 +445,13 @@ function pc_folio_documents_ajax_list(): void {
     }
     $from = new DateTimeImmutable($date_from);
     $to = new DateTimeImmutable($date_to);
-    if ((int) $from->diff($to)->format('%a') > 365) {
+    if (!$preorders_only && (int) $from->diff($to)->format('%a') > 365) {
         wp_send_json_error(['message' => __('The document period must not exceed 366 days.', 'pc-folio-customer-balance')], 400);
     }
 
     $raw_types = isset($_POST['types']) ? sanitize_text_field(wp_unslash($_POST['types'])) : '';
     $types = array_values(array_unique(array_filter(explode(',', $raw_types))));
+    if ($preorders_only) $types = ['ACCOUNT'];
     if (!$types || array_diff($types, ['ACCOUNT', 'EXPENSE', 'PAYMENT'])) {
         wp_send_json_error(['message' => __('Select at least one valid document type.', 'pc-folio-customer-balance')], 400);
     }
@@ -463,6 +471,10 @@ function pc_folio_documents_ajax_list(): void {
         'types' => implode(',', $types),
         'limit' => $limit,
     ];
+    if ($preorders_only) {
+        $query['preordersOnly'] = 'true';
+        $query['types'] = 'ACCOUNT';
+    }
     if ($cursor !== '') {
         $query['cursor'] = $cursor;
     }
@@ -476,6 +488,9 @@ function pc_folio_documents_ajax_list(): void {
     }
     if (!is_array($data['documents'] ?? null)) {
         pc_folio_documents_send_error(new WP_Error('invalid_document_list', __('Folio returned an invalid document list.', 'pc-folio-customer-balance'), ['status' => 502]));
+    }
+    if ($preorders_only && empty($data['filters']['preordersOnly'])) {
+        pc_folio_documents_send_error(new WP_Error('folio_preorder_version', __('Update the Folio service and rebuild the debtors snapshot to use preorder balances.', 'pc-folio-customer-balance'), ['status' => 503]));
     }
     $data['documents'] = array_map(static function ($document): array {
         return pc_folio_documents_prepare_document(is_array($document) ? $document : []);

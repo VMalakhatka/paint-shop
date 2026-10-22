@@ -21,6 +21,21 @@ final class FiscalizationService
     /** @return array<string,mixed>|\WP_Error */
     public function execute(array $input, string $mode = 'preview'): array|\WP_Error
     {
+        $key = is_scalar($input['operation_key'] ?? null) ? trim((string) $input['operation_key']) : '';
+        if (!$this->operations->lock($key)) {
+            return new \WP_Error('operation_busy', 'The operation is already being processed.', ['status' => 409]);
+        }
+        try {
+            return $this->executeLocked($input, $mode);
+        } catch (\Throwable) {
+            return new \WP_Error('operation_processing_failed', 'The operation was interrupted. Check its saved state before retrying.', ['status' => 500]);
+        } finally {
+            $this->operations->unlock($key);
+        }
+    }
+
+    private function executeLocked(array $input, string $mode): array|\WP_Error
+    {
         $mode = strtolower(trim($mode));
         if (!in_array($mode, ['preview', 'validate', 'fiscalize'], true)) {
             return new \WP_Error('invalid_mode', 'mode must be preview, validate, or fiscalize.', ['status' => 400]);
@@ -92,10 +107,12 @@ final class FiscalizationService
 
         $environment = $this->assertSafeEnvironment($token);
         if (is_wp_error($environment)) {
+            $this->storePreflightError($command['operation_key'], $environment, 'profile', 'ENVIRONMENT_FAILED');
             return $environment;
         }
-        $shift = $this->ensureShift($token);
+        $shift = $this->ensureShift($token, $operation);
         if (is_wp_error($shift)) {
+            $this->storePreflightError($command['operation_key'], $shift, 'shift', 'SHIFT_FAILED');
             return $shift;
         }
 
@@ -136,6 +153,20 @@ final class FiscalizationService
 
     /** @return array<string,mixed>|\WP_Error */
     public function reconcile(string $operation_key): array|\WP_Error
+    {
+        if (!$this->operations->lock($operation_key)) {
+            return new \WP_Error('operation_busy', 'The operation is already being processed.', ['status' => 409]);
+        }
+        try {
+            return $this->reconcileLocked($operation_key);
+        } catch (\Throwable) {
+            return new \WP_Error('operation_processing_failed', 'The operation was interrupted. Check its saved state before retrying.', ['status' => 500]);
+        } finally {
+            $this->operations->unlock($operation_key);
+        }
+    }
+
+    private function reconcileLocked(string $operation_key): array|\WP_Error
     {
         $operation = $this->operations->find($operation_key);
         if (!$operation) {
@@ -220,40 +251,30 @@ final class FiscalizationService
     }
 
     /** @return string|\WP_Error */
-    private function ensureShift(string $token): string|\WP_Error
+    private function ensureShift(string $token, array $operation): string|\WP_Error
     {
-        $response = $this->api->activeShift($token);
-        if ($response['ok']) {
-            $id = $this->activeShiftId($response['body']);
-            if ($id !== '') {
-                return $id;
-            }
+        $manager = new ShiftManager($this->config, $this->api, $this->operations);
+        $result = $manager->ensure($token, $this->config->shiftPolicy() === 'open_if_missing');
+        if (is_wp_error($result)) {
+            $data = (array) $result->get_error_data();
+            if (!empty($data['shift_id'])) $this->operations->update($operation['operation_key'], ['shift_id'=>$data['shift_id']]);
+            return $result;
         }
-        if ($this->config->shiftPolicy() !== 'open_if_missing') {
-            return new \WP_Error('open_shift_required', 'An opened Checkbox shift is required. This plugin never closes shifts.', ['status' => 409]);
-        }
-        $shift_id = wp_generate_uuid4();
-        $opened = $this->api->openShift($token, $shift_id);
-        if (!$opened['ok']) {
-            return $this->apiError($opened, 'Checkbox shift could not be opened.');
-        }
-        for ($attempt = 0; $attempt < 8; $attempt++) {
-            if ($attempt > 0) {
-                usleep(500000);
-            }
-            $state = $this->api->getShift($token, $shift_id);
-            if (!$state['ok']) {
-                continue;
-            }
-            $status = strtoupper((string) ($state['body']['status'] ?? ''));
-            if ($status === 'OPENED') {
-                return $shift_id;
-            }
-            if ($status === 'CLOSED') {
-                return new \WP_Error('shift_open_failed', 'Checkbox closed the shift while it was being opened.', ['status' => 409]);
-            }
-        }
-        return new \WP_Error('shift_open_pending', 'Checkbox accepted the shift but it is not OPENED yet. Retry after checking its state.', ['status' => 409]);
+        return $result['shift_id'];
+    }
+
+    private function storePreflightError(string $key, \WP_Error $error, string $stage, string $status): void
+    {
+        $data = (array) $error->get_error_data();
+        $http = (int) ($data['http_code'] ?? 0);
+        $prefix = '[' . (($data['stage'] ?? '') ?: $stage) . '] ';
+        $message = $this->api->safeMessage($error->get_error_message());
+        $this->operations->update($key, [
+            'status'=>$status,
+            'http_code'=>$http,
+            'error_code'=>$error->get_error_code(),
+            'error_message'=>str_starts_with($message, $prefix) ? $message : $prefix . $message,
+        ]);
     }
 
     /** @param array<string,mixed> $body */
@@ -304,7 +325,7 @@ final class FiscalizationService
     }
 
     /** @param array<string,mixed> $response */
-    private function apiError(array $response, string $fallback): \WP_Error
+    private function apiError(array $response, string $fallback, string $stage = ''): \WP_Error
     {
         $status = (int) $response['http_code'];
         if ($status < 400 || $status > 599) {
@@ -313,7 +334,7 @@ final class FiscalizationService
         return new \WP_Error(
             (string) ($response['error_code'] ?: 'checkbox_error'),
             (string) ($response['error_message'] ?: $fallback),
-            ['status' => $status]
+            ['status' => $status, 'http_code'=>(int) $response['http_code'], 'stage'=>$stage]
         );
     }
 
@@ -337,6 +358,10 @@ final class FiscalizationService
             'checkbox_receipt_id' => (string) ($operation['checkbox_receipt_id'] ?? ''),
             'fiscal_code' => (string) ($operation['fiscal_code'] ?? ''),
             'attempts' => (int) $operation['attempts'],
+            'http_code' => (int) ($operation['http_code'] ?? 0),
+            'error_code' => (string) ($operation['error_code'] ?? ''),
+            'error_message' => (string) ($operation['error_message'] ?? ''),
+            'shift_id' => (string) ($operation['shift_id'] ?? ''),
             'updated_at' => (string) $operation['updated_at'],
         ];
     }

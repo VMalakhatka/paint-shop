@@ -4,35 +4,8 @@ add_action('wp_enqueue_scripts', function() {
     wp_enqueue_style('generatepress-child-style', get_stylesheet_uri(), [], (string) filemtime(get_stylesheet_directory() . '/style.css'));
 });
 
-// Хлебные крошки: меняем разделитель
-add_filter('woocommerce_breadcrumb_defaults', function($defaults) {
-    $defaults['delimiter'] = ' <span class="breadcrumb-delimiter">→</span> ';
-    return $defaults;
-});
-
-
-// Contextual category URLs are owned by PC Wholesale Quick Order, not the theme.
-
-add_filter('psu_products_per_page', fn()=>24);
-
-/** ================= Stock Locations UI: опциональный кастом лейблов ============== */
-/*
-// Включай ТОЛЬКО если нужны свои аббревиатуры, отличные от перевода плагина
-add_filter('slu_ui_labels', function($L){
-    $L['from']       = 'Зі складу';
-    $L['others']     = 'Інші скл.';
-    $L['total']      = 'Загал.';
-    $L['allocation'] = 'Списання';
-    // $L['in_cart']  = 'В кошику'; // при желании
-    return $L;
-});
-*/
-
-/** =============== Чек-аут: фиксируем дату создания ордера ======================= */
-add_action('woocommerce_checkout_create_order', function(\WC_Order $order, $data){
-    // Зафиксировать «сейчас» с учётом таймзоны WP
-    $order->set_date_created( current_time('timestamp') );
-}, 10, 2);
+// Store behaviour belongs to plugins: Paint Shop UX (breadcrumbs),
+// PSU Products Per Page (24 by default), Paint Core (checkout creation date).
 
 // ВЕРХНИЙ БАР С ЛОГОТИПОМ (inline SVG) НАД ШАПКОЙ ТЕМЫ
 add_action( 'generate_before_header', 'lavka_topbar', 1 );

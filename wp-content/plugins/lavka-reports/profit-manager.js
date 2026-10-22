@@ -27,16 +27,16 @@
         let sequence=0;
         return ['KYIV','ODESA'].map(city=>{
             const kyiv=city==='KYIV', name=kyiv?t.kyiv:t.odesa, end=kyiv?38:31;
-            const rows=Array.from({length:end},()=>Array(9).fill('')), headings=[1,3], merges=[], used=new Set();
+            const rows=Array.from({length:end},()=>Array(9).fill('')), headings=[1,3], merges=[], used=new Set(), rowIds={};
             const result=(data.cities||[]).find(c=>c.city===city)||{};
             rows[0]=['№',t.fields.label,t.fields.expenseCodes,t.fields.operationTypes,t.fields.purposeCodes,t.fields.cashWarehouses,t.fields.bankWarehouses,t.manualTemplateAmount,t.siteAmount];
             rows[1]=['',t.reportMonth,'','','','','',data.month,data.month];
             rows[2][1]=name+' — '+t.cityExpenses;
-            const put=(r,label,amount)=>{rows[r-1][0]=++sequence;rows[r-1][1]=label;rows[r-1][8]=number(amount);};
+            const put=(r,label,amount,id)=>{if(id)rowIds[r-1]=city+':'+id;rows[r-1][0]=++sequence;rows[r-1][1]=label;rows[r-1][8]=number(amount);};
             const lines=Array.isArray(data.expenseLines)?data.expenseLines:[];
             const expense=(r,id,fallback)=>{
                 used.add(id);const line=lines.find(l=>l.lineId===id&&l.city===city);
-                put(r,line?.label||fallback||t.unavailable,line?.amount);
+                put(r,line?.label||fallback||t.unavailable,line?.amount,'expense:'+id);
                 if(!line){rows[r-1][2]=t.templateRuleUnavailable;return;}
                 const f=line.filters, na=line.source==='NOT_APPLICABLE',manual=line.source&&line.source!=='FOLIO';
                 rows[r-1][2]=na?t.doNotFill:(f?.expenseCodes||[]).join(' / ')||(manual?t.manualAmount:'—');
@@ -53,24 +53,24 @@
                 [9,'ADVERTISING'],[10,'TRANSPORT_UKRAINE'],[11,'INTERNET'],[12,'PHONE']];
             layout.forEach(([r,id,label])=>expense(r,city+'_'+id,label));
             const total=kyiv?21:14, master=kyiv?25:18, base=kyiv?30:23, gross=kyiv?36:29, op=gross+1, profit=gross+2;
-            put(total,t.fields.operatingExpenses,result.operatingExpenses);headings.push(total);
+            put(total,t.fields.operatingExpenses,result.operatingExpenses,'total:operatingExpenses');headings.push(total);
             if(kyiv)expense(23,'KYIV_IMPORT_TRANSPORT');
             rows[master-1][1]=t.masterTitle;headings.push(master);
             const mk=masterClasses(data)[city];
             [['income',t.masterIncome],['returns',t.masterReturns],['netContribution',t.masterNet]].forEach(([key,label],i)=>{
-                put(master+i+1,label,mk?.[key]);
+                put(master+i+1,label,mk?.[key],'master:'+key);
                 if(i<2){const row=rows[master+i];row[2]=mk?.sku||'—';row[3]=i?t.returnInvoice:t.outgoingInvoice;row[4]='—';row[5]=mk?.warehouseId??'—';row[6]='—';}
             });
             headings.push(base);
-            put(base,t.fields.baseGrossProfit+' — '+(kyiv?t.kyivAndWholesale:name),result.baseGrossProfit);
+            put(base,t.fields.baseGrossProfit+' — '+(kyiv?t.kyivAndWholesale:name),result.baseGrossProfit,'total:baseGrossProfit');
             const grossLines=(data.grossProfitLines||[]).filter(l=>l.city===city);
             rows[base-1][5]=(grossLines[0]?.warehouseIds||[]).join(' / ');
             ['OWN_SHOPS','PARTNERS','DEALERS','CUSTOMERS','ART_SALONS'].forEach((key,i)=>{
                 const id=city+'_GROSS_'+key,line=grossLines.find(l=>l.lineId===id);used.add(id);
-                put(base+i+1,t.fields.grossProfit+' — '+(line?.label||t.grossCategoryLabels?.[key]||key),line?.amount);
+                put(base+i+1,t.fields.grossProfit+' — '+(line?.label||t.grossCategoryLabels?.[key]||key),line?.amount,'gross:'+id);
                 rows[base+i][2]=(line?.organizationTypes||[]).join(' / ');rows[base+i][5]=(line?.warehouseIds||[]).join(' / ');
             });
-            put(gross,t.grossWithMaster+' — '+name,result.grossProfit);put(op,t.fields.operatingExpenses+' — '+name,result.operatingExpenses);put(profit,t.netProfit+' — '+name,result.profit);
+            put(gross,t.grossWithMaster+' — '+name,result.grossProfit,'total:grossProfit');put(op,t.fields.operatingExpenses+' — '+name,result.operatingExpenses,'total:operatingExpenses');put(profit,t.netProfit+' — '+name,result.profit,'total:profit');
             // Manual subtotals count category rows once; authoritative API totals stay independent.
             const formulas=kyiv?{21:'SUM(H4:H20)',28:'H26-H27',30:'SUM(H31:H35)',36:'H30+H28',37:'H21',38:'H36-H37'}:
                 {14:'SUM(H4:H13)',21:'H19-H20',23:'SUM(H24:H28)',29:'H23+H21',30:'H14',31:'H29-H30'};
@@ -85,11 +85,11 @@
             if(extras.length||grossExtras.length){
                 rows.push(['',t.templateExtraRows]);headings.push(rows.length);
                 extras.forEach(line=>expense(rows.push(Array(9).fill('')),line.lineId));
-                grossExtras.forEach(line=>{rows.push(Array(9).fill(''));put(rows.length,t.fields.baseGrossProfit+' — '+line.label,line.amount);});
+                grossExtras.forEach(line=>{rows.push(Array(9).fill(''));put(rows.length,t.fields.baseGrossProfit+' — '+line.label,line.amount,'gross:'+line.lineId);});
                 notes.unshift(t.templateExtraHelp);
             }
             notes.forEach(note=>{rows.push([note]);merges.push(rows.length);});
-            return {name,city,rows,widths:[7,40,28,28,30,18,18,23,23],headerRows:headings,freezeRows:2,mergeRows:merges,rowHeight:28,landscape:true,bordered:true,manualColumn:7,reportColumn:8,copyStartRow:4,copyEndRow:end};
+            return {name,city,rows,rowIds,widths:[7,40,28,28,30,18,18,23,23],headerRows:headings,freezeRows:2,mergeRows:merges,rowHeight:28,landscape:true,bordered:true,manualColumn:7,reportColumn:8,copyStartRow:4,copyEndRow:end};
         });
     }
     function sheets(data, t) {
@@ -153,6 +153,7 @@
             return {name:city==='KYIV'?t.kyiv:t.odesa,rows,widths:[7,40,23,28,22,20,20,21,24],headerRows:headingRows,freezeRows:8,mergeRows,rowHeight:24,landscape:true};
         });
     }
-    const api={sheets,taxLabel,purpose,currentLayout,masterClasses,masterDocuments};
+    const comparisonLayout=(data,t)=>manualTemplateSheets(data,t).flatMap(s=>s.rows.flatMap((r,i)=>s.rowIds[i]?[{id:s.rowIds[i],city:s.city,number:r[0],label:r[1],heading:s.headerRows.includes(i+1)}]:[]));
+    const api={comparisonLayout,sheets,taxLabel,purpose,currentLayout,masterClasses,masterDocuments};
     if(typeof module!=='undefined'&&module.exports)module.exports=api;else scope.LavkaProfitManager=api;
 })(typeof window!=='undefined'?window:globalThis);

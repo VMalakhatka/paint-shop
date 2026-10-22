@@ -6250,3 +6250,738 @@ msgstr ""
 
 msgid "Warehouse %d is included again after a completed attempt failed. A fresh snapshot will be built; the previous error is retained in diagnostics."
 msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Select one supplier. Children and grandchildren are found automatically, including our own products and products outside the supplier filter. Review their stock and incoming quantities. Only their shortages consume components. The export contains purchasing products of the selected supplier; assembly documents are not created."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Own sales forecast with minimum stock"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Component demand from children"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Quantity to manufacture"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Child shortage breakdown"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Components per unit"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Manufactured product: calculation only, excluded from supplier order"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Purchasing product of the selected supplier"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Checking recipes and dependent products"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Component units per child"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Recalculate this product and its parents"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "The Folio assembly role is missing or differs between warehouses. Check BALL4."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "This is a child product, but its recipe is missing. Check the Folio assembly tables."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "The recipe contains an empty SKU, a non-positive coefficient or a self-reference. Correct it in Folio."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "The recipe repeats a component or has ambiguous simple parents. Check the source rows in Folio."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "The assembly chain contains a cycle. This product or one of its children requires recipe correction."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Child analytics are missing for the selected warehouses. Refresh the snapshots and start a new preview."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Review the child shortage breakdown and complete the child supply inputs. Its unknown shortage is not treated as zero."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Remove assembly consumption from the sales selection: child forecasts already calculate component consumption."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Select exactly one supplier for the purchase preview."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Assembly recipes changed. Start a new preview before exporting."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-assembly.php
+msgid "Assembly recipes are unavailable or incomplete. Update Java and start a new preview."
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "All analysed warehouses"
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Physical stock across all analysed warehouses"
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Outgoing quantity in selected period"
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Surplus stock"
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Stock coverage, months"
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Outgoing quantity follows the selected movement filters. Stock includes all analysed warehouses; stock-only warehouses contribute no movements. Surplus is current stock available for planning minus forecast, minimum stock and child needs; expected receipts are excluded. Months use actual regular demand and a 30-day month; 9999 means positive stock with no regular demand. Child needs are shown separately. A dash means missing data."
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Uncovered child demand, component units"
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "The selected order leaves child demand uncovered after reserving the own forecast and planned replenishments. Increase the quantity or review the plan."
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Assembly consumption is excluded from demand and lost-sales estimates, even when selected in the scenario. Actual outgoing quantities still follow the selected operations. Child shortages are calculated from recipes."
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Child demand coverage warning"
+msgstr ""
+
+msgid "Use cold-sensitive stock coverage"
+msgstr ""
+
+msgid "Freezes"
+msgstr ""
+
+msgid "Does not freeze"
+msgstr ""
+
+msgid "Cold sensitivity unknown"
+msgstr ""
+
+msgid "Stock for freezing products, days"
+msgstr ""
+
+msgid "Stock for non-freezing products, days"
+msgstr ""
+
+msgid "When enabled, these periods replace group stock days for each product, including children. Lead time and safety days still apply. Unknown cold sensitivity requires review."
+msgstr ""
+
+msgid "Cold sensitivity is missing or differs between warehouses. Check BALL2 before ordering."
+msgstr ""
+
+msgid "Set both cold-sensitive coverage periods between 1 and 730 days."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "Current stock read from Folio"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "The current network stock read is incomplete or changed its scope. Start a new preview."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "No other incoming orders besides current Transport and Receiving stock"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "No supplier minimum order quantity separate from pack size"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "Current Transport and Receiving stock will arrive within the lead time"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "These confirmations apply only to this scenario. Current stock is read together from Folio after loading sales history. Transit is allocated once to the single procurement group; item edits take precedence."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "Use actual sales when stockout history is unavailable, with a warning"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "Stockout correction was not calculated; the forecast uses actual sales only."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "Group replenishment is disabled because its selected minimum-stock source has MIN=0."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "Calculation notes"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "Current network stock captured"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-current-stock.php
+msgid "Current stock captured"
+msgstr ""
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Select a supplier price variant."
+msgstr ""
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "No confirmed supplier price."
+msgstr ""
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Confirm supplier availability: while stocks last."
+msgstr ""
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Total supplier order quantity"
+msgstr ""
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Supplier unit price"
+msgstr ""
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Supplier currency"
+msgstr ""
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Supplier order amount"
+msgstr ""
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Supplier price review"
+msgstr ""
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Physical stock in warehouse groups, excluding Transport and Receiving"
+msgstr ""
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Physical stock on Transport and Receiving"
+msgstr ""
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Physical stock including Transport and Receiving"
+msgstr ""
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Stock available for planning including Transport and Receiving"
+msgstr ""
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Warehouse group detail"
+msgstr ""
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Supplier order summary"
+msgstr ""
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Assembly recipe revision"
+msgstr ""
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Supply confirmations"
+msgstr ""
+
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "The export has one supplier-order row per SKU. XLSX also includes warehouse group detail. Stock totals distinguish warehouse groups from Transport and Receiving; individual warehouse stock is shown separately."
+msgstr ""
+
+#: inc/purchase-export.php inc/purchase-planning.php inc/product-analytics-export.php
+msgid "Cold sensitivity"
+msgstr ""
+
+#: inc/purchase-export.php inc/purchase-planning.php
+msgid "Remaining customer preorders"
+msgstr ""
+
+#: inc/purchase-export.php inc/purchase-planning.php
+msgid "Additional preorder demand"
+msgstr ""
+
+#: inc/purchase-export.php inc/purchase-planning.php
+msgid "Expected free stock after customer preorders"
+msgstr ""
+
+#: inc/purchase-export.php inc/purchase-planning.php
+msgid "Customer preorders not covered by current stock and expected receipts"
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Customer preorder source lines (JSON)"
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Current customer preorder data is required before ordering."
+msgstr ""
+
+#: inc/analytics-period.php
+msgid "Set the analysis period between 1 and 3650 whole days."
+msgstr ""
+
+#: inc/analytics-period.php
+msgid "Select a valid analysis period mode."
+msgstr ""
+
+#: inc/analytics-scenarios.php
+msgid "Analysis period mode"
+msgstr ""
+
+#: inc/analytics-scenarios.php
+msgid "Last N days through today"
+msgstr ""
+
+#: inc/analytics-scenarios.php
+msgid "Fixed dates"
+msgstr ""
+
+#: inc/analytics-scenarios.php
+msgid "Analysis period, days"
+msgstr ""
+
+#: inc/analytics-scenarios.php
+msgid "Relative dates are recalculated at each new report or forecast. Today is included in the number of days. The completed calculation and Excel keep their actual dates."
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Assembly role"
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Parent products"
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Child products"
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Child product"
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Parent product"
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "The export has one row per SKU, including children with zero supplier order. Parent and child lists show the assembly links. XLSX also includes warehouse group detail and individual warehouse stock."
+msgstr ""
+
+#: inc/purchase-planning.php
+msgid "Select one supplier. Children and grandchildren are found automatically, including products outside the supplier filter. Their shortages consume components. The report includes their statistics and assembly links, with zero supplier order for every child. Review the quantity to manufacture."
+msgstr ""
+
+#: inc/purchase-current-stock.php
+msgid "Java returned an outdated current stock format without customer preorders. Update and deploy the Java backend, then start a new calculation."
+msgstr ""
+
+msgid "Draft saved. Confirmed edits are saved automatically."
+msgstr ""
+
+msgid "Saved draft opened. Stock and forecast are from the original calculation date."
+msgstr ""
+
+msgid "Completed calculations are saved as separate drafts. Use Apply for each edited product before leaving. A new calculation creates a new draft."
+msgstr ""
+
+msgid "Saved order drafts"
+msgstr ""
+
+msgid "Open draft"
+msgstr ""
+
+msgid "Could not save the order draft. Please try again."
+msgstr ""
+
+msgid "The saved draft is incomplete. Start a new calculation."
+msgstr ""
+
+msgid "Complete the preview before saving a draft."
+msgstr ""
+
+msgid "This draft changed in another tab. Reopen it before saving."
+msgstr ""
+
+msgid "Saved order draft not found."
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Profit / average inventory for the period, %"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Selection"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Groups, period and warehouses"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "All selected products"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Remove from comparison"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "One-off sales are excluded. Build the report to apply this condition."
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Group profitability comparison"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Choose product group levels, dates and warehouses above, then build the report. Add each completed selection to compare groups or periods."
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Exclude one-off sales (*РАЗОВАЯ)"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Last completed report: whole selection"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Amounts are in the report currency. Average inventory is a monthly approximation. Gross profit excludes overhead expenses. Return on inventory is for the selected period, not annualized. Movement filters do not remove capital from inventory."
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Comparison row name (optional)"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Add completed report to comparison"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Download comparison CSV"
+msgstr ""
+
+
+#: inc/product-analytics.php
+msgid "Comparison rows keep their original filters and snapshot dates. They remain in this page until reload; download the comparison to keep it. Maximum 50 rows. Rows may overlap and are not summed."
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Selected conditions"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "No conditions added."
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Product group tree"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Find a group or subgroup"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Include branch"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Exclude branch"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Add condition"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Edit condition"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Remove condition"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Switch include / exclude"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "No group at this level"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Included branches are combined. Excluded branches are removed from the result. Other conditions apply together."
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Group tree requires the updated Java service. Existing conditions are preserved."
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Saved level condition"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Press Add condition to apply your selection."
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Use at most 100 valid group branches."
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Invalid group branch path."
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "The analytics response did not apply the selected group branches."
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Included condition"
+msgstr ""
+
+
+#: inc/analytics-conditions.php
+msgid "Excluded condition"
+msgstr ""
+
+
+#: inc/purchase-planning.php
+msgid "Respect MAX in purchase planning"
+msgstr ""
+
+
+#: inc/purchase-planning.php
+msgid "When disabled, this group keeps its full forecast for the supplier order, including future replenishments from the source warehouse. Folio MAX values and actual transfer limits are not changed."
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Enter up to 500 exact SKUs, one per line, with at most 100 characters each."
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "The queries returned different results. Export each query separately for review."
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Product cards could not be read. Check the Java service, API token, Paint_Ua source and 50,000-row limit, then try again."
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Lavka Folio"
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Product cards"
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Read product cards from Paint_Ua and export 54 fields in the supplied Excel column order. No Folio data is changed."
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Both queries require the legacy warehouse and markup records. Requested SKUs excluded by those conditions are listed separately. Assembly columns 55–57 are not returned by these queries."
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Query"
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Compare both queries"
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Exact SKUs, one per line. Leave empty for all eligible cards."
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Read and check"
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Export product cards XLSX"
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Reading product cards…"
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Both queries match."
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Rows returned:"
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Requested SKUs not returned:"
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Preview: first 50 rows. The Excel export contains all returned rows."
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Preparing the Excel download…"
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "SQL Server denied read access to this query. Use 1212 all fields, or ask the database administrator to allow reading card_tov."
+msgstr ""
+
+
+#: inc/folio-product-cards.php
+msgid "Listed SKUs"
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "All eligible cards"
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Load SKUs from Excel"
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Excel file"
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Column letter"
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "First data row"
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Load list"
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "XLS or XLSX, up to 5 MB. The first sheet is read. Loading replaces the list below; review it before reading cards."
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Paste exact SKUs, one per line (up to 500)."
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Reading Excel…"
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "SKUs loaded:"
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Could not read the list. Choose an XLS/XLSX file up to 5 MB, a valid column and first data row. Use up to 500 unique SKUs; formulas are not accepted."
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Read product cards from Paint_Ua and export them in the supplied Excel column order. No Folio data is changed."
+msgstr ""
+
+#: inc/folio-product-cards.php
+msgid "Both queries require the legacy warehouse and markup records. Requested SKUs excluded by those conditions are listed separately. Assembly columns 55–57 are exported empty because these queries do not return them."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-export.php
+msgid "Surplus / shortage at forecast end, before new order"
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-export.php
+msgid "No active supplier price list was saved with this calculation. Activate the supplier price list and start a new calculation."
+msgstr ""
+
+#: inc/purchase-planning.php inc/purchase-export.php
+msgid "Surplus / shortage: available stock plus confirmed receipts allocated to this group, minus forecast, minimum reserve, child demand and additional preorders. Before new purchases and proposed inter-group transfers; negative means shortage. Blank means incomplete data."
+msgstr ""

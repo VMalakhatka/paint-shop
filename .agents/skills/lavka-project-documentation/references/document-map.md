@@ -10,6 +10,7 @@
 | Безопасная точка входа | `README.md`, затем `docs/README.md` |
 | Архитектура, ownership и data flow | `docs/SYSTEM_OVERVIEW.md` |
 | Backend code map, API families, environments и development workflow | `docs/BACKEND_GUIDE.md` |
+| Consent, GA4 витрины, split/payment semantics и read-only аналитика покупателей | `docs/CUSTOMER_ANALYTICS.md`; lifecycle/contract: `lavka-customer-analytics/README.md` |
 | Sync/report/status/error workflow | `docs/OPERATIONS_RUNBOOK.md` |
 | Локальный старт, перенос и recovery платформы | `docs/BOOTSTRAP_AND_RECOVERY.md` |
 | Java image/container/env/health/deploy | `docs/JAVA_DOCKER_RUNTIME.md` |

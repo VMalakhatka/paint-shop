@@ -105,11 +105,11 @@ function pc_folio_debtors_render_page(): void {
                     <tr>
                         <th><?php esc_html_e('Folio customer', 'pc-folio-customer-balance'); ?></th>
                         <th><?php esc_html_e('Type', 'pc-folio-customer-balance'); ?></th>
-                        <th><?php esc_html_e('Total debt', 'pc-folio-customer-balance'); ?></th>
+                        <th><?php esc_html_e('Accounting balance', 'pc-folio-customer-balance'); ?></th>
                         <th><?php esc_html_e('Deferred / on sale', 'pc-folio-customer-balance'); ?></th>
                         <th><?php esc_html_e('Overdue deferred / on sale', 'pc-folio-customer-balance'); ?></th>
-                        <th><?php esc_html_e('Payments marked PRD', 'pc-folio-customer-balance'); ?></th>
-                        <th><?php esc_html_e('Payable now', 'pc-folio-customer-balance'); ?></th>
+                        <th><?php esc_html_e('Preorder invoices', 'pc-folio-customer-balance'); ?></th>
+                        <th><?php esc_html_e('Payable including preorders', 'pc-folio-customer-balance'); ?></th>
                         <th><?php esc_html_e('Customer on site', 'pc-folio-customer-balance'); ?></th>
                     </tr>
                 </thead>
@@ -173,11 +173,11 @@ function pc_folio_debtors_enqueue_assets(): void {
             ],
             'summary'       => [
                 'matchedClients'             => __('Debtors found', 'pc-folio-customer-balance'),
-                'commonDebtTotal'             => __('Total debt', 'pc-folio-customer-balance'),
+                'commonDebtTotal'             => __('Accounting balance', 'pc-folio-customer-balance'),
                 'deferredAmountTotal'         => __('Deferred / on sale', 'pc-folio-customer-balance'),
                 'overdueDeferredAmountTotal'  => __('Overdue deferred / on sale', 'pc-folio-customer-balance'),
-                'prepaymentAmountTotal'       => __('Payments marked PRD', 'pc-folio-customer-balance'),
-                'payableNowTotal'             => __('Payable now', 'pc-folio-customer-balance'),
+                'prepaymentAmountTotal'       => __('Preorder invoices', 'pc-folio-customer-balance'),
+                'payableNowTotal'             => __('Payable including preorders', 'pc-folio-customer-balance'),
             ],
             'currency' => __('UAH', 'pc-folio-customer-balance'),
             'snapshot' => [
@@ -321,6 +321,9 @@ function pc_folio_debtors_fetch(array $filters) {
         return new WP_Error('invalid_folio_debtors', __('Folio returned an invalid debtors report.', 'pc-folio-customer-balance'), ['status' => 502]);
     }
 
+    if ((int) ($data['calculationVersion'] ?? 0) < 2) {
+        return new WP_Error('folio_balance_version', __('Update the Folio service and rebuild the debtors snapshot to use preorder balances.', 'pc-folio-customer-balance'), ['status' => 503]);
+    }
     $short_names = [];
     foreach ($data['debtors'] as $debtor) {
         $short_name = trim((string) ($debtor['partner']['shortName'] ?? ''));

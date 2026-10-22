@@ -29,6 +29,7 @@ REQUIRED = (
     "docs/WORKSHOPS_GUIDE_RU.md",
     "docs/MANAGER_CUSTOMER_GUIDE_UK.md",
     "docs/FOLIO_ACCOUNTING_PRICES_MANAGER_UK.md",
+    "docs/CUSTOMER_ANALYTICS.md",
 )
 
 
@@ -40,6 +41,11 @@ class ImpactRule:
 
 
 IMPACT_RULES = (
+    ImpactRule(
+        "customer storefront analytics and anonymous sales reports",
+        ("wp-content/plugins/lavka-customer-analytics/**", "scripts/audit-customer-analytics.php", "scripts/analyze-customer-sales.php"),
+        ("docs/CUSTOMER_ANALYTICS.md", "wp-content/plugins/lavka-customer-analytics/README.md"),
+    ),
     ImpactRule(
         "manager workspace contextual guide",
         ("wp-content/plugins/pc-order-import-export/inc/ManagerHelp.php", "wp-content/plugins/pc-order-import-export/assets/manager-help.*", "wp-content/plugins/pc-order-import-export/languages/pcoe-manager-help*"),
@@ -109,6 +115,7 @@ IMPACT_RULES = (
             "wp-content/plugins/pc-order-import-export/**",
             "wp-content/plugins/paint-nova-poshta-multishipping/**",
             "wp-content/plugins/pc-checkbox-fiscalization/**",
+            "wp-content/plugins/pc-wayforpay-checkbox/**",
             "wp-content/mu-plugins/*order*.php",
             "wp-content/mu-plugins/*checkbox*.php",
             "wp-content/mu-plugins/*wayforpay*.php",
@@ -135,6 +142,7 @@ IMPACT_RULES = (
         ),
         (
             "docs/BOOTSTRAP_AND_RECOVERY.md",
+            "docs/WAYFORPAY_TEST_ACCESS.md",
             "docs/WORKSHOPS_GUIDE_RU.md",
             "docs/BACKEND_GUIDE.md",
             "docs/JAVA_DOCKER_RUNTIME.md",
@@ -146,6 +154,7 @@ IMPACT_RULES = (
         "storefront and account UI",
         (
             "wp-content/themes/generatepress-child/**",
+            "wp-content/themes/lavka-storefront/**",
             "wp-content/plugins/role-price/**",
         ),
         (
@@ -217,6 +226,7 @@ def is_documentation(path: str) -> bool:
         or (path.startswith("docs/") and path.endswith(".md"))
         or (path.startswith(".agents/skills/") and path.endswith(".md"))
         or (path.startswith("wp-content/plugins/") and path.endswith("/README.md"))
+        or (path.startswith("wp-content/themes/lavka-storefront/") and path.endswith("/README.md"))
     )
 
 
@@ -225,6 +235,7 @@ def managed_source(path: str) -> bool:
         path.startswith("wp-content/plugins/")
         or path.startswith("wp-content/mu-plugins/")
         or path.startswith("wp-content/themes/generatepress-child/")
+        or path.startswith("wp-content/themes/lavka-storefront/")
         or path.startswith(".agents/skills/")
         or path.startswith("wp-content/deploy")
         or path

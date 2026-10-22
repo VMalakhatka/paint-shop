@@ -1670,6 +1670,28 @@ if (!function_exists('pc_folio_build_delivery_info')) {
     }
 }
 
+if (!function_exists('pc_folio_order_has_verified_wayforpay_payment')) {
+    /**
+     * Only the signature-verifying adapter writes this payment evidence.
+     * Woo status/date alone (including a manual processing transition) is insufficient.
+     * Do not compare current totals: Folio can subsequently split the paid parent.
+     */
+    function pc_folio_order_has_verified_wayforpay_payment(\WC_Order $order): bool
+    {
+        $verified = $order->get_meta('_pc_wfp_verified', true);
+        return $order->get_payment_method() === 'wayforpay'
+            && $order->get_date_paid() !== null
+            && is_array($verified)
+            && is_string($verified['reference'] ?? null)
+            && $verified['reference'] !== ''
+            && $verified['reference'] === (string) $order->get_transaction_id()
+            && is_int($verified['amount_cents'] ?? null)
+            && $verified['amount_cents'] > 0
+            && ($verified['currency'] ?? '') === 'UAH'
+            && $order->get_currency() === 'UAH';
+    }
+}
+
 if (!function_exists('pc_folio_build_account_header_preview')) {
     /**
      * Build the extended Folio account header fields from Woo order data.
@@ -1702,7 +1724,8 @@ if (!function_exists('pc_folio_build_account_header_preview')) {
             $checkout_note !== '' ? $checkout_note : ($fallback_source_info !== '' ? $fallback_source_info : 'Internet order')
         );
         $additional_info = pc_folio_header_short_text(sprintf(
-            'Int %s %s',
+            '%s %s %s',
+            pc_folio_order_has_verified_wayforpay_payment($order) ? 'WFP' : 'Int',
             $order->get_order_number(),
             $ordered_at_short
         ));

@@ -32,6 +32,7 @@ final class CheckoutIntegration
         add_action('woocommerce_checkout_create_order', [$this, 'saveOrder'], 20, 2);
         add_filter('woocommerce_available_payment_gateways', [$this, 'filterPaymentGateways'], 900);
         add_action('woocommerce_review_order_after_shipping', [$this, 'renderQuoteSummary']);
+        add_action('woocommerce_cart_totals_after_shipping', [$this, 'renderQuoteSummary']);
         add_action('wp_ajax_pnpm_search_recipient_cities', [$this, 'searchCities']);
         add_action('wp_ajax_nopriv_pnpm_search_recipient_cities', [$this, 'searchCities']);
         add_action('wp_ajax_pnpm_search_recipient_points', [$this, 'searchPoints']);
@@ -42,18 +43,22 @@ final class CheckoutIntegration
 
     public function assets(): void
     {
+        if (function_exists('is_cart') && is_cart()) {
+            wp_enqueue_style('pnpm-checkout', PNPM_URL . 'assets/checkout.css', [], PNPM_VERSION);
+        }
         if (!function_exists('is_checkout') || !is_checkout() || is_order_received_page()) {
             return;
         }
         $this->enqueueAssets();
     }
 
-    public function enqueueAssets(bool $approval = false): void
+    public function enqueueAssets(bool $approval = false, bool $manager = false): void
     {
         wp_enqueue_style('pnpm-checkout', PNPM_URL . 'assets/checkout.css', [], PNPM_VERSION);
-        wp_enqueue_script('pnpm-checkout', PNPM_URL . 'assets/checkout.js', $approval ? ['jquery'] : ['jquery', 'wc-checkout'], filemtime(PNPM_DIR . 'assets/checkout.js'), true);
+        wp_enqueue_script('pnpm-checkout', PNPM_URL . 'assets/checkout.js', ($approval || $manager) ? ['jquery'] : ['jquery', 'wc-checkout'], filemtime(PNPM_DIR . 'assets/checkout.js'), true);
         wp_localize_script('pnpm-checkout', 'pnpmCheckout', [
             'approval' => $approval,
+            'manager' => $manager,
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('pnpm_checkout_directory'),
             'searching' => __('Searching Nova Poshta...', 'paint-nova-poshta-multishipping'),
@@ -78,11 +83,11 @@ final class CheckoutIntegration
     {
         echo '<section class="pnpm-checkout-fields" id="pnpm-checkout-fields">';
         echo '<h3>' . esc_html__('Nova Poshta delivery', 'paint-nova-poshta-multishipping') . '</h3>';
-        echo '<p class="pnpm-checkout-intro">' . esc_html__('Choose the destination. The site will calculate every warehouse parcel and apply your delivery policy.', 'paint-nova-poshta-multishipping') . '</p>';
+        echo '<p class="pnpm-checkout-intro">' . esc_html__('Choose the destination. Delivery is paid separately to Nova Poshta, not with the goods. The estimate and any store contribution are shown below.', 'paint-nova-poshta-multishipping') . '</p>';
 
         woocommerce_form_field('pnpm_city_label', [
             'type' => 'text',
-            'required' => $approval,
+            'required' => true,
             'class' => ['form-row-wide', 'pnpm-directory-field'],
             'label' => __('City or settlement', 'paint-nova-poshta-multishipping'),
             'placeholder' => __('Start typing and choose a city from the list', 'paint-nova-poshta-multishipping'),
@@ -93,7 +98,7 @@ final class CheckoutIntegration
 
         woocommerce_form_field('pnpm_delivery_type', [
             'type' => 'select',
-            'required' => $approval,
+            'required' => true,
             'class' => ['form-row-wide'],
             'label' => __('How to receive the parcel', 'paint-nova-poshta-multishipping'),
             'options' => [
@@ -106,7 +111,7 @@ final class CheckoutIntegration
         echo '<div id="pnpm-point-fields">';
         woocommerce_form_field('pnpm_point_label', [
             'type' => 'text',
-            'required' => $approval,
+            'required' => true,
             'class' => ['form-row-wide', 'pnpm-directory-field'],
             'label' => __('Branch or parcel locker', 'paint-nova-poshta-multishipping'),
             'placeholder' => __('Enter a number or address and choose from the list', 'paint-nova-poshta-multishipping'),
@@ -115,10 +120,11 @@ final class CheckoutIntegration
         echo '<input type="hidden" id="pnpm_point_ref" name="pnpm_point_ref" value="' . esc_attr((string) ($state['point_ref'] ?? '')) . '">';
         echo '<div class="pnpm-directory-results" id="pnpm-point-results" aria-live="polite" hidden></div>';
         echo '<div id="pnpm-point-card" class="pnpm-point-card" aria-live="polite" hidden></div></div>';
-        echo '<div class="pnpm-address-help" id="pnpm-address-help">';
+        echo '<div class="pnpm-address-help" id="pnpm-address-help"' . (($state['delivery_type'] ?? 'branch') === 'address' ? '' : ' style="display:none"') . '>';
+        echo '<p class="pnpm-point-warning" role="status">' . esc_html__('Address delivery costs more than delivery to a branch. You can choose a Nova Poshta branch in the delivery type above.', 'paint-nova-poshta-multishipping') . '</p>';
         if ($approval) woocommerce_form_field('pnpm_address', ['type'=>'text', 'class'=>['form-row-wide'],
             'label'=>__('Courier street and building', 'paint-nova-poshta-multishipping'),
-            'autocomplete'=>'shipping street-address', 'custom_attributes'=>['maxlength'=>'300']], '');
+            'autocomplete'=>'shipping street-address', 'custom_attributes'=>['maxlength'=>'300']], (string)($state['address'] ?? ''));
         else echo '<p>' . esc_html__('For courier delivery, fill in the shipping street and building in the standard address fields above.', 'paint-nova-poshta-multishipping') . '</p>';
         echo '</div>';
         echo '</section>';
@@ -165,7 +171,7 @@ final class CheckoutIntegration
         foreach ((array) ($quote['errors'] ?? []) as $message) {
             $errors->add('pnpm_quote_error', sanitize_text_field((string) $message));
         }
-        if (empty($quote['policy'])) {
+        if (empty($quote['policy']) || ($quote['recipient'] ?? []) !== $state) {
             $errors->add('pnpm_quote_missing', __('Delivery has not been calculated yet. Check the Nova Poshta destination.', 'paint-nova-poshta-multishipping'));
         }
     }
@@ -196,7 +202,7 @@ final class CheckoutIntegration
 
     public function renderQuoteSummary(): void
     {
-        if (!WC()->session || \Paint\NovaPoshta\Domain\ExternalShipmentPolicy::selected()) {
+        if (!WC()->session || !$this->novaPoshtaSelected() || \Paint\NovaPoshta\Domain\ExternalShipmentPolicy::selected()) {
             return;
         }
         $quote = (array) WC()->session->get('pnpm_quote', []);
@@ -220,12 +226,24 @@ final class CheckoutIntegration
             _n('%d parcel', '%d parcels', $shipments, 'paint-nova-poshta-multishipping'),
             $shipments
         )) . '</strong><br>';
-        echo esc_html(sprintf(
+        if (empty($quote['estimate_available'])) {
+            echo esc_html__('The delivery price will be determined by Nova Poshta. No delivery fee is included in the payment for goods.', 'paint-nova-poshta-multishipping');
+        } else {
+            echo esc_html(sprintf(
             /* translators: 1: carrier total, 2: store contribution. */
             __('Carrier total: %1$s. Store contribution: %2$s.', 'paint-nova-poshta-multishipping'),
             wp_strip_all_tags(wc_price((float) ($policy['total'] ?? 0))),
             wp_strip_all_tags(wc_price((float) ($policy['store_total'] ?? 0)))
-        ));
+            ));
+            echo '<br>' . esc_html(sprintf(
+                /* translators: %s: estimated amount payable to carrier. */
+                __('Estimated payment to Nova Poshta: %s. Final packaging and charges are confirmed by the carrier.', 'paint-nova-poshta-multishipping'),
+                wp_strip_all_tags(wc_price((float) ($policy['customer_total'] ?? 0)))
+            ));
+        }
+        if (!empty($quote['base_transport_free'])) {
+            echo '<br>' . esc_html__('Free delivery covers the base tariff only. Insurance and additional services are paid by the recipient.', 'paint-nova-poshta-multishipping');
+        }
         if (isset($policy['cod_allowed']) && !$policy['cod_allowed']) {
             echo '<br><span class="pnpm-cod-note">' . esc_html__('Cash on delivery is unavailable for this multi-warehouse delivery. Choose prepayment.', 'paint-nova-poshta-multishipping') . '</span>';
         }

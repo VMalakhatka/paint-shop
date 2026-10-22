@@ -505,8 +505,8 @@ final class SettingsPage
                                 <th><?php esc_html_e('Maximum store contribution', 'paint-nova-poshta-multishipping'); ?></th>
                             </tr></thead>
                             <tbody>
-                                <?php $this->renderPolicyTier($profile_key, 'below', $profile['below'] ?? [], __('Below the threshold', 'paint-nova-poshta-multishipping')); ?>
-                                <?php $this->renderPolicyTier($profile_key, 'above', $profile['above'] ?? [], __('At or above the threshold', 'paint-nova-poshta-multishipping')); ?>
+                                <?php $this->renderPolicyTier($profile_key, 'below', $profile['below'] ?? [], __('At or below the threshold', 'paint-nova-poshta-multishipping')); ?>
+                                <?php $this->renderPolicyTier($profile_key, 'above', $profile['above'] ?? [], __('Above the threshold', 'paint-nova-poshta-multishipping')); ?>
                             </tbody>
                         </table>
                     </div>

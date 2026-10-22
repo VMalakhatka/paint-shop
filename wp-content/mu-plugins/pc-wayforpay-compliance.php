@@ -424,7 +424,7 @@ function pc_wayforpay_render_legal_footer(): void
                 <a href="tel:<?php echo esc_attr($seller['contact_href']); ?>"><?php echo esc_html($seller['contact_phone']); ?></a>
                 <a href="mailto:<?php echo esc_attr($seller['email']); ?>"><?php echo esc_html($seller['email']); ?></a>
                 <a class="pc-legal-footer__payments" href="https://wayforpay.com/" target="_blank" rel="noopener">
-                    <img src="https://wfpstorage.s3-eu-west-1.amazonaws.com/help/1746550624_%D0%B4%D0%BB%D1%8F%20%D1%82%D0%B5%D0%BC%D0%BD%D0%BE%D0%B3%D0%BE%20%D1%84%D0%BE%D0%BD%D1%83.png" alt="WayForPay — оплата картками Visa та Mastercard" width="300" height="40">
+                    <img src="https://wfpstorage.s3-eu-west-1.amazonaws.com/help/1746550624_%D0%B4%D0%BB%D1%8F%20%D1%82%D0%B5%D0%BC%D0%BD%D0%BE%D0%B3%D0%BE%20%D1%84%D0%BE%D0%BD%D1%83.png" alt="WayForPay — оплата картками Visa та Mastercard" width="300" height="40" loading="lazy" decoding="async" data-no-lazy="1">
                 </a>
             </div>
         </div>
