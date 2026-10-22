@@ -592,3 +592,37 @@ Planned safe sequence:
 8. Should Java trust Woo-provided `folioUser=buh`, or should Java override it from its Folio auth/config?
 9. Should empty `documentNumber` mean "allocate last + 1" in Java?
 10. Are `receiverName=CLASSIC` and `folioOperationKind=*ПРЕДОПЛАТ` valid dictionary values on production?
+
+
+## Checkout payment recovery (2026-10-22, local)
+
+Owner: `pc-folio-order-link.php` and its `pc-folio-order-link/recovery.php` companion.
+The automatic and manual create paths share a reentrant per-order MySQL advisory
+lock. Reload Woo CRUD data under that lock, persist `_folio_create_attempted_at`
+before HTTP, and never automatically retry an attempted request after a timeout,
+invalid response or error. A saved response can still be applied/split using the
+existing actions. Do not clear the attempt marker without explicit reconciliation.
+This guard does not query Folio for externally created documents.
+
+`_folio_checked_payment_method` and `_folio_payment_checked_at` record the method
+used by the gate; method changes are noted. A newly observed, unsubmitted online
+payment wait receives `_folio_recovery_safe=1`. Legacy waits are not upgraded merely
+by reading them: their historical manual attempts cannot be proven absent. BACS
+on-hold transitions revisit this wait; paid callbacks and checkout retain their
+existing triggers. Running/success/error/attempted states do not start another
+create. Ordinary failed preflight can be reviewed manually; attempted HTTP needs
+reconciliation. No Woo paid flag or payment event is manufactured.
+
+The signed-in owner can POST `pc_folio_customer_resume` with an order-specific
+nonce only for safe waiting records in on-hold/processing, without documents,
+parent split or attempted marker, after the payment gate has cleared. Permission
+and state are rechecked inside the same lock. GET/view is read-only; no cron or
+migration replays older orders. Recovery preserves the customer's current cart.
+The customer UI distinguishes unknown/unconfirmed processing from stored document
+links; it does not claim a live reserve or treat non-accounting accounts as stock.
+
+Validation: `scripts/tests/folio-checkout-recovery.php` (fake DB/HTTP, real pipeline)
+and `scripts/tests/folio-wayforpay-info.php`. WordPress-only deploy; no new options,
+Java change or schema migration. No production order/stock/payment was modified in
+these tests. Rollback removes this protection, so reconcile attempted requests
+before using older creation code. Operator steps: manager/customer guides.

@@ -101,6 +101,7 @@ final class ManagerHelp {
             ]],
             'orders' => [__('Orders, export and repeat order', 'pcoe-manager-help'), [
                 __('Orders shows the newest orders first. In a customer card the list contains only that customer\'s drafts and orders. Open a number to inspect it; use page navigation for older records.', 'pcoe-manager-help'),
+                __('Folio records the payment method checked during automatic processing. Verified unsubmitted BACS waits resume on hold. The customer can continue only a safe unsubmitted order; unknown results and legacy waits require manager review. Do not mark an order paid to trigger Folio, remove an attempted-request marker, or repeat creation after a timeout. Apply an already saved response instead of creating documents again.', 'pcoe-manager-help'),
                 __('CSV or Excel downloads the selected order. Copy to a new draft creates a separate working copy, not a second reservation. Check quantities and current customer prices before preparing it. Open WooCommerce order leads to the full editor.', 'pcoe-manager-help'),
             ]],
             'np-preparation' => [__('Prepare Nova Poshta shipment in an existing order', 'pcoe-manager-help'), [

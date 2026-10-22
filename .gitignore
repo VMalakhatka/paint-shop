@@ -108,6 +108,8 @@ wp-content/mu-plugins/*
 !wp-content/mu-plugins/pc-folio-customer-balance/
 !wp-content/mu-plugins/pc-folio-customer-balance/**
 !wp-content/mu-plugins/pc-folio-order-link.php
+!wp-content/mu-plugins/pc-folio-order-link/
+!wp-content/mu-plugins/pc-folio-order-link/**
 !wp-content/mu-plugins/pc-wayforpay-compliance.php
 !wp-content/mu-plugins/pc-wayforpay-test-access.php
 !wp-content/mu-plugins/00-mu-i18n-loader.php

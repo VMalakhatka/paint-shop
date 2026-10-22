@@ -576,3 +576,13 @@ Manager delivery display (2026-10-18): PCOE `ManagerOrderDetails` shows saved
 split source resolver; never present checkout choice as the current issued TTN
 destination. NP preparation owns later corrections. Details: PCOE README,
 Saved Nova Poshta destination in manager orders.
+
+
+Folio checkout recovery (2026-10-22, offline verified): the MU order-link companion
+`pc-folio-order-link/recovery.php` owns the shared per-order create lock and
+pre-HTTP attempt marker. Never clear `_folio_create_attempted_at` or infer no
+Folio document from an absent Woo link after timeout. Customer continuation is
+restricted to new, proven-unsubmitted waits; legacy waits need reconciliation.
+BACS on-hold rechecks that gate without creating a paid event. Saved links are
+not live reserve checks. Contract, rollback and tests: `docs/FOLIO_ORDER_JSON_CONTRACT.md`,
+Checkout payment recovery. This is PHP flow protection, not Java idempotency.

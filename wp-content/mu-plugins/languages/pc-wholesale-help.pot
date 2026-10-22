@@ -1195,3 +1195,6 @@ msgstr ""
 #: pc-wholesale-help.php
 msgid "Shared subgroup name while scrolling"
 msgstr ""
+
+msgid "Open the order in My account to see the saved Folio documents or processing status. Continue Folio processing is available only for a verified unsubmitted order when payment no longer blocks processing. After an unknown result, contact the manager instead of ordering again. Document links are not a live reserve check; non-accounting documents do not reserve goods."
+msgstr ""

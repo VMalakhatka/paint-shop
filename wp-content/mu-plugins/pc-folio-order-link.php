@@ -410,7 +410,7 @@ if (!function_exists('pc_folio_create_documents_for_order')) {
     /**
      * Create real Folio documents through Java and save the response on the Woo order.
      */
-    function pc_folio_create_documents_for_order(\WC_Order $order, string $source = 'manual'): array
+    function pc_folio_create_documents_for_order_unlocked(\WC_Order $order, string $source = 'manual'): array
     {
         if (pc_folio_order_has_saved_documents($order)) {
             return [
@@ -437,6 +437,11 @@ if (!function_exists('pc_folio_create_documents_for_order')) {
             ];
         }
 
+        // Persist before HTTP: timeout/fatal must never permit a blind second create.
+        $order->update_meta_data('_folio_create_attempted_at', gmdate('c'));
+        $order->save();
+        $confirmed = pc_folio_fresh_order((int)$order->get_id());
+        if (!$confirmed || !$confirmed->get_meta('_folio_create_attempted_at')) throw new \RuntimeException('Folio attempt could not be recorded');
         $resp = pc_folio_order_link_java_post('/admin/folio/order-accounts', $payload, [
             'timeout' => 180,
         ]);
@@ -1234,7 +1239,7 @@ if (!function_exists('pc_folio_auto_process_checkout_order')) {
      *
      * Classic checkout passes an order ID, while Store API checkout passes a WC_Order object.
      */
-    function pc_folio_auto_process_checkout_order($order_or_id): void
+    function pc_folio_auto_process_checkout_order_unlocked($order_or_id, bool $clear_cart = false): void
     {
         if (!pc_folio_auto_checkout_enabled()) {
             return;
@@ -1258,16 +1263,28 @@ if (!function_exists('pc_folio_auto_process_checkout_order')) {
             return;
         }
 
+        $prior = (string)$order->get_meta('_folio_auto_status');
+        if (in_array($prior, ['running','success','error'], true) || $order->get_meta('_folio_create_attempted_at')) return;
+        $method = (string)$order->get_payment_method();
+        $previous = (string)$order->get_meta('_folio_checked_payment_method');
+        if ($previous !== $method) {
+            $order->add_order_note(sprintf(__('Folio payment check: %1$s → %2$s.', 'pc-folio-order-link'), $previous ?: '—', $method ?: '—'));
+        }
+        $order->update_meta_data('_folio_checked_payment_method', $method);
+        $order->update_meta_data('_folio_payment_checked_at', gmdate('c'));
         if (pc_folio_order_should_wait_for_online_payment($order)) {
+            // Legacy waiting records cannot prove that no manual request was made.
+            if ($prior === '') $order->update_meta_data('_folio_recovery_safe', '1');
             $order->update_meta_data('_folio_auto_status', 'waiting_payment');
             $order->update_meta_data('_folio_auto_started_at', current_time('mysql'));
             $order->delete_meta_data('_folio_auto_error');
             $order->delete_meta_data('_folio_auto_error_raw');
-            $order->add_order_note(__('Automatic Folio checkout processing is waiting for online payment confirmation.', 'pc-folio-order-link'));
+            if ($prior !== 'waiting_payment' || $previous !== $method) $order->add_order_note(__('Automatic Folio checkout processing is waiting for online payment confirmation.', 'pc-folio-order-link'));
             $order->save();
             return;
         }
 
+        if ($prior === 'waiting_payment' && $order->get_meta('_folio_recovery_safe') !== '1') { $order->save(); return; }
         $auto_status = (string) $order->get_meta('_folio_auto_status', true);
         if (in_array($auto_status, ['running', 'success'], true)) {
             return;
@@ -1316,7 +1333,7 @@ if (!function_exists('pc_folio_auto_process_checkout_order')) {
                     ));
                 }
                 $order->save();
-                pc_folio_clear_current_checkout_cart();
+                if ($clear_cart) pc_folio_clear_current_checkout_cart();
             }
         } catch (\Throwable $e) {
             $order = wc_get_order($order_id);
@@ -2743,3 +2760,5 @@ add_action('woocommerce_process_shop_order_meta', function ($order_id) {
 
     pc_folio_set_order_document_link((int) $order_id, $data);
 }, 10, 1);
+
+require_once __DIR__ . '/pc-folio-order-link/recovery.php';

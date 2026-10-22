@@ -491,3 +491,31 @@ msgstr "проверка менеджером"
 
 msgid "The order is being processed. Please wait: we are creating Folio account documents and checking warehouses."
 msgstr "Заказ обрабатывается системой. Пожалуйста, подождите: мы создаём счета ФОЛИО и проверяем склады."
+
+#, php-format
+msgid "Folio payment check: %1$s → %2$s."
+msgstr "Проверка оплаты для ФОЛИО: %1$s → %2$s."
+
+msgid "Folio processing is already running. Refresh the order shortly."
+msgstr "Обработка ФОЛИО уже выполняется. Вскоре обновите заказ."
+
+msgid "A Folio creation request was already attempted. A manager must reconcile its result before any new request."
+msgstr "Запрос создания документов ФОЛИО уже выполнялся. Перед новым запросом менеджер должен сверить его результат."
+
+msgid "Folio links show the saved creation result, not a live check of the current warehouse reserve. Non-accounting documents do not reserve stock."
+msgstr "Ссылки ФОЛИО показывают сохранённый результат создания, а не текущую проверку резерва на складе. Неучитываемые документы не резервируют товар."
+
+msgid "Folio processing"
+msgstr "Обработка ФОЛИО"
+
+msgid "Waiting for payment confirmation. Folio document creation has not been confirmed."
+msgstr "Ожидается подтверждение оплаты. Создание документов ФОЛИО ещё не подтверждено."
+
+msgid "Folio document creation has not been confirmed. If no Continue button is shown, contact your manager; do not place a duplicate order."
+msgstr "Создание документов ФОЛИО не подтверждено. Если кнопки продолжения нет, обратитесь к менеджеру; не создавайте повторный заказ."
+
+msgid "Continue submits this order to Folio using current stock availability. Payment is not recorded by this action."
+msgstr "Продолжение передаёт этот заказ в ФОЛИО с проверкой текущего наличия. Это действие не регистрирует оплату."
+
+msgid "Continue Folio processing"
+msgstr "Продолжить обработку в ФОЛИО"

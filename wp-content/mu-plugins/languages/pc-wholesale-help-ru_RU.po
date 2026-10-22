@@ -1217,3 +1217,6 @@ msgstr "Если под заголовком конечной подгруппы
 #: pc-wholesale-help.php
 msgid "Shared subgroup name while scrolling"
 msgstr "Общая часть названия подгруппы при прокрутке"
+
+msgid "Open the order in My account to see the saved Folio documents or processing status. Continue Folio processing is available only for a verified unsubmitted order when payment no longer blocks processing. After an unknown result, contact the manager instead of ordering again. Document links are not a live reserve check; non-accounting documents do not reserve goods."
+msgstr "Откройте заказ в кабинете, чтобы увидеть сохранённые документы ФОЛИО или состояние обработки. «Продолжить обработку в ФОЛИО» доступно только для проверенного ещё не отправленного заказа, когда оплата больше не блокирует обработку. Если результат неизвестен, обратитесь к менеджеру вместо повторного заказа. Ссылки на документы не являются текущей проверкой резерва; неучитываемые документы не резервируют товар."

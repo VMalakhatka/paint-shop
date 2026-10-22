@@ -460,3 +460,31 @@ msgstr ""
 
 msgid "The order is being processed. Please wait: we are creating Folio account documents and checking warehouses."
 msgstr ""
+
+#, php-format
+msgid "Folio payment check: %1$s → %2$s."
+msgstr ""
+
+msgid "Folio processing is already running. Refresh the order shortly."
+msgstr ""
+
+msgid "A Folio creation request was already attempted. A manager must reconcile its result before any new request."
+msgstr ""
+
+msgid "Folio links show the saved creation result, not a live check of the current warehouse reserve. Non-accounting documents do not reserve stock."
+msgstr ""
+
+msgid "Folio processing"
+msgstr ""
+
+msgid "Waiting for payment confirmation. Folio document creation has not been confirmed."
+msgstr ""
+
+msgid "Folio document creation has not been confirmed. If no Continue button is shown, contact your manager; do not place a duplicate order."
+msgstr ""
+
+msgid "Continue submits this order to Folio using current stock availability. Payment is not recorded by this action."
+msgstr ""
+
+msgid "Continue Folio processing"
+msgstr ""
