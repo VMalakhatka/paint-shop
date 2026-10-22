@@ -488,3 +488,36 @@ msgstr ""
 
 msgid "Continue Folio processing"
 msgstr ""
+
+msgid "Please wait and keep this page open. Your order is being submitted; online payment may require a separate payment page. Do not submit it again."
+msgstr ""
+
+msgid "This is taking longer than expected. The result is not yet confirmed. Check your order or contact the manager; we will help resolve it. Do not repeat the order or payment."
+msgstr ""
+
+msgid "Online payment confirmed."
+msgstr ""
+
+msgid "Online payment has not yet been confirmed. Please wait; do not pay again if funds have been charged."
+msgstr ""
+
+msgid "Processing needs attention. Contact your manager; we will help clarify the result and resolve the issue. Do not repeat the order or payment."
+msgstr ""
+
+msgid "Folio documents are being created. Please wait and keep this page open."
+msgstr ""
+
+msgid "Folio documents have been saved. You can continue; document details are shown below."
+msgstr ""
+
+msgid "Waiting for payment confirmation and Folio processing. Please keep this page open; the status will refresh automatically."
+msgstr ""
+
+msgid "Folio documents have not yet been confirmed. Use Continue if available, or contact your manager; we will help resolve this."
+msgstr ""
+
+msgid "Folio document creation has not yet been confirmed. Contact your manager if the status does not change; we will help resolve this."
+msgstr ""
+
+msgid "Confirmation is taking longer than expected. Contact your manager; we will check the result and help resolve it. Do not repeat the payment or order."
+msgstr ""

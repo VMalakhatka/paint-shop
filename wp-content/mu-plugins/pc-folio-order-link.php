@@ -819,42 +819,46 @@ if (!function_exists('pc_folio_render_checkout_processing_message')) {
      */
     function pc_folio_render_checkout_processing_message(): void
     {
-        if (!function_exists('is_checkout') || !is_checkout() || (function_exists('is_order_received_page') && is_order_received_page())) {
+        if (!function_exists('is_checkout') || (!is_checkout() && !(function_exists('is_account_page') && is_account_page())) || (function_exists('is_order_received_page') && is_order_received_page())) {
             return;
         }
         ?>
         <script>
         (function(){
-            var shown = false;
-            function showProcessingMessage() {
-                if (shown) {
-                    return;
+            var box, timer;
+            function show(text) {
+                if (!box) {
+                    box = document.createElement('div');
+                    box.className = 'pc-folio-checkout-processing';
+                    box.setAttribute('role', 'status');
+                    box.setAttribute('aria-live', 'polite');
+                    box.style.cssText = 'position:fixed;bottom:12px;left:12px;right:12px;z-index:100001;max-height:35vh;overflow:auto;box-shadow:0 2px 12px #0003';
+                    document.body.appendChild(box);
                 }
-                shown = true;
-                var target = document.querySelector('form.checkout, .wc-block-checkout, .wp-block-woocommerce-checkout');
-                if (!target) {
-                    return;
-                }
-                var box = document.createElement('div');
-                box.className = 'pc-folio-checkout-processing';
-                box.textContent = '<?php echo esc_js(__('The order is being processed. Please wait: we are creating Folio account documents and checking warehouses.', 'pc-folio-order-link')); ?>';
-                target.parentNode.insertBefore(box, target);
+                box.textContent = text;
             }
-
-            document.addEventListener('submit', function(event) {
-                if (event.target && event.target.matches && event.target.matches('form.checkout')) {
-                    showProcessingMessage();
-                }
+            var wait = <?php echo wp_json_encode(__('Please wait and keep this page open. Your order is being submitted; online payment may require a separate payment page. Do not submit it again.', 'pc-folio-order-link')); ?>;
+            var uncertain = <?php echo wp_json_encode(__('This is taking longer than expected. The result is not yet confirmed. Check your order or contact the manager; we will help resolve it. Do not repeat the order or payment.', 'pc-folio-order-link')); ?>;
+            function start() {
+                show(wait); clearTimeout(timer);
+                timer = setTimeout(function(){ show(uncertain); }, 180000);
+            }
+            function clear() { clearTimeout(timer); if (box) box.remove(); box = null; }
+            document.addEventListener('submit', function(e){
+                if (e.target.matches('form.checkout, form:has(input[name="action"][value="pc_folio_customer_resume"])')) start();
             }, true);
-
-            document.addEventListener('click', function(event) {
-                var button = event.target && event.target.closest
-                    ? event.target.closest('button[name="woocommerce_checkout_place_order"], .wc-block-components-checkout-place-order-button')
-                    : null;
-                if (button) {
-                    showProcessingMessage();
-                }
-            }, true);
+            document.addEventListener('click', function(e){
+                if (e.target.closest('.wc-block-components-checkout-place-order-button')) start();
+            });
+            if (window.jQuery) window.jQuery(document.body).on('checkout_error', clear);
+            // Block checkout validation also has to release the waiting notice.
+            new MutationObserver(function(records){
+                if (!box) return;
+                if (records.some(function(r){ return Array.from(r.addedNodes).some(function(n){
+                    return n.nodeType === 1 && (n.matches('.woocommerce-error, .wc-block-components-notice-banner.is-error') || n.querySelector('.woocommerce-error, .wc-block-components-notice-banner.is-error'));
+                }); })) clear();
+            }).observe(document.body, {childList:true, subtree:true});
+            window.addEventListener('pageshow', clear);
         }());
         </script>
         <?php
@@ -2762,3 +2766,5 @@ add_action('woocommerce_process_shop_order_meta', function ($order_id) {
 }, 10, 1);
 
 require_once __DIR__ . '/pc-folio-order-link/recovery.php';
+
+require_once __DIR__ . '/pc-folio-order-link/progress.php';

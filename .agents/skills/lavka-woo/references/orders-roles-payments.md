@@ -586,3 +586,9 @@ restricted to new, proven-unsubmitted waits; legacy waits need reconciliation.
 BACS on-hold rechecks that gate without creating a paid event. Saved links are
 not live reserve checks. Contract, rollback and tests: `docs/FOLIO_ORDER_JSON_CONTRACT.md`,
 Checkout payment recovery. This is PHP flow protection, not Java idempotency.
+
+Customer progress (2026-10-22): `pc-folio-order-link/progress.php` is read-only;
+bounded GET refresh must never invoke checkout/create/payment callbacks. Payment
+success requires the verified gateway reference, matching transaction and paid
+date; saved Folio documents do not imply payment or a live reserve. See the
+customer progress section of `docs/FOLIO_ORDER_JSON_CONTRACT.md`.

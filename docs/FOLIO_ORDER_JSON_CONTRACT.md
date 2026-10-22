@@ -626,3 +626,9 @@ and `scripts/tests/folio-wayforpay-info.php`. WordPress-only deploy; no new opti
 Java change or schema migration. No production order/stock/payment was modified in
 these tests. Rollback removes this protection, so reconcile attempted requests
 before using older creation code. Operator steps: manager/customer guides.
+
+### Customer progress messages (2026-10-22)
+
+`pc-folio-order-link/progress.php` displays independent payment and document outcomes on Woo-authorized order detail/thank-you pages and the owner-checked post-checkout orders list. WayForPay success requires verified reference matching transaction ID and paid date, never merely a Woo processing status. Actual saved result/link is document evidence; a manager command alone is not. Terminal errors instruct manager reconciliation without retrying writes.
+
+Pending result pages reload read-only GET every 10 seconds for up to 2 minutes per order/tab (sessionStorage budget). No polling API, financial request, mutation or browser navigation lock is added. Storage unavailable or elapsed budget shows manager guidance; manual refresh remains possible. Checkout/continuation has a responsive live-region waiting notice; validation errors dismiss it, slow submission changes to unknown-result guidance after 3 minutes. This notice also allows gateway navigation. Rollback is PHP-only; no DB migration.

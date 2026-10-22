@@ -69,13 +69,8 @@ function pc_folio_customer_recovery_view($order): void {
         echo '<p>'.esc_html__('Folio links show the saved creation result, not a live check of the current warehouse reserve. Non-accounting documents do not reserve stock.', 'pc-folio-order-link').'</p>';
         return;
     }
-    $state=(string)$order->get_meta('_folio_auto_status');
-    if (!in_array($state,['waiting_payment','running','error'],true)) return;
-    $waiting=$state==='waiting_payment' && pc_folio_order_should_wait_for_online_payment($order);
-    echo '<section class="pc-folio-customer-notice"><h2>'.esc_html__('Folio processing', 'pc-folio-order-link').'</h2><p>';
-    echo esc_html($waiting?__('Waiting for payment confirmation. Folio document creation has not been confirmed.', 'pc-folio-order-link'):
-        __('Folio document creation has not been confirmed. If no Continue button is shown, contact your manager; do not place a duplicate order.', 'pc-folio-order-link'));
-    echo '</p>';
+    if (!pc_folio_customer_can_resume($order,get_current_user_id())) return;
+    echo '<section class="pc-folio-customer-notice">';
     if (pc_folio_customer_can_resume($order,get_current_user_id())) {
         echo '<form method="post" action="'.esc_url(admin_url('admin-post.php')).'"><input type="hidden" name="action" value="pc_folio_customer_resume"><input type="hidden" name="order_id" value="'.(int)$order->get_id().'">';
         wp_nonce_field('pc_folio_resume_'.$order->get_id());
