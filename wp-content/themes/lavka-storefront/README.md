@@ -3,9 +3,9 @@
 Independent classic WordPress theme for the Lavka/KREUL storefront. It has no
 parent theme and does not load GeneratePress PHP, scripts, or styles.
 
-Status: activated on `paint.local` and verified on 2026-10-22 with the owner’s
-explicit approval. The owner installed the 0.1.0 ZIP on production later that day;
-it remains inactive there. Installing files does not activate the theme.
+Status: active on `paint.local` and production as of 2026-10-22. The owner first
+installed the 0.1.0 ZIP, then explicitly authorized production activation.
+Installing files alone does not activate the theme.
 
 ## Ownership
 
@@ -80,14 +80,14 @@ Widths 320/390/768/1280 px passed; mobile navigation and wholesale/retail menu
 visibility were checked. No order, payment or external integration was submitted.
 
 The existing deploy script still deliberately excludes this new theme and does
-not activate themes. Future theme updates, production activation and real-device
-acceptance remain separate. Local backup/rollback: [Bootstrap and recovery](../../../docs/BOOTSTRAP_AND_RECOVERY.md#локальная-активация-lavka-storefront-2026-10-22).
+not activate themes. Future theme updates need separate delivery or an agreed
+deploy-script change. Local backup/rollback: [Bootstrap and recovery](../../../docs/BOOTSTRAP_AND_RECOVERY.md#локальная-активация-lavka-storefront-2026-10-22).
 
 ### Production preflight, 2026-10-22
 
 Read-only server checks confirmed all 20 uploaded theme files and 45 Paint Shop UX
 runtime files match the locally verified copy. Paint Shop UX 1.9.0 is active;
-WordPress 7.0 and PHP 8.3.8 meet the requirements. The saved active theme remains
+WordPress 7.0 and PHP 8.3.8 meet the requirements. At preflight, the saved theme was
 GeneratePress Child with GeneratePress as its parent. Primary menu, two sidebar
 widgets and both rollback themes are present.
 
@@ -96,12 +96,38 @@ The Customizer iframe was blank for both themes. Authenticated native
 on each checked URL. Browser checks covered the catalogue, oil-category image,
 sticky Number One context, Clairefontaine brand and eight-photo product gallery,
 mobile menu, empty cart, account and legal page at desktop, 390 and 768 px widths.
-Production `after_switch_theme`, real orders and payments were not exercised.
+Production `after_switch_theme`, real orders and payments were not exercised in
+this preflight.
 
 A private local snapshot contains 86 option rows and `.htaccess`; it is not a
-full database backup. A fresh full DB backup was not confirmed in the checked
-server locations. Verify or create one before activation. Evidence, limitations
+full database backup. At preflight, a fresh full DB backup was not confirmed in
+the checked server locations; that gap was resolved before activation below.
+Evidence, limitations
 and rollback scope: [production preflight](../../../docs/BOOTSTRAP_AND_RECOVERY.md#production-preflight-lavka-storefront-2026-10-22).
+
+### Production activation, 2026-10-22
+
+With explicit owner approval, native `switch_theme` activated 0.1.0 at 21:16:21 UTC;
+a fresh WordPress bootstrap completed `after_switch_theme` at 21:16:40 UTC.
+All 10 read-only postchecks passed at 21:16:50 UTC: the switch marker cleared,
+the primary menu was saved in this theme's own mods, widget assignments/hash and
+Woo page/image options were unchanged. No pending or running image-regeneration
+actions or Woo regeneration batches were present. The operation lock was released.
+
+Before activation, database and WordPress-file backup checksums were verified.
+These were sequential backups of a live site; no restore rehearsal was performed.
+Both GeneratePress themes remain available for rollback.
+
+Browser acceptance passed on normal production URLs without preview parameters:
+admin theme/CSS/sidebar/account navigation, guest catalogue and images, the
+Clairefontaine brand and eight-image gallery (open, next, close), mobile menu,
+sticky compact-name context, oil-category description, empty cart, login/register
+and legal page. Desktop 1280/1680 px and 390/768 px checks showed no horizontal
+overflow, including the guest gallery. Viewport overrides were reset. No cart
+items, orders, payments, imports, sync, manual regeneration or S3 writes were
+submitted. Populated-cart checkout, payment, every business role and physical
+phones remain outside this acceptance. Procedure and backup scope:
+[production activation](../../../docs/BOOTSTRAP_AND_RECOVERY.md#production-activation-lavka-storefront-2026-10-22).
 
 Source messages are English; bundled `languages/uk.po` and `ru_RU.po` catalogs
 provide Ukrainian and Russian translations. Rebuild the matching `.mo` files

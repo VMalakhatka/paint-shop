@@ -53,7 +53,7 @@ OVH service -> physical host -> hypervisor -> Windows VM
 |---|---|---|
 | Каталог, корзина, checkout, кабинет, HPOS-заказы | WooCommerce + собственные PHP-плагины | текущий Woo runtime и PHP-код |
 | Шапка и основное меню | `paint-shop-ux/inc/site-header.php` | собственные разметка/CSS/JS; меню WordPress `primary` и существующие фильтры доступа; выбор склада — `paint-core` |
-| Внешняя PHP-оболочка и резервные шаблоны | Локально активна `lavka-storefront`; production-переход с GeneratePress + `generatepress-child` отдельно | `wp-content/themes/lavka-storefront/`; реальная локальная активация и приёмка 2026-10-22, production не менялся |
+| Внешняя PHP-оболочка и резервные шаблоны | `lavka-storefront` активна локально и на production; GeneratePress + `generatepress-child` сохранены для возврата | `wp-content/themes/lavka-storefront/`; штатная production-активация и 10 серверных postchecks 2026-10-22 |
 | Обычные информационные страницы и 404 | `paint-shop-ux/inc/public-pages.php` | ограниченный выбор default templates, `templates/public-page.php` и `assets/public-pages.css`; содержимое — WordPress и прежние провайдеры |
 | Футер | `paint-shop-ux/inc/site-footer.php` | собственная разметка/CSS, adapter GP + однократный fallback `wp_footer`; юридические данные — `pc-wayforpay-compliance` |
 | Каталог, товар и стили покупательских страниц | `paint-shop-ux` | собственные modules/templates/assets, scoped storefront.css; Woo hooks сохраняют цены, склады и покупку |
@@ -103,11 +103,13 @@ WooCommerce, главная, Elementor, приложения на shortcodes, cu
 query routing. Содержимое, ссылки, парольная защита и разделение страниц сохраняют
 WordPress API. Локально 2026-10-21 пройдены 166 PHP-проверок, сравнение текста
 четырёх правовых страниц и browser-проверки 320/390/768/1280 px, в том числе без
-CSS темы. Канон и код справки обновлены; выпуск 1.8.0 на production не развёрнут.
+CSS темы. Канон и код справки обновлены; 2026-10-22 на production подтверждён
+активный Paint Shop UX 1.9.0, включающий этот модуль.
 Приёмка и откат — [Paint Shop UX](../wp-content/plugins/paint-shop-ux/README.md).
 
 Самостоятельная тема `lavka-storefront`, без родительской темы, подготовлена
-2026-10-21 и активирована на `paint.local` 2026-10-22 по решению владельца. Она
+2026-10-21 и активирована на `paint.local` и production 2026-10-22 по отдельным
+решениям владельца. Она
 предоставляет PHP-каркас, резервные шаблоны WordPress, регистрацию меню, областей
 виджетов и возможностей WooCommerce, включая галерею товара. Шапка, футер,
 каталог, карточка товара и бизнес-правила остаются у прежних плагинов. Чужие
@@ -128,8 +130,16 @@ CSS темы. Канон и код справки обновлены; выпус
 Проверены каталог/поиск, галерея, мобильное меню, корзина/checkout и кабинет.
 Резервная копия настроек сохранена вне публичного каталога; процедура возврата —
 [локальная активация](BOOTSTRAP_AND_RECOVERY.md#локальная-активация-lavka-storefront-2026-10-22).
-Production в этой операции не менялся; доставка и активация новой темы там
-по-прежнему требуют отдельного этапа. Обычный code deploy тему не переключает.
+Позже в тот же день, после отдельного разрешения и проверки резервных копий,
+production переключён на Lavka Storefront 0.1.0. Свежая загрузка WordPress завершила
+`after_switch_theme`; 10 read-only postchecks подтвердили собственное назначение
+primary, неизменность виджетов, Woo-страниц и параметров изображений, отсутствие
+задач регенерации. Браузерная приёмка обычных URL пройдена под администратором и
+гостем: каталог, галерея, mobile menu, пустая корзина, вход и обычные страницы.
+Старые темы сохранены. Полные backups БД и файлов проверены по checksum,
+тестовое восстановление не выполнялось. Подробности и границы приёмки —
+[production activation](BOOTSTRAP_AND_RECOVERY.md#production-activation-lavka-storefront-2026-10-22).
+Обычный code deploy тему не переключает и пока не обновляет её файлы.
 
 ## Собственные WordPress-компоненты
 

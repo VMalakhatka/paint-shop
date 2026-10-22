@@ -438,17 +438,17 @@ Featured image на принятой обычной странице прина�
 не удалять. Не переносить тексты юридических страниц или media в код/новые options.
 Откат — `psu_public_pages_enabled=false` до выбора template. Источник/границы:
 `tests/public-pages-local.php`; приёмка и согласованный deploy/rollback — README
-Paint Shop UX. Владельцы — `docs/SYSTEM_OVERVIEW.md`; канон и код справки обновлены,
-публикация выпуска 1.8.0 и production-проверка ожидают deploy.
+Paint Shop UX. Владельцы — `docs/SYSTEM_OVERVIEW.md`; канон и код справки обновлены.
+2026-10-22 на production подтверждён активный PSU 1.9.0 с этим модулем.
 
 
 ## Независимый каркас: этап 2 (1.9.0, 2026-10-21)
 
 `wp-content/themes/lavka-storefront` — самостоятельная классическая тема без
 Template/GP dependency. Подготовлена 2026-10-21, реально активирована на paint.local
-2026-10-22 с разрешения владельца. Владелец установил ZIP 0.1.0 на production
-2026-10-22, но не активировал. В code deploy новая папка не добавлена;
-не путать установку, локальную активацию и production activation.
+2026-10-22 с разрешения владельца. После установки ZIP 0.1.0 владелец отдельно
+разрешил production activation; она завершена 2026-10-22. В code deploy новая
+папка не добавлена; будущая доставка обновлений требует отдельного решения.
 
 PSU public-pages принимает `current_theme_supports('psu-public-pages')` с прежними
 ограничениями default page/search/404 и исключениями приложений. Сохраняются
@@ -470,14 +470,27 @@ Preview bootstrap не вызывает switch_theme и сверяет сохр�
 изменение сериализованного sidebars_widgets само по себе потерей активных виджетов.
 Woo image hash не изменился, regen queue осталась пустой. Backup и точечный возврат:
 `docs/BOOTSTRAP_AND_RECOVERY.md`, «Локальная активация Lavka Storefront».
-Перенос папки в deploy и production activation/acceptance — отдельное разрешение.
+Перенос папки в deploy остаётся отдельным изменением; активация не добавляет её
+в список синхронизации автоматически.
 
 Production preflight 2026-10-22: 20 файлов темы и 45 runtime-файлов PSU совпали
-с локальными; PSU 1.9.0 активен, WP/PHP совместимы. Saved theme остаётся GP Child;
+с локальными; PSU 1.9.0 активен, WP/PHP совместимы. Во время preflight saved theme была GP Child;
 primary и два sidebar widgets доступны. Пустой Customizer iframe воспроизводился
 и на действующей теме; для read-only проверки с правом `switch_themes` работает
 штатный `?wp_theme_preview=lavka-storefront`, который надо сохранять на каждом URL.
 Это не проверяет production `after_switch_theme`. Закрытый локальный снимок
-86 options и `.htaccess` не заменяет полную БД: свежая полная копия в проверенных
-местах не подтверждена. Источники: защищённый SHORTINIT preflight и браузер;
+86 options и `.htaccess` не заменяет полную БД: на этапе preflight свежая полная
+копия ещё не была подтверждена. Источники: защищённый SHORTINIT preflight и браузер;
 подробности — [production preflight](../../../../docs/BOOTSTRAP_AND_RECOVERY.md#production-preflight-lavka-storefront-2026-10-22).
+
+Production activation 2026-10-22: после отдельного решения владельца выполнены
+штатные `switch_theme` и следующая полная загрузка WordPress. 10 read-only checks
+подтвердили cleared `theme_switched`, собственный primary, неизменные widget
+assignments/hash, Woo page/image options и пустые очереди image regeneration.
+Lock освобождён. До записи проверены checksums полных backups БД/файлов;
+последовательный live backup не считать test restore. Старые темы оставлены,
+состояние production теперь `lavka-storefront`. Браузерная приёмка обычных URL
+под администратором и гостем пройдена на desktop/390/768 px, включая галерею,
+sticky context, мобильное меню, пустую корзину и вход. Полный checkout/платёж,
+все бизнес-роли и физические телефоны этим не подтверждены. Источник и точечный возврат —
+[production activation](../../../../docs/BOOTSTRAP_AND_RECOVERY.md#production-activation-lavka-storefront-2026-10-22).
