@@ -1,0 +1,167 @@
+msgid ""
+msgstr "Project-Id-Version: lps-manager\nContent-Type: text/plain; charset=UTF-8\nLanguage: \nMIME-Version: 1.0\nContent-Transfer-Encoding: 8bit\n"
+
+msgid "Accepts the full Access input table; the simplified manager input is still being clarified. Calculates three result tables, without creating a Folio invoice. Ambiguous source matches stop the calculation."
+msgstr ""
+
+msgid "Access denied."
+msgstr ""
+
+msgid "Adds missing articles to the common description table and updates descriptions for existing articles."
+msgstr ""
+
+msgid "Apply to Folio"
+msgstr ""
+
+msgid "Article"
+msgstr ""
+
+msgid "Articles by base article"
+msgstr ""
+
+msgid "Articles without existing target rows"
+msgstr ""
+
+msgid "Assembly has ambiguous source matches or duplicate output articles. Check composition links, warehouse 7 prices and repeated child articles."
+msgstr ""
+
+msgid "Assembly invoice calculation"
+msgstr ""
+
+msgid "Cannot apply: resolve the reported conflicts first."
+msgstr ""
+
+msgid "Changes names on all warehouses."
+msgstr ""
+
+msgid "Changes units on all warehouses."
+msgstr ""
+
+msgid "Check before applying"
+msgstr ""
+
+msgid "Check input row %s: column count, value length, numeric format or duplicate article."
+msgstr ""
+
+msgid "Check status"
+msgstr ""
+
+msgid "Check the displayed columns. Supply either a file or pasted cells, with no formulas or repeated update articles. For assembly, SLOG is required."
+msgstr ""
+
+msgid "Choose an operation. Prepare the columns shown below, then upload a file or paste cells from Excel. Preview the result. For card changes, check every warehouse and each empty value, download the preview, and confirm Apply. For selections and assembly, download the result; they do not create a Folio invoice."
+msgstr ""
+
+msgid "Could not export this operation. Reopen it from history and try again."
+msgstr ""
+
+msgid "Could not process the operation. Check the input and Java connection. After Apply, check status before repeating."
+msgstr ""
+
+msgid "Do not upload and apply the same file again. Use Check status or reopen this operation in history. If the result stays unknown, ask the administrator to verify Folio against the saved preview."
+msgstr ""
+
+msgid "Download Excel"
+msgstr ""
+
+msgid "Excel or CSV file"
+msgstr ""
+
+msgid "Field"
+msgstr ""
+
+msgid "File and empty values"
+msgstr ""
+
+msgid "I checked all changes, including empty values, and confirm the update in Paint_Ua."
+msgstr ""
+
+msgid "If the result is unknown"
+msgstr ""
+
+msgid "Manager operations"
+msgstr ""
+
+msgid "NULL / empty"
+msgstr ""
+
+msgid "Name, groups and unit are updated on every matching warehouse card. Check the old and new values, missing articles and intended field clearing. A preview is valid for 15 minutes; changed source rows require a new preview."
+msgstr ""
+
+msgid "New value"
+msgstr ""
+
+msgid "No target rows."
+msgstr ""
+
+msgid "Old value"
+msgstr ""
+
+msgid "Operation"
+msgstr ""
+
+msgid "Or paste cells from Excel"
+msgstr ""
+
+msgid "Outcome unknown. Check status; do not repeat the update."
+msgstr ""
+
+msgid "Pasted cells"
+msgstr ""
+
+msgid "Preview / calculate"
+msgstr ""
+
+msgid "Preview expired. Create a new preview."
+msgstr ""
+
+msgid "Processing…"
+msgstr ""
+
+msgid "Product description"
+msgstr ""
+
+msgid "Product groups"
+msgstr ""
+
+msgid "Product name"
+msgstr ""
+
+msgid "Quick guide"
+msgstr ""
+
+msgid "Read only. Duplicate input rows and unmatched NULL/NULL output rows are retained."
+msgstr ""
+
+msgid "Ready for confirmation"
+msgstr ""
+
+msgid "Recent operations"
+msgstr ""
+
+msgid "Replaces all six group fields on all warehouses. Empty cells clear groups."
+msgstr ""
+
+msgid "Result ready for download"
+msgstr ""
+
+msgid "Saved and verified in Folio."
+msgstr ""
+
+msgid "Six operations from the manager workbook. Source and destination: Paint_Ua."
+msgstr ""
+
+msgid "Source rows changed. Nothing was applied; create a new preview."
+msgstr ""
+
+msgid "The operation is running. Check status."
+msgstr ""
+
+msgid "Unit of measure"
+msgstr ""
+
+msgid "Warehouse"
+msgstr ""
+
+msgid "XLS, XLSX or UTF-8 CSV, up to 5 MB and 500 data rows. Only the first sheet is read. Headers are optional, in the displayed order. Use tabs or semicolons for decimal commas. Formulas are rejected. Empty values clear fields to NULL. Keep all six group columns. For assembly, supply SLOG explicitly as 0 or 1 and preserve the initial values used in Access."
+msgstr ""

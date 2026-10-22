@@ -1,0 +1,167 @@
+msgid ""
+msgstr "Project-Id-Version: lps-manager\nContent-Type: text/plain; charset=UTF-8\nLanguage: ru_RU\nMIME-Version: 1.0\nContent-Transfer-Encoding: 8bit\n"
+
+msgid "Accepts the full Access input table; the simplified manager input is still being clarified. Calculates three result tables, without creating a Folio invoice. Ambiguous source matches stop the calculation."
+msgstr "Принимает полную входную таблицу Access; упрощённый ввод менеджера ещё уточняется. Рассчитывает три таблицы результата, не создавая накладную ФОЛИО. Неоднозначные совпадения останавливают расчёт."
+
+msgid "Access denied."
+msgstr "Доступ запрещён."
+
+msgid "Adds missing articles to the common description table and updates descriptions for existing articles."
+msgstr "Добавляет отсутствующие артикулы в общую таблицу описаний и обновляет описания существующих товаров."
+
+msgid "Apply to Folio"
+msgstr "Применить в ФОЛИО"
+
+msgid "Article"
+msgstr "Артикул"
+
+msgid "Articles by base article"
+msgstr "Артикулы по главному артикулу"
+
+msgid "Articles without existing target rows"
+msgstr "Артикулы без существующих строк назначения"
+
+msgid "Assembly has ambiguous source matches or duplicate output articles. Check composition links, warehouse 7 prices and repeated child articles."
+msgstr "В сборке неоднозначные связи или повторные артикулы результата. Проверьте состав, цены склада 7 и повторяющиеся артикулы детей."
+
+msgid "Assembly invoice calculation"
+msgstr "Сборка накладная — расчёт"
+
+msgid "Cannot apply: resolve the reported conflicts first."
+msgstr "Применение заблокировано: сначала разрешите указанные конфликты."
+
+msgid "Changes names on all warehouses."
+msgstr "Меняет наименования на всех складах."
+
+msgid "Changes units on all warehouses."
+msgstr "Меняет единицы измерения на всех складах."
+
+msgid "Check before applying"
+msgstr "Что проверить перед применением"
+
+msgid "Check input row %s: column count, value length, numeric format or duplicate article."
+msgstr "Проверьте входную строку %s: число колонок, длину значения, формат числа или повтор артикула."
+
+msgid "Check status"
+msgstr "Проверить статус"
+
+msgid "Check the displayed columns. Supply either a file or pasted cells, with no formulas or repeated update articles. For assembly, SLOG is required."
+msgstr "Проверьте указанные колонки. Используйте либо файл, либо вставленные ячейки; без формул и повторных артикулов для обновления. Для сборки требуется SLOG."
+
+msgid "Choose an operation. Prepare the columns shown below, then upload a file or paste cells from Excel. Preview the result. For card changes, check every warehouse and each empty value, download the preview, and confirm Apply. For selections and assembly, download the result; they do not create a Folio invoice."
+msgstr "Выберите операцию. Подготовьте указанные ниже колонки, загрузите файл или вставьте ячейки из Excel. Откройте предпросмотр. Для изменений карточек проверьте каждый склад и пустые значения, скачайте предпросмотр и подтвердите применение. Для выборки и сборки скачайте результат: накладная в ФОЛИО не создаётся."
+
+msgid "Could not export this operation. Reopen it from history and try again."
+msgstr "Не удалось выгрузить операцию. Откройте её в истории и повторите скачивание."
+
+msgid "Could not process the operation. Check the input and Java connection. After Apply, check status before repeating."
+msgstr "Не удалось обработать операцию. Проверьте входные данные и соединение с Java. После применения сначала проверьте статус; не повторяйте запись."
+
+msgid "Do not upload and apply the same file again. Use Check status or reopen this operation in history. If the result stays unknown, ask the administrator to verify Folio against the saved preview."
+msgstr "Не загружайте и не применяйте тот же файл повторно. Нажмите «Проверить статус» или откройте операцию в истории. Если результат остаётся неизвестным, попросите администратора сверить ФОЛИО с сохранённым предпросмотром."
+
+msgid "Download Excel"
+msgstr "Скачать Excel"
+
+msgid "Excel or CSV file"
+msgstr "Файл Excel или CSV"
+
+msgid "Field"
+msgstr "Поле"
+
+msgid "File and empty values"
+msgstr "Файл и пустые значения"
+
+msgid "I checked all changes, including empty values, and confirm the update in Paint_Ua."
+msgstr "Я проверил все изменения, включая пустые значения, и подтверждаю запись в Paint_Ua."
+
+msgid "If the result is unknown"
+msgstr "Если результат неизвестен"
+
+msgid "Manager operations"
+msgstr "Операции менеджера"
+
+msgid "NULL / empty"
+msgstr "NULL / пусто"
+
+msgid "Name, groups and unit are updated on every matching warehouse card. Check the old and new values, missing articles and intended field clearing. A preview is valid for 15 minutes; changed source rows require a new preview."
+msgstr "Наименование, группы и единица измерения изменяются в каждой подходящей складской карточке. Проверьте старые и новые значения, отсутствующие артикулы и очистку полей. Предпросмотр действует 15 минут; если исходные строки изменились, нужен новый предпросмотр."
+
+msgid "New value"
+msgstr "Новое значение"
+
+msgid "No target rows."
+msgstr "Нет строк для изменения."
+
+msgid "Old value"
+msgstr "Старое значение"
+
+msgid "Operation"
+msgstr "Операция"
+
+msgid "Or paste cells from Excel"
+msgstr "Или вставьте ячейки из Excel"
+
+msgid "Outcome unknown. Check status; do not repeat the update."
+msgstr "Результат неизвестен. Проверьте статус; не повторяйте запись."
+
+msgid "Pasted cells"
+msgstr "Вставленные ячейки"
+
+msgid "Preview / calculate"
+msgstr "Предпросмотр / рассчитать"
+
+msgid "Preview expired. Create a new preview."
+msgstr "Предпросмотр устарел. Создайте новый."
+
+msgid "Processing…"
+msgstr "Обработка…"
+
+msgid "Product description"
+msgstr "Описание товара"
+
+msgid "Product groups"
+msgstr "Группы товара"
+
+msgid "Product name"
+msgstr "Наименование товара"
+
+msgid "Quick guide"
+msgstr "Краткая инструкция"
+
+msgid "Read only. Duplicate input rows and unmatched NULL/NULL output rows are retained."
+msgstr "Только чтение. Повторные входные строки и строки NULL/NULL без совпадений сохраняются."
+
+msgid "Ready for confirmation"
+msgstr "Готово к подтверждению"
+
+msgid "Recent operations"
+msgstr "Последние операции"
+
+msgid "Replaces all six group fields on all warehouses. Empty cells clear groups."
+msgstr "Заменяет все шесть групп на всех складах. Пустые ячейки очищают группы."
+
+msgid "Result ready for download"
+msgstr "Результат готов к скачиванию"
+
+msgid "Saved and verified in Folio."
+msgstr "Сохранено и проверено в ФОЛИО."
+
+msgid "Six operations from the manager workbook. Source and destination: Paint_Ua."
+msgstr "Шесть операций из таблицы менеджера. Чтение и изменения: Paint_Ua."
+
+msgid "Source rows changed. Nothing was applied; create a new preview."
+msgstr "Исходные строки изменились. Запись не выполнена; создайте новый предпросмотр."
+
+msgid "The operation is running. Check status."
+msgstr "Операция выполняется. Проверьте статус."
+
+msgid "Unit of measure"
+msgstr "Единица измерения"
+
+msgid "Warehouse"
+msgstr "Склад"
+
+msgid "XLS, XLSX or UTF-8 CSV, up to 5 MB and 500 data rows. Only the first sheet is read. Headers are optional, in the displayed order. Use tabs or semicolons for decimal commas. Formulas are rejected. Empty values clear fields to NULL. Keep all six group columns. For assembly, supply SLOG explicitly as 0 or 1 and preserve the initial values used in Access."
+msgstr "XLS, XLSX или CSV в UTF-8, до 5 МБ и 500 строк данных. Читается первый лист. Шапка необязательна; порядок колонок указан выше. При десятичной запятой используйте табуляцию или точку с запятой. Формулы не принимаются. Пустые значения очищают поля до NULL. Сохраняйте все шесть колонок групп. Для сборки явно укажите SLOG: 0 или 1, и начальные значения как в Access."

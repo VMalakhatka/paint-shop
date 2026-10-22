@@ -95,3 +95,7 @@ files. Validate capability, topic anchors and the translated menu after publicat
 ## Валютная цена Украина
 
 `inc/folio-currency.php` добавляет менеджерскую операцию в «Лавка ФОЛИО»: XLS/XLSX/CSV, предпросмотр и отдельное подтверждение двух UPDATE в Paint_Ua. Существующий capability `manage_lavka_prices`, UK/RU домен `lps-currency`, Java `/admin/folio/currency-ua/*`. Инструкция, границы записи и неизвестный итог: [FOLIO_CURRENCY_UA.md](../../../docs/api/FOLIO_CURRENCY_UA.md). Подготовлено локально 22.10.2026; ещё не опубликовано.
+
+## Операции менеджера ФОЛИО
+
+`inc/folio-manager.php` / `assets/folio-manager.js` добавляют меню шести операций в «Лавка ФОЛИО». Java `/admin/folio/manager/*` выполняет чтение/расчёт и отдельно подтверждённую запись только в Paint_Ua. Импорт XLS/XLSX/CSV/буфер, Excel-выгрузка, журнал автора, общий lock, nonce/capability и одноразовый apply; домен `lps-manager` (RU/UK). [Инструкция, статус сборки и восстановление](../../../docs/FOLIO_MANAGER_OPERATIONS.md). Код проверен локально 22.10.2026; production ожидает deploy.

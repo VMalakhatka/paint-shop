@@ -2,11 +2,6 @@
 
 ## Пути групп в условиях аналитики
 
-Проверено 2026-10-19: `analytics-conditions.css` явно скрывает карточки с
-`data-lps(-as)-selection[hidden]`, поскольку `display:grid` в стилях страницы
-перекрывает браузерное скрытие. Браузерный тест подключает реальные стили обеих
-страниц и сохраняет возможность явного редактирования старого условия уровня.
-
 Проверено по коду и тестам 2026-10-17: `analytics-conditions.js` общий для
 аналитики и сценариев. `groupBranches` хранит полный путь, INCLUDE-ветки
 объединяются, EXCLUDE всегда вычитаются; Java применяет предикат ко всей выборке.
@@ -464,40 +459,4 @@ the creating user. Open/export uses the pinned calculation, not fresh Folio read
 only explicit new calculation refreshes source data. Accepted edits and exports
 require current draft revision. See OPERATIONS_RUNBOOK saved purchase drafts.
 
-
-### Signed forecast balance and supplier export, 2026-10-20
-
-Owner: `lavka-price-sync/inc/purchase-stock-report.php` and `purchase-export.php`.
-`forecastBalance` is a view derived from frozen draft inputs: local planning stock
-+ allocated confirmed transit/other receipts − uncapped inventory target (forecast,
-selected MIN, component demand, additional preorders). It excludes new purchases
-and proposed transfers; unknown inputs stay null. Do not substitute clipped
-`excessStock` or sum the shared transit pool into each group. Opening an old draft
-adds this view without saving or recalculating its order. Supplier `uploaded` is
-not active; export must use pinned versions, never refresh prices from today's
-active head. Updated owner layout and activation recovery are documented in
-`docs/OPERATIONS_RUNBOOK.md` under «Формат заказа и излишки по группам».
-
-
-### Large supplier preview storage, 2026-10-20
-
-`inc/supplier-prices.php`: keep `lps_sp_json` canonical for approval hashes;
-use `lps_sp_encode_preview` only at both `preview_json` write sites (build and
-activation/partial merge). All consumers use `lps_sp_decode`, which reads legacy
-JSON and bounded, checksummed gzip envelopes. Do not discard raw supplier rows
-or increase production DB limits as the default fix for packet overflow.
-Uploading XLSX does not prove parsed preview persistence or activation. The
-owner recovery flow and rollback reader requirement are in
-`docs/OPERATIONS_RUNBOOK.md`, «Большой прайс остаётся “Завантажено”».
-
-
-### Main-photo replacement confirmation (2026-10-22)
-
-`lavka-product-media-upload` owns per-row keep/remove decisions after the checked
-batch. `MainImageReplacement` stores server-owned Woo snapshots; `WorkflowService`
-plans old-gallery changes and main replacement together before Woo assignment.
-Java must support optimistic `remove_gallery` before plugin 0.5.0 deployment.
-Generated replacement names preserve old objects; never bypass the operator decision,
-S3 proof, shared lock or Folio preview/apply. The manager workflow is documented in
-`docs/MEDIA_MANAGER_GUIDE_UK.md`; endpoint details in
-`docs/api/FOLIO_PRODUCT_MEDIA_API.md`. No production writes are implied by this code.
+Confirmed by code and owner decisions 2026-10-22: `lavka-price-sync` manager operations use `/admin/folio/manager/*`, only Paint_Ua. Four card operations use preview/apply with shared locks; BASE and assembly return results without creating Folio invoices. Description inserts missing keys then updates; assembly sums component costs by owner decision. Full technical assembly input is implemented; simplified manager columns and reference comparison are pending. Operator/source-of-truth: `docs/FOLIO_MANAGER_OPERATIONS.md`; Java API contract of the same name. Production not deployed.

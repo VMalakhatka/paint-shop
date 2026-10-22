@@ -1,0 +1,167 @@
+msgid ""
+msgstr "Project-Id-Version: lps-manager\nContent-Type: text/plain; charset=UTF-8\nLanguage: uk\nMIME-Version: 1.0\nContent-Transfer-Encoding: 8bit\n"
+
+msgid "Accepts the full Access input table; the simplified manager input is still being clarified. Calculates three result tables, without creating a Folio invoice. Ambiguous source matches stop the calculation."
+msgstr "Приймає повну вхідну таблицю Access; спрощене введення менеджера ще уточнюється. Розраховує три таблиці результату, не створюючи накладну ФОЛІО. Неоднозначні збіги зупиняють розрахунок."
+
+msgid "Access denied."
+msgstr "Доступ заборонено."
+
+msgid "Adds missing articles to the common description table and updates descriptions for existing articles."
+msgstr "Додає відсутні артикули до загальної таблиці описів та оновлює описи наявних товарів."
+
+msgid "Apply to Folio"
+msgstr "Застосувати у ФОЛІО"
+
+msgid "Article"
+msgstr "Артикул"
+
+msgid "Articles by base article"
+msgstr "Артикули за головним артикулом"
+
+msgid "Articles without existing target rows"
+msgstr "Артикули без наявних цільових рядків"
+
+msgid "Assembly has ambiguous source matches or duplicate output articles. Check composition links, warehouse 7 prices and repeated child articles."
+msgstr "У збірці неоднозначні зв’язки або повторні артикули результату. Перевірте склад виробу, ціни складу 7 і повторні артикули дітей."
+
+msgid "Assembly invoice calculation"
+msgstr "Збірка накладна — розрахунок"
+
+msgid "Cannot apply: resolve the reported conflicts first."
+msgstr "Застосування заблоковано: спочатку вирішіть зазначені конфлікти."
+
+msgid "Changes names on all warehouses."
+msgstr "Змінює назви на всіх складах."
+
+msgid "Changes units on all warehouses."
+msgstr "Змінює одиниці виміру на всіх складах."
+
+msgid "Check before applying"
+msgstr "Що перевірити перед застосуванням"
+
+msgid "Check input row %s: column count, value length, numeric format or duplicate article."
+msgstr "Перевірте вхідний рядок %s: кількість колонок, довжину значення, формат числа або повтор артикула."
+
+msgid "Check status"
+msgstr "Перевірити статус"
+
+msgid "Check the displayed columns. Supply either a file or pasted cells, with no formulas or repeated update articles. For assembly, SLOG is required."
+msgstr "Перевірте наведені колонки. Використовуйте або файл, або вставлені комірки; без формул і повторних артикулів для оновлення. Для збірки потрібен SLOG."
+
+msgid "Choose an operation. Prepare the columns shown below, then upload a file or paste cells from Excel. Preview the result. For card changes, check every warehouse and each empty value, download the preview, and confirm Apply. For selections and assembly, download the result; they do not create a Folio invoice."
+msgstr "Виберіть операцію. Підготуйте наведені нижче колонки, завантажте файл або вставте комірки з Excel. Відкрийте попередній перегляд. Для змін карток перевірте кожен склад і порожні значення, завантажте перегляд та підтвердьте застосування. Для вибірки та збірки завантажте результат: накладна у ФОЛІО не створюється."
+
+msgid "Could not export this operation. Reopen it from history and try again."
+msgstr "Не вдалося вивантажити операцію. Відкрийте її в історії та повторіть завантаження."
+
+msgid "Could not process the operation. Check the input and Java connection. After Apply, check status before repeating."
+msgstr "Не вдалося обробити операцію. Перевірте вхідні дані та з’єднання з Java. Після застосування спочатку перевірте статус; не повторюйте запис."
+
+msgid "Do not upload and apply the same file again. Use Check status or reopen this operation in history. If the result stays unknown, ask the administrator to verify Folio against the saved preview."
+msgstr "Не завантажуйте й не застосовуйте той самий файл повторно. Натисніть «Перевірити статус» або відкрийте операцію в історії. Якщо результат залишається невідомим, попросіть адміністратора звірити ФОЛІО зі збереженим переглядом."
+
+msgid "Download Excel"
+msgstr "Завантажити Excel"
+
+msgid "Excel or CSV file"
+msgstr "Файл Excel або CSV"
+
+msgid "Field"
+msgstr "Поле"
+
+msgid "File and empty values"
+msgstr "Файл і порожні значення"
+
+msgid "I checked all changes, including empty values, and confirm the update in Paint_Ua."
+msgstr "Я перевірив усі зміни, зокрема порожні значення, і підтверджую запис у Paint_Ua."
+
+msgid "If the result is unknown"
+msgstr "Якщо результат невідомий"
+
+msgid "Manager operations"
+msgstr "Операції менеджера"
+
+msgid "NULL / empty"
+msgstr "NULL / порожньо"
+
+msgid "Name, groups and unit are updated on every matching warehouse card. Check the old and new values, missing articles and intended field clearing. A preview is valid for 15 minutes; changed source rows require a new preview."
+msgstr "Назва, групи та одиниця виміру змінюються в кожній відповідній складській картці. Перевірте старі й нові значення, відсутні артикули та очищення полів. Перегляд діє 15 хвилин; якщо початкові рядки змінилися, потрібен новий перегляд."
+
+msgid "New value"
+msgstr "Нове значення"
+
+msgid "No target rows."
+msgstr "Немає рядків для зміни."
+
+msgid "Old value"
+msgstr "Старе значення"
+
+msgid "Operation"
+msgstr "Операція"
+
+msgid "Or paste cells from Excel"
+msgstr "Або вставте комірки з Excel"
+
+msgid "Outcome unknown. Check status; do not repeat the update."
+msgstr "Результат невідомий. Перевірте статус; не повторюйте запис."
+
+msgid "Pasted cells"
+msgstr "Вставлені комірки"
+
+msgid "Preview / calculate"
+msgstr "Переглянути / розрахувати"
+
+msgid "Preview expired. Create a new preview."
+msgstr "Перегляд застарів. Створіть новий."
+
+msgid "Processing…"
+msgstr "Обробка…"
+
+msgid "Product description"
+msgstr "Опис товару"
+
+msgid "Product groups"
+msgstr "Групи товару"
+
+msgid "Product name"
+msgstr "Назва товару"
+
+msgid "Quick guide"
+msgstr "Коротка інструкція"
+
+msgid "Read only. Duplicate input rows and unmatched NULL/NULL output rows are retained."
+msgstr "Лише читання. Повторні вхідні рядки та рядки NULL/NULL без збігів зберігаються."
+
+msgid "Ready for confirmation"
+msgstr "Готово до підтвердження"
+
+msgid "Recent operations"
+msgstr "Останні операції"
+
+msgid "Replaces all six group fields on all warehouses. Empty cells clear groups."
+msgstr "Замінює всі шість груп на всіх складах. Порожні комірки очищують групи."
+
+msgid "Result ready for download"
+msgstr "Результат готовий до завантаження"
+
+msgid "Saved and verified in Folio."
+msgstr "Збережено й перевірено у ФОЛІО."
+
+msgid "Six operations from the manager workbook. Source and destination: Paint_Ua."
+msgstr "Шість операцій із таблиці менеджера. Читання та зміни: Paint_Ua."
+
+msgid "Source rows changed. Nothing was applied; create a new preview."
+msgstr "Початкові рядки змінилися. Запис не виконано; створіть новий перегляд."
+
+msgid "The operation is running. Check status."
+msgstr "Операція виконується. Перевірте статус."
+
+msgid "Unit of measure"
+msgstr "Одиниця виміру"
+
+msgid "Warehouse"
+msgstr "Склад"
+
+msgid "XLS, XLSX or UTF-8 CSV, up to 5 MB and 500 data rows. Only the first sheet is read. Headers are optional, in the displayed order. Use tabs or semicolons for decimal commas. Formulas are rejected. Empty values clear fields to NULL. Keep all six group columns. For assembly, supply SLOG explicitly as 0 or 1 and preserve the initial values used in Access."
+msgstr "XLS, XLSX або CSV в UTF-8, до 5 МБ і 500 рядків даних. Читається перший аркуш. Заголовок необов’язковий; порядок колонок наведено вище. Для десяткової коми використовуйте табуляцію або крапку з комою. Формули не приймаються. Порожні значення очищують поля до NULL. Зберігайте всі шість колонок груп. Для збірки явно вкажіть SLOG: 0 або 1, і початкові значення як в Access."
