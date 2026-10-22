@@ -3,9 +3,9 @@
 Independent classic WordPress theme for the Lavka/KREUL storefront. It has no
 parent theme and does not load GeneratePress PHP, scripts, or styles.
 
-Status: prepared and verified locally on 2026-10-21. Adding these files does not activate
-the theme, alter the database, or deploy it to production. Theme activation is a
-separate rollout step after the local checks and review.
+Status: activated on `paint.local` and verified on 2026-10-22 with the owner’s
+explicit approval. Production was not changed. Adding or deploying files alone
+does not activate a theme; production delivery and activation remain separate.
 
 ## Ownership
 
@@ -64,11 +64,24 @@ account/quick order, mobile menu, 404, workshops, and fallback header/footer.
 No horizontal overflow was observed in these scenarios. Generic table styling
 keeps native table layout, and product-search fallback renders its sidebar.
 
-The saved active theme and its options stayed unchanged. These checks do not
-exercise WordPress `switch_theme`/`after_switch_theme` or widget remapping during
-real activation. The existing deploy script deliberately excludes this new theme;
-delivery, activation, and production acceptance belong to the separate next stage.
-See the stage-two section of Paint Shop UX README for the test command and scope.
+The preview checks above left the saved active theme unchanged. On 2026-10-22,
+real local `switch_theme` and the next request’s `after_switch_theme` completed:
+59 activation checks and 103 integration checks passed without theme-option
+overrides. Primary menu and all active widget assignments/order were retained;
+widget data and Woo page assignments were unchanged. Core removed one inactive
+legacy widget reference, preserving its widget data. Image sizes/hash stayed the
+same and no image-regeneration job was queued.
+
+Browser acceptance after activation covered the actual `paint.local` catalogue,
+SKU search, page-two sticky context, product gallery/lightbox, ordinary page,
+404 and login, plus memory-only cart/checkout and role previews on loopback.
+Those previews used the saved active theme, without template/stylesheet overrides.
+Widths 320/390/768/1280 px passed; mobile navigation and wholesale/retail menu
+visibility were checked. No order, payment or external integration was submitted.
+
+The existing deploy script still deliberately excludes this new theme and does
+not activate themes. Production delivery, activation and real-device acceptance
+remain separate. Local backup/rollback: [Bootstrap and recovery](../../../docs/BOOTSTRAP_AND_RECOVERY.md#локальная-активация-lavka-storefront-2026-10-22).
 
 Source messages are English; bundled `languages/uk.po` and `ru_RU.po` catalogs
 provide Ukrainian and Russian translations. Rebuild the matching `.mo` files

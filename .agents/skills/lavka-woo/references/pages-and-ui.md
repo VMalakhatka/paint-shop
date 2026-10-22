@@ -445,9 +445,9 @@ Paint Shop UX. Владельцы — `docs/SYSTEM_OVERVIEW.md`; канон и �
 ## Независимый каркас: этап 2 (1.9.0, 2026-10-21)
 
 `wp-content/themes/lavka-storefront` — самостоятельная классическая тема без
-Template/GP dependency. Статус: подготовлена для локального request-only preview,
-не активирована и не добавлена в production deploy. Действующая тема остаётся
-GeneratePress Child. Не считать наличие файлов завершённым переключением.
+Template/GP dependency. Подготовлена 2026-10-21, реально активирована на paint.local
+2026-10-22 с разрешения владельца. В production deploy новая папка не добавлена;
+production activation не выполнена. Не путать локальное и production состояние.
 
 PSU public-pages принимает `current_theme_supports('psu-public-pages')` с прежними
 ограничениями default page/search/404 и исключениями приложений. Сохраняются
@@ -459,7 +459,14 @@ child theme mods только при отсутствии собственног
 настройку без записи. Шаблоны приложений и права остаются у плагинов.
 
 Источник и проверка — README темы и `tests/lavka-theme-{bootstrap-local,local}.php`.
-Тест выполняется в отдельном WP CLI процессе, не вызывает switch_theme и сверяет
-сохранённые options. Это не покрывает WordPress after_switch_theme/widget remapping:
-настоящую активацию, перенос папки в deploy и production acceptance выполнять лишь
-в отдельном согласованном этапе 3, с возможностью возврата прежней темы.
+Preview bootstrap не вызывает switch_theme и сверяет сохранённые options.
+Отдельная реальная активация 2026-10-22 покрыла следующий WP load/init@99,
+после которого core очистил theme_switched и перенёс primary/активные widgets.
+Меню теперь сохранено в own theme mods; read-only legacy fallback остаётся для
+других установок. Проверка: 59 activation + 103 integration, без pre_option
+подмены темы. Core может очищать неактивные ссылки на незарегистрированные widgets;
+сравнивать отдельно активные назначения, widget data и inactive list, не считать
+изменение сериализованного sidebars_widgets само по себе потерей активных виджетов.
+Woo image hash не изменился, regen queue осталась пустой. Backup и точечный возврат:
+`docs/BOOTSTRAP_AND_RECOVERY.md`, «Локальная активация Lavka Storefront».
+Перенос папки в deploy и production activation/acceptance — отдельное разрешение.

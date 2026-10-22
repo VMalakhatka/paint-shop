@@ -282,3 +282,32 @@ POST `/admin/folio/customer-debtors/snapshot/refresh`. При timeout снача
 При `running=true` кнопка остаётся заблокированной; для старого API без running
 сохраняется прежнее поведение. Проверка интерфейса:
 `node wp-content/mu-plugins/pc-folio-customer-balance/tests/customer-debtors-status.cjs`.
+
+## Локальная активация Lavka Storefront (2026-10-22)
+
+Подтверждено на `paint.local`: после явного решения владельца активирована
+`lavka-storefront`; production не менялся. Операция использовала штатный
+`switch_theme`, затем отдельную загрузку WordPress для `after_switch_theme`,
+переноса меню/виджетов и обновления rewrite rules. Перед записью проверены
+`WP_ENVIRONMENT_TYPE=local`, host `paint.local`, прежняя тема
+`generatepress-child` и требования новой темы. Cron и внешние HTTP-запросы
+в CLI-проверке отключены. Тестовые cart/role previews ограничены loopback GET,
+не подменяют активную тему и не создают заказов или платежей.
+
+Backup расположен вне web root: относительно `public/` это
+`../theme-switch-backups/2026-10-22-lavka-storefront/`. Закрытый JSON содержит
+71 исходную option row, menu/widget snapshot; отдельно сохранён `.htaccess`.
+Права directory/file — 0700/0600; содержимое не включать в Git или public uploads.
+Меню primary, все активные виджеты и их порядок сохранены. Core удалил одну
+неактивную ссылку legacy widget, данные самого виджета остались. Image size hash
+не изменился, новых задач регенерации нет. Результат: 59 activation checks и
+103 integration checks; браузерная приёмка — README темы.
+
+Локальная тема остаётся активной для ручной проверки владельцем. Для возврата
+на этом же локальном сайте использовать штатное `wp theme activate generatepress-child`,
+затем открыть сайт новым запросом и проверить меню/боковую колонку. Обе прежние
+темы и их сохранённые настройки оставлены. Если нужен точный возврат назначения
+неактивных виджетов, сверять private snapshot; не заменять всю БД ради темы.
+
+Этот регламент не разрешает production activation. `deploy_safe.sh` по-прежнему
+копирует только `generatepress-child` и не вызывает переключение темы.
