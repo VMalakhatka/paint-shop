@@ -55,6 +55,14 @@ production не включён. Владелец — `pc-order-import-export/Wai
 
 Hash не заменяет исправление derived state: при изменении visibility/search/media обновляй соответствующее состояние и индекс, а не только `_ms_hash`.
 
+Full-card supplier/hash v2 (2026-10-22, code and local fixtures): Java exports
+warehouse-7 `DOP2_ARTIC` as `supplier`, sends Woo `lavka_supplier`, and hashes the
+complete output DTO except hash itself. LTS 0.1.2 owns term resolution and CRUD
+`brand_ids`; never write `psu_catalog_suppliers` during sync. Empty source clears
+assignment, missing source rows fail closed, absent legacy fields preserve it.
+Java requires the PHP OPTIONS capability before diff. Deploy/retry boundaries:
+[full sync release](../../../../docs/api/FOLIO_FULL_SYNC_SUPPLIER_RELEASE.md).
+
 Единица измерения имеет **два пути хранения**: Java `SyncServiceImpl.mapDtoToWooProduct`
 пишет `edinIzmer` в meta `_edin_izmer`; PHP `lavka-total-sync/inc/sync_goods.php`
 пишет глобальный атрибут `pa_edin_izmer`, relationship и `_product_attributes`.
