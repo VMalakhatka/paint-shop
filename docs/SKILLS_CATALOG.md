@@ -14,6 +14,7 @@ production approval или документацию внешнего серви�
 |---|---|---|
 | `$lavka-woo` | Любой код, настройка, deploy, диагностика или операция `paint.local`/KREUL | чистой логики ФОЛИО, provider/server operations |
 | `$lavka-project-documentation` | структура, создание, ревизия, актуализация и автоматический контроль документации Lavka/KREUL | владельца фактического поведения кода или разрешения production-операции |
+| `$folio-access-catalog` | офлайн-разбор MDB ФОЛИО: SQL, макросы, зависимости и подготовка спецификации; [реестр](FOLIO_MDB_CATALOG.md) | исполнения запросов, живой БД и реализации сайта |
 | `$work-with-folio-mssql` | Paint_Ua/Paint_Rus, SQL Server 2000, таблицы/процедуры ФОЛИО, Java DAO | обычного WordPress/MariaDB SQL |
 | `$server-lavka` | host, hypervisor, Windows VM, services, disks, RDP, MSSQL runtime, incident | Woo deploy и семантики бизнес-таблиц |
 | `$build-java-docker-runtime` | Java/Spring Boot, Dockerfile/Compose, env contract, image, container health и deploy/rollback; human runbook — `JAVA_DOCKER_RUNTIME.md` | физического host, WordPress и бизнес-данных ФОЛИО |

@@ -22,6 +22,7 @@
 
 | Задача | Основной документ |
 |---|---|
+| Разобрать MDB ФОЛИО и подготовить перенос запросов/макросов | [Каталог MDB и статус разбора](FOLIO_MDB_CATALOG.md) |
 | Понять устройство системы и владельца поведения | [SYSTEM_OVERVIEW.md](SYSTEM_OVERVIEW.md) |
 | Отслеживать покупателей, источники, товары и заказ без двойного счёта | [CUSTOMER_ANALYTICS.md](CUSTOMER_ANALYTICS.md) |
 | Разрабатывать и сопровождать backend PHP/Java/Folio | [BACKEND_GUIDE.md](BACKEND_GUIDE.md) |
