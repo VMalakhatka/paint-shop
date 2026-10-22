@@ -301,6 +301,16 @@ keep `manage_options` for payee editing. Runtime defaults survive code deploys.
 и его assets; выбор склада остаётся у Paint Core.
 Инструкция и снимок — `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md` и pc-wholesale-help.
 
+Проверено локально 2026-10-22: PSU 1.9.1 `assets/category-entry.js` на ширине
+до 767 px однократно открывает выбранную категорию с её H1. Источник намерения —
+обычный клик в плитке, native category menu или Woo breadcrumbs; точный URL и
+30-секундный срок хранятся только в sessionStorage этой вкладки. Без storage/JS
+остаётся обычная навигация. Маркер потребляется один раз; reload/back-forward,
+явный hash, модифицированный клик/новая вкладка, поиск/фильтры/пагинация и
+ширина от 768 px не запускают прокрутку. Ручной ввод или уже начатая прокрутка
+отменяют отложенный переход. Не менять history.scrollRestoration и не переносить
+фильтры в DOM ради этой задачи. Канон и код справки обновлены; deploy ожидается.
+
 ### Preorder balance v2 (2026-10-14)
 
 `pc-folio-customer-balance` requires Java `calculationVersion >= 2` for individual/debtors responses. `prepaymentAmount` is now the reserve from active non-accounted ПРД/*РАЗОВАЯ invoices no older than six calendar months (inclusive), not payments. Older orders must be recreated by the manager. The ledger balance is separate; payable adds reserve and subtracts deferral. Individual balance renders `preorders[]`; XLSX shows the invoice list and reserve total below ledger movements on the main sheet, and retains a separate data sheet (2026-10-14 export follow-up). Customer and manager use the same exporter with existing ownership checks. Customer/manager documents have `preordersOnly` server-side filtering over the same six-month window before pagination. Java V18 separates old snapshot generations and live overrides; rebuild debtors after deploying Java + WP. Never relabel a v1 cached payment amount as an invoice reserve. Current outstanding invoice amount already excludes fulfilled goods (owner confirmation).

@@ -38,6 +38,10 @@ add_action('wp_enqueue_scripts', static function (): void {
     if (is_admin()) return;
     $file = dirname(__DIR__) . '/assets/catalog-cards.css';
     wp_enqueue_style('psu-catalog-cards', plugins_url('assets/catalog-cards.css', dirname(__DIR__) . '/paint-shop-ux.php'), [], (string) filemtime($file));
+    if (is_shop() || is_product_category()) {
+        $entry = dirname(__DIR__) . '/assets/category-entry.js';
+        wp_enqueue_script('psu-category-entry', plugins_url('../assets/category-entry.js', __FILE__), [], (string) filemtime($entry), true);
+    }
     if (psu_catalog_uses_compact_titles()) {
         $script = dirname(__DIR__) . '/assets/catalog-context.js';
         wp_enqueue_script('psu-catalog-context', plugins_url('../assets/catalog-context.js', __FILE__), [], (string) filemtime($script), true);

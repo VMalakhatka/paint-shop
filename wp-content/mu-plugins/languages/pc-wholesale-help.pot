@@ -1201,3 +1201,7 @@ msgstr ""
 
 msgid "After submitting checkout, wait for the result and do not submit again. Online payment and Folio documents have separate statuses. The result page refreshes for up to two minutes. If confirmation is delayed, contact your manager; do not repeat a charged payment."
 msgstr ""
+
+#: pc-wholesale-help.php
+msgid "On a phone, choosing a category from its tile, the category menu or breadcrumbs opens it at the large heading. Scroll up to reach search and filters. Tablets, computers, page reloads and Back keep normal browser scrolling."
+msgstr ""

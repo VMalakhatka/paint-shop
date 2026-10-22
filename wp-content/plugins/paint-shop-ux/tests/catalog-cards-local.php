@@ -145,6 +145,8 @@ try {
         try {
             ob_start(); pc_wholesale_help_render_endpoint(); $help = ob_get_clean();
             $check(str_contains($help, $translated), 'Wholesale help translated: ' . $locale);
+            $check(str_contains($help, $locale === 'uk' ? 'На телефоні вибір категорії' : 'На телефоне выбор категории'),
+                'Mobile category entry help translated: ' . $locale);
             $check(str_contains($help, 'catalog-cards-mobile-2026-10-07.jpg'), 'Wholesale help screenshot: ' . $locale);
         } finally { if ($switched) restore_previous_locale(); }
     }

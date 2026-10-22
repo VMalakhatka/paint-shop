@@ -1223,3 +1223,7 @@ msgstr "Відкрийте замовлення в кабінеті, щоб по
 
 msgid "After submitting checkout, wait for the result and do not submit again. Online payment and Folio documents have separate statuses. The result page refreshes for up to two minutes. If confirmation is delayed, contact your manager; do not repeat a charged payment."
 msgstr "Після оформлення дочекайтеся результату та не надсилайте замовлення повторно. Онлайн-оплата й документи ФОЛІО мають окремі статуси. Сторінка результату оновлюється до двох хвилин. Якщо підтвердження затримується, зверніться до менеджера; не повторюйте вже списану оплату."
+
+#: pc-wholesale-help.php
+msgid "On a phone, choosing a category from its tile, the category menu or breadcrumbs opens it at the large heading. Scroll up to reach search and filters. Tablets, computers, page reloads and Back keep normal browser scrolling."
+msgstr "На телефоні вибір категорії в плитці, меню категорій або навігаційному ланцюжку відкриває її з великого заголовка. Прокрутіть угору, щоб перейти до пошуку й фільтрів. На планшеті, комп’ютері, під час оновлення сторінки та повернення кнопкою «Назад» зберігається звичайна прокрутка браузера."
