@@ -11,6 +11,7 @@ add_action('muplugins_loaded', function () {
     // Перечень текст-доменов MU-плагинов (добавляй при необходимости)
     $domains = [
         'pc-account-tweaks',
+        'pc-guest-customer-register',
         'pc-cart-guard',
         'pc-folio-customer-map',
         'pc-folio-customer-balance',

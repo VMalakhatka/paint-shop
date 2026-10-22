@@ -3,7 +3,7 @@
 Plugin Name: Paint Shop UX
 Description: UX improvements for WooCommerce catalog: compact titles, square thumbnails, per-page switcher, graceful fallbacks.
 Author: Volodymyr
-Version: 1.9.1
+Version: 1.9.2
 Text Domain: paint-shop-ux
 Domain Path: /languages
 */
@@ -18,6 +18,7 @@ require_once __DIR__ . '/inc/slw-assets.php';
 require_once __DIR__ . '/inc/social-assets.php';
 require_once __DIR__ . '/inc/cart-layout.php';
 require_once __DIR__ . '/inc/mobile-cart.php';
+require_once __DIR__ . '/inc/checkout-comfort.php';
 require_once __DIR__ . '/inc/catalog-cards.php';
 require_once __DIR__ . '/inc/single-product.php';
 require_once __DIR__ . '/inc/store-presentation.php';

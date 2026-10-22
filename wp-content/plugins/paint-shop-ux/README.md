@@ -965,3 +965,55 @@ Production deploy/приёмка этой версии ещё не выполн�
 Доставка — обычный deploy существующего Paint Shop UX и MU-справки с переводами;
 новой активации, миграции или обновления темы не требуется. Откат — вернуть
 изменения 1.9.1 в enqueue, файл category-entry.js и связанный текст справки.
+
+## Checkout comfort (2026-10-23; 1.9.2)
+
+`inc/checkout-comfort.php` presents native Woo login and an explanation of the
+existing automatic email account workflow before classic checkout. Current
+production account creation at checkout is disabled in Woo settings; the MU
+`pc-guest-customer-register.php` owns automatic guest account creation instead.
+The login reminder is enabled at runtime only on checkout; no stored options
+change. Existing account access still requires authentication. Wholesale users
+must sign in before checkout to receive their own prices/conditions.
+
+MU version 1.1.0 associates guests strictly by valid billing email, never phone.
+Existing profiles, roles and Folio mapping remain unchanged (Woo may update its
+own `wc_last_active` bookkeeping). Only newly created customers receive billing,
+shipping and default Internet client data. Association is saved before mail;
+`_pc_guest_customer_account_created` distinguishes new vs existing accounts.
+The mail flag now observes `woocommerce_email_sent`; acceptance by transport is
+not proof of inbox delivery. Reprocessing an attached order never creates or
+emails a second account. The thank-you notice checks order ownership or secret
+order key, distinguishes creation from association, and offers password recovery
+when mail fails. No automatic authentication is granted by this workflow.
+
+Email remains required and validated. For every actual shipping package selected
+as `local_pickup` (including NP-generated rates), the UI hides street, extra
+address, city, state and postcode. Server validation removes their required and format
+errors (a hidden stale postcode must not block pickup); contact/country/shipping
+errors are preserved. Mixed delivery,
+unknown rate IDs or incomplete selections retain normal validation. Switching
+back to delivery restores requirements, including country locale changes.
+No Nova Poshta API, payment gateway, price or stock algorithm was changed.
+
+The existing mobile cart bar is now <=767px and has a 44px crossed-eye button.
+A sessionStorage boolean hides it in the current tab until the next successful
+AJAX add-to-cart. Storage denial falls back to in-page dismissal. No cart contents,
+prices or personal totals enter storage. AJAX fragments and own-session summary
+remain the data source; desktop, cart, checkout, account and draft exclusions stay.
+At <=360px the summary occupies its own row to keep controls readable.
+
+Verification: `scripts/tests/checkout-comfort-local.php` runs real Woo CRUD with
+synthetic local orders/customers, blocks HTTP and intercepts mail, then deletes
+fixtures. Covers creation, existing retail/wholesale/staff profiles, duplicate
+processing, same-phone/different-email, mail failure, private notice, actual and
+forged/mixed rates, email and preserved errors. Browser acceptance covers the
+native login form, pickup/delivery switch, cart hide/reload/next addition, narrow
+phone and desktop layouts. No real checkout payment or inbox delivery was tested.
+User-facing guide and account help are updated in Ukrainian and Russian.
+
+Deploy together: PSU, `pc-guest-customer-register.php`, `00-mu-i18n-loader.php`,
+`pc-wholesale-help.php`, help image and matching MU/plugin PO/MO translations.
+No theme reinstall or DB migration. Not deployed by this task. Rollback restores
+these files from the previous release; do not remove accounts/orders created
+while the change was active. Old mail flags are not retroactively reclassified.

@@ -26,6 +26,7 @@ production, Woo wc-user-functions, pc-folio-customer-map/balance и WordPress co
 
 - Новая guest purchase может создать WordPress user с ролью `customer` и связать его с default Internet Client ФОЛИО.
 - При существующем email заказ связывается с найденным пользователем по правилам guest-register plugin; не создавай дубликат без проверки.
+- Guest register 1.1.0: email-only association, never phone lookup/auth cookies/profile or role overwrite. New users alone receive default Folio mapping and billing/shipping data. Persist association before sending account mail; `_pc_guest_customer_account_email_sent` records the Woo mail transport result, not delivery to inbox. Classic checkout requires email; pickup exemption must validate every selected rate against actual packages, never trust its label or prefix. Canonical customer steps: `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md`, section 10; implementation/verification/deploy: PSU README, Checkout comfort (2026-10-23).
 - Связь с реальным оптовиком/дилером задаётся на user edit через partners API и user meta.
 - `_folio_partner_id` и `_folio_partner_short_name` в текущем контракте содержат короткое имя/ID ФОЛИО; сохраняй их согласованно.
 - Финансовые tabs разрешай только при подтверждённом short name и допустимой роли/политике.

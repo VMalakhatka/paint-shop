@@ -1,0 +1,24 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: PC Guest Customer Register 1.1.0\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Your account has been created using the email entered at checkout."
+msgstr ""
+
+msgid "This order is linked to the account for the email entered at checkout. Sign in to view your orders."
+msgstr ""
+
+msgid "Check your email for the password setup link, including your spam folder."
+msgstr ""
+
+msgid "The password setup email could not be sent. Use password recovery to access your account."
+msgstr ""
+
+msgid "My account"
+msgstr ""
+
+msgid "Set or recover password"
+msgstr ""

@@ -1227,3 +1227,12 @@ msgstr "После оформления дождитесь результата 
 #: pc-wholesale-help.php
 msgid "On a phone, choosing a category from its tile, the category menu or breadcrumbs opens it at the large heading. Scroll up to reach search and filters. Tablets, computers, page reloads and Back keep normal browser scrolling."
 msgstr "На телефоне выбор категории в плитке, меню категорий или навигационной цепочке открывает её с крупного заголовка. Прокрутите вверх, чтобы перейти к поиску и фильтрам. На планшете, компьютере, при обновлении страницы и возврате кнопкой «Назад» сохраняется обычная прокрутка браузера."
+
+msgid "The crossed-eye button hides the bottom cart bar in this browser tab. It appears again when you add another product. You can still open the cart from the site menu."
+msgstr "Кнопка с перечёркнутым глазом скрывает нижнюю панель корзины в этой вкладке браузера. Панель снова появится после добавления следующего товара. Корзина также доступна в меню сайта."
+
+msgid "Email is required for every order. With store pickup, street, city, region and postcode are not required. Switching back to delivery restores its address requirements."
+msgstr "E-mail обязателен для каждого заказа. При самовывозе улица, город, область и индекс не нужны. При переключении обратно на доставку требования к адресу восстанавливаются."
+
+msgid "Before checkout, you can sign in. Without signing in, a new account is created using the order email, or the order is linked to the existing account for that email. This does not sign you in or change an existing profile. For wholesale prices and terms, sign in before ordering. After a new account is created, check your email to set a password; if sending fails, use password recovery."
+msgstr "Перед оформлением можно войти в кабинет. Без входа создаётся новый кабинет по e-mail заказа или заказ привязывается к существующему кабинету с этим e-mail. Это не выполняет вход и не меняет существующий профиль. Для оптовых цен и условий войдите до оформления. После создания кабинета проверьте почту для установки пароля; если письмо не отправлено, воспользуйтесь восстановлением пароля."

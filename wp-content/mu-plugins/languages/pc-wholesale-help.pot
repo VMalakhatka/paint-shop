@@ -1205,3 +1205,12 @@ msgstr ""
 #: pc-wholesale-help.php
 msgid "On a phone, choosing a category from its tile, the category menu or breadcrumbs opens it at the large heading. Scroll up to reach search and filters. Tablets, computers, page reloads and Back keep normal browser scrolling."
 msgstr ""
+
+msgid "The crossed-eye button hides the bottom cart bar in this browser tab. It appears again when you add another product. You can still open the cart from the site menu."
+msgstr ""
+
+msgid "Email is required for every order. With store pickup, street, city, region and postcode are not required. Switching back to delivery restores its address requirements."
+msgstr ""
+
+msgid "Before checkout, you can sign in. Without signing in, a new account is created using the order email, or the order is linked to the existing account for that email. This does not sign you in or change an existing profile. For wholesale prices and terms, sign in before ordering. After a new account is created, check your email to set a password; if sending fails, use password recovery."
+msgstr ""

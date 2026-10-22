@@ -1,0 +1,11 @@
+.psu-checkout-account {
+    margin:0 0 24px; padding:20px 24px; border:1px solid #e3dcd3;
+    border-radius:12px; background:#fff; color:#35312c;
+}
+.psu-checkout-account p { margin:8px 0 12px; max-width:76ch; line-height:1.6; }
+.psu-checkout-account a { font-weight:600; text-underline-offset:3px; }
+.woocommerce-checkout .woocommerce-form-login-toggle a.showlogin { display:inline-block; }
+form.checkout .psu-pickup-address { display:none !important; }
+.psu-pickup-hint[hidden] { display:none !important; }
+.psu-pickup-hint td { color:#28634c; font-size:14px; }
+@media (max-width:767px) { .psu-checkout-account { padding:16px; } }

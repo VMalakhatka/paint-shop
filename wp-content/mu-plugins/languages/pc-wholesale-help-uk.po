@@ -1227,3 +1227,12 @@ msgstr "Після оформлення дочекайтеся результа�
 #: pc-wholesale-help.php
 msgid "On a phone, choosing a category from its tile, the category menu or breadcrumbs opens it at the large heading. Scroll up to reach search and filters. Tablets, computers, page reloads and Back keep normal browser scrolling."
 msgstr "На телефоні вибір категорії в плитці, меню категорій або навігаційному ланцюжку відкриває її з великого заголовка. Прокрутіть угору, щоб перейти до пошуку й фільтрів. На планшеті, комп’ютері, під час оновлення сторінки та повернення кнопкою «Назад» зберігається звичайна прокрутка браузера."
+
+msgid "The crossed-eye button hides the bottom cart bar in this browser tab. It appears again when you add another product. You can still open the cart from the site menu."
+msgstr "Кнопка з перекресленим оком ховає нижню панель кошика в цій вкладці браузера. Панель знову з’явиться після додавання наступного товару. Кошик також доступний у меню сайту."
+
+msgid "Email is required for every order. With store pickup, street, city, region and postcode are not required. Switching back to delivery restores its address requirements."
+msgstr "E-mail обов’язковий для кожного замовлення. Для самовивозу вулиця, місто, область та індекс не потрібні. Після повернення до доставки вимоги до адреси відновлюються."
+
+msgid "Before checkout, you can sign in. Without signing in, a new account is created using the order email, or the order is linked to the existing account for that email. This does not sign you in or change an existing profile. For wholesale prices and terms, sign in before ordering. After a new account is created, check your email to set a password; if sending fails, use password recovery."
+msgstr "Перед оформленням можна увійти до кабінету. Без входу створюється новий кабінет за e-mail замовлення або замовлення прив’язується до наявного кабінету з цим e-mail. Це не виконує вхід і не змінює наявний профіль. Для оптових цін та умов увійдіть до оформлення. Після створення кабінету перевірте пошту для встановлення пароля; якщо лист не надіслано, скористайтеся відновленням пароля."

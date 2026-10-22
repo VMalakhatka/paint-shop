@@ -3,7 +3,7 @@
 Plugin Name: PC Guest Customer Register
 Description: Converts WooCommerce guest checkout orders into customer users and assigns the default Folio internet client mapping.
 Author: PaintCore
-Version: 1.0.0
+Version: 1.1.0
 Text Domain: pc-guest-customer-register
 Domain Path: /languages
 */
@@ -86,48 +86,6 @@ if (!function_exists('pc_guest_customer_username_from_order')) {
     }
 }
 
-if (!function_exists('pc_guest_customer_find_user_by_phone')) {
-    /**
-     * Find a user by billing phone meta after normalizing digits.
-     */
-    function pc_guest_customer_find_user_by_phone(string $phone): int
-    {
-        $normalized = pc_guest_customer_normalize_phone($phone);
-        if ($normalized === '') {
-            return 0;
-        }
-
-        $users = get_users([
-            'number'     => 20,
-            'fields'     => ['ID'],
-            'meta_query' => [
-                'relation' => 'OR',
-                [
-                    'key'     => 'billing_phone',
-                    'value'   => $normalized,
-                    'compare' => 'LIKE',
-                ],
-                [
-                    'key'     => 'phone',
-                    'value'   => $normalized,
-                    'compare' => 'LIKE',
-                ],
-            ],
-        ]);
-
-        foreach ($users as $user) {
-            $user_id = (int) $user->ID;
-            $billing_phone = pc_guest_customer_normalize_phone((string) get_user_meta($user_id, 'billing_phone', true));
-            $phone_meta = pc_guest_customer_normalize_phone((string) get_user_meta($user_id, 'phone', true));
-            if ($billing_phone === $normalized || $phone_meta === $normalized) {
-                return $user_id;
-            }
-        }
-
-        return 0;
-    }
-}
-
 if (!function_exists('pc_guest_customer_create_from_order')) {
     /**
      * Create a Woo customer user from order billing data.
@@ -174,9 +132,18 @@ if (!function_exists('pc_guest_customer_send_new_account_email')) {
             return false;
         }
 
-        $email->trigger($user_id, '', true);
-
-        return true;
+        // trigger() has no return value. Observe the mail transport result instead.
+        $sent = false;
+        $observe = static function ($success, $id, $instance) use (&$sent, $email): void {
+            if ($id === 'customer_new_account' && $instance === $email) $sent = (bool) $success;
+        };
+        add_action('woocommerce_email_sent', $observe, 10, 3);
+        try {
+            $email->trigger($user_id, '', true);
+        } finally {
+            remove_action('woocommerce_email_sent', $observe, 10);
+        }
+        return $sent;
     }
 }
 
@@ -239,45 +206,74 @@ if (!function_exists('pc_guest_customer_attach_order')) {
         }
 
         $email = sanitize_email($order->get_billing_email());
-        $user_id = $email !== '' ? (int) email_exists($email) : 0;
-
-        if (!$user_id) {
-            $user_id = pc_guest_customer_find_user_by_phone((string) $order->get_billing_phone());
-        }
+        $user_id = is_email($email) ? (int) email_exists($email) : 0;
 
         $created_user = false;
         if (!$user_id) {
             $user_id = pc_guest_customer_create_from_order($order);
             $created_user = $user_id > 0;
+            // Another checkout may have registered this email in the meantime.
+            if (!$user_id && is_email($email)) $user_id = (int) email_exists($email);
         }
 
         if (!$user_id) {
             $order->update_meta_data('_pc_guest_customer_register_status', 'skipped');
-            $order->update_meta_data('_pc_guest_customer_register_reason', 'missing_valid_email');
+            $order->update_meta_data('_pc_guest_customer_register_reason', is_email($email) ? 'creation_failed' : 'missing_valid_email');
             $order->save();
             return;
         }
 
-        $user = get_user_by('id', $user_id);
-        if ($user instanceof \WP_User && empty(array_intersect($user->roles, ['administrator', 'shop_manager', 'lavka_manager', 'partner', 'opt', 'opt_osn', 'schule']))) {
-            $user->set_role(PC_GUEST_CUSTOMER_ROLE);
+        // An email match associates this order only. It proves neither identity
+        // nor permission to change an existing profile, role, mapping or session.
+        if ($created_user) {
+            pc_guest_customer_assign_default_folio_client($user_id);
+            pc_guest_customer_sync_user_meta_from_order($user_id, $order);
         }
-
-        pc_guest_customer_assign_default_folio_client($user_id);
-        pc_guest_customer_sync_user_meta_from_order($user_id, $order);
 
         $order->set_customer_id($user_id);
         $order->update_meta_data('_pc_guest_customer_register_status', 'attached');
         $order->update_meta_data('_pc_guest_customer_user_id', $user_id);
-        if ($created_user && pc_guest_customer_send_new_account_email($user_id)) {
-            $order->update_meta_data('_pc_guest_customer_account_email_sent', 'yes');
-            $order->add_order_note('Customer account was created automatically. A password setup email was sent to the customer.');
-        }
+        $order->update_meta_data('_pc_guest_customer_account_created', $created_user ? 'yes' : 'no');
+        // Persist the association before invoking the mailer; a mail failure must
+        // never turn an already-created account into a duplicate checkout attempt.
         $order->save();
+        if ($created_user) {
+            try {
+                $sent = pc_guest_customer_send_new_account_email($user_id);
+            } catch (\Throwable $error) {
+                $sent = false;
+            }
+            $order->update_meta_data('_pc_guest_customer_account_email_sent', $sent ? 'yes' : 'no');
+            $order->add_order_note($sent
+                ? 'Customer account created automatically; password setup email accepted by mail transport.'
+                : 'Customer account created automatically; password setup email could not be sent.');
+            $order->save();
+        }
     }
 }
 add_action('woocommerce_checkout_order_processed', 'pc_guest_customer_attach_order', 20, 1);
 add_action('woocommerce_store_api_checkout_order_processed', 'pc_guest_customer_attach_order', 20, 1);
+
+/** Only the order owner or holder of its secret checkout key sees the result. */
+add_action('woocommerce_thankyou', static function ($order_id): void {
+    $order = wc_get_order($order_id);
+    if (!$order || $order->get_meta('_pc_guest_customer_register_status') !== 'attached') return;
+    $key = isset($_GET['key']) && is_string($_GET['key']) ? wc_clean(wp_unslash($_GET['key'])) : '';
+    $owns = is_user_logged_in() && get_current_user_id() === (int) $order->get_customer_id();
+    if (!$owns && ($key === '' || !hash_equals($order->get_order_key(), $key))) return;
+    $created = $order->get_meta('_pc_guest_customer_account_created') === 'yes';
+    echo '<div class="woocommerce-info pc-account-result" role="status">';
+    echo esc_html($created
+        ? __('Your account has been created using the email entered at checkout.', 'pc-guest-customer-register')
+        : __('This order is linked to the account for the email entered at checkout. Sign in to view your orders.', 'pc-guest-customer-register'));
+    if ($created) {
+        echo ' ' . esc_html($order->get_meta('_pc_guest_customer_account_email_sent') === 'yes'
+            ? __('Check your email for the password setup link, including your spam folder.', 'pc-guest-customer-register')
+            : __('The password setup email could not be sent. Use password recovery to access your account.', 'pc-guest-customer-register'));
+    }
+    echo ' <a href="' . esc_url(wc_get_page_permalink('myaccount')) . '">' . esc_html__('My account', 'pc-guest-customer-register') . '</a>';
+    echo ' · <a href="' . esc_url(wc_lostpassword_url()) . '">' . esc_html__('Set or recover password', 'pc-guest-customer-register') . '</a></div>';
+}, 6);
 
 if (defined('WP_CLI') && WP_CLI && !class_exists('PC_Guest_Customer_Register_CLI')) {
     /**

@@ -303,3 +303,30 @@ msgstr "Наступна"
 #: templates/public-page.php:51
 msgid "Nothing found. Try a different search or open the catalogue."
 msgstr "Нічого не знайдено. Спробуйте інший запит або відкрийте каталог."
+
+msgid "Your account"
+msgstr "Ваш кабінет"
+
+msgid "Register while placing your order"
+msgstr "Зареєструйтеся під час оформлення"
+
+msgid "You can sign in above or continue without signing in. After placing the order, we will create an account using your email and send a password setup link. If an account already uses that email, the order will be linked to it; signing in is required to access the account."
+msgstr "Можете увійти вище або продовжити без входу. Після оформлення ми створимо кабінет за вашим e-mail та надішлемо посилання для встановлення пароля. Якщо кабінет із цим e-mail уже є, замовлення буде прив’язано до нього; для доступу до кабінету потрібно увійти."
+
+msgid "Continue and create an account"
+msgstr "Продовжити та створити кабінет"
+
+msgid "Enter your email address."
+msgstr "Введіть адресу електронної пошти."
+
+msgid "Store pickup: no street address is needed. Email is required."
+msgstr "Самовивіз: адресу вулиці вводити не потрібно. E-mail обов’язковий."
+
+msgid "Hide the cart bar until the next product is added"
+msgstr "Приховати панель кошика до наступного додавання товару"
+
+msgid "Hide the cart bar"
+msgstr "Приховати панель кошика"
+
+msgid "Enter a valid email address."
+msgstr "Введіть коректну адресу електронної пошти."

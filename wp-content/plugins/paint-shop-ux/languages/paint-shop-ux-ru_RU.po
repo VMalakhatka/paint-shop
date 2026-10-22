@@ -303,3 +303,30 @@ msgstr "Следующая"
 #: templates/public-page.php:51
 msgid "Nothing found. Try a different search or open the catalogue."
 msgstr "Ничего не найдено. Попробуйте другой запрос или откройте каталог."
+
+msgid "Your account"
+msgstr "Ваш кабинет"
+
+msgid "Register while placing your order"
+msgstr "Зарегистрируйтесь при оформлении"
+
+msgid "You can sign in above or continue without signing in. After placing the order, we will create an account using your email and send a password setup link. If an account already uses that email, the order will be linked to it; signing in is required to access the account."
+msgstr "Можете войти выше или продолжить без входа. После оформления мы создадим кабинет по вашему e-mail и отправим ссылку для установки пароля. Если кабинет с этим e-mail уже есть, заказ будет привязан к нему; для доступа к кабинету нужно войти."
+
+msgid "Continue and create an account"
+msgstr "Продолжить и создать кабинет"
+
+msgid "Enter your email address."
+msgstr "Введите адрес электронной почты."
+
+msgid "Store pickup: no street address is needed. Email is required."
+msgstr "Самовывоз: адрес улицы вводить не нужно. E-mail обязателен."
+
+msgid "Hide the cart bar until the next product is added"
+msgstr "Скрыть панель корзины до следующего добавления товара"
+
+msgid "Hide the cart bar"
+msgstr "Скрыть панель корзины"
+
+msgid "Enter a valid email address."
+msgstr "Введите корректный адрес электронной почты."

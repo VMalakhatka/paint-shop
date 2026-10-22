@@ -14,7 +14,9 @@ function psu_mobile_cart_html(bool $with_cart = false): string {
     $html .= $count > 0 ? wp_kses_post($cart->get_cart_subtotal()) : '';
     $html .= '</span><span class="psu-mobile-cart__notice" role="status" aria-live="polite"></span></div>';
     $html .= '<a class="psu-mobile-cart__link" href="' . esc_url(wc_get_cart_url()) . '">';
-    $html .= esc_html__('Go to cart', 'paint-shop-ux') . '</a></div>';
+    $html .= esc_html__('Go to cart', 'paint-shop-ux') . '</a>';
+    $html .= '<button type="button" class="psu-mobile-cart__hide" aria-label="' . esc_attr__('Hide the cart bar until the next product is added', 'paint-shop-ux') . '" title="' . esc_attr__('Hide the cart bar', 'paint-shop-ux') . '">';
+    $html .= '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 3 18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.5 5.3A11 11 0 0 1 12 5c6 0 10 7 10 7a18 18 0 0 1-3.3 3.9M6.2 6.2A19 19 0 0 0 2 12s4 7 10 7a11 11 0 0 0 5-1.3"/></svg></button></div>';
     return $html;
 }
 

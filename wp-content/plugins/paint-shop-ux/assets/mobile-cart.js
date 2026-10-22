@@ -2,7 +2,17 @@
     'use strict';
     const config = window.psuMobileCart;
     if (!config || !document.getElementById('psu-mobile-cart')) return;
-    const media = window.matchMedia('(max-width:768px)');
+    const media = window.matchMedia('(max-width:767px)');
+    const dismissKey = 'psu-mobile-cart-dismissed';
+    let dismissed = false;
+    try { dismissed = sessionStorage.getItem(dismissKey) === 'yes'; } catch (_) {}
+    function dismiss(value) {
+        dismissed = value;
+        try {
+            if (value) sessionStorage.setItem(dismissKey, 'yes');
+            else sessionStorage.removeItem(dismissKey);
+        } catch (_) { /* The in-page control also works with storage disabled. */ }
+    }
     let request = null;
     let generation = 0;
     let announcement = null;
@@ -19,7 +29,7 @@
     function sync() {
         const bar = root();
         if (!bar) return;
-        const visible = allowed() && Number(bar.dataset.count) > 0 && !typing();
+        const visible = allowed() && !dismissed && Number(bar.dataset.count) > 0 && !typing();
         bar.hidden = !visible;
         document.body.classList.toggle('psu-mobile-cart-visible', visible);
         if (observer && observed !== bar) {
@@ -72,6 +82,7 @@
     }
     $(document.body).on('added_to_cart.psuMobileCart removed_from_cart.psuMobileCart', function (event, fragments) {
         cancel();
+        if (event.type === 'added_to_cart') dismiss(false);
         // Woo and catalogue adapters may also replace fragments in this event.
         // Apply our visibility/announcement after every synchronous listener finishes.
         queueMicrotask(() => {
@@ -88,6 +99,12 @@
             }
             sync();
         });
+    });
+    $(document.body).on('click.psuMobileCart', '.psu-mobile-cart__hide', function () {
+        dismiss(true);
+        // Do not leave keyboard focus in the now-hidden fixed bar.
+        this.blur();
+        sync();
     });
     window.addEventListener('pageshow', schedule);
     window.addEventListener('resize', sync);
