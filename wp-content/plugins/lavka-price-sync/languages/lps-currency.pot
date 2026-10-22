@@ -1,0 +1,114 @@
+msgid ""
+msgstr "Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Currency price Ukraine"
+msgstr ""
+
+msgid "Access denied."
+msgstr ""
+
+msgid "Updates Folio Paint_Ua: CENA_VALT and COD_VALT on all warehouses, then RUB_PRICE for ЯЯ_Р_ВАЛЮТ on warehouse 7. Both updates are saved together."
+msgstr ""
+
+msgid "How to import prices"
+msgstr ""
+
+msgid "Choose XLS, XLSX or UTF-8 CSV (up to 5 MB, 500 articles). The first Excel sheet is used."
+msgstr ""
+
+msgid "Use three columns in this order: CODE_ARTIC, PRICE, KOD_VALUT. The header is optional. Decimal comma and decimal point are supported."
+msgstr ""
+
+msgid "CSV separators: semicolon, tab or comma. Quote prices containing a comma when the separator is also a comma. Formulas and duplicate articles are rejected."
+msgstr ""
+
+msgid "Preview all target rows and missing articles. Missing cards or prices are skipped, as in Access; no rows are created."
+msgstr ""
+
+msgid "Confirm the preview and apply within 15 minutes. If target values changed, create a new preview. After a timeout, check this operation status; do not submit the file again until the outcome is known."
+msgstr ""
+
+msgid "Price file"
+msgstr ""
+
+msgid "Preview changes"
+msgstr ""
+
+msgid "I checked the rows and confirm both updates in Folio."
+msgstr ""
+
+msgid "Apply to Folio"
+msgstr ""
+
+msgid "Check status"
+msgstr ""
+
+msgid "Recent operations"
+msgstr ""
+
+msgid "Processing…"
+msgstr ""
+
+msgid "The request failed. For an apply request, check status before taking another action."
+msgstr ""
+
+msgid "Card rows"
+msgstr ""
+
+msgid "Retail price rows"
+msgstr ""
+
+msgid "Articles without cards"
+msgstr ""
+
+msgid "Articles without the selected retail price"
+msgstr ""
+
+msgid "Table"
+msgstr ""
+
+msgid "Article"
+msgstr ""
+
+msgid "Warehouse"
+msgstr ""
+
+msgid "Row ID"
+msgstr ""
+
+msgid "Old price"
+msgstr ""
+
+msgid "New price"
+msgstr ""
+
+msgid "Old currency"
+msgstr ""
+
+msgid "New currency"
+msgstr ""
+
+msgid "Ready for confirmation"
+msgstr ""
+
+msgid "Both updates saved and verified."
+msgstr ""
+
+msgid "The operation is running. Check status."
+msgstr ""
+
+msgid "Outcome unknown. Check status and ask the administrator to verify Folio before repeating."
+msgstr ""
+
+msgid "Target rows changed. Nothing was applied; create a new preview."
+msgstr ""
+
+msgid "Preview expired. Create a new preview."
+msgstr ""
+
+msgid "No target rows."
+msgstr ""
+
+msgid "Could not process the file or operation. Check the three columns, file limits, duplicate articles, Java connection and whether another synchronization is running."
+msgstr ""
+

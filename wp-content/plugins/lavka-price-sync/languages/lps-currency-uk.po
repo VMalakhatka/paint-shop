@@ -1,0 +1,114 @@
+msgid ""
+msgstr "Content-Type: text/plain; charset=UTF-8\nLanguage: uk\nMIME-Version: 1.0\nContent-Transfer-Encoding: 8bit\n"
+
+msgid "Currency price Ukraine"
+msgstr "Валютна ціна Україна"
+
+msgid "Access denied."
+msgstr "Доступ заборонено."
+
+msgid "Updates Folio Paint_Ua: CENA_VALT and COD_VALT on all warehouses, then RUB_PRICE for ЯЯ_Р_ВАЛЮТ on warehouse 7. Both updates are saved together."
+msgstr "Оновлює ФОЛІО Paint_Ua: CENA_VALT і COD_VALT на всіх складах, потім RUB_PRICE для ЯЯ_Р_ВАЛЮТ на складі 7. Обидва оновлення зберігаються разом."
+
+msgid "How to import prices"
+msgstr "Як завантажити ціни"
+
+msgid "Choose XLS, XLSX or UTF-8 CSV (up to 5 MB, 500 articles). The first Excel sheet is used."
+msgstr "Оберіть XLS, XLSX або CSV у UTF-8 (до 5 МБ, 500 артикулів). Читається перший аркуш Excel."
+
+msgid "Use three columns in this order: CODE_ARTIC, PRICE, KOD_VALUT. The header is optional. Decimal comma and decimal point are supported."
+msgstr "Три колонки в такому порядку: CODE_ARTIC, PRICE, KOD_VALUT. Шапка необов’язкова. Десятковий роздільник — кома або крапка."
+
+msgid "CSV separators: semicolon, tab or comma. Quote prices containing a comma when the separator is also a comma. Formulas and duplicate articles are rejected."
+msgstr "Роздільники CSV: крапка з комою, табуляція або кома. Якщо роздільник — кома, ціну з комою беріть у лапки. Формули та повторні артикули не приймаються."
+
+msgid "Preview all target rows and missing articles. Missing cards or prices are skipped, as in Access; no rows are created."
+msgstr "Перевірте всі рядки та відсутні артикули. Відсутні картки або ціни пропускаються, як в Access; нові рядки не створюються."
+
+msgid "Confirm the preview and apply within 15 minutes. If target values changed, create a new preview. After a timeout, check this operation status; do not submit the file again until the outcome is known."
+msgstr "Підтвердьте перегляд і застосуйте протягом 15 хвилин. Якщо значення змінилися, створіть новий перегляд. Після тайм-ауту перевірте статус операції; не надсилайте файл знову до з’ясування результату."
+
+msgid "Price file"
+msgstr "Файл цін"
+
+msgid "Preview changes"
+msgstr "Переглянути зміни"
+
+msgid "I checked the rows and confirm both updates in Folio."
+msgstr "Я перевірив рядки та підтверджую обидва оновлення у ФОЛІО."
+
+msgid "Apply to Folio"
+msgstr "Застосувати у ФОЛІО"
+
+msgid "Check status"
+msgstr "Перевірити статус"
+
+msgid "Recent operations"
+msgstr "Останні операції"
+
+msgid "Processing…"
+msgstr "Обробка…"
+
+msgid "The request failed. For an apply request, check status before taking another action."
+msgstr "Помилка запиту. Якщо застосовували зміни, спочатку перевірте статус."
+
+msgid "Card rows"
+msgstr "Рядків карток"
+
+msgid "Retail price rows"
+msgstr "Рядків додаткової ціни"
+
+msgid "Articles without cards"
+msgstr "Артикули без карток"
+
+msgid "Articles without the selected retail price"
+msgstr "Артикули без обраної додаткової ціни"
+
+msgid "Table"
+msgstr "Таблиця"
+
+msgid "Article"
+msgstr "Артикул"
+
+msgid "Warehouse"
+msgstr "Склад"
+
+msgid "Row ID"
+msgstr "ID рядка"
+
+msgid "Old price"
+msgstr "Стара ціна"
+
+msgid "New price"
+msgstr "Нова ціна"
+
+msgid "Old currency"
+msgstr "Стара валюта"
+
+msgid "New currency"
+msgstr "Нова валюта"
+
+msgid "Ready for confirmation"
+msgstr "Готово до підтвердження"
+
+msgid "Both updates saved and verified."
+msgstr "Обидва оновлення збережено та перевірено."
+
+msgid "The operation is running. Check status."
+msgstr "Операція виконується. Перевірте статус."
+
+msgid "Outcome unknown. Check status and ask the administrator to verify Folio before repeating."
+msgstr "Результат невідомий. Перевірте статус і зверніться до адміністратора для перевірки ФОЛІО перед повтором."
+
+msgid "Target rows changed. Nothing was applied; create a new preview."
+msgstr "Рядки змінилися. Нічого не застосовано; створіть новий перегляд."
+
+msgid "Preview expired. Create a new preview."
+msgstr "Строк перегляду минув. Створіть новий."
+
+msgid "No target rows."
+msgstr "Немає рядків для оновлення."
+
+msgid "Could not process the file or operation. Check the three columns, file limits, duplicate articles, Java connection and whether another synchronization is running."
+msgstr "Не вдалося обробити файл або операцію. Перевірте три колонки, обмеження файлу, повторні артикули, зв’язок із Java та чи не виконується інша синхронізація."
+

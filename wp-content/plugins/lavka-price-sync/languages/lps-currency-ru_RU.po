@@ -1,0 +1,114 @@
+msgid ""
+msgstr "Content-Type: text/plain; charset=UTF-8\nLanguage: ru_RU\nMIME-Version: 1.0\nContent-Transfer-Encoding: 8bit\n"
+
+msgid "Currency price Ukraine"
+msgstr "Валютная цена Украина"
+
+msgid "Access denied."
+msgstr "Доступ запрещён."
+
+msgid "Updates Folio Paint_Ua: CENA_VALT and COD_VALT on all warehouses, then RUB_PRICE for ЯЯ_Р_ВАЛЮТ on warehouse 7. Both updates are saved together."
+msgstr "Обновляет ФОЛИО Paint_Ua: CENA_VALT и COD_VALT на всех складах, затем RUB_PRICE для ЯЯ_Р_ВАЛЮТ на складе 7. Оба обновления сохраняются вместе."
+
+msgid "How to import prices"
+msgstr "Как загрузить цены"
+
+msgid "Choose XLS, XLSX or UTF-8 CSV (up to 5 MB, 500 articles). The first Excel sheet is used."
+msgstr "Выберите XLS, XLSX или CSV в UTF-8 (до 5 МБ, 500 артикулов). Читается первый лист Excel."
+
+msgid "Use three columns in this order: CODE_ARTIC, PRICE, KOD_VALUT. The header is optional. Decimal comma and decimal point are supported."
+msgstr "Три колонки в таком порядке: CODE_ARTIC, PRICE, KOD_VALUT. Шапка необязательна. Десятичный разделитель — запятая или точка."
+
+msgid "CSV separators: semicolon, tab or comma. Quote prices containing a comma when the separator is also a comma. Formulas and duplicate articles are rejected."
+msgstr "Разделители CSV: точка с запятой, табуляция или запятая. Если разделитель — запятая, цену с запятой заключайте в кавычки. Формулы и повторные артикулы не принимаются."
+
+msgid "Preview all target rows and missing articles. Missing cards or prices are skipped, as in Access; no rows are created."
+msgstr "Проверьте все строки и отсутствующие артикулы. Отсутствующие карточки или цены пропускаются, как в Access; новые строки не создаются."
+
+msgid "Confirm the preview and apply within 15 minutes. If target values changed, create a new preview. After a timeout, check this operation status; do not submit the file again until the outcome is known."
+msgstr "Подтвердите просмотр и примените в течение 15 минут. Если значения изменились, создайте новый просмотр. После тайм-аута проверьте статус операции; не отправляйте файл снова до выяснения результата."
+
+msgid "Price file"
+msgstr "Файл цен"
+
+msgid "Preview changes"
+msgstr "Посмотреть изменения"
+
+msgid "I checked the rows and confirm both updates in Folio."
+msgstr "Я проверил строки и подтверждаю оба обновления в ФОЛИО."
+
+msgid "Apply to Folio"
+msgstr "Применить в ФОЛИО"
+
+msgid "Check status"
+msgstr "Проверить статус"
+
+msgid "Recent operations"
+msgstr "Последние операции"
+
+msgid "Processing…"
+msgstr "Обработка…"
+
+msgid "The request failed. For an apply request, check status before taking another action."
+msgstr "Ошибка запроса. Если применяли изменения, сначала проверьте статус."
+
+msgid "Card rows"
+msgstr "Строк карточек"
+
+msgid "Retail price rows"
+msgstr "Строк дополнительной цены"
+
+msgid "Articles without cards"
+msgstr "Артикулы без карточек"
+
+msgid "Articles without the selected retail price"
+msgstr "Артикулы без выбранной дополнительной цены"
+
+msgid "Table"
+msgstr "Таблица"
+
+msgid "Article"
+msgstr "Артикул"
+
+msgid "Warehouse"
+msgstr "Склад"
+
+msgid "Row ID"
+msgstr "ID строки"
+
+msgid "Old price"
+msgstr "Старая цена"
+
+msgid "New price"
+msgstr "Новая цена"
+
+msgid "Old currency"
+msgstr "Старая валюта"
+
+msgid "New currency"
+msgstr "Новая валюта"
+
+msgid "Ready for confirmation"
+msgstr "Готово к подтверждению"
+
+msgid "Both updates saved and verified."
+msgstr "Оба обновления сохранены и проверены."
+
+msgid "The operation is running. Check status."
+msgstr "Операция выполняется. Проверьте статус."
+
+msgid "Outcome unknown. Check status and ask the administrator to verify Folio before repeating."
+msgstr "Результат неизвестен. Проверьте статус и обратитесь к администратору для проверки ФОЛИО перед повтором."
+
+msgid "Target rows changed. Nothing was applied; create a new preview."
+msgstr "Строки изменились. Ничего не применено; создайте новый просмотр."
+
+msgid "Preview expired. Create a new preview."
+msgstr "Срок просмотра истёк. Создайте новый."
+
+msgid "No target rows."
+msgstr "Нет строк для обновления."
+
+msgid "Could not process the file or operation. Check the three columns, file limits, duplicate articles, Java connection and whether another synchronization is running."
+msgstr "Не удалось обработать файл или операцию. Проверьте три колонки, ограничения файла, повторные артикулы, связь с Java и не выполняется ли другая синхронизация."
+

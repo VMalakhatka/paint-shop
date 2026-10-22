@@ -91,3 +91,7 @@ no plugin activation, migration, settings change or Java release is needed. Back
 up those exact existing files before replacement and retain the new-file inventory.
 Rollback restores the screen/catalogues and removes only the newly introduced help
 files. Validate capability, topic anchors and the translated menu after publication.
+
+## Валютная цена Украина
+
+`inc/folio-currency.php` добавляет менеджерскую операцию в «Лавка ФОЛИО»: XLS/XLSX/CSV, предпросмотр и отдельное подтверждение двух UPDATE в Paint_Ua. Существующий capability `manage_lavka_prices`, UK/RU домен `lps-currency`, Java `/admin/folio/currency-ua/*`. Инструкция, границы записи и неизвестный итог: [FOLIO_CURRENCY_UA.md](../../../docs/api/FOLIO_CURRENCY_UA.md). Подготовлено локально 22.10.2026; ещё не опубликовано.
