@@ -1,6 +1,7 @@
 <?php
 if (!defined('ABSPATH')) exit;
 require_once __DIR__.'/folio-currency-import.php';
+require_once __DIR__.'/folio-currency-help.php';
 const LPS_CURRENCY_NONCE = 'lps_currency_ua';
 add_action('init', static function () { load_plugin_textdomain('lps-currency', false, dirname(plugin_basename(__DIR__.'/../lavka-price-sync.php')).'/languages'); });
 add_action('admin_menu', static function () {
@@ -10,17 +11,16 @@ function lps_currency_render(): void {
     if (!current_user_can(LPS_CAP)) wp_die(esc_html__('Access denied.', 'lps-currency'));
     echo '<div class="wrap"><h1>'.esc_html__('Currency price Ukraine', 'lps-currency').'</h1>';
     echo '<p>'.esc_html__('Updates Folio Paint_Ua: CENA_VALT and COD_VALT on all warehouses, then RUB_PRICE for ЯЯ_Р_ВАЛЮТ on warehouse 7. Both updates are saved together.', 'lps-currency').'</p>';
-    echo '<details><summary>'.esc_html__('How to import prices', 'lps-currency').'</summary><ol>';
-    foreach ([__('Choose XLS, XLSX or UTF-8 CSV (up to 5 MB, 500 articles). The first Excel sheet is used.', 'lps-currency'),
-        __('Use three columns in this order: CODE_ARTIC, PRICE, KOD_VALUT. The header is optional. Decimal comma and decimal point are supported.', 'lps-currency'),
-        __('CSV separators: semicolon, tab or comma. Quote prices containing a comma when the separator is also a comma. Formulas and duplicate articles are rejected.', 'lps-currency'),
-        __('Preview all target rows and missing articles. Missing cards or prices are skipped, as in Access; no rows are created.', 'lps-currency'),
-        __('Confirm the preview and apply within 15 minutes. If target values changed, create a new preview. After a timeout, check this operation status; do not submit the file again until the outcome is known.', 'lps-currency')] as $line) echo '<li>'.esc_html($line).'</li>';
-    echo '</ol></details><form id="lps-currency-form"><p><input name="file" type="file" accept=".xls,.xlsx,.csv" required aria-label="'.esc_attr__('Price file', 'lps-currency').'"></p>';
+    lps_currency_quick_guide();
+    echo '<form id="lps-currency-form"><p><input name="file" type="file" accept=".xls,.xlsx,.csv" required aria-describedby="lps-currency-note-file" aria-label="'.esc_attr__('Price file', 'lps-currency').'"></p>';
+    lps_currency_help('file');
     wp_nonce_field(LPS_CURRENCY_NONCE);
     echo '<button class="button button-primary" type="submit">'.esc_html__('Preview changes', 'lps-currency').'</button></form>';
+    lps_currency_help('preview');
     echo '<p id="lps-currency-status" role="status" aria-live="polite"></p><div id="lps-currency-result"></div>';
+    lps_currency_help('apply');
     echo '<p><label><input id="lps-currency-confirm" type="checkbox" disabled> '.esc_html__('I checked the rows and confirm both updates in Folio.', 'lps-currency').'</label></p><p><button id="lps-currency-apply" class="button button-primary" disabled>'.esc_html__('Apply to Folio', 'lps-currency').'</button> <button id="lps-currency-check" class="button" disabled>'.esc_html__('Check status', 'lps-currency').'</button></p>';
+    lps_currency_help('status');
     echo '<h2>'.esc_html__('Recent operations', 'lps-currency').'</h2><ul id="lps-currency-history">';
     foreach (array_reverse((array)get_option('lps_currency_history_'.get_current_user_id(), [])) as $id) {
         $job=get_option('lps_currency_job_'.$id); if (!is_array($job)) continue;

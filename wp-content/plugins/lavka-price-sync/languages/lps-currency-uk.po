@@ -112,3 +112,57 @@ msgstr "Немає рядків для оновлення."
 msgid "Could not process the file or operation. Check the three columns, file limits, duplicate articles, Java connection and whether another synchronization is running."
 msgstr "Не вдалося обробити файл або операцію. Перевірте три колонки, обмеження файлу, повторні артикули, зв’язок із Java та чи не виконується інша синхронізація."
 
+
+msgid "How should I prepare the file?"
+msgstr "Як підготувати файл?"
+
+msgid "Use columns A–C in this order: CODE_ARTIC (article), PRICE (currency price), KOD_VALUT (currency code). You may include these headings in the first row or start with data."
+msgstr "Колонки A–C у такому порядку: CODE_ARTIC (артикул), PRICE (валютна ціна), KOD_VALUT (код валюти). У першому рядку можна вказати ці заголовки або одразу дані."
+
+msgid "XLS/XLSX: first sheet only. CSV: UTF-8, separated by semicolons, tabs or commas. Use 1,8987 or 1.8987; quote a decimal comma if the CSV separator is a comma. Up to 5 MB and 500 unique articles. Paste formula results as values."
+msgstr "XLS/XLSX: лише перший аркуш. CSV: UTF-8, роздільник — крапка з комою, табуляція або кома. Ціна: 1,8987 або 1.8987; якщо роздільник CSV — кома, ціну з комою беріть у лапки. До 5 МБ і 500 унікальних артикулів. Результати формул вставляйте як значення."
+
+msgid "What should I check in the preview?"
+msgstr "Що перевірити перед застосуванням?"
+
+msgid "Preview changes only reads Folio. Check the file name, articles, warehouses, old and new prices and currency codes. One article can appear on several warehouses, so the row count may exceed the number of articles."
+msgstr "«Переглянути зміни» лише читає ФОЛІО. Перевірте назву файлу, артикули, склади, старі й нові ціни та коди валют. Один артикул може бути на кількох складах, тому рядків може бути більше, ніж артикулів."
+
+msgid "SCL_ARTC shows product cards; SCL_PRIC shows the additional price ЯЯ_Р_ВАЛЮТ on warehouse 7. Review both missing-article lists: missing rows will be skipped, not created."
+msgstr "SCL_ARTC — картки товарів; SCL_PRIC — додаткова ціна ЯЯ_Р_ВАЛЮТ на складі 7. Перевірте обидва списки відсутніх артикулів: відсутні рядки будуть пропущені, а не створені."
+
+msgid "When can I apply the changes?"
+msgstr "Коли можна застосувати зміни?"
+
+msgid "After checking the preview, tick the confirmation box and click Apply to Folio. Both updates are saved together. The preview is valid for 15 minutes; if it expires or the Folio values change, create and check a new preview."
+msgstr "Після перевірки позначте підтвердження й натисніть «Застосувати у ФОЛІО». Обидва оновлення зберігаються разом. Перегляд діє 15 хвилин; якщо строк минув або значення у ФОЛІО змінилися, створіть і перевірте новий перегляд."
+
+msgid "The confirmation box unlocks Apply to Folio only when a preview contains target rows. A saved operation cannot be applied again. There is no automatic undo: contact the administrator if the submitted prices were wrong."
+msgstr "Підтвердження відкриває кнопку «Застосувати у ФОЛІО», лише коли є рядки для оновлення. Збережену операцію не можна застосувати повторно. Автоматичного скасування немає: якщо ціни були помилковими, зверніться до адміністратора."
+
+msgid "What if the result is unclear?"
+msgstr "Що робити, якщо результат незрозумілий?"
+
+msgid "Success is confirmed by Both updates saved and verified. If processing is interrupted or the outcome is unknown, click Check status. You can also reopen the operation from Recent operations, including after refreshing the page."
+msgstr "Успіх підтверджує повідомлення «Обидва оновлення збережено та перевірено». Якщо обробка перервалася або результат невідомий, натисніть «Перевірити статус». Операцію також можна відкрити з «Останніх операцій», зокрема після оновлення сторінки."
+
+msgid "Do not upload the file again while the outcome is unknown. If checking status does not resolve it, give the administrator the file name and operation time. Recent operations lists your last 50 operations."
+msgstr "Не завантажуйте файл повторно, доки результат невідомий. Якщо перевірка статусу не допомогла, передайте адміністратору назву файлу й час операції. В «Останніх операціях» — ваші останні 50 операцій."
+
+msgid "Quick manager guide"
+msgstr "Коротка інструкція менеджеру"
+
+msgid "Prepare three columns: article, currency price and currency code. Example:"
+msgstr "Підготуйте три колонки: артикул, валютна ціна й код валюти. Приклад:"
+
+msgid "Select the file and click Preview changes. Check all rows and the missing articles."
+msgstr "Оберіть файл і натисніть «Переглянути зміни». Перевірте всі рядки та відсутні артикули."
+
+msgid "Tick the confirmation box, then click Apply to Folio. Wait for Both updates saved and verified."
+msgstr "Позначте підтвердження й натисніть «Застосувати у ФОЛІО». Дочекайтеся повідомлення «Обидва оновлення збережено та перевірено»."
+
+msgid "If the connection is interrupted, click Check status or reopen the operation from Recent operations. Do not repeat the upload until the outcome is known."
+msgstr "Якщо зв’язок перервався, натисніть «Перевірити статус» або відкрийте операцію з «Останніх операцій». Не повторюйте завантаження до з’ясування результату."
+
+msgid "Both Folio updates keep the existing rules: currency price and code on all warehouses; ЯЯ_Р_ВАЛЮТ only on warehouse 7."
+msgstr "Обидва оновлення зберігають наявні правила ФОЛІО: валютна ціна й код на всіх складах; ЯЯ_Р_ВАЛЮТ лише на складі 7."
