@@ -1,0 +1,104 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: \n"
+
+#: inc/folio-product-cards-help.php
+msgid "Product cards in Excel: instructions"
+msgstr ""
+
+#: inc/folio-product-cards-help.php
+msgid "Help: export product cards"
+msgstr ""
+
+#: inc/folio-product-cards-help.php
+msgid "Back to product cards"
+msgstr ""
+
+#: inc/folio-product-cards-help.php
+msgid "Open Lavka Folio → Product cards in the site administration. Access is available to staff with permission to manage Lavka prices. Export reads Folio; it does not change product cards or prices."
+msgstr ""
+
+#: inc/folio-product-cards-help.php
+msgid "One product or a pasted list"
+msgstr ""
+
+#: inc/folio-product-cards-help.php
+msgid "Keep Query set to 1212 все поля and Selection set to Listed SKUs."
+msgstr ""
+
+#: inc/folio-product-cards-help.php
+msgid "Paste the exact Folio SKU into the large text box. For several products, paste one SKU per line, up to 500 unique SKUs. Use the SKU, not the product name or barcode."
+msgstr ""
+
+#: inc/folio-product-cards-help.php
+msgid "Click Read and check. Check the returned row count and the requested SKUs not returned. The preview shows the first 50 rows."
+msgstr ""
+
+#: inc/folio-product-cards-help.php
+msgid "Click Export product cards XLSX and save the downloaded file. It contains all returned rows for your selection, including rows beyond the preview."
+msgstr ""
+
+#: inc/folio-product-cards-help.php
+msgid "Load a list from Excel"
+msgstr ""
+
+#: inc/folio-product-cards-help.php
+msgid "Prepare an XLS or XLSX file up to 5 MB. Put the SKUs on the first worksheet and store identifiers as text to preserve leading zeroes. Formulas and error cells in the selected column are not accepted."
+msgstr ""
+
+#: inc/folio-product-cards-help.php
+msgid "In Load SKUs from Excel, choose the file and enter the column letter. Use A if the SKUs are in the first column, or B if they are in the second."
+msgstr ""
+
+#: inc/folio-product-cards-help.php
+msgid "Set First data row to 2 when row 1 is a header, or to 1 when the file has no header. Click Load list."
+msgstr ""
+
+#: inc/folio-product-cards-help.php
+msgid "Review the SKUs placed in the text box and correct them if needed. Loading replaces the previous list and removes duplicates. Then click Read and check, followed by Export product cards XLSX."
+msgstr ""
+
+#: inc/folio-product-cards-help.php
+msgid "What is in the downloaded file"
+msgstr ""
+
+#: inc/folio-product-cards-help.php
+msgid "The НК worksheet has the 57 column headings from the supplied template in the same order. The queries fill the first 54 columns. The final three assembly columns are empty because the queries do not return them. The file is XLSX."
+msgstr ""
+
+#: inc/folio-product-cards-help.php
+msgid "The Report worksheet contains the row count, query, generation time, comparison result and requested SKUs not returned. A blank value means no value was supplied; it is not necessarily zero. Editing the downloaded file does not update Folio."
+msgstr ""
+
+#: inc/folio-product-cards-help.php
+msgid "Export reads the cards again. If someone changed a card after the preview, the downloaded values may differ from the preview."
+msgstr ""
+
+#: inc/folio-product-cards-help.php
+msgid "All cards and query comparison"
+msgstr ""
+
+#: inc/folio-product-cards-help.php
+msgid "To export all eligible cards, explicitly choose All eligible cards in Selection. An empty list in Listed SKUs mode does not select the whole database. The result limit is 50,000 rows."
+msgstr ""
+
+#: inc/folio-product-cards-help.php
+msgid "For ordinary exports, use 1212 все поля. The alternative is _dbo_Все поля по Artic. Compare both queries checks the same selection with both queries; export in this mode is available only when their results match."
+msgstr ""
+
+#: inc/folio-product-cards-help.php
+msgid "If a card or file is missing"
+msgstr ""
+
+#: inc/folio-product-cards-help.php
+msgid "If a SKU is not returned, check spelling and extra spaces. A card may exist in Folio but be excluded by the query conditions for warehouses or markups. Do not treat the missing list as proof that the product does not exist."
+msgstr ""
+
+#: inc/folio-product-cards-help.php
+msgid "If loading Excel fails, check the file size, first worksheet, column letter, first data row and the 500-SKU limit. Keep the previous list or paste the SKUs manually."
+msgstr ""
+
+#: inc/folio-product-cards-help.php
+msgid "If reading fails, keep the message, query and time and contact the responsible operator. For an access error on the alternative query, try 1212 все поля. If comparison reports a difference, export each query separately for review. If no file appears after a successful download, check your browser downloads."
+msgstr ""

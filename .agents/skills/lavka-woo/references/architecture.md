@@ -268,3 +268,9 @@ PhpSpreadsheet autoloader for XLS/XLSX SKU lists; it never imports card values.
 Preserve explicit selected/all scope, capability/nonce and text identifiers. Export
 has 57 template headings with the final three assembly fields empty; SQL remains
 54 fields. Operator contract: `docs/api/FOLIO_PRODUCT_CARDS.md`.
+
+Product-card contextual help (2026-10-22): `folio-product-cards-help.php` owns the
+capability-gated guide submenu and the disclosure topic menu above the card form.
+`lps-card-help` is a dedicated UK/RU domain. Keep topic anchors and button names
+aligned with the form; help rendering makes no Java request. Canonical operator
+steps: `docs/api/FOLIO_PRODUCT_CARDS.md`, linked from `docs/OPERATIONS_RUNBOOK.md`.

@@ -1,6 +1,8 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
+require_once __DIR__.'/folio-product-cards-help.php';
+
 const LPS_CARD_NONCE = 'lps_folio_product_cards';
 
 function lps_card_selection(array $input): array {
@@ -62,6 +64,7 @@ function lps_card_render(): void {
     echo '<div class="wrap"><h1>'.esc_html__('Lavka Folio', 'lavka-price-sync').'</h1><h2>'.esc_html__('Product cards', 'lavka-price-sync').'</h2>';
     echo '<p>'.esc_html__('Read product cards from Paint_Ua and export them in the supplied Excel column order. No Folio data is changed.', 'lavka-price-sync').'</p>';
     echo '<p>'.esc_html__('Both queries require the legacy warehouse and markup records. Requested SKUs excluded by those conditions are listed separately. Assembly columns 55–57 are exported empty because these queries do not return them.', 'lavka-price-sync').'</p>';
+    lps_card_help_menu();
     echo '<form method="post" id="lps-card-form" action="'.esc_url(admin_url('admin-post.php')).'">';
     wp_nonce_field(LPS_CARD_NONCE);
     echo '<input type="hidden" name="action" value="lps_folio_product_cards"><p><label>'.esc_html__('Query', 'lavka-price-sync').' <select name="mode">';

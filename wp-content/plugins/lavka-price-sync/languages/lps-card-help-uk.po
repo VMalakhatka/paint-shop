@@ -1,0 +1,110 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Lavka Product Card Help 1.0\n"
+"PO-Revision-Date: 2026-10-22 12:00+0200\n"
+"Last-Translator: Lavka\n"
+"Language-Team: Lavka\n"
+"MIME-Version: 1.0\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: uk\n"
+
+#: inc/folio-product-cards-help.php
+msgid "Product cards in Excel: instructions"
+msgstr "Картки товарів в Excel: інструкція"
+
+#: inc/folio-product-cards-help.php
+msgid "Help: export product cards"
+msgstr "Довідка: вивантаження карток товарів"
+
+#: inc/folio-product-cards-help.php
+msgid "Back to product cards"
+msgstr "Повернутися до карток товарів"
+
+#: inc/folio-product-cards-help.php
+msgid "Open Lavka Folio → Product cards in the site administration. Access is available to staff with permission to manage Lavka prices. Export reads Folio; it does not change product cards or prices."
+msgstr "Відкрийте Лавка ФОЛІО → Картки товарів в адміністративній частині сайту. Доступ мають працівники з правом керування цінами Лавки. Вивантаження читає ФОЛІО та не змінює картки або ціни."
+
+#: inc/folio-product-cards-help.php
+msgid "One product or a pasted list"
+msgstr "Один товар або вставлений список"
+
+#: inc/folio-product-cards-help.php
+msgid "Keep Query set to 1212 все поля and Selection set to Listed SKUs."
+msgstr "Залиште запит «1212 все поля» та вибір «Артикули зі списку»."
+
+#: inc/folio-product-cards-help.php
+msgid "Paste the exact Folio SKU into the large text box. For several products, paste one SKU per line, up to 500 unique SKUs. Use the SKU, not the product name or barcode."
+msgstr "Вставте точний артикул ФОЛІО у велике текстове поле. Для кількох товарів вставте по одному артикулу в рядку, до 500 унікальних артикулів. Потрібен артикул, а не назва товару чи штрихкод."
+
+#: inc/folio-product-cards-help.php
+msgid "Click Read and check. Check the returned row count and the requested SKUs not returned. The preview shows the first 50 rows."
+msgstr "Натисніть «Прочитати й перевірити». Перевірте кількість рядків і запитані артикули, яких немає в результаті. Перегляд показує перші 50 рядків."
+
+#: inc/folio-product-cards-help.php
+msgid "Click Export product cards XLSX and save the downloaded file. It contains all returned rows for your selection, including rows beyond the preview."
+msgstr "Натисніть «Експорт карток XLSX» та збережіть завантажений файл. Він містить усі повернуті рядки вашої вибірки, зокрема ті, що не потрапили до перегляду."
+
+#: inc/folio-product-cards-help.php
+msgid "Load a list from Excel"
+msgstr "Завантажити список з Excel"
+
+#: inc/folio-product-cards-help.php
+msgid "Prepare an XLS or XLSX file up to 5 MB. Put the SKUs on the first worksheet and store identifiers as text to preserve leading zeroes. Formulas and error cells in the selected column are not accepted."
+msgstr "Підготуйте XLS або XLSX до 5 МБ. Розмістіть артикули на першому аркуші та зберігайте їх як текст, щоб не втратити початкові нулі. Формули та комірки з помилками у вибраній колонці не приймаються."
+
+#: inc/folio-product-cards-help.php
+msgid "In Load SKUs from Excel, choose the file and enter the column letter. Use A if the SKUs are in the first column, or B if they are in the second."
+msgstr "У блоці «Завантажити артикули з Excel» виберіть файл і вкажіть літеру колонки. A — якщо артикули в першій колонці, B — якщо в другій."
+
+#: inc/folio-product-cards-help.php
+msgid "Set First data row to 2 when row 1 is a header, or to 1 when the file has no header. Click Load list."
+msgstr "Вкажіть «Перший рядок даних»: 2, якщо перший рядок — заголовок, або 1, якщо заголовка немає. Натисніть «Завантажити список»."
+
+#: inc/folio-product-cards-help.php
+msgid "Review the SKUs placed in the text box and correct them if needed. Loading replaces the previous list and removes duplicates. Then click Read and check, followed by Export product cards XLSX."
+msgstr "Перевірте артикули в текстовому полі та за потреби виправте їх. Завантаження замінює попередній список і прибирає повтори. Потім натисніть «Прочитати й перевірити» та «Експорт карток XLSX»."
+
+#: inc/folio-product-cards-help.php
+msgid "What is in the downloaded file"
+msgstr "Що містить завантажений файл"
+
+#: inc/folio-product-cards-help.php
+msgid "The НК worksheet has the 57 column headings from the supplied template in the same order. The queries fill the first 54 columns. The final three assembly columns are empty because the queries do not return them. The file is XLSX."
+msgstr "Аркуш «НК» має 57 заголовків колонок наданого шаблону в тому самому порядку. Запити заповнюють перші 54 колонки. Останні три колонки збірок порожні, оскільки запити їх не повертають. Формат файлу — XLSX."
+
+#: inc/folio-product-cards-help.php
+msgid "The Report worksheet contains the row count, query, generation time, comparison result and requested SKUs not returned. A blank value means no value was supplied; it is not necessarily zero. Editing the downloaded file does not update Folio."
+msgstr "Аркуш Report містить кількість рядків, запит, час створення, результат порівняння та артикули, яких немає в результаті. Порожня комірка означає, що значення не надано; це не обов’язково нуль. Редагування файлу не оновлює ФОЛІО."
+
+#: inc/folio-product-cards-help.php
+msgid "Export reads the cards again. If someone changed a card after the preview, the downloaded values may differ from the preview."
+msgstr "Вивантаження повторно читає картки. Якщо після перегляду хтось змінив картку, значення у файлі можуть відрізнятися від перегляду."
+
+#: inc/folio-product-cards-help.php
+msgid "All cards and query comparison"
+msgstr "Усі картки та порівняння запитів"
+
+#: inc/folio-product-cards-help.php
+msgid "To export all eligible cards, explicitly choose All eligible cards in Selection. An empty list in Listed SKUs mode does not select the whole database. The result limit is 50,000 rows."
+msgstr "Для всіх доступних карток явно виберіть «Усі доступні картки». Порожній список у режимі «Артикули зі списку» не вибирає всю базу. Ліміт результату — 50 000 рядків."
+
+#: inc/folio-product-cards-help.php
+msgid "For ordinary exports, use 1212 все поля. The alternative is _dbo_Все поля по Artic. Compare both queries checks the same selection with both queries; export in this mode is available only when their results match."
+msgstr "Для звичайного вивантаження використовуйте «1212 все поля». Альтернатива — «_dbo_Все поля по Artic». «Порівняти обидва запити» перевіряє ту саму вибірку двома запитами; вивантаження в цьому режимі доступне лише за збігу результатів."
+
+#: inc/folio-product-cards-help.php
+msgid "If a card or file is missing"
+msgstr "Якщо немає картки або файлу"
+
+#: inc/folio-product-cards-help.php
+msgid "If a SKU is not returned, check spelling and extra spaces. A card may exist in Folio but be excluded by the query conditions for warehouses or markups. Do not treat the missing list as proof that the product does not exist."
+msgstr "Якщо артикул не повернувся, перевірте написання та зайві пробіли. Картка може існувати у ФОЛІО, але не відповідати умовам запиту щодо складів або націнок. Відсутність у результаті не доводить, що товару немає."
+
+#: inc/folio-product-cards-help.php
+msgid "If loading Excel fails, check the file size, first worksheet, column letter, first data row and the 500-SKU limit. Keep the previous list or paste the SKUs manually."
+msgstr "Якщо Excel не завантажився, перевірте розмір файлу, перший аркуш, літеру колонки, перший рядок даних і ліміт 500 артикулів. Збережіть попередній список або вставте артикули вручну."
+
+#: inc/folio-product-cards-help.php
+msgid "If reading fails, keep the message, query and time and contact the responsible operator. For an access error on the alternative query, try 1212 все поля. If comparison reports a difference, export each query separately for review. If no file appears after a successful download, check your browser downloads."
+msgstr "Якщо читання не вдалося, збережіть повідомлення, запит і час та зверніться до відповідального працівника. За помилки доступу до альтернативного запиту спробуйте «1212 все поля». Якщо порівняння показало різницю, вивантажте кожен запит окремо для перевірки. Якщо файл не з’явився після успішного завантаження, перевірте завантаження браузера."

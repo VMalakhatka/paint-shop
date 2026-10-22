@@ -62,10 +62,9 @@ Java `FolioProductCardDaoTest` covers parameter binding, source guard and multis
 comparison. Browser coverage uses synthetic responses; it does not establish live
 equivalence of the current view and direct query.
 
-Live read check (2026-10-18): direct SELECT returned 36,798 rows and 54 columns, but SQL Server denied the
-card_tov view query (229/42000). Direct mode is the default. View/compare modes
-show a safe permission message until the DBA grants SELECT on that view; this
-change does not grant permissions. Live equality remains unverified.
+Live JDBC check (2026-10-18): both queries returned 36,798 rows and the same 54
+fields, including duplicate multiplicity. The earlier view permission error no
+longer reproduced. This does not establish the deployed HTTP endpoint status.
 
 ### Product-card Excel input (2026-10-18)
 
@@ -79,3 +78,16 @@ product-cards-import and product-cards-auth under tests/. No migration required.
 
 Translation integration reuses the existing Selection message; Ukrainian and Russian
 MO catalogues are rebuilt from the merged PO sources and checked with msgfmt.
+
+### Product-card contextual help (2026-10-22)
+
+`inc/folio-product-cards-help.php` owns the capability-protected guide submenu
+and a native disclosure menu above the export form. Topic links open the matching
+section in a new tab. The dedicated `lps-card-help` UK/RU catalogues keep the guide
+separate from price operations. Opening help performs no Java/API request.
+Canonical steps: [manager instructions](../../../docs/api/FOLIO_PRODUCT_CARDS.md#инструкция-менеджеру-как-получить-карточку-в-excel).
+Help publication requires only the card screen, new help PHP and two MO files;
+no plugin activation, migration, settings change or Java release is needed. Back
+up those exact existing files before replacement and retain the new-file inventory.
+Rollback restores the screen/catalogues and removes only the newly introduced help
+files. Validate capability, topic anchors and the translated menu after publication.
