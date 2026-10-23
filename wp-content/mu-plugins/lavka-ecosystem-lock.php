@@ -220,6 +220,12 @@ function lavka_ecosystem_lock_is_stale(?array $lock = null): bool {
         return false;
     }
 
+    // A lost HTTP response is not proof that the Java writer has stopped.
+    // Only the owning full-sync coordinator may release this persisted lease.
+    if (!empty($lock['full_sync_job_id']) && ($lock['owner'] ?? '') === 'lavka-total-sync') {
+        return false;
+    }
+
     $expires_at = isset($lock['expires_at']) ? (int) $lock['expires_at'] : 0;
 
     return $expires_at > 0 && $expires_at <= time();
@@ -391,6 +397,14 @@ function lavka_ecosystem_lock_release(?string $token): bool {
 
     if (!$lock || !isset($lock['token']) || !hash_equals((string) $lock['token'], $token)) {
         return false;
+    }
+
+    if (!empty($lock['full_sync_job_id']) && ($lock['owner'] ?? '') === 'lavka-total-sync') {
+        $job = get_option('lts_full_sync_job', []);
+        if (($job['jobId'] ?? '') !== $lock['full_sync_job_id'] || ($job['safeToRelease'] ?? false) !== true
+            || !in_array($job['status'] ?? '', ['COMPLETED', 'COMPLETED_WITH_ERRORS', 'PAUSED_LIMIT'], true)) {
+            return false;
+        }
     }
 
     $deleted = delete_option(LAVKA_ECOSYSTEM_LOCK_OPTION);

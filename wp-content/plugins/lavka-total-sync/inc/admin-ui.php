@@ -73,6 +73,12 @@ add_action('admin_enqueue_scripts', function($hook) {
     // Enqueue styles and scripts
     wp_enqueue_style('lts-admin', plugins_url('../assets/admin.css', __FILE__), [], @filemtime($css) ?: '1.0');
     wp_enqueue_script('lts-admin', plugins_url('../assets/admin.js', __FILE__), ['jquery'], @filemtime($js) ?: '1.0', true);
+    wp_enqueue_script('lts-full-jobs', plugins_url('../assets/full-sync-jobs.js', __FILE__), ['jquery', 'lts-admin'], '0.2.0', true);
+    wp_enqueue_style('lts-full-jobs', plugins_url('../assets/full-sync-jobs.css', __FILE__), [], '0.2.0');
+    wp_localize_script('lts-full-jobs', 'LTS_FULL_JOB', [
+        'job' => lts_full_job_public(get_option(LTS_FULL_JOB_OPTION, [])),
+        'unavailable' => __('Progress temporarily unavailable; the task is not restarted.', 'lavka-total-sync'),
+    ]);
 
     // Localize strings for JS
     wp_localize_script('lts-admin', 'LTS_I18N', [
@@ -397,7 +403,7 @@ add_action('wp_ajax_lts_sync_run', function(){
 
     $pageSizeWoo = isset($_POST['pageSizeWoo']) && $_POST['pageSizeWoo'] !== ''
         ? (int)$_POST['pageSizeWoo']
-        : (int)($def['pageSizeWoo'] ?? 200);
+        : (int)($def['pageSizeWoo'] ?? 50);
 
     // Use a binary-safe sentinel until Java supports an unbounded first page consistently.
     $cursorAfter = array_key_exists('cursorAfter', $_POST)
@@ -412,7 +418,7 @@ add_action('wp_ajax_lts_sync_run', function(){
     // Build payload as required by Java API
     $payload = [
         'limit'       => $limit,
-        'pageSizeWoo' => max(1, min(200, $pageSizeWoo)),
+        'pageSizeWoo' => max(1, min(100, $pageSizeWoo)),
         'cursorAfter' => $cursorAfter,
         'dryRun'      => $dryRun,
     ];
@@ -443,7 +449,7 @@ add_action('wp_ajax_lts_sync_force_refresh', function(){
 
     $pageSizeWoo = isset($_POST['pageSizeWoo']) && $_POST['pageSizeWoo'] !== ''
         ? (int)$_POST['pageSizeWoo']
-        : (int)($def['pageSizeWoo'] ?? 200);
+        : (int)($def['pageSizeWoo'] ?? 50);
 
     $cursorAfter = array_key_exists('cursorAfter', $_POST)
         ? sanitize_text_field((string)$_POST['cursorAfter'])
@@ -456,18 +462,12 @@ add_action('wp_ajax_lts_sync_force_refresh', function(){
 
     $payload = [
         'limit'       => $limit,
-        'pageSizeWoo' => max(1, min(200, $pageSizeWoo)),
+        'pageSizeWoo' => max(1, min(100, $pageSizeWoo)),
         'cursorAfter' => $cursorAfter,
         'dryRun'      => $dryRun,
     ];
 
     $res = lts_call_java_sync_force_refresh_locked($payload, $opts, 'manual');
-
-    if (!empty($res['ok']) && !$dryRun) {
-        $json = isset($res['json']) && is_array($res['json']) ? $res['json'] : [];
-        $nextAfter = isset($json['nextAfter']) ? (string)$json['nextAfter'] : '';
-        $res['relevanssi_reindexed'] = lts_reindex_products_in_sync_window($cursorAfter, $nextAfter, $limit);
-    }
 
     if (!empty($res['ok'])) {
         wp_send_json_success($res);
@@ -535,41 +535,13 @@ if (!function_exists('lts_call_java_sync_endpoint')) {
 
 if (!function_exists('lts_call_java_sync_run_locked')) {
     function lts_call_java_sync_run_locked(array $payload, array $opts, string $source): array {
-        $lock = lts_ecosystem_lock_acquire(
-            'product_fields_java',
-            $source,
-            __('Java product data synchronization', 'lavka-total-sync')
-        );
-        if (empty($lock['ok'])) {
-            return lts_ecosystem_lock_error($lock);
-        }
-
-        $lock_token = $lock['token'] ?? null;
-        try {
-            return lts_call_java_sync_run($payload, $opts);
-        } finally {
-            lts_ecosystem_lock_release($lock_token);
-        }
+        return lts_full_job_enqueue($payload, $source);
     }
 }
 
 if (!function_exists('lts_call_java_sync_force_refresh_locked')) {
     function lts_call_java_sync_force_refresh_locked(array $payload, array $opts, string $source): array {
-        $lock = lts_ecosystem_lock_acquire(
-            'product_fields_java',
-            $source,
-            __('Java product force refresh', 'lavka-total-sync')
-        );
-        if (empty($lock['ok'])) {
-            return lts_ecosystem_lock_error($lock);
-        }
-
-        $lock_token = $lock['token'] ?? null;
-        try {
-            return lts_call_java_sync_force_refresh($payload, $opts);
-        } finally {
-            lts_ecosystem_lock_release($lock_token);
-        }
+        return lts_full_job_enqueue($payload, $source, true);
     }
 }
 
@@ -693,7 +665,7 @@ add_action('lts_cron_full_sync_event', function () {
     $firstSku = lts_normalize_cursor_after($opts['first_sku'] ?? null);
 
     $limit       = isset($opts['cron_limit']) ? (int)$opts['cron_limit'] : 900000;
-    $pageSizeWoo = isset($opts['cron_page'])  ? (int)$opts['cron_page']  : 200;
+    $pageSizeWoo = max(1, min(100, (int)($opts['cron_page'] ?? 50)));
     $cursorAfter = $firstSku;
     $dryRun      = false;
 
@@ -704,26 +676,7 @@ add_action('lts_cron_full_sync_event', function () {
         'dryRun'      => $dryRun,
     ];
 
-    $res = lts_call_java_sync_run_locked($payload, $opts, 'cron');
-
-    if (($res['error'] ?? '') === 'lavka_sync_locked') {
-        lts_ecosystem_schedule_retry(
-            'lts_cron_full_sync_event',
-            'product_fields_java',
-            $res['lock'] ?? null
-        );
-    }
-
-    // Log a short line into DB logs (if table exists)
-    if (function_exists('lts_log_db')) {
-        $ctx = ['cron'=>'full','payload'=>$payload];
-        if (!empty($res['json'])) $ctx['result'] = $res['json'];
-        lts_log_db(!empty($res['ok']) ? 'info' : 'error', 'cron_full_sync', [
-            'result'  => !empty($res['ok']) ? 'ok' : 'failed',
-            'message' => $res['message'] ?? $res['error'] ?? '',
-            'ctx'     => $ctx,
-        ]);
-    }
+    lts_full_job_enqueue($payload, 'cron');
 });
 
 /**
@@ -787,7 +740,7 @@ add_action('wp_ajax_lts_cron_run_now', function(){
     $opts = lts_get_options();
     $payload = [
         'limit'       => isset($opts['cron_limit']) ? (int)$opts['cron_limit'] : 900000,
-        'pageSizeWoo' => isset($opts['cron_page']) ? (int)$opts['cron_page'] : 200,
+        'pageSizeWoo' => max(1, min(100, (int)($opts['cron_page'] ?? 50))),
         'cursorAfter' => lts_normalize_cursor_after($opts['first_sku'] ?? null),
         'dryRun'      => false,
     ];
@@ -839,7 +792,7 @@ function lts_render_settings_page() {
         // Save defaults for new API (/sync/run) and the "first" SKU
         $opts['new_api_defaults'] = [
             'limit'       => isset($_POST['lts_def_limit']) ? (int)$_POST['lts_def_limit'] : 40000,
-            'pageSizeWoo' => isset($_POST['lts_def_page'])  ? (int)$_POST['lts_def_page']  : 200,
+            'pageSizeWoo' => max(1, min(100, (int)($_POST['lts_def_page'] ?? 50))),
             'cursorAfter' => lts_normalize_cursor_after(isset($_POST['lts_def_after']) ? sanitize_text_field((string)$_POST['lts_def_after']) : null),
             'dryRun'      => !empty($_POST['lts_def_dry']),
         ];
@@ -853,7 +806,7 @@ function lts_render_settings_page() {
         $opts['cron_min']  = max(0, min(59, (int)($_POST['lts_cron_min']  ?? 0)));
         $opts['cron_dow']  = max(1, min(7,  (int)($_POST['lts_cron_dow']  ?? 1))); // 1=Mon..7=Sun
         $opts['cron_limit']     = isset($_POST['lts_cron_limit']) ? (int)$_POST['lts_cron_limit'] : 900000;
-        $opts['cron_page']      = isset($_POST['lts_cron_page'])  ? (int)$_POST['lts_cron_page']  : 200;
+        $opts['cron_page']      = max(1, min(100, (int)($_POST['lts_cron_page'] ?? 50)));
         lts_update_options($opts);
         // (Re)schedule cron according to updated options
         if (function_exists('lts_refresh_cron_schedule')) {
@@ -898,6 +851,7 @@ function lts_render_settings_page() {
     ?>
     <div class="wrap">
         <h1><?php echo esc_html__('Lavka Total Sync', 'lavka-total-sync'); ?></h1>
+        <?php lts_full_job_render_panel(); ?>
         <form method="post" class="lps-sync-settings">
             <?php wp_nonce_field('lts_save_options'); ?>
             <table class="form-table">
@@ -1002,7 +956,7 @@ function lts_render_settings_page() {
                 </tr>
                 <tr>
                     <th scope="row"><label for="lts_def_page"><?php _e('Default Woo batch size', 'lavka-total-sync'); ?></label></th>
-                    <td><input type="number" id="lts_def_page" name="lts_def_page" class="regular-text" value="<?php echo isset($def['pageSizeWoo']) ? (int)$def['pageSizeWoo'] : 200; ?>"></td>
+                    <td><input type="number" min="1" max="100" id="lts_def_page" name="lts_def_page" class="regular-text" value="<?php echo max(1, min(100, (int)($def['pageSizeWoo'] ?? 50))); ?>"></td>
                 </tr>
                 <tr>
                     <th scope="row"><label for="lts_def_after"><?php _e('Default cursorAfter', 'lavka-total-sync'); ?></label></th>
@@ -1067,8 +1021,8 @@ function lts_render_settings_page() {
                     <td><input type="number" id="lts_cron_limit" name="lts_cron_limit" class="regular-text" value="<?php echo isset($opts['cron_limit']) ? (int)$opts['cron_limit'] : 900000; ?>"></td>
                 </tr>
                 <tr>
-                    <th scope="row"><label for="lts_cron_page"><?php _e('Cron Woo batch size (1..200)', 'lavka-total-sync'); ?></label></th>
-                    <td><input type="number" id="lts_cron_page" name="lts_cron_page" class="regular-text" value="<?php echo isset($opts['cron_page']) ? (int)$opts['cron_page'] : 200; ?>"></td>
+                    <th scope="row"><label for="lts_cron_page"><?php _e('Woo comparison window (1..100)', 'lavka-total-sync'); ?></label></th>
+                    <td><input type="number" min="1" max="100" id="lts_cron_page" name="lts_cron_page" class="regular-text" value="<?php echo max(1, min(100, (int)($opts['cron_page'] ?? 50))); ?>"></td>
                 </tr>
                 <tr>
                     <th scope="row"><?php _e('First SKU used as cursorAfter', 'lavka-total-sync'); ?></th>
@@ -1111,7 +1065,8 @@ function lts_render_settings_page() {
                     nonce:  '<?php echo esc_js( wp_create_nonce('lts_admin_nonce') ); ?>'
                 }).done(function(resp){
                     if (resp && resp.success) {
-                        $st.text('<?php echo esc_js(__('Done.','lavka-total-sync')); ?>');
+                        $st.text(resp.data.job ? resp.data.job.label : '');
+                        $(document).trigger('lts:job', [resp.data.job]);
                     } else {
                         $st.text('<?php echo esc_js(__('Error','lavka-total-sync')); ?>');
                     }
@@ -1184,6 +1139,7 @@ function lts_render_run_page() {
     ?>
     <div class="wrap">
         <h1><?php echo esc_html__('Run Total Sync', 'lavka-total-sync'); ?></h1>
+        <?php lts_full_job_render_panel(); ?>
         <p class="description">
             <?php _e('Run a full synchronization of WooCommerce products (except price and stock) from the external MSSQL source. Uses keyset pagination (limit/after).', 'lavka-total-sync'); ?>
         </p>
@@ -1248,8 +1204,8 @@ function lts_render_run_page() {
                 <td><input type="number" id="lts_new_limit" class="regular-text" placeholder="40000"></td>
             </tr>
             <tr>
-                <th scope="row"><label for="lts_new_page"><?php _e('Woo batch size (1..200)', 'lavka-total-sync'); ?></label></th>
-                <td><input type="number" id="lts_new_page" class="regular-text" placeholder="200"></td>
+                <th scope="row"><label for="lts_new_page"><?php _e('Woo comparison window (1..100)', 'lavka-total-sync'); ?></label></th>
+                <td><input type="number" min="1" max="100" id="lts_new_page" class="regular-text" placeholder="50"></td>
             </tr>
             <tr>
                 <th scope="row"><label for="lts_new_after"><?php _e('Cursor (after SKU)', 'lavka-total-sync'); ?></label></th>
@@ -1282,8 +1238,8 @@ function lts_render_run_page() {
                 <td><input type="number" id="lts_force_limit" class="regular-text" placeholder="5"></td>
             </tr>
             <tr>
-                <th scope="row"><label for="lts_force_page"><?php _e('Woo batch size (1..200)', 'lavka-total-sync'); ?></label></th>
-                <td><input type="number" id="lts_force_page" class="regular-text" placeholder="5"></td>
+                <th scope="row"><label for="lts_force_page"><?php _e('Woo comparison window (1..100)', 'lavka-total-sync'); ?></label></th>
+                <td><input type="number" min="1" max="100" id="lts_force_page" class="regular-text" placeholder="5"></td>
             </tr>
             <tr>
                 <th scope="row"><label for="lts_force_after"><?php _e('Cursor (after SKU)', 'lavka-total-sync'); ?></label></th>
@@ -1515,10 +1471,12 @@ function lts_render_run_page() {
                     $('#lts_new_run_output').text(print(res && res.data ? res.data : res));
                     return;
                 }
-                $('#lts_new_run_status').text('<?php echo esc_js(__('Done.','lavka-total-sync')); ?>');
+                $('#lts_new_run_status').text(res.data.job ? res.data.job.label : '');
 
                 const d = res.data;
-                if (d.json) {
+                if (d.job) {
+                    $(document).trigger('lts:job', [d.job]);
+                } else if (d.json) {
                     $('#lts_new_run_output').text(print(d.json));
                 } else {
                     $('#lts_new_run_output').text(d.raw || '(no body)');
@@ -1551,10 +1509,12 @@ function lts_render_run_page() {
                     $('#lts_force_output').text(print(res && res.data ? res.data : res));
                     return;
                 }
-                $('#lts_force_status').text('<?php echo esc_js(__('Done.','lavka-total-sync')); ?>');
+                $('#lts_force_status').text(res.data.job ? res.data.job.label : '');
 
                 const d = res.data;
-                if (d.json) {
+                if (d.job) {
+                    $(document).trigger('lts:job', [d.job]);
+                } else if (d.json) {
                     $('#lts_force_output').text(print(d.json));
                 } else {
                     $('#lts_force_output').text(d.raw || '(no body)');

@@ -1,5 +1,17 @@
 # Операции и регламенты
 
+## Durable full sync (2026-10-23)
+
+`lavka-total-sync` 0.2.0 uses `/admin/sync/jobs` protocol 1, persisted ID and short
+polling; Java V19 owns chunk checkpoints/history. Never release a protected
+`full_sync_job_id` ecosystem lease on HTTP timeout or age. Only a validated
+same-job terminal response with `safeToRelease:true` permits release. Recover
+unknown acceptance using the same ID; an acknowledged missing job or uncertain
+write requires reconciliation, not a fresh run. Deploy plugin/assets/i18n + MU
+guard before Java, after the old synchronous writer is confirmed stopped.
+Operator workflow and rollback: `docs/OPERATIONS_RUNBOOK.md`, full-sync section.
+Tests are offline/isolated; code completion is not production deployment.
+
 ## Пути групп в условиях аналитики
 
 Проверено 2026-10-19: `analytics-conditions.css` явно скрывает карточки с

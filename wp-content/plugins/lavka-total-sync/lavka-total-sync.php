@@ -3,7 +3,7 @@
  * Plugin Name: Lavka Total Sync
  * Plugin URI: https://example.com/
  * Description: Total synchronisation of products from external MSSQL or file sources into WooCommerce, excluding price and stock. Provides an admin interface to configure endpoints and launch synchronisation tasks.
- * Version: 0.1.2
+ * Version: 0.2.0
  * Author: Your Name
  * Text Domain: lavka-total-sync
  * Domain Path: /languages
@@ -41,6 +41,7 @@ if (!defined('LTS_MAX_BATCH')) {
 
 // Load helper functions and admin UI.
 require_once __DIR__ . '/inc/helpers.php';
+require_once __DIR__ . '/inc/full-sync-jobs.php';
 require_once __DIR__ . '/inc/supplier-sync.php';
 require_once __DIR__ . '/inc/admin-ui.php';
 // [LTS] ANCHOR: include sync goods

@@ -1,0 +1,8 @@
+.lts-full-job { border-block: 1px solid #c3c4c7; padding: 12px 0 20px; margin: 16px 0; max-width: 1100px; }
+.lts-full-job dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 16px; }
+.lts-full-job dt { color: #50575e; }
+.lts-full-job dd { margin: 4px 0 0; font-weight: 600; overflow-wrap: anywhere; }
+.lts-full-job pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 360px; overflow: auto; }
+.lts-full-job summary { cursor: pointer; }
+.lts-full-job[data-status="OUTCOME_UNKNOWN"] [data-job-field="label"], .lts-job-connection { color: #a02020; }
+.lts-full-job[data-status="COMPLETED"] [data-job-field="label"] { color: #145b39; }

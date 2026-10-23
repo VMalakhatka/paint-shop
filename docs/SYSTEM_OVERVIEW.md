@@ -58,7 +58,7 @@ OVH service -> physical host -> hypervisor -> Windows VM
 | Футер | `paint-shop-ux/inc/site-footer.php` | собственная разметка/CSS, adapter GP + однократный fallback `wp_footer`; юридические данные — `pc-wayforpay-compliance` |
 | Каталог, товар и стили покупательских страниц | `paint-shop-ux` | собственные modules/templates/assets, scoped storefront.css; Woo hooks сохраняют цены, склады и покупку |
 | Общие остатки и allocation | `paint-core` | код, Woo product/order state |
-| Полная синхронизация карточек и категорий | `lavka-total-sync` + Java `/sync/run` | код обоих владельцев и run status |
+| Полная синхронизация карточек и категорий | `lavka-total-sync` + Java `/admin/sync/jobs`, V19 checkpoints | job ID, подтверждённые порции, terminal status и общий lease |
 | Остатки, названия и глобальные группы складов | `lavka-sync` | стабильные location term ID/slug, `lavka_folio_warehouses`, Folio warehouse ID и Woo stock |
 | Цены по ролям | `lavka-price-sync` + `role-price` | mapping роли к договору и product meta |
 | Оптовая справка и единый доступ к быстрому заказу | `pc-wholesale-help` + `pc-wholesale-quick-order` | server-side allow-list ролей `partner`, `opt`, `opt_osn`, `schule` |

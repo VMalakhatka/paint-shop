@@ -203,7 +203,7 @@ availability и transit изучены по исходникам; новый з�
 
 | Поток | Последовательность | Где точный контракт |
 |---|---|---|
-| Карточки/категории | WordPress `lavka-total-sync` -> Java `/sync/run` -> Woo | [OPERATIONS_RUNBOOK.md](OPERATIONS_RUNBOOK.md) |
+| Карточки/категории | WordPress `lavka-total-sync` -> Java `/admin/sync/jobs` -> Woo, durable chunks + short polling | [OPERATIONS_RUNBOOK.md](OPERATIONS_RUNBOOK.md#полная-синхронизация-карточек) |
 | Остатки | Java/Folio -> `wp_stock_import` -> Woo location stock | [OPERATIONS_RUNBOOK.md](OPERATIONS_RUNBOOK.md) |
 | Цены по ролям | Folio contract -> Java -> role-price meta -> runtime Woo price | plugin README + runbook |
 | Woo-заказ -> ФОЛИО | Woo order -> PHP preview/proxy -> Java allocation/idempotency -> Folio documents | [FOLIO_ORDER_JSON_CONTRACT.md](FOLIO_ORDER_JSON_CONTRACT.md) + Java API |

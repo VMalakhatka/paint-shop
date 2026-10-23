@@ -18,6 +18,13 @@ function lts_logs_render_context($action, $raw) {
         return;
     }
 
+    if ($action === 'full_sync_job' && is_array($context)) {
+        echo '<strong>' . esc_html(lts_full_job_label((string)($context['status'] ?? ''))) . '</strong><br>';
+        echo esc_html(sprintf('%s: %s | %s: %d | %s: %s',
+            __('Job ID', 'lavka-total-sync'), (string)($context['jobId'] ?? ''),
+            __('Completed chunks', 'lavka-total-sync'), (int)($context['chunks'] ?? 0),
+            __('Saved cursor', 'lavka-total-sync'), (string)($context['nextAfter'] ?? '')));
+    }
     if ($action === 'cron_full_sync' && is_array($context)) {
         $payload = isset($context['payload']) && is_array($context['payload']) ? $context['payload'] : [];
         $result  = isset($context['result']) && is_array($context['result']) ? $context['result'] : [];

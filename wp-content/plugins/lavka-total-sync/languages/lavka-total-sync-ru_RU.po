@@ -17,6 +17,51 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
+msgid "Waiting for queue"
+msgstr "Ожидает очереди"
+
+msgid "Removed from Woo"
+msgstr "Удалено из Woo"
+
+msgid "Woo comparison window (1..100)"
+msgstr "Порция сравнения Woo (1..100)"
+
+msgid "Starting; checking acceptance"
+msgstr "Запуск: проверяем принятие задачи"
+
+msgid "Running"
+msgstr "Выполняется"
+
+msgid "Completed"
+msgstr "Завершено"
+
+msgid "Completed with errors"
+msgstr "Завершено с ошибками"
+
+msgid "Stopped at the configured limit"
+msgstr "Остановлено на заданном лимите"
+
+msgid "Write outcome requires review"
+msgstr "Результат записи требует проверки"
+
+msgid "Background full synchronization"
+msgstr "Фоновая полная синхронизация"
+
+msgid "Job ID"
+msgstr "ID задачи"
+
+msgid "Completed chunks"
+msgstr "Завершено порций"
+
+msgid "Saved cursor"
+msgstr "Сохранённый курсор"
+
+msgid "Diagnostics"
+msgstr "Диагностика"
+
+msgid "Progress temporarily unavailable; the task is not restarted."
+msgstr "Прогресс временно недоступен; задача не запускается повторно."
+
 #. Plugin Name of the plugin
 #: lavka-total-sync.php inc/admin-ui.php:19 inc/admin-ui.php:891
 msgid "Lavka Total Sync"
