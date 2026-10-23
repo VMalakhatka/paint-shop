@@ -11,6 +11,12 @@ write requires reconciliation, not a fresh run. Deploy plugin/assets/i18n + MU
 guard before Java, after the old synchronous writer is confirmed stopped.
 Operator workflow and rollback: `docs/OPERATIONS_RUNBOOK.md`, full-sync section.
 Tests are offline/isolated; code completion is not production deployment.
+Production auth check (2026-10-23): Total Sync and price-sync may use different
+tokens. Preserve shared `LAVKA_TOKEN` and Woo options; Java's dedicated
+`LAVKA_FULL_SYNC_TOKEN` scopes authentication to `/admin/sync/jobs/**`, falling
+back to the shared token only when unset. Check auth with global exception advice
+enabled (401/503, never a masked 500). Runtime/rollback:
+`docs/JAVA_DOCKER_RUNTIME.md`, dedicated full-sync token section.
 
 ## Пути групп в условиях аналитики
 
