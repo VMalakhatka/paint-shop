@@ -972,3 +972,6 @@ copy is owner-requested campaign text, not a recurring newsletter subscription.
 Tests: `tests/opencart-customers.php` and `tests/opencart-import-flow.php FILE.xlsx`
 (the latter uses in-memory users/mail and the real XLSX reader). Operator runbook:
 `docs/MANAGER_CUSTOMER_GUIDE_UK.md`, OpenCart customer transfer section.
+WP-CLI may already have a Composer loader: the XLSX read path explicitly loads
+only the existing site vendor when the legacy MU loader skipped it. No package
+installation or global Composer configuration change is performed.

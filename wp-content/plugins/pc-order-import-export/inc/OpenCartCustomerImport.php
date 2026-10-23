@@ -26,6 +26,10 @@ final class OpenCartCustomerImport {
     }
     public static function read(string $path): array {
         if (!is_file($path) || filesize($path)>5*1024*1024) throw new \RuntimeException('Invalid XLSX file');
+        // WP-CLI already loads its own Composer ClassLoader, so the legacy MU
+        // loader may skip the site's vendor. Load only the site's existing vendor.
+        if (!class_exists(\PhpOffice\PhpSpreadsheet\Reader\Xlsx::class) && defined('WP_CONTENT_DIR') && is_file(WP_CONTENT_DIR.'/vendor/autoload.php')) require_once WP_CONTENT_DIR.'/vendor/autoload.php';
+        if (!class_exists(\PhpOffice\PhpSpreadsheet\Reader\Xlsx::class)) throw new \RuntimeException('Site XLSX dependency unavailable');
         $reader=new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
         $reader->setReadDataOnly(true);$reader->setLoadSheetsOnly(['Customers']);
         $book=$reader->load($path);$sheet=$book->getSheetByName('Customers');
