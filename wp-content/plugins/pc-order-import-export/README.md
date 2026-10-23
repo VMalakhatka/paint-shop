@@ -952,3 +952,23 @@ The existing GeneratePress, WooCommerce and explicit-shortcode hooks remain;
 its render guard still allows only one toolbar per request. Permissions and
 draft/cart operations are unchanged. This prepares the local `lavka-storefront`
 theme; it does not activate a theme or deploy to production.
+
+### Prepared OpenCart customer XLSX (operator CLI)
+
+`wp pcoe customers-import FILE.xlsx` validates and reports current email conflicts.
+`--apply --send` requires owner authorization for account creation and invitations.
+`OpenCartCustomerImport::HEADERS` is the exact Customers sheet schema (max 2,000
+customers / 5 MiB). Role allowlist and low-privilege capability verification,
+source-site allowlist, phone/country exclusion, current email check, shared
+customer_import ecosystem lock, and durable per-row claims are mandatory.
+Job state: private option `pcoe_oc_import_<sha256>` (no reset links/passwords).
+User provenance: `_pcoe_oc_import`, `_pcoe_oc_sources`, `_pcoe_oc_source_ids`,
+`_pcoe_oc_addresses`. Existing users are never updated. Unknown interrupted
+claims are never replayed. Address/payment role migration does not create Folio
+accounts, invoices or payments. Retail only receives existing INET KL fallback;
+wholesale personal Folio links need independent mapping. The Ukrainian invitation
+copy is owner-requested campaign text, not a recurring newsletter subscription.
+
+Tests: `tests/opencart-customers.php` and `tests/opencart-import-flow.php FILE.xlsx`
+(the latter uses in-memory users/mail and the real XLSX reader). Operator runbook:
+`docs/MANAGER_CUSTOMER_GUIDE_UK.md`, OpenCart customer transfer section.

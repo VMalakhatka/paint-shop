@@ -5,6 +5,13 @@ class Plugin {
     public function init(){
         CustomerPermissions::hooks();
         FolioCustomerImport::hooks();
+        if (defined('WP_CLI') && WP_CLI) {
+            \WP_CLI::add_command('pcoe customers-import', static function ($args,$options) {
+                if (empty($args[0])) \WP_CLI::error('Provide the prepared Customers XLSX path.');
+                try { \WP_CLI::log(wp_json_encode(OpenCartCustomerImport::run($args[0],isset($options['apply']),isset($options['send'])),JSON_UNESCAPED_UNICODE)); }
+                catch (\Throwable $e) { \WP_CLI::error($e->getMessage()); }
+            });
+        }
         CustomerInternalNotes::hooks();
         // Статус чернетки
         ImporterDraft::register_status();

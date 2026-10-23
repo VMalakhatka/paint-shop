@@ -593,3 +593,10 @@ bounded GET refresh must never invoke checkout/create/payment callbacks. Payment
 success requires the verified gateway reference, matching transaction and paid
 date; saved Folio documents do not imply payment or a live reserve. See the
 customer progress section of `docs/FOLIO_ORDER_JSON_CONTRACT.md`.
+
+Prepared OpenCart migration (2026-10-23): PCOE operator CLI
+`pcoe customers-import` owns the exact Customers XLSX schema and durable option
+claims. Existing users never change; creation/mail after unknown outcomes never
+replay. Source roles are owner-approved per-file values, not Folio identity.
+Retail receives INET KL; wholesale identities cannot be inferred from old XLSX.
+See PCOE README and manager guide. Personal exports remain private, outside Git.
