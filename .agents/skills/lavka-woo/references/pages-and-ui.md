@@ -518,3 +518,9 @@ New batches pin `expectedScopeSettingsVersion`; dirty/unknown/CAS conflict stops
 calculation, with no auto retry. Deploy compatible Java (migration V20) first.
 See [profit manager guide](../../../../docs/PROFIT_REPORT_MANAGER_RU.md#склады-и-исключения-из-остатков)
 and [contract](../../../../docs/api/FOLIO_PROFIT_SAVED_REPORTS_FRONTEND.md).
+
+Profit disclosure UI (2026-10-24): `profit-folds.js` enhances report sections with
+native details/summary controls and preserves their state during in-page renders.
+Keep DOM IDs and existing event-bound nodes when wrapping; never use visibility
+as an export or calculation filter. Revision pagination must stay inside its
+fold. Manager steps: [profit guide](../../../../docs/PROFIT_REPORT_MANAGER_RU.md#как-свернуть-длинные-таблицы).

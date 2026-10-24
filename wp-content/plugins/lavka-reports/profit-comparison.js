@@ -119,7 +119,7 @@
             const a=el('a');a.href=url;a.download='lavka-profit-comparison.xlsx';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
         }
         function renderTables(list,id,editable){const box=el('div');box.id=id;const layout=layoutFor(list);
-            for(const c of new Set(layout.map(r=>r.city))){const group=layout.filter(r=>r.city===c);box.append(el('h3',city(c)),grid(tableHeaders(list),tableRows(list,group,editable),group));}target.append(box);}
+            for(const c of new Set(layout.map(r=>r.city))){const group=layout.filter(r=>r.city===c);const panel=el('details');panel.id=id+'-'+c;panel.open=true;panel.append(el('summary',city(c)),grid(tableHeaders(list),tableRows(list,group,editable),group));box.append(panel);}target.append(box);}
         function render(){
             target.replaceChildren(el('h2',t('comparison')),el('p',t('comparisonHelp')),el('p',t('meanHelp')));
             const list=el('ul');selected.forEach(w=>{const li=el('li',metadata(w)+' ');li.append(action('remove',()=>{selected=selected.filter(x=>x.month!==w.month);persist();render();}));list.append(li);});target.append(list);

@@ -262,3 +262,10 @@ Contract evidence: `tests/fixtures/profit-scope-java.json` is a synthetic respon
 serialized by Java `FolioProfitScopeReportTest` on 2026-10-24 (rule version
 2026-10-24.1), not production data. The saved-view test verifies original labels,
 inventory values and XLSX export without any current-catalog requests.
+
+### 0.12.1 — collapsible profit sections
+
+Saved months, period totals, comparison cities and report/audit sections can be
+collapsed using native keyboard-accessible disclosures. `profit-folds.js` preserves
+in-page disclosure state across rendering; collapse never filters export data.
+Only the WordPress plugin needs deployment for this presentation change.

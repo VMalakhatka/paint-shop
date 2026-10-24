@@ -45,7 +45,7 @@ async function setup(mode='normal'){
   return route.fulfill({contentType:'text/html',body:html});
  });
  await page.goto('https://profit.test/');await page.addStyleTag({content:'body{font-family:Arial;margin:20px}*{box-sizing:border-box}button{padding:7px}'});await page.addStyleTag({path:path.join(base,'profit-report.css')});
- for(const file of ['profit-xlsx.js','profit-manager.js','profit-report.js','profit-comparison.js','profit-history.js'])await page.addScriptTag({path:path.join(base,file)});
+ for(const file of ['profit-folds.js','profit-xlsx.js','profit-manager.js','profit-report.js','profit-comparison.js','profit-history.js'])await page.addScriptTag({path:path.join(base,file)});
  await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);
  return {page,requests,errors};
 }
@@ -198,7 +198,7 @@ test('manager order, preceding four months, priority manual inputs, new calculat
  const row=()=>page.locator('#lpc-table tr[data-row-id="KYIV:expense:KYIV_RENT_SHOP"]');
  assert.equal(await row().locator('td').first().innerText(),'1');
  assert.match(await row().innerText(),/50,00/);assert.match(await row().innerText(),/2\/4/);assert.match(await row().innerText(),/\+500,00%/);
- assert.deepEqual(await page.locator('#lpc-table h3').allTextContents(),['Kyiv','Odesa']);
+ assert.deepEqual(await page.locator('#lpc-table > details > summary').allTextContents(),['Kyiv','Odesa']);
  const phone=()=>page.locator('#lpc-table tr[data-row-id="KYIV:expense:KYIV_PHONE"]');
  assert.match(await phone().innerText(),/Manual input required/);
  const change=async(locator,value)=>{await locator.fill(value);await locator.dispatchEvent('change');};
@@ -218,7 +218,7 @@ test('manager order, preceding four months, priority manual inputs, new calculat
  await page.locator('#lpc-table').screenshot({path:path.join(out,'comparison-rolling-desktop.png')});
  await page.setViewportSize({width:390,height:844});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
  const start=requests.length;await page.reload();
- for(const file of ['profit-xlsx.js','profit-manager.js','profit-report.js','profit-comparison.js','profit-history.js'])await page.addScriptTag({path:path.join(base,file)});
+ for(const file of ['profit-folds.js','profit-xlsx.js','profit-manager.js','profit-report.js','profit-comparison.js','profit-history.js'])await page.addScriptTag({path:path.join(base,file)});
  await page.waitForFunction(()=>document.querySelectorAll('#lavr-profit-comparison li').length===1&&!document.getElementById('lph-view').disabled);
  assert.equal(await row().locator('input').inputValue(),'200');assert.match(await row().innerText(),/\+50,00%/);
  assert(requests.slice(start).every(r=>['range','month'].includes(r.operation)));
@@ -244,4 +244,32 @@ test('history lookup failure does not turn a confirmed calculation into a failed
  const r=page.locator('#lpc-deviations tr[data-row-id="KYIV:total:profit"]');
  await r.locator('input').fill('40');await r.locator('input').dispatchEvent('change');
  assert.match(await r.innerText(),/\+100,00%/);assert.deepEqual(errors,[]);await page.close();
+});
+
+test('collapsed report panels retain data, keyboard access and state after refresh',async()=>{
+ const {page,requests,errors}=await setup('rolling');
+ await page.locator('#lph-from').fill('2025-10');await page.locator('#lph-to').fill('2025-10');await page.locator('#lph-view').click();await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);
+ await page.locator('#lph-months button').first().click();
+ await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);
+ const panel=page.locator('#lavr-profit-manager-template > details[data-profit-fold]');
+ const summary=panel.locator(':scope > summary');
+ const count=await panel.locator('table tr').count();assert(count>0);
+ await summary.focus();await page.keyboard.press('Enter');
+ assert.equal(await panel.evaluate(n=>n.open),false);
+ assert.equal(await panel.locator('table').first().isVisible(),false);
+ const download=page.waitForEvent('download');await page.locator('#lavr-profit-export-xlsx').click();
+ await(await download).saveAs(path.join(out,'collapsed.xlsx'));
+ await page.locator('#lph-months button').first().click();
+ await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);
+ assert.equal(await panel.evaluate(n=>n.open),false);
+ assert.equal(await panel.locator('table tr').count(),count);
+ await summary.focus();await page.keyboard.press('Space');
+ assert.equal(await panel.locator('table').first().isVisible(),true);
+ await summary.scrollIntoViewIfNeeded();await page.screenshot({path:path.join(out,'folds-desktop.png')});
+ await page.setViewportSize({width:390,height:844});await summary.scrollIntoViewIfNeeded();await page.screenshot({path:path.join(out,'folds-mobile.png')});
+ await page.locator('#lph-month-list > summary').click();
+ assert.equal(await page.locator('#lph-months').isVisible(),false);
+ assert.equal(await page.locator('#lph-total-panel > summary').isVisible(),true);
+ assert(requests.every(r=>['range','month'].includes(r.operation)));assert.deepEqual(errors,[]);
+ await page.close();
 });

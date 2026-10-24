@@ -26,9 +26,9 @@ class Lavka_Reports_Profit_History {
           </div>
           <p><?php echo esc_html($t['monthlyHelp']); ?></p>
           <p id="lph-state" role="status" aria-live="polite"></p><p id="lph-error" role="alert" hidden></p>
-          <div id="lph-results" hidden><p id="lph-coverage"></p><div id="lph-months" class="lavr-profit-table-wrap"></div>
-          <button id="lph-compare-range" type="button" class="button"><?php echo esc_html($t['compareRange']); ?></button>
-          <h3><?php echo esc_html($t['range']); ?></h3><p><?php echo esc_html($t['inventoryHelp']); ?></p><div id="lph-totals"></div></div>
+          <div id="lph-results" hidden><p id="lph-coverage"></p><details id="lph-month-list" open><summary><?php echo esc_html($t['title']); ?></summary><div id="lph-months" class="lavr-profit-table-wrap"></div>
+          <button id="lph-compare-range" type="button" class="button"><?php echo esc_html($t['compareRange']); ?></button></details>
+          <details id="lph-total-panel" open><summary><?php echo esc_html($t['range']); ?></summary><p><?php echo esc_html($t['inventoryHelp']); ?></p><div id="lph-totals"></div></details></div>
           <div id="lph-revisions" hidden></div>
         </section>
         <section id="lavr-profit-comparison" class="lavr-profit-summary"></section>

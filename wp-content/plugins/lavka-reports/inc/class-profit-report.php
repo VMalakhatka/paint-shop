@@ -33,12 +33,13 @@ class Lavka_Reports_Profit_Report {
             [],
             LAVR_VER
         );
+        wp_enqueue_script('lavr-profit-folds', LAVR_URL . 'profit-folds.js', [], LAVR_VER, true);
         wp_enqueue_script('lavr-profit-manager', LAVR_URL . 'profit-manager.js', [], LAVR_VER, true);
         wp_enqueue_script('lavr-profit-xlsx', LAVR_URL . 'profit-xlsx.js', [], LAVR_VER, true);
         wp_enqueue_script(
             'lavr-profit-report',
             LAVR_URL . 'profit-report.js',
-            ['lavr-profit-xlsx', 'lavr-profit-manager'],
+            ['lavr-profit-xlsx', 'lavr-profit-manager', 'lavr-profit-folds'],
             LAVR_VER,
             true
         );
