@@ -257,3 +257,8 @@ Deploy compatible Java with migration V20 before frontend 0.12.0. No production
 deploy or database mutation was performed during development. See
 [manager instructions](../../../docs/PROFIT_REPORT_MANAGER_RU.md#склады-и-исключения-из-остатков)
 and [saved report contract](../../../docs/api/FOLIO_PROFIT_SAVED_REPORTS_FRONTEND.md).
+
+Contract evidence: `tests/fixtures/profit-scope-java.json` is a synthetic response
+serialized by Java `FolioProfitScopeReportTest` on 2026-10-24 (rule version
+2026-10-24.1), not production data. The saved-view test verifies original labels,
+inventory values and XLSX export without any current-catalog requests.

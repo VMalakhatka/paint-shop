@@ -37,6 +37,7 @@ async function setup(mode='normal'){
    if(mode==='slowOpen' && q.operation==='month')await new Promise(r=>setTimeout(r,500));
    if(mode==='java' && q.operation==='month')body=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/profit-saved-java.json'),'utf8'));
    if(mode==='headcount' && ['month','calculate'].includes(q.operation))body={...body,report:{...JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/profit-headcount-java.json'),'utf8')),month:q.month}};
+   if(mode==='scopeJava' && ['month','calculate'].includes(q.operation))body={...body,report:JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/profit-scope-java.json'),'utf8'))};
    if(mode==='wrongRevision'&&q.operation==='month')body.revisionId=777;
    return route.fulfill({contentType:'application/json',body:JSON.stringify({success:true,data:{httpStatus:200,bodyRaw:JSON.stringify(body)}})});
   }
@@ -112,6 +113,16 @@ test('stored warehouse and exclusion snapshot is displayed and exported without 
  await page.locator('#lavr-profit-result summary').filter({hasText:'Applied parameters and selection period'}).click();
  assert.match(await page.locator('#lavr-profit-result').innerText(),/Historical exclusion/);assert.match(await page.locator('#lavr-profit-result').innerText(),/Historical warehouse/);
  const download=page.waitForEvent('download');await page.locator('#lavr-profit-export-xlsx').click();await(await download).saveAs(path.join(out,'scope-snapshot.xlsx'));
+ assert(requests.every(r=>['range','month'].includes(r.operation)));assert.deepEqual(errors,[]);await page.close();
+});
+
+test('serialized Java scope report preserves exclusion names and inventory values in viewer and Excel',async()=>{
+ const {page,requests,errors}=await setup('scopeJava');await page.locator('#lph-from').fill('2026-07');await page.locator('#lph-to').fill('2026-07');await page.locator('#lph-view').click();await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);
+ await page.locator('#lph-months button').first().click();await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);
+ await page.locator('#lavr-profit-result summary').filter({hasText:'Applied parameters and selection period'}).click();
+ await page.locator('#lavr-profit-result summary').filter({hasText:'Inventory accounting value'}).click();
+ assert.match(await page.locator('#lavr-profit-policy').innerText(),/Материалы/);assert.match(await page.locator('#lavr-profit-policy').innerText(),/2026-10-24.1/);assert.match(await page.locator('#lavr-profit-inventory').innerText(),/30,00/);assert.match(await page.locator('#lavr-profit-inventory').innerText(),/40,00/);
+ const download=page.waitForEvent('download');await page.locator('#lavr-profit-export-xlsx').click();await(await download).saveAs(path.join(out,'scope-java.xlsx'));
  assert(requests.every(r=>['range','month'].includes(r.operation)));assert.deepEqual(errors,[]);await page.close();
 });
 
