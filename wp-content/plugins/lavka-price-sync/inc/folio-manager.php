@@ -13,34 +13,52 @@ function lps_manager_labels(): array {
     return ['NAME'=>__('Product name','lps-manager'),'GROUPS'=>__('Product groups','lps-manager'),'UNIT'=>__('Unit of measure','lps-manager'),
         'DESCRIPTION'=>__('Product description','lps-manager'),'BASE'=>__('Articles by base article','lps-manager'),'ASSEMBLY'=>__('Assembly invoice calculation','lps-manager')];
 }
-add_action('admin_menu',static function(){add_submenu_page('lps-folio-cards',__('Manager operations','lps-manager'),__('Manager operations','lps-manager'),LPS_CAP,'lps-folio-manager','lps_manager_render');});
+add_action('admin_menu',static function(){
+    add_submenu_page('lps-folio-cards',__('Manager operations','lps-manager'),__('Manager operations','lps-manager'),LPS_CAP,'lps-folio-manager','lps_manager_render');
+    add_submenu_page('lps-folio-cards',__('Assembly invoice calculation','lps-manager'),__('Assembly invoice calculation','lps-manager'),LPS_CAP,'lps-folio-assembly','lps_assembly_render');
+});
+function lps_manager_screen_labels(bool $assembly): array {
+    return array_filter(lps_manager_labels(),static fn($key)=>($key==='ASSEMBLY')===$assembly,ARRAY_FILTER_USE_KEY);
+}
+function lps_manager_render(): void { lps_manager_render_page(false); }
+function lps_assembly_render(): void { lps_manager_render_page(true); }
 function lps_manager_help(string $title,string $text): void {
     echo '<details><summary>'.esc_html($title).'</summary><p style="max-width:900px">'.esc_html($text).'</p></details>';
 }
-function lps_manager_render(): void {
+function lps_manager_render_page(bool $assembly): void {
     if(!current_user_can(LPS_CAP))wp_die(esc_html__('Access denied.','lps-manager'));
-    echo '<div class="wrap"><h1>'.esc_html__('Manager operations','lps-manager').'</h1><p>'.esc_html__('Six operations from the manager workbook. Source and destination: Paint_Ua.','lps-manager').'</p>';
-    lps_manager_help(__('Quick guide','lps-manager'),__('Choose an operation. Prepare the columns shown below, then upload a file or paste cells from Excel. Preview the result. For card changes, check every warehouse and each empty value, download the preview, and confirm Apply. For selections and assembly, download the result; they do not create a Folio invoice.','lps-manager'));
-    echo '<form id="lps-manager-form"><p><label for="lps-manager-kind">'.esc_html__('Operation','lps-manager').'</label> <select id="lps-manager-kind" name="kind" style="max-width:100%">';
-    foreach(lps_manager_labels() as $key=>$label)echo '<option value="'.esc_attr($key).'">'.esc_html($label).'</option>';
-    echo '</select></p><p id="lps-manager-columns" style="overflow-wrap:anywhere"></p><p id="lps-manager-scope"></p>';
+    $labels=lps_manager_screen_labels($assembly);
+    echo '<div class="wrap"><h1>'.esc_html($assembly?__('Assembly invoice calculation','lps-manager'):__('Manager operations','lps-manager')).'</h1><p>'.esc_html($assembly?__('Calculate assembly and download its results. Folio invoice generation will be added here later.','lps-manager'):__('Five operations for product cards and article selection. Source and destination: Paint_Ua.','lps-manager')).'</p>';
+    lps_manager_help(__('Quick guide','lps-manager'),$assembly?__('Upload the assembly input or paste cells from Excel, calculate and check the result tables, then download Excel. This screen does not create a Folio invoice.','lps-manager'):__('Choose an operation, upload a file or paste cells from Excel, then preview. For card changes, check all warehouses and empty values before confirming Apply. For article selection, download the result.','lps-manager'));
+    echo '<form id="lps-manager-form">';
+    if($assembly)echo '<input id="lps-manager-kind" name="kind" type="hidden" value="ASSEMBLY">';
+    else {
+        echo '<p><label for="lps-manager-kind">'.esc_html__('Operation','lps-manager').'</label> <select id="lps-manager-kind" name="kind" style="max-width:100%">';
+        foreach($labels as $key=>$label)echo '<option value="'.esc_attr($key).'">'.esc_html($label).'</option>';
+        echo '</select></p>';
+    }
+    echo '<p id="lps-manager-columns" style="overflow-wrap:anywhere"></p><p id="lps-manager-scope"></p>';
     echo '<p><label>'.esc_html__('Excel or CSV file','lps-manager').' <input type="file" name="file" style="max-width:100%" accept=".xls,.xlsx,.csv"></label></p><p><label for="lps-manager-paste">'.esc_html__('Or paste cells from Excel','lps-manager').'</label></p><textarea id="lps-manager-paste" name="paste" rows="6" style="width:100%;max-width:1000px;box-sizing:border-box" spellcheck="false"></textarea>';
     lps_manager_help(__('File and empty values','lps-manager'),__('XLS, XLSX or UTF-8 CSV, up to 5 MB and 500 data rows. Only the first sheet is read. Headers are optional, in the displayed order. Use tabs or semicolons for decimal commas. Formulas are rejected. Empty values clear fields to NULL. Keep all six group columns. For assembly, supply SLOG explicitly as 0 or 1 and preserve the initial values used in Access.','lps-manager'));
     wp_nonce_field(LPS_MANAGER_NONCE);
-    echo '<p><button class="button button-primary" type="submit">'.esc_html__('Preview / calculate','lps-manager').'</button></p></form>';
+    echo '<p><button class="button button-primary" type="submit">'.esc_html($assembly?__('Calculate assembly','lps-manager'):__('Preview / calculate','lps-manager')).'</button></p></form>';
     echo '<p id="lps-manager-status" role="status" aria-live="polite"></p><div id="lps-manager-result"></div><p><a id="lps-manager-download" class="button" hidden>'.esc_html__('Download Excel','lps-manager').'</a></p>';
+    if(!$assembly) {
     lps_manager_help(__('Check before applying','lps-manager'),__('Name, groups and unit are updated on every matching warehouse card. Check the old and new values, missing articles and intended field clearing. A preview is valid for 15 minutes; changed source rows require a new preview.','lps-manager'));
-    echo '<p><label><input id="lps-manager-confirm" type="checkbox" disabled> '.esc_html__('I checked all changes, including empty values, and confirm the update in Paint_Ua.','lps-manager').'</label></p><p><button id="lps-manager-apply" class="button button-primary" disabled>'.esc_html__('Apply to Folio','lps-manager').'</button> <button id="lps-manager-check" class="button" disabled>'.esc_html__('Check status','lps-manager').'</button></p>';
+    echo '<p><label><input id="lps-manager-confirm" type="checkbox" disabled> '.esc_html__('I checked all changes, including empty values, and confirm the update in Paint_Ua.','lps-manager').'</label></p><p><button id="lps-manager-apply" class="button button-primary" disabled>'.esc_html__('Apply to Folio','lps-manager').'</button></p>';
     lps_manager_help(__('If the result is unknown','lps-manager'),__('Do not upload and apply the same file again. Use Check status or reopen this operation in history. If the result stays unknown, ask the administrator to verify Folio against the saved preview.','lps-manager'));
-    echo '<h2>'.esc_html__('Recent operations','lps-manager').'</h2><ul id="lps-manager-history">';
-    foreach(array_reverse((array)get_option('lps_manager_history_'.get_current_user_id(),[])) as $id){$job=get_option('lps_manager_job_'.$id);if(!is_array($job))continue;
+    }
+    echo '<p><button id="lps-manager-check" class="button" disabled>'.esc_html__('Check status','lps-manager').'</button></p>';
+    echo '<h2>'.esc_html($assembly?__('Recent assembly calculations','lps-manager'):__('Recent operations','lps-manager')).'</h2><ul id="lps-manager-history">';
+    foreach(array_reverse((array)get_option('lps_manager_history_'.get_current_user_id(),[])) as $id){$job=get_option('lps_manager_job_'.$id);if(!is_array($job)||!isset($labels[$job['result']['operation']??'']))continue;
         echo '<li><button type="button" class="button-link" data-job="'.esc_attr($id).'">'.esc_html($job['created'].' — '.$job['filename'].' — '.(lps_manager_states()[$job['status']]??$job['status'])).'</button></li>';}
     echo '</ul></div>';
 }
 add_action('admin_enqueue_scripts',static function(){
-    if(($_GET['page']??'')!=='lps-folio-manager')return;
+    $page=$_GET['page']??'';
+    if(!in_array($page,['lps-folio-manager','lps-folio-assembly'],true))return;
     wp_enqueue_script('lps-manager',plugins_url('../assets/folio-manager.js',__FILE__),[],(string)filemtime(__DIR__.'/../assets/folio-manager.js'),true);
-    $columns=[];foreach(array_keys(lps_manager_labels()) as $op)$columns[$op]=lps_manager_columns($op);
+    $columns=[];foreach(array_keys(lps_manager_screen_labels($page==='lps-folio-assembly')) as $op)$columns[$op]=lps_manager_columns($op);
     wp_localize_script('lps-manager','lpsManager',['url'=>admin_url('admin-ajax.php'),'columns'=>$columns,
         'busy'=>__('Processing…','lps-manager'),'error'=>__('Could not process the operation. Check the input and Java connection. After Apply, check status before repeating.','lps-manager'),
         'headers'=>[__('Article','lps-manager'),__('Warehouse','lps-manager'),__('Field','lps-manager'),__('Old value','lps-manager'),__('New value','lps-manager')],

@@ -28,6 +28,12 @@ msgstr ""
 msgid "Assembly invoice calculation"
 msgstr ""
 
+msgid "Calculate assembly"
+msgstr ""
+
+msgid "Calculate assembly and download its results. Folio invoice generation will be added here later."
+msgstr ""
+
 msgid "Cannot apply: resolve the reported conflicts first."
 msgstr ""
 
@@ -49,7 +55,7 @@ msgstr ""
 msgid "Check the displayed columns. Supply either a file or pasted cells, with no formulas or repeated update articles. For assembly, SLOG is required."
 msgstr ""
 
-msgid "Choose an operation. Prepare the columns shown below, then upload a file or paste cells from Excel. Preview the result. For card changes, check every warehouse and each empty value, download the preview, and confirm Apply. For selections and assembly, download the result; they do not create a Folio invoice."
+msgid "Choose an operation, upload a file or paste cells from Excel, then preview. For card changes, check all warehouses and empty values before confirming Apply. For article selection, download the result."
 msgstr ""
 
 msgid "Could not export this operation. Reopen it from history and try again."
@@ -71,6 +77,9 @@ msgid "Field"
 msgstr ""
 
 msgid "File and empty values"
+msgstr ""
+
+msgid "Five operations for product cards and article selection. Source and destination: Paint_Ua."
 msgstr ""
 
 msgid "I checked all changes, including empty values, and confirm the update in Paint_Ua."
@@ -136,6 +145,9 @@ msgstr ""
 msgid "Ready for confirmation"
 msgstr ""
 
+msgid "Recent assembly calculations"
+msgstr ""
+
 msgid "Recent operations"
 msgstr ""
 
@@ -148,9 +160,6 @@ msgstr ""
 msgid "Saved and verified in Folio."
 msgstr ""
 
-msgid "Six operations from the manager workbook. Source and destination: Paint_Ua."
-msgstr ""
-
 msgid "Source rows changed. Nothing was applied; create a new preview."
 msgstr ""
 
@@ -158,6 +167,9 @@ msgid "The operation is running. Check status."
 msgstr ""
 
 msgid "Unit of measure"
+msgstr ""
+
+msgid "Upload the assembly input or paste cells from Excel, calculate and check the result tables, then download Excel. This screen does not create a Folio invoice."
 msgstr ""
 
 msgid "Warehouse"

@@ -6,11 +6,12 @@
     const kind = el('kind'), status = el('status'), result = el('result'), apply = el('apply'), check = el('check'), confirm = el('confirm'), download = el('download');
     let job = '', preview = false, busy = false;
     function buttons() {
-        apply.disabled = busy || !preview || !confirm.checked;
-        confirm.disabled = busy || !preview; check.disabled = busy || !job;
+        if (apply && confirm) apply.disabled = busy || !preview || !confirm.checked;
+        if (confirm) confirm.disabled = busy || !preview;
+        check.disabled = busy || !job;
         for (const control of form.elements) control.disabled = busy;
     }
-    function invalidate() { preview = false; confirm.checked = false; download.hidden = true; buttons(); }
+    function invalidate() { preview = false; if (confirm) confirm.checked = false; download.hidden = true; buttons(); }
     function operation() {
         invalidate(); result.replaceChildren(); status.textContent = '';
         el('columns').textContent = lpsManager.columns[kind.value].join(' | ');
@@ -26,6 +27,7 @@
         box.append(table); result.append(box);
     }
     function render(data) {
+        if (!Object.prototype.hasOwnProperty.call(lpsManager.columns, data.operation)) throw new Error(lpsManager.error);
         kind.value = data.operation;
         el('columns').textContent = lpsManager.columns[kind.value].join(' | ');
         el('scope').textContent = lpsManager.scopes[kind.value];
@@ -34,7 +36,7 @@
         const quote = value => '"' + String(value ?? '').replace(/"/g, '""') + '"';
         el('paste').value = [columns, ...data.input.map(row => columns.map(c => row[c]))].map(row => row.map(quote).join('\t')).join('\n');
         job = data.job; preview = data.status === 'PREVIEW' && (data.before.length > 0 || data.operation === 'DESCRIPTION');
-        confirm.checked = false; result.replaceChildren(); status.textContent = (lpsManager.states[data.status] || data.status) + ' — ' + data.filename;
+        if (confirm) confirm.checked = false; result.replaceChildren(); status.textContent = (lpsManager.states[data.status] || data.status) + ' — ' + data.filename;
         download.href = data.download; download.hidden = false;
         let button = Array.from(el('history').querySelectorAll('button')).find(b => b.dataset.job === job);
         if (!button) { const li = document.createElement('li'); button = document.createElement('button'); button.type = 'button'; button.className = 'button-link'; button.dataset.job = job; li.append(button); el('history').prepend(li); }
@@ -69,8 +71,8 @@
     kind.addEventListener('change', operation);
     form.querySelector('[type="file"]').addEventListener('change', invalidate);
     el('paste').addEventListener('input', invalidate);
-    confirm.addEventListener('change', buttons);
-    apply.addEventListener('click', () => { const data = new FormData(); data.set('job', job); data.set('confirmed', '1'); request('apply', data); });
+    confirm?.addEventListener('change', buttons);
+    apply?.addEventListener('click', () => { const data = new FormData(); data.set('job', job); data.set('confirmed', '1'); request('apply', data); });
     check.addEventListener('click', () => { const data = new FormData(); data.set('job', job); request('status', data); });
     el('history').addEventListener('click', e => { const button = e.target.closest('button[data-job]'); if (!button || busy) return; const data = new FormData(); data.set('job', button.dataset.job); request('status', data); });
     operation();
