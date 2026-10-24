@@ -51,6 +51,7 @@ class Lavka_Reports_Profit_Report {
         ]);
         Lavka_Reports_Profit_History::assets();
         Lavka_Reports_Profit_Tax_Settings::assets();
+        Lavka_Reports_Profit_Scope_Settings::assets();
     }
 
     public function render_page() {
@@ -74,6 +75,9 @@ class Lavka_Reports_Profit_Report {
                             <li><strong><?php echo esc_html__('Download Excel.', 'lavka-reports'); ?></strong> <?php echo esc_html($guide['managerStep6']); ?></li>
                     </ol>
                     <p><?php echo esc_html__('Additional work follows salary: Kyiv is not applicable (0), Odesa defaults to UAH 5000. Enter 0 explicitly to cancel the Odesa default.', 'lavka-reports'); ?></p>
+                    <h3><?php echo esc_html__('Warehouses and inventory exclusions', 'lavka-reports'); ?></h3>
+                    <p><?php echo esc_html__('Open Warehouses and inventory exclusions below this guide. Select the required warehouses and excluded branches, save, then calculate the required months.', 'lavka-reports'); ?></p>
+                    <p><?php echo esc_html__('Excluded groups and subgroups apply only to inventory in both cities. A group excludes all its subgroups. Sales profit, master classes and expenses are not filtered by these exclusions.', 'lavka-reports'); ?></p>
                     <h3><?php echo esc_html__('How to read Excel', 'lavka-reports'); ?></h3>
                     <p><?php echo esc_html__('Start with the Kyiv and Odesa sheets. Selection columns follow the working template. Enter your own amount in the final Manager check, UAH column. Details and documents are on the following sheets. The downloaded file is usually in Downloads.', 'lavka-reports'); ?></p>
                     <div class="lavr-profit-guide-note">
@@ -85,6 +89,7 @@ class Lavka_Reports_Profit_Report {
                 </div>
             </details>
             <?php if (class_exists('Lavka_Reports_Profit_Tax_Settings')) Lavka_Reports_Profit_Tax_Settings::render(); ?>
+            <?php if (class_exists('Lavka_Reports_Profit_Scope_Settings')) Lavka_Reports_Profit_Scope_Settings::render(); ?>
             <?php if (class_exists('Lavka_Reports_Profit_History')) Lavka_Reports_Profit_History::render_toolbar(); ?>
 
             <section class="lavr-profit-toolbar" aria-labelledby="lavr-profit-period-title">
@@ -304,6 +309,10 @@ class Lavka_Reports_Profit_Report {
             'noTaxFirms' => __('No firms configured', 'lavka-reports'),
             'taxSettingsUsed' => __('Tax rules used in this report', 'lavka-reports'),
             'taxSettingsVersion' => __('Tax settings version', 'lavka-reports'),
+            'scopeSettingsVersion' => __('Warehouse and exclusion settings version', 'lavka-reports'),
+            'scopeSettingsLegacy' => __('This saved report has no warehouse-settings snapshot. Its original warehouse parameters are shown; current settings are not substituted.', 'lavka-reports'),
+            'noExclusions' => __('No exclusions', 'lavka-reports'),
+            'unnamedLevel' => __('Unnamed level', 'lavka-reports'),
             'taxSettingsLegacy' => __('This saved report does not contain a tax firm settings snapshot. Current lists are not applied to it.', 'lavka-reports'),
             'unallocatedTax' => __('Unallocated taxes', 'lavka-reports'),
             'retailTax' => __('Retail taxes', 'lavka-reports'),
@@ -627,6 +636,8 @@ class Lavka_Reports_Profit_Report {
                 'odesaWarehouseIds' => __('Odesa sales warehouses', 'lavka-reports'),
                 'kyivStockWarehouseIds' => __('Kyiv inventory warehouses', 'lavka-reports'),
                 'odesaStockWarehouseIds' => __('Odesa inventory warehouses', 'lavka-reports'),
+                'excludedInventoryGroupIds' => __('Exclude groups from inventory', 'lavka-reports'),
+                'excludedInventorySubgroupIds' => __('Exclude subgroups from inventory', 'lavka-reports'),
                 'taxAllocationMethod' => __('Tax allocation method', 'lavka-reports'),
                 'status' => __('Status', 'lavka-reports'),
                 'name' => __('Name', 'lavka-reports'),

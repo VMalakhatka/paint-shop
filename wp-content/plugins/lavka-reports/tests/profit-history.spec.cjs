@@ -93,6 +93,28 @@ test('a multi-month calculation pins one tax settings version and blocks unsaved
  const calculations=requests.filter(r=>r.operation==='calculate');assert.equal(calculations.length,2);assert(calculations.every(r=>r.taxSettingsVersion==='3'));assert.equal(await page.evaluate(()=>window.taxVersionReads),1);assert.deepEqual(errors,[]);await page.close();
 });
 
+test('a multi-month calculation pins warehouse settings and never calculates after settings read failure',async()=>{
+ const {page,requests,errors}=await setup();await range(page);
+ await page.evaluate(()=>{window.scopeReads=0;window.LavkaProfitScopeSettings={setReportBusy(){},assertReady(){throw new Error('Unsaved warehouse edits');},async calculationVersion(){window.scopeReads++;return 0;}};});
+ await page.locator('#lph-calculate').click();assert(!requests.some(r=>r.operation==='calculate'));assert.match(await page.locator('#lph-error').innerText(),/Unsaved warehouse/);
+ await page.evaluate(()=>{window.LavkaProfitScopeSettings.assertReady=()=>{};window.LavkaProfitScopeSettings.calculationVersion=async()=>{throw new Error('Scope settings unavailable');};});
+ await page.locator('#lph-calculate').click();await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);assert(!requests.some(r=>r.operation==='calculate'));
+ await page.evaluate(()=>window.LavkaProfitScopeSettings.calculationVersion=async()=>{window.scopeReads++;return 0;});
+ await page.locator('#lph-calculate').click();await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);
+ const calls=requests.filter(r=>r.operation==='calculate');assert.equal(calls.length,2);assert(calls.every(r=>r.expectedScopeSettingsVersion==='0'));assert.equal(await page.evaluate(()=>window.scopeReads),1);assert.deepEqual(errors,[]);await page.close();
+});
+
+test('stored warehouse and exclusion snapshot is displayed and exported without current catalog reads',async()=>{
+ const {page,requests,errors}=await setup();await page.locator('#lph-months button').first().click();await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);
+ const snapshot={version:8,kyivWarehouseIds:[12],odesaWarehouseIds:[5],kyivStockWarehouseIds:[12],odesaStockWarehouseIds:[5],excludedInventoryGroupIds:['g:old'],excludedInventorySubgroupIds:[]};
+ const catalog={warehouses:[{id:12,name:'Historical warehouse'}],groups:[{id:'g:old',name:'Historical exclusion',path:['Historical exclusion']}],subgroups:[]};
+ await page.evaluate(({snapshot,catalog,wrapper})=>{wrapper.report.scopeSettings=snapshot;wrapper.report.scopeCatalog=catalog;window.LavkaProfitViewer.showSaved(wrapper);},{snapshot,catalog,wrapper:wrapper('2025-07')});
+ await page.locator('#lavr-profit-result summary').filter({hasText:'Applied parameters and selection period'}).click();
+ assert.match(await page.locator('#lavr-profit-result').innerText(),/Historical exclusion/);assert.match(await page.locator('#lavr-profit-result').innerText(),/Historical warehouse/);
+ const download=page.waitForEvent('download');await page.locator('#lavr-profit-export-xlsx').click();await(await download).saveAs(path.join(out,'scope-snapshot.xlsx'));
+ assert(requests.every(r=>['range','month'].includes(r.operation)));assert.deepEqual(errors,[]);await page.close();
+});
+
 test('tax snapshots and unallocated documents are visible and exported with historical firm codes',async()=>{
  const {page,errors}=await setup('headcount');await page.locator('#lph-months button').first().click();await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);
  const fixture=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/profit-headcount-java.json'),'utf8'));

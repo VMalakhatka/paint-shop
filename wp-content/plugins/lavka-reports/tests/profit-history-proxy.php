@@ -48,3 +48,7 @@ $r=request(['operation'=>'calculate','month'=>'2025-10','requestId'=>'11111111-1
 verify($r->success && $GLOBALS['body']['taxSettingsVersion']===0,'Tax settings version zero preserved');
 foreach(['-1','1.1','9007199254740992','1e2'] as $v){$r=request(['operation'=>'calculate','month'=>'2025-10','requestId'=>'11111111-1111-4111-8111-111111111111','taxSettingsVersion'=>$v]);verify(!$r->success&&$GLOBALS['http_calls']===0,'Invalid tax version rejected');}
 echo "PASS: pinned tax settings version forwarding\n";
+$r=request(['operation'=>'calculate','month'=>'2025-10','requestId'=>'11111111-1111-4111-8111-111111111111','expectedScopeSettingsVersion'=>'0']);
+verify($r->success && $GLOBALS['body']['expectedScopeSettingsVersion']===0,'Scope settings version zero preserved');
+foreach(['-1','1.1','9007199254740992','1e2',[]] as $v){$r=request(['operation'=>'calculate','month'=>'2025-10','requestId'=>'11111111-1111-4111-8111-111111111111','expectedScopeSettingsVersion'=>$v]);verify(!$r->success&&$GLOBALS['http_calls']===0,'Invalid scope version rejected');}
+echo "PASS: pinned scope settings version forwarding\n";

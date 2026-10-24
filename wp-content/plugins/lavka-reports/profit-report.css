@@ -546,3 +546,18 @@
 #lavr-profit-comparison th:first-child,#lavr-profit-comparison td:first-child { min-width:45px; }
 #lavr-profit-comparison .lavr-profit-template-heading { background:#e8eef5; }
 #lpc-baseline summary { cursor:pointer; font-weight:600; }
+
+.lavr-profit-scope-editor{padding:4px 20px 20px}
+.lavr-profit-scope-editor>p{max-width:950px}
+#lps-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;max-width:1200px}
+#lps-fields section{min-width:0;border:1px solid #dce5ec;padding:14px;background:#fafcfd}
+#lps-fields h3{margin:0 0 12px}
+#lps-fields input[type=search]{width:100%;max-width:100%}
+.lps-choices{max-height:260px;overflow:auto}
+.lps-choices label{display:flex;align-items:flex-start;gap:8px;padding:8px 4px;overflow-wrap:anywhere}
+.lps-choices input{flex-shrink:0;margin-top:3px}
+.lps-choices small{display:block;color:#52616b}
+.lps-choices [hidden]{display:none!important}
+.lps-missing,#lps-error{color:#b32d2e}
+#lps-error,#lps-state{font-weight:600}
+@media(max-width:650px){#lps-fields{grid-template-columns:1fr}.lavr-profit-scope-editor{padding:4px 12px 16px}}

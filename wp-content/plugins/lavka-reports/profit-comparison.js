@@ -111,9 +111,9 @@
             const sheets=[],add=(list,prefix)=>{const layout=layoutFor(list);['KYIV','ODESA'].forEach(c=>{const group=layout.filter(r=>r.city===c);if(group.length)sheets.push({name:city(c)+' '+prefix,rows:[tableHeaders(list),...tableRows(list,group).map(exportCells)],headerRows:[1],freezeRows:1});});};
             if(selected.length)add(selected,t('comparison'));if(results.length)add(results,t('deviations'));
             sheets.push({name:t('baseline'),rows:[[t('meanHelp')],[t('baselineHelp')],[t('percentHelp')],[t('missingHelp')],
-                ...selected.map(w=>[t('comparison'),metadata(w),w.report.calculatedAt,JSON.stringify(w.report.inputs||{})]),
-                ...results.map(w=>[t('newValue'),metadata(w),w.report.calculatedAt,JSON.stringify(w.report.inputs||{})]),
-                ...allTargets().flatMap(w=>[...[['target',stamp(w),'window',previousMonths(w.month).join(', ')]],...(windows[w.month]||[]).map(v=>[w.month,t('baseline'),metadata(v),v.report.calculatedAt,JSON.stringify(v.report.inputs||{})])]),
+                ...selected.map(w=>[t('comparison'),metadata(w),w.report.calculatedAt,JSON.stringify(w.report.inputs||{}),JSON.stringify(w.report.scopeSettings||null),JSON.stringify(w.report.scopeCatalog||null)]),
+                ...results.map(w=>[t('newValue'),metadata(w),w.report.calculatedAt,JSON.stringify(w.report.inputs||{}),JSON.stringify(w.report.scopeSettings||null),JSON.stringify(w.report.scopeCatalog||null)]),
+                ...allTargets().flatMap(w=>[...[['target',stamp(w),'window',previousMonths(w.month).join(', ')]],...(windows[w.month]||[]).map(v=>[w.month,t('baseline'),metadata(v),v.report.calculatedAt,JSON.stringify(v.report.inputs||{}),JSON.stringify(v.report.scopeSettings||null),JSON.stringify(v.report.scopeCatalog||null)])]),
                 ...Object.entries(manual).map(([id,value])=>[t('manualBaseline'),id,{type:'number',value}]) ]});
             const url=URL.createObjectURL(new Blob([scope.LavkaProfitXlsx.build(sheets)],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
             const a=el('a');a.href=url;a.download='lavka-profit-comparison.xlsx';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
@@ -131,7 +131,7 @@
             const base=el('details');base.id='lpc-baseline';base.append(el('summary',t('baseline')),el('p',t('baselineHelp')));
             allTargets().forEach(w=>base.append(el('p',w.month+' ← '+previousMonths(w.month).join(', ')+' · '+((windows[w.month]||[]).map(metadata).join(' · ')||t('requiredBaseline')))));target.append(base);
             const combined=[...selected,...Object.values(windows).flat(),...results];
-            if(combined.some(w=>w.status!=='COMPLETED'||!w.report.complete)||new Set(combined.map(w=>JSON.stringify([w.report.ruleVersion,w.report.inputs,w.report.taxDetails?.settings]))).size>1)target.append(el('p',t('comparisonWarning')));
+            if(combined.some(w=>w.status!=='COMPLETED'||!w.report.complete)||new Set(combined.map(w=>JSON.stringify([w.report.ruleVersion,w.report.inputs,w.report.taxDetails?.settings,w.report.scopeSettings]))).size>1)target.append(el('p',t('comparisonWarning')));
             target.append(el('p',t('missingHelp')),el('p',t('percentHelp')));
             if(storageFailed)target.append(el('p',t('storageWarning')));if(error){const p=el('p',t('historyUnavailable')+' '+error);p.setAttribute('role','alert');target.append(p);}
             if(selected.length)renderTables(selected,'lpc-table',true);

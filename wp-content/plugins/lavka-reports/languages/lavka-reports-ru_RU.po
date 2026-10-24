@@ -2306,3 +2306,119 @@ msgstr "Введите корректную сумму или очистите �
 #: inc/class-profit-history.php
 msgid "Comparison history could not be loaded."
 msgstr "Не удалось загрузить историю сравнения."
+
+#: inc/class-profit-scope-settings.php
+msgid "Warehouses and inventory exclusions"
+msgstr "Склады и исключения из остатков"
+
+#: inc/class-profit-scope-settings.php
+msgid "Choose sales and inventory warehouses separately for Kyiv and Odesa. Expense filters and master-class warehouses are not changed here."
+msgstr "Выберите отдельно склады продаж и остатков для Киева и Одессы. Отборы расходов и склады мастер-классов здесь не меняются."
+
+#: inc/class-profit-scope-settings.php
+msgid "Excluded groups and subgroups apply only to inventory in both cities. A group excludes all its subgroups. Sales profit, master classes and expenses are not filtered by these exclusions."
+msgstr "Исключения групп и подгрупп действуют только для остатков обоих городов. Группа исключает все свои подгруппы. На прибыль от продаж, мастер-классы и расходы эти исключения не влияют."
+
+#: inc/class-profit-scope-settings.php
+msgid "Save the settings, then calculate the required months. Saved reports keep their original amounts and settings."
+msgstr "Сохраните настройки, затем рассчитайте нужные месяцы. Сохранённые отчёты остаются со своими первоначальными суммами и настройками."
+
+#: inc/class-profit-scope-settings.php
+msgid "Save warehouses and exclusions"
+msgstr "Сохранить склады и исключения"
+
+#: inc/class-profit-scope-settings.php
+msgid "Reload saved settings"
+msgstr "Загрузить сохранённые настройки"
+
+#: inc/class-profit-scope-settings.php
+msgid "Could not confirm the settings request. Reload saved settings before trying again."
+msgstr "Не удалось подтвердить запрос настроек. Загрузите сохранённые настройки перед повторной попыткой."
+
+#: inc/class-profit-scope-settings.php
+msgid "Check the selection: choose warehouses for each city, without city overlaps, and use valid groups and subgroups."
+msgstr "Проверьте выбор: выберите склады для каждого города без пересечений между городами и действующие группы и подгруппы."
+
+#: inc/class-profit-scope-settings.php
+msgid "Exclude groups from inventory"
+msgstr "Исключить группы из остатков"
+
+#: inc/class-profit-scope-settings.php
+msgid "Exclude subgroups from inventory"
+msgstr "Исключить подгруппы из остатков"
+
+#: inc/class-profit-scope-settings.php
+msgid "Search by name or code"
+msgstr "Поиск по названию или коду"
+
+#: inc/class-profit-scope-settings.php
+msgid "Selected"
+msgstr "Выбрано"
+
+#: inc/class-profit-scope-settings.php
+msgid "Excluded with its group"
+msgstr "Исключено вместе с родительской группой"
+
+#: inc/class-profit-scope-settings.php
+msgid "Not in the current catalog"
+msgstr "Отсутствует в текущем справочнике"
+
+#: inc/class-profit-scope-settings.php
+msgid "Unnamed level"
+msgstr "Уровень без названия"
+
+#: inc/class-profit-scope-settings.php
+msgid "No matching entries"
+msgstr "Нет подходящих записей"
+
+#: inc/class-profit-scope-settings.php
+msgid "Loading warehouses, groups and settings…"
+msgstr "Загрузка складов, групп и настроек…"
+
+#: inc/class-profit-scope-settings.php
+msgid "Saving warehouses and exclusions…"
+msgstr "Сохранение складов и исключений…"
+
+#: inc/class-profit-scope-settings.php
+msgid "Settings saved. Calculate the required months to apply them; saved reports remain unchanged."
+msgstr "Настройки сохранены. Рассчитайте нужные месяцы, чтобы применить их; сохранённые отчёты не изменены."
+
+#: inc/class-profit-scope-settings.php
+msgid "Unsaved warehouse or exclusion changes. Save them or reload saved settings before calculating."
+msgstr "Есть несохранённые изменения складов или исключений. Сохраните их или загрузите сохранённые настройки перед расчётом."
+
+#: inc/class-profit-scope-settings.php
+msgid "Warehouse and exclusion settings version"
+msgstr "Версия настроек складов и исключений"
+
+#: inc/class-profit-scope-settings.php
+msgid "Could not load warehouse settings or the Folio catalog. Check that Java supports warehouse and inventory settings."
+msgstr "Не удалось загрузить настройки складов или справочник ФОЛИО. Проверьте, поддерживает ли Java настройки складов и остатков."
+
+#: inc/class-profit-scope-settings.php
+msgid "Saving was not confirmed. Reload saved settings and check them before saving again."
+msgstr "Сохранение не подтверждено. Загрузите сохранённые настройки и проверьте их перед повторным сохранением."
+
+#: inc/class-profit-scope-settings.php
+msgid "Another user changed warehouse settings. Reload saved settings, review them, then make your changes again."
+msgstr "Другой пользователь изменил настройки складов. Загрузите сохранённые настройки, проверьте их и внесите свои изменения снова."
+
+#: inc/class-profit-scope-settings.php
+msgid "Discard your unsaved warehouse and exclusion edits and reload saved settings?"
+msgstr "Отменить несохранённые изменения складов и исключений и загрузить сохранённые настройки?"
+
+#: inc/class-profit-scope-settings.php
+msgid "Warehouses and exclusions used for this report"
+msgstr "Склады и исключения этого отчёта"
+
+#: inc/class-profit-scope-settings.php
+msgid "This saved report has no warehouse-settings snapshot. Its original warehouse parameters are shown; current settings are not substituted."
+msgstr "Этот сохранённый отчёт не содержит снимка настроек складов. Показаны его первоначальные параметры складов; текущие настройки не подставляются."
+
+#: inc/class-profit-scope-settings.php
+msgid "No exclusions"
+msgstr "Без исключений"
+
+#: inc/class-profit-scope-settings.php
+msgid "Open Warehouses and inventory exclusions below this guide. Select the required warehouses and excluded branches, save, then calculate the required months."
+msgstr "Раскройте «Склады и исключения из остатков» под этой инструкцией. Выберите нужные склады и исключённые ветки, сохраните и рассчитайте нужные месяцы."

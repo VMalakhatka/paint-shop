@@ -504,3 +504,17 @@ Lock освобождён. До записи проверены checksums пол
 sticky context, мобильное меню, пустую корзину и вход. Полный checkout/платёж,
 все бизнес-роли и физические телефоны этим не подтверждены. Источник и точечный возврат —
 [production activation](../../../../docs/BOOTSTRAP_AND_RECOVERY.md#production-activation-lavka-storefront-2026-10-22).
+
+
+Profit warehouse/exclusion settings (2026-10-24, 0.12.0 code/tests):
+`class-profit-scope-settings.php` / `profit-scope-settings.js` expose Java-owned
+versioned scopes and read-only Folio catalog on the profit page. Four warehouse
+lists separate sales/inventory and Kyiv/Odesa. Inventory exclusions are opaque
+Folio group-path IDs, not Woo categories or guessed numeric groups. Root and
+subgroup branches cover descendants (up to six levels); never infer identity
+from labels. Persisted reports use their own `scopeSettings` + `scopeCatalog`,
+including names/paths for Excel; reading history must not fetch current catalog.
+New batches pin `expectedScopeSettingsVersion`; dirty/unknown/CAS conflict stops
+calculation, with no auto retry. Deploy compatible Java (migration V20) first.
+See [profit manager guide](../../../../docs/PROFIT_REPORT_MANAGER_RU.md#склады-и-исключения-из-остатков)
+and [contract](../../../../docs/api/FOLIO_PROFIT_SAVED_REPORTS_FRONTEND.md).

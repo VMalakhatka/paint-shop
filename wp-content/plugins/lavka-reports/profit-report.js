@@ -889,10 +889,25 @@
             {label:labels.unallocatedTax,amount:data.taxDetails.unallocatedAmount}
         ];
     }
+    function scopeSettingsRows(data) {
+        const settings=data.scopeSettings;
+        if(!settings)return [{parameter:labels.scopeSettingsVersion,value:labels.scopeSettingsLegacy}];
+        const catalog=data.scopeCatalog || {};
+        const fields=['kyivWarehouseIds','odesaWarehouseIds','kyivStockWarehouseIds','odesaStockWarehouseIds','excludedInventoryGroupIds','excludedInventorySubgroupIds'];
+        return [{parameter:labels.scopeSettingsVersion,value:settings.version},...fields.map(key=>{
+            const excluded=key.startsWith('excluded'), entries=excluded?(key==='excludedInventoryGroupIds'?catalog.groups:catalog.subgroups):catalog.warehouses;
+            const ids=settings[key];
+            const value=!Array.isArray(ids)?printable(null):!ids.length?(excluded?labels.noExclusions:printable(null)):ids.map(id=>{
+                const entry=(Array.isArray(entries)?entries:[]).find(item=>item.id===id);
+                return excluded&&Array.isArray(entry?.path)?entry.path.map(part=>part||labels.unnamedLevel).join(' / '):entry?.name?id+' · '+entry.name:String(id);
+            }).join('; ');
+            return {parameter:fieldLabel(key),value};
+        })];
+    }
     function parameterRows(data) {
         const saved = state.savedMetadata && data === state.report ? Object.entries(state.savedMetadata).map(([key,value]) => ['saved.' + key,value]) : [];
         return [['month', data.month], ['calculatedAt', formatDateTime(data.calculatedAt)], ['ruleVersion', data.ruleVersion], ['complete', data.complete],
-            ...Object.entries(data.inputs || {}), ...Object.entries(data.periodPolicy || {}), ...saved].map(([key, value]) => ({ parameter: fieldLabel(key), value: printable(value) })).concat(taxSettingsRows(data));
+            ...Object.entries(data.inputs || {}), ...Object.entries(data.periodPolicy || {}), ...saved].map(([key, value]) => ({ parameter: fieldLabel(key), value: printable(value) })).concat(taxSettingsRows(data),scopeSettingsRows(data));
     }
     function renderSupplement(data) {
         safeRender(labels.appliedParameters, nodes.policy, () => {

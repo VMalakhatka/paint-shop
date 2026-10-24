@@ -236,3 +236,24 @@ Tests: `tests/profit-comparison.test.cjs`, `tests/profit-manager.test.cjs`,
 refresh the tab. Production deployment requires separate authorization. Rollback
 restores the prior plugin; report snapshots are unchanged (browser comparison
 settings may need clearing after a downgrade from storage v2).
+
+
+## Warehouse and inventory settings (0.12.0)
+
+The profit page now edits Java-owned warehouse scopes and inventory exclusions.
+Read/save uses `/profit-report/scope-settings`; catalog uses `/scope-catalog`,
+behind a `manage_woocommerce` + nonce proxy. Four warehouse lists select sales
+and inventory separately for Kyiv/Odesa. Excluded Folio group paths apply only
+to inventory in both cities; whole branches cover descendants through level 6.
+Opaque string IDs and parent links come from Java; no Woo category mapping.
+
+Unsaved/conflicting/unknown settings block new calculations. A batch pins one
+`expectedScopeSettingsVersion`. Saved reports and Excel use `scopeSettings` and
+`scopeCatalog` snapshots only; they never fetch the current Folio catalog.
+Legacy reports retain their original data. Different historical scopes do not
+block period totals. Comparison exports include the saved scopes as provenance.
+
+Deploy compatible Java with migration V20 before frontend 0.12.0. No production
+deploy or database mutation was performed during development. See
+[manager instructions](../../../docs/PROFIT_REPORT_MANAGER_RU.md#склады-и-исключения-из-остатков)
+and [saved report contract](../../../docs/api/FOLIO_PROFIT_SAVED_REPORTS_FRONTEND.md).

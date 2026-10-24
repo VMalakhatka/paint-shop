@@ -3,14 +3,14 @@
  * Plugin Name: Lavka Reports
  * Description: WooCommerce admin reports. Report #1: No movement by warehouses (settings step).
  * Author: Volodymyr
- * Version: 0.11.0
+ * Version: 0.12.0
  * Text Domain: lavka-reports
  * Domain Path: /languages
  */
 
 if (!defined('ABSPATH')) exit;
 
-define('LAVR_VER', '0.11.0');
+define('LAVR_VER', '0.12.0');
 define('LAVR_FILE', __FILE__);
 define('LAVR_PATH', plugin_dir_path(__FILE__));
 define('LAVR_URL',  plugin_dir_url(__FILE__));
@@ -24,6 +24,7 @@ require_once LAVR_PATH . 'inc/class-ajax.php';
 require_once LAVR_PATH . 'inc/class-profit-report.php';
 require_once LAVR_PATH . 'inc/class-profit-history.php';
 require_once LAVR_PATH . 'inc/class-profit-tax-settings.php';
+require_once LAVR_PATH . 'inc/class-profit-scope-settings.php';
 require_once LAVR_PATH . 'inc/class-document-audit.php';
 require_once LAVR_PATH . 'inc/no-movement/class-settings.php';
 
@@ -33,6 +34,7 @@ add_action('plugins_loaded', function(){
     new Lavka_Reports_Profit_Report();
     new Lavka_Reports_Profit_History();
     new Lavka_Reports_Profit_Tax_Settings();
+    new Lavka_Reports_Profit_Scope_Settings();
     new Lavka_Reports_Document_Audit();
     new Lavka_Reports_NoMovement_Settings();
 });
