@@ -193,6 +193,10 @@ function lps_purchase_start(int $id, int $version): array {
         'period' => $profile['period'], 'productFilters' => $profile['productFilters'], 'movementFilters' => $profile['movementFilters'],
         'calculation' => $profile['calculation'], 'sort' => [['field' => 'sku', 'direction' => 'ASC']], 'page' => ['size' => 100],
     ]);
+    // Warm the contract check in its own request. A preview page then performs
+    // one analytics query instead of a capability probe plus a long query.
+    $capabilities = lps_product_analytics_v4_probe_capabilities($query);
+    if (is_wp_error($capabilities)) throw new RuntimeException($capabilities->get_error_message());
     $token = bin2hex(random_bytes(16));
     $state = ['previewVersion' => 6, 'scenario' => ['id' => $scenario['id'], 'uuid' => $scenario['uuid'], 'name' => $scenario['name'], 'version' => $scenario['version']],
         'supplierPriceVersions' => function_exists('lps_sp_active_versions') ? lps_sp_active_versions($profile['context']['sourceDatabase']) : [],

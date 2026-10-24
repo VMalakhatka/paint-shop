@@ -18,6 +18,7 @@ function lavka_get_global_warehouse_groups_revision() { return $GLOBALS['revisio
 function lavka_get_transit_warehouse_ids() { return $GLOBALS['transitIds'] ?? [9]; }
 function lavka_get_global_warehouse_groups() { return [['code' => 'group', 'name' => 'Group', 'warehouseIds' => [1, 7]]]; }
 function lps_product_analytics_v4_sanitize_query($query) { return $query; }
+function lps_product_analytics_v4_probe_capabilities($query) { $GLOBALS['capabilityQueries'][] = $query; return ['ok' => true]; }
 function lps_product_analytics_v4_request_java($path, $query) { $GLOBALS['queries'][] = $query; return $GLOBALS['response']; }
 function is_wp_error($value) { return false; }
 require __DIR__ . '/../inc/purchase-planning-model.php';
@@ -36,6 +37,7 @@ $scenario = ['id' => 1, 'uuid' => 'scenario-1', 'version' => 2, 'status' => 'act
         ['code' => 'group', 'receivingWarehouseId' => 7, 'leadTimeDays' => 5, 'targetDays' => 20, 'safetyDays' => 5]]]]];
 $token = lps_purchase_start(1, 2)['token'];
 check(lps_purchase_session($token)['query']['calculation']['availability']['enabled'] === true, 'Days of stockout are requested even with correction disabled');
+check(count($capabilityQueries) === 1, 'Start warms Java capabilities before the paginated preview');
 $user = 2;
 rejected(fn() => lps_purchase_session($token), 'Preview token must be user-bound');
 $user = 1;

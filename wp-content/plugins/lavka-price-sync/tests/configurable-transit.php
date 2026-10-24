@@ -10,6 +10,8 @@ function rest_sanitize_boolean($v) { return (bool)$v; }
 function wp_json_encode($v, $f = 0) { return json_encode($v, $f); }
 function wp_date($f) { return date($f); }
 function current_time($type) { return time(); }
+function get_transient($key) { return $GLOBALS['transients'][$key] ?? false; }
+function set_transient($key, $value, $ttl) { $GLOBALS['transients'][$key] = $value; return true; }
 function wp_send_json_error($data, $status = 400) { throw new InvalidArgumentException($data['message']); }
 function lavka_get_transit_warehouse_ids() { return $GLOBALS['ids']; }
 function lps_get_options() { return ['java_base_url' => $GLOBALS['server'] ?? 'fixture']; }
@@ -63,7 +65,7 @@ check(lps_purchase_transit($bad, $ids)['quantity'] === null, 'Independent snapsh
 $empty = ['calculationVersion' => 3, 'warehouseIds' => [], 'configurationRevision' => hash('sha256', '[]'), 'enabled' => false, 'status' => 'DISABLED', 'availableForNetworkPlanningQuantity' => 0];
 check(lps_purchase_transit($empty, [])['quantity'] === 0.0, 'Explicit disabled configuration');
 $group = ['code' => 'kyiv', 'name' => 'Kyiv', 'warehouseIds' => [1], 'receivingWarehouseId' => 1, 'leadTimeDays' => 0, 'targetDays' => 30, 'safetyDays' => 0];
-$row = ['sku' => 'TEST', 'inTransitStock' => $transit, 'dimensions' => ['currentSuppliers' => ['Kreul'], 'packageQuantity' => 10, 'minimumOrderQuantity' => 10],
+$row = ['sku' => 'TEST', 'inTransitStock' => $transit, 'internalTransferReservations' => ['calculationVersion' => 1, 'status' => 'CAPTURED', 'accounts' => []], 'dimensions' => ['currentSuppliers' => ['Kreul'], 'packageQuantity' => 10, 'minimumOrderQuantity' => 10],
     'metrics' => ['grossProfit' => 50], 'networkOrderPolicy' => ['status' => 'ALLOWED', 'orderAllowed' => true],
     'warehouseBreakdown' => [['warehouseId' => 1, 'metrics' => ['physicalQuantity' => 30, 'availableQuantity' => 30, 'regularSoldUnits' => 90, 'returnQuantity' => 0],
         'orderPolicy' => ['orderAllowed' => true, 'reserveAboveForecast' => 0, 'maximumStockLimited' => false]]]];
@@ -92,6 +94,7 @@ check(!is_wp_error($body), 'Modern response accepted');
 check(!isset($requests[0][1]['calculation']['transit']) && $requests[1][1]['calculation']['transit'] === lps_transit_configuration(), 'Probe then configurable query');
 $cap = lps_product_analytics_v4_request_java(LPS_PRODUCT_ANALYTICS_CAPABILITIES_PATH, $frozen);
 check($cap['transit']['warehouseIds'] === $ids, 'Same configuration applied to capabilities');
+check(count(array_filter($requests, static fn($request) => $request[0] === LPS_PRODUCT_ANALYTICS_CAPABILITIES_PATH)) === 2, 'Cache avoids a repeated capability probe across admin requests');
 $responses = [$response]; $responses[0]['rows'][0]['inTransitStock']['sources'][1]['generationId']++;
 check(is_wp_error(lps_product_analytics_v4_request_java(LPS_PRODUCT_ANALYTICS_QUERY_PATH, $frozen)), 'Row source must match context generation');
 $responses = [$response];
