@@ -89,6 +89,7 @@ final class RegistryPage
             'ScheduledDeliveryDate'=>'Estimated delivery date','ActualDeliveryDate'=>'Actual delivery date',
             'account_link_id'=>'Related account link ID', 'api_snapshot'=>'Folio header evidence',
             'Sender'=>'Sender','Recipient'=>'Recipient',
+            'ThirdPerson'=>'Third party',
             'EWDateCreated'=>'Carrier creation date','RecipientDateTime'=>'Actual delivery date',
             'PreferredDeliveryDate'=>'Estimated delivery date',
         ];
@@ -154,16 +155,25 @@ final class RegistryPage
         $this->select('purpose','Purpose',array_merge([''],Record::PURPOSES),$filter['purpose']);
         echo '<button class="button">'.self::e('Search').'</button></form>';
         $rows=(new Store())->listing($filter,$page); $more=count($rows)>30;
-        echo '<table class="widefat striped"><thead><tr>';
-        foreach (['TTN','Direction','Purpose','Folio partner code','Updated (UTC)'] as $label) echo '<th>'.self::e($label).'</th>';
+        echo '<p>'.self::e('Amounts are in UAH. Delivery payer does not prove payment. The NP date may be the document date; missing data is shown as a dash.').'</p>';
+        echo '<div class="pnpm-table-scroll" role="region" aria-label="'.esc_attr(self::t('Nova Poshta registry')).'" tabindex="0"><table class="widefat striped pnpm-registry-list"><thead><tr>';
+        foreach (['TTN','Recipient','Recipient city','Shipment / document date','Delivery, UAH','Declared value, UAH','Delivery payer','Folio partner code','Updated (UTC)'] as $label) echo '<th scope="col">'.self::e($label).'</th>';
         echo '</tr></thead><tbody>';
         foreach (array_slice($rows,0,30) as $row) {
-            echo '<tr><td><a href="'.esc_url(add_query_arg(['page'=>'pnpm-registry','id'=>$row['id']],admin_url('admin.php'))).'">'.esc_html($row['ttn']).'</a></td>';
-            foreach (['direction','purpose','partner_code','updated_at'] as $key) echo '<td>'.esc_html(self::labels()[$row[$key]]??$row[$key]).'</td>';
+            $summary=$row['summary'];
+            echo '<tr><td><a class="pnpm-ttn" href="'.esc_url(add_query_arg(['page'=>'pnpm-registry','id'=>$row['id']],admin_url('admin.php'))).'">'.esc_html($row['ttn']).'</a>';
+            foreach (['direction'=>'unknown','purpose'=>'unclassified'] as $key=>$empty) if ($row[$key]!==$empty) echo '<small>'.esc_html(self::labels()[$row[$key]]??$row[$key]).'</small>';
+            if ($summary['csv']) echo '<small>'.self::e('Contains CSV data (unverified)').'</small>';
+            echo '</td><td class="pnpm-recipient">'.esc_html($summary['recipient']?:'—');
+            if ($summary['contact']!=='') echo '<small>'.esc_html($summary['contact']).'</small>';
+            echo '</td><td>'.esc_html($summary['city']?:'—').'</td><td>'.esc_html($summary['date']?:'—').'</td>';
+            foreach (['delivery','declared'] as $key) echo '<td class="pnpm-amount">'.esc_html($summary[$key]===''?'—':number_format_i18n((float)$summary[$key],2)).'</td>';
+            echo '<td>'.esc_html(self::labels()[$summary['payer']]??($summary['payer']?:'—')).'</td>';
+            echo '<td>'.esc_html($row['partner_code']?:'—').'</td><td class="pnpm-updated">'.esc_html($row['updated_at']).'</td>';
             echo '</tr>';
         }
-        if (!$rows) echo '<tr><td colspan="5">'.self::e('No records match. Import data or change the filter.').'</td></tr>';
-        echo '</tbody></table><p>';
+        if (!$rows) echo '<tr><td colspan="9">'.self::e('No records match. Import data or change the filter.').'</td></tr>';
+        echo '</tbody></table></div><p>';
         foreach ([$page-1=>'Previous page',$page+1=>'Next page'] as $p=>$label) if ($p>=1 && ($p<$page || $more)) {
             echo '<a class="button" href="'.esc_url(add_query_arg(array_merge($filter,['page'=>'pnpm-registry','registry_page'=>$p]),admin_url('admin.php'))).'">'.self::e($label).'</a> ';
         }

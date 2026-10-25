@@ -1,5 +1,24 @@
 # Paint Nova Poshta Multishipping
 
+## Registry list details 0.10.2 — 2026-10-25
+
+The list now shows recipient/company and contact, recipient city, shipment/document
+date, delivery cost, declared value, delivery payer and the saved Folio partner code.
+Known direction/purpose appear beneath the TTN. Amounts are in UAH; missing fields
+use a dash, while an explicit zero remains zero. Payer is not proof of payment;
+the document date is not proof of physical handover. CSV fallback is labelled unverified.
+
+`Registry/Summary.php` projects the latest saved observation per source. Newer NP
+observations take precedence; missing fields fall back to the other NP source,
+then CSV. UUIDs are not shown as city/person names; CSV destination text is not
+guessed to be a city. Folio code is the manager's saved classification, never an
+automatic name/phone match. The list performs four bounded read queries, no carrier
+requests or writes. Existing imports work immediately without reimport or migration.
+The table scrolls horizontally on narrow screens; UK/RU translations and the
+[manager guide](../../../docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-registry) are updated.
+Validation: 13 standalone summary checks and 65 isolated registry checks with all
+external requests mocked. 0.10.2 requires the normal production deployment.
+
 ## Monthly history fix 0.10.1 — 2026-10-25
 
 Production read-only diagnosis confirmed that 0.10.0, schema 1 and an API key are
@@ -22,8 +41,9 @@ arbitrary provider error text is not exposed. No schema migration is needed.
 
 Until 0.10.1 is deployed, select June, July and subsequent months separately.
 After deployment, select the full period and continue reading/saving pages across
-months until the next-page button disappears. 0.10.1 is prepared locally; production
-still needs its normal scoped deployment. All 59 local registry checks pass, covering
+months until the next-page button disappears. 0.10.1 was subsequently observed on
+production on 25.10.2026; the 0.10.2 list enhancement above awaits deployment.
+All 59 original local registry checks passed, covering
 partial months, 31-day months, boundary replay, last-window completion, stale
 legacy cursors and the observed provider error. Full incoming coverage remains unproven.
 
@@ -32,7 +52,7 @@ legacy cursors and the observed provider error. Full incoming coverage remains u
 Stage 1 is implemented locally: WooCommerce → **Nova Poshta registry**, outgoing,
 incoming, customer returns, supplier purchases/returns and internal transfers.
 Registry TTNs do not require Woo orders. 0.10.0 was subsequently observed on
-production on 25.10.2026; the newer monthly fix above is pending deployment.
+production on 25.10.2026, followed by the monthly fix 0.10.1.
 The supported history start is **2026-06-01**.
 Manager steps: [registry guide](../../../docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-registry).
 

@@ -177,7 +177,19 @@ final class Store
         }
         if (!empty($filter['ttn'])) { $where.=' AND ttn=%s'; $args[]=Record::ttn($filter['ttn']); }
         $args[]=max(0,$page-1)*30;
-        return $wpdb->get_results($wpdb->prepare('SELECT * FROM '.$this->table()." WHERE $where ORDER BY id DESC LIMIT 31 OFFSET %d",...$args),ARRAY_A) ?: [];
+        $rows=$wpdb->get_results($wpdb->prepare('SELECT * FROM '.$this->table()." WHERE $where ORDER BY id DESC LIMIT 31 OFFSET %d",...$args),ARRAY_A) ?: [];
+        if (!$rows) return [];
+        $ids=implode(',',array_map('intval',array_column($rows,'id')));
+        $observations=[];
+        // Three bounded queries, one indexed latest-row lookup per shipment/source; never fetch full histories.
+        foreach (['np_documents','np_tracking','csv'] as $source) {
+            $sql='SELECT o.* FROM '.$this->table().' r JOIN '.$this->table('_observations').' o ON o.id=(SELECT newer.id FROM '.$this->table('_observations').
+                " newer WHERE newer.registry_id=r.id AND newer.source=%s ORDER BY newer.observed_at DESC,newer.id DESC LIMIT 1) WHERE r.id IN ($ids)";
+            foreach ($wpdb->get_results($wpdb->prepare($sql,$source),ARRAY_A)?:[] as $observation) $observations[$observation['registry_id']][]=$observation;
+        }
+        foreach ($rows as &$row) $row['summary']=Summary::fromObservations($observations[$row['id']]??[]);
+        unset($row);
+        return $rows;
     }
 
     public function detail(int $id): array

@@ -1374,3 +1374,21 @@ msgstr "Следующее чтение: с"
 #: src/Admin/RegistryPage.php src/Registry/Carrier.php
 msgid "Select the full period. The site reads one month at a time; after an empty page, continue to the next month."
 msgstr "Выберите весь период. Сайт читает по одному месяцу; после пустой страницы переходите к следующему месяцу."
+
+msgid "Shipment / document date"
+msgstr "Дата отправления / документа"
+
+msgid "Delivery, UAH"
+msgstr "Доставка, грн"
+
+msgid "Declared value, UAH"
+msgstr "Объявленная стоимость, грн"
+
+msgid "Amounts are in UAH. Delivery payer does not prove payment. The NP date may be the document date; missing data is shown as a dash."
+msgstr "Суммы в гривнах. Плательщик доставки не подтверждает факт оплаты. Дата НП может быть датой документа; отсутствующие данные обозначены прочерком."
+
+msgid "Contains CSV data (unverified)"
+msgstr "Есть данные из CSV (не проверено)"
+
+msgid "Third party"
+msgstr "Третье лицо"

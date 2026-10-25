@@ -2271,3 +2271,21 @@ msgstr ""
 #: src/Admin/RegistryPage.php src/Registry/Carrier.php
 msgid "Select the full period. The site reads one month at a time; after an empty page, continue to the next month."
 msgstr ""
+
+msgid "Shipment / document date"
+msgstr ""
+
+msgid "Delivery, UAH"
+msgstr ""
+
+msgid "Declared value, UAH"
+msgstr ""
+
+msgid "Amounts are in UAH. Delivery payer does not prove payment. The NP date may be the document date; missing data is shown as a dash."
+msgstr ""
+
+msgid "Contains CSV data (unverified)"
+msgstr ""
+
+msgid "Third party"
+msgstr ""

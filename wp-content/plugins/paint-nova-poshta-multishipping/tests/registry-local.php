@@ -166,6 +166,25 @@ try {
     ob_start(); (new RegistryPage())->render(); $html=ob_get_clean();
     $check(str_contains($html,'data-command="link_preview"') && str_contains($html,$ttn),'Registry detail renders');
     $check(!str_contains($html,'never-store') && !str_contains($html,'synthetic-registry-test-key'),'Secrets absent from rendered page');
+    $summaryTtn='99999999000004';
+    $summaryId=$store->transaction(fn()=>$store->observe($summaryTtn,'np_documents',[
+        'RecipientDescription'=>'Тестова компанія & партнери <script>alert(1)</script>','RecipientContactPerson'=>'Тестовий одержувач',
+        'CityRecipientDescription'=>'Київ','DateTime'=>'2026-10-20 10:00:00','Cost'=>'13217.00','CostOnSite'=>'1116.09','PayerType'=>'Sender',
+    ],'2026-10-21 10:00:00'));
+    $store->transaction(fn()=>$store->observe($summaryTtn,'np_tracking',['CostOnSite'=>'0','PayerType'=>'ThirdPerson'],'2026-10-22 10:00:00'));
+    // A late-arriving old snapshot must not override newer evidence or supply its missing city.
+    $store->transaction(fn()=>$store->observe($summaryTtn,'np_tracking',['CostOnSite'=>'999','CityRecipient'=>'Wrong old city'],'2026-10-20 10:00:00'));
+    $service->run('classify',['id'=>$summaryId,'revision'=>1,'direction'=>'outgoing','purpose'=>'sale','partner_code'=>'TEST']);
+    $queries=[]; $capture=static function($sql) use (&$queries) { $queries[]=$sql; return $sql; };
+    $httpBefore=count($http); add_filter('query',$capture);
+    try { $list=$store->listing(['ttn'=>$summaryTtn]); } finally { remove_filter('query',$capture); }
+    $check(count($list)===1 && $list[0]['summary']['city']==='Київ' && $list[0]['summary']['date']==='20.10.2026','Listing projects existing source fields; skips stale tracking city');
+    $check($list[0]['summary']['delivery']==='0' && $list[0]['summary']['declared']==='13217.00' && $list[0]['summary']['payer']==='ThirdPerson','Latest observation time wins over insertion order; amounts separate');
+    $check($list[0]['partner_code']==='TEST' && $list[0]['summary']['contact']==='Тестовий одержувач','Manager Folio code and recipient contact retained');
+    $check(count($http)===$httpBefore && count($queries)===4 && count(array_filter($queries,static fn($sql)=>str_starts_with($sql,'SELECT ')))===4,'Listing uses four bounded reads and no HTTP or writes');
+    $_GET=['page'=>'pnpm-registry']; ob_start(); (new RegistryPage())->render(); $index=ob_get_clean();
+    $check(str_contains($index,'Київ') && str_contains($index,'20.10.2026') && str_contains($index,'TEST') && str_contains($index,number_format_i18n(13217,2)),'Requested summary fields render');
+    $check(!str_contains($index,'<script>alert(1)</script>') && str_contains($index,'компанія &amp; партнери'),'Carrier text sanitized and escaped in list');
     if ($dir=getenv('PNPM_REGISTRY_FIXTURE_DIR')) {
         foreach (['detail','index'] as $view) {
             switch_to_locale('uk'); $_GET=$view==='detail'?['page'=>'pnpm-registry','id'=>$id]:['page'=>'pnpm-registry'];
