@@ -29,7 +29,7 @@
             if (next) { next.hidden = true; form.elements.previous.value = ''; }
         });
         const request = async (command, continuation = false) => {
-            if (busy || !form.reportValidity()) return;
+            if (busy || form.dataset.pickerBlocked === '1' || !form.reportValidity()) return;
             if (command === 'confirm' && (!token || !agreed.checked)) return;
             if (command === 'history' && !continuation) { form.elements.previous.value = ''; if (next) next.hidden = true; }
             const savedToken = token;
@@ -38,6 +38,7 @@
             if (command === 'confirm') body.set('token', token);
             else invalidate();
             busy = true;
+            form.dataset.busy = '1';
             const controls = [...form.querySelectorAll('input,select,textarea,button')];
             const previousDisabled = controls.map(control => control.disabled);
             controls.forEach(control => { control.disabled = true; });
@@ -69,6 +70,7 @@
                 message.textContent = error.message || cfg.failure;
             } finally {
                 busy = false;
+                delete form.dataset.busy;
                 controls.forEach((control, i) => { control.disabled = previousDisabled[i]; });
                 if (apply) apply.disabled = !token || !agreed.checked;
             }

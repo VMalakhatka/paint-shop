@@ -17,9 +17,9 @@ $store=new Store(); $service=new Service(); $ttn='99999999000001'; $ttn2='999999
 $key='pnpm_registry_schema'; $old_schema=get_option($key,null);
 // Exercise real migration and transactions against isolated disposable tables, not local business data.
 $wpdb->prefix=$prefix.'pnpmtest_';
-$http=[]; $documentReads=[]; $mail=0; $mode='good'; $status='1'; $partner='TEST';
+$http=[]; $documentReads=[]; $mail=0; $mode='good'; $status='1'; $partner='TEST'; $catalogMode='good';
 add_filter('pre_wp_mail', static function() use (&$mail) { $mail++; return false; },PHP_INT_MAX);
-$mock=static function($pre,$args,$url) use (&$http,&$documentReads,&$mode,&$status,&$partner,$ttn,$ttn2) {
+$mock=static function($pre,$args,$url) use (&$http,&$documentReads,&$mode,&$status,&$partner,&$catalogMode,$ttn,$ttn2) {
     $http[]=$url;
     $response=static fn($body)=>['headers'=>[],'body'=>wp_json_encode($body),'response'=>['code'=>200,'message'=>'OK']];
     if (str_starts_with($url,'https://api.novaposhta.ua/')) {
@@ -39,14 +39,27 @@ $mock=static function($pre,$args,$url) use (&$http,&$documentReads,&$mode,&$stat
         return $response(['success'=>true,'data'=>[['Number'=>$mode==='wrong'?$ttn2:$ttn,'StatusCode'=>$status,'Status'=>'Synthetic status',
             'PayerType'=>'Recipient','CostOnSite'=>'70','DocumentCost'=>'149','TrackingUpdateDate'=>'2026-06-01 12:30:00','ApiKey'=>'never-store','TrackingURL'=>'https://example.invalid/secret']]]);
     }
+    parse_str(parse_url($url,PHP_URL_QUERY)?:'',$query);
+    if (str_contains($url,'/ref/warehouses')) return $response([['code'=>7,'name'=>'Тестовий склад']]);
+    if (str_contains($url,'/admin/folio/partners')) {
+        if (($query['types']??'')!=='all' || ($query['limit']??'')!=='20') throw new RuntimeException('Bounded partner search including suppliers');
+        return $response(['items'=>[['id'=>'TEST','shortName'=>'TEST','name'=>'Тестовий клієнт']]]);
+    }
+    if (str_contains($url,'/admin/folio/customer-documents?')) {
+        if (($query['partnerShortName']??'')!=='TEST' || ($query['limit']??'')!=='50') throw new RuntimeException('Use saved shipment partner and bounded page');
+        $row=['documentType'=>$query['types'],'documentId'=>123,'documentNumber'=>'50','documentNumberSuffix'=>'a','documentDate'=>'2026-06-01T12:00:00','warehouseId'=>7,'returnDocument'=>false,'totalAmount'=>'149.00'];
+        return $response(['ok'=>true,'partner'=>['shortName'=>$catalogMode==='wrong_partner'?'OTHER':'TEST'],
+            'documents'=>[$row,array_merge($row,['documentId'=>124,'warehouseId'=>8]),array_merge($row,['documentId'=>125,'returnDocument'=>true])],
+            'hasMore'=>!isset($query['cursor']),'nextCursor'=>$catalogMode==='bad_cursor'?'':'next-page']);
+    }
     if (str_contains($url,'/admin/folio/customer-documents/')) {
         $type=str_contains($url,'/EXPENSE/')?'EXPENSE':'ACCOUNT';
         return $response(['ok'=>true,'partner'=>['shortName'=>$partner],'document'=>['documentType'=>$type,'documentId'=>123,
             'documentNumber'=>'50','documentNumberSuffix'=>'a','documentDate'=>'2026-06-01T12:00:00.000','returnDocument'=>false,'warehouseId'=>7,
             'items'=>[['sku'=>'not-needed']],'linkedPayments'=>[['private'=>'not-needed']]]]);
     }
-    if (str_contains($url,'/admin/folio/receipt-catalogue')) return $response(['ok'=>true,'warehouseId'=>7,'date'=>'2026-06-01',
-        'documents'=>[['id'=>123,'number'=>'50a','date'=>[2026,6,1],'warehouseId'=>7,'type'=>'receipt','accounted'=>true]],'hasMore'=>false]);
+    if (str_contains($url,'/admin/folio/receipt-catalogue')) return $response(['ok'=>true,'warehouseId'=>7,'date'=>$query['date'],
+        'documents'=>[['id'=>123,'number'=>'50a','date'=>array_map('intval',explode('-',$query['date'])),'warehouseId'=>7,'type'=>'receipt','accounted'=>true]],'hasMore'=>false]);
     return new WP_Error('blocked','Unexpected HTTP blocked');
 };
 add_filter('pre_http_request',$mock,PHP_INT_MAX,3);
@@ -185,16 +198,35 @@ try {
     $_GET=['page'=>'pnpm-registry']; ob_start(); (new RegistryPage())->render(); $index=ob_get_clean();
     $check(str_contains($index,'Київ') && str_contains($index,'20.10.2026') && str_contains($index,'TEST') && str_contains($index,number_format_i18n(13217,2)),'Requested summary fields render');
     $check(!str_contains($index,'<script>alert(1)</script>') && str_contains($index,'компанія &amp; партнери'),'Carrier text sanitized and escaped in list');
+    $beforeCatalog=$store->detail($summaryId);
+    $check($service->run('partners',['q'=>'те'])['items'][0]['name']==='Тестовий клієнт','Partner selector provides short code and full name');
+    $countHttp=count($http); $check($service->run('partners',['q'=>'т'])['items']===[] && count($http)===$countHttp,'Short query never calls Java');
+    $check($service->run('warehouses',[])['items'][0]['code']==='7','Shared warehouse directory normalized');
+    $query=['id'=>$summaryId,'revision'=>2,'type'=>'ACCOUNT','warehouse'=>'7','date_from'=>'2026-06-01','date_to'=>'2026-06-02','partner'=>'UNTRUSTED'];
+    $documents=$service->run('documents',$query);
+    $check(count($documents['items'])===1 && $documents['items'][0]['number']==='50a' && $documents['cursor']==='next-page','Documents scoped to saved partner, warehouse and non-return type');
+    $check($service->run('documents',$query+['cursor'=>'next-page'])['cursor']==='','Customer pagination terminates');
+    $catalogMode='wrong_partner'; $reject(fn()=>$service->run('documents',$query),'Different partner response rejected');
+    $catalogMode='bad_cursor'; $reject(fn()=>$service->run('documents',$query),'Broken continuation rejected'); $catalogMode='good';
+    $reject(fn()=>$service->run('documents',array_merge($query,['revision'=>1])),'Stale registry selection rejected');
+    $reject(fn()=>$service->run('documents',array_merge($query,['warehouse'=>'0'])),'Warehouse required');
+    $reject(fn()=>$service->run('documents',array_merge($query,['date_to'=>'2026-05-31'])),'Reversed dates rejected');
+    $reject(fn()=>$service->run('documents',array_merge($query,['type'=>'RETURN'])),'Returns keep manual verification');
+    $receipts=$service->run('documents',array_merge($query,['type'=>'RECEIPT']));
+    $check($receipts['receipt'] && $receipts['cursor']==='2026-06-02|0','Receipt catalogue advances one day without supplier claim');
+    $check($service->run('documents',array_merge($query,['type'=>'RECEIPT','cursor'=>$receipts['cursor']]))['cursor']==='','Receipt period completes');
+    $reject(fn()=>$service->run('documents',array_merge($query,['type'=>'RECEIPT','cursor'=>'2026-06-03|0'])),'Receipt cursor cannot leave selected period');
+    $check($store->detail($summaryId)===$beforeCatalog,'Selectors do not change registry records, observations or links');
     if ($dir=getenv('PNPM_REGISTRY_FIXTURE_DIR')) {
         foreach (['detail','index'] as $view) {
-            switch_to_locale('uk'); $_GET=$view==='detail'?['page'=>'pnpm-registry','id'=>$id]:['page'=>'pnpm-registry'];
+            switch_to_locale('uk'); $_GET=$view==='detail'?['page'=>'pnpm-registry','id'=>$summaryId]:['page'=>'pnpm-registry'];
             ob_start(); (new RegistryPage())->render(); $body=ob_get_clean();
             $config=['url'=>'/ajax','nonce'=>'synthetic','page'=>'/registry-index.html','loading'=>RegistryPage::t('Checking…'),
                 'failure'=>RegistryPage::t('The request failed. Reload and check the saved result before repeating.'),
                 'preview'=>RegistryPage::t('Preview only. Check the data and confirm below.'),'saved'=>RegistryPage::t('Saved to the site registry.'),
-                'empty'=>'Synthetic empty page','more'=>'Synthetic next page','labels'=>RegistryPage::labels()];
+                'empty'=>'Synthetic empty page','more'=>'Synthetic next page','labels'=>RegistryPage::labels(),'picker'=>RegistryPage::pickerText()];
             restore_previous_locale();
-            file_put_contents($dir.'/registry-'.$view.'.html','<!doctype html><html lang="uk"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font:16px/1.5 system-ui;background:#f0f0f1;margin:24px}input,button,select,textarea{font:inherit}table{width:100%;text-align:left}button{padding:6px 12px}td{padding:8px}h1{font-size:28px}</style><style>'.file_get_contents(PNPM_DIR.'assets/registry.css').'</style>'.$body.'<script>window.pnpmRegistry='.wp_json_encode($config).';</script><script>'.file_get_contents(PNPM_DIR.'assets/registry.js').'</script></html>');
+            file_put_contents($dir.'/registry-'.$view.'.html','<!doctype html><html lang="uk"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font:16px/1.5 system-ui;background:#f0f0f1;margin:24px}input,button,select,textarea{font:inherit}table{width:100%;text-align:left}button{padding:6px 12px}td{padding:8px}h1{font-size:28px}</style><style>'.file_get_contents(PNPM_DIR.'assets/registry.css').'</style>'.$body.'<script>window.pnpmRegistry='.wp_json_encode($config).';</script><script>'.file_get_contents(PNPM_DIR.'assets/registry.js').'</script><script>'.file_get_contents(PNPM_DIR.'assets/registry-picker.js').'</script></html>');
         }
     }
     $check($mail===0,'Registry sent no email');

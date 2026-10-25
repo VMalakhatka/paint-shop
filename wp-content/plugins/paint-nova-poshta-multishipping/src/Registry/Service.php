@@ -17,6 +17,14 @@ final class Service
     {
         self::authorize();
         if (!Schema::ready()) throw new \RuntimeException('Install the registry tables first.');
+        // Directory reads never create previews, consume tokens or clean registry data.
+        if ($command==='partners') return (new Catalog())->partners($input);
+        if ($command==='warehouses') return (new Catalog())->warehouses();
+        if ($command==='documents') {
+            $row=$this->store->find((int)($input['id']??0));
+            if ((int)($input['revision']??0)!==(int)$row['revision']) throw new \RuntimeException('The record changed. Reload before saving.');
+            return (new Catalog())->documents($input,$row);
+        }
         $this->store->cleanup();
         if ($command==='classify') return $this->store->classify((int)($input['id']??0),(int)($input['revision']??0),$input);
         if ($command==='unlink') return $this->store->unlink((int)($input['id']??0),(int)($input['revision']??0),(int)($input['link']??0),(string)($input['reason']??''));

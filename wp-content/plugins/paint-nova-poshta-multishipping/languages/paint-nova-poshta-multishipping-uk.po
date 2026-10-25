@@ -2125,3 +2125,78 @@ msgstr "Є дані з CSV (не перевірено)"
 
 msgid "Third party"
 msgstr "Третя особа"
+
+msgid "Choose a Folio document"
+msgstr "Вибрати документ ФОЛІО"
+
+msgid "Choose a document"
+msgstr "Виберіть документ"
+
+msgid "Choose a partner from the search results or clear the search."
+msgstr "Виберіть контрагента з результатів або очистьте пошук."
+
+msgid "Choose the saved partner, warehouse, period and document. Check the preview and confirm the link. Folio documents are not changed."
+msgstr "Використайте збереженого контрагента, виберіть склад, період і документ. Перевірте перегляд і підтвердьте зв’язок. Документи ФОЛІО не змінюються."
+
+msgid "Document details / manual entry"
+msgstr "Реквізити документа / ручне введення"
+
+msgid "Find Folio partner (code or name)"
+msgstr "Знайти контрагента ФОЛІО (код або ім’я)"
+
+msgid "Folio returned an invalid selection list."
+msgstr "ФОЛІО повернуло некоректний список для вибору."
+
+msgid "Folio selection is unavailable. Try loading again."
+msgstr "Список ФОЛІО недоступний. Спробуйте завантажити ще раз."
+
+msgid "For an expense document, first confirm and select its account. Receipts require a manual supplier check."
+msgstr "Для видаткової спочатку підтвердьте та виберіть її рахунок. Для прибуткової перевірте постачальника вручну."
+
+msgid "Invalid document page cursor."
+msgstr "Некоректний перехід до наступної сторінки документів."
+
+msgid "Load documents"
+msgstr "Завантажити документи"
+
+msgid "Load next page / day"
+msgstr "Завантажити наступну сторінку / день"
+
+msgid "Load warehouses"
+msgstr "Завантажити склади"
+
+msgid "More pages remain. Continue loading or narrow the period."
+msgstr "Є наступні сторінки. Продовжте завантаження або звузьте період."
+
+msgid "No matches on this page."
+msgstr "На цій сторінці збігів немає."
+
+msgid "Receipts are listed by warehouse and day. Confirm the supplier manually; the list does not identify the supplier."
+msgstr "Прибуткові показано за складом і днем. Підтвердьте постачальника вручну: список не визначає постачальника."
+
+msgid "Save the classification before choosing a document."
+msgstr "Збережіть класифікацію перед вибором документа."
+
+msgid "Select a Folio warehouse."
+msgstr "Виберіть склад ФОЛІО."
+
+msgid "Select a valid period of up to 366 days."
+msgstr "Виберіть коректний період до 366 днів."
+
+msgid "Select and save the shipment partner first."
+msgstr "Спочатку виберіть і збережіть контрагента посилки."
+
+msgid "Selected document:"
+msgstr "Вибраний документ:"
+
+msgid "Selection changed. Load the document list again."
+msgstr "Вибір змінено. Завантажте список документів знову."
+
+msgid "Use manual verification for returns or documents unavailable in the list."
+msgstr "Для повернень або відсутніх у списку документів використайте ручну перевірку."
+
+msgid "Clear"
+msgstr "Очистити"
+
+msgid "Warehouse"
+msgstr "Склад"

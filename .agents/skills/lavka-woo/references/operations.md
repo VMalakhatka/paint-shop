@@ -532,3 +532,12 @@ the whole import unless it is the last window. 0.10.0 requires manual monthly
 selection. Do not infer incoming/history completeness from a successful empty
 response. Canonical contract: `docs/api/NOVA_POSHTA_SHIPMENT_CONTRACT.md`; manager
 steps: `docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-registry`.
+
+NP Folio selectors (code/local checks, 2026-10-25): `Registry/Catalog.php` reuses
+the customer partner directory, mailing warehouse directory and existing customer
+documents/receipt catalogue APIs. Never infer a supplier from a receipt list:
+it has no supplier identity. Warehouse filtering follows customer pagination, so
+an empty filtered page is not completion. Selection fills preview fields only;
+retain persisted-partner/revision checks, explicit link confirmation and account
+before expense. No Java change or Folio write is needed for 0.10.3. Manager steps:
+`docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-registry`; technical scope: NP README.

@@ -1,5 +1,34 @@
 # Paint Nova Poshta Multishipping
 
+## Folio selectors 0.10.3 — 2026-10-25
+
+The classification form now searches partners by code/name using the same
+`/admin/folio/partners` directory as customer editing (two characters, 20 results,
+all types including suppliers). Selection shows short code plus full name; typing
+without selecting cannot accidentally save the previous code. Save classification
+before linking a document. The linking form is visible above carrier refresh.
+
+`Registry/Catalog.php` reuses the existing `lps_java_get` gateway and routes:
+`/ref/warehouses` from the mailing workflow; `/admin/folio/customer-documents`
+for ACCOUNT/EXPENSE; `/admin/folio/receipt-catalogue` for RECEIPT. No Java change
+or migration. Admin capability pair and registry nonce protect all commands;
+lookups skip even registry cleanup and never write Folio, NP, links or profiles.
+Document reads use the persisted shipment partner and current revision, not a
+browser-supplied partner. Customer API pages (50 rows) are filtered by warehouse
+after pagination; a page with no matching warehouse is not end-of-list. Receipts
+use one page/day per explicit click across the selected range (up to 366 days).
+Their API lacks supplier identity: retain explicit supplier evidence, never
+present the warehouse list as supplier-filtered. Returns remain manual.
+
+Picking a document fills the existing preview fields; it does not link anything.
+Exact header verification, explicit preview/confirm, revision checks and account
+before expense remain unchanged. Manual entry remains available. Stale search
+responses are ignored; changed filters/selection invalidate the preview. Source
+failure has an explicit retry for reads; mutations are never retried automatically.
+UK/RU UI and [manager instructions](../../../docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-registry)
+are updated. Local registry checks: 80 with external HTTP mocked. Requires the
+normal scoped WordPress deployment; no production writes were performed.
+
 ## Registry list details 0.10.2 — 2026-10-25
 
 The list now shows recipient/company and contact, recipient city, shipment/document

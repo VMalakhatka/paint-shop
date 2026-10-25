@@ -2289,3 +2289,78 @@ msgstr ""
 
 msgid "Third party"
 msgstr ""
+
+msgid "Choose a Folio document"
+msgstr ""
+
+msgid "Choose a document"
+msgstr ""
+
+msgid "Choose a partner from the search results or clear the search."
+msgstr ""
+
+msgid "Choose the saved partner, warehouse, period and document. Check the preview and confirm the link. Folio documents are not changed."
+msgstr ""
+
+msgid "Document details / manual entry"
+msgstr ""
+
+msgid "Find Folio partner (code or name)"
+msgstr ""
+
+msgid "Folio returned an invalid selection list."
+msgstr ""
+
+msgid "Folio selection is unavailable. Try loading again."
+msgstr ""
+
+msgid "For an expense document, first confirm and select its account. Receipts require a manual supplier check."
+msgstr ""
+
+msgid "Invalid document page cursor."
+msgstr ""
+
+msgid "Load documents"
+msgstr ""
+
+msgid "Load next page / day"
+msgstr ""
+
+msgid "Load warehouses"
+msgstr ""
+
+msgid "More pages remain. Continue loading or narrow the period."
+msgstr ""
+
+msgid "No matches on this page."
+msgstr ""
+
+msgid "Receipts are listed by warehouse and day. Confirm the supplier manually; the list does not identify the supplier."
+msgstr ""
+
+msgid "Save the classification before choosing a document."
+msgstr ""
+
+msgid "Select a Folio warehouse."
+msgstr ""
+
+msgid "Select a valid period of up to 366 days."
+msgstr ""
+
+msgid "Select and save the shipment partner first."
+msgstr ""
+
+msgid "Selected document:"
+msgstr ""
+
+msgid "Selection changed. Load the document list again."
+msgstr ""
+
+msgid "Use manual verification for returns or documents unavailable in the list."
+msgstr ""
+
+msgid "Clear"
+msgstr ""
+
+msgid "Warehouse"
+msgstr ""

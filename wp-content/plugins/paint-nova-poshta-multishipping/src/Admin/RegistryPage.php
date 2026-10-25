@@ -23,14 +23,28 @@ final class RegistryPage
             if (($_GET['page']??'')!=='pnpm-registry' || !self::allowed()) return;
             wp_enqueue_style('pnpm-registry',PNPM_URL.'assets/registry.css',[],PNPM_VERSION);
             wp_enqueue_script('pnpm-registry',PNPM_URL.'assets/registry.js',[],PNPM_VERSION,true);
+            wp_enqueue_script('pnpm-registry-picker',PNPM_URL.'assets/registry-picker.js',['pnpm-registry'],PNPM_VERSION,true);
             wp_localize_script('pnpm-registry','pnpmRegistry',['url'=>admin_url('admin-ajax.php'),'nonce'=>wp_create_nonce('pnpm_registry'),
                 'page'=>admin_url('admin.php?page=pnpm-registry'),'loading'=>self::t('Checking…'),
                 'failure'=>self::t('The request failed. Reload and check the saved result before repeating.'),
                 'saved'=>self::t('Saved to the site registry.'),'preview'=>self::t('Preview only. Check the data and confirm below.'),
                 'empty'=>self::t('Empty page received. This only ends the selected account document list; incoming and historical events are not proven complete.'),
                 'more'=>self::t('Page saved. Continue with the next page or month until the selected period is finished.'),
-                'labels'=>self::labels()]);
+                'labels'=>self::labels(),'picker'=>self::pickerText()]);
         });
+    }
+
+    public static function pickerText(): array
+    {
+        return array_map([self::class,'t'],[
+            'empty'=>'No matches on this page.','more'=>'More pages remain. Continue loading or narrow the period.',
+            'selected'=>'Selected document:','choose'=>'Choose a document','savedPartner'=>'Save the classification before choosing a document.',
+            'receipt'=>'Receipts are listed by warehouse and day. Confirm the supplier manually; the list does not identify the supplier.',
+            'manual'=>'Use manual verification for returns or documents unavailable in the list.',
+            'selectPartner'=>'Choose a partner from the search results or clear the search.',
+            'account'=>'Confirm and select the related account before linking an expense document.',
+            'changed'=>'Selection changed. Load the document list again.',
+        ]);
     }
 
     public function ajax(): void
@@ -186,10 +200,11 @@ final class RegistryPage
         echo '<section class="pnpm-box"><h3>'.self::e('Shipment classification').'</h3>';
         $this->form('classify',$row);
         $this->select('direction','Direction',Record::DIRECTIONS,$row['direction']); $this->select('purpose','Purpose',Record::PURPOSES,$row['purpose']);
-        $this->input('partner_code','Folio partner code','text',$row['partner_code']); $this->input('related_ttn','Original / related TTN','text',$row['related_ttn']); $this->input('note','Manager note','text',(string)$row['note']);
+        echo '<div class="pnpm-partner-picker"><label>'.self::e('Find Folio partner (code or name)').'<input type="search" class="pnpm-partner-search" autocomplete="off" maxlength="100"></label>';
+        echo '<input type="hidden" name="partner_code" value="'.esc_attr($row['partner_code']).'"><p class="pnpm-partner-current">'.self::e('Folio partner code').': <strong>'.esc_html($row['partner_code']?:'—').'</strong></p>';
+        echo '<button type="button" class="button pnpm-partner-clear">'.self::e('Clear').'</button><div class="pnpm-partner-results" role="status" aria-live="polite"></div></div>';
+        $this->input('related_ttn','Original / related TTN','text',$row['related_ttn']); $this->input('note','Manager note','text',(string)$row['note']);
         $this->saveEnd(); echo '</section>';
-        echo '<section class="pnpm-box"><h3>'.self::e('Refresh carrier data').'</h3>';
-        $this->form('tracking'); $this->input('ttn','TTN','text',$row['ttn'],true); $this->input('phone','Sender or recipient phone (optional)','tel'); $this->previewEnd(); echo '</section>';
         echo '<section class="pnpm-box"><h3>'.self::e('Confirmed Folio links').'</h3><p>'.self::e('A link is evidence of an association, not a payment or cost allocation. The same TTN may have several documents.').'</p>';
         $accounts=[];
         foreach ($row['links'] as $link) {
@@ -205,17 +220,30 @@ final class RegistryPage
             echo '</details>';
         }
         if (!$row['links']) echo '<p>'.self::e('No confirmed links yet.').'</p>';
-        echo '<details><summary>'.self::e('Add a Folio document link').'</summary><p>'.self::e('Enter the printed number and date. API verification also requires the internal Folio ID. For a receipt, the API verifies the header only; confirm the supplier in the evidence field.').'</p>';
+        echo '<h3>'.self::e('Add a Folio document link').'</h3><p>'.self::e('Choose the saved partner, warehouse, period and document. Check the preview and confirm the link. Folio documents are not changed.').'</p>';
+        if (!$row['partner_code']) echo '<p>'.self::e('Select and save the shipment partner first.').'</p>';
         $this->form('link_preview',$row);
-        $this->select('type','Document type',Folio::TYPES,'ACCOUNT'); $this->select('role','Document role',Folio::ROLES,'sale_account');
+        $type=$row['purpose']==='purchase'?'RECEIPT':(in_array($row['purpose'],['customer_return','supplier_return'],true)?'RETURN':'ACCOUNT');
+        $role=['RECEIPT'=>'purchase','RETURN'=>$row['purpose'],'ACCOUNT'=>'sale_account'][$type];
+        $this->select('type','Document type',Folio::TYPES,$type); $this->select('role','Document role',Folio::ROLES,$role);
         $this->select('verification','Verification method',['api','manual'],'api');
+        echo '<label>'.self::e('Folio partner code').'<input name="partner" value="'.esc_attr($row['partner_code']).'" readonly required></label>';
+        echo '<fieldset class="pnpm-document-picker"><legend>'.self::e('Choose a Folio document').'</legend><div class="pnpm-picker-filters">';
+        echo '<label>'.self::e('Warehouse').'<select name="picker_warehouse"><option value="">—</option></select></label><button type="button" class="button pnpm-warehouses">'.self::e('Load warehouses').'</button>';
+        $this->input('date_from','From date','date',current_time('Y-m-01')); $this->input('date_to','To date','date',current_time('Y-m-d'));
+        echo '<button type="button" class="button pnpm-documents-load">'.self::e('Load documents').'</button></div><p class="pnpm-picker-message" role="status" aria-live="polite"></p>';
+        echo '<label>'.self::e('Choose a document').'<select class="pnpm-document-select" size="6" aria-label="'.esc_attr(self::t('Choose a document')).'"></select></label>';
+        echo '<button type="button" class="button pnpm-documents-more" hidden>'.self::e('Load next page / day').'</button><p>'.self::e('For an expense document, first confirm and select its account. Receipts require a manual supplier check.').'</p></fieldset>';
+        echo '<p class="pnpm-document-selected" role="status"></p><details class="pnpm-manual-fields"><summary>'.self::e('Document details / manual entry').'</summary><div class="pnpm-picker-filters">';
         $this->input('document_id','Internal Folio document ID (optional for manual verification)');
         $this->input('number','Document number','text','',true); $this->input('date','Document date','date','',true);
-        $this->input('partner','Folio partner code','text',$row['partner_code'],true); $this->input('warehouse','Folio warehouse code');
-        echo '<label>'.self::e('Related account for the expense document').'<select name="account_link_id"><option value="">—</option>';
+        $this->input('warehouse','Folio warehouse code'); echo '</div></details>';
+        echo '<p class="pnpm-link-requirement" role="status"></p><label>'.self::e('Related account for the expense document').'<select name="account_link_id"><option value="">—</option>';
         foreach ($accounts as $id=>$label) echo '<option value="'.esc_attr($id).'">'.esc_html($label).'</option>';
         echo '</select></label>';
-        $this->input('evidence','Verification evidence'); $this->previewEnd(); echo '</details></section>';
+        $this->input('evidence','Verification evidence'); $this->previewEnd(); echo '</section>';
+        echo '<section class="pnpm-box"><h3>'.self::e('Refresh carrier data').'</h3>';
+        $this->form('tracking'); $this->input('ttn','TTN','text',$row['ttn'],true); $this->input('phone','Sender or recipient phone (optional)','tel'); $this->previewEnd(); echo '</section>';
         echo '<section class="pnpm-box"><h3>'.self::e('Carrier observations').'</h3><p>'.self::e('Latest 100 changed responses, newest observation first. Unavailable fields remain unknown. Read times are UTC, not the shipment event time.').'</p>';
         foreach ($row['observations'] as $i=>$observation) {
             echo '<details'.($i===0?' open':'').'><summary>'.esc_html((self::labels()[$observation['source']]??$observation['source']).' · '.$observation['observed_at'].' UTC').'</summary>';
