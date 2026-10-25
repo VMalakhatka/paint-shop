@@ -59,7 +59,7 @@
                 } else if (command === 'confirm' && form.dataset.command === 'history') {
                     invalidate(); form.elements.previous.value = savedToken;
                     next.hidden = !data.scope?.next_page;
-                    message.textContent = data.scope?.empty_page ? cfg.empty : cfg.more;
+                    message.textContent = data.scope?.next_page ? cfg.more : cfg.empty;
                 } else {
                     invalidate(); message.textContent = cfg.saved;
                     window.location.assign(cfg.page + (data.id ? '&id=' + encodeURIComponent(data.id) : ''));

@@ -523,3 +523,12 @@ S3 proof, shared lock or Folio preview/apply. The manager workflow is documented
 Confirmed by code and owner decisions 2026-10-22: `lavka-price-sync` manager operations use `/admin/folio/manager/*`, only Paint_Ua. Four card operations use preview/apply with shared locks; BASE and assembly return results without creating Folio invoices. Description inserts missing keys then updates; assembly sums component costs by owner decision. Full technical assembly input is implemented; simplified manager columns and reference comparison are pending. Operator/source-of-truth: `docs/FOLIO_MANAGER_OPERATIONS.md`; Java API contract of the same name. Production not deployed.
 
 Folio assembly UI (2026-10-24): `lps-folio-assembly` is a separate Lavka Folio submenu, with fixed ASSEMBLY input and calculation/export controls. `lps-folio-manager` retains five card/selection operations; filter shared history by operation without migrating records. Future Folio invoice generation belongs to the assembly screen but is not implemented or authorized by this navigation change. Java calculation and Paint_Ua-only scope are unchanged. See `docs/FOLIO_MANAGER_OPERATIONS.md`.
+
+Nova Poshta history (live read-only evidence, 2026-10-25): `InternetDocument.getDocumentList`
+rejects a single range over three months even when pagination is enabled. The owner
+is `paint-nova-poshta-multishipping/src/Registry`: 0.10.1 walks calendar months and
+pages, preserving the selected overall range. An empty page ends one month, not
+the whole import unless it is the last window. 0.10.0 requires manual monthly
+selection. Do not infer incoming/history completeness from a successful empty
+response. Canonical contract: `docs/api/NOVA_POSHTA_SHIPMENT_CONTRACT.md`; manager
+steps: `docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-registry`.

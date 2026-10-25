@@ -47,15 +47,28 @@ final class Service
         }
         if ($command==='history') {
             $page=1; $previous=[];
+            $from=(string)($input['from']??''); $to=(string)($input['to']??'');
+            Carrier::period($from,$to);
+            $windowFrom=$from;
             if (!empty($input['previous'])) {
                 $previous=$this->store->result((string)$input['previous']);
                 if (($previous['source']??'')!=='np_documents' || empty($previous['scope']['next_page'])
                     || ($previous['scope']['from']??'')!==($input['from']??'') || ($previous['scope']['to']??'')!==($input['to']??'')
+                    || empty($previous['scope']['next_from'])
                     || !hash_equals($previous['account']??'', $this->carrier->fingerprint())) throw new \RuntimeException('Start a new import for this period.');
                 $page=(int)$previous['scope']['next_page'];
+                $windowFrom=$previous['scope']['next_from'];
             }
-            $payload=$this->carrier->documents((string)($input['from']??''),(string)($input['to']??''),$page);
-            if ($previous && array_intersect($previous['ttns'],array_column($payload['rows'],'ttn'))) throw new \RuntimeException('Duplicate carrier page. Stop and check coverage.');
+            $windowTo=min($to,(new \DateTimeImmutable($windowFrom))->format('Y-m-t'));
+            $payload=$this->carrier->documents($windowFrom,$windowTo,$page);
+            if ($previous && ($previous['scope']['window_from']??null)===$windowFrom
+                && array_intersect($previous['ttns'],array_column($payload['rows'],'ttn'))) throw new \RuntimeException('Duplicate carrier page. Stop and check coverage.');
+            $nextFrom=$windowFrom;
+            if ($payload['scope']['empty_page']) {
+                $nextFrom=$windowTo<$to ? (new \DateTimeImmutable($windowTo))->modify('+1 day')->format('Y-m-d') : null;
+                $payload['scope']['next_page']=$nextFrom ? 1 : null;
+            }
+            $payload['scope']=array_merge($payload['scope'],['from'=>$from,'to'=>$to,'window_from'=>$windowFrom,'window_to'=>$windowTo,'next_from'=>$nextFrom]);
         } elseif ($command==='tracking') {
             $payload=$this->carrier->tracking((string)($input['ttn']??''),(string)($input['phone']??''));
         } elseif ($command==='csv') {

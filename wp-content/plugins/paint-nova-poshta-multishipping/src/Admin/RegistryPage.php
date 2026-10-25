@@ -28,7 +28,7 @@ final class RegistryPage
                 'failure'=>self::t('The request failed. Reload and check the saved result before repeating.'),
                 'saved'=>self::t('Saved to the site registry.'),'preview'=>self::t('Preview only. Check the data and confirm below.'),
                 'empty'=>self::t('Empty page received. This only ends the selected account document list; incoming and historical events are not proven complete.'),
-                'more'=>self::t('Page saved. Read the next page until an empty page is received.'),
+                'more'=>self::t('Page saved. Continue with the next page or month until the selected period is finished.'),
                 'labels'=>self::labels()]);
         });
     }
@@ -75,6 +75,7 @@ final class RegistryPage
             'type'=>'Document type','role'=>'Document role','id'=>'Internal ID','number'=>'Document number','date'=>'Document date',
             'partner'=>'Folio partner code','warehouse'=>'Folio warehouse code','verification'=>'Verification method','evidence'=>'Verification evidence',
             'from'=>'From date','to'=>'To date','page'=>'Page','count'=>'Records','empty_page'=>'Empty page','next_page'=>'Next page',
+            'window_from'=>'Current month: from','window_to'=>'Current month: to','next_from'=>'Next read: from',
             'coverage'=>'Coverage','account_document_list_only'=>'Only documents visible to this API account',
             'known_ttn_only'=>'Only the specified TTN','manual_csv_only'=>'Only supplied CSV rows','manual_reference_only'=>'Manual TTN reference',
             'source'=>'Source','scope'=>'Import scope','observed_at'=>'Read at (UTC)',
@@ -130,6 +131,7 @@ final class RegistryPage
         echo '<details class="pnpm-box"><summary>'.self::e('Add shipments / load history').'</summary><p>'.self::e('Incoming discovery is not verified. Add known incoming TTNs or CSV; an empty account list does not prove that there were no incoming parcels.').'</p>';
         $this->form('tracking'); $this->input('ttn','TTN','text','',true); $this->input('phone','Sender or recipient phone (optional)','tel'); $this->previewEnd();
         echo '<h3>'.self::e('Account history').'</h3>';
+        echo '<p>'.self::e('Select the full period. The site reads one month at a time; after an empty page, continue to the next month.').'</p>';
         $this->form('history');
         $this->input('from','From date','date',Record::START,true); $this->input('to','To date','date',wp_date('Y-m-d'),true);
         echo '<input type="hidden" name="previous" value="">';

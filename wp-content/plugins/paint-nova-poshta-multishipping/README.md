@@ -1,11 +1,39 @@
 # Paint Nova Poshta Multishipping
 
+## Monthly history fix 0.10.1 — 2026-10-25
+
+Production read-only diagnosis confirmed that 0.10.0, schema 1 and an API key are
+present. A single 01.06–25.10.2026 request failed with the provider's exact error:
+`The difference between DateTimeFrom and DateTimeTo cannot be more than three months.`
+The original advice to send that range in one request was incorrect. First-page
+reads for June and 1–25 October succeeded (1 and 8 rows respectively); no import
+confirmation, TTN, notification or deployment was performed by this diagnosis.
+
+0.10.1 keeps the overall period (up to 366 days) but sends only one calendar-month
+window at a time. Pages stay in that window until an explicitly saved empty page;
+the next action then advances to the next month at page 1. The first/last months
+are clipped to the selected dates, with no gaps or overlap. Only an empty final
+window finishes the period. Preview and coverage show overall dates, actual window
+and next cursor; confirmation replay cannot skip a month. A 0.10.0 continuation
+without the new month cursor requires restarting the period, preserving saved facts.
+The carrier boundary refuses requests over 31 inclusive days before HTTP.
+Known period/key/busy/rate-limit/network failures have safe actionable messages;
+arbitrary provider error text is not exposed. No schema migration is needed.
+
+Until 0.10.1 is deployed, select June, July and subsequent months separately.
+After deployment, select the full period and continue reading/saving pages across
+months until the next-page button disappears. 0.10.1 is prepared locally; production
+still needs its normal scoped deployment. All 59 local registry checks pass, covering
+partial months, 31-day months, boundary replay, last-window completion, stale
+legacy cursors and the observed provider error. Full incoming coverage remains unproven.
+
 ## Shipment registry 0.10.0 — 2026-10-25
 
 Stage 1 is implemented locally: WooCommerce → **Nova Poshta registry**, outgoing,
 incoming, customer returns, supplier purchases/returns and internal transfers.
-Registry TTNs do not require Woo orders. This release is **not deployed** and has
-not imported real history. The supported history start is **2026-06-01**.
+Registry TTNs do not require Woo orders. 0.10.0 was subsequently observed on
+production on 25.10.2026; the newer monthly fix above is pending deployment.
+The supported history start is **2026-06-01**.
 Manager steps: [registry guide](../../../docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-registry).
 
 ### Ownership, installation and access
@@ -26,10 +54,11 @@ secret is needed: reads reuse the server-only NP key and the existing Java proxy
 
 ### Import, data and coverage
 
-- `InternetDocument.getDocumentList`: explicit date range, maximum 366 days,
+- `InternetDocument.getDocumentList`: explicit overall range, maximum 366 days,
+  split into calendar-month requests in 0.10.1 (0.10.0 requires manual splitting),
   `GetFullList=0`, sequential `Page`, up to 100 records. Each page is read,
   previewed and explicitly saved. Only then is **Read next page** available.
-  Continue through a confirmed empty page, not merely a short page. Adjacent-page
+  Continue through a confirmed empty page of every month, not merely a short page. Adjacent-page
   duplicates stop the import rather than silently claiming completion.
 - The period filter is NP's shipment date, with document creation as fallback
   according to the official portal re-read on 25.10.2026. It is not a filter for

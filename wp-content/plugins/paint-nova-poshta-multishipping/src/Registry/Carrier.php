@@ -13,11 +13,18 @@ final class Carrier
 
     public function fingerprint(): string { return $this->api->accountFingerprint(); }
 
-    public function documents(string $from, string $to, int $page): array
+    public static function period(string $from, string $to): void
     {
         Record::date($from); Record::date($to);
         if ($from < Record::START || $to < $from || $to > wp_date('Y-m-d')
-            || (new \DateTimeImmutable($from))->diff(new \DateTimeImmutable($to))->days > 365
+            || (new \DateTimeImmutable($from))->diff(new \DateTimeImmutable($to))->days > 365) throw new \InvalidArgumentException('Invalid import period or page.');
+    }
+
+    public function documents(string $from, string $to, int $page): array
+    {
+        self::period($from,$to);
+        // Keep each carrier call well inside the observed three-month API limit.
+        if ((new \DateTimeImmutable($from))->diff(new \DateTimeImmutable($to))->days > 30
             || $page < 1 || $page > 10000) throw new \InvalidArgumentException('Invalid import period or page.');
         $data = $this->read('InternetDocument', 'getDocumentList', [
             'DateTimeFrom'=>date('d.m.Y', strtotime($from)), 'DateTimeTo'=>date('d.m.Y', strtotime($to)),
@@ -59,6 +66,14 @@ final class Carrier
     private function read(string $model, string $method, array $properties): array
     {
         $result=$this->api->call($model,$method,$properties);
+        if (is_wp_error($result) && in_array($result->get_error_code(),[
+            'pnpm_missing_api_key','pnpm_api_busy','pnpm_api_rate_limited','pnpm_api_unavailable',
+        ],true)) throw new \RuntimeException($result->get_error_message());
+        if (is_array($result) && ($result['success']??null)===false && in_array(
+            'The difference between DateTimeFrom and DateTimeTo cannot be more than three months.',
+            (array)($result['errors']??[]),true)) {
+            throw new \RuntimeException('Nova Poshta rejected a period longer than three months. Start the import again; the site reads one month at a time.');
+        }
         if (is_wp_error($result) || ($result['success']??null)!==true || !empty($result['errors'])
             || !isset($result['data']) || !is_array($result['data']) || !array_is_list($result['data'])) {
             throw new \RuntimeException('The carrier read failed. No saved data changed.');

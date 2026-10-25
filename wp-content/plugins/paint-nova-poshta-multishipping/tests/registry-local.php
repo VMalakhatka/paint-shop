@@ -17,9 +17,9 @@ $store=new Store(); $service=new Service(); $ttn='99999999000001'; $ttn2='999999
 $key='pnpm_registry_schema'; $old_schema=get_option($key,null);
 // Exercise real migration and transactions against isolated disposable tables, not local business data.
 $wpdb->prefix=$prefix.'pnpmtest_';
-$http=[]; $mail=0; $mode='good'; $status='1'; $partner='TEST';
+$http=[]; $documentReads=[]; $mail=0; $mode='good'; $status='1'; $partner='TEST';
 add_filter('pre_wp_mail', static function() use (&$mail) { $mail++; return false; },PHP_INT_MAX);
-$mock=static function($pre,$args,$url) use (&$http,&$mode,&$status,&$partner,$ttn,$ttn2) {
+$mock=static function($pre,$args,$url) use (&$http,&$documentReads,&$mode,&$status,&$partner,$ttn,$ttn2) {
     $http[]=$url;
     $response=static fn($body)=>['headers'=>[],'body'=>wp_json_encode($body),'response'=>['code'=>200,'message'=>'OK']];
     if (str_starts_with($url,'https://api.novaposhta.ua/')) {
@@ -28,7 +28,11 @@ $mock=static function($pre,$args,$url) use (&$http,&$mode,&$status,&$partner,$tt
         if ($mode==='fail') return $response(['success'=>false,'data'=>[],'errors'=>['synthetic failure']]);
         if ($request['calledMethod']==='getDocumentList') {
             $p=$request['methodProperties'];
-            if ($p['GetFullList']!=='0' || $p['DateTimeFrom']!=='01.06.2026') throw new RuntimeException('Wrong pagination contract');
+            $documentReads[]=$p;
+            $start=DateTimeImmutable::createFromFormat('!d.m.Y',$p['DateTimeFrom']);
+            $finish=DateTimeImmutable::createFromFormat('!d.m.Y',$p['DateTimeTo']);
+            if ($p['GetFullList']!=='0' || !$start || !$finish || $start->diff($finish)->days>30) throw new RuntimeException('Wrong monthly pagination contract');
+            if ($mode==='period_error') return $response(['success'=>false,'data'=>[],'errors'=>['The difference between DateTimeFrom and DateTimeTo cannot be more than three months.']]);
             $rows=$p['Page']==='1' || $mode==='repeat' ? [['IntDocNumber'=>$ttn,'DateTime'=>'01.06.2026','StateId'=>'1','PayerType'=>'Recipient','CostOnSite'=>'70','Cost'=>'149','LinkedDocumentNumber'=>$ttn2]] : [];
             return $response(['success'=>true,'data'=>$rows]);
         }
@@ -68,6 +72,32 @@ try {
     $page2=$service->run('history',['from'=>'2026-06-01','to'=>'2026-06-30','previous'=>$p['token']]);
     $end=$confirm($page2['token']); $check($end['scope']['empty_page'] && !$end['scope']['next_page'],'Empty-page evidence is scoped');
     $check($end['scope']['coverage']==='account_document_list_only','No false all incoming coverage');
+    $reject(fn()=>(new Carrier())->documents('2026-06-01','2026-10-25',1),'Transport rejects long period before HTTP');
+    $long=['from'=>'2026-06-15','to'=>'2026-08-05'];
+    $cursor=$service->run('history',$long);
+    $check($cursor['scope']['window_from']==='2026-06-15' && $cursor['scope']['window_to']==='2026-06-30','Partial first month');
+    $confirm($cursor['token']);
+    $cursor=$service->run('history',$long+['previous'=>$cursor['token']]);
+    $check($cursor['scope']['page']===2 && $cursor['scope']['window_from']==='2026-06-15','Pages stay in the same month until empty');
+    $result=$confirm($cursor['token']);
+    $check($result['scope']['next_page']===1 && $result['scope']['next_from']==='2026-07-01','Empty page advances to next month, not completion');
+    $check($confirm($cursor['token'])===$result,'Repeated boundary confirmation does not skip a month');
+    $cursor=$service->run('history',$long+['previous'=>$cursor['token']]);
+    $check($cursor['scope']['page']===1 && $cursor['scope']['window_from']==='2026-07-01' && $cursor['scope']['window_to']==='2026-07-31','31-day month included');
+    $confirm($cursor['token']); $cursor=$service->run('history',$long+['previous'=>$cursor['token']]); $confirm($cursor['token']);
+    $cursor=$service->run('history',$long+['previous'=>$cursor['token']]);
+    $check($cursor['scope']['window_from']==='2026-08-01' && $cursor['scope']['window_to']==='2026-08-05','Last month clipped to selected end');
+    $confirm($cursor['token']); $cursor=$service->run('history',$long+['previous'=>$cursor['token']]); $result=$confirm($cursor['token']);
+    $check($result['scope']['empty_page'] && $result['scope']['next_page']===null && $result['scope']['next_from']===null,'Only last empty page ends full selected period');
+    $reject(fn()=>$service->run('history',$long+['previous'=>$cursor['token']]),'Finished period cannot continue');
+    $mode='period_error';
+    try { (new Carrier())->documents('2026-06-01','2026-06-30',1); throw new Exception('Expected period error'); }
+    catch (RuntimeException $e) { $check(str_contains($e->getMessage(),'three months'),'Known provider error becomes actionable'); }
+    $mode='good';
+    $legacy=$store->preview('import',['source'=>'np_documents','rows'=>[],'scope'=>['from'=>'2026-06-01','to'=>'2026-06-30','next_page'=>2],
+        'observed_at'=>gmdate('Y-m-d H:i:s'),'account'=>(new Carrier())->fingerprint()]);
+    $confirm($legacy);
+    $reject(fn()=>$service->run('history',['from'=>'2026-06-01','to'=>'2026-06-30','previous'=>$legacy]),'Legacy cursor requires explicit restart');
     $service->run('classify',['id'=>$id,'revision'=>1,'direction'=>'outgoing','purpose'=>'sale','partner_code'=>'TEST']);
     $reject(fn()=>$service->run('classify',['id'=>$id,'revision'=>1]),'Stale classification blocked');
     $first=$service->run('tracking',['ttn'=>$ttn]); $confirm($first['token']);

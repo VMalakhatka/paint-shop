@@ -2083,3 +2083,27 @@ msgstr "Почніть новий імпорт цього періоду."
 #: src/Admin/RegistryPage.php src/Registry/
 msgid "Unknown registry action."
 msgstr "Невідома дія реєстру."
+
+#: src/Admin/RegistryPage.php src/Registry/Carrier.php
+msgid "Nova Poshta rejected a period longer than three months. Start the import again; the site reads one month at a time."
+msgstr "Нова пошта відхилила період понад три місяці. Почніть імпорт знову: сайт читає по одному місяцю."
+
+#: src/Admin/RegistryPage.php src/Registry/Carrier.php
+msgid "Page saved. Continue with the next page or month until the selected period is finished."
+msgstr "Сторінку збережено. Читайте наступну сторінку або місяць до завершення вибраного періоду."
+
+#: src/Admin/RegistryPage.php src/Registry/Carrier.php
+msgid "Current month: from"
+msgstr "Поточний місяць: з"
+
+#: src/Admin/RegistryPage.php src/Registry/Carrier.php
+msgid "Current month: to"
+msgstr "Поточний місяць: до"
+
+#: src/Admin/RegistryPage.php src/Registry/Carrier.php
+msgid "Next read: from"
+msgstr "Наступне читання: з"
+
+#: src/Admin/RegistryPage.php src/Registry/Carrier.php
+msgid "Select the full period. The site reads one month at a time; after an empty page, continue to the next month."
+msgstr "Виберіть увесь період. Сайт читає по одному місяцю; після порожньої сторінки переходьте до наступного місяця."

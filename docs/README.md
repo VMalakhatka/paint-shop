@@ -48,7 +48,7 @@
 | Мастеру: вести расписание МК, статьи и заявки | [WORKSHOPS_GUIDE_RU.md](WORKSHOPS_GUIDE_RU.md) |
 | Пользоваться сайтом и кабинетом | [SITE_USER_GUIDE_UK.md](SITE_USER_GUIDE_UK.md) |
 | Менеджеру: весь раздел «Робота з клієнтами», черновики, документы, баланс, сообщения и Telegram | [MANAGER_CUSTOMER_GUIDE_UK.md](MANAGER_CUSTOMER_GUIDE_UK.md) |
-| Менеджеру: реестр НП, исходящие/входящие/возвраты, импорт с июня и подтверждённые связи с ФОЛИО | [Реестр НП 0.10.0 — локально, до публикации](MANAGER_CUSTOMER_GUIDE_UK.md#np-registry) |
+| Менеджеру: реестр НП, исходящие/входящие/возвраты, импорт с июня и подтверждённые связи с ФОЛИО | [Реестр НП — помесячная загрузка и связи](MANAGER_CUSTOMER_GUIDE_UK.md#np-registry) |
 | Менеджеру: НП — порядок кнопок, неактивные состояния, несколько складов, свои/клиентские ТТН, PDF и email | [Инструкция НП 0.9.3](MANAGER_CUSTOMER_GUIDE_UK.md#np-preparation) · [предложение упрощения, не реализовано](MANAGER_CUSTOMER_GUIDE_UK.md#np-simplification-plan) |
 | Менеджеру: импорт клиентов из ФОЛІО в Woo, цены, приглашения и восстановление | [Пошаговый импорт](MANAGER_CUSTOMER_GUIDE_UK.md#customer-import) |
 | Менеджеру: облікові ціни ФОЛІО, один товар / весь склад, стан складів, від’ємний залишок та Excel | [Покрокова інструкція](FOLIO_ACCOUNTING_PRICES_MANAGER_UK.md) |
