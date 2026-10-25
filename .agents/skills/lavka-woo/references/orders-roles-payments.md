@@ -600,3 +600,11 @@ claims. Existing users never change; creation/mail after unknown outcomes never
 replay. Source roles are owner-approved per-file values, not Folio identity.
 Retail receives INET KL; wholesale identities cannot be inferred from old XLSX.
 See PCOE README and manager guide. Personal exports remain private, outside Git.
+
+Promotion coupons (2026-10-25, local code): `pc-order-import-export/inc/PromotionCoupons.php`
+extends native Woo coupon editing with start date and gift instructions. Native Woo
+owns code generation, restrictions and usage accounting; do not maintain a second
+usage counter. Gift-only coupons normalize to fixed_cart/zero/no free shipping.
+Checkout snapshots instructions in order meta `_pcoe_coupon_gifts` via CRUD; no
+Folio document or gift stock movement occurs. Coupons are not enabled automatically.
+Operator procedure: `docs/MANAGER_CUSTOMER_GUIDE_UK.md`, section coupons.

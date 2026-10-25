@@ -4,6 +4,7 @@ namespace PaintCore\PCOE;
 class Plugin {
     public function init(){
         CustomerPermissions::hooks();
+        PromotionCoupons::hooks();
         FolioCustomerImport::hooks();
         if (defined('WP_CLI') && WP_CLI) {
             \WP_CLI::add_command('pcoe customers-import', static function ($args,$options) {

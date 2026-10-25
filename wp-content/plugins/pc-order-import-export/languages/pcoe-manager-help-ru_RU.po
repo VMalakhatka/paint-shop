@@ -433,3 +433,12 @@ msgstr "После создания скачайте PDF ТТН или марк�
 
 msgid "Folio records the payment method checked during automatic processing. Verified unsubmitted BACS waits resume on hold. The customer can continue only a safe unsubmitted order; unknown results and legacy waits require manager review. Do not mark an order paid to trigger Folio, remove an attempted-request marker, or repeat creation after a timeout. Apply an already saved response instead of creating documents again."
 msgstr "ФОЛИО записывает способ оплаты, проверенный при автоматической обработке. Проверенное ожидание BACS без предыдущей попытки возобновляется при переходе на удержание. Клиент может продолжить только безопасно подтверждённый ещё не отправленный заказ; неизвестные результаты и старые ожидания требуют проверки менеджера. Не отмечайте заказ оплаченным для запуска ФОЛИО, не удаляйте отметку попытки и не повторяйте создание после тайм-аута. Если ответ уже сохранён, примените его без повторного создания документов."
+
+msgid "Promotion coupons"
+msgstr "Купоны акций"
+
+msgid "Open Promotion coupons in the customer workspace, add a coupon and enter or generate its code. Set the start date and native expiry date, spending/product/email restrictions and total/per-customer usage limits. Blank limits are unlimited. Expiry is at midnight at the start of the selected date."
+msgstr "Откройте «Купоны акций» в работе с клиентами, добавьте купон и введите или сгенерируйте код. Установите начало и окончание, ограничения суммы/товаров/email и общий лимит и лимит на клиента. Пустые лимиты — без ограничений. Действие заканчивается в 00:00 в начале выбранной даты."
+
+msgid "For a gift-only promotion, fill Gift instructions for the manager. This sets the discount to zero and disables free shipping. The gift is not added as a product automatically. Instructions are saved with the checkout order and shown in the manager workspace, WooCommerce order and admin email. Check the original order when splitting by warehouses; do not add the gift once per shipment. An administrator must first enable coupons in WooCommerce settings."
+msgstr "Для акции с подарком заполните «Задание менеджеру по подарку». Скидка станет нулевой, бесплатная доставка отключится. Подарок не добавляется как товар автоматически. Задание сохраняется при оформлении и показывается в работе с клиентами, заказе WooCommerce и письме менеджеру. При разделении по складам проверяйте исходный заказ; не добавляйте подарок в каждую отправку. Сначала администратор должен включить купоны в настройках WooCommerce."

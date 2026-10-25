@@ -3550,3 +3550,33 @@ msgstr ""
 
 msgid "Recipient and address saved in WooCommerce"
 msgstr ""
+
+msgid "Promotion start date"
+msgstr ""
+
+msgid "Starts at midnight in the site timezone. Leave empty to start immediately."
+msgstr ""
+
+msgid "Gift instructions for the manager"
+msgstr ""
+
+msgid "Enter the promotion and gift to add. A non-empty value makes this a gift-only coupon: no discount or free shipping. Leave empty for a regular discount coupon."
+msgstr ""
+
+msgid "Use Generate coupon code above. Set the expiry, usage restrictions and usage limits in the standard coupon tabs. Blank limits mean unlimited usage."
+msgstr ""
+
+msgid "Coupons are disabled. An administrator must enable coupons in WooCommerce settings before customers can enter codes."
+msgstr ""
+
+msgid "Invalid promotion start date. The previous date has been kept."
+msgstr ""
+
+msgid "This promotion has not started yet."
+msgstr ""
+
+msgid "Add promotional gifts"
+msgstr ""
+
+msgid "Promotion coupons"
+msgstr ""

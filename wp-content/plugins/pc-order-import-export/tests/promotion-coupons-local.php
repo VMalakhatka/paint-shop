@@ -1,0 +1,50 @@
+<?php
+/** Run with wp eval-file on paint.local only. Fixtures are removed; all outgoing calls blocked. */
+use PaintCore\PCOE\PromotionCoupons as Promotions;
+if (!defined('WP_CLI') || !WP_CLI || parse_url(home_url(), PHP_URL_HOST) !== 'paint.local') throw new RuntimeException('Local only');
+add_filter('pre_http_request', static fn() => new WP_Error('test', 'External requests blocked'), PHP_INT_MAX);
+add_filter('pre_wp_mail', '__return_false', PHP_INT_MAX);
+$checks = 0; $ids = [];
+$check = static function ($ok, $label) use (&$checks) { if (!$ok) throw new RuntimeException($label); ++$checks; };
+try {
+    $p = new WC_Product_Simple(); $p->set_name('Synthetic coupon test'); $p->set_regular_price('100'); $p->set_virtual(true); $p->save(); $ids[] = $p;
+    $c = new WC_Coupon(); $c->set_code('fixture-' . wp_generate_uuid4()); $c->set_discount_type('fixed_cart');
+    $c->set_amount(50); $c->set_free_shipping(true); $c->update_meta_data(Promotions::GIFT, 'Test gift <unsafe>'); $c->save(); $ids[] = $c;
+    $check((float)$c->get_amount() === 0.0 && !$c->get_free_shipping(), 'Gift never grants discount or free shipping');
+    $order = new WC_Order(); $order->add_product($p, 1);
+    $discounts = new WC_Discounts($order);
+    $check($discounts->is_coupon_valid($c) === true, 'Gift coupon accepted with normal conditions');
+    $c->set_minimum_amount(200); $check(is_wp_error($discounts->is_coupon_valid($c)), 'Minimum spend enforced'); $c->set_minimum_amount(0);
+    $c->set_date_expires(time()-86400); $check(is_wp_error($discounts->is_coupon_valid($c)), 'Expiry enforced'); $c->set_date_expires(null);
+    $c->update_meta_data(Promotions::START, current_datetime()->modify('+1 day')->format('Y-m-d'));
+    $check(is_wp_error($discounts->is_coupon_valid($c)), 'Future start rejected');
+    $c->update_meta_data(Promotions::START, current_datetime()->format('Y-m-d'));
+    $check($discounts->is_coupon_valid($c) === true, 'Start today accepted');
+    $c->set_usage_limit(1); $c->set_usage_count(1);
+    $check(is_wp_error($discounts->is_coupon_valid($c)), 'Exhausted total usage rejected'); $c->set_usage_count(0);
+    $c->set_email_restrictions(['allowed@example.invalid']); $order->set_billing_email('other@example.invalid');
+    $check(is_wp_error($discounts->is_coupon_valid($c)), 'Wrong customer email rejected'); $c->set_email_restrictions([]);
+    $c->set_usage_limit(0); $c->set_usage_limit_per_user(1); $c->save();
+    $order->set_customer_id(2147483000);
+    $c->increase_usage_count(2147483000);
+    $check(is_wp_error($discounts->is_coupon_valid($c)), 'Per-customer usage limit enforced');
+    $c->decrease_usage_count(2147483000);
+    $check($discounts->is_coupon_valid($c) === true, 'Returned usage permits retry');
+    $order->set_customer_id(0);
+    $c->save();
+    $check(!is_wp_error($discounts->apply_coupon($c)), 'Zero-value gift applied');
+    $check((float) array_sum($discounts->get_discounts_by_coupon()) === 0.0, 'Order discount stays zero');
+    $item = new WC_Order_Item_Coupon(); $item->set_code($c->get_code()); $order->add_item($item);
+    Promotions::snapshot($order);
+    $check(count($order->get_meta(Promotions::SNAPSHOT)) === 1, 'Gift snapshot recorded');
+    $c->update_meta_data(Promotions::GIFT, 'Changed later'); $c->save();
+    $check(current($order->get_meta(Promotions::SNAPSHOT)) === 'Test gift <unsafe>', 'Historical promise unchanged');
+    ob_start(); Promotions::render($order); $html = ob_get_clean();
+    $check(str_contains($html, '&lt;unsafe&gt;') && !str_contains($html, '<unsafe>'), 'Manager gift text escaped');
+    ob_start(); Promotions::email($order, true, true, null); $text = ob_get_clean();
+    $check(str_contains($text, $c->get_code()) && str_contains($text, 'Test gift'), 'Manager email contains gift and code');
+    ob_start(); Promotions::email($order, false, false, null); $check(ob_get_clean() === '', 'Internal instructions excluded from customer mail');
+    $check(!Promotions::date_valid('2026-02-30') && Promotions::date_valid('2026-10-25'), 'Strict calendar validation');
+    $c->update_meta_data(Promotions::GIFT, ''); $check((float)$c->get_amount() === 50.0, 'Ordinary coupons unchanged');
+    echo "PASS: $checks checks\n";
+} finally { foreach (array_reverse($ids) as $obj) $obj->delete(true); }

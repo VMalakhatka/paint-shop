@@ -3752,3 +3752,33 @@ msgstr "Це вибір, збережений у замовленні. Пізн�
 
 msgid "Recipient and address saved in WooCommerce"
 msgstr "Отримувач та адреса, збережені у WooCommerce"
+
+msgid "Promotion start date"
+msgstr "Дата початку акції"
+
+msgid "Starts at midnight in the site timezone. Leave empty to start immediately."
+msgstr "Початок о 00:00 за часовим поясом сайту. Залиште порожнім для дії одразу."
+
+msgid "Gift instructions for the manager"
+msgstr "Завдання менеджеру щодо подарунка"
+
+msgid "Enter the promotion and gift to add. A non-empty value makes this a gift-only coupon: no discount or free shipping. Leave empty for a regular discount coupon."
+msgstr "Вкажіть акцію та подарунок. Заповнене поле означає купон лише на подарунок: без знижки й безкоштовної доставки. Для звичайного купона залиште порожнім."
+
+msgid "Use Generate coupon code above. Set the expiry, usage restrictions and usage limits in the standard coupon tabs. Blank limits mean unlimited usage."
+msgstr "Скористайтеся кнопкою генерації коду вище. Вкажіть строк, обмеження та ліміти на стандартних вкладках купона. Порожні ліміти означають необмежене використання."
+
+msgid "Coupons are disabled. An administrator must enable coupons in WooCommerce settings before customers can enter codes."
+msgstr "Купони вимкнені. Адміністратор має увімкнути їх у налаштуваннях WooCommerce, щоб клієнти могли вводити коди."
+
+msgid "Invalid promotion start date. The previous date has been kept."
+msgstr "Некоректна дата початку акції. Попередню дату збережено."
+
+msgid "This promotion has not started yet."
+msgstr "Ця акція ще не почалася."
+
+msgid "Add promotional gifts"
+msgstr "Додати подарунки за акцією"
+
+msgid "Promotion coupons"
+msgstr "Купони акцій"

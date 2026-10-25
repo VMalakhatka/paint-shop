@@ -1236,3 +1236,6 @@ msgstr "E-mail обов’язковий для кожного замовлен�
 
 msgid "Before checkout, you can sign in. Without signing in, a new account is created using the order email, or the order is linked to the existing account for that email. This does not sign you in or change an existing profile. For wholesale prices and terms, sign in before ordering. After a new account is created, check your email to set a password; if sending fails, use password recovery."
 msgstr "Перед оформленням можна увійти до кабінету. Без входу створюється новий кабінет за e-mail замовлення або замовлення прив’язується до наявного кабінету з цим e-mail. Це не виконує вхід і не змінює наявний профіль. Для оптових цін та умов увійдіть до оформлення. Після створення кабінету перевірте пошту для встановлення пароля; якщо лист не надіслано, скористайтеся відновленням пароля."
+
+msgid "If you received a promotion code, apply it in the cart or checkout. Dates, order conditions and usage limits are checked. A gift coupon does not reduce the total: the manager receives instructions to add your gift. Contact the manager if the code is rejected."
+msgstr "Якщо отримали промокод, застосуйте його в кошику або при оформленні. Перевіряються строки, умови замовлення та ліміти. Купон на подарунок не зменшує суму: менеджер отримує завдання додати подарунок. Якщо код не прийнято, зверніться до менеджера."

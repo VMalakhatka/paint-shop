@@ -435,3 +435,12 @@ msgstr ""
 
 msgid "Folio records the payment method checked during automatic processing. Verified unsubmitted BACS waits resume on hold. The customer can continue only a safe unsubmitted order; unknown results and legacy waits require manager review. Do not mark an order paid to trigger Folio, remove an attempted-request marker, or repeat creation after a timeout. Apply an already saved response instead of creating documents again."
 msgstr ""
+
+msgid "Promotion coupons"
+msgstr ""
+
+msgid "Open Promotion coupons in the customer workspace, add a coupon and enter or generate its code. Set the start date and native expiry date, spending/product/email restrictions and total/per-customer usage limits. Blank limits are unlimited. Expiry is at midnight at the start of the selected date."
+msgstr ""
+
+msgid "For a gift-only promotion, fill Gift instructions for the manager. This sets the discount to zero and disables free shipping. The gift is not added as a product automatically. Instructions are saved with the checkout order and shown in the manager workspace, WooCommerce order and admin email. Check the original order when splitting by warehouses; do not add the gift once per shipment. An administrator must first enable coupons in WooCommerce settings."
+msgstr ""

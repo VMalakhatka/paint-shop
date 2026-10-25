@@ -1214,3 +1214,6 @@ msgstr ""
 
 msgid "Before checkout, you can sign in. Without signing in, a new account is created using the order email, or the order is linked to the existing account for that email. This does not sign you in or change an existing profile. For wholesale prices and terms, sign in before ordering. After a new account is created, check your email to set a password; if sending fails, use password recovery."
 msgstr ""
+
+msgid "If you received a promotion code, apply it in the cart or checkout. Dates, order conditions and usage limits are checked. A gift coupon does not reduce the total: the manager receives instructions to add your gift. Contact the manager if the code is rejected."
+msgstr ""

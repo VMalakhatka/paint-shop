@@ -25,6 +25,7 @@ $form_fields = static function (string $operation) use ($customer_id, $order): v
 <a class="nav-tab <?php echo $orders_tab ? 'nav-tab-active' : ''; ?>" href="<?php echo esc_url(add_query_arg('view', 'orders', ManagerWorkspace::url(0))); ?>"><?php esc_html_e('Orders', 'pc-order-import-export'); ?></a>
 <a class="nav-tab <?php echo $messages_tab ? 'nav-tab-active' : ''; ?>" href="<?php echo esc_url(Conversations::url([],true)); ?>"><?php esc_html_e('Conversations', 'pc-order-import-export'); ?></a>
 <a class="nav-tab <?php echo $mailings_tab ? 'nav-tab-active' : ''; ?>" href="<?php echo esc_url(BroadcastUi::url()); ?>"><?php esc_html_e('Mailings', 'pc-order-import-export'); ?></a>
+<?php if (current_user_can("edit_shop_coupons")): ?><a class="nav-tab" href="<?php echo esc_url(admin_url("edit.php?post_type=shop_coupon")); ?>"><?php esc_html_e("Promotion coupons", "pc-order-import-export"); ?></a><?php endif; ?>
 </nav>
 <p><a class="button" href="<?php echo esc_url(ManagerHelp::url()); ?>" target="_blank" rel="noopener noreferrer"><?php ManagerHelp::load(); esc_html_e('Manager guide', 'pcoe-manager-help'); ?></a></p>
 <?php if ($mailings_tab) { BroadcastUi::render(); echo '</div>'; return; } ?>
@@ -127,6 +128,7 @@ $non_accounting_only = ManagerOrderFlow::non_accounting_only($order);
 ?>
 <?php if ($editable && $context): ?><p class="pcoe-actions"><a class="button button-primary" href="#pcoe-place-order"><?php esc_html_e('Place customer order from this draft','pc-order-import-export'); ?></a></p><?php endif; ?>
 <?php ManagerOrderDetails::render($order); ?>
+<?php if ($order) PromotionCoupons::render($order); ?>
 <section class="pcoe-card"><h2><?php echo esc_html(sprintf(__('Order #%s', 'pc-order-import-export'), $order->get_order_number())); ?></h2>
 <div class="pcoe-actions"><a class="button" href="<?php echo esc_url($order->get_edit_order_url()); ?>"><?php esc_html_e('Open WooCommerce order', 'pc-order-import-export'); ?></a>
 <?php foreach (['csv' => 'CSV', 'xlsx' => 'Excel'] as $fmt => $label): ?><a class="button" href="<?php echo esc_url(add_query_arg(['action' => 'pcoe_export', 'type' => 'order', 'order_id' => $order->get_id(), 'fmt' => $fmt, '_wpnonce' => wp_create_nonce('pcoe_export')], admin_url('admin-ajax.php'))); ?>"><?php echo esc_html($label); ?></a><?php endforeach; ?>
