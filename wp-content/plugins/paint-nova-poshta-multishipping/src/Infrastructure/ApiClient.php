@@ -26,6 +26,12 @@ final class ApiClient
         return $this->apiKey() !== '';
     }
 
+    /** Opaque server-side preview binding; never render or log this account marker. */
+    public function accountFingerprint(): string
+    {
+        return hash_hmac('sha256', $this->apiKey(), wp_salt('auth'));
+    }
+
     public function maskedApiKey(): string
     {
         $key = $this->apiKey();

@@ -1535,3 +1535,715 @@ msgstr ""
 
 msgid "The earlier version did not save verification details. Administrator reconciliation is required."
 msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Nova Poshta registry"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Checking…"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "The request failed. Reload and check the saved result before repeating."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Saved to the site registry."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Preview only. Check the data and confirm below."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Empty page received. This only ends the selected account document list; incoming and historical events are not proven complete."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Page saved. Read the next page until an empty page is received."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Registry access denied."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Reload the page and try again."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Registry installation failed. Ask the administrator to check the database."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Not classified"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Outgoing"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Incoming"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Between our warehouses"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Purpose not selected"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Customer sale"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Customer return"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Supplier purchase"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Return to supplier"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Internal transfer"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Other"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Account"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Expense document"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Receipt document"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Return document"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Sale: account"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Sale: related expense document"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Verify through Folio API"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Manager verification with evidence"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Header verified; supplier confirmed by manager"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Nova Poshta document list"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Nova Poshta tracking"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Imported CSV"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Document type"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Document role"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Internal ID"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Document number"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Document date"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Folio partner code"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Folio warehouse code"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Verification method"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Verification evidence"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "From date"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "To date"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Page"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Records"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Empty page"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Next page"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Coverage"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Only documents visible to this API account"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Only the specified TTN"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Only supplied CSV rows"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Manual TTN reference"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Source"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Import scope"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Read at (UTC)"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "TTN"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Carrier status"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Carrier status code"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Carrier delivery amount (not proof of payment)"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Declared value"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Delivery amount from CSV (unverified)"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Origin"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Destination"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Sender city"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Recipient city"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Weight"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Packages"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Carrier document date"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Carrier creation date"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Estimated delivery date"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Actual delivery date"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Related account link ID"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Folio header evidence"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Outgoing, incoming and returns since 2026-06-01. Folio links do not require a WooCommerce order."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "How to work with the registry"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Read a TTN, import an account page or paste CSV. Preview does not save the registry record."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Check the preview, tick the confirmation and save. The preview expires after 10 minutes. Editing a field requires a new preview."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Open a TTN and choose its direction, purpose and Folio partner code. For a return, also enter the original TTN if known."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Confirm the account link first. Add the related expense document later without replacing the account."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Incoming purchases use receipt documents. Returns use a separate return reference and evidence checked by the manager."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Carrier reads retain available fields and changes observed by the site. They cannot reconstruct events the carrier no longer returns."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Delivery amounts, declared value and cash on delivery are separate facts. No margin, payment, stock, TTN or customer notification is created here."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "The administrator must initialize the registry after a database backup. Existing shipment tables are not changed."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Initialize registry tables"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Could not load the registry. Check the selection or contact the administrator."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Add shipments / load history"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Incoming discovery is not verified. Add known incoming TTNs or CSV; an empty account list does not prove that there were no incoming parcels."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Sender or recipient phone (optional)"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Account history"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "CSV import"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "UTF-8, semicolon separator, up to 100 rows. Blank cost means unknown, not zero. Use this exact header:"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "CSV contents"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Use for old TTNs unavailable through tracking. This does not verify the shipment with Nova Poshta."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Direction"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Purpose"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Updated (UTC)"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "No records match. Import data or change the filter."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Previous page"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Back to registry"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Shipment classification"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Original / related TTN"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Manager note"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Refresh carrier data"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Confirmed Folio links"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "A link is evidence of an association, not a payment or cost allocation. The same TTN may have several documents."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Confirmed by user ID"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Reason for revoking the link"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Revoke link, retain audit"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "No confirmed links yet."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Add a Folio document link"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Enter the printed number and date. API verification also requires the internal Folio ID. For a receipt, the API verifies the header only; confirm the supplier in the evidence field."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Internal Folio document ID (optional for manual verification)"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Related account for the expense document"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Carrier observations"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Latest 100 changed responses, newest observation first. Unavailable fields remain unknown. Read times are UTC, not the shipment event time."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Manager audit (latest 100)"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Import coverage (latest 30 confirmations)"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Completed pages prove only what this account returned at that time. Empty pages do not prove full incoming coverage or historical movement. CSV and manual records remain separate sources."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Unknown"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Yes"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "No"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "All"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Read and preview"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Read next page"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "I checked this preview and confirm saving it to the site registry."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Confirm and save"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Save classification"
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Enter a 14-digit TTN."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Invalid date."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Response is too large."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Response field is too large."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Invalid classification."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Direction and purpose do not match."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Invalid field."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Field is too long."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Import is too large."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Use the displayed CSV header."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Use at most 100 complete CSV rows."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Duplicate TTN in import."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Import starts on 2026-06-01."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Invalid delivery cost."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Import is empty."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Install the registry tables first."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Registry storage failed. Reload and inspect the saved result."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Preview not found."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Preview expired. Check again."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Invalid source."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "The record changed. Reload before saving."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "A TTN cannot refer to itself."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Revoke existing document links before changing the partner or direction."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Confirm and select the related account before linking an expense document."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Explain the correction (10–1000 characters)."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Revoke the related expense link before revoking its account."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Link not found. Reload the record."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Invalid import period or page."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Unexpected carrier page. Nothing imported."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Duplicate carrier page. Stop and check coverage."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Use a phone in 380XXXXXXXXX format."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "The carrier did not return this TTN. No saved data changed."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "The carrier read failed. No saved data changed."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Invalid document selection."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Document type and role do not match."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Classify shipment direction before linking this document."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Document number and the shipment partner code must match your selection."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Use the internal Folio document ID, not its printed number."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Explain the manual verification (at least 10 characters)."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "This document requires manual verification with evidence."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Enter the Folio warehouse code."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Folio returned a different document."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Confirm the supplier manually: the receipt API does not return the supplier."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Folio is unavailable. Use explicit manual verification if you have the document."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Confirm the preview before saving."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "The site synchronization lock is unavailable."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Another synchronization is running. Try saving after it finishes."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "The Nova Poshta account changed. Check again."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Start a new import for this period."
+msgstr ""
+
+#: src/Admin/RegistryPage.php src/Registry/
+msgid "Unknown registry action."
+msgstr ""

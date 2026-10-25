@@ -1,5 +1,123 @@
 # Paint Nova Poshta Multishipping
 
+## Shipment registry 0.10.0 — 2026-10-25
+
+Stage 1 is implemented locally: WooCommerce → **Nova Poshta registry**, outgoing,
+incoming, customer returns, supplier purchases/returns and internal transfers.
+Registry TTNs do not require Woo orders. This release is **not deployed** and has
+not imported real history. The supported history start is **2026-06-01**.
+Manager steps: [registry guide](../../../docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-registry).
+
+### Ownership, installation and access
+
+`src/Registry/{Schema,Record,Store,Carrier,Folio,Service}.php` owns the read model;
+`Admin/RegistryPage.php` and `assets/registry.{js,css}` own the private manager UI.
+Both `manage_woocommerce` and `manage_pnpm_shipments` are mandatory for the page
+and every AJAX command; nonce is required. No public REST route or customer view.
+English msgids have UK/RU PO/MO translations, including inline expandable help.
+
+After an independently authorized deployment and private database backup, an
+administrator with `manage_options` initializes the five InnoDB tables using the
+page button. Merely loading updated code does **not** migrate production:
+`{prefix}pnpm_registry`, `_observations`, `_links`, `_audit`, `_batches`.
+Option `pnpm_registry_schema=1` records the installed schema. The existing
+`pnpm_shipments` lifecycle and Woo/Folio documents remain unchanged. No new API
+secret is needed: reads reuse the server-only NP key and the existing Java proxy.
+
+### Import, data and coverage
+
+- `InternetDocument.getDocumentList`: explicit date range, maximum 366 days,
+  `GetFullList=0`, sequential `Page`, up to 100 records. Each page is read,
+  previewed and explicitly saved. Only then is **Read next page** available.
+  Continue through a confirmed empty page, not merely a short page. Adjacent-page
+  duplicates stop the import rather than silently claiming completion.
+- The period filter is NP's shipment date, with document creation as fallback
+  according to the official portal re-read on 25.10.2026. It is not a filter for
+  every tracking event. The API does not promise retention back to June.
+- A known incoming/outgoing TTN can be read with `TrackingDocument.getStatusDocuments`;
+  an optional 380-format sender/recipient phone is used only in that request.
+  Wrong/missing TTN, missing status, HTTP/business failure do not change saved facts.
+- CSV uses the site's explicit UTF-8 semicolon template, up to 100 rows / 256 KiB:
+  `ttn;date;sender;recipient;origin;destination;payer;delivery_cost`.
+  It is **not** advertised as a universal NP export parser. Blank cost is null,
+  supplied cost is unverified. Old inaccessible TTNs can have a manual reference
+  with manager evidence; this is not carrier verification.
+- Full safe row responses are retained as source-labelled observations, including
+  available payer, addresses, weights, fees, COD and status fields. Keys, tokens,
+  passwords, URLs and URL-bearing values are excluded. Unchanged responses are
+  deduplicated per source; changes, including a return to an older state, remain.
+  Carrier dates remain raw source fields; observed/recorded times are UTC.
+  Listing latest 100 observations and 30 import confirmations does not delete older
+  database evidence. Unknown values never become zero or proof of payment.
+- Current observations are collected on explicit reads, **not** scheduled polling.
+  No all-incoming discovery endpoint or full historical event feed was verified.
+  Account pages, known-TTN tracking, CSV and manual references are distinct scopes.
+  An empty page does not certify complete incoming coverage. Match June onward
+  against the business cabinet/export after deployment; record missing periods
+  and account roles before calling the backfill complete.
+
+### Confirmed Folio associations
+
+Classification and links are manager-controlled, never inferred from a name,
+phone or tracking status. A sale links an ACCOUNT first; a subsequent EXPENSE
+must reference its active account link. Both remain. Incoming purchases use
+RECEIPT; returns have explicit RETURN references and an optional original TTN.
+Multiple document links per TTN are supported; this is not a cost allocation.
+
+API verification reads the existing `/admin/folio/customer-documents/{type}/{id}`
+through `pc_folio_documents_java_get`: exact type, internal ID, printed number,
+date, partner and non-return state must match for ACCOUNT/EXPENSE. Only header
+evidence is retained. It does not prove an account-to-expense business relationship;
+the manager confirms that relationship in the preview. RECEIPT reads the existing
+`/admin/folio/receipt-catalogue` by exact date/warehouse/ID. It verifies the accounted,
+non-return receipt header; this API does not return the supplier, so manager
+evidence is still required (`api_header_manual_party`). No new Java deployment or
+MSSQL write is part of this change; unavailable endpoints fail visibly.
+
+Unsupported return documents and offline records use explicitly selected `manual`
+verification, printed number/date/partner/warehouse, optional internal ID and a
+reason of at least 10 characters. This label must never be promoted to API verified.
+Identity uses Paint_Ua + document type + internal ID, or the full manual composite.
+Links record actor/time/evidence. Revoking retains audit; revoke related expenses
+before their account. Existing active links block a partner/direction change.
+
+### Concurrency, safety, release and rollback
+
+Previews live in private DB staging for 10 minutes, bound to actor and (for NP)
+an opaque server-side key fingerprint. Expired staged payloads are erased on the
+next registry command; final observations and audit remain. Preview/edit/confirm
+are separate. Edits invalidate browser preview; record revisions reject stale
+classifications and Folio links. Confirmation, observations and its durable result
+commit atomically under row locks and `lavka_ecosystem_lock`. Retrying the same
+confirmation returns that result. A storage/audit error rolls back all writes.
+Unknown network outcomes are never auto-retried by the UI: reload and inspect;
+deliberate confirmation of the same token is idempotent.
+
+Reopening the page loses the browser's continuation token: review saved page
+evidence and restart the period; existing TTNs/unchanged observations deduplicate.
+Carrier observations never change confirmed links, Woo orders, stock, lifecycle
+claims, receipts or customer addresses, and never send email/Telegram or create TTNs.
+Fees are not yet included in margin; purchases need a later verified allocation
+and exclusion of shipping already included in Folio cost. Automatic linkage on
+TTN creation, reusable checkout addresses and scheduled updates are next stages.
+
+Rollback restores the previous plugin files; retain registry tables for recovery,
+do not drop/restore over newer manager evidence. Private snapshots contain personal
+data and belong in normal protected database backups, not uploads or Git.
+
+Local acceptance: 48 synthetic integration checks with a fake API key, all carrier
+and Java HTTP mocked, mail blocked, disposable table prefix removed in `finally`:
+
+```sh
+php /usr/local/bin/wp --require=wp-content/plugins/paint-nova-poshta-multishipping/tests/registry-bootstrap.php eval-file wp-content/plugins/paint-nova-poshta-multishipping/tests/registry-local.php
+```
+
+Coverage includes repeat confirmations, source deduplication, changed responses,
+incoming/returns, account + expense retention, receipt supplier limitation, stale
+revisions, actor/account/expiry guards, malformed dates/CSV, carrier failures,
+wrong TTNs/partners, rollback on observation/audit failure and private rendering.
+This is local acceptance, not proof of real historical API completeness.
+
 ## Recipient directory verification 0.9.3 — 2026-10-18
 
 Official `CounterpartyGeneral.save` examples omit contact Phones. 0.9.1/0.9.2

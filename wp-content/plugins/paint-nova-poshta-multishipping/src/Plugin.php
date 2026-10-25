@@ -52,6 +52,7 @@ final class Plugin
         (new \Paint\NovaPoshta\Email\DeliverySummary())->hooks();
         (new \Paint\NovaPoshta\Admin\ManagerPreparationPanel())->hooks();
         (new \Paint\NovaPoshta\Admin\ShipmentLifecyclePanel())->hooks();
+        (new \Paint\NovaPoshta\Admin\RegistryPage())->hooks();
     }
 
     /** @param array<string,class-string> $methods @return array<string,class-string> */
