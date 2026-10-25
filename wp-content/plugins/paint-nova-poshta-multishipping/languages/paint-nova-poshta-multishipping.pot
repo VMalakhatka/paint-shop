@@ -2364,3 +2364,9 @@ msgstr ""
 
 msgid "Warehouse"
 msgstr ""
+
+msgid "Save classification and continue"
+msgstr ""
+
+msgid "Classification changes are not saved yet. Save to enable document loading; warehouse and dates will stay selected."
+msgstr ""

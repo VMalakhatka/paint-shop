@@ -1467,3 +1467,9 @@ msgstr "Очистить"
 
 msgid "Warehouse"
 msgstr "Склад"
+
+msgid "Save classification and continue"
+msgstr "Сохранить классификацию и продолжить"
+
+msgid "Classification changes are not saved yet. Save to enable document loading; warehouse and dates will stay selected."
+msgstr "Изменения классификации ещё не сохранены. Сохраните, чтобы загрузить документы; склад и даты останутся выбранными."

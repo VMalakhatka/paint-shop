@@ -111,7 +111,7 @@ final class Store
             $metadata['updated_at'] = gmdate('Y-m-d H:i:s');
             $this->must($wpdb->update($this->table(),$metadata,['id'=>$id]));
             $this->audit($id,'classified',['before'=>array_intersect_key($row,$metadata),'after'=>$metadata]);
-            return ['id'=>$id];
+            return ['id'=>$id,'classification'=>array_intersect_key($metadata,array_flip(['revision','partner_code','direction','purpose','related_ttn','note']))];
         });
     }
 

@@ -187,7 +187,10 @@ try {
     $store->transaction(fn()=>$store->observe($summaryTtn,'np_tracking',['CostOnSite'=>'0','PayerType'=>'ThirdPerson'],'2026-10-22 10:00:00'));
     // A late-arriving old snapshot must not override newer evidence or supply its missing city.
     $store->transaction(fn()=>$store->observe($summaryTtn,'np_tracking',['CostOnSite'=>'999','CityRecipient'=>'Wrong old city'],'2026-10-20 10:00:00'));
-    $service->run('classify',['id'=>$summaryId,'revision'=>1,'direction'=>'outgoing','purpose'=>'sale','partner_code'=>'TEST']);
+    $classified=$service->run('classify',['id'=>$summaryId,'revision'=>1,'direction'=>'outgoing','purpose'=>'sale','partner_code'=>'TEST']);
+    $check($classified['classification']['revision']===2 && $classified['classification']['partner_code']==='TEST'
+        && $classified['classification']['direction']==='outgoing' && $classified['classification']['note']==='',
+        'Classification returns accepted snapshot and revision for all forms without a page reload');
     $queries=[]; $capture=static function($sql) use (&$queries) { $queries[]=$sql; return $sql; };
     $httpBefore=count($http); add_filter('query',$capture);
     try { $list=$store->listing(['ttn'=>$summaryTtn]); } finally { remove_filter('query',$capture); }

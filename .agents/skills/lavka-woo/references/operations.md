@@ -541,3 +541,9 @@ an empty filtered page is not completion. Selection fills preview fields only;
 retain persisted-partner/revision checks, explicit link confirmation and account
 before expense. No Java change or Folio write is needed for 0.10.3. Manager steps:
 `docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-registry`; technical scope: NP README.
+
+Classification handoff 0.10.4 (local code/browser, 2026-10-25): mirror the pending
+partner for display, but enable document reads only after explicit classification
+save returns the accepted snapshot/revision. Refresh all record forms without
+discarding warehouse/date filters. Never turn partner selection or document reads
+into an implicit write. Ignore late preview responses after classification changes.

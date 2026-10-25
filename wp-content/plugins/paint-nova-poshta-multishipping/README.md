@@ -1,5 +1,25 @@
 # Paint Nova Poshta Multishipping
 
+## Classification handoff fix 0.10.4 — 2026-10-25
+
+In 0.10.3 the partner picker showed a new selection while the link form retained
+its server-rendered empty partner. This made a deliberate save prerequisite look
+like a missing-field or document-loading failure. 0.10.4 mirrors the selected code,
+shows the unsaved state and provides **Save classification and continue** beside
+the document picker. Both save buttons share the existing revision-checked classify
+command; selection and Load documents never implicitly write classification.
+
+Successful classification returns the accepted metadata/revision and updates all
+forms for that record without reloading or clearing warehouse/date/type filters.
+Changes invalidate document choices/previews, including late preview responses.
+Documents still read the persisted partner server-side. Save failure is displayed
+beside the document list and leaves loading blocked; no mutation retries. The
+readonly partner display no longer has misleading required-field validation.
+81 isolated registry checks passed; browser checks reproduced the initially empty
+partner, successful save/load without losing dates and a rejected save. No production
+write or deploy. Deploy 0.10.4 PHP and JS together; no schema or Java change.
+Manager steps: [registry guide](../../../docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-registry).
+
 ## Folio selectors 0.10.3 — 2026-10-25
 
 The classification form now searches partners by code/name using the same

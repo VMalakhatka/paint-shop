@@ -15,11 +15,12 @@
         return list;
     };
     document.querySelectorAll('.pnpm-registry-form').forEach(form => {
-        let token = '', busy = false;
+        let token = '', busy = false, generation = 0;
         const message = form.querySelector('.pnpm-message'), preview = form.querySelector('.pnpm-preview');
         const confirm = form.querySelector('.pnpm-confirm'), agreed = form.querySelector('[name="confirmed"]');
         const apply = form.querySelector('.pnpm-apply'), next = form.querySelector('.pnpm-next');
         const invalidate = () => {
+            ++generation;
             token = '';
             if (confirm) { confirm.hidden = true; agreed.checked = false; apply.disabled = true; preview.replaceChildren(); }
         };
@@ -37,8 +38,10 @@
             body.set('action', 'pnpm_registry'); body.set('nonce', cfg.nonce); body.set('command', command);
             if (command === 'confirm') body.set('token', token);
             else invalidate();
+            const requestGeneration = generation;
             busy = true;
             form.dataset.busy = '1';
+            if (command === 'classify') form.dispatchEvent(new Event('pnpm:classification-saving'));
             const controls = [...form.querySelectorAll('input,select,textarea,button')];
             const previousDisabled = controls.map(control => control.disabled);
             controls.forEach(control => { control.disabled = true; });
@@ -49,6 +52,8 @@
                 if (!response.ok || !result.success) throw new Error(result.data?.message || cfg.failure);
                 const data = result.data;
                 if (data.token) {
+                    // Another form may have changed the saved classification during this read.
+                    if (requestGeneration !== generation) return;
                     token = data.token; preview.replaceChildren();
                     if (data.document) preview.append(table(data.document));
                     if (data.scope) preview.append(table(data.scope));
@@ -57,6 +62,9 @@
                         summary.textContent = row.ttn; details.append(summary, table(row.data)); preview.append(details);
                     });
                     confirm.hidden = false; message.textContent = cfg.preview;
+                } else if (command === 'classify' && data.classification) {
+                    invalidate(); message.textContent = cfg.saved;
+                    form.dispatchEvent(new CustomEvent('pnpm:classification-saved', {detail: data}));
                 } else if (command === 'confirm' && form.dataset.command === 'history') {
                     invalidate(); form.elements.previous.value = savedToken;
                     next.hidden = !data.scope?.next_page;
@@ -73,6 +81,7 @@
                 delete form.dataset.busy;
                 controls.forEach((control, i) => { control.disabled = previousDisabled[i]; });
                 if (apply) apply.disabled = !token || !agreed.checked;
+                if (command === 'classify') form.dispatchEvent(new Event('pnpm:classification-finished'));
             }
         };
         form.addEventListener('submit', event => { event.preventDefault(); request(form.dataset.command); });

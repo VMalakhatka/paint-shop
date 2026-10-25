@@ -221,13 +221,14 @@ final class RegistryPage
         }
         if (!$row['links']) echo '<p>'.self::e('No confirmed links yet.').'</p>';
         echo '<h3>'.self::e('Add a Folio document link').'</h3><p>'.self::e('Choose the saved partner, warehouse, period and document. Check the preview and confirm the link. Folio documents are not changed.').'</p>';
-        if (!$row['partner_code']) echo '<p>'.self::e('Select and save the shipment partner first.').'</p>';
+        echo '<p class="pnpm-partner-save-help"'.($row['partner_code']?' hidden':'').'>'.self::e('Select and save the shipment partner first.').'</p>';
         $this->form('link_preview',$row);
         $type=$row['purpose']==='purchase'?'RECEIPT':(in_array($row['purpose'],['customer_return','supplier_return'],true)?'RETURN':'ACCOUNT');
         $role=['RECEIPT'=>'purchase','RETURN'=>$row['purpose'],'ACCOUNT'=>'sale_account'][$type];
         $this->select('type','Document type',Folio::TYPES,$type); $this->select('role','Document role',Folio::ROLES,$role);
         $this->select('verification','Verification method',['api','manual'],'api');
-        echo '<label>'.self::e('Folio partner code').'<input name="partner" value="'.esc_attr($row['partner_code']).'" readonly required></label>';
+        echo '<label>'.self::e('Folio partner code').'<input name="partner" value="'.esc_attr($row['partner_code']).'" readonly></label>';
+        echo '<div class="pnpm-actions pnpm-classification-continue" hidden><button type="button" class="button button-primary pnpm-save-continue">'.self::e('Save classification and continue').'</button><p>'.self::e('Classification changes are not saved yet. Save to enable document loading; warehouse and dates will stay selected.').'</p></div>';
         echo '<fieldset class="pnpm-document-picker"><legend>'.self::e('Choose a Folio document').'</legend><div class="pnpm-picker-filters">';
         echo '<label>'.self::e('Warehouse').'<select name="picker_warehouse"><option value="">—</option></select></label><button type="button" class="button pnpm-warehouses">'.self::e('Load warehouses').'</button>';
         $this->input('date_from','From date','date',current_time('Y-m-01')); $this->input('date_to','To date','date',current_time('Y-m-d'));

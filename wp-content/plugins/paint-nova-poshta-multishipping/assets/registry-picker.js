@@ -1,4 +1,4 @@
-/* Read-only Folio selectors. Every selection still uses the registry preview/confirm flow. */
+/* Folio selectors are read-only. Classification saves are explicit; links still use preview/confirm. */
 (() => {
     'use strict';
     const cfg = window.pnpmRegistry;
@@ -13,8 +13,9 @@
     };
     const changed = form => form.dispatchEvent(new Event('input', {bubbles: true}));
     const classification = document.querySelector('[data-command="classify"]');
-    const initial = classification ? ['partner_code', 'direction', 'purpose'].map(key => classification.elements[key].value) : [];
-    const classificationDirty = () => classification && (classification.dataset.pickerBlocked === '1' || ['partner_code', 'direction', 'purpose'].some((key, i) => classification.elements[key].value !== initial[i]));
+    const classificationKeys = ['partner_code', 'direction', 'purpose', 'related_ttn', 'note'];
+    let initial = classification ? classificationKeys.map(key => classification.elements[key].value) : [];
+    const classificationDirty = () => classification && (classification.dataset.busy === '1' || classification.dataset.pickerBlocked === '1' || classificationKeys.some((key, i) => classification.elements[key].value !== initial[i]));
     document.querySelectorAll('.pnpm-partner-picker').forEach(box => {
         const form = box.closest('form'), search = box.querySelector('input[type="search"]');
         const results = box.querySelector('.pnpm-partner-results'), current = box.querySelector('strong');
@@ -58,9 +59,18 @@
     const submit = form.querySelector('[type="submit"]'), load = form.querySelector('.pnpm-documents-load');
     const warehouseButton = form.querySelector('.pnpm-warehouses');
     const requirement = form.querySelector('.pnpm-link-requirement');
+    const continueBox = form.querySelector('.pnpm-classification-continue'), saveContinue = form.querySelector('.pnpm-save-continue');
+    const partnerHelp = document.querySelector('.pnpm-partner-save-help');
     let version = 0, warehouseVersion = 0, cursor = '', items = [], selectedItem = null, reading = false;
     const apiMode = () => field('verification').value === 'api';
     const block = () => {
+        field('partner').value = classification?.elements.partner_code.value || '';
+        const dirty = classificationDirty();
+        picker.disabled = classification?.dataset.busy === '1';
+        continueBox.hidden = !dirty;
+        saveContinue.disabled = !classification || classification.dataset.busy === '1' || classification.dataset.pickerBlocked === '1' || !field('partner').value;
+        if (partnerHelp) partnerHelp.hidden = !!field('partner').value;
+        load.disabled = reading || dirty || !field('partner').value;
         const needsAccount = field('role').value === 'sale_expense';
         field('account_link_id').closest('label').hidden = !needsAccount;
         requirement.textContent = classificationDirty() || !field('partner').value ? text.savedPartner : (needsAccount && !field('account_link_id').value ? text.account : '');
@@ -75,7 +85,7 @@
     };
     const reset = () => {
         ++version; reading = false; cursor = ''; items = []; select.replaceChildren(); more.hidden = true;
-        clearSelection(); load.disabled = false; more.disabled = false;
+        clearSelection(); more.disabled = false;
         status.textContent = text.changed;
     };
     const mode = () => {
@@ -122,6 +132,27 @@
         finally { if (mine === warehouseVersion) warehouseButton.disabled = false; }
     }
     warehouseButton.addEventListener('click', warehouses);
+    saveContinue.addEventListener('click', () => {
+        if (!saveContinue.disabled) classification.requestSubmit();
+    });
+    classification?.addEventListener('pnpm:classification-saving', () => { reset(); block(); });
+    classification?.addEventListener('pnpm:classification-saved', event => {
+        const saved = event.detail.classification;
+        initial = classificationKeys.map(key => String(saved[key] ?? ''));
+        // The server owns the accepted snapshot and revision. Refresh every form for this record.
+        classificationKeys.forEach((key, i) => { classification.elements[key].value = initial[i]; });
+        document.querySelectorAll('.pnpm-registry-form').forEach(target => {
+            if (target.elements.id?.value === String(event.detail.id) && target.elements.revision) {
+                target.elements.revision.value = String(saved.revision);
+                changed(target);
+            }
+        });
+        field('partner').value = saved.partner_code;
+        reset();
+    });
+    classification?.addEventListener('pnpm:classification-finished', () => {
+        block(); status.textContent = classification.querySelector('.pnpm-message').textContent || text.savedPartner;
+    });
     load.addEventListener('click', () => documents()); more.addEventListener('click', () => documents(true));
     ['picker_warehouse', 'date_from', 'date_to'].forEach(key => field(key).addEventListener('input', reset));
     field('type').addEventListener('change', () => {
