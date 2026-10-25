@@ -6,7 +6,7 @@ defined('ABSPATH') || exit;
 
 final class Service
 {
-    public function __construct(private readonly Store $store = new Store(), private readonly Carrier $carrier = new Carrier(), private readonly Folio $folio = new Folio()) {}
+    public function __construct(private readonly Store $store = new Store(), private readonly Carrier $carrier = new Carrier(), private readonly Folio $folio = new Folio(), private readonly WooOrders $woo = new WooOrders()) {}
 
     public static function authorize(): void
     {
@@ -20,6 +20,7 @@ final class Service
         // Directory reads never create previews, consume tokens or clean registry data.
         if ($command==='partners') return (new Catalog())->partners($input);
         if ($command==='warehouses') return (new Catalog())->warehouses();
+        if ($command==='woo_orders') return $this->woo->listing($input);
         if ($command==='documents') {
             $row=$this->store->find((int)($input['id']??0));
             if ((int)($input['revision']??0)!==(int)$row['revision']) throw new \RuntimeException('The record changed. Reload before saving.');
@@ -36,6 +37,10 @@ final class Service
             try {
                 return $this->store->apply((string)($input['token']??''),function($kind,$payload) {
                     if ($kind==='link') return $this->store->link($payload);
+                    if ($kind==='woo_link') {
+                        $this->woo->verify($payload['document']);
+                        return $this->store->link($payload);
+                    }
                     if ($kind!=='import') throw new \RuntimeException('Preview not found.');
                     if (isset($payload['account']) && !hash_equals($payload['account'],$this->carrier->fingerprint())) throw new \RuntimeException('The Nova Poshta account changed. Check again.');
                     $ids=[];
@@ -46,12 +51,13 @@ final class Service
                 });
             } finally { lavka_ecosystem_lock_release($lock['token']); }
         }
-        if ($command==='link_preview') {
+        if ($command==='link_preview' || $command==='woo_preview') {
             $row=$this->store->find((int)($input['id']??0));
             if ((int)($input['revision']??0)!==(int)$row['revision']) throw new \RuntimeException('The record changed. Reload before saving.');
-            $document=$this->folio->preview($input,$row);
+            $document=$command==='woo_preview' ? $this->woo->preview($input) : $this->folio->preview($input,$row);
             $payload=['id'=>(int)$row['id'],'revision'=>(int)$row['revision'],'document'=>$document];
-            return ['token'=>$this->store->preview('link',$payload),'document'=>$document];
+            $visible=$document; unset($visible['order_fingerprint']);
+            return ['token'=>$this->store->preview($command==='woo_preview'?'woo_link':'link',$payload),'document'=>$visible];
         }
         if ($command==='history') {
             $page=1; $previous=[];

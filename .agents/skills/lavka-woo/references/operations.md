@@ -547,3 +547,11 @@ partner for display, but enable document reads only after explicit classificatio
 save returns the accepted snapshot/revision. Refresh all record forms without
 discarding warehouse/date filters. Never turn partner selection or document reads
 into an implicit write. Ignore late preview responses after classification changes.
+
+NP→Woo links 0.10.5 (local code/tests, 2026-10-25): registry associations use Woo
+CRUD reads and `WOO_ORDER` / `woo_order` in existing link/audit tables. Keep the
+Woo/blog identity namespace separate from Paint_Ua. Confirm a fresh order snapshot
+and registry revision; never convert these links into Woo shipment creation,
+order/meta/status writes, payment evidence or automatic Folio matches. Multiple
+orders/TTNs are allowed; do not sum parent/child totals as separate sales. Manager
+steps: `docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-registry`; contract: NP README.

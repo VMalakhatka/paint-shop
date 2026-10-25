@@ -104,7 +104,7 @@ final class Store
             $metadata = Record::metadata($input);
             if ($metadata['related_ttn'] === $row['ttn']) throw new \InvalidArgumentException('A TTN cannot refer to itself.');
             if (($metadata['partner_code']!==$row['partner_code'] || $metadata['direction']!==$row['direction'])
-                && $wpdb->get_var($wpdb->prepare('SELECT id FROM '.$this->table('_links').' WHERE registry_id=%d AND active=1 LIMIT 1',$id))) {
+                && $wpdb->get_var($wpdb->prepare('SELECT id FROM '.$this->table('_links')." WHERE registry_id=%d AND active=1 AND document_type<>'WOO_ORDER' LIMIT 1",$id))) {
                 throw new \InvalidArgumentException('Revoke existing document links before changing the partner or direction.');
             }
             $metadata['revision'] = $revision+1;
@@ -121,13 +121,15 @@ final class Store
         $id = (int)$payload['id']; $row = $this->find($id,true);
         if ((int)$row['revision'] !== (int)$payload['revision']) throw new \RuntimeException('The record changed. Reload before saving.');
         $doc = $payload['document'];
-        if ($doc['partner']!==$row['partner_code']) throw new \RuntimeException('The record changed. Reload before saving.');
+        $woo=$doc['type']==='WOO_ORDER' && $doc['role']==='woo_order';
+        if (!$woo && $doc['partner']!==$row['partner_code']) throw new \RuntimeException('The record changed. Reload before saving.');
         if ($doc['role']==='sale_expense') {
             $account=$wpdb->get_row($wpdb->prepare('SELECT * FROM '.$this->table('_links').' WHERE id=%d AND registry_id=%d AND active=1 AND role=%s',
                 $doc['account_link_id']??0,$id,'sale_account'),ARRAY_A);
             if (!$account || $account['partner_code']!==$doc['partner']) throw new \InvalidArgumentException('Confirm and select the related account before linking an expense document.');
         }
-        $identity = ['Paint_Ua', $doc['type'], $doc['id'] ?: ($doc['number'].'|'.$doc['date'].'|'.$doc['partner'].'|'.$doc['warehouse'])];
+        $identity = $woo ? ['WooCommerce',get_current_blog_id(),'shop_order',$doc['id']]
+            : ['Paint_Ua', $doc['type'], $doc['id'] ?: ($doc['number'].'|'.$doc['date'].'|'.$doc['partner'].'|'.$doc['warehouse'])];
         $key = hash('sha256',wp_json_encode($identity));
         $existing = $wpdb->get_var($wpdb->prepare('SELECT id FROM '.$this->table('_links').' WHERE registry_id=%d AND document_key=%s AND role=%s', $id,$key,$doc['role']));
         $fields = ['registry_id'=>$id,'document_key'=>$key,'document_type'=>$doc['type'],'document_id'=>$doc['id'],

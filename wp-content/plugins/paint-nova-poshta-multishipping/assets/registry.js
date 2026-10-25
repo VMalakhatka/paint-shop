@@ -55,7 +55,12 @@
                     // Another form may have changed the saved classification during this read.
                     if (requestGeneration !== generation) return;
                     token = data.token; preview.replaceChildren();
-                    if (data.document) preview.append(table(data.document));
+                    if (data.document) {
+                        const header = {...data.document}, order = header.order_snapshot;
+                        delete header.order_snapshot;
+                        preview.append(table(header));
+                        if (order) { const shown = {...order}; delete shown.order_modified; preview.append(table(shown)); }
+                    }
                     if (data.scope) preview.append(table(data.scope));
                     (data.rows || []).forEach(row => {
                         const details = document.createElement('details'), summary = document.createElement('summary');

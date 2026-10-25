@@ -1,5 +1,31 @@
 # Paint Nova Poshta Multishipping
 
+## WooCommerce registry links 0.10.5 — 2026-10-25
+
+`Registry/WooOrders.php` uses Woo CRUD exclusively for manager-only exact-ID or
+creation-period/email lookup (20 orders/page, max 366 days). UI shows order ID,
+number, customer, date, status, currency/total. No automatic Folio/name/amount
+matching. A manager selects one order, records evidence, previews and explicitly
+confirms. Repeat for multiple orders; the same order may relate to several TTNs.
+The existing capability pair and nonce cover lookups, preview and confirmation.
+
+Reuse registry links/audit/batches without a schema change: `WOO_ORDER` /
+`woo_order`, identity namespace `WooCommerce + blog ID + shop_order + ID` rather
+than `Paint_Ua`. Manual Folio input cannot create this type. Woo links are displayed
+separately, do not require a Folio partner and do not freeze Folio classification.
+Folio links keep their previous partner/account invariants. Preview holds a minimal
+order snapshot and fingerprint; confirmation re-reads it and rejects changed or
+unavailable orders. Registry revisions and durable token replay remain in force.
+Revoke retains audit. This does not lock the Woo editing workflow; stored evidence
+describes the reviewed order and is not a live mirror of later edits.
+
+No order/meta/status/item/payment write, shipment lifecycle import, notification,
+Java/NP call or automatic Folio link. No financial aggregation of parent/child
+orders. Distinct confirmation labels now identify Folio links, Woo links and
+carrier data. UK/RU translations and the [manager guide](../../../docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-registry)
+are updated. Local tests use in-memory Woo objects plus isolated registry tables;
+no actual Woo orders are created. Deploy the 0.10.5 plugin; no migration/Java update.
+
 ## Classification handoff fix 0.10.4 — 2026-10-25
 
 In 0.10.3 the partner picker showed a new selection while the link form retained

@@ -24,6 +24,7 @@ final class RegistryPage
             wp_enqueue_style('pnpm-registry',PNPM_URL.'assets/registry.css',[],PNPM_VERSION);
             wp_enqueue_script('pnpm-registry',PNPM_URL.'assets/registry.js',[],PNPM_VERSION,true);
             wp_enqueue_script('pnpm-registry-picker',PNPM_URL.'assets/registry-picker.js',['pnpm-registry'],PNPM_VERSION,true);
+            wp_enqueue_script('pnpm-registry-woo',PNPM_URL.'assets/registry-woo.js',['pnpm-registry'],PNPM_VERSION,true);
             wp_localize_script('pnpm-registry','pnpmRegistry',['url'=>admin_url('admin-ajax.php'),'nonce'=>wp_create_nonce('pnpm_registry'),
                 'page'=>admin_url('admin.php?page=pnpm-registry'),'loading'=>self::t('Checking…'),
                 'failure'=>self::t('The request failed. Reload and check the saved result before repeating.'),
@@ -44,6 +45,7 @@ final class RegistryPage
             'selectPartner'=>'Choose a partner from the search results or clear the search.',
             'account'=>'Confirm and select the related account before linking an expense document.',
             'changed'=>'Selection changed. Load the document list again.',
+            'wooSelected'=>'Selected WooCommerce order:',
         ]);
     }
 
@@ -104,10 +106,18 @@ final class RegistryPage
             'account_link_id'=>'Related account link ID', 'api_snapshot'=>'Folio header evidence',
             'Sender'=>'Sender','Recipient'=>'Recipient',
             'ThirdPerson'=>'Third party',
+            'WOO_ORDER'=>'WooCommerce order','woo_order'=>'WooCommerce order',
+            'order_snapshot'=>'Reviewed WooCommerce order','order_id'=>'WooCommerce order ID',
+            'order_number'=>'Order number','order_date'=>'Order date','order_modified'=>'Order revision time',
+            'order_status'=>'Order status','order_total'=>'Order total','order_currency'=>'Currency',
+            'customer_id'=>'Customer ID','customer_name'=>'Customer name','recipient_name'=>'Recipient',
+            'recipient_city'=>'Recipient city','parent_order_id'=>'Parent order ID',
             'EWDateCreated'=>'Carrier creation date','RecipientDateTime'=>'Actual delivery date',
             'PreferredDeliveryDate'=>'Estimated delivery date',
         ];
-        return array_map([self::class,'t'],$labels);
+        $labels=array_map([self::class,'t'],$labels);
+        if (function_exists('wc_get_order_statuses')) foreach (wc_get_order_statuses() as $key=>$label) $labels[substr($key,3)]=$label;
+        return $labels;
     }
 
     public function render(): void
@@ -207,7 +217,8 @@ final class RegistryPage
         $this->saveEnd(); echo '</section>';
         echo '<section class="pnpm-box"><h3>'.self::e('Confirmed Folio links').'</h3><p>'.self::e('A link is evidence of an association, not a payment or cost allocation. The same TTN may have several documents.').'</p>';
         $accounts=[];
-        foreach ($row['links'] as $link) {
+        $folioLinks=array_filter($row['links'],static fn($link)=>$link['document_type']!=='WOO_ORDER');
+        foreach ($folioLinks as $link) {
             if ($link['active'] && $link['document_type']==='ACCOUNT') $accounts[$link['id']]=$link['document_number'].' · '.$link['document_date'];
             echo '<details><summary>'.esc_html(($link['active']?'✓ ':'— ').(self::labels()[$link['role']]??$link['role']).' · '.$link['document_number'].' · '.$link['document_date']).'</summary>';
             echo '<p>'.self::e('Confirmed by user ID').' '.esc_html($link['confirmed_by']).' · '.esc_html($link['confirmed_at']).' UTC</p>';
@@ -219,7 +230,7 @@ final class RegistryPage
             }
             echo '</details>';
         }
-        if (!$row['links']) echo '<p>'.self::e('No confirmed links yet.').'</p>';
+        if (!$folioLinks) echo '<p>'.self::e('No confirmed links yet.').'</p>';
         echo '<h3>'.self::e('Add a Folio document link').'</h3><p>'.self::e('Choose the saved partner, warehouse, period and document. Check the preview and confirm the link. Folio documents are not changed.').'</p>';
         echo '<p class="pnpm-partner-save-help"'.($row['partner_code']?' hidden':'').'>'.self::e('Select and save the shipment partner first.').'</p>';
         $this->form('link_preview',$row);
@@ -242,9 +253,10 @@ final class RegistryPage
         echo '<p class="pnpm-link-requirement" role="status"></p><label>'.self::e('Related account for the expense document').'<select name="account_link_id"><option value="">—</option>';
         foreach ($accounts as $id=>$label) echo '<option value="'.esc_attr($id).'">'.esc_html($label).'</option>';
         echo '</select></label>';
-        $this->input('evidence','Verification evidence'); $this->previewEnd(); echo '</section>';
+        $this->input('evidence','Verification evidence'); $this->previewEnd(false,'Confirm Folio link'); echo '</section>';
+        $this->wooLinks($row);
         echo '<section class="pnpm-box"><h3>'.self::e('Refresh carrier data').'</h3>';
-        $this->form('tracking'); $this->input('ttn','TTN','text',$row['ttn'],true); $this->input('phone','Sender or recipient phone (optional)','tel'); $this->previewEnd(); echo '</section>';
+        $this->form('tracking'); $this->input('ttn','TTN','text',$row['ttn'],true); $this->input('phone','Sender or recipient phone (optional)','tel'); $this->previewEnd(false,'Save carrier data'); echo '</section>';
         echo '<section class="pnpm-box"><h3>'.self::e('Carrier observations').'</h3><p>'.self::e('Latest 100 changed responses, newest observation first. Unavailable fields remain unknown. Read times are UTC, not the shipment event time.').'</p>';
         foreach ($row['observations'] as $i=>$observation) {
             echo '<details'.($i===0?' open':'').'><summary>'.esc_html((self::labels()[$observation['source']]??$observation['source']).' · '.$observation['observed_at'].' UTC').'</summary>';
@@ -256,6 +268,39 @@ final class RegistryPage
             $this->data(json_decode($event['context'],true)?:[]); echo '</details>';
         }
         echo '</details>';
+    }
+
+    private function wooLinks(array $row): void
+    {
+        echo '<section class="pnpm-box"><h3>'.self::e('Linked WooCommerce orders').'</h3><p>'.self::e('One TTN can be linked to several WooCommerce orders. This records an association only: order status, payment, shipments and Folio documents are not changed.').'</p>';
+        $links=array_filter($row['links'],static fn($link)=>$link['document_type']==='WOO_ORDER');
+        foreach ($links as $link) {
+            echo '<details><summary>'.esc_html(($link['active']?'✓ ':'— ').'#'.$link['document_number'].' · '.$link['document_date']).'</summary>';
+            $order=wc_get_order((int)$link['document_id']);
+            if ($order instanceof \WC_Order) echo '<p><a href="'.esc_url($order->get_edit_order_url()).'">'.self::e('Open WooCommerce order').'</a></p>';
+            else echo '<p>'.self::e('WooCommerce order is unavailable. Reload the selection.').'</p>';
+            $snapshot=json_decode($link['snapshot'],true)?:[];
+            $shown=$snapshot['order_snapshot']??[]; unset($shown['order_modified']);
+            $this->data($shown);
+            echo '<p>'.self::e('Verification evidence').': '.esc_html($link['evidence']).'</p><p>'.self::e('Confirmed by user ID').' '.esc_html($link['confirmed_by']).' · '.esc_html($link['confirmed_at']).' UTC</p>';
+            if ($link['active']) {
+                $this->form('unlink',$row); echo '<input type="hidden" name="link" value="'.esc_attr($link['id']).'">';
+                $this->input('reason','Reason for revoking the link','text','',true); $this->saveEnd('Revoke link, retain audit');
+            }
+            echo '</details>';
+        }
+        if (!$links) echo '<p>'.self::e('No confirmed WooCommerce links yet.').'</p>';
+        echo '<h3>'.self::e('Link a WooCommerce order').'</h3>';
+        $this->form('woo_preview',$row);
+        echo '<fieldset class="pnpm-woo-picker"><legend>'.self::e('Find WooCommerce orders').'</legend><div class="pnpm-picker-filters">';
+        $this->input('woo_id','WooCommerce order ID (optional)','number');
+        $this->input('woo_email','Customer email (optional)','email');
+        $this->input('woo_from','From date','date',current_time('Y-m-01')); $this->input('woo_to','To date','date',current_time('Y-m-d'));
+        echo '<button type="button" class="button pnpm-woo-load">'.self::e('Find orders').'</button></div><p>'.self::e('Search by exact order ID, or by creation dates and optional customer email. Results are not automatically matched to the Folio partner.').'</p>';
+        echo '<p class="pnpm-woo-message" role="status" aria-live="polite"></p><label>'.self::e('Choose a WooCommerce order').'<select class="pnpm-woo-select" size="6" aria-label="'.esc_attr(self::t('Choose a WooCommerce order')).'"></select></label>';
+        echo '<button type="button" class="button pnpm-woo-more" hidden>'.self::e('Next page').'</button></fieldset><p class="pnpm-woo-selected" role="status"></p><input type="hidden" name="woo_order_id">';
+        $this->input('evidence','Why this order belongs to this TTN','text','',true);
+        $this->previewEnd(false,'Confirm WooCommerce link'); echo '</section>';
     }
 
     private function coverage(): void
@@ -295,11 +340,11 @@ final class RegistryPage
         foreach ($options as $value) echo '<option value="'.esc_attr($value).'"'.selected($selected,$value,false).'>'.esc_html(self::labels()[$value]??($value ?: self::t('All'))).'</option>';
         echo '</select></label>';
     }
-    private function previewEnd(bool $history=false): void
+    private function previewEnd(bool $history=false,string $saveLabel='Confirm and save'): void
     {
         echo '<div class="pnpm-actions"><button class="button" type="submit">'.self::e('Read and preview').'</button>';
         if ($history) echo '<button class="button pnpm-next" type="button" hidden>'.self::e('Read next page').'</button>';
-        echo '</div><p class="pnpm-message" role="status" aria-live="polite"></p><div class="pnpm-preview"></div><fieldset class="pnpm-confirm" hidden><label><input type="checkbox" name="confirmed" value="1"> '.self::e('I checked this preview and confirm saving it to the site registry.').'</label><button type="button" class="button button-primary pnpm-apply" disabled>'.self::e('Confirm and save').'</button></fieldset></form>';
+        echo '</div><p class="pnpm-message" role="status" aria-live="polite"></p><div class="pnpm-preview"></div><fieldset class="pnpm-confirm" hidden><label><input type="checkbox" name="confirmed" value="1"> '.self::e('I checked this preview and confirm saving it to the site registry.').'</label><button type="button" class="button button-primary pnpm-apply" disabled>'.self::e($saveLabel).'</button></fieldset></form>';
     }
     private function saveEnd(string $label='Save classification'): void
     {

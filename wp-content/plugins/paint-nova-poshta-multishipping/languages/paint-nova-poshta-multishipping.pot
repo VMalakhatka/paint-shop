@@ -2370,3 +2370,99 @@ msgstr ""
 
 msgid "Classification changes are not saved yet. Save to enable document loading; warehouse and dates will stay selected."
 msgstr ""
+
+msgid "Choose a WooCommerce order"
+msgstr ""
+
+msgid "Confirm Folio link"
+msgstr ""
+
+msgid "Confirm WooCommerce link"
+msgstr ""
+
+msgid "Currency"
+msgstr ""
+
+msgid "Customer ID"
+msgstr ""
+
+msgid "Customer email (optional)"
+msgstr ""
+
+msgid "Customer name"
+msgstr ""
+
+msgid "Enter a valid WooCommerce order ID."
+msgstr ""
+
+msgid "Enter a valid customer email."
+msgstr ""
+
+msgid "Find WooCommerce orders"
+msgstr ""
+
+msgid "Find orders"
+msgstr ""
+
+msgid "Link a WooCommerce order"
+msgstr ""
+
+msgid "Linked WooCommerce orders"
+msgstr ""
+
+msgid "No confirmed WooCommerce links yet."
+msgstr ""
+
+msgid "One TTN can be linked to several WooCommerce orders. This records an association only: order status, payment, shipments and Folio documents are not changed."
+msgstr ""
+
+msgid "Open WooCommerce order"
+msgstr ""
+
+msgid "Order date"
+msgstr ""
+
+msgid "Order number"
+msgstr ""
+
+msgid "Order revision time"
+msgstr ""
+
+msgid "Order status"
+msgstr ""
+
+msgid "Order total"
+msgstr ""
+
+msgid "Parent order ID"
+msgstr ""
+
+msgid "Reviewed WooCommerce order"
+msgstr ""
+
+msgid "Save carrier data"
+msgstr ""
+
+msgid "Search by exact order ID, or by creation dates and optional customer email. Results are not automatically matched to the Folio partner."
+msgstr ""
+
+msgid "Selected WooCommerce order:"
+msgstr ""
+
+msgid "The WooCommerce order changed. Preview the link again."
+msgstr ""
+
+msgid "Why this order belongs to this TTN"
+msgstr ""
+
+msgid "WooCommerce order"
+msgstr ""
+
+msgid "WooCommerce order ID"
+msgstr ""
+
+msgid "WooCommerce order ID (optional)"
+msgstr ""
+
+msgid "WooCommerce order is unavailable. Reload the selection."
+msgstr ""

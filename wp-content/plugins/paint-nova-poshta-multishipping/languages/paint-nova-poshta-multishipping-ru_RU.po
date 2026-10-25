@@ -1473,3 +1473,99 @@ msgstr "Сохранить классификацию и продолжить"
 
 msgid "Classification changes are not saved yet. Save to enable document loading; warehouse and dates will stay selected."
 msgstr "Изменения классификации ещё не сохранены. Сохраните, чтобы загрузить документы; склад и даты останутся выбранными."
+
+msgid "Choose a WooCommerce order"
+msgstr "Выберите заказ WooCommerce"
+
+msgid "Confirm Folio link"
+msgstr "Подтвердить связь с ФОЛИО"
+
+msgid "Confirm WooCommerce link"
+msgstr "Подтвердить связь с WooCommerce"
+
+msgid "Currency"
+msgstr "Валюта"
+
+msgid "Customer ID"
+msgstr "ID клиента"
+
+msgid "Customer email (optional)"
+msgstr "Email клиента (необязательно)"
+
+msgid "Customer name"
+msgstr "Имя клиента"
+
+msgid "Enter a valid WooCommerce order ID."
+msgstr "Введите корректный ID заказа WooCommerce."
+
+msgid "Enter a valid customer email."
+msgstr "Введите корректный email клиента."
+
+msgid "Find WooCommerce orders"
+msgstr "Найти заказы WooCommerce"
+
+msgid "Find orders"
+msgstr "Найти заказы"
+
+msgid "Link a WooCommerce order"
+msgstr "Привязать заказ WooCommerce"
+
+msgid "Linked WooCommerce orders"
+msgstr "Связанные заказы WooCommerce"
+
+msgid "No confirmed WooCommerce links yet."
+msgstr "Подтверждённых связей с WooCommerce пока нет."
+
+msgid "One TTN can be linked to several WooCommerce orders. This records an association only: order status, payment, shipments and Folio documents are not changed."
+msgstr "Одну ТТН можно связать с несколькими заказами WooCommerce. Это только связь: статус заказа, оплата, отправления и документы ФОЛИО не изменяются."
+
+msgid "Open WooCommerce order"
+msgstr "Открыть заказ WooCommerce"
+
+msgid "Order date"
+msgstr "Дата заказа"
+
+msgid "Order number"
+msgstr "Номер заказа"
+
+msgid "Order revision time"
+msgstr "Время изменения заказа"
+
+msgid "Order status"
+msgstr "Статус заказа"
+
+msgid "Order total"
+msgstr "Сумма заказа"
+
+msgid "Parent order ID"
+msgstr "ID родительского заказа"
+
+msgid "Reviewed WooCommerce order"
+msgstr "Проверенный заказ WooCommerce"
+
+msgid "Save carrier data"
+msgstr "Сохранить данные перевозчика"
+
+msgid "Search by exact order ID, or by creation dates and optional customer email. Results are not automatically matched to the Folio partner."
+msgstr "Поиск по точному ID заказа либо датам создания и необязательному email клиента. Результаты не сопоставляются с контрагентом ФОЛИО автоматически."
+
+msgid "Selected WooCommerce order:"
+msgstr "Выбранный заказ WooCommerce:"
+
+msgid "The WooCommerce order changed. Preview the link again."
+msgstr "Заказ WooCommerce изменился. Просмотрите связь заново."
+
+msgid "Why this order belongs to this TTN"
+msgstr "Почему этот заказ относится к этой ТТН"
+
+msgid "WooCommerce order"
+msgstr "Заказ WooCommerce"
+
+msgid "WooCommerce order ID"
+msgstr "ID заказа WooCommerce"
+
+msgid "WooCommerce order ID (optional)"
+msgstr "ID заказа WooCommerce (необязательно)"
+
+msgid "WooCommerce order is unavailable. Reload the selection."
+msgstr "Заказ WooCommerce недоступен. Обновите список."

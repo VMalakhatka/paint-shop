@@ -3,7 +3,7 @@
 if (!defined('WP_CLI') || !WP_CLI || wp_get_environment_type()!=='local'
     || !defined('PNPM_NOVA_POSHTA_API_KEY') || PNPM_NOVA_POSHTA_API_KEY!=='synthetic-registry-test-key') throw new RuntimeException('Intercepted local CLI only');
 
-use Paint\NovaPoshta\Registry\{Schema,Record,Store,Service,Folio,Carrier};
+use Paint\NovaPoshta\Registry\{Schema,Record,Store,Service,Folio,Carrier,WooOrders};
 use Paint\NovaPoshta\Infrastructure\ApiClient;
 use Paint\NovaPoshta\Admin\RegistryPage;
 
@@ -220,6 +220,52 @@ try {
     $check($service->run('documents',array_merge($query,['type'=>'RECEIPT','cursor'=>$receipts['cursor']]))['cursor']==='','Receipt period completes');
     $reject(fn()=>$service->run('documents',array_merge($query,['type'=>'RECEIPT','cursor'=>'2026-06-03|0'])),'Receipt cursor cannot leave selected period');
     $check($store->detail($summaryId)===$beforeCatalog,'Selectors do not change registry records, observations or links');
+    // In-memory CRUD objects only: never create/change actual Woo orders in this DB.
+    $wooA=new WC_Order(); $wooA->set_date_created('2026-06-01 12:00:00'); $wooA->set_status('processing');
+    $wooA->set_currency('UAH'); $wooA->set_total('149.00'); $wooA->set_billing_first_name('Synthetic'); $wooA->set_billing_last_name('Customer'); $wooA->set_id(999999001);
+    $wooB=clone $wooA; $wooB->set_id(999999002);
+    $wooFixture=[999999001=>$wooA,999999002=>$wooB]; $wooQueries=[];
+    $woo=new WooOrders(static function($id) use (&$wooFixture) { return $wooFixture[$id]??false; },
+        static function($args) use (&$wooQueries,$wooA) { $wooQueries[]=$args; return (object)['orders'=>[$wooA],'max_num_pages'=>2]; });
+    $wooService=new Service($store,new Carrier(),new Folio(),$woo);
+    $wooRegistry=$store->transaction(fn()=>$store->observe('99999999000005','manual',['evidence'=>'Synthetic Woo registry'],'2026-06-01 12:00:00'));
+    $httpBefore=count($http);
+    $orderList=$wooService->run('woo_orders',['woo_from'=>'2026-06-01','woo_to'=>'2026-06-02','woo_email'=>'test@example.invalid']);
+    $check($orderList['next_page']===2 && $wooQueries[0]['limit']===20 && $wooQueries[0]['type']==='shop_order'
+        && $wooQueries[0]['billing_email']==='test@example.invalid' && $wooQueries[0]['date_created']==='2026-06-01...2026-06-02','Woo search uses bounded CRUD query and explicit filters');
+    $check($wooService->run('woo_orders',['woo_id'=>'999999001'])['items'][0]['order_id']===999999001 && count($wooQueries)===1,'Exact Woo ID uses CRUD read independently of dates');
+    $reject(fn()=>$wooService->run('woo_orders',['woo_id'=>'invalid']),'Invalid Woo ID rejected');
+    $reject(fn()=>$wooService->run('woo_orders',['woo_id'=>'999999999']),'Unavailable Woo order rejected');
+    $reject(fn()=>$wooService->run('woo_orders',['woo_from'=>'2026-06-02','woo_to'=>'2026-06-01']),'Woo reversed date period rejected');
+    $draft=['id'=>$wooRegistry,'revision'=>1,'woo_order_id'=>'999999001','evidence'=>'Checked synthetic recipient and order'];
+    $preview=$wooService->run('woo_preview',$draft);
+    $check(!isset($preview['document']['order_fingerprint']) && count($store->detail($wooRegistry)['links'])===0,'Woo preview creates no association and hides fingerprint');
+    $wooA->set_total('150.00');
+    $reject(fn()=>$wooService->run('confirm',['token'=>$preview['token'],'confirmed'=>'1']),'Changed Woo snapshot blocks confirmation');
+    $wooA->set_total('149.00');
+    $confirmed=$wooService->run('confirm',['token'=>$preview['token'],'confirmed'=>'1']);
+    $check($wooService->run('confirm',['token'=>$preview['token'],'confirmed'=>'1'])===$confirmed && count($store->detail($wooRegistry)['links'])===1,'Woo confirmation replay is idempotent');
+    $second=$wooService->run('woo_preview',array_merge($draft,['revision'=>2,'woo_order_id'=>'999999002']));
+    $wooService->run('confirm',['token'=>$second['token'],'confirmed'=>'1']);
+    $check(count($store->detail($wooRegistry)['links'])===2,'Several Woo orders can belong to one TTN');
+    $other=$wooService->run('woo_preview',['id'=>$summaryId,'revision'=>2,'woo_order_id'=>'999999001','evidence'=>'Synthetic split shipment']);
+    $wooService->run('confirm',['token'=>$other['token'],'confirmed'=>'1']);
+    $check($store->detail($summaryId)['links'][0]['document_type']==='WOO_ORDER','One Woo order can belong to several TTNs');
+    $missing=$wooService->run('woo_preview',array_merge($draft,['revision'=>3]));
+    unset($wooFixture[999999001]);
+    $reject(fn()=>$wooService->run('confirm',['token'=>$missing['token'],'confirmed'=>'1']),'Order deleted after preview blocks confirmation');
+    $wooFixture[999999001]=$wooA;
+    $store->classify($wooRegistry,3,['partner_code'=>'OTHER','direction'=>'incoming','purpose'=>'customer_return']);
+    $check(count($store->detail($wooRegistry)['links'])===2,'Woo association does not require or freeze a Folio partner');
+    $stale=$wooService->run('woo_preview',array_merge($draft,['revision'=>4]));
+    $store->classify($wooRegistry,4,['partner_code'=>'OTHER','direction'=>'incoming','purpose'=>'customer_return','note'=>'Synthetic revision']);
+    $reject(fn()=>$wooService->run('confirm',['token'=>$stale['token'],'confirmed'=>'1']),'Registry revision guards Woo confirmation');
+    $links=$store->detail($wooRegistry)['links'];
+    $store->unlink($wooRegistry,5,(int)$links[0]['id'],'Synthetic correction of association');
+    $check(count(array_filter($store->detail($wooRegistry)['links'],static fn($link)=>$link['active']))===1,'Woo link revoked independently with audit');
+    $check(count($http)===$httpBefore && $wooA->get_total()==='149.00','Woo linking performs no external HTTP or order mutation');
+    $manager->allcaps=[]; $reject(fn()=>$wooService->run('woo_orders',['woo_id'=>'999999001']),'Woo search requires registry manager permissions');
+    $manager->allcaps=['manage_woocommerce'=>true,'manage_pnpm_shipments'=>true];
     if ($dir=getenv('PNPM_REGISTRY_FIXTURE_DIR')) {
         foreach (['detail','index'] as $view) {
             switch_to_locale('uk'); $_GET=$view==='detail'?['page'=>'pnpm-registry','id'=>$summaryId]:['page'=>'pnpm-registry'];
@@ -229,7 +275,7 @@ try {
                 'preview'=>RegistryPage::t('Preview only. Check the data and confirm below.'),'saved'=>RegistryPage::t('Saved to the site registry.'),
                 'empty'=>'Synthetic empty page','more'=>'Synthetic next page','labels'=>RegistryPage::labels(),'picker'=>RegistryPage::pickerText()];
             restore_previous_locale();
-            file_put_contents($dir.'/registry-'.$view.'.html','<!doctype html><html lang="uk"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font:16px/1.5 system-ui;background:#f0f0f1;margin:24px}input,button,select,textarea{font:inherit}table{width:100%;text-align:left}button{padding:6px 12px}td{padding:8px}h1{font-size:28px}</style><style>'.file_get_contents(PNPM_DIR.'assets/registry.css').'</style>'.$body.'<script>window.pnpmRegistry='.wp_json_encode($config).';</script><script>'.file_get_contents(PNPM_DIR.'assets/registry.js').'</script><script>'.file_get_contents(PNPM_DIR.'assets/registry-picker.js').'</script></html>');
+            file_put_contents($dir.'/registry-'.$view.'.html','<!doctype html><html lang="uk"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font:16px/1.5 system-ui;background:#f0f0f1;margin:24px}input,button,select,textarea{font:inherit}table{width:100%;text-align:left}button{padding:6px 12px}td{padding:8px}h1{font-size:28px}</style><style>'.file_get_contents(PNPM_DIR.'assets/registry.css').'</style>'.$body.'<script>window.pnpmRegistry='.wp_json_encode($config).';</script><script>'.file_get_contents(PNPM_DIR.'assets/registry.js').'</script><script>'.file_get_contents(PNPM_DIR.'assets/registry-picker.js').'</script><script>'.file_get_contents(PNPM_DIR.'assets/registry-woo.js').'</script></html>');
         }
     }
     $check($mail===0,'Registry sent no email');
