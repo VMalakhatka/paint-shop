@@ -57,7 +57,7 @@ $mock=static function($pre,$args,$url) use (&$http,&$documentReads,&$mode,&$stat
         $second=str_contains($url,'/124/');
         return $response(['ok'=>true,'values'=>['documentType'=>str_contains($url,'/EXPENSE/')?'EXPENSE':'ACCOUNT',
             'documentId'=>$second?124:123,'partnerShortName'=>$valuesMode==='wrong'?'OTHER':'TEST',
-            'documentNumber'=>$second?'51':'50','documentNumberSuffix'=>'a','documentDate'=>'2026-06-01','warehouseId'=>$second?8:7,
+            'documentNumber'=>$second?'51':'50','documentNumberSuffix'=>'a','documentDate'=>match($valuesMode) {'array_date'=>[2026,6,1], 'bad_date'=>[2026,2,31], 'wrong_date'=>[2026,6,2], default=>'2026-06-01'},'warehouseId'=>$second?8:7,
             'documentAmount'=>'149.00','shipmentAmount'=>'149.00','accountingAmount'=>$valuesMode==='missing'?null:'100.25',
             'lineCount'=>2,'missingAmountLines'=>0,'missingAccountingLines'=>$valuesMode==='missing'?1:0,'currency'=>'UAH','source'=>'ACTIVE_LEDGER']]);
     }
@@ -291,6 +291,12 @@ try {
 
     $v=$store->detail($transferId)['links'][0]; $values=json_decode($v['snapshot'],true)['values'];
     $check($values['document_amount']==='149.00' && $values['shipment_amount']==='149.00' && $values['accounting_amount']==='100.25' && $values['currency']==='UAH','Document amounts captured as decimal strings, independently of carrier costs');
+    $valuesMode='array_date'; $p=$service->run('link_preview',$direct);
+    $check($p['document']['values']['accounting_amount']==='100.25','Production Java LocalDate arrays preserve verified document amounts');
+    foreach (['bad_date','wrong_date'] as $valuesMode) {
+        $p=$service->run('link_preview',$direct);
+        $check($p['document']['values']['status']==='values_unavailable','Invalid or different Java date cannot match the selected document');
+    }
     $valuesMode='missing'; $p=$service->run('link_preview',$direct);
     $check($p['document']['values']['accounting_amount']===null && $p['document']['values']['missing_accounting_lines']===1,'Missing accounting line is not zero or a partial sum');
     $valuesMode='wrong'; $p=$service->run('link_preview',$direct);
@@ -299,9 +305,14 @@ try {
     $check($p['document']['values']['document_amount']==='149.00' && $p['document']['values']['accounting_amount']===null,'Old API retains verified header total without inventing cost');
     $valuesMode='good';
     $link=$store->detail($transferId)['links'][0]; $before=$store->detail($transferId);
+    $valuesMode='offline';
+    $reject(fn()=>$service->run('refresh_link_preview',['id'=>$transferId,'revision'=>4,'link'=>$link['id']]),'Unavailable amounts cannot replace a saved snapshot');
+    $check($store->detail($transferId)===$before,'Failed values refresh preserves existing link and amounts');
+    $valuesMode='array_date';
     $refresh=$service->run('refresh_link_preview',['id'=>$transferId,'revision'=>4,'link'=>$link['id']]);
     $check($store->detail($transferId)===$before,'Refreshing values is preview-only');
     $confirm($refresh['token']); $check(count($store->detail($transferId)['links'])===2 && (int)$store->find($transferId)['revision']===5,'Refresh updates the existing link without duplicate');
+    $valuesMode='good';
     $reject(fn()=>$service->run('refresh_link_preview',['id'=>$transferId,'revision'=>5,'link'=>999999]),'Refresh cannot access unrelated link');
     $check(DocumentValues::money('0')==='0.00' && DocumentValues::money('-12.34')==='-12.34' && DocumentValues::money(null)===null && DocumentValues::money('1e4')===null,'Money retains zero, signed values and unknown without floating arithmetic');
     $packages=$store->detail($summaryId)['carrier_packages'];

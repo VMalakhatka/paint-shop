@@ -17,7 +17,7 @@ final class DocumentValues
         if (!is_array($v) || ($v['documentType']??'')!==$doc['type'] || (string)($v['documentId']??'')!==$doc['id']
             || ($v['partnerShortName']??'')!==$doc['partner'] || ($v['currency']??'')!=='UAH' || ($v['source']??'')!=='ACTIVE_LEDGER'
             || trim((string)($v['documentNumber']??'').(string)($v['documentNumberSuffix']??''))!==$doc['number']
-            || substr((string)($v['documentDate']??''),0,10)!==$doc['date'] || (string)($v['warehouseId']??'')!==$doc['warehouse']) return $values;
+            || self::date($v['documentDate']??null)!==$doc['date'] || (string)($v['warehouseId']??'')!==$doc['warehouse']) return $values;
         $document=self::money($v['documentAmount']??null);
         // Two reads must agree on the already verified header amount, if present.
         if ($values['document_amount']!==null && $document!==$values['document_amount']) return $values;
@@ -40,5 +40,18 @@ final class DocumentValues
         if (!preg_match('/^(-?)(\d{1,12})(?:\.(\d{1,2}))?$/D',$value,$m)) return null;
         $whole=ltrim($m[2],'0')?:'0'; $fraction=str_pad($m[3]??'',2,'0');
         return ($m[1] && ($whole!=='0'||$fraction!=='00')?'-':'').$whole.'.'.$fraction;
+    }
+
+    private static function date($value): ?string
+    {
+        // Java LocalDate may be serialized as [year, month, day] in production.
+        if (is_array($value)) {
+            if (!array_is_list($value) || count($value)!==3 || count(array_filter($value,'is_int'))!==3) return null;
+            if (!checkdate($value[1],$value[2],$value[0])) return null;
+            $value=sprintf('%04d-%02d-%02d',...$value);
+        }
+        if (!is_string($value)) return null;
+        try { return Record::date(substr($value,0,10)); }
+        catch (\InvalidArgumentException $e) { return null; }
     }
 }

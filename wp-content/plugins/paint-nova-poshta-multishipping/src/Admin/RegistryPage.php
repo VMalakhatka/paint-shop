@@ -260,7 +260,7 @@ final class RegistryPage
         $folioLinks=array_filter($row['links'],static fn($link)=>$link['document_type']!=='WOO_ORDER');
         foreach ($folioLinks as $link) {
             if ($link['active'] && $link['document_type']==='ACCOUNT') $accounts[$link['id']]=$link['document_number'].' · '.$link['document_date'];
-            echo '<details><summary>'.esc_html(($link['active']?'✓ ':'— ').(self::labels()[$link['role']]??$link['role']).' · '.$link['document_number'].' · '.$link['document_date']).'</summary>';
+            echo '<details id="pnpm-link-'.esc_attr($link['id']).'"><summary>'.esc_html(($link['active']?'✓ ':self::t('Removed link').' · ').(self::labels()[$link['role']]??$link['role']).' · '.$link['document_number'].' · '.$link['document_date']).'</summary>';
             echo '<p>'.self::e('Confirmed by user ID').' '.esc_html($link['confirmed_by']).' · '.esc_html($link['confirmed_at']).' UTC</p>';
             $snapshot=json_decode($link['snapshot'],true)?:[]; $values=$snapshot['values']??null; unset($snapshot['values']);
             $this->data($snapshot);
@@ -268,11 +268,12 @@ final class RegistryPage
             if ($link['active'] && in_array($link['document_type'],['ACCOUNT','EXPENSE','RECEIPT'],true) && $link['document_id'] && $link['verification']!=='api_basis') {
                 $this->form('refresh_link_preview',$row); echo '<input type="hidden" name="link" value="'.esc_attr($link['id']).'">';
                 echo '<p>'.self::e('Read this linked document again to refresh its saved values. Check and confirm; previous evidence remains in the audit.').'</p>';
-                $this->previewEnd(false,'Confirm Folio link');
+                $this->previewEnd(false,'Save updated amounts','Read current amounts');
             }
             if ($link['active']) {
                 $this->form('unlink',$row); echo '<input type="hidden" name="link" value="'.esc_attr($link['id']).'">';
-                $this->input('reason','Reason for revoking the link','text','',true);
+                echo '<p>'.self::e('Wrong document? Remove this association, then choose and confirm the correct document below. This does not delete or change Folio documents or the TTN.').'</p>';
+                $this->input('reason','Reason for revoking the link (10–1000 characters)','text','',true);
                 $this->saveEnd('Revoke link, retain audit');
             }
             echo '</details>';
@@ -401,13 +402,17 @@ final class RegistryPage
         $links=array_filter($links,static fn($link)=>$link['active'] && $link['document_type']!=='WOO_ORDER');
         if (!$links) return;
         echo '<div class="pnpm-table-scroll"><table class="widefat striped pnpm-evidence-table"><thead><tr>';
-        foreach(['Document number','Warehouse','Document total, UAH','Goods amount in document lines, UAH','Accounting cost in document lines, UAH','Read at (UTC)'] as $label) echo '<th>'.self::e($label).'</th>';
+        foreach(['Document number','Warehouse','Document total, UAH','Goods amount in document lines, UAH','Accounting cost in document lines, UAH','Read at (UTC)','Actions'] as $label) echo '<th>'.self::e($label).'</th>';
         echo '</tr></thead><tbody>';
         foreach($links as $link) {
             $v=json_decode($link['snapshot'],true)['values']??[];
             echo '<tr>';
             foreach([$link['document_number'],$link['warehouse_id'],$v['document_amount']??null,$v['shipment_amount']??null,$v['accounting_amount']??null,$v['captured_at_utc']??null] as $value) echo '<td>'.esc_html($value===null?'—':(string)$value).'</td>';
-            echo '</tr>';
+            echo '<td class="pnpm-link-actions">';
+            if (in_array($link['document_type'],['ACCOUNT','EXPENSE','RECEIPT'],true) && $link['document_id'] && $link['verification']!=='api_basis') {
+                echo '<button type="button" class="button" data-link-target="pnpm-link-'.esc_attr($link['id']).'" data-link-action="refresh_link_preview">'.self::e('Update amounts').'</button> ';
+            }
+            echo '<button type="button" class="button" data-link-target="pnpm-link-'.esc_attr($link['id']).'" data-link-action="unlink">'.self::e('Correct / remove link').'</button></td></tr>';
         }
         echo '</tbody></table></div><p>'.self::e('A dash means no saved value. Open the link below and read it again to update older links.').'</p>';
     }
@@ -448,7 +453,7 @@ final class RegistryPage
     }
     private function input(string $name,string $label,string $type='text',string $value='',bool $required=false): void
     {
-        echo '<label>'.self::e($label).'<input name="'.esc_attr($name).'" type="'.esc_attr($type).'" value="'.esc_attr($value).'" maxlength="1000"'.($required?' required':'').'></label>';
+        echo '<label>'.self::e($label).'<input name="'.esc_attr($name).'" type="'.esc_attr($type).'" value="'.esc_attr($value).'" maxlength="1000"'.($required?' required':'').($name==='reason'?' minlength="10"':'').'></label>';
     }
     private function select(string $name,string $label,array $options,string $selected=''): void
     {
@@ -456,9 +461,9 @@ final class RegistryPage
         foreach ($options as $value) echo '<option value="'.esc_attr($value).'"'.selected($selected,$value,false).'>'.esc_html(self::labels()[$value]??($value ?: self::t('All'))).'</option>';
         echo '</select></label>';
     }
-    private function previewEnd(bool $history=false,string $saveLabel='Confirm and save'): void
+    private function previewEnd(bool $history=false,string $saveLabel='Confirm and save',string $readLabel='Read and preview'): void
     {
-        echo '<div class="pnpm-actions"><button class="button" type="submit">'.self::e('Read and preview').'</button>';
+        echo '<div class="pnpm-actions"><button class="button" type="submit">'.self::e($readLabel).'</button>';
         if ($history) echo '<button class="button pnpm-next" type="button" hidden>'.self::e('Read next page').'</button>';
         echo '</div><p class="pnpm-message" role="status" aria-live="polite"></p><div class="pnpm-preview"></div><fieldset class="pnpm-confirm" hidden><label><input type="checkbox" name="confirmed" value="1"> '.self::e('I checked this preview and confirm saving it to the site registry.').'</label><button type="button" class="button button-primary pnpm-apply" disabled>'.self::e($saveLabel).'</button></fieldset></form>';
     }

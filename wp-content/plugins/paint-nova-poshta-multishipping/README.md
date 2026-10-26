@@ -1,5 +1,24 @@
 # Paint Nova Poshta Multishipping
 
+## Saved-link correction and values refresh 0.10.10 — 2026-10-26
+
+Production read-only verification exposed Java LocalDate JSON arrays in `/values`.
+`DocumentValues` now accepts validated `[year, month, day]` and ISO dates; invalid
+or mismatching dates still reject detailed values. Refresh refuses unavailable
+values before staging a preview, preserving old evidence instead of replacing it
+with unknowns. New links may still retain a verified header when details are absent.
+
+The active values table has explicit Update amounts and Correct / remove link
+buttons. They open and focus the existing card/forms; neither submits a request.
+Refresh has distinct read/save labels. Revocation retains audit and removes only
+the association, with a visible reason length requirement; replacement uses the
+normal document selection/confirmation. No Folio, NP or Woo mutation was added.
+
+146 local registry checks pass, including production date format, invalid dates
+and unavailable refresh preserving evidence. UI checked using synthetic data.
+Only WordPress plugin deployment is needed for this fix; no schema migration or
+Java change. Production values were read, not saved or backfilled.
+
 ## Document values and package facts 0.10.9 — 2026-10-26
 
 `DocumentValues` captures immutable decimal-string UAH evidence in link snapshot

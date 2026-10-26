@@ -2667,3 +2667,30 @@ msgstr ""
 
 msgid "Volume, m³"
 msgstr ""
+
+msgid "Update amounts"
+msgstr ""
+
+msgid "Correct / remove link"
+msgstr ""
+
+msgid "Read current amounts"
+msgstr ""
+
+msgid "Save updated amounts"
+msgstr ""
+
+msgid "Removed link"
+msgstr ""
+
+msgid "Actions"
+msgstr ""
+
+msgid "Reason for revoking the link (10–1000 characters)"
+msgstr ""
+
+msgid "Wrong document? Remove this association, then choose and confirm the correct document below. This does not delete or change Folio documents or the TTN."
+msgstr ""
+
+msgid "Document amounts could not be verified. Saved values were not changed."
+msgstr ""

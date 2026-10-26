@@ -63,6 +63,7 @@ final class Service
                 'document_id'=>$link['document_id'],'number'=>$link['document_number'],'date'=>$link['document_date'],
                 'warehouse'=>$link['warehouse_id'],'partner'=>$link['partner_code'],'evidence'=>$link['evidence'],
                 'account_link_id'=>$snapshot['account_link_id']??0],$row);
+            if (($document['values']['status']??'')!=='values_captured') throw new \RuntimeException('Document amounts could not be verified. Saved values were not changed.');
             return ['token'=>$this->store->preview('link',['id'=>(int)$row['id'],'revision'=>(int)$row['revision'],'document'=>$document]),'document'=>$document];
         }
         if ($command==='link_preview' || $command==='woo_preview') {

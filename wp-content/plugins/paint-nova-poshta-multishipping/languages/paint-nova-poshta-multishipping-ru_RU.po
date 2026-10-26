@@ -1773,3 +1773,30 @@ msgstr "Объём, м³"
 
 msgid "Status"
 msgstr "Статус"
+
+msgid "Update amounts"
+msgstr "Обновить суммы"
+
+msgid "Correct / remove link"
+msgstr "Исправить / убрать связь"
+
+msgid "Read current amounts"
+msgstr "Прочитать актуальные суммы"
+
+msgid "Save updated amounts"
+msgstr "Сохранить обновлённые суммы"
+
+msgid "Removed link"
+msgstr "Отменённая связь"
+
+msgid "Actions"
+msgstr "Действия"
+
+msgid "Reason for revoking the link (10–1000 characters)"
+msgstr "Причина отмены связи (10–1000 символов)"
+
+msgid "Wrong document? Remove this association, then choose and confirm the correct document below. This does not delete or change Folio documents or the TTN."
+msgstr "Ошибочный документ? Уберите эту связь, затем выберите и подтвердите правильный документ ниже. Документы ФОЛИО и ТТН не удаляются и не изменяются."
+
+msgid "Document amounts could not be verified. Saved values were not changed."
+msgstr "Не удалось проверить суммы документа. Сохранённые значения не изменены."

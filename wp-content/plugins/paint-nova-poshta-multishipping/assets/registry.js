@@ -36,6 +36,14 @@
         }
         target.append(paragraph('folio_context_hint'));
     };
+    document.querySelectorAll('[data-link-target]').forEach(button => button.addEventListener('click', () => {
+        const card = document.getElementById(button.dataset.linkTarget);
+        const form = card?.querySelector(`form[data-command="${button.dataset.linkAction}"]`);
+        if (!form) return;
+        card.open = true;
+        form.scrollIntoView({block: 'center'});
+        form.querySelector('input:not([type="hidden"]),button[type="submit"]')?.focus({preventScroll: true});
+    }));
     document.querySelectorAll('.pnpm-registry-form').forEach(form => {
         let token = '', busy = false, generation = 0;
         const message = form.querySelector('.pnpm-message'), preview = form.querySelector('.pnpm-preview');

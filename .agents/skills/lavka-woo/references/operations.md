@@ -587,3 +587,13 @@ are not per-TTN allocations; account/expense, repeated TTNs and internal transfe
 must not become duplicate sales. NP OptionsSeat and our creation request already
 persist per-place kg/cm data; show source-separated facts, never guessed dimensions.
 See NP README 0.10.9 and manager guide #np-registry for workflow/deployment limits.
+
+### Registry link refresh date contract — verified 2026-10-26
+
+NP registry `/values` reads can return Java LocalDate as `[year, month, day]`;
+normalize and validate it before exact document identity matching. A refresh
+with unavailable/mismatching values must not replace existing evidence.
+Link correction is audited revocation plus normal selection/confirmation; it
+never deletes or edits Folio documents. Sources: `DocumentValues.php`,
+`Service::run(refresh_link_preview)`, `Store::unlink`, read-only production check.
+Operator steps remain in `docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-registry`.
