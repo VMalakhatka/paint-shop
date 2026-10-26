@@ -17,9 +17,9 @@ $store=new Store(); $service=new Service(); $ttn='99999999000001'; $ttn2='999999
 $key='pnpm_registry_schema'; $old_schema=get_option($key,null);
 // Exercise real migration and transactions against isolated disposable tables, not local business data.
 $wpdb->prefix=$prefix.'pnpmtest_';
-$http=[]; $documentReads=[]; $mail=0; $mode='good'; $status='1'; $partner='TEST'; $catalogMode='good';
+$http=[]; $documentReads=[]; $mail=0; $mode='good'; $status='1'; $partner='TEST'; $catalogMode='good'; $basisMode='NOT_FOUND';
 add_filter('pre_wp_mail', static function() use (&$mail) { $mail++; return false; },PHP_INT_MAX);
-$mock=static function($pre,$args,$url) use (&$http,&$documentReads,&$mode,&$status,&$partner,&$catalogMode,$ttn,$ttn2) {
+$mock=static function($pre,$args,$url) use (&$http,&$documentReads,&$mode,&$status,&$partner,&$catalogMode,&$basisMode,$ttn,$ttn2) {
     $http[]=$url;
     $response=static fn($body)=>['headers'=>[],'body'=>wp_json_encode($body),'response'=>['code'=>200,'message'=>'OK']];
     if (str_starts_with($url,'https://api.novaposhta.ua/')) {
@@ -47,19 +47,24 @@ $mock=static function($pre,$args,$url) use (&$http,&$documentReads,&$mode,&$stat
     }
     if (str_contains($url,'/admin/folio/customer-documents?')) {
         if (($query['partnerShortName']??'')!=='TEST' || ($query['limit']??'')!=='50') throw new RuntimeException('Use saved shipment partner and bounded page');
-        $row=['documentType'=>$query['types'],'documentId'=>123,'documentNumber'=>'50','documentNumberSuffix'=>'a','documentDate'=>'2026-06-01T12:00:00','warehouseId'=>7,'returnDocument'=>false,'totalAmount'=>'149.00'];
+        $row=['documentType'=>$query['types'],'documentId'=>123,'documentNumber'=>'50','documentNumberSuffix'=>'a','documentDate'=>'2026-06-01T12:00:00','warehouseId'=>7,'returnDocument'=>false,'totalAmount'=>'149.00','operationKind'=>'*ПЕРЕМЕЩЕНИЕ','sourceInfo'=>'Тестовий маршрут','additionalInfo'=>'Тестова примітка'];
         return $response(['ok'=>true,'partner'=>['shortName'=>$catalogMode==='wrong_partner'?'OTHER':'TEST'],
-            'documents'=>[$row,array_merge($row,['documentId'=>124,'warehouseId'=>8]),array_merge($row,['documentId'=>125,'returnDocument'=>true])],
+            'documents'=>[$row,array_merge($row,['documentId'=>124,'documentNumber'=>'51','warehouseId'=>8]),array_merge($row,['documentId'=>125,'returnDocument'=>true])],
             'hasMore'=>!isset($query['cursor']),'nextCursor'=>$catalogMode==='bad_cursor'?'':'next-page']);
     }
-    if (str_contains($url,'/admin/folio/customer-documents/')) {
-        $type=str_contains($url,'/EXPENSE/')?'EXPENSE':'ACCOUNT';
-        return $response(['ok'=>true,'partner'=>['shortName'=>$partner],'document'=>['documentType'=>$type,'documentId'=>123,
-            'documentNumber'=>'50','documentNumberSuffix'=>'a','documentDate'=>'2026-06-01T12:00:00.000','returnDocument'=>false,'warehouseId'=>7,
-            'items'=>[['sku'=>'not-needed']],'linkedPayments'=>[['private'=>'not-needed']]]]);
+    if (str_contains($url,'/basis-account')) {
+        if ($basisMode==='offline') return new WP_Error('unavailable','Synthetic outage');
+        return $response(['ok'=>true,'partnerShortName'=>'TEST','expenseId'=>123,'basis'=>'123456Woo о 18.06.2026','status'=>$basisMode,
+            'account'=>$basisMode==='MATCHED'?['documentType'=>'ACCOUNT','documentId'=>321,'documentNumber'=>'123456','documentNumberSuffix'=>'Woo','documentDate'=>'2026-06-18','warehouseId'=>7,'partnerShortName'=>'TEST','source'=>'ARCHIVE_LEDGER']:null]);
     }
-    if (str_contains($url,'/admin/folio/receipt-catalogue')) return $response(['ok'=>true,'warehouseId'=>7,'date'=>$query['date'],
-        'documents'=>[['id'=>123,'number'=>'50a','date'=>array_map('intval',explode('-',$query['date'])),'warehouseId'=>7,'type'=>'receipt','accounted'=>true]],'hasMore'=>false]);
+    if (str_contains($url,'/admin/folio/customer-documents/')) {
+        $type=str_contains($url,'/EXPENSE/')?'EXPENSE':'ACCOUNT'; $second=str_ends_with(parse_url($url,PHP_URL_PATH),'/124');
+        return $response(['ok'=>true,'partner'=>['shortName'=>$partner],'document'=>['documentType'=>$type,'documentId'=>$second?124:123,
+            'documentNumber'=>$second?'51':'50','documentNumberSuffix'=>'a','documentDate'=>'2026-06-01T12:00:00.000','returnDocument'=>false,'warehouseId'=>$second?8:7,
+            'basis'=>'123456Woo о 18.06.2026','items'=>[['sku'=>'not-needed']],'linkedPayments'=>[['private'=>'not-needed']]]]);
+    }
+    if (str_contains($url,'/admin/folio/receipt-catalogue')) return $response(['ok'=>true,'warehouseId'=>(int)$query['warehouseId'],'date'=>$query['date'],
+        'documents'=>[['id'=>123,'number'=>'50a','date'=>array_map('intval',explode('-',$query['date'])),'warehouseId'=>(int)$query['warehouseId'],'type'=>'receipt','accounted'=>true]],'hasMore'=>false]);
     return new WP_Error('blocked','Unexpected HTTP blocked');
 };
 add_filter('pre_http_request',$mock,PHP_INT_MAX,3);
@@ -220,6 +225,61 @@ try {
     $check($service->run('documents',array_merge($query,['type'=>'RECEIPT','cursor'=>$receipts['cursor']]))['cursor']==='','Receipt period completes');
     $reject(fn()=>$service->run('documents',array_merge($query,['type'=>'RECEIPT','cursor'=>'2026-06-03|0'])),'Receipt cursor cannot leave selected period');
     $check($store->detail($summaryId)===$beforeCatalog,'Selectors do not change registry records, observations or links');
+    $multiQuery=array_merge($query,['warehouses'=>'7,8','type'=>'EXPENSE','operation'=>'ПЕРЕМЕЩЕНИЕ']);
+    $multi=$service->run('documents',$multiQuery);
+    $check(count($multi['items'])===2 && $multi['items'][1]['warehouse']==='8' && $multi['items'][0]['source_info']==='Тестовий маршрут' && $multi['items'][0]['additional_info']==='Тестова примітка','Multiple warehouses and all selection details returned');
+    $check($service->run('documents',array_merge($multiQuery,['operation'=>'НЕМАЄ']))['items']===[],'Operation text is filtered, even with an older API');
+    $reject(fn()=>$service->run('documents',array_merge($multiQuery,['warehouses'=>'7,0'])),'Invalid warehouse list rejected');
+    $r=$service->run('documents',array_merge($multiQuery,['type'=>'RECEIPT','operation'=>'','date_to'=>'2026-06-01']));
+    $check($r['cursor']==='1!2026-06-01|0','Receipt cursor advances to the next warehouse');
+    $r=$service->run('documents',array_merge($multiQuery,['type'=>'RECEIPT','operation'=>'','date_to'=>'2026-06-01','cursor'=>$r['cursor']]));
+    $check($r['cursor']==='' && $r['items'][0]['warehouse']==='8','Receipt paging completes across warehouses');
+    $transferId=$store->transaction(fn()=>$store->observe('99999999000009','manual',['evidence'=>'Synthetic transfer'],'2026-06-01 12:00:00'));
+    $store->classify($transferId,1,['partner_code'=>'TEST','direction'=>'internal','purpose'=>'other']);
+    $batch=array_merge($expense,['id'=>$transferId,'revision'=>2,'role'=>'other','account_link_id'=>0,'selected_documents'=>wp_json_encode($multi['items'])]);
+    $beforeTransfer=$store->detail($transferId); $p=$service->run('link_preview',$batch);
+    $check(count($p['documents'])===2 && empty($p['documents'][0]['related_account']) && $store->detail($transferId)===$beforeTransfer,'Transfer batch is read-only preview, no account or Woo required');
+    $wrong=$multi['items']; $wrong[1]['warehouse']='7';
+    $reject(fn()=>$service->run('link_preview',array_merge($batch,['selected_documents'=>wp_json_encode($wrong)])),'Every selected header checked against API');
+    $reject(fn()=>$service->run('link_preview',array_merge($batch,['selected_documents'=>wp_json_encode([$multi['items'][0],$multi['items'][0]])])),'Duplicate document IDs rejected');
+    $reject(fn()=>$service->run('link_preview',array_merge($batch,['selected_documents'=>wp_json_encode(array_fill(0,21,$multi['items'][0]))])),'Batch limited to twenty documents');
+    $breakSecond=static fn($sql)=>str_starts_with($sql,'INSERT INTO `'.$wpdb->prefix.'pnpm_registry_links`') && str_contains($sql,"'124'") ? 'INVALID SYNTHETIC QUERY' : $sql;
+    $old_suppress=$wpdb->suppress_errors(true); add_filter('query',$breakSecond);
+    try { $reject(fn()=>$confirm($p['token']),'Second link failure rejects batch'); }
+    finally { remove_filter('query',$breakSecond); $wpdb->suppress_errors($old_suppress); }
+    $check($store->detail($transferId)===$beforeTransfer,'Batch failure rolls back first link and audit');
+    $savedBatch=$confirm($p['token']); $check($confirm($p['token'])===$savedBatch,'Batch confirmation replay is idempotent');
+    $check(count($store->detail($transferId)['links'])===2 && (int)$store->find($transferId)['revision']===4,'Two warehouses linked in one confirmation');
+
+    // Expenses stand alone. Basis accounts are optional, read-only proposals in the same confirmation.
+    $directId=$store->transaction(fn()=>$store->observe('99999999000006','manual',['evidence'=>'Synthetic direct expense'],'2026-06-01 12:00:00'));
+    $store->classify($directId,1,['partner_code'=>'TEST','direction'=>'outgoing','purpose'=>'sale']);
+    $direct=array_merge($expense,['id'=>$directId,'revision'=>2,'account_link_id'=>0]);
+    $p=$service->run('link_preview',$direct);
+    $check($p['document']['basis_lookup_status']==='NOT_FOUND' && empty($p['document']['related_account']),'Missing basis account does not block expense preview');
+    $confirm($p['token']);
+    $check(count($store->detail($directId)['links'])===1 && $store->detail($directId)['links'][0]['document_type']==='EXPENSE','Expense confirms without account or Woo order');
+    $basisMode='MATCHED'; $direct['revision']=3; $p=$service->run('link_preview',$direct);
+    $check($p['document']['related_account']['source']==='ARCHIVE_LEDGER' && count($store->detail($directId)['links'])===1,'Archived account proposed without saving on preview');
+    $result=$confirm($p['token']); $check($confirm($p['token'])===$result,'Account and expense confirmation replay is idempotent');
+    $linked=$store->detail($directId)['links'];
+    $check(count($linked)===2 && $linked[0]['document_type']==='ACCOUNT' && (int)$store->find($directId)['revision']===5,'Account and expense saved together');
+    $expenseSaved=json_decode($linked[1]['snapshot'],true);
+    $check($expenseSaved['account_link_id']===(int)$linked[0]['id'],'Expense points to the confirmed archived account');
+    $direct['revision']=5; $basisMode='AMBIGUOUS'; $p=$service->run('link_preview',$direct);
+    $check($p['document']['basis_lookup_status']==='AMBIGUOUS' && empty($p['document']['related_account']),'Ambiguous basis never selects an account');
+    $basisMode='offline'; $p=$service->run('link_preview',$direct);
+    $check($p['document']['basis_lookup_status']==='UNAVAILABLE' && empty($p['document']['related_account']),'Old or unavailable API still allows expense alone');
+    $p=$service->run('link_preview',array_merge($direct,['account_link_id'=>999999]));
+    $reject(fn()=>$confirm($p['token']),'An explicitly selected unrelated account is rejected');
+    $basisMode='MATCHED'; $p=$service->run('link_preview',$direct); $beforeBundle=$store->detail($directId);
+    $breakExpense=static fn($sql)=>str_starts_with($sql,'UPDATE `'.$wpdb->prefix.'pnpm_registry_links`') && str_contains($sql,"'EXPENSE'") ? 'INVALID SYNTHETIC QUERY' : $sql;
+    $old_suppress=$wpdb->suppress_errors(true); add_filter('query',$breakExpense);
+    try { $reject(fn()=>$confirm($p['token']),'Expense failure rolls back whole bundle'); }
+    finally { remove_filter('query',$breakExpense); $wpdb->suppress_errors($old_suppress); }
+    $check($store->detail($directId)===$beforeBundle,'No partial account update after bundle failure');
+    $basisMode='NOT_FOUND';
+
     // In-memory CRUD objects only: never create/change actual Woo orders in this DB.
     $wooA=new WC_Order(); $wooA->set_date_created('2026-06-01 12:00:00'); $wooA->set_status('processing');
     $wooA->set_currency('UAH'); $wooA->set_total('149.00'); $wooA->set_billing_first_name('Synthetic'); $wooA->set_billing_last_name('Customer'); $wooA->set_id(999999001);

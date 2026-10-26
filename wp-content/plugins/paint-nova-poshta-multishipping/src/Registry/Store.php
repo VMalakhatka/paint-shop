@@ -123,13 +123,13 @@ final class Store
         $doc = $payload['document'];
         $woo=$doc['type']==='WOO_ORDER' && $doc['role']==='woo_order';
         if (!$woo && $doc['partner']!==$row['partner_code']) throw new \RuntimeException('The record changed. Reload before saving.');
-        if ($doc['role']==='sale_expense') {
+        if ($doc['role']==='sale_expense' && !empty($doc['account_link_id'])) {
             $account=$wpdb->get_row($wpdb->prepare('SELECT * FROM '.$this->table('_links').' WHERE id=%d AND registry_id=%d AND active=1 AND role=%s',
                 $doc['account_link_id']??0,$id,'sale_account'),ARRAY_A);
             if (!$account || $account['partner_code']!==$doc['partner']) throw new \InvalidArgumentException('Confirm and select the related account before linking an expense document.');
         }
         $identity = $woo ? ['WooCommerce',get_current_blog_id(),'shop_order',$doc['id']]
-            : ['Paint_Ua', $doc['type'], $doc['id'] ?: ($doc['number'].'|'.$doc['date'].'|'.$doc['partner'].'|'.$doc['warehouse'])];
+            : [($doc['source']??'')==='ARCHIVE_LEDGER' ? 'Paint_Ua_ARCHIVE' : 'Paint_Ua', $doc['type'], $doc['id'] ?: ($doc['number'].'|'.$doc['date'].'|'.$doc['partner'].'|'.$doc['warehouse'])];
         $key = hash('sha256',wp_json_encode($identity));
         $existing = $wpdb->get_var($wpdb->prepare('SELECT id FROM '.$this->table('_links').' WHERE registry_id=%d AND document_key=%s AND role=%s', $id,$key,$doc['role']));
         $fields = ['registry_id'=>$id,'document_key'=>$key,'document_type'=>$doc['type'],'document_id'=>$doc['id'],
@@ -138,10 +138,31 @@ final class Store
             'evidence'=>$doc['evidence'],'snapshot'=>wp_json_encode($doc),'active'=>1,
             'confirmed_by'=>get_current_user_id(),'confirmed_at'=>gmdate('Y-m-d H:i:s')];
         if ($existing) $this->must($wpdb->update($this->table('_links'),$fields,['id'=>$existing]));
-        else $this->must($wpdb->insert($this->table('_links'),$fields));
+        else { $this->must($wpdb->insert($this->table('_links'),$fields)); $existing=(int)$wpdb->insert_id; }
         $this->must($wpdb->update($this->table(), ['revision'=>(int)$row['revision']+1,'updated_at'=>gmdate('Y-m-d H:i:s')], ['id'=>$id]));
         $this->audit($id,'link_confirmed',$doc);
-        return ['id'=>$id];
+        return ['id'=>$id,'link_id'=>(int)$existing];
+    }
+
+    public function linkBundle(array $payload): array
+    {
+        $account=$payload['document']['related_account']??null;
+        if ($account) {
+            $saved=$this->link(['id'=>$payload['id'],'revision'=>$payload['revision'],'document'=>$account]);
+            $payload['revision']++;
+            $payload['document']['account_link_id']=$saved['link_id'];
+        }
+        return $this->link($payload);
+    }
+
+    public function linkMany(array $payload): array
+    {
+        $result=['id'=>$payload['id']];
+        foreach ($payload['documents'] as $document) {
+            $result=$this->linkBundle(['id'=>$payload['id'],'revision'=>$payload['revision'],'document'=>$document]);
+            $payload['revision']=(int)$this->find((int)$payload['id'])['revision'];
+        }
+        return $result;
     }
 
     public function unlink(int $id, int $revision, int $link, string $reason): array

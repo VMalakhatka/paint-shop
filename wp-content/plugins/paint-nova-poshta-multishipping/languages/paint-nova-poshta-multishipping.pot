@@ -2502,3 +2502,93 @@ msgstr ""
 
 msgid "Find a WooCommerce order, review its details and confirm its link separately. The comment is optional. Saved carrier responses do not confirm WooCommerce or Folio links."
 msgstr ""
+
+msgid "An expense document can be linked without an account or WooCommerce order."
+msgstr ""
+
+msgid "Link the expense document directly. An account and WooCommerce order are optional; a unique basis account, including the archive, is offered in the same preview."
+msgstr ""
+
+msgid "An expense document does not require an account. The preview looks for its basis account, including the archive. Receipts require a manual supplier check."
+msgstr ""
+
+msgid "Previously linked account (optional)"
+msgstr ""
+
+msgid "Sale: expense document"
+msgstr ""
+
+msgid "Expense basis"
+msgstr ""
+
+msgid "Basis account lookup"
+msgstr ""
+
+msgid "Unique account found; confirming saves both links"
+msgstr ""
+
+msgid "No basis account specified; the expense can be linked alone"
+msgstr ""
+
+msgid "Basis format not recognized; the expense can be linked alone"
+msgstr ""
+
+msgid "Basis account not found; the expense can be linked alone"
+msgstr ""
+
+msgid "Several basis accounts found; no account will be linked automatically"
+msgstr ""
+
+msgid "Basis account lookup unavailable; the expense can be linked alone"
+msgstr ""
+
+msgid "Account matched from the expense basis"
+msgstr ""
+
+msgid "Active Folio documents"
+msgstr ""
+
+msgid "Folio archive"
+msgstr ""
+
+msgid "Account to link together with the expense"
+msgstr ""
+
+msgid "Warehouses (select several)"
+msgstr ""
+
+msgid "Operation type contains"
+msgstr ""
+
+msgid "Operation type"
+msgstr ""
+
+msgid "Source information"
+msgstr ""
+
+msgid "Additional information"
+msgstr ""
+
+msgid "Select"
+msgstr ""
+
+msgid "Select document"
+msgstr ""
+
+msgid "Selected documents:"
+msgstr ""
+
+msgid "Select between 1 and 20 documents."
+msgstr ""
+
+msgid "Duplicate document selection."
+msgstr ""
+
+msgid "Operation filtering is unavailable for receipt documents."
+msgstr ""
+
+msgid "Amount"
+msgstr ""
+
+msgid "Select up to 20 documents. Loading the next page keeps your selection; changing filters clears it. One confirmation saves the whole group."
+msgstr ""

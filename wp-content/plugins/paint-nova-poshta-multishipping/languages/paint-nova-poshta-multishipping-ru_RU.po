@@ -1605,3 +1605,93 @@ msgstr "В этой сохранённой связи данные ФОЛИО е
 
 msgid "Find a WooCommerce order, review its details and confirm its link separately. The comment is optional. Saved carrier responses do not confirm WooCommerce or Folio links."
 msgstr "Найдите заказ WooCommerce, просмотрите данные и отдельно подтвердите связь. Комментарий необязателен. Сохранённые ответы перевозчика не подтверждают связи WooCommerce или ФОЛИО."
+
+msgid "An expense document can be linked without an account or WooCommerce order."
+msgstr "Расходную можно привязать без счёта и заказа WooCommerce."
+
+msgid "Link the expense document directly. An account and WooCommerce order are optional; a unique basis account, including the archive, is offered in the same preview."
+msgstr "Привяжите расходную напрямую. Счёт и WooCommerce необязательны; однозначно найденный счёт из основания, включая архив, предлагается в том же просмотре."
+
+msgid "An expense document does not require an account. The preview looks for its basis account, including the archive. Receipts require a manual supplier check."
+msgstr "Счёт для расходной необязателен. При просмотре ищется счёт из её основания, включая архив. Для приходной проверьте поставщика вручную."
+
+msgid "Previously linked account (optional)"
+msgstr "Ранее привязанный счёт (необязательно)"
+
+msgid "Sale: expense document"
+msgstr "Продажа: расходная накладная"
+
+msgid "Expense basis"
+msgstr "Основание расходной"
+
+msgid "Basis account lookup"
+msgstr "Поиск счёта из основания"
+
+msgid "Unique account found; confirming saves both links"
+msgstr "Найден один счёт; подтверждение сохранит обе связи"
+
+msgid "No basis account specified; the expense can be linked alone"
+msgstr "Счёт в основании не указан; можно привязать только расходную"
+
+msgid "Basis format not recognized; the expense can be linked alone"
+msgstr "Формат основания не распознан; можно привязать только расходную"
+
+msgid "Basis account not found; the expense can be linked alone"
+msgstr "Счёт из основания не найден; можно привязать только расходную"
+
+msgid "Several basis accounts found; no account will be linked automatically"
+msgstr "Найдено несколько счетов; автоматической привязки счёта не будет"
+
+msgid "Basis account lookup unavailable; the expense can be linked alone"
+msgstr "Поиск счёта недоступен; можно привязать только расходную"
+
+msgid "Account matched from the expense basis"
+msgstr "Счёт найден по основанию расходной"
+
+msgid "Active Folio documents"
+msgstr "Действующие документы ФОЛИО"
+
+msgid "Folio archive"
+msgstr "Архив ФОЛИО"
+
+msgid "Account to link together with the expense"
+msgstr "Счёт для привязки вместе с расходной"
+
+msgid "Warehouses (select several)"
+msgstr "Склады (можно выбрать несколько)"
+
+msgid "Operation type contains"
+msgstr "Тип операции содержит"
+
+msgid "Operation type"
+msgstr "Тип операции"
+
+msgid "Source information"
+msgstr "Источник информации"
+
+msgid "Additional information"
+msgstr "Дополнительная информация"
+
+msgid "Select"
+msgstr "Выбор"
+
+msgid "Select document"
+msgstr "Выбрать документ"
+
+msgid "Selected documents:"
+msgstr "Выбрано документов:"
+
+msgid "Select between 1 and 20 documents."
+msgstr "Выберите от 1 до 20 документов."
+
+msgid "Duplicate document selection."
+msgstr "Один документ выбран несколько раз."
+
+msgid "Operation filtering is unavailable for receipt documents."
+msgstr "Для приходных накладных отбор по типу операции пока недоступен."
+
+msgid "Amount"
+msgstr "Сумма"
+
+msgid "Select up to 20 documents. Loading the next page keeps your selection; changing filters clears it. One confirmation saves the whole group."
+msgstr "Отметьте до 20 документов. Следующая страница сохраняет выбор; изменение фильтров очищает его. Одно подтверждение сохраняет всю группу."

@@ -63,9 +63,36 @@ final class Folio
             // Retain header evidence only; no products/quantities are needed for this association.
             $doc['api_snapshot']=Record::clean(array_intersect_key($found,array_flip([
                 'documentType','documentId','documentNumber','documentNumberSuffix','documentDate',
-                'warehouseId','accounted','returnDocument','correctedAt','source',
+                'warehouseId','accounted','returnDocument','correctedAt','source','basis',
             ])));
         }
+        if ($role==='sale_expense' && empty($doc['account_link_id'])) $doc=$this->basisAccount($doc);
+        return $doc;
+    }
+
+    private function basisAccount(array $doc): array
+    {
+        $doc['basis']=$doc['api_snapshot']['basis']??'';
+        $doc['basis_lookup_status']='UNAVAILABLE';
+        try {
+            $result=$this->get('/admin/folio/customer-documents/EXPENSE/'.$doc['id'].'/basis-account',['partnerShortName'=>$doc['partner']]);
+            $status=$result['status']??'';
+            if (($result['partnerShortName']??'')!==$doc['partner'] || (string)($result['expenseId']??'')!==$doc['id']
+                || (string)($result['basis']??'')!==(string)$doc['basis']
+                || !in_array($status,['MATCHED','NO_BASIS','UNRECOGNIZED_BASIS','NOT_FOUND','AMBIGUOUS'],true)) return $doc;
+            $doc['basis_lookup_status']=$status;
+            if ($status!=='MATCHED') return $doc;
+            $a=$result['account']??[];
+            if (($a['documentType']??'')!=='ACCOUNT' || ($a['partnerShortName']??'')!==$doc['partner']
+                || !preg_match('/^[1-9]\d{0,9}$/D',(string)($a['documentId']??''))
+                || !in_array($a['source']??'',['ACTIVE_LEDGER','ARCHIVE_LEDGER'],true)) throw new \RuntimeException('Invalid basis account');
+            $number=Record::text(trim((string)($a['documentNumber']??'').(string)($a['documentNumberSuffix']??'')),100);
+            if ($number==='') throw new \RuntimeException('Invalid basis account');
+            $doc['related_account']=['type'=>'ACCOUNT','role'=>'sale_account','id'=>(string)$a['documentId'],
+                'number'=>$number,'date'=>self::date($a['documentDate']??''),'partner'=>$doc['partner'],
+                'warehouse'=>Record::text($a['warehouseId']??'',32),'verification'=>'api_basis','evidence'=>'',
+                'source'=>$a['source'],'api_snapshot'=>Record::clean($a)];
+        } catch (\RuntimeException|\InvalidArgumentException $e) { $doc['basis_lookup_status']='UNAVAILABLE'; unset($doc['related_account']); }
         return $doc;
     }
 

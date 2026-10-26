@@ -1,5 +1,44 @@
 # Paint Nova Poshta Multishipping
 
+## Multi-document picker 0.10.8 — 2026-10-26
+
+Checkbox warehouse selection (up to 20), operation substring filter and a full
+header table replace the single warehouse/document dropdowns. Show number/date,
+amount, partner, warehouse, operation, source info and additional info. Preserve
+checked documents on subsequent pages; changing filters invalidates choices and
+preview. Up to 20 selected headers are re-read against the saved shipment partner
+and shown in one preview; one confirmation applies all links atomically with audit
+and durable token replay. Internal transfers default to EXPENSE/other, without
+ACCOUNT/Woo prerequisites. No implicit financial classification from operation text.
+
+Java customer-documents accepts warehouses CSV + operation, applies both before
+TOP/cursor pagination, and exposes sourceInfo. PHP also filters returned rows for
+older Java compatibility; full display/server filtering requires Java deployment.
+Receipt API remains supplier-unverified and day/warehouse paged, with unavailable
+fields shown as unknown; operation filtering is explicitly unavailable for receipts.
+No new schema or production data write. 128 isolated registry checks and 14 Java
+tests passed; external services mocked. Deploy plugin 0.10.8 and updated Java API.
+
+## Expense-first links 0.10.7 — owner rule 2026-10-26
+
+An EXPENSE can be confirmed without ACCOUNT or Woo. Optional explicitly selected
+account links still require same registry/partner/active role. The new read-only
+Java `/admin/folio/customer-documents/EXPENSE/{id}/basis-account` resolves the exact
+expense basis against active + archive headers, matching partner, number, suffix
+and date. PHP checks expense/partner/basis and preserves the returned header/source.
+Unique matches appear in preview and save with the expense in one transaction;
+rollback and token replay cover the whole bundle. Archived account identities use
+`Paint_Ua_ARCHIVE` to avoid collisions with active IDs. Ambiguous, missing, malformed
+basis or unavailable lookup never invent a link and never block expense-only save.
+An explicit existing account selection bypasses automatic lookup. Manual verification
+remains possible with evidence; there is no implicit Woo order lookup from a Woo suffix.
+
+Deploy plugin 0.10.8 (includes 0.10.7 changes) for optional accounts; deploy the Java endpoint for archive
+lookup. No schema migration, Folio mutation, archive restore, shipment creation or
+notification. Existing list API stays active-only. Local verification: 115 registry
+checks and 12 Java tests; no production schema/query or deployment verified here.
+See manager guide #np-registry and Java FOLIO_CUSTOMER_DOCUMENTS_API.md.
+
 ## Woo preview clarity 0.10.6 — 2026-10-26
 
 Woo linking no longer requires a written explanation. Optional comments are still
@@ -32,7 +71,7 @@ Reuse registry links/audit/batches without a schema change: `WOO_ORDER` /
 `woo_order`, identity namespace `WooCommerce + blog ID + shop_order + ID` rather
 than `Paint_Ua`. Manual Folio input cannot create this type. Woo links are displayed
 separately, do not require a Folio partner and do not freeze Folio classification.
-Folio links keep their previous partner/account invariants. Preview holds a minimal
+Folio links retain partner checks; expense accounts are optional since 0.10.7. Preview holds a minimal
 order snapshot and fingerprint; confirmation re-reads it and rejects changed or
 unavailable orders. Registry revisions and durable token replay remain in force.
 Revoke retains audit. This does not lock the Woo editing workflow; stored evidence
@@ -202,19 +241,19 @@ secret is needed: reads reuse the server-only NP key and the existing Java proxy
 ### Confirmed Folio associations
 
 Classification and links are manager-controlled, never inferred from a name,
-phone or tracking status. A sale links an ACCOUNT first; a subsequent EXPENSE
-must reference its active account link. Both remain. Incoming purchases use
+phone or tracking status. Since 0.10.7, an EXPENSE may stand alone; an ACCOUNT is
+optional. A unique account matched from its basis is offered in the same preview. Incoming purchases use
 RECEIPT; returns have explicit RETURN references and an optional original TTN.
 Multiple document links per TTN are supported; this is not a cost allocation.
 
 API verification reads the existing `/admin/folio/customer-documents/{type}/{id}`
 through `pc_folio_documents_java_get`: exact type, internal ID, printed number,
 date, partner and non-return state must match for ACCOUNT/EXPENSE. Only header
-evidence is retained. It does not prove an account-to-expense business relationship;
-the manager confirms that relationship in the preview. RECEIPT reads the existing
+evidence is retained. The separate 0.10.7 basis lookup offers exact account matches;
+the manager confirms the association in the preview. RECEIPT reads the existing
 `/admin/folio/receipt-catalogue` by exact date/warehouse/ID. It verifies the accounted,
 non-return receipt header; this API does not return the supplier, so manager
-evidence is still required (`api_header_manual_party`). No new Java deployment or
+evidence is still required (`api_header_manual_party`). The original manual-link path requires no new Java deployment or
 MSSQL write is part of this change; unavailable endpoints fail visibly.
 
 Unsupported return documents and offline records use explicitly selected `manual`

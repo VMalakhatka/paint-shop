@@ -54,14 +54,16 @@
     if (!form) return;
     const field = name => form.elements[name];
     const picker = form.querySelector('.pnpm-document-picker'), manual = form.querySelector('.pnpm-manual-fields');
-    const select = form.querySelector('.pnpm-document-select'), status = form.querySelector('.pnpm-picker-message');
+    const rows = form.querySelector('.pnpm-document-rows'), status = form.querySelector('.pnpm-picker-message');
     const selected = form.querySelector('.pnpm-document-selected'), more = form.querySelector('.pnpm-documents-more');
     const submit = form.querySelector('[type="submit"]'), load = form.querySelector('.pnpm-documents-load');
     const warehouseButton = form.querySelector('.pnpm-warehouses');
     const requirement = form.querySelector('.pnpm-link-requirement');
     const continueBox = form.querySelector('.pnpm-classification-continue'), saveContinue = form.querySelector('.pnpm-save-continue');
     const partnerHelp = document.querySelector('.pnpm-partner-save-help');
-    let version = 0, warehouseVersion = 0, cursor = '', items = [], selectedItem = null, reading = false;
+    let version = 0, warehouseVersion = 0, cursor = '', items = [], reading = false;
+    const selectedIds = new Set(), warehouseNames = new Map();
+    const warehouseOptions = form.querySelector('.pnpm-warehouse-options');
     const apiMode = () => field('verification').value === 'api';
     const block = () => {
         field('partner').value = classification?.elements.partner_code.value || '';
@@ -73,19 +75,20 @@
         load.disabled = reading || dirty || !field('partner').value;
         const needsAccount = field('role').value === 'sale_expense';
         field('account_link_id').closest('label').hidden = !needsAccount;
-        requirement.textContent = classificationDirty() || !field('partner').value ? text.savedPartner : (needsAccount && !field('account_link_id').value ? text.account : '');
-        const blocked = classificationDirty() || !field('partner').value || reading || (apiMode() && !selectedItem)
-            || (needsAccount && !field('account_link_id').value);
+        requirement.textContent = classificationDirty() || !field('partner').value ? text.savedPartner : '';
+        const blocked = classificationDirty() || !field('partner').value || reading || (apiMode() && (!selectedIds.size || selectedIds.size > 20));
         form.dataset.pickerBlocked = blocked ? '1' : '0'; submit.disabled = !!blocked;
     };
-    const clearSelection = () => {
-        selectedItem = null; select.value = ''; selected.textContent = '';
-        ['document_id', 'number', 'date', 'warehouse'].forEach(key => { field(key).value = ''; });
+    const syncSelection = () => {
+        const chosen = items.filter(item => selectedIds.has(item.id));
+        field('selected_documents').value = JSON.stringify(chosen.map(({id, number, date, warehouse}) => ({id, number, date, warehouse})));
+        ['document_id', 'number', 'date', 'warehouse'].forEach(key => { field(key).value = chosen[0]?.[key === 'document_id' ? 'id' : key] || ''; });
+        selected.textContent = chosen.length ? `${text.selectedCount} ${chosen.length} — ${chosen.map(item => item.number).join(', ')}` : '';
         changed(form); block();
     };
     const reset = () => {
-        ++version; reading = false; cursor = ''; items = []; select.replaceChildren(); more.hidden = true;
-        clearSelection(); more.disabled = false;
+        ++version; reading = false; cursor = ''; items = []; selectedIds.clear(); rows.replaceChildren(); more.hidden = true;
+        syncSelection(); more.disabled = false;
         status.textContent = text.changed;
     };
     const mode = () => {
@@ -94,40 +97,63 @@
         if (!apiMode()) selected.textContent = text.manual;
         block();
     };
-    const documentLabel = item => `${item.number} · ${item.date}${item.amount !== '' ? ` · ${Number(item.amount).toLocaleString(document.documentElement.lang || 'uk', {minimumFractionDigits: 2, maximumFractionDigits: 2})} UAH` : ''}`;
-    select.addEventListener('change', () => {
-        selectedItem = items.find(item => item.id === select.value) || null;
-        if (!selectedItem) { clearSelection(); return; }
-        ['document_id', 'number', 'date', 'warehouse'].forEach(key => { field(key).value = selectedItem[key === 'document_id' ? 'id' : key]; });
-        selected.textContent = `${text.selected} ${documentLabel(selectedItem)}`;
-        changed(form); block();
-    });
+    const renderRows = () => {
+        rows.replaceChildren();
+        items.forEach(item => {
+            const row = document.createElement('tr'), cell = document.createElement('td'), checkbox = document.createElement('input');
+            checkbox.type = 'checkbox'; checkbox.checked = selectedIds.has(item.id);
+            checkbox.setAttribute('aria-label', `${text.selectDocument} ${item.number}`);
+            checkbox.addEventListener('change', () => {
+                if (checkbox.checked && selectedIds.size >= 20) { checkbox.checked = false; status.textContent = text.limit; return; }
+                if (checkbox.checked) selectedIds.add(item.id); else selectedIds.delete(item.id);
+                syncSelection();
+            });
+            cell.append(checkbox); row.append(cell);
+            const amount = item.amount !== '' ? `${Number(item.amount).toLocaleString(document.documentElement.lang || 'uk', {minimumFractionDigits: 2, maximumFractionDigits: 2})} UAH` : '—';
+            [item.number, item.date, amount, [item.partner, item.partner_name].filter(Boolean).join(' — '),
+                `${warehouseNames.get(item.warehouse) || '—'} (${item.warehouse})`, item.operation, item.source_info, item.additional_info].forEach(value => {
+                const td = document.createElement('td'); td.textContent = value || '—'; row.append(td);
+            });
+            rows.append(row);
+        });
+    };
     async function documents(append = false) {
         if (form.dataset.busy || reading || classificationDirty() || !field('partner').value || !apiMode()) {
             if (classificationDirty() || !field('partner').value) status.textContent = text.savedPartner;
             return;
         }
         const nextCursor = append ? cursor : '';
-        if (!append) reset(); else clearSelection();
+        if (!append) reset(); else changed(form);
         const mine = ++version; reading = true; block(); load.disabled = true; more.disabled = true; status.textContent = cfg.loading;
         try {
             const data = await request('documents', {id: field('id').value, revision: field('revision').value, type: field('type').value,
-                warehouse: field('picker_warehouse').value, date_from: field('date_from').value, date_to: field('date_to').value, cursor: nextCursor});
+                warehouses: field('picker_warehouse').value, operation: field('operation').value, date_from: field('date_from').value, date_to: field('date_to').value, cursor: nextCursor});
             if (mine !== version || form.dataset.busy) return;
-            for (const item of data.items) if (!items.some(old => old.id === item.id)) { items.push(item); select.add(new Option(documentLabel(item), item.id)); }
-            select.value = ''; cursor = data.cursor || ''; more.hidden = !cursor;
+            for (const item of data.items) if (!items.some(old => old.id === item.id)) items.push(item);
+            renderRows(); cursor = data.cursor || ''; more.hidden = !cursor;
             status.textContent = [!data.items.length ? text.empty : '', cursor ? text.more : '', data.receipt ? text.receipt : '', data.read_date || ''].filter(Boolean).join(' ');
         } catch (error) { if (mine === version) status.textContent = error.message || cfg.failure; }
         finally { if (mine === version) { reading = false; load.disabled = false; more.disabled = false; block(); } }
     }
     async function warehouses() {
-        const mine = ++warehouseVersion; reset(); field('picker_warehouse').replaceChildren(new Option('—', ''));
+        const keep = new Set(field('picker_warehouse').value.split(','));
+        const mine = ++warehouseVersion; reset(); warehouseOptions.replaceChildren(); field('picker_warehouse').value = ''; warehouseNames.clear();
         warehouseButton.disabled = true; status.textContent = cfg.loading;
         try {
             const data = await request('warehouses');
             if (mine !== warehouseVersion || form.dataset.busy) return;
-            for (const item of data.items) field('picker_warehouse').add(new Option(`${item.name} (${item.code})`, item.code));
-            status.textContent = data.items.length ? '' : text.empty;
+            const syncWarehouses = () => {
+                field('picker_warehouse').value = [...warehouseOptions.querySelectorAll('input:checked')].map(input => input.value).join(',');
+                reset();
+            };
+            for (const item of data.items) {
+                warehouseNames.set(item.code, item.name);
+                const label = document.createElement('label'), checkbox = document.createElement('input');
+                checkbox.type = 'checkbox'; checkbox.value = item.code; checkbox.checked = keep.has(item.code);
+                checkbox.addEventListener('change', syncWarehouses);
+                label.append(checkbox, document.createTextNode(` ${item.name} (${item.code})`)); warehouseOptions.append(label);
+            }
+            syncWarehouses(); status.textContent = data.items.length ? '' : text.empty;
         } catch (error) { if (mine === warehouseVersion) status.textContent = error.message || cfg.failure; }
         finally { if (mine === warehouseVersion) warehouseButton.disabled = false; }
     }
@@ -148,17 +174,19 @@
             }
         });
         field('partner').value = saved.partner_code;
-        reset();
+        if (saved.direction === 'internal') {
+            field('type').value = 'EXPENSE'; field('role').value = 'other'; field('verification').value = 'api'; mode();
+        } else reset();
     });
     classification?.addEventListener('pnpm:classification-finished', () => {
-        block(); status.textContent = classification.querySelector('.pnpm-message').textContent || text.savedPartner;
+        block(); status.textContent = classificationDirty() ? (classification.querySelector('.pnpm-message').textContent || text.savedPartner) : text.changed;
     });
     load.addEventListener('click', () => documents()); more.addEventListener('click', () => documents(true));
-    ['picker_warehouse', 'date_from', 'date_to'].forEach(key => field(key).addEventListener('input', reset));
+    ['operation', 'date_from', 'date_to'].forEach(key => field(key).addEventListener('input', reset));
     field('type').addEventListener('change', () => {
         const type = field('type').value;
         field('role').value = {ACCOUNT: 'sale_account', EXPENSE: 'sale_expense', RECEIPT: 'purchase', RETURN: classification?.elements.purpose.value || 'customer_return'}[type];
-        if (!field('role').value) field('role').value = 'other';
+        if (!field('role').value || classification?.elements.direction.value === 'internal') field('role').value = 'other';
         field('verification').value = type === 'RETURN' ? 'manual' : 'api'; mode();
     });
     field('verification').addEventListener('change', mode);

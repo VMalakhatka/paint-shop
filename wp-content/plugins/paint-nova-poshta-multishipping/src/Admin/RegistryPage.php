@@ -43,9 +43,10 @@ final class RegistryPage
             'receipt'=>'Receipts are listed by warehouse and day. Confirm the supplier manually; the list does not identify the supplier.',
             'manual'=>'Use manual verification for returns or documents unavailable in the list.',
             'selectPartner'=>'Choose a partner from the search results or clear the search.',
-            'account'=>'Confirm and select the related account before linking an expense document.',
+            'account'=>'An expense document can be linked without an account or WooCommerce order.',
             'changed'=>'Selection changed. Load the document list again.',
             'wooSelected'=>'Selected WooCommerce order:',
+            'selectDocument'=>'Select document','selectedCount'=>'Selected documents:','limit'=>'Select between 1 and 20 documents.',
         ]);
     }
 
@@ -84,7 +85,7 @@ final class RegistryPage
             'unclassified'=>'Purpose not selected','sale'=>'Customer sale','customer_return'=>'Customer return',
             'purchase'=>'Supplier purchase','supplier_return'=>'Return to supplier','transfer'=>'Internal transfer','other'=>'Other',
             'ACCOUNT'=>'Account','EXPENSE'=>'Expense document','RECEIPT'=>'Receipt document','RETURN'=>'Return document',
-            'sale_account'=>'Sale: account','sale_expense'=>'Sale: related expense document',
+            'sale_account'=>'Sale: account','sale_expense'=>'Sale: expense document',
             'api'=>'Verify through Folio API','manual'=>'Manager verification with evidence',
             'api_header_manual_party'=>'Header verified; supplier confirmed by manager',
             'np_documents'=>'Nova Poshta document list','np_tracking'=>'Nova Poshta tracking','csv'=>'Imported CSV',
@@ -103,6 +104,16 @@ final class RegistryPage
             'sender'=>'Sender','recipient'=>'Recipient','origin'=>'Origin','destination'=>'Destination',
             'Weight'=>'Weight','SeatsAmount'=>'Packages','DateTime'=>'Carrier document date','DateCreated'=>'Carrier creation date',
             'ScheduledDeliveryDate'=>'Estimated delivery date','ActualDeliveryDate'=>'Actual delivery date',
+            'basis'=>'Expense basis','basis_lookup_status'=>'Basis account lookup',
+            'MATCHED'=>'Unique account found; confirming saves both links',
+            'NO_BASIS'=>'No basis account specified; the expense can be linked alone',
+            'UNRECOGNIZED_BASIS'=>'Basis format not recognized; the expense can be linked alone',
+            'NOT_FOUND'=>'Basis account not found; the expense can be linked alone',
+            'AMBIGUOUS'=>'Several basis accounts found; no account will be linked automatically',
+            'UNAVAILABLE'=>'Basis account lookup unavailable; the expense can be linked alone',
+            'api_basis'=>'Account matched from the expense basis',
+            'ACTIVE_LEDGER'=>'Active Folio documents','ARCHIVE_LEDGER'=>'Folio archive',
+            'related_account'=>'Account to link together with the expense',
             'account_link_id'=>'Related account link ID', 'api_snapshot'=>'Folio header evidence',
             'Sender'=>'Sender','Recipient'=>'Recipient',
             'ThirdPerson'=>'Third party',
@@ -138,7 +149,7 @@ final class RegistryPage
         foreach (['Read a TTN, import an account page or paste CSV. Preview does not save the registry record.',
             'Check the preview, tick the confirmation and save. The preview expires after 10 minutes. Editing a field requires a new preview.',
             'Open a TTN and choose its direction, purpose and Folio partner code. For a return, also enter the original TTN if known.',
-            'Confirm the account link first. Add the related expense document later without replacing the account.',
+            'Link the expense document directly. An account and WooCommerce order are optional; a unique basis account, including the archive, is offered in the same preview.',
             'Find a WooCommerce order, review its details and confirm its link separately. The comment is optional. Saved carrier responses do not confirm WooCommerce or Folio links.',
             'Incoming purchases use receipt documents. Returns use a separate return reference and evidence checked by the manager.',
             'Carrier reads retain available fields and changes observed by the site. They cannot reconstruct events the carrier no longer returns.',
@@ -244,23 +255,28 @@ final class RegistryPage
         echo '<h3>'.self::e('Add a Folio document link').'</h3><p>'.self::e('Choose the saved partner, warehouse, period and document. Check the preview and confirm the link. Folio documents are not changed.').'</p>';
         echo '<p class="pnpm-partner-save-help"'.($row['partner_code']?' hidden':'').'>'.self::e('Select and save the shipment partner first.').'</p>';
         $this->form('link_preview',$row);
-        $type=$row['purpose']==='purchase'?'RECEIPT':(in_array($row['purpose'],['customer_return','supplier_return'],true)?'RETURN':'ACCOUNT');
-        $role=['RECEIPT'=>'purchase','RETURN'=>$row['purpose'],'ACCOUNT'=>'sale_account'][$type];
+        $type=$row['purpose']==='purchase'?'RECEIPT':(in_array($row['purpose'],['customer_return','supplier_return'],true)?'RETURN':'EXPENSE');
+        $role=['RECEIPT'=>'purchase','RETURN'=>$row['purpose'],'ACCOUNT'=>'sale_account','EXPENSE'=>'sale_expense'][$type];
+        if ($row['direction']==='internal') { $type='EXPENSE'; $role='other'; }
         $this->select('type','Document type',Folio::TYPES,$type); $this->select('role','Document role',Folio::ROLES,$role);
         $this->select('verification','Verification method',['api','manual'],'api');
         echo '<label>'.self::e('Folio partner code').'<input name="partner" value="'.esc_attr($row['partner_code']).'" readonly></label>';
         echo '<div class="pnpm-actions pnpm-classification-continue" hidden><button type="button" class="button button-primary pnpm-save-continue">'.self::e('Save classification and continue').'</button><p>'.self::e('Classification changes are not saved yet. Save to enable document loading; warehouse and dates will stay selected.').'</p></div>';
         echo '<fieldset class="pnpm-document-picker"><legend>'.self::e('Choose a Folio document').'</legend><div class="pnpm-picker-filters">';
-        echo '<label>'.self::e('Warehouse').'<select name="picker_warehouse"><option value="">—</option></select></label><button type="button" class="button pnpm-warehouses">'.self::e('Load warehouses').'</button>';
+        echo '<fieldset class="pnpm-warehouse-picker"><legend>'.self::e('Warehouses (select several)').'</legend><div class="pnpm-warehouse-options"></div></fieldset><input type="hidden" name="picker_warehouse"><button type="button" class="button pnpm-warehouses">'.self::e('Load warehouses').'</button>';
         $this->input('date_from','From date','date',current_time('Y-m-01')); $this->input('date_to','To date','date',current_time('Y-m-d'));
+        $this->input('operation','Operation type contains');
         echo '<button type="button" class="button pnpm-documents-load">'.self::e('Load documents').'</button></div><p class="pnpm-picker-message" role="status" aria-live="polite"></p>';
-        echo '<label>'.self::e('Choose a document').'<select class="pnpm-document-select" size="6" aria-label="'.esc_attr(self::t('Choose a document')).'"></select></label>';
-        echo '<button type="button" class="button pnpm-documents-more" hidden>'.self::e('Load next page / day').'</button><p>'.self::e('For an expense document, first confirm and select its account. Receipts require a manual supplier check.').'</p></fieldset>';
+        echo '<p>'.self::e('Select up to 20 documents. Loading the next page keeps your selection; changing filters clears it. One confirmation saves the whole group.').'</p>';
+        echo '<div class="pnpm-table-scroll"><table class="widefat striped pnpm-document-table"><thead><tr><th>'.self::e('Select').'</th>';
+        foreach (['Document number','Document date','Amount','Folio partner code','Warehouse','Operation type','Source information','Additional information'] as $label) echo '<th>'.self::e($label).'</th>';
+        echo '</tr></thead><tbody class="pnpm-document-rows"></tbody></table></div><input type="hidden" name="selected_documents" value="[]">';
+        echo '<button type="button" class="button pnpm-documents-more" hidden>'.self::e('Load next page / day').'</button><p>'.self::e('An expense document does not require an account. The preview looks for its basis account, including the archive. Receipts require a manual supplier check.').'</p></fieldset>';
         echo '<p class="pnpm-document-selected" role="status"></p><details class="pnpm-manual-fields"><summary>'.self::e('Document details / manual entry').'</summary><div class="pnpm-picker-filters">';
         $this->input('document_id','Internal Folio document ID (optional for manual verification)');
         $this->input('number','Document number','text','',true); $this->input('date','Document date','date','',true);
         $this->input('warehouse','Folio warehouse code'); echo '</div></details>';
-        echo '<p class="pnpm-link-requirement" role="status"></p><label>'.self::e('Related account for the expense document').'<select name="account_link_id"><option value="">—</option>';
+        echo '<p class="pnpm-link-requirement" role="status"></p><label>'.self::e('Previously linked account (optional)').'<select name="account_link_id"><option value="">—</option>';
         foreach ($accounts as $id=>$label) echo '<option value="'.esc_attr($id).'">'.esc_html($label).'</option>';
         echo '</select></label>';
         $this->input('evidence','Verification evidence'); $this->previewEnd(false,'Confirm Folio link'); echo '</section>';

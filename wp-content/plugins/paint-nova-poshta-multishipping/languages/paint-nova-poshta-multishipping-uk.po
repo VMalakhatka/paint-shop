@@ -2338,3 +2338,93 @@ msgstr "У цьому збереженому зв’язку дані ФОЛІО
 
 msgid "Find a WooCommerce order, review its details and confirm its link separately. The comment is optional. Saved carrier responses do not confirm WooCommerce or Folio links."
 msgstr "Знайдіть замовлення WooCommerce, перегляньте дані та окремо підтвердьте зв’язок. Коментар необов’язковий. Збережені відповіді перевізника не підтверджують зв’язки WooCommerce чи ФОЛІО."
+
+msgid "An expense document can be linked without an account or WooCommerce order."
+msgstr "Видаткову можна прив’язати без рахунку й замовлення WooCommerce."
+
+msgid "Link the expense document directly. An account and WooCommerce order are optional; a unique basis account, including the archive, is offered in the same preview."
+msgstr "Прив’яжіть видаткову безпосередньо. Рахунок і WooCommerce необов’язкові; однозначно знайдений рахунок з підстави, зокрема з архіву, пропонується в тому самому перегляді."
+
+msgid "An expense document does not require an account. The preview looks for its basis account, including the archive. Receipts require a manual supplier check."
+msgstr "Рахунок для видаткової необов’язковий. Під час перегляду шукається рахунок з її підстави, включно з архівом. Для прибуткової перевірте постачальника вручну."
+
+msgid "Previously linked account (optional)"
+msgstr "Раніше прив’язаний рахунок (необов’язково)"
+
+msgid "Sale: expense document"
+msgstr "Продаж: видаткова накладна"
+
+msgid "Expense basis"
+msgstr "Підстава видаткової"
+
+msgid "Basis account lookup"
+msgstr "Пошук рахунку з підстави"
+
+msgid "Unique account found; confirming saves both links"
+msgstr "Знайдено один рахунок; підтвердження збереже обидва зв’язки"
+
+msgid "No basis account specified; the expense can be linked alone"
+msgstr "Рахунок у підставі не зазначено; можна прив’язати лише видаткову"
+
+msgid "Basis format not recognized; the expense can be linked alone"
+msgstr "Формат підстави не розпізнано; можна прив’язати лише видаткову"
+
+msgid "Basis account not found; the expense can be linked alone"
+msgstr "Рахунок з підстави не знайдено; можна прив’язати лише видаткову"
+
+msgid "Several basis accounts found; no account will be linked automatically"
+msgstr "Знайдено кілька рахунків; автоматичної прив’язки рахунку не буде"
+
+msgid "Basis account lookup unavailable; the expense can be linked alone"
+msgstr "Пошук рахунку недоступний; можна прив’язати лише видаткову"
+
+msgid "Account matched from the expense basis"
+msgstr "Рахунок знайдено за підставою видаткової"
+
+msgid "Active Folio documents"
+msgstr "Діючі документи ФОЛІО"
+
+msgid "Folio archive"
+msgstr "Архів ФОЛІО"
+
+msgid "Account to link together with the expense"
+msgstr "Рахунок для прив’язки разом із видатковою"
+
+msgid "Warehouses (select several)"
+msgstr "Склади (можна вибрати кілька)"
+
+msgid "Operation type contains"
+msgstr "Тип операції містить"
+
+msgid "Operation type"
+msgstr "Тип операції"
+
+msgid "Source information"
+msgstr "Джерело інформації"
+
+msgid "Additional information"
+msgstr "Додаткова інформація"
+
+msgid "Select"
+msgstr "Вибір"
+
+msgid "Select document"
+msgstr "Вибрати документ"
+
+msgid "Selected documents:"
+msgstr "Вибрано документів:"
+
+msgid "Select between 1 and 20 documents."
+msgstr "Виберіть від 1 до 20 документів."
+
+msgid "Duplicate document selection."
+msgstr "Той самий документ вибрано кілька разів."
+
+msgid "Operation filtering is unavailable for receipt documents."
+msgstr "Для прибуткових накладних відбір за типом операції поки недоступний."
+
+msgid "Amount"
+msgstr "Сума"
+
+msgid "Select up to 20 documents. Loading the next page keeps your selection; changing filters clears it. One confirmation saves the whole group."
+msgstr "Позначте до 20 документів. Наступна сторінка зберігає вибір; зміна фільтрів очищає його. Одне підтвердження зберігає всю групу."

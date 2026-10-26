@@ -36,7 +36,8 @@ final class Service
             if (empty($lock['ok'])) throw new \RuntimeException('Another synchronization is running. Try saving after it finishes.');
             try {
                 return $this->store->apply((string)($input['token']??''),function($kind,$payload) {
-                    if ($kind==='link') return $this->store->link($payload);
+                    if ($kind==='links') return $this->store->linkMany($payload);
+                    if ($kind==='link') return $this->store->linkBundle($payload);
                     if ($kind==='woo_link') {
                         $this->woo->verify($payload['document']);
                         return $this->store->link($payload);
@@ -54,6 +55,21 @@ final class Service
         if ($command==='link_preview' || $command==='woo_preview') {
             $row=$this->store->find((int)($input['id']??0));
             if ((int)($input['revision']??0)!==(int)$row['revision']) throw new \RuntimeException('The record changed. Reload before saving.');
+            if ($command==='link_preview' && ($input['verification']??'')==='api' && !empty($input['selected_documents']) && $input['selected_documents']!=='[]') {
+                $selected=json_decode((string)$input['selected_documents'],true);
+                if (!is_array($selected) || !array_is_list($selected) || count($selected)<1 || count($selected)>20) throw new \InvalidArgumentException('Select between 1 and 20 documents.');
+                $documents=[]; $seen=[];
+                foreach ($selected as $candidate) {
+                    if (!is_array($candidate)) throw new \InvalidArgumentException('Invalid document selection.');
+                    $id=(string)($candidate['id']??'');
+                    if (isset($seen[$id])) throw new \InvalidArgumentException('Duplicate document selection.');
+                    $seen[$id]=true;
+                    $values=array_merge($input,['document_id'=>$id,'number'=>$candidate['number']??'','date'=>$candidate['date']??'','warehouse'=>$candidate['warehouse']??'']);
+                    // Each row is re-read and checked against the saved shipment, never trusted from HTML.
+                    $documents[]=$this->folio->preview($values,$row);
+                }
+                return ['token'=>$this->store->preview('links',['id'=>(int)$row['id'],'revision'=>(int)$row['revision'],'documents'=>$documents]),'documents'=>$documents];
+            }
             $document=$command==='woo_preview' ? $this->woo->preview($input) : $this->folio->preview($input,$row);
             if ($command==='woo_preview') $document['registry_context']=$this->store->folioContext($row);
             $payload=['id'=>(int)$row['id'],'revision'=>(int)$row['revision'],'document'=>$document];

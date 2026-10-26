@@ -34,9 +34,10 @@ final class Catalog
 
     public function documents(array $input,array $shipment): array
     {
-        $type=(string)($input['type']??''); $warehouse=(string)($input['warehouse']??'');
+        $type=(string)($input['type']??''); $warehouse=(string)($input['warehouses']??$input['warehouse']??'');
+        $operation=Record::text($input['operation']??'',100);
         if (!in_array($type,['ACCOUNT','EXPENSE','RECEIPT'],true)) throw new \InvalidArgumentException('This document requires manual verification with evidence.');
-        if (!preg_match('/^[1-9]\d{0,8}$/D',$warehouse)) throw new \InvalidArgumentException('Select a Folio warehouse.');
+        if (!preg_match('/^[1-9]\d{0,8}(,[1-9]\d{0,8}){0,19}$/D',$warehouse)) throw new \InvalidArgumentException('Select a Folio warehouse.');
         if (!$shipment['partner_code']) throw new \InvalidArgumentException('Select and save the shipment partner first.');
         $from=Record::date((string)($input['date_from']??'')); $to=Record::date((string)($input['date_to']??''));
         if ($from>$to || $to>current_time('Y-m-d') || (new \DateTimeImmutable($from))->diff(new \DateTimeImmutable($to))->days>365) {
@@ -44,8 +45,21 @@ final class Catalog
         }
         $cursor=(string)($input['cursor']??'');
         if (strlen($cursor)>2048) throw new \InvalidArgumentException('Invalid document page cursor.');
-        if ($type==='RECEIPT') return $this->receipts($warehouse,$from,$to,$cursor);
-        $query=['partnerShortName'=>$shipment['partner_code'],'dateFrom'=>$from,'dateTo'=>$to,'types'=>$type,'limit'=>50];
+        $warehouses=array_values(array_unique(explode(',',$warehouse)));
+        if ($type==='RECEIPT') {
+            if ($operation!=='') throw new \InvalidArgumentException('Operation filtering is unavailable for receipt documents.');
+            $index=0; $receiptCursor=$cursor;
+            if (str_contains($cursor,'!')) {
+                [$indexText,$receiptCursor]=explode('!',$cursor,2);
+                if (!ctype_digit($indexText) || !isset($warehouses[(int)$indexText])) throw new \InvalidArgumentException('Invalid document page cursor.');
+                $index=(int)$indexText;
+            }
+            $result=$this->receipts($warehouses[$index],$from,$to,$receiptCursor);
+            if ($result['cursor']!=='' && count($warehouses)>1) $result['cursor']=$index.'!'.$result['cursor'];
+            elseif (isset($warehouses[$index+1])) $result['cursor']=($index+1).'!'.$from.'|0';
+            return $result;
+        }
+        $query=['partnerShortName'=>$shipment['partner_code'],'dateFrom'=>$from,'dateTo'=>$to,'types'=>$type,'limit'=>50,'warehouses'=>implode(',',$warehouses),'operation'=>$operation];
         if ($cursor!=='') $query['cursor']=$cursor;
         $data=$this->get('/admin/folio/customer-documents',$query,true);
         if (($data['partner']['shortName']??'')!==$shipment['partner_code'] || !is_array($data['documents']??null)) {
@@ -53,10 +67,15 @@ final class Catalog
         }
         $items=[];
         foreach ($data['documents'] as $row) {
-            if (($row['documentType']??'')!==$type || ($row['returnDocument']??null)!==false || (string)($row['warehouseId']??'')!==$warehouse) continue;
+            if (($row['documentType']??'')!==$type || ($row['returnDocument']??null)!==false || !in_array((string)($row['warehouseId']??''),$warehouses,true)) continue;
+            if ($operation!=='' && mb_stripos((string)($row['operationKind']??''),$operation)===false) continue;
             $date=substr((string)($row['documentDate']??''),0,10);
             if ($date<$from || $date>$to) throw new \RuntimeException('Folio returned a different document.');
-            $items[]=$this->document($row['documentId']??'',trim((string)($row['documentNumber']??'').(string)($row['documentNumberSuffix']??'')),$date,$warehouse,$row['totalAmount']??null);
+            $items[]=array_merge($this->document($row['documentId']??'',trim((string)($row['documentNumber']??'').(string)($row['documentNumberSuffix']??'')),$date,(string)$row['warehouseId'],$row['totalAmount']??null),[
+                'partner'=>$shipment['partner_code'],'partner_name'=>Record::text($data['partner']['name']??'',250),
+                'operation'=>Record::text($row['operationKind']??'',100),'source_info'=>Record::text($row['sourceInfo']??'',250),
+                'additional_info'=>Record::text($row['additionalInfo']??'',250),
+            ]);
         }
         $next=!empty($data['hasMore']) ? (string)($data['nextCursor']??'') : '';
         if (!empty($data['hasMore']) && ($next==='' || $next===$cursor || strlen($next)>2048)) throw new \RuntimeException('Invalid document page cursor.');

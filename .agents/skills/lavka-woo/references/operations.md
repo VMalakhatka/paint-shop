@@ -560,3 +560,20 @@ shipment classification/active confirmed Folio links. Never treat an unsaved
 picker selection or saved carrier response as a document association. Older Woo
 snapshots without captured Folio data mean unknown, not no documents. Manager
 steps: `docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-registry`; contract: NP README.
+
+
+NP expense rule superseded by owner 2026-10-26 (0.10.7): EXPENSE alone suffices;
+ACCOUNT and Woo are optional. Do not restore the old account-first UI/server guard.
+The read-only Java expense-basis endpoint matches exact partner/number/suffix/date
+across active/archive headers; only a unique match enters a manager-confirmed atomic
+link bundle. Unavailable/ambiguous/missing matches allow expense alone. Never infer
+Woo order identity from suffix Woo, nor restore/mutate an archived account. Archive
+identity is separate from active IDs. See NP README and manager guide #np-registry.
+
+NP grouped Folio picker 0.10.8 (local code/tests, 2026-10-26): multiple warehouse
+checkboxes and operation substring scope the read-only list before Java pagination.
+Keep selections across pages, invalidate on changed filters/classification. Re-read
+every selected header; max 20 links per explicit preview/atomic confirmation.
+Internal transfers use EXPENSE/other; no account/Woo requirement or inferred sale.
+Receipt lists remain supplier-unverified and cannot filter by operation. Human
+steps and deployment boundary: docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-registry.

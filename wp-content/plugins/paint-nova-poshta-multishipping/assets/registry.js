@@ -79,8 +79,21 @@
                     token = data.token; preview.replaceChildren();
                     if (data.document) {
                         if (data.document.type === 'WOO_ORDER') wooPreview(preview, data.document);
-                        else preview.append(table(data.document));
+                        else {
+                            const header = {...data.document}, account = header.related_account;
+                            delete header.related_account;
+                            preview.append(table(header));
+                            if (account) { const shown = {...account}; delete shown.api_snapshot; preview.append(heading('related_account'), table(nonempty(shown))); }
+                        }
                     }
+                    (data.documents || []).forEach(document => {
+                        const header = {...document}, account = header.related_account;
+                        delete header.related_account;
+                        const section = window.document.createElement('section');
+                        section.className = 'pnpm-batch-document'; section.append(table(header));
+                        if (account) { const shown = {...account}; delete shown.api_snapshot; section.append(heading('related_account'), table(nonempty(shown))); }
+                        preview.append(section);
+                    });
                     if (data.scope) preview.append(table(data.scope));
                     (data.rows || []).forEach(row => {
                         const details = document.createElement('details'), summary = document.createElement('summary');
