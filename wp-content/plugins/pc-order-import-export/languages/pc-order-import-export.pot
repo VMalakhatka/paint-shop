@@ -3580,3 +3580,201 @@ msgstr ""
 
 msgid "Promotion coupons"
 msgstr ""
+
+msgid "Account"
+msgstr ""
+
+msgid "After"
+msgstr ""
+
+msgid "Agreed deadline"
+msgstr ""
+
+msgid "Assembly, packing, box passports, acceptance and signed documents are not electronically confirmed yet. Paper records must be checked separately."
+msgstr ""
+
+msgid "Assign an available responsible manager"
+msgstr ""
+
+msgid "Background monitoring is not scheduled. Save the card again or contact an administrator."
+msgstr ""
+
+msgid "Before"
+msgstr ""
+
+msgid "Check linked sources now"
+msgstr ""
+
+msgid "Check order links"
+msgstr ""
+
+msgid "Confirmation exists — open it to verify the current version"
+msgstr ""
+
+msgid "Control started"
+msgstr ""
+
+msgid "Customer or Folio mapping changed. Monitoring is blocked; ask an administrator to reconcile the execution card."
+msgstr ""
+
+msgid "Deadline passed — review required"
+msgstr ""
+
+msgid "Document ID"
+msgstr ""
+
+msgid "Document linked by manager"
+msgstr ""
+
+msgid "Each check reads one linked Folio document in rotation and the saved Woo/NP data. This does not poll Nova Poshta directly. New unlinked documents require a verified manual link."
+msgstr ""
+
+msgid "Enter the internal document ID, not its printed number. The customer is checked against Folio. This link is for supervision and does not create or alter accounting documents."
+msgstr ""
+
+msgid "Execution control"
+msgstr ""
+
+msgid "Execution control not started"
+msgstr ""
+
+msgid "Execution data changed or is unavailable. Reload the order and try again."
+msgstr ""
+
+msgid "Execution history"
+msgstr ""
+
+msgid "Expense document"
+msgstr ""
+
+msgid "Folio document could not be verified"
+msgstr ""
+
+msgid "Folio document read or changed"
+msgstr ""
+
+msgid "Internal supervision. Folio documents, carrier handover and customer acceptance are separate facts. No payments, documents, messages or bonuses are created here."
+msgstr ""
+
+msgid "Last source check"
+msgstr ""
+
+msgid "Link an existing Folio document"
+msgstr ""
+
+msgid "Linked Folio documents"
+msgstr ""
+
+msgid "Manual supervision link removed"
+msgstr ""
+
+msgid "Monitor linked sources every five minutes"
+msgstr ""
+
+msgid "Monitoring paused"
+msgstr ""
+
+msgid "No TTN yet"
+msgstr ""
+
+msgid "No saved shipment in the linked orders; check delivery or pickup"
+msgstr ""
+
+msgid "No separate customer confirmation recorded"
+msgstr ""
+
+msgid "No verified document links yet"
+msgstr ""
+
+msgid "Not verified; do not infer deletion"
+msgstr ""
+
+msgid "Only an administrator can transfer responsibility for an existing execution card."
+msgstr ""
+
+msgid "Order execution control"
+msgstr ""
+
+msgid "Original deadline"
+msgstr ""
+
+msgid "Payment"
+msgstr ""
+
+msgid "Please wait for the source check or save to finish. Do not submit again."
+msgstr ""
+
+msgid "Reason or evidence for this change"
+msgstr ""
+
+msgid "Recorded document"
+msgstr ""
+
+msgid "Related orders and confirmations"
+msgstr ""
+
+msgid "Remove a manual supervision link"
+msgstr ""
+
+msgid "Remove link only; keep documents and history"
+msgstr ""
+
+msgid "Requires attention"
+msgstr ""
+
+msgid "Requires review"
+msgstr ""
+
+msgid "Responsibility is fixed for this order. An administrator must approve a transfer. Moving the deadline keeps the original date and history; it does not approve an exception."
+msgstr ""
+
+msgid "Responsibility or next action updated"
+msgstr ""
+
+msgid "Responsible manager for this order"
+msgstr ""
+
+msgid "Save execution control"
+msgstr ""
+
+msgid "Saved order or shipment data changed"
+msgstr ""
+
+msgid "Saved shipments"
+msgstr ""
+
+msgid "Shared execution card for order #%s"
+msgstr ""
+
+msgid "Source observation"
+msgstr ""
+
+msgid "Sources are unavailable or stale. Last known data is shown; no cancellation or completion is inferred."
+msgstr ""
+
+msgid "Sources unavailable"
+msgstr ""
+
+msgid "Specify an agreed deadline"
+msgstr ""
+
+msgid "Specify the next action"
+msgstr ""
+
+msgid "Verify customer and link document"
+msgstr ""
+
+msgid "Woo payment status is shown in the order. It is not a reconciliation of payments or the customer balance in Folio."
+msgstr ""
+
+msgid "Open shipment details to review its preparation or error"
+msgstr ""
+
+msgid "Monitoring active"
+msgstr ""
+
+msgid "Included in accounting"
+msgstr ""
+
+msgid "Not included in accounting"
+msgstr ""

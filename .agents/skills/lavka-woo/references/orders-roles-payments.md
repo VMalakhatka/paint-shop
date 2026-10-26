@@ -608,3 +608,15 @@ usage counter. Gift-only coupons normalize to fixed_cart/zero/no free shipping.
 Checkout snapshots instructions in order meta `_pcoe_coupon_gifts` via CRUD; no
 Folio document or gift stock movement occurs. Coupons are not enabled automatically.
 Operator procedure: `docs/MANAGER_CUSTOMER_GUIDE_UK.md`, section coupons.
+
+Order execution pilot (2026-10-26): `OrderExecution` / `OrderExecutionUi` in PCOE
+own internal supervision on a validated Woo/Folio order family. One CRUD meta
+`_pcoe_execution_v1` contains state and history; shared order GET_LOCK + revision
+protect updates. Explicit per-order start schedules one Folio GET every five
+minutes in Action Scheduler group `pcoe-execution`; NP data is saved-source only.
+Manual links validate exact type/ID/customer; missing/failed reads preserve last
+verified values. Responsibility transfer requires manage_options; source/customer
+mapping changes stop updates. No payment, completion, shipping command or bonus
+side effects. Packing and box passports currently exist only on paper (owner
+26.10); do not confuse production-component assembly with order picking.
+Launch/limits/rollback: docs/MANAGER_CUSTOMER_GUIDE_UK.md#execution-control.

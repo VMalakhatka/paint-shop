@@ -442,3 +442,12 @@ msgstr "Відкрийте «Купони акцій» у роботі з клі
 
 msgid "For a gift-only promotion, fill Gift instructions for the manager. This sets the discount to zero and disables free shipping. The gift is not added as a product automatically. Instructions are saved with the checkout order and shown in the manager workspace, WooCommerce order and admin email. Check the original order when splitting by warehouses; do not add the gift once per shipment. An administrator must first enable coupons in WooCommerce settings."
 msgstr "Для акції з подарунком заповніть «Завдання менеджеру щодо подарунка». Знижка стане нульовою, безкоштовну доставку буде вимкнено. Подарунок не додається як товар автоматично. Завдання зберігається при оформленні та показується у роботі з клієнтами, замовленні WooCommerce і листі менеджеру. При поділі на склади перевіряйте вихідне замовлення; не додавайте подарунок до кожного відправлення. Спочатку адміністратор має увімкнути купони в налаштуваннях WooCommerce."
+
+msgid "Order execution control"
+msgstr "Контроль виконання замовлення"
+
+msgid "Open a customer order and save its responsible manager, next action, agreed deadline and reason. Enable monitoring for this order only. Linked warehouse orders share the original execution card. An administrator can transfer responsibility; the original deadline and all changes remain in history."
+msgstr "Відкрийте замовлення клієнта та збережіть відповідального, наступну дію, узгоджений строк і причину. Увімкніть контроль лише цього замовлення. Пов’язані складські замовлення мають спільну картку. Передати відповідальність може адміністратор; початковий строк і зміни залишаються в історії."
+
+msgid "Each check reads one known Folio document and saved order/shipment data. Unavailable sources keep the last verified values. Link additional documents by their internal ID with a reason; the customer is verified. Saved NP data is not new carrier tracking. Assembly, box passports and acceptance remain paper-based at this stage. No messages, accounting documents, payments or bonuses are created."
+msgstr "Кожна перевірка читає один відомий документ ФОЛІО й збережені дані замовлень/відправок. При недоступності джерела залишаються останні перевірені значення. Додаткові документи прив’язуйте за внутрішнім ID із причиною; клієнт перевіряється. Збережені дані НП не є новою перевіркою трекінгу. Комплектація, паспорти коробок і приймання на цьому етапі залишаються паперовими. Повідомлення, облікові документи, платежі та бонуси не створюються."

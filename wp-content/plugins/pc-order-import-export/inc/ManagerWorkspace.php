@@ -48,6 +48,8 @@ class ManagerWorkspace
     public static function assets(): void {
         if (($_GET['page'] ?? '') !== self::PAGE || !current_user_can('manage_woocommerce')) return;
         ManagerHelp::assets();
+        wp_enqueue_script('pcoe-execution', PCOE_URL . 'assets/execution.js', [], filemtime(PCOE_DIR . '/assets/execution.js'), true);
+        wp_add_inline_script('pcoe-execution', 'window.pcoeExecutionWait = ' . wp_json_encode(__('Please wait for the source check or save to finish. Do not submit again.', 'pc-order-import-export')) . ';', 'before');
         wp_enqueue_style('pcoe-manager', PCOE_URL . 'assets/manager.css', [], filemtime(PCOE_DIR . '/assets/manager.css'));
         wp_enqueue_script('pcoe-manager', PCOE_URL . 'assets/manager.js', [], filemtime(PCOE_DIR . '/assets/manager.js'), true);
         wp_localize_script('pcoe-manager', 'pcoeManager', [

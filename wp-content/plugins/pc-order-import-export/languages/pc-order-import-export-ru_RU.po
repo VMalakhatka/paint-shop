@@ -3776,3 +3776,201 @@ msgstr "Добавить подарки по акции"
 
 msgid "Promotion coupons"
 msgstr "Купоны акций"
+
+msgid "Account"
+msgstr "Счёт"
+
+msgid "After"
+msgstr "После"
+
+msgid "Agreed deadline"
+msgstr "Согласованный срок"
+
+msgid "Assembly, packing, box passports, acceptance and signed documents are not electronically confirmed yet. Paper records must be checked separately."
+msgstr "Комплектация, упаковка, паспорта коробок, приёмка и подписанные документы пока не подтверждены электронно. Проверьте бумажные записи отдельно."
+
+msgid "Assign an available responsible manager"
+msgstr "Назначьте доступного ответственного менеджера"
+
+msgid "Background monitoring is not scheduled. Save the card again or contact an administrator."
+msgstr "Фоновая проверка не запланирована. Сохраните карточку ещё раз или обратитесь к администратору."
+
+msgid "Before"
+msgstr "До"
+
+msgid "Check linked sources now"
+msgstr "Проверить связанные источники сейчас"
+
+msgid "Check order links"
+msgstr "Проверьте связи заказа"
+
+msgid "Confirmation exists — open it to verify the current version"
+msgstr "Есть подтверждение — откройте его для проверки текущей версии"
+
+msgid "Control started"
+msgstr "Контроль начат"
+
+msgid "Customer or Folio mapping changed. Monitoring is blocked; ask an administrator to reconcile the execution card."
+msgstr "Изменился клиент или привязка ФОЛИО. Контроль заблокирован; администратор должен сверить карточку исполнения."
+
+msgid "Deadline passed — review required"
+msgstr "Срок прошёл — требуется разбор"
+
+msgid "Document ID"
+msgstr "Внутренний ID документа"
+
+msgid "Document linked by manager"
+msgstr "Менеджер привязал документ"
+
+msgid "Each check reads one linked Folio document in rotation and the saved Woo/NP data. This does not poll Nova Poshta directly. New unlinked documents require a verified manual link."
+msgstr "Каждая проверка читает один связанный документ ФОЛИО по очереди и сохранённые данные Woo/НП. Прямого опроса НП нет. Новые несвязанные документы нужно привязать вручную после проверки."
+
+msgid "Enter the internal document ID, not its printed number. The customer is checked against Folio. This link is for supervision and does not create or alter accounting documents."
+msgstr "Введите внутренний ID документа, а не печатный номер. Клиент проверяется в ФОЛИО. Связь используется для контроля и не создаёт и не изменяет учётные документы."
+
+msgid "Execution control"
+msgstr "Контроль исполнения"
+
+msgid "Execution control not started"
+msgstr "Контроль исполнения не начат"
+
+msgid "Execution data changed or is unavailable. Reload the order and try again."
+msgstr "Данные исполнения изменились или недоступны. Обновите заказ и повторите попытку."
+
+msgid "Execution history"
+msgstr "История исполнения"
+
+msgid "Expense document"
+msgstr "Расходная накладная"
+
+msgid "Folio document could not be verified"
+msgstr "Не удалось проверить документ ФОЛИО"
+
+msgid "Folio document read or changed"
+msgstr "Документ ФОЛИО прочитан или изменён"
+
+msgid "Internal supervision. Folio documents, carrier handover and customer acceptance are separate facts. No payments, documents, messages or bonuses are created here."
+msgstr "Внутренний контроль. Документы ФОЛИО, передача перевозчику и приёмка клиентом — отдельные факты. Этот блок не создаёт оплат, документов, сообщений или бонусов."
+
+msgid "Last source check"
+msgstr "Последняя проверка источников"
+
+msgid "Link an existing Folio document"
+msgstr "Привязать существующий документ ФОЛИО"
+
+msgid "Linked Folio documents"
+msgstr "Связанные документы ФОЛИО"
+
+msgid "Manual supervision link removed"
+msgstr "Ручная связь контроля удалена"
+
+msgid "Monitor linked sources every five minutes"
+msgstr "Проверять связанные источники каждые пять минут"
+
+msgid "Monitoring paused"
+msgstr "Контроль приостановлен"
+
+msgid "No TTN yet"
+msgstr "ТТН пока нет"
+
+msgid "No saved shipment in the linked orders; check delivery or pickup"
+msgstr "В связанных заказах нет сохранённой отправки; проверьте доставку или самовывоз"
+
+msgid "No separate customer confirmation recorded"
+msgstr "Отдельное подтверждение клиента не зафиксировано"
+
+msgid "No verified document links yet"
+msgstr "Проверенных связей документов пока нет"
+
+msgid "Not verified; do not infer deletion"
+msgstr "Не проверено; это не означает удаление"
+
+msgid "Only an administrator can transfer responsibility for an existing execution card."
+msgstr "Передать ответственность в существующей карточке исполнения может только администратор."
+
+msgid "Order execution control"
+msgstr "Контроль исполнения заказа"
+
+msgid "Original deadline"
+msgstr "Первоначальный срок"
+
+msgid "Payment"
+msgstr "Платёж"
+
+msgid "Please wait for the source check or save to finish. Do not submit again."
+msgstr "Дождитесь завершения проверки или сохранения. Не отправляйте форму повторно."
+
+msgid "Reason or evidence for this change"
+msgstr "Причина или подтверждение этого изменения"
+
+msgid "Recorded document"
+msgstr "Зафиксированный документ"
+
+msgid "Related orders and confirmations"
+msgstr "Связанные заказы и подтверждения"
+
+msgid "Remove a manual supervision link"
+msgstr "Удалить ручную связь контроля"
+
+msgid "Remove link only; keep documents and history"
+msgstr "Удалить только связь; сохранить документы и историю"
+
+msgid "Requires attention"
+msgstr "Требует внимания"
+
+msgid "Requires review"
+msgstr "Требуется разбор"
+
+msgid "Responsibility is fixed for this order. An administrator must approve a transfer. Moving the deadline keeps the original date and history; it does not approve an exception."
+msgstr "Ответственный закреплён за этим заказом. Передачу выполняет администратор. Перенос срока сохраняет первоначальную дату и историю и не является согласованием исключения."
+
+msgid "Responsibility or next action updated"
+msgstr "Ответственность или следующее действие обновлены"
+
+msgid "Responsible manager for this order"
+msgstr "Ответственный менеджер этого заказа"
+
+msgid "Save execution control"
+msgstr "Сохранить контроль исполнения"
+
+msgid "Saved order or shipment data changed"
+msgstr "Сохранённые данные заказа или отправки изменились"
+
+msgid "Saved shipments"
+msgstr "Сохранённые отправки"
+
+msgid "Shared execution card for order #%s"
+msgstr "Общая карточка исполнения заказа №%s"
+
+msgid "Source observation"
+msgstr "Наблюдение источника"
+
+msgid "Sources are unavailable or stale. Last known data is shown; no cancellation or completion is inferred."
+msgstr "Источники недоступны или данные устарели. Показаны последние известные данные; отмена или завершение не подтверждены."
+
+msgid "Sources unavailable"
+msgstr "Источники недоступны"
+
+msgid "Specify an agreed deadline"
+msgstr "Укажите согласованный срок"
+
+msgid "Specify the next action"
+msgstr "Укажите следующее действие"
+
+msgid "Verify customer and link document"
+msgstr "Проверить клиента и привязать документ"
+
+msgid "Woo payment status is shown in the order. It is not a reconciliation of payments or the customer balance in Folio."
+msgstr "Статус оплаты Woo показан в заказе. Это не сверка платежей или баланса клиента в ФОЛИО."
+
+msgid "Open shipment details to review its preparation or error"
+msgstr "Откройте отправку для проверки подготовки или ошибки"
+
+msgid "Monitoring active"
+msgstr "Контроль активен"
+
+msgid "Included in accounting"
+msgstr "Учитывается в учёте"
+
+msgid "Not included in accounting"
+msgstr "Не учитывается в учёте"

@@ -444,3 +444,12 @@ msgstr ""
 
 msgid "For a gift-only promotion, fill Gift instructions for the manager. This sets the discount to zero and disables free shipping. The gift is not added as a product automatically. Instructions are saved with the checkout order and shown in the manager workspace, WooCommerce order and admin email. Check the original order when splitting by warehouses; do not add the gift once per shipment. An administrator must first enable coupons in WooCommerce settings."
 msgstr ""
+
+msgid "Order execution control"
+msgstr ""
+
+msgid "Open a customer order and save its responsible manager, next action, agreed deadline and reason. Enable monitoring for this order only. Linked warehouse orders share the original execution card. An administrator can transfer responsibility; the original deadline and all changes remain in history."
+msgstr ""
+
+msgid "Each check reads one known Folio document and saved order/shipment data. Unavailable sources keep the last verified values. Link additional documents by their internal ID with a reason; the customer is verified. Saved NP data is not new carrier tracking. Assembly, box passports and acceptance remain paper-based at this stage. No messages, accounting documents, payments or bonuses are created."
+msgstr ""
