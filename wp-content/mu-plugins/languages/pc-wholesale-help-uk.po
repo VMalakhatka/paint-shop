@@ -1247,3 +1247,7 @@ msgstr "Після входу «Покупка / Чернетка» та «Як 
 #: pc-wholesale-help.php
 msgid "Compact catalogue header"
 msgstr "Компактна шапка каталогу"
+
+#: pc-wholesale-help.php
+msgid "The catalogue uses the available screen width with small equal side margins. Purchase / Draft uses the same text size as the desktop shop selector and menu."
+msgstr "Каталог використовує доступну ширину екрана з невеликими однаковими полями з обох боків. Написи «Покупка / Чернетка» мають такий самий розмір, як вибір магазину й меню на комп’ютері."

@@ -192,3 +192,8 @@ body.psu-storefront :where(#content) :is(.button, button, input[type="submit"]):
     .psu-storefront .woocommerce-MyAccount-navigation { margin-bottom: 20px; }
     .psu-storefront .woocommerce-MyAccount-navigation a { padding: 10px; }
 }
+
+/* Avoid large auto margins on wide catalogue screens; keep other pages readable. */
+@media (min-width: 769px) {
+    .psu-storefront.psu-storefront--catalog #page { max-width: none; padding-left: 24px; padding-right: 24px; }
+}

@@ -1225,3 +1225,7 @@ msgstr ""
 #: pc-wholesale-help.php
 msgid "Compact catalogue header"
 msgstr ""
+
+#: pc-wholesale-help.php
+msgid "The catalogue uses the available screen width with small equal side margins. Purchase / Draft uses the same text size as the desktop shop selector and menu."
+msgstr ""
