@@ -1695,3 +1695,81 @@ msgstr "Сумма"
 
 msgid "Select up to 20 documents. Loading the next page keeps your selection; changing filters clears it. One confirmation saves the whole group."
 msgstr "Отметьте до 20 документов. Следующая страница сохраняет выбор; изменение фильтров очищает его. Одно подтверждение сохраняет всю группу."
+
+msgid "Document values at confirmation"
+msgstr "Суммы документа на момент подтверждения"
+
+msgid "Document total, UAH"
+msgstr "Сумма документа, грн"
+
+msgid "Goods amount in document lines, UAH"
+msgstr "Отгрузочная сумма по строкам, грн"
+
+msgid "Accounting cost in document lines, UAH"
+msgstr "Учётная себестоимость по строкам, грн"
+
+msgid "Document lines"
+msgstr "Строк документа"
+
+msgid "Lines without goods amount"
+msgstr "Строк без отгрузочной суммы"
+
+msgid "Lines without accounting cost"
+msgstr "Строк без учётной стоимости"
+
+msgid "Folio document header"
+msgstr "Шапка документа ФОЛИО"
+
+msgid "Folio document header and lines"
+msgstr "Шапка и строки документа ФОЛИО"
+
+msgid "Detailed values unavailable; unknown amounts are not zero"
+msgstr "Подробные суммы недоступны; неизвестные суммы не равны нулю"
+
+msgid "Values read from Folio"
+msgstr "Суммы прочитаны из ФОЛИО"
+
+msgid "Total weight, kg"
+msgstr "Общая масса, кг"
+
+msgid "Declared number of places"
+msgstr "Заявленное количество мест"
+
+msgid "Our package data used for creation"
+msgstr "Наши данные мест для создания ТТН"
+
+msgid "Site shipment ID"
+msgstr "ID отправления на сайте"
+
+msgid "Read this linked document again to refresh its saved values. Check and confirm; previous evidence remains in the audit."
+msgstr "Прочитайте связанный документ повторно, чтобы обновить сохранённые суммы. Проверьте и подтвердите; прежние данные остаются в журнале."
+
+msgid "Values describe the whole document at the time of reading, not the part allocated to this TTN. Do not add account and expense amounts as separate sales."
+msgstr "Суммы относятся ко всему документу на момент чтения, а не к части, отнесённой на эту ТТН. Не складывайте счёт и расходную как отдельные продажи."
+
+msgid "A dash means no saved value. Open the link below and read it again to update older links."
+msgstr "Прочерк означает отсутствие сохранённого значения. Для старых связей раскройте документ ниже и прочитайте его повторно."
+
+msgid "Saved package weights and dimensions"
+msgstr "Сохранённые масса и габариты мест"
+
+msgid "Carrier data and our creation data are separate snapshots. Missing dimensions remain unknown; total weight is never divided between places."
+msgstr "Данные перевозчика и наши данные создания — отдельные снимки. Отсутствующие габариты остаются неизвестными; общая масса не делится между местами автоматически."
+
+msgid "No saved package data yet. Our TTN creation retains the weight and dimensions of every entered box."
+msgstr "Сохранённых данных мест пока нет. При создании нашей ТТН сохраняются масса и габариты каждой введённой коробки."
+
+msgid "The source did not provide dimensions for individual places."
+msgstr "Источник не передал габариты отдельных мест."
+
+msgid "Place"
+msgstr "Место"
+
+msgid "Volumetric weight, kg"
+msgstr "Объёмная масса, кг"
+
+msgid "Volume, m³"
+msgstr "Объём, м³"
+
+msgid "Status"
+msgstr "Статус"

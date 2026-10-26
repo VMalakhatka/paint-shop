@@ -66,6 +66,7 @@ final class Folio
                 'warehouseId','accounted','returnDocument','correctedAt','source','basis',
             ])));
         }
+        $doc['values']=DocumentValues::capture($doc,$found);
         if ($role==='sale_expense' && empty($doc['account_link_id'])) $doc=$this->basisAccount($doc);
         return $doc;
     }

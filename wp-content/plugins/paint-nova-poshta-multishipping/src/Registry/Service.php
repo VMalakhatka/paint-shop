@@ -52,6 +52,19 @@ final class Service
                 });
             } finally { lavka_ecosystem_lock_release($lock['token']); }
         }
+        if ($command==='refresh_link_preview') {
+            $row=$this->store->detail((int)($input['id']??0));
+            if ((int)($input['revision']??0)!==(int)$row['revision']) throw new \RuntimeException('The record changed. Reload before saving.');
+            $link=null;
+            foreach($row['links'] as $candidate) if ((int)$candidate['id']===(int)($input['link']??0) && $candidate['active']) $link=$candidate;
+            if (!$link || !in_array($link['document_type'],['ACCOUNT','EXPENSE','RECEIPT'],true) || !$link['document_id'] || $link['verification']==='api_basis') throw new \InvalidArgumentException('Invalid document selection.');
+            $snapshot=json_decode($link['snapshot'],true)?:[];
+            $document=$this->folio->preview(['type'=>$link['document_type'],'role'=>$link['role'],'verification'=>'api',
+                'document_id'=>$link['document_id'],'number'=>$link['document_number'],'date'=>$link['document_date'],
+                'warehouse'=>$link['warehouse_id'],'partner'=>$link['partner_code'],'evidence'=>$link['evidence'],
+                'account_link_id'=>$snapshot['account_link_id']??0],$row);
+            return ['token'=>$this->store->preview('link',['id'=>(int)$row['id'],'revision'=>(int)$row['revision'],'document'=>$document]),'document'=>$document];
+        }
         if ($command==='link_preview' || $command==='woo_preview') {
             $row=$this->store->find((int)($input['id']??0));
             if ((int)($input['revision']??0)!==(int)$row['revision']) throw new \RuntimeException('The record changed. Reload before saving.');

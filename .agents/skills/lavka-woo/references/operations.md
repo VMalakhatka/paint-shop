@@ -577,3 +577,13 @@ every selected header; max 20 links per explicit preview/atomic confirmation.
 Internal transfers use EXPENSE/other; no account/Woo requirement or inferred sale.
 Receipt lists remain supplier-unverified and cannot filter by operation. Human
 steps and deployment boundary: docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-registry.
+
+NP values/package evidence 0.10.9 (2026-10-26, code/tests and read-only inspection):
+Folio link snapshots preserve full-document UAH header/goods/accounting amounts with
+read time and missing-line counts. Cost comes from the authenticated manager values
+route; never expose it through the customer DTO/proxy or derive it from NP declared
+cost. Same-document refresh requires preview/confirmation and retains audit. These
+are not per-TTN allocations; account/expense, repeated TTNs and internal transfers
+must not become duplicate sales. NP OptionsSeat and our creation request already
+persist per-place kg/cm data; show source-separated facts, never guessed dimensions.
+See NP README 0.10.9 and manager guide #np-registry for workflow/deployment limits.

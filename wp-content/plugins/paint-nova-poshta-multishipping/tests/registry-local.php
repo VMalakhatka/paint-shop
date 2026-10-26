@@ -3,7 +3,7 @@
 if (!defined('WP_CLI') || !WP_CLI || wp_get_environment_type()!=='local'
     || !defined('PNPM_NOVA_POSHTA_API_KEY') || PNPM_NOVA_POSHTA_API_KEY!=='synthetic-registry-test-key') throw new RuntimeException('Intercepted local CLI only');
 
-use Paint\NovaPoshta\Registry\{Schema,Record,Store,Service,Folio,Carrier,WooOrders};
+use Paint\NovaPoshta\Registry\{Schema,Record,Store,Service,Folio,Carrier,WooOrders,DocumentValues,PackageFacts};
 use Paint\NovaPoshta\Infrastructure\ApiClient;
 use Paint\NovaPoshta\Admin\RegistryPage;
 
@@ -17,9 +17,9 @@ $store=new Store(); $service=new Service(); $ttn='99999999000001'; $ttn2='999999
 $key='pnpm_registry_schema'; $old_schema=get_option($key,null);
 // Exercise real migration and transactions against isolated disposable tables, not local business data.
 $wpdb->prefix=$prefix.'pnpmtest_';
-$http=[]; $documentReads=[]; $mail=0; $mode='good'; $status='1'; $partner='TEST'; $catalogMode='good'; $basisMode='NOT_FOUND';
+$http=[]; $documentReads=[]; $mail=0; $mode='good'; $status='1'; $partner='TEST'; $catalogMode='good'; $basisMode='NOT_FOUND'; $valuesMode='good';
 add_filter('pre_wp_mail', static function() use (&$mail) { $mail++; return false; },PHP_INT_MAX);
-$mock=static function($pre,$args,$url) use (&$http,&$documentReads,&$mode,&$status,&$partner,&$catalogMode,&$basisMode,$ttn,$ttn2) {
+$mock=static function($pre,$args,$url) use (&$http,&$documentReads,&$mode,&$status,&$partner,&$catalogMode,&$basisMode,&$valuesMode,$ttn,$ttn2) {
     $http[]=$url;
     $response=static fn($body)=>['headers'=>[],'body'=>wp_json_encode($body),'response'=>['code'=>200,'message'=>'OK']];
     if (str_starts_with($url,'https://api.novaposhta.ua/')) {
@@ -52,6 +52,15 @@ $mock=static function($pre,$args,$url) use (&$http,&$documentReads,&$mode,&$stat
             'documents'=>[$row,array_merge($row,['documentId'=>124,'documentNumber'=>'51','warehouseId'=>8]),array_merge($row,['documentId'=>125,'returnDocument'=>true])],
             'hasMore'=>!isset($query['cursor']),'nextCursor'=>$catalogMode==='bad_cursor'?'':'next-page']);
     }
+    if (str_ends_with(parse_url($url,PHP_URL_PATH),'/values')) {
+        if($valuesMode==='offline') return new WP_Error('offline','Synthetic outage');
+        $second=str_contains($url,'/124/');
+        return $response(['ok'=>true,'values'=>['documentType'=>str_contains($url,'/EXPENSE/')?'EXPENSE':'ACCOUNT',
+            'documentId'=>$second?124:123,'partnerShortName'=>$valuesMode==='wrong'?'OTHER':'TEST',
+            'documentNumber'=>$second?'51':'50','documentNumberSuffix'=>'a','documentDate'=>'2026-06-01','warehouseId'=>$second?8:7,
+            'documentAmount'=>'149.00','shipmentAmount'=>'149.00','accountingAmount'=>$valuesMode==='missing'?null:'100.25',
+            'lineCount'=>2,'missingAmountLines'=>0,'missingAccountingLines'=>$valuesMode==='missing'?1:0,'currency'=>'UAH','source'=>'ACTIVE_LEDGER']]);
+    }
     if (str_contains($url,'/basis-account')) {
         if ($basisMode==='offline') return new WP_Error('unavailable','Synthetic outage');
         return $response(['ok'=>true,'partnerShortName'=>'TEST','expenseId'=>123,'basis'=>'123456Woo о 18.06.2026','status'=>$basisMode,
@@ -61,7 +70,7 @@ $mock=static function($pre,$args,$url) use (&$http,&$documentReads,&$mode,&$stat
         $type=str_contains($url,'/EXPENSE/')?'EXPENSE':'ACCOUNT'; $second=str_ends_with(parse_url($url,PHP_URL_PATH),'/124');
         return $response(['ok'=>true,'partner'=>['shortName'=>$partner],'document'=>['documentType'=>$type,'documentId'=>$second?124:123,
             'documentNumber'=>$second?'51':'50','documentNumberSuffix'=>'a','documentDate'=>'2026-06-01T12:00:00.000','returnDocument'=>false,'warehouseId'=>$second?8:7,
-            'basis'=>'123456Woo о 18.06.2026','items'=>[['sku'=>'not-needed']],'linkedPayments'=>[['private'=>'not-needed']]]]);
+            'basis'=>'123456Woo о 18.06.2026','totalAmount'=>'149.00','items'=>[['sku'=>'not-needed']],'linkedPayments'=>[['private'=>'not-needed']]]]);
     }
     if (str_contains($url,'/admin/folio/receipt-catalogue')) return $response(['ok'=>true,'warehouseId'=>(int)$query['warehouseId'],'date'=>$query['date'],
         'documents'=>[['id'=>123,'number'=>'50a','date'=>array_map('intval',explode('-',$query['date'])),'warehouseId'=>(int)$query['warehouseId'],'type'=>'receipt','accounted'=>true]],'hasMore'=>false]);
@@ -187,7 +196,7 @@ try {
     $summaryTtn='99999999000004';
     $summaryId=$store->transaction(fn()=>$store->observe($summaryTtn,'np_documents',[
         'RecipientDescription'=>'Тестова компанія & партнери <script>alert(1)</script>','RecipientContactPerson'=>'Тестовий одержувач',
-        'CityRecipientDescription'=>'Київ','DateTime'=>'2026-10-20 10:00:00','Cost'=>'13217.00','CostOnSite'=>'1116.09','PayerType'=>'Sender',
+        'CityRecipientDescription'=>'Київ','DateTime'=>'2026-10-20 10:00:00','Cost'=>'13217.00','CostOnSite'=>'1116.09','PayerType'=>'Sender','Weight'=>'3.5','SeatsAmount'=>'2','OptionsSeat'=>[['weight'=>'1.5','volumetricLength'=>'25','volumetricWidth'=>'16','volumetricHeight'=>'12'],['weight'=>'2','volumetricLength'=>'30','volumetricWidth'=>'20','volumetricHeight'=>'15']],
     ],'2026-10-21 10:00:00'));
     $store->transaction(fn()=>$store->observe($summaryTtn,'np_tracking',['CostOnSite'=>'0','PayerType'=>'ThirdPerson'],'2026-10-22 10:00:00'));
     // A late-arriving old snapshot must not override newer evidence or supply its missing city.
@@ -280,6 +289,31 @@ try {
     $check($store->detail($directId)===$beforeBundle,'No partial account update after bundle failure');
     $basisMode='NOT_FOUND';
 
+    $v=$store->detail($transferId)['links'][0]; $values=json_decode($v['snapshot'],true)['values'];
+    $check($values['document_amount']==='149.00' && $values['shipment_amount']==='149.00' && $values['accounting_amount']==='100.25' && $values['currency']==='UAH','Document amounts captured as decimal strings, independently of carrier costs');
+    $valuesMode='missing'; $p=$service->run('link_preview',$direct);
+    $check($p['document']['values']['accounting_amount']===null && $p['document']['values']['missing_accounting_lines']===1,'Missing accounting line is not zero or a partial sum');
+    $valuesMode='wrong'; $p=$service->run('link_preview',$direct);
+    $check($p['document']['values']['accounting_amount']===null && $p['document']['values']['status']==='values_unavailable','Different partner values cannot enter snapshot');
+    $valuesMode='offline'; $p=$service->run('link_preview',$direct);
+    $check($p['document']['values']['document_amount']==='149.00' && $p['document']['values']['accounting_amount']===null,'Old API retains verified header total without inventing cost');
+    $valuesMode='good';
+    $link=$store->detail($transferId)['links'][0]; $before=$store->detail($transferId);
+    $refresh=$service->run('refresh_link_preview',['id'=>$transferId,'revision'=>4,'link'=>$link['id']]);
+    $check($store->detail($transferId)===$before,'Refreshing values is preview-only');
+    $confirm($refresh['token']); $check(count($store->detail($transferId)['links'])===2 && (int)$store->find($transferId)['revision']===5,'Refresh updates the existing link without duplicate');
+    $reject(fn()=>$service->run('refresh_link_preview',['id'=>$transferId,'revision'=>5,'link'=>999999]),'Refresh cannot access unrelated link');
+    $check(DocumentValues::money('0')==='0.00' && DocumentValues::money('-12.34')==='-12.34' && DocumentValues::money(null)===null && DocumentValues::money('1e4')===null,'Money retains zero, signed values and unknown without floating arithmetic');
+    $packages=$store->detail($summaryId)['carrier_packages'];
+    $check(count($packages['places'])===2 && $packages['places'][0]['length_cm']==='25' && $packages['places'][1]['weight_kg']==='2','Carrier place sizes and weights survive observation storage');
+    $check($packages['captured_at_utc']==='2026-10-21 10:00:00' && $packages['total_weight_kg']==='3.5','Dimensions retain their own snapshot date, not the latest tracking date');
+    $local=PackageFacts::local(['id'=>1,'order_id'=>2,'request_snapshot'=>wp_json_encode(['boxes'=>[['weight'=>1.5,'length'=>25,'width'=>16,'height'=>12]],'carrier'=>['OptionsSeat'=>[['weight'=>2,'volumetricLength'=>30,'volumetricWidth'=>20,'volumetricHeight'=>15]],'Weight'=>2,'SeatsAmount'=>1]])]);
+    $check($local['source']==='site_package_entry' && $local['places'][0]['length_cm']==='30' && $local['places'][0]['weight_kg']==='2','Exact durable creation payload takes precedence over earlier preparation');
+    $noPlaces=PackageFacts::carrier([['source'=>'np_tracking','observed_at'=>'2026-06-01 00:00:00','payload'=>wp_json_encode(['Weight'=>10,'SeatsAmount'=>3])]]);
+    $check($noPlaces['places']===[] && $noPlaces['place_count']===3,'Total mass never becomes guessed per-place mass');
+    $badPlaces=PackageFacts::local(['id'=>1,'order_id'=>2,'request_snapshot'=>wp_json_encode(['boxes'=>[['weight'=>0,'length'=>'secret','width'=>null,'height'=>-1]]])]);
+    $check($badPlaces['places'][0]['weight_kg']===null && $badPlaces['places'][0]['length_cm']===null,'Invalid or missing package fields stay unknown');
+
     // In-memory CRUD objects only: never create/change actual Woo orders in this DB.
     $wooA=new WC_Order(); $wooA->set_date_created('2026-06-01 12:00:00'); $wooA->set_status('processing');
     $wooA->set_currency('UAH'); $wooA->set_total('149.00'); $wooA->set_billing_first_name('Synthetic'); $wooA->set_billing_last_name('Customer'); $wooA->set_id(999999001);
@@ -341,9 +375,10 @@ try {
     $check(count($http)===$httpBefore && $wooA->get_total()==='149.00','Woo linking performs no external HTTP or order mutation');
     $manager->allcaps=[]; $reject(fn()=>$wooService->run('woo_orders',['woo_id'=>'999999001']),'Woo search requires registry manager permissions');
     $manager->allcaps=['manage_woocommerce'=>true,'manage_pnpm_shipments'=>true];
+    $store->transaction(fn()=>$store->observe('99999999000009','np_documents',['Weight'=>'3.5','SeatsAmount'=>'2','OptionsSeat'=>[['weight'=>'1.5','volumetricLength'=>'25','volumetricWidth'=>'16','volumetricHeight'=>'12'],['weight'=>'2','volumetricLength'=>'30','volumetricWidth'=>'20','volumetricHeight'=>'15']]],'2026-06-01 12:00:00'));
     if ($dir=getenv('PNPM_REGISTRY_FIXTURE_DIR')) {
         foreach (['detail','index'] as $view) {
-            switch_to_locale('uk'); $_GET=$view==='detail'?['page'=>'pnpm-registry','id'=>$summaryId]:['page'=>'pnpm-registry'];
+            switch_to_locale('uk'); $_GET=$view==='detail'?['page'=>'pnpm-registry','id'=>$transferId]:['page'=>'pnpm-registry'];
             ob_start(); (new RegistryPage())->render(); $body=ob_get_clean();
             $config=['url'=>'/ajax','nonce'=>'synthetic','page'=>'/registry-index.html','loading'=>RegistryPage::t('Checking…'),
                 'failure'=>RegistryPage::t('The request failed. Reload and check the saved result before repeating.'),

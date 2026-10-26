@@ -80,17 +80,21 @@
                     if (data.document) {
                         if (data.document.type === 'WOO_ORDER') wooPreview(preview, data.document);
                         else {
-                            const header = {...data.document}, account = header.related_account;
+                            const header = {...data.document}, account = header.related_account, values = header.values;
+                            delete header.values;
                             delete header.related_account;
                             preview.append(table(header));
+                            if (values) { const shown={...values}; delete shown.schema_version; preview.append(heading('values'),table(shown)); }
                             if (account) { const shown = {...account}; delete shown.api_snapshot; preview.append(heading('related_account'), table(nonempty(shown))); }
                         }
                     }
                     (data.documents || []).forEach(document => {
-                        const header = {...document}, account = header.related_account;
+                        const header = {...document}, account = header.related_account, values = header.values;
+                        delete header.values;
                         delete header.related_account;
                         const section = window.document.createElement('section');
                         section.className = 'pnpm-batch-document'; section.append(table(header));
+                        if (values) { const shown={...values}; delete shown.schema_version; section.append(heading('values'),table(shown)); }
                         if (account) { const shown = {...account}; delete shown.api_snapshot; section.append(heading('related_account'), table(nonempty(shown))); }
                         preview.append(section);
                     });

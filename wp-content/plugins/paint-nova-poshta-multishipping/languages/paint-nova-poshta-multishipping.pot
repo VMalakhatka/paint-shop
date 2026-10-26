@@ -2592,3 +2592,78 @@ msgstr ""
 
 msgid "Select up to 20 documents. Loading the next page keeps your selection; changing filters clears it. One confirmation saves the whole group."
 msgstr ""
+
+msgid "Document values at confirmation"
+msgstr ""
+
+msgid "Document total, UAH"
+msgstr ""
+
+msgid "Goods amount in document lines, UAH"
+msgstr ""
+
+msgid "Accounting cost in document lines, UAH"
+msgstr ""
+
+msgid "Document lines"
+msgstr ""
+
+msgid "Lines without goods amount"
+msgstr ""
+
+msgid "Lines without accounting cost"
+msgstr ""
+
+msgid "Folio document header"
+msgstr ""
+
+msgid "Folio document header and lines"
+msgstr ""
+
+msgid "Detailed values unavailable; unknown amounts are not zero"
+msgstr ""
+
+msgid "Values read from Folio"
+msgstr ""
+
+msgid "Total weight, kg"
+msgstr ""
+
+msgid "Declared number of places"
+msgstr ""
+
+msgid "Our package data used for creation"
+msgstr ""
+
+msgid "Site shipment ID"
+msgstr ""
+
+msgid "Read this linked document again to refresh its saved values. Check and confirm; previous evidence remains in the audit."
+msgstr ""
+
+msgid "Values describe the whole document at the time of reading, not the part allocated to this TTN. Do not add account and expense amounts as separate sales."
+msgstr ""
+
+msgid "A dash means no saved value. Open the link below and read it again to update older links."
+msgstr ""
+
+msgid "Saved package weights and dimensions"
+msgstr ""
+
+msgid "Carrier data and our creation data are separate snapshots. Missing dimensions remain unknown; total weight is never divided between places."
+msgstr ""
+
+msgid "No saved package data yet. Our TTN creation retains the weight and dimensions of every entered box."
+msgstr ""
+
+msgid "The source did not provide dimensions for individual places."
+msgstr ""
+
+msgid "Place"
+msgstr ""
+
+msgid "Volumetric weight, kg"
+msgstr ""
+
+msgid "Volume, m³"
+msgstr ""

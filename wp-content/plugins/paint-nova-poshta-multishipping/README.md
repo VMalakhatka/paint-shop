@@ -1,5 +1,36 @@
 # Paint Nova Poshta Multishipping
 
+## Document values and package facts 0.10.9 — 2026-10-26
+
+`DocumentValues` captures immutable decimal-string UAH evidence in link snapshot
+`values`: header document_amount, shipment_amount from all SCL_MOVE.SUM_PREDM,
+accounting_amount from all SCL_MOVE.SUM_UCHET, line/missing counts, status/source and
+captured_at_utc. The manager-only Java `/{type}/{id}/values` route verifies exact
+partner/type/id and excludes return headers. PHP also compares number/date/warehouse
+and the header amount. Missing service or mismatch keeps detailed values unknown;
+never derive accounting cost from retail value or NP declared/delivery amounts.
+No partial sums are labeled complete; explicit zero remains zero. This evidence
+is a whole-document snapshot, never a TTN cost allocation or an automatic profit sum.
+
+`refresh_link_preview` re-reads a confirmed active link and stages the normal
+revision-checked confirmation; same identity updates without duplicates. Previous
+confirmation evidence remains in audit. No silent backfill, live Folio write or
+schema change. Client document DTOs/proxies do not expose accounting costs; the
+new Java route requires the existing server token and sends Cache-Control: no-store.
+
+`PackageFacts` renders existing durable NP OptionsSeat/Weight/SeatsAmount observations
+and own shipment request_snapshot.carrier.OptionsSeat (fallback preparation boxes)
+separately. Keep the observation's own timestamp, kg/cm/m³ units and unknown fields.
+Never divide total weight into guessed seats, synthesize dimensions or mix observations.
+Carrier raw snapshots and creation payloads already persist; no new storage migration
+or carrier request is needed. Exact TTN lookup is bounded and only reads store_api rows.
+
+141 isolated registry checks pass, including atomic refresh, money unknown/zero,
+wrong partner, source timestamps and final creation payload precedence. Java value
+and authorization tests are separate. Production was inspected read-only; deploy
+plugin 0.10.9 + Java for costs, then explicitly refresh any older links as needed.
+Manager instructions: docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-registry.
+
 ## Multi-document picker 0.10.8 — 2026-10-26
 
 Checkbox warehouse selection (up to 20), operation substring filter and a full

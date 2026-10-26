@@ -104,6 +104,24 @@ final class RegistryPage
             'sender'=>'Sender','recipient'=>'Recipient','origin'=>'Origin','destination'=>'Destination',
             'Weight'=>'Weight','SeatsAmount'=>'Packages','DateTime'=>'Carrier document date','DateCreated'=>'Carrier creation date',
             'ScheduledDeliveryDate'=>'Estimated delivery date','ActualDeliveryDate'=>'Actual delivery date',
+            'values'=>'Document values at confirmation',
+            'document_amount'=>'Document total, UAH',
+            'shipment_amount'=>'Goods amount in document lines, UAH',
+            'accounting_amount'=>'Accounting cost in document lines, UAH',
+            'captured_at_utc'=>'Read at (UTC)',
+            'line_count'=>'Document lines',
+            'missing_amount_lines'=>'Lines without goods amount',
+            'missing_accounting_lines'=>'Lines without accounting cost',
+            'currency'=>'Currency','status'=>'Status',
+            'folio_header'=>'Folio document header',
+            'folio_document_values'=>'Folio document header and lines',
+            'values_unavailable'=>'Detailed values unavailable; unknown amounts are not zero',
+            'values_captured'=>'Values read from Folio',
+            'total_weight_kg'=>'Total weight, kg',
+            'place_count'=>'Declared number of places',
+            'site_package_entry'=>'Our package data used for creation',
+            'shipment_id'=>'Site shipment ID',
+            'order_id'=>'WooCommerce order ID',
             'basis'=>'Expense basis','basis_lookup_status'=>'Basis account lookup',
             'MATCHED'=>'Unique account found; confirming saves both links',
             'NO_BASIS'=>'No basis account specified; the expense can be linked alone',
@@ -237,13 +255,21 @@ final class RegistryPage
         $this->input('related_ttn','Original / related TTN','text',$row['related_ttn']); $this->input('note','Manager note','text',(string)$row['note']);
         $this->saveEnd(); echo '</section>';
         echo '<section class="pnpm-box"><h3>'.self::e('Confirmed Folio links').'</h3><p>'.self::e('A link is evidence of an association, not a payment or cost allocation. The same TTN may have several documents.').'</p>';
+        $this->valueTable($row['links']);
         $accounts=[];
         $folioLinks=array_filter($row['links'],static fn($link)=>$link['document_type']!=='WOO_ORDER');
         foreach ($folioLinks as $link) {
             if ($link['active'] && $link['document_type']==='ACCOUNT') $accounts[$link['id']]=$link['document_number'].' · '.$link['document_date'];
             echo '<details><summary>'.esc_html(($link['active']?'✓ ':'— ').(self::labels()[$link['role']]??$link['role']).' · '.$link['document_number'].' · '.$link['document_date']).'</summary>';
             echo '<p>'.self::e('Confirmed by user ID').' '.esc_html($link['confirmed_by']).' · '.esc_html($link['confirmed_at']).' UTC</p>';
-            $this->data(json_decode($link['snapshot'],true)?:[]);
+            $snapshot=json_decode($link['snapshot'],true)?:[]; $values=$snapshot['values']??null; unset($snapshot['values']);
+            $this->data($snapshot);
+            if ($values) { unset($values['schema_version']); $this->data($values); }
+            if ($link['active'] && in_array($link['document_type'],['ACCOUNT','EXPENSE','RECEIPT'],true) && $link['document_id'] && $link['verification']!=='api_basis') {
+                $this->form('refresh_link_preview',$row); echo '<input type="hidden" name="link" value="'.esc_attr($link['id']).'">';
+                echo '<p>'.self::e('Read this linked document again to refresh its saved values. Check and confirm; previous evidence remains in the audit.').'</p>';
+                $this->previewEnd(false,'Confirm Folio link');
+            }
             if ($link['active']) {
                 $this->form('unlink',$row); echo '<input type="hidden" name="link" value="'.esc_attr($link['id']).'">';
                 $this->input('reason','Reason for revoking the link','text','',true);
@@ -281,6 +307,7 @@ final class RegistryPage
         echo '</select></label>';
         $this->input('evidence','Verification evidence'); $this->previewEnd(false,'Confirm Folio link'); echo '</section>';
         $this->wooLinks($row);
+        $this->packageTable($row);
         echo '<section class="pnpm-box"><h3>'.self::e('Refresh carrier data').'</h3>';
         $this->form('tracking'); $this->input('ttn','TTN','text',$row['ttn'],true); $this->input('phone','Sender or recipient phone (optional)','tel'); $this->previewEnd(false,'Save carrier data'); echo '</section>';
         echo '<section class="pnpm-box"><h3>'.self::e('Carrier observations').'</h3><p>'.self::e('Latest 100 changed responses, newest observation first. Unavailable fields remain unknown. Read times are UTC, not the shipment event time.').'</p>';
@@ -315,6 +342,11 @@ final class RegistryPage
             }
             if ($link['evidence']!=='') echo '<p>'.self::e('Comment (optional)').': '.esc_html($link['evidence']).'</p>';
             echo '<p>'.self::e('Confirmed by user ID').' '.esc_html($link['confirmed_by']).' · '.esc_html($link['confirmed_at']).' UTC</p>';
+            if ($link['active'] && in_array($link['document_type'],['ACCOUNT','EXPENSE','RECEIPT'],true) && $link['document_id'] && $link['verification']!=='api_basis') {
+                $this->form('refresh_link_preview',$row); echo '<input type="hidden" name="link" value="'.esc_attr($link['id']).'">';
+                echo '<p>'.self::e('Read this linked document again to refresh its saved values. Check and confirm; previous evidence remains in the audit.').'</p>';
+                $this->previewEnd(false,'Confirm Folio link');
+            }
             if ($link['active']) {
                 $this->form('unlink',$row); echo '<input type="hidden" name="link" value="'.esc_attr($link['id']).'">';
                 $this->input('reason','Reason for revoking the link','text','',true); $this->saveEnd('Revoke link, retain audit');
@@ -361,6 +393,40 @@ final class RegistryPage
             echo '<details><summary>'.esc_html('#'.$batch['id'].' · '.$batch['created_at'].' UTC').'</summary>'; $this->data($result); echo '</details>';
         }
         echo '</details>';
+    }
+
+    private function valueTable(array $links): void
+    {
+        echo '<p>'.self::e('Values describe the whole document at the time of reading, not the part allocated to this TTN. Do not add account and expense amounts as separate sales.').'</p>';
+        $links=array_filter($links,static fn($link)=>$link['active'] && $link['document_type']!=='WOO_ORDER');
+        if (!$links) return;
+        echo '<div class="pnpm-table-scroll"><table class="widefat striped pnpm-evidence-table"><thead><tr>';
+        foreach(['Document number','Warehouse','Document total, UAH','Goods amount in document lines, UAH','Accounting cost in document lines, UAH','Read at (UTC)'] as $label) echo '<th>'.self::e($label).'</th>';
+        echo '</tr></thead><tbody>';
+        foreach($links as $link) {
+            $v=json_decode($link['snapshot'],true)['values']??[];
+            echo '<tr>';
+            foreach([$link['document_number'],$link['warehouse_id'],$v['document_amount']??null,$v['shipment_amount']??null,$v['accounting_amount']??null,$v['captured_at_utc']??null] as $value) echo '<td>'.esc_html($value===null?'—':(string)$value).'</td>';
+            echo '</tr>';
+        }
+        echo '</tbody></table></div><p>'.self::e('A dash means no saved value. Open the link below and read it again to update older links.').'</p>';
+    }
+
+    private function packageTable(array $row): void
+    {
+        echo '<section class="pnpm-box"><h3>'.self::e('Saved package weights and dimensions').'</h3><p>'.self::e('Carrier data and our creation data are separate snapshots. Missing dimensions remain unknown; total weight is never divided between places.').'</p>';
+        $sets=array_merge($row['carrier_packages']?[$row['carrier_packages']]:[],$row['site_packages']);
+        if (!$sets) echo '<p>'.self::e('No saved package data yet. Our TTN creation retains the weight and dimensions of every entered box.').'</p>';
+        foreach($sets as $set) {
+            $places=$set['places']; unset($set['places']); $this->data($set);
+            if (!$places) { echo '<p>'.self::e('The source did not provide dimensions for individual places.').'</p>'; continue; }
+            echo '<div class="pnpm-table-scroll"><table class="widefat striped pnpm-evidence-table"><thead><tr>';
+            foreach(['Place','Weight, kg','Length, cm','Width, cm','Height, cm','Volumetric weight, kg','Volume, m³'] as $label) echo '<th>'.self::e($label).'</th>';
+            echo '</tr></thead><tbody>';
+            foreach($places as $place) { echo '<tr>'; foreach($place as $value) echo '<td>'.esc_html($value===null?'—':(string)$value).'</td>'; echo '</tr>'; }
+            echo '</tbody></table></div>';
+        }
+        echo '</section>';
     }
 
     private function data(array $data): void

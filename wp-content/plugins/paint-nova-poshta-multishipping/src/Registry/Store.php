@@ -223,6 +223,8 @@ final class Store
             $sort=$key==='observations' ? 'observed_at DESC,id DESC' : 'id DESC';
             $row[$key]=$wpdb->get_results($wpdb->prepare('SELECT * FROM '.$this->table($suffix).' WHERE registry_id=%d ORDER BY '.$sort.' LIMIT 100',$id),ARRAY_A) ?: [];
         }
+        $row['carrier_packages']=PackageFacts::carrier($row['observations']);
+        $row['site_packages']=PackageFacts::savedLocal($row['ttn']);
         return $row;
     }
 
