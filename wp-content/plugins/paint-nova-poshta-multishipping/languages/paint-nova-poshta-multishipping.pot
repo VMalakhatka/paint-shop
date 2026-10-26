@@ -2694,3 +2694,51 @@ msgstr ""
 
 msgid "Document amounts could not be verified. Saved values were not changed."
 msgstr ""
+
+msgid "Account found; review its details and choose whether to link it"
+msgstr ""
+
+msgid "Account found from the expense basis"
+msgstr ""
+
+msgid "I checked this account and confirm linking it together with the expense."
+msgstr ""
+
+msgid "Leave unchecked to save only the expense. An account is optional."
+msgstr ""
+
+msgid "Basis account confirmation"
+msgstr ""
+
+msgid "Account explicitly confirmed"
+msgstr ""
+
+msgid "Account not selected; only expense confirmed"
+msgstr ""
+
+msgid "Invalid basis account confirmation."
+msgstr ""
+
+msgid "Account search source"
+msgstr ""
+
+msgid "Account number from expense header"
+msgstr ""
+
+msgid "Account date from expense header"
+msgstr ""
+
+msgid "Folio fields: By account and Account date"
+msgstr ""
+
+msgid "Expense basis text"
+msgstr ""
+
+msgid "Account number or date is missing in the header; check manually"
+msgstr ""
+
+msgid "Header account number is not recognized; check manually"
+msgstr ""
+
+msgid "Header account and basis text disagree; no account selected"
+msgstr ""

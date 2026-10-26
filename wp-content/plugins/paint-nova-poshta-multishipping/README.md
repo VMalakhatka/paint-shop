@@ -1,5 +1,26 @@
 # Paint Nova Poshta Multishipping
 
+## Explicit basis account selection 0.10.11 — 2026-10-26
+
+Basis lookup prefers Folio NUMSCHETPL/SCH_DATE, falling back to OSNOVANIE only
+when both header fields are absent. PHP displays reference source/fields and
+incomplete/unrecognized/conflicting statuses. A unique active/archive match is a
+separate preview card with the account's own ID/number/date/partner/warehouse/source.
+
+Each proposed account has an unchecked checkbox. Final confirmation sends only
+source-qualified proposal keys (expense ID + ledger + account ID). The service
+validates them against the immutable preview, rejects unknown/duplicate keys and
+removes unselected account proposals before atomic link saving. Expense-only
+confirmation remains valid. Changing an account choice resets the general agreement,
+not the preview. Replay returns the saved result, never applies a changed choice.
+
+Requires plugin + Java deployment; no DB migration, Folio write or archive restore.
+Production diagnostic confirmed the old parser rejected Latin `o` in basis text.
+Column snapshot and manufacturer manual establish editable header references, not
+an immutable parent ID. Verification: 155 isolated registry checks and 19 Java tests
+passed; desktop and narrow-column confirmation UI checked with synthetic data.
+Operator instructions: docs/MANAGER_CUSTOMER_GUIDE_UK.md.
+
 ## Saved-link correction and values refresh 0.10.10 — 2026-10-26
 
 Production read-only verification exposed Java LocalDate JSON arrays in `/values`.
@@ -76,7 +97,8 @@ account links still require same registry/partner/active role. The new read-only
 Java `/admin/folio/customer-documents/EXPENSE/{id}/basis-account` resolves the exact
 expense basis against active + archive headers, matching partner, number, suffix
 and date. PHP checks expense/partner/basis and preserves the returned header/source.
-Unique matches appear in preview and save with the expense in one transaction;
+Unique matches appear in preview and, since 0.10.11, save with the expense only
+after the separate account checkbox is selected, in one transaction;
 rollback and token replay cover the whole bundle. Archived account identities use
 `Paint_Ua_ARCHIVE` to avoid collisions with active IDs. Ambiguous, missing, malformed
 basis or unavailable lookup never invent a link and never block expense-only save.

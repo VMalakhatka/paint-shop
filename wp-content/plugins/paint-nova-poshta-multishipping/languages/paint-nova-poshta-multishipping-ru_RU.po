@@ -1800,3 +1800,51 @@ msgstr "Ошибочный документ? Уберите эту связь, �
 
 msgid "Document amounts could not be verified. Saved values were not changed."
 msgstr "Не удалось проверить суммы документа. Сохранённые значения не изменены."
+
+msgid "Account found; review its details and choose whether to link it"
+msgstr "Счёт найден; проверьте реквизиты и выберите, привязывать ли его"
+
+msgid "Account found from the expense basis"
+msgstr "Счёт, найденный по основанию расходной"
+
+msgid "I checked this account and confirm linking it together with the expense."
+msgstr "Я проверил(-а) этот счёт и подтверждаю его привязку вместе с расходной."
+
+msgid "Leave unchecked to save only the expense. An account is optional."
+msgstr "Без этой отметки сохранится только расходная. Счёт необязателен."
+
+msgid "Basis account confirmation"
+msgstr "Подтверждение счёта из основания"
+
+msgid "Account explicitly confirmed"
+msgstr "Счёт отдельно подтверждён"
+
+msgid "Account not selected; only expense confirmed"
+msgstr "Счёт не выбран; подтверждена только расходная"
+
+msgid "Invalid basis account confirmation."
+msgstr "Недопустимое подтверждение счёта из основания."
+
+msgid "Account search source"
+msgstr "Источник поиска счёта"
+
+msgid "Account number from expense header"
+msgstr "Номер счёта из шапки расходной"
+
+msgid "Account date from expense header"
+msgstr "Дата счёта из шапки расходной"
+
+msgid "Folio fields: By account and Account date"
+msgstr "Поля ФОЛИО: «По счёту» и «Дата счёта»"
+
+msgid "Expense basis text"
+msgstr "Текст основания расходной"
+
+msgid "Account number or date is missing in the header; check manually"
+msgstr "В шапке нет номера или даты счёта; проверьте вручную"
+
+msgid "Header account number is not recognized; check manually"
+msgstr "Номер счёта в шапке не распознан; проверьте вручную"
+
+msgid "Header account and basis text disagree; no account selected"
+msgstr "Счёт в шапке противоречит тексту основания; счёт не выбран"

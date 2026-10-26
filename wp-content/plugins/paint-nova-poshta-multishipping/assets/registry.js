@@ -36,6 +36,20 @@
         }
         target.append(paragraph('folio_context_hint'));
     };
+    const basisAccount = (target, document) => {
+        const account = document.related_account;
+        if (!account) return;
+        const section = window.document.createElement('section');
+        section.className = 'pnpm-basis-account';
+        const shown = {id: account.id, number: account.number, date: account.date,
+            partner: account.partner, warehouse: account.warehouse, source: account.source};
+        section.append(heading('related_account'), table(shown));
+        const label = window.document.createElement('label'), choice = window.document.createElement('input');
+        choice.type = 'checkbox'; choice.className = 'pnpm-basis-choice';
+        choice.value = `${document.id}:${account.source}:${account.id}`;
+        label.append(choice, window.document.createTextNode(' ' + cfg.labels.confirm_basis_account));
+        section.append(label, paragraph('basis_account_optional')); target.append(section);
+    };
     document.querySelectorAll('[data-link-target]').forEach(button => button.addEventListener('click', () => {
         const card = document.getElementById(button.dataset.linkTarget);
         const form = card?.querySelector(`form[data-command="${button.dataset.linkAction}"]`);
@@ -55,6 +69,7 @@
             if (confirm) { confirm.hidden = true; agreed.checked = false; apply.disabled = true; preview.replaceChildren(); }
         };
         form.addEventListener('input', event => {
+            if (event.target.classList.contains('pnpm-basis-choice')) { agreed.checked = false; apply.disabled = true; return; }
             if (event.target === agreed) { apply.disabled = !token || !agreed.checked || busy; return; }
             invalidate(); message.textContent = '';
             if (next) { next.hidden = true; form.elements.previous.value = ''; }
@@ -66,7 +81,10 @@
             const savedToken = token;
             const body = new FormData(form);
             body.set('action', 'pnpm_registry'); body.set('nonce', cfg.nonce); body.set('command', command);
-            if (command === 'confirm') body.set('token', token);
+            if (command === 'confirm') {
+                body.set('token', token);
+                body.set('basis_accounts', JSON.stringify([...form.querySelectorAll('.pnpm-basis-choice:checked')].map(el => el.value)));
+            }
             else invalidate();
             const requestGeneration = generation;
             busy = true;
@@ -93,7 +111,7 @@
                             delete header.related_account;
                             preview.append(table(header));
                             if (values) { const shown={...values}; delete shown.schema_version; preview.append(heading('values'),table(shown)); }
-                            if (account) { const shown = {...account}; delete shown.api_snapshot; preview.append(heading('related_account'), table(nonempty(shown))); }
+                            if (account) basisAccount(preview, data.document);
                         }
                     }
                     (data.documents || []).forEach(document => {
@@ -103,7 +121,7 @@
                         const section = window.document.createElement('section');
                         section.className = 'pnpm-batch-document'; section.append(table(header));
                         if (values) { const shown={...values}; delete shown.schema_version; section.append(heading('values'),table(shown)); }
-                        if (account) { const shown = {...account}; delete shown.api_snapshot; section.append(heading('related_account'), table(nonempty(shown))); }
+                        if (account) basisAccount(section, document);
                         preview.append(section);
                     });
                     if (data.scope) preview.append(table(data.scope));

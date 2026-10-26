@@ -63,7 +63,7 @@ $mock=static function($pre,$args,$url) use (&$http,&$documentReads,&$mode,&$stat
     }
     if (str_contains($url,'/basis-account')) {
         if ($basisMode==='offline') return new WP_Error('unavailable','Synthetic outage');
-        return $response(['ok'=>true,'partnerShortName'=>'TEST','expenseId'=>123,'basis'=>'123456Woo о 18.06.2026','status'=>$basisMode,
+        return $response(['ok'=>true,'partnerShortName'=>'TEST','expenseId'=>str_contains($url,'/124/')?124:123,'basis'=>'123456Woo о 18.06.2026','status'=>$basisMode,
             'account'=>$basisMode==='MATCHED'?['documentType'=>'ACCOUNT','documentId'=>321,'documentNumber'=>'123456','documentNumberSuffix'=>'Woo','documentDate'=>'2026-06-18','warehouseId'=>7,'partnerShortName'=>'TEST','source'=>'ARCHIVE_LEDGER']:null]);
     }
     if (str_contains($url,'/admin/folio/customer-documents/')) {
@@ -91,7 +91,7 @@ try {
     $p=$service->run('history',['from'=>'2026-06-01','to'=>'2026-06-30']);
     $check($store->listing([])===[],'Preview does not create registry record');
     $reject(fn()=>$service->run('confirm',['token'=>$p['token']]),'Explicit confirmation required');
-    $confirm=fn($token)=>$service->run('confirm',['token'=>$token,'confirmed'=>'1']);
+    $confirm=fn($token,$basis=[])=>$service->run('confirm',['token'=>$token,'confirmed'=>'1','basis_accounts'=>wp_json_encode($basis)]);
     $saved=$confirm($p['token']); $id=$saved['id']; $ids[]=$id;
     $check($id>0 && count($store->detail($id)['observations'])===1,'History imported');
     $check($confirm($p['token'])===$saved,'Repeated confirmation returns durable result');
@@ -270,13 +270,24 @@ try {
     $check(count($store->detail($directId)['links'])===1 && $store->detail($directId)['links'][0]['document_type']==='EXPENSE','Expense confirms without account or Woo order');
     $basisMode='MATCHED'; $direct['revision']=3; $p=$service->run('link_preview',$direct);
     $check($p['document']['related_account']['source']==='ARCHIVE_LEDGER' && count($store->detail($directId)['links'])===1,'Archived account proposed without saving on preview');
-    $result=$confirm($p['token']); $check($confirm($p['token'])===$result,'Account and expense confirmation replay is idempotent');
+    $confirm($p['token']);
+    $onlyExpense=$store->detail($directId)['links'];
+    $check(count($onlyExpense)===1 && json_decode($onlyExpense[0]['snapshot'],true)['basis_confirmation']==='account_not_selected','Unselected found account is not linked; expense remains independent');
+    $direct['revision']=4; $p=$service->run('link_preview',$direct);
+    $reject(fn()=>$confirm($p['token'],['123:ARCHIVE_LEDGER:999999']),'Account outside immutable preview cannot be confirmed');
+    $reject(fn()=>$confirm($p['token'],['123:ARCHIVE_LEDGER:321','123:ARCHIVE_LEDGER:321']),'Duplicate account confirmations rejected');
+    $result=$confirm($p['token'],['123:ARCHIVE_LEDGER:321']);
+    $check($confirm($p['token'])===$result,'Account and expense confirmation replay is idempotent');
     $linked=$store->detail($directId)['links'];
-    $check(count($linked)===2 && $linked[0]['document_type']==='ACCOUNT' && (int)$store->find($directId)['revision']===5,'Account and expense saved together');
+    $check(count($linked)===2 && $linked[0]['document_type']==='ACCOUNT' && (int)$store->find($directId)['revision']===6,'Account and expense saved together');
     $expenseSaved=json_decode($linked[1]['snapshot'],true);
     $check($expenseSaved['account_link_id']===(int)$linked[0]['id'],'Expense points to the confirmed archived account');
-    $direct['revision']=5; $basisMode='AMBIGUOUS'; $p=$service->run('link_preview',$direct);
+    $direct['revision']=6; $basisMode='AMBIGUOUS'; $p=$service->run('link_preview',$direct);
     $check($p['document']['basis_lookup_status']==='AMBIGUOUS' && empty($p['document']['related_account']),'Ambiguous basis never selects an account');
+    foreach (['INCOMPLETE_REFERENCE','UNRECOGNIZED_REFERENCE','CONFLICTING_REFERENCE'] as $basisMode) {
+        $p=$service->run('link_preview',$direct);
+        $check($p['document']['basis_lookup_status']===$basisMode && empty($p['document']['related_account']),'Uncertain header reference allows expense alone without proposing an account');
+    }
     $basisMode='offline'; $p=$service->run('link_preview',$direct);
     $check($p['document']['basis_lookup_status']==='UNAVAILABLE' && empty($p['document']['related_account']),'Old or unavailable API still allows expense alone');
     $p=$service->run('link_preview',array_merge($direct,['account_link_id'=>999999]));
@@ -284,9 +295,17 @@ try {
     $basisMode='MATCHED'; $p=$service->run('link_preview',$direct); $beforeBundle=$store->detail($directId);
     $breakExpense=static fn($sql)=>str_starts_with($sql,'UPDATE `'.$wpdb->prefix.'pnpm_registry_links`') && str_contains($sql,"'EXPENSE'") ? 'INVALID SYNTHETIC QUERY' : $sql;
     $old_suppress=$wpdb->suppress_errors(true); add_filter('query',$breakExpense);
-    try { $reject(fn()=>$confirm($p['token']),'Expense failure rolls back whole bundle'); }
+    try { $reject(fn()=>$confirm($p['token'],['123:ARCHIVE_LEDGER:321']),'Expense failure rolls back whole bundle'); }
     finally { remove_filter('query',$breakExpense); $wpdb->suppress_errors($old_suppress); }
     $check($store->detail($directId)===$beforeBundle,'No partial account update after bundle failure');
+    $batchAccountId=$store->transaction(fn()=>$store->observe('99999999000008','manual',['evidence'=>'Synthetic sale bundle'],'2026-06-01 12:00:00'));
+    $store->classify($batchAccountId,1,['partner_code'=>'TEST','direction'=>'outgoing','purpose'=>'sale']);
+    $accountBatch=array_merge($batch,['id'=>$batchAccountId,'revision'=>2,'role'=>'sale_expense']);
+    $p=$service->run('link_preview',$accountBatch);
+    $confirm($p['token'],['123:ARCHIVE_LEDGER:321']);
+    $bundle=$store->detail($batchAccountId)['links']; $expenses=array_values(array_filter($bundle,fn($l)=>$l['document_type']==='EXPENSE'));
+    $check(count($bundle)===3 && count($expenses)===2,'Batch confirms only selected basis account alongside two expenses');
+    foreach($expenses as $l) { $snapshot=json_decode($l['snapshot'],true); $check(!empty($snapshot['account_link_id'])===($l['document_id']==='123'),'Account choice belongs to its exact expense'); }
     $basisMode='NOT_FOUND';
 
     $v=$store->detail($transferId)['links'][0]; $values=json_decode($v['snapshot'],true)['values'];

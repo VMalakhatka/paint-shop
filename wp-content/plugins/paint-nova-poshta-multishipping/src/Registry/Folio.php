@@ -80,8 +80,11 @@ final class Folio
             $status=$result['status']??'';
             if (($result['partnerShortName']??'')!==$doc['partner'] || (string)($result['expenseId']??'')!==$doc['id']
                 || (string)($result['basis']??'')!==(string)$doc['basis']
-                || !in_array($status,['MATCHED','NO_BASIS','UNRECOGNIZED_BASIS','NOT_FOUND','AMBIGUOUS'],true)) return $doc;
+                || !in_array($status,['MATCHED','NO_BASIS','UNRECOGNIZED_BASIS','NOT_FOUND','AMBIGUOUS','INCOMPLETE_REFERENCE','UNRECOGNIZED_REFERENCE','CONFLICTING_REFERENCE'],true)) return $doc;
             $doc['basis_lookup_status']=$status;
+            if (in_array($result['referenceSource']??'',['HEADER_FIELDS','BASIS_TEXT'],true)) $doc['account_reference_source']=$result['referenceSource'];
+            if (!empty($result['accountNumber'])) $doc['account_reference_number']=Record::text($result['accountNumber'],100);
+            if (!empty($result['accountDate'])) $doc['account_reference_date']=self::date($result['accountDate']);
             if ($status!=='MATCHED') return $doc;
             $a=$result['account']??[];
             if (($a['documentType']??'')!=='ACCOUNT' || ($a['partnerShortName']??'')!==$doc['partner']

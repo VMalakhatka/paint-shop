@@ -9,3 +9,5 @@
 .pnpm-evidence-table{min-width:760px}.pnpm-evidence-table th{overflow-wrap:normal}.pnpm-evidence-table td{white-space:nowrap;font-variant-numeric:tabular-nums}
 
 .pnpm-link-actions .button{display:block;margin:4px 0;white-space:normal}
+
+.pnpm-basis-account{border:1px solid #b6d6ed;background:#f0f6fc;padding:14px;margin:16px 0}.pnpm-basis-account label{display:block;font-weight:600}

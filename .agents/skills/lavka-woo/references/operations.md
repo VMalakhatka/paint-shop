@@ -597,3 +597,13 @@ Link correction is audited revocation plus normal selection/confirmation; it
 never deletes or edits Folio documents. Sources: `DocumentValues.php`,
 `Service::run(refresh_link_preview)`, `Store::unlink`, read-only production check.
 Operator steps remain in `docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-registry`.
+
+### Expense account proposals — verified 2026-10-26
+
+Prefer Folio header NUMSCHETPL + SCH_DATE; use OSNOVANIE only when both are absent.
+They are editable account/tax-invoice references, not a parent document ID.
+Incomplete/conflicting references never select an account automatically. Search
+active/archive by exact number/suffix/date/partner; confirm the proposal separately
+from the expense. Checkbox keys are validated against the immutable registry preview.
+Sources: FolioExpenseBasisService/Dao, captured column schema, Структура7.doc
+NUMSCHETPL/SCH_DATE descriptions; manager steps in the NP registry guide.

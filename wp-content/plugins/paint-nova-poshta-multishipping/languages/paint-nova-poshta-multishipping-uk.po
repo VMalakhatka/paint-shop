@@ -2530,3 +2530,51 @@ msgstr "Помилковий документ? Скасуйте цей зв’я
 
 msgid "Document amounts could not be verified. Saved values were not changed."
 msgstr "Не вдалося перевірити суми документа. Збережені значення не змінено."
+
+msgid "Account found; review its details and choose whether to link it"
+msgstr "Рахунок знайдено; перевірте реквізити та виберіть, чи прив’язувати його"
+
+msgid "Account found from the expense basis"
+msgstr "Рахунок, знайдений за підставою видаткової"
+
+msgid "I checked this account and confirm linking it together with the expense."
+msgstr "Я перевірив(-ла) цей рахунок і підтверджую його прив’язку разом із видатковою."
+
+msgid "Leave unchecked to save only the expense. An account is optional."
+msgstr "Без цієї позначки буде збережено лише видаткову. Рахунок необов’язковий."
+
+msgid "Basis account confirmation"
+msgstr "Підтвердження рахунку з підстави"
+
+msgid "Account explicitly confirmed"
+msgstr "Рахунок окремо підтверджено"
+
+msgid "Account not selected; only expense confirmed"
+msgstr "Рахунок не вибрано; підтверджено лише видаткову"
+
+msgid "Invalid basis account confirmation."
+msgstr "Неприпустиме підтвердження рахунку з підстави."
+
+msgid "Account search source"
+msgstr "Джерело пошуку рахунку"
+
+msgid "Account number from expense header"
+msgstr "Номер рахунку з шапки видаткової"
+
+msgid "Account date from expense header"
+msgstr "Дата рахунку з шапки видаткової"
+
+msgid "Folio fields: By account and Account date"
+msgstr "Поля ФОЛІО: «По рахунку» та «Дата рахунку»"
+
+msgid "Expense basis text"
+msgstr "Текст підстави видаткової"
+
+msgid "Account number or date is missing in the header; check manually"
+msgstr "У шапці немає номера або дати рахунку; перевірте вручну"
+
+msgid "Header account number is not recognized; check manually"
+msgstr "Номер рахунку в шапці не розпізнано; перевірте вручну"
+
+msgid "Header account and basis text disagree; no account selected"
+msgstr "Рахунок у шапці суперечить тексту підстави; рахунок не вибрано"

@@ -35,7 +35,8 @@ final class Service
             $lock=lavka_ecosystem_lock_acquire('paint-nova-poshta-multishipping','np_registry','manual','Nova Poshta registry',600);
             if (empty($lock['ok'])) throw new \RuntimeException('Another synchronization is running. Try saving after it finishes.');
             try {
-                return $this->store->apply((string)($input['token']??''),function($kind,$payload) {
+                return $this->store->apply((string)($input['token']??''),function($kind,$payload) use ($input) {
+                    if (in_array($kind,['link','links'],true)) $payload=$this->selectBasisAccounts($payload,$input);
                     if ($kind==='links') return $this->store->linkMany($payload);
                     if ($kind==='link') return $this->store->linkBundle($payload);
                     if ($kind==='woo_link') {
@@ -126,5 +127,27 @@ final class Service
                 'scope'=>['coverage'=>'manual_reference_only'],'observed_at'=>gmdate('Y-m-d H:i:s')];
         } else throw new \InvalidArgumentException('Unknown registry action.');
         return ['token'=>$this->store->preview('import',$payload),'source'=>$payload['source'],'scope'=>$payload['scope'],'rows'=>$payload['rows']];
+    }
+
+    /** The browser selects only proposals from the immutable preview, never account data. */
+    private function selectBasisAccounts(array $payload,array $input): array
+    {
+        $selected=json_decode((string)($input['basis_accounts']??'[]'),true);
+        if (!is_array($selected) || !array_is_list($selected) || count($selected)>20
+            || count(array_filter($selected,'is_string'))!==count($selected)
+            || count(array_unique($selected))!==count($selected)) throw new \InvalidArgumentException('Invalid basis account confirmation.');
+        $documents=$payload['documents']??[$payload['document']]; $allowed=[];
+        foreach ($documents as &$document) {
+            $account=$document['related_account']??null;
+            if (!$account) continue;
+            $key=$document['id'].':'.$account['source'].':'.$account['id']; $allowed[]=$key;
+            $document['basis_confirmation']=in_array($key,$selected,true)?'account_selected':'account_not_selected';
+            if ($document['basis_confirmation']==='account_not_selected') unset($document['related_account']);
+        }
+        unset($document);
+        if (array_diff($selected,$allowed)) throw new \InvalidArgumentException('Invalid basis account confirmation.');
+        if (isset($payload['documents'])) $payload['documents']=$documents;
+        else $payload['document']=$documents[0];
+        return $payload;
     }
 }
