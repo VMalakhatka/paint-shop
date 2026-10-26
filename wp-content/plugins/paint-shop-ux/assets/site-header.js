@@ -9,7 +9,8 @@
     const mobile = window.matchMedia('(max-width: 768px)');
     // Share the final control row on small screens instead of consuming another
     // full row. Without JS the menu remains expanded and this button stays hidden.
-    const allocation = header.querySelector('.pc-alloc');
+    // The warehouse control is hidden in draft mode; keep the menu outside it.
+    const allocation = header.querySelector('.psu-site-header__allocation');
     if (allocation) allocation.append(toggle);
     const disclosures = [];
     nav.querySelectorAll('li').forEach((item, index) => {

@@ -1017,3 +1017,22 @@ Deploy together: PSU, `pc-guest-customer-register.php`, `00-mu-i18n-loader.php`,
 No theme reinstall or DB migration. Not deployed by this task. Rollback restores
 these files from the previous release; do not remove accounts/orders created
 while the change was active. Old mail flags are not retroactively reclassified.
+
+## Компактная шапка (1.9.3, 2026-10-26)
+
+На страницах, где доступен режим покупки/чернетки, шапка вызывает существующий
+`pcoe_catalog_toolbar` рядом с выбором магазина. Eligibility, nonce, AJAX и
+render-once остаются у PCOE; поздние legacy hooks не дублируют панель. Справка
+раскрывается в потоке, на узких экранах элементы переносятся. Мобильная кнопка
+меню расположена вне скрываемого в режиме чернетки `.pc-alloc`.
+
+Только ссылка настроенной WooCommerce-корзины в собственной шапке получает
+переведённый `Cart` и декоративный SVG; название страницы, адрес, сохранённое
+меню и роль-фильтры не меняются. Заголовок и каталог используют одинаковую
+ширину 1440px и симметричные поля 32px (12px на телефоне).
+
+Проверка: `tests/site-header-local.php` (guest, customer, administrator, wholesale,
+rollback, fallback, empty-menu), браузер на desktop/tablet/mobile, открытие
+справки и переключение Purchase → Draft → Purchase. Канон и код «Як замовляти»
+обновлены; production deploy в этой задаче не выполнялся. Откат: вернуть
+`inc/site-header.php`, `assets/site-header.css/js` предыдущей версии вместе.

@@ -1217,3 +1217,11 @@ msgstr ""
 
 msgid "If you received a promotion code, apply it in the cart or checkout. Dates, order conditions and usage limits are checked. A gift coupon does not reduce the total: the manager receives instructions to add your gift. Contact the manager if the code is rejected."
 msgstr ""
+
+#: pc-wholesale-help.php
+msgid "After signing in, Purchase / Draft and How to work with a draft? are next to the warehouse controls in the header. On narrow screens they wrap onto separate lines. Open the help to read it, then close it to return to the compact view. The Cart menu link has a basket icon."
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Compact catalogue header"
+msgstr ""

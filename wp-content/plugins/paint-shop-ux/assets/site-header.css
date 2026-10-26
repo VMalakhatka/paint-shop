@@ -14,7 +14,7 @@ body.psu-header-page { margin: 0; }
 .psu-site-header a { color: inherit; text-decoration: none; }
 .psu-site-header a:hover { color: var(--psu-header-accent); }
 .psu-site-header :is(a, button, select):focus-visible, .psu-site-header__skip:focus-visible { outline: 3px solid #743c2e; outline-offset: 3px; }
-.psu-site-header__container { width: 100%; max-width: 1360px; margin: 0 auto; padding: 0 40px; }
+.psu-site-header__container { width: 100%; max-width: 1440px; margin: 0 auto; padding: 0 32px; }
 .psu-site-header__identity { background: #f7cfa1; }
 .psu-site-header__brand-row { display: flex; align-items: center; gap: 36px; padding-top: 12px; padding-bottom: 12px; }
 .psu-site-header__logo { display: block; flex: 0 0 168px; color: #4b2b1b; }
@@ -24,8 +24,22 @@ body.psu-header-page { margin: 0; }
 .psu-site-header__contacts li { display: flex; flex-wrap: wrap; gap: 0 10px; margin: 0; padding: 0; }
 .psu-site-header__contacts a { font-weight: 500; white-space: nowrap; text-underline-offset: 3px; }
 .psu-site-header__contacts a:hover { text-decoration: underline; }
-.psu-site-header__toolbar { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding-top: 16px; padding-bottom: 16px; }
-.psu-site-header__allocation { flex: 1 1 520px; min-width: 0; max-width: 680px; }
+.psu-site-header__toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; padding-top: 12px; padding-bottom: 12px; }
+.psu-site-header__controls { display: flex; flex: 1 1 auto; flex-wrap: wrap; align-items: center; gap: 12px 18px; min-width: 0; max-width: 100%; }
+.psu-site-header__allocation { flex: 0 1 auto; min-width: 0; max-width: 100%; }
+.psu-site-header__nav { min-width: 0; max-width: 100%; margin-left: auto; }
+.psu-site-header .pcoe-catalog-toolbar { display: contents; }
+.psu-site-header .pcoe-mode-switch { flex: 0 0 auto; }
+.psu-site-header .pcoe-mode-switch button { min-height: 42px; font-family: inherit; line-height: 1.4; cursor: pointer; }
+.psu-site-header .pcoe-draft-help { flex: 0 1 auto; width: auto; margin: 0; font-size: 14px; }
+.psu-site-header .pcoe-draft-help > summary { min-height: 44px; padding: 11px 0; }
+.psu-site-header .pcoe-draft-help[open] { flex-basis: 100%; }
+.psu-site-header .pcoe-draft-help__body { padding: 16px 0; }
+.psu-site-header .pcoe-draft-help a { text-decoration: underline; }
+.psu-site-header .pcoe-draft-picker { flex-basis: 260px; }
+.psu-site-header .pcoe-catalog-toolbar :is(input, select) { min-height: 44px; padding: 8px 10px; border: 1px solid var(--psu-header-border); border-radius: 8px; background: #fff; color: inherit; font-family: inherit; }
+.psu-site-header .pcoe-catalog-toolbar a { text-decoration: underline; }
+.psu-site-header__cart-icon { width: 20px; height: 20px; margin-left: 7px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
 .psu-site-header .pc-alloc { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0; width: 100%; min-width: 0; font: inherit; }
 .psu-site-header .pc-alloc-warning { flex: 0 0 100%; width: 100%; max-width: none; margin: 0 0 2px; padding: 8px 10px; border: 0; border-left: 3px solid #b48730; border-radius: 0 6px 6px 0; background: #fff8e7; color: #5e481e; font-family: inherit; line-height: 1.5; font-size: 12px; }
 .psu-site-header .pc-alloc small { flex: 0 0 auto; margin: 0; color: #6e655e; font-size: 12px; }
@@ -54,12 +68,11 @@ body.psu-header-page { margin: 0; }
     .psu-site-header[data-enhanced] .sub-menu .sub-menu { position: static; width: 100%; box-shadow: none; }
 }
 @media (max-width: 1024px) {
-    .psu-site-header__container { padding-left: 24px; padding-right: 24px; }
     .psu-site-header__toolbar { flex-wrap: wrap; gap: 12px; }
     .psu-site-header__allocation { max-width: none; }
 }
 @media (max-width: 768px) {
-    .psu-site-header__container { padding-left: 16px; padding-right: 16px; }
+    .psu-site-header__container { padding-left: 12px; padding-right: 12px; }
     .psu-site-header__brand-row { gap: 12px; padding-top: 10px; padding-bottom: 10px; }
     .psu-site-header__logo { flex-basis: 96px; }
     .psu-site-header__contacts { min-width: 0; gap: 6px; font-size: 12px; line-height: 1.35; }
@@ -67,7 +80,10 @@ body.psu-header-page { margin: 0; }
     .psu-site-header__contacts a { display: inline-block; }
     .psu-site-header__contacts span { display: block; }
     .psu-site-header__toolbar { gap: 12px; padding-top: 12px; padding-bottom: 12px; }
-    .psu-site-header__allocation { flex-basis: 100%; }
+    .psu-site-header__controls { flex-basis: 100%; gap: 8px 12px; }
+    .psu-site-header__allocation { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; flex-basis: 100%; }
+    .psu-site-header__allocation > .pc-alloc { flex: 1 1 0; width: auto; }
+    .psu-site-header__allocation > .pc-context-help { order: 1; flex-basis: 100%; }
     .psu-site-header .pc-alloc { gap: 8px; }
     .psu-site-header .pc-alloc small { display: none; }
     .psu-site-header .pc-alloc select { flex: 1 1 auto; font-size: 16px; }

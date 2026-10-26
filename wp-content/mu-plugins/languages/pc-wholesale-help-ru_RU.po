@@ -1239,3 +1239,11 @@ msgstr "Перед оформлением можно войти в кабине�
 
 msgid "If you received a promotion code, apply it in the cart or checkout. Dates, order conditions and usage limits are checked. A gift coupon does not reduce the total: the manager receives instructions to add your gift. Contact the manager if the code is rejected."
 msgstr "Если получили промокод, примените его в корзине или при оформлении. Проверяются сроки, условия заказа и лимиты. Купон на подарок не уменьшает сумму: менеджер получает задание добавить подарок. Если код не принят, обратитесь к менеджеру."
+
+#: pc-wholesale-help.php
+msgid "After signing in, Purchase / Draft and How to work with a draft? are next to the warehouse controls in the header. On narrow screens they wrap onto separate lines. Open the help to read it, then close it to return to the compact view. The Cart menu link has a basket icon."
+msgstr "После входа «Покупка / Чернетка» и «Як працювати з чернеткою?» находятся в шапке рядом с выбором склада. На узком экране они переносятся на отдельные строки. Разверните справку для чтения, затем сверните её для компактного вида. Пункт меню «Корзина» отмечен значком корзины."
+
+#: pc-wholesale-help.php
+msgid "Compact catalogue header"
+msgstr "Компактная шапка каталога"

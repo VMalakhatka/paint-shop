@@ -24,7 +24,7 @@ $hooks = ['wp_body_open', 'generate_before_header', 'generate_header', 'generate
     'wp_footer', 'wp_nav_menu_items', 'pc_alloc_header_rendered', 'psu_site_header_enabled', 'theme_mod_nav_menu_locations'];
 $saved_hooks = [];
 foreach ($hooks as $name) $saved_hooks[$name] = isset($GLOBALS['wp_filter'][$name]) ? clone $GLOBALS['wp_filter'][$name] : null;
-$saved = ['user' => get_current_user_id(), 'cookies' => $_COOKIE,
+$saved = ['user' => get_current_user_id(), 'cookies' => $_COOKIE, 'query' => $GLOBALS['wp_query'],
     'rendered_exists' => array_key_exists('psu_site_header_rendered', $GLOBALS),
     'rendered' => $GLOBALS['psu_site_header_rendered'] ?? null];
 $disabled = static fn(): bool => false;
@@ -44,6 +44,10 @@ $links = static function (DOMXPath $xpath, string $selector): array {
 };
 
 try {
+    // Render a real shop context without navigating or changing stored options.
+    $GLOBALS['wp_query'] = new WP_Query();
+    $GLOBALS['wp_query']->is_post_type_archive = true;
+    $GLOBALS['wp_query']->set('post_type', 'product');
     wp_set_current_user(0);
     if (in_array($scenario, ['customer', 'administrator', 'wholesale'], true)) {
         $roles = $scenario === 'wholesale' ? ($wholesale_role !== '' ? [$wholesale_role] : pc_wholesale_customer_roles()) : [$scenario];
@@ -99,6 +103,12 @@ try {
         psu_render_site_header();
         $html = ob_get_clean();
         $xpath = $parse($html);
+        $toolbars = $xpath->query('//header//section[contains(@class,"pcoe-catalog-toolbar")]')->length;
+        $check($toolbars === (is_user_logged_in() ? 1 : 0), 'Existing shopping-mode visibility preserved inside the header');
+        ob_start();
+        do_action('pcoe_catalog_toolbar');
+        $late_toolbar = ob_get_clean();
+        $check($late_toolbar === '', 'Legacy catalogue placement does not duplicate the toolbar');
         $check($xpath->query('//header[contains(concat(" ", normalize-space(@class), " "), " psu-site-header ")]')->length === 1, 'Exactly one header across repeated placements');
         $check($xpath->query('//*[@id="psu-primary-menu"]')->length === 1, 'Exactly one primary navigation list');
         $check($xpath->query('//nav[contains(concat(" ", normalize-space(@class), " "), " psu-site-header__nav ")]')->length === 1, 'One independent navigation landmark');
@@ -111,6 +121,12 @@ try {
         $check($xpath->query('//a[@href="tel:+380503480138"]')->length === 1, 'Wholesale phone preserved as a callable link');
         $check($xpath->query('//a[@href="' . esc_url(home_url('/')) . '"]//*[local-name()="svg"]')->length === 1, 'Existing SVG logo links home');
         $actual_links = $links($xpath, '//*[@id="psu-primary-menu"]//a[@href]');
+        foreach ($xpath->query('//*[@id="psu-primary-menu"]//a[@href="' . esc_url(wc_get_page_permalink('cart')) . '"]') as $cart_link) {
+            $check(trim($cart_link->textContent) === __('Cart', 'paint-shop-ux') && $cart_link->getElementsByTagName('svg')->length === 1, 'Configured cart link uses a translated short label and decorative cart icon');
+        }
+        $check(!has_filter('nav_menu_item_title', 'psu_site_header_menu_title'), 'Cart label filter does not leak to other menus');
+        $cart_item = (object) ['object' => 'page', 'object_id' => wc_get_page_id('cart')];
+        $check(psu_site_header_menu_title('Original cart title', $cart_item, (object) ['menu_id' => 'footer']) === 'Original cart title', 'Other menu titles are preserved');
         $check(has_filter('wp_nav_menu_items', 'generate_menu_search_icon') === $search_filter_before, 'Theme search filter restored after rendering the own menu');
         if ($expected_links) {
             $check($actual_links === $expected_links, 'Saved primary links, order and role filters preserved');
@@ -148,5 +164,6 @@ try {
     }
     if ($saved['rendered_exists']) $GLOBALS['psu_site_header_rendered'] = $saved['rendered']; else unset($GLOBALS['psu_site_header_rendered']);
     $_COOKIE = $saved['cookies'];
+    $GLOBALS['wp_query'] = $saved['query'];
     wp_set_current_user($saved['user']);
 }

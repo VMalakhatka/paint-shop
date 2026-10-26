@@ -33,10 +33,26 @@ add_filter('pc_alloc_header_rendered', static function ($rendered): bool {
     return (bool) $rendered || !empty($GLOBALS['psu_site_header_rendered']);
 });
 
+/** Translated link text with a decorative, bundled cart icon. */
+function psu_site_header_cart_label(): string {
+    return esc_html__('Cart', 'paint-shop-ux') . ' <svg class="psu-site-header__cart-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 3h2l2.5 12h11l2-8H6M9 20h.01M18 20h.01"/></svg>';
+}
+
+/** Change only the configured cart link inside our primary menu, not page titles. */
+function psu_site_header_menu_title($title, $item, $args) {
+    if (($args->menu_id ?? '') !== 'psu-primary-menu' || !function_exists('wc_get_page_id')) return $title;
+    $cart_id = wc_get_page_id('cart');
+    if ($cart_id <= 0) return $title;
+    $is_cart = ($item->object ?? '') === 'page' && (int) ($item->object_id ?? 0) === $cart_id;
+    $is_cart = $is_cart || untrailingslashit((string) ($item->url ?? '')) === untrailingslashit(wc_get_page_permalink('cart'));
+    return $is_cart ? psu_site_header_cart_label() : $title;
+}
+
 /** Use the saved menu and its Woo/role filters, without GeneratePress's search item. */
 function psu_site_header_menu(): string {
     $search_priority = has_filter('wp_nav_menu_items', 'generate_menu_search_icon');
     if ($search_priority !== false) remove_filter('wp_nav_menu_items', 'generate_menu_search_icon', $search_priority);
+    add_filter('nav_menu_item_title', 'psu_site_header_menu_title', 100, 3);
     try {
         $menu = wp_nav_menu([
             'theme_location' => 'primary', 'container' => false, 'container_class' => '',
@@ -44,6 +60,7 @@ function psu_site_header_menu(): string {
             'fallback_cb' => false, 'echo' => false,
         ]);
     } finally {
+        remove_filter('nav_menu_item_title', 'psu_site_header_menu_title', 100);
         if ($search_priority !== false) add_filter('wp_nav_menu_items', 'generate_menu_search_icon', $search_priority, 2);
     }
     if (is_string($menu) && trim($menu) !== '') return $menu;
@@ -53,7 +70,7 @@ function psu_site_header_menu(): string {
     $html = '<ul id="psu-primary-menu" class="psu-site-header__menu">';
     foreach ($links as [$page, $label]) {
         $url = function_exists('wc_get_page_permalink') ? wc_get_page_permalink($page) : ($page === 'shop' ? home_url('/') : '');
-        if ($url && $url !== '-1') $html .= '<li><a href="' . esc_url($url) . '">' . esc_html($label) . '</a></li>';
+        if ($url && $url !== '-1') $html .= '<li><a href="' . esc_url($url) . '">' . ($page === 'cart' ? psu_site_header_cart_label() : esc_html($label)) . '</a></li>';
     }
     return $html . '</ul>';
 }
@@ -81,7 +98,10 @@ function psu_render_site_header(): void {
             <div class="psu-site-header__container psu-site-header__widgets"><?php dynamic_sidebar($area); ?></div>
         <?php endif; endforeach; ?>
         <div class="psu-site-header__container psu-site-header__toolbar">
-            <div class="psu-site-header__allocation"><?php if (function_exists('pc_render_alloc_control')) pc_render_alloc_control(); ?></div>
+            <div class="psu-site-header__controls">
+                <div class="psu-site-header__allocation"><?php if (function_exists('pc_render_alloc_control')) pc_render_alloc_control(); ?></div>
+                <?php do_action('pcoe_catalog_toolbar'); // Existing eligibility and render-once guard remain in PCOE. ?>
+            </div>
             <button class="psu-site-header__toggle" type="button" aria-controls="psu-site-navigation" aria-expanded="true">
                 <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
                 <span><?php esc_html_e('Menu', 'paint-shop-ux'); ?></span>
