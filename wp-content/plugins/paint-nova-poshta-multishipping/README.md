@@ -1,12 +1,31 @@
 # Paint Nova Poshta Multishipping
 
+## Woo preview clarity 0.10.6 — 2026-10-26
+
+Woo linking no longer requires a written explanation. Optional comments are still
+bounded/sanitized; explicit manager confirmation, actor/time audit, revision and
+order re-read checks remain. Manual Folio evidence requirements are unchanged.
+
+Woo previews now render the order once, then separate saved Woo Folio headers
+(`_folio_documents_result`, legacy `_folio_document_*` fallback via Woo CRUD)
+from saved TTN classification and active confirmed Folio links. No raw Java payloads,
+item/payment data or unsaved browser selections enter this context. Saved order
+headers participate in the preview fingerprint; registry revision guards its
+confirmed-link context. The context is retained as evidence at confirmation and is
+not a live mirror. Older snapshots explicitly say it was not captured.
+
+No automatic Woo→Folio association or business-data migration; no carrier/API
+contract changes. Updated UK/RU UI and manager guide. Deploy plugin 0.10.6 and refresh
+open forms before previewing; production deployment is separate. Validation: 104
+isolated checks, PHP/JS syntax, desktop/narrow browser preview and lookup-error reset.
+
 ## WooCommerce registry links 0.10.5 — 2026-10-25
 
 `Registry/WooOrders.php` uses Woo CRUD exclusively for manager-only exact-ID or
 creation-period/email lookup (20 orders/page, max 366 days). UI shows order ID,
 number, customer, date, status, currency/total. No automatic Folio/name/amount
-matching. A manager selects one order, records evidence, previews and explicitly
-confirms. Repeat for multiple orders; the same order may relate to several TTNs.
+matching. A manager selects one order, previews and explicitly confirms (a written comment
+is optional since 0.10.6). Repeat for multiple orders; the same order may relate to several TTNs.
 The existing capability pair and nonce cover lookups, preview and confirmation.
 
 Reuse registry links/audit/batches without a schema change: `WOO_ORDER` /

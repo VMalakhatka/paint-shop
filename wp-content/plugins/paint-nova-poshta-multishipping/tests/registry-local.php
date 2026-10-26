@@ -224,6 +224,9 @@ try {
     $wooA=new WC_Order(); $wooA->set_date_created('2026-06-01 12:00:00'); $wooA->set_status('processing');
     $wooA->set_currency('UAH'); $wooA->set_total('149.00'); $wooA->set_billing_first_name('Synthetic'); $wooA->set_billing_last_name('Customer'); $wooA->set_id(999999001);
     $wooB=clone $wooA; $wooB->set_id(999999002);
+    $savedFolio=['documents'=>[['document_id'=>'321','document_number'=>'TEST-ACCOUNT','document_type'=>'account','document_date'=>'2026-06-01','folio_warehouse_id'=>'7','items'=>[['private'=>'not-needed']]]]];
+    $wooA->update_meta_data('_folio_documents_result',$savedFolio);
+    $wooB->update_meta_data('_folio_document_id','654'); $wooB->update_meta_data('_folio_document_number','LEGACY'); $wooB->update_meta_data('_folio_document_type','account');
     $wooFixture=[999999001=>$wooA,999999002=>$wooB]; $wooQueries=[];
     $woo=new WooOrders(static function($id) use (&$wooFixture) { return $wooFixture[$id]??false; },
         static function($args) use (&$wooQueries,$wooA) { $wooQueries[]=$args; return (object)['orders'=>[$wooA],'max_num_pages'=>2]; });
@@ -237,15 +240,25 @@ try {
     $reject(fn()=>$wooService->run('woo_orders',['woo_id'=>'invalid']),'Invalid Woo ID rejected');
     $reject(fn()=>$wooService->run('woo_orders',['woo_id'=>'999999999']),'Unavailable Woo order rejected');
     $reject(fn()=>$wooService->run('woo_orders',['woo_from'=>'2026-06-02','woo_to'=>'2026-06-01']),'Woo reversed date period rejected');
-    $draft=['id'=>$wooRegistry,'revision'=>1,'woo_order_id'=>'999999001','evidence'=>'Checked synthetic recipient and order'];
+    $draft=['id'=>$wooRegistry,'revision'=>1,'woo_order_id'=>'999999001','evidence'=>''];
     $preview=$wooService->run('woo_preview',$draft);
     $check(!isset($preview['document']['order_fingerprint']) && count($store->detail($wooRegistry)['links'])===0,'Woo preview creates no association and hides fingerprint');
+    $check($preview['document']['evidence']==='' && $preview['document']['verification']==='manager_confirmation','Woo comment is optional; manager confirmation remains explicit');
+    $check($preview['document']['order_snapshot']['folio_documents']===[['id'=>'321','number'=>'TEST-ACCOUNT','type'=>'ACCOUNT','date'=>'2026-06-01','warehouse'=>'7']],'Only saved Folio headers shown from Woo, not raw payload');
+    $check($preview['document']['registry_context']===['partner'=>'','documents'=>[]],'Unclassified TTN explicitly has no saved Folio context');
+    $folioPreview=$wooService->run('woo_preview',['id'=>$id,'revision'=>9,'woo_order_id'=>'999999001','evidence'=>'OK']);
+    $context=$folioPreview['document']['registry_context'];
+    $check($context['partner']==='TEST' && count($context['documents'])===1 && $context['documents'][0]['type']==='RECEIPT','Folio context includes saved partner and active documents, not revoked links');
+    $wooA->update_meta_data('_folio_documents_result',['documents'=>[]]);
+    $reject(fn()=>$wooService->run('confirm',['token'=>$preview['token'],'confirmed'=>'1']),'Changed saved Folio metadata invalidates Woo preview');
+    $wooA->update_meta_data('_folio_documents_result',$savedFolio);
     $wooA->set_total('150.00');
     $reject(fn()=>$wooService->run('confirm',['token'=>$preview['token'],'confirmed'=>'1']),'Changed Woo snapshot blocks confirmation');
     $wooA->set_total('149.00');
     $confirmed=$wooService->run('confirm',['token'=>$preview['token'],'confirmed'=>'1']);
     $check($wooService->run('confirm',['token'=>$preview['token'],'confirmed'=>'1'])===$confirmed && count($store->detail($wooRegistry)['links'])===1,'Woo confirmation replay is idempotent');
     $second=$wooService->run('woo_preview',array_merge($draft,['revision'=>2,'woo_order_id'=>'999999002']));
+    $check($second['document']['order_snapshot']['folio_documents'][0]['number']==='LEGACY','Legacy single document metadata stays visible');
     $wooService->run('confirm',['token'=>$second['token'],'confirmed'=>'1']);
     $check(count($store->detail($wooRegistry)['links'])===2,'Several Woo orders can belong to one TTN');
     $other=$wooService->run('woo_preview',['id'=>$summaryId,'revision'=>2,'woo_order_id'=>'999999001','evidence'=>'Synthetic split shipment']);
@@ -263,6 +276,8 @@ try {
     $links=$store->detail($wooRegistry)['links'];
     $store->unlink($wooRegistry,5,(int)$links[0]['id'],'Synthetic correction of association');
     $check(count(array_filter($store->detail($wooRegistry)['links'],static fn($link)=>$link['active']))===1,'Woo link revoked independently with audit');
+    $savedWoo=json_decode($store->detail($summaryId)['links'][0]['snapshot'],true);
+    $check($savedWoo['registry_context']['partner']==='TEST' && $savedWoo['order_snapshot']['folio_documents'][0]['number']==='TEST-ACCOUNT','Saved link retains source-separated Folio context');
     $check(count($http)===$httpBefore && $wooA->get_total()==='149.00','Woo linking performs no external HTTP or order mutation');
     $manager->allcaps=[]; $reject(fn()=>$wooService->run('woo_orders',['woo_id'=>'999999001']),'Woo search requires registry manager permissions');
     $manager->allcaps=['manage_woocommerce'=>true,'manage_pnpm_shipments'=>true];

@@ -1569,3 +1569,39 @@ msgstr "ID заказа WooCommerce (необязательно)"
 
 msgid "WooCommerce order is unavailable. Reload the selection."
 msgstr "Заказ WooCommerce недоступен. Обновите список."
+
+msgid "Confirmed by manager"
+msgstr "Подтверждено менеджером"
+
+msgid "Comment (optional)"
+msgstr "Комментарий (необязательно)"
+
+msgid "Folio documents saved in this WooCommerce order"
+msgstr "Документы ФОЛИО, сохранённые в этом заказе WooCommerce"
+
+msgid "Saved shipment classification"
+msgstr "Сохранённая классификация посылки"
+
+msgid "Confirmed Folio documents for this TTN"
+msgstr "Подтверждённые документы ФОЛИО для этой ТТН"
+
+msgid "No Folio documents are saved in this WooCommerce order."
+msgstr "В этом заказе WooCommerce нет сохранённых документов ФОЛИО."
+
+msgid "No confirmed Folio documents for this TTN. A selection in the form above is not a saved link."
+msgstr "Для этой ТТН нет подтверждённых документов ФОЛИО. Выбор в форме выше ещё не является сохранённой связью."
+
+msgid "Order documents and TTN links are separate sources. Check both; linking WooCommerce does not confirm a Folio link."
+msgstr "Документы заказа и связи ТТН — отдельные источники. Сверьте оба; привязка WooCommerce не подтверждает связь с ФОЛИО."
+
+msgid "Non-accounting missing-stock account"
+msgstr "Неучитываемый счёт на отсутствующий товар"
+
+msgid "Folio context at confirmation"
+msgstr "Данные ФОЛИО на момент подтверждения"
+
+msgid "Folio details were not captured in this saved link. Preview the order again to read them."
+msgstr "В этой сохранённой связи данные ФОЛИО ещё не фиксировались. Просмотрите заказ повторно, чтобы прочитать их."
+
+msgid "Find a WooCommerce order, review its details and confirm its link separately. The comment is optional. Saved carrier responses do not confirm WooCommerce or Folio links."
+msgstr "Найдите заказ WooCommerce, просмотрите данные и отдельно подтвердите связь. Комментарий необязателен. Сохранённые ответы перевозчика не подтверждают связи WooCommerce или ФОЛИО."

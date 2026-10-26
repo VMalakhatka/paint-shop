@@ -553,5 +553,10 @@ CRUD reads and `WOO_ORDER` / `woo_order` in existing link/audit tables. Keep the
 Woo/blog identity namespace separate from Paint_Ua. Confirm a fresh order snapshot
 and registry revision; never convert these links into Woo shipment creation,
 order/meta/status writes, payment evidence or automatic Folio matches. Multiple
-orders/TTNs are allowed; do not sum parent/child totals as separate sales. Manager
+orders/TTNs are allowed; do not sum parent/child totals as separate sales.
+0.10.6 (2026-10-26, local code/tests): the Woo comment is optional; actor/time and
+explicit confirmation remain. Show saved Woo Folio headers separately from saved
+shipment classification/active confirmed Folio links. Never treat an unsaved
+picker selection or saved carrier response as a document association. Older Woo
+snapshots without captured Folio data mean unknown, not no documents. Manager
 steps: `docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-registry`; contract: NP README.

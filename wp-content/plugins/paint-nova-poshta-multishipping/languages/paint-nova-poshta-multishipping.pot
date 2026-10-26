@@ -2466,3 +2466,39 @@ msgstr ""
 
 msgid "WooCommerce order is unavailable. Reload the selection."
 msgstr ""
+
+msgid "Confirmed by manager"
+msgstr ""
+
+msgid "Comment (optional)"
+msgstr ""
+
+msgid "Folio documents saved in this WooCommerce order"
+msgstr ""
+
+msgid "Saved shipment classification"
+msgstr ""
+
+msgid "Confirmed Folio documents for this TTN"
+msgstr ""
+
+msgid "No Folio documents are saved in this WooCommerce order."
+msgstr ""
+
+msgid "No confirmed Folio documents for this TTN. A selection in the form above is not a saved link."
+msgstr ""
+
+msgid "Order documents and TTN links are separate sources. Check both; linking WooCommerce does not confirm a Folio link."
+msgstr ""
+
+msgid "Non-accounting missing-stock account"
+msgstr ""
+
+msgid "Folio context at confirmation"
+msgstr ""
+
+msgid "Folio details were not captured in this saved link. Preview the order again to read them."
+msgstr ""
+
+msgid "Find a WooCommerce order, review its details and confirm its link separately. The comment is optional. Saved carrier responses do not confirm WooCommerce or Folio links."
+msgstr ""

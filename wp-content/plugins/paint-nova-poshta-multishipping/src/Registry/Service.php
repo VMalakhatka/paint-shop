@@ -55,6 +55,7 @@ final class Service
             $row=$this->store->find((int)($input['id']??0));
             if ((int)($input['revision']??0)!==(int)$row['revision']) throw new \RuntimeException('The record changed. Reload before saving.');
             $document=$command==='woo_preview' ? $this->woo->preview($input) : $this->folio->preview($input,$row);
+            if ($command==='woo_preview') $document['registry_context']=$this->store->folioContext($row);
             $payload=['id'=>(int)$row['id'],'revision'=>(int)$row['revision'],'document'=>$document];
             $visible=$document; unset($visible['order_fingerprint']);
             return ['token'=>$this->store->preview($command==='woo_preview'?'woo_link':'link',$payload),'document'=>$visible];

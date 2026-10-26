@@ -28,7 +28,35 @@ final class WooOrders
             'customer_id'=>$order->get_customer_id(),'customer_name'=>$order->get_formatted_billing_full_name(),
             'recipient_name'=>$order->get_formatted_shipping_full_name(),'recipient_city'=>$order->get_shipping_city(),
             'parent_order_id'=>$order->get_parent_id(),
+            'folio_documents'=>$this->folioDocuments($order),
         ];
+    }
+
+    /** Saved headers only, never raw Java payloads or inferred links to this TTN. */
+    private function folioDocuments(\WC_Order $order): array
+    {
+        $result=$order->get_meta('_folio_documents_result',true);
+        $documents=is_array($result) && is_array($result['documents']??null) ? $result['documents'] : [];
+        if (!$documents) {
+            $legacy=[];
+            foreach (['id','number','type','date','status'] as $key) $legacy['document_'.$key]=$order->get_meta('_folio_document_'.$key,true);
+            $documents=[$legacy];
+        }
+        $headers=[];
+        foreach ($documents as $document) {
+            if (!is_array($document)) continue;
+            $header=[];
+            foreach (['id'=>['document_id','documentId'],'number'=>['document_number','documentNumber'],
+                'type'=>['document_type','documentType'],'date'=>['document_date','documentDate'],
+                'warehouse'=>['folio_warehouse_id','warehouseId']] as $key=>$names) {
+                $value=$document[$names[0]]??$document[$names[1]]??'';
+                $header[$key]=is_scalar($value) ? Record::text((string)$value,100) : '';
+            }
+            if ($header['id']==='' && $header['number']==='') continue;
+            $header['type']=['account'=>'ACCOUNT','expense'=>'EXPENSE','receipt'=>'RECEIPT','missing_stock_account'=>'missing_stock_account'][$header['type']]??$header['type'];
+            $headers[]=$header;
+        }
+        return $headers;
     }
 
     public function listing(array $input): array
@@ -59,9 +87,8 @@ final class WooOrders
     {
         $snapshot=$this->snapshot($this->order($this->id((string)($input['woo_order_id']??''))));
         $evidence=Record::text($input['evidence']??'',1000);
-        if (mb_strlen($evidence)<10) throw new \InvalidArgumentException('Explain the manual verification (at least 10 characters).');
         return ['type'=>'WOO_ORDER','role'=>'woo_order','id'=>(string)$snapshot['order_id'],'number'=>$snapshot['order_number'],
-            'date'=>$snapshot['order_date'],'partner'=>'','warehouse'=>'','verification'=>'manual','evidence'=>$evidence,
+            'date'=>$snapshot['order_date'],'partner'=>'','warehouse'=>'','verification'=>'manager_confirmation','evidence'=>$evidence,
             'order_snapshot'=>$snapshot,'order_fingerprint'=>hash('sha256',wp_json_encode($snapshot))];
     }
 

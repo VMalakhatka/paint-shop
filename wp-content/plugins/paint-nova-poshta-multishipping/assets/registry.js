@@ -14,6 +14,28 @@
         });
         return list;
     };
+    const heading = key => { const el = document.createElement('h4'); el.textContent = cfg.labels[key]; return el; };
+    const paragraph = key => { const el = document.createElement('p'); el.textContent = cfg.labels[key]; return el; };
+    const nonempty = data => Object.fromEntries(Object.entries(data).filter(([,value]) => value !== '' && value !== null));
+    const folioHeaders = (target, documents, title, empty) => {
+        target.append(heading(title));
+        if (!documents.length) target.append(paragraph(empty));
+        documents.forEach(document => target.append(table(nonempty(document))));
+    };
+    const wooPreview = (target, document) => {
+        const order = {...document.order_snapshot}, documents = order.folio_documents || [];
+        delete order.folio_documents; delete order.order_modified;
+        if (!order.parent_order_id) delete order.parent_order_id;
+        target.append(heading('order_snapshot'), table(nonempty(order)));
+        if (document.evidence) target.append(table({evidence_optional: document.evidence}));
+        folioHeaders(target, documents, 'folio_documents', 'no_order_folio');
+        const context = document.registry_context;
+        if (context) {
+            target.append(heading('registry_context'), table({partner: context.partner || '—'}));
+            folioHeaders(target, context.documents || [], 'registry_documents', 'no_registry_folio');
+        }
+        target.append(paragraph('folio_context_hint'));
+    };
     document.querySelectorAll('.pnpm-registry-form').forEach(form => {
         let token = '', busy = false, generation = 0;
         const message = form.querySelector('.pnpm-message'), preview = form.querySelector('.pnpm-preview');
@@ -56,10 +78,8 @@
                     if (requestGeneration !== generation) return;
                     token = data.token; preview.replaceChildren();
                     if (data.document) {
-                        const header = {...data.document}, order = header.order_snapshot;
-                        delete header.order_snapshot;
-                        preview.append(table(header));
-                        if (order) { const shown = {...order}; delete shown.order_modified; preview.append(table(shown)); }
+                        if (data.document.type === 'WOO_ORDER') wooPreview(preview, data.document);
+                        else preview.append(table(data.document));
                     }
                     if (data.scope) preview.append(table(data.scope));
                     (data.rows || []).forEach(row => {

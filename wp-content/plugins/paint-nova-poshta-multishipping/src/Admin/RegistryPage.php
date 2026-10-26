@@ -107,6 +107,15 @@ final class RegistryPage
             'Sender'=>'Sender','Recipient'=>'Recipient',
             'ThirdPerson'=>'Third party',
             'WOO_ORDER'=>'WooCommerce order','woo_order'=>'WooCommerce order',
+            'manager_confirmation'=>'Confirmed by manager','evidence_optional'=>'Comment (optional)',
+            'folio_documents'=>'Folio documents saved in this WooCommerce order',
+            'registry_context'=>'Saved shipment classification',
+            'old_woo_folio'=>'Folio details were not captured in this saved link. Preview the order again to read them.',
+            'registry_documents'=>'Confirmed Folio documents for this TTN',
+            'no_order_folio'=>'No Folio documents are saved in this WooCommerce order.',
+            'no_registry_folio'=>'No confirmed Folio documents for this TTN. A selection in the form above is not a saved link.',
+            'folio_context_hint'=>'Order documents and TTN links are separate sources. Check both; linking WooCommerce does not confirm a Folio link.',
+            'missing_stock_account'=>'Non-accounting missing-stock account',
             'order_snapshot'=>'Reviewed WooCommerce order','order_id'=>'WooCommerce order ID',
             'order_number'=>'Order number','order_date'=>'Order date','order_modified'=>'Order revision time',
             'order_status'=>'Order status','order_total'=>'Order total','order_currency'=>'Currency',
@@ -130,6 +139,7 @@ final class RegistryPage
             'Check the preview, tick the confirmation and save. The preview expires after 10 minutes. Editing a field requires a new preview.',
             'Open a TTN and choose its direction, purpose and Folio partner code. For a return, also enter the original TTN if known.',
             'Confirm the account link first. Add the related expense document later without replacing the account.',
+            'Find a WooCommerce order, review its details and confirm its link separately. The comment is optional. Saved carrier responses do not confirm WooCommerce or Folio links.',
             'Incoming purchases use receipt documents. Returns use a separate return reference and evidence checked by the manager.',
             'Carrier reads retain available fields and changes observed by the site. They cannot reconstruct events the carrier no longer returns.',
             'Delivery amounts, declared value and cash on delivery are separate facts. No margin, payment, stock, TTN or customer notification is created here.'] as $text) echo '<li>'.self::e($text).'</li>';
@@ -280,9 +290,15 @@ final class RegistryPage
             if ($order instanceof \WC_Order) echo '<p><a href="'.esc_url($order->get_edit_order_url()).'">'.self::e('Open WooCommerce order').'</a></p>';
             else echo '<p>'.self::e('WooCommerce order is unavailable. Reload the selection.').'</p>';
             $snapshot=json_decode($link['snapshot'],true)?:[];
-            $shown=$snapshot['order_snapshot']??[]; unset($shown['order_modified']);
-            $this->data($shown);
-            echo '<p>'.self::e('Verification evidence').': '.esc_html($link['evidence']).'</p><p>'.self::e('Confirmed by user ID').' '.esc_html($link['confirmed_by']).' · '.esc_html($link['confirmed_at']).' UTC</p>';
+            $this->wooOrderData($snapshot['order_snapshot']??[]);
+            if (isset($snapshot['registry_context'])) {
+                $context=$snapshot['registry_context'];
+                echo '<h4>'.self::e('Folio context at confirmation').'</h4>';
+                $this->data(['partner'=>$context['partner'] ?: '—']);
+                $this->folioHeaders($context['documents'],'Confirmed Folio documents for this TTN','No confirmed Folio documents for this TTN. A selection in the form above is not a saved link.');
+            }
+            if ($link['evidence']!=='') echo '<p>'.self::e('Comment (optional)').': '.esc_html($link['evidence']).'</p>';
+            echo '<p>'.self::e('Confirmed by user ID').' '.esc_html($link['confirmed_by']).' · '.esc_html($link['confirmed_at']).' UTC</p>';
             if ($link['active']) {
                 $this->form('unlink',$row); echo '<input type="hidden" name="link" value="'.esc_attr($link['id']).'">';
                 $this->input('reason','Reason for revoking the link','text','',true); $this->saveEnd('Revoke link, retain audit');
@@ -299,8 +315,26 @@ final class RegistryPage
         echo '<button type="button" class="button pnpm-woo-load">'.self::e('Find orders').'</button></div><p>'.self::e('Search by exact order ID, or by creation dates and optional customer email. Results are not automatically matched to the Folio partner.').'</p>';
         echo '<p class="pnpm-woo-message" role="status" aria-live="polite"></p><label>'.self::e('Choose a WooCommerce order').'<select class="pnpm-woo-select" size="6" aria-label="'.esc_attr(self::t('Choose a WooCommerce order')).'"></select></label>';
         echo '<button type="button" class="button pnpm-woo-more" hidden>'.self::e('Next page').'</button></fieldset><p class="pnpm-woo-selected" role="status"></p><input type="hidden" name="woo_order_id">';
-        $this->input('evidence','Why this order belongs to this TTN','text','',true);
+        $this->input('evidence','Comment (optional)');
         $this->previewEnd(false,'Confirm WooCommerce link'); echo '</section>';
+    }
+
+    private function wooOrderData(array $order): void
+    {
+        $captured=array_key_exists('folio_documents',$order);
+        $documents=$order['folio_documents']??[];
+        unset($order['folio_documents'],$order['order_modified']);
+        if (empty($order['parent_order_id'])) unset($order['parent_order_id']);
+        $this->data($order);
+        if ($captured) $this->folioHeaders($documents,'Folio documents saved in this WooCommerce order','No Folio documents are saved in this WooCommerce order.');
+        else echo '<p>'.self::e('Folio details were not captured in this saved link. Preview the order again to read them.').'</p>';
+    }
+
+    private function folioHeaders(array $documents,string $title,string $empty): void
+    {
+        echo '<h4>'.self::e($title).'</h4>';
+        if (!$documents) echo '<p>'.self::e($empty).'</p>';
+        foreach ($documents as $document) $this->data(array_filter($document,static fn($value)=>$value!=='' && $value!==null));
     }
 
     private function coverage(): void

@@ -205,6 +205,17 @@ final class Store
         return $row;
     }
 
+    /** Only confirmed active Folio links; an unsaved picker selection is never evidence. */
+    public function folioContext(array $row): array
+    {
+        global $wpdb;
+        $links=$wpdb->get_results($wpdb->prepare('SELECT document_type,document_id,document_number,document_date,partner_code,warehouse_id FROM '.$this->table('_links')." WHERE registry_id=%d AND active=1 AND document_type<>'WOO_ORDER' ORDER BY id",$row['id']),ARRAY_A)?:[];
+        return ['partner'=>$row['partner_code'],'documents'=>array_map(static fn($link)=>[
+            'type'=>$link['document_type'],'id'=>$link['document_id'],'number'=>$link['document_number'],
+            'date'=>$link['document_date'],'partner'=>$link['partner_code'],'warehouse'=>$link['warehouse_id'],
+        ],$links)];
+    }
+
     public function recentImports(): array
     {
         global $wpdb;
