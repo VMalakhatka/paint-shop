@@ -413,7 +413,9 @@ unchecked sends no customer preparation email. Native processing/on-hold custome
 emails are suppressed for these work orders. Unknown writes never retry.
 `_pcoe_execution_source_id` / reciprocal `_pcoe_execution_children` extend the
 execution family without impersonating native Folio parent links. Existing PRD
-sources require reconciliation before conversion. Auxiliary availability uses
+sources require reconciliation before conversion. The manager form explains this
+requirement before offering creation; recovery of a stale save command preserves
+the preorder purpose and cannot silently remove its balance reserve. Auxiliary availability uses
 Java's authenticated `/admin/folio/manager-order-accounts` route; only the target
 REZ_KOLCH decreases, physical stock and auxiliary REZ remain unchanged. The mode
 is not a cross-warehouse exclusivity guarantee against independent Folio writes.
