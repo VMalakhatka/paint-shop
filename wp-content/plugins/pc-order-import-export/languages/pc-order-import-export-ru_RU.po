@@ -4061,3 +4061,19 @@ msgstr "Как это работает"
 #, php-format
 msgid "Operation ID: %s"
 msgstr "Код операции: %s"
+
+#: inc/ManagerWorkspace.php
+msgid "Collapse"
+msgstr "Свернуть"
+
+#: inc/ManagerWorkspace.php
+msgid "Expand"
+msgstr "Развернуть"
+
+#: inc/ManagerWorkspace.php
+msgid "Collapse all sections"
+msgstr "Свернуть все разделы"
+
+#: inc/ManagerWorkspace.php
+msgid "Expand all sections"
+msgstr "Развернуть все разделы"

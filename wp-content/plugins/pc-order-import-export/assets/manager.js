@@ -2,6 +2,63 @@
     'use strict';
     const root = document.querySelector('.pcoe-manager');
     if (!root) return;
+    // Keep the original form/field DOM intact: other plugins bind to these nodes.
+    const sections = [];
+    const pageKey = ['customer_id', 'order_id', 'view'].map(key => new URLSearchParams(location.search).get(key) || '').join(':');
+    root.querySelectorAll('.pcoe-card').forEach((card, index) => {
+        const heading = [...card.querySelectorAll('h2')].find(el => el.closest('.pcoe-card') === card);
+        if (!heading) return;
+        const title = heading.textContent.trim();
+        let hash = 0;
+        for (const char of title) hash = ((hash << 5) - hash + char.codePointAt(0)) | 0;
+        const key = 'pcoe:sections:' + (pcoeManager.preferenceScope || '') + ':' + pageKey + ':' + (card.id || hash);
+        const button = document.createElement('button');
+        button.type = 'button'; button.className = 'pcoe-section-toggle';
+        const bodyId = card.id || 'pcoe-section-' + index;
+        if (!card.id) card.id = bodyId;
+        button.setAttribute('aria-controls', bodyId);
+        heading.append(button);
+        const branches = [];
+        for (let node = heading; node !== card; node = node.parentElement) {
+            [...node.parentElement.children].forEach(sibling => {
+                if (sibling !== node && !sibling.matches('script,style')) branches.push(sibling);
+            });
+        }
+        const setOpen = (open, remember = true) => {
+            card.classList.toggle('pcoe-section-collapsed', !open);
+            branches.forEach(el => el.classList.toggle('pcoe-section-hidden', !open));
+            button.textContent = open ? pcoeManager.collapseSection : pcoeManager.expandSection;
+            button.setAttribute('aria-expanded', String(open));
+            button.setAttribute('aria-label', button.textContent + ': ' + title);
+            if (remember) { try { sessionStorage.setItem(key, open ? 'open' : 'closed'); } catch (_) { /* Storage can be disabled. */ } }
+        };
+        let open = true;
+        try { open = sessionStorage.getItem(key) !== 'closed'; } catch (_) { /* Keep usable without storage. */ }
+        setOpen(open, false);
+        button.addEventListener('click', () => setOpen(button.getAttribute('aria-expanded') !== 'true'));
+        sections.push({card, setOpen});
+    });
+    if (sections.length) {
+        const controls = document.createElement('div'); controls.className = 'pcoe-actions pcoe-section-controls';
+        [[pcoeManager.collapseAll, false], [pcoeManager.expandAll, true]].forEach(([label, open]) => {
+            const button = document.createElement('button'); button.type = 'button'; button.className = 'button'; button.textContent = label;
+            button.addEventListener('click', () => sections.forEach(section => section.setOpen(open)));
+            controls.append(button);
+        });
+        sections[0].card.before(controls);
+        const reveal = target => sections.forEach(section => { if (target && section.card.contains(target)) section.setOpen(true); });
+        const revealHash = () => {
+            let id; try { id = decodeURIComponent(location.hash.slice(1)); } catch (_) { return; }
+            if (id) reveal(document.getElementById(id));
+        };
+        window.addEventListener('hashchange', revealHash);
+        root.addEventListener('click', event => {
+            const link = event.target.closest('a[href^="#"]');
+            if (link) { try { reveal(document.getElementById(decodeURIComponent(link.hash.slice(1)))); } catch (_) {} }
+        });
+        root.addEventListener('invalid', event => reveal(event.target), true);
+        revealHash();
+    }
     const status = root.querySelector('#pcoe-manager-status');
     const applyForm = root.querySelector('[data-apply-form]');
     const orderForm = root.querySelector('[data-preview-form] input[value="accounts"]')?.form;

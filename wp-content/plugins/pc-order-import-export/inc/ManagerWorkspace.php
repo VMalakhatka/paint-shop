@@ -54,6 +54,11 @@ class ManagerWorkspace
         wp_enqueue_script('pcoe-manager', PCOE_URL . 'assets/manager.js', [], filemtime(PCOE_DIR . '/assets/manager.js'), true);
         wp_localize_script('pcoe-manager', 'pcoeManager', [
             'url' => admin_url('admin-ajax.php'), 'nonce' => wp_create_nonce('pcoe_manager'),
+            'preferenceScope' => (string) get_current_user_id(),
+            'collapseSection' => __('Collapse', 'pc-order-import-export'),
+            'expandSection' => __('Expand', 'pc-order-import-export'),
+            'collapseAll' => __('Collapse all sections', 'pc-order-import-export'),
+            'expandAll' => __('Expand all sections', 'pc-order-import-export'),
             'busy' => __('Processing…', 'pc-order-import-export'),
             'saveFirst' => __('Save draft changes before continuing.', 'pc-order-import-export'),
             'error' => __('The request failed. Reload the workspace to check the saved result before trying again.', 'pc-order-import-export'),

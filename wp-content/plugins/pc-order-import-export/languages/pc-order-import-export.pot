@@ -3869,3 +3869,19 @@ msgstr ""
 #, php-format
 msgid "Operation ID: %s"
 msgstr ""
+
+#: inc/ManagerWorkspace.php
+msgid "Collapse"
+msgstr ""
+
+#: inc/ManagerWorkspace.php
+msgid "Expand"
+msgstr ""
+
+#: inc/ManagerWorkspace.php
+msgid "Collapse all sections"
+msgstr ""
+
+#: inc/ManagerWorkspace.php
+msgid "Expand all sections"
+msgstr ""

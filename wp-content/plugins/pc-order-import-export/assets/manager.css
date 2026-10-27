@@ -4,3 +4,13 @@
 .pcoe-manager #pcoe-place-order{scroll-margin-top:80px;border-left:4px solid #2271b1}.pcoe-manager .pcoe-non-accounting{margin:24px 0;padding:16px;background:#f6f7f7;border:1px solid #dcdcde;border-radius:6px}.pcoe-manager .pcoe-non-accounting summary{cursor:pointer;font-weight:600}.pcoe-manager [data-preview-result] h3{font-size:18px}.pcoe-manager [data-apply-form]{margin-top:16px}
 .pcoe-manager input[type=email]{display:block;width:min(100%,600px);margin-top:6px}
 .pcoe-execution-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:16px}.pcoe-manager #pcoe-execution{scroll-margin-top:70px}.pcoe-manager #pcoe-execution textarea{box-sizing:border-box;min-height:80px}.pcoe-manager #pcoe-execution details{margin:12px 0;overflow-wrap:anywhere}.pcoe-manager #pcoe-execution li{margin:8px 0;overflow-wrap:anywhere}.pcoe-manager #pcoe-execution input{max-width:100%;box-sizing:border-box}.pcoe-execution-form[aria-busy=true]{opacity:.7}
+
+/* Disclosures do not move or replace forms owned by other plugins. */
+.pcoe-manager .pcoe-section-hidden{display:none!important}
+.pcoe-manager .pcoe-section-toggle{float:right;margin:0 0 6px 12px;border:1px solid #c3c4c7;border-radius:4px;background:#f6f7f7;color:#2271b1;padding:5px 10px;font:inherit;font-size:13px;cursor:pointer}
+.pcoe-manager .pcoe-section-toggle:focus-visible{outline:2px solid #2271b1;outline-offset:2px}
+.pcoe-manager .pcoe-section-toggle::before{content:"▾";margin-right:6px}
+.pcoe-manager .pcoe-section-toggle[aria-expanded=false]::before{content:"▸"}
+.pcoe-manager .pcoe-section-collapsed h2{margin-bottom:0;min-height:28px}
+@media(max-width:782px){.pcoe-manager .pcoe-section-toggle{float:none;display:block;margin:10px 0 0}}
+@media print{.pcoe-manager .pcoe-section-hidden{display:revert!important}.pcoe-section-toggle,.pcoe-section-controls{display:none!important}}

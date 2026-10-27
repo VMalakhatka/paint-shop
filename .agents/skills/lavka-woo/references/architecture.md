@@ -274,3 +274,9 @@ capability-gated guide submenu and the disclosure topic menu above the card form
 `lps-card-help` is a dedicated UK/RU domain. Keep topic anchors and button names
 aligned with the form; help rendering makes no Java request. Canonical operator
 steps: `docs/api/FOLIO_PRODUCT_CARDS.md`, linked from `docs/OPERATIONS_RUNBOOK.md`.
+
+Manager card disclosures (2026-10-27): PCOE `assets/manager.js` hides sibling
+branches around each card heading without reparenting forms. Preserve this boundary:
+NP and Folio modules bind to their existing nodes. Visibility belongs to session
+storage, not order metadata, and must never change draft/preorder purpose. The
+manager guide documents controls, anchors, validation and no-JS fallback.

@@ -421,3 +421,12 @@ REZ_KOLCH decreases, physical stock and auxiliary REZ remain unchanged. The mode
 is not a cross-warehouse exclusivity guarantee against independent Folio writes.
 See [manager workflow](MANAGER_CUSTOMER_GUIDE_UK.md#чернетка--замовлення-однією-дією-27102026)
 and Java `docs/api/FOLIO_ACCOUNT_JS_API.md` for operation/rollback details.
+
+Manager section disclosures (2026-10-27): PCOE `manager.js` / `manager.css`
+add accessible collapse/expand controls to titled workspace cards, including
+nested Folio headings, without moving existing forms or replacing field nodes.
+Session storage holds only per-page section visibility, scoped to the current
+manager. Storage failure keeps controls usable; no-JS leaves content visible.
+Anchor navigation and invalid form controls reopen their containing cards.
+This presentation state never changes draft purpose, stock, documents or jobs.
+See the [manager guide](MANAGER_CUSTOMER_GUIDE_UK.md#згортання-розділів-картки-клієнта-та-замовлення).

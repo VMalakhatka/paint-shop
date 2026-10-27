@@ -11,7 +11,7 @@ const base=path.resolve(__dirname,'..'),root=path.resolve(base,'../../..');
   for(const file of ['wp-admin/css/common.css','wp-admin/css/forms.css','wp-includes/css/buttons.css'])await page.addStyleTag({content:fs.readFileSync(path.join(root,file),'utf8')});
   await page.addStyleTag({content:fs.readFileSync(path.join(base,'assets/manager.css'),'utf8')});
   await page.evaluate(()=>{
-   window.pcoeManager={url:'https://example.invalid/',nonce:'test',busy:'Обробка…',error:'Помилка',saveFirst:'Збережіть зміни'};window.requests=[];
+   window.pcoeManager={collapseSection:'Згорнути',expandSection:'Розгорнути',collapseAll:'Згорнути всі розділи',expandAll:'Розгорнути всі розділи',url:'https://example.invalid/',nonce:'test',busy:'Обробка…',error:'Помилка',saveFirst:'Збережіть зміни'};window.requests=[];
    window.fetch=async(url,options)=>{window.requests.push([...options.body]);return {ok:true,json:async()=>({success:true,data:{message:'Тест: додано до черги'}})};};
   });
   await page.addScriptTag({content:fs.readFileSync(path.join(base,'assets/manager.js'),'utf8')});
