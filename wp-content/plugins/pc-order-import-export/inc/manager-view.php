@@ -125,6 +125,7 @@ $list = wc_get_orders(['customer_id' => $customer_id, 'limit' => 25, 'page' => $
 $editable = ManagerWorkspace::editable($order);
 $command = ManagerWorkspace::command($order);
 $non_accounting_only = ManagerOrderFlow::non_accounting_only($order);
+ManagerQuickOrder::render($order);
 ?>
 <?php if ($editable && $context): ?><p class="pcoe-actions"><a class="button button-primary" href="#pcoe-place-order"><?php esc_html_e('Place customer order from this draft','pc-order-import-export'); ?></a></p><?php endif; ?>
 <?php OrderExecutionUi::render($order); ?>

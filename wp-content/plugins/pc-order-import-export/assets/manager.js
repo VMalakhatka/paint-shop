@@ -16,6 +16,16 @@
     }
     orderForm?.addEventListener('change', updateWarehouse);
     updateWarehouse();
+    const quickForm = root.querySelector('input[value="quick_order"]')?.form;
+    function updateAuxiliary() {
+        if (!quickForm?.elements.pool_target) return;
+        quickForm.querySelectorAll('input[name="auxiliary[]"]').forEach(input => {
+            input.disabled = input.value === quickForm.elements.pool_target.value;
+            if (input.disabled) input.checked = false;
+        });
+    }
+    quickForm?.addEventListener('change', updateAuxiliary);
+    updateAuxiliary();
     let busy = false;
     let dirty = false;
     function clearPreview() {

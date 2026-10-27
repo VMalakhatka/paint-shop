@@ -3986,3 +3986,84 @@ msgstr "Не вдалося зберегти дані замовлення. Зв
 
 msgid "Order data could not be saved"
 msgstr "Не вдалося зберегти дані замовлення"
+
+#: inc/ManagerQuickOrder.php
+msgid "Reconcile the existing preorder account before automatic conversion."
+msgstr "Перед автоматичним оформленням звірте наявний рахунок передзамовлення."
+
+#: inc/ManagerQuickOrder.php
+msgid "Create customer orders from this draft"
+msgstr "Створити замовлення клієнта з цієї чернетки"
+
+#: inc/ManagerQuickOrder.php
+msgid "Queued"
+msgstr "У черзі"
+
+#: inc/ManagerQuickOrder.php
+msgid "Creating orders; do not submit again"
+msgstr "Створюються замовлення; не запускайте повторно"
+
+#: inc/ManagerQuickOrder.php
+msgid "Sending confirmation requests"
+msgstr "Надсилаються запити підтвердження"
+
+#: inc/ManagerQuickOrder.php
+msgid "Order preparation finished"
+msgstr "Підготовку замовлень завершено"
+
+#: inc/ManagerQuickOrder.php
+msgid "Operation needs review"
+msgstr "Операція потребує перевірки"
+
+#: inc/ManagerQuickOrder.php
+msgid "Processing continues in the background. Refresh this page to see the result."
+msgstr "Обробка триває у фоні. Оновіть сторінку, щоб побачити результат."
+
+#: inc/ManagerQuickOrder.php
+msgid "Open created orders and Folio documents"
+msgstr "Відкрити створені замовлення та документи ФОЛІО"
+
+#: inc/ManagerQuickOrder.php
+msgid "Confirmation email was not selected."
+msgstr "Надсилання листа для підтвердження не вибрано."
+
+#: inc/ManagerQuickOrder.php
+msgid "One action creates linked Woo orders and Folio accounts by warehouse, plus a separate non-accounting shortage document. The source draft remains in history."
+msgstr "Одна дія створює пов’язані замовлення Woo та рахунки ФОЛІО за складами, а також окремий неураховуваний документ нестачі. Початкова чернетка зберігається в історії."
+
+#: inc/ManagerQuickOrder.php
+msgid "Count additional warehouses without moving goods"
+msgstr "Врахувати додаткові склади без переміщення товару"
+
+#: inc/ManagerQuickOrder.php
+msgid "Account warehouse for the combined free stock"
+msgstr "Склад рахунку для сумарного вільного залишку"
+
+#: inc/ManagerQuickOrder.php
+msgid "Additional warehouses"
+msgstr "Додаткові склади"
+
+#: inc/ManagerQuickOrder.php
+msgid "Accounts reserve the target warehouse. Goods remain on the additional warehouses; their transfer must be completed before picking."
+msgstr "Рахунки резервують цільовий склад. Товар залишається на додаткових складах; до зборки потрібно завершити його переміщення."
+
+#: inc/ManagerQuickOrder.php
+msgid "Additional warehouses are unavailable. Standard stock allocation remains available."
+msgstr "Додаткові склади недоступні. Звичайний розподіл залишків залишається доступним."
+
+#: inc/ManagerQuickOrder.php
+msgid "Send the customer a confirmation email"
+msgstr "Надіслати клієнту email для підтвердження"
+
+#: inc/ManagerQuickOrder.php
+msgid "Create orders"
+msgstr "Створити замовлення"
+
+#: inc/ManagerQuickOrder.php
+msgid "How it works"
+msgstr "Як це працює"
+
+#: inc/ManagerQuickOrder.php
+#, php-format
+msgid "Operation ID: %s"
+msgstr "Код операції: %s"

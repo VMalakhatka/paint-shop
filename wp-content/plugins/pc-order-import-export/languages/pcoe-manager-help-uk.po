@@ -451,3 +451,19 @@ msgstr "Відкрийте замовлення клієнта та збереж
 
 msgid "Each check reads one known Folio document and saved order/shipment data. Unavailable sources keep the last verified values. Link additional documents by their internal ID with a reason; the customer is verified. Saved NP data is not new carrier tracking. Assembly, box passports and acceptance remain paper-based at this stage. No messages, accounting documents, payments or bonuses are created."
 msgstr "Кожна перевірка читає один відомий документ ФОЛІО й збережені дані замовлень/відправок. При недоступності джерела залишаються останні перевірені значення. Додаткові документи прив’язуйте за внутрішнім ID із причиною; клієнт перевіряється. Збережені дані НП не є новою перевіркою трекінгу. Комплектація, паспорти коробок і приймання на цьому етапі залишаються паперовими. Повідомлення, облікові документи, платежі та бонуси не створюються."
+
+#: inc/ManagerHelp.php
+msgid "Create orders in one action"
+msgstr "Створення замовлень однією дією"
+
+#: inc/ManagerHelp.php
+msgid "In a saved draft, use Create orders. Optionally select the target account warehouse and additional warehouses. The combined free stock is reserved on the target without moving goods. Before picking, arrange the actual transfer. Additional warehouse stock remains available to other Folio operations until transferred."
+msgstr "У збереженій чернетці натисніть «Створити замовлення». За потреби виберіть склад рахунку та додаткові склади. Сумарний вільний залишок резервується на цільовому складі без переміщення товару. До зборки організуйте фактичне переміщення. До переміщення залишок додаткового складу доступний іншим операціям ФОЛІО."
+
+#: inc/ManagerHelp.php
+msgid "Send the customer a confirmation email is checked before the button. Clear it to prepare orders without sending customer emails. The background task creates linked Woo and Folio orders and a separate shortage document; only reserved orders receive confirmation requests, one email per order. Refresh the page for the result."
+msgstr "Перед кнопкою встановлена галочка «Надіслати клієнту email для підтвердження». Зніміть її, щоб підготувати замовлення без листів клієнту. Фонове завдання створює пов’язані замовлення Woo і ФОЛІО та окремий документ нестачі. Запит підтвердження надсилається лише для замовлень із резервом, по одному листу на замовлення. Оновіть сторінку для перегляду результату."
+
+#: inc/ManagerHelp.php
+msgid "If an operation or email needs review, inspect its saved result instead of repeating creation. A mail failure does not recreate accounts. Existing PRD preorder accounts must first be reconciled by the manager to avoid counting the same preorder twice. The original draft and ordinary non-accounting document remain in history."
+msgstr "Якщо операція або лист потребують перевірки, перегляньте збережений результат, не повторюйте створення. Помилка пошти не створює рахунки повторно. Наявні рахунки передзамовлення ПРД спочатку має звірити менеджер, щоб не врахувати те саме передзамовлення двічі. Початкова чернетка і звичайний неураховуваний документ зберігаються в історії."

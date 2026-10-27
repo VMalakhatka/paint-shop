@@ -122,7 +122,7 @@ final class ApprovalNotifications {
             && ($data['confirmed_at']??'')===($context['confirmed_at']??'') && in_array($user,self::managers($data),true);
     }
 
-    private static function label(string $status): string {
+    public static function label(string $status): string {
         return ['accepted'=>__('Accepted by the mail service','pc-order-import-export'),'failed'=>__('Email sending failed','pc-order-import-export'),
             'sending'=>__('Email delivery is uncertain; check the mail log','pc-order-import-export'),'unknown'=>__('Email delivery is uncertain; check the mail log','pc-order-import-export')][$status]??__('Not sent','pc-order-import-export');
     }

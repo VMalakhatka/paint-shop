@@ -404,3 +404,18 @@ checkpoints before sending and after receiving Folio requests. OrderExecution se
 reports persistence failure and normalizes creation types (`account`,
 `non_accounting_account`, `missing_stock_account`) to the read API's `ACCOUNT`, without
 changing accounting flags. Operator recovery and limits are in the manager guide above.
+
+Manager one-action preparation (2026-10-27, local verification): PCOE
+`ManagerQuickOrder` persists an explicit manager command on the source draft,
+then Action Scheduler creates a work copy via `ManagerWorkspace` and optionally
+sends one `CustomerApproval` notice per reserved child. The checkbox defaults on;
+unchecked sends no customer preparation email. Native processing/on-hold customer
+emails are suppressed for these work orders. Unknown writes never retry.
+`_pcoe_execution_source_id` / reciprocal `_pcoe_execution_children` extend the
+execution family without impersonating native Folio parent links. Existing PRD
+sources require reconciliation before conversion. Auxiliary availability uses
+Java's authenticated `/admin/folio/manager-order-accounts` route; only the target
+REZ_KOLCH decreases, physical stock and auxiliary REZ remain unchanged. The mode
+is not a cross-warehouse exclusivity guarantee against independent Folio writes.
+See [manager workflow](MANAGER_CUSTOMER_GUIDE_UK.md#чернетка--замовлення-однією-дією-27102026)
+and Java `docs/api/FOLIO_ACCOUNT_JS_API.md` for operation/rollback details.

@@ -6,6 +6,7 @@ class Plugin {
         CustomerPermissions::hooks();
         PromotionCoupons::hooks();
         OrderExecution::hooks();
+        ManagerQuickOrder::hooks();
         FolioCustomerImport::hooks();
         if (defined('WP_CLI') && WP_CLI) {
             \WP_CLI::add_command('pcoe customers-import', static function ($args,$options) {

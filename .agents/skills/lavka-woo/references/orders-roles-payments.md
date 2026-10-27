@@ -632,3 +632,18 @@ before external POST and the saved result afterward. Normalize creation account 
 to ACCOUNT for document reads; do not infer accounting status from that normalization.
 Recovery verifies partner, source Woo marker and all SKU quantities, never resends
 creation. Operator details: docs/MANAGER_CUSTOMER_GUIDE_UK.md, large-order recovery.
+
+Manager one-action preparation (2026-10-27): `ManagerQuickOrder` is manager-only,
+uses a persisted job on the source, a separate work copy, and native reserved Woo
+children. Email checkbox defaults on; unchecked suppresses initial customer emails.
+Approved work may run in Action Scheduler; do not infer new authorization from a
+job with changed customer/Folio mapping or revoked actor. Recheck before execution.
+Never replay an uncertain Folio POST or mail; request/command checkpoints precede
+side effects. Mail failure is separate from successful document creation. Original
+PRD accounts must be reconciled separately (automatic conversion refuses them).
+Execution source links are reciprocal and customer-scoped; do not use native Folio
+parent metadata for historical drafts. New Java manager route is required only for
+auxiliary stock; do not silently fall back to ordinary checkout. Pool reserves the
+target only, including signed negative target free stock in future calculations;
+no physical transfer and no exclusive donor reserve. Preserve these distinctions
+in manager help. Canonical steps: `docs/MANAGER_CUSTOMER_GUIDE_UK.md`.

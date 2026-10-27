@@ -453,3 +453,19 @@ msgstr ""
 
 msgid "Each check reads one known Folio document and saved order/shipment data. Unavailable sources keep the last verified values. Link additional documents by their internal ID with a reason; the customer is verified. Saved NP data is not new carrier tracking. Assembly, box passports and acceptance remain paper-based at this stage. No messages, accounting documents, payments or bonuses are created."
 msgstr ""
+
+#: inc/ManagerHelp.php
+msgid "Create orders in one action"
+msgstr ""
+
+#: inc/ManagerHelp.php
+msgid "In a saved draft, use Create orders. Optionally select the target account warehouse and additional warehouses. The combined free stock is reserved on the target without moving goods. Before picking, arrange the actual transfer. Additional warehouse stock remains available to other Folio operations until transferred."
+msgstr ""
+
+#: inc/ManagerHelp.php
+msgid "Send the customer a confirmation email is checked before the button. Clear it to prepare orders without sending customer emails. The background task creates linked Woo and Folio orders and a separate shortage document; only reserved orders receive confirmation requests, one email per order. Refresh the page for the result."
+msgstr ""
+
+#: inc/ManagerHelp.php
+msgid "If an operation or email needs review, inspect its saved result instead of repeating creation. A mail failure does not recreate accounts. Existing PRD preorder accounts must first be reconciled by the manager to avoid counting the same preorder twice. The original draft and ordinary non-accounting document remain in history."
+msgstr ""

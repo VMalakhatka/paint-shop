@@ -254,6 +254,25 @@ class CustomerApproval {
         return $result;
     }
 
+    /** Manager-authorized automation, after the actual reserved child order is verified. */
+    public static function request_order(int $order_id): int {
+        if (!current_user_can('manage_woocommerce')) self::unavailable();
+        $order=wc_get_order($order_id);
+        if (!$order || !$order->has_status('processing') || !$order->get_meta('_folio_document_id')) self::unavailable();
+        $source=['customer_id'=>(int)$order->get_customer_id(),'order_id'=>$order_id];
+        ManagerWorkspace::customer($source['customer_id']);
+        // Read current Folio accounting state before requesting approval.
+        self::folio($source,(int)$order->get_meta('_folio_document_id'),true);
+        return self::locked(self::key($source),static function()use($source){
+            $snapshot=self::snapshot($source); $revision=self::revision($snapshot);
+            $post=self::find($source); $old=$post?self::data($post):[];
+            if (($old['revision']??'')===$revision) return (int)$post->ID;
+            $history=$old['history']??[]; if ($old) { unset($old['history']); $history[]=$old; }
+            return self::save(['source'=>$source,'snapshot'=>$snapshot,'revision'=>$revision,'status'=>'pending',
+                'requested_by'=>get_current_user_id(),'requested_at'=>gmdate('c'),'history'=>$history],$post?$post->ID:0);
+        });
+    }
+
     public static function request(): void {
         try {
             if (!current_user_can('manage_woocommerce')) self::unavailable();

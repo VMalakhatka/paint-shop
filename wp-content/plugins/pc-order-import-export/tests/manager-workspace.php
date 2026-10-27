@@ -5,18 +5,20 @@ if (!defined('WP_CLI') || !WP_CLI || wp_parse_url(home_url(), PHP_URL_HOST) !== 
 require_once ABSPATH . 'wp-admin/includes/class-wp-screen.php';
 require_once ABSPATH . 'wp-admin/includes/screen.php';
 set_current_screen('dashboard');
-add_filter('pre_wp_mail', '__return_true', PHP_INT_MAX);
-$orders = []; $users = []; $products = []; $terms = []; $checks = 0; $writes = 0; $http_failure = false; $with_shortage = false;
+$test_mails=[]; $mail_accept=true; add_filter('pre_wp_mail',static function($pre,$atts)use(&$test_mails,&$mail_accept){if(str_contains(is_array($atts['to'])?implode(',',$atts['to']):$atts['to'],'@example.invalid')) $test_mails[]=$atts; return $mail_accept;}, PHP_INT_MAX,2);
+$orders = []; $users = []; $products = []; $terms = []; $checks = 0; $writes = 0; $http_failure = false; $with_shortage = false; $all_shortage=false; $test_docs=[];
 $check = static function ($condition, $message) use (&$checks): void { if (!$condition) throw new RuntimeException($message); $checks++; };
 $invoke = static function ($method, ...$args) { return (new ReflectionMethod(Workspace::class, $method))->invoke(null, ...$args); };
 $expect_error = static function (callable $fn) use ($check): void { try { $fn(); } catch (Throwable $e) { $check(true, 'rejected'); return; } throw new RuntimeException('Expected rejection'); };
-add_filter('pre_http_request', static function ($pre, $args, $url) use (&$writes, &$http_failure, &$with_shortage) {
-    if (!str_contains($url, '/admin/folio/order-accounts')) return new WP_Error('test_block', 'External HTTP blocked by test.');
-    $payload = json_decode($args['body'], true);
+add_filter('pre_http_request', static function ($pre, $args, $url) use (&$writes, &$http_failure, &$with_shortage,&$all_shortage,&$test_docs) {
+    if (str_contains($url,'/ref/warehouses')) return ['response'=>['code'=>200],'body'=>wp_json_encode(array_map(static fn($id)=>['code'=>$id,'name'=>'Test '.$id],[901,902,903,904])),'headers'=>[]];
+    if (preg_match('~/customer-documents/ACCOUNT/(\d+)~i',$url,$m) && isset($test_docs[(int)$m[1]])) return ['response'=>['code'=>200],'headers'=>[],'body'=>wp_json_encode(['ok'=>true,'partner'=>['shortName'=>'TEST'],'document'=>$test_docs[(int)$m[1]]])];
+    if (!str_contains($url, '/admin/folio/order-accounts') && !str_contains($url,'/admin/folio/manager-order-accounts')) return new WP_Error('test_block', 'External HTTP blocked by test.');
+    $payload = json_decode($args['body'], true); if (isset($payload['order'])) $payload=$payload['order'];
     if (!$payload['preview_only']) { $writes++; if ($http_failure) return new WP_Error('timeout', 'Simulated timeout'); }
     $documents = [];
     foreach ($payload['items'] as $item) foreach ($item['allocations'] as $allocation) {
-        $wid = (int) $allocation['folio_warehouses'][0]['id'];
+        $candidates=$allocation['folio_warehouses']; usort($candidates,fn($a,$b)=>$a['priority']<=>$b['priority']); $wid = (int) $candidates[0]['id'];
         $accounted = (bool) $payload['folio_account_header']['accountingEnabled'];
         if (!isset($documents[$wid])) $documents[$wid] = ['document_id' => 900000 + $wid, 'document_number' => (string) (900000 + $wid), 'folio_warehouse_id' => $wid,
             'document_type' => $accounted ? 'account' : 'non_accounting_account', 'accounting_enabled' => $accounted,
@@ -32,6 +34,14 @@ add_filter('pre_http_request', static function ($pre, $args, $url) use (&$writes
         $documents['missing']=['document_id'=>999999,'document_number'=>'999999','folio_warehouse_id'=>(int)$payload['folio_account_header']['warehouseId'],
             'document_type'=>'missing_stock_account','accounting_enabled'=>false,'source_external_request_id'=>$payload['folio_account_header']['externalRequestId'].':missing','items'=>[$missing]];
     }
+    if ($all_shortage) {
+        $items=[]; foreach($documents as $doc) foreach($doc['items'] as $line) { $line['allocation_status']='missing_stock'; $items[]=$line; }
+        $documents=[['document_id'=>999998,'document_number'=>'999998','folio_warehouse_id'=>(int)$payload['folio_account_header']['warehouseId'],
+            'document_type'=>'missing_stock_account','accounting_enabled'=>false,'source_external_request_id'=>$payload['folio_account_header']['externalRequestId'].':missing','items'=>$items]];
+    }
+    foreach($documents as $doc) $test_docs[(int)$doc['document_id']]=['documentId'=>$doc['document_id'],'documentNumber'=>$doc['document_number'],
+        'documentType'=>'ACCOUNT','accounted'=>$doc['accounting_enabled'],'returnDocument'=>false,'warehouseId'=>$doc['folio_warehouse_id'],'warehouseLabel'=>'Test',
+        'documentDate'=>'2026-10-27','totalAmount'=>array_sum(array_column($doc['items'],'amount')),'items'=>$doc['items']];
     return ['response' => ['code' => $payload['preview_only'] ? 200 : 201], 'headers' => [], 'body' => wp_json_encode([
         'ok' => true, 'preview_only' => $payload['preview_only'], 'woo_order_id' => $payload['woo_order']['id'], 'documents' => array_values($documents), 'errors' => [], 'warnings' => []])];
 }, PHP_INT_MAX, 3);
@@ -142,6 +152,7 @@ try {
     $check($before_stock === array_map(fn($tid)=>get_post_meta($product->get_id(), '_stock_at_' . $tid, true), $terms), 'Non-accounting leaves stock unchanged');
     remove_filter('pcoe_folio_non_accounting_warehouse_id', $warehouse_filter);
     require __DIR__.'/manager-order-flow.php';
+    require __DIR__.'/manager-quick-order.php';
     // Connection locks exclude a second DB connection without changing any data or grants.
     $second = new wpdb(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST);
     $name = $invoke('lock_name', 'order:' . $id);
@@ -160,7 +171,7 @@ try {
 } finally {
     remove_filter('pcoe_folio_non_accounting_warehouse_id',$shortage_warehouse,1);
     wp_set_current_user($manager_id ?? $original);
-    foreach (array_reverse(array_unique($orders)) as $id) { $order = wc_get_order($id); if ($order) $order->delete(true); }
+    foreach (array_reverse(array_unique($orders)) as $id) { as_unschedule_all_actions('pcoe_quick_order_step',[$id],'pcoe-quick-orders'); $order = wc_get_order($id); if ($order) $order->delete(true); }
     foreach ($products as $id) wp_delete_post($id, true);
     foreach ($terms as $tid) wp_delete_term($tid, 'location');
     require_once ABSPATH . 'wp-admin/includes/user.php';

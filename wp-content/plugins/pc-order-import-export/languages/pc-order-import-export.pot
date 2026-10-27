@@ -3784,3 +3784,88 @@ msgstr ""
 
 msgid "Order data could not be saved"
 msgstr ""
+
+#: inc/ManagerQuickOrder.php
+msgid "Reconcile the existing preorder account before automatic conversion."
+msgstr ""
+
+#: inc/ManagerQuickOrder.php
+msgid "Create customer orders from this draft"
+msgstr ""
+
+#: inc/ManagerQuickOrder.php
+msgid "Queued"
+msgstr ""
+
+#: inc/ManagerQuickOrder.php
+msgid "Creating orders; do not submit again"
+msgstr ""
+
+#: inc/ManagerQuickOrder.php
+msgid "Sending confirmation requests"
+msgstr ""
+
+#: inc/ManagerQuickOrder.php
+msgid "Order preparation finished"
+msgstr ""
+
+#: inc/ManagerQuickOrder.php
+msgid "Operation needs review"
+msgstr ""
+
+#: inc/ManagerQuickOrder.php
+msgid "Processing continues in the background. Refresh this page to see the result."
+msgstr ""
+
+#: inc/ManagerQuickOrder.php
+msgid "Open created orders and Folio documents"
+msgstr ""
+
+#: inc/ManagerQuickOrder.php
+msgid "Confirmation email was not selected."
+msgstr ""
+
+#: inc/ManagerQuickOrder.php
+msgid "Customer confirmation"
+msgstr ""
+
+#: inc/ManagerQuickOrder.php
+msgid "One action creates linked Woo orders and Folio accounts by warehouse, plus a separate non-accounting shortage document. The source draft remains in history."
+msgstr ""
+
+#: inc/ManagerQuickOrder.php
+msgid "Count additional warehouses without moving goods"
+msgstr ""
+
+#: inc/ManagerQuickOrder.php
+msgid "Account warehouse for the combined free stock"
+msgstr ""
+
+#: inc/ManagerQuickOrder.php
+msgid "Additional warehouses"
+msgstr ""
+
+#: inc/ManagerQuickOrder.php
+msgid "Accounts reserve the target warehouse. Goods remain on the additional warehouses; their transfer must be completed before picking."
+msgstr ""
+
+#: inc/ManagerQuickOrder.php
+msgid "Additional warehouses are unavailable. Standard stock allocation remains available."
+msgstr ""
+
+#: inc/ManagerQuickOrder.php
+msgid "Send the customer a confirmation email"
+msgstr ""
+
+#: inc/ManagerQuickOrder.php
+msgid "Create orders"
+msgstr ""
+
+#: inc/ManagerQuickOrder.php
+msgid "How it works"
+msgstr ""
+
+#: inc/ManagerQuickOrder.php
+#, php-format
+msgid "Operation ID: %s"
+msgstr ""

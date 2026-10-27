@@ -160,7 +160,7 @@ class ManagerWorkspace
     }
 
     public static function editable(\WC_Order $order): bool {
-        return $order->has_status('pc-draft') && !$order->get_meta(self::COMMAND, true)
+        return $order->has_status('pc-draft') && !$order->get_meta(ManagerQuickOrder::META,true) && !$order->get_meta(self::COMMAND, true)
             && !pc_folio_order_has_saved_documents($order) && !$order->get_parent_id();
     }
 
@@ -258,6 +258,7 @@ class ManagerWorkspace
                         return $result;
                     }
                     $order = self::order($id, $user->ID);
+                    if ($operation === 'quick_order') return ManagerQuickOrder::start($order,$user,wp_unslash($_POST));
                     if ($operation === 'apply') return self::apply($order, $user);
                     if ($operation === 'copy') return self::copy($order, $user);
                     self::require_editable($order);
@@ -328,6 +329,30 @@ class ManagerWorkspace
         $order->calculate_totals(false);
         self::audit($order, __('Manager created a customer draft.', 'pc-order-import-export'));
         return ['url' => self::url($user->ID, $order->get_id()), 'report_html' => $report, 'message' => __('The customer draft was saved.', 'pc-order-import-export')];
+    }
+
+    public static function quick_copy(\WC_Order $source, \WP_User $user,string $key): \WC_Order {
+        if (!current_user_can('manage_woocommerce')) throw new \RuntimeException('Forbidden');
+        $old=$_POST; $_POST=['request_key'=>$key];
+        try { $result=self::copy($source,$user); } finally { $_POST=$old; }
+        parse_str((string)wp_parse_url($result['url'],PHP_URL_QUERY),$args);
+        return self::order((int)$args['order_id'],$user->ID);
+    }
+
+    public static function quick_create(\WC_Order $order, \WP_User $user,array $pool): void {
+        if (!current_user_can('manage_woocommerce')) throw new \RuntimeException('Forbidden');
+        self::lock('order:'.$order->get_id(),static function()use($order,$user,$pool){
+            $order=self::order($order->get_id(),$user->ID); self::require_editable($order);
+            $token=wp_generate_uuid4(); $preference=['mode'=>'auto','term_id'=>0,'manager_pool'=>$pool];
+            $payload=self::payload($order,$user,'accounts',$preference,$token);
+            $response=self::send($payload,true);
+            // A completely unavailable list is saved as a shortage without sending an approval.
+            set_transient('pcoe_manager_preview_'.$token,['actor'=>get_current_user_id(),'customer'=>$user->ID,
+                'order'=>$order->get_id(),'revision'=>self::revision($order),'mode'=>'accounts','preference'=>$preference,
+                'payload'=>$payload,'response'=>$response,'quick'=>true],15*MINUTE_IN_SECONDS);
+            $old=$_POST; $_POST=['confirmation'=>'1','mode'=>'accounts','token'=>$token];
+            try { self::apply($order,$user); } finally { $_POST=$old; }
+        });
     }
 
     private static function copy(\WC_Order $source, \WP_User $user): array {
@@ -453,6 +478,7 @@ class ManagerWorkspace
             }
         }
         unset($line);
+        if (!empty($preference['manager_pool'])) $payload=ManagerQuickOrder::pool_payload($payload,$preference['manager_pool'],$locations);
         $errors = pc_folio_validate_order_payload_for_create($payload);
         if ($errors) throw new \RuntimeException(implode(' ', $errors));
         return $payload;
@@ -489,7 +515,9 @@ class ManagerWorkspace
 
     private static function send(array $payload, bool $preview, ?callable $observe = null): array {
         $payload['preview_only'] = $preview;
-        $response = pc_folio_order_link_java_post('/admin/folio/order-accounts', $payload, ['timeout' => 180]);
+        $pool=$payload['manager_stock_pool']??[];
+        $response = pc_folio_order_link_java_post($pool?'/admin/folio/manager-order-accounts':'/admin/folio/order-accounts',
+            $pool?['order'=>$payload,'stockPool'=>$pool]:$payload, ['timeout' => 180]);
         if (is_wp_error($response)) throw new \RuntimeException(__('Folio did not confirm the result. Reload the workspace and check the operation status.', 'pc-order-import-export'));
         $code = wp_remote_retrieve_response_code($response);
         $data = json_decode(wp_remote_retrieve_body($response), true);
@@ -526,7 +554,7 @@ class ManagerWorkspace
         if (!$preview || $preview['actor'] !== get_current_user_id() || $preview['customer'] !== $user->ID || $preview['order'] !== $order->get_id()
             || !hash_equals($preview['revision'], self::revision($order))) throw new \RuntimeException(__('The preview expired or the draft changed. Create a new preview.', 'pc-order-import-export'));
         if (($_POST['mode']??'') !== $preview['mode']) throw new \RuntimeException(__('The selected action does not match this preview. Create a new preview before confirming.','pc-order-import-export'));
-        if (!ManagerOrderFlow::can_apply($preview['response'],$preview['mode'])) throw new \RuntimeException(__('No quantities are available for reservation. Customer order creation is unavailable; check stock or change the selected warehouse group and preview again.','pc-order-import-export'));
+        if (empty($preview['quick']) && !ManagerOrderFlow::can_apply($preview['response'],$preview['mode'])) throw new \RuntimeException(__('No quantities are available for reservation. Customer order creation is unavailable; check stock or change the selected warehouse group and preview again.','pc-order-import-export'));
         $fresh = self::payload($order, $user, $preview['mode'], $preview['preference'], $token);
         if (wp_json_encode($fresh) !== wp_json_encode($preview['payload'])) throw new \RuntimeException(__('Customer prices or stock allocation changed. Create a new preview.', 'pc-order-import-export'));
         $command = ['token' => $token, 'status' => 'sending', 'actor' => get_current_user_id(), 'customer' => $user->ID, 'started_at' => current_time('mysql'), 'payload' => $fresh];
@@ -582,6 +610,11 @@ class ManagerWorkspace
     }
 
     private static function result_plan(array $payload, string $sku, float $quantity, int $warehouse): array {
+        if (!empty($payload['manager_stock_pool'])) {
+            $tid=(int)($payload['manager_warehouse_locations'][$warehouse]??0);
+            if (!$tid) throw new \RuntimeException(__('The Folio warehouse cannot be matched to the prepared stock allocation.', 'pc-order-import-export'));
+            return [$tid=>$quantity];
+        }
         $plan = []; $left = $quantity;
         foreach (($payload['items'] ?? []) as $source) {
             if ($source['sku'] !== $sku) continue;

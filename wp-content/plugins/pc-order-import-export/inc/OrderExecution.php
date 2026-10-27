@@ -20,11 +20,11 @@ final class OrderExecution {
         for ($n=0;$n<10;$n++) {
             if (isset($seen[$order->get_id()])) self::fail();
             $seen[$order->get_id()]=true;
-            $parent=(int)($order->get_meta('_folio_parent_order_id') ?: $order->get_meta('_folio_split_from_order_id'));
+            $parent=(int)($order->get_meta('_folio_parent_order_id') ?: $order->get_meta('_folio_split_from_order_id') ?: $order->get_meta('_pcoe_execution_source_id'));
             if (!$parent) return $order;
             $p=wc_get_order($parent);
             if (!$p instanceof \WC_Order || !$order->get_customer_id() || $p->get_customer_id()!==$order->get_customer_id()
-                || ($order->get_parent_id()!==$p->get_id() && !in_array($order->get_id(),array_map('intval',(array)$p->get_meta('_folio_child_order_ids')),true))) self::fail();
+                || ($order->get_parent_id()!==$p->get_id() && !in_array($order->get_id(),array_map('intval',array_merge((array)$p->get_meta('_folio_child_order_ids'),(array)$p->get_meta('_pcoe_execution_children'))),true))) self::fail();
             $order=$p;
         }
         self::fail();
@@ -40,7 +40,7 @@ final class OrderExecution {
         $orders=[$root->get_id()=>$root]; $queue=[$root];
         while ($queue) {
             $parent=array_shift($queue);
-            foreach (array_unique(array_map('intval',(array)$parent->get_meta('_folio_child_order_ids'))) as $id) {
+            foreach (array_unique(array_map('intval',array_merge((array)$parent->get_meta('_folio_child_order_ids'),(array)$parent->get_meta('_pcoe_execution_children')))) as $id) {
                 if (!$id || isset($orders[$id])) continue;
                 $child=wc_get_order($id);
                 if (!$child instanceof \WC_Order || $child->get_customer_id()!==$root->get_customer_id()
