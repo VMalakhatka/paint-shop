@@ -424,7 +424,8 @@ and Java `docs/api/FOLIO_ACCOUNT_JS_API.md` for operation/rollback details.
 
 Manager section disclosures (2026-10-27): PCOE `manager.js` / `manager.css`
 add accessible collapse/expand controls to titled workspace cards, including
-nested Folio headings, without moving existing forms or replacing field nodes.
+nested Folio headings and subscription cards. CSS hides late AJAX siblings too,
+without moving existing forms or replacing field nodes.
 Session storage holds only per-page section visibility, scoped to the current
 manager. Storage failure keeps controls usable; no-JS leaves content visible.
 Anchor navigation and invalid form controls reopen their containing cards.

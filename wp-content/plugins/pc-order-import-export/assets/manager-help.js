@@ -7,7 +7,7 @@
     if (!cfg || !root) return;
     const attached = new WeakMap();
     function link(target, anchor) {
-        if (!target || target.matches('.pcoe-help-link')) return;
+        if (!target || target.matches('.pcoe-help-link, .pcoe-section-toggle')) return;
         const links = attached.get(target) || new Map();
         if (links.get(anchor)?.isConnected) return;
         const a = document.createElement('a');

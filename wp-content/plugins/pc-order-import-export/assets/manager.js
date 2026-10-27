@@ -6,7 +6,7 @@
     const sections = [];
     const pageKey = ['customer_id', 'order_id', 'view'].map(key => new URLSearchParams(location.search).get(key) || '').join(':');
     root.querySelectorAll('.pcoe-card').forEach((card, index) => {
-        const heading = [...card.querySelectorAll('h2')].find(el => el.closest('.pcoe-card') === card);
+        const heading = [...card.querySelectorAll('h2,h3')].find(el => el.closest('.pcoe-card') === card);
         if (!heading) return;
         const title = heading.textContent.trim();
         let hash = 0;
@@ -18,15 +18,12 @@
         if (!card.id) card.id = bodyId;
         button.setAttribute('aria-controls', bodyId);
         heading.append(button);
-        const branches = [];
+        // CSS also covers siblings inserted later by Folio AJAX and contextual help.
         for (let node = heading; node !== card; node = node.parentElement) {
-            [...node.parentElement.children].forEach(sibling => {
-                if (sibling !== node && !sibling.matches('script,style')) branches.push(sibling);
-            });
+            node.classList.add('pcoe-section-heading-path');
         }
         const setOpen = (open, remember = true) => {
             card.classList.toggle('pcoe-section-collapsed', !open);
-            branches.forEach(el => el.classList.toggle('pcoe-section-hidden', !open));
             button.textContent = open ? pcoeManager.collapseSection : pcoeManager.expandSection;
             button.setAttribute('aria-expanded', String(open));
             button.setAttribute('aria-label', button.textContent + ': ' + title);
