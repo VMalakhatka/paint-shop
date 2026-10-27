@@ -659,3 +659,10 @@ provenance, update the existing result ID and mark it complete under the shared
 order lock with a verified private backup and readback. This restores the manager
 button without creating accounts/reserves/email; it is not automatic page-load
 reconciliation. Steps: manager guide, missing preparation button section.
+
+Preorder-purpose mismatch recovery (production, 2026-10-27): distinguish the stored
+Woo draft intent from the live Folio header. A prior save may be complete while the
+Folio account was subsequently replaced/edited. If rows match but purpose differs,
+ask which business purpose is intended before changing classification. An explicit
+owner choice of ordinary non-accounting draft permits correcting only Woo purpose
+while retaining the live Folio header; do not add PRD or change VID_DOC implicitly.
