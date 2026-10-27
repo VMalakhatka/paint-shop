@@ -7,6 +7,7 @@ final class OrderExecution {
     const META = '_pcoe_execution_v1';
     const JOB = 'pcoe_execution_observe';
     const GROUP = 'pcoe-execution';
+    const STORAGE_ERROR = 71001;
 
     public static function hooks(): void {
         add_action('admin_post_pcoe_execution', [self::class, 'post']);
@@ -64,7 +65,7 @@ final class OrderExecution {
             $new['revision']=wp_generate_uuid4();
             $order->update_meta_data(self::META,$new); $order->save_meta_data();
             $order->read_meta_data(true);
-            if ((self::state($order)['revision']??'')!==$new['revision']) self::fail();
+            if (self::state($order)!==$new) throw new \RuntimeException(__('Order data could not be saved. Contact an administrator; do not repeat document creation.', 'pc-order-import-export'), self::STORAGE_ERROR);
             return $new;
         } finally { $wpdb->get_var($wpdb->prepare('SELECT RELEASE_LOCK(%s)',$key)); }
     }
@@ -104,6 +105,12 @@ final class OrderExecution {
             return $state;
         });
         self::schedule($root->get_id(),$result['active']); return $result;
+    }
+    /** Creation responses use lower-case account variants; the read API uses ACCOUNT. */
+    public static function source_type(string $type): string {
+        $type=strtoupper(trim($type));
+        if (in_array($type,['ACCOUNT','NON_ACCOUNTING_ACCOUNT','MISSING_STOCK_ACCOUNT'],true)) return 'ACCOUNT';
+        return in_array($type,['EXPENSE','PAYMENT'],true)?$type:'';
     }
     public static function reference(string $type,int $id): array {
         if (!in_array($type,['ACCOUNT','EXPENSE','PAYMENT'],true) || $id<1) self::fail();
@@ -159,11 +166,11 @@ final class OrderExecution {
         foreach (self::family($root) as $id=>$order) {
             $lines=[]; foreach ($order->get_items() as $item) { $product=$item->get_product(); $lines[]=['id'=>$item->get_id(),'sku'=>$product?$product->get_sku():'','name'=>$item->get_name(),'quantity'=>$item->get_quantity(),'total'=>$item->get_total(),'tax'=>$item->get_total_tax()]; }
             $data['orders'][$id]=['status'=>$order->get_status(),'total'=>$order->get_total(),'currency'=>$order->get_currency(),'payment'=>$order->get_payment_method(),'paid'=>$order->get_date_paid()? $order->get_date_paid()->date('c') : '', 'lines'=>$lines];
-            $type=(string)$order->get_meta('_folio_document_type'); $doc=(int)$order->get_meta('_folio_document_id');
+            $type=self::source_type((string)$order->get_meta('_folio_document_type')); $doc=(int)$order->get_meta('_folio_document_id');
             if ($doc && in_array($type,['ACCOUNT','EXPENSE','PAYMENT'],true)) $data['refs'][$type.':'.$doc]=self::reference($type,$doc);
             $result=(array)$order->get_meta('_folio_documents_result');
             foreach ($result['documents']??[] as $entry) {
-                $t=(string)($entry['document_type']??$entry['documentType']??''); $d=(int)($entry['document_id']??$entry['documentId']??0);
+                $t=self::source_type((string)($entry['document_type']??$entry['documentType']??'')); $d=(int)($entry['document_id']??$entry['documentId']??0);
                 if ($d && in_array($t,['ACCOUNT','EXPENSE','PAYMENT'],true)) $data['refs'][$t.':'.$d]=self::reference($t,$d);
             }
             $posts=get_posts(['post_type'=>CustomerApproval::TYPE,'post_status'=>'private','name'=>CustomerApproval::key(['customer_id'=>$order->get_customer_id(),'order_id'=>$id]),'numberposts'=>1]);
@@ -200,7 +207,7 @@ final class OrderExecution {
             self::change($id,$revision,static function($s)use($snapshot,$key,$document,$doc_error,$time){
                 $before=$s['observed']??[];
                 if ($before!==$snapshot) self::event($s,'sources_changed',['before'=>$before,'after'=>$snapshot],0);
-                $s['observed']=$snapshot; $s['checked']=$time; $s['source_error']=false;
+                $s['observed']=$snapshot; $s['checked']=$time; $s['source_error']=false; $s['storage_error']=false;
                 if ($key) {
                     $previous=$s['documents'][$key]??[];
                     if ($doc_error) {
@@ -217,9 +224,11 @@ final class OrderExecution {
             });
         } catch (\Throwable $e) {
             // Do not apply an observation to a concurrent edit or changed customer mapping.
-            try { self::change($id,$revision,static function($s)use($time){
-                if (empty($s['source_error'])) self::event($s,'source_unavailable',[],0);
-                $s['source_error']=true; $s['attempted']=$time; return $s;
+            $storage=$e->getCode()===self::STORAGE_ERROR;
+            try { self::change($id,$revision,static function($s)use($time,$storage){
+                $flag=$storage?'storage_error':'source_error';
+                if (empty($s[$flag])) self::event($s,$storage?'storage_unavailable':'source_unavailable',[],0);
+                $s[$flag]=true; $s['attempted']=$time; return $s;
             }); } catch (\Throwable $ignored) {}
         }
     }

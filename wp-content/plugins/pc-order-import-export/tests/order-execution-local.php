@@ -27,6 +27,16 @@ try {
     $root->update_meta_data('_folio_child_order_ids',[$child->get_id()]);$root->save_meta_data();
     $check(Execution::root($child)->get_id()===$root->get_id(),'Child resolves to common execution');
     $check(count(Execution::family($root))===2,'Family includes original and child');
+    foreach (['account','non_accounting_account','missing_stock_account'] as $variant) {
+        $child->update_meta_data('_folio_document_type',$variant); $child->update_meta_data('_folio_document_id',41); $child->save_meta_data();
+        $snap=Execution::snapshot($root,[]);
+        $check(isset($snap['refs']['ACCOUNT:41']),'Creation type normalized to read API: '.$variant);
+    }
+    $child->delete_meta_data('_folio_document_type'); $child->delete_meta_data('_folio_document_id'); $child->save_meta_data();
+    $root->update_meta_data('_folio_documents_result',['documents'=>[['document_type'=>'non_accounting_account','document_id'=>42],['document_type'=>'unknown','document_id'=>99]]]); $root->save_meta_data();
+    $snap=Execution::snapshot($root,[]);
+    $check(array_keys($snap['refs'])===['ACCOUNT:42'],'Response links include non-accounting accounts but reject unknown types');
+    $root->delete_meta_data('_folio_documents_result'); $root->save_meta_data();
     $foreign->update_meta_data('_folio_parent_order_id',$root->get_id());$foreign->save_meta_data();$deny(fn()=>Execution::root($foreign));
     wp_set_current_user($customer);$deny(fn()=>Execution::save($root->get_id(),'',[]));
     wp_set_current_user($manager);
@@ -77,6 +87,39 @@ try {
     $beforeRequests=count($calls);Execution::observe($root->get_id());$check(count($calls)===$beforeRequests,'Changed customer mapping cannot read another customer');
     $check(!$mails,'No emails');$check(!array_filter($calls,fn($r)=>$r['method']!=='GET'),'Only read requests');
     $check(!array_filter($calls,fn($r)=>$r['timeout']>20),'Bounded source timeout');
+    // Exercise the actual HPOS capacity, not just small fixture snapshots.
+    update_user_meta($customer,'_folio_partner_short_name','TEST');
+    $large=$makeOrder($customer);
+    for ($i=0;$i<325;$i++) { $item=new WC_Order_Item_Product(); $item->set_name('Large order fixture '.str_repeat('Товар ',30).$i); $item->set_quantity(2); $item->set_subtotal(12); $item->set_total(12); $large->add_item($item); }
+    $large->save();
+    $column=$wpdb->get_row("SHOW COLUMNS FROM ".$wpdb->prefix."wc_orders_meta LIKE 'meta_value'",ARRAY_A);
+    $wide=($column['Type']??'')==='longtext';
+    wp_set_current_user($admin);
+    Execution::save($large->get_id(),'',array_merge($input,['manager'=>$admin]));
+    wp_set_current_user(0); Execution::observe($large->get_id()); $bigState=$state($large->get_id());
+    if ($wide) {
+        $check(count($bigState['observed']['orders'][$large->get_id()]['lines']??[])===325 && empty($bigState['storage_error']),'Large source observation persisted after widening');
+        $check(strlen(maybe_serialize($bigState))>65535,'Large regression exceeds TEXT capacity');
+        $events=count($bigState['events']); Execution::observe($large->get_id());
+        $check(count($state($large->get_id())['events'])===$events,'Large repeat observation is idempotent');
+    } else {
+        $check(!empty($bigState['storage_error']) && empty($bigState['source_error']),'Storage failure is not reported as a source outage');
+        $check(end($bigState['events'])['type']==='storage_unavailable','Storage failure recorded explicitly');
+    }
+    $checkpoint=new ReflectionMethod(\PaintCore\PCOE\ManagerWorkspace::class,'save_command'); $checkpoint->setAccessible(true);
+    $checkpoint->invoke(null,$large,['status'=>'sending','token'=>'fixture']);
+    $bigCommand=['status'=>'sending','token'=>'fixture','payload'=>str_repeat('X',80000)];
+    if ($wide) {
+        $checkpoint->invoke(null,$large,$bigCommand);
+        \PaintCore\PCOE\ManagerWorkspace::require_saved_meta($large,'_pcoe_manager_command',$bigCommand);
+        $check(true,'Large command is verified from persisted storage');
+    } else {
+        $beforeRequests=count($calls);
+        $deny(fn()=>$checkpoint->invoke(null,$large,$bigCommand));
+        $check(count($calls)===$beforeRequests,'Rejected checkpoint cannot send HTTP');
+        $large->read_meta_data(true);
+        $check($large->get_meta('_pcoe_manager_command')===['status'=>'sending','token'=>'fixture'],'Previously persisted claim survives a failed large update');
+    }
     echo "PASS: $checks execution checks\n";
 } finally {
     if($shipment){global $wpdb;$wpdb->delete($wpdb->prefix.'pnpm_shipments',['id'=>$shipment]);}

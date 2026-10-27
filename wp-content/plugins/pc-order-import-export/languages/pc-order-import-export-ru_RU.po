@@ -3974,3 +3974,9 @@ msgstr "Учитывается в учёте"
 
 msgid "Not included in accounting"
 msgstr "Не учитывается в учёте"
+
+msgid "Order data could not be saved. Contact an administrator; do not repeat document creation."
+msgstr "Не удалось сохранить данные заказа. Обратитесь к администратору; не создавайте документы повторно."
+
+msgid "Order data could not be saved"
+msgstr "Не удалось сохранить данные заказа"

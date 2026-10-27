@@ -3778,3 +3778,9 @@ msgstr ""
 
 msgid "Not included in accounting"
 msgstr ""
+
+msgid "Order data could not be saved. Contact an administrator; do not repeat document creation."
+msgstr ""
+
+msgid "Order data could not be saved"
+msgstr ""

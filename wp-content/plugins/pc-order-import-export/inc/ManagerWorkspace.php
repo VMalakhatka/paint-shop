@@ -145,6 +145,20 @@ class ManagerWorkspace
         return is_array($value) ? $value : [];
     }
 
+    /** A successful save() return alone does not prove that HPOS accepted large meta. */
+    public static function require_saved_meta(\WC_Order $order, string $key, $expected): void {
+        $fresh=wc_get_order($order->get_id());
+        if ($fresh instanceof \WC_Order) $fresh->read_meta_data(true);
+        if (!$fresh instanceof \WC_Order || $fresh->get_meta($key,true)!==$expected) {
+            throw new \RuntimeException(__('Order data could not be saved. Contact an administrator; do not repeat document creation.', 'pc-order-import-export'));
+        }
+    }
+
+    private static function save_command(\WC_Order $order,array $command): void {
+        $order->update_meta_data(self::COMMAND,$command); $order->save();
+        self::require_saved_meta($order,self::COMMAND,$command);
+    }
+
     public static function editable(\WC_Order $order): bool {
         return $order->has_status('pc-draft') && !$order->get_meta(self::COMMAND, true)
             && !pc_folio_order_has_saved_documents($order) && !$order->get_parent_id();
@@ -516,16 +530,17 @@ class ManagerWorkspace
         $fresh = self::payload($order, $user, $preview['mode'], $preview['preference'], $token);
         if (wp_json_encode($fresh) !== wp_json_encode($preview['payload'])) throw new \RuntimeException(__('Customer prices or stock allocation changed. Create a new preview.', 'pc-order-import-export'));
         $command = ['token' => $token, 'status' => 'sending', 'actor' => get_current_user_id(), 'customer' => $user->ID, 'started_at' => current_time('mysql'), 'payload' => $fresh];
-        $order->update_meta_data(self::COMMAND, $command); $order->save();
+        self::save_command($order,$command);
         try {
             // Never retry this POST automatically, including after an invalid/partial response.
             $response = self::send($fresh, false, static function (array $observed) use ($order, &$command): void {
                 $command['observed_response'] = $observed;
-                $order->update_meta_data(self::COMMAND, $command); $order->save();
+                self::save_command($order,$command);
             });
             $command['status'] = 'folio_saved'; $command['response'] = $response;
-            $order->update_meta_data(self::COMMAND, $command); $order->save();
+            self::save_command($order,$command);
             pc_folio_save_order_java_response($order, $response, $fresh);
+            self::require_saved_meta($order,'_folio_documents_result',pc_folio_clean_meta_value($response));
             foreach ($fresh['items'] as $line) {
                 $item = $order->get_item($line['order_item_id']);
                 $item->set_subtotal($line['subtotal']); $item->set_total($line['total']);
@@ -546,13 +561,13 @@ class ManagerWorkspace
                     foreach (($split['child_order_ids'] ?? []) as $child_id) self::audit(wc_get_order($child_id), __('Created from the manager workspace.', 'pc-order-import-export'));
                 }
             }
-            $command['status'] = 'complete'; $order->update_meta_data(self::COMMAND, $command);
+            $command['status'] = 'complete'; self::save_command($order,$command);
             self::audit($order, __('Manager confirmed Folio documents for this customer.', 'pc-order-import-export'));
             delete_transient('pcoe_manager_preview_' . $token);
             return ['url' => self::url($user->ID, $order->get_id())];
         } catch (\Throwable $e) {
             $command['status'] = isset($command['response']) ? 'needs_review' : 'unknown';
-            $order->update_meta_data(self::COMMAND, $command); $order->save();
+            self::save_command($order,$command);
             throw new \RuntimeException(__('The operation needs review. Do not submit it again. Check the saved Folio documents and operation ID.', 'pc-order-import-export'));
         }
     }

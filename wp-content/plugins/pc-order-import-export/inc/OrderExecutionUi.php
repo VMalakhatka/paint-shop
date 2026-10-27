@@ -54,6 +54,7 @@ final class OrderExecutionUi {
         if (empty($state['due'])) $warnings[]=__('Specify an agreed deadline','pc-order-import-export');
         elseif (strtotime($state['due'])<time()) $warnings[]=__('Deadline passed — review required','pc-order-import-export');
         if (empty($state['active'])) $warnings[]=__('Monitoring paused','pc-order-import-export');
+        if (!empty($state['storage_error'])) $warnings[]=__('Order data could not be saved. Contact an administrator; do not repeat document creation.','pc-order-import-export');
         if (!empty($state['source_error']) || empty($state['checked']) || strtotime($state['checked'])<time()-900) $warnings[]=__('Sources are unavailable or stale. Last known data is shown; no cancellation or completion is inferred.','pc-order-import-export');
         if (!function_exists('as_has_scheduled_action') || (!empty($state['active']) && !as_has_scheduled_action(OrderExecution::JOB,[$root->get_id()],OrderExecution::GROUP))) $warnings[]=__('Background monitoring is not scheduled. Save the card again or contact an administrator.','pc-order-import-export');
         if (empty($state['observed']['refs']) && empty($state['links'])) $warnings[]=__('No verified document links yet','pc-order-import-export');
@@ -123,7 +124,7 @@ final class OrderExecutionUi {
         return ['started'=>__('Control started','pc-order-import-export'),'assignment'=>__('Responsibility or next action updated','pc-order-import-export'),
             'sources_changed'=>__('Saved order or shipment data changed','pc-order-import-export'),'document_linked'=>__('Document linked by manager','pc-order-import-export'),'document_unlinked'=>__('Manual supervision link removed','pc-order-import-export'),
             'document_observed'=>__('Folio document read or changed','pc-order-import-export'),'document_unavailable'=>__('Folio document could not be verified','pc-order-import-export'),
-            'source_unavailable'=>__('Sources unavailable','pc-order-import-export')][$type]??__('Requires review','pc-order-import-export');
+            'storage_unavailable'=>__('Order data could not be saved','pc-order-import-export'),'source_unavailable'=>__('Sources unavailable','pc-order-import-export')][$type]??__('Requires review','pc-order-import-export');
     }
     public static function document_key(string $key): string {
         [$type,$id]=array_pad(explode(':',$key,2),2,'');

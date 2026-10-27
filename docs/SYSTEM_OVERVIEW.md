@@ -392,3 +392,15 @@ CRUD у исходного заказа; lock и revision защищают со�
 бонусы и не завершает Woo-заказы. Контроль включается явно для отдельных заказов.
 Инструкция, пределы пилота и остановка:
 [Контроль виконання замовлення](MANAGER_CUSTOMER_GUIDE_UK.md#execution-control).
+
+
+Order metadata capacity (2026-10-27): HPOS `wc_orders_meta.meta_value` must be
+LONGTEXT for large Folio responses and the complete execution audit. The operator-only
+`scripts/expand-order-meta.php` previews by default; explicit apply validates a private
+backup and widens the column without changing the collation or existing values.
+No automatic schema change is run on requests. Recheck after Woo schema upgrades;
+never narrow during code rollback. ManagerWorkspace verifies persisted command/result
+checkpoints before sending and after receiving Folio requests. OrderExecution separately
+reports persistence failure and normalizes creation types (`account`,
+`non_accounting_account`, `missing_stock_account`) to the read API's `ACCOUNT`, without
+changing accounting flags. Operator recovery and limits are in the manager guide above.

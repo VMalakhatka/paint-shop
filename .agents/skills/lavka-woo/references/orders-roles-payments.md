@@ -620,3 +620,15 @@ mapping changes stop updates. No payment, completion, shipping command or bonus
 side effects. Packing and box passports currently exist only on paper (owner
 26.10); do not confuse production-component assembly with order picking.
 Launch/limits/rollback: docs/MANAGER_CUSTOMER_GUIDE_UK.md#execution-control.
+
+
+HPOS capacity (2026-10-27, reproduced locally and production schema read): native
+TEXT order meta rejects serialized values above 65,535 bytes; WC save success alone
+is not persistence proof. Large manager commands/results and execution history need
+LONGTEXT. `scripts/expand-order-meta.php` is preview-only unless explicitly enabled
+with a verified private backup; no on-request DDL and no narrowing rollback. Recheck
+after Woo schema upgrades. ManagerWorkspace must read back each command checkpoint
+before external POST and the saved result afterward. Normalize creation account variants
+to ACCOUNT for document reads; do not infer accounting status from that normalization.
+Recovery verifies partner, source Woo marker and all SKU quantities, never resends
+creation. Operator details: docs/MANAGER_CUSTOMER_GUIDE_UK.md, large-order recovery.
