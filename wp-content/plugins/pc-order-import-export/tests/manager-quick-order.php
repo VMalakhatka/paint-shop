@@ -80,6 +80,8 @@ try {
     $check($quick_job($draft->get_id())['status']==='review','Changed Folio link prevents execution');
     $non_order->update_meta_data('_pcoe_draft_purpose','preorder');$non_order->save_meta_data();
     $expect_error(fn()=>Quick::start($non_order,$user,['revision'=>ManagerWorkspace::revision($non_order)]));
+    ob_start();Quick::render($non_order);$preorder_html=ob_get_clean();
+    $check(!str_contains($preorder_html,'value="quick_order"') && str_contains($preorder_html,esc_html__('Reconcile the existing preorder account before automatic conversion.','pc-order-import-export')),'Saved preorder explains reconciliation before showing a creation form');
     $non_order->update_meta_data('_pcoe_draft_purpose','draft');$non_order->save_meta_data();
     $check(Quick::eligible($non_order),'Existing ordinary non-accounting source remains eligible');
     $draft=$quick_fixture();$expect_error(fn()=>Quick::start($draft,$user,['revision'=>ManagerWorkspace::revision($draft),'pool_target'=>901,'auxiliary'=>[901]]));

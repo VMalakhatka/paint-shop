@@ -157,6 +157,10 @@ final class ManagerQuickOrder {
             }
             echo '</section>'; return;
         }
+        if (DraftPurpose::current($order)==='preorder' && pc_folio_order_has_saved_documents($order)) {
+            echo '<p class="pcoe-warning">'.esc_html__('Reconcile the existing preorder account before automatic conversion.','pc-order-import-export').'</p></section>';
+            return;
+        }
         echo '<p>'.esc_html__('One action creates linked Woo orders and Folio accounts by warehouse, plus a separate non-accounting shortage document. The source draft remains in history.','pc-order-import-export').'</p>';
         echo '<p><a href="'.esc_url(add_query_arg(['page'=>'pcoe-customers','view'=>'help'],admin_url('admin.php')).'#quick-order').'" target="_blank">'.esc_html__('How it works','pc-order-import-export').'</a></p>';
         echo '<form data-pcoe-manager>';
