@@ -263,6 +263,7 @@ class ManagerWorkspace
                         return $result;
                     }
                     $order = self::order($id, $user->ID);
+                    if ($operation === 'quick_preview') return ManagerQuickOrder::preview($order,$user,wp_unslash($_POST));
                     if ($operation === 'quick_order') return ManagerQuickOrder::start($order,$user,wp_unslash($_POST));
                     if ($operation === 'apply') return self::apply($order, $user);
                     if ($operation === 'copy') return self::copy($order, $user);
@@ -344,11 +345,11 @@ class ManagerWorkspace
         return self::order((int)$args['order_id'],$user->ID);
     }
 
-    public static function quick_create(\WC_Order $order, \WP_User $user,array $pool): void {
+    public static function quick_create(\WC_Order $order, \WP_User $user,array $pool,array $preference): void {
         if (!current_user_can('manage_woocommerce')) throw new \RuntimeException('Forbidden');
-        self::lock('order:'.$order->get_id(),static function()use($order,$user,$pool){
+        self::lock('order:'.$order->get_id(),static function()use($order,$user,$pool,$preference){
             $order=self::order($order->get_id(),$user->ID); self::require_editable($order);
-            $token=wp_generate_uuid4(); $preference=['mode'=>'auto','term_id'=>0,'manager_pool'=>$pool];
+            $token=wp_generate_uuid4(); $preference['manager_pool']=$pool;
             $payload=self::payload($order,$user,'accounts',$preference,$token);
             $response=self::send($payload,true);
             // A completely unavailable list is saved as a shortage without sending an approval.
@@ -483,7 +484,7 @@ class ManagerWorkspace
             }
         }
         unset($line);
-        if (!empty($preference['manager_pool'])) $payload=ManagerQuickOrder::pool_payload($payload,$preference['manager_pool'],$locations);
+        if (!empty($preference['manager_pool'])) $payload=ManagerQuickOrder::pool_payload($payload,$preference['manager_pool'],$locations,$preference);
         $errors = pc_folio_validate_order_payload_for_create($payload);
         if ($errors) throw new \RuntimeException(implode(' ', $errors));
         return $payload;
@@ -500,6 +501,9 @@ class ManagerWorkspace
             foreach ($line['allocations'] as $allocation) foreach ($allocation['folio_warehouses'] as $warehouse) $allowed_warehouses[$key][(int) $warehouse['id']] = true;
         }
         foreach ($data['documents'] as $doc) {
+            if (pc_folio_is_waiting_transfer_document($doc) && (empty($payload['manager_stock_pool'])
+                || ($doc['accounting_enabled']??null)!==true
+                || (int)$doc['folio_warehouse_id']!==(int)$payload['manager_stock_pool']['targetWarehouseId'])) throw new \RuntimeException($error);
             if (!str_starts_with((string) ($doc['source_external_request_id'] ?? ''), $payload['folio_account_header']['externalRequestId'] . ':')) throw new \RuntimeException($error);
             if (empty($doc['items']) || empty($doc['folio_warehouse_id']) || !is_bool($doc['accounting_enabled'] ?? null)
                 || (!$preview && (empty($doc['document_id']) || empty($doc['document_number'])))) throw new \RuntimeException($error);
@@ -518,10 +522,10 @@ class ManagerWorkspace
         foreach ($expected as $key => $qty) if (abs($qty - $actual[$key]) > 0.000001) throw new \RuntimeException($error);
     }
 
-    private static function send(array $payload, bool $preview, ?callable $observe = null): array {
+    public static function send(array $payload, bool $preview, ?callable $observe = null): array {
         $payload['preview_only'] = $preview;
         $pool=$payload['manager_stock_pool']??[];
-        $response = pc_folio_order_link_java_post($pool?'/admin/folio/manager-order-accounts':'/admin/folio/order-accounts',
+        $response = pc_folio_order_link_java_post($pool?'/admin/folio/manager-order-accounts/v2':'/admin/folio/order-accounts',
             $pool?['order'=>$payload,'stockPool'=>$pool]:$payload, ['timeout' => 180]);
         if (is_wp_error($response)) throw new \RuntimeException(__('Folio did not confirm the result. Reload the workspace and check the operation status.', 'pc-order-import-export'));
         $code = wp_remote_retrieve_response_code($response);
@@ -608,7 +612,7 @@ class ManagerWorkspace
     /** Child stock reduction must use its Folio warehouse, never the manager cart preference. */
     public static function stamp_child_plan(\WC_Order $parent, \WC_Order_Item_Product $item, array $line): void {
         $command = self::command($parent);
-        if (!$command || ($line['allocation_status'] ?? '') !== 'allocated') return;
+        if (!$command || !in_array(($line['allocation_status'] ?? ''),['allocated','awaiting_transfer'],true)) return;
         $plan = self::result_plan((array) ($command['payload'] ?? []), (string) ($line['sku'] ?? ''),
             (float) ($line['quantity'] ?? 0), (int) ($line['folio_warehouse_id'] ?? 0));
         $item->update_meta_data('_pc_alloc_plan', $plan);
@@ -639,7 +643,7 @@ class ManagerWorkspace
         echo '<div class="pcoe-scroll"><table class="widefat striped"><thead><tr><th>' . esc_html__('Folio warehouse', 'pc-order-import-export') . '</th><th>' . esc_html__('Document', 'pc-order-import-export') . '</th><th>' . esc_html__('Items and amounts', 'pc-order-import-export') . '</th></tr></thead><tbody>';
         foreach (($response['documents'] ?? []) as $doc) {
             echo '<tr><td>' . esc_html(pc_folio_warehouse_label($doc['folio_warehouse_id'] ?? '')) . '</td><td>'
-                . esc_html(($doc['accounting_enabled'] ?? false) ? __('Account with reservation', 'pc-order-import-export') : __('Non-accounting document', 'pc-order-import-export'));
+                . esc_html(pc_folio_is_waiting_transfer_document($doc) ? __('Awaiting transfer — reserved on the primary warehouse','pc-order-import-export') : (($doc['accounting_enabled'] ?? false) ? __('Account with reservation', 'pc-order-import-export') : __('Non-accounting document', 'pc-order-import-export')));
             if (empty($response['preview_only'])) echo ' #' . esc_html($doc['document_number'] ?? '');
             echo '</td><td>';
             foreach (($doc['items'] ?? []) as $line) echo '<div>' . esc_html(($line['sku'] ?? '') . ' × ' . ($line['quantity'] ?? '') . ' · ' . ($line['price'] ?? '') . ' = ' . ($line['amount'] ?? '')) . '</div>';

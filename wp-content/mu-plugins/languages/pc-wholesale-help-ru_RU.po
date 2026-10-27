@@ -1251,3 +1251,6 @@ msgstr "Компактная шапка каталога"
 #: pc-wholesale-help.php
 msgid "The catalogue uses the available screen width with small equal side margins. Purchase / Draft uses the same text size as the desktop shop selector and menu."
 msgstr "Каталог использует доступную ширину экрана с небольшими одинаковыми полями с обеих сторон. Надписи «Покупка / Чернетка» имеют тот же размер, что выбор магазина и меню на компьютере."
+
+msgid "A manager may reserve goods that are awaiting transfer to the shipping warehouse in a separate order. Such an order is on hold and explicitly marked as not ready for picking. You may review and confirm it, but confirmation does not mean the transfer or shipment has happened. Your manager will confirm readiness separately."
+msgstr "Менеджер может зарезервировать товары, ожидающие перемещения на склад отгрузки, в отдельном заказе. У него статус «На удержании» и отметка, что он ещё не готов к сборке. Его можно проверить и подтвердить, но это не означает, что перемещение или отправка уже произошли. О готовности отдельно сообщит менеджер."

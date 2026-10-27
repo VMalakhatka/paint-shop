@@ -552,3 +552,6 @@ msgstr "Создание документов ФОЛИО ещё не подтв�
 
 msgid "Confirmation is taking longer than expected. Contact your manager; we will check the result and help resolve it. Do not repeat the payment or order."
 msgstr "Подтверждение занимает больше времени, чем ожидалось. Свяжитесь с менеджером — мы проверим результат и поможем разобраться. Не повторяйте оплату или заказ."
+
+msgid "Reserved goods are awaiting transfer to the shipping warehouse. This order is not ready for picking yet; the manager will confirm readiness."
+msgstr "Зарезервированные товары ожидают перемещения на склад отгрузки. Заказ ещё не готов к сборке; о готовности сообщит менеджер."

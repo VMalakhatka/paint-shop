@@ -4077,3 +4077,24 @@ msgstr "Свернуть все разделы"
 #: inc/ManagerWorkspace.php
 msgid "Expand all sections"
 msgstr "Развернуть все разделы"
+
+msgid "Primary warehouse"
+msgstr "Основной склад"
+
+msgid "Additional stock is assigned to the first warehouse in the selected allocation order. Quantities requiring a transfer receive a separate accounting account and Woo order awaiting transfer."
+msgstr "Дополнительный остаток добавляется к первому складу в выбранном порядке распределения. Количество, требующее перемещения, попадает в отдельный учитываемый счёт и заказ Woo в ожидании перемещения."
+
+msgid "Preview only. Creation checks prices and stock again."
+msgstr "Только просмотр. При создании цены и остатки проверяются заново."
+
+msgid "Awaiting transfer — not ready for picking"
+msgstr "Ожидает перемещения — не готов к сборке"
+
+msgid "Awaiting transfer — reserved on the primary warehouse"
+msgstr "Ожидает перемещения — резерв на основном складе"
+
+msgid "Reserved goods are awaiting transfer to the shipping warehouse. The manager will confirm when this order is ready for picking."
+msgstr "Зарезервированные товары ожидают перемещения на склад отгрузки. Менеджер сообщит, когда заказ будет готов к сборке."
+
+msgid "Open a reserved order to review or request customer confirmation. If confirmation emails were selected during creation, check their results in the original draft before sending again. The customer chooses delivery and payment preferences in the confirmation."
+msgstr "Откройте заказ с резервом, чтобы просмотреть или запросить подтверждение. Если при создании были выбраны письма подтверждения, проверьте их результат в исходном черновике перед повторной отправкой. В подтверждении клиент выбирает условия доставки и оплаты."

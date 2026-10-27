@@ -173,6 +173,12 @@ if (!function_exists('pc_folio_is_missing_document')) {
     }
 }
 
+if (!function_exists('pc_folio_is_waiting_transfer_document')) {
+    function pc_folio_is_waiting_transfer_document(array $document): bool {
+        return ($document['document_type'] ?? $document['documentType'] ?? '') === 'waiting_transfer_account';
+    }
+}
+
 if (!function_exists('pc_folio_document_created_at_text')) {
     /**
      * Convert Java document_created_at variants to a compact string for order meta.
@@ -595,6 +601,7 @@ if (!function_exists('pc_folio_build_child_order_notice')) {
      */
     function pc_folio_build_child_order_notice(array $document): string
     {
+        if (pc_folio_is_waiting_transfer_document($document)) return __('Reserved goods are awaiting transfer to the shipping warehouse. This order is not ready for picking yet; the manager will confirm readiness.', 'pc-folio-order-link');
         if (pc_folio_is_missing_document($document)) {
             return __('Product is currently unavailable. This part of the order was moved to waiting/preorder mode. A manager will contact the customer to confirm details.', 'pc-folio-order-link');
         }
@@ -678,7 +685,7 @@ if (!function_exists('pc_folio_get_order_customer_message')) {
 
         if ($notice !== '') {
             return [
-                'type'    => pc_folio_is_missing_document(['document_type' => (string) $order->get_meta('_folio_document_type', true)]) ? 'notice' : 'success',
+                'type'    => in_array((string) $order->get_meta('_folio_document_type', true), ['missing_stock_account', 'waiting_transfer_account'], true) ? 'notice' : 'success',
                 'title'   => __('Folio order status', 'pc-folio-order-link'),
                 'message' => $notice,
             ];
@@ -1014,8 +1021,10 @@ if (!function_exists('pc_folio_apply_saved_response_to_order')) {
             }
 
             pc_folio_set_order_document_link($order, $single_link);
-            if ($order->get_status() !== 'processing') {
-                $order->update_status('processing', __('Saved Folio response applied: linked one Folio account.', 'pc-folio-order-link'));
+            $status = pc_folio_is_waiting_transfer_document($real_documents[0]) ? 'on-hold' : 'processing';
+            if (pc_folio_is_waiting_transfer_document($real_documents[0])) pc_folio_set_order_customer_notice($order, pc_folio_build_child_order_notice($real_documents[0]));
+            if ($order->get_status() !== $status) {
+                $order->update_status($status, __('Saved Folio response applied: linked one Folio account.', 'pc-folio-order-link'));
             } else {
                 $order->add_order_note(__('Saved Folio response applied: linked one Folio account.', 'pc-folio-order-link'));
             }
@@ -1157,11 +1166,11 @@ if (!function_exists('pc_folio_create_child_order_from_document')) {
 
         $child_order->calculate_totals(false);
         $child_order->update_meta_data('_folio_split_from_order_id', (int) $parent_order->get_id());
-        $child_order->update_meta_data('_folio_split_document_kind', pc_folio_is_missing_document($document) ? 'missing_stock' : 'account');
+        $child_order->update_meta_data('_folio_split_document_kind', pc_folio_is_missing_document($document) ? 'missing_stock' : (pc_folio_is_waiting_transfer_document($document) ? 'awaiting_transfer' : 'account'));
         pc_folio_set_order_document_link($child_order, pc_folio_get_single_document_link($document));
         pc_folio_set_order_customer_notice($child_order, pc_folio_build_child_order_notice($document));
 
-        $status = pc_folio_is_missing_document($document) ? 'on-hold' : 'processing';
+        $status = (pc_folio_is_missing_document($document) || pc_folio_is_waiting_transfer_document($document)) ? 'on-hold' : 'processing';
         $note = pc_folio_is_missing_document($document)
             ? __('Created from parent order as missing-stock Folio child order.', 'pc-folio-order-link')
             : __('Created from parent order as Folio child order.', 'pc-folio-order-link');

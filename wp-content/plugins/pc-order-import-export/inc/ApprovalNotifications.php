@@ -41,6 +41,7 @@ final class ApprovalNotifications {
 
     private static function summary(array $data): string {
         $s=$data['snapshot'];$lines=[$s['title'],sprintf(__('Total: %1$s %2$s','pc-order-import-export'),$s['total'],$s['currency'])];
+        if (!empty($s['awaiting_transfer'])) $lines[]=__('Reserved goods are awaiting transfer to the shipping warehouse. The manager will confirm when this order is ready for picking.','pc-order-import-export');
         $order=!empty($data['source']['order_id'])?wc_get_order($data['source']['order_id']):false;
         if($order)foreach(ManagerNotifications::documents($order) as $doc)$lines[]=__('Folio account','pc-order-import-export').' #'.$doc['number'].' · '.($doc['date']?:__('Document date unavailable','pc-order-import-export'));
         else if(!empty($s['warehouse']))$lines[]=$s['warehouse'];

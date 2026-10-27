@@ -211,11 +211,13 @@ class CustomerApproval {
             }
         }
         ksort($documents);
-        return ['title' => __('Website order', 'pc-order-import-export') . ' #' . $order->get_order_number(),
+        $snapshot = ['title' => __('Website order', 'pc-order-import-export') . ' #' . $order->get_order_number(),
             'items' => $items, 'total' => $order->get_total(), 'currency' => $order->get_currency(),
             'shipping' => $order->get_shipping_total(), 'fees' => $order->get_total_fees(),
             'address' => $order->get_address('shipping'), 'note' => $order->get_customer_note(),
             'documents' => array_values($documents)];
+        if ($order->get_meta('_folio_document_type')==='waiting_transfer_account') $snapshot['awaiting_transfer']=true;
+        return $snapshot;
     }
 
     public static function choices(): array {
@@ -258,7 +260,7 @@ class CustomerApproval {
     public static function request_order(int $order_id): int {
         if (!current_user_can('manage_woocommerce')) self::unavailable();
         $order=wc_get_order($order_id);
-        if (!$order || !$order->has_status('processing') || !$order->get_meta('_folio_document_id')) self::unavailable();
+        if (!$order || !($order->has_status('processing') || ($order->has_status('on-hold') && $order->get_meta('_folio_document_type')==='waiting_transfer_account')) || !$order->get_meta('_folio_document_id')) self::unavailable();
         $source=['customer_id'=>(int)$order->get_customer_id(),'order_id'=>$order_id];
         ManagerWorkspace::customer($source['customer_id']);
         // Read current Folio accounting state before requesting approval.
@@ -347,6 +349,7 @@ class CustomerApproval {
     }
 
     private static function table(array $snapshot): void {
+        if (!empty($snapshot['awaiting_transfer'])) echo '<p class="pcoe-warning">'.esc_html__('Reserved goods are awaiting transfer to the shipping warehouse. The manager will confirm when this order is ready for picking.','pc-order-import-export').'</p>';
         echo '<h3>' . esc_html($snapshot['title']) . '</h3><div style="overflow-x:auto"><table class="shop_table widefat"><thead><tr>';
         $columns = ['SKU', 'Product', 'Quantity', 'Price', 'Amount'];
         if (!empty($snapshot['bundle'])) $columns = array_merge($columns, ['Folio account', 'Warehouse']);

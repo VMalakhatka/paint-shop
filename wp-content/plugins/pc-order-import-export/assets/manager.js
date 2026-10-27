@@ -58,7 +58,8 @@
     }
     const status = root.querySelector('#pcoe-manager-status');
     const applyForm = root.querySelector('[data-apply-form]');
-    const orderForm = root.querySelector('[data-preview-form] input[value="accounts"]')?.form;
+    const quickForm = root.querySelector('input[value="quick_order"]')?.form;
+    const orderForm = quickForm || root.querySelector('[data-preview-form] input[value="accounts"]')?.form;
     const groupHint = root.querySelector('[data-warehouse-description]');
     const groupDefault = groupHint?.textContent || '';
     function updateWarehouse() {
@@ -66,15 +67,21 @@
         const selected = orderForm.elements.warehouse_mode.value !== 'auto';
         const group = orderForm.elements.warehouse_id;
         group.disabled = !selected; group.required = selected;
-        groupHint.textContent = selected && group.selectedOptions[0]?.dataset.folioWarehouses ? group.selectedOptions[0].dataset.folioWarehouses : groupDefault;
+        if (groupHint) groupHint.textContent = selected && group.selectedOptions[0]?.dataset.folioWarehouses ? group.selectedOptions[0].dataset.folioWarehouses : groupDefault;
     }
     orderForm?.addEventListener('change', updateWarehouse);
     updateWarehouse();
-    const quickForm = root.querySelector('input[value="quick_order"]')?.form;
     function updateAuxiliary() {
-        if (!quickForm?.elements.pool_target) return;
+        if (!quickForm) return;
+        const target = quickForm.elements.warehouse_mode.value === 'auto'
+            ? quickForm.querySelector('[data-default-primary]')?.dataset.defaultPrimary
+            : quickForm.elements.warehouse_id.selectedOptions[0]?.dataset.primary;
+        const primary = quickForm.querySelector('[data-current-primary]');
+        if (primary) primary.textContent = (quickForm.elements.warehouse_mode.value === 'auto'
+            ? quickForm.querySelector('[data-default-primary]')?.dataset.defaultPrimaryLabel
+            : quickForm.elements.warehouse_id.selectedOptions[0]?.dataset.primaryLabel) || '—';
         quickForm.querySelectorAll('input[name="auxiliary[]"]').forEach(input => {
-            input.disabled = input.value === quickForm.elements.pool_target.value;
+            input.disabled = input.value === target;
             if (input.disabled) input.checked = false;
         });
     }
@@ -92,6 +99,8 @@
         if (preview) { preview.hidden = true; preview.innerHTML = ''; }
     }
     root.addEventListener('input', function (event) {
+        const quickPreview = root.querySelector('[data-quick-preview-result]');
+        if (quickPreview) { quickPreview.hidden = true; quickPreview.innerHTML = ''; }
         const editor = event.target.closest('form[data-pcoe-manager]');
         if (editor?.elements.operation?.value === 'save') {
             dirty = true;
@@ -108,6 +117,7 @@
             if (dirty && form.elements.operation.value !== 'save') { status.textContent = pcoeManager.saveFirst; return; }
             if (form.hasAttribute('data-preview-form')) clearPreview();
             const body = new FormData(form);
+            if (event.submitter?.hasAttribute('data-quick-preview')) body.set('operation','quick_preview');
             if (form.elements.operation.value === 'save') {
                 const quantities = {};
                 [...body.keys()].forEach(key => {
@@ -142,6 +152,11 @@
                     }
                 } else if (data.url) {
                     window.location.assign(data.url);
+                }
+                if (data.quick_preview_html) {
+                    const preview = root.querySelector('[data-quick-preview-result]');
+                    preview.innerHTML = data.quick_preview_html; preview.hidden = false;
+                    preview.scrollIntoView({behavior:'smooth', block:'center'});
                 }
                 if (data.preview_html) {
                     const preview = root.querySelector('[data-preview-result]');

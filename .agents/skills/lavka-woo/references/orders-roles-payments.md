@@ -122,6 +122,22 @@ Java отвечает за складское распределение вну�
 - Старый AJAX `pcoe_draft_to_cart` не должен напрямую переносить `pc-draft`: он
   только направляет пользователя в новый preview-процесс.
 
+## Manager allocation with auxiliary stock (2026-10-27)
+
+`ManagerQuickOrder` extends the existing manager form: auto/priority/single,
+optional preview, explicit creation, optional confirmation email. Pool target is
+always the first warehouse in that mode; auxiliaries cannot also be destinations.
+Java `/admin/folio/manager-order-accounts/v2` separates ready quantities from
+`waiting_transfer_account` (accounting enabled, target reserve, `ОЖП` label),
+including two documents on the same warehouse. Waiting Woo orders stay on-hold;
+their approval snapshot/email explicitly explains that picking must wait. Only
+waiting items use the pooled reserve writer; ready accounts use ordinary reserve.
+Do not mark waiting as missing stock or PRD, or expose this manager mode to clients.
+No automatic transfer/readiness clearing or auxiliary reservation. Signed target
+free stock carries previous commitments. Preserve operation journal/unknown-result
+stop. Deploy Java and PHP together; old pool route is closed before old PHP can
+misclassify the new document type. See manager guide, one-action draft section.
+
 ## Split lifecycle
 
 - Один реальный document: reuse исходного Woo order, status `processing`, сохранить связь.

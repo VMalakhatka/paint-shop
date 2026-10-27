@@ -52,11 +52,11 @@ final class ManagerOrderFlow {
         }
         if (!$rows) return;
         echo '<h3>'.esc_html__('Customer orders and confirmation','pc-order-import-export').'</h3>';
-        echo '<p>'.esc_html__('Open each reserved order to request customer confirmation. The customer chooses delivery and payment preferences in that confirmation; nothing is sent automatically here.','pc-order-import-export').'</p>';
+        echo '<p>'.esc_html__('Open a reserved order to review or request customer confirmation. If confirmation emails were selected during creation, check their results in the original draft before sending again. The customer chooses delivery and payment preferences in the confirmation.','pc-order-import-export').'</p>';
         echo '<div class="pcoe-scroll"><table class="widefat striped"><thead><tr><th>'.esc_html__('Woo order','pc-order-import-export').'</th><th>'.esc_html__('Folio warehouse','pc-order-import-export').'</th><th>'.esc_html__('Result','pc-order-import-export').'</th><th>'.esc_html__('Next action','pc-order-import-export').'</th></tr></thead><tbody>';
         foreach ($rows as [$child,$doc,$reserved]) {
-            echo '<tr><td><a href="'.esc_url(ManagerWorkspace::url($child->get_customer_id(),$child->get_id())).'">#'.esc_html($child->get_order_number()).'</a><br>'.esc_html(wc_get_order_status_name($child->get_status())).'</td><td>'.esc_html(pc_folio_warehouse_label($doc['folio_warehouse_id']??0)).'</td><td>'.esc_html($reserved?__('Reserved stock','pc-order-import-export'):__('Shortage — not ready for assembly','pc-order-import-export')).'</td><td>';
-            if ($reserved && $child->has_status('processing')) echo '<a class="button" href="'.esc_url(CustomerApproval::url(['order_id'=>$child->get_id()])).'">'.esc_html__('Request customer confirmation','pc-order-import-export').'</a>';
+            echo '<tr><td><a href="'.esc_url(ManagerWorkspace::url($child->get_customer_id(),$child->get_id())).'">#'.esc_html($child->get_order_number()).'</a><br>'.esc_html(wc_get_order_status_name($child->get_status())).'</td><td>'.esc_html(pc_folio_warehouse_label($doc['folio_warehouse_id']??0)).'</td><td>'.esc_html($reserved?(pc_folio_is_waiting_transfer_document($doc)?__('Awaiting transfer — not ready for picking','pc-order-import-export'):__('Reserved stock','pc-order-import-export')):__('Shortage — not ready for assembly','pc-order-import-export')).'</td><td>';
+            if ($reserved && ($child->has_status('processing') || pc_folio_is_waiting_transfer_document($doc))) echo '<a class="button" href="'.esc_url(CustomerApproval::url(['order_id'=>$child->get_id()])).'">'.esc_html__('Request customer confirmation','pc-order-import-export').'</a>';
             else echo esc_html__('Review this order separately','pc-order-import-export');
             echo '</td></tr>';
         }

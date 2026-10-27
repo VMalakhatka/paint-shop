@@ -556,6 +556,7 @@ function pc_wholesale_help_render_endpoint(): void {
         </section>
 
         <section class="pc-help-section" id="customer-confirmation">
+            <p><?php esc_html_e('A manager may reserve goods that are awaiting transfer to the shipping warehouse in a separate order. Such an order is on hold and explicitly marked as not ready for picking. You may review and confirm it, but confirmation does not mean the transfer or shipment has happened. Your manager will confirm readiness separately.', 'pc-wholesale-help'); ?></p>
             <h2><?php esc_html_e('Confirm an order prepared by a manager', 'pc-wholesale-help'); ?></h2>
             <p><?php esc_html_e('The manager can prepare delivery for your order without changing your profile. After separately creating a Nova Poshta waybill, the manager can email its number and tracking link to the email on your order. Different warehouses may have different waybills. A created waybill does not yet confirm physical dispatch. Automatic Telegram delivery notices are not enabled.', 'pc-wholesale-help'); ?></p>
             <p><?php esc_html_e('The manager can combine selected accounts from different warehouses into one confirmation. Its Excel file has one worksheet without photos, with source account numbers, dates, warehouses and a common total. Payment details may be included. Agree the payable amount with the manager, taking previous payments into account. Original accounts remain separate; an email reply does not automatically confirm the request on the website.', 'pc-wholesale-help'); ?></p>

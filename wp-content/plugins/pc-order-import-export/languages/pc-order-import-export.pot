@@ -3885,3 +3885,24 @@ msgstr ""
 #: inc/ManagerWorkspace.php
 msgid "Expand all sections"
 msgstr ""
+
+msgid "Primary warehouse"
+msgstr ""
+
+msgid "Additional stock is assigned to the first warehouse in the selected allocation order. Quantities requiring a transfer receive a separate accounting account and Woo order awaiting transfer."
+msgstr ""
+
+msgid "Preview only. Creation checks prices and stock again."
+msgstr ""
+
+msgid "Awaiting transfer — not ready for picking"
+msgstr ""
+
+msgid "Awaiting transfer — reserved on the primary warehouse"
+msgstr ""
+
+msgid "Reserved goods are awaiting transfer to the shipping warehouse. The manager will confirm when this order is ready for picking."
+msgstr ""
+
+msgid "Open a reserved order to review or request customer confirmation. If confirmation emails were selected during creation, check their results in the original draft before sending again. The customer chooses delivery and payment preferences in the confirmation."
+msgstr ""

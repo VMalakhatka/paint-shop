@@ -521,3 +521,6 @@ msgstr ""
 
 msgid "Confirmation is taking longer than expected. Contact your manager; we will check the result and help resolve it. Do not repeat the payment or order."
 msgstr ""
+
+msgid "Reserved goods are awaiting transfer to the shipping warehouse. This order is not ready for picking yet; the manager will confirm readiness."
+msgstr ""

@@ -1229,3 +1229,6 @@ msgstr ""
 #: pc-wholesale-help.php
 msgid "The catalogue uses the available screen width with small equal side margins. Purchase / Draft uses the same text size as the desktop shop selector and menu."
 msgstr ""
+
+msgid "A manager may reserve goods that are awaiting transfer to the shipping warehouse in a separate order. Such an order is on hold and explicitly marked as not ready for picking. You may review and confirm it, but confirmation does not mean the transfer or shipment has happened. Your manager will confirm readiness separately."
+msgstr ""

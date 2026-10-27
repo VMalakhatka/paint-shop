@@ -37,7 +37,7 @@ try {
     $work=wc_get_order($job['work_order']);$check(!$work->get_meta('_folio_parent_order_id'),'Execution link does not fabricate a native accounting parent');
 
     $draft=$quick_fixture(); $written=$writes;$with_shortage=true;$mail_accept=false;
-    Quick::start($draft,$user,['revision'=>ManagerWorkspace::revision($draft),'send_confirmation'=>'1','pool_target'=>901,'auxiliary'=>[903]]);
+    Quick::start($draft,$user,['revision'=>ManagerWorkspace::revision($draft),'send_confirmation'=>'1','warehouse_mode'=>'single','warehouse_id'=>$terms[0],'auxiliary'=>[903]]);
     Quick::run($draft->get_id());$job=$quick_collect($draft->get_id());
     $check($job['status']==='approvals' && count($job['orders'])===1,'Only reserved pooled child enters approval queue: '.wp_json_encode($job));
     $command=wc_get_order($job['work_order'])->get_meta('_pcoe_manager_command');
@@ -84,9 +84,34 @@ try {
     $check(!str_contains($preorder_html,'value="quick_order"') && str_contains($preorder_html,esc_html__('Reconcile the existing preorder account before automatic conversion.','pc-order-import-export')),'Saved preorder explains reconciliation before showing a creation form');
     $non_order->update_meta_data('_pcoe_draft_purpose','draft');$non_order->save_meta_data();
     $check(Quick::eligible($non_order),'Existing ordinary non-accounting source remains eligible');
-    $draft=$quick_fixture();$expect_error(fn()=>Quick::start($draft,$user,['revision'=>ManagerWorkspace::revision($draft),'pool_target'=>901,'auxiliary'=>[901]]));
-    $expect_error(fn()=>Quick::start($draft,$user,['revision'=>ManagerWorkspace::revision($draft),'pool_target'=>901,'auxiliary'=>[999999]]));
+    $draft=$quick_fixture();$expect_error(fn()=>Quick::start($draft,$user,['revision'=>ManagerWorkspace::revision($draft),'warehouse_mode'=>'single','warehouse_id'=>$terms[0],'auxiliary'=>[901]]));
+    $expect_error(fn()=>Quick::start($draft,$user,['revision'=>ManagerWorkspace::revision($draft),'warehouse_mode'=>'single','warehouse_id'=>$terms[0],'auxiliary'=>[999999]]));
     $check(!$quick_job($draft->get_id()),'Invalid warehouse choice is rejected before queue');
+    $draft=$quick_fixture();$sent=count($test_mails);$written=$writes;
+    $settings=['warehouse_mode'=>'manual','warehouse_id'=>$terms[1],'auxiliary'=>[903]];
+    $prefs=Quick::preferences($settings);
+    $check($prefs['manager_pool']['targetWarehouseId']===902,'Manual priority determines pool target');
+    $payload=ManagerWorkspace::payload($draft,$user,'accounts',$prefs,wp_generate_uuid4());
+    $check((int)$payload['items'][0]['allocations'][0]['folio_warehouses'][0]['id']===902,'Selected group remains first, not the configured shortage warehouse');
+    $single=Quick::preferences(['warehouse_mode'=>'single','warehouse_id'=>$terms[1],'auxiliary'=>[903]]);
+    $payload=ManagerWorkspace::payload($draft,$user,'accounts',$single,wp_generate_uuid4());
+    $check(count($payload['items'][0]['allocations'][0]['folio_warehouses'])===1,'Single mode excludes other destinations');
+    $preview=Quick::preview($draft,$user,$settings+['revision'=>ManagerWorkspace::revision($draft)]);
+    $check(!empty($preview['quick_preview_html']) && !$quick_job($draft->get_id()) && $writes===$written && count($test_mails)===$sent,'Preview does not copy, queue, write or email');
+
+    $draft=$quick_fixture();$with_waiting=true;
+    Quick::start($draft,$user,['revision'=>ManagerWorkspace::revision($draft),'warehouse_mode'=>'single','warehouse_id'=>$terms[0],'auxiliary'=>[903],'send_confirmation'=>'1']);
+    Quick::run($draft->get_id());$job=$quick_collect($draft->get_id());
+    $waiting=null;foreach($job['orders'] as $id) { $o=wc_get_order($id);if($o->get_meta('_folio_document_type')==='waiting_transfer_account')$waiting=$o; }
+    $check(count($job['orders'])===2 && $waiting && $waiting->has_status('on-hold'),'Ready and waiting create separate Woo orders on the same warehouse');
+    foreach($waiting->get_items() as $item)$check((bool)$item->get_meta('_pc_alloc_plan'),'Waiting order keeps target stock allocation');
+    $check(Execution::source_type('waiting_transfer_account')==='ACCOUNT','Waiting account remains readable by execution control');
+    for($i=0;$i<3;$i++)Quick::run($draft->get_id());
+    $job=$quick_job($draft->get_id());
+    $check($job['approvals'][$waiting->get_id()]['status']==='accepted','Waiting order can request confirmation without marking it ready');
+    $data=(new ReflectionMethod(\PaintCore\PCOE\CustomerApproval::class,'data'))->invoke(null,get_post($job['approvals'][$waiting->get_id()]['approval']));
+    $check(!empty($data['snapshot']['awaiting_transfer']),'Customer approval snapshot explicitly records waiting');
+    $with_waiting=false;
 } finally {
     foreach($quick_sources as $id){
         $job=$quick_collect($id);

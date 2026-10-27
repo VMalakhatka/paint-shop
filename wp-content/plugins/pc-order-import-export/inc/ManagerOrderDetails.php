@@ -34,6 +34,7 @@ final class ManagerOrderDetails {
         if (!current_user_can('manage_woocommerce')) return;
         $source = self::source($order);
         echo '<section class="pcoe-card"><h2 data-pcoe-help="delivery">' . esc_html__('Delivery and customer comments', 'pc-order-import-export') . '</h2>';
+        if ($order->get_meta('_folio_document_type')==='waiting_transfer_account') echo '<p class="pcoe-warning">'.esc_html__('Awaiting transfer — not ready for picking','pc-order-import-export').'</p>';
         if ($source->get_id() !== $order->get_id()) echo '<p>' . esc_html(sprintf(__('Delivery from original order #%s (all warehouses).', 'pc-order-import-export'), $source->get_order_number())) . '</p>';
         $summary = class_exists('Paint\\NovaPoshta\\Email\\DeliverySummary') ? (new \Paint\NovaPoshta\Email\DeliverySummary())->render($order, true, false) : '';
         echo $summary ? wp_kses_post($summary) : '<p>' . esc_html($source->get_shipping_method() ?: __('Delivery method not specified.', 'pc-order-import-export')) . '</p>';

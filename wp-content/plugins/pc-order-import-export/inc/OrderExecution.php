@@ -109,7 +109,7 @@ final class OrderExecution {
     /** Creation responses use lower-case account variants; the read API uses ACCOUNT. */
     public static function source_type(string $type): string {
         $type=strtoupper(trim($type));
-        if (in_array($type,['ACCOUNT','NON_ACCOUNTING_ACCOUNT','MISSING_STOCK_ACCOUNT'],true)) return 'ACCOUNT';
+        if (in_array($type,['ACCOUNT','NON_ACCOUNTING_ACCOUNT','MISSING_STOCK_ACCOUNT','WAITING_TRANSFER_ACCOUNT'],true)) return 'ACCOUNT';
         return in_array($type,['EXPENSE','PAYMENT'],true)?$type:'';
     }
     public static function reference(string $type,int $id): array {

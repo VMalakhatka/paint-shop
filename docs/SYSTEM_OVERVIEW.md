@@ -416,8 +416,14 @@ execution family without impersonating native Folio parent links. Existing PRD
 sources require reconciliation before conversion. The manager form explains this
 requirement before offering creation; recovery of a stale save command preserves
 the preorder purpose and cannot silently remove its balance reserve. Auxiliary availability uses
-Java's authenticated `/admin/folio/manager-order-accounts` route; only the target
-REZ_KOLCH decreases, physical stock and auxiliary REZ remain unchanged. The mode
+Java's authenticated `/admin/folio/manager-order-accounts/v2` route. The single
+manager form preserves automatic/priority/single allocation; the first destination
+is the pool target. Ready quantities and `waiting_transfer_account` use separate
+Folio documents and Woo orders, even on the same warehouse. Waiting uses on-hold
+and an explicit customer notice; no automatic transfer or readiness transition.
+Only target REZ_KOLCH decreases; physical stock and auxiliary REZ are unchanged.
+The old manager pool route is closed to prevent old PHP misclassifying waiting
+orders; deploy Java then PHP, and retain persisted journals during rollback. The mode
 is not a cross-warehouse exclusivity guarantee against independent Folio writes.
 See [manager workflow](MANAGER_CUSTOMER_GUIDE_UK.md#чернетка--замовлення-однією-дією-27102026)
 and Java `docs/api/FOLIO_ACCOUNT_JS_API.md` for operation/rollback details.

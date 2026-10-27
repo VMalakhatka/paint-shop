@@ -6,11 +6,11 @@ require_once ABSPATH . 'wp-admin/includes/class-wp-screen.php';
 require_once ABSPATH . 'wp-admin/includes/screen.php';
 set_current_screen('dashboard');
 $test_mails=[]; $mail_accept=true; add_filter('pre_wp_mail',static function($pre,$atts)use(&$test_mails,&$mail_accept){if(str_contains(is_array($atts['to'])?implode(',',$atts['to']):$atts['to'],'@example.invalid')) $test_mails[]=$atts; return $mail_accept;}, PHP_INT_MAX,2);
-$orders = []; $users = []; $products = []; $terms = []; $checks = 0; $writes = 0; $http_failure = false; $with_shortage = false; $all_shortage=false; $test_docs=[];
+$orders = []; $users = []; $products = []; $terms = []; $checks = 0; $writes = 0; $http_failure = false; $with_shortage = false; $all_shortage=false; $with_waiting=false; $test_docs=[];
 $check = static function ($condition, $message) use (&$checks): void { if (!$condition) throw new RuntimeException($message); $checks++; };
 $invoke = static function ($method, ...$args) { return (new ReflectionMethod(Workspace::class, $method))->invoke(null, ...$args); };
 $expect_error = static function (callable $fn) use ($check): void { try { $fn(); } catch (Throwable $e) { $check(true, 'rejected'); return; } throw new RuntimeException('Expected rejection'); };
-add_filter('pre_http_request', static function ($pre, $args, $url) use (&$writes, &$http_failure, &$with_shortage,&$all_shortage,&$test_docs) {
+add_filter('pre_http_request', static function ($pre, $args, $url) use (&$writes, &$http_failure, &$with_shortage,&$all_shortage,&$with_waiting,&$test_docs) {
     if (str_contains($url,'/ref/warehouses')) return ['response'=>['code'=>200],'body'=>wp_json_encode(array_map(static fn($id)=>['code'=>$id,'name'=>'Test '.$id],[901,902,903,904])),'headers'=>[]];
     if (preg_match('~/customer-documents/ACCOUNT/(\d+)~i',$url,$m) && isset($test_docs[(int)$m[1]])) return ['response'=>['code'=>200],'headers'=>[],'body'=>wp_json_encode(['ok'=>true,'partner'=>['shortName'=>'TEST'],'document'=>$test_docs[(int)$m[1]]])];
     if (!str_contains($url, '/admin/folio/order-accounts') && !str_contains($url,'/admin/folio/manager-order-accounts')) return new WP_Error('test_block', 'External HTTP blocked by test.');
@@ -33,6 +33,14 @@ add_filter('pre_http_request', static function ($pre, $args, $url) use (&$writes
         $missing['quantity']=1;$missing['amount']=$missing['price'];$missing['allocation_status']='missing_stock';
         $documents['missing']=['document_id'=>999999,'document_number'=>'999999','folio_warehouse_id'=>(int)$payload['folio_account_header']['warehouseId'],
             'document_type'=>'missing_stock_account','accounting_enabled'=>false,'source_external_request_id'=>$payload['folio_account_header']['externalRequestId'].':missing','items'=>[$missing]];
+    }
+    if ($with_waiting) {
+        $wid=array_key_first($documents);$waiting=$documents[$wid]['items'][0];
+        $documents[$wid]['items'][0]['quantity']-=1;
+        $documents[$wid]['items'][0]['amount']=$documents[$wid]['items'][0]['quantity']*$waiting['price'];
+        $waiting['quantity']=1;$waiting['amount']=$waiting['price'];$waiting['allocation_status']='awaiting_transfer';
+        $documents['waiting']=['document_id'=>999997,'document_number'=>'999997','folio_warehouse_id'=>$wid,
+            'document_type'=>'waiting_transfer_account','accounting_enabled'=>true,'source_external_request_id'=>$payload['folio_account_header']['externalRequestId'].':wh:'.$wid.':waiting','items'=>[$waiting]];
     }
     if ($all_shortage) {
         $items=[]; foreach($documents as $doc) foreach($doc['items'] as $line) { $line['allocation_status']='missing_stock'; $items[]=$line; }
