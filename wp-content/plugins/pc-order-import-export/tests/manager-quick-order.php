@@ -112,6 +112,32 @@ try {
     $data=(new ReflectionMethod(\PaintCore\PCOE\CustomerApproval::class,'data'))->invoke(null,get_post($job['approvals'][$waiting->get_id()]['approval']));
     $check(!empty($data['snapshot']['awaiting_transfer']),'Customer approval snapshot explicitly records waiting');
     $with_waiting=false;
+    // Authenticated manager pool uses Lavka settings, not the independent checkout transport.
+    $lavka_options=static fn()=>['java_base_url'=>'https://manager-test.invalid','api_token'=>'manager-test-token'];
+    add_filter('pre_option_lps_options',$lavka_options);
+    try {
+        $draft=$quick_fixture();$preview_failure=true;$sent=count($test_mails);$written=$writes;
+        Quick::start($draft,$user,['revision'=>ManagerWorkspace::revision($draft),'warehouse_mode'=>'single','warehouse_id'=>$terms[0],'auxiliary'=>[903]]);
+        Quick::run($draft->get_id());$job=$quick_collect($draft->get_id());$draft=wc_get_order($draft->get_id());
+        $check(str_starts_with($last_manager_http['url'],'https://manager-test.invalid/') && $last_manager_http['token']==='manager-test-token','Pool uses configured Lavka authentication');
+        $check(Quick::can_return_to_settings($draft) && $writes===$written && count($test_mails)===$sent,'Preflight failure may return to settings without writes or mail');
+        $input=['revision'=>ManagerWorkspace::revision($draft),'operation_key'=>$job['key']];
+        ob_start();Quick::render($draft);$recovery_html=ob_get_clean();
+        $check(str_contains($recovery_html,'value="quick_settings"') && !str_contains($recovery_html,'value="quick_order"'),'Stopped preview offers settings, not another create');
+        if(getenv('PCOE_QUICK_RECOVERY_FIXTURE'))file_put_contents(getenv('PCOE_QUICK_RECOVERY_FIXTURE'),wp_json_encode(['html'=>$recovery_html]));
+        wp_set_current_user($user->ID);$expect_error(fn()=>Quick::return_to_settings($draft,$user,$input));wp_set_current_user($manager_id);
+        $expect_error(fn()=>Quick::return_to_settings($draft,$user,array_merge($input,['operation_key'=>'stale'])));
+        $work=wc_get_order($job['work_order']);$work->update_meta_data('_pcoe_manager_command',['status'=>'unknown']);$work->save_meta_data();
+        $check(!Quick::can_return_to_settings($draft),'Attempted document command blocks settings recovery');
+        $expect_error(fn()=>Quick::return_to_settings($draft,$user,$input));
+        $work->delete_meta_data('_pcoe_manager_command');$work->update_meta_data('_folio_create_attempted_at',gmdate('c'));$work->save_meta_data();
+        $check(!Quick::can_return_to_settings($draft),'Legacy attempted Folio write also blocks recovery');
+        $work->delete_meta_data('_folio_create_attempted_at');$work->save_meta_data();
+        Quick::return_to_settings($draft,$user,$input);$draft=wc_get_order($draft->get_id());
+        $check(!$draft->get_meta(Quick::META) && isset($draft->get_meta(Quick::HISTORY)[$job['key']]),'Returning archives the exact stopped attempt before unlocking');
+        $check(Quick::eligible($draft) && $writes===$written && count($test_mails)===$sent && wc_get_order($job['work_order']),'Settings restored without API writes, mail or deleting the work copy');
+        Quick::run($draft->get_id());$check(!$draft->get_meta(Quick::META) && $writes===$written,'Old worker cannot restart after returning to settings');
+    } finally {remove_filter('pre_option_lps_options',$lavka_options);$preview_failure=false;}
 } finally {
     foreach($quick_sources as $id){
         $job=$quick_collect($id);

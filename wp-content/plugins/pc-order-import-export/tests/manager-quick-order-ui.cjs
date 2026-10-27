@@ -15,6 +15,15 @@ const base=path.resolve(__dirname,'..'),root=path.resolve(base,'../../..');
    window.fetch=async(url,options)=>{window.requests.push([...options.body]);return {ok:true,json:async()=>({success:true,data:options.body.get('operation')==='quick_preview'?{message:'Перегляд',quick_preview_html:'<p>Очікує переміщення</p>'}:{message:'Тест: додано до черги'}})};};
   });
   await page.addScriptTag({content:fs.readFileSync(path.join(base,'assets/manager.js'),'utf8')});
+  const recovery=process.argv[3]==='recovery';
+  if (recovery) {
+   assert.equal(await page.locator('[value="quick_order"]').count(),0);
+   const form=page.locator('form').filter({has:page.locator('[value="quick_settings"]')});
+   await form.locator('button').click();await page.waitForFunction(()=>requests.length===1);
+   const request=Object.fromEntries(await page.evaluate(()=>requests[0]));
+   assert.equal(request.operation,'quick_settings');assert(request.operation_key);assert(request.revision);
+   assert(!('send_confirmation' in request));
+  } else {
   const email=page.locator('[name="send_confirmation"]');assert(await email.isChecked());
   const form=page.locator('form').filter({has:page.locator('[value="quick_order"]')});
   const mode=form.locator('[name="warehouse_mode"]'),warehouse=form.locator('[name="warehouse_id"]');
@@ -34,12 +43,13 @@ const base=path.resolve(__dirname,'..'),root=path.resolve(base,'../../..');
   await email.uncheck();await mode.selectOption('auto');assert(await warehouse.isDisabled());
   await form.locator('button.button-primary').click();await page.waitForFunction(()=>requests.length===3);
   request=Object.fromEntries(await page.evaluate(()=>requests[2]));assert(!('send_confirmation' in request));assert.equal(request.warehouse_mode,'auto');
+  }
   for(const width of [1100,390]){
    await page.setViewportSize({width,height:800});
    await page.evaluate(()=>{scrollTo({top:0,behavior:'instant'});return new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));});
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'No horizontal overflow');
-   await page.screenshot({path:path.join(path.dirname(process.argv[2]),`pcoe-quick-${width}.png`),fullPage:true});
+   await page.screenshot({path:path.join(path.dirname(process.argv[2]),`pcoe-quick-${recovery?"recovery-":""}${width}.png`),fullPage:true});
   }
-  console.log('PASS: three warehouse modes, preview without creation, checked/unchecked confirmation, auxiliary selection, target exclusion, desktop/mobile; no network.');
+  console.log(recovery?'PASS: explicit settings recovery, no creation or mail, desktop/mobile; no network.':'PASS: three warehouse modes, preview without creation, checked/unchecked confirmation, auxiliary selection, target exclusion, desktop/mobile; no network.');
  } finally {await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

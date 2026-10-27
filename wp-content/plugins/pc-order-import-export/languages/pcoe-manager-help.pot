@@ -484,3 +484,6 @@ msgstr ""
 
 msgid "Check the saved Folio document numbers, warehouses, quantities and amounts, and the linked Woo orders. Ready goods, waiting transfers and shortages are separate. If confirmation emails were selected, check their results in the original draft. Otherwise request confirmation manually for the required reserved orders. The original draft cannot create the same orders again."
 msgstr ""
+
+msgid "The top Go to order preparation button only scrolls to the existing preparation block. Warehouse choices are hidden while an operation is active or needs review. If the preliminary check stopped before any document creation attempt, Return to warehouse settings archives the failed attempt and restores the form without creating orders or sending emails. This action is unavailable after any attempted write or uncertain accounting result."
+msgstr ""

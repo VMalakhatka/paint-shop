@@ -198,7 +198,7 @@ class ManagerWorkspace
     }
 
     /** Per-order connection lock also covers the outbound command and Woo finalization. */
-    private static function lock(string $name, callable $callback) {
+    public static function lock(string $name, callable $callback) {
         global $wpdb;
         $name = self::lock_name($name);
         if ((string) $wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s, 0)', $name)) !== '1') {
@@ -263,6 +263,7 @@ class ManagerWorkspace
                         return $result;
                     }
                     $order = self::order($id, $user->ID);
+                    if ($operation === 'quick_settings') return ManagerQuickOrder::return_to_settings($order,$user,wp_unslash($_POST));
                     if ($operation === 'quick_preview') return ManagerQuickOrder::preview($order,$user,wp_unslash($_POST));
                     if ($operation === 'quick_order') return ManagerQuickOrder::start($order,$user,wp_unslash($_POST));
                     if ($operation === 'apply') return self::apply($order, $user);
@@ -525,10 +526,15 @@ class ManagerWorkspace
     public static function send(array $payload, bool $preview, ?callable $observe = null): array {
         $payload['preview_only'] = $preview;
         $pool=$payload['manager_stock_pool']??[];
-        $response = pc_folio_order_link_java_post($pool?'/admin/folio/manager-order-accounts/v2':'/admin/folio/order-accounts',
-            $pool?['order'=>$payload,'stockPool'=>$pool]:$payload, ['timeout' => 180]);
+        // Authenticated manager endpoints use the same Lavka connection as their warehouse directory.
+        // The older checkout transport has separate Total Sync settings and may have a different token.
+        if ($pool && !function_exists('lps_java_post')) throw new \RuntimeException(__('The Folio document service is unavailable.','pc-order-import-export'));
+        $response = $pool
+            ? lps_java_post('/admin/folio/manager-order-accounts/v2',['order'=>$payload,'stockPool'=>$pool],['timeout'=>180])
+            : pc_folio_order_link_java_post('/admin/folio/order-accounts',$payload,['timeout'=>180]);
         if (is_wp_error($response)) throw new \RuntimeException(__('Folio did not confirm the result. Reload the workspace and check the operation status.', 'pc-order-import-export'));
         $code = wp_remote_retrieve_response_code($response);
+        if ($pool && in_array($code,[401,403],true)) throw new \RuntimeException(sprintf(__('Folio access was denied (HTTP %s). Ask an administrator to check the API token in Lavka price sync settings.','pc-order-import-export'),$code));
         $data = json_decode(wp_remote_retrieve_body($response), true);
         if ($observe && is_array($data)) $observe($data);
         if ($code < 200 || $code >= 300 || !is_array($data)) throw new \RuntimeException(__('Folio did not confirm the result. Reload the workspace and check the operation status.', 'pc-order-import-export'));

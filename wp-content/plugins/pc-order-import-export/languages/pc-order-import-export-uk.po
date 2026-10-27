@@ -4104,3 +4104,22 @@ msgstr "Зарезервовані товари очікують переміщ�
 
 msgid "Open a reserved order to review or request customer confirmation. If confirmation emails were selected during creation, check their results in the original draft before sending again. The customer chooses delivery and payment preferences in the confirmation."
 msgstr "Відкрийте замовлення з резервом, щоб переглянути або запросити підтвердження. Якщо під час створення були вибрані листи підтвердження, перевірте їхній результат у вихідній чернетці перед повторним надсиланням. У підтвердженні клієнт вибирає умови доставки й оплати."
+
+msgid "Go to order preparation"
+msgstr "Перейти до оформлення замовлення"
+
+msgid "Open preparation draft"
+msgstr "Відкрити підготовчу чернетку"
+
+msgid "Previous stopped attempts"
+msgstr "Попередні зупинені спроби"
+
+msgid "Return to warehouse settings"
+msgstr "Повернутися до налаштувань складів"
+
+msgid "The preliminary check stopped before document creation. Return to settings to select warehouses again. This does not create orders, reserve goods or send emails. The stopped attempt stays in history."
+msgstr "Попередня перевірка зупинилася до створення документів. Поверніться до налаштувань, щоб знову вибрати склади. Ця дія не створює замовлень, не резервує товар і не надсилає листів. Зупинена спроба зберігається в історії."
+
+#, php-format
+msgid "Folio access was denied (HTTP %s). Ask an administrator to check the API token in Lavka price sync settings."
+msgstr "ФОЛІО відхилила доступ (HTTP %s). Попросіть адміністратора перевірити API-токен у налаштуваннях синхронізації цін Lavka."

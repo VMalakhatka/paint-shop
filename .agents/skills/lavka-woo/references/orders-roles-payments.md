@@ -127,6 +127,15 @@ Java отвечает за складское распределение вну�
 `ManagerQuickOrder` extends the existing manager form: auto/priority/single,
 optional preview, explicit creation, optional confirmation email. Pool target is
 always the first warehouse in that mode; auxiliaries cannot also be destinations.
+Manager pool transport must use `lps_java_post` / `lps_options` like its warehouse
+catalogue; `pc_folio_order_link_java_post` uses independent Total Sync credentials.
+Production read-only verification 2026-10-27: legacy transport 401 versus Lavka
+preview 200. Do not disable authentication or fall back to unprotected routes.
+A review job may return to settings only if its same-customer work copy has no
+persisted create command, Folio links, write-attempt marker or background progress.
+Archive the old job before removing its active marker, under source/work locks;
+never automatically retry a write or send email during this recovery. Keep both
+source and work drafts for audit. Operator steps: manager guide, one-action section.
 Java `/admin/folio/manager-order-accounts/v2` separates ready quantities from
 `waiting_transfer_account` (accounting enabled, target reserve, `ОЖП` label),
 including two documents on the same warehouse. Waiting Woo orders stay on-hold;

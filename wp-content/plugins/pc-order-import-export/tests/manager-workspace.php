@@ -7,14 +7,17 @@ require_once ABSPATH . 'wp-admin/includes/screen.php';
 set_current_screen('dashboard');
 $test_mails=[]; $mail_accept=true; add_filter('pre_wp_mail',static function($pre,$atts)use(&$test_mails,&$mail_accept){if(str_contains(is_array($atts['to'])?implode(',',$atts['to']):$atts['to'],'@example.invalid')) $test_mails[]=$atts; return $mail_accept;}, PHP_INT_MAX,2);
 $orders = []; $users = []; $products = []; $terms = []; $checks = 0; $writes = 0; $http_failure = false; $with_shortage = false; $all_shortage=false; $with_waiting=false; $test_docs=[];
+$preview_failure=false;$last_manager_http=[];
 $check = static function ($condition, $message) use (&$checks): void { if (!$condition) throw new RuntimeException($message); $checks++; };
 $invoke = static function ($method, ...$args) { return (new ReflectionMethod(Workspace::class, $method))->invoke(null, ...$args); };
 $expect_error = static function (callable $fn) use ($check): void { try { $fn(); } catch (Throwable $e) { $check(true, 'rejected'); return; } throw new RuntimeException('Expected rejection'); };
-add_filter('pre_http_request', static function ($pre, $args, $url) use (&$writes, &$http_failure, &$with_shortage,&$all_shortage,&$with_waiting,&$test_docs) {
+add_filter('pre_http_request', static function ($pre, $args, $url) use (&$writes, &$http_failure, &$with_shortage,&$all_shortage,&$with_waiting,&$test_docs,&$preview_failure,&$last_manager_http) {
     if (str_contains($url,'/ref/warehouses')) return ['response'=>['code'=>200],'body'=>wp_json_encode(array_map(static fn($id)=>['code'=>$id,'name'=>'Test '.$id],[901,902,903,904])),'headers'=>[]];
     if (preg_match('~/customer-documents/ACCOUNT/(\d+)~i',$url,$m) && isset($test_docs[(int)$m[1]])) return ['response'=>['code'=>200],'headers'=>[],'body'=>wp_json_encode(['ok'=>true,'partner'=>['shortName'=>'TEST'],'document'=>$test_docs[(int)$m[1]]])];
     if (!str_contains($url, '/admin/folio/order-accounts') && !str_contains($url,'/admin/folio/manager-order-accounts')) return new WP_Error('test_block', 'External HTTP blocked by test.');
     $payload = json_decode($args['body'], true); if (isset($payload['order'])) $payload=$payload['order'];
+    $last_manager_http=['url'=>$url,'token'=>$args['headers']['X-Auth-Token']??''];
+    if ($preview_failure && $payload['preview_only']) return ['response'=>['code'=>401],'headers'=>[],'body'=>''];
     if (!$payload['preview_only']) { $writes++; if ($http_failure) return new WP_Error('timeout', 'Simulated timeout'); }
     $documents = [];
     foreach ($payload['items'] as $item) foreach ($item['allocations'] as $allocation) {

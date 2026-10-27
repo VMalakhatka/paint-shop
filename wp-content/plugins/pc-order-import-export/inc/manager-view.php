@@ -127,7 +127,7 @@ $command = ManagerWorkspace::command($order);
 $non_accounting_only = ManagerOrderFlow::non_accounting_only($order);
 
 ?>
-<?php if (ManagerQuickOrder::eligible($order) && $context): ?><p class="pcoe-actions"><a class="button button-primary" href="#pcoe-place-order"><?php esc_html_e('Place customer order from this draft','pc-order-import-export'); ?></a></p><?php endif; ?>
+<?php if (ManagerQuickOrder::eligible($order) && $context): ?><p class="pcoe-actions"><a class="button button-primary" href="#pcoe-place-order"><?php esc_html_e('Go to order preparation','pc-order-import-export'); ?></a></p><?php endif; ?>
 <?php OrderExecutionUi::render($order); ?>
 <?php ManagerOrderDetails::render($order); ?>
 <?php if ($order) PromotionCoupons::render($order); ?>

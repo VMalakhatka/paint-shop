@@ -3906,3 +3906,22 @@ msgstr ""
 
 msgid "Open a reserved order to review or request customer confirmation. If confirmation emails were selected during creation, check their results in the original draft before sending again. The customer chooses delivery and payment preferences in the confirmation."
 msgstr ""
+
+msgid "Go to order preparation"
+msgstr ""
+
+msgid "Open preparation draft"
+msgstr ""
+
+msgid "Previous stopped attempts"
+msgstr ""
+
+msgid "Return to warehouse settings"
+msgstr ""
+
+msgid "The preliminary check stopped before document creation. Return to settings to select warehouses again. This does not create orders, reserve goods or send emails. The stopped attempt stays in history."
+msgstr ""
+
+#, php-format
+msgid "Folio access was denied (HTTP %s). Ask an administrator to check the API token in Lavka price sync settings."
+msgstr ""

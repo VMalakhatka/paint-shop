@@ -428,6 +428,18 @@ is not a cross-warehouse exclusivity guarantee against independent Folio writes.
 See [manager workflow](MANAGER_CUSTOMER_GUIDE_UK.md#чернетка--замовлення-однією-дією-27102026)
 and Java `docs/api/FOLIO_ACCOUNT_JS_API.md` for operation/rollback details.
 
+Manager preflight recovery/authentication (2026-10-27): pooled orders use
+`lps_java_post` and Lavka Price Sync credentials, matching the warehouse directory;
+the legacy checkout transport uses independent Total Sync settings. Production
+read-only comparison confirmed 401 via the old transport and successful preview
+via Lavka, including the separate waiting account. No accounting write was tested.
+An explicit manager action can archive a failed preflight and restore settings
+only while its work copy has no create journal, Folio link, write-attempt marker,
+children or processing status. Source/work and legacy Folio locks guard recovery;
+no API call, worker enqueue or email occurs. Unknown writes stay blocked. See the
+manager guide one-action section for recovery and deployment steps. This PHP fix
+does not require changing Java or overwriting either saved API token.
+
 Manager section disclosures (2026-10-27): PCOE `manager.js` / `manager.css`
 add accessible collapse/expand controls to titled workspace cards, including
 nested Folio headings and subscription cards. CSS hides late AJAX siblings too,
