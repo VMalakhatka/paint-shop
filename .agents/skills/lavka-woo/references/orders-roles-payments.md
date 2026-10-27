@@ -647,3 +647,15 @@ auxiliary stock; do not silently fall back to ordinary checkout. Pool reserves t
 target only, including signed negative target free stock in future calculations;
 no physical transfer and no exclusive donor reserve. Preserve these distinctions
 in manager help. Canonical steps: `docs/MANAGER_CUSTOMER_GUIDE_UK.md`.
+
+Verified production recovery, 2026-10-27: a saved non-accounting response can coexist
+with a legacy manager command stuck at `sending`; `ManagerQuickOrder::eligible`
+correctly refuses it until reconciled. Do not clear the command or resend creation.
+A Folio visible number may survive an internal-ID change. Resolve only within the
+same customer and require source `Int` marker, warehouse, accounting mode and all
+SKU quantities/prices/amounts to match the saved request/result and current draft.
+Scoped operator recovery may then preserve the original command, record recovery
+provenance, update the existing result ID and mark it complete under the shared
+order lock with a verified private backup and readback. This restores the manager
+button without creating accounts/reserves/email; it is not automatic page-load
+reconciliation. Steps: manager guide, missing preparation button section.
