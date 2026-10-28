@@ -1232,3 +1232,7 @@ msgstr ""
 
 msgid "A manager may reserve goods that are awaiting transfer to the shipping warehouse in a separate order. Such an order is on hold and explicitly marked as not ready for picking. You may review and confirm it, but confirmation does not mean the transfer or shipment has happened. Your manager will confirm readiness separately."
 msgstr ""
+
+#: pc-wholesale-help.php
+msgid "When a manager processes your draft, it stays as the original request. Warehouse orders link directly to it and each has its own Folio account. Goods awaiting transfer form a separate order; shortages form a separate draft with a non-accounting account. Open the original draft to see linked orders, or use Source order to return from an order. Do not submit the original request again."
+msgstr ""

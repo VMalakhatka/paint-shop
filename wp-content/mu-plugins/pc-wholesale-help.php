@@ -466,6 +466,7 @@ function pc_wholesale_help_render_endpoint(): void {
         </section>
         <section class="pc-help-section" id="stari-zamovlennia">
             <?php if (class_exists('\\PaintCore\\PCOE\\DraftHelp')) \PaintCore\PCOE\DraftHelp::render('processing'); ?>
+            <p><?php esc_html_e('When a manager processes your draft, it stays as the original request. Warehouse orders link directly to it and each has its own Folio account. Goods awaiting transfer form a separate order; shortages form a separate draft with a non-accounting account. Open the original draft to see linked orders, or use Source order to return from an order. Do not submit the original request again.', 'pc-wholesale-help'); ?></p>
             <h2><?php esc_html_e('Build a draft from the catalogue', 'pc-wholesale-help'); ?></h2>
             <p><?php esc_html_e('After signing in, Purchase / Draft and How to work with a draft? are next to the warehouse controls in the header. On narrow screens they wrap onto separate lines. Open the help to read it, then close it to return to the compact view. The Cart menu link has a basket icon.', 'pc-wholesale-help'); ?></p>
             <p><?php esc_html_e('The catalogue uses the available screen width with small equal side margins. Purchase / Draft uses the same text size as the desktop shop selector and menu.', 'pc-wholesale-help'); ?></p>

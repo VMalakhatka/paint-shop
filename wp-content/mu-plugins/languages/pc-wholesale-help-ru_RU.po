@@ -1254,3 +1254,7 @@ msgstr "Каталог использует доступную ширину эк
 
 msgid "A manager may reserve goods that are awaiting transfer to the shipping warehouse in a separate order. Such an order is on hold and explicitly marked as not ready for picking. You may review and confirm it, but confirmation does not mean the transfer or shipment has happened. Your manager will confirm readiness separately."
 msgstr "Менеджер может зарезервировать товары, ожидающие перемещения на склад отгрузки, в отдельном заказе. У него статус «На удержании» и отметка, что он ещё не готов к сборке. Его можно проверить и подтвердить, но это не означает, что перемещение или отправка уже произошли. О готовности отдельно сообщит менеджер."
+
+#: pc-wholesale-help.php
+msgid "When a manager processes your draft, it stays as the original request. Warehouse orders link directly to it and each has its own Folio account. Goods awaiting transfer form a separate order; shortages form a separate draft with a non-accounting account. Open the original draft to see linked orders, or use Source order to return from an order. Do not submit the original request again."
+msgstr "Когда менеджер обрабатывает черновик, он остаётся исходной заявкой. Заказы по складам связаны с ним напрямую, и у каждого свой счёт ФОЛИО. Товары, ожидающие перемещения, образуют отдельный заказ; нехватка — отдельный черновик с неучитываемым счётом. Откройте исходный черновик, чтобы увидеть связанные заказы, или воспользуйтесь ссылкой на исходный заказ для возврата. Не отправляйте исходную заявку повторно."

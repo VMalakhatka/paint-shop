@@ -42,6 +42,13 @@ class DraftFolioWorkflow
         echo '<h2>' . esc_html__('Draft processing', 'pc-order-import-export') . '</h2>';
         DraftHelp::render('processing');
 
+        if ($order->get_meta('_pcoe_quick_order', true)) {
+            echo '<div class="woocommerce-info">'
+                . esc_html__('This operation was already submitted. Check the saved result; automatic resubmission is blocked.', 'pc-order-import-export')
+                . '</div></section>';
+            return;
+        }
+
         if ($warehouse_id <= 0) {
             echo '<div class="woocommerce-error" role="alert">'
                 . esc_html__('The Folio warehouse for non-accounting drafts is not configured. Ask a manager to select it in Lavka settings.', 'pc-order-import-export')
@@ -969,7 +976,9 @@ class DraftFolioWorkflow
         if (!self::can_access($order)) {
             wp_die(esc_html__('You do not have permission to perform this action.', 'pc-order-import-export'), '', ['response' => 403]);
         }
-        if ($order->get_meta('_pcoe_manager_command', true)) {
+        // The source remains a draft after direct child creation. Its active journal,
+        // including a completed operation, must block cart/remainder edits and writes.
+        if ($order->get_meta('_pcoe_manager_command', true) || $order->get_meta('_pcoe_quick_order', true)) {
             wp_die(esc_html__('This operation was already submitted. Check the saved result; automatic resubmission is blocked.', 'pc-order-import-export'), '', ['response' => 409]);
         }
         if (!$order->has_status('pc-draft')) {

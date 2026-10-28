@@ -177,7 +177,7 @@ DEF-456;3</code></pre>
         });
 
         add_filter('woocommerce_my_account_my_orders_actions', function(array $actions, $order): array {
-            if (!$order instanceof \WC_Order || !$order->has_status('pc-draft')) {
+            if (!$order instanceof \WC_Order || !$order->has_status('pc-draft') || $order->get_meta('_pcoe_quick_order', true)) {
                 return $actions;
             }
 

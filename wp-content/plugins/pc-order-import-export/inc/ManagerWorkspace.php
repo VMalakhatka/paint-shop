@@ -232,6 +232,12 @@ class ManagerWorkspace
         register_shutdown_function(static function () use ($wpdb, $name): void {
             $wpdb->get_var($wpdb->prepare('SELECT RELEASE_LOCK(%s)', $name));
         });
+        $order=wc_get_order($id);$order->read_meta_data(true);
+        if (ManagerDraftOrders::active($order)) {
+            $message=__('This draft is locked. Check its Folio result or create a new copy.', 'pc-order-import-export');
+            if (wp_doing_ajax()) wp_send_json_error(['message'=>$message],409);
+            wp_die(esc_html($message),'',['response'=>409]);
+        }
     }
 
     public static function ajax(): void {
@@ -618,6 +624,8 @@ class ManagerWorkspace
     /** Child stock reduction must use its Folio warehouse, never the manager cart preference. */
     public static function stamp_child_plan(\WC_Order $parent, \WC_Order_Item_Product $item, array $line): void {
         $command = self::command($parent);
+        $job=$parent->get_meta(ManagerQuickOrder::META,true);
+        if (is_array($job) && ($job['flow']??'')===ManagerDraftOrders::FLOW) $command=['payload'=>$job['payload']??[]];
         if (!$command || !in_array(($line['allocation_status'] ?? ''),['allocated','awaiting_transfer'],true)) return;
         $plan = self::result_plan((array) ($command['payload'] ?? []), (string) ($line['sku'] ?? ''),
             (float) ($line['quantity'] ?? 0), (int) ($line['folio_warehouse_id'] ?? 0));

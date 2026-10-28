@@ -405,14 +405,21 @@ reports persistence failure and normalizes creation types (`account`,
 `non_accounting_account`, `missing_stock_account`) to the read API's `ACCOUNT`, without
 changing accounting flags. Operator recovery and limits are in the manager guide above.
 
-Manager one-action preparation (2026-10-27, local verification): PCOE
-`ManagerQuickOrder` persists an explicit manager command on the source draft,
-then Action Scheduler creates a work copy via `ManagerWorkspace` and optionally
-sends one `CustomerApproval` notice per reserved child. The checkbox defaults on;
-unchecked sends no customer preparation email. Native processing/on-hold customer
-emails are suppressed for these work orders. Unknown writes never retry.
-`_pcoe_execution_source_id` / reciprocal `_pcoe_execution_children` extend the
-execution family without impersonating native Folio parent links. Existing PRD
+Manager one-action preparation (2026-10-28): new `ManagerQuickOrder` jobs use
+`flow=direct_children`; the source draft owns the payload, saved Folio response
+and per-document child map. No intermediate preparation order is created.
+Every actual response document becomes a direct Woo child: reserved goods use
+processing, waiting transfers use on-hold, and shortages use pc-draft. Even a
+single document gets its own child. Source items, title, status and historical
+Folio links remain unchanged; new result data stays in the quick-job journal.
+The execution family links source and children directly. Preflight failure
+creates no new Woo orders. A saved write-attempt marker blocks automatic replay,
+including after a partial Folio or local materialization result.
+Action Scheduler optionally sends one `CustomerApproval` notice per reserved
+child. The checkbox defaults on; unchecked sends no customer preparation email.
+Native processing/on-hold preparation emails are suppressed. Legacy jobs without
+this flow marker retain their work-copy path and saved links; no automatic
+migration or deletion of old preparation copies is performed. Existing PRD
 sources require reconciliation before conversion. The manager form explains this
 requirement before offering creation; recovery of a stale save command preserves
 the preorder purpose and cannot silently remove its balance reserve. Auxiliary availability uses
@@ -434,10 +441,11 @@ the legacy checkout transport uses independent Total Sync settings. Production
 read-only comparison confirmed 401 via the old transport and successful preview
 via Lavka, including the separate waiting account. No accounting write was tested.
 An explicit manager action can archive a failed preflight and restore settings
-only while its work copy has no create journal, Folio link, write-attempt marker,
-children or processing status. Source/work and legacy Folio locks guard recovery;
-the same guards apply to a retained work copy in trash (2026-10-28). Recovery
-never restores that copy or makes trashed orders editable; it unlocks the source.
+only before any write attempt or child creation. New jobs inspect the source
+journal; legacy jobs additionally inspect their same-customer work copy for
+create journals, Folio links and processing markers, including when it is in trash.
+Source/work and legacy Folio locks guard recovery. Recovery never restores a
+trashed copy; it unlocks the source for a new direct-children run.
 No API call, worker enqueue or email occurs. Unknown writes stay blocked. See the
 manager guide one-action section for recovery and deployment steps. This PHP fix
 does not require changing Java or overwriting either saved API token.

@@ -10,12 +10,14 @@ final class ManagerQuickOrder {
     const GROUP='pcoe-quick-orders';
     public static function hooks(): void {
         add_action(self::JOB,[self::class,'run']);
+        add_action('woocommerce_order_details_before_order_table',[ManagerDraftOrders::class,'customer_links'],8);
         foreach (['customer_processing_order','customer_on_hold_order'] as $type)
             add_filter('woocommerce_email_enabled_'.$type,[self::class,'standard_email'],20,2);
     }
     /** Initial status emails would bypass the manager's explicit confirmation-email choice. */
     public static function standard_email($enabled,$order): bool {
         if (!$order instanceof \WC_Order) return (bool)$enabled;
+        if ($order->get_meta(ManagerDraftOrders::CHILD_KEY)) return false;
         $work=$order;
         if ($order->get_parent_id()) {
             $parent=wc_get_order($order->get_parent_id());
@@ -24,7 +26,7 @@ final class ManagerQuickOrder {
         return $work->get_meta('_pcoe_execution_source_id') ? false : (bool)$enabled;
     }
     private static function fail(): void { throw new \RuntimeException(__('The operation needs review. Do not submit it again. Check the saved Folio documents and operation ID.','pc-order-import-export')); }
-    private static function save(\WC_Order $order,array $job): void {
+    public static function save(\WC_Order $order,array $job): void {
         $job['updated_at']=gmdate('c'); $order->update_meta_data(self::META,$job); $order->save_meta_data();
         ManagerWorkspace::require_saved_meta($order,self::META,$job);
     }
@@ -38,6 +40,12 @@ final class ManagerQuickOrder {
     /** The create journal is durably saved before any mutating Folio POST. Never clear that journal. */
     public static function can_return_to_settings(\WC_Order $order): bool {
         $job=$order->get_meta(self::META,true);
+        if (is_array($job) && ($job['flow']??'')===ManagerDraftOrders::FLOW) {
+            return ($job['status']??'')==='review' && ($job['step']??'')==='preflight'
+                && empty($job['write_started_at']) && empty($job['response']) && empty($job['children']) && empty($job['slots'])
+                && empty($job['orders']) && empty($job['approvals']) && $order->has_status('pc-draft')
+                && !$order->get_parent_id() && !$order->get_meta('_pcoe_execution_source_id');
+        }
         if (!is_array($job) || ($job['status']??'')!=='review' || ($job['step']??'')!=='documents'
             || empty($job['work_order']) || !empty($job['orders']) || !empty($job['approvals'])
             || !$order->has_status('pc-draft') || $order->get_parent_id() || $order->get_meta('_pcoe_execution_source_id')) return false;
@@ -61,8 +69,9 @@ final class ManagerQuickOrder {
             $job=$order->get_meta(self::META,true);
             if (!self::can_return_to_settings($order) || !hash_equals((string)$job['key'],(string)($input['operation_key']??''))
                 || !hash_equals(ManagerWorkspace::revision($order),(string)($input['revision']??''))) self::fail();
-            $result=ManagerWorkspace::lock('order:'.$job['work_order'],static function()use($order,$user,$job){
-                return pc_folio_order_locked((int)$job['work_order'],static function()use($order,$user,$job){
+            $locked_id=(int)($job['work_order']?:$order->get_id());
+            $result=ManagerWorkspace::lock('order:'.$locked_id,static function()use($order,$user,$job,$locked_id){
+                return pc_folio_order_locked($locked_id,static function()use($order,$user,$job){
                     if (!self::can_return_to_settings($order)) self::fail();
                     $history=$order->get_meta(self::HISTORY,true);$history=is_array($history)?$history:[];
                     $history[$job['key']]=$job+['returned_by'=>get_current_user_id(),'returned_at'=>gmdate('c')];
@@ -88,7 +97,7 @@ final class ManagerQuickOrder {
         $preference=self::preferences($input);
         $pool=$preference['manager_pool'];
         if (!empty($input['send_confirmation']) && !is_email($user->user_email)) self::fail();
-        $job=['key'=>wp_generate_uuid4(),'status'=>'queued','actor'=>get_current_user_id(),'customer'=>$user->ID,
+        $job=['key'=>wp_generate_uuid4(),'flow'=>ManagerDraftOrders::FLOW,'status'=>'queued','actor'=>get_current_user_id(),'customer'=>$user->ID,
             'folio'=>OrderExecution::context($order),'revision'=>ManagerWorkspace::revision($order),'pool'=>$pool,
             'preference'=>$preference,'send'=>!empty($input['send_confirmation']),'work_order'=>0,'orders'=>[],'approvals'=>[],'cursor'=>0,'started_at'=>gmdate('c')];
         if (!$job['folio']) self::fail();
@@ -108,6 +117,13 @@ final class ManagerQuickOrder {
             wp_set_current_user($job['actor']); $user=ManagerWorkspace::customer($job['customer']);
             if ($job['status']==='queued') {
                 if (!hash_equals($job['revision'],ManagerWorkspace::revision($source))) self::fail();
+                if (($job['flow']??'')===ManagerDraftOrders::FLOW) {
+                    ManagerDraftOrders::create($source,$user,$job);
+                    $job['status']=$job['send'] && $job['orders']?'approvals':'complete';
+                    self::save($source,$job);
+                    if ($job['status']==='approvals') self::enqueue($id);
+                    return;
+                }
                 $job['status']='running'; $job['step']='copy'; self::save($source,$job);
                 $work=ManagerWorkspace::quick_copy($source,$user,$job['key']);
                 $job['work_order']=$work->get_id(); self::save($source,$job);
@@ -232,7 +248,8 @@ final class ManagerQuickOrder {
             echo '<p><strong>'.esc_html($stale?$labels['review']:($labels[$job['status']]??$labels['review'])).'</strong></p>';
             if ($stale) echo '<p>'.esc_html__('The operation needs review. Do not submit it again. Check the saved Folio documents and operation ID.','pc-order-import-export').'</p>';
             if (!$stale && in_array($job['status'],['queued','running','approvals'],true)) echo '<p>'.esc_html__('Processing continues in the background. Refresh this page to see the result.','pc-order-import-export').'</p>';
-            if (!empty($job['work_order'])) echo '<p><a class="button" href="'.esc_url(ManagerWorkspace::url($order->get_customer_id(),$job['work_order'])).'">'.esc_html($settings_available?__('Open preparation draft','pc-order-import-export'):__('Open created orders and Folio documents','pc-order-import-export')).'</a></p>';
+            if (!empty($job['work_order']) && !$settings_available) echo '<p><a class="button" href="'.esc_url(ManagerWorkspace::url($order->get_customer_id(),$job['work_order'])).'">'.esc_html__('Open created orders and Folio documents','pc-order-import-export').'</a></p>';
+            if (($job['flow']??'')===ManagerDraftOrders::FLOW) ManagerDraftOrders::render($order,$job);
             echo '<p>'.esc_html(sprintf(__('Operation ID: %s','pc-order-import-export'),$job['key'])).'</p>';
             if (!empty($job['error'])) echo '<p>'.esc_html($job['error']).'</p>';
             if ($settings_available) {

@@ -257,8 +257,10 @@ if (!function_exists('pc_folio_order_has_saved_documents')) {
     {
         $result = pc_folio_get_order_documents_result($order);
         $link = pc_folio_get_order_document_link($order);
+        $quick = $order->get_meta('_pcoe_quick_order', true);
 
-        return !empty($order->get_meta('_pcoe_manager_command', true))
+        return (is_array($quick) && ($quick['flow'] ?? '') === 'direct_children')
+            || !empty($order->get_meta('_pcoe_manager_command', true))
             || !empty($result['documents'])
             || !empty($link['document_id'])
             || !empty($link['document_number']);

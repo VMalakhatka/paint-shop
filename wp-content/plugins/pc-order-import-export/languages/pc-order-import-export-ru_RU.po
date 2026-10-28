@@ -4117,3 +4117,31 @@ msgstr "Предварительная проверка остановилась
 #, php-format
 msgid "Folio access was denied (HTTP %s). Ask an administrator to check the API token in Lavka price sync settings."
 msgstr "ФОЛИО отклонила доступ (HTTP %s). Попросите администратора проверить API-токен в настройках синхронизации цен Lavka."
+
+#: inc/ManagerDraftOrders.php
+#, php-format
+msgid "Awaiting transfer from draft #%s"
+msgstr "Ожидание перемещения из черновика №%s"
+
+#: inc/ManagerDraftOrders.php
+#, php-format
+msgid "Order from draft #%s"
+msgstr "Заказ из черновика №%s"
+
+#: inc/ManagerDraftOrders.php
+#, php-format
+msgid "Shortage from draft #%s"
+msgstr "Нехватка из черновика №%s"
+
+#: inc/ManagerDraftOrders.php
+msgid "Orders created from this draft"
+msgstr "Заказы из этого черновика"
+
+#: inc/ManagerDraftOrders.php
+#, php-format
+msgid "Folio account #%s"
+msgstr "Счёт ФОЛИО №%s"
+
+#: inc/ManagerDraftOrders.php
+msgid "Woo order creation needs review. Do not create the Folio document again."
+msgstr "Создание заказа Woo требует проверки. Не создавайте документ ФОЛИО повторно."

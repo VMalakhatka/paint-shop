@@ -131,14 +131,20 @@ Manager pool transport must use `lps_java_post` / `lps_options` like its warehou
 catalogue; `pc_folio_order_link_java_post` uses independent Total Sync credentials.
 Production read-only verification 2026-10-27: legacy transport 401 versus Lavka
 preview 200. Do not disable authentication or fall back to unprotected routes.
-A review job may return to settings only if its same-customer work copy has no
-persisted create command, Folio links, write-attempt marker or background progress.
-The copy may be a draft or in trash; inspect its retained journal instead of
-requiring editability. Never restore it as a side effect. Regression verified
-2026-10-28 for trashed preflight failure versus trashed uncertain write/document.
-Archive the old job before removing its active marker, under source/work locks;
-never automatically retry a write or send email during this recovery. Keep both
-source and work drafts for audit. Operator steps: manager guide, one-action section.
+New jobs (2026-10-28) use `flow=direct_children`: source quick-job payload,
+response and per-document child map replace the intermediate work copy. Every
+Folio response document gets a direct Woo child, including a single result:
+ready processing, waiting on-hold, shortage pc-draft. Preserve source contents,
+status and prior Folio metadata; never call the legacy apply/split wrapper on
+that source or replace its original result with the new batch. Unknown writes
+must stay blocked. Suppress native preparation emails for direct children too.
+A review job may return to settings only before any write attempt or children.
+Legacy jobs lacking the flow marker retain work-copy handling: inspect the
+same-customer copy's journal, Folio links and progress, including when in trash.
+Never restore or delete old copies as a recovery side effect. Archive the old job
+before removing its active marker, under source/work locks; never automatically
+retry a write or send email during recovery. Next explicit creation uses the new
+flow. Operator steps: manager guide, one-action section.
 Java `/admin/folio/manager-order-accounts/v2` separates ready quantities from
 `waiting_transfer_account` (accounting enabled, target reserve, `ОЖП` label),
 including two documents on the same warehouse. Waiting Woo orders stay on-hold;

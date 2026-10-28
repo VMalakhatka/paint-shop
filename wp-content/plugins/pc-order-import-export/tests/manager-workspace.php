@@ -164,6 +164,8 @@ try {
     remove_filter('pcoe_folio_non_accounting_warehouse_id', $warehouse_filter);
     require __DIR__.'/manager-order-flow.php';
     require __DIR__.'/manager-quick-order.php';
+    require __DIR__.'/manager-direct-orders.php';
+    require __DIR__.'/manager-source-guards.php';
     // Connection locks exclude a second DB connection without changing any data or grants.
     $second = new wpdb(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST);
     $name = $invoke('lock_name', 'order:' . $id);

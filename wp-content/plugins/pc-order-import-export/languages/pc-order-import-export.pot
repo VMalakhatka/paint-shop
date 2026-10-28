@@ -3925,3 +3925,31 @@ msgstr ""
 #, php-format
 msgid "Folio access was denied (HTTP %s). Ask an administrator to check the API token in Lavka price sync settings."
 msgstr ""
+
+#: inc/ManagerDraftOrders.php
+#, php-format
+msgid "Awaiting transfer from draft #%s"
+msgstr ""
+
+#: inc/ManagerDraftOrders.php
+#, php-format
+msgid "Order from draft #%s"
+msgstr ""
+
+#: inc/ManagerDraftOrders.php
+#, php-format
+msgid "Shortage from draft #%s"
+msgstr ""
+
+#: inc/ManagerDraftOrders.php
+msgid "Orders created from this draft"
+msgstr ""
+
+#: inc/ManagerDraftOrders.php
+#, php-format
+msgid "Folio account #%s"
+msgstr ""
+
+#: inc/ManagerDraftOrders.php
+msgid "Woo order creation needs review. Do not create the Folio document again."
+msgstr ""

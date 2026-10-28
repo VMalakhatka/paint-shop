@@ -4,6 +4,14 @@ use PaintCore\PCOE\ManagerQuickOrder as Quick;
 use PaintCore\PCOE\OrderExecution as Execution;
 use PaintCore\PCOE\ManagerWorkspace;
 $quick_sources=[];
+// Exercise persisted jobs from the old release without exposing a production flow selector.
+$legacy_start=static function($draft,$customer,$input){
+    $result=Quick::start($draft,$customer,$input);
+    $fresh=wc_get_order($draft->get_id());$fresh->read_meta_data(true);
+    $job=$fresh->get_meta(Quick::META,true);
+    if(is_array($job) && isset($job['flow'])) {unset($job['flow']);$fresh->update_meta_data(Quick::META,$job);$fresh->save_meta_data();}
+    return $result;
+};
 $quick_fixture=static function()use(&$orders,&$quick_sources,$user,$order){
     $draft=ManagerWorkspace::quick_copy($order,$user,wp_generate_uuid4());
     $orders[]=$draft->get_id();$quick_sources[]=$draft->get_id();return $draft;
@@ -17,16 +25,16 @@ $quick_collect=static function($id)use(&$orders,$quick_job){
 };
 try {
     $draft=$quick_fixture(); $input=['revision'=>ManagerWorkspace::revision($draft)];
-    wp_set_current_user($user->ID);$expect_error(fn()=>Quick::start($draft,$user,$input));
+    wp_set_current_user($user->ID);$expect_error(fn()=>$legacy_start($draft,$user,$input));
     $check(!$quick_job($draft->get_id()),'Customer cannot start automatic processing');wp_set_current_user($manager_id);
-    $expect_error(fn()=>Quick::start($draft,$user,['revision'=>'old']));
+    $expect_error(fn()=>$legacy_start($draft,$user,['revision'=>'old']));
     ob_start();Quick::render($draft);$html=ob_get_clean();
     if(getenv('PCOE_QUICK_UI_FIXTURE')) file_put_contents(getenv('PCOE_QUICK_UI_FIXTURE'),wp_json_encode(['html'=>$html]));
     $check(str_contains($html,'name="send_confirmation" value="1" checked'),'Confirmation checkbox is checked by default');
     $check(strpos($html,'name="send_confirmation"')<strpos($html,'button-primary'),'Confirmation checkbox precedes creation button');
     $sent=count($test_mails);$written=$writes;
-    Quick::start($draft,$user,$input);$first=$quick_job($draft->get_id());
-    Quick::start(wc_get_order($draft->get_id()),$user,$input);
+    $legacy_start($draft,$user,$input);$first=$quick_job($draft->get_id());
+    $legacy_start(wc_get_order($draft->get_id()),$user,$input);
     $check($quick_job($draft->get_id())['key']===$first['key'],'Double click keeps one operation');
     Quick::run($draft->get_id());$job=$quick_collect($draft->get_id());
     $check($job['status']==='complete','Unchecked preparation completes: '.wp_json_encode($job));
@@ -37,7 +45,7 @@ try {
     $work=wc_get_order($job['work_order']);$check(!$work->get_meta('_folio_parent_order_id'),'Execution link does not fabricate a native accounting parent');
 
     $draft=$quick_fixture(); $written=$writes;$with_shortage=true;$mail_accept=false;
-    Quick::start($draft,$user,['revision'=>ManagerWorkspace::revision($draft),'send_confirmation'=>'1','warehouse_mode'=>'single','warehouse_id'=>$terms[0],'auxiliary'=>[903]]);
+    $legacy_start($draft,$user,['revision'=>ManagerWorkspace::revision($draft),'send_confirmation'=>'1','warehouse_mode'=>'single','warehouse_id'=>$terms[0],'auxiliary'=>[903]]);
     Quick::run($draft->get_id());$job=$quick_collect($draft->get_id());
     $check($job['status']==='approvals' && count($job['orders'])===1,'Only reserved pooled child enters approval queue: '.wp_json_encode($job));
     $command=wc_get_order($job['work_order'])->get_meta('_pcoe_manager_command');
@@ -49,7 +57,7 @@ try {
     $check($writes===$written+1,'Mail failure does not recreate documents');
     $mail_accept=true;$with_shortage=false;
 
-    $draft=$quick_fixture();Quick::start($draft,$user,['revision'=>ManagerWorkspace::revision($draft),'send_confirmation'=>'1']);
+    $draft=$quick_fixture();$legacy_start($draft,$user,['revision'=>ManagerWorkspace::revision($draft),'send_confirmation'=>'1']);
     Quick::run($draft->get_id());$job=$quick_collect($draft->get_id());
     $sent=count($test_mails);$written=$writes;
     for($i=0;$i<count($job['orders'])+1;$i++)Quick::run($draft->get_id());
@@ -60,32 +68,32 @@ try {
     ob_start();Quick::render(wc_get_order($draft->get_id()));$html=ob_get_clean();$check(str_contains($html,'pcoe-quick-order'),'Completed result renders safely');
 
     $draft=$quick_fixture();$all_shortage=true;$sent=count($test_mails);
-    Quick::start($draft,$user,['revision'=>ManagerWorkspace::revision($draft),'send_confirmation'=>'1']);Quick::run($draft->get_id());
+    $legacy_start($draft,$user,['revision'=>ManagerWorkspace::revision($draft),'send_confirmation'=>'1']);Quick::run($draft->get_id());
     $job=$quick_collect($draft->get_id());$check($job['status']==='complete' && !$job['orders'] && count($test_mails)===$sent,'All unavailable quantities create shortage without approval email: '.wp_json_encode($job));$all_shortage=false;
 
-    $draft=$quick_fixture();Quick::start($draft,$user,['revision'=>ManagerWorkspace::revision($draft)]);
+    $draft=$quick_fixture();$legacy_start($draft,$user,['revision'=>ManagerWorkspace::revision($draft)]);
     $draft->set_customer_note('changed');$draft->save();$written=$writes;Quick::run($draft->get_id());
     $check($quick_job($draft->get_id())['status']==='review' && $writes===$written,'Changed draft blocks processing');
 
     $draft=$quick_fixture();$http_failure=true;
-    Quick::start($draft,$user,['revision'=>ManagerWorkspace::revision($draft),'send_confirmation'=>'1']);Quick::run($draft->get_id());$job=$quick_collect($draft->get_id());
+    $legacy_start($draft,$user,['revision'=>ManagerWorkspace::revision($draft),'send_confirmation'=>'1']);Quick::run($draft->get_id());$job=$quick_collect($draft->get_id());
     $written=$writes;Quick::run($draft->get_id());
     $check($job['status']==='review' && $writes===$written,'Unknown document result never automatically retried');$http_failure=false;
 
-    $draft=$quick_fixture();Quick::start($draft,$user,['revision'=>ManagerWorkspace::revision($draft)]);
+    $draft=$quick_fixture();$legacy_start($draft,$user,['revision'=>ManagerWorkspace::revision($draft)]);
     $job=$quick_job($draft->get_id());$job['actor']=$user->ID;$draft->update_meta_data(Quick::META,$job);$draft->save_meta_data();
     $written=$writes;Quick::run($draft->get_id());$check($quick_job($draft->get_id())['status']==='review' && $writes===$written,'Revoked manager authority prevents execution');
-    $draft=$quick_fixture();Quick::start($draft,$user,['revision'=>ManagerWorkspace::revision($draft)]);
+    $draft=$quick_fixture();$legacy_start($draft,$user,['revision'=>ManagerWorkspace::revision($draft)]);
     update_user_meta($user->ID,'_folio_partner_short_name','OTHER');Quick::run($draft->get_id());update_user_meta($user->ID,'_folio_partner_short_name','TEST');
     $check($quick_job($draft->get_id())['status']==='review','Changed Folio link prevents execution');
     $non_order->update_meta_data('_pcoe_draft_purpose','preorder');$non_order->save_meta_data();
-    $expect_error(fn()=>Quick::start($non_order,$user,['revision'=>ManagerWorkspace::revision($non_order)]));
+    $expect_error(fn()=>$legacy_start($non_order,$user,['revision'=>ManagerWorkspace::revision($non_order)]));
     ob_start();Quick::render($non_order);$preorder_html=ob_get_clean();
     $check(!str_contains($preorder_html,'value="quick_order"') && str_contains($preorder_html,esc_html__('Reconcile the existing preorder account before automatic conversion.','pc-order-import-export')),'Saved preorder explains reconciliation before showing a creation form');
     $non_order->update_meta_data('_pcoe_draft_purpose','draft');$non_order->save_meta_data();
     $check(Quick::eligible($non_order),'Existing ordinary non-accounting source remains eligible');
-    $draft=$quick_fixture();$expect_error(fn()=>Quick::start($draft,$user,['revision'=>ManagerWorkspace::revision($draft),'warehouse_mode'=>'single','warehouse_id'=>$terms[0],'auxiliary'=>[901]]));
-    $expect_error(fn()=>Quick::start($draft,$user,['revision'=>ManagerWorkspace::revision($draft),'warehouse_mode'=>'single','warehouse_id'=>$terms[0],'auxiliary'=>[999999]]));
+    $draft=$quick_fixture();$expect_error(fn()=>$legacy_start($draft,$user,['revision'=>ManagerWorkspace::revision($draft),'warehouse_mode'=>'single','warehouse_id'=>$terms[0],'auxiliary'=>[901]]));
+    $expect_error(fn()=>$legacy_start($draft,$user,['revision'=>ManagerWorkspace::revision($draft),'warehouse_mode'=>'single','warehouse_id'=>$terms[0],'auxiliary'=>[999999]]));
     $check(!$quick_job($draft->get_id()),'Invalid warehouse choice is rejected before queue');
     $draft=$quick_fixture();$sent=count($test_mails);$written=$writes;
     $settings=['warehouse_mode'=>'manual','warehouse_id'=>$terms[1],'auxiliary'=>[903]];
@@ -100,7 +108,7 @@ try {
     $check(!empty($preview['quick_preview_html']) && !$quick_job($draft->get_id()) && $writes===$written && count($test_mails)===$sent,'Preview does not copy, queue, write or email');
 
     $draft=$quick_fixture();$with_waiting=true;
-    Quick::start($draft,$user,['revision'=>ManagerWorkspace::revision($draft),'warehouse_mode'=>'single','warehouse_id'=>$terms[0],'auxiliary'=>[903],'send_confirmation'=>'1']);
+    $legacy_start($draft,$user,['revision'=>ManagerWorkspace::revision($draft),'warehouse_mode'=>'single','warehouse_id'=>$terms[0],'auxiliary'=>[903],'send_confirmation'=>'1']);
     Quick::run($draft->get_id());$job=$quick_collect($draft->get_id());
     $waiting=null;foreach($job['orders'] as $id) { $o=wc_get_order($id);if($o->get_meta('_folio_document_type')==='waiting_transfer_account')$waiting=$o; }
     $check(count($job['orders'])===2 && $waiting && $waiting->has_status('on-hold'),'Ready and waiting create separate Woo orders on the same warehouse');
@@ -117,7 +125,7 @@ try {
     add_filter('pre_option_lps_options',$lavka_options);
     try {
         $draft=$quick_fixture();$preview_failure=true;$sent=count($test_mails);$written=$writes;
-        Quick::start($draft,$user,['revision'=>ManagerWorkspace::revision($draft),'warehouse_mode'=>'single','warehouse_id'=>$terms[0],'auxiliary'=>[903]]);
+        $legacy_start($draft,$user,['revision'=>ManagerWorkspace::revision($draft),'warehouse_mode'=>'single','warehouse_id'=>$terms[0],'auxiliary'=>[903]]);
         Quick::run($draft->get_id());$job=$quick_collect($draft->get_id());$draft=wc_get_order($draft->get_id());
         $check(str_starts_with($last_manager_http['url'],'https://manager-test.invalid/') && $last_manager_http['token']==='manager-test-token','Pool uses configured Lavka authentication');
         $check(Quick::can_return_to_settings($draft) && $writes===$written && count($test_mails)===$sent,'Preflight failure may return to settings without writes or mail');
