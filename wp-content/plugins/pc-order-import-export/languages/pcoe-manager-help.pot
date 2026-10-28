@@ -487,3 +487,15 @@ msgstr ""
 
 msgid "The top Go to order preparation button only scrolls to the existing block. Return to warehouse settings is available after a failed preliminary check before any document creation attempt. It archives the attempt and restores the form without orders or emails. Older operations may retain a preparation copy, even in trash; a safe return preserves its history and the next run uses direct orders. Any attempted write or uncertain accounting result blocks this return and requires reconciliation."
 msgstr ""
+
+#: inc/ManagerHelp.php
+msgid "Execution roadmap. In Next action choose a named stage, read its scenario and record its result, details, agreed deadline and evidence. Required stages cannot be skipped. Optional stages may be left unused or skipped with a reason. Moving to a later stage does not complete earlier ones; the next stage after completion needs its own agreed deadline. Previous free-text actions remain as notes."
+msgstr ""
+
+#: inc/ManagerHelp.php
+msgid "The route covers request intake, order preparation, customer confirmation, picking, packing, shipment documents, payment terms, dispatch, receipt and acceptance. Waiting for stock, box passports, shortages, carrier booking, claims, returns, corrections and signatures are optional branches. Expand Execution roadmap to see every scenario and recorded result. Close control only after all required stages and opened branches are resolved; reopening a stage reopens control and keeps history."
+msgstr ""
+
+#: inc/ManagerHelp.php
+msgid "Roadmap results are manager review records. Check Folio documents, payments, shipment tracking and paper packing/acceptance records separately. A stage mark does not create an account, TTN, message, signature or bonus and does not complete a Woo order. Closing the roadmap does not pause source monitoring; use the monitoring checkbox separately."
+msgstr ""

@@ -4145,3 +4145,228 @@ msgstr "Счёт ФОЛИО №%s"
 #: inc/ManagerDraftOrders.php
 msgid "Woo order creation needs review. Do not create the Folio document again."
 msgstr "Создание заказа Woo требует проверки. Не создавайте документ ФОЛИО повторно."
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Accept request and assign a manager"
+msgstr "Принять заявку и назначить менеджера"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Check the customer, source list and responsible manager. Complete when the request and agreed next deadline are recorded."
+msgstr "Проверьте клиента, исходный список и ответственного. Завершите, когда заявка и согласованный срок зафиксированы."
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Wait for receipt or stock transfer"
+msgstr "Дождаться поступления или перемещения"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Record the expected goods, warehouse and date. Complete after checking their actual receipt; an expected arrival is not available stock."
+msgstr "Укажите ожидаемые товары, склад и дату. Завершите после проверки фактического поступления; ожидаемая поставка ещё не является доступным остатком."
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Prepare Woo orders and Folio accounts"
+msgstr "Подготовить заказы Woo и счета ФОЛИО"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Check stock and create linked orders using the preparation block. Complete only after verifying the saved accounts, warehouse allocation and shortage for all parts of the request."
+msgstr "Проверьте остатки и создайте связанные заказы в блоке оформления. Завершите после сверки сохранённых счетов, распределения складов и нехватки для всех частей заявки."
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Confirm contents and delivery with the customer"
+msgstr "Согласовать состав и доставку с клиентом"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Verify the current confirmed version, recipient, delivery and payment choice. Existing checkout confirmation may be used if the contents have not changed; otherwise request a new confirmation."
+msgstr "Сверьте актуальную подтверждённую версию, получателя, доставку и выбор оплаты. Можно использовать подтверждение при оформлении, если состав не изменился; иначе запросите новое."
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Pick the goods"
+msgstr "Собрать товар"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Check the warehouse picking record against every ordered line. Complete when picked quantities and all missing or damaged items are recorded."
+msgstr "Сверьте складской лист сборки с каждой позицией. Завершите, когда зафиксированы собранное количество, вся нехватка и повреждения."
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Pack and check the goods"
+msgstr "Упаковать и проверить товар"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Check the actual packed contents, package count and responsible packer. Complete after the packing record has been checked; a Folio account alone is not packing evidence."
+msgstr "Проверьте фактически упакованный состав, количество мест и упаковщика. Завершите после сверки записи упаковки; сам счёт ФОЛИО не подтверждает упаковку."
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Prepare box passports"
+msgstr "Подготовить паспорта коробок"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Number the boxes and record the contents of each. Complete when every required passport matches the packing record; refer to the paper passport if it is kept on paper."
+msgstr "Пронумеруйте коробки и запишите состав каждой. Завершите, когда все нужные паспорта соответствуют упаковке; укажите бумажный паспорт, если он ведётся на бумаге."
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Check actual shipment documents"
+msgstr "Проверить документы фактической отгрузки"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Check the expense documents in Folio against the packed quantities and link them to this request. Complete when quantities, amounts and document references have been reconciled."
+msgstr "Сверьте расходные документы ФОЛИО с упакованным количеством и привяжите их к заявке. Завершите после сверки количества, сумм и ссылок на документы."
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Agree shortages and remaining orders"
+msgstr "Согласовать нехватку и остаток заказа"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Agree waiting, replacement, cancellation or a later shipment for every shortage. Complete when the customer decision and the linked remaining account or draft are recorded."
+msgstr "Согласуйте ожидание, замену, отмену или доотгрузку для всей нехватки. Завершите, когда записаны решение клиента и связанный счёт или черновик остатка."
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Check payment and agreed payment terms"
+msgstr "Проверить оплату и согласованные условия"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Reconcile the packed amount, advance and Folio payments. Request only the agreed remaining amount when needed. Complete when payment or an authorized deferral is verified and its evidence is recorded."
+msgstr "Сверьте сумму собранного товара, аванс и платежи ФОЛИО. При необходимости запросите только согласованный остаток. Завершите после проверки оплаты или разрешённой отсрочки и записи основания."
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Prepare carrier shipment and TTN"
+msgstr "Оформить отправление и ТТН"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Verify the customer delivery data and package details, then prepare the shipment in the delivery block. Complete when the actual TTN and package data are saved. Skip with a reason for pickup or delivery without a TTN."
+msgstr "Проверьте данные доставки клиента и мест, затем оформите отправку в блоке доставки. Завершите, когда сохранены настоящая ТТН и данные мест. Для самовывоза или доставки без ТТН пропустите с причиной."
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Hand over the goods and notify the customer"
+msgstr "Передать товар и уведомить клиента"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Verify physical handover to the carrier or pickup recipient and notify the customer using the agreed channel. Complete when handover and notification are evidenced; creating a TTN is not handover."
+msgstr "Проверьте фактическую передачу перевозчику или получателю при самовывозе и сообщите клиенту согласованным каналом. Завершите при наличии подтверждений передачи и уведомления; создание ТТН не является передачей."
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Verify delivery or pickup receipt"
+msgstr "Подтвердить получение доставки или самовывоз"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Check carrier tracking or obtain receipt confirmation from the customer. Record the source and date. This confirms receipt of the shipment, not acceptance of its contents."
+msgstr "Проверьте трекинг перевозчика или получите подтверждение клиента. Запишите источник и дату. Это подтверждает получение отправления, а не приёмку его содержимого."
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Confirm customer acceptance"
+msgstr "Подтвердить приёмку клиентом"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Obtain the customer acceptance result or receiving report. Complete after recording the result; open the claim stage for shortages, damage or disputed contents."
+msgstr "Получите результат проверки клиента или акт приёмки. Завершите после записи результата; для нехватки, повреждений или спорного состава откройте этап претензии."
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Review a customer claim"
+msgstr "Рассмотреть претензию клиента"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Record disputed lines, quantities and evidence; agree the resolution and responsible person. Complete only after the agreed resolution, using return or correction stages when needed."
+msgstr "Запишите спорные позиции, количество и доказательства; согласуйте решение и ответственного. Завершите после выполнения решения, при необходимости используя этапы возврата или корректировки."
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Arrange and verify a return"
+msgstr "Оформить и проверить возврат"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Agree return quantities and conditions, verify actual receipt and the Folio return documents. Complete when goods and documents are reconciled; this mark does not issue a refund."
+msgstr "Согласуйте количество и условия возврата, проверьте фактическое получение и документы ФОЛИО. Завершите после сверки товара и документов; эта отметка не возвращает деньги."
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Reconcile corrections, balance or a later shipment"
+msgstr "Сверить корректировки, баланс или доотгрузку"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Verify corrected Folio documents, the customer balance and any linked additional shipment. Complete when the agreed correction is actually applied and evidenced."
+msgstr "Проверьте исправленные документы ФОЛИО, баланс клиента и связанную доотгрузку. Завершите, когда согласованная корректировка фактически выполнена и подтверждена."
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Collect signed delivery documents"
+msgstr "Получить подписанные документы выдачи"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Check which signatures are required for this customer and collect the signed documents. Record whether the evidence is paper, a scan or an electronic signature; these are different forms of evidence."
+msgstr "Проверьте, какие подписи нужны для клиента, и получите подписанные документы. Укажите вид подтверждения: бумага, скан или электронная подпись; это разные виды доказательств."
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Close execution control"
+msgstr "Закрыть контроль исполнения"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Review all linked orders, required stages and opened exception branches. Close only after their completion. Closing this roadmap does not change Woo statuses, accounting documents or manager bonuses."
+msgstr "Проверьте все связанные заказы, основные этапы и открытые дополнительные ветки. Закрывайте только после их завершения. Закрытие маршрута не меняет статусы Woo, учётные документы или бонусы менеджера."
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Completed by manager"
+msgstr "Выполнено менеджером"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Skipped with a reason"
+msgstr "Пропущено с указанием причины"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Not completed"
+msgstr "Не выполнено"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "If needed"
+msgstr "При необходимости"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "A required stage cannot be skipped. Record its completion or keep it in progress."
+msgstr "Обязательный этап нельзя пропустить. Зафиксируйте выполнение или оставьте его в работе."
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Complete all required stages and resolve every opened optional stage before closing execution."
+msgstr "Перед завершением контроля выполните все обязательные этапы и закройте каждый начатый дополнительный этап."
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Stage result"
+msgstr "Состояние этапа"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Stage details: warehouse, goods or document reference"
+msgstr "Подробности этапа: склад, товары или ссылка на документ"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Optional stage"
+msgstr "Необязательный этап"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Required stage"
+msgstr "Обязательный этап"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Choose a stage to see its scenario and completion criteria. The full roadmap is below."
+msgstr "Выберите этап, чтобы увидеть его сценарий и условия завершения. Полная дорожная карта — ниже."
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Previous next action, kept as a note"
+msgstr "Прежнее следующее действие, сохранённое как примечание"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+#, php-format
+msgid "Execution roadmap: %1$d of %2$d required stages completed"
+msgstr "Дорожная карта: выполнено %1$d из %2$d обязательных этапов"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Choose the next stage according to the actual order. Moving to a later stage does not complete earlier ones. Optional stages can be skipped with a reason; all opened branches must be resolved before closure."
+msgstr "Выбирайте следующий этап по фактическому состоянию заказа. Переход к более позднему этапу не завершает предыдущие. Необязательный этап можно пропустить с причиной; перед закрытием нужно завершить все начатые дополнительные этапы."
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Execution roadmap closed"
+msgstr "Контроль по дорожной карте завершён"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Choose a roadmap stage for the next action"
+msgstr "Выберите этап дорожной карты как следующее действие"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Stage completion is a manager review record. Check the referenced documents and paper records separately; a roadmap mark does not create or sign them."
+msgstr "Выполнение этапа — это запись проверки менеджером. Отдельно сверяйте документы и бумажные записи: отметка в дорожной карте не создаёт и не подписывает их."
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "In progress"
+msgstr "В работе"

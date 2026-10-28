@@ -18,7 +18,8 @@ final class OrderExecutionUi {
         try { $root=OrderExecution::root($order); $state=OrderExecution::state($root); }
         catch (\Throwable $e) { echo esc_html__('Check order links','pc-order-import-export'); return; }
         if (!$state) { echo esc_html__('Execution control not started','pc-order-import-export'); return; }
-        echo esc_html(self::name((int)$state['manager'])).'<br>'.esc_html($state['next']?:__('Specify the next action','pc-order-import-export'));
+        echo esc_html(self::name((int)$state['manager'])).'<br>'.esc_html(OrderExecutionRoadmap::next_label($state)?:__('Specify the next action','pc-order-import-export'));
+        if (!empty($state['roadmap']['closed_at'])) echo '<br><strong>'.esc_html__('Execution roadmap closed','pc-order-import-export').'</strong>';
         if (!empty($state['due'])) echo '<br>'.esc_html(self::time($state['due']));
         if (!empty($state['due']) && strtotime($state['due'])<time()) echo '<br><strong>'.esc_html__('Deadline passed — review required','pc-order-import-export').'</strong>';
         if (empty($state['active'])) echo '<br>'.esc_html__('Monitoring paused','pc-order-import-export');
@@ -40,19 +41,20 @@ final class OrderExecutionUi {
         echo '<div class="pcoe-execution-fields">';
         if (!$state || current_user_can('manage_options')) CustomerManagers::select('manager',__('Responsible manager for this order','pc-order-import-export'),$manager);
         else echo '<p>'.esc_html__('Responsible manager for this order','pc-order-import-export').': <strong>'.esc_html(self::name($manager)).'</strong><input type="hidden" name="manager" value="'.esc_attr($manager).'"></p>';
-        echo '<label>'.esc_html__('Next action','pc-order-import-export').'<textarea name="next" maxlength="500">'.esc_textarea($state['next']??'').'</textarea></label>';
+        OrderExecutionRoadmapUi::fields($state);
         echo '<label>'.esc_html__('Agreed deadline','pc-order-import-export').'<input type="datetime-local" name="due" value="'.esc_attr(!empty($state['due'])?wp_date('Y-m-d\TH:i',strtotime($state['due'])):'').'"></label>';
         echo '<label>'.esc_html__('Reason or evidence for this change','pc-order-import-export').'<textarea name="reason" required maxlength="1000"></textarea></label></div>';
         echo '<p><label><input type="checkbox" name="active" value="1" '.checked((bool)($state['active']??true),true,false).'> '.esc_html__('Monitor linked sources every five minutes','pc-order-import-export').'</label></p>';
         echo '<button type="submit" class="button button-primary">'.esc_html__('Save execution control','pc-order-import-export').'</button></form>';
+        OrderExecutionRoadmapUi::roadmap($state);
         echo '<p>'.esc_html__('Responsibility is fixed for this order. An administrator must approve a transfer. Moving the deadline keeps the original date and history; it does not approve an exception.','pc-order-import-export').'</p>';
         if (!$state) { echo '</section>'; return; }
         echo '<p>'.esc_html__('Original deadline','pc-order-import-export').': '.esc_html(self::time($state['original_due']??'')).' · '.esc_html__('Last source check','pc-order-import-export').': '.esc_html(self::time($state['checked']??'')).'</p>';
         $warnings=[];
         if (!$manager || !user_can($manager,'manage_woocommerce')) $warnings[]=__('Assign an available responsible manager','pc-order-import-export');
-        if (empty($state['next'])) $warnings[]=__('Specify the next action','pc-order-import-export');
-        if (empty($state['due'])) $warnings[]=__('Specify an agreed deadline','pc-order-import-export');
-        elseif (strtotime($state['due'])<time()) $warnings[]=__('Deadline passed — review required','pc-order-import-export');
+        if (empty($state['roadmap']['current'])) $warnings[]=__('Choose a roadmap stage for the next action','pc-order-import-export');
+        if (empty($state['due']) && empty($state['roadmap']['closed_at'])) $warnings[]=__('Specify an agreed deadline','pc-order-import-export');
+        elseif (!empty($state['due']) && strtotime($state['due'])<time()) $warnings[]=__('Deadline passed — review required','pc-order-import-export');
         if (empty($state['active'])) $warnings[]=__('Monitoring paused','pc-order-import-export');
         if (!empty($state['storage_error'])) $warnings[]=__('Order data could not be saved. Contact an administrator; do not repeat document creation.','pc-order-import-export');
         if (!empty($state['source_error']) || empty($state['checked']) || strtotime($state['checked'])<time()-900) $warnings[]=__('Sources are unavailable or stale. Last known data is shown; no cancellation or completion is inferred.','pc-order-import-export');
@@ -61,7 +63,7 @@ final class OrderExecutionUi {
         if (empty($state['observed']['shipments'])) $warnings[]=__('No saved shipment in the linked orders; check delivery or pickup','pc-order-import-export');
         echo '<h3>'.esc_html__('Requires attention','pc-order-import-export').'</h3><ul>';
         foreach ($warnings as $warning) echo '<li>'.esc_html($warning).'</li>';
-        echo '<li>'.esc_html__('Assembly, packing, box passports, acceptance and signed documents are not electronically confirmed yet. Paper records must be checked separately.','pc-order-import-export').'</li></ul>';
+        echo '<li>'.esc_html__('Stage completion is a manager review record. Check the referenced documents and paper records separately; a roadmap mark does not create or sign them.','pc-order-import-export').'</li></ul>';
         if (!empty($state['active'])) {
             self::form($root,$state,'refresh'); echo '<button class="button">'.esc_html__('Check linked sources now','pc-order-import-export').'</button></form>';
         }
@@ -109,6 +111,7 @@ final class OrderExecutionUi {
             echo '<details><summary>'.esc_html(self::time($event['time']).' · '.($event['actor']?self::name($event['actor']):__('Source observation','pc-order-import-export')).' · '.self::event_label($event['type'])).'</summary>';
             $details=$event['details'];
             if (!empty($details['reason'])) echo '<p>'.nl2br(esc_html($details['reason'])).'</p>';
+            if (!empty($details['stage_update'])) OrderExecutionRoadmapUi::event($details['stage_update']);
             if (isset($details['key'])) echo '<p>'.esc_html(self::document_key($details['key'])).'</p>';
             foreach (['before'=>__('Before','pc-order-import-export'),'after'=>__('After','pc-order-import-export'),'value'=>__('Recorded document','pc-order-import-export')] as $field=>$label) if (!empty($details[$field])) {
                 echo '<p><strong>'.esc_html($label).'</strong></p>'; self::event_value($details[$field]);

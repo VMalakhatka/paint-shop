@@ -40,7 +40,7 @@ try {
     $foreign->update_meta_data('_folio_parent_order_id',$root->get_id());$foreign->save_meta_data();$deny(fn()=>Execution::root($foreign));
     wp_set_current_user($customer);$deny(fn()=>Execution::save($root->get_id(),'',[]));
     wp_set_current_user($manager);
-    $input=['manager'=>$manager,'next'=>'Check paper packing record','due'=>'2026-11-01T15:00','reason'=>'Agreed with customer','active'=>1];
+    $input=['manager'=>$manager,'stage'=>'packing','stage_status'=>'in_progress','stage_detail'=>'Check paper packing record','due'=>'2026-11-01T15:00','reason'=>'Agreed with customer','active'=>1];
     $s=Execution::save($root->get_id(),'',$input);
     $check($s['manager']===$manager && count($s['events'])===1,'Responsibility and initial event saved');
     $check(as_has_scheduled_action(Execution::JOB,[$root->get_id()],Execution::GROUP),'Monitoring scheduled');
@@ -120,6 +120,7 @@ try {
         $large->read_meta_data(true);
         $check($large->get_meta('_pcoe_manager_command')===['status'=>'sending','token'=>'fixture'],'Previously persisted claim survives a failed large update');
     }
+    require __DIR__.'/order-execution-roadmap.php';
     echo "PASS: $checks execution checks\n";
 } finally {
     if($shipment){global $wpdb;$wpdb->delete($wpdb->prefix.'pnpm_shipments',['id'=>$shipment]);}

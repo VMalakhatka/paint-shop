@@ -655,6 +655,21 @@ side effects. Packing and box passports currently exist only on paper (owner
 26.10); do not confuse production-component assembly with order picking.
 Launch/limits/rollback: docs/MANAGER_CUSTOMER_GUIDE_UK.md#execution-control.
 
+Execution roadmap (2026-10-28, local verification): `OrderExecutionRoadmap` owns
+19 stable stage IDs, required/optional policy, scenarios and guarded closure.
+`OrderExecutionRoadmapUi` renders the selector and full folded route. Store manual
+results under execution meta `roadmap.version=1` using the existing lock/revision
+and audit; never infer completion from navigating to a later stage or observing
+Folio/NP. Preserve pre-roadmap text as `legacy_next` on first explicit selection.
+Optional unused branches need no fabricated completion; opened branches must be
+completed or skipped with a reason. Reopening invalidates closure, not history.
+Completing a stage clears the next-action deadline; do not copy it to the next
+stage as though it were agreed. Stage marks never create documents/TTN/mail,
+perform payment, sign delivery records or change Woo completion/bonuses.
+Tests: `order-execution-local.php` (includes roadmap assertions) and
+`order-execution-roadmap-ui.cjs` with its generated local fixture. Guide above
+owns the exact manager procedure; production UI remains deployment-dependent.
+
 
 HPOS capacity (2026-10-27, reproduced locally and production schema read): native
 TEXT order meta rejects serialized values above 65,535 bytes; WC save success alone

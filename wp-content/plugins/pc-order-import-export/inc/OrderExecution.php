@@ -89,19 +89,20 @@ final class OrderExecution {
         ManagerWorkspace::customer($root->get_customer_id());
         $manager=absint($input['manager']??0);
         if ($manager && !user_can($manager,'manage_woocommerce')) self::fail();
-        $next=sanitize_textarea_field($input['next']??''); $reason=sanitize_textarea_field($input['reason']??'');
-        if (mb_strlen($next)>500 || mb_strlen($reason)>1000 || trim($reason)==='') self::fail();
+        $reason=sanitize_textarea_field($input['reason']??'');
+        if (mb_strlen($reason)>1000 || trim($reason)==='') self::fail();
         $due=self::date((string)($input['due']??'')); $actor=get_current_user_id();
-        $result=self::change($root->get_id(),$revision,static function($state,$order)use($manager,$next,$reason,$due,$actor,$input){
+        $result=self::change($root->get_id(),$revision,static function($state,$order)use($manager,$reason,$due,$actor,$input){
             $initial=!$state;
             if (!$initial && $state['manager']!==$manager && !current_user_can('manage_options')) {
                 throw new \RuntimeException(__('Only an administrator can transfer responsibility for an existing execution card.', 'pc-order-import-export'));
             }
             if (!$state) $state=['customer'=>$order->get_customer_id(),'folio'=>self::context($order),'manager'=>0,'due'=>'','original_due'=>'','next'=>'','active'=>false,'links'=>[],'documents'=>[],'events'=>[],'observed'=>[]];
             $before=array_intersect_key($state,array_flip(['manager','due','next','active']));
-            $state['manager']=$manager; $state['due']=$due; $state['next']=$next; $state['active']=!empty($input['active']);
+            $state['manager']=$manager; $state['due']=$due; $state['active']=!empty($input['active']);
+            $stage_update=OrderExecutionRoadmap::apply($state,$input,$manager,$due,$actor,$reason);
             if ($due && !$state['original_due']) $state['original_due']=$due;
-            self::event($state,$initial?'started':'assignment',['before'=>$before,'after'=>array_intersect_key($state,$before),'reason'=>$reason],$actor);
+            self::event($state,$initial?'started':'assignment',['before'=>$before,'after'=>array_intersect_key($state,$before),'reason'=>$reason,'stage_update'=>$stage_update],$actor);
             return $state;
         });
         self::schedule($root->get_id(),$result['active']); return $result;

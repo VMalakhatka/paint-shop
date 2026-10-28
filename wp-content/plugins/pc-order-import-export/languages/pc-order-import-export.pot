@@ -3953,3 +3953,228 @@ msgstr ""
 #: inc/ManagerDraftOrders.php
 msgid "Woo order creation needs review. Do not create the Folio document again."
 msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Accept request and assign a manager"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Check the customer, source list and responsible manager. Complete when the request and agreed next deadline are recorded."
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Wait for receipt or stock transfer"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Record the expected goods, warehouse and date. Complete after checking their actual receipt; an expected arrival is not available stock."
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Prepare Woo orders and Folio accounts"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Check stock and create linked orders using the preparation block. Complete only after verifying the saved accounts, warehouse allocation and shortage for all parts of the request."
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Confirm contents and delivery with the customer"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Verify the current confirmed version, recipient, delivery and payment choice. Existing checkout confirmation may be used if the contents have not changed; otherwise request a new confirmation."
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Pick the goods"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Check the warehouse picking record against every ordered line. Complete when picked quantities and all missing or damaged items are recorded."
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Pack and check the goods"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Check the actual packed contents, package count and responsible packer. Complete after the packing record has been checked; a Folio account alone is not packing evidence."
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Prepare box passports"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Number the boxes and record the contents of each. Complete when every required passport matches the packing record; refer to the paper passport if it is kept on paper."
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Check actual shipment documents"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Check the expense documents in Folio against the packed quantities and link them to this request. Complete when quantities, amounts and document references have been reconciled."
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Agree shortages and remaining orders"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Agree waiting, replacement, cancellation or a later shipment for every shortage. Complete when the customer decision and the linked remaining account or draft are recorded."
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Check payment and agreed payment terms"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Reconcile the packed amount, advance and Folio payments. Request only the agreed remaining amount when needed. Complete when payment or an authorized deferral is verified and its evidence is recorded."
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Prepare carrier shipment and TTN"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Verify the customer delivery data and package details, then prepare the shipment in the delivery block. Complete when the actual TTN and package data are saved. Skip with a reason for pickup or delivery without a TTN."
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Hand over the goods and notify the customer"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Verify physical handover to the carrier or pickup recipient and notify the customer using the agreed channel. Complete when handover and notification are evidenced; creating a TTN is not handover."
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Verify delivery or pickup receipt"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Check carrier tracking or obtain receipt confirmation from the customer. Record the source and date. This confirms receipt of the shipment, not acceptance of its contents."
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Confirm customer acceptance"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Obtain the customer acceptance result or receiving report. Complete after recording the result; open the claim stage for shortages, damage or disputed contents."
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Review a customer claim"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Record disputed lines, quantities and evidence; agree the resolution and responsible person. Complete only after the agreed resolution, using return or correction stages when needed."
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Arrange and verify a return"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Agree return quantities and conditions, verify actual receipt and the Folio return documents. Complete when goods and documents are reconciled; this mark does not issue a refund."
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Reconcile corrections, balance or a later shipment"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Verify corrected Folio documents, the customer balance and any linked additional shipment. Complete when the agreed correction is actually applied and evidenced."
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Collect signed delivery documents"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Check which signatures are required for this customer and collect the signed documents. Record whether the evidence is paper, a scan or an electronic signature; these are different forms of evidence."
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Close execution control"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Review all linked orders, required stages and opened exception branches. Close only after their completion. Closing this roadmap does not change Woo statuses, accounting documents or manager bonuses."
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Completed by manager"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Skipped with a reason"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Not completed"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "If needed"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "A required stage cannot be skipped. Record its completion or keep it in progress."
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Complete all required stages and resolve every opened optional stage before closing execution."
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Stage result"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Stage details: warehouse, goods or document reference"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Optional stage"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Required stage"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Choose a stage to see its scenario and completion criteria. The full roadmap is below."
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Previous next action, kept as a note"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+#, php-format
+msgid "Execution roadmap: %1$d of %2$d required stages completed"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Choose the next stage according to the actual order. Moving to a later stage does not complete earlier ones. Optional stages can be skipped with a reason; all opened branches must be resolved before closure."
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Execution roadmap closed"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Choose a roadmap stage for the next action"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Stage completion is a manager review record. Check the referenced documents and paper records separately; a roadmap mark does not create or sign them."
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "In progress"
+msgstr ""
