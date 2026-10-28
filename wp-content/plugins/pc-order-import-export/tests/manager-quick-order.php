@@ -133,9 +133,23 @@ try {
         $work->delete_meta_data('_pcoe_manager_command');$work->update_meta_data('_folio_create_attempted_at',gmdate('c'));$work->save_meta_data();
         $check(!Quick::can_return_to_settings($draft),'Legacy attempted Folio write also blocks recovery');
         $work->delete_meta_data('_folio_create_attempted_at');$work->save_meta_data();
+        $work->delete(false);$work=wc_get_order($job['work_order']);
+        $check($work->has_status('trash') && !ManagerWorkspace::editable($work) && Quick::can_return_to_settings($draft),'Trashed untouched work copy allows source recovery without making the copy editable');
+        $work->update_meta_data('_pcoe_manager_command',['status'=>'unknown']);$work->save_meta_data();
+        $check(!Quick::can_return_to_settings($draft),'Trashing a work copy does not bypass an uncertain create command');
+        $expect_error(fn()=>Quick::return_to_settings($draft,$user,$input));
+        $work->delete_meta_data('_pcoe_manager_command');$work->update_meta_data('_folio_document_id',999991);$work->save_meta_data();
+        $check(!Quick::can_return_to_settings($draft),'Trashed work copy with a saved Folio link stays blocked');
+        $work->delete_meta_data('_folio_document_id');$work->save_meta_data();
+        ob_start();Quick::render($draft);$recovery_html=ob_get_clean();
+        $check(str_contains($recovery_html,'value="quick_settings"'),'Recovery button remains available after trashing an untouched work copy');
+        if(getenv('PCOE_QUICK_RECOVERY_FIXTURE'))file_put_contents(getenv('PCOE_QUICK_RECOVERY_FIXTURE'),wp_json_encode(['html'=>$recovery_html]));
         Quick::return_to_settings($draft,$user,$input);$draft=wc_get_order($draft->get_id());
         $check(!$draft->get_meta(Quick::META) && isset($draft->get_meta(Quick::HISTORY)[$job['key']]),'Returning archives the exact stopped attempt before unlocking');
         $check(Quick::eligible($draft) && $writes===$written && count($test_mails)===$sent && wc_get_order($job['work_order']),'Settings restored without API writes, mail or deleting the work copy');
+        $check(wc_get_order($job['work_order'])->has_status('trash'),'Recovery leaves discarded work copy in the trash');
+        ob_start();Quick::render($draft);$restored_html=ob_get_clean();
+        $check(str_contains($restored_html,'name="auxiliary[]"') && str_contains($restored_html,'value="quick_order"'),'Original draft regains warehouse selection after explicit recovery');
         Quick::run($draft->get_id());$check(!$draft->get_meta(Quick::META) && $writes===$written,'Old worker cannot restart after returning to settings');
     } finally {remove_filter('pre_option_lps_options',$lavka_options);$preview_failure=false;}
 } finally {

@@ -436,7 +436,9 @@ via Lavka, including the separate waiting account. No accounting write was teste
 An explicit manager action can archive a failed preflight and restore settings
 only while its work copy has no create journal, Folio link, write-attempt marker,
 children or processing status. Source/work and legacy Folio locks guard recovery;
-no API call, worker enqueue or email occurs. Unknown writes stay blocked. See the
+the same guards apply to a retained work copy in trash (2026-10-28). Recovery
+never restores that copy or makes trashed orders editable; it unlocks the source.
+No API call, worker enqueue or email occurs. Unknown writes stay blocked. See the
 manager guide one-action section for recovery and deployment steps. This PHP fix
 does not require changing Java or overwriting either saved API token.
 

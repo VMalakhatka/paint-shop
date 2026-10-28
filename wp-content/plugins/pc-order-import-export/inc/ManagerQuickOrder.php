@@ -45,7 +45,11 @@ final class ManagerQuickOrder {
         if (!$work || $work->get_customer_id()!==$order->get_customer_id()
             || (int)$work->get_meta('_pcoe_execution_source_id')!==$order->get_id()) return false;
         $work->read_meta_data(true);
-        return ManagerWorkspace::editable($work) && !$work->get_meta('_folio_auto_status')
+        // Trashing an untouched preparation copy must not strand its source draft.
+        // Check the operation journal independently of editability; never restore the copy itself.
+        return $work->has_status(['pc-draft','trash']) && !$work->get_parent_id()
+            && !$work->get_meta(self::META) && !pc_folio_order_has_saved_documents($work)
+            && !$work->get_meta('_folio_auto_status')
             && !$work->get_meta('_folio_child_order_ids') && !$work->get_meta('_folio_create_attempted_at')
             && !$work->get_meta('_folio_document_payload_hash') && !$work->get_meta('_folio_split_status');
     }

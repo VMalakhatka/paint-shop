@@ -133,6 +133,9 @@ Production read-only verification 2026-10-27: legacy transport 401 versus Lavka
 preview 200. Do not disable authentication or fall back to unprotected routes.
 A review job may return to settings only if its same-customer work copy has no
 persisted create command, Folio links, write-attempt marker or background progress.
+The copy may be a draft or in trash; inspect its retained journal instead of
+requiring editability. Never restore it as a side effect. Regression verified
+2026-10-28 for trashed preflight failure versus trashed uncertain write/document.
 Archive the old job before removing its active marker, under source/work locks;
 never automatically retry a write or send email during this recovery. Keep both
 source and work drafts for audit. Operator steps: manager guide, one-action section.
