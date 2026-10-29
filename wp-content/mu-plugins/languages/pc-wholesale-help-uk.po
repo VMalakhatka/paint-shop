@@ -1262,3 +1262,7 @@ msgstr "Коли менеджер опрацьовує чернетку, вон�
 #: wp-content/mu-plugins/pc-wholesale-help.php
 msgid "Bank transfers and payment invoices use the same verified recipient details. Check the recipient name and IBAN shown for the order. If the site says the details await verification, contact your manager before paying. Previously sent emails and downloaded files do not update automatically."
 msgstr "Банківський переказ і рахунок на оплату використовують однакові перевірені реквізити отримувача. Перевірте ім’я отримувача та IBAN у замовленні. Якщо сайт повідомляє, що реквізити очікують перевірки, зверніться до менеджера перед оплатою. Раніше надіслані листи та завантажені файли автоматично не оновлюються."
+
+#: wp-content/mu-plugins/pc-wholesale-help.php
+msgid "If payment details in an earlier combined confirmation are hidden because they changed or could not be verified, ask the manager for an updated confirmation before paying. Do not use an earlier email or file."
+msgstr "Якщо реквізити у попередньому зведеному підтвердженні приховані через зміну або неможливість перевірки, попросіть менеджера оновити підтвердження перед оплатою. Не використовуйте попередній лист або файл."

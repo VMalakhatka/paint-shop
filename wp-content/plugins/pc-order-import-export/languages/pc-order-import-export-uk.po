@@ -4480,3 +4480,7 @@ msgstr "Час операції раніший за останній зафік�
 #: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
 msgid "Record the result of the outstanding legacy plan before closing execution."
 msgstr "Перед закриттям контролю зафіксуйте результат незавершеного попереднього текстового плану."
+
+#: inc/ApprovalBundle.php
+msgid "Payment details in this confirmation are no longer verified. Ask your manager for an updated confirmation before paying. Do not use details from an earlier file or email."
+msgstr "Реквізити в цьому підтвердженні більше не перевірені. Перед оплатою попросіть менеджера надати оновлене підтвердження. Не використовуйте реквізити з попереднього файла або листа."

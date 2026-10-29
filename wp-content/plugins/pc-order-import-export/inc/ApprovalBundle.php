@@ -53,9 +53,32 @@ final class ApprovalBundle {
     public static function payment_panel(array $snapshot): void {
         echo '<p>'.esc_html__('Selected account totals are combined once. Original Folio accounts and Woo orders remain separate. This is not a calculation of unpaid debt.', 'pc-order-import-export').'</p>';
         if (empty($snapshot['payment_details'])) return;
+        if (!self::payment_is_current($snapshot['payment_details'])) {
+            echo '<p role="alert" class="woocommerce-info pcoe-payment-details-unavailable">'.esc_html__('Payment details in this confirmation are no longer verified. Ask your manager for an updated confirmation before paying. Do not use details from an earlier file or email.', 'pc-order-import-export').'</p>';
+            return;
+        }
         echo '<h3>'.esc_html__('Payment details', 'pc-order-import-export').'</h3><dl>';
         foreach (self::payment_labels() as $key => $label) if (!empty($snapshot['payment_details'][$key])) echo '<dt>'.esc_html($label).'</dt><dd>'.esc_html($snapshot['payment_details'][$key]).'</dd>';
         echo '</dl><p>'.esc_html__('Before payment, agree the amount with your manager, including any payments already made.', 'pc-order-import-export').'</p>';
+    }
+
+    /** Keep the historical snapshot, but never present an obsolete recipient for payment. */
+    private static function payment_is_current($saved): bool {
+        if (!is_array($saved) || !function_exists('pc_folio_payment_details')) return false;
+        try { $current = pc_folio_payment_details(); }
+        catch (\Throwable $e) { return false; }
+        if (!$current) return false;
+        foreach (array_keys(self::payment_labels()) as $key) {
+            if (!is_scalar($saved[$key] ?? '') || !is_scalar($current[$key] ?? '')) return false;
+            $before = trim((string) ($saved[$key] ?? ''));
+            $now = trim((string) ($current[$key] ?? ''));
+            if ($key === 'iban') {
+                $before = strtoupper(preg_replace('/\s+/', '', $before));
+                $now = strtoupper(preg_replace('/\s+/', '', $now));
+            }
+            if ($before !== $now) return false;
+        }
+        return true;
     }
 
     public static function options(array $source): void {

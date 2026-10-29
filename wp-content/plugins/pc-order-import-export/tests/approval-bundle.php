@@ -51,6 +51,26 @@ try {
     foreach(['offline','foreign','unaccounted','return','wrong-id'] as $mode)$deny(fn()=>Approval::snapshot($source));$mode='ok';
     $settings['confirmed']=false;$deny(fn()=>Approval::snapshot($source));$settings['confirmed']=true;
     $settings['name']='Changed recipient';$check(Approval::revision(Approval::snapshot($source))!==$data['revision'],'Changed bank recipient invalidates saved confirmation');$settings['name']='Test recipient';
+    $payment_html=static function(array $saved):string {ob_start();Bundle::payment_panel($saved);return ob_get_clean();};
+    $original_snapshot=$snapshot;$original_settings=$settings;
+    $check(str_contains($payment_html($snapshot),'Test recipient'),'Verified matching saved recipient remains visible');
+    $formatted=$snapshot;$formatted['payment_details']['iban']=strtolower(chunk_split($settings['iban'],4,' '));
+    $check(str_contains($payment_html($formatted),'Test recipient'),'Harmless IBAN formatting does not hide a matching recipient');
+    foreach(['name'=>'Changed recipient','tax_id'=>'1111111111','bank'=>'Changed bank','mfo'=>'123456','confirmed'=>false,'iban'=>['malformed']] as $field=>$value){
+        $settings=array_replace($original_settings,[$field=>$value]);$html=$payment_html($snapshot);
+        $check(str_contains($html,'pcoe-payment-details-unavailable')&&!str_contains($html,'Test recipient')&&!str_contains($html,'Test bank')&&!str_contains($html,'Changed recipient')&&!str_contains($html,'Changed bank'),'Changed or invalid canonical payment details are hidden without silently substituting another recipient');
+    }
+    $settings=array_replace($original_settings,['name'=>'Changed recipient']);
+    ob_start();(new ReflectionMethod(Approval::class,'details'))->invoke(null,get_post($id),true);$stale_html=ob_get_clean();
+    $check(str_contains($stale_html,'pcoe-payment-details-unavailable')&&!str_contains($stale_html,'Test recipient')&&!str_contains($stale_html,'Changed recipient'),'Existing stale confirmation page suppresses obsolete bank details');
+    $settings=$original_settings;
+    foreach([['iban'=>['malformed']],['name'=>'Historical recipient'],['iban'=>'UA00'.str_repeat('0',25)]] as $override){
+        $broken=$snapshot;$broken['payment_details']=array_replace($broken['payment_details'],$override);
+        $check(str_contains($payment_html($broken),'pcoe-payment-details-unavailable'),'Malformed or mismatched saved recipient is hidden');
+    }
+    $check(!str_contains($payment_html($plain),'pcoe-payment-details-unavailable'),'Confirmation without selected payment details has no payment warning');
+    $stored_after=(new ReflectionMethod(Approval::class,'data'))->invoke(null,get_post($id));
+    $check($snapshot===$original_snapshot&&$stored_after['snapshot']===$original_snapshot,'Rendering never mutates the saved confirmation snapshot');
     $choices=['payment'=>['bacs'=>'Bank'],'delivery'=>['pickup:1'=>'Pickup']];$input=['revision'=>$data['revision'],'consent'=>'1','payment'=>'bacs','delivery'=>'pickup:1','recipient'=>'Test','phone'=>'000','destination'=>'Test'];
     $deny(fn()=>Approval::confirmed($data,$manager,$data['revision'],$input,$choices));
     $confirmed=Approval::confirmed($data,$owner,$data['revision'],$input,$choices);$check($confirmed['status']==='confirmed','Owning customer confirms the whole bundle');

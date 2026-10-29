@@ -1240,3 +1240,7 @@ msgstr ""
 #: wp-content/mu-plugins/pc-wholesale-help.php
 msgid "Bank transfers and payment invoices use the same verified recipient details. Check the recipient name and IBAN shown for the order. If the site says the details await verification, contact your manager before paying. Previously sent emails and downloaded files do not update automatically."
 msgstr ""
+
+#: wp-content/mu-plugins/pc-wholesale-help.php
+msgid "If payment details in an earlier combined confirmation are hidden because they changed or could not be verified, ask the manager for an updated confirmation before paying. Do not use an earlier email or file."
+msgstr ""
