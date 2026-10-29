@@ -236,3 +236,31 @@ msgstr "К оплате = баланс по документам и оплата
 
 msgid "Preorder invoices from the last six calendar months through period end; period start and document types are ignored."
 msgstr "Счета на предзаказ за последние шесть календарных месяцев до конца периода; начало периода и типы документов не ограничивают список."
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/payment-details.php
+msgid "Pay using the recipient details below and include your order number in the payment reference. Check the recipient name before confirming the transfer."
+msgstr "Оплачивайте по указанным ниже реквизитам и указывайте номер заказа в назначении платежа. Перед подтверждением перевода проверьте имя получателя."
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/payment-details.php
+msgid "Bank details are awaiting verification. Please contact your manager before paying. Do not use bank details from an earlier email or invoice."
+msgstr "Реквизиты ожидают проверки. Перед оплатой обратитесь к менеджеру. Не используйте реквизиты из предыдущего письма или счёта."
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/payment-details.php
+msgid "Verified bank details will be shown after placing the order and in the order email. Include your order number in the payment reference."
+msgstr "Проверенные реквизиты будут показаны после оформления заказа и в письме о заказе. В назначении платежа укажите номер заказа."
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/payment-details.php
+msgid "Bank transfers and Folio payment invoices use the confirmed details in Lavka: payment invoices. The separate bank account and free-text instructions on this WooCommerce screen are not used."
+msgstr "Банковские переводы и счета ФОЛИО на оплату используют подтверждённые реквизиты из раздела «Лавка: счета на оплату». Отдельный банковский счёт и произвольные инструкции на этом экране WooCommerce не используются."
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/payment-details.php
+msgid "Open payment recipient settings"
+msgstr "Открыть настройки получателя платежа"
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-invoice.php
+msgid "These confirmed recipient details are used for Folio payment invoices and WooCommerce bank transfer payments, including customer emails and the order confirmation page."
+msgstr "Эти подтверждённые реквизиты получателя используются в счетах ФОЛИО на оплату и для банковских переводов WooCommerce, включая письма клиентам и страницу подтверждения заказа."
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-invoice.php
+msgid "I have verified that the recipient name, tax ID and bank account belong to the intended payment recipient."
+msgstr "Я проверил(-а), что имя получателя, налоговый номер и банковский счёт принадлежат нужному получателю платежа."

@@ -1258,3 +1258,7 @@ msgstr "Менеджер может зарезервировать товары,
 #: pc-wholesale-help.php
 msgid "When a manager processes your draft, it stays as the original request. Warehouse orders link directly to it and each has its own Folio account. Goods awaiting transfer form a separate order; shortages form a separate draft with a non-accounting account. Open the original draft to see linked orders, or use Source order to return from an order. Do not submit the original request again."
 msgstr "Когда менеджер обрабатывает черновик, он остаётся исходной заявкой. Заказы по складам связаны с ним напрямую, и у каждого свой счёт ФОЛИО. Товары, ожидающие перемещения, образуют отдельный заказ; нехватка — отдельный черновик с неучитываемым счётом. Откройте исходный черновик, чтобы увидеть связанные заказы, или воспользуйтесь ссылкой на исходный заказ для возврата. Не отправляйте исходную заявку повторно."
+
+#: wp-content/mu-plugins/pc-wholesale-help.php
+msgid "Bank transfers and payment invoices use the same verified recipient details. Check the recipient name and IBAN shown for the order. If the site says the details await verification, contact your manager before paying. Previously sent emails and downloaded files do not update automatically."
+msgstr "Банковский перевод и счёт на оплату используют одинаковые проверенные реквизиты получателя. Проверьте имя получателя и IBAN в заказе. Если сайт сообщает, что реквизиты ожидают проверки, обратитесь к менеджеру перед оплатой. Ранее отправленные письма и скачанные файлы автоматически не обновляются."

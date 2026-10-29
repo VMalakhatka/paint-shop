@@ -60,8 +60,6 @@ function pc_wayforpay_seller(): array
         'manager_phone'  => '+38 (050) 348-01-38',
         'manager_href'   => '+380503480138',
         'email'          => 'shop@paint.dn.ua',
-        'iban'           => 'UA423348510000000026007158346',
-        'bank'           => 'АТ «ПУМБ»',
     ];
 }
 
@@ -172,9 +170,8 @@ function pc_wayforpay_page_contents(array $urls): array
 <div><dt>РНОКПП (ІПН)</dt><dd>' . esc_html($seller['tax_id']) . '</dd></div>
 <div><dt>Юридична адреса</dt><dd>' . esc_html($seller['legal_address']) . '</dd></div>
 <div><dt>Фактична адреса магазину</dt><dd>' . esc_html($seller['actual_address']) . '</dd></div>
-<div><dt>Поточний рахунок (IBAN)</dt><dd><code>' . esc_html($seller['iban']) . '</code></dd></div>
-<div><dt>Банк</dt><dd>' . esc_html($seller['bank']) . '</dd></div>
 </dl>
+[pc_folio_payment_details]
 <h2>Контактна інформація</h2>
 <ul>
 <li>Контактний телефон продавця: <a href="tel:' . esc_attr($seller['contact_href']) . '">' . esc_html($seller['contact_phone']) . '</a></li>

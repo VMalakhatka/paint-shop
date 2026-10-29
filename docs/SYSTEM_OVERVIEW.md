@@ -80,11 +80,20 @@ Java read API → проверенные реквизиты → подтверж
 | Отчёты | `lavka-reports` и профильные MU-плагины | Java response + параметры и контрольные суммы |
 | Заказ Woo → документы ФОЛИО | `pc-folio-order-link` + Java | стабильный request ID и `documents[]` |
 | WayForPay → независимый банковский приход ФОЛИО | `pc-wayforpay-checkbox/FolioPayments` + Java `folio.payment` | verified Approved, снимок плательщика, отдельный outbox и атомарный MSSQL-журнал; [запуск](FOLIO_WFP_PAYMENTS.md) |
+| Реквизиты для банковского перевода и счетов на оплату | `pc-folio-customer-balance/inc/customer-invoice.php` + `inc/payment-details.php` | единственный подтверждённый источник `pc_folio_invoice_settings`; Woo BACS email/thank-you/Blocks и shortcode контактов читают его без legacy fallback; [проверка и откат](MANAGER_CUSTOMER_GUIDE_UK.md#payment-recipient) |
 | Изображения Woo | `$image-in-woo`: Media Library + Media Cloud + Java media API | attachment ID, exact S3 HEAD proof и ФОЛИО reference |
 | OVH contract/DNS/compute/S3 policy | `$manage-ovh-infrastructure` | текущий OVH Manager/API и фактический resource state |
 | Java image/container/env/health | `$build-java-docker-runtime` | текущий Docker/deploy code и runtime state |
 | ФОЛИО-документы и бизнес-данные | ФОЛИО/MS SQL | живая схема и подтверждённое поведение |
 | Сервер и MSSQL runtime | host/Windows/MSSQL operations | фактическое read-only состояние слоёв |
+
+Источник реквизитов проверен по коду 29.10.2026: адаптер не меняет заказы,
+платежи или сохранённые настройки при чтении. Неподтверждённые/повреждённые
+реквизиты скрываются с сообщением клиенту. Старые письма, XLSX и сохранённые
+запросы подтверждения остаются историческими снимками. Новый шаблон контактов
+использует shortcode `pc_folio_payment_details`; замена старого текстового блока
+на действующей странице — отдельная разрешённая операция, без общего повышения
+версии содержимого всех юридических страниц.
 
 С 2026-10-21 настройки магазина вынесены из дочерней темы: разделитель хлебных
 крошек — `paint-shop-ux/inc/store-presentation.php`, исходные 24 товара на странице —

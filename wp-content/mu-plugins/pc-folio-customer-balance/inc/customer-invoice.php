@@ -14,12 +14,17 @@ function pc_folio_invoice_settings(): array {
 }
 
 function pc_folio_invoice_validate_settings(array $settings) {
+    foreach (['name', 'tax_id', 'iban', 'bank', 'mfo'] as $key) {
+        if (array_key_exists($key, $settings) && !is_scalar($settings[$key])) {
+            return new WP_Error('invoice_settings', __('Payment invoice requisites must be configured and confirmed by the manager.', 'pc-folio-customer-balance'));
+        }
+    }
     foreach (['name', 'tax_id', 'iban', 'bank'] as $key) {
         if (trim((string) ($settings[$key] ?? '')) === '') {
             return new WP_Error('invoice_settings', __('Payment invoice requisites must be configured and confirmed by the manager.', 'pc-folio-customer-balance'));
         }
     }
-    $iban = strtoupper(preg_replace('/\s+/', '', $settings['iban']));
+    $iban = strtoupper(preg_replace('/\s+/', '', (string) $settings['iban']));
     if (!preg_match('/^UA[0-9]{27}$/', $iban) || !preg_match('/^\d{8}(\d{2})?$/', $settings['tax_id'])) {
         return new WP_Error('invoice_settings', __('Check the IBAN and tax ID.', 'pc-folio-customer-balance'));
     }
@@ -31,11 +36,13 @@ function pc_folio_invoice_validate_settings(array $settings) {
     if ($remainder !== 1) {
         return new WP_Error('invoice_iban', __('Check the IBAN and tax ID.', 'pc-folio-customer-balance'));
     }
-    if (empty($settings['confirmed'])) {
+    if (!in_array($settings['confirmed'] ?? false, [true, 1, '1'], true)) {
         return new WP_Error('invoice_unconfirmed', __('Payment invoice requisites must be configured and confirmed by the manager.', 'pc-folio-customer-balance'));
     }
     return true;
 }
+
+require_once __DIR__ . '/payment-details.php';
 
 add_action('admin_menu', static function (): void {
     add_submenu_page(
@@ -58,6 +65,7 @@ function pc_folio_invoice_render_settings(): void {
         'logo_id' => __('Logo media ID', 'pc-folio-customer-balance'),
     ];
     echo '<div class="wrap"><h1>' . esc_html__('Lavka: payment invoices', 'pc-folio-customer-balance') . '</h1>';
+    echo '<p>' . esc_html__('These confirmed recipient details are used for Folio payment invoices and WooCommerce bank transfer payments, including customer emails and the order confirmation page.', 'pc-folio-customer-balance') . '</p>';
     if (isset($_GET['saved'])) echo '<div class="notice notice-success"><p>' . esc_html__('Settings saved.', 'pc-folio-customer-balance') . '</p></div>';
     echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '"><input type="hidden" name="action" value="pc_folio_invoice_settings">';
     wp_nonce_field('pc_folio_invoice_settings');
@@ -67,7 +75,7 @@ function pc_folio_invoice_render_settings(): void {
         if ($key === 'logo_id') echo ' <button type="button" class="button" id="pc-invoice-logo">' . esc_html__('Choose logo', 'pc-folio-customer-balance') . '</button>';
         echo '</td></tr>';
     }
-    echo '</table><p><label><input type="checkbox" name="confirmed" value="1" ' . checked(!empty($settings['confirmed']), true, false) . '> ' . esc_html__('I have verified the payment recipient and bank details for generated invoices.', 'pc-folio-customer-balance') . '</label></p>';
+    echo '</table><p><label><input type="checkbox" name="confirmed" value="1" ' . checked(!empty($settings['confirmed']), true, false) . '> ' . esc_html__('I have verified that the recipient name, tax ID and bank account belong to the intended payment recipient.', 'pc-folio-customer-balance') . '</label></p>';
     submit_button();
     echo '</form></div>';
 }

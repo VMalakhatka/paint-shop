@@ -1353,3 +1353,31 @@ msgstr ""
 
 msgid "Preorder invoices from the last six calendar months through period end; period start and document types are ignored."
 msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/payment-details.php
+msgid "Pay using the recipient details below and include your order number in the payment reference. Check the recipient name before confirming the transfer."
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/payment-details.php
+msgid "Bank details are awaiting verification. Please contact your manager before paying. Do not use bank details from an earlier email or invoice."
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/payment-details.php
+msgid "Verified bank details will be shown after placing the order and in the order email. Include your order number in the payment reference."
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/payment-details.php
+msgid "Bank transfers and Folio payment invoices use the confirmed details in Lavka: payment invoices. The separate bank account and free-text instructions on this WooCommerce screen are not used."
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/payment-details.php
+msgid "Open payment recipient settings"
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-invoice.php
+msgid "These confirmed recipient details are used for Folio payment invoices and WooCommerce bank transfer payments, including customer emails and the order confirmation page."
+msgstr ""
+
+#: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-invoice.php
+msgid "I have verified that the recipient name, tax ID and bank account belong to the intended payment recipient."
+msgstr ""

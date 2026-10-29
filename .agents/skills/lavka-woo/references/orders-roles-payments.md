@@ -733,3 +733,18 @@ Folio account was subsequently replaced/edited. If rows match but purpose differ
 ask which business purpose is intended before changing classification. An explicit
 owner choice of ordinary non-accounting draft permits correcting only Woo purpose
 while retaining the live Folio header; do not add PRD or change VID_DOC implicitly.
+
+Payment recipient ownership (code verified 2026-10-29):
+`pc-folio-customer-balance/inc/customer-invoice.php` owns the administrator-confirmed
+`pc_folio_invoice_settings`; `inc/payment-details.php` reuses it for Woo BACS
+HTML/plain customer emails, thank-you, checkout/Blocks and the contacts shortcode.
+Reject malformed, missing, invalid-checksum or unconfirmed settings without using
+raw `woocommerce_bacs_accounts`, legacy gateway fields or free-text instructions.
+Bank checksum is not recipient-ownership verification. Never infer historical
+email contents from current options; no per-order BACS snapshot existed in core.
+Keep enabled/title/status policy independent. Reads must not mutate settings/orders
+or send mail. Public compliance templates must not hardcode payment accounts;
+existing published pages need a separately authorized, scoped replacement rather
+than bumping the content version of all managed legal pages. Code rollback can
+reactivate old raw Woo accounts, so verify those privately first. Canonical operator
+steps and historical-file boundaries: `docs/MANAGER_CUSTOMER_GUIDE_UK.md#payment-recipient`.

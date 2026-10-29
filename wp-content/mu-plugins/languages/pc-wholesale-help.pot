@@ -1236,3 +1236,7 @@ msgstr ""
 #: pc-wholesale-help.php
 msgid "When a manager processes your draft, it stays as the original request. Warehouse orders link directly to it and each has its own Folio account. Goods awaiting transfer form a separate order; shortages form a separate draft with a non-accounting account. Open the original draft to see linked orders, or use Source order to return from an order. Do not submit the original request again."
 msgstr ""
+
+#: wp-content/mu-plugins/pc-wholesale-help.php
+msgid "Bank transfers and payment invoices use the same verified recipient details. Check the recipient name and IBAN shown for the order. If the site says the details await verification, contact your manager before paying. Previously sent emails and downloaded files do not update automatically."
+msgstr ""
