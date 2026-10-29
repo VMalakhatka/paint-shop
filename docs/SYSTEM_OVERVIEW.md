@@ -49,6 +49,24 @@ OVH service -> physical host -> hypervisor -> Windows VM
 
 ## Владельцы поведения и данных
 
+### Legacy 1lavka.com → KREUL
+
+Проверено чтением production-каталогов 2026-10-29: legacy OpenCart и KREUL
+обслуживаются на одном сервере; WordPress URL-настройки не нужно менять для
+направления старых ссылок на KREUL. Собственный мост подготовлен в
+[`scripts/legacy-domain-redirect`](../scripts/legacy-domain-redirect/README.md),
+но **ещё не установлен на production**. Сопоставлено 8 374 товара по артикулу и
+1 723 категории по пути/составу.
+Сгенерированная карта публичных URL хранится вне Git.
+
+Мост владеет только HTTP-переходами каталога старого домена. OpenCart сохраняет
+старые сессии/корзины, заказы, кабинет, checkout, callbacks и не перенесённое содержимое; Woo —
+новые покупки на KREUL. Перенос аккаунтов имеет отдельного владельца
+`pc-order-import-export/inc/OpenCartCustomerImport.php`: повторный импорт не следует
+из самого включения переходов. Детали проверки, ограничения первого этапа,
+preflight, ручное включение и откат — в README моста. Обычный WordPress deploy его
+не распространяет. DNS/MX и `paint.dn.ua` не затрагиваются.
+
 Реестр НП (0.10.0, 25.10.2026, локальная реализация):
 `paint-nova-poshta-multishipping/src/Registry` хранит отдельную проекцию отправлений,
 наблюдений и подтверждённых связей с ФОЛИО в пяти `pnpm_registry*` таблицах MariaDB.

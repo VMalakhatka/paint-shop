@@ -42,6 +42,11 @@ class ImpactRule:
 
 IMPACT_RULES = (
     ImpactRule(
+        "legacy catalogue domain bridge",
+        ("scripts/legacy-domain-redirect/**",),
+        ("docs/SYSTEM_OVERVIEW.md", "scripts/legacy-domain-redirect/README.md"),
+    ),
+    ImpactRule(
         "customer storefront analytics and anonymous sales reports",
         ("wp-content/plugins/lavka-customer-analytics/**", "scripts/audit-customer-analytics.php", "scripts/analyze-customer-sales.php"),
         ("docs/CUSTOMER_ANALYTICS.md", "wp-content/plugins/lavka-customer-analytics/README.md"),
