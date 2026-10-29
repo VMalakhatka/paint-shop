@@ -655,17 +655,35 @@ side effects. Packing and box passports currently exist only on paper (owner
 26.10); do not confuse production-component assembly with order picking.
 Launch/limits/rollback: docs/MANAGER_CUSTOMER_GUIDE_UK.md#execution-control.
 
-Execution roadmap (2026-10-28, local verification): `OrderExecutionRoadmap` owns
+Execution roadmap (2026-10-28; operation/plan split 2026-10-29, local code): `OrderExecutionRoadmap` owns
 19 stable stage IDs, required/optional policy, scenarios and guarded closure.
-`OrderExecutionRoadmapUi` renders the selector and full folded route. Store manual
-results under execution meta `roadmap.version=1` using the existing lock/revision
-and audit; never infer completion from navigating to a later stage or observing
+`OrderExecutionRoadmapUi` renders planning and the full folded route.
+`OrderExecutionOperations` / `OrderExecutionOperationsUi` own a separate
+record_operation command/form for actual results. Planning accepts in_progress
+only; completion/skip must use record_operation. Store results under execution
+meta `roadmap.version=1` using the existing nonce/capability/lock/revision and
+append-only operation_recorded audit; never infer completion from planning or observing
 Folio/NP. Preserve pre-roadmap text as `legacy_next` on first explicit selection.
 Optional unused branches need no fabricated completion; opened branches must be
 completed or skipped with a reason. Reopening invalidates closure, not history.
-Completing a stage clears the next-action deadline; do not copy it to the next
-stage as though it were agreed. Stage marks never create documents/TTN/mail,
+Resolve planned source under the shared lock from an outstanding stored plan,
+including compatible old v1 in_progress records; never trust a posted source flag.
+Preserve its detail/manager/deadline snapshot separately from actual performed_at
+and event recording time. Reject future actual times and a same-stage result older
+than the latest recorded actual result. On migration preserve the outstanding
+legacy free-text task as a separate legacy_plan snapshot until recorded completed;
+new roadmap planning must not silently fulfill it or require guessing a stage.
+Custom named operations require a
+result, append history only, and do not reopen a closed route or finish core stages.
+Only completing/skipping the current planned stage clears the next action and its
+deadline; record of another operation must preserve both. Do not auto-select a new
+agreed task. A first operation may create an inactive control card before any plan;
+recording does not enable monitoring. Stage marks never create documents/TTN/mail,
 perform payment, sign delivery records or change Woo completion/bonuses.
+Existing cards configure responsibility/monitoring separately under the same
+lock/revision and responsibility-transfer guard. Pausing after closure must not
+require a new stage or reopen the route; configuration never records a performed
+operation. Initial planning may still set responsibility/monitoring explicitly.
 Tests: `order-execution-local.php` (includes roadmap assertions) and
 `order-execution-roadmap-ui.cjs` with its generated local fixture. Guide above
 owns the exact manager procedure; production UI remains deployment-dependent.

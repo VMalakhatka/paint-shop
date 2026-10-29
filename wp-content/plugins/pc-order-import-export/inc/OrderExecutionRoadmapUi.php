@@ -10,11 +10,10 @@ final class OrderExecutionRoadmapUi {
         echo '<label>'.esc_html__('Next action','pc-order-import-export').'<select id="pcoe-next-stage" name="stage" required data-roadmap-stage><option value="">—</option>';
         foreach($stages as $id=>$stage) {
             $saved=$state['roadmap']['stages'][$id]??[];
-            echo '<option value="'.esc_attr($id).'" data-optional="'.($stage['optional']?'1':'0').'" data-status="'.esc_attr($saved['status']??'in_progress').'" data-detail="'.esc_attr($saved['detail']??'').'" data-due="'.esc_attr(!empty($saved['due'])?wp_date('Y-m-d\TH:i',strtotime($saved['due'])):'').'" '.selected($current,$id,false).'>'.esc_html($stage['label'].($stage['optional']?' · '.__('If needed','pc-order-import-export'):'')).'</option>';
+            $plan=OrderExecutionOperations::planned($state)[$id]??[];
+            echo '<option value="'.esc_attr($id).'" data-detail="'.esc_attr($plan['detail']??'').'" data-due="'.esc_attr(!empty($plan['due'])?wp_date('Y-m-d\TH:i',strtotime($plan['due'])):'').'" '.selected($current,$id,false).'>'.esc_html($stage['label'].($stage['optional']?' · '.__('If needed','pc-order-import-export'):'')).'</option>';
         }
-        echo '</select></label><label>'.esc_html__('Stage result','pc-order-import-export').'<select name="stage_status" data-roadmap-status>';
-        foreach(['in_progress','completed','skipped'] as $status) echo '<option value="'.esc_attr($status).'" '.selected($record['status']??'in_progress',$status,false).'>'.esc_html(OrderExecutionRoadmap::status_label($status)).'</option>';
-        echo '</select></label><label>'.esc_html__('Stage details: warehouse, goods or document reference','pc-order-import-export').'<textarea name="stage_detail" maxlength="500">'.esc_textarea($record['detail']??$legacy).'</textarea></label>';
+        echo '</select></label><input type="hidden" name="stage_status" value="in_progress"><label>'.esc_html__('Stage details: warehouse, goods or document reference','pc-order-import-export').'<textarea name="stage_detail" maxlength="500">'.esc_textarea($record['plan']['detail']??$record['detail']??$legacy).'</textarea></label>';
         echo '<div class="pcoe-stage-scenario" aria-live="polite">';
         foreach($stages as $id=>$stage) echo '<div data-roadmap-scenario="'.esc_attr($id).'" '.($current!==$id?'hidden':'').'><strong>'.esc_html($stage['optional']?__('Optional stage','pc-order-import-export'):__('Required stage','pc-order-import-export')).'</strong><p>'.esc_html($stage['scenario']).'</p></div>';
         echo '<p data-roadmap-empty '.($current?'hidden':'').'>'.esc_html__('Choose a stage to see its scenario and completion criteria. The full roadmap is below.','pc-order-import-export').'</p></div>';

@@ -99,6 +99,8 @@ final class OrderExecution {
             }
             if (!$state) $state=['customer'=>$order->get_customer_id(),'folio'=>self::context($order),'manager'=>0,'due'=>'','original_due'=>'','next'=>'','active'=>false,'links'=>[],'documents'=>[],'events'=>[],'observed'=>[]];
             $before=array_intersect_key($state,array_flip(['manager','due','next','active']));
+            $legacy=OrderExecutionOperations::legacy_plan($state);
+            if ($legacy) $state['legacy_plan']=$legacy;
             $state['manager']=$manager; $state['due']=$due; $state['active']=!empty($input['active']);
             $stage_update=OrderExecutionRoadmap::apply($state,$input,$manager,$due,$actor,$reason);
             if ($due && !$state['original_due']) $state['original_due']=$due;
@@ -106,6 +108,29 @@ final class OrderExecution {
             return $state;
         });
         self::schedule($root->get_id(),$result['active']); return $result;
+    }
+    /** Assignment/monitoring can change without inventing a new plan or reopening a closed route. */
+    public static function configure(int $id,string $revision,array $input): array {
+        if (!current_user_can('manage_woocommerce')) self::fail();
+        $root=self::root(wc_get_order($id));ManagerWorkspace::customer($root->get_customer_id());
+        foreach (['manager','reason','active'] as $key) if (isset($input[$key]) && !is_scalar($input[$key])) self::fail();
+        $reason=sanitize_textarea_field($input['reason']??'');
+        if (trim($reason)==='' || mb_strlen($reason)>1000) self::fail();
+        $actor=get_current_user_id();
+        $result=self::change($root->get_id(),$revision,static function($state)use($input,$reason,$actor){
+            if (!$state) self::fail();
+            $manager=array_key_exists('manager',$input)?absint($input['manager']):(int)$state['manager'];
+            if ($manager && !user_can($manager,'manage_woocommerce')) self::fail();
+            if ($manager!==(int)$state['manager'] && !current_user_can('manage_options'))
+                throw new \RuntimeException(__('Only an administrator can transfer responsibility for an existing execution card.', 'pc-order-import-export'));
+            $before=array_intersect_key($state,array_flip(['manager','due','next','active']));
+            $legacy=OrderExecutionOperations::legacy_plan($state);
+            if ($legacy) $state['legacy_plan']=$legacy;
+            $state['manager']=$manager;$state['active']=!empty($input['active']);
+            self::event($state,'assignment',['before'=>$before,'after'=>array_intersect_key($state,$before),'reason'=>$reason],$actor);
+            return $state;
+        });
+        self::schedule($root->get_id(),$result['active']);return $result;
     }
     /** Creation responses use lower-case account variants; the read API uses ACCOUNT. */
     public static function source_type(string $type): string {
@@ -243,6 +268,8 @@ final class OrderExecution {
             elseif (($input['operation']??'')==='unlink') self::unlink($root->get_id(),$revision,(string)($input['key']??''),(string)($input['reason']??''));
             elseif (($input['operation']??'')==='refresh') { if (!hash_equals((string)(self::state($root)['revision']??''),$revision)) self::fail(); self::observe($root->get_id()); }
             elseif (($input['operation']??'')==='save') self::save($id,$revision,$input);
+            elseif (($input['operation']??'')==='record_operation') OrderExecutionOperations::record($id,$revision,$input);
+            elseif (($input['operation']??'')==='configure') self::configure($id,$revision,$input);
             else self::fail();
             wp_safe_redirect(ManagerWorkspace::url($root->get_customer_id(),$root->get_id()).'#pcoe-execution'); exit;
         } catch (\Throwable $e) { wp_die(esc_html($e instanceof \RuntimeException?$e->getMessage():__('Execution data changed or is unavailable. Reload the order and try again.','pc-order-import-export')),'',['response'=>400,'back_link'=>true]); }

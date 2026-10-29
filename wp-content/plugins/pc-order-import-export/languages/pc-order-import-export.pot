@@ -4178,3 +4178,107 @@ msgstr ""
 #: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
 msgid "In progress"
 msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Operation to document"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Previously planned"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Another roadmap stage"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Other operation — enter a name"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Operation name (for Other operation)"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Resulting stage status"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Actual operation time"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Result and evidence"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "This records an operation in history without completing a roadmap stage. The next planned action remains separate."
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Select a previous plan, another roadmap stage, or enter your own operation. Describe what actually happened."
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Other operation"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Original plan"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Last recorded operation"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Record current operation"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Record the action performed and its result here. Plan the next task separately below."
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Record operation"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Plan next action"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Planning assigns the next task; it does not document a performed operation."
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Save next action"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Responsible manager and source checks"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Save responsibility and monitoring"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Operation recorded"
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Enter the actual operation time. A future time belongs in the next-action plan."
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Planning cannot complete an operation. Record its actual result in the operation form."
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "The operation time is earlier than the last recorded result of this stage. Check the history before recording a correction."
+msgstr ""
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Record the result of the outstanding legacy plan before closing execution."
+msgstr ""

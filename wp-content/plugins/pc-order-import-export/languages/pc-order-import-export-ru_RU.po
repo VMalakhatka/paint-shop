@@ -4370,3 +4370,107 @@ msgstr "Выполнение этапа — это запись проверки
 #: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
 msgid "In progress"
 msgstr "В работе"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Operation to document"
+msgstr "Операция для записи"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Previously planned"
+msgstr "Ранее запланированные"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Another roadmap stage"
+msgstr "Другой этап дорожной карты"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Other operation — enter a name"
+msgstr "Другая операция — указать название"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Operation name (for Other operation)"
+msgstr "Название операции (для другой операции)"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Resulting stage status"
+msgstr "Состояние этапа после операции"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Actual operation time"
+msgstr "Фактическое время операции"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Result and evidence"
+msgstr "Результат и подтверждение"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "This records an operation in history without completing a roadmap stage. The next planned action remains separate."
+msgstr "Операция сохранится в истории без завершения этапа дорожной карты. Следующее запланированное действие ведётся отдельно."
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Select a previous plan, another roadmap stage, or enter your own operation. Describe what actually happened."
+msgstr "Выберите прежний план, другой этап дорожной карты или укажите свою операцию. Опишите, что фактически сделано."
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Other operation"
+msgstr "Другая операция"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Original plan"
+msgstr "Исходный план"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Last recorded operation"
+msgstr "Последняя записанная операция"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Record current operation"
+msgstr "Зафиксировать текущую операцию"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Record the action performed and its result here. Plan the next task separately below."
+msgstr "Здесь запишите выполненное действие и его результат. Следующую задачу запланируйте отдельно ниже."
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Record operation"
+msgstr "Зафиксировать операцию"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Plan next action"
+msgstr "Запланировать следующее действие"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Planning assigns the next task; it does not document a performed operation."
+msgstr "Планирование назначает следующую задачу; выполненную операцию нужно записать отдельно."
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Save next action"
+msgstr "Сохранить следующее действие"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Responsible manager and source checks"
+msgstr "Ответственный менеджер и проверки источников"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Save responsibility and monitoring"
+msgstr "Сохранить ответственного и проверки"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Operation recorded"
+msgstr "Операция записана"
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Enter the actual operation time. A future time belongs in the next-action plan."
+msgstr "Укажите фактическое время операции. Будущее время нужно указывать в плане следующего действия."
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Planning cannot complete an operation. Record its actual result in the operation form."
+msgstr "Планирование не завершает операцию. Зафиксируйте её фактический результат в форме операции."
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "The operation time is earlier than the last recorded result of this stage. Check the history before recording a correction."
+msgstr "Время операции раньше последнего записанного результата этого этапа. Перед корректировкой проверьте историю."
+
+#: inc/OrderExecutionRoadmap.php inc/OrderExecutionRoadmapUi.php inc/OrderExecutionUi.php
+msgid "Record the result of the outstanding legacy plan before closing execution."
+msgstr "Перед закрытием контроля запишите результат незавершённого прежнего текстового плана."

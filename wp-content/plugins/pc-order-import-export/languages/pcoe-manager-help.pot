@@ -499,3 +499,15 @@ msgstr ""
 #: inc/ManagerHelp.php
 msgid "Roadmap results are manager review records. Check Folio documents, payments, shipment tracking and paper packing/acceptance records separately. A stage mark does not create an account, TTN, message, signature or bonus and does not complete a Woo order. Closing the roadmap does not pause source monitoring; use the monitoring checkbox separately."
 msgstr ""
+
+#: inc/ManagerHelp.php
+msgid "Record current operation. Choose Previously planned, another roadmap stage, or Other operation and enter a name. Review the original plan details and deadline before recording a planned action. Enter the actual operation time, result and evidence, then click Record operation. Custom operations are history entries and do not complete roadmap stages. You can record the first operation before planning the next task; source monitoring stays off until explicitly enabled."
+msgstr ""
+
+#: inc/ManagerHelp.php
+msgid "Plan next action separately: select a stage, enter its details, agreed deadline and reason, then Save next action. Planning does not record completion. Recording another operation keeps the current next task and deadline. Completing or skipping the current planned stage clears that task; choose the next action explicitly. Required stages cannot be skipped. Opened optional stages need completion or a justified skip before closure. Previous text plans remain selectable until their result is recorded."
+msgstr ""
+
+#: inc/ManagerHelp.php
+msgid "History keeps the author, recording time, actual operation time, result and original plan snapshot. A future operation time is rejected, as is a result dated earlier than the last recorded result of that stage. After recording, inspect Last recorded operation or Execution history. Responsible manager and source checks has a separate save button: monitoring can be paused without assigning a new task or reopening a closed roadmap. Only an administrator can transfer existing responsibility."
+msgstr ""

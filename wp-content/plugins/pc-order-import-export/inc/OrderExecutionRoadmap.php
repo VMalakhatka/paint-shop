@@ -36,16 +36,42 @@ final class OrderExecutionRoadmap {
     public static function next_label(array $state): string {
         return !empty($state['roadmap']['current']) ? self::label($state['roadmap']['current']) : (string)($state['next']??'');
     }
-    /** Pure state update called under the existing execution lock/revision check. */
+    /** Planning only. A plan is not evidence that the business operation happened. */
     public static function apply(array &$state,array $input,int $manager,string $due,int $actor,string $reason): array {
         $stages=self::stages(); $id=(string)($input['stage']??'');$status=(string)($input['stage_status']??'in_progress');
         $detail=sanitize_textarea_field($input['stage_detail']??'');
-        if (!isset($stages[$id]) || !in_array($status,['in_progress','completed','skipped'],true) || mb_strlen($detail)>500) OrderExecution::fail();
+        if (!isset($stages[$id]) || mb_strlen($detail)>500) OrderExecution::fail();
+        if ($status!=='in_progress') throw new \RuntimeException(__('Planning cannot complete an operation. Record its actual result in the operation form.','pc-order-import-export'));
+        $map=$state['roadmap']??['version'=>1,'current'=>'','stages'=>[]];
+        if (($map['version']??0)!==1) OrderExecution::fail();
+        $before=$map['stages'][$id]??[];
+        $legacy=OrderExecutionOperations::legacy_plan($state);
+        if ($legacy) { $state['legacy_plan']=$legacy;$state['legacy_next']=$legacy['detail']; }
+        $time=gmdate('c');
+        $record=['status'=>'in_progress','detail'=>$detail,'reason'=>$reason,'actor'=>$actor,'at'=>$time,'manager'=>$manager,
+            'due'=>$due,'original_due'=>!empty($before['original_due'])?$before['original_due']:$due,
+            'plan'=>['detail'=>$detail,'manager'=>$manager,'due'=>$due,'at'=>$time,'actor'=>$actor]];
+        if (!empty($before['performed_at'])) $record['performed_at']=$before['performed_at'];
+        $map['stages'][$id]=$record;
+        if (!empty($map['closed_at'])) { unset($map['closed_at']); if($id!=='close') unset($map['stages']['close']); }
+        $map['current']=$id;
+        $state['roadmap']=$map;
+        $state['next']=self::label($id);
+        return ['stage'=>$id,'before'=>$before,'after'=>$record,'next_stage'=>$id];
+    }
+    /** Actual result, called only after authorization and source selection under the shared lock. */
+    public static function record(array &$state,string $id,string $status,string $result,string $performed,int $actor,?array $plan): void {
+        $stages=self::stages();
+        if (!isset($stages[$id]) || !in_array($status,['in_progress','completed','skipped'],true)) OrderExecution::fail();
         if ($status==='skipped' && !$stages[$id]['optional']) throw new \RuntimeException(__('A required stage cannot be skipped. Record its completion or keep it in progress.','pc-order-import-export'));
         $map=$state['roadmap']??['version'=>1,'current'=>'','stages'=>[]];
         if (($map['version']??0)!==1) OrderExecution::fail();
         $before=$map['stages'][$id]??[];
+        if (!empty($before['performed_at']) && strtotime($performed)<strtotime($before['performed_at']))
+            throw new \RuntimeException(__('The operation time is earlier than the last recorded result of this stage. Check the history before recording a correction.','pc-order-import-export'));
         if ($id==='close' && $status==='completed') {
+            if (OrderExecutionOperations::legacy_plan($state))
+                throw new \RuntimeException(__('Record the result of the outstanding legacy plan before closing execution.','pc-order-import-export'));
             foreach ($stages as $key=>$stage) {
                 if ($key==='close') continue;
                 $record=$map['stages'][$key]??[];$s=$record['status']??'pending';
@@ -53,31 +79,21 @@ final class OrderExecutionRoadmap {
                     throw new \RuntimeException(__('Complete all required stages and resolve every opened optional stage before closing execution.','pc-order-import-export'));
             }
         }
-        if (!isset($state['roadmap']) && !empty($state['next'])) $state['legacy_next']=$state['next'];
-        $record=['status'=>$status,'detail'=>$detail,'reason'=>$reason,'actor'=>$actor,'at'=>gmdate('c'),'manager'=>$manager,
-            'due'=>$due,'original_due'=>!empty($before['original_due'])?$before['original_due']:$due];
-        $map['stages'][$id]=$record;
-        if ($status==='in_progress') {
-            // Reopening a finished route reopens its closure too, while the audit keeps the old result.
-            if (!empty($map['closed_at'])) { unset($map['closed_at']); if($id!=='close') unset($map['stages']['close']); }
-            $map['current']=$id;
-        } elseif ($id==='close') {
-            $map['current']='close';$map['closed_at']=gmdate('c');$state['due']='';
-        } else {
-            unset($map['closed_at'],$map['stages']['close']);
-            $map['current']=self::suggest($map,$id);$state['due']='';
+        $legacy=OrderExecutionOperations::legacy_plan($state);
+        if ($legacy) { $state['legacy_plan']=$legacy;$state['legacy_next']=$legacy['detail']; }
+        $due=(string)($plan['due']??'');
+        $map['stages'][$id]=['status'=>$status,'detail'=>$result,'reason'=>'','actor'=>$actor,'at'=>gmdate('c'),
+            'performed_at'=>$performed,'manager'=>(int)$state['manager'],'due'=>$due,
+            'original_due'=>!empty($before['original_due'])?$before['original_due']:$due,'plan'=>$plan];
+        if ($status==='in_progress' && !empty($map['closed_at'])) {
+            unset($map['closed_at']);if($id!=='close') unset($map['stages']['close']);
+            if (($map['current']??'')==='close') { $map['current']='';$state['next']='';$state['due']=''; }
+        }
+        if ($id==='close' && $status==='completed') {
+            $map['closed_at']=gmdate('c');$map['current']='';$state['next']='';$state['due']='';
+        } elseif ($status!=='in_progress' && ($map['current']??'')===$id) {
+            $map['current']='';$state['next']='';$state['due']='';
         }
         $state['roadmap']=$map;
-        $state['next']=self::label($map['current']);
-        return ['stage'=>$id,'before'=>$before,'after'=>$record,'next_stage'=>$map['current']];
-    }
-    private static function suggest(array $map,string $after): string {
-        $stages=self::stages();$keys=array_keys($stages);$offset=array_search($after,$keys,true)+1;
-        foreach(array_merge(array_slice($keys,$offset),array_slice($keys,0,$offset)) as $id) {
-            if ($id==='close') continue;
-            $row=$map['stages'][$id]??[];
-            if ((!$stages[$id]['optional'] || $row) && !in_array($row['status']??'pending',['completed','skipped'],true)) return $id;
-        }
-        return 'close';
     }
 }
