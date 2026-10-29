@@ -2,9 +2,28 @@
 
 defined('ABSPATH') || exit;
 
+require_once __DIR__ . '/bacs-recipient.php';
+
+function pc_folio_bacs_source_settings(): array {
+    $empty = ['name' => '', 'tax_id' => '', 'iban' => '', 'bank' => '', 'mfo' => '', 'confirmed' => false];
+    $accounts = get_option('woocommerce_bacs_accounts', []);
+    if (!is_array($accounts) || count($accounts) !== 1) return $empty;
+    $account = reset($accounts);
+    if (!is_array($account)) return $empty;
+    $fields = pc_folio_bacs_normalize_account($account);
+    if (!$fields) return $empty;
+    $proof = $account['pc_folio_confirmed_hash'] ?? '';
+    return [
+        'name' => $fields['account_name'], 'tax_id' => $fields['tax_id'],
+        'iban' => $fields['iban'], 'bank' => $fields['bank_name'], 'mfo' => $fields['sort_code'],
+        'confirmed' => is_string($proof) && $proof !== '' && hash_equals(pc_folio_bacs_confirmation_hash($account), $proof),
+    ];
+}
+
 /**
  * Bank transfer and payment invoices share one explicitly confirmed recipient.
- * Never fall back to the independent Woo BACS option or legacy gateway fields.
+ * Woo's one verified bank account is authoritative; legacy invoice fields and
+ * deprecated single-account gateway settings are never an alternative source.
  */
 function pc_folio_payment_details(): array {
     $settings = pc_folio_invoice_settings();
@@ -27,9 +46,8 @@ function pc_folio_bacs_accounts(): array {
     ]];
 }
 
-// The option filter also bypasses Woo's early empty-account guard and its legacy
-// option fallback. The runtime filter refreshes a gateway instantiated earlier.
-add_filter('pre_option_woocommerce_bacs_accounts', 'pc_folio_bacs_accounts', PHP_INT_MAX);
+// Do not filter the stored option: Woo is now the editor and source. Rendering
+// still validates fresh data, even if a gateway was instantiated before a change.
 add_filter('woocommerce_bacs_accounts', 'pc_folio_bacs_accounts', PHP_INT_MAX);
 
 function pc_folio_bacs_instruction(): string {
@@ -76,6 +94,8 @@ function pc_folio_bacs_remove_native_output($registry = null): void {
         if (!$gateway instanceof WC_Gateway_BACS) continue;
         remove_action('woocommerce_email_before_order_table', [$gateway, 'email_instructions'], 10);
         remove_action('woocommerce_thankyou_bacs', [$gateway, 'thankyou_page'], 10);
+        // The native table saver would discard tax ID and confirmation proof.
+        remove_action('woocommerce_update_options_payment_gateways_bacs', [$gateway, 'save_account_details'], 10);
     }
 }
 add_action('wc_payment_gateways_initialized', 'pc_folio_bacs_remove_native_output', PHP_INT_MAX);
@@ -129,14 +149,4 @@ function pc_folio_bacs_thankyou($order_id): void {
 }
 add_action('woocommerce_thankyou_bacs', 'pc_folio_bacs_thankyou', 9);
 
-function pc_folio_payment_details_admin_notice(): void {
-    if (!current_user_can('manage_woocommerce')) return;
-    if (($_GET['page'] ?? '') !== 'wc-settings' || ($_GET['tab'] ?? '') !== 'checkout' || ($_GET['section'] ?? '') !== 'bacs') return;
-    $valid = (bool) pc_folio_payment_details();
-    echo '<div class="notice notice-' . ($valid ? 'info' : 'error') . '"><p>';
-    echo esc_html__('Bank transfers and Folio payment invoices use the confirmed details in Lavka: payment invoices. The separate bank account and free-text instructions on this WooCommerce screen are not used.', 'pc-folio-customer-balance') . ' ';
-    echo '<a href="' . esc_url(admin_url('admin.php?page=pc-folio-invoices')) . '">' . esc_html__('Open payment recipient settings', 'pc-folio-customer-balance') . '</a>';
-    if (!$valid) echo ' ' . esc_html(pc_folio_bacs_unavailable_message());
-    echo '</p></div>';
-}
-add_action('admin_notices', 'pc_folio_payment_details_admin_notice');
+require_once __DIR__ . '/bacs-settings.php';

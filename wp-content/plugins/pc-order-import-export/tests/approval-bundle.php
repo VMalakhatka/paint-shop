@@ -5,6 +5,7 @@ use PaintCore\PCOE\ApprovalBundle as Bundle;
 use PaintCore\PCOE\ApprovalWorkbook as Workbook;
 use PaintCore\PCOE\ApprovalNotifications as Notices;
 if (!defined('WP_CLI') || !WP_CLI || wp_parse_url(home_url(), PHP_URL_HOST) !== 'paint.local') throw new RuntimeException('Local only');
+require_once WPMU_PLUGIN_DIR . '/pc-folio-customer-balance/tests/payment-fixture.php';
 $checks=0; $users=[]; $id=0; $mode='ok'; $mails=[]; $order=null; $original=get_current_user_id();
 $check=static function($ok,$label)use(&$checks){if(!$ok)throw new RuntimeException($label);$checks++;};
 $deny=static function($fn)use($check){try{$fn();}catch(Throwable $e){$check(true,'Rejected');return;}throw new RuntimeException('Expected rejection');};
@@ -19,7 +20,8 @@ add_filter('pre_http_request',static function($pre,$args,$url)use(&$mode){
             'warehouseId'=>$id,'warehouseName'=>$id===41?'Київ':'Одеса','items'=>[['sku'=>'0000123','name'=>'=1+1','quantity'=>1,'price'=>$id===41?10.01:20.02,'amount'=>$id===41?10.01:20.02]]]])];
 },PHP_INT_MAX,3);
 $settings=['name'=>'Test recipient','tax_id'=>'0000000000','iban'=>'UA89'.str_repeat('0',25),'bank'=>'Test bank','mfo'=>'','confirmed'=>true];
-add_filter('pre_option_pc_folio_invoice_settings',static function()use(&$settings){return $settings;});
+$bank_fixture=static function()use(&$settings){return [pc_payment_fixture_account($settings)];};
+add_filter('pre_option_woocommerce_bacs_accounts',$bank_fixture);
 try {
     foreach(['opt','shop_manager'] as $role){$uid=wp_insert_user(['user_login'=>'bundle-'.wp_generate_uuid4(),'user_pass'=>wp_generate_password(30),'user_email'=>wp_generate_uuid4().'@example.invalid','role'=>$role]);if(is_wp_error($uid))throw new RuntimeException('Fixture');$users[]=$uid;}
     [$owner,$manager]=$users;update_user_meta($owner,'_folio_partner_short_name','TEST');update_user_meta($owner,'_folio_partner_id','TEST');wp_set_current_user($manager);
@@ -82,5 +84,6 @@ try {
     if($dir)file_put_contents($dir.'/preview.html','<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font:16px system-ui;margin:20px}table{border-collapse:collapse;width:100%}td,th{padding:10px;border:1px solid #ccc}button{padding:10px}dt{font-weight:bold}</style>'.$html);
     echo "PASS: $checks combined approval checks; HTTP and email intercepted.\n";
 } finally {
+    remove_filter('pre_option_woocommerce_bacs_accounts',$bank_fixture);
     if($id)wp_delete_post($id,true);if($order)$order->delete(true);wp_set_current_user($original);require_once ABSPATH.'wp-admin/includes/user.php';foreach($users as $uid)wp_delete_user($uid);
 }

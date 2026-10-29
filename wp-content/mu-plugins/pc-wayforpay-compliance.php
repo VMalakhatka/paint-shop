@@ -327,6 +327,35 @@ function pc_wayforpay_page_url(string $key): string
 }
 
 /**
+ * Existing managed contacts may still contain the original two static bank rows.
+ * Replace only that known markup while rendering; never rewrite legal content.
+ */
+function pc_wayforpay_contacts_payment_source(string $content): string
+{
+    $ids = get_option(PC_WAYFORPAY_PAGES_OPTION, []);
+    $post = get_post();
+    if (!is_array($ids) || !$post || $post->post_type !== 'page'
+        || (int) ($ids['contacts'] ?? 0) !== (int) $post->ID
+        || !get_post_meta($post->ID, '_pc_wayforpay_managed', true)) return $content;
+
+    $block_pattern = '~(<dl\s+class=([\'\"])pc-seller-details\2\s*>)(.*?)(</dl>)~su';
+    if (preg_match_all($block_pattern, $content, $blocks, PREG_SET_ORDER | PREG_OFFSET_CAPTURE) !== 1) return $content;
+    $block = $blocks[0];
+    $body = $block[3][0];
+    $rows_pattern = '~<div>\s*<dt>Поточний рахунок \(IBAN\)</dt>\s*<dd>\s*<code>[^<]*</code>\s*</dd>\s*</div>\s*<div>\s*<dt>Банк</dt>\s*<dd>[^<]*</dd>\s*</div>~u';
+    if (preg_match_all($rows_pattern, $body, $rows) !== 1) return $content;
+
+    $replacement = $block[1][0] . str_replace($rows[0][0], '', $body) . $block[4][0];
+    if (!has_shortcode($content, 'pc_folio_payment_details')) {
+        $replacement .= shortcode_exists('pc_folio_payment_details') ? "\n[pc_folio_payment_details]"
+            : '<p>' . esc_html__('Bank details are awaiting verification. Please contact your manager before paying. Do not use bank details from an earlier email or invoice.', 'pc-folio-customer-balance') . '</p>';
+    }
+    return substr_replace($content, $replacement, $block[0][1], strlen($block[0][0]));
+}
+// Run before wpautop/do_shortcode so the shared renderer is outside the legal <dl>.
+add_filter('the_content', 'pc_wayforpay_contacts_payment_source', 8);
+
+/**
  * Build the payment and delivery link shown along the purchase flow.
  */
 function pc_wayforpay_purchase_guidance_html(string $context): string

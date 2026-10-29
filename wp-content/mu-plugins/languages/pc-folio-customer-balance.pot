@@ -1381,3 +1381,55 @@ msgstr ""
 #: wp-content/mu-plugins/pc-folio-customer-balance/inc/customer-invoice.php
 msgid "I have verified that the recipient name, tax ID and bank account belong to the intended payment recipient."
 msgstr ""
+
+#: inc/bacs-settings.php
+msgid "The bank account form is incomplete. Reload the settings page and try again."
+msgstr ""
+
+#: inc/bacs-settings.php
+msgid "Only an administrator can change payment recipient details."
+msgstr ""
+
+#: inc/bacs-settings.php
+msgid "The bank account form has expired. Reload the settings page and try again."
+msgstr ""
+
+#: inc/bacs-settings.php
+msgid "Payment recipient details changed after you opened this page. Reload it and review the current account before saving."
+msgstr ""
+
+#: inc/bacs-settings.php
+msgid "Payment recipient details could not be saved. Reload the page and check the current account."
+msgstr ""
+
+#: inc/bacs-settings.php
+msgid "Payment recipient"
+msgstr ""
+
+#: inc/bacs-settings.php
+msgid "This single verified WooCommerce bank account is used for bank transfers, Folio invoices, customer emails and the payment details on the contacts page."
+msgstr ""
+
+#: inc/bacs-settings.php
+msgid "Confirm the intended recipient here before customers can see bank details. Previous invoice settings are not used for payments."
+msgstr ""
+
+#: inc/bacs-settings.php
+msgid "Several bank accounts are stored. Enter and confirm the one payment recipient to use; saving this form replaces the account list with that single account."
+msgstr ""
+
+#: inc/bacs-settings.php
+msgid "The tax ID below is suggested from the earlier invoice settings because the bank account matches exactly. Verify it and confirm the recipient before saving."
+msgstr ""
+
+#: inc/bacs-settings.php
+msgid "When recipient details change, confirm them again before saving. Saving unchanged details keeps their existing verification."
+msgstr ""
+
+#: inc/customer-invoice.php
+msgid "Payment recipient details are configured only in WooCommerce → Settings → Payments → Direct bank transfer. This page controls the invoice logo only."
+msgstr ""
+
+#: inc/bacs-settings.php
+msgid "Payment recipient settings are being saved by another administrator. Wait a moment, then reload the page before trying again."
+msgstr ""

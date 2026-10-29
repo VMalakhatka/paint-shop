@@ -7,10 +7,9 @@ use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 function pc_folio_invoice_settings(): array {
-    return wp_parse_args((array) get_option('pc_folio_invoice_settings', []), [
-        'name' => '', 'tax_id' => '', 'iban' => '', 'bank' => '', 'mfo' => '',
-        'confirmed' => false, 'logo_id' => (int) get_theme_mod('custom_logo'),
-    ]);
+    $appearance = (array) get_option('pc_folio_invoice_settings', []);
+    $logo = $appearance['logo_id'] ?? get_theme_mod('custom_logo');
+    return array_merge(pc_folio_bacs_source_settings(), ['logo_id' => is_scalar($logo) ? absint($logo) : 0]);
 }
 
 function pc_folio_invoice_validate_settings(array $settings) {
@@ -57,15 +56,10 @@ function pc_folio_invoice_render_settings(): void {
     if (!current_user_can('manage_options')) return;
     $settings = pc_folio_invoice_settings();
     $fields = [
-        'name' => __('Supplier / payment recipient', 'pc-folio-customer-balance'),
-        'tax_id' => __('Tax ID', 'pc-folio-customer-balance'),
-        'iban' => __('IBAN', 'pc-folio-customer-balance'),
-        'bank' => __('Bank', 'pc-folio-customer-balance'),
-        'mfo' => __('Bank code (MFO)', 'pc-folio-customer-balance'),
         'logo_id' => __('Logo media ID', 'pc-folio-customer-balance'),
     ];
     echo '<div class="wrap"><h1>' . esc_html__('Lavka: payment invoices', 'pc-folio-customer-balance') . '</h1>';
-    echo '<p>' . esc_html__('These confirmed recipient details are used for Folio payment invoices and WooCommerce bank transfer payments, including customer emails and the order confirmation page.', 'pc-folio-customer-balance') . '</p>';
+    echo '<p>' . esc_html__('Payment recipient details are configured only in WooCommerce → Settings → Payments → Direct bank transfer. This page controls the invoice logo only.', 'pc-folio-customer-balance') . ' <a href="' . esc_url(pc_folio_bacs_settings_url()) . '">' . esc_html__('Open payment recipient settings', 'pc-folio-customer-balance') . '</a></p>';
     if (isset($_GET['saved'])) echo '<div class="notice notice-success"><p>' . esc_html__('Settings saved.', 'pc-folio-customer-balance') . '</p></div>';
     echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '"><input type="hidden" name="action" value="pc_folio_invoice_settings">';
     wp_nonce_field('pc_folio_invoice_settings');
@@ -75,7 +69,7 @@ function pc_folio_invoice_render_settings(): void {
         if ($key === 'logo_id') echo ' <button type="button" class="button" id="pc-invoice-logo">' . esc_html__('Choose logo', 'pc-folio-customer-balance') . '</button>';
         echo '</td></tr>';
     }
-    echo '</table><p><label><input type="checkbox" name="confirmed" value="1" ' . checked(!empty($settings['confirmed']), true, false) . '> ' . esc_html__('I have verified that the recipient name, tax ID and bank account belong to the intended payment recipient.', 'pc-folio-customer-balance') . '</label></p>';
+    echo '</table>';
     submit_button();
     echo '</form></div>';
 }
@@ -89,17 +83,10 @@ add_action('admin_enqueue_scripts', static function (): void {
 add_action('admin_post_pc_folio_invoice_settings', static function (): void {
     if (!current_user_can('manage_options')) wp_die('', '', ['response' => 403]);
     check_admin_referer('pc_folio_invoice_settings');
-    $settings = [];
-    foreach (['name', 'tax_id', 'iban', 'bank', 'mfo'] as $key) {
-        $settings[$key] = sanitize_text_field(wp_unslash((string) ($_POST[$key] ?? '')));
-    }
-    $settings['iban'] = strtoupper(preg_replace('/\s+/', '', $settings['iban']));
-    $settings['logo_id'] = absint($_POST['logo_id'] ?? 0);
-    $settings['confirmed'] = !empty($_POST['confirmed']);
-    if ($settings['confirmed']) {
-        $valid = pc_folio_invoice_validate_settings($settings);
-        if (is_wp_error($valid)) wp_die(esc_html($valid->get_error_message()), '', ['response' => 400, 'back_link' => true]);
-    }
+    // Old submitted financial fields are deliberately ignored; they are no longer
+    // an alternative editor. Keep historical values until explicit BACS setup.
+    $settings = (array) get_option('pc_folio_invoice_settings', []);
+    $settings['logo_id'] = is_scalar($_POST['logo_id'] ?? 0) ? absint($_POST['logo_id'] ?? 0) : 0;
     update_option('pc_folio_invoice_settings', $settings, false);
     wp_safe_redirect(add_query_arg(['page' => 'pc-folio-invoices', 'saved' => 1], admin_url('admin.php')));
     exit;

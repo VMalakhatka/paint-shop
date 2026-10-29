@@ -4,6 +4,7 @@ defined('ABSPATH') || exit;
 if (!defined('WP_CLI') || !WP_CLI || wp_parse_url(home_url(), PHP_URL_HOST) !== 'paint.local') {
     throw new RuntimeException('Run only with WP-CLI on paint.local.');
 }
+require_once __DIR__ . '/payment-fixture.php';
 function invoice_assert($condition, string $message): void {
     if (!$condition) throw new RuntimeException($message);
     echo "PASS: $message\n";
@@ -83,7 +84,7 @@ class InvoiceTestResponse extends RuntimeException {}
 $die = static function () { return static function () { throw new InvoiceTestResponse(); }; };
 add_filter('wp_die_ajax_handler', $die, 999);
 $context_filter = static function () use ($user_id) { return ['user_id'=>$user_id, 'short_name'=>'TEST', 'name'=>'Test customer']; };
-$settings_filter = static function () use ($settings) { return $settings; };
+$settings_filter = static function () use ($settings) { return [pc_payment_fixture_account($settings)]; };
 $http_result = $fixture;
 $http_result['ok'] = true;
 $http_calls = 0;
@@ -107,7 +108,7 @@ $mail_filter = static function ($pre, $atts) use (&$mail_calls, &$attached_path,
     return $mail_accept;
 };
 add_filter('pc_folio_documents_request_context', $context_filter);
-add_filter('pre_option_pc_folio_invoice_settings', $settings_filter);
+add_filter('pre_option_woocommerce_bacs_accounts', $settings_filter);
 add_filter('pre_http_request', $http_filter, 999, 3);
 add_filter('pre_wp_mail', $mail_filter, 999, 2);
 $nonce = wp_create_nonce('pc_folio_customer_documents');
@@ -143,7 +144,7 @@ try {
     delete_option($key);
     remove_filter('wp_die_ajax_handler', $die, 999);
     remove_filter('pc_folio_documents_request_context', $context_filter);
-    remove_filter('pre_option_pc_folio_invoice_settings', $settings_filter);
+    remove_filter('pre_option_woocommerce_bacs_accounts', $settings_filter);
     remove_filter('pre_http_request', $http_filter, 999);
     remove_filter('pre_wp_mail', $mail_filter, 999);
 }

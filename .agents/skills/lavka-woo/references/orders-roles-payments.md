@@ -735,16 +735,33 @@ owner choice of ordinary non-accounting draft permits correcting only Woo purpos
 while retaining the live Folio header; do not add PRD or change VID_DOC implicitly.
 
 Payment recipient ownership (code verified 2026-10-29):
-`pc-folio-customer-balance/inc/customer-invoice.php` owns the administrator-confirmed
-`pc_folio_invoice_settings`; `inc/payment-details.php` reuses it for Woo BACS
-HTML/plain customer emails, thank-you, checkout/Blocks and the contacts shortcode.
-Reject malformed, missing, invalid-checksum or unconfirmed settings without using
-raw `woocommerce_bacs_accounts`, legacy gateway fields or free-text instructions.
+The native Woo BACS editor is the only recipient editor. Its one account in
+`woocommerce_bacs_accounts` stores its tax ID and a confirmation fingerprint in
+the same row, supplying `pc-folio-customer-balance/inc/customer-invoice.php` and
+`inc/payment-details.php`: invoices, BACS HTML/plain customer emails, thank-you,
+checkout/Blocks and the contacts shortcode. The old Folio settings screen retains
+only logo configuration and a link to Woo. Never revive historical recipient fields
+from `pc_folio_invoice_settings`, legacy gateway fields or free-text instructions.
+Reject malformed, missing, invalid-checksum, multiple-account or unconfirmed data;
+any recipient change invalidates the previous confirmation. Do not filter the
+native account option into a derived view: the editor and update_option must see
+the actual saved account. Recipient edits require manage_options and valid Woo
+and recipient form nonces; the complete row and its confirmation are saved
+atomically under the shared BACS configuration lock, with a fresh option read
+and revision check inside it; migrations must use the same lock. The fingerprint covers all seven normalized recipient fields,
+including account_number and BIC, and is bound to wp_salt('auth'); salt rotation
+therefore requires explicit reconfirmation. Do not restore the native independent
+account-save callback alongside the guarded row writer.
 Bank checksum is not recipient-ownership verification. Never infer historical
 email contents from current options; no per-order BACS snapshot existed in core.
 Keep enabled/title/status policy independent. Reads must not mutate settings/orders
-or send mail. Public compliance templates must not hardcode payment accounts;
-existing published pages need a separately authorized, scoped replacement rather
-than bumping the content version of all managed legal pages. Code rollback can
-reactivate old raw Woo accounts, so verify those privately first. Canonical operator
+or send mail. Public compliance templates must not hardcode payment accounts.
+The contacts-only the_content adapter recognizes exactly the old bank/IBAN row
+pair inside pc-seller-details on the mapped, marked managed contacts page and
+renders the shared shortcode outside the dl; it does not write post content or
+change other legal text. Customized unknown markup needs separate review; never
+bump all managed legal pages' content version for this repair. A source migration
+must not overwrite bank fields or silently approve a differing recipient; require
+an exact match with previously verified details or a fresh explicit review. Code
+rollback can reactivate obsolete Folio settings, so verify those privately first. Canonical operator
 steps and historical-file boundaries: `docs/MANAGER_CUSTOMER_GUIDE_UK.md#payment-recipient`.

@@ -841,7 +841,8 @@ The manager selects accounted, positive invoices across document pages. Preview 
 request reload each selected document through the existing partner-validated Java GET.
 No Woo/Folio records are merged or written. Selected Folio totals are summed in kopecks;
 linked Woo totals are never added. Duplicate SKU rows remain separate with source
-number/date/warehouse. Optional confirmed `pc_folio_invoice_settings` are part of the
+number/date/warehouse. Optional confirmed `pc_folio_invoice_settings()` values (the compatibility projection
+of the single verified Woo BACS recipient, not the legacy option) are part of the
 reviewed revision; changed/missing settings or changed accounts block stale sends and
 confirmation. File totals describe accounts, not unpaid debt.
 

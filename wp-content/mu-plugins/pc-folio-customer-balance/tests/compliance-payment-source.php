@@ -23,6 +23,48 @@ $check(str_contains($contents['contacts'], 'pc-seller-details'), 'Legal seller i
 foreach (['terms', 'payment_delivery', 'refund'] as $key) {
     $check(!empty($contents[$key]) && !str_contains($contents[$key], '[pc_folio_payment_details]'), 'Payment renderer belongs only in the contacts template');
 }
+require_once __DIR__ . '/payment-fixture.php';
+$original_post = $GLOBALS['post'] ?? null;
+$account = pc_payment_fixture_account(['name' => 'Current synthetic recipient', 'tax_id' => '0000000000',
+    'iban' => 'UA89' . str_repeat('0', 25), 'bank' => 'Current synthetic bank', 'confirmed' => true]);
+$account_filter = static function () use (&$account): array { return [$account]; };
+$deny_http = static fn() => new WP_Error('local_fixture', 'External requests are blocked');
+$deny_mail = static fn() => false;
+add_filter('pre_option_woocommerce_bacs_accounts', $account_filter, PHP_INT_MAX);
+add_filter('pre_http_request', $deny_http, PHP_INT_MAX);
+add_filter('pre_wp_mail', $deny_mail, PHP_INT_MAX);
+try {
+    $GLOBALS['post'] = get_post((int) ($ids['contacts'] ?? 0));
+    $check($GLOBALS['post'] instanceof WP_Post && (bool) get_post_meta($GLOBALS['post']->ID, '_pc_wayforpay_managed', true), 'Test the actual contacts identity from the managed-page mapping');
+    $old_rows = '<div><dt>Поточний рахунок (IBAN)</dt><dd><code>OBSOLETE-TEST-ACCOUNT</code></dd></div>' . "\n"
+        . '<div><dt>Банк</dt><dd>Historical synthetic bank</dd></div>';
+    $legacy = str_replace('[pc_folio_payment_details]', '', $contents['contacts']);
+    $legacy = str_replace('</dl>', $old_rows . "\n</dl>", $legacy);
+    $dynamic = pc_wayforpay_contacts_payment_source($legacy);
+    $check(substr_count($dynamic, '[pc_folio_payment_details]') === 1 && !str_contains($dynamic, 'OBSOLETE-TEST-ACCOUNT') && !str_contains($dynamic, 'Historical synthetic bank'), 'Known legacy rows are replaced with one canonical renderer');
+    $check(strpos($dynamic, '</dl>') < strpos($dynamic, '[pc_folio_payment_details]'), 'Payment renderer is outside the seller definition list');
+    $check(str_replace($old_rows, '', $legacy) === str_replace("\n[pc_folio_payment_details]", '', $dynamic), 'Only the bank rows and shortcode change; legal identity and contact content are preserved');
+    $html = apply_filters('the_content', $legacy);
+    $check(str_contains($html, 'Current synthetic bank') && !str_contains($html, 'Historical synthetic bank') && !str_contains($html, 'OBSOLETE-TEST-ACCOUNT'), 'Full content rendering reads current Woo details without a stale account');
+    $account['bank_name'] = 'Updated synthetic bank';$account['pc_folio_confirmed_hash'] = pc_folio_bacs_confirmation_hash($account);
+    $html = apply_filters('the_content', $legacy);
+    $check(str_contains($html, 'Updated synthetic bank') && !str_contains($html, 'Current synthetic bank'), 'Next rendering reflects a verified Woo change without editing the stored page');
+    $account['pc_folio_confirmed_hash'] = '';
+    $html = apply_filters('the_content', $legacy);
+    $check(str_contains($html, 'pc-payment-details-unavailable') && !str_contains($html, 'OBSOLETE-TEST-ACCOUNT') && !str_contains($html, 'Updated synthetic bank'), 'Unverified Woo data shows a warning and never restores the historical account');
+    $check(pc_wayforpay_contacts_payment_source($contents['contacts']) === $contents['contacts'], 'New shortcode template is unchanged');
+    $mixed = $legacy . "\n[pc_folio_payment_details]";
+    $check(substr_count(pc_wayforpay_contacts_payment_source($mixed), '[pc_folio_payment_details]') === 1, 'An existing payment shortcode is not duplicated');
+    $custom = str_replace('<dt>Банк</dt>', '<dt>Мій банк</dt>', $legacy);
+    $check(pc_wayforpay_contacts_payment_source($custom) === $custom, 'Unknown customized markup is left for explicit review');
+    $GLOBALS['post'] = get_post((int) ($ids['terms'] ?? 0));
+    $check(pc_wayforpay_contacts_payment_source($legacy) === $legacy, 'Other managed legal pages are not modified');
+} finally {
+    $GLOBALS['post'] = $original_post;
+    remove_filter('pre_option_woocommerce_bacs_accounts', $account_filter, PHP_INT_MAX);
+    remove_filter('pre_http_request', $deny_http, PHP_INT_MAX);
+    remove_filter('pre_wp_mail', $deny_mail, PHP_INT_MAX);
+}
 foreach ($ids as $key => $id) {
     $check(get_post_field('post_content', (int) $id, 'raw') === $before[$key], 'Generating the template must not rewrite a stored legal page');
 }
