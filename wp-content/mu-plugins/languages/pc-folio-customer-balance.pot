@@ -1433,3 +1433,9 @@ msgstr ""
 #: inc/bacs-settings.php
 msgid "Payment recipient settings are being saved by another administrator. Wait a moment, then reload the page before trying again."
 msgstr ""
+
+#. translators: %s: URL of the complete WooCommerce bank transfer settings form.
+#: inc/bacs-settings.php
+#, php-format
+msgid "This bank account editor does not include all recipient fields. Open the complete bank transfer settings, verify the details and save there: %s"
+msgstr ""

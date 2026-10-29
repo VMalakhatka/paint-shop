@@ -752,6 +752,17 @@ and revision check inside it; migrations must use the same lock. The fingerprint
 including account_number and BIC, and is bound to wp_salt('auth'); salt rotation
 therefore requires explicit reconfirmation. Do not restore the native independent
 account-save callback alongside the guarded row writer.
+Woo's React BACS modal does not support tax ID or the recipient confirmation and
+its REST schema strips custom metadata. Opt out only `bacs` via
+`experimental_woocommerce_admin_payment_reactify_render_sections`: Woo's own Manage
+URL must resolve to `section=bacs`, and old GET `path=/offline/bacs` bookmarks
+redirect there. Preserve other gateway editors. Reject account writes from stale
+React tabs after REST permission checks and before any partial write: V4
+`settings/payment-gateways/bacs` with `values.account_details`, and legacy
+`wc-admin/options` with `woocommerce_bacs_accounts`. Empty/null account lists also
+need rejection; reads and non-recipient settings stay available. Regression must
+exercise `WC_Settings_Payment_Gateways::output()` and `get_settings_url()` plus
+actual REST controller dispatch, not just `WC_Gateway_BACS::admin_options()`.
 Bank checksum is not recipient-ownership verification. Never infer historical
 email contents from current options; no per-order BACS snapshot existed in core.
 Keep enabled/title/status policy independent. Reads must not mutate settings/orders

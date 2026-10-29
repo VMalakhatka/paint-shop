@@ -6,6 +6,46 @@ function pc_folio_bacs_settings_url(): string {
     return admin_url('admin.php?page=wc-settings&tab=checkout&section=bacs');
 }
 
+// Woo's React account modal omits tax ID and strips our confirmation metadata.
+// Use the complete gateway form, including when Woo builds its Manage links.
+add_filter('experimental_woocommerce_admin_payment_reactify_render_sections', static function ($sections): array {
+    return is_array($sections) ? array_values(array_filter($sections, static fn($section) => $section !== 'bacs')) : [];
+}, PHP_INT_MAX);
+
+/** Old bookmarks may still address the React router instead of section=bacs. */
+function pc_folio_bacs_redirect_incomplete_editor(): void {
+    if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'GET' || !current_user_can('manage_woocommerce')) return;
+    if (($_GET['page'] ?? '') !== 'wc-settings' || ($_GET['tab'] ?? '') !== 'checkout') return;
+    $path = $_GET['path'] ?? '';
+    if (!is_string($path) || rtrim(wp_unslash($path), '/') !== '/offline/bacs') return;
+    wp_safe_redirect(pc_folio_bacs_settings_url());
+    exit;
+}
+add_action('admin_init', 'pc_folio_bacs_redirect_incomplete_editor');
+
+/** A previously opened React tab must not bypass the guarded full-form save. */
+function pc_folio_bacs_guard_incomplete_rest_save($result, WP_REST_Request $request) {
+    if ($result !== null || !in_array($request->get_method(), ['POST', 'PUT', 'PATCH'], true)) return $result;
+    $route = rtrim($request->get_route(), '/');
+    if ($route === '/wc/v4/settings/payment-gateways/bacs') {
+        $values = $request->get_param('values');
+        if (!is_array($values) || !array_key_exists('account_details', $values)) return $result;
+    } elseif ($route === '/wc-admin/options') {
+        // Older Woo account editors write the option directly through this API.
+        $values = $request->get_json_params();
+        if (!is_array($values) || !array_key_exists('woocommerce_bacs_accounts', $values)) return $result;
+    } else {
+        return $result;
+    }
+    return new WP_Error('pc_folio_bacs_full_form_required', sprintf(
+        /* translators: %s: URL of the complete WooCommerce bank transfer settings form. */
+        __('This bank account editor does not include all recipient fields. Open the complete bank transfer settings, verify the details and save there: %s', 'pc-folio-customer-balance'),
+        pc_folio_bacs_settings_url()
+    ), ['status' => 409]);
+}
+// This hook runs after the endpoint's permission check and before any writes.
+add_filter('rest_dispatch_request', 'pc_folio_bacs_guard_incomplete_rest_save', 10, 2);
+
 function pc_folio_bacs_accounts_revision($accounts): string {
     return hash('sha256', wp_json_encode($accounts));
 }
