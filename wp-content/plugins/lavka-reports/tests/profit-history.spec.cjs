@@ -52,6 +52,8 @@ async function setup(mode='normal'){
    if(mode==='java' && q.operation==='month')body=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/profit-saved-java.json'),'utf8'));
    if(mode==='headcount' && ['month','calculate'].includes(q.operation))body={...body,report:{...JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/profit-headcount-java.json'),'utf8')),month:q.month}};
    if(mode==='scopeJava' && ['month','calculate'].includes(q.operation))body={...body,report:JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/profit-scope-java.json'),'utf8'))};
+   if(mode==='latestJava' && q.operation==='range' && q.fromMonth==='2026-09' && q.toMonth==='2026-09')body=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/profit-latest-range-java.json'),'utf8'));
+   if(mode==='latestJava' && q.operation==='month' && q.month==='2026-09')body=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/profit-latest-month-java.json'),'utf8'));
    if(mode==='wrongRevision'&&q.operation==='month')body.revisionId=777;
    return route.fulfill({contentType:'application/json',body:JSON.stringify({success:true,data:{httpStatus:200,bodyRaw:JSON.stringify(body)}})});
   }
@@ -108,6 +110,18 @@ test('failed and running attempts stay visible while the last report is used wit
   assert.match(await page.locator('#lph-selected').innerText(),/Revision: 9/);
   assert(!requests.some(r=>r.operation==='calculate'));assert.deepEqual(errors,[]);await page.close();
  }
+});
+test('serialized Java latest-result contract uses result 2, retains failed attempt 3 and never opens publication 1',async()=>{
+ const {page,requests,errors}=await setup('latestJava');
+ await page.locator('#lph-from').fill('2026-09');await page.locator('#lph-to').fill('2026-09');await page.locator('#lph-view').click();await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);
+ assert.match(await page.locator('#lph-months').innerText(),/3 \/ Failed attempt/);
+ assert.match(await page.locator('#lph-totals').innerText(),/120,00/);
+ await page.locator('#lph-months button').first().click();await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);
+ assert.match(await page.locator('#lph-selected').innerText(),/Revision: 2/);
+ assert.match(await page.locator('#lavr-profit-result').innerText(),/SYNTHETIC_CHECK_REQUIRED/);
+ const download=page.waitForEvent('download');await page.locator('#lph-export').click();await(await download).saveAs(path.join(out,'latest-java-range.xlsx'));
+ assert(requests.filter(r=>r.operation==='month'&&r.month==='2026-09').every(r=>r.revisionId==='2'));
+ assert(!requests.some(r=>r.operation==='calculate'));assert.deepEqual(errors,[]);await page.close();
 });
 test('explicit range saves each month with zero override and distinct request IDs',async()=>{const{page,requests,errors}=await setup();await range(page);await page.locator('#lavr-profit-manual').evaluate(n=>n.open=true);await page.locator('#lavr-profit-additional-salary').fill('0');await page.locator('#lph-calculate').click();await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);const c=requests.filter(r=>r.operation==='calculate');assert.deepEqual(c.map(r=>r.month),['2025-07','2025-08']);assert(c.every(r=>r.odesaAdditionalSalary==='0'));assert.notEqual(c[0].requestId,c[1].requestId);assert.deepEqual(errors,[]);await page.close();});
 test('stop waits for current month then prevents following commands',async()=>{const{page,requests}=await setup('slow');await range(page);await page.locator('#lph-calculate').click();await page.locator('#lph-stop').click();await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);assert.equal(requests.filter(r=>r.operation==='calculate').length,1);assert.match(await page.locator('#lph-state').innerText(),/Stopped/);await page.close();});
