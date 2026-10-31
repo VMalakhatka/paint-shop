@@ -95,7 +95,7 @@
             const data=await request('month',{month,revisionId});if(token!==generation)return;
             if(viewVersion!==viewer.version()){setError(t('stale'));return;}
             if(data.month!==month || String(data.revisionId)!==String(revisionId))throw new Error(t('invalid'));
-            $('selected').textContent=`${t('readonly')}: ${month} · ${t('revision')}: ${revisionId} · ${terminalLabel(data.status)} · ${t('published')}: ${text(data.publishedRevisionId)}`;
+            $('selected').textContent=`${t('readonly')}: ${month} · ${t('revision')}: ${revisionId} · ${terminalLabel(data.status)}`;
             if (!data.report) {viewer.clear();setError([terminalLabel(data.status),data.errorCode,data.requestId].filter(Boolean).join(' · '));return;}
             viewer.showSaved(data);await comparison?.observe(data);
         } catch(e){if(token===generation)setError(e.message || t('error'));}
@@ -144,7 +144,7 @@
                 const data=await request('calculate',{...params,month,requestId,...(taxSettingsVersion===null?{}:{taxSettingsVersion}),...(expectedScopeSettingsVersion===null?{}:{expectedScopeSettingsVersion})});
                 if(data.month!==month || data.requestId!==requestId || !activeStates.has(data.status) || !data.report || !data.revisionId)throw new Error(t('uncertain')+' '+text(data.status));
                 remember(null);viewer.showSaved(data);await comparison?.observe(data);lockedFields.forEach(([n])=>{n.disabled=true;});controls();
-                $('selected').textContent=`${t('readonly')}: ${month} · ${t('revision')}: ${data.revisionId} · ${terminalLabel(data.status)} · ${t('published')}: ${text(data.publishedRevisionId)}`;
+                $('selected').textContent=`${t('readonly')}: ${month} · ${t('revision')}: ${data.revisionId} · ${terminalLabel(data.status)}`;
             }
         }catch(e){failed=true;setError((e.message||t('error'))+'\n'+requestNote);}
         finally{

@@ -1599,11 +1599,7 @@ msgid "Stopped before the next month. Completed revisions remain saved."
 msgstr ""
 
 #: inc/class-profit-history.php
-msgid "Current saved result"
-msgstr ""
-
-#: inc/class-profit-history.php
-msgid "Preliminary revision"
+msgid "Preliminary result — review required"
 msgstr ""
 
 #: inc/class-profit-history.php
@@ -1745,7 +1741,7 @@ msgid "Select the same month in From month and Through month. For several months
 msgstr ""
 
 #: inc/class-profit-report.php
-msgid "To open an existing result, click View saved reports, then Open saved month. No new calculation is needed."
+msgid "Click View saved reports, then Open saved month. The latest saved result opens, including preliminary calculations. Review its warnings. Older results are available in Monthly revisions. No new calculation is needed."
 msgstr ""
 
 #: inc/class-profit-report.php
@@ -2383,4 +2379,8 @@ msgstr ""
 
 #: inc/class-profit-scope-settings.php
 msgid "Open Warehouses and inventory exclusions below this guide. Select the required warehouses and excluded branches, save, then calculate the required months."
+msgstr ""
+
+#: inc/class-profit-history.php
+msgid "The latest saved result is shown for each month, including preliminary calculations. Warnings remain visible. Failed or unfinished attempts do not replace a result. Older results are available in Monthly revisions."
 msgstr ""

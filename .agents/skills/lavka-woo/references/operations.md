@@ -607,3 +607,14 @@ active/archive by exact number/suffix/date/partner; confirm the proposal separat
 from the expense. Checkbox keys are validated against the immutable registry preview.
 Sources: FolioExpenseBasisService/Dao, captured column schema, Структура7.doc
 NUMSCHETPL/SCH_DATE descriptions; manager steps in the NP registry guide.
+
+## Последний сохранённый результат прибыли (31.10.2026)
+
+Решение владельца: просмотр месяца/диапазона по умолчанию выбирает последний
+COMPLETED/PROVISIONAL с отчётом. Выбор принадлежит Java; PHP/JS используют
+вернувшиеся revisionId/totals, а не подменяют ID или складывают суммы сами.
+FAILED/RUNNING — отдельная последняя попытка, publishedRevisionId — отдельный
+признак публикации, не критерий текущего просмотра. Явные исторические версии,
+предупреждения и зафиксированные ID экспорта/сравнения сохраняются. Деплой Java
+и фронта проверяется отдельно от тестов; GET не изменяет историю или ФОЛИО.
+Канон: [сохранённая прибыль](../../../../docs/api/FOLIO_PROFIT_SAVED_REPORTS_FRONTEND.md).

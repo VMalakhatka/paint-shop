@@ -27,6 +27,20 @@ async function setup(mode='normal'){
    }
    if(mode==='comparison' && q.operation==='range')body.months.forEach(m=>{m.latestRevisionId=45;m.latestStatus='PROVISIONAL';});
    if(mode==='comparison' && q.operation==='calculate')body.report.cities.forEach(c=>{c.profit='120';});
+   if(['latestResult','latestFailed','latestRunning'].includes(mode)){
+    const latestStatus=mode==='latestFailed'?'FAILED':mode==='latestRunning'?'RUNNING':'PROVISIONAL';
+    const latestRevisionId=latestStatus==='PROVISIONAL'?9:10;
+    if(q.operation==='range'){
+     body.complete=false;
+     body.months.forEach(m=>Object.assign(m,{revisionId:9,status:'PROVISIONAL',latestRevisionId,latestStatus,cities:report(m.month).cities.map(c=>({...c,profit:'155'}))}));
+     body.totals=[{city:'KYIV',profit:'310',complete:false}];
+    }
+    if(q.operation==='month'){
+     const isLatest=Number(q.revisionId)===9;
+     body={...body,status:isLatest?'PROVISIONAL':'COMPLETED',latestRevisionId,latestStatus,report:{...body.report,complete:!isLatest,cities:body.report.cities.map(c=>({...c,profit:isLatest?'155':'80'})),warnings:isLatest?[{code:'REVIEW_TEST',severity:'WARNING',message:'Synthetic review remains required'}]:[]}};
+    }
+    if(q.operation==='revisions')body={ok:true,month:q.month,revisions:[{...wrapper(q.month,9),status:'PROVISIONAL'},{...wrapper(q.month,1)}],hasMore:false};
+   }
    if(mode==='rolling' && q.operation==='range')body.months=body.months.map(m=>['2025-06','2025-07'].includes(m.month)?{month:m.month,status:'MISSING',revisionId:null}:m);
    if(mode==='rolling' && ['month','calculate'].includes(q.operation)){
     const d=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/profit-template-java.json'),'utf8'));d.month=q.month;
@@ -60,6 +74,41 @@ test('default saved view, monthly audit and exports never calculate Folio',async
  await page.screenshot({path:path.join(out,'desktop.png'),fullPage:true});await page.setViewportSize({width:390,height:844});await page.screenshot({path:path.join(out,'mobile.png'),fullPage:true});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);await page.close();
 });
 test('missing month remains visible and does not become zero',async()=>{const{page,requests}=await setup('missing');await range(page);assert.match(await page.locator('#lph-months').innerText(),/No saved report/);assert.match(await page.locator('#lph-totals').innerText(),/—/);assert(requests.every(r=>r.operation==='range'));await page.close();});
+test('latest preliminary result drives open, comparison and pinned period export; old revisions remain explicit',async()=>{
+ const {page,requests,errors}=await setup('latestResult');await range(page);
+ assert.match(await page.locator('#lph-months').innerText(),/Preliminary result — review required/);
+ assert.match(await page.locator('#lph-totals').innerText(),/310,00/);
+ await page.locator('#lph-months button').first().click();await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);
+ assert.equal(requests.filter(r=>r.operation==='month')[0].revisionId,'9');
+ assert.match(await page.locator('#lph-selected').innerText(),/Revision: 9/);
+ assert.doesNotMatch(await page.locator('#lph-selected').innerText(),/Current saved result/);
+ assert.match(await page.locator('#lavr-profit-result').innerText(),/Synthetic review remains required/);
+ assert.match(await page.locator('#lavr-profit-result').innerText(),/155,00/);
+ await page.locator('#lph-compare-range').click();await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);
+ assert.match(await page.locator('#lavr-profit-comparison').innerText(),/2025-07 \/ #9/);
+ const before=requests.length,download=page.waitForEvent('download');await page.locator('#lph-export').click();await(await download).saveAs(path.join(out,'latest-range.xlsx'));
+ assert.deepEqual(requests.slice(before).filter(r=>r.operation==='month').map(r=>[r.month,r.revisionId]),[['2025-07','9'],['2025-08','9']]);
+ await page.locator('#lph-months').getByRole('button',{name:'Monthly revisions',exact:true}).first().click();await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);
+ await page.locator('#lph-revisions').getByRole('button',{name:'Open saved month',exact:true}).last().click();await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);
+ assert.match(await page.locator('#lph-selected').innerText(),/Revision: 1/);
+ assert.match(await page.locator('#lavr-profit-result').innerText(),/80,00/);
+ assert.match(await page.locator('#lph-totals').innerText(),/310,00/);
+ assert(!requests.some(r=>r.operation==='calculate'));assert.deepEqual(errors,[]);
+ await page.locator('#lavr-profit-history').screenshot({path:path.join(out,'latest-result-desktop.png')});
+ await page.setViewportSize({width:390,height:844});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+ await page.locator('#lavr-profit-history').screenshot({path:path.join(out,'latest-result-mobile.png')});await page.close();
+});
+test('failed and running attempts stay visible while the last report is used without auto-retry',async()=>{
+ for(const mode of ['latestFailed','latestRunning']){
+  const {page,requests,errors}=await setup(mode);await range(page);
+  assert.match(await page.locator('#lph-months').innerText(),mode==='latestFailed'?/10 \/ Failed attempt/:/10 \/ Unfinished attempt/);
+  assert.equal(await page.locator('#lph-months').getByRole('button',{name:/Compare latest calculation/}).count(),0);
+  await page.locator('#lph-months button').first().click();await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);
+  assert.equal(requests.filter(r=>r.operation==='month')[0].revisionId,'9');
+  assert.match(await page.locator('#lph-selected').innerText(),/Revision: 9/);
+  assert(!requests.some(r=>r.operation==='calculate'));assert.deepEqual(errors,[]);await page.close();
+ }
+});
 test('explicit range saves each month with zero override and distinct request IDs',async()=>{const{page,requests,errors}=await setup();await range(page);await page.locator('#lavr-profit-manual').evaluate(n=>n.open=true);await page.locator('#lavr-profit-additional-salary').fill('0');await page.locator('#lph-calculate').click();await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);const c=requests.filter(r=>r.operation==='calculate');assert.deepEqual(c.map(r=>r.month),['2025-07','2025-08']);assert(c.every(r=>r.odesaAdditionalSalary==='0'));assert.notEqual(c[0].requestId,c[1].requestId);assert.deepEqual(errors,[]);await page.close();});
 test('stop waits for current month then prevents following commands',async()=>{const{page,requests}=await setup('slow');await range(page);await page.locator('#lph-calculate').click();await page.locator('#lph-stop').click();await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);assert.equal(requests.filter(r=>r.operation==='calculate').length,1);assert.match(await page.locator('#lph-state').innerText(),/Stopped/);await page.close();});
 test('uncertain save stops campaign, retains request ID and does not auto-retry',async()=>{const{page,requests}=await setup('timeout');await range(page);await page.locator('#lph-calculate').click();await page.waitForFunction(()=>!document.getElementById('lph-view').disabled);assert.equal(requests.filter(r=>r.operation==='calculate').length,1);assert.match(await page.locator('#lph-error').innerText(),/not confirmed/);assert(await page.evaluate(()=>sessionStorage.getItem('lavkaProfitSaveAttempt')));await page.close();});

@@ -269,3 +269,19 @@ Saved months, period totals, comparison cities and report/audit sections can be
 collapsed using native keyboard-accessible disclosures. `profit-folds.js` preserves
 in-page disclosure state across rendering; collapse never filters export data.
 Only the WordPress plugin needs deployment for this presentation change.
+
+### 0.12.2 — latest saved result by default
+
+The month and range use Java's latest saved COMPLETED/PROVISIONAL result with a
+report. Publication metadata no longer labels an older revision as the current
+result in the viewer. Preliminary results retain their warnings; FAILED/RUNNING
+attempts remain visible separately. Explicit historical revision IDs and frozen
+comparison/export selections are preserved. No calculation or publication occurs
+on reads. The manager guide and Ukrainian/Russian labels explain this distinction.
+
+Requires the matching Java default-selection update for both month and range;
+frontend alone cannot change server totals. No data migration or recalculation is
+needed. `profit-history.spec.cjs` covers preliminary selection, pinned range XLSX,
+comparison, historical opening, failed/running attempts and responsive rendering.
+Deployment and live acceptance are separate from these synthetic checks. See the
+[saved report contract](../../../docs/api/FOLIO_PROFIT_SAVED_REPORTS_FRONTEND.md).

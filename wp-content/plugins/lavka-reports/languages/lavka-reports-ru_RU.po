@@ -1631,12 +1631,8 @@ msgid "Stopped before the next month. Completed revisions remain saved."
 msgstr "Остановлено перед следующим месяцем. Завершённые версии сохранены."
 
 #: inc/class-profit-history.php
-msgid "Current saved result"
-msgstr "Текущий сохранённый результат"
-
-#: inc/class-profit-history.php
-msgid "Preliminary revision"
-msgstr "Предварительная версия"
+msgid "Preliminary result — review required"
+msgstr "Предварительный результат — нужна проверка"
 
 #: inc/class-profit-history.php
 msgid "Incomplete period: missing or preliminary results require review."
@@ -1783,8 +1779,8 @@ msgid "Select the same month in From month and Through month. For several months
 msgstr "Выберите одинаковый месяц в полях «С месяца» и «По месяц включительно». Для периода укажите первый и последний месяц."
 
 #: inc/class-profit-report.php
-msgid "To open an existing result, click View saved reports, then Open saved month. No new calculation is needed."
-msgstr "Чтобы открыть готовый результат, нажмите «Показать сохранённые отчёты», затем «Открыть сохранённый месяц». Пересчитывать не нужно."
+msgid "Click View saved reports, then Open saved month. The latest saved result opens, including preliminary calculations. Review its warnings. Older results are available in Monthly revisions. No new calculation is needed."
+msgstr "Нажмите «Показать сохранённые отчёты», затем «Открыть сохранённый месяц». Откроется последний сохранённый результат, в том числе предварительный. Проверьте его предупреждения. Старые результаты доступны в «Версиях месяца». Перерасчёт не нужен."
 
 #: inc/class-profit-report.php
 msgid "For a new calculation, open Manual report parameters. Choose By employee count and check Kyiv and Odesa staff, additional work and the RUB rate if applicable. Leave additional work blank for the default; enter 0 to cancel it."
@@ -2422,3 +2418,7 @@ msgstr "Без исключений"
 #: inc/class-profit-scope-settings.php
 msgid "Open Warehouses and inventory exclusions below this guide. Select the required warehouses and excluded branches, save, then calculate the required months."
 msgstr "Раскройте «Склады и исключения из остатков» под этой инструкцией. Выберите нужные склады и исключённые ветки, сохраните и рассчитайте нужные месяцы."
+
+#: inc/class-profit-history.php
+msgid "The latest saved result is shown for each month, including preliminary calculations. Warnings remain visible. Failed or unfinished attempts do not replace a result. Older results are available in Monthly revisions."
+msgstr "Для каждого месяца показан последний сохранённый результат, в том числе предварительный. Предупреждения остаются видимыми. Неудачная или незавершённая попытка не заменяет результат. Старые результаты доступны в «Версиях месяца»."
