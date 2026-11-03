@@ -30,6 +30,7 @@ REQUIRED = (
     "docs/MANAGER_CUSTOMER_GUIDE_UK.md",
     "docs/FOLIO_ACCOUNTING_PRICES_MANAGER_UK.md",
     "docs/CUSTOMER_ANALYTICS.md",
+    "docs/MAKERS_LANDING.md",
 )
 
 
@@ -41,6 +42,11 @@ class ImpactRule:
 
 
 IMPACT_RULES = (
+    ImpactRule(
+        "makers landing content and release",
+        ("content/makers-landing/**",),
+        ("docs/MAKERS_LANDING.md", "content/makers-landing/README.md"),
+    ),
     ImpactRule(
         "legacy catalogue domain bridge",
         ("scripts/legacy-domain-redirect/**",),

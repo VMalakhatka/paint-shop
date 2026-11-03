@@ -462,6 +462,17 @@ Featured image на принятой обычной странице прина�
 Paint Shop UX. Владельцы — `docs/SYSTEM_OVERVIEW.md`; канон и код справки обновлены.
 2026-10-22 на production подтверждён активный PSU 1.9.0 с этим модулем.
 
+Лендинг «Для майстрів» (`dlia-maistriv`, 2026-11-03) — контент отдельной WordPress
+page, не новый plugin/template. Источники: `content/makers-landing/`; операторский
+канон: `docs/MAKERS_LANDING.md`. Inline CSS ограничен `.lavka-makers`; правила
+типографики должны превосходить specificity `.psu-public-page #main .psu-page-prose`,
+иначе общая тема заменяет отступы/шрифты. `body:has(.lavka-makers)` скрывает только
+дублирующий внешний H1 и снимает ширину карточки. Шесть editorial attachments
+загружаются через WordPress с обычными Media Cloud hooks; не назначать их товарам
+или Folio SKU. Главный CTA ведёт в существующий PCOE account chat
+`my-account/?pcoe_chat=1`; запасной email — shop@paint.dn.ua. Ни переход в кабинет,
+ни mailto не являются отправленной заявкой и не назначают скидку/роль.
+
 
 ## Независимый каркас: этап 2 (1.9.0, 2026-10-21)
 
