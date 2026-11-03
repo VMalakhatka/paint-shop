@@ -1041,3 +1041,13 @@ rollback, fallback, empty-menu), браузер на desktop/tablet/mobile, от
 справки и переключение Purchase → Draft → Purchase. Канон и код «Як замовляти»
 обновлены; production deploy в этой задаче не выполнялся. Откат: вернуть
 `inc/site-header.php`, `assets/site-header.css/js` предыдущей версии вместе.
+
+## Метаданные товара (2026-11-03)
+
+`assets/single-product.css`: артикул, категории и разрешённые бренды оформлены
+как штрихкод: 13px, цвет #333, line-height 1.45; подписи 600, значения 400.
+Ссылки остаются подчёркнутыми и кликабельными. Изменение ограничено
+`.psu-product .product_meta`; данные, Woo hooks и фильтр брендов не меняются.
+CSS обновляется через существующий filemtime URL. Проверено в браузере на товаре
+Ж-Л-175: desktop и mobile 390px, computed styles всех строк совпадают, overflow нет.
+Production deploy не выполнен.
