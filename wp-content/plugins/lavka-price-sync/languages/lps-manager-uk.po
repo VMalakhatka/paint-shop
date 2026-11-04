@@ -1,9 +1,6 @@
 msgid ""
 msgstr "Project-Id-Version: lps-manager\nContent-Type: text/plain; charset=UTF-8\nLanguage: uk\nMIME-Version: 1.0\nContent-Transfer-Encoding: 8bit\n"
 
-msgid "Accepts the full Access input table; the simplified manager input is still being clarified. Calculates three result tables, without creating a Folio invoice. Ambiguous source matches stop the calculation."
-msgstr "Приймає повну вхідну таблицю Access; спрощене введення менеджера ще уточнюється. Розраховує три таблиці результату, не створюючи накладну ФОЛІО. Неоднозначні збіги зупиняють розрахунок."
-
 msgid "Access denied."
 msgstr "Доступ заборонено."
 
@@ -25,6 +22,9 @@ msgstr "Артикули без наявних цільових рядків"
 msgid "Assembly has ambiguous source matches or duplicate output articles. Check composition links, warehouse 7 prices and repeated child articles."
 msgstr "У збірці неоднозначні зв’язки або повторні артикули результату. Перевірте склад виробу, ціни складу 7 і повторні артикули дітей."
 
+msgid "Assembly input"
+msgstr "Вхідні дані збірки"
+
 msgid "Assembly invoice calculation"
 msgstr "Збірка накладна — розрахунок"
 
@@ -33,6 +33,9 @@ msgstr "Розрахувати збірку"
 
 msgid "Calculate assembly and download its results. Folio invoice generation will be added here later."
 msgstr "Розрахуйте збірку та завантажте результати. Створення накладних у ФОЛІО додамо сюди пізніше."
+
+msgid "Calculation details"
+msgstr "Деталі розрахунку"
 
 msgid "Cannot apply: resolve the reported conflicts first."
 msgstr "Застосування заблоковано: спочатку вирішіть зазначені конфлікти."
@@ -52,11 +55,23 @@ msgstr "Перевірте вхідний рядок %s: кількість ко
 msgid "Check status"
 msgstr "Перевірити статус"
 
-msgid "Check the displayed columns. Supply either a file or pasted cells, with no formulas or repeated update articles. For assembly, SLOG is required."
-msgstr "Перевірте наведені колонки. Використовуйте або файл, або вставлені комірки; без формул і повторних артикулів для оновлення. Для збірки потрібен SLOG."
+msgid "Check the displayed columns. Supply either a file or pasted cells, with no formulas or repeated update articles. For assembly, use the two columns of the selected mode and positive quantities; only the full Access format requires SLOG."
+msgstr "Перевірте колонки на екрані. Використайте файл або вставлені комірки, без формул і повторних артикулів оновлення. Для збірки потрібні дві колонки обраного режиму й додатні кількості; SLOG потрібен лише в повному форматі Access."
 
 msgid "Choose an operation, upload a file or paste cells from Excel, then preview. For card changes, check all warehouses and empty values before confirming Apply. For article selection, download the result."
 msgstr "Виберіть операцію, завантажте файл або вставте комірки з Excel та відкрийте перегляд. Перед застосуванням змін карток перевірте всі склади й порожні значення. Для вибірки артикулів завантажте результат."
+
+msgid "Choose parent articles and quantities, or child articles and quantities for multi-assembly. Upload or paste two columns, calculate, then copy ARTIC / KOL_R / PRICE into IMPORT DBF or download the first Excel sheet. Load the DBF into an assembly invoice in Folio as before. Each calculation starts with a fresh input table."
+msgstr "Оберіть артикули батьків і кількості або артикули дітей і кількості для мультизбірки. Завантажте чи вставте дві колонки, розрахуйте, потім скопіюйте ARTIC / KOL_R / PRICE у IMPORT DBF або завантажте перший аркуш Excel. Завантажте DBF у накладну збірки ФОЛІО, як раніше. Кожен розрахунок починається з нової вхідної таблиці."
+
+msgid "Copied without headers. Paste into IMPORT DBF."
+msgstr "Скопійовано без заголовків. Вставте в IMPORT DBF."
+
+msgid "Copy failed. Download Excel and copy the three columns from IMPORT_DBF without the header."
+msgstr "Не вдалося скопіювати. Завантажте Excel і скопіюйте три колонки аркуша IMPORT_DBF без заголовка."
+
+msgid "Copy for IMPORT DBF"
+msgstr "Скопіювати для IMPORT DBF"
 
 msgid "Could not export this operation. Reopen it from history and try again."
 msgstr "Не вдалося вивантажити операцію. Відкрийте її в історії та повторіть завантаження."
@@ -82,6 +97,18 @@ msgstr "Файл і порожні значення"
 msgid "Five operations for product cards and article selection. Source and destination: Paint_Ua."
 msgstr "П’ять операцій для карток товарів і вибірки артикулів. Читання та зміни: Paint_Ua."
 
+msgid "For IMPORT DBF: ARTIC / KOL_R / PRICE"
+msgstr "Для IMPORT DBF: ARTIC / KOL_R / PRICE"
+
+msgid "From parent articles"
+msgstr "Збірка: від артикулів батьків"
+
+msgid "Full Access table (advanced)"
+msgstr "Повна таблиця Access (розширений режим)"
+
+msgid "Headers are optional. In parent mode, enter ARTIC_roditel and KOL_rod_razob; in multi-assembly mode, ARTIC_rebenok and kol_reb_pol. Both cells are required; quantities must be positive, child quantities whole numbers up to 32767. Unentered fields receive the defaults of a new Access row. XLS/XLSX/UTF-8 CSV: first sheet, up to 5 MB and 500 rows; no formulas. Use tabs or semicolons with decimal commas."
+msgstr "Заголовки необов’язкові. Для збірки введіть ARTIC_roditel і KOL_rod_razob, для мультизбірки — ARTIC_rebenok і kol_reb_pol. Обидві комірки обов’язкові; кількість додатна, кількість дітей — ціле число до 32767. Решта полів отримують початкові значення нового рядка Access. XLS/XLSX/CSV UTF-8: перший аркуш, до 5 МБ і 500 рядків, без формул. Для десяткової коми використовуйте табуляцію або крапку з комою."
+
 msgid "I checked all changes, including empty values, and confirm the update in Paint_Ua."
 msgstr "Я перевірив усі зміни, зокрема порожні значення, і підтверджую запис у Paint_Ua."
 
@@ -90,6 +117,9 @@ msgstr "Якщо результат невідомий"
 
 msgid "Manager operations"
 msgstr "Операції менеджера"
+
+msgid "Multi-assembly: from child articles"
+msgstr "Мультизбірка: від артикулів дітей"
 
 msgid "NULL / empty"
 msgstr "NULL / порожньо"
@@ -163,14 +193,17 @@ msgstr "Збережено й перевірено у ФОЛІО."
 msgid "Source rows changed. Nothing was applied; create a new preview."
 msgstr "Початкові рядки змінилися. Запис не виконано; створіть новий перегляд."
 
+msgid "The invoice result is incomplete. Check recipes and warehouse 7 prices. Copying to IMPORT DBF is unavailable; the Excel report retains the diagnostic tables."
+msgstr "Результат для накладної неповний. Перевірте склад збірки та ціни складу 7. Копіювання в IMPORT DBF недоступне; діагностичні таблиці збережено у звіті Excel."
+
 msgid "The operation is running. Check status."
 msgstr "Операція виконується. Перевірте статус."
 
+msgid "The recipe, prices and assembly type are determined from Folio. Negative quantities consume components; positive quantities receive the finished article. Check the result before importing the DBF."
+msgstr "Склад збірки, ціни й тип збірки визначаються за даними ФОЛІО. Від’ємні кількості списують компоненти, додатні — оприбутковують готовий товар. Перевірте результат перед імпортом DBF."
+
 msgid "Unit of measure"
 msgstr "Одиниця виміру"
-
-msgid "Upload the assembly input or paste cells from Excel, calculate and check the result tables, then download Excel. This screen does not create a Folio invoice."
-msgstr "Завантажте дані збірки або вставте комірки з Excel, виконайте розрахунок і перевірте таблиці результату, потім завантажте Excel. Цей екран поки не створює накладну ФОЛІО."
 
 msgid "Warehouse"
 msgstr "Склад"

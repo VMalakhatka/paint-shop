@@ -607,3 +607,5 @@ active/archive by exact number/suffix/date/partner; confirm the proposal separat
 from the expense. Checkbox keys are validated against the immutable registry preview.
 Sources: FolioExpenseBasisService/Dao, captured column schema, Структура7.doc
 NUMSCHETPL/SCH_DATE descriptions; manager steps in the NP registry guide.
+
+Folio assembly input (owner/manager instruction 2026-11-04): parent mode supplies ARTIC_roditel/KOL_rod_razob; child mode supplies ARTIC_rebenok/kol_reb_pol. WordPress expands fresh Access defaults (other article NULL, other numeric fields 0 including SLOG), then calls the unchanged six-column ASSEMBLY Java contract. Do not force SLOG=1 for child mode; macro step 13 classifies by recipe. IMPORT_DBF concatenates columns ARTIC/KOL_R/PRICE from outputs 18/9/91 without aggregation; preserve technical sheets/history. Actual DBF generation and invoice creation remain outside this change. Canonical manager instructions and remaining Access comparison: `docs/FOLIO_MANAGER_OPERATIONS.md`.
