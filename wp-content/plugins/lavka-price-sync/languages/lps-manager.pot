@@ -1,8 +1,5 @@
 msgid ""
-msgstr "Project-Id-Version: lps-manager\nContent-Type: text/plain; charset=UTF-8\nLanguage: \nMIME-Version: 1.0\nContent-Transfer-Encoding: 8bit\n"
-
-msgid "Accepts the full Access input table; the simplified manager input is still being clarified. Calculates three result tables, without creating a Folio invoice. Ambiguous source matches stop the calculation."
-msgstr ""
+msgstr "Content-Type: text/plain; charset=UTF-8\n"
 
 msgid "Access denied."
 msgstr ""
@@ -25,6 +22,9 @@ msgstr ""
 msgid "Assembly has ambiguous source matches or duplicate output articles. Check composition links, warehouse 7 prices and repeated child articles."
 msgstr ""
 
+msgid "Assembly input"
+msgstr ""
+
 msgid "Assembly invoice calculation"
 msgstr ""
 
@@ -32,6 +32,9 @@ msgid "Calculate assembly"
 msgstr ""
 
 msgid "Calculate assembly and download its results. Folio invoice generation will be added here later."
+msgstr ""
+
+msgid "Calculation details"
 msgstr ""
 
 msgid "Cannot apply: resolve the reported conflicts first."
@@ -52,10 +55,22 @@ msgstr ""
 msgid "Check status"
 msgstr ""
 
-msgid "Check the displayed columns. Supply either a file or pasted cells, with no formulas or repeated update articles. For assembly, SLOG is required."
+msgid "Check the displayed columns. Supply either a file or pasted cells, with no formulas or repeated update articles. For assembly, use the two columns of the selected mode and positive quantities; only the full Access format requires SLOG."
 msgstr ""
 
 msgid "Choose an operation, upload a file or paste cells from Excel, then preview. For card changes, check all warehouses and empty values before confirming Apply. For article selection, download the result."
+msgstr ""
+
+msgid "Choose parent articles and quantities, or child articles and quantities for multi-assembly. Upload or paste two columns, calculate, then copy ARTIC / KOL_R / PRICE into IMPORT DBF or download the first Excel sheet. Load the DBF into an assembly invoice in Folio as before. Each calculation starts with a fresh input table."
+msgstr ""
+
+msgid "Copied without headers. Paste into IMPORT DBF."
+msgstr ""
+
+msgid "Copy failed. Download Excel and copy the three columns from IMPORT_DBF without the header."
+msgstr ""
+
+msgid "Copy for IMPORT DBF"
 msgstr ""
 
 msgid "Could not export this operation. Reopen it from history and try again."
@@ -82,6 +97,18 @@ msgstr ""
 msgid "Five operations for product cards and article selection. Source and destination: Paint_Ua."
 msgstr ""
 
+msgid "For IMPORT DBF: ARTIC / KOL_R / PRICE"
+msgstr ""
+
+msgid "From parent articles"
+msgstr ""
+
+msgid "Full Access table (advanced)"
+msgstr ""
+
+msgid "Headers are optional. In parent mode, enter ARTIC_roditel and KOL_rod_razob; in multi-assembly mode, ARTIC_rebenok and kol_reb_pol. Both cells are required; quantities must be positive, child quantities whole numbers up to 32767. Unentered fields receive the defaults of a new Access row. XLS/XLSX/UTF-8 CSV: first sheet, up to 5 MB and 500 rows; no formulas. Use tabs or semicolons with decimal commas."
+msgstr ""
+
 msgid "I checked all changes, including empty values, and confirm the update in Paint_Ua."
 msgstr ""
 
@@ -89,6 +116,9 @@ msgid "If the result is unknown"
 msgstr ""
 
 msgid "Manager operations"
+msgstr ""
+
+msgid "Multi-assembly: from child articles"
 msgstr ""
 
 msgid "NULL / empty"
@@ -163,13 +193,16 @@ msgstr ""
 msgid "Source rows changed. Nothing was applied; create a new preview."
 msgstr ""
 
+msgid "The invoice result is incomplete. Check recipes and warehouse 7 prices. Copying to IMPORT DBF is unavailable; the Excel report retains the diagnostic tables."
+msgstr ""
+
 msgid "The operation is running. Check status."
 msgstr ""
 
-msgid "Unit of measure"
+msgid "The recipe, prices and assembly type are determined from Folio. Negative quantities consume components; positive quantities receive the finished article. Check the result before importing the DBF."
 msgstr ""
 
-msgid "Upload the assembly input or paste cells from Excel, calculate and check the result tables, then download Excel. This screen does not create a Folio invoice."
+msgid "Unit of measure"
 msgstr ""
 
 msgid "Warehouse"
