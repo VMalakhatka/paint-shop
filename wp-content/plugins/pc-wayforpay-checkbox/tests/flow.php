@@ -102,7 +102,7 @@ class FakeService {
     }
 }
 $GLOBALS['wpdb']=new FakeDB(); $GLOBALS['service']=new FakeService(); $GLOBALS['orders']=[]; $GLOBALS['uuid']=0; $GLOBALS['jobs']=[]; $GLOBALS['can_manage']=true;
-foreach (['Protocol','Command','Store','Bridge'] as $file) require __DIR__.'/../src/'.$file.'.php';
+foreach (['Protocol','Command','Store','Availability','PaymentFeedback','Bridge'] as $file) require __DIR__.'/../src/'.$file.'.php';
 require __DIR__.'/../../pc-checkbox-fiscalization/src/Domain/ValidationException.php';
 require __DIR__.'/../../pc-checkbox-fiscalization/src/Domain/CommandValidator.php';
 use Paint\WayForPayCheckbox\Protocol;
@@ -125,11 +125,37 @@ check(!is_wp_error($bridge->accept(signed(1,['transactionStatus'=>'Declined'])))
 check(empty($GLOBALS['wpdb']->rows) && !$GLOBALS['orders'][1]->is_paid(),'decline no payment or receipt');
 check(!is_wp_error($bridge->accept(signed(1,['transactionStatus'=>'WaitingAuthComplete']))),'hold acknowledged');
 check(empty($GLOBALS['wpdb']->rows),'hold no receipt');
+check($GLOBALS['orders'][1]->meta['_pc_wfp_payment_feedback']['status']==='Declined','late pending does not erase terminal failure');
+fixture(81);
+$declined=signed(81,['transactionStatus'=>'Declined','reasonCode'=>1118,'reason'=>'private raw reason','cardPan'=>'****0000']);
+$bridge->accept($declined);
+$saved=$GLOBALS['orders'][81]->meta['_pc_wfp_payment_feedback'];
+check($saved['code']==='1118' && count($saved)===4,'safe failure fields persisted');
+check(!str_contains(json_encode($saved),'private')&&!str_contains(json_encode($saved),'****'),'raw reason and card not retained');
+$bridge->accept(signed(81,['transactionStatus'=>'Declined','reasonCode'=>1104,'orderReference'=>'81_woo_w4p_1792000001']));
+$bridge->accept($declined);
+check($GLOBALS['orders'][81]->meta['_pc_wfp_payment_feedback']['code']==='1104','older attempt cannot overwrite newer diagnostic');
+check(empty($GLOBALS['wpdb']->rows) && !$GLOBALS['orders'][81]->is_paid(),'failed attempts never create a financial row');
+fixture(82);
+$badReturn=signed(82,['transactionStatus'=>'Declined','reasonCode'=>1118]);$badReturn['reasonCode']=1104;
+\Paint\WayForPayCheckbox\PaymentFeedback::returned($GLOBALS['orders'][82],$badReturn);
+check(empty($GLOBALS['orders'][82]->meta),'unsigned/tampered browser failure ignored');
+\Paint\WayForPayCheckbox\PaymentFeedback::returned($GLOBALS['orders'][82],signed(82));
+check(empty($GLOBALS['orders'][82]->meta) && !$GLOBALS['orders'][82]->is_paid(),'browser Approved cannot mark paid');
+\Paint\WayForPayCheckbox\PaymentFeedback::returned($GLOBALS['orders'][82],signed(82,['transactionStatus'=>'Declined','reasonCode'=>1118]));
+check($GLOBALS['orders'][82]->meta['_pc_wfp_payment_feedback']['code']==='1118','signed browser failure available before callback');
+fixture(83);
+\Paint\WayForPayCheckbox\PaymentFeedback::returned($GLOBALS['orders'][83],signed(82,['transactionStatus'=>'Declined','reasonCode'=>1118]));
+\Paint\WayForPayCheckbox\PaymentFeedback::returned($GLOBALS['orders'][83],signed(83,['transactionStatus'=>'Declined','reasonCode'=>1118,'amount'=>'9.00']));
+check(empty($GLOBALS['orders'][83]->meta),'cross-order and wrong-total return ignored');
 check(!is_wp_error($bridge->accept(signed(1,['transactionStatus'=>'Voided']))) && empty($GLOBALS['wpdb']->rows),'cancelled payment cannot create a sale');
 check(!is_wp_error($bridge->accept(signed(1,['reasonCode'=>1101]))) && empty($GLOBALS['wpdb']->rows),'Approved without successful reason cannot pay');
 $ack=$bridge->accept($b); check($ack['status']==='accept','approved accepted');
 check($GLOBALS['orders'][1]->status==='processing','payment_complete used without completed override');
 check(isset($GLOBALS['orders'][1]->meta['_pc_wfp_verified']),'verified marker exists');
+$diagnostic=$GLOBALS['orders'][1]->meta['_pc_wfp_payment_feedback'];
+$bridge->accept(signed(1,['transactionStatus'=>'Declined','reasonCode'=>1118]));
+check($GLOBALS['orders'][1]->meta['_pc_wfp_payment_feedback']===$diagnostic && $GLOBALS['orders'][1]->is_paid(),'late decline never downgrades verified payment');
 check(count($GLOBALS['service']->sent)===0,'callback does not call Checkbox');
 check(!is_wp_error($bridge->accept($b)) && $GLOBALS['orders'][1]->paidCalls===1,'duplicate callback payment once');
 $bridge->work(1); check($GLOBALS['wpdb']->rows[1]['status']==='SUCCEEDED','sale succeeds');

@@ -12,17 +12,22 @@ function wc_get_endpoint_url($e,$v,$url) { return $url.$e.'/'.$v.'/'; }
 function wc_get_account_endpoint_url($e) { return 'https://example.test/my-account/'.$e.'/'; }
 function add_query_arg($key,$value,$url) { return $url.'?'.urlencode($key).'='.urlencode($value); }
 function wc_get_order($id) { return $GLOBALS['orders'][$id]??false; }
+function get_option($key,$default=[]) { return []; }
+function get_transient($key) { return ['available'=>$GLOBALS['available']??true,'code'=>'1100']; }
 class WC_Order {
     public $method='wayforpay', $status='pending', $paid=null, $verified='', $transaction='';
     public function get_id(){return 7;}
     public function get_order_key(){return 'fixture-key';}
     public function get_payment_method(){return $this->method;}
     public function get_status(){return $this->status;}
-    public function get_meta(...$a){return $this->verified;}
+    public $feedback='';
+    public function get_meta($key,...$a){return $key==='_pc_wfp_verified'?$this->verified:$this->feedback;}
     public function get_transaction_id(){return $this->transaction;}
     public function get_date_paid(){return $this->paid;}
 }
 require __DIR__.'/../src/ReturnPage.php';
+require __DIR__.'/../src/Availability.php';
+require __DIR__.'/../src/PaymentFeedback.php';
 $page=new \Paint\WayForPayCheckbox\ReturnPage(); $page->boot();
 $orders=[7=>new WC_Order()];$checks=0;
 function check($ok,$label){global $checks;if(!$ok)throw new RuntimeException($label);$checks++;}
@@ -31,9 +36,20 @@ $query=['order'=>'7','key'=>'fixture-key'];
 check($page->target($query)==='https://example.test/checkout/order-received/7/?key=fixture-key','legacy return redirected to protected Woo endpoint');
 foreach ([['order'=>7,'key'=>'wrong'],['order'=>8,'key'=>'fixture-key'],['order'=>['7'],'key'=>'fixture-key'],['order'=>7,'key'=>['fixture-key']],$query+['wc-api'=>'WC_wayforpay']]as $q){check($page->target($q)==='','invalid/callback request untouched');}
 check(str_contains($page->message('original',$orders[7]),'waiting for payment confirmation'),'early browser return never claims paid');
+$GLOBALS['available']=false;
+check(str_contains($page->message('original',$orders[7]),'temporarily unavailable'),'restricted merchant explained on return');
+$GLOBALS['available']=true;
+$orders[7]->feedback=['status'=>'Declined','code'=>'1118'];
+check(str_contains($page->message('original',$orders[7]),'payment service restriction'),'signed merchant refusal explained as attempt outcome');
+$orders[7]->feedback=['status'=>'Declined','code'=>'1104'];
+check(str_contains($page->message('original',$orders[7]),'Check with your bank'),'bank decline distinguished from service restriction');
+$orders[7]->feedback=['status'=>'Expired','code'=>'1124'];
+check(str_contains($page->message('original',$orders[7]),'session expired'),'expired session explained');
+$orders[7]->feedback='';
 $orders[7]->paid=true;$orders[7]->status='processing';
 check(str_contains($page->message('original',$orders[7]),'waiting for payment confirmation'),'manual paid status not trusted');
 $orders[7]->verified=['reference'=>'verified-ref'];$orders[7]->transaction='verified-ref';
+$GLOBALS['available']=false;$orders[7]->feedback=['status'=>'Declined','code'=>'1118'];
 check(str_contains($page->message('original',$orders[7]),'paid successfully'),'verified callback success');
 $orders[7]->status='pc-draft';
 check(str_contains($page->message('original',$orders[7]),'paid successfully'),'paid split parent success');

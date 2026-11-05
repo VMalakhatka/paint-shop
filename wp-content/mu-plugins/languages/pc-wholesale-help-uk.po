@@ -1273,3 +1273,6 @@ msgstr "Банківський переказ, рахунок на оплату 
 
 msgid "Open Cooperation in the site footer and choose For makers to see materials and individual cooperation terms. The list opens with a click or with Enter or Space on the keyboard."
 msgstr "Унизу сайту відкрийте «Співпраця» та виберіть «Для майстрів», щоб переглянути матеріали й індивідуальні умови співпраці. Список відкривається натисканням або клавішами Enter чи Пробіл."
+
+msgid "If WayForPay is temporarily unavailable, the site explains the problem and stops automatic redirects to payment. Choose another available method or contact the manager. An existing order is saved. If money was charged, do not pay again; ask the manager to check the payment. Refresh checkout after the service recovers."
+msgstr "Якщо WayForPay тимчасово недоступний, сайт пояснює проблему та припиняє автоматичні переходи до оплати. Виберіть інший доступний спосіб або зверніться до менеджера. Уже створене замовлення зберігається. Якщо гроші списано, не сплачуйте вдруге: попросіть менеджера перевірити платіж. Після відновлення сервісу оновіть сторінку оформлення."

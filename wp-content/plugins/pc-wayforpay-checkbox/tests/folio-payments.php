@@ -69,7 +69,7 @@ class DB {
         $id=$where['order_id']; $this->tables[$table][$id]=array_merge($this->tables[$table][$id],$data); return 1;
     }
 }
-foreach (['Protocol','Command','Store','Bridge','FolioStore','FolioCommand','FolioClient','FolioPayments'] as $file) require __DIR__.'/../src/'.$file.'.php';
+foreach (['Protocol','Command','Store','Availability','PaymentFeedback','Bridge','FolioStore','FolioCommand','FolioClient','FolioPayments'] as $file) require __DIR__.'/../src/'.$file.'.php';
 class Client extends Paint\WayForPayCheckbox\FolioClient {
     public $calls=[], $ledger=[], $timeout=false, $persist=true, $tamper=false, $previewFail=false;
     public function call(string $method,string $path,?array $body=null): array {

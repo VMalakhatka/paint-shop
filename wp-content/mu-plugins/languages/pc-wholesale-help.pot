@@ -1251,3 +1251,6 @@ msgstr ""
 
 msgid "Open Cooperation in the site footer and choose For makers to see materials and individual cooperation terms. The list opens with a click or with Enter or Space on the keyboard."
 msgstr ""
+
+msgid "If WayForPay is temporarily unavailable, the site explains the problem and stops automatic redirects to payment. Choose another available method or contact the manager. An existing order is saved. If money was charged, do not pay again; ask the manager to check the payment. Refresh checkout after the service recovers."
+msgstr ""

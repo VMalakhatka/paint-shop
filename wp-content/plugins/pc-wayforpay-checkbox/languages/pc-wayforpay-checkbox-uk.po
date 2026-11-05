@@ -81,3 +81,24 @@ msgstr "У черзі на обробку. Фонове завдання ще н
 
 msgid "Previous attempt diagnostic (not the current result)"
 msgstr "Діагностика попередньої спроби (не поточний результат)"
+
+msgid "Card payment through WayForPay is temporarily unavailable. Please choose another payment method or contact the manager. Do not repeat payment if money has already been charged."
+msgstr "Оплата карткою через WayForPay тимчасово недоступна. Виберіть інший спосіб оплати або зверніться до менеджера. Не сплачуйте повторно, якщо гроші вже списано."
+
+msgid "Choose another payment method"
+msgstr "Вибрати інший спосіб оплати"
+
+msgid "Payment was cancelled or the payment session expired. Your order is saved. Check whether money was charged before trying again or contact the manager."
+msgstr "Оплату скасовано або час оплати минув. Ваше замовлення збережено. Перед повторною спробою перевірте, чи списано гроші, або зверніться до менеджера."
+
+msgid "WayForPay did not confirm this payment. Your order is saved. Check with your bank or contact the manager to choose another payment method. Do not repeat payment if money has already been charged."
+msgstr "WayForPay не підтвердив цю оплату. Ваше замовлення збережено. Уточніть у банку або зверніться до менеджера, щоб вибрати інший спосіб оплати. Не сплачуйте повторно, якщо гроші вже списано."
+
+msgid "WayForPay could not process this payment because of a payment service restriction or error. Your order is saved. Contact the manager before trying again; do not repeat payment if money was charged."
+msgstr "WayForPay не зміг провести цю оплату через обмеження або помилку платіжного сервісу. Ваше замовлення збережено. Зверніться до менеджера перед повторною спробою; не сплачуйте вдруге, якщо гроші списано."
+
+msgid "Last WayForPay payment diagnostic"
+msgstr "Остання діагностика оплати WayForPay"
+
+msgid "Historical diagnostic; the confirmed payment status takes precedence."
+msgstr "Історія спроби; підтверджений статус оплати має пріоритет."

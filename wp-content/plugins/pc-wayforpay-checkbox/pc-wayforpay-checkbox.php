@@ -2,7 +2,7 @@
 /**
  * Plugin Name: PC WayForPay Checkbox
  * Description: Verifies WayForPay callbacks and queues Checkbox receipts and independent Folio bank income.
- * Version: 0.2.1
+ * Version: 0.2.2
  * Requires PHP: 8.1
  * Requires Plugins: woocommerce, pc-checkbox-fiscalization
  * Text Domain: pc-wayforpay-checkbox
@@ -31,6 +31,8 @@ add_action('plugins_loaded', static function (): void {
         Paint\WayForPayCheckbox\FolioStore::upgrade();
         (new Paint\WayForPayCheckbox\Bridge())->boot();
         (new Paint\WayForPayCheckbox\ReturnPage())->boot();
+        (new Paint\WayForPayCheckbox\Availability())->boot();
+        add_action('woocommerce_admin_order_data_after_order_details', [new Paint\WayForPayCheckbox\PaymentFeedback(), 'panel']);
         (new Paint\WayForPayCheckbox\FolioPayments())->boot();
         (new Paint\WayForPayCheckbox\ReceiptPanel())->boot();
     }

@@ -1,5 +1,16 @@
 # Пользователи, роли, заказы и оплаты
 
+WayForPay admission/failure UI (code 0.2.2, 2026-11-05): `Availability` in
+pc-wayforpay-checkbox probes read-only TRANSACTION_LIST over a one-second window,
+retaining only status/code/time in a credential-scoped transient. It gates new
+Classic checkout/pay/legacy receipt attempts, never callbacks or fiscal/Folio work.
+HTTP 200 / 1118 is MerchantRestriction, not a Checkbox error; it does not reveal
+the private reason for account review. Never claim individual card results from
+this probe. Signed negative feedback is HPOS metadata under the shared payment
+lock; browser Approved cannot mark paid, and late failures cannot downgrade
+verified payment. Preserve protected Woo return URLs and UK/RU notices. Exact
+recovery and deployment boundaries: `docs/WAYFORPAY_TEST_ACCESS.md` and plugin README.
+
 ## Пользователь и ФОЛИО
 
 Регистрация оптовика: инструкция `docs/MANAGER_CUSTOMER_GUIDE_UK.md`,
