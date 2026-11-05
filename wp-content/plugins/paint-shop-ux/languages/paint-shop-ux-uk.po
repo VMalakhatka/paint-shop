@@ -330,3 +330,12 @@ msgstr "Приховати панель кошика"
 
 msgid "Enter a valid email address."
 msgstr "Введіть коректну адресу електронної пошти."
+
+msgid "Cooperation links (footer)"
+msgstr "Посилання співпраці (підвал)"
+
+msgid "Cooperation"
+msgstr "Співпраця"
+
+msgid "For makers"
+msgstr "Для майстрів"

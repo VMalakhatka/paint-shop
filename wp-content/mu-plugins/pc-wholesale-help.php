@@ -602,7 +602,8 @@ function pc_wholesale_help_render_endpoint(): void {
         </section>
 
         <p><?php esc_html_e('The site footer links to the catalogue and your account, and to this guide when you are signed in as a wholesale customer. It also contains purchase terms, payment and delivery, refunds, and seller contacts.', 'pc-wholesale-help'); ?></p>
-        <?php pc_wholesale_help_image('site-footer-links-mobile-2026-10-21.png', __('Footer links on a phone', 'pc-wholesale-help'), __('Click the image to enlarge it.', 'pc-wholesale-help')); ?>
+        <p><?php esc_html_e('Open Cooperation in the site footer and choose For makers to see materials and individual cooperation terms. The list opens with a click or with Enter or Space on the keyboard.', 'pc-wholesale-help'); ?></p>
+        <?php pc_wholesale_help_image('site-footer-cooperation-mobile-2026-11-05.png', __('Footer links on a phone', 'pc-wholesale-help'), __('Click the image to enlarge it.', 'pc-wholesale-help')); ?>
         <p><?php esc_html_e('Information pages use a comfortable text width and clear spacing, including on a phone. If a page cannot be found, use the catalogue link to continue browsing products.', 'pc-wholesale-help'); ?></p>
         <?php pc_wholesale_help_image('ordinary-page-mobile-2026-10-21.jpg', __('Information page on a phone', 'pc-wholesale-help'), __('Click the image to enlarge it.', 'pc-wholesale-help')); ?>
         <footer class="pc-help-footer">

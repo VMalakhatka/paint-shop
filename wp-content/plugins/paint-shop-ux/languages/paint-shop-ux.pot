@@ -415,3 +415,12 @@ msgstr ""
 
 msgid "Enter a valid email address."
 msgstr ""
+
+msgid "Cooperation links (footer)"
+msgstr ""
+
+msgid "Cooperation"
+msgstr ""
+
+msgid "For makers"
+msgstr ""

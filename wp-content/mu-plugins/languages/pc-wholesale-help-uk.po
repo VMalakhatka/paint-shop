@@ -1270,3 +1270,6 @@ msgstr "Якщо реквізити у попередньому зведеном
 #: wp-content/mu-plugins/pc-wholesale-help.php
 msgid "Bank transfers, payment invoices and the contacts page use the same verified recipient details. Check the recipient name and IBAN shown for the order. If the site says the details await verification, contact your manager before paying. Previously sent emails and downloaded files do not update automatically."
 msgstr "Банківський переказ, рахунок на оплату та сторінка контактів використовують однакові перевірені реквізити отримувача. Перевірте ім’я отримувача та IBAN у замовленні. Якщо сайт повідомляє, що реквізити очікують перевірки, зверніться до менеджера перед оплатою. Раніше надіслані листи та завантажені файли автоматично не оновлюються."
+
+msgid "Open Cooperation in the site footer and choose For makers to see materials and individual cooperation terms. The list opens with a click or with Enter or Space on the keyboard."
+msgstr "Унизу сайту відкрийте «Співпраця» та виберіть «Для майстрів», щоб переглянути матеріали й індивідуальні умови співпраці. Список відкривається натисканням або клавішами Enter чи Пробіл."

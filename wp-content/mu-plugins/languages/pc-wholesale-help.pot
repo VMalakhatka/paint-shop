@@ -1248,3 +1248,6 @@ msgstr ""
 #: wp-content/mu-plugins/pc-wholesale-help.php
 msgid "Bank transfers, payment invoices and the contacts page use the same verified recipient details. Check the recipient name and IBAN shown for the order. If the site says the details await verification, contact your manager before paying. Previously sent emails and downloaded files do not update automatically."
 msgstr ""
+
+msgid "Open Cooperation in the site footer and choose For makers to see materials and individual cooperation terms. The list opens with a click or with Enter or Space on the keyboard."
+msgstr ""

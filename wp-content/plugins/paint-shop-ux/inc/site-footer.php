@@ -17,12 +17,36 @@ function psu_site_footer_setup(): void {
 }
 add_action('wp', 'psu_site_footer_setup');
 
+add_action('init', static function (): void {
+    register_nav_menu('psu-cooperation', __('Cooperation links (footer)', 'paint-shop-ux'));
+}, 20);
+
+/** Only public, unprotected pages belong in this one-level partnership list. */
+function psu_site_footer_cooperation_links(): array {
+    $locations = get_nav_menu_locations();
+    if (!empty($locations['psu-cooperation'])) {
+        $links = [];
+        foreach (wp_get_nav_menu_items($locations['psu-cooperation']) ?: [] as $item) {
+            if ($item->type !== 'post_type' || $item->object !== 'page' || (int) $item->menu_item_parent !== 0) continue;
+            $page = get_post((int) $item->object_id);
+            if (!$page || $page->post_status !== 'publish' || $page->post_password !== '') continue;
+            $links[] = ['url' => get_permalink($page), 'label' => $item->title ?: get_the_title($page)];
+        }
+        return $links;
+    }
+    // No local page ID: the existing published landing is a safe initial menu.
+    $page = get_page_by_path('dlia-maistriv', OBJECT, 'page');
+    if (!$page || $page->post_status !== 'publish' || $page->post_password !== '') return [];
+    return [['url' => get_permalink($page), 'label' => __('For makers', 'paint-shop-ux')]];
+}
+
 function psu_render_site_footer(): void {
     static $rendered = false;
     if ($rendered || !psu_site_footer_enabled()) return;
     $rendered = true;
     $shop = function_exists('wc_get_page_permalink') ? wc_get_page_permalink('shop') : home_url('/');
     $account = function_exists('wc_get_page_permalink') ? wc_get_page_permalink('myaccount') : '';
+    $cooperation = psu_site_footer_cooperation_links();
     ?>
     <footer class="psu-site-footer" aria-label="<?php esc_attr_e('Site footer', 'paint-shop-ux'); ?>">
         <div class="psu-site-footer__top psu-site-footer__container">
@@ -34,6 +58,16 @@ function psu_render_site_footer(): void {
                 <?php endif; ?>
                 <?php if (function_exists('pc_wholesale_customer_can_access') && pc_wholesale_customer_can_access() && function_exists('pc_wholesale_help_url')): ?>
                     <a href="<?php echo esc_url(pc_wholesale_help_url()); ?>"><?php esc_html_e('How to order', 'paint-shop-ux'); ?></a>
+                <?php endif; ?>
+                <?php if ($cooperation): ?>
+                    <details class="psu-site-footer__cooperation">
+                        <summary><?php esc_html_e('Cooperation', 'paint-shop-ux'); ?></summary>
+                        <ul class="psu-site-footer__cooperation-list">
+                            <?php foreach ($cooperation as $link): ?>
+                                <li><a href="<?php echo esc_url($link['url']); ?>"><?php echo esc_html($link['label']); ?></a></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </details>
                 <?php endif; ?>
             </nav>
         </div>

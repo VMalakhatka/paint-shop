@@ -345,6 +345,14 @@ child theme. Семантика `current_time('timestamp')` сохранена �
 Источники: названные modules, `tests/site-footer-local.php`, `tests/site-footer.spec.cjs`;
 приёмка/rollback/deploy — README Paint Shop UX. Пока локальный выпуск.
 
+
+Обновление 2026-11-05: `psu-cooperation` регистрируется в Paint Shop UX как область
+WordPress-меню для «Співпраця» в подвале. Только публичные, не защищённые паролем
+страницы верхнего уровня; без назначения — fallback на `dlia-maistriv`, без ID.
+Не добавлять будущие страницы как неработающие ссылки и не переносить навигацию
+в тему. Источник — `inc/site-footer.php`; настройки и статус deploy (ожидается,
+SSH timeout) — [MAKERS_LANDING.md](../../../../docs/MAKERS_LANDING.md).
+
 ## Граница самостоятельных стилей (1.6.0, 2026-10-21)
 
 `paint-shop-ux/inc/storefront-styles.php` определяет `.psu-storefront` по Woo
