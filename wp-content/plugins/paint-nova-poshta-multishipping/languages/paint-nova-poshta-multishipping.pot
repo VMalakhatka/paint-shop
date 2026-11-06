@@ -2794,3 +2794,24 @@ msgstr ""
 
 msgid "Missing TTNs"
 msgstr ""
+
+msgid "Enter up to 100 TTNs, one number per line."
+msgstr ""
+
+msgid "Nova Poshta did not verify every supplied TTN. Check the list; nothing was saved."
+msgstr ""
+
+msgid "Only the supplied TTN list, incoming and outgoing"
+msgstr ""
+
+msgid "Load incoming and outgoing TTNs from a list"
+msgstr ""
+
+msgid "Copy TTN numbers from the Nova Poshta cabinet or the missing-number comparison. Paste up to 100 numbers, one per line. The site reads their current carrier data; check the preview and confirm saving. Existing Folio/Woo links and classification are preserved."
+msgstr ""
+
+msgid "TTNs to load"
+msgstr ""
+
+msgid "Documents available through the NP API"
+msgstr ""

@@ -118,6 +118,8 @@ final class Service
             $payload['scope']=array_merge($payload['scope'],['from'=>$from,'to'=>$to,'window_from'=>$windowFrom,'window_to'=>$windowTo,'next_from'=>$nextFrom]);
         } elseif ($command==='tracking') {
             $payload=$this->carrier->tracking((string)($input['ttn']??''),(string)($input['phone']??''));
+        } elseif ($command==='tracking_batch') {
+            $payload=$this->carrier->trackingBatch((string)($input['ttns']??''));
         } elseif ($command==='csv') {
             $payload=['rows'=>Record::csv((string)($input['csv']??'')),'source'=>'csv','scope'=>['coverage'=>'manual_csv_only'], 'observed_at'=>gmdate('Y-m-d H:i:s')];
         } elseif ($command==='manual') {

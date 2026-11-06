@@ -1900,3 +1900,24 @@ msgstr "Отсутствующих в реестре"
 
 msgid "Missing TTNs"
 msgstr "Отсутствующие ТТН"
+
+msgid "Enter up to 100 TTNs, one number per line."
+msgstr "Введите до 100 ТТН, по одному номеру на строку."
+
+msgid "Nova Poshta did not verify every supplied TTN. Check the list; nothing was saved."
+msgstr "Новая почта не подтвердила все ТТН из списка. Проверьте номера; ничего не сохранено."
+
+msgid "Only the supplied TTN list, incoming and outgoing"
+msgstr "Только переданный список ТТН: входящие и исходящие"
+
+msgid "Load incoming and outgoing TTNs from a list"
+msgstr "Загрузить входящие и исходящие ТТН списком"
+
+msgid "Copy TTN numbers from the Nova Poshta cabinet or the missing-number comparison. Paste up to 100 numbers, one per line. The site reads their current carrier data; check the preview and confirm saving. Existing Folio/Woo links and classification are preserved."
+msgstr "Скопируйте номера ТТН из кабинета Новой почты или из списка отсутствующих после сверки. Вставьте до 100 номеров, по одному на строку. Сайт прочитает актуальные данные перевозчика; проверьте просмотр и подтвердите сохранение. Существующие связи с ФОЛИО/Woo и классификация сохраняются."
+
+msgid "TTNs to load"
+msgstr "ТТН для загрузки"
+
+msgid "Documents available through the NP API"
+msgstr "Документы, доступные через API НП"

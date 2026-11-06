@@ -100,6 +100,7 @@ final class RegistryPage
             'window_from'=>'Current month: from','window_to'=>'Current month: to','next_from'=>'Next read: from',
             'coverage'=>'Coverage','account_document_list_only'=>'Only documents visible to this API account',
             'known_ttn_only'=>'Only the specified TTN','manual_csv_only'=>'Only supplied CSV rows','manual_reference_only'=>'Manual TTN reference',
+            'known_ttn_list'=>'Only the supplied TTN list, incoming and outgoing',
             'source'=>'Source','scope'=>'Import scope','observed_at'=>'Read at (UTC)',
             'IntDocNumber'=>'TTN','Number'=>'TTN','Status'=>'Carrier status','StatusCode'=>'Carrier status code','StateName'=>'Carrier status','StateId'=>'Carrier status code',
             'PayerType'=>'Delivery payer','payer'=>'Delivery payer','CostOnSite'=>'Carrier delivery amount (not proof of payment)',
@@ -208,7 +209,11 @@ final class RegistryPage
     {
         echo '<details class="pnpm-box"><summary>'.self::e('Add shipments / load history').'</summary><p>'.self::e('The API document list may omit outgoing and incoming shipments visible in the Nova Poshta cabinet. Compare it with the cabinet; add missing TTNs separately or via CSV.').'</p>';
         $this->form('tracking'); $this->input('ttn','TTN','text','',true); $this->input('phone','Sender or recipient phone (optional)','tel'); $this->previewEnd();
-        echo '<h3>'.self::e('Account history').'</h3>';
+        echo '<h3>'.self::e('Load incoming and outgoing TTNs from a list').'</h3><p>'.self::e('Copy TTN numbers from the Nova Poshta cabinet or the missing-number comparison. Paste up to 100 numbers, one per line. The site reads their current carrier data; check the preview and confirm saving. Existing Folio/Woo links and classification are preserved.').'</p>';
+        $this->form('tracking_batch');
+        echo '<label>'.self::e('TTNs to load').'<textarea name="ttns" rows="6" maxlength="2500" required></textarea></label>';
+        $this->previewEnd();
+        echo '<h3>'.self::e('Documents available through the NP API').'</h3>';
         echo '<p>'.self::e('Select the full period. The site reads one month at a time; after an empty page, continue to the next month.').'</p>';
         $this->form('history');
         $this->input('from','From date','date',Record::START,true); $this->input('to','To date','date',wp_date('Y-m-d'),true);

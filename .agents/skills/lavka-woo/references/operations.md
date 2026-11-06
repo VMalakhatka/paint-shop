@@ -619,3 +619,12 @@ never imports/changes classification or links. Cabinet outgoing/incoming coverag
 cannot be inferred from getDocumentList completion or matching aggregate counts.
 Evidence: Store::listing/reconcile, isolated fixtures, production cabinet/preview
 and import coverage UI. Operator steps: docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-registry.
+
+NP discovery limitation — verified 2026-11-06: live page 1/full-list/general-model
+queries for the same November range returned one record; page 2 was empty, while
+the cabinet showed more. Do not prescribe another deploy/reimport as a coverage
+fix. 0.10.13 reads an explicit list of up to 100 known incoming/outgoing TTNs via
+tracking, with all-or-nothing preview and the existing explicit confirmation.
+This does not discover unknown numbers or prove full event history. Current
+contract/evidence: docs/api/NOVA_POSHTA_SHIPMENT_CONTRACT.md; operator workflow:
+docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-registry.

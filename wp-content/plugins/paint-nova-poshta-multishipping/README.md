@@ -1,5 +1,29 @@
 # Paint Nova Poshta Multishipping
 
+## Explicit known-TTN batch import 0.10.13 — 2026-11-06
+
+Live read-only diagnosis on deployed 0.10.12 confirmed one November document on
+page 1, none on page 2, one with GetFullList=1; InternetDocumentGeneral did not
+expand coverage. Two known omitted outgoing/incoming numbers were readable in
+one TrackingDocument.getStatusDocuments call. This is incomplete discovery, not
+a persistence/pagination fix. Detailed evidence: docs/api/NOVA_POSHTA_SHIPMENT_CONTRACT.md.
+
+The new manager list input uses that documented tracking contract for up to 100
+numbers (2500 bytes), normalizes horizontal spaces and deduplicates numbers.
+Every response must match the requested set exactly with a valid non-3 status;
+missing/foreign/duplicate/invalid rows reject the entire preview. Input order is
+retained, secret-bearing fields stripped, scope is known_ttn_list. Existing
+nonce/capabilities, account binding, immutable preview, explicit confirmation,
+atomic observe and idempotent apply are reused. It never infers classification
+or changes Folio/Woo associations. No full event-history/discovery claim.
+
+Manager steps and failure handling: docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-registry.
+Only plugin deployment is needed; no schema/Java changes or production import
+was performed in this task.
+Validation: 183 isolated registry checks and 13 summary checks passed. Desktop
+and 390px browser fixtures verified invalid-input feedback, preview, confirmation,
+invalidation after edits and return to the list. Provider HTTP/mail were mocked.
+
 ## Registry sorting, counts and presence comparison 0.10.12 — 2026-11-06
 
 List ordering now uses the displayed carrier/document calendar date descending
