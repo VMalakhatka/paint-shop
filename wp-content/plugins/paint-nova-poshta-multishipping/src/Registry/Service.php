@@ -28,6 +28,8 @@ final class Service
             return (new Catalog())->documents($input,$row);
         }
         $this->store->cleanup();
+        if ($command==='history_range') return (new HistoryRange($this->store,$this->carrier))->start($input);
+        if ($command==='history_range_step') return (new HistoryRange($this->store,$this->carrier))->step((string)($input['cursor']??''),(int)($input['step']??-1));
         if ($command==='classify') return $this->store->classify((int)($input['id']??0),(int)($input['revision']??0),$input);
         if ($command==='unlink') return $this->store->unlink((int)($input['id']??0),(int)($input['revision']??0),(int)($input['link']??0),(string)($input['reason']??''));
         if ($command==='confirm') {
@@ -37,6 +39,7 @@ final class Service
             if (empty($lock['ok'])) throw new \RuntimeException('Another synchronization is running. Try saving after it finishes.');
             try {
                 return $this->store->apply((string)($input['token']??''),function($kind,$payload) use ($input) {
+                    if ($kind==='history_range') return (new HistoryRange($this->store,$this->carrier))->apply($payload);
                     if (in_array($kind,['link','links'],true)) $payload=$this->selectBasisAccounts($payload,$input);
                     if ($kind==='links') return $this->store->linkMany($payload);
                     if ($kind==='link') return $this->store->linkBundle($payload);

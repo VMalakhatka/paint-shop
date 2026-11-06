@@ -65,6 +65,40 @@ final class Store
         return json_decode($result,true);
     }
 
+    /** Private staging only. A range's pages are owned by the same manager as its cursor. */
+    public function staged(string $token, string $kind, bool $lock=true): array
+    {
+        global $wpdb;
+        $batch=$wpdb->get_row($wpdb->prepare('SELECT * FROM '.$this->table('_batches').' WHERE token_hash=%s'.($lock?' FOR UPDATE':''),hash('sha256',$token)),ARRAY_A);
+        if (!$batch || (int)$batch['actor_id']!==get_current_user_id() || $batch['kind']!==$kind) throw new \RuntimeException('Preview not found.');
+        if ($batch['status']!=='preview' || $batch['expires_at']<=gmdate('Y-m-d H:i:s')) throw new \RuntimeException('Preview expired. Check again.');
+        return json_decode($batch['payload'],true);
+    }
+
+    /** Serialize cursor advances, including a lost-response replay, without importing business records. */
+    public function advanceHistory(string $token, callable $read): array
+    {
+        global $wpdb;
+        return $this->transaction(function () use ($token,$read,$wpdb) {
+            [$state,$response]=$read($this->staged($token,'history_range'));
+            $json=wp_json_encode($state);
+            if (!$json || strlen($json)>2097152) throw new \InvalidArgumentException('Import is too large.');
+            $this->must($wpdb->update($this->table('_batches'),['payload'=>$json],['token_hash'=>hash('sha256',$token)]));
+            // Active work keeps the entire preview alive, including early months. Abandoned pages expire normally.
+            $hashes=array_map(static fn($part)=>hash('sha256',$part),array_merge([$token],$state['parts']));
+            $sql='UPDATE '.$this->table('_batches').' SET expires_at=%s WHERE actor_id=%d AND status=\'preview\' AND token_hash IN ('.implode(',',array_fill(0,count($hashes),'%s')).')';
+            $this->must($wpdb->query($wpdb->prepare($sql,array_merge([gmdate('Y-m-d H:i:s',time()+600),get_current_user_id()],$hashes))));
+            return $response;
+        });
+    }
+
+    public function consumeHistoryPart(string $token): void
+    {
+        global $wpdb;
+        $this->must($wpdb->update($this->table('_batches'),['payload'=>'{}','status'=>'applied','result'=>'{}'],
+            ['token_hash'=>hash('sha256',$token),'actor_id'=>get_current_user_id(),'kind'=>'history_part']));
+    }
+
     public function observe(string $ttn, string $source, array $data, string $observed): int
     {
         global $wpdb;
@@ -289,7 +323,7 @@ final class Store
     public function recentImports(): array
     {
         global $wpdb;
-        return $wpdb->get_results("SELECT id,kind,status,result,created_at FROM ".$this->table('_batches')." WHERE kind='import' AND status='applied' ORDER BY id DESC LIMIT 30",ARRAY_A) ?: [];
+        return $wpdb->get_results("SELECT id,kind,status,result,created_at FROM ".$this->table('_batches')." WHERE kind IN ('import','history_range') AND status='applied' ORDER BY id DESC LIMIT 30",ARRAY_A) ?: [];
     }
 
     public function cleanup(): void

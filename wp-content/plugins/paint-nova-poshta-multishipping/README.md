@@ -1,5 +1,41 @@
 # Paint Nova Poshta Multishipping
 
+## Automatic date-range preview 0.10.14 — 2026-11-06
+
+The manager now clicks **Read the entire period** once. `history_range` starts a
+private staging cursor; each `history_range_step` reads one monthly carrier page.
+A short nonempty page does not terminate the month; only an empty page advances
+it. The browser displays progress and supports pause/resume. Keep the tab open.
+Only a completed range exposes the single **Confirm and save the entire period**
+action. Operator steps: docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-registry.
+
+Range/page previews use the existing batch table, manager/account binding and
+10-minute inactivity expiry, refreshed for every staged page while reading.
+Carrier HTTP runs outside SQL transactions. Advances lock/recheck the server
+cursor; a lost-response replay returns the same page. The browser never controls
+the next date/page. Repeated TTNs within a month stop traversal; repeats across
+months count once, while all returned observations remain in the staged pages.
+Final confirmation uses the ecosystem lock and one atomic, idempotent transaction:
+all pages are observed, staged payloads consumed, and whole-period coverage plus
+per-page evidence retained. No partial business import on read/save failure.
+Existing links/classification are preserved. Expired/abandoned staging is cleared
+by normal cleanup. Capacity: 500 pages, 5000 unique TTNs, 32 MiB total and the
+existing 2 MiB per-page limit; overflow stops with no partial import.
+
+This completes traversal of **documents visible to the API**, not discovery of
+all incoming/outgoing shipments or reconstruction of every delivery event. The
+verified November cabinet/API mismatch described below remains unresolved.
+No schema or Java change. Production remains 0.10.13 until plugin deployment;
+this task performs no deployment, real import or carrier mutation.
+
+Validation: 215 isolated registry checks and 13 summary checks passed, including
+multiple months, 100-row and
+short pages, empty months, replay, expiry, failures/rollback, preserved links and
+incoming classification. Browser fixture verified pause/resume, a simulated
+connection failure, final checkbox gating, one confirmation, and invalidation
+after a date edit. All provider HTTP and mail are intercepted.
+
+
 ## Explicit known-TTN batch import 0.10.13 — 2026-11-06
 
 Live read-only diagnosis on deployed 0.10.12 confirmed one November document on

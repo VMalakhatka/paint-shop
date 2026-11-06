@@ -4,6 +4,7 @@
     const cfg = window.pnpmRegistry;
     if (!cfg) return;
     const display = value => value === null ? '—' : (typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value));
+    const format = (text, values) => text.replace(/\{(\w+)\}/g, (_, key) => String(values[key] ?? ''));
     const table = data => {
         const list = document.createElement('dl'); list.className = 'pnpm-data';
         Object.entries(data).forEach(([key, value]) => {
@@ -60,12 +61,18 @@
     }));
     document.querySelectorAll('.pnpm-registry-form').forEach(form => {
         let token = '', busy = false, generation = 0;
+        let rangeCursor = '', rangeStep = 0, rangePaused = false;
+        const rangeStop = form.querySelector('.pnpm-range-stop'), rangeResume = form.querySelector('.pnpm-range-resume');
+        const rangeSummary = document.createElement('div'), rangeRows = document.createElement('div');
+        const rangeSeen = new Map();
         const message = form.querySelector('.pnpm-message'), preview = form.querySelector('.pnpm-preview');
         const confirm = form.querySelector('.pnpm-confirm'), agreed = form.querySelector('[name="confirmed"]');
         const apply = form.querySelector('.pnpm-apply'), next = form.querySelector('.pnpm-next');
         const invalidate = () => {
             ++generation;
             token = '';
+            rangeCursor = ''; rangeStep = 0; rangeSeen.clear(); rangeRows.replaceChildren(); rangeSummary.replaceChildren();
+            if (rangeResume) rangeResume.hidden = true;
             if (confirm) { confirm.hidden = true; agreed.checked = false; apply.disabled = true; preview.replaceChildren(); }
         };
         form.addEventListener('input', event => {
@@ -85,7 +92,7 @@
                 body.set('token', token);
                 body.set('basis_accounts', JSON.stringify([...form.querySelectorAll('.pnpm-basis-choice:checked')].map(el => el.value)));
             }
-            else invalidate();
+            else if (!(command === 'history_range' && continuation)) invalidate();
             const requestGeneration = generation;
             busy = true;
             form.dataset.busy = '1';
@@ -94,12 +101,45 @@
             const previousDisabled = controls.map(control => control.disabled);
             controls.forEach(control => { control.disabled = true; });
             message.textContent = cfg.loading;
-            try {
-                const response = await fetch(cfg.url, {method:'POST', body, credentials:'same-origin', cache:'no-store'});
+            const send = async payload => {
+                const response = await fetch(cfg.url, {method:'POST', body:payload, credentials:'same-origin', cache:'no-store'});
                 const result = await response.json();
                 if (!response.ok || !result.success) throw new Error(result.data?.message || cfg.failure);
-                const data = result.data;
-                if (data.token) {
+                return result.data;
+            };
+            try {
+                let data;
+                if (command === 'history_range') {
+                    rangePaused = false; rangeStop.hidden = false; rangeStop.disabled = false; rangeResume.hidden = true;
+                    preview.replaceChildren(rangeSummary, rangeRows);
+                    if (!rangeCursor) { data = await send(body); rangeCursor = data.cursor; rangeStep = data.step; }
+                    do {
+                        if (rangePaused) break;
+                        const stepBody = new FormData();
+                        Object.entries({action:'pnpm_registry', nonce:cfg.nonce, command:'history_range_step', cursor:rangeCursor, step:rangeStep})
+                            .forEach(([key,value]) => stepBody.set(key, value));
+                        data = await send(stepBody);
+                        if (requestGeneration !== generation) return;
+                        rangeStep = data.step;
+                        rangeSummary.replaceChildren(table(data.scope));
+                        (data.rows || []).forEach(row => {
+                            const previous = rangeSeen.get(row.ttn);
+                            const details = document.createElement('details'), summary = document.createElement('summary');
+                            summary.textContent = row.ttn; details.append(summary);
+                            // Render full carrier fields only when opened, keeping large previews responsive.
+                            details.addEventListener('toggle', () => { if (details.open && details.children.length === 1) details.append(table(row.data)); });
+                            if (previous) previous.replaceWith(details); else rangeRows.append(details);
+                            rangeSeen.set(row.ttn, details);
+                        });
+                        message.textContent = format(cfg.range.progress, {from:data.scope.window_from, to:data.scope.window_to,
+                            page:data.scope.page, pages:data.scope.pages_read, count:data.scope.count});
+                    } while (!data.done);
+                    if (data?.done) { token = data.token; confirm.hidden = false; message.textContent = cfg.range.ready; rangeCursor = ''; }
+                    else message.textContent = cfg.range.paused;
+                } else data = await send(body);
+                if (command === 'history_range') {
+                    // Staged rows above are confirmed only once, after the final empty page of the final month.
+                } else if (data.token) {
                     // Another form may have changed the saved classification during this read.
                     if (requestGeneration !== generation) return;
                     token = data.token; preview.replaceChildren();
@@ -135,11 +175,17 @@
                 } else if (command === 'classify' && data.classification) {
                     invalidate(); message.textContent = cfg.saved;
                     form.dispatchEvent(new CustomEvent('pnpm:classification-saved', {detail: data}));
+                } else if (command === 'confirm' && form.dataset.command === 'history_range') {
+                    invalidate();
+                    preview.append(table(data.scope));
+                    message.textContent = format(cfg.range.saved, {...data.scope, count:data.count});
+                    const refresh = document.createElement('a'); refresh.href = cfg.page;
+                    refresh.className = 'button'; refresh.textContent = cfg.refreshList;
+                    message.append(document.createElement('br'), refresh);
                 } else if (command === 'confirm' && form.dataset.command === 'history') {
                     invalidate(); form.elements.previous.value = savedToken;
                     next.hidden = !data.scope?.next_page;
                     const scope = data.scope || {};
-                    const format = (text, values) => text.replace(/\{(\w+)\}/g, (_, key) => String(values[key] ?? ''));
                     message.textContent = format(cfg.savedWindow, {from: scope.window_from, to: scope.window_to, page: scope.page, count: data.count}) + ' ' +
                         (scope.next_page ? format(cfg.continueWindow, {from: scope.next_from, page: scope.next_page}) : cfg.empty);
                     const refresh = document.createElement('a'); refresh.href = cfg.page;
@@ -157,11 +203,14 @@
                 delete form.dataset.busy;
                 controls.forEach((control, i) => { control.disabled = previousDisabled[i]; });
                 if (apply) apply.disabled = !token || !agreed.checked;
+                if (rangeStop) { rangeStop.hidden = true; rangeResume.hidden = !rangeCursor; rangeResume.disabled = false; }
                 if (command === 'classify') form.dispatchEvent(new Event('pnpm:classification-finished'));
             }
         };
         form.addEventListener('submit', event => { event.preventDefault(); request(form.dataset.command); });
         if (apply) apply.addEventListener('click', () => request('confirm'));
         if (next) next.addEventListener('click', () => request('history', true));
+        if (rangeStop) rangeStop.addEventListener('click', () => { rangePaused = true; rangeStop.disabled = true; });
+        if (rangeResume) rangeResume.addEventListener('click', () => request('history_range', true));
     });
 })();

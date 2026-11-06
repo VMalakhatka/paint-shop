@@ -35,8 +35,19 @@ final class RegistryPage
                 'continueWindow'=>self::t('Import is not finished. Next: {from}, page {page}. Read and confirm the next page.'),
                 'refreshList'=>self::t('Refresh saved shipment list'),
                 'compared'=>self::t('Compared with saved records in all directions. This only checks the TTNs you supplied; it does not import missing shipments or prove the cabinet list is complete.'),
+                'range'=>self::rangeText(),
                 'labels'=>self::labels(),'picker'=>self::pickerText()]);
         });
+    }
+
+    public static function rangeText(): array
+    {
+        return array_map([self::class,'t'],[
+            'progress'=>'Reading {from} – {to}, page {page}. Pages read: {pages}; unique TTNs: {count}. Nothing imported yet.',
+            'paused'=>'Reading paused. Continue within 10 minutes or start again. Nothing imported yet.',
+            'ready'=>'The entire selected API period has been read. Review the result and confirm saving once. This does not prove that all cabinet shipments are available through the API.',
+            'saved'=>'Saved the selected period: {from} – {to}. Unique TTNs: {count}. Existing classification and Folio/Woo links are preserved.',
+        ]);
     }
 
     public static function pickerText(): array
@@ -98,6 +109,8 @@ final class RegistryPage
             'from'=>'From date','to'=>'To date','page'=>'Page','count'=>'Records','empty_page'=>'Empty page','next_page'=>'Next page',
             'provided'=>'Unique TTNs supplied','duplicates'=>'Repeated numbers ignored','present'=>'Already in the registry','missing_count'=>'Missing from the registry','missing_ttns'=>'Missing TTNs',
             'window_from'=>'Current month: from','window_to'=>'Current month: to','next_from'=>'Next read: from',
+            'pages_read'=>'Pages read','months_read'=>'Months completed','returned_count'=>'Rows returned by the carrier',
+            'range_state'=>'Reading progress','range_reading'=>'Reading the selected period','range_complete'=>'Selected API period read completely',
             'coverage'=>'Coverage','account_document_list_only'=>'Only documents visible to this API account',
             'known_ttn_only'=>'Only the specified TTN','manual_csv_only'=>'Only supplied CSV rows','manual_reference_only'=>'Manual TTN reference',
             'known_ttn_list'=>'Only the supplied TTN list, incoming and outgoing',
@@ -179,7 +192,7 @@ final class RegistryPage
         echo '<div class="wrap pnpm-registry"><h1>'.self::e('Nova Poshta registry').'</h1>';
         echo '<p>'.self::e('Outgoing, incoming and returns since 2026-06-01. Folio links do not require a WooCommerce order.').'</p>';
         echo '<details class="pnpm-box"><summary>'.self::e('How to work with the registry').'</summary><ol>';
-        foreach (['Read a TTN, import an account page or paste CSV. Preview does not save the registry record.',
+        foreach (['Read a TTN or the entire date range, or paste a TTN list / CSV. Wait for the complete preview, then confirm saving once.',
             'Check the preview, tick the confirmation and save. The preview expires after 10 minutes. Editing a field requires a new preview.',
             'Open a TTN and choose its direction, purpose and Folio partner code. For a return, also enter the original TTN if known.',
             'Link the expense document directly. An account and WooCommerce order are optional; a unique basis account, including the archive, is offered in the same preview.',
@@ -214,11 +227,11 @@ final class RegistryPage
         echo '<label>'.self::e('TTNs to load').'<textarea name="ttns" rows="6" maxlength="2500" required></textarea></label>';
         $this->previewEnd();
         echo '<h3>'.self::e('Documents available through the NP API').'</h3>';
-        echo '<p>'.self::e('Select the full period. The site reads one month at a time; after an empty page, continue to the next month.').'</p>';
-        $this->form('history');
+        echo '<p>'.self::e('Choose the dates and read the entire period. All months and pages are read automatically. Keep this tab open; then review the total and confirm saving once. This covers only documents returned by the NP API.').'</p>';
+        $this->form('history_range');
         $this->input('from','From date','date',Record::START,true); $this->input('to','To date','date',wp_date('Y-m-d'),true);
-        echo '<input type="hidden" name="previous" value="">';
-        $this->previewEnd(true);
+        echo '<div class="pnpm-actions"><button type="button" class="button pnpm-range-stop" hidden>'.self::e('Pause reading').'</button><button type="button" class="button pnpm-range-resume" hidden>'.self::e('Continue reading').'</button></div>';
+        $this->previewEnd(false,'Confirm and save the entire period','Read the entire period');
         echo '<h3>'.self::e('CSV import').'</h3><p>'.self::e('UTF-8, semicolon separator, up to 100 rows. Blank cost means unknown, not zero. Use this exact header:').'</p><code>ttn;date;sender;recipient;origin;destination;payer;delivery_cost</code>';
         $this->form('csv'); echo '<label>'.self::e('CSV contents').'<textarea name="csv" rows="5" required maxlength="262144"></textarea></label>'; $this->previewEnd();
         echo '<h3>'.self::e('Manual TTN reference').'</h3><p>'.self::e('Use for old TTNs unavailable through tracking. This does not verify the shipment with Nova Poshta.').'</p>';

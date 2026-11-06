@@ -1921,3 +1921,57 @@ msgstr "ТТН для загрузки"
 
 msgid "Documents available through the NP API"
 msgstr "Документы, доступные через API НП"
+
+msgid "Reading {from} – {to}, page {page}. Pages read: {pages}; unique TTNs: {count}. Nothing imported yet."
+msgstr "Читаем {from} – {to}, страница {page}. Прочитано страниц: {pages}; уникальных ТТН: {count}. В реестр ещё не импортировано."
+
+msgid "Reading paused. Continue within 10 minutes or start again. Nothing imported yet."
+msgstr "Чтение приостановлено. Продолжите в течение 10 минут или начните заново. В реестр ещё не импортировано."
+
+msgid "The entire selected API period has been read. Review the result and confirm saving once. This does not prove that all cabinet shipments are available through the API."
+msgstr "Весь выбранный период API прочитан. Проверьте результат и подтвердите сохранение один раз. Это не доказывает, что API вернул все посылки из кабинета НП."
+
+msgid "Saved the selected period: {from} – {to}. Unique TTNs: {count}. Existing classification and Folio/Woo links are preserved."
+msgstr "Сохранён выбранный период: {from} – {to}. Уникальных ТТН: {count}. Существующая классификация и связи с ФОЛИО/Woo сохранены."
+
+msgid "Pages read"
+msgstr "Прочитано страниц"
+
+msgid "Months completed"
+msgstr "Месяцев завершено"
+
+msgid "Rows returned by the carrier"
+msgstr "Строк вернул перевозчик"
+
+msgid "Reading progress"
+msgstr "Состояние чтения"
+
+msgid "Reading the selected period"
+msgstr "Читаем выбранный период"
+
+msgid "Selected API period read completely"
+msgstr "Выбранный период API прочитан полностью"
+
+msgid "Choose the dates and read the entire period. All months and pages are read automatically. Keep this tab open; then review the total and confirm saving once. This covers only documents returned by the NP API."
+msgstr "Выберите даты и прочитайте весь период. Все месяцы и страницы читаются автоматически. Оставьте эту вкладку открытой; затем проверьте итог и подтвердите сохранение один раз. Охватываются только документы, которые возвращает API НП."
+
+msgid "Pause reading"
+msgstr "Приостановить чтение"
+
+msgid "Continue reading"
+msgstr "Продолжить чтение"
+
+msgid "Confirm and save the entire period"
+msgstr "Подтвердить и сохранить весь период"
+
+msgid "Read the entire period"
+msgstr "Прочитать весь период"
+
+msgid "This period is too large for one preview. Split it into shorter periods; nothing was imported."
+msgstr "Период слишком большой для одного просмотра. Разделите его на короткие периоды; ничего не импортировано."
+
+msgid "Wait until the entire date range has been read before saving."
+msgstr "Перед сохранением дождитесь чтения всего диапазона дат."
+
+msgid "Read a TTN or the entire date range, or paste a TTN list / CSV. Wait for the complete preview, then confirm saving once."
+msgstr "Прочитайте ТТН или весь диапазон дат либо вставьте список ТТН / CSV. Дождитесь полного просмотра и подтвердите сохранение один раз."

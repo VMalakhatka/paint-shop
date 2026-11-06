@@ -2651,3 +2651,57 @@ msgstr "ТТН для завантаження"
 
 msgid "Documents available through the NP API"
 msgstr "Документи, доступні через API НП"
+
+msgid "Reading {from} – {to}, page {page}. Pages read: {pages}; unique TTNs: {count}. Nothing imported yet."
+msgstr "Читаємо {from} – {to}, сторінка {page}. Прочитано сторінок: {pages}; унікальних ТТН: {count}. У реєстр ще не імпортовано."
+
+msgid "Reading paused. Continue within 10 minutes or start again. Nothing imported yet."
+msgstr "Читання призупинено. Продовжте протягом 10 хвилин або почніть заново. У реєстр ще не імпортовано."
+
+msgid "The entire selected API period has been read. Review the result and confirm saving once. This does not prove that all cabinet shipments are available through the API."
+msgstr "Весь вибраний період API прочитано. Перевірте результат і підтвердьте збереження один раз. Це не доводить, що API повернув усі посилки з кабінету НП."
+
+msgid "Saved the selected period: {from} – {to}. Unique TTNs: {count}. Existing classification and Folio/Woo links are preserved."
+msgstr "Збережено вибраний період: {from} – {to}. Унікальних ТТН: {count}. Наявну класифікацію та зв’язки з ФОЛІО/Woo збережено."
+
+msgid "Pages read"
+msgstr "Прочитано сторінок"
+
+msgid "Months completed"
+msgstr "Місяців завершено"
+
+msgid "Rows returned by the carrier"
+msgstr "Рядків повернув перевізник"
+
+msgid "Reading progress"
+msgstr "Стан читання"
+
+msgid "Reading the selected period"
+msgstr "Читаємо вибраний період"
+
+msgid "Selected API period read completely"
+msgstr "Вибраний період API прочитано повністю"
+
+msgid "Choose the dates and read the entire period. All months and pages are read automatically. Keep this tab open; then review the total and confirm saving once. This covers only documents returned by the NP API."
+msgstr "Виберіть дати та прочитайте весь період. Усі місяці й сторінки читаються автоматично. Залиште цю вкладку відкритою; потім перевірте підсумок і підтвердьте збереження один раз. Охоплюються лише документи, які повертає API НП."
+
+msgid "Pause reading"
+msgstr "Призупинити читання"
+
+msgid "Continue reading"
+msgstr "Продовжити читання"
+
+msgid "Confirm and save the entire period"
+msgstr "Підтвердити й зберегти весь період"
+
+msgid "Read the entire period"
+msgstr "Прочитати весь період"
+
+msgid "This period is too large for one preview. Split it into shorter periods; nothing was imported."
+msgstr "Період завеликий для одного перегляду. Розділіть його на коротші періоди; нічого не імпортовано."
+
+msgid "Wait until the entire date range has been read before saving."
+msgstr "Перед збереженням дочекайтеся читання всього діапазону дат."
+
+msgid "Read a TTN or the entire date range, or paste a TTN list / CSV. Wait for the complete preview, then confirm saving once."
+msgstr "Прочитайте ТТН або весь діапазон дат, чи вставте список ТТН / CSV. Дочекайтеся повного перегляду та підтвердьте збереження один раз."

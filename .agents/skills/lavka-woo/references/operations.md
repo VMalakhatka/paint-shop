@@ -628,3 +628,11 @@ tracking, with all-or-nothing preview and the existing explicit confirmation.
 This does not discover unknown numbers or prove full event history. Current
 contract/evidence: docs/api/NOVA_POSHTA_SHIPMENT_CONTRACT.md; operator workflow:
 docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-registry.
+
+Date-range traversal — 0.10.14: the manager UI reads all monthly API pages before
+one confirmation. Do not instruct managers to save every empty page manually.
+Resume replays the last server-owned step after a lost response; no business
+imports occur until the entire range is read. Confirm uses the existing lock and
+atomic idempotent apply. This improves traversal only and does not resolve the
+November discovery limitation above. Keep `account_document_list_only` coverage.
+No schema/Java migration; manager guide and plugin README own limits and steps.

@@ -33,6 +33,13 @@ $mock=static function($pre,$args,$url) use (&$http,&$documentReads,&$mode,&$stat
             $finish=DateTimeImmutable::createFromFormat('!d.m.Y',$p['DateTimeTo']);
             if ($p['GetFullList']!=='0' || !$start || !$finish || $start->diff($finish)->days>30) throw new RuntimeException('Wrong monthly pagination contract');
             if ($mode==='period_error') return $response(['success'=>false,'data'=>[],'errors'=>['The difference between DateTimeFrom and DateTimeTo cannot be more than three months.']]);
+            if ($mode==='range') {
+                $month=$start->format('m'); $page=(int)$p['Page']; $numbers=[];
+                if ($month==='06' && $page===1) { for ($i=0;$i<99;$i++) $numbers[]=(string)(99999999400000+$i); $numbers[]=$ttn; }
+                if ($month==='06' && $page===2) $numbers=['99999999100000'];
+                if ($month==='07' && $page===1) $numbers=[$ttn,'99999999400100'];
+                return $response(['success'=>true,'data'=>array_map(static fn($n)=>['IntDocNumber'=>$n,'DateTime'=>$p['DateTimeFrom'],'Cost'=>'149'],$numbers)]);
+            }
             $rows=$p['Page']==='1' || $mode==='repeat' ? [['IntDocNumber'=>$ttn,'DateTime'=>'01.06.2026','StateId'=>'1','PayerType'=>'Recipient','CostOnSite'=>'70','Cost'=>'149','LinkedDocumentNumber'=>$ttn2]] : [];
             return $response(['success'=>true,'data'=>$rows]);
         }
@@ -459,6 +466,7 @@ try {
     $check(count($http)===$httpBefore,'Invalid list never reaches carrier');
     $manager->allcaps=[]; $reject(fn()=>$service->run('tracking_batch',['ttns'=>$batchText]),'Bulk read requires manager permissions');
     $manager->allcaps=['manage_woocommerce'=>true,'manage_pnpm_shipments'=>true];
+    require __DIR__.'/registry-range-cases.php';
     if ($dir=getenv('PNPM_REGISTRY_FIXTURE_DIR')) {
         foreach (['detail','index'] as $view) {
             switch_to_locale('uk'); $_GET=$view==='detail'?['page'=>'pnpm-registry','id'=>$transferId]:['page'=>'pnpm-registry'];
@@ -470,6 +478,7 @@ try {
                 'savedWindow'=>RegistryPage::t('Saved: {from} – {to}, page {page}, TTNs: {count}.'),
                 'continueWindow'=>RegistryPage::t('Import is not finished. Next: {from}, page {page}. Read and confirm the next page.'),
                 'refreshList'=>RegistryPage::t('Refresh saved shipment list'),
+                'range'=>RegistryPage::rangeText(),
                 'compared'=>RegistryPage::t('Compared with saved records in all directions. This only checks the TTNs you supplied; it does not import missing shipments or prove the cabinet list is complete.'),'labels'=>RegistryPage::labels(),'picker'=>RegistryPage::pickerText()];
             restore_previous_locale();
             file_put_contents($dir.'/registry-'.$view.'.html','<!doctype html><html lang="uk"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font:16px/1.5 system-ui;background:#f0f0f1;margin:24px}input,button,select,textarea{font:inherit}table{width:100%;text-align:left}button{padding:6px 12px}td{padding:8px}h1{font-size:28px}</style><style>'.file_get_contents(PNPM_DIR.'assets/registry.css').'</style>'.$body.'<script>window.pnpmRegistry='.wp_json_encode($config).';</script><script>'.file_get_contents(PNPM_DIR.'assets/registry.js').'</script><script>'.file_get_contents(PNPM_DIR.'assets/registry-picker.js').'</script><script>'.file_get_contents(PNPM_DIR.'assets/registry-woo.js').'</script></html>');
