@@ -34,4 +34,20 @@ $s=Summary::fromObservations([$ob('np_tracking','2026-10-03',4,['DateCreated'=>'
 $check($s['date']==='' && $s['delivery']==='','Invalid dates and amounts not displayed as valid');
 $s=Summary::fromObservations([$ob('np_tracking','2026-10-03',4,['DateCreated'=>'25.10.2026 01:30:00'])]);
 $check($s['date']==='25.10.2026','Document date in dotted format');
+$tracking=$ob('np_tracking','2026-11-06 12:00:00',5,[
+    'Number'=>'99999999999001','DocumentCost'=>'112.4','AnnouncedPrice'=>2480,'DateCreated'=>'05-11-2026 17:04:34',
+    'CounterpartyRecipientDescription'=>'Private person','RecipientFullNameEW'=>'Synthetic Recipient','CityRecipient'=>'Synthetic City',
+]);
+$s=Summary::fromObservations([$tracking]);
+$check($s['delivery']==='112.4' && $s['declared']==='2480','Actual tracking shape separates delivery tariff from declared value');
+$check($s['date']==='05.11.2026','Tracking day-month-year date appears and can be sorted');
+$check($s['recipient']==='Private person' && $s['contact']==='Synthetic Recipient','Tracking recipient description and contact retained');
+$s=Summary::fromObservations([$document,$tracking]);
+$check($s['delivery']==='112.4' && $s['declared']==='2480' && $s['date']==='05.11.2026','Latest tracking values supersede older document facts in their correct columns');
+$s=Summary::fromObservations([$ob('np_tracking','2026-11-06',6,['DocumentCost'=>'0','AnnouncedPrice'=>0,'DateCreated'=>'31-02-2026'])]);
+$check($s['delivery']==='0' && $s['declared']==='0' && $s['date']==='','Zero amounts remain facts; invalid hyphen date rejected');
+$s=Summary::fromObservations([$ob('np_tracking','2026-11-06',6,['DocumentCost'=>'80'])]);
+$check($s['delivery']==='80' && $s['declared']==='','Delivery cost never substitutes missing declared value');
+$s=Summary::fromObservations([$ob('np_tracking','2026-11-06',6,['AnnouncedPrice'=>100])]);
+$check($s['delivery']==='' && $s['declared']==='100','Declared value never substitutes missing delivery cost');
 echo "Registry summary: $checks checks passed.\n";

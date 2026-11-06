@@ -2869,3 +2869,6 @@ msgstr ""
 
 msgid "Read a TTN or the entire date range, or paste a TTN list / CSV. Wait for the complete preview, then confirm saving once."
 msgstr ""
+
+msgid "Recipient contact"
+msgstr ""

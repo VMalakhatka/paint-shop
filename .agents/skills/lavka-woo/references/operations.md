@@ -636,3 +636,9 @@ imports occur until the entire range is read. Confirm uses the existing lock and
 atomic idempotent apply. This improves traversal only and does not resolve the
 November discovery limitation above. Keep `account_document_list_only` coverage.
 No schema/Java migration; manager guide and plugin README own limits and steps.
+
+Tracking summary contract — verified 2026-11-06: DocumentCost is delivery,
+AnnouncedPrice is declared value, DateCreated uses dd-mm-yyyy. Do not reuse
+getDocumentList Cost/CostOnSite mapping for tracking. All 12 checked November
+TTNs were already saved; the old date parser hid them at the end of the list.
+Check registry presence before prescribing reimport; 0.10.15 fixes display only.

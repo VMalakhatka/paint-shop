@@ -2705,3 +2705,6 @@ msgstr "Перед збереженням дочекайтеся читання 
 
 msgid "Read a TTN or the entire date range, or paste a TTN list / CSV. Wait for the complete preview, then confirm saving once."
 msgstr "Прочитайте ТТН або весь діапазон дат, чи вставте список ТТН / CSV. Дочекайтеся повного перегляду та підтвердьте збереження один раз."
+
+msgid "Recipient contact"
+msgstr "Контактна особа одержувача"

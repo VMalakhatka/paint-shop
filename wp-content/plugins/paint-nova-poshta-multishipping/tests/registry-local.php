@@ -44,7 +44,7 @@ $mock=static function($pre,$args,$url) use (&$http,&$documentReads,&$mode,&$stat
             return $response(['success'=>true,'data'=>$rows]);
         }
         $rows=array_map(static fn($doc)=>['Number'=>$mode==='wrong'?$ttn2:$doc['DocumentNumber'],'StatusCode'=>$status,'Status'=>'Synthetic status',
-            'PayerType'=>'Recipient','CostOnSite'=>'70','DocumentCost'=>'149','TrackingUpdateDate'=>'2026-06-01 12:30:00','ApiKey'=>'never-store','TrackingURL'=>'https://example.invalid/secret'], $request['methodProperties']['Documents']);
+            'PayerType'=>'Recipient','DocumentCost'=>'70','AnnouncedPrice'=>'149','DateCreated'=>'01-06-2026 12:30:00','TrackingUpdateDate'=>'2026-06-01 12:30:00','ApiKey'=>'never-store','TrackingURL'=>'https://example.invalid/secret'], $request['methodProperties']['Documents']);
         if ($mode==='batch_missing') array_pop($rows);
         if ($mode==='batch_duplicate') $rows[]=$rows[0];
         if ($mode==='batch_foreign') $rows[0]['Number']='99999999999999';

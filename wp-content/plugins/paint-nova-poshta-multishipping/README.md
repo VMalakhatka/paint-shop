@@ -1,5 +1,31 @@
 # Paint Nova Poshta Multishipping
 
+## Correct tracking summaries 0.10.15 — 2026-11-06
+
+A live read verified all 12 known November cabinet numbers through tracking;
+the same sender profile is exposed by the API, while exact getDocumentList lookup
+of an omitted number returns no rows. Discovery remains unresolved: see
+`docs/api/NOVA_POSHTA_SHIPMENT_CONTRACT.md`. Automatic pagination alone is not a fix.
+
+Tracking fields differ from document-list fields. Summary now treats tracking
+DocumentCost as delivery, AnnouncedPrice as declared value, and accepts the
+provider's dd-mm-yyyy DateCreated for display/global sorting. It also recognizes
+CounterpartyRecipientDescription and RecipientFullNameEW. Document-list CostOnSite
+and Cost retain their existing semantics. The raw preview/detail labels match.
+Missing declared value never falls back to the delivery tariff; zero is preserved.
+Existing saved raw responses render correctly after deployment without reimport,
+backfill, classification edits or association changes. Read-only production
+reconciliation confirmed all 12 known numbers were already saved via np_tracking;
+the old date parser pushed them to the end of the list. No reimport is needed.
+No production writes/deploy.
+
+Validation: 215 isolated registry checks and 20 standalone source/field summary
+checks passed, including the verified
+tracking response shape, date validation, newest-source fallback and zero/unknown
+amounts. Synthetic tracking fixtures now use the documented fields. Manager
+instructions: `docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-registry`.
+
+
 ## Automatic date-range preview 0.10.14 — 2026-11-06
 
 The manager now clicks **Read the entire period** once. `history_range` starts a

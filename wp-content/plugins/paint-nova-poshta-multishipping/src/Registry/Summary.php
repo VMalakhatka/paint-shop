@@ -20,13 +20,15 @@ final class Summary
             $data=json_decode($observation['payload'],true);
             if (!is_array($data)) continue;
             $csv=$observation['source']==='csv';
+            $tracking=$observation['source']==='np_tracking';
             $values=[
-                'recipient'=>self::first($data,$csv?['recipient']:['RecipientDescription','RecipientFullName','RecipientContactPerson']),
-                'contact'=>$csv?'':self::first($data,['RecipientContactPerson','RecipientFullName']),
+                'recipient'=>self::first($data,$csv?['recipient']:($tracking?['CounterpartyRecipientDescription','RecipientFullNameEW','RecipientFullName','RecipientDescription','RecipientContactPerson']:['RecipientDescription','RecipientFullName','RecipientContactPerson'])),
+                'contact'=>$csv?'':self::first($data,$tracking?['RecipientFullNameEW','RecipientFullName','RecipientContactPerson']:['RecipientContactPerson','RecipientFullName']),
                 'city'=>$csv?'':self::first($data,['CityRecipientDescription','CityRecipient','RecipientSettlementDescription']),
                 'date'=>self::date(self::first($data,$csv?['date']:['DateTime','DateCreated','CreateTime'])),
-                'delivery'=>self::amount($data[$csv?'delivery_cost':'CostOnSite']??null),
-                'declared'=>$csv?'':self::amount($data['DocumentCost']??$data['Cost']??null),
+                // Tracking DocumentCost is the delivery tariff; document-list Cost is declared value.
+                'delivery'=>self::amount($csv?($data['delivery_cost']??null):($tracking?($data['DocumentCost']??$data['CostOnSite']??null):($data['CostOnSite']??null))),
+                'declared'=>$csv?'':self::amount($data[$tracking?'AnnouncedPrice':'Cost']??null),
                 'payer'=>self::first($data,$csv?['payer']:['PayerType']),
             ];
             if ($values['city']==='' && is_array($data['SettlmentAddressData']??null)) $values['city']=self::first($data['SettlmentAddressData'],['RecipientSettlementDescription']);
@@ -62,7 +64,7 @@ final class Summary
     private static function date(string $value): string
     {
         if (preg_match('/^(\d{4})-(\d{2})-(\d{2})(?:[ T]|$)/',$value,$m)) [$year,$month,$day]=[(int)$m[1],(int)$m[2],(int)$m[3]];
-        elseif (preg_match('/^(\d{2})\.(\d{2})\.(\d{4})(?:[ T]|$)/',$value,$m)) [$year,$month,$day]=[(int)$m[3],(int)$m[2],(int)$m[1]];
+        elseif (preg_match('/^(\d{2})([.\-])(\d{2})\2(\d{4})(?:[ T]|$)/',$value,$m)) [$year,$month,$day]=[(int)$m[4],(int)$m[3],(int)$m[1]];
         else return '';
         return $year>=1900 && checkdate($month,$day,$year) ? sprintf('%02d.%02d.%04d',$day,$month,$year) : '';
     }
