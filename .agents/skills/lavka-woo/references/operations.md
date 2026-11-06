@@ -609,3 +609,13 @@ Sources: FolioExpenseBasisService/Dao, captured column schema, Структур�
 NUMSCHETPL/SCH_DATE descriptions; manager steps in the NP registry guide.
 
 Folio assembly input (owner/manager instruction 2026-11-04): parent mode supplies ARTIC_roditel/KOL_rod_razob; child mode supplies ARTIC_rebenok/kol_reb_pol. WordPress expands fresh Access defaults (other article NULL, other numeric fields 0 including SLOG), then calls the unchanged six-column ASSEMBLY Java contract. Do not force SLOG=1 for child mode; macro step 13 classifies by recipe. IMPORT_DBF concatenates columns ARTIC/KOL_R/PRICE from outputs 18/9/91 without aggregation; preserve technical sheets/history. Actual DBF generation and invoice creation remain outside this change. Canonical manager instructions and remaining Access comparison: `docs/FOLIO_MANAGER_OPERATIONS.md`.
+
+### Registry completeness and date sorting — verified 2026-11-06
+
+Registry listing uses carrier/document calendar dates before pagination, not import
+IDs. Read chunks remain bounded; full filtered scan is required without a persisted
+date index. Reconcile checks supplied unique TTNs against all saved directions and
+never imports/changes classification or links. Cabinet outgoing/incoming coverage
+cannot be inferred from getDocumentList completion or matching aggregate counts.
+Evidence: Store::listing/reconcile, isolated fixtures, production cabinet/preview
+and import coverage UI. Operator steps: docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-registry.

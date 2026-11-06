@@ -18,6 +18,7 @@ final class Service
         self::authorize();
         if (!Schema::ready()) throw new \RuntimeException('Install the registry tables first.');
         // Directory reads never create previews, consume tokens or clean registry data.
+        if ($command==='reconcile') return ['reconciliation'=>$this->store->reconcile((string)($input['ttns']??''))];
         if ($command==='partners') return (new Catalog())->partners($input);
         if ($command==='warehouses') return (new Catalog())->warehouses();
         if ($command==='woo_orders') return $this->woo->listing($input);

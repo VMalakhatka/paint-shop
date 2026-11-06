@@ -31,6 +31,10 @@ final class RegistryPage
                 'saved'=>self::t('Saved to the site registry.'),'preview'=>self::t('Preview only. Check the data and confirm below.'),
                 'empty'=>self::t('Empty page received. This only ends the selected account document list; incoming and historical events are not proven complete.'),
                 'more'=>self::t('Page saved. Continue with the next page or month until the selected period is finished.'),
+                'savedWindow'=>self::t('Saved: {from} – {to}, page {page}, TTNs: {count}.'),
+                'continueWindow'=>self::t('Import is not finished. Next: {from}, page {page}. Read and confirm the next page.'),
+                'refreshList'=>self::t('Refresh saved shipment list'),
+                'compared'=>self::t('Compared with saved records in all directions. This only checks the TTNs you supplied; it does not import missing shipments or prove the cabinet list is complete.'),
                 'labels'=>self::labels(),'picker'=>self::pickerText()]);
         });
     }
@@ -92,6 +96,7 @@ final class RegistryPage
             'type'=>'Document type','role'=>'Document role','id'=>'Internal ID','number'=>'Document number','date'=>'Document date',
             'partner'=>'Folio partner code','warehouse'=>'Folio warehouse code','verification'=>'Verification method','evidence'=>'Verification evidence',
             'from'=>'From date','to'=>'To date','page'=>'Page','count'=>'Records','empty_page'=>'Empty page','next_page'=>'Next page',
+            'provided'=>'Unique TTNs supplied','duplicates'=>'Repeated numbers ignored','present'=>'Already in the registry','missing_count'=>'Missing from the registry','missing_ttns'=>'Missing TTNs',
             'window_from'=>'Current month: from','window_to'=>'Current month: to','next_from'=>'Next read: from',
             'coverage'=>'Coverage','account_document_list_only'=>'Only documents visible to this API account',
             'known_ttn_only'=>'Only the specified TTN','manual_csv_only'=>'Only supplied CSV rows','manual_reference_only'=>'Manual TTN reference',
@@ -194,14 +199,14 @@ final class RegistryPage
         try {
             $id=isset($_GET['id']) ? absint($_GET['id']) : 0;
             if ($id) $this->detail((new Store())->detail($id));
-            else { $this->imports(); $this->listing(); $this->coverage(); }
+            else { $this->imports(); $this->reconciliation(); $this->listing(); $this->coverage(); }
         } catch (\Throwable $e) { echo '<p role="alert">'.self::e('Could not load the registry. Check the selection or contact the administrator.').'</p>'; }
         echo '</div>';
     }
 
     private function imports(): void
     {
-        echo '<details class="pnpm-box"><summary>'.self::e('Add shipments / load history').'</summary><p>'.self::e('Incoming discovery is not verified. Add known incoming TTNs or CSV; an empty account list does not prove that there were no incoming parcels.').'</p>';
+        echo '<details class="pnpm-box"><summary>'.self::e('Add shipments / load history').'</summary><p>'.self::e('The API document list may omit outgoing and incoming shipments visible in the Nova Poshta cabinet. Compare it with the cabinet; add missing TTNs separately or via CSV.').'</p>';
         $this->form('tracking'); $this->input('ttn','TTN','text','',true); $this->input('phone','Sender or recipient phone (optional)','tel'); $this->previewEnd();
         echo '<h3>'.self::e('Account history').'</h3>';
         echo '<p>'.self::e('Select the full period. The site reads one month at a time; after an empty page, continue to the next month.').'</p>';
@@ -216,6 +221,14 @@ final class RegistryPage
         echo '</details>';
     }
 
+    private function reconciliation(): void
+    {
+        echo '<details class="pnpm-box"><summary>'.self::e('Compare TTNs with the Nova Poshta cabinet').'</summary><p>'.self::e('Copy the TTN number column from all pages of outgoing and incoming shipments for the same period. Paste one number per line, up to 1000; spaces inside a number are allowed. Repeated numbers count once. This is a presence check, not an import.').'</p>';
+        $this->form('reconcile');
+        echo '<label>'.self::e('TTNs from the Nova Poshta cabinet').'<textarea name="ttns" rows="6" maxlength="25000" required></textarea></label>';
+        $this->previewEnd(false,'Confirm and save','Compare saved TTNs'); echo '</details>';
+    }
+
     private function listing(): void
     {
         $filter=[];
@@ -226,8 +239,9 @@ final class RegistryPage
         $this->select('direction','Direction',array_merge([''],Record::DIRECTIONS),$filter['direction']);
         $this->select('purpose','Purpose',array_merge([''],Record::PURPOSES),$filter['purpose']);
         echo '<button class="button">'.self::e('Search').'</button></form>';
-        $rows=(new Store())->listing($filter,$page); $more=count($rows)>30;
-        echo '<p>'.self::e('Amounts are in UAH. Delivery payer does not prove payment. The NP date may be the document date; missing data is shown as a dash.').'</p>';
+        $store=new Store(); $rows=$store->listing($filter,$page); $more=count($rows)>30;
+        echo '<p><strong>'.esc_html(sprintf(self::t('Saved TTNs matching filters: %d. Page: %d.'),$store->listingCount($filter),$page)).'</strong></p>';
+        echo '<p>'.self::e('Newest shipment / document dates first, across all pages. Undated records are last. Amounts are in UAH; delivery payer does not prove payment.').'</p>';
         echo '<div class="pnpm-table-scroll" role="region" aria-label="'.esc_attr(self::t('Nova Poshta registry')).'" tabindex="0"><table class="widefat striped pnpm-registry-list"><thead><tr>';
         foreach (['TTN','Recipient','Recipient city','Shipment / document date','Delivery, UAH','Declared value, UAH','Delivery payer','Folio partner code','Updated (UTC)'] as $label) echo '<th scope="col">'.self::e($label).'</th>';
         echo '</tr></thead><tbody>';

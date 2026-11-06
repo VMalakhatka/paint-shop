@@ -1,5 +1,33 @@
 # Paint Nova Poshta Multishipping
 
+## Registry sorting, counts and presence comparison 0.10.12 — 2026-11-06
+
+List ordering now uses the displayed carrier/document calendar date descending
+before pagination, with unknown dates last and ID descending as a stable tie-break.
+No schema/backfill: scans filtered records in keyset chunks of 200, loading only
+the latest observation per source, retaining compact summaries for at most the
+requested page range + lookahead. Cost grows with registry size; a persisted date
+projection/index is a future scaling improvement, not silently added on reads.
+
+A filtered saved-TTN count and read-only `reconcile` compare up to 1000 supplied
+TTNs with all saved directions, including unclassified/incoming. Horizontal spaces
+are normalized; duplicates ignored; malformed lines reject the whole input.
+The result reports exact missing numbers, without carrier calls, previews, cleanup
+or writes. It proves presence only for supplied numbers, not full account coverage.
+
+History confirmation names the saved month/page/count, next step and a refresh-list
+link; the list below remains a page-load snapshot until refreshed. The coverage
+warning now includes both outgoing and incoming. Read-only production UI diagnosis
+found an unfinished October import and a November preview narrower than the cabinet;
+SSH was unavailable, so no database-level or provider-page-2 diagnosis is claimed.
+Normal plugin deployment only, no Java update/migration. Manager guide #np-registry
+contains the operator steps and evidence limits.
+
+Validation: 164 isolated registry checks and 13 summary checks passed; provider
+HTTP/mail were mocked and fixture tables removed. Browser fixture verified the
+comparison counts/missing number and the unfinished-month continuation message.
+No production imports, deployment or carrier writes were performed.
+
 ## Explicit basis account selection 0.10.11 — 2026-10-26
 
 Basis lookup prefers Folio NUMSCHETPL/SCH_DATE, falling back to OSNOVANIE only

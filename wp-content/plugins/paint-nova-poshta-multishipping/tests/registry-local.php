@@ -406,6 +406,32 @@ try {
     $manager->allcaps=[]; $reject(fn()=>$wooService->run('woo_orders',['woo_id'=>'999999001']),'Woo search requires registry manager permissions');
     $manager->allcaps=['manage_woocommerce'=>true,'manage_pnpm_shipments'=>true];
     $store->transaction(fn()=>$store->observe('99999999000009','np_documents',['Weight'=>'3.5','SeatsAmount'=>'2','OptionsSeat'=>[['weight'=>'1.5','volumetricLength'=>'25','volumetricWidth'=>'16','volumetricHeight'=>'12'],['weight'=>'2','volumetricLength'=>'30','volumetricWidth'=>'20','volumetricHeight'=>'15']]],'2026-06-01 12:00:00'));
+    // More than one read chunk and one visible page; import IDs deliberately oppose dates.
+    $expected=[];
+    $store->transaction(function() use ($store,&$expected) {
+        for ($i=0;$i<205;$i++) {
+            $number=(string)(99999999100000+$i);
+            $date=(new DateTimeImmutable('2026-11-06'))->modify('-'.$i.' days')->format('Y-m-d');
+            $id=$store->observe($number,'np_documents',['DateTime'=>$date],'2026-11-06 10:00:00');
+            $store->classify($id,1,['direction'=>'incoming','purpose'=>'other','partner_code'=>'SORT']);
+            $expected[]=$number;
+        }
+    });
+    $sortFilter=['direction'=>'incoming','purpose'=>'other']; $actual=[];
+    for ($page=1;$page<=7;$page++) foreach (array_slice($store->listing($sortFilter,$page),0,30) as $r) $actual[]=$r['ttn'];
+    $check($actual===$expected,'Global date order precedes pagination across read chunks; incoming shipments included');
+    $check($store->listingCount($sortFilter)===205 && $store->listingCount(['ttn'=>$expected[0]])===1,'Counts cover filters and exact TTN');
+    $check($store->listing($sortFilter,8)===[],'No phantom page after final date-sorted page');
+    $store->transaction(fn()=>$store->observe($expected[150],'np_documents',['DateTime'=>'2026-06-09'],'2026-11-07 10:00:00'));
+    $check($store->listing($sortFilter)[0]['ttn']===$expected[0],'Reimport does not sort by observation or insertion time');
+    $beforeCompare=$store->detail($summaryId); $httpBefore=count($http);
+    $cmp=$service->run('reconcile',['ttns'=>$expected[0]."\n".substr($expected[1],0,2).' '.substr($expected[1],2)."\n".$expected[0]."\n99999999999999"]);
+    $check($cmp['reconciliation']===['provided'=>3,'duplicates'=>1,'present'=>2,'missing_count'=>1,'missing_ttns'=>'99999999999999'],'Reconciliation normalizes spaces, deduplicates and identifies missing incoming TTNs');
+    $check(count($http)===$httpBefore && $store->detail($summaryId)===$beforeCompare,'Reconciliation never imports, calls carrier or changes links');
+    $reject(fn()=>$service->run('reconcile',['ttns'=>"99999999100000 extra"]),'Reject partial or malformed pasted lines');
+    $reject(fn()=>$service->run('reconcile',['ttns'=>str_repeat("99999999100000\n",1001)]),'Bound reconciliation input');
+    $manager->allcaps=[]; $reject(fn()=>$service->run('reconcile',['ttns'=>$expected[0]]),'Reconciliation requires manager permissions');
+    $manager->allcaps=['manage_woocommerce'=>true,'manage_pnpm_shipments'=>true];
     if ($dir=getenv('PNPM_REGISTRY_FIXTURE_DIR')) {
         foreach (['detail','index'] as $view) {
             switch_to_locale('uk'); $_GET=$view==='detail'?['page'=>'pnpm-registry','id'=>$transferId]:['page'=>'pnpm-registry'];
@@ -413,7 +439,11 @@ try {
             $config=['url'=>'/ajax','nonce'=>'synthetic','page'=>'/registry-index.html','loading'=>RegistryPage::t('Checking…'),
                 'failure'=>RegistryPage::t('The request failed. Reload and check the saved result before repeating.'),
                 'preview'=>RegistryPage::t('Preview only. Check the data and confirm below.'),'saved'=>RegistryPage::t('Saved to the site registry.'),
-                'empty'=>'Synthetic empty page','more'=>'Synthetic next page','labels'=>RegistryPage::labels(),'picker'=>RegistryPage::pickerText()];
+                'empty'=>'Synthetic empty page','more'=>'Synthetic next page',
+                'savedWindow'=>RegistryPage::t('Saved: {from} – {to}, page {page}, TTNs: {count}.'),
+                'continueWindow'=>RegistryPage::t('Import is not finished. Next: {from}, page {page}. Read and confirm the next page.'),
+                'refreshList'=>RegistryPage::t('Refresh saved shipment list'),
+                'compared'=>RegistryPage::t('Compared with saved records in all directions. This only checks the TTNs you supplied; it does not import missing shipments or prove the cabinet list is complete.'),'labels'=>RegistryPage::labels(),'picker'=>RegistryPage::pickerText()];
             restore_previous_locale();
             file_put_contents($dir.'/registry-'.$view.'.html','<!doctype html><html lang="uk"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font:16px/1.5 system-ui;background:#f0f0f1;margin:24px}input,button,select,textarea{font:inherit}table{width:100%;text-align:left}button{padding:6px 12px}td{padding:8px}h1{font-size:28px}</style><style>'.file_get_contents(PNPM_DIR.'assets/registry.css').'</style>'.$body.'<script>window.pnpmRegistry='.wp_json_encode($config).';</script><script>'.file_get_contents(PNPM_DIR.'assets/registry.js').'</script><script>'.file_get_contents(PNPM_DIR.'assets/registry-picker.js').'</script><script>'.file_get_contents(PNPM_DIR.'assets/registry-woo.js').'</script></html>');
         }

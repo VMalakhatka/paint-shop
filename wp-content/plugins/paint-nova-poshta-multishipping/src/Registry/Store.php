@@ -191,6 +191,36 @@ final class Store
             'context'=>wp_json_encode($context),'created_at'=>gmdate('Y-m-d H:i:s')]));
     }
 
+    /** Read-only presence comparison; classification does not hide incoming/unknown records. */
+    public function reconcile(string $input): array
+    {
+        if (strlen($input)>25000) throw new \InvalidArgumentException('Enter up to 1000 TTNs, one number per line.');
+        $lines=preg_split('/\R/u',trim($input)); $numbers=[]; $count=0;
+        foreach ($lines as $line) {
+            if (trim($line)==='') continue;
+            $number=preg_replace('/[\h]/u','',$line);
+            if (!preg_match('/^\d{14}$/D',$number) || ++$count>1000) throw new \InvalidArgumentException('Enter up to 1000 TTNs, one number per line.');
+            $numbers[$number]=$number;
+        }
+        if (!$numbers) throw new \InvalidArgumentException('Enter up to 1000 TTNs, one number per line.');
+        global $wpdb;
+        $found=$wpdb->get_col($wpdb->prepare('SELECT ttn FROM '.$this->table().' WHERE ttn IN ('.implode(',',array_fill(0,count($numbers),'%s')).')',...array_values($numbers)));
+        $missing=array_values(array_diff($numbers,$found)); sort($missing,SORT_STRING);
+        return ['provided'=>count($numbers),'duplicates'=>$count-count($numbers),'present'=>count($found),'missing_count'=>count($missing),'missing_ttns'=>implode("\n",$missing)];
+    }
+
+    public function listingCount(array $filter): int
+    {
+        global $wpdb;
+        $where='1=1'; $args=[];
+        foreach (['direction'=>Record::DIRECTIONS,'purpose'=>Record::PURPOSES] as $key=>$allowed) {
+            if (in_array($filter[$key]??'',$allowed,true)) { $where.=" AND $key=%s"; $args[]=$filter[$key]; }
+        }
+        if (!empty($filter['ttn'])) { $where.=' AND ttn=%s'; $args[]=Record::ttn($filter['ttn']); }
+        $sql='SELECT COUNT(*) FROM '.$this->table()." WHERE $where";
+        return (int)$wpdb->get_var($args?$wpdb->prepare($sql,...$args):$sql);
+    }
+
     public function listing(array $filter, int $page = 1): array
     {
         global $wpdb;
@@ -199,12 +229,29 @@ final class Store
             if (in_array($filter[$key]??'', $allowed,true)) { $where.=" AND $key=%s"; $args[]=$filter[$key]; }
         }
         if (!empty($filter['ttn'])) { $where.=' AND ttn=%s'; $args[]=Record::ttn($filter['ttn']); }
-        $args[]=max(0,$page-1)*30;
-        $rows=$wpdb->get_results($wpdb->prepare('SELECT * FROM '.$this->table()." WHERE $where ORDER BY id DESC LIMIT 31 OFFSET %d",...$args),ARRAY_A) ?: [];
+        // Sort the whole filtered registry before pagination. Read only latest source snapshots
+        // in bounded chunks; retain at most the requested pages plus one look-ahead row.
+        $offset=max(0,$page-1)*30; $keep=$offset+31; $before=PHP_INT_MAX; $ranked=[];
+        do {
+            $rows=$this->listingChunk($where,$args,$before);
+            foreach ($rows as $row) $ranked[]=$row;
+            usort($ranked,static function($a,$b) {
+                $key=static fn($row)=>$row['summary']['date']===''?'':substr($row['summary']['date'],6,4).substr($row['summary']['date'],3,2).substr($row['summary']['date'],0,2);
+                return strcmp($key($b),$key($a)) ?: ((int)$b['id']<=>(int)$a['id']);
+            });
+            $ranked=array_slice($ranked,0,$keep);
+            if ($rows) $before=(int)end($rows)['id'];
+        } while (count($rows)===200);
+        return array_slice($ranked,$offset,31);
+    }
+
+    private function listingChunk(string $where,array $args,int $before): array
+    {
+        global $wpdb;
+        $rows=$wpdb->get_results($wpdb->prepare('SELECT * FROM '.$this->table()." WHERE $where AND id<%d ORDER BY id DESC LIMIT 200",...array_merge($args,[$before])),ARRAY_A) ?: [];
         if (!$rows) return [];
         $ids=implode(',',array_map('intval',array_column($rows,'id')));
         $observations=[];
-        // Three bounded queries, one indexed latest-row lookup per shipment/source; never fetch full histories.
         foreach (['np_documents','np_tracking','csv'] as $source) {
             $sql='SELECT o.* FROM '.$this->table().' r JOIN '.$this->table('_observations').' o ON o.id=(SELECT newer.id FROM '.$this->table('_observations').
                 " newer WHERE newer.registry_id=r.id AND newer.source=%s ORDER BY newer.observed_at DESC,newer.id DESC LIMIT 1) WHERE r.id IN ($ids)";

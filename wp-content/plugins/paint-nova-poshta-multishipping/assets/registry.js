@@ -130,13 +130,21 @@
                         summary.textContent = row.ttn; details.append(summary, table(row.data)); preview.append(details);
                     });
                     confirm.hidden = false; message.textContent = cfg.preview;
+                } else if (data.reconciliation) {
+                    invalidate(); preview.append(table(data.reconciliation)); message.textContent = cfg.compared;
                 } else if (command === 'classify' && data.classification) {
                     invalidate(); message.textContent = cfg.saved;
                     form.dispatchEvent(new CustomEvent('pnpm:classification-saved', {detail: data}));
                 } else if (command === 'confirm' && form.dataset.command === 'history') {
                     invalidate(); form.elements.previous.value = savedToken;
                     next.hidden = !data.scope?.next_page;
-                    message.textContent = data.scope?.next_page ? cfg.more : cfg.empty;
+                    const scope = data.scope || {};
+                    const format = (text, values) => text.replace(/\{(\w+)\}/g, (_, key) => String(values[key] ?? ''));
+                    message.textContent = format(cfg.savedWindow, {from: scope.window_from, to: scope.window_to, page: scope.page, count: data.count}) + ' ' +
+                        (scope.next_page ? format(cfg.continueWindow, {from: scope.next_from, page: scope.next_page}) : cfg.empty);
+                    const refresh = document.createElement('a'); refresh.href = cfg.page;
+                    refresh.className = 'button'; refresh.textContent = cfg.refreshList;
+                    message.append(document.createElement('br'), refresh);
                 } else {
                     invalidate(); message.textContent = cfg.saved;
                     window.location.assign(cfg.page + (data.id ? '&id=' + encodeURIComponent(data.id) : ''));

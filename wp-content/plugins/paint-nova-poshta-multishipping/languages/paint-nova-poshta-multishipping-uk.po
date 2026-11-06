@@ -2578,3 +2578,55 @@ msgstr "Номер рахунку в шапці не розпізнано; пе�
 
 msgid "Header account and basis text disagree; no account selected"
 msgstr "Рахунок у шапці суперечить тексту підстави; рахунок не вибрано"
+
+msgid "Saved: {from} – {to}, page {page}, TTNs: {count}."
+msgstr "Збережено: {from} – {to}, сторінка {page}, ТТН: {count}."
+
+msgid "Import is not finished. Next: {from}, page {page}. Read and confirm the next page."
+msgstr "Імпорт не завершено. Далі: {from}, сторінка {page}. Прочитайте й підтвердьте наступну сторінку."
+
+msgid "Refresh saved shipment list"
+msgstr "Оновити список збережених посилок"
+
+msgid "Newest shipment / document dates first, across all pages. Undated records are last. Amounts are in UAH; delivery payer does not prove payment."
+msgstr "Новіші дати відправлення / документа — зверху на всіх сторінках. Записи без дати — в кінці. Суми в гривнях; платник доставки не підтверджує оплату."
+
+msgid "The API document list may omit outgoing and incoming shipments visible in the Nova Poshta cabinet. Compare it with the cabinet; add missing TTNs separately or via CSV."
+msgstr "Список документів API може не містити частину вихідних і вхідних посилок із кабінету Нової пошти. Звірте списки; відсутні ТТН додайте окремо або через CSV."
+
+msgid "Compare TTNs with the Nova Poshta cabinet"
+msgstr "Звірити ТТН із кабінетом Нової пошти"
+
+msgid "Copy the TTN number column from all pages of outgoing and incoming shipments for the same period. Paste one number per line, up to 1000; spaces inside a number are allowed. Repeated numbers count once. This is a presence check, not an import."
+msgstr "Скопіюйте стовпець номерів ТТН з усіх сторінок вихідних і вхідних посилок за однаковий період. Вставте по одному номеру на рядок, до 1000; пробіли всередині номера дозволені. Повтори рахуються один раз. Це перевірка наявності, а не імпорт."
+
+msgid "TTNs from the Nova Poshta cabinet"
+msgstr "ТТН із кабінету Нової пошти"
+
+msgid "Compare saved TTNs"
+msgstr "Звірити збережені ТТН"
+
+msgid "Compared with saved records in all directions. This only checks the TTNs you supplied; it does not import missing shipments or prove the cabinet list is complete."
+msgstr "Звірено зі збереженими записами всіх напрямків. Перевірено лише передані номери; відсутні посилки не імпортовано, повноту списку кабінету не перевірено."
+
+msgid "Enter up to 1000 TTNs, one number per line."
+msgstr "Введіть до 1000 ТТН, по одному номеру на рядок."
+
+#, php-format
+msgid "Saved TTNs matching filters: %d. Page: %d."
+msgstr "Збережених ТТН за фільтрами: %d. Сторінка: %d."
+
+msgid "Unique TTNs supplied"
+msgstr "Унікальних ТТН у списку"
+
+msgid "Repeated numbers ignored"
+msgstr "Повторних номерів пропущено"
+
+msgid "Already in the registry"
+msgstr "Уже в реєстрі"
+
+msgid "Missing from the registry"
+msgstr "Відсутніх у реєстрі"
+
+msgid "Missing TTNs"
+msgstr "Відсутні ТТН"
