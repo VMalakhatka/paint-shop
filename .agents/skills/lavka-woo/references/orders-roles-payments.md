@@ -787,3 +787,7 @@ must not overwrite bank fields or silently approve a differing recipient; requir
 an exact match with previously verified details or a fresh explicit review. Code
 rollback can reactivate obsolete Folio settings, so verify those privately first. Canonical operator
 steps and historical-file boundaries: `docs/MANAGER_CUSTOMER_GUIDE_UK.md#payment-recipient`.
+
+### Document list dates (2026-11-09)
+
+`customer-documents.php` and Java `FolioCustomerDocumentService` accept explicit future document periods: stored Folio dates can differ from server today. Keep default dates unchanged and retain ordered ranges / 366-day maximum. Do not reuse this read-only rule for balance as-of dates or document creation. Both PHP and Java must be deployed; see `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md` section 13.

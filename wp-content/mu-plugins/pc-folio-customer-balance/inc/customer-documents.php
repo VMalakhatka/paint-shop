@@ -183,8 +183,8 @@ function pc_folio_documents_render_endpoint(int $manager_customer_id = 0): void 
 
         <form class="pc-folio-documents__filters" data-pc-documents-form>
             <label><span><?php esc_html_e('Preorder invoices', 'pc-folio-customer-balance'); ?></span><input type="checkbox" name="preorders_only" value="1"> <?php esc_html_e('Preorder invoices from the last six calendar months through period end; period start and document types are ignored.', 'pc-folio-customer-balance'); ?></label>
-            <label><span><?php esc_html_e('Period start', 'pc-folio-customer-balance'); ?></span><input type="date" name="date_from" value="<?php echo esc_attr($date_from); ?>" max="<?php echo esc_attr($date_to); ?>" required></label>
-            <label><span><?php esc_html_e('Period end', 'pc-folio-customer-balance'); ?></span><input type="date" name="date_to" value="<?php echo esc_attr($date_to); ?>" max="<?php echo esc_attr($date_to); ?>" required></label>
+            <label><span><?php esc_html_e('Period start', 'pc-folio-customer-balance'); ?></span><input type="date" name="date_from" value="<?php echo esc_attr($date_from); ?>" required></label>
+            <label><span><?php esc_html_e('Period end', 'pc-folio-customer-balance'); ?></span><input type="date" name="date_to" value="<?php echo esc_attr($date_to); ?>" required></label>
             <fieldset>
                 <legend><?php esc_html_e('Document types', 'pc-folio-customer-balance'); ?></legend>
                 <label><input type="checkbox" name="types" value="ACCOUNT" checked> <?php esc_html_e('Accounts', 'pc-folio-customer-balance'); ?></label>
@@ -439,8 +439,7 @@ function pc_folio_documents_ajax_list(): void {
     if ($preorders_only) $date_from = $date_to;
     if (!pc_folio_balance_valid_date($date_from)
         || !pc_folio_balance_valid_date($date_to)
-        || $date_from > $date_to
-        || $date_to > current_time('Y-m-d')) {
+        || $date_from > $date_to) {
         wp_send_json_error(['message' => __('Enter a valid document period.', 'pc-folio-customer-balance')], 400);
     }
     $from = new DateTimeImmutable($date_from);

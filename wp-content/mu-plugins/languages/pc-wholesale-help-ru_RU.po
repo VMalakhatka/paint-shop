@@ -1276,3 +1276,7 @@ msgstr "Внизу сайта откройте «Сотрудничество» 
 
 msgid "If WayForPay is temporarily unavailable, the site explains the problem and stops automatic redirects to payment. Choose another available method or contact the manager. An existing order is saved. If money was charged, do not pay again; ask the manager to check the payment. Refresh checkout after the service recovers."
 msgstr "Если WayForPay временно недоступен, сайт объясняет проблему и прекращает автоматические переходы к оплате. Выберите другой доступный способ или обратитесь к менеджеру. Уже созданный заказ сохраняется. Если деньги списаны, не платите второй раз: попросите менеджера проверить платёж. После восстановления сервиса обновите страницу оформления."
+
+#: pc-wholesale-help.php
+msgid "If a Folio document has a later date, include that date in the document period. Viewing documents does not change their dates or the balance calculation."
+msgstr "Если документ ФОЛИО имеет более позднюю дату, включите её в период документов. Просмотр не меняет даты документов или расчёт баланса."

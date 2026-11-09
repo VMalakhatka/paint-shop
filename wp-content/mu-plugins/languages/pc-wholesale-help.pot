@@ -1254,3 +1254,7 @@ msgstr ""
 
 msgid "If WayForPay is temporarily unavailable, the site explains the problem and stops automatic redirects to payment. Choose another available method or contact the manager. An existing order is saved. If money was charged, do not pay again; ask the manager to check the payment. Refresh checkout after the service recovers."
 msgstr ""
+
+#: pc-wholesale-help.php
+msgid "If a Folio document has a later date, include that date in the document period. Viewing documents does not change their dates or the balance calculation."
+msgstr ""
