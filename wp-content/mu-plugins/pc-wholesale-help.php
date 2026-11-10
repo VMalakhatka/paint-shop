@@ -584,6 +584,11 @@ function pc_wholesale_help_render_endpoint(): void {
             <?php endif; ?>
         </section>
 
+        <section class="pc-help-section" id="partner-catalog">
+            <h2><?php esc_html_e('Data and photos for your website', 'pc-wholesale-help'); ?></h2>
+            <p><?php esc_html_e('In My account, open Data and photos for your website. Save and review a selection of up to 500 products, then download data or photos. Prom XML uses retail prices only. Enable the personal link after checking prices and configure scheduled imports in Prom. Start with a small test import. Check manifest.csv in photo archives for missing images.', 'pc-wholesale-help'); ?></p>
+            <a href="<?php echo esc_url(add_query_arg('pcoe_catalog','1',wc_get_page_permalink('myaccount'))); ?>"><?php esc_html_e('Open product export', 'pc-wholesale-help'); ?></a>
+        </section>
         <section class="pc-help-section" id="folio">
             <div class="pc-help-section__heading"><span>12</span><div><h2><?php esc_html_e('View and repeat Folio documents', 'pc-wholesale-help'); ?></h2><p><?php esc_html_e('Choose a period and document types, then open an invoice, expense invoice or payment for details.', 'pc-wholesale-help'); ?></p></div></div>
             <h3 id="folio-search"><?php esc_html_e('Find and open a document', 'pc-wholesale-help'); ?></h3>

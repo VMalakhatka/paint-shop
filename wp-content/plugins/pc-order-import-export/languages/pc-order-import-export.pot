@@ -4286,3 +4286,215 @@ msgstr ""
 #: inc/ApprovalBundle.php
 msgid "Payment details in this confirmation are no longer verified. Ask your manager for an updated confirmation before paying. Do not use details from an earlier file or email."
 msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Data and photos for your website"
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Choose up to 500 products. CSV/XLSX contains your purchase price and retail price separately. Prom and WooCommerce files use retail prices only."
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Category and subcategories"
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Brand"
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "All"
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "SKUs, one per line"
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Or upload CSV/XLSX: SKUs in column A, optional SKU header; replaces the text list."
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Filters are combined. Saving a selection pauses its Prom link until you review and enable it again."
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Save and preview"
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Preview"
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Products: %d. Data prepared: %s (UTC). Refresh interval: 10 minutes."
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Not found or excluded by visibility and filters:"
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "First 25 products are shown below. Downloads contain the whole saved selection."
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Your price"
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Retail price"
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Stock"
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Photos"
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Download Excel"
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Download CSV"
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "CSV for WooCommerce"
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "XML for Prom"
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Download photos (ZIP)"
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "ZIP supports up to 100 images. Check manifest.csv inside the archive: it lists every missing image. Full-size image links are also included in the table files."
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Automatic import into Prom"
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Prom reads this personal link according to the import schedule you configure in Prom. The link exports retail prices, never your purchase prices. It does not send orders or reserve goods."
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Personal XML link — share only with your import service"
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "The Prom link is paused."
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "I checked the selection and retail prices for publication on my website."
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Enable Prom link"
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Pause link"
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Replace link"
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Replacing the link invalidates the old address. In Prom, first test a small import and match groups; for later updates select prices and availability so your edited descriptions remain unchanged."
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Export access is unavailable."
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Export is busy. Please retry shortly."
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Could not prepare the export. Please retry or contact the manager."
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Selection saved. Review the preview before enabling the Prom link."
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Confirm the retail prices and selection."
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Unknown export action."
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Use up to 500 SKUs, one per line."
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Invalid SKU list."
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Invalid selection."
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Select a category, brand or SKU list."
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "More than 500 products. Narrow the selection; no partial file was created."
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Could not read categories."
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "No exportable products. Check SKUs and filters."
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Pack quantities are unavailable. Contact the manager if you need them."
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "A product has no retail price. Contact the manager before exporting to Prom."
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Photo ZIP supports up to 100 images. Narrow the selection or use the image links."
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "ZIP export is unavailable."
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Upload a CSV or XLSX file up to 5 MB."
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Invalid XLSX file."
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "The workbook is too large. Use a single SKU column."
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Use SKU values, not formulas."
+msgstr ""

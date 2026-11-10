@@ -4,6 +4,7 @@ namespace PaintCore\PCOE;
 class Plugin {
     public function init(){
         CustomerPermissions::hooks();
+        PartnerCatalog::hooks();
         PromotionCoupons::hooks();
         OrderExecution::hooks();
         ManagerQuickOrder::hooks();

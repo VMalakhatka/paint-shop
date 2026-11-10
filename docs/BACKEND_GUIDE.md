@@ -552,3 +552,12 @@ the operations runbook for rollout and the Kreul regression example.
 Java `FolioProductCardDao/Controller` владеет SELECT по исходным Access-запросам и
 их сравнением. Это прямое чтение Paint_Ua, без проекций, импорта и записи в ФОЛИО.
 Контракт, ограничения и проверка: [карточки товаров](api/FOLIO_PRODUCT_CARDS.md).
+
+
+### Partner catalogue delivery
+
+`PCOE\PartnerCatalog` serves private XLSX/CSV and revocable retail-only Prom YML.
+It reuses WordPress visibility, scoped pricing and stock; packaging reads the existing
+Java endpoint. No separate feed database or Java change. Limits and the customer
+workflow are in [the wholesale guide](WHOLESALE_CUSTOMER_GUIDE_UK.md); internal
+ownership and access invariants are in the Lavka skill's orders reference.

@@ -1,0 +1,10 @@
+.pcoe-partner-catalog {max-width:100%;overflow-wrap:anywhere}
+.pcoe-partner-catalog form {margin:1.25rem 0;padding:1rem;border:1px solid #ddd;border-radius:8px}
+.pcoe-partner-catalog label {display:block;margin:.8rem 0}
+.pcoe-partner-catalog textarea,.pcoe-partner-catalog select {display:block;width:100%;max-width:100%;box-sizing:border-box}
+.pcoe-partner-catalog input[type=file] {display:block;max-width:100%;margin-top:.5rem}
+.pcoe-partner-catalog .button {margin:.4rem .2rem .4rem 0;white-space:normal}
+.pcoe-partner-fields {display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.pcoe-partner-table {overflow-x:auto;max-width:100%}
+.pcoe-partner-table table {min-width:540px}
+@media(max-width:600px){.pcoe-partner-fields{grid-template-columns:1fr;gap:0}.pcoe-partner-catalog form{padding:.65rem}.pcoe-partner-catalog .button{width:100%}}

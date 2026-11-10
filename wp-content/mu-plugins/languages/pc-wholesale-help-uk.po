@@ -1280,3 +1280,15 @@ msgstr "Якщо WayForPay тимчасово недоступний, сайт �
 #: pc-wholesale-help.php
 msgid "If a Folio document has a later date, include that date in the document period. Viewing documents does not change their dates or the balance calculation."
 msgstr "Якщо документ ФОЛІО має пізнішу дату, включіть її в період документів. Перегляд не змінює дати документів або розрахунок балансу."
+
+#: pc-wholesale-help.php
+msgid "Data and photos for your website"
+msgstr "Дані та фото для вашого сайту"
+
+#: pc-wholesale-help.php
+msgid "Open product export"
+msgstr "Відкрити експорт товарів"
+
+#: pc-wholesale-help.php
+msgid "In My account, open Data and photos for your website. Save and review a selection of up to 500 products, then download data or photos. Prom XML uses retail prices only. Enable the personal link after checking prices and configure scheduled imports in Prom. Start with a small test import. Check manifest.csv in photo archives for missing images."
+msgstr "У кабінеті відкрийте «Дані та фото для вашого сайту». Збережіть і перевірте добірку до 500 товарів, потім завантажте дані або фото. XML Prom використовує лише роздрібні ціни. Увімкніть персональне посилання після перевірки цін і налаштуйте регулярний імпорт у Prom. Почніть із невеликого тестового імпорту. В архівах фото перевіряйте manifest.csv щодо відсутніх зображень."

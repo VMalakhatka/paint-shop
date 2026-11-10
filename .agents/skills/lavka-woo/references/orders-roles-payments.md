@@ -791,3 +791,22 @@ steps and historical-file boundaries: `docs/MANAGER_CUSTOMER_GUIDE_UK.md#payment
 ### Document list dates (2026-11-09)
 
 `customer-documents.php` and Java `FolioCustomerDocumentService` accept explicit future document periods: stored Folio dates can differ from server today. Keep default dates unchanged and retain ordered ranges / 366-day maximum. Do not reuse this read-only rule for balance as-of dates or document creation. Both PHP and Java must be deployed; see `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md` section 13.
+
+
+### Partner product exports (2026-11-10)
+
+`pc-order-import-export/inc/PartnerCatalog*.php` owns the opt-in account screen
+`?pcoe_catalog=1` and bearer-key retail YML via admin-post. The account redirect
+MU-plugin preserves this query. `_pcoe_partner_catalog` user meta stores selection,
+revocation seed and enabled flag; a private 10-minute transient holds owner-scoped
+rows. Recheck wholesale access for every request, never share private rows between
+users, and never expose purchase prices in Prom/Woo CSV. Use public category
+visibility from PriceList; category_id added to its row envelope is metadata only.
+Schema headers are export field names, not customer record metadata. Public visible
+attributes only, no supplier attributes. Settings writes use a per-user DB lock.
+Requests read WordPress stock; optional packaging read is the existing bounded Java
+endpoint. No new Java code, media assignment, stock writes, email or scheduled
+synchronization. Version one explicitly caps 500 products / 100 ZIP photos. See
+`docs/WHOLESALE_CUSTOMER_GUIDE_UK.md` for setup, Prom test import and limits. Undo the
+Plugin hook and account redirect exception to disable the feature; no business data
+migration. No marketplace test or production deployment implied by local tests.

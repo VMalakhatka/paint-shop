@@ -4478,3 +4478,215 @@ msgstr "Перед закрытием контроля запишите резу
 #: inc/ApprovalBundle.php
 msgid "Payment details in this confirmation are no longer verified. Ask your manager for an updated confirmation before paying. Do not use details from an earlier file or email."
 msgstr "Реквизиты в этом подтверждении больше не проверены. Перед оплатой попросите менеджера предоставить обновлённое подтверждение. Не используйте реквизиты из предыдущего файла или письма."
+
+#: inc/PartnerCatalogUi.php
+msgid "Data and photos for your website"
+msgstr "Данные и фото для вашего сайта"
+
+#: inc/PartnerCatalogUi.php
+msgid "Choose up to 500 products. CSV/XLSX contains your purchase price and retail price separately. Prom and WooCommerce files use retail prices only."
+msgstr "Выберите до 500 товаров. CSV/XLSX содержит отдельно вашу закупочную и розничную цену. Файлы Prom и WooCommerce используют только розничные цены."
+
+#: inc/PartnerCatalogUi.php
+msgid "Category and subcategories"
+msgstr "Категория и подкатегории"
+
+#: inc/PartnerCatalogUi.php
+msgid "Brand"
+msgstr "Бренд"
+
+#: inc/PartnerCatalogUi.php
+msgid "All"
+msgstr "Все"
+
+#: inc/PartnerCatalogUi.php
+msgid "SKUs, one per line"
+msgstr "Артикулы, по одному в строке"
+
+#: inc/PartnerCatalogUi.php
+msgid "Or upload CSV/XLSX: SKUs in column A, optional SKU header; replaces the text list."
+msgstr "Или загрузите CSV/XLSX: артикулы в колонке A, необязательный заголовок SKU. Файл заменит текстовый список."
+
+#: inc/PartnerCatalogUi.php
+msgid "Filters are combined. Saving a selection pauses its Prom link until you review and enable it again."
+msgstr "Фильтры применяются вместе. Сохранение подборки приостанавливает ссылку Prom до повторной проверки и включения."
+
+#: inc/PartnerCatalogUi.php
+msgid "Save and preview"
+msgstr "Сохранить и просмотреть"
+
+#: inc/PartnerCatalogUi.php
+msgid "Preview"
+msgstr "Предпросмотр"
+
+#: inc/PartnerCatalogUi.php
+msgid "Products: %d. Data prepared: %s (UTC). Refresh interval: 10 minutes."
+msgstr "Товаров: %d. Данные подготовлены: %s (UTC). Интервал обновления: 10 минут."
+
+#: inc/PartnerCatalogUi.php
+msgid "Not found or excluded by visibility and filters:"
+msgstr "Не найдены или исключены видимостью и фильтрами:"
+
+#: inc/PartnerCatalogUi.php
+msgid "First 25 products are shown below. Downloads contain the whole saved selection."
+msgstr "Ниже показаны первые 25 товаров. Загружаемые файлы содержат всю сохранённую подборку."
+
+#: inc/PartnerCatalogUi.php
+msgid "Your price"
+msgstr "Ваша цена"
+
+#: inc/PartnerCatalogUi.php
+msgid "Retail price"
+msgstr "Розничная цена"
+
+#: inc/PartnerCatalogUi.php
+msgid "Stock"
+msgstr "Остаток"
+
+#: inc/PartnerCatalogUi.php
+msgid "Photos"
+msgstr "Фото"
+
+#: inc/PartnerCatalogUi.php
+msgid "Download Excel"
+msgstr "Скачать Excel"
+
+#: inc/PartnerCatalogUi.php
+msgid "Download CSV"
+msgstr "Скачать CSV"
+
+#: inc/PartnerCatalogUi.php
+msgid "CSV for WooCommerce"
+msgstr "CSV для WooCommerce"
+
+#: inc/PartnerCatalogUi.php
+msgid "XML for Prom"
+msgstr "XML для Prom"
+
+#: inc/PartnerCatalogUi.php
+msgid "Download photos (ZIP)"
+msgstr "Скачать фото (ZIP)"
+
+#: inc/PartnerCatalogUi.php
+msgid "ZIP supports up to 100 images. Check manifest.csv inside the archive: it lists every missing image. Full-size image links are also included in the table files."
+msgstr "ZIP поддерживает до 100 фото. Проверьте manifest.csv в архиве: там указаны все незагруженные фото. Ссылки на полноразмерные фото также есть в таблицах."
+
+#: inc/PartnerCatalogUi.php
+msgid "Automatic import into Prom"
+msgstr "Автоматический импорт в Prom"
+
+#: inc/PartnerCatalogUi.php
+msgid "Prom reads this personal link according to the import schedule you configure in Prom. The link exports retail prices, never your purchase prices. It does not send orders or reserve goods."
+msgstr "Prom читает персональную ссылку по расписанию импорта, которое вы настроите в Prom. Передаются розничные цены, без ваших закупочных цен. Это не отправляет заказы и не резервирует товар."
+
+#: inc/PartnerCatalogUi.php
+msgid "Personal XML link — share only with your import service"
+msgstr "Персональная XML-ссылка — передавайте только сервису импорта"
+
+#: inc/PartnerCatalogUi.php
+msgid "The Prom link is paused."
+msgstr "Ссылка Prom приостановлена."
+
+#: inc/PartnerCatalogUi.php
+msgid "I checked the selection and retail prices for publication on my website."
+msgstr "Я проверил подборку и розничные цены для публикации на своём сайте."
+
+#: inc/PartnerCatalogUi.php
+msgid "Enable Prom link"
+msgstr "Включить ссылку Prom"
+
+#: inc/PartnerCatalogUi.php
+msgid "Pause link"
+msgstr "Приостановить ссылку"
+
+#: inc/PartnerCatalogUi.php
+msgid "Replace link"
+msgstr "Заменить ссылку"
+
+#: inc/PartnerCatalogUi.php
+msgid "Replacing the link invalidates the old address. In Prom, first test a small import and match groups; for later updates select prices and availability so your edited descriptions remain unchanged."
+msgstr "Замена ссылки отключает старый адрес. В Prom сначала проверьте небольшой импорт и сопоставьте группы. Для дальнейших обновлений выберите цены и наличие, чтобы сохранить собственные описания."
+
+#: inc/PartnerCatalogUi.php
+msgid "Export access is unavailable."
+msgstr "Доступ к экспорту отсутствует."
+
+#: inc/PartnerCatalogUi.php
+msgid "Export is busy. Please retry shortly."
+msgstr "Экспорт занят. Повторите немного позже."
+
+#: inc/PartnerCatalogUi.php
+msgid "Could not prepare the export. Please retry or contact the manager."
+msgstr "Не удалось подготовить экспорт. Повторите или обратитесь к менеджеру."
+
+#: inc/PartnerCatalogUi.php
+msgid "Selection saved. Review the preview before enabling the Prom link."
+msgstr "Подборка сохранена. Проверьте предпросмотр перед включением ссылки Prom."
+
+#: inc/PartnerCatalogUi.php
+msgid "Confirm the retail prices and selection."
+msgstr "Подтвердите розничные цены и подборку."
+
+#: inc/PartnerCatalogUi.php
+msgid "Unknown export action."
+msgstr "Неизвестное действие экспорта."
+
+#: inc/PartnerCatalogUi.php
+msgid "Use up to 500 SKUs, one per line."
+msgstr "Укажите до 500 артикулов, по одному в строке."
+
+#: inc/PartnerCatalogUi.php
+msgid "Invalid SKU list."
+msgstr "Некорректный список артикулов."
+
+#: inc/PartnerCatalogUi.php
+msgid "Invalid selection."
+msgstr "Некорректная подборка."
+
+#: inc/PartnerCatalogUi.php
+msgid "Select a category, brand or SKU list."
+msgstr "Выберите категорию, бренд или список артикулов."
+
+#: inc/PartnerCatalogUi.php
+msgid "More than 500 products. Narrow the selection; no partial file was created."
+msgstr "Более 500 товаров. Сузьте подборку; частичный файл не создавался."
+
+#: inc/PartnerCatalogUi.php
+msgid "Could not read categories."
+msgstr "Не удалось прочитать категории."
+
+#: inc/PartnerCatalogUi.php
+msgid "No exportable products. Check SKUs and filters."
+msgstr "Нет доступных товаров для экспорта. Проверьте артикулы и фильтры."
+
+#: inc/PartnerCatalogUi.php
+msgid "Pack quantities are unavailable. Contact the manager if you need them."
+msgstr "Количество в упаковке недоступно. При необходимости обратитесь к менеджеру."
+
+#: inc/PartnerCatalogUi.php
+msgid "A product has no retail price. Contact the manager before exporting to Prom."
+msgstr "У товара нет розничной цены. Обратитесь к менеджеру перед экспортом в Prom."
+
+#: inc/PartnerCatalogUi.php
+msgid "Photo ZIP supports up to 100 images. Narrow the selection or use the image links."
+msgstr "ZIP поддерживает до 100 фото. Сузьте подборку или используйте ссылки на фото."
+
+#: inc/PartnerCatalogUi.php
+msgid "ZIP export is unavailable."
+msgstr "Экспорт ZIP недоступен."
+
+#: inc/PartnerCatalogUi.php
+msgid "Upload a CSV or XLSX file up to 5 MB."
+msgstr "Загрузите CSV или XLSX до 5 МБ."
+
+#: inc/PartnerCatalogUi.php
+msgid "Invalid XLSX file."
+msgstr "Некорректный файл XLSX."
+
+#: inc/PartnerCatalogUi.php
+msgid "The workbook is too large. Use a single SKU column."
+msgstr "Книга слишком большая. Используйте одну колонку артикулов."
+
+#: inc/PartnerCatalogUi.php
+msgid "Use SKU values, not formulas."
+msgstr "Укажите значения артикулов без формул."

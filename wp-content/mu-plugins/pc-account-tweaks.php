@@ -14,6 +14,7 @@ add_action('template_redirect', function () {
     if ( ! function_exists('is_account_page') ) return;
 
     // Query-based account screens must reach their renderer, which checks ownership.
+    if ( isset($_GET['pcoe_catalog']) && class_exists('PaintCore\\PCOE\\PartnerCatalog') ) return;
     if ( isset($_GET['pcoe_chat']) && class_exists('PaintCore\\PCOE\\Conversations') ) return;
     if ( (isset($_GET['pcoe_approval']) || isset($_GET['approval_page']))
         && class_exists('PaintCore\\PCOE\\CustomerApproval') ) return;
