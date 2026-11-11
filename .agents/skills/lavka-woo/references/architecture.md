@@ -18,7 +18,15 @@ combine both carrier collection fields. Save exact kopecks and payment basis;
 revalidate paid state, total and method before writing. Old drafts require resave;
 locked attempts require reconciliation. Declared value and delivery quote are not
 collection; the quote excludes transfer commission. No courier address, non-cash
-carrier payment, polling, Telegram or automated reconciliation yet. The official docs were accessible in Chrome on 2026-10-18;
+carrier payment, polling, Telegram or automated reconciliation yet.
+Read-only COD capability diagnosis (verified live 2026-11-11): match the exact
+configured sender against `Counterparty.getCounterparties`, then read
+`getCounterpartyOptions` for that Ref. `CanAfterpaymentOnGoodsCost=true` confirms
+payment-control availability at that moment, not settlement account, fees, or
+successful TTN creation. Missing/failed responses are inconclusive. Use the
+existing server credential, never recipient/document save as a capability test;
+this diagnostic is not an automatic lifecycle check in version 0.11.0.
+The official docs were accessible in Chrome on 2026-10-18;
 do not repeat the earlier 403 as a current access blocker. Read
 [the contract review](../../../../docs/api/NOVA_POSHTA_SHIPMENT_CONTRACT.md)
 before extending the lifecycle: official examples have contradictions, status 1
