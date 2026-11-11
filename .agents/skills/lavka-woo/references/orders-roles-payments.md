@@ -802,7 +802,8 @@ external TTN or order-pay. Keep selection separate from payment/TTN creation;
 native initial COD status is on-hold. Manager preparation reads the Woo payment
 method and paid date. Do not duplicate totals into shipments or infer a real
 payment from Folio processing status. Gateway activation is a separate approved
-Woo setting, after manager COD acceptance. Runbook and local DB test gap: PSU
+Woo setting, after manager COD acceptance. Local Woo/native COD and role-policy
+contracts passed; browser/manager release acceptance remains. Runbook: PSU
 README, section «Оплата при получении НП»; public help: checkout-cod anchor.
 
 ### Partner product exports (2026-11-10)

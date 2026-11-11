@@ -1100,8 +1100,12 @@ rollback, fallback, empty-menu), браузер на desktop/tablet/mobile, от
 Проверки: `php wp-content/plugins/paint-shop-ux/tests/checkout-cod.php` — изолированные
 контракты. `wp eval-file wp-content/plugins/paint-shop-ux/tests/checkout-cod-local.php`
 — synthetic Woo CRUD/native COD с запретом исходящих HTTP/mail, требует paint.local.
-На 2026-11-11 локальная БД недоступна: CRUD/native checkout и браузерная приёмка
-не выполнены. Production не изменён, gateway не включён, реальные платежи/ТТН
+Проверено 2026-11-11 после запуска paint.local: 67 изолированных проверок и 21
+интеграционная проверка Woo CRUD/native COD, фактического CartShipmentBuilder,
+актуальной политики, цепочки gateway-фильтров для гостя/розницы/опта и скомпилированных
+UK/RU переводов. Synthetic заказ удалён после проверки; настройки COD не записывались.
+Осталась браузерная приёмка desktop/mobile и совместная проверка менеджерской
+подготовки COD-ТТН. Production не изменён, gateway не включён, реальные платежи/ТТН
 не выполнялись. Канон оптовой инструкции и код страницы обновлены, но не опубликованы.
 
 Откат: сначала отключить COD в Woo, затем вернуть PSU и справку/переводы вместе.
