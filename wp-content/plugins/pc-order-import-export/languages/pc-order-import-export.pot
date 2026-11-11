@@ -4498,3 +4498,27 @@ msgstr ""
 #: inc/PartnerCatalogUi.php
 msgid "Use SKU values, not formulas."
 msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Full export help"
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Short guide (PDF, Ukrainian)"
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "How to select products"
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Which file to choose"
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "How to connect Prom"
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "If products or photos are missing"
+msgstr ""

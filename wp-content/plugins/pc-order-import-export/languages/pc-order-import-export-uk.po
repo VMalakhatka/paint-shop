@@ -4692,3 +4692,27 @@ msgstr "Книга завелика. Використайте одну коло�
 #: inc/PartnerCatalogUi.php
 msgid "Use SKU values, not formulas."
 msgstr "Вкажіть значення артикулів без формул."
+
+#: inc/PartnerCatalogUi.php
+msgid "Full export help"
+msgstr "Повна довідка з експорту"
+
+#: inc/PartnerCatalogUi.php
+msgid "Short guide (PDF, Ukrainian)"
+msgstr "Коротка інструкція (PDF, українською)"
+
+#: inc/PartnerCatalogUi.php
+msgid "How to select products"
+msgstr "Як вибрати товари"
+
+#: inc/PartnerCatalogUi.php
+msgid "Which file to choose"
+msgstr "Який файл вибрати"
+
+#: inc/PartnerCatalogUi.php
+msgid "How to connect Prom"
+msgstr "Як підключити Prom"
+
+#: inc/PartnerCatalogUi.php
+msgid "If products or photos are missing"
+msgstr "Якщо бракує товарів або фото"

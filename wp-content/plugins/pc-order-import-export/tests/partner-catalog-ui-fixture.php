@@ -12,6 +12,7 @@ function wp_enqueue_style(...$args){}function esc_html($v){return htmlspecialcha
 function __($s,$domain=''){static $t;if($t===null)$t=getenv('PCOE_TRANSLATIONS')?json_decode(file_get_contents(getenv('PCOE_TRANSLATIONS')),true):[];return $t[$s]??$s;}function esc_html__($s,$d=''){return esc_html(__($s,$d));}
 function wp_salt($s){return 'fixture-secret';}function admin_url($s){return 'https://example.test/'.$s;}function add_query_arg($a,$b=null,$c=null){return ($c??$b).'?'.http_build_query(is_array($a)?$a:[$a=>$b]);}
 function wc_get_page_permalink($s){return 'https://example.test/my-account/';}
+function wc_get_account_endpoint_url($s){return 'https://example.test/my-account/'.$s.'/';}
 echo '<!doctype html><html lang="uk"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{font:16px/1.5 Arial;margin:20px auto;padding:0 12px;max-width:1000px}*{box-sizing:border-box}button,input,textarea,select{font:inherit}textarea,select{padding:8px}button{padding:10px;background:#245f4c;color:white;border:0;border-radius:4px}td,th{padding:8px;text-align:left}table{border-collapse:collapse}tr{border-bottom:1px solid #ddd}.woocommerce-info{background:#edf4fa;padding:12px}</style><style>'.file_get_contents(PCOE_DIR.'/assets/partner-catalog.css').'</style>';
 \PaintCore\PCOE\PartnerCatalogUi::render();echo '</html>';
 }

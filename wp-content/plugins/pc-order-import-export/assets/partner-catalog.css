@@ -8,3 +8,4 @@
 .pcoe-partner-table {overflow-x:auto;max-width:100%}
 .pcoe-partner-table table {min-width:540px}
 @media(max-width:600px){.pcoe-partner-fields{grid-template-columns:1fr;gap:0}.pcoe-partner-catalog form{padding:.65rem}.pcoe-partner-catalog .button{width:100%}}
+.pcoe-partner-help{display:flex;flex-wrap:wrap;gap:.6em 1.4em;margin:1em 0}.pcoe-partner-help a{overflow-wrap:anywhere}

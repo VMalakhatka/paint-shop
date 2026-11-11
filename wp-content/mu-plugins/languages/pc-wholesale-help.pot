@@ -1270,3 +1270,83 @@ msgstr ""
 #: pc-wholesale-help.php
 msgid "In My account, open Data and photos for your website. Save and review a selection of up to 500 products, then download data or photos. Prom XML uses retail prices only. Enable the personal link after checking prices and configure scheduled imports in Prom. Start with a small test import. Check manifest.csv in photo archives for missing images."
 msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Full export help"
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Short guide (PDF, Ukrainian)"
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "How to select products"
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Which file to choose"
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "How to connect Prom"
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "If products or photos are missing"
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Sign in to your wholesale account and open Data and photos for your website. If this menu is missing, ask your manager to check your access."
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Choose a category with subcategories, a brand or SKUs, one per line. Filters work together: a SKU outside the chosen category or brand is excluded. Select up to 500 products."
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "You can upload CSV/XLSX up to 5 MB instead of typing SKUs. Use column A of the first sheet, with an optional SKU or Артикул header and no formulas. Uploading replaces the typed list."
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Select Save and preview. Check the total count, purchase and retail prices, stock and excluded SKUs. Only the first 25 products are displayed; files contain the entire selection. Saving pauses the Prom link until you review and enable it again."
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Download Excel / Download CSV: a flat table with SKU, barcode, names, descriptions, category path, unit, pack quantity, purchase and retail prices, stock, public attributes and full-size photo links. Keep this purchase-price file for your own work; do not publish it."
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "CSV for WooCommerce / XML for Prom: import formats with retail prices only. These are the normal retail prices saved on our site; your own markup is not configured here. First test a few products, map categories and check images, prices and availability in your shop."
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Download photos (ZIP): up to 100 images, grouped by product. Read manifest.csv inside: it lists saved and missing images. Limits are 5 MB per image, 50 MB in total and limited preparation time. For a larger selection, use photo links from Excel/CSV or smaller archives. Prom XML contains up to 10 photos per product."
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "After reviewing the selection, tick the price confirmation and select Enable Prom link. Copy the personal XML link into the import settings of your Prom shop. Share it only with your import service, not on public pages."
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Start with a small test import. For later updates, select prices and availability if you want to keep descriptions you edited in Prom. Product IDs remain stable. Do not automatically delete products just because you changed the selection."
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Set the import schedule in Prom. Our snapshot refreshes on request at intervals of at least 10 minutes; its timestamp is shown in UTC. Stock comes from the website price-list data for Kyiv and Odesa and is not a promise of real-time availability. Unknown stock is not marked available. Exports do not create orders, reserves or shipments."
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Pause link stops access. Replace link invalidates the previous address; paste the new address into Prom. Saving any selection pauses the link and requires a new review and enable action. If a request fails, keep your previous imported catalogue."
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "No products or some SKUs missing: check exact website SKUs and the combined category/brand filters. Hidden or unpublished products are not exported. More than 500 products: narrow the selection; the system does not silently truncate it."
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Missing images: check manifest.csv, then use photo links or export fewer products. Missing pack quantity: the rest of the file can still be used; ask your manager for packaging. Missing retail price prevents a Prom export and needs the manager to check the product."
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Link unavailable: check that it is enabled and that Prom has the latest address. If export still fails, retry later or send the manager the time, format, affected SKUs and a screenshot. Do not send your personal XML link in public messages."
+msgstr ""

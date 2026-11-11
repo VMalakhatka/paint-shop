@@ -1292,3 +1292,83 @@ msgstr "Відкрити експорт товарів"
 #: pc-wholesale-help.php
 msgid "In My account, open Data and photos for your website. Save and review a selection of up to 500 products, then download data or photos. Prom XML uses retail prices only. Enable the personal link after checking prices and configure scheduled imports in Prom. Start with a small test import. Check manifest.csv in photo archives for missing images."
 msgstr "У кабінеті відкрийте «Дані та фото для вашого сайту». Збережіть і перевірте добірку до 500 товарів, потім завантажте дані або фото. XML Prom використовує лише роздрібні ціни. Увімкніть персональне посилання після перевірки цін і налаштуйте регулярний імпорт у Prom. Почніть із невеликого тестового імпорту. В архівах фото перевіряйте manifest.csv щодо відсутніх зображень."
+
+#: pc-wholesale-help.php
+msgid "Full export help"
+msgstr "Повна довідка з експорту"
+
+#: pc-wholesale-help.php
+msgid "Short guide (PDF, Ukrainian)"
+msgstr "Коротка інструкція (PDF, українською)"
+
+#: pc-wholesale-help.php
+msgid "How to select products"
+msgstr "Як вибрати товари"
+
+#: pc-wholesale-help.php
+msgid "Which file to choose"
+msgstr "Який файл вибрати"
+
+#: pc-wholesale-help.php
+msgid "How to connect Prom"
+msgstr "Як підключити Prom"
+
+#: pc-wholesale-help.php
+msgid "If products or photos are missing"
+msgstr "Якщо бракує товарів або фото"
+
+#: pc-wholesale-help.php
+msgid "Sign in to your wholesale account and open Data and photos for your website. If this menu is missing, ask your manager to check your access."
+msgstr "Увійдіть у свій оптовий кабінет і відкрийте «Дані та фото для вашого сайту». Якщо пункту меню немає, попросіть менеджера перевірити доступ."
+
+#: pc-wholesale-help.php
+msgid "Choose a category with subcategories, a brand or SKUs, one per line. Filters work together: a SKU outside the chosen category or brand is excluded. Select up to 500 products."
+msgstr "Виберіть категорію з підкатегоріями, бренд або введіть артикули по одному в рядку. Фільтри діють разом: артикул поза вибраною категорією чи брендом не потрапить у файл. Максимум 500 товарів."
+
+#: pc-wholesale-help.php
+msgid "You can upload CSV/XLSX up to 5 MB instead of typing SKUs. Use column A of the first sheet, with an optional SKU or Артикул header and no formulas. Uploading replaces the typed list."
+msgstr "Замість введення артикулів можна завантажити CSV/XLSX до 5 МБ: колонка A першого аркуша, необов’язковий заголовок SKU або Артикул, без формул. Файл замінює введений список."
+
+#: pc-wholesale-help.php
+msgid "Select Save and preview. Check the total count, purchase and retail prices, stock and excluded SKUs. Only the first 25 products are displayed; files contain the entire selection. Saving pauses the Prom link until you review and enable it again."
+msgstr "Натисніть «Зберегти та переглянути». Перевірте загальну кількість, закупівельні й роздрібні ціни, залишки та виключені артикули. На екрані лише перші 25 товарів; файли містять усю добірку. Збереження призупиняє посилання Prom до повторної перевірки та ввімкнення."
+
+#: pc-wholesale-help.php
+msgid "Download Excel / Download CSV: a flat table with SKU, barcode, names, descriptions, category path, unit, pack quantity, purchase and retail prices, stock, public attributes and full-size photo links. Keep this purchase-price file for your own work; do not publish it."
+msgstr "«Завантажити Excel» / «Завантажити CSV»: плоска таблиця з артикулом, штрихкодом, назвами, описами, шляхом категорії, одиницею, фасовкою, закупівельною й роздрібною ціною, залишком, публічними характеристиками та посиланнями на повні фото. Цей файл із закупівельними цінами призначений для вашої роботи; не публікуйте його."
+
+#: pc-wholesale-help.php
+msgid "CSV for WooCommerce / XML for Prom: import formats with retail prices only. These are the normal retail prices saved on our site; your own markup is not configured here. First test a few products, map categories and check images, prices and availability in your shop."
+msgstr "«CSV для WooCommerce» / «XML для Prom»: формати імпорту лише з роздрібними цінами. Це звичайні роздрібні ціни, збережені на нашому сайті; власна націнка тут не налаштовується. Спочатку перевірте кілька товарів, зіставте категорії та перегляньте фото, ціни й наявність у своєму магазині."
+
+#: pc-wholesale-help.php
+msgid "Download photos (ZIP): up to 100 images, grouped by product. Read manifest.csv inside: it lists saved and missing images. Limits are 5 MB per image, 50 MB in total and limited preparation time. For a larger selection, use photo links from Excel/CSV or smaller archives. Prom XML contains up to 10 photos per product."
+msgstr "«Завантажити фото (ZIP)»: до 100 зображень, розкладених за товарами. Прочитайте manifest.csv усередині: там перелічено збережені й відсутні фото. Обмеження: 5 МБ на фото, 50 МБ загалом та обмежений час підготовки. Для великої добірки використовуйте посилання з Excel/CSV або менші архіви. XML для Prom містить до 10 фото товару."
+
+#: pc-wholesale-help.php
+msgid "After reviewing the selection, tick the price confirmation and select Enable Prom link. Copy the personal XML link into the import settings of your Prom shop. Share it only with your import service, not on public pages."
+msgstr "Після перевірки добірки позначте підтвердження цін і натисніть «Увімкнути посилання Prom». Скопіюйте персональне XML-посилання в налаштування імпорту свого магазину Prom. Передавайте його лише сервісу імпорту, не розміщуйте на відкритих сторінках."
+
+#: pc-wholesale-help.php
+msgid "Start with a small test import. For later updates, select prices and availability if you want to keep descriptions you edited in Prom. Product IDs remain stable. Do not automatically delete products just because you changed the selection."
+msgstr "Почніть із невеликого тестового імпорту. Для наступних оновлень виберіть ціни та наявність, якщо хочете зберегти описи, відредаговані в Prom. ID товарів залишаються сталими. Не видаляйте товари автоматично лише через зміну добірки."
+
+#: pc-wholesale-help.php
+msgid "Set the import schedule in Prom. Our snapshot refreshes on request at intervals of at least 10 minutes; its timestamp is shown in UTC. Stock comes from the website price-list data for Kyiv and Odesa and is not a promise of real-time availability. Unknown stock is not marked available. Exports do not create orders, reserves or shipments."
+msgstr "Розклад імпорту налаштуйте в Prom. Наш знімок оновлюється при запиті з інтервалом не менше 10 хвилин; час показано в UTC. Залишки беруться зі складських даних прайсу сайту для Києва й Одеси та не гарантують наявність у реальному часі. Невідомий залишок не позначається як наявний. Експорт не створює замовлень, резервів або відправок."
+
+#: pc-wholesale-help.php
+msgid "Pause link stops access. Replace link invalidates the previous address; paste the new address into Prom. Saving any selection pauses the link and requires a new review and enable action. If a request fails, keep your previous imported catalogue."
+msgstr "«Призупинити посилання» закриває доступ. «Замінити посилання» робить стару адресу недійсною; вставте нову адресу в Prom. Збереження будь-якої добірки призупиняє посилання: перевірте її та ввімкніть знову. Якщо запит завершився помилкою, збережіть попередній імпортований каталог."
+
+#: pc-wholesale-help.php
+msgid "No products or some SKUs missing: check exact website SKUs and the combined category/brand filters. Hidden or unpublished products are not exported. More than 500 products: narrow the selection; the system does not silently truncate it."
+msgstr "Немає товарів або бракує артикулів: перевірте точні артикули сайту та поєднання фільтрів категорії/бренду. Приховані чи неопубліковані товари не експортуються. Понад 500 товарів: звузьте добірку; система не обрізає її непомітно."
+
+#: pc-wholesale-help.php
+msgid "Missing images: check manifest.csv, then use photo links or export fewer products. Missing pack quantity: the rest of the file can still be used; ask your manager for packaging. Missing retail price prevents a Prom export and needs the manager to check the product."
+msgstr "Бракує фото: перевірте manifest.csv, потім використайте посилання на фото або експортуйте менше товарів. Немає фасовки: решту файлу можна використовувати, а фасовку уточнити в менеджера. Відсутня роздрібна ціна блокує експорт Prom: попросіть менеджера перевірити товар."
+
+#: pc-wholesale-help.php
+msgid "Link unavailable: check that it is enabled and that Prom has the latest address. If export still fails, retry later or send the manager the time, format, affected SKUs and a screenshot. Do not send your personal XML link in public messages."
+msgstr "Посилання недоступне: перевірте, чи ввімкнене воно та чи має Prom останню адресу. Якщо експорт усе ще не працює, повторіть пізніше або передайте менеджеру час, формат, проблемні артикули та знімок екрана. Не надсилайте персональне XML-посилання у відкритих повідомленнях."

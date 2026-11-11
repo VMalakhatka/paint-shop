@@ -4690,3 +4690,27 @@ msgstr "Книга слишком большая. Используйте одн�
 #: inc/PartnerCatalogUi.php
 msgid "Use SKU values, not formulas."
 msgstr "Укажите значения артикулов без формул."
+
+#: inc/PartnerCatalogUi.php
+msgid "Full export help"
+msgstr "Полная справка по экспорту"
+
+#: inc/PartnerCatalogUi.php
+msgid "Short guide (PDF, Ukrainian)"
+msgstr "Краткая инструкция (PDF, на украинском)"
+
+#: inc/PartnerCatalogUi.php
+msgid "How to select products"
+msgstr "Как выбрать товары"
+
+#: inc/PartnerCatalogUi.php
+msgid "Which file to choose"
+msgstr "Какой файл выбрать"
+
+#: inc/PartnerCatalogUi.php
+msgid "How to connect Prom"
+msgstr "Как подключить Prom"
+
+#: inc/PartnerCatalogUi.php
+msgid "If products or photos are missing"
+msgstr "Если не хватает товаров или фото"

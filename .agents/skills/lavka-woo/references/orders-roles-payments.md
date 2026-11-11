@@ -810,3 +810,12 @@ synchronization. Version one explicitly caps 500 products / 100 ZIP photos. See
 `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md` for setup, Prom test import and limits. Undo the
 Plugin hook and account redirect exception to disable the feature; no business data
 migration. No marketplace test or production deployment implied by local tests.
+
+Partner export help (2026-11-11, code/local render): `PartnerCatalogUi` opens
+`pc_wholesale_help_url()` anchors `partner-catalog`, `partner-catalog-selection`,
+`partner-catalog-files`, `partner-catalog-prom`, `partner-catalog-errors` in a new
+tab. Keep these stable: the downloadable Ukrainian PDF also links to them.
+`scripts/build-partner-catalog-guide.py` builds the deployed static asset
+`pc-order-import-export/assets/partner-catalog-guide-uk.pdf`; it must never embed
+customer tokens or purchase prices. Full operator steps stay in the wholesale
+guide. Code/render checks do not prove production help publication.

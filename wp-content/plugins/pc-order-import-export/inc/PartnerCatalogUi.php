@@ -2,14 +2,23 @@
 namespace PaintCore\PCOE;
 defined('ABSPATH') || exit;
 final class PartnerCatalogUi {
+    private static function help(string $anchor, string $label): void {
+        $url = function_exists('pc_wholesale_help_url')
+            ? pc_wholesale_help_url($anchor)
+            : wc_get_account_endpoint_url('yak-zamovyty').'#'.$anchor;
+        echo '<a href="'.esc_url($url).'" target="_blank" rel="noopener">? '.esc_html__($label,'pc-order-import-export').'</a>';
+    }
     private static function form(): void {echo '<form method="post" enctype="multipart/form-data" action="'.esc_url(admin_url('admin-post.php')).'">';wp_nonce_field('pcoe_partner_catalog');echo '<input type="hidden" name="action" value="pcoe_partner_catalog">';}
     private static function button(string $operation,string $label): void {echo '<button class="button" name="operation" value="'.esc_attr($operation).'">'.esc_html__($label,'pc-order-import-export').'</button> ';}
     public static function render(): void {
         $user=get_current_user_id();if(!PartnerCatalog::allowed($user)){echo '<p>'.esc_html__('Export access is unavailable.','pc-order-import-export').'</p>';return;}
         $c=PartnerCatalog::config($user);$s=$c['selection']??['skus'=>[],'category'=>0,'brand'=>0];
         echo '<div class="pcoe-partner-catalog"><h2>'.esc_html__('Data and photos for your website','pc-order-import-export').'</h2>';
+        echo '<div class="pcoe-partner-help">';self::help('partner-catalog','Full export help');
+        echo '<a href="'.esc_url(PCOE_URL.'assets/partner-catalog-guide-uk.pdf').'" target="_blank" rel="noopener">'.esc_html__('Short guide (PDF, Ukrainian)','pc-order-import-export').'</a></div>';
         $notice=get_transient('pcoe_catalog_notice_'.$user);if($notice){delete_transient('pcoe_catalog_notice_'.$user);echo '<p role="status" class="woocommerce-info">'.esc_html($notice).'</p>';}
         echo '<p>'.esc_html__('Choose up to 500 products. CSV/XLSX contains your purchase price and retail price separately. Prom and WooCommerce files use retail prices only.','pc-order-import-export').'</p>';
+        echo '<p>';self::help('partner-catalog-selection','How to select products');echo '</p>';
         self::form();echo '<div class="pcoe-partner-fields">';
         foreach(['category'=>['product_cat','Category and subcategories'],'brand'=>['product_brand','Brand']] as $key=>[$tax,$label]){
             echo '<label>'.esc_html__($label,'pc-order-import-export').'<select name="'.$key.'"><option value="0">'.esc_html__('All','pc-order-import-export').'</option>';
@@ -28,15 +37,17 @@ final class PartnerCatalogUi {
                 echo '<p>'.esc_html__('First 25 products are shown below. Downloads contain the whole saved selection.','pc-order-import-export').'</p><div class="pcoe-partner-table"><table><thead><tr>';
                 foreach(['SKU','Name','Your price','Retail price','Stock','Photos'] as $h)echo '<th>'.esc_html__($h,'pc-order-import-export').'</th>';
                 echo '</tr></thead><tbody>';foreach(array_slice($data['rows'],0,25) as $r){echo '<tr>';foreach([$r['sku'],$r['name'],$r['cost']??'—',$r['retail']??'—',$r['stock']??'—',count($r['images'])] as $v)echo '<td>'.esc_html((string)$v).'</td>';echo '</tr>';}
-                echo '</tbody></table></div>';self::form();foreach(['xlsx'=>'Download Excel','csv'=>'Download CSV','woo'=>'CSV for WooCommerce','yml'=>'XML for Prom','zip'=>'Download photos (ZIP)'] as $op=>$label)self::button($op,$label);echo '</form>';
+                echo '</tbody></table></div><p>';self::help('partner-catalog-files','Which file to choose');echo '</p>';self::form();foreach(['xlsx'=>'Download Excel','csv'=>'Download CSV','woo'=>'CSV for WooCommerce','yml'=>'XML for Prom','zip'=>'Download photos (ZIP)'] as $op=>$label)self::button($op,$label);echo '</form>';
                 echo '<p>'.esc_html__('ZIP supports up to 100 images. Check manifest.csv inside the archive: it lists every missing image. Full-size image links are also included in the table files.','pc-order-import-export').'</p>';
                 echo '<h3>'.esc_html__('Automatic import into Prom','pc-order-import-export').'</h3><p>'.esc_html__('Prom reads this personal link according to the import schedule you configure in Prom. The link exports retail prices, never your purchase prices. It does not send orders or reserve goods.','pc-order-import-export').'</p>';
+                echo '<p>';self::help('partner-catalog-prom','How to connect Prom');echo '</p>';
                 if(!empty($c['enabled']))echo '<label>'.esc_html__('Personal XML link — share only with your import service','pc-order-import-export').'<textarea readonly rows="3">'.esc_textarea(PartnerCatalog::feedUrl($user,$c)).'</textarea></label>';
                 else echo '<p>'.esc_html__('The Prom link is paused.','pc-order-import-export').'</p>';
                 self::form();echo '<label><input type="checkbox" name="confirmed" value="1"> '.esc_html__('I checked the selection and retail prices for publication on my website.','pc-order-import-export').'</label><p>';self::button('enable','Enable Prom link');self::button('disable','Pause link');self::button('rotate','Replace link');echo '</p></form>';
                 echo '<p>'.esc_html__('Replacing the link invalidates the old address. In Prom, first test a small import and match groups; for later updates select prices and availability so your edited descriptions remain unchanged.','pc-order-import-export').'</p>';
             }catch(\Throwable $e){echo '<p role="alert">'.esc_html__('Could not prepare the export. Please retry or contact the manager.','pc-order-import-export').'</p>';}
         }
+        echo '<p>';self::help('partner-catalog-errors','If products or photos are missing');echo '</p>';
         echo '</div>';
     }
 }
