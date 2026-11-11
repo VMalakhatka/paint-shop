@@ -793,6 +793,18 @@ steps and historical-file boundaries: `docs/MANAGER_CUSTOMER_GUIDE_UK.md#payment
 `customer-documents.php` and Java `FolioCustomerDocumentService` accept explicit future document periods: stored Folio dates can differ from server today. Keep default dates unchanged and retain ordered ranges / 366-day maximum. Do not reuse this read-only rule for balance as-of dates or document creation. Both PHP and Java must be deployed; see `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md` section 13.
 
 
+### Checkout COD (2026-11-11, prepared; not deployed)
+
+PSU `inc/checkout-cod.php` guards native Woo `cod`; never reinsert a disabled or
+filtered gateway. Require one real NP rate/package and one locally revalidated
+warehouse parcel, current recipient/quote and allowed role policy. No pickup,
+external TTN or order-pay. Keep selection separate from payment/TTN creation;
+native initial COD status is on-hold. Manager preparation reads the Woo payment
+method and paid date. Do not duplicate totals into shipments or infer a real
+payment from Folio processing status. Gateway activation is a separate approved
+Woo setting, after manager COD acceptance. Runbook and local DB test gap: PSU
+README, section «Оплата при получении НП»; public help: checkout-cod anchor.
+
 ### Partner product exports (2026-11-10)
 
 `pc-order-import-export/inc/PartnerCatalog*.php` owns the opt-in account screen

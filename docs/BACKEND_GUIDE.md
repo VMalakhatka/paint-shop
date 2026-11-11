@@ -124,6 +124,13 @@ layer для frontend URL Stock Locations. Версия ресурса зави�
 Серверные cache headers остаются вне этого модуля. Список handles, fallback,
 проверка и точечный откат — в [README владельца](../wp-content/plugins/paint-shop-ux/README.md).
 
+Оплата при получении в классическом checkout: адаптер PSU
+`inc/checkout-cod.php` ограничивает штатный Woo `cod` одной допустимой посылкой НП.
+Выбор сохраняет Woo CRUD; подтверждение суммы и создание ТТН принадлежат
+менеджерскому модулю НП. Адаптер не включает gateway настройкой и не подтверждает
+платёж. Требования совместного выпуска, проверки и откат —
+[README PSU](../wp-content/plugins/paint-shop-ux/README.md#включение-и-проверка).
+
 - `wp-content/plugins/` — обычные собственные плагины с activation lifecycle.
 - `wp-content/mu-plugins/` — автоматически загружаемые integration/guard modules.
 - `wp-content/deploy_plugins.list` — allow-list обычных собственных plugins для deploy.

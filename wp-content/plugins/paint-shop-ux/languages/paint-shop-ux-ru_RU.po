@@ -339,3 +339,12 @@ msgstr "Сотрудничество"
 
 msgid "For makers"
 msgstr "Для мастеров"
+
+msgid "Payment on receipt (Nova Poshta)"
+msgstr "Наложенный платёж (Новая почта)"
+
+msgid "Pay for the goods when receiving your Nova Poshta parcel. The manager confirms the collection amount before shipment. Delivery and money-transfer fees are separate and follow the agreed delivery terms."
+msgstr "Оплатите товары при получении посылки Новой почты. Менеджер подтвердит сумму наложенного платежа перед отправкой. Доставка и комиссия за перевод средств оплачиваются отдельно согласно согласованным условиям доставки."
+
+msgid "Payment on receipt is available only for an eligible single Nova Poshta parcel. Check delivery or choose another payment method."
+msgstr "Наложенный платёж доступен только для одной посылки Новой почты, если это разрешено условиями доставки. Проверьте доставку или выберите другой способ оплаты."

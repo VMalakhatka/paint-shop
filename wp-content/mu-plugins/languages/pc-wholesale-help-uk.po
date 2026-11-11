@@ -1290,5 +1290,9 @@ msgid "Open product export"
 msgstr "Відкрити експорт товарів"
 
 #: pc-wholesale-help.php
+msgid "For an eligible single Nova Poshta parcel, choose Payment on receipt after entering the delivery destination. Your choice is saved in the order for the manager; it does not confirm payment or create a TTN. The manager confirms the collection amount before shipment. This option is unavailable for store pickup, customer-provided TTNs and multiple parcels. Delivery and money-transfer fees follow the agreed delivery terms."
+msgstr "Для однієї дозволеної посилки Нової пошти після введення адреси доставки виберіть «Оплата при отриманні». Вибір зберігається у замовленні для менеджера; він не підтверджує оплату й не створює ТТН. Менеджер підтвердить суму післяплати перед відправленням. Цей спосіб недоступний для самовивозу, клієнтських ТТН і кількох посилок. Доставка та комісія за переказ коштів враховуються за узгодженими умовами доставки."
+
+#: pc-wholesale-help.php
 msgid "In My account, open Data and photos for your website. Save and review a selection of up to 500 products, then download data or photos. Prom XML uses retail prices only. Enable the personal link after checking prices and configure scheduled imports in Prom. Start with a small test import. Check manifest.csv in photo archives for missing images."
 msgstr "У кабінеті відкрийте «Дані та фото для вашого сайту». Збережіть і перевірте добірку до 500 товарів, потім завантажте дані або фото. XML Prom використовує лише роздрібні ціни. Увімкніть персональне посилання після перевірки цін і налаштуйте регулярний імпорт у Prom. Почніть із невеликого тестового імпорту. В архівах фото перевіряйте manifest.csv щодо відсутніх зображень."

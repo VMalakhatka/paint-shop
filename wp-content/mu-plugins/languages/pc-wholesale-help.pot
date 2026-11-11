@@ -1268,5 +1268,9 @@ msgid "Open product export"
 msgstr ""
 
 #: pc-wholesale-help.php
+msgid "For an eligible single Nova Poshta parcel, choose Payment on receipt after entering the delivery destination. Your choice is saved in the order for the manager; it does not confirm payment or create a TTN. The manager confirms the collection amount before shipment. This option is unavailable for store pickup, customer-provided TTNs and multiple parcels. Delivery and money-transfer fees follow the agreed delivery terms."
+msgstr ""
+
+#: pc-wholesale-help.php
 msgid "In My account, open Data and photos for your website. Save and review a selection of up to 500 products, then download data or photos. Prom XML uses retail prices only. Enable the personal link after checking prices and configure scheduled imports in Prom. Start with a small test import. Check manifest.csv in photo archives for missing images."
 msgstr ""
