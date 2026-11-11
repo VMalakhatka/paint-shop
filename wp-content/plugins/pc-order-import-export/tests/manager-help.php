@@ -26,12 +26,13 @@ namespace {
     $npOnly=($argv[1]??'')==='--np-preparation';
     foreach (['uk','ru_RU'] as $locale) {
         $html=render_help(); $sections=\PaintCore\PCOE\ManagerHelp::sections();
-        if(count($sections)!==31) throw new \RuntimeException('Section count');
+        if(!$npOnly && count($sections)!==31) throw new \RuntimeException('Section count');
         foreach($sections as $id=>[$title,$paragraphs]) {
             if($npOnly && $id!=='np-preparation') continue;
             if(substr_count($html,'id="'.$id.'"')!==1 || !str_contains($canon,'id="'.$id.'"')) throw new \RuntimeException('Anchor: '.$id);
             if(preg_match('/^[A-Za-z]/u',$title) && !preg_match('/\p{Cyrillic}/u',$title)) throw new \RuntimeException('Untranslated title: '.$title);
             foreach($paragraphs as $p) if($locale==='uk' && !str_contains($canon,$p)) throw new \RuntimeException('Canon drift: '.$id);
+            if ($id==='np-preparation') foreach($paragraphs as $p) if (!preg_match('/\p{Cyrillic}/u',$p)) throw new \RuntimeException('Untranslated NP help');
         }
         if(str_contains($html,'start=') || str_contains($html,'<form')) throw new \RuntimeException('Help must be static');
     }

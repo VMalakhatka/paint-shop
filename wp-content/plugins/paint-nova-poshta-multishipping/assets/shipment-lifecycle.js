@@ -39,6 +39,7 @@
                 $('<p>').text(p.origin+' → '+p.destination).appendTo($preview);
                 $('<p>').text(pnpmLifecycle.cost+': '+p.payload.Cost+' / '+p.estimate).appendTo($preview);
                 $('<p>').text(pnpmLifecycle.payer+': '+pnpmLifecycle[p.payload.PayerType]).appendTo($preview);
+                (p.cod_summary || []).forEach(function (line) { $('<p>').text(line).appendTo($preview); });
                 p.payload.OptionsSeat.forEach(function (box,i) { $('<p>').text('#'+(i+1)+' · '+pnpmLifecycle.box+': '+box.weight+' / '+[box.volumetricLength,box.volumetricWidth,box.volumetricHeight].join(' × ')).appendTo($preview); });
                 $card.find('.pnpm-create-agreed').removeAttr('data-pnpm-flight').prop('disabled',!p.enabled).prop('checked',false);
                 $card.find('[data-shipment-command="create"]').removeAttr('data-pnpm-flight').prop('disabled',true);

@@ -58,6 +58,7 @@ final class ManagerPreparationPanel
         }
         CheckoutIntegration::create()->renderDestination($context['recipient'], true);
         echo '<p>' . esc_html__('Payment method and order total', 'paint-nova-poshta-multishipping') . ': ' . esc_html($order->get_payment_method_title() . ' · ' . $order->get_total() . ' UAH') . '</p>';
+        self::cashOnDelivery($context);
         foreach ($context['groups'] as $location=>$group) {
             echo '<fieldset data-location="' . esc_attr($location) . '"><legend>' . esc_html($group['location_name']) . '</legend><ul>';
             foreach ($group['items'] as $item) echo '<li>' . esc_html($item['sku'] . ' · ' . $item['name'] . ' × ' . $item['quantity']) . '</li>';
@@ -73,12 +74,33 @@ final class ManagerPreparationPanel
             echo '</div><button type="button" class="button pnpm-add-box">' . esc_html__('Add packed box', 'paint-nova-poshta-multishipping') . '</button></fieldset>';
         }
         echo '<template id="pnpm-box-template">'; self::box([]); echo '</template>';
-        echo '<p><label><input type="checkbox" name="agreed" value="1"> ' . esc_html__('Recipient details were agreed; warehouse contents, packed box weights, dimensions and payer were checked.', 'paint-nova-poshta-multishipping') . '</label></p>';
+        echo '<p><label><input type="checkbox" name="agreed" value="1"> ' . esc_html__('Recipient details were agreed; warehouse contents, packed boxes, delivery payer and cash on delivery settings were checked.', 'paint-nova-poshta-multishipping') . '</label></p>';
         echo '<p><button type="button" class="button" data-pnpm-command="save">' . esc_html__('Save preparation', 'paint-nova-poshta-multishipping') . '</button> <button type="button" class="button button-primary" data-pnpm-command="preview">' . esc_html__('Check preview', 'paint-nova-poshta-multishipping') . '</button></p>';
         echo '<div id="pnpm-manager-status" role="status" aria-live="polite"></div><div id="pnpm-manager-preview"></div>';
         echo '<p>' . esc_html__('Save preparation and reload this page before creating a TTN.', 'paint-nova-poshta-multishipping') . '</p></form>';
         self::audit($order->get_id());
         echo '</section>';
+    }
+
+    private static function cashOnDelivery(array $context): void
+    {
+        $cod = $context['cod_settings'];
+        if (empty($cod['enabled'])) $cod['amount'] = number_format((float)$context['total'], 2, '.', '');
+        echo '<fieldset class="pnpm-cod"><legend>' . esc_html__('Cash on delivery', 'paint-nova-poshta-multishipping') . '</legend>';
+        echo '<p>' . esc_html__('For orders paid on receipt, the order total is suggested. Check payments already received and enter only the amount still to collect. This does not change the order payment method.', 'paint-nova-poshta-multishipping') . '</p>';
+        echo '<label><input type="checkbox" name="cod_enabled" value="1"' . checked(!empty($cod['enabled']), true, false) . '> ' . esc_html__('Collect payment from the recipient', 'paint-nova-poshta-multishipping') . '</label>';
+        if ($context['paid']) echo '<p class="description">' . esc_html__('This order is already paid. Cash on delivery would collect payment again.', 'paint-nova-poshta-multishipping') . '</p>';
+        if (count($context['groups']) !== 1) echo '<p class="description">' . esc_html__('Cash on delivery currently requires one warehouse. Do not repeat the order amount on several shipments.', 'paint-nova-poshta-multishipping') . '</p>';
+        echo '<div class="pnpm-cod-fields"><label>' . esc_html__('Amount to collect, UAH', 'paint-nova-poshta-multishipping') . '<input name="cod_amount" type="number" min="0.01" max="' . esc_attr($context['total']) . '" step="0.01" value="' . esc_attr($cod['amount']) . '"></label>';
+        echo '<label>' . esc_html__('Payment return service', 'paint-nova-poshta-multishipping') . '<select name="cod_service">';
+        foreach ([''=>__('Choose a payment return service', 'paint-nova-poshta-multishipping'),
+            'payment_control'=>__('To the FOP account under the NovaPay contract (payment control)', 'paint-nova-poshta-multishipping'),
+            'money_transfer'=>__('Separate money transfer (return delivery of funds)', 'paint-nova-poshta-multishipping')] as $value=>$label) {
+            echo '<option value="' . esc_attr($value) . '"' . selected($cod['service'], $value, false) . '>' . esc_html($label) . '</option>';
+        }
+        echo '</select></label><label class="pnpm-cod-fee">' . esc_html__('Money transfer fee payer', 'paint-nova-poshta-multishipping') . '<select name="cod_fee_payer">';
+        foreach ([''=>__('Choose the money transfer fee payer', 'paint-nova-poshta-multishipping'),'Recipient'=>__('Recipient', 'paint-nova-poshta-multishipping'),'Sender'=>__('Sender', 'paint-nova-poshta-multishipping')] as $value=>$label) echo '<option value="' . esc_attr($value) . '"' . selected($cod['fee_payer'], $value, false) . '>' . esc_html($label) . '</option>';
+        echo '</select></label><p class="description">' . esc_html__('Payment control requires an active NovaPay contract; its fees follow that contract. The collection amount is separate from declared value and delivery charges.', 'paint-nova-poshta-multishipping') . '</p></div></fieldset>';
     }
 
     private static function box(array $box): void

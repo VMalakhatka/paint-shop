@@ -3,6 +3,7 @@ namespace Paint\NovaPoshta\Infrastructure;
 
 use Paint\NovaPoshta\Domain\AllocationSnapshotBuilder;
 use Paint\NovaPoshta\Domain\DeliveryPolicy;
+use Paint\NovaPoshta\Domain\CashOnDelivery;
 
 defined('ABSPATH') || exit;
 
@@ -69,6 +70,7 @@ final class ManagerPreparation
             ]));
             $group['boxes'] = $draft['boxes'] ?? [['weight'=> '', 'length'=> '', 'width'=> '', 'height'=> '']];
             $group['payer'] = $draft['payer'] ?? 'Recipient';
+            $group['cod_settings'] = $draft['cod_settings'] ?? null;
             $group['saved_id'] = (int)($old['id'] ?? 0);
             $groups[$location] = $group;
         }
@@ -81,6 +83,7 @@ final class ManagerPreparation
             'payment'=>$order->get_payment_method(), 'total'=>(float)$order->get_total(),
             'paid'=>(bool)$order->get_date_paid(), 'profile'=>$policy['profiles'][$profile],
             'quote'=>(array)$order->get_meta('_pnpm_checkout_quote')];
+        $context['cod_settings'] = $groups ? (reset($groups)['cod_settings'] ?? CashOnDelivery::defaults($context)) : CashOnDelivery::defaults($context);
         if ($saved) $context['recipient'] = json_decode((string)reset($saved)['recipient_snapshot'], true) ?: $recipient;
         $shipping = [];
         foreach ($order->get_items('shipping') as $item) $shipping[] = [$item->get_id(),$item->get_method_id(),$item->get_instance_id(),$item->get_total()];
@@ -92,7 +95,7 @@ final class ManagerPreparation
         return $context;
     }
 
-    /** Bounded, typed inputs only. No posted items, sender identities or COD amounts. */
+    /** Bounded, typed inputs only. No posted items or sender identities; COD amounts are reviewed against the current order. */
     public function prepare(array $context, array $input): array
     {
         if (!hash_equals($context['revision'], (string)($input['revision'] ?? ''))) $this->fail(__('The order or preparation changed. Reload and review it again.', 'paint-nova-poshta-multishipping'));
@@ -117,6 +120,7 @@ final class ManagerPreparation
             if (!self::ref($recipient['point_ref'])) $this->fail(__('Check recipient details and phone number.', 'paint-nova-poshta-multishipping'));
             $recipient['address'] = '';
         }
+        $cod = CashOnDelivery::review((array)($input['cod_settings'] ?? []), $context);
         $groups = [];
         if (!is_array($input['groups'] ?? null) || count($input['groups']) !== count($context['groups'])) $this->fail(__('Check all warehouse parcels.', 'paint-nova-poshta-multishipping'));
         foreach ($context['groups'] as $location => $group) {
@@ -142,7 +146,9 @@ final class ManagerPreparation
             }
             $group['boxes'] = $clean;
             $group['payer'] = $value['payer'];
-            $group['cod'] = $context['payment'] === 'cod' && !$context['paid'] && count($context['groups']) === 1 ? $context['total'] : 0.0;
+            $group['cod_settings'] = $cod;
+            $group['cod'] = (float)$cod['amount'];
+            $group['cod_summary'] = CashOnDelivery::summary($cod);
             $groups[$location] = $group;
         }
         return ['recipient'=>$recipient, 'groups'=>$groups];
@@ -158,10 +164,6 @@ final class ManagerPreparation
             if (($sender['enabled'] ?? '') !== 'yes' || !in_array($sender['sender_type'] ?? '', ['warehouse','doors'], true)
                 || !preg_match('/^\+?380\d{9}$/', (string)($sender['phone'] ?? ''))) $issues[] = __('Check the warehouse sender mapping and phone in Nova Poshta settings.', 'paint-nova-poshta-multishipping');
             foreach ($required as $key) if (!self::ref((string)($sender[$key] ?? ''))) $issues[] = __('Check the warehouse sender mapping and phone in Nova Poshta settings.', 'paint-nova-poshta-multishipping');
-        }
-        if ($context['payment'] === 'cod' && !$context['paid']) {
-            if (count($prepared['groups']) > 1) $issues[] = __('Multi-warehouse COD requires an approved allocation rule; no COD will be created.', 'paint-nova-poshta-multishipping');
-            elseif (($context['profile']['cod']['single_shipment'] ?? 'no') !== 'yes') $issues[] = __('COD is disabled by the customer delivery policy.', 'paint-nova-poshta-multishipping');
         }
         $issues[] = __('Delivery payer and store subsidy still require carrier-contract verification; this preview does not calculate the final tariff.', 'paint-nova-poshta-multishipping');
         $issues[] = __('Save preparation and reload this page before creating a TTN.', 'paint-nova-poshta-multishipping');
@@ -194,12 +196,12 @@ final class ManagerPreparation
                     $previous_draft = json_decode((string)($previous['request_snapshot'] ?? ''), true) ?: [];
                     $changed = [];
                     foreach ($prepared['recipient'] as $field=>$value) if (($previous_recipient[$field] ?? null) !== $value) $changed[] = 'recipient.' . $field;
-                    foreach (['boxes','payer'] as $field) if (($previous_draft[$field] ?? null) !== $group[$field]) $changed[] = $field;
+                    foreach (['boxes','payer','cod_settings'] as $field) if (($previous_draft[$field] ?? null) !== $group[$field]) $changed[] = $field;
                     if (($previous['sender_snapshot'] ?? '') !== wp_json_encode($group['sender'])) $changed[] = 'sender';
                     $record = ['recipient_snapshot'=>wp_json_encode($prepared['recipient']), 'sender_snapshot'=>wp_json_encode($group['sender']),
-                        'pricing_snapshot'=>wp_json_encode(['payer'=>$group['payer'],'cod'=>$group['cod'],'policy'=>$context['profile'], 'verified'=>false]),
+                        'pricing_snapshot'=>wp_json_encode(['payer'=>$group['payer'],'cod'=>$group['cod'],'cod_settings'=>$group['cod_settings'],'policy'=>$context['profile'], 'verified'=>false]),
                         'request_snapshot'=>wp_json_encode(['schema'=>'manager-preparation-v1','revision'=>wp_generate_uuid4(),'boxes'=>$group['boxes'],
-                            'payer'=>$group['payer'],'order_revision'=>$context['revision']]), 'updated_at'=>$now];
+                            'payer'=>$group['payer'],'cod_settings'=>$group['cod_settings'],'order_revision'=>$context['revision']]), 'updated_at'=>$now];
                     if ($id) $ok = $wpdb->update($wpdb->prefix . 'pnpm_shipments', $record, ['id'=>$id, 'source'=>'store_api', 'status'=>self::STATUS]);
                     else {
                         $ok = $wpdb->insert($wpdb->prefix . 'pnpm_shipments', $record + ['shipment_uuid'=>wp_generate_uuid4(), 'order_id'=>$order_id,
@@ -218,7 +220,7 @@ final class ManagerPreparation
                     if ($wpdb->insert($wpdb->prefix . 'pnpm_shipment_events', ['shipment_id'=>$id,'event_type'=>'manager_preparation_saved',
                         'actor_id'=>get_current_user_id(),'correlation_id'=>wp_generate_uuid4(), 'created_at'=>$now,
                         'safe_context'=>wp_json_encode(['previous_revision'=>$context['revision'], 'snapshot_hash'=>hash('sha256',wp_json_encode($record)),
-                            'changed_fields'=>$changed, 'checked_fields'=>['recipient','boxes','payer'], 'agreed'=>true])]) === false) $this->fail(__('Shipment preparation could not be saved.', 'paint-nova-poshta-multishipping'));
+                            'changed_fields'=>$changed, 'checked_fields'=>['recipient','boxes','payer','cod_settings'], 'agreed'=>true])]) === false) $this->fail(__('Shipment preparation could not be saved.', 'paint-nova-poshta-multishipping'));
                 }
                 if ($wpdb->query('COMMIT') === false) $this->fail(__('Shipment preparation could not be saved.', 'paint-nova-poshta-multishipping'));
             } catch (\Throwable $e) { $wpdb->query('ROLLBACK'); throw $e; }

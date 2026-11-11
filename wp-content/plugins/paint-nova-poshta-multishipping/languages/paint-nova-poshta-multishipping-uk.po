@@ -2708,3 +2708,70 @@ msgstr "Прочитайте ТТН або весь діапазон дат, ч�
 
 msgid "Recipient contact"
 msgstr "Контактна особа одержувача"
+
+msgid "Amount to collect, UAH"
+msgstr "Сума до отримання, грн"
+
+#, php-format
+msgid "Amount to collect: %s UAH."
+msgstr "Сума до отримання: %s грн."
+
+msgid "Cash on delivery currently requires one warehouse. Do not repeat the order amount on several shipments."
+msgstr "Післяплата наразі доступна для одного складу. Не повторюйте суму замовлення в кількох відправленнях."
+
+msgid "Cash on delivery: none."
+msgstr "Без післяплати."
+
+msgid "Check the cash on delivery amount and payment return settings."
+msgstr "Перевірте суму післяплати та спосіб отримання коштів."
+
+msgid "Choose a payment return service"
+msgstr "Виберіть спосіб отримання коштів"
+
+msgid "Choose the money transfer fee payer"
+msgstr "Виберіть платника комісії за переказ"
+
+msgid "Choose how Nova Poshta should return the cash on delivery payment."
+msgstr "Виберіть, як Нова пошта має передати вам післяплату."
+
+msgid "Collect payment from the recipient"
+msgstr "Отримати оплату від одержувача"
+
+msgid "Enter a cash on delivery amount greater than zero and no greater than the order total."
+msgstr "Вкажіть суму післяплати більшу за нуль і не більшу за суму замовлення."
+
+msgid "For orders paid on receipt, the order total is suggested. Check payments already received and enter only the amount still to collect. This does not change the order payment method."
+msgstr "Для оплати при отриманні підставляється сума замовлення. Перевірте вже отримані платежі та вкажіть лише залишок до отримання. Спосіб оплати замовлення не змінюється."
+
+msgid "I checked the recipient, boxes, declared value, delivery payer, cash on delivery amount and return service, cash payment and store subsidy. Create this real TTN."
+msgstr "Я перевірив(-ла) одержувача, коробки, оголошену вартість, платника доставки, суму післяплати та спосіб отримання коштів, готівкову оплату й компенсацію магазину. Створити цю реальну ТТН."
+
+msgid "Money transfer fee payer"
+msgstr "Платник комісії за грошовий переказ"
+
+msgid "Payment control requires an active NovaPay contract; its fees follow that contract. The collection amount is separate from declared value and delivery charges."
+msgstr "Контроль оплати потребує чинного договору NovaPay; комісія визначається договором. Сума до отримання — окремо від оголошеної вартості та плати за доставку."
+
+msgid "Payment return service"
+msgstr "Спосіб отримання коштів"
+
+msgid "Recipient details were agreed; warehouse contents, packed boxes, delivery payer and cash on delivery settings were checked."
+msgstr "Дані одержувача узгоджено; товари за складами, коробки, платника доставки та налаштування післяплати перевірено."
+
+msgid "Review and save cash on delivery settings again: the payment method, order amount or payment status changed, or this preparation uses the old format."
+msgstr "Перевірте й збережіть післяплату ще раз: спосіб оплати, сума чи стан оплати замовлення змінилися або підготовку збережено у старому форматі."
+
+msgid "Separate money transfer (return delivery of funds)"
+msgstr "Окремий грошовий переказ (зворотна доставка коштів)"
+
+msgid "Supported: drop-off at a branch, delivery to a branch or parcel locker, reviewed single-warehouse cash on delivery, cash payment for carrier services. Enter the legal recipient name in Ukrainian; it will be recorded in the Nova Poshta recipient directory, not in the store customer profile."
+msgstr "Підтримується: відправка з відділення до відділення чи поштомата, перевірена післяплата для одного складу, готівкова оплата послуг перевізника. Введіть ім’я одержувача за документами українською; його буде записано в довідник НП, без зміни картки клієнта магазину."
+
+msgid "The delivery estimate does not include the money transfer commission. Collection instructions do not confirm that payment was received."
+msgstr "Орієнтовна доставка не включає комісію за переказ коштів. Вказана післяплата не підтверджує отримання оплати."
+
+msgid "This order is already paid. Cash on delivery would collect payment again."
+msgstr "Замовлення вже оплачене. Післяплата призведе до повторного стягнення."
+
+msgid "To the FOP account under the NovaPay contract (payment control)"
+msgstr "На рахунок ФОП за договором NovaPay (контроль оплати)"

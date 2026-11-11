@@ -1,6 +1,8 @@
 <?php
 namespace Paint\NovaPoshta\Infrastructure;
 
+use Paint\NovaPoshta\Domain\CashOnDelivery;
+
 defined('ABSPATH') || exit;
 
 /** Explicit manager commands. No background creation, retry or automatic order completion. */
@@ -95,15 +97,14 @@ final class ShipmentLifecycle
         $service = new ManagerPreparation();
         $context = $service->context($order, true);
         if (!in_array($row['status'], [ManagerPreparation::STATUS,'np_recipient_ready','np_recipient_mismatch'], true) || $row['ttn_number'] || $row['np_ref']) self::fail();
-        if ($context['payment'] === 'cod' && !$context['paid']) {
-            throw new \RuntimeException(__('COD creation is not supported in this release. Do not change the payment method just to bypass this check.', 'paint-nova-poshta-multishipping'));
-        }
         foreach ((new ShipmentRepository())->findByOrder($order->get_id()) as $other) {
             $snapshot = json_decode($other['request_snapshot'], true) ?: [];
             if (isset($snapshot['plan_hash']) && !hash_equals($snapshot['plan_hash'], $context['order_fingerprint'])) self::fail();
         }
         $group = $context['groups'][(int)$row['location_id']] ?? null;
         if (!$group || $group['saved_id'] !== (int)$row['id']) self::fail();
+        $cod = CashOnDelivery::saved($group['cod_settings'], $context);
+        $collection = CashOnDelivery::carrier($cod);
         $sender = $group['sender'];
         if (($sender['enabled'] ?? '') !== 'yes' || ($sender['sender_type'] ?? '') !== 'warehouse') {
             throw new \RuntimeException(__('This release supports drop-off at a branch and delivery to a branch or parcel locker only.', 'paint-nova-poshta-multishipping'));
@@ -167,7 +168,8 @@ final class ShipmentLifecycle
             'CitySender'=>$sender['city_ref'],'Sender'=>$sender['counterparty_ref'],'SenderAddress'=>$sender['handover_warehouse_ref'],
             'ContactSender'=>$sender['contact_ref'],'SendersPhone'=>$sender['phone'],
             'CityRecipient'=>$recipient['city_ref'],'RecipientAddress'=>$recipient['point_ref'],'RecipientsPhone'=>$recipient['phone'],'OptionsSeat'=>$seats];
-        return ['payload'=>$payload,'person'=>$person,'context'=>$context,'origin'=>$origin['label'],'destination'=>$destination['label']];
+        $payload += $collection;
+        return ['cod'=>$cod,'payload'=>$payload,'person'=>$person,'context'=>$context,'origin'=>$origin['label'],'destination'=>$destination['label']];
     }
 
     public function preview(int $order_id, int $id, array $names): array
@@ -192,6 +194,7 @@ final class ShipmentLifecycle
             return ['token'=>$token,'enabled'=>$this->api->writesEnabled(), 'recipient'=>implode(' ', array_intersect_key($plan['person'], array_flip(['FirstName','LastName','MiddleName']))),
                 'phone'=>$plan['person']['Phone'],'origin'=>$plan['origin'],'destination'=>$plan['destination'],
                 'payload'=>array_intersect_key($plan['payload'], array_flip(['Cost','Weight','SeatsAmount','PayerType','PaymentMethod','OptionsSeat'])),
+                'cod_settings'=>$plan['cod'], 'cod_summary'=>CashOnDelivery::summary($plan['cod']),
                 'estimate'=>(float)$quote['data'][0]['Cost']];
         });
     }

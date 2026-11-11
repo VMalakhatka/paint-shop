@@ -37,7 +37,7 @@ try {
     $context = $service->context($order);
     $check(count($context['groups']) === 2, 'Physical warehouses separated');
     $check($context['groups'][$locations[1]]['items'][0]['quantity'] === 2.0, 'Split line quantity retained');
-    $input = ['revision'=>$context['revision'],'agreed'=>'1','recipient'=>$context['recipient'],'groups'=>[]];
+    $input = ['revision'=>$context['revision'],'agreed'=>'1','recipient'=>$context['recipient'],'cod_settings'=>['enabled'=>false],'groups'=>[]];
     foreach ($locations as $location) $input['groups'][$location] = ['payer'=>'Recipient','boxes'=>[['weight'=>'2.5','length'=>'20','width'=>'15','height'=>'10']]];
     $input['recipient']['name'] = 'Agreed recipient';
     $input['recipient']['phone'] = '0000000000';
@@ -72,12 +72,22 @@ try {
     $bad=$input; $bad['agreed']=''; $reject(fn()=>$service->prepare($context,$bad),'Agreement required');
     $bad=$input; unset($bad['groups'][$locations[1]]); $reject(fn()=>$service->prepare($context,$bad),'Missing warehouse');
     $bad=$input; $bad['groups'][$locations[0]]['boxes']=array_fill(0,21,['weight'=>1,'length'=>1,'width'=>1,'height'=>1]); $reject(fn()=>$service->prepare($context,$bad),'Bounded boxes');
-    $cod=$context; $cod['payment']='cod'; $cod['paid']=false; $p=$service->prepare($cod,$input);
-    $check(array_sum(array_column($p['groups'],'cod'))===0.0,'Multiwarehouse COD never duplicated');
-    $check(count($service->blockers($cod,$p))===3,'Multiwarehouse COD blocked explicitly');
-    unset($cod['groups'][$locations[1]]); $single=$input; unset($single['groups'][$locations[1]]);
-    $check($service->prepare($cod,$single)['groups'][$locations[0]]['cod']===300.0,'Single COD uses server total');
-    $cod['paid']=true; $check($service->prepare($cod,$single)['groups'][$locations[0]]['cod']===0.0,'Paid COD order does not collect twice');
+    $cod=$context; $cod['payment']='cod'; $cod['paid']=false;
+    $single=$input; $single['cod_settings']=['enabled'=>true,'amount'=>'215,50','service'=>'money_transfer','fee_payer'=>'Recipient'];
+    $reject(fn()=>$service->prepare($cod,$single),'Multiwarehouse COD rejected, never duplicated');
+    unset($cod['groups'][$locations[1]],$single['groups'][$locations[1]]);
+    $reviewed=$service->prepare($cod,$single)['groups'][$locations[0]];
+    $check($reviewed['cod']===215.5 && $reviewed['cod_settings']['amount']==='215.50','Reviewed amount normalized without rounding');
+    foreach ([0,-1,301,'1e2','1.001','NaN',[],true] as $badAmount) {
+        $bad=$single;$bad['cod_settings']['amount']=$badAmount;
+        $reject(fn()=>$service->prepare($cod,$bad),'Invalid or excessive collection rejected');
+    }
+    $bad=$single;unset($bad['cod_settings']['service']);$reject(fn()=>$service->prepare($cod,$bad),'Service must be explicit');
+    $defaults=Paint\NovaPoshta\Domain\CashOnDelivery::defaults($cod);
+    $check($defaults['enabled'] && $defaults['amount']==='300.00' && $defaults['service']==='', 'Woo COD suggests total without guessing service');
+    $cod['paid']=true;$reject(fn()=>$service->prepare($cod,$single),'Paid COD order cannot collect twice');
+    $single['cod_settings']=['enabled'=>false];
+    $check($service->prepare($cod,$single)['groups'][$locations[0]]['cod']===0.0,'Paid order permits explicit no collection');
     // A journal write failure rolls back all updates, including earlier warehouses/items.
     $before=(new ShipmentRepository())->findByOrder($order->get_id());
     $break=static fn($q)=>str_starts_with($q,"INSERT INTO `{$wpdb->prefix}pnpm_shipment_events`") ? 'INVALID SYNTHETIC TEST QUERY' : $q;

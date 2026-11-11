@@ -78,13 +78,13 @@ $noWait=new class extends Paint\NovaPoshta\Infrastructure\ApiRequestThrottle {
 };
 $orders=[]; $tokens=[]; $customerId=0; $service=new ShipmentLifecycle(new Paint\NovaPoshta\Infrastructure\ApiClient($noWait)); $prep=new ManagerPreparation();
 $names=['FirstName'=>'Тест','LastName'=>'Приклад','MiddleName'=>'Тестович'];
-$make=static function ($two=false) use (&$orders,$locations,$refs,$prep) {
-    $order=new WC_Order();$order->set_currency('UAH');$order->set_payment_method('bacs');$order->set_billing_email('np-fixture@example.invalid');
+$make=static function ($two=false, $cod=null, $payment='bacs') use (&$orders,$locations,$refs,$prep) {
+    $order=new WC_Order();$order->set_currency('UAH');$order->set_payment_method($payment);$order->set_billing_email('np-fixture@example.invalid');
     $order->set_shipping_first_name('Тест');$order->set_shipping_last_name('Приклад');$order->set_shipping_phone('380000000000');
     $order->update_meta_data('_pnpm_recipient',['city_ref'=>$refs[1],'city_label'=>'Fixture city','point_ref'=>$refs[5],'point_label'=>'Fixture locker','delivery_type'=>'parcel_locker']);
     $item=new WC_Order_Item_Product();$item->set_name('Fixture goods');$item->set_quantity($two?2:1);$item->set_subtotal($two?200:100);$item->set_total($two?200:100);
     $alloc=[$locations[0]=>['quantity_subtracted'=>1]];if($two)$alloc[$locations[1]]=['quantity_subtracted'=>1];$item->add_meta_data('_slw_data',$alloc);$order->add_item($item);$order->set_total($two?200:100);$order->save();$orders[]=$order;
-    $context=$prep->context($order);$input=['revision'=>$context['revision'],'agreed'=>'1','recipient'=>$context['recipient'],'groups'=>[]];
+    $context=$prep->context($order);$input=['revision'=>$context['revision'],'agreed'=>'1','recipient'=>$context['recipient'],'cod_settings'=>$cod ?? ['enabled'=>false],'groups'=>[]];
     foreach ($context['groups'] as $id=>$group)$input['groups'][$id]=['payer'=>'Recipient','boxes'=>[['weight'=>0.1,'length'=>18,'width'=>2,'height'=>3]]];
     $prep->save($order->get_id(),$input);
     return $order;
@@ -151,8 +151,40 @@ try {
         $sent=count($mails);$service->email($mailOrder->get_id(),$mailId,hash('sha256',$mailOrder->get_billing_email()));
         $check(count($mails)===$sent,'Failed email not retried');
     } finally {remove_filter('pre_wp_mail',$failMail,PHP_INT_MAX);}
+    global $wpdb;
+    // Both collection services use the exact saved amount; no payment or email is implied.
+    foreach (['money_transfer','payment_control'] as $collectionService) {
+        $settings=['enabled'=>true,'amount'=>'75.25','service'=>$collectionService,'fee_payer'=>'Sender'];
+        $o=$make(false,$settings,'cod');$oid=$o->get_id();$row=(new ShipmentRepository())->findByOrder($oid)[0];$sid=(int)$row['id'];
+        $p=$service->preview($oid,$sid,$names);$tokens[]=$p['token'];
+        $check($p['cod_settings']['amount']==='75.25' && $p['payload']['Cost']===100,'COD and declared value stay separate');
+        $codOrderId=$oid;$codPreview=$p;
+        $beforeMail=count($mails);$beforeWrites=$writes;
+        $service->create($oid,$sid,$p['token']);
+        $sent=array_values(array_filter($requests,static fn($p)=>$p['modelName']==='InternetDocumentGeneral' && $p['calledMethod']==='save'));
+        $payload=end($sent)['methodProperties'];
+        if ($collectionService==='money_transfer') {
+            $check($payload['BackwardDeliveryData']===[['PayerType'=>'Sender','CargoType'=>'Money','RedeliveryString'=>'75.25']] && !isset($payload['AfterpaymentOnGoodsCost']),'Money transfer contract and fee payer exactly saved');
+        } else $check($payload['AfterpaymentOnGoodsCost']==='75.25' && !isset($payload['BackwardDeliveryData']),'Payment control never combined with money transfer');
+        $check($writes===$beforeWrites+2 && count($mails)===$beforeMail && !wc_get_order($oid)->get_date_paid(),'COD create does not mark paid or notify');
+        $saved=json_decode($service->row($oid,$sid)['request_snapshot'],true);
+        $check($saved['carrier']===$payload && $saved['cod_settings']['amount']==='75.25','Immutable request retains exact COD');
+        $check(str_starts_with($service->pdf($oid,$sid,'zebra'),'%PDF-') && str_starts_with($service->pdf($oid,$sid,'a4'),'%PDF-'),'Both label sizes available for COD TTN');
+        ob_start();(new Paint\NovaPoshta\Admin\ShipmentLifecyclePanel())->render(wc_get_order($oid));$panel=ob_get_clean();
+        $check(str_contains($panel,'75.25') && str_contains($panel,'pnpm_shipment_pdf'),'Created card shows saved collection and label actions');
+    }
+    $o=$make(false,['enabled'=>true,'amount'=>'75','service'=>'money_transfer','fee_payer'=>'Recipient'],'cod');
+    $oid=$o->get_id();$sid=(int)(new ShipmentRepository())->findByOrder($oid)[0]['id'];
+    $p=$service->preview($oid,$sid,$names);$tokens[]=$p['token'];$beforeWrites=$writes;
+    $o->set_date_paid(time());$o->save();
+    $reject(fn()=>$service->create($oid,$sid,$p['token']),'Payment received after preview stops collection');
+    $check($writes===$beforeWrites,'Paid race never writes recipient or TTN');
+    $o=$make();$oid=$o->get_id();$row=(new ShipmentRepository())->findByOrder($oid)[0];$sid=(int)$row['id'];
+    $legacy=json_decode($row['request_snapshot'],true);unset($legacy['cod_settings']);
+    $wpdb->update($wpdb->prefix.'pnpm_shipments',['request_snapshot'=>wp_json_encode($legacy)],['id'=>$sid]);
+    $reject(fn()=>$service->preview($oid,$sid,$names),'Legacy preparation needs explicit COD review');
     foreach (['timeout','rejected','write_limited'] as $next) {
-        $o=$make();$row=(new ShipmentRepository())->findByOrder($o->get_id())[0];$sid=(int)$row['id'];$p=$service->preview($o->get_id(),$sid,$names);$tokens[]=$p['token'];$mode=$next;
+    $o=$make();$row=(new ShipmentRepository())->findByOrder($o->get_id())[0];$sid=(int)$row['id'];$p=$service->preview($o->get_id(),$sid,$names);$tokens[]=$p['token'];$mode=$next;
         $check($service->create($o->get_id(),$sid,$p['token'])===['unknown'=>true],$next.' fail closed');$n=$writes;
         $reject(fn()=>$service->create($o->get_id(),$sid,$p['token']),$next.' replay denied');
         $check($writes===$n,$next.' no retry');$mode='success';
@@ -210,8 +242,8 @@ try {
     $check(!empty($service->create($o->get_id(),$sid,$p['token'])['ttn']),'Exact contact on second directory page');$mode='success';
     $o=$make();$row=(new ShipmentRepository())->findByOrder($o->get_id())[0];$sid=(int)$row['id'];$p=$service->preview($o->get_id(),$sid,$names);$tokens[]=$p['token'];
     $o->set_total(101);$o->save();$n=$writes;$reject(fn()=>$service->create($o->get_id(),$sid,$p['token']),'Stale order');$check($writes===$n,'Stale order no writes');
-    $o->set_payment_method('cod');$o->save();$reject(fn()=>$service->preview($o->get_id(),$sid,$names),'COD gate');
-    $o->set_payment_method('bacs');$o->save();
+    $o->set_payment_method('cod');$o->save();$reject(fn()=>$service->preview($o->get_id(),$sid,$names),'Changed payment method requires resaving collection settings');
+    $o->set_payment_method('bacs');$o->set_total(100);$o->save();
     global $wpdb;
     $p=$service->preview($o->get_id(),$sid,$names);$tokens[]=$p['token'];
     $expired=get_transient('pnpm_create_'.$p['token']);$expired['expires']=time()-1;set_transient('pnpm_create_'.$p['token'],$expired,300);
@@ -228,19 +260,19 @@ try {
     $reject(fn()=>ShipmentLifecycle::checkPoint($point,[['weight'=>21,'length'=>18,'width'=>2,'height'=>3]],100,'receiving'),'Locker weight limit');
     $reject(fn()=>ShipmentLifecycle::checkPoint($point,[['weight'=>1,'length'=>61,'width'=>2,'height'=>3]],100,'receiving'),'Locker dimensions');
     $check(ShipmentLifecycle::createdDocument(['success'=>true,'data'=>[['Ref'=>$refs[8],'IntDocNumber'=>'not-ttn']]])===null,'Malformed success unknown');
-    ob_start();(new Paint\NovaPoshta\Admin\ShipmentLifecyclePanel())->render(wc_get_order($oid));$html=ob_get_clean();
+    ob_start();(new Paint\NovaPoshta\Admin\ShipmentLifecyclePanel())->render(wc_get_order($codOrderId));$html=ob_get_clean();
     $check(str_contains($html,'pnpm_shipment_pdf') && str_contains($html,'data-shipment-command="email"') && !str_contains($html,'apiKey/'),'Manager controls without carrier secret URL');
     if ($dir=getenv('PNPM_LIFECYCLE_FIXTURE_DIR')) {
         if (!is_dir($dir) || !str_starts_with(realpath($dir),'/private/tmp/')) throw new RuntimeException('Fixture directory must be under /private/tmp');
         switch_to_locale('uk');
-        ob_start();(new Paint\NovaPoshta\Admin\ShipmentLifecyclePanel())->render(wc_get_order($oid));$created=ob_get_clean();
+        ob_start();(new Paint\NovaPoshta\Admin\ShipmentLifecyclePanel())->render(wc_get_order($codOrderId));$created=ob_get_clean();
         $draft=$make();
         ob_start();(new Paint\NovaPoshta\Admin\ShipmentLifecyclePanel())->render($draft);$draftHtml=ob_get_clean();
         $page='<!doctype html><html lang="uk"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>НП — синтетична локальна перевірка</title><style>body{font:16px/1.5 system-ui;max-width:1050px;margin:24px auto;padding:16px}*{box-sizing:border-box}input,button{font:inherit;padding:8px;max-width:100%}.pnpm-legal-name{display:flex;gap:12px;flex-wrap:wrap}.pnpm-legal-name label{display:flex;flex-direction:column;flex:1;min-width:200px}.pcoe-card{border:1px solid #ddd;border-radius:8px;padding:18px;margin:20px 0}.pnpm-shipment{border-top:1px solid #ddd;padding:16px 0}button{cursor:pointer}button:disabled{cursor:not-allowed;color:#777}details{background:#f5f5f5;padding:10px}h2{font-size:23px}</style><h1>НП — синтетична локальна перевірка</h1><p>Жодної реальної ТТН чи повідомлення. Кнопки транспорту в цьому статичному прикладі не виконують запити.</p>'.$draftHtml.$created.'<script>document.querySelectorAll("form").forEach(function(f){f.addEventListener("submit",function(e){e.preventDefault()})});</script></html>';
         $panel=new Paint\NovaPoshta\Admin\ShipmentLifecyclePanel();
         $previous_get=$_GET;$_GET=['page'=>'pcoe-customers','order_id'=>$draft->get_id()];$panel->assets();$_GET=$previous_get;
         $config=wp_scripts()->get_data('pnpm-lifecycle','data');
-        $uiPreview=$preview;$uiPreview['enabled']=true;
+        $uiPreview=$codPreview;$uiPreview['enabled']=true;
         $scripts='<script>'.file_get_contents(ABSPATH.'wp-includes/js/jquery/jquery.min.js').'</script><script>'.$config.';jQuery.post=function(){var d=jQuery.Deferred();setTimeout(function(){d.resolve({success:true,data:{preview:'.wp_json_encode($uiPreview).'}})},50);return d.promise()};</script><script>'.file_get_contents(PNPM_DIR.'assets/shipment-lifecycle.js').'</script>';
         $page=str_replace('</html>',$scripts.'</html>',$page);
         // Exercise the read-only recovered-state layout at desktop and narrow widths too.

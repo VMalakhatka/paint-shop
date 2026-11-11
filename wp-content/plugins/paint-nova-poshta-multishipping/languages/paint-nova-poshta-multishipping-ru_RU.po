@@ -1978,3 +1978,70 @@ msgstr "Прочитайте ТТН или весь диапазон дат ли
 
 msgid "Recipient contact"
 msgstr "Контактное лицо получателя"
+
+msgid "Amount to collect, UAH"
+msgstr "Сумма к получению, грн"
+
+#, php-format
+msgid "Amount to collect: %s UAH."
+msgstr "Сумма к получению: %s грн."
+
+msgid "Cash on delivery currently requires one warehouse. Do not repeat the order amount on several shipments."
+msgstr "Наложенный платёж пока доступен для одного склада. Не повторяйте сумму заказа в нескольких отправлениях."
+
+msgid "Cash on delivery: none."
+msgstr "Без наложенного платежа."
+
+msgid "Check the cash on delivery amount and payment return settings."
+msgstr "Проверьте сумму наложенного платежа и способ получения денег."
+
+msgid "Choose a payment return service"
+msgstr "Выберите способ получения денег"
+
+msgid "Choose the money transfer fee payer"
+msgstr "Выберите плательщика комиссии за перевод"
+
+msgid "Choose how Nova Poshta should return the cash on delivery payment."
+msgstr "Выберите, как Новая почта должна передать вам наложенный платёж."
+
+msgid "Collect payment from the recipient"
+msgstr "Получить оплату от получателя"
+
+msgid "Enter a cash on delivery amount greater than zero and no greater than the order total."
+msgstr "Укажите сумму наложенного платежа больше нуля и не больше суммы заказа."
+
+msgid "For orders paid on receipt, the order total is suggested. Check payments already received and enter only the amount still to collect. This does not change the order payment method."
+msgstr "Для оплаты при получении подставляется сумма заказа. Проверьте уже полученные платежи и укажите только остаток к получению. Способ оплаты заказа не меняется."
+
+msgid "I checked the recipient, boxes, declared value, delivery payer, cash on delivery amount and return service, cash payment and store subsidy. Create this real TTN."
+msgstr "Я проверил(-а) получателя, коробки, объявленную стоимость, плательщика доставки, сумму наложенного платежа и способ получения денег, наличную оплату и компенсацию магазина. Создать эту реальную ТТН."
+
+msgid "Money transfer fee payer"
+msgstr "Плательщик комиссии за денежный перевод"
+
+msgid "Payment control requires an active NovaPay contract; its fees follow that contract. The collection amount is separate from declared value and delivery charges."
+msgstr "Контроль оплаты требует действующего договора NovaPay; комиссия определяется договором. Сумма к получению — отдельно от объявленной стоимости и платы за доставку."
+
+msgid "Payment return service"
+msgstr "Способ получения денег"
+
+msgid "Recipient details were agreed; warehouse contents, packed boxes, delivery payer and cash on delivery settings were checked."
+msgstr "Данные получателя согласованы; товары по складам, коробки, плательщик доставки и настройки наложенного платежа проверены."
+
+msgid "Review and save cash on delivery settings again: the payment method, order amount or payment status changed, or this preparation uses the old format."
+msgstr "Проверьте и сохраните наложенный платёж ещё раз: способ оплаты, сумма или состояние оплаты заказа изменились либо подготовка сохранена в старом формате."
+
+msgid "Separate money transfer (return delivery of funds)"
+msgstr "Отдельный денежный перевод (обратная доставка денег)"
+
+msgid "Supported: drop-off at a branch, delivery to a branch or parcel locker, reviewed single-warehouse cash on delivery, cash payment for carrier services. Enter the legal recipient name in Ukrainian; it will be recorded in the Nova Poshta recipient directory, not in the store customer profile."
+msgstr "Поддерживается: отправка из отделения в отделение или почтомат, проверенный наложенный платёж для одного склада, наличная оплата услуг перевозчика. Введите имя получателя по документам на украинском; оно будет записано в справочник НП, без изменения карточки клиента магазина."
+
+msgid "The delivery estimate does not include the money transfer commission. Collection instructions do not confirm that payment was received."
+msgstr "Ориентировочная доставка не включает комиссию за перевод денег. Указанный наложенный платёж не подтверждает получение оплаты."
+
+msgid "This order is already paid. Cash on delivery would collect payment again."
+msgstr "Заказ уже оплачен. Наложенный платёж приведёт к повторному взысканию."
+
+msgid "To the FOP account under the NovaPay contract (payment control)"
+msgstr "На счёт ФОП по договору NovaPay (контроль оплаты)"

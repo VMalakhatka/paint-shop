@@ -11,8 +11,14 @@ Lifecycle 0.9.0 adds explicit preview/create, private PDF and at-most-once order
 email. Keep the same PCOE lock; commit the create claim BEFORE either recipient or
 document save. Unknown/rejected/creating states never auto-retry. The first attempt
 freezes preparation; remaining warehouses require the same order fingerprint.
-External TTNs cannot use store-key printing. No COD, courier address, non-cash carrier
-payment, polling, Telegram or automated reconciliation yet. The official docs were accessible in Chrome on 2026-10-18;
+External TTNs cannot use store-key printing. Version 0.11.0 adds reviewed
+single-warehouse COD: explicit amount and money-transfer fee payer or payment
+control under an active NovaPay agreement. Never default the return service or
+combine both carrier collection fields. Save exact kopecks and payment basis;
+revalidate paid state, total and method before writing. Old drafts require resave;
+locked attempts require reconciliation. Declared value and delivery quote are not
+collection; the quote excludes transfer commission. No courier address, non-cash
+carrier payment, polling, Telegram or automated reconciliation yet. The official docs were accessible in Chrome on 2026-10-18;
 do not repeat the earlier 403 as a current access blocker. Read
 [the contract review](../../../../docs/api/NOVA_POSHTA_SHIPMENT_CONTRACT.md)
 before extending the lifecycle: official examples have contradictions, status 1

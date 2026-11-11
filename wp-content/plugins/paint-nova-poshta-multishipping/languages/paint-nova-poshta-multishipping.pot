@@ -2872,3 +2872,70 @@ msgstr ""
 
 msgid "Recipient contact"
 msgstr ""
+
+msgid "Amount to collect, UAH"
+msgstr ""
+
+#, php-format
+msgid "Amount to collect: %s UAH."
+msgstr ""
+
+msgid "Cash on delivery currently requires one warehouse. Do not repeat the order amount on several shipments."
+msgstr ""
+
+msgid "Cash on delivery: none."
+msgstr ""
+
+msgid "Check the cash on delivery amount and payment return settings."
+msgstr ""
+
+msgid "Choose a payment return service"
+msgstr ""
+
+msgid "Choose the money transfer fee payer"
+msgstr ""
+
+msgid "Choose how Nova Poshta should return the cash on delivery payment."
+msgstr ""
+
+msgid "Collect payment from the recipient"
+msgstr ""
+
+msgid "Enter a cash on delivery amount greater than zero and no greater than the order total."
+msgstr ""
+
+msgid "For orders paid on receipt, the order total is suggested. Check payments already received and enter only the amount still to collect. This does not change the order payment method."
+msgstr ""
+
+msgid "I checked the recipient, boxes, declared value, delivery payer, cash on delivery amount and return service, cash payment and store subsidy. Create this real TTN."
+msgstr ""
+
+msgid "Money transfer fee payer"
+msgstr ""
+
+msgid "Payment control requires an active NovaPay contract; its fees follow that contract. The collection amount is separate from declared value and delivery charges."
+msgstr ""
+
+msgid "Payment return service"
+msgstr ""
+
+msgid "Recipient details were agreed; warehouse contents, packed boxes, delivery payer and cash on delivery settings were checked."
+msgstr ""
+
+msgid "Review and save cash on delivery settings again: the payment method, order amount or payment status changed, or this preparation uses the old format."
+msgstr ""
+
+msgid "Separate money transfer (return delivery of funds)"
+msgstr ""
+
+msgid "Supported: drop-off at a branch, delivery to a branch or parcel locker, reviewed single-warehouse cash on delivery, cash payment for carrier services. Enter the legal recipient name in Ukrainian; it will be recorded in the Nova Poshta recipient directory, not in the store customer profile."
+msgstr ""
+
+msgid "The delivery estimate does not include the money transfer commission. Collection instructions do not confirm that payment was received."
+msgstr ""
+
+msgid "This order is already paid. Cash on delivery would collect payment again."
+msgstr ""
+
+msgid "To the FOP account under the NovaPay contract (payment control)"
+msgstr ""

@@ -10,6 +10,14 @@
     }
     $form.on('input change', 'input:not([name=agreed]),select', dirty);
     $(document.body).on('pnpm_destination_changed', dirty);
+    function codFields() {
+        var enabled = $form.find('[name=cod_enabled]').is(':checked');
+        $form.find('.pnpm-cod-fields').prop('hidden', !enabled).find('input,select').prop('disabled', !enabled);
+        var transfer = enabled && $form.find('[name=cod_service]').val() === 'money_transfer';
+        $form.find('.pnpm-cod-fee').prop('hidden', !transfer).find('select').prop('disabled', !transfer);
+    }
+    $form.on('change', '[name=cod_enabled],[name=cod_service]', codFields);
+    codFields();
     $form.on('submit', function (event) { event.preventDefault(); });
     $form.on('click', '.pnpm-add-box', function () {
         var $boxes = $(this).siblings('.pnpm-boxes');
@@ -26,6 +34,7 @@
         var recipient = {name:$form.find('[name=name]').val(), phone:$form.find('[name=phone]').val(), address:$('#pnpm_address').val() || ''};
         ['city_label','city_ref','delivery_type','point_label','point_ref'].forEach(function (key) { recipient[key] = $('#pnpm_' + key).val(); });
         var payload = {revision:$form.attr('data-revision'),recipient:recipient,groups:{},agreed:$form.find('[name=agreed]').is(':checked') ? '1' : ''};
+        payload.cod_settings = {enabled:$form.find('[name=cod_enabled]').is(':checked'),amount:$form.find('[name=cod_amount]').val(),service:$form.find('[name=cod_service]').val(),fee_payer:$form.find('[name=cod_fee_payer]').val()};
         $form.find('fieldset[data-location]').each(function () {
             var $group = $(this), boxes = [];
             $group.find('.pnpm-box').each(function () {
@@ -35,7 +44,7 @@
         });
         busy = true;
         // Freeze the reviewed input while a request is in flight; no automatic retries.
-        $form.find('input,select,button:not(:disabled)').attr('data-pnpm-busy', '1').prop('disabled', true);
+        $form.find('input:not(:disabled),select:not(:disabled),button:not(:disabled)').attr('data-pnpm-busy', '1').prop('disabled', true);
         $('#pnpm-manager-preview').empty(); $('#pnpm-manager-status').text(pnpmManager.loading);
         $.post(pnpmManager.url, {action:'pnpm_manager_preparation',nonce:pnpmManager.nonce,command:command,order_id:$form.data('order'),payload:JSON.stringify(payload)})
             .done(function (response) {
@@ -57,12 +66,13 @@
                     $.each(data.preview.groups, function (_, group) {
                         $('<h3></h3>').text(group.location_name).appendTo($preview);
                         group.boxes.forEach(function (box, index) { $('<p></p>').text('#' + (index + 1) + ': ' + box.weight + ' ' + pnpmManager.kg + ' · ' + [box.length,box.width,box.height].join(' × ') + ' ' + pnpmManager.cm).appendTo($preview); });
-                        $('<p></p>').text(pnpmManager.payer + ': ' + pnpmManager[group.payer] + ' · ' + pnpmManager.cod + ': ' + group.cod + ' ' + pnpmManager.currency).appendTo($preview);
+                        $('<p></p>').text(pnpmManager.payer + ': ' + pnpmManager[group.payer]).appendTo($preview);
+                        (group.cod_summary || []).forEach(function (line) { $('<p>').text(line).appendTo($preview); });
                     });
                     var $list = $('<ul class="pnpm-blockers"></ul>').appendTo($preview);
                     data.blockers.forEach(function (text) { $('<li></li>').text(text).appendTo($list); });
                 }
             }).fail(function (xhr) { $('#pnpm-manager-status').text(xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message || pnpmManager.failure); })
-            .always(function () { busy = false; $form.find('[data-pnpm-busy]').prop('disabled', false).removeAttr('data-pnpm-busy'); });
+            .always(function () { busy = false; $form.find('[data-pnpm-busy]').prop('disabled', false).removeAttr('data-pnpm-busy'); codFields(); });
     });
 })(jQuery);
