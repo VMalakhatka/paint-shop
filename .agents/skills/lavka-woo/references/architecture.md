@@ -49,7 +49,11 @@ requires the configured contact Ref AND phone under the current sender. A matchi
 phone on another contact does not pass ownership. An owner-approved repair changes
 only the selected location's `contact_ref`, after unique-match, backup, lock and
 concurrency checks; never reset shipment state or write to the carrier. HTTP 200
-directory responses can still be unsuccessful. Recovery and evidence boundaries:
+directory responses can still be unsuccessful. Reconfirmed 2026-11-12 on 0.11.0:
+a stale contact Ref absent from a successful sender directory blocked preflight
+before any create claim. An owner-approved one-field repair passed a fresh preview;
+it did not change preparation or create a TTN. The cause of the vanished Ref is
+unknown; never silently relink by phone. Recovery and evidence boundaries:
 manager guide `#np-preparation`.
 
 NP recipient verification 0.9.3 (2026-10-18): save does not promise contact Phones.
