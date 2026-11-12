@@ -77,7 +77,7 @@ final class ManagerPreparationPanel
         echo '<p><label><input type="checkbox" name="agreed" value="1"> ' . esc_html__('Recipient details were agreed; warehouse contents, packed boxes, delivery payer and cash on delivery settings were checked.', 'paint-nova-poshta-multishipping') . '</label></p>';
         echo '<p><button type="button" class="button" data-pnpm-command="save">' . esc_html__('Save preparation', 'paint-nova-poshta-multishipping') . '</button> <button type="button" class="button button-primary" data-pnpm-command="preview">' . esc_html__('Check preview', 'paint-nova-poshta-multishipping') . '</button></p>';
         echo '<div id="pnpm-manager-status" role="status" aria-live="polite"></div><div id="pnpm-manager-preview"></div>';
-        echo '<p>' . esc_html__('Save preparation and reload this page before creating a TTN.', 'paint-nova-poshta-multishipping') . '</p></form>';
+        echo '<p>' . esc_html__('Save preparation. The TTN panel updates automatically; then check the saved shipment with Nova Poshta.', 'paint-nova-poshta-multishipping') . '</p></form>';
         self::audit($order->get_id());
         echo '</section>';
     }
@@ -117,12 +117,19 @@ final class ManagerPreparationPanel
     {
         global $wpdb;
         $events = $wpdb->get_results($wpdb->prepare("SELECT e.actor_id, e.created_at, e.safe_context, s.location_id FROM {$wpdb->prefix}pnpm_shipment_events e INNER JOIN {$wpdb->prefix}pnpm_shipments s ON s.id=e.shipment_id WHERE s.order_id=%d AND e.event_type='manager_preparation_saved' ORDER BY e.id DESC LIMIT 10", $order_id), ARRAY_A);
-        echo '<details><summary>' . esc_html__('Preparation audit (last 10 saves)', 'paint-nova-poshta-multishipping') . '</summary><ul>';
+        echo '<div id="pnpm-preparation-audit"><details><summary>' . esc_html__('Preparation audit (last 10 saves)', 'paint-nova-poshta-multishipping') . '</summary><ul>';
         foreach ((array)$events as $event) {
             $context = json_decode((string)$event['safe_context'], true) ?: [];
             echo '<li>' . esc_html($event['created_at'] . ' UTC · #' . $event['actor_id'] . ' · ' . $event['location_id']) . '<br><code>' . esc_html(implode(', ', (array)($context['changed_fields'] ?? []))) . '</code></li>';
         }
-        echo '</ul></details>';
+        echo '</ul></details></div>';
+    }
+
+    private static function auditHtml(int $order_id): string
+    {
+        ob_start();
+        try { self::audit($order_id); return (string)ob_get_contents(); }
+        finally { ob_end_clean(); }
     }
 
     public function ajax(): void
@@ -147,7 +154,9 @@ final class ManagerPreparationPanel
             if (!in_array($command, ['save','preview'], true)) throw new \RuntimeException(__('Invalid preparation request.', 'paint-nova-poshta-multishipping'));
             if ($command === 'save') {
                 $context = $service->save($order->get_id(), $input);
-                wp_send_json_success(['revision'=>$context['revision'], 'message'=>__('Preparation saved. No TTN or notification was sent.', 'paint-nova-poshta-multishipping')]);
+                wp_send_json_success(['revision'=>$context['revision'], 'lifecycle_html'=>ShipmentLifecyclePanel::html($service->order($order->get_id())),
+                    'audit_html'=>self::auditHtml($order->get_id()),
+                    'message'=>__('Preparation saved. The TTN panel is updated below. Check the saved shipment with Nova Poshta.', 'paint-nova-poshta-multishipping')]);
             }
             $prepared = $service->prepare($context, $input);
             wp_send_json_success(['preview'=>$prepared, 'blockers'=>$service->blockers($context, $prepared),

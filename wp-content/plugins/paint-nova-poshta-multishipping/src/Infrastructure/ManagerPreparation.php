@@ -166,7 +166,7 @@ final class ManagerPreparation
             foreach ($required as $key) if (!self::ref((string)($sender[$key] ?? ''))) $issues[] = __('Check the warehouse sender mapping and phone in Nova Poshta settings.', 'paint-nova-poshta-multishipping');
         }
         $issues[] = __('Delivery payer and store subsidy still require carrier-contract verification; this preview does not calculate the final tariff.', 'paint-nova-poshta-multishipping');
-        $issues[] = __('Save preparation and reload this page before creating a TTN.', 'paint-nova-poshta-multishipping');
+        $issues[] = __('Save preparation. The TTN panel updates automatically; then check the saved shipment with Nova Poshta.', 'paint-nova-poshta-multishipping');
         return array_values(array_unique($issues));
     }
 

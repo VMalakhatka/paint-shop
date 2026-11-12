@@ -1,5 +1,32 @@
 # Paint Nova Poshta Multishipping
 
+## Manager panel refresh 0.11.1 — 2026-11-12
+
+Successful preparation saves return a freshly rendered lifecycle panel, audit and
+revision. The browser replaces only those blocks, including after the first save;
+other unsaved page fields remain untouched. Saving clears every old create token
+before the request; new cards require a fresh carrier preview and explicit consent.
+Delegated handlers survive replacement. Manual legal names survive only when the
+saved recipient name/phone identity has not changed. Concurrent preparation and
+lifecycle commands are blocked while either request is in flight.
+
+The preview exposes its remaining five-minute lifetime. Expiry clears the client
+token/consent and asks for a new check, without requiring a page reload. Server
+expiry, order/row binding, write gates and durable claims remain authoritative.
+Existing full-page refresh after a confirmed create/email remains automatic; an
+unknown result still requires reconciliation, never an automatic write retry.
+A stale sender contact now has its own pre-claim message instead of the generic
+verification error; no automatic contact replacement is performed.
+
+Tests: local preparation/lifecycle fixtures with all HTTP/mail intercepted, plus
+`tests/manager-workflow-ui.cjs` on generated `manager-workflow.html` at desktop and
+mobile widths. UK/RU contextual help and the manager guide describe the new flow.
+Verified: 53 preparation, 213 lifecycle and 56 browser checks; targeted NP help
+UK/RU/canonical parity, PHP/JS syntax and documentation validation passed. The
+unrelated full manager-help test still fails its existing section-count assertion,
+reproduced with the unchanged pre-release help source.
+No production deploy or real shipment is part of this release verification.
+
 ## Reviewed cash on delivery 0.11.0 — 2026-11-11
 
 Manager preparation now explicitly records whether to collect payment, the amount,

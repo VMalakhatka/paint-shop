@@ -26,7 +26,8 @@ final class ShipmentLifecyclePanel
         wp_localize_script('pnpm-lifecycle','pnpmLifecycle',['url'=>admin_url('admin-ajax.php'),'nonce'=>wp_create_nonce('pnpm_shipment_command'),
             'busy'=>__('Checking shipment…','paint-nova-poshta-multishipping'),
             'failed'=>__('Result not confirmed. Reload the page; do not repeat creation or email.','paint-nova-poshta-multishipping'),
-            'dirty'=>__('Save preparation and reload this page before creating a TTN.','paint-nova-poshta-multishipping'),
+            'dirty'=>__('Save the changed preparation, then check the saved shipment with Nova Poshta.','paint-nova-poshta-multishipping'),
+            'expired'=>__('The shipment check expired. Check the saved shipment again; no page reload is needed.','paint-nova-poshta-multishipping'),
             'cost'=>__('Declared value / estimated delivery, UAH','paint-nova-poshta-multishipping'),
             'payer'=>__('Delivery payer','paint-nova-poshta-multishipping'),
             'Sender'=>__('Sender','paint-nova-poshta-multishipping'),'Recipient'=>__('Recipient','paint-nova-poshta-multishipping'),
@@ -37,16 +38,19 @@ final class ShipmentLifecyclePanel
     public function render(\WC_Order $order): void
     {
         if (!ManagerPreparation::allowed() || $order->get_meta('_folio_parent_order_id') || $order->get_meta('_folio_split_from_order_id')) return;
+        echo '<div id="pnpm-lifecycle-panel" data-order="'.esc_attr($order->get_id()).'">';
         $rows=(new ShipmentRepository())->findByOrder($order->get_id());
-        if (!$rows) return;
+        if (!$rows) { echo '</div>'; return; }
         $service=new ShipmentLifecycle();
         echo '<section class="pcoe-card pnpm-lifecycle"><h2 data-pcoe-help="np-preparation">'.esc_html__('TTN, PDF and customer email','paint-nova-poshta-multishipping').'</h2>';
-        echo '<p>'.esc_html__('Only saved preparation is used. Save and reload after editing. Create each warehouse TTN separately; printing and customer email are separate actions.','paint-nova-poshta-multishipping').'</p>';
+        echo '<p>'.esc_html__('Only saved preparation is used. After saving, this panel updates automatically. Check each warehouse shipment and create its TTN separately; printing and customer email are separate actions.','paint-nova-poshta-multishipping').'</p>';
         echo '<details><summary>'.esc_html__('How this works and current limits','paint-nova-poshta-multishipping').'</summary><p>'.esc_html__('Supported: drop-off at a branch, delivery to a branch or parcel locker, reviewed single-warehouse cash on delivery, cash payment for carrier services. Enter the legal recipient name in Ukrainian; it will be recorded in the Nova Poshta recipient directory, not in the store customer profile.','paint-nova-poshta-multishipping').'</p><p>'.esc_html__('The estimate is not a final invoice. Unknown point limits must be checked with Nova Poshta. Confirm payer and any store subsidy manually. A created TTN does not mean that goods have been handed over.','paint-nova-poshta-multishipping').'</p><p>'.esc_html__('After a timeout or rejection, do not create another TTN: reconcile the result in the Nova Poshta business account with an administrator. Automatic retries and automatic Telegram messages are not enabled.','paint-nova-poshta-multishipping').'</p><p>'.esc_html__('Nova Poshta checks are paced and may take several seconds. Only a rate-limited read can retry once; recipient and TTN creation are never retried automatically. If the message says creation was not started, wait 10 seconds, reload and run a new check. An unknown creation result still requires administrator review.','paint-nova-poshta-multishipping').'</p></details>';
         foreach ($rows as $row) {
             if ($row['source']!=='store_api') continue;
             $location=get_term((int)$row['location_id'],'location');
-            echo '<article class="pnpm-shipment" data-order="'.esc_attr($order->get_id()).'" data-id="'.esc_attr($row['id']).'"><h3>'.esc_html($location && !is_wp_error($location) ? $location->name : '#'.$row['location_id']).'</h3>';
+            $recipient = json_decode($row['recipient_snapshot'], true) ?: [];
+            $identity = hash('sha256', wp_json_encode([$recipient['name'] ?? '', $recipient['phone'] ?? '']));
+            echo '<article class="pnpm-shipment" data-order="'.esc_attr($order->get_id()).'" data-id="'.esc_attr($row['id']).'" data-recipient="'.esc_attr($identity).'"><h3>'.esc_html($location && !is_wp_error($location) ? $location->name : '#'.$row['location_id']).'</h3>';
             if (in_array($row['status'], ['manager_draft','np_recipient_ready'],true)) {
                 $recipient = json_decode($row['recipient_snapshot'], true) ?: [];
                 $defaults = RecipientIdentity::defaults($order, $recipient);
@@ -103,7 +107,15 @@ final class ShipmentLifecyclePanel
             }
             echo '<div class="pnpm-lifecycle-status" role="status" aria-live="polite"></div></article>';
         }
-        echo '</section>';
+        echo '</section></div>';
+    }
+
+    /** Fresh local state only; rendering never creates a preview or calls the carrier. */
+    public static function html(\WC_Order $order): string
+    {
+        ob_start();
+        try { (new self())->render($order); return (string)ob_get_contents(); }
+        finally { ob_end_clean(); }
     }
 
     public function ajax(): void

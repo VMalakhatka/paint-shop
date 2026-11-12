@@ -19,6 +19,14 @@ revalidate paid state, total and method before writing. Old drafts require resav
 locked attempts require reconciliation. Declared value and delivery quote are not
 collection; the quote excludes transfer commission. No courier address, non-cash
 carrier payment, polling, Telegram or automated reconciliation yet.
+Manager UI 0.11.1 (2026-11-12): successful preparation save returns current local
+lifecycle HTML/audit/revision; replace only the NP blocks. Never retain a create
+token or consent across saves; manually entered legal names survive only for the
+same saved recipient name/phone. Delegated handlers must work after first save and
+replacement. Expiry disables create and offers a fresh preview without page reload;
+server expiry/fingerprints remain authoritative. Never turn automatic UI refresh
+into carrier writes or retries. A missing sender contact gets a specific pre-claim
+error; it does not authorize silently selecting a different Ref.
 Read-only COD capability diagnosis (verified live 2026-11-11): match the exact
 configured sender against `Counterparty.getCounterparties`, then read
 `getCounterpartyOptions` for that Ref. `CanAfterpaymentOnGoodsCost=true` confirms

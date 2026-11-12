@@ -132,7 +132,7 @@ final class ShipmentLifecycle
                 if ($contact['ref'] === $sender['contact_ref'] && in_array(preg_replace('/\D/', '', $sender['phone']), $phones, true)) $owned = true;
             }
         }
-        if (!$owned) self::fail();
+        if (!$owned) throw new \RuntimeException(__('The warehouse sender contact no longer matches the Nova Poshta directory. Ask an administrator to check the contact and phone in sender settings. No TTN creation was started.', 'paint-nova-poshta-multishipping'));
         $boxes = $group['boxes'];
         if (!$boxes || count($boxes)>20 || !in_array($group['payer'], ['Sender','Recipient'], true)) self::fail();
         $seats = [];
@@ -191,7 +191,7 @@ final class ShipmentLifecycle
             $cache = ['user'=>get_current_user_id(),'order'=>$order_id,'id'=>$id,'row_hash'=>hash('sha256',wp_json_encode($row)),
                 'plan_hash'=>$plan['context']['order_fingerprint'],'payload'=>$plan['payload'],'person'=>$plan['person'],'expires'=>time()+300];
             if (!set_transient('pnpm_create_'.$token, $cache, 300)) self::fail();
-            return ['token'=>$token,'enabled'=>$this->api->writesEnabled(), 'recipient'=>implode(' ', array_intersect_key($plan['person'], array_flip(['FirstName','LastName','MiddleName']))),
+            return ['token'=>$token,'expires_in'=>max(0, $cache['expires']-time()),'enabled'=>$this->api->writesEnabled(), 'recipient'=>implode(' ', array_intersect_key($plan['person'], array_flip(['FirstName','LastName','MiddleName']))),
                 'phone'=>$plan['person']['Phone'],'origin'=>$plan['origin'],'destination'=>$plan['destination'],
                 'payload'=>array_intersect_key($plan['payload'], array_flip(['Cost','Weight','SeatsAmount','PayerType','PaymentMethod','OptionsSeat'])),
                 'cod_settings'=>$plan['cod'], 'cod_summary'=>CashOnDelivery::summary($plan['cod']),

@@ -36,7 +36,7 @@ add_filter('pre_http_request',static function ($pre,$args,$url) use (&$writes,&$
     if ($m==='getCounterparties') $data=[['Ref'=>$refs[2],'Description'=>'Fixture sender']];
     elseif ($m==='getCounterpartyAddresses') $data=[['Ref'=>$refs[4],'CityRef'=>$refs[1]]];
     elseif ($m==='getCounterpartyContactPersons') {
-        if ($p['methodProperties']['Ref']===$refs[2]) $data=[['Ref'=>$refs[3],'Phones'=>'380000000000']];
+        if ($p['methodProperties']['Ref']===$refs[2]) $data=[['Ref'=>$mode==='stale_sender'?$refs[8]:$refs[3],'Phones'=>'380000000000']];
         else {
             if ($mode==='contact_unavailable') return new WP_Error('timeout','Synthetic contact timeout');
             $person=$lastPerson;$person['Phones']=$person['Phone'];unset($person['Phone']);
@@ -118,7 +118,15 @@ try {
     $check(str_contains($draftPanel,'data-person="FirstName" value="Тест"') && str_contains($draftPanel,'data-person="LastName" value="Приклад"'),'Rendered automatic suggestions');
     $reject(fn()=>$service->row($oid+100000,$id),'Cross-order access');
     $manager->allcaps=[];$reject(fn()=>$service->row($oid,$id),'Permission denied');$manager->allcaps=['manage_woocommerce'=>true,'manage_pnpm_shipments'=>true,'manage_options'=>true];
+    $mode='stale_sender';
+    try { $service->preview($oid,$id,$withoutMiddle); throw new LogicException('Expected stale sender rejection'); }
+    catch (RuntimeException $e) {
+        $check($e->getMessage()===__('The warehouse sender contact no longer matches the Nova Poshta directory. Ask an administrator to check the contact and phone in sender settings. No TTN creation was started.','paint-nova-poshta-multishipping'),'Actionable sender mismatch, no silent phone remapping');
+    }
+    $check($writes===0 && $service->row($oid,$id)['status']==='manager_draft','Sender mismatch does not claim or write');
+    $mode='success';
     $preview=$service->preview($oid,$id,$withoutMiddle);$tokens[]=$preview['token'];
+    $check($preview['expires_in']>0 && $preview['expires_in']<=300,'Preview exposes bounded remaining lifetime');
     $check($writes===0,'Preview never mutates carrier');
     $check($preview['payload']['Cost']===100 && $preview['payload']['OptionsSeat'][0]['volumetricVolume']===0.000108,'Per-warehouse goods and cubic metres');
     $check($preview['estimate']===80.0,'Live estimate returned');

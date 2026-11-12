@@ -2775,3 +2775,21 @@ msgstr "Замовлення вже оплачене. Післяплата пр�
 
 msgid "To the FOP account under the NovaPay contract (payment control)"
 msgstr "На рахунок ФОП за договором NovaPay (контроль оплати)"
+
+msgid "Save the changed preparation, then check the saved shipment with Nova Poshta."
+msgstr "Збережіть змінену підготовку, потім перевірте збережене відправлення в Новій пошті."
+
+msgid "The shipment check expired. Check the saved shipment again; no page reload is needed."
+msgstr "Строк перевірки відправлення минув. Перевірте збережене відправлення ще раз; оновлювати сторінку не потрібно."
+
+msgid "Only saved preparation is used. After saving, this panel updates automatically. Check each warehouse shipment and create its TTN separately; printing and customer email are separate actions."
+msgstr "Використовується лише збережена підготовка. Після збереження цей блок оновлюється автоматично. Перевіряйте відправлення кожного складу та створюйте його ТТН окремо; друк і лист клієнту — окремі дії."
+
+msgid "Save preparation. The TTN panel updates automatically; then check the saved shipment with Nova Poshta."
+msgstr "Збережіть підготовку. Блок ТТН оновиться автоматично; потім перевірте збережене відправлення в Новій пошті."
+
+msgid "Preparation saved. The TTN panel is updated below. Check the saved shipment with Nova Poshta."
+msgstr "Підготовку збережено. Блок ТТН нижче оновлено. Перевірте збережене відправлення в Новій пошті."
+
+msgid "The warehouse sender contact no longer matches the Nova Poshta directory. Ask an administrator to check the contact and phone in sender settings. No TTN creation was started."
+msgstr "Контакт відправника складу більше не відповідає довіднику Нової пошти. Попросіть адміністратора перевірити контакт і телефон у налаштуваннях відправника. Створення ТТН не починалося."

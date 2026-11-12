@@ -46,10 +46,15 @@ try {
     $check(array_sum(array_column($prepared['groups'],'cod')) === 0.0, 'Prepayment has no COD');
     $check(count($service->blockers($context,$prepared)) >= 2, 'Preparation preview is not permission to create');
     $check((new ShipmentRepository())->findByOrder($order->get_id()) === [], 'Preview does not persist');
+    $placeholder=Paint\NovaPoshta\Admin\ShipmentLifecyclePanel::html($order);
+    $check(str_contains($placeholder,'id="pnpm-lifecycle-panel"') && !str_contains($placeholder,'data-shipment-command'), 'First save has a stable empty panel to replace');
     $context = $service->save($order->get_id(),$input);
     $rows = (new ShipmentRepository())->findByOrder($order->get_id());
     $check(count($rows) === 2, 'One saved preparation per warehouse');
     $check($rows[0]['status'] === 'manager_draft' && !$rows[0]['ttn_number'], 'Preparation not a created TTN');
+    $freshPanel=Paint\NovaPoshta\Admin\ShipmentLifecyclePanel::html($order);
+    $check(substr_count($freshPanel,'data-shipment-command="preview"')===2 && substr_count($freshPanel,'class="pnpm-create-agreed" disabled')===2,'Fresh saved panels expose checks, never permission to create');
+    $check(!str_contains($freshPanel,'apiKey/') && !str_contains($freshPanel,'synthetic-test-key'),'Refreshed panel contains no carrier credentials');
     $check($context['recipient']['name'] === 'Agreed recipient', 'Order-only override reloaded');
     $check(wc_get_order($order->get_id())->get_shipping_first_name() === 'Synthetic', 'Woo address not silently overwritten');
     $check(get_user_meta($customer_id) === $profile_before, 'Customer profile unchanged');
@@ -131,6 +136,13 @@ try {
         $page='<!doctype html><html lang="uk"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font:16px/1.5 system-ui;margin:16px}input,select,button{font:inherit;padding:8px}*{box-sizing:border-box}button{cursor:pointer}input[type=checkbox]{width:auto}h2{font-size:24px}</style><style>'.file_get_contents(PNPM_DIR.'assets/checkout.css').file_get_contents(PNPM_DIR.'assets/manager-preparation.css').'</style>'.$html
             .'<script>'.file_get_contents(ABSPATH.'wp-includes/js/jquery/jquery.min.js').'</script><script>var pnpmCheckout='.wp_json_encode($card).';var pnpmManager='.wp_json_encode($manager_config).';</script><script>'.file_get_contents(PNPM_DIR.'assets/checkout.js').'</script><script>'.file_get_contents(PNPM_DIR.'assets/manager-preparation.js').'</script></html>';
         file_put_contents($dir.'/manager-preparation.html',$page); restore_previous_locale();
+        switch_to_locale('uk');
+        $panel=new Paint\NovaPoshta\Admin\ShipmentLifecyclePanel();
+        $previous_get=$_GET;$_GET=['page'=>'pcoe-customers','order_id'=>$order->get_id()];$panel->assets();$_GET=$previous_get;
+        $config=wp_scripts()->get_data('pnpm-lifecycle','data').';pnpmLifecycle.url="https://pnpm-test.invalid/ajax";';
+        file_put_contents($dir.'/lifecycle-panel.html',Paint\NovaPoshta\Admin\ShipmentLifecyclePanel::html($order));
+        $workflow=str_replace('</html>','<div id="pnpm-lifecycle-panel" data-order="'.$order->get_id().'"></div><label>Other unsaved field <input id="other-unsaved" value="Keep me"></label><script>'.$config.'</script><script>'.file_get_contents(PNPM_DIR.'assets/shipment-lifecycle.js').'</script></html>',$page);
+        file_put_contents($dir.'/manager-workflow.html',$workflow);restore_previous_locale();
     }
     $check($http===0,'No carrier/Java HTTP during preparation');
     // Woo creation hooks may call intercepted mail; preparation must never add its own messages.
