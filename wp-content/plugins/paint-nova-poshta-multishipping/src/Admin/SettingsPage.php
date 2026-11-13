@@ -208,6 +208,7 @@ final class SettingsPage
                                         </select>
                                         <small class="pnpm-city-label"></small>
                                         <?php $this->technicalRefInput($prefix, 'sender_address_ref', $mapping); ?>
+                                        <input type="hidden" class="pnpm-sender-address-label" name="<?php echo esc_attr($prefix); ?>[sender_address_label]" value="<?php echo esc_attr($mapping['sender_address_label'] ?? ''); ?>">
                                         <?php $this->technicalRefInput($prefix, 'city_ref', $mapping); ?>
                                     </td>
                                     <td class="pnpm-handover-cell">
@@ -279,6 +280,7 @@ final class SettingsPage
                 'counterparty_ref' => sanitize_text_field($mapping['counterparty_ref'] ?? ''),
                 'city_ref' => sanitize_text_field($mapping['city_ref'] ?? ''),
                 'sender_address_ref' => sanitize_text_field($mapping['sender_address_ref'] ?? ''),
+                'sender_address_label' => sanitize_text_field($mapping['sender_address_label'] ?? ''),
                 'handover_warehouse_ref' => sanitize_text_field($mapping['handover_warehouse_ref'] ?? ''),
                 'handover_warehouse_label' => sanitize_text_field($mapping['handover_warehouse_label'] ?? ''),
                 'contact_ref' => sanitize_text_field($mapping['contact_ref'] ?? ''),

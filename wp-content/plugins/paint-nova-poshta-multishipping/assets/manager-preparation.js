@@ -10,6 +10,15 @@
     }
     $form.on('input change', 'input:not([name=agreed]),select', dirty);
     $(document.body).on('pnpm_destination_changed', dirty);
+    function handoverFields() {
+        $form.find('fieldset[data-location]').each(function () {
+            var courier = $(this).find('.pnpm-handover').val() === 'doors';
+            $(this).find('.pnpm-courier-hint,.pnpm-origin-address').prop('hidden', !courier);
+            $(this).find('.pnpm-origin-branch').prop('hidden', courier);
+        });
+    }
+    $form.on('change', '.pnpm-handover', handoverFields);
+    handoverFields();
     function codFields() {
         var enabled = $form.find('[name=cod_enabled]').is(':checked');
         $form.find('.pnpm-cod-fields').prop('hidden', !enabled).find('input,select').prop('disabled', !enabled);
@@ -41,7 +50,7 @@
             $group.find('.pnpm-box').each(function () {
                 var box = {}; $(this).find('[data-box]').each(function () { box[$(this).data('box')] = $(this).val(); }); boxes.push(box);
             });
-            payload.groups[$group.data('location')] = {payer:$group.find('.pnpm-payer').val(),boxes:boxes};
+            payload.groups[$group.data('location')] = {payer:$group.find('.pnpm-payer').val(),handover:$group.find('.pnpm-handover').val(),boxes:boxes};
         });
         busy = true;
         // Freeze the reviewed input while a request is in flight; no automatic retries.
@@ -70,6 +79,7 @@
                     $('<p></p>').text([data.preview.recipient.name,data.preview.recipient.phone,data.preview.recipient.city_label,data.preview.recipient.point_label || data.preview.recipient.address].join(' · ')).appendTo($preview);
                     $.each(data.preview.groups, function (_, group) {
                         $('<h3></h3>').text(group.location_name).appendTo($preview);
+                        $('<p></p>').text(group.handover_label || '').appendTo($preview);
                         group.boxes.forEach(function (box, index) { $('<p></p>').text('#' + (index + 1) + ': ' + box.weight + ' ' + pnpmManager.kg + ' · ' + [box.length,box.width,box.height].join(' × ') + ' ' + pnpmManager.cm).appendTo($preview); });
                         $('<p></p>').text(pnpmManager.payer + ': ' + pnpmManager[group.payer]).appendTo($preview);
                         (group.cod_summary || []).forEach(function (line) { $('<p>').text(line).appendTo($preview); });

@@ -106,6 +106,9 @@ final class ShipmentLifecycle
         $cod = CashOnDelivery::saved($group['cod_settings'], $context);
         $collection = CashOnDelivery::carrier($cod);
         $sender = $group['sender'];
+        if (($sender['sender_type'] ?? '') === 'doors') {
+            throw new \RuntimeException(__('Courier preparation is saved, but address-origin TTN creation and shared courier requests are not enabled yet. Choose branch drop-off to use the current shipment flow.', 'paint-nova-poshta-multishipping'));
+        }
         if (($sender['enabled'] ?? '') !== 'yes' || ($sender['sender_type'] ?? '') !== 'warehouse') {
             throw new \RuntimeException(__('This release supports drop-off at a branch and delivery to a branch or parcel locker only.', 'paint-nova-poshta-multishipping'));
         }

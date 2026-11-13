@@ -2793,3 +2793,96 @@ msgstr "Підготовку збережено. Блок ТТН нижче он
 
 msgid "The warehouse sender contact no longer matches the Nova Poshta directory. Ask an administrator to check the contact and phone in sender settings. No TTN creation was started."
 msgstr "Контакт відправника складу більше не відповідає довіднику Нової пошти. Попросіть адміністратора перевірити контакт і телефон у налаштуваннях відправника. Створення ТТН не починалося."
+
+#: courier-preparation
+msgid "Choose how this shipment will be handed to Nova Poshta."
+msgstr "Виберіть спосіб передачі цього відправлення Новій пошті."
+
+#: courier-preparation
+msgid "How to hand over this shipment"
+msgstr "Як передати це відправлення"
+
+#: courier-preparation
+msgid "Save courier preparation to the pickup queue. This does not call a courier. Address-origin TTN creation and a shared courier request are not enabled yet."
+msgstr "Збережіть підготовку до черги кур’єра. Це не викликає кур’єра. Створення ТТН з адреси та спільного виклику ще не ввімкнено."
+
+#: courier-preparation
+msgid "Open courier queue"
+msgstr "Відкрити чергу кур’єра"
+
+#: courier-preparation
+msgid "Drop-off point:"
+msgstr "Місце самостійної здачі:"
+
+#: courier-preparation
+msgid "Pickup address:"
+msgstr "Адреса забору:"
+
+#: courier-preparation
+msgid "Check the registered address in sender settings."
+msgstr "Перевірте зареєстровану адресу в налаштуваннях відправника."
+
+#: courier-preparation
+msgid "Courier preparation is saved, but address-origin TTN creation and shared courier requests are not enabled yet. Choose branch drop-off to use the current shipment flow."
+msgstr "Підготовку для кур’єра збережено, але створення ТТН з адреси та спільних викликів ще не ввімкнено. Для поточного оформлення виберіть самостійну здачу у відділенні."
+
+#: courier-preparation
+msgid "Nova Poshta courier queue"
+msgstr "Черга кур’єра НП"
+
+#: courier-preparation
+msgid "Saved preparations only. No courier has been called and no pickup time is reserved. Shared courier requests through the site are not enabled yet."
+msgstr "Це лише збережені підготовки. Кур’єра не викликано, час забору не заброньовано. Спільні виклики через сайт ще не ввімкнено."
+
+#: courier-preparation
+msgid "How the courier queue works"
+msgstr "Як працює черга кур’єра"
+
+#: courier-preparation
+msgid "In an order, choose courier pickup for the warehouse and save preparation. The choice applies only to this shipment."
+msgstr "У замовленні виберіть забір кур’єром для складу та збережіть підготовку. Вибір стосується лише цього відправлення."
+
+#: courier-preparation
+msgid "Preparations with the same sender, city, address and contact appear together. Different origins require separate pickups."
+msgstr "Підготовки з однаковими відправником, містом, адресою та контактом показано разом. Для різних адрес потрібні окремі виклики."
+
+#: courier-preparation
+msgid "Before enabling address-origin TTNs, confirm with Nova Poshta that automatic individual courier calls are disabled for this sender."
+msgstr "Перед увімкненням ТТН з адреси підтвердьте з Новою поштою, що автоматичні окремі виклики кур’єра вимкнено для цього відправника."
+
+#: courier-preparation
+msgid "This list does not change TTNs, customer shipments, payment, WooCommerce orders or Folio links."
+msgstr "Цей список не змінює ТТН, відправлення клієнтів, оплату, замовлення WooCommerce чи зв’язки з ФОЛІО."
+
+#: courier-preparation
+msgid "Saved courier preparations:"
+msgstr "Збережених підготовок для кур’єра:"
+
+#: courier-preparation
+msgid "No saved courier preparations on this page."
+msgstr "На цій сторінці немає збережених підготовок для кур’єра."
+
+#: courier-preparation
+msgid "Contact phone:"
+msgstr "Телефон контакту:"
+
+#: courier-preparation
+msgid "Sender settings are incomplete. This preparation cannot be grouped with others."
+msgstr "Налаштування відправника неповні. Цю підготовку не можна об’єднати з іншими."
+
+#: courier-preparation
+msgid "Places / packed weight on this page:"
+msgstr "Місць / вага паковань на цій сторінці:"
+
+#: courier-preparation
+msgid "Order"
+msgstr "Замовлення"
+
+#: courier-preparation
+msgid "Places"
+msgstr "Місць"
+
+#: courier-preparation
+#, php-format
+msgid "Page %1$d of %2$d"
+msgstr "Сторінка %1$d з %2$d"

@@ -93,6 +93,37 @@ try {
     $cod['paid']=true;$reject(fn()=>$service->prepare($cod,$single),'Paid COD order cannot collect twice');
     $single['cod_settings']=['enabled'=>false];
     $check($service->prepare($cod,$single)['groups'][$locations[0]]['cod']===0.0,'Paid order permits explicit no collection');
+    // Per-shipment handover is persisted without changing warehouse defaults.
+    $input['revision']=$context['revision'];
+    $input['groups'][$locations[0]]['handover']='doors';
+    $context=$service->save($order->get_id(),$input);
+    $check($context['groups'][$locations[0]]['sender']['sender_type']==='doors' && $context['groups'][$locations[1]]['sender']['sender_type']==='warehouse','Mixed handover per order restored');
+    $check(get_option('pnpm_location_mappings')[$locations[0]]['sender_type']==='warehouse','Warehouse default unchanged');
+    $queue=(new Paint\NovaPoshta\Infrastructure\CourierQueue())->page();
+    $queueRows=array_merge([], ...array_column($queue['groups'],'rows'));
+    $check(count(array_filter($queueRows,static fn($row)=>(int)$row['order_id']===$order->get_id()))===1,'Saved courier preparation appears once in queue');
+    if ($dir=getenv('PNPM_MANAGER_FIXTURE_DIR')) {
+        switch_to_locale('uk');
+        // Render only this synthetic order, even if the local clone contains other drafts.
+        $onlyFixture=static function ($sql) use ($wpdb,$order) {
+            $needle="FROM {$wpdb->prefix}pnpm_shipments WHERE source='store_api'";
+            return str_replace($needle,$needle.' AND order_id='.(int)$order->get_id(),$sql);
+        };
+        add_filter('query',$onlyFixture);
+        try { ob_start(); (new Paint\NovaPoshta\Admin\CourierPage())->render(); $queueHtml=ob_get_clean(); }
+        finally { remove_filter('query',$onlyFixture); restore_previous_locale(); }
+        $check(str_contains($queueHtml,'Черга кур’єра НП') && str_contains($queueHtml,'Synthetic sender'),'Queue renders translated title and saved sender');
+        file_put_contents($dir.'/courier.html','<!doctype html><html lang="uk"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font:16px/1.5 system-ui;background:#f0f0f1;margin:20px}.card{background:white;border:1px solid #ccc;padding:20px}table{width:100%;text-align:left}th,td{padding:10px}a{color:#3858e9}.notice{background:#fff4dc;padding:12px}</style>'.$queueHtml.'</html>');
+    }
+    $input['revision']=$context['revision'];
+    $bad=$input;$bad['groups'][$locations[0]]['handover']='automatic';
+    $reject(fn()=>$service->prepare($context,$bad),'Unknown handover rejected');
+    $input['groups'][$locations[0]]['handover']='warehouse';
+    $context=$service->save($order->get_id(),$input);
+    $input['revision']=$context['revision'];
+    $queue=(new Paint\NovaPoshta\Infrastructure\CourierQueue())->page();
+    $queueRows=array_merge([], ...array_column($queue['groups'],'rows'));
+    $check(!array_filter($queueRows,static fn($row)=>(int)$row['order_id']===$order->get_id()),'Returning to branch drop-off removes draft from queue');
     // A journal write failure rolls back all updates, including earlier warehouses/items.
     $before=(new ShipmentRepository())->findByOrder($order->get_id());
     $break=static fn($q)=>str_starts_with($q,"INSERT INTO `{$wpdb->prefix}pnpm_shipment_events`") ? 'INVALID SYNTHETIC TEST QUERY' : $q;

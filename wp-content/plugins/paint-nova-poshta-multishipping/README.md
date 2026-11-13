@@ -1,5 +1,38 @@
 # Paint Nova Poshta Multishipping
 
+## Courier preparation only 0.11.2 — 2026-11-13
+
+This is the local preparation stage of the requested shared courier workflow.
+**Address-origin TTN creation, courier API create/add/read, scheduling, request
+membership and carrier status reconciliation are not implemented or enabled.**
+The new courier method pages are blocked by Cloudflare. Do not ship a fabricated
+API payload or treat the list as a booked pickup.
+
+Each preparation saves `request_snapshot.handover` and its effective sender type.
+The default is the warehouse mapping; a saved choice overrides that default for
+this shipment only. Existing branch creation, COD and print behavior is retained.
+An address-origin preview stops before any carrier call or durable create claim,
+with an explicit explanation. Existing frozen plan hashes exclude the new
+display-only address label so loading that label cannot invalidate a created plan.
+
+`CourierQueue` projects only unnumbered `store_api` / `manager_draft` rows. The new
+WooCommerce submenu `pnpm-courier` is read-only and requires both shipment and Woo
+management capabilities. No schema migration or new credential. Results are paged
+at 50, ordered by updated time and ID; exact sender/city/address/contact/phone
+identities group within a page. Missing references never merge. Weight totals are
+unknown if any saved box weight is unknown; customer external TTNs are excluded.
+
+UK/RU interface and contextual help explain the current limit. Manager steps:
+[Courier preparation](../../../docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-courier).
+API work remaining: [courier contract](../../../docs/api/NOVA_POSHTA_SHIPMENT_CONTRACT.md#courier-contract-pending).
+Deploy the NP plugin and updated PCOE manager help/translations together when this
+preparation-only stage is wanted. It does not enable a real pickup.
+
+Verification: `tests/courier-queue.php` (18 checks); local intercepted preparation
+and lifecycle suites (58 checks, or 59 with the rendered queue fixture, and 215 checks). Real calls, TTNs, emails and production
+deployment were not performed. The full requested courier feature remains open.
+
+
 ## Manager panel refresh 0.11.1 — 2026-11-12
 
 Successful preparation saves return a freshly rendered lifecycle panel, audit and

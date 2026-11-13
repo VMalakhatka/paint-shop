@@ -63,10 +63,14 @@ final class ManagerPreparationPanel
             echo '<fieldset data-location="' . esc_attr($location) . '"><legend>' . esc_html($group['location_name']) . '</legend><ul>';
             foreach ($group['items'] as $item) echo '<li>' . esc_html($item['sku'] . ' · ' . $item['name'] . ' × ' . $item['quantity']) . '</li>';
             echo '</ul><p>' . esc_html__('Warehouse sender', 'paint-nova-poshta-multishipping') . ': ' . esc_html(implode(' · ', array_filter([
-                $group['sender']['customer_label'] ?? '', $group['sender']['handover_warehouse_label'] ?? '',
-                ($group['sender']['sender_type'] ?? '') === 'doors' ? __('Courier pickup from sender address', 'paint-nova-poshta-multishipping') : __('Drop off at a branch / parcel locker', 'paint-nova-poshta-multishipping'),
+                $group['sender']['customer_label'] ?? '',
                 $group['sender']['phone'] ?? '',
             ]))) . '</p><p><a target="_blank" rel="noopener" href="' . esc_url(admin_url('admin.php?page=pnpm-settings')) . '">' . esc_html__('Check sender settings', 'paint-nova-poshta-multishipping') . '</a></p>';
+            echo '<p class="pnpm-origin-branch">' . esc_html__('Drop-off point:', 'paint-nova-poshta-multishipping') . ' ' . esc_html($group['sender']['handover_warehouse_label'] ?? '') . '</p>';
+            echo '<p class="pnpm-origin-address">' . esc_html__('Pickup address:', 'paint-nova-poshta-multishipping') . ' ' . esc_html(($group['sender']['sender_address_label'] ?? '') ?: __('Check the registered address in sender settings.', 'paint-nova-poshta-multishipping')) . '</p>';
+            echo '<label>' . esc_html__('How to hand over this shipment', 'paint-nova-poshta-multishipping') . '<select class="pnpm-handover">';
+            foreach (['warehouse'=>__('Drop off at a branch / parcel locker', 'paint-nova-poshta-multishipping'), 'doors'=>__('Courier pickup from sender address', 'paint-nova-poshta-multishipping')] as $value=>$label) echo '<option value="' . esc_attr($value) . '"' . selected($group['sender']['sender_type'] ?? 'warehouse', $value, false) . '>' . esc_html($label) . '</option>';
+            echo '</select></label><p class="pnpm-courier-hint">' . esc_html__('Save courier preparation to the pickup queue. This does not call a courier. Address-origin TTN creation and a shared courier request are not enabled yet.', 'paint-nova-poshta-multishipping') . ' <a target="_blank" rel="noopener" href="' . esc_url(admin_url('admin.php?page=pnpm-courier')) . '">' . esc_html__('Open courier queue', 'paint-nova-poshta-multishipping') . '</a></p>';
             echo '<label>' . esc_html__('Delivery payer', 'paint-nova-poshta-multishipping') . '<select class="pnpm-payer">';
             foreach (['Recipient'=>__('Recipient', 'paint-nova-poshta-multishipping'), 'Sender'=>__('Sender', 'paint-nova-poshta-multishipping')] as $value=>$label) echo '<option value="' . esc_attr($value) . '"' . selected($group['payer'], $value, false) . '>' . esc_html($label) . '</option>';
             echo '</select></label><div class="pnpm-boxes">';

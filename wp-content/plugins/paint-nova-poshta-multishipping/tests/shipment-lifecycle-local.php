@@ -118,6 +118,15 @@ try {
     $check(str_contains($draftPanel,'data-person="FirstName" value="Тест"') && str_contains($draftPanel,'data-person="LastName" value="Приклад"'),'Rendered automatic suggestions');
     $reject(fn()=>$service->row($oid+100000,$id),'Cross-order access');
     $manager->allcaps=[];$reject(fn()=>$service->row($oid,$id),'Permission denied');$manager->allcaps=['manage_woocommerce'=>true,'manage_pnpm_shipments'=>true,'manage_options'=>true];
+    $courierContext=$prep->context($order);
+    $courierInput=['revision'=>$courierContext['revision'],'agreed'=>'1','recipient'=>$courierContext['recipient'],'cod_settings'=>['enabled'=>false],'groups'=>[]];
+    foreach ($courierContext['groups'] as $loc=>$group) $courierInput['groups'][$loc]=['payer'=>$group['payer'],'boxes'=>$group['boxes'],'handover'=>'doors'];
+    $courierContext=$prep->save($oid,$courierInput);
+    $reject(fn()=>$service->preview($oid,$id,$withoutMiddle),'Courier drafts cannot create TTNs while courier API is unavailable');
+    $check($writes===0,'Courier draft never triggers automatic address-origin pickup');
+    $courierInput['revision']=$courierContext['revision'];
+    foreach ($courierInput['groups'] as &$group) $group['handover']='warehouse'; unset($group);
+    $prep->save($oid,$courierInput);
     $mode='stale_sender';
     try { $service->preview($oid,$id,$withoutMiddle); throw new LogicException('Expected stale sender rejection'); }
     catch (RuntimeException $e) {

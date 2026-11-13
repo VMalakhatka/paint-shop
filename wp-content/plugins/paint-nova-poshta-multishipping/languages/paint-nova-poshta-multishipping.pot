@@ -2957,3 +2957,96 @@ msgstr ""
 
 msgid "The warehouse sender contact no longer matches the Nova Poshta directory. Ask an administrator to check the contact and phone in sender settings. No TTN creation was started."
 msgstr ""
+
+#: courier-preparation
+msgid "Choose how this shipment will be handed to Nova Poshta."
+msgstr ""
+
+#: courier-preparation
+msgid "How to hand over this shipment"
+msgstr ""
+
+#: courier-preparation
+msgid "Save courier preparation to the pickup queue. This does not call a courier. Address-origin TTN creation and a shared courier request are not enabled yet."
+msgstr ""
+
+#: courier-preparation
+msgid "Open courier queue"
+msgstr ""
+
+#: courier-preparation
+msgid "Drop-off point:"
+msgstr ""
+
+#: courier-preparation
+msgid "Pickup address:"
+msgstr ""
+
+#: courier-preparation
+msgid "Check the registered address in sender settings."
+msgstr ""
+
+#: courier-preparation
+msgid "Courier preparation is saved, but address-origin TTN creation and shared courier requests are not enabled yet. Choose branch drop-off to use the current shipment flow."
+msgstr ""
+
+#: courier-preparation
+msgid "Nova Poshta courier queue"
+msgstr ""
+
+#: courier-preparation
+msgid "Saved preparations only. No courier has been called and no pickup time is reserved. Shared courier requests through the site are not enabled yet."
+msgstr ""
+
+#: courier-preparation
+msgid "How the courier queue works"
+msgstr ""
+
+#: courier-preparation
+msgid "In an order, choose courier pickup for the warehouse and save preparation. The choice applies only to this shipment."
+msgstr ""
+
+#: courier-preparation
+msgid "Preparations with the same sender, city, address and contact appear together. Different origins require separate pickups."
+msgstr ""
+
+#: courier-preparation
+msgid "Before enabling address-origin TTNs, confirm with Nova Poshta that automatic individual courier calls are disabled for this sender."
+msgstr ""
+
+#: courier-preparation
+msgid "This list does not change TTNs, customer shipments, payment, WooCommerce orders or Folio links."
+msgstr ""
+
+#: courier-preparation
+msgid "Saved courier preparations:"
+msgstr ""
+
+#: courier-preparation
+msgid "No saved courier preparations on this page."
+msgstr ""
+
+#: courier-preparation
+msgid "Contact phone:"
+msgstr ""
+
+#: courier-preparation
+msgid "Sender settings are incomplete. This preparation cannot be grouped with others."
+msgstr ""
+
+#: courier-preparation
+msgid "Places / packed weight on this page:"
+msgstr ""
+
+#: courier-preparation
+msgid "Order"
+msgstr ""
+
+#: courier-preparation
+msgid "Places"
+msgstr ""
+
+#: courier-preparation
+#, php-format
+msgid "Page %1$d of %2$d"
+msgstr ""

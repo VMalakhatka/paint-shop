@@ -66,8 +66,10 @@ final class ManagerPreparation
             $draft = json_decode((string)($old['request_snapshot'] ?? ''), true) ?: [];
             $group['sender'] = array_intersect_key((array)($mappings[$location] ?? []), array_flip([
                 'enabled', 'sender_type', 'counterparty_ref', 'city_ref', 'sender_address_ref',
-                'handover_warehouse_ref', 'handover_warehouse_label', 'contact_ref', 'phone', 'customer_label',
+                'sender_address_label', 'handover_warehouse_ref', 'handover_warehouse_label', 'contact_ref', 'phone', 'customer_label',
             ]));
+            // Preserve the chosen handover per shipment, independently of the warehouse default.
+            if (isset($draft['handover'])) $group['sender']['sender_type'] = $draft['handover'];
             $group['boxes'] = $draft['boxes'] ?? [['weight'=> '', 'length'=> '', 'width'=> '', 'height'=> '']];
             $group['payer'] = $draft['payer'] ?? 'Recipient';
             $group['cod_settings'] = $draft['cod_settings'] ?? null;
@@ -87,7 +89,10 @@ final class ManagerPreparation
         if ($saved) $context['recipient'] = json_decode((string)reset($saved)['recipient_snapshot'], true) ?: $recipient;
         $shipping = [];
         foreach ($order->get_items('shipping') as $item) $shipping[] = [$item->get_id(),$item->get_method_id(),$item->get_instance_id(),$item->get_total()];
-        $context['order_fingerprint'] = hash('sha256', wp_json_encode([$context, $order->get_status(),
+        $fingerprint_context = $context;
+        foreach ($fingerprint_context['groups'] as &$fingerprint_group) unset($fingerprint_group['sender']['sender_address_label']);
+        unset($fingerprint_group);
+        $context['order_fingerprint'] = hash('sha256', wp_json_encode([$fingerprint_context, $order->get_status(),
             $order->get_customer_id(), $order->get_address('billing'), $order->get_address('shipping'),
             $shipping,$order->get_customer_note(),$order->get_date_modified()?->format(DATE_ATOM)]));
         $context['revision'] = hash('sha256', wp_json_encode([$context, $rows, $order->get_status(),
@@ -144,6 +149,11 @@ final class ManagerPreparation
                 }
                 $clean[] = $dimensions;
             }
+            $handover = $value['handover'] ?? ($group['sender']['sender_type'] ?? 'warehouse');
+            if (!in_array($handover, ['warehouse', 'doors'], true)) $this->fail(__('Choose how this shipment will be handed to Nova Poshta.', 'paint-nova-poshta-multishipping'));
+            $group['sender']['sender_type'] = $handover;
+            $group['handover'] = $handover;
+            $group['handover_label'] = $handover === 'doors' ? __('Courier pickup from sender address', 'paint-nova-poshta-multishipping') : __('Drop off at a branch / parcel locker', 'paint-nova-poshta-multishipping');
             $group['boxes'] = $clean;
             $group['payer'] = $value['payer'];
             $group['cod_settings'] = $cod;
@@ -196,12 +206,12 @@ final class ManagerPreparation
                     $previous_draft = json_decode((string)($previous['request_snapshot'] ?? ''), true) ?: [];
                     $changed = [];
                     foreach ($prepared['recipient'] as $field=>$value) if (($previous_recipient[$field] ?? null) !== $value) $changed[] = 'recipient.' . $field;
-                    foreach (['boxes','payer','cod_settings'] as $field) if (($previous_draft[$field] ?? null) !== $group[$field]) $changed[] = $field;
+                    foreach (['boxes','payer','cod_settings','handover'] as $field) if (($previous_draft[$field] ?? null) !== $group[$field]) $changed[] = $field;
                     if (($previous['sender_snapshot'] ?? '') !== wp_json_encode($group['sender'])) $changed[] = 'sender';
                     $record = ['recipient_snapshot'=>wp_json_encode($prepared['recipient']), 'sender_snapshot'=>wp_json_encode($group['sender']),
                         'pricing_snapshot'=>wp_json_encode(['payer'=>$group['payer'],'cod'=>$group['cod'],'cod_settings'=>$group['cod_settings'],'policy'=>$context['profile'], 'verified'=>false]),
                         'request_snapshot'=>wp_json_encode(['schema'=>'manager-preparation-v1','revision'=>wp_generate_uuid4(),'boxes'=>$group['boxes'],
-                            'payer'=>$group['payer'],'cod_settings'=>$group['cod_settings'],'order_revision'=>$context['revision']]), 'updated_at'=>$now];
+                            'payer'=>$group['payer'],'cod_settings'=>$group['cod_settings'],'handover'=>$group['handover'],'order_revision'=>$context['revision']]), 'updated_at'=>$now];
                     if ($id) $ok = $wpdb->update($wpdb->prefix . 'pnpm_shipments', $record, ['id'=>$id, 'source'=>'store_api', 'status'=>self::STATUS]);
                     else {
                         $ok = $wpdb->insert($wpdb->prefix . 'pnpm_shipments', $record + ['shipment_uuid'=>wp_generate_uuid4(), 'order_id'=>$order_id,
@@ -220,7 +230,7 @@ final class ManagerPreparation
                     if ($wpdb->insert($wpdb->prefix . 'pnpm_shipment_events', ['shipment_id'=>$id,'event_type'=>'manager_preparation_saved',
                         'actor_id'=>get_current_user_id(),'correlation_id'=>wp_generate_uuid4(), 'created_at'=>$now,
                         'safe_context'=>wp_json_encode(['previous_revision'=>$context['revision'], 'snapshot_hash'=>hash('sha256',wp_json_encode($record)),
-                            'changed_fields'=>$changed, 'checked_fields'=>['recipient','boxes','payer','cod_settings'], 'agreed'=>true])]) === false) $this->fail(__('Shipment preparation could not be saved.', 'paint-nova-poshta-multishipping'));
+                            'changed_fields'=>$changed, 'checked_fields'=>['recipient','boxes','payer','cod_settings','handover'], 'agreed'=>true])]) === false) $this->fail(__('Shipment preparation could not be saved.', 'paint-nova-poshta-multishipping'));
                 }
                 if ($wpdb->query('COMMIT') === false) $this->fail(__('Shipment preparation could not be saved.', 'paint-nova-poshta-multishipping'));
             } catch (\Throwable $e) { $wpdb->query('ROLLBACK'); throw $e; }

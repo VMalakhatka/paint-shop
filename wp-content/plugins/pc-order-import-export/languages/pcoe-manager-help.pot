@@ -526,3 +526,7 @@ msgstr ""
 
 msgid "Cash on delivery: choose Collect payment from the recipient, check the amount still due, then select a separate money transfer and its fee payer, or payment control under an active NovaPay contract. Unpaid pay-on-receipt orders suggest the total; the return service must be chosen explicitly. Paid orders and multiple warehouses cannot use COD here. Save before checking with Nova Poshta; no page reload is needed. A changed order total, payment method or paid state requires a new review. The delivery estimate excludes transfer commission. After creation, print the TTN or A4/Zebra label; collection instructions do not mark the order paid."
 msgstr ""
+
+#: courier-preparation
+msgid "Handover is selected separately for each warehouse shipment. Branch drop-off uses the current TTN flow. Courier pickup currently saves preparation only; view it under WooCommerce → Nova Poshta courier queue. No pickup is booked, and address-origin TTN creation remains disabled until the courier API integration is completed. You can change the choice before creating a TTN."
+msgstr ""

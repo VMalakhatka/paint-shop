@@ -306,3 +306,18 @@ branches around each card heading without reparenting forms. Preserve this bound
 NP and Folio modules bind to their existing nodes. Visibility belongs to session
 storage, not order metadata, and must never change draft/preorder purpose. The
 manager guide documents controls, anchors, validation and no-JS fallback.
+
+### Courier preparation stage (2026-11-13, NP 0.11.2)
+
+Per-shipment `request_snapshot.handover` overrides only the mapping default.
+`CourierQueue` / `Admin/CourierPage` show saved, unnumbered manager drafts at
+WooCommerce → Nova Poshta courier queue. Group exact saved sender/city/address/
+contact/phone; incomplete origins never merge; totals are per page. External TTNs
+are excluded. Display-only sender address labels are excluded from the frozen
+order fingerprint. Saving a label must not invalidate a multi-shipment plan.
+
+Only local preparation is implemented. Address-origin TTN creation and actual
+shared courier requests remain disabled pending verification of the new official
+API contract. Never describe a queued preparation as a booked pickup. Read
+[the contract gap](../../../../docs/api/NOVA_POSHTA_SHIPMENT_CONTRACT.md#courier-contract-pending)
+and [manager steps](../../../../docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-courier).

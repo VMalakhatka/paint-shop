@@ -2,3 +2,5 @@
 .pnpm-lifecycle{max-width:960px;overflow-wrap:anywhere}.pnpm-legal-name{display:flex;flex-wrap:wrap;gap:12px}.pnpm-legal-name label{display:flex;flex:1;flex-direction:column;min-width:180px}.pnpm-legal-name input{max-width:100%;width:100%}.pnpm-shipment{border-top:1px solid #c3c4c7;padding:16px 0}.pnpm-lifecycle details{padding:12px;background:#f6f7f7}.pnpm-lifecycle-status{padding:12px 0}.pnpm-lifecycle .button{white-space:normal;height:auto}
 
 .pnpm-manager .pnpm-cod [hidden]{display:none}
+
+.pnpm-manager [hidden]{display:none!important}
