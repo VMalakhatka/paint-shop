@@ -23,17 +23,44 @@ final class CourierQueue
         return ['groups'=>self::project((array)$rows), 'total'=>$count, 'page'=>$page, 'pages'=>$pages];
     }
 
+    public function createdPage(int $page = 1): array
+    {
+        if (!ManagerPreparation::allowed()) throw new \RuntimeException(__('Shipment access denied.', 'paint-nova-poshta-multishipping'));
+        global $wpdb;
+        if (!CourierStorage::ready()) return ['groups'=>[], 'total'=>0, 'page'=>1, 'pages'=>1];
+        $where="s.source='store_api' AND s.status='np_created' AND s.sender_snapshot LIKE %s AND m.shipment_id IS NULL";
+        $from="{$wpdb->prefix}pnpm_shipments s LEFT JOIN {$wpdb->prefix}pnpm_courier_members m ON m.shipment_id=s.id";
+        $pattern='%"sender_type":"doors"%';
+        $count=(int)$wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $from WHERE $where",$pattern));
+        $pages=max(1,(int)ceil($count/self::PAGE_SIZE)); $page=min(max(1,$page),$pages);
+        $rows=$wpdb->get_results($wpdb->prepare("SELECT s.* FROM $from WHERE $where ORDER BY s.id DESC LIMIT %d OFFSET %d",$pattern,self::PAGE_SIZE,($page-1)*self::PAGE_SIZE),ARRAY_A);
+        return ['groups'=>self::project((array)$rows,true),'total'=>$count,'page'=>$page,'pages'=>$pages];
+    }
+
     /** Only exact saved origins are grouped. Labels/phones alone never establish an origin. */
-    public static function project(array $rows): array
+    public static function project(array $rows, bool $created = false): array
     {
         $groups = [];
         foreach ($rows as $row) {
-            if (($row['source'] ?? '') !== 'store_api' || ($row['status'] ?? '') !== 'manager_draft'
-                || !empty($row['ttn_number']) || !empty($row['np_ref'])) continue;
+            if (($row['source'] ?? '') !== 'store_api') continue;
+            if ($created) {
+                if (($row['status'] ?? '') !== 'np_created' || !preg_match('/^\d{14}$/D', (string)($row['ttn_number'] ?? '')) || !ShipmentLifecycle::ref($row['np_ref'] ?? null)) continue;
+            } elseif (($row['status'] ?? '') !== 'manager_draft' || !empty($row['ttn_number']) || !empty($row['np_ref'])) continue;
             $sender = json_decode((string)($row['sender_snapshot'] ?? ''), true) ?: [];
             $request = json_decode((string)($row['request_snapshot'] ?? ''), true) ?: [];
             if (!is_array($sender) || !is_array($request)) continue;
             if (($sender['sender_type'] ?? '') !== 'doors') continue;
+            if ($created) {
+                $carrier=$request['carrier'] ?? [];
+                if (empty($request['courier_origin_label'])) continue;
+                $sender['sender_address_label']=$request['courier_origin_label'];
+                if (($carrier['ServiceType'] ?? '') !== 'DoorsWarehouse') continue;
+                $matches=true;
+                foreach (['Sender'=>'counterparty_ref','CitySender'=>'city_ref','SenderAddress'=>'sender_address_ref','ContactSender'=>'contact_ref'] as $key=>$field) {
+                    if (empty($sender[$field]) || ($carrier[$key] ?? '') !== $sender[$field]) $matches=false;
+                }
+                if (!$matches || preg_replace('/\D/','',(string)($carrier['SendersPhone'] ?? '')) !== preg_replace('/\D/','',(string)($sender['phone'] ?? ''))) continue;
+            }
             $origin = [];
             $valid = ($sender['enabled'] ?? '') === 'yes' && (bool)preg_match('/^\+?380\d{9}$/D', (string)($sender['phone'] ?? ''));
             foreach (['counterparty_ref','city_ref','sender_address_ref','contact_ref'] as $field) {

@@ -521,7 +521,7 @@ msgstr ""
 msgid "Check each warehouse and its items, sender mapping and delivery payer. Add the actual packed boxes with weight in kg and dimensions in cm. Tick the review checkbox, then Save preparation. Check preview does not save. After saving, the TTN panel updates automatically; repeated saves do not add duplicate shipments. The preparation audit records the manager and time. Child orders link to the original order; external or locked shipments cannot be replaced."
 msgstr ""
 
-msgid "Save preparation; the TTN panel updates automatically without reloading the order. In TTN, PDF and customer email, enter the legal recipient name in Ukrainian and check the saved shipment with Nova Poshta. Review boxes, declared value, delivery estimate, payer, collection amount, return service and subsidy, then confirm creation separately for each warehouse. Real creation requires administrator-enabled write gates. Supported: branch drop-off to a branch or parcel locker, cash payment for carrier services, reviewed single-warehouse cash on delivery. The recipient is recorded in the Nova Poshta directory; the store profile stays unchanged."
+msgid "Save preparation; the TTN panel updates automatically without reloading the order. In TTN, PDF and customer email, enter the legal recipient name in Ukrainian and check the saved shipment with Nova Poshta. Review boxes, declared value, delivery estimate, payer, collection amount, return service and subsidy, then confirm creation separately for each warehouse. Real creation requires administrator-enabled write gates. Supported: branch drop-off or enabled courier pickup to a branch or parcel locker, cash payment for carrier services, reviewed single-warehouse cash on delivery. The recipient is recorded in the Nova Poshta directory; the store profile stays unchanged."
 msgstr ""
 
 msgid "Cash on delivery: choose Collect payment from the recipient, check the amount still due, then select a separate money transfer and its fee payer, or payment control under an active NovaPay contract. Unpaid pay-on-receipt orders suggest the total; the return service must be chosen explicitly. Paid orders and multiple warehouses cannot use COD here. Save before checking with Nova Poshta; no page reload is needed. A changed order total, payment method or paid state requires a new review. The delivery estimate excludes transfer commission. After creation, print the TTN or A4/Zebra label; collection instructions do not mark the order paid."
@@ -529,4 +529,8 @@ msgstr ""
 
 #: courier-preparation
 msgid "Handover is selected separately for each warehouse shipment. Branch drop-off uses the current TTN flow. Courier pickup currently saves preparation only; view it under WooCommerce → Nova Poshta courier queue. No pickup is booked, and address-origin TTN creation remains disabled until the courier API integration is completed. You can change the choice before creating a TTN."
+msgstr ""
+
+#: courier-pickup
+msgid "Choose handover separately for each warehouse shipment. Courier pickup requires activation confirmed by Nova Poshta. Save preparation, check and create each TTN, then print labels in the order. Under WooCommerce → Nova Poshta courier queue, select ready TTNs from one address, load pickup intervals and confirm one shared call. Creating a TTN alone does not book a courier. Check the call history after any incomplete result; do not repeat creation."
 msgstr ""

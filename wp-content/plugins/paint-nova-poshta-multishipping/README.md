@@ -1,37 +1,55 @@
 # Paint Nova Poshta Multishipping
 
-## Courier preparation only 0.11.2 — 2026-11-13
+## Shared courier pickup 0.11.3 — 2026-11-13
 
-This is the local preparation stage of the requested shared courier workflow.
-**Address-origin TTN creation, courier API create/add/read, scheduling, request
-membership and carrier status reconciliation are not implemented or enabled.**
-The new courier method pages are blocked by Cloudflare. Do not ship a fabricated
-API payload or treat the list as a booked pickup.
+Per-shipment handover supports branch drop-off or a registered sender address.
+`DoorsWarehouse` creation verifies the address/city and sender contact against the
+fresh directory. COD and private label printing reuse the existing lifecycle.
+An address TTN does not itself send a courier booking request in this workflow.
+Nova Poshta must first enable Courier Call **and disable automatic individual
+calls** for that sender. The site's administrator records this attestation for
+an exact sender/API account; it does not configure the carrier account.
 
-Each preparation saves `request_snapshot.handover` and its effective sender type.
-The default is the warehouse mapping; a saved choice overrides that default for
-this shipment only. Existing branch creation, COD and print behavior is retained.
-An address-origin preview stops before any carrier call or durable create claim,
-with an explicit explanation. Existing frozen plan hashes exclude the new
-display-only address label so loading that label cannot invalidate a created plan.
+At `WooCommerce → Nova Poshta courier queue` (`pnpm-courier`), select 1–50 created
+store-owned TTNs from one exact sender/city/address/contact/phone, choose a Kyiv
+date (today through +30 days), load carrier intervals and review planned weight.
+A five-minute preview is bound to user, API account and shipment snapshots.
+One confirmation creates a call, durably saves its Barcode, then adds TTNs using
+verified `CarCallGeneral.saveCourierCall` and `insertDocuments`. Partial results
+are not success. No write retries. Calls and membership are saved before HTTP;
+unique token/origin-date-interval/member keys and a shared lock prevent duplicates.
+Database transactions never span carrier HTTP.
 
-`CourierQueue` projects only unnumbered `store_api` / `manager_draft` rows. The new
-WooCommerce submenu `pnpm-courier` is read-only and requires both shipment and Woo
-management capabilities. No schema migration or new credential. Results are paged
-at 50, ordered by updated time and ID; exact sender/city/address/contact/phone
-identities group within a page. Missing references never merge. Weight totals are
-unknown if any saved box weight is unknown; customer external TTNs are excluded.
+Deployment: update this plugin **and PCOE manager help/catalogs**. An administrator
+then explicitly clicks Initialize courier storage in the queue: this installs
+InnoDB `pnpm_courier_calls`, `pnpm_courier_members`, `pnpm_courier_events` and sets
+`pnpm_courier_schema=1`. Enrollment lives in `pnpm_courier_enrollment` with actor,
+time and HMAC account fingerprint. No key in browser or snapshots, no new key.
+Both Woo and shipment capabilities apply; setup also requires manage_options.
+Existing real-write gates remain required. No production migration/deploy is
+performed by development tests.
 
-UK/RU interface and contextual help explain the current limit. Manager steps:
-[Courier preparation](../../../docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-courier).
-API work remaining: [courier contract](../../../docs/api/NOVA_POSHTA_SHIPMENT_CONTRACT.md#courier-contract-pending).
-Deploy the NP plugin and updated PCOE manager help/translations together when this
-preparation-only stage is wanted. It does not enable a real pickup.
+History shows latest 30 local operations, their numbers and TTNs. Explicit refresh
+reads the carrier's **seven-day** call list and all pages of its document list;
+it reports missing/extra TTNs and preserves raw snapshots and audit. A missing
+old call is not inferred cancelled. Unknown/partial/rejected attempts retain
+membership and require reconciliation in the NP account. Editing/cancelling,
+adding to an existing call and releasing/recovering unknown claims are not in
+this interface. Unknown creation is never matched by similar address text.
 
-Verification: `tests/courier-queue.php` (18 checks); local intercepted preparation
-and lifecycle suites (58 checks, or 59 with the rendered queue fixture, and 215 checks). Real calls, TTNs, emails and production
-deployment were not performed. The full requested courier feature remains open.
+Draft preparations remain a separate paged view; external TTNs are excluded.
+Address labels are display-only for order-plan fingerprints, while the exact
+verified address label and account are frozen into the created TTN snapshot.
+Final accepted weight/price is determined by NP. No payment, Folio, notification
+or courier-handover event is fabricated by creating the call.
 
+Checks: pure queue fixtures, local preparation/lifecycle regressions and
+`tests/courier-pickup-local.php` with all HTTP/mail intercepted cover success,
+write/access gates, ownership, stale previews, duplicate confirmation, timeout,
+partial/ambiguous results and read reconciliation. Local rendered UK interface
+is inspected separately. No real TTNs, courier requests or notifications.
+[Manager instructions](../../../docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-courier).
+[Verified API contract](../../../docs/api/NOVA_POSHTA_SHIPMENT_CONTRACT.md#courier-contract).
 
 ## Manager panel refresh 0.11.1 — 2026-11-12
 

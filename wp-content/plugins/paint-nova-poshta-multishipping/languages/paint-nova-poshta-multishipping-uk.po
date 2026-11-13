@@ -2886,3 +2886,215 @@ msgstr "Місць"
 #, php-format
 msgid "Page %1$d of %2$d"
 msgstr "Сторінка %1$d з %2$d"
+
+#: courier-pickup
+msgid "Courier data changed or could not be verified. Check the selection and request a new preview."
+msgstr "Дані виклику змінилися або не підтверджені. Перевірте вибір і повторіть попередній перегляд."
+
+#: courier-pickup
+msgid "Confirm courier service activation and disabled automatic individual calls for this sender in the courier queue settings."
+msgstr "У налаштуваннях черги кур’єра підтвердьте підключення послуги та вимкнення автоматичних окремих викликів для цього відправника."
+
+#: courier-pickup
+msgid "Another courier operation is running. Wait until it finishes."
+msgstr "Інша операція з викликом уже виконується. Дочекайтеся завершення."
+
+#: courier-pickup
+msgid "A selected TTN already belongs to a courier operation. Check the call history; do not create another call."
+msgstr "Вибрана ТТН уже належить до операції виклику. Перевірте історію; не створюйте повторний виклик."
+
+#: courier-pickup
+msgid "A courier operation already exists for this address and interval. Check the call history."
+msgstr "Для цієї адреси й інтервалу вже є операція виклику. Перевірте історію."
+
+#: courier-pickup
+msgid "The call number was not confirmed. Reconcile it in the Nova Poshta account with an administrator; do not create another call."
+msgstr "Номер виклику не підтверджено. Звірте результат у кабінеті НП з адміністратором; не створюйте повторний виклик."
+
+#: courier-pickup
+msgid "Initialize courier storage before continuing."
+msgstr "Спочатку підготуйте сховище викликів кур’єра."
+
+#: courier-pickup
+msgid "Courier operation could not be saved. Check the call history before continuing."
+msgstr "Не вдалося зберегти операцію кур’єра. Перед продовженням перевірте історію викликів."
+
+#: courier-pickup
+msgid "Checking courier data…"
+msgstr "Перевіряємо дані виклику…"
+
+#: courier-pickup
+msgid "Result not confirmed. Reload the page and check the call history. Do not repeat creation."
+msgstr "Результат не підтверджено. Оновіть сторінку й перевірте історію викликів. Не повторюйте створення."
+
+#: courier-pickup
+msgid "Choose a pickup interval"
+msgstr "Виберіть інтервал забору"
+
+#: courier-pickup
+msgid "No pickup intervals are available for this date."
+msgstr "На цю дату немає доступних інтервалів забору."
+
+#: courier-pickup
+msgid "The preview expired. Request a new preview."
+msgstr "Час перегляду минув. Запросіть новий перегляд."
+
+#: courier-pickup
+msgid "Planned weight, kg"
+msgstr "Планова вага, кг"
+
+#: courier-pickup
+msgid "Confirm activation with Nova Poshta first."
+msgstr "Спочатку підтвердьте підключення послуги з Новою поштою."
+
+#: courier-pickup
+msgid "Ask your Nova Poshta manager to enable Courier Call and disable automatic individual calls for address-origin TTNs. An administrator then confirms this below for the exact sender."
+msgstr "Попросіть менеджера НП підключити «Виклик кур’єра» та вимкнути автоматичні окремі виклики за адресними ТТН. Потім адміністратор підтверджує це нижче для конкретного відправника."
+
+#: courier-pickup
+msgid "In an order, choose courier pickup, save preparation, check the shipment and create its TTN. Print labels in the order. Creating a TTN does not call a courier."
+msgstr "У замовленні виберіть забір кур’єром, збережіть підготовку, перевірте відправлення й створіть ТТН. Наклейки друкуються в замовленні. Створення ТТН не викликає кур’єра."
+
+#: courier-pickup
+msgid "Select ready TTNs from one sender address, choose a date and available interval, check planned weight and confirm one courier call. Different addresses require separate calls."
+msgstr "Виберіть готові ТТН з однієї адреси відправника, дату й доступний інтервал, перевірте планову вагу та підтвердьте один виклик. Різні адреси потребують окремих викликів."
+
+#: courier-pickup
+msgid "The call and adding TTNs are two separate carrier operations. A partial or unknown result stays locked; check the saved call and Nova Poshta account before any further action."
+msgstr "Створення виклику та додавання ТТН — дві окремі операції НП. Частковий або невідомий результат блокує повтор; спочатку перевірте збережений виклик і кабінет НП."
+
+#: courier-pickup
+msgid "The final pickup price and accepted weight are determined by Nova Poshta. Order payments, COD, recipients and Folio links are not changed."
+msgstr "Остаточну вартість забору й прийняту вагу визначає Нова пошта. Оплата замовлень, післяплата, одержувачі та зв’язки ФОЛІО не змінюються."
+
+#: courier-pickup
+msgid "Initialize courier storage"
+msgstr "Підготувати сховище викликів"
+
+#: courier-pickup
+msgid "TTNs ready for a shared courier call"
+msgstr "ТТН, готові до спільного виклику кур’єра"
+
+#: courier-pickup
+msgid "Courier service activation"
+msgstr "Підключення послуги кур’єра"
+
+#: courier-pickup
+msgid "This confirmation records the arrangement with Nova Poshta. It does not enable the service at the carrier."
+msgstr "Це підтвердження фіксує домовленість із НП. Воно не підключає послугу в перевізника."
+
+#: courier-pickup
+msgid "Nova Poshta confirmed Courier Call is enabled and automatic individual calls are disabled for this sender."
+msgstr "НП підтвердила: послугу «Виклик кур’єра» підключено, автоматичні окремі виклики для цього відправника вимкнено."
+
+#: courier-pickup
+msgid "Disable courier creation for this sender"
+msgstr "Вимкнути створення викликів для відправника"
+
+#: courier-pickup
+msgid "Confirm courier activation"
+msgstr "Підтвердити підключення кур’єра"
+
+#: courier-pickup
+msgid "No created TTNs awaiting a courier call."
+msgstr "Немає створених ТТН, що очікують виклику кур’єра."
+
+#: courier-pickup
+msgid "Preparation"
+msgstr "Підготовка"
+
+#: courier-pickup
+msgid "Pickup date"
+msgstr "Дата забору"
+
+#: courier-pickup
+msgid "Load pickup intervals"
+msgstr "Завантажити інтервали забору"
+
+#: courier-pickup
+msgid "Pickup interval"
+msgstr "Інтервал забору"
+
+#: courier-pickup
+msgid "The selected boxes supply the initial planned weight. Review the total packed load, including bulky parcels, before confirming."
+msgstr "Початкова планова вага береться з вибраних коробок. Перед підтвердженням перевірте весь упакований вантаж, зокрема об’ємні посилки."
+
+#: courier-pickup
+msgid "Review shared courier call"
+msgstr "Переглянути спільний виклик кур’єра"
+
+#: courier-pickup
+msgid "I checked the address, selected TTNs, pickup time and planned weight. Order one real courier pickup."
+msgstr "Я перевірив(-ла) адресу, вибрані ТТН, час забору й планову вагу. Замовити один реальний виклик кур’єра."
+
+#: courier-pickup
+msgid "Confirm and call courier"
+msgstr "Підтвердити й викликати кур’єра"
+
+#: courier-pickup
+msgid "Courier call history (latest 30)"
+msgstr "Історія викликів кур’єра (останні 30)"
+
+#: courier-pickup
+msgid "No courier calls have been recorded."
+msgstr "Викликів кур’єра ще не записано."
+
+#: courier-pickup
+msgid "Number not confirmed"
+msgstr "Номер не підтверджено"
+
+#: courier-pickup
+msgid "Carrier status:"
+msgstr "Статус у перевізника:"
+
+#: courier-pickup
+msgid "Not returned in the seven-day carrier list."
+msgstr "Немає у відповіді НП за останні сім днів."
+
+#: courier-pickup
+msgid "The carrier document list matches the selected TTNs."
+msgstr "Склад документів у НП збігається з вибраними ТТН."
+
+#: courier-pickup
+msgid "The carrier document list differs. Reconcile missing or extra TTNs in the Nova Poshta account."
+msgstr "Склад документів у НП відрізняється. Звірте відсутні або зайві ТТН у кабінеті НП."
+
+#: courier-pickup
+msgid "Missing TTNs:"
+msgstr "Відсутні ТТН:"
+
+#: courier-pickup
+msgid "Extra TTNs:"
+msgstr "Зайві ТТН:"
+
+#: courier-pickup
+msgid "Last checked (UTC):"
+msgstr "Остання перевірка (UTC):"
+
+#: courier-pickup
+msgid "Nova Poshta confirmed the call number and all selected TTNs. Pickup is not yet confirmed."
+msgstr "НП підтвердила номер виклику та всі вибрані ТТН. Фактичний забір ще не підтверджено."
+
+#: courier-pickup
+msgid "The operation is incomplete or its result is unknown. Do not create another call. Reconcile it with Nova Poshta."
+msgstr "Операцію не завершено або її результат невідомий. Не створюйте повторний виклик. Звірте результат із НП."
+
+#: courier-pickup
+msgid "Check call and TTNs with Nova Poshta"
+msgstr "Перевірити виклик і ТТН у НП"
+
+#: courier-pickup
+msgid "The pickup address is not in the sender directory or its city differs. Check sender settings."
+msgstr "Адреси забору немає в довіднику відправника або місто відрізняється. Перевірте налаштування відправника."
+
+#: courier-pickup
+msgid "Save preparation, then check and create the address-origin TTN below. Print its labels in the order. Select several ready TTNs in the courier queue to order one pickup."
+msgstr "Збережіть підготовку, потім перевірте й створіть ТТН з адреси нижче. Наклейки друкуються в замовленні. У черзі кур’єра виберіть кілька готових ТТН для одного забору."
+
+#: courier-pickup
+msgid "Creating a TTN does not book pickup. Check the courier queue for the call status."
+msgstr "Створення ТТН не бронює забір. Статус виклику дивіться в черзі кур’єра."
+
+#: courier-pickup
+msgid "Supported: branch drop-off or courier pickup from an enabled sender address, delivery to a branch or parcel locker, reviewed single-warehouse cash on delivery, cash payment for carrier services. Enter the legal recipient name in Ukrainian; it will be recorded in the Nova Poshta recipient directory, not in the store customer profile."
+msgstr "Підтримується: самостійна здача або забір кур’єром із підключеної адреси відправника, доставка у відділення чи поштомат, перевірена післяплата одного складу, готівкова оплата послуг НП. Укажіть ім’я одержувача українською за документом; його буде записано в довідник НП, а не в картку клієнта магазину."

@@ -106,15 +106,14 @@ final class ShipmentLifecycle
         $cod = CashOnDelivery::saved($group['cod_settings'], $context);
         $collection = CashOnDelivery::carrier($cod);
         $sender = $group['sender'];
-        if (($sender['sender_type'] ?? '') === 'doors') {
-            throw new \RuntimeException(__('Courier preparation is saved, but address-origin TTN creation and shared courier requests are not enabled yet. Choose branch drop-off to use the current shipment flow.', 'paint-nova-poshta-multishipping'));
-        }
-        if (($sender['enabled'] ?? '') !== 'yes' || ($sender['sender_type'] ?? '') !== 'warehouse') {
+        $courier = ($sender['sender_type'] ?? '') === 'doors';
+        if ($courier) (new CourierPickup($this->api))->requireEnrollment($sender['counterparty_ref'] ?? '');
+        if (($sender['enabled'] ?? '') !== 'yes' || !in_array($sender['sender_type'] ?? '', ['warehouse','doors'], true)) {
             throw new \RuntimeException(__('This release supports drop-off at a branch and delivery to a branch or parcel locker only.', 'paint-nova-poshta-multishipping'));
         }
         $recipient = json_decode($row['recipient_snapshot'], true) ?: [];
         if (!in_array($recipient['delivery_type'] ?? '', ['branch','parcel_locker'], true)) self::fail();
-        foreach (['counterparty_ref','city_ref','contact_ref','handover_warehouse_ref'] as $key) if (!self::ref($sender[$key] ?? null)) self::fail();
+        foreach (['counterparty_ref','city_ref','contact_ref',$courier ? 'sender_address_ref' : 'handover_warehouse_ref'] as $key) if (!self::ref($sender[$key] ?? null)) self::fail();
         if (!self::ref($recipient['city_ref'] ?? null) || !self::ref($recipient['point_ref'] ?? null)
             || !preg_match('/^380\d{9}$/D', (string)($recipient['phone'] ?? ''))
             || !preg_match('/^\+?380\d{9}$/D', (string)($sender['phone'] ?? ''))) self::fail();
@@ -127,15 +126,19 @@ final class ShipmentLifecycle
         $directory = (new SenderDirectory($this->api))->load(true);
         self::checkApiAvailability($directory);
         if (is_wp_error($directory)) self::fail();
-        $owned = false;
+        $owned = false; $pickupAddress = null;
         foreach ($directory['counterparties'] as $party) {
             if ($party['ref'] !== $sender['counterparty_ref']) continue;
+            if ($courier) foreach ($party['addresses'] as $address) {
+                if ($address['ref'] === $sender['sender_address_ref'] && $address['cityRef'] === $sender['city_ref']) $pickupAddress = $address;
+            }
             foreach ($party['contacts'] as $contact) {
                 $phones = array_map(static fn($p)=>preg_replace('/\D/','',$p), preg_split('/[,;]/', $contact['phones']));
                 if ($contact['ref'] === $sender['contact_ref'] && in_array(preg_replace('/\D/', '', $sender['phone']), $phones, true)) $owned = true;
             }
         }
         if (!$owned) throw new \RuntimeException(__('The warehouse sender contact no longer matches the Nova Poshta directory. Ask an administrator to check the contact and phone in sender settings. No TTN creation was started.', 'paint-nova-poshta-multishipping'));
+        if ($courier && (!$pickupAddress || !$pickupAddress['description'])) throw new \RuntimeException(__('The pickup address is not in the sender directory or its city differs. Check sender settings.', 'paint-nova-poshta-multishipping'));
         $boxes = $group['boxes'];
         if (!$boxes || count($boxes)>20 || !in_array($group['payer'], ['Sender','Recipient'], true)) self::fail();
         $seats = [];
@@ -156,19 +159,19 @@ final class ShipmentLifecycle
         }
         $declared = max(1, (int)ceil(round($declared, 2)));
         $points = new WarehouseDirectory($this->api);
-        $origin = $points->find($sender['city_ref'], $sender['handover_warehouse_ref']);
+        $origin = $courier ? ['kind'=>'address','label'=>$pickupAddress['description']] : $points->find($sender['city_ref'], $sender['handover_warehouse_ref']);
         self::checkApiAvailability($origin);
         if (is_wp_error($origin)) self::fail();
         $destination = $points->find($recipient['city_ref'], $recipient['point_ref']);
         self::checkApiAvailability($destination);
-        if (is_wp_error($origin) || is_wp_error($destination) || $origin['kind'] !== 'branch'
+        if (is_wp_error($origin) || is_wp_error($destination) || (!$courier && $origin['kind'] !== 'branch')
             || $destination['kind'] !== ($recipient['delivery_type'] === 'parcel_locker' ? 'postomat' : 'branch')) self::fail();
-        self::checkPoint($origin, $boxes, $declared, 'sending');
+        if (!$courier) self::checkPoint($origin, $boxes, $declared, 'sending');
         self::checkPoint($destination, $boxes, $declared, 'receiving');
         $payload = ['PayerType'=>$group['payer'],'PaymentMethod'=>'Cash','DateTime'=>wp_date('d.m.Y', null, new \DateTimeZone('Europe/Kyiv')),
             'CargoType'=>$destination['kind'] === 'postomat' ? 'Parcel' : 'Cargo','Weight'=>array_sum(array_column($boxes,'weight')),
-            'ServiceType'=>'WarehouseWarehouse','SeatsAmount'=>count($boxes),'Description'=>'Художні матеріали','Cost'=>$declared,
-            'CitySender'=>$sender['city_ref'],'Sender'=>$sender['counterparty_ref'],'SenderAddress'=>$sender['handover_warehouse_ref'],
+            'ServiceType'=>$courier ? 'DoorsWarehouse' : 'WarehouseWarehouse','SeatsAmount'=>count($boxes),'Description'=>'Художні матеріали','Cost'=>$declared,
+            'CitySender'=>$sender['city_ref'],'Sender'=>$sender['counterparty_ref'],'SenderAddress'=>$courier ? $sender['sender_address_ref'] : $sender['handover_warehouse_ref'],
             'ContactSender'=>$sender['contact_ref'],'SendersPhone'=>$sender['phone'],
             'CityRecipient'=>$recipient['city_ref'],'RecipientAddress'=>$recipient['point_ref'],'RecipientsPhone'=>$recipient['phone'],'OptionsSeat'=>$seats];
         $payload += $collection;
@@ -218,6 +221,10 @@ final class ShipmentLifecycle
             $plan = $this->compile((new ManagerPreparation())->order($order_id), $row, $cache['person']);
             if (!hash_equals($cache['plan_hash'], $plan['context']['order_fingerprint']) || $cache['payload'] !== $plan['payload']) self::fail();
             $snapshot = json_decode($row['request_snapshot'],true) ?: [];
+            if ($plan['payload']['ServiceType'] === 'DoorsWarehouse') {
+                $snapshot['courier_account'] = $this->api->accountFingerprint();
+                $snapshot['courier_origin_label'] = $plan['origin'];
+            }
             $snapshot += ['plan_hash'=>$cache['plan_hash'],'carrier'=>$plan['payload'],'person'=>$plan['person']];
             // A durable claim precedes BOTH writes. Process death also stays non-retryable.
             $resume = $row['status'] === 'np_recipient_ready';

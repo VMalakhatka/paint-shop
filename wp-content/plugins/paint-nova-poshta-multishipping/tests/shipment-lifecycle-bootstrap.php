@@ -1,7 +1,7 @@
 <?php
 /** CLI-process-only constants. Never include from WordPress or deploy configuration. */
-$fixture = 'wp-content/plugins/paint-nova-poshta-multishipping/tests/shipment-lifecycle-local.php';
-if (PHP_SAPI !== 'cli' || !in_array('eval-file', $_SERVER['argv'], true) || !in_array($fixture, $_SERVER['argv'], true)
+$fixtures = ['wp-content/plugins/paint-nova-poshta-multishipping/tests/shipment-lifecycle-local.php', 'wp-content/plugins/paint-nova-poshta-multishipping/tests/courier-pickup-local.php'];
+if (PHP_SAPI !== 'cli' || !in_array('eval-file', $_SERVER['argv'], true) || !array_intersect($fixtures, $_SERVER['argv'])
     || realpath(getcwd()) !== realpath(dirname(__DIR__, 4)) || !is_file(getcwd().'/wp-config.local.php')) {
     throw new RuntimeException('Only the named local intercepted fixture may load this bootstrap');
 }

@@ -19,6 +19,8 @@ final class ApiClient
     ];
     private const MUTATING_METHODS = [
         'save', 'update', 'delete', 'redirecting', 'return', 'create',
+        'savecouriercall', 'insertdocuments', 'deletecouriercall', 'updatecouriercall', 'removedocuments',
+        'deleteorders', 'updateorders',
     ];
 
     public function apiKeyConfigured(): bool
@@ -50,7 +52,7 @@ final class ApiClient
             return new WP_Error('pnpm_invalid_api_call', __('Invalid Nova Poshta API method.', 'paint-nova-poshta-multishipping'));
         }
 
-        if ($this->isMutating($method)) {
+        if ($this->isMutating($method) || ($model === 'CarCallGeneral' && !in_array($method, ['getOrdersListCourierCall'], true))) {
             if (!$allow_write || !$this->writesEnabled()) {
                 return new WP_Error(
                     'pnpm_write_disabled',
