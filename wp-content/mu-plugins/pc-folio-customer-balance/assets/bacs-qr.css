@@ -1,0 +1,8 @@
+.pc-bacs-qr { margin: 2rem 0; padding: 1.25rem; border: 1px solid #d7dde2; border-radius: 8px; background: #fff; color: #202428; }
+.pc-bacs-qr__layout { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 1.5rem; }
+.pc-bacs-qr__image { width: 320px; max-width: 100%; flex-shrink: 0; }
+.pc-bacs-qr__image svg { display: block; width: 100%; height: auto; }
+.pc-bacs-qr__details { flex: 1 1 220px; min-width: 0; overflow-wrap: anywhere; }
+.pc-bacs-qr__open { white-space: normal; text-align: center; }
+.pc-bacs-qr__notice { margin: 1rem 0 0; padding-top: 1rem; border-top: 1px solid #d7dde2; }
+@media (max-width: 480px) { .pc-bacs-qr { padding: .75rem; } .pc-bacs-qr__layout { gap: .75rem; } }

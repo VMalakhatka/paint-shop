@@ -788,6 +788,17 @@ an exact match with previously verified details or a fresh explicit review. Code
 rollback can reactivate obsolete Folio settings, so verify those privately first. Canonical operator
 steps and historical-file boundaries: `docs/MANAGER_CUSTOMER_GUIDE_UK.md#payment-recipient`.
 
+Bank QR (2026-11-14, local code): `inc/bacs-qr.php` in the same MU component
+extends existing `bacs`, not a new gateway. Use only the confirmed Woo recipient
+and full pending/on-hold UAH parent-order total with no paid date/refunds.
+NBU format 002 uses a bank-domain link, UTF-8 fields and empty reserved fields;
+reject malformed/oversized values rather than trimming a recipient or amount.
+Render locally, with symbol versions 10–17, ECC Q (M for longer payloads) and the hryvnia circle from
+NBU Resolution 97. Camera handoff depends on OS/bank support; never promise all
+banks or infer payment from opening a link. Email links to the existing protected
+order page. No payment_complete, bank API, Checkbox, Folio or settings write.
+Release limits and rollback: the manager guide's `#payment-recipient` section.
+
 ### Document list dates (2026-11-09)
 
 `customer-documents.php` and Java `FolioCustomerDocumentService` accept explicit future document periods: stored Folio dates can differ from server today. Keep default dates unchanged and retain ordered ranges / 366-day maximum. Do not reuse this read-only rule for balance as-of dates or document creation. Both PHP and Java must be deployed; see `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md` section 13.

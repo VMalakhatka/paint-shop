@@ -1350,3 +1350,12 @@ msgstr ""
 #: pc-wholesale-help.php
 msgid "Link unavailable: check that it is enabled and that Prom has the latest address. If export still fails, retry later or send the manager the time, format, affected SKUs and a screenshot. Do not send your personal XML link in public messages."
 msgstr ""
+
+msgid ""
+"For an unpaid bank-transfer order in UAH, the order result page and My "
+"account show a bank QR with the amount and order number. Scan it inside your"
+" banking app, or use Open banking app on the same phone. Camera links depend"
+" on your bank and phone settings. Check the details before confirming. If "
+"you have already paid, do not pay again: the manager must confirm receipt of"
+" the funds."
+msgstr ""
