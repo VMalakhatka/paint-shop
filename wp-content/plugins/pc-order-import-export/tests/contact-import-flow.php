@@ -40,3 +40,36 @@ ContactImport::apply($repeat,0,$fields);
 $check(array_column(ContactImport::page($repeat,0),'result')===array_fill(0,6,'existing'),'Repeat import deduplicated');
 $check(get_user_by('email',$rows[0]['Email'])->roles===['schule'],'Repeated default does not overwrite existing role');
 echo "Verified staged roles, review form, validation, applied roles, preserved contacts, occupied/shared addresses and repeat import.\n";
+
+$invited = []; $checks = [];
+foreach (['accept','fail','blocked-row','blocked-email','contact-only'] as $i=>$name) {
+    $checks[] = ['ID'=>$tag.'invite'.$i,ContactWorkbook::ORGANIZATION=>$name,'Телефон'=>'0123',
+        'Статус обращения'=>$i === 2 ? 'Не писать' : '', 'Email'=>$i === 4 ? '' : $tag.$i.'@example.invalid'];
+}
+$mail = static function ($pre,$args) use (&$invited,$checks) {
+    $invited[] = $args;
+    return $args['to'] !== $checks[1]['Email'];
+};
+add_filter('pre_wp_mail',$mail,99,2);
+try {
+    $group = \PaintCore\PCOE\CustomerGroups::SCHOOLS;
+    $job = ContactImport::stage($checks,'schule',$group,[$checks[3]['Email']=>true]);
+    $fields = [];
+    foreach (ContactImport::page($job,0) as $i=>$row) $fields[$i]=['role'=>$i===1?'partner':'schule','email'=>$row['email']];
+    ContactImport::apply($job,0,$fields,true);
+    $result = ContactImport::page($job,0);
+    $check(array_column($result,'invitation') === ['accepted','failed','blocked','blocked'],'Per-recipient invitation outcomes');
+    $check(array_column($invited,'to') === [$checks[0]['Email'],$checks[1]['Email']],'Only eligible recipients');
+    preg_match('~https?://\S+action=rp\S+~',$invited[0]['message'],$match);
+    parse_str(parse_url($match[0],PHP_URL_QUERY),$link);
+    $owner = check_password_reset_key($link['key'],$link['login']);
+    $check(!is_wp_error($owner) && $owner->user_email === $checks[0]['Email'],'Valid personal link');
+    $all = \PaintCore\PCOE\ManagerWorkspace::directory($tag,'','',1,25,'',$group);
+    $partners = \PaintCore\PCOE\ManagerWorkspace::directory($tag,'partner','',1,25,'',$group);
+    $check((int)$all['total'] === 4 && (int)$partners['total'] === 1,'Group filter independent of price role');
+    $card = get_page_by_path('xlsx-'.hash('sha256',$checks[4]['ID']),OBJECT,[ContactImport::CARD]);
+    $check($card && get_post_meta($card->ID,\PaintCore\PCOE\CustomerGroups::META,true)===$group,'Contact-only row grouped');
+    ContactImport::apply($job,0,$fields,true);
+    $check(count($invited)===2,'No repeat mail after accepted or failed send');
+} finally { remove_filter('pre_wp_mail',$mail,99); }
+echo "Verified group filters, customer roles, personal invitation link, blocked addresses, transport failure and repeat submission.\n";

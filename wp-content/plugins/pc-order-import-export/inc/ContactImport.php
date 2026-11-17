@@ -11,6 +11,8 @@ final class ContactImport {
         add_action('init', static function () {
             foreach ([self::JOB, self::CARD] as $type) register_post_type($type, ['public'=>false, 'show_ui'=>false, 'show_in_rest'=>false, 'supports'=>[]]);
         });
+        add_action('edit_user_profile',[CustomerGroups::class,'profile']);
+        add_action('edit_user_profile_update',[CustomerGroups::class,'save']);
         add_action('admin_post_pcoe_contact_import', [ContactImportUi::class, 'post']);
         add_action('pcoe_contact_job_cleanup', static function ($id) {
             if (get_post_type($id) === self::JOB) wp_delete_post($id, true);
@@ -22,9 +24,10 @@ final class ContactImport {
         if (get_post_meta($id, $key, true) !== $value) throw new \RuntimeException(__('Could not save import progress. Reload the page before continuing.', 'pc-order-import-export'));
     }
 
-    public static function stage(array $rows, string $role): int {
+    public static function stage(array $rows, string $role, string $group = '', array $blockedEmails = []): int {
         FolioCustomerImport::authorize();
         self::checkRole($role);
+        if ($group !== '' && !isset(CustomerGroups::labels()[$group])) throw new \RuntimeException(__('Unknown customer group.', 'pc-order-import-export'));
         $counts = [];
         foreach ($rows as $row) foreach (ContactWorkbook::emails($row) as $email) $counts[$email] = ($counts[$email] ?? 0) + 1;
         $job = wp_insert_post(['post_type'=>self::JOB, 'post_status'=>'private', 'post_title'=>'XLSX', 'post_author'=>get_current_user_id()], true);
@@ -39,13 +42,14 @@ final class ContactImport {
             if (($row['Качество источника'] ?? '') === 'Сайт организации: контакты опубликованы') $fromSite++;
         }
         self::store($job, '_summary', ['total'=>count($rows), 'channels'=>$countsByChannel, 'site'=>$fromSite]);
+        self::store($job, '_group', $group);
         $pages = array_chunk($rows, self::PAGE_SIZE);
         foreach ($pages as $page => $records) {
             $entries = [];
             foreach ($records as $row) {
                 $unique = array_values(array_filter(ContactWorkbook::emails($row), static fn($email) => $counts[$email] === 1 && !email_exists($email)));
                 $known = self::existing($row);
-                $entries[] = ['source'=>$row, 'role'=>$role, 'options'=>$unique, 'email'=>$unique[0] ?? '', 'result'=>$known];
+                $entries[] = ['source'=>$row, 'role'=>$role, 'options'=>$unique, 'blocked_emails'=>array_values(array_filter($unique,static fn($email)=>isset($blockedEmails[$email]))), 'email'=>$unique[0] ?? '', 'result'=>$known];
             }
             self::store($job, '_page_'.$page, $entries);
         }
@@ -68,10 +72,11 @@ final class ContactImport {
         return $entries;
     }
 
-    public static function apply(int $job, int $page, array $fields): void {
+    public static function apply(int $job, int $page, array $fields, bool $invite = false): void {
         FolioCustomerImport::authorize();
-        FolioCustomerImport::locked(static function () use ($job, $page, $fields) {
+        FolioCustomerImport::locked(static function () use ($job, $page, $fields, $invite) {
             $entries = self::page($job, $page);
+            $group = (string)get_post_meta($job,'_group',true);
             foreach ($entries as $i => &$entry) {
                 if ($entry['result'] !== '') continue;
                 $role = $fields[$i]['role'] ?? '';
@@ -84,7 +89,7 @@ final class ContactImport {
             unset($entry);
             foreach ($entries as &$entry) {
                 if ($entry['result'] !== '') continue;
-                $entry['result'] = self::applyRow($entry);
+                $entry['result'] = self::applyRow($entry, $group, $invite);
                 self::store($job, '_page_'.$page, $entries);
             }
             unset($entry);
@@ -103,7 +108,7 @@ final class ContactImport {
         return '';
     }
 
-    private static function applyRow(array $entry): string {
+    private static function applyRow(array &$entry, string $group, bool $invite): string {
         $row = $entry['source'];
         $name = $row[ContactWorkbook::ORGANIZATION];
         $slug = 'xlsx-'.hash('sha256', $row['ID']);
@@ -115,6 +120,7 @@ final class ContactImport {
         $role = $entry['role'];
         $state = ['source'=>$row, 'email'=>$email, 'role'=>$role, 'status'=>'review', 'user_id'=>0];
         self::store($id, '_contact', $state);
+        if ($group !== '') self::store($id, CustomerGroups::META, $group);
         if (!$email || email_exists($email)) {
             $state['status'] = 'contact';
         } else {
@@ -124,7 +130,7 @@ final class ContactImport {
             try {
                 $user = wp_insert_user(wp_slash(['user_login'=>FolioCustomerImport::username($email), 'user_pass'=>wp_generate_password(40,true,true),
                     'user_email'=>$email, 'display_name'=>mb_substr($name,0,250), 'role'=>$role,
-                    'meta_input'=>['_pcoe_contact_id'=>$id, 'billing_company'=>$name, 'billing_email'=>$email, 'billing_phone'=>$row['Телефон'],
+                    'meta_input'=>[CustomerGroups::META=>$group, '_pcoe_contact_id'=>$id, 'billing_company'=>$name, 'billing_email'=>$email, 'billing_phone'=>$row['Телефон'],
                         'billing_address_1'=>$row['Адрес из источника'] ?? '', 'billing_city'=>$row['Город / населённый пункт'] ?? '', 'billing_country'=>'UA']]));
             } finally { remove_filter('pre_wp_mail', $mute, PHP_INT_MAX); }
             if (!is_wp_error($user)) {
@@ -134,6 +140,9 @@ final class ContactImport {
             }
         }
         self::store($id, '_contact', $state);
+        if ($invite && $state['status'] === 'created') {
+            $entry['invitation'] = ContactInvitation::send($id,$saved,$row,in_array($email,$entry['blocked_emails'] ?? [],true));
+        }
         return $state['status'];
     }
 }

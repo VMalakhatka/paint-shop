@@ -4708,3 +4708,24 @@ msgstr ""
 
 msgid "Contacts published on the organization website"
 msgstr ""
+
+msgid "Schools and studios"
+msgstr ""
+
+msgid "Customer group"
+msgstr ""
+
+msgid "All groups"
+msgstr ""
+
+msgid "No group"
+msgstr ""
+
+msgid "Unknown customer group."
+msgstr ""
+
+msgid "Invitation skipped: do not contact"
+msgstr ""
+
+msgid "Register and send invitations"
+msgstr ""

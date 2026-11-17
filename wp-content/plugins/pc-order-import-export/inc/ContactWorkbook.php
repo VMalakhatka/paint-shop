@@ -10,7 +10,7 @@ final class ContactWorkbook {
     public const SHEET = 'Контакты';
 
     /** Read values without evaluating workbook formulas. Preserve the source headers and all columns. */
-    public static function read(string $path): array {
+    public static function read(string $path, array &$blockedEmails = []): array {
         $invalid = __('Check the Contacts worksheet, column headers and unique organization IDs.', 'pc-order-import-export');
         $zip = new \ZipArchive();
         if (!is_file($path) || filesize($path) > 5242880 || $zip->open($path) !== true) {
@@ -24,10 +24,10 @@ final class ContactWorkbook {
             }
         } finally { $zip->close(); }
         $reader = new Xlsx();
-        $reader->setLoadSheetsOnly(self::SHEET);
+        $reader->setLoadSheetsOnly([self::SHEET,'Email']);
         $reader->setReadDataOnly(true);
         foreach ($reader->listWorksheetInfo($path) as $info) {
-            if ($info['worksheetName'] === self::SHEET && ($info['totalRows'] > 2020 || $info['totalColumns'] > 64)) {
+            if (in_array($info['worksheetName'],[self::SHEET,'Email'],true) && (($info['worksheetName'] === 'Email' ? 10020 : 2020) < $info['totalRows'] || $info['totalColumns'] > 64)) {
                 throw new \RuntimeException($invalid);
             }
         }
@@ -61,6 +61,31 @@ final class ContactWorkbook {
                 $rows[] = $row;
             }
             if (!$rows) throw new \RuntimeException($invalid);
+            $blockedEmails = [];
+            $addresses = $book->getSheetByName('Email');
+            if ($addresses) {
+                $emailColumn = ''; $statusColumn = '';
+                foreach ($addresses->getRowIterator() as $line) {
+                    if (!$emailColumn) {
+                        $columns = [];
+                        $cells = $line->getCellIterator();
+                        $cells->setIterateOnlyExistingCells(true);
+                        foreach ($cells as $cell) $columns[trim((string)$cell->getValue())] = $cell->getColumn();
+                        if (isset($columns['Email'],$columns['Статус обращения'])) {
+                            $emailColumn = $columns['Email']; $statusColumn = $columns['Статус обращения'];
+                        }
+                        continue;
+                    }
+                    $status = $addresses->getCell($statusColumn.$line->getRowIndex());
+                    if ($status->isFormula()) throw new \RuntimeException($invalid);
+                    if (ContactInvitation::blocked(['Статус обращения'=>(string)$status->getValue()])) {
+                        $email = strtolower(trim((string)$addresses->getCell($emailColumn.$line->getRowIndex())->getValue()));
+                        if (!is_email($email)) throw new \RuntimeException($invalid);
+                        $blockedEmails[$email] = true;
+                    }
+                }
+                if (!$emailColumn) throw new \RuntimeException($invalid);
+            }
             return $rows;
         } finally { $book->disconnectWorksheets(); }
     }

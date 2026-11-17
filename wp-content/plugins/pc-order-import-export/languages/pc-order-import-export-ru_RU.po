@@ -4900,3 +4900,24 @@ msgstr "Организаций в книге: %d"
 
 msgid "Contacts published on the organization website"
 msgstr "Контакты опубликованы на сайте организации"
+
+msgid "Schools and studios"
+msgstr "Школы и студии"
+
+msgid "Customer group"
+msgstr "Группа клиентов"
+
+msgid "All groups"
+msgstr "Все группы"
+
+msgid "No group"
+msgstr "Без группы"
+
+msgid "Unknown customer group."
+msgstr "Неизвестная группа клиентов."
+
+msgid "Invitation skipped: do not contact"
+msgstr "Приглашение пропущено: не писать"
+
+msgid "Register and send invitations"
+msgstr "Зарегистрировать и прислать приглашение"
