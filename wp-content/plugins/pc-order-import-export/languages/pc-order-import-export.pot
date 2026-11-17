@@ -4669,3 +4669,42 @@ msgstr ""
 #: inc/CrmCatalogUi.php
 msgid "Warehouse group composition comes from the shared site settings and is the same for every customer. Choose which groups this feed includes. Stock uses website data."
 msgstr ""
+
+msgid "Check the Contacts worksheet, column headers and unique organization IDs."
+msgstr ""
+
+msgid "Choose a customer role."
+msgstr ""
+
+msgid "Excel contacts"
+msgstr ""
+
+msgid "Previously imported"
+msgstr ""
+
+msgid "Contact only"
+msgstr ""
+
+msgid "Default role for this workbook"
+msgstr ""
+
+msgid "Review workbook"
+msgstr ""
+
+msgid "Check the role and registration email for each organization. Shared or occupied addresses are kept in the contact card."
+msgstr ""
+
+msgid "Organization"
+msgstr ""
+
+msgid "Registration email"
+msgstr ""
+
+msgid "Save this page and register selected accounts"
+msgstr ""
+
+msgid "Organizations in workbook: %d"
+msgstr ""
+
+msgid "Contacts published on the organization website"
+msgstr ""
