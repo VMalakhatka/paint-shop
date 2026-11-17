@@ -48,6 +48,7 @@ final class PartnerCatalogUi {
             }catch(\Throwable $e){echo '<p role="alert">'.esc_html__('Could not prepare the export. Please retry or contact the manager.','pc-order-import-export').'</p>';}
         }
         echo '<p>';self::help('partner-catalog-errors','If products or photos are missing');echo '</p>';
+        CrmCatalogUi::render();
         echo '</div>';
     }
 }

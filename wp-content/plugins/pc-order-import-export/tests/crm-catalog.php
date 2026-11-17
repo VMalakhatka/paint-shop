@@ -1,0 +1,63 @@
+<?php
+/** Offline lifecycle + formatter + no-login endpoint checks. No production or external services. */
+namespace PaintCore\PCOE {
+final class PartnerCatalog {static function allowed($u){return $u===5 && empty($GLOBALS['revoked']);}static function url(){return 'https://example.test/my-account/';}}
+final class CrmCatalogData {
+ const BATCH=100;const MAX_PRODUCTS=30000;
+ static function context($u,$s){return $GLOBALS['context']??'context-a';}
+ static function page($s,$after){$end=min($after+100,$GLOBALS['total']??605);return $after<$end?range($after+1,$end):[];}
+ static function rows($u,$ids,$s){$rows=[];foreach($ids as $id)$rows[]=['id'=>$id,'sku'=>'SKU-'.$id,'gtin'=>'0012345678905','name'=>'Paint & colour','category_id'=>2,'description'=>'<text>','short_description'=>'','brand'=>'Brand','retail'=>99.99,'cost'=>($id===($GLOBALS['fail_id']??0)?null:12.34),'stock'=>($id%2?3:null),'images'=>['https://images.example.test/1.jpg'],'url'=>'https://example.test/product/'.$id,'attributes'=>['Colour'=>'Blue'],'unit'=>'ml','pack'=>null];return ['rows'=>$rows,'categories'=>[2=>['name'=>'Paint','parent'=>0]],'at'=>gmdate('c'),'currency'=>'UAH'];}
+}
+final class BroadcastStore {static function temporary_file(){return tempnam(sys_get_temp_dir(),'crm-test-');}}
+}
+namespace {
+define('ABSPATH','/nonexistent/test-site/');define('DB_NAME','fixture');
+foreach(['PartnerCatalogFormats','CrmCatalogFormat','CrmCatalogStore','CrmCatalog'] as $class)require dirname(__DIR__).'/inc/'.$class.'.php';
+use PaintCore\PCOE\CrmCatalog as C;use PaintCore\PCOE\CrmCatalogStore as S;use PaintCore\PCOE\CrmCatalogFormat as F;use PaintCore\PCOE\CrmCatalogData as D;
+class DB {public $prefix='wp_';function prepare($q,...$args){return $q;}function get_var($q){return empty($GLOBALS['owner_busy'])?'1':'0';}}
+$GLOBALS['wpdb']=new DB();$GLOBALS['options']=[];$GLOBALS['meta']=[];$GLOBALS['events']=[];
+function __($s,$d=''){return $s;}function get_option($k,$d=false){return $GLOBALS['options'][$k]??$d;}function update_option($k,$v,$autoload=null){$GLOBALS['options'][$k]=$v;return true;}function delete_option($k){unset($GLOBALS['options'][$k]);}
+function get_user_meta($u,$k,$single){return $GLOBALS['meta'][$u][$k]??[];}function update_user_meta($u,$k,$v){$GLOBALS['meta'][$u][$k]=$v;return true;}function wp_slash($x){return $x;}
+function get_woocommerce_currency(){return 'UAH';}function get_bloginfo($k){return 'Test shop';}function home_url($p){return 'https://example.test'.$p;}function wp_salt($k){return 'test-secret';}
+function wp_next_scheduled($h,$args){return $GLOBALS['events'][$args[0]]??false;}function wp_schedule_single_event($at,$h,$args){$GLOBALS['events'][$args[0]]=$at;return true;}function wp_unschedule_event($at,$h,$args){unset($GLOBALS['events'][$args[0]]);}function wp_clear_scheduled_hook($h,$args){unset($GLOBALS['events'][$args[0]]);}
+function wp_cache_supports($f){return false;}function nocache_headers(){}function absint($v){return abs((int)$v);}function status_header($s){$GLOBALS['status']=$s;}
+function ok($v,$reason){if(!$v)throw new \RuntimeException($reason);$GLOBALS['checks']=($GLOBALS['checks']??0)+1;}
+if(($argv[1]??'')==='endpoint'){
+ $state=json_decode(file_get_contents($argv[2]),true);foreach($state as $k=>$v)$GLOBALS[$k]=$v;
+ $_GET=['user'=>5,'key'=>C::key(5,C::config(5))];$case=$argv[3];
+ if($case==='bad-key')$_GET['key']=str_repeat('f',64);
+ if($case==='prom-key')$_GET['key']=hash_hmac('sha256','5:'.C::config(5)['seed'],wp_salt('auth'));
+ if($case==='wrong-owner')$_GET['user']=6;
+ if($case==='paused')$GLOBALS['meta'][5][C::META]['enabled']=false;
+ if($case==='revoked')$GLOBALS['revoked']=true;
+ if($case==='stale')$GLOBALS['options']['pcoe_crm_snapshot_5']['at']=time()-C::MAX_AGE;
+ if($case==='changed')$GLOBALS['context']='different';
+ if($case==='incomplete')unset($GLOBALS['options'][array_key_first(array_filter($GLOBALS['options'],fn($v)=>is_string($v)))]);
+ register_shutdown_function(function(){fwrite(STDERR,'STATUS:'.($GLOBALS['status']??200));});C::feed();exit;
+}
+$c=['selection'=>['brands'=>[1,2],'locations'=>[10]],'revision'=>'rev-1','seed'=>'seed-one','enabled'=>false];C::save(5,$c);$start=C::start(5,$c);S::put(5,'build',$start);
+$GLOBALS['owner_busy']=true;C::tick(5);ok(!S::get(5,'snapshot') && S::get(5,'build')['after']===0,'Concurrent owner job does not read/build a snapshot');unset($GLOBALS['owner_busy']);
+C::tick(5);$snapshot=S::get(5,'snapshot');ok($snapshot['count']===605,'All 605 rows across multiple batches, no old 500 cap');ok(S::get(5,'build')===[],'Build complete');ok(C::ready(5,$c,$snapshot),'Complete snapshot ready');ok(empty(C::config(5)['enabled']),'Build does not enable a private link');
+$path=S::file(5,$snapshot);$xml=file_get_contents($path);unlink($path);$dom=new \DOMDocument();ok($dom->loadXML($xml),'Complete valid XML');$xp=new \DOMXPath($dom);
+ok($xp->evaluate('count(//offer)')===605.0,'Every row appears once');ok($xp->evaluate('string(//offer/price)')==='12.34','Price is purchase price');ok($xp->evaluate('string(//offer/purchase_price)')==='12.34','Explicit purchase tag');ok($xp->evaluate('string(//offer/barcode)')==='0012345678905','EAN leading zero preserved');ok(!str_contains($xml,'99.99'),'Retail not substituted for purchase');ok($xp->evaluate('string(//offer[@id="2"]/quantity_in_stock)')==='0','Unknown stock never positive');ok($xp->evaluate('string(//offer/@selling_type)')==='w','Wholesale type');
+$key=C::key(5,$c);$changed=$c;$changed['seed']='new-seed';$changed['enabled']=true;ok(!C::authorized(5,$changed,$key),'Rotated key invalid');ok(!C::authorized(5,$c,$key),'Disabled denied');
+// Simulate termination after snapshot publication but before clearing its build pointer.
+$replay=$start;$replay['generation']=$snapshot['generation'];S::put(5,'build',$replay);
+$GLOBALS['fail_id']=1;C::tick(5);unset($GLOBALS['fail_id']);
+ok(S::get(5,'build')===[],'Recovery recognizes committed publication without rebuilding it');
+S::discard(5,$replay);$path=S::file(5,S::get(5,'snapshot'));ok(filesize($path)>0,'Retry cleanup cannot delete the just-published generation');unlink($path);
+$c['enabled']=true;C::save(5,$c);$state=tempnam(sys_get_temp_dir(),'crm-state-');file_put_contents($state,json_encode(['options'=>$GLOBALS['options'],'meta'=>$GLOBALS['meta']]));
+foreach(['valid'=>200,'bad-key'=>403,'prom-key'=>403,'wrong-owner'=>403,'paused'=>403,'revoked'=>403,'stale'=>503,'changed'=>503,'incomplete'=>503] as $case=>$status){
+ $pipes=[];$proc=proc_open([PHP_BINARY,__FILE__,'endpoint',$state,$case],[1=>['pipe','w'],2=>['pipe','w']],$pipes);$body=stream_get_contents($pipes[1]);$err=stream_get_contents($pipes[2]);fclose($pipes[1]);fclose($pipes[2]);$exit=proc_close($proc);
+ ok($exit===0 && str_contains($err,'STATUS:'.$status),'Endpoint '.$case.' '.$err);ok($status===200?str_contains($body,'<purchase_price>12.34</purchase_price>'):!str_contains($body,'<offer'),'No partial/sensitive XML on failure '.$case);
+}unlink($state);
+$sample=D::rows(5,[1],[]);$sample['rows'][0]['cost']=null;try{F::part($sample);$failed=false;}catch(\RuntimeException $e){$failed=true;}ok($failed,'Missing purchase price refuses publication');
+$sample=D::rows(5,[1],[]);$retail=\PaintCore\PCOE\PartnerCatalogFormats::yml($sample);ok(str_contains($retail,'<price>99.99</price>') && !str_contains($retail,'<purchase_price>'),'Prom formatter remains retail-only');
+$GLOBALS['context']='updated-shared-settings';ok(!C::ready(5,$c,S::get(5,'snapshot')),'Shared site setting changes invalidate old snapshot');
+C::tick(5);ok(C::ready(5,$c,S::get(5,'snapshot')),'Refresh uses updated shared site settings automatically');
+$old=S::get(5,'snapshot');$GLOBALS['fail_id']=150;S::put(5,'build',C::start(5,$c));C::tick(5);
+ok(S::get(5,'build')['status']==='failed' && S::get(5,'snapshot')['generation']===$old['generation'],'Failed second batch never replaces complete snapshot');
+S::clear(5);S::put(5,'build',C::start(5,$c));C::tick(5);ok(!S::get(5,'snapshot'),'Failed partial preparation cannot publish a first snapshot');unset($GLOBALS['fail_id']);
+$GLOBALS['total']=0;S::clear(5);S::put(5,'build',C::start(5,$c));C::tick(5);ok(S::get(5,'build')['status']==='failed' && !S::get(5,'snapshot'),'Empty catalogue cannot publish successful empty feed');
+echo 'PASS '.$GLOBALS['checks']." CRM lifecycle and endpoint checks\n";
+}

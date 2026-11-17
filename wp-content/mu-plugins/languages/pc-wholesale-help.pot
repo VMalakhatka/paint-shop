@@ -1350,3 +1350,39 @@ msgstr ""
 #: pc-wholesale-help.php
 msgid "Link unavailable: check that it is enabled and that Prom has the latest address. If export still fails, retry later or send the manager the time, format, affected SKUs and a screenshot. Do not send your personal XML link in public messages."
 msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Purchase price feed for CRM / SalesDrive"
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Open CRM export"
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "In Data and photos for your website, open Purchase price feed for CRM / SalesDrive. Select several brands and the Kyiv or Odesa group. Warehouse composition comes from the shared site settings for all customers. This export reads existing website data and does not run another Folio synchronization. The retail Prom selection is separate."
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Select Prepare CRM file. You may close the page while it is prepared in the background. Refresh CRM status to see the result. The limit is 30,000 catalogue records or 30 MB, not 500 products. If preparation fails, no partial file is published; correct the issue and select Prepare CRM file again."
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Review the first ten products and download CRM XML for review. It contains your purchase prices, stock, SKUs, EAN when present, descriptions, public attributes and image URLs. Unknown stock is exported as zero. Missing purchase prices stop preparation. Data is read from the website, not directly from Folio in real time."
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Tick the authorization to share purchase prices, then select Enable CRM link. The personal URL works without signing in and remains the same during normal updates. Do not publish it or replace your retail Prom URL with it. Anyone with this URL can read these purchase prices."
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "In SalesDrive, use the supplier XML import with blocks offers / offer. Match vendorCode to SKU, barcode to EAN, quantity_in_stock to quantity, and purchase_price (or price) to purchase cost. These are not your selling prices. Test the mapping with a small selection and keep supplier stock separate from your own inventory. Import into a real SalesDrive account still needs verification."
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Configure the read schedule in your CRM. Enabled snapshots refresh about every 30 minutes when the website scheduler runs. Preparation may take longer when the website scheduler is delayed. A previous complete file can be served during refresh for at most two hours; afterwards the service returns an error rather than an empty or outdated catalogue. Keep the previous import if a request fails."
+msgstr ""
+
+#: pc-wholesale-help.php
+msgid "Saving brands or warehouses pauses the link until you review and enable it again. Pause CRM link stops access. Replace CRM link invalidates the old address; update it in your CRM. Exports do not create orders, reserves, payments or shipments."
+msgstr ""

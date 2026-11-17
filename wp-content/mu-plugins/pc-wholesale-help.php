@@ -293,6 +293,7 @@ function pc_wholesale_help_render_endpoint(): void {
             <a href="#koshyk"><span>4</span><?php esc_html_e('Cart', 'pc-wholesale-help'); ?></a>
             <a href="#import"><span>5</span><?php esc_html_e('Import', 'pc-wholesale-help'); ?></a>
             <a href="#eksport"><span>6</span><?php esc_html_e('Export', 'pc-wholesale-help'); ?></a>
+            <a href="#crm-catalog"><span>↗</span><?php esc_html_e('Purchase price feed for CRM / SalesDrive', 'pc-wholesale-help'); ?></a>
             <a href="#partner-catalog"><span>↗</span><?php esc_html_e('Data and photos for your website', 'pc-wholesale-help'); ?></a>
             <a href="#chernetky"><span>7</span><?php esc_html_e('Drafts', 'pc-wholesale-help'); ?></a>
             <a href="#email-mailings"><?php esc_html_e('News and price lists by email', 'pc-wholesale-help'); ?></a>
@@ -617,6 +618,19 @@ function pc_wholesale_help_render_endpoint(): void {
                 <li><?php esc_html_e('Missing images: check manifest.csv, then use photo links or export fewer products. Missing pack quantity: the rest of the file can still be used; ask your manager for packaging. Missing retail price prevents a Prom export and needs the manager to check the product.', 'pc-wholesale-help'); ?></li>
                 <li><?php esc_html_e('Link unavailable: check that it is enabled and that Prom has the latest address. If export still fails, retry later or send the manager the time, format, affected SKUs and a screenshot. Do not send your personal XML link in public messages.', 'pc-wholesale-help'); ?></li>
             </ol>
+        </section>
+        <section class="pc-help-section" id="crm-catalog">
+            <h2><?php esc_html_e('Purchase price feed for CRM / SalesDrive', 'pc-wholesale-help'); ?></h2>
+            <ol>
+                <li><?php esc_html_e('In Data and photos for your website, open Purchase price feed for CRM / SalesDrive. Select several brands and the Kyiv or Odesa group. Warehouse composition comes from the shared site settings for all customers. This export reads existing website data and does not run another Folio synchronization. The retail Prom selection is separate.', 'pc-wholesale-help'); ?></li>
+                <li><?php esc_html_e('Select Prepare CRM file. You may close the page while it is prepared in the background. Refresh CRM status to see the result. The limit is 30,000 catalogue records or 30 MB, not 500 products. If preparation fails, no partial file is published; correct the issue and select Prepare CRM file again.', 'pc-wholesale-help'); ?></li>
+                <li><?php esc_html_e('Review the first ten products and download CRM XML for review. It contains your purchase prices, stock, SKUs, EAN when present, descriptions, public attributes and image URLs. Unknown stock is exported as zero. Missing purchase prices stop preparation. Data is read from the website, not directly from Folio in real time.', 'pc-wholesale-help'); ?></li>
+                <li><?php esc_html_e('Tick the authorization to share purchase prices, then select Enable CRM link. The personal URL works without signing in and remains the same during normal updates. Do not publish it or replace your retail Prom URL with it. Anyone with this URL can read these purchase prices.', 'pc-wholesale-help'); ?></li>
+                <li><?php esc_html_e('In SalesDrive, use the supplier XML import with blocks offers / offer. Match vendorCode to SKU, barcode to EAN, quantity_in_stock to quantity, and purchase_price (or price) to purchase cost. These are not your selling prices. Test the mapping with a small selection and keep supplier stock separate from your own inventory. Import into a real SalesDrive account still needs verification.', 'pc-wholesale-help'); ?></li>
+                <li><?php esc_html_e('Configure the read schedule in your CRM. Enabled snapshots refresh about every 30 minutes when the website scheduler runs. Preparation may take longer when the website scheduler is delayed. A previous complete file can be served during refresh for at most two hours; afterwards the service returns an error rather than an empty or outdated catalogue. Keep the previous import if a request fails.', 'pc-wholesale-help'); ?></li>
+                <li><?php esc_html_e('Saving brands or warehouses pauses the link until you review and enable it again. Pause CRM link stops access. Replace CRM link invalidates the old address; update it in your CRM. Exports do not create orders, reserves, payments or shipments.', 'pc-wholesale-help'); ?></li>
+            </ol>
+            <a class="pc-help-inline-action" href="<?php echo esc_url(add_query_arg('pcoe_catalog','1',wc_get_page_permalink('myaccount')).'#pcoe-crm-catalog'); ?>"><?php esc_html_e('Open CRM export', 'pc-wholesale-help'); ?></a>
         </section>
         <section class="pc-help-section" id="folio">
             <div class="pc-help-section__heading"><span>12</span><div><h2><?php esc_html_e('View and repeat Folio documents', 'pc-wholesale-help'); ?></h2><p><?php esc_html_e('Choose a period and document types, then open an invoice, expense invoice or payment for details.', 'pc-wholesale-help'); ?></p></div></div>

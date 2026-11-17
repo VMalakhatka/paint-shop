@@ -819,3 +819,16 @@ tab. Keep these stable: the downloadable Ukrainian PDF also links to them.
 `pc-order-import-export/assets/partner-catalog-guide-uk.pdf`; it must never embed
 customer tokens or purchase prices. Full operator steps stay in the wholesale
 guide. Code/render checks do not prove production help publication.
+
+CRM purchase export (2026-11-17, local code/tests): `CrmCatalog*` owns an independent
+`_pcoe_crm_catalog` config and HMAC domain (`crm-purchase`), not a price switch on
+`pcoe_partner_feed`. Never enable purchase-price sharing implicitly. Site location
+groups may aggregate Folio warehouses; confirm their mapping before promising
+Kyiv-only physical stock. `PartnerCatalogData::build_ids` shares owner-scoped data
+projection but skips Java packaging for this background feed. Private option chunks
+publish only after completion, checked before HTTP 200; expired/context-mismatched
+snapshots return 503. This is file preparation from existing Woo data with a per-owner lock, not another
+stock synchronization: no Java/Folio calls, no global sync lock. Preserve
+retail Prom semantics and stable existing help anchors. Contract and production
+pilot boundaries: `docs/api/CRM_CATALOG_FEED.md`; customer steps remain in the
+wholesale guide `#crm-catalog`. No live SalesDrive import is implied by offline tests.

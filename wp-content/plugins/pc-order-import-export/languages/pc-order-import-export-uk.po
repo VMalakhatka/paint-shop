@@ -4716,3 +4716,150 @@ msgstr "Як підключити Prom"
 #: inc/PartnerCatalogUi.php
 msgid "If products or photos are missing"
 msgstr "Якщо бракує товарів або фото"
+
+#: inc/CrmCatalogUi.php
+msgid "Purchase price feed for CRM / SalesDrive"
+msgstr "Закупівельний прайс для CRM / SalesDrive"
+
+#: inc/CrmCatalogUi.php
+msgid "A separate private link contains your purchase prices and the selected warehouse groups. The retail Prom link above is unchanged. Anyone with the CRM link can read your purchase prices; share it only with your CRM."
+msgstr "Окреме приватне посилання містить ваші закупівельні ціни та вибрані складські групи. Роздрібне посилання Prom вище працює як раніше. Кожен, хто має CRM-посилання, може прочитати ваші закупівельні ціни; передавайте його лише своїй CRM."
+
+#: inc/CrmCatalogUi.php
+msgid "Brands for the CRM feed"
+msgstr "Бренди для CRM-прайсу"
+
+#: inc/CrmCatalogUi.php
+msgid "Stock from warehouse groups"
+msgstr "Залишки складських груп"
+
+
+#: inc/CrmCatalogUi.php
+msgid "Prepare CRM file"
+msgstr "Підготувати CRM-файл"
+
+#: inc/CrmCatalogUi.php
+msgid "Saving pauses the CRM link. Files are prepared in the background, up to 30,000 records and 30 MB. Wait for completion and review the file before enabling the link."
+msgstr "Збереження призупиняє CRM-посилання. Файл готується у фоні: до 30 000 записів і 30 МБ. Дочекайтеся завершення та перевірте файл перед увімкненням посилання."
+
+#: inc/CrmCatalogUi.php
+msgid "CRM preparation failed"
+msgstr "Не вдалося підготувати CRM-файл"
+
+#: inc/CrmCatalogUi.php
+msgid "Preparing the CRM file"
+msgstr "Готується CRM-файл"
+
+#: inc/CrmCatalogUi.php
+msgid "Products prepared: %d"
+msgstr "Підготовлено товарів: %d"
+
+#: inc/CrmCatalogUi.php
+msgid "CRM file ready for review"
+msgstr "CRM-файл готовий до перевірки"
+
+#: inc/CrmCatalogUi.php
+msgid "Products: %d. Prepared: %s (UTC)."
+msgstr "Товарів: %d. Підготовлено: %s (UTC)."
+
+#: inc/CrmCatalogUi.php
+msgid "Download CRM XML for review"
+msgstr "Завантажити CRM XML для перевірки"
+
+#: inc/CrmCatalogUi.php
+msgid "The CRM file is outdated or its settings changed. Prepare it again before importing."
+msgstr "CRM-файл застарів або налаштування змінилися. Підготуйте його знову перед імпортом."
+
+#: inc/CrmCatalogUi.php
+msgid "Refresh CRM status"
+msgstr "Оновити стан CRM-файлу"
+
+#: inc/CrmCatalogUi.php
+msgid "Prepare CRM file again"
+msgstr "Підготувати CRM-файл знову"
+
+#: inc/CrmCatalogUi.php
+msgid "Map purchase_price (or price) to purchase cost, not your selling price. Use vendorCode for SKU, barcode for EAN and quantity_in_stock for quantity. First test a few products in SalesDrive."
+msgstr "Зіставте purchase_price (або price) із закупівельною вартістю, а не своєю ціною продажу. Артикул — vendorCode, EAN — barcode, кількість — quantity_in_stock. Спочатку перевірте кілька товарів у SalesDrive."
+
+#: inc/CrmCatalogUi.php
+msgid "Private CRM URL — contains purchase prices"
+msgstr "Приватне CRM-посилання — містить закупівельні ціни"
+
+#: inc/CrmCatalogUi.php
+msgid "The CRM link is paused."
+msgstr "CRM-посилання призупинено."
+
+#: inc/CrmCatalogUi.php
+msgid "I reviewed the file and authorize my CRM to read my purchase prices."
+msgstr "Я перевірив файл і дозволяю своїй CRM читати мої закупівельні ціни."
+
+#: inc/CrmCatalogUi.php
+msgid "Enable CRM link"
+msgstr "Увімкнути CRM-посилання"
+
+#: inc/CrmCatalogUi.php
+msgid "Pause CRM link"
+msgstr "Призупинити CRM-посилання"
+
+#: inc/CrmCatalogUi.php
+msgid "Replace CRM link"
+msgstr "Замінити CRM-посилання"
+
+#: inc/CrmCatalogUi.php
+msgid "The URL stays the same when data refreshes. Replacement invalidates the old URL. Enabled files refresh about every 30 minutes when the scheduler runs; files older than two hours are not served. Configure the read schedule in your CRM."
+msgstr "Адреса не змінюється при оновленні даних. Заміна робить стару адресу недійсною. Увімкнені файли оновлюються приблизно кожні 30 хвилин за роботи планувальника; файли старші двох годин не видаються. Розклад зчитування налаштуйте у своїй CRM."
+
+
+#: inc/CrmCatalogUi.php
+msgid "Could not schedule the CRM export. Ask the administrator to check the scheduler."
+msgstr "Не вдалося запланувати CRM-експорт. Попросіть адміністратора перевірити планувальник."
+
+
+#: inc/CrmCatalogUi.php
+msgid "CRM preparation took too long. Prepare it again or ask the manager to check the scheduler."
+msgstr "Підготовка CRM-файлу триває надто довго. Запустіть її знову або попросіть менеджера перевірити планувальник."
+
+#: inc/CrmCatalogUi.php
+msgid "The CRM selection exceeds 30,000 records or 30 MB. Narrow the brands; no partial feed was published."
+msgstr "Добірка CRM перевищує 30 000 записів або 30 МБ. Звузьте список брендів; частковий файл не опубліковано."
+
+#: inc/CrmCatalogUi.php
+msgid "Could not prepare the CRM feed. Retry or contact the manager."
+msgstr "Не вдалося підготувати CRM-прайс. Повторіть або зверніться до менеджера."
+
+#: inc/CrmCatalogUi.php
+msgid "Select brands and warehouse groups for the CRM feed."
+msgstr "Виберіть бренди та складські групи для CRM-прайсу."
+
+#: inc/CrmCatalogUi.php
+msgid "Confirm sharing your purchase prices with your CRM."
+msgstr "Підтвердьте передачу своїх закупівельних цін до CRM."
+
+#: inc/CrmCatalogUi.php
+msgid "Wait for a complete, current CRM file before enabling the link."
+msgstr "Перед увімкненням посилання дочекайтеся повного актуального CRM-файлу."
+
+#: inc/CrmCatalogUi.php
+msgid "Could not complete the action. Check the CRM preparation status and try again."
+msgstr "Не вдалося виконати дію. Перевірте стан підготовки CRM-файлу та повторіть."
+
+#: inc/CrmCatalogUi.php
+msgid "Warehouse groups are unavailable or overlap. Ask the manager to check the mapping."
+msgstr "Складські групи недоступні або перетинаються. Попросіть менеджера перевірити прив’язку складів."
+
+#: inc/CrmCatalogUi.php
+msgid "Could not read the catalogue. Try preparing the CRM feed again."
+msgstr "Не вдалося прочитати каталог. Спробуйте підготувати CRM-прайс знову."
+
+#: inc/CrmCatalogUi.php
+msgid "A product has no purchase price. Ask the manager to check prices before enabling the CRM feed."
+msgstr "У товару немає закупівельної ціни. Попросіть менеджера перевірити ціни перед увімкненням CRM-прайсу."
+
+#: inc/CrmCatalogUi.php
+msgid "One CRM export batch is too large. Ask the manager to check product descriptions."
+msgstr "Частина CRM-експорту завелика. Попросіть менеджера перевірити описи товарів."
+
+#: inc/CrmCatalogUi.php
+msgid "Warehouse group composition comes from the shared site settings and is the same for every customer. Choose which groups this feed includes. Stock uses website data."
+msgstr "Склад груп береться зі спільних налаштувань сайту й однаковий для всіх клієнтів. Виберіть групи для цієї вигрузки. Використовуються залишки з даних сайту."

@@ -561,3 +561,9 @@ It reuses WordPress visibility, scoped pricing and stock; packaging reads the ex
 Java endpoint. No separate feed database or Java change. Limits and the customer
 workflow are in [the wholesale guide](WHOLESALE_CUSTOMER_GUIDE_UK.md); internal
 ownership and access invariants are in the Lavka skill's orders reference.
+
+Закупочный CRM-feed (2026-11-17): `CrmCatalog*` в PCOE — отдельный персональный
+YML, multiple brands, выбранные торговые location, приватные option chunks,
+фоновая подготовка XML из уже синхронизированных данных Woo с per-owner lock.
+Не запускает Java/ФОЛИО или дополнительную синхронизацию. Retail Prom не меняется.
+[Контракт, разрешения, жизненный цикл, тесты и rollout](api/CRM_CATALOG_FEED.md).

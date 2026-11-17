@@ -4,7 +4,7 @@ final class BroadcastPricing {
     public static function scope($u,$fn){$old=$GLOBALS['owner']??0;$GLOBALS['owner']=$u;try{return $fn();}finally{$GLOBALS['owner']=$old;}}
     public static function products($ids){foreach($ids as $id)if(isset($GLOBALS['products'][$id]))yield $GLOBALS['products'][$id];}
 }
-final class CommercialOffer {public static function packaging($skus){return array_fill_keys($skus,6);}}
+final class CommercialOffer {public static function packaging($skus){$GLOBALS['packaging_calls']=($GLOBALS['packaging_calls']??0)+1;return array_fill_keys($skus,6);}}
 }
 namespace {
 define('ABSPATH',__DIR__);
@@ -23,7 +23,7 @@ class Attr {function __construct(private bool $visible){}function get_visible(){
 class PSU_Category_Menu {static function index(){return ['visible'=>[1=>1,2=>1],'blocked'=>[3=>1]];}}
 function __($v,$d=''){return $v;}function absint($v){return abs((int)$v);}function term_exists($v,$t){return true;}
 function get_terms($args){return [(object)['term_id'=>1,'name'=>'Art','parent'=>0],(object)['term_id'=>2,'name'=>'Paint','parent'=>1],(object)['term_id'=>3,'name'=>'Private','parent'=>0]];}
-function get_term($id,$tax){foreach(get_terms([]) as $t)if($t->term_id===$id)return $t;return false;}
+function get_term($id,$tax){if($tax==='location')return (object)['term_id'=>$id,'name'=>'Location '.$id,'parent'=>0];foreach(get_terms([]) as $t)if($t->term_id===$id)return $t;return false;}
 function get_ancestors($id,$tax,$type){return $id===2?[1]:[];}
 function get_term_children($id,$tax){return $id===1?[2]:[];}
 function is_taxonomy_hierarchical($tax){return true;}function has_term($ids,$tax,$id){return (bool)array_intersect($ids,$GLOBALS['products'][$id]->categories);}
@@ -35,12 +35,21 @@ function wc_get_product($id){return $GLOBALS['products'][$id]??false;}function w
 function wc_get_price_to_display($p,$args){return $args['price'];}function wc_attribute_label($s){return $s;}
 function get_permalink($id){return 'https://example.test/product/'.$id;}
 function wp_strip_all_tags($s){return strip_tags($s);}function strip_shortcodes($s){return $s;}
-function lavka_get_locations_mapping_for_java(){return [['id'=>10,'codes'=>['1']],['id'=>11,'codes'=>['5']]];}
+function lavka_get_locations_mapping_for_java(){return $GLOBALS['locations']??[['id'=>10,'codes'=>['1']],['id'=>11,'codes'=>['5']]];}
 function get_woocommerce_currency(){return 'UAH';}
 $GLOBALS['products']=[1=>new WC_Product(1,'A'),2=>new WC_Product(2,'PRIVATE',[3]),4=>new WC_Product(4,'PASSWORD')];
 use PaintCore\PCOE\PartnerCatalogData as D;
 $n=0;function ok($v,$why){global $n;$n++;if(!$v)throw new RuntimeException($why);}
 $s=['skus'=>['A','PRIVATE','PASSWORD','MISSING'],'category'=>0,'brand'=>0];$d=D::build(5,$s);
 ok(count($d['rows'])===1,'hidden category and password excluded');ok($d['rows'][0]['cost']===10.0,'owner 5 cost');ok($d['rows'][0]['retail']===30.0,'retail not replaced by owner price');ok($d['rows'][0]['stock']===4.0,'selling stock reused');ok($d['rows'][0]['attributes']===['colour'=>'Blue'],'internal/supplier attrs excluded');ok($d['rows'][0]['pack']===6.0 || $d['rows'][0]['pack']===6,'pack quantity');ok(count($d['missing'])===3,'missing and excluded report');ok($d['rows'][0]['category_id']===2,'stable real category id');ok(D::build(6,$s)['rows'][0]['cost']===20.0,'different owner cost');ok(($GLOBALS['owner']??null)===0,'scope restored');
+$calls=$GLOBALS['packaging_calls'];
+$only=D::build_ids(5,[1],$s,[10],[],false);ok($only['rows'][0]['stock']===2.0,'CRM selected Kyiv group excludes Odesa');
+ok($GLOBALS['packaging_calls']===$calls,'CRM does not request Java packaging');
+require dirname(__DIR__).'/inc/CrmCatalogData.php';
+$sel=\PaintCore\PCOE\CrmCatalogData::selection(['brands'=>['2','1','2'],'locations'=>['10']]);
+ok($sel===['brands'=>[1,2],'locations'=>[10]],'Multiple brands use a deduplicated selection');
+$GLOBALS['locations']=[['id'=>10,'codes'=>['1','7']],['id'=>11,'codes'=>['5']],['id'=>12,'codes'=>['1']]];
+try{\PaintCore\PCOE\CrmCatalogData::selection(['brands'=>[1],'locations'=>[10,12]]);$bad=false;}catch(\RuntimeException $e){$bad=true;}ok($bad,'Overlapping warehouse groups cannot double-count stock');
+try{\PaintCore\PCOE\CrmCatalogData::selection(['brands'=>[1],'locations'=>[999]]);$bad=false;}catch(\RuntimeException $e){$bad=true;}ok($bad,'Unknown/incoming warehouse cannot be selected');
 echo "PASS $n catalogue data checks\n";
 }

@@ -1372,3 +1372,39 @@ msgstr "Не хватает фото: проверьте manifest.csv, зате�
 #: pc-wholesale-help.php
 msgid "Link unavailable: check that it is enabled and that Prom has the latest address. If export still fails, retry later or send the manager the time, format, affected SKUs and a screenshot. Do not send your personal XML link in public messages."
 msgstr "Ссылка недоступна: проверьте, включена ли она и есть ли у Prom последняя ссылка. Если экспорт всё ещё не работает, повторите позже или передайте менеджеру время, формат, проблемные артикулы и снимок экрана. Не отправляйте персональную XML-ссылку в открытых сообщениях."
+
+#: pc-wholesale-help.php
+msgid "Purchase price feed for CRM / SalesDrive"
+msgstr "Закупочный прайс для CRM / SalesDrive"
+
+#: pc-wholesale-help.php
+msgid "Open CRM export"
+msgstr "Открыть CRM-экспорт"
+
+#: pc-wholesale-help.php
+msgid "In Data and photos for your website, open Purchase price feed for CRM / SalesDrive. Select several brands and the Kyiv or Odesa group. Warehouse composition comes from the shared site settings for all customers. This export reads existing website data and does not run another Folio synchronization. The retail Prom selection is separate."
+msgstr "В разделе «Данные и фото для вашего сайта» найдите «Закупочный прайс для CRM / SalesDrive». Выберите несколько брендов и группу «Киев» или «Одесса». Состав групп берётся из общих настроек сайта для всех клиентов. Экспорт читает готовые данные сайта и не запускает ещё одну синхронизацию ФОЛИО. Розничная подборка Prom настраивается отдельно."
+
+#: pc-wholesale-help.php
+msgid "Select Prepare CRM file. You may close the page while it is prepared in the background. Refresh CRM status to see the result. The limit is 30,000 catalogue records or 30 MB, not 500 products. If preparation fails, no partial file is published; correct the issue and select Prepare CRM file again."
+msgstr "Нажмите «Подготовить CRM-файл». Страницу можно закрыть: подготовка продолжается в фоне. «Обновить состояние CRM-файла» показывает результат. Предел — 30 000 записей каталога или 30 МБ, а не 500 товаров. При ошибке частичный файл не публикуется; устраните причину и нажмите «Подготовить CRM-файл снова». "
+
+#: pc-wholesale-help.php
+msgid "Review the first ten products and download CRM XML for review. It contains your purchase prices, stock, SKUs, EAN when present, descriptions, public attributes and image URLs. Unknown stock is exported as zero. Missing purchase prices stop preparation. Data is read from the website, not directly from Folio in real time."
+msgstr "Проверьте первые десять товаров и скачайте CRM XML для проверки. Он содержит ваши закупочные цены, остатки, артикулы, имеющиеся EAN, описания, публичные характеристики и ссылки на фото. Неизвестный остаток передаётся как ноль. Отсутствие закупочной цены останавливает подготовку. Данные берутся с сайта, а не напрямую из ФОЛИО в реальном времени."
+
+#: pc-wholesale-help.php
+msgid "Tick the authorization to share purchase prices, then select Enable CRM link. The personal URL works without signing in and remains the same during normal updates. Do not publish it or replace your retail Prom URL with it. Anyone with this URL can read these purchase prices."
+msgstr "Отметьте разрешение на передачу закупочных цен и нажмите «Включить CRM-ссылку». Персональный адрес работает без входа и не меняется при обычных обновлениях. Не публикуйте его и не заменяйте им розничную ссылку Prom. Каждый, у кого есть этот адрес, может прочитать закупочные цены."
+
+#: pc-wholesale-help.php
+msgid "In SalesDrive, use the supplier XML import with blocks offers / offer. Match vendorCode to SKU, barcode to EAN, quantity_in_stock to quantity, and purchase_price (or price) to purchase cost. These are not your selling prices. Test the mapping with a small selection and keep supplier stock separate from your own inventory. Import into a real SalesDrive account still needs verification."
+msgstr "В SalesDrive используйте импорт XML поставщика с блоками offers / offer. Сопоставьте vendorCode с артикулом, barcode с EAN, quantity_in_stock с количеством, а purchase_price (или price) с закупочной стоимостью. Это не ваши цены продажи. Проверьте соответствие полей на небольшой подборке и учитывайте остатки поставщика отдельно от собственного склада. Импорт в реальный кабинет SalesDrive ещё требует проверки."
+
+#: pc-wholesale-help.php
+msgid "Configure the read schedule in your CRM. Enabled snapshots refresh about every 30 minutes when the website scheduler runs. Preparation may take longer when the website scheduler is delayed. A previous complete file can be served during refresh for at most two hours; afterwards the service returns an error rather than an empty or outdated catalogue. Keep the previous import if a request fails."
+msgstr "Настройте расписание чтения в своей CRM. Включённые снимки обновляются примерно каждые 30 минут при работе планировщика сайта. Если планировщик сайта задерживается, подготовка может длиться дольше. Во время обновления предыдущий полный файл доступен не дольше двух часов; затем сервис возвращает ошибку вместо пустого или устаревшего каталога. При ошибке запроса сохраните предыдущий импорт."
+
+#: pc-wholesale-help.php
+msgid "Saving brands or warehouses pauses the link until you review and enable it again. Pause CRM link stops access. Replace CRM link invalidates the old address; update it in your CRM. Exports do not create orders, reserves, payments or shipments."
+msgstr "Сохранение брендов или складов приостанавливает ссылку до повторной проверки и включения. «Приостановить CRM-ссылку» закрывает доступ. «Заменить CRM-ссылку» делает старый адрес недействительным; обновите его в CRM. Экспорт не создаёт заказов, резервов, оплат или отправлений."

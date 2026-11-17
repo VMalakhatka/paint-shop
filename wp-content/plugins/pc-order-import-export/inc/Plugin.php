@@ -5,6 +5,7 @@ class Plugin {
     public function init(){
         CustomerPermissions::hooks();
         PartnerCatalog::hooks();
+        CrmCatalog::hooks();
         PromotionCoupons::hooks();
         OrderExecution::hooks();
         ManagerQuickOrder::hooks();
