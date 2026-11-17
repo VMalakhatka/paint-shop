@@ -4863,3 +4863,42 @@ msgstr "Частина CRM-експорту завелика. Попросіть
 #: inc/CrmCatalogUi.php
 msgid "Warehouse group composition comes from the shared site settings and is the same for every customer. Choose which groups this feed includes. Stock uses website data."
 msgstr "Склад груп береться зі спільних налаштувань сайту й однаковий для всіх клієнтів. Виберіть групи для цієї вигрузки. Використовуються залишки з даних сайту."
+
+msgid "Check the Contacts worksheet, column headers and unique organization IDs."
+msgstr "Перевірте аркуш «Контакты», заголовки стовпців та унікальні ID організацій."
+
+msgid "Choose a customer role."
+msgstr "Виберіть роль клієнта."
+
+msgid "Excel contacts"
+msgstr "Контакти з Excel"
+
+msgid "Previously imported"
+msgstr "Уже імпортовано"
+
+msgid "Contact only"
+msgstr "Лише контакт"
+
+msgid "Default role for this workbook"
+msgstr "Роль за замовчуванням для цієї книги"
+
+msgid "Review workbook"
+msgstr "Перевірити книгу"
+
+msgid "Check the role and registration email for each organization. Shared or occupied addresses are kept in the contact card."
+msgstr "Перевірте роль та email для реєстрації кожної організації. Спільні або вже зайняті адреси зберігаються в картці контакту."
+
+msgid "Organization"
+msgstr "Організація"
+
+msgid "Registration email"
+msgstr "Email для реєстрації"
+
+msgid "Save this page and register selected accounts"
+msgstr "Зберегти цю сторінку та зареєструвати вибрані акаунти"
+
+msgid "Organizations in workbook: %d"
+msgstr "Організацій у книзі: %d"
+
+msgid "Contacts published on the organization website"
+msgstr "Контакти опубліковані на сайті організації"
