@@ -1408,3 +1408,18 @@ msgstr "Настройте расписание чтения в своей CRM. 
 #: pc-wholesale-help.php
 msgid "Saving brands or warehouses pauses the link until you review and enable it again. Pause CRM link stops access. Replace CRM link invalidates the old address; update it in your CRM. Exports do not create orders, reserves, payments or shipments."
 msgstr "Сохранение брендов или складов приостанавливает ссылку до повторной проверки и включения. «Приостановить CRM-ссылку» закрывает доступ. «Заменить CRM-ссылку» делает старый адрес недействительным; обновите его в CRM. Экспорт не создаёт заказов, резервов, оплат или отправлений."
+
+msgid ""
+"For an unpaid bank-transfer order in UAH, the order result page and My "
+"account show a bank QR with the amount and order number. Scan it inside your"
+" banking app, or use Open banking app on the same phone. Camera links depend"
+" on your bank and phone settings. Check the details before confirming. If "
+"you have already paid, do not pay again: the manager must confirm receipt of"
+" the funds."
+msgstr ""
+"Для неоплаченного заказа в гривнах с оплатой на счёт страница результата и "
+"кабинет показывают банковский QR с суммой и номером заказа. Отсканируйте его"
+" внутри приложения банка или нажмите «Открыть банковское приложение» на том "
+"же телефоне. Переход через камеру зависит от банка и настроек телефона. "
+"Проверьте реквизиты перед подтверждением. Если уже оплатили, не платите "
+"повторно: менеджер должен подтвердить поступление средств."
