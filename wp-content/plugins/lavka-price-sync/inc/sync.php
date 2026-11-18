@@ -65,10 +65,11 @@ function lps_java_fetch_prices_multi(array $skus): array {
     foreach ($items as $x) {
         $sku = (string)($x['sku'] ?? '');
         if ($sku==='') continue;
-        $retail = isset($x['price']) ? (float)$x['price'] : null;
+        $retail = is_numeric($x['price'] ?? null) ? (float)$x['price'] : null;
         $roles  = is_array($x['prices'] ?? null) ? $x['prices'] : [];
         $cleanRoles = [];
         foreach ($roles as $role => $val) {
+            if (!is_numeric($val)) continue;
             $cleanRoles[sanitize_key((string)$role)] = (float)$val;
         }
         $out[] = [
@@ -106,7 +107,7 @@ function lps_apply_prices_multi(array $items, bool $dry = false): array {
         $change = ['retail'=>false, 'roles'=>[]];
 
         // Розничная
-        if (isset($row['retail'])) {
+        if (is_numeric($row['retail'] ?? null)) {
             $ret = (float)$row['retail'];
             if (!$dry) {
                 update_post_meta($pid, '_regular_price', $ret);
@@ -119,6 +120,7 @@ function lps_apply_prices_multi(array $items, bool $dry = false): array {
        // Ролевые
         $roles = is_array($row['roles'] ?? null) ? $row['roles'] : [];
         foreach ($roles as $role => $price) {
+            if (!is_numeric($price)) continue;
             $meta_key = lps_role_meta_key($role);
             if (!$dry) {
                 // ===== transient-замок на post_id+meta_key (защита от параллельной записи) =====
