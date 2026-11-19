@@ -29,8 +29,18 @@ final class CrmCatalogUi {
         $ready=false;try{$ready=$snapshot && CrmCatalog::ready($user,$c,$snapshot);}catch(\Throwable $e){}
         if($ready){
             echo '<h3>'.esc_html__('CRM file ready for review','pc-order-import-export').'</h3><p>'.esc_html(sprintf(__('Products: %d. Prepared: %s (UTC).','pc-order-import-export'),$snapshot['count'],gmdate('Y-m-d H:i',$snapshot['at']))).'</p>';
+            if (!empty($snapshot['unpriced'])) {
+                echo '<p>'.esc_html(sprintf(__('Products included without a purchase price: %d.','pc-order-import-export'), $snapshot['unpriced'])).'</p>';
+            }
             echo '<div class="pcoe-partner-table"><table><thead><tr>';foreach(['SKU','Name','Your price','Stock'] as $h)echo '<th>'.esc_html__($h,'pc-order-import-export').'</th>';echo '</tr></thead><tbody>';
-            foreach($snapshot['preview'] as $row){echo '<tr>';foreach(['sku','name','cost','stock'] as $key)echo '<td>'.esc_html((string)($row[$key]??'—')).'</td>';echo '</tr>';}
+            foreach ($snapshot['preview'] as $row) {
+                $row['cost'] = PartnerCatalogFormats::priceText($row['cost'] ?? null);
+                echo '<tr>';
+                foreach (['sku', 'name', 'cost', 'stock'] as $key) {
+                    echo '<td>'.esc_html((string)($row[$key] ?? '—')).'</td>';
+                }
+                echo '</tr>';
+            }
             echo '</tbody></table></div>';self::form();self::button('download','Download CRM XML for review');echo '</form>';
         }elseif($snapshot)echo '<p>'.esc_html__('The CRM file is outdated or its settings changed. Prepare it again before importing.','pc-order-import-export').'</p>';
         if(!empty($c['selection'])){

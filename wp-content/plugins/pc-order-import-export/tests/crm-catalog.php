@@ -6,7 +6,9 @@ final class CrmCatalogData {
  const BATCH=100;const MAX_PRODUCTS=30000;
  static function context($u,$s){return $GLOBALS['context']??'context-a';}
  static function page($s,$after){$end=min($after+100,$GLOBALS['total']??605);return $after<$end?range($after+1,$end):[];}
- static function rows($u,$ids,$s){$rows=[];foreach($ids as $id)$rows[]=['id'=>$id,'sku'=>'SKU-'.$id,'gtin'=>'0012345678905','name'=>'Paint & colour','category_id'=>2,'description'=>'<text>','short_description'=>'','brand'=>'Brand','retail'=>99.99,'cost'=>($id===($GLOBALS['fail_id']??0)?null:12.34),'stock'=>($id%2?3:null),'images'=>['https://images.example.test/1.jpg'],'url'=>'https://example.test/product/'.$id,'attributes'=>['Colour'=>'Blue'],'unit'=>'ml','pack'=>null];return ['rows'=>$rows,'categories'=>[2=>['name'=>'Paint','parent'=>0]],'at'=>gmdate('c'),'currency'=>'UAH'];}
+ static function rows($u,$ids,$s){
+  if(in_array($GLOBALS['read_failure_id']??0,$ids,true))throw new \RuntimeException('Fixture catalogue read failure');
+  $rows=[];foreach($ids as $id)$rows[]=['id'=>$id,'sku'=>'SKU-'.$id,'gtin'=>'0012345678905','name'=>'Paint & colour','category_id'=>2,'description'=>'<text>','short_description'=>'','brand'=>'Brand','retail'=>99.99,'cost'=>(array_key_exists($id,$GLOBALS['costs']??[])?$GLOBALS['costs'][$id]:12.34),'stock'=>($id%2?3:null),'images'=>['https://images.example.test/1.jpg'],'url'=>'https://example.test/product/'.$id,'attributes'=>['Colour'=>'Blue'],'unit'=>'ml','pack'=>null];return ['rows'=>$rows,'categories'=>[2=>['name'=>'Paint','parent'=>0]],'at'=>gmdate('c'),'currency'=>'UAH'];}
 }
 final class BroadcastStore {static function temporary_file(){return tempnam(sys_get_temp_dir(),'crm-test-');}}
 }
@@ -37,13 +39,14 @@ if(($argv[1]??'')==='endpoint'){
 }
 $c=['selection'=>['brands'=>[1,2],'locations'=>[10]],'revision'=>'rev-1','seed'=>'seed-one','enabled'=>false];C::save(5,$c);$start=C::start(5,$c);S::put(5,'build',$start);
 $GLOBALS['owner_busy']=true;C::tick(5);ok(!S::get(5,'snapshot') && S::get(5,'build')['after']===0,'Concurrent owner job does not read/build a snapshot');unset($GLOBALS['owner_busy']);
+$GLOBALS['costs']=[2=>0,153=>null];
 C::tick(5);$snapshot=S::get(5,'snapshot');ok($snapshot['count']===605,'All 605 rows across multiple batches, no old 500 cap');ok(S::get(5,'build')===[],'Build complete');ok(C::ready(5,$c,$snapshot),'Complete snapshot ready');ok(empty(C::config(5)['enabled']),'Build does not enable a private link');
 $path=S::file(5,$snapshot);$xml=file_get_contents($path);unlink($path);$dom=new \DOMDocument();ok($dom->loadXML($xml),'Complete valid XML');$xp=new \DOMXPath($dom);
-ok($xp->evaluate('count(//offer)')===605.0,'Every row appears once');ok($xp->evaluate('string(//offer/price)')==='12.34','Price is purchase price');ok($xp->evaluate('string(//offer/purchase_price)')==='12.34','Explicit purchase tag');ok($xp->evaluate('string(//offer/barcode)')==='0012345678905','EAN leading zero preserved');ok(!str_contains($xml,'99.99'),'Retail not substituted for purchase');ok($xp->evaluate('string(//offer[@id="2"]/quantity_in_stock)')==='0','Unknown stock never positive');ok($xp->evaluate('string(//offer/@selling_type)')==='w','Wholesale type');
+ok($xp->evaluate('count(//offer)')===605.0,'Every row appears once');ok($xp->evaluate('string(//offer/price)')==='12.34','Price is purchase price');ok($xp->evaluate('string(//offer/purchase_price)')==='12.34','Explicit purchase tag');ok($xp->evaluate('string(//offer/barcode)')==='0012345678905','EAN leading zero preserved');ok($xp->evaluate('count(//offer/retail_price[text()="99.99"])')===605.0 && $xp->evaluate('count(//offer/price[text()="99.99"] | //offer/purchase_price[text()="99.99"])')===0.0,'All available public retail prices have their own field');ok($xp->evaluate('string(//offer[@id="2"]/quantity_in_stock)')==='0','Unknown stock never positive');ok($xp->evaluate('string(//offer/@selling_type)')==='w','Wholesale type');
 $key=C::key(5,$c);$changed=$c;$changed['seed']='new-seed';$changed['enabled']=true;ok(!C::authorized(5,$changed,$key),'Rotated key invalid');ok(!C::authorized(5,$c,$key),'Disabled denied');
 // Simulate termination after snapshot publication but before clearing its build pointer.
 $replay=$start;$replay['generation']=$snapshot['generation'];S::put(5,'build',$replay);
-$GLOBALS['fail_id']=1;C::tick(5);unset($GLOBALS['fail_id']);
+$GLOBALS['read_failure_id']=1;C::tick(5);unset($GLOBALS['read_failure_id']);
 ok(S::get(5,'build')===[],'Recovery recognizes committed publication without rebuilding it');
 S::discard(5,$replay);$path=S::file(5,S::get(5,'snapshot'));ok(filesize($path)>0,'Retry cleanup cannot delete the just-published generation');unlink($path);
 $c['enabled']=true;C::save(5,$c);$state=tempnam(sys_get_temp_dir(),'crm-state-');file_put_contents($state,json_encode(['options'=>$GLOBALS['options'],'meta'=>$GLOBALS['meta']]));
@@ -51,13 +54,43 @@ foreach(['valid'=>200,'bad-key'=>403,'prom-key'=>403,'wrong-owner'=>403,'paused'
  $pipes=[];$proc=proc_open([PHP_BINARY,__FILE__,'endpoint',$state,$case],[1=>['pipe','w'],2=>['pipe','w']],$pipes);$body=stream_get_contents($pipes[1]);$err=stream_get_contents($pipes[2]);fclose($pipes[1]);fclose($pipes[2]);$exit=proc_close($proc);
  ok($exit===0 && str_contains($err,'STATUS:'.$status),'Endpoint '.$case.' '.$err);ok($status===200?str_contains($body,'<purchase_price>12.34</purchase_price>'):!str_contains($body,'<offer'),'No partial/sensitive XML on failure '.$case);
 }unlink($state);
-$sample=D::rows(5,[1],[]);$sample['rows'][0]['cost']=null;try{F::part($sample);$failed=false;}catch(\RuntimeException $e){$failed=true;}ok($failed,'Missing purchase price refuses publication');
+ok($snapshot['unpriced'] === 2, 'Counts unpriced products across batches');
+foreach ([2 => '0', 153 => '3'] as $id => $quantity) {
+    $offer = "//offer[@id='$id']";
+    ok($xp->evaluate("count($offer)") === 1.0, 'Unpriced SKU appears once');
+    ok($xp->evaluate("count($offer/price | $offer/purchase_price)") === 0.0, 'Unpriced SKU omits both numeric prices');
+    ok($xp->evaluate("string($offer/purchase_price_status)") === 'unavailable', 'Missing price explicitly marked');
+    ok($xp->evaluate("string($offer/quantity_in_stock)") === $quantity, 'Missing price preserves real stock');
+    ok($xp->evaluate("string($offer/vendorCode)") === 'SKU-'.$id && $xp->evaluate("string($offer/barcode)") === '0012345678905', 'Keeps SKU and EAN');
+    ok($xp->evaluate("string($offer/description)") === '<text>' && $xp->evaluate("string($offer/picture)") === 'https://images.example.test/1.jpg'
+        && $xp->evaluate("string($offer/param[@name='Colour'])") === 'Blue' && $xp->evaluate("string($offer/url)") === 'https://example.test/product/'.$id, 'Keeps descriptions, photos, attributes and links');
+}
+$sample = D::rows(5,[1],[]); $sample['rows'][0]['retail'] = null;
+$part = F::part($sample);
+ok(!str_contains($part['xml'],'<retail_price>') && str_contains($part['xml'],'<purchase_price>12.34</purchase_price>'), 'Unavailable retail does not suppress purchase price');
+ok($xp->evaluate('count(//offer/purchase_price)') === 603.0 && $xp->evaluate('count(//offer/price)') === 603.0, 'Every other SKU retains its purchase price');
+foreach (['', 'invalid', -1, INF, NAN, 0.001, 10000000000] as $cost) {
+    $sample = D::rows(5,[1],[]); $sample['rows'][0]['cost'] = $cost;
+    $part = F::part($sample);
+    ok($part['unpriced'] === 1 && str_contains($part['xml'],'<vendorCode>SKU-1</vendorCode>') && !str_contains($part['xml'],'<price>'), 'Invalid price only affects its fields');
+}
 $sample=D::rows(5,[1],[]);$retail=\PaintCore\PCOE\PartnerCatalogFormats::yml($sample);ok(str_contains($retail,'<price>99.99</price>') && !str_contains($retail,'<purchase_price>'),'Prom formatter remains retail-only');
 $GLOBALS['context']='updated-shared-settings';ok(!C::ready(5,$c,S::get(5,'snapshot')),'Shared site setting changes invalidate old snapshot');
 C::tick(5);ok(C::ready(5,$c,S::get(5,'snapshot')),'Refresh uses updated shared site settings automatically');
-$old=S::get(5,'snapshot');$GLOBALS['fail_id']=150;S::put(5,'build',C::start(5,$c));C::tick(5);
+$old=S::get(5,'snapshot');$GLOBALS['read_failure_id']=150;S::put(5,'build',C::start(5,$c));C::tick(5);
 ok(S::get(5,'build')['status']==='failed' && S::get(5,'snapshot')['generation']===$old['generation'],'Failed second batch never replaces complete snapshot');
-S::clear(5);S::put(5,'build',C::start(5,$c));C::tick(5);ok(!S::get(5,'snapshot'),'Failed partial preparation cannot publish a first snapshot');unset($GLOBALS['fail_id']);
+S::clear(5);S::put(5,'build',C::start(5,$c));C::tick(5);ok(!S::get(5,'snapshot'),'Failed partial preparation cannot publish a first snapshot');unset($GLOBALS['read_failure_id']);
+// A build interrupted before this release must re-encode all of its rows.
+$previousBuild=C::start(5,$c);unset($previousBuild['offer_format']);$previousBuild['after']=100;
+S::put(5,'build',$previousBuild);C::tick(5);
+ok(S::get(5,'snapshot')['count']===605,'A pre-upgrade partial build restarts from the first SKU');
+$GLOBALS['total']=2; $GLOBALS['costs']=[1=>0,2=>null];
+S::clear(5); S::put(5,'build',C::start(5,$c)); C::tick(5);
+$unpricedSnapshot=S::get(5,'snapshot');
+ok(C::ready(5,$c,$unpricedSnapshot) && $unpricedSnapshot['count']===2 && $unpricedSnapshot['unpriced']===2, 'A selection entirely without prices still produces a complete file');
+$GLOBALS['costs']=[1=>13.50,2=>null]; C::tick(5);
+$updated=S::get(5,'snapshot');$path=S::file(5,$updated);$dom->load($path);unlink($path);
+ok($updated['unpriced']===1 && (new \DOMXPath($dom))->evaluate('string(//offer[@id="1"]/purchase_price)')==='13.50','Corrected price returns on refresh under the same offer ID');
 $GLOBALS['total']=0;S::clear(5);S::put(5,'build',C::start(5,$c));C::tick(5);ok(S::get(5,'build')['status']==='failed' && !S::get(5,'snapshot'),'Empty catalogue cannot publish successful empty feed');
 echo 'PASS '.$GLOBALS['checks']." CRM lifecycle and endpoint checks\n";
 }

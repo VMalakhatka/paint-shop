@@ -833,7 +833,7 @@ guide. Code/render checks do not prove production help publication.
 
 CRM purchase export (2026-11-17, local code/tests): `CrmCatalog*` owns an independent
 `_pcoe_crm_catalog` config and HMAC domain (`crm-purchase`), not a price switch on
-`pcoe_partner_feed`. Never enable purchase-price sharing implicitly. Site location
+`pcoe_partner_feed`. Never enable purchase-price sharing implicitly. CRM XML keeps eligible SKUs without a usable purchase price, omits both purchase price tags, keeps a known public retail price in `retail_price`, and marks the offer with `purchase_price_status=unavailable` (2026-11-19). Site location
 groups may aggregate Folio warehouses; confirm their mapping before promising
 Kyiv-only physical stock. `PartnerCatalogData::build_ids` shares owner-scoped data
 projection but skips Java packaging for this background feed. Private option chunks

@@ -4,23 +4,25 @@ defined('ABSPATH') || exit;
 
 /** Supplier YML: price is the owner's purchase price; never changes the Prom formatter. */
 final class CrmCatalogFormat {
-    public static function part(array $data): string {
-        foreach($data['rows'] as &$r){
-            if(!is_numeric($r['cost']) || !is_finite((float)$r['cost']) || round((float)$r['cost'],2)<0.01 || $r['cost']>9999999999)
-                throw new \RuntimeException(__('A product has no purchase price. Ask the manager to check prices before enabling the CRM feed.','pc-order-import-export'),400);
-            $r['retail']=$r['cost'];
-        }unset($r);
-        $doc=new \DOMDocument();
-        if(!$doc->loadXML(PartnerCatalogFormats::yml($data),LIBXML_NONET))throw new \RuntimeException('Invalid CRM XML');
-        $out='';
-        foreach($doc->getElementsByTagName('offer') as $i=>$offer){
-            $offer->setAttribute('selling_type','w');
-            foreach(['purchase_price'=>number_format($data['rows'][$i]['cost'],2,'.',''),'barcode'=>$data['rows'][$i]['gtin'],'url'=>$data['rows'][$i]['url']] as $tag=>$v){
-                if($v==='')continue;$node=$doc->createElement($tag);$node->appendChild($doc->createTextNode($v));$offer->appendChild($node);
+    /** @return array{xml: string, unpriced: int} */
+    public static function part(array $data): array {
+        $xml = '';
+        $unpriced = 0;
+        foreach ($data['rows'] as $row) {
+            $price = PartnerCatalogFormats::priceText($row['cost'] ?? null);
+            if ($price === null) {
+                ++$unpriced;
             }
-            $out.=$doc->saveXML($offer)."\n";
+            $xml .= PartnerCatalogFormats::offerXml($row, $data['currency'], 'w', [
+                'price' => $price,
+                'purchase_price' => $price,
+                'retail_price' => PartnerCatalogFormats::priceText($row['retail'] ?? null),
+                'purchase_price_status' => $price === null ? 'unavailable' : null,
+                'barcode' => $row['gtin'] !== '' ? $row['gtin'] : null,
+                'url' => $row['url'] !== '' ? $row['url'] : null,
+            ])."\n";
         }
-        return $out;
+        return ['xml' => $xml, 'unpriced' => $unpriced];
     }
     public static function header(array $snapshot): string {
         $e=[PartnerCatalogFormats::class,'xmlText'];

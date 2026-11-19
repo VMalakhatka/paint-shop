@@ -4852,6 +4852,10 @@ msgstr "Складські групи недоступні або перетин
 msgid "Could not read the catalogue. Try preparing the CRM feed again."
 msgstr "Не вдалося прочитати каталог. Спробуйте підготувати CRM-прайс знову."
 
+#, php-format
+msgid "Products included without a purchase price: %d."
+msgstr "Товарів у файлі без закупівельної ціни: %d."
+
 #: inc/CrmCatalogUi.php
 msgid "A product has no purchase price. Ask the manager to check prices before enabling the CRM feed."
 msgstr "У товару немає закупівельної ціни. Попросіть менеджера перевірити ціни перед увімкненням CRM-прайсу."

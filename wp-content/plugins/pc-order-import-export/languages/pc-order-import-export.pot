@@ -4658,6 +4658,10 @@ msgstr ""
 msgid "Could not read the catalogue. Try preparing the CRM feed again."
 msgstr ""
 
+#, php-format
+msgid "Products included without a purchase price: %d."
+msgstr ""
+
 #: inc/CrmCatalogUi.php
 msgid "A product has no purchase price. Ask the manager to check prices before enabling the CRM feed."
 msgstr ""

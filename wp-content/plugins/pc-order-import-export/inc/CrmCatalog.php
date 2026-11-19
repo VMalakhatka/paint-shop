@@ -8,6 +8,7 @@ final class CrmCatalog {
     const HOOK='pcoe_crm_catalog_tick';
     const MAX_AGE=7200;
     const REFRESH=1800;
+    private const OFFER_FORMAT = 2;
     public static function hooks(): void {
         add_action('admin_post_pcoe_crm_catalog',[self::class,'post']);
         add_action('admin_post_pcoe_crm_feed',[self::class,'feed']);
@@ -38,8 +39,8 @@ final class CrmCatalog {
             && hash_equals($snapshot['context']??'',CrmCatalogData::context($user,$c['selection']));
     }
     public static function start(int $user,array $c): array {
-        return ['generation'=>bin2hex(random_bytes(16)),'revision'=>$c['revision'],'context'=>CrmCatalogData::context($user,$c['selection']),
-            'after'=>0,'scanned'=>0,'count'=>0,'bytes'=>0,'hashes'=>[],'categories'=>[],'preview'=>[],'started'=>time(),
+        return ['offer_format'=>self::OFFER_FORMAT,'generation'=>bin2hex(random_bytes(16)),'revision'=>$c['revision'],'context'=>CrmCatalogData::context($user,$c['selection']),
+            'after'=>0,'scanned'=>0,'count'=>0,'unpriced'=>0,'bytes'=>0,'hashes'=>[],'categories'=>[],'preview'=>[],'started'=>time(),
             'currency'=>get_woocommerce_currency(),'status'=>'preparing','error'=>''];
     }
     public static function tick(int $user): void {
@@ -58,7 +59,9 @@ final class CrmCatalog {
                 if(!$b){$b=self::start($user,$c);CrmCatalogStore::put($user,'build',$b);}
                 self::schedule($user,60); // Recovery for process termination before the next durable checkpoint.
                 try {
-                    if($b['revision']!==$c['revision'] || $b['context']!==CrmCatalogData::context($user,$c['selection'])){
+                    if (($b['offer_format'] ?? 1) !== self::OFFER_FORMAT
+                        || $b['revision'] !== $c['revision']
+                        || $b['context'] !== CrmCatalogData::context($user, $c['selection'])) {
                         CrmCatalogStore::discard($user,$b);$b=self::start($user,$c);CrmCatalogStore::put($user,'build',$b);
                     }
                     if(time()-$b['started']>3600)throw new \RuntimeException(__('CRM preparation took too long. Prepare it again or ask the manager to check the scheduler.','pc-order-import-export'),400);
@@ -67,7 +70,10 @@ final class CrmCatalog {
                         $ids=CrmCatalogData::page($c['selection'],(int)$b['after']);
                         if($ids){
                             $data=CrmCatalogData::rows($user,$ids,$c['selection']);
-                            $xml=CrmCatalogFormat::part($data);$index=count($b['hashes']);
+                            $part = CrmCatalogFormat::part($data);
+                            $xml = $part['xml'];
+                            $b['unpriced'] = ($b['unpriced'] ?? 0) + $part['unpriced'];
+                            $index = count($b['hashes']);
                             $b['scanned']+=count($ids);$b['count']+=count($data['rows']);$b['bytes']+=strlen($xml);
                             if($b['scanned']>CrmCatalogData::MAX_PRODUCTS || $b['bytes']>30*1024*1024)throw new \RuntimeException(__('The CRM selection exceeds 30,000 records or 30 MB. Narrow the brands; no partial feed was published.','pc-order-import-export'),400);
                             CrmCatalogStore::chunk($user,$b['generation'],$index,$xml);$b['hashes'][]=hash('sha256',$xml);
