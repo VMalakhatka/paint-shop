@@ -4751,3 +4751,45 @@ msgstr ""
 
 msgid "Save selected rows without invitations"
 msgstr ""
+
+#: inc/ManagerQuickOrder.php
+#, php-format
+msgid "Queued at %s. You can close this page."
+msgstr ""
+
+#: inc/ManagerQuickOrder.php
+msgid "Checking prices and stock"
+msgstr ""
+
+#: inc/ManagerQuickOrder.php
+msgid "Creating Folio accounts"
+msgstr ""
+
+#: inc/ManagerQuickOrder.php
+msgid "Linking warehouse orders"
+msgstr ""
+
+#: inc/ManagerQuickOrder.php
+#, php-format
+msgid "Confirmation requests processed: %1$d of %2$d"
+msgstr ""
+
+#: inc/ManagerQuickOrder.php
+msgid "No queued task was found. Ask an administrator to check the operation ID."
+msgstr ""
+
+#: inc/ManagerQuickOrder.php
+msgid "Status updates automatically while this page is open."
+msgstr ""
+
+#: inc/ManagerQuickOrder.php
+msgid "Run this order now"
+msgstr ""
+
+#: inc/ManagerWorkspace.php
+msgid "Executing this order now…"
+msgstr ""
+
+#: inc/ManagerWorkspace.php
+msgid "Waiting for the scheduler. Checking the saved status…"
+msgstr ""

@@ -94,6 +94,8 @@ final class ManagerDraftOrders {
     public static function render(\WC_Order $source,array $job,bool $customer=false): void {
         $documents=[];foreach($job['response']['documents']??[] as $doc)$documents[(int)$doc['document_id']]=$doc;
         if (!$documents) return;
+        $linking=($job['status']??'')==='running' && ($job['step']??'')==='children'
+            && strtotime($job['updated_at']??'') >= time()-15*MINUTE_IN_SECONDS;
         echo '<h3>'.esc_html__('Orders created from this draft','pc-order-import-export').'</h3>';
         foreach($documents as $id=>$doc) {
             $child=wc_get_order((int)($job['children'][$id]??0));
@@ -103,7 +105,8 @@ final class ManagerDraftOrders {
             echo '<p><strong>'.esc_html($label).'</strong> · '.esc_html(pc_folio_warehouse_label($doc['folio_warehouse_id'])).' · '.esc_html(sprintf(__('Folio account #%s','pc-order-import-export'),$doc['document_number']));
             if($linked) {
                 echo ' · <a href="'.esc_url($customer?$child->get_view_order_url():ManagerWorkspace::url($source->get_customer_id(),$child->get_id())).'">#'.esc_html($child->get_order_number()).'</a> · '.esc_html(wc_get_order_status_name($child->get_status()));
-            } else echo ' · '.esc_html__('Woo order creation needs review. Do not create the Folio document again.','pc-order-import-export');
+            } elseif ($linking) echo ' · '.esc_html__('Linking warehouse orders', 'pc-order-import-export');
+            else echo ' · '.esc_html__('Woo order creation needs review. Do not create the Folio document again.','pc-order-import-export');
             echo '</p>';
         }
     }

@@ -4943,3 +4943,45 @@ msgstr "Только карточка контакта (без аккаунта 
 
 msgid "Save selected rows without invitations"
 msgstr "Сохранить выбранные строки без приглашений"
+
+#: inc/ManagerQuickOrder.php
+#, php-format
+msgid "Queued at %s. You can close this page."
+msgstr "В очереди с %s. Страницу можно закрыть."
+
+#: inc/ManagerQuickOrder.php
+msgid "Checking prices and stock"
+msgstr "Проверяем цены и остатки"
+
+#: inc/ManagerQuickOrder.php
+msgid "Creating Folio accounts"
+msgstr "Создаём счета ФОЛІО"
+
+#: inc/ManagerQuickOrder.php
+msgid "Linking warehouse orders"
+msgstr "Привязываем заказы по складам"
+
+#: inc/ManagerQuickOrder.php
+#, php-format
+msgid "Confirmation requests processed: %1$d of %2$d"
+msgstr "Обработано запросов на подтверждение: %1$d из %2$d"
+
+#: inc/ManagerQuickOrder.php
+msgid "No queued task was found. Ask an administrator to check the operation ID."
+msgstr "Задание отсутствует в очереди. Передайте код операции администратору для проверки."
+
+#: inc/ManagerQuickOrder.php
+msgid "Status updates automatically while this page is open."
+msgstr "Пока страница открыта, статус обновляется автоматически."
+
+#: inc/ManagerQuickOrder.php
+msgid "Run this order now"
+msgstr "Выполнить этот заказ сейчас"
+
+#: inc/ManagerWorkspace.php
+msgid "Executing this order now…"
+msgstr "Выполняем этот заказ…"
+
+#: inc/ManagerWorkspace.php
+msgid "Waiting for the scheduler. Checking the saved status…"
+msgstr "Ожидаем планировщик. Проверяем сохранённый статус…"

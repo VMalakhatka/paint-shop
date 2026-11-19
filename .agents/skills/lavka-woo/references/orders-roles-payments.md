@@ -711,6 +711,8 @@ to ACCOUNT for document reads; do not infer accounting status from that normaliz
 Recovery verifies partner, source Woo marker and all SKU quantities, never resends
 creation. Operator details: docs/MANAGER_CUSTOMER_GUIDE_UK.md, large-order recovery.
 
+Manager quick-order status reads the saved source journal without taking the worker lock. Expediting reuses only a pending, unclaimed Action Scheduler step for the selected order under its source lock; check the operation key and stage before advancing. See `ManagerQuickOrder` and `docs/MANAGER_CUSTOMER_GUIDE_UK.md`.
+
 Manager one-action preparation (2026-10-27): `ManagerQuickOrder` is manager-only,
 uses a persisted job on the source, a separate work copy, and native reserved Woo
 children. Email checkbox defaults on; unchecked suppresses initial customer emails.

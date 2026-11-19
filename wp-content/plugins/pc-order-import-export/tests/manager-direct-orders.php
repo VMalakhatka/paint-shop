@@ -41,7 +41,34 @@ try {
     DirectQuick::start($draft,$user,$direct_input($draft));$initial=$direct_job($draft->get_id());
     DirectQuick::start(wc_get_order($draft->get_id()),$user,$direct_input($draft));
     $check(($initial['flow']??'')==='direct_children' && $direct_job($draft->get_id())['key']===$initial['key'],'New direct operation has one stable key after a double click');
-    DirectQuick::run($draft->get_id());$job=$direct_job($draft->get_id());$children=$direct_children($job);
+    $key=$initial['key'];
+    $expedite=static fn($draft,$key,$step)=>DirectWorkspace::lock('order:'.$draft->get_id(),
+        static fn()=>DirectQuick::expedite($draft,$key,$step));
+    $expect_error(fn()=>DirectQuick::progress($draft,'old-operation'));
+    wp_set_current_user($user->ID);
+    try { $expect_error(fn()=>$expedite($draft,$key,'queued')); }
+    finally { wp_set_current_user($manager_id); }
+    $check(str_contains(DirectQuick::progress($draft,$key)['html'],'data-quick-run="queued"') && $writes===$written,'Polling a queued order does not run it');
+    $expect_error(fn()=>$expedite($draft,'old-operation','queued'));
+    $check(!$expedite($draft,$key,'approvals-0')['processed'] && $writes===$written,'Old step cannot claim a different action');
+    $other_draft=$direct_fixture();
+    DirectQuick::start($other_draft,$user,$direct_input($other_draft));
+    $before_ids[]=$other_draft->get_id();
+    $other_connection=new wpdb(DB_USER,DB_PASSWORD,DB_NAME,DB_HOST);
+    $lock_name=$invoke('lock_name','order:'.$draft->get_id());
+    $check((int)$other_connection->get_var($other_connection->prepare('SELECT GET_LOCK(%s,0)',$lock_name))===1,'Second worker holds the source lock');
+    try {
+        $expect_error(fn()=>$expedite($draft,$key,'queued'));
+        $check(str_contains(DirectQuick::progress($draft,$key)['html'],'data-quick-active') && $writes===$written,'Status remains readable while another worker owns the order');
+    } finally {
+        $other_connection->get_var($other_connection->prepare('SELECT RELEASE_LOCK(%s)',$lock_name));
+        $other_connection->close();
+    }
+    $run=$expedite($draft,$key,'queued');
+    $check($run['processed'] && !str_contains($run['html'],'data-quick-run') && $direct_job($other_draft->get_id())['status']==='queued','Manual step executes only the selected job and renders its terminal state');
+    $check(!$expedite($draft,$key,'queued')['processed'],'Duplicate manager click cannot replay completed creation');
+    $job=$direct_job($draft->get_id());$children=$direct_children($job);
+
     $check($job['status']==='complete' && empty($job['work_order']) && count($children)===1,'Single warehouse produces one real child and no preparation copy');
     $created=array_values(array_diff($direct_ids(),$before_ids));sort($created);$sorted=$children;sort($sorted);
     $check($created===$sorted,'Only actual result orders appear in the customer register');
@@ -86,7 +113,11 @@ try {
     }
     $check($statuses['account']==='processing' && $statuses['waiting_transfer_account']==='on-hold' && $statuses['missing_stock_account']==='pc-draft','All three business document kinds have explicit statuses');
     $check((int)$job['payload']['folio_account_header']['warehouseId']===904 && $job['payload']['manager_stock_pool']['auxiliaryWarehouseIds']===[903],'Direct flow preserves configured shortage warehouse and additional stock selection');
-    for($i=0;$i<3;$i++)DirectQuick::run($draft->get_id());$job=$direct_job($draft->get_id());
+    $key=$job['key'];
+    $check($expedite($draft,$key,'approvals-0')['processed'],'Manager can advance the requested confirmations');
+    $check(!$expedite($draft,$key,'approvals-0')['processed'] && count($test_mails)===$sent+1,'Stale tab cannot send the next confirmation');
+    $check($expedite($draft,$key,'approvals-1')['processed'],'Second confirmation finishes the same operation');
+    DirectQuick::run($draft->get_id());$job=$direct_job($draft->get_id());
     $check($job['status']==='complete' && count($test_mails)===$sent+2 && count($job['approvals'])===2,'Only two accounted orders receive the requested customer confirmations');
     foreach($job['approvals'] as $id=>$notice){
         $check(in_array((int)$id,$job['orders'],true) && $notice['status']==='accepted','Confirmation result belongs to a real accounted child');

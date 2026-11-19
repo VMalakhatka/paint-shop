@@ -59,6 +59,8 @@ class ManagerWorkspace
             'expandSection' => __('Expand', 'pc-order-import-export'),
             'collapseAll' => __('Collapse all sections', 'pc-order-import-export'),
             'expandAll' => __('Expand all sections', 'pc-order-import-export'),
+            'quickRunning' => __('Executing this order now…', 'pc-order-import-export'),
+            'quickWait' => __('Waiting for the scheduler. Checking the saved status…', 'pc-order-import-export'),
             'busy' => __('Processing…', 'pc-order-import-export'),
             'saveFirst' => __('Save draft changes before continuing.', 'pc-order-import-export'),
             'error' => __('The request failed. Reload the workspace to check the saved result before trying again.', 'pc-order-import-export'),
@@ -256,6 +258,10 @@ class ManagerWorkspace
                 return;
             }
             $id = absint($_POST['order_id'] ?? 0);
+            if ($operation === 'quick_status') {
+                $order = self::order($id, $user->ID);
+                wp_send_json_success(ManagerQuickOrder::progress($order, sanitize_text_field(wp_unslash($_POST['operation_key'] ?? ''))));
+            }
             $request_key = sanitize_text_field(wp_unslash($_POST['request_key'] ?? ''));
             if (!$id && !preg_match('/^[a-f0-9-]{36}$/i', $request_key)) {
                 throw new \RuntimeException(__('Reload the workspace before creating a draft.', 'pc-order-import-export'));
@@ -270,6 +276,8 @@ class ManagerWorkspace
                         return $result;
                     }
                     $order = self::order($id, $user->ID);
+                    if ($operation === 'quick_run') return ManagerQuickOrder::expedite($order,
+                        sanitize_text_field(wp_unslash($_POST['operation_key'] ?? '')), sanitize_key($_POST['step'] ?? ''));
                     if ($operation === 'quick_settings') return ManagerQuickOrder::return_to_settings($order,$user,wp_unslash($_POST));
                     if ($operation === 'quick_preview') return ManagerQuickOrder::preview($order,$user,wp_unslash($_POST));
                     if ($operation === 'quick_order') return ManagerQuickOrder::start($order,$user,wp_unslash($_POST));

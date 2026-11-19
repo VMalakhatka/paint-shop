@@ -230,6 +230,97 @@ final class ManagerQuickOrder {
         ob_start(); ManagerWorkspace::documents_table($response); $html=ob_get_clean();
         return ['quick_preview_html'=>$html,'message'=>__('Preview only. Creation checks prices and stock again.','pc-order-import-export')];
     }
+    private static function stalled(array $job): bool {
+        $notice=$job['approvals'][$job['orders'][$job['cursor']??0]??0]??[];
+        $in_flight=$job['status']==='running' || ($job['status']==='approvals' && !empty($notice));
+        return $in_flight && strtotime($job['updated_at']??'') < time()-15*MINUTE_IN_SECONDS;
+    }
+
+    /** Compare the stage too: a second click from an old tab must not advance a different step. */
+    private static function runnable_step(array $job): string {
+        if ($job['status']==='queued' && empty($job['write_started_at'])) return 'queued';
+        if ($job['status']==='approvals' && !empty($job['send'])) {
+            $cursor=(int)($job['cursor']??0);
+            $id=$job['orders'][$cursor]??0;
+            if ($id && empty($job['approvals'][$id])) return 'approvals-'.$cursor;
+        }
+        return '';
+    }
+
+    private static function checked_job(\WC_Order $source,string $key): array {
+        $source->read_meta_data(true);
+        $job=$source->get_meta(self::META,true);
+        if (!current_user_can('manage_woocommerce') || !is_array($job) || $key===''
+            || !hash_equals((string)$job['key'],$key) || (int)$job['customer']!==$source->get_customer_id()) self::fail();
+        return $job;
+    }
+
+    public static function progress(\WC_Order $source,string $key): array {
+        $job=self::checked_job($source,$key);
+        ob_start();
+        self::render_progress($source,$job);
+        return ['html'=>ob_get_clean()];
+    }
+
+    /** Called under the same source order lock as the background worker. Run only an existing pending action. */
+    public static function expedite(\WC_Order $source,string $key,string $step): array {
+        $job=self::checked_job($source,$key);
+        $advanced=false;
+        if ($step!=='' && self::runnable_step($job)===$step) {
+            $ids=as_get_scheduled_actions(['hook'=>self::JOB,'group'=>self::GROUP,'args'=>[$source->get_id()],
+                'status'=>\ActionScheduler_Store::STATUS_PENDING,'claimed'=>false,'per_page'=>1], 'ids');
+            if ($ids) {
+                \ActionScheduler::runner()->process_action((int)reset($ids),'Manager workspace');
+                $advanced=true;
+            }
+        }
+        return self::progress($source,$key)+['processed'=>$advanced];
+    }
+
+    private static function render_progress(\WC_Order $order,array $job): void {
+        $settings_available=self::can_return_to_settings($order);
+        $labels=['queued'=>__('Queued','pc-order-import-export'),'running'=>__('Creating orders; do not submit again','pc-order-import-export'),'approvals'=>__('Sending confirmation requests','pc-order-import-export'),'complete'=>__('Order preparation finished','pc-order-import-export'),'review'=>__('Operation needs review','pc-order-import-export')];
+        $stale=self::stalled($job);
+        $missing_task=self::runnable_step($job)!=='' && strtotime($job['updated_at']??'') < time()-2*MINUTE_IN_SECONDS
+            && !as_has_scheduled_action(self::JOB,[$order->get_id()],self::GROUP);
+        if ($missing_task) $stale=true;
+        echo '<p role="status"><strong>'.esc_html($stale?$labels['review']:($labels[$job['status']]??$labels['review'])).'</strong></p>';
+        if ($missing_task) echo '<p>'.esc_html__('No queued task was found. Ask an administrator to check the operation ID.', 'pc-order-import-export').'</p>';
+        elseif ($stale) echo '<p>'.esc_html__('The operation needs review. Do not submit it again. Check the saved Folio documents and operation ID.','pc-order-import-export').'</p>';
+        if ($job['status']==='queued' && !empty($job['started_at'])) {
+            echo '<p>'.esc_html(sprintf(__('Queued at %s. You can close this page.', 'pc-order-import-export'),wp_date('H:i:s',strtotime($job['started_at'])))).'</p>';
+        }
+        if ($job['status']==='running' && !$stale) {
+            $steps=['preflight'=>__('Checking prices and stock', 'pc-order-import-export'),
+                'documents'=>__('Creating Folio accounts', 'pc-order-import-export'),
+                'children'=>__('Linking warehouse orders', 'pc-order-import-export')];
+            if (isset($steps[$job['step']??''])) echo '<p>'.esc_html($steps[$job['step']]).'</p>';
+        }
+        if ($job['status']==='approvals') echo '<p>'.esc_html(sprintf(__('Confirmation requests processed: %1$d of %2$d', 'pc-order-import-export'),(int)$job['cursor'],count($job['orders']))).'</p>';
+        if (!empty($job['work_order']) && !$settings_available) echo '<p><a class="button" href="'.esc_url(ManagerWorkspace::url($order->get_customer_id(),$job['work_order'])).'">'.esc_html__('Open created orders and Folio documents','pc-order-import-export').'</a></p>';
+        if (($job['flow']??'')===ManagerDraftOrders::FLOW) ManagerDraftOrders::render($order,$job);
+        echo '<p>'.esc_html(sprintf(__('Operation ID: %s','pc-order-import-export'),$job['key'])).'</p>';
+        if (!empty($job['error'])) echo '<p>'.esc_html($job['error']).'</p>';
+        if ($settings_available) {
+            echo '<p>'.esc_html__('The preliminary check stopped before document creation. Return to settings to select warehouses again. This does not create orders, reserve goods or send emails. The stopped attempt stays in history.','pc-order-import-export').'</p><form data-pcoe-manager>';
+            foreach (['operation'=>'quick_settings','customer_id'=>$order->get_customer_id(),'order_id'=>$order->get_id(),'operation_key'=>$job['key'],'revision'=>ManagerWorkspace::revision($order)] as $k=>$v) echo '<input type="hidden" name="'.esc_attr($k).'" value="'.esc_attr($v).'">';
+            echo '<button type="submit" class="button">'.esc_html__('Return to warehouse settings','pc-order-import-export').'</button></form>';
+        }
+        if (empty($job['send'])) echo '<p>'.esc_html__('Confirmation email was not selected.','pc-order-import-export').'</p>';
+        foreach ($job['approvals']??[] as $id=>$notice) {
+            echo '<p>#'.esc_html($id).' · '.esc_html(ApprovalNotifications::label($notice['status']??''));
+            if (!empty($notice['approval'])) echo ' <a href="'.esc_url(CustomerApproval::url(['approval_id'=>$notice['approval']])).'">'.esc_html__('Customer confirmation','pc-order-import-export').'</a>';
+            echo '</p>';
+            if (!empty($notice['error'])) echo '<p>'.esc_html($notice['error']).'</p>';
+        }
+        $active=in_array($job['status'],['queued','running','approvals'],true) && !$stale;
+        if ($active) {
+            $step=self::runnable_step($job);
+            echo '<div data-quick-active><p>'.esc_html__('Status updates automatically while this page is open.', 'pc-order-import-export').'</p>';
+            if ($step!=='') echo '<button type="button" class="button" data-quick-run="'.esc_attr($step).'">'.esc_html__('Run this order now', 'pc-order-import-export').'</button>';
+            echo '</div>';
+        }
+    }
     public static function render(\WC_Order $order): void {
         if (!current_user_can('manage_woocommerce')) return;
         $job=$order->get_meta(self::META,true);
@@ -242,28 +333,9 @@ final class ManagerQuickOrder {
             echo '</details>';
         }
         if ($job) {
-            $settings_available=self::can_return_to_settings($order);
-            $labels=['queued'=>__('Queued','pc-order-import-export'),'running'=>__('Creating orders; do not submit again','pc-order-import-export'),'approvals'=>__('Sending confirmation requests','pc-order-import-export'),'complete'=>__('Order preparation finished','pc-order-import-export'),'review'=>__('Operation needs review','pc-order-import-export')];
-            $stale=$job['status']==='running' && strtotime($job['updated_at'])<time()-15*MINUTE_IN_SECONDS;
-            echo '<p><strong>'.esc_html($stale?$labels['review']:($labels[$job['status']]??$labels['review'])).'</strong></p>';
-            if ($stale) echo '<p>'.esc_html__('The operation needs review. Do not submit it again. Check the saved Folio documents and operation ID.','pc-order-import-export').'</p>';
-            if (!$stale && in_array($job['status'],['queued','running','approvals'],true)) echo '<p>'.esc_html__('Processing continues in the background. Refresh this page to see the result.','pc-order-import-export').'</p>';
-            if (!empty($job['work_order']) && !$settings_available) echo '<p><a class="button" href="'.esc_url(ManagerWorkspace::url($order->get_customer_id(),$job['work_order'])).'">'.esc_html__('Open created orders and Folio documents','pc-order-import-export').'</a></p>';
-            if (($job['flow']??'')===ManagerDraftOrders::FLOW) ManagerDraftOrders::render($order,$job);
-            echo '<p>'.esc_html(sprintf(__('Operation ID: %s','pc-order-import-export'),$job['key'])).'</p>';
-            if (!empty($job['error'])) echo '<p>'.esc_html($job['error']).'</p>';
-            if ($settings_available) {
-                echo '<p>'.esc_html__('The preliminary check stopped before document creation. Return to settings to select warehouses again. This does not create orders, reserve goods or send emails. The stopped attempt stays in history.','pc-order-import-export').'</p><form data-pcoe-manager>';
-                foreach (['operation'=>'quick_settings','customer_id'=>$order->get_customer_id(),'order_id'=>$order->get_id(),'operation_key'=>$job['key'],'revision'=>ManagerWorkspace::revision($order)] as $k=>$v) echo '<input type="hidden" name="'.esc_attr($k).'" value="'.esc_attr($v).'">';
-                echo '<button type="submit" class="button">'.esc_html__('Return to warehouse settings','pc-order-import-export').'</button></form>';
-            }
-            if (empty($job['send'])) echo '<p>'.esc_html__('Confirmation email was not selected.','pc-order-import-export').'</p>';
-            foreach ($job['approvals']??[] as $id=>$notice) {
-                echo '<p>#'.esc_html($id).' · '.esc_html(ApprovalNotifications::label($notice['status']??''));
-                if (!empty($notice['approval'])) echo ' <a href="'.esc_url(CustomerApproval::url(['approval_id'=>$notice['approval']])).'">'.esc_html__('Customer confirmation','pc-order-import-export').'</a>';
-                echo '</p>';
-                if (!empty($notice['error'])) echo '<p>'.esc_html($notice['error']).'</p>';
-            }
+            echo '<div data-quick-progress data-customer="'.esc_attr($order->get_customer_id()).'" data-order="'.esc_attr($order->get_id()).'" data-key="'.esc_attr($job['key']).'">';
+            self::render_progress($order,$job);
+            echo '</div><p data-quick-feedback role="status"></p>';
             echo '</section>'; return;
         }
         if (DraftPurpose::current($order)==='preorder' && pc_folio_order_has_saved_documents($order)) {

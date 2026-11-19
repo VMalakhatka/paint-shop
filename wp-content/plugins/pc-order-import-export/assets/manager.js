@@ -87,6 +87,96 @@
     }
     quickForm?.addEventListener('change', updateAuxiliary);
     updateAuxiliary();
+    const progress = root.querySelector('[data-quick-progress]');
+    if (progress && progress.querySelector('[data-quick-active]')) {
+        const feedback = root.querySelector('[data-quick-feedback]');
+        let timer;
+        let forceInFlight = false;
+        let generation = 0;
+        let lastHtml = '';
+        function schedule(delay = 5000) {
+            clearTimeout(timer);
+            if (!document.hidden && progress.querySelector('[data-quick-active]')) {
+                timer = setTimeout(poll, delay);
+            }
+        }
+        async function request(operation, step = '') {
+            const body = new URLSearchParams({action: 'pcoe_manager', manager_nonce: pcoeManager.nonce,
+                customer_id: progress.dataset.customer, order_id: progress.dataset.order,
+                operation_key: progress.dataset.key, operation, step});
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), operation === 'quick_status' ? 15000 : 120000);
+            try {
+                const response = await fetch(pcoeManager.url, {method: 'POST', body, credentials: 'same-origin', signal: controller.signal});
+                const json = await response.json();
+                if (!response.ok || !json.success || typeof json.data?.html !== 'string') {
+                    throw new Error(json.data?.message || pcoeManager.error);
+                }
+                return json.data;
+            } catch (error) {
+                if (error.name === 'AbortError') throw new Error(pcoeManager.error);
+                throw error;
+            } finally {
+                clearTimeout(timeout);
+            }
+        }
+        function show(data) {
+            if (lastHtml !== data.html) {
+                progress.innerHTML = data.html;
+                lastHtml = data.html;
+            }
+            const run = progress.querySelector('[data-quick-run]');
+            if (run) run.disabled = forceInFlight;
+            return run?.dataset.quickRun;
+        }
+        async function poll() {
+            const current = ++generation;
+            try {
+                const data = await request('quick_status');
+                if (current !== generation) return;
+                show(data);
+                if (!forceInFlight) feedback.textContent = '';
+            } catch (error) {
+                if (current === generation && !forceInFlight) feedback.textContent = error.message || pcoeManager.error;
+            } finally {
+                if (current === generation) schedule();
+            }
+        }
+        progress.addEventListener('click', async event => {
+            const button = event.target.closest('[data-quick-run]');
+            if (!button || forceInFlight) return;
+            forceInFlight = true;
+            button.disabled = true;
+            feedback.textContent = pcoeManager.quickRunning;
+            let step = button.dataset.quickRun;
+            // Only a manager click advances work. Polls and transport retries are read-only.
+            try {
+                while (step) {
+                    const data = await request('quick_run', step);
+                    ++generation;
+                    const next = show(data);
+                    if (!data.processed || next === step) {
+                        feedback.textContent = progress.querySelector('[data-quick-active]') ? pcoeManager.quickWait : '';
+                        break;
+                    }
+                    step = next;
+                    if (!step) feedback.textContent = '';
+                }
+            } catch (error) {
+                feedback.textContent = error.message || pcoeManager.error;
+            } finally {
+                forceInFlight = false;
+                const run = progress.querySelector('[data-quick-run]');
+                if (run) run.disabled = false;
+                schedule();
+            }
+        });
+        document.addEventListener('visibilitychange', () => {
+            ++generation;
+            schedule(0);
+        });
+        schedule();
+    }
     let busy = false;
     let dirty = false;
     function clearPreview() {
@@ -110,73 +200,80 @@
             clearPreview();
         }
     });
-    root.querySelectorAll('form[data-pcoe-manager]').forEach(function (form) {
-        form.addEventListener('submit', async function (event) {
-            event.preventDefault();
-            if (busy || !form.reportValidity()) return;
-            if (dirty && form.elements.operation.value !== 'save') { status.textContent = pcoeManager.saveFirst; return; }
-            if (form.hasAttribute('data-preview-form')) clearPreview();
-            const body = new FormData(form);
-            if (event.submitter?.hasAttribute('data-quick-preview')) body.set('operation','quick_preview');
-            if (form.elements.operation.value === 'save') {
-                const quantities = {};
-                [...body.keys()].forEach(key => {
-                    const match = /^quantity\[(\d+)\]$/.exec(key);
-                    if (match) { quantities[match[1]] = body.get(key); body.delete(key); }
-                });
-                body.set('quantities_json', JSON.stringify(quantities));
-            }
-            body.set('action', 'pcoe_manager');
-            body.set('manager_nonce', pcoeManager.nonce);
-            const buttons = [...root.querySelectorAll('form[data-pcoe-manager] button')];
-            busy = true; buttons.forEach(button => { button.disabled = true; });
-            form.setAttribute('aria-busy', 'true');
-            status.textContent = pcoeManager.busy;
-            status.className = 'notice notice-info';
-            try {
-                const response = await fetch(pcoeManager.url, { method: 'POST', body, credentials: 'same-origin' });
-                const json = await response.json();
-                if (!response.ok || !json.success) throw new Error(json.data?.message || pcoeManager.error);
-                const data = json.data;
-                status.textContent = data.message || '';
-                status.className = 'notice notice-success';
-                if (data.report_html) {
-                    const report = root.querySelector('[data-import-report]');
-                    report.innerHTML = data.report_html;
-                    if (data.url) {
-                        const link = document.createElement('a');
-                        link.href = data.url; link.className = 'button button-primary';
-                        link.textContent = data.message; report.append(link);
-                    } else {
-                        form.elements.request_key.value = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) { var r = crypto.getRandomValues(new Uint8Array(1))[0] & 15; return (c === 'x' ? r : (r & 3) | 8).toString(16); });
-                    }
-                } else if (data.url) {
+    root.addEventListener('submit', async function (event) {
+        const form = event.target;
+        if (!form.matches('form[data-pcoe-manager]')) return;
+        event.preventDefault();
+        if (busy || !form.reportValidity()) return;
+        if (dirty && form.elements.operation.value !== 'save') { status.textContent = pcoeManager.saveFirst; return; }
+        if (form.hasAttribute('data-preview-form')) clearPreview();
+        const body = new FormData(form);
+        if (event.submitter?.hasAttribute('data-quick-preview')) body.set('operation','quick_preview');
+        if (form.elements.operation.value === 'save') {
+            const quantities = {};
+            [...body.keys()].forEach(key => {
+                const match = /^quantity\[(\d+)\]$/.exec(key);
+                if (match) { quantities[match[1]] = body.get(key); body.delete(key); }
+            });
+            body.set('quantities_json', JSON.stringify(quantities));
+        }
+        body.set('action', 'pcoe_manager');
+        body.set('manager_nonce', pcoeManager.nonce);
+        const buttons = [...root.querySelectorAll('form[data-pcoe-manager] button')];
+        busy = true; buttons.forEach(button => { button.disabled = true; });
+        form.setAttribute('aria-busy', 'true');
+        status.textContent = pcoeManager.busy;
+        status.className = 'notice notice-info';
+        try {
+            const response = await fetch(pcoeManager.url, { method: 'POST', body, credentials: 'same-origin' });
+            const json = await response.json();
+            if (!response.ok || !json.success) throw new Error(json.data?.message || pcoeManager.error);
+            const data = json.data;
+            status.textContent = data.message || '';
+            status.className = 'notice notice-success';
+            if (data.report_html) {
+                const report = root.querySelector('[data-import-report]');
+                report.innerHTML = data.report_html;
+                if (data.url) {
+                    const link = document.createElement('a');
+                    link.href = data.url; link.className = 'button button-primary';
+                    link.textContent = data.message; report.append(link);
+                } else {
+                    form.elements.request_key.value = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) { var r = crypto.getRandomValues(new Uint8Array(1))[0] & 15; return (c === 'x' ? r : (r & 3) | 8).toString(16); });
+                }
+            } else if (data.url) {
+                const target = new URL(data.url, location.href);
+                if (target.origin === location.origin && target.pathname === location.pathname && target.search === location.search && target.hash) {
+                    // A fragment-only navigation would leave the old, still actionable form on screen.
+                    history.replaceState(history.state, '', target);
+                    location.reload();
+                } else {
                     window.location.assign(data.url);
                 }
-                if (data.quick_preview_html) {
-                    const preview = root.querySelector('[data-quick-preview-result]');
-                    preview.innerHTML = data.quick_preview_html; preview.hidden = false;
-                    preview.scrollIntoView({behavior:'smooth', block:'center'});
-                }
-                if (data.preview_html) {
-                    const preview = root.querySelector('[data-preview-result]');
-                    preview.innerHTML = data.preview_html; preview.hidden = false;
-                    applyForm.elements.token.value = data.token;
-                    applyForm.elements.mode.value = data.mode;
-                    applyForm.querySelector('[data-confirmation-label]').textContent = data.confirmation_label;
-                    applyForm.querySelector('[data-apply-button]').textContent = data.apply_label;
-                    applyForm.elements.confirmation.checked = false;
-                    applyForm.hidden = !data.can_apply;
-                    preview.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-            } catch (error) {
-                status.textContent = error.message || pcoeManager.error;
-                status.className = 'notice notice-error';
-                if (form === applyForm) clearPreview();
-            } finally {
-                busy = false; buttons.forEach(button => { button.disabled = dirty && !!button.closest('[data-preview-form]'); });
-                form.removeAttribute('aria-busy');
             }
-        });
+            if (data.quick_preview_html) {
+                const preview = root.querySelector('[data-quick-preview-result]');
+                preview.innerHTML = data.quick_preview_html; preview.hidden = false;
+                preview.scrollIntoView({behavior:'smooth', block:'center'});
+            }
+            if (data.preview_html) {
+                const preview = root.querySelector('[data-preview-result]');
+                preview.innerHTML = data.preview_html; preview.hidden = false;
+                applyForm.elements.token.value = data.token;
+                applyForm.elements.mode.value = data.mode;
+                applyForm.querySelector('[data-confirmation-label]').textContent = data.confirmation_label;
+                applyForm.querySelector('[data-apply-button]').textContent = data.apply_label;
+                applyForm.elements.confirmation.checked = false;
+                applyForm.hidden = !data.can_apply;
+                preview.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        } catch (error) {
+            status.textContent = error.message || pcoeManager.error;
+            status.className = 'notice notice-error';
+            if (form === applyForm) clearPreview();
+        } finally {
+            busy = false; buttons.forEach(button => { button.disabled = dirty && !!button.closest('[data-preview-form]'); });
+            form.removeAttribute('aria-busy');
+        }
     });
 })();

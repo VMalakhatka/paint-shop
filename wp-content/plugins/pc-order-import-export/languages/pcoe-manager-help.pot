@@ -463,7 +463,7 @@ msgid "In a saved draft, use Create orders. Optionally select the target account
 msgstr ""
 
 #: inc/ManagerHelp.php
-msgid "Send the customer a confirmation email is checked before the button. Clear it to prepare orders without customer emails. New runs create Woo orders directly under the original draft, each linked to its Folio account; no intermediate preparation draft is created. The original draft keeps its items, title and previous Folio links. Only reserved orders receive confirmation requests, one email per order. Refresh the page for the result."
+msgid "Send the customer a confirmation email is checked before the button. Clear it to prepare orders without customer emails. New runs create Woo orders directly under the original draft, each linked to its Folio account; no intermediate preparation draft is created. The original draft keeps its items, title and previous Folio links. Only reserved orders receive confirmation requests, one email per order. The status updates automatically. To process this order without waiting for the shared queue, select Run this order now."
 msgstr ""
 
 #: inc/ManagerHelp.php
@@ -476,7 +476,7 @@ msgstr ""
 msgid "Use the existing Place customer order from this draft block. Choose automatic, priority or selected-only allocation. Optional additional warehouses supplement the primary warehouse, which is first in that allocation order. There is no separate target selector. Additional warehouses are not counted again as independent destinations."
 msgstr ""
 
-msgid "Save any draft edits, select the allocation settings and optionally preview. Choose whether to email confirmation requests, then click Create orders once. Refresh the page for the saved result. The separate non-accounting action retains its own preview, confirmation and Save only the non-accounting Folio document button."
+msgid "Save any draft edits, select the allocation settings and optionally preview. Choose whether to email confirmation requests, then click Create orders once. The saved result appears in this block automatically. The separate non-accounting action retains its own preview, confirmation and Save only the non-accounting Folio document button."
 msgstr ""
 
 msgid "Ready goods receive ordinary Folio accounts and processing Woo orders by warehouse. Goods requiring transfer receive a separate accounted waiting account on the primary warehouse and an on-hold Woo order. Shortages receive a separate Woo draft linked to a non-accounting account. For 10 requested, 3 ready and 5 on receipt, the result is 3 ready, 5 waiting and 2 shortage. Before picking, arrange and check the transfer; automatic transfer and automatic readiness updates are not implemented."
