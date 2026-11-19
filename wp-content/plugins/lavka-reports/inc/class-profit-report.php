@@ -362,7 +362,7 @@ class Lavka_Reports_Profit_Report {
             'managerEditHelp' => __('The last column is for your manual check. Employee counts must be whole numbers, with a positive total. Excel changes affect this file only. Use the same counts on both city sheets.', 'lavka-reports'),
             'managerGuide' => __('How to use this report', 'lavka-reports'),
             'managerStep1' => __('Select the same month in From month and Through month. For several months, select the first and last month.', 'lavka-reports'),
-            'managerStep2' => __('To open an existing result, click View saved reports, then Open saved month. No new calculation is needed.', 'lavka-reports'),
+            'managerStep2' => __('Click View saved reports, then Open saved month. The latest saved result opens, including preliminary calculations. Review its warnings. Older results are available in Monthly revisions. No new calculation is needed.', 'lavka-reports'),
             'managerStep3' => __('For a new calculation, check Odesa additional work and the RUB rate if applicable. Leave additional work blank for the default; enter 0 to cancel it.', 'lavka-reports'),
             'managerStep4' => __('Click Calculate and save selected months and wait. The same parameters apply to each selected month.', 'lavka-reports'),
             'managerStep5' => __('Check the month, profit and warnings. A dash means unavailable data, not zero. If a result needs review, send the Excel file and the warning to the person responsible.', 'lavka-reports'),

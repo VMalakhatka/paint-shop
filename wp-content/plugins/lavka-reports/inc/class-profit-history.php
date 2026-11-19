@@ -15,6 +15,7 @@ class Lavka_Reports_Profit_History {
         $t = self::translations(); ?>
         <section id="lavr-profit-history" class="lavr-profit-summary">
           <h2><?php echo esc_html($t['title']); ?></h2><p><?php echo esc_html($t['intro']); ?></p>
+          <p><?php echo esc_html($t['latestResultHelp']); ?></p>
           <p><?php echo esc_html($t['auditFirst']); ?></p>
           <div class="lavr-profit-toolbar">
             <label><?php echo esc_html($t['from']); ?><input id="lph-from" type="month" required></label>
@@ -155,6 +156,7 @@ class Lavka_Reports_Profit_History {
         'stop'=>__('Stop after current month','lavka-reports'),
         'export'=>__('Export saved period to Excel','lavka-reports'),
         'intro'=>__('Viewing saved reports does not read Folio. Calculation is a separate action that saves a new monthly revision.','lavka-reports'),
+        'latestResultHelp'=>__('The latest saved result is shown for each month, including preliminary calculations. Warnings remain visible. Failed or unfinished attempts do not replace a result. Older results are available in Monthly revisions.','lavka-reports'),
         'monthlyHelp'=>__('When calculating a range, the manual parameters below apply to each month. A blank additional salary uses the server default for each month; zero overrides it.','lavka-reports'),
         'inventoryHelp'=>__('Period profit and expenses are summed by month. Inventory uses the opening value of the first month and closing value of the last month.','lavka-reports'),
         'loading'=>__('Loading saved reports…','lavka-reports'),
@@ -176,8 +178,7 @@ class Lavka_Reports_Profit_History {
         'running'=>__('Calculating and saving month','lavka-reports'),
         'finished'=>__('Monthly calculations finished. Review saved results and warnings.','lavka-reports'),
         'stopped'=>__('Stopped before the next month. Completed revisions remain saved.','lavka-reports'),
-        'published'=>__('Current saved result','lavka-reports'),
-        'draft'=>__('Preliminary revision','lavka-reports'),
+        'draft'=>__('Preliminary result — review required','lavka-reports'),
         'partial'=>__('Incomplete period: missing or preliminary results require review.','lavka-reports'),
         'dates'=>__('Select a valid month range.','lavka-reports'),
         'detail'=>__('Monthly detail and calculation parameters','lavka-reports'),

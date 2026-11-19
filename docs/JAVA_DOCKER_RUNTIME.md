@@ -22,6 +22,55 @@ Java API `kreul_com_ua`. Он дополняет общий
 Запрос на диагностику не разрешает rebuild, restart или deploy. Production deploy
 выполняется только после отдельного решения, проверки backup и готового rollback.
 
+## Восстановление настроек складов отчёта прибыли — 2026-10-31
+
+Подтверждено read-only через production WordPress: `scope-settings` и
+`scope-catalog` в `/admin/folio/profit-report/` возвращают HTTP 404
+`ROUTE_NOT_FOUND`; `tax-settings` и просмотр сохранённого месяца возвращают 200.
+В работающем Java JAR отсутствуют scope-контроллер и ресурсы V19/V20. В базе
+MariaDB 10.6.19 эти миграции уже успешно применены, таблицы существуют.
+Это регрессия состава сборки, а не основание пересоздавать настройки или отчёты.
+
+Подготовленный Java-кандидат: `dc0994192bb5a9dc4c6a2837e677e8f8bef437f4`,
+ветка `codex/profit-scope-release-recovery`, отправлена в Java origin.
+Основа `2fabbe3` включает актуальные изменения; найденные в production
+vendor-aware Flyway V12 и нормализация SKU также сохранены. Основной расходящийся
+dirty checkout не сбрасывался. Не заменять текущий релиз старым `93136a6`.
+Точные доказательства и контракт находятся в Java
+`docs/api/FOLIO_PROFIT_SCOPE_SETTINGS_API.md`, раздел восстановления от 31.10.2026.
+
+Порядок для отдельно разрешённого выпуска:
+
+1. Использовать чистый checkout согласованного release commit. Проверить
+   `git rev-parse HEAD` и пустой `git status --porcelain`. `deploy.sh` собирает
+   выбранный исходный каталог; запуск из старой или расходящейся main может
+   снова удалить уже работающие функции. Не выполнять слепой reset/pull и не
+   переносить весь dirty каталог в release.
+2. Под JDK 17 проверить tests/package и выполнить Java
+   `python3 scripts/verify-profit-release.py target/Proect_Lavka-0.0.1-SNAPSHOT.jar`.
+   Проверка читает JAR, подтверждает состав и checksum, но не заменяет HTTP-проверку.
+3. До замены проверить отсутствие активных sync/apply, подготовить ecosystem
+   maintenance lock, сохранить текущие image/env и application DB backup по
+   процедуре ниже. Сверить приватный production env с источником следующего
+   запуска `ENV_LOCAL_FILE`, не печатая значений.
+4. Повторно проверить отсутствие failed/pending миграций. Для подтверждённой
+   базы ожидается ноль новых миграций: V12/V19/V20 уже SQL/success=1, checksum
+   соответственно `-1886659825`, `-1642929544`, `497939418`. Не выполнять repair,
+   ручной CREATE или отключение validation при несовпадении.
+5. Запустить штатный `deploy.sh` из проверенного release checkout, затем проверить
+   internal/external health и оба scope GET через авторизацию WordPress: HTTP 200
+   и корректные DTO. Повторить чтение tax-settings и saved history. Для приёмки
+   не нужны PUT настроек, новый расчёт прибыли, refresh или apply.
+
+При неуспехе использовать зафиксированные image/env по процедуре rollback ниже.
+Откат контейнера не удаляет V19/V20 и не исправляет прежние 404; не повторять
+деплой циклически и не откатывать схему или сохранённые отчёты.
+
+Статус подготовки: Maven package прошёл, 309 Java-тестов и 5 проверок упаковки
+успешны; 19 opt-in DB-тестов пропущены, локальный Docker выключен. Docker image
+и production deploy не выполнялись. WordPress proxy и 6 браузерных сценариев
+формы прошли на синтетических данных; frontend-код менять не требуется.
+
 <a id="wayforpay-bank-runtime"></a>
 ## WayForPay: разрешение банковских приходов
 
