@@ -1,5 +1,9 @@
 # Операции и регламенты
 
+`lavka-price-sync/inc/sync.php`: an absent or nonnumeric Folio value must not
+overwrite retail or role metadata. An explicit zero is a price. Release order
+and verification: `docs/OPERATIONS_RUNBOOK.md`, “Ноль и отсутствие цены ФОЛИО”.
+
 ## Durable full sync (2026-10-23)
 
 `lavka-total-sync` 0.2.0 uses `/admin/sync/jobs` protocol 1, persisted ID and short
