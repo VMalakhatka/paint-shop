@@ -4690,3 +4690,256 @@ msgstr "Книга слишком большая. Используйте одн�
 #: inc/PartnerCatalogUi.php
 msgid "Use SKU values, not formulas."
 msgstr "Укажите значения артикулов без формул."
+
+#: inc/PartnerCatalogUi.php
+msgid "Full export help"
+msgstr "Полная справка по экспорту"
+
+#: inc/PartnerCatalogUi.php
+msgid "Short guide (PDF, Ukrainian)"
+msgstr "Краткая инструкция (PDF, на украинском)"
+
+#: inc/PartnerCatalogUi.php
+msgid "How to select products"
+msgstr "Как выбрать товары"
+
+#: inc/PartnerCatalogUi.php
+msgid "Which file to choose"
+msgstr "Какой файл выбрать"
+
+#: inc/PartnerCatalogUi.php
+msgid "How to connect Prom"
+msgstr "Как подключить Prom"
+
+#: inc/PartnerCatalogUi.php
+msgid "If products or photos are missing"
+msgstr "Если не хватает товаров или фото"
+
+#: inc/CrmCatalogUi.php
+msgid "Purchase price feed for CRM / SalesDrive"
+msgstr "Закупочный прайс для CRM / SalesDrive"
+
+#: inc/CrmCatalogUi.php
+msgid "A separate private link contains your purchase prices and the selected warehouse groups. The retail Prom link above is unchanged. Anyone with the CRM link can read your purchase prices; share it only with your CRM."
+msgstr "Отдельная приватная ссылка содержит ваши закупочные цены и выбранные складские группы. Розничная ссылка Prom выше работает как раньше. Каждый, у кого есть CRM-ссылка, может прочитать ваши закупочные цены; передавайте её только своей CRM."
+
+#: inc/CrmCatalogUi.php
+msgid "Brands for the CRM feed"
+msgstr "Бренды для CRM-прайса"
+
+#: inc/CrmCatalogUi.php
+msgid "Stock from warehouse groups"
+msgstr "Остатки складских групп"
+
+
+#: inc/CrmCatalogUi.php
+msgid "Prepare CRM file"
+msgstr "Подготовить CRM-файл"
+
+#: inc/CrmCatalogUi.php
+msgid "Saving pauses the CRM link. Files are prepared in the background, up to 30,000 records and 30 MB. Wait for completion and review the file before enabling the link."
+msgstr "Сохранение приостанавливает CRM-ссылку. Файл готовится в фоне: до 30 000 записей и 30 МБ. Дождитесь завершения и проверьте файл перед включением ссылки."
+
+#: inc/CrmCatalogUi.php
+msgid "CRM preparation failed"
+msgstr "Не удалось подготовить CRM-файл"
+
+#: inc/CrmCatalogUi.php
+msgid "Preparing the CRM file"
+msgstr "Готовится CRM-файл"
+
+#: inc/CrmCatalogUi.php
+msgid "Products prepared: %d"
+msgstr "Подготовлено товаров: %d"
+
+#: inc/CrmCatalogUi.php
+msgid "CRM file ready for review"
+msgstr "CRM-файл готов к проверке"
+
+#: inc/CrmCatalogUi.php
+msgid "Products: %d. Prepared: %s (UTC)."
+msgstr "Товаров: %d. Подготовлено: %s (UTC)."
+
+#: inc/CrmCatalogUi.php
+msgid "Download CRM XML for review"
+msgstr "Скачать CRM XML для проверки"
+
+#: inc/CrmCatalogUi.php
+msgid "The CRM file is outdated or its settings changed. Prepare it again before importing."
+msgstr "CRM-файл устарел или настройки изменились. Подготовьте его снова перед импортом."
+
+#: inc/CrmCatalogUi.php
+msgid "Refresh CRM status"
+msgstr "Обновить состояние CRM-файла"
+
+#: inc/CrmCatalogUi.php
+msgid "Prepare CRM file again"
+msgstr "Подготовить CRM-файл снова"
+
+#: inc/CrmCatalogUi.php
+msgid "Map purchase_price (or price) to purchase cost, not your selling price. Use vendorCode for SKU, barcode for EAN and quantity_in_stock for quantity. First test a few products in SalesDrive."
+msgstr "Сопоставьте purchase_price (или price) с закупочной стоимостью, а не своей ценой продажи. Артикул — vendorCode, EAN — barcode, количество — quantity_in_stock. Сначала проверьте несколько товаров в SalesDrive."
+
+#: inc/CrmCatalogUi.php
+msgid "Private CRM URL — contains purchase prices"
+msgstr "Приватная CRM-ссылка — содержит закупочные цены"
+
+#: inc/CrmCatalogUi.php
+msgid "The CRM link is paused."
+msgstr "CRM-ссылка приостановлена."
+
+#: inc/CrmCatalogUi.php
+msgid "I reviewed the file and authorize my CRM to read my purchase prices."
+msgstr "Я проверил файл и разрешаю своей CRM читать мои закупочные цены."
+
+#: inc/CrmCatalogUi.php
+msgid "Enable CRM link"
+msgstr "Включить CRM-ссылку"
+
+#: inc/CrmCatalogUi.php
+msgid "Pause CRM link"
+msgstr "Приостановить CRM-ссылку"
+
+#: inc/CrmCatalogUi.php
+msgid "Replace CRM link"
+msgstr "Заменить CRM-ссылку"
+
+#: inc/CrmCatalogUi.php
+msgid "The URL stays the same when data refreshes. Replacement invalidates the old URL. Enabled files refresh about every 30 minutes when the scheduler runs; files older than two hours are not served. Configure the read schedule in your CRM."
+msgstr "Адрес не меняется при обновлении данных. Замена делает старый адрес недействительным. Включённые файлы обновляются примерно каждые 30 минут при работе планировщика; файлы старше двух часов не выдаются. Расписание чтения настройте в своей CRM."
+
+
+#: inc/CrmCatalogUi.php
+msgid "Could not schedule the CRM export. Ask the administrator to check the scheduler."
+msgstr "Не удалось запланировать CRM-экспорт. Попросите администратора проверить планировщик."
+
+
+#: inc/CrmCatalogUi.php
+msgid "CRM preparation took too long. Prepare it again or ask the manager to check the scheduler."
+msgstr "Подготовка CRM-файла длится слишком долго. Запустите её снова или попросите менеджера проверить планировщик."
+
+#: inc/CrmCatalogUi.php
+msgid "The CRM selection exceeds 30,000 records or 30 MB. Narrow the brands; no partial feed was published."
+msgstr "Подборка CRM превышает 30 000 записей или 30 МБ. Сократите список брендов; частичный файл не опубликован."
+
+#: inc/CrmCatalogUi.php
+msgid "Could not prepare the CRM feed. Retry or contact the manager."
+msgstr "Не удалось подготовить CRM-прайс. Повторите или обратитесь к менеджеру."
+
+#: inc/CrmCatalogUi.php
+msgid "Select brands and warehouse groups for the CRM feed."
+msgstr "Выберите бренды и складские группы для CRM-прайса."
+
+#: inc/CrmCatalogUi.php
+msgid "Confirm sharing your purchase prices with your CRM."
+msgstr "Подтвердите передачу своих закупочных цен в CRM."
+
+#: inc/CrmCatalogUi.php
+msgid "Wait for a complete, current CRM file before enabling the link."
+msgstr "Перед включением ссылки дождитесь полного актуального CRM-файла."
+
+#: inc/CrmCatalogUi.php
+msgid "Could not complete the action. Check the CRM preparation status and try again."
+msgstr "Не удалось выполнить действие. Проверьте состояние подготовки CRM-файла и повторите."
+
+#: inc/CrmCatalogUi.php
+msgid "Warehouse groups are unavailable or overlap. Ask the manager to check the mapping."
+msgstr "Складские группы недоступны или пересекаются. Попросите менеджера проверить привязку складов."
+
+#: inc/CrmCatalogUi.php
+msgid "Could not read the catalogue. Try preparing the CRM feed again."
+msgstr "Не удалось прочитать каталог. Попробуйте подготовить CRM-прайс снова."
+
+#, php-format
+msgid "Products included without a purchase price: %d."
+msgstr "Товаров в файле без закупочной цены: %d."
+
+#: inc/CrmCatalogUi.php
+msgid "A product has no purchase price. Ask the manager to check prices before enabling the CRM feed."
+msgstr "У товара нет закупочной цены. Попросите менеджера проверить цены перед включением CRM-прайса."
+
+#: inc/CrmCatalogUi.php
+msgid "One CRM export batch is too large. Ask the manager to check product descriptions."
+msgstr "Часть CRM-экспорта слишком велика. Попросите менеджера проверить описания товаров."
+
+#: inc/CrmCatalogUi.php
+msgid "Warehouse group composition comes from the shared site settings and is the same for every customer. Choose which groups this feed includes. Stock uses website data."
+msgstr "Состав групп берётся из общих настроек сайта и одинаков для всех клиентов. Выберите группы для этой выгрузки. Используются остатки из данных сайта."
+
+msgid "Check the Contacts worksheet, column headers and unique organization IDs."
+msgstr "Проверьте лист «Контакты», заголовки столбцов и уникальные ID организаций."
+
+msgid "Choose a customer role."
+msgstr "Выберите роль клиента."
+
+msgid "Excel contacts"
+msgstr "Контакты из Excel"
+
+msgid "Previously imported"
+msgstr "Уже импортировано"
+
+msgid "Contact only"
+msgstr "Только контакт"
+
+msgid "Default role for this workbook"
+msgstr "Роль по умолчанию для этой книги"
+
+msgid "Review workbook"
+msgstr "Проверить книгу"
+
+msgid "Check the role and registration email for each organization. Shared or occupied addresses are kept in the contact card."
+msgstr "Проверьте роль и email для регистрации каждой организации. Общие или уже занятые адреса сохраняются в карточке контакта."
+
+msgid "Organization"
+msgstr "Организация"
+
+msgid "Registration email"
+msgstr "Email для регистрации"
+
+msgid "Save this page and register selected accounts"
+msgstr "Сохранить эту страницу и зарегистрировать выбранные аккаунты"
+
+msgid "Organizations in workbook: %d"
+msgstr "Организаций в книге: %d"
+
+msgid "Contacts published on the organization website"
+msgstr "Контакты опубликованы на сайте организации"
+
+msgid "Schools and studios"
+msgstr "Школы и студии"
+
+msgid "Customer group"
+msgstr "Группа клиентов"
+
+msgid "All groups"
+msgstr "Все группы"
+
+msgid "No group"
+msgstr "Без группы"
+
+msgid "Unknown customer group."
+msgstr "Неизвестная группа клиентов."
+
+msgid "Invitation skipped: do not contact"
+msgstr "Приглашение пропущено: не писать"
+
+msgid "Register and send invitations"
+msgstr "Зарегистрировать и прислать приглашение"
+
+msgid "Select at least one organization on this page."
+msgstr "Выберите хотя бы одну организацию на этой странице."
+
+msgid "Select all on this page"
+msgstr "Выбрать всех на этой странице"
+
+msgid "Select %s"
+msgstr "Выбрать %s"
+
+msgid "Check the organizations to process. Invitations go to the selected registration email. Contact-only rows save a card without creating an account or sending a message."
+msgstr "Отметьте нужные организации. Приглашение придёт на выбранный email для регистрации. Для строк без такого email сохранится только карточка контакта, без аккаунта и сообщения."
+
+msgid "Contact card only (no account or email)"
+msgstr "Только карточка контакта (без аккаунта и письма)"
+
+msgid "Save selected rows without invitations"
+msgstr "Сохранить выбранные строки без приглашений"

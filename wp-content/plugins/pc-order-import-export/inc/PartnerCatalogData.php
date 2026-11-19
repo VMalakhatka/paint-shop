@@ -54,8 +54,15 @@ final class PartnerCatalogData {
     }
     public static function text(string $value): string {return trim(wp_strip_all_tags(strip_shortcodes(html_entity_decode($value,ENT_QUOTES|ENT_HTML5,'UTF-8'))));}
     public static function build(int $user,array $selection): array {
-        return BroadcastPricing::scope($user,static function()use($selection){
-            [$ids,$missing]=self::ids($selection);$rows=[];$seen=[];$categories=[];$locations=PriceList::location_ids();
+        return BroadcastPricing::scope($user,static function()use($user,$selection){
+            [$ids,$missing]=self::ids($selection);
+            return self::build_ids($user,$ids,$selection,PriceList::location_ids(),$missing);
+        });
+    }
+    /** Bounded shared projection; CRM supplies its own warehouse selection and skips Java packaging. */
+    public static function build_ids(int $user,array $ids,array $selection,array $locations,array $missing=[],bool $packaging=true,bool $require_rows=true): array {
+        return BroadcastPricing::scope($user,static function()use($ids,$selection,$locations,$missing,$packaging,$require_rows){
+            $rows=[];$seen=[];$categories=[];
             foreach(PriceList::catalogue_rows(self::products($ids,$selection),$locations) as $entry){
                 if(!isset($entry['product_id']))continue;
                 $p=wc_get_product($entry['product_id']);$parent=$p->get_parent_id()?wc_get_product($p->get_parent_id()):$p;$v=$entry['values'];
@@ -73,9 +80,9 @@ final class PartnerCatalogData {
                 $seen[]=$v[0];
             }
             $missing=array_values(array_unique(array_merge($missing,array_diff($selection['skus'],$seen))));
-            if(!$rows)throw new \RuntimeException(__('No exportable products. Check SKUs and filters.','pc-order-import-export'));
+            if(!$rows && $require_rows)throw new \RuntimeException(__('No exportable products. Check SKUs and filters.','pc-order-import-export'));
             $warnings=[];
-            try{$packs=CommercialOffer::packaging(array_column($rows,'sku'));}catch(\Throwable $e){$packs=[];$warnings[]=__('Pack quantities are unavailable. Contact the manager if you need them.','pc-order-import-export');}
+            try{$packs=$packaging && $rows?CommercialOffer::packaging(array_column($rows,'sku')):[];}catch(\Throwable $e){$packs=[];$warnings[]=__('Pack quantities are unavailable. Contact the manager if you need them.','pc-order-import-export');}
             foreach($rows as &$row)$row['pack']=$packs[$row['sku']]??null;unset($row);
             return ['rows'=>$rows,'categories'=>$categories,'missing'=>$missing,'warnings'=>$warnings,'at'=>gmdate('c'),'currency'=>get_woocommerce_currency()];
         });

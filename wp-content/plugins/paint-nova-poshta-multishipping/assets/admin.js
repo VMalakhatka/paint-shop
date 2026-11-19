@@ -168,6 +168,7 @@
             var address = findByRef(addresses, ref);
 
             $row.find('.pnpm-sender-address-ref').val(ref);
+            $row.find('.pnpm-sender-address-label').val(address ? String(address.description || '') : '');
             $row.find('.pnpm-city-ref').val(address ? String(address.cityRef || '') : '');
             $row.find('.pnpm-city-label').text(
                 address && address.cityDescription ? address.cityDescription : ''

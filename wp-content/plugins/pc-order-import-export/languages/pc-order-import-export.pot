@@ -4498,3 +4498,256 @@ msgstr ""
 #: inc/PartnerCatalogUi.php
 msgid "Use SKU values, not formulas."
 msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Full export help"
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Short guide (PDF, Ukrainian)"
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "How to select products"
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "Which file to choose"
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "How to connect Prom"
+msgstr ""
+
+#: inc/PartnerCatalogUi.php
+msgid "If products or photos are missing"
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "Purchase price feed for CRM / SalesDrive"
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "A separate private link contains your purchase prices and the selected warehouse groups. The retail Prom link above is unchanged. Anyone with the CRM link can read your purchase prices; share it only with your CRM."
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "Brands for the CRM feed"
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "Stock from warehouse groups"
+msgstr ""
+
+
+#: inc/CrmCatalogUi.php
+msgid "Prepare CRM file"
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "Saving pauses the CRM link. Files are prepared in the background, up to 30,000 records and 30 MB. Wait for completion and review the file before enabling the link."
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "CRM preparation failed"
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "Preparing the CRM file"
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "Products prepared: %d"
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "CRM file ready for review"
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "Products: %d. Prepared: %s (UTC)."
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "Download CRM XML for review"
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "The CRM file is outdated or its settings changed. Prepare it again before importing."
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "Refresh CRM status"
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "Prepare CRM file again"
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "Map purchase_price (or price) to purchase cost, not your selling price. Use vendorCode for SKU, barcode for EAN and quantity_in_stock for quantity. First test a few products in SalesDrive."
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "Private CRM URL — contains purchase prices"
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "The CRM link is paused."
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "I reviewed the file and authorize my CRM to read my purchase prices."
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "Enable CRM link"
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "Pause CRM link"
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "Replace CRM link"
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "The URL stays the same when data refreshes. Replacement invalidates the old URL. Enabled files refresh about every 30 minutes when the scheduler runs; files older than two hours are not served. Configure the read schedule in your CRM."
+msgstr ""
+
+
+#: inc/CrmCatalogUi.php
+msgid "Could not schedule the CRM export. Ask the administrator to check the scheduler."
+msgstr ""
+
+
+#: inc/CrmCatalogUi.php
+msgid "CRM preparation took too long. Prepare it again or ask the manager to check the scheduler."
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "The CRM selection exceeds 30,000 records or 30 MB. Narrow the brands; no partial feed was published."
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "Could not prepare the CRM feed. Retry or contact the manager."
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "Select brands and warehouse groups for the CRM feed."
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "Confirm sharing your purchase prices with your CRM."
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "Wait for a complete, current CRM file before enabling the link."
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "Could not complete the action. Check the CRM preparation status and try again."
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "Warehouse groups are unavailable or overlap. Ask the manager to check the mapping."
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "Could not read the catalogue. Try preparing the CRM feed again."
+msgstr ""
+
+#, php-format
+msgid "Products included without a purchase price: %d."
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "A product has no purchase price. Ask the manager to check prices before enabling the CRM feed."
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "One CRM export batch is too large. Ask the manager to check product descriptions."
+msgstr ""
+
+#: inc/CrmCatalogUi.php
+msgid "Warehouse group composition comes from the shared site settings and is the same for every customer. Choose which groups this feed includes. Stock uses website data."
+msgstr ""
+
+msgid "Check the Contacts worksheet, column headers and unique organization IDs."
+msgstr ""
+
+msgid "Choose a customer role."
+msgstr ""
+
+msgid "Excel contacts"
+msgstr ""
+
+msgid "Previously imported"
+msgstr ""
+
+msgid "Contact only"
+msgstr ""
+
+msgid "Default role for this workbook"
+msgstr ""
+
+msgid "Review workbook"
+msgstr ""
+
+msgid "Check the role and registration email for each organization. Shared or occupied addresses are kept in the contact card."
+msgstr ""
+
+msgid "Organization"
+msgstr ""
+
+msgid "Registration email"
+msgstr ""
+
+msgid "Save this page and register selected accounts"
+msgstr ""
+
+msgid "Organizations in workbook: %d"
+msgstr ""
+
+msgid "Contacts published on the organization website"
+msgstr ""
+
+msgid "Schools and studios"
+msgstr ""
+
+msgid "Customer group"
+msgstr ""
+
+msgid "All groups"
+msgstr ""
+
+msgid "No group"
+msgstr ""
+
+msgid "Unknown customer group."
+msgstr ""
+
+msgid "Invitation skipped: do not contact"
+msgstr ""
+
+msgid "Register and send invitations"
+msgstr ""
+
+msgid "Select at least one organization on this page."
+msgstr ""
+
+msgid "Select all on this page"
+msgstr ""
+
+msgid "Select %s"
+msgstr ""
+
+msgid "Check the organizations to process. Invitations go to the selected registration email. Contact-only rows save a card without creating an account or sending a message."
+msgstr ""
+
+msgid "Contact card only (no account or email)"
+msgstr ""
+
+msgid "Save selected rows without invitations"
+msgstr ""

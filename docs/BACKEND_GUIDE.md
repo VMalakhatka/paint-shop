@@ -77,6 +77,22 @@ Frontend не обращается напрямую к MSSQL или MariaDB. PHP
 
 ## Репозитории и владельцы
 
+Банковский QR (2026-11-14, код, без production deploy) принадлежит
+`pc-folio-customer-balance/inc/bacs-qr.php`. Переиспользует подтверждённый Woo
+BACS recipient, HPOS CRUD и приватные Woo order pages; ничего не записывает.
+Payload НБУ 002 формируется в PHP, изображение — локальным JS с коррекцией Q
+(M для длинного содержимого),
+версией символа 10–17 и знаком гривны. Не использовать сторонний QR image API
+и не превращать переход по ссылке в подтверждение оплаты/событие WFP.
+Ограничения и выпуск: [инструкция менеджера](MANAGER_CUSTOMER_GUIDE_UK.md#payment-recipient).
+Изолированный регресс: `php wp-content/mu-plugins/pc-folio-customer-balance/tests/bacs-qr.php`.
+Browser/decode регресс: `node wp-content/mu-plugins/pc-folio-customer-balance/tests/bacs-qr-ui.cjs`
+(Playwright, Chrome/Chromium, Python с Pillow и zxing-cpp; пути можно передать
+через `CHROME_BIN`, `PHP_BIN`, `PYTHON_BIN`). Проверяет обычный и максимальный
+payload на desktop/390px/320px, декодирование с гривной, отсутствие сети и
+fallback без JS. На 14.11.2026 прошли 48 PHP-проверок и 6 декодирований;
+это не проверка банковского приложения или полного Woo checkout.
+
 | Область | Репозиторий/компонент | Владелец знания |
 |---|---|---|
 | WordPress, WooCommerce, PHP plugins, theme, proxy и deploy сайта | WordPress repository | `$lavka-woo` |
@@ -568,3 +584,9 @@ It reuses WordPress visibility, scoped pricing and stock; packaging reads the ex
 Java endpoint. No separate feed database or Java change. Limits and the customer
 workflow are in [the wholesale guide](WHOLESALE_CUSTOMER_GUIDE_UK.md); internal
 ownership and access invariants are in the Lavka skill's orders reference.
+
+Закупочный CRM-feed (2026-11-17): `CrmCatalog*` в PCOE — отдельный персональный
+YML, multiple brands, выбранные торговые location, приватные option chunks,
+фоновая подготовка XML из уже синхронизированных данных Woo с per-owner lock.
+Не запускает Java/ФОЛИО или дополнительную синхронизацию. Retail Prom не меняется.
+[Контракт, разрешения, жизненный цикл, тесты и rollout](api/CRM_CATALOG_FEED.md).

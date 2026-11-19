@@ -11,8 +11,31 @@ Lifecycle 0.9.0 adds explicit preview/create, private PDF and at-most-once order
 email. Keep the same PCOE lock; commit the create claim BEFORE either recipient or
 document save. Unknown/rejected/creating states never auto-retry. The first attempt
 freezes preparation; remaining warehouses require the same order fingerprint.
-External TTNs cannot use store-key printing. No COD, courier address, non-cash carrier
-payment, polling, Telegram or automated reconciliation yet. The official docs were accessible in Chrome on 2026-10-18;
+External TTNs cannot use store-key printing. Version 0.11.0 adds reviewed
+single-warehouse COD: explicit amount and money-transfer fee payer or payment
+control under an active NovaPay agreement. Never default the return service or
+combine both carrier collection fields. Save exact kopecks and payment basis;
+revalidate paid state, total and method before writing. Old drafts require resave;
+locked attempts require reconciliation. Declared value and delivery quote are not
+collection; the quote excludes transfer commission. Courier sender addresses are
+supported since 0.11.3 below; non-cash carrier payment, polling, Telegram and
+automated recovery remain unavailable.
+Manager UI 0.11.1 (2026-11-12): successful preparation save returns current local
+lifecycle HTML/audit/revision; replace only the NP blocks. Never retain a create
+token or consent across saves; manually entered legal names survive only for the
+same saved recipient name/phone. Delegated handlers must work after first save and
+replacement. Expiry disables create and offers a fresh preview without page reload;
+server expiry/fingerprints remain authoritative. Never turn automatic UI refresh
+into carrier writes or retries. A missing sender contact gets a specific pre-claim
+error; it does not authorize silently selecting a different Ref.
+Read-only COD capability diagnosis (verified live 2026-11-11): match the exact
+configured sender against `Counterparty.getCounterparties`, then read
+`getCounterpartyOptions` for that Ref. `CanAfterpaymentOnGoodsCost=true` confirms
+payment-control availability at that moment, not settlement account, fees, or
+successful TTN creation. Missing/failed responses are inconclusive. Use the
+existing server credential, never recipient/document save as a capability test;
+this diagnostic is not an automatic lifecycle check in version 0.11.0.
+The official docs were accessible in Chrome on 2026-10-18;
 do not repeat the earlier 403 as a current access blocker. Read
 [the contract review](../../../../docs/api/NOVA_POSHTA_SHIPMENT_CONTRACT.md)
 before extending the lifecycle: official examples have contradictions, status 1
@@ -35,7 +58,11 @@ requires the configured contact Ref AND phone under the current sender. A matchi
 phone on another contact does not pass ownership. An owner-approved repair changes
 only the selected location's `contact_ref`, after unique-match, backup, lock and
 concurrency checks; never reset shipment state or write to the carrier. HTTP 200
-directory responses can still be unsuccessful. Recovery and evidence boundaries:
+directory responses can still be unsuccessful. Reconfirmed 2026-11-12 on 0.11.0:
+a stale contact Ref absent from a successful sender directory blocked preflight
+before any create claim. An owner-approved one-field repair passed a fresh preview;
+it did not change preparation or create a TTN. The cause of the vanished Ref is
+unknown; never silently relink by phone. Recovery and evidence boundaries:
 manager guide `#np-preparation`.
 
 NP recipient verification 0.9.3 (2026-10-18): save does not promise contact Phones.
@@ -280,3 +307,39 @@ branches around each card heading without reparenting forms. Preserve this bound
 NP and Folio modules bind to their existing nodes. Visibility belongs to session
 storage, not order metadata, and must never change draft/preorder purpose. The
 manager guide documents controls, anchors, validation and no-JS fallback.
+
+### Shared courier pickup (2026-11-13, NP 0.11.3)
+
+Per-shipment `request_snapshot.handover` overrides only the mapping default.
+`DoorsWarehouse` lifecycle verifies the registered sender address/city and contact
+through a fresh directory. A required administrator attestation binds the NP
+service enrollment and disabled automatic individual calls to the exact sender
+and API account; it is not activation at NP or an inferred capability flag.
+
+`CourierQueue` / `Admin/CourierPage` separate unnumbered drafts from created,
+store-owned address TTNs at WooCommerce → Nova Poshta courier queue. Group exact
+sender/city/address/contact/phone; incomplete origins never merge. External TTNs
+are excluded. Display labels remain outside the frozen order fingerprint; the
+actual verified origin label and account fingerprint are stored with creation.
+
+`CourierStorage` explicitly installs three InnoDB tables (calls/members/events)
+through an administrator setup action, never silently during release validation.
+`CourierPickup` provides available intervals, a user/account/row-bound five-minute
+preview and explicit create → persist Barcode → insertDocuments. Unique token,
+origin/date/interval and membership keys plus a shared lock prevent duplicate
+calls. Durable local claims precede HTTP; no DB transaction spans an API call.
+All courier mutations require the existing double write gate and never retry.
+
+Partial/unknown responses retain claims. Refresh is read-only: carrier call list
+covers seven days, while the document list is paged until empty. Persist the raw
+responses and exact missing/extra TTNs. Never infer cancellation from absence or
+recover an unknown call by similar address text. Local history keeps the latest
+30 operations visible. Editing/cancelling/adding to old calls/releasing claims
+is not implemented; reconciliation belongs in the NP account with an admin.
+The creation flow does not change COD, payment, recipients or Folio documents.
+
+Deploy NP and PCOE help/catalogs together, initialize storage explicitly and
+confirm service enrollment only after NP confirms it. Tests use synthetic local
+orders and intercept all HTTP/mail. No real pickup, TTN or production migration
+is part of development. Read [verified contracts](../../../../docs/api/NOVA_POSHTA_SHIPMENT_CONTRACT.md#courier-contract)
+and [manager steps](../../../../docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-courier).

@@ -30,6 +30,7 @@ $form_fields = static function (string $operation) use ($customer_id, $order): v
 <p><a class="button" href="<?php echo esc_url(ManagerHelp::url()); ?>" target="_blank" rel="noopener noreferrer"><?php ManagerHelp::load(); esc_html_e('Manager guide', 'pcoe-manager-help'); ?></a></p>
 <?php if ($mailings_tab) { BroadcastUi::render(); echo '</div>'; return; } ?>
 <?php if (($_GET['view'] ?? '') === 'customer-import') { FolioCustomerImportUi::render(); echo '</div>'; return; } ?>
+<?php if (($_GET['view'] ?? '') === 'excel-contacts' && FolioCustomerImport::allowed()) { ContactImportUi::render(); echo '</div>'; return; } ?>
 <?php if ($messages_tab) { Conversations::render(); echo '</div>'; return; } ?>
 <?php if ($orders_tab) { require __DIR__ . '/manager-orders-view.php'; echo '</div>'; return; } ?>
 <?php if ($error): ?><div class="notice notice-error"><p><?php echo esc_html($error); ?></p></div><?php endif; ?>
@@ -41,16 +42,18 @@ $folio_types = ManagerWorkspace::folio_organization_types();
 $folio_type = sanitize_text_field(wp_unslash($_GET['customer_folio_type'] ?? ''));
 $folio_type = isset($folio_types[$folio_type]) ? $folio_type : '';
 $directory_page = max(1, absint($_GET['customers_page'] ?? 1));
-$directory = ManagerWorkspace::directory($search, $role, $city, $directory_page, 25, $folio_type);
+$group = sanitize_key($_GET['customer_group'] ?? '');
+$directory = ManagerWorkspace::directory($search, $role, $city, $directory_page, 25, $folio_type, $group);
 $role_names = wp_roles()->get_names();
-$directory_url = add_query_arg(['page' => ManagerWorkspace::PAGE, 'customer_search' => $search, 'customer_role' => $role, 'customer_city' => $city, 'customer_folio_type' => $folio_type], admin_url('admin.php'));
+$directory_url = add_query_arg(['page' => ManagerWorkspace::PAGE, 'customer_search' => $search, 'customer_role' => $role, 'customer_city' => $city, 'customer_folio_type' => $folio_type, 'customer_group'=>$group], admin_url('admin.php'));
 ?>
 <section class="pcoe-card">
-<?php if (FolioCustomerImport::allowed()): ?><p><a class="button" href="<?php echo esc_url(FolioCustomerImportUi::url()); ?>"><?php esc_html_e('Import customers from Folio', 'pc-order-import-export'); ?></a></p><?php endif; ?>
+<?php if (FolioCustomerImport::allowed()): ?><p><a class="button" href="<?php echo esc_url(FolioCustomerImportUi::url()); ?>"><?php esc_html_e('Import customers from Folio', 'pc-order-import-export'); ?></a> <a class="button" href="<?php echo esc_url(ContactImportUi::url()); ?>"><?php esc_html_e('Excel contacts', 'pc-order-import-export'); ?></a></p><?php endif; ?>
 <form method="get" class="pcoe-directory-filters">
 <input type="hidden" name="page" value="<?php echo esc_attr(ManagerWorkspace::PAGE); ?>">
 <label for="pcoe-search"><?php esc_html_e('Find customer by name, company or email', 'pc-order-import-export'); ?><input id="pcoe-search" name="customer_search" type="search" value="<?php echo esc_attr($search); ?>"></label>
 <label for="pcoe-role"><?php esc_html_e('Customer role', 'pc-order-import-export'); ?><select id="pcoe-role" name="customer_role"><option value=""><?php esc_html_e('All roles', 'pc-order-import-export'); ?></option><?php foreach (ManagerWorkspace::customer_roles() as $key): ?><option value="<?php echo esc_attr($key); ?>" <?php selected($role, $key); ?>><?php echo esc_html(translate_user_role($role_names[$key] ?? $key)); ?></option><?php endforeach; ?></select></label>
+<?php CustomerGroups::select('customer_group',$group,true); ?>
 <label for="pcoe-folio-type"><?php esc_html_e('Folio organization type', 'pc-order-import-export'); ?><select id="pcoe-folio-type" name="customer_folio_type"><option value=""><?php esc_html_e('All organization types', 'pc-order-import-export'); ?></option><?php foreach ($folio_types as $key => $label): ?><option value="<?php echo esc_attr($key); ?>" <?php selected($folio_type, $key); ?>><?php echo esc_html($label); ?></option><?php endforeach; ?></select></label>
 <label for="pcoe-city"><?php esc_html_e('City', 'pc-order-import-export'); ?><select id="pcoe-city" name="customer_city"><option value=""><?php esc_html_e('All cities', 'pc-order-import-export'); ?></option><?php foreach ($directory['cities'] as $value): ?><option <?php selected($city, $value); ?> value="<?php echo esc_attr($value); ?>"><?php echo esc_html($value); ?></option><?php endforeach; ?></select></label>
 <div class="pcoe-actions"><button class="button button-primary"><?php esc_html_e('Filter customers', 'pc-order-import-export'); ?></button><a class="button" href="<?php echo esc_url(ManagerWorkspace::url(0)); ?>"><?php esc_html_e('Reset filters', 'pc-order-import-export'); ?></a></div>

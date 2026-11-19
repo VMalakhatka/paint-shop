@@ -1,5 +1,107 @@
 # Paint Nova Poshta Multishipping
 
+## Shared courier pickup 0.11.3 — 2026-11-13
+
+Per-shipment handover supports branch drop-off or a registered sender address.
+`DoorsWarehouse` creation verifies the address/city and sender contact against the
+fresh directory. COD and private label printing reuse the existing lifecycle.
+An address TTN does not itself send a courier booking request in this workflow.
+Nova Poshta must first enable Courier Call **and disable automatic individual
+calls** for that sender. The site's administrator records this attestation for
+an exact sender/API account; it does not configure the carrier account.
+
+At `WooCommerce → Nova Poshta courier queue` (`pnpm-courier`), select 1–50 created
+store-owned TTNs from one exact sender/city/address/contact/phone, choose a Kyiv
+date (today through +30 days), load carrier intervals and review planned weight.
+A five-minute preview is bound to user, API account and shipment snapshots.
+One confirmation creates a call, durably saves its Barcode, then adds TTNs using
+verified `CarCallGeneral.saveCourierCall` and `insertDocuments`. Partial results
+are not success. No write retries. Calls and membership are saved before HTTP;
+unique token/origin-date-interval/member keys and a shared lock prevent duplicates.
+Database transactions never span carrier HTTP.
+
+Deployment: update this plugin **and PCOE manager help/catalogs**. An administrator
+then explicitly clicks Initialize courier storage in the queue: this installs
+InnoDB `pnpm_courier_calls`, `pnpm_courier_members`, `pnpm_courier_events` and sets
+`pnpm_courier_schema=1`. Enrollment lives in `pnpm_courier_enrollment` with actor,
+time and HMAC account fingerprint. No key in browser or snapshots, no new key.
+Both Woo and shipment capabilities apply; setup also requires manage_options.
+Existing real-write gates remain required. No production migration/deploy is
+performed by development tests.
+
+History shows latest 30 local operations, their numbers and TTNs. Explicit refresh
+reads the carrier's **seven-day** call list and all pages of its document list;
+it reports missing/extra TTNs and preserves raw snapshots and audit. A missing
+old call is not inferred cancelled. Unknown/partial/rejected attempts retain
+membership and require reconciliation in the NP account. Editing/cancelling,
+adding to an existing call and releasing/recovering unknown claims are not in
+this interface. Unknown creation is never matched by similar address text.
+
+Draft preparations remain a separate paged view; external TTNs are excluded.
+Address labels are display-only for order-plan fingerprints, while the exact
+verified address label and account are frozen into the created TTN snapshot.
+Final accepted weight/price is determined by NP. No payment, Folio, notification
+or courier-handover event is fabricated by creating the call.
+
+Checks: pure queue fixtures, local preparation/lifecycle regressions and
+`tests/courier-pickup-local.php` with all HTTP/mail intercepted cover success,
+write/access gates, ownership, stale previews, duplicate confirmation, timeout,
+partial/ambiguous results and read reconciliation. Local rendered UK interface
+is inspected separately. No real TTNs, courier requests or notifications.
+[Manager instructions](../../../docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-courier).
+[Verified API contract](../../../docs/api/NOVA_POSHTA_SHIPMENT_CONTRACT.md#courier-contract).
+
+## Manager panel refresh 0.11.1 — 2026-11-12
+
+Successful preparation saves return a freshly rendered lifecycle panel, audit and
+revision. The browser replaces only those blocks, including after the first save;
+other unsaved page fields remain untouched. Saving clears every old create token
+before the request; new cards require a fresh carrier preview and explicit consent.
+Delegated handlers survive replacement. Manual legal names survive only when the
+saved recipient name/phone identity has not changed. Concurrent preparation and
+lifecycle commands are blocked while either request is in flight.
+
+The preview exposes its remaining five-minute lifetime. Expiry clears the client
+token/consent and asks for a new check, without requiring a page reload. Server
+expiry, order/row binding, write gates and durable claims remain authoritative.
+Existing full-page refresh after a confirmed create/email remains automatic; an
+unknown result still requires reconciliation, never an automatic write retry.
+A stale sender contact now has its own pre-claim message instead of the generic
+verification error; no automatic contact replacement is performed.
+
+Tests: local preparation/lifecycle fixtures with all HTTP/mail intercepted, plus
+`tests/manager-workflow-ui.cjs` on generated `manager-workflow.html` at desktop and
+mobile widths. UK/RU contextual help and the manager guide describe the new flow.
+Verified: 53 preparation, 213 lifecycle and 56 browser checks; targeted NP help
+UK/RU/canonical parity, PHP/JS syntax and documentation validation passed. The
+unrelated full manager-help test still fails its existing section-count assertion,
+reproduced with the unchanged pre-release help source.
+No production deploy or real shipment is part of this release verification.
+
+## Reviewed cash on delivery 0.11.0 — 2026-11-11
+
+Manager preparation now explicitly records whether to collect payment, the amount,
+the return service and (for a separate money transfer) its fee payer. Unpaid Woo
+`cod` orders suggest the order total; the service has no default. A manager may
+also request collection for another unpaid payment method without changing it.
+`BackwardDeliveryData` with `CargoType=Money` and `AfterpaymentOnGoodsCost` are
+mutually exclusive, verified official contracts; payment control requires the
+merchant's active NovaPay agreement, whose availability was not verified here.
+
+Only one warehouse is supported. Positive amounts up to the order total, exact
+kopecks, customer policy and paid state are checked on save and before creation.
+Changing payment method, total or paid state invalidates the saved instructions.
+Old drafts require review and resave; locked attempts require administrator review.
+The final carrier payload and reviewed amount remain in the shipment snapshot.
+Declared value, delivery estimate and collection are separate; the estimate does
+not include transfer commission. Existing private TTN/A4/Zebra printing applies.
+No order payment, automatic email or accounting action is generated by collection.
+
+Verified locally: preparation and lifecycle fixtures (HTTP/mail intercepted),
+UK/RU catalogs and contextual help. No production deploy or real COD shipment.
+Operator workflow: [manager guide](../../../docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-preparation).
+Payload evidence: [API contract](../../../docs/api/NOVA_POSHTA_SHIPMENT_CONTRACT.md).
+
 ## Correct tracking summaries 0.10.15 — 2026-11-06
 
 A live read verified all 12 known November cabinet numbers through tracking;
@@ -602,8 +704,9 @@ No automatic email on save/create, no stock/payment/profile updates and no autom
 Woo status transitions. Created means prepared, not physically handed over.
 
 Scope: private-person recipient with confirmed Ukrainian first/last names and
-optional patronymic, branch drop-off to branch/locker, Cash carrier payment, no COD.
-Courier addresses, origin lockers, NonCash and COD fail closed.
+optional patronymic, branch drop-off to branch/locker, Cash carrier payment,
+reviewed single-warehouse COD (0.11.0). Courier addresses, origin lockers,
+NonCash carrier payment and multi-warehouse COD fail closed.
 `RecipientIdentity` suggests structured order shipping/billing names, then customer
 card names, only when the saved recipient name and normalized phone match. Never
 split a free-text full name, overwrite a dropship recipient, or update a profile.
@@ -682,8 +785,9 @@ revisions reject repeat writes. No profile/address/stock/payment changes. Existi
 external or non-draft shipments block preparation, including mixed-source orders.
 Child orders must use the original; missing allocations and refunds fail closed.
 The manager's profile never determines the customer's COD policy. Multi-origin COD
-remains blocked; no duplicated full-order COD is stored. A single-origin COD amount
-is a preview from the saved order, not permission to collect it.
+remains blocked; no duplicated full-order COD is stored. Single-origin collection
+requires an explicit amount and return service saved with the order payment basis,
+then a fresh carrier preview and separate creation confirmation (0.11.0).
 
 The preview validates local typed fields and mapping completeness, but does not
 approve packed-point compatibility, final tariff, sender ownership or subsidy/payer

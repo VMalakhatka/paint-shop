@@ -37,7 +37,7 @@ try {
     $context = $service->context($order);
     $check(count($context['groups']) === 2, 'Physical warehouses separated');
     $check($context['groups'][$locations[1]]['items'][0]['quantity'] === 2.0, 'Split line quantity retained');
-    $input = ['revision'=>$context['revision'],'agreed'=>'1','recipient'=>$context['recipient'],'groups'=>[]];
+    $input = ['revision'=>$context['revision'],'agreed'=>'1','recipient'=>$context['recipient'],'cod_settings'=>['enabled'=>false],'groups'=>[]];
     foreach ($locations as $location) $input['groups'][$location] = ['payer'=>'Recipient','boxes'=>[['weight'=>'2.5','length'=>'20','width'=>'15','height'=>'10']]];
     $input['recipient']['name'] = 'Agreed recipient';
     $input['recipient']['phone'] = '0000000000';
@@ -46,10 +46,15 @@ try {
     $check(array_sum(array_column($prepared['groups'],'cod')) === 0.0, 'Prepayment has no COD');
     $check(count($service->blockers($context,$prepared)) >= 2, 'Preparation preview is not permission to create');
     $check((new ShipmentRepository())->findByOrder($order->get_id()) === [], 'Preview does not persist');
+    $placeholder=Paint\NovaPoshta\Admin\ShipmentLifecyclePanel::html($order);
+    $check(str_contains($placeholder,'id="pnpm-lifecycle-panel"') && !str_contains($placeholder,'data-shipment-command'), 'First save has a stable empty panel to replace');
     $context = $service->save($order->get_id(),$input);
     $rows = (new ShipmentRepository())->findByOrder($order->get_id());
     $check(count($rows) === 2, 'One saved preparation per warehouse');
     $check($rows[0]['status'] === 'manager_draft' && !$rows[0]['ttn_number'], 'Preparation not a created TTN');
+    $freshPanel=Paint\NovaPoshta\Admin\ShipmentLifecyclePanel::html($order);
+    $check(substr_count($freshPanel,'data-shipment-command="preview"')===2 && substr_count($freshPanel,'class="pnpm-create-agreed" disabled')===2,'Fresh saved panels expose checks, never permission to create');
+    $check(!str_contains($freshPanel,'apiKey/') && !str_contains($freshPanel,'synthetic-test-key'),'Refreshed panel contains no carrier credentials');
     $check($context['recipient']['name'] === 'Agreed recipient', 'Order-only override reloaded');
     $check(wc_get_order($order->get_id())->get_shipping_first_name() === 'Synthetic', 'Woo address not silently overwritten');
     $check(get_user_meta($customer_id) === $profile_before, 'Customer profile unchanged');
@@ -72,12 +77,53 @@ try {
     $bad=$input; $bad['agreed']=''; $reject(fn()=>$service->prepare($context,$bad),'Agreement required');
     $bad=$input; unset($bad['groups'][$locations[1]]); $reject(fn()=>$service->prepare($context,$bad),'Missing warehouse');
     $bad=$input; $bad['groups'][$locations[0]]['boxes']=array_fill(0,21,['weight'=>1,'length'=>1,'width'=>1,'height'=>1]); $reject(fn()=>$service->prepare($context,$bad),'Bounded boxes');
-    $cod=$context; $cod['payment']='cod'; $cod['paid']=false; $p=$service->prepare($cod,$input);
-    $check(array_sum(array_column($p['groups'],'cod'))===0.0,'Multiwarehouse COD never duplicated');
-    $check(count($service->blockers($cod,$p))===3,'Multiwarehouse COD blocked explicitly');
-    unset($cod['groups'][$locations[1]]); $single=$input; unset($single['groups'][$locations[1]]);
-    $check($service->prepare($cod,$single)['groups'][$locations[0]]['cod']===300.0,'Single COD uses server total');
-    $cod['paid']=true; $check($service->prepare($cod,$single)['groups'][$locations[0]]['cod']===0.0,'Paid COD order does not collect twice');
+    $cod=$context; $cod['payment']='cod'; $cod['paid']=false;
+    $single=$input; $single['cod_settings']=['enabled'=>true,'amount'=>'215,50','service'=>'money_transfer','fee_payer'=>'Recipient'];
+    $reject(fn()=>$service->prepare($cod,$single),'Multiwarehouse COD rejected, never duplicated');
+    unset($cod['groups'][$locations[1]],$single['groups'][$locations[1]]);
+    $reviewed=$service->prepare($cod,$single)['groups'][$locations[0]];
+    $check($reviewed['cod']===215.5 && $reviewed['cod_settings']['amount']==='215.50','Reviewed amount normalized without rounding');
+    foreach ([0,-1,301,'1e2','1.001','NaN',[],true] as $badAmount) {
+        $bad=$single;$bad['cod_settings']['amount']=$badAmount;
+        $reject(fn()=>$service->prepare($cod,$bad),'Invalid or excessive collection rejected');
+    }
+    $bad=$single;unset($bad['cod_settings']['service']);$reject(fn()=>$service->prepare($cod,$bad),'Service must be explicit');
+    $defaults=Paint\NovaPoshta\Domain\CashOnDelivery::defaults($cod);
+    $check($defaults['enabled'] && $defaults['amount']==='300.00' && $defaults['service']==='', 'Woo COD suggests total without guessing service');
+    $cod['paid']=true;$reject(fn()=>$service->prepare($cod,$single),'Paid COD order cannot collect twice');
+    $single['cod_settings']=['enabled'=>false];
+    $check($service->prepare($cod,$single)['groups'][$locations[0]]['cod']===0.0,'Paid order permits explicit no collection');
+    // Per-shipment handover is persisted without changing warehouse defaults.
+    $input['revision']=$context['revision'];
+    $input['groups'][$locations[0]]['handover']='doors';
+    $context=$service->save($order->get_id(),$input);
+    $check($context['groups'][$locations[0]]['sender']['sender_type']==='doors' && $context['groups'][$locations[1]]['sender']['sender_type']==='warehouse','Mixed handover per order restored');
+    $check(get_option('pnpm_location_mappings')[$locations[0]]['sender_type']==='warehouse','Warehouse default unchanged');
+    $queue=(new Paint\NovaPoshta\Infrastructure\CourierQueue())->page();
+    $queueRows=array_merge([], ...array_column($queue['groups'],'rows'));
+    $check(count(array_filter($queueRows,static fn($row)=>(int)$row['order_id']===$order->get_id()))===1,'Saved courier preparation appears once in queue');
+    if ($dir=getenv('PNPM_MANAGER_FIXTURE_DIR')) {
+        switch_to_locale('uk');
+        // Render only this synthetic order, even if the local clone contains other drafts.
+        $onlyFixture=static function ($sql) use ($wpdb,$order) {
+            $needle="FROM {$wpdb->prefix}pnpm_shipments WHERE source='store_api'";
+            return str_replace($needle,$needle.' AND order_id='.(int)$order->get_id(),$sql);
+        };
+        add_filter('query',$onlyFixture);
+        try { ob_start(); (new Paint\NovaPoshta\Admin\CourierPage())->render(); $queueHtml=ob_get_clean(); }
+        finally { remove_filter('query',$onlyFixture); restore_previous_locale(); }
+        $check(str_contains($queueHtml,'Черга кур’єра НП') && str_contains($queueHtml,'Synthetic sender'),'Queue renders translated title and saved sender');
+        file_put_contents($dir.'/courier.html','<!doctype html><html lang="uk"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font:16px/1.5 system-ui;background:#f0f0f1;margin:20px}.card{background:white;border:1px solid #ccc;padding:20px}table{width:100%;text-align:left}th,td{padding:10px}a{color:#3858e9}.notice{background:#fff4dc;padding:12px}</style>'.$queueHtml.'</html>');
+    }
+    $input['revision']=$context['revision'];
+    $bad=$input;$bad['groups'][$locations[0]]['handover']='automatic';
+    $reject(fn()=>$service->prepare($context,$bad),'Unknown handover rejected');
+    $input['groups'][$locations[0]]['handover']='warehouse';
+    $context=$service->save($order->get_id(),$input);
+    $input['revision']=$context['revision'];
+    $queue=(new Paint\NovaPoshta\Infrastructure\CourierQueue())->page();
+    $queueRows=array_merge([], ...array_column($queue['groups'],'rows'));
+    $check(!array_filter($queueRows,static fn($row)=>(int)$row['order_id']===$order->get_id()),'Returning to branch drop-off removes draft from queue');
     // A journal write failure rolls back all updates, including earlier warehouses/items.
     $before=(new ShipmentRepository())->findByOrder($order->get_id());
     $break=static fn($q)=>str_starts_with($q,"INSERT INTO `{$wpdb->prefix}pnpm_shipment_events`") ? 'INVALID SYNTHETIC TEST QUERY' : $q;
@@ -121,6 +167,13 @@ try {
         $page='<!doctype html><html lang="uk"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font:16px/1.5 system-ui;margin:16px}input,select,button{font:inherit;padding:8px}*{box-sizing:border-box}button{cursor:pointer}input[type=checkbox]{width:auto}h2{font-size:24px}</style><style>'.file_get_contents(PNPM_DIR.'assets/checkout.css').file_get_contents(PNPM_DIR.'assets/manager-preparation.css').'</style>'.$html
             .'<script>'.file_get_contents(ABSPATH.'wp-includes/js/jquery/jquery.min.js').'</script><script>var pnpmCheckout='.wp_json_encode($card).';var pnpmManager='.wp_json_encode($manager_config).';</script><script>'.file_get_contents(PNPM_DIR.'assets/checkout.js').'</script><script>'.file_get_contents(PNPM_DIR.'assets/manager-preparation.js').'</script></html>';
         file_put_contents($dir.'/manager-preparation.html',$page); restore_previous_locale();
+        switch_to_locale('uk');
+        $panel=new Paint\NovaPoshta\Admin\ShipmentLifecyclePanel();
+        $previous_get=$_GET;$_GET=['page'=>'pcoe-customers','order_id'=>$order->get_id()];$panel->assets();$_GET=$previous_get;
+        $config=wp_scripts()->get_data('pnpm-lifecycle','data').';pnpmLifecycle.url="https://pnpm-test.invalid/ajax";';
+        file_put_contents($dir.'/lifecycle-panel.html',Paint\NovaPoshta\Admin\ShipmentLifecyclePanel::html($order));
+        $workflow=str_replace('</html>','<div id="pnpm-lifecycle-panel" data-order="'.$order->get_id().'"></div><label>Other unsaved field <input id="other-unsaved" value="Keep me"></label><script>'.$config.'</script><script>'.file_get_contents(PNPM_DIR.'assets/shipment-lifecycle.js').'</script></html>',$page);
+        file_put_contents($dir.'/manager-workflow.html',$workflow);restore_previous_locale();
     }
     $check($http===0,'No carrier/Java HTTP during preparation');
     // Woo creation hooks may call intercepted mail; preparation must never add its own messages.

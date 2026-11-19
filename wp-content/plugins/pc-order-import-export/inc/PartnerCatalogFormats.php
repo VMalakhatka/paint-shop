@@ -14,21 +14,64 @@ final class PartnerCatalogFormats {
         foreach($categories as $id=>$c)$xml.='<category id="'.$id.'"'.($c['parent']?' parentId="'.$c['parent'].'"':'').'>'.$e($c['name']).'</category>';
         $xml.='</categories><offers>';
         foreach($data['rows'] as $r){
-            if(!is_numeric($r['retail']) || !is_finite((float)$r['retail']) || round((float)$r['retail'],2)<0.01 || $r['retail']>9999999999)throw new \RuntimeException(__('A product has no retail price. Contact the manager before exporting to Prom.','pc-order-import-export'));
-            $available=is_numeric($r['stock']) && $r['stock']>0;
-            $xml.='<offer id="'.$r['id'].'" available="'.($available?'true':'false').'" selling_type="r">';
-            foreach(['name'=>$r['name'],'name_ua'=>$r['name'],'vendorCode'=>$r['sku'],'price'=>number_format($r['retail'],2,'.',''),'currencyId'=>$data['currency'],'categoryId'=>$r['category_id'],'description'=>$r['description']?:$r['short_description'],'description_ua'=>$r['description']?:$r['short_description']] as $tag=>$value)$xml.='<'.$tag.'>'.$e($value).'</'.$tag.'>';
-            if(!empty($r['brand']))$xml.='<vendor>'.$e($r['brand']).'</vendor>';
-            // Prom's barcode tag is a SKU alias; GTIN is a named characteristic instead.
-            if($r['gtin']!=='')$xml.='<param name="GTIN">'.$e($r['gtin']).'</param>';
-            $xml.='<quantity_in_stock>'.($available?$e($r['stock']):'0').'</quantity_in_stock>';
-            foreach(array_slice($r['images'],0,10) as $url)$xml.='<picture>'.$e($url).'</picture>';
-            foreach($r['attributes'] as $name=>$value)$xml.='<param name="'.$e($name).'">'.$e($value).'</param>';
-            if(!empty($r['unit']))$xml.='<param name="Unit">'.$e($r['unit']).'</param>';
-            if(!empty($r['pack']))$xml.='<param name="Units per pack">'.$e($r['pack']).'</param>';
-            $xml.='</offer>';
+            $price = self::priceText($r['retail']);
+            if ($price === null) {
+                throw new \RuntimeException(__('A product has no retail price. Contact the manager before exporting to Prom.','pc-order-import-export'));
+            }
+            $xml .= self::offerXml($r, $data['currency'], 'r', ['price' => $price]);
         }
         return str_replace('\\n',"\n",$xml.'</offers></shop></yml_catalog>');
+    }
+
+    public static function priceText($value): ?string {
+        if (!is_numeric($value) || !is_finite((float)$value) || round((float)$value, 2) < 0.01 || $value > 9999999999) {
+            return null;
+        }
+        return number_format((float)$value, 2, '.', '');
+    }
+
+    /** Callers supply format-specific XML fields, with null for omitted values. */
+    public static function offerXml(array $row, string $currency, string $sellingType, array $fields): string {
+        $escape = [self::class, 'xmlText'];
+        $available = is_numeric($row['stock']) && $row['stock'] > 0;
+        $description = $row['description'] ?: $row['short_description'];
+        $elements = [
+            'name' => $row['name'],
+            'name_ua' => $row['name'],
+            'vendorCode' => $row['sku'],
+        ] + $fields + [
+            'currencyId' => $currency,
+            'categoryId' => $row['category_id'],
+            'description' => $description,
+            'description_ua' => $description,
+        ];
+
+        $xml = '<offer id="'.(int)$row['id'].'" available="'.($available ? 'true' : 'false').'" selling_type="'.$escape($sellingType).'">';
+        foreach ($elements as $tag => $value) {
+            if ($value !== null) {
+                $xml .= '<'.$tag.'>'.$escape($value).'</'.$tag.'>';
+            }
+        }
+        if (!empty($row['brand'])) {
+            $xml .= '<vendor>'.$escape($row['brand']).'</vendor>';
+        }
+        if ($row['gtin'] !== '') {
+            $xml .= '<param name="GTIN">'.$escape($row['gtin']).'</param>';
+        }
+        $xml .= '<quantity_in_stock>'.($available ? $escape($row['stock']) : '0').'</quantity_in_stock>';
+        foreach (array_slice($row['images'], 0, 10) as $url) {
+            $xml .= '<picture>'.$escape($url).'</picture>';
+        }
+        foreach ($row['attributes'] as $name => $value) {
+            $xml .= '<param name="'.$escape($name).'">'.$escape($value).'</param>';
+        }
+        if (!empty($row['unit'])) {
+            $xml .= '<param name="Unit">'.$escape($row['unit']).'</param>';
+        }
+        if (!empty($row['pack'])) {
+            $xml .= '<param name="Units per pack">'.$escape($row['pack']).'</param>';
+        }
+        return $xml.'</offer>';
     }
     public static function cells(array $r,bool $woo=false): array {
         if($woo && (!is_numeric($r['retail']) || !is_finite((float)$r['retail']) || round((float)$r['retail'],2)<0.01 || $r['retail']>9999999999))throw new \RuntimeException(__('A product has no retail price. Contact the manager before exporting to Prom.','pc-order-import-export'));
