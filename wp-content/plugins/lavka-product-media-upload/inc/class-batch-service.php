@@ -14,13 +14,14 @@ final class BatchService
         array $registry_upload,
         array $image_uploads,
         bool $legacy_main_confirm,
-        bool $generate_names
+        bool $generate_names,
+        array $row_actions = []
     ): array
     {
         $reader = new RegistryReader();
         $registry = $reader->read($registry_upload, $legacy_main_confirm);
         $validator = new ImageValidator();
-        $validation = $validator->validate($registry, $image_uploads, $generate_names);
+        $validation = $validator->validate($registry, $image_uploads, $generate_names, $row_actions);
 
         $batch_id = wp_generate_uuid4();
         $batch_token = \lpmu_writes_enabled() ? str_replace('-', '', wp_generate_uuid4()) : '';
@@ -33,6 +34,9 @@ final class BatchService
         $approved = [];
 
         foreach ($validation['rows'] as &$row) {
+            if (!empty($row['product_id'])) {
+                $row['library_candidates'] = LibraryImage::candidates($row);
+            }
             if (!empty($row['valid'])) {
                 $snapshot = $row['role'] === 'main' ? MainImageReplacement::snapshot($row) : null;
                 if ($snapshot && $snapshot['required']) {
@@ -51,6 +55,7 @@ final class BatchService
                     'position' => (int) $row['position'],
                     'attachment_id' => (int) ($row['attachment_id'] ?? 0),
                     '_main_snapshot' => $snapshot,
+                    '_library_proof' => $row['_library_proof'] ?? null,
                 ];
             }
         }
@@ -65,6 +70,7 @@ final class BatchService
                 'legacy_main_confirm' => $legacy_main_confirm,
                 'generate_names' => $generate_names,
                 'approved' => $approved,
+                'row_actions' => $row_actions,
                 'created_at' => time(),
             ], self::BATCH_TTL);
         }
@@ -136,7 +142,7 @@ final class BatchService
         }
 
         $validator = new ImageValidator();
-        $validation = $validator->validate($registry, $image_uploads, $generate_names);
+        $validation = $validator->validate($registry, $image_uploads, $generate_names, $stored['row_actions'] ?? []);
         $approved_map = [];
         foreach ((array) ($stored['approved'] ?? []) as $approved) {
             $approved_map[$this->approval_key($approved)] = $approved;
@@ -226,6 +232,13 @@ final class BatchService
             $workflow->release_lock($lock_token);
         }
 
+        foreach ($completed as &$row) {
+            if (!empty($row['product_id']) && in_array($row['status'], ['NAME_CONFLICT_WP', 'NAME_CONFLICT_S3'], true)) {
+                $row['library_candidates'] = LibraryImage::candidates($row);
+            }
+        }
+        unset($row);
+
         $summary = $this->summarize($completed);
         $report = [
             'batch_id' => (string) $stored['batch_id'],
@@ -302,6 +315,7 @@ final class BatchService
             (string) ($row['role'] ?? ''),
             (int) ($row['position'] ?? 0),
             (int) ($row['attachment_id'] ?? 0),
+            hash('sha256', serialize($row['_library_proof'] ?? null)),
         ]);
     }
 
@@ -317,6 +331,7 @@ final class BatchService
                 $row['_asset_owner_row'],
                 $row['_asset_owner_product_id'],
                 $row['_main_snapshot'],
+                $row['_library_proof'],
                 $row['_previous_main_proof']
             );
         }

@@ -19,6 +19,9 @@
     var summary = document.getElementById('lpmu-summary');
     var results = document.getElementById('lpmu-results');
     var selectedImages = [];
+    var rowActions = {};
+    var currentRows = [];
+    var revision = 0;
     var batchToken = '';
     var uploadAllowed = false;
 
@@ -55,6 +58,15 @@
         fileCount.textContent = selectedImages.length
             ? format(strings.filesSelected, selectedImages.length)
             : '';
+        resetInputs();
+    }
+
+    function resetInputs() {
+        revision++;
+        rowActions = {};
+        currentRows = [];
+        results.innerHTML = '';
+        summary.innerHTML = '';
         resetApproval();
     }
 
@@ -78,7 +90,10 @@
             uploadButton.disabled = active || !uploadAllowed;
         }
         spinner.classList.toggle('is-active', active);
-        results.querySelectorAll('.lpmu-main-choice').forEach(function (select) { select.disabled = active; });
+        results.querySelectorAll('button, input, select').forEach(function (control) { control.disabled = active; });
+        [registryInput, imagesInput, folderInput, folderButton, legacyMain, generateNames].forEach(function (control) {
+            if (control) { control.disabled = active; }
+        });
         if (active && message) {
             summary.innerHTML = '<div class="notice notice-info inline"><p>' + escapeHtml(message) + '</p></div>';
         }
@@ -94,6 +109,9 @@
         selectedImages.forEach(function (file) {
             form.append('images[]', file, file.name);
         });
+        if (action === 'lpmu_dry_run') {
+            form.append('row_actions', JSON.stringify(rowActions));
+        }
         if (batchToken) {
             form.append('batch_token', batchToken);
         }
@@ -198,7 +216,79 @@
             }).join('') + '</ul></div>';
     }
 
-    function renderRows(rows) {
+    function previewLink(image) {
+        if (!/^https?:\/\//i.test(image.url || '')) { return ''; }
+        return '<a href="' + escapeHtml(image.url) + '" target="_blank" rel="noopener noreferrer">'
+            + escapeHtml(strings.openExisting + ' · ' + image.name) + '</a>';
+    }
+
+    function rowTools(row, completed) {
+        var locked = completed && row.status !== 'NAME_CONFLICT_WP' && row.status !== 'NAME_CONFLICT_S3';
+        var number = row.row_number;
+        var choice = rowActions[number] || {};
+        var candidates = (row.library_candidates || []).slice();
+        if (row.url && row.attachment_id && !candidates.some(function (item) { return item.id === row.attachment_id; })) {
+            candidates.push({ id: row.attachment_id, name: row.canonical_file || '#' + row.attachment_id, url: row.url });
+        }
+        var tools = candidates.map(function (image) {
+            return '<div>' + previewLink(image) + (locked ? '' : '<button type="button" class="button-link" data-choose="' + escapeHtml(image.id) + '">'
+                + escapeHtml(strings.useExisting + ' #' + image.id) + '</button>') + '</div>';
+        }).join('');
+        if (!locked && row.product_id) {
+            var proposed = choice.attachment ? row.suggested_file : row.canonical_file || row.suggested_file;
+            var name = choice.filename === undefined ? proposed || '' : choice.filename;
+            var expanded = choice.filename !== undefined || row.status === 'NAME_CONFLICT_WP' || row.status === 'NAME_CONFLICT_S3';
+            tools += '<details' + (expanded ? ' open' : '') + '><summary>' + escapeHtml(strings.editName) + '</summary>'
+                + '<label>' + escapeHtml(strings.siteName) + '<input type="text" data-filename spellcheck="false" value="' + escapeHtml(name) + '"></label></details>';
+            if (window.wp && window.wp.media) {
+                tools += '<button type="button" class="button-link" data-library>' + escapeHtml(strings.chooseLibrary) + '</button>';
+            }
+            tools += '<p data-choice aria-live="polite">' + (choice.attachment ? escapeHtml(strings.selectedImage + ' #' + choice.attachment) : '') + '</p>'
+                + '<button type="button" class="button-link" data-reset' + (rowActions[number] ? '' : ' hidden') + '>' + escapeHtml(strings.resetRow) + '</button>'
+                + '<button type="button" class="button" data-recheck>' + escapeHtml(strings.recheckBatch) + '</button>';
+        }
+        return tools ? '<div class="lpmu-row-tools" data-row="' + escapeHtml(number) + '">' + tools + '</div>' : '';
+    }
+
+    function setRowChoice(box, choice, image) {
+        var number = box.dataset.row;
+        if (choice) { rowActions[number] = choice; } else { delete rowActions[number]; }
+        resetApproval();
+        var message = box.querySelector('[data-choice]');
+        message.textContent = (choice && choice.attachment ? strings.selectedImage + ' #' + choice.attachment + '. ' : '') + strings.recheckNeeded;
+        if (image) { message.insertAdjacentHTML('beforeend', ' ' + previewLink(image)); }
+        box.querySelector('[data-reset]').hidden = !choice;
+    }
+
+    results.addEventListener('input', function (event) {
+        if (event.target.matches('[data-filename]')) {
+            setRowChoice(event.target.closest('.lpmu-row-tools'), { filename: event.target.value });
+        }
+    });
+    results.addEventListener('click', function (event) {
+        var button = event.target.closest('button');
+        var box = button && button.closest('.lpmu-row-tools');
+        if (!box || checkButton.disabled) { return; }
+        if (button.hasAttribute('data-choose')) {
+            setRowChoice(box, { attachment: Number(button.dataset.choose) });
+        } else if (button.hasAttribute('data-library')) {
+            var frame = window.wp.media({ title: strings.chooseLibrary, button: { text: strings.useExisting }, library: { type: 'image' }, multiple: false });
+            frame.on('select', function () {
+                if (!results.contains(box) || checkButton.disabled) { return; }
+                var image = frame.state().get('selection').first().toJSON();
+                setRowChoice(box, { attachment: Number(image.id) }, { name: image.filename, url: image.url });
+            });
+            frame.open();
+        } else if (button.hasAttribute('data-reset')) {
+            var row = currentRows.find(function (item) { return String(item.row_number) === box.dataset.row; });
+            box.querySelector('[data-filename]').value = row.suggested_file || row.canonical_file || '';
+            setRowChoice(box, null);
+        } else if (button.hasAttribute('data-recheck')) {
+            checkButton.click();
+        }
+    });
+
+    function renderRows(rows, completed) {
         if (!rows || !rows.length) {
             results.innerHTML = '';
             return;
@@ -244,7 +334,9 @@
             if (row.position) {
                 assignment.push('<strong>' + escapeHtml(strings.position) + ':</strong> ' + escapeHtml(row.position));
             }
-            if (row.attachment_id) {
+            if (row.library_attachment_id) {
+                assignment.push(escapeHtml(strings.selectedImage) + ' #' + escapeHtml(row.library_attachment_id));
+            } else if (row.attachment_id) {
                 assignment.push('<strong>' + escapeHtml(strings.attachment) + ':</strong> #' + escapeHtml(row.attachment_id));
             }
             if (row.workflow_stage) {
@@ -283,7 +375,7 @@
                 + '<td><span class="lpmu-status">' + escapeHtml(statusLabel(row.status)) + '</span>'
                 + listBlock(strings.errors, row.errors, 'errors')
                 + listBlock(strings.warnings, row.warnings, 'warnings')
-                + technical + '</td>'
+                + technical + rowTools(row, completed) + '</td>'
                 + '</tr>';
         }).join('');
 
@@ -328,7 +420,7 @@
             + '</p>' + technical + '</div>';
     }
 
-    registryInput.addEventListener('change', resetApproval);
+    registryInput.addEventListener('change', resetInputs);
     imagesInput.addEventListener('change', function () {
         if (folderInput) {
             folderInput.value = '';
@@ -346,9 +438,9 @@
             folderInput.click();
         });
     }
-    legacyMain.addEventListener('change', resetApproval);
+    legacyMain.addEventListener('change', resetInputs);
     if (generateNames) {
-        generateNames.addEventListener('change', resetApproval);
+        generateNames.addEventListener('change', resetInputs);
     }
 
     dropZone.addEventListener('click', function () {
@@ -373,7 +465,7 @@
         });
     });
     dropZone.addEventListener('drop', function (event) {
-        setFiles(event.dataTransfer.files);
+        if (!checkButton.disabled) { setFiles(event.dataTransfer.files); }
     });
 
     checkButton.addEventListener('click', function () {
@@ -381,7 +473,10 @@
             return;
         }
         resetApproval();
+        var checkedRevision = revision;
         request('lpmu_dry_run', strings.checking).then(function (result) {
+            if (checkedRevision !== revision) { return; }
+            currentRows = result.rows || [];
             batchToken = result.batch_token || '';
             renderSummary(result, false);
             renderRows(result.rows || []);
@@ -421,7 +516,10 @@
             }
             request('lpmu_upload_batch', strings.uploading).then(function (result) {
                 renderSummary(result, true);
-                renderRows(result.rows || []);
+                var finalRows = result.rows || [];
+                var candidates = new Map(currentRows.map(function (row) { return [row.row_number, row.library_candidates || []]; }));
+                finalRows.forEach(function (row) { row.library_candidates = row.library_candidates || candidates.get(row.row_number) || []; });
+                renderRows(finalRows, true);
                 uploadAllowed = false;
                 uploadButton.disabled = true;
                 batchToken = '';

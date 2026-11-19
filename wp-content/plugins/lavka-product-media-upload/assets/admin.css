@@ -294,3 +294,9 @@
 .lpmu-main-replacement label { display: block; font-weight: 600; }
 .lpmu-main-replacement select { display: block; width: 100%; max-width: 100%; margin: 8px 0; }
 .lpmu-main-replacement small { display: block; font-weight: normal; }
+
+.lpmu-row-tools { display: grid; gap: .5rem; margin-top: .75rem; justify-items: start; }
+.lpmu-row-tools a, .lpmu-row-tools label, .lpmu-row-tools [data-choose] { display: block; overflow-wrap: anywhere; }
+.lpmu-row-tools input { width: 100%; }
+.lpmu-row-tools [data-choice] { margin: 0; }
+.lpmu-row-tools [data-choice]:empty, .lpmu-row-tools [hidden] { display: none; }

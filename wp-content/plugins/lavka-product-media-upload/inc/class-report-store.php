@@ -80,6 +80,7 @@ final class ReportStore
             __('Errors', 'lavka-product-media-upload'),
             __('Warnings', 'lavka-product-media-upload'),
             __('Technical details', 'lavka-product-media-upload'),
+            __('Selected attachment', 'lavka-product-media-upload'),
         ]);
 
         foreach ((array) ($report['rows'] ?? []) as $row) {
@@ -117,6 +118,7 @@ final class ReportStore
                 implode(' | ', (array) ($row['errors'] ?? [])),
                 implode(' | ', (array) ($row['warnings'] ?? [])),
                 (string) ($row['technical'] ?? ''),
+                (string) ($row['library_attachment_id'] ?? ''),
             ]);
         }
 

@@ -47,7 +47,7 @@ final class ImageValidator
         return wp_parse_args($values, $defaults);
     }
 
-    public function validate(array $registry, array $uploads, bool $generate_names = true): array
+    public function validate(array $registry, array $uploads, bool $generate_names = true, array $row_actions = []): array
     {
         $prepared_files = $this->prepare_uploads($uploads);
         $rows = [];
@@ -58,9 +58,13 @@ final class ImageValidator
         $seen_main = [];
         $seen_product_assignments = [];
         $resumable_uploads = [];
+        $library_files = [];
 
         foreach ($registry['rows'] as $manifest_row) {
             $row = $this->base_result($manifest_row);
+            $action = $row_actions[$row['row_number']] ?? [];
+            $library_id = (int) ($action['attachment'] ?? 0);
+            $override = $action['filename'] ?? null;
             $errors = (array) ($manifest_row['manifest_errors'] ?? []);
             $warnings = [];
 
@@ -110,15 +114,6 @@ final class ImageValidator
                 $row['status'] = 'UNSAFE_FILENAME';
             }
 
-            $file_candidates = $prepared_files['by_name'][$source_key] ?? [];
-            if (!$file_candidates) {
-                $errors[] = __('No selected image matches the registry source filename.', 'lavka-product-media-upload');
-                $row['status'] = 'FILE_NOT_FOUND';
-            } elseif (count($file_candidates) !== 1) {
-                $errors[] = __('More than one selected file matches the registry source filename.', 'lavka-product-media-upload');
-                $row['status'] = 'DUPLICATE_IN_BATCH';
-            }
-
             $product_result = null;
             if (!$errors) {
                 $product_result = $this->products->resolve(
@@ -151,9 +146,33 @@ final class ImageValidator
                 }
             }
 
+            $file_candidates = $prepared_files['by_name'][$source_key] ?? [];
+            if (!$errors && !$library_id && !$file_candidates) {
+                $errors[] = __('No selected image matches the registry source filename.', 'lavka-product-media-upload');
+                $row['status'] = 'FILE_NOT_FOUND';
+            } elseif (!$errors && !$library_id && count($file_candidates) !== 1) {
+                $errors[] = __('More than one selected file matches the registry source filename.', 'lavka-product-media-upload');
+                $row['status'] = 'DUPLICATE_IN_BATCH';
+            }
+
+            if ($row['product_id']) {
+                $ext = strtolower(pathinfo($source_file, PATHINFO_EXTENSION));
+                if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp'], true)) {
+                    $proposed = $this->canonical_filename($manifest_row, $ext === 'jpeg' ? 'jpg' : $ext, $generate_names);
+                    $row['suggested_file'] = $proposed['filename'] ?? '';
+                }
+            }
             $file_result = null;
-            if (!$errors && count($file_candidates) === 1) {
-                $file_result = $this->validate_file($file_candidates[0]);
+            if (!$errors) {
+                if ($library_id) {
+                    $library_files[$library_id] ??= $this->validate_library_image($library_id);
+                    $file_result = $library_files[$library_id];
+                    $row['attachment_id'] = $library_id;
+                    $row['library_attachment_id'] = $library_id;
+                } else {
+                    $file_result = $this->validate_file($file_candidates[0]);
+                    $row['_upload'] = $file_candidates[0];
+                }
                 $warnings = array_merge($warnings, $file_result['warnings']);
                 if (!$file_result['ok']) {
                     $errors = array_merge($errors, $file_result['errors']);
@@ -169,23 +188,27 @@ final class ImageValidator
                         'sha256' => $file_result['sha256'],
                         'color_space' => $file_result['color_space'],
                     ]);
-                    $row['_upload'] = $file_candidates[0];
+                    if ($library_id) {
+                        $row['url'] = $file_result['library']['url'];
+                        $row['_library_proof'] = $file_result['proof'];
+                    }
                 }
             }
 
             if (!$errors && $file_result && $file_result['ok']) {
-                $canonical = $this->canonical_filename(
-                    $manifest_row,
-                    $file_result['extension'],
-                    $generate_names
-                );
+                if ($library_id || $override !== null) {
+                    $name = $library_id ? $file_result['library']['name'] : $override;
+                    $canonical = $this->explicit_filename($name, $file_result['extension'], $role, (bool) $library_id);
+                } else {
+                    $canonical = $this->canonical_filename($manifest_row, $file_result['extension'], $generate_names);
+                }
                 if (!$canonical['ok']) {
                     $errors[] = $canonical['message'];
                     $row['status'] = 'UNSAFE_FILENAME';
                 } else {
                     $row['canonical_file'] = $canonical['filename'];
                     $warnings = array_merge($warnings, $canonical['warnings']);
-                    if ($generate_names && $role === 'main'
+                    if (!$action && $generate_names && $role === 'main'
                         && (int) $product_result['product']->get_image_id('edit') > 0) {
                         $conflict = $this->wordpress_name_conflict($row['canonical_file']);
                         if ($conflict > 0 && !$this->existing_attachment_matches_source($conflict, $row)
@@ -201,7 +224,8 @@ final class ImageValidator
                 // Deduplicate repeated registry references to the same selected
                 // source file. Equal bytes under intentionally different source
                 // names remain separate assets with separate canonical names.
-                $asset_key = hash('sha256', $source_key . '|' . (string) $row['sha256']);
+                $identity = $library_id ? 'attachment:' . $library_id : 'upload:' . $source_key;
+                $asset_key = hash('sha256', serialize([$identity, $override, $row['sha256']]));
                 if (isset($assets[$asset_key])) {
                     $asset = $assets[$asset_key];
                     $row['canonical_file'] = (string) $asset['canonical_file'];
@@ -227,7 +251,7 @@ final class ImageValidator
                 $seen_canonical[$canonical_key] = $asset_key;
             }
 
-            if (!$errors && $row['canonical_file'] !== '') {
+            if (!$errors && !$library_id && $row['canonical_file'] !== '') {
                 $wp_conflict = $this->wordpress_name_conflict($row['canonical_file']);
                 if ($wp_conflict > 0) {
                     if ($this->existing_attachment_matches_source($wp_conflict, $row)) {
@@ -246,6 +270,7 @@ final class ImageValidator
                     } else {
                         $errors[] = __('The canonical filename already exists in the WordPress Media Library.', 'lavka-product-media-upload');
                         $row['status'] = 'NAME_CONFLICT_WP';
+                        $row['conflict_attachment_id'] = $wp_conflict;
                         $row['technical'] = 'attachment_id=' . $wp_conflict;
                     }
                 }
@@ -254,6 +279,7 @@ final class ImageValidator
             if (
                 !$errors
                 && $row['canonical_file'] !== ''
+                && !$library_id
                 && empty($row['_reuse_attachment_id'])
                 && empty($resumable_uploads[$row['row_number']])
             ) {
@@ -263,7 +289,10 @@ final class ImageValidator
                     $row['canonical_file'],
                     $row
                 );
-                if (is_array($remote) && !empty($remote['available'])) {
+                if ($override !== null && empty($remote['available'])) {
+                    $errors[] = __('The S3 media index could not be checked.', 'lavka-product-media-upload');
+                    $row['status'] = 'NAME_CONFLICT_S3';
+                } elseif (is_array($remote) && !empty($remote['available'])) {
                     if (!empty($remote['error'])) {
                         $errors[] = __('The S3 media index could not be checked.', 'lavka-product-media-upload');
                         $row['status'] = 'NAME_CONFLICT_S3';
@@ -276,7 +305,7 @@ final class ImageValidator
                 }
             }
 
-            if (!$errors && $row['canonical_file'] !== '') {
+            if (!$errors && !$library_id && $row['canonical_file'] !== '') {
                 $legacy_variants = $this->legacy_auto_renamed_variants($row['canonical_file']);
                 if ($legacy_variants) {
                     $warnings[] = sprintf(
@@ -290,7 +319,6 @@ final class ImageValidator
             if (!$errors) {
                 $row['valid'] = true;
                 $row['status'] = 'READY';
-                $row['_upload'] = $file_candidates[0];
                 $row['_product'] = $product_result['product'];
                 if (!empty($resumable_uploads[$row['row_number']])) {
                     $row['_resume_attachment_id'] = (int) $resumable_uploads[$row['row_number']];
@@ -534,7 +562,74 @@ final class ImageValidator
         return ['files' => $files, 'by_name' => $by_name];
     }
 
-    private function validate_file(array $file): array
+    private function explicit_filename(string $name, string $extension, string $role, bool $library): array
+    {
+        $normalized = $library ? strtolower($name) : $name;
+        $ext = pathinfo($normalized, PATHINFO_EXTENSION);
+        if (!preg_match('/^[a-z0-9][a-z0-9_-]*\.(?:jpg|png|webp|jpeg)$/D', $normalized)
+            || ($ext === 'jpeg' ? 'jpg' : $ext) !== $extension
+            || $this->is_reserved_stem(pathinfo($normalized, PATHINFO_FILENAME))) {
+            return ['ok' => false, 'message' => __('Use lowercase Latin letters, digits, hyphens or underscores and keep the image extension.', 'lavka-product-media-upload')];
+        }
+        if (strlen($name) > min($role === 'main' ? 50 : 100, $this->thresholds['filename_max_length'])) {
+            return ['ok' => false, 'message' => __('The canonical filename exceeds the configured hard length limit.', 'lavka-product-media-upload')];
+        }
+        return ['ok' => true, 'filename' => $name, 'warnings' => []];
+    }
+
+    private function validate_library_image(int $id): array
+    {
+        $image = LibraryImage::describe($id);
+        if (!$image) {
+            return $this->file_failure('METADATA_FAILED', __('The selected Media Library image is unavailable.', 'lavka-product-media-upload'));
+        }
+        $proof = (new WorkflowService())->s3_proof([
+            'canonical_file' => $image['name'], 's3_key' => get_post_meta($id, '_wp_attached_file', true),
+        ]);
+        if (!$proof['ok']) {
+            return $this->file_failure('S3_PROOF_FAILED', $proof['message'], $proof['technical'] ?? '');
+        }
+        $limit = (int) $this->thresholds['max_file_bytes'];
+        if ($proof['proof']['sizeBytes'] > $limit) {
+            return $this->file_failure('FILE_TOO_LARGE', __('The image exceeds the configured hard file-size limit.', 'lavka-product-media-upload'));
+        }
+
+        $tmp = wp_tempnam($image['name']);
+        if (!$tmp) {
+            return $this->file_failure('UPLOAD_FAILED', __('The selected Media Library image is unavailable.', 'lavka-product-media-upload'));
+        }
+        try {
+            $response = wp_safe_remote_get($image['url'], [
+                'stream' => true, 'filename' => $tmp, 'timeout' => 20, 'redirection' => 2,
+                'limit_response_size' => $limit + 1, 'headers' => ['Accept-Encoding' => 'identity'],
+            ]);
+            clearstatcache(true, $tmp);
+            $size = (int) filesize($tmp);
+            $etag = trim($proof['proof']['etag'], '"');
+            // A CDN may supply its own ETag. Single-part S3 ETags can be checked against the actual bytes.
+            $matches_object = preg_match('/^[a-f0-9]{32}$/iD', $etag)
+                ? hash_equals(strtolower($etag), (string) md5_file($tmp))
+                : !is_wp_error($response) && $etag === trim((string) wp_remote_retrieve_header($response, 'etag'), '"');
+            if (is_wp_error($response) || (int) wp_remote_retrieve_response_code($response) !== 200
+                || $size !== $proof['proof']['sizeBytes'] || !$matches_object) {
+                return $this->file_failure('S3_PROOF_FAILED', __('The selected image could not be verified against the stored object.', 'lavka-product-media-upload'));
+            }
+            $file = $this->validate_file([
+                'error' => UPLOAD_ERR_OK, 'safe_name' => $image['name'], 'size' => $size, 'tmp_name' => $tmp,
+            ], false);
+            if (!$file['ok']) { return $file; }
+            $metadata = wp_get_attachment_metadata($id);
+            if (get_post_mime_type($id) !== $file['mime'] || (int) ($metadata['width'] ?? 0) !== $file['width']
+                || (int) ($metadata['height'] ?? 0) !== $file['height']) {
+                return $this->file_failure('METADATA_FAILED', __('The selected image differs from its Media Library metadata.', 'lavka-product-media-upload'));
+            }
+            return $file + ['library' => $image, 'proof' => $proof['proof']];
+        } finally {
+            wp_delete_file($tmp);
+        }
+    }
+
+    private function validate_file(array $file, bool $require_http_upload = true): array
     {
         $errors = [];
         $warnings = [];
@@ -555,7 +650,7 @@ final class ImageValidator
         if (!empty($file['unsafe_name_error'])) {
             return $this->file_failure('UNSAFE_FILENAME', (string) $file['unsafe_name_error']);
         }
-        if ($tmp === '' || !is_file($tmp) || !is_readable($tmp) || !is_uploaded_file($tmp)) {
+        if ($tmp === '' || !is_file($tmp) || !is_readable($tmp) || ($require_http_upload && !is_uploaded_file($tmp))) {
             return $this->file_failure('UPLOAD_FAILED', __('The image temporary file is missing or is not a valid HTTP upload.', 'lavka-product-media-upload'));
         }
         $actual_size = (int) filesize($tmp);

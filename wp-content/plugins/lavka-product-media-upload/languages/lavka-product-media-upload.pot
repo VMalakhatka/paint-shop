@@ -2191,3 +2191,57 @@ msgstr ""
 
 msgid "A verified identical image can be reused. When replacing an existing main image with automatic naming enabled, a different photo receives a separate filename and requires your choice about the previous photo. Other filename conflicts remain blocked. An S3-only file requires an administrator to restore its Media Library record."
 msgstr ""
+
+msgid "Open image in a new tab"
+msgstr ""
+
+msgid "Use this image"
+msgstr ""
+
+msgid "Edit proposed filename"
+msgstr ""
+
+msgid "Filename on the website"
+msgstr ""
+
+msgid "Choose from Media Library"
+msgstr ""
+
+msgid "Selected attachment"
+msgstr ""
+
+msgid "Use original batch settings"
+msgstr ""
+
+msgid "Check the batch again"
+msgstr ""
+
+msgid "Check the batch again to apply this choice."
+msgstr ""
+
+msgid "Invalid row choice. Check the batch again."
+msgstr ""
+
+msgid "Use lowercase Latin letters, digits, hyphens or underscores and keep the image extension."
+msgstr ""
+
+msgid "The selected Media Library image is unavailable."
+msgstr ""
+
+msgid "The selected image could not be verified against the stored object."
+msgstr ""
+
+msgid "The selected image differs from its Media Library metadata."
+msgstr ""
+
+msgid "To use your new photo under a free name, open “Edit proposed filename” in the result row. For example, change kr-16416.jpg to kr-16416-front.jpg. Keep the extension and click “Check the batch again”. Your original file and spreadsheet keep their names."
+msgstr ""
+
+msgid "To use an existing photo, open it in a new tab and check the product, colour and volume. Click “Use this image” next to the matching photo, or “Choose from Media Library” to find another. Check the batch again. The system verifies the selected attachment in storage and links it during synchronization."
+msgstr ""
+
+msgid "A size warning alone allows a small colour swatch, for example 243 × 102 px, as the main image. Check the shade and review any errors. Once the row is ready, choose what to do with the current main photo and confirm synchronization."
+msgstr ""
+
+msgid "If a name is taken, open the existing photo in the result row. Choose a Media Library image or edit the proposed filename and check the batch again."
+msgstr ""

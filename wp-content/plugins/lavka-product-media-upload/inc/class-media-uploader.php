@@ -28,6 +28,9 @@ final class MediaUploader
         $resume_attachment_id = (int) ($row['_resume_attachment_id'] ?? 0);
         $reuse_attachment_id = (int) ($row['_reuse_attachment_id'] ?? 0);
 
+        if (!empty($row['_library_proof'])) {
+            return $this->complete_attachment((int) $row['attachment_id'], $row, $batch_id, $manifest_hash);
+        }
         if ($filename === '' || $product_id < 1 || $source_tmp === '') {
             return $this->failure($row, 'UPLOAD_FAILED', __('The approved row is missing internal upload data.', 'lavka-product-media-upload'));
         }

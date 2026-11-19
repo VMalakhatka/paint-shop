@@ -107,6 +107,10 @@ final class WorkflowService
                     $proof_failures[$index] = $proof;
                     continue;
                 }
+                if (isset($rows[$index]['_library_proof']) && $rows[$index]['_library_proof'] !== $proof['proof']) {
+                    $proof_failures[$index] = $this->build_failure(__('The selected image could not be verified against the stored object.', 'lavka-product-media-upload'));
+                    continue;
+                }
                 $rows[$index]['_s3_proof'] = $proof['proof'];
                 $rows[$index]['workflow_stage'] = 's3_verified';
                 unset($pending_proofs[$index], $proof_failures[$index]);
@@ -507,7 +511,7 @@ final class WorkflowService
         ];
     }
 
-    private function s3_proof(array $row): array
+    public function s3_proof(array $row): array
     {
         global $wpdb;
 

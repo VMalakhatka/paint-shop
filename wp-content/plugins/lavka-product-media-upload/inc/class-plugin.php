@@ -64,6 +64,7 @@ final class Plugin
             return;
         }
 
+        wp_enqueue_media();
         wp_enqueue_style(
             'lpmu-admin',
             LPMU_URL . 'assets/admin.css',
@@ -113,6 +114,15 @@ final class Plugin
                 'reportReady' => __('The operation is complete. Download the report for the full audit trail.', 'lavka-product-media-upload'),
                 'reportPartial' => __('The operation finished, but some rows require a safe retry. Review the errors and download the report.', 'lavka-product-media-upload'),
                 'confirmUpload' => __('Upload all approved images, refresh the S3 index, update Folio and assign the images in WooCommerce?', 'lavka-product-media-upload'),
+                'openExisting' => __('Open image in a new tab', 'lavka-product-media-upload'),
+                'useExisting' => __('Use this image', 'lavka-product-media-upload'),
+                'editName' => __('Edit proposed filename', 'lavka-product-media-upload'),
+                'siteName' => __('Filename on the website', 'lavka-product-media-upload'),
+                'chooseLibrary' => __('Choose from Media Library', 'lavka-product-media-upload'),
+                'selectedImage' => __('Selected attachment', 'lavka-product-media-upload'),
+                'resetRow' => __('Use original batch settings', 'lavka-product-media-upload'),
+                'recheckBatch' => __('Check the batch again', 'lavka-product-media-upload'),
+                'recheckNeeded' => __('Check the batch again to apply this choice.', 'lavka-product-media-upload'),
                 'previousMain' => __('Current main image', 'lavka-product-media-upload'),
                 'previousMainQuestion' => __('What should happen to the current main image?', 'lavka-product-media-upload'),
                 'chooseMainAction' => __('Choose an action', 'lavka-product-media-upload'),
@@ -398,7 +408,8 @@ final class Plugin
                 $this->registry_upload(),
                 $this->image_uploads(),
                 !empty($_POST['legacy_main_confirm']),
-                !empty($_POST['generate_names'])
+                !empty($_POST['generate_names']),
+                $this->row_actions()
             );
             wp_send_json_success($result);
         } catch (\Throwable $e) {
@@ -407,6 +418,23 @@ final class Plugin
                 'technical' => $e->getMessage(),
             ], 400);
         }
+    }
+
+    private function row_actions(): array
+    {
+        $raw = wp_unslash($_POST['row_actions'] ?? '{}');
+        $actions = is_string($raw) ? json_decode($raw, true) : null;
+        if (!is_array($actions)) {
+            throw new \RuntimeException(__('Invalid row choice. Check the batch again.', 'lavka-product-media-upload'));
+        }
+        foreach ($actions as $number => $action) {
+            if (!is_int($number) || $number < 1 || !is_array($action) || count($action) !== 1
+                || !(isset($action['filename']) && is_string($action['filename'])
+                    || isset($action['attachment']) && is_int($action['attachment']) && $action['attachment'] > 0)) {
+                throw new \RuntimeException(__('Invalid row choice. Check the batch again.', 'lavka-product-media-upload'));
+            }
+        }
+        return $actions;
     }
 
     public function ajax_upload_batch(): void

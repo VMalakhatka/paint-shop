@@ -158,7 +158,14 @@ The previous attachment/object and references on other products are preserved.
 With generated filenames enabled, a different-content main-image collision for a
 product that already has a main gets a deterministic `-r<12 hex>` filename within
 Folio's 50-byte limit. It is checked through the normal WP/S3 conflict and reuse path.
-Unchanged content is reused; explicitly supplied conflicting names remain blocked.
+A manager can edit a proposed filename inside a result row, preview candidate attachments
+in a new tab, or select an existing image from the Media Library. Recheck the batch
+after changing any row. An explicit name is checked for collisions and the Folio
+field length. A selected attachment uses its actual attached file, including WordPress
+scaled versions. Its downloaded bytes, image metadata and exact indexed storage object
+are checked before approval and again before assignment. The batch token binds the
+filename, content, attachment and storage proof to the decision. Size recommendations
+are warnings, including for small colour swatches.
 
 Folio main replacement and old-gallery changes share one per-SKU preview/apply request.
 Keeping the old photo requires exact S3 index proof and HEAD size/ETag verification;

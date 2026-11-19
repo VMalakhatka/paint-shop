@@ -2452,3 +2452,57 @@ msgstr "После проверки замены главного фото вы�
 
 msgid "A verified identical image can be reused. When replacing an existing main image with automatic naming enabled, a different photo receives a separate filename and requires your choice about the previous photo. Other filename conflicts remain blocked. An S3-only file requires an administrator to restore its Media Library record."
 msgstr "Проверенное одинаковое фото можно использовать повторно. При замене существующего главного фото с автоматическим именованием другое фото получает отдельное имя; выберите, что сделать с прежним. Другие конфликты имён блокируются. Для файла только в S3 администратор должен восстановить запись в медиатеке."
+
+msgid "Open image in a new tab"
+msgstr "Открыть фото в новой вкладке"
+
+msgid "Use this image"
+msgstr "Привязать это фото"
+
+msgid "Edit proposed filename"
+msgstr "Изменить предложенное имя"
+
+msgid "Filename on the website"
+msgstr "Имя файла на сайте"
+
+msgid "Choose from Media Library"
+msgstr "Выбрать из медиатеки"
+
+msgid "Selected attachment"
+msgstr "Выбранное вложение"
+
+msgid "Use original batch settings"
+msgstr "Вернуть исходный выбор"
+
+msgid "Check the batch again"
+msgstr "Проверить пакет снова"
+
+msgid "Check the batch again to apply this choice."
+msgstr "Проверьте пакет снова, чтобы применить выбор."
+
+msgid "Invalid row choice. Check the batch again."
+msgstr "Некорректный выбор в строке. Повторите проверку пакета."
+
+msgid "Use lowercase Latin letters, digits, hyphens or underscores and keep the image extension."
+msgstr "Используйте строчные латинские буквы, цифры, дефис или нижнее подчёркивание. Сохраните расширение изображения."
+
+msgid "The selected Media Library image is unavailable."
+msgstr "Выбранное фото из медиатеки недоступно."
+
+msgid "The selected image could not be verified against the stored object."
+msgstr "Не удалось подтвердить соответствие выбранного фото файлу в хранилище."
+
+msgid "The selected image differs from its Media Library metadata."
+msgstr "Выбранное фото отличается от данных о нём в медиатеке."
+
+msgid "To use your new photo under a free name, open “Edit proposed filename” in the result row. For example, change kr-16416.jpg to kr-16416-front.jpg. Keep the extension and click “Check the batch again”. Your original file and spreadsheet keep their names."
+msgstr "Чтобы использовать новое фото, откройте «Изменить предложенное имя» в строке результата. Например, измените kr-16416.jpg на kr-16416-front.jpg. Сохраните расширение и нажмите «Проверить пакет снова». Переименовывать файл на компьютере или редактировать таблицу не нужно."
+
+msgid "To use an existing photo, open it in a new tab and check the product, colour and volume. Click “Use this image” next to the matching photo, or “Choose from Media Library” to find another. Check the batch again. The system verifies the selected attachment in storage and links it during synchronization."
+msgstr "Чтобы использовать существующее фото, откройте его в новой вкладке и сверьте товар, цвет и фасовку. Нажмите «Привязать это фото» возле подходящего изображения или «Выбрать из медиатеки», чтобы найти другое. Проверьте пакет снова. Система проверит выбранное вложение в хранилище и привяжет его при синхронизации."
+
+msgid "A size warning alone allows a small colour swatch, for example 243 × 102 px, as the main image. Check the shade and review any errors. Once the row is ready, choose what to do with the current main photo and confirm synchronization."
+msgstr "Небольшой образец цвета, например 243 × 102 пикселя, можно выбрать главным фото. Сверьте оттенок. Предупреждение о размере позволяет продолжить. Если есть ошибки, исправьте их. Когда строка будет готова, выберите действие для предыдущего главного фото и подтвердите синхронизацию."
+
+msgid "If a name is taken, open the existing photo in the result row. Choose a Media Library image or edit the proposed filename and check the batch again."
+msgstr "Если имя занято, просмотрите найденные фото в строке результата. Выберите изображение из медиатеки или измените предложенное имя и проверьте пакет снова."

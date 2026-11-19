@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Lavka Product Media Upload
  * Description: Validates and uploads product image batches, then synchronizes OVH/S3, Folio and WooCommerce.
- * Version: 0.5.0
+ * Version: 0.6.0
  * Author: Volodymyr
  * Text Domain: lavka-product-media-upload
  * Domain Path: /languages
@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('LPMU_VERSION', '0.5.0');
+define('LPMU_VERSION', '0.6.0');
 define('LPMU_FILE', __FILE__);
 define('LPMU_DIR', plugin_dir_path(__FILE__));
 define('LPMU_URL', plugin_dir_url(__FILE__));
@@ -30,6 +30,7 @@ function lpmu_writes_enabled(): bool
 
 require_once LPMU_DIR . 'inc/class-registry-reader.php';
 require_once LPMU_DIR . 'inc/class-product-resolver.php';
+require_once LPMU_DIR . 'inc/class-library-image.php';
 require_once LPMU_DIR . 'inc/class-image-validator.php';
 require_once LPMU_DIR . 'inc/class-media-uploader.php';
 require_once LPMU_DIR . 'inc/class-main-image-replacement.php';

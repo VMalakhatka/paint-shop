@@ -74,7 +74,7 @@ if (!defined('ABSPATH')) { exit; }
     <details class="lsc-panel"><summary><?php esc_html_e('How to choose photos safely', 'lavka-product-media-upload'); ?></summary>
         <p><?php esc_html_e('Compare the exact product, colour, volume and packaging. The first supplier photo is not automatically the main image. Select its role explicitly.', 'lavka-product-media-upload'); ?></p>
         <p><?php esc_html_e('A barcode match must be unique. For ambiguous matches or lifestyle photos, confirm the exact SKU of our product. Saved manual matches are reused when the supplier ID stays the same.', 'lavka-product-media-upload'); ?></p>
-        <p><?php esc_html_e('Existing photos remain visible for comparison. Identical files can be reused; different content under an occupied filename is blocked by the image checker.', 'lavka-product-media-upload'); ?></p>
+        <p><?php esc_html_e('If a name is taken, open the existing photo in the result row. Choose a Media Library image or edit the proposed filename and check the batch again.', 'lavka-product-media-upload'); ?></p>
         <p><?php esc_html_e('Prices and descriptions are supplier reference information. Catalogue refresh does not update our products. Videos open at the source and are not sent to the image uploader.', 'lavka-product-media-upload'); ?></p>
     </details>
 </div>
