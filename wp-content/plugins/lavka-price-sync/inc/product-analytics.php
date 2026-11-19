@@ -8,6 +8,7 @@ const LPS_PRODUCT_ANALYTICS_NONCE = 'lps_product_analytics';
 const LPS_PRODUCT_ANALYTICS_PRESETS_META = 'lps_product_analytics_filter_presets';
 const LPS_PRODUCT_ANALYTICS_CAPABILITIES_PATH = '/admin/folio/product-analytics/capabilities';
 const LPS_PRODUCT_ANALYTICS_QUERY_PATH = '/admin/folio/product-analytics/query';
+const LPS_PRODUCT_ANALYTICS_CAPABILITIES_CACHE_TTL = 900;
 
 add_action('admin_menu', function (): void {
     add_submenu_page(
@@ -1979,6 +1980,43 @@ function lps_product_analytics_v4_scenario_context(array $payload, array $query)
     ];
 }
 
+/**
+ * Capability data describes the Java contract, not a snapshot generation. Keeping
+ * it briefly across admin requests prevents each page of a long preview from
+ * spending an additional request discovering the same contract.
+ */
+function lps_product_analytics_v4_capability_cache_key(array $payload): string {
+    $warehouse_ids = array_values(array_unique(array_map('intval', (array)($payload['warehouseIds'] ?? []))));
+    sort($warehouse_ids, SORT_NUMERIC);
+    $identity = [
+        (string)(lps_get_options()['java_base_url'] ?? ''),
+        (string)($payload['sourceDatabase'] ?? 'Paint_Ua'),
+        $warehouse_ids,
+    ];
+    return 'lps_product_analytics_capabilities_' . substr(hash('sha256', wp_json_encode($identity)), 0, 32);
+}
+
+function lps_product_analytics_v4_probe_capabilities(array $payload) {
+    $cache_key = lps_product_analytics_v4_capability_cache_key($payload);
+    $cached = function_exists('get_transient') ? get_transient($cache_key) : false;
+    if (is_array($cached) && !empty($cached['ok']) && isset($cached['features'], $cached['transit'])) return $cached;
+
+    $probe = lps_product_analytics_v4_request_java_raw(LPS_PRODUCT_ANALYTICS_CAPABILITIES_PATH, [
+        'sourceDatabase' => $payload['sourceDatabase'] ?? 'Paint_Ua',
+        'warehouseIds' => $payload['warehouseIds'] ?? [],
+    ]);
+    if (is_wp_error($probe)) return $probe;
+
+    // Keep only contract flags, not the warehouse sources or generation IDs.
+    $probe = [
+        'ok' => $probe['ok'] ?? false,
+        'features' => array_intersect_key((array) ($probe['features'] ?? []), array_flip(['groupHierarchy', 'warehouseUsage', 'configurableTransit'])),
+        'transit' => array_intersect_key((array) ($probe['transit'] ?? []), array_flip(['configurable', 'calculationVersion'])),
+    ];
+    if (!empty($probe['ok']) && function_exists('set_transient')) set_transient($cache_key, $probe, LPS_PRODUCT_ANALYTICS_CAPABILITIES_CACHE_TTL);
+    return $probe;
+}
+
 function lps_product_analytics_v4_request_java(string $path, array $payload) {
     if (!in_array($path, [LPS_PRODUCT_ANALYTICS_CAPABILITIES_PATH, LPS_PRODUCT_ANALYTICS_QUERY_PATH], true)) {
         return lps_product_analytics_v4_request_java_raw($path, $payload);
@@ -1988,28 +2026,21 @@ function lps_product_analytics_v4_request_java(string $path, array $payload) {
     if (isset($payload['calculation']['transit']) && $payload['calculation']['transit'] !== $config) {
         return new WP_Error('TRANSIT_CONFIGURATION_CHANGED', __('Transport warehouse settings changed. Start a new preview.', 'lavka-price-sync'), ['status' => 409]);
     }
-    // Probe without the new field first, including on older deployments. Cache only
-    // feature support within this PHP request, never source generations across requests.
-    static $support = [];
-    static $usage_support = [];
-    static $branch_support = [];
-    $key = wp_json_encode([lps_get_options()['java_base_url'] ?? '', $payload['sourceDatabase'] ?? '', $payload['warehouseIds'] ?? []]);
-    if (!array_key_exists($key, $support)) {
-        $probe = lps_product_analytics_v4_request_java_raw(LPS_PRODUCT_ANALYTICS_CAPABILITIES_PATH, [
-            'sourceDatabase' => $payload['sourceDatabase'] ?? 'Paint_Ua', 'warehouseIds' => $payload['warehouseIds'] ?? [],
-        ]);
-        if (is_wp_error($probe)) return $probe;
-        $branch_support[$key] = ($probe['features']['groupHierarchy']['version'] ?? 0) === 1 && !empty($probe['features']['groupHierarchy']['supported']);
-        $usage_support[$key] = ($probe['features']['warehouseUsage']['version'] ?? 0) === 1;
-        $support[$key] = ($probe['features']['configurableTransit']['supported'] ?? null) === true
-            && ($probe['transit']['configurable'] ?? null) === true && ($probe['transit']['calculationVersion'] ?? 0) === 3;
-    }
+    // Probe without the new field first, including on older deployments. This
+    // short-lived cache never contains stock, reservations, or snapshot generations.
+    $probe = lps_product_analytics_v4_probe_capabilities($payload);
+    if (is_wp_error($probe)) return $probe;
+    $usage_support = ($probe['features']['warehouseUsage']['version'] ?? 0) === 1;
+    $support = ($probe['features']['configurableTransit']['supported'] ?? null) === true
+        && ($probe['transit']['configurable'] ?? null) === true && ($probe['transit']['calculationVersion'] ?? 0) === 3;
+    $branch_support = ($probe['features']['groupHierarchy']['version'] ?? 0) === 1 && !empty($probe['features']['groupHierarchy']['supported']);
     unset($payload['calculation']['transit']);
-    $branches = $payload['productFilters']['groupBranches'] ?? [];
-    if ($branches && empty($branch_support[$key])) return new WP_Error('GROUP_BRANCHES_UNSUPPORTED', __('Group tree requires the updated Java service. Existing conditions are preserved.', 'lavka-price-sync'), ['status'=>409]);
+    $filters = (array) ($payload['productFilters'] ?? []);
+    $branches = $filters['groupBranches'] ?? [];
+    if ($branches && !$branch_support) return new WP_Error('GROUP_BRANCHES_UNSUPPORTED', __('Group tree requires the updated Java service. Existing conditions are preserved.', 'lavka-price-sync'), ['status'=>409]);
     $stock_only = $payload['calculation']['stockOnlyWarehouseIds'] ?? [];
-    if ($stock_only && empty($usage_support[$key])) return new WP_Error('WAREHOUSE_USAGE_UNSUPPORTED', __('Stock-only warehouse mode requires a Java update.', 'lavka-price-sync'), ['status' => 409]);
-    if ($support[$key]) $payload['calculation']['transit'] = $config;
+    if ($stock_only && !$usage_support) return new WP_Error('WAREHOUSE_USAGE_UNSUPPORTED', __('Stock-only warehouse mode requires a Java update.', 'lavka-price-sync'), ['status' => 409]);
+    if ($support) $payload['calculation']['transit'] = $config;
     $body = lps_product_analytics_v4_request_java_raw($path, $payload);
     if (is_wp_error($body)) return $body;
     if ($path === LPS_PRODUCT_ANALYTICS_QUERY_PATH && $branches && ($body['appliedFilters']['groupBranches'] ?? null) !== $branches) {
@@ -2019,7 +2050,7 @@ function lps_product_analytics_v4_request_java(string $path, array $payload) {
         && ($body['appliedFilters']['calculation']['stockOnlyWarehouseIds'] ?? null) !== $stock_only) {
         return new WP_Error('WAREHOUSE_USAGE_MISMATCH', __('The analytics response did not apply the selected warehouse modes.', 'lavka-price-sync'), ['status' => 502]);
     }
-    if ($support[$key]) {
+    if ($support) {
         $context = $path === LPS_PRODUCT_ANALYTICS_QUERY_PATH ? ($body['context']['transit'] ?? []) : ($body['transit'] ?? []);
         if (($context['calculationVersion'] ?? 0) !== 3 || !lps_transit_matches($context, $config['warehouseIds'])) {
             return new WP_Error('TRANSIT_SOURCE_MISMATCH', __('The transit response does not match the selected sources.', 'lavka-price-sync'), ['status' => 502]);

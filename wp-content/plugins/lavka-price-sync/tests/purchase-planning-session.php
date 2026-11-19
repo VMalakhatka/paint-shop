@@ -32,6 +32,7 @@ function lps_product_analytics_v4_request_java($path, $query) {
     $GLOBALS['queries'][] = $query; return !empty($GLOBALS['responseQueue']) ? array_shift($GLOBALS['responseQueue']) : $GLOBALS['response'];
 }
 function is_wp_error($value) { return $value instanceof WP_Error; }
+function lps_product_analytics_v4_probe_capabilities($query) { $GLOBALS['capabilityQueries'][] = $query; return ['ok' => true]; }
 require __DIR__ . '/../inc/purchase-planning-model.php';
 require __DIR__ . '/../inc/purchase-planning.php';
 function check($condition, $message) { if (!$condition) throw new RuntimeException($message); }
@@ -48,6 +49,7 @@ $scenario = ['id' => 1, 'uuid' => 'scenario-1', 'version' => 2, 'status' => 'act
         ['code' => 'group', 'receivingWarehouseId' => 7, 'leadTimeDays' => 5, 'targetDays' => 20, 'safetyDays' => 5]]]]];
 $token = lps_purchase_start(1, 2)['token'];
 check(lps_purchase_session($token)['query']['calculation']['availability']['enabled'] === true, 'Days of stockout are requested even with correction disabled');
+check(count($capabilityQueries) === 1, 'Start warms Java capabilities before the paginated preview');
 $user = 2;
 rejected(fn() => lps_purchase_session($token), 'Preview token must be user-bound');
 $user = 1;
