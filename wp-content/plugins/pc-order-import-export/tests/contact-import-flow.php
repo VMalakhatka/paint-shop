@@ -18,10 +18,18 @@ $_GET = ['job'=>$job,'part'=>0];
 ob_start(); ContactImportUi::render(); $html = ob_get_clean();
 $check(preg_match_all('/value="schule"\s+selected/', $html) === 6,'Per-row review controls have the default');
 $fields = [];
-foreach ($staged as $i=>$row) $fields[$i]=['role'=>$i===1?'partner':'schule','email'=>$row['email']];
+foreach ($staged as $i=>$row) $fields[$i]=['selected'=>'1','role'=>$i===1?'partner':'schule','email'=>$row['email']];
 $bad = $fields; $bad[1]['role']='administrator';
 try { ContactImport::apply($job,0,$bad); throw new LogicException('Privileged role accepted'); } catch (RuntimeException $e) {}
 $check(!email_exists($rows[0]['Email']),'Reject invalid page before any creation');
+$partial = $fields;
+foreach ($partial as &$input) unset($input['selected']);
+unset($input);
+try { ContactImport::apply($job,0,$partial,true); throw new LogicException('Empty selection accepted'); } catch (RuntimeException $e) {}
+$partial[1]['selected']='1';
+ContactImport::apply($job,0,$partial);
+$check(array_column(ContactImport::page($job,0),'result') === ['', 'created','','','',''], 'Only checked row saved');
+$check(!email_exists($rows[0]['Email']), 'Unchecked account not created');
 ContactImport::apply($job,0,$fields);
 $check(array_column(ContactImport::page($job,0),'result') === ['created','created','contact','contact','contact','contact'],'Registration and contact-only outcomes');
 foreach ([0=>'schule',1=>'partner'] as $i=>$role) {
@@ -35,7 +43,7 @@ $check(get_user_by('email','tester@example.invalid')->has_cap('manage_options'),
 ContactImport::apply($job,0,$fields);
 $repeat = ContactImport::stage($rows,'opt');
 $repeatRows=ContactImport::page($repeat,0);
-foreach ($repeatRows as $i=>$row) $fields[$i]=['role'=>'opt','email'=>$row['email']];
+foreach ($repeatRows as $i=>$row) $fields[$i]=['selected'=>'1','role'=>'opt','email'=>$row['email']];
 ContactImport::apply($repeat,0,$fields);
 $check(array_column(ContactImport::page($repeat,0),'result')===array_fill(0,6,'existing'),'Repeat import deduplicated');
 $check(get_user_by('email',$rows[0]['Email'])->roles===['schule'],'Repeated default does not overwrite existing role');
@@ -55,7 +63,11 @@ try {
     $group = \PaintCore\PCOE\CustomerGroups::SCHOOLS;
     $job = ContactImport::stage($checks,'schule',$group,[$checks[3]['Email']=>true]);
     $fields = [];
-    foreach (ContactImport::page($job,0) as $i=>$row) $fields[$i]=['role'=>$i===1?'partner':'schule','email'=>$row['email']];
+    foreach (ContactImport::page($job,0) as $i=>$row) $fields[$i]=['selected'=>'1','role'=>$i===1?'partner':'schule','email'=>$row['email']];
+    $subset = $fields;
+    unset($subset[1]['selected']);
+    ContactImport::apply($job,0,$subset,true);
+    $check(count($invited)===1 && !email_exists($checks[1]['Email']), 'Unchecked address neither registered nor invited');
     ContactImport::apply($job,0,$fields,true);
     $result = ContactImport::page($job,0);
     $check(array_column($result,'invitation') === ['accepted','failed','blocked','blocked'],'Per-recipient invitation outcomes');

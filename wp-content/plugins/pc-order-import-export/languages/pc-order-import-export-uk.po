@@ -4927,3 +4927,21 @@ msgstr "Запрошення пропущено: не писати"
 
 msgid "Register and send invitations"
 msgstr "Зареєструвати та надіслати запрошення"
+
+msgid "Select at least one organization on this page."
+msgstr "Виберіть хоча б одну організацію на цій сторінці."
+
+msgid "Select all on this page"
+msgstr "Вибрати всіх на цій сторінці"
+
+msgid "Select %s"
+msgstr "Вибрати %s"
+
+msgid "Check the organizations to process. Invitations go to the selected registration email. Contact-only rows save a card without creating an account or sending a message."
+msgstr "Позначте потрібні організації. Запрошення надходить на вибраний email для реєстрації. Для рядків без такого email зберігається лише картка контакту, без акаунта й повідомлення."
+
+msgid "Contact card only (no account or email)"
+msgstr "Лише картка контакту (без акаунта й листа)"
+
+msgid "Save selected rows without invitations"
+msgstr "Зберегти вибрані рядки без запрошень"

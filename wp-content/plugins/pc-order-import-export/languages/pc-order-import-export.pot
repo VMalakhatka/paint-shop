@@ -4733,3 +4733,21 @@ msgstr ""
 
 msgid "Register and send invitations"
 msgstr ""
+
+msgid "Select at least one organization on this page."
+msgstr ""
+
+msgid "Select all on this page"
+msgstr ""
+
+msgid "Select %s"
+msgstr ""
+
+msgid "Check the organizations to process. Invitations go to the selected registration email. Contact-only rows save a card without creating an account or sending a message."
+msgstr ""
+
+msgid "Contact card only (no account or email)"
+msgstr ""
+
+msgid "Save selected rows without invitations"
+msgstr ""

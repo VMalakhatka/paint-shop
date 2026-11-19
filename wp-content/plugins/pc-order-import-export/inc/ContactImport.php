@@ -76,9 +76,13 @@ final class ContactImport {
         FolioCustomerImport::authorize();
         FolioCustomerImport::locked(static function () use ($job, $page, $fields, $invite) {
             $entries = self::page($job, $page);
+            $selected = array_filter($fields, static fn($field) => is_array($field) && ($field['selected'] ?? '') === '1');
+            if (!$selected || array_diff_key($selected,$entries)) {
+                throw new \RuntimeException(__('Select at least one organization on this page.', 'pc-order-import-export'));
+            }
             $group = (string)get_post_meta($job,'_group',true);
             foreach ($entries as $i => &$entry) {
-                if ($entry['result'] !== '') continue;
+                if (!isset($selected[$i]) || $entry['result'] !== '') continue;
                 $role = $fields[$i]['role'] ?? '';
                 $email = $fields[$i]['email'] ?? null;
                 self::checkRole($role);
@@ -87,8 +91,8 @@ final class ContactImport {
                 $entry['email'] = $email;
             }
             unset($entry);
-            foreach ($entries as &$entry) {
-                if ($entry['result'] !== '') continue;
+            foreach ($entries as $i => &$entry) {
+                if (!isset($selected[$i]) || $entry['result'] !== '') continue;
                 $entry['result'] = self::applyRow($entry, $group, $invite);
                 self::store($job, '_page_'.$page, $entries);
             }

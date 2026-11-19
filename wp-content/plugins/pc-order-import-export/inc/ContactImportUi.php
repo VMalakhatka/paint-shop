@@ -90,23 +90,29 @@ final class ContactImportUi {
         }
         $counts[] = __('Contacts published on the organization website','pc-order-import-export').' '.(int)$summary['site'];
         echo '<p><strong>'.esc_html(sprintf(__('Organizations in workbook: %d','pc-order-import-export'),$summary['total'])).'</strong><br>'.esc_html(implode(' · ', $counts)).'</p>';
-        echo '<p>'.esc_html__('Check the role and registration email for each organization. Shared or occupied addresses are kept in the contact card.', 'pc-order-import-export').'</p>';
+        echo '<p>'.esc_html__('Check the organizations to process. Invitations go to the selected registration email. Contact-only rows save a card without creating an account or sending a message.', 'pc-order-import-export').'</p>';
         $group = get_post_meta($job,'_group',true);
         if (isset(CustomerGroups::labels()[$group])) echo '<p>'.esc_html__('Customer group','pc-order-import-export').' · '.esc_html(CustomerGroups::labels()[$group]).'</p>';
+        wp_enqueue_script('pcoe-contact-selection', PCOE_URL.'assets/contact-selection.js', [], filemtime(PCOE_DIR.'/assets/contact-selection.js'), true);
+        $pending = in_array('', array_column($rows,'result'), true);
         self::startForm();
-        echo '<input type="hidden" name="job" value="'.esc_attr($job).'"><input type="hidden" name="part" value="'.esc_attr($page).'"><table class="widefat striped"><thead><tr><th>'.esc_html__('Organization','pc-order-import-export').'</th><th>'.esc_html__('Customer role','pc-order-import-export').'</th><th>'.esc_html__('Registration email','pc-order-import-export').'</th></tr></thead><tbody>';
-        $pending = false;
+        echo '<input type="hidden" name="job" value="'.esc_attr($job).'"><input type="hidden" name="part" value="'.esc_attr($page).'"><table class="widefat striped"><thead><tr><th>';
+        if ($pending) echo '<label><input type="checkbox" data-contact-select-all> '.esc_html__('Select all on this page','pc-order-import-export').'</label>';
+        echo '</th><th>'.esc_html__('Organization','pc-order-import-export').'</th><th>'.esc_html__('Customer role','pc-order-import-export').'</th><th>'.esc_html__('Registration email','pc-order-import-export').'</th></tr></thead><tbody>';
         foreach ($rows as $index=>$entry) {
-            echo '<tr><td>'; self::details($entry['source']); echo '</td><td>';
+            echo '<tr><td>';
+            if ($entry['result'] === '') {
+                echo '<input type="checkbox" data-contact-select name="fields['.(int)$index.'][selected]" value="1" aria-label="'.esc_attr(sprintf(__('Select %s','pc-order-import-export'),$entry['source'][ContactWorkbook::ORGANIZATION])).'">';
+            }
+            echo '</td><td>'; self::details($entry['source']); echo '</td><td>';
             if ($entry['result']) {
                 $unchanged = in_array($entry['result'], ['existing','review'], true);
                 $label = $unchanged ? '—' : (FolioCustomerImport::roles()[$entry['role']] ?? $entry['role']);
                 echo esc_html($label).'</td><td>'.esc_html(trim(self::result($entry['result']).' '.($unchanged ? '' : $entry['email'])));
                 if (!empty($entry['invitation'])) echo '<br>'.esc_html(ContactInvitation::label($entry['invitation']));
             } else {
-                $pending = true;
                 self::role('fields['.$index.'][role]', $entry['role']);
-                echo '</td><td><select aria-label="'.esc_attr__('Registration email','pc-order-import-export').'" name="fields['.(int)$index.'][email]"><option value="">'.esc_html__('Contact only','pc-order-import-export').'</option>';
+                echo '</td><td><select aria-label="'.esc_attr__('Registration email','pc-order-import-export').'" name="fields['.(int)$index.'][email]"><option value="">'.esc_html__('Contact card only (no account or email)','pc-order-import-export').'</option>';
                 foreach ($entry['options'] as $email) echo '<option '.selected($entry['email'],$email,false).' value="'.esc_attr($email).'">'.esc_html($email.(in_array($email,$entry['blocked_emails'] ?? [],true) ? ' · '.ContactInvitation::label('blocked') : '')).'</option>';
                 echo '</select>';
                 if (ContactInvitation::blocked($entry['source'])) echo '<br>'.esc_html(ContactInvitation::label('blocked'));
@@ -114,7 +120,7 @@ final class ContactImportUi {
             echo '</td></tr>';
         }
         echo '</tbody></table>';
-        if ($pending) echo '<p><button class="button">'.esc_html__('Save this page and register selected accounts', 'pc-order-import-export').'</button> <button class="button button-primary" name="operation" value="invite">'.esc_html__('Register and send invitations', 'pc-order-import-export').'</button></p>';
+        if ($pending) echo '<p><button class="button">'.esc_html__('Save selected rows without invitations', 'pc-order-import-export').'</button> <button class="button button-primary" name="operation" value="invite">'.esc_html__('Register and send invitations', 'pc-order-import-export').'</button></p>';
         echo '</form>';
         self::navigation($page,$pages,['job'=>$job], 'part');
     }
