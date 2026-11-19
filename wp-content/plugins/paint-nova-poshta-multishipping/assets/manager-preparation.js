@@ -10,6 +10,23 @@
     }
     $form.on('input change', 'input:not([name=agreed]),select', dirty);
     $(document.body).on('pnpm_destination_changed', dirty);
+    function handoverFields() {
+        $form.find('fieldset[data-location]').each(function () {
+            var courier = $(this).find('.pnpm-handover').val() === 'doors';
+            $(this).find('.pnpm-courier-hint,.pnpm-origin-address').prop('hidden', !courier);
+            $(this).find('.pnpm-origin-branch').prop('hidden', courier);
+        });
+    }
+    $form.on('change', '.pnpm-handover', handoverFields);
+    handoverFields();
+    function codFields() {
+        var enabled = $form.find('[name=cod_enabled]').is(':checked');
+        $form.find('.pnpm-cod-fields').prop('hidden', !enabled).find('input,select').prop('disabled', !enabled);
+        var transfer = enabled && $form.find('[name=cod_service]').val() === 'money_transfer';
+        $form.find('.pnpm-cod-fee').prop('hidden', !transfer).find('select').prop('disabled', !transfer);
+    }
+    $form.on('change', '[name=cod_enabled],[name=cod_service]', codFields);
+    codFields();
     $form.on('submit', function (event) { event.preventDefault(); });
     $form.on('click', '.pnpm-add-box', function () {
         var $boxes = $(this).siblings('.pnpm-boxes');
@@ -21,28 +38,34 @@
         if ($(this).closest('.pnpm-boxes').children().length > 1) { $(this).closest('.pnpm-box').remove(); dirty(); }
     });
     $form.on('click', '[data-pnpm-command]', function () {
-        if (busy) return;
+        if (busy || $('[data-pnpm-flight]').length) return;
         var command = $(this).data('pnpm-command');
+        if (command === 'save') $(document.body).trigger('pnpm_preparation_saving');
         var recipient = {name:$form.find('[name=name]').val(), phone:$form.find('[name=phone]').val(), address:$('#pnpm_address').val() || ''};
         ['city_label','city_ref','delivery_type','point_label','point_ref'].forEach(function (key) { recipient[key] = $('#pnpm_' + key).val(); });
         var payload = {revision:$form.attr('data-revision'),recipient:recipient,groups:{},agreed:$form.find('[name=agreed]').is(':checked') ? '1' : ''};
+        payload.cod_settings = {enabled:$form.find('[name=cod_enabled]').is(':checked'),amount:$form.find('[name=cod_amount]').val(),service:$form.find('[name=cod_service]').val(),fee_payer:$form.find('[name=cod_fee_payer]').val()};
         $form.find('fieldset[data-location]').each(function () {
             var $group = $(this), boxes = [];
             $group.find('.pnpm-box').each(function () {
                 var box = {}; $(this).find('[data-box]').each(function () { box[$(this).data('box')] = $(this).val(); }); boxes.push(box);
             });
-            payload.groups[$group.data('location')] = {payer:$group.find('.pnpm-payer').val(),boxes:boxes};
+            payload.groups[$group.data('location')] = {payer:$group.find('.pnpm-payer').val(),handover:$group.find('.pnpm-handover').val(),boxes:boxes};
         });
         busy = true;
         // Freeze the reviewed input while a request is in flight; no automatic retries.
-        $form.find('input,select,button:not(:disabled)').attr('data-pnpm-busy', '1').prop('disabled', true);
+        $form.find('input:not(:disabled),select:not(:disabled),button:not(:disabled)').add($('.pnpm-lifecycle button:not(:disabled),.pnpm-lifecycle input:not(:disabled)')).attr('data-pnpm-busy', '1').prop('disabled', true);
         $('#pnpm-manager-preview').empty(); $('#pnpm-manager-status').text(pnpmManager.loading);
         $.post(pnpmManager.url, {action:'pnpm_manager_preparation',nonce:pnpmManager.nonce,command:command,order_id:$form.data('order'),payload:JSON.stringify(payload)})
             .done(function (response) {
                 if (!response || !response.success) { $('#pnpm-manager-status').text(response && response.data && response.data.message || pnpmManager.failure); return; }
                 var data = response.data;
                 if (data.revision) $form.attr('data-revision', data.revision);
-                if (command === 'save') $(document.body).trigger('pnpm_preparation_saved');
+                if (command === 'save') $(document.body).trigger('pnpm_preparation_saved', [data.lifecycle_html]);
+                if (command === 'save' && typeof data.audit_html === 'string') {
+                    var $audit = $($.parseHTML(data.audit_html, document, false)).filter('#pnpm-preparation-audit');
+                    if ($audit.length === 1) $('#pnpm-preparation-audit').replaceWith($audit);
+                }
                 if (data.recipient) {
                     ['name','phone'].forEach(function (key) { $form.find('[name=' + key + ']').val(data.recipient[key] || ''); });
                     $('#pnpm_city_label').trigger('input'); // Cancel stale directory responses before replacing values.
@@ -56,13 +79,15 @@
                     $('<p></p>').text([data.preview.recipient.name,data.preview.recipient.phone,data.preview.recipient.city_label,data.preview.recipient.point_label || data.preview.recipient.address].join(' · ')).appendTo($preview);
                     $.each(data.preview.groups, function (_, group) {
                         $('<h3></h3>').text(group.location_name).appendTo($preview);
+                        $('<p></p>').text(group.handover_label || '').appendTo($preview);
                         group.boxes.forEach(function (box, index) { $('<p></p>').text('#' + (index + 1) + ': ' + box.weight + ' ' + pnpmManager.kg + ' · ' + [box.length,box.width,box.height].join(' × ') + ' ' + pnpmManager.cm).appendTo($preview); });
-                        $('<p></p>').text(pnpmManager.payer + ': ' + pnpmManager[group.payer] + ' · ' + pnpmManager.cod + ': ' + group.cod + ' ' + pnpmManager.currency).appendTo($preview);
+                        $('<p></p>').text(pnpmManager.payer + ': ' + pnpmManager[group.payer]).appendTo($preview);
+                        (group.cod_summary || []).forEach(function (line) { $('<p>').text(line).appendTo($preview); });
                     });
                     var $list = $('<ul class="pnpm-blockers"></ul>').appendTo($preview);
                     data.blockers.forEach(function (text) { $('<li></li>').text(text).appendTo($list); });
                 }
             }).fail(function (xhr) { $('#pnpm-manager-status').text(xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message || pnpmManager.failure); })
-            .always(function () { busy = false; $form.find('[data-pnpm-busy]').prop('disabled', false).removeAttr('data-pnpm-busy'); });
+            .always(function () { busy = false; $('[data-pnpm-busy]').prop('disabled', false).removeAttr('data-pnpm-busy'); codFields(); });
     });
 })(jQuery);

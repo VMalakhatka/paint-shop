@@ -1,5 +1,221 @@
 # Paint Nova Poshta Multishipping
 
+## Shared courier pickup 0.11.3 — 2026-11-13
+
+Per-shipment handover supports branch drop-off or a registered sender address.
+`DoorsWarehouse` creation verifies the address/city and sender contact against the
+fresh directory. COD and private label printing reuse the existing lifecycle.
+An address TTN does not itself send a courier booking request in this workflow.
+Nova Poshta must first enable Courier Call **and disable automatic individual
+calls** for that sender. The site's administrator records this attestation for
+an exact sender/API account; it does not configure the carrier account.
+
+At `WooCommerce → Nova Poshta courier queue` (`pnpm-courier`), select 1–50 created
+store-owned TTNs from one exact sender/city/address/contact/phone, choose a Kyiv
+date (today through +30 days), load carrier intervals and review planned weight.
+A five-minute preview is bound to user, API account and shipment snapshots.
+One confirmation creates a call, durably saves its Barcode, then adds TTNs using
+verified `CarCallGeneral.saveCourierCall` and `insertDocuments`. Partial results
+are not success. No write retries. Calls and membership are saved before HTTP;
+unique token/origin-date-interval/member keys and a shared lock prevent duplicates.
+Database transactions never span carrier HTTP.
+
+Deployment: update this plugin **and PCOE manager help/catalogs**. An administrator
+then explicitly clicks Initialize courier storage in the queue: this installs
+InnoDB `pnpm_courier_calls`, `pnpm_courier_members`, `pnpm_courier_events` and sets
+`pnpm_courier_schema=1`. Enrollment lives in `pnpm_courier_enrollment` with actor,
+time and HMAC account fingerprint. No key in browser or snapshots, no new key.
+Both Woo and shipment capabilities apply; setup also requires manage_options.
+Existing real-write gates remain required. No production migration/deploy is
+performed by development tests.
+
+History shows latest 30 local operations, their numbers and TTNs. Explicit refresh
+reads the carrier's **seven-day** call list and all pages of its document list;
+it reports missing/extra TTNs and preserves raw snapshots and audit. A missing
+old call is not inferred cancelled. Unknown/partial/rejected attempts retain
+membership and require reconciliation in the NP account. Editing/cancelling,
+adding to an existing call and releasing/recovering unknown claims are not in
+this interface. Unknown creation is never matched by similar address text.
+
+Draft preparations remain a separate paged view; external TTNs are excluded.
+Address labels are display-only for order-plan fingerprints, while the exact
+verified address label and account are frozen into the created TTN snapshot.
+Final accepted weight/price is determined by NP. No payment, Folio, notification
+or courier-handover event is fabricated by creating the call.
+
+Checks: pure queue fixtures, local preparation/lifecycle regressions and
+`tests/courier-pickup-local.php` with all HTTP/mail intercepted cover success,
+write/access gates, ownership, stale previews, duplicate confirmation, timeout,
+partial/ambiguous results and read reconciliation. Local rendered UK interface
+is inspected separately. No real TTNs, courier requests or notifications.
+[Manager instructions](../../../docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-courier).
+[Verified API contract](../../../docs/api/NOVA_POSHTA_SHIPMENT_CONTRACT.md#courier-contract).
+
+## Manager panel refresh 0.11.1 — 2026-11-12
+
+Successful preparation saves return a freshly rendered lifecycle panel, audit and
+revision. The browser replaces only those blocks, including after the first save;
+other unsaved page fields remain untouched. Saving clears every old create token
+before the request; new cards require a fresh carrier preview and explicit consent.
+Delegated handlers survive replacement. Manual legal names survive only when the
+saved recipient name/phone identity has not changed. Concurrent preparation and
+lifecycle commands are blocked while either request is in flight.
+
+The preview exposes its remaining five-minute lifetime. Expiry clears the client
+token/consent and asks for a new check, without requiring a page reload. Server
+expiry, order/row binding, write gates and durable claims remain authoritative.
+Existing full-page refresh after a confirmed create/email remains automatic; an
+unknown result still requires reconciliation, never an automatic write retry.
+A stale sender contact now has its own pre-claim message instead of the generic
+verification error; no automatic contact replacement is performed.
+
+Tests: local preparation/lifecycle fixtures with all HTTP/mail intercepted, plus
+`tests/manager-workflow-ui.cjs` on generated `manager-workflow.html` at desktop and
+mobile widths. UK/RU contextual help and the manager guide describe the new flow.
+Verified: 53 preparation, 213 lifecycle and 56 browser checks; targeted NP help
+UK/RU/canonical parity, PHP/JS syntax and documentation validation passed. The
+unrelated full manager-help test still fails its existing section-count assertion,
+reproduced with the unchanged pre-release help source.
+No production deploy or real shipment is part of this release verification.
+
+## Reviewed cash on delivery 0.11.0 — 2026-11-11
+
+Manager preparation now explicitly records whether to collect payment, the amount,
+the return service and (for a separate money transfer) its fee payer. Unpaid Woo
+`cod` orders suggest the order total; the service has no default. A manager may
+also request collection for another unpaid payment method without changing it.
+`BackwardDeliveryData` with `CargoType=Money` and `AfterpaymentOnGoodsCost` are
+mutually exclusive, verified official contracts; payment control requires the
+merchant's active NovaPay agreement, whose availability was not verified here.
+
+Only one warehouse is supported. Positive amounts up to the order total, exact
+kopecks, customer policy and paid state are checked on save and before creation.
+Changing payment method, total or paid state invalidates the saved instructions.
+Old drafts require review and resave; locked attempts require administrator review.
+The final carrier payload and reviewed amount remain in the shipment snapshot.
+Declared value, delivery estimate and collection are separate; the estimate does
+not include transfer commission. Existing private TTN/A4/Zebra printing applies.
+No order payment, automatic email or accounting action is generated by collection.
+
+Verified locally: preparation and lifecycle fixtures (HTTP/mail intercepted),
+UK/RU catalogs and contextual help. No production deploy or real COD shipment.
+Operator workflow: [manager guide](../../../docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-preparation).
+Payload evidence: [API contract](../../../docs/api/NOVA_POSHTA_SHIPMENT_CONTRACT.md).
+
+## Correct tracking summaries 0.10.15 — 2026-11-06
+
+A live read verified all 12 known November cabinet numbers through tracking;
+the same sender profile is exposed by the API, while exact getDocumentList lookup
+of an omitted number returns no rows. Discovery remains unresolved: see
+`docs/api/NOVA_POSHTA_SHIPMENT_CONTRACT.md`. Automatic pagination alone is not a fix.
+
+Tracking fields differ from document-list fields. Summary now treats tracking
+DocumentCost as delivery, AnnouncedPrice as declared value, and accepts the
+provider's dd-mm-yyyy DateCreated for display/global sorting. It also recognizes
+CounterpartyRecipientDescription and RecipientFullNameEW. Document-list CostOnSite
+and Cost retain their existing semantics. The raw preview/detail labels match.
+Missing declared value never falls back to the delivery tariff; zero is preserved.
+Existing saved raw responses render correctly after deployment without reimport,
+backfill, classification edits or association changes. Read-only production
+reconciliation confirmed all 12 known numbers were already saved via np_tracking;
+the old date parser pushed them to the end of the list. No reimport is needed.
+No production writes/deploy.
+
+Validation: 215 isolated registry checks and 20 standalone source/field summary
+checks passed, including the verified
+tracking response shape, date validation, newest-source fallback and zero/unknown
+amounts. Synthetic tracking fixtures now use the documented fields. Manager
+instructions: `docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-registry`.
+
+
+## Automatic date-range preview 0.10.14 — 2026-11-06
+
+The manager now clicks **Read the entire period** once. `history_range` starts a
+private staging cursor; each `history_range_step` reads one monthly carrier page.
+A short nonempty page does not terminate the month; only an empty page advances
+it. The browser displays progress and supports pause/resume. Keep the tab open.
+Only a completed range exposes the single **Confirm and save the entire period**
+action. Operator steps: docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-registry.
+
+Range/page previews use the existing batch table, manager/account binding and
+10-minute inactivity expiry, refreshed for every staged page while reading.
+Carrier HTTP runs outside SQL transactions. Advances lock/recheck the server
+cursor; a lost-response replay returns the same page. The browser never controls
+the next date/page. Repeated TTNs within a month stop traversal; repeats across
+months count once, while all returned observations remain in the staged pages.
+Final confirmation uses the ecosystem lock and one atomic, idempotent transaction:
+all pages are observed, staged payloads consumed, and whole-period coverage plus
+per-page evidence retained. No partial business import on read/save failure.
+Existing links/classification are preserved. Expired/abandoned staging is cleared
+by normal cleanup. Capacity: 500 pages, 5000 unique TTNs, 32 MiB total and the
+existing 2 MiB per-page limit; overflow stops with no partial import.
+
+This completes traversal of **documents visible to the API**, not discovery of
+all incoming/outgoing shipments or reconstruction of every delivery event. The
+verified November cabinet/API mismatch described below remains unresolved.
+No schema or Java change. Production remains 0.10.13 until plugin deployment;
+this task performs no deployment, real import or carrier mutation.
+
+Validation: 215 isolated registry checks and 13 summary checks passed, including
+multiple months, 100-row and
+short pages, empty months, replay, expiry, failures/rollback, preserved links and
+incoming classification. Browser fixture verified pause/resume, a simulated
+connection failure, final checkbox gating, one confirmation, and invalidation
+after a date edit. All provider HTTP and mail are intercepted.
+
+
+## Explicit known-TTN batch import 0.10.13 — 2026-11-06
+
+Live read-only diagnosis on deployed 0.10.12 confirmed one November document on
+page 1, none on page 2, one with GetFullList=1; InternetDocumentGeneral did not
+expand coverage. Two known omitted outgoing/incoming numbers were readable in
+one TrackingDocument.getStatusDocuments call. This is incomplete discovery, not
+a persistence/pagination fix. Detailed evidence: docs/api/NOVA_POSHTA_SHIPMENT_CONTRACT.md.
+
+The new manager list input uses that documented tracking contract for up to 100
+numbers (2500 bytes), normalizes horizontal spaces and deduplicates numbers.
+Every response must match the requested set exactly with a valid non-3 status;
+missing/foreign/duplicate/invalid rows reject the entire preview. Input order is
+retained, secret-bearing fields stripped, scope is known_ttn_list. Existing
+nonce/capabilities, account binding, immutable preview, explicit confirmation,
+atomic observe and idempotent apply are reused. It never infers classification
+or changes Folio/Woo associations. No full event-history/discovery claim.
+
+Manager steps and failure handling: docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-registry.
+Only plugin deployment is needed; no schema/Java changes or production import
+was performed in this task.
+Validation: 183 isolated registry checks and 13 summary checks passed. Desktop
+and 390px browser fixtures verified invalid-input feedback, preview, confirmation,
+invalidation after edits and return to the list. Provider HTTP/mail were mocked.
+
+## Registry sorting, counts and presence comparison 0.10.12 — 2026-11-06
+
+List ordering now uses the displayed carrier/document calendar date descending
+before pagination, with unknown dates last and ID descending as a stable tie-break.
+No schema/backfill: scans filtered records in keyset chunks of 200, loading only
+the latest observation per source, retaining compact summaries for at most the
+requested page range + lookahead. Cost grows with registry size; a persisted date
+projection/index is a future scaling improvement, not silently added on reads.
+
+A filtered saved-TTN count and read-only `reconcile` compare up to 1000 supplied
+TTNs with all saved directions, including unclassified/incoming. Horizontal spaces
+are normalized; duplicates ignored; malformed lines reject the whole input.
+The result reports exact missing numbers, without carrier calls, previews, cleanup
+or writes. It proves presence only for supplied numbers, not full account coverage.
+
+History confirmation names the saved month/page/count, next step and a refresh-list
+link; the list below remains a page-load snapshot until refreshed. The coverage
+warning now includes both outgoing and incoming. Read-only production UI diagnosis
+found an unfinished October import and a November preview narrower than the cabinet;
+SSH was unavailable, so no database-level or provider-page-2 diagnosis is claimed.
+Normal plugin deployment only, no Java update/migration. Manager guide #np-registry
+contains the operator steps and evidence limits.
+
+Validation: 164 isolated registry checks and 13 summary checks passed; provider
+HTTP/mail were mocked and fixture tables removed. Browser fixture verified the
+comparison counts/missing number and the unfinished-month continuation message.
+No production imports, deployment or carrier writes were performed.
+
 ## Explicit basis account selection 0.10.11 — 2026-10-26
 
 Basis lookup prefers Folio NUMSCHETPL/SCH_DATE, falling back to OSNOVANIE only
@@ -488,8 +704,9 @@ No automatic email on save/create, no stock/payment/profile updates and no autom
 Woo status transitions. Created means prepared, not physically handed over.
 
 Scope: private-person recipient with confirmed Ukrainian first/last names and
-optional patronymic, branch drop-off to branch/locker, Cash carrier payment, no COD.
-Courier addresses, origin lockers, NonCash and COD fail closed.
+optional patronymic, branch drop-off to branch/locker, Cash carrier payment,
+reviewed single-warehouse COD (0.11.0). Courier addresses, origin lockers,
+NonCash carrier payment and multi-warehouse COD fail closed.
 `RecipientIdentity` suggests structured order shipping/billing names, then customer
 card names, only when the saved recipient name and normalized phone match. Never
 split a free-text full name, overwrite a dropship recipient, or update a profile.
@@ -568,8 +785,9 @@ revisions reject repeat writes. No profile/address/stock/payment changes. Existi
 external or non-draft shipments block preparation, including mixed-source orders.
 Child orders must use the original; missing allocations and refunds fail closed.
 The manager's profile never determines the customer's COD policy. Multi-origin COD
-remains blocked; no duplicated full-order COD is stored. A single-origin COD amount
-is a preview from the saved order, not permission to collect it.
+remains blocked; no duplicated full-order COD is stored. Single-origin collection
+requires an explicit amount and return service saved with the order payment basis,
+then a fresh carrier preview and separate creation confirmation (0.11.0).
 
 The preview validates local typed fields and mapping completeness, but does not
 approve packed-point compatibility, final tariff, sender ownership or subsidy/payer

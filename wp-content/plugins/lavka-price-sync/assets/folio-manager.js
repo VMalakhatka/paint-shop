@@ -4,35 +4,40 @@
     if (!form) return;
     const el = id => document.getElementById('lps-manager-' + id);
     const kind = el('kind'), status = el('status'), result = el('result'), apply = el('apply'), check = el('check'), confirm = el('confirm'), download = el('download');
+    const assemblyMode = el('assembly-mode'), copy = el('copy'), invoice = el('invoice');
+    let invoiceRows = [];
+    const inputColumns = () => assemblyMode ? lpsManager.assemblyModes[assemblyMode.value] : lpsManager.columns[kind.value];
     let job = '', preview = false, busy = false;
     function buttons() {
         if (apply && confirm) apply.disabled = busy || !preview || !confirm.checked;
         if (confirm) confirm.disabled = busy || !preview;
         check.disabled = busy || !job;
+        if (copy) copy.disabled = busy || !invoiceRows.length;
         for (const control of form.elements) control.disabled = busy;
     }
-    function invalidate() { preview = false; if (confirm) confirm.checked = false; download.hidden = true; buttons(); }
+    function invalidate() { preview = false; if (confirm) confirm.checked = false; download.hidden = true; invoiceRows = []; if (copy) copy.hidden = true; if (invoice) invoice.replaceChildren(); buttons(); }
     function operation() {
         invalidate(); result.replaceChildren(); status.textContent = '';
-        el('columns').textContent = lpsManager.columns[kind.value].join(' | ');
+        el('columns').textContent = inputColumns().join(' | ');
         el('scope').textContent = lpsManager.scopes[kind.value];
     }
-    function table(headers, rows) {
+    function table(headers, rows, target = result) {
         const box = document.createElement('div'); box.style.overflow = 'auto'; box.style.maxHeight = '55vh'; box.style.marginBottom = '16px';
         const table = document.createElement('table'); table.className = 'widefat striped';
         const head = table.createTHead().insertRow();
         headers.forEach(label => { const th = document.createElement('th'); th.textContent = label; head.append(th); });
         const body = table.createTBody();
         rows.forEach(row => { const tr = body.insertRow(); row.forEach(value => { const td = tr.insertCell(); td.textContent = value === null ? lpsManager.clear : String(value); td.style.whiteSpace = 'pre-wrap'; }); });
-        box.append(table); result.append(box);
+        box.append(table); target.append(box);
     }
     function render(data) {
         if (!Object.prototype.hasOwnProperty.call(lpsManager.columns, data.operation)) throw new Error(lpsManager.error);
         kind.value = data.operation;
-        el('columns').textContent = lpsManager.columns[kind.value].join(' | ');
+        if (assemblyMode) assemblyMode.value = data.assemblyMode || 'FULL';
+        el('columns').textContent = inputColumns().join(' | ');
         el('scope').textContent = lpsManager.scopes[kind.value];
         form.querySelector('[type="file"]').value = '';
-        const columns = lpsManager.columns[data.operation];
+        const columns = inputColumns();
         const quote = value => '"' + String(value ?? '').replace(/"/g, '""') + '"';
         el('paste').value = [columns, ...data.input.map(row => columns.map(c => row[c]))].map(row => row.map(quote).join('\t')).join('\n');
         job = data.job; preview = data.status === 'PREVIEW' && (data.before.length > 0 || data.operation === 'DESCRIPTION');
@@ -51,7 +56,15 @@
             const inserts = data.input.filter((r, i) => !existing.has(i));
             if (inserts.length) table(['COD_ARTIC', 'DESCRIPTION'], inserts.map(r => [r.COD_ARTIC, r.DESCRIPTION]));
         }
-        for (const [name, output] of Object.entries(data.outputs)) { const h = document.createElement('h3'); h.textContent = name; result.append(h); table(output.columns, output.rows); }
+        if (invoice) {
+            invoice.replaceChildren(); invoiceRows = data.invoice?.rows || []; copy.hidden = !invoiceRows.length;
+            const h = document.createElement('h2'); h.textContent = lpsManager.invoiceTitle; invoice.append(h);
+            if (data.invoice) table(data.invoice.columns, invoiceRows, invoice);
+            else { const p = document.createElement('p'); p.textContent = data.invoiceError || lpsManager.error; invoice.append(p); }
+        }
+        let outputTarget = result;
+        if (invoice) { const details = document.createElement('details'), summary = document.createElement('summary'); summary.textContent = lpsManager.details; details.append(summary); result.append(details); outputTarget = details; }
+        for (const [name, output] of Object.entries(data.outputs)) { const h = document.createElement('h3'); h.textContent = name; outputTarget.append(h); table(output.columns, output.rows, outputTarget); }
         buttons();
     }
     async function request(operation, data) {
@@ -69,6 +82,16 @@
     }
     form.addEventListener('submit', e => { e.preventDefault(); invalidate(); request('preview', new FormData(form)); });
     kind.addEventListener('change', operation);
+    assemblyMode?.addEventListener('change', () => {
+        el('paste').value = ''; form.querySelector('[type="file"]').value = ''; job = ''; operation();
+    });
+    copy?.addEventListener('click', async () => {
+        if (busy || !invoiceRows.length) return;
+        try {
+            await navigator.clipboard.writeText(invoiceRows.map(row => row.join('\t')).join('\r\n'));
+            status.textContent = lpsManager.copied;
+        } catch (_) { status.textContent = lpsManager.copyError; }
+    });
     form.querySelector('[type="file"]').addEventListener('change', invalidate);
     el('paste').addEventListener('input', invalidate);
     confirm?.addEventListener('change', buttons);

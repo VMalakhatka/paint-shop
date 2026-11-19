@@ -4,10 +4,13 @@ namespace PaintCore\PCOE;
 class Plugin {
     public function init(){
         CustomerPermissions::hooks();
+        PartnerCatalog::hooks();
+        CrmCatalog::hooks();
         PromotionCoupons::hooks();
         OrderExecution::hooks();
         ManagerQuickOrder::hooks();
         FolioCustomerImport::hooks();
+        ContactImport::hooks();
         if (defined('WP_CLI') && WP_CLI) {
             \WP_CLI::add_command('pcoe customers-import', static function ($args,$options) {
                 if (empty($args[0])) \WP_CLI::error('Provide the prepared Customers XLSX path.');

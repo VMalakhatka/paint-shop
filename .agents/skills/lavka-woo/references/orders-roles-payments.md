@@ -1,5 +1,16 @@
 # Пользователи, роли, заказы и оплаты
 
+WayForPay admission/failure UI (code 0.2.2, 2026-11-05): `Availability` in
+pc-wayforpay-checkbox probes read-only TRANSACTION_LIST over a one-second window,
+retaining only status/code/time in a credential-scoped transient. It gates new
+Classic checkout/pay/legacy receipt attempts, never callbacks or fiscal/Folio work.
+HTTP 200 / 1118 is MerchantRestriction, not a Checkbox error; it does not reveal
+the private reason for account review. Never claim individual card results from
+this probe. Signed negative feedback is HPOS metadata under the shared payment
+lock; browser Approved cannot mark paid, and late failures cannot downgrade
+verified payment. Preserve protected Woo return URLs and UK/RU notices. Exact
+recovery and deployment boundaries: `docs/WAYFORPAY_TEST_ACCESS.md` and plugin README.
+
 ## Пользователь и ФОЛИО
 
 Регистрация оптовика: инструкция `docs/MANAGER_CUSTOMER_GUIDE_UK.md`,
@@ -776,3 +787,59 @@ must not overwrite bank fields or silently approve a differing recipient; requir
 an exact match with previously verified details or a fresh explicit review. Code
 rollback can reactivate obsolete Folio settings, so verify those privately first. Canonical operator
 steps and historical-file boundaries: `docs/MANAGER_CUSTOMER_GUIDE_UK.md#payment-recipient`.
+
+Bank QR (2026-11-14, local code): `inc/bacs-qr.php` in the same MU component
+extends existing `bacs`, not a new gateway. Use only the confirmed Woo recipient
+and full pending/on-hold UAH parent-order total with no paid date/refunds.
+NBU format 002 uses a bank-domain link, UTF-8 fields and empty reserved fields;
+reject malformed/oversized values rather than trimming a recipient or amount.
+Render locally, with symbol versions 10–17, ECC Q (M for longer payloads) and the hryvnia circle from
+NBU Resolution 97. Camera handoff depends on OS/bank support; never promise all
+banks or infer payment from opening a link. Email links to the existing protected
+order page. No payment_complete, bank API, Checkbox, Folio or settings write.
+Release limits and rollback: the manager guide's `#payment-recipient` section.
+
+### Document list dates (2026-11-09)
+
+`customer-documents.php` and Java `FolioCustomerDocumentService` accept explicit future document periods: stored Folio dates can differ from server today. Keep default dates unchanged and retain ordered ranges / 366-day maximum. Do not reuse this read-only rule for balance as-of dates or document creation. Both PHP and Java must be deployed; see `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md` section 13.
+
+
+### Partner product exports (2026-11-10)
+
+`pc-order-import-export/inc/PartnerCatalog*.php` owns the opt-in account screen
+`?pcoe_catalog=1` and bearer-key retail YML via admin-post. The account redirect
+MU-plugin preserves this query. `_pcoe_partner_catalog` user meta stores selection,
+revocation seed and enabled flag; a private 10-minute transient holds owner-scoped
+rows. Recheck wholesale access for every request, never share private rows between
+users, and never expose purchase prices in Prom/Woo CSV. Use public category
+visibility from PriceList; category_id added to its row envelope is metadata only.
+Schema headers are export field names, not customer record metadata. Public visible
+attributes only, no supplier attributes. Settings writes use a per-user DB lock.
+Requests read WordPress stock; optional packaging read is the existing bounded Java
+endpoint. No new Java code, media assignment, stock writes, email or scheduled
+synchronization. Version one explicitly caps 500 products / 100 ZIP photos. See
+`docs/WHOLESALE_CUSTOMER_GUIDE_UK.md` for setup, Prom test import and limits. Undo the
+Plugin hook and account redirect exception to disable the feature; no business data
+migration. No marketplace test or production deployment implied by local tests.
+
+Partner export help (2026-11-11, code/local render): `PartnerCatalogUi` opens
+`pc_wholesale_help_url()` anchors `partner-catalog`, `partner-catalog-selection`,
+`partner-catalog-files`, `partner-catalog-prom`, `partner-catalog-errors` in a new
+tab. Keep these stable: the downloadable Ukrainian PDF also links to them.
+`scripts/build-partner-catalog-guide.py` builds the deployed static asset
+`pc-order-import-export/assets/partner-catalog-guide-uk.pdf`; it must never embed
+customer tokens or purchase prices. Full operator steps stay in the wholesale
+guide. Code/render checks do not prove production help publication.
+
+CRM purchase export (2026-11-17, local code/tests): `CrmCatalog*` owns an independent
+`_pcoe_crm_catalog` config and HMAC domain (`crm-purchase`), not a price switch on
+`pcoe_partner_feed`. Never enable purchase-price sharing implicitly. CRM XML keeps eligible SKUs without a usable purchase price, omits both purchase price tags, keeps a known public retail price in `retail_price`, and marks the offer with `purchase_price_status=unavailable` (2026-11-19). Site location
+groups may aggregate Folio warehouses; confirm their mapping before promising
+Kyiv-only physical stock. `PartnerCatalogData::build_ids` shares owner-scoped data
+projection but skips Java packaging for this background feed. Private option chunks
+publish only after completion, checked before HTTP 200; expired/context-mismatched
+snapshots return 503. This is file preparation from existing Woo data with a per-owner lock, not another
+stock synchronization: no Java/Folio calls, no global sync lock. Preserve
+retail Prom semantics and stable existing help anchors. Contract and production
+pilot boundaries: `docs/api/CRM_CATALOG_FEED.md`; customer steps remain in the
+wholesale guide `#crm-catalog`. No live SalesDrive import is implied by offline tests.

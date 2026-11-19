@@ -29,9 +29,13 @@ function lps_manager_render_page(bool $assembly): void {
     if(!current_user_can(LPS_CAP))wp_die(esc_html__('Access denied.','lps-manager'));
     $labels=lps_manager_screen_labels($assembly);
     echo '<div class="wrap"><h1>'.esc_html($assembly?__('Assembly invoice calculation','lps-manager'):__('Manager operations','lps-manager')).'</h1><p>'.esc_html($assembly?__('Calculate assembly and download its results. Folio invoice generation will be added here later.','lps-manager'):__('Five operations for product cards and article selection. Source and destination: Paint_Ua.','lps-manager')).'</p>';
-    lps_manager_help(__('Quick guide','lps-manager'),$assembly?__('Upload the assembly input or paste cells from Excel, calculate and check the result tables, then download Excel. This screen does not create a Folio invoice.','lps-manager'):__('Choose an operation, upload a file or paste cells from Excel, then preview. For card changes, check all warehouses and empty values before confirming Apply. For article selection, download the result.','lps-manager'));
+    lps_manager_help(__('Quick guide','lps-manager'),$assembly?__('Choose parent articles and quantities, or child articles and quantities for multi-assembly. Upload or paste two columns, calculate, then copy ARTIC / KOL_R / PRICE into IMPORT DBF or download the first Excel sheet. Load the DBF into an assembly invoice in Folio as before. Each calculation starts with a fresh input table.','lps-manager'):__('Choose an operation, upload a file or paste cells from Excel, then preview. For card changes, check all warehouses and empty values before confirming Apply. For article selection, download the result.','lps-manager'));
     echo '<form id="lps-manager-form">';
-    if($assembly)echo '<input id="lps-manager-kind" name="kind" type="hidden" value="ASSEMBLY">';
+    if($assembly) {
+        echo '<input id="lps-manager-kind" name="kind" type="hidden" value="ASSEMBLY"><p><label for="lps-manager-assembly-mode">'.esc_html__('Assembly input','lps-manager').'</label> <select id="lps-manager-assembly-mode" name="assembly_mode" style="max-width:100%">';
+        foreach(['PARENT'=>__('From parent articles','lps-manager'),'CHILD'=>__('Multi-assembly: from child articles','lps-manager'),'FULL'=>__('Full Access table (advanced)','lps-manager')] as $key=>$label)echo '<option value="'.$key.'">'.esc_html($label).'</option>';
+        echo '</select></p>';
+    }
     else {
         echo '<p><label for="lps-manager-kind">'.esc_html__('Operation','lps-manager').'</label> <select id="lps-manager-kind" name="kind" style="max-width:100%">';
         foreach($labels as $key=>$label)echo '<option value="'.esc_attr($key).'">'.esc_html($label).'</option>';
@@ -39,9 +43,10 @@ function lps_manager_render_page(bool $assembly): void {
     }
     echo '<p id="lps-manager-columns" style="overflow-wrap:anywhere"></p><p id="lps-manager-scope"></p>';
     echo '<p><label>'.esc_html__('Excel or CSV file','lps-manager').' <input type="file" name="file" style="max-width:100%" accept=".xls,.xlsx,.csv"></label></p><p><label for="lps-manager-paste">'.esc_html__('Or paste cells from Excel','lps-manager').'</label></p><textarea id="lps-manager-paste" name="paste" rows="6" style="width:100%;max-width:1000px;box-sizing:border-box" spellcheck="false"></textarea>';
-    lps_manager_help(__('File and empty values','lps-manager'),__('XLS, XLSX or UTF-8 CSV, up to 5 MB and 500 data rows. Only the first sheet is read. Headers are optional, in the displayed order. Use tabs or semicolons for decimal commas. Formulas are rejected. Empty values clear fields to NULL. Keep all six group columns. For assembly, supply SLOG explicitly as 0 or 1 and preserve the initial values used in Access.','lps-manager'));
+    lps_manager_help(__('File and empty values','lps-manager'),$assembly?__('Headers are optional. In parent mode, enter ARTIC_roditel and KOL_rod_razob; in multi-assembly mode, ARTIC_rebenok and kol_reb_pol. Both cells are required; quantities must be positive, child quantities whole numbers up to 32767. Unentered fields receive the defaults of a new Access row. XLS/XLSX/UTF-8 CSV: first sheet, up to 5 MB and 500 rows; no formulas. Use tabs or semicolons with decimal commas.','lps-manager'):__('XLS, XLSX or UTF-8 CSV, up to 5 MB and 500 data rows. Only the first sheet is read. Headers are optional, in the displayed order. Use tabs or semicolons for decimal commas. Formulas are rejected. Empty values clear fields to NULL. Keep all six group columns. For assembly, supply SLOG explicitly as 0 or 1 and preserve the initial values used in Access.','lps-manager'));
     wp_nonce_field(LPS_MANAGER_NONCE);
     echo '<p><button class="button button-primary" type="submit">'.esc_html($assembly?__('Calculate assembly','lps-manager'):__('Preview / calculate','lps-manager')).'</button></p></form>';
+    if($assembly)echo '<p><button type="button" id="lps-manager-copy" class="button" hidden>'.esc_html__('Copy for IMPORT DBF','lps-manager').'</button></p><div id="lps-manager-invoice"></div>';
     echo '<p id="lps-manager-status" role="status" aria-live="polite"></p><div id="lps-manager-result"></div><p><a id="lps-manager-download" class="button" hidden>'.esc_html__('Download Excel','lps-manager').'</a></p>';
     if(!$assembly) {
     lps_manager_help(__('Check before applying','lps-manager'),__('Name, groups and unit are updated on every matching warehouse card. Check the old and new values, missing articles and intended field clearing. A preview is valid for 15 minutes; changed source rows require a new preview.','lps-manager'));
@@ -60,13 +65,16 @@ add_action('admin_enqueue_scripts',static function(){
     wp_enqueue_script('lps-manager',plugins_url('../assets/folio-manager.js',__FILE__),[],(string)filemtime(__DIR__.'/../assets/folio-manager.js'),true);
     $columns=[];foreach(array_keys(lps_manager_screen_labels($page==='lps-folio-assembly')) as $op)$columns[$op]=lps_manager_columns($op);
     wp_localize_script('lps-manager','lpsManager',['url'=>admin_url('admin-ajax.php'),'columns'=>$columns,
+        'assemblyModes'=>['PARENT'=>lps_manager_input_columns('ASSEMBLY','PARENT'),'CHILD'=>lps_manager_input_columns('ASSEMBLY','CHILD'),'FULL'=>lps_manager_columns('ASSEMBLY')],
+        'details'=>__('Calculation details','lps-manager'),
+        'invoiceTitle'=>__('For IMPORT DBF: ARTIC / KOL_R / PRICE','lps-manager'),'copied'=>__('Copied without headers. Paste into IMPORT DBF.','lps-manager'),'copyError'=>__('Copy failed. Download Excel and copy the three columns from IMPORT_DBF without the header.','lps-manager'),
         'busy'=>__('Processing…','lps-manager'),'error'=>__('Could not process the operation. Check the input and Java connection. After Apply, check status before repeating.','lps-manager'),
         'headers'=>[__('Article','lps-manager'),__('Warehouse','lps-manager'),__('Field','lps-manager'),__('Old value','lps-manager'),__('New value','lps-manager')],
         'missing'=>__('Articles without existing target rows','lps-manager'),'clear'=>__('NULL / empty','lps-manager'),
         'scopes'=>['NAME'=>__('Changes names on all warehouses.','lps-manager'),'GROUPS'=>__('Replaces all six group fields on all warehouses. Empty cells clear groups.','lps-manager'),'UNIT'=>__('Changes units on all warehouses.','lps-manager'),
             'DESCRIPTION'=>__('Adds missing articles to the common description table and updates descriptions for existing articles.','lps-manager'),
             'BASE'=>__('Read only. Duplicate input rows and unmatched NULL/NULL output rows are retained.','lps-manager'),
-            'ASSEMBLY'=>__('Accepts the full Access input table; the simplified manager input is still being clarified. Calculates three result tables, without creating a Folio invoice. Ambiguous source matches stop the calculation.','lps-manager')],
+            'ASSEMBLY'=>__('The recipe, prices and assembly type are determined from Folio. Negative quantities consume components; positive quantities receive the finished article. Check the result before importing the DBF.','lps-manager')],
         'states'=>lps_manager_states(),
         'issues'=>[]]);
 });
@@ -85,6 +93,10 @@ function lps_manager_java(string $action,array $payload): array {
 }
 function lps_manager_public(array $job): array {
     $data=$job['result'];unset($data['token']);$data['status']=$job['status'];$data['job']=$job['id'];$data['filename']=$job['filename'];$data['created']=$job['created'];
+    if($data['operation']==='ASSEMBLY') {
+        $data['assemblyMode']=$job['assembly_mode']??'FULL';
+        try {$data['invoice']=lps_assembly_invoice($data['outputs']);} catch (RuntimeException $e) {$data['invoice']=null;$data['invoiceError']=lps_manager_error('ASSEMBLY_INCOMPLETE');}
+    }
     $data['download']=wp_nonce_url(add_query_arg(['action'=>'lps_manager_export','job'=>$job['id']],admin_url('admin-post.php')),LPS_MANAGER_NONCE);
     return $data;
 }
@@ -94,9 +106,10 @@ function lps_manager_job(string $id): array {
     if(!is_array($job)||$job['user']!==get_current_user_id())throw new RuntimeException('JOB');return $job;
 }
 function lps_manager_error(string $code): string {
+    if($code==='ASSEMBLY_INCOMPLETE')return __('The invoice result is incomplete. Check recipes and warehouse 7 prices. Copying to IMPORT DBF is unavailable; the Excel report retains the diagnostic tables.','lps-manager');
     if(str_starts_with($code,'ASSEMBLY_'))return __('Assembly has ambiguous source matches or duplicate output articles. Check composition links, warehouse 7 prices and repeated child articles.','lps-manager');
     if(preg_match('/^(ROW_|DUPLICATE_)([0-9]+)$/D',$code,$m))return sprintf(__('Check input row %s: column count, value length, numeric format or duplicate article.','lps-manager'),$m[2]);
-    if(in_array($code,['CSV_FORMAT','EXCEL_FORMULA','EXCEL_RANGE','ARTICLE_REQUIRED','SLOG_REQUIRED','INVALID_COLUMNS','INVALID_VALUE','DUPLICATE_ARTICLE','EMPTY_FILE','ONE_SOURCE'],true))return __('Check the displayed columns. Supply either a file or pasted cells, with no formulas or repeated update articles. For assembly, SLOG is required.','lps-manager');
+    if(in_array($code,['CSV_FORMAT','EXCEL_FORMULA','EXCEL_RANGE','ARTICLE_REQUIRED','SLOG_REQUIRED','INVALID_COLUMNS','INVALID_VALUE','DUPLICATE_ARTICLE','EMPTY_FILE','ONE_SOURCE'],true))return __('Check the displayed columns. Supply either a file or pasted cells, with no formulas or repeated update articles. For assembly, use the two columns of the selected mode and positive quantities; only the full Access format requires SLOG.','lps-manager');
     return __('Could not process the operation. Check the input and Java connection. After Apply, check status before repeating.','lps-manager');
 }
 add_action('wp_ajax_lps_manager',static function(){
@@ -106,16 +119,18 @@ add_action('wp_ajax_lps_manager',static function(){
         $action=$_POST['operation']??'';
         if($action==='preview') {
             $kind=$_POST['kind']??'';if(!is_string($kind))throw new RuntimeException('OPERATION');lps_manager_columns($kind);
+            $mode=$kind==='ASSEMBLY'?($_POST['assembly_mode']??'FULL'):'FULL';if(!is_string($mode))throw new RuntimeException('INPUT_MODE');lps_manager_input_columns($kind,$mode);
             $paste=wp_unslash($_POST['paste']??'');if(!is_string($paste))throw new RuntimeException('INPUT');
             $file=$_FILES['file']??[];$hasFile=($file['error']??UPLOAD_ERR_NO_FILE)!==UPLOAD_ERR_NO_FILE;
             if($hasFile&&trim($paste)!=='')throw new RuntimeException('ONE_SOURCE');
             if($hasFile) {
                 if(($file['error']??-1)!==UPLOAD_ERR_OK||!is_string($file['tmp_name']??null)||!is_uploaded_file($file['tmp_name'])||!is_string($file['name']??null))throw new RuntimeException('UPLOAD');
-                $rows=lps_manager_file($file['tmp_name'],strtolower(pathinfo($file['name'],PATHINFO_EXTENSION)),$kind);
+                $rows=lps_manager_file($file['tmp_name'],strtolower(pathinfo($file['name'],PATHINFO_EXTENSION)),$kind,$mode);
                 $name=sanitize_file_name($file['name']);$sha=hash_file('sha256',$file['tmp_name']);
-            }else{$rows=lps_manager_text($paste,$kind);$name=__('Pasted cells','lps-manager');$sha=hash('sha256',$paste);}
+            }else{$rows=lps_manager_text($paste,$kind,$mode);$name=__('Pasted cells','lps-manager');$sha=hash('sha256',$paste);}
             $result=lps_manager_java('preview',['operation'=>$kind,'rows'=>$rows]);$id=wp_generate_uuid4();
             $job=['id'=>$id,'user'=>get_current_user_id(),'created'=>current_time('mysql'),'filename'=>$name,'sha256'=>$sha,'status'=>$result['status'],'result'=>$result];
+            if($kind==='ASSEMBLY')$job['assembly_mode']=$mode;
             if(!add_option('lps_manager_job_'.$id,$job,'',false))throw new RuntimeException('STORAGE');
             $history=(array)get_option('lps_manager_history_'.get_current_user_id(),[]);$history[]=$id;update_option('lps_manager_history_'.get_current_user_id(),array_slice($history,-50),false);
         }else {

@@ -24,6 +24,7 @@
 | Учётные цены: менеджерские шаги, статусы складов, отрицательная хронология и Excel | `docs/FOLIO_ACCOUNTING_PRICES_MANAGER_UK.md`; публикация: `lavka-price-sync/inc/accounting-price-help.php` + `lps-accounting-help` UK/RU |
 | Оптовая справка на сайте, заказ, импорт/экспорт, черновики, повтор старого заказа, склады, checkout split, баланс и документы ФОЛІО | Канон: `docs/WHOLESALE_CUSTOMER_GUIDE_UK.md`; публикация: `wp-content/mu-plugins/pc-wholesale-help.php` + assets/i18n |
 | Media workflow оператора | `docs/MEDIA_MANAGER_GUIDE_UK.md` |
+| Публичное приглашение мастеров, фотографии, контакты и выпуск лендинга | `docs/MAKERS_LANDING.md`; исходники `content/makers-landing/` |
 | Точный request/response/status | Java `docs/api` или contract владельца plugin |
 | Конфигурация/lifecycle одного plugin | `wp-content/plugins/<slug>/README.md` |
 

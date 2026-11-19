@@ -330,3 +330,12 @@ msgstr "Скрыть панель корзины"
 
 msgid "Enter a valid email address."
 msgstr "Введите корректный адрес электронной почты."
+
+msgid "Cooperation links (footer)"
+msgstr "Ссылки сотрудничества (подвал)"
+
+msgid "Cooperation"
+msgstr "Сотрудничество"
+
+msgid "For makers"
+msgstr "Для мастеров"

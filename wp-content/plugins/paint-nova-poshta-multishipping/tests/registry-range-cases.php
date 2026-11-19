@@ -1,0 +1,65 @@
+<?php
+// Included only in the intercepted local DB harness, after link/classification fixtures exist.
+if (!defined('WP_CLI') || !WP_CLI || !isset($check,$service,$confirm)) throw new RuntimeException('Fixture harness only');
+$mode='range'; $period=['from'=>'2026-06-15','to'=>'2026-08-05'];
+$beforeCount=$store->listingCount([]); $beforeRange=$store->detail($id); $beforeIncoming=$store->detail((int)$beforeIncoming['id']);
+$readsBefore=count($documentReads);
+$range=$service->run('history_range',$period); $cursor=$range['cursor'];
+$check(count($documentReads)===$readsBefore && $range['step']===0,'Range start stages a cursor without provider or business writes');
+$reject(fn()=>$confirm($cursor),'Incomplete range cannot be confirmed');
+$step=fn($n)=>$service->run('history_range_step',['cursor'=>$cursor,'step'=>(string)$n]);
+$first=$step(0); $check(!$first['done'] && !$first['token'] && count($first['rows'])===100,'First full page is not a completed range');
+$readsBefore=count($documentReads);
+$check($step(0)===$first && count($documentReads)===$readsBefore,'Lost-response replay returns the same page without another carrier call');
+$reject(fn()=>$step(4),'Browser cannot skip pages');
+$manager->ID--; $reject(fn()=>$step(1),'Other manager cannot advance range'); $manager->ID++;
+$state=$store->staged($cursor,'history_range',false);
+$reject(fn()=>$confirm($state['parts'][0]),'Internal page cannot be independently confirmed');
+$partHash=hash('sha256',$state['parts'][0]);
+$wpdb->update($wpdb->prefix.'pnpm_registry_batches',['expires_at'=>gmdate('Y-m-d H:i:s',time()+30)],['token_hash'=>$partHash]);
+$second=$step(1); $check(count($second['rows'])===1 && !$second['done'],'Short nonempty page must still be followed');
+$expiry=$wpdb->get_var($wpdb->prepare('SELECT expires_at FROM '.$wpdb->prefix.'pnpm_registry_batches WHERE token_hash=%s',$partHash));
+$check($expiry>gmdate('Y-m-d H:i:s',time()+500),'Progress extends early-page preview lifetime');
+$mode='fail'; $reject(fn()=>$step(2),'Provider failure stops the current page'); $mode='range';
+$check(count($store->staged($cursor,'history_range',false)['parts'])===2 && $store->listingCount([])===$beforeCount,'Error neither advances cursor nor imports a partial range');
+$third=$step(2); $check(!$third['done'] && $third['scope']['months_read']===1,'Empty June page advances to July automatically');
+$fourth=$step(3); $check($fourth['scope']['window_from']==='2026-07-01' && $fourth['scope']['window_to']==='2026-07-31','Whole 31-day month included');
+$step(4); $last=$step(5);
+$check($last['done'] && $last['token']===$cursor && $last['scope']['window_to']==='2026-08-05','Final partial empty month completes the entire range');
+$check($last['scope']['count']===102 && $last['scope']['returned_count']===103 && $last['scope']['duplicates']===1 && $last['scope']['pages_read']===6 && $last['scope']['months_read']===3,'Counts distinguish unique TTNs, repeated cross-month rows, pages and months');
+$check($last['scope']['coverage']==='account_document_list_only' && $store->listingCount([])===$beforeCount,'Complete traversal does not claim incoming discovery or import before confirmation');
+$check($step(5)===$last,'Final response can also be replayed after connection loss');
+$reject(fn()=>$step(6),'Finished range cannot continue');
+$observationsWritten=0;
+$breakRange=static function($sql) use ($wpdb,&$observationsWritten) {
+    if (str_starts_with($sql,'INSERT INTO `'.$wpdb->prefix.'pnpm_registry_observations`') && ++$observationsWritten===101) return 'INVALID SYNTHETIC QUERY';
+    return $sql;
+};
+$old_suppress=$wpdb->suppress_errors(true); add_filter('query',$breakRange);
+try { $reject(fn()=>$confirm($cursor),'Range write failure rolls back the whole confirmation'); }
+finally { remove_filter('query',$breakRange); $wpdb->suppress_errors($old_suppress); }
+$check($store->listingCount([])===$beforeCount && count($store->staged($cursor,'history_range',false)['parts'])===6,'Failed confirmation leaves all original pages available and no partial import');
+$check($observationsWritten===101 && $store->detail($id)['observations']===$beforeRange['observations'],'Failure on the second page restores observations and consumed first-page payload');
+$saved=$confirm($cursor);
+$check($saved['count']===102 && count($saved['pages'])===6 && $store->listingCount([])===$beforeCount+100,'One confirmation imports every month with unique registry rows');
+$check($confirm($cursor)===$saved,'Repeated final confirmation is idempotent');
+$afterRange=$store->detail($id); $afterIncoming=$store->detail((int)$beforeIncoming['id']);
+$check($afterRange['links']===$beforeRange['links'] && $afterRange['revision']===$beforeRange['revision'] && $afterRange['partner_code']===$beforeRange['partner_code'],'Range import preserves Folio/Woo links, classification and revision');
+$check($afterIncoming['direction']===$beforeIncoming['direction'] && $afterIncoming['purpose']===$beforeIncoming['purpose'],'Incoming records remain incoming');
+$imports=$store->recentImports(); $check($imports[0]['kind']==='history_range' && json_decode($imports[0]['result'],true)['scope']['months_read']===3,'Coverage keeps the entire range and per-page evidence, not only final month');
+$reject(fn()=>$store->staged($state['parts'][0],'history_part',false),'Applied page payload consumed');
+$duplicate=$service->run('history_range',['from'=>'2026-06-01','to'=>'2026-06-30']); $mode='repeat';
+$service->run('history_range_step',['cursor'=>$duplicate['cursor'],'step'=>'0']);
+$reject(fn()=>$service->run('history_range_step',['cursor'=>$duplicate['cursor'],'step'=>'1']),'Repeated carrier page stops automatic traversal');
+$expired=$service->run('history_range',$period);
+$wpdb->update($wpdb->prefix.'pnpm_registry_batches',['expires_at'=>'2000-01-01 00:00:00'],['token_hash'=>hash('sha256',$expired['cursor'])]);
+$reject(fn()=>$service->run('history_range_step',['cursor'=>$expired['cursor'],'step'=>'0']),'Expired range must restart');
+$accountState=$state; $accountState['account']='changed';
+$wrong=$store->preview('history_range',$accountState);
+$reject(fn()=>$service->run('history_range_step',['cursor'=>$wrong,'step'=>'1']),'Changed API account cannot resume');
+$limit=$state; $limit['bytes']=33554432; $limited=$store->preview('history_range',$limit); $mode='range';
+$reject(fn()=>$service->run('history_range_step',['cursor'=>$limited,'step'=>'1']),'Oversized staging fails explicitly instead of silently truncating');
+$empty=$service->run('history_range',['from'=>'2026-08-01','to'=>'2026-08-05']);
+$empty=$service->run('history_range_step',['cursor'=>$empty['cursor'],'step'=>'0']);
+$check($empty['done'] && $confirm($empty['token'])['count']===0,'Entirely empty period can retain honest coverage evidence');
+$mode='good';

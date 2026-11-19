@@ -201,7 +201,7 @@ final class FolioCustomerImport {
         }
         throw new \RuntimeException(__('Could not create a unique customer login.', 'pc-order-import-export'));
     }
-    private static function locked(callable $work) {
+    public static function locked(callable $work) {
         if (!function_exists('lavka_ecosystem_lock_acquire')) throw new \RuntimeException(__('The synchronization lock is unavailable.', 'pc-order-import-export'));
         $lock = lavka_ecosystem_lock_acquire('pc-order-import-export','customer_import','manual',__('Folio customer import','pc-order-import-export'),600);
         if (empty($lock['ok'])) throw new \RuntimeException(__('Another synchronization is running. Retry when it finishes.', 'pc-order-import-export'));

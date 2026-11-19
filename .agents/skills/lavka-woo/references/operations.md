@@ -1,5 +1,9 @@
 # Операции и регламенты
 
+`lavka-price-sync/inc/sync.php`: an absent or nonnumeric Folio value must not
+overwrite retail or role metadata. An explicit zero is a price. Release order
+and verification: `docs/OPERATIONS_RUNBOOK.md`, “Ноль и отсутствие цены ФОЛИО”.
+
 ## Durable full sync (2026-10-23)
 
 `lavka-total-sync` 0.2.0 uses `/admin/sync/jobs` protocol 1, persisted ID and short
@@ -618,3 +622,38 @@ FAILED/RUNNING — отдельная последняя попытка, publish
 предупреждения и зафиксированные ID экспорта/сравнения сохраняются. Деплой Java
 и фронта проверяется отдельно от тестов; GET не изменяет историю или ФОЛИО.
 Канон: [сохранённая прибыль](../../../../docs/api/FOLIO_PROFIT_SAVED_REPORTS_FRONTEND.md).
+
+Folio assembly input (owner/manager instruction 2026-11-04): parent mode supplies ARTIC_roditel/KOL_rod_razob; child mode supplies ARTIC_rebenok/kol_reb_pol. WordPress expands fresh Access defaults (other article NULL, other numeric fields 0 including SLOG), then calls the unchanged six-column ASSEMBLY Java contract. Do not force SLOG=1 for child mode; macro step 13 classifies by recipe. IMPORT_DBF concatenates columns ARTIC/KOL_R/PRICE from outputs 18/9/91 without aggregation; preserve technical sheets/history. Actual DBF generation and invoice creation remain outside this change. Canonical manager instructions and remaining Access comparison: `docs/FOLIO_MANAGER_OPERATIONS.md`.
+
+### Registry completeness and date sorting — verified 2026-11-06
+
+Registry listing uses carrier/document calendar dates before pagination, not import
+IDs. Read chunks remain bounded; full filtered scan is required without a persisted
+date index. Reconcile checks supplied unique TTNs against all saved directions and
+never imports/changes classification or links. Cabinet outgoing/incoming coverage
+cannot be inferred from getDocumentList completion or matching aggregate counts.
+Evidence: Store::listing/reconcile, isolated fixtures, production cabinet/preview
+and import coverage UI. Operator steps: docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-registry.
+
+NP discovery limitation — verified 2026-11-06: live page 1/full-list/general-model
+queries for the same November range returned one record; page 2 was empty, while
+the cabinet showed more. Do not prescribe another deploy/reimport as a coverage
+fix. 0.10.13 reads an explicit list of up to 100 known incoming/outgoing TTNs via
+tracking, with all-or-nothing preview and the existing explicit confirmation.
+This does not discover unknown numbers or prove full event history. Current
+contract/evidence: docs/api/NOVA_POSHTA_SHIPMENT_CONTRACT.md; operator workflow:
+docs/MANAGER_CUSTOMER_GUIDE_UK.md#np-registry.
+
+Date-range traversal — 0.10.14: the manager UI reads all monthly API pages before
+one confirmation. Do not instruct managers to save every empty page manually.
+Resume replays the last server-owned step after a lost response; no business
+imports occur until the entire range is read. Confirm uses the existing lock and
+atomic idempotent apply. This improves traversal only and does not resolve the
+November discovery limitation above. Keep `account_document_list_only` coverage.
+No schema/Java migration; manager guide and plugin README own limits and steps.
+
+Tracking summary contract — verified 2026-11-06: DocumentCost is delivery,
+AnnouncedPrice is declared value, DateCreated uses dd-mm-yyyy. Do not reuse
+getDocumentList Cost/CostOnSite mapping for tracking. All 12 checked November
+TTNs were already saved; the old date parser hid them at the end of the list.
+Check registry presence before prescribing reimport; 0.10.15 fixes display only.

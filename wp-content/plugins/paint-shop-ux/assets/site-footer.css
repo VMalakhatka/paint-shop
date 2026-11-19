@@ -32,6 +32,16 @@
 }
 .psu-site-footer .psu-site-footer__brand { font-size: 24px; font-weight: 500; letter-spacing: -.025em; }
 .psu-site-footer .psu-site-footer__navigation { display: flex; flex-wrap: wrap; gap: 4px 28px; }
+.psu-site-footer .psu-site-footer__cooperation { position: relative; margin: 0; padding: 0; border: 0; }
+.psu-site-footer .psu-site-footer__cooperation > summary { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0; cursor: pointer; list-style: none; font: inherit; color: inherit; }
+.psu-site-footer .psu-site-footer__cooperation > summary::-webkit-details-marker { display: none; }
+.psu-site-footer .psu-site-footer__cooperation > summary::after { content: ''; width: 7px; height: 7px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg) translateY(-2px); }
+.psu-site-footer .psu-site-footer__cooperation[open] > summary::after { transform: rotate(225deg) translate(-2px, -1px); }
+.psu-site-footer .psu-site-footer__cooperation > summary:hover { color: #edc695; }
+.psu-site-footer .psu-site-footer__cooperation > summary:focus-visible { outline: 2px solid #edc695; outline-offset: 5px; border-radius: 2px; }
+.psu-site-footer .psu-site-footer__cooperation-list { position: absolute; z-index: 2; right: 0; top: 100%; width: max-content; min-width: 210px; max-width: min(300px, calc(100vw - 40px)); margin: 4px 0 0; padding: 8px 16px; list-style: none; border: 1px solid #6a5e50; border-radius: 8px; background: #332e28; box-shadow: 0 8px 20px #0003; }
+.psu-site-footer .psu-site-footer__cooperation-list li { margin: 0; padding: 0; list-style: none; }
+.psu-site-footer .psu-site-footer__cooperation-list a { padding: 6px 0; }
 .psu-site-footer .psu-site-footer__navigation a,
 .psu-site-footer .pc-legal-footer__links a,
 .psu-site-footer .pc-legal-footer__contacts > a:not(.pc-legal-footer__payments) {
@@ -63,5 +73,7 @@
     .psu-site-footer .pc-legal-footer__inner { padding-left: 20px; padding-right: 20px; }
     .psu-site-footer .psu-site-footer__top { align-items: flex-start; flex-direction: column; gap: 10px; padding-top: 24px; padding-bottom: 18px; }
     .psu-site-footer .psu-site-footer__navigation { gap: 4px 22px; }
+    .psu-site-footer .psu-site-footer__cooperation { flex-basis: 100%; }
+    .psu-site-footer .psu-site-footer__cooperation-list { position: static; width: auto; min-width: 0; max-width: 100%; margin-top: 2px; box-shadow: none; }
     .psu-site-footer .pc-legal-footer__inner { grid-template-columns: minmax(0, 1fr); gap: 20px; padding-top: 24px; padding-bottom: 24px; }
 }

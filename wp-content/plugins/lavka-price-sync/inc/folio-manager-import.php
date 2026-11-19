@@ -13,8 +13,15 @@ function lps_manager_columns(string $operation): array {
     if (!isset($columns[$operation])) throw new RuntimeException('OPERATION');
     return $columns[$operation];
 }
-function lps_manager_rows(array $rows, string $operation): array {
-    $columns=lps_manager_columns($operation);$result=[];$seen=[];$first=true;
+// Manager input mirrors a fresh Access row; FULL preserves the historical six-column contract.
+function lps_manager_input_columns(string $operation, string $mode='FULL'): array {
+    if ($operation!=='ASSEMBLY' || $mode==='FULL') return lps_manager_columns($operation);
+    if ($mode==='PARENT') return ['ARTIC_roditel','KOL_rod_razob'];
+    if ($mode==='CHILD') return ['ARTIC_rebenok','kol_reb_pol'];
+    throw new RuntimeException('INPUT_MODE');
+}
+function lps_manager_rows(array $rows, string $operation, string $mode='FULL'): array {
+    $columns=lps_manager_input_columns($operation,$mode);$result=[];$seen=[];$first=true;
     $limits=['COD_ARTIC'=>20,'CODE_ARTIC'=>20,'ARTIC_BAZA'=>20,'ARTIC_roditel'=>20,'ARTIC_rebenok'=>20,'NAME_ARTIC'=>200,'EDIN_IZMER'=>10,'DESCRIPTION'=>5000,'KOL_rod_razob'=>64,'kol_reb_pol'=>64,'CENA_REB'=>64,'SLOG'=>1];
     foreach ($rows as $number=>$row) {
         $row=array_map(static fn($v)=>trim((string)$v),$row);
@@ -34,6 +41,12 @@ function lps_manager_rows(array $rows, string $operation): array {
             }
             if ($value==='') $value=null;
         } unset($value);
+        if ($operation==='ASSEMBLY' && $mode!=='FULL') {
+            if ($item[$columns[0]]===null || $item[$columns[1]]===null || (float)$item[$columns[1]]<=0) throw new RuntimeException('ROW_'.($number+1));
+            // Access kol_reb_pol is a signed 16-bit integer. Do not silently round manager input.
+            if ($mode==='CHILD' && ((float)$item['kol_reb_pol']>32767 || floor((float)$item['kol_reb_pol'])!=(float)$item['kol_reb_pol'])) throw new RuntimeException('ROW_'.($number+1));
+            $item=array_replace(['ARTIC_roditel'=>null,'ARTIC_rebenok'=>null,'KOL_rod_razob'=>'0','kol_reb_pol'=>'0','CENA_REB'=>'0','SLOG'=>'0'],$item);
+        }
         if ($operation==='ASSEMBLY') {
             if (!in_array($item['SLOG'],['0','1'],true)) throw new RuntimeException('SLOG_REQUIRED');
         } elseif ($item[$columns[0]]===null) throw new RuntimeException('ARTICLE_REQUIRED');
@@ -46,24 +59,24 @@ function lps_manager_rows(array $rows, string $operation): array {
     if (!$result) throw new RuntimeException('EMPTY_FILE');
     return $result;
 }
-function lps_manager_text(string $text,string $operation): array {
+function lps_manager_text(string $text,string $operation,string $mode='FULL'): array {
     if (strlen($text)>5*1024*1024||!mb_check_encoding($text,'UTF-8'))throw new RuntimeException('CSV_UTF8');
     $candidates=[];
     foreach (["\t",';',','] as $delimiter) {
         $stream=fopen('php://temp','r+');fwrite($stream,$text);rewind($stream);$rows=[];
         try {
             while(($row=fgetcsv($stream,0,$delimiter,'"',''))!==false){$rows[]=$row;if(count($rows)>10000)throw new RuntimeException('TOO_MANY_ROWS');}
-            $candidate=lps_manager_rows($rows,$operation);$candidates[json_encode($candidate)]=$candidate;
+            $candidate=lps_manager_rows($rows,$operation,$mode);$candidates[json_encode($candidate)]=$candidate;
         } catch(RuntimeException $e) {} finally {fclose($stream);}
     }
     if(count($candidates)!==1)throw new RuntimeException('CSV_FORMAT');
     return reset($candidates);
 }
 
-function lps_manager_file(string $path, string $extension, string $operation): array {
+function lps_manager_file(string $path, string $extension, string $operation, string $mode='FULL'): array {
     if (!is_file($path) || filesize($path) > 5 * 1024 * 1024) throw new RuntimeException('FILE_TOO_LARGE');
-    if ($extension === 'csv') return lps_manager_text(file_get_contents($path), $operation);
-    $width=count(lps_manager_columns($operation));
+    if ($extension === 'csv') return lps_manager_text(file_get_contents($path), $operation, $mode);
+    $width=count(lps_manager_input_columns($operation,$mode));
     if (!in_array($extension, ['xls','xlsx'], true) || !class_exists(\PhpOffice\PhpSpreadsheet\IOFactory::class)) throw new RuntimeException('EXCEL_FORMAT');
     if (file_get_contents($path, false, null, 0, 2) === 'PK') {
         $zip = new ZipArchive(); if ($zip->open($path) !== true) throw new RuntimeException('EXCEL_FORMAT');
@@ -90,8 +103,8 @@ function lps_manager_file(string $path, string $extension, string $operation): a
             if ($c >= $width || $r>9999) throw new RuntimeException('EXCEL_RANGE');
             if (!isset($rows[$r])) $rows[$r] = array_fill(0,$width,'');
             // Preserve article display masks; numbers use raw values (no currency/group formatting).
-            $rows[$r][$c] = ($operation!=='ASSEMBLY' || $c<2) ? $cell->getFormattedValue() : $cell->getValue();
+            $rows[$r][$c] = ($operation!=='ASSEMBLY' || $c<($mode==='FULL'?2:1)) ? $cell->getFormattedValue() : $cell->getValue();
         }
-        ksort($rows); return lps_manager_rows($rows,$operation);
+        ksort($rows); return lps_manager_rows($rows,$operation,$mode);
     } finally { $book->disconnectWorksheets(); }
 }

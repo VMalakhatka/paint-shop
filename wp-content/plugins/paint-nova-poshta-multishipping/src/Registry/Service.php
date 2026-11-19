@@ -18,6 +18,7 @@ final class Service
         self::authorize();
         if (!Schema::ready()) throw new \RuntimeException('Install the registry tables first.');
         // Directory reads never create previews, consume tokens or clean registry data.
+        if ($command==='reconcile') return ['reconciliation'=>$this->store->reconcile((string)($input['ttns']??''))];
         if ($command==='partners') return (new Catalog())->partners($input);
         if ($command==='warehouses') return (new Catalog())->warehouses();
         if ($command==='woo_orders') return $this->woo->listing($input);
@@ -27,6 +28,8 @@ final class Service
             return (new Catalog())->documents($input,$row);
         }
         $this->store->cleanup();
+        if ($command==='history_range') return (new HistoryRange($this->store,$this->carrier))->start($input);
+        if ($command==='history_range_step') return (new HistoryRange($this->store,$this->carrier))->step((string)($input['cursor']??''),(int)($input['step']??-1));
         if ($command==='classify') return $this->store->classify((int)($input['id']??0),(int)($input['revision']??0),$input);
         if ($command==='unlink') return $this->store->unlink((int)($input['id']??0),(int)($input['revision']??0),(int)($input['link']??0),(string)($input['reason']??''));
         if ($command==='confirm') {
@@ -36,6 +39,7 @@ final class Service
             if (empty($lock['ok'])) throw new \RuntimeException('Another synchronization is running. Try saving after it finishes.');
             try {
                 return $this->store->apply((string)($input['token']??''),function($kind,$payload) use ($input) {
+                    if ($kind==='history_range') return (new HistoryRange($this->store,$this->carrier))->apply($payload);
                     if (in_array($kind,['link','links'],true)) $payload=$this->selectBasisAccounts($payload,$input);
                     if ($kind==='links') return $this->store->linkMany($payload);
                     if ($kind==='link') return $this->store->linkBundle($payload);
@@ -117,6 +121,8 @@ final class Service
             $payload['scope']=array_merge($payload['scope'],['from'=>$from,'to'=>$to,'window_from'=>$windowFrom,'window_to'=>$windowTo,'next_from'=>$nextFrom]);
         } elseif ($command==='tracking') {
             $payload=$this->carrier->tracking((string)($input['ttn']??''),(string)($input['phone']??''));
+        } elseif ($command==='tracking_batch') {
+            $payload=$this->carrier->trackingBatch((string)($input['ttns']??''));
         } elseif ($command==='csv') {
             $payload=['rows'=>Record::csv((string)($input['csv']??'')),'source'=>'csv','scope'=>['coverage'=>'manual_csv_only'], 'observed_at'=>gmdate('Y-m-d H:i:s')];
         } elseif ($command==='manual') {

@@ -1519,3 +1519,66 @@ msgstr "Інший адміністратор зараз зберігає рек
 #, php-format
 msgid "This bank account editor does not include all recipient fields. Open the complete bank transfer settings, verify the details and save there: %s"
 msgstr "Цей редактор банківського рахунка не містить усіх полів одержувача. Відкрийте повні налаштування банківського переказу, перевірте реквізити й збережіть їх там: %s"
+
+msgid "Payment to sole proprietor account — QR"
+msgstr "Оплата на рахунок ФОП — QR"
+
+msgid ""
+"After placing the order, pay by bank QR or use the verified recipient "
+"details. A compatible banking app can fill in the amount and order number. "
+"Payment is confirmed after the funds are received."
+msgstr ""
+"Після оформлення сплатіть за банківським QR або перевіреними реквізитами. "
+"Сумісний застосунок банку підставить суму й номер замовлення. Оплата "
+"підтверджується після надходження коштів."
+
+#, php-format
+msgid "Payment for order #%s"
+msgstr "Оплата замовлення №%s"
+
+msgid "Pay by bank QR"
+msgstr "Сплатити за банківським QR"
+
+msgid ""
+"Scan with your banking app, or use your phone camera and tap the detected "
+"link. Check the recipient, amount and payment reference before confirming."
+msgstr ""
+"Відскануйте у застосунку банку або камерою телефона й натисніть розпізнане "
+"посилання. Перед підтвердженням перевірте одержувача, суму та призначення "
+"платежу."
+
+msgid "Bank transfer QR code"
+msgstr "QR-код банківського переказу"
+
+msgid ""
+"If the QR code is unavailable, use the bank link or the recipient details."
+msgstr ""
+"Якщо QR недоступний, скористайтеся банківським посиланням або реквізитами "
+"одержувача."
+
+msgid "Payment reference"
+msgstr "Призначення платежу"
+
+msgid "Open banking app"
+msgstr "Відкрити банківський застосунок"
+
+msgid ""
+"Opening an app depends on your bank and phone settings. If the link opens a "
+"browser or another bank, scan the QR inside your preferred banking app or "
+"enter the details manually."
+msgstr ""
+"Відкриття застосунку залежить від банку та налаштувань телефона. Якщо "
+"посилання відкриває браузер або інший банк, відскануйте QR всередині "
+"потрібного банківського застосунку чи введіть реквізити вручну."
+
+msgid ""
+"A QR code does not confirm payment. Your order awaits confirmation of funds "
+"received. If you have already transferred the money, do not pay again; "
+"contact your manager."
+msgstr ""
+"QR не підтверджує оплату. Замовлення очікує підтвердження надходження "
+"коштів. Якщо ви вже переказали гроші, не сплачуйте повторно — зверніться до "
+"менеджера."
+
+msgid "View bank QR and current payment details"
+msgstr "Переглянути банківський QR та актуальні реквізити"

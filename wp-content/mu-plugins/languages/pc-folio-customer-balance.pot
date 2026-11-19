@@ -1439,3 +1439,52 @@ msgstr ""
 #, php-format
 msgid "This bank account editor does not include all recipient fields. Open the complete bank transfer settings, verify the details and save there: %s"
 msgstr ""
+
+msgid "Payment to sole proprietor account — QR"
+msgstr ""
+
+msgid ""
+"After placing the order, pay by bank QR or use the verified recipient "
+"details. A compatible banking app can fill in the amount and order number. "
+"Payment is confirmed after the funds are received."
+msgstr ""
+
+#, php-format
+msgid "Payment for order #%s"
+msgstr ""
+
+msgid "Pay by bank QR"
+msgstr ""
+
+msgid ""
+"Scan with your banking app, or use your phone camera and tap the detected "
+"link. Check the recipient, amount and payment reference before confirming."
+msgstr ""
+
+msgid "Bank transfer QR code"
+msgstr ""
+
+msgid ""
+"If the QR code is unavailable, use the bank link or the recipient details."
+msgstr ""
+
+msgid "Payment reference"
+msgstr ""
+
+msgid "Open banking app"
+msgstr ""
+
+msgid ""
+"Opening an app depends on your bank and phone settings. If the link opens a "
+"browser or another bank, scan the QR inside your preferred banking app or "
+"enter the details manually."
+msgstr ""
+
+msgid ""
+"A QR code does not confirm payment. Your order awaits confirmation of funds "
+"received. If you have already transferred the money, do not pay again; "
+"contact your manager."
+msgstr ""
+
+msgid "View bank QR and current payment details"
+msgstr ""

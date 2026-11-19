@@ -63,6 +63,38 @@ final class Carrier
             'scope'=>['coverage'=>'known_ttn_only','count'=>1], 'account'=>$this->fingerprint(), 'observed_at'=>gmdate('Y-m-d H:i:s')];
     }
 
+    /** Known numbers from either cabinet direction, one bounded read, all-or-nothing preview. */
+    public function trackingBatch(string $input): array
+    {
+        $error='Enter up to 100 TTNs, one number per line.';
+        if (strlen($input)>2500) throw new \InvalidArgumentException($error);
+        $lines=preg_split('/\R/u',trim($input)); $numbers=[]; $count=0;
+        if ($lines===false) throw new \InvalidArgumentException($error);
+        foreach ($lines as $line) {
+            if (trim($line)==='') continue;
+            $number=preg_replace('/\h/u','',$line);
+            if (!preg_match('/^\d{14}$/D',$number) || ++$count>100) throw new \InvalidArgumentException($error);
+            $numbers[$number]=$number;
+        }
+        if (!$numbers) throw new \InvalidArgumentException($error);
+        $data=$this->read('TrackingDocument','getStatusDocuments',[
+            'Documents'=>array_map(static fn($number)=>['DocumentNumber'=>$number],array_values($numbers)),
+        ]);
+        $rows=[];
+        foreach ($data as $item) {
+            $number=(string)($item['Number']??'');
+            if (!isset($numbers[$number]) || isset($rows[$number])
+                || !preg_match('/^\d{1,5}$/D',(string)($item['StatusCode']??'')) || (string)$item['StatusCode']==='3') {
+                throw new \RuntimeException('Nova Poshta did not verify every supplied TTN. Check the list; nothing was saved.');
+            }
+            $rows[$number]=['ttn'=>$number,'data'=>Record::clean($item)];
+        }
+        if (count($rows)!==count($numbers)) throw new \RuntimeException('Nova Poshta did not verify every supplied TTN. Check the list; nothing was saved.');
+        return ['source'=>'np_tracking','rows'=>array_map(static fn($number)=>$rows[$number],array_values($numbers)),
+            'scope'=>['coverage'=>'known_ttn_list','count'=>count($rows),'duplicates'=>$count-count($numbers)],
+            'account'=>$this->fingerprint(),'observed_at'=>gmdate('Y-m-d H:i:s')];
+    }
+
     private function read(string $model, string $method, array $properties): array
     {
         $result=$this->api->call($model,$method,$properties);

@@ -42,6 +42,10 @@ final class ReturnPage
         }
         $url = $this->target(wp_unslash($_GET));
         if ($url !== '') {
+            if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+                $order = wc_get_order((int) $_GET['order']);
+                PaymentFeedback::returned($order, wp_unslash($_POST));
+            }
             nocache_headers();
             wp_safe_redirect($url, 303, 'PC WayForPay Checkbox');
             exit;
@@ -62,6 +66,11 @@ final class ReturnPage
         $message = $paid
             ? __('Your order has been paid successfully. You can view it in your account. The manager will notify you about shipment.', 'pc-wayforpay-checkbox')
             : __('Your order has been received. We are waiting for payment confirmation from WayForPay. Refresh this page shortly; do not pay again if money has already been charged.', 'pc-wayforpay-checkbox');
+        if (!$paid) {
+            $failure = PaymentFeedback::message($order->get_meta(PaymentFeedback::META, true));
+            if ($failure !== '') $message = $failure;
+            elseif (!(new Availability())->status()['available']) $message = Availability::message();
+        }
         return esc_html($message) . ' <a href="' . esc_url(wc_get_account_endpoint_url('orders')) . '">'
             . esc_html__('View my orders', 'pc-wayforpay-checkbox') . '</a>';
     }

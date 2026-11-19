@@ -1848,3 +1848,523 @@ msgstr "Номер счёта в шапке не распознан; прове�
 
 msgid "Header account and basis text disagree; no account selected"
 msgstr "Счёт в шапке противоречит тексту основания; счёт не выбран"
+
+msgid "Saved: {from} – {to}, page {page}, TTNs: {count}."
+msgstr "Сохранено: {from} – {to}, страница {page}, ТТН: {count}."
+
+msgid "Import is not finished. Next: {from}, page {page}. Read and confirm the next page."
+msgstr "Импорт не завершён. Далее: {from}, страница {page}. Прочитайте и подтвердите следующую страницу."
+
+msgid "Refresh saved shipment list"
+msgstr "Обновить список сохранённых посылок"
+
+msgid "Newest shipment / document dates first, across all pages. Undated records are last. Amounts are in UAH; delivery payer does not prove payment."
+msgstr "Новые даты отправления / документа — сверху на всех страницах. Записи без даты — в конце. Суммы в гривнах; плательщик доставки не подтверждает оплату."
+
+msgid "The API document list may omit outgoing and incoming shipments visible in the Nova Poshta cabinet. Compare it with the cabinet; add missing TTNs separately or via CSV."
+msgstr "Список документов API может не содержать часть исходящих и входящих посылок из кабинета Новой почты. Сверьте списки; отсутствующие ТТН добавьте отдельно или через CSV."
+
+msgid "Compare TTNs with the Nova Poshta cabinet"
+msgstr "Сверить ТТН с кабинетом Новой почты"
+
+msgid "Copy the TTN number column from all pages of outgoing and incoming shipments for the same period. Paste one number per line, up to 1000; spaces inside a number are allowed. Repeated numbers count once. This is a presence check, not an import."
+msgstr "Скопируйте столбец номеров ТТН со всех страниц исходящих и входящих посылок за одинаковый период. Вставьте по одному номеру на строку, до 1000; пробелы внутри номера разрешены. Повторы считаются один раз. Это проверка наличия, а не импорт."
+
+msgid "TTNs from the Nova Poshta cabinet"
+msgstr "ТТН из кабинета Новой почты"
+
+msgid "Compare saved TTNs"
+msgstr "Сверить сохранённые ТТН"
+
+msgid "Compared with saved records in all directions. This only checks the TTNs you supplied; it does not import missing shipments or prove the cabinet list is complete."
+msgstr "Сверено с сохранёнными записями всех направлений. Проверены только переданные номера; отсутствующие посылки не импортированы, полнота списка кабинета не проверена."
+
+msgid "Enter up to 1000 TTNs, one number per line."
+msgstr "Введите до 1000 ТТН, по одному номеру на строку."
+
+#, php-format
+msgid "Saved TTNs matching filters: %d. Page: %d."
+msgstr "Сохранённых ТТН по фильтрам: %d. Страница: %d."
+
+msgid "Unique TTNs supplied"
+msgstr "Уникальных ТТН в списке"
+
+msgid "Repeated numbers ignored"
+msgstr "Повторных номеров пропущено"
+
+msgid "Already in the registry"
+msgstr "Уже в реестре"
+
+msgid "Missing from the registry"
+msgstr "Отсутствующих в реестре"
+
+msgid "Missing TTNs"
+msgstr "Отсутствующие ТТН"
+
+msgid "Enter up to 100 TTNs, one number per line."
+msgstr "Введите до 100 ТТН, по одному номеру на строку."
+
+msgid "Nova Poshta did not verify every supplied TTN. Check the list; nothing was saved."
+msgstr "Новая почта не подтвердила все ТТН из списка. Проверьте номера; ничего не сохранено."
+
+msgid "Only the supplied TTN list, incoming and outgoing"
+msgstr "Только переданный список ТТН: входящие и исходящие"
+
+msgid "Load incoming and outgoing TTNs from a list"
+msgstr "Загрузить входящие и исходящие ТТН списком"
+
+msgid "Copy TTN numbers from the Nova Poshta cabinet or the missing-number comparison. Paste up to 100 numbers, one per line. The site reads their current carrier data; check the preview and confirm saving. Existing Folio/Woo links and classification are preserved."
+msgstr "Скопируйте номера ТТН из кабинета Новой почты или из списка отсутствующих после сверки. Вставьте до 100 номеров, по одному на строку. Сайт прочитает актуальные данные перевозчика; проверьте просмотр и подтвердите сохранение. Существующие связи с ФОЛИО/Woo и классификация сохраняются."
+
+msgid "TTNs to load"
+msgstr "ТТН для загрузки"
+
+msgid "Documents available through the NP API"
+msgstr "Документы, доступные через API НП"
+
+msgid "Reading {from} – {to}, page {page}. Pages read: {pages}; unique TTNs: {count}. Nothing imported yet."
+msgstr "Читаем {from} – {to}, страница {page}. Прочитано страниц: {pages}; уникальных ТТН: {count}. В реестр ещё не импортировано."
+
+msgid "Reading paused. Continue within 10 minutes or start again. Nothing imported yet."
+msgstr "Чтение приостановлено. Продолжите в течение 10 минут или начните заново. В реестр ещё не импортировано."
+
+msgid "The entire selected API period has been read. Review the result and confirm saving once. This does not prove that all cabinet shipments are available through the API."
+msgstr "Весь выбранный период API прочитан. Проверьте результат и подтвердите сохранение один раз. Это не доказывает, что API вернул все посылки из кабинета НП."
+
+msgid "Saved the selected period: {from} – {to}. Unique TTNs: {count}. Existing classification and Folio/Woo links are preserved."
+msgstr "Сохранён выбранный период: {from} – {to}. Уникальных ТТН: {count}. Существующая классификация и связи с ФОЛИО/Woo сохранены."
+
+msgid "Pages read"
+msgstr "Прочитано страниц"
+
+msgid "Months completed"
+msgstr "Месяцев завершено"
+
+msgid "Rows returned by the carrier"
+msgstr "Строк вернул перевозчик"
+
+msgid "Reading progress"
+msgstr "Состояние чтения"
+
+msgid "Reading the selected period"
+msgstr "Читаем выбранный период"
+
+msgid "Selected API period read completely"
+msgstr "Выбранный период API прочитан полностью"
+
+msgid "Choose the dates and read the entire period. All months and pages are read automatically. Keep this tab open; then review the total and confirm saving once. This covers only documents returned by the NP API."
+msgstr "Выберите даты и прочитайте весь период. Все месяцы и страницы читаются автоматически. Оставьте эту вкладку открытой; затем проверьте итог и подтвердите сохранение один раз. Охватываются только документы, которые возвращает API НП."
+
+msgid "Pause reading"
+msgstr "Приостановить чтение"
+
+msgid "Continue reading"
+msgstr "Продолжить чтение"
+
+msgid "Confirm and save the entire period"
+msgstr "Подтвердить и сохранить весь период"
+
+msgid "Read the entire period"
+msgstr "Прочитать весь период"
+
+msgid "This period is too large for one preview. Split it into shorter periods; nothing was imported."
+msgstr "Период слишком большой для одного просмотра. Разделите его на короткие периоды; ничего не импортировано."
+
+msgid "Wait until the entire date range has been read before saving."
+msgstr "Перед сохранением дождитесь чтения всего диапазона дат."
+
+msgid "Read a TTN or the entire date range, or paste a TTN list / CSV. Wait for the complete preview, then confirm saving once."
+msgstr "Прочитайте ТТН или весь диапазон дат либо вставьте список ТТН / CSV. Дождитесь полного просмотра и подтвердите сохранение один раз."
+
+msgid "Recipient contact"
+msgstr "Контактное лицо получателя"
+
+msgid "Amount to collect, UAH"
+msgstr "Сумма к получению, грн"
+
+#, php-format
+msgid "Amount to collect: %s UAH."
+msgstr "Сумма к получению: %s грн."
+
+msgid "Cash on delivery currently requires one warehouse. Do not repeat the order amount on several shipments."
+msgstr "Наложенный платёж пока доступен для одного склада. Не повторяйте сумму заказа в нескольких отправлениях."
+
+msgid "Cash on delivery: none."
+msgstr "Без наложенного платежа."
+
+msgid "Check the cash on delivery amount and payment return settings."
+msgstr "Проверьте сумму наложенного платежа и способ получения денег."
+
+msgid "Choose a payment return service"
+msgstr "Выберите способ получения денег"
+
+msgid "Choose the money transfer fee payer"
+msgstr "Выберите плательщика комиссии за перевод"
+
+msgid "Choose how Nova Poshta should return the cash on delivery payment."
+msgstr "Выберите, как Новая почта должна передать вам наложенный платёж."
+
+msgid "Collect payment from the recipient"
+msgstr "Получить оплату от получателя"
+
+msgid "Enter a cash on delivery amount greater than zero and no greater than the order total."
+msgstr "Укажите сумму наложенного платежа больше нуля и не больше суммы заказа."
+
+msgid "For orders paid on receipt, the order total is suggested. Check payments already received and enter only the amount still to collect. This does not change the order payment method."
+msgstr "Для оплаты при получении подставляется сумма заказа. Проверьте уже полученные платежи и укажите только остаток к получению. Способ оплаты заказа не меняется."
+
+msgid "I checked the recipient, boxes, declared value, delivery payer, cash on delivery amount and return service, cash payment and store subsidy. Create this real TTN."
+msgstr "Я проверил(-а) получателя, коробки, объявленную стоимость, плательщика доставки, сумму наложенного платежа и способ получения денег, наличную оплату и компенсацию магазина. Создать эту реальную ТТН."
+
+msgid "Money transfer fee payer"
+msgstr "Плательщик комиссии за денежный перевод"
+
+msgid "Payment control requires an active NovaPay contract; its fees follow that contract. The collection amount is separate from declared value and delivery charges."
+msgstr "Контроль оплаты требует действующего договора NovaPay; комиссия определяется договором. Сумма к получению — отдельно от объявленной стоимости и платы за доставку."
+
+msgid "Payment return service"
+msgstr "Способ получения денег"
+
+msgid "Recipient details were agreed; warehouse contents, packed boxes, delivery payer and cash on delivery settings were checked."
+msgstr "Данные получателя согласованы; товары по складам, коробки, плательщик доставки и настройки наложенного платежа проверены."
+
+msgid "Review and save cash on delivery settings again: the payment method, order amount or payment status changed, or this preparation uses the old format."
+msgstr "Проверьте и сохраните наложенный платёж ещё раз: способ оплаты, сумма или состояние оплаты заказа изменились либо подготовка сохранена в старом формате."
+
+msgid "Separate money transfer (return delivery of funds)"
+msgstr "Отдельный денежный перевод (обратная доставка денег)"
+
+msgid "Supported: drop-off at a branch, delivery to a branch or parcel locker, reviewed single-warehouse cash on delivery, cash payment for carrier services. Enter the legal recipient name in Ukrainian; it will be recorded in the Nova Poshta recipient directory, not in the store customer profile."
+msgstr "Поддерживается: отправка из отделения в отделение или почтомат, проверенный наложенный платёж для одного склада, наличная оплата услуг перевозчика. Введите имя получателя по документам на украинском; оно будет записано в справочник НП, без изменения карточки клиента магазина."
+
+msgid "The delivery estimate does not include the money transfer commission. Collection instructions do not confirm that payment was received."
+msgstr "Ориентировочная доставка не включает комиссию за перевод денег. Указанный наложенный платёж не подтверждает получение оплаты."
+
+msgid "This order is already paid. Cash on delivery would collect payment again."
+msgstr "Заказ уже оплачен. Наложенный платёж приведёт к повторному взысканию."
+
+msgid "To the FOP account under the NovaPay contract (payment control)"
+msgstr "На счёт ФОП по договору NovaPay (контроль оплаты)"
+
+msgid "Save the changed preparation, then check the saved shipment with Nova Poshta."
+msgstr "Сохраните изменённую подготовку, затем проверьте сохранённую отправку в Новой почте."
+
+msgid "The shipment check expired. Check the saved shipment again; no page reload is needed."
+msgstr "Срок проверки отправки истёк. Проверьте сохранённую отправку ещё раз; обновлять страницу не нужно."
+
+msgid "Only saved preparation is used. After saving, this panel updates automatically. Check each warehouse shipment and create its TTN separately; printing and customer email are separate actions."
+msgstr "Используется только сохранённая подготовка. После сохранения этот блок обновляется автоматически. Проверяйте отправку каждого склада и создавайте его ТТН отдельно; печать и письмо клиенту — отдельные действия."
+
+msgid "Save preparation. The TTN panel updates automatically; then check the saved shipment with Nova Poshta."
+msgstr "Сохраните подготовку. Блок ТТН обновится автоматически; затем проверьте сохранённую отправку в Новой почте."
+
+msgid "Preparation saved. The TTN panel is updated below. Check the saved shipment with Nova Poshta."
+msgstr "Подготовка сохранена. Блок ТТН ниже обновлён. Проверьте сохранённую отправку в Новой почте."
+
+msgid "The warehouse sender contact no longer matches the Nova Poshta directory. Ask an administrator to check the contact and phone in sender settings. No TTN creation was started."
+msgstr "Контакт отправителя склада больше не соответствует справочнику Новой почты. Попросите администратора проверить контакт и телефон в настройках отправителя. Создание ТТН не начиналось."
+
+#: courier-preparation
+msgid "Choose how this shipment will be handed to Nova Poshta."
+msgstr "Выберите способ передачи этого отправления Новой почте."
+
+#: courier-preparation
+msgid "How to hand over this shipment"
+msgstr "Как передать это отправление"
+
+#: courier-preparation
+msgid "Save courier preparation to the pickup queue. This does not call a courier. Address-origin TTN creation and a shared courier request are not enabled yet."
+msgstr "Сохраните подготовку в очередь курьера. Это не вызывает курьера. Создание ТТН с адреса и общего вызова ещё не включено."
+
+#: courier-preparation
+msgid "Open courier queue"
+msgstr "Открыть очередь курьера"
+
+#: courier-preparation
+msgid "Drop-off point:"
+msgstr "Место самостоятельной сдачи:"
+
+#: courier-preparation
+msgid "Pickup address:"
+msgstr "Адрес забора:"
+
+#: courier-preparation
+msgid "Check the registered address in sender settings."
+msgstr "Проверьте зарегистрированный адрес в настройках отправителя."
+
+#: courier-preparation
+msgid "Courier preparation is saved, but address-origin TTN creation and shared courier requests are not enabled yet. Choose branch drop-off to use the current shipment flow."
+msgstr "Подготовка для курьера сохранена, но создание ТТН с адреса и общих вызовов ещё не включено. Для текущего оформления выберите самостоятельную сдачу в отделении."
+
+#: courier-preparation
+msgid "Nova Poshta courier queue"
+msgstr "Очередь курьера НП"
+
+#: courier-preparation
+msgid "Saved preparations only. No courier has been called and no pickup time is reserved. Shared courier requests through the site are not enabled yet."
+msgstr "Это только сохранённые подготовки. Курьер не вызван, время забора не забронировано. Общие вызовы через сайт ещё не включены."
+
+#: courier-preparation
+msgid "How the courier queue works"
+msgstr "Как работает очередь курьера"
+
+#: courier-preparation
+msgid "In an order, choose courier pickup for the warehouse and save preparation. The choice applies only to this shipment."
+msgstr "В заказе выберите забор курьером для склада и сохраните подготовку. Выбор относится только к этому отправлению."
+
+#: courier-preparation
+msgid "Preparations with the same sender, city, address and contact appear together. Different origins require separate pickups."
+msgstr "Подготовки с одинаковыми отправителем, городом, адресом и контактом показаны вместе. Для разных адресов нужны отдельные вызовы."
+
+#: courier-preparation
+msgid "Before enabling address-origin TTNs, confirm with Nova Poshta that automatic individual courier calls are disabled for this sender."
+msgstr "Перед включением ТТН с адреса подтвердите с Новой почтой, что автоматические отдельные вызовы курьера отключены для этого отправителя."
+
+#: courier-preparation
+msgid "This list does not change TTNs, customer shipments, payment, WooCommerce orders or Folio links."
+msgstr "Этот список не изменяет ТТН, отправления клиентов, оплату, заказы WooCommerce или связи с ФОЛИО."
+
+#: courier-preparation
+msgid "Saved courier preparations:"
+msgstr "Сохранённых подготовок для курьера:"
+
+#: courier-preparation
+msgid "No saved courier preparations on this page."
+msgstr "На этой странице нет сохранённых подготовок для курьера."
+
+#: courier-preparation
+msgid "Contact phone:"
+msgstr "Телефон контакта:"
+
+#: courier-preparation
+msgid "Sender settings are incomplete. This preparation cannot be grouped with others."
+msgstr "Настройки отправителя неполные. Эту подготовку нельзя объединить с другими."
+
+#: courier-preparation
+msgid "Places / packed weight on this page:"
+msgstr "Мест / вес упаковок на этой странице:"
+
+#: courier-preparation
+msgid "Order"
+msgstr "Заказ"
+
+#: courier-preparation
+msgid "Places"
+msgstr "Мест"
+
+#: courier-preparation
+#, php-format
+msgid "Page %1$d of %2$d"
+msgstr "Страница %1$d из %2$d"
+
+#: courier-pickup
+msgid "Courier data changed or could not be verified. Check the selection and request a new preview."
+msgstr "Данные вызова изменились или не подтверждены. Проверьте выбор и повторите предварительный просмотр."
+
+#: courier-pickup
+msgid "Confirm courier service activation and disabled automatic individual calls for this sender in the courier queue settings."
+msgstr "В настройках очереди курьера подтвердите подключение услуги и отключение автоматических отдельных вызовов для этого отправителя."
+
+#: courier-pickup
+msgid "Another courier operation is running. Wait until it finishes."
+msgstr "Другая операция с вызовом уже выполняется. Дождитесь завершения."
+
+#: courier-pickup
+msgid "A selected TTN already belongs to a courier operation. Check the call history; do not create another call."
+msgstr "Выбранная ТТН уже относится к операции вызова. Проверьте историю; не создавайте повторный вызов."
+
+#: courier-pickup
+msgid "A courier operation already exists for this address and interval. Check the call history."
+msgstr "Для этого адреса и интервала уже есть операция вызова. Проверьте историю."
+
+#: courier-pickup
+msgid "The call number was not confirmed. Reconcile it in the Nova Poshta account with an administrator; do not create another call."
+msgstr "Номер вызова не подтверждён. Сверьте результат в кабинете НП с администратором; не создавайте повторный вызов."
+
+#: courier-pickup
+msgid "Initialize courier storage before continuing."
+msgstr "Сначала подготовьте хранилище вызовов курьера."
+
+#: courier-pickup
+msgid "Courier operation could not be saved. Check the call history before continuing."
+msgstr "Не удалось сохранить операцию курьера. Перед продолжением проверьте историю вызовов."
+
+#: courier-pickup
+msgid "Checking courier data…"
+msgstr "Проверяем данные вызова…"
+
+#: courier-pickup
+msgid "Result not confirmed. Reload the page and check the call history. Do not repeat creation."
+msgstr "Результат не подтверждён. Обновите страницу и проверьте историю вызовов. Не повторяйте создание."
+
+#: courier-pickup
+msgid "Choose a pickup interval"
+msgstr "Выберите интервал забора"
+
+#: courier-pickup
+msgid "No pickup intervals are available for this date."
+msgstr "На эту дату нет доступных интервалов забора."
+
+#: courier-pickup
+msgid "The preview expired. Request a new preview."
+msgstr "Срок просмотра истёк. Запросите новый просмотр."
+
+#: courier-pickup
+msgid "Planned weight, kg"
+msgstr "Плановый вес, кг"
+
+#: courier-pickup
+msgid "Confirm activation with Nova Poshta first."
+msgstr "Сначала подтвердите подключение услуги с Новой почтой."
+
+#: courier-pickup
+msgid "Ask your Nova Poshta manager to enable Courier Call and disable automatic individual calls for address-origin TTNs. An administrator then confirms this below for the exact sender."
+msgstr "Попросите менеджера НП подключить «Вызов курьера» и отключить автоматические отдельные вызовы по адресным ТТН. Затем администратор подтверждает это ниже для конкретного отправителя."
+
+#: courier-pickup
+msgid "In an order, choose courier pickup, save preparation, check the shipment and create its TTN. Print labels in the order. Creating a TTN does not call a courier."
+msgstr "В заказе выберите забор курьером, сохраните подготовку, проверьте отправление и создайте ТТН. Наклейки печатаются в заказе. Создание ТТН не вызывает курьера."
+
+#: courier-pickup
+msgid "Select ready TTNs from one sender address, choose a date and available interval, check planned weight and confirm one courier call. Different addresses require separate calls."
+msgstr "Выберите готовые ТТН с одного адреса отправителя, дату и доступный интервал, проверьте плановый вес и подтвердите один вызов. Разные адреса требуют отдельных вызовов."
+
+#: courier-pickup
+msgid "The call and adding TTNs are two separate carrier operations. A partial or unknown result stays locked; check the saved call and Nova Poshta account before any further action."
+msgstr "Создание вызова и добавление ТТН — две отдельные операции НП. Частичный или неизвестный результат блокирует повтор; сначала проверьте сохранённый вызов и кабинет НП."
+
+#: courier-pickup
+msgid "The final pickup price and accepted weight are determined by Nova Poshta. Order payments, COD, recipients and Folio links are not changed."
+msgstr "Окончательную стоимость забора и принятый вес определяет Новая почта. Оплата заказов, наложенный платёж, получатели и связи ФОЛИО не меняются."
+
+#: courier-pickup
+msgid "Initialize courier storage"
+msgstr "Подготовить хранилище вызовов"
+
+#: courier-pickup
+msgid "TTNs ready for a shared courier call"
+msgstr "ТТН, готовые к общему вызову курьера"
+
+#: courier-pickup
+msgid "Courier service activation"
+msgstr "Подключение услуги курьера"
+
+#: courier-pickup
+msgid "This confirmation records the arrangement with Nova Poshta. It does not enable the service at the carrier."
+msgstr "Это подтверждение фиксирует договорённость с НП. Оно не подключает услугу у перевозчика."
+
+#: courier-pickup
+msgid "Nova Poshta confirmed Courier Call is enabled and automatic individual calls are disabled for this sender."
+msgstr "НП подтвердила: услуга «Вызов курьера» подключена, автоматические отдельные вызовы для этого отправителя отключены."
+
+#: courier-pickup
+msgid "Disable courier creation for this sender"
+msgstr "Отключить создание вызовов для отправителя"
+
+#: courier-pickup
+msgid "Confirm courier activation"
+msgstr "Подтвердить подключение курьера"
+
+#: courier-pickup
+msgid "No created TTNs awaiting a courier call."
+msgstr "Нет созданных ТТН, ожидающих вызова курьера."
+
+#: courier-pickup
+msgid "Preparation"
+msgstr "Подготовка"
+
+#: courier-pickup
+msgid "Pickup date"
+msgstr "Дата забора"
+
+#: courier-pickup
+msgid "Load pickup intervals"
+msgstr "Загрузить интервалы забора"
+
+#: courier-pickup
+msgid "Pickup interval"
+msgstr "Интервал забора"
+
+#: courier-pickup
+msgid "The selected boxes supply the initial planned weight. Review the total packed load, including bulky parcels, before confirming."
+msgstr "Начальный плановый вес берётся из выбранных коробок. Перед подтверждением проверьте весь упакованный груз, включая объёмные посылки."
+
+#: courier-pickup
+msgid "Review shared courier call"
+msgstr "Просмотреть общий вызов курьера"
+
+#: courier-pickup
+msgid "I checked the address, selected TTNs, pickup time and planned weight. Order one real courier pickup."
+msgstr "Я проверил(-а) адрес, выбранные ТТН, время забора и плановый вес. Заказать один реальный вызов курьера."
+
+#: courier-pickup
+msgid "Confirm and call courier"
+msgstr "Подтвердить и вызвать курьера"
+
+#: courier-pickup
+msgid "Courier call history (latest 30)"
+msgstr "История вызовов курьера (последние 30)"
+
+#: courier-pickup
+msgid "No courier calls have been recorded."
+msgstr "Вызовы курьера ещё не записаны."
+
+#: courier-pickup
+msgid "Number not confirmed"
+msgstr "Номер не подтверждён"
+
+#: courier-pickup
+msgid "Carrier status:"
+msgstr "Статус у перевозчика:"
+
+#: courier-pickup
+msgid "Not returned in the seven-day carrier list."
+msgstr "Нет в ответе НП за последние семь дней."
+
+#: courier-pickup
+msgid "The carrier document list matches the selected TTNs."
+msgstr "Состав документов в НП совпадает с выбранными ТТН."
+
+#: courier-pickup
+msgid "The carrier document list differs. Reconcile missing or extra TTNs in the Nova Poshta account."
+msgstr "Состав документов в НП отличается. Сверьте отсутствующие или лишние ТТН в кабинете НП."
+
+#: courier-pickup
+msgid "Missing TTNs:"
+msgstr "Отсутствующие ТТН:"
+
+#: courier-pickup
+msgid "Extra TTNs:"
+msgstr "Лишние ТТН:"
+
+#: courier-pickup
+msgid "Last checked (UTC):"
+msgstr "Последняя проверка (UTC):"
+
+#: courier-pickup
+msgid "Nova Poshta confirmed the call number and all selected TTNs. Pickup is not yet confirmed."
+msgstr "НП подтвердила номер вызова и все выбранные ТТН. Фактический забор ещё не подтверждён."
+
+#: courier-pickup
+msgid "The operation is incomplete or its result is unknown. Do not create another call. Reconcile it with Nova Poshta."
+msgstr "Операция не завершена или её результат неизвестен. Не создавайте повторный вызов. Сверьте результат с НП."
+
+#: courier-pickup
+msgid "Check call and TTNs with Nova Poshta"
+msgstr "Проверить вызов и ТТН в НП"
+
+#: courier-pickup
+msgid "The pickup address is not in the sender directory or its city differs. Check sender settings."
+msgstr "Адреса забора нет в справочнике отправителя или город отличается. Проверьте настройки отправителя."
+
+#: courier-pickup
+msgid "Save preparation, then check and create the address-origin TTN below. Print its labels in the order. Select several ready TTNs in the courier queue to order one pickup."
+msgstr "Сохраните подготовку, затем проверьте и создайте ТТН с адреса ниже. Наклейки печатаются в заказе. В очереди курьера выберите несколько готовых ТТН для одного забора."
+
+#: courier-pickup
+msgid "Creating a TTN does not book pickup. Check the courier queue for the call status."
+msgstr "Создание ТТН не бронирует забор. Статус вызова смотрите в очереди курьера."
+
+#: courier-pickup
+msgid "Supported: branch drop-off or courier pickup from an enabled sender address, delivery to a branch or parcel locker, reviewed single-warehouse cash on delivery, cash payment for carrier services. Enter the legal recipient name in Ukrainian; it will be recorded in the Nova Poshta recipient directory, not in the store customer profile."
+msgstr "Поддерживается: самостоятельная сдача или забор курьером с подключённого адреса отправителя, доставка в отделение или почтомат, проверенный наложенный платёж одного склада, наличная оплата услуг НП. Укажите имя получателя на украинском по документу; оно будет записано в справочник НП, а не в карточку клиента магазина."

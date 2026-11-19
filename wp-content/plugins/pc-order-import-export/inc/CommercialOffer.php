@@ -46,7 +46,7 @@ final class CommercialOffer {
     }
 
     /** Read packaging in bounded batches; never substitute volume, dimensions or stock. */
-    private static function packaging(array $skus): array {
+    public static function packaging(array $skus): array {
         $error=__('Could not load pack quantities from Folio. Check the Java service update and API token, then prepare the mailing again.','pc-order-import-export');
         if(!function_exists('lps_java_post'))throw new \RuntimeException($error);
         $packing=[];

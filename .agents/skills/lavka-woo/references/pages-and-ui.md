@@ -345,6 +345,16 @@ child theme. Семантика `current_time('timestamp')` сохранена �
 Источники: названные modules, `tests/site-footer-local.php`, `tests/site-footer.spec.cjs`;
 приёмка/rollback/deploy — README Paint Shop UX. Пока локальный выпуск.
 
+
+Обновление 2026-11-05: `psu-cooperation` регистрируется в Paint Shop UX как область
+WordPress-меню для «Співпраця» в подвале. Только публичные, не защищённые паролем
+страницы верхнего уровня; без назначения — fallback на `dlia-maistriv`, без ID.
+Не добавлять будущие страницы как неработающие ссылки и не переносить навигацию
+в тему. Источник — `inc/site-footer.php`; точечно опубликован и проверен
+на production 2026-11-05. В тот же день по разрешению владельца код включён
+в `main`, server checkout обновлён fast-forward. Настройки и rollback —
+[MAKERS_LANDING.md](../../../../docs/MAKERS_LANDING.md).
+
 ## Граница самостоятельных стилей (1.6.0, 2026-10-21)
 
 `paint-shop-ux/inc/storefront-styles.php` определяет `.psu-storefront` по Woo
@@ -461,6 +471,17 @@ Featured image на принятой обычной странице прина�
 `tests/public-pages-local.php`; приёмка и согласованный deploy/rollback — README
 Paint Shop UX. Владельцы — `docs/SYSTEM_OVERVIEW.md`; канон и код справки обновлены.
 2026-10-22 на production подтверждён активный PSU 1.9.0 с этим модулем.
+
+Лендинг «Для майстрів» (`dlia-maistriv`, 2026-11-03) — контент отдельной WordPress
+page, не новый plugin/template. Источники: `content/makers-landing/`; операторский
+канон: `docs/MAKERS_LANDING.md`. Inline CSS ограничен `.lavka-makers`; правила
+типографики должны превосходить specificity `.psu-public-page #main .psu-page-prose`,
+иначе общая тема заменяет отступы/шрифты. `body:has(.lavka-makers)` скрывает только
+дублирующий внешний H1 и снимает ширину карточки. Шесть editorial attachments
+загружаются через WordPress с обычными Media Cloud hooks; не назначать их товарам
+или Folio SKU. Главный CTA ведёт в существующий PCOE account chat
+`my-account/?pcoe_chat=1`; запасной email — shop@paint.dn.ua. Ни переход в кабинет,
+ни mailto не являются отправленной заявкой и не назначают скидку/роль.
 
 
 ## Независимый каркас: этап 2 (1.9.0, 2026-10-21)

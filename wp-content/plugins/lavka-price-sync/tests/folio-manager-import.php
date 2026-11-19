@@ -36,5 +36,38 @@ try {
     $book=\PhpOffice\PhpSpreadsheet\IOFactory::load($file);
     check($book->getSheet(0)->getCell('A2')->getValue()==='001');check($book->getSheet(0)->getCell('B2')->getDataType()==='s');
     check($book->getSheet(1)->getCell('A2')->getValue()===null);check($book->getSheet(1)->getCell('A3')->getValue()==='001');$book->disconnectWorksheets();
+    // Two-column manager workflows must reconstruct fresh Access defaults, not NULL numeric fields.
+    $parent=['ARTIC_roditel'=>'001','ARTIC_rebenok'=>null,'KOL_rod_razob'=>'2.5','kol_reb_pol'=>'0','CENA_REB'=>'0','SLOG'=>'0'];
+    $child=['ARTIC_roditel'=>null,'ARTIC_rebenok'=>'001','KOL_rod_razob'=>'0','kol_reb_pol'=>'3','CENA_REB'=>'0','SLOG'=>'0'];
+    foreach(['PARENT'=>$parent,'CHILD'=>$child] as $mode=>$expected) {
+        $cols=lps_manager_input_columns('ASSEMBLY',$mode);$qty=$mode==='PARENT'?'2,5':'3';
+        check(lps_manager_text(implode(';',$cols)."\n001;".$qty,'ASSEMBLY',$mode)===[$expected]);
+        check(lps_manager_text("001\t".$qty,'ASSEMBLY',$mode)===[$expected]);
+        foreach(['Xls','Xlsx'] as $format)foreach([false,true] as $header) {
+            $book=new \PhpOffice\PhpSpreadsheet\Spreadsheet();$sheet=$book->getActiveSheet();$r=$header?2:1;
+            if($header)$sheet->fromArray($cols,null,'A1');
+            $sheet->setCellValue('A'.$r,1);$sheet->getStyle('A'.$r)->getNumberFormat()->setFormatCode('000');
+            $sheet->setCellValue('B'.$r,(float)str_replace(',','.',$qty));$sheet->getStyle('B'.$r)->getNumberFormat()->setFormatCode('0.00');
+            \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($book,$format)->save($file);
+            check(lps_manager_file($file,strtolower($format),'ASSEMBLY',$mode)===[$expected]);
+            $book->disconnectWorksheets();
+        }
+        foreach(['001;', ';2', '001;0','001;-1','001;=1+1','001;2;3'] as $bad) fails(fn()=>lps_manager_text($bad,'ASSEMBLY',$mode));
+    }
+    fails(fn()=>lps_manager_text('001;1.5','ASSEMBLY','CHILD'));
+    fails(fn()=>lps_manager_text('001;32768','ASSEMBLY','CHILD'));
+    fails(fn()=>lps_manager_text('001;2','ASSEMBLY','INVALID'));
+    fails(fn()=>lps_manager_text("ARTIC_rebenok;kol_reb_pol\n001;2",'ASSEMBLY','PARENT'));
+    $output=['ASSEMBLY_18'=>['columns'=>['ARTIC','KOL_R','PRICE','ARTIC_REB','cborka'],'rows'=>[['001','-2.5','12','CH','WWORK'],['CH','5','6','CH','WWORK']]],
+        'ASSEMBLY_9'=>['columns'=>['ARTIC','KOL_R','PRICE','cborka','ARTIC_REB'],'rows'=>[['001','-1','2','multi','M'],['P2','-2','3','multi','M'],['M','1','8','multi','M']]],
+        'ASSEMBLY_91'=>['columns'=>['ARTIC','KOL_R','PRICE','cborka','ARTIC_REB'],'rows'=>[]]];
+    $invoice=lps_assembly_invoice($output);
+    check($invoice['columns']===['ARTIC','KOL_R','PRICE']);check(count($invoice['rows'])===5);check($invoice['rows'][0]===['001','-2.5','12']);check($invoice['rows'][2]===['001','-1','2']);check($invoice['rows'][4]===['M','1','8']);
+    $bad=$output;$bad['ASSEMBLY_9']['rows'][0][2]=null;fails(fn()=>lps_assembly_invoice($bad));
+    $job=['id'=>'test','status'=>'READY','created'=>'test','filename'=>'test','sha256'=>'test','assembly_mode'=>'PARENT','result'=>['operation'=>'ASSEMBLY','input'=>[$parent],'outputs'=>$output]];
+    $tables=lps_manager_export_tables($job);check(array_key_first($tables)==='IMPORT_DBF');check($tables['IMPORT_DBF']===$invoice);
+    lps_manager_xlsx($tables,$file);$book=\PhpOffice\PhpSpreadsheet\IOFactory::load($file);
+    check($book->getSheet(0)->getTitle()==='IMPORT_DBF');check($book->getSheet(0)->getHighestColumn()==='C');check($book->getSheet(0)->getCell('A2')->getValue()==='001');check($book->getSheet(0)->getCell('B2')->getValue()==='-2.5');$book->disconnectWorksheets();
+    $job['result']['outputs']=$bad;check(!isset(lps_manager_export_tables($job)['IMPORT_DBF']));
 }finally{unlink($file);}
-echo "PASS: six schemas; 24 Excel cases; headerless/CSV/paste; null, duplicates, formulas, bounds; safe multi-sheet export\n";
+echo "PASS: six schemas; 32 Excel cases; parent/child defaults and invoice projection; headerless/CSV/paste; null, duplicates, formulas, bounds; safe multi-sheet export\n";

@@ -60,9 +60,18 @@ function pc_folio_bacs_unavailable_message(): string {
 
 function pc_folio_bacs_checkout_description(): string {
     return pc_folio_payment_details()
-        ? __('Verified bank details will be shown after placing the order and in the order email. Include your order number in the payment reference.', 'pc-folio-customer-balance')
+        ? __('After placing the order, pay by bank QR or use the verified recipient details. A compatible banking app can fill in the amount and order number. Payment is confirmed after the funds are received.', 'pc-folio-customer-balance')
         : pc_folio_bacs_unavailable_message();
 }
+
+function pc_folio_bacs_qr_title($title) {
+    $recipient = pc_folio_payment_details();
+    return $recipient && strlen($recipient['tax_id']) === 10
+        ? __('Payment to sole proprietor account — QR', 'pc-folio-customer-balance') : $title;
+}
+add_filter('woocommerce_gateway_title', static function ($title, $gateway_id) {
+    return $gateway_id === 'bacs' ? pc_folio_bacs_qr_title($title) : $title;
+}, PHP_INT_MAX, 2);
 
 function pc_folio_bacs_settings($settings) {
     if (!is_array($settings)) return $settings;
@@ -73,6 +82,7 @@ function pc_folio_bacs_settings($settings) {
         $settings[$key] = $accounts[0][$key] ?? '';
     }
     $settings['description'] = pc_folio_bacs_checkout_description();
+    $settings['title'] = pc_folio_bacs_qr_title($settings['title'] ?? '');
     $settings['instructions'] = $accounts ? pc_folio_bacs_instruction() : pc_folio_bacs_unavailable_message();
     return $settings;
 }
@@ -138,15 +148,22 @@ function pc_folio_bacs_email_instructions($order, $sent_to_admin, $plain_text = 
     pc_folio_bacs_remove_native_output();
     if ($sent_to_admin || !$order || $order->get_payment_method() !== 'bacs') return;
     $status = apply_filters('woocommerce_bacs_email_instructions_order_status', 'on-hold', $order);
-    if ($order->has_status($status)) pc_folio_bacs_render_details((bool) $plain_text);
+    if ($order->has_status($status)) {
+        pc_folio_bacs_render_details((bool) $plain_text);
+        pc_folio_bacs_qr_email_link($order, (bool) $plain_text);
+    }
 }
 add_action('woocommerce_email_before_order_table', 'pc_folio_bacs_email_instructions', 9, 3);
 
 function pc_folio_bacs_thankyou($order_id): void {
     pc_folio_bacs_remove_native_output();
     $order = wc_get_order($order_id);
-    if ($order && $order->get_payment_method() === 'bacs') pc_folio_bacs_render_details();
+    if ($order && $order->get_payment_method() === 'bacs') {
+        pc_folio_bacs_render_details();
+        pc_folio_bacs_render_qr($order);
+    }
 }
 add_action('woocommerce_thankyou_bacs', 'pc_folio_bacs_thankyou', 9);
 
 require_once __DIR__ . '/bacs-settings.php';
+require_once __DIR__ . '/bacs-qr.php';

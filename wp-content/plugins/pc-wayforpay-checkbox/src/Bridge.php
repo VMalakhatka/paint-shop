@@ -32,11 +32,7 @@ final class Bridge
 
     private function settings(): array
     {
-        $s = (array) get_option('woocommerce_wayforpay_settings', []);
-        return [
-            'merchant' => defined('PC_WFP_MERCHANT_ACCOUNT') ? (string) PC_WFP_MERCHANT_ACCOUNT : (string) ($s['merchant_account'] ?? ''),
-            'secret' => defined('PC_WFP_MERCHANT_SECRET') ? (string) PC_WFP_MERCHANT_SECRET : (string) ($s['secret_key'] ?? ''),
-        ];
+        return Availability::credentials();
     }
 
     public function httpCallback(): void
@@ -106,6 +102,7 @@ final class Bridge
                 return $ack;
             }
             if ($p['status'] !== 'Approved' || $p['reason'] !== '1100') {
+                if (!$row) PaymentFeedback::record($order, $p);
                 return $ack; // Pending, declined, cancelled and hold statuses cannot mark an order paid.
             }
             if (!$row) {

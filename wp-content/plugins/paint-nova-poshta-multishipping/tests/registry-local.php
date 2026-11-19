@@ -33,11 +33,22 @@ $mock=static function($pre,$args,$url) use (&$http,&$documentReads,&$mode,&$stat
             $finish=DateTimeImmutable::createFromFormat('!d.m.Y',$p['DateTimeTo']);
             if ($p['GetFullList']!=='0' || !$start || !$finish || $start->diff($finish)->days>30) throw new RuntimeException('Wrong monthly pagination contract');
             if ($mode==='period_error') return $response(['success'=>false,'data'=>[],'errors'=>['The difference between DateTimeFrom and DateTimeTo cannot be more than three months.']]);
+            if ($mode==='range') {
+                $month=$start->format('m'); $page=(int)$p['Page']; $numbers=[];
+                if ($month==='06' && $page===1) { for ($i=0;$i<99;$i++) $numbers[]=(string)(99999999400000+$i); $numbers[]=$ttn; }
+                if ($month==='06' && $page===2) $numbers=['99999999100000'];
+                if ($month==='07' && $page===1) $numbers=[$ttn,'99999999400100'];
+                return $response(['success'=>true,'data'=>array_map(static fn($n)=>['IntDocNumber'=>$n,'DateTime'=>$p['DateTimeFrom'],'Cost'=>'149'],$numbers)]);
+            }
             $rows=$p['Page']==='1' || $mode==='repeat' ? [['IntDocNumber'=>$ttn,'DateTime'=>'01.06.2026','StateId'=>'1','PayerType'=>'Recipient','CostOnSite'=>'70','Cost'=>'149','LinkedDocumentNumber'=>$ttn2]] : [];
             return $response(['success'=>true,'data'=>$rows]);
         }
-        return $response(['success'=>true,'data'=>[['Number'=>$mode==='wrong'?$ttn2:$ttn,'StatusCode'=>$status,'Status'=>'Synthetic status',
-            'PayerType'=>'Recipient','CostOnSite'=>'70','DocumentCost'=>'149','TrackingUpdateDate'=>'2026-06-01 12:30:00','ApiKey'=>'never-store','TrackingURL'=>'https://example.invalid/secret']]]);
+        $rows=array_map(static fn($doc)=>['Number'=>$mode==='wrong'?$ttn2:$doc['DocumentNumber'],'StatusCode'=>$status,'Status'=>'Synthetic status',
+            'PayerType'=>'Recipient','DocumentCost'=>'70','AnnouncedPrice'=>'149','DateCreated'=>'01-06-2026 12:30:00','TrackingUpdateDate'=>'2026-06-01 12:30:00','ApiKey'=>'never-store','TrackingURL'=>'https://example.invalid/secret'], $request['methodProperties']['Documents']);
+        if ($mode==='batch_missing') array_pop($rows);
+        if ($mode==='batch_duplicate') $rows[]=$rows[0];
+        if ($mode==='batch_foreign') $rows[0]['Number']='99999999999999';
+        return $response(['success'=>true,'data'=>array_reverse($rows)]);
     }
     parse_str(parse_url($url,PHP_URL_QUERY)?:'',$query);
     if (str_contains($url,'/ref/warehouses')) return $response([['code'=>7,'name'=>'Тестовий склад']]);
@@ -406,6 +417,56 @@ try {
     $manager->allcaps=[]; $reject(fn()=>$wooService->run('woo_orders',['woo_id'=>'999999001']),'Woo search requires registry manager permissions');
     $manager->allcaps=['manage_woocommerce'=>true,'manage_pnpm_shipments'=>true];
     $store->transaction(fn()=>$store->observe('99999999000009','np_documents',['Weight'=>'3.5','SeatsAmount'=>'2','OptionsSeat'=>[['weight'=>'1.5','volumetricLength'=>'25','volumetricWidth'=>'16','volumetricHeight'=>'12'],['weight'=>'2','volumetricLength'=>'30','volumetricWidth'=>'20','volumetricHeight'=>'15']]],'2026-06-01 12:00:00'));
+    // More than one read chunk and one visible page; import IDs deliberately oppose dates.
+    $expected=[];
+    $store->transaction(function() use ($store,&$expected) {
+        for ($i=0;$i<205;$i++) {
+            $number=(string)(99999999100000+$i);
+            $date=(new DateTimeImmutable('2026-11-06'))->modify('-'.$i.' days')->format('Y-m-d');
+            $id=$store->observe($number,'np_documents',['DateTime'=>$date],'2026-11-06 10:00:00');
+            $store->classify($id,1,['direction'=>'incoming','purpose'=>'other','partner_code'=>'SORT']);
+            $expected[]=$number;
+        }
+    });
+    $sortFilter=['direction'=>'incoming','purpose'=>'other']; $actual=[];
+    for ($page=1;$page<=7;$page++) foreach (array_slice($store->listing($sortFilter,$page),0,30) as $r) $actual[]=$r['ttn'];
+    $check($actual===$expected,'Global date order precedes pagination across read chunks; incoming shipments included');
+    $check($store->listingCount($sortFilter)===205 && $store->listingCount(['ttn'=>$expected[0]])===1,'Counts cover filters and exact TTN');
+    $check($store->listing($sortFilter,8)===[],'No phantom page after final date-sorted page');
+    $store->transaction(fn()=>$store->observe($expected[150],'np_documents',['DateTime'=>'2026-06-09'],'2026-11-07 10:00:00'));
+    $check($store->listing($sortFilter)[0]['ttn']===$expected[0],'Reimport does not sort by observation or insertion time');
+    $beforeCompare=$store->detail($summaryId); $httpBefore=count($http);
+    $cmp=$service->run('reconcile',['ttns'=>$expected[0]."\n".substr($expected[1],0,2).' '.substr($expected[1],2)."\n".$expected[0]."\n99999999999999"]);
+    $check($cmp['reconciliation']===['provided'=>3,'duplicates'=>1,'present'=>2,'missing_count'=>1,'missing_ttns'=>'99999999999999'],'Reconciliation normalizes spaces, deduplicates and identifies missing incoming TTNs');
+    $check(count($http)===$httpBefore && $store->detail($summaryId)===$beforeCompare,'Reconciliation never imports, calls carrier or changes links');
+    $reject(fn()=>$service->run('reconcile',['ttns'=>"99999999100000 extra"]),'Reject partial or malformed pasted lines');
+    $reject(fn()=>$service->run('reconcile',['ttns'=>str_repeat("99999999100000\n",1001)]),'Bound reconciliation input');
+    $manager->allcaps=[]; $reject(fn()=>$service->run('reconcile',['ttns'=>$expected[0]]),'Reconciliation requires manager permissions');
+    $manager->allcaps=['manage_woocommerce'=>true,'manage_pnpm_shipments'=>true];
+    $batchNumbers=[$ttn,$expected[0],'99999999200001']; $batchText=implode("\n",$batchNumbers)."\n".$ttn;
+    $beforeBatch=$store->detail($id); $beforeIncoming=$store->detail((int)$store->listing(['ttn'=>$expected[0]])[0]['id']);
+    $httpBefore=count($http); $countBefore=$store->listingCount([]);
+    $batch=$service->run('tracking_batch',['ttns'=>$batchText]);
+    $check(count($http)===$httpBefore+1 && array_column($batch['rows'],'ttn')===$batchNumbers && $batch['scope']['duplicates']===1,'One bulk read, input order retained, repeats removed');
+    $check($batch['scope']['coverage']==='known_ttn_list' && $store->listingCount([])===$countBefore,'Bulk preview has explicit coverage and does not import');
+    $reject(fn()=>$service->run('confirm',['token'=>$batch['token']]),'Bulk import requires explicit confirmation');
+    $result=$confirm($batch['token']); $check($result['count']===3 && $store->listingCount([])===$countBefore+1,'Bulk confirmation imports missing TTN and updates existing');
+    $check($confirm($batch['token'])===$result,'Bulk confirmation is idempotent');
+    $afterBatch=$store->detail($id); $afterIncoming=$store->detail((int)$beforeIncoming['id']);
+    $check($afterBatch['links']===$beforeBatch['links'] && $afterBatch['partner_code']===$beforeBatch['partner_code'] && $afterBatch['revision']===$beforeBatch['revision'],'Bulk import preserves links, partner and revision');
+    $check($afterIncoming['direction']==='incoming' && $afterIncoming['purpose']===$beforeIncoming['purpose'],'Bulk import retains incoming classification');
+    $repeat=$service->run('tracking_batch',['ttns'=>$batchText]); $confirm($repeat['token']);
+    $check($store->listingCount([])===$countBefore+1 && count($store->detail($id)['observations'])===count($afterBatch['observations']),'Repeated batch adds neither shipment nor unchanged observation');
+    foreach (['batch_missing','batch_duplicate','batch_foreign','fail'] as $mode) {
+        $reject(fn()=>$service->run('tracking_batch',['ttns'=>$batchText]),'Reject incomplete or invalid batch: '.$mode);
+    }
+    $mode='good'; $status='3'; $reject(fn()=>$service->run('tracking_batch',['ttns'=>$batchText]),'Reject not-found status'); $status='9';
+    $httpBefore=count($http);
+    foreach (['', '123 bad', str_repeat($ttn."\n",101), "\xFF"] as $bad) $reject(fn()=>$service->run('tracking_batch',['ttns'=>$bad]),'Reject malformed/oversized batch before HTTP');
+    $check(count($http)===$httpBefore,'Invalid list never reaches carrier');
+    $manager->allcaps=[]; $reject(fn()=>$service->run('tracking_batch',['ttns'=>$batchText]),'Bulk read requires manager permissions');
+    $manager->allcaps=['manage_woocommerce'=>true,'manage_pnpm_shipments'=>true];
+    require __DIR__.'/registry-range-cases.php';
     if ($dir=getenv('PNPM_REGISTRY_FIXTURE_DIR')) {
         foreach (['detail','index'] as $view) {
             switch_to_locale('uk'); $_GET=$view==='detail'?['page'=>'pnpm-registry','id'=>$transferId]:['page'=>'pnpm-registry'];
@@ -413,7 +474,12 @@ try {
             $config=['url'=>'/ajax','nonce'=>'synthetic','page'=>'/registry-index.html','loading'=>RegistryPage::t('Checking…'),
                 'failure'=>RegistryPage::t('The request failed. Reload and check the saved result before repeating.'),
                 'preview'=>RegistryPage::t('Preview only. Check the data and confirm below.'),'saved'=>RegistryPage::t('Saved to the site registry.'),
-                'empty'=>'Synthetic empty page','more'=>'Synthetic next page','labels'=>RegistryPage::labels(),'picker'=>RegistryPage::pickerText()];
+                'empty'=>'Synthetic empty page','more'=>'Synthetic next page',
+                'savedWindow'=>RegistryPage::t('Saved: {from} – {to}, page {page}, TTNs: {count}.'),
+                'continueWindow'=>RegistryPage::t('Import is not finished. Next: {from}, page {page}. Read and confirm the next page.'),
+                'refreshList'=>RegistryPage::t('Refresh saved shipment list'),
+                'range'=>RegistryPage::rangeText(),
+                'compared'=>RegistryPage::t('Compared with saved records in all directions. This only checks the TTNs you supplied; it does not import missing shipments or prove the cabinet list is complete.'),'labels'=>RegistryPage::labels(),'picker'=>RegistryPage::pickerText()];
             restore_previous_locale();
             file_put_contents($dir.'/registry-'.$view.'.html','<!doctype html><html lang="uk"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font:16px/1.5 system-ui;background:#f0f0f1;margin:24px}input,button,select,textarea{font:inherit}table{width:100%;text-align:left}button{padding:6px 12px}td{padding:8px}h1{font-size:28px}</style><style>'.file_get_contents(PNPM_DIR.'assets/registry.css').'</style>'.$body.'<script>window.pnpmRegistry='.wp_json_encode($config).';</script><script>'.file_get_contents(PNPM_DIR.'assets/registry.js').'</script><script>'.file_get_contents(PNPM_DIR.'assets/registry-picker.js').'</script><script>'.file_get_contents(PNPM_DIR.'assets/registry-woo.js').'</script></html>');
         }
