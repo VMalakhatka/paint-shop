@@ -26,7 +26,7 @@ final class PartnerCatalog {
     public static function feedUrl(int $user,array $c): string {return add_query_arg(['action'=>'pcoe_partner_feed','user'=>$user,'key'=>self::key($user,$c)],admin_url('admin-post.php'));}
     public static function data(int $user,array $c): array {
         if(!self::allowed($user) || empty($c['selection']))throw new \RuntimeException(__('Export access is unavailable.','pc-order-import-export'));
-        $signature=hash('sha256',wp_json_encode([$c['selection'],BroadcastPricing::group($user)]));
+        $signature=hash('sha256',wp_json_encode([$c['selection'],BroadcastPricing::group($user),PartnerCatalogData::brand_names()]));
         $cache=get_transient('pcoe_catalog_'.$user);
         if(is_array($cache) && ($cache['signature']??'')===$signature)return $cache['data'];
         $data=PartnerCatalogData::build($user,$c['selection']);

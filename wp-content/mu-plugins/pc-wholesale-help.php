@@ -607,7 +607,7 @@ function pc_wholesale_help_render_endpoint(): void {
                 <li><?php esc_html_e('CSV for WooCommerce / XML for Prom: import formats with retail prices only. These are the normal retail prices saved on our site; your own markup is not configured here. First test a few products, map categories and check images, prices and availability in your shop.', 'pc-wholesale-help'); ?></li>
                 <li><?php esc_html_e('Download photos (ZIP): up to 100 images, grouped by product. Read manifest.csv inside: it lists saved and missing images. Limits are 5 MB per image, 50 MB in total and limited preparation time. For a larger selection, use photo links from Excel/CSV or smaller archives. Prom XML contains up to 10 photos per product.', 'pc-wholesale-help'); ?></li>
             </ol>
-            <p><?php esc_html_e('Prom and SalesDrive use the same brand names shown on the product page. Variations use the parent product’s brands. If no brand is shown, the XML omits the vendor field.', 'pc-wholesale-help'); ?></p>
+            <p><?php esc_html_e('You can select the same brands as on the storefront. Prom and SalesDrive export those brand names. Variations use the parent product’s brands. If no brand is shown, the XML omits the vendor field.', 'pc-wholesale-help'); ?></p>
             <h3 id="partner-catalog-prom"><?php esc_html_e('How to connect Prom', 'pc-wholesale-help'); ?></h3>
             <ol>
                 <li><?php esc_html_e('After reviewing the selection, tick the price confirmation and select Enable Prom link. Copy the personal XML link into the import settings of your Prom shop. Share it only with your import service, not on public pages.', 'pc-wholesale-help'); ?></li>
@@ -633,7 +633,7 @@ function pc_wholesale_help_render_endpoint(): void {
                 <li><?php esc_html_e('Configure the read schedule in your CRM. Enabled snapshots refresh about every 30 minutes when the website scheduler runs. Preparation may take longer when the website scheduler is delayed. A previous complete file can be served during refresh for at most two hours; afterwards the service returns an error rather than an empty or outdated catalogue. Keep the previous import if a request fails.', 'pc-wholesale-help'); ?></li>
                 <li><?php esc_html_e('Saving brands or warehouses pauses the link until you review and enable it again. Pause CRM link stops access. Replace CRM link invalidates the old address; update it in your CRM. Exports do not create orders, reserves, payments or shipments.', 'pc-wholesale-help'); ?></li>
             </ol>
-            <p><?php esc_html_e('Prom and SalesDrive use the same brand names shown on the product page. Variations use the parent product’s brands. If no brand is shown, the XML omits the vendor field.', 'pc-wholesale-help'); ?></p>
+            <p><?php esc_html_e('You can select the same brands as on the storefront. Prom and SalesDrive export those brand names. Variations use the parent product’s brands. If no brand is shown, the XML omits the vendor field.', 'pc-wholesale-help'); ?></p>
             <a class="pc-help-inline-action" href="<?php echo esc_url(add_query_arg('pcoe_catalog','1',wc_get_page_permalink('myaccount')).'#pcoe-crm-catalog'); ?>"><?php esc_html_e('Open CRM export', 'pc-wholesale-help'); ?></a>
         </section>
         <section class="pc-help-section" id="folio">

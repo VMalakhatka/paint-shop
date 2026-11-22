@@ -16,7 +16,7 @@ final class CrmCatalogData {
         }
         return $result;
     }
-    public static function selection(array $input): array {
+    public static function selection(array $input, bool $saved = false): array {
         $s=[];
         foreach(['brands','locations'] as $key){
             $values=$input[$key]??[];
@@ -24,7 +24,9 @@ final class CrmCatalogData {
             foreach($values as $v)if(!is_scalar($v) || !ctype_digit((string)$v) || (int)$v<1)throw new \RuntimeException(__('Invalid selection.','pc-order-import-export'),400);
             $s[$key]=array_values(array_unique(array_map('intval',$values)));sort($s[$key],SORT_NUMERIC);
         }
-        foreach($s['brands'] as $id)if(!term_exists($id,'product_brand'))throw new \RuntimeException(__('Invalid selection.','pc-order-import-export'),400);
+        $visible = self::visible_brands($s['brands']);
+        if (!$saved && $s['brands'] !== $visible) throw new \RuntimeException(__('Invalid selection.','pc-order-import-export'),400);
+        $s['brands'] = $visible;
         $available=self::locations();$covered=[];
         foreach($s['locations'] as $id){
             if(!isset($available[$id]) || array_intersect($covered,$available[$id]['codes']))throw new \RuntimeException(__('Warehouse groups are unavailable or overlap. Ask the manager to check the mapping.','pc-order-import-export'),400);
@@ -32,15 +34,20 @@ final class CrmCatalogData {
         }
         return $s;
     }
+    private static function visible_brands(array $selected): array {
+        return array_values(array_intersect($selected, array_keys(PartnerCatalogData::brand_names())));
+    }
     public static function context(int $user,array $selection): string {
-        $selection=self::selection($selection);$all=self::locations();$mapping=[];
+        $selection=self::selection($selection, true);$all=self::locations();$mapping=[];
         foreach($selection['locations'] as $id)$mapping[$id]=$all[$id];
-        return hash('sha256',wp_json_encode(['crm-v1',BroadcastPricing::group($user),$selection,$mapping]));
+        return hash('sha256',wp_json_encode(['crm-public-brands',BroadcastPricing::group($user),$selection,$mapping,PartnerCatalogData::brand_names()]));
     }
     /** Keyset scan: bounded memory, no unstable OFFSET during catalogue changes. */
     public static function page(array $selection,int $after): array {
         global $wpdb;
-        $brands=implode(',',array_map('intval',$selection['brands']));
+        $visible = self::visible_brands($selection['brands']);
+        if (!$visible) return [];
+        $brands=implode(',',array_map('intval',$visible));
         $sql=$wpdb->prepare("SELECT p.ID FROM {$wpdb->posts} p WHERE p.ID > %d
             AND p.post_status = 'publish' AND p.post_type IN ('product','product_variation')
             AND EXISTS (SELECT 1 FROM {$wpdb->term_relationships} tr
@@ -54,7 +61,8 @@ final class CrmCatalogData {
     }
     public static function rows(int $user,array $ids,array $s): array {
         // Recheck membership before projection, including a variation's parent.
-        $ids=array_values(array_filter($ids,static function($id)use($s){$p=wc_get_product($id);return $p && has_term($s['brands'],'product_brand',$p->get_parent_id()?:$id);}));
+        $brands = self::visible_brands($s['brands']);
+        $ids = $brands ? array_values(array_filter($ids,static function($id)use($brands){$p=wc_get_product($id);return $p && has_term($brands,'product_brand',$p->get_parent_id()?:$id);})) : [];
         return PartnerCatalogData::build_ids($user,$ids,['skus'=>[],'category'=>0,'brand'=>0],$s['locations'],[],false,false);
     }
 }

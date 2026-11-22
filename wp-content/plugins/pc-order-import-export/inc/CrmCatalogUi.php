@@ -15,8 +15,13 @@ final class CrmCatalogUi {
         $notice=get_transient('pcoe_crm_notice_'.$user);if($notice){delete_transient('pcoe_crm_notice_'.$user);echo '<p role="alert">'.esc_html($notice).'</p>';}
         self::form();
         echo '<fieldset><legend>'.esc_html__('Brands for the CRM feed','pc-order-import-export').'</legend><div class="pcoe-crm-choices">';
-        $brands=get_terms(['taxonomy'=>'product_brand','hide_empty'=>true,'orderby'=>'name']);
-        if(!is_wp_error($brands))foreach($brands as $t)echo '<label><input type="checkbox" name="brands[]" value="'.(int)$t->term_id.'" '.checked(in_array((int)$t->term_id,$s['brands'],true),true,false).'> '.esc_html($t->name).'</label>';
+        $brands = PartnerCatalogData::brand_names();
+        if (array_diff($s['brands'], array_keys($brands))) {
+            echo '<p class="woocommerce-info">'.esc_html__('Unavailable selection — choose again','pc-order-import-export').'</p>';
+        }
+        foreach ($brands as $id => $name) {
+            echo '<label><input type="checkbox" name="brands[]" value="'.$id.'" '.checked(in_array($id,$s['brands'],true),true,false).'> '.esc_html($name).'</label>';
+        }
         echo '</div></fieldset><fieldset><legend>'.esc_html__('Stock from warehouse groups','pc-order-import-export').'</legend>';
         foreach(CrmCatalogData::locations() as $id=>$loc)echo '<label><input type="checkbox" name="locations[]" value="'.(int)$id.'" '.checked(in_array($id,$s['locations'],true),true,false).'> '.esc_html($loc['name']).'</label>';
         echo '<p>'.esc_html__('Warehouse group composition comes from the shared site settings and is the same for every customer. Choose which groups this feed includes. Stock uses website data.','pc-order-import-export').'</p></fieldset>';

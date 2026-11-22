@@ -7,11 +7,13 @@ final class CrmCatalogData {static function locations(){return [10=>['name'=>'К
 }
 namespace {
 define('ABSPATH',__DIR__);define('PCOE_DIR',dirname(__DIR__));define('PCOE_URL','file://'.PCOE_DIR.'/');
-require PCOE_DIR.'/inc/PartnerCatalogFormats.php';require PCOE_DIR.'/inc/CrmCatalogUi.php';require PCOE_DIR.'/inc/PartnerCatalog.php';require PCOE_DIR.'/inc/PartnerCatalogUi.php';
+require PCOE_DIR.'/inc/PartnerCatalogData.php';require PCOE_DIR.'/inc/PartnerCatalogFormats.php';require PCOE_DIR.'/inc/CrmCatalogUi.php';require PCOE_DIR.'/inc/PartnerCatalog.php';require PCOE_DIR.'/inc/PartnerCatalogUi.php';
 function get_current_user_id(){return 5;}function get_userdata($u){return (object)['ID'=>$u];}function pc_wholesale_customer_can_access($u){return true;}
 function get_user_meta($id,$k,$single){return ['selection'=>['skus'=>['TEST-001'],'category'=>0,'brand'=>0],'enabled'=>true,'seed'=>'fixture'];}
-function get_transient($key){if(str_contains($key,'notice'))return false;return ['signature'=>hash('sha256',wp_json_encode([get_user_meta(5,'',true)['selection'],'fixture'])),'data'=>['rows'=>[['sku'=>'TEST-001','name'=>'Тестова фарба для творчості, синя, 50 мл','cost'=>40,'retail'=>60,'stock'=>5,'images'=>['image']]],'missing'=>['TEST-MISSING'],'at'=>'2026-11-10T12:00:00Z']];}
+function get_transient($key){if(str_contains($key,'notice'))return false;return ['signature'=>hash('sha256',wp_json_encode([get_user_meta(5,'',true)['selection'],'fixture',\PaintCore\PCOE\PartnerCatalogData::brand_names()])),'data'=>['rows'=>[['sku'=>'TEST-001','name'=>'Тестова фарба для творчості, синя, 50 мл','cost'=>40,'retail'=>60,'stock'=>5,'images'=>['image']]],'missing'=>['TEST-MISSING'],'at'=>'2026-11-10T12:00:00Z']];}
 function wp_json_encode($v){return json_encode($v);}function get_terms($a){if(($a['taxonomy']??'')==='product_brand')return array_map(fn($i,$name)=>(object)['term_id'=>$i,'name'=>$name],range(3,7),['Darwi','Kreul','Pebeo','Renesans','Solo Goya']);return [(object)['term_id'=>3,'name'=>'Матеріали для творчості']];}function is_wp_error($v){return false;}
+function psu_catalog_supplier_terms($visible){return array_filter(get_terms(['taxonomy'=>'product_brand']),fn($t)=>$t->term_id!==7);}
+function wp_list_pluck($terms,$field,$key){return array_column($terms,$field,$key);}
 function checked($a,$b,$echo=false){return $a===$b?'checked':'';}
 function selected($a,$b,$echo=false){return $a===$b?'selected':'';}function wp_nonce_field($a){echo '<input type="hidden" name="_wpnonce" value="fixture">';}
 function wp_enqueue_style(...$args){}function esc_html($v){return htmlspecialchars((string)$v,ENT_QUOTES,'UTF-8');}function esc_attr($v){return esc_html($v);}function esc_textarea($v){return esc_html($v);}function esc_url($v){return esc_html($v);}

@@ -1428,5 +1428,5 @@ msgstr ""
 "Проверьте реквизиты перед подтверждением. Если уже оплатили, не платите "
 "повторно: менеджер должен подтвердить поступление средств."
 
-msgid "Prom and SalesDrive use the same brand names shown on the product page. Variations use the parent product’s brands. If no brand is shown, the XML omits the vendor field."
-msgstr "Prom и SalesDrive получают те же названия брендов, которые вы видите в карточке товара. Для вариации берутся бренды основного товара. Если бренд не показан на витрине, поле vendor в XML пропускается."
+msgid "You can select the same brands as on the storefront. Prom and SalesDrive export those brand names. Variations use the parent product’s brands. If no brand is shown, the XML omits the vendor field."
+msgstr "Для выбора доступны те же бренды, что и на витрине. Их названия передаются в Prom и SalesDrive. Для вариации берутся бренды основного товара. Если бренд не показан на витрине, поле vendor в XML пропускается."

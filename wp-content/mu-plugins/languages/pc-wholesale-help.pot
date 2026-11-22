@@ -1400,5 +1400,5 @@ msgid ""
 " the funds."
 msgstr ""
 
-msgid "Prom and SalesDrive use the same brand names shown on the product page. Variations use the parent product’s brands. If no brand is shown, the XML omits the vendor field."
+msgid "You can select the same brands as on the storefront. Prom and SalesDrive export those brand names. Variations use the parent product’s brands. If no brand is shown, the XML omits the vendor field."
 msgstr ""

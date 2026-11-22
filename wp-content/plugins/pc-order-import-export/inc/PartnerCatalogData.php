@@ -5,6 +5,28 @@ defined('ABSPATH') || exit;
 /** Public product content plus the authenticated customer's prices. Never exports supplier metadata. */
 final class PartnerCatalogData {
     const LIMIT = 500;
+    /** Brand labels permitted by the storefront, keyed by WooCommerce term ID. */
+    public static function brand_names(): array {
+        $terms = function_exists('psu_catalog_supplier_terms') ? psu_catalog_supplier_terms(true) : [];
+        $names = [];
+        foreach ($terms as $term) {
+            $names[(int)$term->term_id] = html_entity_decode($term->name, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        }
+        return $names;
+    }
+
+    private static function brand_filter_ids(int $id): array {
+        $public = self::brand_names();
+        if (!isset($public[$id])) {
+            throw new \RuntimeException(__('Unavailable selection — choose again','pc-order-import-export'));
+        }
+        $children = is_taxonomy_hierarchical('product_brand') ? get_term_children($id, 'product_brand') : [];
+        if (is_wp_error($children)) {
+            throw new \RuntimeException(__('Could not read categories.','pc-order-import-export'));
+        }
+        return array_values(array_intersect(array_merge([$id], array_map('intval', $children)), array_keys($public)));
+    }
+
     public static function skus(string $text): array {
         if (strlen($text)>100000) throw new \RuntimeException(__('Use up to 500 SKUs, one per line.','pc-order-import-export'));
         $rows=array_values(array_unique(array_filter(array_map('trim',preg_split('/\R/u',$text)),static fn($v)=>$v!=='')));
@@ -15,7 +37,8 @@ final class PartnerCatalogData {
     public static function selection(array $input): array {
         foreach(['skus','category','brand'] as $key) if(isset($input[$key]) && !is_scalar($input[$key])) throw new \RuntimeException(__('Invalid selection.','pc-order-import-export'));
         $s=['skus'=>self::skus((string)($input['skus']??'')), 'category'=>absint($input['category']??0),'brand'=>absint($input['brand']??0)];
-        foreach(['category'=>'product_cat','brand'=>'product_brand'] as $key=>$tax) if($s[$key] && !term_exists($s[$key],$tax)) throw new \RuntimeException(__('Invalid selection.','pc-order-import-export'));
+        if ($s['brand']) self::brand_filter_ids($s['brand']);
+        if ($s['category'] && !term_exists($s['category'],'product_cat')) throw new \RuntimeException(__('Invalid selection.','pc-order-import-export'));
         if(!$s['skus'] && !$s['category'] && !$s['brand']) throw new \RuntimeException(__('Select a category, brand or SKU list.','pc-order-import-export'));
         return $s;
     }
@@ -25,7 +48,8 @@ final class PartnerCatalogData {
             foreach($s['skus'] as $sku){$id=wc_get_product_id_by_sku($sku);if($id)$ids[]=$id;else $missing[]=$sku;}
         } else {
             $tax=[];
-            foreach(['category'=>'product_cat','brand'=>'product_brand'] as $key=>$taxonomy) if($s[$key]) $tax[]=['taxonomy'=>$taxonomy,'terms'=>[$s[$key]],'include_children'=>true];
+            if ($s['category']) $tax[] = ['taxonomy'=>'product_cat','terms'=>[$s['category']],'include_children'=>true];
+            if ($s['brand']) $tax[] = ['taxonomy'=>'product_brand','terms'=>self::brand_filter_ids($s['brand']),'include_children'=>false];
             $q=new \WP_Query(['post_type'=>'product','post_status'=>'publish','has_password'=>false,'fields'=>'ids','posts_per_page'=>self::LIMIT+1,'no_found_rows'=>true,'orderby'=>'ID','order'=>'ASC','tax_query'=>$tax]);
             if(count($q->posts)>self::LIMIT)throw new \RuntimeException(__('More than 500 products. Narrow the selection; no partial file was created.','pc-order-import-export'));
             foreach($q->posts as $id){$p=wc_get_product($id);if(!$p)continue;if($p->is_type('variable'))$ids=array_merge($ids,$p->get_children());else $ids[]=$id;if(count($ids)>self::LIMIT)break;}
@@ -34,14 +58,18 @@ final class PartnerCatalogData {
         return [array_values(array_unique($ids)),$missing];
     }
     public static function products(array $ids,array $s): \Generator {
+        $brandIds = $s['brand'] ? self::brand_filter_ids($s['brand']) : [];
+        $categoryIds = [];
+        if ($s['category']) {
+            $children = get_term_children($s['category'], 'product_cat');
+            if (is_wp_error($children)) throw new \RuntimeException(__('Could not read categories.','pc-order-import-export'));
+            $categoryIds = array_merge([$s['category']], $children);
+        }
         foreach(BroadcastPricing::products($ids) as $p){
             $parent=$p->get_parent_id()?:$p->get_id();
             if(post_password_required($parent) || !apply_filters('woocommerce_product_is_visible',true,$parent))continue;
-            foreach(['category'=>'product_cat','brand'=>'product_brand'] as $key=>$tax) if($s[$key]){
-                $terms=[$s[$key]];
-                if(is_taxonomy_hierarchical($tax)){$children=get_term_children($s[$key],$tax);if(is_wp_error($children))throw new \RuntimeException(__('Could not read categories.','pc-order-import-export'));$terms=array_merge($terms,$children);}
-                if(!has_term($terms,$tax,$parent))continue 2;
-            }
+            if ($categoryIds && !has_term($categoryIds, 'product_cat', $parent)) continue;
+            if ($brandIds && !has_term($brandIds, 'product_brand', $parent)) continue;
             yield $p;
         }
     }
@@ -63,11 +91,7 @@ final class PartnerCatalogData {
     public static function build_ids(int $user,array $ids,array $selection,array $locations,array $missing=[],bool $packaging=true,bool $require_rows=true): array {
         return BroadcastPricing::scope($user,static function()use($ids,$selection,$locations,$missing,$packaging,$require_rows){
             $rows=[];$seen=[];$categories=[];
-            $publicBrands = function_exists('psu_catalog_supplier_terms') ? psu_catalog_supplier_terms(true) : [];
-            $brandNames = [];
-            foreach ($publicBrands as $brand) {
-                $brandNames[$brand->term_id] = self::text($brand->name);
-            }
+            $brandNames = self::brand_names();
             foreach(PriceList::catalogue_rows(self::products($ids,$selection),$locations) as $entry){
                 if(!isset($entry['product_id']))continue;
                 $p=wc_get_product($entry['product_id']);$parent=$p->get_parent_id()?wc_get_product($p->get_parent_id()):$p;$v=$entry['values'];
@@ -86,9 +110,15 @@ final class PartnerCatalogData {
                     if (!$attribute->get_visible() || preg_match('/supplier|postav|постач|постав/i', $key)) {
                         continue;
                     }
+                    $label = wc_attribute_label($key);
+                    // A legacy brand attribute could otherwise re-publish a hidden name as an XML param.
+                    $identity = '/^(?:pa_)?(?:product_brand|brand|brend|manufacturer|бренд|виробник|производитель|vyrobnyk|proizvoditel|торгова марка|торговая марка)$/iu';
+                    if (preg_match($identity, $key) || preg_match($identity, trim($label))) {
+                        continue;
+                    }
                     $value = $p->get_attribute($key) ?: $parent->get_attribute($key);
                     if ($value !== '') {
-                        $attributes[wc_attribute_label($key)] = self::text($value);
+                        $attributes[$label] = self::text($value);
                     }
                 }
                 $rows[]=['id'=>(int)$p->get_id(),'sku'=>$v[0],'gtin'=>$v[1],'name'=>self::text($v[2]),'category'=>$v[4],'category_id'=>$categoryId,

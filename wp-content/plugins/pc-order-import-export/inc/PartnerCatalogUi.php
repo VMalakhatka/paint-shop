@@ -22,7 +22,18 @@ final class PartnerCatalogUi {
         self::form();echo '<div class="pcoe-partner-fields">';
         foreach(['category'=>['product_cat','Category and subcategories'],'brand'=>['product_brand','Brand']] as $key=>[$tax,$label]){
             echo '<label>'.esc_html__($label,'pc-order-import-export').'<select name="'.$key.'"><option value="0">'.esc_html__('All','pc-order-import-export').'</option>';
-            $terms=get_terms(['taxonomy'=>$tax,'hide_empty'=>true]);if(!is_wp_error($terms))foreach($terms as $t)echo '<option value="'.(int)$t->term_id.'" '.selected($s[$key],$t->term_id,false).'>'.esc_html($t->name).'</option>';
+            if ($key === 'brand') {
+                $options = PartnerCatalogData::brand_names();
+                if ($s['brand'] && !isset($options[$s['brand']])) {
+                    echo '<option value="'.(int)$s['brand'].'" selected>'.esc_html__('Unavailable selection — choose again','pc-order-import-export').'</option>';
+                }
+            } else {
+                $terms = get_terms(['taxonomy'=>$tax,'hide_empty'=>true]);
+                $options = is_wp_error($terms) ? [] : wp_list_pluck($terms, 'name', 'term_id');
+            }
+            foreach ($options as $id => $name) {
+                echo '<option value="'.(int)$id.'" '.selected($s[$key],$id,false).'>'.esc_html($name).'</option>';
+            }
             echo '</select></label>';
         }
         echo '</div><label>'.esc_html__('SKUs, one per line','pc-order-import-export').'<textarea rows="6" name="skus">'.esc_textarea(implode("\n",$s['skus'])).'</textarea></label>';
