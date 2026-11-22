@@ -49,7 +49,9 @@ final class CrmCatalogUi {
             echo '</tbody></table></div>';self::form();self::button('download','Download CRM XML for review');echo '</form>';
         }elseif($snapshot)echo '<p>'.esc_html__('The CRM file is outdated or its settings changed. Prepare it again before importing.','pc-order-import-export').'</p>';
         if(!empty($c['selection'])){
-            echo '<p><a href="'.esc_url(PartnerCatalog::url().'#pcoe-crm-catalog').'">'.esc_html__('Refresh CRM status','pc-order-import-export').'</a></p>';
+            // A fragment-only navigation would keep the previously rendered status.
+            $statusUrl = add_query_arg('pcoe_crm_status', wp_generate_uuid4(), PartnerCatalog::url());
+            echo '<p><a href="'.esc_url($statusUrl.'#pcoe-crm-catalog').'">'.esc_html__('Refresh CRM status','pc-order-import-export').'</a></p>';
             self::form();self::button('retry','Prepare CRM file again');echo '</form>';
             echo '<p>'.esc_html__('Map purchase_price (or price) to purchase cost, not your selling price. Use vendorCode for SKU, barcode for EAN and quantity_in_stock for quantity. First test a few products in SalesDrive.','pc-order-import-export').'</p>';
             if(!empty($c['enabled']))echo '<label>'.esc_html__('Private CRM URL — contains purchase prices','pc-order-import-export').'<textarea readonly rows="3">'.esc_textarea(CrmCatalog::url($user,$c)).'</textarea></label>';

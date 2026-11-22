@@ -1368,7 +1368,7 @@ msgid "In Data and photos for your website, open Purchase price feed for CRM / S
 msgstr ""
 
 #: pc-wholesale-help.php
-msgid "Select Prepare CRM file. You may close the page while it is prepared in the background. Refresh CRM status to see the result. The limit is 30,000 catalogue records or 30 MB, not 500 products. If preparation fails, no partial file is published; correct the issue and select Prepare CRM file again."
+msgid "Select Prepare CRM file. You may close the page while it is prepared in the background. Select Refresh CRM status to read the latest progress and see the download button when the file is ready. The limit is 30,000 catalogue records or 30 MB, not 500 products. If preparation fails, no partial file is published; correct the issue and select Prepare CRM file again."
 msgstr ""
 
 #: pc-wholesale-help.php

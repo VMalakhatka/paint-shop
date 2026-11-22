@@ -110,6 +110,10 @@ User meta `_pcoe_crm_catalog`: selection, enabled, seed, revision.
 upload URL. Части XML сохраняются по 100 записей, SHA-256 проверяется при чтении.
 До ответа файл собирается в защищённом системном temp-файле и удаляется после чтения.
 
+«Оновити стан CRM-файлу» открывает кабинет отдельным GET с новым параметром
+`pcoe_crm_status` и возвращает к секции CRM. Статус принадлежит текущему
+пользователю. Ссылка обновления только перечитывает состояние.
+
 Cron `pcoe_crm_catalog_tick` использует named lock на пользователя для сборки файла.
 Это чтение данных Woo, а не синхронизация остатков: не запускает Java/ФОЛИО,
 не меняет складскую проекцию и не добавляет глобальный sync lock.
@@ -135,7 +139,7 @@ generation/index. Снимок публикуется одной заменой 
 
 ## Проверка, выпуск и откат
 
-Offline tests: `tests/crm-catalog.php`, `tests/partner-catalog-data.php`, существующие
+Offline tests: `tests/crm-catalog.php`, `tests/crm-status-refresh.php`, `tests/partner-catalog-data.php`, существующие
 `tests/partner-catalog.php` / `tests/partner-catalog-access.php`. UI fixture проверяет
 desktop/mobile. Проверить nonce/role/HTTP lifecycle, 605 позиций, цену/баркод/количество,
 закрытие доступа, целостность снимка и восстановление после публикации.

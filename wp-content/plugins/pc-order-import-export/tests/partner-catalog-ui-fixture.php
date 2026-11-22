@@ -2,7 +2,9 @@
 namespace PaintCore\PCOE {
 final class BroadcastPricing {static function group($id){return 'fixture';}}
 final class CrmCatalog {static function config($u){return ['selection'=>['brands'=>[3],'locations'=>[10]],'enabled'=>true];}static function ready(...$args){return true;}static function url(...$args){return 'https://example.test/crm?key=fixture';}}
-final class CrmCatalogStore {static function get($u,$kind){return $kind==='build'?[]:['count'=>605,'unpriced'=>1,'at'=>time(),'preview'=>[['sku'=>'TEST-001','name'=>'Фарба для творчості','cost'=>0,'stock'=>3]]];}}
+final class CrmCatalogStore {static function get($u,$kind){
+    if (getenv('PCOE_FIXTURE_PREPARING')) return $kind==='build'?['status'=>'preparing','count'=>0]:[];
+    return $kind==='build'?[]:['count'=>605,'unpriced'=>1,'at'=>time(),'preview'=>[['sku'=>'TEST-001','name'=>'Фарба для творчості','cost'=>0,'stock'=>3]]];}}
 final class CrmCatalogData {static function locations(){return [10=>['name'=>'Київ'],11=>['name'=>'Одеса']];}}
 }
 namespace {
@@ -18,7 +20,12 @@ function checked($a,$b,$echo=false){return $a===$b?'checked':'';}
 function selected($a,$b,$echo=false){return $a===$b?'selected':'';}function wp_nonce_field($a){echo '<input type="hidden" name="_wpnonce" value="fixture">';}
 function wp_enqueue_style(...$args){}function esc_html($v){return htmlspecialchars((string)$v,ENT_QUOTES,'UTF-8');}function esc_attr($v){return esc_html($v);}function esc_textarea($v){return esc_html($v);}function esc_url($v){return esc_html($v);}
 function __($s,$domain=''){static $t;if($t===null)$t=getenv('PCOE_TRANSLATIONS')?json_decode(file_get_contents(getenv('PCOE_TRANSLATIONS')),true):[];return $t[$s]??$s;}function esc_html__($s,$d=''){return esc_html(__($s,$d));}
-function wp_salt($s){return 'fixture-secret';}function admin_url($s){return 'https://example.test/'.$s;}function add_query_arg($a,$b=null,$c=null){return ($c??$b).'?'.http_build_query(is_array($a)?$a:[$a=>$b]);}
+function wp_salt($s){return 'fixture-secret';}function admin_url($s){return 'https://example.test/'.$s;}function wp_generate_uuid4(){return bin2hex(random_bytes(16));}
+function add_query_arg($a,$b=null,$c=null){
+    [$base,$query]=array_pad(explode('?', $c??$b, 2), 2, '');
+    parse_str($query,$args);
+    return $base.'?'.http_build_query(array_merge($args,is_array($a)?$a:[$a=>$b]));
+}
 function wc_get_page_permalink($s){return 'https://example.test/my-account/';}
 function wc_get_account_endpoint_url($s){return 'https://example.test/my-account/'.$s.'/';}
 echo '<!doctype html><html lang="uk"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{font:16px/1.5 Arial;margin:20px auto;padding:0 12px;max-width:1000px}*{box-sizing:border-box}button,input,textarea,select{font:inherit}textarea,select{padding:8px}button{padding:10px;background:#245f4c;color:white;border:0;border-radius:4px}td,th{padding:8px;text-align:left}table{border-collapse:collapse}tr{border-bottom:1px solid #ddd}.woocommerce-info{background:#edf4fa;padding:12px}</style><style>'.file_get_contents(PCOE_DIR.'/assets/partner-catalog.css').'</style>';
