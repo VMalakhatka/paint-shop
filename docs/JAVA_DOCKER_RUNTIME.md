@@ -302,10 +302,15 @@ customer payloads.
 вручную подтвердите работающий container, внешний endpoint и WordPress proxy; один
 факт запуска процесса недостаточен.
 
+С 2026-11-22 основной Java checkout соответствует GitHub `main`;
+в коммите `36cebb0` сохранён `.dockerignore`, исключающий, в частности,
+`.env`, `.env.*`, локальные VPN-файлы, логи и архивы сборки. Файл
+входит в Git: не нужно переносить его из старого worktree. Перед сборкой
+проверяйте новые локальные файлы на соответствие этим исключениям.
+Тесты безопасности галереи запускаются командой `mvn -Dtest=MsToWpImageSyncServiceTest test`.
+
 ## Подтверждённые технические долги
 
-- `.dockerignore` отсутствует: build context включает ненужные generated/ignored
-  файлы; до регулярных builds нужен безопасный allow/ignore contract.
 - Dockerfile пропускает tests; они обязательны отдельным шагом.
 - Runtime image использует полный JDK и по умолчанию запускается от root.
 - В tracked `application.properties` обнаружены непустые sensitive defaults. Их
