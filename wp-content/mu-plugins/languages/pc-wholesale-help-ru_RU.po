@@ -1427,3 +1427,6 @@ msgstr ""
 "же телефоне. Переход через камеру зависит от банка и настроек телефона. "
 "Проверьте реквизиты перед подтверждением. Если уже оплатили, не платите "
 "повторно: менеджер должен подтвердить поступление средств."
+
+msgid "Prom and SalesDrive use the same brand names shown on the product page. Variations use the parent product’s brands. If no brand is shown, the XML omits the vendor field."
+msgstr "Prom и SalesDrive получают те же названия брендов, которые вы видите в карточке товара. Для вариации берутся бренды основного товара. Если бренд не показан на витрине, поле vendor в XML пропускается."

@@ -15,7 +15,7 @@ class WC_Product {
     function get_price(){return $GLOBALS['owner']===5?10:20;}function get_regular_price($mode='view'){return 30;}
     function get_name(){return 'Product '.$this->sku;}function is_type($s){return $s==='simple';}
     function get_description(){return '<p>Full</p>';}function get_short_description(){return 'Short';}
-    function get_attributes(){return ['colour'=>new Attr(true),'supplier'=>new Attr(true),'internal'=>new Attr(false)];}
+    function get_attributes(){return ($GLOBALS['extra_attributes'][$this->id] ?? []) + ['colour'=>new Attr(true),'supplier'=>new Attr(true),'internal'=>new Attr(false)];}
     function get_attribute($key){return $key==='colour'?'Blue':'SECRET';}
     function get_image_id(){return 0;}function get_gallery_image_ids(){return [];}function get_meta($key){return '';}
 }
@@ -26,8 +26,13 @@ function get_terms($args){return [(object)['term_id'=>1,'name'=>'Art','parent'=>
 function get_term($id,$tax){if($tax==='location')return (object)['term_id'=>$id,'name'=>'Location '.$id,'parent'=>0];foreach(get_terms([]) as $t)if($t->term_id===$id)return $t;return false;}
 function get_ancestors($id,$tax,$type){return $id===2?[1]:[];}
 function get_term_children($id,$tax){return $id===1?[2]:[];}
-function is_taxonomy_hierarchical($tax){return true;}function has_term($ids,$tax,$id){return (bool)array_intersect($ids,$GLOBALS['products'][$id]->categories);}
-function get_the_terms($id,$tax){if($tax!=='product_cat')return [];return array_values(array_filter(get_terms([]),fn($t)=>in_array($t->term_id,$GLOBALS['products'][$id]->categories)));}
+function is_taxonomy_hierarchical($tax){return true;}
+function has_term($ids,$tax,$id){return (bool)array_intersect($ids,wp_list_pluck(get_the_terms($id,$tax),'term_id'));}
+function get_the_terms($id,$tax){
+    if($tax==='product_brand')return $GLOBALS['assigned_brands'][$id]??[];
+    return array_values(array_filter(get_terms([]),fn($t)=>in_array($t->term_id,$GLOBALS['products'][$id]->categories)));
+}
+function psu_catalog_supplier_terms($visible=false){return $visible ? ($GLOBALS['visible_brands']??[]) : ($GLOBALS['catalog_brands']??[]);}
 function get_post_meta($id,$key,$single){return str_starts_with($key,'_stock_at_')?2:'';}
 function wp_list_pluck($a,$key){return array_map(fn($r)=>$r->$key,$a);}function is_wp_error($v){return false;}
 function post_password_required($id){return $id===4;}function apply_filters($h,$value,...$args){return $value;}
@@ -36,6 +41,8 @@ function wc_get_price_to_display($p,$args){return $args['price'];}function wc_at
 function get_permalink($id){return 'https://example.test/product/'.$id;}
 function wp_strip_all_tags($s){return strip_tags($s);}function strip_shortcodes($s){return $s;}
 function lavka_get_locations_mapping_for_java(){return $GLOBALS['locations']??[['id'=>10,'codes'=>['1']],['id'=>11,'codes'=>['5']]];}
+function get_bloginfo($k){return 'Shop';}function home_url($p){return 'https://example.test/';}
+function wp_json_encode($v,$flags=0){return json_encode($v,$flags);}
 function get_woocommerce_currency(){return 'UAH';}
 $GLOBALS['products']=[1=>new WC_Product(1,'A'),2=>new WC_Product(2,'PRIVATE',[3]),4=>new WC_Product(4,'PASSWORD')];
 use PaintCore\PCOE\PartnerCatalogData as D;
@@ -51,5 +58,35 @@ ok($sel===['brands'=>[1,2],'locations'=>[10]],'Multiple brands use a deduplicate
 $GLOBALS['locations']=[['id'=>10,'codes'=>['1','7']],['id'=>11,'codes'=>['5']],['id'=>12,'codes'=>['1']]];
 try{\PaintCore\PCOE\CrmCatalogData::selection(['brands'=>[1],'locations'=>[10,12]]);$bad=false;}catch(\RuntimeException $e){$bad=true;}ok($bad,'Overlapping warehouse groups cannot double-count stock');
 try{\PaintCore\PCOE\CrmCatalogData::selection(['brands'=>[1],'locations'=>[999]]);$bad=false;}catch(\RuntimeException $e){$bad=true;}ok($bad,'Unknown/incoming warehouse cannot be selected');
+// The same brand assignment must drive selection and public export fields.
+$brand=(object)['term_id'=>22,'name'=>'Clairefontaine'];
+$otherBrand=(object)['term_id'=>23,'name'=>'Art & Paper'];
+$privateBrand=(object)['term_id'=>24,'name'=>'Internal distributor'];
+$GLOBALS['visible_brands']=[$brand,$otherBrand];
+$GLOBALS['catalog_brands']=[$brand,$otherBrand,$privateBrand];
+$GLOBALS['assigned_brands'][1]=[$brand,$privateBrand,$otherBrand];
+$GLOBALS['extra_attributes'][1]=['manufacturer'=>new Attr(true)];
+$GLOBALS['products'][6]=new class(6,'A-VARIATION') extends WC_Product {
+    function get_parent_id(){return 1;}
+    function is_type($type){return $type==='variation';}
+    function get_permalink(){return get_permalink(1);}
+};
+$rows=\PaintCore\PCOE\CrmCatalogData::rows(5,[1,6],['brands'=>[22],'locations'=>[10]]);
+ok(count($rows['rows'])===2,'CRM selects both a matching product and its variation');
+require dirname(__DIR__).'/inc/PartnerCatalogFormats.php';
+require dirname(__DIR__).'/inc/CrmCatalogFormat.php';
+$xml=new DOMDocument();
+$xml->loadXML('<offers>'.\PaintCore\PCOE\CrmCatalogFormat::part($rows)['xml'].'</offers>');
+$xpath=new DOMXPath($xml);
+foreach([1,6] as $id){
+    ok($xpath->evaluate("string(/offers/offer[@id='$id']/vendor)")==='Clairefontaine, Art & Paper','XML uses assigned brands for product and variation, regardless of attribute label');
+}
+$xml->loadXML(\PaintCore\PCOE\PartnerCatalogFormats::yml($rows));
+ok((new DOMXPath($xml))->evaluate('string(//offer/vendor)')==='Clairefontaine, Art & Paper','Prom exports the same public names');
+ok(\PaintCore\PCOE\PartnerCatalogFormats::cells($rows['rows'][0])[3]==='Clairefontaine, Art & Paper','Partner spreadsheets export the same brand names');
+$GLOBALS['assigned_brands'][1]=[$privateBrand];
+$manual=D::build_ids(5,[1],['skus'=>['A'],'category'=>0,'brand'=>0],[10],[],false);
+ok(count($manual['rows'])===1 && $manual['rows'][0]['brand']==='','SKU with a private supplier and a manufacturer attribute is included without a public brand');
+ok(!str_contains(\PaintCore\PCOE\CrmCatalogFormat::part($manual)['xml'],'<vendor>'),'No vendor is invented for an unbranded product');
 echo "PASS $n catalogue data checks\n";
 }

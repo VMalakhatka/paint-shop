@@ -63,6 +63,11 @@ final class PartnerCatalogData {
     public static function build_ids(int $user,array $ids,array $selection,array $locations,array $missing=[],bool $packaging=true,bool $require_rows=true): array {
         return BroadcastPricing::scope($user,static function()use($ids,$selection,$locations,$missing,$packaging,$require_rows){
             $rows=[];$seen=[];$categories=[];
+            $publicBrands = function_exists('psu_catalog_supplier_terms') ? psu_catalog_supplier_terms(true) : [];
+            $brandNames = [];
+            foreach ($publicBrands as $brand) {
+                $brandNames[$brand->term_id] = self::text($brand->name);
+            }
             foreach(PriceList::catalogue_rows(self::products($ids,$selection),$locations) as $entry){
                 if(!isset($entry['product_id']))continue;
                 $p=wc_get_product($entry['product_id']);$parent=$p->get_parent_id()?wc_get_product($p->get_parent_id()):$p;$v=$entry['values'];
@@ -70,10 +75,24 @@ final class PartnerCatalogData {
                 foreach(array_merge([$categoryId],get_ancestors($categoryId,'product_cat','taxonomy')) as $id){$term=get_term($id,'product_cat');if(!$term || is_wp_error($term))throw new \RuntimeException(__('Could not read categories.','pc-order-import-export'));$categories[(int)$id]=['name'=>$term->name,'parent'=>(int)$term->parent];}
                 $retail=$p->get_regular_price('edit');
                 $description=$p->get_description()?:$parent->get_description();$short=$p->get_short_description()?:$parent->get_short_description();
-                $attributes=[];$brand='';
-                foreach($parent->get_attributes() as $key=>$a){if(!$a->get_visible() || preg_match('/supplier|postav|постач|постав/i',$key))continue;$value=$p->get_attribute($key)?:$parent->get_attribute($key);if($value!=='')$attributes[wc_attribute_label($key)]=self::text($value);if(preg_match('/brand|brend|виробник|бренд|manufacturer|производитель/iu',wc_attribute_label($key)))$brand=self::text($value);}
+                $assignedBrandNames = [];
+                foreach ($entry['brand_ids'] as $brandId) {
+                    if (isset($brandNames[$brandId])) {
+                        $assignedBrandNames[] = $brandNames[$brandId];
+                    }
+                }
+                $attributes = [];
+                foreach ($parent->get_attributes() as $key => $attribute) {
+                    if (!$attribute->get_visible() || preg_match('/supplier|postav|постач|постав/i', $key)) {
+                        continue;
+                    }
+                    $value = $p->get_attribute($key) ?: $parent->get_attribute($key);
+                    if ($value !== '') {
+                        $attributes[wc_attribute_label($key)] = self::text($value);
+                    }
+                }
                 $rows[]=['id'=>(int)$p->get_id(),'sku'=>$v[0],'gtin'=>$v[1],'name'=>self::text($v[2]),'category'=>$v[4],'category_id'=>$categoryId,
-                    'brand'=>$brand,'description'=>self::text($description),'short_description'=>self::text($short),'cost'=>$v[5],
+                    'brand'=>implode(', ', $assignedBrandNames),'description'=>self::text($description),'short_description'=>self::text($short),'cost'=>$v[5],
                     'retail'=>$retail!=='' && is_numeric($retail)?wc_get_price_to_display($p,['price'=>(float)$retail]):null,
                     'stock'=>$v[6],'url'=>$v[8],'images'=>self::photos($p),'attributes'=>$attributes,
                     'unit'=>(string)($p->get_meta('_edin_izmer')?:$parent->get_meta('_edin_izmer'))];

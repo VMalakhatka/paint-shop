@@ -52,7 +52,7 @@ final class PartnerCatalogFormats {
                 $xml .= '<'.$tag.'>'.$escape($value).'</'.$tag.'>';
             }
         }
-        if (!empty($row['brand'])) {
+        if (($row['brand'] ?? '') !== '') {
             $xml .= '<vendor>'.$escape($row['brand']).'</vendor>';
         }
         if ($row['gtin'] !== '') {

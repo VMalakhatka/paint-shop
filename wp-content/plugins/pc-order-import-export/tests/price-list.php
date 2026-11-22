@@ -117,16 +117,17 @@ try {
     $assert(empty($generic_map['price_list']) && $generic_start === 1 && $generic_map['qty'] === 1 && $generic_map['price'] === 2, 'Generic import mapping regressed');
     delete_post_meta($pids[1], '_stock_at_' . $locations[1]);
     $assert(PriceList::stock($products[1], $locations) === null, 'Unknown stock became zero');
+    $quantityColumn = $map['qty'];
     foreach (['Замовити','Заказать','Order quantity'] as $header) {
-        $copy = $loaded; $copy[0][7] = $header;
+        $copy = $loaded; $copy[0][$quantityColumn] = $header;
         [$m] = Helpers::detect_colmap_and_start($copy);
-        $assert($m['qty'] === 7 && !empty($m['price_list']), 'Locale mapping failed');
+        $assert($m['qty'] === $quantityColumn && !empty($m['price_list']), 'Locale mapping failed');
     }
-    $broken = $loaded; $broken[0][7] = 'wrong';
+    $broken = $loaded; $broken[0][$quantityColumn] = 'wrong';
     [$m] = Helpers::detect_colmap_and_start($broken);
     $assert(Helpers::price_list_import_error($broken, $m, 1) !== null, 'Stock substituted for missing order column');
     foreach (['garbage', '=2+2', '-1', '1e999'] as $bad) {
-        $copy = $loaded; $copy[$dataRow-1][7] = $bad;
+        $copy = $loaded; $copy[$dataRow-1][$quantityColumn] = $bad;
         $result = Helpers::process_rows_with_adder($copy, $map, 1, ['adder'=>static fn() => true]);
         $assert($result['ok'] === 0 && $result['skipped'] === 1, 'Invalid quantity accepted: ' . $bad);
     }

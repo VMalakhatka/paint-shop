@@ -173,6 +173,7 @@ class PriceList
                     self::stock($product, $locations), null,
                     $product->is_type('variation') ? $product->get_permalink() : get_permalink($parent_id),
                 ],
+                'brand_ids' => wp_list_pluck($brands, 'term_id'),
                 'rank' => $rank,
                 'id' => $product->get_id(),
             ];
@@ -183,7 +184,7 @@ class PriceList
         unset($items);
         $walk = static function (int $id, int $depth) use (&$walk, $index, $children, $used, $buckets): \Generator {
             yield ['heading'=>$id ? $index[$id]->name : __('Other products', 'pc-order-import-export'), 'depth'=>$depth];
-            foreach ($buckets[$id] ?? [] as $item) yield ['values'=>$item['values'], 'depth'=>$depth + 1, 'product_id'=>$item['id'], 'category_id'=>$id];
+            foreach ($buckets[$id] ?? [] as $item) yield ['values'=>$item['values'], 'depth'=>$depth + 1, 'product_id'=>$item['id'], 'category_id'=>$id, 'brand_ids'=>$item['brand_ids']];
             foreach ($children[$id] ?? [] as $child) {
                 if (isset($used[$child])) yield from $walk($child, $depth + 1);
             }

@@ -8,7 +8,7 @@ final class CrmCatalog {
     const HOOK='pcoe_crm_catalog_tick';
     const MAX_AGE=7200;
     const REFRESH=1800;
-    private const OFFER_FORMAT = 2;
+    private const OFFER_FORMAT = 3;
     public static function hooks(): void {
         add_action('admin_post_pcoe_crm_catalog',[self::class,'post']);
         add_action('admin_post_pcoe_crm_feed',[self::class,'feed']);

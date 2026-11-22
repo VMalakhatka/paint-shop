@@ -1399,3 +1399,6 @@ msgid ""
 "you have already paid, do not pay again: the manager must confirm receipt of"
 " the funds."
 msgstr ""
+
+msgid "Prom and SalesDrive use the same brand names shown on the product page. Variations use the parent product’s brands. If no brand is shown, the XML omits the vendor field."
+msgstr ""

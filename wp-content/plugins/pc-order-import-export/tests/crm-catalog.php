@@ -81,7 +81,7 @@ $old=S::get(5,'snapshot');$GLOBALS['read_failure_id']=150;S::put(5,'build',C::st
 ok(S::get(5,'build')['status']==='failed' && S::get(5,'snapshot')['generation']===$old['generation'],'Failed second batch never replaces complete snapshot');
 S::clear(5);S::put(5,'build',C::start(5,$c));C::tick(5);ok(!S::get(5,'snapshot'),'Failed partial preparation cannot publish a first snapshot');unset($GLOBALS['read_failure_id']);
 // A build interrupted before this release must re-encode all of its rows.
-$previousBuild=C::start(5,$c);unset($previousBuild['offer_format']);$previousBuild['after']=100;
+$previousBuild=C::start(5,$c);$previousBuild['offer_format']=2;$previousBuild['after']=100;
 S::put(5,'build',$previousBuild);C::tick(5);
 ok(S::get(5,'snapshot')['count']===605,'A pre-upgrade partial build restarts from the first SKU');
 $GLOBALS['total']=2; $GLOBALS['costs']=[1=>0,2=>null];

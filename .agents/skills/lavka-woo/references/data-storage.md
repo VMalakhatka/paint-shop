@@ -63,6 +63,11 @@ assignment, missing source rows fail closed, absent legacy fields preserve it.
 Java requires the PHP OPTIONS capability before diff. Deploy/retry boundaries:
 [full sync release](../../../../docs/api/FOLIO_FULL_SYNC_SUPPLIER_RELEASE.md).
 
+For customer-facing catalogues, resolve brand from the assigned WooCommerce
+`product_brand` terms on the parent (or the simple product). See the
+[shared brand contract](../../../../docs/BACKEND_GUIDE.md#lavka-catalog-brand)
+before changing a reader or sync settings.
+
 Единица измерения имеет **два пути хранения**: Java `SyncServiceImpl.mapDtoToWooProduct`
 пишет `edinIzmer` в meta `_edin_izmer`; PHP `lavka-total-sync/inc/sync_goods.php`
 пишет глобальный атрибут `pa_edin_izmer`, relationship и `_product_attributes`.
