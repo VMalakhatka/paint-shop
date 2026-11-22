@@ -17,7 +17,9 @@ function psu_catalog_supplier_terms(bool $visible_only = false): array {
     });
     if ($visible_only) {
         $terms = array_values(array_filter($terms, static function ($term) use ($settings): bool {
-            return $term->count > 0 && ($settings[$term->term_id]['visible'] ?? false);
+            // Woo only substitutes the storefront count on frontend get_terms() requests.
+            return !empty($settings[$term->term_id]['visible'])
+                && (int) get_term_meta($term->term_id, 'product_count_product_brand', true) > 0;
         }));
     }
     return $terms;

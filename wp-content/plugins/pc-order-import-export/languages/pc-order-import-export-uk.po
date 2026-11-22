@@ -4987,3 +4987,6 @@ msgstr "Виконуємо це замовлення…"
 #: inc/ManagerWorkspace.php
 msgid "Waiting for the scheduler. Checking the saved status…"
 msgstr "Очікуємо на планувальник. Перевіряємо збережений статус…"
+
+msgid "There is no current CRM file to download. Refresh the file status. If the file has expired, prepare it again."
+msgstr "Актуального CRM-файлу для завантаження немає. Оновіть стан файлу. Якщо строк його дії минув, підготуйте файл знову."

@@ -131,7 +131,7 @@ final class CrmCatalog {
                 if(empty($c['selection']))throw new \RuntimeException('CRM not configured');$c['seed']=bin2hex(random_bytes(32));self::save($user,$c);
             }elseif($op==='download'){
                 $snapshot=CrmCatalogStore::get($user,'snapshot');
-                if(!self::ready($user,$c,$snapshot))throw new \RuntimeException(__('Wait for a complete, current CRM file before enabling the link.','pc-order-import-export'),400);
+                if(!self::ready($user,$c,$snapshot))throw new \RuntimeException(__('There is no current CRM file to download. Refresh the file status. If the file has expired, prepare it again.','pc-order-import-export'),400);
                 $download=CrmCatalogStore::file($user,$snapshot);
             }else throw new \RuntimeException(__('Unknown export action.','pc-order-import-export'),400);
         });}catch(\Throwable $e){set_transient('pcoe_crm_notice_'.$user,$e->getCode()===400?$e->getMessage():__('Could not complete the action. Check the CRM preparation status and try again.','pc-order-import-export'),60);}

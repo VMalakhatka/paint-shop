@@ -23,7 +23,26 @@ class WC_Product {
 class Attr {function __construct(private bool $visible){}function get_visible(){return $this->visible;}}
 class PSU_Category_Menu {static function index(){return ['visible'=>[1=>1,2=>1],'blocked'=>[3=>1]];}}
 function __($v,$d=''){return $v;}function absint($v){return abs((int)$v);}function term_exists($v,$t){return true;}
-function get_terms($args){return [(object)['term_id'=>1,'name'=>'Art','parent'=>0],(object)['term_id'=>2,'name'=>'Paint','parent'=>1],(object)['term_id'=>3,'name'=>'Private','parent'=>0]];}
+function add_filter(...$args){}function add_action(...$args){}
+require dirname(__DIR__,3).'/mu-plugins/psu-catalog-suppliers.php';
+function get_option($key,$default=false){
+    if($key!=='psu_catalog_suppliers')return $default;
+    $settings=[];
+    foreach($GLOBALS['visible_brands']??[] as $order=>$term)$settings[$term->term_id]=['visible'=>true,'order'=>$order];
+    return $settings;
+}
+function get_term_meta($id,$key,$single){return $key==='product_count_product_brand'?($GLOBALS['storefront_counts'][$id]??1):'';}
+function get_terms($args){
+    if(($args['taxonomy']??'')==='product_brand'){
+        $terms=[];
+        foreach($GLOBALS['catalog_brands']??$GLOBALS['visible_brands']??[] as $brand){
+            $term=clone $brand;
+            $term->count=empty($GLOBALS['admin_request'])?get_term_meta($term->term_id,'product_count_product_brand',true):26;
+            $terms[]=$term;
+        }
+        return $terms;
+    }
+    return [(object)['term_id'=>1,'name'=>'Art','parent'=>0],(object)['term_id'=>2,'name'=>'Paint','parent'=>1],(object)['term_id'=>3,'name'=>'Private','parent'=>0]];}
 function get_term($id,$tax){if($tax==='location')return (object)['term_id'=>$id,'name'=>'Location '.$id,'parent'=>0];foreach(get_terms([]) as $t)if($t->term_id===$id)return $t;return false;}
 function get_ancestors($id,$tax,$type){return $id===2?[1]:[];}
 function get_term_children($id,$tax){return ($tax==='product_brand' && $id===22) ? [24] : ($id===1?[2]:[]);}
@@ -33,7 +52,7 @@ function get_the_terms($id,$tax){
     if($tax==='product_brand')return $GLOBALS['assigned_brands'][$id]??[];
     return array_values(array_filter(get_terms([]),fn($t)=>in_array($t->term_id,$GLOBALS['products'][$id]->categories)));
 }
-function psu_catalog_supplier_terms($visible=false){return $visible ? ($GLOBALS['visible_brands']??[]) : ($GLOBALS['catalog_brands']??[]);}
+
 function get_post_meta($id,$key,$single){return str_starts_with($key,'_stock_at_')?2:'';}
 function wp_list_pluck($a,$key){return array_map(fn($r)=>$r->$key,$a);}function is_wp_error($v){return false;}
 function post_password_required($id){return $id===4;}function apply_filters($h,$value,...$args){return $value;}
@@ -104,7 +123,15 @@ foreach ([fn()=>D::selection(['brand'=>24]),fn()=>\PaintCore\PCOE\CrmCatalogData
 ok(iterator_to_array(D::products([1],['brand'=>22,'category'=>0]))===[],'Hidden child brand cannot match a public parent-brand filter');
 try{D::build(5,['skus'=>['A'],'category'=>0,'brand'=>24]);$rejected=false;}catch(RuntimeException $e){$rejected=true;}
 ok($rejected,'Previously saved hidden Prom brand cannot become an unfiltered SKU export');
+$emptyBrand=(object)['term_id'=>25,'name'=>'Only hidden products'];
+$GLOBALS['catalog_brands'][]=$emptyBrand;
+$GLOBALS['visible_brands'][]=$emptyBrand;
+$GLOBALS['storefront_counts'][25]=0;
 $before=\PaintCore\PCOE\CrmCatalogData::context(5,$mixed);
+$GLOBALS['admin_request']=true;
+ok(array_column(psu_catalog_supplier_terms(), 'count')===[26,26,26,26], 'Admin fixture includes raw product counts');
+ok(array_keys(D::brand_names())===[22,23], 'Download handler sees exactly the storefront brands even when raw counts include hidden products');
+ok(\PaintCore\PCOE\CrmCatalogData::context(5,$mixed)===$before, 'The account preview and admin-post download accept the same snapshot');
 $GLOBALS['visible_brands']=[$brand];
 ok(\PaintCore\PCOE\CrmCatalogData::context(5,$mixed)!==$before,'Hiding a secondary brand invalidates the previous CRM snapshot');
 echo "PASS $n catalogue data checks\n";

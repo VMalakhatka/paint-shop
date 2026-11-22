@@ -24,9 +24,22 @@ function get_woocommerce_currency(){return 'UAH';}function get_bloginfo($k){retu
 function wp_next_scheduled($h,$args){return $GLOBALS['events'][$args[0]]??false;}function wp_schedule_single_event($at,$h,$args){$GLOBALS['events'][$args[0]]=$at;return true;}function wp_unschedule_event($at,$h,$args){unset($GLOBALS['events'][$args[0]]);}function wp_clear_scheduled_hook($h,$args){unset($GLOBALS['events'][$args[0]]);}
 function wp_cache_supports($f){return false;}function nocache_headers(){}function absint($v){return abs((int)$v);}function status_header($s){$GLOBALS['status']=$s;}
 function ok($v,$reason){if(!$v)throw new \RuntimeException($reason);$GLOBALS['checks']=($GLOBALS['checks']??0)+1;}
+function get_current_user_id(){return 5;}
+function check_admin_referer($action){if($action!=='pcoe_crm_catalog')throw new RuntimeException('Unexpected nonce action');}
+function set_transient($key,$value,$ttl){$GLOBALS['notice']=$value;}
+function wp_safe_redirect($url){status_header(302);}
 if(($argv[1]??'')==='endpoint'){
  $state=json_decode(file_get_contents($argv[2]),true);foreach($state as $k=>$v)$GLOBALS[$k]=$v;
  $_GET=['user'=>5,'key'=>C::key(5,C::config(5))];$case=$argv[3];
+ if(in_array($case,['preview-download','expired-download'],true)){
+    $GLOBALS['meta'][5][C::META]['enabled']=false;
+    if($case==='expired-download')$GLOBALS['options']['pcoe_crm_snapshot_5']['at']=time()-C::MAX_AGE;
+    $_POST=['operation'=>'download'];
+    register_shutdown_function(function(){
+        fwrite(STDERR,'STATUS:'.($GLOBALS['status']??200).' ENABLED:'.(int)C::config(5)['enabled'].' '.($GLOBALS['notice']??''));
+    });
+    C::post();exit;
+ }
  if($case==='bad-key')$_GET['key']=str_repeat('f',64);
  if($case==='prom-key')$_GET['key']=hash_hmac('sha256','5:'.C::config(5)['seed'],wp_salt('auth'));
  if($case==='wrong-owner')$_GET['user']=6;
@@ -50,9 +63,11 @@ $GLOBALS['read_failure_id']=1;C::tick(5);unset($GLOBALS['read_failure_id']);
 ok(S::get(5,'build')===[],'Recovery recognizes committed publication without rebuilding it');
 S::discard(5,$replay);$path=S::file(5,S::get(5,'snapshot'));ok(filesize($path)>0,'Retry cleanup cannot delete the just-published generation');unlink($path);
 $c['enabled']=true;C::save(5,$c);$state=tempnam(sys_get_temp_dir(),'crm-state-');file_put_contents($state,json_encode(['options'=>$GLOBALS['options'],'meta'=>$GLOBALS['meta']]));
-foreach(['valid'=>200,'bad-key'=>403,'prom-key'=>403,'wrong-owner'=>403,'paused'=>403,'revoked'=>403,'stale'=>503,'changed'=>503,'incomplete'=>503] as $case=>$status){
+foreach(['valid'=>200,'preview-download'=>200,'expired-download'=>302,'bad-key'=>403,'prom-key'=>403,'wrong-owner'=>403,'paused'=>403,'revoked'=>403,'stale'=>503,'changed'=>503,'incomplete'=>503] as $case=>$status){
  $pipes=[];$proc=proc_open([PHP_BINARY,__FILE__,'endpoint',$state,$case],[1=>['pipe','w'],2=>['pipe','w']],$pipes);$body=stream_get_contents($pipes[1]);$err=stream_get_contents($pipes[2]);fclose($pipes[1]);fclose($pipes[2]);$exit=proc_close($proc);
  ok($exit===0 && str_contains($err,'STATUS:'.$status),'Endpoint '.$case.' '.$err);ok($status===200?str_contains($body,'<purchase_price>12.34</purchase_price>'):!str_contains($body,'<offer'),'No partial/sensitive XML on failure '.$case);
+ if($case==='preview-download')ok($body===$xml && str_contains($err,'ENABLED:0'),'Owner downloads the complete preview while the private URL stays paused');
+ if($case==='expired-download')ok(str_contains($err,'no current CRM file to download') && !str_contains($err,'enabling'),'Expired download explains the download action');
 }unlink($state);
 ok($snapshot['unpriced'] === 2, 'Counts unpriced products across batches');
 foreach ([2 => '0', 153 => '3'] as $id => $quantity) {

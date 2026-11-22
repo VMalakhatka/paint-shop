@@ -4793,3 +4793,6 @@ msgstr ""
 #: inc/ManagerWorkspace.php
 msgid "Waiting for the scheduler. Checking the saved status…"
 msgstr ""
+
+msgid "There is no current CRM file to download. Refresh the file status. If the file has expired, prepare it again."
+msgstr ""

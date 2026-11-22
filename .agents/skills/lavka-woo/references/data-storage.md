@@ -64,7 +64,8 @@ Java requires the PHP OPTIONS capability before diff. Deploy/retry boundaries:
 [full sync release](../../../../docs/api/FOLIO_FULL_SYNC_SUPPLIER_RELEASE.md).
 
 For customer-facing catalogues, resolve brand from the assigned WooCommerce
-`product_brand` terms on the parent (or the simple product). See the
+`product_brand` terms on the parent (or the simple product). Use the storefront count
+`product_count_product_brand` with the configured visibility in every request context. See the
 [shared brand contract](../../../../docs/BACKEND_GUIDE.md#lavka-catalog-brand)
 before changing a reader or sync settings.
 

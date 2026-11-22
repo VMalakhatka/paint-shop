@@ -1372,7 +1372,7 @@ msgid "Select Prepare CRM file. You may close the page while it is prepared in t
 msgstr ""
 
 #: pc-wholesale-help.php
-msgid "Review the first ten products and download CRM XML for review. It contains your purchase prices, stock, SKUs, EAN when present, descriptions, public attributes and image URLs. Unknown stock is exported as zero. A product without a purchase price stays in the file with its available details. Its purchase price fields are omitted. The retail_price field contains the regular retail price when available. Data is read from the website, not directly from Folio in real time."
+msgid "Review the first ten products and download CRM XML for review. You can download it while your CRM link is paused. It contains your purchase prices, stock, SKUs, EAN when present, descriptions, public attributes and image URLs. Unknown stock is exported as zero. A product without a purchase price stays in the file with its available details. Its purchase price fields are omitted. The retail_price field contains the regular retail price when available. Data is read from the website, not directly from Folio in real time."
 msgstr ""
 
 #: pc-wholesale-help.php
