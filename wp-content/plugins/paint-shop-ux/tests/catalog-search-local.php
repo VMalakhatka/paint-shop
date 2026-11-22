@@ -45,6 +45,23 @@ try {
         $check(array_column($find([$key=>$value,'catalog_search'=>'indexedonlyneedle']), 'id') === [$ids['exact']], 'Existing '.$taxonomy.' restricts indexed search');
     }
     $check(array_column($find(['catalog_search'=>'0012345678905']), 'id') === [$ids['barcode']], 'Leading-zero barcode');
+    $parent = new WC_Product_Variable();
+    $parent->set_name('Identifier fixture parent');
+    $parent->set_status('publish');
+    $ids['parent'] = $parent->save();
+    $child = new WC_Product_Variation();
+    $child->set_parent_id($ids['parent']);
+    $child->set_sku('psu-variation-identifier');
+    $child->set_regular_price('25');
+    $ids['variation'] = $child->save();
+    $check(psu_find_exact_identifier_product_ids($child->get_sku()) === [$ids['parent']], 'Variation SKU returns its parent');
+    foreach (['_gtin','_wc_gtin_code','_global_unique_id','_wpm_gtin_code','_alg_ean','_ean','_sku_gtin'] as $i=>$key) {
+        $code = '00777222000'.$i;
+        update_post_meta($ids['variation'], $key, $code);
+        update_post_meta($ids['parent'], $key, $code);
+        $check(psu_find_exact_identifier_product_ids($code) === [$ids['parent']], $key.' preserves zeroes and deduplicates parent/child');
+    }
+    $check(!$find(['catalog_search'=>'zzxqnonexistent93173']), 'No identifier or indexed match');
     $check(!$find(['catalog_search'=>['invalid']]) && !$find(['catalog_search'=>'x']), 'Malformed and short search rejected');
     $product = wc_get_product($ids['description']); $product->set_stock_status('outofstock'); $product->save();
     $check(!in_array($ids['description'], array_column($find(['in_stock'=>'1']), 'id'), true), 'Availability intersection');
@@ -63,6 +80,6 @@ try {
     echo wp_json_encode(['passed'=>$checks]), "\n";
 } finally {
     wp_set_current_user($user_id);
-    foreach ($ids as $id) wp_delete_post($id, true);
+    foreach (array_reverse($ids) as $id) wp_delete_post($id, true);
     foreach (array_reverse($terms) as $id) wp_delete_term($id, 'product_cat');
 }

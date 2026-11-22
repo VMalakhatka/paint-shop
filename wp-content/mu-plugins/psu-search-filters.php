@@ -2,7 +2,7 @@
 /*
 Plugin Name: PSU Search & Filters
 Description: Базовые фильтры для витрин Woo (location / in_stock). Поиск — Relevanssi.
-Version: 1.6.1
+Version: 1.6.2
 Author: PaintCore
 Text Domain: psu-search-filters
 Domain Path: /languages
@@ -296,12 +296,16 @@ function psu_find_exact_identifier_product_ids(string $needle): array {
     $needle = trim($needle);
     if ($needle === '' || strlen($needle) > 128) return [];
 
-    $keys = psu_searchable_identifier_meta_keys();
-    $key_placeholders = implode(',', array_fill(0, count($keys), '%s'));
-    $sql = $wpdb->prepare(
-        "SELECT DISTINCT post_id FROM {$wpdb->postmeta} WHERE meta_key IN ({$key_placeholders}) AND meta_value = %s LIMIT 50",
-        array_merge($keys, [$needle])
-    );
+    // Separate equality probes let MySQL use the meta_key index for each code family.
+    $probes = [];
+    foreach (psu_searchable_identifier_meta_keys() as $key) {
+        $probes[] = $wpdb->prepare(
+            "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = %s AND meta_value = %s",
+            $key, $needle
+        );
+    }
+    $sql = 'SELECT DISTINCT post_id FROM (' . implode(' UNION ALL ', $probes)
+        . ') AS identifier_matches LIMIT 50';
     $matched_ids = array_map('intval', (array) $wpdb->get_col($sql));
     $product_ids = [];
 
