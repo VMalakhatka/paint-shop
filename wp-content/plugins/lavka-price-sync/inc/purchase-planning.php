@@ -114,6 +114,7 @@ function lps_purchase_i18n(): array {
         'networkConsistency' => __('Combined network snapshot', 'lavka-price-sync'),
         'currentStockCapture' => __('Current stock read from Folio', 'lavka-price-sync'),
         'notes' => [
+            'FREEZING_PURCHASE_EXCLUDED' => __('Freezing product excluded from the supplier order.', 'lavka-price-sync'),
             'STOCKOUT_CORRECTION_NOT_CALCULATED' => __('Stockout correction was not calculated; the forecast uses actual sales only.', 'lavka-price-sync'),
             'GROUP_REPLENISHMENT_DISABLED_BY_MINIMUM' => __('Group replenishment is disabled because its selected minimum-stock source has MIN=0.', 'lavka-price-sync'),
         ],
@@ -189,6 +190,7 @@ function lps_purchase_scenario_fields(): void {
         <div class="lps-as-purchase-body">
             <p><label><input type="checkbox" id="lps-as-purchase-enabled"> <?php echo esc_html__('Enable supplier order preview', 'lavka-price-sync'); ?></label></p>
             <p><label><input type="checkbox" id="lps-as-purchase-cold"> <?php echo esc_html__('Use cold-sensitive stock coverage', 'lavka-price-sync'); ?></label></p>
+            <p><label><input type="checkbox" id="lps-as-purchase-exclude-freezing"> <?php echo esc_html__('Order only non-freezing products', 'lavka-price-sync'); ?></label></p>
             <p><label><?php echo esc_html__('Stock for freezing products, days', 'lavka-price-sync'); ?> <input type="number" id="lps-as-purchase-freezing-days" min="1" max="730" value="210"></label>
             <label><?php echo esc_html__('Stock for non-freezing products, days', 'lavka-price-sync'); ?> <input type="number" id="lps-as-purchase-nonfreezing-days" min="1" max="730" value="150"></label></p>
             <p class="description"><?php echo esc_html__('When enabled, these periods replace group stock days for each product, including children. Lead time and safety days still apply. Unknown cold sensitivity requires review.', 'lavka-price-sync'); ?></p>
@@ -283,6 +285,7 @@ function lps_purchase_start(int $id, int $version): array {
             'noSupplierMinimumOrder' => !empty($profile['purchasePlanning']['noSupplierMinimumOrder']),
             'currentReceiptsWithinLeadTime' => !empty($profile['purchasePlanning']['currentReceiptsWithinLeadTime'])],
         'coldCoverage' => ['enabled' => !empty($profile['purchasePlanning']['coldCoverageEnabled']),
+            'excludeFreezing' => !empty($profile['purchasePlanning']['excludeFreezing']),
             'freezingTargetDays' => $profile['purchasePlanning']['freezingTargetDays'] ?? 210,
             'nonFreezingTargetDays' => $profile['purchasePlanning']['nonFreezingTargetDays'] ?? 150],
         'rows' => [], 'edits' => [], 'page' => 0, 'cursor' => null, 'seenCursors' => [], 'complete' => false,
@@ -364,7 +367,8 @@ function lps_purchase_page(string $token, int $page): array {
             }
             $state['transitGenerationId'] = $generation;
         }
-        $results[] = $result;
+        // The assembly graph supplies BALL2 when loading finishes.
+        if (empty($state['coldCoverage']['excludeFreezing'])) $results[] = $result;
     }
     $next = (string)($body['nextCursor'] ?? '');
     if ($next !== '' && (isset($state['seenCursors'][$next]) || !$body['rows'])) throw new RuntimeException(__('The analytics service returned a repeated page cursor.', 'lavka-price-sync'));

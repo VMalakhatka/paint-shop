@@ -308,7 +308,13 @@
             group.respectMaximumStock = row.querySelector('[data-field="respectMaximumStock"]').checked;
             groups.push(group);
         });
-        return { version: 2, allowActualSalesWithoutAvailability: el('lps-as-purchase-history-fallback').checked, noOtherIncomingOrders: el('lps-as-purchase-no-incoming').checked, noSupplierMinimumOrder: el('lps-as-purchase-no-moq').checked, currentReceiptsWithinLeadTime: el('lps-as-purchase-receipts-on-time').checked, coldCoverageEnabled: el('lps-as-purchase-cold').checked, freezingTargetDays: Number(el('lps-as-purchase-freezing-days').value), nonFreezingTargetDays: Number(el('lps-as-purchase-nonfreezing-days').value), packRounding: el('lps-as-purchase-pack').value, stockoutCorrectionEnabled: el('lps-as-purchase-stockout').checked, maxDemandMultiplier: Number(el('lps-as-purchase-demand-cap').value), enabled: el('lps-as-purchase-enabled').checked, allowTransfers: el('lps-as-purchase-transfers').checked, groups: groups };
+        return { version: 2, excludeFreezing: el('lps-as-purchase-exclude-freezing').checked, allowActualSalesWithoutAvailability: el('lps-as-purchase-history-fallback').checked, noOtherIncomingOrders: el('lps-as-purchase-no-incoming').checked, noSupplierMinimumOrder: el('lps-as-purchase-no-moq').checked, currentReceiptsWithinLeadTime: el('lps-as-purchase-receipts-on-time').checked, coldCoverageEnabled: el('lps-as-purchase-cold').checked, freezingTargetDays: Number(el('lps-as-purchase-freezing-days').value), nonFreezingTargetDays: Number(el('lps-as-purchase-nonfreezing-days').value), packRounding: el('lps-as-purchase-pack').value, stockoutCorrectionEnabled: el('lps-as-purchase-stockout').checked, maxDemandMultiplier: Number(el('lps-as-purchase-demand-cap').value), enabled: el('lps-as-purchase-enabled').checked, allowTransfers: el('lps-as-purchase-transfers').checked, groups: groups };
+    }
+
+    function syncColdPeriods() {
+        const disabled = !el('lps-as-purchase-cold').checked;
+        el('lps-as-purchase-freezing-days').disabled = disabled;
+        el('lps-as-purchase-nonfreezing-days').disabled = disabled;
     }
 
     function applyPurchasePlanning(plan) {
@@ -318,6 +324,8 @@
         el('lps-as-purchase-no-moq').checked = plan.noSupplierMinimumOrder === true;
         el('lps-as-purchase-receipts-on-time').checked = plan.currentReceiptsWithinLeadTime === true;
         el('lps-as-purchase-cold').checked = plan.coldCoverageEnabled === true;
+        el('lps-as-purchase-exclude-freezing').checked = plan.excludeFreezing === true;
+        syncColdPeriods();
         el('lps-as-purchase-freezing-days').value = plan.freezingTargetDays == null ? 210 : plan.freezingTargetDays;
         el('lps-as-purchase-nonfreezing-days').value = plan.nonFreezingTargetDays == null ? 150 : plan.nonFreezingTargetDays;
         el('lps-as-purchase-pack').value = plan.packRounding || (plan.respectPack === false ? 'NONE' : 'UP');
@@ -548,6 +556,7 @@
 
     warehouses.addEventListener('change', () => { state.pendingProfile = null; renderWarehouseUsage(); loadCapabilities(); });
     el('lps-as-period-mode').addEventListener('change', updatePeriodFields);
+    el('lps-as-purchase-cold').addEventListener('change', syncColdPeriods);
     el('lps-as-period-days').addEventListener('input', updatePeriodFields);
     form.addEventListener('submit', saveScenario);
     el('lps-as-new').addEventListener('click', resetEditor);

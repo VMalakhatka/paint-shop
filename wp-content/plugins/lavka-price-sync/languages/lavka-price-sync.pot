@@ -6985,3 +6985,9 @@ msgstr ""
 #: inc/purchase-planning.php inc/purchase-export.php
 msgid "Surplus / shortage: available stock plus confirmed receipts allocated to this group, minus forecast, minimum reserve, child demand and additional preorders. Before new purchases and proposed inter-group transfers; negative means shortage. Blank means incomplete data."
 msgstr ""
+
+msgid "Order only non-freezing products"
+msgstr ""
+
+msgid "Freezing product excluded from the supplier order."
+msgstr ""

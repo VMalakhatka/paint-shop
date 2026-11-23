@@ -109,4 +109,10 @@ check(in_array('COLD_CLASSIFICATION_REQUIRED',calculate($s)['C']['groups'][0]['i
 check(calculate($s)['P']['groups'][0]['finalQuantity']===null,'Unknown child class blocks its parent');
 $s['coldCoverage']['enabled']=false;
 check(calculate($s)['P']['groups'][0]['finalQuantity']===2.0,'Existing fixed group horizons remain unchanged');
+$s['coldCoverage']['excludeFreezing']=true;
+$s['assemblyGraph']['nodes'][1]['coldStatus']='FREEZES';
+check(calculate($s)['P']['groups'][0]['finalQuantity']===2.0,'A non-freezing component still covers demand from its freezing child');
+$s['assemblyGraph']['nodes'][0]['coldStatus']='FREEZES';
+$group=calculate($s)['P']['groups'][0];
+check($group['finalQuantity']===0.0 && $group['childCoverageShortfall']===1.0,'Excluding a freezing component retains its child shortage');
 echo "PASS: cold-sensitive parent/child horizons and unknown classification\n";

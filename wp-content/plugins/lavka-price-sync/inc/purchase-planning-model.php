@@ -261,6 +261,7 @@ function lps_purchase_profile(array $input): array {
         'currentReceiptsWithinLeadTime' => !empty($input['currentReceiptsWithinLeadTime']),
         'allowActualSalesWithoutAvailability' => !empty($input['allowActualSalesWithoutAvailability']),
         'coldCoverageEnabled' => $cold_enabled, 'freezingTargetDays' => $freezing_days, 'nonFreezingTargetDays' => $non_freezing_days,
+        'excludeFreezing' => !empty($input['excludeFreezing']),
         'packRounding' => $mode, 'respectPack' => $mode !== 'NONE',
         'stockoutCorrectionEnabled' => !empty($input['stockoutCorrectionEnabled']), 'maxDemandMultiplier' => $multiplier,
         'allowTransfers' => !empty($input['allowTransfers']), 'groups' => $groups];
@@ -603,19 +604,25 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
         unset($receiver);
     }
     foreach ($result as $code => &$item) {
+        $excluded_purchase = !empty($assembly['excludeSupplierPurchase']);
+        if ($excluded_purchase) {
+            $item['notes'][] = 'FREEZING_PURCHASE_EXCLUDED';
+            $item['managerQuantity'] = null;
+        }
         $item['childCoverageShortfall'] = null;
         if ($item['policyExcluded']) {
             $item['recommendedQuantity'] = 0.0; $item['finalQuantity'] = $item['issues'] ? null : 0.0;
             if (($item['managerQuantity'] ?? 0) > 0 || ($item['requiredTransferOverride'] ?? 0) > 0) {
                 $item['issues'][] = 'DESTINATION_POLICY_BLOCKED'; $item['finalQuantity'] = null;
             }
+            if ($excluded_purchase) $item['finalQuantity'] = 0.0;
             $item['status'] = $item['finalQuantity'] === null ? 'REVIEW_REQUIRED' : 'ORDER_DISABLED';
             unset($item['position'], $item['ready']); continue;
         }
         if ($item['ready']) {
             $need = max(0, $item['target'] - $item['position'] - $item['transferIn'] + $item['transferOut'] - $item['plannedTransferIn'] + $item['plannedTransferOut']);
             $item['manufacturingNeed'] = $manufactured ? $need : null;
-            $item['recommendedQuantity'] = $manufactured || $item['supplyFromGroupCode'] !== '' ? 0.0 : lps_purchase_rounded_quantity($need, $item['inputs']['moq'], $item['inputs']['pack'], $item['packRounding']);
+            $item['recommendedQuantity'] = $manufactured || $excluded_purchase || $item['supplyFromGroupCode'] !== '' ? 0.0 : lps_purchase_rounded_quantity($need, $item['inputs']['moq'], $item['inputs']['pack'], $item['packRounding']);
             $destination = $members[$item['receivingWarehouseId']];
             $policy = $destination['orderPolicy'];
             $quantity = $item['managerQuantity'] ?? $item['recommendedQuantity'];
@@ -633,9 +640,12 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
             $item['issues'][] = 'PLANNED_REPLENISHMENT_UNCOVERED';
         }
         $item['finalQuantity'] = !$item['issues'] ? ($item['managerQuantity'] ?? $item['recommendedQuantity']) : null;
+        if ($excluded_purchase) {
+            $item['finalQuantity'] = $item['recommendedQuantity'] = 0.0;
+        }
         // Keep the chosen rounding/manual order. Warn when it cannot cover child demand.
         // The own target and routed replenishments retain their existing priority.
-        if (!$manufactured && $item['finalQuantity'] !== null) {
+        if (!$manufactured && $item['ready'] && $item['finalQuantity'] !== null) {
             $child_demand = $item['componentDemand'];
             foreach ($result as $receiver) {
                 if ($receiver['supplyFromGroupCode'] === $code) {

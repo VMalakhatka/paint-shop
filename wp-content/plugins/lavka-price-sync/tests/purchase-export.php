@@ -27,6 +27,17 @@ foreach ($capture['cards'] as &$card) {
 unset($card); $state=lps_purchase_apply_current_stock($state,$capture);
 $results=lps_purchase_calculate_network($state); $summary=lps_purchase_export_summary($state,$results); $row=$summary['rows'][0];
 $familyTemplate=$state;
+$winter = $state;
+$winter['coldCoverage']['excludeFreezing'] = true;
+$winter['edits']['TEST-010']['kyiv'] = ['quantity'=>100, 'reason'=>'Manual'];
+foreach (['FREEZES', 'UNKNOWN', 'NON_FREEZING'] as $cold) {
+    $winter['assemblyGraph']['nodes'][0]['coldStatus'] = $cold;
+    $output = lps_purchase_export_summary($winter, lps_purchase_calculate_network($winter))['rows'][0];
+    check($output['sales'] === $row['sales'] && $output['transitPool'] === $row['transitPool'], 'Keep actual sales and transit');
+    if ($cold === 'FREEZES') check($output['final'] === 0.0 && $output['supplierAmount'] === 0.0 && $output['planningNotes'] !== '', 'Frozen purchase excluded even with manual quantity');
+    if ($cold === 'UNKNOWN') check($output['final'] === null, 'Unknown stays on review');
+    if ($cold === 'NON_FREEZING') check($output['final'] === 100.0, 'Eligible non-freezing purchase retains manual quantity');
+}
 check(array_slice(array_column($summary['columns'],'key'),0,16) === ['sku','supplierArticle','product','final','periodExpense','componentDemand','sales','networkPhysical','analysisPhysical','stockMonths','coldStatus','group_kyiv_minimumReserve','minNew','supplierUnitPrice','supplierCurrency','children'], 'Updated owner template: component demand in F, network physical in H, children in P');
 check($row['minNew'] === null, 'Manual min new stays blank and does not change source minimum');
 check(count($summary['rows'])===1,'Two destinations produce one supplier-order row');

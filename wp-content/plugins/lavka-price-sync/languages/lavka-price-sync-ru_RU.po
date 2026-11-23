@@ -7204,3 +7204,9 @@ msgstr "В этом расчёте не сохранён активный пра
 #: inc/purchase-planning.php inc/purchase-export.php
 msgid "Surplus / shortage: available stock plus confirmed receipts allocated to this group, minus forecast, minimum reserve, child demand and additional preorders. Before new purchases and proposed inter-group transfers; negative means shortage. Blank means incomplete data."
 msgstr "Лишние / нехватка: доступный запас плюс подтверждённые поступления, выделенные этой группе, минус прогноз, минимальный запас, потребность детей и дополнительные предзаказы. До новых закупок и предлагаемых перемещений между группами; минус означает нехватку. Пусто — данные неполные."
+
+msgid "Order only non-freezing products"
+msgstr "Заказывать только немёрзнущие товары"
+
+msgid "Freezing product excluded from the supplier order."
+msgstr "Товар мёрзнет. Закупка у поставщика исключена."

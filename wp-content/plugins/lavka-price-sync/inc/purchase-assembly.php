@@ -103,7 +103,12 @@ function lps_purchase_calculate_network(array $state): array {
         $purchasable = isset($roots[$key]) && !$node['manufactured'] && count($supplier) === 1
             && lps_assembly_key((string)$supplier[0]) === lps_assembly_key($state['orderSupplier']);
         if (isset($roots[$key]) && !$node['manufactured'] && !$purchasable) $issues[] = 'SUPPLIER_NOT_CONFIRMED';
+        $winter_order = !empty($coverage['excludeFreezing']) && $purchasable;
+        if ($winter_order && !in_array($cold_status, ['FREEZES', 'NON_FREEZING'], true)) {
+            $issues[] = 'COLD_CLASSIFICATION_REQUIRED';
+        }
         $assembly = ['manufactured' => $node['manufactured'], 'consumption' => [], 'contributions' => [], 'issues' => []];
+        $assembly['excludeSupplierPurchase'] = $winter_order && $cold_status === 'FREEZES';
         foreach ($groups as $group) {
             $code = $group['code']; $assembly['issues'][$code] = $issues;
             $known = true; $total = 0.0;
@@ -144,6 +149,7 @@ function lps_purchase_calculate_network(array $state): array {
         }
         $result = lps_purchase_calculate($row, $groups, $state['periodDays'], $state['allowTransfers'], $edits, $state['transitWarehouseIds'], $assembly);
         $result['coldCoverage'] = ['enabled' => !empty($coverage['enabled']), 'status' => $cold_status, 'targetDays' => $target_days];
+        $result['coldCoverage']['quantityLocked'] = $winter_order && $cold_status !== 'NON_FREEZING';
         $result['assembly'] = ['manufactured' => $node['manufactured'], 'selected' => isset($roots[$key]), 'purchasable' => $purchasable,
             'components' => $components[$key] ?? [], 'children' => $children[$key] ?? []];
         return $result;
