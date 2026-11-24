@@ -31,6 +31,7 @@ final class Plugin
         add_action('wp_ajax_lpmu_dry_run', [$this, 'ajax_dry_run']);
         if (\lpmu_writes_enabled()) {
             add_action('wp_ajax_lpmu_upload_batch', [$this, 'ajax_upload_batch']);
+            add_action('wp_ajax_lpmu_main_repair', [$this, 'ajax_main_repair']);
         }
         add_action('admin_post_lpmu_download_report', [$this, 'download_report']);
         add_action('admin_post_lpmu_download_template', [$this, 'download_template']);
@@ -68,15 +69,24 @@ final class Plugin
             'lpmu-admin',
             LPMU_URL . 'assets/admin.css',
             [],
-            LPMU_VERSION
+            filemtime(LPMU_DIR . 'assets/admin.css')
         );
         wp_enqueue_script(
             'lpmu-admin',
             LPMU_URL . 'assets/admin.js',
             [],
-            LPMU_VERSION,
+            filemtime(LPMU_DIR . 'assets/admin.js'),
             true
         );
+        if (\lpmu_writes_enabled()) {
+            wp_enqueue_script(
+                'lpmu-folio-main-repair',
+                LPMU_URL . 'assets/folio-main-repair.js',
+                ['lpmu-admin'],
+                filemtime(LPMU_DIR . 'assets/folio-main-repair.js'),
+                true
+            );
+        }
 
         wp_localize_script('lpmu-admin', 'LPMU_DATA', [
             'ajaxUrl' => admin_url('admin-ajax.php'),
@@ -87,6 +97,12 @@ final class Plugin
             'writesEnabled' => \lpmu_writes_enabled(),
             'strings' => [
                 'checking' => __('Checking the batch…', 'lavka-product-media-upload'),
+                'mainRepair' => __('Correct the main photo filename in Folio', 'lavka-product-media-upload'),
+                'mainRepairAlreadyAligned' => __('The main photo filename already matches the website.', 'lavka-product-media-upload'),
+                'mainRepairDone' => __('The filename was corrected in Folio. To replace the photo, check and synchronize the same batch again.', 'lavka-product-media-upload'),
+                'checkingMainRepair' => __('Checking the Folio and website filenames…', 'lavka-product-media-upload'),
+                'confirmMainRepair' => __('Open the website photo and verify the product before confirming.', 'lavka-product-media-upload'),
+                'savingMainRepair' => __('Saving the confirmed filename in Folio…', 'lavka-product-media-upload'),
                 'uploading' => __('Uploading to OVH/S3, synchronizing Folio and assigning WooCommerce images…', 'lavka-product-media-upload'),
                 'requestFailed' => __('The server request failed.', 'lavka-product-media-upload'),
                 'selectRegistry' => __('Select an XLS or XLSX registry.', 'lavka-product-media-upload'),
@@ -224,6 +240,9 @@ final class Plugin
 
             <p><a href="<?php echo esc_url(admin_url('upload.php?page=lavka-supplier-catalogs')); ?>"><?php echo esc_html__('Supplier catalogues', 'lavka-product-media-upload'); ?></a></p>
             <?php require __DIR__ . '/operator-help.php'; ?>
+            <?php if (\lpmu_writes_enabled() && function_exists('wc_get_product')) : ?>
+                <?php require __DIR__ . '/folio-main-repair-panel.php'; ?>
+            <?php endif; ?>
 
             <?php if (!\lpmu_writes_enabled()) : ?>
                 <div class="notice notice-info inline">
@@ -447,6 +466,35 @@ final class Plugin
                 'message' => __('The approved batch could not be uploaded.', 'lavka-product-media-upload'),
                 'technical' => $e->getMessage(),
             ], $status);
+        }
+    }
+
+    public function ajax_main_repair(): void
+    {
+        check_ajax_referer(self::NONCE_ACTION, 'nonce');
+        if (!\lpmu_writes_enabled() || !$this->can_operate()) {
+            wp_send_json_error(['message' => __('You do not have permission to update product images.', 'lavka-product-media-upload')], 403);
+        }
+        if (!function_exists('wc_get_product')) {
+            wp_send_json_error(['message' => __('WooCommerce is unavailable.', 'lavka-product-media-upload')], 500);
+        }
+
+        $step = wp_unslash($_POST['step'] ?? '');
+        $input = wp_unslash($_POST[$step === 'apply' ? 'token' : 'sku'] ?? '');
+        if (!in_array($step, ['preview', 'apply'], true) || !is_string($input) || strlen($input) > 255) {
+            wp_send_json_error(['message' => __('The server request failed.', 'lavka-product-media-upload')], 400);
+        }
+
+        try {
+            $service = new WorkflowService();
+            if ($step === 'apply') {
+                $service->apply_main_repair($input);
+                wp_send_json_success(['applied' => true]);
+            }
+            wp_send_json_success($service->preview_main_repair(trim($input)));
+        } catch (\RuntimeException $e) {
+            $status = in_array($e->getCode(), [403, 409, 410], true) ? $e->getCode() : 422;
+            wp_send_json_error(['message' => $e->getMessage()], $status);
         }
     }
 

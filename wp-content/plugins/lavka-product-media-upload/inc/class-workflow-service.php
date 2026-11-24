@@ -62,6 +62,131 @@ final class WorkflowService
         }
     }
 
+    public function preview_main_repair(string $sku): array
+    {
+        $target = $this->main_repair_target($sku);
+        $search = $this->java_request('GET', '/admin/folio/product-media', [
+            'sku' => $sku, 'role' => 'main', 'match' => 'exact', 'limit' => 2, 'offset' => 0,
+        ]);
+        $items = $search['json']['items'] ?? [];
+        $item = $items[0] ?? [];
+        if (!$this->java_success($search) || !is_array($items) || count($items) !== 1 || (int) ($search['json']['total'] ?? 1) !== 1
+            || ($item['sku'] ?? '') !== $sku || ($item['role'] ?? '') !== 'main' || !is_string($item['filename'] ?? null)) {
+            throw new \RuntimeException(__('One current main image could not be found in Folio for this SKU.', 'lavka-product-media-upload'));
+        }
+
+        $before = $item['filename'];
+        $after = $target['filename'];
+        $view = ['sku' => $sku, 'product_name' => $target['product_name'], 'before' => $before, 'after' => $after, 'url' => $target['url'], 'token' => ''];
+        if ($before === $after) {
+            return $view;
+        }
+
+        $token = wp_generate_uuid4();
+        $payload = [
+            'externalRequestId' => 'woo-main-image-name:' . $token,
+            'previewOnly' => true,
+            'source' => 'woo_media_repair',
+            'changes' => [[
+                'operation' => 'set_main',
+                'sku' => $sku,
+                'expectedOldFilename' => $before,
+                'filename' => $after,
+                's3Proof' => $target['proof'],
+            ]],
+        ];
+        $result = $this->java_request('POST', '/admin/folio/product-media/changes', $payload);
+        $check = $this->validate_change_response($result, ['ready'], 1);
+        if (!$check['ok'] || ($result['json']['ok'] ?? false) !== true) {
+            throw new \RuntimeException(__('Folio did not approve this filename correction. Check the current product images and try the preview again.', 'lavka-product-media-upload'));
+        }
+
+        $payload['previewOnly'] = false;
+        if (!set_transient('lpmu_main_repair_' . $token, [
+            'user_id' => get_current_user_id(),
+            'target' => $target,
+            'payload' => $payload,
+        ], 30 * MINUTE_IN_SECONDS)) {
+            throw new \RuntimeException(__('The preview could not be saved. Run it again.', 'lavka-product-media-upload'));
+        }
+        $view['token'] = $token;
+        return $view;
+    }
+
+    public function apply_main_repair(string $token): void
+    {
+        $key = 'lpmu_main_repair_' . $token;
+        $stored = wp_is_uuid($token, 4) ? get_transient($key) : false;
+        if (!is_array($stored) || (int) $stored['user_id'] !== get_current_user_id()) {
+            throw new \RuntimeException(__('This preview has expired. Check the SKU again.', 'lavka-product-media-upload'), 410);
+        }
+
+        $lock = $this->acquire_lock($token);
+        if (empty($lock['ok'])) {
+            throw new \RuntimeException(
+                (string) ($lock['message'] ?? __('Another Lavka synchronization is running. Try again later.', 'lavka-product-media-upload')),
+                409
+            );
+        }
+        try {
+            $change = $stored['payload']['changes'][0];
+            $target = $this->main_repair_target($change['sku']);
+            foreach (['product_id', 'attachment_id', 'filename', 'proof'] as $field) {
+                if ($target[$field] !== $stored['target'][$field]) {
+                    throw new \RuntimeException(__('The main photo changed after the preview. Check the SKU again.', 'lavka-product-media-upload'), 409);
+                }
+            }
+
+            $result = $this->java_request('POST', '/admin/folio/product-media/changes', $stored['payload']);
+            $check = $this->validate_change_response($result, ['applied', 'noop'], 1);
+            if (!$check['ok'] || ($result['json']['ok'] ?? false) !== true) {
+                throw new \RuntimeException(__('The correction could not be confirmed. Run a new preview to check the current Folio filename.', 'lavka-product-media-upload'));
+            }
+            if (function_exists('lts_log_db')) {
+                lts_log_db('info', 'folio_media_repair', [
+                    'sku' => $change['sku'],
+                    'post_id' => $target['product_id'],
+                    'result' => $check['statuses'][0],
+                    'message' => 'Folio main filename aligned with the current WooCommerce image.',
+                    'ctx' => [
+                        'external_request_id' => $stored['payload']['externalRequestId'],
+                        'previous_filename' => $change['expectedOldFilename'],
+                        'filename' => $change['filename'],
+                        'user_id' => get_current_user_id(),
+                    ],
+                ]);
+            }
+            delete_transient($key);
+        } finally {
+            $this->release_lock($lock['token'] ?? null);
+        }
+    }
+
+    private function main_repair_target(string $sku): array
+    {
+        $product = $sku !== '' ? wc_get_product(wc_get_product_id_by_sku($sku)) : false;
+        if (!$product || $product->get_sku('edit') !== $sku || !current_user_can('edit_post', $product->get_id())) {
+            throw new \RuntimeException(__('Enter the exact SKU of a product you can edit.', 'lavka-product-media-upload'), 403);
+        }
+
+        $id = (int) $product->get_image_id('edit');
+        $file = $id > 0 ? (string) get_post_meta($id, '_wp_attached_file', true) : '';
+        $url = $id > 0 ? esc_url_raw((string) wp_get_attachment_url($id), ['http', 'https']) : '';
+        if ($file === '' || $url === '' || !wp_attachment_is_image($id) || get_post_status($id) === 'trash'
+            || !current_user_can('read_post', $id)) {
+            throw new \RuntimeException(__('This product needs a verifiable main photo in WooCommerce before correcting its Folio filename.', 'lavka-product-media-upload'));
+        }
+        $filename = wp_basename($file);
+        $proof = $this->verified_attachment_proof($filename, $file, $url);
+        if (!$proof['ok'] || basename($proof['proof']['fullKey']) !== $filename) {
+            throw new \RuntimeException(__('The current WooCommerce photo could not be verified in OVH/S3.', 'lavka-product-media-upload'));
+        }
+        return [
+            'product_id' => $product->get_id(), 'product_name' => $product->get_name(), 'attachment_id' => $id,
+            'filename' => $filename, 'url' => $url, 'proof' => $proof['proof'],
+        ];
+    }
+
     /**
      * Completes all uploaded rows. Failures remain resumable on the next identical batch.
      */
@@ -258,6 +383,11 @@ final class WorkflowService
 
         $built = $this->build_changes($rows, $indexes, $items);
         if (!$built['ok']) {
+            if (!empty($built['folio_main_repair'])) {
+                foreach ($indexes as $index) {
+                    if (($rows[$index]['role'] ?? '') === 'main') { $rows[$index]['folio_main_repair'] = true; }
+                }
+            }
             return $this->fail_indexes(
                 $rows,
                 $indexes,
@@ -372,7 +502,7 @@ final class WorkflowService
                 return $this->build_failure(
                     __('The main images in Folio and WooCommerce differ. Reconcile them before replacing this image.', 'lavka-product-media-upload'),
                     wp_json_encode(['folio' => $current, 'woocommerce' => $old], JSON_UNESCAPED_UNICODE)
-                );
+                ) + ['folio_main_repair' => true];
             }
             $old_items = [];
             foreach ($gallery_items as $key => $item) {
@@ -618,16 +748,27 @@ final class WorkflowService
     private function previous_main_proof(array $row): array
     {
         $snapshot = $row['_main_snapshot'];
-        $proof = $this->s3_proof(['canonical_file' => $snapshot['filename'], 's3_key' => $snapshot['file']]);
+        $proof = $this->verified_attachment_proof(
+            $snapshot['filename'], $snapshot['file'], (string) wp_get_attachment_url($snapshot['attachment_id'])
+        );
+        if (!$proof['ok'] && empty($proof['message'])) {
+            return $this->build_failure(__('The previous main image could not be verified in storage. It was not moved to the gallery.', 'lavka-product-media-upload'));
+        }
+        return $proof;
+    }
+
+    private function verified_attachment_proof(string $filename, string $file, string $url): array
+    {
+        $proof = $this->s3_proof(['canonical_file' => $filename, 's3_key' => $file]);
         if (!$proof['ok']) { return $proof; }
-        $response = wp_safe_remote_head((string) wp_get_attachment_url($snapshot['attachment_id']), [
+        $response = wp_safe_remote_head($url, [
             'timeout' => 12, 'redirection' => 3, 'sslverify' => true,
         ]);
         if (is_wp_error($response)
             || (int) wp_remote_retrieve_response_code($response) !== 200
             || (int) wp_remote_retrieve_header($response, 'content-length') !== $proof['proof']['sizeBytes']
             || trim((string) wp_remote_retrieve_header($response, 'etag'), '"') !== trim($proof['proof']['etag'], '"')) {
-            return $this->build_failure(__('The previous main image could not be verified in storage. It was not moved to the gallery.', 'lavka-product-media-upload'));
+            return ['ok' => false];
         }
         return $proof;
     }

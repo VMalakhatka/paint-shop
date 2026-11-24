@@ -283,6 +283,8 @@
                 + '<td><span class="lpmu-status">' + escapeHtml(statusLabel(row.status)) + '</span>'
                 + listBlock(strings.errors, row.errors, 'errors')
                 + listBlock(strings.warnings, row.warnings, 'warnings')
+                + (data.writesEnabled && row.folio_main_repair
+                    ? '<button type="button" class="button" data-lpmu-main-repair="' + escapeHtml(row.sku) + '">' + escapeHtml(strings.mainRepair) + '</button>' : '')
                 + technical + '</td>'
                 + '</tr>';
         }).join('');

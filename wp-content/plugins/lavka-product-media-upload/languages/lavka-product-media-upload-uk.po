@@ -2459,3 +2459,78 @@ msgstr "Перевірене однакове фото можна викорис
 
 msgid "The file can pass the first check and remain in the Media Library if Folio blocks the assignment. If the message says Folio and WooCommerce have different main images, send the SKU and the CSV report to the administrator. After the references are corrected, check the same batch and synchronize again. The verified file is reused."
 msgstr "Файл може пройти першу перевірку й залишитися в медіатеці, якщо ФОЛІО заблокує прив’язку. Якщо головні фото у ФОЛІО та WooCommerce відрізняються, передайте артикул і звіт CSV адміністратору. Після узгодження посилань перевірте той самий пакет і повторіть синхронізацію. Система використає вже перевірений файл."
+
+msgid "Correct the main photo filename in Folio"
+msgstr "Узгодити ім’я головного фото у ФОЛІО"
+
+msgid "The main photo filename already matches the website."
+msgstr "Ім’я головного фото у ФОЛІО вже збігається з іменем на сайті."
+
+msgid "The filename was corrected in Folio. To replace the photo, check and synchronize the same batch again."
+msgstr "Ім’я у ФОЛІО узгоджено. Щоб замінити фото, знову перевірте й синхронізуйте той самий пакет."
+
+msgid "Checking the Folio and website filenames…"
+msgstr "Перевіряємо імена файлів у ФОЛІО та на сайті…"
+
+msgid "Open the website photo and verify the product before confirming."
+msgstr "Перед підтвердженням відкрийте фото із сайту та звірте товар."
+
+msgid "Saving the confirmed filename in Folio…"
+msgstr "Зберігаємо підтверджене ім’я у ФОЛІО…"
+
+msgid "Enter the SKU to compare the filename in Folio with the photo currently used on the product page."
+msgstr "Введіть артикул товару, щоб порівняти ім’я у ФОЛІО з іменем поточного головного фото на сайті."
+
+msgid "Preview the Folio filename correction"
+msgstr "Переглянути виправлення для ФОЛІО"
+
+msgid "Current name in Folio"
+msgstr "Поточне ім’я у ФОЛІО"
+
+msgid "Website filename to save in Folio"
+msgstr "Ім’я з сайту для запису у ФОЛІО"
+
+msgid "Open the current website photo"
+msgstr "Відкрити поточне фото на сайті"
+
+msgid "Confirm filename correction in Folio"
+msgstr "Підтвердити зміну імені у ФОЛІО"
+
+msgid "One current main image could not be found in Folio for this SKU."
+msgstr "Не вдалося знайти один однозначний запис головного фото у ФОЛІО для цього артикула."
+
+msgid "Folio did not approve this filename correction. Check the current product images and try the preview again."
+msgstr "ФОЛІО відхилило виправлення імені. Перевірте поточні фото товару й повторіть перегляд."
+
+msgid "The preview could not be saved. Run it again."
+msgstr "Не вдалося зберегти попередній перегляд. Запустіть його знову."
+
+msgid "This preview has expired. Check the SKU again."
+msgstr "Термін дії попереднього перегляду минув. Перевірте артикул знову."
+
+msgid "Another Lavka synchronization is running. Try again later."
+msgstr "Триває інша синхронізація Лавки. Спробуйте пізніше."
+
+msgid "The main photo changed after the preview. Check the SKU again."
+msgstr "Головне фото змінилося після попереднього перегляду. Перевірте артикул знову."
+
+msgid "The correction could not be confirmed. Run a new preview to check the current Folio filename."
+msgstr "Не вдалося підтвердити зміни. Запустіть попередній перегляд і перевірте поточне ім’я у ФОЛІО."
+
+msgid "Enter the exact SKU of a product you can edit."
+msgstr "Введіть точний артикул товару, який ви можете редагувати."
+
+msgid "This product needs a verifiable main photo in WooCommerce before correcting its Folio filename."
+msgstr "Щоб узгодити ім’я у ФОЛІО, товар повинен мати головне фото на сайті, яке можна перевірити."
+
+msgid "The current WooCommerce photo could not be verified in OVH/S3."
+msgstr "Не вдалося перевірити поточне фото із сайту у сховищі OVH/S3."
+
+msgid "WooCommerce is unavailable."
+msgstr "WooCommerce недоступний."
+
+msgid "You do not have permission to update product images."
+msgstr "У вас немає прав оновлювати фото товарів."
+
+msgid "If Folio blocks a replacement because the main filenames differ, open “Correct the main photo filename in Folio”. Preview the two names, open the current website photo and confirm the correction. Then check the same batch and synchronize again to finish the replacement."
+msgstr "Якщо ФОЛІО блокує заміну через різні імена головного фото, відкрийте «Узгодити ім’я головного фото у ФОЛІО». Перегляньте обидва імені, відкрийте поточне фото із сайту й підтвердьте виправлення. Щоб завершити заміну фото, перевірте той самий пакет і знову запустіть синхронізацію."
