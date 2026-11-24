@@ -128,7 +128,7 @@ function lps_purchase_export_summary(array $state, array $results): array {
             'minNew' => null, 'final' => $quantity, 'supplierAmount' => $is_child ? 0.0 : ($quantity !== null && $price['supplierUnitPrice'] !== null ? $quantity * $price['supplierUnitPrice'] : null),
             'periodExpense' => $total['periodExpense'], 'sales' => $total['regularSales'], 'analysisPhysical' => $total['physical'],
             'transitPhysical' => $transit_physical, 'networkPhysical' => lps_purchase_export_sum([$total['physical'], $transit_physical]),
-            'planningAvailable' => lps_purchase_export_sum([$total['planningAvailable'], $item['transitPool']]),
+            'planningAvailable' => lps_purchase_export_sum([$total['planningAvailable'], !empty($item['transitExcluded']) ? 0.0 : $item['transitPool']]),
             'transitPool' => $item['transitPool'],
             'customerPreorders' => lps_purchase_export_sum(array_column($item['groups'], 'customerPreorders')),
             'preorderAdditionalDemand' => lps_purchase_export_sum(array_column($item['groups'], 'preorderAdditionalDemand')),

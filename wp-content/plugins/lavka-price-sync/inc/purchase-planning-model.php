@@ -402,7 +402,7 @@ function lps_purchase_calculate(array $row, array $groups, int $period_days, boo
         $respect_pack = $pack_mode !== 'NONE';
         $issues = array_merge($internal['issues'], $assembly['issues'][$group['code']] ?? []);
         $internal_group = $internal['groups'][$group['code']];
-        if ($confirmed_transit['issue']) $issues[] = $confirmed_transit['issue'];
+        if ($confirmed_transit['issue'] && empty($assembly['ignoreMissingTransit'])) $issues[] = $confirmed_transit['issue'];
         if ($transit_ids && ($edit['receiptsReviewed'] ?? false) !== true) $issues[] = 'RECEIPTS_REVIEW_REQUIRED';
         if (array_intersect($group['warehouseIds'], $transit_ids)) $issues[] = 'TRANSIT_DESTINATION_OVERLAP';
         if (!$manufactured && count((array)($row['dimensions']['currentSuppliers'] ?? [])) !== 1) $issues[] = 'SUPPLIER_NOT_CONFIRMED';

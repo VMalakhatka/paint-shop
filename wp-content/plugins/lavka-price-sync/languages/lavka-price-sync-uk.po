@@ -7194,3 +7194,60 @@ msgstr "Замовляти лише товари, що не мерзнуть"
 
 msgid "Freezing product excluded from the supplier order."
 msgstr "Товар мерзне. Закупівлю у постачальника виключено."
+
+msgid "SKUs with other receipts:"
+msgstr "Артикулів з іншими надходженнями:"
+
+msgid "Answer both delivery questions before starting the calculation."
+msgstr "Перед початком розрахунку дайте відповідь на обидва запитання про надходження."
+
+msgid "Invalid receiving group."
+msgstr "Некоректна група отримання."
+
+msgid "Enter an SKU and a positive quantity on each line. Check: %s"
+msgstr "У кожному рядку вкажіть артикул і додатну кількість. Перевірте рядок «%s»."
+
+msgid "Duplicate incoming quantity for SKU %s in the same group."
+msgstr "Артикул %s вказано двічі в одній групі надходжень."
+
+msgid "List the other confirmed receipts or select None."
+msgstr "Вкажіть інші підтверджені надходження або оберіть «Інших надходжень немає»."
+
+msgid "Incoming SKUs missing from this scenario: %s"
+msgstr "У цьому сценарії відсутні вказані артикули надходжень: %s"
+
+msgid "Non-freezing stock: %s days"
+msgstr "Запас для товарів, що не мерзнуть: %s дн."
+
+msgid "Freezing stock: %s days"
+msgstr "Запас для товарів, що мерзнуть: %s дн."
+
+msgid "%1$s: %2$s stock days"
+msgstr "%1$s: запас на %2$s дн."
+
+msgid "Deliveries for this calculation"
+msgstr "Надходження для цього розрахунку"
+
+msgid "Will stock on Transport and Receiving arrive in time?"
+msgstr "Чи буде товар із Транспорту та Приймання доступний вчасно?"
+
+msgid "Yes, count it as incoming stock"
+msgstr "Так, врахувати в надходженнях"
+
+msgid "No, exclude it from this order calculation"
+msgstr "Ні, виключити з розрахунку цього замовлення"
+
+msgid "Are there other confirmed receipts due in time?"
+msgstr "Чи є інші підтверджені поставки, які надійдуть вчасно?"
+
+msgid "No other receipts"
+msgstr "Інших надходжень немає"
+
+msgid "Yes, enter quantities by receiving group"
+msgstr "Так, вказати кількості за групами складів"
+
+msgid "Enter one SKU and quantity per line. Include only additional receipts outside Transport, Receiving and internal transfers."
+msgstr "Введіть артикул і кількість у кожному рядку. Вказуйте лише додаткові поставки, які ще не враховані на Транспорті, Прийманні або у внутрішніх переміщеннях."
+
+msgid "Supplier offers have different minimum quantities. Enter the minimum for the selected offer."
+msgstr "Пропозиції постачальника мають різні мінімальні партії. Вкажіть мінімум для обраної пропозиції."

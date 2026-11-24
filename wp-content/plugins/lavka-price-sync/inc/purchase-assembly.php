@@ -63,6 +63,20 @@ function lps_purchase_assembly_graph(array $state): array {
     return $graph;
 }
 
+/** Resolve a common minimum from the pinned supplier offers. */
+function lps_purchase_offer_minimums(array $prices, string $supplier): array {
+    $values = [];
+    foreach ($prices as $price) {
+        if (lps_assembly_key($price['supplier'] ?? '') !== lps_assembly_key($supplier)) continue;
+        foreach ($price['offers'] ?? [] as $offer) {
+            if (!in_array($offer['offerStatus'] ?? $price['status'] ?? '', ['PRESENT', 'WHILE_STOCK_LASTS'], true) || !empty($offer['issues'])) continue;
+            $value = lps_purchase_number($offer['minimumOrder'] ?? null);
+            if (!in_array($value, $values, true)) $values[] = $value;
+        }
+    }
+    return $values;
+}
+
 /** Evaluate each product once, in reverse topological order. Stock is netted at each node. */
 function lps_purchase_calculate_network(array $state): array {
     $nodes = $raw = $children = $parents = $remaining = $results = $components = [];
@@ -136,6 +150,16 @@ function lps_purchase_calculate_network(array $state): array {
         // One procurement group receives the pool once; routed groups are supplied internally.
         // Independent procurement groups require explicit allocations.
         $procurement = array_values(array_filter($groups, static fn($g) => empty($g['supplyFromGroupCode'])));
+        $answers = $state['receiptAnswers'] ?? null;
+        $minimums = $answers && $purchasable ? lps_purchase_offer_minimums($row['supplierPrices'] ?? [], $state['orderSupplier']) : [];
+        if (count($minimums) > 1) unset($row['dimensions']['minimumOrderQuantity']);
+        $exclude_transit = ($answers['transit'] ?? '') === 'EXCLUDE';
+        // The atomic capture can explicitly report an unavailable transit card.
+        // That quantity is immaterial when the operator excludes all transit.
+        $assembly['ignoreMissingTransit'] = $exclude_transit && !empty($row['currentStockCapture']['captureId'])
+            && ($row['inTransitStock']['captureId'] ?? '') === $row['currentStockCapture']['captureId']
+            && ($row['inTransitStock']['networkPlanningReady'] ?? null) === false
+            && $transit['status'] === 'CURRENT_NETWORK_STOCK_NOT_READY';
         foreach ($groups as $group) {
             $code = $group['code']; $default = [];
             if (!empty($confirmation['noOtherIncomingOrders'])) $default['openOrders'] = 0.0;
@@ -144,10 +168,24 @@ function lps_purchase_calculate_network(array $state): array {
                 $default['inTransit'] = $code === $procurement[0]['code'] ? $transit['quantity'] : 0.0;
                 if (!empty($confirmation['noOtherIncomingOrders']) && !empty($confirmation['currentReceiptsWithinLeadTime'])) $default['receiptsReviewed'] = true;
             }
+            if ($answers !== null) {
+                $default['openOrders'] = $answers['quantities'][$key][$code] ?? 0.0;
+                if (empty($group['supplyFromGroupCode']) && (count($minimums) > 1 || isset($minimums[0]))) {
+                    $default['moq'] = count($minimums) === 1 ? $minimums[0] : null;
+                }
+
+                $default['receiptsReviewed'] = ($assembly['ignoreMissingTransit'] || $transit['issue'] === null) &&
+                    ($exclude_transit || $transit['quantity'] === 0.0 || isset($default['inTransit']));
+            }
             // Explicit item edits override scenario confirmations, including manual non-zero receipts.
             $edits[$code] = array_replace($default, $edits[$code] ?? []);
+            if ($exclude_transit) $edits[$code]['inTransit'] = 0.0;
+            if (count($minimums) > 1 && empty($group['supplyFromGroupCode']) && !isset($edits[$code]['moq'])) {
+                $assembly['issues'][$code][] = 'SUPPLIER_MINIMUM_AMBIGUOUS';
+            }
         }
         $result = lps_purchase_calculate($row, $groups, $state['periodDays'], $state['allowTransfers'], $edits, $state['transitWarehouseIds'], $assembly);
+        $result['transitExcluded'] = $exclude_transit;
         $result['coldCoverage'] = ['enabled' => !empty($coverage['enabled']), 'status' => $cold_status, 'targetDays' => $target_days];
         $result['coldCoverage']['quantityLocked'] = $winter_order && $cold_status !== 'NON_FREEZING';
         $result['assembly'] = ['manufactured' => $node['manufactured'], 'selected' => isset($roots[$key]), 'purchasable' => $purchasable,

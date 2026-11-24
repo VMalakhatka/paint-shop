@@ -48,9 +48,60 @@ check($g['kyiv']['inputs']['openOrders']===0.0 && $g['kyiv']['inputs']['moq']===
 check($g['kyiv']['inputs']['pack']===6.0,'No MOQ does not remove pack size');
 check($g['odessa']['regularSales']===30.0 && $g['odessa']['planningAvailable']===16.0,'Storage contributes stock and internal reserves, no historical demand');
 check($g['kyiv']['finalQuantity']!==null, 'Complete consistent source and confirmed supply yield a ready quantity');
+$run = $fresh;
+$run['supplyConfirmation'] = [];
+$run['receiptAnswers'] = ['transit'=>'INCLUDE','other'=>'LIST','quantities'=>['P'=>['odessa'=>3]]];
+$offer = ['status'=>'PRESENT','supplier'=>'Supplier','offers'=>[['minimumOrder'=>'6']]];
+$run['rows']['P']['supplierPrices'] = [$offer];
+$included = array_column(lps_purchase_calculate_network($run)[0]['groups'],null,'groupCode');
+check($included['kyiv']['finalQuantity'] !== null && $included['kyiv']['inputs']['moq'] === 6.0 && $included['kyiv']['inputs']['inTransit'] === 16.0, 'Use active price minimum and count confirmed transit once');
+check($included['kyiv']['inputs']['openOrders'] === 0.0 && $included['odessa']['inputs']['openOrders'] === 3.0 && $included['odessa']['receiptsReviewed'], 'Additional receipts count only for the listed SKU and group');
+$run['receiptAnswers']['transit'] = 'EXCLUDE';
+$excluded = lps_purchase_calculate_network($run)[0];
+check($excluded['transitPool'] === 16.0 && $excluded['groups'][0]['inputs']['inTransit'] === 0.0 && $excluded['groups'][0]['finalQuantity'] > $included['kyiv']['finalQuantity'], 'Late transit remains visible but does not cover purchase demand');
+$run['rows']['P']['supplierPrices'][0]['offers'][] = ['minimumOrder'=>'12'];
+$run['supplyConfirmation']['noSupplierMinimumOrder'] = true;
+check(lps_purchase_calculate_network($run)[0]['groups'][0]['finalQuantity'] === null, 'Conflicting minima require an explicit choice even with a no-minimum fallback');
+$run['edits']['P']['kyiv'] = ['moq'=>12];
+check(lps_purchase_calculate_network($run)[0]['groups'][0]['finalQuantity'] !== null, 'Explicit minimum resolves conflicting variants');
 $fresh['edits']['P']['kyiv']=['openOrders'=>3,'moq'=>12,'receiptsReviewed'=>false];
 $g=lps_purchase_calculate_network($fresh)[0]['groups'][0];
 check($g['inputs']['openOrders']===3.0 && $g['inputs']['moq']===12.0 && !$g['receiptsReviewed'],'Explicit item edits override global confirmations');
+// Reproduce the reported purchasing case using anonymous stock and preorder lines.
+$case = $state;
+$case['periodDays'] = 243;
+$case['supplyConfirmation'] = [];
+$case['receiptAnswers'] = ['transit'=>'INCLUDE','other'=>'NONE','quantities'=>[]];
+$case['rows']['P']['supplierPrices'] = [$offer];
+foreach ($case['groups'] as &$group) {
+    $group['leadTimeDays'] = 0;
+    $group['targetDays'] = 150;
+    $group['stockoutCorrectionEnabled'] = true;
+    $group['maxDemandMultiplier'] = 1.2;
+}
+unset($group);
+foreach ($case['rows']['P']['warehouseBreakdown'] as &$member) {
+    $member['metrics']['regularSoldUnits'] = $member['warehouseId'] === 7 ? 79 : 0;
+}
+unset($member);
+$case['rows']['P']['warehouseGroupBreakdown'] = [['code'=>'kyiv','warehouseIds'=>[1,7],'availability'=>['status'=>'MEASURED'],
+    'stockoutDemand'=>['estimatedLostSales'=>36.319,'status'=>'ESTIMATED','method'=>'SALES_ON_AVAILABLE_END_OF_DAY_DAYS_V1']]];
+$case = lps_purchase_apply_current_stock($case,$capture);
+foreach ($case['rows']['P']['warehouseBreakdown'] as &$member) {
+    $quantity = [1=>3,7=>44,5=>1,15=>0][$member['warehouseId']];
+    $member['metrics']['physicalQuantity'] = $member['metrics']['availableQuantity'] = $quantity;
+}
+unset($member);
+$caseRow = &$case['rows']['P'];
+$caseRow['customerPreorders']['lines'] = [['warehouseId'=>7,'lineId'=>1,'quantity'=>216]];
+$caseRow['internalTransferReservations']['accounts'] = [];
+$caseRow['inTransitStock']['availableForNetworkPlanningQuantity'] = 72;
+foreach ($caseRow['inTransitStock']['sources'] as &$source) $source['availableForNetworkPlanningQuantity'] = $source['warehouseId'] === 9 ? 72 : 0;
+unset($source, $caseRow);
+$caseGroup = lps_purchase_calculate_network($case)[0]['groups'][0];
+check($caseGroup['preorderUncoveredAfterReceipts']===97.0 && $caseGroup['finalQuantity']===162.0,'216 preorders, 47 in Kyiv and 72 in transit: 162 at 150 days');
+$case['groups'][0]['targetDays'] = 120;
+check(lps_purchase_calculate_network($case)[0]['groups'][0]['finalQuantity']===150.0,'Same history with 120 target days yields 150');
 $bad=$capture; array_pop($bad['cards']); rejects(fn()=>lps_purchase_apply_current_stock($state,$bad),'Truncated cut rejected');
 $bad=$capture; $bad['cards'][]=$bad['cards'][0]; rejects(fn()=>lps_purchase_apply_current_stock($state,$bad),'Duplicate cards rejected');
 $bad=$capture; $bad['assemblyGraph']['revision']='changed'; rejects(fn()=>lps_purchase_apply_current_stock($state,$bad),'Recipe/role/cold drift rejected');
@@ -58,6 +109,9 @@ $bad=$capture; $bad['cards'][0]['internalTransferAccounts'][0]['quantity']=5; re
 $bad=$capture; $bad['cards'][3]['status']='SKU_NOT_PRESENT'; $bad['cards'][3]['physicalQuantity']=null; $bad['cards'][3]['availableQuantity']=null;
 $missing=lps_purchase_apply_current_stock($state,$bad);
 check(lps_purchase_calculate_network($missing)[0]['groups'][0]['finalQuantity']===null,'Explicit missing Transport card is unknown, never zero');
+$missing['receiptAnswers'] = ['transit'=>'EXCLUDE','other'=>'NONE','quantities'=>[]];
+$excludedMissing = lps_purchase_calculate_network($missing)[0];
+check($excludedMissing['transitPool'] === null && $excludedMissing['groups'][0]['finalQuantity'] !== null, 'Excluded unavailable transit card stays unknown in stock but does not block the order');
 $bad=$capture; $bad['cards'][3]['physicalQuantity']=-1; $bad['cards'][3]['availableQuantity']=-5; $bad['cards'][3]['reservedQuantity']=4;
 $negative=lps_purchase_apply_current_stock($state,$bad);
 check(lps_purchase_calculate_network($negative)[0]['groups'][0]['finalQuantity']===null,'Negative physical Transport stock remains blocked');

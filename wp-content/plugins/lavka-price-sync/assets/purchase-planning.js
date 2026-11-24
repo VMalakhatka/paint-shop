@@ -11,6 +11,13 @@
     const escape = (value) => String(value == null ? '' : value).replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
     const componentNumber = new Intl.NumberFormat(config.locale || 'uk', { maximumFractionDigits: 12 });
     const display = (value) => value == null ? '—' : number.format(value);
+    function receiptSummary(answers) {
+        if (!answers) return '';
+        const transit = el('transit').querySelector('option[value="' + answers.transit + '"]').textContent;
+        const other = answers.other === 'LIST' ? t.listedReceipts + ' ' + Object.keys(answers.quantities).length
+            : el('other').querySelector('option[value="NONE"]').textContent;
+        return ' · ' + t.transitPool + ' — ' + transit + ' · ' + other;
+    }
     function message(text, error) {
         el('message').textContent = text;
         el('message').className = 'notice inline ' + (error ? 'notice-error' : 'notice-info');
@@ -23,6 +30,7 @@
         if (el('open')) el('open').disabled = value;
         if (el('drafts')) el('drafts').disabled = value;
         el('scenario').disabled = value;
+        el('deliveries').disabled = value;
         el('cancel').disabled = !value;
         root.querySelectorAll('[data-export]').forEach((button) => { button.disabled = value || !state.complete; });
         root.querySelectorAll('[data-edit-form] button').forEach((button) => { button.disabled = value || !state.complete; });
@@ -134,7 +142,7 @@
                     '<td>' + group.transfers.map((transfer) => escape(transfer.fromName) + ': ' + display(transfer.quantity)).join('<br>') + (group.transferOut > 0 ? '<br>−' + display(group.transferOut) : '') + '</td></tr>').join('') +
                 '</tbody></table></div><details><summary>' + escape(t.details) + '</summary><form data-edit-form="' + index + '">' + row.groups.map((group) =>
                     '<fieldset data-group="' + escape(group.groupCode) + '"><legend>' + escape(group.groupName) + '</legend><p>' + escape(t.supplyFromGroupCode) + ': ' + escape(group.supplyFromGroupCode ? (row.groups.find((item) => item.groupCode === group.supplyFromGroupCode) || {}).groupName || group.supplyFromGroupCode : t.directSupplier) + '</p><div class="lps-purchase-inputs">' +
-                    (row.assembly && row.assembly.manufactured ? ['inTransit', 'openOrders'] : ['inTransit', 'openOrders', 'pack', 'moq']).map((key) => input(key, group.inputs[key], t[key])).join('') +
+                    (row.assembly && row.assembly.manufactured ? ['inTransit', 'openOrders'] : ['inTransit', 'openOrders', 'pack', 'moq']).filter(key => key !== 'inTransit' || !row.transitExcluded).map((key) => input(key, group.inputs[key], t[key])).join('') +
                     (row.assembly && row.assembly.manufactured ? '' : '<label><span>' + escape(t.packRounding) + '</span><select data-field="packRounding">' + Object.entries(t.packModes).map(([key, label]) => '<option value="' + key + '"' + (group.packRounding === key ? ' selected' : '') + '>' + escape(label) + '</option>').join('') + '</select></label>') +
                     (group.supplyFromGroupCode ? input('requiredTransfer', group.requiredTransferOverride, t.requiredTransfer) : ((row.assembly && row.assembly.manufactured) || (row.coldCoverage && row.coldCoverage.quantityLocked) ? '' : input('quantity', group.managerQuantity, t.quantity))) + input('reason', group.managerReason, t.reason, 'text') + '</div><p>' + escape(t.demandStatus) + ': ' + escape(t.demandStatuses[group.demand.status]) + ' · ' + escape(t.estimatedLostSales) + ': ' + display(group.demand.estimatedLostSales) + ' · ' + escape(t.maxDemandMultiplier) + ': ' + display(group.demand.maxDemandMultiplier) + '</p><p>' + escape(row.assembly && row.assembly.manufactured ? t.assemblyOnly : t.packHelp) + '</p><label><input type="checkbox" data-field="receiptsReviewed"' + (group.receiptsReviewed ? ' checked' : '') + '> ' + escape(t.receiptsReviewed) + '</label><ul class="lps-purchase-review">' +
                     group.issues.map((issue) => '<li>' + escape(t.issues[issue] || issue) + '</li>').join('') + '</ul></fieldset>').join('') +
@@ -178,12 +186,19 @@
         el('context').textContent = '';
         busy(true); render(); message(t.loading);
         try {
-            const started = await api('start', { scenarioId: Number(option.value), version: Number(option.dataset.version) });
+            const lines = {};
+            if (el('other').value === 'LIST') {
+                el('lines').querySelectorAll('textarea').forEach(field => {
+                    if (field.value.trim()) lines[field.dataset.group] = field.value;
+                });
+            }
+            const receiptAnswers = {transit: el('transit').value, other: el('other').value, lines};
+            const started = await api('start', { scenarioId: Number(option.value), version: Number(option.dataset.version), receiptAnswers });
             if (requestId !== state.requestId) return;
             state.token = started.token;
-            const parameters = { scenario: started.scenario, groups: started.groups, warehouseGroupsRevision: started.groupsRevision, transitWarehouseIds: started.transitWarehouseIds, query: started.query };
+            const parameters = { receiptAnswers: started.receiptAnswers, scenario: started.scenario, groups: started.groups, warehouseGroupsRevision: started.groupsRevision, transitWarehouseIds: started.transitWarehouseIds, query: started.query };
             el('parameters').textContent = JSON.stringify(parameters, null, 2);
-            el('context').textContent = started.scenario.name + ' · v' + started.scenario.version + ' · ' + started.query.period.from + ' — ' + started.query.period.to + ' · ' + started.groups.map((group) => group.name + ' [' + group.warehouseIds.join(', ') + ']').join('; ');
+            el('context').textContent = started.scenario.name + ' · v' + started.scenario.version + ' · ' + started.query.period.from + ' — ' + started.query.period.to + ' · ' + started.groups.map((group) => group.name + ' [' + group.warehouseIds.join(', ') + ']').join('; ') + receiptSummary(started.receiptAnswers);
             let page = 0;
             do {
                 const data = await api('page', { token: state.token, page: page });
@@ -220,7 +235,29 @@
     });
     el('prev').addEventListener('click', () => { if (state.page > 0) { state.page--; render(); } });
     el('next').addEventListener('click', () => { state.page++; render(); });
+    function resetDeliveryQuestions() {
+        const option = el('scenario').selectedOptions[0];
+        el('deliveries').hidden = !option || !option.value;
+        el('scope').textContent = option?.dataset.scope || '';
+        el('transit').value = el('other').value = '';
+        el('list').hidden = true;
+        el('lines').replaceChildren();
+        for (const [code, name] of Object.entries(JSON.parse(option?.dataset.groups || '{}'))) {
+            const label = document.createElement('label');
+            const title = document.createElement('span');
+            title.textContent = name;
+            const field = document.createElement('textarea');
+            field.rows = 3;
+            field.dataset.group = code;
+            field.placeholder = 'SKU   12';
+            label.append(title, field);
+            el('lines').append(label);
+        }
+    }
+    resetDeliveryQuestions();
+    el('other').addEventListener('change', () => { el('list').hidden = el('other').value !== 'LIST'; });
     el('scenario').addEventListener('change', () => {
+        resetDeliveryQuestions();
         state.rows = []; state.token = ''; state.complete = false; state.page = 0;
         resetFilters();
         el('context').textContent = ''; el('message').textContent = ''; el('warnings').hidden = true;
@@ -273,7 +310,7 @@
             resetFilters();
             el('parameters').textContent = JSON.stringify(data, (key,value) => key === 'items' ? undefined : value, 2);
             el('context').textContent = data.scenario.name + ' · v' + data.scenario.version + ' · ' + data.query.period.from + ' — ' + data.query.period.to
-                + ' · ' + t.currentStockCapture + ': ' + ((data.currentStockCapture || {}).capturedAt || data.createdAt);
+                + ' · ' + t.currentStockCapture + ': ' + ((data.currentStockCapture || {}).capturedAt || data.createdAt) + receiptSummary(data.receiptAnswers);
             el('warnings').hidden = true;
             if (!Array.from(el('drafts').options).some(option => option.value === token)) {
                 el('drafts').add(new Option(data.scenario.name + ' · ' + data.createdAt, token));

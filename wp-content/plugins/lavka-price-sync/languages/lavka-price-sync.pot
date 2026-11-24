@@ -6991,3 +6991,60 @@ msgstr ""
 
 msgid "Freezing product excluded from the supplier order."
 msgstr ""
+
+msgid "SKUs with other receipts:"
+msgstr ""
+
+msgid "Answer both delivery questions before starting the calculation."
+msgstr ""
+
+msgid "Invalid receiving group."
+msgstr ""
+
+msgid "Enter an SKU and a positive quantity on each line. Check: %s"
+msgstr ""
+
+msgid "Duplicate incoming quantity for SKU %s in the same group."
+msgstr ""
+
+msgid "List the other confirmed receipts or select None."
+msgstr ""
+
+msgid "Incoming SKUs missing from this scenario: %s"
+msgstr ""
+
+msgid "Non-freezing stock: %s days"
+msgstr ""
+
+msgid "Freezing stock: %s days"
+msgstr ""
+
+msgid "%1$s: %2$s stock days"
+msgstr ""
+
+msgid "Deliveries for this calculation"
+msgstr ""
+
+msgid "Will stock on Transport and Receiving arrive in time?"
+msgstr ""
+
+msgid "Yes, count it as incoming stock"
+msgstr ""
+
+msgid "No, exclude it from this order calculation"
+msgstr ""
+
+msgid "Are there other confirmed receipts due in time?"
+msgstr ""
+
+msgid "No other receipts"
+msgstr ""
+
+msgid "Yes, enter quantities by receiving group"
+msgstr ""
+
+msgid "Enter one SKU and quantity per line. Include only additional receipts outside Transport, Receiving and internal transfers."
+msgstr ""
+
+msgid "Supplier offers have different minimum quantities. Enter the minimum for the selected offer."
+msgstr ""

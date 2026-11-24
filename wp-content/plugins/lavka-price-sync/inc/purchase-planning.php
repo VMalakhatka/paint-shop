@@ -39,6 +39,7 @@ function lps_purchase_i18n(): array {
         'supplierOrder' => __('Purchasing product of the selected supplier', 'lavka-price-sync'),
         'assemblyPending' => __('Checking recipes and dependent products', 'lavka-price-sync'),
         'factor' => __('Component units per child', 'lavka-price-sync'),
+        'listedReceipts' => __('SKUs with other receipts:', 'lavka-price-sync'),
         'supplierPrices' => __('Supplier price list information', 'lavka-price-sync'),
         'supplierPriceLabels' => function_exists('lps_sp_labels') ? lps_sp_labels() : [],
         'title' => __('Supplier order preview', 'lavka-price-sync'),
@@ -166,6 +167,7 @@ function lps_purchase_i18n(): array {
             'DESTINATION_POLICY_BLOCKED' => __('The receiving warehouse stock policy does not allow this purchase.', 'lavka-price-sync'),
             'NETWORK_POLICY_NOT_CONFIRMED' => __('Network purchase permission is missing or blocked.', 'lavka-price-sync'),
             'PROFIT_REVIEW_REQUIRED' => __('Profit is negative or unknown. A purchase recommendation requires review.', 'lavka-price-sync'),
+            'SUPPLIER_MINIMUM_AMBIGUOUS' => __('Supplier offers have different minimum quantities. Enter the minimum for the selected offer.', 'lavka-price-sync'),
             'SUPPLY_INPUTS_REQUIRED' => __('Confirm transit, other incoming orders, supplier pack and minimum order quantity. Enter zero only when confirmed.', 'lavka-price-sync'),
             'TRANSIT_OVERALLOCATED' => __('The same transit stock was allocated more than once: group allocations exceed the confirmed total.', 'lavka-price-sync'),
             'TRANSIT_SOURCE_MISMATCH' => __('Java returned a different transport warehouse set. Update the backend for the transport warehouses selected in Lavka settings.', 'lavka-price-sync'),
@@ -237,7 +239,35 @@ function lps_purchase_session(string $token): array {
     return $state;
 }
 
-function lps_purchase_start(int $id, int $version): array {
+function lps_purchase_receipt_answers(array $answers, array $groups): array {
+    $transit = $answers['transit'] ?? null;
+    $other = $answers['other'] ?? null;
+    $lists = $answers['lines'] ?? [];
+    if (!in_array($transit, ['INCLUDE', 'EXCLUDE'], true) || !in_array($other, ['NONE', 'LIST'], true)
+        || !is_array($lists) || ($other === 'NONE' && $lists)) {
+        throw new InvalidArgumentException(__('Answer both delivery questions before starting the calculation.', 'lavka-price-sync'));
+    }
+    $receipts = [];
+    $codes = array_column($groups, 'code');
+    foreach ($lists as $code => $text) {
+        if (!in_array($code, $codes, true) || !is_string($text)) throw new InvalidArgumentException(__('Invalid receiving group.', 'lavka-price-sync'));
+        foreach (preg_split('/\R/u', trim($text)) as $line) {
+            $line = trim($line);
+            if ($line === '') continue;
+            if (!preg_match('/^(.+?)\s+([0-9]+(?:[.,][0-9]+)?)$/uD', $line, $match)
+                || ($quantity = lps_purchase_number(str_replace(',', '.', $match[2]), 0.000001)) === null) {
+                throw new InvalidArgumentException(sprintf(__('Enter an SKU and a positive quantity on each line. Check: %s', 'lavka-price-sync'), $line));
+            }
+            $sku = lps_assembly_key($match[1]);
+            if (isset($receipts[$sku][$code])) throw new InvalidArgumentException(sprintf(__('Duplicate incoming quantity for SKU %s in the same group.', 'lavka-price-sync'), $sku));
+            $receipts[$sku][$code] = $quantity;
+        }
+    }
+    if ($other === 'LIST' && !$receipts) throw new InvalidArgumentException(__('List the other confirmed receipts or select None.', 'lavka-price-sync'));
+    return ['transit' => $transit, 'other' => $other, 'quantities' => $receipts];
+}
+
+function lps_purchase_start(int $id, int $version, ?array $answers = null): array {
     $row = lps_analytics_scenario_row($id);
     if (!$row) throw new InvalidArgumentException(__('The selected analytics scenario was not found or is not available to you.', 'lavka-price-sync'));
     $scenario = lps_analytics_scenario_decode_row($row);
@@ -253,6 +283,7 @@ function lps_purchase_start(int $id, int $version): array {
     }
     if (empty($profile['calculation']['includeReturns'])) throw new InvalidArgumentException(__('Enable returns in the analytics scenario before building a purchase preview.', 'lavka-price-sync'));
     $groups = lps_purchase_resolve_groups($profile, function_exists('lavka_get_global_warehouse_groups') ? lavka_get_global_warehouse_groups() : []);
+    $receipt_answers = $answers === null ? null : lps_purchase_receipt_answers($answers, $groups);
     $transit_ids = lps_purchase_transit_warehouses();
     if (array_intersect($profile['context']['warehouseIds'], $transit_ids)) {
         throw new InvalidArgumentException(lps_purchase_i18n()['issues']['TRANSIT_DESTINATION_OVERLAP']);
@@ -290,8 +321,13 @@ function lps_purchase_start(int $id, int $version): array {
             'nonFreezingTargetDays' => $profile['purchasePlanning']['nonFreezingTargetDays'] ?? 150],
         'rows' => [], 'edits' => [], 'page' => 0, 'cursor' => null, 'seenCursors' => [], 'complete' => false,
         'context' => null, 'createdAt' => $created_at];
+    if ($receipt_answers !== null) {
+        $state['receiptAnswers'] = $receipt_answers;
+        $state['supplyConfirmation']['noOtherIncomingOrders'] = $receipt_answers['other'] === 'NONE';
+        $state['supplyConfirmation']['currentReceiptsWithinLeadTime'] = $receipt_answers['transit'] === 'INCLUDE';
+    }
     set_transient(lps_purchase_session_key($token), $state, 2 * HOUR_IN_SECONDS);
-    return ['token' => $token, 'scenario' => $state['scenario'], 'groups' => $groups, 'query' => $query, 'groupsRevision' => $state['groupsRevision'],
+    return ['receiptAnswers' => $receipt_answers, 'token' => $token, 'scenario' => $state['scenario'], 'groups' => $groups, 'query' => $query, 'groupsRevision' => $state['groupsRevision'],
         'transitWarehouseIds' => $transit_ids];
 }
 
@@ -368,7 +404,7 @@ function lps_purchase_page(string $token, int $page): array {
             $state['transitGenerationId'] = $generation;
         }
         // The assembly graph supplies BALL2 when loading finishes.
-        if (empty($state['coldCoverage']['excludeFreezing'])) $results[] = $result;
+        if (empty($state['receiptAnswers']) && empty($state['coldCoverage']['excludeFreezing'])) $results[] = $result;
     }
     $next = (string)($body['nextCursor'] ?? '');
     if ($next !== '' && (isset($state['seenCursors'][$next]) || !$body['rows'])) throw new RuntimeException(__('The analytics service returned a repeated page cursor.', 'lavka-price-sync'));
@@ -388,6 +424,8 @@ function lps_purchase_page(string $token, int $page): array {
         $state['complete'] = !$state['pendingChildren'];
     }
     if ($state['complete']) {
+        $outside = array_diff_key($state['receiptAnswers']['quantities'] ?? [], $state['seenSkus'] ?? []);
+        if ($outside) throw new InvalidArgumentException(sprintf(__('Incoming SKUs missing from this scenario: %s', 'lavka-price-sync'), implode(', ', array_keys($outside))));
         $state = lps_purchase_capture_current_stock($state);
         $results = lps_purchase_calculate_network($state);
     }
@@ -434,7 +472,7 @@ add_action('wp_ajax_lps_purchase_planning', static function (): void {
         switch (sanitize_key(wp_unslash($_POST['operation'] ?? ''))) {
             case 'drafts': $result = ['items'=>lps_purchase_drafts_list()]; break;
             case 'open': $result = lps_purchase_draft_open((string)($input['token'] ?? '')); break;
-            case 'start': $result = lps_purchase_start(absint($input['scenarioId'] ?? 0), absint($input['version'] ?? 0)); break;
+            case 'start': $result = lps_purchase_start(absint($input['scenarioId'] ?? 0), absint($input['version'] ?? 0), (array)($input['receiptAnswers'] ?? [])); break;
             case 'page': $result = lps_purchase_page((string)($input['token'] ?? ''), absint($input['page'] ?? 0)); break;
             case 'adjust': $result = lps_purchase_adjust((string)($input['token'] ?? ''), (string)($input['sku'] ?? ''), (array)($input['groups'] ?? []), isset($input['revision']) ? absint($input['revision']) : null); break;
             default: throw new InvalidArgumentException(__('Invalid request.', 'lavka-price-sync'));
@@ -481,12 +519,47 @@ function lps_purchase_render(): void {
             </label>
             <button class="button" type="button" id="lps-purchase-open"><?php echo esc_html__('Open draft', 'lavka-price-sync'); ?></button>
         </div>
+        <?php $group_names = function_exists('lavka_get_global_warehouse_groups') ? array_column(lavka_get_global_warehouse_groups(), 'name', 'code') : []; ?>
         <form id="lps-purchase-form" class="lps-purchase-toolbar">
             <label><?php echo esc_html__('Analytics scenario', 'lavka-price-sync'); ?> <select id="lps-purchase-scenario" required><option value="">—</option>
                 <?php foreach (lps_analytics_scenarios_list() as $scenario): if (empty($scenario['profile']['purchasePlanning']['enabled']) || $scenario['status'] !== 'active') continue; ?>
-                    <option value="<?php echo esc_attr($scenario['id']); ?>" data-version="<?php echo esc_attr($scenario['version']); ?>"><?php echo esc_html($scenario['name'] . ' · v' . $scenario['version']); ?></option>
+                    <?php
+                    $plan = $scenario['profile']['purchasePlanning'];
+                    $destinations = [];
+                    foreach ($plan['groups'] ?? [] as $g) $destinations[$g['code']] = $group_names[$g['code']] ?? $g['code'];
+                    $period = lps_analytics_period_resolve($scenario['profile']['period'] ?? []);
+                    $horizons = [];
+                    if (!empty($plan['coldCoverageEnabled'])) {
+                        $horizons[] = sprintf(__('Non-freezing stock: %s days', 'lavka-price-sync'), $plan['nonFreezingTargetDays']);
+                        if (empty($plan['excludeFreezing'])) $horizons[] = sprintf(__('Freezing stock: %s days', 'lavka-price-sync'), $plan['freezingTargetDays']);
+                    } else {
+                        foreach ($plan['groups'] ?? [] as $g) $horizons[] = sprintf(__('%1$s: %2$s stock days', 'lavka-price-sync'), $destinations[$g['code']], $g['targetDays']);
+                    }
+                    if (!empty($plan['excludeFreezing'])) $horizons[] = __('Order only non-freezing products', 'lavka-price-sync');
+                    ?>
+                    <option data-groups="<?php echo esc_attr(json_encode($destinations)); ?>" data-scope="<?php echo esc_attr(implode(' — ', $period) . ' · ' . implode(' · ', $horizons)); ?>" value="<?php echo esc_attr($scenario['id']); ?>" data-version="<?php echo esc_attr($scenario['version']); ?>"><?php echo esc_html($scenario['name'] . ' · v' . $scenario['version']); ?></option>
                 <?php endforeach; ?>
             </select></label>
+            <fieldset id="lps-purchase-deliveries" hidden>
+                <legend><?php echo esc_html__('Deliveries for this calculation', 'lavka-price-sync'); ?></legend>
+                <p id="lps-purchase-scope"></p>
+                <div class="lps-purchase-inputs">
+                    <label><span><?php echo esc_html__('Will stock on Transport and Receiving arrive in time?', 'lavka-price-sync'); ?></span>
+                        <select id="lps-purchase-transit" required><option value="">—</option>
+                            <option value="INCLUDE"><?php echo esc_html__('Yes, count it as incoming stock', 'lavka-price-sync'); ?></option>
+                            <option value="EXCLUDE"><?php echo esc_html__('No, exclude it from this order calculation', 'lavka-price-sync'); ?></option>
+                        </select></label>
+                    <label><span><?php echo esc_html__('Are there other confirmed receipts due in time?', 'lavka-price-sync'); ?></span>
+                        <select id="lps-purchase-other" required><option value="">—</option>
+                            <option value="NONE"><?php echo esc_html__('No other receipts', 'lavka-price-sync'); ?></option>
+                            <option value="LIST"><?php echo esc_html__('Yes, enter quantities by receiving group', 'lavka-price-sync'); ?></option>
+                        </select></label>
+                </div>
+                <div id="lps-purchase-list" hidden>
+                    <p><?php echo esc_html__('Enter one SKU and quantity per line. Include only additional receipts outside Transport, Receiving and internal transfers.', 'lavka-price-sync'); ?></p>
+                    <div class="lps-purchase-inputs" id="lps-purchase-lines"></div>
+                </div>
+            </fieldset>
             <button class="button button-primary" type="submit" id="lps-purchase-start"><?php echo esc_html__('Calculate preview', 'lavka-price-sync'); ?></button>
             <button class="button" type="button" id="lps-purchase-cancel" disabled><?php echo esc_html__('Cancel', 'lavka-price-sync'); ?></button>
             <a class="button" href="<?php echo esc_url(admin_url('admin.php?page=' . LPS_ANALYTICS_SCENARIOS_PAGE)); ?>"><?php echo esc_html__('Manage scenarios', 'lavka-price-sync'); ?></a>
@@ -623,7 +696,13 @@ add_action('admin_post_lps_purchase_export', static function (): void {
         if (preg_match('/^[\s]*[=+@\-]/u', $metadata['scenario'])) $metadata['scenario'] = "'" . $metadata['scenario'];
         $metadata['warehouseGroupsRevision'] = $state['groupsRevision'];
         $metadata['currentStockCapture'] = wp_json_encode($state['currentStockCapture'] ?? null);
-        $metadata['supplyConfirmation'] = wp_json_encode($state['supplyConfirmation'] ?? []);
+        $confirmation = $state['supplyConfirmation'] ?? [];
+        if (isset($state['receiptAnswers'])) {
+            $confirmation['transit'] = $state['receiptAnswers']['transit'];
+            $confirmation['otherReceipts'] = $state['receiptAnswers']['other'];
+            $confirmation['listedSkus'] = count($state['receiptAnswers']['quantities']);
+        }
+        $metadata['supplyConfirmation'] = wp_json_encode($confirmation);
         $metadata['assemblyRecipeRevision'] = $state['assemblyGraph']['revision'];
         $metadata['transitWarehouseIds'] = wp_json_encode($state['transitWarehouseIds']);
         $metadata['transitGenerationId'] = $state['transitGenerationId'];

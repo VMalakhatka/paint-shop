@@ -3,6 +3,8 @@
 .lps-purchase-toolbar select { max-width: 480px; width: 100%; }
 .lps-purchase-toolbar label { max-width: 100%; }
 .lps-purchase .notice { padding: 12px; }
+#lps-purchase-deliveries { flex-basis: 100%; }
+#lps-purchase-lines textarea { width: 100%; box-sizing: border-box; }
 .lps-purchase-filters { display: grid; grid-template-columns: repeat(3, minmax(220px, 1fr)); gap: 14px; margin: 16px 0; padding: 14px; border: 1px solid #c3c4c7; background: #fff; }
 .lps-purchase-filters legend { padding: 0 6px; font-weight: 600; }
 .lps-purchase-filters label > span { display: block; margin-bottom: 6px; font-weight: 600; }

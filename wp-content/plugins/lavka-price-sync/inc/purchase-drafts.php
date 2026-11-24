@@ -108,7 +108,7 @@ function lps_purchase_draft_open(string $token): array {
     }
     unset($item);
     return ['token'=>$token,'items'=>$state['draftResults'],'revision'=>$state['draftRevision'],
-        'scenario'=>$state['scenario'],'query'=>$state['query'],'groups'=>$state['groups'],
+        'receiptAnswers'=>$state['receiptAnswers'] ?? null,'scenario'=>$state['scenario'],'query'=>$state['query'],'groups'=>$state['groups'],
         'createdAt'=>$state['createdAt'],'updatedAt'=>$state['draftUpdatedAt'],
         'currentStockCapture'=>$state['currentStockCapture'] ?? null];
 }

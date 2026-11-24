@@ -11,8 +11,9 @@ function esc_html__($s, $d = '') { return __($s, $d); }
 function current_user_can($s) { return true; }
 function admin_url($s) { return $s; }
 function sanitize_text_field($s) { return strip_tags((string)$s); }
-function lps_analytics_scenarios_list() { return [['id'=>1,'name'=>'Kreul preview','version'=>2,'status'=>'active','profile'=>['purchasePlanning'=>['enabled'=>true]]]]; }
+function lps_analytics_scenarios_list() { return [['id'=>1,'name'=>'Kreul preview','version'=>2,'status'=>'active','profile'=>['purchasePlanning'=>['enabled'=>true,'groups'=>[['code'=>'kyiv','targetDays'=>120]]]]]]; }
 $base = dirname(__DIR__);
+require_once $base . '/inc/analytics-period.php';
 require $base . '/inc/purchase-planning-model.php';
 require $base . '/inc/purchase-planning.php';
 $groups = [['code'=>'kyiv','name'=>'Kyiv','warehouseIds'=>[1],'receivingWarehouseId'=>1,'leadTimeDays'=>0,'targetDays'=>30,'safetyDays'=>0,'respectPack'=>true]];

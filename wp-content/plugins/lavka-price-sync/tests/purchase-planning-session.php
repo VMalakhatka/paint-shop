@@ -50,6 +50,13 @@ $scenario = ['id' => 1, 'uuid' => 'scenario-1', 'version' => 2, 'status' => 'act
 $token = lps_purchase_start(1, 2)['token'];
 check(lps_purchase_session($token)['query']['calculation']['availability']['enabled'] === true, 'Days of stockout are requested even with correction disabled');
 check(count($capabilityQueries) === 1, 'Start warms Java capabilities before the paginated preview');
+$answers = ['transit'=>'EXCLUDE','other'=>'LIST','lines'=>['group'=>"abc  7,5"]];
+$run = lps_purchase_start(1, 2, $answers);
+check(lps_purchase_session($run['token'])['receiptAnswers']['quantities'] === ['ABC'=>['group'=>7.5]], 'Receipt answers normalized and pinned at start');
+foreach ([[], ['other'=>'NONE','transit'=>'invalid'], array_merge($answers,['lines'=>[]]), array_merge($answers,['lines'=>['wrong'=>'ABC 1']]),
+    array_merge($answers,['lines'=>['group'=>"ABC 1\nabc 2"]]),array_merge($answers,['lines'=>['group'=>'ABC -4']])] as $invalid) {
+    rejected(fn()=>lps_purchase_start(1,2,$invalid),'Invalid or incomplete run receipts must be rejected');
+}
 $user = 2;
 rejected(fn() => lps_purchase_session($token), 'Preview token must be user-bound');
 $user = 1;

@@ -14,13 +14,23 @@ const output=process.env.UI_OUTPUT_DIR || require('os').tmpdir();
  let fail=false;
  await page.route('https://fixture.local/api',async route=>{
   const request=new URLSearchParams(route.request().postData()); const op=request.get('operation');const payload=JSON.parse(request.get('payload'));
+  if (op==='start') {
+   assert.equal(payload.receiptAnswers.transit,'INCLUDE');
+   assert(['NONE','LIST'].includes(payload.receiptAnswers.other));
+   if(payload.receiptAnswers.other==='LIST') assert.equal(payload.receiptAnswers.lines.kyiv,'KR-17817 12');
+  }
   const items=assembly?calculateAssembly(op==='adjust'?payload.groups:null):[calculate(op==='adjust'?payload.groups:null),calculateZero()];
   const data=op==='start'?{token:'fixture',scenario:{name:'Kreul',version:2},groups:[{name:'Kyiv',warehouseIds:[1]}],query:{period:{from:'2026-08-01',to:'2026-08-30'}}}:op==='page'?{items,replaceItems:true,complete:true,page:1,loaded:2,total:2,warnings:[],context:{analyticsSchemaVersion:7},currentStockCapture:{captureId:'fixture',capturedAt:'2026-10-11T12:00:00Z'}}:{items};
   await route.fulfill({status:fail?400:200,contentType:'application/json',body:JSON.stringify(fail?{success:false,data:{message:'Fixture validation error'}}:{success:true,data})});
  });
  for(const width of [1440,390]){
   await page.setViewportSize({width,height:1000});await page.setContent(execFileSync(php,[fixture],{encoding:'utf8'}));
-  await page.locator('#lps-purchase-scenario').selectOption('1');await page.locator('#lps-purchase-start').click();
+  await page.locator('#lps-purchase-scenario').selectOption('1');
+  await page.locator('#lps-purchase-transit').selectOption('INCLUDE');
+  assert(await page.locator('#lps-purchase-other').evaluate(field=>!field.checkValidity()));
+  await page.locator('#lps-purchase-other').selectOption('LIST');
+  await page.locator('#lps-purchase-lines textarea').fill('KR-17817 12');
+  await page.locator('#lps-purchase-start').click();
   await page.locator('[data-edit-form]').first().waitFor({state:'attached'});
   assert.equal(await page.locator('.lps-purchase-sku').count(),2);
   assert((await page.locator('#lps-purchase-context').innerText()).includes('2026-10-11T12:00:00Z'),'Current source cut time is visible');
@@ -57,7 +67,9 @@ const output=process.env.UI_OUTPUT_DIR || require('os').tmpdir();
  assert(await page.locator('[data-export="csv"]').isDisabled());assert.deepEqual(errors,[]);
  fail=false;routed=true;
  await page.setViewportSize({width:1440,height:1000});await page.setContent(execFileSync(php,[fixture],{encoding:'utf8'}));
- await page.locator('#lps-purchase-scenario').selectOption('1');await page.locator('#lps-purchase-start').click();
+ await page.locator('#lps-purchase-scenario').selectOption('1');
+  await page.locator('#lps-purchase-transit').selectOption('INCLUDE');
+  await page.locator('#lps-purchase-other').selectOption('NONE');await page.locator('#lps-purchase-start').click();
  await page.locator('[data-edit-form="0"]').waitFor({state:'attached'});
  await page.locator('[data-edit-form="0"]').locator('..').locator('summary').click();
  const destination=page.locator('[data-edit-form="0"] [data-group="odesa"]');
@@ -71,7 +83,9 @@ const output=process.env.UI_OUTPUT_DIR || require('os').tmpdir();
  await page.screenshot({path:`${output}/purchase-linked-replenishment.png`,fullPage:true});
  internal=true; routed=false;
  await page.setContent(execFileSync(php,[fixture],{encoding:'utf8'}));
- await page.locator('#lps-purchase-scenario').selectOption('1');await page.locator('#lps-purchase-start').click();
+ await page.locator('#lps-purchase-scenario').selectOption('1');
+  await page.locator('#lps-purchase-transit').selectOption('INCLUDE');
+  await page.locator('#lps-purchase-other').selectOption('NONE');await page.locator('#lps-purchase-start').click();
  await page.locator('[data-edit-form="0"]').waitFor({state:'attached'});
  const restoredRow=page.locator('.lps-purchase-sku').first().locator('.lps-purchase-calculation tbody tr').first();
  assert.equal(await restoredRow.locator('td').nth(3).innerText(),'0');
@@ -86,7 +100,9 @@ const output=process.env.UI_OUTPUT_DIR || require('os').tmpdir();
  assembly=true; internal=false;
  for (const width of [1440,390]) {
   await page.setViewportSize({width,height:1000}); await page.setContent(execFileSync(php,[fixture],{encoding:'utf8'}));
-  await page.locator('#lps-purchase-scenario').selectOption('1'); await page.locator('#lps-purchase-start').click();
+  await page.locator('#lps-purchase-scenario').selectOption('1');
+  await page.locator('#lps-purchase-transit').selectOption('INCLUDE');
+  await page.locator('#lps-purchase-other').selectOption('NONE'); await page.locator('#lps-purchase-start').click();
   await page.locator('[data-edit-form="1"]').waitFor({state:'attached'});
   const parent=page.locator('.lps-purchase-sku').first();
   assert.equal(await parent.locator('.lps-purchase-calculation tbody tr td').nth(1).innerText(),'12');
@@ -112,7 +128,9 @@ const output=process.env.UI_OUTPUT_DIR || require('os').tmpdir();
  shortfall=true;
  for (const width of [1440,390]) {
   await page.setViewportSize({width,height:1000}); await page.setContent(execFileSync(php,[fixture],{encoding:'utf8'}));
-  await page.locator('#lps-purchase-scenario').selectOption('1'); await page.locator('#lps-purchase-start').click();
+  await page.locator('#lps-purchase-scenario').selectOption('1');
+  await page.locator('#lps-purchase-transit').selectOption('INCLUDE');
+  await page.locator('#lps-purchase-other').selectOption('NONE'); await page.locator('#lps-purchase-start').click();
   const warning=page.locator('[data-child-coverage-warning]');
   await warning.waitFor({state:'visible'});
   assert((await warning.innerText()).includes('0.25'));
