@@ -2191,3 +2191,81 @@ msgstr ""
 
 msgid "A verified identical image can be reused. When replacing an existing main image with automatic naming enabled, a different photo receives a separate filename and requires your choice about the previous photo. Other filename conflicts remain blocked. An S3-only file requires an administrator to restore its Media Library record."
 msgstr ""
+
+msgid "The file can pass the first check and remain in the Media Library if Folio blocks the assignment. If the message says Folio and WooCommerce have different main images, send the SKU and the CSV report to the administrator. After the references are corrected, check the same batch and synchronize again. The verified file is reused."
+msgstr ""
+
+msgid "Correct the main photo filename in Folio"
+msgstr ""
+
+msgid "The main photo filename already matches the website."
+msgstr ""
+
+msgid "The filename was corrected in Folio. To replace the photo, check and synchronize the same batch again."
+msgstr ""
+
+msgid "Checking the Folio and website filenames…"
+msgstr ""
+
+msgid "Open the website photo and verify the product before confirming."
+msgstr ""
+
+msgid "Saving the confirmed filename in Folio…"
+msgstr ""
+
+msgid "Enter the SKU to compare the filename in Folio with the photo currently used on the product page."
+msgstr ""
+
+msgid "Preview the Folio filename correction"
+msgstr ""
+
+msgid "Current name in Folio"
+msgstr ""
+
+msgid "Website filename to save in Folio"
+msgstr ""
+
+msgid "Open the current website photo"
+msgstr ""
+
+msgid "Confirm filename correction in Folio"
+msgstr ""
+
+msgid "One current main image could not be found in Folio for this SKU."
+msgstr ""
+
+msgid "Folio did not approve this filename correction. Check the current product images and try the preview again."
+msgstr ""
+
+msgid "The preview could not be saved. Run it again."
+msgstr ""
+
+msgid "This preview has expired. Check the SKU again."
+msgstr ""
+
+msgid "Another Lavka synchronization is running. Try again later."
+msgstr ""
+
+msgid "The main photo changed after the preview. Check the SKU again."
+msgstr ""
+
+msgid "The correction could not be confirmed. Run a new preview to check the current Folio filename."
+msgstr ""
+
+msgid "Enter the exact SKU of a product you can edit."
+msgstr ""
+
+msgid "This product needs a verifiable main photo in WooCommerce before correcting its Folio filename."
+msgstr ""
+
+msgid "The current WooCommerce photo could not be verified in OVH/S3."
+msgstr ""
+
+msgid "WooCommerce is unavailable."
+msgstr ""
+
+msgid "You do not have permission to update product images."
+msgstr ""
+
+msgid "If Folio blocks a replacement because the main filenames differ, open “Correct the main photo filename in Folio”. Preview the two names, open the current website photo and confirm the correction. Then check the same batch and synchronize again to finish the replacement."
+msgstr ""

@@ -7,6 +7,7 @@ function __(string $text, string $domain = ''): string { return $text; }
 function wp_basename(string $path): string { return basename($path); }
 function wc_get_product(int $id) { return $GLOBALS['product']; }
 function get_post_meta(int $id, string $key, bool $single) { return $GLOBALS['files'][$id] ?? ''; }
+function wp_json_encode($value, int $flags = 0): string { return json_encode($value, $flags | JSON_THROW_ON_ERROR); }
 class ProductFixture {
     public int $main = 12;
     public array $gallery = [13, 12, 14, 15];
@@ -93,6 +94,34 @@ $plan = $build->invoke($workflow, [$keep], [0], [$main, $oldGallery, $duplicate,
 check(array_column($plan['changes'], 'operation') === ['remove_gallery', 'set_main', 'update_gallery'], 'Duplicate old gallery references collapse to one');
 $badMain = ['role' => 'main', 'filename' => 'someone-else.jpg'];
 check(!$build->invoke($workflow, [$keep], [0], [$badMain])['ok'], 'Unreviewed Folio main cannot be overwritten');
+$previousProof = ['fullKey' => 'wp-content/uploads/2025/06/KR-16416.jpg', 'sizeBytes' => 45352, 'etag' => '"previous"'];
+$oldReference = ['role' => 'main', 'filename' => 'kr-16416.jpg', 's3' => [
+    'matches' => [['fullKey' => $previousProof['fullKey'], 'sizeBytes' => 45352, 'etag' => 'previous']],
+]];
+$aliasKeep = array_replace($keep, ['previous_main_file' => 'KR-16416.jpg', '_previous_main_proof' => $previousProof]);
+$aliasRemove = array_replace($remove, ['previous_main_file' => 'KR-16416.jpg', '_previous_main_proof' => $previousProof]);
+$plan = $build->invoke($workflow, [$aliasKeep], [0], [$oldReference, $otherGallery]);
+check($plan['ok'] && $plan['changes'][0]['expectedOldFilename'] === 'kr-16416.jpg', 'Folio uses the exact stored name as the optimistic precondition');
+check($plan['changes'][1]['operation'] === 'add_gallery' && $plan['changes'][1]['filename'] === 'KR-16416.jpg'
+    && $plan['changes'][1]['sortOrder'] === 3, 'Gallery receives the verified original case of the file');
+$galleryAlias = array_replace($oldReference, ['role' => 'gallery', 'recordId' => ['key' => '7'], 'sortOrder' => 1]);
+$plan = $build->invoke($workflow, [$aliasKeep], [0], [$oldReference, $galleryAlias, $otherGallery]);
+check($plan['ok'] && $plan['changes'][1]['operation'] === 'update_gallery' && $plan['changes'][1]['expectedOldFilename'] === 'kr-16416.jpg'
+    && (string) $plan['changes'][1]['recordId'] === '7', 'A verified gallery alias is reused without a duplicate');
+$plan = $build->invoke($workflow, [$aliasRemove], [0], [$oldReference, $galleryAlias, $otherGallery]);
+check($plan['ok'] && array_column($plan['changes'], 'operation') === ['remove_gallery', 'set_main'], 'Removing the previous photo also removes its verified alias from Folio gallery');
+foreach ([
+    [],
+    [['fullKey' => 'wp-content/uploads/2025/06/kr-16416.jpg', 'sizeBytes' => 45352, 'etag' => 'previous']],
+    [['fullKey' => $previousProof['fullKey'], 'sizeBytes' => 100, 'etag' => 'previous']],
+    [['fullKey' => $previousProof['fullKey'], 'sizeBytes' => 45352, 'etag' => 'different']],
+    [$oldReference['s3']['matches'][0], $oldReference['s3']['matches'][0]],
+] as $unverified) {
+    $badReference = array_replace($oldReference, ['s3' => ['matches' => $unverified]]);
+    check(!$build->invoke($workflow, [$aliasKeep], [0], [$badReference])['ok'], 'A case variant with absent, ambiguous or mismatched storage proof remains blocked');
+}
+unset($aliasRemove['_previous_main_proof']);
+check(!$build->invoke($workflow, [$aliasRemove], [0], [$oldReference])['ok'], 'Removing a case variant still requires verified storage identity');
 check(!$build->invoke($workflow, [$row], [0], [$main])['ok'], 'Workflow itself rejects an omitted choice');
 $noProof = $keep; unset($noProof['_previous_main_proof']);
 check(!$build->invoke($workflow, [$noProof], [0], [$main])['ok'], 'Keeping old photo requires object proof');

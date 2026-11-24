@@ -352,7 +352,11 @@ Do not delete duplicate WordPress attachments or S3 objects as part of this work
 6. WordPress searches the current Folio main/gallery references for the exact SKU.
    A replacement requires the operator's explicit keep/remove decision from the checked
    batch. Woo snapshots are rechecked before upload and before Folio; an unexpected
-   Folio main filename blocks the SKU. Keep appends/moves the old main to the end using
+   Folio main filename blocks the SKU. A case-only difference is accepted when
+   Folio's sole indexed match and the previous WooCommerce attachment identify
+   the same storage key, byte size and ETag, and the attachment URL passes the
+   live storage check. The change retains Folio's exact stored name as its
+   expected old value. Keep appends/moves the old main to the end using
    verified S3 proof; remove also removes any gallery references to that old filename.
 7. WordPress sends `set_main`, `update_gallery` or `add_gallery` with
    `previewOnly=true`, including any `remove_gallery` operations in the same SKU request.
@@ -398,6 +402,16 @@ For the mismatch repair report, WordPress follows these rules:
 9. The same stored `externalRequestId` and request content are reused when an apply is retried.
 10. Apply runs under the Lavka ecosystem global lock and writes a compact `folio_media_repair` entry to the Total Sync log.
 11. HTTP 200 is not treated as success by itself. WordPress checks top-level `ok` and the item status. `blocked` is shown as a refusal, `noop` as already correct, and only `applied` or `noop` complete an apply successfully.
+
+The batch uploader also has a standalone repair by exact SKU. The uploader capability,
+product edit permission and attachment read permission are checked at preview and apply.
+The only target is the filename of the product's current WooCommerce main attachment.
+Its exact storage key, byte size and ETag are checked against the current attachment URL.
+WordPress previews one `set_main` against Folio's exact previous value, then stores the
+approved payload for the same user for 30 minutes. Apply rechecks the current attachment
+and storage proof under the shared synchronization lock, and submits the approved payload
+with the same request ID. It records the change in the Total Sync log. The existing site
+assignment already points to the target attachment so this repair needs no sync queue.
 
 The package uploader uses the same authenticated server-side proxy and response rules.
 For each exact SKU it always performs preview before apply, reuses one deterministic
