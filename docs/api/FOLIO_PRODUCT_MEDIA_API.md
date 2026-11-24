@@ -352,7 +352,11 @@ Do not delete duplicate WordPress attachments or S3 objects as part of this work
 6. WordPress searches the current Folio main/gallery references for the exact SKU.
    A replacement requires the operator's explicit keep/remove decision from the checked
    batch. Woo snapshots are rechecked before upload and before Folio; an unexpected
-   Folio main filename blocks the SKU. Keep appends/moves the old main to the end using
+   Folio main filename blocks the SKU. A case-only difference is accepted when
+   Folio's sole indexed match and the previous WooCommerce attachment identify
+   the same storage key, byte size and ETag, and the attachment URL passes the
+   live storage check. The change retains Folio's exact stored name as its
+   expected old value. Keep appends/moves the old main to the end using
    verified S3 proof; remove also removes any gallery references to that old filename.
 7. WordPress sends `set_main`, `update_gallery` or `add_gallery` with
    `previewOnly=true`, including any `remove_gallery` operations in the same SKU request.

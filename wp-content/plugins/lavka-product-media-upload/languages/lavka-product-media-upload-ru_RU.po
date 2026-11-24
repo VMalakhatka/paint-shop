@@ -2452,3 +2452,6 @@ msgstr "После проверки замены главного фото вы�
 
 msgid "A verified identical image can be reused. When replacing an existing main image with automatic naming enabled, a different photo receives a separate filename and requires your choice about the previous photo. Other filename conflicts remain blocked. An S3-only file requires an administrator to restore its Media Library record."
 msgstr "Проверенное одинаковое фото можно использовать повторно. При замене существующего главного фото с автоматическим именованием другое фото получает отдельное имя; выберите, что сделать с прежним. Другие конфликты имён блокируются. Для файла только в S3 администратор должен восстановить запись в медиатеке."
+
+msgid "The file can pass the first check and remain in the Media Library if Folio blocks the assignment. If the message says Folio and WooCommerce have different main images, send the SKU and the CSV report to the administrator. After the references are corrected, check the same batch and synchronize again. The verified file is reused."
+msgstr "Файл может пройти первую проверку и остаться в медиатеке, если ФОЛИО заблокирует привязку. Если главные фото в ФОЛИО и WooCommerce различаются, передайте артикул и отчёт CSV администратору. После согласования ссылок проверьте тот же пакет и повторите синхронизацию. Система использует уже проверенный файл."

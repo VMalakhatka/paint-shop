@@ -185,19 +185,6 @@ final class WorkflowService
         string $manifest_hash
     ): array {
         $sku = (string) ($rows[$indexes[0]]['sku'] ?? '');
-        foreach ($indexes as $index) {
-            if (($rows[$index]['role'] ?? '') !== 'main') { continue; }
-            try {
-                MainImageReplacement::assert_current($rows[$index]);
-                if (($rows[$index]['previous_main_action'] ?? '') === 'gallery') {
-                    $old_proof = $this->previous_main_proof($rows[$index]);
-                    if (!$old_proof['ok']) { throw new \RuntimeException($old_proof['message']); }
-                    $rows[$index]['_previous_main_proof'] = $old_proof['proof'];
-                }
-            } catch (\RuntimeException $e) {
-                return $this->fail_indexes($rows, $indexes, 'FOLIO_PREVIEW_BLOCKED', $e->getMessage(), '', 'folio_prepare');
-            }
-        }
         if ($sku === '') {
             return $this->fail_indexes(
                 $rows,
@@ -241,6 +228,34 @@ final class WorkflowService
                 'folio_search'
             );
         }
+
+        $folio_filenames = array_column($items, 'filename');
+        foreach ($indexes as $index) {
+            $row = $rows[$index];
+            if (($row['role'] ?? '') !== 'main') { continue; }
+            try {
+                MainImageReplacement::assert_current($row);
+                $action = $row['previous_main_action'] ?? '';
+                $old = (string) ($row['previous_main_file'] ?? '');
+                $has_case_variant = false;
+                if ($action === 'remove' && $old !== '') {
+                    foreach ($folio_filenames as $filename) {
+                        if ($filename !== $old && strcasecmp((string) $filename, $old) === 0) {
+                            $has_case_variant = true;
+                            break;
+                        }
+                    }
+                }
+                if ($action === 'gallery' || $has_case_variant) {
+                    $old_proof = $this->previous_main_proof($row);
+                    if (!$old_proof['ok']) { throw new \RuntimeException($old_proof['message']); }
+                    $rows[$index]['_previous_main_proof'] = $old_proof['proof'];
+                }
+            } catch (\RuntimeException $e) {
+                return $this->fail_indexes($rows, $indexes, 'FOLIO_PREVIEW_BLOCKED', $e->getMessage(), '', 'folio_prepare');
+            }
+        }
+
         $built = $this->build_changes($rows, $indexes, $items);
         if (!$built['ok']) {
             return $this->fail_indexes(
@@ -348,15 +363,20 @@ final class WorkflowService
             $action = (string) ($row['previous_main_action'] ?? '');
             $old = (string) ($row['previous_main_file'] ?? '');
             $current = (string) ($main_items[0]['filename'] ?? '');
+            $proof = (array) ($row['_previous_main_proof'] ?? []);
             if (!in_array($action, ['gallery', 'remove'], true)) {
                 return $this->build_failure(__('Choose whether to move the current main image to the gallery or remove it from this product.', 'lavka-product-media-upload'));
             }
-            if ($current !== '' && $current !== $old && $current !== $row['canonical_file']) {
-                return $this->build_failure(__('The main images in Folio and WooCommerce differ. Reconcile them before replacing this image.', 'lavka-product-media-upload'));
+            if ($current !== '' && $current !== $row['canonical_file']
+                && !$this->matches_previous_main($main_items[0], $old, $proof)) {
+                return $this->build_failure(
+                    __('The main images in Folio and WooCommerce differ. Reconcile them before replacing this image.', 'lavka-product-media-upload'),
+                    wp_json_encode(['folio' => $current, 'woocommerce' => $old], JSON_UNESCAPED_UNICODE)
+                );
             }
             $old_items = [];
             foreach ($gallery_items as $key => $item) {
-                if ($old !== '' && (string) ($item['filename'] ?? '') === $old) {
+                if ($this->matches_previous_main($item, $old, $proof)) {
                     $old_items[] = $item;
                     unset($gallery_items[$key]);
                 }
@@ -378,7 +398,6 @@ final class WorkflowService
                 $last_position = 0;
                 foreach ($gallery_items as $item) { $last_position = max($last_position, (int) ($item['sortOrder'] ?? 0)); }
                 foreach ($indexes as $other_index) { $last_position = max($last_position, (int) ($rows[$other_index]['position'] ?? 0)); }
-                $proof = (array) ($row['_previous_main_proof'] ?? []);
                 if ($old === '' || !$proof) { return $this->build_failure(__('The previous main image could not be verified in storage. It was not moved to the gallery.', 'lavka-product-media-upload')); }
                 $change = [
                     'operation' => $keep ? 'update_gallery' : 'add_gallery', 'sku' => $row['sku'],
@@ -505,6 +524,29 @@ final class WorkflowService
             'noop_rows' => $noop_rows,
             'operations' => $operations,
         ];
+    }
+
+    private function matches_previous_main(array $item, string $filename, array $proof): bool
+    {
+        $stored = (string) ($item['filename'] ?? '');
+        if ($filename === '' || strcasecmp($stored, $filename) !== 0) {
+            return false;
+        }
+        if ($stored === $filename) {
+            return true;
+        }
+
+        // Folio uses a case-insensitive index lookup. Confirm its sole match is
+        // the exact object already verified for the WooCommerce attachment.
+        $matches = $item['s3']['matches'] ?? [];
+        if (!$proof || !is_array($matches) || count($matches) !== 1) {
+            return false;
+        }
+        $match = reset($matches);
+        return is_array($match)
+            && ($match['fullKey'] ?? '') === $proof['fullKey']
+            && (int) ($match['sizeBytes'] ?? 0) === $proof['sizeBytes']
+            && trim((string) ($match['etag'] ?? ''), '"') === trim($proof['etag'], '"');
     }
 
     private function s3_proof(array $row): array
