@@ -2368,3 +2368,31 @@ msgstr "Создание ТТН не бронирует забор. Статус
 #: courier-pickup
 msgid "Supported: branch drop-off or courier pickup from an enabled sender address, delivery to a branch or parcel locker, reviewed single-warehouse cash on delivery, cash payment for carrier services. Enter the legal recipient name in Ukrainian; it will be recorded in the Nova Poshta recipient directory, not in the store customer profile."
 msgstr "Поддерживается: самостоятельная сдача или забор курьером с подключённого адреса отправителя, доставка в отделение или почтомат, проверенный наложенный платёж одного склада, наличная оплата услуг НП. Укажите имя получателя на украинском по документу; оно будет записано в справочник НП, а не в карточку клиента магазина."
+
+msgid "Enter the recipient phone number for Nova Poshta."
+msgstr "Укажите номер телефона получателя для Новой почты."
+
+msgid "Check the recipient phone number. Use 0XX XXX XX XX or +380 XX XXX XX XX."
+msgstr "Проверьте номер телефона получателя. Введите его в формате 0XX XXX XX XX или +380 XX XXX XX XX."
+
+msgid "Enter the recipient name."
+msgstr "Укажите имя и фамилию получателя."
+
+msgid "Choose how the recipient will receive the parcel."
+msgstr "Выберите способ получения посылки."
+
+msgid "Go to the field"
+msgstr "Перейти к полю"
+
+msgid "No response from the site. Check your connection and reload the order to check its status."
+msgstr "Сайт не ответил. Проверьте интернет-соединение и обновите страницу заказа, чтобы проверить его состояние."
+
+msgid "Your session may have expired. Reload the order and sign in again if requested."
+msgstr "Возможно, сеанс завершился. Обновите страницу заказа и при необходимости войдите снова."
+
+#, php-format
+msgid "The site returned HTTP %d. Reload the order and check the result before retrying."
+msgstr "Сайт вернул ошибку HTTP %d. Обновите страницу заказа и проверьте результат перед повторной попыткой."
+
+msgid "The site returned an unreadable response. Reload the order and check its status."
+msgstr "Не удалось прочитать ответ сайта. Обновите страницу заказа и проверьте его состояние."

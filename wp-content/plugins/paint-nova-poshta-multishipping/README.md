@@ -811,6 +811,8 @@ carrier-confirmed physical acceptance means dispatched. Service-channel settings
 apply, advertising opt-outs must not. None of these notifications are implemented
 by saving a manager draft.
 
+Recipient phone is required for a new Nova Poshta order (including a customer-provided TTN). Classic checkout uses the recipient’s shipping phone when shipping to a different person and the billing phone otherwise. A manager can supply the missing number on an older order in shipment preparation. Preview and save return a field-specific error and a link to the input. After a transport failure, reload the order and check its saved state before retrying.
+
 Local check: `tests/manager-preparation-local.php` via WP CLI, HTTP/mail intercepted,
 synthetic order/customer/approval rows deleted in finally. Covers two origins/split
 line, multiple boxes, stale revision, atomic rollback, external/locked protections,

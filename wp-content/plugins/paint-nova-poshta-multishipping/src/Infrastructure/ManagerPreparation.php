@@ -56,7 +56,7 @@ final class ManagerPreparation
         $recipient = (array)$order->get_meta('_pnpm_recipient');
         $recipient['name'] = trim($order->get_shipping_first_name() . ' ' . $order->get_shipping_last_name())
             ?: trim($order->get_billing_first_name() . ' ' . $order->get_billing_last_name());
-        $recipient['phone'] = $order->get_shipping_phone() ?: $order->get_billing_phone();
+        $recipient['phone'] = RecipientIdentity::orderPhone($order);
         $recipient['address'] = trim($order->get_shipping_address_1() . ' ' . $order->get_shipping_address_2());
         $recipient['city_label'] = $recipient['city_label'] ?? $order->get_shipping_city();
         $groups = [];
@@ -104,7 +104,6 @@ final class ManagerPreparation
     public function prepare(array $context, array $input): array
     {
         if (!hash_equals($context['revision'], (string)($input['revision'] ?? ''))) $this->fail(__('The order or preparation changed. Reload and review it again.', 'paint-nova-poshta-multishipping'));
-        if (($input['agreed'] ?? '') !== '1') $this->fail(__('Confirm that recipient details and packaging were agreed and checked.', 'paint-nova-poshta-multishipping'));
         if (!is_array($input['recipient'] ?? null)) $this->fail(__('Check recipient details and phone number.', 'paint-nova-poshta-multishipping'));
         $recipient = [];
         foreach (['name','phone','city_label','city_ref','delivery_type','point_label','point_ref','address'] as $key) {
@@ -112,19 +111,22 @@ final class ManagerPreparation
             if (!is_scalar($raw) || mb_strlen((string)$raw) > 300) $this->fail(__('Check recipient details and phone number.', 'paint-nova-poshta-multishipping'));
             $recipient[$key] = sanitize_text_field((string)$raw);
         }
-        $recipient['phone'] = preg_replace('/[^0-9]/', '', $recipient['phone']);
-        if (strlen($recipient['phone']) === 10 && str_starts_with($recipient['phone'], '0')) $recipient['phone'] = '38' . $recipient['phone'];
-        if ($recipient['name'] === '' || !preg_match('/^380\d{9}$/', $recipient['phone'])
-            || !self::ref($recipient['city_ref']) || !in_array($recipient['delivery_type'], ['branch','parcel_locker','address'], true)) {
-            $this->fail(__('Check recipient details and phone number.', 'paint-nova-poshta-multishipping'));
+        $phoneError = RecipientIdentity::phoneError($recipient['phone']);
+        if ($phoneError !== '') throw new PreparationFieldError('phone', $phoneError);
+        $recipient['phone'] = RecipientIdentity::phone($recipient['phone']);
+        if ($recipient['name'] === '') throw new PreparationFieldError('name', __('Enter the recipient name.', 'paint-nova-poshta-multishipping'));
+        if (!self::ref($recipient['city_ref'])) throw new PreparationFieldError('pnpm_city_label', __('Choose a city from the Nova Poshta list.', 'paint-nova-poshta-multishipping'));
+        if (!in_array($recipient['delivery_type'], ['branch','parcel_locker','address'], true)) {
+            throw new PreparationFieldError('pnpm_delivery_type', __('Choose how the recipient will receive the parcel.', 'paint-nova-poshta-multishipping'));
         }
         if ($recipient['delivery_type'] === 'address') {
-            if ($recipient['address'] === '') $this->fail(__('Check recipient details and phone number.', 'paint-nova-poshta-multishipping'));
+            if ($recipient['address'] === '') throw new PreparationFieldError('pnpm_address', __('Enter the courier delivery street and building.', 'paint-nova-poshta-multishipping'));
             $recipient['point_ref'] = $recipient['point_label'] = '';
         } else {
-            if (!self::ref($recipient['point_ref'])) $this->fail(__('Check recipient details and phone number.', 'paint-nova-poshta-multishipping'));
+            if (!self::ref($recipient['point_ref'])) throw new PreparationFieldError('pnpm_point_label', __('Choose a Nova Poshta branch or parcel locker from the list.', 'paint-nova-poshta-multishipping'));
             $recipient['address'] = '';
         }
+        if (($input['agreed'] ?? '') !== '1') throw new PreparationFieldError('agreed', __('Confirm that recipient details and packaging were agreed and checked.', 'paint-nova-poshta-multishipping'));
         $cod = CashOnDelivery::review((array)($input['cod_settings'] ?? []), $context);
         $groups = [];
         if (!is_array($input['groups'] ?? null) || count($input['groups']) !== count($context['groups'])) $this->fail(__('Check all warehouse parcels.', 'paint-nova-poshta-multishipping'));

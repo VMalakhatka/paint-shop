@@ -73,6 +73,13 @@ try {
         $bad=$input; $bad['groups'][$locations[0]]['boxes'][0][$key]=$value;
         $reject(fn()=>$service->prepare($context,$bad),'Bad box '.$key);
     }
+    foreach (['', 'abc0500000000'] as $phone) {
+        $bad=$input; $bad['recipient']['phone']=$phone; $bad['agreed']='';
+        try { $service->prepare($context,$bad); throw new RuntimeException('Missing phone validation'); }
+        catch (Paint\NovaPoshta\Infrastructure\PreparationFieldError $error) {
+            $check($error->field === 'phone' && $error->getMessage() !== '', 'Both commands report the phone before agreement');
+        }
+    }
     $bad=$input; $bad['recipient']['point_ref']='bad'; $reject(fn()=>$service->prepare($context,$bad),'Invalid point');
     $bad=$input; $bad['agreed']=''; $reject(fn()=>$service->prepare($context,$bad),'Agreement required');
     $bad=$input; unset($bad['groups'][$locations[1]]); $reject(fn()=>$service->prepare($context,$bad),'Missing warehouse');
@@ -162,7 +169,7 @@ try {
         switch_to_locale('uk');
         ob_start(); (new Paint\NovaPoshta\Admin\ManagerPreparationPanel())->render($order); $html=ob_get_clean();
         $card=['manager'=>true,'point'=>Paint\NovaPoshta\Checkout\PointCard::labels(),'ajaxUrl'=>'https://pnpm-test.invalid/ajax','nonce'=>'test','searching'=>'Loading','requestFailed'=>'Unavailable'];
-        $manager_config=['url'=>'https://pnpm-test.invalid/ajax','nonce'=>'test','loading'=>'Checking','failure'=>'Failed','dirty'=>'Unsaved'];
+        $manager_config=['url'=>'https://pnpm-test.invalid/ajax','nonce'=>'test','loading'=>'Checking','failure'=>'Failed','dirty'=>'Unsaved','editField'=>'Go to the field','network'=>'Connection lost','server'=>'HTTP %d','session'=>'Session expired','unreadable'=>'Unreadable response','busy'=>'In progress'];
         foreach (['kg'=>'kg','cm'=>'cm','currency'=>'UAH','cod'=>'Cash on delivery','payer'=>'Delivery payer','Sender'=>'Sender','Recipient'=>'Recipient'] as $key=>$text) $manager_config[$key]=__($text,'paint-nova-poshta-multishipping');
         $page='<!doctype html><html lang="uk"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font:16px/1.5 system-ui;margin:16px}input,select,button{font:inherit;padding:8px}*{box-sizing:border-box}button{cursor:pointer}input[type=checkbox]{width:auto}h2{font-size:24px}</style><style>'.file_get_contents(PNPM_DIR.'assets/checkout.css').file_get_contents(PNPM_DIR.'assets/manager-preparation.css').'</style>'.$html
             .'<script>'.file_get_contents(ABSPATH.'wp-includes/js/jquery/jquery.min.js').'</script><script>var pnpmCheckout='.wp_json_encode($card).';var pnpmManager='.wp_json_encode($manager_config).';</script><script>'.file_get_contents(PNPM_DIR.'assets/checkout.js').'</script><script>'.file_get_contents(PNPM_DIR.'assets/manager-preparation.js').'</script></html>';

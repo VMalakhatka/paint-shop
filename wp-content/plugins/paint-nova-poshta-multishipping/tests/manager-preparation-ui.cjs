@@ -21,6 +21,10 @@ if (!dir) throw new Error('Fixture directory required');
     const send=(data,status=200)=>route.fulfill({status,contentType:'application/json',headers:{'Access-Control-Allow-Origin':'*'},body:JSON.stringify(data)});
     if(params.get('action')!=='pnpm_manager_preparation') return send({success:false,data:{message:'Directory offline'}});
     const payload=JSON.parse(params.get('payload')), command=params.get('command');commands.push({command,payload});
+    if ((command==='save' || command==='preview') && !payload.recipient.phone) return send({success:false,data:{message:'Enter recipient phone',field:'phone'}},422);
+    if(fail==='malformed'){fail=false;return route.fulfill({status:200,contentType:'text/html',headers:{'Access-Control-Allow-Origin':'*'},body:'<p>Unexpected response</p>'});}
+    if(fail==='offline'){fail=false;return route.abort();}
+    if(fail==='expired'){fail=false;return route.fulfill({status:403,contentType:'text/plain',headers:{'Access-Control-Allow-Origin':'*'},body:'-1'});}
     if(fail){fail=false;return send({success:false,data:{message:'Stale revision'}},409);}
     if(command==='save') {await new Promise(r=>setTimeout(r,200));return send({success:true,data:{revision:'saved-revision',message:'Saved preparation only'}});}
     if(command==='confirmation') return send({success:true,data:{recipient:{name:'<img src=x onerror=alert(1)>',phone:'380000000000',city_label:'Test',city_ref:'00000000-0000-0000-0000-000000000001',delivery_type:'address',address:'Test address'},message:'Imported only'}});
@@ -38,6 +42,8 @@ if (!dir) throw new Error('Fixture directory required');
    assert.equal(await form.locator('.pnpm-boxes .pnpm-box').count(),initialBoxes+1);checks++;
    await form.locator('.pnpm-boxes').first().locator('.pnpm-remove-box').last().click();
    assert.equal(await form.locator('.pnpm-boxes .pnpm-box').count(),initialBoxes);checks++;
+   // A control disabled before the request must remain disabled when the form unlocks.
+   await form.locator('.pnpm-add-box').first().evaluate(el=>{ el.disabled=true; });
    await form.locator('[name=agreed]').check();
    await form.locator('[data-box=weight]').first().fill('3.25');
    assert(!(await form.locator('[name=agreed]').isChecked()));checks++;
@@ -63,6 +69,23 @@ if (!dir) throw new Error('Fixture directory required');
    await page.waitForFunction(()=>document.querySelector('#pnpm-manager-status').textContent==='Stale revision');
    assert.equal(commands.filter(c=>c.command==='save').length,2);checks++;
    assert.equal(await form.locator('button:disabled').count(),1);checks++;
+   const phone=form.locator('[name=phone]'), status=form.locator('#pnpm-manager-status');
+   await phone.fill('');
+   for (const command of ['preview','save']) {
+    await form.locator('[data-pnpm-command='+command+']').click();
+    await status.getByRole('button',{name:'Go to the field'}).waitFor();
+    assert.equal(await status.getAttribute('role'),'alert');checks++;
+    assert(await status.evaluate(el=>document.activeElement===el));checks++;
+    await status.getByRole('button').click();
+    assert(await phone.evaluate(el=>document.activeElement===el && el.getAttribute('aria-invalid')==='true'));checks++;
+   }
+   await phone.fill('0500000000');
+   for (const [failure,text] of [['offline','Connection lost'],['expired','Session expired'],['malformed','Unreadable response']]) {
+    fail=failure;
+    await form.locator('[data-pnpm-command=preview]').click();
+    await status.getByText(text,{exact:true}).waitFor();
+    assert(await form.locator('[data-pnpm-command=preview]').isEnabled());checks++;
+   }
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));checks++;
    assert.deepEqual(errors,[]);checks++;
    await page.screenshot({path:path.join(dir,`manager-preparation-${width}.png`),fullPage:true});

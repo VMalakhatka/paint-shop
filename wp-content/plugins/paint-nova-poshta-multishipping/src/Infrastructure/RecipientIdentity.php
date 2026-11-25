@@ -12,6 +12,28 @@ final class RecipientIdentity
         return strlen($value) === 10 && str_starts_with($value, '0') ? '38'.$value : $value;
     }
 
+    public static function orderPhone(\WC_Order $order): string
+    {
+        $phone = $order->get_shipping_phone();
+        if ($phone !== '') return $phone;
+        $shipping = self::name($order->get_shipping_first_name() . ' ' . $order->get_shipping_last_name());
+        $billing = self::name($order->get_billing_first_name() . ' ' . $order->get_billing_last_name());
+        return $shipping === '' || $shipping === $billing ? $order->get_billing_phone() : '';
+    }
+
+    public static function phoneError(string $raw): string
+    {
+        $raw = trim($raw);
+        if ($raw === '') {
+            return __('Enter the recipient phone number for Nova Poshta.', 'paint-nova-poshta-multishipping');
+        }
+        $compact = preg_replace('/[\s().-]+/u', '', $raw);
+        if (!is_string($compact) || !preg_match('/^(?:0|\+?380)[0-9]{9}$/D', $compact)) {
+            return __('Check the recipient phone number. Use 0XX XXX XX XX or +380 XX XXX XX XX.', 'paint-nova-poshta-multishipping');
+        }
+        return '';
+    }
+
     private static function name(string $value): string
     {
         return mb_strtolower(preg_replace('/\s+/u', ' ', trim(str_replace(['’','ʼ'], "'", $value))));

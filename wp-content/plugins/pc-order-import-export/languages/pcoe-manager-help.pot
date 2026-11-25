@@ -534,3 +534,6 @@ msgstr ""
 #: courier-pickup
 msgid "Choose handover separately for each warehouse shipment. Courier pickup requires activation confirmed by Nova Poshta. Save preparation, check and create each TTN, then print labels in the order. Under WooCommerce → Nova Poshta courier queue, select ready TTNs from one address, load pickup intervals and confirm one shared call. Creating a TTN alone does not book a courier. Check the call history after any incomplete result; do not repeat creation."
 msgstr ""
+
+msgid "If the order has no recipient phone, ask the recipient for it and enter it in Recipient phone. After editing, tick the review checkbox again. If preview or save fails, read the message beside the buttons and use Go to the field to correct the indicated value."
+msgstr ""

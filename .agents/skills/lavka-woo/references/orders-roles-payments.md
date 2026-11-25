@@ -858,3 +858,11 @@ stock synchronization: no Java/Folio calls, no global sync lock. Preserve
 retail Prom semantics and stable existing help anchors. Contract and production
 pilot boundaries: `docs/api/CRM_CATALOG_FEED.md`; customer steps remain in the
 wholesale guide `#crm-catalog`. No live SalesDrive import is implied by offline tests.
+
+Nova Poshta recipient phone (2026-11-25): checkout validation and field selection
+belong to PNPM `CheckoutIntegration`; PCOE uses the same rule at customer
+confirmation. In existing orders, use the manager preparation’s recipient phone
+for corrections. If shipping names differ from billing, ask for the actual
+recipient’s number. The operator steps are in the manager guide under «Підготувати
+відправлення НП». Regression checks: PNPM `checkout-delivery-local.php` and
+`manager-preparation-ui.cjs`.

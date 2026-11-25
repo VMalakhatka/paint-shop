@@ -250,6 +250,10 @@ class CustomerApproval {
         }
         foreach (['recipient', 'phone', 'destination'] as $key) {
             $text = trim(sanitize_textarea_field((string) ($input[$key] ?? '')));
+            if ($key === 'phone' && ApprovalDelivery::selected($result['delivery']['id'])) {
+                $error = apply_filters('pcoe_np_recipient_phone_error', '', $text);
+                if ($error !== '') self::fail($error);
+            }
             if ($text === '' || mb_strlen($text) > 500) self::fail(__('Enter recipient, phone and delivery details (up to 500 characters each).', 'pc-order-import-export'));
             $result[$key] = $text;
         }

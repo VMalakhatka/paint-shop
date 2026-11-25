@@ -3,9 +3,26 @@
     var $form = $('#pnpm-manager-form');
     if (!$form.length) return;
     var busy = false;
+    var $status = $('#pnpm-manager-status');
+    function status(message, failed, field) {
+        $status.toggleClass('pnpm-request-error', !!failed).attr('role', failed ? 'alert' : 'status')
+            .attr('aria-live', failed ? 'assertive' : 'polite').text(message);
+        $form.find('[aria-invalid="true"][data-pnpm-invalid]').removeAttr('aria-invalid data-pnpm-invalid');
+        if (!failed) return;
+        var $field = $form.find('input,select').filter(function () { return this.name === field; }).first();
+        if ($field.length) {
+            $field.attr({'aria-invalid':'true', 'data-pnpm-invalid':'1'});
+            $('<button type="button" class="button-link"></button>').text(pnpmManager.editField)
+                .on('click', function () { $field.trigger('focus'); }).appendTo($status);
+        }
+        $status.trigger('focus');
+    }
+    function reject(data, fallback) {
+        status(data && typeof data.message === 'string' && data.message || fallback || pnpmManager.failure, true, data && data.field);
+    }
     function dirty() {
         $('#pnpm-manager-preview').empty();
-        $('#pnpm-manager-status').text(pnpmManager.dirty);
+        status(pnpmManager.dirty);
         $form.find('[name=agreed]').prop('checked', false);
     }
     $form.on('input change', 'input:not([name=agreed]),select', dirty);
@@ -38,7 +55,7 @@
         if ($(this).closest('.pnpm-boxes').children().length > 1) { $(this).closest('.pnpm-box').remove(); dirty(); }
     });
     $form.on('click', '[data-pnpm-command]', function () {
-        if (busy || $('[data-pnpm-flight]').length) return;
+        if (busy || $('[data-pnpm-flight]').length) { status(pnpmManager.busy, true); return; }
         var command = $(this).data('pnpm-command');
         if (command === 'save') $(document.body).trigger('pnpm_preparation_saving');
         var recipient = {name:$form.find('[name=name]').val(), phone:$form.find('[name=phone]').val(), address:$('#pnpm_address').val() || ''};
@@ -55,10 +72,10 @@
         busy = true;
         // Freeze the reviewed input while a request is in flight; no automatic retries.
         $form.find('input:not(:disabled),select:not(:disabled),button:not(:disabled)').add($('.pnpm-lifecycle button:not(:disabled),.pnpm-lifecycle input:not(:disabled)')).attr('data-pnpm-busy', '1').prop('disabled', true);
-        $('#pnpm-manager-preview').empty(); $('#pnpm-manager-status').text(pnpmManager.loading);
-        $.post(pnpmManager.url, {action:'pnpm_manager_preparation',nonce:pnpmManager.nonce,command:command,order_id:$form.data('order'),payload:JSON.stringify(payload)})
+        $('#pnpm-manager-preview').empty(); status(pnpmManager.loading);
+        $.ajax({url:pnpmManager.url, type:'POST', dataType:'json', timeout:60000, data:{action:'pnpm_manager_preparation',nonce:pnpmManager.nonce,command:command,order_id:$form.data('order'),payload:JSON.stringify(payload)}})
             .done(function (response) {
-                if (!response || !response.success) { $('#pnpm-manager-status').text(response && response.data && response.data.message || pnpmManager.failure); return; }
+                if (!response || !response.success || !response.data || !response.data.message) { reject(response && response.data, pnpmManager.unreadable); return; }
                 var data = response.data;
                 if (data.revision) $form.attr('data-revision', data.revision);
                 if (command === 'save') $(document.body).trigger('pnpm_preparation_saved', [data.lifecycle_html]);
@@ -73,7 +90,7 @@
                     $(document.body).trigger('updated_checkout');
                     $form.find('[name=agreed]').prop('checked', false);
                 }
-                $('#pnpm-manager-status').text(data.message);
+                status(data.message);
                 if (data.preview) {
                     var $preview = $('#pnpm-manager-preview');
                     $('<p></p>').text([data.preview.recipient.name,data.preview.recipient.phone,data.preview.recipient.city_label,data.preview.recipient.point_label || data.preview.recipient.address].join(' · ')).appendTo($preview);
@@ -87,7 +104,14 @@
                     var $list = $('<ul class="pnpm-blockers"></ul>').appendTo($preview);
                     data.blockers.forEach(function (text) { $('<li></li>').text(text).appendTo($list); });
                 }
-            }).fail(function (xhr) { $('#pnpm-manager-status').text(xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message || pnpmManager.failure); })
+            }).fail(function (xhr, reason) {
+                var fallback = pnpmManager.failure;
+                if (!xhr.status) fallback = pnpmManager.network;
+                else if (xhr.status === 401 || xhr.status === 403 || xhr.responseText === '-1') fallback = pnpmManager.session;
+                else if (xhr.status >= 400) fallback = pnpmManager.server.replace('%d', xhr.status);
+                else if (reason === 'parsererror') fallback = pnpmManager.unreadable;
+                reject(xhr.responseJSON && xhr.responseJSON.data, fallback);
+            })
             .always(function () { busy = false; $('[data-pnpm-busy]').prop('disabled', false).removeAttr('data-pnpm-busy'); codFields(); });
     });
 })(jQuery);

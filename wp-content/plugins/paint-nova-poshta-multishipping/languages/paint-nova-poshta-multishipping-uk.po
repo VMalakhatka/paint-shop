@@ -3098,3 +3098,31 @@ msgstr "Створення ТТН не бронює забір. Статус в�
 #: courier-pickup
 msgid "Supported: branch drop-off or courier pickup from an enabled sender address, delivery to a branch or parcel locker, reviewed single-warehouse cash on delivery, cash payment for carrier services. Enter the legal recipient name in Ukrainian; it will be recorded in the Nova Poshta recipient directory, not in the store customer profile."
 msgstr "Підтримується: самостійна здача або забір кур’єром із підключеної адреси відправника, доставка у відділення чи поштомат, перевірена післяплата одного складу, готівкова оплата послуг НП. Укажіть ім’я одержувача українською за документом; його буде записано в довідник НП, а не в картку клієнта магазину."
+
+msgid "Enter the recipient phone number for Nova Poshta."
+msgstr "Вкажіть номер телефону одержувача для Нової пошти."
+
+msgid "Check the recipient phone number. Use 0XX XXX XX XX or +380 XX XXX XX XX."
+msgstr "Перевірте номер телефону одержувача. Введіть його у форматі 0XX XXX XX XX або +380 XX XXX XX XX."
+
+msgid "Enter the recipient name."
+msgstr "Вкажіть ім’я та прізвище одержувача."
+
+msgid "Choose how the recipient will receive the parcel."
+msgstr "Виберіть спосіб отримання посилки."
+
+msgid "Go to the field"
+msgstr "Перейти до поля"
+
+msgid "No response from the site. Check your connection and reload the order to check its status."
+msgstr "Сайт не відповів. Перевірте інтернет-з’єднання та оновіть сторінку замовлення, щоб перевірити його стан."
+
+msgid "Your session may have expired. Reload the order and sign in again if requested."
+msgstr "Можливо, сеанс завершився. Оновіть сторінку замовлення та за потреби увійдіть знову."
+
+#, php-format
+msgid "The site returned HTTP %d. Reload the order and check the result before retrying."
+msgstr "Сайт повернув помилку HTTP %d. Оновіть сторінку замовлення та перевірте результат перед повторною спробою."
+
+msgid "The site returned an unreadable response. Reload the order and check its status."
+msgstr "Не вдалося прочитати відповідь сайту. Оновіть сторінку замовлення та перевірте його стан."

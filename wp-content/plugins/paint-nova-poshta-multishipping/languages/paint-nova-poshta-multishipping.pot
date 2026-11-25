@@ -3262,3 +3262,31 @@ msgstr ""
 #: courier-pickup
 msgid "Supported: branch drop-off or courier pickup from an enabled sender address, delivery to a branch or parcel locker, reviewed single-warehouse cash on delivery, cash payment for carrier services. Enter the legal recipient name in Ukrainian; it will be recorded in the Nova Poshta recipient directory, not in the store customer profile."
 msgstr ""
+
+msgid "Enter the recipient phone number for Nova Poshta."
+msgstr ""
+
+msgid "Check the recipient phone number. Use 0XX XXX XX XX or +380 XX XXX XX XX."
+msgstr ""
+
+msgid "Enter the recipient name."
+msgstr ""
+
+msgid "Choose how the recipient will receive the parcel."
+msgstr ""
+
+msgid "Go to the field"
+msgstr ""
+
+msgid "No response from the site. Check your connection and reload the order to check its status."
+msgstr ""
+
+msgid "Your session may have expired. Reload the order and sign in again if requested."
+msgstr ""
+
+#, php-format
+msgid "The site returned HTTP %d. Reload the order and check the result before retrying."
+msgstr ""
+
+msgid "The site returned an unreadable response. Reload the order and check its status."
+msgstr ""

@@ -4,7 +4,10 @@ namespace Paint\NovaPoshta\Checkout;
 
 use Paint\NovaPoshta\Infrastructure\ApiClient;
 use Paint\NovaPoshta\Infrastructure\RecipientDirectory;
+use Paint\NovaPoshta\Infrastructure\RecipientIdentity;
+use Paint\NovaPoshta\Domain\ExternalShipmentPolicy;
 use Paint\NovaPoshta\Infrastructure\WarehouseDirectory;
+use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use WC_Order;
 
 defined('ABSPATH') || exit;
@@ -28,6 +31,9 @@ final class CheckoutIntegration
         add_action('wp_enqueue_scripts', [$this, 'assets']);
         add_action('woocommerce_after_order_notes', [$this, 'renderFields']);
         add_action('woocommerce_checkout_update_order_review', [$this, 'captureState']);
+        add_action('woocommerce_store_api_checkout_update_order_from_request', [$this, 'validateStorePhone'], 10, 2);
+        add_filter('pcoe_np_recipient_phone_error', static fn(string $error, string $phone): string => $error ?: RecipientIdentity::phoneError($phone), 10, 2);
+        add_filter('woocommerce_checkout_fields', [$this, 'phoneFields'], 1001);
         add_action('woocommerce_after_checkout_validation', [$this, 'validate'], 10, 2);
         add_action('woocommerce_checkout_create_order', [$this, 'saveOrder'], 20, 2);
         add_filter('woocommerce_available_payment_gateways', [$this, 'filterPaymentGateways'], 900);
@@ -147,11 +153,34 @@ final class CheckoutIntegration
         }
     }
 
+    public function phoneFields(array $fields): array
+    {
+        // Woo normally supplies billing_phone only. Another recipient needs an editable number.
+        foreach (['billing', 'shipping'] as $section) {
+            $key = $section . '_phone';
+            if (!isset($fields[$section][$key])) {
+                $fields[$section][$key] = [
+                    'label' => __('Recipient phone', 'paint-nova-poshta-multishipping'),
+                    'type' => 'tel', 'required' => false, 'priority' => 100,
+                    'autocomplete' => $section . ' tel', 'class' => ['form-row-wide', 'pnpm-phone-only'],
+                ];
+            }
+        }
+        return $fields;
+    }
+
     public function validate(array $data, \WP_Error $errors): void
     {
-        if (!$this->novaPoshtaSelected()) {
-            return;
+        $methods = $this->shippingMethods($data);
+        $storeShipment = $this->novaPoshtaSelected($methods);
+        if (!$this->needsPhone($methods)) return;
+        $field = empty($data['ship_to_different_address']) ? 'billing_phone' : 'shipping_phone';
+        $phone = $data[$field] ?? '';
+        $message = RecipientIdentity::phoneError(is_string($phone) ? $phone : '');
+        if ($message !== '') {
+            $errors->add('pnpm_recipient_phone', $message, ['id' => $field]);
         }
+        if (!$storeShipment) return;
         $posted = wp_unslash($_POST);
         $state = $this->sanitizeState($data + (is_array($posted) ? $posted : []));
         if ($state['city_ref'] === '') {
@@ -176,9 +205,27 @@ final class CheckoutIntegration
         }
     }
 
+    /** Store API also updates draft orders while typing. Validate at final submission only. */
+    public function validateStorePhone(WC_Order $order, \WP_REST_Request $request): void
+    {
+        if ($request->get_method() !== 'POST' || !str_ends_with(rtrim($request->get_route(), '/'), '/checkout')) return;
+        $methods = array_map(static fn($line) => $line->get_method_id(), $order->get_shipping_methods());
+        if (!$this->needsPhone($methods)) return;
+        $error = RecipientIdentity::phoneError(RecipientIdentity::orderPhone($order));
+        if ($error !== '') throw new RouteException('pnpm_recipient_phone', $error, 400);
+    }
+
+    private function needsPhone(array $methods): bool
+    {
+        foreach ($methods as $rate) {
+            if (is_string($rate) && in_array(explode(':', $rate, 2)[0], ['pnpm_nova_poshta', ExternalShipmentPolicy::RATE, 'novaposhta'], true)) return true;
+        }
+        return false;
+    }
+
     public function saveOrder(WC_Order $order, array $data): void
     {
-        if (!$this->novaPoshtaSelected()) {
+        if (!$this->novaPoshtaSelected($this->shippingMethods($data))) {
             return;
         }
         $state = WC()->session ? (array) WC()->session->get('pnpm_recipient', []) : $this->sanitizeState($data);
@@ -303,13 +350,19 @@ final class CheckoutIntegration
         ];
     }
 
-    private function novaPoshtaSelected(): bool
+    private function shippingMethods(array $data = []): array
     {
-        if (!function_exists('WC') || !WC() || !WC()->session) {
-            return false;
+        $chosen = function_exists('WC') && WC() && WC()->session ? (array) WC()->session->get('chosen_shipping_methods', []) : [];
+        $posted = $data['shipping_method'] ?? [];
+        return is_array($posted) ? array_replace($chosen, array_filter($posted, 'is_string')) : $chosen;
+    }
+
+    private function novaPoshtaSelected(?array $methods = null): bool
+    {
+        foreach ($methods ?? $this->shippingMethods() as $rate) {
+            if (is_string($rate) && explode(':', $rate, 2)[0] === 'pnpm_nova_poshta') return true;
         }
-        $chosen = (array) WC()->session->get('chosen_shipping_methods', []);
-        return isset($chosen[0]) && str_starts_with((string) $chosen[0], 'pnpm_nova_poshta');
+        return false;
     }
 
     private function checkoutEnabled(): bool

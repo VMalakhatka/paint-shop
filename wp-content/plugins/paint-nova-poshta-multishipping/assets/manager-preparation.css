@@ -4,3 +4,13 @@
 .pnpm-manager .pnpm-cod [hidden]{display:none}
 
 .pnpm-manager [hidden]{display:none!important}
+
+.pnpm-manager #pnpm-manager-status.pnpm-request-error {
+    padding: 12px 16px;
+    border-inline-start: 4px solid #b32d2e;
+    background: #fcf0f1;
+    color: #3c1719;
+    font-weight: 600;
+}
+.pnpm-request-error .button-link { margin-inline-start: 12px; }
+.pnpm-manager [data-pnpm-invalid] { outline: 2px solid #b32d2e; }

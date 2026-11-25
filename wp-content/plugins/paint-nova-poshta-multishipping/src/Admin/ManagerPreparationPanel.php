@@ -3,6 +3,7 @@ namespace Paint\NovaPoshta\Admin;
 
 use Paint\NovaPoshta\Checkout\CheckoutIntegration;
 use Paint\NovaPoshta\Infrastructure\ManagerPreparation;
+use Paint\NovaPoshta\Infrastructure\PreparationFieldError;
 use Paint\NovaPoshta\Infrastructure\ShipmentRepository;
 
 defined('ABSPATH') || exit;
@@ -30,6 +31,12 @@ final class ManagerPreparationPanel
             'Recipient'=>__('Recipient', 'paint-nova-poshta-multishipping'),
             'loading'=>__('Checking preparation…', 'paint-nova-poshta-multishipping'),
             'failure'=>__('The operation could not be confirmed. Reload before trying again.', 'paint-nova-poshta-multishipping'),
+            'editField'=>__('Go to the field', 'paint-nova-poshta-multishipping'),
+            'unreadable'=>__('The site returned an unreadable response. Reload the order and check its status.', 'paint-nova-poshta-multishipping'),
+            'network'=>__('No response from the site. Check your connection and reload the order to check its status.', 'paint-nova-poshta-multishipping'),
+            'session'=>__('Your session may have expired. Reload the order and sign in again if requested.', 'paint-nova-poshta-multishipping'),
+            'server'=>__('The site returned HTTP %d. Reload the order and check the result before retrying.', 'paint-nova-poshta-multishipping'),
+            'busy'=>__('Another order operation is running. Try again after it finishes.', 'paint-nova-poshta-multishipping'),
             'dirty'=>__('Unsaved changes. Save and check the preparation again.', 'paint-nova-poshta-multishipping')]);
     }
 
@@ -54,7 +61,7 @@ final class ManagerPreparationPanel
         echo '<p><button type="button" class="button" data-pnpm-command="confirmation">' . esc_html__('Use current customer confirmation', 'paint-nova-poshta-multishipping') . '</button></p>';
         echo '<p class="description">' . esc_html__('Import checks the current order version. Review imported details and save separately; your saved preparation is not overwritten automatically.', 'paint-nova-poshta-multishipping') . '</p>';
         foreach (['name'=>__('Recipient name', 'paint-nova-poshta-multishipping'), 'phone'=>__('Recipient phone', 'paint-nova-poshta-multishipping')] as $key=>$label) {
-            echo '<label>' . esc_html($label) . '<input name="' . esc_attr($key) . '" maxlength="300" value="' . esc_attr($context['recipient'][$key] ?? '') . '" required></label>';
+            echo '<label>' . esc_html($label) . '<input name="' . esc_attr($key) . '"' . ($key === 'phone' ? ' type="tel" autocomplete="tel"' : '') . ' maxlength="300" value="' . esc_attr($context['recipient'][$key] ?? '') . '" required></label>';
         }
         CheckoutIntegration::create()->renderDestination($context['recipient'], true);
         echo '<p>' . esc_html__('Payment method and order total', 'paint-nova-poshta-multishipping') . ': ' . esc_html($order->get_payment_method_title() . ' · ' . $order->get_total() . ' UAH') . '</p>';
@@ -80,7 +87,7 @@ final class ManagerPreparationPanel
         echo '<template id="pnpm-box-template">'; self::box([]); echo '</template>';
         echo '<p><label><input type="checkbox" name="agreed" value="1"> ' . esc_html__('Recipient details were agreed; warehouse contents, packed boxes, delivery payer and cash on delivery settings were checked.', 'paint-nova-poshta-multishipping') . '</label></p>';
         echo '<p><button type="button" class="button" data-pnpm-command="save">' . esc_html__('Save preparation', 'paint-nova-poshta-multishipping') . '</button> <button type="button" class="button button-primary" data-pnpm-command="preview">' . esc_html__('Check preview', 'paint-nova-poshta-multishipping') . '</button></p>';
-        echo '<div id="pnpm-manager-status" role="status" aria-live="polite"></div><div id="pnpm-manager-preview"></div>';
+        echo '<div id="pnpm-manager-status" role="status" aria-live="polite" tabindex="-1"></div><div id="pnpm-manager-preview"></div>';
         echo '<p>' . esc_html__('Save preparation. The TTN panel updates automatically; then check the saved shipment with Nova Poshta.', 'paint-nova-poshta-multishipping') . '</p></form>';
         self::audit($order->get_id());
         echo '</section>';
@@ -139,7 +146,9 @@ final class ManagerPreparationPanel
     public function ajax(): void
     {
         if (!ManagerPreparation::allowed()) wp_send_json_error(['message'=>__('Shipment access denied.', 'paint-nova-poshta-multishipping')], 403);
-        check_ajax_referer('pnpm_manager_preparation', 'nonce');
+        if (!check_ajax_referer('pnpm_manager_preparation', 'nonce', false)) {
+            wp_send_json_error(['message'=>__('Your session may have expired. Reload the order and sign in again if requested.', 'paint-nova-poshta-multishipping')], 403);
+        }
         try {
             $raw = wp_unslash($_POST['payload'] ?? '');
             if (!is_string($raw) || strlen($raw) > 65536) throw new \RuntimeException(__('Invalid preparation request.', 'paint-nova-poshta-multishipping'));
@@ -165,6 +174,12 @@ final class ManagerPreparationPanel
             $prepared = $service->prepare($context, $input);
             wp_send_json_success(['preview'=>$prepared, 'blockers'=>$service->blockers($context, $prepared),
                 'message'=>__('Preview only; changes are not saved.', 'paint-nova-poshta-multishipping')]);
-        } catch (\Throwable $e) { wp_send_json_error(['message'=>$e->getMessage()], 409); }
+        } catch (PreparationFieldError $e) {
+            wp_send_json_error(['message'=>$e->getMessage(), 'field'=>$e->field], 422);
+        } catch (\RuntimeException $e) {
+            wp_send_json_error(['message'=>$e->getMessage()], 409);
+        } catch (\Throwable $e) {
+            wp_send_json_error(['message'=>__('The operation could not be confirmed. Reload before trying again.', 'paint-nova-poshta-multishipping')], 500);
+        }
     }
 }

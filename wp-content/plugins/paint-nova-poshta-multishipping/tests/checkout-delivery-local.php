@@ -36,9 +36,44 @@ try {
     $pickup = $rates['pnpm_pickup:' . $location];
     $check((int) $pickup->get_meta_data()['pnpm_pickup_location_id'] === $location, 'Real Woo rate preserves pickup location');
     $integration = Paint\NovaPoshta\Checkout\CheckoutIntegration::create();
-    $data = []; foreach ($state as $key => $value) $data['pnpm_' . $key] = $value;
+    $phones = $integration->phoneFields(['billing' => ['billing_phone' => ['required' => true]]]);
+    $check($phones['billing']['billing_phone'] === ['required' => true], 'Existing Woo phone policy preserved');
+    $check($phones['shipping']['shipping_phone']['type'] === 'tel', 'Alternate recipient can enter a separate phone');
+    $data = ['billing_phone' => '050 000 00 00']; foreach ($state as $key => $value) $data['pnpm_' . $key] = $value;
     $errors = new WP_Error(); $integration->validate($data, $errors);
     $check(!$errors->has_errors(), 'Missing weight does not block valid destination');
+    foreach ([
+        [['billing_phone' => '', 'shipping_method' => ''], 'billing_phone'],
+        [['billing_phone' => 'abc0500000000'], 'billing_phone'],
+        [['billing_phone' => '+0500000000'], 'billing_phone'],
+        [['billing_phone' => '+380 (50) 000-00-00'], ''],
+        [['ship_to_different_address' => 1, 'shipping_phone' => ''], 'shipping_phone'],
+        [['ship_to_different_address' => 1, 'shipping_phone' => '0500000000'], ''],
+        [['billing_phone' => '', 'shipping_method' => ['pnpm_pickup:1','pnpm_nova_poshta:2']], 'billing_phone'],
+        [['billing_phone' => '', 'shipping_method' => ['pnpm_customer_ttn']], 'billing_phone'],
+        [['billing_phone' => '', 'shipping_method' => ['pnpm_pickup:1']], ''],
+    ] as [$changes, $field]) {
+        $errors = new WP_Error();
+        $integration->validate(array_replace($data, $changes), $errors);
+        $check(($errors->get_error_data('pnpm_recipient_phone')['id'] ?? '') === $field, 'Required recipient phone for the selected delivery');
+    }
+    $order = new WC_Order();
+    $line = new WC_Order_Item_Shipping();
+    $line->set_method_id('pnpm_nova_poshta');
+    $order->add_item($line);
+    $order->set_billing_first_name('Buyer');
+    $order->set_billing_phone('0500000000');
+    $order->set_shipping_first_name('Recipient');
+    $request = new WP_REST_Request('POST', '/wc/store/v1/checkout');
+    try {
+        $integration->validateStorePhone($order, $request);
+        throw new RuntimeException('Missing recipient phone passed Store API');
+    } catch (\Automattic\WooCommerce\StoreApi\Exceptions\RouteException $error) {
+        $check($error->getErrorCode() === 'pnpm_recipient_phone', 'Store API rejects a different recipient without their own phone');
+    }
+    $integration->validateStorePhone($order, new WP_REST_Request('PUT', '/wc/store/v1/checkout'));
+    $order->set_shipping_phone('380500000000');
+    $integration->validateStorePhone($order, $request);
     ob_start(); $integration->renderQuoteSummary(); $html = ob_get_clean();
     $check(!str_contains($html, '80,00') && str_contains($html, 'pnpm-checkout-summary'), 'No old fixed charge in actual summary');
     WC()->session->set('chosen_shipping_methods', ['pnpm_pickup:' . $location]);

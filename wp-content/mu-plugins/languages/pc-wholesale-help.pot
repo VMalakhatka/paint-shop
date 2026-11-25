@@ -598,7 +598,7 @@ msgid "Complete delivery"
 msgstr ""
 
 #: pc-wholesale-help.php:432
-msgid "For Nova Poshta, choose the displayed branch, parcel locker or address fields."
+msgid "For Nova Poshta, enter the mobile number of the person receiving the parcel (0XX XXX XX XX or +380 XX XXX XX XX) and choose a branch, parcel locker or courier address. If you select a different recipient, enter their number in the shipping details."
 msgstr ""
 
 #: pc-wholesale-help.php:433

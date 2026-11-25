@@ -91,6 +91,9 @@ try {
     $post=array_replace($input,['action'=>'pcoe_approval_confirm','approval_id'=>$id,'revision'=>$revision,
         'consent'=>'1','recipient'=>'Test recipient','phone'=>'+380500001122','destination'=>'FORGED destination',
         'delivery_quote_token'=>$fresh['token'],'_wpnonce'=>wp_create_nonce('pcoe_approval_confirm')]);
+    foreach (['', 'x0500000000'] as $invalidPhone) {
+        $deny(fn()=>Approval::preferences(array_replace($post,['phone'=>$invalidPhone]), Approval::choices()), 'Invalid NP recipient phone rejected at confirmation');
+    }
     $redirect=static function(){throw new RuntimeException('Test redirect intercepted');};
     $die=static fn()=>static function($message){throw new RuntimeException((string)$message);};
     add_filter('wp_redirect',$redirect);add_filter('wp_die_handler',$die);

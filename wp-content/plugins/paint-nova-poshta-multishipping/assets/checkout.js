@@ -159,12 +159,32 @@
     }
 
     function updateFieldVisibility() {
-        var method = $('input[name^="shipping_method"]:checked, input[type="hidden"][name^="shipping_method"], select[name^="shipping_method"]').first().val() || '';
-        if (pnpmCheckout.approval) { method = $('.pcoe-approval-form [name=delivery]').val() || ''; }
-        if (pnpmCheckout.manager) { method = 'pnpm_nova_poshta'; }
-        var external = method === 'pnpm_customer_ttn';
+        var methods = $('input[name^="shipping_method"]:checked, input[type="hidden"][name^="shipping_method"], select[name^="shipping_method"]').map(function () { return this.value; }).get();
+        if (pnpmCheckout.approval) methods = [$('.pcoe-approval-form [name=delivery]').val() || ''];
+        if (pnpmCheckout.manager) methods = ['pnpm_nova_poshta'];
+        var external = methods.indexOf('pnpm_customer_ttn') !== -1;
+        var nova = methods.some(function (rate) { return rate.split(':')[0] === 'pnpm_nova_poshta'; });
         $('#pnpm-external-fields').prop('hidden', !external);
-        var nova = method.indexOf('pnpm_nova_poshta') === 0;
+        if (!pnpmCheckout.approval && !pnpmCheckout.manager) {
+            var needsPhone = nova || external || methods.some(function (rate) { return rate.split(':')[0] === 'novaposhta'; });
+            var different = $('#ship-to-different-address-checkbox').is(':checked');
+            ['billing', 'shipping'].forEach(function (section) {
+                var $field = $('#' + section + '_phone_field'), $input = $field.find('input');
+                var required = needsPhone && (section === 'shipping' ? different : !different);
+                if ($field.hasClass('pnpm-phone-only')) $field.toggle(required);
+                if (!$field.length || $field.data('pnpm-native-required') === true) return;
+                if ($field.data('pnpm-native-required') === undefined) {
+                    $field.data('pnpm-native-required', $field.hasClass('validate-required'));
+                    if ($field.data('pnpm-native-required')) return;
+                }
+                $field.toggleClass('validate-required', required);
+                $input.attr('aria-required', required ? 'true' : 'false');
+                $field.find('label .optional').toggle(!required);
+                var $mark = $field.find('.pnpm-required');
+                if (required && !$mark.length) $('<span class="required pnpm-required" aria-hidden="true"> *</span>').appendTo($field.find('label'));
+                else $mark.toggle(required);
+            });
+        }
         $('#pnpm-checkout-fields').toggle(nova);
         $('#pnpm-external-fields textarea').each(function () {
             if (Object.prototype.hasOwnProperty.call(externalDraft, this.id)) {
@@ -257,7 +277,7 @@
         resetPoint(); updateFieldVisibility();
     });
     $(document.body).on('change', '.pcoe-approval-form [name=delivery]', updateFieldVisibility);
-    $(document.body).on('change', 'input[name^="shipping_method"], select[name^="shipping_method"]', updateFieldVisibility);
+    $(document.body).on('change', 'input[name^="shipping_method"], select[name^="shipping_method"], #ship-to-different-address-checkbox', updateFieldVisibility);
     $(document.body).on('input', '#pnpm-external-fields textarea', function () {
         externalDraft[this.id] = $(this).val();
         showExtractedNumber($(this));
