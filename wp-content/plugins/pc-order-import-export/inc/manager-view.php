@@ -49,6 +49,7 @@ $directory_url = add_query_arg(['page' => ManagerWorkspace::PAGE, 'customer_sear
 ?>
 <section class="pcoe-card">
 <?php if (FolioCustomerImport::allowed()): ?><p><a class="button" href="<?php echo esc_url(FolioCustomerImportUi::url()); ?>"><?php esc_html_e('Import customers from Folio', 'pc-order-import-export'); ?></a> <a class="button" href="<?php echo esc_url(ContactImportUi::url()); ?>"><?php esc_html_e('Excel contacts', 'pc-order-import-export'); ?></a></p><?php endif; ?>
+<?php CustomerGroups::createForm(); ?>
 <form method="get" class="pcoe-directory-filters">
 <input type="hidden" name="page" value="<?php echo esc_attr(ManagerWorkspace::PAGE); ?>">
 <label for="pcoe-search"><?php esc_html_e('Find customer by name, company or email', 'pc-order-import-export'); ?><input id="pcoe-search" name="customer_search" type="search" value="<?php echo esc_attr($search); ?>"></label>

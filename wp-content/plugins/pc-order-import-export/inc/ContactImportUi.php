@@ -65,11 +65,13 @@ final class ContactImportUi {
             catch (\Throwable $error) { echo '<p role="alert">'.esc_html($error->getMessage()).'</p>'; }
             echo '<p><a href="'.esc_url(self::url()).'">'.esc_html__('Excel contacts', 'pc-order-import-export').'</a></p>';
         } else {
+            CustomerGroups::createForm(true);
             self::startForm();
             echo '<p><label>'.esc_html__('Default role for this workbook', 'pc-order-import-export').' ';
             self::role('role','');
             echo '</label></p><p>';
-            CustomerGroups::select('customer_group', CustomerGroups::SCHOOLS);
+            $ready = sanitize_key($_GET['ready_group'] ?? '');
+            CustomerGroups::select('customer_group', isset(CustomerGroups::labels()[$ready]) ? $ready : CustomerGroups::SCHOOLS);
             echo '</p><p><input type="file" name="contacts" accept=".xlsx" required></p><button class="button button-primary">'.esc_html__('Review workbook', 'pc-order-import-export').'</button></form>';
             $jobs = get_posts(['post_type'=>ContactImport::JOB,'post_status'=>'private','author'=>get_current_user_id(),'numberposts'=>10]);
             if ($jobs) echo '<h3>'.esc_html__('Recent imports','pc-order-import-export').'</h3>';

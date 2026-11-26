@@ -4722,6 +4722,22 @@ msgstr ""
 msgid "Online store"
 msgstr ""
 
+msgid "Create customer group"
+msgstr ""
+
+msgid "Group name"
+msgstr ""
+
+#, php-format
+msgid "Group available: %s"
+msgstr ""
+
+msgid "Enter a group name of up to 100 characters."
+msgstr ""
+
+msgid "Could not save the customer group."
+msgstr ""
+
 msgid "Customer group"
 msgstr ""
 

@@ -4916,6 +4916,22 @@ msgstr "Магазин"
 msgid "Online store"
 msgstr "Онлайн-магазин"
 
+msgid "Create customer group"
+msgstr "Створити групу клієнтів"
+
+msgid "Group name"
+msgstr "Назва групи"
+
+#, php-format
+msgid "Group available: %s"
+msgstr "Група доступна: %s"
+
+msgid "Enter a group name of up to 100 characters."
+msgstr "Введіть назву групи завдовжки до 100 символів."
+
+msgid "Could not save the customer group."
+msgstr "Не вдалося зберегти групу клієнтів."
+
 msgid "Customer group"
 msgstr "Група клієнтів"
 

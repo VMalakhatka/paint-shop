@@ -3,6 +3,7 @@
 use PaintCore\PCOE\ContactImport;
 use PaintCore\PCOE\ContactWorkbook;
 use PaintCore\PCOE\ContactImportUi;
+use PaintCore\PCOE\CustomerGroups;
 if (!defined('WP_CLI') || !WP_CLI || home_url() !== 'http://qa.invalid') throw new RuntimeException('Disposable QA site only');
 $check = static function ($condition, $message) { if (!$condition) throw new RuntimeException($message); };
 $tag = wp_generate_uuid4();
@@ -11,7 +12,11 @@ foreach (['one','two','three','four','five','six'] as $i=>$name) {
     $email = [ $tag.'a@example.invalid', $tag.'b@example.invalid', '', $tag.'shared@example.invalid', $tag.'shared@example.invalid', 'tester@example.invalid'][$i];
     $rows[] = ['ID'=>$tag.$i, ContactWorkbook::ORGANIZATION=>$name,'Email'=>$email,'Телефон'=>'00123','Telegram'=>'qa telegram'];
 }
-$job = ContactImport::stage($rows,'schule');
+$groupName = 'Тестові магазини '.$tag;
+$customGroup = CustomerGroups::create($groupName);
+$check(CustomerGroups::create(mb_strtoupper($groupName)) === $customGroup, 'Repeated group name resolves to one key');
+$check(CustomerGroups::labels()[$customGroup] === $groupName, 'Custom group is available to selectors');
+$job = ContactImport::stage($rows,'schule',$customGroup);
 $staged = ContactImport::page($job,0);
 $check(array_column($staged,'role') === array_fill(0,6,'schule'),'Default role on every row');
 $_GET = ['job'=>$job,'part'=>0];
@@ -37,6 +42,7 @@ foreach ([0=>'schule',1=>'partner'] as $i=>$role) {
     $check($user && $user->roles === [$role],'Effective selected role');
     $card = get_user_meta($user->ID,'_pcoe_contact_id',true);
     $check(get_post_meta($card,'_contact',true)['source'] === $rows[$i],'Every source field retained');
+    $check(get_post_meta($card,CustomerGroups::META,true) === $customGroup && get_user_meta($user->ID,CustomerGroups::META,true) === $customGroup,'Custom group survives import across price roles');
 }
 $check(!email_exists($rows[3]['Email']),'Shared address did not register');
 $check(get_user_by('email','tester@example.invalid')->has_cap('manage_options'),'Existing account preserved');

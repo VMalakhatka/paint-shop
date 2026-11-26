@@ -9,8 +9,16 @@ final class ContactImport {
 
     public static function hooks(): void {
         add_action('init', static function () {
+            register_taxonomy(CustomerGroups::TAXONOMY, self::CARD, [
+                'public' => false, 'show_ui' => false, 'rewrite' => false, 'query_var' => false,
+                'capabilities' => [
+                    'manage_terms' => 'manage_woocommerce', 'edit_terms' => 'manage_woocommerce',
+                    'assign_terms' => 'manage_woocommerce', 'delete_terms' => 'do_not_allow',
+                ],
+            ]);
             foreach ([self::JOB, self::CARD] as $type) register_post_type($type, ['public'=>false, 'show_ui'=>false, 'show_in_rest'=>false, 'supports'=>[]]);
         });
+        add_action('admin_post_pcoe_create_customer_group', [CustomerGroups::class, 'post']);
         add_action('edit_user_profile',[CustomerGroups::class,'profile']);
         add_action('edit_user_profile_update',[CustomerGroups::class,'save']);
         add_action('admin_post_pcoe_contact_import', [ContactImportUi::class, 'post']);
