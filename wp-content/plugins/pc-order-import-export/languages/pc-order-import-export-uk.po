@@ -4910,6 +4910,12 @@ msgstr "Контакти опубліковані на сайті організ
 msgid "Schools and studios"
 msgstr "Школи та студії"
 
+msgid "Retail store"
+msgstr "Магазин"
+
+msgid "Online store"
+msgstr "Онлайн-магазин"
+
 msgid "Customer group"
 msgstr "Група клієнтів"
 

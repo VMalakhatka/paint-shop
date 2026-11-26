@@ -8,7 +8,11 @@ final class CustomerGroups {
     public const SCHOOLS = 'schools-studios';
 
     public static function labels(): array {
-        return [self::SCHOOLS => __('Schools and studios', 'pc-order-import-export')];
+        return [
+            self::SCHOOLS => __('Schools and studios', 'pc-order-import-export'),
+            'retail-store' => __('Retail store', 'pc-order-import-export'),
+            'online-store' => __('Online store', 'pc-order-import-export'),
+        ];
     }
 
     public static function select(string $name, string $value, bool $filter = false): void {

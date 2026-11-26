@@ -4908,6 +4908,12 @@ msgstr "Контакты опубликованы на сайте организ
 msgid "Schools and studios"
 msgstr "Школы и студии"
 
+msgid "Retail store"
+msgstr "Магазин"
+
+msgid "Online store"
+msgstr "Онлайн-магазин"
+
 msgid "Customer group"
 msgstr "Группа клиентов"
 
