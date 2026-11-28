@@ -114,6 +114,10 @@ wp-content/mu-plugins/*
 !wp-content/mu-plugins/pc-wayforpay-test-access.php
 !wp-content/mu-plugins/00-mu-i18n-loader.php
 !wp-content/mu-plugins/lavka-ecosystem-lock.php
+!wp-content/mu-plugins/lavka-ajax-json-compat.php
+!wp-content/mu-plugins/lavka-ajax-json-compat/
+wp-content/mu-plugins/lavka-ajax-json-compat/*
+!wp-content/mu-plugins/lavka-ajax-json-compat/client.js
 !wp-content/mu-plugins/Makefile
 # Но НЕ игнорируем сам каталог languages и его содержимое
 !wp-content/mu-plugins/languages/
